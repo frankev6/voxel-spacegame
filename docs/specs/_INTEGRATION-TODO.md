@@ -46,3 +46,10 @@
 44. SPEC-31: add `SpatialBody { Radius }` to celestial body roots that block shots.
 45. SPEC-72 MIG-010: write SPEC-24 §4.1 v2 values (speed boost MaxSpeed ×1.8, Thrust ×2.0, cost 15 E; shield toggle threshold 0.3, cooldown 1 s).
 46. SPEC-01 BootSingletons: `AbilityContent.CreateSingletons`.
+47. Architecture §5: move `BodyOnRailsSystem` from WorldGroup to GameplayPrePhysicsGroup (SPEC-31 Q1); `StarSystemStreamingSystem` is realised as `StarSystemLoader.Tick` inside `GalaxyServicesBridgeSystem` (SPEC-31 decision 1).
+48. SPEC-30: `OriginRebaseRequest` gets `PlacePlayer`, `PlayerPosition`, `PlayerRotation`; ShiftJob places the PlayerShip root on star-system change (SPEC-31 Q2); `RequestOriginReset` overload with placement.
+49. SPEC-01: §5.7 ShipSpawnService implements `Game.Galaxy.Services.IShipSpawner` with `GalaxyShipSpawnArgs` (SPEC-31 §4.4); BootSingletons `StreamingConfig`; construct `StarSystemLoader`, `DockingService`, `PlayerLocationSaveParticipant`; `RunWritebacks` calls `IGalaxyLiveDeltaSink.FlushStructures` before save.
+50. SPEC-13: §10 Q4 satisfied by SPEC-31 §5.12 adoption (player-ship pieces adopt the loaded star system — answers Q5); chunk bodies are destroyed at unload; `DamageImmune` used for indestructible bodies (SPEC-30 Q15).
+51. SPEC-61: dock screen listens to `DockStateChanged` and calls `DockingService.Undock`; HUD reads `InteractionTarget` and `CurrentStarSystemInfo`.
+52. Pre-existing check-docs errors for the review pass: PERS-001 and MIG-008 (M0) depend on VOX-001 (M1) — either move VOX-001 to M0 or drop the dependency; REN-005/REN-011 use VOX-013/VOX-016 (must be VOX-001 or SPEC-10; fixable once VOX-018 moves to SPEC-71); EDT-021/EDT-022/HUD-015 use non-001 cross-spec tasks (HUD-018, CAM-009, CAM-010) → use SPEC-61/SPEC-62 or the -001 contract.
+53. Pipeline warning: EncounterDirectorSystem area ENC appears once SPEC-33 exists.
