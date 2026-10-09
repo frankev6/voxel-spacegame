@@ -610,7 +610,7 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 ### PWR-008 — Power budget validator and balance tests
 - **Milestone:** M2
 - **Tier:** standard — rules and numbers are given in §4.9 and §5.6
-- **Depends on:** `PWR-006`, `SPEC-72`, `SPEC-21`
+- **Depends on:** `PWR-006`, `SPEC-72`, `WPN-001`
 - **Do:** Implement `PowerBudgetValidator` (§5.6). Update `block_shield_small` values per §4.9 (through SPEC-04/SPEC-72's value table owner; see open question 1). Write `PowerBalanceTests` computing R1/R2 for the reference ships of §4.9 from the converted blueprints and asserting the table values (± 1 s).
 - **Files:** `Assets/Game/Editor/Content/PowerBudgetValidator.cs`; `Assets/Game/Tests/EditMode/Simulation/Power/PowerBalanceTests.cs`
 - **Acceptance criteria:**

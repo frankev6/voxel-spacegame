@@ -28,3 +28,12 @@
 26. SPEC-23: AI steering writes `ShipCommand` with `WithNone<PlayerShip>` and rewrites `Edges` every tick; uses `FlightState`/`FlightMath` caps.
 27. Architecture §8 PhysicsVelocity row: add `PlanarConstraintSystem` (vertical impulses only) — together with item 20.
 28. SPEC-21: `WeaponAimSystem` declares `[UpdateAfter(typeof(PlanarConstraintSystem))]`; uses `GridSpaceMath` from FLT-001.
+29. [DONE] SPEC-22 PWR-008 depends on WPN-001 (not SPEC-21) to break the WPN-012 ↔ PWR-008 cycle; its validator reads `WeaponDefinition.powerDraw` from the SPEC-72 assets.
+30. SPEC-22: `ShieldHitStreams` registration API (`BeginWrite(ref state, ShieldHitProducer, forEachCount)`, `EndWrite(producer, handle)`, consumer combines handles) instead of main-thread field writes with GetSingletonRW (SPEC-21 Q3).
+31. SPEC-63 VFX-006/§5.3/§6.5: tracers read `ProjectileStore` rows (SPEC-21 §4.6) instead of `Projectile` entities; `ProjectileDead` no longer exists.
+32. SPEC-30 §5.10 ShiftJob chain: call `ProjectileStore.ScheduleShift(delta, starSystemChanged)` (SPEC-21 Q5).
+33. SPEC-03 §5.2 step 7: aim = PickingQuery raycast through the cursor (exclude the player's grid), plane Y=0 fallback (SPEC-21 Q6); update decision 5.
+34. SPEC-63 §6.x / SPEC-64 §6.2 producer pattern: `GetSingleton` (RO) + `[NativeDisableContainerSafetyRestriction]` ParallelWriter; drains use GetSingletonRW + CompleteDependency (SPEC-21 Q7).
+35. SPEC-72 MIG-009: write SPEC-21 §4.9 values; damage type into `WeaponDamageType`.
+36. SPEC-01 BootSingletons: `WeaponContent.CreateSingletons(em, catalog, created)` (WeaponDefsRef, WeaponTuning, default FactionRelations); `CombatGridSetup.AddAll` signature as SPEC-21 §4.3.
+37. SPEC-61 Q2/Q4 satisfied by SPEC-21 `WeaponState`, `ShipTarget`.
