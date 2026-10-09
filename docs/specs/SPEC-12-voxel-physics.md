@@ -1071,7 +1071,7 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 ### PHY-019 — Performance gates and memory
 - **Milestone:** M1
 - **Tier:** frontier — F4: owns the brick-collider gate and this spec's shares of the station, spawn and hit gates
-- **Depends on:** `PHY-012`, `PHY-013`, `PHY-015`, `SPEC-10`, `SPEC-71`
+- **Depends on:** `PHY-012`, `PHY-013`, `PHY-015`, `SPEC-10`, `TST-001`
 - **Do:** Performance tests per §8.1 with reference settings (safety checks off, asserted; 60-frame warm-up; 300 measured frames; median and p95). Also measure a 30-ship skirmish stand-in: 30 `Ship20k` grids each losing 20 random cells per tick for 600 ticks (urgent bricks per batch, assemblies per second, worker ms per frame). Record everything in the ledger *Measurements*; update §4.8 numbers in this spec if they differ by more than 20%.
 - **Files:** `Assets/Game/Tests/PlayMode/Voxel/Physics/{BrickColliderPerfTests,PhysicsIdlePerfTests,ColliderSpawnPerfTests,ColliderPipelinePerfTests,ColliderMemoryTests}.cs`
 - **Acceptance criteria:**

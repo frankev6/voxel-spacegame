@@ -910,7 +910,7 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 ### DMG-014 — Determinism hash and frame-rate determinism tests
 - **Milestone:** M2
 - **Tier:** frontier — F1/F3: the gate that proves sorted single-writer resolution
-- **Depends on:** `DMG-013`, `SPEC-71`
+- **Depends on:** `DMG-013`, `TST-001`
 - **Do:** Implement `CellStateHasher` (§5.8); add the scripted skirmish fixture (4 ships with weapons via SPEC-21 test producers, rams, one core kill, one split) run for 600 ticks at simulated 30, 60 and 144 FPS and with worker counts 1 and max; compare hashes.
 - **Files:** `Assets/Game/Voxel/Damage/CellStateHasher.cs`, `Assets/Game/Tests/PlayMode/Combat/DamageDeterminismTests.cs`
 - **Acceptance criteria:**

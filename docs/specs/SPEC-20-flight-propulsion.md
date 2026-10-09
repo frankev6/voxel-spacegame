@@ -583,7 +583,7 @@ sequenceDiagram
 ### FLT-011 — Flight performance and determinism
 - **Milestone:** M1
 - **Tier:** frontier — F3/F4: determinism of the flight path and the per-tick budget
-- **Depends on:** `FLT-007`, `FLT-008`, `SPEC-71`
+- **Depends on:** `FLT-007`, `FLT-008`, `TST-001`
 - **Do:** Performance tests of §8 (50 `Ship20k`-sized ships, 20 thrusters each, all with changing commands); determinism test: 3 ships flying a scripted `ShipCommand` sequence for 600 ticks at frame patterns 1, 2, 0/1 and 6 ticks per frame and worker counts 1 and max → identical `LocalTransform` and `PhysicsVelocity` bits per tick.
 - **Files:** `Assets/Game/Tests/PlayMode/Simulation/Flight/{FlightPerfTests,FlightDeterminismTests}.cs`
 - **Acceptance criteria:**

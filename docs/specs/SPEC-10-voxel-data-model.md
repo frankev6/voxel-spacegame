@@ -7,7 +7,7 @@
 | **Module(s)** | `Game.Voxel` (folders `Assets/Game/Voxel/Model/` and `Assets/Game/Voxel/Grid/`); definitions in `Game.Data` (`Assets/Game/Data/Definitions/Voxel/`) |
 | **Depends on specs** | SPEC-02 (`ContentId`, `ContentHash`, `PersistentId`, `StableHash`, `GameLog`, `GameplayActive`); SPEC-04 (`BlockDef`, `BlockDefsBlob`, `OrientationTablesBlob`, `BlockPlacementMath`, `ContentCatalog`, `ContentService.CreateForTests`); SPEC-05 (VOXS byte layout); SPEC-11 and SPEC-12 (their contract types, added to entities and singletons at spawn); SPEC-71 (`EcsTestWorld`, perf harness) |
 | **Depended on by** | SPEC-11, SPEC-12, SPEC-13 (cell write helpers, ECS layout, prototypes), SPEC-20/21/22 (functional entities, `FunctionalComponentRegistration`), SPEC-05 (codec), SPEC-01 (creates the registry and config singletons), SPEC-31 (spawn/despawn, `IGridSpawnHook`, write-back), SPEC-51 (`VoxelStructure` editing, `GridEditRequest`), SPEC-72 (blueprint encoding), SPEC-70 (benchmark structures) |
-| **Milestone** | M1 (VOX-020 in M3) |
+| **Milestone** | M1 (VOX-001 in M0; VOX-020 in M3) |
 
 > Read [01-architecture.md](../01-architecture.md) (especially §5.1 and §11), [02-conventions.md](../02-conventions.md), [03-glossary.md](../03-glossary.md) and [07-implementation-traps.md](../07-implementation-traps.md) before this spec. This spec may not contradict them.
 
@@ -690,9 +690,9 @@ Registration of functional component types (SPEC-20/21/22): a system with `[Crea
 
 | Gate | Target | Test (task) |
 |---|---|---|
-| 1M-cell station idle, all voxel systems | ≤ 2 ms main thread | `VoxelGatePerfTests.IdleStation1M_VoxelMainThreadUnder2ms` (VOX-018) |
-| Memory, reference station (cells + masks + meshes + colliders) | ≤ 40 MB | `VoxelGatePerfTests.HollowStation1M_MemoryUnder40MB` (VOX-018) |
-| Spawn a 1M-cell grid | no frame > 8 ms voxel work; meshed and collidable ≤ 30 frames | `VoxelGatePerfTests.SpawnStation1M_NoFrameOver8ms_ReadyWithin30Frames` (VOX-018) |
+| 1M-cell station idle, all voxel systems | ≤ 2 ms main thread | `VoxelGatePerfTests.IdleStation1M_VoxelMainThreadUnder2ms` (SPEC-71 TST-004) |
+| Memory, reference station (cells + masks + meshes + colliders) | ≤ 40 MB | `VoxelGatePerfTests.HollowStation1M_MemoryUnder40MB` (SPEC-71 TST-004) |
+| Spawn a 1M-cell grid | no frame > 8 ms voxel work; meshed and collidable ≤ 30 frames | `VoxelGatePerfTests.SpawnStation1M_NoFrameOver8ms_ReadyWithin30Frames` (SPEC-71 TST-004) |
 | Moving 2,500 bricks / remesh / collider per brick | 0.5 ms / 60 µs / 150 µs | SPEC-11 / SPEC-11 / SPEC-12 |
 
 Own budgets: `GridSpawnSystem` ≤ 6 ms main thread in a frame creating 1,024 bricks (`GridSpawnPerfTests.Create1024Bricks_Under6ms`); `BrickDirtyScheduleSystem` ≤ 0.05 ms for 64 dirty bricks; `VoxelStructure.GetCell` ≤ 20 ns; `Diff` of two 100k-cell structures ≤ 10 ms; `Decode` of `HollowStation1M` ≤ 150 ms; `WriteBack` of an unchanged 1M grid ≤ 0.2 ms (O(bricks) scan).
@@ -731,7 +731,7 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 ## 9. Tasks
 
 ### VOX-001 — Public contract types
-- **Milestone:** M1
+- **Milestone:** M0
 - **Tier:** standard — transcribes the exact code in §4
 - **Depends on:** `CORE-001`, `DATA-001`
 - **Do:** Create every type of §4.1–§4.7 with the exact fields, enums and signatures; method bodies `throw new System.NotImplementedException()` except one-line properties and `Cell` helpers. Create folders `Assets/Game/Voxel/Model/`, `Assets/Game/Voxel/Grid/`, `Assets/Game/Data/Definitions/Voxel/`. Add the `[ContentIdPrefix]` attributes shown.
@@ -882,7 +882,7 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 ### VOX-013 — GridSpawnSystem: spawn path and singletons
 - **Milestone:** M1
 - **Tier:** frontier — F1/F5: builds every grid; ordering with SPEC-11/12/13/31
-- **Depends on:** `VOX-006`, `VOX-011`, `VOX-012`, `REN-001`, `PHY-001`, `SPEC-71`
+- **Depends on:** `VOX-006`, `VOX-011`, `VOX-012`, `REN-001`, `PHY-001`, `TST-001`
 - **Do:** Implement `VoxelSingletons`, `GridSpawnApi` spawn overloads, `GridSpawnSystem` §5.7 steps 1, 4 and 5 with `BrickFillJob` and `FunctionalFillJob`, hooks, `PersistentId` copy, profiler markers.
 - **Files:** `Assets/Game/Voxel/Grid/{GridSpawnSystem,GridSpawnApi,VoxelSingletons,BrickFillJob,FunctionalFillJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/GridSpawnSystemTests.cs`; `Assets/Game/Tests/PlayMode/Voxel/GridSpawnPerfTests.cs`
 - **Acceptance criteria:**
@@ -944,18 +944,6 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
   - [ ] Cell and brick counts equal §5.11 (asteroid: equals the brute-force count).
   - [ ] `HollowStation1M` builds in ≤ 300 ms.
 - **Tests:** `BenchmarkStructuresTests.Counts_MatchSpec`, `.HollowStation_BuildTime` (`Performance`).
-
-### VOX-018 — Integrated voxel gate suite
-- **Milestone:** M1
-- **Tier:** frontier — F4: owns three 06 voxel gates
-- **Depends on:** `VOX-014`, `VOX-015`, `VOX-016`, `VOX-017`, `SPEC-11`, `SPEC-12`
-- **Do:** PlayMode performance tests in a test scene with the full voxel pipeline, URP camera at 1920×1080, safety checks off (asserted), 60-frame warm-up, 300 measured frames (median and p95 logged): (1) idle `HollowStation1M` 200 m in front of the camera — sum of `ProfilerRecorder` main-thread times of every `Game.Voxel` system marker plus `EntitiesGraphicsSystem`; (2) memory per §8.2 using `VoxelMemoryStats` (cells = bricks × 16,896; chunk bytes from archetype chunk counts; mesh bytes from SPEC-11 `BrickRenderStats`; collider bytes from SPEC-12 `GridColliderStats`; mesh CPU copies via `Profiler.GetRuntimeMemorySizeLong` minus GPU estimate); (3) spawn `HollowStation1M`: per-frame voxel work and frames until every brick has `BrickRenderState.HasMesh` and SPEC-12 reports all bricks built. Record results in the ledger *Measurements*.
-- **Files:** `Assets/Game/Tests/PlayMode/Voxel/{VoxelGatePerfTests,VoxelMemoryStats}.cs`
-- **Acceptance criteria:**
-  - [ ] Idle median ≤ 2.0 ms main thread for all voxel systems combined.
-  - [ ] Memory ≤ 40 MB for `HollowStation1M`; `ThinShellStation1M` reported (not asserted).
-  - [ ] Spawn: no frame over 8 ms of voxel work; fully meshed and collidable within 30 frames.
-- **Tests:** `VoxelGatePerfTests.IdleStation1M_VoxelMainThreadUnder2ms`, `.HollowStation1M_MemoryUnder40MB`, `.ThinShell_Report`, `.SpawnStation1M_NoFrameOver8ms_ReadyWithin30Frames`.
 
 ### VOX-019 — Damage persistence scenario
 - **Milestone:** M1

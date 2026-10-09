@@ -928,7 +928,7 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 ### EDT-021 — Editor UI panels
 - **Milestone:** M3
 - **Tier:** standard — views on existing view models; names in §5.14
-- **Depends on:** `EDT-001`, `SPEC-60`, `HUD-018`
+- **Depends on:** `EDT-001`, `SPEC-60`, `SPEC-61`
 - **Do:** `ShipEditorPanels.Mount` building toolbar, palette (pooled 128 slots, 16 swatches), stats (12 pooled rows), BOM and issues (ListViews), footer; UXML and `Theme/screens/editor.uss`.
 - **Files:** `Assets/Game/UI/Views/ShipEditorPanels.cs`, `Assets/Game/UI/Views/Uxml/{EditorToolbar,EditorPalette,EditorStats,EditorFooter}.uxml`, `Assets/Game/UI/Theme/screens/editor.uss`
 - **Acceptance criteria:**
@@ -940,7 +940,7 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 ### EDT-022 — Editor host, input, presenter and leave prompt
 - **Milestone:** M3
 - **Tier:** frontier — F5: input, UI, camera, session and renderers ordered every frame
-- **Depends on:** `EDT-011`, `EDT-015`, `EDT-019`, `EDT-021`, `CAM-009`, `INP-001`
+- **Depends on:** `EDT-011`, `EDT-015`, `EDT-019`, `EDT-021`, `SPEC-62`, `INP-001`
 - **Do:** `ShipEditorHost` (§5.15 steps 1–5), `EditorInputSampler` (Editor map → `EditorInputFrame`), `ShipEditorPresenter` (view models, commands, throttled refresh, leave prompt §5.9, commit toast), `EditorHostServices`.
 - **Files:** `Assets/Game/App/EditorHost/{ShipEditorHost,EditorInputSampler,ShipEditorPresenter,EditorHostServices}.cs`
 - **Acceptance criteria:**

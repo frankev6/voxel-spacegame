@@ -579,7 +579,7 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 ### HUD-015 — MapCanvas control
 - **Milestone:** M3
 - **Tier:** frontier — F4: owns the map frame budget (tessellation caching and translate-only panning)
-- **Depends on:** `HUD-001`, `CAM-010`
+- **Depends on:** `HUD-001`, `SPEC-62`
 - **Do:** Implement `MapCanvas` per §5.7 and `screens/maps.uss` with `--maps-color-0..7`.
 - **Files:** `Assets/Game/UI/Controls/MapCanvas.cs`, `Assets/Game/UI/Theme/screens/maps.uss`
 - **Acceptance criteria:**

@@ -512,7 +512,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (`AiS
 ### AI-012 — AI and hash performance
 - **Milestone:** M2
 - **Tier:** frontier — F4: owns the 06 AI gate
-- **Depends on:** `AI-010`, `SPEC-71`
+- **Depends on:** `AI-010`, `TST-001`
 - **Do:** Performance tests of §8 (50 AI ships in combat with weapons and flight active; 1,000 proxies for hash micro-benchmarks); record in the ledger *Measurements*.
 - **Files:** `Assets/Game/Tests/PlayMode/Simulation/Ai/{AiPerfTests,SpatialHashPerfTests}.cs`
 - **Acceptance criteria:**

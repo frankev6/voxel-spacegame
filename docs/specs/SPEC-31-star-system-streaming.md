@@ -590,7 +590,7 @@ sequenceDiagram
 ### SYS-014 — World gates: streaming performance and soak
 - **Milestone:** M3
 - **Tier:** frontier — F4: owns two 06 world gates
-- **Depends on:** `SYS-007`, `SYS-013`, `SPEC-71`
+- **Depends on:** `SYS-007`, `SYS-013`, `TST-001`
 - **Do:** Tests of §8; 50-jump soak between two content star systems with stations and a belt; record in the ledger *Measurements*.
 - **Files:** `Assets/Game/Tests/PlayMode/Galaxy/{StreamingPerfTests,StreamingSoakTests}.cs`
 - **Acceptance criteria:**

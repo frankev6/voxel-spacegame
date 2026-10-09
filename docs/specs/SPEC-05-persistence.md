@@ -951,7 +951,7 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 ### PERS-013 — Regression scenario R28: load from the pause menu
 - **Milestone:** M3
 - **Tier:** frontier — F5: scene flow, streaming, spawning and UI ordering across modules
-- **Depends on:** `PERS-009`, `PERS-010`, `SPEC-01`, `SPEC-20`, `SPEC-31`, `SPEC-61`, `SPEC-71`
+- **Depends on:** `PERS-009`, `PERS-010`, `SPEC-01`, `SPEC-20`, `SPEC-31`, `SPEC-61`, `TST-001`
 - **Do:** PlayMode scenario: boot through the real `GameRoot`; new game with seed 12345; wait for `GameplayActive` and the player ship; fly with scripted `PlayerCommand` (thrust forward) for 120 ticks; record star system `S`, `UniversePosition U1`, yaw `Y1`, body count `N1` (`StarSystemMember` entities); manual save to `manual_001`; fly 120 more ticks (assert moved > 20 m); push the pause screen through `UINavigator`; invoke the pause screen's load command for `manual_001`; await `GameLoaded` and the next `GameplayActive`.
 - **Files:** `Assets/Game/Tests/PlayMode/Persistence/R28PauseMenuLoadScenario.cs`
 - **Acceptance criteria:**
@@ -963,7 +963,7 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 ### PERS-014 — Regression scenario 04-B1: load after a content change (end to end)
 - **Milestone:** M3
 - **Tier:** standard — scripted scenario for behaviour specified in §5.6 and §7
-- **Depends on:** `PERS-010`, `SPEC-01`, `SPEC-50`, `SPEC-61`, `SPEC-71`
+- **Depends on:** `PERS-010`, `SPEC-01`, `SPEC-50`, `SPEC-61`, `TST-001`
 - **Do:** PlayMode scenario: new game; add `item_research_blueprint` × 3 to cargo; save `manual_001`; quit to the main menu; with `SaveContainerReader`/`SaveContainerWriter` rewrite that file's `IDPL` entry `item_research_blueprint` to `item_removed_for_test` and set `databaseHash32` to `0xDEADBEEF` (test utility `SaveFileRewriter`); load `manual_001` from the main menu's load screen.
 - **Files:** `Assets/Game/Tests/PlayMode/Persistence/{Regression04B1Scenario,SaveFileRewriter}.cs`
 - **Acceptance criteria:**

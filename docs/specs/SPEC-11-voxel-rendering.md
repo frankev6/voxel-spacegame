@@ -389,7 +389,7 @@ Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `Hollow
 | Triangles | ≤ 2 per exposed face at LOD0; LOD1 ≤ 25% of LOD0 | `BrickMesherTests.Lod0_TwoTrianglesPerExposedFace`, `BrickLod1Tests.TriangleRatio_AtMost25Percent` |
 | Ship moving, 2,500 bricks | ≤ 0.5 ms main thread (TransformSystemGroup + Entities Graphics delta vs static) | `BrickRenderPerfTests.MovingLattice2500_TransformUnder0_5ms` (REN-013) |
 | Share of idle 1M station (2 ms total, SPEC-10) | ≤ 1.2 ms for Entities Graphics + all REN systems | `BrickRenderPerfTests.IdleStation1M_RenderShare` (REN-013) |
-| Spawn 1M: meshing part | 872 bricks meshed in ≤ 10 frames at 128 bricks/batch; apply ≤ 2.5 ms per frame | measured in VOX-018 |
+| Spawn 1M: meshing part | 872 bricks meshed in ≤ 10 frames at 128 bricks/batch; apply ≤ 2.5 ms per frame | measured in SPEC-71 TST-004 |
 
 Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch; `GridLodSystem` ≤ 0.1 ms main thread (scheduling) for 5,000 bricks; `BrickMeshBuildSystem` ≤ 0.5 ms main thread including the completed snapshot job for 128 bricks; mesh memory per §8.2 of SPEC-10 (≈ 21.6 B per exposed welded face).
 
@@ -451,7 +451,7 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 ### REN-005 — Snapshot gathering
 - **Milestone:** M1
 - **Tier:** frontier — F2/F3: the only reader of live cell memory for meshing; cross-brick borders
-- **Depends on:** `REN-004`, `VOX-013`
+- **Depends on:** `REN-004`, `SPEC-10`
 - **Do:** Implement `BrickSnapshotJob` (§5.1) and `BrickSnapshotUtility.FromStructure`.
 - **Files:** `Assets/Game/Voxel/Rendering/{BrickSnapshotJob,BrickSnapshotUtility}.cs`; `Assets/Game/Tests/EditMode/Voxel/Rendering/SnapshotTests.cs`
 - **Acceptance criteria:**
@@ -525,7 +525,7 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 ### REN-011 — BrickMeshApplySystem, cleanup and statistics
 - **Milestone:** M1
 - **Tier:** frontier — F2/F4: mesh lifetime, registration, deferred disposal, apply budget
-- **Depends on:** `REN-010`, `VOX-016`
+- **Depends on:** `REN-010`, `SPEC-10`
 - **Do:** Implement `BrickMeshApplySystem` (§5.5) with `ApplyResultsJob`, registration, managed state; `BrickRenderCleanupSystem` (§5.6); `BrickRenderStats.Gather`.
 - **Files:** `Assets/Game/Voxel/Rendering/{BrickMeshApplySystem,ApplyResultsJob,BrickRenderCleanupSystem,VoxelRenderManagedState,BrickRenderStats}.cs`; `Assets/Game/Tests/PlayMode/Voxel/BrickMeshApplyTests.cs`
 - **Acceptance criteria:**

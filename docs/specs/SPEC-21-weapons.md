@@ -714,7 +714,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 ### WPN-013 — Weapon performance gates
 - **Milestone:** M2
 - **Tier:** frontier — F4: owns the 5,000-projectile gate
-- **Depends on:** `WPN-012`, `SPEC-71`
+- **Depends on:** `WPN-012`, `TST-001`
 - **Do:** Performance tests of §8 with reference settings; record results in the ledger *Measurements*.
 - **Files:** `Assets/Game/Tests/PlayMode/Simulation/Weapons/{ProjectilePerfTests,WeaponPerfTests}.cs`
 - **Acceptance criteria:**
