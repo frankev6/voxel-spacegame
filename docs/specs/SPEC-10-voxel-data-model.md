@@ -733,9 +733,9 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 ### VOX-001 — Public contract types
 - **Milestone:** M1
 - **Tier:** standard — transcribes the exact code in §4
-- **Depends on:** `CORE-001`, `DATA-001`, `REN-001`, `PHY-001`
+- **Depends on:** `CORE-001`, `DATA-001`
 - **Do:** Create every type of §4.1–§4.7 with the exact fields, enums and signatures; method bodies `throw new System.NotImplementedException()` except one-line properties and `Cell` helpers. Create folders `Assets/Game/Voxel/Model/`, `Assets/Game/Voxel/Grid/`, `Assets/Game/Data/Definitions/Voxel/`. Add the `[ContentIdPrefix]` attributes shown.
-- **Files:** `Assets/Game/Voxel/Model/{Cell,CellFlags,PaletteEntry,BlockInstance,BlockInstanceFlags,GridKind,GridMotion,GridSpawnFlags,BlockPlacement,PlaceResult,VoxelContent,BrickMath,BrickMaskBits,BrickSolidMask,StructureMassData,StructureHeader,BrickRecord,VoxelStructureData,StructureBlock,StructureDiff,VoxelStructure,VoxelStructureRegistryRef,GridSpawnRequest,GridRebuildRequest,GridDespawnRequest,GridSpawning,GridRebuilt,GridBodyInit,GridSource,GridEditedBrick,GridEditRequest,VoxelGrid,BrickSlot,Brick,BrickCells,BrickDirtyFlags,BrickDirty,FunctionalBlock,FunctionalComponentRegistration,GridPrototypes,RetiredBlob,RetiredMesh,DeferredDisposalQueue,VoxelConfig,ICellSolidQuery,VoxelRayHit,VoxelRaycast,StructureCellQuery,GridCellQuery,IBlockIdMap,VoxelStructureCodec,VoxelCodecException,MassAccumulator,BenchmarkStructures}.cs`; `Assets/Game/Voxel/Grid/{IGridSpawnHook,VoxelStructureRegistry,BlueprintLibrary,GridSpawnParams,GridSpawnApi,GridStructureSync,BrickWrite,GridCellReader,VoxelConfigFactory,DeferredDisposal,VoxelSingletons,CatalogBlockIdMap}.cs`; `Assets/Game/Data/Definitions/Voxel/{ShipBlueprintDefinition,VoxelConfigDefinition}.cs`
+- **Files:** `Assets/Game/Voxel/Model/{Cell,CellFlags,PaletteEntry,BlockInstance,BlockInstanceFlags,GridKind,GridMotion,GridSpawnFlags,BlockPlacement,PlaceResult,VoxelContent,BrickMath,BrickMaskBits,BrickSolidMask,StructureMassData,StructureHeader,BrickRecord,VoxelStructureData,StructureBlock,StructureDiff,VoxelStructure,VoxelStructureRegistryRef,GridSpawnRequest,GridRebuildRequest,GridDespawnRequest,GridSpawning,GridRebuilt,GridBodyInit,GridSource,GridEditedBrick,GridEditRequest,VoxelGrid,BrickSlot,Brick,BrickCells,BrickDirtyFlags,BrickDirty,FunctionalBlock,FunctionalComponentRegistration,GridPrototypes,RetiredBlob,RetiredMesh,DeferredDisposalQueue,VoxelConfig,ICellSolidQuery,VoxelRayHit,VoxelRaycast,StructureCellQuery,GridCellQuery,IBlockIdMap,VoxelStructureCodec,VoxelCodecException,MassAccumulator,BenchmarkStructures}.cs`; `Assets/Game/Voxel/Grid/{IGridSpawnHook,VoxelStructureRegistry,BlueprintLibrary,GridSpawnParams,GridSpawnApi,GridStructureSync,BrickWrite,GridCellReader,VoxelConfigFactory,DeferredDisposal,CatalogBlockIdMap}.cs`; `Assets/Game/Data/Definitions/Voxel/{ShipBlueprintDefinition,VoxelConfigDefinition}.cs`
 - **Acceptance criteria:**
   - [ ] `tools/compile.sh` passes with zero warnings in `Game.Voxel` and `Game.Data`.
   - [ ] `UnsafeUtility.SizeOf<Cell>() == 4`, `<PaletteEntry>() == 4`, `<BlockInstance>() == 32`, `<Brick>() == 28`, `<BrickMaskBits>() == 512`, `<BrickRecord>() == 32`.
@@ -882,7 +882,7 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 ### VOX-013 — GridSpawnSystem: spawn path and singletons
 - **Milestone:** M1
 - **Tier:** frontier — F1/F5: builds every grid; ordering with SPEC-11/12/13/31
-- **Depends on:** `VOX-006`, `VOX-011`, `VOX-012`, `SPEC-71`
+- **Depends on:** `VOX-006`, `VOX-011`, `VOX-012`, `REN-001`, `PHY-001`, `SPEC-71`
 - **Do:** Implement `VoxelSingletons`, `GridSpawnApi` spawn overloads, `GridSpawnSystem` §5.7 steps 1, 4 and 5 with `BrickFillJob` and `FunctionalFillJob`, hooks, `PersistentId` copy, profiler markers.
 - **Files:** `Assets/Game/Voxel/Grid/{GridSpawnSystem,GridSpawnApi,VoxelSingletons,BrickFillJob,FunctionalFillJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/GridSpawnSystemTests.cs`; `Assets/Game/Tests/PlayMode/Voxel/GridSpawnPerfTests.cs`
 - **Acceptance criteria:**
