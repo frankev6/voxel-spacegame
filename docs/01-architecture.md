@@ -10,7 +10,7 @@ Read [00-vision.md](00-vision.md) first for what the game is. This document says
 
 1. **Cells are data, not entities.** A voxel is a 4-byte cell inside a 16³ brick. Plain hull never becomes an entity or a GameObject. A cell becomes its own object only at the moment it breaks free (as debris).
 2. **One voxel model everywhere.** The ship editor, the runtime and save files all use the same `VoxelStructure` layout. There is no conversion step that can lose information.
-3. **One deterministic tick.** Gameplay simulation runs in `FixedStepSimulationSystemGroup` at exactly 60 Hz. Stages communicate through event streams produced and consumed in the same tick. There is exactly one structural-change sync point per tick in gameplay (`GameplayEndCommandBufferSystem`).
+3. **One deterministic tick.** Gameplay simulation runs in `FixedStepSimulationSystemGroup` at exactly 60 Hz. Stages communicate through event streams produced and consumed in the same tick. Inside the fixed step there is exactly one structural-change sync point per tick (`GameplayEndCommandBufferSystem`); every fixed-step system that creates/destroys entities or adds/removes components records into its command buffer. Outside the fixed step, only the systems marked *structural* in §5 touch `EntityManager` directly.
 4. **One writer per piece of state.** The ownership table in §8 names the only system or service allowed to write each piece of state. Everyone else reads or sends a request/event.
 5. **Stable identity.** Content uses stable string IDs (`block_hull`). The galaxy is a seed plus saved deltas. No `UnityEngine.Random`, no `string.GetHashCode()`, no `System.Random` in anything that affects simulation or saves.
 6. **Presentation is swappable.** All visuals and sounds are referenced through content definitions and theme tokens, never hard-coded. Every current art asset is a placeholder (see [design/DESIGN-SYSTEM.md](design/DESIGN-SYSTEM.md) and ADR-0009).
@@ -150,7 +150,7 @@ Shutdown runs in reverse order. No service may create another service. No `FindO
 
 - One default `World`. Systems are created automatically but **every gameplay system declares `state.RequireForUpdate<GameplayActive>()`** (or a more specific singleton) so nothing runs in the menu.
 - `SceneFlow` creates the `GameplayActive` singleton entity when the World scene is ready and destroys it on exit.
-- Entities that belong to a loaded star system carry `StarSystemMember { StarSystemId }`. Unloading a star system is one `DestroyEntity(query)`.
+- Entities that belong to a loaded star system carry the **shared** component `StarSystemMember { StarSystemId }` (`ISharedComponentData`, low cardinality: at most 2 star systems are loaded). This includes grid roots, their bricks and functional entities. Unloading a star system is one `EntityManager.DestroyEntity(query)` with a shared-component filter: a chunk-level batch destroy. The player ship and its children carry **no** `StarSystemMember`, because they travel between star systems.
 - No subscenes for gameplay content in v1. Configuration singletons are created by `Game.App` at boot from the `ContentDatabase` (`GameConfig` singleton, block blob singleton).
 
 ---
@@ -164,7 +164,7 @@ InitializationSystemGroup
 └─ GameInitGroup                         (custom; OrderLast)
    ├─ OriginRebaseSystem                 GAL  single floating-origin owner
    ├─ PlayerInputSampleSystem            INP  managed; writes PlayerCommand singleton
-   └─ GridSpawnSystem                    VOX  GridSpawnRequest → grid root + bricks + functional entities
+   └─ GridSpawnSystem                    VOX  structural; GridSpawnRequest → grid root + bricks + functional entities (batch APIs)
 
 SimulationSystemGroup
 ├─ FixedStepSimulationSystemGroup        60 Hz, runs 0..N times per frame
@@ -188,9 +188,9 @@ SimulationSystemGroup
 │     ├─ BeamStepSystem                  WPN
 │     ├─ ExplosionSystem                 WPN  ExplosionRequest → ShieldHits / DamageEvents per overlapped grid
 │     ├─ ShieldSystem                    PWR  regen + ShieldHit → ShieldState HP; overflow → DamageEvents
-│     ├─ DamageResolveSystem             DMG  one job per grid; the ONLY cell-HP writer
+│     ├─ DamageResolveSystem             DMG  parallel over grids, each grid's events by one worker; the ONLY cell-HP writer
 │     ├─ IntegritySystem                 DMG  islands after removals
-│     ├─ SplitSystem                     DMG  debris particles / chunk bodies / hulk grids
+│     ├─ SplitSystem                     DMG  debris particles / chunk bodies / hulk grids (records into the GameplayEnd ECB)
 │     ├─ ShipDeathSystem                 DMG  core lost → Hulk state
 │     ├─ GridMassUpdateSystem            PHY  incremental mass, centre of mass, inertia
 │     ├─ BrickDirtyScheduleSystem        VOX  marks bricks for remesh / collider rebuild
@@ -199,7 +199,7 @@ SimulationSystemGroup
 │  ├─ BrickMeshBuildSystem               REN  budgeted Burst jobs → MeshDataArray
 │  └─ BrickColliderBuildSystem           PHY  budgeted Burst jobs → blobs, swapped next tick
 ├─ WorldGroup                            (custom; variable rate)
-│  ├─ StarSystemStreamingSystem          SYS  tiers T1–T3 with hysteresis
+│  ├─ StarSystemStreamingSystem          SYS  structural; tiers T1–T3 with hysteresis, time-sliced
 │  ├─ BodyOnRailsSystem                  SYS  analytic orbits from UniversalTime
 │  ├─ InteractionQuerySystem             SYS  nearest interactable → singleton
 │  ├─ EncounterDirectorSystem            ENC
@@ -226,6 +226,9 @@ Codes on the right are spec area codes (§10).
 - Input is sampled once per frame into `PlayerCommand`. Edge-triggered actions (fire once, toggle) are **latched** until a fixed tick consumes them, so a 144 FPS frame and a 30 FPS frame produce the same gameplay.
 - Cooldowns and rates use accumulators in fixed ticks (`Tick` counter), never `Time.deltaTime`.
 - Presentation interpolates from the physics state using `PhysicsGraphicalSmoothing`; gameplay logic always reads the physics transform (`LocalTransform` inside the fixed step), never the smoothed `LocalToWorld`.
+- **Catch-up cap.** `Time.maximumDeltaTime = 0.1`, so at most 6 fixed ticks run in one frame. Below 10 FPS the game slows down instead of spiralling. (`ProjectSetup` enforces it.)
+- **Jobs that outlive their frame never touch ECS memory.** Mesh, collider and other cache-building jobs that may run across frames read only **snapshots**: native buffers the scheduling system copied the inputs into (for example the brick's 16³ cells plus a 1-cell border from neighbours, 18³). This prevents both sync points and the safety errors that arise when the fixed step writes those cells next frame. Results are installed by a later system after `JobHandle.IsCompleted` is true; nobody calls `Complete()` on them in the fixed step.
+- **Deterministic event order.** Streams that change simulation state (`DamageStreams`, `ShieldHit`, `ExplosionRequest`, `CellRemoved`, collision-derived events) are written with `NativeStream`. Each producer writes at a foreach index derived from the chunk index in its query, and consumers read indices in order, so content order does not depend on thread timing. Where several producers feed one consumer, the consumer sorts by a stable key `(Grid.Index, Source.Index, producer kind, sequence)` before applying. `NativeQueue` is allowed only for presentation streams (`FxEvent`, `SfxEvent`, managed events), whose order does not affect simulation. `EntityCommandBuffer.ParallelWriter` always uses `ChunkIndexInQuery` (or `unfilteredChunkIndex`) as its sort key.
 
 ---
 
@@ -237,13 +240,16 @@ These types cross module boundaries. **Their names and owning module are binding
 
 | Type | Shape (binding parts) | Notes |
 |---|---|---|
-| `ContentId` | `readonly struct { string Value; ulong Hash; }` | Hash = `StableHash.Hash64(Value)` (xxHash3-64 over UTF-8). Lowercase `snake_case` |
+| `ContentId` | `readonly struct { string Value; ContentHash Hash; }` — **managed** (holds a string) | Hash = `StableHash.Hash64(Value)` (xxHash3-64 over UTF-8). Lowercase `snake_case`. Used in definitions, managed code and saves. **Never inside an `IComponentData`, buffer, blob, job or ECS event** |
+| `ContentHash` | `readonly struct : IEquatable<ContentHash> { ulong Value; }` — unmanaged | The only way ECS/Burst data refers to content that has no dense runtime index (blueprints, audio cues, factions in events). `ContentDatabase` resolves it; boot fails if two content IDs hash equal. Hot per-element lookups use dense runtime indices instead (`BlockIndex`) |
+| `PersistentId` | `IComponentData { ulong Value; }` — unmanaged | Stable identity of a runtime-spawned object across save/load (every grid root, fleet, encounter). Allocated monotonically by `GameSession` (SPEC-01), saved with the session, never reused. `Entity` is never saved or used as a cross-session reference |
 | `StableHash` | static: `Hash64(string)`, `Hash64(ReadOnlySpan<byte>)`, `Combine(ulong, ulong)` | Never use `GetHashCode` for anything persisted or simulated |
 | `Tick` | `uint` fixed-step counter in `SimClock` singleton | Starts at 0 per session |
 | `UniversalTime` | `double` seconds since campaign start, in `SimClock` | Saved |
 | `RngStreams` | `static Unity.Mathematics.Random For(ulong seed, RngPurpose purpose, ulong salt)` | All randomness. `RngPurpose` is an enum; add values, never reorder |
 | `EventBus<T>` | `Subscribe`, `Unsubscribe`, `Publish` (deferred), `Drain()` once per frame | Per-handler try/catch; re-entrancy safe |
 | `Services` | `Register<T>`, `Get<T>`, `TryGet<T>`, `Reset()` | Reset on `SubsystemRegistration` |
+| `GameplayActive`, `SimClock`, custom groups, `GameplayEndCommandBufferSystem` | ECS declarations | The only Entities types in Core (with `PersistentId`) |
 | `ISaveParticipant` | `string Key {get;}` (4-char), `int Version {get;}`, `void Capture(SaveWriter)`, `void Restore(SaveReader, int fromVersion)` | Implemented by owning modules |
 | `InputContext` | `enum { None, Flight, Editor, Menu, Dialog, TextEntry }` | Plus the always-on Global map |
 | `IPauseService` | `PauseToken Acquire(string reason)`; `bool IsPaused` | Ref-counted |
@@ -268,10 +274,11 @@ These types cross module boundaries. **Their names and owning module are binding
 | `VoxelStructure` | Managed class owning `NativeList`s: palette, instances, bricks (coord → 4096 cells) | Same layout as ECS; used by editor, saves, tests |
 | `VoxelGrid` | `IComponentData`: `int3 BrickMin, BrickDims; float CellSize; uint Revision; int AnchorInstance; GridKind Kind` | Root entity of a ship, station, asteroid or hulk |
 | `GridKind` | `enum : byte { Ship, Station, Asteroid, Hulk }` | |
-| `Brick` | `IComponentData`: `Entity Grid; int3 Coord; ushort SolidCount` + buffer `BrickCells` (4096 × `Cell`) + `BrickSolidMask` (512 B) + enableable `BrickDirty` | 16³ cells |
+| `Brick` | `IComponentData`: `Entity Grid; int3 Coord; ushort SolidCount` + buffer `BrickCells` (4096 × `Cell`) + `BrickSolidMask` (512 B) + enableable `BrickDirty` | 16³ cells. Both buffers are declared `[InternalBufferCapacity(0)]` so their data lives outside the chunk |
 | `BlockInstance` | buffer element on the grid: `ushort Block; byte Orient, Color; int3 Origin; float FunctionHp; Entity Functional` | Multi-cell and functional blocks |
 | `FunctionalBlock` | `IComponentData`: `Entity Grid; int InstanceIndex` | On thruster/weapon/reactor/shield/core entities |
-| `GridSpawnRequest` | entity with `ContentId Blueprint` or a structure handle, pose, `GridKind`, allegiance | Consumed by `GridSpawnSystem` |
+| `GridSpawnRequest` | entity with `ContentHash Blueprint` **or** `int StructureHandle` (index into the managed `VoxelStructureRegistry`), pose, `GridKind`, allegiance, `PersistentId` | Consumed by `GridSpawnSystem`. Unmanaged only |
+| `PhysicsLayers` | static class: the named `CollisionFilter`s for grids, debris, chunk bodies, bodies, sensors and query filters for projectiles, explosions and picking | Owned by SPEC-12. **The only place collision filters are defined** |
 | `DamageEvent` | `Entity Grid; float3 LocalPoint, LocalDir; float Amount, Radius, Penetration; DamageType Type; Entity Source; float3 WorldImpulse` | Grid-space. Written to `DamageStreams` by producers |
 | `CellRemoved` | `Entity Grid; int3 Cell; ushort Block; byte Color; float3 WorldPos, WorldVel, Kick` | Output of the resolver; consumed by split, VFX, audio, salvage |
 | `ExplosionRequest` | `float3 WorldPos; float Radius, Amount; DamageType Type; Entity Source` | Defined here so Voxel code (reactor chain reactions) can request explosions; consumed by `ExplosionSystem` in Simulation (SPEC-21), which tests shields first |
@@ -301,14 +308,14 @@ These types cross module boundaries. **Their names and owning module are binding
 | `UniversePosition` | `double3` metres relative to the current star | On every persistent root entity |
 | `FrameOrigin` | singleton: `double3 OriginInStarSystem` | Owned by `OriginRebaseSystem` |
 | `OriginShifted` | event `{ float3 Delta }` | Camera, VFX and trails listen |
-| `StarSystemMember` | `StarSystemId` | Unload = destroy by this |
+| `StarSystemMember` | `ISharedComponentData { StarSystemId Id; }` | Unload = batch destroy by shared filter. Not on the player ship |
 
 ### 6.6 Presentation event streams
 
 | Stream | Producer → consumer | Notes |
 |---|---|---|
 | `FxEvent` | Simulation/Voxel → `FxUploadSystem` | `FxKind Kind; float3 Pos, Dir, Vel; float Scale; uint Color` |
-| `SfxEvent` | Simulation/Voxel → `AudioEventDrainSystem` | `ContentId Cue; float3 Pos; float Volume` |
+| `SfxEvent` | Simulation/Voxel → `AudioEventDrainSystem` | `ContentHash Cue; float3 Pos; float Volume` |
 | Managed events | via `ManagedEventDrainSystem` → `EventBus<T>` | `ShipDestroyed`, `StarSystemEntered`, `BodyInteracted`, `BodyDestroyed`, `LaneJumped`, `ItemAcquired`, `FactChanged`, `SessionReset`, `GameSaved`, `GameLoaded` |
 
 ### 6.7 Content and logic (`Game.Data`, specs SPEC-04 and SPEC-40)
@@ -372,6 +379,8 @@ Lane jump request → warp transition starts → `StarSystemStreamingSystem` unl
 | Inventory, wallet | `InventoryModel` / `Wallet` methods called by commit/merchant/loot code | Read through view models |
 | Pause state | `PauseService` (tokens from `UINavigator` and others) | Read |
 | Active input context | `InputService` (set by `UINavigator`) | Read |
+| `Dormant` enable bit on grids | `GridLodSystem` | Read (expensive systems skip dormant grids) |
+| `PersistentId` allocation | `GameSession.AllocatePersistentId()` (the counter is saved) | Read; `GridSpawnSystem` copies it from the request onto the grid root |
 | Scenes | `SceneFlow` | — |
 | Save files | `SaveService` | — |
 
@@ -428,3 +437,32 @@ Lane jump request → warp transition starts → `StarSystemStreamingSystem` unl
 | MIG | [SPEC-72 Legacy content migration](specs/SPEC-72-legacy-migration.md) | Editor |
 | ART | [SPEC-80 Art direction and design system](specs/SPEC-80-art-direction.md) | Art (docs, definitions) |
 | AST | [SPEC-81 Asset production](specs/SPEC-81-asset-production.md) | Art (assets) |
+
+---
+
+## 11. Scalability rules (binding)
+
+The game must hold 1M-cell stations, 30-ship battles and 50,000 debris particles at 60 FPS (see [06-performance-budgets.md](06-performance-budgets.md)). These rules are where naïve DOTS code usually loses 10–100×. Code review rejects violations. Concrete wrong/right examples are in [07-implementation-traps.md](07-implementation-traps.md).
+
+1. **Incremental, never global.** Every piece of derived per-grid data is updated for **dirty pieces only**: meshes, colliders, mass, stats, integrity, LOD. Any pass that touches every cell of a grid needs a spec decision that names it and a budget in 06. Removing one cell must cost O(brick) for rebuilds plus O(bricks of that grid) at most for re-assembly, never O(cells of the grid).
+2. **Time-sliced with explicit budgets.** Unbounded work, such as remeshing after a big explosion, spawning a 1M-cell grid or streaming a star system, is queued and processed under a per-frame budget measured in microseconds or items, in a stated priority order. Examples of priority: colliders of grids near the player before meshes of far grids; visible before hidden. No frame may exceed the 8 ms voxel spike budget.
+3. **Rendering through registered IDs.**
+   - Every brick mesh is a `Mesh` registered **once** with `EntitiesGraphicsSystem.RegisterMesh`, referenced by `BatchMeshID` in `MaterialMeshInfo`, and rewritten **in place** (`Mesh.ApplyAndDisposeWritableMeshData`, explicit bounds, then update `RenderBounds`). It is unregistered and destroyed through `DeferredDisposalSystem`.
+   - Materials are shared, one per material layer, registered once.
+   - Per-instance variation comes from material-property components or the palette, never from material instances.
+   - **Never** give entities their own `RenderMeshArray`.
+4. **Shared components only at low cardinality.** Allowed: `StarSystemMember` (≤ 2 values) and the components Entities Graphics adds itself. A shared component whose value is unique per grid, per brick or per ship splits chunks down to one entity each and is forbidden.
+5. **Large buffers live outside chunks.** Any dynamic buffer that is typically larger than 128 bytes is declared `[InternalBufferCapacity(0)]`.
+6. **Batch structural changes.**
+   - Create many entities with `EntityManager.CreateEntity(archetype, NativeArray<Entity>)` or `Instantiate(prefab, NativeArray<Entity>)`, then fill them from a parallel job via lookups.
+   - Destroy by query.
+   - Never use a per-entity `AddComponent` / `SetComponent` loop on the main thread for more than 100 entities.
+7. **No main-thread per-entity loops in hot paths.** Fixed-step and per-frame work over more than 100 entities runs in Burst jobs (`IJobEntity`/`IJobChunk`, `ScheduleParallel` when writes are disjoint).
+8. **Physics colliders are two-level.**
+   - Each brick has its own collider blob (merged boxes).
+   - The grid's `PhysicsCollider` is a compound over the brick blobs, so a changed brick rebuilds only its own blob and the compound is re-assembled from cached children.
+   - Replaced blobs are disposed through `DeferredDisposalSystem` after the physics step that last used them (at least 3 frames).
+   - Never rebuild every brick's collider because one changed.
+9. **Simulation level of detail.** Grids far from the player go **dormant**: an enableable `Dormant` tag, owned by `GridLodSystem` (SPEC-11), switches off AI thinking, weapon aiming, stats recompute and mesh LOD0. Physics stays on. AI decisions are staggered across ticks: each AI ship thinks every N ticks, in buckets by `PersistentId`.
+10. **Memory is budgeted, not hoped for.** Specs that store per-cell or per-vertex data state their bytes per item and the total for the 1M-cell reference station, and those totals must add up to the 06 memory gate. Packed vertex formats are required for brick meshes.
+11. **Measure before optimising, and measure after.** Every system with a budget gets a performance test (`Game.Tests.PlayMode`, category `Performance`) and `ProfilerMarker`s named `<SystemName>.<Step>` around its expensive steps. `gh_perf` reads them through `ProfilerRecorder`.

@@ -20,6 +20,7 @@ namespace Game.Editor
         public const string ProductName = "Spaceship Game V2";
         public const string BundleId = "com.koalastudios.spaceshipgame.v2";
         public const float FixedTimestep = 1f / 60f;                  // docs/01-architecture.md §2
+        public const float MaximumDeltaTime = 0.1f;                   // §5.1 catch-up cap: at most 6 fixed ticks per frame
         public const string ScenesFolder = "Assets/Game/Scenes";
         public const string RenderPipelineAsset = "Assets/Game/Settings/Rendering/URP_Default.asset";
 
@@ -41,6 +42,7 @@ namespace Game.Editor
             EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload;
 
             Time.fixedDeltaTime = FixedTimestep; // "Fixed Timestep" in ProjectSettings/TimeManager.asset must read 0.016666668
+            Time.maximumDeltaTime = MaximumDeltaTime;
             SetProjectSetting("ProjectSettings/ProjectSettings.asset", "activeInputHandler", 1); // Input System only
             Physics.simulationMode = SimulationMode.Script;    // PhysX never simulates; Unity Physics is the only gameplay physics
 
@@ -66,6 +68,7 @@ namespace Game.Editor
                    (EditorSettings.enterPlayModeOptions & EnterPlayModeOptions.DisableDomainReload) != 0,
                    "Enter Play Mode Options should be on with domain reload disabled");
             Expect(Mathf.Abs(Time.fixedDeltaTime - FixedTimestep) < 1e-6f, $"fixed timestep should be 1/60 (is {Time.fixedDeltaTime})");
+            Expect(Mathf.Abs(Time.maximumDeltaTime - MaximumDeltaTime) < 1e-6f, $"maximum allowed timestep should be {MaximumDeltaTime} (is {Time.maximumDeltaTime})");
             Expect(GetProjectSettingInt("ProjectSettings/ProjectSettings.asset", "activeInputHandler") == 1, "active input handling should be Input System only");
             Expect(Physics.simulationMode == SimulationMode.Script, "Physics.simulationMode should be Script (PhysX must not simulate)");
             Expect(GraphicsSettings.defaultRenderPipeline != null &&

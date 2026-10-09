@@ -57,7 +57,7 @@ This spec defines how every piece of authored content is identified, stored, val
 14. **Content errors fail loudly**: in the editor (postprocessor + console), in CI (`-executeMethod`, exit code 1), at build time (build fails) and at boot (`ContentValidationException`). Never silently at runtime. Reason: conventions §6.
 15. **Missing content degrades, never rejects.** Unknown IDs read from saves resolve to `block_missing` / `item_missing` and are recorded for a warning (SPEC-05 surfaces them). Reason: 04-B1.
 16. **Content assets live in `Assets/Game/Content/<Area>/<id>.asset`; the database asset is `Assets/Game/Content/ContentDatabase.asset`.** All definition *classes* are in `Assets/Game/Data/Definitions/<Area>/` with namespace `Game.Data.Definitions` (architecture §3.2 wins over the sub-folder namespace rule).
-17. **Hashes use `StableHash` (xxHash3-64) only.** `BlockDefsBlob.ContentHash` and `ContentCatalog.ContentHash` are reproducible across machines and runs (§5.5).
+17. **Hashes use `StableHash` (xxHash3-64) only.** `BlockDefsBlob.ContentHash`, `ContentCatalog.ContentHash` and `ContentService.ContentHash` are reproducible across machines and runs (§5.5).
 
 ## 4. Data model
 
@@ -411,6 +411,42 @@ namespace Game.Data.Components
 }
 ```
 
+Builder and generator signatures (public contract):
+
+```csharp
+namespace Game.Data.Blocks
+{
+    /// <summary>Immutable managed copy of the orientation tables (same layout as OrientationTablesBlob).</summary>
+    public sealed class OrientationData
+    {
+        public System.ReadOnlySpan<Unity.Mathematics.int3x3> Matrices { get; }      // 24
+        public System.ReadOnlySpan<Unity.Mathematics.quaternion> Rotations { get; } // 24
+        public System.ReadOnlySpan<byte> ComposeTable { get; }   // 576
+        public System.ReadOnlySpan<byte> InverseTable { get; }   // 24
+        public System.ReadOnlySpan<byte> MirrorTable { get; }    // 72
+        public System.ReadOnlySpan<byte> FaceTable { get; }      // 144
+        public System.ReadOnlySpan<byte> AxisTurnTable { get; }  // 12
+        public System.ReadOnlySpan<byte> ForwardUpTable { get; } // 36
+    }
+
+    public static class OrientationTableGenerator
+    {
+        public static OrientationData Generate();                                   // §5.3
+        public static Unity.Entities.BlobAssetReference<OrientationTablesBlob> BuildBlob(OrientationData data, Unity.Collections.Allocator allocator);
+    }
+
+    public static class BlockDefsBlobBuilder
+    {
+        /// <summary>§5.5. propMeshes receives the prop mesh table (index = BlockDef.PropMeshIndex).</summary>
+        public static Unity.Entities.BlobAssetReference<BlockDefsBlob> Build(
+            Game.Data.Services.ContentCatalog catalog,
+            Game.Data.Validation.ValidationReport report,
+            System.Collections.Generic.List<UnityEngine.Mesh> propMeshes,
+            Unity.Collections.Allocator allocator);
+    }
+}
+```
+
 `OrientationTables` (static, managed, thread-safe) exposes the same methods with the same results for non-Burst code (editor, MIG, tests); it is backed by an immutable `OrientationData` produced by `OrientationTableGenerator.Generate()` and stored in a `static readonly` field (immutable, deterministic, so no `SubsystemRegistration` reset is needed). It also exposes `int3x3 Matrix(byte o)`, `bool TryFromMatrix(int3x3 m, out byte o)` and `quaternion ToQuaternion(byte o)`.
 
 ### 4.8 Validation types (public contract)
@@ -536,6 +572,7 @@ namespace Game.Data.Services
         public Unity.Entities.BlobAssetReference<Game.Data.Blocks.BlockDefsBlob> BlockDefs { get; }
         public Unity.Entities.BlobAssetReference<Game.Data.Blocks.OrientationTablesBlob> Orientations { get; }
         public System.Collections.Generic.IReadOnlyList<UnityEngine.Mesh> PropMeshes { get; } // index = BlockDef.PropMeshIndex
+        public ulong ContentHash { get; }                                          // Combine(BlockDefs hash, Catalog hash); saved as diagnostics by SPEC-05
 
         public void CreateSingletons(Unity.Entities.EntityManager entityManager);  // idempotent per world
         public void DestroySingletons(Unity.Entities.EntityManager entityManager);
@@ -578,7 +615,7 @@ SPEC-72 writes exactly these values (MIG-006). Footprints and clearance are bloc
 
 | ID | Kind | Shape | Cells | Orient. | Attach | CellHp | FuncHp | Mass | Function | Price / rarity | Prop mesh |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| `block_missing` | Structural | Cube | 1 | All | All | 100 | 0 | 25 | None | 0 / Common; `MaterialLayer` 63 (reserved "missing" look) | — |
+| `block_missing` | Structural | Cube | 1 | All | All | 100 | 0 | 25 | None | 0 / Common; display name "Missing block"; `MaterialLayer` 63 (reserved "missing" look) | — |
 | `item_missing` (ItemDefinition) | — | — | — | — | — | — | — | — | — | 0 / Common, category Misc, maxStack 999, display name "Missing item" | — |
 | `block_reactor_small` | Functional | Cube | box 2×2×2 | All | All | 150 | 1200 | 50 | Reactor: gen 60, blast radius 4 cells, blast damage 400 | 300 / Rare | hulls : `base_2x2_hull_base_2x2_hull` |
 | `block_cargo_small` | Functional | Cube | box 2×1×1 | All | All | 100 | 200 | 20 | Utility Cargo: capacity 50 | 20 / Common | hulls : `base_1x2_hull.001_base_1x2_hull.001` |
@@ -619,7 +656,7 @@ sequenceDiagram
 4. If `report.HasErrors`: `report.LogTo("Content")` and throw `ContentValidationException(report)`. Nothing is allocated before this point except managed objects.
 5. Build orientation tables (§5.3) into a `BlobBuilder(Allocator.Temp)` → `CreateBlobAssetReference<OrientationTablesBlob>(Allocator.Persistent)`.
 6. Build `BlockDefsBlob` (§5.5) the same way; keep `PropMeshes`.
-7. `BootReport = report` (it may contain warnings); log the summary line once: `Content: N definitions, B blocks, hash 0x…, W warnings`.
+7. `ContentHash = StableHash.Combine(BlockDefs.Value.ContentHash, Catalog.ContentHash)`. `BootReport = report` (it may contain warnings); log the summary line once: `Content: N definitions, B blocks, hash 0x<16 hex digits>, W warnings`.
 
 `CreateSingletons(em)`: if a `BlockDefsRef` singleton already exists in `em`'s world, do nothing; else create one entity named `ContentSingletons` with both components. `DestroySingletons(em)` destroys it if present. `Dispose()` disposes both blobs if created (safe to call twice). The service must be disposed after the singletons are destroyed or the world is disposed (SPEC-01 shutdown order).
 
@@ -655,7 +692,7 @@ Cost: < 0.2 ms; done once per boot. Test vectors (any implementation must reprod
 4. Former IDs: each must pass the format check, must not equal any live ID or another former ID → `E006`. Store in a separate alias dictionary.
 5. Families: for each definition, walk its type chain from the concrete type up to (excluding) `ContentDefinition`; append it to the family list of every type on the chain. Sort every family list by `string.CompareOrdinal(Id.Value)`. A family with more than 65,535 entries → `E009`. Store `def → index` maps per family.
 6. Required system definitions: `block_missing` must exist and be a `BlockDefinition`; `item_missing` an `ItemDefinition` (not a block) → else `E008`.
-7. `ContentHash` = `StableHash.Combine(blockDefsHashPlaceholder = 0, H)` where `H = StableHash.Hash64(bytes)` and `bytes` = for every definition in global ordinal ID order: UTF-8 ID, `0x00`, UTF-8 `GetType().FullName`, `0x00`. (The block blob hash is combined in later by `ContentService`: `Catalog.ContentHash` is finalised as `StableHash.Combine(BlockDefsBlob.ContentHash, H)`; the catalog exposes the final value after `ContentService` construction and `H` alone when built standalone.)
+7. `ContentCatalog.ContentHash` = `StableHash.Hash64(bytes)` where `bytes` = for every definition in global ordinal ID order: UTF-8 ID, `0x00`, UTF-8 `GetType().FullName`, `0x00`. (`ContentService.ContentHash` combines it with the block blob hash, §5.2 step 7.)
 8. Lookups: `TryGet` checks live IDs then aliases; alias hits log `GameLog.Info("Content", ...)` once per alias.
 9. `TryResolve` / `Resolve*OrMissing`: on failure append `UnresolvedContentId(id, typeof(T).Name, context)` unless an equal `(Id, ExpectedType)` pair is already recorded; `ResolveBlockOrMissing` returns `MissingBlock`, `ResolveItemOrMissing` returns `MissingItem` (an ID that resolves to a definition of the wrong type also counts as unresolved).
 
@@ -838,6 +875,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 
 ### DATA-001 — Public contract types
 - **Milestone:** M0
+- **Tier:** standard — transcribes the exact code of §4 (bodies throw NotImplementedException)
 - **Depends on:** `CORE-001`
 - **Do:** Create every public type of §4 with fields, enums, attributes and method signatures exactly as written; method bodies `throw new System.NotImplementedException()` except trivial property getters and `OrientationMask.Allows`. Add `/// <summary>` lines naming the spec section. Create folders of §4.1.
 - **Files:** `Assets/Game/Data/ContentDatabase.cs`; `Assets/Game/Data/Definitions/Common/{ContentDefinition,ContentIdPrefixAttribute}.cs`; `Assets/Game/Data/Definitions/Items/{ItemDefinition,ItemCategory,ItemRarity}.cs`; `Assets/Game/Data/Definitions/Blocks/BlockDefinition.cs`; `Assets/Game/Data/Blocks/{BlockIndex,Orientation,BlockKind,BlockShape,BlockFace,BlockFaceMask,OrientationMask,FunctionKind,UtilityKind,FunctionParams,CoreParams,ReactorParams,CapacitorParams,ThrusterParams,WeaponMountParams,ShieldEmitterParams,UtilityParams,BlockDef,BlockDefsBlob,OrientationTablesBlob,OrientationTables,OrientationData,OrientationTableGenerator,BlockPlacementMath,BlockDefsBlobBuilder}.cs`; `Assets/Game/Data/Components/{BlockDefsRef,OrientationTablesRef}.cs`; `Assets/Game/Data/Validation/{ValidationSeverity,ValidationEntry,ValidationReport,ValidationScope,ContentValidationContext,IContentDatabaseValidator,ContentValidationException,ContentIdRules}.cs`; `Assets/Game/Data/Services/{ContentCatalog,ContentService,UnresolvedContentId}.cs`
@@ -850,6 +888,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 
 ### DATA-002 — ValidationReport implementation
 - **Milestone:** M0
+- **Tier:** standard — small managed class fully specified in §4.8
 - **Depends on:** `DATA-001`
 - **Do:** Implement `ValidationReport`, `ValidationScope`, `ValidationEntry`, `ContentValidationException` per §4.8: counters, `Merge`, deterministic `Sorted()` (ordinal on AssetPath, Field, Code, Message), `ToText` (one line per entry: `"[E] DATA-E004 Assets/... id: message"`, then `"N errors, M warnings, K infos"`), `LogTo` via `GameLog` with the 50-line cap.
 - **Files:** `Assets/Game/Data/Validation/*.cs` (bodies); `Assets/Game/Tests/EditMode/Data/ValidationReportTests.cs`
@@ -862,8 +901,9 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 
 ### DATA-003 — Orientation tables
 - **Milestone:** M0
+- **Tier:** frontier — F1/F3: orientation group every voxel module relies on; a wrong table silently corrupts placement and saves
 - **Depends on:** `DATA-001`
-- **Do:** Implement `OrientationTableGenerator.Generate()` exactly as §5.3, `OrientationData` (immutable arrays exposed as `ReadOnlySpan`), the managed `OrientationTables` facade (static readonly data; `Matrix`, `TryFromMatrix`, `ToQuaternion`, `Rotate`, `Compose`, `Inverse`, `Mirror`, `RotateFace`, `AxisTurn`, `FromForwardUp`), `OrientationTablesBlob` methods and a static `OrientationTablesBlob.Build(Allocator)` that copies `OrientationData` into a blob.
+- **Do:** Implement `OrientationTableGenerator.Generate()` exactly as §5.3, `OrientationData` (immutable arrays exposed as `ReadOnlySpan`), the managed `OrientationTables` facade (static readonly data; `Matrix`, `TryFromMatrix`, `ToQuaternion`, `Rotate`, `Compose`, `Inverse`, `Mirror`, `RotateFace`, `AxisTurn`, `FromForwardUp`), `OrientationTablesBlob` methods and `OrientationTableGenerator.BuildBlob(data, allocator)` that copies `OrientationData` into a blob.
 - **Files:** `Assets/Game/Data/Blocks/{OrientationTableGenerator,OrientationData,OrientationTables,OrientationTablesBlob}.cs`; `Assets/Game/Tests/EditMode/Data/OrientationTablesTests.cs`; `Assets/Game/Tests/EditMode/Data/OrientationTablesPerfTests.cs`
 - **Acceptance criteria:**
   - [ ] All 24 matrices are integer, orthonormal, determinant +1 and pairwise distinct.
@@ -876,6 +916,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 
 ### DATA-004 — Definition self-validation and ID rules
 - **Milestone:** M0
+- **Tier:** standard — explicit rule table with codes and fixtures
 - **Depends on:** `DATA-002`
 - **Do:** Implement `ContentIdRules` (regex compiled once, prefix lookup walking the type chain with a per-type cache built on first use and reset in a `SubsystemRegistration` method), `ContentDefinition.Id` caching, `ItemDefinition.Validate` (E020–E024, W023) and `BlockDefinition.Validate` (E030–E045, using `BlockPlacementMath.ComputeMirrorOffset`). Add a test helper that creates definitions in memory via `ScriptableObject.CreateInstance` + `SerializedObject` (no assets).
 - **Files:** `Assets/Game/Data/Validation/ContentIdRules.cs`; `Assets/Game/Data/Definitions/Common/ContentDefinition.cs`; `Assets/Game/Data/Definitions/Items/ItemDefinition.cs`; `Assets/Game/Data/Definitions/Blocks/BlockDefinition.cs`; `Assets/Game/Data/Blocks/BlockPlacementMath.cs` (`ComputeMirrorOffset` only); `Assets/Game/Tests/EditMode/Data/TestContentFactory.cs`; `Assets/Game/Tests/EditMode/Data/DefinitionValidationTests.cs`
@@ -888,6 +929,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 
 ### DATA-005 — ContentCatalog
 - **Milestone:** M0
+- **Tier:** frontier — F1/F3: deterministic runtime indices and ID resolution used by every module and by saves
 - **Depends on:** `DATA-004`
 - **Do:** Implement `ContentCatalog.Build` per §5.4 and every lookup of §4.9 / §6.1; eager family tables; unresolved tracking; placeholder detection.
 - **Files:** `Assets/Game/Data/Services/{ContentCatalog,UnresolvedContentId}.cs`; `Assets/Game/Tests/EditMode/Data/ContentCatalogTests.cs`
@@ -903,6 +945,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 
 ### DATA-006 — Block blob builder and placement maths
 - **Milestone:** M0
+- **Tier:** frontier — F1/F3: content baking into blobs, content hash, mirror placement maths
 - **Depends on:** `DATA-003`, `DATA-005`
 - **Do:** Implement `BlockDefsBlobBuilder.Build` per §5.5 (including the air entry, prop mesh table, canonical cell order and content hash) and the rest of `BlockPlacementMath` per §5.6 / §6.3.
 - **Files:** `Assets/Game/Data/Blocks/{BlockDefsBlobBuilder,BlockPlacementMath}.cs`; `Assets/Game/Tests/EditMode/Data/{BlockDefsBlobBuilderTests,BlockPlacementMathTests}.cs`
@@ -917,6 +960,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 
 ### DATA-007 — ContentService and ECS singletons
 - **Milestone:** M0
+- **Tier:** frontier — F1/F2: boot service lifecycle and Persistent blobs living for the whole session
 - **Depends on:** `DATA-006`
 - **Do:** Implement `ContentService` per §5.1–§5.2 (validation throw, blob creation with `finally` cleanup, `CreateSingletons`/`DestroySingletons`, idempotent `Dispose`, `CreateForTests`). Add performance tests with a synthetic content generator (2,000 definitions, 500 blocks, seeded `Unity.Mathematics.Random`).
 - **Files:** `Assets/Game/Data/Services/ContentService.cs`; `Assets/Game/Tests/EditMode/Data/{ContentServiceTests,ContentServicePerfTests,SyntheticContent}.cs`
@@ -924,12 +968,13 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
   - [ ] Invalid content throws `ContentValidationException` whose report contains the error, and leaks nothing.
   - [ ] `CreateSingletons` twice on the same world creates one entity; systems can read `BlockDefsRef` and `OrientationTablesRef` via singleton queries.
   - [ ] Construct → CreateSingletons → DestroySingletons → Dispose under `NativeLeakDetection.Mode = Enabled` reports no leak; `Dispose` twice is safe.
-  - [ ] `Catalog.ContentHash` equals `StableHash.Combine(BlockDefs.Value.ContentHash, H)`.
+  - [ ] `ContentService.ContentHash` equals `StableHash.Combine(BlockDefs.Value.ContentHash, Catalog.ContentHash)` and is identical across two constructions from the same database.
   - [ ] Performance budgets of §8 met for both content sets.
 - **Tests:** `ContentServiceTests.InvalidContent_Throws_AndDoesNotLeak`, `.CreateSingletons_IsIdempotent`, `.Lifecycle_NoLeaks`, `.ContentHash_CombinesBlobAndCatalog`; `ContentServicePerfTests.Construct_ShippedContent`, `.Construct_Synthetic2000` (`[Category("Performance")]`).
 
 ### DATA-008 — Editor database builder, postprocessor, validator runner and CLI
 - **Milestone:** M0
+- **Tier:** standard — editor tooling with explicit steps; no runtime data path
 - **Depends on:** `DATA-005`
 - **Do:** Implement `ContentDatabaseBuilder`, `ContentDatabasePostprocessor`, `ContentValidatorRunner`, `ContentValidationCli`, `ContentBuildGate` per §5.7; menu items `Game/Content/Rebuild and Validate` and `Game/Content/Create Mirror Partner` (selected `BlockDefinition` → new asset `<id>_mirrored` with X-mirrored cells/clearance, swapped ±X attach bits, both partner references set); property drawers for `OrientationMask` (24 toggles in 6 rows labelled by forward face, plus buttons All / Horizontal / Yaw / None) and `BlockFaceMask`.
 - **Files:** `Assets/Game/Editor/Content/{ContentDatabaseBuilder,ContentDatabasePostprocessor,ContentValidatorRunner,ContentValidationCli,ContentBuildGate,ContentMenu,MirrorPartnerCreator,OrientationMaskDrawer,BlockFaceMaskDrawer}.cs`; `Assets/Game/Tests/EditMode/Editor/Content/ContentValidatorRunnerTests.cs`
@@ -943,6 +988,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 
 ### DATA-009 — System placeholder content and the database asset
 - **Milestone:** M0
+- **Tier:** standard — content authoring with given values plus a gate test
 - **Depends on:** `DATA-008`
 - **Do:** Create folders `Assets/Game/Content/{Blocks,Items,Ships,Weapons,Abilities,Audio,Factions,Loot,Bodies,Encounters,Narrative}/`, the `ContentDatabase.asset`, and the assets `block_missing` and `item_missing` with the §4.10 values (icon null; `block_missing` has no prop mesh). Add the EditMode gate test that loads the real database and runs the full editor validator.
 - **Files:** `Assets/Game/Content/ContentDatabase.asset`; `Assets/Game/Content/Blocks/block_missing.asset`; `Assets/Game/Content/Items/item_missing.asset`; `Assets/Game/Tests/EditMode/Editor/Content/ProjectContentTests.cs`
@@ -953,6 +999,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 
 ### DATA-010 — Weapon and ability links on blocks
 - **Milestone:** M2
+- **Tier:** standard — two fields and an index lookup with explicit rules
 - **Depends on:** `DATA-007`, `WPN-001`, `ABL-001`
 - **Do:** Add `[SerializeField] WeaponDefinition weapon` and `[SerializeField] AbilityDefinition[] grantedAbilities` (+ getters) to `BlockDefinition`; validation E047 (weapon iff `Function.Kind == Weapon`) and E010 coverage for both; in the blob builder set `Function.Weapon.WeaponIndex = catalog.IndexOf<WeaponDefinition>(weapon)` and fill `AbilityIndices` in authored order; include both in the content hash (they already are, as fields of the canonical layout).
 - **Files:** `Assets/Game/Data/Definitions/Blocks/BlockDefinition.cs`; `Assets/Game/Data/Blocks/BlockDefsBlobBuilder.cs`; `Assets/Game/Tests/EditMode/Data/BlockLinksTests.cs`
@@ -964,6 +1011,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 
 ### DATA-011 — v2 block additions (reactor, cargo)
 - **Milestone:** M1
+- **Tier:** standard — content authoring with given values
 - **Depends on:** `DATA-009`
 - **Do:** Author `block_reactor_small` and `block_cargo_small` with the §4.10 values (icons: reuse `item_icons_sheet` sprites `spritetest2_transparent_12` for the reactor and `spritetest2_transparent_0` for cargo until SPEC-81). Display names "Reactor Small", "Cargo Pod Small".
 - **Files:** `Assets/Game/Content/Blocks/block_reactor_small.asset`; `Assets/Game/Content/Blocks/block_cargo_small.asset`

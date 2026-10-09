@@ -12,8 +12,9 @@ This file is the entry point. It is short on purpose; the binding details are in
 4. [docs/03-glossary.md](docs/03-glossary.md): words and their exact meanings (**binding**)
 5. [docs/04-workflow.md](docs/04-workflow.md): how to claim, do and finish a task
 6. [docs/05-testing.md](docs/05-testing.md) and [docs/06-performance-budgets.md](docs/06-performance-budgets.md): checks and gates
-7. The spec for your task in [docs/specs/](docs/specs/), plus the *Decisions* and *Data model* of every spec it depends on
-8. [docs/LEDGER.md](docs/LEDGER.md): what is done, in progress and blocked
+7. [docs/07-implementation-traps.md](docs/07-implementation-traps.md): the DOTS/physics/rendering/UI mistakes that compile but fail later (**binding**, with a review checklist)
+8. The spec for your task in [docs/specs/](docs/specs/), plus the *Decisions* and *Data model* of every spec it depends on
+9. [docs/LEDGER.md](docs/LEDGER.md): what is done, in progress and blocked
 
 ## 2. The non-negotiables
 

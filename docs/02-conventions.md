@@ -31,20 +31,30 @@
 ## 2. ECS rules
 
 1. **Unmanaged components only.** `class : IComponentData` is forbidden (deprecated in Entities 6.6). Reference Unity objects with `UnityObjectRef<T>`.
-2. **`ISystem` + `[BurstCompile]`** for every system, on both the struct and `OnCreate`/`OnUpdate`/`OnDestroy`. `SystemBase` is allowed only for managed bridge systems in `Game.Presentation`, `Game.App` and `Game.Input`, and their names end with `BridgeSystem` or are listed in the architecture pipeline as managed.
+2. **`ISystem` + `[BurstCompile]`** for every system, on both the struct and `OnCreate`/`OnUpdate`/`OnDestroy`. `SystemBase` is allowed only for managed bridge systems in `Game.Presentation` and `Game.App` whose names end with `BridgeSystem` or which the architecture pipeline lists as managed (e.g. `PlayerInputSampleSystem`, which lives in `Game.Presentation` because `Game.Input` has no Entities reference).
 3. **Every system has `[UpdateInGroup(...)]`** naming a group from [01-architecture.md §5](01-architecture.md#5-frame-pipeline-system-groups-and-ordering). Ordering inside a group uses `[UpdateBefore]`/`[UpdateAfter]` against named systems only when the spec requires it.
 4. **Every gameplay system calls `state.RequireForUpdate<GameplayActive>()`** (or a narrower singleton) in `OnCreate`.
 5. **Structural changes** (create/destroy entities, add/remove components, change shared components) happen only:
    - through an `EntityCommandBuffer` from `GameplayEndCommandBufferSystem` (fixed step), `BeginInitializationEntityCommandBufferSystem` (spawning), or `EndSimulationEntityCommandBufferSystem` (variable-rate groups);
-   - or directly with `EntityManager` in the few systems the specs explicitly mark *structural* (`GridSpawnSystem`, `StarSystemStreamingSystem`, `SplitSystem` playback). Nowhere else.
+   - or directly with `EntityManager` in the two systems the architecture marks *structural*: `GridSpawnSystem` (init group) and `StarSystemStreamingSystem` (WorldGroup). Nowhere else. In particular `SplitSystem` **records** into the `GameplayEndCommandBufferSystem` buffer.
+   - Use batch APIs: `CreateEntity(archetype, NativeArray<Entity>)`, `Instantiate(prefab, NativeArray<Entity>)`, `DestroyEntity(query)`, `AddComponent(query, ...)`. Never loop `AddComponent`/`SetComponent` per entity on the main thread for more than 100 entities (architecture §11).
 6. **Prefer enableable components over add/remove** for anything that toggles at runtime (powered, dirty, dead projectile).
 7. **No sync points in hot paths.** `Complete()`, `EntityManager.GetComponentData` on main thread inside `OnUpdate`, and `CompleteDependency()` are forbidden in fixed-step systems unless the spec says so with a reason.
 8. **Jobs:** `IJobEntity` or `IJobChunk` by default, `ScheduleParallel` when safe. Read-only lookups are `[ReadOnly]`. Never write the same component from two jobs in one tick (single-writer table, architecture §8).
-9. **Events between stages** use the streams named in the architecture (`DamageStreams`, `FxEvent`/`SfxEvent` queues). Producers append from parallel jobs with `NativeStream`/`NativeQueue.ParallelWriter`; the single consumer sorts by a stable key before applying, so results don't depend on thread scheduling.
+9. **Events between stages** use the streams named in the architecture. Streams that change simulation state use `NativeStream`. Each producer writes at the foreach index `ChunkIndexInQuery` (or the parallel-for index), and the consumer reads indices in order. When several producers feed one consumer, the consumer sorts by `(Grid.Index, Source.Index, producer kind, sequence)`. `NativeQueue.ParallelWriter` is allowed **only** for presentation streams (`FxEvent`, `SfxEvent`) and managed-event queues. Rule of thumb: if the order could change a cell, an HP value or a velocity, it is not a `NativeQueue`.
 10. **Randomness:** `RngStreams.For(seed, purpose, salt)`; for per-entity, per-tick randomness use `Random.CreateFromIndex((uint)StableHash.Combine(tick, entity.Index ^ salt))`. Never `UnityEngine.Random`, `System.Random`, or `Guid` for gameplay.
 11. **Blob assets** are created once, stored in a cleanup component or a service that disposes them, and never rebuilt per frame.
 12. **Native containers:** `Allocator.Temp` inside jobs/one frame, `Allocator.TempJob` for jobs that finish within 4 frames, `Allocator.Persistent` only in an owner that disposes in `OnDestroy`. Every `Persistent` allocation has a matching dispose; leaks fail the leak-detection test.
 13. **Floats:** gameplay inside the local frame uses `float`/`float3`. Anything stored across star systems or in saves uses `double`/`double3` (`UniversePosition`).
+14. **No managed types in ECS data.** No `string`, class, array or `ContentId` in components, buffers, blobs, jobs or events. Use `ContentHash`, dense runtime indices, `FixedString*Bytes` (debug names only) and `UnityObjectRef<T>`.
+15. **Lookups and handles:** `ComponentLookup`/`BufferLookup`/type handles are created in `OnCreate` and `.Update(ref state)` at the top of every `OnUpdate`. Writing through a lookup from a parallel job needs `[NativeDisableParallelForRestriction]` **and** a written argument in the job comment for why no two threads touch the same entity.
+16. **Command buffers:** `EntityCommandBuffer.ParallelWriter` sort key is `[ChunkIndexInQuery] int chunkIndex` (in `IJobEntity`) or `unfilteredChunkIndex` (in `IJobChunk`), never a constant or a thread index.
+17. **Main-thread queries:** `EntityQuery.ToEntityArray`/`ToComponentDataArray`/`CalculateEntityCount` force completion of jobs writing those types. They are forbidden in fixed-step `OnUpdate` unless the spec says so with a reason; prefer `ToEntityListAsync` or a job.
+18. **Profiling:** expensive steps get a `static readonly ProfilerMarker` named `<SystemName>.<Step>` (e.g. `DamageResolveSystem.Rasterize`). Burst jobs are profiled automatically by name.
+19. **Physics:**
+    - Collision filters come only from `PhysicsLayers` (SPEC-12).
+    - Velocity changes are impulses (`PhysicsVelocity.ApplyLinearImpulse`/`ApplyAngularImpulse` with the body's `PhysicsMass`), never assignments (architecture §8).
+    - Runtime-created collider blobs are owned and disposed through `DeferredDisposalSystem`, never `Dispose()`d while a physics step may still read them.
 
 ## 3. Managed (MonoBehaviour / plain C#) rules
 

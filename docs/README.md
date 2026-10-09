@@ -8,9 +8,10 @@ Read in this order. Documents marked **binding** may only change through an ADR.
 | 1 | [01-architecture.md](01-architecture.md) | Modules, frame pipeline, shared types, who writes what, coordinate frames, spec map | **binding** |
 | 2 | [02-conventions.md](02-conventions.md) | How code is written | **binding** |
 | 3 | [03-glossary.md](03-glossary.md) | What words mean | **binding** |
-| 4 | [04-workflow.md](04-workflow.md) | How to claim, do and finish a task; ambiguity and contradiction rules | **binding** |
+| 4 | [04-workflow.md](04-workflow.md) | How to claim, do and finish a task; ambiguity and contradiction rules; **task tiers** (which model may take which task) | **binding** |
 | 5 | [05-testing.md](05-testing.md) | Commands, test kinds, Definition of Done, regression scenarios | **binding** |
 | 6 | [06-performance-budgets.md](06-performance-budgets.md) | Perf gates | **binding** |
+| 7 | [07-implementation-traps.md](07-implementation-traps.md) | The DOTS, physics, rendering, UI and save mistakes that compile but fail later; review checklist | **binding** |
 | — | [ROADMAP.md](ROADMAP.md) | Milestones M0–M4 and the art track, with exit gates | binding (order) |
 | — | [LEDGER.md](LEDGER.md) | Task status, open questions, measurements, log | living |
 | — | [specs/](specs/) | One spec per system with numbered tasks ([template](specs/_TEMPLATE.md)) | per spec |

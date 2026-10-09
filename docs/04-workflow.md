@@ -4,7 +4,7 @@
 
 ## 1. Before you write code
 
-1. Read, in order: [AGENTS.md](../AGENTS.md) → [00-vision](00-vision.md) → [01-architecture](01-architecture.md) → [02-conventions](02-conventions.md) → [03-glossary](03-glossary.md) → the spec you'll work on → the specs it depends on (at least their *Decisions* and *Data model*).
+1. Read, in order: [AGENTS.md](../AGENTS.md) → [00-vision](00-vision.md) → [01-architecture](01-architecture.md) → [02-conventions](02-conventions.md) → [03-glossary](03-glossary.md) → [07-implementation-traps](07-implementation-traps.md) → the spec you'll work on → the specs it depends on (at least their *Decisions* and *Data model*).
 2. Pick a task in [LEDGER.md](LEDGER.md):
    - status `todo`,
    - in the current milestone (see [ROADMAP.md](ROADMAP.md)),
@@ -34,6 +34,7 @@
    - [ ] No hard-coded colours, sizes, fonts or asset paths; placeholders referenced through definitions or tokens.
    - [ ] Every `TODO` has a task ID.
    - [ ] Tests named and placed per conventions §7.
+   - [ ] The review checklist at the end of [07-implementation-traps.md](07-implementation-traps.md) passes for every section that applies.
 3. Update [LEDGER.md](LEDGER.md): status `done`, commit hash, and one entry in the *Log* (what changed, measurements, follow-ups).
 4. Commit `<TASK-ID>: <summary>` on `task/<TASK-ID>-<slug>`, then merge to `main` (rebase first). One task per merge.
 
