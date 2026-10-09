@@ -22,3 +22,9 @@
 20. Architecture §8: PhysicsVelocity row adds GridMassUpdateSystem (exact re-expression only); creation of PhysicsCollider/PhysicsMass/PhysicsVelocity by GridBodyInitSystem, SplitSystem (via GridBodyFactory) is not a write (SPEC-12 Q2, SPEC-13 Q14). Also `VoxelGrid.Kind` writer ShipDeathSystem (SPEC-13 Q6).
 21. SPEC-01 §5.3 BootSingletons: rows `PhysicsVoxelConfig` = `PhysicsVoxelConfigFactory.Create(catalog.Get<PhysicsVoxelConfigDefinition>("config_physics"))` and `PhysicsStep` = `PhysicsVoxelConfigFactory.CreatePhysicsStep(same def)`.
 22. SPEC-10 §8.2 memory table collider line: use SPEC-12 §4.8 (≈ 2.3 MB peak, 1.1 MB steady for HollowStation1M).
+23. SPEC-01 §5.7 step 4: call `FlightSetup.Add(em, root)` (SPEC-20) next to `PlanarConstraintSetup.Add`; BootSingletons row `FlightConfig` = `FlightConfigFactory.Create(catalog.Get<FlightConfigDefinition>("config_flight"))`.
+24. SPEC-22: `ShipStats.YawTorque` += `FlightMath.GyroYawTorque(FlightConfig, InverseInertia.y)` for non-hulk ships (mass part, §5.4 step 4); PWR-006 depends on FLT-001 for `GridSpaceMath` (not WPN-001); §10 Q5 answered (SPEC-20 FLT-012).
+25. SPEC-31 InteractionQuery/interaction: consume `PlayerCommand.Edges.Interact` with its own last-seen counter (SPEC-20 §6), never `ShipCommand.Edges` (variable-rate group).
+26. SPEC-23: AI steering writes `ShipCommand` with `WithNone<PlayerShip>` and rewrites `Edges` every tick; uses `FlightState`/`FlightMath` caps.
+27. Architecture §8 PhysicsVelocity row: add `PlanarConstraintSystem` (vertical impulses only) — together with item 20.
+28. SPEC-21: `WeaponAimSystem` declares `[UpdateAfter(typeof(PlanarConstraintSystem))]`; uses `GridSpaceMath` from FLT-001.

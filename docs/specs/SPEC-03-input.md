@@ -444,7 +444,7 @@ When the Editor map is disabled, set `frame = default`.
 ### INP-007 — Frame-rate independence test
 - **Milestone:** M1
 - **Tier:** standard — test of specified behaviour
-- **Depends on:** `INP-005`, `FLT-005`
+- **Depends on:** `INP-005`, `SPEC-20`
 - **Do:** PlayMode test: inject a scripted sequence of presses and holds at simulated 30, 60 and 144 FPS (`Time.captureDeltaTime`). Assert the same number of consumed `Interact` and `Ability1` edges, and the same total thrust-seconds (±1 tick), in the player ship's `ShipCommand` history recorded by a test system.
 - **Files:** `Assets/Game/Tests/PlayMode/Input/FrameRateIndependenceTests.cs`
 - **Acceptance criteria:**
