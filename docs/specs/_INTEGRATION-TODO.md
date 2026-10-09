@@ -44,3 +44,5 @@
 42. SPEC-63 tracers: hide/correct while `ProjectileStore.AppliedShiftSequence != FrameOrigin.ShiftSequence`.
 43. SPEC-01 BootSingletons: `AiContent.CreateSingletons`; `AiSetup.Add(em, root, profile)` after `CombatGridSetup.AddAll`; save blocker reads `PlayerCombatStatus` with `CompleteDependencyBeforeRO`.
 44. SPEC-31: add `SpatialBody { Radius }` to celestial body roots that block shots.
+45. SPEC-72 MIG-010: write SPEC-24 §4.1 v2 values (speed boost MaxSpeed ×1.8, Thrust ×2.0, cost 15 E; shield toggle threshold 0.3, cooldown 1 s).
+46. SPEC-01 BootSingletons: `AbilityContent.CreateSingletons`.
