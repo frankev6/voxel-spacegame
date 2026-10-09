@@ -1,0 +1,643 @@
+# SPEC-70 — Dev tools and CLI harness
+
+| | |
+|---|---|
+| **Status** | Draft |
+| **Area code** | DEV (task IDs are `DEV-001`, `DEV-002`, …) |
+| **Module(s)** | `Game.DevTools.Editor` (folder `Assets/Game/DevTools/Editor/`, Editor only); dev-build runtime code in `Game.App` (folder `Assets/Game/App/DevRuntime/`, every file inside `#if UNITY_EDITOR \|\| DEVELOPMENT_BUILD`); scripts in `tools/playtest/`; scenario files in `TestData/Scenarios/` |
+| **Depends on specs** | SPEC-01 (GameRoot creates `DevRuntimeHost`; `SceneFlow` new game and sandbox; `ShipSpawnService`), SPEC-02 (`Services`, `EventBus<T>`, `GameLog`, `PersistentId`, `SimClock`), SPEC-03 (action names), SPEC-05 (save slots, harness profile), SPEC-10/11/12 (grid, brick, collider data for `gh_grid` and overlays), SPEC-21/23 (weapons, spatial hash), SPEC-31/32 (bodies, interaction, travel), SPEC-40 (facts, condition compiler), SPEC-50 (inventory), SPEC-60/62 (screens, camera), SPEC-63/64 (`FxStats`, `AudioStats`), SPEC-71 (test fixtures, `PerfMarkers`, PlayerCommand replay) |
+| **Depended on by** | Every spec whose regression scenarios (05-testing §5) are written as `.scenario` files; SPEC-71 benchmark debugging; human and AI playtesting |
+| **Milestone** | M0 (harness, scenario engine, host) with game commands landing in M1–M3 as their systems exist |
+
+> Read [01-architecture.md](../01-architecture.md), [02-conventions.md](../02-conventions.md) and [03-glossary.md](../03-glossary.md) before this spec. This spec may not contradict them.
+
+## 1. Purpose
+
+Developers and AI agents must be able to drive the running game from a terminal in seconds: start a new game with a seed, teleport, spawn ships, aim and fire, interact, save, load, jump, read and set facts, inspect any grid, read performance counters, and run scripted scenarios that end in an exit code. This spec documents the generic CLI harness that already exists, adds the game-specific commands on top of one shared command registry (used by the CLI, an in-game dev console and scenario files), defines the scenario file language so the old prototype's regressions (ledger R10, R15, R16/R19, R25/R26, R28, R30) become data, adds debug overlays, and guarantees nothing ships in release builds. It keeps the lessons of the prototype's harness (audit synthesis §6m, ledger "TOOLING v1–v5"): input through Input System state events and a virtual mouse, no `capture_game_view --save_path`, no modal dialogs, and — new — no bypass of game rules that would hide the very bugs we test for (the prototype's `gh_interact` bypassed the broken interaction radius of R10).
+
+## 2. Scope
+
+**In scope:**
+- Documentation of the as-built generic harness (`GameTestHarness.cs`) and scripts.
+- `DevRuntimeHost`, the dev command registry, async operations, runtime input injection and UI query.
+- Game commands: `newgame`, `sandbox`, `teleport`, `spawn`, `aim`, `fire`, `interact`, `inv`, `give`, `save`, `load`, `jump`, `facts`, `grid`, `perf` extensions, `overlay`, `record`, `replay`, `until`, `op`, `help`, plus their `gh_*` CLI wrappers.
+- The scenario language, runner, results JSON, `gh_scenario*` commands, the PlayMode test that runs every active scenario file, and draft regression scenario files.
+- Debug overlays: brick bounds, dirty bricks, collider boxes, islands, spatial hash, interaction radius.
+- In-game dev console (UI Toolkit, dev builds only, no QFSW).
+- Scripts `tools/playtest/newgame.sh`, `toworld.sh`, `scenario.sh`, `scenarios.sh`.
+- The release-strip guarantee and its test.
+
+**Out of scope (and who owns it instead):**
+- The tick-level PlayerCommand recording/replay mechanism and its file format (SPEC-71); this spec only exposes commands for it.
+- Test fixtures, perf harness, benchmark setups, determinism hashing (SPEC-71).
+- Making regression scenarios pass (each owning spec, 05-testing §5); this spec writes drafts.
+- The gameplay APIs the commands call (owning specs; requested in §6.4).
+
+## 3. Decisions (binding)
+
+1. **One command implementation, three front-ends.** Every game command is an `IDevCommand` in `Game.App.DevRuntime`. The CLI wrapper (`gh_*` in `Game.DevTools.Editor`), the dev console and scenario steps all call `DevCommandRegistry.Execute`. Reason: no drift between how agents, humans and tests drive the game.
+2. **Runtime dev code lives in `Game.App/DevRuntime/` and is compiled only in the Editor and development builds** (`#if UNITY_EDITOR || DEVELOPMENT_BUILD` around each whole file). It follows every runtime convention (`ConventionsTests` covers it): no `Find*`, no `Debug.Log` (use `GameLog`), no `Resources.Load`, no mutable statics. Reason: architecture §3 has no runtime DevTools assembly; `Game.App` may reference every module.
+3. **Nothing from DevTools ships in release builds.** Enforced by: the Editor-only asmdef; the `#if` guards; `GameRoot` creating `DevRuntimeHost` only under the same `#if`; no dev assets at all (the console is built in C# with theme classes; overlays use the built-in `Hidden/Internal-Colored` shader); and `DevReleaseStripTests` compiling release player scripts and asserting no `Game.App.DevRuntime` type exists.
+4. **Commands use the real game paths.** Fire presses the real input action; interact presses the real Interact action and only moves the ship to a legal distance first; save/load/jump call the same service methods the UI calls. Commands never call private methods or reflection-invoke game internals.
+5. **Dev writes outside architecture §8 are exhaustively listed** (§5.4): teleporting the player root and dev inventory/fact/credit grants. Each happens on the main thread between world updates after `EntityManager.CompleteAllTrackedJobs()`. Nothing else in this spec writes game state directly.
+6. **Long operations are asynchronous.** A CLI call must return while the Editor keeps ticking, so commands that take frames return an operation id; `gh_op` polls it and scripts loop. No command blocks the main thread or waits on wall-clock sleeps inside C#.
+7. **Scenario files are a line-based text language** (§6.2), parsed by hand. No JSON library is involved (Newtonsoft is not allowed in `Game.App` or DevTools, architecture §3.1). Results are written as JSON by a small hand-written writer.
+8. **Exit codes:** 0 pass, 1 fail (assertion false, wait timed out, scenario timeout, unexpected error logs), 2 error (parse error, unknown command, command could not run, exception, play mode exited), 3 Editor unreachable (scripts only).
+9. **Draft scenarios do not fail the suite.** A scenario with `status draft` is reported as ignored by the PlayMode runner; the owning spec flips it to `status active` when its feature lands.
+10. **Grids are addressed by `PersistentId`** (architecture §6.1) in commands, probes and output, never by `Entity` alone, so scenarios survive save/load.
+11. **No modal dialogs.** No DevTools or game code path reachable from the CLI may open `EditorUtility.DisplayDialog` or any modal window; a modal blocks the Editor main thread and the CLI times out.
+12. **Outputs go under `Logs/`** (`Logs/playtest/…`), never `Temp/` (Unity deletes it) and never `Assets/`.
+
+## 4. Data model
+
+All runtime types: namespace `Game.App.DevRuntime` (plus sub-namespaces by folder), folder `Assets/Game/App/DevRuntime/`, each file wrapped in `#if UNITY_EDITOR || DEVELOPMENT_BUILD`. *Public contract* for SPEC-71 and the Editor wrappers.
+
+```csharp
+/// One dev command. Implementations are stateless; state lives in DevContext/DevRuntimeHost.
+public interface IDevCommand
+{
+    string Name { get; }          // lowercase, one word: "teleport"
+    string Usage { get; }         // "teleport x=<m> z=<m> [yaw=<deg>] | sx=<m> sz=<m> | near=<body> [offset=<m>]"
+    string Summary { get; }       // one line for help
+    DevCommandResult Execute(DevArgs args, DevContext ctx);
+}
+
+public enum DevResultKind : byte { Ok = 0, Pending = 1, Failed = 2 }
+
+public readonly struct DevCommandResult
+{
+    public readonly DevResultKind Kind;
+    public readonly string Text;          // human/agent readable, never null
+    public readonly int OperationId;      // > 0 when Kind == Pending
+    public static DevCommandResult Ok(string text);
+    public static DevCommandResult Fail(string text);
+    public static DevCommandResult Pending(int operationId, string text);
+}
+
+/// Parsed "key=value" arguments. Keys are lowercase. Values may be quoted with "..." (\" escapes a quote).
+public sealed class DevArgs
+{
+    public static bool TryParse(string line, out string command, out DevArgs args, out string error);
+    public bool Has(string key);
+    public string GetString(string key, string fallback);
+    public bool TryGetString(string key, out string value);
+    public double GetDouble(string key, double fallback);   // invariant culture
+    public long GetLong(string key, long fallback);
+    public ulong GetULong(string key, ulong fallback);
+    public bool GetBool(string key, bool fallback);          // true/false/1/0
+    public IReadOnlyList<string> Keys { get; }
+    public IReadOnlyList<string> Positional { get; }         // tokens without '=' (e.g. "record start")
+}
+
+public enum DevOperationStatus : byte { Running = 0, Succeeded = 1, Failed = 2 }
+
+/// A multi-frame command. Advanced once per frame by DevRuntimeHost.Update until not Running.
+public interface IDevOperation
+{
+    DevOperationStatus Status { get; }
+    string Message { get; }               // progress or final result
+    double TimeoutSeconds { get; }        // realtime; host fails the op when exceeded
+    void Tick(DevContext ctx);
+}
+
+/// What commands may touch. Created by DevRuntimeHost.
+public sealed class DevContext
+{
+    public World World { get; }                      // World.DefaultGameObjectInjectionWorld
+    public EntityManager EntityManager { get; }
+    public bool TryGetService<T>(out T service) where T : class;   // wraps Services.TryGet
+    public DevInputInjector Input { get; }
+    public DevUiQuery Ui { get; }
+    public DevLogCapture Logs { get; }
+    public DevEventCounter Events { get; }           // counts managed events (§6.2 probe events.count)
+    public Camera GameplayCamera { get; }            // from SPEC-62 (open question 10); null outside the World scene
+    public Entity PlayerShipRoot { get; }            // Entity.Null when none
+}
+
+/// Scenario probe: a named value source for expressions (player.pos.x, fact("x"), ...).
+public interface IScenarioProbe
+{
+    string Name { get; }                             // dotted path or function name: "player.pos.x", "fact"
+    int ArgCount { get; }                            // 0 for paths
+    ScenarioValue Read(DevContext ctx, ReadOnlySpan<ScenarioValue> args);
+}
+
+public enum ScenarioValueKind : byte { Number = 0, Bool = 1, String = 2 }
+public readonly struct ScenarioValue { public readonly ScenarioValueKind Kind; public readonly double Number; public readonly bool Bool; public readonly string String; }
+
+public enum ScenarioOutcome : byte { Running = 0, Passed = 1, Failed = 2, Error = 3, Ignored = 4 }
+
+public sealed class ScenarioRun
+{
+    public string Name { get; }  public string FilePath { get; }  public int RunId { get; }
+    public ScenarioOutcome Outcome { get; }  public int ExitCode { get; }      // 0/1/2 per §3.8; Ignored → 0
+    public string Message { get; }  public int CurrentLine { get; }  public double ElapsedSeconds { get; }
+    public string ResultJsonPath { get; }                                     // Logs/playtest/scenarios/<name>-<UTC yyyyMMdd-HHmmss>.json
+}
+```
+
+`DevRuntimeHost : MonoBehaviour` (public contract; thin): owns `DevCommandRegistry Commands`, `DevInputInjector`, `DevUiQuery`, `DevLogCapture`, `DevEventCounter`, `DevOverlayRenderer`, `DevConsole`, the operation table (`Dictionary<int, IDevOperation>`, ids start at 1 and never repeat in a session) and active `ScenarioRunner`s. Static factory `DevRuntimeHost.Create(Transform parent)`. `Update()` pumps input releases, ticks operations and scenario runners; `LateUpdate()` draws overlays.
+
+Results JSON (written by `ScenarioRunner` with `DevJsonWriter`, UTF-8, no BOM):
+
+```json
+{ "scenario": "r28_pause_load", "file": "TestData/Scenarios/r28_pause_load.scenario", "status": "active",
+  "result": "pass", "exitCode": 0, "message": "", "startedUtc": "2026-10-09T10:00:00Z", "durationSeconds": 41.2,
+  "failedLine": 0, "seed": 28028,
+  "steps": [ { "line": 7, "text": "newgame seed=28028", "outcome": "ok", "seconds": 5.1, "output": "op 3 succeeded: in world" } ],
+  "logs": { "errors": 0, "exceptions": 0, "warnings": 2 } }
+```
+
+## 5. Systems, services and flow
+
+```mermaid
+flowchart LR
+    CLI["unity command gh_* (Editor)"] --> W[Editor wrappers] --> R[DevCommandRegistry]
+    CON[Dev console] --> R
+    SCN[ScenarioRunner] --> R
+    R --> C[IDevCommand] --> G[Game services / ECS / input actions]
+    C -- Pending --> OP[(Operation table)] --> H[DevRuntimeHost.Update ticks ops]
+    SH[tools/playtest/*.sh] --> CLI
+```
+
+### 5.1 Generic harness (as built; Editor)
+`Assets/Game/DevTools/Editor/GameTestHarness.cs` (`[InitializeOnLoad]`): log collector (deduplicated, per-message counts, first `Assets/Game` frame), unfocused-input mode (on in play mode, restored on exit), virtual `AgentMouse` (native mice disabled during play, restored on exit and after reloads), reflection helpers. Commands in §6.1.
+
+### 5.2 `DevRuntimeHost` per frame (`Update`, main thread, outside world updates)
+1. `Input.Pump(Time.unscaledTimeAsDouble)`: release keys/buttons whose hold time ended (one state event per device when anything changed).
+2. For each running operation (ascending id): `op.Tick(ctx)`; if still `Running` and its realtime age > `TimeoutSeconds` → mark `Failed` with "timeout after N s".
+3. For each active `ScenarioRunner`: `runner.Step(ctx)` (§5.3).
+4. Console: handled by its screen (event-driven).
+5. `LateUpdate`: `DevOverlayRenderer.Draw()` when any overlay is on.
+
+### 5.3 `ScenarioRunner.Step` (once per frame)
+1. If finished, return. If total realtime > the file's `timeout` (default 300 s) → fail "scenario timeout".
+2. Current statement:
+   - **command** (`teleport x=1 z=2`): `Execute` once. `Ok` → next statement this same frame (at most 32 statements per frame). `Failed` → error (exit 2). `Pending` → remember the op id; each frame check it: `Succeeded` → next; `Failed` → error (exit 2).
+   - **wait cond [timeout=s]** (default 30 s): evaluate each frame; true → next; timeout → fail "wait timed out: <cond>".
+   - **wait ticks=N**: record `SimClock.Tick` at start; next when `Tick − start >= N`; if no `SimClock`, fall back to frames.
+   - **wait frames=N**: next after N `Step` calls.
+   - **assert cond ["message"]**: false → fail with message and both operand values when the top node is a comparison.
+   - **let name = expr**: evaluate and store; `$name` reads it.
+   - **expect_errors N**: sets the error-log allowance (default 0).
+3. After the last statement: if `logs.errors > allowance` → fail "unexpected error logs: <first 3 messages>"; else pass.
+4. On finish: write the results JSON, set `Outcome`, `ExitCode`, `Message`.
+
+### 5.4 Dev writes outside architecture §8 (complete list)
+| Write | Code | Rule kept |
+|---|---|---|
+| Player root `LocalTransform` (position, yaw), `PhysicsVelocity = default`, Unity Physics graphical-smoothing history reset | `DevEcs.TeleportRoot(EntityManager, Entity root, float3 pos, quaternion rot)` | Main thread, between world updates, after `CompleteAllTrackedJobs()`; `OriginRebaseSystem` rebases next frame if the new position is > 2,000 m from the origin |
+| Inventory add, credits add | `InventoryModel` / `Wallet` public methods (owner methods, dev caller) | No direct field writes |
+| Fact set | `FactStore.Set` (owner method, dev caller) | No direct field writes |
+| `PlayerCommand` during replay | SPEC-71 replay system | Specified by SPEC-71 |
+
+## 6. Public API
+
+### 6.1 Generic CLI commands (as built in `GameTestHarness.cs`; DEV-002 reconciles this table with the code)
+
+| Command | Args (default) | Purpose |
+|---|---|---|
+| `gh_snapshot` | `logs` (true), `mark` (true), `ecs` (true), `ui` (true) | Frame/time, scenes, visible UI text, camera + AudioListener count, ECS summary, deduplicated logs since mark. DEV-009 adds `[session]` and `[player]` sections |
+| `gh_logs` | `level` all\|warn\|error (all), `mark` (true), `max` (80) | Deduplicated logs since the last mark |
+| `gh_mark` | — | Move the log mark |
+| `gh_ui` | `max` (60), `chars` (200) | Visible UI Toolkit text per document |
+| `gh_click` | `target` (name or text), `index` (0) | Click a visible element |
+| `gh_key` | `keys` (comma list of `Key` names), `hold` (0.12 s; 0 = until `release`), `release` (false) | Keyboard state-event injection |
+| `gh_mouse` | `x`, `y` (−1 = keep; game-view pixels, origin bottom-left), `button` none\|left\|right\|middle, `down` (true), `scroll`, `dx`, `dy` | Virtual AgentMouse |
+| `gh_unfocused_input` | `enable` (true) | Route input to the game while the Editor is unfocused |
+| `gh_get` / `gh_invoke` / `gh_find` | `type`, `path`, `depth` / `type`, `method`, `args`, `path` / `type`, `max` | Reflection reads, calls, scene lookups (debugging only; scenarios must not use them) |
+| `gh_ecs` | `filter` (""), `max` (60) | Component counts |
+| `gh_entities` | `component`, `max` (10) | Entities with a component and its field values |
+| `gh_perf` | — (DEV-011 adds `voxel`, `combat`, `markers`, `json`, all false) | Main-thread ms, draws, triangles, GC alloc/frame, memory, entities |
+
+### 6.2 Scenario language
+
+Files: `TestData/Scenarios/<name>.scenario`, UTF-8, one statement per line, `#` starts a comment, blank lines ignored, keywords lowercase.
+
+```
+header      := 'scenario' NAME | 'desc' STRING | 'status' ('draft'|'active') | 'tags' NAME+ | 'timeout' NUMBER
+step        := 'wait' expr ['timeout=' NUMBER] | 'wait' 'ticks=' INT | 'wait' 'frames=' INT
+             | 'assert' expr [STRING] | 'let' NAME '=' expr | 'expect_errors' INT
+             | COMMAND (KEY '=' VALUE | WORD)*                # any registered dev command, same syntax as the console
+expr        := or ;  or := and ('||' and)* ;  and := not ('&&' not)* ;  not := '!' not | cmp
+cmp         := sum [('=='|'!='|'<'|'<='|'>'|'>=') sum] ;  sum := term (('+'|'-') term)* ;  term := unary (('*'|'/') unary)*
+unary       := '-' unary | primary
+primary     := NUMBER | STRING | 'true' | 'false' | '$' NAME | probe | '(' expr ')'
+probe       := NAME ('.' NAME)* ['(' [expr (',' expr)*] ')']
+```
+Rules: `scenario` must be the first statement; NAME is `[a-z0-9_]+`; STRING is `"…"` with `\"` and `\\` escapes; numbers are invariant-culture doubles; `==` on strings is ordinal; mixing kinds in a comparison is a runtime error (exit 2); unknown probe or command is a parse error (exit 2) reported with the line number.
+
+Built-in probes (DEV-005 unless noted):
+
+| Probe | Value |
+|---|---|
+| `scene` | Active scene name |
+| `frame`, `tick` | `Time.frameCount`; `SimClock.Tick` (−1 when absent) |
+| `paused` | `IPauseService.IsPaused` |
+| `context` | Active `InputContext` name |
+| `services.ready` | `GameRoot` finished constructing services |
+| `ui.visible("text")` | Any visible text element contains the text (case-insensitive) |
+| `logs.errors`, `logs.exceptions`, `logs.warnings`, `logs.contains("text")` | Counts since the run started |
+| `events.count("Name")` | Count since the run started of the managed event `Name` (any of the ten in architecture §6.6) |
+| `ecs.count("Component")` | Entities with that component type name (disabled entities excluded) |
+| `audio.listeners` | Enabled `AudioListener` count (dev code may count through `AudioService`; never `Find*`) |
+| `abs(x)`, `min(a,b)`, `max(a,b)`, `distance(x1,z1,x2,z2)` | Math helpers |
+| `player.exists`, `player.ready` (DEV-009) | `PlayerShip` exists; ready = exists, `GameplayActive`, player grid has `PhysicsCollider`, context `Flight` |
+| `player.pos.x/y/z`, `player.upos.x/z`, `player.speed`, `player.id`, `player.cells` (DEV-009) | Local position; `UniversePosition`; speed m/s; `PersistentId.Value`; solid cell count |
+| `grid(id).exists`, `grid(id).cells`, `grid(id).kind`, `grids.count("Ship"\|"Station"\|"Asteroid"\|"Hulk")` (DEV-009) | By `PersistentId` |
+| `star_system` (DEV-018) | Current `StarSystemId.Value` (−1 when none) |
+| `interaction.target`, `interaction.inrange` (DEV-014) | Target body name or ""; in range |
+| `fact("name")`, `cond("condition text")`, `inv("item_id")`, `credits` (DEV-017) | Fact value; compiled condition result; item count; wallet |
+| `fx.drained`, `sfx.voices` (DEV-011) | `FxStats.EventsDrained` last frame; `AudioStats.ActiveSfxVoices` |
+
+Complete example (draft until SPEC-05/SPEC-31 land):
+
+```
+scenario r28_pause_load
+desc "Loading from the pause menu restores the saved position and keeps the star system (ledger R28)"
+status draft
+tags regression R28
+timeout 180
+newgame seed=28028
+wait player.ready timeout=60
+teleport sx=250 sz=-300
+wait ticks=30
+let sx = player.upos.x
+let sz = player.upos.z
+let sys = star_system
+save slot=r28
+teleport sx=600 sz=600
+wait ticks=30
+key keys=Escape
+wait ui.visible("Load") timeout=5
+click target="Load"
+wait ui.visible("r28") timeout=5
+click target="r28"
+wait events.count("GameLoaded") == 1 timeout=30
+wait player.ready timeout=30
+wait ticks=60
+assert abs(player.upos.x - $sx) < 1 && abs(player.upos.z - $sz) < 1 "player is where it was saved"
+assert star_system == $sys "same star system"
+assert ecs.count("Brick") > 0 "voxels present"
+```
+
+### 6.3 Game commands (runtime registry name → CLI wrapper `gh_<name>`)
+
+| Command | Args | Behaviour | Result |
+|---|---|---|---|
+| `help` | `[cmd]` | Lists commands or one usage | Ok |
+| `op` | `id` | Status of an operation | Ok: `running\|succeeded\|failed: message` |
+| `until` | `cond` (expression text) | Evaluates once | Ok: `true` or `false` |
+| `newgame` | `seed` (ulong, required), `ship` (blueprint id, default from SPEC-01), `intro` (false), `profile` (`harness`) | Edit mode (CLI wrapper only): open `Assets/Game/Scenes/Boot.unity`, enter play mode, wait for the host. Then `SceneFlow.StartNewGameAsync(new NewGameOptions { Seed, StartBlueprint, SkipIntro = !intro })` with the save profile set to `profile`. Done when `player.ready` (or context `Dialog` when `intro=true`). Timeout 60 s | Pending → `in world: seed S, player id P` |
+| `sandbox` | `player` (true), `seed` (1) | `SceneFlow.EnterSandboxAsync(new SandboxOptions { SpawnPlayer, Seed })`. Done when `GameplayActive` exists (and `player.ready` when `player=true`). Timeout 30 s | Pending |
+| `teleport` | `x`,`z` (local) or `sx`,`sz` (star-system metres; converted with `FrameOrigin`) or `near` (body query) + `offset` (40), `yaw` (degrees, keep current) | `DevEcs.TeleportRoot` (§5.4). `near`: body via `IBodyDirectory.TryFind`; target = body centre − (0, 0, surfaceRadius + offset) | Ok: new local and universe position |
+| `spawn` | `blueprint` (required), `x`,`z` or `dx`,`dz` (relative to player; default dz=80), `yaw` or `face=player`, `faction` (id), `team` (1), `count` (1), `spacing` (60), `ai` (true) | One `ShipSpawnService.Spawn` per ship, placed along +X by `spacing`. Done when every requested `PersistentId` has a grid root. Timeout 10 s | Pending → `spawned N: ids …` |
+| `aim` | `target` = `nearest_hostile` (default) \| `nearest` \| `id:<PersistentId>` \| `point` with `x`,`z`; `track` (0 s) | Projects the target with `GameplayCamera.WorldToScreenPoint`, moves the AgentMouse; with `track > 0` an operation re-aims every frame. Hostile = `Allegiance.Team` differs from the player's | Ok or Pending |
+| `fire` | `group` (1..4, default 1), `seconds` (0.5) | Presses the first bound control of action `Flight/Fire{group}` through `DevInputInjector` for `seconds` | Pending |
+| `interact` | `body` (optional query) | With `body`: teleport to `surfaceRadius + 0.5 × interactionRange` from the body (never closer than the rule allows, never beyond it). Then press `Flight/Interact` for 0.1 s. Never calls interaction code directly | Pending → target before/after |
+| `inv` | `max` (80) | Cargo items `id×count`, wallet | Ok |
+| `give` | `item` + `count` (1), or `credits` | `InventoryModel.TryAdd` / `Wallet.Add` | Ok or Fail with reason |
+| `save` | `slot` (required) | `SaveService.SaveAsync(slot)`; done on `GameSaved` | Pending |
+| `load` | `slot` (required) | `SaveService.LoadAsync(slot)`; done on `GameLoaded` and `player.ready` | Pending |
+| `jump` | `to` (StarSystemId number or name) | `TravelService.RequestJump(id)`; refused → Fail with the reason; done on `StarSystemEntered` for that id. Timeout 30 s | Pending |
+| `facts` | `get` \| `set=name=value` \| `list=prefix` \| `eval="condition"` | `FactStore.Get/Set/Keys`; `eval` compiles with the SPEC-40 condition compiler and evaluates with the game's `ILogicContext` | Ok |
+| `grid` | `id` (PersistentId) \| `player=true` \| `nearest=true`; `bricks` (false) | Prints §6.5 fields; `bricks=true` adds one line per brick (max 200) | Ok |
+| `perf` | `voxel`, `combat`, `markers`, `json` (all false) | §6.6 | Ok |
+| `overlay` | `name` = bricks\|dirty\|colliders\|islands\|spatial\|interaction\|all\|none; `on` (true); `id` (islands target, default player) | Toggles overlays | Ok |
+| `record` | `start` \| `stop` \| `save name=<file>` | SPEC-71 `PlayerCommandRecorder` | Ok |
+| `replay` | `name=<file>` | SPEC-71 replay; done when the script ends | Pending |
+| `key`, `mouse`, `click`, `ui` | as §6.1 | Runtime equivalents of the generic commands (for scenarios and the console) | Ok / Pending |
+
+CLI-only: `gh_scenario --file <path>` (starts a run, enters play mode first when needed; returns the run id), `gh_scenario_status --run <id>` (outcome, line, message, JSON path), `gh_scenario_stop --run <id>`, `gh_dev --cmd "<console line>"` (any registry command). Arguments of wrappers use the same names as the registry; ulong values are passed as strings.
+
+### 6.4 Requested game APIs (defaults in §10)
+
+| Spec | API the commands call |
+|---|---|
+| SPEC-01 | `DevRuntimeHost.Create` call in `GameRoot`; `SceneFlow.StartNewGameAsync(NewGameOptions)`; `SceneFlow.EnterSandboxAsync(SandboxOptions)`; `ShipSpawnService.Spawn(ContentId blueprint, float3 pos, quaternion rot, Allegiance al, bool withAi) → PersistentId` |
+| SPEC-03 | Action names `Flight/Fire1..Fire4`, `Flight/Interact`, `Global/DevConsole` (Backquote); `InputService.Context` |
+| SPEC-05 | `SaveService.SetProfile(string)`, `SaveAsync(string slot)`, `LoadAsync(string slot)` |
+| SPEC-10/11/12 | `BrickDirty` flag field, `Brick.SolidCount`, mesh-applied marker on bricks, provisional vs compound collider detection |
+| SPEC-23 | `SpatialHash.CellSize` and `ShipProxy` positions |
+| SPEC-31 | `IBodyDirectory.TryFind(string query, out Entity body, out float surfaceRadius, out float interactionRange)`; `InteractionTarget` singleton; `Interactable` |
+| SPEC-32 | `TravelService.RequestJump(StarSystemId) → JumpRequestResult { bool Accepted; string Reason; }` |
+| SPEC-40 | `FactStore.Get(string)`, `Set(string, int)`, `Keys`; `ConditionCompiler.Compile(string, ValidationReport) → ICondition` |
+| SPEC-50 | `InventoryModel.TryAdd(ContentId, int, out string reason)`, `Wallet.Add(long)`, cargo enumeration |
+| SPEC-60/62 | `Screen` base class and `UINavigator.Push/Pop`; gameplay `Camera` |
+
+### 6.5 `grid` output fields
+`PersistentId`, `Entity`, `GridKind`, `Hulk`, `Dormant`, `CellSize`, `BrickMin`, `BrickDims`, `Revision`, bricks (count), solid cells (Σ `Brick.SolidCount`), block instances, dirty bricks (mesh / collider / both), bricks with an applied mesh, collider (`none` / `provisional box` / `compound N children`), mass (from `PhysicsMass.InverseMass`), linear speed, angular speed, `UniversePosition`.
+
+### 6.6 `perf` output (also `gh_perf`)
+- Default line (as built): main ms (15-frame average), draws, triangles, GC alloc/frame, system memory, entities.
+- `voxel`: grids by kind, bricks, solid cells, dirty bricks, chunk bodies, hulks.
+- `combat`: live projectiles (`Projectile` without enabled `ProjectileDead`), active beams, `FxStats` (drained, culled, budget-dropped, debris live estimate), `AudioStats` (drained, started, active voices).
+- `markers`: the 15 slowest `<System>.<Step>` markers in the last frame through SPEC-71 `PerfMarkers.Recorders` (ms, sorted).
+- `json`: the same data as one JSON object (hand-written) for scripts.
+
+### 6.7 Scripts (`tools/playtest/`, zsh, source `_env.sh`)
+
+| Script | Does | Exit |
+|---|---|---|
+| `newgame.sh [seed=1] [ship]` | `g.sh newgame --seed … --ship …`, polls `g.sh op --id N` every 0.5 s (max 90 s), then `g.sh snapshot --ui false` | 0 ok, 1 op failed, 3 Editor unreachable |
+| `toworld.sh [seed=1]` | Real UI path: enters play mode from `Boot`, clicks the MainMenu "New Game" flow by element names (SPEC-61), advances the opening dialog with `key --keys Digit1` until context is `Flight`, snapshot | same |
+| `scenario.sh <name or path> [timeout=600]` | Resolves `TestData/Scenarios/<name>.scenario`, `g.sh scenario --file …`, polls `scenario_status` every 1 s, prints the outcome line and the JSON path | the scenario exit code (0/1/2), 3 unreachable |
+| `scenarios.sh [tag=regression]` | Runs every `status active` file with the tag one by one, prints a table `name result seconds`, writes `Logs/playtest/scenarios/summary.json` | 0 when all pass, else 1 |
+
+All use `to.sh` for hard timeouts and print `Editor unreachable (is a modal dialog open?)` on CLI timeouts.
+
+### 6.8 Regression scenario drafts (`TestData/Scenarios/`, written by DEV-019 as `status draft`)
+
+| File | Owner spec flips to active | Key steps → assertions |
+|---|---|---|
+| `r10_station_interaction.scenario` | SPEC-31 | newgame → `interact body=<hub station>` → `interaction.inrange` true and context `Dialog` within 5 s |
+| `r15_editor_no_dupe.scenario` | SPEC-51, SPEC-50 | newgame → `let n = inv("block_hull")` → open the editor at the hub, remove 10 blocks, cancel → `inv("block_hull") == $n` |
+| `r16_r19_editor_round_trip.scenario` | SPEC-51, SPEC-01 | newgame → record `player.upos`, `ecs.count("Brick")` → editor round trip with commit → position within 1 m, brick count equals the committed ship's, `interact` still reaches `Dialog` |
+| `r25_r26_ship_death_no_ecb_errors.scenario` | SPEC-13 | sandbox → `spawn blueprint=<frigate> count=30 spacing=5 team=2 ai=true` → `wait ticks=1200` → `logs.exceptions == 0 && !logs.contains("EntityCommandBuffer")`, `grids.count("Hulk") > 0` |
+| `r28_pause_load.scenario` | SPEC-05, SPEC-31 | §6.2 example |
+| `r30_lane_jump_entry.scenario` | SPEC-32 | newgame → `jump to=<adjacent>` → `star_system` is the target; player within 500 m of the lane entry (probe added by SPEC-32) |
+
+## 7. Edge cases and failure behaviour
+
+| Situation | Required behaviour |
+|---|---|
+| CLI command needs play mode and the Editor is in edit mode | `newgame`, `sandbox`, `gh_scenario` enter play mode themselves; every other game command returns `not playing` |
+| `DevRuntimeHost` missing in play mode (release-like config, SPEC-01 not wired) | Wrappers return `dev runtime not available`; scenario runs fail with exit 2 |
+| Play mode exits during an operation or scenario | Operation `Failed: play mode exited`; scenario exit 2; JSON still written (by the Editor driver from the last known state) |
+| Unknown command or argument | `Fail("unknown command 'x'; see help")` / `Fail("unknown argument 'y' for teleport")` |
+| Argument parse error (`seed=abc`) | Fail naming the argument and expected type |
+| `teleport` with no player ship | Fail `no player ship` |
+| `spawn` with an unknown blueprint | Fail from `ShipSpawnService` passed through |
+| `aim` target behind the camera | Fail `target behind camera` (mouse not moved) |
+| `fire` action has no binding | Fail `action Flight/Fire2 has no binding` |
+| Operation exceeds its timeout | Failed `timeout after N s` |
+| Two scenario runs at once | Allowed; both advance each frame (scenario authors must not overlap commands) |
+| Scenario `wait` condition throws (bad probe argument) | Error exit 2 with line number |
+| Scenario never ends (missing timeout) | File-level `timeout` (default 300 s) fails it |
+| Overlay line buffer exceeds 262,144 vertices | Truncated; overlay status shows `truncated` |
+| Islands overlay on a grid over 2,000,000 cells | Skipped with message `grid too large for islands overlay` |
+| Console open | Input context `TextEntry`; gameplay maps off (SPEC-60/03 rules) |
+| Release build | No dev type, command, console or overlay exists (`DevReleaseStripTests`) |
+| Second Play with domain reload off | `DevRuntimeHost` recreated by `GameRoot`; operation ids restart at 1; Editor-side run table survives and marks old runs `play mode exited` |
+
+## 8. Performance budget
+
+| What | Budget | Measured by |
+|---|---|---|
+| `DevRuntimeHost.Update` with no operations, runs or overlays | ≤ 0.02 ms, 0 B GC | `DevHostPerfTests.Idle_Smoke` |
+| Scenario runner step | ≤ 0.1 ms per frame excluding the commands it runs | `ScenarioRunnerPerfTests.Step_Smoke` |
+| Overlays `bricks` on the 1M-cell station (≈ 870 bricks) | ≤ 1.5 ms main thread (dev only; not a game gate) | `DevOverlayPerfTests.Bricks1M` |
+| Harness commands | Each sync command returns within 50 ms | Manual timing in DEV tasks |
+
+Overlays and the console are dev-only and excluded from the 06 frame budgets; perf benchmarks (SPEC-71) assert all overlays are off.
+
+## 9. Tasks
+
+### DEV-001 — Public contract types
+- **Milestone:** M0
+- **Tier:** standard — transcribes the types of §4
+- **Depends on:** `CORE-001`
+- **Do:** Create the §4 types with the given members; `DevCommandResult` factories implemented; other members throw `NotImplementedException` except trivial getters. Every file wrapped in `#if UNITY_EDITOR || DEVELOPMENT_BUILD`.
+- **Files:** `Assets/Game/App/DevRuntime/{IDevCommand,DevCommandResult,DevResultKind,DevArgs,IDevOperation,DevOperationStatus,DevContext,DevRuntimeHost}.cs`, `Assets/Game/App/DevRuntime/Scenarios/{IScenarioProbe,ScenarioValue,ScenarioValueKind,ScenarioOutcome,ScenarioRun}.cs`
+- **Acceptance criteria:**
+  - [ ] Compiles in Editor and development player script compilation; `ConventionsTests` pass.
+- **Tests:** `DevContractTests.ResultFactories_SetKindAndText`.
+
+### DEV-002 — Verify and document the as-built generic harness
+- **Milestone:** M0
+- **Tier:** standard — documentation reconciled with existing code
+- **Depends on:** —
+- **Do:** Compare §6.1 with `GameTestHarness.cs` (names, args, defaults). Where they differ, the code wins: update §6.1 in this spec and `tools/playtest/README.md`. Add a "Game commands" section to the README listing §6.3 commands as they land (each later task appends its rows).
+- **Files:** `docs/specs/SPEC-70-devtools-harness.md`, `tools/playtest/README.md`
+- **Acceptance criteria:**
+  - [ ] Every `[CliCommand]` in `Assets/Game/DevTools/Editor/` appears in the README with its args.
+- **Tests:** `HarnessCommandTests.EveryCliCommand_IsDocumentedInReadme` (EditMode: reflection over `[CliCommand]` methods, text search in the README).
+
+### DEV-003 — DevRuntimeHost, command registry, operations, help/op/until
+- **Milestone:** M0
+- **Tier:** frontier — F1: every dev command, the console and scenarios build on it; F5: lifetime tied to `GameRoot`, play-mode transitions and the Editor
+- **Depends on:** `DEV-001`, `FND-001`
+- **Do:** Implement `DevArgs.TryParse` (§4), `DevCommandRegistry` (explicit registration list in `DevCommandRegistry.CreateDefault()`, no reflection scanning; duplicate names throw at creation), `DevRuntimeHost.Create/Update/LateUpdate/OnDestroy` (§5.2), the operation table, `DevContext`, `DevLogCapture` (subscribes `Application.logMessageReceivedThreaded` in `OnEnable`, unsubscribes in `OnDisable`; thread-safe counters and the last 200 messages), `DevEventCounter` (subscribes to the ten managed events of architecture §6.6), commands `help`, `op`, `until` (until uses DEV-005's evaluator; until DEV-005 lands it returns `Fail("expressions not available")`). Editor wrappers `gh_op`, `gh_until`, `gh_dev`, `gh_help` that find the host through `Services.TryGet<DevRuntimeHost>`.
+- **Files:** `Assets/Game/App/DevRuntime/{DevRuntimeHost,DevCommandRegistry,DevArgs,DevContext,DevLogCapture,DevEventCounter,DevJsonWriter}.cs`, `Assets/Game/App/DevRuntime/Commands/{HelpDevCommand,OpDevCommand,UntilDevCommand}.cs`, `Assets/Game/DevTools/Editor/Commands/CoreDevCliCommands.cs`
+- **Acceptance criteria:**
+  - [ ] `DevArgs` parses quoted values, escapes, positional words and rejects unterminated quotes with the column number.
+  - [ ] An operation that never finishes fails after its timeout; ids never repeat within a session.
+  - [ ] `gh_dev --cmd "help"` lists every registered command.
+  - [ ] No allocation per frame in `Update` when idle.
+- **Tests:** `DevArgsTests.Parse_QuotedEscapedPositional`, `DevArgsTests.Parse_UnterminatedQuote_Error`, `DevRegistryTests.DuplicateName_Throws`, `DevHostTests.Operation_TimesOut` (PlayMode), `DevHostTests.LogCapture_CountsErrors`, `DevHostPerfTests.Idle_Smoke`.
+
+### DEV-004 — Runtime input injection and UI query
+- **Milestone:** M0
+- **Tier:** standard — ports the existing, specified technique (state events, AgentMouse)
+- **Depends on:** `DEV-003`
+- **Do:** `DevInputInjector`: keyboard state events with timed release, AgentMouse (add device, disable native mice, restore on destroy), `PressAction(InputAction action, double seconds)` (first binding's control: keyboard key or mouse button). `DevUiQuery`: visible text listing and click by name or text on the `UIRoot` document (from `Services`), using `NavigationSubmitEvent` for buttons and `ClickEvent` otherwise. Runtime commands `key`, `mouse`, `click`, `ui`. Change `gh_key`, `gh_mouse`, `gh_click`, `gh_ui` to delegate to the host when it exists and keep their current code path otherwise.
+- **Files:** `Assets/Game/App/DevRuntime/Input/DevInputInjector.cs`, `Assets/Game/App/DevRuntime/Ui/DevUiQuery.cs`, `Assets/Game/App/DevRuntime/Commands/{KeyDevCommand,MouseDevCommand,ClickDevCommand,UiDevCommand}.cs`, `Assets/Game/DevTools/Editor/GameTestHarness.cs`
+- **Acceptance criteria:**
+  - [ ] `key keys=W hold=0.2` makes `Keyboard.current.wKey.isPressed` true for 0.2 s (±1 frame) then false.
+  - [ ] After play mode exits, every native mouse is enabled and no `AgentMouse` device remains.
+  - [ ] `click target="New Game"` clicks the button whose text contains it.
+- **Tests:** `DevInputTests.KeyHold_ReleasesAfterHold`, `DevInputTests.AgentMouse_RestoresNativeMice`, `DevUiQueryTests.Click_ByText_InvokesButton` (PlayMode, test UI built in code).
+
+### DEV-005 — Scenario language: parser, expressions and built-in probes
+- **Milestone:** M0
+- **Tier:** frontier — F6: defines the format and vocabulary every regression scenario is written in
+- **Depends on:** `DEV-003`
+- **Do:** Implement the §6.2 grammar as a hand-written tokenizer and recursive-descent parser producing `ScenarioScript` (headers + statements with line numbers) and expression trees; evaluation with `ScenarioValue` kinds and the runtime type errors of §6.2; `ScenarioProbeRegistry` with the built-in probes marked "DEV-005" in §6.2.
+- **Files:** `Assets/Game/App/DevRuntime/Scenarios/{ScenarioTokenizer,ScenarioParser,ScenarioScript,ScenarioStatement,ScenarioExpression,ScenarioProbeRegistry,BuiltInScenarioProbes}.cs`
+- **Acceptance criteria:**
+  - [ ] Parse errors carry line and column; `scenario` not first is an error.
+  - [ ] Operator precedence `! > * / > + - > comparisons > && > ||`.
+  - [ ] Comparing a string with a number is a runtime error, not false.
+  - [ ] The §6.2 R28 example parses without error.
+- **Tests:** `ScenarioParserTests.Precedence`, `ScenarioParserTests.Strings_Escapes`, `ScenarioParserTests.HeaderOrder_Error`, `ScenarioParserTests.UnknownProbe_ErrorWithLine`, `ScenarioParserTests.R28Example_Parses`, `ScenarioEvalTests.MixedKinds_RuntimeError`, `ScenarioEvalTests.LetAndVariable`.
+
+### DEV-006 — Scenario runner, results JSON and CLI/scripts
+- **Milestone:** M0
+- **Tier:** frontier — F5: one flow across Editor play-mode transitions, the runtime host and shell scripts
+- **Depends on:** `DEV-004`, `DEV-005`
+- **Do:** `ScenarioRunner` per §5.3; JSON per §4 via `DevJsonWriter` into `Logs/playtest/scenarios/`; `EditorScenarioDriver` (Editor): starts runs, enters play mode from `Boot.unity` when needed, hands the run to the host when `Services.TryGet<DevRuntimeHost>` succeeds, records `play mode exited`; CLI `gh_scenario`, `gh_scenario_status`, `gh_scenario_stop`; scripts `scenario.sh`, `scenarios.sh` (§6.7).
+- **Files:** `Assets/Game/App/DevRuntime/Scenarios/ScenarioRunner.cs`, `Assets/Game/DevTools/Editor/Scenarios/EditorScenarioDriver.cs`, `Assets/Game/DevTools/Editor/Commands/ScenarioCliCommands.cs`, `tools/playtest/scenario.sh`, `tools/playtest/scenarios.sh`, `TestData/Scenarios/smoke_boot.scenario`, `TestData/Scenarios/smoke_fail.scenario`
+- **Acceptance criteria:**
+  - [ ] `scenario.sh smoke_boot` exits 0 (`wait scene == "MainMenu"`, `assert audio.listeners == 1`); `smoke_fail` (an `assert false`) exits 1; a file with a syntax error exits 2.
+  - [ ] A wait that times out reports the condition text; an assert failure reports both operand values.
+  - [ ] The JSON file exists for every finished run and matches §4's keys.
+- **Tests:** `ScenarioRunnerTests.Pass_Fail_Error_ExitCodes` (PlayMode), `ScenarioRunnerTests.WaitTimeout_Message`, `ScenarioRunnerTests.UnexpectedErrorLogs_Fail`, `ScenarioRunnerTests.Json_HasAllKeys`, `ScenarioRunnerPerfTests.Step_Smoke`.
+
+### DEV-007 — PlayMode test that runs every active scenario file
+- **Milestone:** M1
+- **Tier:** standard — test wiring on top of DEV-006 and SPEC-71 fixtures
+- **Depends on:** `DEV-006`, `SPEC-71`
+- **Do:** `ScenarioFileTests : GameFlowFixture` (SPEC-71) with `[TestCaseSource]` listing every `TestData/Scenarios/*.scenario` tagged `regression` or `smoke`; `status draft` → `Assert.Ignore("draft")`; else run through `ScenarioRunner` with a frame-count timeout equal to `timeout × 60` and assert outcome `Passed`, printing the JSON path. Category `Scenario`.
+- **Files:** `Assets/Game/Tests/PlayMode/DevTools/ScenarioFileTests.cs`
+- **Acceptance criteria:**
+  - [ ] Adding a new active file adds a test case without code changes.
+  - [ ] Draft files appear as ignored, not failed.
+- **Tests:** `ScenarioFileTests.Run(scenarioName)` (one case per file).
+
+### DEV-008 — newgame and sandbox commands, newgame.sh
+- **Milestone:** M1
+- **Tier:** standard — commands calling specified service APIs
+- **Depends on:** `DEV-006`, `FND-001`, `PERS-001`
+- **Do:** Commands `newgame`, `sandbox` and probes `player.exists`, `player.ready` (§6.2, §6.3); CLI wrappers `gh_newgame`, `gh_sandbox` (edit-mode handling through `EditorScenarioDriver`'s play-mode entry); `tools/playtest/newgame.sh`.
+- **Files:** `Assets/Game/App/DevRuntime/Commands/{NewGameDevCommand,SandboxDevCommand}.cs`, `Assets/Game/App/DevRuntime/Scenarios/PlayerScenarioProbes.cs`, `Assets/Game/DevTools/Editor/Commands/SessionCliCommands.cs`, `tools/playtest/newgame.sh`
+- **Acceptance criteria:**
+  - [ ] From edit mode, `newgame.sh 42` reaches `player.ready` in ≤ 20 s and prints the snapshot.
+  - [ ] Two runs with seed 42 report the same player `PersistentId` and spawn position.
+  - [ ] Saves created by harness runs go to the `harness` profile only.
+- **Tests:** `NewGameCommandTests.Seed42_ReachesReady` (PlayMode), `NewGameCommandTests.SameSeed_SameSpawn`, `SandboxCommandTests.NoPlayer_GameplayActive`.
+
+### DEV-009 — teleport, spawn and grid commands; snapshot game sections
+- **Milestone:** M1
+- **Tier:** standard — commands with exact behaviour in §5.4, §6.3, §6.5
+- **Depends on:** `DEV-008`, `VOX-001`, `PHY-001`
+- **Do:** `DevEcs.TeleportRoot`; commands `teleport` (local and `sx/sz`; `near` arrives with DEV-014), `spawn`, `grid`; probes `player.pos.*`, `player.upos.*`, `player.speed`, `player.id`, `player.cells`, `grid(id).*`, `grids.count`; CLI wrappers; `gh_snapshot` gains `[session]` (seed, scene, star system, tick) and `[player]` (PersistentId, local and universe position, speed, cells) sections through `DevSnapshotSections` (Editor).
+- **Files:** `Assets/Game/App/DevRuntime/DevEcs.cs`, `Assets/Game/App/DevRuntime/Commands/{TeleportDevCommand,SpawnDevCommand,GridDevCommand}.cs`, `Assets/Game/App/DevRuntime/Scenarios/GridScenarioProbes.cs`, `Assets/Game/DevTools/Editor/Commands/WorldCliCommands.cs`, `Assets/Game/DevTools/Editor/DevSnapshotSections.cs`, `Assets/Game/DevTools/Editor/GameTestHarness.cs`
+- **Acceptance criteria:**
+  - [ ] After `teleport x=100 z=-50`, the player root is at (100, 0, −50) with zero velocity on the next frame and no physics pop on the following frame.
+  - [ ] `spawn blueprint=<test> count=3 spacing=60` creates 3 grids with distinct `PersistentId`s 60 m apart.
+  - [ ] `grid player=true` prints every §6.5 field.
+- **Tests:** `TeleportCommandTests.SetsPositionZeroVelocity`, `SpawnCommandTests.CountSpacing_DistinctIds`, `GridCommandTests.PrintsAllFields` (PlayMode, sandbox).
+
+### DEV-010 — aim and fire commands
+- **Milestone:** M2
+- **Tier:** standard — input-path commands with exact behaviour in §6.3
+- **Depends on:** `DEV-009`, `WPN-001`, `INP-001`, `CAM-001`
+- **Do:** Commands `aim` (including `track`) and `fire`; CLI wrappers `gh_aim`, `gh_fire`.
+- **Files:** `Assets/Game/App/DevRuntime/Commands/{AimDevCommand,FireDevCommand}.cs`, `Assets/Game/DevTools/Editor/Commands/CombatCliCommands.cs`
+- **Acceptance criteria:**
+  - [ ] `aim target=nearest_hostile` puts the AgentMouse within 2 px of the target's screen projection.
+  - [ ] `fire group=1 seconds=1` produces at least one `Muzzle` FxEvent from the player's group-1 weapons (via `FxStats`).
+- **Tests:** `AimCommandTests.NearestHostile_MouseOnTarget`, `FireCommandTests.Group1_FiresWeapons` (PlayMode, sandbox with one hostile).
+
+### DEV-011 — perf command and gh_perf extensions
+- **Milestone:** M2
+- **Tier:** standard — counters listed in §6.6
+- **Depends on:** `DEV-009`, `VFX-001`, `AUD-001`, `TST-001`
+- **Do:** `DevPerfCounters` (voxel, combat, markers through `PerfMarkers.Recorders`), command `perf`, `gh_perf` args `voxel`, `combat`, `markers`, `json`; probes `fx.drained`, `sfx.voices`.
+- **Files:** `Assets/Game/App/DevRuntime/Perf/DevPerfCounters.cs`, `Assets/Game/App/DevRuntime/Commands/PerfDevCommand.cs`, `Assets/Game/DevTools/Editor/GameTestHarness.cs`
+- **Acceptance criteria:**
+  - [ ] `gh_perf --json true` output parses with `python3 -m json.tool`.
+  - [ ] `markers` lists `FxUploadSystem.Batch` while FX events flow.
+- **Tests:** `PerfCommandTests.Json_IsValid`, `PerfCommandTests.Markers_ListsActiveMarkers`.
+
+### DEV-012 — Overlay renderer and voxel overlays (bricks, dirty, colliders)
+- **Milestone:** M1
+- **Tier:** frontier — F2: unsafe traversal of Unity Physics collider blobs and Persistent native line buffers
+- **Depends on:** `DEV-009`, `REN-001`, `PHY-001`
+- **Do:** `DevOverlayRenderer`: one dynamic `Mesh` (`MeshTopology.Lines`, `IndexFormat.UInt32`, max 262,144 vertices, vertex = `float3` position + `Color32`), material from `Shader.Find("Hidden/Internal-Colored")` with `_ZTest` = Always, drawn with `Graphics.RenderMesh` in `LateUpdate`. Gather jobs (Burst `IJob`, `.Run()`) for grids within 300 m of the player: `bricks` (white AABB per brick), `dirty` (yellow mesh-dirty, red collider-dirty, orange both), `colliders` (green box per leaf `BoxCollider` of the root compound, cyan for a provisional root box). Command `overlay`, CLI `gh_overlay`.
+- **Files:** `Assets/Game/App/DevRuntime/Overlays/{DevOverlayRenderer,DevLineBatch,BrickOverlayJob,DirtyOverlayJob,ColliderOverlayJob}.cs`, `Assets/Game/App/DevRuntime/Commands/OverlayDevCommand.cs`, `Assets/Game/DevTools/Editor/Commands/OverlayCliCommands.cs`
+- **Acceptance criteria:**
+  - [ ] A 2×1×1-brick test grid produces exactly 24 brick edges.
+  - [ ] Collider overlay box count equals the number of leaf boxes in the compound.
+  - [ ] Buffers are disposed on host destroy (leak check on).
+- **Tests:** `OverlayTests.BrickEdges_Count`, `OverlayTests.ColliderBoxes_MatchCompound`, `OverlayTests.Dispose_NoLeak`, `DevOverlayPerfTests.Bricks1M`.
+
+### DEV-013 — Overlays: islands and spatial hash
+- **Milestone:** M2
+- **Tier:** standard — single-threaded Burst flood fill and a grid draw with exact rules
+- **Depends on:** `DEV-012`, `AI-001`
+- **Do:** `islands`: every 60 frames for the target grid (≤ 2,000,000 cells) a Burst `IJob` flood-fills solid cells with 6-connectivity using a `NativeBitArray` visited set and draws each island's AABB in colour `hue = (islandIndex × 0.618) mod 1`, the largest island white. `spatial`: occupied cells of `SpatialHash.CellSize` within 1 km, as XZ squares at y = 0.
+- **Files:** `Assets/Game/App/DevRuntime/Overlays/{IslandOverlayJob,SpatialHashOverlayJob}.cs`
+- **Acceptance criteria:**
+  - [ ] A test grid of two separate 3×3×3 blocks shows 2 islands; joined by one cell, 1 island.
+  - [ ] Grids over 2,000,000 cells show the skip message.
+- **Tests:** `IslandOverlayTests.TwoBlocks_TwoIslands`, `IslandOverlayTests.Joined_OneIsland`, `IslandOverlayTests.TooLarge_Skipped`.
+
+### DEV-014 — interact command and interaction overlay
+- **Milestone:** M3
+- **Tier:** standard — input-path command and overlay with exact rules
+- **Depends on:** `DEV-009`, `SYS-001`, `INP-001`
+- **Do:** `teleport near=`; command `interact` (§6.3); probes `interaction.target`, `interaction.inrange`; overlay `interaction` (32-segment XZ circle of radius `surfaceRadius + interactionRange` per interactable, line player→target green in range, red otherwise).
+- **Files:** `Assets/Game/App/DevRuntime/Commands/InteractDevCommand.cs`, `Assets/Game/App/DevRuntime/Overlays/InteractionOverlayJob.cs`, `Assets/Game/App/DevRuntime/Scenarios/InteractionScenarioProbes.cs`
+- **Acceptance criteria:**
+  - [ ] `interact body=<station>` places the ship inside the legal range measured from the surface and the real Interact action opens the station's interaction.
+  - [ ] The command never invokes interaction code directly (code review + test with the Interact action unbound → Fail).
+- **Tests:** `InteractCommandTests.Station_OpensInteraction`, `InteractCommandTests.UnboundAction_Fails`.
+
+### DEV-015 — In-game dev console
+- **Milestone:** M1
+- **Tier:** standard — UI Toolkit screen over the existing registry
+- **Depends on:** `DEV-003`, `UI-001`, `INP-001`
+- **Do:** `DevConsoleScreen : Screen` (SPEC-60) with `Context = TextEntry`, `PausesSimulation = false`, `BlocksWorldPointer = true`, built in C# using theme classes only (no UXML/USS asset, no inline styles): output list (last 200 lines, `ListView` with pooled items), input `TextField`, history (↑/↓, 50 entries), Tab completion of command names, Enter executes through the registry (Pending results print when the op ends). Toggled by `Global/DevConsole`.
+- **Files:** `Assets/Game/App/DevRuntime/Console/{DevConsole,DevConsoleScreen}.cs`
+- **Acceptance criteria:**
+  - [ ] Backquote opens and closes the console; gameplay input is off while open.
+  - [ ] `help` output appears; ↑ recalls the last command; Tab completes `tel` to `teleport`.
+  - [ ] No allocation per frame while the console is closed.
+- **Tests:** `DevConsoleTests.Toggle_ChangesContext`, `DevConsoleTests.History_And_Completion`, `DevConsoleTests.Closed_NoGcAlloc` (PlayMode).
+
+### DEV-016 — record and replay commands
+- **Milestone:** M1
+- **Tier:** standard — commands on top of the SPEC-71 replay mechanism
+- **Depends on:** `DEV-008`, `SPEC-71`
+- **Do:** Commands `record start|stop|save name=` (files in `TestData/Replays/<name>.pcr`), `replay name=` (Pending until the script ends); CLI `gh_record`, `gh_replay`.
+- **Files:** `Assets/Game/App/DevRuntime/Commands/{RecordDevCommand,ReplayDevCommand}.cs`, `Assets/Game/DevTools/Editor/Commands/ReplayCliCommands.cs`
+- **Acceptance criteria:**
+  - [ ] Record 300 ticks of flying after `newgame seed=7`, replay after a fresh `newgame seed=7`: player `UniversePosition` after 300 ticks equal within 1e-4 m.
+- **Tests:** `ReplayCommandTests.RecordReplay_SamePosition` (PlayMode).
+
+### DEV-017 — inv, give and facts commands
+- **Milestone:** M3
+- **Tier:** standard — commands calling the APIs listed in §6.4
+- **Depends on:** `DEV-009`, `ECO-001`, `NAR-001`
+- **Do:** Commands `inv`, `give`, `facts`; probes `fact()`, `cond()`, `inv()`, `credits`; CLI wrappers.
+- **Files:** `Assets/Game/App/DevRuntime/Commands/{InvDevCommand,GiveDevCommand,FactsDevCommand}.cs`, `Assets/Game/App/DevRuntime/Scenarios/StateScenarioProbes.cs`, `Assets/Game/DevTools/Editor/Commands/StateCliCommands.cs`
+- **Acceptance criteria:**
+  - [ ] `give item=item_fuel count=5` then `inv` shows +5; `facts set=x=3` then `facts get=x` prints 3; `facts eval="fact(x) >= 3"` prints true.
+  - [ ] Unknown item or malformed condition → Fail with the validator message.
+- **Tests:** `StateCommandTests.GiveThenInv`, `StateCommandTests.FactsSetGetEval`, `StateCommandTests.BadCondition_Fails`.
+
+### DEV-018 — save, load and jump commands; toworld.sh
+- **Milestone:** M3
+- **Tier:** standard — commands calling the APIs listed in §6.4
+- **Depends on:** `DEV-008`, `PERS-001`, `TRV-001`, `HUD-001`
+- **Do:** Commands `save`, `load`, `jump`; probe `star_system`; CLI wrappers; `tools/playtest/toworld.sh` (§6.7).
+- **Files:** `Assets/Game/App/DevRuntime/Commands/{SaveDevCommand,LoadDevCommand,JumpDevCommand}.cs`, `Assets/Game/DevTools/Editor/Commands/TravelCliCommands.cs`, `tools/playtest/toworld.sh`
+- **Acceptance criteria:**
+  - [ ] `save slot=a`, move, `load slot=a` returns the player to the saved `UniversePosition` within 0.01 m.
+  - [ ] `jump to=<adjacent>` succeeds and `star_system` equals the target; a gated lane returns Fail with the reason.
+  - [ ] `toworld.sh` reaches context `Flight` through the real menus.
+- **Tests:** `SaveLoadCommandTests.RoundTrip_Position`, `JumpCommandTests.Adjacent_Succeeds`, `JumpCommandTests.Gated_FailsWithReason`.
+
+### DEV-019 — Draft regression scenario files
+- **Milestone:** M1
+- **Tier:** standard — writes files in the §6.2 language from the §6.8 table
+- **Depends on:** `DEV-007`
+- **Do:** Write the six files of §6.8 with `status draft`, `tags regression <id>`, full step lists using only commands and probes of §6.2/§6.3 (commands that land later are allowed; drafts are not run).
+- **Files:** `TestData/Scenarios/{r10_station_interaction,r15_editor_no_dupe,r16_r19_editor_round_trip,r25_r26_ship_death_no_ecb_errors,r28_pause_load,r30_lane_jump_entry}.scenario`
+- **Acceptance criteria:**
+  - [ ] All six parse (`ScenarioParser`) and show as ignored in `ScenarioFileTests`.
+- **Tests:** `ScenarioDraftTests.AllDrafts_Parse`.
+
+### DEV-020 — Release-strip guarantee
+- **Milestone:** M0
+- **Tier:** standard — a build check and a compile test with exact rules (§3.3)
+- **Depends on:** `DEV-003`
+- **Do:** `DevReleaseStripTests` (EditMode, category `Slow`): `PlayerBuildInterface.CompilePlayerScripts` for the active target without `ScriptCompilationOptions.DevelopmentBuild` into `Logs/tools/release-scripts/`, then assert the bytes of `Game.App.dll` do not contain the UTF-8 string `Game.App.DevRuntime`, and that no `Game.DevTools*` assembly is produced. `DevStripBuildCheck : IPreprocessBuildWithReport` (Editor): for non-development builds, fails when any scene or prefab in the build references a type whose namespace starts with `Game.App.DevRuntime` or `Game.DevTools`.
+- **Files:** `Assets/Game/Tests/EditMode/DevTools/DevReleaseStripTests.cs`, `Assets/Game/DevTools/Editor/Build/DevStripBuildCheck.cs`
+- **Acceptance criteria:**
+  - [ ] The test passes on main and fails when a test file removes the `#if` from one DevRuntime file.
+- **Tests:** `DevReleaseStripTests.ReleaseScripts_ContainNoDevRuntime`, `DevReleaseStripTests.ReleaseScripts_NoDevToolsAssembly`.
+
+## 10. Open questions
+
+| # | Question | Default if unanswered | Decider |
+|---|---|---|---|
+| 1 | SPEC-01: creating the host | `GameRoot`, last step of `Awake`, inside `#if UNITY_EDITOR \|\| DEVELOPMENT_BUILD`: `var dev = DevRuntimeHost.Create(transform); Services.Register(dev);` | Tech lead |
+| 2 | SPEC-01: new-game and sandbox entry points | `SceneFlow.StartNewGameAsync(NewGameOptions { ulong Seed; ContentId StartBlueprint; bool SkipIntro; })` and `SceneFlow.EnterSandboxAsync(SandboxOptions { bool SpawnPlayer; ulong Seed; })` (sandbox = World scene, `GameplayActive`, no galaxy streaming), both `Awaitable` | Tech lead |
+| 3 | SPEC-01: `ShipSpawnService.Spawn` signature | `PersistentId Spawn(ContentId blueprint, float3 position, quaternion rotation, Allegiance allegiance, bool withAi)` | Tech lead |
+| 4 | SPEC-05: harness saves must not mix with player saves | `SaveService.SetProfile("harness")`; PlayMode tests use a temporary root (SPEC-71) | Tech lead |
+| 5 | SPEC-03: action names for fire groups, interact and the console | `Flight/Fire1`..`Fire4`, `Flight/Interact`, `Global/DevConsole` bound to Backquote | Tech lead |
+| 6 | SPEC-31: body lookup and interaction state | `IBodyDirectory.TryFind(...)` per §6.4; singleton `InteractionTarget { Entity Body; float Distance; byte InRange; }` | Tech lead |
+| 7 | SPEC-32: jump request API | `TravelService.RequestJump(StarSystemId) → JumpRequestResult { bool Accepted; string Reason; }` | Tech lead |
+| 8 | SPEC-40: fact access and condition compiler | `FactStore.Get(string)`, `Set(string,int)`, `Keys`; `ConditionCompiler.Compile(string, ValidationReport)` | Tech lead |
+| 9 | SPEC-50: dev grants | `InventoryModel.TryAdd(ContentId, int, out string reason)`, `Wallet.Add(long)` | Tech lead |
+| 10 | SPEC-62: gameplay camera access | `CameraRigService.Camera` (registered in `Services`) | Tech lead |
+| 11 | SPEC-60: theme classes for a code-built screen | Generic classes `panel`, `label`, `label--mono`, `text-field`, `list` exist in the theme | Tech lead |
+| 12 | Where do non-asset test inputs live? | `TestData/` at the project root (`Scenarios/`, `Replays/`, `Golden/`); see Proposed change in the report | Tech lead |
+
+## 11. References
+
+- `docs/reference/audit-2026-10/00-synthesis.md` §6m (harness, lessons, plan); `LEDGER.md` TOOLING v1–v5, R10, R15, R16, R18 (modal blocks CLI), R19, R25, R26, R28, R30.
+- As-built: `Assets/Game/DevTools/Editor/GameTestHarness.cs`, `tools/playtest/README.md`.
+- Unity: `com.unity.pipeline` `[CliCommand]`/`[CliArg]`; Input System `InputSystem.QueueStateEvent`, `InputSystem.AddDevice<Mouse>`; `PlayerBuildInterface.CompilePlayerScripts`; `Graphics.RenderMesh`.

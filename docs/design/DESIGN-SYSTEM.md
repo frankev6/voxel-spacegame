@@ -79,7 +79,7 @@ The audit screenshots (`docs/reference/audit-2026-10/screenshots/`) show the pla
 | The ARK station reads as a flat beige silhouette with no lit or shadow side (`06-ark-station`, `07-ark-dialog`) | Fog and flat ambient remove form; a 300 m structure looks like a decal | One hard key light pitched above the plane, a fill light, no fog (§10.16) |
 | The player ship is about 10 % of the screen width and its red/grey colours mean nothing | Block function is not readable | Function colours + function glyphs + silhouettes (§3 P3, §10.6) |
 | Five UI vocabularies at once: rounded grey cards with white bevel buttons (`01-start`), cyan sci-fi slot frames (`22-inventory`), slanted hazard bars (`05-flying`), navy grid panels (`23-fleet`), painted illustrations (`03-galaxy-start`) | No coherence | One token set (§8.1), one component kit (SPEC-81 `AST-022`), one icon grid (§10.5) |
-| Item icons are outlined pixel art at mixed scales (`22-inventory`, `09-trade`) | Clashes with vector UI, unreadable at 32 px | One icon style per direction; block icons rendered from the real block assets (SPEC-81 `AST-025`) |
+| Item icons are outlined pixel art at mixed scales (`22-inventory`, `09-trade`) | Clashes with vector UI, unreadable at 32 px | One icon style per direction; block icons rendered from the real block assets (SPEC-81 `AST-026`) |
 | Every beam is the same white line (`18-12-enemies`) | Weapons and damage types are indistinguishable | VFX colour by damage type and weapon family; core/halo structure (§5.7, §6.7, §7.7) |
 | Debris cubes are pale beige whatever they came from (`11-firing`) | Destruction does not read as "my ship lost those blocks" | Debris inherits the cell's paint colour and starts hot (§10.17) |
 | HUD texts overlap ("AUTOFIRE" over "FUEL"), stats sit on top of each other (`23-fleet`) | Unreadable | Fixed HUD zones (§10.4.2) and layout tests |
@@ -437,7 +437,7 @@ The dark between the stars is listening. Ships are near-black, glossy metal — 
 | Specular aliasing | Smoothness is reduced by mip level (Toksvig-style, in the layer mask mips baked by `ART-007`) so distant voxels do not sparkle |
 | UV mapping | Same as DRYDOCK (cell-face UVs, `macroTile = 2`, no triplanar) |
 | Authored channel | The emissive mask (alpha of the mask array) is the main hand-authored content |
-| Brick layers used | 30 of the 64-slot plan (no `hull_hazard`, `hull_marking_a`, `hull_dock`, `station_solar` as separate looks; they reuse `hull_panel_a`) |
+| Brick layers used | 30 of the 64-slot plan: `hull_hazard`, `hull_marking` and `hull_dock` are copies of `hull_panel_a`, and `station_solar` is a copy of `station_plating` (§10.12) |
 
 ### 6.7 VFX language
 
@@ -607,7 +607,7 @@ Rule: band luminance ≤ 0.08 and covers ≤ 25 % of the screen; everything else
 | Normal maps | Bevel only (4 texels at cell edges) |
 | Albedo | Flat fields; macro variation 0 |
 | UV mapping | Cell-face UVs, `macroTile = 2`, no triplanar |
-| Brick layers used | 26 of the 64-slot plan (asteroid layers reduced to 4, station layers to 3) |
+| Brick layers used | 29 of the 64-slot plan: 4 distinct asteroid layers, 3 distinct station layers, `hull_vent` and `xeno_membrane` are copies (§10.12) |
 
 ### 7.7 VFX language
 
@@ -657,4 +657,592 @@ Rule: band luminance ≤ 0.08 and covers ≤ 25 % of the screen; everything else
 
 Estimated production: textures ≈ 3 days; shader work (toon ramp, outline feature, halftone) ≈ 8 days, mostly in SPEC-11's shader; prop meshes ≈ 14 days (simpler forms); VFX ≈ 10 days (drawn flipbooks); UI ≈ 5 days; icons and glyphs ≈ 6 days; sky ≈ 4 days; audio ≈ 8 days. **Total ≈ 58 working days.**
 
-<!-- PART-3 -->
+---
+
+## 8. Side by side
+
+### 8.1 UI token values for every binding token
+
+Token **names** are binding (§10.1); this table proposes their **values**. The *Placeholder* column is what `ART-001` writes into `Assets/Game/UI/Theme/tokens.uss` now, so UI work can proceed without pre-judging the decision; `ART-014` replaces it with the approved column. Font files are under `Assets/Game/UI/Theme/Fonts/` (§10.8); the USS value is `url("project://database/Assets/Game/UI/Theme/Fonts/<file>")`.
+
+| Token | Placeholder (until approval) | DRYDOCK | NOCTURNE | PULP HORIZON |
+|---|---|---|---|---|
+| `--color-bg` | `#111214` | `#0D0F11` | `#05070D` | `#0F1626` |
+| `--color-surface-1` | `#1A1B1E` | `#16191C` | `#0A0F1A` | `#18223A` |
+| `--color-surface-2` | `#232428` | `#1F2327` | `#101826` | `#22304E` |
+| `--color-surface-3` | `#2D2F33` | `#2A2F34` | `#172233` | `#2E3F63` |
+| `--color-border` | `#4A4D52` | `#454C53` | `#2A3B55` | `#5B6E96` |
+| `--color-text` | `#EDEDED` | `#ECE6D8` | `#DCE8F5` | `#F6EEDC` |
+| `--color-text-muted` | `#A6A6A6` | `#A9A395` | `#8FA6C2` | `#C7C0AE` |
+| `--color-accent` | `#7AA7D9` | `#2EC4B6` | `#39D5FF` | `#FFC233` |
+| `--color-accent-strong` | `#B3CDEB` | `#7FE6DB` | `#A6EEFF` | `#FFE08A` |
+| `--color-positive` | `#8CCB6A` | `#8BD64A` | `#3DD6A3` | `#A3DE52` |
+| `--color-warning` | `#E3BE5A` | `#F2B33D` | `#FFC247` | `#FF9F1C` |
+| `--color-danger` | `#F06A7E` | `#FF5277` | `#FF5C7A` | `#FF7085` |
+| `--color-info` | `#6CB8F0` | `#55B8F5` | `#8FB0FF` | `#62CCFF` |
+| `--color-ally` | `#5C9BFF` | `#4D9BFF` | `#5B8CFF` | `#4FA3FF` |
+| `--color-enemy` | `#FF7A4D` | `#FF6A3D` | `#FF7A45` | `#FF6B35` |
+| `--color-neutral` | `#C8C8C8` | `#CFC8B6` | `#B9C3D1` | `#E9DFC7` |
+| `--color-shield` | `#5CC8FF` | `#47C8FF` | `#3FD8FF` | `#4FD1FF` |
+| `--color-hull` | `#E0E0E0` | `#E6DCC8` | `#EDE6DA` | `#F6EEDC` |
+| `--color-energy` | `#EFD25A` | `#F5D33A` | `#FFB84D` | `#FFB020` |
+| `--space-1` … `--space-8` | 4, 8, 12, 16, 24, 32, 48, 64 px | same (shared) | same | same |
+| `--radius-s` / `-m` / `-l` | 2 / 4 / 8 px | 0 / 2 / 4 px | 0 / 0 / 2 px | 4 / 8 / 14 px |
+| `--border-thin` / `--border-thick` | 1 / 2 px | 1 / 2 px | 1 / 2 px | 2 / 3 px |
+| `--font-display` | `OfficeCodePro-Bold_SDF.asset` (in `_Placeholder/Fonts/`) | `FNT_BarlowCondensed-SemiBold_SDF.asset` | `FNT_Michroma-Regular_SDF.asset` | `FNT_ArchivoExpanded-ExtraBold_SDF.asset` |
+| `--font-body` | `OfficeCodePro-Regular_SDF.asset` (in `_Placeholder/Fonts/`) | `FNT_Barlow-Regular_SDF.asset` | `FNT_Inter-Regular_SDF.asset` | `FNT_AtkinsonHyperlegible-Regular_SDF.asset` |
+| `--font-mono` | `OfficeCodePro-Regular_SDF.asset` (in `_Placeholder/Fonts/`) | `FNT_IBMPlexMono-Regular_SDF.asset` | `FNT_JetBrainsMono-Regular_SDF.asset` | `FNT_SpaceMono-Regular_SDF.asset` |
+| `--text-xs` | 12 px | 12 px | 12 px | 13 px |
+| `--text-s` | 14 px | 14 px | 14 px | 15 px |
+| `--text-m` | 16 px | 16 px | 16 px | 17 px |
+| `--text-l` | 20 px | 20 px | 20 px | 22 px |
+| `--text-xl` | 28 px | 26 px | 26 px | 30 px |
+| `--text-xxl` | 40 px | 36 px | 34 px | 44 px |
+| `--duration-fast` | 100 ms | 80 ms | 120 ms | 100 ms |
+| `--duration-normal` | 200 ms | 150 ms | 250 ms | 200 ms |
+| `--duration-slow` | 400 ms | 300 ms | 500 ms | 350 ms |
+
+Measured contrast (WCAG 2.x ratio) of every text-capable token, worst case over `--color-bg`, `--color-surface-1`, `--color-surface-2`:
+
+| Token | Placeholder | DRYDOCK | NOCTURNE | PULP HORIZON |
+|---|---|---|---|---|
+| `--color-text` | 13.24 | 12.71 | 14.32 | 11.36 |
+| `--color-text-muted` | 6.37 | 6.30 | 7.12 | 7.23 |
+| `--color-accent` | 6.17 | 7.30 | 10.28 | 8.13 |
+| `--color-positive` | 8.02 | 8.90 | 9.61 | 8.20 |
+| `--color-warning` | 8.70 | 8.50 | 11.06 | 6.39 |
+| `--color-danger` | 5.22 | 5.06 | 5.98 | 4.94 |
+| `--color-info` | 7.20 | 7.20 | 8.32 | 7.25 |
+| `--color-ally` | 5.60 | 5.61 | 5.62 | 5.01 |
+| `--color-enemy` | 6.01 | 5.56 | 6.88 | 4.63 |
+
+All ≥ 4.5:1 (WCAG AA for body text). On `--color-surface-3` some semantic colours fall below 4.5:1 (lowest: PULP HORIZON `--color-danger` 3.94); rule T3 in §10.3 forbids semantic-coloured **text** on `--color-surface-3`.
+
+### 8.2 One-line comparison
+
+| | DRYDOCK | NOCTURNE | PULP HORIZON |
+|---|---|---|---|
+| Hull value | Light to mid | Dark | Light, saturated |
+| Readability carried by | Light hulls on black, safety colours | Rim light, seams, emissive glyphs | Flat colour fields, ink outlines |
+| Material model | PBR Lit | PBR Lit, glossy | Toon ramp + outlines |
+| Destruction look | Scorch, char, embers, girders | Light dying, white-hot cracks | Halftone ink, confetti |
+| Space | Black, sparse, photographic | Blue-black, luminous filaments | Painted gradients, per-system colour key |
+| UI | Utilitarian plates, stencil, teal accent | Thin holographic lines, cyan | Bold print cards, sunflower accent |
+| Needs new shader features beyond URP Lit | No | Seam emission, rim term | Toon ramp, outline pass, halftone |
+| Estimated production days | 68 | 74 | 58 |
+
+### 8.3 Scorecard
+
+Scores 1–5 (5 = best; for cost and risk, 5 = cheapest / lowest risk). Weights follow the pillar order. These are the author's estimates; the owner may re-weight.
+
+| Criterion | Weight | DRYDOCK | NOCTURNE | PULP HORIZON |
+|---|---|---|---|---|
+| Destruction readability at 50–300 m (pillar 1) | 3 | 5 | 3 | 5 |
+| Block function legibility (pillar 2) | 3 | 4 | 5 | 5 |
+| Massive-scale cues (pillar 3) | 2 | 5 | 4 | 3 |
+| Mystery mood (pillar 4) | 2 | 4 | 5 | 3 |
+| Production cost | 2 | 4 | 3 | 5 |
+| Technical risk (fits SPEC-11's master shader and architecture §11) | 2 | 5 | 3 | 2 |
+| Uniqueness | 1 | 2 | 3 | 5 |
+| **Weighted total (max 75)** | | **65** | **57** | **61** |
+
+---
+
+## 9. Recommendation
+
+**Recommended: DRYDOCK.** Recommended second finalist for the look test: **PULP HORIZON**.
+
+Reasons, in pillar order:
+
+1. **Destruction readability.** Light-to-mid hulls on a black backdrop give the largest value contrast of the three (rule L3), and the damage ladder scorch → char → cracks with embers → exposed girders reads as a value change at 300 m and as material detail at 50 m. NOCTURNE's dark hulls make readability depend on rim light and bloom, which is the riskiest place to spend pillar 1.
+2. **"Break apart realistically".** The vision's wording asks for realistic breakup. Burnt plating, glowing edges and exposed structure sell physical destruction; PULP HORIZON's halftone and confetti sell graphic destruction instead.
+3. **Scale.** Navigation lights, stencils, window strips and the 1 m plate grain make a 1M-cell station feel kilometres long.
+4. **Lowest technical risk and best fit with architecture §11.3.** DRYDOCK needs nothing beyond URP Lit in the one shared brick material and the one shared prop material (§10.14–§10.15): no toon ramp, no outline renderer feature, no seam-emission distance fade, no new keywords.
+5. **Mood without a readability tax.** Industrial human technology makes the Vanguard (gold-lit ceramic) and the Silence (light-eating void) stand out by contrast — the mystery is carried by the Otherness rules, not by darkening combat.
+6. **Cost.** About 68 working days, mostly procedural.
+
+Its weakness is uniqueness (2/5). The mitigation is in the plan: the Otherness layer, safety-coded blocks and the stencil UI are the signature, and the look test must show them. **If the owner values uniqueness and the lowest art cost above realism, PULP HORIZON is the strong alternative** (61 points) — that is why it is the recommended second finalist. NOCTURNE is the mood-first option; choose it only if the look test proves rules L2–L5 in a 30-ship fight.
+
+---
+
+## 10. Shared rules (all directions)
+
+### 10.1 Token contract
+
+- **Binding names.** `Assets/Game/UI/Theme/tokens.uss` defines exactly these custom properties on `:root`, and no other file defines them: `--color-bg`, `--color-surface-1`, `--color-surface-2`, `--color-surface-3`, `--color-border`, `--color-text`, `--color-text-muted`, `--color-accent`, `--color-accent-strong`, `--color-positive`, `--color-warning`, `--color-danger`, `--color-info`, `--color-ally`, `--color-enemy`, `--color-neutral`, `--color-shield`, `--color-hull`, `--color-energy`, `--space-1` … `--space-8`, `--radius-s`, `--radius-m`, `--radius-l`, `--border-thin`, `--border-thick`, `--font-display`, `--font-body`, `--font-mono`, `--text-xs`, `--text-s`, `--text-m`, `--text-l`, `--text-xl`, `--text-xxl`, `--duration-fast`, `--duration-normal`, `--duration-slow`. They are never renamed. Proposed additions are in §11 and become binding only through the decision log (§12).
+- **Usage.** USS rules use `var(--token)`; UXML and C# never contain colours, sizes, fonts or durations (conventions §4.2).
+
+| Token | Meaning | Allowed use |
+|---|---|---|
+| `--color-bg` | Screen backdrop behind full-screen UI | Screen root backgrounds, scrims (with opacity) |
+| `--color-surface-1/2/3` | Raised surfaces, each one step lighter | 1 panels, 2 controls and cards inside panels, 3 hover/selected rows |
+| `--color-border` | Decorative separators | Dividers, panel outlines. Not enough contrast for input boundaries — use `--color-border-strong` (§11) |
+| `--color-text` / `--color-text-muted` | Primary / secondary text | Any surface 1–3 |
+| `--color-accent` / `--color-accent-strong` | Interactive highlight / its hover-pressed state and accent text on dark | Focus, selection, primary buttons, objective markers |
+| `--color-positive/warning/danger/info` | Notices and validation | **Always paired with a glyph** (✓, ⚠, ✕, ⓘ shapes, §10.6) |
+| `--color-ally/enemy/neutral` | Relationship of a world object to the player | Markers, radar blips, target frames. **Always paired with a marker shape** (§10.2) |
+| `--color-shield/hull/energy` | Ship resources | Bars and their numbers |
+
+### 10.2 Colour-blind safety
+
+Rules:
+
+- **C1.** Ally / enemy / neutral differ by colour **and** shape: ally = circle or rounded chevron, enemy = diamond or sharp chevron, neutral = square. Radar blips use the same shapes.
+- **C2.** Notices pair colour with a glyph; validation messages also say the problem in words.
+- **C3.** Functional blocks are identified by silhouette and glyph (§10.6) as well as colour; the six function colours are not required to be distinguishable from each other under colour-vision deficiency, but each must differ from every hull neutral of the direction by ΔE2000 ≥ 10 under all simulations (so a functional block never looks like plain hull).
+- **C4.** Measurement: colours are simulated with the Machado-2009 matrices at severity 1.0 (protanopia, deuteranopia, tritanopia) in linear RGB and compared with CIEDE2000. Required minimum over the normal view and the three simulations: ally–enemy ≥ 30, ally–neutral and enemy–neutral ≥ 20, hull–shield–energy pairs ≥ 12, positive–danger ≥ 10.
+
+Measured (minimum ΔE2000 over normal + 3 simulations):
+
+| Pair | Placeholder | DRYDOCK | NOCTURNE | PULP HORIZON |
+|---|---|---|---|---|
+| ally–enemy | 46.9 | 48.6 | 47.9 | 49.5 |
+| ally–neutral | 25.3 | 32.2 | 20.2 | 35.7 |
+| enemy–neutral | 25.1 | 21.1 | 32.0 | 23.3 |
+| hull–shield | 19.4 | 29.7 | 23.1 | 27.5 |
+| hull–energy | 18.9 | 12.0 | 20.7 | 22.6 |
+| shield–energy | 43.9 | 44.0 | 45.9 | 49.5 |
+| positive–danger | 10.5 | 14.4 | 10.4 | 15.3 |
+
+The check is automated by `tools/art/check_tokens.py` (SPEC-80 `ART-002`).
+
+### 10.3 Contrast and luminance minimums
+
+UI text (WCAG 2.x, AA):
+
+- **T1.** Body text (< 24 px regular, < 19 px bold) ≥ 4.5:1 against its actual background.
+- **T2.** Large text and non-text UI that identifies a control (input boundary, button outline, focus ring, slider track) ≥ 3:1 against adjacent colours.
+- **T3.** Semantic colours (`positive`, `warning`, `danger`, `info`, `ally`, `enemy`) may be used as text only on `--color-bg`, `--color-surface-1` and `--color-surface-2`.
+- **T4.** HUD text drawn directly over the world gets a 2 px `--color-bg` outline at 80 % opacity (`-unity-text-outline`) so it stays ≥ 4.5:1 over any backdrop.
+
+In-world luminance (measured on 1920×1080 look-test captures, relative luminance per WCAG of the final sRGB pixel):
+
+| Rule | Requirement |
+|---|---|
+| **L1 Backdrop** | ≥ 95 % of backdrop pixels (not covered by ships, bodies, VFX or UI) ≤ 0.03 (DRYDOCK, NOCTURNE) or ≤ 0.05 (PULP HORIZON); no backdrop pixel inside the central 40 % of the screen above 0.08 |
+| **L2 Lit hull** | Median luminance of lit, upward-facing default hull: DRYDOCK 0.25–0.60; NOCTURNE 0.06–0.25 (seams included); PULP HORIZON 0.35–0.75 |
+| **L3 Silhouette** | Median hull luminance ≥ 3× the median of a 32 px ring of backdrop around the ship |
+| **L4 Shadow side** | Hull pixels in shadow have median ≥ 0.02 (never pure black), except Silence |
+| **L5 Function lights** | Function emissive pixels ≥ 2× the median luminance of the adjacent hull |
+
+### 10.4 Sizes at 1080p
+
+#### 10.4.1 Components (logical px at the 1920 × 1080 reference)
+
+| Item | Size |
+|---|---|
+| Minimum pointer target | 32 × 32 |
+| Button height | 36 (`m`) and 44 (`l`); PULP HORIZON 40 and 48 |
+| Text field height | 36 |
+| Tab height | 36 |
+| List row | 40 |
+| Inventory slot | 64 × 64, gap `--space-1` |
+| Tooltip | max width 360, padding `--space-3` |
+| Toast | width 480, ≤ 3 lines, ≤ 3 visible |
+| Modal | max width 960, padding `--space-6` |
+| Scrollbar | 8 visible, 16 hit area |
+| Focus ring | 2 px `--color-accent-strong` |
+| Minimum sentence text | `--text-s`; `--text-xs` only for units, tags and key hints |
+| HUD safe margin | 32 on every edge |
+
+#### 10.4.2 HUD zones (shared skeleton; directions vary only as stated in their §x.8)
+
+| Zone | Rectangle x, y, w, h | Content | Visible |
+|---|---|---|---|
+| Z-TL | 32, 32, 480, 128 | Star system and location; objective tracker (≤ 3 lines) | Always |
+| Z-TC | 672, 32, 576, 112 | Toasts (≤ 3), alert banner | On event |
+| Z-TR | 1568, 32, 320, 320 | Radar / minimap | Always |
+| Z-L | 32, 200, 528, 600 | Comms and dialog (NORA) | When open |
+| Z-C | 560, 200, 800, 600 | World only: reticle, markers, weapon arcs; interaction prompt centred at y = 740 | Always; **no panels** |
+| Z-R | 1488, 400, 400, 360 | Target panel | With a target |
+| Z-BL | 32, 856, 528, 192 | Ship status: hull, shield, energy, speed, heat | Always |
+| Z-BC | 640, 952, 640, 96 | Weapon groups 1–5, abilities, key hints | Always |
+| Z-BR | 1408, 936, 480, 112 | Cargo, credits, fuel | Always |
+
+Zones never overlap. In flight with no screen open, HUD pixels with opacity ≥ 70 % cover ≤ 15 % of the screen (measured in `ART-010`).
+
+### 10.5 Icon grid
+
+| Kind | Master | Shipped as | Displayed at |
+|---|---|---|---|
+| System glyphs (UI actions, stats, tools) | 24 × 24 px grid, 2 px padding (live area 20 × 20), strokes on whole pixels | SVG → UI Toolkit `VectorImage` | 16, 24, 32, 48 px |
+| Item and block icons | 256 × 256 px, subject fills the central 224 × 224 | PNG Sprite 128 × 128 | 64 px (slot), 128 px (tooltip, detail) |
+| Faction crests | 256 × 256 vector | SVG → `VectorImage` | 24, 64, 128 px |
+| Cursors | 32 × 32 and 64 × 64 PNG | Texture (Cursor) | Native |
+
+Item and block icons share one camera and light rig (SPEC-81 `AST-026`): orthographic, yaw 35°, pitch 30°, key light from the top left, transparent background, the direction's functional colours, no drop shadow (DRYDOCK, NOCTURNE) or a 4 px ink offset shadow (PULP HORIZON).
+
+### 10.6 Function glyphs
+
+Every functional block shows its glyph on every face that can be exposed (R3). Shapes are the same in all directions; only the rendering differs (DRYDOCK stencil paint, NOCTURNE emissive line, PULP HORIZON cream print).
+
+| Function (`FunctionKind`) | Glyph | Description |
+|---|---|---|
+| Thruster | Chevron | Two nested chevrons pointing toward thrust |
+| Weapon | Crosshair | Circle with four ticks |
+| Reactor, Capacitor | Bolt | Zig-zag lightning bolt (capacitor: bolt inside a rounded rectangle) |
+| ShieldEmitter | Ring | Thick circle open at the bottom |
+| Core | Diamond | Diamond with a centre dot |
+| Utility | Square | Square inside a square (cargo), a prism triangle (beam combiner), a circle-in-square (portal) |
+| Notice: positive / warning / danger / info | ✓ check / ⚠ triangle with ! / ✕ cross / ⓘ circled i | UI only |
+
+### 10.7 Naming conventions
+
+ASCII only, no spaces. Content IDs stay lowercase `snake_case` (conventions §1); file-name segments use PascalCase joined by `_`.
+
+| Asset type | Pattern | Example |
+|---|---|---|
+| Brick layer source texture | `TL_<NN>_<layerName>_<Map>.png` (`Map` = `Albedo`, `Mask`, `Normal`) | `TL_00_hull_plain_Albedo.png` |
+| Baked texture array | `TA_Brick_<Map>.asset` | `TA_Brick_Albedo.asset` |
+| Other texture | `T_<Group>_<Name>_<Map>.png` | `T_Prop_Trim_Albedo.png`, `T_Fx_Spark_Flipbook.png` |
+| Material | `M_<Name>.mat` | `M_Brick.mat`, `M_Prop_Trim.mat`, `M_Sky_Procedural.mat` |
+| Shader / Shader Graph | `SH_<Name>` | `SH_Sky_Procedural.shadergraph` |
+| Mesh | `SM_<content_id>[_<Part>]_LOD<n>.fbx` | `SM_weapon_plasma_turret_small_Yaw_LOD0.fbx` |
+| VFX Graph | `VFX_<Family>_<Name>.vfx` | `VFX_Debris_Cells.vfx` |
+| Item / block icon | `ICO_<content_id>.png` | `ICO_block_hull.png` |
+| UI glyph | `GLY_<name>.svg` | `GLY_undo.svg` |
+| UI sprite | `UI_<Component>_<Variant>.png` | `UI_Bracket_Focus.png` |
+| Cursor | `CUR_<Name>_<Size>.png` | `CUR_Default_32.png` |
+| Font source / font asset | `FNT_<Family>-<Style>.ttf` / `FNT_<Family>-<Style>_SDF.asset` | `FNT_Barlow-Regular.ttf` |
+| Sound effect | `SFX_<Category>_<Name>_<NN>.wav` | `SFX_Weapon_PlasmaFire_01.wav` |
+| Music / ambience | `MUS_<Context>_<Name>.ogg` / `AMB_<Context>_<Name>.ogg` | `MUS_Explore_DriftingLight.ogg` |
+| Definition asset | `<content_id>.asset` | `artdir_drydock.asset`, `brickmat_drydock.asset`, `vis_weapon_railgun_medium.asset` |
+| Source file (outside `Assets/`) | `ArtSource/<Category>/<name>.<ext>` | `ArtSource/Blocks/weapon_railgun_medium.blend` |
+
+### 10.8 Folder layout
+
+| What | Folder |
+|---|---|
+| Brick layer sources, baked arrays, `M_Brick.mat` | `Assets/Game/Art/Bricks/` (`Layers/`, `Arrays/`) |
+| Prop meshes, trim sheet, `M_Prop_Trim.mat` | `Assets/Game/Art/Props/` (`Meshes/`, `Textures/`) |
+| Space: sky, stars, planets, gates | `Assets/Game/Art/Space/` |
+| VFX graphs and textures | `Assets/Game/Art/VFX/` |
+| Art-owned shaders (sky, planet, star, VFX, look-test reference) | `Assets/Game/Art/Shaders/` |
+| Look-test scenes and their assets (removed at A2) | `Assets/Game/Art/LookTest/<direction>/` |
+| Tokens, theme, component styles | `Assets/Game/UI/Theme/` (`tokens.uss`, `theme.tss`, `Components/*.uss`) |
+| Fonts, glyphs, sprites, cursors | `Assets/Game/UI/Theme/Fonts/`, `Glyphs/`, `Sprites/`, `Cursors/` |
+| Item and block icons | `Assets/Game/UI/Theme/Icons/` |
+| Audio | `Assets/Game/Audio/Sfx/`, `Music/`, `Ambience/` |
+| Art definition classes | `Assets/Game/Data/Definitions/Art/` (namespace `Game.Data.Definitions`) |
+| Art definition assets | `Assets/Game/Content/Art/` (SPEC-04 decision 16) |
+| Editable sources (`.blend`, `.kra`, `.svg` masters, `.mmg`, audio masters) | `ArtSource/` at the repository root, never under `Assets/`; binaries are marked `binary` in `.gitattributes` and move to Git LFS before the first push ([ADR-0008](../decisions/ADR-0008-no-lfs-yet.md)) |
+| Licences and receipts | `docs/design/licenses/` and the register `docs/design/LICENSES.md` (SPEC-81 `AST-001`) |
+| Placeholders (removed at A2) | `Assets/Game/Art/_Placeholder/` |
+
+### 10.9 File formats and import settings
+
+| Kind | Source format | Unity import settings |
+|---|---|---|
+| Colour textures (albedo, UI) | PNG 8-bit sRGB | sRGB on; BC7; mipmaps on (world) / off (UI); aniso 4 (world); wrap Repeat (world) / Clamp (UI) |
+| Mask textures | PNG 8-bit, linear | sRGB off; BC7; mipmaps on |
+| Normal maps | PNG 16-bit | Texture Type *Normal map*; BC5; mipmaps on |
+| Brick layer sources | PNG exactly 256 × 256 | Read/Write on (the baker reads them); not referenced at runtime |
+| Item / block icons | PNG 128 × 128, straight alpha | Texture Type *Sprite (2D and UI)*, single; BC7; mipmaps off; filter Bilinear |
+| UI glyphs, crests | SVG | Imported as UI Toolkit *Vector Image* (built-in vector graphics module); fallback PNG at 2× only if an SVG fails to import |
+| Meshes | FBX 7.4 binary from Blender: Forward −Z, Up Y, *Apply Transform* on, scale 1 | Scale factor 1; Read/Write off; normals Import; tangents Calculate Mikktspace; mesh compression Off; materials None; no animation, no cameras, no lights |
+| Fonts | TTF/OTF static instances + `OFL.txt` next to them | FontAsset (TextCore): SDF AA, sampling point size 90, padding 9, atlas 1024 × 1024, dynamic, character set ASCII + Latin-1 Supplement + General Punctuation + arrows (U+2190–U+21FF) + ✓ ⚠ ✕ ⓘ |
+| SFX | WAV 48 kHz 16-bit (masters 24-bit in `ArtSource/Audio/`) | 3D sounds Force To Mono; < 2 s Decompress On Load (Vorbis q 0.7); 2–10 s Compressed In Memory; > 10 s Streaming |
+| Music, ambience | OGG Vorbis q 8 (masters WAV in `ArtSource/Audio/`) | Streaming; Load In Background |
+| Cursors | PNG 32 × 32 and 64 × 64 | Texture Type *Cursor*; Read/Write on (required by `Cursor.SetCursor`) |
+
+### 10.10 Texture memory budgets (runtime VRAM, approved direction only)
+
+| Group | Contents | Budget |
+|---|---|---|
+| Brick arrays | 3 × `Texture2DArray` (albedo BC7, mask BC7, normal BC5), 256 × 256, ≤ 64 slices, full mips: 87,381 B per slice per array | ≤ 18 MB |
+| Brick support | `_PaintPalette` 256 × 1, `_BrickLayerParams` 64 × 2, `_DamageRamp` 256 × 1, `_CrackTex` 256², `_MacroNoiseTex` 256², `_ToonRamp` 256 × 1 | ≤ 0.5 MB |
+| Prop trim sheet | 3 × 2048² (BC7, BC7, BC5) with mips | ≤ 17 MB |
+| VFX | Flipbooks ≤ 1024², noise textures | ≤ 16 MB |
+| Space | Noise volumes (≤ 128³ R8), gradient LUTs, reflection cubemap 128 px RGBA Half | ≤ 8 MB |
+| Planets and stars | Shared noise, 256 × 1 ramps; no per-planet bitmaps | ≤ 8 MB |
+| UI | Icons (~120 × 128² BC7), sprites, font atlases (≤ 6 × 1024² A8) | ≤ 24 MB |
+| **Total art textures** | | **≤ 92 MB (hard cap 128 MB)** |
+
+No texture is larger than 2048². No texture is uncompressed except the 1-pixel-high LUTs and palettes (they must stay exact).
+
+### 10.11 Polygon and LOD budgets
+
+**Prop and functional block meshes** (counted for the whole block including moving parts; footprint from SPEC-04):
+
+| Footprint cells | LOD0 triangles | LOD1 triangles (≤ 25 % of LOD0) |
+|---|---|---|
+| 1 | ≤ 150 | ≤ 40 |
+| 2–4 | ≤ 600 | ≤ 150 |
+| 5–18 | ≤ 1,500 | ≤ 375 |
+| 19–64 | ≤ 3,000 | ≤ 750 |
+| > 64 | ≤ 5,000 | ≤ 1,250 |
+
+Other meshes: projectile / missile ≤ 100 triangles (no LOD); gate body LOD0 ≤ 20,000, LOD1 ≤ 5,000; planet sphere ≤ 8,192 triangles (shared mesh); star sphere ≤ 2,048. Brick meshes follow 06-performance-budgets (≤ 2 triangles per exposed face at LOD0).
+
+**LOD and impostor visual rules** (SPEC-11 owns the switch logic and may tune distances; these visual rules are binding for art):
+
+| Level | Default switch (camera distance to grid bounds, 10 % hysteresis) | What must still read |
+|---|---|---|
+| LOD0 | < 120 m | Everything: layers, AO, damage stages, props at LOD0 |
+| LOD1 | 120–450 m | 2× downsampled brick mesh. Each 2 × 2 × 2 group takes the majority layer and paint of its solid cells, **except that a cell with a function paint (20–25) or an emissive layer always wins**; damage = the worst stage of the group; per-vertex AO off; props use their LOD1 mesh; no shadow casting |
+| LOD2 / impostor | > 450 m or projected height < 96 px | 4× downsampled merged mesh or an impostor (SPEC-11 chooses); functional blocks drawn as their footprint cells in their function colour **with emissive on**; props hidden; no shadow casting |
+| Debris particles and chunk bodies | Always | No shadow casting |
+
+Function lights stay visible at every level (principle P3).
+
+### 10.12 Brick layer plan
+
+`BlockDefinition.materialLayer` (SPEC-04, 0–63) selects one slice of the brick texture arrays. The plan is shared by all directions, so changing direction never changes a block's layer number. Each layer is authored as a 2 × 2-cell macro-panel (`macroTile = 2`) unless marked 1, and must look correct on all six faces and on the wedge slope (stretched by √2 along the slope; no text, no circles on hull layers).
+
+| Index | Name | Use | macroTile | DRYDOCK | NOCTURNE | PULP |
+|---|---|---|---|---|---|---|
+| 0 | `hull_plain` | Default plate (all legacy blocks) | 2 | ✓ | ✓ | ✓ |
+| 1 | `hull_panel_a` | Plate variant A | 2 | ✓ | ✓ | ✓ |
+| 2 | `hull_panel_b` | Plate variant B | 2 | ✓ | ✓ | ✓ |
+| 3 | `hull_heavy` | Armour plate (bolts) | 2 | ✓ | ✓ | ✓ |
+| 4 | `hull_hazard` | Hazard stripes (paint-locked to slots 26/27) | 1 | ✓ | → 1 | ✓ |
+| 5 | `hull_window` | Window strip, emissive | 1 | ✓ | ✓ | ✓ |
+| 6 | `hull_grate` | Grating | 1 | ✓ | ✓ | ✓ |
+| 7 | `hull_vent` | Vents | 1 | ✓ | ✓ | → 6 |
+| 8 | `hull_bare` | Unpainted metal frame | 2 | ✓ | ✓ | ✓ |
+| 9 | `hull_light_strip` | Emissive light strip (team accent) | 1 | ✓ | ✓ | ✓ |
+| 10 | `hull_marking` | Stencil band / hull-number field | 2 | ✓ | → 1 | ✓ |
+| 11 | `hull_dock` | Docking marking | 2 | ✓ | → 1 | ✓ |
+| 12–15 | reserved hull | — | — | | | |
+| 16 | `internals_girder` | Exposed internals (shader-selected) | 1 | ✓ | ✓ | ✓ |
+| 17 | `internals_conduit` | Exposed internals | 1 | ✓ | ✓ | ✓ |
+| 18 | `internals_cavity` | Exposed internals | 1 | ✓ | ✓ | ✓ |
+| 19 | reserved internals | — | — | | | |
+| 20 | `station_plating` | Station hull | 2 | ✓ | ✓ | ✓ |
+| 21 | `station_habitat` | Habitat with window rows | 2 | ✓ | ✓ | ✓ |
+| 22 | `station_solar` | Solar panel | 2 | ✓ | → 20 | ✓ |
+| 23 | `station_glass` | Glass | 1 | ✓ | ✓ | → 21 |
+| 24–27 | reserved station | — | — | | | |
+| 28 | `asteroid_rock` | Rock | 2 | ✓ | ✓ | ✓ |
+| 29 | `asteroid_rock_dark` | Dark rock | 2 | ✓ | ✓ | → 28 |
+| 30 | `asteroid_ice` | Ice | 2 | ✓ | ✓ | ✓ |
+| 31 | `asteroid_metal` | Metal ore | 2 | ✓ | ✓ | ✓ |
+| 32 | `asteroid_crystal` | Strange-matter crystal (emissive) | 1 | ✓ | ✓ | ✓ |
+| 33 | `asteroid_regolith` | Dust-covered rock | 2 | ✓ | ✓ | → 28 |
+| 34–39 | reserved asteroid | — | — | | | |
+| 40 | `vanguard_ceramic` | Vanguard plate | 2 | ✓ | ✓ | ✓ |
+| 41 | `vanguard_glass` | Vanguard glass | 1 | ✓ | ✓ | ✓ |
+| 42 | `vanguard_light` | Vanguard light seam (emissive) | 1 | ✓ | ✓ | ✓ |
+| 43 | `silence_void` | Silence matter | 1 | ✓ | ✓ | ✓ |
+| 44 | `silence_growth` | Silence growth on human hull | 1 | ✓ | ✓ | ✓ |
+| 45 | `xeno_chitin` | Xeno probe shell | 1 | ✓ | ✓ | ✓ |
+| 46 | `xeno_membrane` | Xeno membrane (emissive) | 1 | ✓ | ✓ | → 45 |
+| 47–61 | reserved | — | — | | | |
+| 62 | `debug_checker` | Development checker | 1 | ✓ | ✓ | ✓ |
+| 63 | `missing` | `block_missing` (SPEC-04, binding): magenta/black 1-cell checker | 1 | ✓ | ✓ | ✓ |
+
+"→ n" means the slice is a copy of layer n in that direction (the index must still exist). Unused reserved slices are filled by the baker with a copy of layer 63. Layers that exist as distinct content: DRYDOCK 34, NOCTURNE 30, PULP HORIZON 29 (counting 62 and 63).
+
+### 10.13 Paint palette and team colour slots
+
+`PaletteEntry.Color` (architecture §6.3, one byte per palette entry) is an index into the global **paint palette**, a 256 × 1 texture. The layout is shared by all directions:
+
+| Index | Meaning | Resolved |
+|---|---|---|
+| 0 | Default | Same as 17 (team primary) on paintable surfaces |
+| 1–16 | Player paints `paint_01` … `paint_16` (legacy `PaintBucket_01`…`_16` order) | From the palette texture |
+| 17 / 18 / 19 | Team primary / secondary / accent | **Per grid**, from the material-property components `_TeamPrimary/_TeamSecondary/_TeamAccent` (§10.14.4); the palette texture holds the ARK colours as fallback |
+| 20–25 | Function colours: thruster, weapon, power, shield, core, utility | From the palette texture; never selectable by the player |
+| 26 / 27 | Hazard light / hazard dark | From the palette texture |
+| 28–31 | Vanguard ceramic, Vanguard light, Silence void, Xeno chitin | From the palette texture |
+| 32–255 | Reserved; never written by content (validator error) | Copy of index 0 |
+
+Player paints per direction (index: name → DRYDOCK / NOCTURNE / PULP HORIZON). Before approval the placeholder art direction uses the DRYDOCK column.
+
+| Index | Paint (`paint_NN_…`) | DRYDOCK | NOCTURNE | PULP HORIZON |
+|---|---|---|---|---|
+| 1 | Dark Gray | `#4A4D50` | `#3A3F48` | `#5E6470` |
+| 2 | Red | `#B3362C` | `#8E1F35` | `#E2483D` |
+| 3 | Green | `#3E7D4A` | `#1F6B55` | `#3FA34D` |
+| 4 | Blue | `#2F5F9E` | `#23458F` | `#2F6FD6` |
+| 5 | Yellow | `#E0B021` | `#B8902A` | `#FFC233` |
+| 6 | Orange | `#D9661F` | `#A8501F` | `#FF8A2B` |
+| 7 | Purple | `#6B4A8E` | `#5A2E8C` | `#8A5CD6` |
+| 8 | Cyan | `#2C9AA6` | `#1D7F95` | `#2FC2C9` |
+| 9 | Pink | `#C76A8A` | `#9A3F72` | `#F27BAA` |
+| 10 | Brown | `#6E4B33` | `#4D3428` | `#9A6440` |
+| 11 | Black | `#1E1F21` | `#0E1014` | `#23252B` |
+| 12 | Military Green | `#4F5B3A` | `#34432F` | `#6E8040` |
+| 13 | Steel Blue | `#4D6D8A` | `#33506E` | `#4F7FA8` |
+| 14 | Tan | `#B59E78` | `#8A7A5E` | `#E3C38E` |
+| 15 | Dark Red | `#6E2024` | `#4F1622` | `#9C2F35` |
+| 16 | White | `#E3DED2` | `#C9CED6` | `#F6EEDC` |
+
+Indices 17–31 take their values from each direction's §x.3 tables (team fallback = ARK; function colours; hazard = DRYDOCK `#F2B705`/`#3B3E42`, NOCTURNE `#FFB84D`/`#1B1E24`, PULP `#FFC233`/`#2A3140`; Otherness colours).
+
+### 10.14 Brick rendering contract (the master brick shader)
+
+SPEC-11 implements the brick shader; this section is the **art-facing contract** it must expose. It is written to satisfy architecture §11.3.
+
+#### 10.14.1 Scalability rules (binding for art, from architecture §11.3)
+
+1. **One shared material for all opaque brick meshes** of every grid, every faction and every direction: `M_Brick.mat` using SPEC-11's master brick shader. All 64 brick layers live in the texture arrays of that one material, and the layer is selected **per vertex** (from `materialLayer`). This is the strictest form of "materials are shared, one per material layer, registered once": there is one material for the brick layer set. If SPEC-11 instead registers one material per `materialLayer` value, each of those materials uses the same shader, the same arrays and a fixed `_LayerIndex`; nothing in this contract changes.
+2. **Per-cell variation comes only from the packed vertex** (layer, paint index, damage stage, AO, flags). **Per-grid variation comes only from material-property components** (§10.14.4). **Per-block variation on props comes only from material-property components** (§10.15). No material instance is ever created per grid, per brick, per block, per faction or for damage; no entity gets its own `RenderMeshArray`.
+3. **SRP Batcher and Entities Graphics compatible.** Every material-level property in §10.14.3 lives in the `UnityPerMaterial` constant buffer; every per-grid property in §10.14.4 is declared for DOTS instancing (`UNITY_DOTS_INSTANCED_PROP`) and fed by an `IComponentData` with `[MaterialProperty("<name>")]`.
+4. **No art switch adds a shader keyword.** Direction differences (toon ramp, rim, seams, halftone) are uniform branches on material properties. The brick and prop shaders add no `multi_compile` or `shader_feature` for art.
+5. **Damage tint and heat** come from the per-vertex damage stage plus the per-grid `_LastHitTime` — never from a new material.
+
+#### 10.14.2 Per-vertex data the art needs (SPEC-11 owns the exact packed layout, architecture §11.10)
+
+| Field | Minimum bits | Source |
+|---|---|---|
+| Position in brick-local cells (0–16 per axis) | 5 per axis (a `byte4` is fine) | Mesher |
+| Face index (+X, −X, +Y, −Y, +Z, −Z, wedge slope) | 3 | Mesher |
+| Brick layer (`materialLayer`) | 6 | `BlockDef.MaterialLayer` |
+| Paint index (`PaletteEntry.Color`) | 8 | Grid palette |
+| Ambient occlusion | 2 | Mesher (4 levels) |
+| Damage stage (§10.14.5) | 2 | `Cell.Hp` |
+| Exposed flag (face became visible because a neighbour cell was removed) | 1 | `Cell.Flags` (SPEC-10/13; optional — if absent, exposed faces look like normal hull) |
+
+#### 10.14.3 Material properties the art team may change without code
+
+All live on `M_Brick.mat`, written by the `BrickMaterialDefinition` baker (SPEC-80 `ART-007`); people edit the definition, not the material.
+
+| Property | Type | Range / format | DRYDOCK | NOCTURNE | PULP |
+|---|---|---|---|---|---|
+| `_BrickAlbedoArray` | Texture2DArray | 256², ≤ 64 slices, BC7 sRGB, mips | baked | baked | baked |
+| `_BrickMaskArray` | Texture2DArray | BC7 linear: R metallic, G smoothness, B paint mask (1 = replace albedo hue with the paint colour, keep albedo luminance), A emissive mask | baked | baked | baked |
+| `_BrickNormalArray` | Texture2DArray | BC5 | baked | baked | baked |
+| `_BrickLayerParams` | Texture2D 64 × 2 RGBAHalf, point, no mips | Row 0: emissive RGB (linear HDR), A = emissive mode (0 layer colour, 1 team accent); row 1: R macroTile (1 or 2), G scorchable (0/1), B crack strength 0–1, A edge wear 0–1 | baked | baked | baked |
+| `_PaintPalette` | Texture2D 256 × 1 RGBA8 sRGB, point, clamp, no mips | §10.13 | baked | baked | baked |
+| `_CrackTex` | Texture2D 256² R8 linear, repeat | Crack distance field | ✓ | ✓ | ✓ |
+| `_CrackTiling` | float | cells per crack tile, 1–4 | 2 | 2 | 1 |
+| `_DamageRamp` | Texture2D 256 × 1 sRGB | x = damage 0–1 → albedo multiply | ✓ | ✓ | ✓ |
+| `_ScorchColor` | Color | | `#3A332C` | `#0A0B0E` | `#2A3140` |
+| `_ScorchStrength` | float | 0–1 | 0.85 | 0.60 | 0.00 |
+| `_EmberColor` | Color (HDR) | | `#FF5A1A` | `#FFFFFF` | `#FF8A2B` |
+| `_EmberIntensity` | float | 0–16 | 4.0 | 6.0 | 1.5 |
+| `_EmberFadeSeconds` | float | 0–30 | 8 | 6 | 6 |
+| `_ExposedLayers` | Vector4 | x, y, z = layer indices, w = count | 16, 17, 18, 3 | 16, 17, 18, 3 | 16, 17, 18, 3 |
+| `_AOStrength` | float | 0–1 | 0.80 | 0.60 | 0.50 |
+| `_AOColor` | Color | | `#000000` | `#000000` | `#2A3140` |
+| `_MacroNoiseTex` | Texture2D 256² R8, repeat | | ✓ | ✓ | ✓ |
+| `_MacroScale` | float | cells, 16–256 | 64 | 64 | 64 |
+| `_MacroStrength` | float | 0–0.3 | 0.06 | 0.03 | 0.00 |
+| `_EmissiveIntensity` | float | global multiplier 0–16 | 1.0 | 1.0 | 1.0 |
+| `_SeamEmission` | float | 0–2 | 0.00 | 0.35 | 0.00 |
+| `_SeamFadeStart` / `_SeamFadeEnd` | float | metres | 0 / 0 | 150 / 450 | 0 / 0 |
+| `_RimColor` | Color | | `#8FA6C8` | `#5FD0FF` | `#000000` |
+| `_RimStrength` | float | 0–1 | 0.00 | 0.35 | 0.00 |
+| `_ShadingMode` | float | 0 PBR, 1 toon ramp | 0 | 0 | 1 |
+| `_ToonRamp` | Texture2D 256 × 1 | 3 steps 0.35 / 0.70 / 1.0 | — | — | ✓ |
+| `_HalftoneScale` | float | screen px per dot cell, 4–12 | 0 | 0 | 6 |
+
+#### 10.14.4 Per-grid material-property components (DOTS instanced; written by Presentation, never by art)
+
+| Shader property | Type | Written from | Meaning |
+|---|---|---|---|
+| `_TeamPrimary`, `_TeamSecondary`, `_TeamAccent` | float4 (linear colour) | Grid `Allegiance` → faction → `ArtDirectionDefinition` faction look | Resolve paint indices 0, 17, 18, 19 |
+| `_GridPowered` | float 0–1 | 1 while the grid has a core and power; animates to 0 over the direction's hulk time | Multiplies all emissive |
+| `_LastHitTime` | float (shader time `_Time.y`) | Time of the most recent damage event on the grid | Drives ember fade (`_EmberFadeSeconds`) |
+| `_Highlight` | float4 (rgb, strength) | Selection, target lock, editor hover | Additive rim highlight |
+| `_Dissolve01` | float 0–1 | Chunk bodies only: 0 → 1 over 1.2 s before removal (SPEC-13) | Edge dissolve with the direction's ember colour (§x.7) |
+
+#### 10.14.5 Damage stages
+
+Stage = from `Cell.Hp` as a fraction of the block's `CellHp`: **0** ≥ 75 %, **1** 50–75 %, **2** 25–50 %, **3** < 25 %. A stage change must be visible within 0.25 s (SPEC-11/13 mark the brick mesh-dirty when a cell's stage changes; see SPEC-80 §10). Each direction's §x.3 damage table defines the look; prop meshes use `_Damage01 = 1 − FunctionHp / maxFunctionHp` with the same four thresholds.
+
+#### 10.14.6 What needs code (SPEC-11 change through its Open questions)
+
+New shader properties, a different packed vertex, a new shading model, a new per-grid or per-instance component, any new render pass. Everything in §10.14.3 is data.
+
+### 10.15 Prop and functional mesh conventions
+
+- **Units and pivot (SPEC-04):** 1 FBX unit = 1 cell; pivot at the centre of the root cell (0,0,0); footprint extends toward +X, +Y, +Z; SPEC-11 scales by `VoxelGrid.CellSize`. The mesh must stay inside its footprint cells plus 0.1 cell, except barrels and nozzles, which may extend 1 cell into the block's clearance cells.
+- **Forward:** +Z is the block's business direction: weapons fire toward +Z; thruster exhaust leaves toward +Z (SPEC-04 clearance cells are at +Z).
+- **One material:** every prop and functional mesh uses `M_Prop_Trim.mat` (one shared material, one 2048² trim sheet set). UV0 maps to the trim sheet. No other material is ever assigned to a prop mesh.
+- **Vertex colour = paint selection:** R → team primary, G → team secondary, B → team accent, A → function colour; black = trim-sheet albedo. Channels are 0 or 1 (no blends).
+- **Per-instance material-property components** (DOTS instanced): `_TeamPrimary`, `_TeamSecondary`, `_TeamAccent`, `_FunctionPaint` (float palette index 20–25), `_Damage01`, `_Powered` (0–1), `_Throttle` (0–1, thrusters only; drives nozzle emissive), `_LastHitTime`, `_Highlight`.
+- **Blinking lights without code:** UV1.x on a prop mesh vertex is a blink phase. 0 = steady; a value in (0, 1] makes that vertex's emissive flash for 0.1 s once per second, offset by the phase (navigation lights use 0.25 left, 0.5 right, 0.75 aft). Material-level properties are the brick set minus the arrays, plus `_PropAlbedo`, `_PropMask`, `_PropNormal` (same channel conventions as the arrays).
+- **Moving parts:** a turret is two meshes: the base (`SM_<id>_LOD0.fbx`, assigned to `BlockDefinition.propMesh`) and the yaw part (`SM_<id>_Yaw_LOD0.fbx`, in `BlockVisualDefinition.parts`, pivot on the yaw axis).
+- **Sockets:** empties named `MUZZLE_00…`, `NOZZLE_00…`, `EMITTER_00`, `LIGHT_00…`, `FX_00…` in the FBX are converted at import into `BlockVisualDefinition.sockets` (SPEC-80 §4) and stripped from the mesh. A visual muzzle socket lies within 0.25 cell of the gameplay muzzle in `WeaponParams` (SPEC-04 §4.10); gameplay data always wins.
+- **Glyph and band:** every functional mesh shows its function glyph (§10.6) on every exposed face and a function-colour area ≥ 2 cells long or a full 1-cell face (rule R1).
+
+### 10.16 Space and lighting technical rules
+
+- **No fog, no realtime or baked GI, no SSAO** in space scenes; voxel AO comes from the mesh.
+- **Key light pitch** per direction (R4); azimuth = from the star toward the camera target. One shadow-casting light per scene.
+- **Shadows** (SPEC-11 owns settings): at least 4 shadow-map texels per cell within 60 m of the camera.
+- **Reflections:** one 128 px cubemap of the procedural sky, rendered once on star-system load; no realtime reflection probes.
+- **Exposure:** fixed (no auto-exposure); post exposure 0 EV.
+- **Spectral table** (key light and star disc colour by spectral class; each direction applies its saturation): O `#9BB0FF`, B `#AABFFF`, A `#CAD7FF`, F `#F8F7FF`, G `#FFF4EA`, K `#FFD2A1`, M `#FFCC6F`.
+- **Sky:** one procedural sky shader `SH_Sky_Procedural` (stars hashed in 3 tiers, galaxy band, nebula noise); no cubemap or 6-sided skybox textures. Because the camera looks down, sky features are authored for the **lower hemisphere and the horizon band** (directions below the flight plane); the upper hemisphere is a plain gradient.
+- **Emissive units:** shader emission = linear colour × intensity × `_EmissiveIntensity`; at the reference exposure a lit default hull is about 0.5, which is the scale used by the bloom thresholds in §x.4.
+
+### 10.17 VFX technical rules
+
+- All gameplay VFX are VFX Graph assets driven by `FxEvent` and `CellRemoved` (architecture §6.6); `FxEvent.Color` carries the damage-type colour from `ArtDirectionDefinition` (SPEC-80 §4).
+- Debris inherits the cell's paint colour (palette index from `CellRemoved.Color`).
+- Shared timings: hit flash 0.05–0.1 s; muzzle flash ≤ 0.06 s; small explosion 0.6 s; large 1.8 s; reactor 2.5 s; shield ripple 0.4 s; beam on 0.05 s / off 0.12 s; debris life 3–6 s; chunk dissolve 1.2 s; lane jump 1.5 s total (covers the ≤ 1.5 s star-system load in 06-performance-budgets).
+- Budgets: debris follows 06 (50,000 live particles ≤ 1 ms GPU); at most 20,000 new debris particles per frame; transparent overdraw in heavy combat ≤ 4 full-screen layers at 1080p; no VFX texture over 1024².
+- Fewer, larger particles beyond 300 m (half the count, double the size).
+
+### 10.18 Audio technical rules
+
+- Loudness: music −16 LUFS integrated; ambience −24 LUFS; SFX peaks ≤ −1 dBTP; UI sounds ≤ −20 LUFS short-term.
+- 48 kHz; 3D SFX mono; each looping SFX loops seamlessly (zero-crossing, no click at 0 dB gain).
+- Every cue has 2–4 variations where it repeats more than once per second (weapons, impacts, debris).
+- Cues are referenced through `AudioCueDefinition` (SPEC-64), never by path.
+
+### 10.19 Licensing and provenance
+
+| Allowed | Not allowed |
+|---|---|
+| Made by the owner or a contributor who assigned rights in writing | Anything without a licence file or a receipt |
+| CC0 / public domain (including NASA and ESA imagery marked public domain) | "Free for personal use", non-commercial (`NC`) or no-derivatives (`ND`) licences |
+| SIL Open Font License 1.1 fonts (licence text shipped next to the font) | Share-alike (`SA`) licences for assets that ship in builds |
+| CC-BY 4.0 with an entry in the credits file | Assets extracted from other games (the excluded Starsector files are the example) |
+| Paid licences whose terms allow commercial games, with the licence file or receipt in `docs/design/licenses/` | Fonts with unverified licences (the placeholder **Kontrapunkt** has no licence file and is not used) |
+| AI-generated assets only with the owner's explicit approval per asset and a tool whose terms allow commercial use, recorded in the register | Copyrighted images in mood boards stored in the repository (use links instead) |
+
+Every shipped asset has a row in `docs/design/LICENSES.md` (path, source, licence, author, date, proof file).
+
+### 10.20 Asset review checklist (every SPEC-81 task)
+
+- [ ] Named and placed per §10.7–§10.8; import settings per §10.9.
+- [ ] Within its texture budget (§10.10) and polygon budget (§10.11).
+- [ ] Uses only `M_Brick.mat` or `M_Prop_Trim.mat` (world) — no new material for a block, grid, faction or damage state.
+- [ ] Colours come from the approved palette tables (no new hex values without a §12 decision).
+- [ ] Function glyph and function colour present on every exposed face (functional blocks).
+- [ ] Reads at 50 / 150 / 300 m in the look-test camera (screenshot attached to the ledger log).
+- [ ] Damage stages 0–3 visible (blocks and layers).
+- [ ] UI: tokens only; contrast T1–T4 pass; colour-blind rules C1–C3 pass.
+- [ ] Licence row in `docs/design/LICENSES.md`.
+- [ ] Source file committed under `ArtSource/`.
+
+---
+
+## 11. Proposed additional tokens
+
+Not binding until accepted in §12. `ART-002` writes them into the per-direction sheets; `ART-014` adds the accepted ones to `tokens.uss`.
+
+| Token | Purpose | Placeholder | DRYDOCK | NOCTURNE | PULP HORIZON |
+|---|---|---|---|---|---|
+| `--color-border-strong` | Input and button boundaries (≥ 3:1, rule T2) | `#767A80` | `#737B84` | `#56769F` | `#8C9DC4` |
+| `--color-text-on-accent` | Text on accent fills | `#111214` | `#0D0F11` | `#05070D` | `#0F1626` |
+| `--color-overlay` | Modal scrim | `rgba(0, 0, 0, 0.6)` | `rgba(4, 5, 7, 0.65)` | `rgba(2, 4, 10, 0.70)` | `rgba(8, 12, 22, 0.60)` |
+| `--color-objective` | Objective markers | `#E3BE5A` | `#FFD24A` | `#FFE08A` | `#FFE08A` |
+| `--color-clue` | Clue, rumor and Whisper markers | `#C9A7FF` | `#B89CFF` | `#E0C3FF` | `#FF7FC8` |
+| `--font-body-strong` | Bold body text | `OfficeCodePro-Bold_SDF.asset` | `FNT_Barlow-SemiBold_SDF.asset` | `FNT_Inter-SemiBold_SDF.asset` | `FNT_AtkinsonHyperlegible-Bold_SDF.asset` |
+| `--easing-in` | Appearing elements | `ease-out` | `ease-out-cubic` | `ease-in-out-sine` | `ease-out-back` |
+| `--easing-out` | Leaving elements | `ease-in` | `ease-in-cubic` | `ease-in-out-sine` | `ease-in-cubic` |
+| `--icon-s` / `--icon-m` / `--icon-l` | Glyph sizes | 16 / 24 / 32 px | same | same | same |
+| `--hud-margin` | HUD safe margin | 32 px | same | same | same |
+| `--opacity-disabled` | Disabled controls | 0.4 | 0.4 | 0.4 | 0.4 |
+| `--opacity-hud-panel` | HUD panel background opacity | 0.85 | 0.85 | 0.80 | 0.90 |
+
+---
+
+## 12. Decision log
+
+Filled at approval (`ART-013`) and for every later change. Each row: what was decided, by whom, and where it is applied.
+
+| # | Date | Decision | By | Applied in |
+|---|---|---|---|---|
+| | | | | |
+
+---
+
+## Appendix A — Directions not chosen
+
+Empty until approval. At `ART-013`, the sections of the two non-chosen directions are moved here unchanged, for the record.

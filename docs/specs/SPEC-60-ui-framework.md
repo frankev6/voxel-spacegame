@@ -50,7 +50,7 @@ This spec builds the one UI stack of the game: a single `UIDocument` with fixed 
 9. **Closing is always `Navigator.Pop(screen)`** (helper `UIScreen.Close()`); popping a screen also pops every screen above it.
 10. **Screens are built once and cached.** A popped screen is hidden with `.is-hidden`, never destroyed. Reason: no rebuild cost, no lost subscriptions.
 11. **No inline styles and no hard-coded colours, sizes, fonts in UXML or C#.** The only allowed C# style writes are **data-driven geometry**: `style.width`/`style.height` as a percentage for fills, `style.translate`, `style.left`/`style.top` for tooltip and markers, `style.rotate`, `style.backgroundImage` from a content icon. Screen USS files (`Theme/screens/*.uss`) may use literal layout dimensions (px or %) for widths/heights of regions; colours, fonts, font sizes, spacing, radii, borders and durations come only from tokens.
-12. **Class names are BEM-like and defined only in §4.6.** Block `.btn`, element `.panel__title`, modifier `.btn--primary`, state `.is-selected`. Code queries elements **by name only**, never by class (exception: `UILayoutAudit`).
+12. **Class names are BEM-like and the shared ones are defined only in §4.6.** Block `.btn`, element `.panel__title`, modifier `.btn--primary`, state `.is-selected`. Screen-scoped classes are allowed only inside `Theme/screens/<stem>.uss`, must start with that file's stem followed by `-` (for example `.hud-narrow` in `hud.uss`, `.maps-color-3` in `maps.uss`, `.editor-palette-grid` in `editor.uss`), and are listed in the owning spec. Code queries elements **by name only**, never by class (exception: `UILayoutAudit`).
 13. **Every interactive element and every bound label has a `name`** following §4.7. Reason: tests and the `gh_ui`/`gh_click` harness.
 14. **View models are plain C#** deriving from `ViewModelBase`; they never reference ECS, services or session objects. Presenters (SPEC-61/SPEC-51) write them. Views never read ECS, services or session state.
 15. **Default binding is UXML `DataBinding`.** Exception: values that can change every frame (HUD meters, cooldowns, speed, radar) are pushed by view code from `propertyChanged` using `NumberStringCache` strings and percentage styles, because flight must allocate 0 B/frame (06 budgets).
@@ -382,6 +382,7 @@ namespace Game.UI.Controls
 | `.slot` | `__icon`, `__count`, `__key`, `__cooldown` | — | `components/slot.uss` |
 | `.tooltip` | `__title`, `__subtitle`, `__body`, `__stats`, `__stat-row`, `__stat-label`, `__stat-value` | `__stat-value--better`, `__stat-value--worse` | `components/tooltip.uss` |
 | `.toast` | `__icon`, `__text` | `--info`, `--positive`, `--warning`, `--danger`, `--enter`, `--exit`, `--bump` | `components/toast.uss` |
+| `.toast-column` | — | — | `components/toast.uss` |
 | `.modal` | `__scrim`, `__window`, `__title`, `__body`, `__actions` | — | `components/modal.uss` |
 | `.text-field` (on `TextField`) | — | — | `components/text-field.uss` |
 | `.slider` (on `Slider`/`SliderInt`) | — | — | `components/slider.uss` |
@@ -408,7 +409,7 @@ namespace Game.UI.Controls
 | Static element in a screen | `<key>-<element>` kebab-case | `pause-resume`, `hud-hull-meter` |
 | Dynamic item | `<key>-<collection>-<stableId>`; stableId = content id, slot index or option index | `inventory-slot-12`, `editor-palette-block_hull` |
 | Confirm buttons | `ConfirmOption.ElementName`, else `confirm-option-<index>` | `confirm-commit` |
-| Toast | `toast-<poolIndex>` | `toast-0` |
+| Toast column / toast | `toast-column` / `toast-<poolIndex>` | `toast-0` |
 | Tooltip | `tooltip` | — |
 
 Rules: lowercase `a-z0-9-` plus `_` only inside content ids; unique within its screen; never renamed once a task ships (harness scripts depend on them). `UINames` (`Assets/Game/UI/Data/UINames.cs`) provides `ScreenRoot(string key)`, `Layer(UILayer layer)`, `Item(string key, string collection, string id)`; these allocate and are called only during build or pool setup.
@@ -551,7 +552,9 @@ State: one tooltip element instantiated from `UIConfig.TooltipUxml` into `layer-
 
 ### 5.8 Notification service (`NotificationService`)
 
-State: `ToastSlot[ToastPoolSize]` (element instantiated from `ToastUxml` into `layer-toasts`, name `toast-<i>`), `List<ActiveToast> visible` (capacity `MaxVisibleToasts`), `Queue<Notification> queue` (capacity `MaxQueuedToasts`).
+Container: at construction the service adds one element `toast-column` (class `.toast-column`: absolute, `right: var(--space-5)`, `top: 296px` = 24 px margin + 240 px radar + 32 px gap so toasts sit below SPEC-61's top-right radar, `width: 360px`, flex column) to `layer-toasts`; all toasts are children of it, newest at the bottom.
+
+State: `ToastSlot[ToastPoolSize]` (element instantiated from `ToastUxml` into `toast-column`, name `toast-<i>`), `List<ActiveToast> visible` (capacity `MaxVisibleToasts`), `Queue<Notification> queue` (capacity `MaxQueuedToasts`).
 1. `Post(in Notification n)`:
    a. If `n.CoalesceKey` is non-empty and a visible toast has the same key and `now - lastBumpTime < ToastCoalesceWindowSeconds`: `Amount += n.Amount`, reset its remaining life to `ToastLifetimeSeconds`, refresh text, add `.toast--bump` and remove it after `--duration-fast`, return.
    b. Same check against queued notifications with the same key: add amounts in place, return.

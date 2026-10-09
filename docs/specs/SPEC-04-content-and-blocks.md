@@ -57,7 +57,8 @@ This spec defines how every piece of authored content is identified, stored, val
 14. **Content errors fail loudly**: in the editor (postprocessor + console), in CI (`-executeMethod`, exit code 1), at build time (build fails) and at boot (`ContentValidationException`). Never silently at runtime. Reason: conventions §6.
 15. **Missing content degrades, never rejects.** Unknown IDs read from saves resolve to `block_missing` / `item_missing` and are recorded for a warning (SPEC-05 surfaces them). Reason: 04-B1.
 16. **Content assets live in `Assets/Game/Content/<Area>/<id>.asset`; the database asset is `Assets/Game/Content/ContentDatabase.asset`.** All definition *classes* are in `Assets/Game/Data/Definitions/<Area>/` with namespace `Game.Data.Definitions` (architecture §3.2 wins over the sub-folder namespace rule).
-17. **Hashes use `StableHash` (xxHash3-64) only.** `BlockDefsBlob.ContentHash`, `ContentCatalog.ContentHash` and `ContentService.ContentHash` are reproducible across machines and runs (§5.5).
+17. **Hashes use `StableHash` (xxHash3-64) only.** `BlockDefsBlob.BlockDefsHash`, `ContentCatalog.IdentityHash` and `ContentService.DatabaseHash` are reproducible across machines and runs (§5.5). (These are database fingerprints, not to be confused with the per-ID `Game.Core.ContentHash` type.)
+18. **`ContentId` is managed and never appears in blobs, components, buffers, jobs or ECS events.** ECS data refers to content by `ContentHash` (blueprints, cues, factions) or by a dense runtime index (`BlockIndex`); `ContentCatalog.TryGet(in ContentHash, ...)` maps a hash back to its definition. Two IDs with equal hashes fail validation and boot (`DATA-E005`). Reason: architecture §6.1 erratum.
 
 ## 4. Data model
 
@@ -359,7 +360,7 @@ namespace Game.Data.Blocks
         public float FunctionHp;             // 0 unless Functional
         public float CellMass;               // kg per cell
         public int PropMeshIndex;            // index into ContentService.PropMeshes, -1 = none
-        public ulong IdHash;                 // ContentId.Hash (diagnostics, debug lookup)
+        public Game.Core.ContentHash IdHash; // ContentId.Hash: lets ECS code map a BlockIndex back to its content (diagnostics, saves go through the catalog)
         public Unity.Entities.BlobArray<Unity.Mathematics.int3> Cells;      // [0] == (0,0,0); rest sorted by (z, y, x)
         public Unity.Entities.BlobArray<Unity.Mathematics.int3> Clearance;  // sorted by (z, y, x)
         public Unity.Entities.BlobArray<ushort> AbilityIndices;             // IndexOf<AbilityDefinition>; empty until DATA-010
@@ -373,7 +374,7 @@ namespace Game.Data.Blocks
     public struct BlockDefsBlob
     {
         public Unity.Entities.BlobArray<BlockDef> Blocks;   // length = blockCount + 1
-        public ulong ContentHash;                            // §5.5
+        public ulong BlockDefsHash;                          // database fingerprint of all BlockDefs, §5.5
         public ushort MissingBlockIndex;                     // index of block_missing
     }
 
@@ -536,12 +537,14 @@ namespace Game.Data.Services
         public static ContentCatalog Build(System.Collections.Generic.IReadOnlyList<Game.Data.Definitions.ContentDefinition> definitions, Game.Data.Validation.ValidationReport report);
 
         public int Count { get; }
-        public ulong ContentHash { get; }
+        public ulong IdentityHash { get; }                    // fingerprint of all (ID, type) pairs, §5.4 step 7
         public Game.Data.Definitions.BlockDefinition MissingBlock { get; }
         public Game.Data.Definitions.ItemDefinition MissingItem { get; }
 
         public bool TryGet(in Game.Core.ContentId id, out Game.Data.Definitions.ContentDefinition def);   // live IDs, then former IDs
         public bool TryGet<T>(in Game.Core.ContentId id, out T def) where T : Game.Data.Definitions.ContentDefinition;
+        public bool TryGet(in Game.Core.ContentHash hash, out Game.Data.Definitions.ContentDefinition def);   // for hashes coming from ECS data; live IDs only
+        public bool TryGet<T>(in Game.Core.ContentHash hash, out T def) where T : Game.Data.Definitions.ContentDefinition;
         public T Get<T>(in Game.Core.ContentId id) where T : Game.Data.Definitions.ContentDefinition;      // KeyNotFoundException if absent
         public bool TryResolve<T>(in Game.Core.ContentId id, string context, out T def) where T : Game.Data.Definitions.ContentDefinition; // records unresolved on failure
         public Game.Data.Definitions.BlockDefinition ResolveBlockOrMissing(in Game.Core.ContentId id, string context);
@@ -572,7 +575,7 @@ namespace Game.Data.Services
         public Unity.Entities.BlobAssetReference<Game.Data.Blocks.BlockDefsBlob> BlockDefs { get; }
         public Unity.Entities.BlobAssetReference<Game.Data.Blocks.OrientationTablesBlob> Orientations { get; }
         public System.Collections.Generic.IReadOnlyList<UnityEngine.Mesh> PropMeshes { get; } // index = BlockDef.PropMeshIndex
-        public ulong ContentHash { get; }                                          // Combine(BlockDefs hash, Catalog hash); saved as diagnostics by SPEC-05
+        public ulong DatabaseHash { get; }                                         // Combine(BlockDefsHash, IdentityHash); saved as diagnostics by SPEC-05
 
         public void CreateSingletons(Unity.Entities.EntityManager entityManager);  // idempotent per world
         public void DestroySingletons(Unity.Entities.EntityManager entityManager);
@@ -656,7 +659,7 @@ sequenceDiagram
 4. If `report.HasErrors`: `report.LogTo("Content")` and throw `ContentValidationException(report)`. Nothing is allocated before this point except managed objects.
 5. Build orientation tables (§5.3) into a `BlobBuilder(Allocator.Temp)` → `CreateBlobAssetReference<OrientationTablesBlob>(Allocator.Persistent)`.
 6. Build `BlockDefsBlob` (§5.5) the same way; keep `PropMeshes`.
-7. `ContentHash = StableHash.Combine(BlockDefs.Value.ContentHash, Catalog.ContentHash)`. `BootReport = report` (it may contain warnings); log the summary line once: `Content: N definitions, B blocks, hash 0x<16 hex digits>, W warnings`.
+7. `DatabaseHash = StableHash.Combine(BlockDefs.Value.BlockDefsHash, Catalog.IdentityHash)`. `BootReport = report` (it may contain warnings); log the summary line once: `Content: N definitions, B blocks, hash 0x<16 hex digits>, W warnings`.
 
 `CreateSingletons(em)`: if a `BlockDefsRef` singleton already exists in `em`'s world, do nothing; else create one entity named `ContentSingletons` with both components. `DestroySingletons(em)` destroys it if present. `Dispose()` disposes both blobs if created (safe to call twice). The service must be disposed after the singletons are destroyed or the world is disposed (SPEC-01 shutdown order).
 
@@ -688,11 +691,11 @@ Cost: < 0.2 ms; done once per boot. Test vectors (any implementation must reprod
 
 1. For each entry `i` of `definitions`: null → `DATA-E007` (field `definitions[i]`), skip.
 2. ID checks: empty → `E001`; `!IsValidFormat` → `E002`; prefix not allowed for the type (nearest `[ContentIdPrefix]`; none found → also `E003`) → `E003`.
-3. Insert into `Dictionary<string, ContentDefinition>` (ordinal); duplicate → `E004` naming both assets. Insert `Id.Hash` into `Dictionary<ulong, ContentDefinition>`; a different ID with the same hash → `E005`.
+3. Insert into `Dictionary<string, ContentDefinition>` (ordinal); duplicate → `E004` naming both assets. Insert `Id.Hash` into `Dictionary<ContentHash, ContentDefinition>`; a different ID with the same hash → `E005` (boot then fails, decision 18).
 4. Former IDs: each must pass the format check, must not equal any live ID or another former ID → `E006`. Store in a separate alias dictionary.
 5. Families: for each definition, walk its type chain from the concrete type up to (excluding) `ContentDefinition`; append it to the family list of every type on the chain. Sort every family list by `string.CompareOrdinal(Id.Value)`. A family with more than 65,535 entries → `E009`. Store `def → index` maps per family.
 6. Required system definitions: `block_missing` must exist and be a `BlockDefinition`; `item_missing` an `ItemDefinition` (not a block) → else `E008`.
-7. `ContentCatalog.ContentHash` = `StableHash.Hash64(bytes)` where `bytes` = for every definition in global ordinal ID order: UTF-8 ID, `0x00`, UTF-8 `GetType().FullName`, `0x00`. (`ContentService.ContentHash` combines it with the block blob hash, §5.2 step 7.)
+7. `ContentCatalog.IdentityHash` = `StableHash.Hash64(bytes)` where `bytes` = for every definition in global ordinal ID order: UTF-8 ID, `0x00`, UTF-8 `GetType().FullName`, `0x00`. (`ContentService.DatabaseHash` combines it with the block blob hash, §5.2 step 7.)
 8. Lookups: `TryGet` checks live IDs then aliases; alias hits log `GameLog.Info("Content", ...)` once per alias.
 9. `TryResolve` / `Resolve*OrMissing`: on failure append `UnresolvedContentId(id, typeof(T).Name, context)` unless an equal `(Id, ExpectedType)` pair is already recorded; `ResolveBlockOrMissing` returns `MissingBlock`, `ResolveItemOrMissing` returns `MissingItem` (an ID that resolves to a definition of the wrong type also counts as unresolved).
 
@@ -703,7 +706,7 @@ Complexity: O(D·depth + D log D). Errors are collected, never thrown here.
 1. `blocks = catalog.All<BlockDefinition>()` (index `i+1` for element `i`). Allocate `Blocks` with `blocks.Count + 1` entries; entry 0 = air: all fields zero, `PropMeshIndex = −1`, empty arrays, `Function.Kind = None`.
 2. Prop meshes: iterate blocks in index order; for each non-null `PropMesh` not yet seen (reference equality) append to `PropMeshes`; `PropMeshIndex` = its position, or −1.
 3. For each block `b` at index `k`: `Cells` = `(0,0,0)` first then the remaining cells sorted by `(z, y, x)`; `Clearance` sorted by `(z, y, x)`; `BoundsMin/Max` over `Cells`; `MirrorIndex` = `catalog.GetBlockIndex(b.MirrorPartner)`; `MirrorOffset` = §5.6 step 1 (validated earlier, so it exists); copy scalar fields; `Function` copied, then `Function.Weapon.WeaponIndex = 0` and `AbilityIndices` empty (DATA-010 fills both); `IdHash = b.Id.Hash`; `MissingBlockIndex` = index of `catalog.MissingBlock`.
-4. `ContentHash = StableHash.Hash64(canonical)`, where `canonical` is, for `k = 1..N`, little-endian: `IdHash u64, Kind u8, Shape u8, AttachFaces u8, MaterialLayer u8, ArmorClass u8, AllowedOrientations u32, MirrorIndex u16, MirrorOffset 3×i32, CellHp f32, FunctionHp f32, CellMass f32, Cells.Length u16 + 3×i32 each, Clearance.Length u16 + 3×i32 each, AbilityIndices.Length u16 + u16 each, Function.Kind u8`, then every field of every `Function` sub-struct in declaration order (f32 as IEEE bits, ints as i32, ushort as u16, enums as u8). `PropMeshIndex` is excluded (presentation only).
+4. `BlockDefsHash = StableHash.Hash64(canonical)`, where `canonical` is, for `k = 1..N`, little-endian: `IdHash.Value u64, Kind u8, Shape u8, AttachFaces u8, MaterialLayer u8, ArmorClass u8, AllowedOrientations u32, MirrorIndex u16, MirrorOffset 3×i32, CellHp f32, FunctionHp f32, CellMass f32, Cells.Length u16 + 3×i32 each, Clearance.Length u16 + 3×i32 each, AbilityIndices.Length u16 + u16 each, Function.Kind u8`, then every field of every `Function` sub-struct in declaration order (f32 as IEEE bits, ints as i32, ushort as u16, enums as u8). `PropMeshIndex` is excluded (presentation only).
 5. Return the blob (`Allocator.Persistent`).
 
 Complexity O(Σ cells). Memory: ~(120 B + 12 B × cells) per block; < 64 KB for 200 blocks.
@@ -804,6 +807,7 @@ flowchart LR
 | `ResolveBlockOrMissing` / `ResolveItemOrMissing` | Main thread | Never null; records unresolved |
 | `All<T>()` / `IndexOf<T>` / `GetByIndex<T>` | — | Deterministic order; index 0 = none |
 | `IsPlaceholder(def)` | — | Editor palettes, loot and merchants must exclude placeholders |
+| `TryGet(in ContentHash, out def)` | — | Maps a hash stored in ECS data (`GridSpawnRequest.Blueprint`, `SfxEvent.Cue`) to its definition; `false` if unknown |
 
 ### 6.2 Burst access
 
@@ -931,7 +935,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 - **Milestone:** M0
 - **Tier:** frontier — F1/F3: deterministic runtime indices and ID resolution used by every module and by saves
 - **Depends on:** `DATA-004`
-- **Do:** Implement `ContentCatalog.Build` per §5.4 and every lookup of §4.9 / §6.1; eager family tables; unresolved tracking; placeholder detection.
+- **Do:** Implement `ContentCatalog.Build` per §5.4 and every lookup of §4.9 / §6.1 (including the `ContentHash` lookups); eager family tables; unresolved tracking; placeholder detection. Add an `internal` test hook `ContentCatalog.HashOverrideForTests` (a `Func<string, ContentHash>`, null in production, reset in a `SubsystemRegistration` method) so tests can force a collision.
 - **Files:** `Assets/Game/Data/Services/{ContentCatalog,UnresolvedContentId}.cs`; `Assets/Game/Tests/EditMode/Data/ContentCatalogTests.cs`
 - **Acceptance criteria:**
   - [ ] Block indices are 1..N in ordinal ID order regardless of input order; `GetBlock(0) == null`.
@@ -939,9 +943,10 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
   - [ ] Duplicate IDs, null entries, missing placeholders and alias collisions produce E004/E007/E008/E006.
   - [ ] `ResolveItemOrMissing("item_gone", ...)` returns `MissingItem` and records one unresolved entry even when called twice.
   - [ ] An alias resolves to the live definition.
-  - [ ] `ContentHash` (standalone) is identical for the same set in two different input orders and differs when one ID changes.
+  - [ ] `IdentityHash` is identical for the same set in two different input orders and differs when one ID changes.
+  - [ ] `TryGet(ContentHash)` finds every definition by `Id.Hash`; two test IDs forced to collide (test hook replacing the hash function) produce `DATA-E005`.
   - [ ] `TryGet` allocates 0 bytes after warm-up.
-- **Tests:** `ContentCatalogTests.BlockIndices_AreOrdinalAndOneBased`, `.Families_IncludeSubclasses`, `.Build_ReportsDuplicatesNullsAndMissingPlaceholders`, `.Resolve_UnknownId_ReturnsMissingAndRecordsOnce`, `.FormerId_ResolvesToLiveDefinition`, `.ContentHash_IsOrderIndependent`, `.TryGet_DoesNotAllocate`.
+- **Tests:** `ContentCatalogTests.BlockIndices_AreOrdinalAndOneBased`, `.Families_IncludeSubclasses`, `.Build_ReportsDuplicatesNullsAndMissingPlaceholders`, `.Resolve_UnknownId_ReturnsMissingAndRecordsOnce`, `.FormerId_ResolvesToLiveDefinition`, `.IdentityHash_IsOrderIndependent`, `.TryGetByHash_FindsDefinitions`, `.HashCollision_IsE005`, `.TryGet_DoesNotAllocate`.
 
 ### DATA-006 — Block blob builder and placement maths
 - **Milestone:** M0
@@ -951,12 +956,12 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 - **Files:** `Assets/Game/Data/Blocks/{BlockDefsBlobBuilder,BlockPlacementMath}.cs`; `Assets/Game/Tests/EditMode/Data/{BlockDefsBlobBuilderTests,BlockPlacementMathTests}.cs`
 - **Acceptance criteria:**
   - [ ] `Blocks[0]` is air; `Blocks[k].Index == k`; `Cells[0] == (0,0,0)`.
-  - [ ] Two builds from the same definitions (different input order) give identical `ContentHash`; changing any hashed field changes it; changing only `propMesh` does not.
+  - [ ] Two builds from the same definitions (different input order) give identical `BlockDefsHash`; changing any hashed field changes it; changing only `propMesh` does not.
   - [ ] `MirrorPlace` postcondition holds for: a chiral 4-cell pair `{(0,0,0),(1,0,0),(1,1,0),(1,1,1)}` and its X-mirror, the capacitor box, and the 10-cell medium-thruster cross, for all 24 orientations, 3 axes and `planeTwice ∈ {0, 1, 7, −3}`.
   - [ ] Mirroring twice returns the original block, orientation and origin.
   - [ ] No proper rotation maps the chiral 4-cell shape onto its mirror (up to translation).
   - [ ] Built blob is disposed in every test (leak detection on).
-- **Tests:** `BlockDefsBlobBuilderTests.AirEntry_IsIndexZero`, `.Cells_RootFirstThenSorted`, `.ContentHash_IsDeterministic`, `.ContentHash_IgnoresPropMesh`, `.MirrorIndexAndOffset_Computed`, `.PropMeshTable_DeduplicatesByReference`; `BlockPlacementMathTests.GetCells_RotatesAroundRoot`, `.MirrorPlace_ReflectsCellsExactly`, `.MirrorPlace_Twice_ReturnsOriginal`, `.Chirality_NoRotationEqualsMirror`, `.WorldAttachFaces_RotatesBits`.
+- **Tests:** `BlockDefsBlobBuilderTests.AirEntry_IsIndexZero`, `.Cells_RootFirstThenSorted`, `.BlockDefsHash_IsDeterministic`, `.BlockDefsHash_IgnoresPropMesh`, `.MirrorIndexAndOffset_Computed`, `.PropMeshTable_DeduplicatesByReference`; `BlockPlacementMathTests.GetCells_RotatesAroundRoot`, `.MirrorPlace_ReflectsCellsExactly`, `.MirrorPlace_Twice_ReturnsOriginal`, `.Chirality_NoRotationEqualsMirror`, `.WorldAttachFaces_RotatesBits`.
 
 ### DATA-007 — ContentService and ECS singletons
 - **Milestone:** M0
@@ -968,9 +973,9 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
   - [ ] Invalid content throws `ContentValidationException` whose report contains the error, and leaks nothing.
   - [ ] `CreateSingletons` twice on the same world creates one entity; systems can read `BlockDefsRef` and `OrientationTablesRef` via singleton queries.
   - [ ] Construct → CreateSingletons → DestroySingletons → Dispose under `NativeLeakDetection.Mode = Enabled` reports no leak; `Dispose` twice is safe.
-  - [ ] `ContentService.ContentHash` equals `StableHash.Combine(BlockDefs.Value.ContentHash, Catalog.ContentHash)` and is identical across two constructions from the same database.
+  - [ ] `ContentService.DatabaseHash` equals `StableHash.Combine(BlockDefs.Value.BlockDefsHash, Catalog.IdentityHash)` and is identical across two constructions from the same database.
   - [ ] Performance budgets of §8 met for both content sets.
-- **Tests:** `ContentServiceTests.InvalidContent_Throws_AndDoesNotLeak`, `.CreateSingletons_IsIdempotent`, `.Lifecycle_NoLeaks`, `.ContentHash_CombinesBlobAndCatalog`; `ContentServicePerfTests.Construct_ShippedContent`, `.Construct_Synthetic2000` (`[Category("Performance")]`).
+- **Tests:** `ContentServiceTests.InvalidContent_Throws_AndDoesNotLeak`, `.CreateSingletons_IsIdempotent`, `.Lifecycle_NoLeaks`, `.DatabaseHash_CombinesBlobAndCatalog`; `ContentServicePerfTests.Construct_ShippedContent`, `.Construct_Synthetic2000` (`[Category("Performance")]`).
 
 ### DATA-008 — Editor database builder, postprocessor, validator runner and CLI
 - **Milestone:** M0

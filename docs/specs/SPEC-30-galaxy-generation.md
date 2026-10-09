@@ -1,0 +1,685 @@
+# SPEC-30 — Galaxy generation and coordinate frames
+
+| | |
+|---|---|
+| **Status** | Draft |
+| **Area code** | GAL (task IDs are `GAL-001`, `GAL-002`, …) |
+| **Module(s)** | `Game.Galaxy` (folder `Assets/Game/Galaxy/`); world content definitions in `Game.Data` (folder `Assets/Game/Data/Definitions/World/`); one bridge system in `Game.Presentation` (folder `Assets/Game/Presentation/World/`); content assets in `Assets/Game/Content/Galaxy/` and `Assets/Game/Content/Bodies/` |
+| **Depends on specs** | SPEC-02 (`StableHash`, `RngStreams`, `SimClock`, `EventBus<T>`, `ISaveParticipant`, `SaveWriter`/`SaveReader`, `GameInitGroup`, `GameplayActive`, `ContentHash`, `PersistentId`), SPEC-04 (`ContentDefinition`, `ContentCatalog`, validation API), SPEC-10 (`ShipBlueprintDefinition`, `VoxelStructure`, `VoxelGrid`, `GridSpawnRequest`), SPEC-12 (`PhysicsLayers`, graphical smoothing), SPEC-40 (`ConditionRef`, `ILogicContext`), SPEC-01 (`GameSession` holds `GalaxyState`; service construction) |
+| **Depended on by** | SPEC-31 (content, deltas, frames), SPEC-32 (lane graph, frames), SPEC-33 (star-system seeds, danger), SPEC-05 (`GLXY` chunk), SPEC-42 (resolve star systems/bodies, reveal), SPEC-61 (galaxy map model), SPEC-62/63 (`OriginShifted`), SPEC-01 (new game / restore entry points) |
+| **Milestone** | M3 |
+
+> Read [01-architecture.md](../01-architecture.md), [02-conventions.md](../02-conventions.md), [03-glossary.md](../03-glossary.md) and [07-implementation-traps.md](../07-implementation-traps.md) §5 before this spec. This spec may not contradict them.
+
+## 1. Purpose
+
+The galaxy is pure data computed from `(GalaxySeed, GeneratorVersion)` plus the world content definitions: a set of star systems at galaxy-frame positions connected by lanes, some of them authored (the start star system, story star systems) and the rest procedural. This spec defines that data (`GalaxyDef`), the per-star-system body list (`StarSystemContent`) generated on demand from a star-system seed, the saved changes to it (`StarSystemDelta`, applied strictly after generation), the three coordinate frames, and `OriginRebaseSystem`, the single owner of the floating origin. It also gives the UI a read-only galaxy map model. It prevents the old prototype's "each star system generated twice, differently" (R9, audit 03-B1/D3), IDs that drift because they were derived from rolls (03-D3), seeds never assigned (04-B11), and ad-hoc origin shifting that left belts, the camera and debris behind (03-B9a–d).
+
+## 2. Scope
+
+**In scope:**
+- IDs: `StarSystemId`, `BodyId`, `BodyRole`; seeds and sub-seeds per purpose.
+- Galaxy layout (positions, authored overrides merged), lane graph (with fact-gated lanes), galaxy hash.
+- Star-system content generation (star, planets, moons, belts, stations, points of interest, lane gates) as data, and its hash.
+- `StarSystemDelta` model, the generate-then-apply-deltas order, `GalaxyState` and the `GLXY` save chunk.
+- Coordinate frames, `UniversePosition`, `FrameOrigin`, `OriginShifted`, `OriginRebaseSystem` (threshold 2,000 m and on star-system entry), `UniversePosition` sync.
+- `GalaxyService` (managed facade), `GalaxyFrameTicker` and the Presentation bridge that ticks Galaxy services once per frame.
+- `GalaxyMapModel` (data the galaxy map screen reads).
+- World content definitions: `GalaxyGenerationDefinition`, `StarSystemTemplateDefinition`, `AuthoredStarSystemDefinition`, `BodyTemplateDefinition`, `BodyVisualDefinition`, and their validator.
+- Regression R9 (EditMode part) and the world perf gates "galaxy generation ≤ 50 ms" and "origin rebase ≤ 0.5 ms".
+
+**Out of scope (and who owns it instead):**
+- Creating entities for bodies, streaming tiers, orbits at runtime, interaction, asteroid belts, the R9 PlayMode check, M3 world content assets → SPEC-31.
+- Jumps, lane fuel cost, lane-open evaluation (`ILaneAccess` implementation), routes, supercruise → SPEC-32.
+- Factions, territory, encounters (they read `StarSystemDef.Danger` and seeds) → SPEC-33.
+- The save container, slots and participant registration → SPEC-05; `GameSession`, `PersistentId` allocation, new-game/load orchestration → SPEC-01.
+- Camera, trail and VFX reaction to `OriginShifted` → SPEC-62, SPEC-63.
+- Galaxy map and system map screens (views) → SPEC-61. Rumor markers on the map → SPEC-42.
+- `ConditionRef`, `ILogicContext`, fact names → SPEC-40 / SPEC-42.
+
+## 3. Decisions (binding)
+
+1. **The galaxy is never saved.** `GalaxyDef` = f(`GalaxySeed`, `GeneratorVersion`, world definitions). Only `GalaxyState` (seed, version, deltas, knowledge, player location) is saved. Reason: deltas are small and survive content additions (fixes 04-B1).
+2. **`GeneratorVersion` freezes output.** Current value `GalaxyConstants.CurrentGeneratorVersion = 1`. Any change to generation output (algorithm, constant, RNG call order) bumps the version and keeps the previous code path selectable through `switch (generatorVersion)`. A save is always regenerated with the version it was created with. Reason: deltas are keyed by structural IDs that must keep pointing at the same things.
+3. **All randomness comes from `RngStreams.For(seed, purpose, salt)`** (SPEC-02, SplitMix64-based) with one `RngPurpose` per concern (§4.1). Seeds are combined only with `StableHash.Combine`. No `UnityEngine.Random`, `System.Random`, `GetHashCode`, `DateTime` or `Guid` anywhere in this spec's code. Reason: purpose separation means adding a loot roll cannot move a planet.
+4. **IDs are structural.** Procedural `StarSystemId.Value = 1 + acceptance index`; authored `StarSystemId.Value = 0x80000000 | (ContentHash.Value & 0x7FFFFFFF)` (if the low 31 bits are 0, use 1). `BodyId = (StarSystemId, BodyRole, Slot, SubSlot)` where Slot/SubSlot are generation positions (orbit index, moon index, lane index), never rolled values. Reason: a destroyed body can never shift another body's identity (03-D3).
+5. **Counts come from one layout stream; each body's attributes come from its own stream** seeded by its `BodyId.LocalKey`. A stream always consumes the same number of draws regardless of earlier outcomes (draw first, then decide). RNG is never consumed conditionally on saved state. Reason: determinism under deltas.
+6. **Generate, then apply deltas.** Content generation never reads `StarSystemDelta`. `StarSystemDeltaApplier` runs afterwards in a fixed order (§5.6). Reason: R9 / 03-D3.
+7. **Three frames** (architecture §9): galaxy `double2` light-years; star system `double3` metres relative to the star; local `float3` relative to `FrameOrigin`. Galaxy-frame direction `(x, y)` maps to star-system direction `(x, 0, y)` (galaxy +y = star-system +Z). Ships fly on the star-system XZ plane at Y = 0.
+8. **`OriginRebaseSystem` is the only code that moves the origin or shifts root transforms.** It rebases when the player ship's local position length exceeds `GalaxyConstants.OriginRebaseThresholdM = 2000` and whenever an `OriginRebaseRequest` is enabled (star-system entry, new game, load). For roots with `UniversePosition` the new local position is recomputed in double precision from `UniversePosition − newOrigin` (no float error accumulates); roots without it are shifted by the float delta.
+9. **`UniversePosition` is synced from the physics transform once per frame** by `OriginRebaseSystem` before any rebase decision: `UniversePosition = FrameOrigin + (double3)LocalTransform.Position` for every root that has both. Nobody else writes `UniversePosition` after an entity exists (creators set the initial value).
+10. **Generation runs in Burst.** Galaxy layout, lanes and star-system content are `IJob`s over blittable parameter arrays. Managed code only extracts parameters from definitions before and resolves names after.
+11. **Exactly one galaxy generation per new game or load** (`GalaxyService.GenerationCount` increments once). Star-system content is generated at most once per load request and cached until released. Reason: R9.
+12. **Deltas are sorted or append-only** (Destroyed, Interacted, Replacements, StructureDiffs sorted by body key ascending; StorySpawns append-only, removal only marks), so save → load → save is byte-identical.
+13. **Spawned things are referenced by `PersistentId`, generated things by `BodyId`, never by `Entity`** (architecture §6.1). Story spawns are generated content (`BodyRole.StorySpawn`, slot = record index); runtime grids of bodies get a fresh `PersistentId` per spawn that is never saved.
+14. **Galaxy world events are unmanaged structs in `Game.Galaxy.Events`**, published to `EventBus<T>` by Galaxy managed services from the per-frame Galaxy tick (§5.8). ECS systems in Galaxy never call managed code; they write singletons or managed-event `NativeQueue`s that the tick drains (architecture §5.1 allows `NativeQueue` for managed-event queues).
+15. **M3 galaxy = authored star systems only** (`proceduralStarSystemCount = 0` in `galaxy_main`), but the generator is tested at 1,000 procedural star systems. Reason: vision M3 scope is 2–4 star systems.
+
+## 4. Data model
+
+### 4.1 Requested additions to other specs' types (defaults used until answered)
+
+| Owner | Addition | Used for |
+|---|---|---|
+| SPEC-02 `RngPurpose` (append in this order) | `GalaxyLayout`, `GalaxyLanes`, `StarSystemAttributes`, `StarSystemLayout`, `BodyAttributes`, `AsteroidSector`, `AsteroidShape`, `StationShape`, `EncounterVisit`, `EncounterFleet`, `EncounterPlacement`, `Territory` | All Galaxy randomness (SPEC-30…33) |
+| SPEC-04 prefix registry | `GalaxyGenerationDefinition` `galaxy_`; `StarSystemTemplateDefinition` `systpl_`; `AuthoredStarSystemDefinition` `starsys_`; `BodyVisualDefinition` `bodyvis_`; (`BodyTemplateDefinition` `body_` already listed) | Content IDs |
+| SPEC-02 / SPEC-01 | `Game.Core.IPersistentIdAllocator { ulong Allocate(); }` implemented by `GameSession` | Runtime grids spawned by Galaxy |
+
+### 4.2 IDs and enums (public contract)
+
+Enums used by definitions live in `Game.Data` so `Game.Data` can reference them (architecture §3.2). Folder `Assets/Game/Data/Definitions/World/`, namespace `Game.Data.Definitions`.
+
+```csharp
+namespace Game.Data.Definitions
+{
+    /// <summary>Role of a body inside a star system. Implements SPEC-30 §4.2. Add values at the end only.</summary>
+    public enum BodyRole : byte { None = 0, Star = 1, Planet = 2, Moon = 3, Station = 4, Belt = 5, Asteroid = 6, LaneGate = 7, PointOfInterest = 8, StorySpawn = 9 }
+
+    public enum OrbitMode : byte { Fixed = 0, Circular = 1, Elliptic = 2 }                 // add at end only
+    public enum LaneKind : byte { Hyperlane = 0, AncientGate = 1 }                         // add at end only
+    public enum StarClass : byte { M = 0, K = 1, G = 2, F = 3, A = 4, B = 5, O = 6, WhiteDwarf = 7, NeutronStar = 8, BlackHole = 9 }
+    public enum InteractionKind : byte { None = 0, Dock = 1, Inspect = 2, LaneGate = 3, Hail = 4, Salvage = 5 } // add at end only
+    public enum StructureSource : byte { None = 0, Blueprint = 1, ProceduralShape = 2 }
+    public enum ShapeKind : byte { Ring = 0, Cylinder = 1, Box = 2, Sphere = 3 }
+}
+```
+
+Folder `Assets/Game/Galaxy/Data/`, namespace `Game.Galaxy.Data`:
+
+```csharp
+/// <summary>Star-system identity (architecture §6.5). Implements SPEC-30 §4.2.</summary>
+public readonly struct StarSystemId : System.IEquatable<StarSystemId>, System.IComparable<StarSystemId>
+{
+    public readonly uint Value;                                   // 0 = None
+    public const uint AuthoredBit = 0x80000000u;
+    public StarSystemId(uint value) { Value = value; }
+    public static StarSystemId None => default;
+    public bool IsValid => Value != 0;
+    public bool IsAuthored => (Value & AuthoredBit) != 0;
+    public static StarSystemId FromProceduralIndex(int index) => new StarSystemId((uint)index + 1u);  // index 0 .. 0x7FFFFFFD
+    public static StarSystemId FromAuthored(Game.Core.ContentHash hash)
+    { uint low = (uint)(hash.Value & 0x7FFFFFFFul); return new StarSystemId(AuthoredBit | (low == 0u ? 1u : low)); }
+    public bool Equals(StarSystemId o) => Value == o.Value;
+    public override bool Equals(object o) => o is StarSystemId s && s.Value == Value;
+    public override int GetHashCode() => (int)Value;              // dictionary use only; never persisted
+    public int CompareTo(StarSystemId o) => Value.CompareTo(o.Value);
+    public override string ToString() => "ss:" + Value.ToString("X8");
+}
+
+/// <summary>Structural body identity (architecture §6.5). LocalKey is unique inside one star system.</summary>
+public readonly struct BodyId : System.IEquatable<BodyId>
+{
+    public readonly StarSystemId System;
+    public readonly Game.Data.Definitions.BodyRole Role;
+    public readonly ushort Slot, SubSlot;
+    public BodyId(StarSystemId system, Game.Data.Definitions.BodyRole role, ushort slot, ushort subSlot)
+    { System = system; Role = role; Slot = slot; SubSlot = subSlot; }
+    public bool IsValid => System.IsValid && Role != Game.Data.Definitions.BodyRole.None;
+    /// <summary>(Role &lt;&lt; 32) | (Slot &lt;&lt; 16) | SubSlot. Saved in deltas. Sort order = generation order.</summary>
+    public ulong LocalKey => ((ulong)Role << 32) | ((ulong)Slot << 16) | SubSlot;
+    public static BodyId FromLocalKey(StarSystemId system, ulong key)
+        => new BodyId(system, (Game.Data.Definitions.BodyRole)(byte)(key >> 32), (ushort)(key >> 16), (ushort)key);
+    public ulong StableKey => Game.Core.StableHash.Combine(System.Value, LocalKey);  // seeds and hashing
+    public bool Equals(BodyId o) => System.Value == o.System.Value && LocalKey == o.LocalKey;
+    public override bool Equals(object o) => o is BodyId b && Equals(b);
+    public override int GetHashCode() => (int)(System.Value * 31u) ^ (int)LocalKey;    // dictionary use only
+    public override string ToString() => System + "/" + Role + ":" + Slot + "." + SubSlot;
+}
+
+[System.Flags] public enum StarSystemFlags : ushort { None = 0, Authored = 1, Start = 2, Story = 4, HiddenUntilKnown = 8, NoEncounters = 16, Hub = 32 }
+[System.Flags] public enum LaneFlags : byte { None = 0, Authored = 1, HiddenUntilKnown = 2 }
+[System.Flags] public enum BodyStateFlags : byte { None = 0, Destroyed = 1, Interacted = 2, Replaced = 4, StorySpawn = 8, HasStructure = 16 }
+
+public static class GalaxyConstants
+{
+    public const float OriginRebaseThresholdM = 2000f;   // architecture §9 (binding, not tunable)
+    public const int CurrentGeneratorVersion = 1;
+    public const ushort NoIndex = 0xFFFF;                 // "no template / no lane" in ushort index fields
+    public const int MaxAuthoredStarSystems = 256;
+    public const int MaxProceduralStarSystems = 100000;
+    public const int MaxBodiesPerStarSystem = 512;
+}
+```
+
+`StarSystemId` and `BodyId` are unmanaged and may appear in components, buffers, jobs and ECS events.
+
+### 4.3 World content definitions (public contract)
+
+All in `Assets/Game/Data/Definitions/World/`, namespace `Game.Data.Definitions`, one public type per file. **Property rule:** every `[SerializeField] private` field below has a read-only public property with the PascalCase name (`radiusMinM` → `RadiusMinM`); lists are exposed as `IReadOnlyList<T>`. `Validate` overrides call `base.Validate` first and report the codes of §5.9. `ConditionRef` is SPEC-40's serializable condition wrapper (`Game.Data.Logic`, §10 Q5).
+
+```csharp
+[System.Serializable] public struct WeightedBodyTemplate
+{ public BodyTemplateDefinition template; public float weight; public int maxCount; }   // maxCount 0 = unlimited
+
+[System.Serializable] public struct WeightedStarSystemTemplate
+{ public StarSystemTemplateDefinition template; public float weight; }
+
+[System.Serializable] public struct ProceduralShapeParams
+{
+    public ShapeKind kind;
+    public UnityEngine.Vector3Int sizeCells;   // Ring: x = outer diameter, y = height, z = inner diameter; Cylinder: x = diameter, y = height; Box: x,y,z; Sphere: x = diameter
+    public int wallThicknessCells;             // ≥ 1; 0 = solid
+    public BlockDefinition hullBlock;          // structural block filling the shell
+    public BlockDefinition coreBlock;          // functional Core block placed once (required when destructible)
+    public byte colorIndex;                    // palette colour (SPEC-10 PaletteEntry.Color)
+}
+
+[System.Serializable] public sealed class AuthoredLane
+{
+    public AuthoredStarSystemDefinition a, b;
+    public LaneKind kind = LaneKind.Hyperlane;
+    public Game.Data.Logic.ConditionRef condition;      // empty = always open
+    [UnityEngine.TextArea(1, 3)] public string lockedMessage;   // shown on the map while closed
+    public BodyTemplateDefinition gateTemplateA, gateTemplateB; // null = galaxy default for the kind
+    public bool hiddenUntilKnown;
+}
+
+[System.Serializable] public sealed class AuthoredBody
+{
+    public string key;                      // snake_case, unique in the star system, e.g. "ark_station"
+    public BodyRole role;                   // Planet, Moon, Station, Belt or PointOfInterest
+    public ushort slot;                     // unique per role in the star system
+    public string parentKey;                // Moon: key of its planet; others: ""
+    public BodyTemplateDefinition template;
+    public OrbitMode mode = OrbitMode.Circular;   // Station/PointOfInterest/Belt must be Fixed
+    public float orbitRadiusM;              // distance from parent (Belt: centre radius of the ring)
+    public float phaseDegrees;              // angle at UniversalTime 0, measured from +X toward +Z
+    public float eccentricity;              // Elliptic only, 0 .. 0.3
+    public float periodOverrideS;           // 0 = Kepler-lite from the template (§5.5)
+    public float radiusOverrideM;           // 0 = rolled from the body template range
+    public float yawDegrees;                // Fixed bodies only
+    public string displayNameOverride;      // "" = template display name
+}
+
+[ContentIdPrefix("galaxy_")]
+[UnityEngine.CreateAssetMenu(menuName = "Game/Content/World/Galaxy Generation", fileName = "galaxy_new")]
+public sealed class GalaxyGenerationDefinition : ContentDefinition
+{
+    [SerializeField] private int generatorVersion = 1;            // must equal GalaxyConstants.CurrentGeneratorVersion
+    [SerializeField] private bool useFixedSeed = true;            // M3: every new game uses fixedSeed
+    [SerializeField] private ulong fixedSeed = 0x5EED0001ul;
+    [SerializeField] private float galaxyRadiusLy = 60f;
+    [SerializeField] private int proceduralStarSystemCount = 0;   // M3 content: 0. Range 0..100000
+    [SerializeField] private float minStarSystemSpacingLy = 3f;
+    [SerializeField] private int placementAttemptsPerStarSystem = 30;
+    [SerializeField] private int laneCandidateNeighbours = 6;
+    [SerializeField] private int maxLaneDegree = 4;
+    [SerializeField] private float maxLaneLengthLy = 12f;
+    [SerializeField, UnityEngine.Range(0f, 1f)] private float extraLaneChance = 0.35f;
+    [SerializeField] private System.Collections.Generic.List<WeightedStarSystemTemplate> templatePool = new();
+    [SerializeField] private System.Collections.Generic.List<AuthoredStarSystemDefinition> authoredStarSystems = new();
+    [SerializeField] private AuthoredStarSystemDefinition startStarSystem;
+    [SerializeField] private System.Collections.Generic.List<AuthoredLane> authoredLanes = new();
+    [SerializeField] private BodyTemplateDefinition defaultHyperlaneGate;
+    [SerializeField] private BodyTemplateDefinition defaultAncientGate;
+}
+
+[ContentIdPrefix("systpl_")]
+[UnityEngine.CreateAssetMenu(menuName = "Game/Content/World/Star System Template", fileName = "systpl_new")]
+public sealed class StarSystemTemplateDefinition : ContentDefinition
+{
+    [SerializeField] private string namePrefix = "Uncharted";      // procedural display name prefix (§5.7)
+    [SerializeField] private System.Collections.Generic.List<WeightedBodyTemplate> starPool = new();
+    [SerializeField] private int minPlanets = 2, maxPlanets = 4;
+    [SerializeField] private System.Collections.Generic.List<WeightedBodyTemplate> planetPool = new();
+    [SerializeField] private int maxMoonsPerPlanet = 2;
+    [SerializeField, UnityEngine.Range(0f, 1f)] private float moonChance = 0.5f;
+    [SerializeField] private System.Collections.Generic.List<WeightedBodyTemplate> moonPool = new();
+    [SerializeField] private int minBelts = 0, maxBelts = 1;
+    [SerializeField] private System.Collections.Generic.List<WeightedBodyTemplate> beltPool = new();
+    [SerializeField] private int minStations = 0, maxStations = 1;
+    [SerializeField] private System.Collections.Generic.List<WeightedBodyTemplate> stationPool = new();
+    [SerializeField] private int minPointsOfInterest = 1, maxPointsOfInterest = 3;
+    [SerializeField] private System.Collections.Generic.List<WeightedBodyTemplate> pointOfInterestPool = new();
+    [SerializeField] private float firstOrbitRadiusM = 3000f;
+    [SerializeField] private float orbitSpacingMinM = 2000f, orbitSpacingMaxM = 3000f;
+    [SerializeField] private double orbitPeriodAtReferenceS = 3600.0;   // Kepler-lite: T = Tref·(a/aref)^1.5
+    [SerializeField] private float orbitReferenceRadiusM = 4000f;
+    [SerializeField] private float moonOrbitMinM = 600f, moonOrbitMaxM = 1500f;   // added to the planet radius
+    [SerializeField] private double moonPeriodAtReferenceS = 600.0;
+    [SerializeField] private float moonReferenceRadiusM = 1000f;
+    [SerializeField] private float stationRadiusMinM = 2500f, stationRadiusMaxM = 9000f;
+    [SerializeField] private float pointOfInterestRadiusMinM = 2000f, pointOfInterestRadiusMaxM = 12000f;
+    [SerializeField] private float minBodySeparationM = 1500f;
+    [SerializeField] private float laneRingMarginM = 3000f;
+    [SerializeField] private float minLaneRingRadiusM = 8000f;
+    [SerializeField] private float extentMarginM = 2000f;              // ExtentM = lane ring radius + this
+    [SerializeField] private int dangerMin = 0, dangerMax = 1;          // 0..3
+}
+
+[ContentIdPrefix("starsys_")]
+[UnityEngine.CreateAssetMenu(menuName = "Game/Content/World/Authored Star System", fileName = "starsys_new")]
+public sealed class AuthoredStarSystemDefinition : ContentDefinition
+{
+    [SerializeField] private string displayName;
+    [SerializeField] private UnityEngine.Vector2 positionLy;           // galaxy frame
+    [SerializeField] private StarSystemTemplateDefinition template;    // supplies orbit/period/lane-ring parameters
+    [SerializeField] private BodyTemplateDefinition star;
+    [SerializeField] private System.Collections.Generic.List<AuthoredBody> bodies = new();
+    [SerializeField] private bool hiddenUntilKnown, isStory, isHub, noEncounters;
+    [SerializeField] private bool connectProcedurally;                  // joins the procedural lane graph
+    [SerializeField, UnityEngine.Range(0, 3)] private int danger;
+    [SerializeField] private string startBodyKey;                       // start star system only: spawn near this body
+    [SerializeField] private UnityEngine.Vector3 startOffsetM = new UnityEngine.Vector3(0f, 0f, -400f); // from that body at UniversalTime 0
+    [SerializeField] private float startYawDegrees;
+}
+
+[ContentIdPrefix("body_")]
+[UnityEngine.CreateAssetMenu(menuName = "Game/Content/World/Body Template", fileName = "body_new")]
+public sealed class BodyTemplateDefinition : ContentDefinition
+{
+    [SerializeField] private string displayName;
+    [SerializeField, UnityEngine.TextArea(2, 5)] private string description;
+    [SerializeField] private BodyRole role;
+    [SerializeField] private float radiusMinM = 100f, radiusMaxM = 100f;  // visual/collider radius (celestials) or bounding radius before a grid exists
+    [SerializeField] private BodyVisualDefinition visual;
+    [SerializeField] private StarClass starClass;                          // Star only
+    [SerializeField] private bool hasCollider = true;                      // Star/Planet/Moon: static sphere collider
+    [SerializeField] private bool canHaveMoons;                            // Planet only
+    [SerializeField] private InteractionKind interaction;
+    [SerializeField] private float interactionDistanceM = 150f;           // measured to the collider surface (SPEC-31 R10)
+    [SerializeField] private string interactPrompt;                        // e.g. "Dock"; "" = none
+    [SerializeField] private string storyTag;                              // optional narrative location tag, snake_case
+    [SerializeField] private StructureSource structureSource;
+    [SerializeField] private ShipBlueprintDefinition blueprint;             // structureSource == Blueprint
+    [SerializeField] private ProceduralShapeParams shape;                   // structureSource == ProceduralShape
+    [SerializeField] private bool destructible = true;                     // false: SPEC-13 DamageImmune (§10 Q15)
+    [SerializeField] private float t2LoadDistanceM = 6000f;                // SPEC-31 tier T2, measured to the bounding sphere
+    // Belt only
+    [SerializeField] private float beltWidthM = 2000f;
+    [SerializeField] private float sectorSizeM = 500f;
+    [SerializeField] private int asteroidsPerSectorMin = 2, asteroidsPerSectorMax = 6;   // max ≤ 8
+    [SerializeField] private float asteroidRadiusMinM = 4f, asteroidRadiusMaxM = 18f;
+    [SerializeField] private BlockDefinition asteroidBlock;
+    [SerializeField] private float asteroidNoiseAmplitude = 0.25f, asteroidNoiseFrequency = 0.15f;
+}
+
+[ContentIdPrefix("bodyvis_")]
+[UnityEngine.CreateAssetMenu(menuName = "Game/Content/World/Body Visual", fileName = "bodyvis_new")]
+public sealed class BodyVisualDefinition : ContentDefinition
+{
+    [SerializeField] private UnityEngine.Mesh mesh;                // placeholder; centred at the origin
+    [SerializeField] private float meshRadius = 0.5f;              // radius of `mesh` in mesh units (Unity sphere = 0.5)
+    [SerializeField] private UnityEngine.Material material;        // shared placeholder material (never instanced)
+    [SerializeField] private UnityEngine.Color baseColor = UnityEngine.Color.gray;  // per-instance material property
+    [SerializeField] private UnityEngine.Color emissionColor = UnityEngine.Color.black;
+    [SerializeField] private bool castShadows;
+    [SerializeField] private bool hideWhenGridPresent = true;      // impostor of a voxel body
+    [SerializeField] private UnityEngine.Sprite mapIcon;
+    [SerializeField] private string mapColorToken = "--color-map-body";   // USS token for map UI (SPEC-61)
+}
+```
+
+`baseColor`/`emissionColor` are art data for placeholder materials (per-instance material properties), not UI colours; UI uses `mapColorToken` only (conventions §4.2).
+
+Code blocks above omit `using UnityEngine;` and `using Game.Data.Definitions;`; the files include them.
+
+### 4.4 Galaxy definition (public contract, regenerated, never saved)
+
+Folder `Assets/Game/Galaxy/Data/`, namespace `Game.Galaxy.Data`.
+
+```csharp
+/// <summary>One star system in the galaxy frame. Blittable. Implements SPEC-30 §4.4.</summary>
+public struct StarSystemDef
+{
+    public StarSystemId Id;
+    public Unity.Mathematics.double2 PositionLy;
+    public ulong Seed;                 // StableHash.Combine(galaxySeed, Id.Value)
+    public ushort TemplateIndex;       // index into GalaxyDef.Templates; NoIndex for authored
+    public ushort AuthoredIndex;       // 0 = procedural; else 1 + index into GalaxyDef.Authored
+    public ushort StarTemplateIndex;   // index into GalaxyDef.BodyTemplates (rolled or authored star)
+    public StarSystemFlags Flags;
+    public byte Danger;                // 0..3
+    public int FirstAdjacency;         // first index into GalaxyDef.Adjacency
+    public ushort LaneCount;           // number of adjacency entries
+}
+
+/// <summary>A lane between two star systems. A.Value &lt; B.Value always.</summary>
+public struct LaneDef
+{
+    public StarSystemId A, B;
+    public float LengthLy;
+    public Game.Data.Definitions.LaneKind Kind;
+    public LaneFlags Flags;
+    public ushort GateIndex;           // 0 = ungated; else 1 + index into GalaxyDef.LaneGates
+    public ushort GateTemplateA;       // body template index of the gate in A (GalaxyDef.BodyTemplates)
+    public ushort GateTemplateB;       // body template index of the gate in B
+}
+
+/// <summary>Managed lane gate condition (only authored lanes are gated in v1).</summary>
+public sealed class LaneGateSpec
+{
+    public Game.Data.Logic.ConditionRef Condition;
+    public string LockedMessage;
+}
+
+/// <summary>The generated galaxy. Owns native memory (Allocator.Persistent); disposed by GalaxyService.</summary>
+public sealed class GalaxyDef : System.IDisposable
+{
+    public ulong Seed { get; }
+    public int GeneratorVersion { get; }
+    public ulong Hash { get; }                                       // GalaxyHash.Compute, §5.4
+    public Unity.Collections.NativeArray<StarSystemDef> StarSystems; // sorted by Id.Value ascending
+    public Unity.Collections.NativeArray<LaneDef> Lanes;             // sorted by (A.Value, B.Value)
+    public Unity.Collections.NativeArray<int> Adjacency;             // lane indices; per star system sorted by neighbour Id.Value
+    public Unity.Collections.NativeHashMap<uint, int> IndexById;     // StarSystemId.Value → index in StarSystems
+    public Unity.Collections.NativeArray<BodyTemplateParams> BodyTemplateParams; // index = body template index
+    public Unity.Collections.NativeArray<AuthoredBodyParams> AuthoredBodies;     // all authored bodies, grouped
+    public Unity.Collections.NativeArray<int2> AuthoredBodyRanges;   // per authored star system: (start, count) into AuthoredBodies
+    public Unity.Collections.NativeArray<StarSystemTemplateParams> TemplateParams; // index = TemplateIndex; authored systems use AuthoredTemplateParams
+    public Unity.Collections.NativeArray<StarSystemTemplateParams> AuthoredTemplateParams; // index = AuthoredIndex - 1
+    public System.Collections.Generic.IReadOnlyList<StarSystemTemplateDefinition> Templates { get; }   // templatePool order
+    public System.Collections.Generic.IReadOnlyList<AuthoredStarSystemDefinition> Authored { get; }     // sorted by ID (ordinal)
+    public System.Collections.Generic.IReadOnlyList<LaneGateSpec> LaneGates { get; }
+    public System.Collections.Generic.IReadOnlyList<BodyTemplateDefinition> BodyTemplates { get; }      // catalog.All<BodyTemplateDefinition>() order
+    public StarSystemId StartStarSystem { get; }
+
+    public bool TryGetIndex(StarSystemId id, out int index);
+    public ref readonly StarSystemDef Get(StarSystemId id);          // KeyNotFoundException if absent
+    public int LaneCountOf(StarSystemId id);
+    public int LaneIndexOf(StarSystemId id, int adjacencySlot);      // 0 ≤ adjacencySlot < LaneCount
+    public static StarSystemId Neighbour(in LaneDef lane, StarSystemId self); // the other end
+    public bool TryFindLane(StarSystemId a, StarSystemId b, out int laneIndex);
+    public ushort BodyTemplateIndexOf(BodyTemplateDefinition def);  // NoIndex if not in BodyTemplates
+    public void Dispose();                                           // safe to call twice
+}
+```
+
+Blittable parameter structs (copied from definitions by `GalaxyDefBuilder`, §5.1; same folder):
+
+```csharp
+public struct WeightedIndex { public ushort Index; public float Weight; public int MaxCount; }   // Index into BodyTemplates
+
+public struct StarSystemTemplateParams
+{
+    public int MinPlanets, MaxPlanets, MaxMoonsPerPlanet, MinBelts, MaxBelts, MinStations, MaxStations, MinPois, MaxPois, DangerMin, DangerMax;
+    public float MoonChance, FirstOrbitRadiusM, OrbitSpacingMinM, OrbitSpacingMaxM, OrbitReferenceRadiusM,
+                 MoonOrbitMinM, MoonOrbitMaxM, MoonReferenceRadiusM, StationRadiusMinM, StationRadiusMaxM,
+                 PoiRadiusMinM, PoiRadiusMaxM, MinBodySeparationM, LaneRingMarginM, MinLaneRingRadiusM, ExtentMarginM;
+    public double OrbitPeriodAtReferenceS, MoonPeriodAtReferenceS;
+    public int2 StarPool, PlanetPool, MoonPool, BeltPool, StationPool, PoiPool;  // (start, count) into GalaxyDef.PoolEntries
+}
+// GalaxyDef also has: public NativeArray<WeightedIndex> PoolEntries;  (all pools of all templates, concatenated)
+
+public struct BodyTemplateParams
+{
+    public Game.Data.Definitions.BodyRole Role;
+    public float RadiusMinM, RadiusMaxM, BeltWidthM;
+    public byte CanHaveMoons;              // 0/1
+}
+
+public struct AuthoredBodyParams
+{
+    public ulong LocalKey;                 // BodyId(role, slot, subSlot) of this entry; Moon SubSlot = index among the planet's moons in list order
+    public ulong ParentKey;                // 0 = star
+    public ushort TemplateIndex;
+    public Game.Data.Definitions.OrbitMode Mode;
+    public float OrbitRadiusM, PhaseRad, Eccentricity, PeriodOverrideS, RadiusOverrideM, YawRad;
+}
+```
+
+### 4.5 Star-system content (public contract, regenerated, never saved)
+
+```csharp
+public struct OrbitElements
+{
+    public Game.Data.Definitions.OrbitMode Mode;
+    public double RadiusM;          // Fixed: distance from parent; Circular/Elliptic: semi-major axis
+    public double Eccentricity;     // Elliptic only, 0 .. 0.3
+    public double PeriodS;          // Circular/Elliptic, > 0
+    public double PhaseRad;         // angle (Fixed, Circular) or mean anomaly (Elliptic) at UniversalTime 0
+    public double ArgPeriapsisRad;  // Elliptic only
+}
+
+public struct BodySpec
+{
+    public BodyId Id;
+    public ulong ParentKey;         // 0 = star-system root; Moon: LocalKey of its planet; StorySpawn: anchor key or 0
+    public ushort TemplateIndex;    // GalaxyDef.BodyTemplates (after replacements)
+    public ushort LaneIndex;        // LaneGate: index into GalaxyDef.Lanes; else NoIndex
+    public OrbitElements Orbit;
+    public OrbitElements ParentOrbit; // copy of the parent's orbit (Moon/StorySpawn with parent), Mode Fixed + Radius 0 otherwise
+    public float RadiusM;           // celestial radius or voxel-body bounding radius
+    public float YawRad;
+    public float BeltInnerRadiusM, BeltOuterRadiusM;  // Belt only (ring around the star), else 0
+    public ulong Seed;              // StableHash.Combine(StarSystemDef.Seed, Id.LocalKey)
+    public BodyStateFlags State;
+}
+
+/// <summary>Bodies of one star system: generated (§5.5), then deltas applied (§5.6). Owns native memory.</summary>
+public sealed class StarSystemContent : System.IDisposable
+{
+    public StarSystemId Id { get; }
+    public Unity.Collections.NativeList<BodySpec> Bodies;   // Allocator.Persistent, sorted by Id.LocalKey ascending
+    public double LaneRingRadiusM { get; internal set; }
+    public double ExtentM { get; internal set; }
+    public ulong GeneratedHash { get; internal set; }        // StarSystemContentHash over Bodies before deltas
+    public bool TryFind(ulong localKey, out int index);       // binary search
+    public void Dispose();
+}
+
+public static class OrbitMath   // Burst-compatible static methods
+{
+    public static double3 LocalPosition(in OrbitElements o, double t);   // relative to parent, Y = 0
+    public static double3 LocalVelocity(in OrbitElements o, double t);
+    public static double3 Position(in BodySpec b, double t);             // star-system frame: parent + local
+    public static double3 Velocity(in BodySpec b, double t);
+}
+```
+
+### 4.6 Deltas and galaxy state (public contract, saved)
+
+```csharp
+public struct StorySpawnRecord                 // managed (ContentId); never in ECS data
+{
+    public Game.Core.ContentId Template;       // body template ID
+    public ulong AnchorBodyKey;                // 0 = position relative to the star
+    public Unity.Mathematics.double3 OffsetM;  // from the anchor's position (XZ used; Y ignored)
+    public float YawRad;
+    public bool Removed;                       // removal keeps the index (slot stability)
+}
+public struct ReplacementRecord { public ulong BodyKey; public Game.Core.ContentId Template; }
+
+public sealed class StructureDiffRecord : System.IDisposable
+{
+    public ulong BodyKey;
+    public uint Revision;                      // VoxelGrid.Revision when captured
+    public Game.Voxel.VoxelStructure Structure; // owned; full structure in M3 (brick diffs: GAL-016, M4)
+    public void Dispose();
+}
+
+/// <summary>Saved changes to one generated star system. Implements SPEC-30 §4.6.</summary>
+public sealed class StarSystemDelta : System.IDisposable
+{
+    public StarSystemDelta(StarSystemId id);
+    public StarSystemId StarSystem { get; }
+    public uint VisitCount { get; }
+    public System.Collections.Generic.IReadOnlyList<ulong> Destroyed { get; }          // sorted ascending, unique
+    public System.Collections.Generic.IReadOnlyList<ulong> Interacted { get; }         // sorted ascending, unique
+    public System.Collections.Generic.IReadOnlyList<StorySpawnRecord> StorySpawns { get; } // append-only; index = slot
+    public System.Collections.Generic.IReadOnlyList<ReplacementRecord> Replacements { get; } // sorted by BodyKey, unique
+    public System.Collections.Generic.IReadOnlyList<StructureDiffRecord> StructureDiffs { get; } // sorted by BodyKey, unique
+
+    public void IncrementVisit();
+    public bool MarkDestroyed(ulong bodyKey);              // false if already present
+    public bool MarkInteracted(ulong bodyKey);
+    public int AddStorySpawn(in StorySpawnRecord r);       // returns slot; throws when Count == 65535
+    public bool RemoveStorySpawn(int slot);                // sets Removed; false if already removed or out of range
+    public void SetReplacement(ulong bodyKey, Game.Core.ContentId template);   // insert or overwrite
+    public void SetStructure(ulong bodyKey, uint revision, Game.Voxel.VoxelStructure s); // takes ownership; disposes the previous one
+    public bool RemoveStructure(ulong bodyKey);            // disposes it
+    public bool TryGetStructure(ulong bodyKey, out StructureDiffRecord r);
+    public bool IsEmpty { get; }                           // VisitCount == 0 and all lists empty
+    public void Dispose();                                 // disposes structures
+}
+
+public struct PlayerLocation
+{
+    public StarSystemId StarSystem;
+    public Unity.Mathematics.double3 PositionM;            // star-system frame (UniversePosition)
+    public float YawRad;
+}
+
+/// <summary>Everything the galaxy saves. Held by GameSession (SPEC-01); restored in place.</summary>
+public sealed class GalaxyState : System.IDisposable
+{
+    public ulong Seed;
+    public int GeneratorVersion;
+    public StarSystemId CurrentStarSystem;
+    public bool HasPlayerLocation;
+    public PlayerLocation PlayerLocation;
+    public StarSystemId RouteDestination;                 // written by SPEC-32
+    public System.Collections.Generic.IReadOnlyList<uint> Known { get; }    // sorted ascending
+    public System.Collections.Generic.IReadOnlyList<uint> Visited { get; }  // sorted ascending
+    public bool AddKnown(StarSystemId id); public bool AddVisited(StarSystemId id);
+    public bool IsKnown(StarSystemId id); public bool IsVisited(StarSystemId id);
+    public StarSystemDelta GetOrCreateDelta(StarSystemId id);
+    public bool TryGetDelta(StarSystemId id, out StarSystemDelta d);
+    public System.Collections.Generic.IEnumerable<StarSystemDelta> DeltasSorted();   // ascending StarSystemId, skips IsEmpty
+    public void Clear();                                  // disposes deltas, resets every field to default
+    public void Dispose();
+}
+```
+
+`Game.Galaxy` may reference `Game.Voxel` (architecture §3), so `VoxelStructure` is allowed in `StructureDiffRecord`; it is managed and never enters ECS data.
+
+### 4.7 ECS components and events (public contract)
+
+Folder `Assets/Game/Galaxy/Components/` (namespace `Game.Galaxy.Components`) and `Assets/Game/Galaxy/Events/` (namespace `Game.Galaxy.Events`; a new folder name, reason: event structs consumed by Presentation and App that are neither components nor services).
+
+```csharp
+/// <summary>Star-system-frame position (architecture §6.5). On every persistent root entity. Synced by OriginRebaseSystem.</summary>
+public struct UniversePosition : IComponentData { public Unity.Mathematics.double3 Value; }
+
+/// <summary>Singleton. Written only by OriginRebaseSystem.</summary>
+public struct FrameOrigin : IComponentData
+{
+    public Unity.Mathematics.double3 OriginInStarSystem;   // binding (architecture §6.5)
+    public StarSystemId StarSystem;                        // star system this frame belongs to; None before the first load
+    public uint ShiftSequence;                             // +1 on every rebase (threshold or request)
+    public Unity.Mathematics.float3 LastShiftDelta;        // newLocal = oldLocal + delta for the last threshold rebase; zero for requests
+    public byte LastShiftChangedStarSystem;                // 1 when the last rebase came from a request with a different star system
+    public uint AppliedRequestSerial;                      // Serial of the last OriginRebaseRequest applied
+}
+
+/// <summary>Enableable, on the FrameOrigin entity. Written only by GalaxyService.RequestOriginReset; consumed (disabled) by OriginRebaseSystem.</summary>
+public struct OriginRebaseRequest : IComponentData, IEnableableComponent
+{
+    public Unity.Mathematics.double3 NewOrigin;
+    public StarSystemId StarSystem;
+    public uint Serial;                                    // monotonically increasing, starts at 1
+}
+
+/// <summary>Shared, low cardinality (≤ 2 values). On every star-system-owned entity: grid roots, bricks, functional entities, body anchors. Never on the player ship or its children.</summary>
+public struct StarSystemMember : ISharedComponentData { public StarSystemId Id; }
+
+/// <summary>Singleton on the FrameOrigin entity. Managed-event queue drained by GalaxyFrameTicker (§5.8). Allocated in OriginRebaseSystem.OnCreate, disposed in OnDestroy.</summary>
+public struct OriginShiftedQueue : IComponentData { public Unity.Collections.NativeQueue<OriginShifted> Value; }
+```
+
+```csharp
+namespace Game.Galaxy.Events
+{
+    /// <summary>Raised on every rebase (architecture §6.5). Same-frame consumers read FrameOrigin.ShiftSequence/LastShiftDelta instead (§5.10).</summary>
+    public readonly struct OriginShifted
+    {
+        public readonly Unity.Mathematics.float3 Delta;    // binding; zero when StarSystemChanged == 1 or for a request rebase
+        public readonly byte StarSystemChanged;            // 1: everything local was replaced; consumers reset (camera cut, clear trails)
+        public readonly StarSystemId StarSystem;
+        public readonly uint Sequence;                     // FrameOrigin.ShiftSequence after the rebase
+        public OriginShifted(Unity.Mathematics.float3 delta, byte changed, StarSystemId sys, uint seq) { Delta = delta; StarSystemChanged = changed; StarSystem = sys; Sequence = seq; }
+    }
+}
+```
+
+### 4.8 Managed services and interfaces (public contract)
+
+Folder `Assets/Game/Galaxy/Services/`, namespace `Game.Galaxy.Services`.
+
+```csharp
+public readonly struct GalaxyFrameContext
+{
+    public readonly Unity.Entities.EntityManager EntityManager;
+    public readonly double UniversalTime;    // SimClock.UniversalTime
+    public readonly uint Tick;               // SimClock.Tick
+    public readonly float UnscaledDeltaTime; // UnityEngine.Time.unscaledDeltaTime, clamped to 0.1
+    public readonly int FrameCount;          // UnityEngine.Time.frameCount
+}
+
+/// <summary>A Galaxy managed service that needs one call per frame. Called by GalaxyFrameTicker.</summary>
+public interface IGalaxyFrameTick { int TickOrder { get; } void Tick(in GalaxyFrameContext ctx); }
+
+/// <summary>Registry of IGalaxyFrameTick. Constructed by SPEC-01 before every Galaxy service; ticked by GalaxyServicesBridgeSystem.</summary>
+public sealed class GalaxyFrameTicker
+{
+    public void Register(IGalaxyFrameTick t);     // idempotent
+    public void Unregister(IGalaxyFrameTick t);
+    public void Tick(in GalaxyFrameContext ctx);  // order: TickOrder ascending, then type full name (ordinal); per-service try/catch → GameLog.Error, others still run
+}
+
+/// <summary>Implemented by SPEC-32 (TravelService). Lane availability for the map and routes.</summary>
+public interface ILaneAccess
+{
+    bool IsLaneOpen(int laneIndex);               // gate condition true (ungated lanes: always true)
+    string GetLockedMessage(int laneIndex);       // "" when open
+    int GetFuelCost(int laneIndex);
+}
+
+/// <summary>Implemented by SPEC-33. Owner faction of a star system (0 = none).</summary>
+public interface IStarSystemOwnership { byte GetOwnerFaction(StarSystemId id); string GetOwnerColorToken(StarSystemId id); }
+
+/// <summary>Implemented by SPEC-31 (StarSystemLoader). Lets delta writes reach the loaded star system.</summary>
+public interface IGalaxyLiveDeltaSink
+{
+    void OnBodyDeltaChanged(BodyId body);         // replacement / story spawn added or removed in a loaded star system
+    void FlushStructures();                       // capture damaged body grids into deltas now (called before save)
+}
+
+/// <summary>Owner of GalaxyDef, star-system content cache and world commands. Implements SPEC-30 §5.8.</summary>
+public sealed class GalaxyService : System.IDisposable, IGalaxyFrameTick
+{
+    public GalaxyService(Game.Data.Services.ContentCatalog catalog, GalaxyState state, Unity.Entities.World world, GalaxyFrameTicker ticker);
+    public int TickOrder => 0;
+    public GalaxyDef Galaxy { get; }                   // null until NewGame/OnSessionRestored
+    public GalaxyState State { get; }
+    public GalaxyGenerationDefinition Definition { get; }  // the single GalaxyGenerationDefinition in the catalog
+    public int GenerationCount { get; }                // galaxy generations since construction (R9 test hook)
+    public int ContentGenerationCount(StarSystemId id);  // content generations of `id` since the last NewGame/restore (R9)
+
+    // Lifecycle (called by SPEC-01)
+    public void NewGame(ulong seed);                   // seed is ignored when Definition.UseFixedSeed
+    public void OnSessionRestored();                   // after GameSession restored GalaxyState in place
+
+    // Content
+    public JobHandle PrefetchContent(StarSystemId id); // schedules generation; no-op if cached or scheduled
+    public StarSystemContent GetContent(StarSystemId id);   // completes prefetch or generates now; applies deltas; cached
+    public void ReleaseContent(StarSystemId id);       // disposes the cache entry
+    public void SetLiveDeltaSink(IGalaxyLiveDeltaSink sink);
+    public void RequestOriginReset(StarSystemId id, double3 newOrigin); // enables OriginRebaseRequest with Serial+1
+    public uint LastOriginRequestSerial { get; }
+
+    // Queries
+    public bool TryResolveStarSystem(Game.Core.ContentId authoredId, out StarSystemId id);
+    public bool TryResolveBody(Game.Core.ContentId authoredStarSystem, string bodyKey, out BodyId id);
+    public BodyTemplateDefinition GetBodyTemplate(ushort templateIndex);
+    public string GetStarSystemName(StarSystemId id);  // §5.7
+    public string GetBodyName(BodyId id);              // authored override, else template display name + " " + roman/letter suffix (§5.7)
+    public string GetLocationKey(BodyId id);           // "<starsys id>/<body key>" for authored bodies, else "<ss:XXXXXXXX>/<role>:<slot>.<subslot>"
+    public bool CapturePlayerLocation();               // reads PlayerShip UniversePosition + yaw into State; false when no player ship
+
+    // World commands (narrative effects reach these through ILogicContext in Game.App)
+    public void ReplaceBody(BodyId body, Game.Core.ContentId template);
+    public BodyId AddStorySpawn(StarSystemId sys, Game.Core.ContentId template, BodyId anchor, double3 offsetM, float yawRad);
+    public bool RemoveStorySpawn(BodyId storySpawn);
+    public bool MarkBodyDestroyed(BodyId body);
+    public bool MarkBodyInteracted(BodyId body);
+    public bool IsBodyDestroyed(BodyId body);
+    public void Reveal(StarSystemId id);               // Known += id (also hidden ones)
+    public void MarkVisited(StarSystemId id);          // Visited += id; Known += id and its non-hidden neighbours
+
+    public void Tick(in GalaxyFrameContext ctx);       // drains OriginShiftedQueue → EventBus<OriginShifted>
+    public void Dispose();                             // disposes GalaxyDef and cached content
+}
+```
+
+`GalaxyMapModel` (§5.12) and `GalaxySaveParticipant` (§5.11) are in the same folder.
