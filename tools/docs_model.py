@@ -13,6 +13,14 @@ MILESTONE_RANK = {"M0": 0, "M1": 1, "M2": 2, "M3": 3, "M4": 4, "A0": 0, "A1": 3,
 MILESTONE_ORDER = ["M0", "M1", "M2", "M3", "M4", "A0", "A1", "A2"]
 STATUSES = ["todo", "in-progress", "blocked", "review", "done", "dropped"]
 
+# Task tiers (docs/04-workflow.md §7). "frontier" tasks are reserved for frontier-class models (Claude Opus / GPT Astra class)
+# at their highest reasoning setting, and need an independent frontier review before `done`. "standard" tasks may be taken
+# by standard-class models (Claude Sonnet / GPT Sol class) or better.
+TIERS = ["frontier", "standard"]
+# Model names that may NOT own a frontier task (matched case-insensitively against the "(model)" part of Owner).
+NON_FRONTIER_MODEL_RE = re.compile(r"sonnet|haiku|\bsol\b|mini|nano|flash|lite|small", re.I)
+OWNER_RE = re.compile(r"^(?P<who>[^()]+?)\s*\((?P<model>[^()]+)\)\s*$")
+
 TASK_RE = re.compile(r"^###\s+([A-Z]{2,4}-\d{3})\s+[—-]+\s+(.+?)\s*$")
 FIELD_RE = re.compile(r"^-\s+\*\*([A-Za-z ]+):\*\*\s*(.*)$")
 SPEC_FILE_RE = re.compile(r"^SPEC-(\d{2})-[\w-]+\.md$")
@@ -31,6 +39,11 @@ class Task:
     @property
     def milestone(self):
         return self.fields.get("Milestone", "").strip().split()[0] if self.fields.get("Milestone") else ""
+
+    @property
+    def tier(self):
+        v = self.fields.get("Tier", "").strip()
+        return v.split()[0].strip("*`").lower() if v else ""
 
     @property
     def deps_raw(self):
@@ -122,7 +135,7 @@ def expand_deps(task, specs_by_num, idx):
 
 # ---------------------------------------------------------------- ledger table
 
-LEDGER_COLS = ["ID", "Title", "Spec", "Milestone", "Depends on", "Ready", "Status", "Owner", "Updated", "Commit", "Notes"]
+LEDGER_COLS = ["ID", "Title", "Spec", "Milestone", "Tier", "Depends on", "Ready", "Status", "Owner", "Updated", "Commit", "Notes"]
 BEGIN, END = "<!-- tasks:begin -->", "<!-- tasks:end -->"
 SUM_BEGIN, SUM_END = "<!-- summary:begin -->", "<!-- summary:end -->"
 

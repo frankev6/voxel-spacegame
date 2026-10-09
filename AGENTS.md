@@ -17,6 +17,7 @@ This file is the entry point. It is short on purpose; the binding details are in
 
 ## 2. The non-negotiables
 
+- **Respect the task tier.** Each task is `frontier` (reserved for Claude Opus / GPT Astra class models at their highest reasoning setting, plus an independent frontier review) or `standard` (Claude Sonnet / GPT Sol class may take it). If you are a standard-class model, never claim a `frontier` task. Sign the ledger *Owner* as `name (model)`. Rules: [04-workflow §7](docs/04-workflow.md#7-task-tiers-which-model-may-take-which-task).
 - **Work only on a claimed task from the ledger** whose dependencies are `done`. One task per branch: `task/<ID>-<slug>`, commits `<ID>: <summary>`.
 - **Never invent architecture.** If something isn't specified: architecture → conventions → glossary → the spec's *Open questions* default → otherwise pick the simplest option that keeps every rule, record it as a new open question with your default, and continue. Never silently diverge.
 - **Never change a binding contract** (architecture §6 types, another module's public API, assembly references, packages) without an accepted ADR in `docs/decisions/`.

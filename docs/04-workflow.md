@@ -61,3 +61,54 @@ Some work needs the owner's explicit approval before it starts or ships. These a
 - **Art direction / design system** (SPEC-80): blocks all of SPEC-81 asset production.
 - **Yarn Spinner adoption** (SPEC-41): after the compatibility spike.
 - Any change to [00-vision.md](00-vision.md) scope.
+
+## 7. Task tiers (which model may take which task)
+
+Every task in a spec has a **Tier**. It says how much capability the task needs so that the foundation is built by the strongest workers and nothing subtle ships broken.
+
+| Tier | Who may take it | Extra requirement before `done` |
+|---|---|---|
+| `frontier` | Frontier-class models at their highest reasoning setting (Claude Opus class, GPT Astra class), or a senior human engineer | An **independent review** by a second frontier-class session that did not write the code. Record `reviewed-by: name (model)` in the ledger *Notes*. |
+| `standard` | Standard-class models (Claude Sonnet class, GPT Sol class) or better | The normal Definition of Done |
+
+### 7.1 What makes a task `frontier`
+
+A task is `frontier` if **any** of these hold. When in doubt, it is `frontier`.
+
+- **F1 Foundation.** Other systems build on it and it is expensive to change later: boot and service lifecycle, ECS world and system-group wiring, the voxel cell/brick data model and the cell write path, the damage event pipeline, content baking into blobs, the save container and versioning, origin rebasing, RNG streams, hashing and determinism.
+- **F2 Concurrency and memory safety.** Burst jobs with parallel writers; `NativeStream` / `NativeParallelMultiHashMap` producers and consumers; job dependencies chained across systems; unsafe code (`UnsafeList`, pointers); native allocations that live longer than one frame; deferred disposal.
+- **F3 Silent-corruption algorithms.** Bugs show up as wrong data instead of a crash: connectivity/integrity and splitting, greedy meshing and collider merging, face culling across brick borders, binary encoding/decoding and migrations, deterministic ordering of events.
+- **F4 Budgeted hot paths.** The task owns a number in [06-performance-budgets.md](06-performance-budgets.md): mesher, collider build, damage resolve, spatial hash, debris, streaming.
+- **F5 Cross-module flows.** Three or more systems interact with ordering constraints: scene transitions with streaming, wiring the frame pipeline, saving and loading the whole world.
+- **F6 Design or spike work.** The deliverable is a decision, a format, a vocabulary or a measurement, not code against an exact spec.
+
+Everything else is `standard`. Typical `standard` tasks:
+- transcribing contract types that the spec gives as exact code;
+- definition classes listed field by field;
+- converters with an explicit field map;
+- UI views bound to an existing view model;
+- harness commands;
+- tests for behaviour that is already specified;
+- VFX/audio hookups through existing events;
+- content authoring.
+
+Contract tasks (`-001`) are `standard` when the spec's §4 gives the exact code, and `frontier` when it leaves type design to the implementer.
+
+### 7.2 Rules
+
+1. **A standard-class model must not claim a `frontier` task**, even if it is the only ready task. Pick another task or stop.
+2. **Owner format** in the ledger is `name (model)`, for example `alex (claude-opus-5-5)` or `frank (human)`. `tools/check-docs.py` rejects a `frontier` task owned by a non-frontier model, and a `frontier` task marked `done` without `reviewed-by:`.
+3. **Escalate, don't push through.** If a `standard` task turns out to need a frontier concern, stop: set it `blocked` with *Notes* `needs-frontier: <reason>` and add an Open questions row. Frontier concerns here include:
+   - changing a Burst job's parallel writes;
+   - changing a contract type;
+   - changing a binary format;
+   - changing system ordering;
+   - meeting a perf budget the spec's algorithm doesn't reach.
+4. **What a frontier review checks:**
+   - conformance to the spec's Decisions and Data model;
+   - job safety, with tests run with Burst safety checks and leak detection on (`NativeLeakDetection.Mode = EnabledWithStackTrace`);
+   - determinism;
+   - every row of the spec's edge-case table;
+   - the perf gate measured and logged in *Measurements*;
+   - no hidden allocation in hot paths.
+5. **Who changes a tier.** Only the owner or tech lead changes a task's tier, by editing the spec and giving the reason.

@@ -4,12 +4,15 @@
 
 - **Task rows** are created by `tools/ledger-sync.py` from the specs. Never add or delete rows by hand; edit only **Status, Owner, Updated, Commit, Notes**. *Ready* = every dependency is `done` (recomputed by the sync).
 - **Statuses:** `todo`, `in-progress`, `blocked`, `review`, `done`, `dropped` (meanings in 04-workflow §4).
-- To find work: current milestone in [ROADMAP.md](ROADMAP.md), `Status = todo`, `Ready = yes`.
+- To find work: current milestone in [ROADMAP.md](ROADMAP.md), `Status = todo`, `Ready = yes`, and a **Tier** you may take: `frontier` is reserved for frontier-class models such as Claude Opus or GPT Astra, and needs an independent review; `standard` is open to anyone. See [04-workflow §7](04-workflow.md#7-task-tiers-which-model-may-take-which-task).
+- **Owner** is `name (model)`, e.g. `alex (claude-opus-5-5)` or `frank (human)`. A `frontier` task is `done` only with `reviewed-by: name (model)` in *Notes*.
 - `tools/check-docs.py` fails if a spec task has no row, a status is invalid, or a `done` row has no commit hash.
 
 ## Summary
 
 <!-- summary:begin -->
+| Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
+|---|---|---|---|---|---|---|---|---|
 <!-- summary:end -->
 
 ## Owner gates
@@ -22,6 +25,8 @@
 ## Tasks
 
 <!-- tasks:begin -->
+| ID | Title | Spec | Milestone | Tier | Depends on | Ready | Status | Owner | Updated | Commit | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|---|
 <!-- tasks:end -->
 
 ## Open questions

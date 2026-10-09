@@ -4,7 +4,8 @@
 Checks:
 - every spec has the header table and the 11 template sections;
 - task IDs are unique and use the spec's area code; task -001 exists ("Public contract types");
-- every task has Milestone (valid), Depends on, Do, Files, Acceptance criteria, Tests;
+- every task has Milestone (valid), Tier (valid), Depends on, Do, Files, Acceptance criteria, Tests;
+- frontier-tier tasks are owned only by frontier-class models and are `done` only with "reviewed-by:" in Notes;
 - dependency tokens are valid: own task IDs, another spec's <CODE>-001, or SPEC-NN;
 - no task depends on a task scheduled in a later milestone; no dependency cycles;
 - the ledger has exactly one row per spec task (run tools/ledger-sync.py to fix), valid statuses;
@@ -13,12 +14,13 @@ Checks:
 import os
 import re
 import sys
-from docs_model import (ROOT, MILESTONE_RANK, STATUSES, load_specs, task_index, expand_deps, load_ledger_rows)
+from docs_model import (ROOT, MILESTONE_RANK, STATUSES, TIERS, NON_FRONTIER_MODEL_RE, OWNER_RE,
+                        load_specs, task_index, expand_deps, load_ledger_rows)
 
 REQUIRED_HEADER = ["Status", "Area code", "Module(s)", "Depends on specs", "Milestone"]
 REQUIRED_SECTIONS = ["1. Purpose", "2. Scope", "3. Decisions", "4. Data model", "5. Systems", "6. Public API",
                      "7. Edge cases", "8. Performance", "9. Tasks", "10. Open questions", "11. References"]
-REQUIRED_FIELDS = ["Milestone", "Depends on", "Do", "Files", "Acceptance criteria", "Tests"]
+REQUIRED_FIELDS = ["Milestone", "Tier", "Depends on", "Do", "Files", "Acceptance criteria", "Tests"]
 
 
 def main():
@@ -48,6 +50,8 @@ def main():
             for f in REQUIRED_FIELDS:
                 if f not in t.fields:
                     errors.append(f"{where}: missing '- **{f}:**' line")
+            if "Tier" in t.fields and t.tier not in TIERS:
+                errors.append(f"{where}: invalid tier '{t.fields.get('Tier')}' (use {' or '.join(TIERS)})")
             if t.milestone not in MILESTONE_RANK:
                 errors.append(f"{where}: invalid milestone '{t.milestone}' (use {', '.join(MILESTONE_RANK)})")
             for tok in t.deps:
@@ -102,6 +106,15 @@ def main():
                 errors.append(f"ledger: {tid} has invalid status '{r.get('Status')}' (use {', '.join(STATUSES)})")
             if r.get("Status") == "done" and not r.get("Commit"):
                 errors.append(f"ledger: {tid} is done but has no commit hash")
+            st, owner = r.get("Status"), (r.get("Owner") or "").strip()
+            if st in ("in-progress", "review", "done") and owner:
+                m = OWNER_RE.match(owner)
+                if not m:
+                    errors.append(f"ledger: {tid} owner '{owner}' must be 'name (model)', e.g. 'alex (claude-opus-5-5)' or 'sam (human)'")
+                elif tid in idx and idx[tid][0].tier == "frontier" and NON_FRONTIER_MODEL_RE.search(m.group("model")):
+                    errors.append(f"ledger: {tid} is a frontier task but is owned by a non-frontier model '{m.group('model')}' (04-workflow §7)")
+            if st == "done" and tid in idx and idx[tid][0].tier == "frontier" and "reviewed-by:" not in (r.get("Notes") or ""):
+                errors.append(f"ledger: {tid} is a frontier task marked done without 'reviewed-by: name (model)' in Notes (04-workflow §7)")
 
     # spec map
     arch = open(os.path.join(ROOT, "docs", "01-architecture.md"), encoding="utf-8").read()

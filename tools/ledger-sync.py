@@ -2,7 +2,7 @@
 """Sync docs/LEDGER.md task rows with the specs.
 
 - Adds a row (status `todo`) for every task found in docs/specs/SPEC-*.md.
-- Refreshes Title / Spec / Milestone / Depends on from the spec (the spec is the source of truth for definitions).
+- Refreshes Title / Spec / Milestone / Tier / Depends on from the spec (the spec is the source of truth for definitions).
 - Recomputes Ready (= every dependency is `done`) and the milestone summary.
 - Never deletes rows and never touches Status / Owner / Updated / Commit / Notes, except marking orphans in Notes.
 """
@@ -34,6 +34,7 @@ def main():
                 added += 1
             r["ID"], r["Title"], r["Spec"] = t.id, esc(t.title), f"[{s.num}](specs/{t.spec_file})"
             r["Milestone"] = t.milestone
+            r["Tier"] = t.tier
             r["Depends on"] = ", ".join(t.deps) if t.deps else "—"
             if r.get("Notes", "").startswith("ORPHAN"):
                 r["Notes"] = ""

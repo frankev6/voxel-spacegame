@@ -61,10 +61,13 @@ Each task is small (0.5–3 days), independently reviewable, and ordered so that
 - another spec's **contract task** `<CODE>-001` — in every spec, task `-001` is *"Public contract types"*: it creates all public types of that spec (components, structs, enums, interfaces, definition classes) with no behaviour, so other modules can compile against them early;
 - a whole spec, `SPEC-NN`, meaning "every task of SPEC-NN whose milestone is the same as or earlier than this task's milestone".
 
-Task blocks are machine-read by `tools/ledger-sync.py` and `tools/check-docs.py`. Keep this exact shape: heading `### <ID> — <title>`, then the bullet lines **Milestone**, **Depends on** (comma-separated task IDs in backticks, or `—`), **Do**, **Files**, **Acceptance criteria**, **Tests**.
+**Tier** (see [04-workflow.md §7](../04-workflow.md#7-task-tiers-which-model-may-take-which-task)): `frontier` = reserved for frontier-class models (Claude Opus / GPT Astra class, highest reasoning setting) and needs an independent frontier review; `standard` = standard-class models (Claude Sonnet / GPT Sol class) may take it. Write the tier, then one short reason after a dash.
+
+Task blocks are machine-read by `tools/ledger-sync.py` and `tools/check-docs.py`. Keep this exact shape: heading `### <ID> — <title>`, then the bullet lines **Milestone**, **Tier**, **Depends on** (comma-separated task IDs in backticks, or `—`), **Do**, **Files**, **Acceptance criteria**, **Tests**.
 
 ### XXX-001 — Short imperative title
 - **Milestone:** M1
+- **Tier:** standard — transcribes the types in §4 exactly
 - **Depends on:** — / `YYY-00N`, `XXX-000`
 - **Do:** precise steps.
 - **Files:** paths to create or change.
