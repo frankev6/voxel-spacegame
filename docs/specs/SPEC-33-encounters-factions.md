@@ -1009,13 +1009,13 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 
      Ships come from the **first** formation, grouped by blueprint into entries with `countMin = countMax = count`. Other formations are reported as `ENC-I001` (dropped). Allegiance "Enemy" maps to the hostile factions below and "Neutral" to `faction_vestari`.
   2. **Author** the factions `faction_ark` and `faction_raiders`, plus `faction_xeno` (hostile, locked, −100, map token `--color-faction-xeno`). MIG-012 writes the three legacy factions with the §4.1 fields:
-     - `faction_ark` ("ARK Expedition"): player, locked, owns `starsys_haven`.
+     - `faction_ark` ("ARK Expedition"): player, locked, owns `starsys_ark_start` (SPEC-42 §4.12).
      - `faction_raiders` ("Raiders"):
        - −100, locked, Hostile to every other non-player faction;
        - doctrine `ship_fighter` 1.0 and `ship_striker` 0.6;
        - `defaultAiProfile ai_default`.
-     - `faction_vestari` owns `starsys_relay`.
-  3. **Author the encounters below** (all `faction_raiders` unless stated) and set `starsys_drift` danger 2 in GAL-012's asset.
+     - `faction_vestari` owns `starsys_whisper`.
+  3. **Author the encounters below** (all `faction_raiders` unless stated). `starsys_drift` has danger 2 (SPEC-42 §4.12).
 
   | ID | Kind | Ships (count) | Director | Notes |
   |---|---|---|---|---|
@@ -1041,15 +1041,16 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 - **Tier:** standard — PlayMode tests of specified behaviour
 - **Depends on:** `ENC-008`, `ENC-009`, `ENC-010`, `TST-001`
 - **Do:** PlayMode suite on the M3 content. Each scenario records its frame time in the ledger *Measurements*.
-  - **Raiders:** in `starsys_drift` with a forced roll, raiders spawn, engage the player and a nearby Vestari station shoots them.
-  - **Provocation:** firing at a Vestari station turns Vestari hostile and its turrets fire back.
+  - **Raiders:** in `starsys_drift` with a forced roll, raiders spawn and engage the player.
+  - **Station defence:** `encounter spawn=encounter_raiders` near `whisper_outpost` (Vestari, SPEC-42 §4.12): the outpost's turrets shoot them.
+  - **Provocation:** firing at `whisper_outpost` turns Vestari hostile and its turrets fire back.
   - **Narrative:** `start_combat encounter_whisper_hunter` from a test dialog spawns one ship within 300–600 m; destroying its core publishes `EncounterDefeated` and sets `defeated_encounter_whisper_hunter`.
   - **Persistence:** a save with a pending story encounter loads and respawns it.
   - **Battle:** 30 director-spawned and story ships fighting meet SPEC-21/23's combat gate on the reference machine.
 - **Files:** `Assets/Game/Tests/PlayMode/Galaxy/EncounterIntegrationTests.cs`
 - **Acceptance criteria:**
-  - [ ] All five scenarios pass.
-- **Tests:** `EncounterIntegrationTests.Raiders_EngageAndStationDefends`, `.Provocation_StationRetaliates`, `.StartCombat_DefeatSetsFact`, `.PendingStory_SurvivesSaveLoad`, `.ThirtyShips_CombatGate`.
+  - [ ] All six scenarios pass.
+- **Tests:** `EncounterIntegrationTests.Raiders_Engage`, `.StationDefends`, `.Provocation_StationRetaliates`, `.StartCombat_DefeatSetsFact`, `.PendingStory_SurvivesSaveLoad`, `.ThirtyShips_CombatGate`.
 
 ### ENC-012 — Dev commands and probes
 - **Milestone:** M3

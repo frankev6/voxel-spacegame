@@ -924,14 +924,18 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
      | `item_vanguard_thruster` | Vanguard Thruster | |
   2. **`resource_scrap`** ("Scrap", Resource, Common, price 2, stack 999).
   3. **`loot_salvage_module`**, picks 1: `module_armor_plating` 30, `module_coolant_injector` 30, `module_micro_plating` 30, `module_shield_efficiency` 20, each 1–1.
-  4. **`merchant_haven_outfitter`** ("Haven Outfitters"):
-     - at authored body `starsys_haven/haven_station`;
+  4. **`merchant_station_market`** ("ARK Station Market"; the ID SPEC-40's converter emits for the station hub's TRADE):
+     - at authored body `starsys_ark_start/ark_station` (SPEC-42 §4.12);
      - stock: `resource_fuel` unlimited, `block_hull` 200, `block_hull_angled` 100, `block_thruster_small` 10, `block_cargo_small` 6, `block_shield_small` 4, `block_reactor_small` 2, `weapon_plasma_turret_small` 4, `weapon_small_beam_turret` 2;
      - buys Block, Resource, Module; `restockHours` 24.
-- **Files:** `Assets/Game/Content/Items/*.asset`; `Assets/Game/Content/Loot/loot_salvage_module.asset`; `Assets/Game/Content/Merchants/merchant_haven_outfitter.asset`
+  5. **`merchant_shady_trader`** ("Shady Trader"; emitted for `event_merchant_shady`'s TRADE):
+     - no location (opened only from that dialog through `open_merchant`);
+     - stock: `resource_fuel` 40, `module_coolant_injector` 2, `module_micro_plating` 2, `item_psycho_gas` 3;
+     - buys Resource, Module, Misc; `sellPriceFactor` 1.3, `buyPriceFactor` 0.6, `restockHours` 48.
+- **Files:** `Assets/Game/Content/Items/*.asset`; `Assets/Game/Content/Loot/loot_salvage_module.asset`; `Assets/Game/Content/Merchants/{merchant_station_market,merchant_shady_trader}.asset`
 - **Acceptance criteria:**
   - [ ] Zero ECO errors.
-  - [ ] Every item ID that SPEC-40's converted content uses (`give_item`, `take_item`, `has_item`, `give_loot`) exists.
+  - [ ] Every item, loot table and merchant ID that SPEC-40's converted content uses (`give_item`, `take_item`, `has_item`, `give_loot`, `open_merchant`) exists.
 - **Tests:** `EconomyContentSmokeTests.NarrativeItemsExist`, `.ContentValidates`.
 
 ### ECO-010 — Economy integration scenarios
@@ -939,7 +943,7 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
 - **Tier:** standard — PlayMode tests of specified behaviour
 - **Depends on:** `ECO-006`, `ECO-008`, `ECO-009`, `TST-001`
 - **Do:** Add a PlayMode suite on the M3 content:
-  - **Trade:** dock at `haven_station`, open the outfitter through `TryOpenForBody`, buy 3 hull, sell 10 scrap, close.
+  - **Trade:** dock at `ark_station`, open the station market through `TryOpenForBody`, buy 3 hull, sell 10 scrap, close.
   - **Persistence:** save and load, then the wallet, cargo and merchant stock are identical.
   - **Salvage:** destroy a raider's core, salvage it, and `inv("resource_scrap") > 0`.
   - **Capacity:** commit a design with 1 extra cargo block through SPEC-51's commit path; capacity +5.
