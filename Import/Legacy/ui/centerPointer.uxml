@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement enabled="false" style="flex-grow: 1; justify-content: center; align-items: flex-start; opacity: 1;">
+        <ui:VisualElement name="Container" enabled="true" style="flex-grow: 1; justify-content: center; width: 484px; margin-bottom: 0; align-self: center; align-content: center; flex-direction: column; height: 10px;">
+            <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Game/Visuals/SVG/aim_white_1.svg?fileID=7388822144124034973&amp;guid=6beacc301b563fa4483d83ff958d85f1&amp;type=3#aim_white_1&quot;); width: 12px; height: 12px; min-height: 12px; min-width: 12px; max-width: 12px; max-height: 12px; align-self: center; justify-content: space-between; align-content: center; opacity: 1;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

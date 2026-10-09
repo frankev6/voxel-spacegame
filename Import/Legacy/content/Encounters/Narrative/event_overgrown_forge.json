@@ -1,0 +1,72 @@
+{
+"$path":"Assets/Resources/Encounters/Narrative/event_overgrown_forge.asset",
+"$type":"NarrativeEncounter",
+"$name":"event_overgrown_forge",
+"encounterId":"event_overgrown_forge",
+"isUnique":true,
+"repeatable":false,
+"startingPageId":"start",
+"lootTable":null,
+"presentationMode":"Default",
+"disableInputsMode":false,
+"pages":[
+{
+"id":"start",
+"text":"Massive Vanguard fabricators are rusting here, wrapped in thick, purple vines. The plants seem to be feeding on the residual energy of the machines. The factory is still trying to print something.",
+"localizationKey":"event_overgrown_forge_start_text",
+"imageName":"",
+"imageOverride":null,
+"tags":["terrestrial_jungle"],
+"audioClipName":"",
+"options":[
+{
+"text":"Cut Vines",
+"localizationKey":"event_overgrown_forge_start_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"GoToPage","parameter1":"machine_active","parameter2":""}
+]
+},
+{"text":"Harvest Plants","localizationKey":"event_overgrown_forge_start_opt2","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"ChangeFuel","parameter1":"3","parameter2":""},{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]},
+{
+"text":"Scan Schematic",
+"localizationKey":"event_overgrown_forge_start_opt3",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"SetVariable","parameter1":"blueprint_vanguard_plating","parameter2":"TRUE"},
+{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}
+]
+}
+]
+},
+{
+"id":"machine_active",
+"text":"The machine roars to life. It finishes its job: A single, perfect 'Terraforming Seed.' But the noise attracts the local fauna.",
+"localizationKey":"event_overgrown_forge_machine_active_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{
+"text":"Brace for Impact",
+"localizationKey":"event_overgrown_forge_machine_active_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"SetVariable","parameter1":"item_terra_seed","parameter2":"TRUE"},
+{"type":"StartCombat","parameter1":"encounter_jungle_beasts","parameter2":""}
+]
+}
+]
+}
+]
+}

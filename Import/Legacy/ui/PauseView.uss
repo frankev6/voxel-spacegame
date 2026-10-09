@@ -1,0 +1,17 @@
+.pause-save-row {
+    flex-direction: row;
+    align-items: center;
+    height: 60px;
+    margin-bottom: 5px;
+}
+
+.pause-save-button {
+    flex-grow: 1;
+    height: 60px;
+    -unity-text-align: middle-left;
+}
+
+.pause-save-delete-button {
+    width: 40px;
+    height: 60px;
+}

@@ -1,0 +1,27 @@
+.ship-editor-load-root {
+    flex-grow: 1;
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.ship-editor-load-panel {
+    width: 472px;
+    height: 574px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.ship-editor-load-title {
+    font-size: 20px;
+    -unity-font-style: bold;
+    margin-bottom: 10px;
+    align-self: center;
+}
+
+.ship-editor-load-list {
+    height: 313px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    color: rgb(255, 255, 255);
+}

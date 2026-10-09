@@ -1,0 +1,20 @@
+{
+    "name": "Game.Persistence",
+    "rootNamespace": "Game.Persistence",
+    "references": [
+        "Game.Core",
+        "Game.Data",
+        "Unity.Collections",
+        "Unity.Mathematics",
+        "Unity.Burst"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

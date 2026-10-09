@@ -1,0 +1,12 @@
+{
+"$path":"Assets/Resources/Abilities/ability_speed_boost.asset",
+"$type":"BoostAbilitySO",
+"$name":"ability_speed_boost",
+"<ID>k__BackingField":"2",
+"<Icon>k__BackingField":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_25","type":"Sprite","sub":"spritetest2_transparent_25"},
+"<Description>k__BackingField":"",
+"maxCharges":2,
+"cooldownPerUse":0.5,
+"chargeRechargeTime":3,
+"boostDuration":1
+}

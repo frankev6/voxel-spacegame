@@ -1,0 +1,17 @@
+{
+"$path":"Assets/Resources/Encounters/Combat/encounter_combat_probe_tutorial.asset",
+"$type":"CombatEncounter",
+"$name":"encounter_combat_probe_tutorial",
+"encounterId":"",
+"isUnique":false,
+"repeatable":false,
+"possibleFormations":[
+{
+"ships":[
+{"$ref":"Assets/Resources/Items/Ships/ship_frigate.asset","name":"ship_frigate","type":"ShipItem"},
+{"$ref":"Assets/Resources/Items/Ships/ship_frigate.asset","name":"ship_frigate","type":"ShipItem"},
+{"$ref":"Assets/Resources/Items/Ships/ship_frigate.asset","name":"ship_frigate","type":"ShipItem"}
+]
+}
+]
+}

@@ -1,0 +1,28 @@
+{
+"$path":"Assets/Resources/Galaxies/Solar System Entities/moon_1.asset",
+"$type":"SolarSystemEntity",
+"$name":"moon_1",
+"entityId":"satelite_1",
+"ownerFactionIdOverride":"",
+"prefab":{"$ref":"Assets/Planets of the Solar System 3D/Prefabs/Moon.prefab","name":"Moon","type":"GameObject"},
+"mapIcon":null,
+"color":[0.40000000596046448,0.699999988079071,1,1],
+"description":"This is a placeholder description blah blah blah",
+"encounterPool":{
+"poolName":"",
+"encounters":[
+{"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/event_hollow_moon.asset","name":"event_hollow_moon","type":"NarrativeEncounter"},"probabilityWeight":1}
+]
+},
+"encounterIdOverride":"",
+"autoInteractOnContact":false,
+"orbitType":"Static",
+"orbitSpeedMultiplier":2,
+"showOrbitLine":true,
+"spawnType":"AroundEntity",
+"minOrbitRadius":15,
+"maxOrbitRadius":25,
+"canHaveSatellites":false,
+"spawnRequirement":"",
+"spawnBlocker":""
+}

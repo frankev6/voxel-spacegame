@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles"/>
+    <Style src="project://database/Assets/Game/UI/ShipEditorLoadUI.uss?fileID=7433441132597879392&amp;guid=f1d55ce1f73448239f64e889eb17fe91&amp;type=3#ShipEditorLoadUI"/>
+    <ui:VisualElement class="ship-editor-load-root intel-theme-screen">
+        <ui:VisualElement class="ship-editor-load-panel intel-theme-panel">
+            <ui:Label text="Ship Editor" class="ship-editor-load-title intel-theme-title" />
+            <ui:ListView name="ShipList" class="ship-editor-load-list intel-theme-subpanel" />
+            <ui:VisualElement style="flex-grow: 1; justify-content: flex-end;">
+                <ui:TextField name="ShipNameField" label="Ship Name" style="margin-bottom: 10px;" />
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                    <ui:Button name="LoadButton" text="Load" class="button" style="flex-grow: 1; margin-right: 5px;" />
+                    <ui:Button name="SaveButton" text="Save (Overwrite)" class="button" style="flex-grow: 1; margin-left: 5px; margin-right: 5px;" />
+                    <ui:Button name="SaveTemplateButton" text="Save As Template" class="button" style="flex-grow: 1; margin-left: 5px;" />
+                </ui:VisualElement>
+                <ui:Button name="CloseButton" text="Close" class="button button-danger" style="margin-top: 10px; margin-right: 0;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

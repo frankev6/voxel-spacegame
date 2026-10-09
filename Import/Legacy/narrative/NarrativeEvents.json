@@ -1,0 +1,2147 @@
+{
+  "encounters": [
+    {
+      "id": "event_derelict_salvage",
+      "isUnique": false,
+      "lootTable": "BaseLootTable",
+      "pages": [
+        {
+          "id": "start",
+          "text": "A drifting cruiser, split in half by some massive impact, floats nearby. Sensors detect lingering radiation and valuable scrap.",
+          "image": "image_wreckage",
+          "tags": ["salvage"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Salvage Scrap",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GRANT_LOOT(3); GOTO(salvage_success)",
+              "consume": false
+            },
+            {
+              "text": "Scan for Modules",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RANDOM_BRANCH(40:module_found|60:nothing_found)",
+              "consume": false
+            },
+            {
+              "text": "Leave",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "salvage_success",
+          "text": "You extract useful materials, but the unstable reactor leaks radiation, slightly damaging your hull.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_HULL(-10); DESTROY_ENTITY(); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "module_found",
+          "text": "Deep in the wreckage, you find an intact Weapon Module!",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Success",
+          "options": [
+            {
+              "text": "Take Module",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "ADD_ITEM(500, 1); DESTROY_ENTITY(); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "nothing_found",
+          "text": "The wreckage is picked clean. Nothing of value remains.",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Fail",
+          "options": [
+            {
+              "text": "Leave",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "DESTROY_ENTITY(); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_merchant_shady",
+      "isUnique": false,
+      "lootTable": "BaseLootTable",
+      "pages": [
+        {
+          "id": "start",
+          "text": "A sleek, unmarked vessel hails you. 'Interested in some... undocumented upgrades? No questions asked.'",
+          "image": "image_merchant",
+          "tags": ["trade"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Trade",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "TRADE; GOTO(trade_done)",
+              "consume": false
+            },
+            {
+              "text": "Attack",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "START_COMBAT(encounter_combat_01)",
+              "consume": false
+            },
+            {
+              "text": "Leave",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "trade_done",
+          "text": "'Pleasure doing business.' The ship engages its cloak and vanishes.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_distress_trap",
+      "isUnique": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "A distress beacon pulsates from a debris field. It claims to be a civilian transport out of fuel.",
+          "image": "image_beacon",
+          "tags": ["trap"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Approach to assist",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RANDOM_BRANCH(70:trap_spring|30:real_survivors)",
+              "consume": false
+            },
+            {
+              "text": "Ignore",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "trap_spring",
+          "text": "As you power down weapons to transfer fuel, pirate signatures flare to life all around you! It's a trap!",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Battle Stations!",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "START_COMBAT(encounter_combat_01)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "real_survivors",
+          "text": "You find a small pod with a grateful survivor. They offer a Blueprint in exchange for the fuel.",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Success",
+          "options": [
+            {
+              "text": "Trade Fuel for Blueprint",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_FUEL(-2); ADD_ITEM(500, 1); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Leave them",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_stable_point",
+      "isUnique": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "A fluctuation in the subspace field indicates a stable jump point. However, activating it will require a massive energy discharge from a Warp Core.",
+          "image": "image_portal",
+          "tags": ["portal"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Activate Warp Drive",
+              "showReq": "",
+              "enableReq": "REQ_ITEM(717185106, 1)",
+              "actions": "START_COMBAT(encounter_extraction)",
+              "consume": false
+            },
+            {
+              "text": "Leave",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "demo_station_hub",
+      "isUnique": false,
+      "lootTable": "BaseLootTable",
+      "pages": [
+        {
+          "id": "hub",
+          "text": "Welcome to Nexus Station! The bustling marketplace offers many opportunities.",
+          "image": "image_station",
+          "tags": ["hub", "station"],
+          "audio": "UI_View_Open",
+          "options": [
+            {
+              "text": "Visit Marketplace",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "PUSH_GOTO(market_menu)",
+              "consume": false
+            },
+            {
+              "text": "Station Bar",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "PUSH_GOTO(bar_menu)",
+              "consume": false
+            },
+            {
+              "text": "Research Lab",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "PUSH_GOTO(lab_menu)",
+              "consume": false
+            },
+            {
+              "text": "Mission Control",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "PUSH_GOTO(mission_control)",
+              "consume": false
+            },
+            {
+              "text": "Repair All Ships",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "REPAIR_ALL_SHIPS",
+              "consume": false
+            },
+            {
+              "text": "Visit Hangar Bay",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "OPEN_SHIP_EDITOR",
+              "consume": false
+            },
+            {
+              "text": "Undock",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "market_menu",
+          "text": "The marketplace is filled with vendors hawking exotic wares.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Trade Goods",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "TRADE",
+              "consume": false
+            },
+            {
+              "text": "View Bounties",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "PUSH_GOTO(bounties)",
+              "consume": false
+            },
+            {
+              "text": "Back",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RETURN",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "bounties",
+          "text": "The bounty board lists several active contracts.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Accept Pirate Hunt",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(pirate_bounty, 1); RETURN",
+              "consume": false
+            },
+            {
+              "text": "Accept Hostile Blackbox Contract",
+              "showReq": "REQ_QUEST_STATE(quest_hostile_blackbox, NotAccepted)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.accept, questId=quest_hostile_blackbox|track=true); RETURN",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Generate Bounty Template Mission",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.generate_template, templateId=tmpl_bounty_probe|track=true); RETURN",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Back",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RETURN",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "mission_control",
+          "text": "Mission Control tracks contracts, trigger listeners, and experimental quest chains.",
+          "image": "",
+          "tags": ["mission", "quest", "intel"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Accept Material Turn-In Test",
+              "showReq": "REQ_QUEST_STATE(quest_ark_material_turnin, NotAccepted)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.accept, questId=quest_ark_material_turnin|track=true); RETURN",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Accept Station Data Delivery Test",
+              "showReq": "REQ_QUEST_STATE(quest_station_data_delivery, NotAccepted)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.accept, questId=quest_station_data_delivery|track=true); RETURN",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Accept Boarding Trial Test",
+              "showReq": "REQ_QUEST_STATE(quest_station_boarding_trial, NotAccepted)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.accept, questId=quest_station_boarding_trial|track=true); RETURN",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Start Whisper Chain Storyline",
+              "showReq": "REQ_QUEST_STATE(story_chain_signal_1, NotAccepted)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.accept, questId=story_chain_signal_1|track=true); RETURN",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Accept Fail-State Sandbox",
+              "showReq": "REQ_QUEST_STATE(quest_trigger_fail_test, NotAccepted)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.accept, questId=quest_trigger_fail_test|track=true); RETURN",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Generate Signal Relay Template Mission",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.generate_template, templateId=tmpl_signal_relay|track=true); RETURN",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Generate Material Sweep Template Mission",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.generate_template, templateId=tmpl_material_sweep|track=true); RETURN",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Force Fail Sandbox Quest",
+              "showReq": "REQ_QUEST_ACTIVE(quest_trigger_fail_test)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.fail, questId=quest_trigger_fail_test); RETURN",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Complete Sandbox Quest",
+              "showReq": "REQ_QUEST_ACTIVE(quest_trigger_fail_test)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.complete, questId=quest_trigger_fail_test); RETURN",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Back",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RETURN",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "bar_menu",
+          "text": "The station bar is dimly lit and filled with suspicious characters.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Talk to Shady Figure",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "PLAY_NESTED(bar_shady_man)",
+              "consume": true
+            },
+            {
+              "text": "Random Encounter",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "PLAY_FROM_POOL(bar_encounters)",
+              "consume": false
+            },
+            {
+              "text": "Back",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RETURN",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "lab_menu",
+          "text": "The research lab hums with advanced equipment.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Upgrade Shields",
+              "showReq": "",
+              "enableReq": "REQ_CURRENCY(500)",
+              "actions": "CHANGE_CURRENCY(-500); RETURN",
+              "consume": false
+            },
+            {
+              "text": "View Research",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(research_view)",
+              "consume": false
+            },
+            {
+              "text": "Back",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RETURN",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "research_view",
+          "text": "Current research projects are displayed on the screen.",
+          "image": "",
+          "tags": ["lab"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Contribute Research Points",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_RESEARCH(10); RETURN",
+              "consume": false
+            },
+            {
+              "text": "Back",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RETURN",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "demo_conditional_options",
+      "isUnique": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "You encounter a locked container. Your options depend on your abilities and inventory.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Force it Open (Costs Hull)",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_HULL(-10); GOTO(opened)",
+              "consume": false
+            },
+            {
+              "text": "Use Keycard",
+              "showReq": "",
+              "enableReq": "REQ_ITEM(500, 1)",
+              "actions": "REMOVE_ITEM(500, 1); GOTO(opened)",
+              "consume": false
+            },
+            {
+              "text": "Hack (Requires Skill)",
+              "showReq": "REQ_VAR(has_hacking, TRUE)",
+              "enableReq": "",
+              "actions": "GOTO(opened)",
+              "consume": false
+            },
+            {
+              "text": "Leave",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "opened",
+          "text": "The container opens, revealing valuable cargo!",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Success",
+          "options": [
+            {
+              "text": "Take the Loot",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "ADD_ITEM(500, 3); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "demo_audio_events",
+      "isUnique": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "This encounter demonstrates audio feedback on pages and actions.",
+          "image": "",
+          "tags": [],
+          "audio": "UI_View_Open",
+          "options": [
+            {
+              "text": "Play Success Sound",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "PLAY_AUDIO(UI_Success); GOTO(audio_played)",
+              "consume": false
+            },
+            {
+              "text": "Play Fail Sound",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "PLAY_AUDIO(UI_Fail); GOTO(audio_played)",
+              "consume": false
+            },
+            {
+              "text": "Silent Option",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "audio_played",
+          "text": "You should have heard a sound effect!",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "End Demo",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_territory_friendly_entry",
+      "isUnique": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "Friendly patrol signatures lock onto your ship and then stand down after an encrypted handshake. Local command uplinks fresh intel channels.",
+          "image": "",
+          "tags": ["territory", "friendly"],
+          "audio": "UI_View_Open",
+          "options": [
+            {
+              "text": "Acknowledge Patrol Assignment",
+              "showReq": "REQ_QUEST_ACTIVE(quest_relation_watch)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.add_log, questId=quest_relation_watch|text=Entered allied territory and received patrol assignment.); END(TRUE)",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Request Local Contract",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.generate_template, templateId=tmpl_signal_relay|track=true); END(TRUE)",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Continue Patrol",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_territory_hostile_entry",
+      "isUnique": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "Hostile sensor pings flood your tactical feed as you cross the border. Someone is tracking your vector from the dark side of the system.",
+          "image": "",
+          "tags": ["territory", "hostile"],
+          "audio": "UI_Fail",
+          "options": [
+            {
+              "text": "Mark Contact in Intel",
+              "showReq": "REQ_QUEST_ACTIVE(quest_hostile_blackbox)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.add_log, questId=quest_hostile_blackbox|text=Hostile contact recorded on border entry.); END(TRUE)",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Request Reinforcement Contract",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.generate_template, templateId=tmpl_bounty_probe|track=true); END(TRUE)",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Run Silent",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bar_shady_man",
+      "isUnique": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "A scarred man in a dark corner beckons you over. 'I have information... for a price.'",
+          "image": "image_shady_man",
+          "tags": ["bar"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Pay for Info (100 Scrap)",
+              "showReq": "",
+              "enableReq": "REQ_CURRENCY(100)",
+              "actions": "CUSTOM_ACTION(quest.complete_objective, questId=quest_station_boarding_trial|objectiveId=meet_shady_contact); CHANGE_CURRENCY(-100); GOTO(info_revealed)",
+              "consume": false
+            },
+            {
+              "text": "Debrief Contact for Boarding Trial",
+              "showReq": "REQ_QUEST_ACTIVE(quest_station_boarding_trial)",
+              "enableReq": "",
+              "actions": "SET_VAR(station_shady_truth, revealed); CUSTOM_ACTION(quest.complete_objective, questId=quest_station_boarding_trial|objectiveId=meet_shady_contact); CUSTOM_ACTION(quest.complete_objective, questId=quest_station_boarding_trial|objectiveId=decode_tip); GOTO(info_revealed)",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Threaten Him",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.complete_objective, questId=quest_station_boarding_trial|objectiveId=meet_shady_contact); RANDOM_BRANCH(50:info_revealed|50:bar_fight)",
+              "consume": false
+            },
+            {
+              "text": "Walk Away",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.complete_objective, questId=quest_station_boarding_trial|objectiveId=meet_shady_contact); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "info_revealed",
+          "text": "'There's a hidden cache in the asteroid belt. Coordinates transmitted.'",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Success",
+          "options": [
+            {
+              "text": "Thanks",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(cache_location, asteroid_belt); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Log Debrief to Boarding Trial",
+              "showReq": "REQ_QUEST_ACTIVE(quest_station_boarding_trial)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.add_log, questId=quest_station_boarding_trial|text=Bar contact debrief complete.); END(TRUE)",
+              "consume": false,
+              "style": "quest"
+            }
+          ]
+        },
+        {
+          "id": "bar_fight",
+          "text": "He pulls a knife! Security intervenes before it escalates.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Leave Quickly",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_mystery_signal",
+      "isUnique": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "Your comms array picks up an encrypted signal. It's repeating coordinates nearby.",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Button_Click",
+          "options": [
+            {
+              "text": "Flag as Signal Trace Contract",
+              "showReq": "REQ_QUEST_STATE(quest_signal_trace, NotAccepted)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.accept, questId=quest_signal_trace|track=true); GOTO(signal_source)",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Investigate",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(signal_found, TRUE); GOTO(signal_source)",
+              "consume": false
+            },
+            {
+              "text": "Submit Signal Telemetry (Debug Complete)",
+              "showReq": "REQ_QUEST_ACTIVE(quest_signal_trace)",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(quest.complete, questId=quest_signal_trace); END(TRUE)",
+              "consume": false,
+              "style": "quest"
+            },
+            {
+              "text": "Ignore Signal",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "signal_source",
+          "text": "Following the signal leads to a hidden research station. It appears abandoned... or is it?",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Button_Click",
+          "options": [
+            {
+              "text": "Board the Station",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "PUSH_GOTO(station_interior)",
+              "consume": false
+            },
+            {
+              "text": "Scan From Distance",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RANDOM_BRANCH(60:scan_good|40:scan_bad)",
+              "consume": false
+            },
+            {
+              "text": "Leave",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "station_interior",
+          "text": "The station interior is dark. Emergency lights flash red. You hear strange sounds echoing through the halls.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Search Lab",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "ADD_ITEM(500, 2); RETURN",
+              "consume": false
+            },
+            {
+              "text": "Search Armory",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_CURRENCY(250); RETURN",
+              "consume": false
+            },
+            {
+              "text": "Go Deeper",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(station_deep)",
+              "consume": false
+            },
+            {
+              "text": "Back to Ship",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RETURN",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "station_deep",
+          "text": "Deep inside you find an AI terminal still operational. It offers you a choice.",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Button_Click",
+          "options": [
+            {
+              "text": "Download Data",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(ai_data, TRUE); CHANGE_RESEARCH(25); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Destroy the Terminal",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_HULL(-5); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "scan_good",
+          "text": "Long-range scans reveal the station contains valuable research data.",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Success",
+          "options": [
+            {
+              "text": "Board Now",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "PUSH_GOTO(station_interior)",
+              "consume": false
+            },
+            {
+              "text": "Leave With Scan Data",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_RESEARCH(10); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "scan_bad",
+          "text": "Your scan triggers an automated defense system! Turrets target your ship!",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Fail",
+          "options": [
+            {
+              "text": "Evade!",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RANDOM_BRANCH(70:evade_success|30:evade_fail)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "evade_success",
+          "text": "You dodge the turret fire and escape unscathed.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "evade_fail",
+          "text": "A turret blast grazes your hull before you can escape.",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Fail",
+          "options": [
+            {
+              "text": "Damage Report",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_HULL(-15); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_empty_cargo",
+      "isUnique": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "You find a small cargo pod floating in space. It seems intact.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Open It",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RANDOM_BRANCH(50:cargo_good|30:cargo_trap|20:cargo_empty)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "cargo_good",
+          "text": "The pod contains valuable supplies!",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Success",
+          "options": [
+            {
+              "text": "Take It",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_CURRENCY(150); DESTROY_ENTITY(); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "cargo_trap",
+          "text": "The pod was rigged! It explodes near your hull!",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Fail",
+          "options": [
+            {
+              "text": "Damage Report",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_HULL(-10); DESTROY_ENTITY(); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "cargo_empty",
+          "text": "The pod is empty. Someone got here first.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "DESTROY_ENTITY(); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_fuel_station",
+      "isUnique": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "An automated refueling depot orbits a gas giant. The docking fees are reasonable.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Refuel (50 Scrap)",
+              "showReq": "",
+              "enableReq": "REQ_CURRENCY(50)",
+              "actions": "CHANGE_CURRENCY(-50); CHANGE_FUEL(3); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Quick Top-Off (20 Scrap)",
+              "showReq": "",
+              "enableReq": "REQ_CURRENCY(20)",
+              "actions": "CHANGE_CURRENCY(-20); CHANGE_FUEL(1); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Leave",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_crew_stranded",
+      "isUnique": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "A distress pod from a destroyed vessel floats nearby. Life signs detected inside.",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Button_Click",
+          "options": [
+            {
+              "text": "Rescue Survivor",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_CREW(1); GOTO(rescued)",
+              "consume": false
+            },
+            {
+              "text": "Ignore",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "rescued",
+          "text": "A grateful engineer joins your crew. 'I won't forget this. Let me repay you with my skills.'",
+          "image": "",
+          "tags": [],
+          "audio": "UI_Success",
+          "options": [
+            {
+              "text": "Welcome Aboard",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_singing_storm",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "Your sensors pick up a rhythmic signal coming from inside the gas giant's crushing atmosphere. It's not random static; it's a distress beacon using an outdated Ark encryption code. The source is deep\u2014approaching hull-crush depth.",
+          "image": "",
+          "tags": ["gas_giant"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Dive and Retrieve",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_FUEL(-2); RANDOM_BRANCH(60:success_dive|40:fail_dive)",
+              "consume": false
+            },
+            {
+              "text": "Deploy Drone",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(drone_success)",
+              "consume": false
+            },
+            {
+              "text": "Ignore",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "success_dive",
+          "text": "The pressure screams against your hull, but you snag the object. It's a 'Black Box' from Ark Mission 12. The audio log is terrifying: 'The clouds... they aren't clouds. They are billions of microscopic machines eating the ship.'",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(item_ancient_data_log, TRUE); CHANGE_HULL(-5); SET_VAR(lore_nanite_storms, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "drone_success",
+          "text": "The pressure screams against your hull, but you snag the object. It's a 'Black Box' from Ark Mission 12. The audio log is terrifying: 'The clouds... they aren't clouds. They are billions of microscopic machines eating the ship.'",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(item_ancient_data_log, TRUE); SET_VAR(lore_nanite_storms, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "fail_dive",
+          "text": "Turbulence slams your ship against a pocket of metallic hydrogen. You are forced to emergency ascend before the hull buckles. You lost the signal.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_HULL(-20); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_glass_desert",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "This planet has no atmosphere. The surface is entirely fused glass. It wasn't formed naturally; scanning indicates the planet was 'glassed' by a weapon of impossible heat roughly 1,000 years ago. In the center of a crater, a single Vanguard spire stands untouched.",
+          "image": "",
+          "tags": ["barren_world"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Excavate Spire",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(spire_open)",
+              "consume": false
+            },
+            {
+              "text": "Reflect Sunlight",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(reflection_event)",
+              "consume": false
+            },
+            {
+              "text": "Harvest Glass",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(silence_trap)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "spire_open",
+          "text": "You breach the outer shell. Inside is a perfectly preserved Vanguard terminal. It offers a single weapon schematic\u2014a 'Glass-Cannon' beam.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(blueprint_glass_beam, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "reflection_event",
+          "text": "You align your solar panels to catch the brilliant reflection off the glass surface. Your energy banks surge with power.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_FUEL(5); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "silence_trap",
+          "text": "As you harvest the glass, the ground shatters. Sub-surface 'Glass Worms' (Silence constructs) erupt. They were dormant until you disturbed the seal.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Battle Stations!",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "START_COMBAT(encounter_glass_worm)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_frozen_sentinel",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "A Vanguard warship drifts here, dead in the water. It's covered in ice, but your thermal scans show a faint heat signature in the core. It's not a reactor; it's a biological life sign.",
+          "image": "",
+          "tags": ["derelict"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Board: Bridge",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(bridge_log)",
+              "consume": false
+            },
+            {
+              "text": "Board: Core",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(core_stasis)",
+              "consume": false
+            },
+            {
+              "text": "Salvage Exterior",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_CURRENCY(200); DESTROY_ENTITY(); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "bridge_log",
+          "text": "The bridge logs reveal this ship was on a reconnaissance mission mapping Silence incursion zones. The star charts are invaluable.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Download Charts",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(vanguard_charts, TRUE); CHANGE_RESEARCH(25); DESTROY_ENTITY(); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "core_stasis",
+          "text": "You find a stasis pod. Inside is a human... from your Ark. But he's aged 100 years. He wakes up screaming: 'Don't let me go back! I've seen the loop!' then turns to dust as the pod opens.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(trait_existential_dread, TRUE); CHANGE_CURRENCY(500); DESTROY_ENTITY(); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_silent_city",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "You land in a sprawling metropolis. The buildings are pristine chrome and white stone. Vehicles are parked in the streets. Food is on the tables in cafes. But there are no people. No bodies. No signs of struggle. They just... vanished.",
+          "image": "",
+          "tags": ["terrestrial"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Loot Homes",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "RANDOM_BRANCH(50:food_find|50:trap_echo)",
+              "consume": false
+            },
+            {
+              "text": "Access Network",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(network_truth)",
+              "consume": false
+            },
+            {
+              "text": "Leave",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "food_find",
+          "text": "You scavenge the abandoned homes and find preserved supplies still in their packaging.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Take Supplies",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_CURRENCY(300); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "network_truth",
+          "text": "The logs show the city didn't die. They 'Uploaded.' The entire population transferred their consciousness into a satellite array to escape the Silence. The array is orbiting the planet now.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(poi_satellite_array, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "trap_echo",
+          "text": "You enter a house. A holographic 'Echo' of a family eating dinner triggers. It loops the moment of their disappearance\u2014a flash of black light. Your crew member watching it collapses, their mind partially erased.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_CREW(-1); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_cryo_vault",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "Buried in the ice ring is a vault marked with the symbol of the 'First Ark'\u2014a mission launched 500 years ago that was presumed lost. The airlock is frozen shut.",
+          "image": "",
+          "tags": ["ice_giant"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Melt Seal",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_FUEL(-3); GOTO(vault_enter)",
+              "consume": false
+            },
+            {
+              "text": "Use Explosives",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(vault_damaged)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "vault_enter",
+          "text": "Inside are thousands of genetic samples\u2014embryos of Earth's extinct animals. A custodian AI wakes up. 'Are you the Gardeners? Is it safe to plant yet?'",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Lie: 'Yes, it is safe.'",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(item_seed_bank, TRUE); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Truth: 'No, the galaxy is dying.'",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(item_genetic_stimulants, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "vault_damaged",
+          "text": "The explosion compromises some of the samples, but you gain access. Inside are genetic samples and a custodian AI that powers down from the shock.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Salvage What You Can",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(item_genetic_stimulants, TRUE); CHANGE_HULL(-5); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_time_echo",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "Your radar pings a ship. It has your transponder code. It has your hull configuration. It is your ship, drifting heavily damaged. A hail comes through\u2014it's your voice, but older and terrified. 'Don't go to the next sector. The Weaver is there.'",
+          "image": "",
+          "tags": ["deep_space"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Demand Data",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(ship_fade)",
+              "consume": false
+            },
+            {
+              "text": "Salvage Self",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(paradox_damage)",
+              "consume": false
+            },
+            {
+              "text": "Attack",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "START_COMBAT(encounter_doppelganger)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "ship_fade",
+          "text": "The future ship transmits its map data before flickering out of existence like a dying star. The coordinates reveal two sectors ahead.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(map_reveal_2, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "paradox_damage",
+          "text": "As you strip parts from your future ship, reality snaps. The paradox causes internal damage to your current ship, but you get the repairs.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_HULL(50); CHANGE_CREW(-1); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_quarantine_lab",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "This station was a medical research facility. The air is thick with yellow spores. Bodies in hazmat suits line the halls. They were researching a 'Cure' for the Silence's erasure effect.",
+          "image": "",
+          "tags": ["station"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Search Lab",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(vial_found)",
+              "consume": false
+            },
+            {
+              "text": "Purge Station",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_FUEL(-5); SET_VAR(rep_ark, TRUE); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Download Data",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(virus_contract)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "vial_found",
+          "text": "You find a single vial of 'Reality Anchor.' It prevents one instance of death/erasure.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Take Vial",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(item_revival_injector, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "virus_contract",
+          "text": "You download the research notes, but the spores have contaminated your ship's air supply. Your crew begins showing symptoms.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(item_research_data, TRUE); CHANGE_CREW(-1); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_scavenger_king",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "This isn't a station; it's a hundred dead ships welded together. The 'King' hails you. He sits on a throne made of Vanguard plating. 'You want to pass? Pay the toll, or become a brick in my wall.'",
+          "image": "",
+          "tags": ["station_pirate"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Pay Toll",
+              "showReq": "",
+              "enableReq": "REQ_CURRENCY(50)",
+              "actions": "CHANGE_CURRENCY(-50); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Challenge",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "START_COMBAT(encounter_pirate_boss)",
+              "consume": false
+            },
+            {
+              "text": "Trade Info",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(king_impressed)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "king_impressed",
+          "text": "The King laughs. 'A hunter! I like hunters.' He lets you pass and gives you a weapon from his vault.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Accept Gift",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(weapon_scrap_cannon, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_mutiny_end",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "This Ark ship didn't die to aliens. The blast marks are from inside. You find the mess hall barricaded. Inside are the skeletons of the crew... and one skeleton sitting on a pile of food cans, holding a pistol.",
+          "image": "",
+          "tags": ["derelict"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Take Supplies",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_FUEL(3); DESTROY_ENTITY(); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Investigate Logs",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(log_reveal)",
+              "consume": false
+            },
+            {
+              "text": "Burial",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(morale_boost, TRUE); DESTROY_ENTITY(); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "log_reveal",
+          "text": "The logs reveal the Captain tried to turn back to the Ark. The crew mutinied to keep going forward. 'There is nothing back there,' the final log reads. 'Only the Silence.'",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(lore_great_panic, TRUE); DESTROY_ENTITY(); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_overgrown_forge",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "Massive Vanguard fabricators are rusting here, wrapped in thick, purple vines. The plants seem to be feeding on the residual energy of the machines. The factory is still trying to print something.",
+          "image": "",
+          "tags": ["terrestrial_jungle"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Cut Vines",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(machine_active)",
+              "consume": false
+            },
+            {
+              "text": "Harvest Plants",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_FUEL(3); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Scan Schematic",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(blueprint_vanguard_plating, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "machine_active",
+          "text": "The machine roars to life. It finishes its job: A single, perfect 'Terraforming Seed.' But the noise attracts the local fauna.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Brace for Impact",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(item_terra_seed, TRUE); START_COMBAT(encounter_jungle_beasts)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_miner_lament",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "A mining rig is silent. The drill is stuck deep in the rock. The logs say: 'We hit a vein of something black. It's not ore. It's bleeding.'",
+          "image": "",
+          "tags": ["asteroid"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Retract Drill",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(oil_spill)",
+              "consume": false
+            },
+            {
+              "text": "Loot Rig",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(weapon_mining_beam_mk2, TRUE); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Destroy Asteroid",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_FUEL(-2); SET_VAR(rep_vanguard_ghosts, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "oil_spill",
+          "text": "You retract the drill. A geyser of raw, liquid Silence erupts. It damages your hull, but crystalizes into Dark Matter.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_HULL(-15); CHANGE_CURRENCY(300); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_solar_parasite",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "Orbiting close to the star is a creature... or a ship... that looks like a tick. It has extended a siphon into the star and is sucking plasma. It hasn't noticed you.",
+          "image": "",
+          "tags": ["star"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Kill It",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "START_COMBAT(encounter_solar_parasite)",
+              "consume": false
+            },
+            {
+              "text": "Siphon the Parasite",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(parasite_flee)",
+              "consume": false
+            },
+            {
+              "text": "Study",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_RESEARCH(50); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "parasite_flee",
+          "text": "You fill your tanks with super-charged plasma. The parasite detaches and flees into deep space, terrified of you.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_FUEL(10); SET_VAR(trait_solar_charged_engines, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_sensor_ghost",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "Your sensors go wild. You see a massive fleet surrounding you\u2014hundreds of Ark ships. But your visual scanners show nothing. The nebula is psycho-reactive; it's projecting your crew's hopes onto the radar.",
+          "image": "",
+          "tags": ["nebula"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Calibrate Sensors",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_RESEARCH(100); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Hail Them",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(sanity_break)",
+              "consume": false
+            },
+            {
+              "text": "Harvest Gas",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(resource_psycho_gas, TRUE); CHANGE_CURRENCY(250); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "sanity_break",
+          "text": "You hail the ghosts. The static screams back with the voices of your dead relatives. The crew panics.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(trait_shaken, TRUE); CHANGE_CREW(-1); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_hollow_moon",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "Scanning reveals this moon is hollow. It's a shell built around a massive, dormant engine. It looks like the Vanguard tried to turn this moon into a ship.",
+          "image": "",
+          "tags": ["moon"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Enter Core",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(engine_choice)",
+              "consume": false
+            },
+            {
+              "text": "Mine Shell",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CHANGE_CURRENCY(400); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "engine_choice",
+          "text": "The engine is intact but requires a Strange Matter spark to start. If you start it, the moon might leave orbit... or explode.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Ignite Engine",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(map_hidden_planet, TRUE); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Strip Engine for Parts",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(item_vanguard_thruster, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event_horizon_message",
+      "isUnique": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "A buoy floats dangerously close to the event horizon. It's transmitting a text file. It's a message from You. Timestamped: 3 cycles ago.",
+          "image": "",
+          "tags": ["black_hole"],
+          "audio": "",
+          "options": [
+            {
+              "text": "Retrieve Buoy",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(message_read)",
+              "consume": false
+            },
+            {
+              "text": "Remote Download",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(corrupt_data)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "message_read",
+          "text": "The message is clear: 'The Silence tracks movement. Stop moving. Play dead. That is how I survived the last wipe.' It includes a software patch for your stealth systems.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Install Patch",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(upgrade_stealth, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "corrupt_data",
+          "text": "The gravity distortion corrupted the file. You only get fragments: '...movement... dead... wipe...' It's useless.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Continue",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(lore_fragmented_warning, TRUE); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

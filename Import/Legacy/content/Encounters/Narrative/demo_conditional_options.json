@@ -1,0 +1,41 @@
+{
+"$path":"Assets/Resources/Encounters/Narrative/demo_conditional_options.asset",
+"$type":"NarrativeEncounter",
+"$name":"demo_conditional_options",
+"encounterId":"demo_conditional_options",
+"isUnique":false,
+"repeatable":true,
+"startingPageId":"start",
+"lootTable":null,
+"presentationMode":"Default",
+"disableInputsMode":false,
+"pages":[
+{
+"id":"start",
+"text":"You encounter a locked container. Your options depend on your abilities and inventory.",
+"localizationKey":"demo_conditional_options_start_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{"text":"Force it Open (Costs Hull)","localizationKey":"demo_conditional_options_start_opt1","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"ChangeHull","parameter1":"-10","parameter2":""},{"type":"GoToPage","parameter1":"opened","parameter2":""}]},
+{"text":"Use Keycard","localizationKey":"demo_conditional_options_start_opt2","showRequirement":"","enableRequirement":"REQ_ITEM(500, 1)","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"RemoveItem","parameter1":"500","parameter2":"1"},{"type":"GoToPage","parameter1":"opened","parameter2":""}]},
+{"text":"Hack (Requires Skill)","localizationKey":"demo_conditional_options_start_opt3","showRequirement":"REQ_VAR(has_hacking, TRUE)","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"GoToPage","parameter1":"opened","parameter2":""}]},
+{"text":"Leave","localizationKey":"leave_option","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+},
+{
+"id":"opened",
+"text":"The container opens, revealing valuable cargo!",
+"localizationKey":"demo_conditional_options_opened_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"UI_Success",
+"options":[
+{"text":"Take the Loot","localizationKey":"demo_conditional_options_opened_opt1","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"AddItem","parameter1":"500","parameter2":"3"},{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+}
+]
+}

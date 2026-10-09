@@ -1,0 +1,32 @@
+{
+"$path":"Assets/Resources/Galaxies/Solar System Entities/derelict_ship_entity.asset",
+"$type":"SolarSystemEntity",
+"$name":"derelict_ship_entity",
+"entityId":"derelict_ship",
+"ownerFactionIdOverride":"",
+"prefab":{"$ref":"Assets/Game/Meshes/Voxel Meshes/shipVoxels.obj","name":"shipVoxels","type":"GameObject"},
+"mapIcon":{"$ref":"Assets/Starsector Visuals/icons/derelict.png","name":"derelict","type":"Texture2D"},
+"color":[0.56603777408599854,0.56603777408599854,0.56603777408599854,1],
+"description":"This is a placeholder description blah blah blah",
+"encounterPool":{
+"poolName":"",
+"encounters":[
+{
+"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/event_derelict_salvage.asset","name":"event_derelict_salvage","type":"NarrativeEncounter"},
+"probabilityWeight":0.5
+},
+{"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/event_mutiny_end.asset","name":"event_mutiny_end","type":"NarrativeEncounter"},"probabilityWeight":0.5}
+]
+},
+"encounterIdOverride":"",
+"autoInteractOnContact":false,
+"orbitType":"Static",
+"orbitSpeedMultiplier":1,
+"showOrbitLine":false,
+"spawnType":"Random",
+"minOrbitRadius":5,
+"maxOrbitRadius":120,
+"canHaveSatellites":false,
+"spawnRequirement":"",
+"spawnBlocker":""
+}

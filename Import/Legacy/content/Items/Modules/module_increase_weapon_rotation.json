@@ -1,0 +1,19 @@
+{
+"$path":"Assets/Resources/Items/Modules/module_increase_weapon_rotation.asset",
+"$type":"SlottableItem",
+"$name":"module_increase_weapon_rotation",
+"RegistryKey":"module_increase_weapon_rotation",
+"Name":"Targeting Computer",
+"Description":"Increases Rotation speed of all turrets",
+"BasePrice":10,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_57","type":"Sprite","sub":"spritetest2_transparent_57"},
+"Category":"Block",
+"Rarity":"Common",
+"EffectType":"None",
+"GrantsAbilities":[],
+"RequiredSocketType":"Core",
+"Modifiers":[
+{"StatToModify":"WeaponDamage","ModifyType":"Add","ModifierRange":"Global","Value":10}
+]
+}

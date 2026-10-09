@@ -1,0 +1,42 @@
+{
+"$path":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_terrestrial.asset",
+"$type":"PlanetEntity",
+"$name":"planet_terrestrial",
+"entityId":"planet_terrestrial",
+"ownerFactionIdOverride":"",
+"prefab":{"$ref":"Assets/Game/Prefabs/Galaxy/PlanetSolarSystem.prefab","name":"PlanetSolarSystem","type":"GameObject"},
+"mapIcon":{"$ref":"Assets/Starsector Visuals/icons/radar_circle.png","name":"radar_circle","type":"Texture2D"},
+"color":[0.28216531872749329,0.56603777408599854,0.098789609968662262,1],
+"description":"This is a placeholder description blah blah blah",
+"encounterPool":{
+"poolName":"",
+"encounters":[
+{"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/event_silent_city.asset","name":"event_silent_city","type":"NarrativeEncounter"},"probabilityWeight":0.5},
+{
+"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/event_overgrown_forge.asset","name":"event_overgrown_forge","type":"NarrativeEncounter"},
+"probabilityWeight":0.5
+}
+]
+},
+"encounterIdOverride":"",
+"autoInteractOnContact":false,
+"orbitType":"Static",
+"orbitSpeedMultiplier":1,
+"showOrbitLine":true,
+"spawnType":"AroundStar",
+"minOrbitRadius":10,
+"maxOrbitRadius":300,
+"canHaveSatellites":true,
+"spawnRequirement":"",
+"spawnBlocker":"",
+"planetType":"Terrestrial",
+"preferredOrbitDistance":0.40000000596046448,
+"minRadius":8,
+"maxRadius":12,
+"hasAtmosphere":true,
+"atmosphereColor":[0.5,0.699999988079071,1,0.30000001192092896],
+"hasRings":false,
+"planetTextures":[
+{"$ref":"Assets/Planets of the Solar System 3D/Textures/Planets/Earth_4k.png","name":"Earth_4k","type":"Texture2D"}
+]
+}

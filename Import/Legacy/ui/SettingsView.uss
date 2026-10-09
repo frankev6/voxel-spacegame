@@ -1,0 +1,119 @@
+.tab-button {
+    flex-grow: 1;
+    height: 100%;
+    margin: 0;
+    border-width: 0;
+    border-radius: 0;
+    background-color: rgb(60, 60, 60);
+    color: rgb(180, 180, 180);
+    font-size: 18px;
+    -unity-font-style: bold;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.tab-button:hover {
+    background-color: rgb(80, 80, 80);
+    color: white;
+}
+
+.tab-button.selected {
+    background-color: rgb(32, 32, 32);
+    color: rgb(255, 200, 0);
+    border-bottom-width: 3px;
+    border-bottom-color: rgb(255, 200, 0);
+}
+
+.tab-content {
+    flex-grow: 1;
+}
+
+.section-header {
+    font-size: 24px;
+    color: rgb(255, 200, 0);
+    -unity-font-style: bold;
+    margin-bottom: 20px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+    padding-bottom: 5px;
+}
+
+.setting-row {
+    flex-direction: row;
+    height: 40px;
+    align-items: center;
+    margin-bottom: 15px;
+    justify-content: space-between;
+}
+
+.setting-label {
+    font-size: 18px;
+    color: white;
+    width: 200px;
+}
+
+.setting-slider {
+    flex-grow: 1;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.value-label {
+    width: 60px;
+    font-size: 16px;
+    color: rgb(200, 200, 200);
+    -unity-text-align: middle-right;
+}
+
+.setting-dropdown {
+    width: 300px;
+}
+
+.unity-toggle__checkmark {
+    width: 24px;
+    height: 24px;
+}
+
+/* Rebinding List Item Styling */
+.rebinding-item {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+    background-color: rgba(255, 255, 255, 0.05);
+    margin-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 5px;
+}
+
+.rebinding-label {
+    font-size: 16px;
+    color: white;
+    width: 200px;
+}
+
+.rebinding-button {
+    width: 150px;
+    height: 35px;
+    font-size: 14px;
+    background-color: rgb(50, 50, 50);
+    color: white;
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgb(100, 100, 100);
+}
+
+.rebinding-button:hover {
+    background-color: rgb(70, 70, 70);
+    border-color: white;
+}
+
+.rebinding-button.listening {
+    background-color: rgb(200, 150, 0);
+    color: black;
+    -unity-font-style: bold;
+}
+
+.settings-tab-hidden {
+    display: none;
+}

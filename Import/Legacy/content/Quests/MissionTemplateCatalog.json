@@ -1,0 +1,75 @@
+{
+"$path":"Assets/Resources/Quests/MissionTemplateCatalog.asset",
+"$type":"MissionTemplateCatalog",
+"$name":"MissionTemplateCatalog",
+"templates":[
+{
+"id":"tmpl_bounty_probe",
+"idPrefix":"bounty_probe",
+"titleFormat":"Probe Bounty #{0}",
+"shortDescriptionFormat":"Destroy a rogue probe target and collect payment.",
+"detailedDescriptionFormat":"A hostile probe has been marked for destruction. Eliminate one target to complete contract #{0}.",
+"autoTrack":true,
+"objectives":[
+{"id":"eliminate_probe","title":"Destroy Rogue Probe","description":"Destroy one rogue probe fleet.","objectiveType":"DestroyEntity","targetId":"npc_probe_tutorial","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]}
+],
+"entityOptions":[],
+"markers":[
+{"entityId":"npc_probe_tutorial","systemId":"","label":"Bounty Target"}
+],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Bounty contract posted.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Bounty contract complete.","parameters":[]},
+{"actionType":"SetWorldState","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"quest.bounty.last_completed","value":"probe","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+],
+"onFailedActions":[]
+},
+{
+"id":"tmpl_signal_relay",
+"idPrefix":"signal_relay",
+"titleFormat":"Signal Relay Sweep #{0}",
+"shortDescriptionFormat":"Reach a new system and resolve one encounter.",
+"detailedDescriptionFormat":"Relay command requests wide-area telemetry. Enter any system and complete one encounter for sweep #{0}.",
+"autoTrack":true,
+"objectives":[
+{"id":"reach_any_system","title":"Reach Any System","description":"Enter any system.","objectiveType":"ReachSystem","targetId":"","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]},
+{"id":"resolve_any_encounter","title":"Resolve Any Encounter","description":"Complete one encounter successfully.","objectiveType":"CompleteEncounter","targetId":"","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]}
+],
+"entityOptions":[],
+"markers":[],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Signal relay sweep accepted.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Signal relay sweep complete.","parameters":[]},
+{"actionType":"SetWorldState","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"quest.template.signal_relay.completed","value":"1","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+],
+"onFailedActions":[]
+},
+{
+"id":"tmpl_material_sweep",
+"idPrefix":"material_sweep",
+"titleFormat":"Material Sweep #{0}",
+"shortDescriptionFormat":"Collect local material fragments and survive one encounter.",
+"detailedDescriptionFormat":"For sweep #{0}, collect two material fragments and complete one encounter before filing the report.",
+"autoTrack":true,
+"objectives":[
+{"id":"collect_materials","title":"Collect Material Fragments","description":"Collect 2 material fragments.","objectiveType":"CollectItem","targetId":"500","targetCount":2,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]},
+{"id":"survive_contact","title":"Complete One Encounter","description":"Complete one encounter successfully.","objectiveType":"CompleteEncounter","targetId":"","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]}
+],
+"entityOptions":[],
+"markers":[
+{"entityId":"ark_station","systemId":"","label":"Optional Debrief Hub"}
+],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Material sweep accepted.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Material sweep complete.","parameters":[]}
+],
+"onFailedActions":[]
+}
+]
+}

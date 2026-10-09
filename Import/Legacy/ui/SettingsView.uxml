@@ -1,0 +1,81 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles"/>
+    <Style src="project://database/Assets/Game/UI/SettingsView.uss?fileID=7433441132597879392&amp;guid=6d1d1b2a161de2b40b9c9a3bac9b6931&amp;type=3#SettingsView"/>
+    <ui:VisualElement name="settings-root" class="intel-theme-screen" style="width: 100%; height: 100%; justify-content: center; align-items: center;">
+        <ui:VisualElement name="settings-panel" class="intel-theme-panel" style="width: 80%; height: 80%; border-radius: 10px;">
+            <ui:VisualElement name="header" style="height: 60px; justify-content: center; align-items: center; background-color: rgb(48, 48, 48); border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                <ui:Label text="SETTINGS" style="font-size: 32px; color: white; -unity-font-style: bold;"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="tabs-container" style="flex-direction: row; height: 50px; background-color: rgb(60, 60, 60);">
+                <ui:Button name="tab-audio" text="AUDIO" class="tab-button selected"/>
+                <ui:Button name="tab-video" text="VIDEO" class="tab-button"/>
+                <ui:Button name="tab-controls" text="CONTROLS" class="tab-button"/>
+                <ui:Button name="tab-general" text="GENERAL" class="tab-button"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="content-area" style="flex-grow: 1; padding: 20px;">
+                <ui:VisualElement name="content-audio" class="tab-content">
+                    <ui:Label text="Volume Settings" class="section-header"/>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Master Volume" class="setting-label"/>
+                        <ui:Slider name="slider-master" low-value="0" high-value="1" class="setting-slider"/>
+                        <ui:Label name="label-master-val" text="100%" class="value-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Music Volume" class="setting-label"/>
+                        <ui:Slider name="slider-music" low-value="0" high-value="1" class="setting-slider"/>
+                        <ui:Label name="label-music-val" text="80%" class="value-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="SFX Volume" class="setting-label"/>
+                        <ui:Slider name="slider-sfx" low-value="0" high-value="1" class="setting-slider"/>
+                        <ui:Label name="label-sfx-val" text="80%" class="value-label"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="content-video" class="tab-content">
+                    <ui:Label text="Graphics Settings" class="section-header"/>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Resolution" class="setting-label"/>
+                        <ui:DropdownField name="dropdown-resolution" class="setting-dropdown"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Fullscreen" class="setting-label"/>
+                        <ui:Toggle name="toggle-fullscreen"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Quality" class="setting-label"/>
+                        <ui:DropdownField name="dropdown-quality" class="setting-dropdown"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Brightness" class="setting-label"/>
+                        <ui:Slider name="slider-brightness" low-value="-2" high-value="2" class="setting-slider"/>
+                        <ui:Label name="label-brightness-val" text="0.0" class="value-label"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="content-controls" class="tab-content">
+                    <ui:Label text="Input Settings" class="section-header"/>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Mouse Sensitivity" class="setting-label"/>
+                        <ui:Slider name="slider-sensitivity" low-value="0.1" high-value="5.0" class="setting-slider"/>
+                        <ui:Label name="label-sensitivity-val" text="1.0" class="value-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Invert Y-Axis" class="setting-label"/>
+                        <ui:Toggle name="toggle-invert-y"/>
+                    </ui:VisualElement>
+                    <ui:Label text="Key Bindings" class="section-header" style="margin-top: 20px;"/>
+                    <ui:ScrollView name="scroll-bindings" style="flex-grow: 1; height: 300px; background-color: rgba(0, 0, 0, 0.2);"/>
+                </ui:VisualElement>
+                <ui:VisualElement name="content-general" class="tab-content">
+                    <ui:Label text="General Settings" class="section-header"/>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Language" class="setting-label"/>
+                        <ui:DropdownField name="dropdown-language" class="setting-dropdown"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="footer" style="height: 60px; justify-content: center; align-items: center; border-top-width: 1px; border-color: rgb(100, 100, 100);">
+                <ui:Button name="btn-close" text="CLOSE" class="button button-danger" style="width: 150px; height: 40px; font-size: 18px; margin-right: 0;"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

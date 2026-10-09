@@ -1,0 +1,17 @@
+{
+"$path":"Assets/Resources/Items/Officers/officer_august.asset",
+"$type":"SlottableItem",
+"$name":"officer_august",
+"RegistryKey":"officer_august",
+"Name":"August",
+"Description":"",
+"BasePrice":0,
+"isStackable":false,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_68","type":"Sprite","sub":"spritetest2_transparent_68"},
+"Category":"Officer",
+"Rarity":"Unique",
+"EffectType":"None",
+"GrantsAbilities":[],
+"RequiredSocketType":"Core",
+"Modifiers":[]
+}

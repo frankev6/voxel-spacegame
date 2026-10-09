@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles"/>
+    <Style src="project://database/Assets/Game/UI/NotificationStyles.uss?fileID=7433441132597879392&amp;guid=83c4e6ce14c654c448feeb21946dab5f&amp;type=3#NotificationStyles"/>
+    <ui:VisualElement name="notificationRoot" picking-mode="Ignore" class="notification-root" style="display: flex;">
+        <ui:VisualElement name="notificationContainer" class="notification-container"/>
+    </ui:VisualElement>
+</ui:UXML>

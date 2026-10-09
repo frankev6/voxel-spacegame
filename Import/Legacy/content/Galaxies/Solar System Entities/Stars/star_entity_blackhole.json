@@ -1,0 +1,40 @@
+{
+"$path":"Assets/Resources/Galaxies/Solar System Entities/Stars/star_entity_blackhole.asset",
+"$type":"StarEntity",
+"$name":"star_entity_blackhole",
+"entityId":"",
+"ownerFactionIdOverride":"",
+"prefab":{"$ref":"Assets/Game/Prefabs/Galaxy/Blackhole.prefab","name":"Blackhole","type":"GameObject"},
+"mapIcon":{"$ref":"Assets/Starsector Visuals/icons/blackhole.png","name":"blackhole","type":"Texture2D"},
+"color":[0.15366728603839874,0.0066749611869454384,0.4716981053352356,1],
+"description":"This is a placeholder description blah blah blah",
+"encounterPool":{
+"poolName":"",
+"encounters":[
+{
+"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/event_horizon_message.asset","name":"event_horizon_message","type":"NarrativeEncounter"},
+"probabilityWeight":1
+}
+]
+},
+"encounterIdOverride":"",
+"autoInteractOnContact":false,
+"orbitType":"Static",
+"orbitSpeedMultiplier":1,
+"showOrbitLine":false,
+"spawnType":"Random",
+"minOrbitRadius":60,
+"maxOrbitRadius":300,
+"canHaveSatellites":false,
+"spawnRequirement":"",
+"spawnBlocker":"",
+"minTemperature":5000,
+"maxTemperature":50000,
+"minScale":0.60000002384185791,
+"maxScale":1,
+"minLuminosity":25,
+"maxLuminosity":60,
+"minPlanetOrbitRadius":25,
+"maxSystemRadius":160,
+"galaxyMapPrefab":null
+}

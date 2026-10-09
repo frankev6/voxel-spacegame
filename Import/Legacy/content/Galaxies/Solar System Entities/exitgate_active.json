@@ -1,0 +1,31 @@
+{
+"$path":"Assets/Resources/Galaxies/Solar System Entities/exitgate_active.asset",
+"$type":"SolarSystemEntity",
+"$name":"exitgate_active",
+"entityId":"exitgate_active",
+"ownerFactionIdOverride":"",
+"prefab":{"$ref":"Assets/Game/Prefabs/SolarSystemPortal.prefab","name":"SolarSystemPortal","type":"GameObject"},
+"mapIcon":{"$ref":"Assets/Starsector Visuals/icons/jump-point2.png","name":"jump-point2","type":"Texture2D"},
+"color":[0.52336597442626953,0.11311853677034378,0.77358490228652954,1],
+"description":"This is a placeholder description blah blah blah",
+"encounterPool":{
+"poolName":"",
+"encounters":[
+{
+"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/story_use_active_gate.asset","name":"story_use_active_gate","type":"NarrativeEncounter"},
+"probabilityWeight":1
+}
+]
+},
+"encounterIdOverride":"story_use_active_gate",
+"autoInteractOnContact":false,
+"orbitType":"Static",
+"orbitSpeedMultiplier":1,
+"showOrbitLine":false,
+"spawnType":"AroundStar",
+"minOrbitRadius":15,
+"maxOrbitRadius":160,
+"canHaveSatellites":false,
+"spawnRequirement":"",
+"spawnBlocker":""
+}

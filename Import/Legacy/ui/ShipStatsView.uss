@@ -1,0 +1,35 @@
+.ship-stats-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-width: 1px;
+    border-color: white;
+}
+
+.ship-stats-title {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.ship-stats-info {
+    font-size: 14px;
+    color: white;
+}
+
+.ship-stats-error-panel {
+    margin-top: 10px;
+    display: flex;
+}
+
+.ship-stats-error-text {
+    color: red;
+    white-space: normal;
+}
+
+.ship-stats-limit-exceeded {
+    color: red;
+}

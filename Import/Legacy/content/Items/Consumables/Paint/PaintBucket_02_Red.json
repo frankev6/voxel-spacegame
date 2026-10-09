@@ -1,0 +1,16 @@
+{
+"$path":"Assets/Resources/Items/Consumables/Paint/PaintBucket_02_Red.asset",
+"$type":"PaintBucketItem",
+"$name":"PaintBucket_02_Red",
+"RegistryKey":"PaintBucket_02_Red",
+"Name":"Paint Bucket (Red)",
+"Description":"Used to paint ship blocks Red.",
+"BasePrice":1,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_95","type":"Sprite","sub":"spritetest2_transparent_95"},
+"Category":"Consumable",
+"Rarity":"Common",
+"EffectType":"Paint",
+"GrantsAbilities":[],
+"PaletteIndex":2
+}

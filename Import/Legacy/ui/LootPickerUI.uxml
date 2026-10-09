@@ -1,0 +1,58 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/LootPickerStyles.uss?fileID=7433441132597879392&amp;guid=f9c4050d22488224ea05889ed25b7ae3&amp;type=3#LootPickerStyles"/>
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles"/>
+    <engine:VisualElement class="intel-theme-screen" style="flex-grow: 1; background-image: none; background-repeat: repeat repeat; -unity-background-scale-mode: scale-to-fit; background-position-x: left 0; background-position-y: top 0; background-size: 100px 100px;">
+        <engine:VisualElement name="topContainer" style="flex-grow: 1; align-self: auto; align-items: center; align-content: flex-start; justify-content: center; height: 20%; flex-direction: row;">
+            <engine:Label text="Salvage Complete" style="color: rgb(255, 255, 255); font-size: 49px; -unity-font-style: bold; -unity-font-definition: url(&quot;project://database/Assets/Plugins/QFSW/Quantum%20Console/Source/Fonts/OfficeCodePro-Medium.ttf?fileID=12800000&amp;guid=e7f9c7e4780a90b45b581308e8a2f94a&amp;type=3#OfficeCodePro-Medium&quot;);"/>
+        </engine:VisualElement>
+        <engine:VisualElement name="centerContainer" style="height: 80%; width: 100%; padding-right: 26px; padding-left: 26px; flex-grow: 1; overflow: hidden; padding-top: 26px; padding-bottom: 26px; align-self: center;">
+            <engine:ScrollView class="holo-scrollview" horizontal-scroller-visibility="Hidden">
+                <engine:VisualElement name="scrollcontainer" style="flex-grow: 1; flex-direction: row; flex-wrap: wrap; align-content: flex-start; justify-content: flex-start;">
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                    <engine:VisualElement name="loot" class="loot-item"/>
+                </engine:VisualElement>
+            </engine:ScrollView>
+        </engine:VisualElement>
+        <engine:VisualElement name="bottomContainer" style="flex-grow: 1; align-self: auto; align-items: center; align-content: flex-start; justify-content: center; height: 20%; flex-direction: row;">
+            <engine:Button text="Reroll" name="rerollBtn" class="button"/>
+            <engine:Button text="Edit Modules" name="modulesBtn" class="button" style="display: none;"/>
+            <engine:Button text="Continue" name="continueBtn" class="button"/>
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

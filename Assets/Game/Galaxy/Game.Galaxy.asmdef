@@ -1,0 +1,27 @@
+{
+    "name": "Game.Galaxy",
+    "rootNamespace": "Game.Galaxy",
+    "references": [
+        "Game.Core",
+        "Game.Data",
+        "Game.Voxel",
+        "Game.Simulation",
+        "Unity.Entities",
+        "Unity.Entities.Hybrid",
+        "Unity.Transforms",
+        "Unity.Collections",
+        "Unity.Burst",
+        "Unity.Mathematics",
+        "Unity.Physics",
+        "Unity.Physics.Hybrid"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

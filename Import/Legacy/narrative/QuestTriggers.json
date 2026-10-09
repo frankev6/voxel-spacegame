@@ -1,0 +1,138 @@
+{
+  "triggers": [
+    {
+      "id": "trigger_first_friendly_territory",
+      "eventType": "territory.entered",
+      "oncePerRun": true,
+      "condition": {
+        "all": [
+          {
+            "type": "event_value",
+            "key": "firstVisit",
+            "value": "true"
+          },
+          {
+            "type": "faction_relation",
+            "comparison": "greater_or_equal",
+            "intValue": 0
+          }
+        ]
+      },
+      "actions": [
+        {
+          "actionType": "QueueEncounter",
+          "encounterId": "event_territory_friendly_entry",
+          "parameters": [
+            {
+              "key": "requireSolarSystem",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "actionType": "AcceptQuest",
+          "questId": "quest_relation_watch",
+          "boolValue": true
+        },
+        {
+          "actionType": "CompleteObjective",
+          "questId": "quest_relation_watch",
+          "objectiveId": "territory_seen"
+        },
+        {
+          "actionType": "GenerateMissionFromTemplate",
+          "templateId": "tmpl_signal_relay",
+          "boolValue": true
+        }
+      ]
+    },
+    {
+      "id": "trigger_first_hostile_territory",
+      "eventType": "territory.entered",
+      "oncePerRun": true,
+      "condition": {
+        "all": [
+          {
+            "type": "event_value",
+            "key": "firstVisit",
+            "value": "true"
+          },
+          {
+            "type": "faction_relation",
+            "comparison": "less",
+            "intValue": 0
+          }
+        ]
+      },
+      "actions": [
+        {
+          "actionType": "QueueEncounter",
+          "encounterId": "event_territory_hostile_entry",
+          "parameters": [
+            {
+              "key": "requireSolarSystem",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "actionType": "AcceptQuest",
+          "questId": "quest_hostile_blackbox",
+          "boolValue": true
+        },
+        {
+          "actionType": "GenerateMissionFromTemplate",
+          "templateId": "tmpl_bounty_probe",
+          "boolValue": true
+        }
+      ]
+    },
+    {
+      "id": "trigger_station_boarding_followup",
+      "eventType": "quest.completed",
+      "oncePerRun": true,
+      "condition": {
+        "type": "event_value",
+        "key": "questId",
+        "value": "quest_station_boarding_trial"
+      },
+      "actions": [
+        {
+          "actionType": "AcceptQuest",
+          "questId": "quest_station_data_delivery",
+          "boolValue": true
+        },
+        {
+          "actionType": "QueueEncounter",
+          "encounterId": "demo_station_hub"
+        }
+      ]
+    },
+    {
+      "id": "trigger_fail_sandbox_on_relation_drop",
+      "eventType": "faction.relation_changed",
+      "oncePerRun": false,
+      "condition": {
+        "all": [
+          {
+            "type": "quest_state",
+            "questId": "quest_trigger_fail_test",
+            "value": "Active"
+          },
+          {
+            "type": "event_value",
+            "key": "delta",
+            "comparison": "less_or_equal",
+            "value": "-5"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "actionType": "FailQuest",
+          "questId": "quest_trigger_fail_test"
+        }
+      ]
+    }
+  ]
+}

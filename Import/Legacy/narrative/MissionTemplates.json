@@ -1,0 +1,129 @@
+{
+  "templates": [
+    {
+      "id": "tmpl_bounty_probe",
+      "idPrefix": "bounty_probe",
+      "titleFormat": "Probe Bounty #{0}",
+      "shortDescriptionFormat": "Destroy a rogue probe target and collect payment.",
+      "detailedDescriptionFormat": "A hostile probe has been marked for destruction. Eliminate one target to complete contract #{0}.",
+      "autoTrack": true,
+      "objectives": [
+        {
+          "id": "eliminate_probe",
+          "title": "Destroy Rogue Probe",
+          "description": "Destroy one rogue probe fleet.",
+          "objectiveType": "destroy_entity",
+          "targetId": "npc_probe_tutorial",
+          "targetCount": 1
+        }
+      ],
+      "markers": [
+        {
+          "entityId": "npc_probe_tutorial",
+          "label": "Bounty Target"
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "logText": "Bounty contract posted."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "logText": "Bounty contract complete."
+        },
+        {
+          "actionType": "SetWorldState",
+          "key": "quest.bounty.last_completed",
+          "value": "probe"
+        }
+      ]
+    },
+    {
+      "id": "tmpl_signal_relay",
+      "idPrefix": "signal_relay",
+      "titleFormat": "Signal Relay Sweep #{0}",
+      "shortDescriptionFormat": "Reach a new system and resolve one encounter.",
+      "detailedDescriptionFormat": "Relay command requests wide-area telemetry. Enter any system and complete one encounter for sweep #{0}.",
+      "autoTrack": true,
+      "objectives": [
+        {
+          "id": "reach_any_system",
+          "title": "Reach Any System",
+          "description": "Enter any system.",
+          "objectiveType": "reach_system",
+          "targetCount": 1
+        },
+        {
+          "id": "resolve_any_encounter",
+          "title": "Resolve Any Encounter",
+          "description": "Complete one encounter successfully.",
+          "objectiveType": "complete_encounter",
+          "targetCount": 1
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "logText": "Signal relay sweep accepted."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "logText": "Signal relay sweep complete."
+        },
+        {
+          "actionType": "SetWorldState",
+          "key": "quest.template.signal_relay.completed",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "id": "tmpl_material_sweep",
+      "idPrefix": "material_sweep",
+      "titleFormat": "Material Sweep #{0}",
+      "shortDescriptionFormat": "Collect local material fragments and survive one encounter.",
+      "detailedDescriptionFormat": "For sweep #{0}, collect two material fragments and complete one encounter before filing the report.",
+      "autoTrack": true,
+      "objectives": [
+        {
+          "id": "collect_materials",
+          "title": "Collect Material Fragments",
+          "description": "Collect 2 material fragments.",
+          "objectiveType": "collect_item",
+          "targetId": "500",
+          "targetCount": 2
+        },
+        {
+          "id": "survive_contact",
+          "title": "Complete One Encounter",
+          "description": "Complete one encounter successfully.",
+          "objectiveType": "complete_encounter",
+          "targetCount": 1
+        }
+      ],
+      "markers": [
+        {
+          "entityId": "ark_station",
+          "label": "Optional Debrief Hub"
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "logText": "Material sweep accepted."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "logText": "Material sweep complete."
+        }
+      ]
+    }
+  ]
+}

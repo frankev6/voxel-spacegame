@@ -1,0 +1,57 @@
+{
+"$path":"Assets/Resources/Galaxies/BaseSolarSystemData.asset",
+"$type":"SolarSystemData",
+"$name":"BaseSolarSystemData",
+"systemId":"base_solar_system",
+"openWorldCoordinates":[3000,0],
+"minEntities":8,
+"maxEntities":11,
+"baseOrbitSpeed":6,
+"orbitSpacingScale":1,
+"starEntities":[
+{"$ref":"Assets/Resources/Galaxies/Solar System Entities/Stars/star_entity.asset","name":"star_entity","type":"StarEntity"}
+],
+"connectedSystems":[
+{"$ref":"Assets/Resources/Galaxies/ARK_StartSolarSystemData 1.asset","name":"ARK_StartSolarSystemData 1","type":"SolarSystemData"}
+],
+"entityPool":[
+{
+"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_barren.asset","name":"planet_barren","type":"PlanetEntity"},
+"weight":0.5,
+"maxCount":2
+},
+{"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_rocky.asset","name":"planet_rocky","type":"PlanetEntity"},"weight":0.5,"maxCount":2},
+{"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_water.asset","name":"planet_water","type":"PlanetEntity"},"weight":0.20000000298023224,"maxCount":1},
+{
+"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_terrestrial.asset","name":"planet_terrestrial","type":"PlanetEntity"},
+"weight":0.20000000298023224,
+"maxCount":1
+},
+{
+"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_gasgiant.asset","name":"planet_gasgiant","type":"PlanetEntity"},
+"weight":0.40000000596046448,
+"maxCount":2
+},
+{
+"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_icegiant.asset","name":"planet_icegiant","type":"PlanetEntity"},
+"weight":0.40000000596046448,
+"maxCount":2
+},
+{"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/moon_1.asset","name":"moon_1","type":"SolarSystemEntity"},"weight":0.5,"maxCount":3},
+{
+"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/derelict_ship_entity.asset","name":"derelict_ship_entity","type":"SolarSystemEntity"},
+"weight":0.40000000596046448,
+"maxCount":3
+},
+{"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/station_1.asset","name":"station_1","type":"SolarSystemEntity"},"weight":0.20000000298023224,"maxCount":2},
+{
+"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/abandoned_station.asset","name":"abandoned_station","type":"SolarSystemEntity"},
+"weight":0.20000000298023224,
+"maxCount":2
+},
+{"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_ice.asset","name":"planet_ice","type":"PlanetEntity"},"weight":0.40000000596046448,"maxCount":2}
+],
+"maxAsteroidBelts":1,
+"asteroidBeltEntity":null,
+"encounterOverride":null
+}

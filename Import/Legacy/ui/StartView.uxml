@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles"/>
+    <ui:VisualElement style="width: 100%; height: 100%; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.8);">
+        <ui:VisualElement name="MainMenuContainer" style="width: 300px; padding: 20px; background-color: rgba(30, 30, 30, 0.9); border-radius: 10px;">
+            <ui:Label text="SPACESHIP GAME" style="font-size: 24px; -unity-font-style: bold; color: white; margin-bottom: 20px; -unity-text-align: middle-center;"/>
+            <ui:Button name="new_game_btn" text="New Game" class="button" style="margin-bottom: 10px; height: 40px;"/>
+            <ui:Button name="load_game_btn" text="Load Game" class="button" style="margin-bottom: 10px; height: 40px;"/>
+            <ui:Button name="quit_btn" text="Quit" class="button" style="height: 40px;"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="LoadGameContainer" style="display: none; width: 600px; height: 500px; padding: 20px; background-color: rgba(30, 30, 30, 0.9); border-radius: 10px; position: absolute;">
+            <ui:Label text="LOAD GAME" style="font-size: 24px; -unity-font-style: bold; color: white; margin-bottom: 20px; -unity-text-align: middle-center;"/>
+            <ui:ScrollView name="save_list" style="flex-grow: 1; margin-bottom: 20px; background-color: rgba(0, 0, 0, 0.3);"/>
+            <ui:Button name="back_btn" text="Back" class="button" style="height: 40px;"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="NewGameContainer" style="display: none; width: 400px; padding: 20px; background-color: rgba(30, 30, 30, 0.9); border-radius: 10px; position: absolute;">
+            <ui:Label text="NEW GAME" style="font-size: 24px; -unity-font-style: bold; color: white; margin-bottom: 20px; -unity-text-align: middle-center;"/>
+            <ui:TextField name="commander_name_input" label="Commander Name" style="margin-bottom: 10px; color: white;"/>
+            <ui:VisualElement style="flex-direction: row; margin-bottom: 20px; display: none;">
+                <ui:Image name="selected_portrait" style="width: 80px; height: 80px; margin-right: 10px; background-color: rgba(0, 0, 0, 0.5); border-radius: 5px;"/>
+                <ui:ScrollView name="portrait_grid" style="flex-grow: 1; height: 80px; background-color: rgba(0, 0, 0, 0.3);"/>
+            </ui:VisualElement>
+            <ui:Button name="start_new_game_btn" text="Start" class="button" style="margin-bottom: 10px; height: 40px;"/>
+            <ui:Button name="cancel_new_game_btn" text="Cancel" class="button" style="height: 40px;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

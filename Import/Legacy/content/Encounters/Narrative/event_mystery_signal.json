@@ -1,0 +1,247 @@
+{
+"$path":"Assets/Resources/Encounters/Narrative/event_mystery_signal.asset",
+"$type":"NarrativeEncounter",
+"$name":"event_mystery_signal",
+"encounterId":"event_mystery_signal",
+"isUnique":false,
+"repeatable":true,
+"startingPageId":"start",
+"lootTable":null,
+"presentationMode":"Default",
+"disableInputsMode":false,
+"pages":[
+{
+"id":"start",
+"text":"Your comms array picks up an encrypted signal. It's repeating coordinates nearby.",
+"localizationKey":"event_mystery_signal_start_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"UI_Button_Click",
+"options":[
+{
+"text":"Flag as Signal Trace Contract",
+"localizationKey":"event_mystery_signal_start_opt1",
+"showRequirement":"REQ_QUEST_STATE(quest_signal_trace, NotAccepted)",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.accept","parameter2":"questId=quest_signal_trace|track=true"},
+{"type":"GoToPage","parameter1":"signal_source","parameter2":""}
+]
+},
+{
+"text":"Investigate",
+"localizationKey":"event_mystery_signal_start_opt2",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"SetVariable","parameter1":"signal_found","parameter2":"TRUE"},
+{"type":"GoToPage","parameter1":"signal_source","parameter2":""}
+]
+},
+{
+"text":"Submit Signal Telemetry (Debug Complete)",
+"localizationKey":"event_mystery_signal_start_opt3",
+"showRequirement":"REQ_QUEST_ACTIVE(quest_signal_trace)",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.complete","parameter2":"questId=quest_signal_trace"},
+{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}
+]
+},
+{"text":"Ignore Signal","localizationKey":"event_mystery_signal_start_opt4","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+},
+{
+"id":"signal_source",
+"text":"Following the signal leads to a hidden research station. It appears abandoned... or is it?",
+"localizationKey":"event_mystery_signal_signal_source_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"UI_Button_Click",
+"options":[
+{
+"text":"Board the Station",
+"localizationKey":"event_mystery_signal_signal_source_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"PushPage","parameter1":"station_interior","parameter2":""}
+]
+},
+{
+"text":"Scan From Distance",
+"localizationKey":"event_mystery_signal_signal_source_opt2",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"RandomBranch","parameter1":"60:scan_good|40:scan_bad","parameter2":""}
+]
+},
+{"text":"Leave","localizationKey":"leave_option","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+},
+{
+"id":"station_interior",
+"text":"The station interior is dark. Emergency lights flash red. You hear strange sounds echoing through the halls.",
+"localizationKey":"event_mystery_signal_station_interior_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{
+"text":"Search Lab",
+"localizationKey":"event_mystery_signal_station_interior_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"AddItem","parameter1":"500","parameter2":"2"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Search Armory",
+"localizationKey":"event_mystery_signal_station_interior_opt2",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"ChangeCurrency","parameter1":"250","parameter2":""},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Go Deeper",
+"localizationKey":"event_mystery_signal_station_interior_opt3",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"GoToPage","parameter1":"station_deep","parameter2":""}
+]
+},
+{
+"text":"Back to Ship",
+"localizationKey":"event_mystery_signal_station_interior_opt4",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+}
+]
+},
+{
+"id":"station_deep",
+"text":"Deep inside you find an AI terminal still operational. It offers you a choice.",
+"localizationKey":"event_mystery_signal_station_deep_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"UI_Button_Click",
+"options":[
+{
+"text":"Download Data",
+"localizationKey":"event_mystery_signal_station_deep_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"SetVariable","parameter1":"ai_data","parameter2":"TRUE"},
+{"type":"ChangeResearch","parameter1":"25","parameter2":""},
+{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}
+]
+},
+{"text":"Destroy the Terminal","localizationKey":"event_mystery_signal_station_deep_opt2","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"ChangeHull","parameter1":"-5","parameter2":""},{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+},
+{
+"id":"scan_good",
+"text":"Long-range scans reveal the station contains valuable research data.",
+"localizationKey":"event_mystery_signal_scan_good_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"UI_Success",
+"options":[
+{
+"text":"Board Now",
+"localizationKey":"event_mystery_signal_scan_good_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"PushPage","parameter1":"station_interior","parameter2":""}
+]
+},
+{"text":"Leave With Scan Data","localizationKey":"event_mystery_signal_scan_good_opt2","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"ChangeResearch","parameter1":"10","parameter2":""},{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+},
+{
+"id":"scan_bad",
+"text":"Your scan triggers an automated defense system! Turrets target your ship!",
+"localizationKey":"event_mystery_signal_scan_bad_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"UI_Fail",
+"options":[
+{
+"text":"Evade!",
+"localizationKey":"event_mystery_signal_scan_bad_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"RandomBranch","parameter1":"70:evade_success|30:evade_fail","parameter2":""}
+]
+}
+]
+},
+{
+"id":"evade_success",
+"text":"You dodge the turret fire and escape unscathed.",
+"localizationKey":"event_mystery_signal_evade_success_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{"text":"Continue","localizationKey":"continue_option","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+},
+{
+"id":"evade_fail",
+"text":"A turret blast grazes your hull before you can escape.",
+"localizationKey":"event_mystery_signal_evade_fail_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"UI_Fail",
+"options":[
+{"text":"Damage Report","localizationKey":"event_mystery_signal_evade_fail_opt1","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"ChangeHull","parameter1":"-15","parameter2":""},{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+}
+]
+}

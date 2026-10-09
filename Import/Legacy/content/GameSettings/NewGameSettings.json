@@ -1,0 +1,6 @@
+{
+"$path":"Assets/Resources/GameSettings/NewGameSettings.asset",
+"$type":"GameSettings",
+"$name":"NewGameSettings",
+"StartingItems":{"$ref":"Assets/Resources/Loot Tables/CreativeModeLootTable.asset","name":"CreativeModeLootTable","type":"LootTable"}
+}

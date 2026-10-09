@@ -1,0 +1,16 @@
+{
+"$path":"Assets/Resources/Items/Consumables/Paint/PaintBucket_06_Orange.asset",
+"$type":"PaintBucketItem",
+"$name":"PaintBucket_06_Orange",
+"RegistryKey":"PaintBucket_06_Orange",
+"Name":"Paint Bucket (Orange)",
+"Description":"Used to paint ship blocks Orange.",
+"BasePrice":1,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_95","type":"Sprite","sub":"spritetest2_transparent_95"},
+"Category":"Consumable",
+"Rarity":"Common",
+"EffectType":"Paint",
+"GrantsAbilities":[],
+"PaletteIndex":6
+}

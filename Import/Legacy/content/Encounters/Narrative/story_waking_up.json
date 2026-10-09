@@ -1,0 +1,173 @@
+{
+"$path":"Assets/Resources/Encounters/Narrative/story_waking_up.asset",
+"$type":"NarrativeEncounter",
+"$name":"story_waking_up",
+"encounterId":"story_waking_up",
+"isUnique":true,
+"repeatable":false,
+"startingPageId":"start",
+"lootTable":null,
+"presentationMode":"Default",
+"disableInputsMode":true,
+"pages":[
+{
+"id":"start",
+"text":"Lightheaded. Nothing but a high pitched sound deep in my ear. Blurry, overexposed, shapeless blobs of light floating in front of me. Can't feel my fingers, can't move my head, can't remember anything at all. The sharp smell of metallic blood and artificial sweetener enters my nostrils simultaneously.",
+"localizationKey":"story_waking_up_start_text",
+"imageName":"",
+"imageOverride":{"$ref":"Assets/Starsector Visuals/illustrations/cryosleeper_interior.jpg","name":"cryosleeper_interior","type":"Texture2D"},
+"tags":["story","tutorial","intro"],
+"audioClipName":"",
+"options":[
+{"text":"Try to move","localizationKey":"story_waking_up_start_opt1","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"GoToPage","parameter1":"syringe","parameter2":""}]}
+]
+},
+{
+"id":"syringe",
+"text":"A sharp syringe from my periphery punctures my neck. I feel the rush immediately, and the uncontrollable urge to vomit.",
+"localizationKey":"story_waking_up_syringe_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{
+"text":"Vomit",
+"localizationKey":"story_waking_up_syringe_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"GoToPage","parameter1":"first_breath","parameter2":""}
+]
+}
+]
+},
+{
+"id":"first_breath",
+"text":"As the pod slowly drains and fills with air, I puke out everything and take my first breath.",
+"localizationKey":"story_waking_up_first_breath_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{
+"text":"Look Around",
+"localizationKey":"story_waking_up_first_breath_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"GoToPage","parameter1":"look_around","parameter2":""}
+]
+}
+]
+},
+{
+"id":"look_around",
+"text":"As my vision clears, in front of me, through the glass pane, is a room full of cryo pods; some empty, most full. The initials A.R.K plastered all over the walls.",
+"localizationKey":"story_waking_up_look_around_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{"text":"Try to move","localizationKey":"story_waking_up_start_opt1","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"GoToPage","parameter1":"collapse","parameter2":""}]},
+{
+"text":"Recall the initials",
+"localizationKey":"story_waking_up_look_around_opt2",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"GoToPage","parameter1":"recall_ark","parameter2":""}
+]
+}
+]
+},
+{
+"id":"recall_ark",
+"text":"The A.R.K expedition. I'm part of it. It was supposed to save humanity or something. A long time must have passed if we made it to our destination.",
+"localizationKey":"story_waking_up_recall_ark_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{"text":"Try to move","localizationKey":"story_waking_up_start_opt1","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"GoToPage","parameter1":"collapse","parameter2":""}]}
+]
+},
+{
+"id":"collapse",
+"text":"The glass pane slides open. Legs still weak. I collapse forward onto my knees and hands. Out the corner of my eye, a familiar face I can't fully remember.\n\"Welcome back, captain.\"",
+"localizationKey":"story_waking_up_collapse_text",
+"imageName":"nora",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{
+"text":"Where am I?",
+"localizationKey":"story_waking_up_collapse_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"GoToPage","parameter1":"nora_briefing","parameter2":""}
+]
+},
+{
+"text":"Who are you?",
+"localizationKey":"story_waking_up_collapse_opt2",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"GoToPage","parameter1":"nora_briefing","parameter2":""}
+]
+},
+{
+"text":"Who am I?",
+"localizationKey":"story_waking_up_collapse_opt3",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"GoToPage","parameter1":"nora_briefing","parameter2":""}
+]
+}
+]
+},
+{
+"id":"nora_briefing",
+"text":"\"Not the time for jokes, captain. The hull of the ARK is breached by an unknown entity. We have to neutralize it.\"",
+"localizationKey":"story_waking_up_nora_briefing_text",
+"imageName":"nora",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{
+"text":"Understood",
+"localizationKey":"story_waking_up_nora_briefing_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"SetVariable","parameter1":"persist.story_waking_up","parameter2":"complete"},
+{"type":"CustomAction","parameter1":"flow.queue_encounter","parameter2":"id=story_choose_start_ship|intro=true"},
+{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}
+]
+}
+]
+}
+]
+}

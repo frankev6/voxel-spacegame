@@ -1,0 +1,15 @@
+{
+"$path":"Assets/Resources/Items/Consumables/strange_matter_container_empty.asset",
+"$type":"ResourceItem",
+"$name":"strange_matter_container_empty",
+"RegistryKey":"strange_matter_container_empty",
+"Name":"Strange Matter Container [EMPTY]",
+"Description":"",
+"BasePrice":1000,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_94","type":"Sprite","sub":"spritetest2_transparent_94"},
+"Category":"Misc",
+"Rarity":"Legendary",
+"EffectType":"None",
+"GrantsAbilities":[]
+}

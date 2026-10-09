@@ -1,0 +1,824 @@
+{
+  "quests": [
+    {
+      "id": "quest_ark_material_turnin",
+      "title": "Survey Local Materials",
+      "shortDescription": "Collect 3 raw materials and return to ARK.",
+      "detailedDescription": "NORA requested raw materials for emergency hull repairs. Gather at least three units of raw materials and deliver them at ARK station.",
+      "isUnique": true,
+      "repeatable": false,
+      "autoTrack": true,
+      "objectives": [
+        {
+          "id": "collect_raw_materials",
+          "title": "Collect Raw Materials",
+          "description": "Gather 3 units of raw materials.",
+          "objectiveType": "collect_item",
+          "targetId": "500",
+          "targetCount": 3
+        },
+        {
+          "id": "deliver_to_ark",
+          "title": "Deliver Materials",
+          "description": "Turn in the materials at ARK station.",
+          "objectiveType": "custom_condition",
+          "condition": {
+            "type": "world_state",
+            "key": "quest.ark_material_turnin.turnedin",
+            "value": "1"
+          }
+        }
+      ],
+      "entityOptions": [
+        {
+          "id": "turn_in_raw_materials_at_ark",
+          "entityId": "ark_station",
+          "scope": "any",
+          "text": "Hand over raw materials",
+          "consumeOnUse": true,
+          "showCondition": {
+            "all": [
+              {
+                "type": "quest_state",
+                "questId": "quest_ark_material_turnin",
+                "value": "Active"
+              },
+              {
+                "type": "objective_state",
+                "questId": "quest_ark_material_turnin",
+                "objectiveId": "collect_raw_materials",
+                "value": "true"
+              }
+            ]
+          },
+          "enableCondition": {
+            "type": "quest_state",
+            "questId": "quest_ark_material_turnin",
+            "value": "Active"
+          },
+          "outcomes": [
+            {
+              "type": "RemoveItem",
+              "parameter1": "500",
+              "parameter2": "3"
+            },
+            {
+              "type": "CustomAction",
+              "parameter1": "state.set",
+              "parameter2": "key=quest.ark_material_turnin.turnedin|value=1"
+            },
+            {
+              "type": "CustomAction",
+              "parameter1": "quest.complete_objective",
+              "parameter2": "questId=quest_ark_material_turnin|objectiveId=deliver_to_ark"
+            }
+          ]
+        }
+      ],
+      "markers": [
+        {
+          "entityId": "ark_station",
+          "label": "Return to ARK"
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_ark_material_turnin",
+          "logText": "Collect 3 raw materials and return to ARK station."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_ark_material_turnin",
+          "logText": "Materials delivered. Hull repair prep started."
+        },
+        {
+          "actionType": "SetWorldState",
+          "key": "story_survey",
+          "value": "complete"
+        }
+      ],
+      "onFailedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_ark_material_turnin",
+          "logText": "Mission failed before materials were delivered."
+        }
+      ]
+    },
+    {
+      "id": "quest_station_data_delivery",
+      "title": "Station Data Delivery",
+      "shortDescription": "Collect 2 survey fragments and submit them at ARK.",
+      "detailedDescription": "Mission Control wants fresh survey fragments for calibration work. Gather two fragments and submit them to ARK operations.",
+      "isUnique": true,
+      "repeatable": false,
+      "autoTrack": true,
+      "objectives": [
+        {
+          "id": "gather_fragments",
+          "title": "Gather Survey Fragments",
+          "description": "Collect 2 survey fragments.",
+          "objectiveType": "collect_item",
+          "targetId": "500",
+          "targetCount": 2
+        },
+        {
+          "id": "submit_fragments",
+          "title": "Submit Fragments",
+          "description": "Turn in fragments at ARK station.",
+          "objectiveType": "custom_condition",
+          "condition": {
+            "type": "world_state",
+            "key": "quest.station_data.submitted",
+            "value": "1"
+          }
+        }
+      ],
+      "entityOptions": [
+        {
+          "id": "turn_in_station_data_at_ark",
+          "entityId": "ark_station",
+          "scope": "any",
+          "text": "Submit station data fragments",
+          "consumeOnUse": true,
+          "showCondition": {
+            "all": [
+              {
+                "type": "quest_state",
+                "questId": "quest_station_data_delivery",
+                "value": "Active"
+              },
+              {
+                "type": "objective_state",
+                "questId": "quest_station_data_delivery",
+                "objectiveId": "gather_fragments",
+                "value": "true"
+              }
+            ]
+          },
+          "enableCondition": {
+            "type": "quest_state",
+            "questId": "quest_station_data_delivery",
+            "value": "Active"
+          },
+          "outcomes": [
+            {
+              "type": "RemoveItem",
+              "parameter1": "500",
+              "parameter2": "2"
+            },
+            {
+              "type": "CustomAction",
+              "parameter1": "state.set",
+              "parameter2": "key=quest.station_data.submitted|value=1"
+            },
+            {
+              "type": "CustomAction",
+              "parameter1": "quest.complete_objective",
+              "parameter2": "questId=quest_station_data_delivery|objectiveId=submit_fragments"
+            }
+          ]
+        }
+      ],
+      "markers": [
+        {
+          "entityId": "ark_station",
+          "label": "Submit Data at ARK"
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_station_data_delivery",
+          "logText": "Collect 2 survey fragments and submit them at ARK."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_station_data_delivery",
+          "logText": "Station data package submitted."
+        },
+        {
+          "actionType": "SetWorldState",
+          "key": "quest.station_data_delivery.complete",
+          "value": "1"
+        }
+      ],
+      "onFailedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_station_data_delivery",
+          "logText": "Data package was not delivered."
+        }
+      ]
+    },
+    {
+      "id": "quest_station_boarding_trial",
+      "title": "Station Boarding Trial",
+      "shortDescription": "Debrief the shady contact and validate their intel.",
+      "detailedDescription": "Mission Control flagged a bar contact as a reliability test. Debrief the contact and extract a verifiable intel marker.",
+      "isUnique": true,
+      "repeatable": false,
+      "autoTrack": true,
+      "objectives": [
+        {
+          "id": "meet_shady_contact",
+          "title": "Meet the Shady Contact",
+          "description": "Complete the shady contact encounter at the station bar.",
+          "objectiveType": "complete_encounter",
+          "targetId": "bar_shady_man",
+          "targetCount": 1
+        },
+        {
+          "id": "decode_tip",
+          "title": "Decode the Intel Tip",
+          "description": "Extract a confirmed intel marker from the contact.",
+          "objectiveType": "custom_condition",
+          "condition": {
+            "type": "world_state",
+            "key": "station_shady_truth",
+            "value": "revealed"
+          }
+        }
+      ],
+      "markers": [
+        {
+          "entityId": "ark_station",
+          "label": "Debrief with Mission Control"
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_station_boarding_trial",
+          "logText": "Visit the station bar and debrief the contact."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_station_boarding_trial",
+          "logText": "Boarding trial passed. Mission Control unlocked the next delivery test."
+        },
+        {
+          "actionType": "AcceptQuest",
+          "questId": "quest_station_data_delivery",
+          "boolValue": true
+        },
+        {
+          "actionType": "SetWorldState",
+          "key": "quest.station_boarding_trial.complete",
+          "value": "1"
+        }
+      ],
+      "onFailedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_station_boarding_trial",
+          "logText": "Boarding trial failed."
+        }
+      ]
+    },
+    {
+      "id": "quest_signal_trace",
+      "title": "Signal Trace",
+      "shortDescription": "Track and resolve one mystery signal encounter.",
+      "detailedDescription": "Intel wants rapid validation of unknown comm signatures. Resolve one mystery signal contact and upload telemetry.",
+      "isUnique": true,
+      "repeatable": false,
+      "autoTrack": true,
+      "objectives": [
+        {
+          "id": "resolve_signal_contact",
+          "title": "Resolve Mystery Signal",
+          "description": "Complete the mystery signal encounter.",
+          "objectiveType": "complete_encounter",
+          "targetId": "event_mystery_signal",
+          "targetCount": 1
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_signal_trace",
+          "logText": "Signal Trace contract accepted."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_signal_trace",
+          "logText": "Signal telemetry uploaded."
+        },
+        {
+          "actionType": "SetWorldState",
+          "key": "quest.signal_trace.complete",
+          "value": "1"
+        }
+      ],
+      "onFailedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_signal_trace",
+          "logText": "Signal trace aborted."
+        }
+      ]
+    },
+    {
+      "id": "quest_relation_watch",
+      "title": "Territory Relations Watch",
+      "shortDescription": "Record a faction-border entry and submit a report at ARK.",
+      "detailedDescription": "Command wants real-time telemetry from faction borders. Confirm entry, then file a structured report at ARK operations.",
+      "isUnique": true,
+      "repeatable": false,
+      "autoTrack": true,
+      "objectives": [
+        {
+          "id": "territory_seen",
+          "title": "Cross a Faction Border",
+          "description": "Enter a faction-controlled territory.",
+          "objectiveType": "visit_faction_territory",
+          "targetCount": 1
+        },
+        {
+          "id": "submit_report",
+          "title": "Submit Territory Report",
+          "description": "Submit your report at ARK station.",
+          "objectiveType": "custom_condition",
+          "condition": {
+            "type": "world_state",
+            "key": "quest.relation_watch.report",
+            "value": "submitted"
+          }
+        }
+      ],
+      "entityOptions": [
+        {
+          "id": "submit_territory_report_ark",
+          "entityId": "ark_station",
+          "scope": "any",
+          "text": "Submit territory intel report",
+          "consumeOnUse": true,
+          "showCondition": {
+            "all": [
+              {
+                "type": "quest_state",
+                "questId": "quest_relation_watch",
+                "value": "Active"
+              },
+              {
+                "type": "objective_state",
+                "questId": "quest_relation_watch",
+                "objectiveId": "territory_seen",
+                "value": "true"
+              }
+            ]
+          },
+          "enableCondition": {
+            "type": "quest_state",
+            "questId": "quest_relation_watch",
+            "value": "Active"
+          },
+          "outcomes": [
+            {
+              "type": "CustomAction",
+              "parameter1": "state.set",
+              "parameter2": "key=quest.relation_watch.report|value=submitted"
+            },
+            {
+              "type": "CustomAction",
+              "parameter1": "quest.complete_objective",
+              "parameter2": "questId=quest_relation_watch|objectiveId=submit_report"
+            }
+          ]
+        }
+      ],
+      "markers": [
+        {
+          "entityId": "ark_station",
+          "label": "Report to ARK"
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_relation_watch",
+          "logText": "Territory entry confirmed. Submit the report at ARK."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_relation_watch",
+          "logText": "Territory report filed and validated."
+        },
+        {
+          "actionType": "AdjustFactionRelation",
+          "intValue": 5
+        }
+      ],
+      "onFailedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_relation_watch",
+          "logText": "Territory report workflow failed."
+        }
+      ]
+    },
+    {
+      "id": "quest_hostile_blackbox",
+      "title": "Hostile Telemetry Blackbox",
+      "shortDescription": "Survive one hostile contact and return telemetry to ARK.",
+      "detailedDescription": "Border scouts tagged hostile signatures. Survive one engagement, recover telemetry, and submit the blackbox package at ARK.",
+      "isUnique": true,
+      "repeatable": false,
+      "autoTrack": true,
+      "objectives": [
+        {
+          "id": "survive_contact",
+          "title": "Survive Hostile Contact",
+          "description": "Complete one encounter after entering hostile territory.",
+          "objectiveType": "complete_encounter",
+          "targetCount": 1
+        },
+        {
+          "id": "submit_blackbox",
+          "title": "Submit Blackbox Telemetry",
+          "description": "Deliver hostile telemetry to ARK station.",
+          "objectiveType": "custom_condition",
+          "condition": {
+            "type": "world_state",
+            "key": "quest.hostile_blackbox.turnin",
+            "value": "done"
+          }
+        }
+      ],
+      "entityOptions": [
+        {
+          "id": "turn_in_blackbox_at_ark",
+          "entityId": "ark_station",
+          "scope": "any",
+          "text": "Turn in hostile telemetry blackbox",
+          "consumeOnUse": true,
+          "showCondition": {
+            "all": [
+              {
+                "type": "quest_state",
+                "questId": "quest_hostile_blackbox",
+                "value": "Active"
+              },
+              {
+                "type": "objective_state",
+                "questId": "quest_hostile_blackbox",
+                "objectiveId": "survive_contact",
+                "value": "true"
+              }
+            ]
+          },
+          "enableCondition": {
+            "type": "quest_state",
+            "questId": "quest_hostile_blackbox",
+            "value": "Active"
+          },
+          "outcomes": [
+            {
+              "type": "CustomAction",
+              "parameter1": "state.set",
+              "parameter2": "key=quest.hostile_blackbox.turnin|value=done"
+            },
+            {
+              "type": "CustomAction",
+              "parameter1": "quest.complete_objective",
+              "parameter2": "questId=quest_hostile_blackbox|objectiveId=submit_blackbox"
+            }
+          ]
+        }
+      ],
+      "markers": [
+        {
+          "entityId": "ark_station",
+          "label": "Turn In Blackbox"
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_hostile_blackbox",
+          "logText": "Survive one hostile contact and submit telemetry at ARK."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_hostile_blackbox",
+          "logText": "Hostile telemetry package submitted."
+        },
+        {
+          "actionType": "SetWorldState",
+          "key": "quest.hostile_blackbox.complete",
+          "value": "1"
+        }
+      ],
+      "onFailedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_hostile_blackbox",
+          "logText": "Hostile telemetry package lost."
+        },
+        {
+          "actionType": "SetWorldState",
+          "key": "quest.hostile_blackbox.failed",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "id": "quest_trigger_fail_test",
+      "title": "Failure Pipeline Sandbox",
+      "shortDescription": "A synthetic quest to test explicit fail and fail-chain actions.",
+      "detailedDescription": "This sandbox quest exists to stress test failure listeners, manual fail controls, and follow-up actions.",
+      "isUnique": true,
+      "repeatable": false,
+      "autoTrack": true,
+      "objectives": [
+        {
+          "id": "reach_any_system",
+          "title": "Reach Any System",
+          "description": "Enter any system once.",
+          "objectiveType": "reach_system",
+          "targetCount": 1
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_trigger_fail_test",
+          "logText": "Failure sandbox accepted."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_trigger_fail_test",
+          "logText": "Failure sandbox completed."
+        }
+      ],
+      "onFailedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_trigger_fail_test",
+          "logText": "Failure sandbox failed; spawning follow-up contract."
+        },
+        {
+          "actionType": "GenerateMissionFromTemplate",
+          "templateId": "tmpl_bounty_probe",
+          "boolValue": true
+        }
+      ]
+    },
+    {
+      "id": "quest_territory_recon",
+      "title": "Hostile Territory Recon",
+      "shortDescription": "Enter hostile territory, survive one encounter, and report to ARK.",
+      "detailedDescription": "Command has requested recon in hostile space. Survive one encounter and report your findings at ARK.",
+      "isUnique": true,
+      "repeatable": false,
+      "autoTrack": true,
+      "objectives": [
+        {
+          "id": "fight_once",
+          "title": "Survive One Encounter",
+          "description": "Complete one encounter successfully.",
+          "objectiveType": "complete_encounter",
+          "targetCount": 1
+        },
+        {
+          "id": "report_back",
+          "title": "Report to ARK",
+          "description": "Interact with ARK station to submit your report.",
+          "objectiveType": "interact_entity",
+          "targetId": "ark_station",
+          "targetCount": 1
+        }
+      ],
+      "markers": [
+        {
+          "entityId": "ark_station",
+          "label": "Submit Recon Report"
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_territory_recon",
+          "logText": "Recon assignment accepted."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_territory_recon",
+          "logText": "Recon complete. Debrief transmitted."
+        }
+      ],
+      "onFailedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "quest_territory_recon",
+          "logText": "Recon assignment failed."
+        }
+      ]
+    },
+    {
+      "id": "story_chain_signal_1",
+      "title": "Story: Whisper Chain I",
+      "shortDescription": "Travel to a nearby star and triangulate the anomalous signal.",
+      "detailedDescription": "Mission Control has identified a repeating whisper-band signature. Move to a neighboring system and establish a stable lock.",
+      "isUnique": true,
+      "repeatable": false,
+      "autoTrack": true,
+      "isStory": true,
+      "objectives": [
+        {
+          "id": "reach_signal_system",
+          "title": "Reach Signal System",
+          "description": "Enter a non-ARK system carrying the whisper signature.",
+          "objectiveType": "reach_system",
+          "targetId": "basesolarsystemdata",
+          "targetCount": 1
+        }
+      ],
+      "markers": [
+        {
+          "systemId": "basesolarsystemdata",
+          "label": "Whisper Signal"
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "story_chain_signal_1",
+          "logText": "Signal lock initiated. Move to a neighboring system."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "story_chain_signal_1",
+          "logText": "Signal lock confirmed. Interceptor contact incoming."
+        },
+        {
+          "actionType": "SpawnEntity",
+          "entityId": "npc_story_hunter",
+          "intValue": 1,
+          "parameters": [
+            {
+              "key": "count",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "actionType": "AcceptQuest",
+          "questId": "story_chain_signal_2",
+          "boolValue": true
+        },
+        {
+          "actionType": "TrackQuest",
+          "questId": "story_chain_signal_2"
+        }
+      ],
+      "onFailedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "story_chain_signal_1",
+          "logText": "Signal triangulation interrupted."
+        }
+      ]
+    },
+    {
+      "id": "story_chain_signal_2",
+      "title": "Story: Whisper Chain II",
+      "shortDescription": "Destroy the interceptor that responded to your signal lock.",
+      "detailedDescription": "The lock drew a hostile interceptor into the system. Eliminate the hunter before it reports your position.",
+      "isUnique": true,
+      "repeatable": false,
+      "autoTrack": true,
+      "isStory": true,
+      "objectives": [
+        {
+          "id": "destroy_interceptor",
+          "title": "Destroy Interceptor",
+          "description": "Destroy the story hunter fleet.",
+          "objectiveType": "destroy_entity",
+          "targetId": "npc_story_hunter",
+          "targetCount": 1
+        }
+      ],
+      "markers": [
+        {
+          "entityId": "npc_story_hunter",
+          "label": "Hunter Interceptor"
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "story_chain_signal_2",
+          "logText": "Hunter contact acquired. Intercept and destroy."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "story_chain_signal_2",
+          "logText": "Interceptor neutralized. Return to ARK for debrief."
+        },
+        {
+          "actionType": "AcceptQuest",
+          "questId": "story_chain_signal_3",
+          "boolValue": true
+        },
+        {
+          "actionType": "TrackQuest",
+          "questId": "story_chain_signal_3"
+        }
+      ],
+      "onFailedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "story_chain_signal_2",
+          "logText": "Interceptor engagement failed."
+        }
+      ]
+    },
+    {
+      "id": "story_chain_signal_3",
+      "title": "Story: Whisper Chain III",
+      "shortDescription": "Return to ARK and debrief Mission Control.",
+      "detailedDescription": "With the interceptor down, bring the recovered telemetry back to ARK and submit a final debrief.",
+      "isUnique": true,
+      "repeatable": false,
+      "autoTrack": true,
+      "isStory": true,
+      "objectives": [
+        {
+          "id": "return_to_ark_system",
+          "title": "Return to ARK System",
+          "description": "Travel back to the ARK staging system.",
+          "objectiveType": "reach_system",
+          "targetId": "ark_start",
+          "targetCount": 1
+        },
+        {
+          "id": "debrief_at_ark",
+          "title": "Debrief at ARK",
+          "description": "Interact with ARK station to submit recovered telemetry.",
+          "objectiveType": "interact_entity",
+          "targetId": "ark_station",
+          "targetCount": 1
+        }
+      ],
+      "markers": [
+        {
+          "systemId": "ark_start",
+          "label": "Return to ARK"
+        },
+        {
+          "entityId": "ark_station",
+          "label": "Mission Debrief"
+        }
+      ],
+      "onAcceptedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "story_chain_signal_3",
+          "logText": "Return to ARK and submit your telemetry package."
+        }
+      ],
+      "onCompletedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "story_chain_signal_3",
+          "logText": "Whisper Chain sequence complete."
+        },
+        {
+          "actionType": "SetWorldState",
+          "key": "story.whisper_chain.complete",
+          "value": "1"
+        }
+      ],
+      "onFailedActions": [
+        {
+          "actionType": "AddLog",
+          "questId": "story_chain_signal_3",
+          "logText": "Debrief sequence failed."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+"$path":"Assets/Resources/Items/Modules/Module_Scrap_Collector.asset",
+"$type":"SlottableItem",
+"$name":"module_scrap_collector",
+"RegistryKey":"module_scrap_collector",
+"Name":"Scrap Collector",
+"Description":"",
+"BasePrice":15,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_52","type":"Sprite","sub":"spritetest2_transparent_52"},
+"Category":"Module",
+"Rarity":"Common",
+"EffectType":"None",
+"GrantsAbilities":[],
+"RequiredSocketType":"Core",
+"Modifiers":[
+{"StatToModify":"EnergyCapacity","ModifyType":"Add","ModifierRange":"Global","Value":10}
+]
+}

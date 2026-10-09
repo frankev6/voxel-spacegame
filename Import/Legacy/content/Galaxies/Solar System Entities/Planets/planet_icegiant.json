@@ -1,0 +1,39 @@
+{
+"$path":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_icegiant.asset",
+"$type":"PlanetEntity",
+"$name":"planet_icegiant",
+"entityId":"planet_icegiant",
+"ownerFactionIdOverride":"",
+"prefab":{"$ref":"Assets/Game/Prefabs/Galaxy/PlanetSolarSystem.prefab","name":"PlanetSolarSystem","type":"GameObject"},
+"mapIcon":{"$ref":"Assets/Starsector Visuals/icons/radar_circle.png","name":"radar_circle","type":"Texture2D"},
+"color":[0.11173905432224274,0.43581309914588928,0.76415097713470459,1],
+"description":"This is a placeholder description blah blah blah",
+"encounterPool":{
+"poolName":"",
+"encounters":[
+{"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/event_cryo_vault.asset","name":"event_cryo_vault","type":"NarrativeEncounter"},"probabilityWeight":1}
+]
+},
+"encounterIdOverride":"",
+"autoInteractOnContact":false,
+"orbitType":"Static",
+"orbitSpeedMultiplier":1,
+"showOrbitLine":true,
+"spawnType":"AroundStar",
+"minOrbitRadius":10,
+"maxOrbitRadius":300,
+"canHaveSatellites":true,
+"spawnRequirement":"",
+"spawnBlocker":"",
+"planetType":"IceGiant",
+"preferredOrbitDistance":0.699999988079071,
+"minRadius":12,
+"maxRadius":16,
+"hasAtmosphere":false,
+"atmosphereColor":[0.5,0.699999988079071,1,0.30000001192092896],
+"hasRings":false,
+"planetTextures":[
+{"$ref":"Assets/Planets of the Solar System 3D/Textures/Planets/Neptune_2k.png","name":"Neptune_2k","type":"Texture2D"},
+{"$ref":"Assets/Planets of the Solar System 3D/Textures/Planets/Uranus_2k.png","name":"Uranus_2k","type":"Texture2D"}
+]
+}

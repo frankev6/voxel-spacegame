@@ -1,0 +1,19 @@
+{
+    "name": "Game.Economy",
+    "rootNamespace": "Game.Economy",
+    "references": [
+        "Game.Core",
+        "Game.Data",
+        "Unity.Collections",
+        "Unity.Mathematics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

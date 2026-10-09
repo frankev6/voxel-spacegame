@@ -1,0 +1,40 @@
+{
+"$path":"Assets/Resources/Galaxies/Solar System Entities/Stars/star_entity.asset",
+"$type":"StarEntity",
+"$name":"star_entity",
+"entityId":"",
+"ownerFactionIdOverride":"",
+"prefab":{"$ref":"Assets/Game/Prefabs/Galaxy/StarSolarSystem.prefab","name":"StarSolarSystem","type":"GameObject"},
+"mapIcon":{"$ref":"Assets/Starsector Visuals/icons/abyssal_light.png","name":"abyssal_light","type":"Texture2D"},
+"color":[1,0.92360222339630127,0.38207548856735229,1],
+"description":"This is a placeholder description blah blah blah",
+"encounterPool":{
+"poolName":"",
+"encounters":[
+{
+"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/event_solar_parasite.asset","name":"event_solar_parasite","type":"NarrativeEncounter"},
+"probabilityWeight":1
+}
+]
+},
+"encounterIdOverride":"",
+"autoInteractOnContact":false,
+"orbitType":"Static",
+"orbitSpeedMultiplier":1,
+"showOrbitLine":false,
+"spawnType":"Random",
+"minOrbitRadius":80,
+"maxOrbitRadius":300,
+"canHaveSatellites":false,
+"spawnRequirement":"",
+"spawnBlocker":"",
+"minTemperature":5000,
+"maxTemperature":50000,
+"minScale":30,
+"maxScale":40,
+"minLuminosity":3,
+"maxLuminosity":5,
+"minPlanetOrbitRadius":25,
+"maxSystemRadius":160,
+"galaxyMapPrefab":null
+}

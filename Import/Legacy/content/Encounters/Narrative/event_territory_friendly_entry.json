@@ -1,0 +1,50 @@
+{
+"$path":"Assets/Resources/Encounters/Narrative/event_territory_friendly_entry.asset",
+"$type":"NarrativeEncounter",
+"$name":"event_territory_friendly_entry",
+"encounterId":"event_territory_friendly_entry",
+"isUnique":false,
+"repeatable":true,
+"startingPageId":"start",
+"lootTable":null,
+"presentationMode":"Default",
+"disableInputsMode":false,
+"pages":[
+{
+"id":"start",
+"text":"Friendly patrol signatures lock onto your ship and then stand down after an encrypted handshake. Local command uplinks fresh intel channels.",
+"localizationKey":"event_territory_friendly_entry_start_text",
+"imageName":"",
+"imageOverride":null,
+"tags":["territory","friendly"],
+"audioClipName":"UI_View_Open",
+"options":[
+{
+"text":"Acknowledge Patrol Assignment",
+"localizationKey":"event_territory_friendly_entry_start_opt1",
+"showRequirement":"REQ_QUEST_ACTIVE(quest_relation_watch)",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.add_log","parameter2":"questId=quest_relation_watch|text=Entered allied territory and received patrol assignment."},
+{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}
+]
+},
+{
+"text":"Request Local Contract",
+"localizationKey":"event_territory_friendly_entry_start_opt2",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.generate_template","parameter2":"templateId=tmpl_signal_relay|track=true"},
+{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}
+]
+},
+{"text":"Continue Patrol","localizationKey":"event_territory_friendly_entry_start_opt3","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+}
+]
+}

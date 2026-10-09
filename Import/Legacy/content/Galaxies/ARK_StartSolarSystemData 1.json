@@ -1,0 +1,45 @@
+{
+"$path":"Assets/Resources/Galaxies/ARK_StartSolarSystemData 1.asset",
+"$type":"SolarSystemData",
+"$name":"ARK_StartSolarSystemData 1",
+"systemId":"ark_start",
+"openWorldCoordinates":[0,0],
+"minEntities":8,
+"maxEntities":9,
+"baseOrbitSpeed":6,
+"orbitSpacingScale":1,
+"starEntities":[
+{"$ref":"Assets/Resources/Galaxies/Solar System Entities/Stars/star_entity.asset","name":"star_entity","type":"StarEntity"}
+],
+"connectedSystems":[
+{"$ref":"Assets/Resources/Galaxies/BaseSolarSystemData.asset","name":"BaseSolarSystemData","type":"SolarSystemData"}
+],
+"entityPool":[
+{
+"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_barren.asset","name":"planet_barren","type":"PlanetEntity"},
+"weight":1,
+"maxCount":1
+},
+{"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_rocky.asset","name":"planet_rocky","type":"PlanetEntity"},"weight":1,"maxCount":1},
+{
+"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_gasgiant.asset","name":"planet_gasgiant","type":"PlanetEntity"},
+"weight":1,
+"maxCount":1
+},
+{"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/ark_station_1.asset","name":"ark_station_1","type":"SolarSystemEntity"},"weight":1,"maxCount":1},
+{"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/moon_1.asset","name":"moon_1","type":"SolarSystemEntity"},"weight":1,"maxCount":1},
+{
+"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/derelict_ship_entity.asset","name":"derelict_ship_entity","type":"SolarSystemEntity"},
+"weight":1,
+"maxCount":2
+},
+{
+"entity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/abandoned_station.asset","name":"abandoned_station","type":"SolarSystemEntity"},
+"weight":1,
+"maxCount":1
+}
+],
+"maxAsteroidBelts":1,
+"asteroidBeltEntity":null,
+"encounterOverride":null
+}

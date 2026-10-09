@@ -1,0 +1,99 @@
+# Roadmap
+
+**Status: BINDING order of work.** Milestones run in order. Within a milestone, any task whose dependencies are `done` may start. The art track runs in parallel, behind its own approval gate.
+
+Task status lives in [LEDGER.md](LEDGER.md). Task definitions live in the specs.
+
+```mermaid
+flowchart LR
+    M0[M0 Foundations] --> M1[M1 Voxel core + flight]
+    M1 --> M2[M2 Combat and destruction]
+    M2 --> M3[M3 Vertical slice]
+    M3 --> M4[M4 Depth and scale]
+    A0[A0 Art direction proposal] --> G{{Owner approval of design system}}
+    G --> A1[A1 Asset production]
+    A1 --> A2[A2 Placeholder replacement]
+    M1 -.placeholders until A2.-> A2
+```
+
+## M0 — Foundations
+
+**Goal:** an empty but correctly structured game that boots from any scene, with the content pipeline, saves container and the test/CLI loop working.
+
+| Specs | Scope in this milestone |
+|---|---|
+| SPEC-01 Boot, services, scene flow | All |
+| SPEC-02 Core utilities | All |
+| SPEC-03 Input | Action maps, contexts, `PlayerCommand` sampling |
+| SPEC-04 Content and blocks | `ContentDatabase`, `BlockDefinition`, orientation tables, block blob |
+| SPEC-05 Persistence | Container, slots, participants, migrations framework |
+| SPEC-70 Dev tools | Harness port, playtest scripts |
+| SPEC-71 Testing | Test helpers, `EcsTestWorld`, perf harness |
+| SPEC-72 Legacy migration | Blocks, items and ship blueprints converted |
+
+**Exit gates:** Play from `Boot`, `MainMenu` or `World` boots correctly; Enter Play Mode ≤ 1 s with domain reload off and no leaked state between plays; save round-trip test passes; all legacy blocks and ships import with zero validator errors; `tools/compile.sh`, `tools/test.sh editmode` and `tools/check-docs.py` all pass.
+
+## M1 — Voxel core and flight
+
+**Goal:** ships and a 1M-cell station render and collide at scale, and the player can fly a ship built from blocks.
+
+| Specs | Scope |
+|---|---|
+| SPEC-10 Voxel data model | All |
+| SPEC-11 Voxel rendering | LOD0, LOD1, prop instancing |
+| SPEC-12 Voxel physics | All |
+| SPEC-20 Flight | All |
+| SPEC-62 Camera | Third-person follow rig |
+| SPEC-60 UI framework | `UIRoot`, `UINavigator`, pause/input contexts (needed for menus) |
+
+**Exit gates:** voxel gates in [06-performance-budgets.md](06-performance-budgets.md) pass (1M-cell station idle ≤ 2 ms; spawn without hitches); a ship with off-centre thrusters turns because of torque; ramming pushes ships physically.
+
+## M2 — Combat and destruction
+
+**Goal:** the core fantasy: weapons carve ships, structures break apart into debris, chunks and hulks.
+
+| Specs | Scope |
+|---|---|
+| SPEC-13 Damage and destruction | All |
+| SPEC-21 Weapons | All weapon types used by legacy content |
+| SPEC-22 Power, shields, stats | All |
+| SPEC-23 AI | Single-ship combat AI (fleets in M4) |
+| SPEC-24 Abilities | Framework + the 2 legacy abilities |
+| SPEC-63 VFX | Debris particles, hits, explosions, beams |
+| SPEC-64 Audio | Event drain, voice caps, mixer |
+
+**Exit gates:** combat gates pass; determinism test passes at 30/60/144 FPS; 10-minute soak with zero errors and zero leaks.
+
+## M3 — Vertical slice
+
+**Goal:** the loop from [00-vision.md](00-vision.md) end to end in 2–4 star systems.
+
+| Specs | Scope |
+|---|---|
+| SPEC-30 Galaxy generation | All |
+| SPEC-31 Star-system streaming | All |
+| SPEC-32 Travel | Lanes and jumps (supercruise may slip to M4) |
+| SPEC-33 Encounters and factions | Director + one hostile encounter type |
+| SPEC-40 Narrative core | All |
+| SPEC-41 Dialog | Yarn spike, runner, presenter |
+| SPEC-42 Quests and mystery | Opening chapter |
+| SPEC-50 Economy | Inventory, wallet, loot, merchant |
+| SPEC-51 Ship editor | Blueprint Lab + commit against inventory |
+| SPEC-61 Screens and HUD | Menus, HUD, inventory, map, dialog, editor UI |
+| SPEC-05 Persistence | All participants |
+
+**Exit gates:** every old-prototype regression scenario in [05-testing.md §5](05-testing.md#5-old-prototype-regression-scenarios) passes; a scripted full playthrough of the opening (harness) passes; save/load anywhere outside combat.
+
+## M4 — Depth and scale
+
+AI fleets and formations, in-world editing when docked, supercruise, faction territory, more content, LOD2/dormancy polish, gamepad. Specs mark these tasks with milestone `M4`.
+
+## Art track (parallel)
+
+| Step | Spec | Gate |
+|---|---|---|
+| **A0** Art direction and design system proposal (visual pillars, palette, typography, UI tokens and components, block design language, VFX language, sample mockups) | SPEC-80 | **Owner approval** recorded in SPEC-80 §Approval. Nothing in A1 starts before this |
+| **A1** Asset production: block kit, materials, VFX, UI kit, icons, audio pass | SPEC-81 | Each asset reviewed against the approved design system |
+| **A2** Placeholder replacement: swap every `_Placeholder` reference, delete the folder | SPEC-81 | `Assets/Game/Art/_Placeholder/` is empty and deleted; no third-party art left |
+
+Until A2, all milestones use placeholders. Code must keep visuals swappable (conventions §5).

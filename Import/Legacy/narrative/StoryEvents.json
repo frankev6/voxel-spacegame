@@ -1,0 +1,298 @@
+{
+  "encounters": [
+    {
+      "id": "story_waking_up",
+      "isUnique": true,
+      "repeatable": false,
+      "disableInputsMode": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "Lightheaded. Nothing but a high pitched sound deep in my ear. Blurry, overexposed, shapeless blobs of light floating in front of me. Can't feel my fingers, can't move my head, can't remember anything at all. The sharp smell of metallic blood and artificial sweetener enters my nostrils simultaneously.",
+          "image": "",
+          "tags": [
+            "story",
+            "tutorial",
+            "intro"
+          ],
+          "audio": "",
+          "options": [
+            {
+              "text": "Try to move",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(syringe)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "syringe",
+          "text": "A sharp syringe from my periphery punctures my neck. I feel the rush immediately, and the uncontrollable urge to vomit.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Vomit",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(first_breath)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "first_breath",
+          "text": "As the pod slowly drains and fills with air, I puke out everything and take my first breath.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Look Around",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(look_around)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "look_around",
+          "text": "As my vision clears, in front of me, through the glass pane, is a room full of cryo pods; some empty, most full. The initials A.R.K plastered all over the walls.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Try to move",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(collapse)",
+              "consume": false
+            },
+            {
+              "text": "Recall the initials",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(recall_ark)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "recall_ark",
+          "text": "The A.R.K expedition. I'm part of it. It was supposed to save humanity or something. A long time must have passed if we made it to our destination.",
+          "image": "",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Try to move",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(collapse)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "collapse",
+          "text": "The glass pane slides open. Legs still weak. I collapse forward onto my knees and hands. Out the corner of my eye, a familiar face I can't fully remember.\n\"Welcome back, captain.\"",
+          "image": "nora",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Where am I?",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(nora_briefing)",
+              "consume": false
+            },
+            {
+              "text": "Who are you?",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(nora_briefing)",
+              "consume": false
+            },
+            {
+              "text": "Who am I?",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "GOTO(nora_briefing)",
+              "consume": false
+            }
+          ]
+        },
+        {
+          "id": "nora_briefing",
+          "text": "\"Not the time for jokes, captain. The hull of the ARK is breached by an unknown entity. We have to neutralize it.\"",
+          "image": "nora",
+          "tags": [],
+          "audio": "",
+          "options": [
+            {
+              "text": "Understood",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "SET_VAR(persist.story_waking_up, complete); CUSTOM_ACTION(flow.queue_encounter,id=story_choose_start_ship|intro=true); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "story_choose_start_ship",
+      "isUnique": false,
+      "repeatable": true,
+      "disableInputsMode": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "The ARK bay systems come online. Choose your starting ship chassis.",
+          "image": "nora",
+          "tags": [
+            "story",
+            "tutorial",
+            "intro"
+          ],
+          "audio": "",
+          "options": [
+            {
+              "text": "Take Fighter",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "ADD_ITEM(ship_fighter, 1); CUSTOM_ACTION(spawn.entity,entityId=npc_probe_tutorial|anchor=ark_station|count=1); CUSTOM_ACTION(state.set,key=run.intro_phase|value=complete); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Take Frigate",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "ADD_ITEM(ship_frigate, 1); CUSTOM_ACTION(spawn.entity,entityId=npc_probe_tutorial|anchor=ark_station|count=1); CUSTOM_ACTION(state.set,key=run.intro_phase|value=complete); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Take Vestari",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "ADD_ITEM(ship_vestari, 1); CUSTOM_ACTION(spawn.entity,entityId=npc_probe_tutorial|anchor=ark_station|count=1); CUSTOM_ACTION(state.set,key=run.intro_phase|value=complete); END(TRUE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "story_survey_system",
+      "isUnique": true,
+      "repeatable": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "We must repair the hull breach left by the xeno probes. We'll need raw materials to do so. Survey the local system for any useful materials and come back once you're done.",
+          "image": "nora",
+          "tags": [
+            "story",
+            "tutorial",
+            "mission"
+          ],
+          "audio": "",
+          "options": [
+            {
+              "text": "Hand over the raw materials",
+              "showReq": "",
+              "enableReq": "REQ_ITEM(500, 3)",
+              "actions": "REMOVE_ITEM(500, 3); SET_VAR(story_survey, complete); ADD_ITEM(717185106, 1); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Leave",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(FALSE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "story_activate_gate",
+      "isUnique": true,
+      "repeatable": false,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "You see a circular gate large enough for a planet to fit through. Whatever technology was necessary to build this monolith, is far from any we currently possess. While we can't understand how they were built, our survey data says the gate reacts to awoken strangelets. Perhaps we can re-activate it.",
+          "image": "",
+          "tags": [
+            "story",
+            "tutorial",
+            "mission"
+          ],
+          "audio": "",
+          "options": [
+            {
+              "text": "Re-activate Gate",
+              "showReq": "",
+              "enableReq": "REQ_ITEM(717185106, 1)",
+              "actions": "REMOVE_ITEM(717185106, 1); SET_VAR(persist.story_gate_activated, complete); CUSTOM_ACTION(world.replace_entity,system=ark_start|from=exitgate_dormant|to=exitgate_active|inPlace=true); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Leave",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(FALSE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "story_use_active_gate",
+      "isUnique": false,
+      "repeatable": true,
+      "lootTable": "",
+      "pages": [
+        {
+          "id": "start",
+          "text": "The gate hums with awakened energy. Do you want to engage the warpgate and exit this solar system?",
+          "image": "",
+          "tags": [
+            "story",
+            "navigation",
+            "gate"
+          ],
+          "audio": "",
+          "options": [
+            {
+              "text": "Use warpgate",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "CUSTOM_ACTION(world.exit_system); END(TRUE)",
+              "consume": false
+            },
+            {
+              "text": "Leave",
+              "showReq": "",
+              "enableReq": "",
+              "actions": "END(FALSE)",
+              "consume": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

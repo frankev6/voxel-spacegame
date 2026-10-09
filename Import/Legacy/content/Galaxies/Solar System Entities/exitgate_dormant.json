@@ -1,0 +1,31 @@
+{
+"$path":"Assets/Resources/Galaxies/Solar System Entities/exitgate_dormant.asset",
+"$type":"SolarSystemEntity",
+"$name":"exitgate_dormant",
+"entityId":"exitgate_dormant",
+"ownerFactionIdOverride":"",
+"prefab":{"$ref":"Assets/Game/Prefabs/ExitGateDormantPrefab.prefab","name":"ExitGateDormantPrefab","type":"GameObject"},
+"mapIcon":{"$ref":"Assets/Starsector Visuals/icons/jump-point2.png","name":"jump-point2","type":"Texture2D"},
+"color":[0.5215686559677124,0.11372549086809158,0.772549033164978,1],
+"description":"This is a placeholder description blah blah blah",
+"encounterPool":{
+"poolName":"",
+"encounters":[
+{
+"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/story_activate_gate.asset","name":"story_activate_gate","type":"NarrativeEncounter"},
+"probabilityWeight":1
+}
+]
+},
+"encounterIdOverride":"",
+"autoInteractOnContact":false,
+"orbitType":"Static",
+"orbitSpeedMultiplier":1,
+"showOrbitLine":false,
+"spawnType":"AroundStar",
+"minOrbitRadius":15,
+"maxOrbitRadius":160,
+"canHaveSatellites":false,
+"spawnRequirement":"",
+"spawnBlocker":""
+}

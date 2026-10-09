@@ -1,0 +1,15 @@
+{
+"$path":"Assets/Resources/Items/Consumables/slot_expansion_item.asset",
+"$type":"ResourceItem",
+"$name":"slot_expansion_item",
+"RegistryKey":"slot_expansion_item",
+"Name":"Slot Expansion",
+"Description":"Adds 1 slot to the selected block",
+"BasePrice":500,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_74","type":"Sprite","sub":"spritetest2_transparent_74"},
+"Category":"Consumable",
+"Rarity":"Epic",
+"EffectType":"AddModuleSlot",
+"GrantsAbilities":[]
+}

@@ -1,0 +1,233 @@
+.container {
+    flex-grow: 1;
+    width: auto;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+    color: rgb(255, 197, 0);
+    align-self: auto;
+}
+
+.inventory {
+    width: 880px;
+    padding: 20px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-grow: 0;
+    background-image: url("project://database/Assets/Game/Visuals/Sprites/HOLO%20UI/UI_HoloBook_Cover01a.png?fileID=2800000&guid=a45c250c6c697304ca256e8198175918&type=3#UI_HoloBook_Cover01a");
+    height: 800px;
+    align-self: center;
+}
+
+.toolbar {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-grow: 0;
+    align-self: center;
+    align-content: flex-start;
+}
+
+.inventoryHeader {
+    position: absolute;
+    top: -32px;
+    left: -27px;
+    width: 350px;
+    height: 70px;
+    justify-content: center;
+    align-items: center;
+}
+
+Label {
+    font-size: 24px;
+    white-space: normal;
+}
+
+.inventoryFrame {
+    position: absolute;
+    top: -10px;
+    left: -17px;
+    width: 80%;
+    height: 100%;
+    -unity-slice-scale: 0.5;
+    align-self: center;
+}
+
+.toolbarFrame {
+    position: absolute;
+    width: 326px;
+    -unity-slice-scale: 0.5;
+}
+
+.slotsContainer {
+    flex-grow: 1;
+    padding-top: 30px;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-shrink: 0;
+}
+
+.toolbarSlotsContainer {
+    flex-grow: 1;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-shrink: 0;
+}
+
+.slot {
+    width: 80px;
+    height: 80px;
+    margin: 4px;
+    background-image: url("project://database/Assets/Game/Visuals/Sprites/HOLO%20UI/UI_HoloBook_SlotAvailable02a.png?fileID=21300000&guid=03da470961234e5429a0a0645f36ffb0&type=3#UI_HoloBook_SlotAvailable02a");
+    margin-top: 6px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    margin-left: 6px;
+}
+
+.selected {
+    background-color: rgb(255, 255, 255);
+    outline-color: rgb(255, 255, 255);
+    border-left-color: rgb(255, 255, 255);
+    border-right-color: rgb(255, 255, 255);
+    border-top-color: rgb(255, 255, 255);
+    border-bottom-color: rgb(255, 255, 255);
+    border-top-width: 4px;
+    border-right-width: 4px;
+    border-bottom-width: 4px;
+    border-left-width: 4px;
+}
+
+.slotFrame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 80px;
+    height: 80px;
+    border-width: 0;
+    background-image: none;
+    -unity-slice-scale: 0.8;
+}
+
+.spacer {
+    height: 4px;
+    width: 100%;
+    background-image: url("project://database/Assets/Game/Visuals/Sprites/HOLO%20UI/UI_HoloBook_Mod04a.png?fileID=21300000&guid=3643238b8e4925546a4c063f08a96e0d&type=3#UI_HoloBook_Mod04a");
+}
+
+.slotIcon {
+    padding: 4px;
+    flex-shrink: 0;
+    flex-grow: 1;
+    -unity-material: url("");
+}
+
+.stackCount {
+    position: absolute;
+    color: white;
+    bottom: 0;
+    right: 0;
+    font-size: 18px;
+}
+
+.ghostIcon {
+    visibility: hidden;
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background-image: none;
+}
+
+.ghostLabel {
+    position: absolute;
+    color: white;
+    bottom: 0;
+    right: 0;
+    font-size: 18px;
+}
+
+.coins {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.coinsIcon {
+    width: 40px;
+    height: 40px;
+    margin: 4px;
+    background-image: url("project://database/Assets/Game/Visuals/Sprites/HOLO%20UI/UI_HoloBook_IconChip01a.png?fileID=21300000&guid=51ca295a8670c3746a4c647161c8e0c2&type=3#UI_HoloBook_IconChip01a");
+}
+
+.container_bottom {
+    flex-grow: 1;
+    width: auto;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+    color: rgb(255, 197, 0);
+    align-self: auto;
+    align-content: flex-end;
+}
+
+.inventoryControls {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+    width: 100%;
+    padding-right: 20px;
+}
+
+.actionButton {
+    margin-left: 5px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border-radius: 4px;
+}
+
+.inventoryScroll {
+    flex-grow: 1;
+    width: 100%;
+}
+
+.toolbarSlot {
+    background-color: rgba(255, 255, 255, 0.05);
+    outline-color: rgb(255, 255, 255);
+    border-left-color: rgb(0, 66, 200);
+    border-right-color: rgb(0, 66, 200);
+    border-top-color: rgb(0, 66, 200);
+    border-bottom-color: rgb(0, 66, 200);
+    border-top-width: 4px;
+    border-right-width: 4px;
+    border-bottom-width: 4px;
+    border-left-width: 4px;
+}
+
+.toolbar-held-item-panel {
+    position: absolute;
+    bottom: 100px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+}

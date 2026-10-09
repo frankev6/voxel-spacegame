@@ -1,0 +1,16 @@
+{
+"$path":"Assets/Resources/Items/Blocks/Weapons/Projectiles/projectile_flak_shell.asset",
+"$type":"Projectile",
+"$name":"projectile_flak_shell",
+"VisualType":"FlakShell",
+"DamageType":"HighExplosive",
+"Damage":0,
+"ExplosionRadius":1,
+"Size":0.5,
+"Speed":150,
+"LifetimeMin":0.5,
+"LifetimeMax":2,
+"IsHoming":false,
+"HomingTurnRate":60,
+"ExplodesOnDeath":true
+}

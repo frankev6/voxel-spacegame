@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles"/>
+    <Style src="project://database/Assets/Game/UI/Tooltips/EntityTooltipStyles.uss?fileID=7433441132597879392&amp;guid=01b0a230cf68c214e80595673cca7725&amp;type=3#EntityTooltipStyles"/>
+    <ui:VisualElement name="Root" style="flex-grow: 1;" picking-mode="Ignore" />
+</ui:UXML>

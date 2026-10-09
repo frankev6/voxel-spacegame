@@ -1,0 +1,38 @@
+.interact-root {
+    flex-grow: 1;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.interact-container {
+    flex-grow: 1;
+    width: 249px;
+    align-self: center;
+    align-content: center;
+    flex-direction: row;
+    -unity-text-align: upper-left;
+    align-items: flex-end;
+    padding-top: 15px;
+    padding-right: 15px;
+    padding-bottom: 51px;
+    padding-left: 15px;
+}
+
+.interact-label {
+    align-self: auto;
+    -unity-font-style: bold;
+    font-size: 16px;
+    padding-bottom: 4px;
+    padding-right: 4px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("project://database/Assets/Fonts/Kontrapunkt-Bold.otf?fileID=12800000&guid=6037689c785f0764e999658db2428f9c&type=3#Kontrapunkt-Bold");
+    -unity-text-outline-width: 0;
+}
+
+.interact-icon {
+    flex-grow: 1;
+    background-image: url("project://database/Assets/Input%20Sprites/all_input.png?fileID=-1350719223&guid=069a00c4a21d8654bbe27600f3ba7103&type=3#e");
+    height: 25px;
+    width: 25px;
+    max-width: 25px;
+}

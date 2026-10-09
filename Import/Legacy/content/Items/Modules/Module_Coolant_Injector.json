@@ -1,0 +1,19 @@
+{
+"$path":"Assets/Resources/Items/Modules/Module_Coolant_Injector.asset",
+"$type":"SlottableItem",
+"$name":"module_coolant_injector",
+"RegistryKey":"module_coolant_injector",
+"Name":"Coolant Injector",
+"Description":"",
+"BasePrice":10,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_51","type":"Sprite","sub":"spritetest2_transparent_51"},
+"Category":"Module",
+"Rarity":"Common",
+"EffectType":"None",
+"GrantsAbilities":[],
+"RequiredSocketType":"Core",
+"Modifiers":[
+{"StatToModify":"ThrusterForce","ModifyType":"MultiplyPercent","ModifierRange":"Global","Value":5}
+]
+}

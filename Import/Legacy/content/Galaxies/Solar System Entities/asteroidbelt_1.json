@@ -1,0 +1,23 @@
+{
+"$path":"Assets/Resources/Galaxies/Solar System Entities/asteroidbelt_1.asset",
+"$type":"SolarSystemEntity",
+"$name":"asteroidbelt_1",
+"entityId":"asteroidbelt_1",
+"ownerFactionIdOverride":"",
+"prefab":{"$ref":"Assets/Planets of the Solar System 3D/Geometry/Asteroids.fbx","name":"Asteroids","type":"GameObject"},
+"mapIcon":null,
+"color":[0.40000000596046448,0.699999988079071,1,1],
+"description":"This is a placeholder description blah blah blah",
+"encounterPool":{"poolName":"","encounters":[]},
+"encounterIdOverride":"",
+"autoInteractOnContact":false,
+"orbitType":"Static",
+"orbitSpeedMultiplier":1,
+"showOrbitLine":false,
+"spawnType":"AroundStar",
+"minOrbitRadius":60,
+"maxOrbitRadius":300,
+"canHaveSatellites":false,
+"spawnRequirement":"",
+"spawnBlocker":""
+}

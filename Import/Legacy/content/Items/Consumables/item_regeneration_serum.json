@@ -1,0 +1,15 @@
+{
+"$path":"Assets/Resources/Items/Consumables/item_regeneration_serum.asset",
+"$type":"ResourceItem",
+"$name":"item_regeneration_serum",
+"RegistryKey":"item_regeneration_serum",
+"Name":"Regeneration Serum",
+"Description":"Removes 1 trauma from an officer.",
+"BasePrice":100,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_73","type":"Sprite","sub":"spritetest2_transparent_73"},
+"Category":"Resource",
+"Rarity":"Epic",
+"EffectType":"None",
+"GrantsAbilities":[]
+}

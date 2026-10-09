@@ -1,0 +1,62 @@
+{
+"$path":"Assets/Resources/Encounters/Narrative/demo_audio_events.asset",
+"$type":"NarrativeEncounter",
+"$name":"demo_audio_events",
+"encounterId":"demo_audio_events",
+"isUnique":false,
+"repeatable":true,
+"startingPageId":"start",
+"lootTable":null,
+"presentationMode":"Default",
+"disableInputsMode":false,
+"pages":[
+{
+"id":"start",
+"text":"This encounter demonstrates audio feedback on pages and actions.",
+"localizationKey":"demo_audio_events_start_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"UI_View_Open",
+"options":[
+{
+"text":"Play Success Sound",
+"localizationKey":"demo_audio_events_start_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"PlayAudio","parameter1":"UI_Success","parameter2":""},
+{"type":"GoToPage","parameter1":"audio_played","parameter2":""}
+]
+},
+{
+"text":"Play Fail Sound",
+"localizationKey":"demo_audio_events_start_opt2",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"PlayAudio","parameter1":"UI_Fail","parameter2":""},
+{"type":"GoToPage","parameter1":"audio_played","parameter2":""}
+]
+},
+{"text":"Silent Option","localizationKey":"demo_audio_events_start_opt3","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+},
+{
+"id":"audio_played",
+"text":"You should have heard a sound effect!",
+"localizationKey":"demo_audio_events_audio_played_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{"text":"End Demo","localizationKey":"demo_audio_events_audio_played_opt1","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+}
+]
+}

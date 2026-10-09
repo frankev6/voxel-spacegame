@@ -1,0 +1,42 @@
+{
+"$path":"Assets/Resources/Galaxies/Solar System Entities/Planets/planet_barren.asset",
+"$type":"PlanetEntity",
+"$name":"planet_barren",
+"entityId":"planet_barren",
+"ownerFactionIdOverride":"",
+"prefab":{"$ref":"Assets/Game/Prefabs/Galaxy/PlanetSolarSystem.prefab","name":"PlanetSolarSystem","type":"GameObject"},
+"mapIcon":{"$ref":"Assets/Starsector Visuals/icons/radar_circle.png","name":"radar_circle","type":"Texture2D"},
+"color":[0.650943398475647,0.30599406361579895,0.15659485757350922,1],
+"description":"This is a placeholder description blah blah blah",
+"encounterPool":{
+"poolName":"",
+"encounters":[
+{
+"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/event_glass_desert.asset","name":"event_glass_desert","type":"NarrativeEncounter"},
+"probabilityWeight":1
+}
+]
+},
+"encounterIdOverride":"",
+"autoInteractOnContact":false,
+"orbitType":"Static",
+"orbitSpeedMultiplier":1,
+"showOrbitLine":true,
+"spawnType":"AroundStar",
+"minOrbitRadius":10,
+"maxOrbitRadius":300,
+"canHaveSatellites":true,
+"spawnRequirement":"",
+"spawnBlocker":"",
+"planetType":"Barren",
+"preferredOrbitDistance":0.20000000298023224,
+"minRadius":6,
+"maxRadius":8,
+"hasAtmosphere":false,
+"atmosphereColor":[0.5,0.699999988079071,1,0.30000001192092896],
+"hasRings":false,
+"planetTextures":[
+{"$ref":"Assets/Planets of the Solar System 3D/Textures/Planets/Mercury_2k.png","name":"Mercury_2k","type":"Texture2D"},
+{"$ref":"Assets/Planets of the Solar System 3D/Textures/Planets/Mars_2k.png","name":"Mars_2k","type":"Texture2D"}
+]
+}

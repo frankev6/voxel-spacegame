@@ -1,0 +1,31 @@
+{
+"$path":"Assets/Resources/Items/Blocks/Misc/block_thruster_large.asset",
+"$type":"BlockItem",
+"$name":"block_thruster_large",
+"RegistryKey":"block_thruster_large",
+"Name":"Thruster Large",
+"Description":"",
+"BasePrice":16,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_25","type":"Sprite","sub":"spritetest2_transparent_25"},
+"Category":"Block",
+"Rarity":"Common",
+"EffectType":"None",
+"GrantsAbilities":[
+{"$ref":"Assets/Resources/Abilities/ability_speed_boost.asset","name":"ability_speed_boost","type":"BoostAbilitySO"}
+],
+"BlockMesh":{"$ref":"Assets/Game/Meshes/Voxel Meshes/hulls.obj","name":"base_2x2_thruster_base_2x2_thruster","type":"Mesh","sub":"base_2x2_thruster_base_2x2_thruster"},
+"Health":100,
+"BlockSize":[2,1,2],
+"VoxelShape":[],
+"RotationLocked":false,
+"SocketTypeProvided":"Core",
+"SocketsProvidedCount":1,
+"EnergyRegenRate":0,
+"MaxEnergyStorage":0,
+"PassiveDrainRate":0,
+"ClearanceDirections":[[0,0,2],[0,0,3],[0,0,4],[1,0,2],[1,0,3],[1,0,4]],
+"Modifiers":[
+{"StatToModify":"ThrusterForce","ModifyType":"Add","ModifierRange":"Global","Value":20}
+]
+}

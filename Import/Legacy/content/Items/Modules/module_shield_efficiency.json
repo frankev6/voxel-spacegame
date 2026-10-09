@@ -1,0 +1,19 @@
+{
+"$path":"Assets/Resources/Items/Modules/module_shield_efficiency.asset",
+"$type":"SlottableItem",
+"$name":"module_shield_efficiency",
+"RegistryKey":"module_shield_efficiency",
+"Name":"Shield Efficiency",
+"Description":"Shields drain energy slower",
+"BasePrice":20,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_53","type":"Sprite","sub":"spritetest2_transparent_53"},
+"Category":"Module",
+"Rarity":"Common",
+"EffectType":"None",
+"GrantsAbilities":[],
+"RequiredSocketType":"Core",
+"Modifiers":[
+{"StatToModify":"ShieldRecharge","ModifyType":"Add","ModifierRange":"Global","Value":5}
+]
+}

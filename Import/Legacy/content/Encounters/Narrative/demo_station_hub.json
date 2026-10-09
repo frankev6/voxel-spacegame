@@ -1,0 +1,387 @@
+{
+"$path":"Assets/Resources/Encounters/Narrative/demo_station_hub.asset",
+"$type":"NarrativeEncounter",
+"$name":"demo_station_hub",
+"encounterId":"demo_station_hub",
+"isUnique":false,
+"repeatable":true,
+"startingPageId":"hub",
+"lootTable":{"$ref":"Assets/Resources/Loot Tables/BaseLootTable.asset","name":"BaseLootTable","type":"LootTable"},
+"presentationMode":"Default",
+"disableInputsMode":false,
+"pages":[
+{
+"id":"hub",
+"text":"Welcome to Nexus Station! The bustling marketplace offers many opportunities.",
+"localizationKey":"demo_station_hub_hub_text",
+"imageName":"image_station",
+"imageOverride":{"$ref":"Assets/Starsector Visuals/illustrations/kazeron.jpg","name":"kazeron","type":"Texture2D"},
+"tags":["hub","station"],
+"audioClipName":"UI_View_Open",
+"options":[
+{
+"text":"Visit Marketplace",
+"localizationKey":"demo_station_hub_hub_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"PushPage","parameter1":"market_menu","parameter2":""}
+]
+},
+{"text":"Station Bar","localizationKey":"demo_station_hub_hub_opt2","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"PushPage","parameter1":"bar_menu","parameter2":""}]},
+{"text":"Research Lab","localizationKey":"demo_station_hub_hub_opt3","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"PushPage","parameter1":"lab_menu","parameter2":""}]},
+{
+"text":"Mission Control",
+"localizationKey":"demo_station_hub_hub_opt4",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"PushPage","parameter1":"mission_control","parameter2":""}
+]
+},
+{"text":"Repair All Ships","localizationKey":"demo_station_hub_hub_opt5","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"RepairAllShips","parameter1":"","parameter2":""}]},
+{"text":"Visit Hangar Bay","localizationKey":"demo_station_hub_hub_opt6","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"OpenShipEditor","parameter1":"","parameter2":""}]},
+{"text":"Undock","localizationKey":"undock_option","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+},
+{
+"id":"market_menu",
+"text":"The marketplace is filled with vendors hawking exotic wares.",
+"localizationKey":"demo_station_hub_market_menu_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{"text":"Trade Goods","localizationKey":"demo_station_hub_market_menu_opt1","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"Trade","parameter1":"","parameter2":""}]},
+{"text":"View Bounties","localizationKey":"demo_station_hub_market_menu_opt2","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"PushPage","parameter1":"bounties","parameter2":""}]},
+{
+"text":"Back",
+"localizationKey":"demo_station_hub_market_menu_opt3",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+}
+]
+},
+{
+"id":"bounties",
+"text":"The bounty board lists several active contracts.",
+"localizationKey":"demo_station_hub_bounties_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{
+"text":"Accept Pirate Hunt",
+"localizationKey":"demo_station_hub_bounties_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"SetVariable","parameter1":"pirate_bounty","parameter2":"1"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Accept Hostile Blackbox Contract",
+"localizationKey":"demo_station_hub_bounties_opt2",
+"showRequirement":"REQ_QUEST_STATE(quest_hostile_blackbox, NotAccepted)",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.accept","parameter2":"questId=quest_hostile_blackbox|track=true"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Generate Bounty Template Mission",
+"localizationKey":"demo_station_hub_bounties_opt3",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.generate_template","parameter2":"templateId=tmpl_bounty_probe|track=true"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Back",
+"localizationKey":"demo_station_hub_market_menu_opt3",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+}
+]
+},
+{
+"id":"mission_control",
+"text":"Mission Control tracks contracts, trigger listeners, and experimental quest chains.",
+"localizationKey":"demo_station_hub_mission_control_text",
+"imageName":"",
+"imageOverride":null,
+"tags":["mission","quest","intel"],
+"audioClipName":"",
+"options":[
+{
+"text":"Accept Material Turn-In Test",
+"localizationKey":"demo_station_hub_mission_control_opt1",
+"showRequirement":"REQ_QUEST_STATE(quest_ark_material_turnin, NotAccepted)",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.accept","parameter2":"questId=quest_ark_material_turnin|track=true"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Accept Station Data Delivery Test",
+"localizationKey":"demo_station_hub_mission_control_opt2",
+"showRequirement":"REQ_QUEST_STATE(quest_station_data_delivery, NotAccepted)",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.accept","parameter2":"questId=quest_station_data_delivery|track=true"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Accept Boarding Trial Test",
+"localizationKey":"demo_station_hub_mission_control_opt3",
+"showRequirement":"REQ_QUEST_STATE(quest_station_boarding_trial, NotAccepted)",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.accept","parameter2":"questId=quest_station_boarding_trial|track=true"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Start Whisper Chain Storyline",
+"localizationKey":"demo_station_hub_mission_control_opt4",
+"showRequirement":"REQ_QUEST_STATE(story_chain_signal_1, NotAccepted)",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.accept","parameter2":"questId=story_chain_signal_1|track=true"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Accept Fail-State Sandbox",
+"localizationKey":"demo_station_hub_mission_control_opt5",
+"showRequirement":"REQ_QUEST_STATE(quest_trigger_fail_test, NotAccepted)",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.accept","parameter2":"questId=quest_trigger_fail_test|track=true"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Generate Signal Relay Template Mission",
+"localizationKey":"demo_station_hub_mission_control_opt6",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.generate_template","parameter2":"templateId=tmpl_signal_relay|track=true"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Generate Material Sweep Template Mission",
+"localizationKey":"demo_station_hub_mission_control_opt7",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.generate_template","parameter2":"templateId=tmpl_material_sweep|track=true"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Force Fail Sandbox Quest",
+"localizationKey":"demo_station_hub_mission_control_opt8",
+"showRequirement":"REQ_QUEST_ACTIVE(quest_trigger_fail_test)",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.fail","parameter2":"questId=quest_trigger_fail_test"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Complete Sandbox Quest",
+"localizationKey":"demo_station_hub_mission_control_opt9",
+"showRequirement":"REQ_QUEST_ACTIVE(quest_trigger_fail_test)",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.complete","parameter2":"questId=quest_trigger_fail_test"},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Back",
+"localizationKey":"demo_station_hub_market_menu_opt3",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+}
+]
+},
+{
+"id":"bar_menu",
+"text":"The station bar is dimly lit and filled with suspicious characters.",
+"localizationKey":"demo_station_hub_bar_menu_text",
+"imageName":"",
+"imageOverride":{"$ref":"Assets/Starsector Visuals/illustrations/hegemony_bar.jpg","name":"hegemony_bar","type":"Texture2D"},
+"tags":[],
+"audioClipName":"",
+"options":[
+{
+"text":"Talk to Shady Figure",
+"localizationKey":"demo_station_hub_bar_menu_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":true,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"PlayNestedDialog","parameter1":"bar_shady_man","parameter2":""}
+]
+},
+{
+"text":"Random Encounter",
+"localizationKey":"demo_station_hub_bar_menu_opt2",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"PlayFromPool","parameter1":"bar_encounters","parameter2":""}
+]
+},
+{
+"text":"Back",
+"localizationKey":"demo_station_hub_market_menu_opt3",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+}
+]
+},
+{
+"id":"lab_menu",
+"text":"The research lab hums with advanced equipment.",
+"localizationKey":"demo_station_hub_lab_menu_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{
+"text":"Upgrade Shields",
+"localizationKey":"demo_station_hub_lab_menu_opt1",
+"showRequirement":"",
+"enableRequirement":"REQ_CURRENCY(500)",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"ChangeCurrency","parameter1":"-500","parameter2":""},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"View Research",
+"localizationKey":"demo_station_hub_lab_menu_opt2",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"GoToPage","parameter1":"research_view","parameter2":""}
+]
+},
+{
+"text":"Back",
+"localizationKey":"demo_station_hub_market_menu_opt3",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+}
+]
+},
+{
+"id":"research_view",
+"text":"Current research projects are displayed on the screen.",
+"localizationKey":"demo_station_hub_research_view_text",
+"imageName":"",
+"imageOverride":null,
+"tags":["lab"],
+"audioClipName":"",
+"options":[
+{
+"text":"Contribute Research Points",
+"localizationKey":"demo_station_hub_research_view_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"ChangeResearch","parameter1":"10","parameter2":""},
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+},
+{
+"text":"Back",
+"localizationKey":"demo_station_hub_market_menu_opt3",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"ReturnToPreviousPage","parameter1":"","parameter2":""}
+]
+}
+]
+}
+]
+}

@@ -1,0 +1,19 @@
+{
+"$path":"Assets/Resources/Items/Modules/module_trained_crew.asset",
+"$type":"SlottableItem",
+"$name":"module_trained_crew",
+"RegistryKey":"module_trained_crew",
+"Name":"Trained Crew",
+"Description":"Your crew works faster",
+"BasePrice":19,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_54","type":"Sprite","sub":"spritetest2_transparent_54"},
+"Category":"Module",
+"Rarity":"Legendary",
+"EffectType":"None",
+"GrantsAbilities":[],
+"RequiredSocketType":"Core",
+"Modifiers":[
+{"StatToModify":"WeaponFireRate","ModifyType":"MultiplyPercent","ModifierRange":"Global","Value":10}
+]
+}

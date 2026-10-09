@@ -1,0 +1,108 @@
+{
+"$path":"Assets/Resources/Quests/QuestTriggerCatalog.asset",
+"$type":"QuestTriggerCatalog",
+"$name":"QuestTriggerCatalog",
+"triggers":[
+{
+"id":"trigger_first_friendly_territory",
+"eventType":"territory.entered",
+"oncePerRun":true,
+"condition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"All",
+"nodes":[
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"event_value","questId":"","objectiveId":"","factionId":"","key":"firstVisit","value":"true","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"faction_relation","questId":"","objectiveId":"","factionId":"","key":"","value":"","intValue":0,"comparison":"GreaterOrEqual","legacyRequirement":""}
+}
+],
+"primitive":{"type":"","questId":"","objectiveId":"","factionId":"","key":"","value":"","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"actions":[
+{"actionType":"QueueEncounter","questId":"","objectiveId":"","templateId":"","encounterId":"event_territory_friendly_entry","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"","parameters":[{"key":"requireSolarSystem","value":"true"}]},
+{"actionType":"AcceptQuest","questId":"quest_relation_watch","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":true,"logText":"","parameters":[]},
+{"actionType":"CompleteObjective","questId":"quest_relation_watch","objectiveId":"territory_seen","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"","parameters":[]},
+{"actionType":"GenerateMissionFromTemplate","questId":"","objectiveId":"","templateId":"tmpl_signal_relay","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":true,"logText":"","parameters":[]}
+]
+},
+{
+"id":"trigger_first_hostile_territory",
+"eventType":"territory.entered",
+"oncePerRun":true,
+"condition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"All",
+"nodes":[
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"event_value","questId":"","objectiveId":"","factionId":"","key":"firstVisit","value":"true","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"faction_relation","questId":"","objectiveId":"","factionId":"","key":"","value":"","intValue":0,"comparison":"Less","legacyRequirement":""}
+}
+],
+"primitive":{"type":"","questId":"","objectiveId":"","factionId":"","key":"","value":"","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"actions":[
+{"actionType":"QueueEncounter","questId":"","objectiveId":"","templateId":"","encounterId":"event_territory_hostile_entry","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"","parameters":[{"key":"requireSolarSystem","value":"true"}]},
+{"actionType":"AcceptQuest","questId":"quest_hostile_blackbox","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":true,"logText":"","parameters":[]},
+{"actionType":"GenerateMissionFromTemplate","questId":"","objectiveId":"","templateId":"tmpl_bounty_probe","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":true,"logText":"","parameters":[]}
+]
+},
+{
+"id":"trigger_station_boarding_followup",
+"eventType":"quest.completed",
+"oncePerRun":true,
+"condition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"event_value","questId":"","objectiveId":"","factionId":"","key":"questId","value":"quest_station_boarding_trial","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"actions":[
+{"actionType":"AcceptQuest","questId":"quest_station_data_delivery","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":true,"logText":"","parameters":[]},
+{"actionType":"QueueEncounter","questId":"","objectiveId":"","templateId":"","encounterId":"demo_station_hub","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+]
+},
+{
+"id":"trigger_fail_sandbox_on_relation_drop",
+"eventType":"faction.relation_changed",
+"oncePerRun":false,
+"condition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"All",
+"nodes":[
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"quest_state","questId":"quest_trigger_fail_test","objectiveId":"","factionId":"","key":"","value":"Active","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"event_value","questId":"","objectiveId":"","factionId":"","key":"delta","value":"-5","intValue":0,"comparison":"LessOrEqual","legacyRequirement":""}
+}
+],
+"primitive":{"type":"","questId":"","objectiveId":"","factionId":"","key":"","value":"","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"actions":[
+{"actionType":"FailQuest","questId":"quest_trigger_fail_test","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+]
+}
+]
+}

@@ -1,0 +1,15 @@
+{
+"$path":"Assets/Resources/Galaxies/OpenWorldGalaxyConfig.asset",
+"$type":"OpenWorldGalaxyConfig",
+"$name":"OpenWorldGalaxyConfig",
+"solarSystems":[
+{"$ref":"Assets/Resources/Galaxies/ARK_StartSolarSystemData 1.asset","name":"ARK_StartSolarSystemData 1","type":"SolarSystemData"},
+{"$ref":"Assets/Resources/Galaxies/BaseSolarSystemData.asset","name":"BaseSolarSystemData","type":"SolarSystemData"}
+],
+"defaultHyperlaneEntity":{"$ref":"Assets/Resources/Galaxies/Solar System Entities/hyperlane_default.asset","name":"hyperlane_default","type":"HyperlaneEntity"},
+"systemLoadRadius":1500,
+"systemUnloadRadius":1500,
+"floatingOriginThreshold":5000,
+"solarSystemScaleMultiplier":4,
+"orbitDistanceMultiplier":7.5
+}

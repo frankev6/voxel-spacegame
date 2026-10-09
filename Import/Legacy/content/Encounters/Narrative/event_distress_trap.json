@@ -1,0 +1,80 @@
+{
+"$path":"Assets/Resources/Encounters/Narrative/event_distress_trap.asset",
+"$type":"NarrativeEncounter",
+"$name":"event_distress_trap",
+"encounterId":"event_distress_trap",
+"isUnique":false,
+"repeatable":true,
+"startingPageId":"start",
+"lootTable":null,
+"presentationMode":"Default",
+"disableInputsMode":false,
+"pages":[
+{
+"id":"start",
+"text":"A distress beacon pulsates from a debris field. It claims to be a civilian transport out of fuel.",
+"localizationKey":"event_distress_trap_start_text",
+"imageName":"image_beacon",
+"imageOverride":null,
+"tags":["trap"],
+"audioClipName":"",
+"options":[
+{
+"text":"Approach to assist",
+"localizationKey":"event_distress_trap_start_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"RandomBranch","parameter1":"70:trap_spring|30:real_survivors","parameter2":""}
+]
+},
+{"text":"Ignore","localizationKey":"event_distress_trap_start_opt2","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+},
+{
+"id":"trap_spring",
+"text":"As you power down weapons to transfer fuel, pirate signatures flare to life all around you! It's a trap!",
+"localizationKey":"event_distress_trap_trap_spring_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"",
+"options":[
+{
+"text":"Battle Stations!",
+"localizationKey":"event_distress_trap_trap_spring_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"StartCombat","parameter1":"encounter_combat_01","parameter2":""}
+]
+}
+]
+},
+{
+"id":"real_survivors",
+"text":"You find a small pod with a grateful survivor. They offer a Blueprint in exchange for the fuel.",
+"localizationKey":"event_distress_trap_real_survivors_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"UI_Success",
+"options":[
+{
+"text":"Trade Fuel for Blueprint",
+"localizationKey":"event_distress_trap_real_survivors_opt1",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[{"type":"ChangeFuel","parameter1":"-2","parameter2":""},{"type":"AddItem","parameter1":"500","parameter2":"1"},{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]
+},
+{"text":"Leave them","localizationKey":"event_distress_trap_real_survivors_opt2","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+}
+]
+}

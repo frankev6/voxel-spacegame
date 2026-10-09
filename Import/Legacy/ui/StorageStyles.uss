@@ -1,0 +1,123 @@
+.inventory {
+    background-color: rgb(0, 0, 0);
+    width: 750px;
+    padding: 10px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.inventoryHeader {
+    width: 350px;
+    height: 70px;
+    justify-content: center;
+    align-items: center;
+    -unity-slice-scale: 0.5;
+}
+
+.container {
+    flex-grow: 1;
+    width: auto;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    -unity-font-definition: url("project://database/Assets/RPGUI/Fonts/Palatino%20Linotype%20Bold.ttf?fileID=12800000&guid=f1c9d0ee0815eac4e928e31809d6e77f&type=3#Palatino Linotype Bold");
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+    color: rgb(255, 197, 0);
+}
+
+Label {
+    font-size: 24px;
+}
+
+.inventoryFrame {
+    position: absolute;
+    top: -10px;
+    left: -17px;
+    width: 326px;
+    height: 520px;
+    -unity-slice-scale: 0.5;
+}
+
+.slotsContainer {
+    flex-grow: 1;
+    padding-top: 30px;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    gap: 4px;
+}
+
+.slot {
+    width: 60px;
+    height: 60px;
+}
+
+.slotFrame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 60px;
+    border-width: 0;
+    background-image: url("project://database/Assets/RPGUI/Textures/Inventory/Inventory_Slot_IconFrame.png?fileID=21300000&guid=58216a0db81c5c34e9da164911a12879&type=3#Inventory_Slot_IconFrame");
+    -unity-slice-scale: 0.8;
+}
+
+.spacer {
+    height: 2px;
+    width: 100%;
+    background-color: white;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.slotIcon {
+    padding: 4px;
+    flex-shrink: 0;
+    flex-grow: 1;
+}
+
+.stackCount {
+    position: absolute;
+    color: white;
+    bottom: 0;
+    right: 0;
+    font-size: 18px;
+}
+
+.ghostIcon {
+    visibility: hidden;
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-image: none;
+}
+
+.coins {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.coinsIcon {
+    width: 40px;
+    height: 40px;
+    margin: 4px;
+    background-image: url("project://database/Assets/RPGUI/Textures/Inventory/Currency_Gold.png?fileID=21300000&guid=bd2d58b9d9827c246975198feba0c7a7&type=3#Currency_Gold");
+}
+
+.ghostLabel {
+    position: absolute;
+    color: white;
+    bottom: 0;
+    right: 0;
+    font-size: 18px;
+}

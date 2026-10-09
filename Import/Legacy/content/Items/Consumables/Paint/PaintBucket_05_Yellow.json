@@ -1,0 +1,16 @@
+{
+"$path":"Assets/Resources/Items/Consumables/Paint/PaintBucket_05_Yellow.asset",
+"$type":"PaintBucketItem",
+"$name":"PaintBucket_05_Yellow",
+"RegistryKey":"PaintBucket_05_Yellow",
+"Name":"Paint Bucket (Yellow)",
+"Description":"Used to paint ship blocks Yellow.",
+"BasePrice":1,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_95","type":"Sprite","sub":"spritetest2_transparent_95"},
+"Category":"Consumable",
+"Rarity":"Common",
+"EffectType":"Paint",
+"GrantsAbilities":[],
+"PaletteIndex":5
+}

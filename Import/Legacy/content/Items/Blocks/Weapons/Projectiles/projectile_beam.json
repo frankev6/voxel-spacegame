@@ -1,0 +1,16 @@
+{
+"$path":"Assets/Resources/Items/Blocks/Weapons/Projectiles/projectile_beam.asset",
+"$type":"Projectile",
+"$name":"projectile_beam",
+"VisualType":"LaserBeam",
+"DamageType":"Energy",
+"Damage":20,
+"ExplosionRadius":1,
+"Size":0.5,
+"Speed":0,
+"LifetimeMin":1,
+"LifetimeMax":1,
+"IsHoming":false,
+"HomingTurnRate":60,
+"ExplodesOnDeath":false
+}

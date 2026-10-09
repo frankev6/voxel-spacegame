@@ -1,0 +1,16 @@
+{
+"$path":"Assets/Resources/Items/Blocks/Weapons/Projectiles/projectile_energybullet.asset",
+"$type":"Projectile",
+"$name":"projectile_energybullet",
+"VisualType":"RailgunSlug",
+"DamageType":"Kinetic",
+"Damage":100,
+"ExplosionRadius":1,
+"Size":0.5,
+"Speed":150,
+"LifetimeMin":2,
+"LifetimeMax":3,
+"IsHoming":false,
+"HomingTurnRate":60,
+"ExplodesOnDeath":false
+}

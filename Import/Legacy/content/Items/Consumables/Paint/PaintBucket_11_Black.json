@@ -1,0 +1,16 @@
+{
+"$path":"Assets/Resources/Items/Consumables/Paint/PaintBucket_11_Black.asset",
+"$type":"PaintBucketItem",
+"$name":"PaintBucket_11_Black",
+"RegistryKey":"PaintBucket_11_Black",
+"Name":"Paint Bucket (Black)",
+"Description":"Used to paint ship blocks Black.",
+"BasePrice":1,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_95","type":"Sprite","sub":"spritetest2_transparent_95"},
+"Category":"Consumable",
+"Rarity":"Common",
+"EffectType":"Paint",
+"GrantsAbilities":[],
+"PaletteIndex":11
+}

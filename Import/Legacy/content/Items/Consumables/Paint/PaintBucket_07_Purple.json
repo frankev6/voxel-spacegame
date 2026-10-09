@@ -1,0 +1,16 @@
+{
+"$path":"Assets/Resources/Items/Consumables/Paint/PaintBucket_07_Purple.asset",
+"$type":"PaintBucketItem",
+"$name":"PaintBucket_07_Purple",
+"RegistryKey":"PaintBucket_07_Purple",
+"Name":"Paint Bucket (Purple)",
+"Description":"Used to paint ship blocks Purple.",
+"BasePrice":1,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_95","type":"Sprite","sub":"spritetest2_transparent_95"},
+"Category":"Consumable",
+"Rarity":"Common",
+"EffectType":"Paint",
+"GrantsAbilities":[],
+"PaletteIndex":7
+}

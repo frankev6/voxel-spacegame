@@ -1,0 +1,15 @@
+{
+"$path":"Assets/Resources/Encounters/Combat/encounter_boss.asset",
+"$type":"CombatEncounter",
+"$name":"encounter_boss",
+"encounterId":"",
+"isUnique":false,
+"repeatable":false,
+"possibleFormations":[
+{
+"ships":[
+{"$ref":"Assets/Resources/Items/Ships/ship_vestari.asset","name":"ship_vestari","type":"ShipItem"}
+]
+}
+]
+}

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Game/Scenes/Boot.unity
+    guid: d0bf78846c68d474fb2a1bfd68c7072d
+  - enabled: 1
+    path: Assets/Game/Scenes/MainMenu.unity
+    guid: c3ef6b90884434fbcbf019bc9206e527
+  - enabled: 1
+    path: Assets/Game/Scenes/World.unity
+    guid: 5737767c4b7794e418fcffb0438f0b71
+  - enabled: 1
+    path: Assets/Game/Scenes/BlueprintLab.unity
+    guid: 09ce24a67e21c4f40b91fe893b78bd59
+  m_configObjects:
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

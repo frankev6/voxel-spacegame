@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles"/>
+    <Style src="project://database/Assets/Game/UI/InteractView.uss?fileID=7433441132597879392&amp;guid=86f7f820a0a04c91b4766670f6f2e2ec&amp;type=3#InteractView"/>
+    <ui:VisualElement enabled="true" class="interact-root">
+        <ui:VisualElement name="Container" enabled="true" class="interact-container">
+            <ui:Label text="Interact" name="interact_text" enabled="true" class="interact-label"/>
+            <ui:VisualElement class="interact-icon"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

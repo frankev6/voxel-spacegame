@@ -1,0 +1,39 @@
+{
+"$path":"Assets/Resources/Encounters/Narrative/event_crew_stranded.asset",
+"$type":"NarrativeEncounter",
+"$name":"event_crew_stranded",
+"encounterId":"event_crew_stranded",
+"isUnique":false,
+"repeatable":true,
+"startingPageId":"start",
+"lootTable":null,
+"presentationMode":"Default",
+"disableInputsMode":false,
+"pages":[
+{
+"id":"start",
+"text":"A distress pod from a destroyed vessel floats nearby. Life signs detected inside.",
+"localizationKey":"event_crew_stranded_start_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"UI_Button_Click",
+"options":[
+{"text":"Rescue Survivor","localizationKey":"event_crew_stranded_start_opt1","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"ChangeCrew","parameter1":"1","parameter2":""},{"type":"GoToPage","parameter1":"rescued","parameter2":""}]},
+{"text":"Ignore","localizationKey":"event_distress_trap_start_opt2","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+},
+{
+"id":"rescued",
+"text":"A grateful engineer joins your crew. 'I won't forget this. Let me repay you with my skills.'",
+"localizationKey":"event_crew_stranded_rescued_text",
+"imageName":"",
+"imageOverride":null,
+"tags":[],
+"audioClipName":"UI_Success",
+"options":[
+{"text":"Welcome Aboard","localizationKey":"event_crew_stranded_rescued_opt1","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+}
+]
+}

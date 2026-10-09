@@ -1,0 +1,17 @@
+{
+"$path":"Assets/Resources/Galaxies/ExtractStablePoint.asset",
+"$type":"SolarSystemData",
+"$name":"ExtractStablePoint",
+"systemId":"",
+"openWorldCoordinates":[0,0],
+"minEntities":4,
+"maxEntities":8,
+"baseOrbitSpeed":6,
+"orbitSpacingScale":1,
+"starEntities":[],
+"connectedSystems":[],
+"entityPool":[],
+"maxAsteroidBelts":1,
+"asteroidBeltEntity":null,
+"encounterOverride":{"$ref":"Assets/Resources/Encounters/Narrative/event_stable_point.asset","name":"event_stable_point","type":"NarrativeEncounter"}
+}

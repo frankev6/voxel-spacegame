@@ -1,0 +1,37 @@
+{
+"$path":"Assets/Resources/Encounters/Narrative/event_stable_point.asset",
+"$type":"NarrativeEncounter",
+"$name":"event_stable_point",
+"encounterId":"event_stable_point",
+"isUnique":false,
+"repeatable":true,
+"startingPageId":"start",
+"lootTable":null,
+"presentationMode":"Default",
+"disableInputsMode":false,
+"pages":[
+{
+"id":"start",
+"text":"A fluctuation in the subspace field indicates a stable jump point. However, activating it will require a massive energy discharge from a Warp Core.",
+"localizationKey":"event_stable_point_start_text",
+"imageName":"image_portal",
+"imageOverride":null,
+"tags":["portal"],
+"audioClipName":"",
+"options":[
+{
+"text":"Activate Warp Drive",
+"localizationKey":"event_stable_point_start_opt1",
+"showRequirement":"",
+"enableRequirement":"REQ_ITEM(717185106, 1)",
+"consumeOnUse":false,
+"optionStyle":"Normal",
+"outcomes":[
+{"type":"StartCombat","parameter1":"encounter_extraction","parameter2":""}
+]
+},
+{"text":"Leave","localizationKey":"leave_option","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+}
+]
+}

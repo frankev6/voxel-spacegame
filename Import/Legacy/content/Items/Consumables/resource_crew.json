@@ -1,0 +1,15 @@
+{
+"$path":"Assets/Resources/Items/Consumables/resource_crew.asset",
+"$type":"ResourceItem",
+"$name":"resource_crew",
+"RegistryKey":"resource_crew",
+"Name":"Crew",
+"Description":"Needed to operate the ship at full capacity. Sent out on explorations.",
+"BasePrice":5,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_70","type":"Sprite","sub":"spritetest2_transparent_70"},
+"Category":"Resource",
+"Rarity":"Common",
+"EffectType":"None",
+"GrantsAbilities":[]
+}

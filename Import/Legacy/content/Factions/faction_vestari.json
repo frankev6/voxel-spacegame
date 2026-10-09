@@ -1,0 +1,14 @@
+{
+"$path":"Assets/Resources/Factions/faction_vestari.asset",
+"$type":"FactionData",
+"$name":"faction_vestari",
+"id":"faction_vestari",
+"displayName":"Vestari",
+"description":"Technologically advanced, dogmatic, democratic civilization. Xenophobic. Peaceful as long as no foreigners enter their space. They believe to be direct Aksharan descendants. They think all other forms of life are lesser. High Tech ships. Normally smaller fleets. Their gestation period is a century so there are few of them in comparison to other factions.",
+"logo":null,
+"crest":null,
+"color":[0,1,1,1],
+"shipNamePrefix":"VSS",
+"doctrine":[],
+"basePlayerRelation":0
+}

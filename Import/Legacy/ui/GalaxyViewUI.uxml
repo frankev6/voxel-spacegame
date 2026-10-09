@@ -1,0 +1,68 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles"/>
+    <Style src="project://database/Assets/Game/UI/GalaxyView.uss?fileID=7433441132597879392&amp;guid=e2f477fd7c124bd1a45c4e9f261d736a&amp;type=3#GalaxyView"/>
+    <ui:VisualElement name="galaxy-view-root" style="flex-grow: 1; justify-content: flex-start; padding: 9px; align-items: flex-start; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;">
+        <ui:VisualElement name="top-bar" class="intel-theme-subpanel" style="flex-direction: row; align-items: center; width: 480px; background-color: rgba(8, 16, 31, 0.85); padding-top: 17px; padding-right: 17px; padding-bottom: 17px; padding-left: 17px; margin-bottom: 19px;">
+            <ui:VisualElement style="flex-direction: row;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-right: 20px;">
+                    <ui:Image style="background-image: url(&quot;project://database/Assets/Game/Visuals/Sprites/spritetest2_transparent.png?fileID=1125713320&amp;guid=f8a50dec0611c624ca8569633b602306&amp;type=3#spritetest2_transparent_71&quot;); width: 32px; height: 32px;"/>
+                    <ui:Label text="FUEL:" style="font-size: 18px; margin-right: 5px; color: rgb(255, 255, 255);"/>
+                    <ui:Label name="fuel-value" text="0" style="color: rgb(255, 255, 255); font-size: 18px;"/>
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-right: 20px;">
+                    <ui:Image style="background-image: url(&quot;project://database/Assets/Game/Visuals/Sprites/spritetest2_transparent.png?fileID=156957974&amp;guid=f8a50dec0611c624ca8569633b602306&amp;type=3#spritetest2_transparent_75&quot;); width: 32px; height: 32px;"/>
+                    <ui:Label text="SCRAP:" style="font-size: 18px; margin-right: 5px; color: rgb(255, 255, 255);"/>
+                    <ui:Label name="scrap-value" text="1000000" style="color: rgb(255, 255, 255); font-size: 18px;"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="mission-objectives-panel" class="intel-theme-subpanel" style="width: 480px; padding-top: 8px; padding-right: 10px; padding-bottom: 8px; padding-left: 10px;">
+            <ui:Label text="TRACKED MISSIONS" style="font-size: 13px; color: rgba(255, 231, 157, 0.95); margin-bottom: 4px;"/>
+            <ui:VisualElement name="mission-objectives-list"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="solar-map-anchor" style="position: absolute; right: 0; bottom: 0; align-items: flex-end;">
+            <ui:Label name="coordinates-label" text="SECTOR: 0 , 0" style="display: none; color: rgb(84, 173, 255); font-size: 14px; margin-bottom: 4px; -unity-font-style: bold; background-color: rgba(0, 0, 0, 0.7); padding: 4px; border-radius: 4px; border-left-color: rgba(84, 173, 255, 0.28); border-right-color: rgba(84, 173, 255, 0.28); border-top-color: rgba(84, 173, 255, 0.28); border-bottom-color: rgba(84, 173, 255, 0.28); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;" />
+            <ui:VisualElement name="solar-map-viewport" class="intel-theme-subpanel" style="position: relative; width: 280px; height: 280px; overflow: hidden; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgba(84, 173, 255, 0.28); border-right-color: rgba(84, 173, 255, 0.28); border-top-color: rgba(84, 173, 255, 0.28); border-bottom-color: rgba(84, 173, 255, 0.28);">
+                <ui:VisualElement name="solar-map-entities" style="position: absolute; left: 0; top: 0; width: 280px; height: 280px;"/>
+                <ui:VisualElement name="solar-map-player-icon" style="position: absolute; width: 12px; height: 12px; background-color: rgb(88, 212, 255); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgba(195, 244, 255, 0.9); border-right-color: rgba(195, 244, 255, 0.9); border-top-color: rgba(195, 244, 255, 0.9); border-bottom-color: rgba(195, 244, 255, 0.9); border-top-left-radius: 6px; border-top-right-radius: 6px; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px;"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="combat-hud-root" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 20px; picking-mode: Ignore;">
+            <ui:VisualElement name="extraction-timer-container" style="position: absolute; top: 20px; left: 0; right: 0; flex-direction: row; justify-content: center;">
+                <ui:VisualElement name="extraction-timer-inner" style="background-color: rgba(20, 20, 20, 0.8); border-radius: 8px; border-width: 2px; border-color: rgba(255, 200, 50, 0.8); padding: 10px 20px; flex-direction: column; align-items: center;">
+                    <ui:Label name="extraction-label" text="EXTRACTION IN PROGRESS" style="color: rgb(255, 200, 50); font-size: 14px; -unity-font-style: bold; -unity-text-align: middle-center; margin-bottom: 5px;"/>
+                    <ui:Label name="extraction-timer-text" text="60" style="color: white; font-size: 32px; -unity-font-style: bold; -unity-text-align: middle-center; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="boss-hud-container" style="position: absolute; top: 140px; left: 0; right: 0; flex-direction: row; justify-content: center;">
+                <ui:VisualElement name="boss-hud-inner" style="width: 500px; flex-direction: column;">
+                    <ui:Label name="boss-name-label" text="BOSS NAME" style="color: white; font-size: 18px; -unity-font-style: bold; -unity-text-align: middle-center; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); margin-bottom: 5px;"/>
+                    <ui:VisualElement name="boss-health-bar-wrapper" style="height: 20px; background-color: rgba(0, 0, 0, 0.6); border-radius: 4px; border-width: 1px; border-color: rgba(255, 255, 255, 0.3); overflow: hidden;">
+                        <ui:VisualElement name="boss-health-bar-fill" style="position: absolute; left: 0; top: 0; bottom: 0; width: 100%; background-color: rgb(200, 50, 50); border-radius: 3px;"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="player-stats-container" style="position: absolute; bottom: 30px; left: 30px; width: 280px; flex-direction: column;">
+                <ui:VisualElement name="health-bar-container" style="height: 18px; margin-bottom: 3px; flex-direction: row; align-items: center;">
+                    <ui:VisualElement name="health-bar-wrapper" style="flex-grow: 1; height: 18px; background-color: rgba(0, 0, 0, 0); border-radius: 4px; border-width: 1px; border-color: rgba(255, 255, 255, 0.3); overflow: hidden; border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; background-image: url(&quot;project://database/Assets/scifi_ui%20white/PNG/Bars/white/x2/Asset%2012@2x.png?fileID=2800000&amp;guid=0f68594475065984aa90b5a5f0cba5d1&amp;type=3#Asset 12@2x&quot;); background-position-x: left 0; -unity-background-scale-mode: scale-and-crop; -unity-background-image-tint-color: rgb(11, 48, 18); border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0;">
+                        <ui:VisualElement name="health-bar-fill" style="position: absolute; left: -1px; top: 0; bottom: 0; width: 100%; border-radius: 3px; background-image: url(&quot;project://database/Assets/scifi_ui%20white/PNG/Bars/white/x2/Asset%208@2x.png?fileID=2800000&amp;guid=e5497edf25d5dbb44ab9874570cccc0c&amp;type=3#Asset 8@2x&quot;); -unity-background-image-tint-color: rgb(192, 192, 90); -unity-background-scale-mode: scale-and-crop; background-position-x: left 0; background-position-y: center; border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; background-size: 280px 100%;"/>
+                        <ui:Label name="health-text" text="100 / 100" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; -unity-text-align: middle-center; color: white; font-size: 9px; -unity-font-style: bold; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="energy-bar-container" style="height: 18px; flex-direction: row; align-items: center;">
+                    <ui:VisualElement name="energy-bar-wrapper" style="flex-grow: 1; height: 18px; border-radius: 4px; border-width: 1px; border-color: rgba(255, 255, 255, 0.3); overflow: hidden; background-image: url(&quot;project://database/Assets/scifi_ui%20white/PNG/Bars/white/x2/Asset%2012@2x.png?fileID=2800000&amp;guid=0f68594475065984aa90b5a5f0cba5d1&amp;type=3#Asset 12@2x&quot;); -unity-background-image-tint-color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); background-position-y: center; background-position-x: center; border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; -unity-background-scale-mode: scale-and-crop; border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0;">
+                        <ui:VisualElement name="energy-bar-fill" style="position: absolute; left: -1px; top: 0; bottom: 0; width: 100%; border-radius: 3px; background-image: url(&quot;project://database/Assets/scifi_ui%20white/PNG/Bars/white/x2/Asset%208@2x.png?fileID=2800000&amp;guid=e5497edf25d5dbb44ab9874570cccc0c&amp;type=3#Asset 8@2x&quot;); -unity-background-image-tint-color: rgb(27, 183, 209); -unity-background-scale-mode: scale-and-crop; background-position-x: left 0; background-position-y: center; border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; background-size: 280px 100%;"/>
+                        <ui:Label name="energy-text" text="100 / 100" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; -unity-text-align: middle-center; color: white; font-size: 9px; -unity-font-style: bold; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="shield-status-container" style="height: 20px; margin-top: 6px; flex-direction: row; align-items: center; justify-content: flex-start;">
+                    <ui:VisualElement name="shield-indicator" style="width: 12px; height: 12px; border-radius: 6px; background-color: rgb(80, 80, 80); margin-right: 6px;"/>
+                    <ui:Label name="shield-status-text" text="SHIELDS OFFLINE" style="color: rgba(255, 255, 255, 0.6); font-size: 10px; -unity-font-style: bold; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="status-container" style="position: absolute;">
+                <ui:Label name="autofire-status" text="AUTOFIRE: OFF" style="color: rgb(255, 255, 255); font-size: 18px; -unity-font-style: bold;"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

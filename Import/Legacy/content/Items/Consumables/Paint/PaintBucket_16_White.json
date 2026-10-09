@@ -1,0 +1,16 @@
+{
+"$path":"Assets/Resources/Items/Consumables/Paint/PaintBucket_16_White.asset",
+"$type":"PaintBucketItem",
+"$name":"PaintBucket_16_White",
+"RegistryKey":"PaintBucket_16_White",
+"Name":"Paint Bucket (White)",
+"Description":"Used to paint ship blocks White.",
+"BasePrice":1,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_95","type":"Sprite","sub":"spritetest2_transparent_95"},
+"Category":"Consumable",
+"Rarity":"Common",
+"EffectType":"Paint",
+"GrantsAbilities":[],
+"PaletteIndex":16
+}

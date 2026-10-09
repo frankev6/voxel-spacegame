@@ -1,0 +1,21 @@
+{
+"$path":"Assets/Resources/Items/Modules/strange_matter_container_full.asset",
+"$type":"SlottableItem",
+"$name":"strange_matter_container_full",
+"RegistryKey":"strange_matter_container_full",
+"Name":"Strange Matter Container [FULL]",
+"Description":"",
+"BasePrice":2500,
+"isStackable":false,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_94","type":"Sprite","sub":"spritetest2_transparent_94"},
+"Category":"Misc",
+"Rarity":"Legendary",
+"EffectType":"None",
+"GrantsAbilities":[],
+"RequiredSocketType":"Core",
+"Modifiers":[
+{"StatToModify":"EnergyCapacity","ModifyType":"Add","ModifierRange":"Global","Value":999},
+{"StatToModify":"EnergyRecharge","ModifyType":"Add","ModifierRange":"Global","Value":333},
+{"StatToModify":"Health","ModifyType":"Add","ModifierRange":"Global","Value":-10}
+]
+}

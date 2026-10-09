@@ -1,0 +1,31 @@
+{
+"$path":"Assets/Resources/Items/Blocks/Misc/block_shield_small.asset",
+"$type":"ShieldBlockItem",
+"$name":"block_shield_small",
+"RegistryKey":"block_shield_small",
+"Name":"Energy Shield Small",
+"Description":"",
+"BasePrice":20,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_14","type":"Sprite","sub":"spritetest2_transparent_14"},
+"Category":"Block",
+"Rarity":"Rare",
+"EffectType":"None",
+"GrantsAbilities":[
+{"$ref":"Assets/Resources/Abilities/ability_shield_toggle.asset","name":"ability_shield_toggle","type":"ShieldToggleAbilitySO"}
+],
+"BlockMesh":{"$ref":"Assets/Game/Meshes/Voxel Meshes/hulls.obj","name":"base_1x1_hull_base_1x1_hull","type":"Mesh","sub":"base_1x1_hull_base_1x1_hull"},
+"Health":100,
+"BlockSize":[1,1,1],
+"VoxelShape":[],
+"RotationLocked":false,
+"SocketTypeProvided":"Core",
+"SocketsProvidedCount":0,
+"EnergyRegenRate":0,
+"MaxEnergyStorage":0,
+"PassiveDrainRate":10,
+"ClearanceDirections":[],
+"Modifiers":[],
+"ShieldRadius":6,
+"ShieldForwardDirection":[0,0,1]
+}

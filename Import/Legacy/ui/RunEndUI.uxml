@@ -1,0 +1,44 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles"/>
+    <Style src="project://database/Assets/Game/UI/RunEndStyles.uss?fileID=7433441132597879392&amp;guid=718b92d22f553cb4095c8143ecf522d6&amp;type=3#RunEndStyles"/>
+    <ui:VisualElement name="runEndOverlay" class="overlay full-screen flex-center" style="background-color: rgb(13, 35, 67);">
+        <ui:VisualElement name="mainContainer" class="run-end-container glass-panel">
+            <ui:Label name="titleLabel" text="RUN OVER" class="header-large text-center m-b-20"/>
+            <ui:VisualElement name="contentWrapper" class="flex-row items-stretch">
+                <ui:VisualElement name="statsColumn" class="flex-1 p-20 glass-sub-panel m-r-10">
+                    <ui:Label text="RUN STATISTICS" class="text-secondary text-bold m-b-10"/>
+                    <ui:VisualElement class="stat-row">
+                        <ui:Label text="Sectors Cleared" class="text-mini"/>
+                        <ui:Label name="sectorValue" text="0" class="stat-value"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-row">
+                        <ui:Label text="Total Kills" class="text-mini"/>
+                        <ui:Label name="killsValue" text="0" class="stat-value"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-row">
+                        <ui:Label text="Damage Dealt" class="text-mini"/>
+                        <ui:Label name="damageValue" text="0" class="stat-value"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stat-row">
+                        <ui:Label text="Scrap Collected" class="text-mini"/>
+                        <ui:Label name="scrapValue" text="0" class="stat-value"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="fleetColumn" class="flex-1 p-20 glass-sub-panel m-l-10">
+                    <ui:Label text="YOUR FLEET" class="text-secondary text-bold m-b-10"/>
+                    <ui:ScrollView name="fleetList" class="fleet-scroll"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="metaSection" class="meta-footer m-t-20 p-20 flex-row items-center justify-between">
+                <ui:VisualElement class="flex-row items-center">
+                    <ui:Image name="blueprintIcon" class="blueprint-icon-large m-r-10"/>
+                    <ui:VisualElement>
+                        <ui:Label text="RESEARCH BLUEPRINTS COLLECTED" class="text-secondary text-mini"/>
+                        <ui:Label name="blueprintCount" text="0" class="text-vibrant text-large"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Button name="continueBtn" text="CONTINUE" class="btn btn-primary btn-large"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

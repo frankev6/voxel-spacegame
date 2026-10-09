@@ -1,0 +1,36 @@
+{
+"$path":"Assets/Resources/Galaxies/Solar System Entities/Fleets/npc_enemy_1.asset",
+"$type":"NPCFleetEntity",
+"$name":"npc_enemy_1",
+"entityId":"npc_enemy_1",
+"ownerFactionIdOverride":"",
+"prefab":null,
+"mapIcon":{"$ref":"Assets/Starsector Visuals/icons/entity.png","name":"entity","type":"Texture2D"},
+"color":[0.82075470685958862,0.099611595273017883,0.073558181524276733,1],
+"description":"This is a placeholder description blah blah blah",
+"encounterPool":{
+"poolName":"",
+"encounters":[
+{"encounter":{"$ref":"Assets/Resources/Encounters/Combat/encounter_combat_01.asset","name":"encounter_combat_01","type":"CombatEncounter"},"probabilityWeight":1}
+]
+},
+"encounterIdOverride":"",
+"autoInteractOnContact":true,
+"orbitType":"Dynamic",
+"orbitSpeedMultiplier":1,
+"showOrbitLine":false,
+"spawnType":"Random",
+"minOrbitRadius":10,
+"maxOrbitRadius":100,
+"canHaveSatellites":false,
+"spawnRequirement":"",
+"spawnBlocker":"",
+"allegiance":"Enemy",
+"detectionRadius":10,
+"patrolRadius":100,
+"chasesPlayer":true,
+"movementSpeed":10,
+"useFactionDoctrine":true,
+"doctrineMinShips":1,
+"doctrineMaxShips":4
+}

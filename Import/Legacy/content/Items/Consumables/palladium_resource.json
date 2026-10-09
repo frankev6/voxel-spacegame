@@ -1,0 +1,15 @@
+{
+"$path":"Assets/Resources/Items/Consumables/palladium_resource.asset",
+"$type":"ResourceItem",
+"$name":"palladium_resource",
+"RegistryKey":"palladium_resource",
+"Name":"Palladium [Pd]",
+"Description":"",
+"BasePrice":100,
+"isStackable":false,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_76","type":"Sprite","sub":"spritetest2_transparent_76"},
+"Category":"Resource",
+"Rarity":"Common",
+"EffectType":"None",
+"GrantsAbilities":[]
+}

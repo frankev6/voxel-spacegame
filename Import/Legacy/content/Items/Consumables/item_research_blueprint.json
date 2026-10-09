@@ -1,0 +1,15 @@
+{
+"$path":"Assets/Resources/Items/Consumables/item_research_blueprint.asset",
+"$type":"ResourceItem",
+"$name":"item_research_blueprint",
+"RegistryKey":"item_research_blueprint",
+"Name":"Research Blueprint",
+"Description":"",
+"BasePrice":0,
+"isStackable":true,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_72","type":"Sprite","sub":"spritetest2_transparent_72"},
+"Category":"Resource",
+"Rarity":"Rare",
+"EffectType":"None",
+"GrantsAbilities":[]
+}

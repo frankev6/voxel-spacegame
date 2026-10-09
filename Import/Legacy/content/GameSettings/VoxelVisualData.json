@@ -1,0 +1,12 @@
+{
+"$path":"Assets/Resources/GameSettings/VoxelVisualData.asset",
+"$type":"VoxelVisualData",
+"$name":"VoxelVisualData",
+"CommonMaterial":{"$ref":"Assets/Game/Visuals/Materials/MetallicShipMaterial.mat","name":"MetallicShipMaterial","type":"Material"},
+"ProjectileMaterial":{"$ref":"Assets/Game/Visuals/Materials/arrowMat.mat","name":"arrowMat","type":"Material"},
+"EnemyMaterial":{"$ref":"Assets/Game/Visuals/Materials/MetallicShipMaterial.mat","name":"MetallicShipMaterial","type":"Material"},
+"ShieldMesh":{"$ref":"Assets/Game/Meshes/semi_sphere_shield.obj","name":"shield_Icosphere.002","type":"Mesh","sub":"shield_Icosphere.002"},
+"ShieldMaterial":{"$ref":"Assets/Game/Visuals/Materials/ShieldMat.mat","name":"ShieldMat","type":"Material"},
+"WeaponArcMaterial":{"$ref":"Assets/Game/Visuals/WeaponArcMaterial.mat","name":"WeaponArcMaterial","type":"Material"},
+"QuadMesh":{"$ref":"Library/unity default resources","name":"Quad","type":"Mesh"}
+}

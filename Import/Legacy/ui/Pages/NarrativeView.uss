@@ -1,0 +1,261 @@
+.narrative-root {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0);
+    -unity-font-definition: url("project://database/Packages/com.unity.render-pipelines.core/Runtime/Debugging/Prefabs/Fonts/PerfectDOSVGA437.ttf?fileID=12800000&guid=74a5091d8707f334b9a5c31ef71a64ba&type=3#PerfectDOSVGA437");
+}
+
+.narrative-root.presentation-centered-black {
+    background-color: rgb(13, 23, 43);
+    align-items: stretch;
+}
+
+.narrative-root.presentation-centered-black .narrative-container {
+    width: 62%;
+    height: 86%;
+    border-radius: 8px;
+    background-image: none;
+    -unity-background-image-tint-color: rgb(0, 0, 0);
+    background-color: rgb(13, 23, 43);
+    align-items: stretch;
+}
+
+.narrative-root.presentation-centered-black .dialog-column {
+    background-image: none;
+    background-color: rgb(13, 23, 43);
+    align-items: stretch;
+}
+
+.narrative-container {
+    width: 35%;
+    height: 100%;
+    flex-direction: row;
+    border-width: 2px;
+    border-color: rgb(100, 100, 100);
+    border-radius: 8px;
+    border-top-width: 0;
+    border-right-width: 1px;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left-color: rgb(43, 73, 118);
+    border-right-color: rgb(43, 73, 118);
+    border-top-color: rgb(43, 73, 118);
+    border-bottom-color: rgb(43, 73, 118);
+    background-color: rgb(8, 16, 31);
+    background-image: url("project://database/Assets/Game/Visuals/Sprites/grid.jpg?fileID=2800000&guid=0def52913ce52494487d266b7b24f434&type=3#grid");
+    background-position-y: top 0;
+    -unity-background-scale-mode: stretch-to-fill;
+    background-repeat: repeat repeat;
+    background-size: 120% 60%;
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.01);
+}
+
+.dialog-column {
+    flex-grow: 1;
+    flex-basis: 60%;
+    padding: 30px;
+    justify-content: space-between;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.image-column {
+    flex-basis: 30%;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding-top: 20px;
+    padding-right: 30px;
+    padding-bottom: 20px;
+    padding-left: 30px;
+    height: 300px;
+    min-height: 300px;
+}
+
+.event-image {
+    width: 100%;
+    height: 100%;
+    -unity-background-scale-mode: scale-and-crop;
+    background-size: cover;
+    border-left-color: rgb(43, 73, 118);
+    border-right-color: rgb(43, 73, 118);
+    border-top-color: rgb(43, 73, 118);
+    border-bottom-color: rgb(43, 73, 118);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+}
+
+.dialog-scroll {
+    flex-grow: 1;
+    padding-top: 0;
+    padding-right: 30px;
+    padding-bottom: 0;
+    padding-left: 30px;
+}
+
+.dialog-text {
+    font-size: 18px;
+    color: rgb(255, 255, 255);
+    white-space: normal;
+    -unity-font-definition: url("project://database/Assets/Fonts/Kontrapunkt-Bold.otf?fileID=12800000&guid=6037689c785f0764e999658db2428f9c&type=3#Kontrapunkt-Bold");
+}
+
+.options-container {
+    min-height: 30%;
+    justify-content: flex-start;
+    -unity-font-definition: initial;
+    padding-top: 30px;
+    padding-right: 30px;
+    padding-bottom: 30px;
+    padding-left: 30px;
+}
+
+.narrative-button {
+    font-size: 18px;
+    padding: 12px;
+    margin-top: 5px;
+    border-width: 1px;
+    border-color: rgb(150, 150, 150);
+    border-radius: 4px;
+    color: rgb(119, 181, 255);
+    -unity-text-align: middle-left;
+    -unity-font-definition: url("project://database/Assets/Fonts/Kontrapunkt-Bold.otf?fileID=12800000&guid=6037689c785f0764e999658db2428f9c&type=3#Kontrapunkt-Bold");
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 1px;
+    border-left-width: 0;
+    padding-top: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    background-color: rgba(0, 0, 0, 0);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left-color: rgba(150, 150, 150, 0);
+    border-right-color: rgba(150, 150, 150, 0);
+    border-top-color: rgba(150, 150, 150, 0);
+    border-bottom-color: rgba(150, 150, 150, 0);
+}
+
+.narrative-button.option-quest {
+    border-color: rgb(245, 207, 94);
+    color: rgb(255, 209, 119);
+    border-left-color: rgba(245, 207, 94, 0);
+    border-right-color: rgba(245, 207, 94, 0);
+    border-top-color: rgba(245, 207, 94, 0);
+    border-bottom-color: rgba(245, 207, 94, 0);
+}
+
+.narrative-button:hover {
+    border-color: rgb(255, 255, 255);
+    border-bottom-width: 1px;
+}
+
+.narrative-button.option-quest:hover {
+    border-color: rgb(255, 233, 139);
+    border-bottom-width: 1px;
+}
+
+.narrative-button:active {
+    background-color: rgb(100, 100, 100);
+}
+
+.selected-option-text {
+    font-size: 17px;
+    color: rgb(147, 147, 147);
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 0;
+    -unity-font-style: italic;
+    white-space: normal;
+}
+
+.dialog-text-block {
+    font-size: 17px;
+    color: rgb(255, 255, 255);
+    white-space: normal;
+    margin-bottom: 20px;
+    -unity-font-definition: url("project://database/Packages/com.unity.render-pipelines.core/Runtime/Debugging/Prefabs/Fonts/PerfectDOSVGA437.ttf?fileID=12800000&guid=74a5091d8707f334b9a5c31ef71a64ba&type=3#PerfectDOSVGA437");
+}
+
+.narrative-layout-docked {
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.narrative-layout-centered {
+    align-items: center;
+    justify-content: center;
+}
+
+.shortcut-label {
+    margin-right: 8px;
+    color: rgb(179, 179, 179);
+}
+
+.narrative-button-content {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.narrative-requirement-box {
+    flex-direction: row;
+    align-items: center;
+}
+
+.narrative-requirement-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 4px;
+}
+
+.narrative-requirement-icon-disabled {
+    -unity-background-image-tint-color: rgb(230, 77, 77);
+}
+
+.narrative-requirement-value {
+    margin-right: 12px;
+    color: white;
+}
+
+.narrative-requirement-value-disabled {
+    color: rgb(230, 77, 77);
+}
+
+.narrative-outcome-box {
+    flex-direction: row;
+    align-items: center;
+    margin-left: 12px;
+}
+
+.narrative-outcome-value {
+    font-size: 14px;
+}
+
+.narrative-outcome-value-positive {
+    color: rgb(95, 214, 117);
+}
+
+.narrative-outcome-value-negative {
+    color: rgb(230, 77, 77);
+}
+
+.narrative-outcome-icon {
+    width: 28px;
+    height: 28px;
+    margin-left: 4px;
+}

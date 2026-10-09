@@ -1,0 +1,35 @@
+{
+"$path":"Assets/Resources/Galaxies/Solar System Entities/abandoned_station.asset",
+"$type":"SolarSystemEntity",
+"$name":"abandoned_station",
+"entityId":"abandoned_station",
+"ownerFactionIdOverride":"",
+"prefab":{"$ref":"Assets/Game/Prefabs/Galaxy/Station Prefab.prefab","name":"Station Prefab","type":"GameObject"},
+"mapIcon":{"$ref":"Assets/Starsector Visuals/icons/station_broken.png","name":"station_broken","type":"Texture2D"},
+"color":[0.46226418018341064,0.46226418018341064,0.46226418018341064,1],
+"description":"This is a placeholder description blah blah blah",
+"encounterPool":{
+"poolName":"",
+"encounters":[
+{
+"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/event_quarantine_lab.asset","name":"event_quarantine_lab","type":"NarrativeEncounter"},
+"probabilityWeight":0.5
+},
+{
+"encounter":{"$ref":"Assets/Resources/Encounters/Narrative/event_miner_lament.asset","name":"event_miner_lament","type":"NarrativeEncounter"},
+"probabilityWeight":0.5
+}
+]
+},
+"encounterIdOverride":"",
+"autoInteractOnContact":false,
+"orbitType":"Static",
+"orbitSpeedMultiplier":2,
+"showOrbitLine":true,
+"spawnType":"AroundEntity",
+"minOrbitRadius":6,
+"maxOrbitRadius":6,
+"canHaveSatellites":false,
+"spawnRequirement":"",
+"spawnBlocker":""
+}

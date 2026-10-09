@@ -1,0 +1,30 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles" />
+    <engine:VisualElement name="BottomPanel" enabled="false" style="flex-grow: 1; flex-direction: row; height: auto; position: absolute; bottom: 0; left: 1px; background-color: rgba(0, 0, 0, 0); width: 183px; display: none;">
+        <engine:VisualElement class="worldUI_panel" style="flex-grow: 1; width: 182px; height: 100%; padding-top: 10px; padding-right: 0; padding-bottom: 10px; padding-left: 25px;">
+            <engine:VisualElement name="gold" style="flex-grow: 1; flex-direction: row; height: 25px;">
+                <engine:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/RPGUI/Textures/Inventory/Currency_Gold.png?fileID=2800000&amp;guid=bd2d58b9d9827c246975198feba0c7a7&amp;type=3#Currency_Gold&quot;); -unity-background-scale-mode: scale-to-fit; background-position-y: center 0; width: 60px;" />
+                <engine:Label text="15g" name="goldlabel" style="width: 124px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; justify-content: flex-start; -unity-text-align: middle-left;" />
+            </engine:VisualElement>
+            <engine:VisualElement name="cargo" style="flex-grow: 1; flex-direction: row; height: 25px;">
+                <engine:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/RPGUI/Textures/Lobby/Hero%20Select/HeroSelect_Role_Tank.png?fileID=2800000&amp;guid=f69654c6e413d9742990253fa2af85df&amp;type=3#HeroSelect_Role_Tank&quot;); -unity-background-scale-mode: scale-to-fit; background-position-y: center 0; width: 60px;" />
+                <engine:Label text="100/250" name="cargolabel" style="width: 124px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; justify-content: flex-start; -unity-text-align: middle-left;" />
+            </engine:VisualElement>
+            <engine:VisualElement name="food" style="flex-grow: 1; flex-direction: row; height: 25px; display: none;">
+                <engine:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Game/Visuals/Sprites/Food/MelonWater.png?fileID=2800000&amp;guid=8570c189a28e22145ac611fc417acd64&amp;type=3#MelonWater&quot;); -unity-background-scale-mode: scale-to-fit; background-position-y: center 0; width: 60px;" />
+                <engine:Label text="10 Months" name="foodlabel" style="width: 124px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; justify-content: flex-start; -unity-text-align: middle-left;" />
+            </engine:VisualElement>
+            <engine:VisualElement name="crew" enabled="false" style="flex-grow: 1; flex-direction: row; height: 25px; display: none;">
+                <engine:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Plugins/Pixel%20Crushers/Dialogue%20System/Prefabs/Art/Textures/Basic/portrait.png?fileID=2800000&amp;guid=8fbfa1bc77a0388499f83f32b410eea3&amp;type=3#portrait&quot;); -unity-background-scale-mode: scale-to-fit; background-position-y: center 0; width: 60px;" />
+                <engine:Label text="130/250" name="crewlabel" style="width: 124px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; justify-content: flex-start; -unity-text-align: middle-left;" />
+            </engine:VisualElement>
+        </engine:VisualElement>
+        <engine:VisualElement enabled="false" style="flex-grow: 1; flex-direction: row; height: auto; align-self: flex-end; width: 0; opacity: 1; display: none;">
+            <engine:Button text="Character" class="button_solid" />
+            <engine:Button text="Fleet" class="button_solid" />
+            <engine:Button text="Inventory" class="button_solid" />
+            <engine:Button text="Map" class="button_solid" />
+            <engine:Button text="Log" class="button_solid" />
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

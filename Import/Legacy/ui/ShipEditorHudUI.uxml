@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles"/>
+    <Style src="project://database/Assets/Game/UI/ShipStatsView.uss?fileID=7433441132597879392&amp;guid=fd8a2c8337061f946bc4f12536f2a775&amp;type=3#ShipStatsView"/>
+    <ui:VisualElement name="ship-stats-container" class="ship-stats-container">
+        <ui:Label text="SHIP STATS" name="title" class="ship-stats-title"/>
+        <ui:Label text="Voxels: 0 / 0" name="coreStats" class="ship-stats-info"/>
+        <ui:VisualElement name="errorPanel" class="ship-stats-error-panel">
+            <ui:Label text="" name="validationText" class="ship-stats-error-text"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

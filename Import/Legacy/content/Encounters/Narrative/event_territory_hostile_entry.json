@@ -1,0 +1,50 @@
+{
+"$path":"Assets/Resources/Encounters/Narrative/event_territory_hostile_entry.asset",
+"$type":"NarrativeEncounter",
+"$name":"event_territory_hostile_entry",
+"encounterId":"event_territory_hostile_entry",
+"isUnique":false,
+"repeatable":true,
+"startingPageId":"start",
+"lootTable":null,
+"presentationMode":"Default",
+"disableInputsMode":false,
+"pages":[
+{
+"id":"start",
+"text":"Hostile sensor pings flood your tactical feed as you cross the border. Someone is tracking your vector from the dark side of the system.",
+"localizationKey":"event_territory_hostile_entry_start_text",
+"imageName":"",
+"imageOverride":null,
+"tags":["territory","hostile"],
+"audioClipName":"UI_Fail",
+"options":[
+{
+"text":"Mark Contact in Intel",
+"localizationKey":"event_territory_hostile_entry_start_opt1",
+"showRequirement":"REQ_QUEST_ACTIVE(quest_hostile_blackbox)",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.add_log","parameter2":"questId=quest_hostile_blackbox|text=Hostile contact recorded on border entry."},
+{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}
+]
+},
+{
+"text":"Request Reinforcement Contract",
+"localizationKey":"event_territory_hostile_entry_start_opt2",
+"showRequirement":"",
+"enableRequirement":"",
+"consumeOnUse":false,
+"optionStyle":"Quest",
+"outcomes":[
+{"type":"CustomAction","parameter1":"quest.generate_template","parameter2":"templateId=tmpl_bounty_probe|track=true"},
+{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}
+]
+},
+{"text":"Run Silent","localizationKey":"event_territory_hostile_entry_start_opt3","showRequirement":"","enableRequirement":"","consumeOnUse":false,"optionStyle":"Normal","outcomes":[{"type":"EndEncounter","parameter1":"TRUE","parameter2":""}]}
+]
+}
+]
+}

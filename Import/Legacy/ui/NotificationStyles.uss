@@ -1,0 +1,82 @@
+.notification-root {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding-top: 18px;
+    padding-right: 18px;
+    pointer-events: none;
+}
+
+.notification-container {
+    width: 380px;
+    flex-direction: column;
+    pointer-events: none;
+}
+
+.notification-item {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    transition-property: translate, opacity, scale;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-out;
+}
+
+.notification-item--quest {
+    border-left-color: rgba(255, 220, 125, 0.75);
+    border-right-color: rgba(255, 220, 125, 0.75);
+    border-top-color: rgba(255, 220, 125, 0.75);
+    border-bottom-color: rgba(255, 220, 125, 0.75);
+}
+
+.notification-item--success {
+    border-left-color: rgba(130, 224, 146, 0.75);
+    border-right-color: rgba(130, 224, 146, 0.75);
+    border-top-color: rgba(130, 224, 146, 0.75);
+    border-bottom-color: rgba(130, 224, 146, 0.75);
+}
+
+.notification-item--failed {
+    border-left-color: rgba(238, 116, 116, 0.75);
+    border-right-color: rgba(238, 116, 116, 0.75);
+    border-top-color: rgba(238, 116, 116, 0.75);
+    border-bottom-color: rgba(238, 116, 116, 0.75);
+}
+
+.notification-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 10px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.notification-text {
+    color: rgb(225, 236, 252);
+    font-size: 14px;
+    -unity-font-style: bold;
+    flex-grow: 1;
+    white-space: normal;
+}
+
+.notification-item--entering {
+    translate: 38px 0;
+    opacity: 0;
+    scale: 0.96;
+}
+
+.notification-item--visible {
+    translate: 0 0;
+    opacity: 1;
+    scale: 1;
+}
+
+.notification-item--exiting {
+    translate: 28px 0;
+    opacity: 0;
+    scale: 0.96;
+}

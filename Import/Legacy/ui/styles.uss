@@ -1,0 +1,255 @@
+.cover {
+    background-image: url("project://database/Assets/scifi_ui%20white/PNG/Borders/White/Group%203%20copy.png?fileID=2800000&guid=9825d7b3842a2e2418c43f6c48f08aab&type=3#Group 3 copy");
+    -unity-font-definition: url("project://database/Assets/Fonts/Kontrapunkt-Bold.otf?fileID=12800000&guid=6037689c785f0764e999658db2428f9c&type=3#Kontrapunkt-Bold");
+}
+
+.trade_resource {
+    flex-direction: row;
+    background-color: rgba(0, 0, 0, 0.11);
+    background-size: 100% 100%;
+    height: auto;
+    border-bottom-width: 0;
+    margin-bottom: 8px;
+    -unity-font-definition: url("project://database/Assets/Fonts/Kontrapunkt-Bold.otf?fileID=12800000&guid=6037689c785f0764e999658db2428f9c&type=3#Kontrapunkt-Bold");
+}
+
+.button_solid {
+    background-image: url("project://database/Assets/Plugins/Pixel%20Crushers/Dialogue%20System/Prefabs/Art/Textures/Runic/ButtonPressed.png?fileID=2800000&guid=ef3f2a31b9a076f4aa72faf842faf425&type=3#ButtonPressed");
+    font-size: 15px;
+    color: rgb(255, 255, 255);
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-slice-scale: 0.2px;
+    -unity-slice-left: 100;
+    -unity-slice-top: 100;
+    -unity-slice-right: 100;
+    -unity-slice-bottom: 100;
+    background-color: rgba(0, 0, 0, 0);
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+    min-width: 100px;
+    margin-top: 0;
+    margin-right: 1px;
+    margin-bottom: 0;
+    margin-left: 1px;
+}
+
+.worldUI_panel {
+    background-image: url("project://database/Assets/Plugins/Pixel%20Crushers/Dialogue%20System/Prefabs/Art/Textures/Runic/Panel%20Background.png?fileID=2800000&guid=738a30cc0b59b154b81d0dd9a11423ba&type=3#Panel Background");
+    -unity-background-scale-mode: stretch-to-fill;
+    background-position-y: center 0;
+    background-position-x: center 0;
+    -unity-slice-left: 150;
+    -unity-slice-scale: 0.1px;
+    -unity-slice-top: 150;
+    -unity-slice-bottom: 150;
+    -unity-slice-right: 150;
+    color: rgb(0, 0, 0);
+    font-size: 16px;
+}
+
+.h1 {
+    -unity-font-definition: url("project://database/Assets/Fonts/Kontrapunkt-Bold.otf?fileID=12800000&guid=6037689c785f0764e999658db2428f9c&type=3#Kontrapunkt-Bold");
+    font-size: 40px;
+}
+
+.p {
+    -unity-font-definition: url("project://database/Assets/Fonts/Kontrapunkt-Bold.otf?fileID=12800000&guid=6037689c785f0764e999658db2428f9c&type=3#Kontrapunkt-Bold");
+}
+
+.button {
+    font-size: 20px;
+    background-image: url("project://database/Assets/scifi_ui%20white/PNG/button/White/1x/Asset%209.png?fileID=2800000&guid=89b8be4652a1c474aa00de4d43cca0df&type=3#Asset 9");
+    margin-bottom: 0;
+    -unity-font-definition: url("project://database/Assets/Fonts/Kontrapunkt-Bold.otf?fileID=12800000&guid=6037689c785f0764e999658db2428f9c&type=3#Kontrapunkt-Bold");
+    color: rgb(255, 255, 255);
+    transition-property: all;
+    transition-duration: 0s;
+    transition-timing-function: ease;
+    transition-delay: 0s;
+    margin-top: 0;
+    margin-right: 14px;
+    margin-left: 0;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-background-scale-mode: stretch-to-fill;
+    background-color: rgba(0, 0, 0, 0);
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+    -unity-text-align: middle-center;
+    background-size: 100% 100%;
+    -unity-font-style: normal;
+    padding-top: 15px;
+    padding-right: 15px;
+    padding-bottom: 15px;
+    padding-left: 15px;
+}
+
+.unity-label {
+    -unity-font-definition: url("project://database/Assets/Fonts/Kontrapunkt-Bold.otf?fileID=12800000&guid=6037689c785f0764e999658db2428f9c&type=3#Kontrapunkt-Bold");
+}
+
+.button:hover {
+    transition-property: all;
+    transition-duration: 0s;
+    transition-timing-function: ease;
+    transition-delay: 0s;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+    -unity-background-image-tint-color: rgb(31, 65, 144);
+}
+
+.tooltip {
+    position: absolute;
+    background-color: rgba(10, 15, 30, 0.98);
+    border-width: 1px;
+    border-color: rgba(100, 150, 255, 0.5);
+    padding: 10px;
+    border-radius: 4px;
+    width: 300px;
+    visibility: hidden;
+    opacity: 0;
+    transition-duration: 0.1s;
+    transition-property: opacity;
+    -unity-font-definition: url("project://database/Assets/Plugins/QFSW/Quantum%20Console/Source/Fonts/OfficeCodePro-Medium.ttf?fileID=12800000&guid=e7f9c7e4780a90b45b581308e8a2f94a&type=3#OfficeCodePro-Medium");
+}
+
+.tooltip-icon {
+    width: 48px;
+    height: 48px;
+    align-self: flex-start;
+    margin-bottom: 5px;
+}
+
+.tooltip-description {
+    font-size: 14px;
+    color: white;
+    white-space: normal;
+    -unity-font-definition: url("project://database/Assets/Plugins/QFSW/Quantum%20Console/Source/Fonts/OfficeCodePro-Medium.ttf?fileID=12800000&guid=e7f9c7e4780a90b45b581308e8a2f94a&type=3#OfficeCodePro-Medium");
+}
+
+.ui-hidden {
+    display: none;
+}
+
+.ui-visibility-hidden {
+    visibility: hidden;
+}
+
+.ui-visibility-visible {
+    visibility: visible;
+}
+
+.intel-theme-screen {
+    background-color: rgba(0, 0, 0, 0.72);
+}
+
+.intel-theme-panel {
+    background-color: rgb(8, 16, 31);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(170, 201, 255, 0.4);
+    border-right-color: rgba(170, 201, 255, 0.4);
+    border-top-color: rgba(170, 201, 255, 0.4);
+    border-bottom-color: rgba(170, 201, 255, 0.4);
+    background-image: url("project://database/Assets/Game/Visuals/Sprites/grid_dark.jpg?fileID=2800000&guid=503fd716697481b4ba55c61e237c8c20&type=3#grid_dark");
+    background-size: 50% 77%;
+    background-repeat: repeat repeat;
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.5);
+}
+
+.intel-theme-subpanel {
+    background-color: rgba(8, 16, 31, 0.85);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(146, 175, 214, 0.35);
+    border-right-color: rgba(146, 175, 214, 0.35);
+    border-top-color: rgba(146, 175, 214, 0.35);
+    border-bottom-color: rgba(146, 175, 214, 0.35);
+}
+
+.intel-theme-title {
+    color: rgb(229, 243, 255);
+}
+
+.intel-theme-muted {
+    color: rgb(168, 188, 214);
+}
+
+.list-empty {
+    color: rgb(168, 188, 214);
+    font-size: 13px;
+}
+
+.button-compact {
+    width: 100px;
+    height: 30px;
+    font-size: 12px;
+}
+
+.button-danger {
+    -unity-background-image-tint-color: rgb(220, 82, 82);
+    color: white;
+}
+
+.stat-value {
+    color: white;
+    -unity-font-style: bold;
+}
+
+.unity-scroll-view__vertical-scroller {
+    width: 4px;
+    min-width: 4px;
+    max-width: 4px;
+    background-color: rgba(0, 0, 0, 0);
+    justify-content: center;
+}
+
+.unity-scroll-view__vertical-scroller .unity-scroller__slider {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+    width: 8px;
+    min-width: 8px;
+    max-width: 8px;
+}
+
+.unity-scroll-view__vertical-scroller .unity-base-slider__tracker {
+    background-color: rgba(33, 87, 156, 0.32);
+    background-image: none;
+    border-width: 0;
+    border-radius: 0;
+    width: 4px;
+    min-width: 4px;
+    max-width: 4px;
+    margin-left: 3px;
+}
+
+.unity-scroll-view__vertical-scroller .unity-base-slider__dragger {
+    min-height: 36px;
+    background-color: rgb(255, 255, 255);
+    background-image: none;
+    border-radius: 0;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}
+
+.unity-scroll-view__vertical-scroller .unity-scroller__low-button,
+.unity-scroll-view__vertical-scroller .unity-scroller__high-button {
+    display: none;
+    width: 0;
+    height: 0;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+}
+
+.unity-scroll-view__content-container {
+    justify-content: center;
+    flex-grow: 1;
+}

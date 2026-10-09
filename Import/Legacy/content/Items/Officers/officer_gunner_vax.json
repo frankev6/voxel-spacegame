@@ -1,0 +1,20 @@
+{
+"$path":"Assets/Resources/Items/Officers/officer_gunner_vax.asset",
+"$type":"SlottableItem",
+"$name":"officer_gunner_vax",
+"RegistryKey":"officer_gunner_vax",
+"Name":"Vax Vandervalk",
+"Description":"After participating in the war against the AI uprise. Vax became a mercenary for the Iron Tide.  ",
+"BasePrice":1000,
+"isStackable":false,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_62","type":"Sprite","sub":"spritetest2_transparent_62"},
+"Category":"Officer",
+"Rarity":"Unique",
+"EffectType":"None",
+"GrantsAbilities":[],
+"RequiredSocketType":"Core",
+"Modifiers":[
+{"StatToModify":"WeaponDamage","ModifyType":"Add","ModifierRange":"Global","Value":5},
+{"StatToModify":"WeaponFireRate","ModifyType":"MultiplyPercent","ModifierRange":"Global","Value":5}
+]
+}

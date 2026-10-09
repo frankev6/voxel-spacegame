@@ -1,0 +1,41 @@
+{
+"$path":"Assets/Resources/Audio/AudioLibrary.asset",
+"$type":"AudioLibrary",
+"$name":"AudioLibrary",
+"Sounds":[
+{"ID":"UI_Button_Click","Clip":{"$ref":"Assets/Game/SFX/INTERFACE-MetallicClick.wav","name":"INTERFACE-MetallicClick","type":"AudioClip"},"Volume":1},
+{
+"ID":"UI_Button_Hover",
+"Clip":{"$ref":"Assets/Game/SFX/UIHover_INTERFACE-Positive Click_HY_PC-002.wav","name":"UIHover_INTERFACE-Positive Click_HY_PC-002","type":"AudioClip"},
+"Volume":1
+},
+{"ID":"UI_Slot_Click","Clip":{"$ref":"Assets/Game/SFX/INTERFACE-MetallicClick.wav","name":"INTERFACE-MetallicClick","type":"AudioClip"},"Volume":1},
+{
+"ID":"UI_Slot_Hover",
+"Clip":{"$ref":"Assets/Game/SFX/UIHover_INTERFACE-Positive Click_HY_PC-002.wav","name":"UIHover_INTERFACE-Positive Click_HY_PC-002","type":"AudioClip"},
+"Volume":0.10000000149011612
+},
+{
+"ID":"Weapon_Laser_Fire",
+"Clip":{"$ref":"Assets/Game/SFX/Projectile_EXPLOSION-Bit Bomb_HY_PC-001.wav","name":"Projectile_EXPLOSION-Bit Bomb_HY_PC-001","type":"AudioClip"},
+"Volume":0.20000000298023224
+},
+{"ID":"Weapon_Plasma_Fire","Clip":{"$ref":"Assets/Game/SFX/EXPLOSION-Cruncher_HY_PC-003.wav","name":"EXPLOSION-Cruncher_HY_PC-003","type":"AudioClip"},"Volume":0.10000000149011612},
+{"ID":"Weapon_Cannon_Fire","Clip":{"$ref":"Assets/Game/SFX/EXPLOSION-Cruncher_HY_PC-003.wav","name":"EXPLOSION-Cruncher_HY_PC-003","type":"AudioClip"},"Volume":0.30000001192092896},
+{"ID":"Impact_Hull","Clip":{"$ref":"Assets/Game/SFX/explosion_hull_impact.wav","name":"explosion_hull_impact","type":"AudioClip"},"Volume":0.30000001192092896},
+{"ID":"Impact_Explosion_Small","Clip":{"$ref":"Assets/Game/SFX/EXPLOSION-Cruncher_HY_PC-003.wav","name":"EXPLOSION-Cruncher_HY_PC-003","type":"AudioClip"},"Volume":0.5},
+{"ID":"Impact_Explosion_Large","Clip":{"$ref":"Assets/Game/SFX/EXPLOSION-Cruncher_HY_PC-003.wav","name":"EXPLOSION-Cruncher_HY_PC-003","type":"AudioClip"},"Volume":0.30000001192092896},
+{"ID":"UI_View_Open","Clip":{"$ref":"Assets/Game/SFX/UIClick_INTERFACE-OpenClose.wav","name":"UIClick_INTERFACE-OpenClose","type":"AudioClip"},"Volume":0.5},
+{"ID":"UI_View_Close","Clip":{"$ref":"Assets/Game/SFX/UIClick_INTERFACE-OpenClose.wav","name":"UIClick_INTERFACE-OpenClose","type":"AudioClip"},"Volume":0.5},
+{"ID":"UI_Fail","Clip":{"$ref":"Assets/Game/SFX/Failure Stinger.wav","name":"Failure Stinger","type":"AudioClip"},"Volume":0.30000001192092896},
+{"ID":"UI_Success","Clip":{"$ref":"Assets/Game/SFX/Success Stinger.wav","name":"Success Stinger","type":"AudioClip"},"Volume":0.30000001192092896},
+{"ID":"Editor_Place_Voxel","Clip":{"$ref":"Assets/Game/SFX/Rooted_Dirt_break3_placeholder.ogg","name":"Rooted_Dirt_break3_placeholder","type":"AudioClip"},"Volume":1},
+{"ID":"Editor_Remove_Voxel","Clip":{"$ref":"Assets/Game/SFX/Rooted_Dirt_break3_placeholder.ogg","name":"Rooted_Dirt_break3_placeholder","type":"AudioClip"},"Volume":1}
+],
+"Music":[
+{"Track":"Combat_Standard","Clip":{"$ref":"Assets/Game/SFX/Music/10 Boarding the Mechanism.wav","name":"10 Boarding the Mechanism","type":"AudioClip"},"Volume":0.10000000149011612},
+{"Track":"Exploration","Clip":{"$ref":"Assets/Game/SFX/Music/02 The Restricted Hangar.wav","name":"02 The Restricted Hangar","type":"AudioClip"},"Volume":0.10000000149011612},
+{"Track":"MainMenu","Clip":{"$ref":"Assets/Game/SFX/Music/02 The Restricted Hangar.wav","name":"02 The Restricted Hangar","type":"AudioClip"},"Volume":0.10000000149011612},
+{"Track":"SpaceStation","Clip":{"$ref":"Assets/Game/SFX/Music/03 Promising Development.wav","name":"03 Promising Development","type":"AudioClip"},"Volume":0.10000000149011612}
+]
+}

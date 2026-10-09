@@ -1,0 +1,15 @@
+{
+"$path":"Assets/Resources/Items/Consumables/item_strange_matter.asset",
+"$type":"ResourceItem",
+"$name":"item_strange_matter",
+"RegistryKey":"item_strange_matter",
+"Name":"Strange Matter",
+"Description":"",
+"BasePrice":0,
+"isStackable":false,
+"ItemImage":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_83","type":"Sprite","sub":"spritetest2_transparent_83"},
+"Category":"Block",
+"Rarity":"Legendary",
+"EffectType":"None",
+"GrantsAbilities":[]
+}

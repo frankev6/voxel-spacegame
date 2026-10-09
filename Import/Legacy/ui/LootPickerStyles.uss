@@ -1,0 +1,52 @@
+.container {
+    flex-grow: 1;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    -unity-font-definition: url("project://database/Assets/Plugins/QFSW/Quantum%20Console/Source/Fonts/OfficeCodePro-Medium.ttf?fileID=12800000&guid=e7f9c7e4780a90b45b581308e8a2f94a&type=3#OfficeCodePro-Medium");
+}
+
+.loot-item {
+    width: 19%;
+    height: 320px;
+    margin: 1%;
+    border-width: 2px;
+    border-color: rgb(88, 88, 88);
+    align-items: center;
+    justify-content: center;
+    margin-top: 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    margin-left: 5px;
+}
+
+.loot-item:hover {
+    border-color: rgb(255, 255, 255);
+}
+
+.loot-image {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+}
+
+.loot-title {
+    color: white;
+    font-size: 16px;
+    -unity-font-style: bold;
+    white-space: normal;
+    text-align: center;
+}
+
+.currency-label {
+    -unity-text-align: middle-center;
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+    align-self: center;
+    width: 100%;
+}
+
+.merchant-filter-button {
+    margin-right: 5px;
+}

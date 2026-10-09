@@ -1,0 +1,554 @@
+{
+"$path":"Assets/Resources/Quests/QuestCatalog.asset",
+"$type":"QuestCatalog",
+"$name":"QuestCatalog",
+"quests":[
+{
+"id":"quest_ark_material_turnin",
+"title":"Survey Local Materials",
+"shortDescription":"Collect 3 raw materials and return to ARK.",
+"detailedDescription":"NORA requested raw materials for emergency hull repairs. Gather at least three units of raw materials and deliver them at ARK station.",
+"isUnique":true,
+"repeatable":false,
+"autoTrack":true,
+"isStory":false,
+"objectives":[
+{"id":"collect_raw_materials","title":"Collect Raw Materials","description":"Gather 3 units of raw materials.","objectiveType":"CollectItem","targetId":"500","targetCount":3,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]},
+{
+"id":"deliver_to_ark",
+"title":"Deliver Materials",
+"description":"Turn in the materials at ARK station.",
+"objectiveType":"CustomCondition",
+"targetId":"",
+"targetCount":1,
+"condition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"world_state","questId":"","objectiveId":"","factionId":"","key":"quest.ark_material_turnin.turnedin","value":"1","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"optional":false,
+"hiddenUntilActive":false,
+"onCompletedActions":[]
+}
+],
+"entityOptions":[
+{
+"id":"turn_in_raw_materials_at_ark",
+"entityId":"ark_station",
+"encounterId":"",
+"pageId":"",
+"scope":"Any",
+"text":"Hand over raw materials",
+"localizationKey":"",
+"consumeOnUse":true,
+"showCondition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"All",
+"nodes":[
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"quest_state","questId":"quest_ark_material_turnin","objectiveId":"","factionId":"","key":"","value":"Active","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"objective_state","questId":"quest_ark_material_turnin","objectiveId":"collect_raw_materials","factionId":"","key":"","value":"true","intValue":0,"comparison":"Equals","legacyRequirement":""}
+}
+],
+"primitive":{"type":"","questId":"","objectiveId":"","factionId":"","key":"","value":"","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"enableCondition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"quest_state","questId":"quest_ark_material_turnin","objectiveId":"","factionId":"","key":"","value":"Active","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"outcomes":[
+{"type":"RemoveItem","parameter1":"500","parameter2":"3"},
+{"type":"CustomAction","parameter1":"state.set","parameter2":"key=quest.ark_material_turnin.turnedin|value=1"},
+{"type":"CustomAction","parameter1":"quest.complete_objective","parameter2":"questId=quest_ark_material_turnin|objectiveId=deliver_to_ark"}
+]
+}
+],
+"markers":[
+{"entityId":"ark_station","systemId":"","label":"Return to ARK"}
+],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"quest_ark_material_turnin","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Collect 3 raw materials and return to ARK station.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"quest_ark_material_turnin","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Materials delivered. Hull repair prep started.","parameters":[]},
+{"actionType":"SetWorldState","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"story_survey","value":"complete","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+],
+"onFailedActions":[
+{"actionType":"AddLog","questId":"quest_ark_material_turnin","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Mission failed before materials were delivered.","parameters":[]}
+]
+},
+{
+"id":"quest_station_data_delivery",
+"title":"Station Data Delivery",
+"shortDescription":"Collect 2 survey fragments and submit them at ARK.",
+"detailedDescription":"Mission Control wants fresh survey fragments for calibration work. Gather two fragments and submit them to ARK operations.",
+"isUnique":true,
+"repeatable":false,
+"autoTrack":true,
+"isStory":false,
+"objectives":[
+{"id":"gather_fragments","title":"Gather Survey Fragments","description":"Collect 2 survey fragments.","objectiveType":"CollectItem","targetId":"500","targetCount":2,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]},
+{
+"id":"submit_fragments",
+"title":"Submit Fragments",
+"description":"Turn in fragments at ARK station.",
+"objectiveType":"CustomCondition",
+"targetId":"",
+"targetCount":1,
+"condition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"world_state","questId":"","objectiveId":"","factionId":"","key":"quest.station_data.submitted","value":"1","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"optional":false,
+"hiddenUntilActive":false,
+"onCompletedActions":[]
+}
+],
+"entityOptions":[
+{
+"id":"turn_in_station_data_at_ark",
+"entityId":"ark_station",
+"encounterId":"",
+"pageId":"",
+"scope":"Any",
+"text":"Submit station data fragments",
+"localizationKey":"",
+"consumeOnUse":true,
+"showCondition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"All",
+"nodes":[
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"quest_state","questId":"quest_station_data_delivery","objectiveId":"","factionId":"","key":"","value":"Active","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"objective_state","questId":"quest_station_data_delivery","objectiveId":"gather_fragments","factionId":"","key":"","value":"true","intValue":0,"comparison":"Equals","legacyRequirement":""}
+}
+],
+"primitive":{"type":"","questId":"","objectiveId":"","factionId":"","key":"","value":"","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"enableCondition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"quest_state","questId":"quest_station_data_delivery","objectiveId":"","factionId":"","key":"","value":"Active","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"outcomes":[
+{"type":"RemoveItem","parameter1":"500","parameter2":"2"},
+{"type":"CustomAction","parameter1":"state.set","parameter2":"key=quest.station_data.submitted|value=1"},
+{"type":"CustomAction","parameter1":"quest.complete_objective","parameter2":"questId=quest_station_data_delivery|objectiveId=submit_fragments"}
+]
+}
+],
+"markers":[
+{"entityId":"ark_station","systemId":"","label":"Submit Data at ARK"}
+],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"quest_station_data_delivery","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Collect 2 survey fragments and submit them at ARK.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"quest_station_data_delivery","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Station data package submitted.","parameters":[]},
+{"actionType":"SetWorldState","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"quest.station_data_delivery.complete","value":"1","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+],
+"onFailedActions":[
+{"actionType":"AddLog","questId":"quest_station_data_delivery","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Data package was not delivered.","parameters":[]}
+]
+},
+{
+"id":"quest_station_boarding_trial",
+"title":"Station Boarding Trial",
+"shortDescription":"Debrief the shady contact and validate their intel.",
+"detailedDescription":"Mission Control flagged a bar contact as a reliability test. Debrief the contact and extract a verifiable intel marker.",
+"isUnique":true,
+"repeatable":false,
+"autoTrack":true,
+"isStory":false,
+"objectives":[
+{"id":"meet_shady_contact","title":"Meet the Shady Contact","description":"Complete the shady contact encounter at the station bar.","objectiveType":"CompleteEncounter","targetId":"bar_shady_man","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]},
+{
+"id":"decode_tip",
+"title":"Decode the Intel Tip",
+"description":"Extract a confirmed intel marker from the contact.",
+"objectiveType":"CustomCondition",
+"targetId":"",
+"targetCount":1,
+"condition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"world_state","questId":"","objectiveId":"","factionId":"","key":"station_shady_truth","value":"revealed","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"optional":false,
+"hiddenUntilActive":false,
+"onCompletedActions":[]
+}
+],
+"entityOptions":[],
+"markers":[
+{"entityId":"ark_station","systemId":"","label":"Debrief with Mission Control"}
+],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"quest_station_boarding_trial","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Visit the station bar and debrief the contact.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"quest_station_boarding_trial","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Boarding trial passed. Mission Control unlocked the next delivery test.","parameters":[]},
+{"actionType":"AcceptQuest","questId":"quest_station_data_delivery","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":true,"logText":"","parameters":[]},
+{"actionType":"SetWorldState","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"quest.station_boarding_trial.complete","value":"1","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+],
+"onFailedActions":[
+{"actionType":"AddLog","questId":"quest_station_boarding_trial","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Boarding trial failed.","parameters":[]}
+]
+},
+{
+"id":"quest_signal_trace",
+"title":"Signal Trace",
+"shortDescription":"Track and resolve one mystery signal encounter.",
+"detailedDescription":"Intel wants rapid validation of unknown comm signatures. Resolve one mystery signal contact and upload telemetry.",
+"isUnique":true,
+"repeatable":false,
+"autoTrack":true,
+"isStory":false,
+"objectives":[
+{"id":"resolve_signal_contact","title":"Resolve Mystery Signal","description":"Complete the mystery signal encounter.","objectiveType":"CompleteEncounter","targetId":"event_mystery_signal","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]}
+],
+"entityOptions":[],
+"markers":[],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"quest_signal_trace","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Signal Trace contract accepted.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"quest_signal_trace","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Signal telemetry uploaded.","parameters":[]},
+{"actionType":"SetWorldState","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"quest.signal_trace.complete","value":"1","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+],
+"onFailedActions":[
+{"actionType":"AddLog","questId":"quest_signal_trace","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Signal trace aborted.","parameters":[]}
+]
+},
+{
+"id":"quest_relation_watch",
+"title":"Territory Relations Watch",
+"shortDescription":"Record a faction-border entry and submit a report at ARK.",
+"detailedDescription":"Command wants real-time telemetry from faction borders. Confirm entry, then file a structured report at ARK operations.",
+"isUnique":true,
+"repeatable":false,
+"autoTrack":true,
+"isStory":false,
+"objectives":[
+{"id":"territory_seen","title":"Cross a Faction Border","description":"Enter a faction-controlled territory.","objectiveType":"VisitFactionTerritory","targetId":"","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]},
+{
+"id":"submit_report",
+"title":"Submit Territory Report",
+"description":"Submit your report at ARK station.",
+"objectiveType":"CustomCondition",
+"targetId":"",
+"targetCount":1,
+"condition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"world_state","questId":"","objectiveId":"","factionId":"","key":"quest.relation_watch.report","value":"submitted","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"optional":false,
+"hiddenUntilActive":false,
+"onCompletedActions":[]
+}
+],
+"entityOptions":[
+{
+"id":"submit_territory_report_ark",
+"entityId":"ark_station",
+"encounterId":"",
+"pageId":"",
+"scope":"Any",
+"text":"Submit territory intel report",
+"localizationKey":"",
+"consumeOnUse":true,
+"showCondition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"All",
+"nodes":[
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"quest_state","questId":"quest_relation_watch","objectiveId":"","factionId":"","key":"","value":"Active","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"objective_state","questId":"quest_relation_watch","objectiveId":"territory_seen","factionId":"","key":"","value":"true","intValue":0,"comparison":"Equals","legacyRequirement":""}
+}
+],
+"primitive":{"type":"","questId":"","objectiveId":"","factionId":"","key":"","value":"","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"enableCondition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"quest_state","questId":"quest_relation_watch","objectiveId":"","factionId":"","key":"","value":"Active","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"outcomes":[
+{"type":"CustomAction","parameter1":"state.set","parameter2":"key=quest.relation_watch.report|value=submitted"},
+{"type":"CustomAction","parameter1":"quest.complete_objective","parameter2":"questId=quest_relation_watch|objectiveId=submit_report"}
+]
+}
+],
+"markers":[
+{"entityId":"ark_station","systemId":"","label":"Report to ARK"}
+],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"quest_relation_watch","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Territory entry confirmed. Submit the report at ARK.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"quest_relation_watch","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Territory report filed and validated.","parameters":[]},
+{"actionType":"AdjustFactionRelation","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":5,"boolValue":false,"logText":"","parameters":[]}
+],
+"onFailedActions":[
+{"actionType":"AddLog","questId":"quest_relation_watch","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Territory report workflow failed.","parameters":[]}
+]
+},
+{
+"id":"quest_hostile_blackbox",
+"title":"Hostile Telemetry Blackbox",
+"shortDescription":"Survive one hostile contact and return telemetry to ARK.",
+"detailedDescription":"Border scouts tagged hostile signatures. Survive one engagement, recover telemetry, and submit the blackbox package at ARK.",
+"isUnique":true,
+"repeatable":false,
+"autoTrack":true,
+"isStory":false,
+"objectives":[
+{"id":"survive_contact","title":"Survive Hostile Contact","description":"Complete one encounter after entering hostile territory.","objectiveType":"CompleteEncounter","targetId":"","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]},
+{
+"id":"submit_blackbox",
+"title":"Submit Blackbox Telemetry",
+"description":"Deliver hostile telemetry to ARK station.",
+"objectiveType":"CustomCondition",
+"targetId":"",
+"targetCount":1,
+"condition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"world_state","questId":"","objectiveId":"","factionId":"","key":"quest.hostile_blackbox.turnin","value":"done","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"optional":false,
+"hiddenUntilActive":false,
+"onCompletedActions":[]
+}
+],
+"entityOptions":[
+{
+"id":"turn_in_blackbox_at_ark",
+"entityId":"ark_station",
+"encounterId":"",
+"pageId":"",
+"scope":"Any",
+"text":"Turn in hostile telemetry blackbox",
+"localizationKey":"",
+"consumeOnUse":true,
+"showCondition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"All",
+"nodes":[
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"quest_state","questId":"quest_hostile_blackbox","objectiveId":"","factionId":"","key":"","value":"Active","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"objective_state","questId":"quest_hostile_blackbox","objectiveId":"survive_contact","factionId":"","key":"","value":"true","intValue":0,"comparison":"Equals","legacyRequirement":""}
+}
+],
+"primitive":{"type":"","questId":"","objectiveId":"","factionId":"","key":"","value":"","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"enableCondition":{
+"$type":"Assembly-CSharp ConditionNode",
+"logic":"Primitive",
+"nodes":[],
+"primitive":{"type":"quest_state","questId":"quest_hostile_blackbox","objectiveId":"","factionId":"","key":"","value":"Active","intValue":0,"comparison":"Equals","legacyRequirement":""}
+},
+"outcomes":[
+{"type":"CustomAction","parameter1":"state.set","parameter2":"key=quest.hostile_blackbox.turnin|value=done"},
+{"type":"CustomAction","parameter1":"quest.complete_objective","parameter2":"questId=quest_hostile_blackbox|objectiveId=submit_blackbox"}
+]
+}
+],
+"markers":[
+{"entityId":"ark_station","systemId":"","label":"Turn In Blackbox"}
+],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"quest_hostile_blackbox","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Survive one hostile contact and submit telemetry at ARK.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"quest_hostile_blackbox","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Hostile telemetry package submitted.","parameters":[]},
+{"actionType":"SetWorldState","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"quest.hostile_blackbox.complete","value":"1","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+],
+"onFailedActions":[
+{"actionType":"AddLog","questId":"quest_hostile_blackbox","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Hostile telemetry package lost.","parameters":[]},
+{"actionType":"SetWorldState","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"quest.hostile_blackbox.failed","value":"1","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+]
+},
+{
+"id":"quest_trigger_fail_test",
+"title":"Failure Pipeline Sandbox",
+"shortDescription":"A synthetic quest to test explicit fail and fail-chain actions.",
+"detailedDescription":"This sandbox quest exists to stress test failure listeners, manual fail controls, and follow-up actions.",
+"isUnique":true,
+"repeatable":false,
+"autoTrack":true,
+"isStory":false,
+"objectives":[
+{"id":"reach_any_system","title":"Reach Any System","description":"Enter any system once.","objectiveType":"ReachSystem","targetId":"","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]}
+],
+"entityOptions":[],
+"markers":[],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"quest_trigger_fail_test","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Failure sandbox accepted.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"quest_trigger_fail_test","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Failure sandbox completed.","parameters":[]}
+],
+"onFailedActions":[
+{"actionType":"AddLog","questId":"quest_trigger_fail_test","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Failure sandbox failed; spawning follow-up contract.","parameters":[]},
+{"actionType":"GenerateMissionFromTemplate","questId":"","objectiveId":"","templateId":"tmpl_bounty_probe","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":true,"logText":"","parameters":[]}
+]
+},
+{
+"id":"quest_territory_recon",
+"title":"Hostile Territory Recon",
+"shortDescription":"Enter hostile territory, survive one encounter, and report to ARK.",
+"detailedDescription":"Command has requested recon in hostile space. Survive one encounter and report your findings at ARK.",
+"isUnique":true,
+"repeatable":false,
+"autoTrack":true,
+"isStory":false,
+"objectives":[
+{"id":"fight_once","title":"Survive One Encounter","description":"Complete one encounter successfully.","objectiveType":"CompleteEncounter","targetId":"","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]},
+{"id":"report_back","title":"Report to ARK","description":"Interact with ARK station to submit your report.","objectiveType":"InteractEntity","targetId":"ark_station","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]}
+],
+"entityOptions":[],
+"markers":[
+{"entityId":"ark_station","systemId":"","label":"Submit Recon Report"}
+],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"quest_territory_recon","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Recon assignment accepted.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"quest_territory_recon","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Recon complete. Debrief transmitted.","parameters":[]}
+],
+"onFailedActions":[
+{"actionType":"AddLog","questId":"quest_territory_recon","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Recon assignment failed.","parameters":[]}
+]
+},
+{
+"id":"story_chain_signal_1",
+"title":"Story: Whisper Chain I",
+"shortDescription":"Travel to a nearby star and triangulate the anomalous signal.",
+"detailedDescription":"Mission Control has identified a repeating whisper-band signature. Move to a neighboring system and establish a stable lock.",
+"isUnique":true,
+"repeatable":false,
+"autoTrack":true,
+"isStory":true,
+"objectives":[
+{"id":"reach_signal_system","title":"Reach Signal System","description":"Enter a non-ARK system carrying the whisper signature.","objectiveType":"ReachSystem","targetId":"basesolarsystemdata","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]}
+],
+"entityOptions":[],
+"markers":[
+{"entityId":"","systemId":"basesolarsystemdata","label":"Whisper Signal"}
+],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"story_chain_signal_1","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Signal lock initiated. Move to a neighboring system.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"story_chain_signal_1","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Signal lock confirmed. Interceptor contact incoming.","parameters":[]},
+{"actionType":"SpawnEntity","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"npc_story_hunter","factionId":"","key":"","value":"","intValue":1,"boolValue":false,"logText":"","parameters":[{"key":"count","value":"1"}]},
+{"actionType":"AcceptQuest","questId":"story_chain_signal_2","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":true,"logText":"","parameters":[]},
+{"actionType":"TrackQuest","questId":"story_chain_signal_2","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+],
+"onFailedActions":[
+{"actionType":"AddLog","questId":"story_chain_signal_1","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Signal triangulation interrupted.","parameters":[]}
+]
+},
+{
+"id":"story_chain_signal_2",
+"title":"Story: Whisper Chain II",
+"shortDescription":"Destroy the interceptor that responded to your signal lock.",
+"detailedDescription":"The lock drew a hostile interceptor into the system. Eliminate the hunter before it reports your position.",
+"isUnique":true,
+"repeatable":false,
+"autoTrack":true,
+"isStory":true,
+"objectives":[
+{"id":"destroy_interceptor","title":"Destroy Interceptor","description":"Destroy the story hunter fleet.","objectiveType":"DestroyEntity","targetId":"npc_story_hunter","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]}
+],
+"entityOptions":[],
+"markers":[
+{"entityId":"npc_story_hunter","systemId":"","label":"Hunter Interceptor"}
+],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"story_chain_signal_2","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Hunter contact acquired. Intercept and destroy.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"story_chain_signal_2","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Interceptor neutralized. Return to ARK for debrief.","parameters":[]},
+{"actionType":"AcceptQuest","questId":"story_chain_signal_3","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":true,"logText":"","parameters":[]},
+{"actionType":"TrackQuest","questId":"story_chain_signal_3","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+],
+"onFailedActions":[
+{"actionType":"AddLog","questId":"story_chain_signal_2","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Interceptor engagement failed.","parameters":[]}
+]
+},
+{
+"id":"story_chain_signal_3",
+"title":"Story: Whisper Chain III",
+"shortDescription":"Return to ARK and debrief Mission Control.",
+"detailedDescription":"With the interceptor down, bring the recovered telemetry back to ARK and submit a final debrief.",
+"isUnique":true,
+"repeatable":false,
+"autoTrack":true,
+"isStory":true,
+"objectives":[
+{"id":"return_to_ark_system","title":"Return to ARK System","description":"Travel back to the ARK staging system.","objectiveType":"ReachSystem","targetId":"ark_start","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]},
+{"id":"debrief_at_ark","title":"Debrief at ARK","description":"Interact with ARK station to submit recovered telemetry.","objectiveType":"InteractEntity","targetId":"ark_station","targetCount":1,"condition":null,"optional":false,"hiddenUntilActive":false,"onCompletedActions":[]}
+],
+"entityOptions":[],
+"markers":[
+{"entityId":"","systemId":"ark_start","label":"Return to ARK"},
+{"entityId":"ark_station","systemId":"","label":"Mission Debrief"}
+],
+"onAcceptedActions":[
+{"actionType":"AddLog","questId":"story_chain_signal_3","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Return to ARK and submit your telemetry package.","parameters":[]}
+],
+"onCompletedActions":[
+{"actionType":"AddLog","questId":"story_chain_signal_3","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Whisper Chain sequence complete.","parameters":[]},
+{"actionType":"SetWorldState","questId":"","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"story.whisper_chain.complete","value":"1","intValue":0,"boolValue":false,"logText":"","parameters":[]}
+],
+"onFailedActions":[
+{"actionType":"AddLog","questId":"story_chain_signal_3","objectiveId":"","templateId":"","encounterId":"","entityId":"","factionId":"","key":"","value":"","intValue":0,"boolValue":false,"logText":"Debrief sequence failed.","parameters":[]}
+]
+}
+]
+}

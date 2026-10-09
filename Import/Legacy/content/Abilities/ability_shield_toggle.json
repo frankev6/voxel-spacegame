@@ -1,0 +1,9 @@
+{
+"$path":"Assets/Resources/Abilities/ability_shield_toggle.asset",
+"$type":"ShieldToggleAbilitySO",
+"$name":"ability_shield_toggle",
+"<ID>k__BackingField":"1",
+"<Icon>k__BackingField":{"$ref":"Assets/Game/Visuals/Sprites/spritetest2_transparent.png","name":"spritetest2_transparent_40","type":"Sprite","sub":"spritetest2_transparent_40"},
+"<Description>k__BackingField":"shield shield shield",
+"enableThreshold":0.30000001192092896
+}

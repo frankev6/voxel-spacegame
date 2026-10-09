@@ -1,0 +1,234 @@
+#Container {
+    flex-grow: 1;
+}
+
+#Spacer {
+    flex-grow: 1;
+    height: 60%;
+}
+
+#DialoguePanel {
+    flex-grow: 1;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin: 20px;
+}
+
+#NPCSubtitlePanel {
+    display: none;
+}
+
+#PCSubtitlePanel {
+    display: none;
+}
+
+#ResponseMenuPanel {
+    flex-grow: 1;
+    background-color: rgba(20, 20, 30, 0.95);
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: rgba(100, 100, 120, 0.3);
+    overflow: hidden;
+    padding: 0;
+}
+
+#TimerProgressBar {
+    display: none;
+}
+
+#ContentArea {
+    flex-direction: row;
+    flex-grow: 1;
+    height: 100%;
+}
+
+#TextSection {
+    flex-basis: 50%;
+    padding: 40px;
+    background-color: rgba(15, 15, 25, 0.9);
+    justify-content: flex-start;
+}
+
+#MenuPortraitContainer {
+    margin-bottom: 30px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#MenuPortraitImage {
+    display: none;
+}
+
+#MenuPortraitLabel {
+    font-size: 32px;
+    color: rgb(220, 220, 230);
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0;
+}
+
+#DescriptionLabel {
+    font-size: 16px;
+    color: rgb(180, 180, 190);
+    white-space: normal;
+    margin-bottom: 30px;
+}
+
+#ButtonsContainer {
+    flex-direction: column;
+    flex-grow: 1;
+    font-size: 12px;
+}
+
+#ResponseButton0 {
+    background-color: rgba(40, 40, 50, 0.8);
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-color: rgba(100, 100, 120, 0.4);
+    color: rgb(200, 160, 100);
+    padding: 15px 20px;
+    margin-bottom: 8px;
+    border-radius: 0;
+    -unity-text-align: middle-left;
+}
+
+#ResponseButton1 {
+    background-color: rgba(40, 40, 50, 0.8);
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-color: rgba(100, 100, 120, 0.4);
+    color: rgb(200, 160, 100);
+    padding: 15px 20px;
+    margin-bottom: 8px;
+    border-radius: 0;
+    -unity-text-align: middle-left;
+}
+
+#ResponseButton2 {
+    background-color: rgba(40, 40, 50, 0.8);
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-color: rgba(100, 100, 120, 0.4);
+    color: rgb(200, 160, 100);
+    padding: 15px 20px;
+    margin-bottom: 8px;
+    border-radius: 0;
+    -unity-text-align: middle-left;
+}
+
+#ResponseButton3 {
+    background-color: rgba(40, 40, 50, 0.8);
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-color: rgba(100, 100, 120, 0.4);
+    color: rgb(200, 160, 100);
+    padding: 15px 20px;
+    margin-bottom: 8px;
+    border-radius: 0;
+    -unity-text-align: middle-left;
+}
+
+#ResponseButton4 {
+    background-color: rgba(40, 40, 50, 0.8);
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-color: rgba(100, 100, 120, 0.4);
+    color: rgb(200, 160, 100);
+    padding: 15px 20px;
+    margin-bottom: 8px;
+    border-radius: 0;
+    -unity-text-align: middle-left;
+}
+
+#ResponseButton0:hover {
+    background-color: rgba(60, 60, 70, 0.9);
+    color: rgb(220, 180, 120);
+    border-color: rgba(200, 160, 100, 0.6);
+}
+
+#ResponseButton1:hover {
+    background-color: rgba(60, 60, 70, 0.9);
+    color: rgb(220, 180, 120);
+    border-color: rgba(200, 160, 100, 0.6);
+}
+
+#ResponseButton2:hover {
+    background-color: rgba(60, 60, 70, 0.9);
+    color: rgb(220, 180, 120);
+    border-color: rgba(200, 160, 100, 0.6);
+}
+
+#ResponseButton3:hover {
+    background-color: rgba(60, 60, 70, 0.9);
+    color: rgb(220, 180, 120);
+    border-color: rgba(200, 160, 100, 0.6);
+}
+
+#ResponseButton4:hover {
+    background-color: rgba(60, 60, 70, 0.9);
+    color: rgb(220, 180, 120);
+    border-color: rgba(200, 160, 100, 0.6);
+}
+
+#ImageSection {
+    flex-basis: 50%;
+    position: relative;
+    overflow: hidden;
+}
+
+#BackgroundImage {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: url("project://database/Assets/Plugins/Pixel%20Crushers/Dialogue%20System/Prefabs/Art/Textures/JRPG/Test%20Portrait%20Sprite.png?fileID=21300000&guid=deeae33315027e045bf104c3f198179d&type=3#Test Portrait Sprite");
+    -unity-background-scale-mode: scale-and-crop;
+    opacity: 0.9;
+}
+
+#GradientOverlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgb(15, 15, 25) 0, rgba(15, 15, 25, 0.8) 20%, rgba(15, 15, 25, 0.3) 50%, rgba(15, 15, 25, 0) 100%);
+}
+
+.panelBackground {
+    background-color: rgba(20, 20, 30, 0.8);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 10px;
+}
+
+.subtitleText {
+    color: rgb(200, 200, 210);
+    font-size: 16px;
+    margin-bottom: 10px;
+    white-space: normal;
+}
+
+.subtitleButton {
+    background-color: rgba(60, 60, 80, 0.8);
+    color: rgb(200, 200, 210);
+    border-width: 1px;
+    border-color: rgba(100, 100, 120, 0.5);
+    padding: 10px 20px;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.responseButton {
+    background-color: rgba(40, 40, 50, 0.8);
+    color: rgb(200, 160, 100);
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-color: rgba(100, 100, 120, 0.4);
+    font-size: 18px;
+    padding: 15px 20px;
+    margin-bottom: 8px;
+    -unity-text-align: middle-left;
+}
+
+.timer {
+    display: none;
+}

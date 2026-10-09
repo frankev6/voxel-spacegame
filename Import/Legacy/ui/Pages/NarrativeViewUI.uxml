@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/Pages/NarrativeView.uss?fileID=7433441132597879392&amp;guid=ce978f6104da0a347814e40b08d54aa1&amp;type=3#NarrativeView"/>
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles"/>
+    <ui:VisualElement name="" class="narrative-root" style="flex-grow: 1; align-items: flex-start; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;">
+        <ui:VisualElement name="panel-container" class="narrative-container" style="background-image: url(&quot;project://database/Assets/Game/Visuals/Sprites/grid_dark.jpg?fileID=2800000&amp;guid=503fd716697481b4ba55c61e237c8c20&amp;type=3#grid_dark&quot;); -unity-background-image-tint-color: rgba(255, 255, 255, 0.5);">
+            <ui:VisualElement name="dialog-column" class="dialog-column">
+                <ui:VisualElement name="image-column" enabled="true" class="image-column ui-hidden" style="flex-basis: 28%; display: flex; position: relative;">
+                    <ui:VisualElement name="event-image" class="event-image"/>
+                </ui:VisualElement>
+                <ui:ScrollView name="dialog-scroll" class="dialog-scroll holo-scrollview" style="width: 100%;"/>
+                <ui:VisualElement name="options-container" class="options-container"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

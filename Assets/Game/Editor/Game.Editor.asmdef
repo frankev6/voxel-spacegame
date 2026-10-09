@@ -1,0 +1,43 @@
+{
+    "name": "Game.Editor",
+    "rootNamespace": "Game.Editor",
+    "references": [
+        "Game.Core",
+        "Game.Data",
+        "Game.Input",
+        "Game.Persistence",
+        "Game.Economy",
+        "Game.Voxel",
+        "Game.Simulation",
+        "Game.Galaxy",
+        "Game.Narrative",
+        "Game.ShipEditor",
+        "Game.UI",
+        "Game.Presentation",
+        "Game.App",
+        "Unity.Entities",
+        "Unity.Entities.Hybrid",
+        "Unity.Transforms",
+        "Unity.Collections",
+        "Unity.Burst",
+        "Unity.Mathematics",
+        "Unity.Physics",
+        "Unity.Physics.Hybrid",
+        "Unity.Entities.Graphics",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.InputSystem",
+        "Unity.VisualEffectGraph.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,67 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Game/UI/FleetViewStyles.uss?fileID=7433441132597879392&amp;guid=88adb517f38437641a5eb9205474c475&amp;type=3#FleetViewStyles"/>
+    <Style src="project://database/Assets/Game/UI/styles.uss?fileID=7433441132597879392&amp;guid=61d281347f6da7842b51b1b08eb220ef&amp;type=3#styles"/>
+    <engine:VisualElement class="root-container intel-theme-screen">
+        <engine:VisualElement name="left-panel" class="left-panel intel-theme-panel">
+            <engine:Label text=" FLEET" class="header-label intel-theme-title"/>
+            <engine:Button text="Repair All Fleet" name="repair-all-btn" class="button" style="margin-left: 10px; margin-right: 10px; margin-bottom: 10px; -unity-background-image-tint-color: rgb(255, 224, 136);"/>
+            <engine:ScrollView class="ship-list-scroll">
+                <engine:VisualElement name="ship-list-container"/>
+            </engine:ScrollView>
+        </engine:VisualElement>
+        <engine:VisualElement class="right-panel intel-theme-panel">
+            <engine:Button name="close-btn" class="btn-close" style="background-image: url(&quot;project://database/Assets/Game/Visuals/Sprites/HOLO%20UI/UI_HoloBook_SlotUnavailable02a.png?fileID=2800000&amp;guid=1d381f303a7422e45984c9d4d9c0372b&amp;type=3#UI_HoloBook_SlotUnavailable02a&quot;); background-color: rgba(0, 0, 0, 0); border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0;"/>
+            <engine:VisualElement name="details-content">
+                <engine:VisualElement class="details-header">
+                    <engine:VisualElement name="details-thumb" class="details-thumb-large">
+                        <engine:Image name="details-thumb-img" style="flex-grow: 1;"/>
+                    </engine:VisualElement>
+                    <engine:VisualElement class="details-info">
+                        <engine:Label name="details-name" text="Ship Name" class="details-name" style="width: 945px;"/>
+                        <engine:Label name="details-status" text="Status: Intact" class="list-item-status"/>
+                    </engine:VisualElement>
+                </engine:VisualElement>
+                <engine:Label text="STATS" class="abilities-label" style="margin-top: 10px;"/>
+                <engine:VisualElement class="stats-grid">
+                    <engine:VisualElement class="stat-item">
+                        <engine:Label text="Blocks" class="stat-label"/>
+                        <engine:Label name="stat-blocks" text="0" class="stat-value"/>
+                    </engine:VisualElement>
+                    <engine:VisualElement class="stat-item">
+                        <engine:Label text="Weapons" class="stat-label"/>
+                        <engine:Label name="stat-weapons" text="0" class="stat-value"/>
+                    </engine:VisualElement>
+                    <engine:VisualElement class="stat-item">
+                        <engine:Label text="Energy" class="stat-label"/>
+                        <engine:Label name="stat-energy" text="0" class="stat-value"/>
+                    </engine:VisualElement>
+                    <engine:VisualElement class="stat-item">
+                        <engine:Label text="Regen" class="stat-label"/>
+                        <engine:Label name="stat-regen" text="0" class="stat-value"/>
+                    </engine:VisualElement>
+                    <engine:VisualElement class="stat-item">
+                        <engine:Label text="Thrusters" class="stat-label"/>
+                        <engine:Label name="stat-thrusters" text="0" class="stat-value"/>
+                    </engine:VisualElement>
+                    <engine:VisualElement class="stat-item">
+                        <engine:Label text="Shields" class="stat-label"/>
+                        <engine:Label name="stat-shields" text="0" class="stat-value"/>
+                    </engine:VisualElement>
+                </engine:VisualElement>
+                <engine:Label text="GLOBAL MODIFIERS" class="abilities-label" style="margin-top: 10px;"/>
+                <engine:VisualElement name="modifiers-container" style="margin-bottom: 20px;"/>
+                <engine:Label text="OFFICERS" class="abilities-label" style="margin-top: 10px;"/>
+                <engine:VisualElement name="officers-container" style="flex-direction: row; flex-wrap: wrap; margin-bottom: 20px;"/>
+                <engine:VisualElement class="abilities-list">
+                    <engine:Label text="ABILITIES" class="abilities-label"/>
+                    <engine:VisualElement name="abilities-container" style="flex-direction: row; flex-wrap: wrap;"/>
+                </engine:VisualElement>
+                <engine:VisualElement class="actions-bar">
+                    <engine:Button text="Repair Ship (0 Cr)" name="repair-btn" class="button"/>
+                    <engine:Button text="Edit Ship" name="edit-btn" class="button" style="-unity-background-image-tint-color: rgb(136, 200, 255);"/>
+                    <engine:Button text="Set as Flagship" name="flagship-btn" class="button" style="-unity-background-image-tint-color: rgb(158, 255, 136);"/>
+                </engine:VisualElement>
+            </engine:VisualElement>
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

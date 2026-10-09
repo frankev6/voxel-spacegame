@@ -1,0 +1,14 @@
+{
+"$path":"Assets/Resources/Factions/faction_khuchad_clan.asset",
+"$type":"FactionData",
+"$name":"faction_khuchad_clan",
+"id":"faction_khuchad_clan",
+"displayName":"Khuchad Clan",
+"description":"Warfare tradition hegemonic faction. Grabby civilization. They don’t care to fully exploit a world an move on to the next. low-midline tech ships. Normally in high numbers of smaller ships, with one larger leading the pack.",
+"logo":null,
+"crest":null,
+"color":[0.988235354423523,0.28235295414924622,0.0078431377187371254,1],
+"shipNamePrefix":"KC",
+"doctrine":[{"shipKey":"ship_fighter","weight":0.5},{"shipKey":"ship_shuttle","weight":1}],
+"basePlayerRelation":0
+}

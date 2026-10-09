@@ -1,0 +1,14 @@
+{
+"$path":"Assets/Resources/Factions/faction_tlaxcala.asset",
+"$type":"FactionData",
+"$name":"faction_tlaxcala",
+"id":"faction_tlaxcala",
+"displayName":"Tlaxcala",
+"description":"A conglomerate of three big players that behave almost like mega corporations, they have an oligopoly know as the Triple Alliance",
+"logo":null,
+"crest":null,
+"color":[0.01161443255841732,0.82075470685958862,0.0268210768699646,1],
+"shipNamePrefix":"TXS",
+"doctrine":[],
+"basePlayerRelation":-20
+}

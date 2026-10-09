@@ -1,0 +1,12 @@
+{
+"$path":"Assets/Resources/Loot Tables/StartShipsTable.asset",
+"$type":"ShipTableSO",
+"$name":"StartShipsTable",
+"ships":[
+{"$ref":"Assets/Resources/Items/Ships/ship_fighter.asset","name":"ship_fighter","type":"ShipItem"},
+{"$ref":"Assets/Resources/Items/Ships/ship_butterfly.asset","name":"ship_butterfly","type":"ShipItem"},
+{"$ref":"Assets/Resources/Items/Ships/ship_beetle.asset","name":"ship_beetle","type":"ShipItem"},
+{"$ref":"Assets/Resources/Items/Ships/ship_crescent.asset","name":"ship_crescent","type":"ShipItem"},
+{"$ref":"Assets/Resources/Items/Ships/ship_vestari.asset","name":"ship_vestari","type":"ShipItem"}
+]
+}
