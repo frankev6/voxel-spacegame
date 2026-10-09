@@ -439,7 +439,7 @@ namespace Game.App.Economy
         public CargoCapacitySync(Game.Economy.InventoryModel inventory, Game.App.Session.FleetModel fleet, Game.Data.Services.ContentCatalog catalog,
                                  Game.Data.Definitions.EconomyConfigDefinition config);
         public int NewGameOrder => 40;                                    // before EconomyService (50)
-        public void Recompute();                                          // also on SessionReset and after editor commits
+        public void Recompute();                                          // also on SessionReset and FleetModel.Changed
         public static int ComputeCapacity(Game.Voxel.VoxelStructure flagship, Game.Data.Services.ContentCatalog catalog,
                                           Game.Data.Definitions.EconomyConfigDefinition config);   // pure
         public void InitializeNewGame(in Game.Core.Flow.NewGameArgs args);
@@ -688,7 +688,7 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
   It is called:
   - by `InitializeNewGame` (order 40);
   - on `EventBus<SessionReset>`;
-  - by SPEC-01/51's fleet commit target after a successful commit or flagship change (item 77).
+  - on SPEC-01's `FleetModel.Changed` (raised after every add, remove, structure replacement — the SPEC-51 commit — and reset). The constructor subscribes; `Dispose` unsubscribes.
 
 ## 6. Public API
 
@@ -882,22 +882,15 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
 - **Do:**
   1. Implement `MerchantDirectory`, `MerchantLauncher` and `CargoCapacitySync` (§5.8).
   2. Wire `LogicWorldAdapter.OpenMerchant` and remove it from `UnwiredMembers`.
-  3. Add the SPEC-01 §5.2 row 8.4 lines:
-     ```csharp
-     economy = new EconomyService(content.Catalog, catalog.Get<EconomyConfigDefinition>("config_economy"), () => session.CampaignSeed, () => session.UniversalTime);
-     ```
-     - Register `EconomyService`, `ILogicEconomy`, `InventoryModel`, `ICargo`, `Wallet` and `MerchantService`.
-     - Register `InventorySaveParticipant` (`INVT`).
-     - Construct `CargoCapacitySync` and register it as `INewGameInitializer`; register `economy` as `INewGameInitializer` and `ISessionModel`.
-     - After row 8.3, construct `SalvageService`.
-     - After row 8.2's SPEC-33 lines, construct `MerchantDirectory` and `MerchantLauncher`.
-- **Files:** `Assets/Game/App/Economy/{MerchantDirectory,MerchantLauncher,CargoCapacitySync}.cs`; `Assets/Game/App/Services/LogicWorldAdapter.cs`; `Assets/Game/App/Composition/GameComposition.cs`; `Assets/Game/Tests/EditMode/App/EconomyWiringTests.cs`
+  3. Implement SPEC-01 §5.2 rows 8.4 (economy, `INVT`, `CargoCapacitySync`, `SalvageService`, `MerchantDirectory`) and 10.1 (`MerchantLauncher`, which needs the UI navigator) exactly as written there, with the registrations listed in those rows.
+- **Files:** `Assets/Game/App/Economy/{MerchantDirectory,MerchantLauncher,CargoCapacitySync}.cs`; `Assets/Game/App/Services/LogicWorldAdapter.cs`; `Assets/Game/App/Boot/GameComposition.cs`; `Assets/Game/Tests/EditMode/App/EconomyWiringTests.cs`
 - **Acceptance criteria:**
   - [ ] `FindForBody`: an authored body wins over a template.
   - [ ] A Hostile owner's merchant opens refused.
   - [ ] A flagship with 2 `block_cargo_small` → capacity 30.
+  - [ ] `FleetModel.ReplaceStructure` with a structure holding one more `block_cargo_small` raises capacity by 5 without any other call.
   - [ ] `open_merchant` calls `onClosed` after the screen pops.
-- **Tests:** `EconomyWiringTests.Directory_AuthoredFirst`, `.Launcher_HostileRefused`, `.Capacity_TwoCargoBlocks`, `.OpenMerchant_CallsOnClosed`.
+- **Tests:** `EconomyWiringTests.Capacity_FollowsFleetChanged`, `EconomyWiringTests.Directory_AuthoredFirst`, `.Launcher_HostileRefused`, `.Capacity_TwoCargoBlocks`, `.OpenMerchant_CallsOnClosed`.
 
 ### ECO-009 — M3 economy content
 - **Milestone:** M3

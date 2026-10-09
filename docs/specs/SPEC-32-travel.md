@@ -957,7 +957,7 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
      flow.RegisterExiting(travel);
      ```
      Register it as `TravelService` and `ILaneAccess`.
-- **Files:** `Assets/Game/Galaxy/Services/{TravelService,StarSystemLoader}.cs`; `Assets/Game/App/Composition/GameComposition.cs` (one line); `Assets/Game/Tests/EditMode/Galaxy/Travel/TravelServiceTests.cs` (fake `ITravelLoader`, fake pause and audio, test ECS world with `PlayerShip`, `SimClock`, `PlayerControlLock`, `WorldSceneActive`)
+- **Files:** `Assets/Game/Galaxy/Services/{TravelService,StarSystemLoader}.cs`; `Assets/Game/App/Boot/GameComposition.cs` (one line); `Assets/Game/Tests/EditMode/Galaxy/Travel/TravelServiceTests.cs` (fake `ITravelLoader`, fake pause and audio, test ECS world with `PlayerShip`, `SimClock`, `PlayerControlLock`, `WorldSceneActive`)
 - **Acceptance criteria:**
   - [ ] Each refusal row of §5.2 is produced by its condition, with exactly the listed text; `CanJump` never changes state.
   - [ ] An accepted gate jump:

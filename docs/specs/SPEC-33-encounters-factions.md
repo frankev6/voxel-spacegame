@@ -942,7 +942,7 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
      session.RegisterNewGameInitializer(factions);
      ```
      Register them in Services as `FactionService`, `TerritoryService`, `IStarSystemOwnership` and `EncounterDirectorService`. `IShipSpawner` comes from row 8.3, so these lines go after it.
-- **Files:** `Assets/Game/Galaxy/Services/EncounterDirectorService.cs`; `Assets/Game/Galaxy/Encounters/EncounterInstance.cs`; `Assets/Game/App/Composition/GameComposition.cs`; `Assets/Game/Tests/PlayMode/Galaxy/EncounterDirectorTests.cs`
+- **Files:** `Assets/Game/Galaxy/Services/EncounterDirectorService.cs`; `Assets/Game/Galaxy/Encounters/EncounterInstance.cs`; `Assets/Game/App/Boot/GameComposition.cs`; `Assets/Game/Tests/PlayMode/Galaxy/EncounterDirectorTests.cs`
 - **Acceptance criteria:**
   - [ ] **Director:** in a danger-2 star system with the director's interval shortened by a test config:
     - rolls happen at the scheduled `UniversalTime` only;

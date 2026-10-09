@@ -58,8 +58,9 @@ All game code lives under `Assets/Game/`. Each folder below is one assembly defi
 | `Game.App` | `App/` | everything above | Composition root: Boot scene, `GameRoot`, service construction order, `GameSession`, `SceneFlow`, save participants for session-level state |
 | `Game.Editor` | `Editor/` | everything (Editor platform only) | Project setup, importers, content validators, legacy converters, inspectors |
 | `Game.DevTools.Editor` | `DevTools/Editor/` | everything (Editor platform only) | CLI playtest harness (`gh_*` commands), debug windows |
-| `Game.Tests.EditMode` | `Tests/EditMode/` | everything | EditMode unit and integration tests |
-| `Game.Tests.PlayMode` | `Tests/PlayMode/` | everything | PlayMode smoke, scenario and performance tests |
+| `Game.Tests.Common` | `Tests/Common/` | everything (test-only: `defineConstraints: ["UNITY_INCLUDE_TESTS"]`) | Shared test kit (SPEC-71): `EcsTestWorld`, `GameTestBase`, `PerfRun`, fixtures, replay |
+| `Game.Tests.EditMode` | `Tests/EditMode/` | everything (including `Game.Tests.Common`) | EditMode unit and integration tests |
+| `Game.Tests.PlayMode` | `Tests/PlayMode/` | everything (including `Game.Tests.Common`) | PlayMode smoke, scenario and performance tests |
 
 ```mermaid
 flowchart TB
@@ -169,9 +170,11 @@ InitializationSystemGroup
 SimulationSystemGroup
 ├─ FixedStepSimulationSystemGroup        60 Hz, runs 0..N times per frame
 │  ├─ GameplayPrePhysicsGroup            (custom; UpdateBefore PhysicsSystemGroup)
+│  │  ├─ FactionStandingSystem           ENC  provocation + relation requests → FactionRelations (before ShipCommandGroup)
 │  │  ├─ ShipCommandGroup                (custom)
 │  │  │  ├─ PlayerCommandApplySystem     FLT  PlayerCommand → player ship's ShipCommand
 │  │  │  └─ AI decision + steering       AI   → ShipCommand (staggered)
+│  │  ├─ BodyOnRailsSystem               SYS  analytic orbits from UniversalTime (tick-exact moving colliders)
 │  │  ├─ PowerAllocationSystem           PWR  sets Powered enable bits
 │  │  ├─ ShipStatsAggregateSystem        PWR  recompute ShipStats for dirty ships
 │  │  ├─ PropulsionSystem                FLT  thruster impulses; never overwrites velocity
@@ -182,7 +185,7 @@ SimulationSystemGroup
 │  │  └─ ColliderSwapSystem              PHY  installs rebuilt brick colliders; queues old blobs
 │  ├─ PhysicsSystemGroup                 (Unity Physics)
 │  └─ GameplayPostPhysicsGroup           (custom; UpdateAfter PhysicsSystemGroup)
-│     ├─ SpatialHashBuildSystem          AI   ShipProxy hash for this tick
+│     ├─ SpatialHashBuildSystem          AI   SpatialProxy hash for this tick (OrderFirst)
 │     ├─ ImpactEventSystem               DMG  collision events → ram DamageEvents
 │     ├─ ProjectileStepSystem            WPN  casts → DamageEvents, FxEvents
 │     ├─ BeamStepSystem                  WPN
@@ -199,10 +202,12 @@ SimulationSystemGroup
 │  ├─ BrickMeshBuildSystem               REN  budgeted Burst jobs → MeshDataArray
 │  └─ BrickColliderBuildSystem           PHY  budgeted Burst jobs → blobs, swapped next tick
 ├─ WorldGroup                            (custom; variable rate)
-│  ├─ StarSystemStreamingSystem          SYS  structural; tiers T1–T3 with hysteresis, time-sliced
-│  ├─ BodyOnRailsSystem                  SYS  analytic orbits from UniversalTime
+│  ├─ GalaxyServicesBridgeSystem         GAL  OrderFirst; main thread; runs the GalaxyFrameTicker services in TickOrder:
+│  │                                          StarSystemLoader.Tick (100, SYS, structural; the "StarSystemStreamingSystem"),
+│  │                                          TravelService.Tick (200, TRV), EncounterDirectorService.Tick (300, ENC; the
+│  │                                          "EncounterDirectorSystem"), TerritoryService.Tick (310, ENC)
 │  ├─ InteractionQuerySystem             SYS  nearest interactable → singleton
-│  ├─ EncounterDirectorSystem            ENC
+│  ├─ SalvageMarkSystem                  ECO  structural; Interactable(Salvage) on new hulks (one batch)
 │  └─ GridLodSystem                      REN  LOD + dormancy
 └─ TransformSystemGroup                  (Unity)
 
@@ -218,7 +223,7 @@ PresentationSystemGroup
 └─ DeferredDisposalSystem                VOX  OrderLast; frees meshes/blobs N frames later
 ```
 
-Codes on the right are spec area codes (§10).
+Codes on the right are spec area codes (§10). The tree lists the groups and the systems that order work *between* modules; each spec's placement table (its §5) places its remaining systems inside these groups with explicit attributes.
 
 ### 5.1 Timing rules
 
@@ -349,7 +354,7 @@ These types cross module boundaries. **Their names and owning module are binding
 
 ### 7.4 Jump to another star system
 
-Lane jump request → warp transition starts → `StarSystemStreamingSystem` unloads the current star system (`StarSystemMember` query) → generator builds the target from `(GalaxySeed, StarSystemId)` and applies its `StarSystemDelta` → `OriginRebaseSystem` re-centres on the lane entry point → player ship placed at the entry → `StarSystemEntered` event.
+Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (controls locked through `PlayerControlLock`, cover fades in) → commit: the arrival point is solved analytically, fuel is taken, a pause token stops the fixed step → `StarSystemLoader` unloads the current star system (`StarSystemMember` query) and builds the target from `(GalaxySeed, StarSystemId)` plus its `StarSystemDelta` → `OriginRebaseSystem` re-centres and places the player ship at the arrival point (one `OriginRebaseRequest` with placement) → the pause is released when the arrival area is ready → Arriving (brake, cover fades out) → `StarSystemEntered` and `LaneJumped` events.
 
 ### 7.5 Edit a ship
 
@@ -367,15 +372,21 @@ Lane jump request → warp transition starts → `StarSystemStreamingSystem` unl
 | Brick render mesh (`MaterialMeshInfo`) | `BrickMeshApplySystem` | — |
 | Grid `PhysicsCollider` | `ColliderSwapSystem` | — |
 | `PhysicsMass` | `GridMassUpdateSystem` | — |
-| `PhysicsVelocity` | Unity Physics + `PropulsionSystem` (impulses only) + `ImpactEventSystem` (impulses only). **Nobody assigns velocity directly** | Read |
+| `VoxelGrid.Kind` | `GridSpawnSystem` (initial), `ShipDeathSystem` (Ship → Hulk) | Read |
+| `PhysicsVelocity` | Unity Physics + `PropulsionSystem` (impulses only) + `ImpactEventSystem` (impulses only) + `PlanarConstraintSystem` (vertical impulses only) + `GridMassUpdateSystem` (exact re-expression about the new centre of mass only) + `OriginRebaseSystem` (placement re-expression only: rotates the player's linear velocity by the placement yaw change). **Nobody else assigns velocity.** Creating `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` on a new body (`GridBodyInitSystem`, `SplitSystem` through `GridBodyFactory`) is initialisation, not a write | Read |
 | `ShipCommand` (player ship) | `PlayerCommandApplySystem` | Read |
-| `ShipCommand` (AI ship) | the AI steering system | Read |
+| `ShipCommand` (AI ship) | `AiSteeringSystem` | Read |
+| `PlayerControlLock` | `TravelService` | Read by `PlayerCommandApplySystem` |
+| `FactionRelations` (after boot), faction standings | `FactionStandingSystem` (requests from `FactionService`) | Read |
+| `PlayerCombatStatus` | `PlayerCombatStatusSystem` | Read |
 | `ShipStats` | `ShipStatsAggregateSystem` | Read |
 | `Powered` bits, `ShipPower` | `PowerAllocationSystem` | Read |
 | `ShieldState` HP | `ShieldSystem` (resolves shield hits before grid damage) | Read |
 | Root `LocalTransform` shift for floating origin | `OriginRebaseSystem` | — |
 | `FrameOrigin`, `UniversePosition` sync | `OriginRebaseSystem` | Read |
-| Loaded star system set | `StarSystemStreamingSystem` | Read |
+| Loaded star system set | `StarSystemLoader` (the "StarSystemStreamingSystem" of §5) | Read |
+| Travel state (phase, destination, route) | `TravelService` | Read |
+| Encounter instances | `EncounterDirectorService` | Read |
 | Facts | `FactStore` (via effects only) | Read via conditions |
 | Inventory, wallet | `InventoryModel` / `Wallet` methods called by commit/merchant/loot code | Read through view models |
 | Pause state | `PauseService` (tokens from `UINavigator` and others) | Read |

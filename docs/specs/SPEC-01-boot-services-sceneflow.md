@@ -154,6 +154,8 @@ namespace Game.App.Session
         public bool Remove(ulong persistentId);             // disposes; the flagship cannot be removed (returns false)
         public void ReplaceStructure(ulong persistentId, Game.Voxel.VoxelStructure s);   // editor commit; disposes the old structure
         public uint Revision { get; }                       // +1 on any change (UI change detection)
+        public event System.Action Changed;                 // raised synchronously after Add, Remove, ReplaceStructure and
+                                                            // ResetToEmpty, once per call (SPEC-50 CargoCapacitySync listens)
         public void ResetToEmpty();                         // disposes all records
         public void Dispose();
     }
@@ -232,7 +234,7 @@ namespace Game.App.Spawning
     }
 
     /// <summary>The single entry point for spawning ships and stations at runtime (App, Galaxy services via an interface, harness).</summary>
-    public sealed class ShipSpawnService
+    public sealed class ShipSpawnService : Game.Galaxy.Services.IShipSpawner
     {
         public ShipSpawnService(Unity.Entities.World world, Game.Voxel.Grid.VoxelStructureRegistry registry,
                                 Game.Data.Services.ContentCatalog catalog, Game.Core.IPersistentIdAllocator ids,
@@ -242,11 +244,15 @@ namespace Game.App.Spawning
                                                        Unity.Mathematics.quaternion rotation, Game.Simulation.Allegiance allegiance, bool withAi); // SPEC-70 signature
         public bool TryGetRoot(Game.Core.Components.PersistentId id, out Unity.Entities.Entity root);   // O(1) map kept by a spawn hook
         public bool Despawn(Game.Core.Components.PersistentId id);               // GridSpawnApi.RequestDespawn
+        // IShipSpawner (SPEC-31 §4.4), explicit implementations, mapping in §5.7:
+        Game.Galaxy.Services.PersistentIdValue Game.Galaxy.Services.IShipSpawner.Spawn(in Game.Galaxy.Services.GalaxyShipSpawnArgs args);
+        bool Game.Galaxy.Services.IShipSpawner.TryGetRoot(ulong persistentId, out Unity.Entities.Entity root);
+        bool Game.Galaxy.Services.IShipSpawner.Despawn(ulong persistentId);
     }
 }
 ```
 
-`Game.App` references every module, so `ShipSpawnService` can call SPEC-20/21/23 setup helpers. Galaxy services (SPEC-31/33) receive it through `Game.Galaxy.Services.IShipSpawner` (declared in SPEC-31; `ShipSpawnService` implements it).
+`Game.App` references every module, so `ShipSpawnService` can call SPEC-20/21/23 setup helpers. Galaxy services (SPEC-31/33) receive it through `Game.Galaxy.Services.IShipSpawner` (declared in SPEC-31 §4.4; `ShipSpawnService` implements it, §5.7).
 
 ### 4.5 Internal types
 
@@ -264,6 +270,13 @@ namespace Game.App.Boot
     { internal readonly System.Collections.Generic.List<System.IDisposable> DisposeStack; }
     internal static class BootSingletons                          // §5.3
     { internal static void CreateAll(Unity.Entities.EntityManager em, Game.Data.Services.ContentCatalog catalog); }
+    /// <summary>Captures damaged persistent bodies into galaxy deltas before every save and World exit (§5.2 row 8.2a).</summary>
+    internal sealed class GalaxyFlushWriteback : Game.Core.Flow.ISessionWriteback
+    {
+        internal GalaxyFlushWriteback(Game.Galaxy.Services.IGalaxyLiveDeltaSink sink);
+        public int WritebackOrder => 90;                          // before FleetWriteback (100)
+        public void WriteBackFromWorld();                         // sink.FlushStructures(); no-op when no WorldSceneActive exists
+    }
     /// <summary>Tag on every entity BootSingletons creates (diagnostics only; teardown uses the snapshot, Decision 5).</summary>
     public struct BootSingleton : Unity.Entities.IComponentData { }
 }
@@ -272,6 +285,13 @@ namespace Game.App.Boot
 ## 5. Systems, services and flow
 
 ### 5.1 Boot
+
+**Paths and test hooks (TST-003).** `GameRoot.Awake`, before step 1 of §5.2, resolves two paths. In the Editor and in development builds (`#if UNITY_EDITOR || DEVELOPMENT_BUILD`) it reads SPEC-71's `Game.App.Testing.GameRootTestHooks`; in release builds the hooks are not compiled in and the defaults are used:
+- `savePaths = GameRootTestHooks.SaveRoot != null ? new SavePaths(GameRootTestHooks.SaveRoot) : SavePaths.CreateDefault()`;
+- `settingsPaths = GameRootTestHooks.SettingsPath != null ? new SettingsPaths(GameRootTestHooks.SettingsPath) : SettingsPaths.Default`;
+- `GameRootTestHooks.SkipIntroScreens` is passed to `SceneFlow.StartupAsync` (the MainMenu splash is skipped).
+
+`SettingsPaths` (`Game.App.Settings`) is `sealed class { public SettingsPaths(string filePath); public static SettingsPaths Default { get; } /* persistentDataPath/settings.json */ public string FilePath { get; } public string TempPath { get; } /* FilePath + ".tmp" */ public string BrokenPath { get; } /* settings.broken.json next to FilePath */ }`.
 
 `Bootstrap.Boot()` (`BeforeSceneLoad`):
 1. If `GameRoot.Instance != null`, return (domain reload is off; this should not happen because of step 0 below, but it is cheap insurance).
@@ -299,23 +319,28 @@ Every row is one step. A step's object is pushed onto `DisposeStack` when it is 
 
 | # | Step | Registered as | Added by |
 |---|---|---|---|
-| 1 | `settings = new SettingsService(new NewtonsoftSaveJsonCodec(), SettingsPaths.Default)`; `settings.Load()` | `SettingsService`, `ISettingsService` | FND-004 |
+| 1 | `settings = new SettingsService(new NewtonsoftSaveJsonCodec(), settingsPaths)` (§5.1); `settings.Load()` | `SettingsService`, `ISettingsService` | FND-004 |
 | 2 | `content = new ContentService(config.ContentDatabase)` (validates; throws `ContentValidationException` → boot fails loudly); `content.CreateSingletons(em)`; `BootSingletons.CreateAll(em, content.Catalog)` (§5.3); `blueprints = new BlueprintLibrary(...)`; `registry = VoxelStructureRegistry.CreateRuntime(blueprints)`; create `VoxelStructureRegistryRef` singleton | `ContentService`, `BlueprintLibrary`, `VoxelStructureRegistry` | FND-005, DATA-007, VOX (registry task) |
 | 3 | `input = new InputService(settings.Current.Controls)` | `InputService` | INP (service task) |
-| 4 | `audio = new AudioService(audioConfig, content.Database, settings.Current.Audio.ToVolumes(), transform)` | `AudioService`, `IAudioService` | AUD (service task) |
+| 4 | `audio = new AudioService(audioConfig, content.Database, SettingsMapping.ToVolumes(settings.Current.Audio), transform)`; `audio.BindTo(world)` (the world exists since step 2) | `AudioService`, `IAudioService` | AUD (service task) |
 | 5 | `pause = new PauseService()`; `audio.BindPause(pause)` | `PauseService`, `IPauseService` | FND-003 |
-| 6 | `save = new SaveService(SavePaths.CreateDefault(), content, pause, new SaveServiceConfig())` | `SaveService` | PERS (service task) |
+| 6 | `save = new SaveService(savePaths, content, pause, new SaveServiceConfig())` (§5.1; SPEC-05 subscribes `Application.wantsToQuit` itself) | `SaveService` | PERS (service task) |
 | 7 | `flow = new SceneFlow(world, pause, save, gameConfig)` | `SceneFlow` | FND-006 |
 | 8 | `session = new GameSession(flow, save, world, content, gameConfig)`; `save.AttachContext(session)`; register `SessionSaveParticipant` (`SESS`), `FleetSaveParticipant` (`FLET`); `Services.Register<IGameFlow>(session)`, `<IPersistentIdAllocator>(session)` | `GameSession`, `IGameFlow`, `IPersistentIdAllocator` | FND-009 |
 | 8.1 | `ticker = new GalaxyFrameTicker()`; `galaxy = new GalaxyService(content.Catalog, session.Galaxy, world, ticker)`; register `GalaxySaveParticipant` | `GalaxyFrameTicker`, `GalaxyService` | GAL-008 |
-| 8.2 | SPEC-31 loader, SPEC-32 travel, SPEC-33 encounter/territory services (each registers itself with `ticker`, participants, ready hooks) | per spec | SYS/TRV/ENC service tasks |
+| 8.2a | `docking = new DockingService()`; `loader = new StarSystemLoader(galaxy, world, registry, blueprints, session, content.Catalog)`; `ticker.Register(loader)`; `flow.RegisterReady(loader)`; `flow.RegisterExiting(loader)`; `session.RegisterWriteback(new GalaxyFlushWriteback(loader))` (§4.5; order 90, so it runs before `FleetWriteback`); register `PlayerLocationSaveParticipant(session.Galaxy, docking)` (`PLOC`) | `DockingService`, `StarSystemLoader`, `IGalaxyLiveDeltaSink` | SYS service task |
+| 8.2b | `travel = new TravelService(galaxy, loader, docking, world, content.Catalog, pause, audio)`; `ticker.Register(travel)`; `session.RegisterSaveBlocker(travel)`; `flow.RegisterExiting(travel)` | `TravelService`, `ILaneAccess` | TRV-006 |
 | 8.3 | `spawner = new ShipSpawnService(world, registry, content.Catalog, session, galaxy)` | `ShipSpawnService`, `IShipSpawner` | FND-012 |
-| 8.4 | SPEC-50 `EconomyService` and its participant | per SPEC-50 | ECO service task |
+| 8.3a | `factions = new FactionService(world, content.Catalog)`; `territory = new TerritoryService(galaxy, factions, content.Catalog)`; `encounters = new EncounterDirectorService(galaxy, loader, travel, docking, spawner, factions, territory, world, content.Catalog)`; `ticker.Register(encounters)`; `ticker.Register(territory)`; `flow.RegisterExiting(encounters)`; `session.RegisterNewGameInitializer(factions)`; register the `FACN` and `ENCT` participants | `FactionService`, `TerritoryService`, `IStarSystemOwnership`, `EncounterDirectorService` | ENC-007 |
+| 8.3b | `mapModel = new GalaxyMapModel(galaxy, travel, territory)`; either argument may be `null` while its task is not done (SPEC-30 §5.12: all lanes open, no owner) | `GalaxyMapModel` | GAL-011 |
+| 8.4 | `economy = new EconomyService(content.Catalog, content.Catalog.Get<EconomyConfigDefinition>("config_economy"), () => session.CampaignSeed, () => session.UniversalTime)`; register `InventorySaveParticipant` (`INVT`); `cargoSync = new CargoCapacitySync(economy.Inventory, session.Fleet, content.Catalog, economyConfig)` registered as `INewGameInitializer` (order 40); `economy` registered as `INewGameInitializer` (order 50) and `ISessionModel`; `salvage = new SalvageService(world, content.Catalog, economyConfig, audio)`; `merchants = new MerchantDirectory(content.Catalog, galaxy)` (`economyConfig` = the `config_economy` definition) | `EconomyService`, `ILogicEconomy`, `InventoryModel`, `ICargo`, `Wallet`, `MerchantService`, `CargoCapacitySync`, `SalvageService`, `MerchantDirectory` | ECO-008 |
 | 8.5 | `NarrativeBootstrap.Build(...)` (SPEC-40 §5.3; throws → boot fails) | per SPEC-40 | NAR boot task |
 | 9 | `inputBridge = new InputServiceBridge(input)`; `ui = new UIRoot(config.UiDocument, config.UiConfig, pause, inputBridge, new AppUiSoundSink(audio), new UnityFrameClock())`; `inputBridge.BindBack(ui.HandleBackPressed)`; `Services.Register<IWorldPointerGate>(ui)` | `UIRoot`, `UINavigator` | UI (root task) |
+| 9.1 | `world.GetExistingSystemManaged<PlayerInputSampleSystem>().Bind(input, ui)` (SPEC-03 INP-005; `ui` is the `IWorldPointerGate` of step 9); on dispose `Unbind()` | — | INP-005 |
 | 10 | `composition = new UiComposition(ui, ...)`; `flow.SetRootScreens(composition)` | `UiComposition` | HUD-002 |
+| 10.1 | `launcher = new MerchantLauncher(economy, merchants, factions, territory, encounters, loader, ui.Navigator)` (needs the navigator of step 9) | `MerchantLauncher` | ECO-008 |
 | 11 | `camera = new CameraRigService(config.CameraConfig, transform, new CameraInputAdapter(input))`; `world.GetExistingSystemManaged<CameraTargetSyncSystem>()` bind (SPEC-62 §5) | `CameraRigService` | CAM (service task) |
-| 12 | `fx = FxRig.Create(transform, vfxConfig, content.Catalog.All<FxDefinition>(), cellPalette, settings.Current.Video.VfxQuality)`; `fx.BindTo(world)` | `FxRig` | VFX (rig task) |
+| 12 | `fx = FxRig.Create(transform, vfxConfig, content.Catalog.All<FxDefinition>(), cellPalette, (VfxQuality)settings.Current.Video.VfxQuality)` (the setting is a `byte`, SPEC-02; the enum is SPEC-63's); `fx.BindTo(world)` | `FxRig` | VFX (rig task) |
 | 13 | SPEC-41 `DialogPresenter` (after `UIRoot`) | per SPEC-41 | DLG presenter task |
 | 14 | `SettingsApplier.ApplyAll(settings.Current)` (§5.6): pushes every section to its consumer once | — | FND-004 |
 | 15 | `flow.SnapshotBootEntities()` (Decision 5) | — | FND-006 |
@@ -323,22 +348,31 @@ Every row is one step. A step's object is pushed onto `DisposeStack` when it is 
 
 Rules:
 - `em` = `World.DefaultGameObjectInjectionWorld.EntityManager`.
+- `SettingsMapping` (`Game.App.Settings`, FND-004) holds the pure conversions between settings sections and consumer types: `static AudioVolumes ToVolumes(AudioSettingsData a)` copies `MasterVolume → Master`, `MusicVolume → Music`, `SfxVolume → Sfx`, `UiVolume → Ui`, `AmbienceVolume → Ambience`.
+- **M4:** the fleet task implements SPEC-32's `IJumpEscorts` (§5.11 of SPEC-32) in `Game.App` and registers it; until then `TravelService` uses its no-escort default.
 - If any step throws, `Build` disposes everything already on `DisposeStack` (in reverse), logs `GameLog.Exception("Boot", ...)`, and rethrows. In the Editor this stops Play Mode (`EditorApplication.isPlaying = false` through `#if UNITY_EDITOR`).
 - **Shutdown** (`Dispose`) runs `DisposeStack` in reverse, then `Services.Reset()`. Each `Dispose` is wrapped in try/catch so one failure cannot leak the rest.
 
 ### 5.3 `BootSingletons.CreateAll`
 
-Creates ECS configuration singletons from content, once per boot. Each line is added by the task named. Every created entity gets `BootSingleton`, and `EntityManager.SetName("Cfg.<Type>")` in the Editor.
+Creates ECS configuration singletons from content, once per boot, **in table order**. Each line is added by the task named. Every created entity gets `BootSingleton`, and `EntityManager.SetName("Cfg.<Type>")` in the Editor. Factories with a `List<Entity> created` parameter append the entities they made; `CreateAll` tags those. A factory that returns a component value is written with `em.CreateSingleton(value)`. Singletons that own native memory are created here or in their system's `OnCreate`, never lazily inside an update.
 
 | Singleton | Created by (call) | Added by |
 |---|---|---|
 | `BlockDefsRef`, `OrientationTablesRef` | `ContentService.CreateSingletons` (step 2) | DATA-007 |
 | `VoxelConfig` | `VoxelConfigFactory.Create(catalog)` | VOX config task |
 | `VoxelRenderConfig` | `VoxelRenderConfigFactory.Create(catalog)` | REN config task |
-| `PhysicsVoxelConfig` | SPEC-12 factory | PHY config task |
+| `PhysicsVoxelConfig` | `PhysicsVoxelConfigFactory.Create(catalog.Get<PhysicsVoxelConfigDefinition>("config_physics"))` | PHY config task |
+| `PhysicsStep` | `PhysicsVoxelConfigFactory.CreatePhysicsStep(catalog.Get<PhysicsVoxelConfigDefinition>("config_physics"))` | PHY config task |
 | `DamageConfig` | `DamageConfig.FromDefinition(catalog.Get<DamageConfigDefinition>("config_damage"))` | DMG config task |
-| `PowerConfig` / block stat blobs | SPEC-22 baker | PWR baker task |
-| `FlightConfig`, `WeaponDefsRef`, `AiConfig`, `AbilityDefsRef` | SPEC-20/21/23/24 factories | their config tasks |
+| `PowerTuning`, `ShieldHitStreams` (entity "PowerSingletons") | `new PowerContent(catalog).CreateSingletons(em)` | PWR content task |
+| `FlightConfig` | `FlightConfigFactory.Create(catalog.Get<FlightConfigDefinition>("config_flight"))` | FLT config task |
+| `FactionRelations`, `FactionStanding`, `FactionRelationRequest`, `FactionState` | `FactionContent.CreateSingletons(em, catalog, catalog.Get<EncounterConfigDefinition>("config_encounters"), created)` — **before** `WeaponContent`, whose default `FactionRelations` is then skipped | ENC-001 |
+| `WeaponDefsRef`, `WeaponTuning`, default `FactionRelations` | `WeaponContent.CreateSingletons(em, catalog, created)` | WPN content task |
+| `AiConfig` | `AiContent.CreateSingletons(em, catalog, created)` | AI content task |
+| `AbilityDefsRef` | `AbilityContent.CreateSingletons(em, catalog, created)` | ABL content task |
+| `StreamingConfig` | `StreamingConfigFactory.Create(catalog.Get<StreamingConfigDefinition>("config_streaming"))` | SYS config task |
+| `EconomyConfigRef` | `EconomyConfigRefFactory.Create(catalog.Get<EconomyConfigDefinition>("config_economy"))` | ECO-007 |
 | `PersistentIdAllocator { Next = 0, End = 0 }` | FND-008 | FND-008 |
 
 ### 5.4 `SceneFlow`
@@ -456,10 +490,10 @@ Main thread; `async Awaitable<FlowResult>`.
   - `CurrentScene == BlueprintLab` → `EditorOpen`;
   - player defeated (§5.9) → `PlayerDead`;
   - any registered `ISaveBlocker` returning non-`None` → that value;
-  - the `PlayerCombatStatus` singleton (SPEC-23) has `HostilesEngaging > 0`, or `SimClock.Tick − LastDamagedTick < combatDamageWindowSeconds × 60` → `InCombat`;
+  - the `PlayerCombatStatus` singleton (SPEC-23) has `HostilesEngaging > 0`, or `SimClock.Tick − LastDamagedTick < combatDamageWindowSeconds × 60` → `InCombat`. Read it through a cached `EntityQuery` with `query.CompleteDependency()` before `GetSingleton` (its writer is a scheduled job), never `GetSingletonRW`;
   - else `None`.
 
-  SPEC-05 uses `Game.Persistence.Data.SaveBlockReason` until it adopts SPEC-02's enum (SPEC-02 Q4). `GameSession` maps by name.
+  SPEC-05 uses SPEC-02's `Game.Core.Save.SaveBlockReason` directly (SPEC-05 has no enum of its own).
 - **`DescribeForMeta(meta)`**: `CommanderName`; `LocationText = galaxy.GetStarSystemName(current)`; `PlaytimeSeconds`.
 - **Thumbnails**: `TryCaptureSlotThumbnail` renders the main camera to a 320×180 `RenderTexture` and reads it back with `AsyncGPUReadback`. The request carries the pending readback; SPEC-05 waits ≤ 2 frames. In the Lab it returns false.
 
@@ -484,7 +518,7 @@ Main thread; `async Awaitable<FlowResult>`.
 
 **`SettingsApplier`** (`Game.App`): subscribes to `SettingsChanged` and applies only the changed sections.
 - **Video:** `Screen.SetResolution`, `QualitySettings.SetQualityLevel(clamped)`, `QualitySettings.vSyncCount`, `Application.targetFrameRate`, `fx.SetQuality`.
-- **Audio:** `audio.SetVolumes(...)`.
+- **Audio:** `audio.ApplyVolumes(SettingsMapping.ToVolumes(settings.Current.Audio))`.
 - **Controls:** `input.ApplyBindingOverrides(json)`, plus `camera.ApplySettings` for camera options.
 - **Gameplay:** `save.Autosave` interval.
 - **Accessibility:** `ui.ApplyAccessibility(...)` (text-scale index mapped per SPEC-02 Q9), plus the camera shake scale.
@@ -509,14 +543,15 @@ Main thread; `async Awaitable<FlowResult>`.
   3. `root = args.Structure != null ? GridSpawnApi.RequestSpawn(em, registry, registry.Register(args.Structure), p) : GridSpawnApi.RequestSpawnBlueprint(em, catalog.Get<ShipBlueprintDefinition>(args.Blueprint).Hash, p)`.
   4. Add the gameplay components on `root` with the main-thread `EntityManager` (allowed: `ShipSpawnService` is never called inside a system update):
      - `CombatGridSetup.AddAll(em, root, args.Allegiance)` (SPEC-21);
-     - `PlanarConstraintSetup.Add(em, root)` (SPEC-20);
+     - `PlanarConstraintSetup.Add(em, root)` and `FlightSetup.Add(em, root)` (SPEC-20);
      - if `args.IsPlayer`: `em.AddComponent<PlayerShip>(root)`;
      - else: `em.AddSharedComponent(root, new StarSystemMember { Id = galaxy.State.CurrentStarSystem })`;
-     - if `args.WithAi`: `AiSetup.Add(em, root, args.AiProfile)` (SPEC-23).
+     - if `args.WithAi`: `AiSetup.Add(em, root, args.AiProfile)` (SPEC-23; always after `CombatGridSetup.AddAll`).
   5. Record `id → root` in a `Dictionary<ulong, Entity>` maintained by an `IGridSpawnHook`. Entries are removed on despawn, detected when `TryGetRoot` finds a dead entity.
   6. Return `id`.
 
   Bricks and functional entities receive `StarSystemMember` through SPEC-31's spawn hook (SPEC-10 §10 Q7).
+- **`IShipSpawner.Spawn(in GalaxyShipSpawnArgs g)`** (SPEC-31 §4.4): build `ShipSpawnArgs { Blueprint = g.Blueprint, Position = g.Position, Rotation = g.Rotation, LinearVelocity = g.LinearVelocity, Allegiance = g.Allegiance, WithAi = g.WithAi, AiProfile = g.AiProfile, IsPlayer = false, PersistentId = 0 }` and run the steps above, except that step 4 uses `StarSystemMember { Id = g.StarSystem }` instead of the current star system. If `g.Encounter.Value != 0`, the caller (SPEC-33) adds `EncounterTag` itself. Returns `new PersistentIdValue(id.Value)`. `TryGetRoot(ulong)` and `Despawn(ulong)` forward to the `PersistentId` overloads.
 
 ### 5.8 ECS systems owned here
 
@@ -571,7 +606,7 @@ If no save exists, "Load last save" is disabled.
 | `SceneFlow.StartupAsync` | Called once by `GameRoot.Start` | A second call returns `NotAllowed` |
 | `SceneFlow.EnterSandboxAsync` | Editor or development build | `NotAllowed` in release |
 | `IPersistentIdAllocator.Allocate` | Main thread | Unique, ≥ 1; `InvalidOperationException` on overflow |
-| `ShipSpawnService.Spawn` | Main thread, outside system updates, `GameplayActive` exists | Returns the id; the grid appears after the next `GridSpawnSystem` update; unknown blueprint → `PersistentId(0)` + `GameLog.Error` |
+| `ShipSpawnService.Spawn` (and `IShipSpawner.Spawn`) | Main thread, outside the fixed step, no `SystemAPI`/`Entities` iteration in progress, `GameplayActive` exists. `GalaxyFrameTicker` callbacks qualify (they run from `GalaxyServicesBridgeSystem.OnUpdate` with no iteration open) | Returns the id; the grid appears after the next `GridSpawnSystem` update; unknown blueprint → `PersistentId(0)` + `GameLog.Error` |
 | `FleetModel.ReplaceStructure` | The ship is not currently spawned (`StructureHandle == -1`) | `InvalidOperationException` otherwise (SPEC-51 commits happen in the Lab) |
 | `PauseService.Acquire/Release` | Main thread | §5.6 |
 | `SettingsService.Apply` | Main thread | §5.6; publishes `SettingsChanged` only for changed sections |
@@ -658,8 +693,8 @@ If no save exists, "Load last save" is disabled.
 - **Milestone:** M0
 - **Tier:** standard — file I/O, DTO and apply table fully given in §5.6
 - **Depends on:** `FND-001`, `PERS-001`
-- **Do:** Implement `SettingsService`, `SettingsPaths`, `GameSettingsDto` (one DTO per section, `version`), and `SettingsApplier`. Apply calls for consumers that do not exist yet are behind null checks on `Services.TryGet`. Wire steps 1 and 14.
-- **Files:** `Assets/Game/App/Settings/{SettingsService,SettingsPaths,GameSettingsDto,SettingsApplier}.cs`; `Assets/Game/Tests/EditMode/App/SettingsServiceTests.cs`
+- **Do:** Implement `SettingsService`, `SettingsPaths` (§5.1), `SettingsMapping` (§5.2 rules), `GameSettingsDto` (one DTO per section, `version`), and `SettingsApplier`. Apply calls for consumers that do not exist yet are behind null checks on `Services.TryGet`. Wire steps 1 and 14.
+- **Files:** `Assets/Game/App/Settings/{SettingsService,SettingsPaths,SettingsMapping,GameSettingsDto,SettingsApplier}.cs`; `Assets/Game/Tests/EditMode/App/SettingsServiceTests.cs`
 - **Acceptance criteria:**
   - [ ] Round trip: defaults → change every field → save → load into a new service → `ValueEquals` for every section.
   - [ ] A corrupt file yields defaults, is renamed to `settings.broken.json`, and produces one warning.
@@ -672,15 +707,16 @@ If no save exists, "Load last save" is disabled.
 - **Tier:** frontier — F1/F5: construction order and lifetime of every service
 - **Depends on:** `FND-002`, `FND-003`, `FND-004`, `SPEC-02`, `SPEC-04`
 - **Do:**
-  1. Implement `GameComposition.Build` and `Dispose` with every step of §5.2 whose type exists at M0 (1, 2 without the voxel lines, 3 when INP is done, 5, 6, 7, 8, 14, 15, 16), plus the placeholder comment lines for the rest.
+  1. Implement `GameComposition.Build` and `Dispose` with every step of §5.2 whose type exists at M0 (1, 2 without the voxel lines, 3 when INP is done, 5, 6, 7, 8, 14, 15, 16), plus the placeholder comment lines for the rest. Resolve `savePaths`/`settingsPaths` through `GameRootTestHooks` as in §5.1 (create `Assets/Game/App/Testing/GameRootTestHooks.cs` with the SPEC-71 §4.4 shape if TST-003 has not yet).
   2. Implement `BootSingletons.CreateAll` with its first rows.
   3. Add `GameConfigValidator` and `config_game.asset`.
-- **Files:** `Assets/Game/App/Boot/{GameComposition,BootSingletons}.cs`; `Assets/Game/Editor/Content/Validators/GameConfigValidator.cs`; `Assets/Game/Content/Config/config_game.asset`; `Assets/Game/Tests/PlayMode/Boot/CompositionTests.cs`
+- **Files:** `Assets/Game/App/Boot/{GameComposition,BootSingletons}.cs`; `Assets/Game/App/Testing/GameRootTestHooks.cs`; `Assets/Game/Editor/Content/Validators/GameConfigValidator.cs`; `Assets/Game/Content/Config/config_game.asset`; `Assets/Game/Tests/PlayMode/Boot/CompositionTests.cs`
 - **Acceptance criteria:**
   - [ ] Services are constructed in §5.2 order, verified by a test hook that records construction order, and disposed in reverse.
   - [ ] A throwing step disposes earlier services and stops boot with one error.
   - [ ] `BootSingletons` entities carry `BootSingleton`.
-- **Tests:** `CompositionTests.Order_AndReverseDispose`, `.ThrowingStep_DisposesEarlier`, `.BootSingletons_Tagged`.
+  - [ ] With `GameRootTestHooks.SaveRoot` and `.SettingsPath` set to a temp folder, a boot writes nothing under `Application.persistentDataPath`.
+- **Tests:** `CompositionTests.Order_AndReverseDispose`, `.ThrowingStep_DisposesEarlier`, `.BootSingletons_Tagged`, `.TestHooks_RedirectPaths`.
 
 ### FND-006 — SceneFlow transitions and teardown
 - **Milestone:** M0
@@ -742,14 +778,15 @@ If no save exists, "Load last save" is disabled.
 - **Milestone:** M1
 - **Tier:** frontier — F3/F5: write-back of damaged cells and identity across spawn, save and edit
 - **Depends on:** `FND-009`, `VOX-001`, `PERS-001`
-- **Do:** Implement `FleetModel`, `FleetShipRecord`, `FleetSaveParticipant` (§5.10), `PlayerShipSpawner` (§5.7), and `FleetWriteback`.
+- **Do:** Implement `FleetModel` (including the `Changed` event, raised once per mutating call after the change), `FleetShipRecord`, `FleetSaveParticipant` (§5.10), `PlayerShipSpawner` (§5.7), and `FleetWriteback`.
 - **Files:** `Assets/Game/App/Session/{FleetModel,FleetShipRecord,FleetSaveParticipant,PlayerShipSpawner,FleetWriteback}.cs`; `Assets/Game/Tests/EditMode/App/FleetTests.cs`; `Assets/Game/Tests/PlayMode/App/PlayerShipTests.cs`
 - **Acceptance criteria:**
   - [ ] New game: the flagship spawns at the start location with its `PersistentId`, `PlayerShip` tag, and no `StarSystemMember`.
   - [ ] Damage 50 cells → save → load: the respawned ship has the same 50 cells missing.
   - [ ] An undecodable structure is rebuilt from its blueprint; the flagship is never lost.
   - [ ] `FLET` round trip is byte-identical.
-- **Tests:** `FleetTests.FlagshipRules`, `.FLET_RoundTrip`, `.CorruptStructure_Fallback`; `PlayerShipTests.Spawn_AtStart`, `.Damage_SurvivesSaveLoad`.
+  - [ ] `Add`, `Remove`, `ReplaceStructure` and `ResetToEmpty` each raise `Changed` exactly once; a refused `Remove` (flagship) raises nothing.
+- **Tests:** `FleetTests.Changed_OncePerMutation`, `FleetTests.FlagshipRules`, `.FLET_RoundTrip`, `.CorruptStructure_Fallback`; `PlayerShipTests.Spawn_AtStart`, `.Damage_SurvivesSaveLoad`.
 
 ### FND-011 — Load flow end to end (R28)
 - **Milestone:** M3
@@ -768,14 +805,15 @@ If no save exists, "Load last save" is disabled.
 - **Milestone:** M2
 - **Tier:** standard — exact call sequence in §5.7
 - **Depends on:** `FND-010`, `WPN-001`, `FLT-001`, `AI-001`
-- **Do:** Implement `ShipSpawnService` (§5.7) including the id → root map via `IGridSpawnHook`, and step 8.3.
+- **Do:** Implement `ShipSpawnService` (§5.7) including the id → root map via `IGridSpawnHook`, the explicit `IShipSpawner` members (§5.7) and step 8.3. Register it as both `ShipSpawnService` and `IShipSpawner`.
 - **Files:** `Assets/Game/App/Spawning/{ShipSpawnService,ShipSpawnArgs}.cs`; `Assets/Game/Tests/PlayMode/App/ShipSpawnServiceTests.cs`
 - **Acceptance criteria:**
   - [ ] An NPC spawn has `StarSystemMember` equal to the current star system; the player spawn has none.
   - [ ] Rotation with pitch and roll is reduced to yaw.
   - [ ] An unknown blueprint returns id 0 with one error.
   - [ ] `TryGetRoot` works after spawn and is false after despawn.
-- **Tests:** `ShipSpawnServiceTests.Npc_HasStarSystemMember`, `.Player_NoMember`, `.YawOnly`, `.UnknownBlueprint`, `.RootLookup`.
+  - [ ] `IShipSpawner.Spawn` with `StarSystem = S` gives the root `StarSystemMember { Id = S }`; the ship has `ShipCommand`, `FlightState` and `PlanarConstraint`.
+- **Tests:** `ShipSpawnServiceTests.GalaxyArgs_UsesStarSystem`, `ShipSpawnServiceTests.Npc_HasStarSystemMember`, `.Player_NoMember`, `.YawOnly`, `.UnknownBlueprint`, `.RootLookup`.
 
 ### FND-013 — Blueprint Lab entry and exit
 - **Milestone:** M3
