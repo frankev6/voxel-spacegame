@@ -52,7 +52,7 @@ The galaxy is pure data computed from `(GalaxySeed, GeneratorVersion)` plus the 
 11. **Exactly one galaxy generation per new game or load** (`GalaxyService.GenerationCount` increments once). Star-system content is generated at most once per load request and cached until released. Reason: R9.
 12. **Deltas are sorted or append-only** (Destroyed, Interacted, Replacements, StructureDiffs sorted by body key ascending; StorySpawns append-only, removal only marks), so save → load → save is byte-identical.
 13. **Spawned things are referenced by `PersistentId`, generated things by `BodyId`, never by `Entity`** (architecture §6.1). Story spawns are generated content (`BodyRole.StorySpawn`, slot = record index); runtime grids of bodies get a fresh `PersistentId` per spawn that is never saved.
-14. **Galaxy world events are unmanaged structs in `Game.Galaxy.Events`**, published to `EventBus<T>` by Galaxy managed services from the per-frame Galaxy tick (§5.8). ECS systems in Galaxy never call managed code; they write singletons or managed-event `NativeQueue`s that the tick drains (architecture §5.1 allows `NativeQueue` for managed-event queues).
+14. **Galaxy events follow the SPEC-02 §5.6 bridge rules.** Payload structs live in `Assets/Game/Core/Events/` (namespace `Game.Core.Events`) and use only Core-visible types, so a star system is carried as `uint StarSystemValue` (= `StarSystemId.Value`). ECS systems in Galaxy enqueue into `ManagedEventQueue<T>` (drained by `ManagedEventDrainSystem`). Galaxy managed services call `EventBus<T>.Publish` directly. ECS systems in Galaxy never call managed code.
 15. **M3 galaxy = authored star systems only** (`proceduralStarSystemCount = 0` in `galaxy_main`), but the generator is tested at 1,000 procedural star systems. Reason: vision M3 scope is 2–4 star systems.
 
 ## 4. Data model
@@ -61,9 +61,9 @@ The galaxy is pure data computed from `(GalaxySeed, GeneratorVersion)` plus the 
 
 | Owner | Addition | Used for |
 |---|---|---|
-| SPEC-02 `RngPurpose` (append in this order) | `GalaxyLayout`, `GalaxyLanes`, `StarSystemAttributes`, `StarSystemLayout`, `BodyAttributes`, `AsteroidSector`, `AsteroidShape`, `StationShape`, `EncounterVisit`, `EncounterFleet`, `EncounterPlacement`, `Territory` | All Galaxy randomness (SPEC-30…33) |
+| SPEC-02 `RngPurpose` | Existing values used as: `GalaxyLayout` (1) star-system placement; `StarSystemGeneration` (2) per-star-system attributes; `BodyGeneration` (3) per-body attributes; `AsteroidField` (4) belt sectors; `EncounterDirector` (5) encounter visits. **Appended** (SPEC-02 owns the enum and lists them): `GalaxyLanes = 18`, `StarSystemLayout = 19`, `AsteroidShape = 20`, `StationShape = 21`, `EncounterFleet = 22`, `EncounterPlacement = 23`, `Territory = 24` | All Galaxy randomness (SPEC-30…33) |
 | SPEC-04 prefix registry | `GalaxyGenerationDefinition` `galaxy_`; `StarSystemTemplateDefinition` `systpl_`; `AuthoredStarSystemDefinition` `starsys_`; `BodyVisualDefinition` `bodyvis_`; (`BodyTemplateDefinition` `body_` already listed) | Content IDs |
-| SPEC-02 / SPEC-01 | `Game.Core.IPersistentIdAllocator { ulong Allocate(); }` implemented by `GameSession` | Runtime grids spawned by Galaxy |
+| SPEC-02 / SPEC-01 | `Game.Core.IPersistentIdAllocator { ulong Allocate(); }` (managed) implemented by `GameSession`; Burst systems use the `PersistentIdAllocator` singleton (SPEC-02 §4.1, SPEC-01 §5) | Runtime grids spawned by Galaxy |
 
 ### 4.2 IDs and enums (public contract)
 
@@ -573,24 +573,23 @@ public struct OriginRebaseRequest : IComponentData, IEnableableComponent
 /// <summary>Shared, low cardinality (≤ 2 values). On every star-system-owned entity: grid roots, bricks, functional entities, body anchors. Never on the player ship or its children.</summary>
 public struct StarSystemMember : ISharedComponentData { public StarSystemId Id; }
 
-/// <summary>Singleton on the FrameOrigin entity. Managed-event queue drained by GalaxyFrameTicker (§5.8). Allocated in OriginRebaseSystem.OnCreate, disposed in OnDestroy.</summary>
-public struct OriginShiftedQueue : IComponentData { public Unity.Collections.NativeQueue<OriginShifted> Value; }
 ```
 
 ```csharp
-namespace Game.Galaxy.Events
+// Assets/Game/Core/Events/OriginShifted.cs  (namespace Game.Core.Events; SPEC-02 §5.6 payload rules)
+/// <summary>Raised on every rebase (architecture §6.5). Delivered next frame through ManagedEventQueue&lt;OriginShifted&gt;;
+/// same-frame consumers read FrameOrigin.ShiftSequence/LastShiftDelta instead (§5.10).</summary>
+public readonly struct OriginShifted
 {
-    /// <summary>Raised on every rebase (architecture §6.5). Same-frame consumers read FrameOrigin.ShiftSequence/LastShiftDelta instead (§5.10).</summary>
-    public readonly struct OriginShifted
-    {
-        public readonly Unity.Mathematics.float3 Delta;    // binding; zero when StarSystemChanged == 1 or for a request rebase
-        public readonly byte StarSystemChanged;            // 1: everything local was replaced; consumers reset (camera cut, clear trails)
-        public readonly StarSystemId StarSystem;
-        public readonly uint Sequence;                     // FrameOrigin.ShiftSequence after the rebase
-        public OriginShifted(Unity.Mathematics.float3 delta, byte changed, StarSystemId sys, uint seq) { Delta = delta; StarSystemChanged = changed; StarSystem = sys; Sequence = seq; }
-    }
+    public readonly Unity.Mathematics.float3 Delta;    // binding; zero when StarSystemChanged == 1 or for a request rebase
+    public readonly byte StarSystemChanged;            // 1: everything local was replaced; consumers reset (camera cut, clear trails)
+    public readonly uint StarSystemValue;              // StarSystemId.Value of the frame after the rebase
+    public readonly uint Sequence;                     // FrameOrigin.ShiftSequence after the rebase
+    public OriginShifted(Unity.Mathematics.float3 delta, byte changed, uint starSystemValue, uint seq) { Delta = delta; StarSystemChanged = changed; StarSystemValue = starSystemValue; Sequence = seq; }
 }
 ```
+
+`Game.Galaxy/AssemblyInfo.cs` adds `[assembly: RegisterGenericComponentType(typeof(Game.Data.Components.ManagedEventQueue<Game.Core.Events.OriginShifted>))]` and `ManagedEventChannels.RegisterAll` gets `system.RegisterChannel<OriginShifted>();` (SPEC-02 §5.6 rule 3).
 
 ### 4.8 Managed services and interfaces (public contract)
 
@@ -677,9 +676,628 @@ public sealed class GalaxyService : System.IDisposable, IGalaxyFrameTick
     public void Reveal(StarSystemId id);               // Known += id (also hidden ones)
     public void MarkVisited(StarSystemId id);          // Visited += id; Known += id and its non-hidden neighbours
 
-    public void Tick(in GalaxyFrameContext ctx);       // drains OriginShiftedQueue → EventBus<OriginShifted>
+    public void Tick(in GalaxyFrameContext ctx);       // completes finished content prefetches (§5.8 step T1); no event draining
     public void Dispose();                             // disposes GalaxyDef and cached content
 }
 ```
 
 `GalaxyMapModel` (§5.12) and `GalaxySaveParticipant` (§5.11) are in the same folder.
+
+### 4.9 Internal types
+
+```csharp
+// Assets/Game/Galaxy/Components/UniversePositionIsAnalytic.cs (public: SPEC-31 adds it to bodies on rails)
+/// <summary>Tag: UniversePosition of this root is computed analytically (orbits). OriginRebaseSystem never syncs it from LocalTransform.</summary>
+public struct UniversePositionIsAnalytic : IComponentData { }
+
+// internal, Assets/Game/Galaxy/Generation/
+internal struct RebaseDecision { public byte Rebase; public byte FromRequest; public byte StarSystemChanged; public double3 NewOrigin; public float3 Delta; }
+internal struct LaneCandidate { public int A, B; public double LengthLy; }        // indices into StarSystems, A < B
+```
+
+## 5. Systems, services and flow
+
+All generation code lives in `Assets/Game/Galaxy/Generation/` (namespace `Game.Galaxy.Generation`). Jobs are `[BurstCompile]` `IJob`s that read only `NativeArray`s in `GalaxyDef` and their own inputs. Generation runs at new game, load and star-system load, never in the fixed step, so completing these jobs on the main thread is allowed (§5.8 states exactly where).
+
+### 5.1 `GalaxyDefBuilder` (managed, main thread)
+
+`static GalaxyDef GalaxyDefBuilder.Build(ContentCatalog catalog, ulong seed, int generatorVersion)`. Steps:
+1. `gen` = the single `GalaxyGenerationDefinition` in `catalog.All<GalaxyGenerationDefinition>()`. The validator guarantees exactly one (GAL-E001). If `generatorVersion` is not a value this build supports (`1` only), throw `GalaxyGenerationException("unsupported generator version N")`.
+2. `BodyTemplates` = `catalog.All<BodyTemplateDefinition>()` (ordinal ID order, SPEC-04 Decision 5). Fill `BodyTemplateParams[i]` from each definition.
+3. `Templates` = `gen.TemplatePool` in list order (weights stay with the entries). `TemplateParams[i]` from each template. Pools of every template are appended to `PoolEntries` in the order star, planet, moon, belt, station, POI, and each pool's `(start, count)` is stored in the template params. Pool entries with `weight <= 0` are skipped (the validator reports them, GAL-E011).
+4. `Authored` = `gen.AuthoredStarSystems` sorted by `string.CompareOrdinal(Id.Value)`. For each, in that order:
+   - `AuthoredTemplateParams[k]` comes from its `template`;
+   - its bodies become `AuthoredBodyParams`, sorted by `LocalKey` and appended to `AuthoredBodies`;
+   - `AuthoredBodyRanges[k] = (start, count)`.
+5. Moons in authored star systems: `SubSlot` = the moon's index among the moons with the same `parentKey`, in list order; `Slot` = the parent planet's slot. `ParentKey` = the planet's `LocalKey`. Other roles: `SubSlot = 0`, `ParentKey = 0`.
+6. Run §5.2 and §5.3 (layout and lanes), §5.4 (hash). Return the `GalaxyDef` (all `NativeArray`s `Allocator.Persistent`).
+
+Lane-gate specs: for every authored lane whose `condition` is non-empty, append `new LaneGateSpec { Condition, LockedMessage }` to `LaneGates` and set `LaneDef.GateIndex = 1 + index`.
+
+### 5.2 Layout job `GalaxyLayoutJob`
+
+Inputs: `galaxySeed`, `gen` scalars, the authored positions/flags/danger/star template indices (sorted as in §5.1), template weights. Output: `NativeList<StarSystemDef>`.
+
+1. **Authored first.** For each authored star system `k`:
+   - `Id = StarSystemId.FromAuthored(ContentHash of its ID)`;
+   - `PositionLy` = `positionLy`;
+   - `AuthoredIndex = k + 1`;
+   - `TemplateIndex = NoIndex`;
+   - `StarTemplateIndex` = index of its `star` in `BodyTemplates`;
+   - `Danger` = `danger`;
+   - `Flags = Authored | (Start if it is gen.startStarSystem) | (Story if isStory) | (HiddenUntilKnown) | (NoEncounters) | (Hub)`.
+
+   If two authored IDs map to the same `StarSystemId`, throw `GalaxyGenerationException` (the validator reports it first as GAL-E021).
+2. **Spatial grid.** Cell size `c = minStarSystemSpacingLy`. Key = `int2(floor(x / c), floor(y / c))`. Use a `NativeParallelMultiHashMap<int2, int>` (capacity `authored + proceduralCount`, `Allocator.Temp`). Insert every authored star system.
+3. **Procedural placement.**
+   - `rng = RngStreams.For(galaxySeed, RngPurpose.GalaxyLayout, 0)`.
+   - For `i` in `0 .. proceduralStarSystemCount − 1`: for `attempt` in `0 .. placementAttemptsPerStarSystem − 1`:
+     1. `u = rng.NextDouble()`, `t = rng.NextDouble()` (both always drawn);
+     2. `r = galaxyRadiusLy * sqrt(u)`, `θ = 2π t`, `p = (r cos θ, r sin θ)`;
+     3. check the 3×3 cells around `p`'s cell. If any accepted star system is closer than `c`, continue;
+     4. otherwise accept: `Id = FromProceduralIndex(acceptedCount)`, insert into the grid, `acceptedCount++`, break.
+   - If all attempts fail, star system `i` is skipped. This is deterministic, and `GalaxyDef` exposes `SkippedProceduralCount`, which GAL-007 asserts is 0 for the M3 definition and logs at Info otherwise.
+4. **Per-star-system attributes.** For each procedural star system:
+   - `Seed = StableHash.Combine(galaxySeed, Id.Value)`;
+   - `a = RngStreams.For(Seed, RngPurpose.StarSystemGeneration, 0)`;
+   - draw exactly three values in this order: `tRoll = a.NextFloat()`, `dRoll = a.NextFloat()`, `sRoll = a.NextFloat()`.
+     - `TemplateIndex` = weighted pick over `Templates` with `tRoll` (§5.5.6);
+     - `Danger = DangerMin + (int)floor(dRoll * (DangerMax − DangerMin + 1))`, clamped to `DangerMax`;
+     - `StarTemplateIndex` = weighted pick over the template's star pool with `sRoll`.
+   - `Flags = None`.
+
+   Authored star systems also get `Seed = StableHash.Combine(galaxySeed, Id.Value)`.
+5. Sort all star systems by `Id.Value` ascending. Build `IndexById`.
+
+Complexity O(N × attempts); N = 1,000, attempts = 30 → ≤ 30,000 grid probes.
+
+### 5.3 Lane job `GalaxyLaneJob`
+
+1. **Authored lanes.** For each `AuthoredLane` in definition order:
+   - `(A, B)` = the two `StarSystemId`s, ordered so `A.Value < B.Value`;
+   - `LengthLy` = the Euclidean distance;
+   - `Kind`;
+   - `Flags = Authored | HiddenUntilKnown?`;
+   - `GateIndex` per §5.1;
+   - gate templates = the lane's override, else the galaxy default for the kind.
+
+   Record the pair in a `NativeHashSet<ulong>` keyed `((ulong)A << 32) | B`.
+2. **Participants.** `P` = procedural star systems plus authored ones with `connectProcedurally`, in `Id` order.
+3. **Candidates.**
+   - Grid cell size = `maxLaneLengthLy`.
+   - For each `p ∈ P`, collect every `q ∈ P` in the 3×3 cells with `0 < dist ≤ maxLaneLengthLy`, sort by `(dist, q.Id)`, and keep the first `laneCandidateNeighbours`.
+   - Add the pair `(min, max)` to the candidate list unless it is already present.
+   - Sort the candidates by `(LengthLy, A.Id, B.Id)`.
+4. **Spanning forest.** Kruskal over the candidates with a union-find (`NativeArray<int> parent`, path halving). An edge joining two sets is accepted even if it exceeds `maxLaneDegree`, because connectivity wins over degree.
+5. **Extra lanes.**
+   - `rng = RngStreams.For(galaxySeed, RngPurpose.GalaxyLanes, 0)`.
+   - For each candidate **not** accepted in step 4, in sorted order: draw `x = rng.NextFloat()` (always drawn). Accept the candidate if `x < extraLaneChance` and both endpoint degrees `< maxLaneDegree`.
+6. **Bridge components.** While more than one union-find set contains a member of `P`:
+   1. take the set containing the smallest `Id` that is not in the start star system's set (if the start star system is not in `P`, use the set of the smallest `Id` in `P`);
+   2. find the shortest pair `(u in that set, v outside it)` by brute force over `P`, breaking ties on `(u.Id, v.Id)`;
+   3. add the lane and union the two sets.
+
+   This is O(N² × sets). It only runs for disconnected leftovers and is capped at `N ≤ 100,000` by the validator. Bridges can exceed `maxLaneLengthLy`.
+7. Drop procedural lanes whose pair already exists in the authored set.
+8. Sort all lanes by `(A.Value, B.Value)`.
+9. **Adjacency.** For each star system, list the lanes touching it, sorted by the neighbour's `Id.Value`, into `Adjacency`, and set `FirstAdjacency` and `LaneCount`.
+
+### 5.4 Galaxy hash `GalaxyHash.Compute`
+
+1. Serialize the following into a `NativeList<byte>` (little-endian, raw IEEE bits for floats and doubles):
+   - **For each star system in order:** `Id.Value u32`, `PositionLy.x f64`, `PositionLy.y f64`, `Seed u64`, `TemplateIndex u16`, `AuthoredIndex u16`, `StarTemplateIndex u16`, `Flags u16`, `Danger u8`;
+   - **then for each lane in order:** `A u32`, `B u32`, `LengthLy f32`, `Kind u8`, `Flags u8`, `GateIndex u16`, `GateTemplateA u16`, `GateTemplateB u16`.
+2. `Hash = StableHash.Hash64(bytes, seed: (ulong)generatorVersion)`.
+
+The same function with the same layout is used for `StarSystemContent.GeneratedHash`. It runs over `BodySpec` fields in declaration order, `Seed` included, `State` excluded.
+
+**Golden values.** `Assets/Game/Tests/EditMode/Galaxy/Golden/galaxy_v1.txt` holds lines `<fixture name> <hash hex>`. The fixture definitions are `TestGalaxyFixtures.Small` (4 authored + 50 procedural, seed `0x1234`) and `.Large` (1,000 procedural, seed `0xABCD`). The first implementation writes the file; afterwards any mismatch fails `GalaxyHashTests.MatchesGolden`. Changing a golden value requires bumping `CurrentGeneratorVersion` (Decision 2) and keeping the v1 path.
+
+### 5.5 Star-system content job `StarSystemContentJob`
+
+Inputs:
+- the `StarSystemDef`;
+- template params: `TemplateParams[TemplateIndex]`, or `AuthoredTemplateParams[AuthoredIndex − 1]` when authored;
+- `PoolEntries`, `BodyTemplateParams`;
+- for authored star systems, the `AuthoredBodies` range;
+- the adjacent lanes, plus each neighbour's `PositionLy`.
+
+Output: `NativeList<BodySpec>`, `laneRingRadiusM`, `extentM`.
+
+Body seeds: `BodySpec.Seed = StableHash.Combine(def.Seed, id.LocalKey)`. **Body stream:** `b = RngStreams.For(BodySpec.Seed, RngPurpose.BodyGeneration, 0)`, drawing exactly five floats in order `[tmpl, radius, phase, extraA, extraB]` whether or not each is used.
+
+1. **Star.** `BodyId(Star, 0, 0)`; template = `StarTemplateIndex`; `Orbit = Fixed, RadiusM 0`; `RadiusM = lerp(RadiusMinM, RadiusMaxM, radius)`.
+2. **Authored path** (`AuthoredIndex > 0`). For each `AuthoredBodyParams` in `LocalKey` order:
+   - `Orbit.Mode = Mode`;
+   - `Orbit.RadiusM = OrbitRadiusM`;
+   - `PhaseRad`;
+   - `Eccentricity`;
+   - `PeriodS = PeriodOverrideS > 0 ? PeriodOverrideS : KeplerLite(...)` (§5.5.5);
+   - `RadiusM = RadiusOverrideM > 0 ? RadiusOverrideM : lerp(min, max, radius)`;
+   - `YawRad`;
+   - `ParentKey`;
+   - `ParentOrbit` = the parent's `Orbit` (the parent was emitted earlier because Planet role (2) < Moon role (3)).
+   - Belt: `BeltInnerRadiusM = OrbitRadiusM − BeltWidthM/2`, `BeltOuterRadiusM = OrbitRadiusM + BeltWidthM/2`.
+
+   Then go to step 6.
+3. **Procedural counts.** `L = RngStreams.For(def.Seed, RngPurpose.StarSystemLayout, 0)`. Draw in this exact order:
+   - `planets = L.NextInt(MinPlanets, MaxPlanets + 1)`;
+   - `belts = L.NextInt(MinBelts, MaxBelts + 1)`;
+   - `stations = L.NextInt(MinStations, MaxStations + 1)`;
+   - `pois = L.NextInt(MinPois, MaxPois + 1)`;
+   - then for `k` in `0 .. MaxPlanets + MaxBelts − 1`: `spacing[k] = L.NextFloat()`;
+   - then for `p` in `0 .. MaxPlanets − 1`: `moonRoll[p] = L.NextFloat()`, `moonCount[p] = L.NextInt(0, MaxMoonsPerPlanet + 1)`.
+
+   Every draw happens for the maximum counts, so the stream position never depends on rolled values.
+4. **Orbit radii.**
+   - `a[0] = FirstOrbitRadiusM`;
+   - `a[k+1] = a[k] + lerp(OrbitSpacingMinM, OrbitSpacingMaxM, spacing[k])`;
+   - planets use `a[0 .. planets−1]`, belts use `a[planets .. planets+belts−1]`.
+5. **Procedural bodies.**
+   - **Planet `p`.** `BodyId(Planet, p, 0)`;
+     - template = weighted pick of the planet pool with `tmpl`;
+     - `Circular`, `RadiusM = a[p]`, `PhaseRad = 2π·phase`, `PeriodS = KeplerLite(a[p], OrbitPeriodAtReferenceS, OrbitReferenceRadiusM)`;
+     - body `RadiusM = lerp(min, max, radius)`.
+   - **Moons of planet `p`.** If the planet template has `CanHaveMoons` and `moonRoll[p] < MoonChance`, then for `m` in `0 .. moonCount[p] − 1`:
+     - `BodyId(Moon, p, m)`;
+     - template from the moon pool with the moon's `tmpl`;
+     - `Circular`, `RadiusM = planetRadius + MoonOrbitMinM + (MoonOrbitMaxM − MoonOrbitMinM) * (m + extraA) / max(1, MaxMoonsPerPlanet)`;
+     - `PeriodS = KeplerLite(r, MoonPeriodAtReferenceS, MoonReferenceRadiusM)`;
+     - `ParentKey` = the planet's key; `ParentOrbit` = the planet orbit.
+   - **Belt `k`.** `BodyId(Belt, k, 0)`; `Fixed`, `RadiusM = a[planets + k]`; width from the template; inner and outer radii as in step 2.
+   - **Station `s` and POI `q`.** `BodyId(Station, s, 0)` / `BodyId(PointOfInterest, q, 0)`. `Fixed`.
+     1. Up to 8 candidates `j = 0..7`: use the body stream's `phase`, `extraA` and `extraB` for `j = 0`; for `j > 0` use `RngStreams.For(Seed, BodyGeneration, (ulong)j)` and its first two floats.
+     2. Radius = `lerp(StationRadiusMinM, StationRadiusMaxM, u)` (POI: the POI range); angle `2πv`.
+     3. Accept the first candidate whose distance to every earlier Fixed body (stations, POIs, gates are placed later) is ≥ `MinBodySeparationM`; otherwise take candidate 7.
+     4. `YawRad = 2π·extraB`.
+   - Templates come from the station and POI pools (weighted pick with `tmpl`).
+6. **Lane gates.** Compute the extent:
+   - `maxExtent = max over bodies of (Orbit.RadiusM·(1 + Eccentricity) + RadiusM + (ParentOrbit.RadiusM if moon))`;
+   - for belts use `BeltOuterRadiusM`.
+
+   Then:
+   - `LaneRingRadiusM = max(MinLaneRingRadiusM, maxExtent + LaneRingMarginM)`;
+   - `ExtentM = LaneRingRadiusM + ExtentMarginM`.
+
+   For adjacency slot `j` (in adjacency order):
+   1. `BodyId(LaneGate, j, 0)`, `LaneIndex` = the lane index;
+   2. direction `d = normalize(neighbour.PositionLy − self.PositionLy)` mapped to `(d.x, 0, d.y)`; angle `φ = atan2(d.y, d.x)`;
+   3. if an earlier gate is within `MinBodySeparationM` along the ring (arc distance), add `MinBodySeparationM / LaneRingRadiusM` radians to `φ` and retry, up to 16 times;
+   4. `Fixed`, `RadiusM = LaneRingRadiusM`, `PhaseRad = φ`, `YawRad = φ + π` (the gate faces the star);
+   5. template = `GateTemplateA` if self is `A`, else `GateTemplateB`.
+7. Sort `Bodies` by `LocalKey` (insertion sort; ≤ 512 elements). If the count exceeds `MaxBodiesPerStarSystem`, truncate the list to 512 and set the job's error flag; `GalaxyService` logs `GameLog.ErrorOnce`. The validator prevents this for shipped content (GAL-E014).
+
+**5.5.5 Kepler-lite.**
+- `KeplerLite(a, Tref, aref) = Tref * pow(a / aref, 1.5)`, clamped to ≥ 60 s.
+- Elliptic orbits use mean anomaly `M = PhaseRad + 2π * frac(t / PeriodS)`.
+  - Solve `E − e sin E = M` with exactly 6 Newton iterations from `E0 = M`. Fixed iteration count means the result is deterministic.
+  - Position is `(a(cos E − e), 0, a√(1−e²) sin E)` rotated by `ArgPeriapsisRad` about Y.
+- Circular: `θ = PhaseRad + 2π * frac(t / PeriodS)`; position `R(cos θ, 0, sin θ)`; velocity `(2πR/T)(−sin θ, 0, cos θ)`.
+- Fixed: position `R(cos PhaseRad, 0, sin PhaseRad)`, velocity 0.
+- `frac` uses `t / PeriodS − floor(t / PeriodS)` in double precision.
+- `OrbitMath.Position(b, t)` = `LocalPosition(ParentOrbit, t) + LocalPosition(Orbit, t)` (moons and anchored story spawns; others have a zero `ParentOrbit`).
+
+**5.5.6 Weighted pick.** `total = Σ weight` over entries with `maxCount == 0 || used < maxCount`. Pick the first entry with cumulative weight `> roll * total`. If `total == 0`, use `NoIndex`: the body is skipped and the job's warning flag is set. `used` counts per pool per star system.
+
+### 5.6 `StarSystemDeltaApplier` (managed, main thread, after the content job)
+
+`static void Apply(StarSystemContent c, StarSystemDelta d, GalaxyDef g, ContentCatalog catalog)`. Fixed order:
+1. **Replacements** (sorted by key). Find the body by binary search; if it is absent, skip with `WarnOnce("GAL.Delta.MissingBody")`. Resolve `Template` via `catalog.TryResolve<BodyTemplateDefinition>`. If unresolved, keep the original template and record the unresolved ID (SPEC-04). Otherwise set `TemplateIndex` and `State |= Replaced`.
+2. **Story spawns** (index order). For `slot i` with `!Removed`:
+   - `BodyId(StorySpawn, i, 0)`;
+   - template resolved as above (unresolved → skip the spawn);
+   - `ParentKey = AnchorBodyKey`.
+   - If the anchor is a `Moon`, use the moon's parent planet as the anchor and `WarnOnce("GAL.StorySpawn.MoonAnchor")`.
+   - `ParentOrbit` = the anchor's `Orbit`, or zero when the anchor key is 0 or missing.
+   - `Orbit = Fixed`, `RadiusM = length(OffsetM.xz)`, `PhaseRad = atan2(OffsetM.z, OffsetM.x)`; `YawRad`; `RadiusM` (body) = the template's `RadiusMaxM`; `State |= StorySpawn`.
+   - Append. Role 9 sorts after all generated roles, and slots ascend, so `Bodies` stays sorted. Assert this in debug builds.
+3. **Interacted.** `State |= Interacted` for each key found.
+4. **Destroyed.** `State |= Destroyed`. Destroyed bodies stay in the list; SPEC-31 decides what to spawn for them.
+5. **Structure diffs.** `State |= HasStructure`.
+
+The applier never consumes RNG and never reorders generated bodies.
+
+### 5.7 Names
+
+- Authored star system: `displayName`.
+- Procedural star system: `namePrefix + " " + (char)('A' + (int)(Seed % 26)) + "-" + Id.Value.ToString("D4")` (e.g. "Uncharted K-0042").
+- Body:
+  - an authored `displayNameOverride` if non-empty;
+  - else Planet: `<star system name> <Roman(slot + 1)>` (I…XX);
+  - Moon: `<planet name> <(char)('a' + subSlot)>`;
+  - LaneGate: `"Gate to " + <neighbour star system name>`;
+  - Star: `<star system name>`;
+  - every other role: the template's `displayName`.
+- Names are computed on demand and cached per `BodyId` in a `Dictionary<BodyId, string>` that is cleared on `ReleaseContent`.
+
+### 5.8 `GalaxyService`, `GalaxyFrameTicker` and `GalaxyServicesBridgeSystem`
+
+`GalaxyServicesBridgeSystem` (`Game.Presentation`, folder `Presentation/World/`):
+- a `SystemBase` in `WorldGroup` with `OrderFirst = true` and `RequireForUpdate<GameplayActive>`;
+- each frame it builds a `GalaxyFrameContext` from `SimClock` and `UnityEngine.Time` and calls `Services.Get<GalaxyFrameTicker>().Tick(ctx)`. If the ticker is missing, it does `WarnOnce` and returns.
+
+`GalaxyService` behaviour:
+- **`NewGame(seed)`**
+  1. `Dispose` cached content and `Galaxy`;
+  2. `State.Clear()`;
+  3. `s = Definition.UseFixedSeed ? Definition.FixedSeed : seed`; if `s == 0`, throw `ArgumentException` (SPEC-01 generates non-zero seeds);
+  4. `State.Seed = s`, `State.GeneratorVersion = CurrentGeneratorVersion`;
+  5. `Galaxy = GalaxyDefBuilder.Build(...)` (jobs `Run()` synchronously); `GenerationCount++`;
+  6. `State.CurrentStarSystem = Galaxy.StartStarSystem`;
+  7. `MarkVisited(start)`;
+  8. `State.HasPlayerLocation = false` (SPEC-31 computes the start location with `GetStartLocation`, §6).
+- **`OnSessionRestored()`**
+  1. dispose `Galaxy` and content;
+  2. `Galaxy = Build(State.Seed, State.GeneratorVersion)`; `GenerationCount++`;
+  3. reset `ContentGenerationCount`.
+  - An unsupported version throws `GalaxyGenerationException`. SPEC-01 catches it and fails the load with "This save needs a newer game version."
+- **`PrefetchContent(id)`**: if cached or already scheduled, return the existing handle. Otherwise allocate the output list (`Persistent`), schedule `StarSystemContentJob` and remember `(id → handle, list)`.
+- **`GetContent(id)`**
+  1. If cached, return it.
+  2. If scheduled, call `handle.Complete()`; this is allowed because SPEC-31 calls it from the `WorldGroup` streaming step, outside the fixed step, and normally only after `IsCompleted`. Otherwise run the job synchronously.
+  3. Wrap the result in `StarSystemContent`, compute `GeneratedHash`, apply the delta if `State.TryGetDelta`, cache it, and increment `ContentGenerationCount[id]`.
+  - An unknown `id` throws `KeyNotFoundException`.
+- **`ReleaseContent(id)`**: complete any scheduled job, dispose, and remove the cache entry and the cached names for that star system.
+- **Delta writes** (`ReplaceBody`, `AddStorySpawn`, `RemoveStorySpawn`, `MarkBodyDestroyed`, `MarkBodyInteracted`):
+  1. update `State.GetOrCreateDelta(sys)`;
+  2. if that star system's content is cached, patch the cached `BodySpec`, in the same way §5.6 does for that record type;
+  3. call `liveSink?.OnBodyDeltaChanged(body)`.
+  - `AddStorySpawn` returns `BodyId(StorySpawn, slot, 0)`.
+- **`MarkVisited(id)`**: `AddVisited(id)`, `AddKnown(id)`, and `AddKnown` for every neighbour whose star system is not `HiddenUntilKnown` and whose lane is not `HiddenUntilKnown`. `IncrementVisit` on the delta happens in SPEC-31, on star-system entry.
+- **`RequestOriginReset(id, origin)`**: main thread; `serial = ++LastOriginRequestSerial`; set `OriginRebaseRequest { NewOrigin, StarSystem = id, Serial }` on the `FrameOrigin` entity and enable it.
+- **`Tick(ctx)`** (T1): for each scheduled prefetch whose handle `IsCompleted`, leave it in place; `GetContent` will finalize it. `Tick` does nothing else in v1. It exists so SPEC-31/32/33 services share one ordered per-frame entry point.
+
+`GalaxyFrameTicker` order (`TickOrder`):
+- `GalaxyService` 0;
+- SPEC-31 `StarSystemLoader` 100;
+- SPEC-32 `TravelService` 200;
+- SPEC-33 `EncounterDirectorService` 300 and `TerritoryService` 310.
+
+### 5.9 `GalaxyContentValidator` (`IContentDatabaseValidator`, `Assets/Game/Editor/Content/Validators/`)
+
+Codes (`ValidationReport` severity in brackets):
+
+| Code | Rule |
+|---|---|
+| GAL-E001 [E] | Exactly one `GalaxyGenerationDefinition` |
+| GAL-E002 [E] | `generatorVersion == CurrentGeneratorVersion` |
+| GAL-E003 [E] | `startStarSystem` set and contained in `authoredStarSystems` |
+| GAL-E004 [E] | `authoredStarSystems.Count ≤ 256`, no nulls, no duplicates |
+| GAL-E005 [E] | Authored bodies: `key` matches `^[a-z][a-z0-9_]*$` and is unique per star system; `(role, slot)` unique; for moons `(slot, subslot)` unique |
+| GAL-E006 [E] | Moon `parentKey` names a body with role Planet in the same star system; non-moons have `parentKey == ""` |
+| GAL-E007 [E] | Station, PointOfInterest and Belt use `OrbitMode.Fixed`; Planet and Moon use Circular or Elliptic |
+| GAL-E008 [E] | `0 ≤ eccentricity ≤ 0.3`; `orbitRadiusM > 0` except Fixed at 0 is allowed for POIs |
+| GAL-E009 [E] | Authored lanes: both ends set, different, pair unique |
+| GAL-E010 [E] | Every pool entry's template role equals the pool's role (star pool → Star, …); every authored body's template role equals its `role` |
+| GAL-E011 [E] | Pool weights > 0; a pool is non-empty when its minimum count > 0 |
+| GAL-E012 [E] | `min ≤ max` for every count pair; counts ≥ 0 |
+| GAL-E013 [E] | Range pairs `min ≤ max` and > 0 (radii, orbit spacing, station/POI radius, moon orbit) |
+| GAL-E014 [E] | Body bound: `1 + MaxPlanets·(1 + MaxMoonsPerPlanet) + MaxBelts + MaxStations + MaxPois + maxLaneDegree + authoredLaneCount ≤ 512` per template; authored: `1 + bodies + lanes ≤ 512` |
+| GAL-E015 [E] | Body templates: `Blueprint` source has `blueprint`; `ProceduralShape` has `sizeCells > 0`, `wallThicknessCells ≥ 0`, `hullBlock` set, and `coreBlock` set when `destructible` |
+| GAL-E016 [E] | Belt templates: `asteroidBlock` set; `1 ≤ asteroidsPerSectorMin ≤ asteroidsPerSectorMax ≤ 8`; `sectorSizeM ≥ 100` |
+| GAL-E017 [E] | `0 ≤ proceduralStarSystemCount ≤ 100000`; `placementAttemptsPerStarSystem` 1..100; `laneCandidateNeighbours` 1..16; `maxLaneDegree` 1..16 |
+| GAL-E018 [E] | Start star system: `startBodyKey` names one of its bodies |
+| GAL-E019 [E] | `defaultHyperlaneGate` and `defaultAncientGate` set with role LaneGate |
+| GAL-E020 [E] | `BodyVisualDefinition.meshRadius > 0`; `mesh` and `material` set |
+| GAL-E021 [E] | No two authored star systems produce the same `StarSystemId` |
+| GAL-W001 [W] | Authored star systems closer than `minStarSystemSpacingLy` |
+| GAL-W002 [W] | Authored lane longer than `maxLaneLengthLy` |
+| GAL-W003 [W] | Authored position outside `galaxyRadiusLy` |
+
+### 5.10 `OriginRebaseSystem`
+
+- **Group:** `GameInitGroup`, `OrderFirst = true` (architecture §5: before `PlayerInputSampleSystem` and `GridSpawnSystem`). `[BurstCompile] ISystem`; `RequireForUpdate<GameplayActive>`, `RequireForUpdate<WorldSceneActive>` (SPEC-01 Decision 6: no galaxy in the Blueprint Lab), `RequireForUpdate<FrameOrigin>`.
+- **`OnCreate`:** create the singleton entity with `FrameOrigin` (all zero) and `OriginRebaseRequest` (disabled). This happens once and is not per-frame structural work.
+- **Reads/Writes:** writes `FrameOrigin`, `OriginRebaseRequest` (enable bit only), `UniversePosition` (non-analytic roots), `LocalTransform` of roots (`WithNone<Parent>`), `PhysicsGraphicalInterpolationBuffer.PreviousTransform` and the enqueue to `ManagedEventQueue<OriginShifted>`. Architecture §8 makes it the only writer of these during a rebase.
+
+Per frame, entirely in jobs with no main-thread sync point (markers `OriginRebaseSystem.Decide`, `.Shift`, `.Sync`):
+
+1. **`DecideJob` (`IJob`).** Inputs: `FrameOrigin` and `OriginRebaseRequest` via `ComponentLookup` on the singleton entity; the player root's `LocalTransform` via a `NativeArray` from `playerQuery.ToComponentDataListAsync` (`PlayerShip`, `WithNone<Parent>`, dependency combined); `RebaseDecision` as a `NativeReference` (`WorldUpdateAllocator`).
+   1. If the request is enabled and `request.Serial > FrameOrigin.AppliedRequestSerial`:
+      - `Rebase = 1`, `FromRequest = 1`, `NewOrigin = request.NewOrigin`;
+      - `StarSystemChanged = request.StarSystem != FrameOrigin.StarSystem`;
+      - `Delta = changed ? 0 : (float3)(FrameOrigin.OriginInStarSystem − NewOrigin)`;
+      - disable the request; set `AppliedRequestSerial`.
+   2. Else, if a player root exists and `length(playerLocal) > 2000`:
+      - `Rebase = 1`, `FromRequest = 0`;
+      - `NewOrigin = FrameOrigin.OriginInStarSystem + (double3)playerLocal`;
+      - `Delta = (float3)(old − NewOrigin)`, i.e. `−playerLocal`.
+   3. If `Rebase`:
+      - update `FrameOrigin` (`OriginInStarSystem = NewOrigin`, `StarSystem` from the request if `FromRequest`, `ShiftSequence++`, `LastShiftDelta = FromRequest ? 0 : Delta`, `LastShiftChangedStarSystem = StarSystemChanged`);
+      - enqueue `OriginShifted(Delta (0 if changed), changed, FrameOrigin.StarSystem.Value, ShiftSequence)` with `SortKey = ShiftSequence`.
+2. **`ShiftJob` (`IJobEntity`, `ScheduleParallel`)** over roots with `LocalTransform` (`WithNone<Parent>`). It reads `RebaseDecision` and returns immediately when `Rebase == 0`.
+   - With `UniversePosition`: `Position = (float3)(UniversePosition.Value − NewOrigin)`.
+   - Without it: `Position += Delta`; when `StarSystemChanged == 1`, skip (those entities belong to the star system being unloaded).
+   - If the entity has `PhysicsGraphicalInterpolationBuffer`: `PreviousTransform.pos += Delta`, or set it to the new pose when the star system changed. This prevents a one-frame smear (03-B9c).
+3. **`SyncJob` (`IJobEntity`, `ScheduleParallel`)** over roots with `UniversePosition` and `LocalTransform`, `WithNone<Parent, UniversePositionIsAnalytic>`: `UniversePosition = FrameOrigin.OriginInStarSystem + (double3)Position`. It reads the post-rebase origin from the `RebaseDecision`, or from `FrameOrigin` when there was no rebase.
+
+Everything else that holds positions reacts to the shift; this spec does not implement those reactions.
+- **Same frame:** read `FrameOrigin.ShiftSequence` and `LastShiftDelta` and compare with the last seen sequence. Presentation systems that keep their own world-space buffers do this: camera (SPEC-62), trails/VFX/debris buffers (SPEC-63), audio emitters (SPEC-64).
+- **Next frame:** `EventBus<OriginShifted>`, for managed listeners that tolerate a one-frame delay.
+
+### 5.11 `GalaxySaveParticipant` (`GLXY`, order 80, version 1)
+
+Implements `ISaveParticipant` over the `GalaxyState` owned by `GameSession`.
+- **Capture:**
+  1. `WriteUInt64(Seed)`; `WriteInt32(GeneratorVersion)`; `WriteUInt32(RouteDestination.Value)`;
+  2. `WriteVarUInt32(Known.Count)` + `WriteUInt32` each; the same for `Visited`;
+  3. deltas: `DeltasSorted()` → `WriteVarUInt32(count)`. Per delta:
+     1. `WriteUInt32(id)`; `WriteVarUInt32(VisitCount)`;
+     2. `Destroyed` and `Interacted` lists (`VarUInt32` count + `UInt64` each);
+     3. story spawns (count, then per record `WriteContentId(Template)`, `WriteUInt64(AnchorBodyKey)`, `WriteDouble3(OffsetM)`, `WriteSingle(YawRad)`, `WriteBool(Removed)`);
+     4. replacements (count, then `UInt64` key + `WriteContentId`);
+     5. structure diffs (count, then `UInt64` key, `UInt32` revision, `WriteDeferred(VoxsSnapshotBlock.Capture(source of Structure, names))`).
+- **Not saved here:** `CurrentStarSystem`, `HasPlayerLocation` and `PlayerLocation` are written by SPEC-31's `PLOC` participant (SPEC-05 §4.8 table) over the same `GalaxyState` object.
+- **Restore(reader, fromVersion):**
+  - `fromVersion == 0` → `State.Clear()` and return.
+  - Otherwise `State.Clear()` and read in the same order. Structures are decoded with `VoxsCodec.TryDecode` and converted to a `VoxelStructure` (SPEC-10 adapter). On failure, drop that record, log `GameLog.Warn`, and continue (SPEC-05 §7).
+  - Unknown template `ContentId`s are kept as read; they are resolved (and reported) when applied (§5.6).
+  - The participant does **not** regenerate the galaxy; SPEC-01 calls `GalaxyService.OnSessionRestored()` after every participant has restored.
+
+### 5.12 `GalaxyMapModel`
+
+A managed class in `Galaxy/Services/`, constructed by SPEC-01 with `(GalaxyService, ILaneAccess, IStarSystemOwnership)`. Read-only for the UI (SPEC-61).
+
+```csharp
+public readonly struct StarSystemMapEntry { public readonly StarSystemId Id; public readonly double2 PositionLy; public readonly string Name; public readonly bool Known, Visited, Current, IsStory, IsRouteTarget; public readonly byte Danger; public readonly string OwnerColorToken; }
+public readonly struct LaneMapEntry { public readonly int LaneIndex; public readonly StarSystemId A, B; public readonly bool Open; public readonly string LockedMessage; public readonly int FuelCost; }
+public sealed class GalaxyMapModel
+{
+    public uint Revision { get; }                       // increments when any visible entry changes
+    public IReadOnlyList<StarSystemMapEntry> StarSystems { get; }
+    public IReadOnlyList<LaneMapEntry> Lanes { get; }
+    public void Refresh();                              // rebuilds when GalaxyService/GalaxyState changed; O(N + L)
+}
+```
+
+Visibility:
+- A star system is listed if it is `Known`.
+- A lane is listed if both ends are `Known` and the lane is not `HiddenUntilKnown`, or if both ends are `Visited`.
+- Unknown star systems are not listed at all, so the map never leaks hidden content.
+
+`Refresh` compares a version stamp (`GalaxyState` change counter + `ILaneAccess` change counter + current star system) and rebuilds only when it changed. Entries are reused lists with no per-frame allocation when nothing changed. SPEC-61's view model calls `Refresh()` when the map screen opens and on `StarSystemEntered`/`FactChanged`.
+
+## 6. Public API
+
+| API | Preconditions | Postconditions / errors |
+|---|---|---|
+| `GalaxyService.NewGame(seed)` | Catalog valid (GAL-E*) | `Galaxy != null`, `GenerationCount` +1, start star system Known + Visited. `ArgumentException` for seed 0 when not fixed |
+| `GalaxyService.OnSessionRestored()` | All participants restored | Galaxy rebuilt from saved seed/version, `GenerationCount` +1. `GalaxyGenerationException` for unsupported version |
+| `GalaxyService.GetStartLocation()` → `PlayerLocation` | `Galaxy != null` | Start body position at UniversalTime `State`'s current time + `startOffsetM` rotated by the body yaw; yaw = `startYawDegrees` |
+| `PrefetchContent` / `GetContent` / `ReleaseContent` | `id` exists in `Galaxy` | See §5.8. `GetContent` returns the same instance until released |
+| `ReplaceBody`, `AddStorySpawn`, `RemoveStorySpawn`, `MarkBodyDestroyed`, `MarkBodyInteracted` | `Galaxy != null`; body's star system exists | Delta updated; cached content patched; sink notified. Unknown template → `false`/`default(BodyId)` + `GameLog.Warn` |
+| `TryResolveStarSystem`, `TryResolveBody` | — | `false` when unknown (never throws) |
+| `RequestOriginReset(id, origin)` | Main thread; `FrameOrigin` exists | Rebase applied by `OriginRebaseSystem` next `GameInitGroup` update |
+| `OrbitMath.*` | `PeriodS > 0` for moving orbits | Pure; Burst-compatible |
+| `GalaxyMapModel.Refresh()` | Main thread | Entries current; `Revision` +1 only when content changed |
+
+## 7. Edge cases and failure behaviour
+
+| Situation | Required behaviour |
+|---|---|
+| Load a save whose `GeneratorVersion` > supported | `GalaxyGenerationException`; SPEC-01 fails the load with a message; nothing half-loaded |
+| Authored star system removed from content after a save | Its deltas remain in `GalaxyState` (saved again unchanged); `TryGetIndex` false; SPEC-31 treats a current star system that no longer exists as "move to start star system" and logs an error |
+| Body template removed after a save (replacement / story spawn) | Unresolved ID recorded and shown in the load warning; the original body stays (replacement) or the spawn is skipped |
+| Procedural placement cannot place every star system | Fewer star systems; deterministic; Info log with the count |
+| Disconnected procedural graph | Bridge lanes (§5.3 step 6); every star system reachable from the start |
+| Two gates in the same direction | Rotated along the ring (§5.5 step 6) |
+| Rebase requested twice in one frame | Only the highest serial applies (the request component holds the last values) |
+| Rebase request and threshold in the same frame | Request wins; threshold is checked again next frame |
+| Player ship absent (dead, in editor) | No threshold rebase; requests still apply |
+| Player more than 2,000 m away after one tick at very high speed | One rebase per frame is enough: the new origin is the player position itself |
+| `UniversalTime` very large (1e9 s) | `frac(t / T)` keeps orbit angles exact to < 1e-6 rad |
+| `GetContent` for an unknown id | `KeyNotFoundException` (programming error, not content) |
+| Story spawn count reaches 65,535 in one star system | `AddStorySpawn` throws `InvalidOperationException`; narrative effect logs the error |
+| Save during a prefetch | Prefetches are not saved; nothing to complete |
+| A `StarSystemTemplateDefinition` or pool used by procedural star systems is edited after release | Procedural star systems using it regenerate differently and old deltas may point at different bodies. Rule: after the first public release, never edit a shipped template's numbers or pools. Create a new template ID and keep the old one (content review checklist, SPEC-72/SPEC-81). Authored star systems are unaffected because their bodies are keyed by authored slots |
+
+## 8. Performance budget
+
+| Gate | Target | Measured by |
+|---|---|---|
+| Galaxy generation (1,000 procedural + 4 authored) | ≤ 50 ms, Burst (06 world gates) | `GalaxyPerfTests.Generate_1000` |
+| One star-system content generation | ≤ 2 ms Burst, ≤ 0.5 ms main thread for delta apply | `GalaxyPerfTests.Content_Procedural` |
+| Origin rebase with 5,000 roots | ≤ 0.5 ms total job time; 0 main-thread sync points | `OriginRebasePerfTests.Rebase_5000Roots` |
+| Galaxy map refresh, 1,000 star systems | ≤ 1 ms, 0 B when unchanged | `GalaxyMapModelTests.Refresh_NoChange_NoAlloc` |
+
+**Scale notes.**
+- `StarSystemDef` is 48 B: 1,000 star systems are 48 KB, and 100,000 are 4.8 MB, the validator cap.
+- Lanes average about 2.5 per star system.
+- Content is generated per star system only when loaded (at most 2 cached, SPEC-31).
+- The shift and sync jobs are O(roots). Bricks are children, so a 1M-cell station costs one root.
+- No per-frame allocation: `RebaseDecision` uses `WorldUpdateAllocator`.
+
+## 9. Tasks
+
+### GAL-001 — Public contract types
+- **Milestone:** M3
+- **Tier:** standard — transcribes the exact code of §4
+- **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`, `NAR-001`
+- **Do:** Create every public type of §4 (IDs, enums, definitions with fields and read-only properties, `GalaxyDef`, params structs, `StarSystemContent`, `OrbitElements`, `BodySpec`, deltas, `GalaxyState`, components, `OriginShifted` in `Game.Core/Events`, services and interfaces) with method bodies `throw new System.NotImplementedException()`. Register the `OriginShifted` channel (SPEC-02 §5.6 rule 3). Add `StarSystemMember` here (architecture §6.5).
+- **Files:** `Assets/Game/Data/Definitions/World/*.cs`; `Assets/Game/Galaxy/{Data,Components,Services}/*.cs`; `Assets/Game/Core/Events/OriginShifted.cs`; `Assets/Game/Galaxy/AssemblyInfo.cs`; `Assets/Game/Presentation/Systems/ManagedEventChannels.cs` (one line)
+- **Acceptance criteria:**
+  - [ ] `tools/compile.sh` clean; every name in §4 exists with the stated namespace and file.
+  - [ ] `StarSystemId`, `BodyId`, `BodySpec`, `StarSystemDef`, `LaneDef` are unmanaged (`UnsafeUtility.IsUnmanaged<T>()`).
+  - [ ] `StarSystemMember` is an `ISharedComponentData`.
+- **Tests:** `GalaxyContractTests.IdTypes_AreUnmanaged`, `.BodyId_LocalKey_RoundTrips`, `.StarSystemId_Authored_SetsHighBit`.
+
+### GAL-002 — Orbit math
+- **Milestone:** M3
+- **Tier:** standard — closed-form formulas fully given in §5.5.5
+- **Depends on:** `GAL-001`
+- **Do:** Implement `OrbitMath` (Fixed, Circular, Elliptic with 6 Newton iterations, `frac`-based angles, analytic velocity, parent composition).
+- **Files:** `Assets/Game/Galaxy/Data/OrbitMath.cs`; `Assets/Game/Tests/EditMode/Galaxy/OrbitMathTests.cs`
+- **Acceptance criteria:**
+  - [ ] Circular: position at `t = 0` equals `R(cos φ, 0, sin φ)`; after one period equals the start within 1e-6 m for R = 1e5 m.
+  - [ ] Velocity equals the central finite difference `(P(t+h) − P(t−h)) / 2h` with h = 0.01 s within 1e-3 m/s for all modes.
+  - [ ] Elliptic with e = 0.3: distance to the parent stays in `[a(1−e), a(1+e)]` over 100 samples.
+  - [ ] At t = 1e9 s positions are finite and the circular error vs. a reference computed with `t mod T` is < 1e-3 m.
+- **Tests:** `OrbitMathTests.Circular_PeriodReturnsToStart`, `.Velocity_MatchesFiniteDifference`, `.Elliptic_DistanceWithinApsides`, `.LargeTime_Stable`, `.Moon_ComposesParent`.
+
+### GAL-003 — Definitions, properties and validator
+- **Milestone:** M3
+- **Tier:** standard — rule table GAL-E001…W003 is explicit
+- **Depends on:** `GAL-001`
+- **Do:** Implement the definitions' properties, `Validate` overrides and `GalaxyContentValidator` with every code of §5.9. Add `TestGalaxyFixtures` (in-memory definitions: `Small`, `Large`, `Disconnected`, `AuthoredOnly`).
+- **Files:** `Assets/Game/Data/Definitions/World/*.cs`; `Assets/Game/Editor/Content/Validators/GalaxyContentValidator.cs`; `Assets/Game/Tests/EditMode/Galaxy/{TestGalaxyFixtures,GalaxyValidatorTests}.cs`
+- **Acceptance criteria:**
+  - [ ] Each code has one failing fixture producing exactly that code and one passing fixture.
+  - [ ] The four fixtures validate with zero errors.
+- **Tests:** `GalaxyValidatorTests.<Code>_Fails` and `.<Code>_Passes` for every code.
+
+### GAL-004 — GalaxyDefBuilder and layout job
+- **Milestone:** M3
+- **Tier:** frontier — F3/F1: deterministic layout and structural IDs every save delta relies on
+- **Depends on:** `GAL-003`
+- **Do:** Implement `GalaxyDefBuilder` steps 1–5 and `GalaxyLayoutJob` (§5.2) with the spatial grid, fixed draw counts and weighted picks (§5.5.6). Implement `GalaxyDef` queries and `Dispose`.
+- **Files:** `Assets/Game/Galaxy/Generation/{GalaxyDefBuilder,GalaxyLayoutJob,WeightedPick}.cs`; `Assets/Game/Galaxy/Data/GalaxyDef.cs`; `Assets/Game/Tests/EditMode/Galaxy/GalaxyLayoutTests.cs`
+- **Acceptance criteria:**
+  - [ ] Same seed → identical `StarSystems` array (bytewise) across two runs and across worker-count 1 vs max.
+  - [ ] No two star systems closer than `minStarSystemSpacingLy`; all within `galaxyRadiusLy`.
+  - [ ] Authored IDs have the high bit; procedural IDs are `1..accepted` without gaps.
+  - [ ] Adding an extra weighted template entry with weight 0 changes nothing; changing an authored star system's danger changes no procedural star system.
+  - [ ] All native memory freed by `Dispose` (leak detection on).
+- **Tests:** `GalaxyLayoutTests.SameSeed_Identical`, `.Spacing_Respected`, `.Ids_Structural`, `.AuthoredEdit_DoesNotMoveProcedural`, `.Dispose_NoLeaks`.
+
+### GAL-005 — Lane graph and galaxy hash
+- **Milestone:** M3
+- **Tier:** frontier — F3: graph algorithm whose ordering bugs silently change every procedural save
+- **Depends on:** `GAL-004`
+- **Do:** Implement `GalaxyLaneJob` (§5.3) and `GalaxyHash.Compute` (§5.4) including the golden file.
+- **Files:** `Assets/Game/Galaxy/Generation/{GalaxyLaneJob,UnionFind,GalaxyHash}.cs`; `Assets/Game/Tests/EditMode/Galaxy/{GalaxyLaneTests,GalaxyHashTests}.cs`; `Assets/Game/Tests/EditMode/Galaxy/Golden/galaxy_v1.txt`
+- **Acceptance criteria:**
+  - [ ] Every star system is reachable from the start star system (BFS over `Adjacency`) for `Small`, `Large` and `Disconnected`.
+  - [ ] Lanes sorted by `(A, B)`, `A < B`, no duplicates, authored lanes present exactly once with their flags.
+  - [ ] Non-bridge procedural lanes ≤ `maxLaneLengthLy`; degree ≤ `maxLaneDegree` except for spanning-forest/bridge lanes (count reported).
+  - [ ] `Hash` identical across runs and matches the golden file.
+- **Tests:** `GalaxyLaneTests.AllReachable`, `.Sorted_NoDuplicates`, `.AuthoredLanes_Kept`, `.LengthAndDegree_Bounds`; `GalaxyHashTests.Deterministic`, `.MatchesGolden`.
+
+### GAL-006 — Star-system content job
+- **Milestone:** M3
+- **Tier:** frontier — F3: draw-order discipline and structural BodyIds
+- **Depends on:** `GAL-002`, `GAL-005`
+- **Do:** Implement `StarSystemContentJob` (§5.5 steps 1–7), `StarSystemContent` (binary search, `GeneratedHash`, `Dispose`) and the content hash.
+- **Files:** `Assets/Game/Galaxy/Generation/{StarSystemContentJob,StarSystemContentHash}.cs`; `Assets/Game/Galaxy/Data/StarSystemContent.cs`; `Assets/Game/Tests/EditMode/Galaxy/StarSystemContentTests.cs`
+- **Acceptance criteria:**
+  - [ ] Same inputs → identical `Bodies` and `GeneratedHash`.
+  - [ ] Bodies sorted by `LocalKey`; every planet orbit radius strictly increases with slot; moons orbit their planet.
+  - [ ] Stations/POIs keep ≥ `MinBodySeparationM` from each other when the 8 candidates allow it (fixture with ample space).
+  - [ ] One gate per adjacent lane at `LaneRingRadiusM`, pairwise arc distance ≥ `MinBodySeparationM` for a fixture with 6 lanes in a 30° cone.
+  - [ ] Authored star system output equals the authored data (radii, phases, keys).
+  - [ ] Releasing and regenerating the same star system 100 times gives the same `GeneratedHash` (no hidden state).
+- **Tests:** `StarSystemContentTests.Deterministic`, `.Sorted_ByLocalKey`, `.Orbits_Increasing`, `.Gates_OnRing_Separated`, `.Authored_MatchesData`, `.Regenerate_NoHiddenState`.
+
+### GAL-007 — StarSystemDelta, GalaxyState and the applier
+- **Milestone:** M3
+- **Tier:** frontier — F3: delta ordering is what makes save → load → save byte-identical (R9)
+- **Depends on:** `GAL-006`
+- **Do:** Implement `StarSystemDelta` (sorted inserts with binary search, append-only story spawns), `GalaxyState`, `StarSystemDeltaApplier` (§5.6).
+- **Files:** `Assets/Game/Galaxy/Data/{StarSystemDelta,GalaxyState,StructureDiffRecord}.cs`; `Assets/Game/Galaxy/Generation/StarSystemDeltaApplier.cs`; `Assets/Game/Tests/EditMode/Galaxy/{StarSystemDeltaTests,DeltaApplierTests}.cs`
+- **Acceptance criteria:**
+  - [ ] Lists stay sorted and unique under random insert order (100 seeded permutations).
+  - [ ] Applying deltas never changes `GeneratedHash` and never changes a generated body's `Id`, orbit or seed except `TemplateIndex` for replacements.
+  - [ ] Destroying body X does not change any other body's `BodySpec` (R9 / 03-D3).
+  - [ ] Story spawn slots are stable after a removal.
+- **Tests:** `StarSystemDeltaTests.Sorted_UnderRandomOrder`, `.StorySpawn_RemovalKeepsSlots`; `DeltaApplierTests.Generated_Unchanged`, `.Destroy_IsolatesBody`, `.Replacement_SetsTemplate`, `.UnresolvedTemplate_Reported`.
+
+### GAL-008 — GalaxyService, ticker and bridge system
+- **Milestone:** M3
+- **Tier:** frontier — F1/F5: lifecycle used by new game, load, streaming and travel
+- **Depends on:** `GAL-007`, `FND-001`
+- **Do:** Implement `GalaxyService` (§5.8, §6 including `GetStartLocation`), names (§5.7), `GalaxyFrameTicker`, `GalaxyServicesBridgeSystem`.
+- **Files:** `Assets/Game/Galaxy/Services/{GalaxyService,GalaxyFrameTicker,GalaxyNames}.cs`; `Assets/Game/Presentation/World/GalaxyServicesBridgeSystem.cs`; `Assets/Game/Tests/EditMode/Galaxy/GalaxyServiceTests.cs`
+- **Acceptance criteria:**
+  - [ ] `NewGame` then `OnSessionRestored` with the same state → identical `Galaxy.Hash`; `GenerationCount == 2`.
+  - [ ] `GetContent` twice returns the same instance; `ContentGenerationCount == 1` (R9 EditMode part).
+  - [ ] Prefetch + `GetContent` equals synchronous `GetContent` byte for byte.
+  - [ ] Delta writes on a cached star system update the cached `BodySpec` and call the sink exactly once.
+  - [ ] Ticker calls services in `TickOrder`; an exception in one does not stop the others.
+- **Tests:** `GalaxyServiceTests.Restore_SameHash`, `.Content_GeneratedOnce`, `.Prefetch_EqualsSync`, `.DeltaWrite_PatchesCacheAndNotifies`, `.Names_Format`, `.Ticker_OrderAndIsolation`.
+
+### GAL-009 — OriginRebaseSystem
+- **Milestone:** M3
+- **Tier:** frontier — F1/F2/F5: single floating-origin owner, parallel jobs, ordering with streaming, camera and VFX
+- **Depends on:** `GAL-001`, `SPEC-02`
+- **Do:** Implement `OriginRebaseSystem` (§5.10) and `GalaxyService.RequestOriginReset`.
+- **Files:** `Assets/Game/Galaxy/Systems/OriginRebaseSystem.cs`; `Assets/Game/Tests/EditMode/Galaxy/OriginRebaseSystemTests.cs`; `Assets/Game/Tests/PlayMode/Galaxy/OriginRebasePerfTests.cs`
+- **Acceptance criteria:**
+  - [ ] Player at local x = 2,001 → after one update local ≈ 0, `FrameOrigin.OriginInStarSystem.x` increased by 2,001, `ShiftSequence` +1, one `OriginShifted` with `Delta = (−2001, 0, 0)`.
+  - [ ] Roots with `UniversePosition` keep `UniversePosition` unchanged (exact double equality) across 1,000 rebases while moving 1,500 m per rebase.
+  - [ ] Child entities (bricks) are not modified.
+  - [ ] Request with a different star system: all `UniversePosition` roots placed at `UP − NewOrigin`, `StarSystemChanged = 1`, `Delta = 0`.
+  - [ ] `UniversePositionIsAnalytic` roots are not synced.
+  - [ ] No main-thread `Complete()` (verified by the test running the system with a pending writer job on `LocalTransform` and asserting no `InvalidOperationException`).
+  - [ ] Perf: 5,000 roots ≤ 0.5 ms.
+- **Tests:** `OriginRebaseSystemTests.Threshold_Rebases`, `.UniversePosition_ExactAcrossRebases`, `.Children_Untouched`, `.Request_ChangesStarSystem`, `.Analytic_NotSynced`, `.Smoothing_HistoryShifted`; `OriginRebasePerfTests.Rebase_5000Roots`.
+
+### GAL-010 — GLXY save participant
+- **Milestone:** M3
+- **Tier:** frontier — F3: binary format with versioning and round-trip guarantee
+- **Depends on:** `GAL-007`, `PERS-001`
+- **Do:** Implement `GalaxySaveParticipant` (§5.11); register it in `SaveChunkRegistry` row `GLXY` (SPEC-05 §4.8 already lists it). Write the v1 fixture with `SaveFixtureHarness.WriteFixture`.
+- **Files:** `Assets/Game/Galaxy/Services/GalaxySaveParticipant.cs`; `Assets/Game/Tests/EditMode/Galaxy/GalaxySaveParticipantTests.cs`; fixture under `Assets/Game/Tests/EditMode/Galaxy/Fixtures/`
+- **Acceptance criteria:**
+  - [ ] Capture → Restore → Capture produces identical bytes for a state with 50 deltas, 10 structures, removed story spawns and unresolved IDs.
+  - [ ] Restore into a non-empty state fully replaces it (no leftovers); structures from the previous state are disposed.
+  - [ ] A corrupted VOXS block drops only that record and logs one warning.
+- **Tests:** `GalaxySaveParticipantTests.RoundTrip_ByteIdentical`, `.Restore_ReplacesState`, `.CorruptStructure_DropsRecord`, `.Restore_FromV1_Fixture`.
+
+### GAL-011 — Galaxy map model
+- **Milestone:** M3
+- **Tier:** standard — visibility rules and change stamp fully given in §5.12
+- **Depends on:** `GAL-008`
+- **Do:** Implement `GalaxyMapModel` (§5.12).
+- **Files:** `Assets/Game/Galaxy/Services/GalaxyMapModel.cs`; `Assets/Game/Tests/EditMode/Galaxy/GalaxyMapModelTests.cs`
+- **Acceptance criteria:**
+  - [ ] Unknown star systems never appear; hidden lanes appear only when both ends are visited.
+  - [ ] `Refresh` without changes allocates 0 bytes (`GC.GetAllocatedBytesForCurrentThread`) and keeps `Revision`.
+- **Tests:** `GalaxyMapModelTests.UnknownHidden`, `.HiddenLane_RevealedByVisits`, `.Refresh_NoChange_NoAlloc`, `.Revision_ChangesOnVisit`.
+
+### GAL-012 — M3 galaxy content
+- **Milestone:** M3
+- **Tier:** standard — content authoring from the vision's star-system list with given definitions
+- **Depends on:** `GAL-003`, `SPEC-72`
+- **Do:** Create `galaxy_main` (fixed seed, `proceduralStarSystemCount = 0`), the default gate templates, and the authored star systems of the M3 slice. Their names and bodies come from SPEC-42's opening chapter list, or, until SPEC-42 publishes it, three placeholders: `starsys_haven` (start, one station `haven_station`, two planets), `starsys_drift` (belt + POI), `starsys_relay` (hub with a gate pair). Add authored lanes `haven–drift`, `drift–relay`, `haven–relay` (the last gated by `ConditionRef` `fact:chapter1_relay_open`).
+- **Files:** `Assets/Game/Content/Galaxy/*.asset`; `Assets/Game/Content/Bodies/*.asset`
+- **Acceptance criteria:**
+  - [ ] Content validates with zero GAL errors; `GalaxyService.NewGame` succeeds in a PlayMode smoke test.
+- **Tests:** `GalaxyContentSmokeTests.MainGalaxy_GeneratesAndValidates` (PlayMode).
+
+### GAL-013 — Performance gates
+- **Milestone:** M3
+- **Tier:** standard — measurement of already-specified code with the SPEC-71 perf helpers
+- **Depends on:** `GAL-005`, `GAL-006`, `GAL-009`, `GAL-011`, `TST-001`
+- **Do:** Add the perf tests of §8 and record results in the ledger *Measurements*.
+- **Files:** `Assets/Game/Tests/PlayMode/Galaxy/GalaxyPerfTests.cs`
+- **Acceptance criteria:**
+  - [ ] All §8 targets met on the reference machine with safety checks off.
+- **Tests:** `GalaxyPerfTests.Generate_1000`, `.Content_Procedural`.
+
+### GAL-014 — Brick-level structure diffs
+- **Milestone:** M4
+- **Tier:** frontier — F3: partial VOXS encoding against a regenerated base structure
+- **Depends on:** `GAL-010`
+- **Do:** Replace full structures in `StructureDiffRecord` with Partial VOXS (`VoxsSource.Partial = true`): only bricks whose cells differ from the regenerated base structure plus `RemovedBricks`. Bump `GLXY` to version 2 with a v1 reader kept.
+- **Files:** `Assets/Game/Galaxy/Data/StructureDiffRecord.cs`; `Assets/Game/Galaxy/Services/GalaxySaveParticipant.cs`; tests
+- **Acceptance criteria:**
+  - [ ] A 1M-cell station with a 2,000-cell cut saves ≤ 40 KB of GLXY payload before container compression.
+  - [ ] v1 fixture still restores.
+- **Tests:** `GalaxySaveParticipantTests.PartialDiff_Small`, `.Restore_FromV1_Fixture`.
+
+## 10. Open questions
+
+| # | Question | Default if unanswered | Decider |
+|---|---|---|---|
+| 1 | Should procedural star systems exist in v1 at all? | Generator built and tested at 1,000; M3 content uses 0 | Owner |
+| 2 | Names for procedural star systems | `"<prefix> <letter>-<NNNN>"` (§5.7) | Owner |
+| 3 | Do destroyed celestial bodies leave wrecks? | No: SPEC-31 spawns nothing for `Destroyed` | Owner |
+| 4 | Galaxy size for M4 | `galaxyRadiusLy` 60, 200 star systems | Owner |
+| 5 | `ConditionRef` shape for gated lanes | SPEC-40's serializable condition wrapper; text form `fact:<name>` | SPEC-40 |
+| 15 | Non-destructible bodies | `destructible = false` → SPEC-13 `DamageImmune` tag on the grid | SPEC-13 |
+
+## 11. References
+
+- Audit: `docs/reference/audit-2026-10/03-galaxy-world.md` (03-B1, 03-B9a–d, 03-D3), `04` (04-B1, 04-B11), `LEDGER.md` R9.
+- Architecture §6.5, §9; conventions §2.10; traps T5.1–T5.2.
+- Unity Physics `PhysicsGraphicalInterpolationBuffer` (graphical smoothing).
+- Kruskal's algorithm; Kepler's equation (Newton iteration).

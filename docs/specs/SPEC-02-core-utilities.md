@@ -119,7 +119,25 @@ public struct PersistentId : Unity.Entities.IComponentData, System.IEquatable<Pe
     public override int GetHashCode() => (int)Value ^ (int)(Value >> 32);
     public override string ToString() => "pid:" + Value.ToString();
 }
+
+// Components/PersistentIdAllocator.cs   (namespace Game.Core.Components)
+/// <summary>Singleton block of pre-granted PersistentIds for Burst systems (SPEC-13 hulks, SPEC-31 spawns).
+/// GameSession (SPEC-01 §5) refills it on the main thread; Burst systems take ids with Next++ while Next &lt; End.</summary>
+public struct PersistentIdAllocator : Unity.Entities.IComponentData
+{
+    public ulong Next;                                 // next id to hand out
+    public ulong End;                                  // exclusive; Next == End means empty (consumer defers its work)
+}
+
+// IPersistentIdAllocator.cs   (namespace Game.Core)
+/// <summary>Managed PersistentId source, implemented by GameSession (SPEC-01). Main thread only.</summary>
+public interface IPersistentIdAllocator
+{
+    ulong Allocate();                                  // never returns 0; never returns a value twice in a campaign
+}
 ```
+
+`PersistentIdAllocator` is a Core ECS type in addition to those listed in architecture §6.1 (same justification as `PersistentId`: every module that spawns needs it). Ids handed out in a granted block but never used are skipped, never reused.
 
 ### 4.2 Hashing and randomness (`Assets/Game/Core/`, namespace `Game.Core`)
 
@@ -162,6 +180,13 @@ public enum RngPurpose : ushort
     Audio = 15,
     ShipEditor = 16,
     NewGameSeed = 17,
+    GalaxyLanes = 18,            // SPEC-30 procedural lane graph
+    StarSystemLayout = 19,       // SPEC-30 body counts and orbit spacing
+    AsteroidShape = 20,          // SPEC-31 per-asteroid shape noise
+    StationShape = 21,           // SPEC-31 procedural station shapes
+    EncounterFleet = 22,         // SPEC-33 fleet composition
+    EncounterPlacement = 23,     // SPEC-33 spawn placement
+    Territory = 24,              // SPEC-33 faction territory
     Test = 1000,
 }
 

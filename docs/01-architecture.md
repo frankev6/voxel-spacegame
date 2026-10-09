@@ -249,7 +249,8 @@ These types cross module boundaries. **Their names and owning module are binding
 | `RngStreams` | `static Unity.Mathematics.Random For(ulong seed, RngPurpose purpose, ulong salt)` | All randomness. `RngPurpose` is an enum; add values, never reorder |
 | `EventBus<T>` | `Subscribe`, `Unsubscribe`, `Publish` (deferred), `Drain()` once per frame | Per-handler try/catch; re-entrancy safe |
 | `Services` | `Register<T>`, `Get<T>`, `TryGet<T>`, `Reset()` | Reset on `SubsystemRegistration` |
-| `GameplayActive`, `SimClock`, custom groups, `GameplayEndCommandBufferSystem` | ECS declarations | The only Entities types in Core (with `PersistentId`) |
+| `GameplayActive`, `SimClock`, custom groups, `GameplayEndCommandBufferSystem` | ECS declarations | The only Entities types in Core (with `PersistentId` and `PersistentIdAllocator`) |
+| `IPersistentIdAllocator` / `PersistentIdAllocator` | managed `ulong Allocate()` / singleton `{ ulong Next, End; }` | `GameSession` implements the interface and refills the singleton block that Burst systems draw from |
 | `ISaveParticipant` | `string Key {get;}` (4-char), `int Version {get;}`, `void Capture(SaveWriter)`, `void Restore(SaveReader, int fromVersion)` | Implemented by owning modules |
 | `InputContext` | `enum { None, Flight, Editor, Menu, Dialog, TextEntry }` | Plus the always-on Global map |
 | `IPauseService` | `PauseToken Acquire(string reason)`; `bool IsPaused` | Ref-counted |
