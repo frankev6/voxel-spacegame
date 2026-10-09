@@ -37,3 +37,10 @@
 35. SPEC-72 MIG-009: write SPEC-21 §4.9 values; damage type into `WeaponDamageType`.
 36. SPEC-01 BootSingletons: `WeaponContent.CreateSingletons(em, catalog, created)` (WeaponDefsRef, WeaponTuning, default FactionRelations); `CombatGridSetup.AddAll` signature as SPEC-21 §4.3.
 37. SPEC-61 Q2/Q4 satisfied by SPEC-21 `WeaponState`, `ShipTarget`.
+38. SPEC-02 + SPEC-30: add Core singleton `OriginShiftRecord { uint Sequence; float3 Delta; byte StarSystemChanged; }` (Game.Core.Components), created in `OriginRebaseSystem.OnCreate`, written by `DecideJob` (Sequence = FrameOrigin.ShiftSequence) — consumers: SPEC-21 ProjectileStore, SPEC-23 AI anchors.
+39. SPEC-13 Q9: drop `SpatialHashBuildSystem [UpdateBefore(ImpactEventSystem)]` — it is `OrderFirst` in GameplayPostPhysicsGroup (SPEC-23 §5.0).
+40. SPEC-22 PowerAllocationSystem demand: a weapon also requests while `WeaponControl.Autofire == 1` and `ShipTarget.Value != Null` (SPEC-23 Q2).
+41. Architecture §5 comment "ShipProxy hash" → "SpatialProxy hash"; SPEC-70 §(overlay) reads `SpatialProxy` (SPEC-23 Q5).
+42. SPEC-63 tracers: hide/correct while `ProjectileStore.AppliedShiftSequence != FrameOrigin.ShiftSequence`.
+43. SPEC-01 BootSingletons: `AiContent.CreateSingletons`; `AiSetup.Add(em, root, profile)` after `CombatGridSetup.AddAll`; save blocker reads `PlayerCombatStatus` with `CompleteDependencyBeforeRO`.
+44. SPEC-31: add `SpatialBody { Radius }` to celestial body roots that block shots.

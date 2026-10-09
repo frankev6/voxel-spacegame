@@ -41,7 +41,7 @@ Weapons are functional blocks: each weapon block has an entity that aims (turret
 5. **Projectiles inherit the shooter's linear velocity** (not angular). Reason: shots fired at speed stay readable relative to the ship; AI lead accounts for it.
 6. **Aim is a 3D point.** Turrets yaw about the ship's up axis within `±TraverseHalfArc` at `TraverseRate`; elevation toward the aim point is instant and clamped to `±MaxElevation`. Fixed weapons (`TraverseHalfArc = 0`) fire along their mount direction with elevation toward the aim point and a convergence yaw of at most `FixedConvergenceDeg` (3°). Reason: what the player points at is what is hit; fixed guns converge on the target.
 7. **Fire timing is in fixed ticks with fractional accumulators** (`CooldownRemainingTicks += 60 / rate` per trigger; `−1` per tick; fire when `≤ 0`). Bursts use the same accumulator per round. Reason: exact average rates; frame-rate independence (architecture §5.1).
-8. **Randomness** (spread, flak fuses) comes from `Random.CreateFromIndex((uint)StableHash.Combine(StableHash.Combine(tick, shooterPersistentId), shotId))`. Reason: conventions §2.10; stable across runs and saves.
+8. **Randomness** (spread, flak fuses) comes from `Random.CreateFromIndex((uint)StableHash.Combine(StableHash.Combine(StableHash.Combine(tick, shooterPersistentId), shotId), (ulong)RngPurpose.WeaponSpread))`. Reason: conventions §2.10; stable across runs and saves.
 9. **Weapons draw power while their fire group is held (or autofire is engaged with a target), not per shot** (SPEC-22 decision 7). A weapon fires only if its entity has no `Powered` component or the bit is enabled.
 10. **Beams are pulses.** A trigger starts a pulse of `BeamPulseTicks`; each tick of the pulse the beam casts once from the muzzle and applies `Damage / BeamPulseTicks` to the first thing hit; `BeamState.EndWorld` is that hit point or the range end (never past the target, R26).
 11. **Explosions** come only from `ExplosionRequest`s (SPEC-13 contract): projectiles (on hit or fuse), reactors and core breaches (SPEC-13), abilities (SPEC-24). `ExplosionSystem` is the single consumer. A blast first meets each overlapped grid's shield (blast `ShieldHit`), else damages its hull (blast `DamageEvent`). Reason: shields first (architecture §6.3).
@@ -323,13 +323,14 @@ namespace Game.Simulation.Weapons
         public NativeList<ProjectileRow> Rows;           // fire order; compacted stably after each step
         public NativeReference<JobHandle> Access;        // main thread only
         public NativeReference<ProjectileStoreStats> Stats;
+        public NativeReference<uint> AppliedShiftSequence;   // last OriginShiftRecord.Sequence applied to Rows (read by SPEC-63 to correct a pending shift)
         public static ProjectileStore Create(int capacity);   // Allocator.Persistent
         public void Dispose();                                // completes Access first
         public JobHandle Acquire(JobHandle dependsOn) => JobHandle.CombineDependencies(dependsOn, Access.Value);
         public void Release(JobHandle lastJob) { Access.Value = lastJob; }
         public void CompleteAccess() { Access.Value.Complete(); }   // never in FixedStepSimulationSystemGroup
-        /// For SPEC-30 OriginRebaseSystem: schedules Position += delta for every row, or clears all rows when clear == true.
-        public JobHandle ScheduleShift(float3 delta, bool clear, JobHandle dependsOn);
+        /// Inside a single-threaded job: if record.Sequence != applied → StarSystemChanged ? clear all rows : Position += Delta for every row; applied = Sequence. Idempotent.
+        public static void ApplyPendingShift(ref NativeList<ProjectileRow> rows, in Game.Core.Components.OriginShiftRecord record, ref NativeReference<uint> applied);
     }
 
     public struct ProjectileStoreStats { public int Live, PeakLive, Fired, DroppedFull, Hits, Expired; }
@@ -342,7 +343,7 @@ namespace Game.Simulation.Weapons
 
 ### 4.8 Required from SPEC-23 (`SpatialHash`)
 
-This spec relies on these members of SPEC-23's `SpatialHash` singleton (rebuilt every tick by `SpatialHashBuildSystem`, first in `GameplayPostPhysicsGroup`; the copy from the previous tick is what pre-physics systems read):
+This spec relies on SPEC-23 §4.1 (`SpatialHash`, `SpatialProxy`, queries) and its access rules (§5.1 there: `hash.BeginRead(state.Dependency)` before scheduling a reading job, `hash.EndRead(handle)` after). The hash is rebuilt every tick by `SpatialHashBuildSystem` (`OrderFirst` in `GameplayPostPhysicsGroup`); pre-physics systems read the previous tick's hash. The members used:
 - `SpatialProxy { Entity Entity; float3 Center; float Radius; float HullRadius; float3 Velocity; ProxyKind Kind; Allegiance Allegiance; ProxyFlags Flags; }` with `ProxyKind { Ship, Station, Asteroid, Hulk, Celestial }`. Grid proxies: `Center` = world centre of the cell bounds, `HullRadius` = half-diagonal of the cell bounds, `Radius = max(HullRadius, shield bounding distance)`. Celestial proxies: `Radius = HullRadius` = body radius.
 - `int QuerySegment(float3 p0, float3 p1, float inflate, ref FixedList512Bytes<int> output)`: indices of proxies whose sphere (radius + inflate) intersects the segment, **ascending by `Entity.Index`**; returns the total match count (may exceed the list capacity).
 - `int QuerySphere(float3 c, float r, ref FixedList512Bytes<int> output)`: same contract for a sphere.
@@ -450,12 +451,12 @@ Job 1 `WeaponFireJob : IJobChunk` (`ScheduleParallel`) over weapon entities; wri
 6. **Release a round:** `ShotCounter++`; `shotId = ((uint)InstanceIndex & 0xFFFF) << 16 | (ShotCounter & 0xFFFF)`; `rng` per decision 8; for each pellet `k`: direction = `FireDirLocal` rotated by a random cone sample (`θ = SpreadRad × sqrt(rng.NextFloat())`, `φ = 2π × rng.NextFloat()`) → world via `rootT`; `pos = muzzleWorld`; `vel = dir × ProjectileSpeed + vs`; `death = tick + (LifetimeMin == LifetimeMax ? LifetimeMax : rng.NextUInt(LifetimeMin, LifetimeMax + 1))`; flags: `Homing` if `HomingTurnRate > 0`, `ExplodeOnExpire`, `PlayerSource` if the root has `PlayerShip`; `Target = ShipTarget.Value` for homing; write `ShotRequest` (pellets share `shotId`; their `Sequence` uniqueness is restored by `ShotId + k` in the low bits: `shotId + (uint)k`, with `ShotCounter += PelletsPerRound − 1`). Emit one muzzle `FxEvent { Muzzle, muzzleWorld, dir, vs, Scale = 0.25 + 0.05 × Damage^0.5 (m), Color = TracerColor, Fx = MuzzleFx }` and one `SfxEvent(FireCue)` per round (`PlayerSource` flag for the player).
 7. `Firing = 1` if any round or pulse started this tick, else 0.
 
-Job 2 `ShotAppendJob : IJob` (after job 1; `ProjectileStore.Acquire/Release`): read the stream indices `0..forEachCount−1` in order, append rows; if `Rows.Length == MaxProjectiles` → drop the shot, `DroppedFull++` (the determinism test asserts 0). `Fired++`.
+Job 2 `ShotAppendJob : IJob` (after job 1; `ProjectileStore.Acquire/Release`): first `ProjectileStore.ApplyPendingShift(...)` with the `OriginShiftRecord` read through a `ComponentLookup` on its entity (new rows are already in the new frame, so old rows must be shifted before appending); then read the stream indices `0..forEachCount−1` in order, append rows; if `Rows.Length == MaxProjectiles` → drop the shot, `DroppedFull++` (the determinism test asserts 0). `Fired++`.
 
 ### 5.6 `ProjectileStepSystem`
 
 1. `streams` = `DamageStreams` (SPEC-13); `n = Rows.Length` is not known on the main thread, so the stream index count is a fixed upper bound: `batches = ceil(MaxProjectiles / 64)`. `dw = streams.BeginDamageWrite(ref state, batches)`, `ew = streams.BeginExplosionWrite(ref state, batches)`, `sw = ShieldHitStreams.BeginWrite(ref state, ShieldHitProducer.Projectiles, batches)` (§10 Q3).
-2. Job `ProjectileStepJob : IJobParallelForBatch` over `Rows` (deferred length; batch size 64), dependencies: `state.Dependency`, `ProjectileStore.Acquire`, stream begin handles. Every batch calls `BeginForEachIndex(startIndex / 64)` on all three writers (empty index when the batch has no events), then for each row `r` (skip `Dead`):
+2. Job `ProjectileShiftJob : IJob` (`ApplyPendingShift`; a no-op when `ShotAppendJob` already applied it this tick), then job `ProjectileStepJob : IJobParallelForBatch` over `Rows` (deferred length; batch size 64), dependencies: `state.Dependency`, `ProjectileStore.Acquire`, stream begin handles. Every batch calls `BeginForEachIndex(startIndex / 64)` on all three writers (empty index when the batch has no events), then for each row `r` (skip `Dead`):
    1. **Homing:** `Target` exists → `toT = normalize(targetCentre − Position)`; rotate `Velocity` toward `toT` by at most `HomingTurnRateRad × dt` (Rodrigues about `cross(v, toT)`), keep speed.
    2. `p0 = Position`, `p1 = p0 + Velocity × dt`.
    3. `hit = CombatHitTest.Segment(p0, p1, ProjectileRadius, Source, ...)` (§5.9).
@@ -531,7 +532,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 |---|---|---|
 | `CombatGridSetup.AddAll(em, root, allegiance)` | Main thread, outside system updates; `root` is a spawn request entity | Adds `Allegiance`, `WeaponControl`, `ShipTarget` and the SPEC-22/24 setup components; calling twice throws `InvalidOperationException` |
 | `WeaponContent.CreateSingletons` | Boot (SPEC-01) | `WeaponDefsRef`, `WeaponTuning`, default `FactionRelations` |
-| `ProjectileStore.ScheduleShift(delta, clear, dep)` | Called by SPEC-30 `OriginRebaseSystem` with `Acquire`/`Release` | Every row shifted by `delta`, or all rows removed |
+| `ProjectileStore.ApplyPendingShift` | Inside this spec's single-threaded jobs only | Rows follow the floating origin (Core `OriginShiftRecord`, SPEC-23 Q4); star-system change clears the store |
 | `ProjectileStore` presentation read (SPEC-63) | Main thread outside the fixed step after `CompleteAccess()`, or a job chained with `Acquire`/`Release` | Rows are the state at the end of the last tick |
 | `FactionRelations.IsHostile` | — | Same faction never hostile; 255 never hostile |
 | `CombatHitTest.Segment` | Created in `OnCreate`, `Update` called this frame; `SpatialHash` of this tick | Deterministic first hit |
@@ -553,7 +554,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 | Player has no target and autofire on | Weapons do not fire automatically; manual fire still works |
 | `AimValid == 0` | Weapons keep their current yaw and do not start new manual fire (SPEC-03 edge case) |
 | Scene change | Store cleared by `OnStopRunning`/`OnStartRunning`; beams inactive (weapon entities are destroyed) |
-| Star-system change during a rebase | SPEC-30 calls `ScheduleShift(0, clear: true)` |
+| Star-system change during a rebase | `ApplyPendingShift` clears the store on the next tick (`StarSystemChanged == 1`); SPEC-63 hides tracers while `AppliedShiftSequence != FrameOrigin.ShiftSequence` |
 | Content errors | WPN-E001 `fireRate ≤ 0`; E002 projectile/missile with `projectileSpeed ≤ 0`; E003 beam with `beamRange ≤ 0`; E004 `explosionRadius > 6 m`; E005 `lifetimeMin > lifetimeMax`; E006 `damage == 0 && explosionDamage == 0`; E007 tuning (§4.7) |
 
 ## 8. Performance budget
@@ -660,7 +661,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 ### WPN-008 — ProjectileStepSystem
 - **Milestone:** M2
 - **Tier:** frontier — F2/F4: parallel NativeStream producers into three consumers; owns the 5,000-projectile gate
-- **Depends on:** `WPN-003`, `WPN-007`, `DMG-001`, `PWR-001`
+- **Depends on:** `WPN-003`, `WPN-007`, `PWR-001`, `SPEC-13`
 - **Do:** Implement §5.6 (homing, hits, fuses, compaction). Uses `ShieldHitStreams.BeginWrite/EndWrite` (open question 3; if SPEC-22 keeps its original field API, follow §6 of SPEC-22 and record the sync cost in the ledger).
 - **Files:** `Assets/Game/Simulation/Weapons/{ProjectileStepSystem,ProjectileStepJob,ProjectileCompactJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Weapons/ProjectileStepTests.cs`
 - **Acceptance criteria:**
@@ -758,7 +759,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 | 2 | Friendly fire on (decision 4)? | Yes | Owner |
 | 3 | SPEC-22 `ShieldHitStreams`: producers access it with `GetSingletonRW` and write fields on the main thread, which completes the previous producer's jobs (sync points). Change to a registration API like SPEC-13 `DamageStreams`: `BeginWrite(ref state, ShieldHitProducer, forEachCount) → NativeStream.Writer`, `EndWrite(producer, JobHandle)`; consumers combine stored handles | Adopt; SPEC-22 PWR-001/007 implement it | SPEC-22 |
 | 4 | SPEC-63 tracers read `ProjectileStore` rows (§6) instead of projectile entities | Yes | SPEC-63 |
-| 5 | SPEC-30 `OriginRebaseSystem` calls `ProjectileStore.ScheduleShift(delta, starSystemChanged)` in its shift job chain | Yes | SPEC-30 |
+| 5 | The store follows the floating origin through the Core `OriginShiftRecord` (SPEC-23 Q4), which SPEC-02/SPEC-30 must add | Yes | SPEC-02, SPEC-30 |
 | 6 | SPEC-03 aim: ray from the camera through the cursor against `PhysicsLayers.PickingQuery` (excluding the player's grid) first, plane `Y = 0` as fallback, so the 3D aim point is on what the cursor covers | Yes | SPEC-03 |
 | 7 | SPEC-63/64 producer pattern: take `FxEventQueue`/`SfxEventQueue` with `GetSingleton` (read-only) and `[NativeDisableContainerSafetyRestriction]` on the `ParallelWriter`, instead of `GetSingletonRW` in fixed-step systems | Yes | SPEC-63, SPEC-64 |
 | 8 | SPEC-72 MIG-009 writes the §4.9 values (not the unit-converted legacy values) | Yes | SPEC-72 |
