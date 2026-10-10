@@ -13,12 +13,12 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 64 | 0 | 0 | 0 | 2 | 0 | 66 | 16 |
+| M0 | 63 | 0 | 0 | 0 | 3 | 0 | 66 | 17 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 3 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
-| A0 | 13 | 0 | 0 | 1 | 2 | 0 | 16 | 3 |
+| A0 | 12 | 1 | 0 | 1 | 2 | 0 | 16 | 2 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 <!-- summary:end -->
@@ -46,15 +46,15 @@
 | CORE-001 | Public contract types | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 4c3a121 | Drain-system lifecycle stub: open question 5 |
 | CORE-002 | StableHash and content identity | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | todo |  |  |  |  |
 | CORE-003 | Random streams and fixed-step time | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-002 | no | todo |  |  |  |  |
-| CORE-004 | GameLog | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-10 |  |  |
+| CORE-004 | GameLog | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | eccf02b |  |
 | CORE-005 | Services locator | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | todo |  |  |  |  |
-| CORE-006 | EventBus and EventHub | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-004 | no | todo |  |  |  |  |
+| CORE-006 | EventBus and EventHub | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-004 | yes | todo |  |  |  |  |
 | CORE-007 | Binary save primitives | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-002 | no | todo |  |  |  |  |
 | CORE-008 | System groups and pipeline order | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | todo |  |  |  |  |
 | CORE-009 | ECS→managed event bridge | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-006, CORE-008 | no | todo |  |  |  |  |
 | CORE-010 | Math helpers | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | todo |  |  |  |  |
 | CORE-011 | Settings model | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | todo |  |  |  |  |
-| CORE-012 | Simulation event channels | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001, CORE-004 | no | todo |  |  |  |  |
+| CORE-012 | Simulation event channels | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001, CORE-004 | yes | todo |  |  |  |  |
 | INP-001 | Public contract types and the actions asset | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | CORE-001 | yes | todo |  |  |  |  |
 | INP-002 | InputService contexts and display strings | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-001 | no | todo |  |  |  |  |
 | INP-003 | Rebinding and overrides | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-002 | no | todo |  |  |  |  |
@@ -555,6 +555,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-10 — CORE-004 GameLog, done (claude, claude-opus-5-5)
+- `GameLog` implemented per SPEC-02 §5.4: `[Category] message` format, per-category minimum levels (ordinal dictionary, default Info in the Editor and development builds, Warning in release), `Exception` (never filtered), `WarnOnce`/`ErrorOnce` counters with a `"<null>"` key for null, `GameLog.Burst.Warn/Error`, and a `SubsystemRegistration` reset.
+- `GameLogTests`: 6 tests, all passing. The Burst test schedules a `[BurstCompile(CompileSynchronously = true)]` job. Inside Burst a `FixedString128Bytes` must come from a string literal; the `new FixedString128Bytes(string)` constructor fails with BC1016.
+- Compile: 0 warnings. EditMode: 16/16 passing.
+- Done now so that `ValidationReport.LogTo` (DATA-002) can use it, on the way to ART-007 (owner answer to question 4).
 
 ### 2026-10-10 — Owner answers: Blender install, ART-003 review, next task
 - **Blender install:** "I download the DMG (Recommended)". Blender 5.2.2 LTS (`blender-5.2.2-macos-arm64.dmg`, 346 MB, from download.blender.org) is installed at `/Applications/Blender.app`. Its SHA-256 matches the published `blender-5.2.2.sha256`, it is notarized by the Stichting Blender Foundation (68UA947AUU), and it runs headless (`-b`, Python 3.13.13). ART-004 is unblocked.
