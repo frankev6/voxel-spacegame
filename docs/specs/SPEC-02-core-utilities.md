@@ -1432,6 +1432,7 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
 | 7 | SPEC-05 §4.10 asked for `SaveWriter(ISaveIdPalette, ISaveJsonCodec)`, `WriteJson`, `WriteDeferred`, `ToArray(encoder)`, `SaveReader.Empty`, `ReadJson` | Adopted in §4.7 with optional (nullable) palette/codec parameters so settings files and tests can use the primitives without a container | SPEC-05 |
 | 8 | Does any spec need more `RngPurpose` values? | Append at the end with the next free number in the same commit as the first use | Each spec |
 | 9 | Accessibility `TextScaleIndex` mirrors SPEC-60's `TextScale` enum by number | Keep the mapping 0/1/2; SPEC-01 converts | SPEC-60 |
+| 10 | CORE-001 says bodies not given in §4 throw `NotImplementedException`, but `ManagedEventDrainSystem` runs in every default world: a throwing `OnUpdate` would log an error each frame in Play Mode and fail the PlayMode smoke test's `LogAssert.NoUnexpectedReceived` (found in CORE-001, 2026-10-10) | Until CORE-009 its `OnCreate` only calls `ManagedEventChannels.RegisterAll(this)` and `OnUpdate`/`OnDestroy` are empty with `TODO(CORE-009)`; `RegisterChannel<T>`, `ChannelCount` and the internal channel types throw | Tech lead |
 
 ## 11. References
 

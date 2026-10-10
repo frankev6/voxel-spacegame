@@ -3,6 +3,7 @@
     "rootNamespace": "Game.Core",
     "references": [
         "Unity.Entities",
+        "Unity.Transforms",
         "Unity.Collections",
         "Unity.Burst",
         "Unity.Mathematics",
