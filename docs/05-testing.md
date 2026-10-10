@@ -22,12 +22,15 @@ The Editor can stay open while you work; the scripts talk to it through the Unit
 
 | Assembly | Folder | Contents |
 |---|---|---|
+| `Game.Tests.Common` | `Assets/Game/Tests/Common/` | The shared test kit (SPEC-71 TST-001): `EcsTestWorld`, `GameTestBase`, `PerfRun`, `PerfSettings`, fixtures, replay helpers. Test-only (`UNITY_INCLUDE_TESTS`); referenced by both test assemblies |
 | `Game.Tests.EditMode` | `Assets/Game/Tests/EditMode/<Module>/` | Pure logic, data structures, Burst jobs run synchronously, ECS systems in a test `World` |
 | `Game.Tests.PlayMode` | `Assets/Game/Tests/PlayMode/<Area>/` | Scene flow, scenarios, save/load, performance |
 
 - Mirror the module folder: tests for `Game.Voxel` go in `Tests/EditMode/Voxel/`.
 - Category attributes: `[Category("Voxel")]` plus `[Category("Performance")]` or `[Category("Scenario")]` where relevant.
-- ECS system tests use the helper `EcsTestWorld` (SPEC-71) which creates a world with only the systems under test, steps fixed ticks and disposes everything.
+- ECS system tests derive from `GameTestBase` (leak and unexpected-log guard) and use `EcsTestWorld` (SPEC-71 TST-001), which creates a world with only the systems under test, steps fixed ticks (`StepTicks`) or frames (`StepFrame`) and disposes everything.
+- Performance tests use `PerfRun` and assert with `PerfSettings.AssertReference` (SPEC-71); they never time with `Stopwatch` directly.
+- A task whose tests need the kit lists `TST-001` in **Depends on** (not `SPEC-71`). Only tasks that need the game-flow fixture or replay (TST-002/003) depend on `SPEC-71`.
 
 ## 3. Required kinds of tests
 

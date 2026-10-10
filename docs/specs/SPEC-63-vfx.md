@@ -370,12 +370,18 @@ Per-frame algorithm:
 9. Copy `counters` into `Rig.Stats`; zero `slotCounts` and `counters`.
 
 ### 5.3 `ProjectileTracerBridgeSystem` (managed `SystemBase`)
-`PresentationBridgeGroup`, after `FxUploadSystem`. `RequireForUpdate<GameplayActive>()`. Query: `Projectile` (SPEC-21) + `LocalTransform`, `WithNone<ProjectileDead>()` (absent or disabled).
+`PresentationBridgeGroup`, after `FxUploadSystem`. `RequireForUpdate<GameplayActive>()`, `RequireForUpdate<ProjectileStore>()`. Projectiles are rows of SPEC-21's `ProjectileStore` (§4.6 there), not entities.
 1. If `Rig == null` return. `batch = Rig.Tracers`; `batch.Begin()`.
 2. `alpha = clamp(ElapsedTime − MostRecentFixedTime.ElapsedTime, 0, 1/60)` when the `Unity.Physics.GraphicsIntegration.MostRecentFixedTime` singleton exists, else 0.
-3. `baseIndices = query.CalculateBaseEntityIndexArrayAsync(Allocator.TempJob, Dependency, out jh)`.
-4. Schedule `TracerGatherJob` (Burst `IJobChunk`, `ScheduleParallel`): for entity `k` in a chunk, `idx = baseIndices[chunkIndex] + k`; if `idx >= cap` (cap = `budget.MaxTracers`) skip; `v = Velocity`; `speed = length(v)`; if `speed < 0.01` skip (write a zero-width instance); `Head = Position + v * alpha`; `Dir = -v / speed`; `Length = clamp(speed * tracerLengthSeconds, tracerMinLength, tracerMaxLength)`; `Width = tracerWidth`; `Color = tracerColorByDamageType[(int)Type]` (linear). Each index is written by exactly one thread (no overlap).
-5. Complete; `batch.Count = min(entityCount, cap)`; `batch.Draw()`; `Stats.TracersDrawn = batch.Count`; dispose `baseIndices`.
+3. `store = SystemAPI.GetSingleton<ProjectileStore>(); store.CompleteAccess();` (main thread outside the fixed step: SPEC-12 §5.1 pattern; it completes only the last projectile jobs, which finished long before presentation). `n = min(store.Rows.Length, cap)` with `cap = budget.MaxTracers`.
+4. **Pending origin shift** (rows are shifted lazily by SPEC-21 at the next tick): `rec = SystemAPI.GetSingleton<OriginShiftRecord>()` (SPEC-02); `applied = store.AppliedShiftSequence.Value`.
+   - `applied == rec.Sequence` → `correction = 0`;
+   - `rec.Sequence − applied == 1` and `rec.StarSystemChanged == 0` → `correction = rec.Delta` (rows are still in the old frame);
+   - otherwise (a star-system change or a missed rebase) → `n = 0`: draw nothing this frame; SPEC-21 clears the rows next tick.
+5. `TracerGatherJob` (Burst `IJobParallelFor`, batch 256, `.Schedule(n, …)` then `Complete`): for row `i`: `r = Rows[i]`; if `(r.Flags & Dead) != 0` or `speed = length(r.Velocity) < 0.01` → write a zero-width instance; else `Head = r.Position + correction + r.Velocity × alpha`; `Dir = −r.Velocity / speed`; `Length = clamp(speed × tracerLengthSeconds, tracerMinLength, tracerMaxLength)`; `Width = tracerWidth`; `Color = tracerColorByDamageType[(int)r.Type]` (linear). Each index is written by exactly one thread.
+6. `batch.Count = n`; `batch.Draw()`; `Stats.TracersDrawn = n`.
+
+Rows are in fire order (SPEC-21 compacts stably), so over the cap the oldest `MaxTracers` projectiles are drawn.
 
 ### 5.4 `BeamRenderBridgeSystem` (managed `SystemBase`)
 `PresentationBridgeGroup`, after `FxUploadSystem`. `RequireForUpdate<GameplayActive>()`. Query: `BeamState` (SPEC-21) + `FunctionalBlock`.
@@ -484,7 +490,8 @@ Each shader declares `StructuredBuffer<T> _Instances;` with `T` exactly as in §
 
 | Spec | Type | Fields this spec reads |
 |---|---|---|
-| SPEC-21 | `Projectile` + `LocalTransform` + enableable `ProjectileDead` | `float3 Velocity`, `DamageType Type` |
+| SPEC-21 | `ProjectileStore` singleton (rows, `AppliedShiftSequence`; access per SPEC-12 §5.1) | `ProjectileRow.Position`, `Velocity`, `Type`, `Flags` (`Dead`) |
+| SPEC-02 | `OriginShiftRecord` singleton | `Sequence`, `Delta`, `StarSystemChanged` |
 | SPEC-21 | `BeamState` on the beam weapon's functional entity (+ `FunctionalBlock`) | `float3 MuzzleLocal` (grid space), `float3 EndWorld` (clipped), `float Width`, `byte Active`, `byte HitSomething`, `ContentHash Fx` |
 | SPEC-20 | `ThrusterState` + `ThrusterVisual` on thruster functional entities | `float Intensity` (0..1); `float3 NozzleLocal`, `float3 ExhaustDirLocal`, `float NozzleRadius` (grid space) |
 | SPEC-22 | `ShieldState` on the grid root; buffer `ShieldRipple` (capacity 8) | `float3 Center, Radii; float Hp, MaxHp; byte Active`; `float3 LocalPoint; uint StartTick; float Strength` |
@@ -509,7 +516,8 @@ Each shader declares `StructuredBuffer<T> _Instances;` with `T` exactly as in §
 | Origin shift | Anchors and pooled instances move by `delta` the same frame; no particle visibly jumps (test in VFX-013) |
 | `|delta| > 20,000 m` or `StarSystemEntered` | All effects cleared except running warp instances |
 | `SessionReset` (load) | All effects cleared, including warp |
-| Projectile count > `MaxTracers` | First `MaxTracers` in chunk order drawn; `TracersDrawn = MaxTracers` |
+| Projectile count > `MaxTracers` | The first `MaxTracers` rows (oldest shots) drawn; `TracersDrawn = MaxTracers` |
+| Rebase between the last fixed tick and this frame | Rows drawn with the record's `Delta` (one rebase) or not at all (star-system change or missed rebase) for that one frame; no tracer jumps (VFX-006) |
 | Beam grid entity destroyed (ship died) while `BeamState.Active` is still 1 | Skipped (no `LocalToWorld` on `FunctionalBlock.Grid`); never drawn from a stale position |
 | Hulk ship with thrusters | No plume (query excludes `Hulk` grids) |
 | Shield ripple `StartTick == 0` or older than `shieldRippleSeconds` | `w = −1`, shader ignores it |
@@ -599,15 +607,16 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 ### VFX-006 — Projectile tracers
 - **Milestone:** M2
 - **Tier:** frontier — F2: parallel `IJobChunk` writes into a shared array by base entity index
-- **Depends on:** `VFX-002`, `WPN-001`
+- **Depends on:** `VFX-002`, `WPN-001`, `CORE-001`
 - **Do:** Implement `ProjectileTracerBridgeSystem` per §5.3, `TracerGatherJob`, `FxTracer.shader` per §6.4, `fx_tracer_default.asset` (Instanced, built-in Quad, material with `FxTracer.shader`), fill `defaults[Tracer]`.
 - **Files:** `Assets/Game/Presentation/Vfx/Systems/ProjectileTracerBridgeSystem.cs`, `Assets/Game/Presentation/Vfx/Jobs/TracerGatherJob.cs`, `Assets/Game/Presentation/Vfx/Shaders/FxTracer.shader`, `Assets/Game/Presentation/Vfx/Shaders/FxTracer.mat`, `Assets/Game/Content/Vfx/fx_tracer_default.asset`, `Assets/Game/Tests/PlayMode/Presentation/Vfx/TracerPerfTests.cs`
 - **Acceptance criteria:**
-  - [ ] Dead (enabled `ProjectileDead`) projectiles are never drawn.
-  - [ ] With 20,000 live projectiles at High, exactly 16,384 instances are drawn and no index is written twice (test fills a sentinel and checks every slot once).
+  - [ ] Rows flagged `Dead` are never drawn.
+  - [ ] With 8,192 rows at Low (`MaxTracers` 4,096), exactly 4,096 instances are drawn and no index is written twice (test fills a sentinel and checks every slot once).
+  - [ ] A rebase of `d` recorded in `OriginShiftRecord` but not yet applied to the rows draws every tracer at `Position + d`; a star-system change draws none until the rows are cleared.
   - [ ] Tracer length and colour follow §5.3 step 4.
   - [ ] 5,000 tracers: ≤ 0.3 ms main thread median (`Tracers5k_Smoke`), measured from the `ProjectileTracerBridgeSystem.Gather` and `.Draw` markers.
-- **Tests:** `TracerGatherJobTests.DeadProjectiles_Skipped`, `TracerGatherJobTests.OverCap_WritesEachIndexOnce`, `TracerGatherJobTests.LengthAndColour_FollowSpec`, `TracerPerfTests.Tracers5k_Smoke` (`[Category("Performance")]`).
+- **Tests:** `TracerGatherJobTests.DeadRows_Skipped`, `TracerGatherJobTests.OverCap_WritesEachIndexOnce`, `TracerGatherJobTests.PendingShift_Corrected`, `.StarSystemChange_DrawsNothing`, `TracerGatherJobTests.LengthAndColour_FollowSpec`, `TracerPerfTests.Tracers5k_Smoke` (`[Category("Performance")]`).
 
 ### VFX-007 — Beams clipped at the hit point
 - **Milestone:** M2

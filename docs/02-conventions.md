@@ -50,7 +50,7 @@
 15. **Lookups and handles:** `ComponentLookup`/`BufferLookup`/type handles are created in `OnCreate` and `.Update(ref state)` at the top of every `OnUpdate`. Writing through a lookup from a parallel job needs `[NativeDisableParallelForRestriction]` **and** a written argument in the job comment for why no two threads touch the same entity.
 16. **Command buffers:** `EntityCommandBuffer.ParallelWriter` sort key is `[ChunkIndexInQuery] int chunkIndex` (in `IJobEntity`) or `unfilteredChunkIndex` (in `IJobChunk`), never a constant or a thread index.
 17. **Main-thread queries:** `EntityQuery.ToEntityArray`/`ToComponentDataArray`/`CalculateEntityCount` force completion of jobs writing those types. They are forbidden in fixed-step `OnUpdate` unless the spec says so with a reason; prefer `ToEntityListAsync` or a job.
-18. **Profiling:** expensive steps get a `static readonly ProfilerMarker` named `<SystemName>.<Step>` (e.g. `DamageResolveSystem.Rasterize`). Burst jobs are profiled automatically by name.
+18. **Profiling:** expensive steps get a `static readonly ProfilerMarker` named `<Type>.<Step>` (e.g. `DamageResolveSystem.Rasterize`, `StarSystemLoader.CreateAnchors`) in `ProfilerCategory.Scripts`: `new ProfilerMarker(ProfilerCategory.Scripts, "DamageResolveSystem.Rasterize")`. SPEC-71 decision 7 discovers markers by that category and the `X.Y` name pattern, so a marker with another category or name shape is invisible to `gh_perf` and the perf gates. Burst jobs are profiled automatically by name.
 19. **Physics:**
     - Collision filters come only from `PhysicsLayers` (SPEC-12).
     - Velocity changes are impulses (`PhysicsVelocity.ApplyLinearImpulse`/`ApplyAngularImpulse` with the body's `PhysicsMass`), never assignments (architecture §8).

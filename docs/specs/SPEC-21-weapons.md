@@ -317,7 +317,8 @@ namespace Game.Simulation.Weapons
         public float DamageMultiplier;   // shooter ShipStats.DamageMultiplier at fire time (1 without SPEC-22)
     }
 
-    /// <summary>Singleton owned by ProjectileStepSystem (created in OnCreate). Access per SPEC-12 §5.1. Read by SPEC-63 tracers and SPEC-30 rebase.</summary>
+    /// <summary>Singleton owned by ProjectileStepSystem (created in OnCreate). Access per SPEC-12 §5.1. Read by SPEC-63 tracers. Follows the
+    /// floating origin itself through the Core OriginShiftRecord (ApplyPendingShift); SPEC-30 never touches it.</summary>
     public struct ProjectileStore : IComponentData
     {
         public NativeList<ProjectileRow> Rows;           // fire order; compacted stably after each step
@@ -799,11 +800,11 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 | 1 | `WeaponDefinition` (Game.Data) cannot reference SPEC-13's `DamageType` (Game.Voxel). Keep the mirror enum `WeaponDamageType` with equal values (WPN-002 tests equality), or move `DamageType` down to Game.Data through an ADR? | Keep the mirror enum | Tech lead |
 | 2 | Friendly fire on (decision 4)? | Yes | Owner |
 | 3 | SPEC-22 `ShieldHitStreams`: producers access it with `GetSingletonRW` and write fields on the main thread, which completes the previous producer's jobs (sync points). Change to a registration API like SPEC-13 `DamageStreams`: `BeginWrite(ref state, ShieldHitProducer, forEachCount) → NativeStream.Writer`, `EndWrite(producer, JobHandle)`; consumers combine stored handles | **Applied** in SPEC-22 §4 (`ShieldHitProducer`, `BeginWrite/EndWrite/BeginRead/EndRead`) | SPEC-22 |
-| 4 | SPEC-63 tracers read `ProjectileStore` rows (§6) instead of projectile entities | Yes | SPEC-63 |
-| 5 | The store follows the floating origin through the Core `OriginShiftRecord` (SPEC-23 Q4), which SPEC-02/SPEC-30 must add | Yes | SPEC-02, SPEC-30 |
-| 6 | SPEC-03 aim: ray from the camera through the cursor against `PhysicsLayers.PickingQuery` (excluding the player's grid) first, plane `Y = 0` as fallback, so the 3D aim point is on what the cursor covers | Yes | SPEC-03 |
-| 7 | SPEC-63/64 producer pattern: take `FxEventQueue`/`SfxEventQueue` with `GetSingleton` (read-only) and `[NativeDisableContainerSafetyRestriction]` on the `ParallelWriter`, instead of `GetSingletonRW` in fixed-step systems | Yes | SPEC-63, SPEC-64 |
-| 8 | SPEC-72 MIG-009 writes the §4.9 values (not the unit-converted legacy values) | Yes | SPEC-72 |
+| 4 | SPEC-63 tracers read `ProjectileStore` rows (§6) instead of projectile entities | **Applied** in SPEC-63 §5.3 (2026-10-09). Yes | SPEC-63 |
+| 5 | The store follows the floating origin through the Core `OriginShiftRecord` (SPEC-23 Q4), which SPEC-02/SPEC-30 must add | **Applied** in SPEC-02 §4.3, SPEC-30 §5.10 (2026-10-09). Yes | SPEC-02, SPEC-30 |
+| 6 | SPEC-03 aim: ray from the camera through the cursor against `PhysicsLayers.PickingQuery` (excluding the player's grid) first, plane `Y = 0` as fallback, so the 3D aim point is on what the cursor covers | **Applied** in SPEC-03 §5.2 (2026-10-09). Yes | SPEC-03 |
+| 7 | SPEC-63/64 producer pattern: take `FxEventQueue`/`SfxEventQueue` with `GetSingleton` (read-only) and `[NativeDisableContainerSafetyRestriction]` on the `ParallelWriter`, instead of `GetSingletonRW` in fixed-step systems | **Applied** in SPEC-02 §5.6, SPEC-63 §6.2, SPEC-64 §6.2 (2026-10-09). Yes | SPEC-63, SPEC-64 |
+| 8 | SPEC-72 MIG-009 writes the §4.9 values (not the unit-converted legacy values) | **Applied** in SPEC-72 §4.6, MIG-009 (2026-10-09). Yes | SPEC-72 |
 | 9 | Should hulks be targetable with `TargetNext`? | No (only hostile ships and stations); `TargetUnderCursor` can pick anything | Owner |
 
 ## 11. References

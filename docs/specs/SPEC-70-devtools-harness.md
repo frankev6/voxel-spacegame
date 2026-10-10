@@ -334,7 +334,7 @@ CLI-only: `gh_scenario --file <path>` (starts a run, enters play mode first when
 ### 6.6 `perf` output (also `gh_perf`)
 - Default line (as built): main ms (15-frame average), draws, triangles, GC alloc/frame, system memory, entities.
 - `voxel`: grids by kind, bricks, solid cells, dirty bricks, chunk bodies, hulks.
-- `combat`: live projectiles (`Projectile` without enabled `ProjectileDead`), active beams, `FxStats` (drained, culled, budget-dropped, debris live estimate), `AudioStats` (drained, started, active voices).
+- `combat`: live projectiles (SPEC-21 `ProjectileStore.Stats.Live`, read after `CompleteAccess()`), active beams, `FxStats` (drained, culled, budget-dropped, debris live estimate), `AudioStats` (drained, started, active voices).
 - `markers`: the 15 slowest `<System>.<Step>` markers in the last frame through SPEC-71 `PerfMarkers.Recorders` (ms, sorted).
 - `json`: the same data as one JSON object (hand-written) for scripts.
 

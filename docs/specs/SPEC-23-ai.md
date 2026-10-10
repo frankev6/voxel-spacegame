@@ -554,10 +554,10 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (`AiS
 | # | Question | Default if unanswered | Decider |
 |---|---|---|---|
 | 1 | Should AI use abilities in v1? | No; `Edges = 0` (SPEC-24 may add an `AiAutoUse` flag in M4) | Owner |
-| 2 | SPEC-22 power demand: a weapon also requests power while `WeaponControl.Autofire == 1` and `ShipTarget` is set (AI and player autofire never hold fire groups) | Yes | SPEC-22 |
+| 2 | SPEC-22 power demand: a weapon also requests power while `WeaponControl.Autofire == 1` and `ShipTarget` is set (AI and player autofire never hold fire groups) | **Applied** in SPEC-22 §5.3 (2026-10-09). Yes | SPEC-22 |
 | 3 | AI awareness of the player: always perfect inside `SensorRange` (no stealth) | Yes | Owner |
-| 4 | SPEC-02/SPEC-30: add the Core singleton `OriginShiftRecord { uint Sequence; float3 Delta; byte StarSystemChanged; }` (`Game.Core.Components`). `OriginRebaseSystem.OnCreate` creates it; its `DecideJob` writes the values of the latest rebase together with `FrameOrigin` (`Sequence = FrameOrigin.ShiftSequence`). Simulation owners of cached positions (AI anchors here, `ProjectileStore` in SPEC-21) react to it because Game.Simulation cannot read `FrameOrigin` | Add the record (last rebase only; consumers detect gaps by `Sequence`) | Tech lead |
-| 5 | Architecture §5 comment says "ShipProxy hash"; SPEC-70 reads `ShipProxy` positions | Rename to `SpatialProxy` in both | Tech lead |
+| 4 | SPEC-02/SPEC-30: add the Core singleton `OriginShiftRecord { uint Sequence; float3 Delta; byte StarSystemChanged; }` (`Game.Core.Components`). `OriginRebaseSystem.OnCreate` creates it; its `DecideJob` writes the values of the latest rebase together with `FrameOrigin` (`Sequence = FrameOrigin.ShiftSequence`). Simulation owners of cached positions (AI anchors here, `ProjectileStore` in SPEC-21) react to it because Game.Simulation cannot read `FrameOrigin` | **Applied** in SPEC-02 §4.3, SPEC-30 §5.10 (2026-10-09). Add the record (last rebase only; consumers detect gaps by `Sequence`) | Tech lead |
+| 5 | Architecture §5 comment says "ShipProxy hash"; SPEC-70 reads `ShipProxy` positions | **Applied** in architecture §5, SPEC-70 §6.4 (2026-10-09). Rename to `SpatialProxy` in both | Tech lead |
 
 ## 11. References
 

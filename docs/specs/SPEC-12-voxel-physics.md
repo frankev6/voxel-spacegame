@@ -1105,12 +1105,12 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 |---|---|---|---|
 | 1 | Is a 7–10 tick (117–167 ms) delay between a cell change and the matching collider acceptable? Projectiles are exact regardless (decision 4); only physical contact with freshly destroyed space lags | Yes | Owner |
 | 2 | Architecture §8 rows: `PhysicsVelocity` adds "`GridMassUpdateSystem` (exact re-expression when the mass frame changes, decision 12)"; `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` creation by `GridBodyInitSystem` or a `GridBodyFactory` caller is not a write (SPEC-13 Q14) | **Applied** in architecture §8 (2026-10-09). Apply as written | Tech lead |
-| 3 | SPEC-10 `GridSpawnSystem` prefills `GridMass` from the cached `VoxelStructure.GetMass` at conversion and disables `GridMassRecompute` | Yes (saves an O(cells) recompute per spawn) | SPEC-10 |
+| 3 | SPEC-10 `GridSpawnSystem` prefills `GridMass` from the cached `VoxelStructure.GetMass` at conversion and disables `GridMassRecompute` | **Applied** in SPEC-10 VOX-013 (2026-10-09). Yes (saves an O(cells) recompute per spawn) | SPEC-10 |
 | 4 | SPEC-10 `BrickDirtyScheduleSystem` (and the edit path of `GridSpawnSystem`) access `ColliderDirtyQueue` with `Acquire/Release` / `CompleteAccess` (§5.1) instead of `GetSingletonRW` | Yes | SPEC-10 |
 | 5 | SPEC-13 `SplitSystem` creates hulk bodies with `GridBodyFactory` (provisional collider + `PhysicsWorldIndex`) so the hulk moves from the next tick; chunk colliders use `PhysicsLayers.ChunkMaterial` | Yes | SPEC-13 |
 | 6 | Urgent collider work is not capped (decision 7). If PHY-019's skirmish shows batches over 512 urgent bricks, cap urgent work and accept late installs, or raise the delay? | Raise `InstallDelayTicks` to 10 before capping | Tech lead |
 | 7 | SPEC-31: celestial bodies use `PhysicsLayers.Celestial`/`CelestialMaterial`, sensors `Sensor`/`SensorMaterial`; stations on rails are Kinematic grids moved with velocities, not teleported | Yes | SPEC-31 |
-| 8 | SPEC-13 §4.4: `CellRemovedView` arrays are deferred job arrays usable inside jobs scheduled after `BeginRemovedRead` | Yes | SPEC-13 |
+| 8 | SPEC-13 §4.4: `CellRemovedView` arrays are deferred job arrays usable inside jobs scheduled after `BeginRemovedRead` | **Applied** in SPEC-13 §4.4 (2026-10-09). Yes | SPEC-13 |
 | 9 | Should ships use non-zero linear damping as a gameplay speed limit? | No: SPEC-20 limits speed through propulsion; `GridLinearDamping = 0` | Owner (SPEC-20) |
 
 ## 11. References
