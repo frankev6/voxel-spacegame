@@ -249,6 +249,151 @@ def panel_material(S, tag, base_hex, name=None, livery=None, scale=1.0):
     return finish(g, bsdf.outputs[0], m)
 
 
+def _triplanar(g, img, o, nrm, tile, offs=((0.0, 0.0), (0.37, 0.11), (0.53, 0.29))):
+    """Box-project an image in object space without blending: x faces use (y, z), y faces (x, z), top/bottom (y, x).
+    Returns (colour, alpha) sockets."""
+    an = g.vmath("ABSOLUTE", nrm)
+    ax, ay, az = g.sep(an)
+    wx = g.math("MULTIPLY", g.math("GREATER_THAN", g.math("ADD", ax, 1e-4), ay), g.math("GREATER_THAN", g.math("ADD", ax, 1e-4), az))
+    wy = g.math("MULTIPLY", g.math("SUBTRACT", 1.0, wx), g.math("GREATER_THAN", g.math("ADD", ay, 1e-4), az))
+    wz = g.math("SUBTRACT", g.math("SUBTRACT", 1.0, wx), wy)
+    ox, oy, oz = g.sep(o)
+    k = 1.0 / tile
+    cols, alphas = [], []
+    for (u, v), w, (du, dv) in (((oy, oz), wx, offs[0]), ((ox, oz), wy, offs[1]), ((oy, ox), wz, offs[2])):
+        uv = g.n("ShaderNodeCombineXYZ")
+        g.set(uv.inputs[0], g.math("ADD", g.math("MULTIPLY", u, k), du))
+        g.set(uv.inputs[1], g.math("ADD", g.math("MULTIPLY", v, k), dv))
+        tx = g.n("ShaderNodeTexImage", p_interpolation="Linear", p_extension="REPEAT")
+        tx.image = img
+        g.set(tx.inputs["Vector"], uv.outputs[0])
+        cols.append(g.vmath("SCALE", g.out(tx, "Color"), scale=w))
+        alphas.append(g.math("MULTIPLY", g.out(tx, "Alpha"), w))
+    col = g.vmath("ADD", g.vmath("ADD", cols[0], cols[1]), cols[2])
+    alpha = g.math("ADD", g.math("ADD", alphas[0], alphas[1]), alphas[2])
+    return col, alpha, wz
+
+
+def plated_material(S, tag, L, name):
+    """Round-4 hull plating: the procedural plate maps of ld_plating, box-projected at human scale on every hull block
+    (big blocks included, so large hulls read large), with the livery's paint, stencils, wear, grime and lit windows."""
+    import ld_plating
+    m = new_mat(name)
+    g = G(m.node_tree)
+    imA, imB = ld_plating.images(L["plating"])
+    tc = g.n("ShaderNodeTexCoord")
+    o = g.out(tc, "Object")
+    nrm = g.out(tc, "Normal")
+    tile = ld_plating.TILE_M
+    cA, aA, wz = _triplanar(g, imA, o, nrm, tile)
+    cB, aB, _ = _triplanar(g, imB, o, nrm, tile)
+    tint, P, K = g.sep(cA)
+    Gm = aA
+    H, M, W = g.sep(cB)
+    E = aB
+    base_hex = L.get(tag) or S["col"][tag]
+    color = lin(base_hex)
+    if tag == "hull" and L.get("plate_paint"):
+        color = g.mix(P, color, lin(L["plate_paint"]))
+    # plate tint, and a slow tonal drift between 3 m blocks so no two big panels match
+    pid = g.vmath("FLOOR", g.vmath("SCALE", g.vmath("SUBTRACT", o, g.vmath("SCALE", nrm, scale=0.02)), scale=1.0 / 3.0))
+    wn = g.n("ShaderNodeTexWhiteNoise", p_noise_dimensions="3D")
+    g.set(wn.inputs["Vector"], pid)
+    drift = g.maprange(wn.outputs["Value"], 0, 1, 0.93, 1.06)
+    t2 = g.math("MULTIPLY", g.math("MULTIPLY", tint, 2.0), drift)
+    color = g.mix(1.0, color, g.n("ShaderNodeCombineColor", t2, t2, t2).outputs[0], "MULTIPLY")
+    color = g.mix(Gm, color, lin(L.get("plate_accent", S["col"]["accent"])))
+    color = g.mix(K, color, lin(L.get("plate_black", "#141518")))
+    color = g.mix(g.math("MULTIPLY", M, 0.7), color, lin(L.get("plate_metal", "#2A2C2F")))
+    wear = L.get("wear", 0.8)
+    Wk = g.math("MULTIPLY", W, wear)
+    color = g.mix(Wk, color, lin(L.get("bare", "#A7AAAD")))
+    # grime in cavities, broad dirt clouds, and (NOCTURNE) rain streaks
+    grime = S.get("grime", 0.0) * L.get("grime", 1.0)
+    if grime:
+        nz = g.n("ShaderNodeTexNoise", Scale=0.9, Detail=8.0, Roughness=0.62)
+        g.set(nz.inputs["Vector"], o)
+        gm = g.maprange(g.out(nz, "Fac"), 0.48, 0.78, 0.0, grime * 0.8)
+        ao = g.n("ShaderNodeAmbientOcclusion", Distance=0.8, p_samples=8)
+        cav = g.maprange(g.out(ao, "AO"), 0.25, 1.0, grime * 1.4, 0.0)
+        dirt = g.math("MAXIMUM", gm, cav)
+        b = lin(base_hex)
+        color = g.mix(dirt, color, (b[0] * 0.3, b[1] * 0.28, b[2] * 0.25, 1))
+    streaks = S.get("streaks", 0.0) * L.get("streaks", 1.0)
+    sm = None
+    if streaks:
+        st = g.n("ShaderNodeTexNoise", Scale=3.0, Detail=6.0, Roughness=0.7)
+        g.set(st.inputs["Vector"], g.vmath("MULTIPLY", o, (9.0, 9.0, 0.7)))
+        sm = g.maprange(g.out(st, "Fac"), 0.52, 0.74, 0.0, streaks)
+        color = g.mix(sm, color, (0.03, 0.027, 0.02, 1))
+    # windows: lit ports on vertical faces only (hull tags)
+    side = g.maprange(g.math("ABSOLUTE", g.sep(nrm)[2]), 0.18, 0.3, 1.0, 0.0)
+    win = L.get("windows_on", {}).get(tag, 1.0 if tag in ("hull", "hull2") else 0.0)
+    Ew = g.math("MULTIPLY", g.math("MULTIPLY", E, side), win)
+    color = g.mix(Ew, color, lin(S["col"].get("glass", "#16222C")))
+    rough = L.get("rough", {}).get(tag, S["rough"].get(tag, 0.5))
+    metal = L.get("metal_k", {}).get(tag, S["metal"].get(tag, 0.0))
+    rough_s = g.mix(Wk, (rough,) * 3, (0.3,) * 3)
+    rough_s = g.mix(M, rough_s, (0.45,) * 3)
+    metal_s = g.mix(Wk, (metal,) * 3, (0.85,) * 3)
+    metal_s = g.mix(g.math("MULTIPLY", M, 0.8), metal_s, (0.7,) * 3)
+    if tag == "hull" and L.get("plate_paint_metal") is not None:
+        metal_s = g.mix(P, metal_s, (L["plate_paint_metal"],) * 3)
+        rough_s = g.mix(P, rough_s, (L.get("plate_paint_rough", 0.35),) * 3)
+    if sm is not None:
+        rough_s = g.mix(sm, rough_s, (rough * 0.55,) * 3)
+    bsdf = g.n("ShaderNodeBsdfPrincipled")
+    g.set(g.sock(bsdf.inputs, "Base Color"), color)
+    g.set(g.sock(bsdf.inputs, "Roughness"), g.sep(rough_s)[0])
+    g.set(g.sock(bsdf.inputs, "Metallic"), g.sep(metal_s)[0])
+    bump = g.n("ShaderNodeBump", Strength=1.0, Distance=L.get("relief", 0.025))
+    g.set(bump.inputs["Height"], H)
+    g.set(g.sock(bsdf.inputs, "Normal"), bump.outputs[0])
+    # windows glow with a per-window flicker of brightness
+    wp = g.vmath("FLOOR", g.vmath("SCALE", o, scale=2.5))
+    wn2 = g.n("ShaderNodeTexWhiteNoise", p_noise_dimensions="3D")
+    g.set(wn2.inputs["Vector"], wp)
+    ec, es = S["emit"]["window"]
+    kk = g.maprange(wn2.outputs["Value"], 0.0, 1.0, 0.25, 1.0)
+    g.set(g.sock(bsdf.inputs, "Emission Color"), lin(L.get("window", ec)))
+    g.set(g.sock(bsdf.inputs, "Emission Strength"), g.math("MULTIPLY", g.math("MULTIPLY", Ew, kk), es * L.get("window_k", 1.0)))
+    return finish(g, bsdf.outputs[0], m)
+
+
+def lattice_material(S, hex_col, name, rough=0.45, metal=0.5):
+    """Girder lattice: square frames with a diagonal brace in every 0.5 m cell face, cut out of the surface (alpha
+    clip), so a box of girder cells reads as an open truss; the far side shows through the gaps."""
+    m = new_mat(name)
+    g = G(m.node_tree)
+    tc = g.n("ShaderNodeTexCoord")
+    o = g.vmath("SCALE", g.out(tc, "Object"), scale=1.0 / CELL)
+    nrm = g.out(tc, "Normal")
+    an = g.vmath("ABSOLUTE", nrm)
+    ax, ay, az = g.sep(an)
+    ox, oy, oz = g.sep(o)
+    wx = g.math("MULTIPLY", g.math("GREATER_THAN", g.math("ADD", ax, 1e-4), ay), g.math("GREATER_THAN", g.math("ADD", ax, 1e-4), az))
+    wy = g.math("MULTIPLY", g.math("SUBTRACT", 1.0, wx), g.math("GREATER_THAN", g.math("ADD", ay, 1e-4), az))
+    wz = g.math("SUBTRACT", g.math("SUBTRACT", 1.0, wx), wy)
+    u = g.math("ADD", g.math("ADD", g.math("MULTIPLY", oy, wx), g.math("MULTIPLY", ox, wy)), g.math("MULTIPLY", oy, wz))
+    v = g.math("ADD", g.math("ADD", g.math("MULTIPLY", oz, wx), g.math("MULTIPLY", oz, wy)), g.math("MULTIPLY", ox, wz))
+    fu, fv = g.math("FRACT", u), g.math("FRACT", v)
+    e = g.math("MINIMUM", g.math("MINIMUM", fu, g.math("SUBTRACT", 1.0, fu)), g.math("MINIMUM", fv, g.math("SUBTRACT", 1.0, fv)))
+    flip = g.math("MODULO", g.math("FLOOR", g.math("ADD", u, v)), 2.0)
+    dg = g.math("ABSOLUTE", g.math("SUBTRACT", fu, g.math("ADD", g.math("MULTIPLY", fv, g.math("SUBTRACT", 1.0, g.math("MULTIPLY", flip, 2.0))), flip)))
+    bar = g.math("MAXIMUM", g.maprange(e, 0.09, 0.11, 1.0, 0.0), g.maprange(dg, 0.07, 0.095, 1.0, 0.0))
+    shade = g.maprange(e, 0.0, 0.1, 0.7, 1.0)
+    col = g.mix(1.0, lin(hex_col), g.n("ShaderNodeCombineColor", shade, shade, shade).outputs[0], "MULTIPLY")
+    bsdf = g.n("ShaderNodeBsdfPrincipled", Roughness=rough, Metallic=metal)
+    g.set(g.sock(bsdf.inputs, "Base Color"), col)
+    g.set(g.sock(bsdf.inputs, "Alpha"), g.math("GREATER_THAN", bar, 0.5))
+    m.surface_render_method = "DITHERED"
+    try:
+        m.use_backface_culling = False
+    except Exception:
+        pass
+    return finish(g, bsdf.outputs[0], m)
+
+
 def heat_material(S):
     """Nozzle steel with heat tint: bronze facing the camera, blue-violet at grazing angles."""
     m = new_mat(f"{S['name']}_heat")
@@ -449,6 +594,8 @@ def make_materials(S):
     for tag in ("hull", "hull2", "armor", "trim", "paint_w", "paint_p", "paint_e", "c_cargo"):
         mats[tag] = panel_material(S, tag, c[tag])
     for liv, L in S.get("liveries", {}).items():
+        if L.get("plating"):
+            continue                      # round-4 plated liveries: built on first use (material_for)
         mats[f"hull@{liv}"] = panel_material(S, "hull", c["hull"], f"{S['name']}_hull@{liv}", livery=L)
         mats[f"hull2@{liv}"] = panel_material(S, "hull2", L["hull2"], f"{S['name']}_hull2@{liv}")
         mats[f"accent@{liv}"] = flat_material(S, f"accent@{liv}", L["accent"], 0.5, 0.0)
@@ -485,6 +632,9 @@ def make_materials(S):
     return mats
 
 
+PLATED = ("hull", "hull2", "armor", "trim")
+
+
 def split_tag(tag):
     """'hull@oxide#3' -> ('hull', 'oxide', 3.0). The '#k' suffix scales the material pattern (large blocks, big aliens)."""
     k = 1.0
@@ -502,6 +652,30 @@ def material_for(mats, S, tag):
     base, liv, k = split_tag(tag)
     plain = f"{base}@{liv}" if liv else base
     m = None
+    L = S.get("liveries", {}).get(liv) if liv else None
+    if L and L.get("plating"):
+        # a plated livery recolours any tag it names; plating ignores the big-block scale (it stays human-sized)
+        if plain in mats:
+            m = mats[plain]
+        elif base in PLATED and (base in L or base == "hull"):
+            m = plated_material(S, base, L, f"{S['name']}_{plain}")
+        elif base == "girder":
+            m = lattice_material(S, L.get("girder", L.get("hull", S["col"]["hull"])), f"{S['name']}_{plain}")
+        elif base in L and base in ("paint_w", "paint_p", "paint_e", "c_cargo"):
+            m = panel_material(S, base, L[base], f"{S['name']}_{plain}")
+        elif base in L:
+            rough = L.get("rough", {}).get(base, S["rough"].get(base, 0.5))
+            metal = L.get("metal_k", {}).get(base, S["metal"].get(base, 0.0))
+            m = flat_material(S, plain, L[base], rough, metal)
+        if m is not None:
+            mats[plain] = m
+            mats[tag] = m
+            return m
+    if base == "girder":
+        m = mats.get("girder") or lattice_material(S, S["col"]["accent"], f"{S['name']}_girder")
+        mats["girder"] = m
+        mats[tag] = m
+        return m
     if k != 1.0:
         c = S["col"]
         L = S.get("liveries", {}).get(liv) if liv else None

@@ -20,15 +20,18 @@ from ld_geom import cell_polys, face_of, _area, classify_cell
 DIRS = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)]
 
 FRONT = {"thruster_s", "thruster_l", "thruster_xl"}
+BACK = {"claw", "toll"}
+SIDE = {"coil"}
 ANY = {"reactor", "core_1", "core_2", "core_3", "core_35", "mass_driver", "capacitor", "lance", "singularity", "hangar",
-       "cargo"}
+       "cargo", "censer_core"}
 
 
 def mount_normal(kind, Rm):
     """World direction from the module toward the structure it must sit on."""
     if kind in ANY:
         return None
-    local = Vector((0, 1, 0)) if kind in FRONT else Vector((0, 0, -1))
+    local = (Vector((0, 1, 0)) if kind in FRONT else Vector((0, -1, 0)) if kind in BACK else
+             Vector((-1, 0, 0)) if kind in SIDE else Vector((0, 0, -1)))
     w = Rm @ local
     return tuple(int(round(v)) for v in w)
 
@@ -146,6 +149,13 @@ def check(ship, verbose=False):
             opp = (-d[0], -d[1], -d[2])
             if _small_face(ship, c, d) >= 0.02 and _small_face(ship, nb, opp) >= 0.02:
                 uf.union(a, b)
+    # a small cell inside a big block's solid overlaps it: the builder merges the two, so they are one piece
+    if ship.big:
+        for c in ship.cells:
+            B = ship.big_of(c)
+            if B in ship.big and c not in modcell:
+                if B not in ship.big_shapes or classify_cell(ship.big_world_planes(B), c)[0] != "empty":
+                    uf.union(("c", c), ("b", B))
     for B in ship.big:
         a = ("b", B)
         uf.find(a)

@@ -545,6 +545,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 4 | 2026-10-10 | ROADMAP, SPEC-80, SPEC-81 | Owner: "our first thing is to nail the look of the game in terms of blocks, ui, meshes, colors, textures, etc. nothing proceeds until the design system is spot on". Which code may run before `ART-013`? | Only what the look tests need: `CORE-001`, `DATA-001`, `DATA-002`, `DATA-004`, `DATA-005`, `DATA-008` (for `ART-007`'s validator), and `AST-001`…`AST-003`. Everything else in M0–M4 waits | Owner | **Answered 2026-10-10 (owner, verbatim):** "Whatever you deep necessary within the scope in order to showcase the most faithful depictions so that our decisions are based on accurate visuals". The lead worker decides which code runs before `ART-013`, limited to what makes the look tests faithful to the final game |
 | 5 | 2026-10-10 | SPEC-02 CORE-001, CORE-009 | `ManagedEventDrainSystem` stub: throwing lifecycle methods would break Play Mode (SPEC-02 open question 10) | Empty `OnUpdate`/`OnDestroy` with `TODO(CORE-009)`; the public API throws | Tech lead | |
 | 6 | 2026-10-10 | SPEC-04 §4.2, SPEC-11 §4, SPEC-12; look book round 3 | How do the look-dev hulls become game blocks? (a) Tapers: the hulls use cut cells (each 0.5 m cell clipped by up to three straight planes that continue across neighbours; 407–1,189 distinct shapes per direction, the 45° `Wedge` covers 8–21% of cut cells), the specs allow only `Cube` and `Wedge` (shape packed in one bit). Options: generic cut cells with a few quantised planes per cell (needs an ADR changing the packed format), a fixed slope catalogue (1:1, 1:2, 1:3 and their corners) with tapers limited to it, or Cube and Wedge only (stepped tapers). (b) Large hull blocks (2×2×2, 3×3×3) as one placeable block that a module splits back into cells. (c) Alien hulls as signed-distance cells meshed by surface nets | Specs as written (Cube, Wedge); the look book keeps showing cut cells, large blocks and smooth alien cells so the decision is made on the real look | Owner | |
+| 7 | 2026-10-10 | SPEC-33, DESIGN-SYSTEM factions; look book round 4 | Batch 3 builds the ship lines on the legacy factions and adds proposals: Triple Alliance house names (Pochteca Freight, Itztli Arms, Caisson Heavy Industries), ship names, refit codes (S) Scavenger, (I) Itztli, (K) Khuchad prize, the Khuchad port-armour/starboard-weapon doctrine, and redacted hints linking the Vanguard to the Aksharans. Where do batch 2's Knell choir and Caisson line sit in the roster? | Proposals only, nothing binding; Caisson is shown as the Alliance's third house; the Knell choir stays an independent order | Owner | |
 
 ## Measurements
 
@@ -556,6 +557,53 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-10 — Look book round 4, in progress: second ship lines, plated hulls, silhouettes for approval (claude, claude-opus-5-5)
+- **Owner feedback (verbatim, 2026-10-10)**, five messages. The Starsector screenshots that came with them are reference only and are not stored (no Starsector art in the repo); the screenshots of our own renders are not stored again.
+
+  > that alien behemoth looks so scary i love it. every single ship in both nocturne and drydock are all just a long rectangle with a taper in the front right now. can we make another ship line for each ( another frigate, cargo ship, cruiser, dreadnaught group), this time the ship should not adhere to be a. boring rectangle I want some actually interesting ships that give the player a sense of ownership of something unique. i've attached an image of ships from a 2d game called starsector, i do not want to copy blindly any designs but the point i want to make is do you see how all ships have a different feel and look. and normally what unifies a ship line is a similar build pattern and colors, in the case of starsector they have high tech ships, midline and low tech. this will require new textures, and perhaps new hull shapes as well. be creative, i don't want the same cookie cutter stuff. I like how with the aliens you branched out. lets do the same here (image 3) also look how within a ship the hull itself is so intricate which gives a sense of scale. we can achieve something of this caliber with texturing and the procedural hulls. lets focus all our efforts in nocturne and drydock specifically.
+
+  > thats just another big rectangle bro
+
+  > and this just another big rectangle
+
+  > how about this. make 2d sihlouetes first and we'll approve the silhouttes then build the ships referencing those
+
+  > again i invite you to look at the starsector ones. don't be so "impractical" with your siloouethes, for example the a, b, c are just so goofy, its supposed to be the future and you're making hammers and hooks?? when i said don't make a rectangle you overcorrected and started optimizing for the wrong thing. if you do a black and white of the starsector ships what makes them unique is not only their silouette which is very memorable but also their distinct color design between different ship lines and how a shipline group shares similar colors and patterns within itself. how about this, one thing that is notable in starsector is right tool for the job, each ship has its own niche where its really good at that job, so bigger doesn't necessarily mean the best, a group of 5 skilled frigates can EASILY down a cruiser class if used correctly. im not just looking for weird shapes, im looking for a form follows function and each ship tells a story. some of your options I do like, for example the crucible is cool, and the gyre, but everything else honestly quite goofy
+
+  > ok and id like you to look at the starsector ships image once again, do you see how a lot of ships are not perfectly symetrical? theres always tiny (sometimes larger) asymetries in the designs.
+  > keep the ones you've made on this round because they aren't bad, but make a new batch playing around with some asymetry, and some bulkier classes, some more slick, some hybrid ships. some ships that were meant for cargo but got re-specced for war so theres a cargo version and a modded war version.
+  >
+  > before you make the new batch, please do research on starsector because its the biggest inspo for this project. look at the factions, experimental ships, different functions of ships, redacted ships, weapons, etc. look at how many ships like the falcon have a pirate modded version that is faster but the hull is weaker, etc. like I'm looking for that level of depth from the silouettes and explanations of each of our ships. like what factions/civilizations, what level of tech, what is their niche, any mods, etc.
+
+- **Plated hull textures** (`ArtSource/LookDev/ld_plating.py`). A procedural 6 m plating tile: recursive plate splits on a 1.5 m grid, bolts, grilles, hatches, stencil digits, pipes, vents and windows. It is box-projected in object space at the same human scale on every block, and paint is chosen per top-level panel so it reads as plates, not camo. Two liveries so far: `caisson` (DRYDOCK) and `knell` (NOCTURNE).
+- **New hull pieces and blocks.** Hull pieces (`ld_ships.py`): `sweep`, `drum`, `bell`, `shell` (a hollow lathe) and `slab`. The convex-hull planes are now computed in float64 from the original points, which fixed a 1e-6 sliver gap. Kit 4 (`ld_kit4.py`): beacon, piston, claw, coil, toll, censer core, bell, candle and gargoyle. The build check gains back-mounted and side-mounted blocks, and small cells that overlap a large block count as attached.
+- **First 3D drafts of DRYDOCK line B** passed the build check but were rejected as rectangles. **Process change (owner):** 2D plan-view silhouettes are approved before any 3D build.
+- **Silhouettes v1** (novelty tool shapes) were rejected and are kept as `docs/design/lookbook/silhouettes-v1.html`.
+- **Batch 2** (`silhouettes.html`, tab "Batch 2"): one role-driven line B per direction, 12 ships each, with a job and a weakness per ship. The DRYDOCK line is Caisson Heavy Industries (mining and salvage). The NOCTURNE line is the Knell choir, a militant mortuary order whose ships are laid out like cathedrals.
+- **Starsector research** (the wiki's ship, faction, refit, hull-mod, weapon and hidden-faction pages, plus a study of the sprites in the browser; nothing stored). Findings are on the page:
+  - tech tiers are philosophies, not upgrades;
+  - factions reuse hulls with their own paint and mods;
+  - civilian hulls get war conversions that cost cargo, hull and reliability;
+  - pirate refits trade hull for speed, and military refits do the opposite;
+  - asymmetry follows use;
+  - every hull has a niche and a counter;
+  - redacted ships break the rules;
+  - every hull has a codex entry.
+- **Batch 3** (`ArtSource/LookDev/sil_batch3.py`, tab "Batch 3"): the owner's own factions as Starsector-style ship lines. The lore comes from `Import/Legacy/content/Factions` and the colours from the DESIGN-SYSTEM faction liveries, with a DRYDOCK/NOCTURNE paint toggle.
+  - **Khuchad Clan**, low tech and bulky: CORSAC, KULAN, ARGALI, ORDU. Pack-and-chief doctrine. Armour is on the port side (the shield arm) and the ram or gun is offset to starboard (the lance arm).
+  - **Triple Alliance**, midline hybrids: AUDITOR, TALLY, ESCROW, CONSORTIUM. Standard spines with module bays and house colour bands.
+  - **Vestari**, high tech and slick: EDICT, CRADLE, MANDATE, QUORUM. Each has one offset speaker's fin.
+  - **Scavengers**: KING'S COURT, three wrecks welded together.
+  - **[REDACTED]**: Vanguard WARDEN and SPINDLE, and the Silence.
+  - **Refit bay**, cargo hulls re-specced for war:
+    - PARCEL → (S) Jackrabbit and (I) Escort;
+    - TALLY → (I) Q-ship and (S) Gunbarge;
+    - WELLHEAD tanker → (K) Khuchad battle-carrier;
+    - CRADLE → the Stolen CRADLE (S).
+
+  Every card has a designation and maker, a story, its fit, ship system, built-ins, asymmetry, variants, what it is weak to, and six stat bars. Refit cards show stat deltas and +/− change lists.
+- **Next:** the owner marks silhouettes from either batch; the approved plan views are then built in 3D with the new pieces, plating and blocks, checked, rendered and added to the look book.
 
 ### 2026-10-10 — Look book round 3: connected ships, cruisers and dreadnoughts, capital weapons, defended stations, five aliens (claude, claude-opus-5-5)
 - **Owner feedback (verbatim, 2026-10-10)** on the round-2 look book. The four screenshots that came with it are of our own renders and are not stored again:

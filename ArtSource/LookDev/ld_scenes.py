@@ -255,6 +255,12 @@ def stage_check(S, only=None):
         if kind in ld_check.FRONT:
             if ymax < size[1] * CELL - 0.03:
                 print(f"CHECK BLOCK {kind}: front face not reached (max y {ymax:.2f} of {size[1] * CELL:.2f})")
+        elif kind in ld_check.BACK:
+            if min(v[1] for v in vs) > 0.03:
+                print(f"CHECK BLOCK {kind}: back face not reached")
+        elif kind in ld_check.SIDE:
+            if min(v[0] for v in vs) > 0.03:
+                print(f"CHECK BLOCK {kind}: side face not reached")
         elif kind not in ld_check.ANY and zmin > 0.03:
             print(f"CHECK BLOCK {kind}: floats above its base (min z {zmin:.2f})")
     print(f"CHECK {'ALL OK' if ok else 'PROBLEMS FOUND'} ({dname})")

@@ -3,47 +3,38 @@ window.BUILDCHECK = {
  "drydock": [
   {
    "big": 0,
-   "cells": 3994,
-   "mods": 16,
-   "name": "MULE",
+   "cells": 26695,
+   "mods": 15,
+   "name": "SPANNER",
    "ok": true,
-   "shapes": 55,
+   "shapes": 1832,
    "u": 1
   },
   {
-   "big": 0,
-   "cells": 21014,
-   "mods": 92,
-   "name": "BULWARK",
+   "big": 10663,
+   "cells": 91005,
+   "mods": 14,
+   "name": "CARBOY",
    "ok": true,
-   "shapes": 131,
-   "u": 1
-  },
-  {
-   "big": 32574,
-   "cells": 275606,
-   "mods": 176,
-   "name": "STEVEDORE",
-   "ok": true,
-   "shapes": 312,
+   "shapes": 224,
    "u": 2
   },
   {
-   "big": 57768,
-   "cells": 1660308,
-   "mods": 75,
-   "name": "ANVIL",
+   "big": 38761,
+   "cells": 320417,
+   "mods": 27,
+   "name": "DERRICK",
    "ok": true,
-   "shapes": 406,
-   "u": 3
+   "shapes": 2586,
+   "u": 2
   },
   {
-   "big": 20664,
-   "cells": 578344,
-   "mods": 348,
-   "name": "PORT KESSLER",
+   "big": 119246,
+   "cells": 3263309,
+   "mods": 101,
+   "name": "CAISSON",
    "ok": true,
-   "shapes": 137,
+   "shapes": 787,
    "u": 3
   }
  ],

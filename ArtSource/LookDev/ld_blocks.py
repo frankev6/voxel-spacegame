@@ -1637,6 +1637,13 @@ CATEGORY.update(CATEGORY_CAPITAL)
 BUILDERS.update(BUILDERS_CAPITAL)
 BUILDERS["thruster_xl"] = lambda b: thruster(b, True)
 
+from ld_kit4 import KIT4, LABELS4, CATEGORY4, BUILDERS4  # noqa: E402
+
+KIT.update(KIT4)
+LABELS.update(LABELS4)
+CATEGORY.update(CATEGORY4)
+BUILDERS.update(BUILDERS4)
+
 
 def build_block(kind, S, acc, group, M, size=None, remap=None):
     size = size or KIT[kind]

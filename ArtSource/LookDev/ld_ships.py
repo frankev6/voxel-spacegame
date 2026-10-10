@@ -17,7 +17,8 @@ from ld_geom import (CELL, Acc, mesh_cells, hash01, cbox, box, cyl, sphere, ico,
                      section_poly, loft_planes, classify_cell, cell_polys, polys_volume)
 from ld_blocks import KIT, build_block, greeble_face
 
-LIVERY_TAGS = ("hull", "hull2", "accent")
+LIVERY_TAGS = ("hull", "hull2", "accent", "armor", "trim", "metal", "dark", "gold", "girder", "paint_w", "paint_p", "paint_e",
+               "c_cargo")
 
 _MERGE = {}
 
@@ -74,6 +75,76 @@ def merge_clip(k1, v1, k2, v2, tol=0.015):
             res = None
     _MERGE[key] = res
     return res
+
+
+_HULLS = {}
+
+
+def hull_planes(pts):
+    """Half-spaces [(n, d)]: n.p <= d of the convex hull of points (cell units), coplanar faces merged."""
+    key = tuple(tuple(round(v, 5) for v in p) for p in pts)
+    if key in _HULLS:
+        return _HULLS[key]
+    import bmesh
+    bm = bmesh.new()
+    seen = set()
+    for p in key:
+        if p not in seen:
+            seen.add(p)
+            bm.verts.new(p)
+    if len(seen) < 4:
+        bm.free()
+        return []
+    bmesh.ops.convex_hull(bm, input=list(bm.verts))
+    bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(0.05), verts=bm.verts, edges=bm.edges)
+    bm.normal_update()
+    cen = Vector((0, 0, 0))
+    vs = [v for v in bm.verts if v.link_faces]
+    for v in vs:
+        cen += v.co
+    cen /= max(1, len(vs))
+    planes = {}
+    for f in bm.faces:
+        nrm = f.normal.copy()
+        if nrm.length < 1e-9:
+            continue
+        p0 = f.verts[0].co
+        if nrm.dot(cen - p0) > 0:
+            nrm = -nrm
+        nk = tuple(round(k, 6) + 0.0 for k in nrm)
+        # the tight plane through the original points (float64), so faces on whole cells stay exactly on them
+        d = max(nk[0] * p[0] + nk[1] * p[1] + nk[2] * p[2] for p in key)
+        planes[nk] = max(planes.get(nk, -1e9), round(d, 5))
+    bm.free()
+    res = [(n, d) for n, d in planes.items()]
+    _HULLS[key] = res
+    return res
+
+
+def inset_poly(poly, d):
+    """Convex polygon [(x, y)] (either winding) offset inward by d."""
+    if d <= 0:
+        return list(poly)
+    n = len(poly)
+    area = sum(poly[i][0] * poly[(i + 1) % n][1] - poly[(i + 1) % n][0] * poly[i][1] for i in range(n))
+    sgn = 1.0 if area > 0 else -1.0
+    lines = []
+    for i in range(n):
+        (x0, y0), (x1, y1) = poly[i], poly[(i + 1) % n]
+        ex, ey = x1 - x0, y1 - y0
+        L = math.hypot(ex, ey) or 1.0
+        nx, ny = -ey / L * sgn, ex / L * sgn          # inward normal
+        lines.append(((x0 + nx * d, y0 + ny * d), (ex, ey)))
+    out = []
+    for i in range(n):
+        (p, e), (q, f) = lines[i - 1], lines[i]
+        den = e[0] * f[1] - e[1] * f[0]
+        if abs(den) < 1e-9:
+            out.append(q)
+            continue
+        t = ((q[0] - p[0]) * f[1] - (q[1] - p[1]) * f[0]) / den
+        out.append((p[0] + e[0] * t, p[1] + e[1] * t))
+    return out
 
 
 class Ship:
@@ -398,6 +469,117 @@ class Ship:
             hi = [max(p[k] for p in pts) + (half_t if wv[k] else 0) for k in range(3)]
             self.convex(planes, (tuple(lo), tuple(hi)), tags[i % len(tags)], big=big)
 
+    # free-form pieces (round 4): any convex hull of points, swept sections, drums, plan-view slabs --------------
+    def hull(self, pts, tag="hull", mirror=False, big=False):
+        """One straight-sided piece: the convex hull of points (cell units)."""
+        planes = hull_planes(pts)
+        if not planes:
+            return
+        lo = tuple(min(p[k] for p in pts) for k in range(3))
+        hi = tuple(max(p[k] for p in pts) for k in range(3))
+        self.convex(planes, (lo, hi), tag, mirror=mirror, big=big)
+
+    def sweep(self, path, sec, tag="hull", up=(0, 0, 1), mirror=False, big=False, closed=False, tags=None):
+        """A section swept along a polyline: arcs, crescents, claws, ribs. path: [(x, y, z)] in cells. sec: one
+        (w, h0, h1[, ct[, cb]]) or one per point: half-width w along the side axis, h0..h1 along the up axis, top and
+        bottom chamfers. Joints are mitred, so neighbouring segments share their section exactly. up: the reference
+        that defines 'up' for the section (z for flat arcs; y for ribs standing across the ship)."""
+        P = [Vector(p) for p in path]
+        n = len(P)
+        secs = sec if isinstance(sec, list) else [sec] * n
+        U = Vector(up)
+        rings = []
+        for i in range(n):
+            if closed:
+                a, b = P[i - 1], P[(i + 1) % n]
+                dp, dn = (P[i] - a).normalized(), (b - P[i]).normalized()
+            else:
+                dp = (P[i] - P[i - 1]).normalized() if i > 0 else (P[1] - P[0]).normalized()
+                dn = (P[i + 1] - P[i]).normalized() if i < n - 1 else dp
+            t = (dp + dn)
+            t = t.normalized() if t.length > 1e-6 else dn
+            s = t.cross(U)
+            if s.length < 1e-6:
+                s = t.cross(Vector((1, 0, 0)))
+            s.normalize()
+            v = s.cross(t).normalized()
+            cosh = max(0.3, dp.dot(t))
+            bend = dn - dp
+            bend = bend - t * bend.dot(t)
+            bn = bend.normalized() if bend.length > 1e-6 else None
+            w, h0, h1, *ch = secs[i]
+            ct, cb = (list(ch) + [0, 0])[:2]
+            pts = []
+            for x, z in section_poly(0.0, w, h0, h1, ct, cb):
+                q = s * x + v * z
+                if bn is not None:
+                    q = q + bn * (q.dot(bn) * (1.0 / cosh - 1.0))
+                pts.append(tuple(P[i] + q))
+            rings.append(pts)
+        segs = range(n) if closed else range(n - 1)
+        for i in segs:
+            tg = tags[i % len(tags)] if tags else tag
+            self.hull(rings[i] + rings[(i + 1) % n], tg, mirror=mirror, big=big)
+
+    def drum(self, p0, p1, r0, r1=None, n=12, sq=(1.0, 1.0), up=(0, 0, 1), tag="hull", mirror=False, big=False, phase=None):
+        """Faceted cylinder or cone frustum from p0 to p1 (radius r0 to r1), n sides; sq squashes the section."""
+        r1 = r0 if r1 is None else r1
+        a, b = Vector(p0), Vector(p1)
+        t = (b - a).normalized()
+        s = t.cross(Vector(up))
+        if s.length < 1e-6:
+            s = t.cross(Vector((1, 0, 0)))
+        s.normalize()
+        v = s.cross(t)
+        ph = math.pi / n if phase is None else phase
+        pts = []
+        for c, r in ((a, r0), (b, r1)):
+            for i in range(n):
+                ang = ph + 2 * math.pi * i / n
+                if r <= 1e-6:
+                    pts.append(tuple(c))
+                    break
+                pts.append(tuple(c + s * (math.cos(ang) * r * sq[0]) + v * (math.sin(ang) * r * sq[1])))
+        self.hull(pts, tag, mirror=mirror, big=big)
+
+    def bell(self, axis_p0, axis_p1, profile, n=16, tag="hull", big=False, tags=None, sq=(1.0, 1.0)):
+        """A lathe of stacked frusta along an axis: profile [(t 0..1 along the axis, radius)]."""
+        a, b = Vector(axis_p0), Vector(axis_p1)
+        for i, ((t0, r0), (t1, r1)) in enumerate(zip(profile, profile[1:])):
+            tg = tags[i % len(tags)] if tags else tag
+            self.drum(tuple(a + (b - a) * t0), tuple(a + (b - a) * t1), r0, r1, n, sq=sq, tag=tg, big=big)
+
+    def shell(self, p0, p1, profile, n=24, tag="hull", big=False, tags=None, phase=None):
+        """Hollow lathe (a bell, a nozzle): profile [(t 0..1 along p0->p1, outer radius, wall thickness)]. Each angular
+        sector of each profile segment is one straight-sided piece, so the wall is exact blocks inside and out."""
+        a, b = Vector(p0), Vector(p1)
+        ax = (b - a).normalized()
+        s = ax.cross(Vector((0, 0, 1)))
+        if s.length < 1e-6:
+            s = ax.cross(Vector((1, 0, 0)))
+        s.normalize()
+        v = s.cross(ax)
+        ph = math.pi / n if phase is None else phase
+        for i, ((t0, r0, k0), (t1, r1, k1)) in enumerate(zip(profile, profile[1:])):
+            for j in range(n):
+                a0, a1 = ph + 2 * math.pi * j / n, ph + 2 * math.pi * (j + 1) / n
+                pts = []
+                for t, r, k in ((t0, r0, k0), (t1, r1, k1)):
+                    c = a + (b - a) * t
+                    for ang in (a0, a1):
+                        d = s * math.cos(ang) + v * math.sin(ang)
+                        pts += [tuple(c + d * r), tuple(c + d * max(0.0, r - k))]
+                tg = tags(i, j) if callable(tags) else (tags[i % len(tags)] if tags else tag)
+                self.hull(pts, tg, big=big)
+
+    def slab(self, poly, z0, z1, ct=0.0, cb=0.0, tag="hull", mirror=False, big=False):
+        """A convex plan-view polygon [(x, y)] extruded from z0 to z1, with chamfered top and bottom edges."""
+        pts = []
+        for z, ins in ((z0, cb), (z0 + cb, 0.0), (z1 - ct, 0.0), (z1, ct)):
+            for x, y in inset_poly(poly, ins):
+                pts.append((x, y, z))
+        self.hull(pts, tag, mirror=mirror, big=big)
+
     # modules -----------------------------------------------------------------------------------------------------
     def mod(self, kind, x, y, z, rot=(0, 0, 0), mirror=False, size=None, remap=None):
         size = size or KIT[kind]
@@ -565,6 +747,10 @@ def realize(ship, S, acc, group, greebles=True, plumes=True, nav=True):
             ship.plumes.append((p, d, r, PLUME_KINDS[kind] * (size[1] / KIT[kind][1])))
     for p, d, r, L in ship.plumes:
         plume(sub, group, p, d, r, L, S)
+    for a, b in getattr(ship, "cables", []):
+        # rigging (crane hoist lines, chains): thin cables between two points, not blocks
+        from ld_geom import cyl as _cyl
+        sub.add(group, "metal", _cyl(tuple(Vector(a) * CELL), tuple(Vector(b) * CELL), 0.05, 6), None, True)
     for fn in ship.extra:
         fn(sub, group, S)
     if greebles:
@@ -851,9 +1037,12 @@ SHIPS = {
 
 def _designs():
     from ld_capships import drydock_cruiser, drydock_dreadnought, nocturne_cruiser, nocturne_dreadnought
+    import ld_lines
     return {
-        "drydock": [("light", drydock_light), ("heavy", drydock_heavy), ("cruiser", drydock_cruiser), ("dreadnought", drydock_dreadnought)],
-        "nocturne": [("light", nocturne_light), ("heavy", nocturne_heavy), ("cruiser", nocturne_cruiser), ("dreadnought", nocturne_dreadnought)],
+        "drydock": [("light", drydock_light), ("heavy", drydock_heavy), ("cruiser", drydock_cruiser), ("dreadnought", drydock_dreadnought)]
+                   + [("b_" + k, f) for k, f in ld_lines.LINES.get("drydock", [])],
+        "nocturne": [("light", nocturne_light), ("heavy", nocturne_heavy), ("cruiser", nocturne_cruiser), ("dreadnought", nocturne_dreadnought)]
+                    + [("b_" + k, f) for k, f in ld_lines.LINES.get("nocturne", [])],
         "opera": [("light", opera_light), ("heavy", opera_heavy)],
     }
 
