@@ -282,6 +282,7 @@ namespace Game.Simulation.Power
         public ShieldHitFlags Flags;
         public Game.Data.Combat.ProducerKind Producer;   // SPEC-02 §4.12: Projectile, Beam, Explosion, Ability…
         public uint Sequence;           // producer sequence for the stable sort key
+        public Entity Instigator;       // copied to the overflow DamageEvent (review X6)
     }
 
     /// <summary>Singleton holding the ShieldHit channel (SPEC-02 §4.12). Created by ShieldSystem.OnCreate (SimEventChannel<ShieldHit>.Create("shield_hits"))
@@ -534,7 +535,7 @@ Complexity: O(1) per untouched ship; O(instances) for ships whose `BlockInstance
 6. **Hits** (if `ranges` has the grid): for each hit in sorted order: `mult = ShieldTypeMultiplier[(int)Type]`; `eff = Amount × mult`.
    - If `Active == 1`: `absorbed = min(eff, Hp)`; `Hp −= absorbed`; `RegenResumeTick = tick + round(delay × 60)`; write ripple `RippleHead` = `{ LocalPoint, StartTick = max(tick, 1), Strength = min(1, absorbed / 100) }`, `RippleHead = (RippleHead + 1) & 7`; enqueue `FxEvents.ShieldRipple(worldPoint, worldNormal, PhysicsVelocity.Linear, min(1, absorbed / 100))` (world = root `LocalTransform` applied to `LocalPoint` / `ShieldMath.Normal`). If `Hp ≤ 0`: `Hp = 0`, `Active = 0`, set `Collapsed`.
    - Else `absorbed = 0`.
-   - Overflow: `rest = (eff − absorbed) / mult` (raw units). If `rest > 0.001`: point hit (`(Flags & Blast) == 0`): `o = LocalPoint / CellSize`, `VoxelRaycast.Cast(ref GridCellQuery{Reader, Grid}, o, LocalDir, maxCells = 2 × BoundingRadius / CellSize, out hit)`; if hit → write `DamageEvent { Grid, LocalPoint = (o + normalize(LocalDir) × (hit.DistanceCells + 0.05)) × CellSize, LocalDir, Amount = rest, Radius = 0, Penetration, Type, Source, WorldImpulse × rest / Amount }`; if no hit → dropped (the shot would have missed the hull). Blast hit: `DamageEvent { Grid, LocalPoint, LocalDir = 0, Amount = rest, Radius, Penetration = 0, Type, Source, WorldImpulse × rest / Amount }`.
+   - Overflow: `rest = (eff − absorbed) / mult` (raw units). If `rest > 0.001`: point hit (`(Flags & Blast) == 0`): `o = LocalPoint / CellSize`, `VoxelRaycast.Cast(ref GridCellQuery{Reader, Grid}, o, LocalDir, maxCells = 2 × BoundingRadius / CellSize, out hit)`; if hit → write `DamageEvent { Grid, LocalPoint = (o + normalize(LocalDir) × (hit.DistanceCells + 0.05)) × CellSize, LocalDir, Amount = rest, Radius = 0, Penetration, Type, Source, WorldImpulse × rest / Amount, Producer = ShieldOverflow, Instigator }`; if no hit → dropped (the shot would have missed the hull). Blast hit: `DamageEvent { Grid, LocalPoint, LocalDir = 0, Amount = rest, Radius, Penetration = 0, Type, Source, WorldImpulse × rest / Amount, Producer = ShieldOverflow, Instigator }` (the hit's `Instigator` is copied).
 7. **Regen:** if `Active == 1 || Collapsed`, `requested`, `tick ≥ RegenResumeTick`: `Hp = min(MaxHp, Hp + RegenPerSecond × dt)`. Then re-run step 5's collapsed check.
 
 Job 2 also disposes nothing: the hits list and map are disposed with `.Dispose(state.Dependency)` after job 2. Complexity: O(H log H) gather with H hits per tick (≤ 4,096 expected), O(emitters) per shielded ship.

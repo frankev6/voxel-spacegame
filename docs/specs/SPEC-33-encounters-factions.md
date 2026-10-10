@@ -64,7 +64,7 @@ This spec decides who is in space with the player and how they feel about each o
 
    Reason: architecture rule 3; hostility flips at a tick boundary every system agrees on.
 4. **Provocation.**
-   - When a grid of faction `f` (not none, not the player faction, not currently Hostile, not locked) records damage whose source was the player ship (`GridDamageStats.LastDamageSource`, item 69), relation `f` drops by `provokePenalty` (10).
+   - When a grid of faction `f` (not none, not the player faction, not currently Hostile, not locked) records damage whose source was the player ship (`GridDamageStats.LastDamageInstigator`, item 69 and review X6: the player's craft count as the player), relation `f` drops by `provokePenalty` (10).
    - The drop happens at most once per `provokeIntervalTicks` (60) per faction.
 
    Reason: friendly fire is on (SPEC-21), so shooting a neutral station must have consequences. Sustained fire turns a neutral faction hostile in about 3 s.
@@ -521,7 +521,7 @@ Per tick (markers `FactionStandingSystem.Provoke`, `.Apply`):
 1. `tick = SimClock.Tick`; `stateEntity = SystemAPI.GetSingletonEntity<FactionState>()`; `player` = the first entity of `playerQuery` (`Entity.Null` if none).
 2. **`ProvokeJob`** (`IJobChunk`, `Schedule`, single-threaded, over `damagedQuery`).
    - Input: `NativeArray<byte> provoked` (64, `WorldUpdateAllocator`, zeroed).
-   - For each entity with `GridDamageStats.LastDamageTick == tick − 1`, `LastDamageSource == player`, `player != Null` and `Allegiance.Faction` in `[1, Count)`: set `provoked[Faction] = 1`.
+   - For each entity with `GridDamageStats.LastDamageTick == tick − 1`, `LastDamageInstigator == player`, `player != Null` and `Allegiance.Faction` in `[1, Count)`: set `provoked[Faction] = 1`.
 
    This is O(chunks changed last tick).
 3. **`ApplyJob`** (`IJob`, `Schedule` after `ProvokeJob`). It uses `BufferLookup<FactionStanding>(false)`, `BufferLookup<FactionRelationRequest>(false)`, `ComponentLookup<FactionState>(false)` and `ComponentLookup<FactionRelations>(false)` (decision 3: RW lookups order this job after every earlier reader without a sync point). It also gets the `ManagedEventQueue<FactionRelationChanged>` parallel writer, obtained with `SystemAPI.GetSingleton` (read-only) and `[NativeDisableContainerSafetyRestriction]` (item 34 pattern).

@@ -188,6 +188,14 @@ namespace Game.Simulation
 
     public enum FactionStance : byte { Neutral = 0, Friendly = 1, Hostile = 2 }
 
+    // OwnedBy is designed here but lives in Assets/Game/Data/Components/OwnedBy.cs (namespace Game.Data.Components) so Voxel (SPEC-13 rams)
+    // can read it (review X6):
+    //   /// <summary>On a root launched or spawned by another root (craft, drones, mines). Added by the requester; never changed.</summary>
+    //   public struct OwnedBy : IComponentData { public Entity Owner; public ulong OwnerPersistentId; /* 0 if the owner is transient */ }
+    // Instigator rule (every producer of DamageEvent, ShieldHit, ExplosionRequest): Instigator = OwnedBy.Owner of the shooter root if present,
+    // else the shooter root. Resolved once per shot (stored in ProjectileRow / ShotRequest). Allegiance of an owned root equals its owner's
+    // (the requester copies it).
+
     /// <summary>Singleton relation matrix. Default created by WeaponContent (factions 0 player, 1 hostile, 2 neutral);
     /// SPEC-33 rebuilds it from FactionDefinitions. Only writer after boot: SPEC-33's faction system.</summary>
     public struct FactionRelations : IComponentData
@@ -328,6 +336,7 @@ namespace Game.Simulation.Weapons
         public DamageType Type;
         public ProjectileFlags Flags;
         public float DamageMultiplier;   // shooter ShipStatMultipliers.Get(StatId.WeaponDamage) at fire time (1 without SPEC-22)
+        public Entity Instigator;        // review X6: OwnedBy.Owner of Source, else Source (resolved at fire time)
     }
 
     /// <summary>Singleton owned by ProjectileStepSystem (created in OnCreate). Access per SPEC-12 §5.1. Read by SPEC-63 tracers. Follows the
@@ -368,14 +377,16 @@ public readonly struct ShipDestroyed
     public readonly byte IsPlayer;                    // 1 when the grid had PlayerShip
     public readonly byte Faction;                     // Allegiance.Faction (255 = none / no Allegiance)
     public readonly byte Kind;                        // (byte)HulkInfo.Kind: the GridKind before death (Ship = 0, Station = 1, Asteroid = 2)
+    public readonly ulong KillerPersistentId;         // PersistentId of GridDamageStats.LastDamageInstigator (0 = none, transient or unknown; review X6)
+    public readonly byte KillerIsPlayer;              // 1 when that instigator was the player ship (so the player's craft credit the player)
     public ShipDestroyed(ulong persistentId, Game.Core.ContentHash blueprint, Game.Core.ContentHash encounter, uint encounterInstance,
-                         uint tick, byte isPlayer, byte faction, byte kind);
+                         uint tick, byte isPlayer, byte faction, byte kind, ulong killerPersistentId, byte killerIsPlayer);
 }
 ```
 
 `ShipDestroyedBridgeSystem` (`Assets/Game/Simulation/Weapons/ShipDestroyedBridgeSystem.cs`, `ISystem`, main thread, not Burst-compiled): `PresentationBridgeGroup`, `[UpdateBefore(typeof(ManagedEventDrainSystem))]`; requires `DamageStreams` only (not `GameplayActive`: a core loss in the last tick before a scene exit is still reported). Per frame:
 1. `streams.DrainCoreLost(pending)` (`pending`: persistent `NativeList<GridCoreLost>`, cleared each frame). Empty → return.
-2. `em.CompleteDependencyBeforeRO` for `PlayerShip`, `Allegiance`, `GridSource`, `HulkInfo` and (from M3) `EncounterTag`; then for each event in list order: if `em.Exists(Grid)`: `IsPlayer = HasComponent<PlayerShip>`, `Faction = Allegiance.Faction` (255 if absent), `Blueprint = GridSource.Blueprint`, `Kind = (byte)HulkInfo.Kind` (0 if absent), `Encounter`/`EncounterInstance` from `EncounterTag` when present; if it no longer exists, those fields are 0/255.
+2. `em.CompleteDependencyBeforeRO` for `PlayerShip`, `Allegiance`, `GridSource`, `HulkInfo` and (from M3) `EncounterTag`; then for each event in list order: if `em.Exists(Grid)`: `IsPlayer = HasComponent<PlayerShip>`, `Faction = Allegiance.Faction` (255 if absent), `Blueprint = GridSource.Blueprint`, `Kind = (byte)HulkInfo.Kind` (0 if absent), `Encounter`/`EncounterInstance` from `EncounterTag` when present; `k = GridDamageStats.LastDamageInstigator`: `KillerPersistentId = PersistentId[k]` and `KillerIsPlayer = HasComponent<PlayerShip>(k)` when `k` exists (else 0/0); if the grid no longer exists, those fields are 0/255.
 3. `em.CompleteDependencyBeforeRO<ManagedEventQueue<ShipDestroyed>>()`; enqueue `ManagedEventEnvelope<ShipDestroyed> { Tick = e.Tick, SortKey = e.PersistentId, Payload }` (main-thread producer, SPEC-02 §5.6). `ManagedEventDrainSystem` publishes it the same frame.
 
 `Game.Simulation/AssemblyInfo.cs` registers `ManagedEventQueue<ShipDestroyed>`; `ManagedEventChannels.RegisterAll` gets `system.RegisterChannel<ShipDestroyed>();`. Consumers: SPEC-01 `DefeatWatcher` (`IsPlayer == 1`), SPEC-40 narrative bridge, SPEC-33 director (`EncounterDefeated`), SPEC-63/64 nothing (they react to `CellRemoved`/FX).
@@ -488,7 +499,7 @@ Inputs: muzzle `m`, shooter velocity `vs` (root `PhysicsVelocity.Linear`), targe
 
 ### 5.5 `WeaponFireSystem`
 
-Job 1 `WeaponFireJob : IJobChunk` (`ScheduleParallel`) over weapon entities; writes `WeaponState`, `BeamState` (own entity) and a `NativeStream` of `ShotRequest { float3 Position; float3 Velocity; Entity Source; Entity Target; uint ShotId; uint DeathTick; ushort Weapon; DamageType Type; ProjectileFlags Flags; float DamageMultiplier; }` at foreach index `unfilteredChunkIndex` (`forEachCount = query.CalculateChunkCountWithoutFiltering()`). Also enqueues muzzle `FxEvent`/`SfxEvent`. Per weapon (`w`, root data as in §5.4; `tick = SimClock.Tick`):
+Job 1 `WeaponFireJob : IJobChunk` (`ScheduleParallel`) over weapon entities; writes `WeaponState`, `BeamState` (own entity) and a `NativeStream` of `ShotRequest { float3 Position; float3 Velocity; Entity Source; Entity Instigator; Entity Target; uint ShotId; uint DeathTick; ushort Weapon; DamageType Type; ProjectileFlags Flags; float DamageMultiplier; }` (`Instigator` per §4.3 rule) at foreach index `unfilteredChunkIndex` (`forEachCount = query.CalculateChunkCountWithoutFiltering()`). Also enqueues muzzle `FxEvent`/`SfxEvent`. Per weapon (`w`, root data as in §5.4; `tick = SimClock.Tick`):
 1. Skip (and set `Firing = 0`) if `WeaponIndex == 0`, root missing, `Hulk`, `Dormant`, `GridSpawning`, or `HasAim == 0`.
 2. Cooldowns: `CooldownRemainingTicks = max(0, CooldownRemainingTicks − 1)`; `CooldownTicks = w.TriggerIntervalTicks / FireRateMultiplier` (`ShipStatMultipliers.Get(StatId.FireRate)`, 1 if absent); `if (RoundsLeftInBurst > 0) BurstRemainingTicks −= 1`.
 3. **Wants to fire:** `held = (cmd.FireGroups & Group) != 0`; `auto = WeaponControl.Autofire == 1 && target exists && InRange && hostile(target)`; `wants = (held || auto) && (Aligned || (IsFixed && held))`; powered = entity has no `Powered` or it is enabled.
@@ -506,8 +517,8 @@ Job 2 `ShotAppendJob : IJob` (after job 1; `ProjectileStore.Acquire/Release`): f
    1. **Homing:** `Target` exists → `toT = normalize(targetCentre − Position)`; rotate `Velocity` toward `toT` by at most `HomingTurnRateRad × dt` (Rodrigues about `cross(v, toT)`), keep speed.
    2. `p0 = Position`, `p1 = p0 + Velocity × dt`.
    3. `hit = CombatHitTest.Segment(p0, p1, ProjectileRadius, Source, ...)` (§5.9).
-   4. **Hull hit** on grid `G` at world point `h`, world dir `u = normalize(Velocity)`: if `Damage > 0`: write `DamageEvent { Grid = G, LocalPoint = WorldToGridPoint(h), LocalDir = WorldToGridDir(u), Amount = Damage × DamageMultiplier, Radius = 0, Penetration = PenetrationCells, Type, Source, WorldImpulse = u × ImpulsePerHit, Producer = Projectile, Sequence = ShotId, Flags = None }`. If `ExplosionRadius > 0`: write `ExplosionRequest { WorldPos = h, Radius, Amount = ExplosionDamage × DamageMultiplier, Type = Explosive, Source, Producer = Projectile, Sequence = ShotId }`. Hit `FxEvent` (`HitKinetic` for Kinetic/Explosive, `HitEnergy` for Energy) at `h`, `Dir = −u`, `Vel` = hit grid velocity, `Scale = clamp(Damage / 50, 0.5, 3)`, `Fx = HitFx`; hit `SfxEvent` from `CombatAudioCues` by type, volume `clamp(Damage / 200, 0.3, 1)`. Mark `Dead`, `Hits++`.
-   5. **Shield hit** on grid `G` at local surface point `q` (grid space): write `ShieldHit { Grid = G, LocalPoint = q, Amount = Damage × DamageMultiplier, Type, Source, LocalDir = WorldToGridDir(u), Penetration = PenetrationCells, Radius = 0, WorldImpulse = u × ImpulsePerHit, Flags = None, Producer = Projectile, Sequence = ShotId }`; explosive rounds additionally write the `ExplosionRequest` at the world surface point. No Fx here (SPEC-22 `ShieldSystem` emits ripples). Mark `Dead`.
+   4. **Hull hit** on grid `G` at world point `h`, world dir `u = normalize(Velocity)`: if `Damage > 0`: write `DamageEvent { Grid = G, LocalPoint = WorldToGridPoint(h), LocalDir = WorldToGridDir(u), Amount = Damage × DamageMultiplier, Radius = 0, Penetration = PenetrationCells, Type, Source, WorldImpulse = u × ImpulsePerHit, Producer = Projectile, Sequence = ShotId, Flags = None, Instigator }`. If `ExplosionRadius > 0`: write `ExplosionRequest { WorldPos = h, Radius, Amount = ExplosionDamage × DamageMultiplier, Type = Explosive, Source, Producer = Projectile, Sequence = ShotId, Instigator }`. Hit `FxEvent` (`HitKinetic` for Kinetic/Explosive, `HitEnergy` for Energy) at `h`, `Dir = −u`, `Vel` = hit grid velocity, `Scale = clamp(Damage / 50, 0.5, 3)`, `Fx = HitFx`; hit `SfxEvent` from `CombatAudioCues` by type, volume `clamp(Damage / 200, 0.3, 1)`. Mark `Dead`, `Hits++`.
+   5. **Shield hit** on grid `G` at local surface point `q` (grid space): write `ShieldHit { Grid = G, LocalPoint = q, Amount = Damage × DamageMultiplier, Type, Source, LocalDir = WorldToGridDir(u), Penetration = PenetrationCells, Radius = 0, WorldImpulse = u × ImpulsePerHit, Flags = None, Producer = Projectile, Sequence = ShotId, Instigator }`; explosive rounds additionally write the `ExplosionRequest` at the world surface point. No Fx here (SPEC-22 `ShieldSystem` emits ripples). Mark `Dead`.
    6. **Celestial hit:** hit Fx only; mark `Dead`.
    7. **No hit:** `Position = p1`; if `tick ≥ DeathTick`: `ExplodeOnExpire` → `ExplosionRequest` at `p1`; mark `Dead`, `Expired++`.
    8. `EndForEachIndex` on all writers per batch.
@@ -522,7 +533,7 @@ Explosion requests written here are drained this tick by `ExplosionSystem` (regi
 1. Root missing, `Hulk` or not powered → `Active = 0`, `TicksLeft = 0`, continue.
 2. `muzzleWorld`/`MuzzleLocal` as §5.4 step 1 (post-physics pose this time, so the beam starts where the ship is drawn); `dir = rootT.TransformDirection(FireDirLocal)`; `p1 = muzzleWorld + dir × BeamRange`.
 3. `hit = CombatHitTest.Segment(muzzleWorld, p1, BeamWidth × 0.5, Source = root, ...)`.
-4. `amount = Damage × DamageMultiplier / BeamPulseTicks`; hull hit → `DamageEvent` (`Penetration = PenetrationCells`, `Producer = Beam`, `Sequence = (uint)InstanceIndex`, `WorldImpulse = dir × ImpulsePerHit / BeamPulseTicks`); shield hit → `ShieldHit` (`Producer = Beam`, same sequence); `EndWorld = hit point`, `HitSomething = 1`; no hit → `EndWorld = p1`, `HitSomething = 0`. Hit Fx every 6th tick of the pulse (`TicksLeft % 6 == 0`) at the hit point.
+4. `amount = Damage × DamageMultiplier / BeamPulseTicks`; hull hit → `DamageEvent` (`Penetration = PenetrationCells`, `Producer = Beam`, `Sequence = (uint)InstanceIndex`, `Instigator` per §4.3 rule, `WorldImpulse = dir × ImpulsePerHit / BeamPulseTicks`); shield hit → `ShieldHit` (`Producer = Beam`, same sequence and instigator); `EndWorld = hit point`, `HitSomething = 1`; no hit → `EndWorld = p1`, `HitSomething = 0`. Hit Fx every 6th tick of the pulse (`TicksLeft % 6 == 0`) at the hit point.
 5. `TicksLeft−−`; `0` → `Active = 0`.
 
 ### 5.8 `ExplosionSystem`
@@ -530,7 +541,7 @@ Explosion requests written here are drained this tick by `ExplosionSystem` (regi
 1. `list = NativeList<ExplosionRequest>(Allocator.TempJob)`; `h0 = streams.ScheduleDrainExplosions(ref state, list)` (sorted by SPEC-13; combines into `state.Dependency`).
 2. `ExplosionJob : IJob` after `h0` (single-threaded; requests are few), damage writer `streams.Damage.BeginWrite(ref state, ProducerKind.Explosion, 1)`, shield writer `shieldHits.Hits.BeginWrite(ref state, ProducerKind.Explosion, 1)`. For each request `e` in order:
    1. `QuerySphere(e.WorldPos, e.Radius)` → grid proxies (skip `Celestial`), ascending `Entity.Index`.
-   2. For each grid `G` (skip if `GridSpawning`, `EditorPreview` grids are never damaged): `c = WorldToGridPoint(e.WorldPos)`. Shield `Active` and `ShieldMath.SphereOverlaps(c, e.Radius, Center, Radii)` → `ShieldHit { Grid = G, LocalPoint = c, Amount, Type, Source, LocalDir = 0, Penetration = 0, Radius, WorldImpulse = impulse, Flags = Blast, Producer = Explosion, Sequence }`. Else, if the sphere intersects the grid's cell bounds box (`CellMin·s .. (CellMax+1)·s`, grid space): `DamageEvent { Grid = G, LocalPoint = c, LocalDir = 0, Amount, Radius, Penetration = 0, Type, Source, WorldImpulse = impulse, Producer = Explosion, Sequence = e.Sequence }`. `impulse = normalize(gridCentreWorld − e.WorldPos) × Amount × ExplosionImpulsePerDamage × (1 − clamp(dist / Radius, 0, 1))²` (zero vector if the centre coincides).
+   2. For each grid `G` (skip if `GridSpawning`, `EditorPreview` grids are never damaged): `c = WorldToGridPoint(e.WorldPos)`. Shield `Active` and `ShieldMath.SphereOverlaps(c, e.Radius, Center, Radii)` → `ShieldHit { Grid = G, LocalPoint = c, Amount, Type, Source, LocalDir = 0, Penetration = 0, Radius, WorldImpulse = impulse, Flags = Blast, Producer = Explosion, Sequence, Instigator = e.Instigator }`. Else, if the sphere intersects the grid's cell bounds box (`CellMin·s .. (CellMax+1)·s`, grid space): `DamageEvent { Grid = G, LocalPoint = c, LocalDir = 0, Amount, Radius, Penetration = 0, Type, Source, WorldImpulse = impulse, Producer = Explosion, Sequence = e.Sequence, Instigator = e.Instigator }`. `impulse = normalize(gridCentreWorld − e.WorldPos) × Amount × ExplosionImpulsePerDamage × (1 − clamp(dist / Radius, 0, 1))²` (zero vector if the centre coincides).
    3. One `FxEvent { Radius < 4 ? ExplosionSmall : ExplosionLarge, e.WorldPos, (0,1,0), Vel = 0, Scale = Radius }` and one `SfxEvent` (`CombatAudioCues.ExplosionSmall/Large`).
 3. Dispose `list` with the job handle; end writers; `state.Dependency = handle`.
 
@@ -636,7 +647,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 - **Tier:** standard — transcribes the exact code of §4 (bodies throw `NotImplementedException`, except `Allegiance`, `FactionRelations.Get/IsHostile/CreateDefault/Dispose`, `ProjectileStore` one-liners)
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`, `DMG-001`, `FLT-001`
 - **Do:** Create every type of §4.1–§4.6 and §5.9's public types in the folders of decision 15. `WeaponDefinition` references SPEC-63's `FxDefinition` and SPEC-64's `AudioCueDefinition`; if they do not exist yet, create them as empty `ContentDefinition` subclasses with a `// TODO(VFX-001)` / `// TODO(AUD-001)` note (their tasks fill them).
-- **Files:** `Assets/Game/Data/Definitions/Weapons/{WeaponDelivery,ProjectileVisual,WeaponFireGroups,WeaponDefinition,WeaponTuningDefinition}.cs`; `Assets/Game/Simulation/{Allegiance,FactionStance,FactionRelations,CombatGridSetup}.cs`; `Assets/Game/Simulation/Weapons/{WeaponDef,WeaponDefsBlob,WeaponDefsRef,WeaponTuning,WeaponContent,WeaponMount,WeaponAim,WeaponState,BeamState,WeaponAimMode,WeaponControl,ShipTarget,ProjectileFlags,ProjectileRow,ProjectileStore,ProjectileStoreStats,HitKind,CombatHit,CombatHitTest}.cs`
+- **Files:** `Assets/Game/Data/Components/OwnedBy.cs`; `Assets/Game/Data/Definitions/Weapons/{WeaponDelivery,ProjectileVisual,WeaponFireGroups,WeaponDefinition,WeaponTuningDefinition}.cs`; `Assets/Game/Simulation/{Allegiance,FactionStance,FactionRelations,CombatGridSetup}.cs`; `Assets/Game/Simulation/Weapons/{WeaponDef,WeaponDefsBlob,WeaponDefsRef,WeaponTuning,WeaponContent,WeaponMount,WeaponAim,WeaponState,BeamState,WeaponAimMode,WeaponControl,ShipTarget,ProjectileFlags,ProjectileRow,ProjectileStore,ProjectileStoreStats,HitKind,CombatHit,CombatHitTest}.cs`
 - **Acceptance criteria:**
   - [ ] Compiles; components unmanaged; `ProjectileRow` is 64 bytes (`UnsafeUtility.SizeOf`).
   - [ ] `FactionRelations.CreateDefault`: 0↔1 hostile, 2 neutral, diagonal friendly.
@@ -804,6 +815,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 - **Acceptance criteria:**
   - [ ] A core loss on an AI ship with `Allegiance.Faction = 3` spawned from blueprint B publishes exactly one `ShipDestroyed { Blueprint = B, Faction = 3, IsPlayer = 0, Kind = 0 }` on the `EventBus` the same frame.
   - [ ] A core loss on the player ship gives `IsPlayer = 1`.
+  - [ ] A ship killed by a craft with `OwnedBy { Owner = player root }` reports `KillerIsPlayer = 1` and the player's `KillerPersistentId` (review X6).
   - [ ] Two core losses in one tick are published in ascending `PersistentId` order.
   - [ ] A grid destroyed before the bridge runs still yields an event with its `PersistentId` and `Faction = 255`.
 - **Tests:** `ShipDestroyedBridgeTests.AiShip_FieldsFilled`, `.Player_IsPlayer`, `.SameTick_SortedById`, `.DestroyedGrid_StillReported`.

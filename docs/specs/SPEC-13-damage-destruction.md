@@ -100,6 +100,7 @@ namespace Game.Voxel.Damage
         public ProducerKind Producer;
         public uint Sequence;          // unique per (Source, Producer) within a tick; assigned by the producer
         public DamageEventFlags Flags;
+        public Entity Instigator;      // who is responsible (review X6): OwnedBy.Owner of the shooter if present, else Source. Not a sort key
     }
 
     public enum CellRemovedReason : byte { Destroyed = 0, DetachedParticle = 1, DetachedBody = 2, Dissolved = 3 }
@@ -131,6 +132,7 @@ namespace Game.Voxel.Damage
         // ---- SPEC-13 additions ----
         public ProducerKind Producer;   // Explosion for reactor/core breaches written by DMG
         public uint Sequence;
+        public Entity Instigator;       // carried into the DamageEvents/ShieldHits the explosion produces (review X6)
     }
 
     /// <summary>Request to push a body (ADR-0016): tractor beams, launch catapults, gravity wells. Applied by ImpactEventSystem (§5.2 step 1b).</summary>
@@ -190,7 +192,8 @@ namespace Game.Voxel.Damage
     public struct GridDamageStats : IComponentData
     {
         public uint LastDamageTick;
-        public Entity LastDamageSource;   // Source of the last event of the latest damaging tick (resolver order); SPEC-33 provocation reads it
+        public Entity LastDamageSource;   // Source of the last event of the latest damaging tick (resolver order)
+        public Entity LastDamageInstigator; // Instigator of that same event (review X6); SPEC-33 provocation and SPEC-21 kill credit read it
         public int CellsDestroyed;     // cumulative, reason Destroyed
         public int CellsDetached;      // cumulative, reasons DetachedParticle/DetachedBody
         public int InstancesDestroyed; // cumulative
@@ -567,7 +570,7 @@ Position: after `SpatialHashBuildSystem`, before `ProjectileStepSystem`. Writes 
    1. `key = ((ulong)(uint)A.Index << 32) | (uint)B.Index`; if `RamPairs[key]` exists and `Tick − last < RamPairCooldownTicks` → skip.
    2. `invMassX` = `PhysicsMass.InverseMass` if the body has `PhysicsVelocity` and `PhysicsMass`, else 0. `E = RamEnergy(J, invA, invB, RamRestitutionCorrection)` = `J² · (invA + invB) / (2 · RamRestitutionCorrection)`. If `E < MinRamEnergyJ` → skip (no cooldown update).
    3. Hardness per side: if the side is a grid, find the contact cell (point nudged `0.5·CellSize` into that grid along the normal, `CellOf`); `h = CellHp(block) / Multiplier(Ram, ArmorClass)`; no solid cell or not a grid → `h = 100`.
-   4. For each side X that is a grid (other side Y): `Amount_X = E · RamHpPerJoule · h_Y / (h_X + h_Y)`; `Radius = clamp(RamRadiusBaseCells + RamRadiusCellsPerSqrtMJ · sqrt(E / 1e6), 0.75, RamRadiusMaxCells) · CellSize_X`; `LocalPoint` = nudged point in X's local space; `LocalDir` = normal pointing into X, X-local; `Type = Ram`, `Source = Y`, `Producer = Impact`, `Sequence = pair ordinal × 2 + side`, `Flags = NoImpulse`, `WorldImpulse = 0`. Write to this system's damage stream (`forEachCount = 1`).
+   4. For each side X that is a grid (other side Y): `Amount_X = E · RamHpPerJoule · h_Y / (h_X + h_Y)`; `Radius = clamp(RamRadiusBaseCells + RamRadiusCellsPerSqrtMJ · sqrt(E / 1e6), 0.75, RamRadiusMaxCells) · CellSize_X`; `LocalPoint` = nudged point in X's local space; `LocalDir` = normal pointing into X, X-local; `Type = Ram`, `Source = Y`, `Instigator = OwnedBy[Y].Owner` if `Y` has `Game.Data.Components.OwnedBy` (SPEC-21 §4.3) else `Y`, `Producer = Impact`, `Sequence = pair ordinal × 2 + side`, `Flags = NoImpulse`, `WorldImpulse = 0`. Write to this system's damage stream (`forEachCount = 1`).
    5. `RamPairs[key] = Tick`; `FxEvent { Kind = RamImpact, Pos = Point, Dir = Normal, Vel = 0, Scale = clamp(cbrt(E / 1e5), 0.5, 4) }`; `SfxEvent { Cue = CueRamImpact, Pos = Point, Volume = clamp(0.3 + 0.15·log10(E / 2e4), 0.3, 1) }` (skip when the cue hash is 0); `Current.RamEvents++`.
 5. **Prune** — every 60 ticks (`Tick % 60 == 0`): remove `RamPairs` entries older than 600 ticks (collect keys, sort, remove).
 
@@ -592,7 +595,7 @@ Position: after `ShieldSystem`/`ExplosionSystem`/`BeamStepSystem`; the only writ
    - `Heal`: for each solid cell in `[CellMin, CellMax] ∩ grid AABB` (z, y, x order): `Hp = min(255, Hp + ceil(HpFraction × 255))` through `BrickWrite.Set`; each live instance (`Flags & Destroyed == 0`) with a cell in the box: `FunctionHp = min(def.FunctionHp, FunctionHp + HpFraction × def.FunctionHp)`. Destroyed instances stay destroyed (the editor replaces them, SPEC-51).
    - `Place`: only if `Block` is a palette block, the cell is air, inside the AABB, and its brick exists (creating bricks is structural): find or append the palette entry `{Block, Orient, Color}`, write the cell at full HP with `BrickWrite.Set`, append `CellRestored`. Anything else is dropped and counted.
 4. Apply events in sorted order: `Radius > 0` → §5.3.4, else §5.3.3. Accumulate `PendingImpulse` unless `Flags.NoImpulse`: if `PendingImpulse.Tick != Tick` reset it to zero with `Tick = Tick`; `p = t.TransformPoint(LocalPoint)`; `LinearWorld += WorldImpulse`; `AngularWorld += cross(p − comWorld, WorldImpulse)`.
-5. If any cell changed: `g.Revision += 1` (once per tick); `GridDamageStats.LastDamageTick = Tick`, `LastDamageSource` = `Source` of the last event of this grid's sorted range whose effective damage was > 0 (`Entity.Null` for the detach pass alone).
+5. If any cell changed: `g.Revision += 1` (once per tick); `GridDamageStats.LastDamageTick = Tick`, `LastDamageSource` = `Source` and `LastDamageInstigator` = `Instigator` (or `Source` when null) of the last event of this grid's sorted range whose effective damage was > 0 (`Entity.Null` for the detach pass alone).
 6. Core loss: if `coreBefore ≥ 0` and the instance was destroyed this tick → `CoreLost = 1`, `CoreWorldPos` = world centre of its root cell, `g.AnchorInstance = −1`.
 
 #### 5.3.2 Cell access
@@ -655,7 +658,7 @@ After damage reaches an instance cell (`ApplyCellDamage` or `RemoveCell` with re
    1. `RemoveCell` every remaining cell with reason `Destroyed` (they add seeds).
    2. `inst.FunctionHp = 0`; `InstancesDestroyed++`.
    3. If `inst.Functional != Entity.Null` and it exists: append to `DestroyList`.
-   4. If the block has an `Explosive` module (`BlockModulesBlob.TryGet(BlockModuleId.Explosive, block, out ExplosiveParams x)`, SPEC-04 §4.6) and `x.BlastDamage > 0`: write `ExplosionRequest { WorldPos = world centre of the instance root cell, Radius = x.BlastRadiusCells · s, Amount = x.BlastDamage, Type = Explosive, Source = Grid, Producer = Explosion, Sequence = instance index }`. It is resolved next tick (chain reactions propagate one link per tick).
+   4. If the block has an `Explosive` module (`BlockModulesBlob.TryGet(BlockModuleId.Explosive, block, out ExplosiveParams x)`, SPEC-04 §4.6) and `x.BlastDamage > 0`: write `ExplosionRequest { WorldPos = world centre of the instance root cell, Radius = x.BlastRadiusCells · s, Amount = x.BlastDamage, Type = Explosive, Source = Grid, Producer = Explosion, Sequence = instance index, Instigator = GridDamageStats.LastDamageInstigator (or Grid) }`. It is resolved next tick (chain reactions propagate one link per tick).
    5. If the index equals `AnchorInstance` → core lost (§5.3.1 step 6).
 
 ### 5.4 `IntegritySystem`

@@ -310,6 +310,7 @@ These types cross module boundaries. **Their names and owning module are binding
 | `PlayerCommand` | singleton: same fields as `ShipCommand` plus latched edge flags | Written only by `PlayerInputSampleSystem` |
 | `PlayerShip` | tag on the player's current ship | |
 | `Allegiance` | `byte Faction; byte Team` | `ContentId` → byte index via `FactionTable` |
+| `OwnedBy` | `Entity Owner; ulong OwnerPersistentId` in `Game.Data.Components` (designed by SPEC-21) | On roots launched or spawned by another root. Damage, shield-hit and explosion events carry `Instigator` = owner (or the shooter); provocation and kill credit use it |
 | `ShipStats` | shared part: mass, mass fraction, bounds, `FunctionalRevision`; multipliers in `ShipStatMultipliers` | Written only by `ShipStatsAggregateSystem`. Feature totals live in feature-owned stats components (`PropulsionStats`, `WeaponStats`, `PowerStats`, `ShieldStats`; ADR-0014) |
 | `PowerRequest` | buffer on functional entities: `{BlockModuleId Module; byte Priority, Requesting; float Draw; short ConsumerIndex}` | One element per power-consuming module; written by the module's owning feature (ADR-0014) |
 | `ShipPower` + buffer `PowerConsumer` + enableable `Powered` | | |
