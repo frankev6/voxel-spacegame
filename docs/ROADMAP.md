@@ -1,6 +1,8 @@
 # Roadmap
 
-**Status: BINDING order of work.** Milestones run in order. Within a milestone, any task whose dependencies are `done` may start. The art track runs in parallel, behind its own approval gate.
+**Status: BINDING order of work.** Milestones run in order. Within a milestone, any task whose dependencies are `done` may start.
+
+**Owner decision 2026-10-10: the design system comes first.** No other work proceeds until the owner approves the design system (`ART-013`). The only exceptions are the tasks the look tests themselves need: `CORE-001`, `DATA-001`, the SPEC-04 validation chain that `ART-007` registers into (`DATA-002`, `DATA-004`, `DATA-005`, `DATA-008`), and SPEC-81 `AST-001`…`AST-003` (ledger open question 4).
 
 Task status lives in [LEDGER.md](LEDGER.md). Task definitions live in the specs.
 
@@ -89,7 +91,7 @@ flowchart LR
 
 In-world editing when docked, supercruise, faction territory, more content, LOD2/dormancy polish, gamepad. Specs mark these tasks with milestone `M4`.
 
-## Art track (parallel)
+## Art track (first: A0 gates every milestone, owner decision 2026-10-10)
 
 | Step | Spec | Gate |
 |---|---|---|
