@@ -230,7 +230,7 @@ namespace Game.Voxel.Damage
     }
 
     /// <summary>On new hulk roots and chunk bodies: contacts with Other are ignored until UntilTick (SPEC-12 honours it).</summary>
-    public struct SplitGrace : IComponentData { public Entity Other; public uint UntilTick; }
+    public struct SplitGrace : IComponentData { public Entity Other; public uint UntilTick; }   // set by SplitSystem, and by SPEC-10 GridStowApi.Unstow for launches (ADR-0017)
 
     /// <summary>On new hulk roots and chunk bodies until SPEC-31 copies the parent's StarSystemMember (open question 4).</summary>
     public struct SplitOrigin : IComponentData { public Entity Parent; }

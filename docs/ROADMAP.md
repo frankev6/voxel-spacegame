@@ -57,7 +57,7 @@ flowchart LR
 | SPEC-13 Damage and destruction | All |
 | SPEC-21 Weapons | All weapon types used by legacy content |
 | SPEC-22 Power, shields, stats | All |
-| SPEC-23 AI | Single-ship combat AI (fleets in M4) |
+| SPEC-23 AI | Single-ship combat AI with ability rules (fleets and wings in M3, ADR-0017) |
 | SPEC-24 Abilities | Framework + the 2 legacy abilities |
 | SPEC-63 VFX | Debris particles, hits, explosions, beams |
 | SPEC-64 Audio | Event drain, voice caps, mixer |
@@ -73,6 +73,7 @@ flowchart LR
 | SPEC-30 Galaxy generation | All |
 | SPEC-31 Star-system streaming | All |
 | SPEC-32 Travel | Lanes and jumps (supercruise may slip to M4) |
+| SPEC-23 AI (fleets) | Fleets and wings with member short-cut thinking; swarm gate (ADR-0017) |
 | SPEC-33 Encounters and factions | Director + one hostile encounter type |
 | SPEC-40 Narrative core | All |
 | SPEC-41 Dialog | Yarn spike, runner, presenter |
@@ -86,7 +87,7 @@ flowchart LR
 
 ## M4 — Depth and scale
 
-AI fleets and formations, in-world editing when docked, supercruise, faction territory, more content, LOD2/dormancy polish, gamepad. Specs mark these tasks with milestone `M4`.
+In-world editing when docked, supercruise, faction territory, more content, LOD2/dormancy polish, gamepad. Specs mark these tasks with milestone `M4`.
 
 ## Art track (parallel)
 

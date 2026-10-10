@@ -256,12 +256,12 @@ namespace Game.Simulation.Ai
 }
 ```
 
-### 4.4 Fleets (M4, `Game.Simulation.Ai`)
+### 4.4 Fleets and wings (M3, `Game.Simulation.Ai`; ADR-0017)
 
 ```csharp
 namespace Game.Simulation.Ai
 {
-    /// <summary>M4. On fleet members (not on the leader). Writer: the spawner (SPEC-33), FleetSystem on leader loss.</summary>
+    /// <summary>On group members (not on the leader): encounter fleets (SPEC-33) and carrier wings alike (ADR-0017). Writer: the spawner, FleetSystem on leader loss.</summary>
     public struct FleetMember : Unity.Entities.IComponentData
     {
         public Unity.Entities.Entity Leader;
@@ -365,9 +365,9 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (step
 
 `IJob` (single-threaded): find the player ship (a `NativeList` from `ToEntityListAsync` of `PlayerShip`); count AI roots with `AiBrain.State == Engage`, `ShipTarget.Value == player`, and centre within `CombatBubbleRadius` of the player (use the hash proxies). `LastDamagedTick = GridDamageStats.LastDamageTick` of the player root if present. Write the singleton through a `ComponentLookup` on its entity (no main-thread access). No player → `HostilesEngaging = 0`, `LastDamagedTick` unchanged.
 
-### 5.7 Fleets (M4)
+### 5.7 Fleets and wings (M3; ADR-0017)
 
-`FleetSystem` (`ShipCommandGroup`, after `AiDecisionSystem`, before `AiSteeringSystem`): for each member with a live leader: `GoalPosition = leaderPos + rotateY((slot.x, 0, slot.y), leaderYaw)`, `GoalHeadingYaw = leaderYaw`, `GoalSpeedFraction = 1` (members can catch up), state `Engage` follows the leader's target when the leader engages (copy `ShipTarget`). Leader lost (destroyed or hulk): promote the member with the lowest `Slot` (record new `Leader` on every member through the GameplayEnd ECB is not needed: `FleetMember.Leader` is a plain write by `FleetSystem`, single writer).
+Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `Leader` is alive and not a hulk skips steps 3 (target choice), 5 (goal) and 6 (avoidance) and copies the leader's `ShipTarget` instead; only leaders and lone ships pay for hash queries, so decision cost is O(groups). `FleetSystem` (`ShipCommandGroup`, after `AiDecisionSystem`, before `AiSteeringSystem`): for each member with a live leader: `GoalPosition = leaderPos + rotateY((slot.x, 0, slot.y), leaderYaw)`, `GoalHeadingYaw = leaderYaw`, `GoalSpeedFraction = 1` (members can catch up), state `Engage` follows the leader's target when the leader engages (copy `ShipTarget`). Leader lost (destroyed or hulk): promote the member with the lowest `Slot` (record new `Leader` on every member through the GameplayEnd ECB is not needed: `FleetMember.Leader` is a plain write by `FleetSystem`, single writer).
 
 ## 6. Public API
 
@@ -541,8 +541,8 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (step
   - [ ] All §8 budgets met or an *Open questions* row with numbers.
 - **Tests:** `AiPerfTests.FiftyShips_Under1_5ms`, `SpatialHashPerfTests.Build1000`, `.QuerySegment`, `.QuerySphere`.
 
-### AI-013 — Fleet data and formations (M4)
-- **Milestone:** M4
+### AI-013 — Fleet data and formations
+- **Milestone:** M3
 - **Tier:** standard — data types and content only
 - **Depends on:** `AI-003`
 - **Do:** `FormationDefinition` validation (≥ 1 slot, no two slots closer than 20 m), blob baking into `AiConfig` (formations array), three formations: `formation_line`, `formation_wedge`, `formation_column`.
@@ -551,25 +551,27 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (step
   - [ ] Formations bake; validation reports spacing errors.
 - **Tests:** `FormationTests.Bake`, `.Validation_Spacing`.
 
-### AI-014 — FleetSystem (M4)
-- **Milestone:** M4
+### AI-014 — FleetSystem and member thinking
+- **Milestone:** M3
 - **Tier:** frontier — F5: leader/member coordination and leader promotion across decision and steering
 - **Depends on:** `AI-013`, `AI-007`
-- **Do:** Implement §5.7.
-- **Files:** `Assets/Game/Simulation/Ai/FleetSystem.cs`, `Assets/Game/Tests/EditMode/Simulation/Ai/FleetTests.cs`
+- **Do:** Implement §5.7, including the member short-cut in `AiDecisionSystem`.
+- **Files:** `Assets/Game/Simulation/Ai/{FleetSystem,AiThinkJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Ai/FleetTests.cs`
 - **Acceptance criteria:**
   - [ ] Members hold slots within 15 m while the leader cruises; members engage the leader's target; leader loss promotes the lowest slot deterministically.
+  - [ ] A member with a live leader performs no `QuerySphere` on its think (counted by a test hook).
 - **Tests:** `FleetTests.HoldsSlots`, `.FollowsLeaderTarget`, `.LeaderLoss_Promotes`.
 
-### AI-015 — Fleet scenario and performance (M4)
-- **Milestone:** M4
+### AI-015 — Fleet and swarm scenario and performance
+- **Milestone:** M3
 - **Tier:** standard — tests of specified behaviour
 - **Depends on:** `AI-014`
-- **Do:** Two 8-ship fleets fight; measure AI cost; check formations visually through the harness.
+- **Do:** Two 8-ship fleets fight; measure AI cost; check formations visually through the harness. Swarm gate (06, ADR-0017): 30 ships plus 100 single-brick `GridProfile.SmallCraft` grids in groups of 10, all fighting; record the result in the ledger *Measurements*.
 - **Files:** `Assets/Game/Tests/PlayMode/Simulation/Ai/FleetScenarioTests.cs`
 - **Acceptance criteria:**
   - [ ] AI total stays ≤ 1.5 ms with 16 fleet ships plus 34 others.
-- **Tests:** `FleetScenarioTests.TwoFleets_Under1_5ms`.
+  - [ ] Swarm: main thread ≤ 10 ms median and AI ≤ 1.5 ms with 30 ships + 100 craft (06).
+- **Tests:** `FleetScenarioTests.TwoFleets_Under1_5ms`, `.Swarm_30Ships100Craft` (`Performance`).
 
 ## 10. Open questions
 

@@ -416,7 +416,10 @@ public static class GridStowApi
     public static void Stow(EntityCommandBuffer.ParallelWriter ecb, int sortKey, Entity root);
     /// Re-enables the group and sets LocalTransform {pose, scale 1}, PhysicsVelocity {linear, angular} and, if present,
     /// PhysicsGraphicalInterpolationBuffer {PreviousTransform = pose, PreviousVelocity = velocity} (no smoothing streak).
-    public static void Unstow(EntityCommandBuffer.ParallelWriter ecb, int sortKey, Entity root, in RigidTransform pose, float3 linear, float3 angular);
+    /// graceOther != Entity.Null also adds SPEC-13 SplitGrace { Other = graceOther, UntilTick = graceUntilTick } (launch from a
+    /// carrier without contacts until the craft is clear; ADR-0017).
+    public static void Unstow(EntityCommandBuffer.ParallelWriter ecb, int sortKey, Entity root, in RigidTransform pose, float3 linear, float3 angular,
+                              Entity graceOther = default, uint graceUntilTick = 0);
 }
 
 public static class GridStructureSync                        // main thread, outside ECS system updates, or inside GridSpawnSystem

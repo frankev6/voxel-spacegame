@@ -38,6 +38,8 @@
 | Cut of 2,000 cells including split into a new hulk | ≤ 2 ms amortized; no frame over 8 ms |
 | Debris | 50,000 GPU debris particles live at ≤ 1 ms GPU; ≤ 64 chunk bodies live |
 | AI | 50 AI ships ≤ 1.5 ms total |
+| Swarm (ADR-0017) | 30 ships + 100 small craft (≤ 1 brick each, groups of 10), all fighting: main thread ≤ 10 ms median; AI ≤ 1.5 ms including craft |
+| Launch (ADR-0017) | Unstow 20 craft in one tick: no frame over 8 ms |
 | Determinism | Same seed + same scripted input → identical cell state hash after 600 ticks, at 30, 60 and 144 FPS |
 | Errors | Zero exceptions, zero ECB errors, zero native-container leaks in a 10-minute soak |
 
