@@ -8,5 +8,14 @@ namespace Game.Data.Validation
         public readonly string AssetPath;  // asset path, file path or logical path ("save:p001/manual_001")
         public readonly string Field;      // field or JSON path, "" if none
         public readonly string Message;    // one sentence, English
+
+        internal ValidationEntry(ValidationSeverity severity, string code, string assetPath, string field, string message)
+        {
+            Severity = severity;
+            Code = code ?? string.Empty;
+            AssetPath = assetPath ?? string.Empty;
+            Field = field ?? string.Empty;
+            Message = message ?? string.Empty;
+        }
     }
 }
