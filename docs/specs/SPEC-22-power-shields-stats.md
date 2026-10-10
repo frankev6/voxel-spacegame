@@ -112,9 +112,12 @@ namespace Game.Simulation.Power
 ```csharp
 namespace Game.Simulation.Power
 {
+    using Game.Data.Combat;   // StatId
+
     [System.Flags] public enum ShipStatsFlags : byte { None = 0, Initialized = 1, HasMass = 2 }
 
-    public enum StatId : byte { Thrust = 0, MaxSpeed = 1, FireRate = 2, WeaponDamage = 3, ShieldRegen = 4, TurnRate = 5 }  // add at end only
+    // StatId is designed here but lives in Assets/Game/Data/Combat/StatId.cs (namespace Game.Data.Combat, architecture §3.2) so ability
+    // content uses it directly:  public enum StatId : byte { Thrust = 0, MaxSpeed = 1, FireRate = 2, WeaponDamage = 3, ShieldRegen = 4, TurnRate = 5 }  // add at end only
 
     /// <summary>Aggregated ship stats on the grid root (architecture §6.4). Only writer: ShipStatsAggregateSystem.</summary>
     public struct ShipStats : IComponentData
@@ -205,7 +208,7 @@ namespace Game.Simulation.Power
         public Entity Grid;             // binding: the shielded grid root
         public float3 LocalPoint;       // binding: grid space, on the ellipsoid surface (blast: blast centre in grid space)
         public float Amount;            // binding: raw damage before shield type multiplier
-        public Game.Voxel.Damage.DamageType Type;   // binding (namespace per SPEC-13)
+        public Game.Data.Combat.DamageType Type;    // binding (designed by SPEC-13, architecture §3.2)
         public Entity Source;           // binding: attacking grid root or Entity.Null
         public float3 LocalDir;         // unit direction of travel in grid space (blast: zero)
         public float Penetration;       // cells, copied to the overflow DamageEvent
@@ -247,7 +250,7 @@ namespace Game.Simulation.Power
 }
 ```
 
-`ShieldHit` fields after the binding five are additions owned by this spec. `DamageType` is SPEC-13's enum (architecture §6.3); use SPEC-13's actual namespace.
+`ShieldHit` fields after the binding five are additions owned by this spec. `DamageType` is `Game.Data.Combat.DamageType` (designed by SPEC-13, architecture §3.2).
 
 ### 4.4 `ShieldMath` (public, static, Burst-compatible, no allocations)
 
@@ -537,8 +540,8 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 - **Milestone:** M2
 - **Tier:** standard — transcribes the types in §4.1–§4.6 exactly
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`, `DMG-001`
-- **Do:** Create every type of §4.1–§4.6 with the exact fields, flags and comments; `ShieldMath`, `PowerGridSetup.AddComponents` and `PowerContent` bodies throw `NotImplementedException("PWR-0xx")` naming the implementing task; `PowerTuning.Defaults` is real. If SPEC-13's `DamageType` namespace differs from `Game.Voxel.Damage`, use SPEC-13's.
-- **Files:** `Assets/Game/Simulation/Power/{ShipPowerFlags,ShipPower,PowerConsumerKind,PowerConsumerFlags,PowerConsumer,Powered,PowerLink,ShipStatsFlags,StatId,ShipStats,ShipStatModifier,ShieldFlags,ShieldState,ShieldRipple,ShieldControl,ShieldHitFlags,ShieldHit,ShieldHitStreams,ShieldMath,PowerTuning,PowerContent,PowerGridSetup}.cs`; `Assets/Game/Data/Definitions/Power/PowerTuningDefinition.cs`
+- **Do:** Create every type of §4.1–§4.6 with the exact fields, flags and comments; `ShieldMath`, `PowerGridSetup.AddComponents` and `PowerContent` bodies throw `NotImplementedException("PWR-0xx")` naming the implementing task; `PowerTuning.Defaults` is real. `StatId` goes to `Assets/Game/Data/Combat/StatId.cs` (namespace `Game.Data.Combat`).
+- **Files:** `Assets/Game/Simulation/Power/{ShipPowerFlags,ShipPower,PowerConsumerKind,PowerConsumerFlags,PowerConsumer,Powered,PowerLink,ShipStatsFlags,ShipStats,ShipStatModifier,ShieldFlags,ShieldState,ShieldRipple,ShieldControl,ShieldHitFlags,ShieldHit,ShieldHitStreams,ShieldMath,PowerTuning,PowerContent,PowerGridSetup}.cs`; `Assets/Game/Data/Definitions/Power/PowerTuningDefinition.cs`; `Assets/Game/Data/Combat/StatId.cs`
 - **Acceptance criteria:**
   - [ ] All files compile in `Game.Simulation` / `Game.Data` with no new assembly reference.
   - [ ] `UnsafeUtility.SizeOf<PowerConsumer>() == 24`, `SizeOf<PowerLink>() == 4`, `SizeOf<ShieldRipple>() == 20`.

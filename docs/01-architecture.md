@@ -106,6 +106,7 @@ Adding any package to `Packages/manifest.json` requires an ADR.
 Two kinds of types are needed by many modules, so they sit low in the graph even though a higher-level spec designs them:
 
 - **Every content definition class** (`*Definition : ContentDefinition : ScriptableObject`) lives in `Assets/Game/Data/Definitions/<Area>/` (namespace `Game.Data.Definitions`), so the single `ContentDatabase` can reference all of them. The spec of the area that uses a definition designs its fields and owns the task that creates it (for example SPEC-21 designs `WeaponDefinition`), but the file goes in `Game.Data`. Definitions hold data only — no behaviour that needs higher modules.
+- **Shared combat enums** (`DamageType`, designed by SPEC-13; `StatId`, designed by SPEC-22) live in `Assets/Game/Data/Combat/` (namespace `Game.Data.Combat`), so content definitions and every runtime module use the one enum instead of mirrors. The designing spec owns the values and the task that creates the file.
 - **The condition/effect logic vocabulary** (`ICondition`, `IEffect`, the compiled node types and the text compiler) lives in `Assets/Game/Data/Logic/` (namespace `Game.Data.Logic`). It is designed by SPEC-40 (Narrative core) and used by narrative, quests, encounters and spawn rules. Conditions and effects talk to the game only through the `ILogicContext` interface (also in `Game.Data.Logic`), which `Game.App` implements by routing to `FactStore`, inventory, galaxy and simulation services.
 
 ### 3.3 How a lower module talks to a higher one
@@ -270,6 +271,8 @@ These types cross module boundaries. **Their names and owning module are binding
 | `BlockDef` | blob struct: `Index`, `MirrorIndex`, `Kind`, `Cells` (footprint), `Clearance`, `AllowedOrientations` (24-bit mask), `AttachFaces`, `CellHp`, `CellMass`, `MaterialLayer`, `PropMeshIndex`, `Function` | Built from `BlockDefinition` ScriptableObjects |
 | `BlockDefsBlob` | `BlobArray<BlockDef>` indexed by `BlockIndex` | ECS singleton `BlockDefsRef` |
 | `ContentDatabase` | ScriptableObject with direct references to every content asset | The only content entry point |
+| `DamageType` | `enum : byte { Kinetic, Energy, Explosive, Ram }` in `Game.Data.Combat` | Designed by SPEC-13 (§3.2). Add values at the end only |
+| `StatId` | `enum : byte` in `Game.Data.Combat` | Designed by SPEC-22 (§3.2). Add values at the end only |
 
 ### 6.3 Voxel (`Game.Voxel`, specs SPEC-10 … SPEC-13)
 
@@ -288,7 +291,6 @@ These types cross module boundaries. **Their names and owning module are binding
 | `DamageEvent` | `Entity Grid; float3 LocalPoint, LocalDir; float Amount, Radius, Penetration; DamageType Type; Entity Source; float3 WorldImpulse` | Grid-space. Written to `DamageStreams` by producers |
 | `CellRemoved` | `Entity Grid; int3 Cell; ushort Block; byte Color; float3 WorldPos, WorldVel, Kick` | Output of the resolver; consumed by split, VFX, audio, salvage |
 | `ExplosionRequest` | `float3 WorldPos; float Radius, Amount; DamageType Type; Entity Source` | Defined here so Voxel code (reactor chain reactions) can request explosions; consumed by `ExplosionSystem` in Simulation (SPEC-21), which tests shields first |
-| `DamageType` | `enum : byte { Kinetic, Energy, Explosive, Ram }` | Add values at the end only |
 | `Hulk` | tag | Dead ship: still physical and damageable, no AI/power |
 
 ### 6.4 Simulation (`Game.Simulation`, specs SPEC-20 … SPEC-24)

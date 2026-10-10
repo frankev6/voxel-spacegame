@@ -63,8 +63,6 @@ namespace Game.Data.Definitions
     public enum WeaponDelivery : byte { Projectile = 0, Beam = 1, Missile = 2 }               // add at end only
     public enum ProjectileVisual : byte { StandardBullet = 0, RailgunSlug = 1, FlakShell = 2, Missile = 3, LaserBeam = 4 }
     [System.Flags] public enum WeaponFireGroups : byte { None = 0, Group1 = 1, Group2 = 2, Group3 = 4 }   // bit g = ShipCommand fire group g
-    /// <summary>Mirror of SPEC-13 DamageType for content (Game.Data cannot reference Game.Voxel). Values must stay equal (tested).</summary>
-    public enum WeaponDamageType : byte { Kinetic = 0, Energy = 1, Explosive = 2 }
 
     /// <summary>One weapon type. Linked from BlockDefinition.weapon (SPEC-04 DATA-010). Implements SPEC-21 §4.1.</summary>
     [ContentIdPrefix("wpn_")]
@@ -73,7 +71,7 @@ namespace Game.Data.Definitions
     {
         [UnityEngine.SerializeField] private string displayName;
         [UnityEngine.SerializeField] private WeaponDelivery delivery;
-        [UnityEngine.SerializeField] private WeaponDamageType damageType;               // same numeric values as SPEC-13 DamageType (§10 Q1)
+        [UnityEngine.SerializeField] private Game.Data.Combat.DamageType damageType;    // Kinetic, Energy or Explosive (Ram is rejected, WPN-E008)
         [UnityEngine.SerializeField, UnityEngine.Min(0)] private float damage;              // per round (projectile/missile direct hit) or per pulse (beam)
         [UnityEngine.SerializeField, UnityEngine.Min(1)] private float penetrationCells = 1; // point hits: max solid cells destroyed along the ray
         [UnityEngine.SerializeField, UnityEngine.Min(0)] private float explosionRadius;     // m; 0 = no explosion
@@ -114,7 +112,7 @@ namespace Game.Data.Definitions
 ```csharp
 namespace Game.Simulation.Weapons
 {
-    using Unity.Entities; using Unity.Mathematics; using Game.Core; using Game.Data.Definitions; using Game.Voxel.Damage;
+    using Unity.Entities; using Unity.Mathematics; using Game.Core; using Game.Data.Combat; using Game.Data.Definitions;
 
     /// <summary>Baked weapon. Index 0 = "none". Times in ticks, angles in radians. Implements SPEC-21 §4.2.</summary>
     public struct WeaponDef
@@ -298,7 +296,7 @@ namespace Game.Simulation.Weapons
 ```csharp
 namespace Game.Simulation.Weapons
 {
-    using Unity.Collections; using Unity.Entities; using Unity.Jobs; using Unity.Mathematics; using Game.Voxel.Damage;
+    using Unity.Collections; using Unity.Entities; using Unity.Jobs; using Unity.Mathematics; using Game.Data.Combat;
 
     [System.Flags] public enum ProjectileFlags : byte { None = 0, Homing = 1, ExplodeOnExpire = 2, Dead = 4, PlayerSource = 8 }
 
@@ -584,7 +582,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 | `AimValid == 0` | Weapons keep their current yaw and do not start new manual fire (SPEC-03 edge case) |
 | Scene change | Store cleared by `OnStopRunning`/`OnStartRunning`; beams inactive (weapon entities are destroyed) |
 | Star-system change during a rebase | `ApplyPendingShift` clears the store on the next tick (`StarSystemChanged == 1`); SPEC-63 hides tracers while `AppliedShiftSequence != FrameOrigin.ShiftSequence` |
-| Content errors | WPN-E001 `fireRate ≤ 0`; E002 projectile/missile with `projectileSpeed ≤ 0`; E003 beam with `beamRange ≤ 0`; E004 `explosionRadius > 6 m`; E005 `lifetimeMin > lifetimeMax`; E006 `damage == 0 && explosionDamage == 0`; E007 tuning (§4.7) |
+| Content errors | WPN-E001 `fireRate ≤ 0`; E002 projectile/missile with `projectileSpeed ≤ 0`; E003 beam with `beamRange ≤ 0`; E004 `explosionRadius > 6 m`; E005 `lifetimeMin > lifetimeMax`; E006 `damage == 0 && explosionDamage == 0`; E007 tuning (§4.7); E008 `damageType == Ram` |
 
 ## 8. Performance budget
 
@@ -611,7 +609,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 - **Tier:** standard — transcribes the exact code of §4 (bodies throw `NotImplementedException`, except `Allegiance`, `FactionRelations.Get/IsHostile/CreateDefault/Dispose`, `ProjectileStore` one-liners)
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`, `DMG-001`, `FLT-001`
 - **Do:** Create every type of §4.1–§4.6 and §5.9's public types in the folders of decision 15. `WeaponDefinition` references SPEC-63's `FxDefinition` and SPEC-64's `AudioCueDefinition`; if they do not exist yet, create them as empty `ContentDefinition` subclasses with a `// TODO(VFX-001)` / `// TODO(AUD-001)` note (their tasks fill them).
-- **Files:** `Assets/Game/Data/Definitions/Weapons/{WeaponDelivery,ProjectileVisual,WeaponFireGroups,WeaponDamageType,WeaponDefinition,WeaponTuningDefinition}.cs`; `Assets/Game/Simulation/{Allegiance,FactionStance,FactionRelations,CombatGridSetup}.cs`; `Assets/Game/Simulation/Weapons/{WeaponDef,WeaponDefsBlob,WeaponDefsRef,WeaponTuning,WeaponContent,WeaponMount,WeaponAim,WeaponState,BeamState,WeaponAimMode,WeaponControl,ShipTarget,ProjectileFlags,ProjectileRow,ProjectileStore,ProjectileStoreStats,HitKind,CombatHit,CombatHitTest}.cs`
+- **Files:** `Assets/Game/Data/Definitions/Weapons/{WeaponDelivery,ProjectileVisual,WeaponFireGroups,WeaponDefinition,WeaponTuningDefinition}.cs`; `Assets/Game/Simulation/{Allegiance,FactionStance,FactionRelations,CombatGridSetup}.cs`; `Assets/Game/Simulation/Weapons/{WeaponDef,WeaponDefsBlob,WeaponDefsRef,WeaponTuning,WeaponContent,WeaponMount,WeaponAim,WeaponState,BeamState,WeaponAimMode,WeaponControl,ShipTarget,ProjectileFlags,ProjectileRow,ProjectileStore,ProjectileStoreStats,HitKind,CombatHit,CombatHitTest}.cs`
 - **Acceptance criteria:**
   - [ ] Compiles; components unmanaged; `ProjectileRow` is 64 bytes (`UnsafeUtility.SizeOf`).
   - [ ] `FactionRelations.CreateDefault`: 0↔1 hostile, 2 neutral, diagonal friendly.
@@ -625,9 +623,9 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 - **Files:** `Assets/Game/Data/Definitions/Weapons/*.cs`, `Assets/Game/Simulation/Weapons/WeaponContent.cs`, `Assets/Game/Content/Config/config_weapons.asset`, `Assets/Game/Tests/EditMode/Simulation/Weapons/WeaponContentTests.cs`
 - **Acceptance criteria:**
   - [ ] Bake of the §4.9 table gives the listed `SustainedDps` (±0.5) and `Range` values; entry 0 is all zero.
-  - [ ] `(byte)WeaponDamageType.X == (byte)DamageType.X` for every value.
+  - [ ] `WeaponDefinition.DamageType` is `Game.Data.Combat.DamageType`; a weapon with `Ram` reports WPN-E008.
   - [ ] Every validation code is reported with asset path and field.
-- **Tests:** `WeaponContentTests.Bake_Table49_Values`, `.Entry0_IsNone`, `.Validation_Codes`, `.DamageTypeMirror_Equal`.
+- **Tests:** `WeaponContentTests.Bake_Table49_Values`, `.Entry0_IsNone`, `.Validation_Codes`, `.RamDamageType_Rejected`.
 
 ### WPN-003 — CombatHitTest
 - **Milestone:** M2
@@ -797,7 +795,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 
 | # | Question | Default if unanswered | Decider |
 |---|---|---|---|
-| 1 | `WeaponDefinition` (Game.Data) cannot reference SPEC-13's `DamageType` (Game.Voxel). Keep the mirror enum `WeaponDamageType` with equal values (WPN-002 tests equality), or move `DamageType` down to Game.Data through an ADR? | Keep the mirror enum | Tech lead |
+| 1 | `WeaponDefinition` (Game.Data) cannot reference SPEC-13's `DamageType` (Game.Voxel). Keep the mirror enum `WeaponDamageType` with equal values (WPN-002 tests equality), or move `DamageType` down to Game.Data through an ADR? | **Answered (2026-10-10, owner, extensibility review X9):** `DamageType` moved to `Game.Data.Combat` (architecture §3.2); the mirror enum and its test are deleted | Owner |
 | 2 | Friendly fire on (decision 4)? | Yes | Owner |
 | 3 | SPEC-22 `ShieldHitStreams`: producers access it with `GetSingletonRW` and write fields on the main thread, which completes the previous producer's jobs (sync points). Change to a registration API like SPEC-13 `DamageStreams`: `BeginWrite(ref state, ShieldHitProducer, forEachCount) → NativeStream.Writer`, `EndWrite(producer, JobHandle)`; consumers combine stored handles | **Applied** in SPEC-22 §4 (`ShieldHitProducer`, `BeginWrite/EndWrite/BeginRead/EndRead`) | SPEC-22 |
 | 4 | SPEC-63 tracers read `ProjectileStore` rows (§6) instead of projectile entities | **Applied** in SPEC-63 §5.3 (2026-10-09). Yes | SPEC-63 |

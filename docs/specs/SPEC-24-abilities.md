@@ -48,10 +48,8 @@ Abilities are what blocks let a ship *do* besides fly and shoot: a speed boost f
 namespace Game.Data.Definitions
 {
     public enum AbilityKind : byte { ShieldToggle = 0, StatBoost = 1 }                 // add at end only
-    /// <summary>Mirror of SPEC-22 StatId (Game.Data cannot reference Game.Simulation); values must stay equal (tested).</summary>
-    public enum AbilityStat : byte { Thrust = 0, MaxSpeed = 1, FireRate = 2, WeaponDamage = 3, ShieldRegen = 4, TurnRate = 5 }
-
-    [System.Serializable] public struct AbilityStatMod { public AbilityStat Stat; [UnityEngine.Min(0.01f)] public float Multiplier; }
+    // Stat ids are SPEC-22's StatId, defined in Game.Data.Combat (architecture §3.2); no mirror enum.
+    [System.Serializable] public struct AbilityStatMod { public Game.Data.Combat.StatId Stat; [UnityEngine.Min(0.01f)] public float Multiplier; }
 
     [ContentIdPrefix("ability_")]
     [UnityEngine.CreateAssetMenu(menuName = "Game/Content/Ability", fileName = "ability_new")]
@@ -88,7 +86,7 @@ v2 values (SPEC-72 MIG-010 writes exactly these):
 ```csharp
 namespace Game.Simulation.Abilities
 {
-    using Unity.Entities; using Game.Core; using Game.Data.Definitions; using Game.Simulation.Power;
+    using Unity.Entities; using Game.Core; using Game.Data.Combat; using Game.Data.Definitions; using Game.Simulation.Power;
 
     public struct AbilityStatModDef { public StatId Stat; public float Multiplier; }
 
@@ -230,7 +228,7 @@ Tick timeline for a costed ability pressed during frame f: tick N `PlayerCommand
 | Ship becomes a hulk | Every slot `Unavailable`; modifiers cleared |
 | No `ShipStats` | Sync once at the first update |
 | No `ShipPower` (non-combat test world) | Costs are treated as granted |
-| Content | ABL-E001 StatBoost without modifiers or with > 4; ABL-E002 StatBoost `durationSeconds ≤ 0`; ABL-E003 `maxCharges > 1` with `chargeRechargeSeconds ≤ 0`; ABL-E004 `AbilityStat` mirror value mismatch (tested, not content) |
+| Content | ABL-E001 StatBoost without modifiers or with > 4; ABL-E002 StatBoost `durationSeconds ≤ 0`; ABL-E003 `maxCharges > 1` with `chargeRechargeSeconds ≤ 0` (ABL-E004 is retired: it was the mirror-enum check) |
 
 ## 8. Performance budget
 
@@ -249,10 +247,10 @@ Scale notes: per ship per tick O(slots ≤ 8); the instance walk happens only on
 - **Tier:** standard — transcribes the exact code of §4
 - **Depends on:** `CORE-001`, `DATA-001`, `PWR-001`
 - **Do:** Create every type of §4 in the folders of decision 8; `AbilityDefinition` references SPEC-63's `FxDefinition` and SPEC-64's `AudioCueDefinition` (create empty shells with `// TODO(VFX-001)` / `// TODO(AUD-001)` if they do not exist).
-- **Files:** `Assets/Game/Data/Definitions/Abilities/{AbilityKind,AbilityStat,AbilityStatMod,AbilityDefinition}.cs`; `Assets/Game/Simulation/Abilities/{AbilityStatModDef,AbilityDef,AbilityDefsBlob,AbilityDefsRef,AbilityContent,AbilitySlotState,AbilitySlotFlags,AbilitySlot,AbilityState,AbilityModifiersDirty,AbilityGridSetup}.cs`
+- **Files:** `Assets/Game/Data/Definitions/Abilities/{AbilityKind,AbilityStatMod,AbilityDefinition}.cs`; `Assets/Game/Simulation/Abilities/{AbilityStatModDef,AbilityDef,AbilityDefsBlob,AbilityDefsRef,AbilityContent,AbilitySlotState,AbilitySlotFlags,AbilitySlot,AbilityState,AbilityModifiersDirty,AbilityGridSetup}.cs`
 - **Acceptance criteria:**
-  - [ ] Compiles; `AbilitySlot` is 48 bytes; `(byte)AbilityStat.X == (byte)StatId.X` for every value.
-- **Tests:** `AbilityContractTests.Slot_Is48Bytes`, `.StatMirror_Equal`.
+  - [ ] Compiles; `AbilitySlot` is 48 bytes; `AbilityStatMod.Stat` is `Game.Data.Combat.StatId`.
+- **Tests:** `AbilityContractTests.Slot_Is48Bytes`.
 
 ### ABL-002 — Ability content and boot singleton
 - **Milestone:** M2

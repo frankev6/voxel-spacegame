@@ -270,7 +270,7 @@ The implementer finds, in the owning spec's §4, the field carrying each meaning
 
 **`ShipBlueprintDefinition` (SPEC-10, area `Ships`, ID = ship key):** display name ← `Name`; description ← `Description`; structure bytes ← VOXS (`VoxsEncodeOptions.ForAsset`) of the structure built by §5.4; price ← `BasePrice` (if SPEC-10/50 defines one). Dropped: `Thumbnail`, `ItemImage`, `AbilityIds`, `OfficerIds`, `GlobalStats`, `width`, `height`, `length`, `moduleSlots`.
 
-**`WeaponDefinition` (SPEC-21, area `Weapons`, ID `wpn_<x>`):** one per legacy weapon block, merged with its `ProjectileData`. **MIG-009 writes the v2 values of SPEC-21 §4.9 for every numeric field** (not the unit-converted legacy values below); from the legacy data it takes only the identity: ID, delivery (projectile, beam, missile), damage type into `WeaponDamageType` (`Kinetic` → `Kinetic`, `Energy` → `Energy`, `HighExplosive` → `Explosive`), projectile visual and fire sound cue. The legacy tables stay as the reference for the mapping test (SPEC-21 Q8).
+**`WeaponDefinition` (SPEC-21, area `Weapons`, ID `wpn_<x>`):** one per legacy weapon block, merged with its `ProjectileData`. **MIG-009 writes the v2 values of SPEC-21 §4.9 for every numeric field** (not the unit-converted legacy values below); from the legacy data it takes only the identity: ID, delivery (projectile, beam, missile), damage type into `Game.Data.Combat.DamageType` (`Kinetic` → `Kinetic`, `Energy` → `Energy`, `HighExplosive` → `Explosive`), projectile visual and fire sound cue. The legacy tables stay as the reference for the mapping test (SPEC-21 Q8).
 
 | Meaning | Source |
 |---|---|
@@ -693,7 +693,7 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 - **Do:** `WeaponConverter` (`Order` 220, `Name` "Weapons"): one `WeaponDefinition wpn_<x>` per weapon block merged with its projectile (§4.6); then `SetLinkIfEmpty(block, "weapon", wpn)` for each of the 9 weapon blocks (SPEC-04 DATA-010 field).
 - **Files:** `Assets/Game/Editor/Migration/Converters/WeaponConverter.cs`; `Assets/Game/Content/Weapons/*.asset` (9, generated); `Assets/Game/Tests/EditMode/Editor/Migration/WeaponConverterTests.cs`
 - **Acceptance criteria:**
-  - [ ] 9 weapon assets whose numeric fields equal SPEC-21 §4.9 row by row; delivery, `WeaponDamageType`, visual and sound cue follow the legacy mapping of §4.6.
+  - [ ] 9 weapon assets whose numeric fields equal SPEC-21 §4.9 row by row; delivery, `DamageType`, visual and sound cue follow the legacy mapping of §4.6.
   - [ ] Every weapon block's `weapon` field references its `wpn_` asset; SPEC-04 `DATA-E047` reports nothing.
 - **Tests:** `WeaponConverterTests.RealExport_ValuesMatchSpec21`, `.DamageTypeMapped`, `.WeaponBlocks_AreLinked`.
 

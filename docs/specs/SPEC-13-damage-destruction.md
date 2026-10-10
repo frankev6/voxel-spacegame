@@ -18,7 +18,7 @@ This spec is the game's first pillar, "destruction you can read". It owns the on
 ## 2. Scope
 
 **In scope:**
-- `DamageEvent`, `DamageType`, `CellRemoved`, `ExplosionRequest`, `Hulk` (architecture §6.3) and the `DamageStreams` singleton: per-tick `NativeStream` registration, producer/consumer job-handle discipline, disposal.
+- `DamageEvent`, `DamageType` (file in `Game.Data.Combat`, architecture §3.2), `CellRemoved`, `ExplosionRequest`, `Hulk` (architecture §6.3) and the `DamageStreams` singleton: per-tick `NativeStream` registration, producer/consumer job-handle discipline, disposal.
 - `DamageResolveSystem`: deterministic ordering, parallel over grids; point damage by 3D DDA with overflow carry; blast rasterization with `(1 − d/r)²` falloff and HP occlusion; armour multipliers; `Cell.Hp` quantization; multi-cell/functional block HP; reactor blasts; island detachment; `CellRemoved` emission with `v + ω×r + kick`; `BrickDirty`; `VoxelGrid.Revision`; knockback impulses (applied next tick by `ImpactEventSystem`).
 - `ImpactEventSystem`: Unity Physics collision events → ram `DamageEvent`s; pair aggregation, cooldown, energy threshold; rams bypass shields; applying pending damage impulses.
 - `IntegritySystem`: incremental connectivity on touched grids only; brick-level graph first; size-fair flood race with early exit; budgets and deferral.
@@ -73,10 +73,12 @@ This spec is the game's first pillar, "destruction you can read". It owns the on
 ```csharp
 namespace Game.Voxel.Damage
 {
-    using Unity.Entities; using Unity.Mathematics;
+    using Unity.Entities; using Unity.Mathematics; using Game.Data.Combat;
 
-    /// <summary>Binding (architecture §6.3). Add values at the end only.</summary>
-    public enum DamageType : byte { Kinetic = 0, Energy = 1, Explosive = 2, Ram = 3 }
+    // DamageType is designed here but lives in Assets/Game/Data/Combat/DamageType.cs (namespace Game.Data.Combat, architecture §3.2)
+    // so content definitions use it directly (no mirror enum):
+    //   /// <summary>Binding (architecture §6.2). Add values at the end only.</summary>
+    //   public enum DamageType : byte { Kinetic = 0, Energy = 1, Explosive = 2, Ram = 3 }
 
     /// <summary>Who produced a DamageEvent; part of the sort key (§3 decision 3). Add values at the end only.</summary>
     public enum DamageProducer : byte { Unknown = 0, Impact = 1, Projectile = 2, Beam = 3, Explosion = 4, ShieldOverflow = 5, Ability = 6, Test = 255 }
@@ -761,7 +763,7 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - **Tier:** standard — transcribes the exact code of §4.2–§4.6 (bodies throw `NotImplementedException`)
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`
 - **Do:** Create every public type of §4.2–§4.6 with the exact fields, enums, comments and signatures; method bodies `throw new System.NotImplementedException()`, except `DamageConfig.Default` (returns the commented values) and `DamageConfig.Multiplier`. `DamageConfigDefinition` gets one `[SerializeField]` per `DamageConfig` field with the same defaults plus the four cue references. Create the folders of §4.1.
-- **Files:** `Assets/Game/Voxel/Damage/{DamageType,DamageProducer,DamageEventFlags,DamageEvent,CellRemovedReason,CellRemoved,ExplosionRequest,Hulk,HulkCause,HulkInfo,DamageImmune,GridDamageStats,PendingImpulse,GridIntegrityState,IntegritySeed,BrickConnectivity,BrickIntegrity,SplitGrace,SplitOrigin,GridDissolveMode,GridDissolveRequest,GridDissolving,ChunkBody,ChunkCell,ChunkColliderBlob,DamageStreams,CellRemovedView,GridRemovedRange,GridCoreLost,DamageTickStats,DamageConfig,DamageSetup,DamageMath,GridDda,CellStateHasher}.cs`; `Assets/Game/Data/Definitions/Damage/DamageConfigDefinition.cs`
+- **Files:** `Assets/Game/Data/Combat/DamageType.cs`; `Assets/Game/Voxel/Damage/{DamageProducer,DamageEventFlags,DamageEvent,CellRemovedReason,CellRemoved,ExplosionRequest,Hulk,HulkCause,HulkInfo,DamageImmune,GridDamageStats,PendingImpulse,GridIntegrityState,IntegritySeed,BrickConnectivity,BrickIntegrity,SplitGrace,SplitOrigin,GridDissolveMode,GridDissolveRequest,GridDissolving,ChunkBody,ChunkCell,ChunkColliderBlob,DamageStreams,CellRemovedView,GridRemovedRange,GridCoreLost,DamageTickStats,DamageConfig,DamageSetup,DamageMath,GridDda,CellStateHasher}.cs`; `Assets/Game/Data/Definitions/Damage/DamageConfigDefinition.cs`
 - **Acceptance criteria:**
   - [ ] `tools/compile.sh` passes with zero warnings in `Game.Voxel` and `Game.Data`.
   - [ ] `DamageType` has exactly `Kinetic, Energy, Explosive, Ram` (byte) in that order.
