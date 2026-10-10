@@ -89,6 +89,17 @@
 | **Blueprint Lab** | The economy-free editor scene used to build and test designs. |
 | **Commit** | Applying an edit session: validate, pay, swap the structure. |
 
+## Art and presentation
+
+| Term | Meaning |
+|---|---|
+| **Paint palette** | The global table of 32 colours (`ArtDirectionDefinition.PaintPalette`) that turns a `PaletteEntry.Color` byte into a colour. Not the per-grid *palette*. |
+| **Team colour slot** | A paint-palette index (17 primary, 18 secondary, 19 accent) resolved per grid from its faction's `ArtFactionLook`. |
+| **Function colour** | The colour that marks what a functional block does (paint indices 20–25: thruster, weapon, power, shield, core, utility). Always paired with a glyph and a silhouette. |
+| **Brick layer** | One slice of the brick texture arrays, selected by `BlockDefinition.materialLayer` (0–63; 63 = missing). |
+| **Look test** | An in-engine review scene for a finalist art direction (SPEC-80 `ART-009`). Review material, not game content; deleted at A2. |
+| **Golden image** | An approved look-test capture in `docs/design/golden/`: the visual target that rendering and asset work must match. |
+
 ## Process
 
 | Term | Meaning |

@@ -1,0 +1,2 @@
+/* Test-only (ART-001, SPEC-80 open question 9): a font token used through var() */
+.token-font-test { -unity-font-definition: var(--font-body); }

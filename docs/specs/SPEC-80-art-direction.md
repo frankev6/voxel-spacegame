@@ -587,11 +587,11 @@ Runtime art budgets are in DESIGN-SYSTEM §10.10–§10.11 and enforced by SPEC-
 | 6 | `BodyVisualDefinition` art-facing fields (§4.5) | SPEC-31 includes them | SPEC-31 |
 | 7 | Add the prefixes `artdir_`, `brickmat_`, `vis_` to SPEC-04's prefix registry | Yes, as in §4 | SPEC-04 |
 | 8 | Content ID of the player's ARK expedition faction | **Answered:** `faction_ark` (SPEC-33); faction tokens `--color-faction-{ark,raiders,xeno,vestari,tlaxcala,khuchad-clan,neutral}` are in §4.4 with placeholder values; each direction sheet sets them, and ART-014 keeps the names | SPEC-33 |
-| 9 | Can a USS custom property carry a font URL (`-unity-font-definition: var(--font-body)`)? | Yes (checked in `ART-001`); if not, `tokens.uss` adds classes `.font-display`, `.font-body`, `.font-mono` | Tech lead |
+| 9 | Can a USS custom property carry a font URL (`-unity-font-definition: var(--font-body)`)? | **Answered (2026-10-10, `ART-001`): yes.** `TokenFontTests.FontBodyToken_ResolvesToPlaceholderFontAsset` (PlayMode) resolves `var(--font-body)` to `OfficeCodePro-Regular_SDF.asset`; no font classes needed | Tech lead |
 | 10 | Reference camera (FOV 40°, pitch 55°, 50/150/300 m) vs SPEC-62's real values | Use the reference; `ART-010` re-measures when SPEC-62 differs | SPEC-62 |
 | 11 | OFL fonts in `Assets/Game/Art/LookTest/Fonts/` before approval, given conventions §5 "no new third-party art" | Allowed as review material (Decision 11); non-chosen fonts deleted at `ART-014` | Owner |
 | 12 | AI-generated assets (DESIGN-SYSTEM §10.19) | Allowed only with the owner's approval per asset, recorded in the licence register | Owner |
-| 13 | Glossary additions: paint palette, team colour slot, function colour, brick layer, look test, golden image | Add them to 03-glossary in the `ART-001` commit | Tech lead |
+| 13 | Glossary additions: paint palette, team colour slot, function colour, brick layer, look test, golden image | **Done (2026-10-10, `ART-001`):** 03-glossary *Art and presentation* | Tech lead |
 | 14 | Wedge slope face UVs | SPEC-11 maps the slope with U along X and V along the slope; layers must tolerate the √2 stretch (DESIGN-SYSTEM §10.12) | SPEC-11 |
 
 ## 11. References

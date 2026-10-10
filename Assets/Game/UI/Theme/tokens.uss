@@ -1,67 +1,21 @@
-/*
- * Design tokens. The NAMES are binding (docs/02-conventions.md §4, SPEC-60, SPEC-80).
- * The VALUES below are NEUTRAL PLACEHOLDERS until the owner approves the design system
- * (docs/design/DESIGN-SYSTEM.md). Only SPEC-80/81 tasks change these values.
- * Never hard-code a colour, size or font anywhere else: use var(--token).
- */
+/* Implements SPEC-80 §4.4. Binding token names (DESIGN-SYSTEM §10.1). Values: placeholder until ART-014. */
 :root {
-    /* surfaces and text */
-    --color-bg: #101216;
-    --color-surface-1: #181B21;
-    --color-surface-2: #20242C;
-    --color-surface-3: #2A2F39;
-    --color-border: #3A404C;
-    --color-text: #E6E8EC;
-    --color-text-muted: #9AA1AD;
-
-    /* accents and states */
-    --color-accent: #8C96A8;
-    --color-accent-strong: #B8C0CE;
-    --color-positive: #6FA97A;
-    --color-warning: #C9A55A;
-    --color-danger: #C46A6A;
-    --color-info: #6F8FB8;
-
-    /* allegiance (must stay colour-blind safe: differ in lightness, not only hue) */
-    --color-ally: #6FA0D8;
-    --color-enemy: #D8875C;
-    --color-neutral: #A0A4AC;
-
-    /* ship systems */
-    --color-shield: #7FB3D9;
-    --color-hull: #B0B4BC;
-    --color-energy: #D9C77F;
-
-    /* spacing: 4 px scale */
-    --space-1: 4px;
-    --space-2: 8px;
-    --space-3: 12px;
-    --space-4: 16px;
-    --space-5: 24px;
-    --space-6: 32px;
-    --space-7: 48px;
-    --space-8: 64px;
-
-    /* shape */
-    --radius-s: 2px;
-    --radius-m: 4px;
-    --radius-l: 8px;
-    --border-thin: 1px;
-    --border-thick: 2px;
-
-    /* typography: this file is the ONE place that names font files (swap here after design approval) */
-    --font-display: url("project://database/Assets/Game/Art/_Placeholder/Fonts/Kontrapunkt-Bold.otf");
-    --font-body: url("project://database/Assets/Game/Art/_Placeholder/Fonts/OfficeCodePro-Regular.ttf");
-    --font-mono: url("project://database/Assets/Game/Art/_Placeholder/Fonts/OfficeCodePro-Regular.ttf");
-    --text-xs: 11px;
-    --text-s: 13px;
-    --text-m: 15px;
-    --text-l: 18px;
-    --text-xl: 24px;
-    --text-xxl: 36px;
-
-    /* motion */
-    --duration-fast: 0.1s;
-    --duration-normal: 0.2s;
-    --duration-slow: 0.4s;
+    --color-bg: #111214;          --color-surface-1: #1A1B1E;   --color-surface-2: #232428;   --color-surface-3: #2D2F33;
+    --color-border: #4A4D52;      --color-text: #EDEDED;        --color-text-muted: #A6A6A6;
+    --color-accent: #7AA7D9;      --color-accent-strong: #B3CDEB;
+    --color-positive: #8CCB6A;    --color-warning: #E3BE5A;     --color-danger: #F06A7E;      --color-info: #6CB8F0;
+    --color-ally: #5C9BFF;        --color-enemy: #FF7A4D;       --color-neutral: #C8C8C8;
+    --color-shield: #5CC8FF;      --color-hull: #E0E0E0;        --color-energy: #EFD25A;
+    --color-faction-ark: #7AA7D9; --color-faction-raiders: #E5533D; --color-faction-xeno: #9B6CF0; --color-faction-vestari: #4FC3A1;
+    --color-faction-tlaxcala: #E3A04F; --color-faction-khuchad-clan: #C9C25A; --color-faction-neutral: #C8C8C8;   /* SPEC-33 mapColorToken */
+    --color-travel-cover: #F4F6FA;                                /* SPEC-32 §5.8 jump cover (direction A white-out) */
+    --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+    --radius-s: 2px; --radius-m: 4px; --radius-l: 8px;
+    --border-thin: 1px; --border-thick: 2px;
+    --font-display: url("project://database/Assets/Game/Art/_Placeholder/Fonts/OfficeCodePro-Bold_SDF.asset");
+    --font-body: url("project://database/Assets/Game/Art/_Placeholder/Fonts/OfficeCodePro-Regular_SDF.asset");
+    --font-mono: url("project://database/Assets/Game/Art/_Placeholder/Fonts/OfficeCodePro-Regular_SDF.asset");
+    --text-xs: 12px; --text-s: 14px; --text-m: 16px; --text-l: 20px; --text-xl: 28px; --text-xxl: 40px;
+    --duration-fast: 100ms; --duration-normal: 200ms; --duration-slow: 400ms;
+    --duration-travel-fade: 0.5s;                                 /* SPEC-32 §5.8 timing contract: never changed by art */
 }
