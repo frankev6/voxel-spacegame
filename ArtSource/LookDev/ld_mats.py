@@ -152,26 +152,56 @@ def toon_shade(g, color, S, bands=(0.42, 0.72, 1.0)):
     return em.outputs[0]
 
 
-def panel_material(S, tag, base_hex):
-    m = new_mat(f"{S['name']}_{tag}")
+def _cellid(g, obj, nrm, size):
+    inset = g.vmath("SUBTRACT", obj, g.vmath("SCALE", nrm, scale=0.02))
+    return g.vmath("FLOOR", g.vmath("SCALE", inset, scale=1.0 / size))
+
+
+def panel_material(S, tag, base_hex, name=None, livery=None):
+    """Painted plating: per-panel tone mosaic, grime and streaks, seams, optional paint bands (OPERA)."""
+    m = new_mat(name or f"{S['name']}_{tag}")
     g = G(m.node_tree)
     tc = g.n("ShaderNodeTexCoord")
     obj = g.out(tc, "Object")
     nrm = g.out(tc, "Normal")
     base = lin(base_hex)
     color = base
-    # per-cell variation
-    inset = g.vmath("SUBTRACT", obj, g.vmath("SCALE", nrm, scale=0.02))
-    cellid = g.vmath("FLOOR", g.vmath("SCALE", inset, scale=1.0 / CELL))
+    panel = S.get("panel", 0) or 2
+    # panel tones: whole plates (2x1 or 2x2 cells) take one tone, so the hull reads as plating, not noise
+    pid = _cellid(g, g.vmath("MULTIPLY", obj, (1.0, 0.5, 1.0)), nrm, CELL * panel)
     wn = g.n("ShaderNodeTexWhiteNoise", p_noise_dimensions="3D")
-    g.set(wn.inputs["Vector"], cellid)
+    g.set(wn.inputs["Vector"], pid)
+    mosaic = S.get("mosaic")
+    if mosaic and tag == "hull":
+        stops, acc = [], 0.0
+        for hx, w in mosaic:
+            stops.append((acc, lin(hx)))
+            acc += w
+        color = g.ramp(wn.outputs["Value"], stops, "CONSTANT")
     var = S.get("variation", 0.0)
     if var:
-        k = g.maprange(wn.outputs["Value"], 0, 1, 1 - var, 1 + var * 0.6)
+        cid = _cellid(g, obj, nrm, CELL)
+        wn2 = g.n("ShaderNodeTexWhiteNoise", p_noise_dimensions="3D")
+        g.set(wn2.inputs["Vector"], cid)
+        k = g.maprange(wn2.outputs["Value"], 0, 1, 1 - var, 1 + var * 0.5)
         color = g.mix(1.0, color, g.n("ShaderNodeCombineColor", k, k, k).outputs[0], "MULTIPLY")
+    # paint bands along the hull (OPERA liveries): broad band in the livery colour edged with thin accent stripes
+    bands = S.get("bands")
+    if bands and tag == "hull" and livery:
+        sep = g.sep(obj)
+        P = bands["period"] * CELL
+        f = g.math("FRACT", g.math("DIVIDE", g.math("ADD", sep[1], P * 0.37), P))
+        wfrac = bands["width"] * CELL / P
+        band = g.math("MULTIPLY", g.maprange(f, 0.0, 0.002, 0.0, 1.0), g.maprange(f, wfrac - 0.002, wfrac, 1.0, 0.0))
+        e = 0.18 * CELL / P
+        stripe = g.math("MAXIMUM", g.maprange(g.math("ABSOLUTE", g.math("SUBTRACT", f, wfrac + e * 1.6)), e * 0.45, e * 0.55, 1.0, 0.0),
+                        g.maprange(g.math("ABSOLUTE", g.math("SUBTRACT", f, 1.0 - e * 1.6)), e * 0.45, e * 0.55, 1.0, 0.0))
+        color = g.mix(band, color, lin(livery["hull2"]))
+        color = g.mix(g.math("MULTIPLY", stripe, bands.get("stripe", 0.6)), color, lin(livery["accent"]))
     # grime
     grime = S.get("grime", 0.0)
-    if grime and tag in ("hull", "hull2", "armor", "trim"):
+    dirty = tag in ("hull", "hull2", "armor", "trim", "paint_w", "paint_p", "paint_e", "c_cargo")
+    if grime and dirty:
         nz = g.n("ShaderNodeTexNoise", Scale=1.2, Detail=8.0, Roughness=0.62)
         g.set(nz.inputs["Vector"], obj)
         gm = g.maprange(g.out(nz, "Fac"), 0.45, 0.75, 0.0, grime)
@@ -179,10 +209,20 @@ def panel_material(S, tag, base_hex):
         cav = g.maprange(g.out(ao, "AO"), 0.2, 1.0, grime * 1.6, 0.0)
         dirt = g.math("MAXIMUM", gm, cav)
         color = g.mix(dirt, color, (base[0] * 0.35, base[1] * 0.33, base[2] * 0.3, 1))
+    streaks = S.get("streaks", 0.0)
+    if streaks and dirty:
+        # rain-streak grime and rust runs: noise stretched along z, strongest under edges (AO) and on sides
+        st = g.n("ShaderNodeTexNoise", Scale=3.0, Detail=6.0, Roughness=0.7)
+        g.set(st.inputs["Vector"], g.vmath("MULTIPLY", obj, (9.0, 9.0, 0.7)))
+        sm = g.maprange(g.out(st, "Fac"), 0.5, 0.72, 0.0, streaks)
+        rust = g.n("ShaderNodeTexNoise", Scale=2.4, Detail=10.0, Roughness=0.7)
+        g.set(rust.inputs["Vector"], obj)
+        rm = g.maprange(g.out(rust, "Fac"), 0.62, 0.74, 0.0, streaks * 0.7)
+        color = g.mix(sm, color, (0.035, 0.03, 0.022, 1))
+        color = g.mix(rm, color, lin("#5A3A22"))
     # seams
-    panel = S.get("panel", 0)
     seam = None
-    if panel and S.get("seam_w", 0) > 0:
+    if S.get("seam_w", 0) > 0:
         size = CELL * panel
         p = g.vmath("SCALE", obj, scale=1.0 / size)
         f = g.vmath("FRACTION", p)
@@ -194,67 +234,93 @@ def panel_material(S, tag, base_hex):
         w = S["seam_w"] / size
         seam = g.maprange(mn, w * 0.6, w * 1.4, 1.0, 0.0)
         color = g.mix(g.math("MULTIPLY", seam, S.get("seam_dark", 0.5)), color, (0, 0, 0, 1))
-    rough = S["rough"].get(tag, 0.5)
-    metal = S["metal"].get(tag, 0.0)
-    if S.get("toon"):
-        shader = toon_shade(g, color, S)
-        return finish(g, shader, m)
+    base_tag = tag.split("@")[0]
+    rough = S["rough"].get(base_tag, 0.5)
+    metal = S["metal"].get(base_tag, 0.0)
     bsdf = g.n("ShaderNodeBsdfPrincipled", Roughness=rough, Metallic=metal)
     g.set(g.sock(bsdf.inputs, "Base Color"), color)
-    # quilted thermal blanket (ORBITAL)
-    if S.get("quilt") and tag == "hull":
-        vor = g.n("ShaderNodeTexVoronoi", Scale=7.0, p_feature="SMOOTH_F1")
-        g.set(vor.inputs["Vector"], obj)
-        nz2 = g.n("ShaderNodeTexNoise", Scale=14.0, Detail=4.0)
-        g.set(nz2.inputs["Vector"], obj)
-        h = g.math("ADD", g.out(vor, "Distance"), g.math("MULTIPLY", g.out(nz2, "Fac"), 0.25))
-        bump = g.n("ShaderNodeBump", Strength=0.35, Distance=0.02)
-        g.set(bump.inputs["Height"], h)
-        g.set(g.sock(bsdf.inputs, "Normal"), bump.outputs[0])
-    if tag == "hull2" and S.get("quilt"):
-        # crumpled gold foil
-        vor = g.n("ShaderNodeTexVoronoi", Scale=18.0, p_feature="F1")
-        g.set(vor.inputs["Vector"], obj)
-        bump = g.n("ShaderNodeBump", Strength=0.6, Distance=0.01)
-        g.set(bump.inputs["Height"], g.out(vor, "Distance"))
-        g.set(g.sock(bsdf.inputs, "Normal"), bump.outputs[0])
-    # nacre (REEF)
-    if S.get("nacre") and tag in ("hull", "armor"):
-        lw = g.n("ShaderNodeLayerWeight", Blend=0.45)
-        irid = g.ramp(g.out(lw, "Facing"), [(0.0, lin("#E8F4F0")), (0.35, lin("#9FE8E0")), (0.6, lin("#E8A8D8")),
-                                           (0.85, lin("#FFD8A0")), (1.0, lin("#C0F0FF"))])
-        g.set(g.sock(bsdf.inputs, "Base Color"), g.mix(0.35, color, irid))
-        g.set(g.sock(bsdf.inputs, "Coat Weight"), 0.8)
-        # bioluminescent veins
-        nz = g.n("ShaderNodeTexNoise", Scale=0.45, Detail=2.0, Distortion=0.5)
-        g.set(nz.inputs["Vector"], obj)
-        ridge = g.math("ABSOLUTE", g.math("SUBTRACT", g.out(nz, "Fac"), 0.5))
-        vein = g.maprange(ridge, 0.003, 0.009, 1.0, 0.0)
-        ec, es = S["emit"]["power"]
-        g.set(g.sock(bsdf.inputs, "Emission Color"), lin(ec))
-        g.set(g.sock(bsdf.inputs, "Emission Strength"), g.math("MULTIPLY", vein, es * 0.6))
-    # light-lines in the seams (NOCTURNE)
-    seam_emit = S["emit"].get("seam")
-    if seam is not None and seam_emit and tag in ("hull", "armor"):
-        ec, es = seam_emit
-        # only some seams carry light: per-cell hash
-        on = g.maprange(wn.outputs["Value"], 0.55, 0.56, 0.0, 1.0)
-        g.set(g.sock(bsdf.inputs, "Emission Color"), lin(ec))
-        g.set(g.sock(bsdf.inputs, "Emission Strength"), g.math("MULTIPLY", g.math("MULTIPLY", seam, on), es))
-    if S.get("flat"):
-        # subtle vertical gradient keeps flat colours from looking dead
-        sepz = g.sep(obj)
-        k = g.maprange(sepz[2], -2.0, 4.0, 0.88, 1.08)
-        g.set(g.sock(bsdf.inputs, "Base Color"), g.mix(1.0, color, g.n("ShaderNodeCombineColor", k, k, k).outputs[0], "MULTIPLY"))
+    if S.get("coat"):
+        g.set(g.sock(bsdf.inputs, "Coat Weight"), S["coat"])
+        g.set(g.sock(bsdf.inputs, "Coat Roughness"), 0.08)
+    if streaks and dirty:
+        # wet sheen where the streaks run
+        g.set(g.sock(bsdf.inputs, "Roughness"), g.maprange(sm, 0.0, streaks, rough, rough * 0.55))
     return finish(g, bsdf.outputs[0], m)
+
+
+def heat_material(S):
+    """Nozzle steel with heat tint: bronze facing the camera, blue-violet at grazing angles."""
+    m = new_mat(f"{S['name']}_heat")
+    g = G(m.node_tree)
+    lw = g.n("ShaderNodeLayerWeight", Blend=0.4)
+    col = g.ramp(g.out(lw, "Facing"), [(0.0, lin("#9A7A52")), (0.45, lin("#8A5A3A")), (0.75, lin("#4A3A6A")), (1.0, lin("#3A5A8A"))])
+    bsdf = g.n("ShaderNodeBsdfPrincipled", Roughness=0.32, Metallic=1.0)
+    g.set(g.sock(bsdf.inputs, "Base Color"), col)
+    return finish(g, bsdf.outputs[0], m)
+
+
+def alien_material(S, cw_key, cw):
+    """Alien carapace: plates with dark grooves, a glowing vein network, glossy coat and an iridescent sheen."""
+    m = new_mat(f"{S['name']}_a_shell@{cw_key}")
+    g = G(m.node_tree)
+    tc = g.n("ShaderNodeTexCoord")
+    obj = g.out(tc, "Object")
+    # carapace plates
+    vor = g.n("ShaderNodeTexVoronoi", Scale=0.32, p_feature="DISTANCE_TO_EDGE")
+    wnz = g.n("ShaderNodeTexNoise", Scale=1.4, Detail=3.0)
+    g.set(wnz.inputs["Vector"], obj)
+    warped = g.vmath("ADD", obj, g.vmath("SCALE", g.out(wnz, "Color"), scale=0.8))
+    g.set(vor.inputs["Vector"], warped)
+    groove = g.maprange(g.out(vor, "Distance"), 0.0, 0.045, 1.0, 0.0)
+    nz = g.n("ShaderNodeTexNoise", Scale=0.8, Detail=6.0, Roughness=0.6)
+    g.set(nz.inputs["Vector"], obj)
+    col = g.mix(g.maprange(g.out(nz, "Fac"), 0.35, 0.7, 0.0, 1.0), lin(cw["shell"]), lin(cw["shell2"]))
+    col = g.mix(groove, col, lin(cw["groove"]))
+    # growth lines inside the plates
+    lines = g.n("ShaderNodeTexWave", Scale=2.2, Distortion=3.0, Detail=2.0, p_wave_type="RINGS")
+    g.set(lines.inputs["Vector"], obj)
+    col = g.mix(g.math("MULTIPLY", g.maprange(g.out(lines, "Fac"), 0.0, 0.12, 0.25, 0.0), 1.0), col, lin(cw["groove"]))
+    # iridescent sheen
+    lw = g.n("ShaderNodeLayerWeight", Blend=0.5)
+    irid = g.ramp(g.out(lw, "Facing"), [(0.0, lin("#40FFB0")), (0.33, lin("#4060FF")), (0.66, lin("#FF40C0")), (1.0, lin("#FFC040"))])
+    col = g.mix(g.math("MULTIPLY", g.out(lw, "Facing"), cw["irid"]), col, irid, "SCREEN")
+    bsdf = g.n("ShaderNodeBsdfPrincipled", Roughness=0.35, Metallic=0.0)
+    g.set(g.sock(bsdf.inputs, "Base Color"), col)
+    g.set(g.sock(bsdf.inputs, "Coat Weight"), 1.0)
+    g.set(g.sock(bsdf.inputs, "Coat Roughness"), 0.12)
+    bump = g.n("ShaderNodeBump", Strength=0.5, Distance=0.05)
+    g.set(bump.inputs["Height"], g.math("SUBTRACT", 1.0, groove))
+    g.set(g.sock(bsdf.inputs, "Normal"), bump.outputs[0])
+    # vein network: thin ridges of warped noise, only in the grooves and a sparse web across plates
+    vn = g.n("ShaderNodeTexNoise", Scale=0.55, Detail=2.0, Distortion=0.5)
+    g.set(vn.inputs["Vector"], obj)
+    ridge = g.math("ABSOLUTE", g.math("SUBTRACT", g.out(vn, "Fac"), 0.5))
+    vein = g.maprange(ridge, 0.003, 0.009, 1.0, 0.0)
+    # veins come in patches (nerve clusters), and pool faintly in a few grooves
+    patch = g.n("ShaderNodeTexNoise", Scale=0.18, Detail=1.0)
+    g.set(patch.inputs["Vector"], obj)
+    pm = g.maprange(g.out(patch, "Fac"), 0.42, 0.6, 0.0, 1.0)
+    vein = g.math("MAXIMUM", g.math("MULTIPLY", vein, pm), g.math("MULTIPLY", groove, g.math("MULTIPLY", pm, 0.25)))
+    pulse = g.n("ShaderNodeTexNoise", Scale=0.35, Detail=1.0)
+    g.set(pulse.inputs["Vector"], obj)
+    k = g.math("MULTIPLY", vein, g.maprange(g.out(pulse, "Fac"), 0.35, 0.65, 0.5, 1.4))
+    g.set(g.sock(bsdf.inputs, "Emission Color"), lin(cw["vein"]))
+    g.set(g.sock(bsdf.inputs, "Emission Strength"), g.math("MULTIPLY", k, 4.0))
+    return finish(g, bsdf.outputs[0], m)
+
+
+def alien_set(S, mats):
+    from ld_styles import ALIEN_COLOURWAYS
+    for key, cw in ALIEN_COLOURWAYS.items():
+        mats[f"a_shell@{key}"] = alien_material(S, key, cw)
+        mats[f"a_spine@{key}"] = flat_material(S, f"a_spine@{key}", cw["shell2"], 0.25, 0.0, coat=1.0)
+        mats[f"a_glow@{key}"] = flat_material(S, f"a_glow@{key}", cw["glow"], 0.3, 0.0, emit=(cw["glow"], 12))
+        mats[f"a_flesh@{key}"] = flat_material(S, f"a_flesh@{key}", cw["shell2"], 0.4, 0.0, emit=(cw["vein"], 3))
 
 
 def flat_material(S, tag, hex_col, rough=0.5, metal=0.0, emit=None, coat=0.0):
     m = new_mat(f"{S['name']}_{tag}")
     g = G(m.node_tree)
-    if S.get("toon") and emit is None:
-        shader = toon_shade(g, lin(hex_col), S)
-        return finish(g, shader, m)
     bsdf = g.n("ShaderNodeBsdfPrincipled", Roughness=rough, Metallic=metal)
     g.set(g.sock(bsdf.inputs, "Base Color"), lin(hex_col))
     if coat:
@@ -375,14 +441,21 @@ def make_materials(S):
     c = S["col"]
     E = S["emit"]
     mats = {}
-    for tag in ("hull", "hull2", "armor", "trim"):
+    for tag in ("hull", "hull2", "armor", "trim", "paint_w", "paint_p", "paint_e", "c_cargo"):
         mats[tag] = panel_material(S, tag, c[tag])
+    for liv, L in S.get("liveries", {}).items():
+        mats[f"hull@{liv}"] = panel_material(S, "hull", c["hull"], f"{S['name']}_hull@{liv}", livery=L)
+        mats[f"hull2@{liv}"] = panel_material(S, "hull2", L["hull2"], f"{S['name']}_hull2@{liv}")
+        mats[f"accent@{liv}"] = flat_material(S, f"accent@{liv}", L["accent"], 0.5, 0.0)
     mats["dark"] = flat_material(S, "dark", c["dark"], 0.7, 0.3)
     mats["metal"] = flat_material(S, "metal", c["metal"], S["rough"]["metal"], S["metal"]["metal"])
     mats["accent"] = flat_material(S, "accent", c["accent"], 0.5, 0.0)
-    mats["foil"] = panel_material(S, "foil", c["foil"]) if S.get("quilt") else flat_material(S, "foil", c["foil"], 0.3, 0.9)
-    if S.get("quilt"):
-        mats["foil"] = mats["hull2"]
+    mats["foil"] = flat_material(S, "foil", c["foil"], 0.3, 0.9)
+    mats["chrome"] = flat_material(S, "chrome", c["chrome"], 0.1, 1.0)
+    mats["gold"] = flat_material(S, "gold", c["gold"], 0.22, 1.0)
+    mats["ceramic"] = flat_material(S, "ceramic", c["ceramic"], 0.25, 0.0, coat=0.8)
+    mats["hose"] = flat_material(S, "hose", c["hose"], 0.75, 0.0)
+    mats["heat"] = heat_material(S)
     mats["glass"] = flat_material(S, "glass", c["glass"], 0.05, 0.0, emit=(c["glass"], 0.15), coat=1.0)
     mats["window"] = window_material(S)
     for key in ("thruster", "weapon", "core", "shield", "power"):
@@ -397,6 +470,7 @@ def make_materials(S):
     mats["shieldfx"] = shield_material(S)
     mats["solar"] = solar_material(S)
     mats["grid"] = flat_material(S, "grid", E["shield"][0], 0.5, 0.0, emit=(E["shield"][0], 1.5))
+    alien_set(S, mats)
     if S.get("outline"):
         mats["ink"] = ink_material(S)
     return mats

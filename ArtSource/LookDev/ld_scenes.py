@@ -12,7 +12,8 @@ import ld_world
 from ld_blocks import KIT, CATEGORY, build_block
 from ld_geom import CELL, Acc, box, cyl, ico, lathe, sphere, mesh_cells, hash01
 from ld_mats import G, lin, new_mat, finish
-from ld_ships import SHIPS, realize as realize_ship, add_greebles, Ship
+from ld_ships import SHIPS, realize as realize_ship, Ship
+from ld_aliens import alien_light, alien_heavy
 from ld_stations import STATIONS
 
 
@@ -200,31 +201,47 @@ def stage_kit(S, scene, mats, out, only=None):
     for i, kind in enumerate(kinds):
         things.show({kind})
         size = Vector(KIT[kind]) * CELL
-        target = Vector((i * 20.0, 0, 0))
-        # thrusters seen from behind, everything else from front-right-above
+        # thrusters seen from behind, long guns more from the side, everything else from front-right-above
         if kind.startswith("thruster"):
-            loc = orbit(target, 30, 180 + 40, 25)
+            yaw, pitch = 180 + 40, 25
+        elif size.y > 2.5:
+            yaw, pitch = 62, 24
         else:
-            loc = orbit(target, 30, 40, 28)
-        ext = max(size.x, size.y, size.z)
-        if kind in ("railgun", "beam", "autocannon", "flak"):
-            ext *= 1.25
-        aim(cam, loc, target, ortho=ext * 1.75)
+            yaw, pitch = 40, 28
+        frame_objects(cam, things.objects(kind), yaw, pitch)
         render(scene, os.path.join(out, "icons", f"{kind}.png"), size=(384, 384), transparent=True)
     if not only:
         hull_patch(S, scene, mats, out, things, cam)
 
 
+def frame_objects(cam, objs, yaw, pitch, margin=1.16):
+    """Orthographic framing on the real geometry (barrels and fins included), centred in the frame."""
+    bpy.context.view_layer.update()
+    pts = [ob.matrix_world @ Vector(c) for ob in objs if ob.type == "MESH" for c in ob.bound_box]
+    lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
+    hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
+    centre = (lo + hi) / 2
+    aim(cam, orbit(centre, 40, yaw, pitch), centre, ortho=1.0)
+    bpy.context.view_layer.update()
+    inv = cam.matrix_world.inverted()
+    cp = [inv @ p for p in pts]
+    x0, x1 = min(p.x for p in cp), max(p.x for p in cp)
+    y0, y1 = min(p.y for p in cp), max(p.y for p in cp)
+    shift = cam.matrix_world.to_3x3() @ Vector(((x0 + x1) / 2, (y0 + y1) / 2, 0))
+    cam.location = cam.location + shift
+    cam.data.ortho_scale = max(x1 - x0, y1 - y0) * margin
+
+
 def hull_patch(S, scene, mats, out, things, cam):
     """A slab of hull with the direction's procedural variants: shows how plain hull gets windows, hatches, pipes."""
     s = Ship("patch", 77)
-    s.box(-12, 12, 0, 40, 0, 4)
-    s.box(-8, 8, 6, 30, 4, 7)
-    s.box(-3, 3, 12, 24, 7, 9)
+    s.loft([(0, 12, 0, 5, 1), (40, 12, 0, 5, 1)])
+    s.loft([(6, 8, 5, 8, 1), (30, 8, 5, 8, 1), (32, 7, 5, 7, 1)])
+    s.loft([(12, 3, 8, 10, 1), (24, 3, 8, 10, 1)], "armor")
     s.paint(lambda x, y, z: z < 2, "hull2")
     dens = dict(S["greeble"])
     S2 = dict(S)
-    S2["greeble"] = {k: min(0.5, v * 2.2) for k, v in dens.items()}
+    S2["greeble"] = {k: min(0.5, v * 1.8) for k, v in dens.items()}
     acc = Acc()
     realize_ship(s, S2, acc, "ship", plumes=False, nav=False)
     mn, mx = s.bounds()
@@ -350,58 +367,107 @@ def builder_grid(S, size_m=60, cell=CELL):
     return ob
 
 
+
+
+def point_light(scene, name, loc, color, energy, size=2.0):
+    ld = bpy.data.lights.new(name, "POINT")
+    ld.color = color
+    ld.energy = energy
+    ld.shadow_soft_size = size
+    ob = bpy.data.objects.new(name, ld)
+    ob.location = loc
+    scene.collection.objects.link(ob)
+    return ob
+
+
+def spot_lights(scene, pts, centre, color=(1.0, 0.86, 0.62), energy=30000, tilt=25):
+    out = []
+    for i, p in enumerate(pts):
+        ld = bpy.data.lights.new(f"work{i}", "SPOT")
+        ld.color = color
+        ld.energy = energy
+        ld.spot_size = math.radians(70)
+        ld.spot_blend = 0.6
+        ob = bpy.data.objects.new(f"work{i}", ld)
+        ob.location = Vector(p) - centre
+        ob.rotation_euler = (math.radians(180 + (tilt if p[0] < 0 else -tilt)), 0, math.radians(90))
+        scene.collection.objects.link(ob)
+        out.append(ob)
+    return out
+
+
+def hide(objs):
+    for ob in objs:
+        ob.hide_render = True
+
+
 def stage_scenes(S, scene, mats, out, only=None, draft=False):
     mats["smoke"] = smoke_material(S)
-    lights = ld_world.setup_lights(S, scene)
+    ld_world.setup_lights(S, scene)
     sd = ld_world.sun_dir(S)
     things = Things()
     dname = S["_key"]
     light_fn, heavy_fn = SHIPS[dname]
+    cw = S.get("aliens")
+    haze = ld_world.haze(S, scene)
+
+    def shot(name):
+        return (not only) or name in only.split(",")
 
     # --- ships -------------------------------------------------------------------------------------------------
-    L = light_fn()
-    H = heavy_fn()
-    build_ship(L, S, mats, things, "light")
+    build_ship(light_fn(), S, mats, things, "light")
     build_ship(light_fn(), S, mats, things, "light2")
-    build_ship(H, S, mats, things, "heavy")
+    build_ship(heavy_fn(), S, mats, things, "heavy")
     build_ship(light_fn(), S, mats, things, "light_still", plumes=False)
     build_ship(heavy_fn(), S, mats, things, "heavy_still", plumes=False)
     Lsize = Vector(things.items["light"]["size"])
     Hsize = Vector(things.items["heavy"]["size"])
 
-    # --- damaged heavy for combat --------------------------------------------------------------------------------
-    D = heavy_fn()
-    mn, mx = D.bounds()
-    cells_mn, cells_mx = mn / CELL, mx / CELL
-    rnd = random.Random(4)
+    # --- the enemy: aliens in DRYDOCK / NOCTURNE, a rival-livery heavy in OPERA --------------------------------------
+    if cw:
+        E = alien_heavy(cw)
+        enemy_light = lambda: alien_light(cw)
+    else:
+        E = heavy_fn()
+        E.livery = "solar"
+        enemy_light = None
+    mn, mx = E.bounds()
+    cmn, cmx = mn / CELL, mx / CELL
     craters = []
     for k in range(3):
-        cy = cells_mn.y + (cells_mx.y - cells_mn.y) * (0.3 + 0.22 * k)
-        cx = cells_mx.x - 1 if k != 1 else cells_mn.x + 1
-        cz = cells_mn.z + (cells_mx.z - cells_mn.z) * 0.6
-        removed = D.carve((cx, cy, cz), 5.5 + k * 1.5, seed=k)
-        craters.append(((Vector((cx, cy, cz))) * CELL, removed))
+        cy = cmn.y + (cmx.y - cmn.y) * (0.3 + 0.22 * k)
+        cx = cmx.x - 2 if k != 1 else cmn.x + 2
+        cz = cmn.z + (cmx.z - cmn.z) * 0.6
+        removed = E.carve((cx, cy, cz), 5.5 + k * 1.5, seed=k)
+        craters.append((Vector((cx, cy, cz)) * CELL, removed))
     acc = Acc()
-    realize_ship(D, S, acc, "ship")
+    realize_ship(E, S, acc, "ship")
     for i, (cc, removed) in enumerate(craters):
-        debris(acc, "debris", removed, cc, S, seed=i, n_chunks=10)
+        if removed:
+            debris(acc, "debris", removed, cc, S, seed=i, n_chunks=10)
         explosion(acc, "fx", cc + Vector((0, 0, 0.5)), 2.2 + i * 0.6, seed=i * 7)
     c = (mn + mx) / 2
-    realize_acc(acc, mats, S, "heavy_dmg", things, centre=c)
+    realize_acc(acc, mats, S, "enemy", things, centre=c)
     crater_world = [cc - c for cc, _ in craters]
+    Esize = mx - mn
+    if cw:
+        build_ship(alien_heavy(cw), S, mats, things, "alien_still", plumes=False)
+        build_ship(alien_light(cw), S, mats, things, "alien_l")
+        build_ship(alien_light(cw), S, mats, things, "alien_l2")
+        ALsize = Vector(things.items["alien_l"]["size"])
 
     # --- station -----------------------------------------------------------------------------------------------
     st = STATIONS[dname]()
     acc = Acc()
     realize_ship(st, S, acc, "station", plumes=False, nav=False)
     smn, smx = st.bounds()
-    realize_acc(acc, mats, S, "station", things, centre=(smn + smx) / 2, subdiv_levels=1 if S.get("subdiv") else None)
+    realize_acc(acc, mats, S, "station", things, centre=(smn + smx) / 2)
     ssize = smx - smn
+    smax = max(ssize.x, ssize.y, ssize.z)
 
-    # --- planet, moon, rocks, grid -----------------------------------------------------------------------------
+    # --- planet, moon, rocks, grid, shield -----------------------------------------------------------------------
     P = S["planet"]
-    pr = 3200.0
-    pl = ld_world.planet(S, "planet", pr, (0, 0, 0), P, sd)
+    ld_world.planet(S, "planet", 3200.0, (0, 0, 0), P, sd)
     proot = bpy.data.objects.new("planet_root", None)
     scene.collection.objects.link(proot)
     for o in [o for o in scene.objects if o.name.startswith("planet") and o is not proot]:
@@ -422,48 +488,43 @@ def stage_scenes(S, scene, mats, out, only=None, draft=False):
     scene.collection.objects.link(groot)
     grid.parent = groot
     things.add("grid", groot)
-
-    # shield bubble for combat
     acc = Acc()
     acc.add("fx", "shieldfx", sphere((0, 0, 0), 1.0, 48, 24, (Lsize.x * 0.75, Lsize.y * 0.65, Lsize.z * 1.4)), None, True)
     realize_acc(acc, mats, S, "shield", things)
 
     cam = make_camera(scene)
-    shots = {}
 
-    def shot(name):
-        return (not only) or name in only.split(",")
-
-    # ---------------------------------------------------------------------------------------------------------------
     # 1. ship close-ups
     if shot("ship_light"):
         things.show({"light_still", "planet", "moon"})
         things.place("light_still", (0, 0, 0), (0, 0, 0))
         things.place("planet", (-2600, -7800, -3000))
         things.place("moon", (900, -6000, 600))
-        dist = Lsize.length * 1.45
-        aim(cam, orbit((0, 0, 0), dist, 38, 20), (0, -0.5, -0.4), lens=50)
+        aim(cam, orbit((0, 0, 0), Lsize.length * 1.45, 38, 20), (0, -0.5, -0.4), lens=50)
         render(scene, os.path.join(out, "ship_light.jpg"))
     if shot("ship_heavy"):
         things.show({"heavy_still", "planet", "moon"})
         things.place("heavy_still", (0, 0, 0), (0, 0, 0))
         things.place("planet", (2400, -8200, -2600))
         things.place("moon", (-1500, -7000, 900))
-        dist = Hsize.length * 1.25
-        aim(cam, orbit((0, 0, 0), dist, -42, 18), (0, -1.0, -1.5), lens=50)
+        aim(cam, orbit((0, 0, 0), Hsize.length * 1.25, -42, 18), (0, -1.0, -1.5), lens=50)
         render(scene, os.path.join(out, "ship_heavy.jpg"))
 
     # 2. hero composition
     if shot("hero"):
-        things.show({"light", "light2", "heavy", "station", "planet", "moon", "rocks"})
+        vis = {"light", "light2", "heavy", "station", "planet", "moon", "rocks"}
         things.place("heavy", (-24, 105, 6), (4, -3, -62))
         things.place("light", (9, 36, -2.5), (6, 8, -38))
         things.place("light2", (24, 58, 3.5), (4, 6, -40))
-        smax = max(ssize.x, ssize.y, ssize.z)
         things.place("station", (smax * 0.9, smax * 3.2, smax * 0.15), (0, 0, 25))
         things.place("planet", (-3600, 9800, -3800))
         things.place("moon", (3200, 11000, 2200))
         things.place("rocks", (0, 260, -20))
+        if cw:
+            vis |= {"alien_l", "alien_l2"}
+            things.place("alien_l", (70, 190, 22), (0, 0, 150))
+            things.place("alien_l2", (95, 215, 30), (0, 0, 160))
+        things.show(vis)
         aim(cam, (0, 0, 0), (6, 100, 2), lens=30)
         render(scene, os.path.join(out, "hero.jpg"))
 
@@ -472,7 +533,6 @@ def stage_scenes(S, scene, mats, out, only=None, draft=False):
         things.show({"light", "heavy", "station", "planet", "rocks"})
         things.place("light", (0, 0, 0), (0, 0, 0))
         things.place("heavy", (-30, 30, -3), (0, 0, 8))
-        smax = max(ssize.x, ssize.y, ssize.z)
         things.place("station", (smax * 0.6, 420, -40), (0, 0, 30))
         things.place("planet", (-2200, 3600, -4300))
         things.place("rocks", (10, 60, -6))
@@ -482,74 +542,57 @@ def stage_scenes(S, scene, mats, out, only=None, draft=False):
 
     # 4. combat at gameplay camera
     if shot("combat"):
-        things.show({"light", "light2", "heavy_dmg", "planet", "rocks", "shield"})
-        things.place("heavy_dmg", (6, 22, 0), (0, 0, 80))
+        vis = {"light", "light2", "enemy", "planet", "rocks", "shield"}
+        things.place("enemy", (6, 22, 0), (0, 0, 80))
         things.place("light", (-20, -12, 0.5), (0, 0, -55))
         things.place("light2", (-34, 4, -1), (0, 0, -70))
         things.place("shield", (-34, 4, -1), (0, 0, -70))
         things.place("planet", (2600, 3400, -4600))
         things.place("rocks", (0, 30, -8))
-        # beams and tracers from the player ships to the craters (in world space, built after placement)
+        if cw:
+            vis |= {"alien_l", "alien_l2"}
+            things.place("alien_l", (34, -10, 1), (0, 0, 120))
+            things.place("alien_l2", (30, 46, -1), (0, 0, 200))
         bpy.context.view_layer.update()
-        hd = things.items["heavy_dmg"]
-        Mw = hd.matrix_world
-        targets = [Mw @ cw for cw in crater_world]
+        Mw = things.items["enemy"].matrix_world
+        targets = [Mw @ cw_ for cw_ in crater_world]
         acc = Acc()
         lw = things.items["light"].matrix_world
         lw2 = things.items["light2"].matrix_world
         beam(acc, "fx", lw @ Vector((Lsize.x * 0.3, Lsize.y * 0.45, 0.2)), targets[0], 0.09)
         beam(acc, "fx", lw @ Vector((-Lsize.x * 0.3, Lsize.y * 0.45, 0.2)), targets[0] + Vector((0.6, 0.4, 0.3)), 0.09)
         tracers(acc, "fx", lw2 @ Vector((0, Lsize.y * 0.5, 0.3)), targets[1], 14, seed=2)
-        # enemy return fire hitting the shield
-        sh = things.items["shield"].matrix_world @ Vector((Lsize.x * 0.5, Lsize.y * 0.3, 0.6))
-        tracers(acc, "fx", Mw @ Vector((0, 8, 3)), sh, 10, seed=5)
-        acc.add("fx", "emit_s", ico(tuple(sh), 0.9, 1, jitter=0.4), None, True)
+        shp = things.items["shield"].matrix_world @ Vector((Lsize.x * 0.5, Lsize.y * 0.3, 0.6))
+        tracers(acc, "fx", Mw @ Vector((0, 8, 3)), shp, 10, seed=5)
+        acc.add("fx", "emit_s", ico(tuple(shp), 0.9, 1, jitter=0.4), None, True)
         realize_acc(acc, mats, S, "fxc", things)
-        things.show({"light", "light2", "heavy_dmg", "planet", "rocks", "shield", "fxc"})
+        things.show(vis | {"fxc"})
         d = 70.0
         aim(cam, (-4, 6 - d * math.cos(math.radians(55)), d * math.sin(math.radians(55))), (-4, 8, 0), fov_v=40)
-        pts = []
-        for i, t in enumerate(targets):
-            ld = bpy.data.lights.new(f"boom{i}", "POINT")
-            ld.color = ld_world.hex_rgb(S["emit"]["ember"][0])
-            ld.energy = 25000
-            ld.shadow_soft_size = 2.0
-            ob = bpy.data.objects.new(f"boom{i}", ld)
-            ob.location = t + Vector((0, 0, 2))
-            scene.collection.objects.link(ob)
-            pts.append(ob)
+        pts = [point_light(scene, f"boom{i}", t + Vector((0, 0, 2)), ld_world.hex_rgb(S["emit"]["ember"][0]), 25000) for i, t in enumerate(targets)]
         render(scene, os.path.join(out, "combat.jpg"))
-        for ob in pts:
-            ob.hide_render = True
+        hide(pts)
 
     # 5. station
     if shot("station"):
-        things.show({"station", "light", "heavy", "planet", "moon"})
-        smax = max(ssize.x, ssize.y, ssize.z)
+        vis = {"station", "light", "heavy", "planet", "moon"}
         things.place("station", (0, 0, 0), (0, 0, 0))
         things.place("light", (smax * 0.35, -smax * 0.55, smax * 0.05), (0, 0, 165))
         things.place("heavy", (-smax * 0.5, -smax * 0.3, -smax * 0.12), (0, 0, 120))
+        if dname == "nocturne":
+            # the tug towing the refinery from its stern yoke
+            things.place("heavy", (0, -ssize.y * 0.5 - Hsize.y * 0.55, -1.0), (0, 0, 180))
+            things.place("light", (smax * 0.22, -smax * 0.1, smax * 0.22), (0, 0, 200))
         things.place("planet", (-2000, 8200, -2600))
         things.place("moon", (2600, 9000, 1400))
-        work = []
-        if getattr(st, "work_lights", None):
-            for i, p in enumerate(st.work_lights):
-                ld = bpy.data.lights.new(f"work{i}", "SPOT")
-                ld.color = (1.0, 0.86, 0.62)
-                ld.energy = 30000
-                ld.spot_size = math.radians(70)
-                ld.spot_blend = 0.6
-                ob = bpy.data.objects.new(f"work{i}", ld)
-                ob.location = Vector(p) - (smn + smx) / 2
-                ob.rotation_euler = (0, 0, 0)
-                ob.rotation_euler = (Vector((0, 0, -1))).to_track_quat("-Z", "Y").to_euler()
-                ob.rotation_euler = (math.radians(180 + (25 if p[0] < 0 else -25)), 0, math.radians(90))
-                scene.collection.objects.link(ob)
-                work.append(ob)
-        aim(cam, orbit((0, 0, 0), smax * 1.25, -38, 16), (0, 0, -smax * 0.05), lens=35)
+        things.show(vis)
+        work = spot_lights(scene, st.work_lights, (smn + smx) / 2,
+                           color=(1.0, 0.72, 0.38) if dname == "nocturne" else (1.0, 0.86, 0.62)) if st.work_lights else []
+        yaw, pitch, dist, look = {"drydock": (42, 20, 1.55, (smax * 0.08, 0, -smax * 0.05)), "nocturne": (-128, 12, 1.5, (0, -smax * 0.12, 0)),
+                                  "opera": (-30, 24, 1.25, (0, 0, -smax * 0.05))}[dname]
+        aim(cam, orbit((0, 0, 0), smax * dist, yaw, pitch), look, lens=35)
         render(scene, os.path.join(out, "station.jpg"))
-        for ob in work:
-            ob.hide_render = True
+        hide(work)
 
     # 6. planet reveal (discovery)
     if shot("planet"):
@@ -566,5 +609,33 @@ def stage_scenes(S, scene, mats, out, only=None, draft=False):
         things.show({"light_still", "grid"})
         things.place("light_still", (0, 0, 0), (0, 0, 0))
         things.place("grid", (0, 0, -Lsize.z / 2 - 0.02))
+        if haze:
+            haze.hide_render = True
         aim(cam, orbit((0, 0, 0), Lsize.length * 1.6, 145, 32), (0, 0.5, -0.8), lens=45)
         render(scene, os.path.join(out, "builder.jpg"))
+        if haze:
+            haze.hide_render = False
+
+    # 8. the alien close-up and the colourway sheet
+    if cw and shot("alien"):
+        AH = Vector(things.items["alien_still"]["size"])
+        things.show({"alien_still", "alien_l", "planet", "moon"})
+        things.place("alien_still", (0, 0, 0), (0, 0, 0))
+        things.place("alien_l", (AH.x * 0.9, -AH.y * 0.35, AH.z * 0.6), (8, -6, 15))
+        things.place("planet", (2600, -8200, -2400))
+        things.place("moon", (-1600, -7000, 800))
+        aim(cam, orbit((0, 0, 0), AH.length * 1.3, -36, 16), (0, -2.0, -1.0), lens=45)
+        render(scene, os.path.join(out, "alien.jpg"))
+    if cw and shot("alien_colours"):
+        from ld_styles import ALIEN_COLOURWAYS
+        for key in ALIEN_COLOURWAYS:
+            name = f"alien_cw_{key}"
+            build_ship(alien_heavy(key), S, mats, things, name, plumes=False)
+            AH = Vector(things.items[name]["size"])
+            things.show({name, "planet"})
+            things.place(name, (0, 0, 0), (0, 0, 0))
+            things.place("planet", (2600, -8200, -2400))
+            aim(cam, orbit((0, 0, 0), AH.length * 1.15, -48, 22), (0, -1.0, -1.0), lens=45)
+            render(scene, os.path.join(out, f"{name}.jpg"), size=(1280, 720))
+            things.show(set())
+        scene.render.resolution_x, scene.render.resolution_y = (960, 540) if draft else (1920, 1080)

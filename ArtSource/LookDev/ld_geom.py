@@ -361,13 +361,99 @@ def cell_polys(shape):
     return _POLY_CACHE[shape]
 
 
+def _same(p, q, eps=1e-7):
+    return max(abs(p[k] - q[k]) for k in range(3)) < eps
+
+
+def _clip_polys(planes):
+    """Polygons of the unit cube clipped by several half-spaces dot(p, n) <= d (a convex cell piece)."""
+    polys = []
+    for dvec, quad in CUBE_FACES.items():
+        cp = list(quad)
+        for n, d in planes:
+            cp = clip_poly(cp, n, d)
+            if not cp:
+                break
+        if cp and _area(cp) > 1e-6:
+            full = len(cp) == 4 and all(any(_same(p, q) for q in quad) for p in cp)
+            polys.append((dvec, cp, full))
+    for i, (n, d) in enumerate(planes):
+        cap = cap_poly(n, d)
+        for j, (n2, d2) in enumerate(planes):
+            if j != i and cap:
+                cap = clip_poly(cap, n2, d2)
+        if cap and _area(cap) > 1e-6:
+            polys.append((None, cap, False))
+    return polys
+
+
+def _area(poly):
+    a = Vector((0, 0, 0))
+    p0 = Vector(poly[0])
+    for i in range(1, len(poly) - 1):
+        a += (Vector(poly[i]) - p0).cross(Vector(poly[i + 1]) - p0)
+    return a.length * 0.5
+
+
+def polys_volume(polys):
+    """Volume of a closed polyhedron given outward-wound polygons (divergence theorem)."""
+    v = 0.0
+    for _, poly, _ in polys:
+        p0 = Vector(poly[0])
+        for i in range(1, len(poly) - 1):
+            v += p0.dot(Vector(poly[i]).cross(Vector(poly[i + 1])))
+    return v / 6.0
+
+
+def classify_cell(planes_world, c):
+    """Clip cell c (integer corner) by world half-spaces [(n, d)] in cell units.
+    Returns ('full',) | ('empty',) | ('clip', local_planes, volume)."""
+    local = []
+    corners = [(x, y, z) for x in (0, 1) for y in (0, 1) for z in (0, 1)]
+    for n, d in planes_world:
+        dl = d - (n[0] * c[0] + n[1] * c[1] + n[2] * c[2])
+        vals = [n[0] * p[0] + n[1] * p[1] + n[2] * p[2] - dl for p in corners]
+        if max(vals) <= 1e-9:
+            continue                      # cell fully inside this half-space
+        if min(vals) >= -1e-9:
+            return ("empty",)             # fully outside
+        local.append((tuple(round(k, 6) for k in n), round(dl, 6)))
+    if not local:
+        return ("full",)
+    key = tuple(sorted(local))
+    vol = polys_volume(cell_polys(("clip", key)))
+    if vol < 1e-4:
+        return ("empty",)
+    return ("clip", key, vol)
+
+
+def face_of(shape, dvec):
+    for dv, poly, full in cell_polys(shape):
+        if dv == dvec:
+            return poly, full
+    return None
+
+
+def _contains(poly, pts, nrm):
+    m = len(poly)
+    for i in range(m):
+        a, b = Vector(poly[i]), Vector(poly[(i + 1) % m])
+        e = b - a
+        for p in pts:
+            if e.cross(Vector(p) - a).dot(Vector(nrm)) < -1e-6:
+                return False
+    return True
+
+
 def _cell_polys(shape):
-    """Polygons (unit cube space) for a cell shape: ('cube',) or ('slope', dirs)."""
+    """Polygons (unit cube space) for a cell shape: ('cube',), ('slope', dirs) or ('clip', planes)."""
     polys = []
     if shape[0] == "cube":
         for dvec, quad in CUBE_FACES.items():
             polys.append((dvec, quad, True))
         return polys
+    if shape[0] == "clip":
+        return _clip_polys(shape[1])
     n, d = slope_plane(shape[1])
     for dvec, quad in CUBE_FACES.items():
         cp = clip_poly(quad, n, d)
@@ -436,15 +522,18 @@ def mesh_cells(cells, shapes, origin=(0, 0, 0), cell=CELL, tag_of=None, solid=No
                 nb = (x + dvec[0], y + dvec[1], z + dvec[2])
                 if nb in filled:
                     nshape = shapes.get(nb, ("cube",))
-                    if nshape[0] == "cube" or nshape == shape:
+                    if nshape[0] == "cube":
                         continue
-                    # neighbour slope: cull only if both faces are full squares
+                    # neighbour is a cut cell: hide this face only where the neighbour's face covers it
                     opp = (-dvec[0], -dvec[1], -dvec[2])
-                    nfull = any(dv == opp and fl for dv, _, fl in cell_polys(nshape))
-                    if full and nfull:
-                        continue
-                    if not full and nfull:
-                        continue
+                    fb = face_of(nshape, opp)
+                    if fb is not None:
+                        pb, fullb = fb
+                        if fullb:
+                            continue
+                        shifted = [(p[0] - dvec[0], p[1] - dvec[1], p[2] - dvec[2]) for p in poly]
+                        if _contains(pb, shifted, opp):
+                            continue
                 if full and shape[0] == "cube":
                     exposed.append((c, dvec))
             t = tag_of(c, dvec) if tag_of else tag
@@ -454,3 +543,91 @@ def mesh_cells(cells, shapes, origin=(0, 0, 0), cell=CELL, tag_of=None, solid=No
                 verts.append(((x + p[0]) * cell + ox, (y + p[1]) * cell + oy, (z + p[2]) * cell + oz))
             faces.append(tuple(range(b, b + len(poly))))
     return out, exposed
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Lofted hull pieces: straight-line slopes that stay aligned across cells (no per-cell sawtooth)
+# ----------------------------------------------------------------------------------------------------------------------
+
+# outward normals of an octagonal section in the x-z plane: sides, top/bottom, and the four 45-degree chamfers
+OCT_N = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
+
+
+def section_poly(cx, w, zb, zt, ct=0.0, cb=0.0):
+    """Octagonal section (x, z) vertices: half-width w around cx, bottom zb, top zt, top/bottom chamfers ct/cb."""
+    x0, x1 = cx - w, cx + w
+    return [(x0 + cb, zb), (x1 - cb, zb), (x1, zb + cb), (x1, zt - ct), (x1 - ct, zt), (x0 + ct, zt), (x0, zt - ct), (x0, zb + cb)]
+
+
+def loft_planes(y0, secA, y1, secB):
+    """Half-spaces [(n, d)] (cell units) of the solid between two parallel octagonal sections at y0 and y1."""
+    planes = [((0, -1, 0), -y0), ((0, 1, 0), y1)]
+    for mx, mz in OCT_N:
+        hA = max(mx * x + mz * z for x, z in secA)
+        hB = max(mx * x + mz * z for x, z in secB)
+        k = (hB - hA) / (y1 - y0)
+        # mx*x + mz*z <= hA + k*(y - y0)   ->   mx*x - k*y + mz*z <= hA - k*y0
+        planes.append(((mx, -k, mz), hA - k * y0))
+    return planes
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Surface nets: smooth-voxel mesher for alien hulls (per-cell density, one pass, no smoothing step)
+# ----------------------------------------------------------------------------------------------------------------------
+
+def surface_nets(field, outside=1.0):
+    """field: {(i,j,k): signed distance in cells, negative inside}. Missing cells count as `outside`.
+    Returns (verts in cell units, quads). Vertices sit at the mean of the sign-change edge crossings."""
+    get = field.get
+    duals = set()
+    for (i, j, k), v in field.items():
+        if -2.0 < v < 0:
+            for a in (0, 1):
+                for b in (0, 1):
+                    for c in (0, 1):
+                        duals.add((i - a, j - b, k - c))
+    vidx = {}
+    verts = []
+    corners = [(a, b, c) for a in (0, 1) for b in (0, 1) for c in (0, 1)]
+    edges = [(0, 1), (2, 3), (4, 5), (6, 7), (0, 2), (1, 3), (4, 6), (5, 7), (0, 4), (1, 5), (2, 6), (3, 7)]
+    for d in duals:
+        i, j, k = d
+        vals = [get((i + a, j + b, k + c), outside) for a, b, c in corners]
+        inside = [v < 0 for v in vals]
+        if all(inside) or not any(inside):
+            continue
+        acc = [0.0, 0.0, 0.0]
+        n = 0
+        for e0, e1 in edges:
+            if inside[e0] != inside[e1]:
+                f0, f1 = vals[e0], vals[e1]
+                t = f0 / (f0 - f1)
+                p0, p1 = corners[e0], corners[e1]
+                for q in range(3):
+                    acc[q] += p0[q] + (p1[q] - p0[q]) * t
+                n += 1
+        vidx[d] = len(verts)
+        verts.append((i + 0.5 + acc[0] / n, j + 0.5 + acc[1] / n, k + 0.5 + acc[2] / n))
+    quads = []
+    for (i, j, k), v in field.items():
+        if v >= 0 or v < -2.0:
+            continue
+        for ax in range(3):
+            for sgn in (1, -1):
+                nb = [i, j, k]
+                nb[ax] += sgn
+                if get(tuple(nb), outside) < 0:
+                    continue
+                # the edge between this voxel centre and nb: lower voxel along ax is `lo`
+                lo = [i, j, k] if sgn > 0 else nb
+                b, c = (ax + 1) % 3, (ax + 2) % 3
+                ring = []
+                for db, dc in ((-1, -1), (0, -1), (0, 0), (-1, 0)):
+                    q = list(lo)
+                    q[b] += db
+                    q[c] += dc
+                    ring.append(vidx.get(tuple(q)))
+                if None in ring:
+                    continue
+                quads.append(tuple(ring) if sgn > 0 else tuple(reversed(ring)))
+    return verts, quads

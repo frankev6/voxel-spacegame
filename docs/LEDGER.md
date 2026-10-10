@@ -556,6 +556,76 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
 
+### 2026-10-10 — Look book round 2: polished DRYDOCK, NOCTURNE as industrial gothic horror, new OPERA, alien enemies (claude, claude-opus-5-5)
+- **Owner decision and feedback (verbatim, 2026-10-10)** on the round-1 look book. The two reference screenshots that came with it are not stored in the repo (one is a page of copyrighted cover images):
+
+  > really good exploration in all of them, here are the finalists:
+  >
+  > 3D:
+  >
+  > * DRYDOCK
+  > * NOCTURNE
+  > * REEF
+  >
+  > UI:
+  >
+  > * DRYDOCK
+  > * NOCTURNE
+  >
+  > VISUAL STYLE:
+  >
+  > * DRYDOCK
+  > * PULP HORIZON (I want to love this one so much and Im sure with some changes it would be in my top 2 favorites, but lets leave it for now and focus on the other finalists)
+  >
+  > 1 DRYDOCK - overall, the strongest most cohesive option, it could however borrow some things from other designs, like making the background more insteresting than just black empty space (nebulas, stars, background subtle color differences).  some stronger color definitions in the 3d scenes for blocks (too much light gray, dark gray) whereas it would really level up with visual changes, and other scene items like planet rings, proper planet atmosphere (the atmosphere right now looks like a shield on the planet lol). I like the industrial feeling drydock has in the 3d as well as the UI, lets find polishing in both areas. also give me crazier weapon variants, like big guns, lasers, etc get creative. also for the EXISTING blocks in drydock you need to give them all a polish pass as well, some of the blocks like the cockpit, core blocks, reactor, are either troubled in terms of clipping 3d or don't look as nice or they are borrowing too much from my original placeholders
+  >
+  > 2 NOCTURNE - great UI, 3d very similar to drydock (in fact looks like a different civilization within the same universe as drydock) how could we give it its own stronger unique style? I love the background, but still not experimental enough with it. 3d blocks are too boring as they are all the same color, and the black vents just look like pixel errors, for this next pass lets try going out of our comfort zone and giving Nocturne a very distinct horror sci-fi look like the ALIEN franchise movies. (no ui changes, its good)
+  >
+  > 3 REEF - wow the ships and blocks are very out of the conventional versions. this would be amazing to integrate into one of the others as an alien civilization. UI not good so don't focus on it. what i want you to explore is if we can have alien enemy ships like these in the worlds of drydock and nocturne, so if we find a way to get a similar look for the reef ships without needing to do per voxel smoothing, really cool green pattern over the ships, also try other coloring rather than gray. so rather than polishing this one, i want to see ships like this in drydock and nocturne.
+  >
+  > GENERAL ISSUE I SAW WITH SHIPS TO KEEP IN MIND FOR YOUR POLISH PASS (IMAGE INCLUDED):
+  > can you see how a lot of ships, the corners are not aligned at all and it gives it this glitchy/ jagged look, i don't know if thats what you were going for but it looks like a mistake honestly. so keep this in mind because i saw it in all 6 versions.
+  >
+  > YOUR deliverables will be a POLISHED DRYDOCK and POLISHED NOCTURNE with all the feedback above as well as your own best judgements. and I want a 3rd NEW variant based on the look of SPACE OPERAS. as well as inspired by things like DUNE, FIFTH ELEMENT, ODDESSEY, NO MANS SKY
+
+  Follow-up during the work (verbatim): "i never said to "smoothing hull edges" btw, i said lets see if we can have some enemy alien ships that look like the REEF ones". Human hulls stay blocky; only the alien enemies use a smooth shell.
+- **Response: look book round 2** in the same page, `docs/design/lookbook/index.html`. Tabs: DRYDOCK, NOCTURNE, OPERA, ALIENS, Compare, and a Round 1 archive. Round-1 renders stay in `img/<direction>/`; round 2 is in `img/r2/<direction>/`. `ArtSource/LookDev/` now builds only the three round-2 directions; the round-1 code is at `1534b2e`.
+- **Jagged corners fixed at the source.** The per-cell auto-slope pass is gone. Hulls are built from straight-sided pieces: lofts between octagonal sections, and general convex pieces (spires, geodesic spheres, faceted rings). Each cell is clipped exactly by the piece's planes, so a slope is one plane across every cell it crosses. Coplanar cell faces are merged before the bevel, which removed the pinched triangles at T-junctions.
+- **DRYDOCK polish.**
+  - Galactic band with dust lanes, rust and teal nebula, warm-to-cool gradient.
+  - Faction liveries (signal blue, oxide red, hauler orange, teal) and function colours on blocks: weapons oxide red, power teal, cargo orange, engines graphite with heat-tinted nozzles.
+  - Planet rings lit by the sun and shadowed by the planet. The new atmosphere is computed from the ray's closest approach, so it hugs the limb and fades out.
+  - Seven new weapons in every direction's style: rotary cannon, heavy twin cannon, spinal mass driver, arc projector, plasma mortar, torpedo launcher, salvage harpoon. The kit is now 38 blocks.
+  - Existing blocks redone, away from the placeholder look (glowing cube in a cage, glowing cylinders, dome shield, dish sensor):
+    - cockpit: a cab with a window band;
+    - reactor: a fission pile with control rods;
+    - cores: a gyro, a gimbal, a foundry heart and a linear accelerator;
+    - capacitor: a rack of cell modules;
+    - shield: an insulator stack with emitter horns;
+    - sensor: a lattice mast with a radar bar;
+    - cargo: corrugated containers.
+  - New ships MULE (salvage gunship) and BULWARK (container frigate with colour-coded container stacks).
+  - Station KESSLER YARD rebuilt.
+  - UI polish: hazard-striped headers, rivets, function-coloured tiles and weapon slots, stencil discovery stamp, backed discovery title.
+- **NOCTURNE: industrial gothic horror (ALIEN-franchise mood). UI unchanged.**
+  - Hunched, ribbed housings, spires, hoses, slit windows, red strobes.
+  - Worn grey plating with ochre panels, oxblood weapons, mustard power, olive cargo, rain streaks and rust.
+  - Vents are deep ribbed grilles with an ember glow instead of black squares.
+  - Smoke-and-dust sky with a sickly glow, and a thin haze that catches work lights.
+  - Ships WRAITH (dropship) and CANTICLE (refinery tug with spires). Station THE ROOD: an inverted-cathedral refinery under tow. Storm planet with night-side lightning.
+- **Alien enemies (REEF brought into DRYDOCK and NOCTURNE).**
+  - Same 0.5 m grid: each alien cell stores one signed-distance byte instead of a block shape, and a surface-nets mesher builds the smooth shell in one pass, with no smoothing step and no subdivision. Damage removes cells and leaves organic craters with glowing flesh.
+  - HUSK (skimmer) and BROODMOTHER (armoured isopod: carapace plates, side spines, sacs, eyes, legs).
+  - Carapace shader with a glowing vein network. Four colourways: bone & jade (DRYDOCK default), obsidian & acid (NOCTURNE default), blood coral, oil slick.
+  - Combat in both worlds is now against them.
+- **OPERA (new): space opera** from the owner's references (space-opera covers, DUNE, THE FIFTH ELEMENT, 2001, NO MAN'S SKY).
+  - Cream hulls in bold liveries with paint bands, gold trim, chrome visors.
+  - Ships LARK (swept-wing courier) and SOVEREIGN (geodesic command sphere, spine with a spinal gun, ring, engine monolith). Station THE CROWN (double wheel).
+  - Painted ultramarine-to-magenta nebula skies; a banded gas giant with rings.
+  - Art-deco blocks; cores are an armillary sphere, an orrery and cut gems.
+  - New UI theme: gold rules and diamonds, octagonal tiles, compass radar, gilded centred discovery title. Fonts Cinzel and Josefin Sans, both SIL OFL 1.1.
+- **Next:** the owner reviews round 2: polish more, pick one, or mix, then in-engine look tests.
+
 ### 2026-10-10 — 3D look book: six directions, ships, stations, planets, block kits, game screens (claude, claude-opus-5-5)
 - **Owner feedback (verbatim, 2026-10-10)** on the ART-004/ART-005 output: "1. I was looking for atleast 6 DIFFERENT options 2. its a 3D game so when i asked for art directions I meant build 2 different varied ships for each look, and a station, and showcase how it would look like, how the ship, the station, the planets, etc. how the scenes would look like. don't get me wrong the UIs you've done so far are great for all 3 but its a 3D game and theres no emphasis on this at all! 3. the nocture UI looks great but the blocks being dark is just silly and bad contrast, try something new 4. art direction of blocks doesn't mean ALL BLOCKS ARE THE EXACT SAME, SLIGHTLY DIFFERENT TEXTURE. the point is I want to see how for example if we had angled blocks instead of just cubed. I want to see different interesting weapons. how modules could visually change the ships. how the cores should be really interesting blocks, like don't follow the old placeholders, but look at how we just used the grid (2x2, 3x3, 3x5) as a boundary but able to experiment a lot within, its like how in minecraft an enchanting table takes 1 block of space but its still  intricate within that space. not every block has to be super intricate, like hulls don't need to look crazy all the time. 5. one big thing I wanted to see if it was possible was some kind of procedural look where some hulls will have slightly different texture like windows, or latches, or wiring/tubes, not all but some in order to make it feel like the proper exterior of a spaceship, not a smooth boring thing. 6. i asked for inventory icons, i got no inventory or other game related screen mockups such as dialog discovery, etc. right now your mockups looks like its for a website and we're trying to make a video game in 3d 7. i need atmosphere, environment, background, intersting planet, ship - all things together make a visual design, but you understand i cannot pick an option if I just have an 8x8 grid of cubes as my only thing to base it on. 8. you spent so many hours following spec mumbo jumbo instead of optimizing for what the designer of a 3d games is actually looking for in order to make decisions, how is reduce motion more important than any of the other 7 points I mentioned above, yet you did that and none of the above"
 - **Response: 3D look book** `docs/design/lookbook/index.html` (opens from file://), generated by `ArtSource/LookDev/` (Blender 5.2.2, fully procedural, about 4 minutes for everything).

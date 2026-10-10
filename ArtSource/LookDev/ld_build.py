@@ -5,8 +5,10 @@ import math
 import bmesh
 import bpy
 
-HARD = {"hull", "hull2", "armor", "trim", "dark", "metal", "accent", "foil", "interior", "solar", "glass"}
-NO_OUTLINE = {"plume", "beam", "tracer", "shieldfx", "window", "nav_r", "nav_g", "nav_w", "grid", "ember"}
+HARD = {"hull", "hull2", "armor", "trim", "dark", "metal", "accent", "foil", "interior", "solar", "glass", "paint_w", "paint_p",
+        "paint_e", "c_cargo", "gold", "chrome", "ceramic", "hose", "heat"}
+PLANAR = {"hull", "hull2", "armor", "accent", "paint", "stripe"}
+NO_OUTLINE ={"plume", "beam", "tracer", "shieldfx", "window", "nav_r", "nav_g", "nav_w", "grid", "ember"}
 
 
 def realize(acc, mats, S, parent_name, collection=None, voxel_groups=(), subdiv_levels=None):
@@ -28,21 +30,26 @@ def realize(acc, mats, S, parent_name, collection=None, voxel_groups=(), subdiv_
         if len(bucket) == 4:
             attr = me.attributes.new("fade", "FLOAT", "POINT")
             attr.data.foreach_set("value", bucket[3][:len(me.vertices)])
-        merge = tag in HARD
+        base = tag.split("@")[0]
+        alien = base.startswith("a_")
+        merge = base in HARD
         if merge:
             bm = bmesh.new()
             bm.from_mesh(me)
             bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-4)
+            if base in PLANAR:
+                # merge coplanar cell faces into one polygon per flat region: removes the T-junctions that the
+                # bevel would otherwise pinch into little triangles where cut cells meet
+                bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(0.5), use_dissolve_boundaries=False,
+                                         verts=bm.verts, edges=bm.edges)
             bm.to_mesh(me)
             bm.free()
         flags = smooth[:len(me.polygons)] if len(smooth) >= len(me.polygons) else [False] * len(me.polygons)
-        if S.get("flat"):
-            flags = [False] * len(me.polygons)
-        if S.get("subdiv") and tag in HARD:
+        if alien:
             flags = [True] * len(me.polygons)
         me.polygons.foreach_set("use_smooth", flags)
         try:
-            me.set_sharp_from_angle(angle=math.radians(40))
+            me.set_sharp_from_angle(angle=math.radians(80 if alien else 40))
         except Exception:
             pass
         ob = bpy.data.objects.new(me.name, me)
@@ -51,16 +58,7 @@ def realize(acc, mats, S, parent_name, collection=None, voxel_groups=(), subdiv_
         mat = mats.get(tag) or mats["hull"]
         me.materials.append(mat)
         # modifiers ---------------------------------------------------------------------------------------------
-        if S.get("subdiv") and tag in HARD:
-            if tag in ("hull", "hull2", "armor"):
-                sm = ob.modifiers.new("relax", "SMOOTH")
-                sm.factor = 0.7
-                sm.iterations = 8
-            lv = S["subdiv"] if subdiv_levels is None else subdiv_levels
-            m = ob.modifiers.new("subd", "SUBSURF")
-            m.levels = lv
-            m.render_levels = lv
-        elif S.get("bevel") and tag in HARD and tag not in ("glass",):
+        if S.get("bevel") and base in HARD and base not in ("glass",):
             m = ob.modifiers.new("bevel", "BEVEL")
             m.width = S["bevel"]
             m.segments = S.get("bevel_seg", 2)
@@ -68,7 +66,7 @@ def realize(acc, mats, S, parent_name, collection=None, voxel_groups=(), subdiv_
             m.angle_limit = math.radians(35)
             m.harden_normals = True
             m.use_clamp_overlap = True
-        if S.get("outline") and tag not in NO_OUTLINE and not tag.startswith("emit"):
+        if S.get("outline") and base not in NO_OUTLINE and not base.startswith("emit"):
             _, w = S["outline"]
             me.materials.append(mats["ink"])
             m = ob.modifiers.new("ink", "SOLIDIFY")

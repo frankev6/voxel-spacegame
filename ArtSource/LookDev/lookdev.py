@@ -1,9 +1,10 @@
-"""3D look-development renders for the six art directions.
+"""3D look-development renders for the art directions (round 2: DRYDOCK, NOCTURNE, OPERA).
 
 Driver (system Python):  python3 ArtSource/LookDev/lookdev.py [--direction drydock] [--stage kit,scenes] [--draft]
 Inside Blender:          blender -b --factory-startup --python lookdev.py -- --blender --direction X --stage S --out DIR
 
-Outputs go to docs/design/lookbook/img/<direction>/ (scenes as JPEG, icons as PNG)."""
+Outputs go to docs/design/lookbook/img/r2/<direction>/ (scenes as JPEG, icons as WebP). Round 1 renders stay in
+img/<direction>/ (their code is at commit 1534b2e)."""
 
 import json
 import math
@@ -14,7 +15,7 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
-OUT_ROOT = os.path.join(ROOT, "docs", "design", "lookbook", "img")
+OUT_ROOT = os.path.join(ROOT, "docs", "design", "lookbook", "img", "r2")
 BLENDER = "/Applications/Blender.app/Contents/MacOS/Blender"
 sys.path.insert(0, HERE)
 

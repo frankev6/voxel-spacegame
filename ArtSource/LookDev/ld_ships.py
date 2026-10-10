@@ -1,39 +1,42 @@
 """Ships and stations as voxel cells (0.5 m) plus functional blocks, and the per-direction designs.
 
 Coordinates in cells: x right, y forward (bow at +y, exhaust toward -y), z up; the ship is symmetric about x = 0
-(cell i mirrors cell -1-i)."""
+(cell i mirrors cell -1-i, i.e. x -> -x in continuous coordinates).
+
+Hull shapes come from straight-sided pieces (lofts between octagonal sections, and general convex pieces), so every
+sloped face is one continuous plane across all the cells it passes through. That is what keeps edges and corners
+aligned; there is no per-cell auto-slope pass any more."""
 
 import math
 from mathutils import Matrix, Vector
 
-from ld_geom import CELL, Acc, auto_slopes, mesh_cells, hash01, DIRS, cbox, box, cyl, sphere, ico, torus, lathe
+from ld_geom import (CELL, Acc, mesh_cells, hash01, cbox, box, cyl, sphere, ico, torus, lathe,
+                     section_poly, loft_planes, classify_cell)
 from ld_blocks import KIT, build_block, greeble_face
+
+LIVERY_TAGS = ("hull", "hull2", "accent")
 
 
 class Ship:
-    def __init__(self, name, seed=1):
+    def __init__(self, name, seed=1, livery=None):
         self.name = name
         self.cells = {}
-        self.mods = []          # (kind, min_cell, euler_deg, size)
+        self.shapes = {}        # cut cells: {cell: ('clip', planes)}
+        self.vols = {}
+        self.livery = livery    # colour scheme name from the style's 'liveries'
+        self.mods = []          # (kind, min_cell, rotation, size, rotated size, colour remap)
         self.mod_cells = set()
         self.seed = seed
         self.craters = []       # (centre metres, radius metres)
         self.plumes = []        # (pos metres, dir, radius, length)
-        self.extra = []         # callables(acc, group, S) for custom geometry (trusses, dishes, ...)
+        self.extra = []         # callables(acc, group, S) for custom geometry
+        self.work_lights = []
 
-    # cell shapes -----------------------------------------------------------------------------------------------
-    def fill(self, pred, xr, yr, zr, tag="hull", mirror=False):
-        for x in range(*xr):
-            for y in range(*yr):
-                for z in range(*zr):
-                    if pred(x + 0.5, y + 0.5, z + 0.5):
-                        self.set((x, y, z), tag)
-                        if mirror:
-                            self.set((-1 - x, y, z), tag)
-
+    # cells -------------------------------------------------------------------------------------------------------
     def set(self, c, tag):
         if c not in self.mod_cells:
             self.cells[c] = tag
+            self.shapes.pop(c, None)
 
     def box(self, x0, x1, y0, y1, z0, z1, tag="hull", mirror=False):
         for x in range(x0, x1):
@@ -47,75 +50,106 @@ class Ship:
         for x in range(x0, x1):
             for y in range(y0, y1):
                 for z in range(z0, z1):
-                    self.cells.pop((x, y, z), None)
-                    if mirror:
-                        self.cells.pop((-1 - x, y, z), None)
+                    for c in ((x, y, z), (-1 - x, y, z)) if mirror else ((x, y, z),):
+                        self.cells.pop(c, None)
+                        self.shapes.pop(c, None)
 
     def paint(self, pred, tag):
         for c in list(self.cells):
             if pred(c[0] + 0.5, c[1] + 0.5, c[2] + 0.5):
                 self.cells[c] = tag
 
-    def ellipsoid(self, cx, cy, cz, rx, ry, rz, tag="hull", shell=None):
-        def pred(x, y, z):
-            d = ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 + ((z - cz) / rz) ** 2
-            if shell is None:
-                return d <= 1
-            return d <= 1 and (((x - cx) / (rx - shell)) ** 2 + ((y - cy) / (ry - shell)) ** 2 + ((z - cz) / (rz - shell)) ** 2) > 1
-        self.fill(pred, (int(cx - rx) - 1, int(cx + rx) + 2), (int(cy - ry) - 1, int(cy + ry) + 2),
-                  (int(cz - rz) - 1, int(cz + rz) + 2), tag)
+    # straight-sided pieces ---------------------------------------------------------------------------------------
+    def loft(self, stations, tag="hull", cx=0.0, mirror=False):
+        """Hull between octagonal sections. stations: [(y, w, zb, zt[, ct[, cb]])] in cells; half-width w around cx,
+        top/bottom chamfers ct/cb. Changes between stations of 0, 1:2, 1:1 or 2:1 keep every cut on whole cells."""
+        for (ya, *a), (yb, *b) in zip(stations, stations[1:]):
+            if yb <= ya:
+                continue
+            sa = section_poly(cx, a[0], a[1], a[2], *(list(a[3:5]) + [0, 0])[:2])
+            sb = section_poly(cx, b[0], b[1], b[2], *(list(b[3:5]) + [0, 0])[:2])
+            planes = loft_planes(ya, sa, yb, sb)
+            xs = [x for x, _ in sa + sb]
+            zs = [z for _, z in sa + sb]
+            self.convex(planes, ((min(xs), ya, min(zs)), (max(xs), yb, max(zs))), tag)
+        if mirror and cx:
+            self.loft(stations, tag, -cx, False)
 
-    def cyl_y(self, cx, cz, r, y0, y1, tag="hull", r1=None, shell=None, mirror=False):
-        r1 = r if r1 is None else r1
+    def convex(self, planes, bbox, tag="hull", mirror=False):
+        """Any convex piece given as half-spaces [(n, d)]: n.p <= d, in cell units."""
+        (x0, y0, z0), (x1, y1, z1) = bbox
+        for x in range(math.floor(x0), math.ceil(x1)):
+            for y in range(math.floor(y0), math.ceil(y1)):
+                for z in range(math.floor(z0), math.ceil(z1)):
+                    self._piece((x, y, z), classify_cell(planes, (x, y, z)), tag)
+        if mirror:
+            mp = [((-n[0], n[1], n[2]), d) for n, d in planes]
+            self.convex(mp, ((-x1, y0, z0), (-x0, y1, z1)), tag)
 
-        def pred(x, y, z):
-            t = (y - y0) / max(1e-6, (y1 - y0))
-            rr = r + (r1 - r) * t
-            d = math.hypot(x - cx, z - cz)
-            return d <= rr and (shell is None or d > rr - shell)
-        m = max(r, r1)
-        self.fill(pred, (int(cx - m) - 1, int(cx + m) + 2), (y0, y1), (int(cz - m) - 1, int(cz + m) + 2), tag, mirror)
+    def _piece(self, c, res, tag):
+        if c in self.mod_cells or res[0] == "empty":
+            return
+        if res[0] == "full":
+            self.cells[c] = tag
+            self.shapes.pop(c, None)
+            return
+        if c in self.cells and c not in self.shapes:
+            return
+        if c in self.shapes and self.vols.get(c, 0) >= res[2]:
+            return
+        self.cells[c] = tag
+        self.shapes[c] = ("clip", res[1])
+        self.vols[c] = res[2]
 
-    def cyl_z(self, cx, cy, r, z0, z1, tag="hull", r1=None, shell=None):
-        r1 = r if r1 is None else r1
+    def spire(self, cx, cy, w, z0, z1, k=1.0, tag="hull", down=False):
+        """Square tower with a pyramid cap (or an inverted one hanging down when down=True). k = cap steepness."""
+        sides = [((1, 0, 0), cx + w), ((-1, 0, 0), -(cx - w)), ((0, 1, 0), cy + w), ((0, -1, 0), -(cy - w))]
+        if not down:
+            planes = sides + [((0, 0, -1), -z0), ((k, 0, 1), z1 + k * cx), ((-k, 0, 1), z1 - k * cx),
+                              ((0, k, 1), z1 + k * cy), ((0, -k, 1), z1 - k * cy)]
+        else:
+            planes = sides + [((0, 0, 1), z1), ((k, 0, -1), -z0 + k * cx), ((-k, 0, -1), -z0 - k * cx),
+                              ((0, k, -1), -z0 + k * cy), ((0, -k, -1), -z0 - k * cy)]
+        self.convex(planes, ((cx - w, cy - w, z0), (cx + w, cy + w, z1)), tag)
 
-        def pred(x, y, z):
-            t = (z - z0) / max(1e-6, (z1 - z0))
-            rr = r + (r1 - r) * t
-            d = math.hypot(x - cx, y - cy)
-            return d <= rr and (shell is None or d > rr - shell)
-        m = max(r, r1)
-        self.fill(pred, (int(cx - m) - 1, int(cx + m) + 2), (int(cy - m) - 1, int(cy + m) + 2), (z0, z1), tag)
+    def ball(self, c, r, tag="hull", n=1):
+        """Faceted sphere: intersection of half-spaces along icosphere directions (geodesic look)."""
+        verts, _ = ico((0, 0, 0), 1.0, n)
+        planes = [((v[0], v[1], v[2]), r + v[0] * c[0] + v[1] * c[1] + v[2] * c[2]) for v in verts]
+        self.convex(planes, ((c[0] - r, c[1] - r, c[2] - r), (c[0] + r, c[1] + r, c[2] + r)), tag)
 
-    def torus_z(self, cx, cy, cz, R, r, tag="hull", shell=None):
-        def pred(x, y, z):
-            q = math.hypot(x - cx, y - cy) - R
-            d = math.hypot(q, z - cz)
-            return d <= r and (shell is None or d > r - shell)
-        m = R + r
-        self.fill(pred, (int(cx - m) - 1, int(cx + m) + 2), (int(cy - m) - 1, int(cy + m) + 2), (int(cz - r) - 1, int(cz + r) + 2), tag)
+    def ring(self, c, axis, R0, R1, half_t, n=24, tags=("hull",)):
+        """Faceted ring of n straight segments around `axis` ('z' or 'y') through centre c."""
+        da = 2 * math.pi / n
 
-    def torus_y(self, cx, cy, cz, R, r, tag="hull", shell=None):
-        def pred(x, y, z):
-            q = math.hypot(x - cx, z - cz) - R
-            d = math.hypot(q, y - cy)
-            return d <= r and (shell is None or d > r - shell)
-        m = R + r
-        self.fill(pred, (int(cx - m) - 1, int(cx + m) + 2), (int(cy - r) - 1, int(cy + r) + 2), (int(cz - m) - 1, int(cz + m) + 2), tag)
+        def u(a):
+            return (math.cos(a), math.sin(a), 0.0) if axis == "z" else (math.cos(a), 0.0, math.sin(a))
 
-    def beam_line(self, p0, p1, w, tag="trim"):
-        """Square-section voxel beam between two cell points."""
-        a, b = Vector(p0), Vector(p1)
-        n = int((b - a).length) + 1
-        for i in range(n + 1):
-            p = a + (b - a) * (i / max(1, n))
-            for dx in range(w):
-                for dy in range(w):
-                    for dz in range(w):
-                        self.set((int(math.floor(p.x)) + dx - w // 2, int(math.floor(p.y)) + dy - w // 2, int(math.floor(p.z)) + dz - w // 2), tag)
+        def tang(a):
+            return (-math.sin(a), math.cos(a), 0.0) if axis == "z" else (-math.sin(a), 0.0, math.cos(a))
+
+        wv = (0, 0, 1) if axis == "z" else (0, 1, 0)
+
+        def dot(n_, p):
+            return n_[0] * p[0] + n_[1] * p[1] + n_[2] * p[2]
+
+        def neg(v):
+            return tuple(-k for k in v)
+
+        for i in range(n):
+            a0, a1 = i * da, (i + 1) * da
+            um = u((a0 + a1) / 2)
+            t0, t1 = tang(a0), tang(a1)
+            planes = [(um, R1 * math.cos(da / 2) + dot(um, c)), (neg(um), -R0 + dot(neg(um), c)),
+                      (neg(t0), dot(neg(t0), c)), (t1, dot(t1, c)),
+                      (wv, half_t + dot(wv, c)), (neg(wv), half_t + dot(neg(wv), c))]
+            pts = [tuple(c[k] + u(a)[k] * r for k in range(3)) for a in (a0, a1) for r in (R0, R1)]
+            lo = [min(p[k] for p in pts) - (half_t if wv[k] else 0) for k in range(3)]
+            hi = [max(p[k] for p in pts) + (half_t if wv[k] else 0) for k in range(3)]
+            self.convex(planes, (tuple(lo), tuple(hi)), tags[i % len(tags)])
 
     # modules -----------------------------------------------------------------------------------------------------
-    def mod(self, kind, x, y, z, rot=(0, 0, 0), mirror=False, size=None):
+    def mod(self, kind, x, y, z, rot=(0, 0, 0), mirror=False, size=None, remap=None):
         size = size or KIT[kind]
         Rm = Matrix.Identity(3)
         for ax, deg in zip("XYZ", rot):
@@ -123,19 +157,19 @@ class Ship:
                 Rm = Matrix.Rotation(math.radians(deg), 3, ax) @ Rm
         rs = Rm @ Vector(size)
         rsz = tuple(int(round(abs(c))) for c in rs)
-        self._place(kind, (x, y, z), Rm, size, rsz)
+        self._place(kind, (x, y, z), Rm, size, rsz, remap)
         if mirror:
-            Mx = Matrix.Diagonal((-1, 1, 1))
-            self._place(kind, (-x - rsz[0], y, z), Rm, size, rsz, mirror_geom=False)
+            self._place(kind, (-x - rsz[0], y, z), Rm, size, rsz, remap)
 
-    def _place(self, kind, mn, Rm, size, rsz, mirror_geom=False):
+    def _place(self, kind, mn, Rm, size, rsz, remap=None):
         for dx in range(rsz[0]):
             for dy in range(rsz[1]):
                 for dz in range(rsz[2]):
                     c = (mn[0] + dx, mn[1] + dy, mn[2] + dz)
                     self.cells.pop(c, None)
+                    self.shapes.pop(c, None)
                     self.mod_cells.add(c)
-        self.mods.append((kind, mn, Rm, size, rsz))
+        self.mods.append((kind, mn, Rm, size, rsz, remap))
 
     def mod_matrix(self, mn, Rm, size, rsz):
         half_local = Vector(size) * (CELL / 2)
@@ -146,17 +180,17 @@ class Ship:
     def carve(self, centre_cells, radius_cells, seed=0):
         cx, cy, cz = centre_cells
         removed = []
-        r2 = radius_cells
         for c in list(self.cells):
             d = math.dist((c[0] + 0.5, c[1] + 0.5, c[2] + 0.5), (cx, cy, cz))
             jag = (hash01(c[0], c[1], c[2], seed) - 0.5) * 1.6
-            if d < r2 + jag:
+            if d < radius_cells + jag:
                 removed.append((c, self.cells.pop(c)))
+                self.shapes.pop(c, None)
         keep = []
         for m in self.mods:
-            kind, mn, Rm, size, rsz = m
+            kind, mn, Rm, size, rsz, remap = m
             mc = Vector(mn) + Vector(rsz) * 0.5
-            if (mc - Vector((cx, cy, cz))).length < r2 * 0.8:
+            if (mc - Vector((cx, cy, cz))).length < radius_cells * 0.8:
                 removed.append((tuple(int(v) for v in mc), "module"))
                 for dx in range(rsz[0]):
                     for dy in range(rsz[1]):
@@ -175,21 +209,25 @@ class Ship:
         return (Vector((min(xs), min(ys), min(zs))) * CELL, Vector((max(xs) + 1, max(ys) + 1, max(zs) + 1)) * CELL)
 
 
-SLOPE_RULES = {
-    "industrial": lambda c, ds: all(d[2] >= 0 for d in ds) and not any(d[1] < 0 for d in ds) and any(d[2] > 0 for d in ds),
-    "sleek": lambda c, ds: not any(d[1] < 0 for d in ds),
-    "retro": lambda c, ds: True,
-    "nasa": lambda c, ds: False,
-    "organic": lambda c, ds: True,
-    "lowpoly": lambda c, ds: True,
-}
+def merge_acc(src, dst, livery=None):
+    """Move every part of src into dst, applying a livery suffix to the painted tags."""
+    for (g, tag), bucket in src.parts.items():
+        t = f"{tag}@{livery}" if livery and tag in LIVERY_TAGS else tag
+        dst_b = dst.parts.setdefault((g, t), [[], [], []])
+        if len(bucket) == 4 and len(dst_b) == 3:
+            dst_b.append([0.0] * len(dst_b[0]))
+        base = len(dst_b[0])
+        dst_b[0].extend(bucket[0])
+        dst_b[1].extend(tuple(i + base for i in f) for f in bucket[1])
+        dst_b[2].extend(bucket[2])
+        if len(dst_b) == 4:
+            dst_b[3].extend(bucket[3] if len(bucket) == 4 else [0.0] * len(bucket[0]))
 
 
 def realize(ship, S, acc, group, greebles=True, plumes=True, nav=True):
-    shape = S["shape"]
+    if hasattr(ship, "realize"):
+        return ship.realize(S, acc, group, plumes=plumes)
     solid = set(ship.cells) | ship.mod_cells
-    rule = SLOPE_RULES[shape]
-    shapes = auto_slopes(ship.cells, allow=rule, filled=solid)
     craters = ship.craters
 
     def tag_of(c, d):
@@ -200,7 +238,8 @@ def realize(ship, S, acc, group, greebles=True, plumes=True, nav=True):
                     return "interior"
         return ship.cells[c]
 
-    out, exposed = mesh_cells(ship.cells, shapes, tag_of=tag_of, solid=solid)
+    sub = Acc()
+    out, exposed = mesh_cells(ship.cells, ship.shapes, tag_of=tag_of, solid=solid)
     for tag, vf in out.items():
         if tag == "interior":
             fade = []
@@ -210,28 +249,27 @@ def realize(ship, S, acc, group, greebles=True, plumes=True, nav=True):
                     d = (Vector(v) - cc).length
                     best = max(best, 1.0 - max(0.0, d - r * 0.7) / (r * 0.9 + 0.3))
                 fade.append(best)
-            acc.add_fade(group, "interior", vf, None, fade)
+            sub.add_fade(group, "interior", vf, None, fade)
         else:
-            acc.add(group, tag, vf)
-    I = Matrix.Identity(4)
-    for kind, mn, Rm, size, rsz in ship.mods:
-        build_block(kind, S, acc, group, ship.mod_matrix(mn, Rm, size, rsz), size)
+            sub.add(group, tag, vf)
+    for kind, mn, Rm, size, rsz, remap in ship.mods:
+        M = ship.mod_matrix(mn, Rm, size, rsz)
+        build_block(kind, S, sub, group, M, size, remap)
         if plumes and kind in ("thruster_s", "thruster_l"):
-            M = ship.mod_matrix(mn, Rm, size, rsz)
             W, H = size[0] * CELL, size[2] * CELL
             r = min(W, H) * 0.42
             p = M @ Vector((W / 2, -0.05, H / 2))
             d = (M.to_3x3() @ Vector((0, -1, 0))).normalized()
-            L = (6.0 if kind == "thruster_l" else 3.0) * (1.3 if shape in ("retro", "lowpoly") else 1.0)
-            ship.plumes.append((p, d, r, L))
+            ship.plumes.append((p, d, r, 6.0 if kind == "thruster_l" else 3.0))
     for p, d, r, L in ship.plumes:
-        plume(acc, group, p, d, r, L, S)
+        plume(sub, group, p, d, r, L, S)
     for fn in ship.extra:
-        fn(acc, group, S)
+        fn(sub, group, S)
     if greebles:
-        add_greebles(ship, S, acc, group, exposed, shapes)
+        add_greebles(ship, S, sub, group, exposed)
     if nav:
-        add_nav(ship, S, acc, group)
+        add_nav(ship, S, sub, group)
+    merge_acc(sub, acc, ship.livery)
     return exposed
 
 
@@ -243,7 +281,6 @@ def plume(acc, group, p0, d, r, length, S):
     for _, h in prof:
         fade += [1.0 - h / length] * seg
     acc.add_fade(group, "plume", (v, f), None, fade)
-    # hot core
     prof2 = [(r * 0.45, 0.0), (r * 0.3, length * 0.15), (r * 0.02, length * 0.4)]
     v2, f2 = lathe(prof2, tuple(p0), tuple(d), seg, False, False)
     fade2 = []
@@ -252,54 +289,70 @@ def plume(acc, group, p0, d, r, length, S):
     acc.add_fade(group, "plume", (v2, f2), None, fade2)
 
 
-GREEBLE_SIDES = {
-    "window": "side", "porthole": "side", "pore": "any", "hatch": "any", "vent": "top_side", "pipe": "top_side",
-    "plate": "any", "light": "any", "antenna": "top", "stripe": "top", "lightline": "side", "handrail": "any",
-    "foil": "any", "vein": "any", "spine": "top", "stud": "any",
-}
+# ----------------------------------------------------------------------------------------------------------------------
+# Procedural hull detail, placed in coherent zones (window rows, pipe runs, vent clusters) rather than a random scatter
+# ----------------------------------------------------------------------------------------------------------------------
 
-
-def add_greebles(ship, S, acc, group, exposed, shapes):
-    dens = S["greeble"]
-    kinds = [(k, p) for k, p in dens.items() if p > 0]
-    if not kinds:
-        return
-    I = Matrix.Identity(4)
+def add_greebles(ship, S, acc, group, exposed):
+    dens = dict(S["greeble"])
+    dens.update(getattr(ship, "greeble_override", {}) or {})
     seed = ship.seed
+    I = Matrix.Identity(4)
     for c, d in exposed:
-        if d[2] < 0:
+        if d[2] < 0 or ship.cells.get(c) in ("accent", "trim"):
             continue
+        x, y, z = c
         side = "top" if d[2] > 0 else ("side" if d[0] != 0 else "end")
-        # coherent runs: windows in rows, pipes along the length
-        row_key = (c[0] if d[0] == 0 else d[0], c[2], d[0], d[1], d[2])
-        chosen = None
-        for k, p in kinds:
-            where = GREEBLE_SIDES.get(k, "any")
-            if where == "side" and side != "side":
-                continue
-            if where == "top" and side != "top":
-                continue
-            if where == "top_side" and side == "end":
-                continue
-            if k in ("window", "pipe", "lightline", "vein"):
-                h = hash01(*row_key, c[1] // 7, seed, len(k))
-                if h < p * 1.6 and (k != "window" or hash01(c[1], c[2], seed) < 0.85):
-                    chosen = k
+        zone = (y // 6, d[0], d[1], d[2], (x // 6) if side == "top" else 0)
+
+        def h(k):
+            return hash01(*zone, seed, k)
+
+        kind = None
+        if side == "side":
+            if "window" in dens and z % 3 == 1 and h(1) < dens["window"] * 4.5 and hash01(x, y, z, seed) < 0.9:
+                kind = "window"
+            elif "rib" in dens and y % 2 == 0 and h(2) < dens["rib"] * 3:
+                kind = "rib"
+            elif "vent" in dens and z % 3 != 1 and h(3) < dens["vent"] * 3 and hash01(x, y, z, seed, 3) < 0.6:
+                kind = "vent"
+            elif "pipe" in dens and z % 3 == 2 and h(4) < dens["pipe"] * 3:
+                kind = "pipe"
+            elif "fairing" in dens and z % 4 == 2 and h(5) < dens["fairing"] * 4:
+                kind = "fairing"
+        elif side == "top":
+            if "pipe" in dens and x % 4 == 1 and h(6) < dens["pipe"] * 3:
+                kind = "pipe"
+            elif "vent" in dens and h(7) < dens["vent"] * 2.5 and hash01(x, y, z, seed, 7) < 0.55:
+                kind = "vent"
+            elif "stripe" in dens and y % 12 == 0 and h(8) < dens["stripe"] * 12:
+                kind = "stripe"
+            elif "hatch" in dens and hash01(x, y, z, seed, 8) < dens["hatch"]:
+                kind = "hatch"
+            elif "plate" in dens and h(9) < dens["plate"] * 3 and hash01(x, y, z, seed, 9) < 0.5:
+                kind = "plate"
+            elif "handrail" in dens and x % 5 == 0 and hash01(x, y, seed, 10) < dens["handrail"] * 2:
+                kind = "handrail"
+        else:
+            if "vent" in dens and hash01(x, y, z, seed, 11) < dens["vent"] * 2:
+                kind = "vent"
+            elif "hatch" in dens and hash01(x, y, z, seed, 12) < dens["hatch"] * 2:
+                kind = "hatch"
+        if kind is None:
+            for k in ("light", "strobe", "antenna", "spike"):
+                if k in dens and hash01(x, y, z, d[0] * 3 + d[1] * 5 + d[2] * 7, seed, len(k)) < dens[k]:
+                    if k in ("antenna", "spike") and side != "top":
+                        continue
+                    kind = k
                     break
-            else:
-                if hash01(c[0], c[1], c[2], d[0] * 3 + d[1] * 5 + d[2] * 7, seed, len(k)) < p:
-                    chosen = k
-                    break
-        if chosen:
-            greeble_face(S, acc, group, I, c, d, chosen, hash01(c[0], c[2], c[1], 99), run=(c[1], 0))
+        if kind:
+            greeble_face(S, acc, group, I, c, d, kind, hash01(x, z, y, 99), run=(y, 0))
 
 
 def add_nav(ship, S, acc, group):
     if not ship.cells:
         return
-    mn, mx = ship.bounds()
     cells = ship.cells
-    # port (red, -x) and starboard (green, +x) at the widest points; white at the stern top
     xmin = min(c[0] for c in cells)
     xmax = max(c[0] for c in cells)
     for xe, tag, sgn in ((xmin, "nav_r", -1), (xmax, "nav_g", 1)):
@@ -313,342 +366,165 @@ def add_nav(ship, S, acc, group):
 
 
 # ======================================================================================================================
-# Designs. Each returns a Ship. "light" ships ~15-20 m, "heavy" ~40-50 m, stations 100-250 m.
+# Designs. "light" ships ~15-20 m, "heavy" ~45-55 m.
 # ======================================================================================================================
 
+CONTAINER_TINTS = [None, "hull2", "paint_p", "paint_w", "accent", None, "hull"]
+
+
 def drydock_light():
-    s = Ship("MULE", 11)
-    s.box(-5, 5, 0, 30, 0, 6)
-    s.box(-4, 4, 30, 34, 0, 5)
-    s.box(-3, 3, 34, 38, 0, 3)
-    s.paint(lambda x, y, z: z < 2, "hull2")
-    s.box(-5, 5, 8, 24, 6, 7, "hull2")
-    s.box(5, 8, -2, 16, 1, 5, "hull2", mirror=True)
-    s.box(5, 7, 16, 20, 2, 4, "hull2", mirror=True)
-    s.mod("cockpit", -2, 28, 5)
-    s.mod("autocannon", 3, 24, 6, mirror=True)
-    s.mod("missile", 1, 13, 7, mirror=True)
-    s.mod("cargo", 2, 1, 6, mirror=True)
-    s.mod("thruster_l", -2, -6, 1)
-    s.mod("thruster_s", 5, -5, 2, mirror=True)
-    s.mod("radiator", 8, 2, 1, mirror=True)
-    s.mod("sensor", -1, 9, 7)
-    s.mod("shield", -1, 18, 7)
-    s.mod("reactor", -1, 6, 2)
+    """MULE: salvage gunship. Chunky chamfered hull, sponsons, harpoon on the nose, rotary chin gun."""
+    s = Ship("MULE", 11, "yard")
+    s.loft([(0, 5, 0, 7, 2, 1), (28, 5, 0, 7, 2, 1), (30, 4, 1, 6, 2, 1), (36, 2, 2, 5, 1, 0)])
+    s.loft([(-5, 6, 0, 8, 2, 1), (1, 6, 0, 8, 2, 1), (3, 5, 0, 7, 2, 1)], "hull2")
+    s.loft([(8, 3, 7, 9, 1), (22, 3, 7, 9, 1), (24, 2, 7, 8, 1)], "armor")
+    s.loft([(1, 2, 1, 5, 1, 1), (19, 2, 1, 5, 1, 1), (21, 1, 2, 4, 0, 0)], "hull2", cx=8, mirror=True)
+    s.box(5, 6, 4, 14, 2, 4, "trim", mirror=True)
+    s.paint(lambda x, y, z: z < 2 and y > 3, "hull2")
+    s.paint(lambda x, y, z: 25 <= y < 26 and z > 5, "accent")
+    s.mod("cockpit", -2, 24, 7)
+    s.mod("gatling", -1, 27, -2)
+    s.mod("harpoon", -1, 33, 4)
+    s.mod("autocannon", 7, 11, 5, mirror=True)
+    s.mod("thruster_l", -2, -11, 2)
+    s.mod("thruster_s", 7, -2, 2, mirror=True)
+    s.mod("radiator", 3, -4, 8, mirror=True)
+    s.mod("cargo", 1, 2, 7, mirror=True)
+    s.mod("sensor", -1, 18, 9)
+    s.mod("shield", -1, 10, 9)
     s.mod("core_2", -1, 14, 2)
+    s.mod("reactor", -1, 4, 2)
     return s
 
 
 def drydock_heavy():
-    s = Ship("BULWARK", 12)
-    s.box(-6, 6, 0, 80, 0, 10)
-    s.box(-5, 5, 80, 88, 0, 8)
-    s.box(-4, 4, 88, 93, 1, 6)
+    """BULWARK: container frigate. Bridge castle aft, a deck of colour-coded containers, twin turret, keel mass driver."""
+    s = Ship("BULWARK", 12, "oxide")
+    s.loft([(0, 7, 0, 11, 2, 2), (76, 7, 0, 11, 2, 2), (82, 6, 1, 10, 2, 2), (92, 3, 3, 8, 1, 1)])
+    s.loft([(-8, 9, 0, 13, 3, 2), (6, 9, 0, 13, 3, 2), (10, 7, 0, 11, 2, 2)], "hull2")
+    s.loft([(10, 5, 11, 21, 1), (20, 5, 11, 21, 1), (22, 4, 11, 20, 1)])
+    s.box(5, 9, 14, 20, 18, 20, "hull2", mirror=True)
+    s.loft([(28, 2, 3, 8, 1, 1), (70, 2, 3, 8, 1, 1), (74, 1, 4, 7, 0, 0)], "hull2", cx=9, mirror=True)
+    s.loft([(54, 2, -3, 0, 0, 1), (74, 2, -3, 0, 0, 1)], "armor")
     s.paint(lambda x, y, z: z < 3, "hull2")
-    for i in range(4):
-        tag = "accent" if i % 2 == 0 else "armor"
-        s.box(6, 14, 12 + i * 15, 25 + i * 15, 0, 8, tag, mirror=True)
-        s.box(6, 14, 25 + i * 15, 27 + i * 15, 1, 7, "hull2", mirror=True)
-    s.box(-4, 4, 56, 68, 10, 18)
-    s.box(-3, 3, 58, 66, 18, 20, "hull2")
-    s.box(-11, 11, -6, 8, 0, 12, "hull2")
-    s.mod("cockpit", -2, 64, 18)
-    for x in (1, 6):
-        s.mod("thruster_l", x, -12, 1, mirror=True)
-        s.mod("thruster_l", x, -12, 6, mirror=True) if x == 1 else None
-    s.mod("flak", -1, 72, 10)
-    s.mod("flak", -1, 40, 10)
-    s.mod("railgun", -1, 86, 8)
-    s.mod("autocannon", 9, 22, 8, mirror=True)
-    s.mod("autocannon", 9, 52, 8, mirror=True)
-    s.mod("missile", 2, 76, 10, mirror=True)
-    s.mod("radiator", 11, -4, 3, mirror=True)
-    s.mod("radiator", 11, 2, 3, mirror=True)
-    s.mod("sensor", -1, 60, 20)
-    s.mod("shield", 3, 30, 10, mirror=True)
-    s.mod("shield", -1, 82, 8)
-    s.mod("reactor", -2, 4, 12)
-    s.mod("capacitor", 4, 4, 12, mirror=True)
-    s.mod("core_3", -2, 30, 4)
-    s.mod("cargo", 1, 12, 10, mirror=True)
+    s.paint(lambda x, y, z: 76 <= y < 78 and z > 7, "accent")
+    for row in range(8):
+        y = 26 + row * 5
+        for col, x in enumerate((-6, -4, -2, 0, 2, 4)):
+            if hash01(row, col, 9) < 0.12:
+                continue
+            for k in range(1 + int(hash01(row, col, 3) < 0.6)):
+                tint = CONTAINER_TINTS[int(hash01(row, col, k, 5) * len(CONTAINER_TINTS))]
+                s.mod("cargo", x, y, 11 + k * 2, remap={"c_cargo": tint} if tint else None)
+    s.mod("heavy_cannon", -2, 70, 11)
+    s.mod("mass_driver", -2, 74, -3)
+    s.mod("cockpit", -2, 16, 21)
+    s.mod("flak", 5, 15, 20, mirror=True)
+    s.mod("sensor", 1, 11, 21)
+    s.mod("shield", -3, 11, 21)
+    s.mod("autocannon", 8, 34, 8, mirror=True)
+    s.mod("autocannon", 8, 58, 8, mirror=True)
+    for x in (-6, -2, 2):
+        for z in (1, 7):
+            s.mod("thruster_l", x, -14, z)
+    s.mod("radiator", 5, -6, 13, mirror=True)
+    s.mod("tesla", -1, -4, 13)
+    s.mod("core_3", -2, 40, 3)
+    s.mod("reactor", -2, 0, 3)
     return s
 
 
 def nocturne_light():
-    s = Ship("KESTREL", 21)
-
-    def pred(x, y, z):
-        ax = abs(x)
-        # fuselage: long needle, tapering at 45 degrees into the nose
-        if ax < 3.5 - max(0, y - 34) and z < 4.5 - max(0, y - 30) * 0.4 and y < 40:
-            return True
-        # 45-degree swept wings
-        if y < 22 and ax < 17 and ax <= 3 + (22 - y) and ax >= 3 and y >= max(0, ax - 9):
-            return z < (2 if ax < 9 else 1)
-        return False
-    s.fill(pred, (-18, 18), (0, 42), (0, 6))
-    s.paint(lambda x, y, z: abs(x) > 8, "hull2")
-    s.fill(lambda x, y, z: y < 9 - (z - 4) * 1.0 and y > (z - 4) * 0.8, (4, 5), (0, 10), (4, 11), "hull2", mirror=True)
-    s.mod("cockpit", -2, 25, 3)
-    s.mod("thruster_s", 1, -3, 1, mirror=True)
-    s.mod("thruster_s", 6, 0, 0, rot=(0, 0, 0), mirror=True)
-    s.mod("beam", 9, 10, 1, mirror=True)
-    s.mod("railgun", -1, 36, 0)
-    s.mod("shield", -1, 10, 4)
-    s.mod("core_1", 0, 16, 1)
+    """WRAITH: hunched dropship. Heavy cowled nose, stub wings with hanging gun pods, twin canted tail fins."""
+    s = Ship("WRAITH", 21, "company")
+    s.loft([(0, 4, 0, 7, 2, 1), (20, 4, 0, 8, 3, 1), (26, 4, 0, 7, 3, 2), (32, 2, 1, 5, 2, 1), (35, 1, 2, 4, 1, 0)])
+    s.loft([(-6, 5, 0, 7, 2, 2), (2, 5, 0, 8, 3, 2)], "hull2")
+    s.loft([(5, 3, 1, 3, 1, 0), (14, 3, 1, 3, 1, 0), (16, 2, 1, 3, 1, 0)], "armor", cx=7, mirror=True)
+    s.loft([(-4, 0.5, 8, 14, 0, 0), (2, 0.5, 8, 10, 0, 0)], "hull2", cx=3.5, mirror=True)
+    s.paint(lambda x, y, z: z < 1.5, "armor")
+    s.paint(lambda x, y, z: 18 <= y < 19, "accent")
+    s.mod("cockpit", -2, 22, 7)
+    s.mod("gatling", 8, 9, -1, mirror=True)
+    s.mod("autocannon", -1, 28, -2)
+    s.mod("thruster_l", -2, -12, 1)
+    s.mod("thruster_s", 8, 2, 1, mirror=True)
+    s.mod("sensor", -1, 12, 8)
+    s.mod("core_1", 0, 14, 2)
     return s
 
 
 def nocturne_heavy():
-    s = Ship("VIGIL", 22)
-    L = 100
-
-    def hw(y):
-        if y < 10:
-            return 8 + y * 0.2
-        if y > 62:
-            return max(1.0, 10 * (1 - (y - 62) / 38) ** 0.9)
-        return 10
-
-    def pred(x, y, z):
-        w = hw(y)
-        if abs(x) > w:
-            return False
-        # hexagonal section
-        top = 9 - abs(x) * 0.45
-        bot = 0 + abs(x) * 0.3
-        if y > 62:
-            top -= (y - 62) * 0.12
-        return bot <= z < top
-    s.fill(pred, (-12, 12), (0, L), (0, 10))
-    s.fill(lambda x, y, z: y > 18 + (z - 9) * 1.2 and y < 64 - (z - 9) * 1.6 and z < 26, (-1, 1), (18, 66), (9, 26), "hull2")
-    s.fill(lambda x, y, z: y > 20 and y < 50 - (-z) * 0.8 and z > -6, (-1, 1), (20, 52), (-6, 0), "hull2")
-    s.paint(lambda x, y, z: z < 2.5, "hull2")
-    s.mod("cockpit", -2, 70, 6)
-    for x in (-6, -2, 2):
-        s.mod("thruster_l", x, -6, 2)
-    for i in range(4):
-        s.mod("beam", 10, 22 + i * 9, 4, rot=(0, 90, 0), mirror=True)
-    s.mod("flak", -1, 60, 7)
-    s.mod("flak", -1, 12, 7)
-    s.mod("railgun", -1, 86, 3)
-    s.mod("shield", -1, 40, 26)
-    s.mod("sensor", -1, 76, 5)
-    s.mod("radiator", 6, 2, 7, mirror=True)
-    s.mod("core_35", -2, 30, 1)
+    """CANTICLE: refinery tug. Top-heavy castle with gothic spires, sloped prow, five-nozzle engine block, keel gun."""
+    s = Ship("CANTICLE", 22, "company")
+    s.loft([(0, 9, 0, 13, 3, 2), (56, 9, 0, 13, 3, 2), (70, 7, 1, 12, 3, 2), (86, 4, 3, 9, 2, 1), (92, 2, 4, 7, 1, 0)])
+    s.loft([(8, 7, 13, 20, 2), (44, 7, 13, 20, 2), (50, 5, 13, 18, 2), (54, 3, 13, 16, 1)], "hull2")
+    s.loft([(-10, 11, -2, 16, 4, 3), (2, 11, -2, 16, 4, 3), (6, 9, 0, 13, 3, 2)], "armor")
+    s.loft([(30, 3, -3, 1, 0, 1), (70, 3, -3, 1, 0, 1)], "armor")
+    s.box(-2, 1, 70, 82, 0, 2, "armor")
+    for y, top in ((12, 38), (22, 34), (32, 30)):
+        s.spire(0, y, 2, 20, top, 1.5, "hull")
+    for sx in (-1, 1):
+        s.spire(sx * 6, 4, 1, 16, 26, 2.0, "armor")
+    s.paint(lambda x, y, z: z < 2.5, "armor")
+    s.paint(lambda x, y, z: 60 <= y < 61 and z > 9, "accent")
+    s.mod("heavy_cannon", -2, 55, 13)
+    s.mod("mass_driver", -2, 70, -3)
+    s.mod("cockpit", -2, 46, 18)
+    s.mod("flak", 2, 38, 20, mirror=True)
+    s.mod("tesla", -1, 7, 20)
+    s.mod("sensor", -1, 40, 20)
+    for x, z in ((-7, 5), (-2, 5), (3, 5), (-5, 0), (1, 0)):
+        s.mod("thruster_l", x, -16, z)
+    s.mod("railgun", 9, 20, 9, mirror=True)
+    s.mod("core_35", -2, 30, 3)
+    s.mod("reactor", -2, 0, 4)
     return s
 
 
-def pulp_light():
-    s = Ship("COMET", 31)
-    s.cyl_y(0, 5, 5.2, 0, 24)
-    s.cyl_y(0, 5, 5.2, 24, 38, r1=0.8)
-    s.paint(lambda x, y, z: y > 31, "armor")
-    s.paint(lambda x, y, z: 12 < y < 15, "hull2")
-    # three fins: top and two lower diagonals
-    s.fill(lambda x, y, z: y < 12 - (z - 9) * 1.1 and y > -3 + (z - 9) * 0.6, (-1, 1), (-3, 13), (9, 17), "armor")
-    for sgn in (-1, 1):
-        def fpred(x, y, z, sgn=sgn):
-            dx, dz = x * sgn, -(z - 5)
-            u = (dx + dz) / 1.414
-            v = (dx - dz) / 1.414
-            return abs(v) < 0.9 and u > 4 and y < 12 - (u - 4) * 1.1 and y > -3 + (u - 4) * 0.6
-        s.fill(fpred, (-14, 14), (-3, 13), (-9, 5), "armor")
-    s.box(5, 9, 10, 16, 4, 6, "hull2", mirror=True)
-    s.mod("cockpit", -2, 23, 9)
-    s.mod("thruster_l", -2, -6, 3)
-    s.mod("autocannon", 7, 13, 6, mirror=True)
-    s.mod("core_1", 0, 18, 4)
+def opera_light():
+    """LARK: courier. Octagonal fuselage, 45-degree swept wings, bubble cab, twin sail fins, wingtip engines."""
+    s = Ship("LARK", 31, "crown")
+    s.loft([(-6, 2, 2, 5, 1, 1), (-2, 3, 1, 6, 2, 2), (18, 3, 1, 6, 2, 2), (24, 2, 2, 5, 1, 1), (28, 1, 3, 4, 0, 0)])
+    # swept wing: leading edge y <= 17 - (x - 3), trailing edge y >= 1, thickness 2..4 with a chamfered tip
+    wing = [((-1, 0, 0), -3), ((1, 0, 0), 14), ((1, 1, 0), 20), ((0, -1, 0), -1), ((0, 0, -1), -2), ((0, 0, 1), 4),
+            ((1, 0, 1), 17)]
+    s.convex(wing, ((3, 1, 2), (14, 17, 4)), "hull2", mirror=True)
+    s.mod("cockpit", -2, 15, 6)
+    s.mod("thruster_l", -2, -12, 1)
+    s.mod("thruster_s", 11, -2, 2, mirror=True)
+    s.mod("autocannon", 4, 8, 4, mirror=True)
+    s.mod("beam", -1, 8, 6)
+    s.mod("radiator", 2, -5, 6, mirror=True)
+    s.mod("core_1", 0, 10, 3)
     return s
 
 
-def pulp_heavy():
-    s = Ship("BIG BERTHA", 32)
-    s.ellipsoid(0, 80, 8, 9, 10, 8)
-    s.paint(lambda x, y, z: y > 84, "armor")
-    s.box(-4, 4, 10, 74, 2, 10, "hull2")
-    colours = ["armor", "accent", "hull", "hull2", "accent"]
-    for i in range(5):
-        t = colours[i]
-        s.box(-10, 10, 14 + i * 12, 24 + i * 12, 0 + (i % 2) * 2, 12 + (i % 2) * 2, t)
-    s.cyl_y(0, 7, 9, 0, 10, "hull")
-    s.paint(lambda x, y, z: y < 3, "armor")
-    s.box(10, 16, 40, 46, 4, 8, "hull2", mirror=True)
-    s.cyl_y(16, 6, 3, 30, 56, "hull", mirror=True)
-    s.mod("cockpit", -2, 82, 15)
-    s.mod("thruster_l", -2, -6, 5)
-    s.mod("thruster_l", -7, -6, 1)
-    s.mod("thruster_l", 3, -6, 1)
-    s.mod("thruster_s", 15, 24, 5, mirror=True)
-    s.mod("beam", 15, 56, 5, mirror=True)
-    s.mod("flak", -1, 64, 14)
-    s.mod("autocannon", 3, 40, 14, mirror=True)
-    s.mod("missile", -1, 26, 14)
-    s.mod("reactor", -1, 50, 14)
-    s.mod("radiator", 10, 2, 8, mirror=True)
-    s.mod("sensor", -1, 88, 14)
-    s.mod("shield", 5, 74, 12, mirror=True)
-    return s
-
-
-def orbital_light():
-    s = Ship("TUG", 41)
-    s.cyl_y(0, 4, 4.2, 0, 18, "hull")
-    s.cyl_y(0, 4, 5.2, -7, 0, "hull2")
-    s.mod("cockpit", -2, 18, 2)
-    s.mod("thruster_l", -2, -13, 2)
-    s.mod("solar", 5, 2, 2, rot=(0, 0, 90), mirror=True)
-    s.mod("solar", 5, 8, 2, rot=(0, 0, 90), mirror=True)
-    s.mod("autocannon", -1, 10, 8)
-    s.mod("sensor", 2, -4, 9)
-    s.mod("radiator", 4, -6, 6, mirror=True)
-    for z in (1, 7):
-        s.mod("thruster_s", -1, 14, z, rot=(0, 0, 180)) if False else None
-    return s
-
-
-def orbital_heavy():
-    s = Ship("PATHFINDER", 42)
-    # habitat ring module at the bow
-    s.cyl_y(0, 8, 7.2, 70, 92, "hull")
-    s.cyl_y(0, 8, 7.2, 92, 98, "hull", r1=3)
-    s.cyl_y(0, 8, 4.2, 56, 70, "hull")
-    # truss spine (voxel girders)
-    for (x, z) in ((-3, 5), (2, 5), (-3, 10), (2, 10)):
-        s.box(x, x + 1, 6, 56, z, z + 1, "trim")
-    for y in range(6, 56, 5):
-        s.box(-3, 3, y, y + 1, 5, 6, "trim")
-        s.box(-3, 3, y, y + 1, 10, 11, "trim")
-        s.box(-3, -2, y, y + 1, 5, 11, "trim")
-        s.box(2, 3, y, y + 1, 5, 11, "trim")
-    # propellant tanks (gold foil)
-    for y0 in (14, 34):
-        s.ellipsoid(-7, y0 + 6, 8, 4.5, 8, 4.5, "hull2")
-        s.ellipsoid(6, y0 + 6, 8, 4.5, 8, 4.5, "hull2")
-    s.cyl_y(0, 8, 6.2, -6, 6, "hull2")
-    s.mod("cockpit", -2, 98, 6)
-    s.mod("thruster_l", -2, -12, 6)
-    s.mod("thruster_s", -6, -9, 6)
-    s.mod("thruster_s", 4, -9, 6)
-    for i in range(3):
-        s.mod("radiator", 4, 8 + i * 14, 11, mirror=True, rot=(0, 0, 0))
-    s.mod("solar", 7, 60, 7, rot=(0, 0, 90), mirror=True)
-    s.mod("solar", 7, 64, 7, rot=(0, 0, 90), mirror=True)
-    s.mod("sensor", -1, 84, 15)
-    s.mod("railgun", -1, 60, 12)
-    s.mod("autocannon", -1, 76, 15)
-    s.mod("shield", 3, 88, 13, mirror=True)
-    s.mod("core_3", -2, 74, 5)
-
-    def dish(acc, group, S):
-        c = Vector((0, 50 * CELL, 13 * CELL))
-        acc.add(group, "metal", cyl(tuple(c), tuple(c + Vector((0, 0, 1.6))), 0.08, 8), None, True)
-        M = Matrix.Translation(c + Vector((0, 0, 1.6))) @ Matrix.Rotation(math.radians(50), 4, "X")
-        prof = [(0.0, 0.0), (0.8, 0.08), (1.6, 0.32), (2.0, 0.5)]
-        v, f = lathe(prof, (0, 0, 0), (0, 0, 1), 32, False, False)
-        acc.add(group, "hull", (v, f), M, True)
-        acc.add(group, "metal", cyl((0, 0, 0), (0, 0, 1.2), 0.03, 6), M, True)
-    s.extra.append(dish)
-    return s
-
-
-def reef_light():
-    s = Ship("RAY", 51)
-
-    def pred(x, y, z):
-        e = (x / 17) ** 2 + ((y - 14) / 15) ** 2
-        if e > 1:
-            return False
-        thick = 1.0 + 4.2 * (1 - e) ** 1.4
-        return abs(z - 3) < thick / 2 + (0.8 if abs(x) < 4 else 0)
-    s.fill(pred, (-18, 18), (-2, 30), (-2, 9))
-    # cephalic horns
-    s.fill(lambda x, y, z: 3 < abs(x) < 6 and abs(z - 3) < 1.2 and y < 34 - (abs(x) - 3) * 1.5, (-7, 7), (26, 34), (1, 5), "hull2")
-    # tail
-    s.cyl_y(0, 3, 0.9, -14, -2, "hull2", r1=0.6)
-    s.paint(lambda x, y, z: z > 4.5 and abs(x) < 10, "hull2")
-    s.mod("cockpit", -2, 16, 5)
-    s.mod("thruster_s", 3, -4, 2, mirror=True)
-    s.mod("autocannon", 9, 16, 4, mirror=True)
-    s.mod("core_2", -1, 8, 2)
-    return s
-
-
-def reef_heavy():
-    s = Ship("LEVIATHAN", 52)
-    segs = [(0, 6.5), (11, 8.5), (23, 10), (36, 10.5), (49, 10), (61, 9), (72, 7.5), (82, 6)]
-    for y, r in segs:
-        s.ellipsoid(0, y + 6, 8, r, 8.5, r * 0.85)
-    s.ellipsoid(0, 92, 7, 6, 9, 5, "hull2")
-    for y, r in segs[1:6]:
-        s.fill(lambda x, y_, z, y0=y, r=r: abs(x) < 1 and abs(y_ - y0 - 6) < 3 - (z - 8 - r * 0.8) * 0.4, (-1, 1), (y, y + 13), (int(8 + r * 0.8), int(8 + r * 0.8 + 7)), "hull2")
-    # pectoral fins
-    s.fill(lambda x, y, z: 8 < abs(x) < 22 and abs(z - 5) < 1 and abs(y - 52 + (abs(x) - 8) * 0.9) < 6 - (abs(x) - 8) * 0.3, (-23, 23), (40, 70), (3, 7), "hull2")
-    # tail flukes
-    s.fill(lambda x, y, z: abs(z - 8) < 1 and abs(x) < 3 + (-y) * 0.9 and y > -14 + abs(x) * 0.3, (-16, 16), (-14, 2), (6, 10), "hull2")
-    s.mod("cockpit", -2, 88, 11)
-    s.mod("thruster_l", -2, -4, 6) if False else None
-    s.mod("thruster_s", 3, -2, 4, mirror=True)
-    s.mod("thruster_s", 3, -2, 10, mirror=True)
-    for i in range(3):
-        s.mod("beam", 9, 30 + i * 14, 7, rot=(0, 90, 0), mirror=True)
-    s.mod("flak", -1, 70, 14)
-    s.mod("shield", -1, 40, 18)
-    s.mod("core_35", -2, 40, 5)
-    return s
-
-
-def facet_light():
-    s = Ship("DART", 61)
-
-    def pred(x, y, z):
-        w = 13 * (1 - y / 34)
-        if abs(x) > w + 1:
-            return False
-        h = 2 + 4 * (1 - abs(x) / (w + 1.5)) * (1 - y / 40)
-        return z < h
-    s.fill(pred, (-15, 15), (0, 34), (0, 7))
-    s.paint(lambda x, y, z: abs(x) > 6, "hull2")
-    s.paint(lambda x, y, z: y > 26, "accent")
-    s.mod("cockpit", -2, 16, 5)
-    s.mod("thruster_l", -2, -6, 0)
-    s.mod("thruster_s", 6, -3, 0, mirror=True)
-    s.mod("autocannon", 8, 8, 2, mirror=True)
-    s.mod("missile", -1, 6, 5)
-    s.mod("core_1", 0, 12, 1)
-    return s
-
-
-def facet_heavy():
-    s = Ship("BASTION", 62)
-    tiers = [(0, 86, 15, 0, 5, "hull2"), (6, 78, 12, 5, 10, "hull"), (14, 66, 8, 10, 15, "hull"), (24, 54, 5, 15, 20, "hull2"),
-             (30, 46, 3, 20, 26, "accent")]
-    for y0, y1, hw, z0, z1, tag in tiers:
-        s.box(-hw, hw, y0, y1, z0, z1, tag)
-    s.fill(lambda x, y, z: abs(x) < 11 - (y - 86) * 0.9, (-12, 12), (86, 98), (0, 5), "hull2")
-    s.fill(lambda x, y, z: abs(x) < 8 - (y - 78) * 0.7, (-9, 9), (78, 90), (5, 10), "hull")
-    s.mod("cockpit", -2, 40, 26)
-    for x in (-10, -2, 6):
-        s.mod("thruster_l", x, -6, 0)
-    s.mod("thruster_l", -2, -6, 5) if False else None
-    for y in (10, 30, 50, 68):
-        s.mod("autocannon", 13, y, 5, mirror=True)
-    s.mod("flak", 6, 20, 10, mirror=True)
-    s.mod("flak", 6, 56, 10, mirror=True)
-    s.mod("railgun", -1, 84, 10)
-    s.mod("missile", 1, 26, 15, mirror=True)
-    s.mod("missile", 1, 50, 15, mirror=True)
-    s.mod("shield", -1, 32, 26)
-    s.mod("sensor", 1, 44, 26)
-    s.mod("core_3", -2, 40, 2)
+def opera_heavy():
+    """SOVEREIGN: monumental capital ship. Geodesic command sphere, long spine with a spinal gun, ring, engine monolith."""
+    s = Ship("SOVEREIGN", 32, "guild")
+    s.ball((0, 80, 8), 12.5, "hull")
+    s.loft([(56, 4, 4, 12, 3, 3), (70, 4, 4, 12, 3, 3)], "hull2")
+    s.loft([(10, 3, 5, 11, 2, 2), (58, 3, 5, 11, 2, 2)], "hull2")
+    s.ring((0, 30, 8), "y", 11, 15, 2, 24, ("hull", "hull", "hull2"))
+    s.box(3, 11, 29, 31, 7, 9, "trim", mirror=True)
+    s.box(-1, 1, 29, 31, 11, 19, "trim")
+    s.box(-1, 1, 29, 31, -3, 5, "trim")
+    s.loft([(-6, 9, -1, 17, 4, 4), (10, 9, -1, 17, 4, 4), (14, 6, 2, 14, 3, 3)], "hull")
+    s.paint(lambda x, y, z: -1 <= y < 3, "hull2")
+    s.mod("mass_driver", -2, 34, 11)
+    s.mod("heavy_cannon", -2, 1, 17)
+    s.mod("missile", 2, -5, 17, mirror=True)
+    s.mod("cockpit", -2, 87, 6)
+    s.mod("sensor", -1, 78, 20)
+    s.mod("shield", -1, 72, 19)
+    for x, z in ((-6, 1), (2, 1), (-6, 11), (2, 11), (-2, 6)):
+        s.mod("thruster_l", x, -12, z)
+    s.mod("core_3", -2, 78, 6)
     return s
 
 
 SHIPS = {
     "drydock": (drydock_light, drydock_heavy),
     "nocturne": (nocturne_light, nocturne_heavy),
-    "pulp-horizon": (pulp_light, pulp_heavy),
-    "orbital": (orbital_light, orbital_heavy),
-    "reef": (reef_light, reef_heavy),
-    "facet": (facet_light, facet_heavy),
+    "opera": (opera_light, opera_heavy),
 }

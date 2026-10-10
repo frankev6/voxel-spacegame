@@ -1,4 +1,5 @@
-/* Look Book chrome (neutral) + six in-game UI themes (.ui-<direction>) used by the 1920x1080 screen stages. */
+/* Look Book chrome (neutral) + in-game UI themes (.ui-<direction>) used by the 1920x1080 screen stages.
+   Round 2 themes: drydock (polished), nocturne (unchanged), opera (new). Round 1 themes kept for the archive. */
 :root {
   --page: #0c0d10; --page2: #15171c; --ink: #e8e9ec; --ink2: #a3a7b0; --ink3: #6c717c; --rule: #262a32; --hi: #f2b705;
   color-scheme: dark;
@@ -24,7 +25,7 @@ main { max-width: 1800px; margin: 0 auto; padding: 0 24px 80px; }
 .hero { position: relative; border-radius: 10px; overflow: hidden; cursor: zoom-in; }
 .hero img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
 .hero-text { position: absolute; left: 0; right: 0; bottom: 0; padding: 120px 40px 32px; background: linear-gradient(transparent, rgba(0,0,0,.82)); }
-.hero-text .hk { text-transform: uppercase; letter-spacing: .18em; font-size: 12px; color: #d8dbe2; }
+.hero-text .hkick { text-transform: uppercase; letter-spacing: .18em; font-size: 12px; color: #d8dbe2; }
 .hero-text h2 { margin: 2px 0 8px; font-size: clamp(34px, 6vw, 84px); line-height: 1; }
 .hero-text p { max-width: 900px; margin: 0; color: #e7e9ee; font-size: clamp(14px, 1.4vw, 18px); }
 .sw { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 18px 4px 4px; }
@@ -47,6 +48,16 @@ h5.cat { margin: 18px 0 8px; font-size: 12px; text-transform: uppercase; letter-
 .kt .ks { display: block; font-size: 11px; color: var(--ink3); font-family: "JetBrains Mono", monospace; }
 
 .lead { color: var(--ink2); margin: 0 0 14px; }
+.changed { margin: 18px 4px 4px; padding: 16px 20px; background: var(--page2); border: 1px solid var(--rule); border-left: 3px solid var(--hi); border-radius: 8px; }
+.changed h4 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--ink3); }
+.changed ul { margin: 0; padding-left: 18px; color: var(--ink2); columns: 2; column-gap: 32px; }
+.changed li { break-inside: avoid; margin-bottom: 4px; }
+.kt .new { font-style: normal; font-size: 10px; color: #111; background: var(--hi); border-radius: 3px; padding: 0 4px; vertical-align: 2px; }
+.g4, .cw4 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.g4 { grid-template-columns: repeat(4, 1fr); }
+.cw4 .shot figcaption, .g4 .shot figcaption { font-size: 12px; }
+.cmp.cmp3 { grid-template-columns: 90px repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tabs .arch-tab { border-color: var(--rule); color: var(--ink3); }
 .cmp { display: grid; grid-template-columns: 90px repeat(6, minmax(0, 1fr)); gap: 6px; align-items: center; }
 .cmp-h { font-size: 12px; color: var(--ink3); }
 .cmp-h .lnk { display: block; background: none; border: 0; padding: 0; font-weight: 700; font-size: 14px; color: var(--ink); cursor: pointer; text-align: left; letter-spacing: .04em; }
@@ -65,6 +76,9 @@ h5.cat { margin: 18px 0 8px; font-size: 12px; text-transform: uppercase; letter-
 
 @media (max-width: 900px) {
   .g2, .sw { grid-template-columns: 1fr; }
+  .changed ul { columns: 1; }
+  .g4 { grid-template-columns: 1fr 1fr; }
+  .cmp.cmp3 { grid-template-columns: 60px repeat(3, 240px); overflow-x: auto; }
   .cmp { grid-template-columns: 60px repeat(6, 150px); overflow-x: auto; }
   main { padding: 0 16px 60px; }
   .top { padding: 10px 16px; }
@@ -208,6 +222,24 @@ h5.cat { margin: 18px 0 8px; font-size: 12px; text-transform: uppercase; letter-
 .ui-drydock .bar .segs { display: flex; } .ui-drydock .bar .segs i { flex: 1; border-right: 3px solid var(--panel); }
 .ui-drydock.s-disc .dname { font-family: "Saira Stencil One", var(--f-disp); }
 .ui-drydock .nora .n-ring, .ui-drydock .nora .n-dot { display: none; }
+/* round 2 polish: hazard header strip, rivets, function colours, stencil stamp */
+.ui-drydock { --f-wpn: #c0503a; --f-pwr: #2fa597; --f-eng: #8a9098; --f-cargo: #e0832f; --f-core: #f2b705; --f-hull: #d8d0be; }
+.ui-drydock .panel { padding-top: 28px !important;
+  background-image: radial-gradient(circle at 12px calc(100% - 12px), #6f7378 2.5px, transparent 3.5px), radial-gradient(circle at calc(100% - 12px) calc(100% - 12px), #6f7378 2.5px, transparent 3.5px); }
+.ui-drydock .panel::before { content: ""; position: absolute; left: 0; right: 34px; top: 0; height: 9px; background: repeating-linear-gradient(-45deg, var(--acc) 0 11px, #17181a 11px 22px); }
+.ui-drydock .topbar.panel, .ui-drydock .tcard.panel { padding-top: 22px !important; }
+.ui-drydock .tile::after, .ui-drydock .wpn::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: var(--fc, transparent); }
+.ui-drydock .wpn::after { top: 0; bottom: auto; height: 4px; }
+.ui-drydock .f-wpn { --fc: var(--f-wpn); } .ui-drydock .f-pwr { --fc: var(--f-pwr); } .ui-drydock .f-eng { --fc: var(--f-eng); }
+.ui-drydock .f-cargo { --fc: var(--f-cargo); } .ui-drydock .f-core { --fc: var(--f-core); } .ui-drydock .f-hull { --fc: var(--f-hull); }
+.ui-drydock .tile { background: linear-gradient(180deg, #2b2e33, #1b1d20); border-width: 1px; }
+.ui-drydock .tile.sel { outline: 3px solid var(--acc); outline-offset: 2px; }
+.ui-drydock .hk.sel { border: 2px solid var(--acc); box-shadow: 0 0 0 4px #17181a, 0 0 0 8px var(--acc); }
+.ui-drydock .cats .on { background: var(--acc); }
+.ui-drydock.s-disc .dkick { display: inline-block; border: 3px solid var(--acc); padding: 4px 14px; transform: rotate(-2deg); background: rgba(20,20,20,.55); }
+.ui-drydock.s-disc .drule { height: 12px; background: repeating-linear-gradient(-45deg, var(--acc) 0 14px, #17181a 14px 28px); }
+.ui-drydock .callout { background: rgba(20,20,20,.75); padding: 4px 12px; border-left: 4px solid currentColor; }
+.ui-drydock .radar { background-image: linear-gradient(rgba(242,183,5,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(242,183,5,.08) 1px, transparent 1px); background-size: 30px 30px; }
 
 .ui-nocturne { --f-disp: Michroma, sans-serif; --f-body: Inter, sans-serif; --f-mono: "JetBrains Mono", monospace;
   --panel: rgba(4,10,22,.58); --panel2: rgba(95,208,255,.06); --line: rgba(95,208,255,.38); --t: #e6f2ff; --mute: #8aa2bf; --acc: #5fd0ff; --on-acc: #02101c;
@@ -273,9 +305,39 @@ h5.cat { margin: 18px 0 8px; font-size: 12px; text-transform: uppercase; letter-
 .ui-facet.s-disc .dkick { background: #ff7a1a; color: #fff; display: inline-block; padding: 4px 14px; border-radius: 10px; border: 4px solid #141833; }
 .ui-facet .nora svg { background: #ff7a1a; border-radius: 24px; } .ui-facet .nora .n-ring, .ui-facet .nora .n-wave { stroke: #fff; } .ui-facet .nora .n-dot { fill: #fff; }
 
+/* OPERA: art-deco panels, gold rules and diamonds, octagonal tiles, compass radar, gilded centred discovery */
+.ui-opera { --f-disp: Cinzel, serif; --f-body: "Josefin Sans", sans-serif; --f-mono: "Space Mono", monospace;
+  --panel: linear-gradient(160deg, rgba(14,16,50,.88), rgba(36,14,52,.82)); --panel2: rgba(217,168,62,.09); --line: rgba(217,168,62,.6); --t: #f3ead6; --mute: #b9b0c9; --acc: #e0b04a; --on-acc: #160f04;
+  --hull: #f3ead6; --shield: #7fe0ff; --energy: #ffd36b; --danger: #ff5a4a; --good: #6bffe0; --track: rgba(255,255,255,.1); --sel: rgba(217,168,62,.14);
+  --bw: 1px; --r: 2px; --barh: 8px; --barr: 4px; --barb: 1px solid rgba(217,168,62,.45); --radar-r: 50%; --shadow: 0 14px 40px rgba(0,0,0,.45);
+  --rar2: #7fe0ff; --rar3: #ff8ac8; --rar4: #e0b04a; }
+.ui-opera .panel { background: var(--panel) !important; outline: 1px solid rgba(217,168,62,.28); outline-offset: -7px; }
+.ui-opera .ph { font-weight: 700; letter-spacing: .16em; color: var(--acc); }
+.ui-opera .panel > .ph:first-child { text-align: center; }
+.ui-opera .panel > .ph:first-child::before, .ui-opera .panel > .ph:first-child::after { content: "◆"; font-size: .55em; margin: 0 .9em; vertical-align: .3em; opacity: .8; }
+.ui-opera .bar .bt b { background: linear-gradient(90deg, var(--c), #fff6e0); }
+.ui-opera .radar { background: radial-gradient(circle, rgba(20,16,60,.85) 60%, rgba(10,8,30,.85)); }
+.ui-opera .radar::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: repeating-conic-gradient(rgba(224,176,74,.7) 0 1deg, transparent 1deg 15deg); -webkit-mask: radial-gradient(circle, transparent 66%, #000 67%); mask: radial-gradient(circle, transparent 66%, #000 67%); }
+.ui-opera .radar .rr { border-color: rgba(224,176,74,.35); }
+.ui-opera .tile, .ui-opera .wpn, .ui-opera .hk { clip-path: polygon(14% 0, 86% 0, 100% 14%, 100% 86%, 86% 100%, 14% 100%, 0 86%, 0 14%); border-radius: 0; background: radial-gradient(circle at 50% 40%, rgba(224,176,74,.18), rgba(14,16,50,.9) 72%); }
+.ui-opera .tile.sel { outline: none; box-shadow: inset 0 0 0 3px var(--acc); }
+.ui-opera .wpn .wn, .ui-opera .s-inv .cats, .ui-opera .tb-ship { font-family: var(--f-disp); }
+.ui-opera .callout { font-family: var(--f-disp); color: #fff3d6; text-shadow: 0 0 18px rgba(255,90,74,.8), 0 2px 6px #000; }
+.ui-opera .target .c { border-color: var(--acc); }
+.ui-opera.s-disc .disc { left: 0; right: 0; width: auto; top: 70px; text-align: center; }
+.ui-opera.s-disc .dkick { letter-spacing: .5em; }
+.ui-opera.s-disc .dname { font-size: 136px; font-weight: 700; letter-spacing: .08em; background: linear-gradient(180deg, #fff3d0 10%, #e0b04a 55%, #9a6a20 90%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 4px 18px rgba(0,0,0,.6)); }
+.ui-opera.s-disc .drule { width: 640px; margin: 22px auto; height: 2px; background: linear-gradient(90deg, transparent, var(--acc) 20%, var(--acc) 80%, transparent); position: relative; }
+.ui-opera.s-disc .drule::after { content: "◆"; position: absolute; left: 50%; top: -14px; transform: translateX(-50%); color: var(--acc); font-size: 20px; background: transparent; }
+.ui-opera.s-disc .drow { margin: 0 auto; text-align: left; }
+.ui-opera .nora .n-dot { fill: var(--acc); } .ui-opera .nora .n-wave { stroke: #7fe0ff; }
+.ui-font-opera { font-family: Cinzel, serif; font-weight: 700; letter-spacing: .1em; }
+
 .ui-font-drydock { font-family: "Barlow Condensed", sans-serif; font-weight: 700; letter-spacing: .04em; }
 .ui-font-nocturne { font-family: Michroma, sans-serif; letter-spacing: .14em; }
 .ui-font-pulp-horizon { font-family: Archivo, sans-serif; font-weight: 800; font-stretch: 125%; }
 .ui-font-orbital { font-family: "IBM Plex Sans Condensed", sans-serif; font-weight: 600; letter-spacing: .06em; }
 .ui-font-reef { font-family: Comfortaa, sans-serif; font-weight: 700; }
 .ui-font-facet { font-family: "Lilita One", sans-serif; }
+.ui-drydock.s-disc .disc { background: linear-gradient(90deg, rgba(14,14,16,.82) 60%, rgba(14,14,16,0)); padding: 26px 120px 30px 36px; margin-left: -36px; }
+.ui-opera.s-disc .disc { background: radial-gradient(ellipse at center, rgba(8,8,30,.72) 30%, rgba(8,8,30,0) 70%); padding: 30px 0; }
