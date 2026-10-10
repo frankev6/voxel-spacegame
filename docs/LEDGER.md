@@ -18,7 +18,7 @@
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
-| A0 | 13 | 1 | 0 | 1 | 1 | 0 | 16 | 2 |
+| A0 | 13 | 0 | 0 | 1 | 2 | 0 | 16 | 3 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 <!-- summary:end -->
@@ -483,9 +483,9 @@
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | no | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
-| ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-10 |  |  |
+| ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | review | claude (claude-opus-5-5) | 2026-10-10 | a61dde8 | Needs an independent frontier review (no subagents this session). Links only; image set waits for owner OK to download |
-| ART-004 | Block-kit style test: five blocks per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002 | no | todo |  |  |  |  |
+| ART-004 | Block-kit style test: five blocks per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002 | yes | todo |  |  |  |  |
 | ART-005 | Interactive HTML design board | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002, ART-003, ART-004 | no | todo |  |  |  |  |
 | ART-006 | Owner shortlist of finalist directions | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-005 | no | todo |  |  |  |  |
 | ART-007 | Brick material baker, preview mesher, reference shader and art validator | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-001 | yes | todo |  |  |  |  |
@@ -555,6 +555,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-10 — ART-002 direction token sheets and checker (claude, claude-opus-5-5)
+- **What.** `Assets/Game/UI/Theme/Directions/tokens-{drydock,nocturne,pulp-horizon}.uss`, 67 tokens each: the 44 binding tokens with their §8.1 column plus every §11 token, generated from the DESIGN-SYSTEM tables. `tools/art/check_tokens.py` (with `--verify-doc`), `tools/art/test_check_tokens.py` and `tools/art/export_board_tokens.py`, which writes `docs/design/board/tokens/*.css` scoped to `[data-direction]`, with Google Fonts imports that all return HTTP 200.
+- **Design-system correction.** The checker reproduces all 36 §8.1 contrast values exactly. In §10.2 it found DRYDOCK hull–energy at **11.99, below the C4 minimum of 12**; the table's "12.0" had rounded up. DRYDOCK `--color-hull` changed from `#E6DCC8` to `#E5DCC8` (one channel by 1, ΔE 0.5), which gives hull–energy 12.4 and hull–shield 29.6. Three other §10.2 cells were corrected by 0.1–0.2 to the computed values (placeholder ally–neutral 25.1, placeholder hull–shield 19.3, PULP ally–enemy 49.6), with a note under the table. Method: Machado severity 1.0 in linear RGB, clamped to [0, 1], then CIEDE2000.
+- **Checks.** `check_tokens.py --verify-doc`: 4 sheets, 0 errors, 0.01 s (budget 2 s). Every sheet value equals DESIGN-SYSTEM; T1, T2 (`--color-border-strong` worst 3.15 / 3.42 / 3.85) and C4 pass. `test_check_tokens.py`: 8/8 pass, including Sharma 2005 pairs 1, 7, 17 and 25 to ±0.0001, and removal of each of the 44 binding tokens failing with the token named. `tools/compile.sh` clean. EditMode 10/10.
+- **Known noise.** Importing the three sheets logs one "Invalid asset path" warning per look-test font URL (12 in total): `Assets/Game/Art/LookTest/Fonts/` is filled by ART-008, as SPEC-80 §4.4 specifies. Compiler warnings: none.
 
 ### 2026-10-10 — ART-001 art contract types, tokens and placeholder fonts (claude, claude-opus-5-5)
 - **What.** The 15 types of SPEC-80 §4.1–§4.3 in `Assets/Game/Data/Definitions/Art/`. `tokens.uss` rewritten byte-for-byte to §4.4: the bootstrap version predated SPEC-80 and pointed at the unlicensed Kontrapunkt font. `OfficeCodePro-{Regular,Bold}_SDF.asset` are TextCore FontAssets with the DESIGN-SYSTEM §10.9 settings: SDF AA, 90 pt sampling, padding 9, 1024² atlas, dynamic, multi-atlas. They were made by a throwaway editor script that was then deleted. Unity clears dynamic glyph data on save, so the §10.9 character set fills in at runtime. Folders `Content/Art`, `Art/LookTest` and `Editor/Art` were added, plus the glossary section *Art and presentation* (SPEC-80 Q13).
