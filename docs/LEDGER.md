@@ -484,7 +484,7 @@
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
-| ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | review | claude (claude-opus-5-5) | 2026-10-10 | a61dde8 | Needs an independent frontier review (no subagents this session). Links only; image set waits for owner OK to download |
+| ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | review | claude (claude-opus-5-5) | 2026-10-10 | a3d0d92 | Needs an independent frontier review (no subagents this session). 13 public-domain images added (owner-approved) |
 | ART-004 | Block-kit style test: five blocks per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002 | yes | todo |  |  |  |  |
 | ART-005 | Interactive HTML design board | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002, ART-003, ART-004 | no | todo |  |  |  |  |
 | ART-006 | Owner shortlist of finalist directions | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-005 | no | todo |  |  |  |  |
@@ -555,6 +555,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-10 — ART-003 mood-board images (claude, claude-opus-5-5)
+- Added 13 public-domain images from Wikimedia Commons under the owner's approval: DRYDOCK 6 (ISS render, Apollo 15 service module, McCandless MMU, *Earthrise*, Apollo 11 command module after re-entry, ISO 7010 warning layout), NOCTURNE 3 (Hubble *Pillars of Creation* 2014, Webb *Cosmic Cliffs* via STScI, USGS Kamoamoa fissure), PULP HORIZON 4 (NASA Ames Stanford torus and Bernal sphere paintings by Don Davis and Rick Guidice).
+- Each is JPEG quality 85, long side ≤ 1600 px, ≤ 400 KB, with its Commons source and licence line; 3.7 MB in total. Licence taken from Commons metadata; CC BY and CC BY-SA versions (ESA releases, McCandless retouches, heat-shield close-ups) were left out. No public-domain image was found for ship-breaking yards, the Chrysler Building or Ben Day dots; they stay links.
+- `check_art_docs.py moodboards`: 0 errors. ART-003 stays `review` (commit a3d0d92) until an independent frontier review.
 
 ### 2026-10-10 — Owner answers on the art track
 - **ART-004 tool:** "Install Blender". ART-004 follows SPEC-80 as written (Blender plus a Python build script).
