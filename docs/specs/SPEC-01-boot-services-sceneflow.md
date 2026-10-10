@@ -364,7 +364,7 @@ Creates ECS configuration singletons from content, once per boot, **in table ord
 | `VoxelRenderConfig` | `VoxelRenderConfigFactory.Create(catalog)` | REN config task |
 | `PhysicsVoxelConfig` | `PhysicsVoxelConfigFactory.Create(catalog.Get<PhysicsVoxelConfigDefinition>("config_physics"))` | PHY config task |
 | `PhysicsStep` | `PhysicsVoxelConfigFactory.CreatePhysicsStep(catalog.Get<PhysicsVoxelConfigDefinition>("config_physics"))` | PHY config task |
-| `DamageConfig` | `DamageConfig.FromDefinition(catalog.Get<DamageConfigDefinition>("config_damage"))` | DMG config task |
+| `DamageConfig` | `DamageConfig.FromDefinition(catalog.Get<DamageConfigDefinition>("config_damage"))` with `Table = DamageContent.BuildTable(catalog)` (SPEC-13 §4.7; disposed at shutdown with the other boot blobs) | DMG config task |
 | `PowerTuning` (entity "PowerSingletons"; `ShieldHitStreams` is created by SPEC-22's `ShieldSystem.OnCreate`) | `new PowerContent(catalog).CreateSingletons(em)` | PWR content task |
 | `FlightConfig` | `FlightConfigFactory.Create(catalog.Get<FlightConfigDefinition>("config_flight"))` | FLT config task |
 | `FactionRelations`, `FactionStanding`, `FactionRelationRequest`, `FactionState` | `FactionContent.CreateSingletons(em, catalog, catalog.Get<EncounterConfigDefinition>("config_encounters"), created)` — **before** `WeaponContent`, whose default `FactionRelations` is then skipped | ENC-001 |

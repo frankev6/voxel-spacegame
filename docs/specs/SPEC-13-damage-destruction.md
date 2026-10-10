@@ -54,7 +54,7 @@ This spec is the game's first pillar, "destruction you can read". It owns the on
 16. **Integrity runs only on grids with `Destroyed` cells this tick or retained seeds**, seeded from solid neighbours of removed cells, over a hybrid graph whose nodes are whole bricks where a brick is internally connected and single cells elsewhere, with a size-fair race that stops as soon as at most one unresolved component remains. Reason: architecture §11.1; cost O(smaller components), never O(grid).
 17. **Every per-tick budget defers deterministically** (integrity per grid, split cells per tick, new bodies per tick, debris particles per tick); deferred work is retried next tick in the same order. Reason: architecture §11.2.
 18. **New hulk grids get a `PersistentId` from a pre-granted block** in the `PersistentIdAllocator` singleton; when the block is empty the split is deferred. Reason: `GameSession` remains the only allocator (architecture §8).
-19. **`ArmorClass` 0..3** = Standard, Armored, Reinforced, Fragile; multipliers in §4.7. Values ≥ 4 behave as 0 and are logged once. Reason: SPEC-04 open question 7.
+19. **Damage types and armour classes are content tables (review X10).** One `DamageTypeDefinition` per `DamageType` value (armour multipliers per class, kick, shield multiplier, shield bypass) and one `ArmorClassDefinition` per armour class index, baked into `DamageTableBlob`. v1 ships the four types and four classes of §4.7 (Standard, Armored, Reinforced, Fragile). An armour class above the table behaves as 0 and is logged once. A new damage type is an enum value plus a definition; a new armour class is a definition. Reason: SPEC-04 open question 7; no code edit per type.
 
 ## 4. Data model
 
@@ -361,11 +361,8 @@ namespace Game.Voxel.Damage
     /// <summary>Singleton. Created with Default by DamageStreamsSystem.OnCreate; overwritten once at boot by Game.App from the definition.</summary>
     public struct DamageConfig : IComponentData
     {
-        // Armour multipliers: x,y,z,w = ArmorClass 0 Standard, 1 Armored, 2 Reinforced, 3 Fragile
-        public float4 MulKinetic;               // (1.0, 0.6, 0.8, 1.5)
-        public float4 MulEnergy;                // (1.0, 0.8, 0.6, 1.25)
-        public float4 MulExplosive;             // (1.0, 0.7, 0.7, 2.0)
-        public float4 MulRam;                   // (1.0, 0.5, 0.75, 2.0)
+        // Per-type and per-armour values: the content table (decision 19, §4.7)
+        public BlobAssetReference<DamageTableBlob> Table;
         // Point and blast
         public float EntryBacktrackCells;       // 0.5
         public int   MaxDdaCells;               // 256
@@ -374,11 +371,6 @@ namespace Game.Voxel.Damage
         public float OcclusionFactor;           // 1.0 (0 disables occlusion)
         public float InstanceDestroyCellFraction; // 0.5
         // Kicks (m/s)
-        public float KickKinetic;               // 6
-        public float KickEnergy;                // 3
-        public float KickExplosiveMin;          // 4
-        public float KickExplosiveMax;          // 18
-        public float KickRam;                   // 3
         public float KickDetach;                // 1.5
         public float KickDissolve;              // 2
         public float KickRandomFraction;        // 0.4
@@ -424,8 +416,8 @@ namespace Game.Voxel.Damage
         // Audio cues (Game.Core.ContentHash of AudioCueDefinition IDs; default = 0 = no sound)
         public Game.Core.ContentHash CueRamImpact, CueCellBreak, CueSplit, CueCoreLost;
 
-        public static DamageConfig Default { get; }   // exactly the values in the comments above
-        public float Multiplier(DamageType type, byte armorClass);  // §3 decision 19; DamageType ≥ 4 → 1.0
+        public static DamageConfig Default { get; }   // exactly the values in the comments above; Table not created (Multiplier → 1, kicks 0) until boot sets it
+        public float Multiplier(DamageType type, byte armorClass);  // Table lookup (decision 19); unknown type → 1.0, armour class out of range → class 0
         public static DamageConfig FromDefinition(Game.Data.Definitions.DamageConfigDefinition def); // cue hashes via ContentId.Hash
     }
 }
@@ -473,14 +465,58 @@ namespace Game.Voxel.Damage
 }
 ```
 
-### 4.7 `ArmorClass` table
+### 4.7 Damage-type and armour tables (content; decision 19)
 
-| ArmorClass | Name | Kinetic | Energy | Explosive | Ram | Intended blocks |
-|---|---|---|---|---|---|---|
-| 0 | Standard | 1.0 | 1.0 | 1.0 | 1.0 | all legacy blocks (SPEC-04 §4.10) |
-| 1 | Armored | 0.6 | 0.8 | 0.7 | 0.5 | armour plates, rams |
-| 2 | Reinforced | 0.8 | 0.6 | 0.7 | 0.75 | frames, cores |
-| 3 | Fragile | 1.5 | 1.25 | 2.0 | 2.0 | glass, solar, antennae |
+```csharp
+namespace Game.Data.Definitions
+{
+    /// <summary>One damage type (decision 19). Exactly one per DamageType value. Implements SPEC-13 §4.7.</summary>
+    [ContentIdPrefix("dmg_")]
+    public sealed class DamageTypeDefinition : ContentDefinition
+    {
+        [UnityEngine.SerializeField] private Game.Data.Combat.DamageType type;
+        [UnityEngine.SerializeField] private float[] armorMultipliers;   // index = armour class; length = number of ArmorClassDefinitions; each ≥ 0
+        [UnityEngine.SerializeField, UnityEngine.Min(0)] private float kickMin;   // m/s debris kick (point hits use kickMin)
+        [UnityEngine.SerializeField, UnityEngine.Min(0)] private float kickMax;   // m/s at a blast centre
+        [UnityEngine.SerializeField, UnityEngine.Min(0)] private float shieldMultiplier = 1;   // SPEC-22 shields (replaces PowerTuning.ShieldTypeMultiplier)
+        [UnityEngine.SerializeField] private bool bypassShields;         // Ram: producers never emit ShieldHit for it
+        // Public getters with the same names in PascalCase. Validate: DMG-E001 lengths, DMG-E002 duplicate type, DMG-E003 kickMin > kickMax.
+    }
+
+    /// <summary>One armour class (decision 19). Implements SPEC-13 §4.7.</summary>
+    [ContentIdPrefix("armor_")]
+    public sealed class ArmorClassDefinition : ContentDefinition
+    {
+        [UnityEngine.SerializeField] private byte index;                 // the value BlockDefinition.armorClass uses; 0..N−1, contiguous (DMG-E004)
+        [UnityEngine.SerializeField] private string displayName;
+    }
+}
+namespace Game.Voxel.Damage
+{
+    public struct DamageTypeRow { public float KickMin, KickMax, ShieldMultiplier; public byte BypassShields; public int ArmorOffset; }
+    public struct DamageTableBlob
+    {
+        public BlobArray<DamageTypeRow> Types;   // index = (int)DamageType
+        public BlobArray<float> ArmorMultipliers; // Types[t].ArmorOffset + armorClass
+        public int ArmorClassCount;
+    }
+    public static class DamageContent   // boot (SPEC-01 BootSingletons, with config_damage): builds the blob and sets DamageConfig.Table
+    {
+        public static BlobAssetReference<DamageTableBlob> BuildTable(Game.Data.Services.ContentCatalog catalog);
+    }
+}
+```
+
+Shipped content (DMG-003 authors it; values are the v1 balance):
+
+| Definition | Standard | Armored | Reinforced | Fragile | Kick min / max (m/s) | Shield × | Bypass shields |
+|---|---|---|---|---|---|---|---|
+| `dmg_kinetic` | 1.0 | 0.6 | 0.8 | 1.5 | 6 / 6 | 0.8 | no |
+| `dmg_energy` | 1.0 | 0.8 | 0.6 | 1.25 | 3 / 3 | 1.25 | no |
+| `dmg_explosive` | 1.0 | 0.7 | 0.7 | 2.0 | 4 / 18 | 1.0 | no |
+| `dmg_ram` | 1.0 | 0.5 | 0.75 | 2.0 | 3 / 3 | 1.0 | yes |
+
+Armour classes: `armor_standard` (0, all legacy blocks, SPEC-04 §4.10), `armor_armored` (1, armour plates, rams), `armor_reinforced` (2, frames, cores), `armor_fragile` (3, glass, solar, antennae).
 
 ### 4.8 Internal per-tick data (`DamageStreamsData`)
 
@@ -640,8 +676,8 @@ Position: after `ShieldSystem`/`ExplosionSystem`/`BeamStepSystem`; the only writ
 4. Kinematics: `wp = t.TransformPoint((c + 0.5) · s)`; `WorldVel = VelocityAtPoint(v, m, t, wp)`; `Kick` per reason/type (all directions world space; `u` = random unit vector from `Random.CreateFromIndex(hash(Tick, Grid.Index, packed(c)))`; `k = KickRandomFraction`; `r01` from the same generator):
    | Case | Kick |
    |---|---|
-   | Destroyed, Kinetic / Energy / Ram | `normalize(−dWorld·(1−k) + u·k) · KickX · (0.6 + 0.8·r01)` (`dWorld` = event direction in world; zero → `u`) |
-   | Destroyed, Explosive (blast) | `normalize((wp − blastCentreWorld)·(1−k) + u·k) · lerp(KickExplosiveMin, KickExplosiveMax, 1 − dist/rc)` |
+   | Destroyed, point event | `normalize(−dWorld·(1−k) + u·k) · row.KickMin · (0.6 + 0.8·r01)` (`row` = the event type's `DamageTypeRow`; `dWorld` = event direction in world; zero → `u`) |
+   | Destroyed, blast event | `normalize((wp − blastCentreWorld)·(1−k) + u·k) · lerp(row.KickMin, row.KickMax, 1 − dist/rc)` |
    | DetachedParticle | `normalize(horizontal(islandCentroidWorld − comWorld)·(1−k) + u·k) · KickDetach` (zero → `u`) |
    | DetachedBody | `0` (the body carries the velocity) |
    | Dissolved | `normalize((wp − comWorld)·(1−k) + u·k) · KickDissolve` |
@@ -815,7 +851,7 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
   - [ ] `tools/compile.sh` passes with zero warnings in `Game.Voxel` and `Game.Data`.
   - [ ] `DamageType` has exactly `Kinetic, Energy, Explosive, Ram` (byte) in that order.
   - [ ] Every component and buffer is unmanaged (`UnsafeUtility.IsUnmanaged`), and `IntegritySeed`, `ChunkCell` have `[InternalBufferCapacity(0)]`.
-  - [ ] `DamageConfig.Default.Multiplier(DamageType.Explosive, 3) == 2.0f`; armor class 7 returns the class-0 value.
+  - [ ] With the default table (§4.7), `Multiplier(DamageType.Explosive, 3) == 2.0f`; armor class 7 returns the class-0 value; an unknown type returns 1.
 - **Tests:** `DamageContractTests.DamageType_HasBindingValues`, `.Components_AreUnmanaged`, `.Buffers_HaveZeroInternalCapacity`, `.Config_DefaultMultipliers` (EditMode, `Tests/EditMode/Voxel/Damage/`).
 
 ### DMG-002 — DamageStreams and DamageStreamsSystem
@@ -835,10 +871,11 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - **Milestone:** M2
 - **Tier:** standard — field-by-field definition and copy
 - **Depends on:** `DMG-001`
-- **Do:** Implement `DamageConfig.FromDefinition`; create `Assets/Game/Content/Config/config_damage.asset` with the defaults; add a `DamageConfigDefinition.Validate` (all budgets ≥ 1, `ParticleMaxCells < ChunkMaxCells`, multipliers ≥ 0, lifetimes `Min ≤ Max`); add the asset to the database; document in the file header that `Game.App` sets the singleton at boot (SPEC-01 open question 11).
-- **Files:** `Assets/Game/Voxel/Damage/DamageConfig.cs`, `Assets/Game/Data/Definitions/Damage/DamageConfigDefinition.cs`, `Assets/Game/Content/Config/config_damage.asset`, `Assets/Game/Tests/EditMode/Voxel/Damage/DamageConfigTests.cs`
+- **Do:** Implement `DamageConfig.FromDefinition` and `DamageContent.BuildTable` (§4.7); create `Assets/Game/Content/Config/config_damage.asset` with the defaults and the eight table assets of §4.7 (`Assets/Game/Content/Damage/`); implement `DamageTypeDefinition`/`ArmorClassDefinition` validation (DMG-E001..E004); add a `DamageConfigDefinition.Validate` (all budgets ≥ 1, `ParticleMaxCells < ChunkMaxCells`, multipliers ≥ 0, lifetimes `Min ≤ Max`); add the asset to the database; document in the file header that `Game.App` sets the singleton at boot (SPEC-01 open question 11).
+- **Files:** `Assets/Game/Voxel/Damage/{DamageConfig,DamageTypeRow,DamageTableBlob,DamageContent}.cs`, `Assets/Game/Data/Definitions/Damage/{DamageConfigDefinition,DamageTypeDefinition,ArmorClassDefinition}.cs`, `Assets/Game/Content/Config/config_damage.asset`, `Assets/Game/Content/Damage/{dmg_kinetic,dmg_energy,dmg_explosive,dmg_ram,armor_standard,armor_armored,armor_reinforced,armor_fragile}.asset`, `Assets/Game/Tests/EditMode/Voxel/Damage/DamageConfigTests.cs`
 - **Acceptance criteria:**
-  - [ ] `FromDefinition(asset)` equals `Default` field by field for the shipped asset.
+  - [ ] `FromDefinition(asset)` equals `Default` field by field for the shipped asset; the built table reproduces every value of §4.7.
+  - [ ] A test-only fifth damage type (enum value + definition) resolves through `Multiplier` without code changes.
   - [ ] Each validation rule rejects a bad fixture with a `ValidationReport` error naming the field.
 - **Tests:** `DamageConfigTests.FromDefinition_MatchesDefault`, `.Validate_RejectsBadBudgets`, `.Validate_RejectsInvertedLifetimes`.
 

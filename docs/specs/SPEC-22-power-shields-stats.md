@@ -360,11 +360,11 @@ namespace Game.Simulation.Power
         public byte PriorityShieldEmitter, PriorityThruster, PriorityAbility, PriorityWeapon;
         public int BrownoutHoldTicks;
         public float ShieldPaddingScale, ShieldPaddingMetres, ShieldMinRadiusMetres, ShieldRestartFraction;
-        public float4 ShieldTypeMultiplier;   // x Kinetic, y Energy, z Explosive, w Ram (index = (int)DamageType)
+        // Per-type shield multipliers moved to SPEC-13's DamageTableBlob (DamageTypeRow.ShieldMultiplier, review X10).
         public float SustainWarningSeconds;
         public static PowerTuning Defaults => new PowerTuning { PriorityShieldEmitter = 200, PriorityThruster = 150, PriorityAbility = 120,
             PriorityWeapon = 100, BrownoutHoldTicks = 30, ShieldPaddingScale = 1.2f, ShieldPaddingMetres = 2f, ShieldMinRadiusMetres = 3f,
-            ShieldRestartFraction = 0.25f, ShieldTypeMultiplier = new float4(0.8f, 1.25f, 1f, 1f), SustainWarningSeconds = 30f };
+            ShieldRestartFraction = 0.25f, SustainWarningSeconds = 30f };
     }
 
     /// <summary>Managed baker (SPEC-01 calls it at boot after ContentService.CreateSingletons).</summary>
@@ -532,7 +532,7 @@ Complexity: O(1) per untouched ship; O(instances) for ships whose `BlockInstance
 3. **Shape:** if `ShapeRevision ≠ ShipStats.FunctionalRevision` or `!Initialized`: `half = (BoundsMax − BoundsMin) / 2`; `Radii = max(half × ShieldPaddingScale + ShieldPaddingMetres, ShieldMinRadiusMetres)`; `Center = BoundsCenter`; `BoundingRadius = cmax(Radii)`; `ShapeRevision = FunctionalRevision`; set `Initialized`.
 4. **Fill:** if `FillOnNextUpdate`: `Hp = MaxHp`, clear the flag and `Collapsed`.
 5. **Up/down:** `requested = ShieldControl.RequestedOn == 1`. If `!requested || MaxHp ≤ 0` → `Active = 0`. Else if `Collapsed` → `Active = Hp ≥ ShieldRestartFraction × MaxHp ? 1 : 0` (clear `Collapsed` when it becomes 1). Else `Active = Hp > 0 ? 1 : 0`.
-6. **Hits** (if `ranges` has the grid): for each hit in sorted order: `mult = ShieldTypeMultiplier[(int)Type]`; `eff = Amount × mult`.
+6. **Hits** (if `ranges` has the grid): for each hit in sorted order: `mult = DamageConfig.Table.Types[(int)Type].ShieldMultiplier` (1 if out of range); `eff = Amount × mult`.
    - If `Active == 1`: `absorbed = min(eff, Hp)`; `Hp −= absorbed`; `RegenResumeTick = tick + round(delay × 60)`; write ripple `RippleHead` = `{ LocalPoint, StartTick = max(tick, 1), Strength = min(1, absorbed / 100) }`, `RippleHead = (RippleHead + 1) & 7`; enqueue `FxEvents.ShieldRipple(worldPoint, worldNormal, PhysicsVelocity.Linear, min(1, absorbed / 100))` (world = root `LocalTransform` applied to `LocalPoint` / `ShieldMath.Normal`). If `Hp ≤ 0`: `Hp = 0`, `Active = 0`, set `Collapsed`.
    - Else `absorbed = 0`.
    - Overflow: `rest = (eff − absorbed) / mult` (raw units). If `rest > 0.001`: point hit (`(Flags & Blast) == 0`): `o = LocalPoint / CellSize`, `VoxelRaycast.Cast(ref GridCellQuery{Reader, Grid}, o, LocalDir, maxCells = 2 × BoundingRadius / CellSize, out hit)`; if hit → write `DamageEvent { Grid, LocalPoint = (o + normalize(LocalDir) × (hit.DistanceCells + 0.05)) × CellSize, LocalDir, Amount = rest, Radius = 0, Penetration, Type, Source, WorldImpulse × rest / Amount, Producer = ShieldOverflow, Instigator }`; if no hit → dropped (the shot would have missed the hull). Blast hit: `DamageEvent { Grid, LocalPoint, LocalDir = 0, Amount = rest, Radius, Penetration = 0, Type, Source, WorldImpulse × rest / Amount, Producer = ShieldOverflow, Instigator }` (the hit's `Instigator` is copied).

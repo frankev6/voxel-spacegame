@@ -166,6 +166,8 @@ namespace Game.Data.Definitions
 | Every `*ConfigDefinition` (one instance each): `GameConfigDefinition` (SPEC-01), `VoxelConfigDefinition` (SPEC-10), `VoxelRenderConfigDefinition`, `VoxelPaletteDefinition` (SPEC-11), `PhysicsVoxelConfigDefinition` (SPEC-12), `DamageConfigDefinition` (SPEC-13), `FlightConfigDefinition` (SPEC-20), `WeaponTuningDefinition` (SPEC-21, id `config_weapons`), `AiConfigDefinition` (SPEC-23), `StreamingConfigDefinition` (SPEC-31), `TravelConfigDefinition` (SPEC-32), `EncounterConfigDefinition` (SPEC-33), `EconomyConfigDefinition` (SPEC-50), `VfxConfigDefinition` (SPEC-63), `AudioConfigDefinition` (SPEC-64) | owning spec | `config_` |
 | `ShipBlueprintDefinition` | SPEC-10 | `ship_` |
 | `WeaponDefinition` | SPEC-21 | `wpn_` |
+| `DamageTypeDefinition` | SPEC-13 | `dmg_` |
+| `ArmorClassDefinition` | SPEC-13 | `armor_` |
 | `PowerTuningDefinition` | SPEC-22 | `tuning_` |
 | `AiProfileDefinition` | SPEC-23 | `ai_` |
 | `FormationDefinition` | SPEC-23 | `formation_` |
