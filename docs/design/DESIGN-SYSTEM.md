@@ -1214,7 +1214,7 @@ Every shipped asset has a row in `docs/design/LICENSES.md` (path, source, licenc
 
 ## 11. Proposed additional tokens
 
-Not binding until accepted in §12. `ART-002` writes them into the per-direction sheets; `ART-014` adds the accepted ones to `tokens.uss`.
+Not binding until accepted in §12. `ART-002` writes them into the per-direction sheets; `ART-014` adds the accepted ones to `tokens.uss`. Exception: tokens marked **functional** are read by game code before approval (SPEC-32, SPEC-33, SPEC-61); their **names** are binding now and `tokens.uss` carries their placeholder values from `ART-001` (SPEC-80 §4.4). Only their values wait for §12.
 
 | Token | Purpose | Placeholder | DRYDOCK | NOCTURNE | PULP HORIZON |
 |---|---|---|---|---|---|
@@ -1230,6 +1230,15 @@ Not binding until accepted in §12. `ART-002` writes them into the per-direction
 | `--hud-margin` | HUD safe margin | 32 px | same | same | same |
 | `--opacity-disabled` | Disabled controls | 0.4 | 0.4 | 0.4 | 0.4 |
 | `--opacity-hud-panel` | HUD panel background opacity | 0.85 | 0.85 | 0.80 | 0.90 |
+| `--color-faction-ark` | Player faction (map owner colour, HUD ally tint) — **functional: SPEC-33/61 read it from M3** | `#7AA7D9` | `#6FA8DC` | `#7FB2FF` | `#3FA7FF` |
+| `--color-faction-raiders` | Raider owner/marker colour — functional | `#E5533D` | `#E0583A` | `#FF5A66` | `#FF4F3A` |
+| `--color-faction-xeno` | Xeno owner/marker colour — functional | `#9B6CF0` | `#9C7BE8` | `#B48CFF` | `#C266FF` |
+| `--color-faction-vestari` | Vestari — functional | `#4FC3A1` | `#4DBA9A` | `#5CE0C0` | `#2FD6A8` |
+| `--color-faction-tlaxcala` | Tlaxcala — functional | `#E3A04F` | `#D99A4A` | `#FFB866` | `#FF9F1C` |
+| `--color-faction-khuchad-clan` | Khuchad Clan — functional | `#C9C25A` | `#BFB656` | `#E6E07A` | `#E8D23A` |
+| `--color-faction-neutral` | No owner / unknown faction — functional | `#C8C8C8` | `#B8BDC4` | `#A9B4C8` | `#D0D6E2` |
+| `--color-travel-cover` | Jump cover colour (SPEC-32 §5.8): white-out, black-out or sky-key wipe — functional | `#F4F6FA` | `#F4F6FA` (white-out) | `#000000` (black-out) | `#FFB84D` (sky-key wipe) |
+| `--duration-travel-fade` | Jump cover fade — functional, **timing contract, the same in every direction** | `0.5s` | `0.5s` | `0.5s` | `0.5s` |
 
 ---
 

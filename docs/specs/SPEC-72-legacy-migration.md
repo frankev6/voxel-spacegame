@@ -229,7 +229,7 @@ Unchanged keys are listed once per row. `→ null` = not converted.
 | AudioCue | Exactly the SPEC-64 §6.4 table (legacy ID → `cue_*` ID, e.g. `UI_Button_Click` → `cue_ui_click`, `Impact_Explosion_Small` → `cue_explosion_small`, `MainMenu` → `cue_music_menu`); `None` → null. SPEC-64 owns these IDs; this table never renames them |
 | LootTable | `BaseLootTable` → `loot_base`; `CreativeModeLootTable` → `loot_creative`; `StartShipsTable` → null (empty, dead) |
 | Body (by asset `$name` and by `entityId`) | `star_entity` → `body_star`; `star_entity_blackhole` → `body_star_blackhole`; `planet_barren` → `body_planet_barren`; `planet_gasgiant` → `body_planet_gas_giant`; `planet_ice` → `body_planet_ice`; `planet_icegiant` → `body_planet_ice_giant`; `planet_rocky` → `body_planet_rocky`; `planet_terrestrial` → `body_planet_terrestrial`; `planet_water` → `body_planet_water` (its `entityId` duplicates `planet_ice`; map by `$name` only); `moon_1`/`satelite_1` → `body_moon`; `station_1` → `body_station`; `ark_station_1`/`ark_station` → `body_station_ark`; `abandoned_station` → `body_station_abandoned`; `asteroidbelt_1` → `body_asteroid_belt`; `exitgate_active` → `body_gate_active`; `exitgate_dormant` → `body_gate_dormant`; `hyperlane_default` → `body_jump_point`; `derelict_ship_entity`/`derelict_ship` → `body_derelict_ship`; `debris_field_entity`/`derelict_ship_1` → `body_debris_field`; `resrource_cache_entity` → `body_resource_cache` |
-| Encounter (suggested, SPEC-33 decides) | `npc_enemy_1` → `encounter_hostile_patrol`; `npc_probe_tutorial` → `encounter_probe_tutorial`; `npc_story_hunter` → `encounter_story_hunter`; `npc_traveling_merchant` → `encounter_traveling_merchant`; `encounter_combat_01`, `encounter_combat_probe_tutorial`, `encounter_boss` → null (their formations are folded into the fleets, §4.7) |
+| Encounter (SPEC-40 §4.13 / SPEC-33 §4.1 IDs) | `npc_enemy_1` → `encounter_raiders`; `npc_probe_tutorial` → `encounter_xeno_probe_tutorial`; `npc_story_hunter` → `encounter_whisper_hunter`; `npc_traveling_merchant` → `encounter_traveling_merchant`; `encounter_combat_01`, `encounter_combat_probe_tutorial`, `encounter_boss` → null (their formations are folded into the fleets, §4.7) |
 | StarSystem | `ark_start`, `base_solar_system` → null (authored star systems are SPEC-30's; values handed off) |
 
 ### 4.5 Value tables for SPEC-04 targets
@@ -270,7 +270,7 @@ The implementer finds, in the owning spec's §4, the field carrying each meaning
 
 **`ShipBlueprintDefinition` (SPEC-10, area `Ships`, ID = ship key):** display name ← `Name`; description ← `Description`; structure bytes ← VOXS (`VoxsEncodeOptions.ForAsset`) of the structure built by §5.4; price ← `BasePrice` (if SPEC-10/50 defines one). Dropped: `Thumbnail`, `ItemImage`, `AbilityIds`, `OfficerIds`, `GlobalStats`, `width`, `height`, `length`, `moduleSlots`.
 
-**`WeaponDefinition` (SPEC-21, area `Weapons`, ID `wpn_<x>`):** one per legacy weapon block, merged with its `ProjectileData`.
+**`WeaponDefinition` (SPEC-21, area `Weapons`, ID `wpn_<x>`):** one per legacy weapon block, merged with its `ProjectileData`. **MIG-009 writes the v2 values of SPEC-21 §4.9 for every numeric field** (not the unit-converted legacy values below); from the legacy data it takes only the identity: ID, delivery (projectile, beam, missile), damage type into `WeaponDamageType` (`Kinetic` → `Kinetic`, `Energy` → `Energy`, `HighExplosive` → `Explosive`), projectile visual and fire sound cue. The legacy tables stay as the reference for the mapping test (SPEC-21 Q8).
 
 | Meaning | Source |
 |---|---|
@@ -313,7 +313,7 @@ Legacy weapon values (for the test that checks the mapping):
 
 Prismatic mirrors get no `WeaponDefinition` (they are `UtilityKind.BeamCombiner` blocks).
 
-**`AbilityDefinition` (SPEC-24, area `Abilities`):**
+**`AbilityDefinition` (SPEC-24, area `Abilities`):** MIG-010 writes the v2 values of SPEC-24 §4.1 (speed boost: `MaxSpeed` ×1.8, `Thrust` ×2.0, cost 15 E, 2 charges; shield toggle: threshold 0.3, cooldown 1 s); the legacy meanings below give the IDs, names, icons and kinds.
 
 | v2 ID | Display name | Meaning → value |
 |---|---|---|
@@ -324,11 +324,11 @@ Ability grants (written by MIG-010 into `BlockDefinition.grantedAbilities`, SPEC
 
 **`AudioCueDefinition` (SPEC-64, area `Audio`):** one per Sounds/Music entry. Meanings: clip ← legacy `Clip` path with `Assets/Game/SFX/Music/<file>` → `Assets/Game/Audio/Music/<file>` and `Assets/Game/SFX/<file>` → `Assets/Game/Audio/Sfx/<file>` (all 13 distinct files exist there); volume ← `Volume`; category ← music for `music_*`, sfx otherwise. A missing clip file is `MIG-E060`.
 
-**`FactionDefinition` (SPEC-33, area `Factions`):** display name ← `displayName`; description ← `description`; colour ← `color` RGBA; ship name prefix ← `shipNamePrefix`; doctrine ← list of (ship blueprint reference by mapped `shipKey`, weight); base player relation ← `basePlayerRelation`. Values: `faction_khuchad_clan` (Khuchad Clan, prefix KC, doctrine `ship_fighter` 0.5 + `ship_shuttle` 1, relation 0); `faction_tlaxcala` (Tlaxcala, TXS, no doctrine, −20); `faction_vestari` (Vestari, VSS, no doctrine, 0). `logo`, `crest` are null in the export (dropped).
+**`FactionDefinition` (SPEC-33 §4.1, area `Factions`):** display name ← `displayName`; description ← `description`; `liveryColor` ← `color` RGBA; `shipNamePrefix` ← `shipNamePrefix`; `mapColorToken` = `--color-faction-<id without the faction_ prefix, underscores as hyphens>` (`--color-faction-khuchad-clan`, `--color-faction-tlaxcala`, `--color-faction-vestari`; SPEC-80 tokens); `isPlayerFaction` = false; doctrine ← list of (ship blueprint reference by mapped `shipKey`, weight); `basePlayerRelation` ← `basePlayerRelation`. Values: `faction_khuchad_clan` (Khuchad Clan, prefix KC, doctrine `ship_fighter` 0.5 + `ship_shuttle` 1, relation 0); `faction_tlaxcala` (Tlaxcala, TXS, no doctrine, −20); `faction_vestari` (Vestari, VSS, no doctrine, 0). `logo`, `crest` are null in the export (dropped).
 
 **`LootTableDefinition` (SPEC-50, area `Loot`):** entries in file order: item reference (mapped through the Item/Block rows), min, max, chance percent (`dropChance`, 0–100). Entries referencing a `ShipItem` (`ship_beetle`, `ship_shuttle`, `ship_crescent`, `ship_fighter` in `BaseLootTable`) map to a ship entry only if SPEC-50 defines one; otherwise they are dropped with `MIG-W070`. `loot_base` has 19 legacy entries; `loot_creative` 37.
 
-**`BodyTemplateDefinition` stubs (SPEC-30, area `Bodies`):** display name, role, description, map colour only; everything else (radius, orbit ranges, textures, prefabs, icons, spawn rules) is dropped with one `MIG-I091` per body and re-authored by SPEC-30. Description: legacy text, except the placeholder "This is a placeholder description blah blah blah" → empty string.
+**`BodyTemplateDefinition` stubs (SPEC-30, area `Bodies`):** display name, role, description, map colour and `storyTag` (the SPEC-42 §4.10 tag of the template, e.g. `body_resource_cache` → `resource_cache`) only; everything else (radius, orbit ranges, textures, prefabs, icons, spawn rules) is dropped with one `MIG-I091` per body and re-authored by SPEC-30. Description: legacy text, except the placeholder "This is a placeholder description blah blah blah" → empty string.
 
 | v2 ID | Display name | Role | v2 ID | Display name | Role |
 |---|---|---|---|---|---|
@@ -343,7 +343,7 @@ Ability grants (written by MIG-010 into `BlockDefinition.grantedAbilities`, SPEC
 | `body_planet_water` | Ocean Planet | Planet | `body_debris_field` | Debris Field | PointOfInterest |
 | `body_moon` | Moon | Moon | `body_resource_cache` | Resource Cache | PointOfInterest |
 
-Roles are written to SPEC-30's role field by name; a role SPEC-30 doesn't have → `MIG-W080` and the stub is written without a role.
+Roles map to SPEC-30's `BodyRole` by name, except `Gate` → `LaneGate` and `AsteroidBelt` → `Belt`; any other unknown role → `MIG-W080` and the stub is written without a role.
 
 ### 4.7 Hand-off to SPEC-30, SPEC-33, SPEC-40/41/42
 
@@ -693,9 +693,9 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 - **Do:** `WeaponConverter` (`Order` 220, `Name` "Weapons"): one `WeaponDefinition wpn_<x>` per weapon block merged with its projectile (§4.6); then `SetLinkIfEmpty(block, "weapon", wpn)` for each of the 9 weapon blocks (SPEC-04 DATA-010 field).
 - **Files:** `Assets/Game/Editor/Migration/Converters/WeaponConverter.cs`; `Assets/Game/Content/Weapons/*.asset` (9, generated); `Assets/Game/Tests/EditMode/Editor/Migration/WeaponConverterTests.cs`
 - **Acceptance criteria:**
-  - [ ] 9 weapon assets; each meaning row of §4.6 that SPEC-21 has a field for holds the legacy value from the tables (unit-converted).
+  - [ ] 9 weapon assets whose numeric fields equal SPEC-21 §4.9 row by row; delivery, `WeaponDamageType`, visual and sound cue follow the legacy mapping of §4.6.
   - [ ] Every weapon block's `weapon` field references its `wpn_` asset; SPEC-04 `DATA-E047` reports nothing.
-- **Tests:** `WeaponConverterTests.RealExport_ValuesMatchTables`, `.WeaponBlocks_AreLinked`.
+- **Tests:** `WeaponConverterTests.RealExport_ValuesMatchSpec21`, `.DamageTypeMapped`, `.WeaponBlocks_AreLinked`.
 
 ### MIG-010 — Ability converter and ability grants
 - **Milestone:** M2
@@ -704,7 +704,7 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 - **Do:** `AbilityConverter` (`Order` 210, `Name` "Abilities") per §4.6; then `SetLinkArrayIfEmpty(block, "grantedAbilities", …)` for the four blocks listed.
 - **Files:** `Assets/Game/Editor/Migration/Converters/AbilityConverter.cs`; `Assets/Game/Content/Abilities/*.asset` (2); `Assets/Game/Tests/EditMode/Editor/Migration/AbilityConverterTests.cs`
 - **Acceptance criteria:**
-  - [ ] Both abilities exist with the §4.6 values; thrusters grant `ability_speed_boost`, the shield grants `ability_shield_toggle`.
+  - [ ] Both abilities exist with the SPEC-24 §4.1 values; thrusters grant `ability_speed_boost`, the shield grants `ability_shield_toggle`.
 - **Tests:** `AbilityConverterTests.RealExport_ValuesAndGrants`.
 
 ### MIG-011 — Audio cue converter
@@ -724,7 +724,7 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 - **Do:** `FactionConverter` (`Order` 400, `Name` "Factions"); skip `faction_4` with `MIG-I091`.
 - **Files:** `Assets/Game/Editor/Migration/Converters/FactionConverter.cs`; `Assets/Game/Content/Factions/*.asset` (3); `Assets/Game/Tests/EditMode/Editor/Migration/FactionConverterTests.cs`
 - **Acceptance criteria:**
-  - [ ] 3 factions with §4.6 values; Khuchad doctrine references `ship_fighter` (0.5) and `ship_shuttle` (1).
+  - [ ] 3 factions with §4.6 values, `mapColorToken` per the rule and `isPlayerFaction == false`; Khuchad doctrine references `ship_fighter` (0.5) and `ship_shuttle` (1).
 - **Tests:** `FactionConverterTests.RealExport_ThreeFactions`.
 
 ### MIG-013 — Loot table converter
@@ -744,7 +744,7 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 - **Do:** `BodyTemplateConverter` (`Order` 420, `Name` "Bodies") per the §4.6 body table.
 - **Files:** `Assets/Game/Editor/Migration/Converters/BodyTemplateConverter.cs`; `Assets/Game/Content/Bodies/*.asset` (20); `Assets/Game/Tests/EditMode/Editor/Migration/BodyTemplateConverterTests.cs`
 - **Acceptance criteria:**
-  - [ ] 20 stubs with the table's names and roles; placeholder descriptions are empty strings.
+  - [ ] 20 stubs with the table's names and roles (`Gate` → `LaneGate`, `AsteroidBelt` → `Belt`) and the SPEC-42 §4.10 `storyTag`; placeholder descriptions are empty strings.
 - **Tests:** `BodyTemplateConverterTests.RealExport_TwentyStubs`.
 
 ### MIG-015 — Hand-off package

@@ -420,7 +420,7 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Milestone:** A1
 - **Tier:** standard — production on top of `AST-016` shaders
 - **Depends on:** `AST-016`, `SPEC-32`
-- **Do:** Gate mesh (dormant and active states through material properties, Vanguard look §x.3, LOD0 ≤ 20,000, LOD1 ≤ 5,000 triangles), lane entry beacon, black hole (dark sphere, accretion ring and lensing rim computed in the shader without sampling the opaque texture), Silence anomaly (Void sphere with the direction's Silence fringe).
+- **Do:** Gate mesh (dormant and active states driven only by the emission colour that SPEC-32's `TravelPresentationSystem` writes — `URPMaterialPropertyEmissionColor`, black = dormant/locked; Vanguard look §x.3, LOD0 ≤ 20,000, LOD1 ≤ 5,000 triangles), lane entry beacon, black hole (dark sphere, accretion ring and lensing rim computed in the shader without sampling the opaque texture), Silence anomaly (Void sphere with the direction's Silence fringe).
 - **Files:** `Assets/Game/Art/Space/Gates/*`, `Assets/Game/Art/Space/Anomalies/*`; matching body visual assets
 - **Acceptance criteria:**
   - [ ] Budgets met; no shader requires the URP opaque texture.
@@ -453,10 +453,10 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Milestone:** A1
 - **Tier:** standard — production within SPEC-63's system
 - **Depends on:** `AST-018`, `SPEC-32`
-- **Do:** Thruster plumes (small, medium, large; throttle-driven), shield shader `SH_Shield.shadergraph` (ellipsoid, ring buffer of 8 hit ripples per ship, collapse, raise), lane jump transition (1.5 s: spool, white-out/black-out/wipe per direction, arrival), supercruise streaks, interact beacon, ability effects for `ability_speed_boost` and `ability_shield_toggle`, motion dust (3 parallax layers).
+- **Do:** Thruster plumes (small, medium, large; throttle-driven), shield shader `SH_Shield.shadergraph` (ellipsoid, ring buffer of 8 hit ripples per ship, collapse, raise), lane jump transition (look of SPEC-32's `travel-cover` per direction — white-out, black-out or sky-key wipe — through `--color-travel-cover` and `screens/travel.uss`; the timing is SPEC-32 §5.8's contract: opaque from commit until the arrival area is ready, transparent `--duration-travel-fade` (0.5 s) later; spool and arrival Fx on `FxKind.Warp`), supercruise streaks, interact beacon, ability effects for `ability_speed_boost` and `ability_shield_toggle`, motion dust (3 parallax layers).
 - **Files:** `Assets/Game/Art/VFX/Systems/*`; `Assets/Game/Art/Shaders/SH_Shield.shadergraph`; `Assets/Game/Content/Fx/*`
 - **Acceptance criteria:**
-  - [ ] Jump transition is exactly 1.5 s and covers the star-system load (06).
+  - [ ] The jump cover follows SPEC-32 §5.8 exactly (fully opaque while `CoverRequested`, fully transparent 0.5 s after) and hides the whole star-system load (06 world gate); art changes only its look.
   - [ ] Shield ripple duration 0.4 s; 8 simultaneous ripples render without artefacts.
 - **Tests:** `ShieldVfxTests.EightRipples_AllVisible` (PlayMode).
 

@@ -285,6 +285,9 @@ namespace Game.Data.Definitions
     --color-positive: #8CCB6A;    --color-warning: #E3BE5A;     --color-danger: #F06A7E;      --color-info: #6CB8F0;
     --color-ally: #5C9BFF;        --color-enemy: #FF7A4D;       --color-neutral: #C8C8C8;
     --color-shield: #5CC8FF;      --color-hull: #E0E0E0;        --color-energy: #EFD25A;
+    --color-faction-ark: #7AA7D9; --color-faction-raiders: #E5533D; --color-faction-xeno: #9B6CF0; --color-faction-vestari: #4FC3A1;
+    --color-faction-tlaxcala: #E3A04F; --color-faction-khuchad-clan: #C9C25A; --color-faction-neutral: #C8C8C8;   /* SPEC-33 mapColorToken */
+    --color-travel-cover: #F4F6FA;                                /* SPEC-32 §5.8 jump cover (direction A white-out) */
     --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
     --radius-s: 2px; --radius-m: 4px; --radius-l: 8px;
     --border-thin: 1px; --border-thick: 2px;
@@ -293,6 +296,7 @@ namespace Game.Data.Definitions
     --font-mono: url("project://database/Assets/Game/Art/_Placeholder/Fonts/OfficeCodePro-Regular_SDF.asset");
     --text-xs: 12px; --text-s: 14px; --text-m: 16px; --text-l: 20px; --text-xl: 28px; --text-xxl: 40px;
     --duration-fast: 100ms; --duration-normal: 200ms; --duration-slow: 400ms;
+    --duration-travel-fade: 0.5s;                                 /* SPEC-32 §5.8 timing contract: never changed by art */
 }
 ```
 
@@ -582,7 +586,7 @@ Runtime art budgets are in DESIGN-SYSTEM §10.10–§10.11 and enforced by SPEC-
 | 5 | `FxDefinition` art-facing fields (§4.5) | SPEC-63 includes them; damage-type colours come from `ArtDirectionDefinition` | SPEC-63 |
 | 6 | `BodyVisualDefinition` art-facing fields (§4.5) | SPEC-31 includes them | SPEC-31 |
 | 7 | Add the prefixes `artdir_`, `brickmat_`, `vis_` to SPEC-04's prefix registry | Yes, as in §4 | SPEC-04 |
-| 8 | Content ID of the player's ARK expedition faction | `faction_ark`; `ART-014` updates `fallbackFactionId` if SPEC-33 differs | SPEC-33 |
+| 8 | Content ID of the player's ARK expedition faction | **Answered:** `faction_ark` (SPEC-33); faction tokens `--color-faction-{ark,raiders,xeno,vestari,tlaxcala,khuchad-clan,neutral}` are in §4.4 with placeholder values; each direction sheet sets them, and ART-014 keeps the names | SPEC-33 |
 | 9 | Can a USS custom property carry a font URL (`-unity-font-definition: var(--font-body)`)? | Yes (checked in `ART-001`); if not, `tokens.uss` adds classes `.font-display`, `.font-body`, `.font-mono` | Tech lead |
 | 10 | Reference camera (FOV 40°, pitch 55°, 50/150/300 m) vs SPEC-62's real values | Use the reference; `ART-010` re-measures when SPEC-62 differs | SPEC-62 |
 | 11 | OFL fonts in `Assets/Game/Art/LookTest/Fonts/` before approval, given conventions §5 "no new third-party art" | Allowed as review material (Decision 11); non-chosen fonts deleted at `ART-014` | Owner |
