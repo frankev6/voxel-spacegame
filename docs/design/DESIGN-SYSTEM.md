@@ -7,7 +7,7 @@
 | **Process spec** | [SPEC-80 Art direction and design system](../specs/SPEC-80-art-direction.md) (area `ART`) |
 | **Production spec** | [SPEC-81 Asset production](../specs/SPEC-81-asset-production.md) (area `AST`), blocked behind the gate `ART-013` |
 | **Binding inputs** | [00-vision](../00-vision.md) pillars, [02-conventions §4–§5](../02-conventions.md), [ADR-0009](../decisions/ADR-0009-placeholder-art-and-design-gate.md), [SPEC-04 §4.5](../specs/SPEC-04-content-and-blocks.md) (`materialLayer`, `propMesh`, `icon`) |
-| **Last edited** | 2026-10-09 |
+| **Last edited** | 2026-10-10 |
 
 This document proposes **three complete art directions** for ships, blocks, space, VFX, UI, icons, typography, motion and audio mood, recommends one, and fixes the **shared rules** that hold whichever direction is chosen. When the owner approves (gate `ART-013`), the chosen direction becomes **binding**, the two others move to Appendix A for the record, and SPEC-81 production starts. Until then every asset in the game stays placeholder ([ADR-0009](../decisions/ADR-0009-placeholder-art-and-design-gate.md)) and **no production art may be made or committed**.
 
@@ -684,7 +684,7 @@ Token **names** are binding (§10.1); this table proposes their **values**. The 
 | `--color-enemy` | `#FF7A4D` | `#FF6A3D` | `#FF7A45` | `#FF6B35` |
 | `--color-neutral` | `#C8C8C8` | `#CFC8B6` | `#B9C3D1` | `#E9DFC7` |
 | `--color-shield` | `#5CC8FF` | `#47C8FF` | `#3FD8FF` | `#4FD1FF` |
-| `--color-hull` | `#E0E0E0` | `#E6DCC8` | `#EDE6DA` | `#F6EEDC` |
+| `--color-hull` | `#E0E0E0` | `#E5DCC8` | `#EDE6DA` | `#F6EEDC` |
 | `--color-energy` | `#EFD25A` | `#F5D33A` | `#FFB84D` | `#FFB020` |
 | `--space-1` … `--space-8` | 4, 8, 12, 16, 24, 32, 48, 64 px | same (shared) | same | same |
 | `--radius-s` / `-m` / `-l` | 2 / 4 / 8 px | 0 / 2 / 4 px | 0 / 0 / 2 px | 4 / 8 / 14 px |
@@ -796,15 +796,15 @@ Measured (minimum ΔE2000 over normal + 3 simulations):
 
 | Pair | Placeholder | DRYDOCK | NOCTURNE | PULP HORIZON |
 |---|---|---|---|---|
-| ally–enemy | 46.9 | 48.6 | 47.9 | 49.5 |
-| ally–neutral | 25.3 | 32.2 | 20.2 | 35.7 |
+| ally–enemy | 46.9 | 48.6 | 47.9 | 49.6 |
+| ally–neutral | 25.1 | 32.2 | 20.2 | 35.7 |
 | enemy–neutral | 25.1 | 21.1 | 32.0 | 23.3 |
-| hull–shield | 19.4 | 29.7 | 23.1 | 27.5 |
-| hull–energy | 18.9 | 12.0 | 20.7 | 22.6 |
+| hull–shield | 19.3 | 29.6 | 23.1 | 27.5 |
+| hull–energy | 18.9 | 12.4 | 20.7 | 22.6 |
 | shield–energy | 43.9 | 44.0 | 45.9 | 49.5 |
 | positive–danger | 10.5 | 14.4 | 10.4 | 15.3 |
 
-The check is automated by `tools/art/check_tokens.py` (SPEC-80 `ART-002`).
+The check is automated by `tools/art/check_tokens.py` (SPEC-80 `ART-002`). Simulated colours are clamped to [0, 1] in linear RGB before the Lab conversion. The script recomputed this table on 2026-10-10. Three cells moved by 0.1–0.2 from the first hand-computed version. DRYDOCK `--color-hull` changed from `#E6DCC8` to `#E5DCC8` (ΔE 0.5, not visible) because hull–energy measured 11.99, just under the C4 minimum of 12, which the earlier "12.0" had rounded up.
 
 ### 10.3 Contrast and luminance minimums
 

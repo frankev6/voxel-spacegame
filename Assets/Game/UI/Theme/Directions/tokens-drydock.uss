@@ -1,0 +1,78 @@
+/* Implements SPEC-80 §4.4 (ART-002). DRYDOCK direction sheet: every binding token (DESIGN-SYSTEM §10.1) with the
+   DRYDOCK column of §8.1, plus every proposed token of §11. Review material until ART-013; fonts are look-test
+   fonts (ART-008). Generated from DESIGN-SYSTEM.md; check with tools/art/check_tokens.py --verify-doc. */
+:root {
+    /* colours */
+    --color-bg: #0D0F11;
+    --color-surface-1: #16191C;
+    --color-surface-2: #1F2327;
+    --color-surface-3: #2A2F34;
+    --color-border: #454C53;
+    --color-text: #ECE6D8;
+    --color-text-muted: #A9A395;
+    --color-accent: #2EC4B6;
+    --color-accent-strong: #7FE6DB;
+    --color-positive: #8BD64A;
+    --color-warning: #F2B33D;
+    --color-danger: #FF5277;
+    --color-info: #55B8F5;
+    --color-ally: #4D9BFF;
+    --color-enemy: #FF6A3D;
+    --color-neutral: #CFC8B6;
+    --color-shield: #47C8FF;
+    --color-hull: #E5DCC8;
+    --color-energy: #F5D33A;
+    --color-border-strong: #737B84;
+    --color-text-on-accent: #0D0F11;
+    --color-overlay: rgba(4, 5, 7, 0.65);
+    --color-objective: #FFD24A;
+    --color-clue: #B89CFF;
+    /* factions (functional: SPEC-33/61) */
+    --color-faction-ark: #6FA8DC;
+    --color-faction-raiders: #E0583A;
+    --color-faction-xeno: #9C7BE8;
+    --color-faction-vestari: #4DBA9A;
+    --color-faction-tlaxcala: #D99A4A;
+    --color-faction-khuchad-clan: #BFB656;
+    --color-faction-neutral: #B8BDC4;
+    /* travel (functional: SPEC-32 §5.8) */
+    --color-travel-cover: #F4F6FA;
+    --duration-travel-fade: 0.5s;
+    /* space, shape, icons, HUD */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
+    --radius-s: 0px;
+    --radius-m: 2px;
+    --radius-l: 4px;
+    --border-thin: 1px;
+    --border-thick: 2px;
+    --icon-s: 16px;
+    --icon-m: 24px;
+    --icon-l: 32px;
+    --hud-margin: 32px;
+    /* type */
+    --font-display: url("project://database/Assets/Game/Art/LookTest/Fonts/FNT_BarlowCondensed-SemiBold_SDF.asset");
+    --font-body: url("project://database/Assets/Game/Art/LookTest/Fonts/FNT_Barlow-Regular_SDF.asset");
+    --font-mono: url("project://database/Assets/Game/Art/LookTest/Fonts/FNT_IBMPlexMono-Regular_SDF.asset");
+    --text-xs: 12px;
+    --text-s: 14px;
+    --text-m: 16px;
+    --text-l: 20px;
+    --text-xl: 26px;
+    --text-xxl: 36px;
+    --font-body-strong: url("project://database/Assets/Game/Art/LookTest/Fonts/FNT_Barlow-SemiBold_SDF.asset");
+    /* motion and opacity */
+    --duration-fast: 80ms;
+    --duration-normal: 150ms;
+    --duration-slow: 300ms;
+    --easing-in: ease-out-cubic;
+    --easing-out: ease-in-cubic;
+    --opacity-disabled: 0.4;
+    --opacity-hud-panel: 0.85;
+}
