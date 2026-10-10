@@ -631,3 +631,80 @@ def surface_nets(field, outside=1.0):
                     continue
                 quads.append(tuple(ring) if sgn > 0 else tuple(reversed(ring)))
     return verts, quads
+
+
+def surface_nets_grid(d, lo=(0, 0, 0), step=1.0):
+    """Vectorised surface nets on a dense grid. d[i, j, k] = signed distance (cells, negative inside) at the centre of
+    grid cell lo + (i, j, k)*step. Returns (verts in cell units, quads). Same result as surface_nets, but fast enough
+    for a behemoth."""
+    import numpy as np
+    d = np.asarray(d, dtype=np.float32)
+    nx, ny, nz = d.shape
+    ins = d < 0
+    # dual cubes: one per 2x2x2 block of grid cells, indexed by its min corner
+    c = [d[a:nx - 1 + a, b:ny - 1 + b, e:nz - 1 + e] for a in (0, 1) for b in (0, 1) for e in (0, 1)]
+    ci = [v < 0 for v in c]
+    anyin = np.zeros_like(ci[0])
+    allin = np.ones_like(ci[0])
+    for v in ci:
+        anyin |= v
+        allin &= v
+    mixed = anyin & ~allin
+    corners = [(a, b, e) for a in (0, 1) for b in (0, 1) for e in (0, 1)]
+    edges = [(0, 1), (2, 3), (4, 5), (6, 7), (0, 2), (1, 3), (4, 6), (5, 7), (0, 4), (1, 5), (2, 6), (3, 7)]
+    idx = np.nonzero(mixed)
+    acc = np.zeros((len(idx[0]), 3), dtype=np.float64)
+    cnt = np.zeros(len(idx[0]), dtype=np.float64)
+    cv = [v[idx] for v in c]
+    for e0, e1 in edges:
+        f0, f1 = cv[e0], cv[e1]
+        cross = (f0 < 0) != (f1 < 0)
+        den = np.where(cross, f0 - f1, 1.0)
+        t = np.where(cross, f0 / den, 0.0)
+        p0, p1 = np.array(corners[e0], float), np.array(corners[e1], float)
+        acc += cross[:, None] * (p0[None, :] + (p1 - p0)[None, :] * t[:, None])
+        cnt += cross
+    pos = np.stack(idx, axis=1) + acc / cnt[:, None]          # in grid units, relative to cell-centre lattice
+    verts = (np.array(lo, float)[None, :] + (pos + 0.5) * step)
+    vid = np.full(mixed.shape, -1, dtype=np.int64)
+    vid[idx] = np.arange(len(idx[0]))
+    quads = []
+    # an edge between grid cells (i,j,k) and (i,j,k)+e_ax with a sign change makes one quad from the 4 dual cubes
+    for ax in range(3):
+        b_, c_ = (ax + 1) % 3, (ax + 2) % 3
+        sl0 = [slice(None)] * 3
+        sl1 = [slice(None)] * 3
+        sl0[ax] = slice(0, d.shape[ax] - 1)
+        sl1[ax] = slice(1, d.shape[ax])
+        a0, a1 = ins[tuple(sl0)], ins[tuple(sl1)]
+        flip = a0 != a1
+        # need j>=1, k>=1 (the four cubes at offsets 0/-1 in the other two axes)
+        m = flip.copy()
+        s = [slice(None)] * 3
+        s[b_] = slice(0, 1)
+        m[tuple(s)] = False
+        s = [slice(None)] * 3
+        s[c_] = slice(0, 1)
+        m[tuple(s)] = False
+        s = [slice(None)] * 3
+        s[b_] = slice(d.shape[b_] - 1, None)
+        m[tuple(s)] = False
+        s = [slice(None)] * 3
+        s[c_] = slice(d.shape[c_] - 1, None)
+        m[tuple(s)] = False
+        ii = np.stack(np.nonzero(m), axis=1)
+        if not len(ii):
+            continue
+        outward = a0[tuple(ii.T)]                 # inside at the lower cell: face points along +ax
+        ring = []
+        for db, dc in ((-1, -1), (0, -1), (0, 0), (-1, 0)):
+            q = ii.copy()
+            q[:, b_] += db
+            q[:, c_] += dc
+            ring.append(vid[tuple(q.T)])
+        ring = np.stack(ring, axis=1)
+        ok = (ring >= 0).all(axis=1)
+        ring, outward = ring[ok], outward[ok]
+        ring[~outward] = ring[~outward][:, ::-1]
+        quads.extend(map(tuple, ring.tolist()))
+    return [tuple(v) for v in verts.tolist()], quads

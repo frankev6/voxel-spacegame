@@ -544,6 +544,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 3 | 2026-10-10 | architecture §5, §6, §7.1, §8; SPEC-01, 04, 10, 12, 13, 20–24, 33, 51, 72, 80; 06 | Extensibility review `docs/specs/_EXTENSIBILITY-REVIEW.md`: approve ADR items X1 (block function modules), X2 (power/stats contributions), X3 (ship profiles + stowed grids, tick-exact launch), X4 (request channels: impulse, cell restore, inhibit, stat-modifier sources); choose the small-craft representation X7; apply errata X5, X6, X8–X11 | Nothing applied; specs as written | Owner | **Answered 2026-10-10: apply all as recommended; X7 = voxel small craft.** Applied in `e3e6c86`…`6b3ee37` (ADR-0013…0017); outcomes in the review §5 |
 | 4 | 2026-10-10 | ROADMAP, SPEC-80, SPEC-81 | Owner: "our first thing is to nail the look of the game in terms of blocks, ui, meshes, colors, textures, etc. nothing proceeds until the design system is spot on". Which code may run before `ART-013`? | Only what the look tests need: `CORE-001`, `DATA-001`, `DATA-002`, `DATA-004`, `DATA-005`, `DATA-008` (for `ART-007`'s validator), and `AST-001`…`AST-003`. Everything else in M0–M4 waits | Owner | **Answered 2026-10-10 (owner, verbatim):** "Whatever you deep necessary within the scope in order to showcase the most faithful depictions so that our decisions are based on accurate visuals". The lead worker decides which code runs before `ART-013`, limited to what makes the look tests faithful to the final game |
 | 5 | 2026-10-10 | SPEC-02 CORE-001, CORE-009 | `ManagedEventDrainSystem` stub: throwing lifecycle methods would break Play Mode (SPEC-02 open question 10) | Empty `OnUpdate`/`OnDestroy` with `TODO(CORE-009)`; the public API throws | Tech lead | |
+| 6 | 2026-10-10 | SPEC-04 §4.2, SPEC-11 §4, SPEC-12; look book round 3 | How do the look-dev hulls become game blocks? (a) Tapers: the hulls use cut cells (each 0.5 m cell clipped by up to three straight planes that continue across neighbours; 407–1,189 distinct shapes per direction, the 45° `Wedge` covers 8–21% of cut cells), the specs allow only `Cube` and `Wedge` (shape packed in one bit). Options: generic cut cells with a few quantised planes per cell (needs an ADR changing the packed format), a fixed slope catalogue (1:1, 1:2, 1:3 and their corners) with tapers limited to it, or Cube and Wedge only (stepped tapers). (b) Large hull blocks (2×2×2, 3×3×3) as one placeable block that a module splits back into cells. (c) Alien hulls as signed-distance cells meshed by surface nets | Specs as written (Cube, Wedge); the look book keeps showing cut cells, large blocks and smooth alien cells so the decision is made on the real look | Owner | |
 
 ## Measurements
 
@@ -555,6 +556,84 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-10 — Look book round 3: connected ships, cruisers and dreadnoughts, capital weapons, defended stations, five aliens (claude, claude-opus-5-5)
+- **Owner feedback (verbatim, 2026-10-10)** on the round-2 look book. The four screenshots that came with it are of our own renders and are not stored again:
+
+  > BROTHER YOU COOKED WITH ALL of these wow.
+  >
+  > can you please revise the ships in all 3 versions, they all have blocks floating, wings not connected, cannons in the middle of nowhere. also how did you do the front taper in the nocturne ships, we can do that with blocks? if so then very impresive.
+  >
+  > regarding aliens, they look really good, can you give me 3 more variants that look unsettling and out of this world completely, one of them a behemoth, bigger than all of others, like a biological mothership .
+  >
+  > i really like the new 3d visual direction you took with nocturne its very warhammer 40k, but the colors can look a bit dull, can we intensify a little and im not just asking you to make it more saturated, im asking slightly lower lows, and slightly higher highs, like for example some more coloration on the planet so its got some slight differences, and the background not all green, like some purple on on the side or other colors, like i love how the opera background isn't just one color.
+  >
+  > for drydock and noctune make a new cruiser class and dreadnaught class, the size comparisons should be clear to give a sense of scale.
+  >
+  > for drydock rethink the station entirely  because it just looks very odd, i don't like the box look, should look like a busy space hub port with multiple connections and ships around. also in general space stations should have defenses, they are made of the same voxels because they will be attacked as well.
+  >
+  > regarding blocks, i want to say for weapons you've gone out of the 1x1 and they are looking amazing. but remember we can have bigger hulls like 3x3x3 etc. bigger ships will be better to build with larger hull pieces than always relying one 1x1s. especially when we get to dreadnaught levels. on that same dreadnaught note, make even larger more sophisticated weapons for the large ships, like the tiny railguns and turrets we have so far are good for smaller ships but these dreadnaughts and cruisers may have large 10xYxZ level weapons that take a lot of energy to use. and doesnt have to be a convetional BIG CANNON GO BOOM. like we can get creative with some of these and get weird like having mini black hole powered weapons. go crazy
+
+- **Response: look book round 3** in `docs/design/lookbook/index.html`. Renders are in `img/r3/<direction>/`. Rounds 1 and 2 are in the "Earlier rounds" tab, and round 2's code is at `f3d4c7d`.
+- **Build check (new `lookdev.py --stage check`).** Every ship and station is checked against the rules the game's builder will enforce:
+  - every block joins through real shared faces (edge or corner contact does not count);
+  - every module sits on its mount face (turrets and masts on their base, engines on their front);
+  - each block's own geometry must reach its mount face.
+
+  All 13 designs (ships and stations) pass. Results are in `docs/design/lookbook/buildcheck.js`.
+
+  Fixes found by the check:
+  - underside turrets were mounted right way up, so they hung in the air; they now hang upside down from their base;
+  - the MULE's sponsons had a 0.5 m gap to the hull;
+  - the WRAITH's tail fins and the CANTICLE's stern spires stood on chamfers;
+  - the CANTICLE's railguns hung off the hull side and are now side-mounted on the wall;
+  - the LARK's wing roots, cockpit and fins were not seated;
+  - THE CROWN's spokes did not reach the hub;
+  - the railgun, laser lance and harpoon floated 4 cm above their own base;
+  - hairline loft slivers are pruned.
+
+  Root-cause fix in the mesher: when two straight-sided pieces cut the same cell (e.g. ring segments meeting on a 45° seam), the cell now takes their exact convex union. The old rule kept only the larger piece, which left a sawtooth crack along diagonal seams.
+- **Tapers are blocks, but not two shapes.** Every 0.5 m cell along a taper is one block cut by straight planes, and the same planes continue across neighbouring cells, which is why the edges line up. The hulls use many distinct cut shapes (counted up to rotation and mirroring):
+  - DRYDOCK: 880 distinct shapes in 17,524 cut cells; the spec's 45° Wedge covers 21% of them
+  - NOCTURNE: 1,189 distinct in 23,090; Wedge 21%
+  - OPERA: 407 distinct in 19,810; Wedge 8%
+
+  The specs today allow only `Cube` and a 45° `Wedge` (SPEC-04 §4.2; SPEC-11 packs the shape in one bit). Recorded as open question 6 (owner).
+- **Cruisers and dreadnoughts (DRYDOCK, NOCTURNE).** The scale ladder is light ~18 m, frigate ~50 m, cruiser ~115 m, dreadnought ~250 m, with line-up renders labelled with name, class and length.
+  - Cruisers build their hull from 2×2×2 blocks (1 m) and dreadnoughts from 3×3×3 blocks (1.5 m), on a second, coarser layer.
+  - A module placed into a big block splits it back into 0.5 m cells of exactly the same shape.
+  - Big hulls get windows on 3 m deck rows and fewer small fittings, so the size reads as calm.
+  - DRYDOCK: STEVEDORE (container ledges, two triple batteries, drone bay, graviton snare) and ANVIL (forked bow, spinal particle lance in a dorsal trench, singularity projector, three triple batteries, nova silos, drone bays, nine capital engines).
+  - NOCTURNE: REQUIEM (nave with spires, lightning tower and organ-pipe silos at the stern, side-mounted railguns) and SEPULCHRE (castle with a forest of spires, flying buttresses, keel spikes, an organ of nova silos, lightning towers, singularity projector, triple batteries, sponsons with drone bays).
+- **Capital kit (all three directions, each in its own style).** The kit is now 53 blocks.
+  - Large hull: Hull 2×2×2, Hull 3×3×3, Slope 3×3×3, Corner 3×3×3, Long slope 3×6×3, Armour block 3×3×3, Truss 3×6×3.
+  - Capital weapons: Triple battery 12×18×8, Spinal particle lance 12×80×12, Singularity projector 16×24×16, Storm coil 10×10×20, Graviton snare 14×12×12, Nova silo 6×6×14, Drone carrier bay 16×24×6.
+  - Capital engine 8×12×8.
+  - Dreadnoughts mount larger variants of the battery and singularity projector.
+  - The look book gives each capital weapon a role and an energy cost (look-dev numbers, not balance).
+- **PORT KESSLER replaces KESSLER YARD.** It is a trade hub:
+  - a central spindle with a defended ledge and a traffic-control crown;
+  - four 80 m docking piers with yellow gantries, container yards and guide lights;
+  - berth heads with ships docked and traffic coming and going.
+- **Station defences, built from the same blocks as the stations:**
+  - PORT KESSLER: heavy cannons and flak on the ledge, a graviton snare on top, a triple battery and flak on every berth head, autocannons along the piers.
+  - THE ROOD: heavy cannons between the spire rows, flak on deck and hanging under it.
+  - THE CROWN: flak on the upper rim and under the lower rim, heavy cannons on the spokes.
+- **Three new aliens:**
+  - LAMPREY: eyeless; a funnel mouth with rings of teeth; seven gill pores per side.
+  - CRINOID: five-fold symmetric sea lily; ten feathered arms; a ring of eyes; a trailing stalk.
+  - GRAVID: the behemoth carrier, ~480 m, nearly twice the dreadnought. It has a banded brood body with egg-chamber pits, an armoured head, horns, sail spines, birthing orifices and trailing tendrils.
+
+  The alien field is now sampled on a dense grid with per-primitive bounds and meshed by a vectorised surface-nets mesher. GRAVID is sampled at 2 m in the renders. Big aliens get larger carapace plates with veins kept thin.
+- **NOCTURNE colour range.**
+  - The image has more contrast, not more saturation: a darker ambient and background, a stronger sun and rim light, brighter windows, engines and strobes.
+  - A violet nebula region and a low amber glow join the green smoke.
+  - The storm planet gets rust, bruise-violet and teal bands, swirls, a dark polar hood and one great pale storm.
+  - UI unchanged.
+- **New shots:**
+  - DRYDOCK and NOCTURNE: cruiser and dreadnought close-ups, the class line-up, the fleet, the superweapon fight against GRAVID, LAMPREY, CRINOID, GRAVID and the alien line-up.
+  - PORT KESSLER with docked ships and traffic.
+- **Next:** the owner reviews round 3, and decides open question 6 (how hull shapes become game blocks) before the voxel specs are implemented.
 
 ### 2026-10-10 — Look book round 2: polished DRYDOCK, NOCTURNE as industrial gothic horror, new OPERA, alien enemies (claude, claude-opus-5-5)
 - **Owner decision and feedback (verbatim, 2026-10-10)** on the round-1 look book. The two reference screenshots that came with it are not stored in the repo (one is a page of copyrighted cover images):

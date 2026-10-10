@@ -341,3 +341,29 @@ h5.cat { margin: 18px 0 8px; font-size: 12px; text-transform: uppercase; letter-
 .ui-font-facet { font-family: "Lilita One", sans-serif; }
 .ui-drydock.s-disc .disc { background: linear-gradient(90deg, rgba(14,14,16,.82) 60%, rgba(14,14,16,0)); padding: 26px 120px 30px 36px; margin-left: -36px; }
 .ui-opera.s-disc .disc { background: radial-gradient(ellipse at center, rgba(8,8,30,.72) 30%, rgba(8,8,30,0) 70%); padding: 30px 0; }
+
+/* round 3: line-ups with labels, capital weapon cards, alien cards, build-check note */
+.lineup .lu { position: relative; }
+.lineup .lu img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; background: #000; }
+.lineup .lbl { position: absolute; transform: translate(-50%, calc(-100% - var(--lift, 14px))); text-align: center; white-space: nowrap; pointer-events: none;
+  font-size: clamp(10px, 1vw, 15px); line-height: 1.15; color: #fff; background: rgba(8,9,12,.62); border-radius: 4px; padding: 3px 7px; }
+.lineup .lbl::after { content: ""; position: absolute; left: 50%; top: 100%; width: 1px; height: var(--lift, 14px); background: rgba(255,255,255,.7); }
+.lineup .lbl b { display: block; letter-spacing: .06em; }
+.lineup .lbl span { display: block; font-size: .8em; color: #d6d9e0; }
+.capw { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 12px; }
+.capw .cw { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: start; background: var(--page2); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 14px 12px 8px; }
+.capw .cw img { width: 120px; aspect-ratio: 1; object-fit: contain; background: radial-gradient(circle at 50% 40%, #232731, #14161b); border-radius: 6px; }
+.capw .cwn { font-weight: 700; font-size: 15px; }
+.capw .cws { font: 11px "JetBrains Mono", monospace; color: var(--ink3); }
+.capw .cw p { margin: 6px 0; color: var(--ink2); font-size: 13px; }
+.capw .cwc { font: 12px "JetBrains Mono", monospace; color: var(--hi); }
+.acards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 12px; }
+.acard { background: var(--page2); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; }
+.acard b { display: block; letter-spacing: .06em; }
+.acard span { display: block; font-size: 12px; color: var(--ink3); }
+.acard p { margin: 6px 0 0; font-size: 13px; color: var(--ink2); }
+.changed.note p { margin: 4px 0 8px; color: var(--ink2); }
+.changed.note ul { columns: 2; font-size: 13px; }
+.cmp-c.none { display: flex; align-items: center; justify-content: center; aspect-ratio: 16/9; background: var(--page2); color: var(--ink3); border-radius: 4px; cursor: default; }
+@media (max-width: 1200px) { .acards { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 700px) { .acards { grid-template-columns: 1fr; } .capw { grid-template-columns: 1fr; } .changed.note ul { columns: 1; } }

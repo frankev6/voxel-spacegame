@@ -4,77 +4,112 @@ import math
 from mathutils import Matrix, Vector
 
 from ld_geom import CELL, box, cyl, lathe, sphere, torus, ico, hash01
-from ld_ships import Ship
+from ld_ships import Ship, CONTAINER_TINTS
 
 
 def drydock_station():
-    """KESSLER YARD: a dry dock. Safety-yellow portal frames around a frigate under construction, control tower,
-    crane gantry, work lights."""
-    s = Ship("KESSLER YARD", 101, "yard")
-    X0, X1, Z0, Z1 = -40, 40, -14, 44
-    T = 3
-    frames = list(range(0, 133, 22))
-    for y in frames:
-        for cx in (X0 + 1.5, X1 - 1.5):
-            s.loft([(y, 1.5, Z0, Z1, 1, 1), (y + T, 1.5, Z0, Z1, 1, 1)], "accent", cx=cx)
-        s.loft([(y, X1, Z1 - T, Z1, 1, 1), (y + T, X1, Z1 - T, Z1, 1, 1)], "accent")
-        s.loft([(y, X1, Z0, Z0 + T, 1, 1), (y + T, X1, Z0, Z0 + T, 1, 1)], "accent")
-    # hazard bands at the feet of every upright
-    s.paint(lambda x, y, z: z < Z0 + 9 and abs(x) > X1 - T - 0.5 and ((int(y) + int(z)) // 2) % 2 == 0, "armor")
-    for cx in (X0 + 1.5, X1 - 1.5):
-        for zc in (Z0 + 1.5, Z1 - 1.5, 14.5):
-            s.loft([(0, 1.5, zc - 1.5, zc + 1.5, 1, 1), (frames[-1] + T, 1.5, zc - 1.5, zc + 1.5, 1, 1)], "trim", cx=cx)
-    # control tower on the starboard side, with a narrower crown and a comms spire
-    s.loft([(34, 11, -10, 28, 3, 2), (98, 11, -10, 28, 3, 2)], "hull", cx=X1 + 11)
-    s.loft([(48, 7, 28, 36, 2), (84, 7, 28, 36, 2)], "hull2", cx=X1 + 11)
-    s.spire(X1 + 11, 66, 1.5, 36, 62, 3.0, "armor")
-    for y in (44, 66, 88):
-        s.box(X1 - 1, X1 + 1, y, y + 3, 6, 10, "trim")
-    s.paint(lambda x, y, z: x > X1 and z < -4, "hull2")
-    # crane gantry riding on the top rails
-    s.loft([(70, X1 + 2, Z1, Z1 + 4, 1, 1), (75, X1 + 2, Z1, Z1 + 4, 1, 1)], "accent")
-    s.loft([(68, 3, Z1 - 8, Z1, 1), (77, 3, Z1 - 8, Z1, 1)], "armor", cx=-6)
-    # the frigate under construction: lower hull plated, upper hull still bare ribs
-    from ld_ships import drydock_heavy
-    h = drydock_heavy()
-    dy, dz = 22, -6
-    for c, tag in h.cells.items():
-        x, y, z = c
-        cc = (x, y + dy, z + dz)
-        if z < 6 or y < 24 or y > 86:
-            s.cells[cc] = tag
-            if c in h.shapes:
-                s.shapes[cc] = h.shapes[c]
-        elif y % 6 == 0 and any((x + ex, y, z + ez) not in h.cells for ex, ez in ((1, 0), (-1, 0), (0, 1))):
-            s.cells[cc] = "trim"
-    for kind, mn, Rm, size, rsz, remap in h.mods:
-        if kind in ("thruster_l", "reactor", "flak", "heavy_cannon", "cockpit", "radiator", "tesla", "sensor"):
-            nm = (mn[0], mn[1] + dy, mn[2] + dz)
-            s.mods.append((kind, nm, Rm, size, rsz, remap))
-            for ddx in range(rsz[0]):
-                for ddy in range(rsz[1]):
-                    for ddz in range(rsz[2]):
-                        s.mod_cells.add((nm[0] + ddx, nm[1] + ddy, nm[2] + ddz))
-    s.mod("sensor", X1 + 10, 60, 36)
-    s.mod("shield", X1 + 14, 76, 36)
-    for y in (38, 58, 78):
-        s.mod("radiator", X1 + 22, y, 28)
-    s.mod("cargo", X1 + 4, 40, 28, remap={"c_cargo": "paint_p"})
-    s.mod("cargo", X1 + 4, 86, 28)
+    """PORT KESSLER: a busy trade hub. A central spindle with a traffic-control crown, four long docking piers with
+    berth heads, gantries and container yards, guide lights, ships docked along the piers. Defences from the same
+    blocks: heavy cannons and flak on the hub ledge, a graviton snare on top for traffic control, a triple battery and
+    flak on every berth head, autocannons along the piers."""
+    s = Ship("PORT KESSLER", 101, "yard", unit=3)
+    # the spindle: a wide lower drum, a ledge at z = 24, a narrower control tower, a crown
+    s.tower(0, 0, [(-60, 12, 4), (-42, 24, 8), (-12, 30, 10), (24, 30, 10)], "hull", big=True)
+    s.tower(0, 0, [(24, 20, 6), (66, 20, 6), (78, 12, 4), (84, 12, 4)], "hull2", big=True)
+    s.tower(0, 0, [(84, 16, 5), (90, 16, 5)], "armor", big=True)
+    s.spire(0, 0, 4, -96, -60, 1.6, "armor", down=True)
+    s.paint(lambda x, y, z: -12 <= z < -6, "hull2")
+    s.paint(lambda x, y, z: 18 <= z < 24 and max(abs(x), abs(y)) > 24, "accent")
+    # four docking piers and their berth heads
+    R0, R1 = 24, 186
+    sec = (8, -6, 6, 3, 3)
+    head = [(0, 22, -9, 9, 4, 4), (18, 22, -9, 9, 4, 4), (24, 16, -6, 6, 3, 3)]
+    for axis in ("x", "y"):
+        s.loft([(R0, *sec), (R1, *sec)], "hull", big=True, axis=axis)
+        s.loft([(-R1, *sec), (-R0, *sec)], "hull", big=True, axis=axis)
+        s.loft([(R1 + d, *rest) for d, *rest in head], "hull2", big=True, axis=axis)
+        s.loft([(-R1 - d, *rest) for d, *rest in reversed(head)], "hull2", big=True, axis=axis)
+    s.paint(lambda x, y, z: z < -3 and max(abs(x), abs(y)) > 30, "armor")
+    # yellow gantries straddling the piers, every 40 cells
+    for r in (60, 100, 140):
+        for sgn in (1, -1):
+            y0 = sgn * r if sgn > 0 else sgn * r - 2
+            s.box(-10, -8, y0, y0 + 2, -4, 22, "accent")
+            s.box(8, 10, y0, y0 + 2, -4, 22, "accent")
+            s.box(-10, 10, y0, y0 + 2, 20, 22, "accent")
+            s.box(y0, y0 + 2, -10, -8, -4, 22, "accent")
+            s.box(y0, y0 + 2, 8, 10, -4, 22, "accent")
+            s.box(y0, y0 + 2, -10, 10, 20, 22, "accent")
+    # defences: hub ledge, crown, berth heads, piers
+    s.mod("heavy_cannon", 22, -2, 24, rot=(0, 0, -90))
+    s.mod("heavy_cannon", -28, -2, 24, rot=(0, 0, 90))
+    s.mod("heavy_cannon", -2, 22, 24)
+    s.mod("heavy_cannon", -2, -28, 24, rot=(0, 0, 180))
+    for x, y in ((18, 18), (-21, 18), (18, -21), (-21, -21)):
+        s.mod("flak", x, y, 24)
+    s.mod("graviton", -7, -6, 90)
+    s.mod("sensor", 8, -1, 84)
+    s.mod("sensor", -10, -1, 84)
+    s.mod("battery", -6, R1 + 6, 9)
+    s.mod("battery", -6, -R1 - 24, 9, rot=(0, 0, 180))
+    s.mod("battery", R1 + 6, -6, 9, rot=(0, 0, -90))
+    s.mod("battery", -R1 - 24, -6, 9, rot=(0, 0, 90))
+    for sgn in (1, -1):
+        e = R1 + 9 if sgn > 0 else -R1 - 12
+        s.mod("flak", 14, e, 9)
+        s.mod("flak", -17, e, 9)
+        s.mod("flak", e, 14, 9)
+        s.mod("flak", e, -17, 9)
+        for r in (44, 100, 166):
+            p = sgn * r if sgn > 0 else sgn * r - 2
+            s.mod("autocannon", 3, p, 6)
+            s.mod("autocannon", p, -5, 6)
+    # container yards on the piers
+    k = 0
+    for sgn in (1, -1):
+        for r0, r1 in ((64, 96), (104, 136)):
+            for r in range(r0, r1, 4):
+                for col, c in enumerate((-6, -4, 2, 4)):
+                    k += 1
+                    h = 1 + int(hash01(r, col, sgn, 3) < 0.5)
+                    tint = CONTAINER_TINTS[int(hash01(r, col, sgn, 5) * len(CONTAINER_TINTS))]
+                    rm = {"c_cargo": tint} if tint else None
+                    p = r if sgn > 0 else -r - 4
+                    for kk in range(h):
+                        s.mod("cargo", c, p, 6 + kk * 2, remap=rm)
+                    if hash01(r, col, sgn, 8) < 0.7:
+                        for kk in range(h):
+                            s.mod("cargo", p, c, 6 + kk * 2, rot=(0, 0, 90), remap=rm)
+    # docking clamps reaching out from the piers to the berthed ships
+    s.berths = [("heavy", (105, 25, 0), -90), ("cruiser", (-38, -160, -2), 180), ("light", (34, 198, 0), 0),
+                ("light", (-198, -34, 0), 90)]
+    for x in (80, 110, 140):
+        s.box(x, x + 2, 8, 12, -2, 2, "trim")
+    for y in (-60, -100, -140):
+        s.box(-12, -8, y, y + 2, -2, 2, "trim")
 
     def lights(acc, group, S):
-        # work-light housings under the top beams (the light itself is a scene light added by the shot)
-        for y in frames:
-            for x in (X0 + T + 1, X1 - T - 2):
-                p = Vector((x + 0.5, y + 1.5, Z1 - T - 0.6)) * CELL
-                acc.add(group, "metal", box(tuple(p - Vector((0.45, 0.45, 0.25))), tuple(p + Vector((0.45, 0.45, 0.3)))), None, False)
-                acc.add(group, "window", box(tuple(p - Vector((0.36, 0.36, 0.27))), tuple(p + Vector((0.36, 0.36, -0.22)))), None, False)
-        # crane hook cable
-        p = Vector((-6, 72.5, Z1 - 8)) * CELL
-        acc.add(group, "metal", cyl(tuple(p), tuple(p - Vector((0, 0, 9))), 0.05, 6), None, True)
-        acc.add(group, "accent", box(tuple(p - Vector((0.5, 0.5, 10))), tuple(p - Vector((-0.5, -0.5, 9)))), None, False)
+        # guide-light rows along every pier edge, beacons on the berth heads, flood lamps on the gantries
+        for axis in ("x", "y"):
+            for sgn in (1, -1):
+                for r in range(28, R1, 6):
+                    for side in (-8.6, 8.6):
+                        q = (sgn * (r + 0.5), side, 6.1) if axis == "x" else (side, sgn * (r + 0.5), 6.1)
+                        acc.add(group, "nav_g" if (r // 6) % 2 else "window", sphere(tuple(Vector(q) * CELL), 0.09, 8, 4), None, True)
+                e = sgn * (R1 + 24.6)
+                for off in (-15, 15):
+                    q = (e, off, 7) if axis == "x" else (off, e, 7)
+                    acc.add(group, "nav_r", sphere(tuple(Vector(q) * CELL), 0.22, 10, 5), None, True)
+        for r in (60, 100, 140):
+            for sgn in (1, -1):
+                for x in (-9, 9):
+                    p = Vector((x, sgn * r + 1, 20)) * CELL
+                    acc.add(group, "window", box(tuple(p - Vector((0.3, 0.3, 0.3))), tuple(p + Vector((0.3, 0.3, 0.0)))), None, False)
+        p = Vector((0, 0, 92)) * CELL
+        acc.add(group, "metal", cyl(tuple(p), tuple(p + Vector((0, 0, 16))), 0.12, 8), None, True)
+        acc.add(group, "nav_w", sphere(tuple(p + Vector((0, 0, 16.2))), 0.3, 12, 6), None, True)
     s.extra.append(lights)
-    s.work_lights = [((x + 0.5) * CELL, (y + 1.5) * CELL, (Z1 - T - 1.2) * CELL) for y in frames for x in (X0 + T + 1, X1 - T - 2)]
+    s.work_lights = [((x + 0.5) * CELL, (sgn * r + 1) * CELL, 19 * CELL) for r in (60, 140) for sgn in (1, -1) for x in (-9, 9)]
     return s
 
 
@@ -104,8 +139,15 @@ def nocturne_station():
     s.loft([(-86, 3, 3, 7, 1, 1), (-72, 3, 3, 7, 1, 1)], "trim", cx=12, mirror=True)
     s.box(-15, 15, -88, -84, 3, 7, "trim")
     for y in (-30, 0, 30):
-        s.mod("radiator", 25, y, 10, mirror=True)
+        s.mod("radiator", 22, y, 10, mirror=True)
     s.mod("tesla", -1, -66, 8)
+    # defences: heavy cannons between the spire rows, flak at the deck corners, turrets hanging under the deck
+    for y in (-48, -24, 0, 24, 46):
+        s.mod("heavy_cannon", 5, y, 10, mirror=True)
+    for y in (-60, -14, 34):
+        s.mod("flak", 19, y, 10, mirror=True)
+    for y in (-50, -10, 30):
+        s.mod("flak", 19, y, -3, rot=(0, 180, 0), mirror=True)
 
     def lamps(acc, group, S):
         for y in range(-60, 60, 10):
@@ -124,8 +166,8 @@ def opera_station():
     for zc, tags in ((12, ("hull", "hull", "hull2", "hull")), (-12, ("hull", "hull2", "hull", "hull"))):
         s.ring((0, 0, zc), "z", 50, 58, 3, 48, tags)
         for ax in ((1, 0), (0, 1), (-1, 0), (0, -1)):
-            x0, x1 = sorted((ax[0] * 13, ax[0] * 51)) if ax[0] else (-2, 2)
-            y0, y1 = sorted((ax[1] * 13, ax[1] * 51)) if ax[1] else (-2, 2)
+            x0, x1 = sorted((ax[0] * 2, ax[0] * 51)) if ax[0] else (-2, 2)
+            y0, y1 = sorted((ax[1] * 2, ax[1] * 51)) if ax[1] else (-2, 2)
             s.box(x0, x1, y0, y1, zc - 2, zc + 2, "trim")
     s.ball((0, 0, 0), 15, "hull")
     oc = [((1, 0, 0), 5), ((-1, 0, 0), 5), ((0, 1, 0), 5), ((0, -1, 0), 5), ((1, 1, 0), 7), ((1, -1, 0), 7), ((-1, 1, 0), 7),
@@ -133,7 +175,15 @@ def opera_station():
     s.convex(oc, ((-5, -5, -44), (5, 5, 44)), "hull2")
     s.spire(0, 0, 3, 44, 58, 2.0, "accent")
     s.spire(0, 0, 3, -58, -44, 2.0, "accent", down=True)
-    s.mod("sensor", -1, -1, 58)
+    s.mod("sensor", 3, -1, 44)
+    # defences: flak on the upper rim and under the lower rim, heavy cannons on the spokes
+    for x, y in ((52, -1), (-55, -2), (-2, 52), (-1, -55)):
+        s.mod("flak", x, y, 15)
+        s.mod("flak", x, y, -18, rot=(0, 180, 0))
+    s.mod("heavy_cannon", 28, -2, 14, rot=(0, 0, -90))
+    s.mod("heavy_cannon", -34, -2, 14, rot=(0, 0, 90))
+    s.mod("heavy_cannon", -2, 28, 14)
+    s.mod("heavy_cannon", -2, -34, 14, rot=(0, 0, 180))
 
     def windows(acc, group, S):
         for zc in (12, -12):

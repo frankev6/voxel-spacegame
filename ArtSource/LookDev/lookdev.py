@@ -1,6 +1,7 @@
 """3D look-development renders for the art directions (round 2: DRYDOCK, NOCTURNE, OPERA).
 
 Driver (system Python):  python3 ArtSource/LookDev/lookdev.py [--direction drydock] [--stage kit,scenes] [--draft]
+                         python3 ArtSource/LookDev/lookdev.py --stage check     (build rules: attachment, mounts, shapes)
 Inside Blender:          blender -b --factory-startup --python lookdev.py -- --blender --direction X --stage S --out DIR
 
 Outputs go to docs/design/lookbook/img/r2/<direction>/ (scenes as JPEG, icons as WebP). Round 1 renders stay in
@@ -15,7 +16,7 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
-OUT_ROOT = os.path.join(ROOT, "docs", "design", "lookbook", "img", "r2")
+OUT_ROOT = os.path.join(ROOT, "docs", "design", "lookbook", "img", "r3")
 BLENDER = "/Applications/Blender.app/Contents/MacOS/Blender"
 sys.path.insert(0, HERE)
 
@@ -58,6 +59,8 @@ def blender_main(argv):
     t0 = time.time()
     if stage == "kit":
         ld_scenes.stage_kit(S, scene, mats, out, only)
+    elif stage == "check":
+        ld_scenes.stage_check(S, only)
     else:
         ld_scenes.stage_scenes(S, scene, mats, out, only, draft)
     print(f"LOOKDEV done {direction} {stage} in {time.time() - t0:.1f}s")
@@ -85,10 +88,40 @@ def run_blender(direction, stage, draft=False, only=None):
     print(f"{direction} {stage}: {'ok' if ok else 'FAILED'} rc={rc} {time.time() - t0:.0f}s  log={log}")
     if ok and stage == "kit":
         icons_to_webp(os.path.join(out, "icons"))
+    if stage == "check":
+        print("\n".join(l[6:] for l in txt.splitlines() if l.startswith("CHECK ")))
+        rows = [json.loads(l[10:]) for l in txt.splitlines() if l.startswith("CHECKJSON ")]
+        merge_js(os.path.join(LOOKBOOK, "buildcheck.js"), "BUILDCHECK", {direction: rows})
     if not ok:
         tail = [l for l in txt.splitlines() if "Error" in l or "Traceback" in l or "line " in l][-25:]
         print("\n".join(tail))
     return ok
+
+
+LOOKBOOK = os.path.join(ROOT, "docs", "design", "lookbook")
+
+
+def merge_js(path, var, data):
+    """Data files for the look book (plain JS so the page works from file://, where fetch is blocked)."""
+    cur = {}
+    if os.path.exists(path):
+        txt = open(path).read()
+        cur = json.loads(txt[txt.index("=") + 1:].strip().rstrip(";"))
+    cur.update(data)
+    with open(path, "w") as fh:
+        fh.write(f"/* written by ArtSource/LookDev/lookdev.py */\nwindow.{var} = {json.dumps(cur, indent=1, sort_keys=True)};\n")
+
+
+def write_lineups():
+    data = {}
+    for d in sorted(os.listdir(OUT_ROOT)):
+        folder = os.path.join(OUT_ROOT, d)
+        if not os.path.isdir(folder):
+            continue
+        for name in sorted(os.listdir(folder)):
+            if name.endswith(".json"):
+                data[f"{d}/{name[:-5]}"] = json.load(open(os.path.join(folder, name)))
+    merge_js(os.path.join(LOOKBOOK, "lineups.js"), "LINEUPS", data)
 
 
 def icons_to_webp(folder):
@@ -110,6 +143,8 @@ def driver(argv):
     for d in dirs:
         for s in stages:
             run_blender(d, s, draft, only)
+    if "scenes" in stages:
+        write_lineups()
 
 
 if __name__ == "__main__":

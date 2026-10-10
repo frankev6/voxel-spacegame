@@ -565,7 +565,7 @@ def railgun(b):
     W, L, H, F = b.W, b.L, b.H, b.F
     cx, zc = W / 2, H * 0.5
     if F == "opera":
-        gunhouse(b, (0.04, 0.0, 0.04), (W - 0.04, 1.2, H - 0.06), F)
+        gunhouse(b, (0.04, 0.0, 0.0), (W - 0.04, 1.2, H - 0.06), F)
         b.put("hull", cyl((cx, 1.1, zc), (cx, L + 0.4, zc), 0.2, 24, r1=0.13))
         for s in (-1, 1):
             b.put("chrome", cyl((cx + s * 0.2, 1.2, zc), (cx + s * 0.15, L + 0.2, zc), 0.025, 10))
@@ -575,7 +575,8 @@ def railgun(b):
         b.put("emit_w", cyl((cx, L + 0.4, zc), (cx, L + 0.42, zc), 0.08, 16))
         return
     housing = "paint_w"
-    b.flat(housing, chbox((0.06, 0.0, 0.04), (W - 0.06, 1.0, H - 0.08), 0.07))
+    b.flat(housing, chbox((0.06, 0.0, 0.0), (W - 0.06, 1.0, H - 0.08), 0.07))
+    b.flat("trim", chbox((cx - 0.2, 1.0, 0.0), (cx + 0.2, L - 0.4, zc - 0.13), 0.03))
     rail_tag = "metal" if F == "ind" else "dark"
     for s in (-1, 1):
         x0 = cx + s * 0.12
@@ -721,7 +722,7 @@ def beam(b):
     W, L, H, F = b.W, b.L, b.H, b.F
     cx, zc = W / 2, H * 0.5
     if F == "opera":
-        gunhouse(b, (0.04, 0.0, 0.04), (W - 0.04, 1.1, H - 0.06), F)
+        gunhouse(b, (0.04, 0.0, 0.0), (W - 0.04, 1.1, H - 0.06), F)
         b.put("chrome", cyl((cx, 1.0, zc), (cx, L - 0.15, zc), 0.11, 20, r1=0.07))
         for k in range(3):
             b.put("gold", torus((cx, 1.2 + k * 0.22, zc), (0, 1, 0), 0.115 - k * 0.012, 0.018, 20, 4))
@@ -732,7 +733,8 @@ def beam(b):
         b.flat("emit_w", hull_pts([(cx + math.cos(math.radians(k * 60)) * 0.08, L - 0.05, zc + math.sin(math.radians(k * 60)) * 0.08) for k in range(6)]
                                + [(cx, L + 0.18, zc), (cx, L - 0.2, zc)]))
         return
-    b.flat("paint_w", chbox((0.05, 0.0, 0.05), (W - 0.05, 1.1, H - 0.08), 0.08))
+    b.flat("paint_w", chbox((0.05, 0.0, 0.0), (W - 0.05, 1.1, H - 0.08), 0.08))
+    b.flat("trim", chbox((cx - 0.16, 1.1, 0.0), (cx + 0.16, L - 0.3, zc - 0.17), 0.03))
     # heat-sink fins
     for k in range(8):
         y = 0.1 + k * 0.12
@@ -954,7 +956,8 @@ def harpoon(b):
     W, L, H, F = b.W, b.L, b.H, b.F
     cx, zc = W / 2, H * 0.55
     if F == "opera":
-        gunhouse(b, (0.06, 0.0, 0.04), (W - 0.06, 1.1, H - 0.1), F)
+        gunhouse(b, (0.06, 0.0, 0.0), (W - 0.06, 1.1, H - 0.1), F)
+        b.flat("trim", chbox((cx - 0.08, 1.1, 0.0), (cx + 0.08, L - 0.4, zc - 0.04), 0.02))
         b.put("chrome", cyl((cx, 0.9, zc), (cx, L + 0.2, zc), 0.045, 12))
         tip = Vector((cx, L + 0.2, zc))
         for k in (-1, 0, 1):
@@ -968,6 +971,7 @@ def harpoon(b):
         b.flat("trim", chbox((x - 0.06, 0.0, 0.0), (x + 0.06, 0.9, 0.85), 0.03))
     # launch rail
     b.flat("trim", chbox((cx - 0.18, 0.9, zc - 0.2), (cx + 0.18, L - 0.6, zc - 0.05), 0.03))
+    b.flat("trim", chbox((cx - 0.1, 1.0, 0.0), (cx + 0.1, L - 0.7, zc - 0.2), 0.02))
     b.put("metal", cyl((cx, 0.8, zc), (cx, L + 0.15, zc), 0.035, 10))
     b.put("hose", pipe_path([(cx, 0.45, 0.8), (cx, 0.75, zc + 0.05), (cx, 0.95, zc)], 0.012, 6))
     tip = Vector((cx, L + 0.15, zc))
@@ -1625,10 +1629,22 @@ BUILDERS = {
 }
 
 
+from ld_capital import KIT_CAPITAL, LABELS_CAPITAL, CATEGORY_CAPITAL, BUILDERS_CAPITAL, BIG_HULL, big_hull  # noqa: E402
+
+KIT.update(KIT_CAPITAL)
+LABELS.update(LABELS_CAPITAL)
+CATEGORY.update(CATEGORY_CAPITAL)
+BUILDERS.update(BUILDERS_CAPITAL)
+BUILDERS["thruster_xl"] = lambda b: thruster(b, True)
+
+
 def build_block(kind, S, acc, group, M, size=None, remap=None):
     size = size or KIT[kind]
     b = B(S, acc, group, M, size)
     b.remap = remap or {}
+    if kind in BIG_HULL:
+        big_hull(b, kind)
+        return b, None
     if kind.startswith("hull_"):
         hull_piece(b, kind)
         return b, None

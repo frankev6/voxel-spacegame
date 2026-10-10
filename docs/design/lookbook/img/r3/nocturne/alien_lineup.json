@@ -1,0 +1,44 @@
+[
+ {
+  "name": "HUSK",
+  "cls": "Skimmer",
+  "length": 23,
+  "x": 0.9309,
+  "y": 0.7964
+ },
+ {
+  "name": "BROODMOTHER",
+  "cls": "Frigate class",
+  "length": 64,
+  "x": 0.8649,
+  "y": 0.7932
+ },
+ {
+  "name": "LAMPREY",
+  "cls": "Boarder",
+  "length": 112,
+  "x": 0.7908,
+  "y": 0.7775
+ },
+ {
+  "name": "CRINOID",
+  "cls": "Cruiser class",
+  "length": 73,
+  "x": 0.7832,
+  "y": 0.6196
+ },
+ {
+  "name": "SEPULCHRE",
+  "cls": "Our dreadnought, for scale",
+  "length": 246,
+  "x": 0.5212,
+  "y": 0.5812
+ },
+ {
+  "name": "GRAVID",
+  "cls": "Behemoth carrier",
+  "length": 490,
+  "x": 0.1052,
+  "y": 0.4107
+ }
+]

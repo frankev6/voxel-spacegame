@@ -1,66 +1,69 @@
-/* Look Book. Round 2: the owner's finalists (DRYDOCK, NOCTURNE), the new OPERA direction, and alien enemies.
-   Round 1 (six directions) stays available as an archive. Renders come from ArtSource/LookDev/lookdev.py (Blender).
+/* Look Book. Round 3: DRYDOCK, NOCTURNE and OPERA with connected ships, cruisers and dreadnoughts, capital weapons,
+   defended stations and five alien types. Rounds 1 and 2 stay available as an archive. Renders come from
+   ArtSource/LookDev/lookdev.py (Blender); lineups.js and buildcheck.js are written by the same tool.
    Game screens are HTML at 1920x1080 composited over the renders and scaled to fit. */
 "use strict";
 
-/* ---------------------------------------------------------------- round 2 data */
+/* ---------------------------------------------------------------- round 3 data */
 
-const R2 = [
+const R3 = [
   {
-    key: "drydock", base: "img/r2/drydock", name: "DRYDOCK", line: "Industrial used-future",
-    pitch: "Working ships in a working universe. Bone plating in faction liveries, safety yellow, colour-coded machinery you can read at a glance, container decks, hazard paint, work lights, under a dusty galactic sky with ringed rust worlds.",
+    key: "drydock", base: "img/r3/drydock", prev: "img/r2/drydock", name: "DRYDOCK", line: "Industrial used-future",
+    pitch: "Working ships in a working universe. Bone plating in faction liveries, safety yellow, colour-coded machinery you can read at a glance, container decks, hazard paint and work lights, from 18 m salvage gunships up to a 250 m dreadnought, around a busy trade port under a ringed rust world.",
     changed: [
-      "Background is no longer black: a galactic band with dust lanes, rust and teal nebula, and subtle colour from warm to cool",
-      "Colour definition: faction liveries (signal blue, oxide red) and function colours on every block (weapons oxide red, power teal, cargo orange, engines graphite)",
-      "Planet gets real rings (lit by the sun and shadowed by the planet) and a proper atmosphere glow that hugs the limb and fades out, instead of a shield-like shell",
-      "Seven new weapons: rotary cannon, heavy twin cannon, spinal mass driver, arc projector, plasma mortar, torpedo launcher, salvage harpoon",
-      "Every existing block redone: cockpit is a heavy cab with a window band, the reactor is a fission pile with control rods, cores are a gyro, a gimbal, a foundry heart and a linear accelerator (no more glowing cube in a cage)",
-      "Hull corners and slopes now line up: hulls are built from straight-sided sections, so every slope is one plane across all its cells",
-      "Alien enemies (bone and jade by default) in this world",
-      "UI polish: hazard-striped headers, function-coloured inventory tiles, stencil discovery stamp",
+      "Every ship passes a build check: no floating blocks, every turret sits on its base (guns under the hull hang upside down from it), sponsons and wings are joined through real faces",
+      "Two new classes with a clear scale ladder: STEVEDORE heavy cruiser and ANVIL dreadnought (line-up below, 18 m to 250 m)",
+      "Large hull blocks: cruisers are built from 1 m blocks (2×2×2 cells), dreadnoughts from 1.5 m blocks (3×3×3). Bigger plating that reads at scale; windows, hatches and small guns stay human-sized",
+      "Capital weapons for the big ships: spinal particle lance, singularity projector, storm coil, graviton snare, nova silo, drone carrier bay, triple battery",
+      "Station rethought from scratch: PORT KESSLER, a trade hub with four docking piers, gantries, container yards, guide lights, ships berthed and traffic coming and going",
+      "Stations are defended, with the same blocks they are built from: heavy cannons and flak on the hub ledge, flak on every berth head, autocannons along the piers, a graviton snare on top",
+      "Three new aliens in this world, including GRAVID, the behemoth carrier (ALIENS tab)",
     ],
-    ships: ["MULE", "salvage gunship"], heavy: ["BULWARK", "container frigate"], station: ["KESSLER YARD", "dry dock with a frigate under construction"],
+    ships: ["MULE", "salvage gunship"], heavy: ["BULWARK", "container frigate"], cruiser: ["STEVEDORE", "heavy cruiser"], dread: ["ANVIL", "dreadnought"],
+    station: ["PORT KESSLER", "trade hub with four docking piers"],
     planet: "OSTRAVA IV", ptype: "Ringed rust world · 0.8 g · dust storms · mining towns", sys: "KESSLER BELT",
-    speaker: "Dockmaster Oyelaran", where: "Kessler Yard, berth 6",
+    speaker: "Dockmaster Oyelaran", where: "Port Kessler, pier 3",
     enemy: ["BROODMOTHER", "alien leviathan"], enemySys: ["CARAPACE BREACHED", "SAC CLUSTER EXPOSED", "SPINES ARMED"],
     obj: ["Break the BROODMOTHER's carapace", "2 / 3 breaches open"], nora: "The sacs along its flank are feeding the shell. Burst them and the carapace goes soft.",
+    fleet: "The fleet: ANVIL, STEVEDORE, a BULWARK and two MULEs", superweapon: "ANVIL's spinal lance and singularity projector against GRAVID",
   },
   {
-    key: "nocturne", base: "img/r2/nocturne", name: "NOCTURNE", line: "Industrial gothic horror",
-    pitch: "The ALIEN-franchise mood: hunched, ribbed ships in worn grey and ochre with oxblood and mustard machinery, slit windows of sodium light, red strobes, a refinery cathedral towed between stars, a storm world below, and something black and living out in the dark.",
+    key: "nocturne", base: "img/r3/nocturne", prev: "img/r2/nocturne", name: "NOCTURNE", line: "Industrial gothic horror",
+    pitch: "The ALIEN-franchise mood with a cathedral's bones: hunched, ribbed ships in worn grey and ochre with oxblood and mustard machinery, slit windows of sodium light, spires and flying buttresses on the capital ships, a refinery cathedral under tow, a storm world below, and something black and living out in the dark.",
     changed: [
-      "A distinct style from DRYDOCK: hunched silhouettes, ribbed housings, spires, hanging hoses, slit windows (DRYDOCK is boxy and clean-painted)",
-      "No more single colour: worn grey plating with ochre panels, oxblood weapons, mustard power, olive cargo, warning-red bands",
-      "Black vents are gone: vents are deep ribbed grilles with an ember glow, so they read as depth, not as missing pixels",
-      "More experimental background: smoke and dark dust against a sickly green glow, very few stars, a thin haze that catches work lights",
-      "Station: THE ROOD, an inverted cathedral refinery towed by the CANTICLE",
-      "Alien enemies in obsidian and acid green: the horror half of the franchise",
-      "UI unchanged, as asked",
+      "Every ship passes a build check: the tail fins and stern spires now stand on flat hull, wing guns and the chin gun hang from their bases, the CANTICLE's railguns are side-mounted on the hull wall",
+      "Two new classes: REQUIEM heavy cruiser (a lightning tower and organ-pipe silos at the stern) and SEPULCHRE dreadnought (a flying cathedral-fortress: spires, flying buttresses, keel spikes, an organ of nova silos)",
+      "More range, not more saturation: deeper blacks, brighter highlights, stronger windows, engines and strobes",
+      "The sky is no longer all green: a violet nebula on one side and a low amber glow on another, over the green smoke",
+      "The storm planet has colour variety: rust, bruise-violet and teal bands, swirls, a dark polar hood and one great pale storm",
+      "THE ROOD is defended: heavy cannons between the spire rows, flak at the deck corners, turrets hanging under the deck",
+      "UI unchanged",
     ],
-    ships: ["WRAITH", "dropship"], heavy: ["CANTICLE", "refinery tug"], station: ["THE ROOD", "refinery cathedral under tow"],
+    ships: ["WRAITH", "dropship"], heavy: ["CANTICLE", "refinery tug"], cruiser: ["REQUIEM", "heavy cruiser"], dread: ["SEPULCHRE", "dreadnought"],
+    station: ["THE ROOD", "refinery cathedral under tow, now defended"],
     planet: "VESPER-9", ptype: "Storm world · permanent lightning · no surface signals", sys: "THE HOLLOW REACH",
     speaker: "Warden Ilse Marrow", where: "The Rood, lower nave",
     enemy: ["BROODMOTHER", "alien leviathan"], enemySys: ["CARAPACE BREACHED", "SAC CLUSTER EXPOSED", "SPINES ARMED"],
     obj: ["Break the BROODMOTHER's carapace", "2 / 3 breaches open"], nora: "The sacs along its flank are feeding the shell. Burst them and the carapace goes soft.",
+    fleet: "The fleet: SEPULCHRE, REQUIEM, a CANTICLE and two WRAITHs", superweapon: "SEPULCHRE's singularity projector and triple batteries against GRAVID",
   },
   {
-    key: "opera", base: "img/r2/opera", name: "OPERA", line: "Space opera (new)",
+    key: "opera", base: "img/r3/opera", prev: "img/r2/opera", name: "OPERA", line: "Space opera",
     pitch: "Paperback space opera on a grand scale. Cream hulls in bold liveries with gold trim, a 2001-style capital ship and double-wheel station, Dune-like monumental masses, Fifth Element warmth, and No Man's Sky skies with painted nebulae and ringed giants.",
     changed: [
-      "New direction from your references: space-opera covers, DUNE, THE FIFTH ELEMENT, 2001, NO MAN'S SKY",
-      "Ships: LARK (swept-wing courier) and SOVEREIGN (geodesic command sphere, spine with a spinal gun, rotating ring, engine monolith)",
-      "Station: THE CROWN, a double wheel on one axle with checkered liveries and ring windows",
-      "Blocks: art-deco hard surface (tapered chamfered housings, chrome visors, gold pinstripes, fluted barrels); cores are an armillary sphere, an orrery and cut gems",
-      "Painted skies: deep ultramarine to magenta, glowing nebula cores, star clusters, a banded gas giant with rings",
-      "Its own UI: art-deco panels with gold rules and diamonds, Cinzel and Josefin Sans (both OFL)",
+      "Build-check fixes: the LARK's wing roots now run into the fuselage and its cockpit and sail fins are seated; the SOVEREIGN's mast and shield sit on the sphere",
+      "THE CROWN fixed: the spokes now reach the hub (the wheels were floating around it), and the 45° seams of both wheels are closed",
+      "THE CROWN is defended: flak on the upper rim and under the lower rim, heavy cannons on all eight spokes",
+      "The capital kit (large hull blocks, capital weapons) in OPERA's art-deco style. No cruiser or dreadnought designs for OPERA this round",
     ],
-    ships: ["LARK", "swept-wing courier"], heavy: ["SOVEREIGN", "monumental capital ship"], station: ["THE CROWN", "double wheel station"],
+    ships: ["LARK", "swept-wing courier"], heavy: ["SOVEREIGN", "monumental capital ship"], station: ["THE CROWN", "double wheel station, now defended"],
     planet: "AURELIA", ptype: "Banded gas giant · ring system · 2 moons", sys: "THE GILDED REACH",
     speaker: "Steward Cassius Vey", where: "The Crown, upper wheel",
     enemy: ["SOVEREIGN", "rival capital ship (Solar livery)"], enemySys: ["SPINE BREACHED", "RING OFFLINE", "MASS DRIVER CHARGING"],
     obj: ["Silence the SOVEREIGN's spinal gun", "2 / 3 capacitor banks down"], nora: "Their ring is offline. Hit the spine behind it before the mass driver finishes charging.",
   },
 ];
+const R2 = R3.map(d => ({ key: d.key, name: d.name, line: d.line, base: d.prev }));
 
 /* round 1 archive (six directions, as delivered on 2026-10-10) */
 const R1 = [
@@ -69,34 +72,54 @@ const R1 = [
   ["reef", "REEF", "Grown biotech"], ["facet", "FACET", "Low-poly bold"],
 ].map(([key, name, line]) => ({ key, name, line, base: `img/${key}` }));
 
+/* capital weapons: what they do and what they cost (look-dev numbers, not balance) */
+const CAPITAL = [
+  ["battery", "Triple battery", "12×18×8 (dreadnought mount 18×27×12)", "Three long barrels in an armoured house. Slow to turn; a salvo lands like a building falling.", "3 × 900 dmg · 4 km · 120 MJ per salvo"],
+  ["lance", "Spinal particle lance", "12×80×12 (ANVIL carries 12×180×12)", "Built into the keel, so the whole ship aims it. Charges for six seconds, then a beam that cuts a hull from end to end.", "1.2 GJ per shot · 6 s charge"],
+  ["singularity", "Singularity projector", "16×24×16 (dreadnought mount 24×36×24)", "Holds a pinhead black hole in a gimbal and throws it. It drifts, swallows every cell it touches, then evaporates in a flash.", "full reactor output for 20 s · lives 8 s"],
+  ["storm", "Storm coil", "10×10×20", "A lightning tower. The discharge chains through up to six hulls, jumping to the nearest metal blocks.", "300 MJ per discharge · 6 chain jumps"],
+  ["graviton", "Graviton snare", "14×12×12", "Pulls a ship in or pins it in place: salvage, boarding, or holding a target still for the big guns.", "40 MW while held"],
+  ["nova", "Nova silo", "6×6×14", "One slow, heavy warhead. The blast wave strips armour from everything in a 60 m sphere.", "1 warhead · 90 s reload"],
+  ["hangar", "Drone carrier bay", "16×24×6", "An open deck with launch rails and six drones that harass, intercept or patch hull.", "6 drones · 20 s relaunch"],
+];
+
 const KIT = {
   "Structure": ["hull_cube", "hull_wedge", "hull_corner", "hull_inner", "hull_slope2", "hull_round", "hull_armor", "girder"],
+  "Large hull (cruisers and dreadnoughts)": ["hull_2", "hull_3", "wedge_3", "corner_3", "slope_3x6", "armor_3", "truss_3"],
   "Procedural hull variants": ["hull_window", "hull_hatch", "hull_vent", "hull_pipes"],
   "Weapons": ["autocannon", "gatling", "railgun", "beam", "harpoon", "tesla", "missile", "flak", "plasma", "torpedo", "heavy_cannon", "mass_driver"],
-  "Modules": ["cockpit", "thruster_s", "thruster_l", "reactor", "shield", "capacitor", "cargo", "radiator", "sensor", "solar"],
+  "Capital weapons": ["battery", "lance", "singularity", "storm", "graviton", "nova", "hangar"],
+  "Modules": ["cockpit", "thruster_s", "thruster_l", "thruster_xl", "reactor", "shield", "capacitor", "cargo", "radiator", "sensor", "solar"],
   "Cores": ["core_1", "core_2", "core_3", "core_35"],
 };
-const NEW = new Set(["gatling", "heavy_cannon", "mass_driver", "tesla", "plasma", "torpedo", "harpoon"]);
+const NEW = new Set(["hull_2", "hull_3", "wedge_3", "corner_3", "slope_3x6", "armor_3", "truss_3", "battery", "lance", "singularity", "storm", "graviton", "nova", "hangar", "thruster_xl"]);
 const LABEL = {
   hull_cube: "Hull", hull_wedge: "Hull slope", hull_corner: "Hull corner", hull_inner: "Inner corner", hull_slope2: "Long slope 1×2",
   hull_round: "Rounded edge", hull_window: "Hull · windows", hull_hatch: "Hull · hatch & latches", hull_vent: "Hull · vents",
   hull_pipes: "Hull · pipes", hull_armor: "Heavy armour", girder: "Girder frame", cockpit: "Cockpit", autocannon: "Autocannon",
   gatling: "Rotary cannon", railgun: "Railgun", heavy_cannon: "Heavy twin cannon", mass_driver: "Spinal mass driver", beam: "Laser lance",
   tesla: "Arc projector", plasma: "Plasma mortar", torpedo: "Torpedo launcher", missile: "Missile cells", flak: "Flak turret",
-  harpoon: "Salvage harpoon", thruster_s: "Thruster", thruster_l: "Main engine", reactor: "Reactor", shield: "Shield projector",
+  harpoon: "Salvage harpoon", thruster_s: "Thruster", thruster_l: "Main engine", thruster_xl: "Capital engine", reactor: "Reactor", shield: "Shield projector",
   capacitor: "Capacitor bank", cargo: "Cargo pod", radiator: "Radiator", sensor: "Sensor mast", solar: "Solar wing",
   core_1: "Core", core_2: "Core", core_3: "Core", core_35: "Core",
+  hull_2: "Hull 2×2×2", hull_3: "Hull 3×3×3", wedge_3: "Slope 3×3×3", corner_3: "Corner 3×3×3", slope_3x6: "Long slope 3×6×3",
+  armor_3: "Armour block 3×3×3", truss_3: "Truss 3×6×3", battery: "Triple battery", lance: "Spinal particle lance",
+  singularity: "Singularity projector", storm: "Storm coil", graviton: "Graviton snare", nova: "Nova silo", hangar: "Drone carrier bay",
 };
 const SIZE = {
   hull_cube: "1×1×1", hull_wedge: "1×1×1", hull_corner: "1×1×1", hull_inner: "1×1×1", hull_slope2: "1×2×1", hull_round: "1×1×1",
   hull_window: "1×1×1", hull_hatch: "1×1×1", hull_vent: "1×1×1", hull_pipes: "1×1×1", hull_armor: "1×1×1", girder: "1×1×1",
   cockpit: "4×4×3", autocannon: "2×2×2", gatling: "2×3×2", railgun: "2×6×2", heavy_cannon: "4×6×3", mass_driver: "3×12×3",
   beam: "2×4×2", tesla: "2×2×3", plasma: "3×3×3", torpedo: "3×6×2", missile: "3×3×1", flak: "3×3×3", harpoon: "2×4×2",
-  thruster_s: "2×3×2", thruster_l: "4×6×4", reactor: "3×3×3", shield: "2×2×2", capacitor: "2×2×2", cargo: "2×4×2",
+  thruster_s: "2×3×2", thruster_l: "4×6×4", thruster_xl: "8×12×8", reactor: "3×3×3", shield: "2×2×2", capacitor: "2×2×2", cargo: "2×4×2",
   radiator: "1×6×4", sensor: "2×2×3", solar: "1×8×4", core_1: "1×1×1", core_2: "2×2×2", core_3: "3×3×3", core_35: "3×5×3",
+  hull_2: "2×2×2 · 1 m", hull_3: "3×3×3 · 1.5 m", wedge_3: "3×3×3", corner_3: "3×3×3", slope_3x6: "3×6×3", armor_3: "3×3×3", truss_3: "3×6×3",
+  battery: "12×18×8", lance: "12×80×12", singularity: "16×24×16", storm: "10×10×20", graviton: "14×12×12", nova: "6×6×14", hangar: "16×24×6",
 };
-const FUNC = (k) => ["autocannon", "gatling", "railgun", "heavy_cannon", "mass_driver", "beam", "tesla", "plasma", "torpedo", "missile", "flak", "harpoon"].includes(k) ? "f-wpn"
-  : ["reactor", "capacitor", "shield"].includes(k) ? "f-pwr" : ["thruster_s", "thruster_l", "radiator"].includes(k) ? "f-eng"
+const WPN = ["autocannon", "gatling", "railgun", "heavy_cannon", "mass_driver", "beam", "tesla", "plasma", "torpedo", "missile", "flak", "harpoon",
+  "battery", "lance", "singularity", "storm", "graviton", "nova", "hangar"];
+const FUNC = (k) => WPN.includes(k) ? "f-wpn"
+  : ["reactor", "capacitor", "shield"].includes(k) ? "f-pwr" : ["thruster_s", "thruster_l", "thruster_xl", "radiator"].includes(k) ? "f-eng"
   : k === "cargo" ? "f-cargo" : k.startsWith("core") ? "f-core" : "f-hull";
 const COLOURWAYS = [["bone", "Bone & jade"], ["obsidian", "Obsidian & acid"], ["coral", "Blood coral"], ["slick", "Oil slick"]];
 
@@ -237,6 +260,51 @@ function kitSection(d, sub) {
   return s;
 }
 
+/* a line-up render with its labels: names, class and length, placed from the JSON the renderer writes */
+function lineupFig(d, name, cap) {
+  const f = el("figure", "shot lineup");
+  f.innerHTML = `<div class="lu"><img src="${img(d, name + ".jpg")}" alt="${cap}" loading="lazy"></div><figcaption>${cap}</figcaption>`;
+  const lu = f.querySelector(".lu");
+  const data = (window.LINEUPS || {})[`${d.key}/${name}`] || [];
+  const placed = [];
+  for (const l of [...data].sort((a, b) => b.x - a.x)) {
+    // stack labels that would overlap (small ships side by side) into rows, each with a longer leader line
+    let row = 0;
+    while (placed.some(p => p.row === row && Math.abs(p.x - l.x) < 0.13 && Math.abs(p.y - l.y) < 0.2)) row++;
+    placed.push({ x: l.x, y: l.y, row });
+    const t = el("div", `lbl ui-font-${d.key}`);
+    t.style.left = `${l.x * 100}%`;
+    t.style.top = `${l.y * 100}%`;
+    t.style.setProperty("--lift", `${14 + row * 48}px`);
+    t.innerHTML = `<b>${l.name}</b><span>${l.cls} · ${l.length} m</span>`;
+    lu.appendChild(t);
+  }
+  f.dataset.zoom = "img";
+  return f;
+}
+
+function capitalSection(d) {
+  const s = section("Capital weapons", "for cruisers and dreadnoughts: big, power-hungry, and not all of them guns");
+  const g = el("div", "capw");
+  for (const [k, n, size, what, cost] of CAPITAL) {
+    const c = el("div", `cw ${FUNC(k)}`);
+    c.innerHTML = `<img src="${icon(d, k)}" alt="${n}" loading="lazy"><div><div class="cwn">${n}</div><div class="cws">${size}</div><p>${what}</p><div class="cwc">${cost}</div></div>`;
+    g.appendChild(c);
+  }
+  s.appendChild(g);
+  return s;
+}
+
+function buildNote(d) {
+  const n = el("div", "changed note");
+  const stats = (window.BUILDCHECK || {})[d.key] || [];
+  const rows = stats.map(r => `<li><b>${r.name}</b> · ${r.cells.toLocaleString("en")} cells${r.big ? ` · ${r.big.toLocaleString("en")} big blocks (${r.u}×${r.u}×${r.u})` : ""} · ${r.mods} blocks placed · ${r.shapes} cut shapes</li>`).join("");
+  n.innerHTML = `<h4>Build check: every design below passes</h4>
+    <p>Every ship and station is checked against the rules the builder will enforce: <b>all blocks join through real faces</b> (touching at an edge or a corner does not count), and <b>every module sits on its mount face</b> (turrets and masts on their base, engines on their front). Turrets under a hull are placed upside down so they hang from their base.</p>
+    <ul>${rows}</ul>`;
+  return n;
+}
+
 function directionPage(d) {
   const p = el("div", `dir dir-${d.key}`);
   const hero = el("div", "hero");
@@ -245,11 +313,32 @@ function directionPage(d) {
   hero.dataset.zoom = "img";
   p.appendChild(hero);
   const ch = el("div", "changed");
-  ch.innerHTML = `<h4>What changed from your feedback</h4><ul>${d.changed.map(s => `<li>${s}</li>`).join("")}</ul>`;
+  ch.innerHTML = `<h4>Round 3: what changed from your feedback</h4><ul>${d.changed.map(s => `<li>${s}</li>`).join("")}</ul>`;
   p.appendChild(ch);
 
-  let s = section("In game", "gameplay camera: 55° pitch, 40° FOV");
-  let g = el("div", "g2");
+  let s, g;
+  if (d.cruiser) {
+    s = section("Fleet classes", "light, frigate, cruiser, dreadnought: sterns lined up on a 10 m grid");
+    s.appendChild(lineupFig(d, "lineup", `${d.ships[0]} → ${d.heavy[0]} → ${d.cruiser[0]} → ${d.dread[0]}`));
+    g = el("div", "g2");
+    g.appendChild(shot(d, "ship_cruiser.jpg", `${d.cruiser[0]} · ${d.cruiser[1]}, built from 1 m hull blocks`));
+    g.appendChild(shot(d, "ship_dreadnought.jpg", `${d.dread[0]} · ${d.dread[1]}, built from 1.5 m hull blocks`));
+    g.appendChild(shot(d, "fleet.jpg", d.fleet));
+    g.appendChild(shot(d, "superweapon.jpg", d.superweapon));
+    s.appendChild(g);
+    p.appendChild(s);
+  }
+
+  s = section("Ships", "built from the block kit below; hull slopes are single planes, so edges and corners line up");
+  g = el("div", "g2");
+  g.appendChild(shot(d, "ship_light.jpg", `${d.ships[0]} · ${d.ships[1]}`));
+  g.appendChild(shot(d, "ship_heavy.jpg", `${d.heavy[0]} · ${d.heavy[1]}`));
+  s.appendChild(g);
+  s.appendChild(buildNote(d));
+  p.appendChild(s);
+
+  s = section("In game", "gameplay camera: 55° pitch, 40° FOV");
+  g = el("div", "g2");
   g.appendChild(hud(d));
   g.appendChild(shot(d, "flight.jpg", `Free flight past ${d.station[0]} (no HUD)`));
   s.appendChild(g);
@@ -264,63 +353,80 @@ function directionPage(d) {
   s.appendChild(g);
   p.appendChild(s);
 
-  s = section("Ships", "built from the block kit below; hull slopes are single planes, so edges and corners line up");
-  g = el("div", "g2");
-  g.appendChild(shot(d, "ship_light.jpg", `${d.ships[0]} · ${d.ships[1]}`));
-  g.appendChild(shot(d, "ship_heavy.jpg", `${d.heavy[0]} · ${d.heavy[1]}`));
-  s.appendChild(g);
-  p.appendChild(s);
-
-  if (d.key !== "opera") {
-    s = section("The enemy", "alien hulls in this world: see the ALIENS tab for how they are built and the four colourways");
-    g = el("div", "g2");
-    g.appendChild(shot(d, "alien.jpg", `BROODMOTHER and a HUSK in ${d.name}'s world`));
-    const cw = el("div", "cw4");
-    for (const [k, n] of COLOURWAYS) cw.appendChild(shot(d, `alien_cw_${k}.jpg`, n));
-    g.appendChild(cw);
-    s.appendChild(g);
-    p.appendChild(s);
-  }
-
-  s = section("Station & planet");
+  s = section("Station & planet", "stations are built from the same blocks as ships, defences included, because they will be attacked too");
   g = el("div", "g2");
   g.appendChild(shot(d, "station.jpg", `${d.station[0]} · ${d.station[1]}`));
   g.appendChild(shot(d, "planet.jpg", `${d.planet} · ${d.ptype}`));
   s.appendChild(g);
   p.appendChild(s);
 
-  p.appendChild(kitSection(d, "38 blocks. Each fills its grid footprint its own way; hulls stay calm, weapons, modules and cores get the detail"));
+  if (d.key !== "opera") {
+    s = section("The enemy", "five alien types in this world: see the ALIENS tab for all of them in both worlds and the four colourways");
+    g = el("div", "g2");
+    g.appendChild(shot(d, "alien_gravid.jpg", `GRAVID, the behemoth carrier, in ${d.name}'s world`));
+    g.appendChild(shot(d, "alien.jpg", `BROODMOTHER and a HUSK in ${d.name}'s world`));
+    s.appendChild(g);
+    p.appendChild(s);
+  }
+
+  p.appendChild(capitalSection(d));
+  p.appendChild(kitSection(d, "53 blocks. Each fills its grid footprint its own way; hulls stay calm, weapons, modules and cores get the detail"));
   return p;
 }
 
+const ALIENS = [
+  ["HUSK", "Skimmer, ~24 m", "A manta with cephalic horns, a ridged back, sac rows on the wings and a whip tail. Comes in swarms."],
+  ["BROODMOTHER", "Frigate class, ~65 m", "An armoured isopod: overlapping carapace plates, swept side spines, a head shield with horns, glowing sacs, legs hanging underneath."],
+  ["LAMPREY", "Boarder, ~100 m", "No eyes. The whole front is a round funnel mouth lined with rings of teeth; it latches onto a hull and bores in. Seven glowing gill pores along each flank."],
+  ["CRINOID", "Cruiser class, ~75 m across", "A sea lily with no front and no back: five-fold symmetric, a ring of eyes around a glowing mouth, ten feathered arms curling up like a closing hand, a jointed stalk trailing behind."],
+  ["GRAVID", "Behemoth carrier, ~480 m", "A living carrier almost twice the length of a dreadnought. A swollen, banded brood body pitted with egg chambers, an armoured head with an eye cluster and sweeping horns, sail spines, birthing orifices underneath and a forest of trailing tendrils."],
+];
+
 function aliensPage() {
   const p = el("div", "dir aliens");
-  const dd = R2[0], nc = R2[1];
+  const dd = R3[0], nc = R3[1];
   const hero = el("div", "hero");
-  hero.innerHTML = `<img src="${img(nc, "alien.jpg")}" alt="Alien ship in NOCTURNE">
+  hero.innerHTML = `<img src="${img(nc, "alien_gravid.jpg")}" alt="GRAVID in NOCTURNE">
     <div class="hero-text"><div class="hkick">Enemies for DRYDOCK and NOCTURNE</div><h2 class="hn">ALIENS</h2>
-    <p>REEF's grown ships, brought into the finalists' worlds as the enemy. A HUSK skimmer and a BROODMOTHER, an armoured isopod the size of a frigate, with carapace plates, side spines, glowing sacs, eyes and hanging legs.</p></div>`;
+    <p>REEF's grown ships as the enemy in both worlds. Round 3 adds three that are meant to feel wrong: an eyeless LAMPREY that bores into hulls, a radially symmetric CRINOID, and GRAVID, a behemoth carrier bigger than anything we can build.</p></div>`;
   hero.dataset.zoom = "img";
   p.appendChild(hero);
   const how = el("div", "changed");
   how.innerHTML = `<h4>How they get the REEF look without per-voxel smoothing</h4><ul>
-    <li>Same 0.5 m grid as every other ship. Instead of a block shape, each alien cell stores one small number: how deep inside the shell it is (one byte)</li>
+    <li>Same grid as every other ship. Instead of a block shape, each alien cell stores one small number: how deep inside the shell it is (one byte)</li>
     <li>A surface-nets mesher reads those numbers and builds a smooth shell in a single pass. No smoothing step, no subdivision, same cost class as the block mesher</li>
     <li>Damage just removes cells: craters come out organic for free, with glowing flesh inside</li>
-    <li>Spines, sacs, eyes and legs are the alien blocks placed on top; the vein pattern is a shader, so any colourway is a palette swap</li></ul>`;
+    <li>Spines, sacs, eyes, teeth and tendrils are the alien blocks placed on top; the vein pattern is a shader, so any colourway is a palette swap</li>
+    <li>GRAVID is sampled at 2 m in these renders (it is seen from far away); in game it would stream in chunks at full resolution</li></ul>`;
   p.appendChild(how);
-  let s = section("In DRYDOCK's world", "default colourway: bone and jade");
+
+  let s = section("Five alien types", "lined up on a 10 m grid next to our dreadnought, for scale");
+  s.appendChild(lineupFig(nc, "alien_lineup", "HUSK, BROODMOTHER, LAMPREY, CRINOID, SEPULCHRE (ours), GRAVID"));
+  const cards = el("div", "acards");
+  for (const [n, c, t] of ALIENS) cards.appendChild(el("div", "acard", `<b>${n}</b><span>${c}</span><p>${t}</p>`));
+  s.appendChild(cards);
+  p.appendChild(s);
+
+  s = section("The new three", "LAMPREY and CRINOID in DRYDOCK's world (bone and jade), GRAVID in both");
   let g = el("div", "g2");
-  g.appendChild(shot(dd, "alien.jpg", "BROODMOTHER and HUSK near Ostrava IV"));
-  g.appendChild(shot(dd, "combat.jpg", "Combat: MULEs against a breached BROODMOTHER"));
+  g.appendChild(shot(dd, "alien_lamprey.jpg", "LAMPREY: the funnel mouth and its rings of teeth"));
+  g.appendChild(shot(dd, "alien_crinoid.jpg", "CRINOID: no front, no back; ten feathered arms and a ring of eyes"));
+  g.appendChild(shot(nc, "alien_lamprey.jpg", "LAMPREY in obsidian and acid"));
+  g.appendChild(shot(nc, "alien_crinoid.jpg", "CRINOID in obsidian and acid"));
+  g.appendChild(shot(dd, "alien_gravid.jpg", "GRAVID with BROODMOTHER, HUSKs and a STEVEDORE cruiser for scale"));
+  g.appendChild(shot(nc, "superweapon.jpg", "GRAVID under fire from SEPULCHRE"));
   s.appendChild(g);
   p.appendChild(s);
-  s = section("In NOCTURNE's world", "default colourway: obsidian and acid");
+
+  s = section("In both worlds");
   g = el("div", "g2");
+  g.appendChild(shot(dd, "alien.jpg", "BROODMOTHER and HUSK near Ostrava IV"));
   g.appendChild(shot(nc, "alien.jpg", "BROODMOTHER and HUSK near Vesper-9"));
+  g.appendChild(shot(dd, "combat.jpg", "Combat: MULEs against a breached BROODMOTHER"));
   g.appendChild(shot(nc, "combat.jpg", "Combat: WRAITHs against a breached BROODMOTHER"));
   s.appendChild(g);
   p.appendChild(s);
+
   s = section("Colourways", "the same alien, four palettes. Pick a default per world, or use them for different hives");
   for (const d of [dd, nc]) {
     s.appendChild(el("h5", "cat", `Lit in ${d.name}'s world`));
@@ -334,19 +440,24 @@ function aliensPage() {
 
 function comparePage() {
   const p = el("div", "dir compare");
-  p.appendChild(el("p", "lead", "Round 2 side by side: the two finalists and the new OPERA. Same camera, same scene layout, same block list. Click any image to enlarge."));
-  const rows = [["hero.jpg", "Hero"], ["combat.jpg", "Combat"], ["flight.jpg", "Flight"], ["ship_heavy.jpg", "Heavy"], ["station.jpg", "Station"], ["planet.jpg", "Planet"], ["builder.jpg", "Blueprint Lab"]];
+  p.appendChild(el("p", "lead", "Round 3 side by side: same camera, same scene layout, same block list. Click any image to enlarge. OPERA has no cruiser or dreadnought this round."));
+  const rows = [["hero.jpg", "Hero"], ["lineup.jpg", "Classes"], ["fleet.jpg", "Fleet"], ["combat.jpg", "Combat"], ["flight.jpg", "Flight"],
+    ["ship_heavy.jpg", "Heavy"], ["station.jpg", "Station"], ["planet.jpg", "Planet"], ["builder.jpg", "Blueprint Lab"]];
   const t = el("div", "cmp cmp3");
   t.appendChild(el("div", "cmp-h", ""));
-  for (const d of R2) t.appendChild(el("div", "cmp-h", `<button class="lnk" data-go="${d.key}">${d.name}</button><span>${d.line}</span>`));
+  for (const d of R3) t.appendChild(el("div", "cmp-h", `<button class="lnk" data-go="${d.key}">${d.name}</button><span>${d.line}</span>`));
   for (const [n, label] of rows) {
     t.appendChild(el("div", "cmp-r", label));
-    for (const d of R2) { const c = el("div", "cmp-c"); const i = el("img"); i.src = img(d, n); i.loading = "lazy"; i.alt = `${d.name} ${label}`; c.appendChild(i); c.dataset.zoom = "img"; t.appendChild(c); }
+    for (const d of R3) {
+      const c = el("div", "cmp-c");
+      if (d.key === "opera" && ["lineup.jpg", "fleet.jpg"].includes(n)) { c.classList.add("none"); c.textContent = "—"; t.appendChild(c); continue; }
+      const i = el("img"); i.src = img(d, n); i.loading = "lazy"; i.alt = `${d.name} ${label}`; c.appendChild(i); c.dataset.zoom = "img"; t.appendChild(c);
+    }
   }
   t.appendChild(el("div", "cmp-r", "Kit"));
-  for (const d of R2) {
+  for (const d of R3) {
     const c = el("div", "cmp-c kitmini");
-    c.innerHTML = ["core_3", "heavy_cannon", "thruster_l", "reactor", "cockpit", "tesla"].map(k => `<img src="${icon(d, k)}" alt="">`).join("");
+    c.innerHTML = ["singularity", "battery", "storm", "core_3", "thruster_xl", "graviton"].map(k => `<img src="${icon(d, k)}" alt="">`).join("");
     t.appendChild(c);
   }
   p.appendChild(t);
@@ -355,9 +466,20 @@ function comparePage() {
 
 function archivePage() {
   const p = el("div", "dir compare");
-  p.appendChild(el("p", "lead", "Round 1 as delivered on 10 October: six directions. Finalists picked: DRYDOCK and NOCTURNE (3D), DRYDOCK and NOCTURNE (UI), DRYDOCK and PULP HORIZON (visual style). PULP HORIZON is parked for later; REEF became the alien enemies."));
-  const rows = [["hero.jpg", "Hero"], ["combat.jpg", "Combat"], ["station.jpg", "Station"], ["planet.jpg", "Planet"]];
-  const t = el("div", "cmp");
+  p.appendChild(el("p", "lead", "Earlier rounds as delivered. Round 2 (10 October): DRYDOCK and NOCTURNE polished, OPERA new, aliens introduced. Round 1 (10 October): six directions; finalists DRYDOCK and NOCTURNE (3D and UI), DRYDOCK and PULP HORIZON (visual style). PULP HORIZON is parked for later; REEF became the aliens."));
+  p.appendChild(el("h5", "cat", "Round 2"));
+  let rows = [["hero.jpg", "Hero"], ["ship_light.jpg", "Light"], ["ship_heavy.jpg", "Heavy"], ["station.jpg", "Station"], ["planet.jpg", "Planet"]];
+  let t = el("div", "cmp cmp3");
+  t.appendChild(el("div", "cmp-h", ""));
+  for (const d of R2) t.appendChild(el("div", "cmp-h", `<b>${d.name}</b><span>${d.line}</span>`));
+  for (const [n, label] of rows) {
+    t.appendChild(el("div", "cmp-r", label));
+    for (const d of R2) { const c = el("div", "cmp-c"); const i = el("img"); i.src = img(d, n); i.loading = "lazy"; i.alt = `${d.name} ${label}`; c.appendChild(i); c.dataset.zoom = "img"; t.appendChild(c); }
+  }
+  p.appendChild(t);
+  p.appendChild(el("h5", "cat", "Round 1"));
+  rows = [["hero.jpg", "Hero"], ["combat.jpg", "Combat"], ["station.jpg", "Station"], ["planet.jpg", "Planet"]];
+  t = el("div", "cmp");
   t.appendChild(el("div", "cmp-h", ""));
   for (const d of R1) t.appendChild(el("div", "cmp-h", `<b>${d.name}</b><span>${d.line}</span>`));
   for (const [n, label] of rows) {
@@ -369,22 +491,41 @@ function archivePage() {
 }
 
 const pages = {};
-const TABS = R2.map(d => ({ key: d.key, name: d.name })).concat([{ key: "aliens", name: "ALIENS" }, { key: "compare", name: "Compare", cls: "cmp-tab" }, { key: "round1", name: "Round 1 archive", cls: "arch-tab" }]);
+const TABS = R3.map(d => ({ key: d.key, name: d.name })).concat([{ key: "aliens", name: "ALIENS" }, { key: "compare", name: "Compare", cls: "cmp-tab" }, { key: "archive", name: "Earlier rounds", cls: "arch-tab" }]);
 
 function show(key) {
   if (!TABS.some(t => t.key === key)) key = "drydock";
   for (const b of document.querySelectorAll("#tabs button")) b.setAttribute("aria-selected", b.dataset.key === key ? "true" : "false");
   const main = $("#main");
   if (!pages[key]) {
-    pages[key] = key === "compare" ? comparePage() : key === "aliens" ? aliensPage() : key === "round1" ? archivePage() : directionPage(R2.find(d => d.key === key));
+    pages[key] = key === "compare" ? comparePage() : key === "aliens" ? aliensPage() : key === "archive" ? archivePage() : directionPage(R3.find(d => d.key === key));
   }
   main.replaceChildren(pages[key]);
   requestAnimationFrame(fit);
-  try { localStorage.setItem("lookbook-tab-r2", key); } catch (e) { /* storage unavailable */ }
+  try { localStorage.setItem("lookbook-tab-r3", key); } catch (e) { /* storage unavailable */ }
   window.scrollTo(0, 0);
 }
 
+function declutter() {
+  // lift any line-up label that still overlaps one already placed (measured boxes, so it holds at every width)
+  for (const lu of document.querySelectorAll(".lineup .lu")) {
+    const labels = [...lu.querySelectorAll(".lbl")].sort((a, b) => parseFloat(b.style.left) - parseFloat(a.style.left));
+    const done = [];
+    for (const t of labels) {
+      let lift = parseFloat(t.style.getPropertyValue("--lift")) || 14;
+      for (let k = 0; k < 12; k++) {
+        const r = t.getBoundingClientRect();
+        if (!done.some(o => r.left < o.right + 4 && o.left < r.right + 4 && r.top < o.bottom + 2 && o.top < r.bottom + 2)) break;
+        lift += 16;
+        t.style.setProperty("--lift", `${lift}px`);
+      }
+      done.push(t.getBoundingClientRect());
+    }
+  }
+}
+
 function fit() {
+  declutter();
   for (const w of document.querySelectorAll(".stage-wrap")) {
     const s = w.firstElementChild;
     const k = w.clientWidth / 1920;
@@ -431,7 +572,7 @@ function init() {
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("#lightbox").hidden = true; });
   window.addEventListener("resize", fit);
   let start = "drydock";
-  try { start = localStorage.getItem("lookbook-tab-r2") || "drydock"; } catch (e) { /* storage unavailable */ }
+  try { start = localStorage.getItem("lookbook-tab-r3") || "drydock"; } catch (e) { /* storage unavailable */ }
   show(start);
 }
 init();

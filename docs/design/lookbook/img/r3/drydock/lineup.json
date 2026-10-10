@@ -1,0 +1,30 @@
+[
+ {
+  "name": "MULE",
+  "cls": "Light",
+  "length": 24,
+  "x": 0.8876,
+  "y": 0.6883
+ },
+ {
+  "name": "BULWARK",
+  "cls": "Frigate",
+  "length": 53,
+  "x": 0.778,
+  "y": 0.6559
+ },
+ {
+  "name": "STEVEDORE",
+  "cls": "Cruiser",
+  "length": 125,
+  "x": 0.527,
+  "y": 0.597
+ },
+ {
+  "name": "ANVIL",
+  "cls": "Dreadnought",
+  "length": 255,
+  "x": 0.0758,
+  "y": 0.4504
+ }
+]

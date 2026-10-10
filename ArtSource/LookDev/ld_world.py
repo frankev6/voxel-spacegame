@@ -97,10 +97,25 @@ def setup_world(S, scene):
         neb = g.math("MULTIPLY", g.maprange(smoke, 0.4, 0.75, 0.0, 1.0), g.maprange(smoke2, 0.3, 0.8, 0.3, 1.0))
         sky = g.mix(g.math("MULTIPLY", neb, nk * 0.35), sky, g.mix(smoke2, lin(n1), lin(n2)), "ADD")
         sky = g.mix(g.math("MULTIPLY", g.math("MULTIPLY", gl, gk), g.maprange(smoke, 0.3, 0.7, 0.2, 1.0)), sky, lin(gc), "ADD")
+        # a second region of violet nebula on the far side, and a low amber glow, so the sky is not one hue
+        if W.get("nebula2"):
+            v1, v2, vk = W["nebula2"]
+            vdir = Vector((-0.6, 0.7, 0.3)).normalized()
+            vm = g.maprange(g.vmath("DOT_PRODUCT", dn, tuple(vdir)), 0.05, 0.85, 0.0, 1.0, "SMOOTHSTEP")
+            vs = _noise(g, dn, 1.7, 12.0, 0.64, 0.9)
+            vd = g.math("MULTIPLY", g.math("POWER", g.maprange(vs, 0.38, 0.78, 0.0, 1.0), 1.4), vm)
+            sky = g.mix(g.math("MULTIPLY", vd, vk), sky, g.mix(_noise(g, dn, 3.0), lin(v1), lin(v2)), "ADD")
+            core = g.math("POWER", vd, 3.0)
+            sky = g.mix(g.math("MULTIPLY", core, vk * 0.5), sky, lin("#E0B8FF"), "ADD")
+        if W.get("glow2"):
+            ac, ak = W["glow2"]
+            adir = Vector((0.75, 0.45, -0.45)).normalized()
+            am = g.maprange(g.vmath("DOT_PRODUCT", dn, tuple(adir)), 0.35, 1.0, 0.0, 1.0, "SMOOTHSTEP")
+            sky = g.mix(g.math("MULTIPLY", g.math("MULTIPLY", am, ak), g.maprange(smoke2, 0.25, 0.75, 0.3, 1.0)), sky, lin(ac), "ADD")
         # filaments of brighter smoke edge
         ridge = g.math("ABSOLUTE", g.math("SUBTRACT", _noise(g, dn, 2.2, 6.0, 0.6, 0.7), 0.5))
         fil = g.math("MULTIPLY", g.maprange(ridge, 0.0, 0.025, 1.0, 0.0), g.maprange(smoke, 0.45, 0.7, 0.0, 1.0))
-        sky = g.mix(g.math("MULTIPLY", fil, 0.12), sky, lin("#9AB090"), "ADD")
+        sky = g.mix(g.math("MULTIPLY", fil, W.get("filament", 0.12)), sky, lin("#B8C8B0"), "ADD")
         dc, dk = W["dust"]
         dust = g.maprange(_noise(g, dn, 1.8, 10.0, 0.62, 0.6), 0.48, 0.66, 0.0, dk)
         sky = g.mix(dust, sky, lin(dc))
@@ -260,15 +275,36 @@ def planet(S, name, radius, location, P, sundir, rot=(0.3, 0.0, 0.0)):
         col = g.mix(1.0, col, g.n("ShaderNodeCombineColor", k, k, k).outputs[0], "MULTIPLY")
         col = g.mix(g.math("MULTIPLY", spot, 0.7), col, cols[2])
     elif kind == "storm":
-        # banded, turbulent, desaturated; storm cells; lightning on the night side
+        # banded, turbulent; storm cells; lightning on the night side. Accent bands (rust, bruise violet, teal) and a
+        # dark polar hood give it colour variety without saturating it
         warp = _noise(g, o, 3.0, 10.0, 0.62, 1.6)
         lat = g.math("ADD", sep[2], g.math("MULTIPLY", g.math("SUBTRACT", warp, 0.5), 0.5))
         t = g.math("ADD", g.math("MULTIPLY", lat, 0.5), 0.5)
-        col = g.ramp(t, [(0.0, cols[3]), (0.15, cols[0]), (0.3, cols[1]), (0.42, cols[2]), (0.5, cols[1]), (0.6, cols[0]),
-                         (0.72, cols[2]), (0.85, cols[1]), (1.0, cols[3])])
+        acc_ = [lin(c) for c in P.get("accents", ())]
+        if len(acc_) >= 3:
+            col = g.ramp(t, [(0.0, cols[3]), (0.08, acc_[1]), (0.16, cols[0]), (0.26, acc_[0]), (0.33, cols[1]), (0.42, cols[2]),
+                             (0.48, acc_[2]), (0.53, cols[1]), (0.61, cols[0]), (0.68, acc_[0]), (0.75, cols[2]), (0.84, acc_[1]),
+                             (0.91, cols[1]), (1.0, cols[3])])
+            # large swirls of the accent colours across the bands
+            sw = _noise(g, g.vmath("MULTIPLY", o, (1.0, 1.0, 2.5)), 1.6, 6.0, 0.6, 2.0)
+            col = g.mix(g.math("MULTIPLY", g.maprange(sw, 0.55, 0.75, 0.0, 1.0), 0.45), col, acc_[1])
+            sw2 = _noise(g, g.vmath("MULTIPLY", o, (1.0, 1.0, 3.0)), 2.3, 6.0, 0.6, 1.4)
+            col = g.mix(g.math("MULTIPLY", g.maprange(sw2, 0.6, 0.78, 0.0, 1.0), 0.4), col, acc_[0])
+            pole = g.maprange(g.math("ABSOLUTE", sep[2]), 0.72, 0.95, 0.0, 0.75)
+            col = g.mix(pole, col, cols[3])
+        else:
+            col = g.ramp(t, [(0.0, cols[3]), (0.15, cols[0]), (0.3, cols[1]), (0.42, cols[2]), (0.5, cols[1]), (0.6, cols[0]),
+                             (0.72, cols[2]), (0.85, cols[1]), (1.0, cols[3])])
         cl = _noise(g, o, 6.0, 12.0, 0.65, 1.0)
         cc, ca = P["cloud"]
         col = g.mix(g.maprange(cl, 0.5, 0.75, 0.0, ca), col, lin(cc))
+        if P.get("eye"):
+            # one great storm: a pale teal vortex
+            spot_c = Vector((0.55, -0.7, 0.42)).normalized()
+            sp = g.vmath("DISTANCE", o, tuple(spot_c))
+            spot = g.maprange(sp, 0.06, 0.17, 1.0, 0.0, "SMOOTHSTEP")
+            swirl = _noise(g, o, 26.0, 4.0, 0.6, 2.0)
+            col = g.mix(g.math("MULTIPLY", spot, g.maprange(swirl, 0.3, 0.7, 0.55, 0.95)), col, lin(P["eye"]))
         vor = g.n("ShaderNodeTexVoronoi", Scale=22.0, p_feature="F1")
         g.set(vor.inputs["Vector"], o)
         sel = g.n("ShaderNodeSeparateColor")

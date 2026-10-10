@@ -5,21 +5,85 @@ Coordinates in cells: x right, y forward (bow at +y, exhaust toward -y), z up; t
 
 Hull shapes come from straight-sided pieces (lofts between octagonal sections, and general convex pieces), so every
 sloped face is one continuous plane across all the cells it passes through. That is what keeps edges and corners
-aligned; there is no per-cell auto-slope pass any more."""
+aligned; there is no per-cell auto-slope pass any more.
+
+Large ships also use big hull blocks (u x u x u cells, e.g. 3x3x3 = 1.5 m) on a second, coarser layer: pieces built with
+big=True fill that layer, and modules placed into a big block split it back into 0.5 m cells around them."""
 
 import math
 from mathutils import Matrix, Vector
 
 from ld_geom import (CELL, Acc, mesh_cells, hash01, cbox, box, cyl, sphere, ico, torus, lathe,
-                     section_poly, loft_planes, classify_cell)
+                     section_poly, loft_planes, classify_cell, cell_polys, polys_volume)
 from ld_blocks import KIT, build_block, greeble_face
 
 LIVERY_TAGS = ("hull", "hull2", "accent")
 
+_MERGE = {}
+
+
+def merge_clip(k1, v1, k2, v2, tol=0.015):
+    """Two convex pieces cut the same cell (e.g. neighbouring ring segments meeting on a diagonal seam). If their union
+    is convex (within a sliver), return it as one cut shape: ('full',) or ('clip', planes, vol). Else None."""
+    key = (k1, k2)
+    if key in _MERGE:
+        return _MERGE[key]
+    import bmesh
+    pts = []
+    for k in (k1, k2):
+        for _, poly, _ in cell_polys(("clip", k)):
+            pts.extend(poly)
+    inter = polys_volume(cell_polys(("clip", tuple(sorted(set(k1) | set(k2)))))) if True else 0.0
+    union = v1 + v2 - max(0.0, inter)
+    bm = bmesh.new()
+    seen = set()
+    for p in pts:
+        q = tuple(round(v, 6) for v in p)
+        if q not in seen:
+            seen.add(q)
+            bm.verts.new(q)
+    bmesh.ops.convex_hull(bm, input=list(bm.verts))
+    bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(0.2), verts=bm.verts, edges=bm.edges)
+    cen = Vector((0, 0, 0))
+    for v in bm.verts:
+        cen += v.co
+    cen /= max(1, len(bm.verts))
+    planes = []
+    for f in bm.faces:
+        n = f.normal.copy()
+        p0 = f.verts[0].co
+        if n.dot(cen - p0) > 0:
+            n = -n
+        d = n.dot(p0)
+        # drop the cube's own faces
+        ax = [i for i in range(3) if abs(n[i]) > 0.9999]
+        if ax and (abs(d - (1.0 if n[ax[0]] > 0 else 0.0)) < 1e-5):
+            continue
+        planes.append((tuple(round(k, 6) for k in n), round(d, 6)))
+    bm.free()
+    if not planes:
+        res = ("full",)
+    else:
+        hk = tuple(sorted(planes))
+        hv = polys_volume(cell_polys(("clip", hk)))
+        if hv > 1 - 1e-4:
+            res = ("full",)
+        elif hv <= union + tol:
+            res = ("clip", hk, hv)
+        else:
+            res = None
+    _MERGE[key] = res
+    return res
+
 
 class Ship:
-    def __init__(self, name, seed=1, livery=None):
+    def __init__(self, name, seed=1, livery=None, unit=1):
         self.name = name
+        self.u = unit           # big hull block size in cells (1 = no big layer)
+        self.big = {}           # big block index -> tag
+        self.big_shapes = {}
+        self.big_vols = {}
+        self.split = set()      # big blocks broken back into cells (modules placed inside them)
         self.cells = {}
         self.shapes = {}        # cut cells: {cell: ('clip', planes)}
         self.vols = {}
@@ -38,7 +102,11 @@ class Ship:
             self.cells[c] = tag
             self.shapes.pop(c, None)
 
-    def box(self, x0, x1, y0, y1, z0, z1, tag="hull", mirror=False):
+    def box(self, x0, x1, y0, y1, z0, z1, tag="hull", mirror=False, big=False):
+        if big:
+            planes = [((1, 0, 0), x1), ((-1, 0, 0), -x0), ((0, 1, 0), y1), ((0, -1, 0), -y0), ((0, 0, 1), z1), ((0, 0, -1), -z0)]
+            self.convex(planes, ((x0, y0, z0), (x1, y1, z1)), tag, mirror, big=True)
+            return
         for x in range(x0, x1):
             for y in range(y0, y1):
                 for z in range(z0, z1):
@@ -47,6 +115,16 @@ class Ship:
                         self.set((-1 - x, y, z), tag)
 
     def clear(self, x0, x1, y0, y1, z0, z1, mirror=False):
+        if self.big:
+            u = self.u
+            regions = [((x0, x1), (y0, y1), (z0, z1))]
+            if mirror:
+                regions.append(((-x1, -x0), (y0, y1), (z0, z1)))
+            for B in list(self.big):
+                for reg in regions:
+                    if all(B[k] * u < hi and (B[k] + 1) * u > lo for k, (lo, hi) in enumerate(reg)):
+                        self._split(B)
+                        break
         for x in range(x0, x1):
             for y in range(y0, y1):
                 for z in range(z0, z1):
@@ -54,15 +132,21 @@ class Ship:
                         self.cells.pop(c, None)
                         self.shapes.pop(c, None)
 
-    def paint(self, pred, tag):
+    def paint(self, pred, tag, big=True):
         for c in list(self.cells):
             if pred(c[0] + 0.5, c[1] + 0.5, c[2] + 0.5):
                 self.cells[c] = tag
+        if big:
+            u = self.u
+            for B in list(self.big):
+                if pred((B[0] + 0.5) * u, (B[1] + 0.5) * u, (B[2] + 0.5) * u):
+                    self.big[B] = tag
 
     # straight-sided pieces ---------------------------------------------------------------------------------------
-    def loft(self, stations, tag="hull", cx=0.0, mirror=False):
+    def loft(self, stations, tag="hull", cx=0.0, mirror=False, big=False, axis="y"):
         """Hull between octagonal sections. stations: [(y, w, zb, zt[, ct[, cb]])] in cells; half-width w around cx,
-        top/bottom chamfers ct/cb. Changes between stations of 0, 1:2, 1:1 or 2:1 keep every cut on whole cells."""
+        top/bottom chamfers ct/cb. Changes between stations of 0, 1:2, 1:1 or 2:1 keep every cut on whole cells.
+        axis='x' runs the loft along x instead (stations give x, and cx is then the centre in y)."""
         for (ya, *a), (yb, *b) in zip(stations, stations[1:]):
             if yb <= ya:
                 continue
@@ -71,20 +155,160 @@ class Ship:
             planes = loft_planes(ya, sa, yb, sb)
             xs = [x for x, _ in sa + sb]
             zs = [z for _, z in sa + sb]
-            self.convex(planes, ((min(xs), ya, min(zs)), (max(xs), yb, max(zs))), tag)
+            lo, hi = (min(xs), ya, min(zs)), (max(xs), yb, max(zs))
+            if axis == "x":
+                planes = [((n[1], n[0], n[2]), d) for n, d in planes]
+                lo, hi = (lo[1], lo[0], lo[2]), (hi[1], hi[0], hi[2])
+            self.convex(planes, (lo, hi), tag, big=big)
         if mirror and cx:
-            self.loft(stations, tag, -cx, False)
+            self.loft(stations, tag, -cx, False, big, axis)
 
-    def convex(self, planes, bbox, tag="hull", mirror=False):
-        """Any convex piece given as half-spaces [(n, d)]: n.p <= d, in cell units."""
+    def convex(self, planes, bbox, tag="hull", mirror=False, big=False):
+        """Any convex piece given as half-spaces [(n, d)]: n.p <= d, in cell units. big=True fills big hull blocks."""
         (x0, y0, z0), (x1, y1, z1) = bbox
-        for x in range(math.floor(x0), math.ceil(x1)):
-            for y in range(math.floor(y0), math.ceil(y1)):
-                for z in range(math.floor(z0), math.ceil(z1)):
-                    self._piece((x, y, z), classify_cell(planes, (x, y, z)), tag)
+        if big and self.u > 1:
+            u = self.u
+            pb = [(n, d / u) for n, d in planes]
+            for x in range(math.floor(x0 / u), math.ceil(x1 / u)):
+                for y in range(math.floor(y0 / u), math.ceil(y1 / u)):
+                    for z in range(math.floor(z0 / u), math.ceil(z1 / u)):
+                        B = (x, y, z)
+                        if B in self.split:
+                            for c in self._cells_of(B):
+                                self._piece(c, classify_cell(planes, c), tag)
+                        else:
+                            self._bpiece(B, classify_cell(pb, B), tag)
+        else:
+            for x in range(math.floor(x0), math.ceil(x1)):
+                for y in range(math.floor(y0), math.ceil(y1)):
+                    for z in range(math.floor(z0), math.ceil(z1)):
+                        self._piece((x, y, z), classify_cell(planes, (x, y, z)), tag)
         if mirror:
             mp = [((-n[0], n[1], n[2]), d) for n, d in planes]
-            self.convex(mp, ((-x1, y0, z0), (-x0, y1, z1)), tag)
+            self.convex(mp, ((-x1, y0, z0), (-x0, y1, z1)), tag, big=big)
+
+    def _bpiece(self, B, res, tag):
+        if res[0] == "empty":
+            return
+        if res[0] == "full":
+            self.big[B] = tag
+            self.big_shapes.pop(B, None)
+            return
+        if B in self.big and B not in self.big_shapes:
+            return
+        if B in self.big_shapes:
+            m = merge_clip(self.big_shapes[B][1], self.big_vols[B], res[1], res[2])
+            if m is not None:
+                if res[2] > self.big_vols[B]:
+                    self.big[B] = tag
+                if m[0] == "full":
+                    self.big_shapes.pop(B, None)
+                else:
+                    self.big_shapes[B] = ("clip", m[1])
+                    self.big_vols[B] = m[2]
+                return
+            if self.big_vols.get(B, 0) >= res[2]:
+                return
+        self.big[B] = tag
+        self.big_shapes[B] = ("clip", res[1])
+        self.big_vols[B] = res[2]
+
+    def _cells_of(self, B):
+        u = self.u
+        return [(B[0] * u + i, B[1] * u + j, B[2] * u + k) for i in range(u) for j in range(u) for k in range(u)]
+
+    def big_world_planes(self, B):
+        """World half-spaces (cell units) of a cut big block."""
+        u = self.u
+        return [(n, u * (d + n[0] * B[0] + n[1] * B[1] + n[2] * B[2])) for n, d in self.big_shapes[B][1]]
+
+    def _split(self, B):
+        """Break a big block back into 0.5 m cells (exactly the same shape), e.g. to seat a module inside it."""
+        if B not in self.big:
+            return
+        tag = self.big.pop(B)
+        self.split.add(B)
+        if B in self.big_shapes:
+            wp = self.big_world_planes(B)
+            self.big_shapes.pop(B)
+            for c in self._cells_of(B):
+                self._piece(c, classify_cell(wp, c), tag)
+        else:
+            for c in self._cells_of(B):
+                if c not in self.mod_cells:
+                    self.cells[c] = tag
+                    self.shapes.pop(c, None)
+
+    def prune(self):
+        """Drop hairline slivers: cut cells that touch the rest of the hull only along an edge or a corner (they
+        appear where two sloped pieces meet at a section change). They are a few millimetres thick."""
+        from ld_check import _small_face
+        if getattr(self, "_pruned", False):
+            return 0
+        removed = 0
+        for _ in range(3):
+            drop = []
+            for c in self.shapes:
+                linked = False
+                for d in ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)):
+                    nb = (c[0] + d[0], c[1] + d[1], c[2] + d[2])
+                    if _small_face(self, c, d) >= 0.02 and _small_face(self, nb, (-d[0], -d[1], -d[2])) >= 0.02:
+                        linked = True
+                        break
+                if not linked:
+                    drop.append(c)
+            for c in drop:
+                self.cells.pop(c, None)
+                self.shapes.pop(c, None)
+            removed += len(drop)
+            if not drop:
+                break
+        # the same for cut big blocks
+        from ld_check import _face_area
+        u = self.u
+        for _ in range(3):
+            drop = []
+            for B, sh in self.big_shapes.items():
+                linked = False
+                for d in ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)):
+                    if _face_area(sh, d) < 0.02:
+                        continue
+                    nb = (B[0] + d[0], B[1] + d[1], B[2] + d[2])
+                    if nb in self.big and _face_area(self.big_shapes.get(nb), (-d[0], -d[1], -d[2])) >= 0.02:
+                        linked = True
+                        break
+                    if nb in self.split:
+                        linked = True
+                        break
+                if not linked:
+                    drop.append(B)
+            for B in drop:
+                self.big.pop(B, None)
+                self.big_shapes.pop(B, None)
+            removed += len(drop)
+            if not drop:
+                break
+        self._pruned = True
+        return removed
+
+    def big_of(self, c):
+        u = self.u
+        return (c[0] // u, c[1] // u, c[2] // u)
+
+    def solid_kind(self, c):
+        """'full' when cell c is solid structure or module, 'part' when partly filled, None when empty."""
+        if c in self.mod_cells:
+            return "full"
+        if c in self.cells:
+            return "full" if c not in self.shapes else "part"
+        if self.big:
+            B = self.big_of(c)
+            if B in self.big:
+                if B not in self.big_shapes:
+                    return "full"
+                r = classify_cell(self.big_world_planes(B), c)
+                return {"full": "full", "empty": None}.get(r[0], "part")
+        return None
 
     def _piece(self, c, res, tag):
         if c in self.mod_cells or res[0] == "empty":
@@ -95,13 +319,39 @@ class Ship:
             return
         if c in self.cells and c not in self.shapes:
             return
-        if c in self.shapes and self.vols.get(c, 0) >= res[2]:
-            return
+        if c in self.shapes:
+            m = merge_clip(self.shapes[c][1], self.vols[c], res[1], res[2])
+            if m is not None:
+                if res[2] > self.vols[c]:
+                    self.cells[c] = tag
+                if m[0] == "full":
+                    self.shapes.pop(c, None)
+                else:
+                    self.shapes[c] = ("clip", m[1])
+                    self.vols[c] = m[2]
+                return
+            if self.vols.get(c, 0) >= res[2]:
+                return
         self.cells[c] = tag
         self.shapes[c] = ("clip", res[1])
         self.vols[c] = res[2]
 
-    def spire(self, cx, cy, w, z0, z1, k=1.0, tag="hull", down=False):
+    def tower(self, cx, cy, stations, tag="hull", big=False):
+        """Vertical octagonal tower: stations [(z, half-width, chamfer)], straight-sided between stations."""
+        dirs = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+        for (za, wa, ca), (zb, wb, cb) in zip(stations, stations[1:]):
+            if zb <= za:
+                continue
+            planes = [((0, 0, -1), -za), ((0, 0, 1), zb)]
+            for mx, my in dirs:
+                hA = wa if not (mx and my) else 2 * wa - ca
+                hB = wb if not (mx and my) else 2 * wb - cb
+                k = (hB - hA) / (zb - za)
+                planes.append(((mx, my, -k), hA - k * za + mx * cx + my * cy))
+            w = max(wa, wb)
+            self.convex(planes, ((cx - w, cy - w, za), (cx + w, cy + w, zb)), tag, big=big)
+
+    def spire(self, cx, cy, w, z0, z1, k=1.0, tag="hull", down=False, big=False):
         """Square tower with a pyramid cap (or an inverted one hanging down when down=True). k = cap steepness."""
         sides = [((1, 0, 0), cx + w), ((-1, 0, 0), -(cx - w)), ((0, 1, 0), cy + w), ((0, -1, 0), -(cy - w))]
         if not down:
@@ -110,15 +360,15 @@ class Ship:
         else:
             planes = sides + [((0, 0, 1), z1), ((k, 0, -1), -z0 + k * cx), ((-k, 0, -1), -z0 - k * cx),
                               ((0, k, -1), -z0 + k * cy), ((0, -k, -1), -z0 - k * cy)]
-        self.convex(planes, ((cx - w, cy - w, z0), (cx + w, cy + w, z1)), tag)
+        self.convex(planes, ((cx - w, cy - w, z0), (cx + w, cy + w, z1)), tag, big=big)
 
-    def ball(self, c, r, tag="hull", n=1):
+    def ball(self, c, r, tag="hull", n=1, big=False):
         """Faceted sphere: intersection of half-spaces along icosphere directions (geodesic look)."""
         verts, _ = ico((0, 0, 0), 1.0, n)
         planes = [((v[0], v[1], v[2]), r + v[0] * c[0] + v[1] * c[1] + v[2] * c[2]) for v in verts]
-        self.convex(planes, ((c[0] - r, c[1] - r, c[2] - r), (c[0] + r, c[1] + r, c[2] + r)), tag)
+        self.convex(planes, ((c[0] - r, c[1] - r, c[2] - r), (c[0] + r, c[1] + r, c[2] + r)), tag, big=big)
 
-    def ring(self, c, axis, R0, R1, half_t, n=24, tags=("hull",)):
+    def ring(self, c, axis, R0, R1, half_t, n=24, tags=("hull",), big=False):
         """Faceted ring of n straight segments around `axis` ('z' or 'y') through centre c."""
         da = 2 * math.pi / n
 
@@ -146,7 +396,7 @@ class Ship:
             pts = [tuple(c[k] + u(a)[k] * r for k in range(3)) for a in (a0, a1) for r in (R0, R1)]
             lo = [min(p[k] for p in pts) - (half_t if wv[k] else 0) for k in range(3)]
             hi = [max(p[k] for p in pts) + (half_t if wv[k] else 0) for k in range(3)]
-            self.convex(planes, (tuple(lo), tuple(hi)), tags[i % len(tags)])
+            self.convex(planes, (tuple(lo), tuple(hi)), tags[i % len(tags)], big=big)
 
     # modules -----------------------------------------------------------------------------------------------------
     def mod(self, kind, x, y, z, rot=(0, 0, 0), mirror=False, size=None, remap=None):
@@ -162,6 +412,12 @@ class Ship:
             self._place(kind, (-x - rsz[0], y, z), Rm, size, rsz, remap)
 
     def _place(self, kind, mn, Rm, size, rsz, remap=None):
+        if self.big:
+            u = self.u
+            for bx in range(mn[0] // u, (mn[0] + rsz[0] - 1) // u + 1):
+                for by in range(mn[1] // u, (mn[1] + rsz[1] - 1) // u + 1):
+                    for bz in range(mn[2] // u, (mn[2] + rsz[2] - 1) // u + 1):
+                        self._split((bx, by, bz))
         for dx in range(rsz[0]):
             for dy in range(rsz[1]):
                 for dz in range(rsz[2]):
@@ -203,16 +459,23 @@ class Ship:
         return removed
 
     def bounds(self):
-        xs = [c[0] for c in self.cells] + [c[0] for c in self.mod_cells]
-        ys = [c[1] for c in self.cells] + [c[1] for c in self.mod_cells]
-        zs = [c[2] for c in self.cells] + [c[2] for c in self.mod_cells]
+        pts = list(self.cells) + list(self.mod_cells)
+        u = self.u
+        for B in self.big:
+            pts.append((B[0] * u, B[1] * u, B[2] * u))
+            pts.append((B[0] * u + u - 1, B[1] * u + u - 1, B[2] * u + u - 1))
+        xs, ys, zs = zip(*pts)
         return (Vector((min(xs), min(ys), min(zs))) * CELL, Vector((max(xs) + 1, max(ys) + 1, max(zs) + 1)) * CELL)
+
+    def cell_count(self):
+        return len(self.cells) + len(self.mod_cells) + len(self.big) * self.u ** 3
 
 
 def merge_acc(src, dst, livery=None):
-    """Move every part of src into dst, applying a livery suffix to the painted tags."""
+    """Move every part of src into dst, applying a livery suffix to the painted tags ('hull#3' -> 'hull@oxide#3')."""
     for (g, tag), bucket in src.parts.items():
-        t = f"{tag}@{livery}" if livery and tag in LIVERY_TAGS else tag
+        base, _, k = tag.partition("#")
+        t = f"{base}@{livery}" + (f"#{k}" if k else "") if livery and base in LIVERY_TAGS else tag
         dst_b = dst.parts.setdefault((g, t), [[], [], []])
         if len(bucket) == 4 and len(dst_b) == 3:
             dst_b.append([0.0] * len(dst_b[0]))
@@ -224,10 +487,32 @@ def merge_acc(src, dst, livery=None):
             dst_b[3].extend(bucket[3] if len(bucket) == 4 else [0.0] * len(bucket[0]))
 
 
+class _SmallFilled:
+    """'Is this 0.5 m cell solid?' for the small-cell mesher: cells, modules, and the inside of big blocks."""
+
+    def __init__(self, ship):
+        self.s = ship
+        self.cache = {}
+
+    def __contains__(self, c):
+        s = self.s
+        if c in s.cells or c in s.mod_cells:
+            return True
+        if not s.big:
+            return False
+        B = s.big_of(c)
+        if B not in s.big:
+            return False
+        if B not in s.big_shapes:
+            return True
+        if c not in self.cache:
+            self.cache[c] = classify_cell(s.big_world_planes(B), c)[0] == "full"
+        return self.cache[c]
+
+
 def realize(ship, S, acc, group, greebles=True, plumes=True, nav=True):
     if hasattr(ship, "realize"):
         return ship.realize(S, acc, group, plumes=plumes)
-    solid = set(ship.cells) | ship.mod_cells
     craters = ship.craters
 
     def tag_of(c, d):
@@ -238,8 +523,25 @@ def realize(ship, S, acc, group, greebles=True, plumes=True, nav=True):
                     return "interior"
         return ship.cells[c]
 
+    ship.prune()
     sub = Acc()
-    out, exposed = mesh_cells(ship.cells, ship.shapes, tag_of=tag_of, solid=solid)
+    out, exposed = mesh_cells(ship.cells, ship.shapes, tag_of=tag_of, solid=_SmallFilled(ship))
+    surf = [(c, d, ship.cells[c], False) for c, d in exposed]
+    if ship.big:
+        u = ship.u
+        bout, bexp = mesh_cells(ship.big, ship.big_shapes, cell=CELL * u, solid=ship.big)
+        for tag, vf in bout.items():
+            sub.add(group, f"{tag}#{u}", vf)
+        # greebles stay at human scale: every exposed big face offers its u x u sub-cell faces
+        for B, d in bexp:
+            ax = [k for k in range(3) if d[k]][0]
+            rng = [range(B[k] * u, B[k] * u + u) for k in range(3)]
+            rng[ax] = [B[ax] * u + (u - 1 if d[ax] > 0 else 0)]
+            t = ship.big[B]
+            for x in rng[0]:
+                for y in rng[1]:
+                    for z in rng[2]:
+                        surf.append(((x, y, z), d, t, True))
     for tag, vf in out.items():
         if tag == "interior":
             fade = []
@@ -255,22 +557,25 @@ def realize(ship, S, acc, group, greebles=True, plumes=True, nav=True):
     for kind, mn, Rm, size, rsz, remap in ship.mods:
         M = ship.mod_matrix(mn, Rm, size, rsz)
         build_block(kind, S, sub, group, M, size, remap)
-        if plumes and kind in ("thruster_s", "thruster_l"):
+        if plumes and kind in PLUME_KINDS:
             W, H = size[0] * CELL, size[2] * CELL
             r = min(W, H) * 0.42
             p = M @ Vector((W / 2, -0.05, H / 2))
             d = (M.to_3x3() @ Vector((0, -1, 0))).normalized()
-            ship.plumes.append((p, d, r, 6.0 if kind == "thruster_l" else 3.0))
+            ship.plumes.append((p, d, r, PLUME_KINDS[kind] * (size[1] / KIT[kind][1])))
     for p, d, r, L in ship.plumes:
         plume(sub, group, p, d, r, L, S)
     for fn in ship.extra:
         fn(sub, group, S)
     if greebles:
-        add_greebles(ship, S, sub, group, exposed)
+        add_greebles(ship, S, sub, group, surf)
     if nav:
         add_nav(ship, S, sub, group)
     merge_acc(sub, acc, ship.livery)
     return exposed
+
+
+PLUME_KINDS = {"thruster_s": 3.0, "thruster_l": 6.0, "thruster_xl": 16.0}
 
 
 def plume(acc, group, p0, d, r, length, S):
@@ -293,14 +598,22 @@ def plume(acc, group, p0, d, r, length, S):
 # Procedural hull detail, placed in coherent zones (window rows, pipe runs, vent clusters) rather than a random scatter
 # ----------------------------------------------------------------------------------------------------------------------
 
-def add_greebles(ship, S, acc, group, exposed):
+def add_greebles(ship, S, acc, group, surf):
     dens = dict(S["greeble"])
     dens.update(getattr(ship, "greeble_override", {}) or {})
     seed = ship.seed
     I = Matrix.Identity(4)
-    for c, d in exposed:
-        if d[2] < 0 or ship.cells.get(c) in ("accent", "trim"):
+    for c, d, ctag, big in surf:
+        if d[2] < 0 or ctag in ("accent", "trim"):
             continue
+        if big:
+            # big hulls: windows only on deck rows every 3 m, and fewer small fittings, so the size reads as calm
+            x, y, z = c
+            if d[2] == 0 and z % 6 != 1:
+                if hash01(x, y, z, seed, 41) > 0.25:
+                    continue
+            elif d[2] > 0 and hash01(x, y, z, seed, 43) > 0.45:
+                continue
         x, y, z = c
         side = "top" if d[2] > 0 else ("side" if d[0] != 0 else "end")
         zone = (y // 6, d[0], d[1], d[2], (x // 6) if side == "top" else 0)
@@ -350,9 +663,15 @@ def add_greebles(ship, S, acc, group, exposed):
 
 
 def add_nav(ship, S, acc, group):
-    if not ship.cells:
+    cells = set(ship.cells)
+    if ship.big:
+        u = ship.u
+        for B in ship.big:
+            for c in ship._cells_of(B):
+                if c[0] in (B[0] * u, B[0] * u + u - 1) or c[2] == B[2] * u + u - 1:
+                    cells.add(c)
+    if not cells:
         return
-    cells = ship.cells
     xmin = min(c[0] for c in cells)
     xmax = max(c[0] for c in cells)
     for xe, tag, sgn in ((xmin, "nav_r", -1), (xmax, "nav_g", 1)):
@@ -378,14 +697,14 @@ def drydock_light():
     s.loft([(0, 5, 0, 7, 2, 1), (28, 5, 0, 7, 2, 1), (30, 4, 1, 6, 2, 1), (36, 2, 2, 5, 1, 0)])
     s.loft([(-5, 6, 0, 8, 2, 1), (1, 6, 0, 8, 2, 1), (3, 5, 0, 7, 2, 1)], "hull2")
     s.loft([(8, 3, 7, 9, 1), (22, 3, 7, 9, 1), (24, 2, 7, 8, 1)], "armor")
-    s.loft([(1, 2, 1, 5, 1, 1), (19, 2, 1, 5, 1, 1), (21, 1, 2, 4, 0, 0)], "hull2", cx=8, mirror=True)
-    s.box(5, 6, 4, 14, 2, 4, "trim", mirror=True)
+    s.loft([(1, 2, 1, 5, 1, 1), (19, 2, 1, 5, 1, 1), (21, 1, 2, 4, 0, 0)], "hull2", cx=7, mirror=True)
+    s.loft([(3, 1.5, 0, 6, 0, 0), (17, 1.5, 0, 6, 0, 0)], "trim", cx=5, mirror=True)
     s.paint(lambda x, y, z: z < 2 and y > 3, "hull2")
     s.paint(lambda x, y, z: 25 <= y < 26 and z > 5, "accent")
     s.mod("cockpit", -2, 24, 7)
-    s.mod("gatling", -1, 27, -2)
+    s.mod("gatling", -1, 23, -2, rot=(0, 180, 0))
     s.mod("harpoon", -1, 33, 4)
-    s.mod("autocannon", 7, 11, 5, mirror=True)
+    s.mod("autocannon", 6, 11, 5, mirror=True)
     s.mod("thruster_l", -2, -11, 2)
     s.mod("thruster_s", 7, -2, 2, mirror=True)
     s.mod("radiator", 3, -4, 8, mirror=True)
@@ -440,15 +759,15 @@ def nocturne_light():
     s.loft([(0, 4, 0, 7, 2, 1), (20, 4, 0, 8, 3, 1), (26, 4, 0, 7, 3, 2), (32, 2, 1, 5, 2, 1), (35, 1, 2, 4, 1, 0)])
     s.loft([(-6, 5, 0, 7, 2, 2), (2, 5, 0, 8, 3, 2)], "hull2")
     s.loft([(5, 3, 1, 3, 1, 0), (14, 3, 1, 3, 1, 0), (16, 2, 1, 3, 1, 0)], "armor", cx=7, mirror=True)
-    s.loft([(-4, 0.5, 8, 14, 0, 0), (2, 0.5, 8, 10, 0, 0)], "hull2", cx=3.5, mirror=True)
+    s.loft([(-4, 0.5, 6, 14, 0, 0), (2, 0.5, 6, 10, 0, 0)], "hull2", cx=3.5, mirror=True)
     s.paint(lambda x, y, z: z < 1.5, "armor")
     s.paint(lambda x, y, z: 18 <= y < 19, "accent")
     s.mod("cockpit", -2, 22, 7)
-    s.mod("gatling", 8, 9, -1, mirror=True)
-    s.mod("autocannon", -1, 28, -2)
+    s.mod("gatling", 8, 9, -1, rot=(0, 180, 0), mirror=True)
+    s.mod("autocannon", -1, 21, -2, rot=(0, 180, 0))
     s.mod("thruster_l", -2, -12, 1)
     s.mod("thruster_s", 8, 2, 1, mirror=True)
-    s.mod("sensor", -1, 12, 8)
+    s.mod("sensor", -1, 12, 7)
     s.mod("core_1", 0, 14, 2)
     return s
 
@@ -456,15 +775,15 @@ def nocturne_light():
 def nocturne_heavy():
     """CANTICLE: refinery tug. Top-heavy castle with gothic spires, sloped prow, five-nozzle engine block, keel gun."""
     s = Ship("CANTICLE", 22, "company")
-    s.loft([(0, 9, 0, 13, 3, 2), (56, 9, 0, 13, 3, 2), (70, 7, 1, 12, 3, 2), (86, 4, 3, 9, 2, 1), (92, 2, 4, 7, 1, 0)])
+    s.loft([(0, 9, 0, 13, 3, 2), (62, 9, 0, 13, 3, 2), (74, 7, 1, 12, 3, 2), (86, 4, 3, 9, 2, 1), (92, 2, 4, 7, 1, 0)])
     s.loft([(8, 7, 13, 20, 2), (44, 7, 13, 20, 2), (50, 5, 13, 18, 2), (54, 3, 13, 16, 1)], "hull2")
     s.loft([(-10, 11, -2, 16, 4, 3), (2, 11, -2, 16, 4, 3), (6, 9, 0, 13, 3, 2)], "armor")
     s.loft([(30, 3, -3, 1, 0, 1), (70, 3, -3, 1, 0, 1)], "armor")
-    s.box(-2, 1, 70, 82, 0, 2, "armor")
+    s.box(-2, 1, 70, 84, 0, 3, "armor")
     for y, top in ((12, 38), (22, 34), (32, 30)):
         s.spire(0, y, 2, 20, top, 1.5, "hull")
     for sx in (-1, 1):
-        s.spire(sx * 6, 4, 1, 16, 26, 2.0, "armor")
+        s.spire(sx * 6, -3, 1, 16, 26, 2.0, "armor")
     s.paint(lambda x, y, z: z < 2.5, "armor")
     s.paint(lambda x, y, z: 60 <= y < 61 and z > 9, "accent")
     s.mod("heavy_cannon", -2, 55, 13)
@@ -475,7 +794,8 @@ def nocturne_heavy():
     s.mod("sensor", -1, 40, 20)
     for x, z in ((-7, 5), (-2, 5), (3, 5), (-5, 0), (1, 0)):
         s.mod("thruster_l", x, -16, z)
-    s.mod("railgun", 9, 20, 9, mirror=True)
+    s.mod("railgun", 9, 20, 4, rot=(0, 90, 0))
+    s.mod("railgun", -11, 20, 4, rot=(0, -90, 0))
     s.mod("core_35", -2, 30, 3)
     s.mod("reactor", -2, 0, 4)
     return s
@@ -486,15 +806,15 @@ def opera_light():
     s = Ship("LARK", 31, "crown")
     s.loft([(-6, 2, 2, 5, 1, 1), (-2, 3, 1, 6, 2, 2), (18, 3, 1, 6, 2, 2), (24, 2, 2, 5, 1, 1), (28, 1, 3, 4, 0, 0)])
     # swept wing: leading edge y <= 17 - (x - 3), trailing edge y >= 1, thickness 2..4 with a chamfered tip
-    wing = [((-1, 0, 0), -3), ((1, 0, 0), 14), ((1, 1, 0), 20), ((0, -1, 0), -1), ((0, 0, -1), -2), ((0, 0, 1), 4),
+    wing = [((-1, 0, 0), -1), ((1, 0, 0), 14), ((1, 1, 0), 20), ((0, -1, 0), -1), ((0, 0, -1), -2), ((0, 0, 1), 4),
             ((1, 0, 1), 17)]
-    s.convex(wing, ((3, 1, 2), (14, 17, 4)), "hull2", mirror=True)
-    s.mod("cockpit", -2, 15, 6)
+    s.convex(wing, ((1, 1, 2), (14, 19, 4)), "hull2", mirror=True)
+    s.mod("cockpit", -2, 15, 5)
     s.mod("thruster_l", -2, -12, 1)
     s.mod("thruster_s", 11, -2, 2, mirror=True)
     s.mod("autocannon", 4, 8, 4, mirror=True)
     s.mod("beam", -1, 8, 6)
-    s.mod("radiator", 2, -5, 6, mirror=True)
+    s.mod("radiator", 1, -5, 4, mirror=True)
     s.mod("core_1", 0, 10, 3)
     return s
 
@@ -515,8 +835,8 @@ def opera_heavy():
     s.mod("heavy_cannon", -2, 1, 17)
     s.mod("missile", 2, -5, 17, mirror=True)
     s.mod("cockpit", -2, 87, 6)
-    s.mod("sensor", -1, 78, 20)
-    s.mod("shield", -1, 72, 19)
+    s.mod("sensor", -1, 81, 19)
+    s.mod("shield", -1, 77, 19)
     for x, z in ((-6, 1), (2, 1), (-6, 11), (2, 11), (-2, 6)):
         s.mod("thruster_l", x, -12, z)
     s.mod("core_3", -2, 78, 6)
@@ -528,3 +848,20 @@ SHIPS = {
     "nocturne": (nocturne_light, nocturne_heavy),
     "opera": (opera_light, opera_heavy),
 }
+
+def _designs():
+    from ld_capships import drydock_cruiser, drydock_dreadnought, nocturne_cruiser, nocturne_dreadnought
+    return {
+        "drydock": [("light", drydock_light), ("heavy", drydock_heavy), ("cruiser", drydock_cruiser), ("dreadnought", drydock_dreadnought)],
+        "nocturne": [("light", nocturne_light), ("heavy", nocturne_heavy), ("cruiser", nocturne_cruiser), ("dreadnought", nocturne_dreadnought)],
+        "opera": [("light", opera_light), ("heavy", opera_heavy)],
+    }
+
+
+class _Lazy(dict):
+    def __missing__(self, k):
+        self.update(_designs())
+        return dict.__getitem__(self, k)
+
+
+DESIGNS = _Lazy()

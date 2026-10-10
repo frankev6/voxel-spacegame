@@ -214,6 +214,52 @@ def stage_kit(S, scene, mats, out, only=None):
         hull_patch(S, scene, mats, out, things, cam)
 
 
+def stage_check(S, only=None):
+    """Build every design of this direction and print the build-rule report (no rendering)."""
+    import ld_check
+    from ld_ships import DESIGNS
+    dname = S["_key"]
+    designs = [(n, f) for n, f in DESIGNS[dname]] + [("station", STATIONS[dname])]
+    if only:
+        designs = [(n, f) for n, f in designs if n in only.split(",")]
+    import json
+    built = [f() for _, f in designs]
+    ok, lines = ld_check.report(built)
+    for l in lines:
+        print("CHECK " + l)
+    allk = {}
+    wedge = ld_check.canon((((0.0, 1.0, 1.0), 1.0),))
+    cut = 0
+    for sh in built:
+        for shapes in (sh.shapes, sh.big_shapes):
+            for c, shp in shapes.items():
+                k = ld_check.canon(shp[1])
+                allk[k] = allk.get(k, 0) + 1
+                cut += 1
+    print(f"CHECK SHAPES {dname}: {len(allk)} distinct cut shapes across {len(built)} designs ({cut} cut cells); "
+          f"45-degree wedge (the spec's Wedge) covers {allk.get(wedge, 0)} of them; top 20 shapes cover "
+          f"{sum(sorted(allk.values(), reverse=True)[:20]) * 100 // max(1, cut)}% of cut cells")
+    for sh in built:
+        r = ld_check.check(sh)
+        print("CHECKJSON " + json.dumps(dict(name=r["name"], cells=r["cells"], big=r["big"], u=r["u"], mods=r["mods"],
+                                             shapes=r["shape_types"], ok=not r["problems"])))
+    # every block's geometry must reach its own mount face
+    for kind, size in KIT.items():
+        acc = Acc()
+        build_block(kind, S, acc, "b", Matrix.Identity(4))
+        vs = [v for (g, t), b in acc.parts.items() for v in b[0]]
+        if not vs:
+            continue
+        zmin = min(v[2] for v in vs)
+        ymax = max(v[1] for v in vs)
+        if kind in ld_check.FRONT:
+            if ymax < size[1] * CELL - 0.03:
+                print(f"CHECK BLOCK {kind}: front face not reached (max y {ymax:.2f} of {size[1] * CELL:.2f})")
+        elif kind not in ld_check.ANY and zmin > 0.03:
+            print(f"CHECK BLOCK {kind}: floats above its base (min z {zmin:.2f})")
+    print(f"CHECK {'ALL OK' if ok else 'PROBLEMS FOUND'} ({dname})")
+
+
 def frame_objects(cam, objs, yaw, pitch, margin=1.16):
     """Orthographic framing on the real geometry (barrels and fins included), centred in the frame."""
     bpy.context.view_layer.update()
@@ -326,7 +372,7 @@ def debris(acc, group, removed, crater_c, S, seed=0, n_chunks=14, spread=(4, 14)
                 acc.add(group, "hull", (v, vf[1]), None, False)
 
 
-def builder_grid(S, size_m=60, cell=CELL):
+def builder_grid(S, size_m=60, cell=CELL, glow=2.0, floor=0.92):
     m = new_mat(f"{S['name']}_buildgrid")
     g = G(m.node_tree)
     tc = g.n("ShaderNodeTexCoord")
@@ -346,12 +392,12 @@ def builder_grid(S, size_m=60, cell=CELL):
     ec = S["emit"]["shield"][0]
     em = g.n("ShaderNodeEmission")
     g.set(em.inputs[0], lin(ec))
-    g.set(em.inputs[1], g.math("MULTIPLY", k, 2.0))
+    g.set(em.inputs[1], g.math("MULTIPLY", k, glow))
     tr = g.n("ShaderNodeBsdfTransparent")
     dark = g.n("ShaderNodeBsdfPrincipled", Roughness=0.7, Metallic=0.3)
     g.set(g.sock(dark.inputs, "Base Color"), lin(S["col"]["dark"]))
     mixf = g.n("ShaderNodeMixShader")
-    g.set(mixf.inputs[0], g.math("MULTIPLY", fade, 0.92))
+    g.set(mixf.inputs[0], g.math("MULTIPLY", fade, floor))
     g.set(mixf.inputs[1], tr.outputs[0])
     g.set(mixf.inputs[2], dark.outputs[0])
     add = g.n("ShaderNodeAddShader")
@@ -399,6 +445,94 @@ def spot_lights(scene, pts, centre, color=(1.0, 0.86, 0.62), energy=30000, tilt=
 def hide(objs):
     for ob in objs:
         ob.hide_render = True
+
+
+def plumes_on(things, name, on):
+    for o in things.objects(name):
+        if o.name.endswith(":plume"):
+            o.hide_render = not on
+
+
+def screen_xy(scene, cam, p):
+    """Normalised image position (x from left, y from top) of a world point."""
+    from bpy_extras.object_utils import world_to_camera_view
+    bpy.context.view_layer.update()
+    v = world_to_camera_view(scene, cam, Vector(p))
+    return round(v.x, 4), round(1.0 - v.y, 4)
+
+
+def write_labels(path, labels):
+    import json
+    with open(path, "w") as fh:
+        json.dump(labels, fh, indent=1)
+
+
+def lineup(scene, cam, things, entries, out, name, yaw=-58, pitch=20, gap=0.35, margin=1.08):
+    """Ships side by side, sterns aligned, smallest nearest the camera; orthographic, labels to a JSON sidecar."""
+    x = 0.0
+    labels = []
+    vis = set()
+    prev_w = 0.0
+    for key, label, cls in entries:
+        sz = Vector(things.items[key]["size"])
+        x += prev_w / 2 + sz.x / 2 + max(6.0, gap * max(prev_w, sz.x)) if prev_w else 0.0
+        things.place(key, (x, sz.y / 2, sz.z / 2), (0, 0, 0))
+        vis.add(key)
+        prev_w = sz.x
+    things.show(vis | {"lgrid"})
+    for key, _, _ in entries:
+        plumes_on(things, key, False)
+    objs = [o for k in vis for o in things.objects(k)]
+    frame_objects(cam, objs, yaw, pitch, margin)
+    for key, label, cls in entries:
+        sz = Vector(things.items[key]["size"])
+        loc = things.items[key].location
+        tip = Vector((loc.x, loc.y + sz.y / 2, loc.z + sz.z / 2))
+        x_, y_ = screen_xy(scene, cam, tip)
+        labels.append(dict(name=label, cls=cls, length=round(sz.y), x=x_, y=y_))
+    render(scene, os.path.join(out, f"{name}.jpg"))
+    write_labels(os.path.join(out, f"{name}.json"), labels)
+    for key, _, _ in entries:
+        plumes_on(things, key, True)
+
+
+def lance_beam(acc, group, p0, p1, r):
+    v, f = cyl(tuple(p0), tuple(p1), r, 16, caps=False)
+    acc.add_fade(group, "beam_x", (v, f), None, [1.0] * len(v))
+    v, f = cyl(tuple(p0), tuple(p1), r * 3.5, 16, caps=False)
+    acc.add_fade(group, "beam_x", (v, f), None, [0.45] * len(v))
+    acc.add(group, "emit_x", sphere(tuple(p1), r * 5, 16, 8), None, True)
+    acc.add(group, "emit_x", sphere(tuple(p0), r * 3, 16, 8), None, True)
+
+
+def singularity_shot(acc, group, c, r, seed=0):
+    """The projectile: a black core, photon ring, accretion disc, a lensing bubble and matter spiralling in."""
+    c = Vector(c)
+    rnd = random.Random(seed)
+    acc.add(group, "dark", sphere(tuple(c), r, 32, 16), None, True)
+    from ld_geom import torus
+    acc.add(group, "emit_x", torus(tuple(c), (0.1, 0.25, 1.0), r * 1.12, r * 0.06, 64, 6), None, True)
+    for k, (ra, rb, tag) in enumerate(((1.25, 1.9, "emit_c"), (1.9, 2.9, "ember"))):
+        pts, faces = [], []
+        seg = 64
+        from ld_geom import _frame
+        u_, v_, w_ = _frame((0.2, -0.1, 1.0))
+        for i in range(seg):
+            a = 2 * math.pi * i / seg
+            d = u_ * math.cos(a) + v_ * math.sin(a)
+            pts += [tuple(c + d * r * ra), tuple(c + d * r * rb)]
+        for i in range(seg):
+            a0, b0 = 2 * i, 2 * ((i + 1) % seg)
+            faces.append((a0, b0, b0 + 1, a0 + 1))
+        acc.add(group, tag, (pts, faces), None, True)
+    acc.add(group, "shieldfx", sphere(tuple(c), r * 3.4, 32, 16), None, True)
+    for i in range(40):
+        a = rnd.uniform(0, 6.283)
+        rr = r * rnd.uniform(3.2, 8.0)
+        p = c + Vector((math.cos(a) * rr, math.sin(a) * rr * 0.4, rnd.uniform(-1, 1) * r * 0.8))
+        q = c + (p - c) * 0.55 + Vector((-math.sin(a), math.cos(a), 0)) * r * 1.4
+        v, f = cyl(tuple(p), tuple(q), r * 0.05, 6, caps=False)
+        acc.add_fade(group, "tracer", (v, f), None, [0.0] * 6 + [1.0] * 6)
 
 
 def stage_scenes(S, scene, mats, out, only=None, draft=False):
@@ -465,6 +599,37 @@ def stage_scenes(S, scene, mats, out, only=None, draft=False):
     ssize = smx - smn
     smax = max(ssize.x, ssize.y, ssize.z)
 
+    # --- capital ships (DRYDOCK, NOCTURNE) and the new aliens ------------------------------------------------------
+    from ld_ships import DESIGNS
+    caps = dict(DESIGNS[dname])
+    has_caps = "dreadnought" in caps
+    names = {}
+    if has_caps:
+        for key, fn in (("cruiser", caps["cruiser"]), ("dread", caps["dreadnought"])):
+            sh = fn()
+            build_ship(sh, S, mats, things, key)
+            names[key] = sh.name
+            if key == "dread":
+                dmn, dmx = sh.bounds()
+                dread_guns = {k: Vector(v) * CELL - (dmn + dmx) / 2 for k, v in sh.weapons.items()}
+        names["light"], names["heavy"] = light_fn().name, heavy_fn().name
+        Csize = Vector(things.items["cruiser"]["size"])
+        Dsize = Vector(things.items["dread"]["size"])
+    if cw:
+        from ld_aliens import alien_lamprey, alien_crinoid, alien_gravid
+        build_ship(alien_lamprey(cw), S, mats, things, "lamprey")
+        build_ship(alien_crinoid(cw), S, mats, things, "crinoid")
+        build_ship(alien_gravid(cw), S, mats, things, "gravid")
+        Gsize = Vector(things.items["gravid"]["size"])
+        g_hit = alien_gravid(cw)
+        gmn, gmx = g_hit.bounds()
+        gc = (gmn + gmx) / 2 / CELL
+        hits = [(gc.x + 150, gc.y + 100, gc.z + 30, 36), (gc.x + 140, gc.y - 80, gc.z - 10, 28)]
+        for hx, hy, hz, hr in hits:
+            g_hit.carve((hx, hy, hz), hr)
+        build_ship(g_hit, S, mats, things, "gravid_hit")
+        gravid_hits = [(Vector((hx, hy, hz)) * CELL - (gmn + gmx) / 2, hr * CELL) for hx, hy, hz, hr in hits]
+
     # --- planet, moon, rocks, grid, shield -----------------------------------------------------------------------
     P = S["planet"]
     ld_world.planet(S, "planet", 3200.0, (0, 0, 0), P, sd)
@@ -488,6 +653,11 @@ def stage_scenes(S, scene, mats, out, only=None, draft=False):
     scene.collection.objects.link(groot)
     grid.parent = groot
     things.add("grid", groot)
+    lg = builder_grid(S, size_m=1400, cell=10.0, glow=0.5, floor=0.0)
+    lroot = bpy.data.objects.new("lgrid_root", None)
+    scene.collection.objects.link(lroot)
+    lg.parent = lroot
+    things.add("lgrid", lroot)
     acc = Acc()
     acc.add("fx", "shieldfx", sphere((0, 0, 0), 1.0, 48, 24, (Lsize.x * 0.75, Lsize.y * 0.65, Lsize.z * 1.4)), None, True)
     realize_acc(acc, mats, S, "shield", things)
@@ -553,6 +723,7 @@ def stage_scenes(S, scene, mats, out, only=None, draft=False):
             vis |= {"alien_l", "alien_l2"}
             things.place("alien_l", (34, -10, 1), (0, 0, 120))
             things.place("alien_l2", (30, 46, -1), (0, 0, 200))
+        things.show(vis)
         bpy.context.view_layer.update()
         Mw = things.items["enemy"].matrix_world
         targets = [Mw @ cw_ for cw_ in crater_world]
@@ -583,12 +754,30 @@ def stage_scenes(S, scene, mats, out, only=None, draft=False):
             # the tug towing the refinery from its stern yoke
             things.place("heavy", (0, -ssize.y * 0.5 - Hsize.y * 0.55, -1.0), (0, 0, 180))
             things.place("light", (smax * 0.22, -smax * 0.1, smax * 0.22), (0, 0, 200))
+        docked = []
+        if getattr(st, "berths", None):
+            # ships alongside the piers, and traffic coming and going
+            cen = (smn + smx) / 2
+            slot = {"heavy": ["heavy_still"], "cruiser": ["cruiser"], "light": ["light_still", "light2"]}
+            for kind, pos, yaw in st.berths:
+                key = slot[kind].pop(0)
+                things.place(key, tuple(Vector(pos) * CELL - cen), (0, 0, yaw))
+                vis.add(key)
+                docked.append(key)
+            things.place("light", (smax * 0.18, smax * 0.3, smax * 0.06), (0, 0, 150))
+            things.place("heavy", (-smax * 0.42, smax * 0.22, smax * 0.1), (4, 0, 120))
         things.place("planet", (-2000, 8200, -2600))
         things.place("moon", (2600, 9000, 1400))
+        if dname == "drydock":
+            things.place("planet", (-3600, -5200, -4300))
+            things.place("moon", (-5200, -1800, -2400))
         things.show(vis)
+        for key in docked:
+            plumes_on(things, key, False)
         work = spot_lights(scene, st.work_lights, (smn + smx) / 2,
                            color=(1.0, 0.72, 0.38) if dname == "nocturne" else (1.0, 0.86, 0.62)) if st.work_lights else []
-        yaw, pitch, dist, look = {"drydock": (42, 20, 1.55, (smax * 0.08, 0, -smax * 0.05)), "nocturne": (-128, 12, 1.5, (0, -smax * 0.12, 0)),
+        yaw, pitch, dist, look = {"drydock": (34, 30, 1.0, (-smax * 0.04, -smax * 0.06, -smax * 0.06)),
+                                  "nocturne": (-128, 22, 1.45, (0, -smax * 0.12, -smax * 0.04)),
                                   "opera": (-30, 24, 1.25, (0, 0, -smax * 0.05))}[dname]
         aim(cam, orbit((0, 0, 0), smax * dist, yaw, pitch), look, lens=35)
         render(scene, os.path.join(out, "station.jpg"))
@@ -639,3 +828,120 @@ def stage_scenes(S, scene, mats, out, only=None, draft=False):
             render(scene, os.path.join(out, f"{name}.jpg"), size=(1280, 720))
             things.show(set())
         scene.render.resolution_x, scene.render.resolution_y = (960, 540) if draft else (1920, 1080)
+
+    # 9. capital ships: close-ups, the scale line-up, the fleet, the superweapon
+    if has_caps and shot("ship_cruiser"):
+        things.show({"cruiser", "light", "planet", "moon"})
+        things.place("cruiser", (0, 0, 0), (0, 0, 0))
+        things.place("light", (Csize.x * 1.5, Csize.y * 0.4, Csize.z * 1.1), (4, -4, 10))
+        things.place("planet", (-2600, -7800, -3000))
+        things.place("moon", (900, -6000, 600))
+        aim(cam, orbit((0, 0, 0), Csize.length * 1.05, 40, 22), (0, -Csize.y * 0.04, -Csize.z * 0.2), lens=40)
+        render(scene, os.path.join(out, "ship_cruiser.jpg"))
+    if has_caps and shot("ship_dreadnought"):
+        things.show({"dread", "light", "light2", "heavy", "planet", "moon"})
+        things.place("dread", (0, 0, 0), (0, 0, 0))
+        things.place("heavy", (-Dsize.x * 1.6, Dsize.y * 0.2, Dsize.z * 0.6), (3, 0, -6))
+        things.place("light", (Dsize.x * 0.95, Dsize.y * 0.05, Dsize.z * 0.9), (6, -6, 4))
+        things.place("light2", (Dsize.x * 1.1, Dsize.y * 0.14, Dsize.z * 0.75), (6, -6, 6))
+        things.place("planet", (2400, -8200, -2600))
+        things.place("moon", (-1500, -7000, 900))
+        aim(cam, orbit((0, 0, 0), Dsize.length * 0.95, -38, 18), (0, -Dsize.y * 0.06, -Dsize.z * 0.25), lens=35)
+        render(scene, os.path.join(out, "ship_dreadnought.jpg"))
+    if has_caps and shot("lineup"):
+        lineup(scene, cam, things, [("light_still", names["light"], "Light"), ("heavy_still", names["heavy"], "Frigate"),
+                                    ("cruiser", names["cruiser"], "Cruiser"), ("dread", names["dread"], "Dreadnought")],
+               out, "lineup")
+        things.show(set())
+    if has_caps and shot("fleet"):
+        vis = {"dread", "cruiser", "heavy", "light", "light2", "planet", "moon", "station"}
+        things.place("dread", (-70, 430, 60), (-3, 0, 160))
+        things.place("cruiser", (105, 245, 16), (0, 2, 202))
+        things.place("heavy", (-46, 128, -5), (0, -3, 170))
+        things.place("light", (16, 52, -3), (3, -6, 196))
+        things.place("light2", (36, 72, 5), (3, -6, 200))
+        things.place("station", (-smax * 3.0, 3200, 300), (0, 0, 20))
+        things.place("planet", (3800, 9800, -3000))
+        things.place("moon", (-4200, 11000, 2600))
+        things.show(vis)
+        aim(cam, (0, 0, 0), (5, 300, 40), lens=26)
+        render(scene, os.path.join(out, "fleet.jpg"))
+    if has_caps and cw and shot("superweapon"):
+        # the dreadnought's spinal lance and singularity projector against the behemoth
+        vis = {"dread", "gravid_hit", "alien_l", "alien_l2", "cruiser", "planet", "moon"}
+        things.place("dread", (0, 0, 0), (0, 0, 0))
+        things.place("cruiser", (-170, 60, -40), (0, 0, 8))
+        gpos = Vector((180, 1050, 90))
+        things.place("gravid_hit", tuple(gpos), (0, 0, 212))
+        things.place("alien_l", (70, 420, 50), (10, 0, 190))
+        things.place("alien_l2", (130, 520, 70), (6, 0, 205))
+        things.place("planet", (5200, 9800, -2600))
+        things.place("moon", (-2600, 9000, 2400))
+        things.show(vis)
+        bpy.context.view_layer.update()
+        Mg = things.items["gravid_hit"].matrix_world
+        targets = [Mg @ c for c, r in gravid_hits]
+        Md = things.items["dread"].matrix_world
+        acc = Acc()
+        if "lance" in dread_guns:
+            muzzle = Md @ dread_guns["lance"]
+            lance_beam(acc, "fx", muzzle, targets[0], 1.2)
+        sg = Md @ dread_guns["singularity"]
+        singularity_shot(acc, "fx", sg + (targets[1] - sg) * 0.5, 7.0, seed=3)
+        if "battery" in dread_guns:
+            muzzle = Md @ dread_guns["battery"]
+            tracers(acc, "fx", muzzle, targets[0], 18, seed=6, length=14.0)
+            lance_beam(acc, "fx", muzzle, targets[0], 0.25)
+        else:
+            muzzle = sg
+        for i, t in enumerate(targets):
+            explosion(acc, "fx", t, 22.0 + 6 * i, seed=11 + i)
+        tracers(acc, "fx", Md @ Vector((20, 60, 30)), things.items["alien_l"].location, 24, seed=4, length=9.0)
+        realize_acc(acc, mats, S, "fxs", things)
+        things.show(vis | {"fxs"})
+        aim(cam, (-460, -560, 230), (90, 470, 40), lens=35)
+        pts = [point_light(scene, f"sw{i}", t, ld_world.hex_rgb(S["emit"]["ember"][0]), 4.0e7, 20.0) for i, t in enumerate(targets)]
+        pts.append(point_light(scene, "swm", muzzle, ld_world.hex_rgb(S["emit"].get("exotic", ("#B890FF", 1))[0]), 2.0e6, 4.0))
+        render(scene, os.path.join(out, "superweapon.jpg"))
+        hide(pts)
+        things.show(set())
+
+    # 10. the new aliens
+    if cw and shot("alien_lamprey"):
+        Lz = Vector(things.items["lamprey"]["size"])
+        things.show({"lamprey", "alien_l", "planet", "moon"})
+        things.place("lamprey", (0, 0, 0), (0, 0, 0))
+        things.place("alien_l", (-Lz.x * 2.6, -Lz.y * 0.3, Lz.z * 1.4), (8, 0, 20))
+        things.place("planet", (2600, -8200, -2400))
+        things.place("moon", (-1600, -7000, 800))
+        aim(cam, orbit((0, Lz.y * 0.1, 0), Lz.length * 1.05, 36, 16), (0, Lz.y * 0.08, -Lz.z * 0.1), lens=40)
+        render(scene, os.path.join(out, "alien_lamprey.jpg"))
+    if cw and shot("alien_crinoid"):
+        Cz = Vector(things.items["crinoid"]["size"])
+        things.show({"crinoid", "planet", "light"})
+        things.place("crinoid", (0, 0, 0), (0, 0, 15))
+        things.place("light", (Cz.x * 0.85, -Cz.y * 0.6, -Cz.z * 0.1), (0, 0, 40))
+        things.place("planet", (-2600, 6800, -5400))
+        aim(cam, orbit((0, 0, 0), Cz.length * 1.2, -20, 36), (0, 0, -Cz.z * 0.12), lens=40)
+        render(scene, os.path.join(out, "alien_crinoid.jpg"))
+    if cw and shot("alien_gravid"):
+        things.show({"gravid", "alien_l", "alien_l2", "alien_still", "planet", "moon"} | ({"cruiser"} if has_caps else set()))
+        things.place("gravid", (0, 0, 0), (0, 0, 0))
+        things.place("alien_l", (Gsize.x * 0.4, Gsize.y * 0.05, -Gsize.z * 0.35), (0, 0, 30))
+        things.place("alien_l2", (Gsize.x * 0.5, -Gsize.y * 0.12, -Gsize.z * 0.42), (0, 0, 40))
+        things.place("alien_still", (Gsize.x * 0.55, Gsize.y * 0.32, -Gsize.z * 0.1), (0, 0, 10))
+        if has_caps:
+            things.place("cruiser", (Gsize.x * 1.15, -Gsize.y * 0.15, Gsize.z * 0.25), (0, 0, 160))
+        things.place("planet", (-2600, -8200, -2400))
+        things.place("moon", (1900, -9000, 1200))
+        aim(cam, orbit((0, Gsize.y * 0.08, 0), Gsize.length * 1.15, 48, 12), (0, Gsize.y * 0.06, -Gsize.z * 0.1), lens=32)
+        render(scene, os.path.join(out, "alien_gravid.jpg"))
+    if cw and shot("alien_lineup"):
+        entries = [("alien_l", "HUSK", "Skimmer"), ("alien_still", "BROODMOTHER", "Frigate class"), ("lamprey", "LAMPREY", "Boarder"),
+                   ("crinoid", "CRINOID", "Cruiser class"), ("gravid", "GRAVID", "Behemoth carrier")]
+        if has_caps:
+            entries.insert(4, ("dread", names["dread"], "Our dreadnought, for scale"))
+        things.place("crinoid", (0, 0, 0), (0, 0, 0))
+        lineup(scene, cam, things, entries, out, "alien_lineup", yaw=-55, pitch=18)
+        things.show(set())
+

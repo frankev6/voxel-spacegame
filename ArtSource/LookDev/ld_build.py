@@ -5,10 +5,12 @@ import math
 import bmesh
 import bpy
 
+from ld_mats import material_for
+
 HARD = {"hull", "hull2", "armor", "trim", "dark", "metal", "accent", "foil", "interior", "solar", "glass", "paint_w", "paint_p",
         "paint_e", "c_cargo", "gold", "chrome", "ceramic", "hose", "heat"}
 PLANAR = {"hull", "hull2", "armor", "accent", "paint", "stripe"}
-NO_OUTLINE ={"plume", "beam", "tracer", "shieldfx", "window", "nav_r", "nav_g", "nav_w", "grid", "ember"}
+NO_OUTLINE = {"plume", "beam", "beam_x", "tracer", "shieldfx", "window", "nav_r", "nav_g", "nav_w", "grid", "ember"}
 
 
 def realize(acc, mats, S, parent_name, collection=None, voxel_groups=(), subdiv_levels=None):
@@ -30,7 +32,7 @@ def realize(acc, mats, S, parent_name, collection=None, voxel_groups=(), subdiv_
         if len(bucket) == 4:
             attr = me.attributes.new("fade", "FLOAT", "POINT")
             attr.data.foreach_set("value", bucket[3][:len(me.vertices)])
-        base = tag.split("@")[0]
+        base = tag.split("#")[0].split("@")[0]
         alien = base.startswith("a_")
         merge = base in HARD
         if merge:
@@ -55,7 +57,7 @@ def realize(acc, mats, S, parent_name, collection=None, voxel_groups=(), subdiv_
         ob = bpy.data.objects.new(me.name, me)
         col.objects.link(ob)
         ob.parent = empties[group]
-        mat = mats.get(tag) or mats["hull"]
+        mat = material_for(mats, S, tag)
         me.materials.append(mat)
         # modifiers ---------------------------------------------------------------------------------------------
         if S.get("bevel") and base in HARD and base not in ("glass",):
@@ -75,6 +77,6 @@ def realize(acc, mats, S, parent_name, collection=None, voxel_groups=(), subdiv_
             m.use_flip_normals = True
             m.use_rim = False
             m.material_offset = 1
-        if tag in ("plume", "beam", "tracer", "shieldfx"):
+        if tag in ("plume", "beam", "beam_x", "tracer", "shieldfx"):
             ob.visible_shadow = False
     return empties

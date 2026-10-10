@@ -1,0 +1,30 @@
+[
+ {
+  "name": "WRAITH",
+  "cls": "Light",
+  "length": 24,
+  "x": 0.8852,
+  "y": 0.7357
+ },
+ {
+  "name": "CANTICLE",
+  "cls": "Frigate",
+  "length": 54,
+  "x": 0.7657,
+  "y": 0.6681
+ },
+ {
+  "name": "REQUIEM",
+  "cls": "Cruiser",
+  "length": 123,
+  "x": 0.5255,
+  "y": 0.6415
+ },
+ {
+  "name": "SEPULCHRE",
+  "cls": "Dreadnought",
+  "length": 246,
+  "x": 0.0787,
+  "y": 0.3855
+ }
+]

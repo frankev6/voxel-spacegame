@@ -157,8 +157,9 @@ def _cellid(g, obj, nrm, size):
     return g.vmath("FLOOR", g.vmath("SCALE", inset, scale=1.0 / size))
 
 
-def panel_material(S, tag, base_hex, name=None, livery=None):
-    """Painted plating: per-panel tone mosaic, grime and streaks, seams, optional paint bands (OPERA)."""
+def panel_material(S, tag, base_hex, name=None, livery=None, scale=1.0):
+    """Painted plating: per-panel tone mosaic, grime and streaks, seams, optional paint bands (OPERA).
+    scale > 1: the plating of large hull blocks (seams and panel tones at the block size)."""
     m = new_mat(name or f"{S['name']}_{tag}")
     g = G(m.node_tree)
     tc = g.n("ShaderNodeTexCoord")
@@ -166,7 +167,7 @@ def panel_material(S, tag, base_hex, name=None, livery=None):
     nrm = g.out(tc, "Normal")
     base = lin(base_hex)
     color = base
-    panel = S.get("panel", 0) or 2
+    panel = (S.get("panel", 0) or 2) * scale
     # panel tones: whole plates (2x1 or 2x2 cells) take one tone, so the hull reads as plating, not noise
     pid = _cellid(g, g.vmath("MULTIPLY", obj, (1.0, 0.5, 1.0)), nrm, CELL * panel)
     wn = g.n("ShaderNodeTexWhiteNoise", p_noise_dimensions="3D")
@@ -180,7 +181,7 @@ def panel_material(S, tag, base_hex, name=None, livery=None):
         color = g.ramp(wn.outputs["Value"], stops, "CONSTANT")
     var = S.get("variation", 0.0)
     if var:
-        cid = _cellid(g, obj, nrm, CELL)
+        cid = _cellid(g, obj, nrm, CELL * scale)
         wn2 = g.n("ShaderNodeTexWhiteNoise", p_noise_dimensions="3D")
         g.set(wn2.inputs["Vector"], cid)
         k = g.maprange(wn2.outputs["Value"], 0, 1, 1 - var, 1 + var * 0.5)
@@ -259,12 +260,13 @@ def heat_material(S):
     return finish(g, bsdf.outputs[0], m)
 
 
-def alien_material(S, cw_key, cw):
-    """Alien carapace: plates with dark grooves, a glowing vein network, glossy coat and an iridescent sheen."""
-    m = new_mat(f"{S['name']}_a_shell@{cw_key}")
+def alien_material(S, cw_key, cw, scale=1.0):
+    """Alien carapace: plates with dark grooves, a glowing vein network, glossy coat and an iridescent sheen.
+    scale > 1 enlarges the pattern for big aliens."""
+    m = new_mat(f"{S['name']}_a_shell@{cw_key}" + (f"#{scale:g}" if scale != 1.0 else ""))
     g = G(m.node_tree)
     tc = g.n("ShaderNodeTexCoord")
-    obj = g.out(tc, "Object")
+    obj = g.vmath("SCALE", g.out(tc, "Object"), scale=1.0 / scale)
     # carapace plates
     vor = g.n("ShaderNodeTexVoronoi", Scale=0.32, p_feature="DISTANCE_TO_EDGE")
     wnz = g.n("ShaderNodeTexNoise", Scale=1.4, Detail=3.0)
@@ -292,14 +294,17 @@ def alien_material(S, cw_key, cw):
     g.set(bump.inputs["Height"], g.math("SUBTRACT", 1.0, groove))
     g.set(g.sock(bsdf.inputs, "Normal"), bump.outputs[0])
     # vein network: thin ridges of warped noise, only in the grooves and a sparse web across plates
+    # veins stay thin on big aliens: their pattern scales less than the plates
+    vobj = g.vmath("SCALE", g.out(tc, "Object"), scale=1.0 / max(1.0, scale ** 0.5)) if scale != 1.0 else obj
     vn = g.n("ShaderNodeTexNoise", Scale=0.55, Detail=2.0, Distortion=0.5)
-    g.set(vn.inputs["Vector"], obj)
+    g.set(vn.inputs["Vector"], vobj)
     ridge = g.math("ABSOLUTE", g.math("SUBTRACT", g.out(vn, "Fac"), 0.5))
-    vein = g.maprange(ridge, 0.003, 0.009, 1.0, 0.0)
+    w0, w1 = (0.003, 0.009) if scale == 1.0 else (0.0015, 0.0045)
+    vein = g.maprange(ridge, w0, w1, 1.0, 0.0)
     # veins come in patches (nerve clusters), and pool faintly in a few grooves
     patch = g.n("ShaderNodeTexNoise", Scale=0.18, Detail=1.0)
     g.set(patch.inputs["Vector"], obj)
-    pm = g.maprange(g.out(patch, "Fac"), 0.42, 0.6, 0.0, 1.0)
+    pm = g.maprange(g.out(patch, "Fac"), 0.42 if scale == 1.0 else 0.5, 0.6 if scale == 1.0 else 0.66, 0.0, 1.0)
     vein = g.math("MAXIMUM", g.math("MULTIPLY", vein, pm), g.math("MULTIPLY", groove, g.math("MULTIPLY", pm, 0.25)))
     pulse = g.n("ShaderNodeTexNoise", Scale=0.35, Detail=1.0)
     g.set(pulse.inputs["Vector"], obj)
@@ -460,12 +465,16 @@ def make_materials(S):
     mats["window"] = window_material(S)
     for key in ("thruster", "weapon", "core", "shield", "power"):
         mats["emit_" + key[0]] = flat_material(S, "emit_" + key, E[key][0], 0.3, 0.0, emit=E[key])
+    # exotic energy (singularity, graviton, particle lance): violet-white
+    ex = E.get("exotic", ("#B890FF", 16))
+    mats["emit_x"] = flat_material(S, "emit_exotic", ex[0], 0.3, 0.0, emit=ex)
     for key in ("nav_r", "nav_g", "nav_w"):
         mats[key] = flat_material(S, key, E[key][0], 0.3, 0.0, emit=E[key])
     mats["ember"] = flat_material(S, "ember", E["ember"][0], 0.5, 0.0, emit=E["ember"])
     mats["interior"] = interior_material(S)
     mats["plume"] = fade_emit_material(S, "plume", E["thruster"][0], E["thruster"][1] * 1.4, 1.4)
     mats["beam"] = fade_emit_material(S, "beam", E["weapon"][0], E["weapon"][1] * 4, 0.7, facing=False)
+    mats["beam_x"] = fade_emit_material(S, "beam_x", ex[0], ex[1] * 3, 0.7, facing=False)
     mats["tracer"] = fade_emit_material(S, "tracer", E["weapon"][0], E["weapon"][1] * 3, 1.0, facing=False)
     mats["shieldfx"] = shield_material(S)
     mats["solar"] = solar_material(S)
@@ -474,3 +483,36 @@ def make_materials(S):
     if S.get("outline"):
         mats["ink"] = ink_material(S)
     return mats
+
+
+def split_tag(tag):
+    """'hull@oxide#3' -> ('hull', 'oxide', 3.0). The '#k' suffix scales the material pattern (large blocks, big aliens)."""
+    k = 1.0
+    if "#" in tag:
+        tag, ks = tag.split("#", 1)
+        k = float(ks)
+    base, _, liv = tag.partition("@")
+    return base, liv or None, k
+
+
+def material_for(mats, S, tag):
+    """The material for a tag; scaled variants are built on first use and cached."""
+    if tag in mats:
+        return mats[tag]
+    base, liv, k = split_tag(tag)
+    plain = f"{base}@{liv}" if liv else base
+    m = None
+    if k != 1.0:
+        c = S["col"]
+        L = S.get("liveries", {}).get(liv) if liv else None
+        name = f"{S['name']}_{tag}"
+        if base in ("hull", "hull2", "armor", "trim", "paint_w", "paint_p", "paint_e", "c_cargo"):
+            col = (L or {}).get("hull2", c["hull2"]) if base == "hull2" else c[base]
+            m = panel_material(S, base, col, name, livery=L if base == "hull" else None, scale=k)
+        elif base == "a_shell":
+            from ld_styles import ALIEN_COLOURWAYS
+            m = alien_material(S, liv, ALIEN_COLOURWAYS[liv], scale=k)
+    if m is None:
+        m = mats.get(plain) or mats.get(base) or mats["hull"]
+    mats[tag] = m
+    return m
