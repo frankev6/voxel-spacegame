@@ -457,7 +457,7 @@ Runtime art budgets are in DESIGN-SYSTEM §10.10–§10.11 and enforced by SPEC-
 - **Acceptance criteria:**
   - [ ] Every mesh is within the §10.11 triangle budget for its footprint (from `stats.json`).
   - [ ] Pixels per cell in each render is within ±10 % of §4.
-  - [ ] In every 150 m render the function glyph of the thruster, turret and core is recognisable by a second reviewer who has not seen the block names (reviewer named in the ledger log).
+  - [ ] In every 50 m render the function glyph of the thruster, turret and core is recognisable, and in every 150 m render their function colour is identifiable, by a second reviewer who has not seen the block names (reviewer named in the ledger log). (Amended 2026-10-10 by owner decision, DESIGN-SYSTEM §12 row 1: 1-cell-wide blocks show about 5 px glyphs at 150 m.)
 - **Tests:** `check_art_docs.py blocks` (all files exist, image sizes, budgets from `stats.json`).
 
 ### ART-005 — Interactive HTML design board

@@ -96,7 +96,7 @@ These derive from the pillars in [00-vision](../00-vision.md) in the same priori
 
 **P2 — Destruction you can read (pillar 1).** Every damage stage is visible at 150 m as a change of value or hue (§10.14 damage stages). A removed cell leaves faces that look different from original hull (exposed internals). Debris inherits the colour of the cell it came from. A ship that loses its core is visibly dead within 1 second: its lights go out and its colours dull. Nothing pops out of existence: chunk bodies dissolve over 1.2 s, debris shrinks to zero.
 
-**P3 — Block function is legible by silhouette, glyph and colour (pillar 2).** In that order of robustness. Every functional block has a distinct mesh silhouette, a function glyph (§10.6) and a function colour. At 300 m the function colour/light must read; at 150 m the glyph; at 50 m the details. Colour alone never carries meaning (colour-blind safety, §10.2).
+**P3 — Block function is legible by silhouette, glyph and colour (pillar 2).** In that order of robustness. Every functional block has a distinct mesh silhouette, a function glyph (§10.6) and a function colour. At 300 m the function colour/light must read; at 150 m the glyph on blocks at least 2 cells wide, and silhouette plus function colour/light on 1-cell-wide blocks (R1); at 50 m every glyph and the details. Colour alone never carries meaning (colour-blind safety, §10.2): where a 1-cell block shows only its colour, its silhouette and the HUD target marker carry the type.
 
 **P4 — Massive scale is shown, not told (pillar 3).** Detail is tied to the 0.5 m cell, so a 300 m station shows 600 cells of grain across and reads as huge. Scale cues are mandatory on every structure over 100 m: navigation lights, hull numbers, window/light strips, docking markings. No tilt-shift, no depth of field, no toy-like specular highlights.
 
@@ -130,7 +130,7 @@ Size of one 0.5 m cell at the centre of the screen:
 
 Derived rules (all directions):
 
-- **R1 (4-pixel rule).** Anything the player must read in combat is at least 4 px at 150 m, which means **at least 2 cells (1 m)** on its smallest axis. Single-cell functional blocks therefore use their whole visible face for the glyph.
+- **R1 (4-pixel rule).** Anything the player must read in combat is at least 4 px at 150 m, which means **at least 2 cells (1 m)** on its smallest axis. Single-cell functional blocks therefore use their whole visible face for the glyph. Even so, a 1-cell face is about 5 px at 150 m, so on 1-cell-wide blocks the glyph is a **50 m feature**; at 150 m they read by silhouette and function colour/light (§12 row 1).
 - **R2 (detail budget).** Texture detail finer than 1/8 cell (6 cm) is visible only in the Blueprint Lab. It may take at most 15 % of texture authoring time.
 - **R3 (top faces).** At 55° pitch, faces pointing up (+Y world) cover about 70 % of the visible hull area. Because blocks rotate (24 orientations), function signifiers must be on **every** face of a block that can be exposed, and are judged from above.
 - **R4 (key light above the plane).** Stars sit in the flight plane, so a light pointing from the star would graze the top faces (N·L ≈ 0) and leave them dark. The key light is therefore always **pitched downward** by the direction's key pitch (35° DRYDOCK, 25° NOCTURNE, 45° PULP HORIZON); its azimuth follows the star (§10.16).
@@ -242,7 +242,7 @@ Working ships in a working universe. The ARK expedition's ships are industrial m
 
 - **Plates.** Brick-layer textures are authored as **1 m macro-panels (2 × 2 cells, `macroTile = 2`)**. A dark seam 3 texels wide (on the 256 px layer) runs only around the macro-panel. Each cell border carries a painted 45° bevel: 4 texels in the normal map plus a 1-texel highlight on the top-left edge at 15 % strength. Up close the 0.5 m grid is visible; at 150 m the mip chain removes it and the AO gives form.
 - **Greebles.** Only on the layers `hull_grate`, `hull_vent` and `hull_heavy` (bolts in each macro-panel corner). Target: at most one feature per macro-panel. Larger detail comes from prop blocks (antennas, vents, lights) placed by builders.
-- **Functional blocks** are prop meshes (SPEC-04 §4.10 gives every functional block a `propMesh`). Each has: a 1-cell function band in its function colour around the mount face; its function glyph (§10.6) stencilled on every exposed face; one emissive indicator ≥ 2 cells long or a full 1-cell face. Readability targets: 300 m → a 2–4 px coloured light; 150 m → the glyph; 50 m → the stencil code (`THR-S`, `WPN-PL`, `PWR-R`, `SHD`, `CORE`, `CRG`).
+- **Functional blocks** are prop meshes (SPEC-04 §4.10 gives every functional block a `propMesh`). Each has: a 1-cell function band in its function colour around the mount face; its function glyph (§10.6) stencilled on every exposed face; one emissive indicator ≥ 2 cells long or a full 1-cell face. Readability targets: 300 m → a 2–4 px coloured light; 150 m → the glyph on blocks ≥ 2 cells wide, the function colour on 1-cell-wide blocks (R1); 50 m → every glyph and the stencil code (`THR-S`, `WPN-PL`, `PWR-R`, `SHD`, `CORE`, `CRG`).
 - **Team colours.** Primary covers ≥ 60 % of hull plates, secondary frames and bands, accent ≤ 10 % (stripes, edges).
 - **Hazard stripes.** 45° stripes Safety Yellow `#F2B705` / Graphite `#3B3E42`, two stripes per cell, on the layer `hull_hazard`. Builders use it around thruster clearance zones, docking ports and weapon arcs.
 - **Damage** follows the table in §5.3: scorch → char → cracks with embers → exposed girders and copper conduits.
@@ -1248,7 +1248,7 @@ Filled at approval (`ART-013`) and for every later change. Each row: what was de
 
 | # | Date | Decision | By | Applied in |
 |---|---|---|---|---|
-| | | | | |
+| 1 | 2026-10-10 | At 150 m, 1-cell-wide functional blocks are identified by silhouette and function colour/light; their glyph is a 50 m feature (the ART-004 style test measured about 5 px per glyph at 150 m in all three directions). Owner's answer: "Colour at 150 m (Recommended)" | Owner | §3 P3, §4 R1, §5.5; SPEC-80 `ART-004` criterion 3 |
 
 ---
 

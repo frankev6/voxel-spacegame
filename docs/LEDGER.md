@@ -556,6 +556,10 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
 
+### 2026-10-10 — Owner answers: glyph rule at 150 m, ART-005 before reviews
+- **Glyph rule (after the ART-004 finding):** "Colour at 150 m (Recommended)". At 150 m, 1-cell-wide functional blocks are identified by silhouette and function colour or light; their glyph is a 50 m feature. Applied in DESIGN-SYSTEM §3 P3, §4 R1, §5.5 and §12 row 1, and in SPEC-80 `ART-004` criterion 3 (now: glyph recognisable at 50 m, function colour identifiable at 150 m).
+- **Next task:** "Build ART-005 board now (Recommended)". The owner lets ART-005 start while ART-003 and ART-004 are still in review; fixes from those reviews flow into the board afterwards.
+
 ### 2026-10-10 — ART-004 block-kit style test, in review (claude, claude-opus-5-5)
 - **What was built.** `ArtSource/StyleTest/build_style_test.py` runs in two modes. Under the system Python (with Pillow) it drives the build and composes the composite. Inside Blender 5.2.2 it builds and renders, per direction:
   - procedural 256 px `hull_plain` and `hull_heavy` layers for damage stages 0–3, saved under `ArtSource/StyleTest/<dir>/textures/` (normal maps 16-bit);
