@@ -4,7 +4,7 @@
 
 **What to look for:** big, honest fields of colour with a clean ink edge; each place remembered by its colour key; destruction that is graphic and joyful but still physical; mystery carried by composition and negative space, so the look never tips into toy-like.
 
-**Images:** links only for now. The NASA Ames space-colony paintings by Rick Guidice and Don Davis (1975–1976) are public-domain NASA works and are the planned image set; they are added once the owner approves downloading them.
+**Images:** four public-domain NASA Ames space-colony paintings by Don Davis and Rick Guidice (1970s) from Wikimedia Commons, approved by the owner on 2026-10-10. Every other reference is a link only.
 
 ## Ships and stations
 
@@ -22,12 +22,24 @@
 - **Touchstone:** Rick Guidice
 - **Link:** https://en.wikipedia.org/wiki/Stanford_torus
 
+![Don Davis's 1970s interior of a Stanford torus colony for NASA Ames](img/pulp-horizon/stanford-torus-interior.jpg)
+Source: https://commons.wikimedia.org/wiki/File:Stanford_Torus_interior.jpg · Licence: Public domain
+
+![Rick Guidice's 1970s cutaway of a Stanford torus colony for NASA Ames](img/pulp-horizon/stanford-torus-cutaway.jpg)
+Source: https://commons.wikimedia.org/wiki/File:Stanford_Torus_cutaway.jpg · Licence: Public domain
+
 ### Bernal sphere paintings for NASA Ames
 - **Creator:** Don Davis and Rick Guidice (for NASA Ames Research Center)
 - **Year:** 1976
 - **Take:** Simple primary shapes (sphere, ring, mirror) carrying huge stations, our station silhouette rule.
 - **Touchstone:** Rick Guidice
 - **Link:** https://en.wikipedia.org/wiki/Bernal_sphere
+
+![Rick Guidice's 1976 Bernal sphere for NASA Ames, looking into the sphere from outside](img/pulp-horizon/bernal-sphere-guidice.jpg)
+Source: https://commons.wikimedia.org/wiki/File:Artwork_by-_Rick_Guidice_Space_Colonization_-_Bernal_Sphere_(ARC-1976-AC76-1089).jpg · Licence: Public domain
+
+![Rick Guidice's 1970s exterior of a Bernal sphere colony for NASA Ames](img/pulp-horizon/bernal-sphere-exterior.jpg)
+Source: https://commons.wikimedia.org/wiki/File:Bernal_sphere_exterior.jpg · Licence: Public domain
 
 ## Space and lighting
 

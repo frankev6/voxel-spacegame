@@ -4,7 +4,7 @@
 
 **What to look for:** dark forms that you see because of their edges, reflections and a few thin lines of light; skies with structure (filaments) but no bright cores behind the action; light as the carrier of both identity and damage (light dying, white-hot cracks); restraint, so a 30-ship fight does not turn into bloom soup.
 
-**Images:** links only for now. NASA-only public-domain astronomy images (Hubble and Webb releases credited to NASA alone) are the planned image set; ESA-credited versions are CC BY 4.0 and stay links. They are added once the owner approves downloading them.
+**Images:** three public-domain images from Wikimedia Commons, approved by the owner on 2026-10-10: Hubble's *Pillars of Creation* (2014) and Webb's *Cosmic Cliffs* (2022), both taken from the STScI releases (hubblesite.org, webbtelescope.org), which Commons lists as public domain, and a USGS photograph of a Kīlauea fissure. The ESA releases of the same images are CC BY 4.0 and are not used; every other reference is a link only.
 
 ## Ships and stations
 
@@ -51,12 +51,18 @@
 - **Touchstone:** Hubble
 - **Link:** https://en.wikipedia.org/wiki/Pillars_of_Creation
 
+![Hubble's 2014 WFC3 image of the Pillars of Creation in the Eagle Nebula](img/nocturne/pillars-of-creation.jpg)
+Source: https://commons.wikimedia.org/wiki/File:Pillars_of_creation_2014_HST_WFC3-UVIS_full-res.jpg · Licence: Public domain
+
 ### Cosmic Cliffs in NGC 3324
 - **Creator:** NASA, ESA, CSA and STScI (James Webb Space Telescope)
 - **Year:** 2022
 - **Take:** A luminous ridge with fine filaments, which shows where the bright "filament cores" may sit (never behind the screen centre).
 - **Touchstone:** JWST
 - **Link:** https://en.wikipedia.org/wiki/NGC_3324
+
+![Webb's near-infrared image of the Cosmic Cliffs in NGC 3324, 2022](img/nocturne/cosmic-cliffs.jpg)
+Source: https://commons.wikimedia.org/wiki/File:NASA%E2%80%99s_Webb_Reveals_Cosmic_Cliffs,_Glittering_Landscape_of_Star_Birth.jpg · Licence: Public domain
 
 ## Destruction and VFX
 
@@ -72,6 +78,9 @@
 - **Year:** 1912–present
 - **Take:** A black crust split by bright cracks that fade as they cool, the look of damage stages 2–3 and the hulk.
 - **Link:** https://en.wikipedia.org/wiki/Lava
+
+![Kamoamoa fissure eruption on Kīlauea, 2011: dark cracked crust split by glowing lava](img/nocturne/kamoamoa-fissure.jpg)
+Source: https://commons.wikimedia.org/wiki/File:Kamoamoa_2011-03-05_fissure.jpg · Licence: Public domain
 
 ### Oblivion: drones and the Tet
 - **Creator:** Joseph Kosinski (director)

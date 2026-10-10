@@ -4,7 +4,7 @@
 
 **What to look for:** hard, single-source light on light-valued hulls against near-black space; systems you can name by their colour coding before you read a label; destruction that looks like real metal failing (scorch, char, glowing cut edges, girders behind the plating); an alien that is unsettling because it is too clean.
 
-**Images:** links only for now. Public-domain NASA photographs are the planned image set (the ISS truss, Apollo 15's service module, the McCandless spacewalk, *Earthrise*, a post-flight heat shield); they are added once the owner approves downloading them.
+**Images:** six public-domain images from Wikimedia Commons, approved by the owner on 2026-10-10: NASA's ISS render, Apollo 15's service module, the McCandless spacewalk, *Earthrise*, the Apollo 11 command module after re-entry, and an ISO 7010 warning-sign layout. Every other reference is a link only.
 
 ## Ships and stations
 
@@ -22,12 +22,18 @@
 - **Touchstone:** NASA and ESA hardware photography
 - **Link:** https://en.wikipedia.org/wiki/Integrated_Truss_Structure
 
+![NASA render of the ISS after STS-119: one long truss carrying every module and array](img/drydock/iss-truss.jpg)
+Source: https://commons.wikimedia.org/wiki/File:ISS_after_STS-119.jpg · Licence: Public domain
+
 ### Apollo service module in orbit (Apollo 15 photographs)
 - **Creator:** NASA
 - **Year:** 1971
 - **Take:** Big flat panels broken by a few dense functional areas (the open instrument bay, thruster quads), our ratio of plain hull to functional blocks.
 - **Touchstone:** NASA and ESA hardware photography
 - **Link:** https://en.wikipedia.org/wiki/Apollo_command_and_service_module
+
+![Apollo 15 command and service module over the Moon, photographed from the lunar module](img/drydock/apollo15-service-module.jpg)
+Source: https://commons.wikimedia.org/wiki/File:AS15-88-11972_(21472924859).jpg · Licence: Public domain
 
 ### The Expanse: Rocinante and Tycho Station
 - **Creator:** Seth Reed (production designer); Alcon Television
@@ -45,11 +51,17 @@
 - **Touchstone:** NASA and ESA hardware photography
 - **Link:** https://en.wikipedia.org/wiki/Bruce_McCandless_II
 
+![Bruce McCandless II flying the Manned Maneuvering Unit above Earth, 1984](img/drydock/mccandless-mmu.jpg)
+Source: https://commons.wikimedia.org/wiki/File:STS-41-B_MMU.jpg · Licence: Public domain
+
 ### Earthrise
 - **Creator:** William Anders, NASA (Apollo 8)
 - **Year:** 1968
 - **Take:** A hard planetary terminator and a thin atmosphere rim against black, which is our planet rule (§5.4).
 - **Link:** https://en.wikipedia.org/wiki/Earthrise
+
+![Earthrise over the lunar horizon, Apollo 8, 1968](img/drydock/earthrise.jpg)
+Source: https://commons.wikimedia.org/wiki/File:NASA-Apollo8-Dec24-Earthrise.jpg · Licence: Public domain
 
 ### Homeworld: Deserts of Kharak
 - **Creator:** Blackbird Interactive
@@ -79,6 +91,9 @@
 - **Take:** The gradient from clean paint to scorch to char on one surface, which is the damage ladder of stages 1–3.
 - **Link:** https://en.wikipedia.org/wiki/Atmospheric_entry
 
+![The Apollo 11 command module after its return from the Moon, its re-entry heat shield exposed as it is loaded into the Super Guppy, August 1969](img/drydock/apollo11-cm-heat-shield.jpg)
+Source: https://commons.wikimedia.org/wiki/File:Apollo_11_CM_loading_into_Super_Guppy_aircraft_(S69-41985).jpg · Licence: Public domain
+
 ### Gravity: the destruction of the station
 - **Creator:** Alfonso Cuarón (director); Framestore (visual effects)
 - **Year:** 2013
@@ -93,6 +108,9 @@
 - **Take:** A colour-plus-shape code that people read without training, the model for our function colours and glyphs.
 - **Touchstone:** ISO 3864
 - **Link:** https://en.wikipedia.org/wiki/ISO_3864
+
+![ISO 7010 warning-sign layout: black-edged yellow triangle above a yellow supplementary panel](img/drydock/iso7010-warning.jpg)
+Source: https://commons.wikimedia.org/wiki/File:ISO_7010_-_Warning_-_Vertical_Example.svg · Licence: Public domain
 
 ### Alien: Isolation interfaces
 - **Creator:** Creative Assembly
