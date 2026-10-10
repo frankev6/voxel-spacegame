@@ -675,7 +675,7 @@ Both maps are dictionaries built once.
 
    With a faction: `relation = factions.GetRelation(f)`, `refuse = factions.GetPlayerStance(f) == Hostile`, reason "They refuse to trade with you.".
 2. `session = economy.Merchants.OpenSession(m, relation, refuse, reason)`.
-3. Push the merchant screen (SPEC-61 `MerchantView` with the session), and call `onClosed` when it pops.
+3. `Services.Get<MerchantPresenter>().Show(session, onClosed)` (SPEC-61 §6): it pushes `MerchantView`, closes the session when the screen pops, then calls `onClosed`.
 
 **`TryOpenForBody(body, onClosed)`**: `m = directory.FindForBody(body)`; return false when null, otherwise `Open`.
 

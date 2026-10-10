@@ -5,8 +5,8 @@
 | **Status** | Draft |
 | **Area code** | HUD (task IDs are `HUD-001`, `HUD-002`, …) |
 | **Module(s)** | `Game.UI` (views, view models, UXML, screen USS), `Game.Presentation` (`HudSnapshotSystem`, `HudSyncSystem`, presenters for economy/narrative/galaxy screens, hotkey router), `Game.App` (presenters that need `SceneFlow`, `SaveService`, `SettingsService`, `GameSession`: folder `Assets/Game/App/Presenters/`, because only `Game.App` may reference those services) |
-| **Depends on specs** | SPEC-60 (framework), SPEC-62 (`MainCameraState`, `MapViewTransform`), SPEC-01 (scene flow, session, settings, root screens), SPEC-03 (actions), SPEC-05 (save slots), SPEC-10/13 (`VoxelGrid`, `Hulk`), SPEC-20 (`PlayerShip`), SPEC-21 (weapon state, target), SPEC-22 (`ShipStats`, `ShieldState`, `ShipPower`), SPEC-24 (abilities), SPEC-30/31 (galaxy, bodies, interaction), SPEC-32 (destination), SPEC-33 (relations), SPEC-41 (dialog presenter), SPEC-42 (quests, clues, rumors), SPEC-50 (inventory, wallet, merchant) |
-| **Depended on by** | SPEC-41 (writes `DialogViewModel`), SPEC-51 (mounts panels into `ShipEditorView`, reuses `StatRowViewModel`), SPEC-01 (`SetRoot` with `MainMenuView`/`FlightHudView`/`ShipEditorView`, uses `LoadingView`), SPEC-70 (harness element names) |
+| **Depends on specs** | SPEC-60 (framework), SPEC-62 (`MainCameraState`, `MapViewTransform`), SPEC-01 (scene flow, session, settings, root screens), SPEC-03 (actions), SPEC-05 (save slots), SPEC-10/13 (`VoxelGrid`, `Hulk`), SPEC-20 (`PlayerShip`), SPEC-21 (weapon state, target), SPEC-22 (`ShipStats`, `ShieldState`, `ShipPower`), SPEC-24 (abilities), SPEC-30/31 (galaxy, bodies, interaction, docking), SPEC-32 (gate info, destination, route, travel notices), SPEC-33 (relations, faction colours and name prefixes, hail), SPEC-41 (dialog presenter), SPEC-42 (`ShipLogQuery`, markers), SPEC-50 (inventory, wallet, merchant session and launcher, economy notices) |
+| **Depended on by** | SPEC-41 (writes `DialogViewModel`), SPEC-51 (mounts panels into `ShipEditorView`, reuses `StatRowViewModel`), SPEC-01 (`IRootScreenSet` for `SetRoot`; `ConfirmDialog` for defeat), SPEC-31 (dock screen), SPEC-50 (`MerchantPresenter.Show`), SPEC-70 (harness element names) |
 | **Milestone** | M3 |
 
 > Read [01-architecture.md](../01-architecture.md), [02-conventions.md](../02-conventions.md) and [03-glossary.md](../03-glossary.md) before this spec. This spec may not contradict them.
@@ -27,7 +27,7 @@ This spec defines every game screen: what it is for, its view model, its command
 2. **Three root screens:** `MainMenuView` (MainMenu scene), `FlightHudView` (World scene), `ShipEditorView` (BlueprintLab scene and in-world edit). `SceneFlow` (SPEC-01) installs them with `UINavigator.SetRoot`, so exactly one HUD root is visible at any time (R13).
 3. **HUD data path:** ECS → `HudSnapshotSystem` (Burst, once per frame) → `HudSnapshot` singleton + `HudRadarBlip` buffer → `HudSyncSystem` (managed, reads the singleton once) → view models (only changed, quantised values) → views (direct element updates for per-frame values). No other UI-side code reads ECS.
 4. **HUD zones are fixed** (§4.4); each zone is one `.hud-region` with one anchor class. Widgets never use absolute positioning inside a zone.
-5. **Presenter placement:** presenters that need only module models live in `Game.Presentation/Presenters/` (Inventory, Merchant, ShipLog, GalaxyMap, StarSystemMap, HUD objective, HUD notifications, hotkeys); presenters that need `SceneFlow`, `SaveService`, `SettingsService` or `GameSession` live in `Game.App/Presenters/` (MainMenu, SaveSlots, Settings, Pause, Fleet, Hulk, Loading). New folder `Presenters/` in both modules: reason, one presenter per screen and neither `Services/` nor `Views/` describes them.
+5. **Presenter placement:** presenters that need only module models live in `Game.Presentation/Presenters/` (Inventory, Merchant, ShipLog, GalaxyMap, StarSystemMap, HUD objective, HUD notifications, hotkeys); presenters that need `SceneFlow`, `SaveService`, `SettingsService`, `GameSession` or App launchers live in `Game.App/Presenters/` (MainMenu, SaveSlots, Settings, Pause, Fleet, Dock, Loading). New folder `Presenters/` in both modules: reason, one presenter per screen and neither `Services/` nor `Views/` describes them.
 6. **View models are created once at boot** by `Game.App` and live for the app lifetime; presenters rebind to new session models on `SessionReset` (never replace view model instances, so bindings never go stale: 04-B2).
 7. **Lists:** `ListView` with virtualization for variable-length lists (save slots, merchant stock and cargo, quests, clues, rumors, fleet, settings rebinds); fixed pools created at build for grids (inventory slots: 200; radar blips: 64; weapon groups: 5; ability slots: 4; dialog options: 9).
 8. **Destructive actions confirm** through `ConfirmDialog`: delete save, overwrite save, load while in game, quit to main menu, quit game.
@@ -53,10 +53,10 @@ This spec defines every game screen: what it is for, its view model, its command
 | `system-map` | `StarSystemMapView` | Screens | Menu | yes | yes | yes | no | `StarSystemMapViewModel` | `IStarSystemMapCommands` | `StarSystemMapPresenter` (Presentation) |
 | `fleet` | `FleetView` | Screens | Menu | yes | yes | yes | no | `FleetViewModel` | `IFleetCommands` | `FleetPresenter` (App) |
 | `ship-editor` | `ShipEditorView` | Hud | Editor | no | no | no | **yes** | `ShipEditorViewModel` (SPEC-51) | `IShipEditorCommands` (SPEC-51) | SPEC-51 host (App) |
-| `hulk` | `HulkView` | Modals | Menu | no | yes | no | no | `HulkViewModel` | `IHulkCommands` | `HulkPresenter` (App) |
-| `loading` | `LoadingView` | Modals | None | yes | yes | yes | no | `LoadingViewModel` | — | `LoadingPresenter` (App) |
+| `dock` | `DockView` | Screens | Menu | no | yes | yes | no | `DockViewModel` | `IDockCommands` | `DockPresenter` (App) |
+| `loading` | `LoadingView` | Modals | None | yes | yes | yes | **yes** (installed by `SceneFlow` during transitions, SPEC-01 §5.4.1) | `LoadingViewModel` | — | `LoadingPresenter` (App) |
 
-Back behaviour: `FlightHudView.OnBack()` pushes `PauseView` and returns true. `MainMenuView.OnBack()` returns true (nothing happens). `ShipEditorView.OnBack()` returns `commands.OnBackPressed()`. `HulkView.OnBack()` and `LoadingView.OnBack()` return true (cannot be dismissed). `SettingsView.OnBack()` cancels a listening rebind first (returns true), otherwise false (pops). All others return false (pop).
+Back behaviour: `FlightHudView.OnBack()` pushes `PauseView` and returns true. `MainMenuView.OnBack()` returns true (nothing happens). `ShipEditorView.OnBack()` returns `commands.OnBackPressed()`. `LoadingView.OnBack()` returns true (cannot be dismissed). `DockView.OnBack()` calls `commands.Undock()` and returns true. The defeat dialog is SPEC-01's `ConfirmDialog` (§5.9 there); this spec has no defeat screen. `SettingsView.OnBack()` cancels a listening rebind first (returns true), otherwise false (pops). All others return false (pop).
 
 ### 4.2 View model rule and the view models
 
@@ -81,21 +81,24 @@ RebindRowViewModel      { string ActionPath; string DisplayName; string BindingT
 PauseViewModel          { bool CanSave; string SaveBlockedReason; }
 
 HudViewModel            { bool HasShip; bool IsHulk;
-                          int HullValue; int HullMax; float HullFraction; int ShieldValue; int ShieldMax; float ShieldFraction; int ShieldStatus /* 0 none,1 online,2 recharging,3 offline */;
+                          int HullPercent; float HullFraction /* SPEC-22 MassFraction */; int ShieldValue; int ShieldMax; float ShieldFraction; int ShieldStatus /* 0 none,1 online,2 recharging,3 offline */;
                           int EnergyValue; int EnergyMax; float EnergyFraction; int SpeedMps; bool Boosting;
                           bool HasTarget; string TargetName; int TargetRelation /* 0 neutral,1 ally,2 enemy */; float TargetHullFraction; float TargetShieldFraction; int TargetDistanceM;
                           bool HasInteraction; string InteractionVerbText; string InteractionTargetName; string InteractionKeyText; bool InteractionInRange;
+                          string InteractionDetailText /* gate: fuel or locked message; "" otherwise */; bool InteractionBlocked /* locked or unaffordable gate */;
                           string StarSystemName; string ZoneName; bool HasObjective; string ObjectiveTitle; string ObjectiveText;
-                          List<HudWeaponGroupViewModel> WeaponGroups (5, filled once with 5 items); List<HudAbilityViewModel> Abilities (4, filled once with 4 items);
+                          bool HasRoute; string RouteText /* "Route: 3 jumps, 4 fuel" or RouteBlockedReason */; bool RouteBlocked;
+                          List<HudWeaponGroupViewModel> WeaponGroups (3, filled once with 3 items); List<HudAbilityViewModel> Abilities (4, filled once with 4 items);
                           int RadarVersion; float RadarRangeM = 2000; float RadarYawDeg; }
 HudWeaponGroupViewModel { int GroupNumber; int WeaponCount; float ReadyFraction; bool Firing; string KeyText; }
 HudAbilityViewModel     { bool HasAbility; string Name; UnityEngine.Sprite Icon; float CooldownFraction; int Charges; bool Ready; bool Active; string KeyText; }
 
-InventoryViewModel      { int Capacity; int UsedSlots; List<InventorySlotViewModel> Slots (200, filled once with 200 items); int SelectedIndex = -1;
-                          string SelectedName; string SelectedDescription; int SelectedCount; int SelectedValue; int Wallet; }
-InventorySlotViewModel  { int Index; string ItemId; UnityEngine.Sprite Icon; int Count; bool IsEmpty = true; bool IsSelected; bool InCapacity; }
+InventoryViewModel      { int Capacity; int UsedSlots; int OverflowCount; List<InventorySlotViewModel> Slots (200, filled once with 200 items); int SelectedIndex = -1;
+                          string SelectedName; string SelectedDescription; int SelectedCount; int SelectedValue; long Wallet; string WalletText; }
+InventorySlotViewModel  { int Index; string ItemId; UnityEngine.Sprite Icon; int Count; bool IsEmpty = true; bool IsSelected;
+                          bool InCapacity /* = Index < InventoryModel.Capacity; false slots are overflow (SPEC-50) and get .slot--overflow */; }
 
-MerchantViewModel       { string MerchantName; int Wallet; List<string> Categories (16); int SelectedCategory;
+MerchantViewModel       { string MerchantName; long Wallet; string WalletText; bool Refused; string RefusalReason; List<string> Categories (16); int SelectedCategory;
                           List<MerchantRowViewModel> Stock (128); List<MerchantRowViewModel> Cargo (200); int SelectedStockIndex = -1; int SelectedCargoIndex = -1;
                           int Quantity = 1; int MaxQuantity; int BuyTotal; int SellTotal; bool CanBuy; bool CanSell; string BuyBlockedReason; string SellBlockedReason;
                           string DetailName; string DetailDescription; }
@@ -105,9 +108,12 @@ DialogViewModel         { string SpeakerName; UnityEngine.Sprite Portrait; bool 
                           List<DialogOptionViewModel> Options (9); bool CanContinue; bool IsWaitingForChoice; }
 DialogOptionViewModel   { int Number /* 1..9 */; string Text; bool Enabled; string DisabledReason; }
 
-ShipLogViewModel        { int SelectedTab /* 0 quests,1 clues,2 rumors */; List<QuestRowViewModel> Quests (64); int SelectedQuest = -1;
-                          string QuestTitle; string QuestStageText; string QuestDescription; List<ObjectiveRowViewModel> Objectives (16);
-                          List<ClueRowViewModel> Clues (256); int SelectedClue = -1; string ClueBody; List<RumorRowViewModel> Rumors (64); }
+ShipLogViewModel        { int SelectedTab /* 0 quests,1 clues,2 rumors */; bool ShowCompleted; List<QuestRowViewModel> Quests (64); int SelectedQuest = -1;
+                          string QuestTitle; string QuestStageText; string QuestDescription; List<ObjectiveRowViewModel> Objectives (16); List<string> QuestLog (32);
+                          List<ClueRowViewModel> Clues (256); int SelectedClue = -1; string ClueBody; List<MysteryRowViewModel> Mysteries (16);
+                          List<JournalRowViewModel> Journal (64); List<RumorRowViewModel> Rumors (64); }
+MysteryRowViewModel     { string Title; int Known; int Required; bool Solved; string SolvedText; }
+JournalRowViewModel     { string Text; int Value; }
 QuestRowViewModel       { string QuestId; string Title; string StageText; bool IsTracked; bool IsCompleted; bool IsSelected; }
 ObjectiveRowViewModel   { string Text; bool IsDone; }
 ClueRowViewModel        { string ClueId; string Title; string MysteryTitle; bool IsNew; bool IsSelected; }
@@ -121,7 +127,7 @@ FleetViewModel          { List<FleetShipRowViewModel> Ships (32); int SelectedIn
                           bool CanEdit; string EditBlockedReason; bool CanSetActive; }
 FleetShipRowViewModel   { ulong PersistentId; string Name; float HullFraction; bool IsActive; int BlockCount; bool IsSelected; }
 
-HulkViewModel           { string Title; string Body; bool HasSave; }
+DockViewModel           { string StationName; bool CanTrade; string TradeBlockedReason; bool CanEditShip; string EditBlockedReason; }
 LoadingViewModel        { string StatusText; float Progress; bool ShowProgress; }
 ```
 
@@ -136,7 +142,8 @@ public sealed class MapData
     public readonly List<MapMarker> Markers = new List<MapMarker>(64);  // player, destination, rumors
     public Unity.Mathematics.double2 BoundsMin, BoundsMax;              // map units
 }
-public struct MapPoint  { public Unity.Mathematics.double2 Pos; public string Name; public float RadiusPx; public MapPointFlags Flags; public byte ColorIndex; }
+public struct MapPoint  { public Unity.Mathematics.double2 Pos; public string Name; public float RadiusPx; public MapPointFlags Flags; public byte ColorIndex;
+                          public string ColorToken; /* e.g. SPEC-33 FactionDefinition.mapColorToken; null/"" = use ColorIndex */ }
 [System.Flags] public enum MapPointFlags : byte { None = 0, Known = 1, Visited = 2, Current = 4, Destination = 8, Selected = 16, Interactable = 32 }
 public struct MapLine   { public int A, B; public bool Gated; public bool Known; }   // indices into Points
 public struct MapRing   { public Unity.Mathematics.double2 Center; public double Radius; }
@@ -144,7 +151,7 @@ public struct MapMarker { public Unity.Mathematics.double2 Pos; public MapMarker
 public enum MapMarkerKind : byte { Player = 0, Destination = 1, Rumor = 2, Waypoint = 3 }
 ```
 
-`ColorIndex` maps to custom properties `--maps-color-0` … `--maps-color-7` declared on the class `.maps-canvas` in `Theme/screens/maps.uss` (values are `var(--color-…)` tokens only); the canvas reads them from its `customStyle` on `CustomStyleResolvedEvent`. Screen-scoped classes of this spec: `.hud-narrow`, `.hud-blip`, `.hud-blip--ship`, `.hud-blip--station`, `.hud-blip--body`, `.hud-blip--poi`, `.hud-blip--beyond`, `.maps-canvas`, `.maps-label`, `.dialog-option`, `.inventory-grid-row`, `.merchant-row`, `.fleet-row`, `.ship-log-row` (SPEC-60 decision 12).
+`ColorIndex` maps to custom properties `--maps-color-0` … `--maps-color-7` declared on the class `.maps-canvas` in `Theme/screens/maps.uss` (values are `var(--color-…)` tokens only); the canvas reads them from its `customStyle` on `CustomStyleResolvedEvent`. A non-empty `ColorToken` (faction owner colours, SPEC-33 `mapColorToken`, SPEC-80 tokens `--color-faction-*`) wins over `ColorIndex`; the canvas resolves each distinct token once per `CustomStyleResolvedEvent` into a `Dictionary<string, Color>` (≤ 64 entries; an unknown token logs `WarnOnce` and uses `--maps-color-0`). Screen-scoped classes of this spec: `.hud-narrow`, `.hud-blip`, `.hud-blip--ship`, `.hud-blip--station`, `.hud-blip--body`, `.hud-blip--poi`, `.hud-blip--beyond`, `.maps-canvas`, `.maps-label`, `.dialog-option`, `.inventory-grid-row`, `.merchant-row`, `.fleet-row`, `.ship-log-row` (SPEC-60 decision 12).
 
 ### 4.3 Command interfaces (`Assets/Game/UI/Views/Commands/`, namespace `Game.UI.Views`)
 
@@ -161,11 +168,11 @@ public interface IPauseCommands          { void Resume(); void Save(); void Load
 public interface IInventoryCommands      { void Select(int slot); void Move(int fromSlot, int toSlot); void Sort(); void StackAll(); }
 public interface IMerchantCommands       { void SelectCategory(int index); void SelectStock(int index); void SelectCargo(int index); void SetQuantity(int quantity); void Buy(); void Sell(); }
 public interface IDialogCommands         { void Choose(int number); void Continue(); }
-public interface IShipLogCommands        { void SelectTab(int tab); void SelectQuest(int index); void ToggleTrack(int index); void SelectClue(int index); void ShowRumorOnMap(int index); }
-public interface IGalaxyMapCommands      { void Select(int pointIndex); void SetDestination(); void FocusCurrent(); }
-public interface IStarSystemMapCommands  { void Select(int pointIndex); void SetWaypoint(); void FocusPlayer(); }
+public interface IShipLogCommands        { void SelectTab(int tab); void SetShowCompleted(bool on); void SelectQuest(int index); void ToggleTrack(int index); void SelectClue(int index); void ShowRumorOnMap(int index); }
+public interface IGalaxyMapCommands      { void Select(int pointIndex); void SetDestination(); void ClearDestination(); void FocusCurrent(); }
+public interface IStarSystemMapCommands  { void Select(int pointIndex); void SetWaypoint(); void FocusPlayer(); }   // SetWaypoint = "Cruise here" (M4)
 public interface IFleetCommands          { void Select(int index); void Edit(); void SetActive(); }
-public interface IHulkCommands           { void LoadLastSave(); void MainMenu(); }
+public interface IDockCommands           { void Trade(); void EditShip(); void Undock(); }
 ```
 
 Close buttons (`<key>-close`) call `UIScreen.Close()` inside the view; they are not commands.
@@ -175,12 +182,12 @@ Close buttons (`<key>-close`) call `UIScreen.Close()` inside the view; they are 
 | Zone | Region name | Anchor class | Contents (element names) |
 |---|---|---|---|
 | Z-TL | `hud-region-location` | `.anchor-top-left` | `hud-star-system` (label), `hud-zone` (label) |
-| Z-TC | `hud-region-objective` | `.anchor-top-center` | `hud-objective-title`, `hud-objective-text` (max width 560 px, wraps, max 3 lines then ellipsis) |
+| Z-TC | `hud-region-objective` | `.anchor-top-center` | `hud-objective-title`, `hud-objective-text` (max width 560 px, wraps, max 3 lines then ellipsis), `hud-route` (one line, `.text-muted`; `.is-warning` when `RouteBlocked`) |
 | Z-TR | `hud-region-radar` | `.anchor-top-right` | `hud-radar` (240 × 240 px square), `hud-radar-range` (label) |
 | Z-R | `hud-region-target` | `.anchor-right-center` | `hud-target-name`, `hud-target-relation` (marker), `hud-target-hull` (Meter), `hud-target-shield` (Meter), `hud-target-distance` (width 280 px) |
-| Z-C | `hud-region-prompt` | `.anchor-center` (offset 18 % of height below centre) | `hud-interaction-key` (KeyHint), `hud-interaction-verb`, `hud-interaction-target` |
+| Z-C | `hud-region-prompt` | `.anchor-center` (offset 18 % of height below centre) | `hud-interaction-key` (KeyHint), `hud-interaction-verb`, `hud-interaction-target`, `hud-interaction-detail` (second line; `.is-warning` when `InteractionBlocked`) |
 | Z-BL | `hud-region-status` | `.anchor-bottom-left` | `hud-hull-meter`, `hud-shield-meter`, `hud-energy-meter` (Meters, width 320 px), `hud-speed`, `hud-shield-status` |
-| Z-BC | `hud-region-weapons` | `.anchor-bottom-center` | `hud-weapon-group-1` … `hud-weapon-group-5` (Slots), `hud-ability-1` … `hud-ability-4` (Slots) |
+| Z-BC | `hud-region-weapons` | `.anchor-bottom-center` | `hud-weapon-group-1` … `hud-weapon-group-3` (Slots; key text from `Flight/FirePrimary`, `FireSecondary`, `FireTertiary`), `hud-ability-1` … `hud-ability-4` (Slots; keys 1–4) |
 | Z-BR | — | — | reserved (empty) |
 
 Toasts stay in `layer-toasts` in the column defined by SPEC-60 (`toast-column`, right edge, below the radar). Every zone has class `.hud-plate`. At logical 1663×1247 (4:3) the objective max width shrinks to 480 px via the `.hud-narrow` class that `FlightHudView` adds when the panel width is below 1700 px (set on `GeometryChangedEvent`, no per-frame work).
@@ -194,9 +201,9 @@ Wireframe (1920 × 1080 logical):
 │                                                                     └──────┘ │
 │                                                         toasts column → ▭▭  │
 │                                                                   Z-R Target │
-│                               [E] Dock  Ark Station                 ▬▬ hull  │
+│                               [F] Dock  Ark Station                 ▬▬ hull  │
 │                                                                     ▬▬ shld  │
-│ Z-BL HULL  ▬▬▬▬▬▬▬ 965/965        Z-BC [1][2][3][4][5]  (Q)(E)(R)(F)         │
+│ Z-BL HULL  ▬▬▬▬▬▬▬ 96%            Z-BC [LMB][RMB][SPC]  (1)(2)(3)(4)         │
 │      SHLD  ▬▬▬▬▬ 200/200                                                    │
 │      ENRG  ▬▬▬▬ 80/120   72 m/s                                             │
 └──────────────────────────────────────────────────────────────────────────────┘
@@ -209,31 +216,35 @@ Wireframe (1920 × 1080 logical):
 public struct HudSnapshot : Unity.Entities.IComponentData
 {
     public HudFlags Flags;
-    public int HullCells, HullCellsMax;                 // §10 Q1
-    public float ShieldHp, ShieldMax; public byte ShieldStatus;
-    public float Energy, EnergyMax;
+    public float Hull01;                                // ShipStats.MassFraction (SPEC-22 hull proxy, §10 Q1)
+    public float ShieldHp, ShieldMax; public byte ShieldStatus;   // ShieldState.Hp/MaxHp; status: MaxHp == 0 → 0 none; Active → 1 online;
+                                                        // Flags & Collapsed → 2 recharging; else 3 offline
+    public float Energy, EnergyMax;                     // ShipPower.Stored / Capacity
     public float SpeedMps;
-    public Unity.Collections.FixedList64Bytes<HudWeaponGroupState> WeaponGroups;  // up to 5, index = group - 1
+    public Unity.Collections.FixedList64Bytes<HudWeaponGroupState> WeaponGroups;  // exactly 3, index = fire-group bit (0 primary, 1 secondary, 2 tertiary)
     public Unity.Collections.FixedList128Bytes<HudAbilityState> Abilities;        // up to 4
-    public Game.Core.ContentHash TargetNameHash;        // display-name key of the target's blueprint (§10 Q4)
+    public Game.Core.ContentHash TargetNameHash;        // the target root's GridSource.Blueprint (SPEC-10); 0 for bodies/structures
+    public byte TargetFaction;                          // Allegiance.Faction of the target (255 = none); the name gets SPEC-33 shipNamePrefix
     public byte TargetRelation; public float TargetHull01, TargetShield01, TargetDistanceM;
-    public byte InteractionVerb; public float InteractionDistanceM; public byte InteractionInRange;
-    public ulong InteractionBodyKey;                    // BodyId packed by SPEC-31 helper (§10 Q5)
-    public uint StarSystemIdValue;                      // StarSystemId.Value of the current star system
+    public byte InteractionKind;                        // SPEC-31 InteractionTarget.Kind (InteractionKind: Dock, Inspect, LaneGate, Hail, Salvage)
+    public float InteractionDistanceM; public byte InteractionInRange;
+    public ulong InteractionBodyKey;                    // InteractionTarget.Body.LocalKey (0 for non-body targets)
+    public ulong InteractionGridPersistentId;           // InteractionTarget.GridPersistentId (hulks, encounter ships)
+    public uint StarSystemIdValue;                      // SPEC-31 CurrentStarSystemInfo.Id.Value (0 while Changing)
     public uint RadarVersion;                           // +1 on every radar refresh (10 Hz)
     public uint FrameIndex;
 }
 [System.Flags] public enum HudFlags : byte { None = 0, HasShip = 1, IsHulk = 2, HasTarget = 4, HasInteraction = 8, Boosting = 16 }
-public struct HudWeaponGroupState { public byte Group; public byte WeaponCount; public byte Firing; public byte Pad; public float Ready01; }   // 8 bytes
+public struct HudWeaponGroupState { public byte Group; public byte WeaponCount; public byte Firing; public byte Pad; public float Ready01; }   // 8 bytes; Group = bit index 0..2
 public struct HudAbilityState { public Game.Core.ContentHash Ability; public float Cooldown01; public byte Charges; public byte Ready; public byte Active; public byte Pad; } // 16 bytes
 
 /// Buffer on the snapshot entity. [InternalBufferCapacity(0)]; at most 64 elements.
 public struct HudRadarBlip : Unity.Entities.IBufferElementData
 {
     public Unity.Mathematics.float2 OffsetXZ;          // metres relative to the player ship, world axes
-    public byte Kind;                                  // 0 ship, 1 station, 2 planet/large body, 3 interactable point
-    public byte Relation;                              // 0 neutral, 1 ally, 2 enemy
-    public byte Flags;                                 // 1 = targeted, 2 = beyond range (clamped to edge)
+    public byte Kind;                                  // 0 ship (grid root, Kind Ship/Hulk), 1 station (Kind Station), 2 celestial body (SPEC-31 StarSystemBody with SpatialBody), 3 interactable point (Interactable without a grid)
+    public byte Relation;                              // 0 neutral, 1 ally, 2 enemy: FactionRelations.Get(player.Faction, other.Faction) (SPEC-21; 255 → Neutral)
+    public byte Flags;                                 // 1 = targeted, 2 = beyond range (clamped to edge), 4 = route waypoint (next gate)
     public byte Pad;
 }
 ```
@@ -245,33 +256,32 @@ Memory: snapshot ≈ 260 bytes + 64 × 12 bytes of blips. Constant regardless of
 ### 5.1 `HudSnapshotSystem`
 
 - `ISystem`, `[BurstCompile]`, `[UpdateInGroup(typeof(PresentationBridgeGroup))]`, `[UpdateAfter(typeof(CameraTargetSyncSystem))]`, `[UpdateBefore(typeof(HudSyncSystem))]`. `OnCreate`: create the snapshot entity (with `HudSnapshot` and the blip buffer), `RequireForUpdate<GameplayActive>()`.
-- Reads: player ship (`PlayerShip`, `ShipStats`, `ShieldState`, `ShipPower`, `PhysicsVelocity`, `Hulk`, target component), weapon functional entities, ability buffer, interaction singleton, current star system singleton, grid roots with `Allegiance`+`LocalToWorld`, body entities. Writes only `HudSnapshot` and `HudRadarBlip`.
+- Reads: player ship (`PlayerShip`, `ShipStats`, `ShieldState`, `ShipPower`, `PhysicsVelocity`, `ShipCommand`, `Allegiance`, `Hulk`, SPEC-21 `ShipTarget`), weapon functional entities (`FunctionalBlock` + SPEC-21 `WeaponState`), SPEC-24 `AbilitySlot` buffer, SPEC-31 `InteractionTarget` and `CurrentStarSystemInfo` singletons, SPEC-21 `FactionRelations`, grid roots with `VoxelGrid`+`Allegiance`+`LocalToWorld`, SPEC-31 body entities (`StarSystemBody`, `SpatialBody`). Writes only `HudSnapshot` and `HudRadarBlip`.
 
 Per frame:
 1. Find the single `PlayerShip` entity with `SystemAPI.TryGetSingletonEntity<PlayerShip>`. None → write `Flags = None`, keep the radar buffer empty, increment nothing else, return.
-2. Fill ship fields from components (§10 Q1). `SpeedMps = length(PhysicsVelocity.Linear)`. `Boosting` from `ShipCommand.Flags` (SPEC-20 boost bit). `IsHulk` when the ship has `Hulk`.
-3. Weapon groups: schedule `HudWeaponGatherJob` (`IJobChunk`, single-threaded `Schedule`, Burst) over entities with `FunctionalBlock` and the SPEC-21 weapon state (§10 Q2), filter `FunctionalBlock.Grid == player`, aggregate per group 1..5: `WeaponCount++`, `Ready01 = min(Ready01, 1 - remaining/period)`, `Firing |= firing`. Groups above 5 are ignored. Cost: O(weapon entities in the world) in Burst; no main-thread loop.
-4. Abilities: copy up to 4 entries of the SPEC-24 slot buffer (§10 Q3).
-5. Target: if the ship's target entity (§10 Q4) exists: relation via §10 Q7, hull and shield fractions from its `ShipStats`/`ShieldState`, distance between `LocalToWorld` positions, name hash from its blueprint hash; else clear `HasTarget`.
-6. Interaction: copy the SPEC-31 interaction singleton (§10 Q5).
-7. Current star system: copy `StarSystemIdValue` (§10 Q6).
-8. Radar, only when `elapsedUnscaled - lastRadar ≥ 0.1 s` (10 Hz): schedule `HudRadarGatherJob` (`IJobChunk`, `Schedule`, Burst) over grid roots (`VoxelGrid` + `Allegiance` + `LocalToWorld`, `WithNone<PlayerShip>`) and bodies (§10 Q8): compute `offset = (pos - playerPos).xz`; keep the 64 nearest using a fixed-size max-heap in the job (`NativeArray` of 64, `Allocator.TempJob`); entries beyond `RadarRangeM` (2,000 m) are clamped to the range circle with flag 2. Then a second single-threaded Burst job writes the buffer sorted by distance (stable tie-break by `Entity.Index`). `RadarVersion++`.
+2. Fill ship fields from components (§4.5 comments). `SpeedMps = length(PhysicsVelocity.Linear)`. `Boosting` from `ShipCommand.Flags` (SPEC-20 boost bit). `IsHulk` when the ship has `Hulk`.
+3. Weapon groups: schedule `HudWeaponGatherJob` (`IJobChunk`, single-threaded `Schedule`, Burst) over entities with `FunctionalBlock` and `WeaponState`, filter `FunctionalBlock.Grid == player`; for each set bit `g` (0..2) of `WeaponState.Group`: `WeaponCount++`, `Ready01 = min(Ready01, 1 − CooldownRemainingTicks / max(1, CooldownTicks))`, `Firing |= WeaponState.Firing`. Bits above 2 are ignored. Cost: O(weapon entities in the world) in Burst; no main-thread loop.
+4. Abilities: copy up to 4 entries of `AbilitySlot` (`Ability`, `Cooldown01 = CooldownRemainingTicks / max(1, CooldownTicks)`, `Charges`, `Ready = CooldownRemainingTicks <= 0 && Charges > 0`, `Active`).
+5. Target: if `ShipTarget.Value` exists: `TargetFaction = Allegiance.Faction` (255 if absent), relation = `FactionRelations.Get(player.Faction, TargetFaction)` mapped Friendly → 1, Hostile → 2, else 0; hull from `ShipStats.MassFraction`, shield from `ShieldState`; distance between `LocalToWorld` positions; `TargetNameHash = GridSource.Blueprint`; else clear `HasTarget`.
+6. Interaction: copy `InteractionTarget` (`Target != Entity.Null` → `HasInteraction`; `Kind`, `DistanceM`, `InRange`, `Body.LocalKey`, `GridPersistentId`).
+7. Current star system: `StarSystemIdValue = CurrentStarSystemInfo.Changing == 1 ? 0 : Id.Value`.
+8. Radar, only when `elapsedUnscaled - lastRadar ≥ 0.1 s` (10 Hz): schedule `HudRadarGatherJob` (`IJobChunk`, `Schedule`, Burst) over grid roots (`VoxelGrid` + `Allegiance` + `LocalToWorld`, `WithNone<PlayerShip>`) and SPEC-31 body entities (`StarSystemBody` + `SpatialBody` + `LocalToWorld`, kind 2; `Interactable` without a grid, kind 3): compute `offset = (pos - playerPos).xz`; keep the 64 nearest using a fixed-size max-heap in the job (`NativeArray` of 64, `Allocator.TempJob`); entries beyond `RadarRangeM` (2,000 m) are clamped to the range circle with flag 2. Then a second single-threaded Burst job writes the buffer sorted by distance (stable tie-break by `Entity.Index`). `RadarVersion++`.
 9. `FrameIndex = (uint)frameCount`. Dependencies are left on `state.Dependency`; `HudSyncSystem` completes them.
 
 ### 5.2 `HudSyncSystem`
 
 - Managed `SystemBase` listed in the architecture pipeline (`PresentationBridgeGroup`), `[UpdateAfter(typeof(HudSnapshotSystem))]`, `[UpdateBefore(typeof(ManagedEventDrainSystem))]`, `RequireForUpdate<HudSnapshot>()` and `RequireForUpdate<GameplayActive>()`.
-- `public void Bind(HudViewModel vm, IHudNames names, Func<string, string> bindingDisplay)` called once by `Game.App`; unbound → return. `IHudNames` (Presentation) resolves `ContentHash` → display name, body key → body name, star system id → name; all names are cached strings (no allocation per lookup).
-- `public event Action<bool> PlayerHulkStateChanged` (instance event).
+- `public void Bind(HudViewModel vm, IHudNames names, Func<string, string> bindingDisplay)` called once by `Game.App`; unbound → return. `IHudNames` (Presentation) resolves: blueprint `ContentHash` → display name, prefixed with the target faction's `FactionDefinition.shipNamePrefix` + space when it is not empty (SPEC-33); `(StarSystemValue, BodyKey)` → `GalaxyService.GetBodyName`; star system id → `GalaxyService.GetStarSystemName`; gate prompts through SPEC-32 `TravelService.TryGetGateInfo` (`TargetName`, `FuelCost`/`FuelHeld`, `LockedMessage`; never the body name "Gate to …"); encounter ships (`Kind == Hail`) → the encounter's display name via SPEC-33 `TryGetInstanceByMember`. All strings are cached per key (no allocation per lookup).
 
 Per frame (marker `HudSyncSystem.Apply`):
 1. `CompleteDependency()`; read `HudSnapshot` and the blip buffer once (one `GetSingleton`, one `GetSingletonBuffer`, `AsNativeArray`).
 2. Compare with the previous snapshot copy stored in the system (`HudSnapshot last`). Write only changed fields, with quantisation: fractions rounded to 1/500 before comparing, ints exact, `SpeedMps` → `(int)round`, distance → `(int)round` metres, cooldowns and ready fractions rounded to 1/100.
-3. Strings: `TargetName`, `InteractionTargetName`, `StarSystemName` are assigned only when their key changed (lookup returns a cached instance). `InteractionVerbText` from a fixed table of cached strings indexed by verb.
+3. Strings: `TargetName`, `InteractionTargetName`, `InteractionDetailText`, `StarSystemName` are assigned only when their key changed (lookup returns a cached instance). `InteractionVerbText` from a fixed table indexed by `InteractionKind`: Dock "Dock", Inspect "Inspect", LaneGate "Jump", Hail "Hail", Salvage "Salvage". For `LaneGate`: `InteractionTargetName = GateInfo.TargetName`, `InteractionDetailText = Open ? "Fuel " + FuelCost : LockedMessage`, `InteractionBlocked = !Open || !CanAfford` (cache key: `(gateKey, TravelService.Revision)`).
+3b. Route: when `TravelService.Destination` or `Revision` changed: `HasRoute = RouteStatus != None`; `RouteText = RouteStatus == Ok ? "Route: " + Route.Count + " jumps, " + RouteFuelCost + " fuel" : RouteBlockedReason`; `RouteBlocked = RouteStatus is Blocked or Unreachable`. The next gate (`TryGetNextHop`) is shown on the radar as a waypoint blip (kind 3, flag 4) at `GatePositionM − FrameOrigin`, clamped to the edge like other contacts.
 4. Weapon groups and abilities: write the 5 / 4 fixed item view models in place.
 5. Radar: if `RadarVersion` changed, copy blips into a reusable `HudRadarBlip[64]` array owned by the system and set `vm.RadarVersion` (the view reads the array through `IHudRadarSource`, implemented by the system, §6); set `vm.RadarYawDeg` from `MainCameraState` yaw when it changed by ≥ 0.5°.
-6. When `IsHulk` changes, raise `PlayerHulkStateChanged(isHulk)`.
-7. No allocation in steps 1–7 (gate §8).
+6. No allocation in steps 1–5 (gate §8). The defeat flow is SPEC-01's (`ShipDestroyed`), not this system's.
 
 ### 5.3 `FlightHudView` per-frame update path
 
@@ -283,28 +293,28 @@ All presenters are plain classes constructed by `Game.App` (`UiComposition`, HUD
 
 | Presenter | Inputs (owning spec) | Refresh trigger | Command behaviour |
 |---|---|---|---|
-| `MainMenuPresenter` | `SaveService` slots (SPEC-05), `SceneFlow`, `GameSession.NewGame` (SPEC-01) | screen `OnPush` | `NewGame` → `TextPrompt` (title "New game", label "Commander name", max 24, validator: 1–24 chars of letters, digits, space, `-`, `'`) → `GameSession.NewGame(name)` → `SceneFlow` to World. `Continue` → load most recent slot. `OpenLab` → SPEC-51 launcher (creative). `Quit` → confirm → `Application.Quit()` through SPEC-01 |
+| `MainMenuPresenter` | `SaveService` slots (SPEC-05), `IGameFlow` (SPEC-01/02) | screen `OnPush` | `NewGame` → `TextPrompt` (title "New game", label "Commander name", max 24, validator: 1–24 chars of letters, digits, space, `-`, `'`) → `IGameFlow.NewGameAsync(new NewGameArgs(name, 0, false, ContentId.None))`. `Continue` → `IGameFlow.LoadGameAsync(<most recent slot id>)`. `OpenLab` → SPEC-51 `ShipEditorLauncher.OpenLab()`. `Quit` → confirm → `IGameFlow.QuitToDesktop()` |
 | `SaveSlotsPresenter` | `SaveService` (SPEC-05) | `OnPush(SaveSlotsMode)`, `GameSaved` | `LoadSelected` (in game) → confirm "Unsaved progress since the last save will be lost." [Load (danger) / Cancel]. `SaveToSelected` on an existing slot → confirm overwrite. `SaveNew` → `TextPrompt` (max 32). `DeleteSelected` → confirm [Delete (danger) / Cancel] (06-B12). Errors → `Notification { Kind = Danger }` and a `ConfirmDialog` with the message |
 | `SettingsPresenter` | `SettingsService` (SPEC-01), `InputService` rebinding (SPEC-03) | `OnPush`, settings changed | Each `Set*` writes the setting immediately (persisted by `SettingsService`). `StartRebind(row)` → SPEC-03 rebind with Esc cancel; row shows "Press a key…" |
-| `PausePresenter` | `SaveService.CanSaveNow` (SPEC-05) | `OnPush` | `Save` → push `SaveSlotsView` (Save). `Load` → push `SaveSlotsView` (Load). `MainMenu` → confirm → `SceneFlow` to MainMenu. `Quit` → confirm → quit |
-| `InventoryPresenter` | `InventoryModel`, `Wallet`, `ItemDefinition` (SPEC-50) | `SlotChanged`, `Reset`, wallet change | `Select`, `Move` (`TryMove`), `Sort`, `StackAll` |
-| `MerchantPresenter` | merchant session API (SPEC-50) | open with merchant args, model events | `Buy`/`Sell` call SPEC-50; failures set `BuyBlockedReason`/`SellBlockedReason` |
-| `ShipLogPresenter` | quest log, clues, rumors (SPEC-42) | `FactChanged`, quest events | `ToggleTrack` → SPEC-42; `ShowRumorOnMap` → push `GalaxyMapView` with the rumor's star system selected |
-| `GalaxyMapPresenter` | galaxy definition, known/visited facts (SPEC-30/42), destination (SPEC-32) | `OnPush`, `StarSystemEntered`, `FactChanged` | `SetDestination` → SPEC-32 |
-| `StarSystemMapPresenter` | bodies and orbits at current `UniversalTime` (SPEC-31), player pose | `OnPush` | `SetWaypoint` → SPEC-31/32 (hidden when unsupported, §10 Q14) |
+| `PausePresenter` | `IGameFlow.GetSaveBlock()` (SPEC-02) | `OnPush` | `Save` → push `SaveSlotsView` (Save), disabled with the block reason text when `GetSaveBlock() != None`. `Load` → push `SaveSlotsView` (Load). `MainMenu` → confirm → `IGameFlow.QuitToMainMenuAsync(saveFirst: true)`. `Quit` → confirm → `IGameFlow.QuitToDesktop()` |
+| `InventoryPresenter` | `InventoryModel`, `Wallet`, `ItemDefinition` (SPEC-50 §4.3–§4.4) | `SlotChanged`, `Reset`, `Wallet.Changed` | `Select`, `Move` (`TryMove`), `Sort`, `StackAll`. `InCapacity = index < Capacity` (overflow slots shown with `.slot--overflow`); `WalletText` = credits formatted with thousands separators (`long`) |
+| `MerchantPresenter` | SPEC-50 `MerchantSession` | `Show(session, onClosed)` (called by SPEC-50 `MerchantLauncher`); `session.Changed` | Binds the view model to the session and pushes `merchant`. `Refused` → all buy/sell disabled with `RefusalReason`. `Buy` → `session.TryBuy(stockIndex, Quantity, out reason)`; `Sell` → `session.TrySell(cargoSlot, Quantity, out reason)`; `CanBuy`/`CanSell` drive the button states and `BuyBlockedReason`/`SellBlockedReason`. On pop: `session.Close()`, then `onClosed?.Invoke()` |
+| `ShipLogPresenter` | SPEC-42 `ShipLogQuery` | `ShipLogQuery.Changed`, `OnPush` | Quests: `GetQuests(ShowCompleted)`, objectives `GetObjectives`, log `GetLog`; Clues tab: `GetClues(rumors: false)`, `GetMysteries`, `GetJournal` (journal rows under the clues); Rumors tab: `GetClues(rumors: true)`. `SelectClue` → `MarkClueSeen`. `ToggleTrack` → `SetTracked`. `ShowRumorOnMap` → push `GalaxyMapView` with the rumor's star system selected |
+| `GalaxyMapPresenter` | SPEC-30 `GalaxyMapModel` (entries, `OwnerColorToken` → `MapPoint.ColorToken`), SPEC-32 `TravelService` (destination, route), SPEC-42 `ShipLogQuery.Markers` (Rumor → `MapMarkerKind.Rumor`) | `OnPush`, `StarSystemEntered`, `FactChanged`, `GalaxyMapModel.Revision` | `CanSetDestination` from `TravelService.CanSetDestination(id, out reason)` (`DestinationBlockedReason` = reason). `SetDestination` → `TravelService.SetDestination`; `ClearDestination` → `TravelService.ClearDestination`. The route (`TravelService.Route`) is drawn as highlighted lines; `Destination` gets `MapPointFlags.Destination` |
+| `StarSystemMapPresenter` | bodies and orbits at current `UniversalTime` (SPEC-31), player pose, SPEC-42 markers (Objective → `MapMarkerKind.Waypoint`; `BodyTag` resolved in the loaded star system) | `OnPush` | M3: `CanSetWaypoint = false` (button hidden). M4: `SetWaypoint` = "Cruise here": `TravelService.CanCruise/RequestCruise(body position, body radius)` (SPEC-32) |
 | `FleetPresenter` | fleet in `GameSession` (SPEC-01), stats (SPEC-22 `BlockStatMath`) | `OnPush`, fleet change | `Edit` → SPEC-51 launcher (only when docked, §10 Q15) |
-| `HulkPresenter` | `HudSyncSystem.PlayerHulkStateChanged` | event | on `true` push `HulkView`; `LoadLastSave` → confirm → load; `MainMenu` → confirm |
-| `LoadingPresenter` | `SceneFlow` progress (SPEC-01) | SceneFlow events | shows/hides `LoadingView` |
-| `HudObjectivePresenter` | tracked quest (SPEC-42) | quest events | writes `HasObjective`, `ObjectiveTitle`, `ObjectiveText` |
-| `HudNotificationPresenter` | `ItemAcquired`, `GameSaved` (EventBus) | events | `ItemAcquired` → `Notification { Kind = Positive, Label = item name, Amount = count, CoalesceKey = cached "item:" + id }`; `GameSaved` → "Game saved" |
+| `DockPresenter` | SPEC-31 `DockingService` + `EventBus<DockStateChanged>`, SPEC-50 `MerchantLauncher`/`MerchantDirectory`, SPEC-51 `ShipEditorLauncher`, `GalaxyService` names | `DockStateChanged(true)` → push `dock`; `(false)` → pop it if open | `StationName = GetBodyName(DockedBody)`. `Trade` → `MerchantLauncher.TryOpenForBody(docking.DockedBody, onClosed: null)`; `CanTrade` = `MerchantDirectory.FindForBody(DockedBody) != null`, else reason "No market here". `EditShip` → `ShipEditorLauncher.EditPlayerShip()`. `Undock` → `docking.Undock()` (the event pops the screen) |
+| `LoadingPresenter` | `SceneFlow.Progress` (SPEC-01), `SceneTransitionStarted`/`Finished` | events; progress polled in `UIRoot.Tick` while visible | `StatusText` "Loading…"; `Progress = SceneFlow.Progress` |
+| `HudObjectivePresenter` | SPEC-42 `ShipLogQuery.TryGetTracked` | `ShipLogQuery.Changed` | writes `HasObjective`, `ObjectiveTitle` (quest title), `ObjectiveText` (current objective text with progress) |
+| `HudNotificationPresenter` | `ItemAcquired`, `GameSaved`, SPEC-32 `TravelNotice`, SPEC-50 `EconomyNotice`, SPEC-40 `InteractionUnhandled` (EventBus) | events | `ItemAcquired` → `Notification { Kind = Positive, Label = item name, Amount = Count, CoalesceKey = cached "item:" + id }`; `GameSaved` → Info "Game saved"; `TravelNotice`: `JumpRefused`, `JumpAborted`, `RouteBlocked` → Warning, `DestinationReached`, `RouteRestored` → Info, label = `Text`; `EconomyNotice`: `CargoFull`, `Jettisoned`, `SalvageRefused`, `TradeRefused` → Warning, `SalvageDone`, `SalvagePartial` → Positive, label = `Text`; `InteractionUnhandled` → Info "Nothing of interest" |
 
 ### 5.5 `ScreenHotkeyRouter` (Presentation, `Assets/Game/Presentation/Presenters/ScreenHotkeyRouter.cs`)
 
-Actions (SPEC-03, §10 Q11): `OpenInventory` (I), `OpenShipLog` (L), `OpenGalaxyMap` (M), `OpenSystemMap` (N), `OpenFleet` (F) in **both** Flight and Menu maps. On `performed` of action → target screen T:
+Actions (SPEC-03 §4.2): `OpenInventory` (I), `OpenShipLog` (L), `OpenGalaxyMap` (M), `OpenSystemMap` (N), `OpenFleet` (K; F is Interact) in **both** Flight and Menu maps. On `performed` of action → target screen T:
 1. `top = navigator.Top`. If `top == T` → `navigator.Pop(T)`; return.
 2. If `top` is `FlightHudView` → `navigator.Push(T)`; return.
 3. If `top` is one of the five hotkey screens → `navigator.Pop(top); navigator.Push(T)`; return.
-4. Otherwise (pause, settings, confirm, merchant, dialog, hulk, loading, editor) → ignore.
+4. Otherwise (pause, settings, confirm, merchant, dock, dialog, loading, editor) → ignore.
 
 ### 5.6 Screen layouts (wireframes; spacing in tokens, sizes as listed)
 
@@ -320,12 +330,12 @@ All full screens: a `.panel` centred, width `min(1600 px, 92 %)`, height `min(92
 | `inventory` | Panel 1100 × 760 px: header title `inventory-title`, `inventory-capacity` ("used / capacity"), header actions `inventory-sort`, `inventory-stack-all`, `inventory-close`; body: left ScrollView `inventory-grid` with 200 pooled `Slot`s named `inventory-slot-<index>` in wrapping rows of 10 (slot 72 px); right detail column 320 px (`inventory-detail-name`, `-description`, `-count`, `-value`); footer `inventory-wallet` |
 | `merchant` | Panel full size: header `merchant-name`, `merchant-wallet`, `merchant-close` ("Leave"); `merchant-tabs` (TabBar, scrolls horizontally, R12); body two columns: `merchant-stock-list` and `merchant-cargo-list` (ListViews, rows: icon 40 px, name `.grow .text-ellipsis`, price, quantity); detail strip: `merchant-detail-name`, `-description`, `merchant-quantity` (SliderInt 1..MaxQuantity), `merchant-buy-total`, `merchant-sell-total`; footer `merchant-buy` (primary), `merchant-sell` |
 | `dialog` | Comms panel in Z-L: left-anchored, width 640 px, top and bottom margins `--space-6`; header `dialog-speaker`; row: `dialog-portrait` (96 × 96 px, hidden when `HasPortrait == false`) and `dialog-text` (ScrollView with the line label; scroll offset reset to 0 when `LineVersion` changes); `dialog-options` ScrollView with 9 pooled buttons `dialog-option-1` … `dialog-option-9` showing "[n] text"; `dialog-continue`. Panel `max-height: 100 %` of the safe area; options scroll, never leave the screen (R11) |
-| `ship-log` | Panel: `ship-log-tabs` (Quests, Clues, Rumors); Quests: `ship-log-quest-list` (ListView 420 px) + detail (`ship-log-quest-title`, `-stage`, `-description`, `ship-log-objectives` list with done class); Clues: `ship-log-clue-list` grouped by mystery title + `ship-log-clue-body`; Rumors: `ship-log-rumor-list` rows with `Show on map` buttons `ship-log-rumor-map-<index>`; header `ship-log-close` |
-| `galaxy-map` | Full panel: `galaxy-map-canvas` (`MapCanvas`, `.grow`) and right column 360 px: `galaxy-map-selected-name`, `galaxy-map-selected-info`, `galaxy-map-set-destination` (primary, disabled with reason), `galaxy-map-focus-current`, `galaxy-map-zoom-in`, `galaxy-map-zoom-out`, legend; header `galaxy-map-close` |
-| `system-map` | Same layout with `system-map-*` names and `system-map-set-waypoint` |
+| `ship-log` | Panel: `ship-log-tabs` (Quests, Clues, Rumors); Quests: `ship-log-show-completed` (Toggle), `ship-log-quest-list` (ListView 420 px) + detail (`ship-log-quest-title`, `-stage`, `-description`, `ship-log-objectives` list with done class, `ship-log-quest-log`); Clues: `ship-log-mysteries` (title, known/required, solved text), `ship-log-clue-list` grouped by mystery title + `ship-log-clue-body`, then `ship-log-journal` (ListView); Rumors: `ship-log-rumor-list` rows with `Show on map` buttons `ship-log-rumor-map-<index>`; header `ship-log-close` |
+| `galaxy-map` | Full panel: `galaxy-map-canvas` (`MapCanvas`, `.grow`) and right column 360 px: `galaxy-map-selected-name`, `galaxy-map-selected-info`, `galaxy-map-set-destination` (primary, disabled with reason), `galaxy-map-clear-destination`, `galaxy-map-focus-current`, `galaxy-map-zoom-in`, `galaxy-map-zoom-out`, legend; header `galaxy-map-close` |
+| `system-map` | Same layout with `system-map-*` names and `system-map-set-waypoint` (label "Cruise here", hidden in M3) |
 | `fleet` | Panel: left `fleet-ship-list` (ListView 420 px; rows: name `.text-ellipsis`, hull Meter, active tag); right: `fleet-detail-name`, `fleet-detail-class`, `fleet-stats` (ListView of `StatRowViewModel`, two columns label/value, row height fixed), footer `fleet-edit`, `fleet-set-active`; header `fleet-close` |
 | `ship-editor` | Root host: regions `ship-editor-region-top` (full width, 64 px), `ship-editor-region-left` (360 px), `ship-editor-region-right` (380 px), `ship-editor-region-bottom` (full width, 48 px), all `.hud-region .hud-plate`, center empty (world shows through, `picking-mode Ignore`). Panels mounted by SPEC-51 |
-| `hulk` | Modal window 520 px: `hulk-title`, `hulk-body`, `hulk-load-last` (primary, hidden when no save), `hulk-main-menu` |
+| `dock` | Panel 560 px wide centred: header `dock-station-name`; body buttons `dock-trade` (primary; disabled with `dock-trade-blocked` reason), `dock-edit-ship` (disabled with reason), `dock-undock` (`.stack-m`); story dialogs started by docking (SPEC-42) open above it |
 | `loading` | Full-screen scrim `--color-bg`; centred `loading-status` and `loading-progress` (Meter variant neutral, 480 px) |
 
 ### 5.7 `MapCanvas` control (`Assets/Game/UI/Controls/MapCanvas.cs`)
@@ -351,18 +361,28 @@ namespace Game.UI.Views
     public struct HudRadarBlipView { public UnityEngine.Vector2 OffsetXZ; public byte Kind; public byte Relation; public byte Flags; }
     // All other screens: public <Name>View(<Name>ViewModel vm, I<Name>Commands commands) — LoadingView(LoadingViewModel vm),
     // ShipEditorView(ShipEditorViewModel vm, IShipEditorCommands commands) — see §4.1.
+
+    /// <summary>The root screens SceneFlow installs (SPEC-01 §4.3 SetRootScreens). Implemented by UiComposition.</summary>
+    public interface IRootScreenSet { UIScreen MainMenu { get; } UIScreen FlightHud { get; } UIScreen ShipEditor { get; } UIScreen Loading { get; } }
+}
+
+namespace Game.Presentation.Presenters
+{
+    /// <summary>Registered in Services by UiComposition; SPEC-50 MerchantLauncher calls Show (step 3 of its Open).</summary>
+    public sealed class MerchantPresenter : Game.UI.Views.IMerchantCommands
+    { public void Show(Game.Economy.MerchantSession session, System.Action onClosed); /* + IMerchantCommands */ }
 }
 
 namespace Game.App.Presenters
 {
     /// Builds every view model, view and presenter once and registers the views. Called by GameRoot (SPEC-01) after step 9.
-    public sealed class UiComposition : System.IDisposable
+    public sealed class UiComposition : Game.UI.Views.IRootScreenSet, System.IDisposable
     {
         public UiComposition(Game.UI.Services.UIRoot ui /* + services, see HUD-002 */);
-        public MainMenuView MainMenu { get; }       // root screens for SceneFlow.SetRoot
-        public FlightHudView FlightHud { get; }
-        public ShipEditorView ShipEditor { get; }
-        public LoadingView Loading { get; }
+        public UIScreen MainMenu { get; }           // MainMenuView; IRootScreenSet (SceneFlow.SetRoot)
+        public UIScreen FlightHud { get; }          // FlightHudView
+        public UIScreen ShipEditor { get; }         // ShipEditorView
+        public UIScreen Loading { get; }            // LoadingView
         public void Dispose();
     }
 }
@@ -375,14 +395,14 @@ namespace Game.App.Presenters
 | Situation | Required behaviour |
 |---|---|
 | No player ship (intro, after despawn) | HUD shows only location/objective zones; ship zones get `.is-hidden` via `HasShip == false` |
-| Player ship becomes a hulk | `HulkView` pushed once; HUD meters stay at their last values |
+| Player ship becomes a hulk | HUD meters stay at their last values; SPEC-01 `DefeatWatcher` shows the defeat `ConfirmDialog` ("Load last save" / "Main menu") |
 | Two `PlayerShip` entities | Snapshot uses the one `TryGetSingletonEntity` fails on → treat as none and `GameLog.WarnOnce` |
-| More than 5 weapon groups | Groups 6+ ignored by the HUD |
+| Weapon on fire-group bits above 2 | Ignored by the HUD |
 | More than 64 radar contacts | Nearest 64 shown (stable by distance, then entity index) |
 | Contact beyond 2,000 m | Clamped to the radar edge with the "beyond" style |
 | Target destroyed between frames | `HasTarget` false next frame; no exception |
 | Name lookup misses | Shows the content id (cached) and logs `WarnOnce` |
-| Inventory capacity above 200 | Slots 200+ not shown; `GameLog.Error` at bind time ("raise pool") |
+| Inventory with overflow items (slots ≥ `Capacity`) | Shown in the same grid with `.slot--overflow`; the header shows "used / capacity (+N overflow)" |
 | Merchant with 10 categories at 4:3 | Tabs scroll horizontally inside the panel (R12) |
 | Dialog line longer than the panel | Text scrolls; options remain reachable (R11) |
 | Dialog with 9 options at 1280×720 logical | Options ScrollView shows all via scrolling; none outside the viewport |
@@ -393,6 +413,8 @@ namespace Game.App.Presenters
 | Hotkey while typing | No effect (context `TextEntry` disables Flight and Menu maps) |
 | Leaving the World scene with screens open | `SetRoot` of the next scene pops every screen (no stale pause, R13/B7) |
 | `SessionReset` | Presenters rebind; view models updated in place; notifications cleared |
+| Interacting with a locked gate | Prompt shows `LockedMessage` with `.is-warning`; pressing F lets SPEC-32 refuse with a `TravelNotice` toast (and a story beat may play, SPEC-42) |
+| Docked when a story dialog starts | Dialog opens above the dock screen; closing it returns to the dock screen |
 
 ## 8. Performance budget
 
@@ -413,7 +435,7 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 - **Tier:** standard — transcribes §4.2, §4.3, §4.5 and §6 with the stated generation rule
 - **Depends on:** `UI-001`, `CORE-001`, `CAM-001`
 - **Do:** Create every view model and item view model of §4.2 (rule in §4.2), `MapData` and its structs, `SaveSlotsMode`, `SettingKey`, every command interface of §4.3, `IHudRadarSource`, `HudRadarBlipView`, the snapshot types of §4.5 (Presentation), view class shells for every screen in §4.1 (constructors per §6, `Key`/`Layer`/`Context`/flags exactly as §4.1, `OnBuild` empty), and the `UiComposition` shell.
-- **Files:** `Assets/Game/UI/ViewModels/*.cs` (one file per view model), `Assets/Game/UI/Data/{MapData,MapPoint,MapPointFlags,MapLine,MapRing,MapMarker,MapMarkerKind}.cs`, `Assets/Game/UI/Views/Commands/*.cs`, `Assets/Game/UI/Views/{MainMenuView,SaveSlotsView,SettingsView,PauseView,FlightHudView,InventoryView,MerchantView,DialogView,ShipLogView,GalaxyMapView,StarSystemMapView,FleetView,ShipEditorView,HulkView,LoadingView,IHudRadarSource,HudRadarBlipView}.cs`, `Assets/Game/Presentation/Components/{HudSnapshot,HudFlags,HudWeaponGroupState,HudAbilityState,HudRadarBlip}.cs`, `Assets/Game/App/Presenters/UiComposition.cs`
+- **Files:** `Assets/Game/UI/ViewModels/*.cs` (one file per view model), `Assets/Game/UI/Data/{MapData,MapPoint,MapPointFlags,MapLine,MapRing,MapMarker,MapMarkerKind}.cs`, `Assets/Game/UI/Views/Commands/*.cs`, `Assets/Game/UI/Views/{MainMenuView,SaveSlotsView,SettingsView,PauseView,FlightHudView,InventoryView,MerchantView,DialogView,ShipLogView,GalaxyMapView,StarSystemMapView,FleetView,ShipEditorView,DockView,LoadingView,IHudRadarSource,HudRadarBlipView,IRootScreenSet}.cs`, `Assets/Game/Presentation/Components/{HudSnapshot,HudFlags,HudWeaponGroupState,HudAbilityState,HudRadarBlip}.cs`, `Assets/Game/App/Presenters/UiComposition.cs`
 - **Acceptance criteria:**
   - [ ] Compiles; every screen's flags equal §4.1 (checked by test).
   - [ ] `HudSnapshot`, `HudRadarBlip` are unmanaged; `HudWeaponGroupState` is 8 bytes, `HudAbilityState` 16 bytes.
@@ -498,35 +520,39 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 - **Do:** Implement §5.1 with `HudWeaponGatherJob`, `HudRadarGatherJob` and the radar sort job. Profiler markers per §8.
 - **Files:** `Assets/Game/Presentation/Systems/HudSnapshotSystem.cs`, `Assets/Game/Presentation/Jobs/{HudWeaponGatherJob,HudRadarGatherJob,HudRadarSortJob}.cs`
 - **Acceptance criteria:**
-  - [ ] Snapshot equals hand-computed values in a test world (ship stats, 7 weapons in 3 groups, 2 abilities, target, interaction).
+  - [ ] Snapshot equals hand-computed values in a test world (ship stats, 7 weapons on 3 fire-group bits, 2 abilities, target, interaction).
+  - [ ] A target whose faction is hostile to the player's in `FactionRelations` gives `TargetRelation == 2`; faction 255 gives 0.
   - [ ] Radar: 100 contacts → nearest 64 sorted by distance; contacts beyond 2,000 m flagged and clamped.
   - [ ] Radar refreshes at 10 Hz (`RadarVersion` increments 10 ± 1 times per simulated second at 144 FPS).
   - [ ] No main-thread iteration over entities.
-- **Tests:** `Assets/Game/Tests/EditMode/Presentation/HudSnapshotSystemTests.cs` (`EcsTestWorld`): `NoPlayer_FlagsNone`, `ShipValues_Copied`, `WeaponGroups_Aggregated`, `GroupsAbove5_Ignored`, `Radar_Nearest64_Sorted`, `Radar_BeyondRange_Clamped`, `Radar_RefreshRate10Hz`, `Hulk_FlagSet`.
+- **Tests:** `Assets/Game/Tests/EditMode/Presentation/HudSnapshotSystemTests.cs` (`EcsTestWorld`): `NoPlayer_FlagsNone`, `ShipValues_Copied`, `WeaponGroups_Aggregated`, `GroupBitsAbove2_Ignored`, `Target_RelationFromFactionRelations`, `Radar_Nearest64_Sorted`, `Radar_BeyondRange_Clamped`, `Radar_RefreshRate10Hz`, `Hulk_FlagSet`.
 
 ### HUD-009 — HudSyncSystem
 - **Milestone:** M3
 - **Tier:** frontier — F4: owns the 0 B/frame HUD gate
-- **Depends on:** `HUD-008`, `HUD-007`
-- **Do:** Implement §5.2 including `Bind`, quantisation, `IHudNames` cache built from `ContentDatabase` and SPEC-30/31 name providers, `IHudRadarSource` implementation, `PlayerHulkStateChanged`.
+- **Depends on:** `HUD-008`, `HUD-007`, `TRV-001`, `ENC-001`
+- **Do:** Implement §5.2 including `Bind`, quantisation, `IHudNames` cache (blueprint names with SPEC-33 prefixes, `GalaxyService` body and star-system names, SPEC-32 gate info, SPEC-33 encounter names), the route readout (step 3b), `IHudRadarSource` implementation.
 - **Files:** `Assets/Game/Presentation/Systems/HudSyncSystem.cs`, `Assets/Game/Presentation/Presenters/{IHudNames,HudNames}.cs`
 - **Acceptance criteria:**
   - [ ] A view model property raises `propertyChanged` only when its quantised value changes.
   - [ ] 0 B GC per frame with all values changing every frame (600 frames).
-  - [ ] `PlayerHulkStateChanged(true)` raised exactly once per hulk transition.
-- **Tests:** `Assets/Game/Tests/EditMode/Presentation/HudSyncSystemTests.cs`: `Unchanged_NoNotifications`, `Quantisation_SmallChangeIgnored`, `TargetNameChange_SingleStringAssign`, `HulkTransition_EventOnce`, `AllChanging_ZeroAlloc`. `Assets/Game/Tests/PlayMode/UI/HudPerformanceTests.cs`: `CombatValuesEveryFrame_ZeroGc`, `Snapshot_30Ships`, `Sync_AllChanged`.
+  - [ ] A gate interaction shows the target star system's name and "Fuel N", or the locked message with `InteractionBlocked`.
+  - [ ] With a destination set, `RouteText` reads "Route: 2 jumps, 3 fuel" for a two-lane route costing 3.
+- **Tests:** `Assets/Game/Tests/EditMode/Presentation/HudSyncSystemTests.cs`: `Unchanged_NoNotifications`, `Quantisation_SmallChangeIgnored`, `TargetNameChange_SingleStringAssign`, `GatePrompt_FromGateInfo`, `RouteText_Formatted`, `AllChanging_ZeroAlloc`. `Assets/Game/Tests/PlayMode/UI/HudPerformanceTests.cs`: `CombatValuesEveryFrame_ZeroGc`, `Snapshot_30Ships`, `Sync_AllChanged`.
 
 ### HUD-010 — HUD presenters and screen hotkeys
 - **Milestone:** M3
 - **Tier:** standard — behaviour tables in §5.4 and §5.5
-- **Depends on:** `HUD-009`, `QST-001`, `ECO-001`, `INP-001`
-- **Do:** `HudObjectivePresenter`, `HudNotificationPresenter`, `ScreenHotkeyRouter`, `HulkPresenter`.
-- **Files:** `Assets/Game/Presentation/Presenters/{HudObjectivePresenter,HudNotificationPresenter,ScreenHotkeyRouter}.cs`, `Assets/Game/App/Presenters/HulkPresenter.cs`
+- **Depends on:** `HUD-009`, `QST-001`, `ECO-001`, `INP-001`, `TRV-001`, `NAR-001`
+- **Do:** `HudObjectivePresenter` (on `ShipLogQuery`), `HudNotificationPresenter` (all §5.4 events), `ScreenHotkeyRouter`.
+- **Files:** `Assets/Game/Presentation/Presenters/{HudObjectivePresenter,HudNotificationPresenter,ScreenHotkeyRouter}.cs`
 - **Acceptance criteria:**
   - [ ] 12 `ItemAcquired` events for the same item within 2.5 s → one toast "+12 <name>".
   - [ ] Hotkey I: HUD → Inventory; I again → closed; I then M → Inventory replaced by Galaxy map; I during Pause → ignored.
   - [ ] Tracked objective text updates on quest change only.
-- **Tests:** `Assets/Game/Tests/EditMode/Presentation/ScreenHotkeyRouterTests.cs`: `FromHud_Opens`, `SameKey_Closes`, `OtherKey_Switches`, `ModalOpen_Ignored`. `Assets/Game/Tests/EditMode/Presentation/HudNotificationPresenterTests.cs`: `TwelveItems_OneToast`. `Assets/Game/Tests/EditMode/Presentation/HudObjectivePresenterTests.cs`: `QuestChange_UpdatesText`.
+  - [ ] `TravelNotice(JumpRefused)` → one Warning toast with its text; `EconomyNotice(SalvageDone)` → one Positive toast; `InteractionUnhandled` → "Nothing of interest".
+  - [ ] K opens and closes the fleet screen; F does not.
+- **Tests:** `Assets/Game/Tests/EditMode/Presentation/ScreenHotkeyRouterTests.cs`: `FromHud_Opens`, `SameKey_Closes`, `OtherKey_Switches`, `ModalOpen_Ignored`. `Assets/Game/Tests/EditMode/Presentation/HudNotificationPresenterTests.cs`: `TwelveItems_OneToast`, `TravelAndEconomyNotices_Mapped`, `InteractionUnhandled_Info`; `ScreenHotkeyRouterTests.FleetOnK`. `Assets/Game/Tests/EditMode/Presentation/HudObjectivePresenterTests.cs`: `QuestChange_UpdatesText`.
 
 ### HUD-011 — Inventory screen
 - **Milestone:** M3
@@ -535,7 +561,7 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 - **Do:** `InventoryView` (200 pooled `Slot`s, drag-move with a `PointerManipulator` that captures the pointer and drops on the slot under the pointer), `InventoryPresenter`.
 - **Files:** `Assets/Game/UI/Views/InventoryView.cs`, `Assets/Game/UI/Views/Uxml/InventoryView.uxml`, `Assets/Game/UI/Theme/screens/inventory.uss`, `Assets/Game/Presentation/Presenters/InventoryPresenter.cs`
 - **Acceptance criteria:**
-  - [ ] Every slot within `Capacity` is reachable by scrolling; slot index `Capacity - 1` is displayed (06-D1).
+  - [ ] Every slot within `Capacity` is reachable by scrolling; slot index `Capacity - 1` is displayed (06-D1); overflow slots carry `.slot--overflow`.
   - [ ] Sort and Stack All sit inside the panel header (R31); no `OutsidePanel` issue.
   - [ ] Opening the screen changes nothing in the inventory (R12 side effect).
 - **Tests:** `Assets/Game/Tests/PlayMode/UI/Screens/InventoryViewTests.cs`: `LastSlot_Displayed`, `HeaderButtons_InsidePanel`, `Open_NoModelChange`, `DragMove_CallsMove`, `Layout_AllLogicalSizes_NoIssues`.
@@ -544,12 +570,13 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 - **Milestone:** M3
 - **Tier:** standard — view on an existing view model
 - **Depends on:** `HUD-002`, `SPEC-50`
-- **Do:** `MerchantView` (TabBar, two ListViews, quantity slider), `MerchantPresenter`.
+- **Do:** `MerchantView` (TabBar, two ListViews, quantity slider), `MerchantPresenter` with `Show(session, onClosed)` (§6), registered in `Services` by `UiComposition`.
 - **Files:** `Assets/Game/UI/Views/MerchantView.cs`, `Assets/Game/UI/Views/Uxml/{MerchantView,MerchantRow}.uxml`, `Assets/Game/UI/Theme/screens/merchant.uss`, `Assets/Game/Presentation/Presenters/MerchantPresenter.cs`
 - **Acceptance criteria:**
   - [ ] Ten categories at logical 1663×1247 stay inside the panel (R12).
   - [ ] Buy of quantity 1 from a stack of 5 leaves 4 in stock (06-A13 via SPEC-50).
   - [ ] Failed buy shows the reason and changes no wallet value.
+  - [ ] A refused session (hostile owner) disables buy and sell with `RefusalReason`; popping the screen calls `session.Close()` then `onClosed` once.
 - **Tests:** `Assets/Game/Tests/PlayMode/UI/Screens/MerchantViewTests.cs`: `TenTabs_4x3_NoOverflow`, `BuyOne_StockDecrementsByOne`, `BuyFails_ReasonShown_WalletUnchanged`, `Layout_AllLogicalSizes_NoIssues`.
 
 ### HUD-013 — Dialog host screen
@@ -568,10 +595,11 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 - **Milestone:** M3
 - **Tier:** standard — view on an existing view model
 - **Depends on:** `HUD-002`, `SPEC-42`
-- **Do:** `ShipLogView` (three tabs), `ShipLogPresenter`.
+- **Do:** `ShipLogView` (three tabs; mysteries and journal under Clues), `ShipLogPresenter` on SPEC-42 `ShipLogQuery` (§5.4).
 - **Files:** `Assets/Game/UI/Views/ShipLogView.cs`, `Assets/Game/UI/Views/Uxml/{ShipLogView,QuestRow,ClueRow,RumorRow}.uxml`, `Assets/Game/UI/Theme/screens/ship-log.uss`, `Assets/Game/Presentation/Presenters/ShipLogPresenter.cs`
 - **Acceptance criteria:**
-  - [ ] Selecting a quest shows its objectives with done states.
+  - [ ] Selecting a quest shows its objectives with done states and its log lines.
+  - [ ] Selecting a new clue clears its `IsNew` mark through `MarkClueSeen`.
   - [ ] "Show on map" opens the galaxy map with the rumor's star system selected.
   - [ ] Layout audit clean with 64 quests and 256 clues.
 - **Tests:** `Assets/Game/Tests/PlayMode/UI/Screens/ShipLogViewTests.cs`: `SelectQuest_ShowsObjectives`, `RumorShowOnMap_OpensGalaxyMapSelected`, `Layout_ManyItems_AllLogicalSizes_NoIssues`.
@@ -591,14 +619,16 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 ### HUD-016 — Galaxy map and star-system map screens
 - **Milestone:** M3
 - **Tier:** standard — views on existing view models using `MapCanvas`
-- **Depends on:** `HUD-015`, `SPEC-30`, `SPEC-31`
-- **Do:** `GalaxyMapView`, `StarSystemMapView`, `GalaxyMapPresenter`, `StarSystemMapPresenter` (system map uses XZ of `double3` star-system positions as `double2`).
+- **Depends on:** `HUD-015`, `SPEC-30`, `SPEC-31`, `TRV-001`, `QST-001`
+- **Do:** `GalaxyMapView`, `StarSystemMapView`, `GalaxyMapPresenter`, `StarSystemMapPresenter` (system map uses XZ of `double3` star-system positions as `double2`), per §5.4: destination and route through SPEC-32, owner colours through `MapPoint.ColorToken`, SPEC-42 markers.
 - **Files:** `Assets/Game/UI/Views/{GalaxyMapView,StarSystemMapView}.cs`, `Assets/Game/UI/Views/Uxml/{GalaxyMapView,StarSystemMapView}.uxml`, `Assets/Game/Presentation/Presenters/{GalaxyMapPresenter,StarSystemMapPresenter}.cs`
 - **Acceptance criteria:**
   - [ ] Opening centres on the current star system (galaxy) or the player (system).
-  - [ ] Set destination disabled with a reason for unknown or gated targets.
+  - [ ] Set destination disabled with `TravelService.CanSetDestination`'s reason; a set destination draws its route; Clear removes it.
+  - [ ] A star system owned by `faction_vestari` is drawn with `--color-faction-vestari`.
+  - [ ] A rumor marker appears on its target star system.
   - [ ] Layout audit clean at all logical sizes.
-- **Tests:** `Assets/Game/Tests/PlayMode/UI/Screens/MapViewsTests.cs`: `GalaxyOpen_CentredOnCurrent`, `SystemOpen_CentredOnPlayer`, `GatedTarget_DestinationDisabledWithReason`, `Layout_AllLogicalSizes_NoIssues`.
+- **Tests:** `Assets/Game/Tests/PlayMode/UI/Screens/MapViewsTests.cs`: `GalaxyOpen_CentredOnCurrent`, `SystemOpen_CentredOnPlayer`, `GatedTarget_DestinationDisabledWithReason`, `Destination_RouteDrawnAndCleared`, `OwnerColour_FromToken`, `RumorMarker_Shown`, `Layout_AllLogicalSizes_NoIssues`.
 
 ### HUD-017 — Fleet screen
 - **Milestone:** M3
@@ -624,17 +654,17 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
   - [ ] Regions do not overlap at all logical sizes.
 - **Tests:** `Assets/Game/Tests/PlayMode/UI/Screens/ShipEditorViewTests.cs`: `SetRoot_OnlyEditorRootVisible`, `Centre_NotPickable`, `Regions_NoOverlap_AllLogicalSizes`, `Back_ForwardsToCommands`.
 
-### HUD-019 — Hulk and loading screens
+### HUD-019 — Loading and dock screens
 - **Milestone:** M3
-- **Tier:** standard — views on existing view models
-- **Depends on:** `HUD-010`
-- **Do:** `HulkView`, `LoadingView`, `LoadingPresenter` (§5.4).
-- **Files:** `Assets/Game/UI/Views/{HulkView,LoadingView}.cs`, `Assets/Game/UI/Views/Uxml/{HulkView,LoadingView}.uxml`, `Assets/Game/UI/Theme/screens/{hulk,loading}.uss`, `Assets/Game/App/Presenters/LoadingPresenter.cs`
+- **Tier:** standard — views on existing view models; presenter steps in §5.4
+- **Depends on:** `HUD-010`, `SYS-001`, `ECO-001`, `EDT-001`
+- **Do:** `LoadingView`, `LoadingPresenter`, `DockView`, `DockPresenter` (§5.4; `DockStateChanged` drives push/pop).
+- **Files:** `Assets/Game/UI/Views/{LoadingView,DockView}.cs`, `Assets/Game/UI/Views/Uxml/{LoadingView,DockView}.uxml`, `Assets/Game/UI/Theme/screens/{loading,dock}.uss`, `Assets/Game/App/Presenters/{LoadingPresenter,DockPresenter}.cs`
 - **Acceptance criteria:**
-  - [ ] Esc cannot dismiss either screen.
-  - [ ] Load-last hidden when no save exists.
-  - [ ] Loading view blocks input (context `None`) and hides the HUD.
-- **Tests:** `Assets/Game/Tests/PlayMode/UI/Screens/HulkLoadingViewTests.cs`: `Hulk_EscIgnored`, `Hulk_NoSave_LoadHidden`, `Loading_ContextNone_HudHidden`.
+  - [ ] Esc cannot dismiss the loading view; it blocks input (context `None`) and hides the HUD.
+  - [ ] `DockStateChanged(true)` pushes the dock screen once; Esc or Undock calls `DockingService.Undock()` and the `(false)` event pops it.
+  - [ ] Trade opens the merchant screen through `MerchantLauncher.TryOpenForBody`; with no merchant the button is disabled with "No market here".
+- **Tests:** `Assets/Game/Tests/PlayMode/UI/Screens/LoadingDockViewTests.cs`: `Loading_EscIgnored_ContextNone_HudHidden`, `Dock_PushOnDock_PopOnUndock`, `Dock_Trade_OpensMerchant`, `Dock_NoMerchant_TradeDisabled`.
 
 ### HUD-020 — Full-screen layout regression suite
 - **Milestone:** M3
@@ -651,20 +681,20 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 
 | # | Question | Default if unanswered | Decider |
 |---|---|---|---|
-| 1 | SPEC-22: hull, shield, energy fields | `ShipStats.CellCount`, `ShipStats.CellCountMax` (cells at spawn/commit) for hull; `ShieldState.Hp`, `ShipStats.ShieldCapacity`, `ShieldState.Status` (byte: 0 none, 1 online, 2 recharging, 3 offline); `ShipPower.Stored`, `ShipStats.PowerStorage` | Tech lead (SPEC-22) |
-| 2 | SPEC-21: weapon state readable per functional weapon entity | `WeaponState { byte Group; float CooldownRemainingTicks; float CooldownTicks; byte Firing; }` alongside `FunctionalBlock` | Tech lead (SPEC-21) |
-| 3 | SPEC-24: ability slots on the ship | Buffer `AbilitySlot { ContentHash Ability; float CooldownRemainingTicks; float CooldownTicks; byte Charges; byte Active; }`, at most 4 shown | Tech lead (SPEC-24) |
-| 4 | SPEC-21/23: player's current target and its name key | `ShipTarget { Entity Value; }` on the player ship; the target grid root carries SPEC-10's blueprint `ContentHash` (`GridBlueprint { ContentHash Value; }`) | Tech lead (SPEC-21) |
-| 5 | SPEC-31: interaction singleton and body names | `InteractionTarget { Entity Entity; ulong BodyKey; byte Verb; float Distance; byte InRange; }`; `IBodyNames.GetName(ulong bodyKey)` managed; verbs 0 none, 1 dock, 2 talk, 3 scan, 4 jump, 5 salvage | Tech lead (SPEC-31) |
-| 6 | SPEC-30: current star system and names | Singleton `CurrentStarSystem { StarSystemId Id; }`; `IStarSystemNames.GetName(StarSystemId)` | Tech lead (SPEC-30) |
-| 7 | SPEC-33: relation between two allegiances (Burst-callable) | Same `Team` → ally; `Team == 0` on either side → neutral; otherwise enemy | Tech lead (SPEC-33) |
-| 8 | SPEC-31: marker component on bodies for the radar | `BodyMarker { byte Role; }` on body entities (stations → kind 1, planets/moons/stars → kind 2, points of interest → kind 3) | Tech lead (SPEC-31) |
-| 9 | SPEC-50: inventory, wallet and merchant APIs used by presenters | `InventoryModel { int Capacity; ItemStack Get(int slot); event Action<int> SlotChanged; event Action Reset; bool TryMove(...); void Sort(); void StackAll(); }`, `Wallet { int Balance; event Action Changed; }`, `MerchantSession { IReadOnlyList<MerchantStock> Stock; bool TryBuy(ContentId item, int qty, out string reason); bool TrySell(int slot, int qty, out string reason); }`; `ItemDefinition { DisplayName, Description, Icon, BasePrice, Category }` | Tech lead (SPEC-50) |
-| 10 | SPEC-42: quest log API and events | `QuestLog { IReadOnlyList<QuestView> Active, Completed; QuestView Tracked; void SetTracked(ContentId); event Action Changed; }`, clues and rumors as read-only lists with `Changed` | Tech lead (SPEC-42) |
-| 11 | SPEC-03: screen hotkey actions | `OpenInventory` I, `OpenShipLog` L, `OpenGalaxyMap` M, `OpenSystemMap` N, `OpenFleet` F, present in both Flight and Menu maps | Tech lead (SPEC-03) |
-| 12 | SPEC-01: who calls `SetRoot` and builds `UiComposition` | `GameRoot` builds `UiComposition` right after step 9; `SceneFlow` calls `SetRoot(MainMenu/FlightHud/ShipEditor)` when each scene is ready and shows `LoadingView` during transitions | Tech lead (SPEC-01) |
+| 1 | SPEC-22: hull, shield, energy fields | **Answered:** hull = `ShipStats.MassFraction`; shield = `ShieldState.Hp/MaxHp/Active/Flags`; energy = `ShipPower.Stored/Capacity` (§4.5) | Tech lead (SPEC-22) |
+| 2 | SPEC-21: weapon state readable per functional weapon entity | **Answered:** SPEC-21 `WeaponState` (`Group` bits, `Firing`, `CooldownRemainingTicks`, `CooldownTicks`) | Tech lead (SPEC-21) |
+| 3 | SPEC-24: ability slots on the ship | **Answered:** SPEC-24 `AbilitySlot` buffer (fields marked "SPEC-61") | Tech lead (SPEC-24) |
+| 4 | SPEC-21/23: player's current target and its name key | **Answered:** SPEC-21 `ShipTarget.Value`; name from `GridSource.Blueprint` (SPEC-10) with the SPEC-33 `shipNamePrefix` | Tech lead (SPEC-21) |
+| 5 | SPEC-31: interaction singleton and body names | **Answered:** SPEC-31 `InteractionTarget` (§4.3); names via `GalaxyService.GetBodyName`; gate prompts via SPEC-32 `TryGetGateInfo`; verb from `InteractionKind` | Tech lead (SPEC-31) |
+| 6 | SPEC-30: current star system and names | **Answered:** SPEC-31 `CurrentStarSystemInfo`; `GalaxyService.GetStarSystemName` | Tech lead (SPEC-30) |
+| 7 | SPEC-33: relation between two allegiances (Burst-callable) | **Answered:** `FactionRelations.Get(a.Faction, b.Faction)` (SPEC-21; 255 → Neutral); colours from `FactionDefinition.mapColorToken`; names prefixed with `shipNamePrefix`; encounter ships show the Hail prompt | Tech lead (SPEC-33) |
+| 8 | SPEC-31: marker component on bodies for the radar | **Answered:** SPEC-31 `StarSystemBody` + `SpatialBody` (kind 2) and `Interactable` without a grid (kind 3); no extra marker component | Tech lead (SPEC-31) |
+| 9 | SPEC-50: inventory, wallet and merchant APIs used by presenters | **Answered:** SPEC-50 §4.3–§4.4 (`Wallet.Credits` is `long`; `MerchantSession.TryBuy/TrySell/CanBuy/CanSell/Refused`; `MerchantLauncher.TryOpenForBody`; `EconomyNotice`) | Tech lead (SPEC-50) |
+| 10 | SPEC-42: quest log API and events | **Answered:** SPEC-42 `ShipLogQuery` and its `Markers` | Tech lead (SPEC-42) |
+| 11 | SPEC-03: screen hotkey actions | **Answered:** `OpenInventory` I, `OpenShipLog` L, `OpenGalaxyMap` M, `OpenSystemMap` N, `OpenFleet` K (F is Interact), in Flight and Menu maps | Tech lead (SPEC-03) |
+| 12 | SPEC-01: who calls `SetRoot` and builds `UiComposition` | **Answered:** SPEC-01 §5.2 step 10 builds `UiComposition` and calls `SceneFlow.SetRootScreens(composition)` (`IRootScreenSet`); `SceneFlow` calls `SetRoot` per scene and installs `Loading` during transitions | Tech lead (SPEC-01) |
 | 13 | SPEC-41: dialog number keys | SPEC-41 handles Dialog-map actions `Choice1..Choice9` and `Continue` and calls the same `IDialogCommands` implementation; `DialogView` handles clicks only | Tech lead (SPEC-41) |
-| 14 | SPEC-31/32: waypoint inside a star system | Not in M3: `system-map-set-waypoint` hidden (`CanSetWaypoint = false`) | Owner |
+| 14 | SPEC-31/32: waypoint inside a star system | **Answered:** M3 hidden; M4 "Cruise here" through `TravelService.CanCruise/RequestCruise` | Owner |
 | 15 | When is "Edit ship" allowed from the Fleet screen? | M3: disabled with reason "Dock at a station to edit" unless the player is docked (SPEC-31 docked flag); M4 adds in-world edit | Owner |
 | 16 | Ship and save thumbnails | None in M3 (text only); revisit after SPEC-80 approval | Owner |
 | 17 | Should Dialog pause the simulation? | Yes (`PausesSimulation = true`) | Owner |
