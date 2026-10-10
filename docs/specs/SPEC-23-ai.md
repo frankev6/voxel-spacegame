@@ -27,7 +27,7 @@ This spec gives the game a cheap, deterministic picture of "what is where" and t
 **Out of scope (and who owns it instead):**
 - Turning `ShipCommand` into thrust: SPEC-20. Aiming, lead and firing: SPEC-21 (AI only sets `ShipTarget` and `WeaponControl`).
 - Which ships spawn where and with which profile: SPEC-33 (encounters) and SPEC-31 (station garrisons). Faction relations content: SPEC-33.
-- Ability use by AI: SPEC-24 (v1 AI never triggers abilities; `Edges = 0`).
+- Ability effects: SPEC-24. This spec chooses when AI ships press abilities (profile ability rules, §5.4 step 8).
 - Navigation around large obstacles with path finding: not in v1 (local avoidance only, §5.6).
 
 ## 3. Decisions (binding)
@@ -37,7 +37,7 @@ This spec gives the game a cheap, deterministic picture of "what is where" and t
 3. **The hash is 2D on the XZ plane** with square cells of `CellSize` (128 m); proxies with radius above `LargeProxyRadius` (4 × `CellSize`) are kept in a separate list that every query scans. Exact tests are 3D. Reason: planar game; planets would otherwise fill thousands of cells.
 4. **AI writes only these:** `ShipCommand` of non-player, non-hulk ships with `AiBrain`; `ShipTarget` and `WeaponControl` of those ships; `AiBrain`; `PlayerCombatStatus`. Reason: single writers (architecture §8; SPEC-20 §4.6; SPEC-21 §4.5).
 5. **Thinking is staggered**: a ship thinks on ticks where `(Tick + (uint)PersistentId) % ThinkIntervalTicks == 0` (`ThinkIntervalTicks` from its profile, × `DormantThinkMultiplier` while `Dormant`). Steering runs every tick for every AI ship. Reason: architecture §11.9; the 1.5 ms gate.
-6. **AI flies like the player**: steering produces `ShipCommand.Thrust/Turn/Flags/AimWorld`; it never touches physics. Weapons fire through SPEC-21 autofire (`WeaponControl.Autofire = 1`, `AimMode = TargetLead`), so AI writes `FireGroups = 0` and `Edges = 0` every tick. Reason: one flight and weapon model (SPEC-20 decision 1).
+6. **AI flies like the player**: steering produces `ShipCommand.Thrust/Turn/Flags/AimWorld`; it never touches physics. Weapons fire through SPEC-21 autofire (`WeaponControl.Autofire = 1`, `AimMode = TargetLead`), so AI writes `FireGroups = 0`. `Edges` carries only the ability edges chosen by the profile's ability rules on think ticks (§5.4 step 8), else 0, so AI ships use abilities exactly like the player (review X5). Reason: one flight and weapon model (SPEC-20 decision 1).
 7. **Randomness** uses `Random.CreateFromIndex((uint)StableHash.Combine(StableHash.Combine(tick, persistentId), (ulong)RngPurpose.AiDecision))`. Reason: conventions §2.10; stable across runs and saves.
 8. **AI state is not saved.** On load, AI ships start in `Idle` with their anchor at the loaded position; SPEC-33 re-applies encounter context. Reason: combat cannot be saved (SPEC-01 `InCombat`), so mid-fight AI state never needs to survive a load.
 9. **Anchors are local-frame points kept consistent with the floating origin** by `AiAnchorShiftSystem`, which applies the Core `OriginShiftRecord` (§10 Q4) to every `AiBrain` the first tick after a shift. Reason: Simulation cannot read SPEC-30's `FrameOrigin`.
@@ -124,6 +124,16 @@ namespace Game.Data.Definitions
     public enum AiFacing : byte { FaceTarget = 0, Broadside = 1 }
     public enum AiRole : byte { Combat = 0, Turret = 1, Civilian = 2 }   // Turret: never steers; Civilian: never engages, flees from hostiles
 
+    /// <summary>When an AI ship presses an ability (review X5). Add values at the end only.</summary>
+    public enum AiAbilityTrigger : byte { EngageStart = 0, Fleeing = 1, HullBelow = 2, ShieldBelow = 3, ShieldOff = 4, HasTarget = 5 }
+
+    [System.Serializable] public struct AiAbilityRule
+    {
+        public AbilityDefinition ability;            // pressed when the ship has a slot (0..3) with this ability that is Ready and not Blocked
+        public AiAbilityTrigger trigger;
+        [UnityEngine.Range(0, 1)] public float threshold; // HullBelow: MassFraction; ShieldBelow: Hp/MaxHp; else unused
+    }
+
     [ContentIdPrefix("ai_")]
     [UnityEngine.CreateAssetMenu(menuName = "Game/Content/AI Profile", fileName = "ai_new")]
     public sealed class AiProfileDefinition : ContentDefinition
@@ -143,8 +153,9 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField, UnityEngine.Range(0, 60)] private int orbitFlipThinks = 12;      // thinks between orbit-direction flips (0 = never)
         [UnityEngine.SerializeField, UnityEngine.Range(0, 1.5f)] private float orbitStepRad = 0.35f;  // angle advanced around the target per think
         [UnityEngine.SerializeField] private bool avoidFriendlyFire = true;
+        [UnityEngine.SerializeField] private AiAbilityRule[] abilityRules = System.Array.Empty<AiAbilityRule>();   // ≤ 8, checked in order (review X5)
         // Public getters with the same names in PascalCase.
-        public override void Validate(ValidationScope scope, ContentValidationContext context);       // AI-E001..E002 (§7)
+        public override void Validate(ValidationScope scope, ContentValidationContext context);       // AI-E001..E003 (§7)
     }
 
     [ContentIdPrefix("config_")]
@@ -161,7 +172,7 @@ namespace Game.Data.Definitions
 }
 ```
 
-Default content (AI-003 creates them): `ai_default` (Combat, values as above), `ai_turret` (Turret, thinkInterval 6, sensorRange 1,200), `ai_skittish` (Combat, fleeHullFraction 0.5, playerBias 0, throttle 1), `ai_civilian` (Civilian, fleeHullFraction 1).
+Default content (AI-003 creates them): `ai_default` (Combat, values as above), `ai_turret` (Turret, thinkInterval 6, sensorRange 1,200), `ai_skittish` (Combat, fleeHullFraction 0.5, playerBias 0, throttle 1), `ai_civilian` (Civilian, fleeHullFraction 1). Ability rules (review X5): `ai_default` `[ability_shield_toggle on ShieldOff, ability_speed_boost on Fleeing]`; `ai_turret` `[ability_shield_toggle on ShieldOff]`; `ai_skittish` and `ai_civilian` `[ability_speed_boost on Fleeing]`.
 
 ### 4.3 AI ECS types (`Game.Simulation.Ai`)
 
@@ -182,7 +193,9 @@ namespace Game.Simulation.Ai
         public float LeashRadius, PatrolRadius, PlayerBias, Stickiness, OrbitStepRad;
         public int OrbitFlipThinks;
         public Game.Core.ContentHash IdHash;
+        public BlobArray<AiAbilityRuleDef> AbilityRules;   // baked from abilityRules (ability → AbilityDefsBlob index)
     }
+    public struct AiAbilityRuleDef { public ushort AbilityIndex; public Game.Data.Definitions.AiAbilityTrigger Trigger; public float Threshold; }
     public struct AiProfilesBlob { public BlobArray<AiProfile> Profiles; }   // [0] = default profile copy; [i] = IndexOf<AiProfileDefinition>
 
     /// <summary>Boot singleton (SPEC-01 BootSingletons) from config_ai and all AiProfileDefinitions.</summary>
@@ -203,6 +216,10 @@ namespace Game.Simulation.Ai
         public sbyte OrbitSign;          // +1 or −1
         public byte FireBlocked;         // 1 = an ally is in the line of fire (autofire suspended)
         public byte Initialized;         // 0 = zeroed by profile conversion; AiAnchorShiftSystem completes it (§5.3 step 0)
+        public byte AbilityEdges;        // bits 0..3 = Ability1..4 chosen on the last think (§5.4 step 8)
+        public AiState PreviousState;    // state before the last think (EngageStart trigger)
+        public ushort Reserved2;
+        public uint AbilityEdgesTick;    // tick the edges belong to; steering writes them only on that tick
         public ushort ProfileIndex;
         public ushort ThinkCount;
         public float3 Anchor;            // local frame
@@ -264,7 +281,7 @@ namespace Game.Data.Definitions
 
 ### 4.5 Memory
 
-Per AI ship: `AiBrain` 64 B. Hash: 64 B per proxy + ≈ 4 entries per proxy × 4 B + map ≈ 20 B per cell; 1,000 proxies ≈ 100 KB.
+Per AI ship: `AiBrain` ≈ 72 B. Hash: 64 B per proxy + ≈ 4 entries per proxy × 4 B + map ≈ 20 B per cell; 1,000 proxies ≈ 100 KB.
 
 ## 5. Systems, services and flow
 
@@ -332,12 +349,13 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (step
    - `Patrol`: when within `ArrivalRadius` of the goal or on the first think: `GoalPosition = Anchor + rotateY((rng.NextFloat() × PatrolRadius, 0, 0), rng.NextFloat(0, 2π))`; heading toward it; speed `0.5 × Throttle`.
    - `Idle`/`Hold`: `GoalPosition = pos`, heading = current, speed 0.
 6. **Local avoidance:** `QuerySegment(pos, GoalPosition, ownHullRadius)`; the first proxy (by index) that is not self and not the target, whose hull (`HullRadius + ownHullRadius + AvoidanceMargin`) the segment passes through → shift `GoalPosition` sideways (perpendicular in XZ, toward the side of the segment the proxy centre is not on) by that clearance.
+8. **Abilities** (review X5): `AbilityEdges = 0`, `AbilityEdgesTick = Tick`, `PreviousState` = the state before step 4. If the root has an `AbilitySlot` buffer (SPEC-24, read-only, last tick's values): for each rule of the profile in order, find slot `k < 4` with `AbilityIndex == rule.AbilityIndex`, `State == Ready`, `Blocked == 0`; if found and the trigger holds, `AbilityEdges |= 1 << k`. Triggers: `EngageStart` = state became `Engage` this think; `Fleeing` = state `Flee`; `HullBelow` = `ShipStats.MassFraction < Threshold`; `ShieldBelow` = `ShieldState.MaxHp > 0 && Hp < Threshold × MaxHp`; `ShieldOff` = `ShieldState.MaxHp > 0 && ShieldControl.RequestedOn == 0`; `HasTarget` = target set.
 7. **Weapons:** `WeaponControl = { Autofire = (State == Engage || State == Hold) && target set && FireBlocked == 0 ? 1 : 0, AimMode = TargetLead }`. `FireBlocked`: if `AvoidFriendlyFire`, `QuerySegment(pos, targetCentre, 2)` contains a non-hostile proxy (not self, not target) whose hull the segment crosses before the target → 1, else 0.
 
 ### 5.5 `AiSteeringSystem`
 
 `AiSteerJob : IJobEntity` (`ScheduleParallel`) over roots with `AiBrain`, `ShipCommand`, `FlightState`, `LocalTransform`, `WithNone<PlayerShip, Hulk>`. Every tick:
-1. `cmd = default` (`Edges = 0`, `FireGroups = 0` — decision 6). Roles `Turret`, or no `FlightState` → write `cmd` with `AimWorld = target centre`, `AimValid = target ? 1 : 0` and return.
+1. `cmd = default` (`FireGroups = 0` — decision 6); `cmd.Edges = AbilityEdgesTick == Tick ? Ability1..4 bits from AbilityEdges : 0`. Roles `Turret`, or no `FlightState` → write `cmd` with `AimWorld = target centre`, `AimValid = target ? 1 : 0` and return.
 2. `fwd = Planar.ForwardFromYaw(Planar.YawFromForward(rotate(rot, (0,0,1))))`; `e = Planar.WrapAngle(GoalHeadingYaw − currentYaw)`; `Turn = clamp(e / (FlightState.YawRateCap × 0.5), −1, 1)` (cap 0 → Turn 0).
 3. `to = GoalPosition − pos` (XZ); `dist = length(to)`; arrival: `dist < ArrivalRadius` → desired world velocity 0; else `vDes = normalize(to) × min(GoalSpeedFraction × FlightState.ForwardCap, sqrt(2 × aBrake × max(0, dist − ArrivalRadius)))` with `aBrake = max(0.5, 0.5 × PropulsionStats.ForwardAccel)` (or 2 m/s² without stats).
 4. Local: `v = FlightMath.ToLocalPlanar(vDes, rot)`; `Thrust.x = clamp(v.x / max(1, StrafeCap), −1, 1)`; `Thrust.y = v.y ≥ 0 ? clamp(v.y / max(1, ForwardCap), 0, 1) : clamp(v.y / max(1, ReverseCap), −1, 0)`; if `|Thrust.y| < 0.002` and the current forward speed exceeds 1 m/s, set `Thrust.y = −0.002 × sign(current forward speed)` so flight assist stops the ship instead of coasting (SPEC-20 decision 4).
@@ -375,7 +393,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (step
 | Origin rebase | Anchors and goals shift by the record delta (§5.3); star-system change resets anchors |
 | Two AI ships each other's target, both fleeing | Allowed; flee goals are recomputed each think |
 | Load | AI restarts in `Idle` (decision 8) |
-| Content | AI-E001 `thinkIntervalTicks < 1`; AI-E002 `config_ai.defaultProfile` null |
+| Content | AI-E001 `thinkIntervalTicks < 1`; AI-E002 `config_ai.defaultProfile` null; AI-E003 more than 8 `abilityRules` or a rule without `ability` |
 
 ## 8. Performance budget
 
@@ -450,15 +468,16 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (step
 ### AI-006 — AiDecisionSystem
 - **Milestone:** M2
 - **Tier:** frontier — F3/F5: staggered deterministic decisions over the hash, writes three components other systems consume
-- **Depends on:** `AI-004`, `AI-005`, `SPEC-20`, `SPEC-21`
-- **Do:** Implement §5.4.
+- **Depends on:** `AI-004`, `AI-005`, `SPEC-20`, `SPEC-21`, `ABL-001`
+- **Do:** Implement §5.4 (including step 8, ability rules) and the `abilityRules` bake in `AiContent`.
 - **Files:** `Assets/Game/Simulation/Ai/{AiDecisionSystem,AiThinkJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Ai/AiDecisionTests.cs`
 - **Acceptance criteria:**
   - [ ] Each ship thinks exactly on its stagger ticks (and 6× less often while dormant).
   - [ ] Target choice prefers nearer hostiles, honours player bias and stickiness, never picks allies, neutrals, hulks or itself.
   - [ ] State transitions of §5.4 step 4 hold in table-driven tests; leash and return work.
   - [ ] Friendly-fire block suspends autofire while an ally crosses the line of fire.
-- **Tests:** `AiDecisionTests.ThinkSchedule`, `.Target_Scoring`, `.Target_NeverAlly`, `.States_Table`, `.Leash_Return`, `.FriendlyFire_Blocks`, `.Avoidance_ShiftsGoal`.
+  - [ ] Ability rules: a fleeing ship with a Ready speed-boost slot sets that slot's edge on its think tick; a Blocked or cooling-down slot is never pressed; the edge reaches `ShipCommand.Edges` only on that tick.
+- **Tests:** `AiDecisionTests.AbilityRules_Fleeing_Boosts`, `.AbilityRules_RespectsBlocked`, `AiDecisionTests.ThinkSchedule`, `.Target_Scoring`, `.Target_NeverAlly`, `.States_Table`, `.Leash_Return`, `.FriendlyFire_Blocks`, `.Avoidance_ShiftsGoal`.
 
 ### AI-007 — AiSteeringSystem
 - **Milestone:** M2
@@ -467,7 +486,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (step
 - **Do:** Implement §5.5.
 - **Files:** `Assets/Game/Simulation/Ai/{AiSteeringSystem,AiSteerJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Ai/AiSteeringTests.cs`
 - **Acceptance criteria:**
-  - [ ] Every AI ship's `ShipCommand` is rewritten every tick with `Edges = 0` and `FireGroups = 0`.
+  - [ ] Every AI ship's `ShipCommand` is rewritten every tick with `FireGroups = 0`, and `Edges` = the ability edges of this tick's think (0 on other ticks).
   - [ ] A ship given a goal 500 m away arrives within `ArrivalRadius` and stops (speed < 1 m/s) without overshooting by more than 20 m (with SPEC-20 propulsion in the test world).
   - [ ] Turrets never get thrust.
 - **Tests:** `AiSteeringTests.RewritesEveryTick`, `.ArrivesAndStops`, `.FacesHeading`, `.Turret_NoThrust`.
@@ -556,7 +575,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (step
 
 | # | Question | Default if unanswered | Decider |
 |---|---|---|---|
-| 1 | Should AI use abilities in v1? | No; `Edges = 0` (SPEC-24 may add an `AiAutoUse` flag in M4) | Owner |
+| 1 | Should AI use abilities in v1? | **Answered (2026-10-10, owner, extensibility review X5): yes**, through per-profile `AiAbilityRule`s (§4.2, §5.4 step 8) | Owner |
 | 2 | SPEC-22 power demand: a weapon also requests power while `WeaponControl.Autofire == 1` and `ShipTarget` is set (AI and player autofire never hold fire groups) | **Applied** in SPEC-22 §5.3 (2026-10-09). Yes | SPEC-22 |
 | 3 | AI awareness of the player: always perfect inside `SensorRange` (no stealth) | Yes | Owner |
 | 4 | SPEC-02/SPEC-30: add the Core singleton `OriginShiftRecord { uint Sequence; float3 Delta; byte StarSystemChanged; }` (`Game.Core.Components`). `OriginRebaseSystem.OnCreate` creates it; its `DecideJob` writes the values of the latest rebase together with `FrameOrigin` (`Sequence = FrameOrigin.ShiftSequence`). Simulation owners of cached positions (AI anchors here, `ProjectileStore` in SPEC-21) react to it because Game.Simulation cannot read `FrameOrigin` | **Applied** in SPEC-02 §4.3, SPEC-30 §5.10 (2026-10-09). Add the record (last rebase only; consumers detect gaps by `Sequence`) | Tech lead |

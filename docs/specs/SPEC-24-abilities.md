@@ -13,14 +13,14 @@
 
 ## 1. Purpose
 
-Abilities are what blocks let a ship *do* besides fly and shoot: a speed boost from thrusters, a shield toggle from shield emitters. They come from blocks (`BlockDefinition.grantedAbilities`), so building changes the ability bar and losing the granting blocks removes the ability. The player triggers them with keys 1–4 (`ShipCommand.Edges`), energy is paid once through SPEC-22's grant handshake, and effects reach the ship only through the existing single-writer components (`ShipStatModifier`, `ShieldControl`). Timing is in fixed ticks: charges, cooldowns and durations are frame-rate independent. The old prototype hard-coded both abilities on the ship asset and read input in the variable-rate update; here abilities are data and the timing is deterministic.
+Abilities are what blocks let a ship *do* besides fly and shoot: a speed boost from thrusters, a shield toggle from shield emitters. They come from blocks (`BlockDefinition.grantedAbilities`), so building changes the ability bar and losing the granting blocks removes the ability. The player triggers them with keys 1–4 and AI ships through their profile's ability rules (both via `ShipCommand.Edges`), energy is paid once through SPEC-22's grant handshake, and effects reach the ship only through the existing single-writer components (`ShipStatModifier`, `ShieldControl`). Timing is in fixed ticks: charges, cooldowns and durations are frame-rate independent. The old prototype hard-coded both abilities on the ship asset and read input in the variable-rate update; here abilities are data and the timing is deterministic.
 
 ## 2. Scope
 
 **In scope:**
 - `AbilityDefinition` (+ blob `AbilityDefsBlob`, singleton `AbilityDefsRef`), the two legacy abilities' v2 values.
 - `AbilitySlot` buffer, `AbilityState`, `AbilityGridSetup`.
-- `AbilitySystem` (slot sync from blocks, timers, activation, power handshake, stat-modifier requests), `ShieldToggleEffectSystem`.
+- `AbilitySystem` (kind-agnostic: slot sync from blocks, timers, activation, power handshake), one effect system per kind: `ShieldToggleEffectSystem`, `StatBoostEffectSystem`.
 - Activation feedback (`FxEvent`/`SfxEvent`), tests.
 
 **Out of scope (and who owns it instead):**
@@ -35,7 +35,7 @@ Abilities are what blocks let a ship *do* besides fly and shoot: a speed boost f
 2. **Slots resync only when `ShipStats.FunctionalRevision` changes**, keeping the timers and charges of abilities that remain. Reason: architecture §11.1; no per-tick scans of instances.
 3. **Keys map to slot positions**: `Ability1..4` edges activate slots 0..3. Slots 4..7 exist for future UI and AI. Reason: SPEC-03 bindings.
 4. **Energy is one-shot and granted with one tick of latency** (SPEC-22 decision 8): an activation request puts the slot into `PendingPower` with `PendingCost`; the next tick's grant bit activates it, a missing bit denies it. Abilities with cost 0 activate in the request tick.
-5. **Effects use existing single writers.** Stat boosts are posted as `StatModifierRequest`s (SPEC-22 `StatusChannels`, ADR-0016; key `(Ability, slot index, stat)`, `UntilTick = ActiveUntilTick`); shield toggles flip `ShieldControl.RequestedOn`, written only by `ShieldToggleEffectSystem`. Reason: architecture §8; SPEC-22 ownership table.
+5. **`AbilitySystem` is kind-agnostic; one effect system per `AbilityKind` (review X5).** `AbilitySystem` owns charges, cooldowns, the power handshake, activation and, for kinds with `DurationTicks > 0`, `Active`/`ActiveUntilTick`. The effect system of a kind reads `ActivatedThisTick`/`Resynced`, applies the effect, and writes `Blocked` (kind-specific preconditions) and, for kinds without duration, `Active`. A new kind is an enum value plus an effect system. **Effects use existing single writers.** Stat boosts are posted as `StatModifierRequest`s (SPEC-22 `StatusChannels`, ADR-0016; key `(Ability, slot index, stat)`, `UntilTick = ActiveUntilTick`); shield toggles flip `ShieldControl.RequestedOn`, written only by `ShieldToggleEffectSystem`. Reason: architecture §8; SPEC-22 ownership table.
 6. **Timing in ticks with fractional accumulators**; charges recharge one at a time. Reason: architecture §5.1.
 7. **Hulks have no abilities**: all slots become `Unavailable`, modifiers are cleared.
 8. **Folders and namespaces:** `Assets/Game/Simulation/Abilities/` → `Game.Simulation.Abilities`; definitions in `Assets/Game/Data/Definitions/Abilities/` → `Game.Data.Definitions`.
@@ -69,7 +69,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField] private AudioCueDefinition activationCue;
         [UnityEngine.SerializeField] private FxDefinition activationFx;
         // Public getters with the same names in PascalCase.
-        public override void Validate(ValidationScope scope, ContentValidationContext context);   // ABL-E001..E004 (§7)
+        public override void Validate(ValidationScope scope, ContentValidationContext context);   // ABL-E001..E005 (§7)
     }
 }
 ```
@@ -123,7 +123,7 @@ namespace Game.Simulation.Abilities
 
     public enum AbilitySlotState : byte { Ready = 0, PendingPower = 1, Active = 2, Cooldown = 3, Unavailable = 4 }   // SPEC-22 reads PendingPower
 
-    [System.Flags] public enum AbilitySlotFlags : byte { None = 0, ActivatedThisTick = 1, DeniedThisTick = 2, ToggleRequested = 4 }
+    [System.Flags] public enum AbilitySlotFlags : byte { None = 0, ActivatedThisTick = 1, DeniedThisTick = 2, Resynced = 4 /* slot list rebuilt or hulk this tick */ }
 
     /// <summary>One ability of the ship. At most 8. Only writer: AbilitySystem. Field names fixed by SPEC-22 and SPEC-61 Q3.</summary>
     [InternalBufferCapacity(0)]
@@ -135,7 +135,8 @@ namespace Game.Simulation.Abilities
         public AbilitySlotFlags Flags;              // this tick only
         public byte Charges;                        // SPEC-61
         public byte Active;                         // SPEC-61: 1 while a boost runs or the toggled shield is requested on
-        public ushort Reserved;
+        public byte Blocked;                        // 1 = activation not allowed now; written only by the effect system of this slot's kind (§5.2)
+        public byte Reserved;
         public float CooldownRemainingTicks;        // SPEC-61
         public float CooldownTicks;                 // SPEC-61
         public float ChargeRechargeRemainingTicks;  // > 0 while a charge is recharging
@@ -173,32 +174,39 @@ Memory: 48 B per slot outside the chunk (≤ 8 per ship), `AbilityState` 8 B.
 |---|---|---|---|
 | `AbilitySystem` | first (no attribute) | yes | `GameplayActive`, `AbilityDefsRef`, `SimClock` |
 | `ShieldToggleEffectSystem` | `[UpdateAfter(typeof(AbilitySystem))]` | yes | `GameplayActive` |
+| `StatBoostEffectSystem` | `[UpdateAfter(typeof(AbilitySystem))]` | yes | `GameplayActive`, `AbilityDefsRef`, `StatusChannels` |
 
 Tick timeline for a costed ability pressed during frame f: tick N `PlayerCommandApplySystem` sets the edge → `AbilitySystem` sets `PendingPower`; tick N+1 `PowerAllocationSystem` grants (bit in `AbilityGrantMask`, `AbilityGrantTick = N+1`) → `AbilitySystem` activates and posts the modifier requests → tick N+2 SPEC-22 `StatusSystem` writes `ShipStatModifier` → `ShipStatsAggregateSystem` applies them (SPEC-22 change filter) → `PropulsionSystem` uses the new caps.
 
 ### 5.1 `AbilitySystem`
 
-`AbilityJob : IJobEntity, IJobEntityChunkBeginEnd` (`ScheduleParallel`; each root by one worker) over roots with `AbilitySlot`, `AbilityState`; writes `StatModifierRequest`s through `StatusChannels.StatModifiers.BeginWrite(ref state, ProducerKind.Ability, chunkCount)` at foreach index `unfilteredChunkIndex` (Begin/EndForEachIndex in the chunk callbacks; `Sequence = slot × 8 + mod index`); "post cancel(s)" below = one request per mod of that slot with `Multiplier = 1`; reads `ShipStats` (optional), `ShipPower` (optional), `ShipCommand` (optional), `ShieldControl`/`ShieldState` (optional), `BlockInstance`, `BlockDefsRef`, `Hulk`, `GridSpawning`, `PlayerShip`, `LocalTransform`; enqueues Fx/Sfx. Per ship (`tick = SimClock.Tick`):
+`AbilityJob : IJobEntity` (`ScheduleParallel`; each root by one worker) over roots with `AbilitySlot`, `AbilityState`; reads `ShipStats` (optional), `ShipPower` (optional), `ShipCommand` (optional), `BlockInstance`, `BlockDefsRef`, `Hulk`, `GridSpawning`, `PlayerShip`, `LocalTransform`; enqueues Fx/Sfx. Per ship (`tick = SimClock.Tick`):
 1. Skip if `GridSpawning` enabled. Clear `Flags` of every slot.
-2. **Hulk:** if the root has `Hulk` and any slot is not `Unavailable` → for each slot with `Active == 1` and kind StatBoost post cancels; every slot `State = Unavailable`, `Active = 0`; return.
+2. **Hulk:** if the root has `Hulk` and any slot is not `Unavailable` → every slot `State = Unavailable`, `Active = 0`, `Flags |= Resynced`; return.
 3. **Sync** (only if `ShipStats` exists with `Initialized` and `FunctionalRevision != SyncedRevision`):
    1. Walk `BlockInstance` in index order; for each alive instance, for each `a` in `BlockDefs[Block].AbilityIndices`: record `(a, instanceIndex)` the first time `a` is seen (≤ 8 distinct; further ones ignored with `GameLog.Burst.Warn` once).
    2. New slot list in that order: reuse the old slot with the same `AbilityIndex` (keep timers, charges, state; update `FirstInstanceIndex`), else a fresh slot `{ Ability = def.IdHash, AbilityIndex = a, State = Ready, Charges = MaxCharges, CooldownTicks = def.CooldownTicks }`.
-   3. Old slots that disappeared: if `Active == 1` and StatBoost → post cancels for that slot index (a removed shield toggle leaves `ShieldControl` as it is). Slots whose index changed post cancels for the old index and re-post the boost under the new one.
+   3. Every slot of the new list gets `Flags |= Resynced` (effect systems reconcile their effects, §5.3).
    4. `SlotCount`, `SyncedRevision = FunctionalRevision`. Without `ShipStats` (tests, M1 worlds) sync once when `SyncedRevision == 0` using `1` as the revision.
 4. **Timers**, per slot `s`, `d = AbilityDefs[s.AbilityIndex]`:
    - `CooldownRemainingTicks = max(0, CooldownRemainingTicks − 1)`.
    - `Charges < d.MaxCharges`: if `ChargeRechargeRemainingTicks <= 0` → start: `ChargeRechargeRemainingTicks = max(1, d.ChargeRechargeTicks)`; else decrement; when it reaches `≤ 0` → `Charges++` (and restart if still below max). With `MaxCharges == 1` the charge returns when the cooldown ends (`Charges = 1` once `CooldownRemainingTicks == 0`).
-   - StatBoost `Active == 1 && tick ≥ ActiveUntilTick` → `Active = 0` (the modifiers expire by their own `UntilTick`).
-   - ShieldToggle: `Active = ShieldControl.RequestedOn` (mirror).
+   - `d.DurationTicks > 0 && Active == 1 && tick ≥ ActiveUntilTick` → `Active = 0` (effects expire by their own timers, e.g. modifier `UntilTick`).
 5. **Power handshake** for slots in `PendingPower`: if `ShipPower` is absent → granted; else granted iff `ShipPower.AbilityGrantTick == tick && (AbilityGrantMask & (1u << index)) != 0`. Granted → **activate** (step 7). Not granted and `tick > PendingSinceTick` → denied: `State = Ready`, `Flags |= DeniedThisTick`, `PendingCost = 0`.
-6. **Requests:** if the root is the player ship, for `k = 0..3` with edge `Ability{k+1}` set in `ShipCommand.Edges` and slot `k` existing: the request is valid if `State ∈ {Ready}`, `Charges > 0`, `CooldownRemainingTicks == 0`, and for ShieldToggle switching on (`ShieldControl.RequestedOn == 0`): `ShieldState.MaxHp > 0 && ShieldState.Hp ≥ d.ShieldEnableThreshold × MaxHp`. Invalid → `Flags |= DeniedThisTick`. Valid: `d.EnergyCost > 0` → `State = PendingPower`, `PendingCost = d.EnergyCost`, `PendingSinceTick = tick`; else activate now (step 7).
-7. **Activate:** `Charges−−`; `CooldownRemainingTicks = CooldownTicks`; `PendingCost = 0`; `Flags |= ActivatedThisTick`; StatBoost → `Active = 1`, `ActiveUntilTick = tick + d.DurationTicks`, post one request per mod `{ Root, Stat, Ability, SourceId = slot, Multiplier, UntilTick = ActiveUntilTick }`; ShieldToggle → `Flags |= ToggleRequested`. If `d.ActivationCue.Value != 0`: enqueue `SfxEvent { Cue = ActivationCue, Pos = root position, Volume = 1 }`. If `d.ActivationFx.Value != 0`: enqueue `FxEvent { Kind = FxKind.Muzzle, Fx = ActivationFx, Pos = root position, Dir = root forward, Vel = root velocity, Scale = 2 }` (the `Fx` hash selects the look; `Muzzle` is only the fallback kind). Both carry the `PlayerSource` flag for the player ship.
-8. **State:** for each slot not `PendingPower`/`Unavailable`: `State = Active == 1 && kind StatBoost ? Active : (CooldownRemainingTicks > 0 || Charges == 0) ? Cooldown : Ready`.
+6. **Requests** (player and AI alike: every `ShipCommand` writer may set ability edges, SPEC-23 §5.4 step 8): for `k = 0..3` with edge `Ability{k+1}` set in `ShipCommand.Edges` and slot `k` existing: the request is valid if `State ∈ {Ready}`, `Charges > 0`, `CooldownRemainingTicks == 0` and `Blocked == 0`. Invalid → `Flags |= DeniedThisTick`. Valid: `d.EnergyCost > 0` → `State = PendingPower`, `PendingCost = d.EnergyCost`, `PendingSinceTick = tick`; else activate now (step 7).
+7. **Activate:** `Charges−−`; `CooldownRemainingTicks = CooldownTicks`; `PendingCost = 0`; `Flags |= ActivatedThisTick`; if `d.DurationTicks > 0` → `Active = 1`, `ActiveUntilTick = tick + d.DurationTicks`. If `d.ActivationCue.Value != 0`: enqueue `SfxEvent { Cue = ActivationCue, Pos = root position, Volume = 1 }`. If `d.ActivationFx.Value != 0`: enqueue `FxEvent { Kind = FxKind.Muzzle, Fx = ActivationFx, Pos = root position, Dir = root forward, Vel = root velocity, Scale = 2 }` (the `Fx` hash selects the look; `Muzzle` is only the fallback kind). Both carry the `PlayerSource` flag for the player ship.
+8. **State:** for each slot not `PendingPower`/`Unavailable`: `State = Active == 1 && d.DurationTicks > 0 ? Active : (CooldownRemainingTicks > 0 || Charges == 0) ? Cooldown : Ready`.
 
-### 5.2 `ShieldToggleEffectSystem`
+### 5.2 `ShieldToggleEffectSystem` (kind ShieldToggle)
 
-`IJobEntity` (`ScheduleParallel`) over roots with `AbilitySlot`, `ShieldControl`: if any slot has `ToggleRequested` this tick → `RequestedOn ^= 1`. The only writer of `ShieldControl` after spawn.
+`IJobEntity` (`ScheduleParallel`) over roots with `AbilitySlot`, `ShieldControl`, `ShieldState`; for each slot of kind ShieldToggle: if `ActivatedThisTick` → `RequestedOn ^= 1` (once per tick even with several such slots); then `Active = RequestedOn`; `Blocked = RequestedOn == 0 && !(ShieldState.MaxHp > 0 && ShieldState.Hp ≥ d.ShieldEnableThreshold × MaxHp) ? 1 : 0`. The only writer of `ShieldControl` after spawn, and of `Active`/`Blocked` of ShieldToggle slots.
+
+### 5.3 `StatBoostEffectSystem` (kind StatBoost; ADR-0016 requests)
+
+`IJobEntity, IJobEntityChunkBeginEnd` (`ScheduleParallel`) over roots with `AbilitySlot`; writes `StatModifierRequest`s through `StatusChannels.StatModifiers.BeginWrite(ref state, ProducerKind.Ability, chunkCount)` at foreach index `unfilteredChunkIndex`. Per root:
+1. If any slot has `Resynced`: post a cancel (`Multiplier = 1`) for every `(SourceId = s, Stat)` with `s` in 0..7 and every `StatId` value (`Sequence = s × 16 + stat`), then re-post `{ Root, Stat, Ability, SourceId = s, Multiplier, UntilTick = ActiveUntilTick, Sequence = 1000 + s × 8 + mod }` for every StatBoost slot `s` with `Active == 1`.
+2. Else for every StatBoost slot `s` with `ActivatedThisTick`: post one request per mod (`Sequence = 1000 + s × 8 + mod`).
+StatBoost slots are never `Blocked` (the system writes 0). `StatusSystem` (SPEC-22) applies the requests the next tick.
 
 ## 6. Public API
 
@@ -221,7 +229,7 @@ Tick timeline for a costed ability pressed during frame f: tick N `PlayerCommand
 | Ship becomes a hulk | Every slot `Unavailable`; modifiers cleared |
 | No `ShipStats` | Sync once at the first update |
 | No `ShipPower` (non-combat test world) | Costs are treated as granted |
-| Content | ABL-E001 StatBoost without modifiers or with > 4; ABL-E002 StatBoost `durationSeconds ≤ 0`; ABL-E003 `maxCharges > 1` with `chargeRechargeSeconds ≤ 0` (ABL-E004 is retired: it was the mirror-enum check) |
+| Content | ABL-E001 StatBoost without modifiers or with > 4; ABL-E002 StatBoost `durationSeconds ≤ 0`; ABL-E003 `maxCharges > 1` with `chargeRechargeSeconds ≤ 0`; ABL-E005 ShieldToggle with `durationSeconds > 0` (toggles own `Active` through their effect system) (ABL-E004 is retired: it was the mirror-enum check) |
 
 ## 8. Performance budget
 
@@ -265,15 +273,16 @@ Scale notes: per ship per tick O(slots ≤ 8); the instance walk happens only on
   - [ ] Slots follow §3 decision 1 ordering and survive resync with their timers.
   - [ ] Speed boost: two presses spend two charges; a third press is denied; one charge returns after 180 ticks; each boost lasts 60 ticks.
   - [ ] Costed activation happens exactly one tick after the request when granted; denied leaves the slot `Ready`.
-  - [ ] Shield toggle respects the threshold when switching on.
-- **Tests:** `AbilitySystemTests.Slots_FromBlocks_Ordered`, `.Resync_KeepsTimers`, `.Boost_ChargesAndRecharge`, `.Boost_Duration`, `.Grant_OneTickLatency`, `.Grant_Denied`, `.ShieldToggle_Threshold`, `.Hulk_Unavailable`.
+  - [ ] Shield toggle respects the threshold when switching on (through `Blocked`, written by its effect system).
+  - [ ] An ability edge written by a non-player ship's `ShipCommand` activates its slot exactly like the player's (review X5).
+- **Tests:** `AbilitySystemTests.Slots_FromBlocks_Ordered`, `.Resync_KeepsTimers`, `.Boost_ChargesAndRecharge`, `.Boost_Duration`, `.Grant_OneTickLatency`, `.Grant_Denied`, `.ShieldToggle_Threshold`, `.Hulk_Unavailable`, `.AiEdge_Activates`.
 
 ### ABL-004 — Effect systems
 - **Milestone:** M2
 - **Tier:** standard — two small writers specified in §5.2–§5.3
 - **Depends on:** `ABL-003`, `SPEC-22`
-- **Do:** Implement `ShieldToggleEffectSystem` and the stat-modifier requests of `AbilitySystem` (§5.1 steps 2, 3.3, 7; ADR-0016).
-- **Files:** `Assets/Game/Simulation/Abilities/{ShieldToggleEffectSystem,AbilitySystem}.cs`, `Assets/Game/Tests/EditMode/Simulation/Abilities/AbilityEffectTests.cs`
+- **Do:** Implement `ShieldToggleEffectSystem` (§5.2) and `StatBoostEffectSystem` (§5.3).
+- **Files:** `Assets/Game/Simulation/Abilities/{ShieldToggleEffectSystem,StatBoostEffectSystem}.cs`, `Assets/Game/Tests/EditMode/Simulation/Abilities/AbilityEffectTests.cs`
 - **Acceptance criteria:**
   - [ ] A toggle flips `ShieldControl.RequestedOn` once; an active boost appears in `ShipStatModifier` (producer `Ability`, `SourceId` = slot) one tick after activation and disappears when it ends or its block is destroyed.
 - **Tests:** `AbilityEffectTests.Toggle_FlipsOnce`, `.Boost_ModifiersAddedAndRemoved`.

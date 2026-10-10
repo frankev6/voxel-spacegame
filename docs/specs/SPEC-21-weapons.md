@@ -101,6 +101,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField] private AudioCueDefinition fireCue;     // null = silent
         [UnityEngine.SerializeField] private FxDefinition muzzleFx;          // null = FxKind default (SPEC-63 Q8)
         [UnityEngine.SerializeField] private FxDefinition hitFx;             // null = FxKind default
+        [UnityEngine.SerializeReference] private WeaponDeliveryData deliveryData;  // §4.6c; null for Projectile/Beam/Missile
         // Public getters with the same names in PascalCase.
         /// §4.9 formula on the authored values (editor stats through SPEC-04 WeaponMountModule; WeaponContent.ComputeSustainedDps gives the same number).
         public float SustainedDps { get; }
@@ -193,7 +194,7 @@ namespace Game.Simulation
     //   /// <summary>On a root launched or spawned by another root (craft, drones, mines). Added by the requester; never changed.</summary>
     //   public struct OwnedBy : IComponentData { public Entity Owner; public ulong OwnerPersistentId; /* 0 if the owner is transient */ }
     // Instigator rule (every producer of DamageEvent, ShieldHit, ExplosionRequest): Instigator = OwnedBy.Owner of the shooter root if present,
-    // else the shooter root. Resolved once per shot (stored in ProjectileRow / ShotRequest). Allegiance of an owned root equals its owner's
+    // else the shooter root. Resolved once per shot (stored in WeaponShot / ProjectileRow). Allegiance of an owned root equals its owner's
     // (the requester copies it).
 
     /// <summary>Singleton relation matrix. Default created by WeaponContent (factions 0 player, 1 hostile, 2 neutral);
@@ -264,7 +265,7 @@ namespace Game.Simulation.Weapons
         public uint ShotCounter;             // rounds fired since spawn (ShotId low 16 bits)
     }
 
-    /// <summary>Beam pulse state on every weapon entity (Active stays 0 for non-beams). Only writer: WeaponFireSystem (start/stop)
+    /// <summary>Beam pulse state on every weapon entity (Active stays 0 for non-beams). Only writers: BeamShotHandlerSystem (start)
     /// and BeamStepSystem (EndWorld, HitSomething). Field names fixed by SPEC-63 §6.5.</summary>
     public struct BeamState : IComponentData
     {
@@ -362,6 +363,42 @@ namespace Game.Simulation.Weapons
 }
 ```
 
+### 4.6c Shots and delivery handlers (`Game.Simulation.Weapons`; review X5)
+
+`WeaponFireSystem` is delivery-agnostic: it aims, cools down, bursts, checks power and emits one `WeaponShot` per released round, pellet or pulse. One **delivery handler** system per `WeaponDelivery` value turns shots into effects (`ProjectileShotHandlerSystem`: Projectile and Missile → `ProjectileStore`; `BeamShotHandlerSystem`: Beam → `BeamState` pulse). A new delivery (mines, ion lance, tractor) is a `WeaponDelivery` value (add at end), a handler system, and, if it needs fields beyond `WeaponDefinition`'s shared ones, an optional `[SerializeReference] WeaponDeliveryData deliveryData` subclass that the handler bakes into its own blob. Nothing else changes.
+
+```csharp
+namespace Game.Simulation.Weapons
+{
+    /// <summary>One released round / pellet / pulse this tick (64 bytes). Implements SPEC-21 §4.6c.</summary>
+    public struct WeaponShot
+    {
+        public Entity Weapon, Grid, Instigator, Target;   // Target = ShipTarget for homing deliveries, else Null
+        public float3 MuzzleWorld;      // local frame
+        public float3 DirWorld;         // unit; spread already applied per pellet
+        public float3 ShooterVelocity;  // PhysicsVelocity.Linear of the root
+        public uint ShotId;             // §5.5 step 6 (pellets: ShotId + k)
+        public ushort Def;              // WeaponDef index
+        public WeaponDelivery Delivery;
+        public ProjectileFlags Flags;   // PlayerSource etc.
+        public float DamageMultiplier;
+    }
+
+    /// <summary>Singleton: this tick's shots in deterministic order (stream index, then write order). Written by WeaponFireSystem
+    /// (Acquire/Release); handlers read with BeginRead/EndRead (SPEC-02 GuardedHandles). Created by WeaponFireSystem.OnCreate.</summary>
+    public struct WeaponShots : IComponentData
+    {
+        public NativeList<WeaponShot> Shots;   // cleared and refilled every tick
+        public Game.Data.Streams.GuardedHandles Access;
+    }
+}
+namespace Game.Data.Definitions
+{
+    /// <summary>Optional per-delivery data on a WeaponDefinition (`[SerializeReference] WeaponDeliveryData deliveryData`, null for v1 deliveries).</summary>
+    [System.Serializable] public abstract class WeaponDeliveryData { public abstract WeaponDelivery Delivery { get; } }
+}
+```
+
 ### 4.6b `ShipDestroyed` (managed event, `Assets/Game/Core/Events/ShipDestroyed.cs`, namespace `Game.Core.Events`)
 
 This spec owns the payload and its bridge (architecture §6.6; SPEC-02 §5.6 rules 1–3). A ship or station counts as destroyed when its core is lost (SPEC-13 `GridCoreLost`); the hulk that remains is not a second event.
@@ -433,6 +470,7 @@ Common to all: `projectileRadius` 0.1 m (flak 0.2, missile 0.3); `fireConeDeg` 3
 | `PlayerTargetingSystem` | `ShipCommandGroup`, `[UpdateAfter(typeof(PlayerCommandApplySystem))]` | yes | `GameplayActive`, `SpatialHash`, `FactionRelations`, `WeaponTuning`, `SimClock` |
 | `WeaponAimSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(PlanarConstraintSystem))]` | yes | `GameplayActive`, `WeaponDefsRef`, `WeaponTuning`, `SpatialHash` |
 | `WeaponFireSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(WeaponAimSystem))]`, `[UpdateBefore(typeof(AbilityActivationGroup))]` | yes | `GameplayActive`, `WeaponDefsRef`, `WeaponTuning`, `ProjectileStore`, `SimClock` |
+| `ProjectileShotHandlerSystem`, `BeamShotHandlerSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(WeaponFireSystem))]`, `[UpdateBefore(typeof(AbilityActivationGroup))]` (§5.5b) | yes | `GameplayActive`, `WeaponDefsRef`, `SimClock` (projectiles also `ProjectileStore`) |
 | `ProjectileStepSystem` | `GameplayPostPhysicsGroup`, `[UpdateAfter(typeof(ImpactEventSystem))]` | yes | `GameplayActive`, `DamageStreams`, `ShieldHitStreams`, `SpatialHash`, `WeaponDefsRef`, `SimClock` |
 | `BeamStepSystem` | `GameplayPostPhysicsGroup`, `[UpdateAfter(typeof(ProjectileStepSystem))]`, `[UpdateBefore(typeof(DamageResolveSystem))]` | yes | same |
 | `ExplosionSystem` | `GameplayPostPhysicsGroup`, `[UpdateAfter(typeof(BeamStepSystem))]`, `[UpdateBefore(typeof(DamageResolveSystem))]` | yes | `GameplayActive`, `DamageStreams`, `ShieldHitStreams`, `SpatialHash`, `WeaponTuning` |
@@ -499,16 +537,22 @@ Inputs: muzzle `m`, shooter velocity `vs` (root `PhysicsVelocity.Linear`), targe
 
 ### 5.5 `WeaponFireSystem`
 
-Job 1 `WeaponFireJob : IJobChunk` (`ScheduleParallel`) over weapon entities; writes `WeaponState`, `BeamState` (own entity) and a `NativeStream` of `ShotRequest { float3 Position; float3 Velocity; Entity Source; Entity Instigator; Entity Target; uint ShotId; uint DeathTick; ushort Weapon; DamageType Type; ProjectileFlags Flags; float DamageMultiplier; }` (`Instigator` per §4.3 rule) at foreach index `unfilteredChunkIndex` (`forEachCount = query.CalculateChunkCountWithoutFiltering()`). Also enqueues muzzle `FxEvent`/`SfxEvent`. Per weapon (`w`, root data as in §5.4; `tick = SimClock.Tick`):
+Delivery-agnostic (§4.6c). Job 1 `WeaponFireJob : IJobChunk` (`ScheduleParallel`) over weapon entities; writes `WeaponState` (own entity) and a `NativeStream` of `WeaponShot` (`Instigator` per §4.3 rule) at foreach index `unfilteredChunkIndex` (`forEachCount = query.CalculateChunkCountWithoutFiltering()`). Also enqueues muzzle `FxEvent`/`SfxEvent`. Per weapon (`w`, root data as in §5.4; `tick = SimClock.Tick`):
 1. Skip (and set `Firing = 0`) if `WeaponIndex == 0`, root missing, `Hulk`, `Dormant`, `GridSpawning`, or `HasAim == 0`.
 2. Cooldowns: `CooldownRemainingTicks = max(0, CooldownRemainingTicks − 1)`; `CooldownTicks = w.TriggerIntervalTicks / FireRateMultiplier` (`ShipStatMultipliers.Get(StatId.FireRate)`, 1 if absent); `if (RoundsLeftInBurst > 0) BurstRemainingTicks −= 1`.
 3. **Wants to fire:** `held = (cmd.FireGroups & Group) != 0`; `auto = WeaponControl.Autofire == 1 && target exists && InRange && hostile(target)`; `wants = (held || auto) && (Aligned || (IsFixed && held))`; powered = entity has no `Powered` or it is enabled.
-4. **Trigger:** if `wants && powered && RoundsLeftInBurst == 0 && CooldownRemainingTicks ≤ 0 && (beam ? BeamState.Active == 0 : true)` → `CooldownRemainingTicks += CooldownTicks`; beams: start pulse (`Active = 1`, `TicksLeft = BeamPulseTicks`), emit muzzle Fx/Sfx, done; others: `RoundsLeftInBurst = BurstCount`, `BurstRemainingTicks = 0`.
+4. **Trigger:** if `wants && powered && RoundsLeftInBurst == 0 && CooldownRemainingTicks ≤ 0 && (beam ? BeamState.Active == 0 : true)` → `CooldownRemainingTicks += CooldownTicks`; `RoundsLeftInBurst = BurstCount`, `BurstRemainingTicks = 0` (a beam has `BurstCount = 1`: its single round is the pulse).
 5. **Rounds:** while `RoundsLeftInBurst > 0 && BurstRemainingTicks ≤ 0 && powered`: release one round (step 6); `RoundsLeftInBurst−−`; `BurstRemainingTicks += BurstIntervalTicks` (0 → all rounds this tick).
-6. **Release a round:** `ShotCounter++`; `shotId = ((uint)InstanceIndex & 0xFFFF) << 16 | (ShotCounter & 0xFFFF)`; `rng` per decision 8; for each pellet `k`: direction = `FireDirLocal` rotated by a random cone sample (`θ = SpreadRad × sqrt(rng.NextFloat())`, `φ = 2π × rng.NextFloat()`) → world via `rootT`; `pos = muzzleWorld`; `vel = dir × ProjectileSpeed + vs`; `death = tick + (LifetimeMin == LifetimeMax ? LifetimeMax : rng.NextUInt(LifetimeMin, LifetimeMax + 1))`; flags: `Homing` if `HomingTurnRate > 0`, `ExplodeOnExpire`, `PlayerSource` if the root has `PlayerShip`; `Target = ShipTarget.Value` for homing; write `ShotRequest` (pellets share `shotId`; their `Sequence` uniqueness is restored by `ShotId + k` in the low bits: `shotId + (uint)k`, with `ShotCounter += PelletsPerRound − 1`). Emit one muzzle `FxEvent { Muzzle, muzzleWorld, dir, vs, Scale = 0.25 + 0.05 × Damage^0.5 (m), Color = TracerColor, Fx = MuzzleFx }` and one `SfxEvent(FireCue)` per round (`PlayerSource` flag for the player).
+6. **Release a round:** `ShotCounter++`; `shotId = ((uint)InstanceIndex & 0xFFFF) << 16 | (ShotCounter & 0xFFFF)`; `rng` per decision 8; for each pellet `k` (beams: one): direction = `FireDirLocal` rotated by a random cone sample (`θ = SpreadRad × sqrt(rng.NextFloat())`, `φ = 2π × rng.NextFloat()`) → world via `rootT`; flags: `Homing` if `HomingTurnRate > 0`, `ExplodeOnExpire`, `PlayerSource` if the root has `PlayerShip`; write `WeaponShot { Weapon, Grid = root, Instigator, Target = homing ? ShipTarget.Value : Null, MuzzleWorld, DirWorld, ShooterVelocity = vs, ShotId = shotId + (uint)k, Def, Delivery, Flags, DamageMultiplier }` (`ShotCounter += PelletsPerRound − 1`). Emit one muzzle `FxEvent { Muzzle, muzzleWorld, dir, vs, Scale = 0.25 + 0.05 × Damage^0.5 (m), Color = TracerColor, Fx = MuzzleFx }` and one `SfxEvent(FireCue)` per round (`PlayerSource` flag for the player).
 7. `Firing = 1` if any round or pulse started this tick, else 0.
 
-Job 2 `ShotAppendJob : IJob` (after job 1; `ProjectileStore.Acquire/Release`): first `ProjectileStore.ApplyPendingShift(...)` with the `OriginShiftRecord` read through a `ComponentLookup` on its entity (new rows are already in the new frame, so old rows must be shifted before appending); then read the stream indices `0..forEachCount−1` in order, append rows; if `Rows.Length == MaxProjectiles` → drop the shot, `DroppedFull++` (the determinism test asserts 0). `Fired++`.
+Job 2 `ShotFlattenJob : IJob` (after job 1; `WeaponShots.Access.Acquire/Release`): clear `Shots`, then read the stream indices `0..forEachCount−1` in order and append every shot. This list is the input of every delivery handler.
+
+### 5.5b Delivery handlers (§4.6c)
+
+Both run in `GameplayPrePhysicsGroup` with `[UpdateAfter(typeof(WeaponFireSystem))] [UpdateBefore(typeof(AbilityActivationGroup))]`, read `WeaponShots` with `Access.BeginRead/EndRead`, and skip shots of other deliveries.
+- **`ProjectileShotHandlerSystem`** (Projectile, Missile): one `IJob` with `ProjectileStore.Acquire/Release`: first `ProjectileStore.ApplyPendingShift(...)` with the `OriginShiftRecord` read through a `ComponentLookup` on its entity (new rows are already in the new frame, so old rows must be shifted before appending); then per shot in list order: `rng` per decision 8 (same seed inputs, `RngPurpose.WeaponSpread`, advanced past the spread samples); `death = tick + (LifetimeMin == LifetimeMax ? LifetimeMax : rng.NextUInt(LifetimeMin, LifetimeMax + 1))`; append `ProjectileRow { Position = MuzzleWorld, Velocity = DirWorld × ProjectileSpeed + ShooterVelocity, Source = Grid, Instigator, Target, ShotId, DeathTick = death, Weapon = Def, Type, Flags, DamageMultiplier }`; if `Rows.Length == MaxProjectiles` → drop the shot, `DroppedFull++` (the determinism test asserts 0). `Fired++`.
+- **`BeamShotHandlerSystem`** (Beam): `IJob` over the shots with a `ComponentLookup<BeamState>` (each weapon at most one beam shot per tick): `BeamState { Active = 1, TicksLeft = BeamPulseTicks, Width = BeamWidth, Fx = HitFx }`.
 
 ### 5.6 `ProjectileStepSystem`
 
@@ -714,14 +758,15 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 - **Milestone:** M2
 - **Tier:** frontier — F2/F3: parallel stream writes, fractional cooldowns, deterministic shot ids
 - **Depends on:** `WPN-006`, `PWR-001`
-- **Do:** Implement §5.5 (both jobs), store creation/clearing in `ProjectileStepSystem.OnCreate`/`ISystemStartStop` (create the system class here with an empty `OnUpdate` if WPN-008 is not done).
-- **Files:** `Assets/Game/Simulation/Weapons/{WeaponFireSystem,WeaponFireJob,ShotAppendJob,ShotRequest}.cs`, `Assets/Game/Tests/EditMode/Simulation/Weapons/WeaponFireTests.cs`
+- **Do:** Implement §5.5 (both jobs), `WeaponShots` (§4.6c), both delivery handlers (§5.5b), store creation/clearing in `ProjectileStepSystem.OnCreate`/`ISystemStartStop` (create the system class here with an empty `OnUpdate` if WPN-008 is not done).
+- **Files:** `Assets/Game/Simulation/Weapons/{WeaponFireSystem,WeaponFireJob,ShotFlattenJob,WeaponShot,WeaponShots,ProjectileShotHandlerSystem,BeamShotHandlerSystem}.cs`, `Assets/Game/Data/Definitions/Weapons/WeaponDeliveryData.cs`, `Assets/Game/Tests/EditMode/Simulation/Weapons/WeaponFireTests.cs`
 - **Acceptance criteria:**
   - [ ] A weapon at 2.5/s fires exactly 150 triggers in 3,600 ticks; a 3-round burst at 0.05 s spaces rounds 3 ticks apart.
   - [ ] Unpowered weapon never fires; hulk never fires; beam pulse lasts exactly `BeamPulseTicks`.
   - [ ] Store rows appended in stream order; `ShotId` unique per pellet; full store drops and counts.
+  - [ ] A test-only delivery handler for a fake `WeaponDelivery` value receives exactly the shots of weapons with that delivery, and the two v1 handlers ignore them (no edit to `WeaponFireSystem`).
   - [ ] Same scripted inputs at 1, 2 and 6 ticks per frame → identical store contents per tick.
-- **Tests:** `WeaponFireTests.Rate_ExactOverAMinute`, `.Burst_Spacing`, `.Unpowered_NoFire`, `.Beam_PulseLength`, `.ShotIds_Unique`, `.StoreFull_Drops`, `.Deterministic_FramePatterns`.
+- **Tests:** `WeaponFireTests.Rate_ExactOverAMinute`, `.Burst_Spacing`, `.Unpowered_NoFire`, `.Beam_PulseLength`, `.ShotIds_Unique`, `.StoreFull_Drops`, `.Deterministic_FramePatterns`, `.CustomDelivery_ReceivesOnlyItsShots`.
 
 ### WPN-008 — ProjectileStepSystem
 - **Milestone:** M2
