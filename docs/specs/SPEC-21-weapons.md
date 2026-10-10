@@ -102,6 +102,8 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField] private FxDefinition muzzleFx;          // null = FxKind default (SPEC-63 Q8)
         [UnityEngine.SerializeField] private FxDefinition hitFx;             // null = FxKind default
         // Public getters with the same names in PascalCase.
+        /// §4.9 formula on the authored values (editor stats through SPEC-04 WeaponMountModule; WeaponContent.ComputeSustainedDps gives the same number).
+        public float SustainedDps { get; }
         public override void Validate(ValidationScope scope, ContentValidationContext context);   // WPN-E001..E006 (§7)
     }
 }
@@ -209,7 +211,7 @@ namespace Game.Simulation
 }
 ```
 
-### 4.4 Weapon entity components (`Game.Simulation.Weapons`, registered for `FunctionKind.Weapon`)
+### 4.4 Weapon entity components (`Game.Simulation.Weapons`, registered for `BlockModuleId.WeaponMount`)
 
 ```csharp
 namespace Game.Simulation.Weapons
@@ -220,10 +222,10 @@ namespace Game.Simulation.Weapons
     public struct WeaponMount : IComponentData
     {
         public float3 PivotLocal;        // grid-local metres: footprint centre (GridSpaceMath.InstanceCenter)
-        public float3 MuzzleLocal;       // grid-local metres at yaw 0: BlockPointToGrid(WeaponMountParams.MuzzleOffsetCells)
+        public float3 MuzzleLocal;       // grid-local metres at yaw 0: BlockPointToGrid(WeaponMountParams.MuzzleOffsetCells) (SPEC-04 §4.6 row)
         public float3 ForwardLocal;      // grid-local unit: BlockDirToGrid(+Z)
         public float3 UpLocal;           // grid-local unit: BlockDirToGrid(+Y)
-        public ushort WeaponIndex;       // BlockDef.Function.Weapon.WeaponIndex; 0 = unarmed (never fires)
+        public ushort WeaponIndex;       // WeaponMountParams.WeaponIndex; 0 = unarmed (never fires)
         public byte Initialized;         // 1 after WeaponInitSystem filled it
         public byte Reserved;
     }
@@ -437,14 +439,14 @@ sequenceDiagram
 ### 5.1 `WeaponContent.BuildBlob` and boot
 
 1. `weapons = catalog.All<WeaponDefinition>()`; allocate `Weapons` with `Count + 1`; entry 0 all zero.
-2. Entry `i+1` from definition `i`: copy fields; `TriggerIntervalTicks = 60 / fireRate`; `BurstIntervalTicks = burstInterval × 60`; `LifetimeMin/MaxTicks = max(1, SimTime.SecondsToTicks(...))`; `BeamPulseTicks = max(1, SecondsToTicks(beamPulseSeconds))`; degrees → radians; `IsFixed = traverseHalfArcDeg == 0`; `Range` and `SustainedDps` per §4.2/§4.9; hashes = `def.Id.Hash` or 0 for null references; `TracerColor` packed from `tracerColor` (sRGB bytes).
+2. Entry `i+1` from definition `i`: copy fields; `TriggerIntervalTicks = 60 / fireRate`; `BurstIntervalTicks = burstInterval × 60`; `LifetimeMin/MaxTicks = max(1, SimTime.SecondsToTicks(...))`; `BeamPulseTicks = max(1, SecondsToTicks(beamPulseSeconds))`; degrees → radians; `IsFixed = traverseHalfArcDeg == 0`; `Range` and `SustainedDps` per §4.2/§4.9 (`SustainedDps` equals `WeaponDefinition.SustainedDps`, tested); hashes = `def.Id.Hash` or 0 for null references; `TracerColor` packed from `tracerColor` (sRGB bytes).
 3. `CreateSingletons`: one entity each for `WeaponDefsRef`, `WeaponTuning` (from `config_weapons`, `WeaponTuningDefinition`) and `FactionRelations.CreateDefault(Allocator.Persistent)` (unless one exists); append to `created` (SPEC-01 tags them `BootSingleton`). Disposal: SPEC-01's dispose stack disposes the blob and `FactionRelations` (the factory returns them through `created`; SPEC-01 owns the order).
 
 ### 5.2 `WeaponInitSystem`
 
-`OnCreate` (`[CreateAfter(typeof(GridSpawnSystem))]`): register `WeaponState`, `WeaponMount`, `WeaponAim`, `BeamState` for `FunctionKind.Weapon` in `FunctionalComponentRegistration`.
+`OnCreate` (`[CreateAfter(typeof(GridSpawnSystem))]`): register `WeaponState`, `WeaponMount`, `WeaponAim`, `BeamState` for `BlockModuleId.WeaponMount` in `FunctionalComponentRegistration`.
 
-Per frame: `WeaponMountInitJob : IJobEntity` (`ScheduleParallel`) over `FunctionalBlock`, `WeaponMount`, `WeaponState`, `BeamState`, **`WithChangeFilter<FunctionalBlock>`**: `inst = BlockInstance[Grid][InstanceIndex]`, `def = Blocks[inst.Block]`; not a weapon → skip. `w = WeaponDefs[def.Function.Weapon.WeaponIndex]`. `PivotLocal = InstanceCenter(...)`; `MuzzleLocal = BlockPointToGrid(def.Function.Weapon.MuzzleOffsetCells, ...)`; `ForwardLocal = BlockDirToGrid((0,0,1))`; `UpLocal = BlockDirToGrid((0,1,0))`; `WeaponIndex`; `Initialized = 1`. On first initialisation only (`Initialized` was 0): `WeaponState { Group = w.DefaultFireGroups, CooldownRemainingTicks = 0, CooldownTicks = w.TriggerIntervalTicks }`; `BeamState.Width = w.BeamWidth`, `Fx = w.HitFx`. Re-parented entities (SPEC-13 hulk splits) keep their `WeaponState`.
+Per frame: `WeaponMountInitJob : IJobEntity` (`ScheduleParallel`) over `FunctionalBlock`, `WeaponMount`, `WeaponState`, `BeamState`, **`WithChangeFilter<FunctionalBlock>`**: `inst = BlockInstance[Grid][InstanceIndex]`, `def = Blocks[inst.Block]`; `!modules.TryGet(BlockModuleId.WeaponMount, inst.Block, out WeaponMountParams m)` → skip. `w = WeaponDefs[m.WeaponIndex]`. `PivotLocal = InstanceCenter(...)`; `MuzzleLocal = BlockPointToGrid(m.MuzzleOffsetCells, ...)`; `ForwardLocal = BlockDirToGrid((0,0,1))`; `UpLocal = BlockDirToGrid((0,1,0))`; `WeaponIndex = m.WeaponIndex`; `Initialized = 1`. On first initialisation only (`Initialized` was 0): `WeaponState { Group = w.DefaultFireGroups, CooldownRemainingTicks = 0, CooldownTicks = w.TriggerIntervalTicks }`; `BeamState.Width = w.BeamWidth`, `Fx = w.HitFx`. Re-parented entities (SPEC-13 hulk splits) keep their `WeaponState`.
 
 ### 5.3 `PlayerTargetingSystem`
 

@@ -5,7 +5,7 @@
 | **Status** | Draft |
 | **Area code** | FLT (task IDs are `FLT-001`, `FLT-002`, …) |
 | **Module(s)** | `Game.Simulation` (folders `Assets/Game/Simulation/Commands/`, `Assets/Game/Simulation/Flight/`, `Assets/Game/Simulation/Common/`); `Game.Data` (`Assets/Game/Data/Components/PlanarConstraint.cs`, `Assets/Game/Data/Definitions/Flight/`) |
-| **Depends on specs** | SPEC-02 (`SimTime`, `SimClock`, `ShipCommandGroup`, `GameplayPrePhysicsGroup`, `GameInitGroup`, `GameLog.Burst`, `Planar`); SPEC-03 (writes `PlayerCommand`); SPEC-04 (`BlockDefsRef`, `OrientationTablesRef`, `FunctionKind`, `ThrusterParams`, block frame convention); SPEC-10 (`VoxelGrid`, `BlockInstance`, `FunctionalBlock`, `FunctionalComponentRegistration`, `GridSpawnSystem`, `GridSpawning`, `GridSpawnFlags.PlanarInertia`); SPEC-12 (body components, `PhysicsMass` with planar inertia); SPEC-13 contract (`Hulk`); SPEC-22 contract, M2 only (`ShipStats` multipliers, `Powered`) |
+| **Depends on specs** | SPEC-02 (`SimTime`, `SimClock`, `ShipCommandGroup`, `GameplayPrePhysicsGroup`, `GameInitGroup`, `GameLog.Burst`, `Planar`); SPEC-03 (writes `PlayerCommand`); SPEC-04 (`BlockDefsRef`, `OrientationTablesRef`, `BlockModuleId`, `ThrusterParams`, `BlockModulesRef`, block frame convention); SPEC-10 (`VoxelGrid`, `BlockInstance`, `FunctionalBlock`, `FunctionalComponentRegistration`, `GridSpawnSystem`, `GridSpawning`, `GridSpawnFlags.PlanarInertia`); SPEC-12 (body components, `PhysicsMass` with planar inertia); SPEC-13 contract (`Hulk`); SPEC-22 contract, M2 only (`ShipStats` multipliers, `Powered`) |
 | **Depended on by** | SPEC-03 (`PlayerCommand`, `ShipCommandFlags`, `PlayerEdgeCounters`); SPEC-01 (`FlightSetup`, `PlanarConstraintSetup`, `FlightConfig` boot singleton); SPEC-13 (`PlanarConstraint`); SPEC-21 (`ShipCommand.FireGroups/AimWorld/Edges`, `GridSpaceMath`); SPEC-22 (`ShipCommand`, `FlightMath.GyroYawTorque`, `GridSpaceMath`); SPEC-23 (writes AI `ShipCommand`, reads `FlightState`); SPEC-24 (ability edges); SPEC-31 (`PlayerShip`, interact edge counter); SPEC-61 (`PlayerShip`, `FlightState`, boost flag); SPEC-62 (`PlayerShip`, smoothing); SPEC-63/64 (`ThrusterState`, `ThrusterVisual`) |
 | **Milestone** | M1 (FLT-012 in M2) |
 
@@ -159,7 +159,7 @@ namespace Game.Simulation.Flight
         public float Throttle;           // last solved throttle 0..BoostThrottle (warm start)
     }
 
-    /// <summary>On every thruster functional entity (registered for FunctionKind.Thruster). Only writer: PropulsionSystem.
+    /// <summary>On every thruster functional entity (registered for BlockModuleId.Thruster). Only writer: PropulsionSystem.
     /// Read by SPEC-63 (plumes) and SPEC-64 (engine loop).</summary>
     public struct ThrusterState : IComponentData { public float Intensity; }   // 0..1, smoothed
 
@@ -336,9 +336,9 @@ Hulk player ship: excluded by `WithNone<Hulk>` → step 2 drops edges; its `Ship
 
 ### 5.2 `ThrusterInitSystem`
 
-`OnCreate` (`[CreateAfter(typeof(GridSpawnSystem))]`): append to the `FunctionalComponentRegistration` singleton buffer `{ FunctionKind.Thruster, ComponentType.ReadWrite<ThrusterState>() }` and `{ FunctionKind.Thruster, ComponentType.ReadWrite<ThrusterVisual>() }` (SPEC-10 §6; a buffer append, not a structural change).
+`OnCreate` (`[CreateAfter(typeof(GridSpawnSystem))]`): append to the `FunctionalComponentRegistration` singleton buffer `{ BlockModuleId.Thruster, ComponentType.ReadWrite<ThrusterState>() }` and `{ BlockModuleId.Thruster, ComponentType.ReadWrite<ThrusterVisual>() }` (SPEC-10 §6; a buffer append, not a structural change).
 
-Per frame: `ThrusterVisualInitJob : IJobEntity` (`ScheduleParallel`) over entities with `FunctionalBlock`, `ThrusterVisual`, **`WithChangeFilter<FunctionalBlock>`** (new entities from `FunctionalFillJob` and entities re-parented by SPEC-13 change it). For each: `g = FunctionalBlock.Grid` (lookup `VoxelGrid`, `BlockInstance`); missing → skip. `inst = BlockInstance[g][InstanceIndex]`; `def = Blocks[inst.Block]`; `def.Function.Kind != Thruster` → skip. Then:
+Per frame: `ThrusterVisualInitJob : IJobEntity` (`ScheduleParallel`) over entities with `FunctionalBlock`, `ThrusterVisual`, **`WithChangeFilter<FunctionalBlock>`** (new entities from `FunctionalFillJob` and entities re-parented by SPEC-13 change it). For each: `g = FunctionalBlock.Grid` (lookup `VoxelGrid`, `BlockInstance`); missing → skip. `inst = BlockInstance[g][InstanceIndex]`; `def = Blocks[inst.Block]`; `!def.HasModule(BlockModuleId.Thruster)` → skip. Then:
 - `size = def.BoundsMax − def.BoundsMin + 1`; `c = (def.BoundsMin + def.BoundsMax) / 2f`;
 - `NozzleLocal = BlockPointToGrid(new float3(c.x, c.y, def.BoundsMax.z + 0.5f), ot, inst.Orient, inst.Origin, s)`;
 - `ExhaustDirLocal = BlockDirToGrid(new float3(0, 0, 1), ot, inst.Orient)`;
@@ -353,7 +353,7 @@ Lookups: `[ReadOnly]` `BlockDefsRef` blob, `OrientationTablesRef` blob, `EntityS
 
 Per ship (`dt = SimTime.FixedTimestep`, `c = FlightConfig`):
 1. **Body:** `InverseMass ≤ 0` → skip (kinematic/static). `M = 1 / InverseMass`; `invIyy = PhysicsMass.InverseInertia.y`; `Iyy = invIyy > 0 ? 1 / invIyy : 0`; `com = PhysicsMass.CenterOfMass`; `rot = LocalTransform.Rotation`.
-2. **Thruster list** (marker none; inside job): if `(Flags & Initialized) == 0` or `SourceRevision != VoxelGrid.Revision`: build a new list in a `FixedList4096Bytes<FlightThruster>`-sized scratch or a `NativeList` (`Allocator.Temp`) by walking `BlockInstance` in index order: instance `i` with `Block != 0`, `(Flags & Destroyed) == 0`, `def.Function.Kind == Thruster`, `Functional != Entity.Null` and existing: `d = BlockDirToGrid((0,0,−1), ot, Orient)`; `h = (d.x, 0, d.z)`; `|h| < 0.01` → skip; `ForceDirLocal = normalize(h)`; `PositionLocal = InstanceCenter(...)`; `MaxForce = def.Function.Thruster.ThrustNewtons`; `Throttle` = the old entry's throttle with the same `InstanceIndex` (merge walk; both lists are in index order), else 0. Replace the buffer contents; `SourceRevision = Revision`; set `Initialized`.
+2. **Thruster list** (marker none; inside job): if `(Flags & Initialized) == 0` or `SourceRevision != VoxelGrid.Revision`: build a new list in a `FixedList4096Bytes<FlightThruster>`-sized scratch or a `NativeList` (`Allocator.Temp`) by walking `BlockInstance` in index order: instance `i` with `Block != 0`, `(Flags & Destroyed) == 0`, `def.HasModule(BlockModuleId.Thruster)`, `Functional != Entity.Null` and existing: `d = BlockDirToGrid((0,0,−1), ot, Orient)`; `h = (d.x, 0, d.z)`; `|h| < 0.01` → skip; `ForceDirLocal = normalize(h)`; `PositionLocal = InstanceCenter(...)`; `MaxForce` = `ThrustNewtons` of the block's `ThrusterParams` row (`BlockModulesBlob.TryGet`, SPEC-04 §4.6); `Throttle` = the old entry's throttle with the same `InstanceIndex` (merge walk; both lists are in index order), else 0. Replace the buffer contents; `SourceRevision = Revision`; set `Initialized`.
 3. **Kinematics:** `v = PhysicsVelocity.Linear`; `local = FlightMath.ToLocalPlanar(v, rot)`; `ωy = math.rotate(math.mul(rot, PhysicsMass.InertiaOrientation), PhysicsVelocity.Angular).y`.
 4. **Targets:** multipliers `ms = mt = mr = 1` (M2: `ShipStats.MaxSpeedMultiplier`, `ThrustMultiplier`, `TurnRateMultiplier` if present and `Initialized`). `boost = (cmd.Flags & Boost) != 0 && (cmd.Flags & Brake) == 0`. `SpeedCaps(c, ms, boost, …)`, `yawCap = YawRateCap(c, mr)`. `Targets(...)`:
    - `Brake` → target velocity `(0, 0)`, target yaw rate 0.

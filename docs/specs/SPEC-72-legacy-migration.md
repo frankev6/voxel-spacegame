@@ -260,7 +260,7 @@ Unchanged keys are listed once per row. `→ null` = not converted.
 
 Rarity names map by name (`Common, Rare, Epic, Legendary, Unique` exist in `ItemRarity`); an unknown name is `MIG-E021`.
 
-**Blocks** (`BlockDefinition`, area `Blocks`): every value in SPEC-04 §4.10, plus the item fields: `displayName` = legacy `Name`, `description` = legacy `Description`, `category` = Block, `rarity` = legacy, `basePrice` = legacy `BasePrice`, `maxStack` = 999, `icon` as for items. Property paths (SPEC-04 §4.5/§4.6): `kind`, `shape`, `cells` (Vector3Int array), `clearance`, `allowedOrientations.Bits`, `attachFaces`, `mirrorPartner` (null), `cellHp`, `functionHp`, `cellMass`, `armorClass`, `materialLayer`, `propMesh`, `function.Kind`, `function.Core.PowerGeneration`, `function.Core.PowerStorage`, `function.Core.MaxCells`, `function.Core.MaxExtentCells`, `function.Capacitor.PowerStorage`, `function.Thruster.ThrustNewtons`, `function.Thruster.PowerDraw`, `function.Weapon.MuzzleOffsetCells`, `function.Shield.Capacity`, `function.Shield.RegenPerSecond`, `function.Shield.RechargeDelaySeconds`, `function.Shield.PowerDraw`, `function.Utility.Kind`, `function.Utility.PortalExitOffsetCells`, `function.Utility.BeamDamageMultiplier`. Enums are written with `intValue`. Footprint and clearance are computed from the legacy data with the rules in §5.3 and must equal the SPEC-04 table (asserted by a test). Prop mesh: legacy `BlockMesh` `$ref` file name (`shipVoxels.obj` or `hulls.obj`) → `Assets/Game/Art/_Placeholder/Meshes/<file>`, sub-asset `Mesh` named `BlockMesh.name`; structural blocks get no mesh.
+**Blocks** (`BlockDefinition`, area `Blocks`): every value in SPEC-04 §4.10, plus the item fields: `displayName` = legacy `Name`, `description` = legacy `Description`, `category` = Block, `rarity` = legacy, `basePrice` = legacy `BasePrice`, `maxStack` = 999, `icon` as for items. Property paths (SPEC-04 §4.5/§4.6): `kind`, `shape`, `cells` (Vector3Int array), `clearance`, `allowedOrientations.Bits`, `attachFaces`, `mirrorPartner` (null), `cellHp`, `functionHp`, `cellMass`, `armorClass`, `materialLayer`, `propMesh`, `blockCategory`, and `modules`: one managed reference per module listed in the §4.10 "Category: modules" cell, in that order, assigned with `SerializedProperty.managedReferenceValue = new ThrusterModule { Params = new ThrusterParams { … } }` (SPEC-04 §4.6, ADR-0013); the weapon blocks get `WeaponMountModule { MuzzleOffsetCells }` and MIG-009 sets its `weapon`. Enums are written with `intValue`. Footprint and clearance are computed from the legacy data with the rules in §5.3 and must equal the SPEC-04 table (asserted by a test). Prop mesh: legacy `BlockMesh` `$ref` file name (`shipVoxels.obj` or `hulls.obj`) → `Assets/Game/Art/_Placeholder/Meshes/<file>`, sub-asset `Mesh` named `BlockMesh.name`; structural blocks get no mesh.
 
 Dropped block data (`MIG-I091`): `RotationLocked`, `SocketTypeProvided`, `SocketsProvidedCount`, `Modifiers` (thrust is per block now), `EnergyRegenRate`/`MaxEnergyStorage`/`PassiveDrainRate` where SPEC-04 §4.10 doesn't use them, `ShieldRadius`, `ShieldForwardDirection`, portal `Entry*`, `ExitDirection`, `EntryRadius`, mirror `BeamThickness`, `IsRotating`/`RotationSpeed`/`MaxRotationAngle` of mirrors, `disableInputTrigger`, legacy `MuzzlePoint` (v2 muzzle offset is computed).
 
@@ -311,7 +311,7 @@ Legacy weapon values (for the test that checks the mapping):
 | `projectile_missile` | Missile | Kinetic | 0 | 1 | 0.5 | 150 | 5 | yes, 60°/s, explodes |
 | `projectile_beam` | LaserBeam | Energy | 20 | 1 | 0.5 | 0 | 1 | no |
 
-Prismatic mirrors get no `WeaponDefinition` (they are `UtilityKind.BeamCombiner` blocks).
+Prismatic mirrors get no `WeaponDefinition` (they migrate as `Prop` blocks without modules; SPEC-04 open question 6).
 
 **`AbilityDefinition` (SPEC-24, area `Abilities`):** MIG-010 writes the v2 values of SPEC-24 §4.1 (speed boost: `MaxSpeed` ×1.8, `Thrust` ×2.0, cost 15 E, 2 charges; shield toggle: threshold 0.3, cooldown 1 s); the legacy meanings below give the IDs, names, icons and kinds.
 
@@ -401,8 +401,8 @@ Hand-off rules for the receiving specs:
 | `Items/Blocks/Cores/{block_core_small,block_core_cross}` | 2 | CoreBlockItem | `BlockDefinition` | MIG-006 |
 | `Items/Blocks/Misc/{block_capacitor_small,block_thruster_small,block_thruster_medium,block_thruster_large}` | 4 | BlockItem | `BlockDefinition` | MIG-006 |
 | `Items/Blocks/Misc/block_shield_small` | 1 | ShieldBlockItem | `BlockDefinition` | MIG-006 |
-| `Items/Blocks/Misc/block_portal_small` | 1 | PortalBlockItem | `BlockDefinition` (Utility ProjectilePortal) | MIG-006 |
-| `Items/Blocks/Misc/{block_prismatic_mirror_small,block_prismatic_mirror_fixed_small}` | 2 | MirrorBlockItem | `BlockDefinition` (Utility BeamCombiner) | MIG-006 |
+| `Items/Blocks/Misc/block_portal_small` | 1 | PortalBlockItem | `BlockDefinition` (Prop, no module; behaviour deferred) | MIG-006 |
+| `Items/Blocks/Misc/{block_prismatic_mirror_small,block_prismatic_mirror_fixed_small}` | 2 | MirrorBlockItem | `BlockDefinition` (Prop, no module; behaviour deferred) | MIG-006 |
 | `Items/Blocks/Weapons/weapon_*` | 9 | WeaponBlockItem | `BlockDefinition` + `WeaponDefinition wpn_*` | MIG-006, MIG-009 |
 | `Items/Blocks/Weapons/Projectiles/projectile_*` | 5 | Projectile | merged into `WeaponDefinition`s | MIG-009 |
 | `Items/Consumables/*` (excluding Paint) | 8 | ResourceItem | `ItemDefinition` | MIG-005 |
@@ -483,7 +483,7 @@ For each `ShipItem` file (13, ordinal path order), with `catalog` = current cont
    - Instances: append `BlockInstance { Block = blockIndex, Orient = o, Color = color, Origin = origin, FunctionHp = def.FunctionHp, Functional = Entity.Null }`; each cell `Ref = 0x8000 | instanceIndex`.
    - Every placed cell: `Hp = 255`, `Flags = 0` (unless SPEC-10 requires a flag for instance cells; then use SPEC-10's helper).
    - Bricks: `brick = cell >> 4` (arithmetic shift, correct for negatives), `local = cell & 15`; bricks are created on first use in a `Dictionary<int3, int>` with 4,096 zero cells each; `Cells[brick × 4096 + VoxsCodec.CellIndex(local)]`.
-   - `AnchorInstance` = the instance index of the core if exactly one placed block has `Function.Kind == Core`; none → −1 and `MIG-W052`; more than one → −1 and `MIG-W053`.
+   - `AnchorInstance` = the instance index of the core if exactly one placed block has a `Core` module; none → −1 and `MIG-W052`; more than one → −1 and `MIG-W053`.
 7. `bytes = VoxsCodec.Encode(source, VoxsBlockNames.FromCatalog(catalog), VoxsEncodeOptions.ForAsset)`; verify by `TryDecode` and comparing palette/instances/cells (mismatch → `MIG-E054`, not written).
 8. Write the `ShipBlueprintDefinition` (§4.6). Add a row to the report's ship table.
 
@@ -690,11 +690,11 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 - **Milestone:** M2
 - **Tier:** standard — meaning map with legacy values given (§4.6)
 - **Depends on:** `MIG-006`, `MIG-011`, `WPN-001`, `SPEC-04`
-- **Do:** `WeaponConverter` (`Order` 220, `Name` "Weapons"): one `WeaponDefinition wpn_<x>` per weapon block merged with its projectile (§4.6); then `SetLinkIfEmpty(block, "weapon", wpn)` for each of the 9 weapon blocks (SPEC-04 DATA-010 field).
+- **Do:** `WeaponConverter` (`Order` 220, `Name` "Weapons"): one `WeaponDefinition wpn_<x>` per weapon block merged with its projectile (§4.6); then `SetLinkIfEmpty(block, "modules.Array.data[k].weapon", wpn)` on the block's `WeaponMountModule` (index `k` in `modules`) for each of the 9 weapon blocks (SPEC-04 DATA-010 field).
 - **Files:** `Assets/Game/Editor/Migration/Converters/WeaponConverter.cs`; `Assets/Game/Content/Weapons/*.asset` (9, generated); `Assets/Game/Tests/EditMode/Editor/Migration/WeaponConverterTests.cs`
 - **Acceptance criteria:**
   - [ ] 9 weapon assets whose numeric fields equal SPEC-21 §4.9 row by row; delivery, `DamageType`, visual and sound cue follow the legacy mapping of §4.6.
-  - [ ] Every weapon block's `weapon` field references its `wpn_` asset; SPEC-04 `DATA-E047` reports nothing.
+  - [ ] Every weapon block's `WeaponMountModule.weapon` references its `wpn_` asset; SPEC-04 `DATA-E047` reports nothing.
 - **Tests:** `WeaponConverterTests.RealExport_ValuesMatchSpec21`, `.DamageTypeMapped`, `.WeaponBlocks_AreLinked`.
 
 ### MIG-010 — Ability converter and ability grants

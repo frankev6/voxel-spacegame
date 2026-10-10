@@ -193,15 +193,15 @@ Working ships in a working universe. The ARK expedition's ships are industrial m
 
 **Function colours** (paint-palette indices 20–25, §10.13; glyphs §10.6)
 
-| Function (`FunctionKind`) | Colour | Emissive intensity (§10.14 units) | Where it appears |
+| Function (`BlockCategory`) | Colour | Emissive intensity (§10.14 units) | Where it appears |
 |---|---|---|---|
-| Thruster | Amber `#FF9A1F` | 0.6 idle → 3.0 full thrust | Nozzle ring, 1-cell band around the mount face |
+| Propulsion (thrusters) | Amber `#FF9A1F` | 0.6 idle → 3.0 full thrust | Nozzle ring, 1-cell band around the mount face |
 | Weapon | Signal Red `#E5332A` | 2.0, pulses to 3.0 while charging | Muzzle ring, mount band |
-| Power (`Reactor`, `Capacitor`) | Volt Yellow `#F5D33A` | 2.5 | Vents, top panel |
-| Shield (`ShieldEmitter`) | Shield Blue `#3D8BFF` | 2.5 | Emitter dish rim |
+| Power (reactors, capacitors) | Volt Yellow `#F5D33A` | 2.5 | Vents, top panel |
+| Shield (shield emitters) | Shield Blue `#3D8BFF` | 2.5 | Emitter dish rim |
 | Core | Command Green `#3DDC84` | 3.0, pulsing at 0.5 Hz | Beacon dome, top panel |
-| Utility (`Cargo`, `BeamCombiner`, `ProjectilePortal`) | Utility Magenta `#E04AC8` | 1.5 | Hatch frame |
-| Structure | none | 0 | Paint only |
+| Utility (cargo; later hangars and other utility modules) | Utility Magenta `#E04AC8` | 1.5 | Hatch frame |
+| Structure, Detail | none | 0 | Paint only |
 
 **Damage and heat** (stages are defined in §10.14)
 
@@ -876,14 +876,14 @@ Item and block icons share one camera and light rig (SPEC-81 `AST-026`): orthogr
 
 Every functional block shows its glyph on every face that can be exposed (R3). Shapes are the same in all directions; only the rendering differs (DRYDOCK stencil paint, NOCTURNE emissive line, PULP HORIZON cream print).
 
-| Function (`FunctionKind`) | Glyph | Description |
+| Function (`BlockCategory`) | Glyph | Description |
 |---|---|---|
-| Thruster | Chevron | Two nested chevrons pointing toward thrust |
+| Propulsion | Chevron | Two nested chevrons pointing toward thrust |
 | Weapon | Crosshair | Circle with four ticks |
-| Reactor, Capacitor | Bolt | Zig-zag lightning bolt (capacitor: bolt inside a rounded rectangle) |
-| ShieldEmitter | Ring | Thick circle open at the bottom |
+| Power | Bolt | Zig-zag lightning bolt (capacitor: bolt inside a rounded rectangle) |
+| Shield | Ring | Thick circle open at the bottom |
 | Core | Diamond | Diamond with a centre dot |
-| Utility | Square | Square inside a square (cargo), a prism triangle (beam combiner), a circle-in-square (portal) |
+| Utility | Square | Square inside a square (cargo); later utility modules get their own inner mark |
 | Notice: positive / warning / danger / info | ✓ check / ⚠ triangle with ! / ✕ cross / ⓘ circled i | UI only |
 
 ### 10.7 Naming conventions

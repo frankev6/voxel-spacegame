@@ -64,8 +64,8 @@ namespace Game.Data.Definitions
         public UnityEngine.Color thruster, weapon, power, shield, core, utility;            // sRGB, alpha 1
         public float thrusterEmissive, weaponEmissive, powerEmissive, shieldEmissive, coreEmissive, utilityEmissive; // DESIGN-SYSTEM §10.16 units
     }
-    // FunctionKind → field: Thruster→thruster, Weapon→weapon, Reactor and Capacitor→power, ShieldEmitter→shield,
-    // Core→core, Utility→utility. Paint index: thruster 20, weapon 21, power 22, shield 23, core 24, utility 25.
+    // BlockCategory (SPEC-04 §4.6, display only) → field: Propulsion→thruster, Weapon→weapon, Power→power, Shield→shield,
+    // Core→core, Utility→utility; Structure and Detail have no function colour. Paint index: thruster 20, weapon 21, power 22, shield 23, core 24, utility 25.
 
     /// <summary>Team colours of one faction (paint slots 17, 18, 19). Implements SPEC-80 §4.1.</summary>
     [System.Serializable]

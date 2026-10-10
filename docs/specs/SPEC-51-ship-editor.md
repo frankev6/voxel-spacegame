@@ -88,13 +88,13 @@ public struct PlacedBlockInfo { public int3 Origin; public ushort Block; public 
 //   PropMeshTable (config SO): Mesh[] Meshes, Material SharedPropMaterial, indexed by BlockDef.PropMeshIndex; mesh pivot = centre of the block's origin cell
 
 // SPEC-04, Game.Data: BlockDefsBlob, OrientationTables (Rotate, Compose, Mirror, Inverse, RotY90/RotX90/RotZ90 constants), ContentService.BlockDefs, ContentService.Orientations,
-//   BlockDef.Function.Kind (BlockFunctionKind: None, Core, Thruster, Weapon, Reactor, Capacitor, Shield, Cargo, Utility), BlockDefinition.DisplayName, BlockDefinition.Icon (§10 Q5)
+//   BlockDef.Category (BlockCategory: Structure, Detail, Core, Propulsion, Power, Weapon, Shield, Utility; display only, ADR-0013), BlockDef.IsCore, BlockDefinition.DisplayName, BlockDefinition.Icon (§10 Q5)
 // SPEC-04 decision 6 + SPEC-50 §4.3 (Game.Economy, §10 Q6): a BlockDefinition IS its own ItemDefinition (no ItemDefinition.Block link);
 //   ItemDefinition.BasePrice; InventoryModel.CountOf(ContentId) (cargo + overflow), InventoryModel.CanApply(ReadOnlySpan<ItemDelta>,
 //   List<ItemShortfall> shortfalls, out bool cargoFull), InventoryModel.TryApplyAtomic(ReadOnlySpan<ItemDelta>), event InventoryModel.Changed;
 //   ItemDelta { ContentId Item; int Count; /* + add, − remove */ }, ItemShortfall { ContentId Item; int Missing; }
-// SPEC-22, Game.Data (§10 Q7): BlockStatContribution BlockStatMath.Of(ref BlockDef def, byte orient)
-//   BlockStatContribution { float Mass; float3 Thrust /* N, grid space */; float PowerGen, PowerUse, PowerStorage; float Dps; float ShieldCapacity; }
+// SPEC-04, Game.Data (§10 Q7, ADR-0013): BlockStatContribution BlockStatMath.Of(BlockDefinition block, byte orient) — Mass from cells, then each module's ContributeStats
+//   BlockStatContribution { float Mass; float3 Thrust /* N, grid space */; float PowerGeneration, PowerDraw, PowerStorage; float SustainedDps; float ShieldCapacity, ShieldRegen; float CargoUnits; }
 ```
 
 ### 4.2 Public contract types (`Game.ShipEditor`, EDT-001)
@@ -196,7 +196,7 @@ namespace Game.ShipEditor.Data
     {
         public double MassKg; public int Blocks; public int Cells;
         public double ForwardThrustN;        // thrust along grid +Z (§10 Q20)
-        public double PowerGen, PowerUse, PowerStorage, Dps, ShieldCapacity;
+        public double PowerGen, PowerUse, PowerStorage, Dps, ShieldCapacity, ShieldRegen, CargoUnits;   // from BlockStatContribution PowerGeneration, PowerDraw, PowerStorage, SustainedDps, ShieldCapacity, ShieldRegen, CargoUnits
         public long Cost;                    // Σ count × ItemDefinition.BasePrice
         public Unity.Mathematics.double3 CenterOfMassCells;   // grid cell units
         public double ThrustToWeight => MassKg > 0 ? ForwardThrustN / (MassKg * 9.81) : 0;
@@ -395,7 +395,7 @@ For each group in order; record the group's own marks so a failed group can roll
 
 **Remove op** (record R):
 1. `DraftReader.TryGetBlockAt(R.Origin)` must return exactly `R.Block`, `R.Orient`, origin `R.Origin`, and the origin must not be in `pendingRemoved` → else `NotFound`.
-2. Mark its present footprint cells `pendingRemoved`; its clearance cells `pendingClearanceRemoved += 1`; core delta −1 when `Function.Kind == Core`; cell delta −present cells.
+2. Mark its present footprint cells `pendingRemoved`; its clearance cells `pendingClearanceRemoved += 1`; core delta −1 when `def.IsCore`; cell delta −present cells.
 
 **Add op** (record A, footprint F = `FootprintCache(A.Block, A.Orient)`, cells W = A.Origin + F):
 1. `A.Block` in 1..(block count − 1). Non-creative: `BlockItemMap.HasItem(A.Block) || originalIntact[A.Block] + originalDamaged[A.Block] > 0` → else `NotAvailable`.
@@ -441,7 +441,7 @@ For every block type b with any non-zero count: `delta = draftIntact[b] - origin
 
 ### 5.8 Stats
 
-`StatTotals` = Σ over (block, orient) pairs with count n of `n × BlockStatMath.Of(def, orient)` (thrust uses its +Z component for `ForwardThrustN`), `Blocks` = Σ counts, `Cells` = solid cells, `Cost` = Σ n × price. Centre of mass is exact: per block add/remove `±massMilli × center2` into `long3 momentHalfCells` with `massMilli = (long)round(Mass × 1000)` and `center2 = 2 × Origin + FootprintMin + FootprintMax + 1`; `CenterOfMassCells = moment / (2 × Σ massMilli)`. Rows shown (diff = draft − original): Mass (t, 1 decimal), Blocks, Forward thrust (kN), T/W (2 decimals), Acceleration (m/s², 1 decimal), Power net (gen − use), Power storage, DPS, Shield, Cost, CoM offset from the core centre (m). `DeltaSign` is +1 when the change is an improvement (more thrust, T/W, power net, storage, DPS, shield; less mass, cost, CoM offset).
+`StatTotals` = Σ over (block, orient) pairs with count n of `n × BlockStatMath.Of(catalog.GetBlock(b), orient)` (SPEC-04 §4.6; thrust uses its +Z component for `ForwardThrustN`), `Blocks` = Σ counts, `Cells` = solid cells, `Cost` = Σ n × price. Centre of mass is exact: per block add/remove `±massMilli × center2` into `long3 momentHalfCells` with `massMilli = (long)round(Mass × 1000)` and `center2 = 2 × Origin + FootprintMin + FootprintMax + 1`; `CenterOfMassCells = moment / (2 × Σ massMilli)`. Rows shown (diff = draft − original): Mass (t, 1 decimal), Blocks, Forward thrust (kN), T/W (2 decimals), Acceleration (m/s², 1 decimal), Power net (gen − use), Power storage, DPS, Shield, Cost, CoM offset from the core centre (m). `DeltaSign` is +1 when the change is an improvement (more thrust, T/W, power net, storage, DPS, shield; less mass, cost, CoM offset).
 
 ### 5.9 Commit, discard and leave
 
@@ -549,7 +549,7 @@ Radial (M4, EDT-025): fold 2 or 4 about the Y axis through (`RadialCenterX2`, `R
 | Right | `editor-stats` (12 pooled rows `editor-stat-<statId>`: label, value, delta with `.editor-delta--better/--worse`), `editor-bom` (ListView rows `editor-bom-<itemId>`: name, required, refunded, available, shortfall highlighted), `editor-bom-summary`, `editor-issues` (ListView rows `editor-issue-<index>`; click → `FocusIssue`), `editor-remove-floating`, `editor-revert`, `editor-commit` (primary; disabled with `CommitBlockedReason` tooltip) |
 | Bottom | `editor-hover-info`, `editor-status`, `editor-key-hints` (KeyHint elements for the active tool) |
 
-Palette categories derived from content (§10 Q5): Structure (Structural), Detail (Prop), Core, Propulsion (Thruster), Power (Reactor, Capacitor), Weapons, Shields, Utility (Cargo, Utility, other). Creative: every block with index ≥ 1. Ship edit: blocks with `inventory count > 0` or present in Original/Draft; `Available = count - Required + Refunded` for that block; blocks with no item are `IsLocked` with reason "Not obtainable". Search: case-insensitive ordinal `Contains` on display name, applied on text change only. Screen-scoped classes (in `Theme/screens/editor.uss`): `.editor-palette-grid`, `.editor-delta--better`, `.editor-delta--worse`, `.editor-tool`, `.editor-swatch`.
+Palette categories are `BlockCategory` values in enum order (SPEC-04 §4.6, ADR-0013): Structure, Detail, Core, Propulsion, Power, Weapons, Shields, Utility; a new module's blocks appear under the category their asset declares. Creative: every block with index ≥ 1. Ship edit: blocks with `inventory count > 0` or present in Original/Draft; `Available = count - Required + Refunded` for that block; blocks with no item are `IsLocked` with reason "Not obtainable". Search: case-insensitive ordinal `Contains` on display name, applied on text change only. Screen-scoped classes (in `Theme/screens/editor.uss`): `.editor-palette-grid`, `.editor-delta--better`, `.editor-delta--worse`, `.editor-tool`, `.editor-swatch`.
 
 ### 5.15 Host, presenter, launcher and scene flow (`Game.App/EditorHost/`)
 
@@ -1003,9 +1003,9 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 | 2 | SPEC-10: read API | `GetCell`, `TryGetBlockAt` (→ `PlacedBlockInfo`), `GetInstance`, `Clone`, `GetBrickCoords`, `TryGetBrickCells`, `CopyBrickSnapshot18`, `GetPalette`, `CellSize`, `SolidCellCount` as §4.1 | Tech lead (SPEC-10) |
 | 3 | SPEC-10/05: blueprint serialization | `VoxelStructureSerializer.Write(VoxelStructure, SaveWriter)` / `Read(SaveReader, ContentService)` with a `ContentId` palette (same encoding as save `VOXS` chunks) | Tech lead (SPEC-10) |
 | 4 | SPEC-11: mesher entry point, slicing and prop meshes | `BrickMesher.Schedule(cells18, in BrickMeshContext{ Defs, Palette, MaxCellY, BrickCoord }, MeshDataArray, index, deps)`; `PropMeshTable` config SO indexed by `PropMeshIndex`, pivot at the origin cell centre; colour table of 16 entries `BlockColorPalette` | Tech lead (SPEC-11) |
-| 5 | SPEC-04: footprint and function data | `BlockDef.Cells` contains (0,0,0) and is face-connected (validator); `AttachFaces` bit order +X,−X,+Y,−Y,+Z,−Z in block-local space; `BlockDef.Function.Kind` enum as §4.1; `ContentService.BlockDefs`/`Orientations` blob references; `BlockDefinition.DisplayName`, `Icon`; mirror pairs validated by SPEC-04 | Tech lead (SPEC-04) |
+| 5 | SPEC-04: footprint and function data | `BlockDef.Cells` contains (0,0,0) and is face-connected (validator); `AttachFaces` bit order +X,−X,+Y,−Y,+Z,−Z in block-local space; `BlockDef.Category`, `ModuleMask` and module rows (SPEC-04 §4.6, ADR-0013); `ContentService.BlockDefs`/`Orientations` blob references; `BlockDefinition.DisplayName`, `Icon`; mirror pairs validated by SPEC-04 | Tech lead (SPEC-04) |
 | 6 | SPEC-50: block ↔ item link and atomic apply | **Answered:** identity (`BlockDefinition : ItemDefinition`, SPEC-04 decision 6); SPEC-50 §4.3 `CountOf`, `CanApply`, `TryApplyAtomic`, `Changed` | Tech lead (SPEC-50) |
-| 7 | SPEC-22: per-block stat contribution usable outside Simulation | `Game.Data` static `BlockStatMath.Of(ref BlockDef, byte orient)` → `BlockStatContribution` (§4.1), also used by `ShipStatsAggregateSystem` so editor and runtime agree | Tech lead (SPEC-22) |
+| 7 | SPEC-22: per-block stat contribution usable outside Simulation | **Answered (ADR-0013):** SPEC-04 `BlockStatMath.Of(BlockDefinition, byte orient)` sums each module's `ContributeStats`; runtime totals come from the same module rows, so editor and runtime agree | Tech lead (SPEC-04) |
 | 8 | SPEC-03: Editor map actions | Primary LMB; Secondary RMB; Pointer; ToolWheel (scroll); Undo Ctrl/Cmd+Z; Redo Ctrl/Cmd+Shift+Z and Ctrl+Y; Copy/Cut/Paste Ctrl+C/X/V; Delete Delete/Backspace; RotateYaw R, RotatePitch T, RotateRoll G (Shift reverses); tools 1–9 (Place, Line, Box, Fill, Remove, Replace, Paint, Eyedropper, Select); MirrorX X, MirrorY V, MirrorZ Z; SliceToggle L, SliceUp ], SliceDown [; XRay H; BoxModeCycle B; Move arrows / PageUp / PageDown; MirrorSelection M; SelectAll Ctrl+A. Modifier shortcuts must not also trigger the plain key (`shortcutKeysConsumeInput`) | Tech lead (SPEC-03) |
 | 9 | SPEC-01: scene flow hooks | **Answered:** `IGameFlow.EnterBlueprintLabAsync(BlueprintLabArgs)` / `ExitBlueprintLabAsync()` (SPEC-01 §5.4.3); SPEC-01's ready hook (order 700) calls `ShipEditorHost.Create` | Tech lead (SPEC-01) |
 | 10 | SPEC-05: blueprint folder and save dirty | `saves/<profile>/blueprints/<id>.ssbp`; no dirty/autosave call from the editor (Lab exit autosaves through SPEC-01) | Tech lead (SPEC-05) |

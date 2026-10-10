@@ -23,9 +23,9 @@ This spec defines how every piece of authored content is identified, stored, val
 - `ContentCatalog` (runtime lookups, per-family 1-based indices, Missing placeholders, unresolved-ID tracking) and `ContentService` (boot, blob lifetime, ECS singletons).
 - `ValidationReport` and the `IContentDatabaseValidator` hook used by every importer and validator.
 - `ItemDefinition` base fields (category, rarity, price, stack size, icon).
-- `BlockDefinition`, `BlockKind`, `BlockShape`, `BlockFace`, masks, `FunctionParams` and its sub-structs.
+- `BlockDefinition`, `BlockKind`, `BlockShape`, `BlockFace`, masks, `BlockCategory`, block modules (`BlockModule`, `BlockModuleId`, the v1 modules and their rows, ADR-0013), `BlockModulesBlob` and `BlockStatMath`.
 - `OrientationTables`: generation, `Rotate`, `Compose`, `Inverse`, `Mirror`, face rotation, axis turns, forward/up lookup.
-- `BlockDefsBlob` / `BlockDef` building with stable ordering and a content hash; ECS singletons `BlockDefsRef` and `OrientationTablesRef`.
+- `BlockDefsBlob` / `BlockDef` and `BlockModulesBlob` building with stable ordering and a content hash; ECS singletons `BlockDefsRef`, `BlockModulesRef` and `OrientationTablesRef`.
 - Placement maths: footprint cells, clearance cells, mirrored placement (`BlockPlacementMath`).
 - System placeholder content (`block_missing`, `item_missing`) and the v2 block additions needed for the M3 block list (reactor, cargo).
 - The value table that SPEC-72 uses to convert every legacy block.
@@ -52,8 +52,8 @@ This spec defines how every piece of authored content is identified, stored, val
 9. **Block local frame: +Z = forward (muzzle / exhaust / functional face), +Y = up. A grid's forward is +Z and up is +Y.** Thrusters push along block-local −Z (exhaust leaves through +Z). Reason: matches every legacy ship (weapons face +Z, thrusters are mounted rotated 180°) and ADR-0003 planar flight on XZ.
 10. **Mirroring uses chiral partners defined against the local X reflection.** A block's mirror partner has footprint `Sx(F) + MirrorOffset` (set equality). `MirrorIndex` = self for achiral blocks. Mirrored placement is computed by §5.6, never by negating Euler angles. Reason: 06-C2/C3.
 11. **`ItemDefinition.cs` is owned by this spec.** SPEC-50 may add economy fields to it in its own task, below the marked line, and must not change or remove the base fields in §4.4. Reason: one class, two designers, no merge ambiguity.
-12. **Function parameters are a tagged struct, not a memory union.** `FunctionParams` holds a `FunctionKind` plus one sub-struct per kind; only the sub-struct matching `Kind` is meaningful. Reason: no aliasing bugs, Burst-friendly, size is irrelevant at < 1,000 blocks.
-13. **Structural blocks are single-cell and use the grid palette; a block uses a `BlockInstance` iff it is Functional or has more than one cell** (`BlockDef.RequiresInstance`). Reason: architecture §6.3 `Cell.Ref` semantics; the brick mesher only ever meshes single-cell structural cells.
+12. **Block functions are composable modules (ADR-0013).** A functional block carries a list of `BlockModule`s (at most one per `BlockModuleId`); each module bakes one unmanaged row into `BlockModulesBlob`, and systems read only the rows of the modules they own. `BlockCategory` is display-only. Reason: a new function (hangar, repair bay) is a new module, never an edit of an enum, a fat struct or a central switch; mixed blocks (reactor + explosive, core + power) are free.
+13. **Structural blocks are single-cell and use the grid palette; a block uses a `BlockInstance` iff it is Functional or has more than one cell** (`BlockDef.RequiresInstance`). A block is Functional iff it has at least one module. Reason: architecture §6.3 `Cell.Ref` semantics; the brick mesher only ever meshes single-cell structural cells.
 14. **Content errors fail loudly**: in the editor (postprocessor + console), in CI (`-executeMethod`, exit code 1), at build time (build fails) and at boot (`ContentValidationException`). Never silently at runtime. Reason: conventions §6.
 15. **Missing content degrades, never rejects.** Unknown IDs read from saves resolve to `block_missing` / `item_missing` and are recorded for a warning (SPEC-05 surfaces them). Reason: 04-B1.
 16. **Content assets live in `Assets/Game/Content/<Area>/<id>.asset`; the database asset is `Assets/Game/Content/ContentDatabase.asset`.** All definition *classes* are in `Assets/Game/Data/Definitions/<Area>/` with namespace `Game.Data.Definitions` (architecture §3.2 wins over the sub-folder namespace rule).
@@ -70,8 +70,8 @@ This spec defines how every piece of authored content is identified, stored, val
 | `Assets/Game/Data/Definitions/Common/` | `Game.Data.Definitions` | `ContentDefinition`, `ContentIdPrefixAttribute` |
 | `Assets/Game/Data/Definitions/Items/` | `Game.Data.Definitions` | `ItemDefinition`, `ItemCategory`, `ItemRarity` |
 | `Assets/Game/Data/Definitions/Blocks/` | `Game.Data.Definitions` | `BlockDefinition` |
-| `Assets/Game/Data/Blocks/` | `Game.Data.Blocks` | `BlockKind`, `BlockShape`, `BlockFace`, `BlockFaceMask`, `OrientationMask`, `FunctionKind`, `UtilityKind`, `FunctionParams` + sub-structs, `BlockDef`, `BlockDefsBlob`, `BlockDefsBlobBuilder`, `OrientationTablesBlob`, `OrientationTables`, `OrientationTableGenerator`, `OrientationData`, `BlockPlacementMath`, `BlockIndex`, `Orientation` |
-| `Assets/Game/Data/Components/` | `Game.Data.Components` | `BlockDefsRef`, `OrientationTablesRef` |
+| `Assets/Game/Data/Blocks/` | `Game.Data.Blocks` | `BlockKind`, `BlockShape`, `BlockFace`, `BlockFaceMask`, `OrientationMask`, `BlockCategory`, `BlockModuleId`, `BlockModule`, `BlockModule<TRow>`, `BlockModuleBakeContext`, the v1 modules and their row structs (§4.6), `BlockStatContribution`, `BlockStatMath`, `BlockDef`, `BlockDefsBlob`, `BlockModuleTable`, `BlockModulesBlob`, `BlockDefsBlobBuilder`, `OrientationTablesBlob`, `OrientationTables`, `OrientationTableGenerator`, `OrientationData`, `BlockPlacementMath`, `BlockIndex`, `Orientation` |
+| `Assets/Game/Data/Components/` | `Game.Data.Components` | `BlockDefsRef`, `BlockModulesRef`, `OrientationTablesRef` |
 | `Assets/Game/Data/Validation/` | `Game.Data.Validation` | `ValidationReport`, `ValidationEntry`, `ValidationSeverity`, `ValidationScope`, `IContentDatabaseValidator`, `ContentValidationContext`, `ContentValidationException`, `ContentIdRules` |
 | `Assets/Game/Data/Services/` | `Game.Data.Services` | `ContentCatalog`, `ContentService`, `UnresolvedContentId` |
 | `Assets/Game/Editor/Content/` | `Game.Editor.Content` | builder, postprocessor, validator runner, CLI, build gate, drawers |
@@ -98,10 +98,7 @@ namespace Game.Data.Blocks
     [System.Flags] public enum BlockFaceMask : byte
     { None = 0, PosX = 1, NegX = 2, PosY = 4, NegY = 8, PosZ = 16, NegZ = 32, All = 63 }
 
-    public enum FunctionKind : byte                                                   // add values at the end only
-    { None = 0, Core = 1, Reactor = 2, Capacitor = 3, Thruster = 4, Weapon = 5, ShieldEmitter = 6, Utility = 7 }
-
-    public enum UtilityKind : byte { None = 0, Cargo = 1, BeamCombiner = 2, ProjectilePortal = 3 }
+    // Block functions are modules (BlockModuleId, BlockCategory: §4.6, ADR-0013).
 
     /// <summary>24-bit set of allowed orientations (bit o = orientation o allowed). Serializable.</summary>
     [System.Serializable]
@@ -270,9 +267,10 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField] private UnityEngine.Mesh propMesh;                           // Prop/Functional: pivot at root cell centre
 
         [UnityEngine.Header("Function")]
-        [UnityEngine.SerializeField] private Game.Data.Blocks.FunctionParams function;           // Kind must match `kind` (§6.4 rules)
+        [UnityEngine.SerializeField] private Game.Data.Blocks.BlockCategory blockCategory;    // display only (§4.6); rules in §6.4
+        [UnityEngine.SerializeReference] private Game.Data.Blocks.BlockModule[] modules = System.Array.Empty<Game.Data.Blocks.BlockModule>(); // §4.6; empty unless Functional
 
-        // DATA-010 (M2) adds: [SerializeField] WeaponDefinition weapon; [SerializeField] AbilityDefinition[] grantedAbilities;
+        // DATA-010 (M2) adds: [SerializeField] AbilityDefinition[] grantedAbilities; (the weapon link lives in WeaponMountModule)
 
         public Game.Data.Blocks.BlockKind Kind => kind;
         public Game.Data.Blocks.BlockShape Shape => shape;
@@ -284,7 +282,9 @@ namespace Game.Data.Definitions
         public float CellHp => cellHp; public float FunctionHp => functionHp; public float CellMass => cellMass;
         public byte ArmorClass => armorClass; public byte MaterialLayer => materialLayer;
         public UnityEngine.Mesh PropMesh => propMesh;
-        public Game.Data.Blocks.FunctionParams Function => function;
+        public Game.Data.Blocks.BlockCategory BlockCategory => blockCategory;
+        public System.Collections.Generic.IReadOnlyList<Game.Data.Blocks.BlockModule> Modules => modules;
+        public bool TryGetModule<T>(out T module) where T : Game.Data.Blocks.BlockModule;   // first module of type T, else false
         public bool RequiresInstance => kind == Game.Data.Blocks.BlockKind.Functional || cells.Length > 1;
     }
 }
@@ -292,73 +292,111 @@ namespace Game.Data.Definitions
 
 `category` inherited from `ItemDefinition` must be `Block` (validated; the inspector shows it read-only for blocks).
 
-### 4.6 Function parameters (public contract, used in the asset and in the blob)
+### 4.6 Block modules (public contract; ADR-0013)
 
-All structs are `[System.Serializable]` with public fields so the same type is authored in the inspector and copied into the blob. Units: force N, power E (energy units) and E/s, HP abstract, lengths in **cells** (multiply by `VoxelGrid.CellSize` at runtime).
+A functional block is a list of **modules**. Each module is a small serializable class authored on the `BlockDefinition` (`[SerializeReference]`, so the inspector shows a typed list with an "Add module" menu), validated by itself, baked into one unmanaged row of the `BlockModulesBlob` (§4.7), and able to add its own editor stats. A block has at most one module per `BlockModuleId`. Gameplay systems read the rows of the modules they own; nothing switches over a list of all module types. Units: force N, power E and E/s, HP abstract, lengths in **cells** (multiply by `VoxelGrid.CellSize` at runtime).
 
 ```csharp
 namespace Game.Data.Blocks
 {
-    [System.Serializable] public struct FunctionParams
+    /// <summary>Identity of a module type: one append-only list (ADR-0013), at most 63 values (bit index in BlockDef.ModuleMask).
+    /// A spec that adds a module appends its value here in the task that creates the module class.</summary>
+    public enum BlockModuleId : byte
+    { None = 0, Core = 1, PowerSource = 2, PowerStorage = 3, Thruster = 4, WeaponMount = 5, ShieldEmitter = 6, Cargo = 7, Explosive = 8 }
+
+    /// <summary>Display-only grouping: editor palette tabs (SPEC-51), function colours and glyphs (SPEC-80, DESIGN-SYSTEM). Gameplay never reads it.</summary>
+    public enum BlockCategory : byte { Structure = 0, Detail = 1, Core = 2, Propulsion = 3, Power = 4, Weapon = 5, Shield = 6, Utility = 7 }   // add at end only
+
+    /// <summary>Managed context for baking module rows (boot and editor).</summary>
+    public readonly struct BlockModuleBakeContext
     {
-        public FunctionKind Kind;
-        public CoreParams Core;
-        public ReactorParams Reactor;
-        public CapacitorParams Capacitor;
-        public ThrusterParams Thruster;
-        public WeaponMountParams Weapon;
-        public ShieldEmitterParams Shield;
-        public UtilityParams Utility;
+        public readonly Game.Data.Services.ContentCatalog Catalog;
+        public readonly Game.Data.Definitions.BlockDefinition Block;
+        public BlockModuleBakeContext(Game.Data.Services.ContentCatalog catalog, Game.Data.Definitions.BlockDefinition block) { Catalog = catalog; Block = block; }
     }
 
-    [System.Serializable] public struct CoreParams
+    /// <summary>One block's editor stats at one orientation, summed by BlockStatMath (SPEC-51 preview, SPEC-61 fleet screen). Add fields at the end only.</summary>
+    public struct BlockStatContribution
     {
-        public float PowerGeneration;   // E/s, ≥ 0
-        public float PowerStorage;      // E, ≥ 0
-        public int MaxCells;            // ≥ 1: build budget of a grid anchored by this core (SPEC-51 enforces)
-        public int MaxExtentCells;      // ≥ 1: max AABB edge length in cells (SPEC-51 enforces)
+        public float Mass;                         // kg = cells × cellMass (BlockStatMath fills it; modules do not)
+        public Unity.Mathematics.float3 Thrust;    // N, grid space at the given orientation
+        public float PowerGeneration;              // E/s
+        public float PowerDraw;                    // E/s at full demand
+        public float PowerStorage;                 // E
+        public float SustainedDps;
+        public float ShieldCapacity, ShieldRegen;  // HP, HP/s
+        public float CargoUnits;
     }
 
-    [System.Serializable] public struct ReactorParams
+    /// <summary>Base of every module. Implements SPEC-04 §4.6 (ADR-0013).</summary>
+    [System.Serializable]
+    public abstract class BlockModule
     {
-        public float PowerGeneration;   // E/s, > 0
-        public float BlastRadiusCells;  // ≥ 0: ExplosionRequest radius when the block's function HP reaches 0 (SPEC-13/21)
-        public float BlastDamage;       // ≥ 0: ExplosionRequest amount
+        public abstract BlockModuleId Id { get; }
+        public abstract int RowSize { get; }
+        /// Writes exactly RowSize bytes. Called by BlockDefsBlobBuilder only.
+        internal abstract unsafe void BakeRow(in BlockModuleBakeContext ctx, void* destination);
+        /// Range checks of this module's fields: report DATA-E041 with the field name. Default: nothing to check.
+        public virtual void Validate(Game.Data.Definitions.BlockDefinition owner, Game.Data.Validation.ValidationReport report) { }
+        /// Adds this module's editor stats for orientation `orient`. Default: nothing.
+        public virtual void ContributeStats(ref BlockStatContribution stats, byte orient) { }
     }
 
-    [System.Serializable] public struct CapacitorParams { public float PowerStorage; }   // E, > 0
-
-    [System.Serializable] public struct ThrusterParams
+    /// <summary>Typed base: TRow is the unmanaged row baked into BlockModulesBlob and read by Burst code with TryGet&lt;TRow&gt;.</summary>
+    [System.Serializable]
+    public abstract class BlockModule<TRow> : BlockModule where TRow : unmanaged
     {
-        public float ThrustNewtons;     // > 0, force along block-local -Z at full throttle
-        public float PowerDraw;         // E/s at full throttle, ≥ 0
+        public sealed override int RowSize => Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<TRow>();
+        protected abstract TRow Bake(in BlockModuleBakeContext ctx);
+        internal sealed override unsafe void BakeRow(in BlockModuleBakeContext ctx, void* destination)
+            => Unity.Collections.LowLevel.Unsafe.UnsafeUtility.WriteArrayElement(destination, 0, Bake(in ctx));
     }
 
-    [System.Serializable] public struct WeaponMountParams
-    {
-        [System.NonSerialized] public ushort WeaponIndex;   // IndexOf<WeaponDefinition>, filled by the blob builder (DATA-010); 0 = none
-        public Unity.Mathematics.float3 MuzzleOffsetCells; // block-local, relative to the root cell centre; fire direction = block-local +Z
-    }
-
+    // ---- Rows (unmanaged; Burst reads them) ----
+    [System.Serializable] public struct CoreParams { public int MaxCells; public int MaxExtentCells; }   // ≥ 1 each: build budget and max AABB edge (SPEC-51 enforces)
+    [System.Serializable] public struct PowerSourceParams { public float Generation; }                  // E/s, > 0
+    [System.Serializable] public struct PowerStorageParams { public float Storage; }                    // E, > 0
+    [System.Serializable] public struct ThrusterParams { public float ThrustNewtons; public float PowerDraw; }   // > 0 along block-local −Z; E/s at full throttle, ≥ 0
     [System.Serializable] public struct ShieldEmitterParams
+    { public float Capacity; public float RegenPerSecond; public float RechargeDelaySeconds; public float PowerDraw; }   // > 0, ≥ 0, ≥ 0, ≥ 0
+    [System.Serializable] public struct CargoParams { public float Capacity; }                          // capacity units (SPEC-50: 10 units = 1 slot), > 0
+    [System.Serializable] public struct ExplosiveParams { public float BlastRadiusCells; public float BlastDamage; }   // ExplosionRequest when the block is destroyed (SPEC-13); > 0 each
+    public struct WeaponMountParams                                                                     // baked from WeaponMountModule (DATA-010)
+    { public ushort WeaponIndex; /* IndexOf<WeaponDefinition>, 0 = none */ public Unity.Mathematics.float3 MuzzleOffsetCells; /* block-local, from the root cell centre; fire dir = +Z */ }
+
+    // ---- v1 modules (SPEC-04 designs them; later modules are designed by their own spec, files in this folder) ----
+    [System.Serializable] public sealed class CoreModule : BlockModule<CoreParams>
+    { public CoreParams Params; public override BlockModuleId Id => BlockModuleId.Core; protected override CoreParams Bake(in BlockModuleBakeContext ctx) => Params; }
+    [System.Serializable] public sealed class PowerSourceModule : BlockModule<PowerSourceParams>          // stats: PowerGeneration
+    { public PowerSourceParams Params; public override BlockModuleId Id => BlockModuleId.PowerSource; protected override PowerSourceParams Bake(in BlockModuleBakeContext ctx) => Params; }
+    [System.Serializable] public sealed class PowerStorageModule : BlockModule<PowerStorageParams>        // stats: PowerStorage
+    { public PowerStorageParams Params; public override BlockModuleId Id => BlockModuleId.PowerStorage; protected override PowerStorageParams Bake(in BlockModuleBakeContext ctx) => Params; }
+    [System.Serializable] public sealed class ThrusterModule : BlockModule<ThrusterParams>                // stats: Thrust += OrientationTables.Rotate((0,0,−1), orient) × ThrustNewtons; PowerDraw
+    { public ThrusterParams Params; public override BlockModuleId Id => BlockModuleId.Thruster; protected override ThrusterParams Bake(in BlockModuleBakeContext ctx) => Params; }
+    [System.Serializable] public sealed class ShieldEmitterModule : BlockModule<ShieldEmitterParams>      // stats: ShieldCapacity, ShieldRegen, PowerDraw
+    { public ShieldEmitterParams Params; public override BlockModuleId Id => BlockModuleId.ShieldEmitter; protected override ShieldEmitterParams Bake(in BlockModuleBakeContext ctx) => Params; }
+    [System.Serializable] public sealed class CargoModule : BlockModule<CargoParams>                      // stats: CargoUnits
+    { public CargoParams Params; public override BlockModuleId Id => BlockModuleId.Cargo; protected override CargoParams Bake(in BlockModuleBakeContext ctx) => Params; }
+    [System.Serializable] public sealed class ExplosiveModule : BlockModule<ExplosiveParams>
+    { public ExplosiveParams Params; public override BlockModuleId Id => BlockModuleId.Explosive; protected override ExplosiveParams Bake(in BlockModuleBakeContext ctx) => Params; }
+    [System.Serializable] public sealed class WeaponMountModule : BlockModule<WeaponMountParams>
     {
-        public float Capacity;          // shield HP contributed, > 0
-        public float RegenPerSecond;    // HP/s, ≥ 0
-        public float RechargeDelaySeconds; // seconds without hits before regen resumes, ≥ 0
-        public float PowerDraw;         // E/s while the shield is up, ≥ 0
+        public Unity.Mathematics.float3 MuzzleOffsetCells;
+        // DATA-010 (M2) adds: [SerializeField] WeaponDefinition weapon (+ getter); Bake then sets WeaponIndex = ctx.Catalog.IndexOf<WeaponDefinition>(weapon)
+        // (0 if null); ContributeStats adds weapon.SustainedDps and weapon.PowerDraw (SPEC-21 getters). Until then WeaponIndex = 0 (unarmed).
+        public override BlockModuleId Id => BlockModuleId.WeaponMount;
+        protected override WeaponMountParams Bake(in BlockModuleBakeContext ctx) => new WeaponMountParams { WeaponIndex = 0, MuzzleOffsetCells = MuzzleOffsetCells };
     }
 
-    [System.Serializable] public struct UtilityParams
+    /// <summary>Editor stats of one block at one orientation: Mass from cells, then every module's ContributeStats in list order.</summary>
+    public static class BlockStatMath
     {
-        public UtilityKind Kind;                                // != None
-        public float CargoCapacity;                             // Cargo: capacity units (meaning defined by SPEC-50), ≥ 0
-        public Unity.Mathematics.float3 PortalExitOffsetCells;  // ProjectilePortal: block-local exit point
-        public float BeamDamageMultiplier;                      // BeamCombiner: ≥ 0
+        public static BlockStatContribution Of(Game.Data.Definitions.BlockDefinition block, byte orient);
     }
 }
 ```
 
-Behaviour for `UtilityKind.BeamCombiner` and `ProjectilePortal` is not specified by any v1 spec; game systems ignore utility kinds they don't implement (open question 6).
+Every v1 module overrides `Validate` with the range checks in the row comments (DATA-E041) and `ContributeStats` as commented (the core contributes nothing; its power comes from its `PowerSource`/`PowerStorage` modules). The legacy portal and prismatic mirrors have no module (they are props, §4.10 and open question 6).
 
 ### 4.7 Blobs and ECS singletons (public contract)
 
@@ -387,10 +425,31 @@ namespace Game.Data.Blocks
         public Unity.Entities.BlobArray<Unity.Mathematics.int3> Cells;      // [0] == (0,0,0); rest sorted by (z, y, x)
         public Unity.Entities.BlobArray<Unity.Mathematics.int3> Clearance;  // sorted by (z, y, x)
         public Unity.Entities.BlobArray<ushort> AbilityIndices;             // IndexOf<AbilityDefinition>; empty until DATA-010
-        public FunctionParams Function;
+        public ulong ModuleMask;             // bit (int)BlockModuleId set for every module of the block (§4.6); 0 for non-functional blocks
+        public BlockCategory Category;       // display only
 
         public bool RequiresInstance => Kind == BlockKind.Functional || Cells.Length > 1;
-        public bool IsCore => Function.Kind == FunctionKind.Core;
+        public bool HasModule(BlockModuleId id) => (ModuleMask & (1ul << (int)id)) != 0;
+        public bool IsCore => HasModule(BlockModuleId.Core);
+    }
+
+    /// <summary>Rows of one module type for every block (ADR-0013).</summary>
+    public struct BlockModuleTable
+    {
+        public BlockModuleId Id;
+        public int RowSize;                                   // bytes; 0 when no block uses this module
+        public int DataOffset;                                // into BlockModulesBlob.RowData; 16-byte aligned
+        public Unity.Entities.BlobArray<short> RowByBlock;    // length = Blocks.Length; −1 = the block has no such module
+    }
+
+    /// <summary>Every module row of every block. Tables indexed by (int)BlockModuleId. Methods are called through `ref` to the blob value.</summary>
+    public struct BlockModulesBlob
+    {
+        public Unity.Entities.BlobArray<BlockModuleTable> Tables;   // length = highest BlockModuleId value + 1
+        public Unity.Entities.BlobArray<byte> RowData;
+        public bool Has(BlockModuleId id, ushort block);
+        /// Copies the row; false (row = default) if absent. Debug builds assert UnsafeUtility.SizeOf<T>() == RowSize.
+        public bool TryGet<T>(BlockModuleId id, ushort block, out T row) where T : unmanaged;
     }
 
     /// <summary>All block definitions indexed by BlockIndex. Blocks[0] is the air entry.</summary>
@@ -430,6 +489,10 @@ namespace Game.Data.Components
     public struct BlockDefsRef : Unity.Entities.IComponentData
     { public Unity.Entities.BlobAssetReference<Game.Data.Blocks.BlockDefsBlob> Value; }
 
+    /// <summary>ECS singleton holding the module rows (§4.6). Created by ContentService.CreateSingletons with BlockDefsRef.</summary>
+    public struct BlockModulesRef : Unity.Entities.IComponentData
+    { public Unity.Entities.BlobAssetReference<Game.Data.Blocks.BlockModulesBlob> Value; }
+
     public struct OrientationTablesRef : Unity.Entities.IComponentData
     { public Unity.Entities.BlobAssetReference<Game.Data.Blocks.OrientationTablesBlob> Value; }
 }
@@ -461,12 +524,13 @@ namespace Game.Data.Blocks
 
     public static class BlockDefsBlobBuilder
     {
-        /// <summary>§5.5. propMeshes receives the prop mesh table (index = BlockDef.PropMeshIndex).</summary>
+        /// <summary>§5.5. propMeshes receives the prop mesh table (index = BlockDef.PropMeshIndex); modules receives the module rows.</summary>
         public static Unity.Entities.BlobAssetReference<BlockDefsBlob> Build(
             Game.Data.Services.ContentCatalog catalog,
             Game.Data.Validation.ValidationReport report,
             System.Collections.Generic.List<UnityEngine.Mesh> propMeshes,
-            Unity.Collections.Allocator allocator);
+            Unity.Collections.Allocator allocator,
+            out Unity.Entities.BlobAssetReference<BlockModulesBlob> modules);
     }
 }
 ```
@@ -611,40 +675,40 @@ namespace Game.Data.Services
 
 SPEC-72 writes exactly these values (MIG-006). Footprints and clearance are block-local. `HF` = `OrientationMask.HorizontalForwardBits`, `All` = `AllBits`. Attach `−PosZ` = `All` minus `PosZ` (47). Price, rarity, display name and description are the legacy values. Formulas (so new blocks stay consistent): `FunctionHp = legacy Health × cell count` for Functional blocks; `ThrustNewtons = legacy ThrusterForce modifier × 2000`; `MuzzleOffsetCells = (centre x of bounds, centre y of bounds, BoundsMax.z + 0.5)`; legacy `BlockSize [sx,sy,sz]` means cells `x∈[0,sx), y∈[0,sy), z∈[0,sz)` unless a `VoxelShape` is given.
 
-| ID | Kind | Shape | Cells | Clearance | Orient. | Attach | CellHp | FuncHp | Mass | Function | Prop mesh (placeholder `.obj` : sub-mesh) |
+| ID | Kind | Shape | Cells | Clearance | Orient. | Attach | CellHp | FuncHp | Mass | Category: modules | Prop mesh (placeholder `.obj` : sub-mesh) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| `block_hull` | Structural | Cube | 1 | — | All | All | 100 | 0 | 25 | None | — |
-| `block_hull_angled` | Structural | Wedge | 1 | — | All | All | 50 | 0 | 15 | None | — |
-| `block_core_small` | Functional | Cube | 1 | — | All | All | 300 | 300 | 60 | Core: gen 40, storage 200, MaxCells 4000, MaxExtent 100 | shipVoxels : `hull_1x1_Cube.008` |
-| `block_core_cross` | Functional | Cube | 7: (0,0,0),(0,1,0),(0,2,0),(1,1,0),(−1,1,0),(0,1,1),(0,1,−1) | — | All | All | 500 | 3500 | 60 | Core: gen 40, storage 200, MaxCells 8000, MaxExtent 150 | hulls : `cross_3x3_hull_cross_3x3_hull` |
-| `block_capacitor_small` | Functional | Cube | box 2×2×1 | — | All | All | 100 | 400 | 35 | Capacitor: storage 40 | shipVoxels : `capacitor_2x1_base_1x1_hull.002` |
-| `block_shield_small` | Functional | Cube | 1 | — | All | All | 100 | 100 | 40 | ShieldEmitter: capacity 300, regen 15, delay 3, draw 10 | hulls : `base_1x1_hull_base_1x1_hull` |
-| `block_thruster_small` | Functional | Cube | box 1×1×2 | (0,0,2),(0,0,3),(0,0,4) | HF | −PosZ | 100 | 200 | 30 | Thruster: 20000 N, draw 0 | shipVoxels : `thruster1x2_Cube.004` |
-| `block_thruster_medium` | Functional | Cube | 10: (0,0,0),(1,0,0),(2,0,0),(1,1,0),(1,−1,0) and the same at z=1 | — | HF | −PosZ | 100 | 1000 | 30 | Thruster: 40000 N, draw 0 | shipVoxels : `thruster3x3x2.001_Cube.007` |
-| `block_thruster_large` | Functional | Cube | box 2×1×2 | (0..1,0,2..4) (6 cells) | HF | −PosZ | 100 | 400 | 30 | Thruster: 40000 N, draw 0 | hulls : `base_2x2_thruster_base_2x2_thruster` |
-| `block_portal_small` | Functional | Cube | 1 | (0,0,2) | HF | −PosZ | 150 | 150 | 30 | Utility ProjectilePortal: exit (0,0,5) | hulls : `base_1x1_hull_base_1x1_hull` |
-| `block_prismatic_mirror_small` | Functional | Cube | 1 | (0,0,1) | HF | −PosZ | 100 | 100 | 30 | Utility BeamCombiner: ×3 | hulls : `base_1x1_hull_base_1x1_hull` |
-| `block_prismatic_mirror_fixed_small` | Functional | Cube | 1 | (0,0,1) | HF | −PosZ | 100 | 100 | 30 | Utility BeamCombiner: ×3 | hulls : `base_1x1_hull_base_1x1_hull` |
-| `weapon_plasma_turret_small` | Functional | Cube | box 1×1×2 | (0,0,2..4) | HF | −PosZ | 100 | 200 | 30 | Weapon: muzzle (0,0,1.5) | shipVoxels : `gun_turret_1x2_base_1x2_gun.001` |
-| `weapon_plasma_turret_small_fixed` | Functional | Cube | box 1×1×2 | (0,0,2..4) | HF | −PosZ | 150 | 300 | 30 | Weapon: muzzle (0,0,1.5) | shipVoxels : `gun_turret_1x2_base_1x2_gun.001` |
-| `weapon_plasma_turret_medium` | Functional | Cube | box 2×1×2 | (0..1,0,3..4) | HF | −PosZ | 100 | 400 | 30 | Weapon: muzzle (0.5,0,1.5) | shipVoxels : `gun_turret_2x1x3_Cube.005` |
-| `weapon_small_beam_turret` | Functional | Cube | box 1×1×2 | (0,0,2..4) | HF | −PosZ | 100 | 200 | 30 | Weapon: muzzle (0,0,1.5) | shipVoxels : `beam_turret_1x2_Cube.002` |
-| `weapon_fixed_beam_turret_small` | Functional | Cube | box 1×1×2 | (0,0,2),(0,0,3) | HF | −PosZ | 200 | 400 | 30 | Weapon: muzzle (0,0,1.5) | shipVoxels : `beam_turret_1x2_Cube.002` |
-| `weapon_railgun_medium` | Functional | Cube | box 1×1×2 | (0,0,2..4) ¹ | HF | −PosZ | 200 | 400 | 30 | Weapon: muzzle (0,0,1.5) | shipVoxels : `beam_turret_1x2_Cube.002` |
-| `weapon_ark_lance_medium` | Functional | Cube | box 1×2×3 | (0,0,3),(0,0,4) ¹ | HF | −PosZ | 200 | 1200 | 30 | Weapon: muzzle (0,0.5,2.5) | shipVoxels : `gun_turret_2x1x3_Cube.005` |
-| `weapon_flak_cannon_medium` | Functional | Cube | box 3×1×3 | (0..2,0,4) | HF | −PosZ | 200 | 1800 | 30 | Weapon: muzzle (1,0,2.5) | shipVoxels : `flak_cannon_3x3x3_Cube` |
-| `weapon_missile_launcher_small` | Functional | Cube | box 2×1×2 | (0..1,0,3..4) | HF | −PosZ | 200 | 800 | 30 | Weapon: muzzle (0.5,0,1.5) | shipVoxels : `missile_launcher_2x1_Cube.006` |
+| `block_hull` | Structural | Cube | 1 | — | All | All | 100 | 0 | 25 | Structure: — | — |
+| `block_hull_angled` | Structural | Wedge | 1 | — | All | All | 50 | 0 | 15 | Structure: — | — |
+| `block_core_small` | Functional | Cube | 1 | — | All | All | 300 | 300 | 60 | Core: Core (MaxCells 4000, MaxExtent 100), PowerSource (gen 40), PowerStorage (200) | shipVoxels : `hull_1x1_Cube.008` |
+| `block_core_cross` | Functional | Cube | 7: (0,0,0),(0,1,0),(0,2,0),(1,1,0),(−1,1,0),(0,1,1),(0,1,−1) | — | All | All | 500 | 3500 | 60 | Core: Core (MaxCells 8000, MaxExtent 150), PowerSource (gen 40), PowerStorage (200) | hulls : `cross_3x3_hull_cross_3x3_hull` |
+| `block_capacitor_small` | Functional | Cube | box 2×2×1 | — | All | All | 100 | 400 | 35 | Power: PowerStorage (40) | shipVoxels : `capacitor_2x1_base_1x1_hull.002` |
+| `block_shield_small` | Functional | Cube | 1 | — | All | All | 100 | 100 | 40 | Shield: ShieldEmitter (capacity 300, regen 15, delay 3, draw 10) | hulls : `base_1x1_hull_base_1x1_hull` |
+| `block_thruster_small` | Functional | Cube | box 1×1×2 | (0,0,2),(0,0,3),(0,0,4) | HF | −PosZ | 100 | 200 | 30 | Propulsion: Thruster (20000 N, draw 0) | shipVoxels : `thruster1x2_Cube.004` |
+| `block_thruster_medium` | Functional | Cube | 10: (0,0,0),(1,0,0),(2,0,0),(1,1,0),(1,−1,0) and the same at z=1 | — | HF | −PosZ | 100 | 1000 | 30 | Propulsion: Thruster (40000 N, draw 0) | shipVoxels : `thruster3x3x2.001_Cube.007` |
+| `block_thruster_large` | Functional | Cube | box 2×1×2 | (0..1,0,2..4) (6 cells) | HF | −PosZ | 100 | 400 | 30 | Propulsion: Thruster (40000 N, draw 0) | hulls : `base_2x2_thruster_base_2x2_thruster` |
+| `block_portal_small` | Prop | Cube | 1 | (0,0,2) | HF | −PosZ | 150 | 0 | 30 | Detail: — (behaviour deferred, Q6) | hulls : `base_1x1_hull_base_1x1_hull` |
+| `block_prismatic_mirror_small` | Prop | Cube | 1 | (0,0,1) | HF | −PosZ | 100 | 0 | 30 | Detail: — (behaviour deferred, Q6) | hulls : `base_1x1_hull_base_1x1_hull` |
+| `block_prismatic_mirror_fixed_small` | Prop | Cube | 1 | (0,0,1) | HF | −PosZ | 100 | 0 | 30 | Detail: — (behaviour deferred, Q6) | hulls : `base_1x1_hull_base_1x1_hull` |
+| `weapon_plasma_turret_small` | Functional | Cube | box 1×1×2 | (0,0,2..4) | HF | −PosZ | 100 | 200 | 30 | Weapon: WeaponMount (weapon `wpn_*` per SPEC-72 MIG-009, muzzle (0,0,1.5)) | shipVoxels : `gun_turret_1x2_base_1x2_gun.001` |
+| `weapon_plasma_turret_small_fixed` | Functional | Cube | box 1×1×2 | (0,0,2..4) | HF | −PosZ | 150 | 300 | 30 | Weapon: WeaponMount (weapon `wpn_*` per SPEC-72 MIG-009, muzzle (0,0,1.5)) | shipVoxels : `gun_turret_1x2_base_1x2_gun.001` |
+| `weapon_plasma_turret_medium` | Functional | Cube | box 2×1×2 | (0..1,0,3..4) | HF | −PosZ | 100 | 400 | 30 | Weapon: WeaponMount (weapon `wpn_*` per SPEC-72 MIG-009, muzzle (0.5,0,1.5)) | shipVoxels : `gun_turret_2x1x3_Cube.005` |
+| `weapon_small_beam_turret` | Functional | Cube | box 1×1×2 | (0,0,2..4) | HF | −PosZ | 100 | 200 | 30 | Weapon: WeaponMount (weapon `wpn_*` per SPEC-72 MIG-009, muzzle (0,0,1.5)) | shipVoxels : `beam_turret_1x2_Cube.002` |
+| `weapon_fixed_beam_turret_small` | Functional | Cube | box 1×1×2 | (0,0,2),(0,0,3) | HF | −PosZ | 200 | 400 | 30 | Weapon: WeaponMount (weapon `wpn_*` per SPEC-72 MIG-009, muzzle (0,0,1.5)) | shipVoxels : `beam_turret_1x2_Cube.002` |
+| `weapon_railgun_medium` | Functional | Cube | box 1×1×2 | (0,0,2..4) ¹ | HF | −PosZ | 200 | 400 | 30 | Weapon: WeaponMount (weapon `wpn_*` per SPEC-72 MIG-009, muzzle (0,0,1.5)) | shipVoxels : `beam_turret_1x2_Cube.002` |
+| `weapon_ark_lance_medium` | Functional | Cube | box 1×2×3 | (0,0,3),(0,0,4) ¹ | HF | −PosZ | 200 | 1200 | 30 | Weapon: WeaponMount (weapon `wpn_*` per SPEC-72 MIG-009, muzzle (0,0.5,2.5)) | shipVoxels : `gun_turret_2x1x3_Cube.005` |
+| `weapon_flak_cannon_medium` | Functional | Cube | box 3×1×3 | (0..2,0,4) | HF | −PosZ | 200 | 1800 | 30 | Weapon: WeaponMount (weapon `wpn_*` per SPEC-72 MIG-009, muzzle (1,0,2.5)) | shipVoxels : `flak_cannon_3x3x3_Cube` |
+| `weapon_missile_launcher_small` | Functional | Cube | box 2×1×2 | (0..1,0,3..4) | HF | −PosZ | 200 | 800 | 30 | Weapon: WeaponMount (weapon `wpn_*` per SPEC-72 MIG-009, muzzle (0.5,0,1.5)) | shipVoxels : `missile_launcher_2x1_Cube.006` |
 
 ¹ Legacy clearance cells that fall inside the block's own footprint are dropped (railgun `(0,0,1)`, ark lance `(0,0,1)`, `(0,0,2)`). The portal's legacy clearance `(1,0,0)` is dropped so the block stays achiral. All legacy blocks are achiral (`mirrorPartner` = null), `ArmorClass` 0, `MaterialLayer` 0, `maxStack` 999, category `Block`. Mesh paths are `Assets/Game/Art/_Placeholder/Meshes/<file>.obj`.
 
 **System placeholders and v2 additions** (authored by DATA-009 and DATA-011, not migrated):
 
-| ID | Kind | Shape | Cells | Orient. | Attach | CellHp | FuncHp | Mass | Function | Price / rarity | Prop mesh |
+| ID | Kind | Shape | Cells | Orient. | Attach | CellHp | FuncHp | Mass | Category: modules | Price / rarity | Prop mesh |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| `block_missing` | Structural | Cube | 1 | All | All | 100 | 0 | 25 | None | 0 / Common; display name "Missing block"; `MaterialLayer` 63 (reserved "missing" look) | — |
+| `block_missing` | Structural | Cube | 1 | All | All | 100 | 0 | 25 | Structure: — | 0 / Common; display name "Missing block"; `MaterialLayer` 63 (reserved "missing" look) | — |
 | `item_missing` (ItemDefinition) | — | — | — | — | — | — | — | — | — | 0 / Common, category Misc, maxStack 999, display name "Missing item" | — |
-| `block_reactor_small` | Functional | Cube | box 2×2×2 | All | All | 150 | 1200 | 50 | Reactor: gen 60, blast radius 4 cells, blast damage 400 | 300 / Rare | hulls : `base_2x2_hull_base_2x2_hull` |
-| `block_cargo_small` | Functional | Cube | box 2×1×1 | All | All | 100 | 200 | 20 | Utility Cargo: capacity 50 | 20 / Common | hulls : `base_1x2_hull.001_base_1x2_hull.001` |
+| `block_reactor_small` | Functional | Cube | box 2×2×2 | All | All | 150 | 1200 | 50 | Power: PowerSource (gen 60), Explosive (radius 4 cells, damage 400) | 300 / Rare | hulls : `base_2x2_hull_base_2x2_hull` |
+| `block_cargo_small` | Functional | Cube | box 2×1×1 | All | All | 100 | 200 | 20 | Utility: Cargo (50) | 20 / Common | hulls : `base_1x2_hull.001_base_1x2_hull.001` |
 
 With these, the M3 block list in [00-vision.md](../00-vision.md) is covered: hull (`block_hull`), armour slope (`block_hull_angled`), core, reactor, capacitor, 2 thrusters, 3 weapons, shield emitter, cargo.
 
@@ -668,9 +732,9 @@ sequenceDiagram
         CS-->>GR: throw ContentValidationException(report)
     end
     CS->>CS: OrientationTableGenerator.Generate → OrientationTablesBlob (Persistent)
-    CS->>BB: Build(catalog, report) → BlockDefsBlob (Persistent) + PropMeshes
+    CS->>BB: Build(catalog, report) → BlockDefsBlob + BlockModulesBlob (Persistent) + PropMeshes
     GR->>CS: CreateSingletons(world.EntityManager) (when the default World exists)
-    CS->>W: entity "BlockDefsRef" + "OrientationTablesRef"
+    CS->>W: entity with BlockDefsRef + BlockModulesRef + OrientationTablesRef
     Note over GR,CS: shutdown (reverse order): DestroySingletons (if world alive) → Dispose blobs
 ```
 
@@ -681,10 +745,10 @@ sequenceDiagram
 3. For each definition in global ID order: `def.Validate(report.For("content:" + id), context)` with `context.IsEditorPass = false`.
 4. If `report.HasErrors`: `report.LogTo("Content")` and throw `ContentValidationException(report)`. Nothing is allocated before this point except managed objects.
 5. Build orientation tables (§5.3) into a `BlobBuilder(Allocator.Temp)` → `CreateBlobAssetReference<OrientationTablesBlob>(Allocator.Persistent)`.
-6. Build `BlockDefsBlob` (§5.5) the same way; keep `PropMeshes`.
+6. Build `BlockDefsBlob` and `BlockModulesBlob` (§5.5) the same way; keep `PropMeshes`.
 7. `DatabaseHash = StableHash.Combine(BlockDefs.Value.BlockDefsHash, Catalog.IdentityHash)`. `BootReport = report` (it may contain warnings); log the summary line once: `Content: N definitions, B blocks, hash 0x<16 hex digits>, W warnings`.
 
-`CreateSingletons(em)`: if a `BlockDefsRef` singleton already exists in `em`'s world, do nothing; else create one entity named `ContentSingletons` with both components. `DestroySingletons(em)` destroys it if present. `Dispose()` disposes both blobs if created (safe to call twice). The service must be disposed after the singletons are destroyed or the world is disposed (SPEC-01 shutdown order).
+`CreateSingletons(em)`: if a `BlockDefsRef` singleton already exists in `em`'s world, do nothing; else create one entity named `ContentSingletons` with `BlockDefsRef`, `BlockModulesRef` and `OrientationTablesRef`. `DestroySingletons(em)` destroys it if present. `Dispose()` disposes the three blobs if created (safe to call twice). The service must be disposed after the singletons are destroyed or the world is disposed (SPEC-01 shutdown order).
 
 Complexity: O(D log D) for D definitions (sorting), O(Σ cells) for the blob. Failure: any exception other than `ContentValidationException` propagates (bug); blobs created before the exception are disposed in a `finally`.
 
@@ -726,11 +790,12 @@ Complexity: O(D·depth + D log D). Errors are collected, never thrown here.
 
 ### 5.5 `BlockDefsBlobBuilder.Build(ContentCatalog catalog, ValidationReport report)`
 
-1. `blocks = catalog.All<BlockDefinition>()` (index `i+1` for element `i`). Allocate `Blocks` with `blocks.Count + 1` entries; entry 0 = air: all fields zero, `PropMeshIndex = −1`, empty arrays, `Function.Kind = None`.
+1. `blocks = catalog.All<BlockDefinition>()` (index `i+1` for element `i`). Allocate `Blocks` with `blocks.Count + 1` entries; entry 0 = air: all fields zero, `PropMeshIndex = −1`, empty arrays, `ModuleMask = 0`, `Category = Structure`.
 2. Prop meshes: iterate blocks in index order; for each non-null `PropMesh` not yet seen (reference equality) append to `PropMeshes`; `PropMeshIndex` = its position, or −1.
-3. For each block `b` at index `k`: `Cells` = `(0,0,0)` first then the remaining cells sorted by `(z, y, x)`; `Clearance` sorted by `(z, y, x)`; `BoundsMin/Max` over `Cells`; `MirrorIndex` = `catalog.GetBlockIndex(b.MirrorPartner)`; `MirrorOffset` = §5.6 step 1 (validated earlier, so it exists); copy scalar fields; `Function` copied, then `Function.Weapon.WeaponIndex = 0` and `AbilityIndices` empty (DATA-010 fills both); `IdHash = b.Id.Hash`; `MissingBlockIndex` = index of `catalog.MissingBlock`.
-4. `BlockDefsHash = StableHash.Hash64(canonical)`, where `canonical` is, for `k = 1..N`, little-endian: `IdHash.Value u64, Kind u8, Shape u8, AttachFaces u8, MaterialLayer u8, ArmorClass u8, AllowedOrientations u32, MirrorIndex u16, MirrorOffset 3×i32, CellHp f32, FunctionHp f32, CellMass f32, Cells.Length u16 + 3×i32 each, Clearance.Length u16 + 3×i32 each, AbilityIndices.Length u16 + u16 each, Function.Kind u8`, then every field of every `Function` sub-struct in declaration order (f32 as IEEE bits, ints as i32, ushort as u16, enums as u8). `PropMeshIndex` is excluded (presentation only).
-5. Return the blob (`Allocator.Persistent`).
+3. For each block `b` at index `k`: `Cells` = `(0,0,0)` first then the remaining cells sorted by `(z, y, x)`; `Clearance` sorted by `(z, y, x)`; `BoundsMin/Max` over `Cells`; `MirrorIndex` = `catalog.GetBlockIndex(b.MirrorPartner)`; `MirrorOffset` = §5.6 step 1 (validated earlier, so it exists); copy scalar fields; `ModuleMask` = OR of `1ul << (int)m.Id` over `b.Modules`; `Category = b.BlockCategory`; `AbilityIndices` empty (DATA-010 fills them); `IdHash = b.Id.Hash`; `MissingBlockIndex` = index of `catalog.MissingBlock`.
+3b. **Modules blob:** `maxId` = highest `BlockModuleId` value; `Tables` has `maxId + 1` entries. For each id `m` in ascending order: the blocks having a module with that id, in block-index order, get rows `0..n−1`; `RowByBlock[k]` = the row or −1; `RowSize` = that module's `RowSize` (all modules of one id share the row type); `DataOffset` = running offset rounded up to 16. Each row is written with `module.BakeRow(new BlockModuleBakeContext(catalog, b), RowData + DataOffset + row × RowSize)`. Tables of unused ids have `RowSize = 0` and all `RowByBlock = −1`.
+4. `BlockDefsHash = StableHash.Hash64(canonical)`, where `canonical` is, for `k = 1..N`, little-endian: `IdHash.Value u64, Kind u8, Shape u8, AttachFaces u8, MaterialLayer u8, ArmorClass u8, AllowedOrientations u32, MirrorIndex u16, MirrorOffset 3×i32, CellHp f32, FunctionHp f32, CellMass f32, Cells.Length u16 + 3×i32 each, Clearance.Length u16 + 3×i32 each, AbilityIndices.Length u16 + u16 each, ModuleMask u64, Category u8`; then, for each module id ascending and each block with that module in index order, `block index u16` followed by the row's raw bytes (rows hold only blittable fields: f32 as IEEE bits, ints little-endian; padding bytes are zero because rows are written into zero-initialised memory). `PropMeshIndex` is excluded (presentation only).
+5. Return both blobs (`Allocator.Persistent`).
 
 Complexity O(Σ cells). Memory: ~(120 B + 12 B × cells) per block; < 64 KB for 200 blocks.
 
@@ -804,18 +869,20 @@ flowchart LR
 | DATA-E032 | Error | Footprint or clearance coordinate outside `[−32, 31]` |
 | DATA-E033 | Error | Clearance cell inside the footprint, or duplicate clearance cell |
 | DATA-E034 | Error | `AllowedOrientations` is 0 or has bits above 23 |
-| DATA-E035 | Error | Kind/function mismatch: Structural or Prop with `Function.Kind ≠ None`, or Functional with `None` |
+| DATA-E035 | Error | Kind/module mismatch: Structural or Prop with any module, or Functional without modules |
 | DATA-E036 | Error | Structural block with more than one cell |
 | DATA-E037 | Error | Non-structural block with `Shape ≠ Cube` |
 | DATA-E038 | Error | Prop or Functional block without `propMesh` |
 | DATA-E039 | Error | `cellHp ≤ 0` or `cellMass ≤ 0` |
 | DATA-E040 | Error | Functional block with `functionHp ≤ 0`, or non-functional with `functionHp ≠ 0` |
-| DATA-E041 | Error | Function params out of range (§4.6 comments) |
-| DATA-E042 | Error | Mirror partner not reciprocal (`partner.MirrorPartner ≠ this`) or partner of a different `Kind`/`Function.Kind` |
+| DATA-E041 | Error | Module params out of range (§4.6 row comments; reported by the module's `Validate` with the field name) |
+| DATA-E042 | Error | Mirror partner not reciprocal (`partner.MirrorPartner ≠ this`) or partner of a different `Kind` or with different module ids |
 | DATA-E043 | Error | Partner geometry is not the X-mirror of this block (§5.6 step 1) |
 | DATA-E044 | Error | Achiral block (no partner) whose footprint/clearance/attach faces are not X-symmetric |
 | DATA-E045 | Error | `materialLayer` ≥ 64 |
-| DATA-E047 | Error | (from DATA-010) Weapon block without `weapon`, or non-weapon block with `weapon` set |
+| DATA-E047 | Error | (from DATA-010) `WeaponMountModule` without `weapon` (before DATA-010 the field does not exist and the mount is unarmed) |
+| DATA-E048 | Error | Null entry in `modules`, or two modules with the same `Id` |
+| DATA-E049 | Error | Category mismatch: Structural must be `Structure`, Prop must be `Detail`, Functional must be neither |
 | DATA-E099 | Error | An `IContentDatabaseValidator` threw |
 
 ## 6. Public API
@@ -837,11 +904,13 @@ flowchart LR
 ```csharp
 ref var blocks = ref SystemAPI.GetSingleton<BlockDefsRef>().Value.Value.Blocks;
 ref BlockDef def = ref blocks[blockIndex];          // blockIndex from PaletteEntry.Block / BlockInstance.Block
+ref var modules = ref SystemAPI.GetSingleton<BlockModulesRef>().Value.Value;
+if (def.HasModule(BlockModuleId.Thruster) && modules.TryGet(BlockModuleId.Thruster, blockIndex, out ThrusterParams thruster)) { /* … */ }
 ref var ot = ref SystemAPI.GetSingleton<OrientationTablesRef>().Value.Value;
 int3 c = ot.Rotate(def.Cells[i], orient);
 ```
 
-Systems that need these call `state.RequireForUpdate<BlockDefsRef>()` in `OnCreate`. The blobs never change during a session.
+Systems that need these call `state.RequireForUpdate<BlockDefsRef>()` (and `<BlockModulesRef>` when they read module rows) in `OnCreate`. The blobs never change during a session.
 
 ### 6.3 Placement maths
 
@@ -861,9 +930,9 @@ Preconditions: `orient < 24` (else results are undefined; debug builds assert), 
 
 ### 6.4 Authoring rules (inspector)
 
-- `kind = Structural` → `function.Kind` must be `None`, one cell, `propMesh` null.
-- `kind = Prop` → `function.Kind = None`, `shape = Cube`, `propMesh` required.
-- `kind = Functional` → `function.Kind ≠ None`, `shape = Cube`, `propMesh` required, `functionHp > 0`.
+- `kind = Structural` → no modules, `blockCategory = Structure`, one cell, `propMesh` null.
+- `kind = Prop` → no modules, `blockCategory = Detail`, `shape = Cube`, `propMesh` required.
+- `kind = Functional` → at least one module (at most one per `BlockModuleId`), `blockCategory` not Structure/Detail, `shape = Cube`, `propMesh` required, `functionHp > 0`.
 - A chiral block needs a partner asset whose `cells` are the X-mirror (`ContentTools` menu "Create Mirror Partner" in DATA-008 generates it).
 
 ## 7. Edge cases and failure behaviour
@@ -904,8 +973,8 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 - **Milestone:** M0
 - **Tier:** standard — transcribes the exact code of §4 (bodies throw NotImplementedException)
 - **Depends on:** `CORE-001`
-- **Do:** Create every public type of §4 with fields, enums, attributes and method signatures exactly as written; method bodies `throw new System.NotImplementedException()` except trivial property getters and `OrientationMask.Allows`. Add `/// <summary>` lines naming the spec section. Create folders of §4.1.
-- **Files:** `Assets/Game/Data/ContentDatabase.cs`; `Assets/Game/Data/Definitions/Common/{ContentDefinition,ContentIdPrefixAttribute}.cs`; `Assets/Game/Data/Definitions/Items/{ItemDefinition,ItemCategory,ItemRarity}.cs`; `Assets/Game/Data/Definitions/Blocks/BlockDefinition.cs`; `Assets/Game/Data/Blocks/{BlockIndex,Orientation,BlockKind,BlockShape,BlockFace,BlockFaceMask,OrientationMask,FunctionKind,UtilityKind,FunctionParams,CoreParams,ReactorParams,CapacitorParams,ThrusterParams,WeaponMountParams,ShieldEmitterParams,UtilityParams,BlockDef,BlockDefsBlob,OrientationTablesBlob,OrientationTables,OrientationData,OrientationTableGenerator,BlockPlacementMath,BlockDefsBlobBuilder}.cs`; `Assets/Game/Data/Components/{BlockDefsRef,OrientationTablesRef}.cs`; `Assets/Game/Data/Validation/{ValidationSeverity,ValidationEntry,ValidationReport,ValidationScope,ContentValidationContext,IContentDatabaseValidator,ContentValidationException,ContentIdRules}.cs`; `Assets/Game/Data/Services/{ContentCatalog,ContentService,UnresolvedContentId}.cs`
+- **Do:** Create every public type of §4 with fields, enums, attributes and method signatures exactly as written; method bodies `throw new System.NotImplementedException()` except trivial property getters, `OrientationMask.Allows`, `BlockDef.HasModule`/`IsCore` and the module classes' `Id`/`Bake`/`RowSize`/`BakeRow` one-liners. `BlockModule<TRow>` is generic: one file `BlockModule.cs` holds both base classes. Add `/// <summary>` lines naming the spec section. Create folders of §4.1.
+- **Files:** `Assets/Game/Data/ContentDatabase.cs`; `Assets/Game/Data/Definitions/Common/{ContentDefinition,ContentIdPrefixAttribute}.cs`; `Assets/Game/Data/Definitions/Items/{ItemDefinition,ItemCategory,ItemRarity}.cs`; `Assets/Game/Data/Definitions/Blocks/BlockDefinition.cs`; `Assets/Game/Data/Blocks/{BlockIndex,Orientation,BlockKind,BlockShape,BlockFace,BlockFaceMask,OrientationMask,BlockCategory,BlockModuleId,BlockModule,BlockModuleBakeContext,BlockStatContribution,BlockStatMath,CoreParams,PowerSourceParams,PowerStorageParams,ThrusterParams,ShieldEmitterParams,CargoParams,ExplosiveParams,WeaponMountParams,CoreModule,PowerSourceModule,PowerStorageModule,ThrusterModule,ShieldEmitterModule,CargoModule,ExplosiveModule,WeaponMountModule,BlockDef,BlockDefsBlob,BlockModuleTable,BlockModulesBlob,OrientationTablesBlob,OrientationTables,OrientationData,OrientationTableGenerator,BlockPlacementMath,BlockDefsBlobBuilder}.cs`; `Assets/Game/Data/Components/{BlockDefsRef,BlockModulesRef,OrientationTablesRef}.cs`; `Assets/Game/Data/Validation/{ValidationSeverity,ValidationEntry,ValidationReport,ValidationScope,ContentValidationContext,IContentDatabaseValidator,ContentValidationException,ContentIdRules}.cs`; `Assets/Game/Data/Services/{ContentCatalog,ContentService,UnresolvedContentId}.cs`
 - **Acceptance criteria:**
   - [ ] `tools/compile.sh` passes with zero warnings in `Game.Data`.
   - [ ] Every type in §4 exists with the stated namespace, file name and member names.
@@ -994,7 +1063,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 - **Files:** `Assets/Game/Data/Services/ContentService.cs`; `Assets/Game/Tests/EditMode/Data/{ContentServiceTests,ContentServicePerfTests,SyntheticContent}.cs`
 - **Acceptance criteria:**
   - [ ] Invalid content throws `ContentValidationException` whose report contains the error, and leaks nothing.
-  - [ ] `CreateSingletons` twice on the same world creates one entity; systems can read `BlockDefsRef` and `OrientationTablesRef` via singleton queries.
+  - [ ] `CreateSingletons` twice on the same world creates one entity; systems can read `BlockDefsRef`, `BlockModulesRef` and `OrientationTablesRef` via singleton queries.
   - [ ] Construct → CreateSingletons → DestroySingletons → Dispose under `NativeLeakDetection.Mode = Enabled` reports no leak; `Dispose` twice is safe.
   - [ ] `ContentService.DatabaseHash` equals `StableHash.Combine(BlockDefs.Value.BlockDefsHash, Catalog.IdentityHash)` and is identical across two constructions from the same database.
   - [ ] Performance budgets of §8 met for both content sets.
@@ -1029,11 +1098,11 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 - **Milestone:** M2
 - **Tier:** standard — two fields and an index lookup with explicit rules
 - **Depends on:** `DATA-007`, `WPN-001`, `ABL-001`
-- **Do:** Add `[SerializeField] WeaponDefinition weapon` and `[SerializeField] AbilityDefinition[] grantedAbilities` (+ getters) to `BlockDefinition`; validation E047 (weapon iff `Function.Kind == Weapon`) and E010 coverage for both; in the blob builder set `Function.Weapon.WeaponIndex = catalog.IndexOf<WeaponDefinition>(weapon)` and fill `AbilityIndices` in authored order; include both in the content hash (they already are, as fields of the canonical layout).
-- **Files:** `Assets/Game/Data/Definitions/Blocks/BlockDefinition.cs`; `Assets/Game/Data/Blocks/BlockDefsBlobBuilder.cs`; `Assets/Game/Tests/EditMode/Data/BlockLinksTests.cs`
+- **Do:** Add the `weapon` field to `WeaponMountModule` (§4.6 comment: `Bake` fills `WeaponIndex`, `Validate` reports E047, `ContributeStats` from `WeaponDefinition.SustainedDps`/`PowerDraw`) and `[SerializeField] AbilityDefinition[] grantedAbilities` (+ getter) on `BlockDefinition`; E010 coverage for both links; fill `AbilityIndices` in authored order in the blob builder. Both are in the content hash (module rows and `AbilityIndices` are part of the canonical layout).
+- **Files:** `Assets/Game/Data/Blocks/WeaponMountModule.cs`; `Assets/Game/Data/Definitions/Blocks/BlockDefinition.cs`; `Assets/Game/Data/Blocks/BlockDefsBlobBuilder.cs`; `Assets/Game/Tests/EditMode/Data/BlockLinksTests.cs`
 - **Acceptance criteria:**
-  - [ ] A weapon block's blob entry has `WeaponIndex == IndexOf<WeaponDefinition>(weapon)` (non-zero).
-  - [ ] A weapon block without `weapon` fails E047; a thruster with `weapon` set fails E047.
+  - [ ] A weapon block's `WeaponMountParams` row has `WeaponIndex == IndexOf<WeaponDefinition>(weapon)` (non-zero).
+  - [ ] A `WeaponMountModule` without `weapon` fails E047.
   - [ ] `AbilityIndices` preserve authored order.
 - **Tests:** `BlockLinksTests.WeaponIndex_IsFilled`, `.E047_WeaponLinkRules`, `.AbilityIndices_PreserveOrder`.
 
@@ -1045,7 +1114,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 - **Files:** `Assets/Game/Content/Blocks/block_reactor_small.asset`; `Assets/Game/Content/Blocks/block_cargo_small.asset`
 - **Acceptance criteria:**
   - [ ] Both assets pass validation; `ProjectContentTests` still has zero errors.
-  - [ ] Their `BlockDef` entries have `Function.Kind` Reactor / Utility(Cargo) and 8 / 2 cells.
+  - [ ] Their `BlockDef` entries have the module masks `{PowerSource, Explosive}` / `{Cargo}`, categories Power / Utility, and 8 / 2 cells.
 - **Tests:** `ProjectContentTests.ProjectContent_HasZeroValidationErrors` (existing), `ProjectContentTests.V2Additions_HaveExpectedFunctions`.
 
 ## 10. Open questions
@@ -1057,7 +1126,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 | 3 | Thrust scale: legacy modifier × 2000 N | Keep; SPEC-20 retunes in M1 using `ShipStats` thrust-to-weight | SPEC-20 |
 | 4 | Thruster power draw | 0 (legacy thrusters consumed nothing) | SPEC-22 |
 | 5 | `block_thruster_medium` has no exhaust clearance in legacy data | Keep none (adding it would invalidate legacy ships) | Owner |
-| 6 | Keep `block_portal_small` and the prismatic mirrors (no v1 behaviour) | Keep as content with `UtilityKind` set; systems ignore them; editor palette shows them only in Creative | Owner |
+| 6 | Keep `block_portal_small` and the prismatic mirrors (no v1 behaviour) | **Answered (2026-10-10, owner, extensibility review X11):** they stay as content but become `Prop` blocks with no module (category Detail), so no dead function contract ships; a later spec can give them modules | Owner |
 | 7 | Meaning of `ArmorClass` and `MaterialLayer` values | All legacy blocks 0; `MaterialLayer` 63 reserved for `block_missing`; SPEC-11/13 define tables | SPEC-11, SPEC-13 |
 | 8 | Cargo capacity unit | **Answered (SPEC-50 decision 1):** 10 capacity units = 1 cargo slot, so a block with 50 units adds 5 slots | SPEC-50 |
 | 9 | Should `CellHp` be a `half` in the blob (synthesis sketch) | `float`; memory is irrelevant at < 1,000 blocks | Tech lead |

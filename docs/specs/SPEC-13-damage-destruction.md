@@ -5,7 +5,7 @@
 | **Status** | Draft |
 | **Area code** | DMG (task IDs are `DMG-001`, `DMG-002`, …) |
 | **Module(s)** | `Game.Voxel` (folder `Assets/Game/Voxel/Damage/`); config definition in `Game.Data` (`Assets/Game/Data/Definitions/Damage/`); harness commands in `Game.DevTools.Editor` |
-| **Depends on specs** | SPEC-02 (`StableHash`, `ContentHash`, `PersistentId`, `SimClock`, groups, `GameplayEndCommandBufferSystem`, `FxEvent`/`SfxEvent` queues); SPEC-04 (`BlockDefsBlob`, `OrientationTablesBlob`, `FunctionParams`, `ArmorClass`); SPEC-10 (`Cell`, `VoxelGrid`, `Brick`, `BrickCells`, `BrickSolidMask`, `BrickDirty`, `BlockInstance`, `FunctionalBlock`, palette, brick lookup, archetypes, `LinkedEntityGroup`); SPEC-12 (`PhysicsLayers`, `GridMassUpdateSystem`, contact suppression for `SplitGrace`); SPEC-21 (`ExplosionSystem` consumes `ExplosionRequest`); SPEC-01 (`PersistentId` block grants) |
+| **Depends on specs** | SPEC-02 (`StableHash`, `ContentHash`, `PersistentId`, `SimClock`, groups, `GameplayEndCommandBufferSystem`, `FxEvent`/`SfxEvent` queues); SPEC-04 (`BlockDefsBlob`, `OrientationTablesBlob`, `BlockModulesBlob` (`Core`, `Explosive` rows), `ArmorClass`); SPEC-10 (`Cell`, `VoxelGrid`, `Brick`, `BrickCells`, `BrickSolidMask`, `BrickDirty`, `BlockInstance`, `FunctionalBlock`, palette, brick lookup, archetypes, `LinkedEntityGroup`); SPEC-12 (`PhysicsLayers`, `GridMassUpdateSystem`, contact suppression for `SplitGrace`); SPEC-21 (`ExplosionSystem` consumes `ExplosionRequest`); SPEC-01 (`PersistentId` block grants) |
 | **Depended on by** | SPEC-12 (reads `CellRemoved` for mass), SPEC-20 (ram physics test), SPEC-21/22/24 (produce `DamageEvent`), SPEC-23 (`Hulk`, `GridDamageStats`), SPEC-31 (adopts `StarSystemMember` for split grids), SPEC-50 (salvage hooks), SPEC-61 (`ShipDestroyed`), SPEC-63/64 (`FxEvent`/`SfxEvent`, chunk render data) |
 | **Milestone** | M2 (DMG-001 in M1; DMG-021 in M4) |
 
@@ -495,7 +495,7 @@ sequenceDiagram
     E->>E: playback: new hulks/chunks exist at end of tick N
 ```
 
-All six systems: `[BurstCompile]` `ISystem`, `[UpdateInGroup(typeof(GameplayPostPhysicsGroup))]`, `state.RequireForUpdate<GameplayActive>()` and `RequireForUpdate<DamageStreams>()`, `<DamageConfig>`, `<BlockDefsRef>`, `<OrientationTablesRef>`, `<SimClock>`. Order inside the group (Voxel-side attributes): `DamageStreamsSystem` `[UpdateBefore(typeof(ImpactEventSystem))]`; `ImpactEventSystem` `[UpdateBefore(typeof(DamageResolveSystem))]`; `DamageResolveSystem` → `IntegritySystem` → `SplitSystem` → `ShipDeathSystem` (each `[UpdateAfter]` the previous); `ShipDeathSystem` `[UpdateBefore(typeof(GridMassUpdateSystem))]`. Simulation-side systems name the Voxel ones (Voxel cannot reference Simulation): `SpatialHashBuildSystem` `[UpdateBefore(ImpactEventSystem)]`; `ProjectileStepSystem` `[UpdateAfter(ImpactEventSystem)]`; `ShieldSystem`, `ExplosionSystem`, `BeamStepSystem` `[UpdateBefore(DamageResolveSystem)]` (open question 9). None of these systems skips `Dormant` grids: damage must apply everywhere. Every expensive step is wrapped in `ProfilerMarker("<SystemName>.<Step>")` with the step names given in bold below.
+All six systems: `[BurstCompile]` `ISystem`, `[UpdateInGroup(typeof(GameplayPostPhysicsGroup))]`, `state.RequireForUpdate<GameplayActive>()` and `RequireForUpdate<DamageStreams>()`, `<DamageConfig>`, `<BlockDefsRef>`, `<BlockModulesRef>`, `<OrientationTablesRef>`, `<SimClock>`. Order inside the group (Voxel-side attributes): `DamageStreamsSystem` `[UpdateBefore(typeof(ImpactEventSystem))]`; `ImpactEventSystem` `[UpdateBefore(typeof(DamageResolveSystem))]`; `DamageResolveSystem` → `IntegritySystem` → `SplitSystem` → `ShipDeathSystem` (each `[UpdateAfter]` the previous); `ShipDeathSystem` `[UpdateBefore(typeof(GridMassUpdateSystem))]`. Simulation-side systems name the Voxel ones (Voxel cannot reference Simulation): `SpatialHashBuildSystem` `[UpdateBefore(ImpactEventSystem)]`; `ProjectileStepSystem` `[UpdateAfter(ImpactEventSystem)]`; `ShieldSystem`, `ExplosionSystem`, `BeamStepSystem` `[UpdateBefore(DamageResolveSystem)]` (open question 9). None of these systems skips `Dormant` grids: damage must apply everywhere. Every expensive step is wrapped in `ProfilerMarker("<SystemName>.<Step>")` with the step names given in bold below.
 
 ### 5.1 `DamageStreamsSystem`
 
@@ -609,7 +609,7 @@ After damage reaches an instance cell (`ApplyCellDamage` or `RemoveCell` with re
    1. `RemoveCell` every remaining cell with reason `Destroyed` (they add seeds).
    2. `inst.FunctionHp = 0`; `InstancesDestroyed++`.
    3. If `inst.Functional != Entity.Null` and it exists: append to `DestroyList`.
-   4. If `Function.Kind == Reactor` and `Reactor.BlastDamage > 0`: write `ExplosionRequest { WorldPos = world centre of the instance root cell, Radius = BlastRadiusCells · s, Amount = BlastDamage, Type = Explosive, Source = Grid, Producer = Explosion, Sequence = instance index }`. It is resolved next tick (chain reactions propagate one link per tick).
+   4. If the block has an `Explosive` module (`BlockModulesBlob.TryGet(BlockModuleId.Explosive, block, out ExplosiveParams x)`, SPEC-04 §4.6) and `x.BlastDamage > 0`: write `ExplosionRequest { WorldPos = world centre of the instance root cell, Radius = x.BlastRadiusCells · s, Amount = x.BlastDamage, Type = Explosive, Source = Grid, Producer = Explosion, Sequence = instance index }`. It is resolved next tick (chain reactions propagate one link per tick).
    5. If the index equals `AnchorInstance` → core lost (§5.3.1 step 6).
 
 ### 5.4 `IntegritySystem`
@@ -722,7 +722,7 @@ Salvage hooks (SPEC-50): same-tick ECS readers use `BeginRemovedRead` (each `Cel
 | Core destroyed and the island cut in the same tick | Core loss → grid treated as coreless in this tick's race; anchor = largest component |
 | Ship spawned without a core (`AnchorInstance == −1`) | Never "dies"; anchor = largest island |
 | All cells of a grid removed | Bricks destroyed; root stays (empty) until a despawn request; `Kind` unchanged; SPEC-33/31 decide cleanup |
-| Reactor destroyed by detach (moved to a hulk) | No explosion (`FunctionHp` set to 0 without the reactor rule) |
+| Explosive block (reactor) destroyed by detach (moved to a hulk) | No explosion (`FunctionHp` set to 0 without the explosive rule) |
 | Reactor chain | One link per tick; each explosion goes through `ExplosionSystem` (shields first) |
 | Ram between two chunks | Ignored (no grid side) |
 | Ram between a ship and a static station (no `PhysicsVelocity`) | `invMass = 0` for the station; both sides take damage if they are grids |

@@ -682,7 +682,7 @@ Both maps are dictionaries built once.
 SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(catalog.GetByIndex<MerchantDefinition>(i), onClosed, member: 0)` (ECO-008).
 
 **`CargoCapacitySync`**:
-- `ComputeCapacity(structure)`: `units = Σ` over `structure.Instances` with `Block != 0`, `(Flags & Destroyed) == 0`, function kind Utility and `UtilityParams.Kind == Cargo` of `UtilityParams.CargoCapacity`. The result is `clamp(baseCargoSlots + floor(units / unitsPerSlot), baseCargoSlots, 200)`.
+- `ComputeCapacity(structure)`: `units = Σ` over `structure.Instances` with `Block != 0`, `(Flags & Destroyed) == 0`, a `CargoModule` (SPEC-04 §4.6: `catalog.GetBlock(Block).TryGetModule(out CargoModule m)`) of `m.Params.Capacity`. The result is `clamp(baseCargoSlots + floor(units / unitsPerSlot), baseCargoSlots, 200)`.
 - `Recompute()`: `inventory.SetCapacity(fleet.Flagship != null ? ComputeCapacity(fleet.Flagship.Structure, …) : baseCargoSlots)`.
 
   It is called:
