@@ -89,9 +89,10 @@ public struct PlacedBlockInfo { public int3 Origin; public ushort Block; public 
 
 // SPEC-04, Game.Data: BlockDefsBlob, OrientationTables (Rotate, Compose, Mirror, Inverse, RotY90/RotX90/RotZ90 constants), ContentService.BlockDefs, ContentService.Orientations,
 //   BlockDef.Function.Kind (BlockFunctionKind: None, Core, Thruster, Weapon, Reactor, Capacitor, Shield, Cargo, Utility), BlockDefinition.DisplayName, BlockDefinition.Icon (§10 Q5)
-// SPEC-50, Game.Economy (§10 Q6): ItemDefinition.Block (BlockDefinition placed by this item, or null), ItemDefinition.BasePrice,
-//   InventoryModel.CountOf(ContentId), InventoryModel.CanApply(ReadOnlySpan<ItemDelta>, List<ItemShortfall> shortfalls, out bool cargoFull),
-//   InventoryModel.TryApplyAtomic(ReadOnlySpan<ItemDelta>), event InventoryModel.Changed;  ItemDelta { ContentId Item; int Count; /* + add, - remove */ }
+// SPEC-04 decision 6 + SPEC-50 §4.3 (Game.Economy, §10 Q6): a BlockDefinition IS its own ItemDefinition (no ItemDefinition.Block link);
+//   ItemDefinition.BasePrice; InventoryModel.CountOf(ContentId) (cargo + overflow), InventoryModel.CanApply(ReadOnlySpan<ItemDelta>,
+//   List<ItemShortfall> shortfalls, out bool cargoFull), InventoryModel.TryApplyAtomic(ReadOnlySpan<ItemDelta>), event InventoryModel.Changed;
+//   ItemDelta { ContentId Item; int Count; /* + add, − remove */ }, ItemShortfall { ContentId Item; int Missing; }
 // SPEC-22, Game.Data (§10 Q7): BlockStatContribution BlockStatMath.Of(ref BlockDef def, byte orient)
 //   BlockStatContribution { float Mass; float3 Thrust /* N, grid space */; float PowerGen, PowerUse, PowerStorage; float Dps; float ShieldCapacity; }
 ```
@@ -275,7 +276,7 @@ namespace Game.ShipEditor.Services
 | Structure | Layout | Bytes | Notes |
 |---|---|---|---|
 | `FootprintCache` | per (block, orient): `NativeArray<int3>` cells (BlockDef.Cells order), rotated clearance cells, AABB min/max, grid-space attach mask (6 bits: +X,−X,+Y,−Y,+Z,−Z) | ~ blocks × 24 × (12 × cells + 32) | Built once per session from `BlockDefsBlob` + `OrientationTables` |
-| `BlockItemMap` | `ContentId[]` indexed by BlockIndex; `int[]` price | 16 B × blocks | From `ItemDefinition.Block` (SPEC-50) |
+| `BlockItemMap` | `ContentId[]` indexed by BlockIndex; `int[]` price | 16 B × blocks | The block's own `Id` and `BasePrice` (`BlockDefinition : ItemDefinition`, SPEC-04 decision 6); `HasItem(i)` is false only for air (0) and the Missing block |
 | Count tables | `int[] originalIntact, originalDamaged, draftIntact, draftDamaged` (by BlockIndex); `NativeHashMap<int,int>` draft count by `block * 24 + orient` | 16 B × blocks + 8 B × used pairs | Exact integers; BOM and stats derive from them |
 | `ClearanceIndex` | `NativeHashMap<int3, ushort>` reservation count per cell | ~20 B × reserved cells | Ref-counted; maintained on add/remove |
 | `ReservedMissing` | `NativeHashSet<int3>` | ~16 B × missing cells | Missing cells of damaged instances |
@@ -472,9 +473,9 @@ sequenceDiagram
     V-->>S: no errors
     S->>I: CanApply(deltas) then TryApplyAtomic(deltas)
     S->>T: TryCommitStructure(clone)
-    T->>T: swap fleet structure (same PersistentId), SaveService.MarkDirty(), RequestAutosave
+    T->>T: FleetModel.ReplaceStructure (same PersistentId) → FleetModel.Changed
     S-->>P: Committed
-    P->>F: ReturnFromShipEditor()
+    P->>F: IGameFlow.ExitBlueprintLabAsync()
 ```
 
 ### 5.10 Picking (`DraftPicker`)
@@ -553,14 +554,14 @@ Palette categories derived from content (§10 Q5): Structure (Structural), Detai
 ### 5.15 Host, presenter, launcher and scene flow (`Game.App/EditorHost/`)
 
 **`ShipEditorLauncher`** (App, constructed by `GameRoot`):
-- `OpenLab()` (main menu): `SceneFlow.EnterBlueprintLab()` → on ready `ShipEditorHost.Create(args{ Creative = true, NewBlueprint, Source = empty structure, CommitTarget = BlueprintCommitTarget })`. Exit → `SceneFlow` to MainMenu.
+- `OpenLab()` (main menu): `IGameFlow.EnterBlueprintLabAsync(new BlueprintLabArgs(BlueprintLabMode.Creative, 0, ContentId.None))` (SPEC-01 §5.4.3) → SPEC-01's ready hook (order 700 Editor) calls `ShipEditorHost.Create(args{ Creative = true, NewBlueprint, Source = empty structure, CommitTarget = BlueprintCommitTarget })`. Exit → `IGameFlow.ExitBlueprintLabAsync()` (Creative → MainMenu).
 - `EditPlayerShip()` (called by the `open_ship_editor` effect and by Fleet "Edit" when docked):
   1. Refuse (toast "Cannot edit now") when `GameplayActive` is absent, the player ship is a hulk, or not docked (§10 Q18).
   2. If a dialog is running, defer until SPEC-41 reports it ended (R19: no stuck dialog state).
   3. `UINavigator.CloseAllAboveRoot()`.
-  4. `SceneFlow.EnterShipEditor(persistentId)` (SPEC-01): captures the player grid's current cells (with damage) into its fleet `VoxelStructure`, captures pose and star system, stops the simulation clock, loads BlueprintLab, then `ShipEditorHost.Create(args{ Creative = false, FleetShip, Source = fleet structure, Inventory = session cargo, CommitTarget = FleetCommitTarget(persistentId), PersistentId })`.
-  5. Exit → `SceneFlow.ReturnFromShipEditor()`: loads World, regenerates the star system, spawns the player ship from the (possibly new) structure with the **same** `PersistentId` at the captured pose, `SetRoot(FlightHud)`.
-- `FleetCommitTarget.TryCommitStructure`: replace the fleet entry's structure (dispose the old one), `SaveService.MarkDirty()`, `SaveService.RequestAutosave("ship-edit")` (§10 Q10).
+  4. `IGameFlow.EnterBlueprintLabAsync(new BlueprintLabArgs(BlueprintLabMode.FleetShip, persistentId, ContentId.None))` (SPEC-01 §5.4.3: the fleet write-back captures the player grid's cells with damage into its fleet `VoxelStructure`; the location is captured; the Lab clock never touches campaign time). SPEC-01's ready hook then calls `ShipEditorHost.Create(args{ Creative = false, FleetShip, Source = the fleet record's structure, CommitTarget = FleetCommitTarget })`.
+  5. Exit → `IGameFlow.ExitBlueprintLabAsync()`: loads World, regenerates the star system, spawns the player ship from the (possibly new) structure with the **same** `PersistentId` at the captured pose, `SetRoot(FlightHud)`.
+- `FleetCommitTarget.TryCommitStructure`: `session.Fleet.ReplaceStructure(persistentId, committed)` (SPEC-01; disposes the old structure and raises `FleetModel.Changed`, so SPEC-50's `CargoCapacitySync` recomputes cargo capacity). No save call: saving is blocked in the Lab, and leaving it autosaves (SPEC-01 §5.4.1 step 2.2).
 - `BlueprintCommitTarget.TryCommitStructure`: `IBlueprintStore.TrySave` (name from `TextPrompt` for new blueprints; existing id otherwise).
 
 **`ShipEditorHost : MonoBehaviour`** — `static ShipEditorHost Create(ShipEditorEntryArgs args, EditorHostServices services)` creates a GameObject in the **active scene** (destroyed with the scene: no leftovers, 06-B7) and:
@@ -703,13 +704,13 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 - **Milestone:** M3
 - **Tier:** frontier — F3: a wrong rotated footprint or attach mask silently corrupts every placement and mirror
 - **Depends on:** `EDT-001`, `SPEC-04`
-- **Do:** Build `EditorContext` with `FootprintCache` (rotated cells in `BlockDef.Cells` order, rotated clearance, AABB, grid-space attach mask by rotating each local face direction), `BlockItemMap` (from `ItemDefinition.Block`; one item per block, a second item for the same block is a boot error), prices, palette categories (§5.14), colour count.
+- **Do:** Build `EditorContext` with `FootprintCache` (rotated cells in `BlockDef.Cells` order, rotated clearance, AABB, grid-space attach mask by rotating each local face direction), `BlockItemMap` (index i → `catalog.GetBlock(i).Id` and `BasePrice`; air and the Missing block have no item), prices, palette categories (§5.14), colour count.
 - **Files:** `Assets/Game/ShipEditor/Services/{EditorContext,FootprintCache,BlockItemMap}.cs`
 - **Acceptance criteria:**
   - [ ] For every block and all 24 orientations the rotated footprint has the same cell count and contains the origin.
   - [ ] Rotating the attach mask by o then by `Inverse(o)` returns the original mask.
-  - [ ] Two items mapping one block → `InvalidOperationException` naming both ids.
-- **Tests:** `Assets/Game/Tests/EditMode/ShipEditor/FootprintCacheTests.cs`: `AllOrientations_CountPreserved_ContainsOrigin`, `AttachMask_RotateInverse_Identity`, `LShape_Yaw90_ExpectedCells`. `BlockItemMapTests.DuplicateItem_Throws`, `BlockWithoutItem_HasItemFalse`.
+  - [ ] `BlockItemMap.ItemOf(i) == catalog.GetBlock(i).Id` for every placeable block; `HasItem(0)` and `HasItem(missingIndex)` are false.
+- **Tests:** `Assets/Game/Tests/EditMode/ShipEditor/FootprintCacheTests.cs`: `AllOrientations_CountPreserved_ContainsOrigin`, `AttachMask_RotateInverse_Identity`, `LShape_Yaw90_ExpectedCells`. `BlockItemMapTests.Item_IsBlockItself`, `.AirAndMissing_HaveNoItem`.
 
 ### EDT-003 — Draft reader/writer adapter and canonical hash
 - **Milestone:** M3
@@ -1003,11 +1004,11 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 | 3 | SPEC-10/05: blueprint serialization | `VoxelStructureSerializer.Write(VoxelStructure, SaveWriter)` / `Read(SaveReader, ContentService)` with a `ContentId` palette (same encoding as save `VOXS` chunks) | Tech lead (SPEC-10) |
 | 4 | SPEC-11: mesher entry point, slicing and prop meshes | `BrickMesher.Schedule(cells18, in BrickMeshContext{ Defs, Palette, MaxCellY, BrickCoord }, MeshDataArray, index, deps)`; `PropMeshTable` config SO indexed by `PropMeshIndex`, pivot at the origin cell centre; colour table of 16 entries `BlockColorPalette` | Tech lead (SPEC-11) |
 | 5 | SPEC-04: footprint and function data | `BlockDef.Cells` contains (0,0,0) and is face-connected (validator); `AttachFaces` bit order +X,−X,+Y,−Y,+Z,−Z in block-local space; `BlockDef.Function.Kind` enum as §4.1; `ContentService.BlockDefs`/`Orientations` blob references; `BlockDefinition.DisplayName`, `Icon`; mirror pairs validated by SPEC-04 | Tech lead (SPEC-04) |
-| 6 | SPEC-50: block ↔ item link and atomic apply | `ItemDefinition.Block` (nullable), one item per block; `InventoryModel.CountOf`, `CanApply(ReadOnlySpan<ItemDelta>, List<ItemShortfall>, out bool cargoFull)`, `TryApplyAtomic(ReadOnlySpan<ItemDelta>)`, `event Changed`; `ItemDefinition.BasePrice` | Tech lead (SPEC-50) |
+| 6 | SPEC-50: block ↔ item link and atomic apply | **Answered:** identity (`BlockDefinition : ItemDefinition`, SPEC-04 decision 6); SPEC-50 §4.3 `CountOf`, `CanApply`, `TryApplyAtomic`, `Changed` | Tech lead (SPEC-50) |
 | 7 | SPEC-22: per-block stat contribution usable outside Simulation | `Game.Data` static `BlockStatMath.Of(ref BlockDef, byte orient)` → `BlockStatContribution` (§4.1), also used by `ShipStatsAggregateSystem` so editor and runtime agree | Tech lead (SPEC-22) |
 | 8 | SPEC-03: Editor map actions | Primary LMB; Secondary RMB; Pointer; ToolWheel (scroll); Undo Ctrl/Cmd+Z; Redo Ctrl/Cmd+Shift+Z and Ctrl+Y; Copy/Cut/Paste Ctrl+C/X/V; Delete Delete/Backspace; RotateYaw R, RotatePitch T, RotateRoll G (Shift reverses); tools 1–9 (Place, Line, Box, Fill, Remove, Replace, Paint, Eyedropper, Select); MirrorX X, MirrorY V, MirrorZ Z; SliceToggle L, SliceUp ], SliceDown [; XRay H; BoxModeCycle B; Move arrows / PageUp / PageDown; MirrorSelection M; SelectAll Ctrl+A. Modifier shortcuts must not also trigger the plain key (`shortcutKeysConsumeInput`) | Tech lead (SPEC-03) |
-| 9 | SPEC-01: scene flow hooks | `SceneFlow.EnterBlueprintLab()`, `EnterShipEditor(ulong persistentId)` (captures ECS cells into the fleet structure, pose, star system; simulation clock stopped), `ReturnFromShipEditor()`; `SceneFlow` calls `ShipEditorHost.Create` when the Lab is ready | Tech lead (SPEC-01) |
-| 10 | SPEC-05: blueprint folder and save dirty | `saves/<profile>/blueprints/<id>.ssbp`; `SaveService.MarkDirty()`, `SaveService.RequestAutosave(string reason)` | Tech lead (SPEC-05) |
+| 9 | SPEC-01: scene flow hooks | **Answered:** `IGameFlow.EnterBlueprintLabAsync(BlueprintLabArgs)` / `ExitBlueprintLabAsync()` (SPEC-01 §5.4.3); SPEC-01's ready hook (order 700) calls `ShipEditorHost.Create` | Tech lead (SPEC-01) |
+| 10 | SPEC-05: blueprint folder and save dirty | `saves/<profile>/blueprints/<id>.ssbp`; no dirty/autosave call from the editor (Lab exit autosaves through SPEC-01) | Tech lead (SPEC-05) |
 | 11 | SPEC-40/41: `open_ship_editor` effect | The effect calls `ShipEditorLauncher.EditPlayerShip`; the launcher defers until the dialog has ended (SPEC-41 `DialogEnded`) | Tech lead (SPEC-41) |
 | 12 | SPEC-13: can a multi-cell instance lose some cells and survive? | Yes; the editor reserves missing cells (§3 decision 9) | Tech lead (SPEC-13) |
 | 13 | Salvage when a damaged block is removed in the editor | None in M3 (BOM line "lost"); SPEC-50 may add salvage later | Owner |

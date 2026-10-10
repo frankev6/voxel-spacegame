@@ -188,7 +188,7 @@ flowchart LR
 |---|---|---|
 | Player root `LocalTransform` (position, yaw), `PhysicsVelocity = default`, Unity Physics graphical-smoothing history reset | `DevEcs.TeleportRoot(EntityManager, Entity root, float3 pos, quaternion rot)` | Main thread, between world updates, after `CompleteAllTrackedJobs()`; `OriginRebaseSystem` rebases next frame if the new position is > 2,000 m from the origin |
 | Inventory add, credits add | `InventoryModel` / `Wallet` public methods (owner methods, dev caller) | No direct field writes |
-| Fact set | `FactStore.Set` (owner method, dev caller) | No direct field writes |
+| Fact set | `FactStore.SetBySlot(slot, value, FactWriteSource.Debugger)` (owner method, dev caller) | No direct field writes |
 | `PlayerCommand` during replay | SPEC-71 replay system | Specified by SPEC-71 |
 
 ## 6. Public API
@@ -247,7 +247,10 @@ Built-in probes (DEV-005 unless noted):
 | `grid(id).exists`, `grid(id).cells`, `grid(id).kind`, `grids.count("Ship"\|"Station"\|"Asteroid"\|"Hulk")` (DEV-009) | By `PersistentId` |
 | `star_system` (DEV-018) | Current `StarSystemId.Value` (−1 when none) |
 | `interaction.target`, `interaction.inrange` (DEV-014) | Target body name or ""; in range |
-| `fact("name")`, `cond("condition text")`, `inv("item_id")`, `credits` (DEV-017) | Fact value; compiled condition result; item count; wallet |
+| `fact("name")`, `cond("condition text")`, `inv("item_id")`, `credits` (DEV-017) | Fact value; compiled condition result; item count (cargo + overflow, `CountOf`); wallet |
+| `travel.phase`, `travel.arrival_gap`, `travel.inside_ring` (SPEC-32 TRV-011) | `TravelService.Phase` name; metres from the arrival point; whether the player is inside the lane ring |
+| `quest("id")`, `clue("id")` (SPEC-42 QST-010) | Status name of the latest instance (`"None"` if never started); clue ordinal (0 = not found) |
+| `encounters.active`, `encounters.ships`, `relation("faction_id")`, `stance("faction_id")`, `encounter_defeated("encounter_id")` (SPEC-33 ENC-012) | Director counts; relation −100..100; stance name; defeats since the run started |
 | `fx.drained`, `sfx.voices` (DEV-011) | `FxStats.EventsDrained` last frame; `AudioStats.ActiveSfxVoices` |
 
 Complete example (draft until SPEC-05/SPEC-31 land):
@@ -288,19 +291,19 @@ assert ecs.count("Brick") > 0 "voxels present"
 | `help` | `[cmd]` | Lists commands or one usage | Ok |
 | `op` | `id` | Status of an operation | Ok: `running\|succeeded\|failed: message` |
 | `until` | `cond` (expression text) | Evaluates once | Ok: `true` or `false` |
-| `newgame` | `seed` (ulong, required), `ship` (blueprint id, default from SPEC-01), `intro` (false), `profile` (`harness`) | Edit mode (CLI wrapper only): open `Assets/Game/Scenes/Boot.unity`, enter play mode, wait for the host. Then `SceneFlow.StartNewGameAsync(new NewGameOptions { Seed, StartBlueprint, SkipIntro = !intro })` with the save profile set to `profile`. Done when `player.ready` (or context `Dialog` when `intro=true`). Timeout 60 s | Pending → `in world: seed S, player id P` |
-| `sandbox` | `player` (true), `seed` (1) | `SceneFlow.EnterSandboxAsync(new SandboxOptions { SpawnPlayer, Seed })`. Done when `GameplayActive` exists (and `player.ready` when `player=true`). Timeout 30 s | Pending |
-| `teleport` | `x`,`z` (local) or `sx`,`sz` (star-system metres; converted with `FrameOrigin`) or `near` (body query) + `offset` (40), `yaw` (degrees, keep current) | `DevEcs.TeleportRoot` (§5.4). `near`: body via `IBodyDirectory.TryFind`; target = body centre − (0, 0, surfaceRadius + offset) | Ok: new local and universe position |
+| `newgame` | `seed` (ulong, required), `ship` (start scenario id, default `ContentId.None` = SPEC-01 default), `intro` (false), `profile` (`harness`) | Edit mode (CLI wrapper only): open `Assets/Game/Scenes/Boot.unity`, enter play mode, wait for the host. Then select the save profile (`SaveService.ListProfiles()` entry whose display name is `profile`, else `CreateProfile(profile)`; `SetActiveProfile(id)`), set `GameRootTestHooks.SkipIntroScreens = !intro` for the next boot only when the CLI wrapper started play mode, and call `IGameFlow.NewGameAsync(new NewGameArgs("Harness", seed, false, ship))` (SPEC-02 §4.8). Done when `player.ready` (or context `Dialog` when `intro=true`). Timeout 60 s | Pending → `in world: seed S, player id P` |
+| `sandbox` | `player` (true), `seed` (1) | `SceneFlow.EnterSandboxAsync(new SandboxArgs(player, seed))` (SPEC-01 §4.3). Done when `GameplayActive` exists (and `player.ready` when `player=true`). Timeout 30 s | Pending |
+| `teleport` | `x`,`z` (local) or `sx`,`sz` (star-system metres; converted with `FrameOrigin`) or `near` (body query) + `offset` (40), `yaw` (degrees, keep current) | `DevEcs.TeleportRoot` (§5.4). `near`: body via `DevBodyQuery.TryFind` (§6.4); target = body centre − (0, 0, surfaceRadius + offset) | Ok: new local and universe position |
 | `spawn` | `blueprint` (required), `x`,`z` or `dx`,`dz` (relative to player; default dz=80), `yaw` or `face=player`, `faction` (id), `team` (1), `count` (1), `spacing` (60), `ai` (true) | One `ShipSpawnService.Spawn` per ship, placed along +X by `spacing`. Done when every requested `PersistentId` has a grid root. Timeout 10 s | Pending → `spawned N: ids …` |
 | `aim` | `target` = `nearest_hostile` (default) \| `nearest` \| `id:<PersistentId>` \| `point` with `x`,`z`; `track` (0 s) | Projects the target with `GameplayCamera.WorldToScreenPoint`, moves the AgentMouse; with `track > 0` an operation re-aims every frame. Hostile = `Allegiance.Team` differs from the player's | Ok or Pending |
-| `fire` | `group` (1..4, default 1), `seconds` (0.5) | Presses the first bound control of action `Flight/Fire{group}` through `DevInputInjector` for `seconds` | Pending |
+| `fire` | `group` (1..3, default 1), `seconds` (0.5) | Presses the first bound control of action `Flight/FirePrimary` (1), `Flight/FireSecondary` (2) or `Flight/FireTertiary` (3) (SPEC-03 §4.2) through `DevInputInjector` for `seconds` | Pending |
 | `interact` | `body` (optional query) | With `body`: teleport to `surfaceRadius + 0.5 × interactionRange` from the body (never closer than the rule allows, never beyond it). Then press `Flight/Interact` for 0.1 s. Never calls interaction code directly | Pending → target before/after |
-| `inv` | `max` (80) | Cargo items `id×count`, wallet | Ok |
-| `give` | `item` + `count` (1), or `credits` | `InventoryModel.TryAdd` / `Wallet.Add` | Ok or Fail with reason |
-| `save` | `slot` (required) | `SaveService.SaveAsync(slot)`; done on `GameSaved` | Pending |
-| `load` | `slot` (required) | `SaveService.LoadAsync(slot)`; done on `GameLoaded` and `player.ready` | Pending |
-| `jump` | `to` (StarSystemId number or name) | `TravelService.RequestJump(id)`; refused → Fail with the reason; done on `StarSystemEntered` for that id. Timeout 30 s | Pending |
-| `facts` | `get` \| `set=name=value` \| `list=prefix` \| `eval="condition"` | `FactStore.Get/Set/Keys`; `eval` compiles with the SPEC-40 condition compiler and evaluates with the game's `ILogicContext` | Ok |
+| `inv` | `max` (80) | One line per occupied slot `slot: id×count`, overflow slots (index ≥ `Capacity`) marked `[overflow]`; then `capacity N`, `credits C` (SPEC-50 §4.3) | Ok |
+| `give` | `item` + `count` (1), or `credits` | `InventoryModel.TryAdd(ContentId, int, out string reason)` (cargo only; refused when full) / `Wallet.Add(long)` (SPEC-50 §4.3–§4.4) | Ok or Fail with reason |
+| `save` | `slot` (required) | `IGameFlow.SaveGameAsync(slot, SaveReason.Manual)` in the active profile; done on `GameSaved` | Pending |
+| `load` | `slot` (required) | `IGameFlow.LoadGameAsync(slot)`; done on `GameLoaded` and `player.ready` | Pending |
+| `jump` | `to` (StarSystemId number or authored name/ID) | `TravelService.RequestJump(id, JumpSource.Dev)` (SPEC-32 §4.4; Dev jumps skip the gate distance and fuel checks); refused → Fail with `JumpRequestResult.Reason`; done on `StarSystemEntered` for that id. Timeout 30 s | Pending |
+| `facts` | `get` \| `set=name=value` \| `list=prefix` \| `eval="condition"` | `slot = store.Catalog.SlotOf(name)`; `GetBySlot`/`SetBySlot(slot, v, FactWriteSource.Debugger)`; `list` walks `Catalog` names with the prefix; `eval` compiles with `LogicCompiler.TryCompileExpression(text, new LogicCompileOptions(LogicUsage.BeatCondition, "dev", "eval"), report, out cond)`, binds it with a `LogicBinder` and evaluates with the game's `ILogicContext` (SPEC-40 §4.5) | Ok |
 | `grid` | `id` (PersistentId) \| `player=true` \| `nearest=true`; `bricks` (false) | Prints §6.5 fields; `bricks=true` adds one line per brick (max 200) | Ok |
 | `perf` | `voxel`, `combat`, `markers`, `json` (all false) | §6.6 | Ok |
 | `overlay` | `name` = bricks\|dirty\|colliders\|islands\|spatial\|interaction\|all\|none; `on` (true); `id` (islands target, default player) | Toggles overlays | Ok |
@@ -314,15 +317,15 @@ CLI-only: `gh_scenario --file <path>` (starts a run, enters play mode first when
 
 | Spec | API the commands call |
 |---|---|
-| SPEC-01 | `DevRuntimeHost.Create` call in `GameRoot`; `SceneFlow.StartNewGameAsync(NewGameOptions)`; `SceneFlow.EnterSandboxAsync(SandboxOptions)`; `ShipSpawnService.Spawn(ContentId blueprint, float3 pos, quaternion rot, Allegiance al, bool withAi) → PersistentId` |
-| SPEC-03 | Action names `Flight/Fire1..Fire4`, `Flight/Interact`, `Global/DevConsole` (Backquote); `InputService.Context` |
-| SPEC-05 | `SaveService.SetProfile(string)`, `SaveAsync(string slot)`, `LoadAsync(string slot)` |
+| SPEC-01 | `DevRuntimeHost.Create` call in `GameRoot` (§5.2 step 16); `IGameFlow.NewGameAsync(NewGameArgs)` (SPEC-02); `SceneFlow.EnterSandboxAsync(SandboxArgs)`; `ShipSpawnService.Spawn(ContentId blueprint, float3 pos, quaternion rot, Allegiance al, bool withAi) → PersistentId` (§4.4); `GameRootTestHooks` (SPEC-71) |
+| SPEC-03 | Action names `Flight/FirePrimary`, `Flight/FireSecondary`, `Flight/FireTertiary`, `Flight/Interact`, `Global/DevConsole` (F1); `InputService.CurrentContext` |
+| SPEC-05 | `SaveService.ListProfiles`, `CreateProfile`, `SetActiveProfile`; saving and loading go through `IGameFlow.SaveGameAsync(slotId, reason)` / `LoadGameAsync(slotId)` |
 | SPEC-10/11/12 | `BrickDirty` flag field, `Brick.SolidCount`, mesh-applied marker on bricks, provisional vs compound collider detection |
-| SPEC-23 | `SpatialHash.CellSize` and `ShipProxy` positions |
-| SPEC-31 | `IBodyDirectory.TryFind(string query, out Entity body, out float surfaceRadius, out float interactionRange)`; `InteractionTarget` singleton; `Interactable` |
-| SPEC-32 | `TravelService.RequestJump(StarSystemId) → JumpRequestResult { bool Accepted; string Reason; }` |
-| SPEC-40 | `FactStore.Get(string)`, `Set(string, int)`, `Keys`; `ConditionCompiler.Compile(string, ValidationReport) → ICondition` |
-| SPEC-50 | `InventoryModel.TryAdd(ContentId, int, out string reason)`, `Wallet.Add(long)`, cargo enumeration |
+| SPEC-23 | `SpatialHash.CellSize` and its `SpatialProxy` entries (`Entity`, `Center`, `Radius`) for the spatial overlay |
+| SPEC-31 | `StarSystemBody` (`Id`, `RadiusM`, `Grid`), `Interactable.DistanceM`, `InteractionTarget` singleton; names through `GalaxyService.GetBodyName`. `DevBodyQuery.TryFind(EntityManager, GalaxyService, string query, out Entity body, out float surfaceRadius, out float interactionRange)` is this spec's own helper over those (DEV-014): `query` matches the body key, the display name (case-insensitive) or the template `storyTag`; ties → nearest |
+| SPEC-32 | `TravelService.RequestJump(StarSystemId, JumpSource) → JumpRequestResult { bool Accepted; JumpRefusal Refusal; string Reason; }` |
+| SPEC-40 | `FactStore.Catalog.SlotOf`, `GetBySlot`, `SetBySlot`; `LogicCompiler.TryCompileExpression`, `LogicBinder` |
+| SPEC-50 | `InventoryModel.TryAdd(ContentId, int, out string reason)`, `Capacity`, slot enumeration, `CountOf`; `Wallet.Add(long)`, `Wallet.Credits` |
 | SPEC-60/62 | `Screen` base class and `UINavigator.Push/Pop`; gameplay `Camera` |
 
 ### 6.5 `grid` output fields
@@ -547,8 +550,8 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Milestone:** M3
 - **Tier:** standard — input-path command and overlay with exact rules
 - **Depends on:** `DEV-009`, `SYS-001`, `INP-001`
-- **Do:** `teleport near=`; command `interact` (§6.3); probes `interaction.target`, `interaction.inrange`; overlay `interaction` (32-segment XZ circle of radius `surfaceRadius + interactionRange` per interactable, line player→target green in range, red otherwise).
-- **Files:** `Assets/Game/App/DevRuntime/Commands/InteractDevCommand.cs`, `Assets/Game/App/DevRuntime/Overlays/InteractionOverlayJob.cs`, `Assets/Game/App/DevRuntime/Scenarios/InteractionScenarioProbes.cs`
+- **Do:** `DevBodyQuery` (§6.4 SPEC-31 row); `teleport near=`; command `interact` (§6.3); probes `interaction.target`, `interaction.inrange`; overlay `interaction` (32-segment XZ circle of radius `surfaceRadius + interactionRange` per interactable, line player→target green in range, red otherwise).
+- **Files:** `Assets/Game/App/DevRuntime/DevBodyQuery.cs`, `Assets/Game/App/DevRuntime/Commands/InteractDevCommand.cs`, `Assets/Game/App/DevRuntime/Overlays/InteractionOverlayJob.cs`, `Assets/Game/App/DevRuntime/Scenarios/InteractionScenarioProbes.cs`
 - **Acceptance criteria:**
   - [ ] `interact body=<station>` places the ship inside the legal range measured from the surface and the real Interact action opens the station's interaction.
   - [ ] The command never invokes interaction code directly (code review + test with the Interact action unbound → Fail).
@@ -561,7 +564,7 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Do:** `DevConsoleScreen : Screen` (SPEC-60) with `Context = TextEntry`, `PausesSimulation = false`, `BlocksWorldPointer = true`, built in C# using theme classes only (no UXML/USS asset, no inline styles): output list (last 200 lines, `ListView` with pooled items), input `TextField`, history (↑/↓, 50 entries), Tab completion of command names, Enter executes through the registry (Pending results print when the op ends). Toggled by `Global/DevConsole`.
 - **Files:** `Assets/Game/App/DevRuntime/Console/{DevConsole,DevConsoleScreen}.cs`
 - **Acceptance criteria:**
-  - [ ] Backquote opens and closes the console; gameplay input is off while open.
+  - [ ] F1 (`Global/DevConsole`, SPEC-03) opens and closes the console; gameplay input is off while open.
   - [ ] `help` output appears; ↑ recalls the last command; Tab completes `tel` to `teleport`.
   - [ ] No allocation per frame while the console is closed.
 - **Tests:** `DevConsoleTests.Toggle_ChangesContext`, `DevConsoleTests.History_And_Completion`, `DevConsoleTests.Closed_NoGcAlloc` (PlayMode).
@@ -624,14 +627,14 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 | # | Question | Default if unanswered | Decider |
 |---|---|---|---|
 | 1 | SPEC-01: creating the host | `GameRoot`, last step of `Awake`, inside `#if UNITY_EDITOR \|\| DEVELOPMENT_BUILD`: `var dev = DevRuntimeHost.Create(transform); Services.Register(dev);` | Tech lead |
-| 2 | SPEC-01: new-game and sandbox entry points | `SceneFlow.StartNewGameAsync(NewGameOptions { ulong Seed; ContentId StartBlueprint; bool SkipIntro; })` and `SceneFlow.EnterSandboxAsync(SandboxOptions { bool SpawnPlayer; ulong Seed; })` (sandbox = World scene, `GameplayActive`, no galaxy streaming), both `Awaitable` | Tech lead |
-| 3 | SPEC-01: `ShipSpawnService.Spawn` signature | `PersistentId Spawn(ContentId blueprint, float3 position, quaternion rotation, Allegiance allegiance, bool withAi)` | Tech lead |
-| 4 | SPEC-05: harness saves must not mix with player saves | `SaveService.SetProfile("harness")`; PlayMode tests use a temporary root (SPEC-71) | Tech lead |
-| 5 | SPEC-03: action names for fire groups, interact and the console | `Flight/Fire1`..`Fire4`, `Flight/Interact`, `Global/DevConsole` bound to Backquote | Tech lead |
-| 6 | SPEC-31: body lookup and interaction state | `IBodyDirectory.TryFind(...)` per §6.4; singleton `InteractionTarget { Entity Body; float Distance; byte InRange; }` | Tech lead |
-| 7 | SPEC-32: jump request API | `TravelService.RequestJump(StarSystemId) → JumpRequestResult { bool Accepted; string Reason; }` | Tech lead |
-| 8 | SPEC-40: fact access and condition compiler | `FactStore.Get(string)`, `Set(string,int)`, `Keys`; `ConditionCompiler.Compile(string, ValidationReport)` | Tech lead |
-| 9 | SPEC-50: dev grants | `InventoryModel.TryAdd(ContentId, int, out string reason)`, `Wallet.Add(long)` | Tech lead |
+| 2 | SPEC-01: new-game and sandbox entry points | **Answered:** `IGameFlow.NewGameAsync(new NewGameArgs(name, seed, creative, startScenario))` and `SceneFlow.EnterSandboxAsync(new SandboxArgs(spawnPlayer, seed))` (SPEC-01 §4.3, §5.4.4) | Tech lead |
+| 3 | SPEC-01: `ShipSpawnService.Spawn` signature | **Answered:** SPEC-01 §4.4 keeps exactly this overload | Tech lead |
+| 4 | SPEC-05: harness saves must not mix with player saves | **Answered:** the harness uses its own profile (`newgame profile=harness`); PlayMode tests set `GameRootTestHooks.SaveRoot`/`SettingsPath` to a temp folder (SPEC-01 §5.1, SPEC-71 TST-003) | Tech lead |
+| 5 | SPEC-03: action names for fire groups, interact and the console | **Answered:** `Flight/FirePrimary`/`FireSecondary`/`FireTertiary`, `Flight/Interact`, `Global/DevConsole` on F1 (the Global map holds only Esc and function keys) | Tech lead |
+| 6 | SPEC-31: body lookup and interaction state | **Answered:** `DevBodyQuery` (this spec, §6.4) over SPEC-31's public components; `InteractionTarget` as in SPEC-31 §4.3 | Tech lead |
+| 7 | SPEC-32: jump request API | **Answered:** `TravelService.RequestJump(StarSystemId, JumpSource.Dev) → JumpRequestResult` (SPEC-32 §4.4); `travel.*` probes from TRV-011 | Tech lead |
+| 8 | SPEC-40: fact access and condition compiler | **Answered:** slot API of `FactStore` and `LogicCompiler.TryCompileExpression` (§6.4) | Tech lead |
+| 9 | SPEC-50: dev grants | **Answered:** `InventoryModel.TryAdd(ContentId, int, out string reason)`, `Wallet.Add(long)` (SPEC-50 §4.3–§4.4) | Tech lead |
 | 10 | SPEC-62: gameplay camera access | `CameraRigService.Camera` (registered in `Services`) | Tech lead |
 | 11 | SPEC-60: theme classes for a code-built screen | Generic classes `panel`, `label`, `label--mono`, `text-field`, `list` exist in the theme | Tech lead |
 | 12 | Where do non-asset test inputs live? | `TestData/` at the project root (`Scenarios/`, `Replays/`, `Golden/`); see Proposed change in the report | Tech lead |
