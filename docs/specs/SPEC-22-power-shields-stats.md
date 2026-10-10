@@ -18,7 +18,7 @@ Every ship has an energy budget, an analytic shield and a set of aggregated stat
 ## 2. Scope
 
 **In scope:**
-- `ShipPower`, `PowerConsumer`, `Powered`, `PowerLink`, `ShipStats`, `ShipStatModifier`, `ShieldState`, `ShieldRipple`, `ShieldControl`, `ShieldHit`, `ShieldHitStreams`, `ShieldMath`, `PowerTuning`, `PowerTuningDefinition`, `PowerGridSetup`.
+- `ShipPower`, `PowerConsumer`, `Powered`, `PowerLink`, `ShipStats`, `ShipStatModifier`, `StatusSystem` with `StatModifierRequest`/`InhibitRequest` channels and `Inhibited` (ADR-0016), `ShieldState`, `ShieldRipple`, `ShieldControl`, `ShieldHit`, `ShieldHitStreams`, `ShieldMath`, `PowerTuning`, `PowerTuningDefinition`, `PowerGridSetup`.
 - Reactors, cores and capacitors as energy sources; weapons, shield emitters and thrusters as consumers.
 - `PowerInitSystem`, `PowerAllocationSystem` (priorities, brownout), `ShipStatsAggregateSystem` (dirty-only), `ShieldSystem` (fit, regen, hits, overflow).
 - Hulk handling (no power, no shield), the shield toggle state (`ShieldControl`), the energy balance rules and the blueprint power-budget validator.
@@ -27,7 +27,7 @@ Every ship has an energy budget, an analytic shield and a set of aggregated stat
 - Which blocks exist and their raw parameters: SPEC-04 (block modules). This spec retunes the shield emitter values (§4.9, open question 1).
 - Thruster impulses and the speed cap: SPEC-20 (reads `ShipStats` multipliers and `Powered`).
 - Weapon fire, beams, projectile casts, explosions and the analytic shield test inside them: SPEC-21 (uses `ShieldMath`, writes `ShieldHitStreams`).
-- Ability activation and the shield toggle ability: SPEC-24 (writes `ShieldControl` and `ShipStatModifier`, reads `ShipPower.AbilityGrantMask`).
+- Ability activation and the shield toggle ability: SPEC-24 (writes `ShieldControl`, posts `StatModifierRequest`s, reads `ShipPower.AbilityGrantMask`).
 - Cell damage, `Hulk` tagging, `DamageStreams`: SPEC-13. Shield and tracer drawing: SPEC-63. HUD: SPEC-61.
 - Saving energy or shield HP: not saved (Decision 12).
 
@@ -192,13 +192,40 @@ namespace Game.Simulation.Power
         public uint SourceRevision;
     }
 
-    /// <summary>Active stat modifier on the grid root. Only writer: AbilityModifierSyncSystem (SPEC-24).</summary>
+    /// <summary>Active stat modifier on the grid root. Only writer: StatusSystem (§5.3b, ADR-0016), from StatModifierRequests.</summary>
     [InternalBufferCapacity(4)]
-    public struct ShipStatModifier : IBufferElementData
+    public struct ShipStatModifier : IBufferElementData   // 12 bytes
     {
         public StatId Stat;
-        public byte SourceSlot;         // AbilitySlot index that produced it
+        public Game.Data.Combat.ProducerKind Producer;   // who asked: Ability, Status, Environment…
+        public ushort SourceId;         // the producer's key (abilities: slot index)
         public float Multiplier;        // > 0
+        public uint UntilTick;          // removed when SimClock.Tick ≥ UntilTick; uint.MaxValue = until cancelled
+    }
+
+    /// <summary>Request to set, refresh or cancel a stat modifier (ADR-0016). Upsert key (Root, Producer, SourceId, Stat);
+    /// Multiplier == 1 or UntilTick ≤ current tick cancels.</summary>
+    public struct StatModifierRequest
+    {
+        public Entity Root; public StatId Stat; public Game.Data.Combat.ProducerKind Producer; public ushort SourceId;
+        public float Multiplier; public uint UntilTick; public uint Sequence;
+    }
+
+    /// <summary>Request to switch blocks off (EMP, ion, hacking; ADR-0016). Target = a functional entity, or a grid root = all its blocks.</summary>
+    public struct InhibitRequest
+    {
+        public Entity Target; public uint DurationTicks; public byte Reason; public Game.Data.Combat.ProducerKind Producer; public uint Sequence;
+    }
+
+    /// <summary>On every functional entity (registered with Module = None). Only writer: StatusSystem. Inhibited while SimClock.Tick < UntilTick.</summary>
+    public struct Inhibited : IComponentData { public uint UntilTick; public byte Reason; }
+
+    /// <summary>Singleton holding the two status channels. Created and disposed by StatusSystem.</summary>
+    public struct StatusChannels : IComponentData
+    {
+        public Game.Data.Streams.SimEventChannel<StatModifierRequest> StatModifiers;
+        public Game.Data.Streams.SimEventChannel<InhibitRequest> Inhibits;
+    }
     }
 }
 ```
@@ -380,7 +407,7 @@ namespace Game.Simulation.Power
 | `ShipStats`, `ShipStatMultipliers`, `PowerStats`, `ShieldStats` | `ShipStatsAggregateSystem` |
 | `ShieldState`, `ShieldRipple` | `ShieldSystem` (`PowerInitSystem` only sets `Flags = FillOnNextUpdate` at init) |
 | `ShieldControl` | `ShieldToggleEffectSystem` (SPEC-24) |
-| `ShipStatModifier` | `AbilityModifierSyncSystem` (SPEC-24) |
+| `ShipStatModifier`, `Inhibited` | `StatusSystem` (from `StatusChannels`, ADR-0016; producers: SPEC-24 abilities, status and environment features) |
 | `ShieldHitStreams.Hits` registrations | Any producer through `Hits.BeginWrite`/`EndWrite` (SPEC-21 today: `ProjectileStepSystem`, `BeamStepSystem`, `ExplosionSystem`); channel owned and read by `ShieldSystem` |
 
 ### 4.8 Memory
@@ -429,7 +456,7 @@ Every system: `[BurstCompile]` `ISystem`, `RequireForUpdate<GameplayActive>()`, 
 
 ### 5.1 Registration (`PowerRegistrationSystem`)
 
-`[UpdateInGroup(typeof(GameInitGroup))] [CreateAfter(typeof(GridSpawnSystem))]`, `OnCreate` only (then `state.Enabled = false`): `PowerRegistration.RegisterConsumer(buffer, BlockModuleId.ShieldEmitter)` (this spec owns shield emitters). Thrusters and weapon mounts are registered by SPEC-20 and SPEC-21 the same way; a later consuming module (a hangar) registers itself. Blocks with only `PowerSource`/`PowerStorage` modules need no component: generation and capacity come from their rows.
+`[UpdateInGroup(typeof(GameInitGroup))] [CreateAfter(typeof(GridSpawnSystem))]`, `OnCreate` only (then `state.Enabled = false`): `PowerRegistration.RegisterConsumer(buffer, BlockModuleId.ShieldEmitter)` (this spec owns shield emitters) and `{ Module = None, Inhibited }` (every functional entity, ADR-0016). Thrusters and weapon mounts are registered by SPEC-20 and SPEC-21 the same way; a later consuming module (a hangar) registers itself. Blocks with only `PowerSource`/`PowerStorage` modules need no component: generation and capacity come from their rows.
 
 **Adding a power consumer (pattern for every spec, ADR-0014):** (1) register with `RegisterConsumer(module)`; (2) in a `GameInitGroup` system `[UpdateAfter(typeof(GridSpawnSystem))] [UpdateBefore(typeof(PowerInitSystem))]`, for new functional entities of the module (`PowerLink.Bound == 0`) call `SetConsumer(requests, module, draw, priority)`; (3) in a system `[UpdateInGroup(typeof(PowerDemandGroup))]` write `SetRequesting(requests, module, …)` every tick from this tick's inputs; (4) gate the feature on `Powered` (enabled = every consumer of the block granted).
 
@@ -458,16 +485,24 @@ Every system: `[BurstCompile]` `ISystem`, `RequireForUpdate<GameplayActive>()`, 
 4. `budget = Stored + Generation × dt`. `demand = 0`, `granted = 0`, `brownout = false`.
 5. (No command inspection: demand comes from `PowerRequest`, decision 6.)
 6. For each consumer `c` in buffer order (already sorted), process in two passes split at `PriorityAbility`: pass 1 all consumers with `Priority > PriorityAbility`, then step 7, then pass 2 the rest. Per consumer:
-   - `alive = inst.Block != 0 && (inst.Flags & Destroyed) == 0` for `inst = BlockInstance[c.InstanceIndex]`.
+   - `alive = inst.Block != 0 && (inst.Flags & Destroyed) == 0 && tick ≥ Inhibited[c.Functional].UntilTick` for `inst = BlockInstance[c.InstanceIndex]` (an inhibited block neither draws nor counts as powered).
    - `requesting = alive && PowerRequest[c.Functional][c.RequestIndex].Requesting == 1` (an entity or element that no longer exists → false).
    - If `requesting`: `demand += c.Draw`. If `tick < c.DeniedUntilTick` → not granted. Else `need = c.Draw × dt`; if `need ≤ budget` → granted, `budget −= need`, `granted += c.Draw`; else not granted, `c.DeniedUntilTick = tick + BrownoutHoldTicks`, `brownout = true`.
    - `c.Flags = (alive ? Alive : 0) | (requesting ? Requesting : 0) | (granted ? Granted : 0) | (tick < c.DeniedUntilTick ? BrownedOut : 0)`.
 7. Abilities: `mask = 0`. If the root has an `AbilitySlot` buffer: for slot `s` in index order (`s < 32`) with `State == PendingPower`: `need = slot.PendingCost`; if `need ≤ budget` → `budget −= need`, `mask |= 1u << s`. `AbilityGrantMask = mask`, `AbilityGrantTick = tick`.
 8. `Stored = clamp(budget, 0, Capacity)`; `DemandPerSecond = demand`; `GrantedPerSecond = granted`; `Flags` = `Initialized | (brownout ? Brownout : 0)`.
 
-**Job B `PoweredApplyJob`** (`IJobChunk`, `ScheduleParallel` over functional entities with `FunctionalBlock`, `PowerLink`, `Powered`; depends on A): for entity `k`: `g = FunctionalBlock.Grid`; if `g` has no `ShipPower` → enabled = true (non-combat grid, nothing to gate). Else `p = ShipPower[g]`: if `p.Flags` has `Dead` or not `Initialized` → false; else if `ConsumerCount == 0` → `alive(instance)`; else true iff for **every** element `e` of the entity's `PowerRequest` buffer, `c = PowerConsumer[g][e.ConsumerIndex]` has `Alive` and not `BrownedOut`. Write with `chunk.SetComponentEnabled(ref poweredHandle, k, value)` — each chunk belongs to one worker, so enable-bit writes are race-free (traps T2.6).
+**Job B `PoweredApplyJob`** (`IJobChunk`, `ScheduleParallel` over functional entities with `FunctionalBlock`, `PowerLink`, `Powered`; depends on A): for entity `k`: `g = FunctionalBlock.Grid`; if `g` has no `ShipPower` → enabled = true (non-combat grid, nothing to gate). Else `p = ShipPower[g]`: if `p.Flags` has `Dead` or not `Initialized` → false; else if `ConsumerCount == 0` → `alive(instance) && tick ≥ Inhibited.UntilTick`; else true iff for **every** element `e` of the entity's `PowerRequest` buffer, `c = PowerConsumer[g][e.ConsumerIndex]` has `Alive` and not `BrownedOut`. Write with `chunk.SetComponentEnabled(ref poweredHandle, k, value)` — each chunk belongs to one worker, so enable-bit writes are race-free (traps T2.6).
 
 Complexity: O(consumers + ability slots) per ship, O(functional entities) for job B. Budget §8.
+
+### 5.3b `StatusSystem` (ADR-0016)
+
+`[UpdateInGroup(typeof(GameplayPrePhysicsGroup))] [UpdateAfter(typeof(PowerDemandGroup))] [UpdateBefore(typeof(PowerAllocationSystem))]`. `OnCreate` creates `StatusChannels` (`SimEventChannel<StatModifierRequest>.Create("stat_modifiers")`, `<InhibitRequest>("inhibits")`); `OnDestroy` disposes them. Per tick (`tick = SimClock.Tick`; `BeginTick(tick)` on both):
+1. **Inhibits:** `BeginRead` → gather → stable sort by `(Target.Index, Producer, Sequence, gather position)`; one `IJob`: target with `Inhibited` → `UntilTick = max(UntilTick, tick + DurationTicks)`, `Reason`; target that is a grid root → the same for every live instance's `Functional` (via `BlockInstance`); others dropped. Writes through lookups, single-threaded (requests are few).
+2. **Stat modifiers:** `BeginRead` → gather → stable sort by `(Root.Index, Producer, SourceId, Stat, Sequence, gather position)`; one `IJob` per tick: for each request on a root with `ShipStatModifier`: find the element with the same `(Producer, SourceId, Stat)`; cancel (`Multiplier == 1` or `UntilTick ≤ tick`) → remove it; else upsert `{Multiplier, UntilTick}`.
+3. **Expiry:** `IJobEntity` over roots with a non-empty `ShipStatModifier` (`ScheduleParallel`): remove elements with `tick ≥ UntilTick` (stable removal).
+Cost: O(requests + roots with modifiers). Changes to `ShipStatModifier` trip `ShipStatsAggregateSystem`'s `modChanged` filter the same tick.
 
 ### 5.4 `ShipStatsAggregateSystem`
 
@@ -564,7 +599,7 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 - **Tier:** standard — transcribes the types in §4.1–§4.6 exactly
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`, `DMG-001`
 - **Do:** Create every type of §4.1–§4.6 with the exact fields, flags and comments; `ShieldMath`, `PowerGridSetup.Register`, `PowerRegistration` and `PowerContent` bodies throw `NotImplementedException("PWR-0xx")` naming the implementing task; `PowerTuning.Defaults` and `ShipStatMultipliers.Get` are real; `PowerDemandGroup` is complete as written. `StatId` goes to `Assets/Game/Data/Combat/StatId.cs` (namespace `Game.Data.Combat`).
-- **Files:** `Assets/Game/Simulation/Power/{ShipPowerFlags,ShipPower,PowerConsumerFlags,PowerConsumer,PowerRequest,PowerDemandGroup,PowerRegistration,Powered,PowerLink,ShipStatsFlags,ShipStats,ShipStatMultipliers,PowerStats,ShieldStats,ShipStatModifier,ShieldFlags,ShieldState,ShieldRipple,ShieldControl,ShieldHitFlags,ShieldHit,ShieldHitStreams,ShieldMath,PowerTuning,PowerContent,PowerGridSetup}.cs`; `Assets/Game/Data/Definitions/Power/PowerTuningDefinition.cs`; `Assets/Game/Data/Combat/StatId.cs`
+- **Files:** `Assets/Game/Simulation/Power/{ShipPowerFlags,ShipPower,PowerConsumerFlags,PowerConsumer,PowerRequest,PowerDemandGroup,PowerRegistration,Powered,PowerLink,ShipStatsFlags,ShipStats,ShipStatMultipliers,PowerStats,ShieldStats,ShipStatModifier,StatModifierRequest,InhibitRequest,Inhibited,StatusChannels,ShieldFlags,ShieldState,ShieldRipple,ShieldControl,ShieldHitFlags,ShieldHit,ShieldHitStreams,ShieldMath,PowerTuning,PowerContent,PowerGridSetup}.cs`; `Assets/Game/Data/Definitions/Power/PowerTuningDefinition.cs`; `Assets/Game/Data/Combat/StatId.cs`
 - **Acceptance criteria:**
   - [ ] All files compile in `Game.Simulation` / `Game.Data` with no new assembly reference.
   - [ ] `UnsafeUtility.SizeOf<PowerConsumer>() == 24`, `SizeOf<PowerLink>() == 4`, `SizeOf<PowerRequest>() == 12`, `SizeOf<ShieldRipple>() == 20`.
@@ -634,7 +669,7 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
   - [ ] `ship_fighter` after spawn: `PowerStats.Generation == 40`, `PowerStats.Capacity == 200`, `AliveFunctionalCount` equals its functional block count, `FunctionalRevision == 1`, `PowerStats.SourceRevision == 1`.
   - [ ] Destroying one weapon (set `BlockInstance.Flags |= Destroyed` in the test) increments `FunctionalRevision` once and recomputes `PowerStats`; damaging hull cells only (no functional change) does not increment it.
   - [ ] Changing `PhysicsMass` updates `Mass` and `MassFraction` without a revision change.
-  - [ ] A `ShipStatModifier { Thrust, 3 }` makes `ShipStatMultipliers.Get(StatId.Thrust) == 3`; other stats stay 1.
+  - [ ] A `ShipStatModifier { Stat = Thrust, Multiplier = 3, UntilTick = max }` makes `ShipStatMultipliers.Get(StatId.Thrust) == 3`; other stats stay 1.
   - [ ] Dormant ships are not updated; hulks are not updated.
 - **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/ShipStatsAggregateSystemTests.cs`: `Spawn_FullRecompute`, `WeaponDestroyed_IncrementsRevision`, `HullDamageOnly_NoRecompute`, `MassChange_CheapUpdateOnly`, `Modifier_AppliesMultiplier`, `PowerStats_FollowRevision`, `Dormant_Skipped`, `Hulk_Skipped`.
 
@@ -652,6 +687,18 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
   - [ ] Same hit set fed in shuffled stream order produces bit-identical `ShieldState` and identical `DamageEvent` sequences.
   - [ ] Hulk: any hit becomes full overflow; `Active == 0`.
 - **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/ShieldSystemTests.cs`: `Init_FillsAndFits`, `Hits_CollapseAndOverflow`, `Overflow_HitsHullCell`, `Regen_AfterDelay`, `Restart_AtQuarter`, `RippleRing_Wraps`, `Order_IndependentOfStreamOrder`, `Hulk_AllOverflow`, `ToggleOff_NoDrawNoBlock`.
+
+### PWR-010 — `StatusSystem`: inhibits and stat modifiers (ADR-0016)
+- **Milestone:** M2
+- **Tier:** standard — two sorted channel consumers and an expiry job, all steps in §5.3b
+- **Depends on:** `PWR-001`, `PWR-005`, `SPEC-02`
+- **Do:** Implement §5.3b, the `Inhibited` registration (§5.1) and the inhibit checks in `PowerAllocateJob`/`PoweredApplyJob` (§5.3).
+- **Files:** `Assets/Game/Simulation/Power/{StatusSystem,PowerAllocateJob,PoweredApplyJob,PowerRegistrationSystem}.cs`, `Assets/Game/Tests/EditMode/Simulation/Power/StatusSystemTests.cs`
+- **Acceptance criteria:**
+  - [ ] An `InhibitRequest` of 120 ticks on a weapon entity disables its `Powered` bit for exactly 120 ticks and removes its draw; on a grid root it inhibits every block.
+  - [ ] Two modifier requests with the same key keep only the later one; a cancel removes it; an entry with `UntilTick = tick + 60` disappears at that tick; `ShipStatMultipliers` follows in the same tick.
+  - [ ] Results do not depend on producer system order or worker count.
+- **Tests:** `StatusSystemTests.Inhibit_Entity`, `.Inhibit_Root`, `.Modifier_Upsert`, `.Modifier_Cancel`, `.Modifier_Expires`, `.Deterministic`.
 
 ### PWR-008 — Power budget validator and balance tests
 - **Milestone:** M2

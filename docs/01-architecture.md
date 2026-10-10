@@ -178,6 +178,7 @@ SimulationSystemGroup
 │  │  │  └─ AI decision + steering       AI   → ShipCommand (staggered)
 │  │  ├─ BodyOnRailsSystem               SYS  analytic orbits from UniversalTime (tick-exact moving colliders)
 │  │  ├─ PowerDemandGroup                PWR  (custom, ADR-0014) each consuming feature writes its PowerRequest.Requesting
+│  │  ├─ StatusSystem                    PWR  inhibit + stat-modifier channels → Inhibited, ShipStatModifier (ADR-0016)
 │  │  ├─ PowerAllocationSystem           PWR  grants by priority; sets Powered enable bits
 │  │  ├─ ShipStatsAggregateSystem        PWR  shared ShipStats, ShipStatMultipliers, PowerStats/ShieldStats for dirty ships
 │  │  ├─ feature stats systems           FLT/WPN PropulsionStats, WeaponStats (ADR-0014)
@@ -297,6 +298,7 @@ These types cross module boundaries. **Their names and owning module are binding
 | `PhysicsLayers` | static class: the named `CollisionFilter`s for grids, debris, chunk bodies, bodies, sensors and query filters for projectiles, explosions and picking | Owned by SPEC-12. **The only place collision filters are defined** |
 | `DamageEvent` | `Entity Grid; float3 LocalPoint, LocalDir; float Amount, Radius, Penetration; DamageType Type; Entity Source; float3 WorldImpulse` | Grid-space. Written to `DamageStreams` by producers |
 | `CellRemoved` | `Entity Grid; int3 Cell; ushort Block; byte Color; float3 WorldPos, WorldVel, Kick` | Output of the resolver; consumed by split, VFX, audio, salvage |
+| `ImpulseRequest`, `CellRestoreRequest` | request channels held by `DamageStreams` (SPEC-13, ADR-0016) | Any feature may post: pushes are applied by `ImpactEventSystem`, restores (heal, place) by `DamageResolveSystem` |
 | `ExplosionRequest` | `float3 WorldPos; float Radius, Amount; DamageType Type; Entity Source` | Defined here so Voxel code (reactor chain reactions) can request explosions; consumed by `ExplosionSystem` in Simulation (SPEC-21), which tests shields first |
 | `Hulk` | tag | Dead ship: still physical and damageable, no AI/power |
 
@@ -377,20 +379,21 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 
 | State | Only writer | Everyone else |
 |---|---|---|
-| Cell contents and `Cell.Hp` | `DamageResolveSystem` at runtime; `EditSession.Commit` in the editor | Read only |
+| Cell contents and `Cell.Hp` | `DamageResolveSystem` at runtime (damage events and the `CellRestoreRequest` channel, ADR-0016); `EditSession.Commit` in the editor | Read only; other features post `CellRestoreRequest`s |
 | `BlockInstance.FunctionHp` | `DamageResolveSystem` | Read |
 | `VoxelGrid.Revision`, `BrickDirty` | `DamageResolveSystem`, `SplitSystem`, `GridSpawnSystem` | Read |
 | Brick render mesh (`MaterialMeshInfo`) | `BrickMeshApplySystem` | — |
 | Grid `PhysicsCollider` | `ColliderSwapSystem` | — |
 | `PhysicsMass` | `GridMassUpdateSystem` | — |
 | `VoxelGrid.Kind` | `GridSpawnSystem` (initial), `ShipDeathSystem` (Ship → Hulk) | Read |
-| `PhysicsVelocity` | Unity Physics + `PropulsionSystem` (impulses only) + `ImpactEventSystem` (impulses only) + `PlanarConstraintSystem` (vertical impulses only) + `GridMassUpdateSystem` (exact re-expression about the new centre of mass only) + `OriginRebaseSystem` (placement re-expression only: rotates the player's linear velocity by the placement yaw change). **Nobody else assigns velocity.** Creating `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` on a new body (`GridBodyInitSystem`, `SplitSystem` through `GridBodyFactory`), and re-enabling a stowed grid with its pose and velocities (`GridStowApi.Unstow`, ADR-0015), is initialisation, not a write | Read |
+| `PhysicsVelocity` | Unity Physics + `PropulsionSystem` (impulses only) + `ImpactEventSystem` (impulses only: collisions, damage knockback and the `ImpulseRequest` channel, ADR-0016; **every new mechanic that pushes bodies posts to that channel**) + `PlanarConstraintSystem` (vertical impulses only) + `GridMassUpdateSystem` (exact re-expression about the new centre of mass only) + `OriginRebaseSystem` (placement re-expression only: rotates the player's linear velocity by the placement yaw change). **Nobody else assigns velocity.** Creating `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` on a new body (`GridBodyInitSystem`, `SplitSystem` through `GridBodyFactory`), and re-enabling a stowed grid with its pose and velocities (`GridStowApi.Unstow`, ADR-0015), is initialisation, not a write | Read |
 | `ShipCommand` (player ship) | `PlayerCommandApplySystem` | Read |
 | `ShipCommand` (AI ship) | `AiSteeringSystem` | Read |
 | `PlayerControlLock` | `TravelService` | Read by `PlayerCommandApplySystem` |
 | `FactionRelations` (after boot), faction standings | `FactionStandingSystem` (requests from `FactionService`) | Read |
 | `PlayerCombatStatus` | `PlayerCombatStatusSystem` | Read |
 | `ShipStats`, `ShipStatMultipliers`, `PowerStats`, `ShieldStats` | `ShipStatsAggregateSystem` | Read |
+| `ShipStatModifier`, `Inhibited` | `StatusSystem` (SPEC-22) from the `StatModifierRequest` / `InhibitRequest` channels (ADR-0016) | Post requests |
 | `PropulsionStats` / `WeaponStats` | `PropulsionStatsSystem` (SPEC-20) / `WeaponStatsSystem` (SPEC-21) | Read |
 | `PowerRequest` element of module m | The feature that owns m (`Draw`/`Priority` at init, `Requesting` in `PowerDemandGroup`); `ConsumerIndex`: `PowerInitSystem` | Read by `PowerAllocationSystem` |
 | `Powered` bits, `ShipPower` | `PowerAllocationSystem` | Read |

@@ -689,6 +689,7 @@ Why not a cleanup component: the record already knows its root; a per-frame exis
 
 Per tick (markers `Remove`, `Recompute`, `Apply`):
 1. **Remove** (only if `SystemAPI.TryGetSingleton<DamageStreams>(out var streams)`): `view = streams.BeginRemovedRead(ref state)`; `GridMassRemoveJob : IJob` (single-threaded; O(removed cells)) over `view.Grids` in order: for each range of grid `G` with `GridMass`: for each `CellRemoved c` with `Reason ∈ {Destroyed, DetachedParticle, DetachedBody}` (not `Dissolved`): `MassAccumulator.RemoveCell(ref gm.Data, c.Cell, cellSize, Blocks[c.Block].CellMass)` (block out of range → mass 0); `gm.Version++` once per grid; append `G` to `changed`. `streams.EndRemovedRead(handle)`.
+1b. **AddRestored** (ADR-0016; same condition): `rview = streams.BeginRestoredRead(ref state)`; `GridMassAddJob : IJob` (chained after step 1) over `rview.Grids` in order: for each `CellRestored c` of a grid with `GridMass`: `MassAccumulator.AddCell(ref gm.Data, c.Cell, cellSize, Blocks[c.Block].CellMass)`; `gm.Version++` once per grid; append to `changed`. `streams.EndRestoredRead(handle)`.
 2. **Recompute** (roots with `GridMassRecompute` enabled and `GridSpawning` disabled): (a) `RecomputeListJob : IJob` builds `NativeList<RecomputeBrick { int Root; Entity Brick; int3 Coord; }>` in root (`Serial`) order, then slot order; (b) `BrickMassJob : IJobParallelForDefer` (inner batch 4) computes one `StructureMassData` per brick: iterate the 64 mask words with `tzcnt`, resolve each solid cell's block (palette entry or instance), `MassAccumulator.AddCell(ref acc, cell, s, CellMass)`; (c) `RecomputeSumJob : IJob` sums per root in list order with `MassAccumulator.Add`, writes `GridMass { Data, Version + 1 }`, disables `GridMassRecompute`, appends to `changed`. Cost O(cells of those grids) spread over workers.
 3. **Apply** (`PhysicsMassApplyJob : IJob` over `changed`, deduplicated): skip roots without `PhysicsMass` or with `GridColliderState.Motion != Dynamic`; `CellCount == 0` → skip (keep the last mass; SPEC-13 deals with empty grids). Else `newMass = CreateDynamicMass(...)`; if it differs from the current `PhysicsMass` (any field): `Reexpress(ref velocity, old, new, t.Rotation, planar)` when the root has `PhysicsVelocity`; write `PhysicsMass`.
 
@@ -1098,6 +1099,16 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Acceptance criteria:**
   - [ ] Assembly after one brick change on `ThinShellStation1M` ≤ 0.3 ms job time; raycast results identical to the two-level form on 10,000 rays.
 - **Tests:** `RegionCompoundTests.Raycasts_MatchTwoLevel`, `.OneBrickChange_Under0_3ms`.
+
+### PHY-022 — Mass of restored cells (ADR-0016)
+- **Milestone:** M3
+- **Tier:** standard — mirror of the removal step with the same accumulator
+- **Depends on:** `PHY-013`, `DMG-001`
+- **Do:** Implement §5.11 step 1b (`GridMassAddJob` over `BeginRestoredRead`). It goes live with SPEC-13 DMG-019; until then `BeginRestoredRead` returns empty arrays.
+- **Files:** `Assets/Game/Voxel/PhysicsBody/{GridMassUpdateSystem,GridMassAddJob}.cs`, `Assets/Game/Tests/EditMode/Voxel/PhysicsBody/GridMassRestoreTests.cs`
+- **Acceptance criteria:**
+  - [ ] Removing then restoring the same cells returns mass, centre of mass and tensor to their original values within 1e-9 relative.
+- **Tests:** `GridMassRestoreTests.RemoveThenRestore_RoundTrips`.
 
 ## 10. Open questions
 

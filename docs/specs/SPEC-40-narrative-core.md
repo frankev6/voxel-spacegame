@@ -881,7 +881,7 @@ Effects never partially apply a list: costs are checked before the first `Apply`
 | `RequestLaneJump` | SPEC-32 `TravelService.RequestJump(id, JumpSource.Narrative)` (wired by TRV-011, SPEC-32 §5.7) | error once |
 | `OpenMerchant` | SPEC-50 `MerchantLauncher.Open(def, onClosed, member: 0)` (wired by ECO-008; it opens SPEC-61's trade screen) | calls `onClosed` immediately |
 | `OpenShipEditor` | SPEC-01 `SceneFlow` → Blueprint Lab / SPEC-51 | error once |
-| `RepairPlayerShip` | SPEC-51 repair API | error once |
+| `RepairPlayerShip` | SPEC-13 `DamageStreams.Restores.PostFromMainThread(new CellRestoreRequest { Grid = player root, Mode = Heal, CellMin/CellMax = the grid's cell bounds, HpFraction = percent / 100, Producer = MainThread })` (ADR-0016); missing blocks are not rebuilt (that is the editor's job, SPEC-51) | no player ship → error once |
 | `DamagePlayerShip` | SPEC-13 `DamageEvent` request on the player grid: one event, `Amount = amount × HullDamagePerPoint`, `Radius = 1.5` cells, `Type = Kinetic`, point = seeded random solid surface cell (`RngPurpose.Narrative`, salt = `UniversalTime` bits) | error once |
 | `PlaySfx` | SPEC-64 `AudioService` | no-op |
 | `Notify` | SPEC-60 `NotificationService` | `GameLog.Info` |
@@ -1432,7 +1432,7 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 | 7 | SPEC-02: `SaveWriter`/`SaveReader` names | SPEC-05 §4.10 names (`WriteInt32`, `WriteString`, `ReadInt32`, `ReadString`); if SPEC-02 differs, map 1:1 — the §4.11 call sequence is binding | SPEC-02 |
 | 8 | SPEC-02: `RngPurpose` values | **Answered:** `Narrative = 12`, `Loot = 6`, `Merchant = 7`, `Salvage = 25` all exist in SPEC-02 §4.2 | SPEC-02 |
 | 9 | SPEC-04: new ID prefixes `facts_`, `narrative_` (and SPEC-41/42/50 prefixes) | **Answered:** SPEC-04 §4.3 registry lists them; `StoryBeatDefinition` (`beat_`) is owned by SPEC-42 | SPEC-04 |
-| 10 | Owner: should `damage_ship` (legacy `CHANGE_HULL(−n)`) really damage voxels? | Yes, one `DamageEvent` of `n × 20` HP at a random surface cell; `repair_ship` stays a warning until SPEC-51 has repair | Owner |
+| 10 | Owner: should `damage_ship` (legacy `CHANGE_HULL(−n)`) really damage voxels? | Yes, one `DamageEvent` of `n × 20` HP at a random surface cell; **Answered (2026-10-10, owner, ADR-0016):** `repair_ship` heals through SPEC-13's restore channel (`Heal`, fraction = percent); destroyed blocks still need the editor | Owner |
 | 11 | Owner: legacy `CHANGE_RESEARCH` has no system in v2 | Converted to the journal fact `research_points` | Owner |
 
 ## 11. References

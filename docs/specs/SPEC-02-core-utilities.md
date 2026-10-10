@@ -847,7 +847,7 @@ public unsafe partial class GameplayEndCommandBufferSystem : EntityCommandBuffer
 /// <summary>Who produced a simulation event; part of every deterministic sort key (architecture §5.1). One enum for every channel
 /// (damage, explosions, shield hits, impulses, restores, inhibits). Add values at the end only. Implements SPEC-02 §4.12.</summary>
 public enum ProducerKind : byte
-{ Unknown = 0, Impact = 1, Projectile = 2, Beam = 3, Explosion = 4, ShieldOverflow = 5, Ability = 6, Status = 7, Repair = 8, Test = 255 }
+{ Unknown = 0, Impact = 1, Projectile = 2, Beam = 3, Explosion = 4, ShieldOverflow = 5, Ability = 6, Status = 7, Repair = 8, Environment = 9, MainThread = 10, Test = 255 }
 
 // Assets/Game/Data/Streams/GuardedHandles.cs   (namespace Game.Data.Streams)
 /// <summary>Job-handle guard embedded in every singleton that owns native memory shared by several systems (architecture §5.1;
@@ -902,6 +902,11 @@ public unsafe struct SimEventChannel<T> where T : unmanaged
     public void EndRead(Unity.Jobs.JobHandle readerJob);
 
     public int PendingCount { get; }                       // registrations not yet read (tests, harness)
+
+    /// Main thread OUTSIDE FixedStepSimulationSystemGroup (narrative effects, services, dev commands; ADR-0016): appends one event to the
+    /// channel's inbox, read by the consumer's next BeginRead as the first registration (ProducerKind.MainThread). Not frame-rate deterministic:
+    /// never used by replayed simulation.
+    public void PostFromMainThread(in T evt);
 }
 
 /// <summary>This tick's registrations of one channel, in registration order. Arrays are Allocator.TempJob, disposed by EndRead.</summary>
@@ -920,7 +925,7 @@ public static class SimEventGather
     public static Unity.Jobs.JobHandle Schedule<T>(SimEventReadSet set, Unity.Collections.NativeList<T> output, Unity.Jobs.JobHandle dependsOn) where T : unmanaged;
 }
 // internal: struct SimEventChannelData<T> { UnsafeList<Registration> Pending; FixedString32Bytes Name; uint Tick; JobHandle LastConsumer; byte OpenWrite; }
-//           (plus byte StaleWarned)
+//           (plus byte StaleWarned; NativeList<T> Inbox for PostFromMainThread)
 //           struct Registration { NativeStream Stream; JobHandle Writer; ProducerKind Producer; int ForEachCount; uint Tick; }
 ```
 
@@ -1157,7 +1162,7 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
 1. **`BeginTick(tick)`**: for each pending registration with `Tick + 1 < tick` (written at least one full tick ago and never read: the consumer did not run), `Stream.Dispose(Writer)`, remove it, and log once per channel (`StaleWarned` flag in the data block; `GameLog.Burst.Warn("[Core] stale stream: " + Name)` so Burst owners can call it); then `Data->Tick = tick`. Owners call it first in their `OnUpdate`; calling it twice in a tick is a no-op the second time.
 2. **`BeginWrite(ref state, producer, n)`**: `n ≥ 1` (else `ArgumentOutOfRangeException`). If `OpenWrite == 1` (a previous `BeginWrite` without `EndWrite`) → `InvalidOperationException` (fail loudly). Allocate `new NativeStream(n, Allocator.TempJob)`; append `Registration { Stream, Writer = default, Producer = producer, ForEachCount = n, Tick = Data->Tick }`; `OpenWrite = 1`; `state.Dependency = JobHandle.CombineDependencies(state.Dependency, LastConsumer)` (a producer never overtakes the consumer of the previous registration set); return `Stream.AsWriter()`.
 3. **`EndWrite(h)`**: requires `OpenWrite == 1`; sets the last registration's `Writer = h`; `OpenWrite = 0`.
-4. **`BeginRead(ref state)`**: `k = Pending.Length`. Allocate the three arrays of length `k` (`Allocator.TempJob`), fill them from `Pending[0..k)` in order (`Readers[i] = Pending[i].Stream.AsReader()`), combine every `Pending[i].Writer` into `state.Dependency`, and remember `k` as the number of registrations taken. Return the set. A second `BeginRead` before `EndRead` → `InvalidOperationException`.
+4. **`BeginRead(ref state)`**: if the inbox is non-empty, move it into a new registration (one `NativeStream` with one index, `ProducerKind.MainThread`) inserted **first**, then clear the inbox. `k = Pending.Length`. Allocate the three arrays of length `k` (`Allocator.TempJob`), fill them from `Pending[0..k)` in order (`Readers[i] = Pending[i].Stream.AsReader()`), combine every `Pending[i].Writer` into `state.Dependency`, and remember `k` as the number of registrations taken. Return the set. A second `BeginRead` before `EndRead` → `InvalidOperationException`.
 5. **`EndRead(h)`**: for the `k` taken registrations `Stream.Dispose(h)`; dispose the three arrays with `h`; remove them from `Pending` (keeping later ones in order); `LastConsumer = h`.
 6. **`Dispose()`**: complete `LastConsumer` and every pending `Writer`, dispose every pending stream and the data block.
 7. **`SimEventGather.Schedule`**: one Burst `IJob`; for `r` in `0..Count`, for index in `0..ForEachCounts[r]`: `BeginForEachIndex`, read all, `EndForEachIndex`, append to `output`. Output order = registration order, then index order, then write order: the deterministic order of architecture §5.1. Consumers sort with `NativeSortExtension` on a key that ends with the gather position (stable by construction).

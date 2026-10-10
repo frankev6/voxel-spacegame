@@ -133,6 +133,36 @@ namespace Game.Voxel.Damage
         public uint Sequence;
     }
 
+    /// <summary>Request to push a body (ADR-0016): tractor beams, launch catapults, gravity wells. Applied by ImpactEventSystem (§5.2 step 1b).</summary>
+    [System.Flags] public enum ImpulseRequestFlags : byte { None = 0, AtCenterOfMass = 1 /* WorldPoint ignored: no angular part */ }
+    public struct ImpulseRequest
+    {
+        public Entity Body;            // any root with PhysicsVelocity + PhysicsMass (grid, chunk body)
+        public float3 WorldImpulse;    // N·s
+        public float3 WorldPoint;      // local-frame world point of application
+        public ProducerKind Producer;
+        public uint Sequence;          // unique per (Producer, producer's own key) within a tick
+        public ImpulseRequestFlags Flags;
+    }
+
+    public enum CellRestoreMode : byte { Heal = 0, Place = 1 }   // add at end only
+
+    /// <summary>Request to restore cells (ADR-0016): repair beams, drones, station repair, narrative repair. Consumed by DamageResolveSystem (§5.3.1 step 3b).</summary>
+    public struct CellRestoreRequest
+    {
+        public Entity Grid;
+        public CellRestoreMode Mode;
+        public int3 CellMin, CellMax;  // Heal: inclusive box in grid cells; Place: CellMin is the cell (CellMax ignored)
+        public float HpFraction;       // Heal: fraction of each cell's max HP (and of each touched live instance's FunctionHp) to add, (0, 1]
+        public ushort Block;           // Place: BlockIndex of a palette block (single-cell, !RequiresInstance)
+        public byte Orient, Color;     // Place
+        public ProducerKind Producer;
+        public uint Sequence;
+    }
+
+    /// <summary>A cell that Place added this tick (published like CellRemoved; SPEC-12 adds its mass).</summary>
+    public struct CellRestored { public Entity Grid; public int3 Cell; public ushort Block; public byte Color; }
+
     /// <summary>Binding tag: dead ship, still physical and damageable; AI, power and propulsion skip it.</summary>
     public struct Hulk : IComponentData { }
 
@@ -252,6 +282,9 @@ namespace Game.Voxel.Damage
         // ExplosionRequest channel. Producers: SPEC-13 (reactors, core breaches), 21, 24. The single consumer is SPEC-21 ExplosionSystem,
         // through ScheduleDrainExplosions.
         public Game.Data.Streams.SimEventChannel<ExplosionRequest> Explosions;
+        // Request channels for state this module owns (ADR-0016). Consumers: ImpactEventSystem (Impulses), DamageResolveSystem (Restores).
+        public Game.Data.Streams.SimEventChannel<ImpulseRequest> Impulses;
+        public Game.Data.Streams.SimEventChannel<CellRestoreRequest> Restores;
 
         // The ExplosionRequest consumer: Explosions.BeginRead, SimEventGather, stable sort by (Source.Index, Producer, Sequence, gather
         // position), Explosions.EndRead. Requests registered after this call are drained next tick.
@@ -260,6 +293,9 @@ namespace Game.Voxel.Damage
         // Same-tick CellRemoved readers (run after DamageResolveSystem, before GameplayEndCommandBufferSystem):
         public CellRemovedView BeginRemovedRead(ref SystemState state);  // combines the resolver's write handle
         public void EndRemovedRead(JobHandle readerJob);
+        // Same-tick CellRestored readers (SPEC-12 mass): same rules as BeginRemovedRead.
+        public CellRestoredView BeginRestoredRead(ref SystemState state);
+        public void EndRestoredRead(JobHandle readerJob);
 
         // SPEC-21 ShipDestroyedBridgeSystem, once per frame (presentation, main thread); completes ShipDeathSystem's last write first.
         public void DrainCoreLost(NativeList<GridCoreLost> output);
@@ -282,6 +318,9 @@ namespace Game.Voxel.Damage
 
     public struct GridRemovedRange { public Entity Grid; public int Start; public int Count; }
 
+    /// <summary>This tick's CellRestored list grouped by grid (deferred job arrays, like CellRemovedView).</summary>
+    public struct CellRestoredView { [ReadOnly] public NativeArray<CellRestored> Cells; [ReadOnly] public NativeArray<GridRemovedRange> Grids; }
+
     /// <summary>Source event for ShipDestroyed (architecture §6.6); enriched with PlayerShip/Allegiance by the bridge.</summary>
     public struct GridCoreLost { public Entity Grid; public ulong PersistentId; public uint Tick; public Unity.Mathematics.float3 WorldPos; }
 
@@ -291,11 +330,12 @@ namespace Game.Voxel.Damage
         public int EventsIn, EventsDropped, GridsResolved, CellsDestroyed, CellsDetached, InstancesDestroyed;
         public int IntegrityGrids, IntegrityDeferred, IslandsFound;
         public int HulksCreated, ChunksCreated, ParticleIslands, SplitsDeferred, DebrisParticles, RamEvents;
+        public int ImpulsesApplied, ImpulsesDropped, CellsHealed, CellsPlaced, RestoresDropped, RestoresDeferred;   // ADR-0016 channels
     }
 }
 ```
 
-`DamageStreamsData` (internal, `Allocator.Persistent`, owned by `DamageStreamsSystem`; the two channels hold their own registrations): `NativeList<CellRemoved> Removed`, `NativeList<GridRemovedRange> RemovedGrids`, `JobHandle RemovedWriteHandle`, `UnsafeList<JobHandle> RemovedReaderHandles`; `NativeList<GridCoreLost> CoreLost` + `JobHandle CoreLostWriteHandle`; `DamageTickStats Current, Last`; the DMG-internal per-tick lists of §4.8 and their handles.
+`DamageStreamsData` (internal, `Allocator.Persistent`, owned by `DamageStreamsSystem`; the four channels hold their own registrations): `NativeList<CellRestored> Restored`, `NativeList<GridRemovedRange> RestoredGrids` (same handles as `Removed`); `NativeList<CellRemoved> Removed`, `NativeList<GridRemovedRange> RemovedGrids`, `JobHandle RemovedWriteHandle`, `UnsafeList<JobHandle> RemovedReaderHandles`; `NativeList<GridCoreLost> CoreLost` + `JobHandle CoreLostWriteHandle`; `DamageTickStats Current, Last`; the DMG-internal per-tick lists of §4.8 and their handles.
 
 ### 4.5 Configuration (public contract)
 
@@ -347,6 +387,8 @@ namespace Game.Voxel.Damage
         public float RamRadiusCellsPerSqrtMJ;   // 1.5
         public float RamRadiusMaxCells;         // 4
         public int   RamPairCooldownTicks;      // 6
+        // Restores (ADR-0016)
+        public int   MaxRestoreCellsPerTick;    // 4096
         // Integrity
         public int IntegrityNodeBudgetPerGrid;  // 131072
         public int MaxIntegrityGridsPerTick;    // 64
@@ -501,11 +543,11 @@ All six systems: `[BurstCompile]` `ISystem`, `[UpdateInGroup(typeof(GameplayPost
 
 Owner of all DMG native memory. **Structural only in `OnCreate`** (creates the `DamageStreams` and `DamageConfig` singletons with `EntityManager`; `DamageConfig.Default` unless one exists).
 
-`OnCreate`: create the two channels (`SimEventChannel<DamageEvent>.Create("damage")`, `SimEventChannel<ExplosionRequest>.Create("explosions")`); allocate `DamageStreamsData` (Persistent) and every list of §4.4/§4.8 with initial capacities (`Removed` 4,096, ranges 256, masks 64, chunk pool `MaxLiveChunks`, ram pairs 1,024). `OnDestroy`: dispose both channels (they complete their handles), complete every stored handle, dispose every list, free the struct.
+`OnCreate`: create the four channels (`SimEventChannel<DamageEvent>.Create("damage")`, `<ExplosionRequest>("explosions")`, `<ImpulseRequest>("impulses")`, `<CellRestoreRequest>("restores")`); allocate `DamageStreamsData` (Persistent) and every list of §4.4/§4.8 with initial capacities (`Removed` 4,096, ranges 256, masks 64, chunk pool `MaxLiveChunks`, ram pairs 1,024). `OnDestroy`: dispose both channels (they complete their handles), complete every stored handle, dispose every list, free the struct.
 
 `OnUpdate` (main thread, no job, < 10 µs):
 1. `Last = Current`; `Current = default; Current.Tick = SimClock.Tick`.
-2. `Damage.BeginTick(SimClock.Tick)`; `Explosions.BeginTick(SimClock.Tick)` (disposes registrations no consumer read for a whole tick, SPEC-02 §5.13).
+2. `BeginTick(SimClock.Tick)` on `Damage`, `Explosions`, `Impulses` and `Restores` (disposes registrations no consumer read for a whole tick, SPEC-02 §5.13).
 3. Swap `PendingDetachCurrent` ↔ `PendingDetachNext`; schedule `ClearListJob` on the new `Next` depending on last tick's resolver handle; store it as `DetachNextWritable` (SplitSystem combines it before writing).
 
 Producer contract (for every producer): in `OnUpdate`, `var streams = SystemAPI.GetSingleton<DamageStreams>(); var w = streams.Damage.BeginWrite(ref state, ProducerKind.X, query.CalculateChunkCountWithoutFiltering());` → schedule an `IJobChunk` that calls `w.BeginForEachIndex(unfilteredChunkIndex)` once per chunk, `w.Write(evt)` per event, `w.EndForEachIndex()` → `state.Dependency = handle; streams.Damage.EndWrite(handle);`. Explosions use `streams.Explosions` the same way. Producers set `Producer` and a per-`(Source, Producer)` unique `Sequence` (for example the projectile's shot counter). A system that writes from a single-threaded job uses `forEachCount = 1`, index 0.
@@ -518,6 +560,7 @@ Position: after `SpatialHashBuildSystem`, before `ProjectileStepSystem`. Writes 
    - if the root has `PlanarConstraint` (SPEC-20, `Game.Data.Components`): `LinearWorld.y = 0`, `AngularWorld.x = AngularWorld.z = 0`;
    - `vel.ApplyLinearImpulse(mass, LinearWorld)`;
    - angular: `float3 a = math.rotate(math.inverse(math.mul(t.Rotation, mass.InertiaOrientation)), AngularWorld); vel.Angular += a * mass.InverseInertia;`.
+1b. **ApplyRequested** (ADR-0016) — `set = streams.Impulses.BeginRead(ref state)`; `SimEventGather` → stable sort by `(Body.Index, Producer, Sequence, gather position)`; one `IJob` applies them in order to bodies that exist and have `PhysicsVelocity` + `PhysicsMass` (others dropped, counted): linear `ApplyLinearImpulse`; unless `AtCenterOfMass`, angular from `cross(WorldPoint − comWorld, WorldImpulse)` as in step 1; the same planar clamp as step 1. Non-finite requests are dropped. `Impulses.EndRead(handle)`.
 2. **Collect** — `ICollisionEventsJob` on `SimulationSingleton` (single-threaded by Unity design): for each event where `EntityA` or `EntityB` has `VoxelGrid`: `details = ev.CalculateDetails(ref physicsWorld)`; write `RamContact { Entity A, B (A.Index < B.Index, swap and negate normal if needed); float3 Point = details.AverageContactPointPosition; float3 Normal (from A to B); float Impulse = details.EstimatedImpulse; int Order }` to a `NativeList` (event order is Unity Physics' deterministic order). Events need `CollideRaiseCollisionEvents` materials (SPEC-12, traps T4.4).
 3. **Aggregate** — `IJob`: stable-sort by `(A.Index, B.Index, Order)`; merge runs with equal pair into one: `J = Σ Impulse`, `Point = Σ(Impulse·Point)/J`, `Normal = normalize(Σ Impulse·Normal)` (if J ≤ 0, skip the pair).
 4. **Emit** — same `IJob`, per pair in order:
@@ -534,17 +577,20 @@ Example: 25 t ship and 3 t ship close at 30 m/s → solver impulse ≈ 2.7 t·30
 
 Position: after `ShieldSystem`/`ExplosionSystem`/`BeamStepSystem`; the only writer of the state in §3 decision 1. Steps (all Burst jobs chained on `state.Dependency` combined with every registered producer handle and every `RemovedReaderHandles` of last tick):
 
-1. **Gather** (`IJob`): `set = streams.Damage.BeginRead(ref state)`; for each registration of `set` in order, for each foreach index ascending, read events; drop events whose `Grid` lacks `VoxelGrid`, whose `Grid` has `DamageImmune`, whose `Amount ≤ 0`, or with any non-finite field (count in `EventsDropped`); append `SortEntry { GridIndex, SourceIndex = Source.Index (−1 for Null), Producer, Sequence, StreamOrder, EventIndex }`. Dispose the streams with the job handle.
+1. **Gather** (`IJob`): `rset = streams.Restores.BeginRead(ref state)` gathered and sorted into per-grid restore ranges (§5.3.1 step 3b; ranges also make a grid with only restores a resolve range); `set = streams.Damage.BeginRead(ref state)`; for each registration of `set` in order, for each foreach index ascending, read events; drop events whose `Grid` lacks `VoxelGrid`, whose `Grid` has `DamageImmune`, whose `Amount ≤ 0`, or with any non-finite field (count in `EventsDropped`); append `SortEntry { GridIndex, SourceIndex = Source.Index (−1 for Null), Producer, Sequence, StreamOrder, EventIndex }`. Dispose the streams with the job handle.
 2. **Sort** (`IJob`): stable sort `SortEntry` by `(GridIndex, SourceIndex, Producer, Sequence, StreamOrder)` → `SortedEvents`.
 3. **Plan** (`IJob`): build `GridRanges` from runs of equal `GridIndex`; merge in grids that have `PendingDetachCurrent` entries but no events (entries are already ordered by grid then island then slot); ranges ordered by `Grid.Index`. Clear `Removed`/`RemovedGrids` (after last tick's readers, step 0).
 4. **Resolve** (`IJobParallelForDefer` over `GridRanges`, batch 1): per range, see §5.3.1–§5.3.7. Writes through lookups carrying `[NativeDisableParallelForRestriction]` with the comment "each grid's bricks, instances and DMG components are written only by its own range (SPEC-13 §3 decision 4)". Outputs per range index: `CellRemoved` NativeStream, `TouchedBricks` stream, `DestroyList` stream, explosion stream (registered via `BeginExplosionWrite(forEachCount = rangeCount)`), `GridResults[range]`.
-5. **Flatten** (`IJob`): copy the `CellRemoved` stream in index order into `Removed` and fill `RemovedGrids`; enable `BrickDirty` for every touched brick (single-threaded, so enable bits never race); fill tick stats. `RemovedWriteHandle = handle`.
+5. **Flatten** (`IJob`): copy the `CellRemoved` stream in index order into `Removed` and fill `RemovedGrids`; the same for `CellRestored` into `Restored`/`RestoredGrids`; enable `BrickDirty` for every touched brick (single-threaded, so enable bits never race); fill tick stats. `RemovedWriteHandle = handle`.
 
 #### 5.3.1 Per-grid job: setup
 
 1. Read `VoxelGrid g`, `LocalTransform t`, optional `PhysicsVelocity v` / `PhysicsMass m` (absent → v = 0, COM = root origin). `s = g.CellSize`, `aabbMin = g.BrickMin·16`, `aabbMax = (g.BrickMin + g.BrickDims)·16`.
 2. `coreBefore = g.AnchorInstance`; `ordinal = 0` (event ordinal for dithering).
 3. **Detach pass**: for each `PendingDetachCurrent` entry of this grid (in stored order): for each set bit of `Mask` (ascending local index): if the cell is solid → `RemoveCell(cell, entry.Reason)` (§5.3.6, no seeds). Afterwards, for each instance whose cells were all removed by detach: `FunctionHp = 0` **without** destroying its functional entity (it now belongs to the new body); if it was `AnchorInstance` (impossible for anchors; defensive) set `AnchorInstance = −1`.
+3b. **Restore pass** (ADR-0016): the grid's `CellRestoreRequest`s (gathered and sorted by `(GridIndex, Producer, Sequence, gather position)` in steps 1–2 alongside the damage events, from `streams.Restores.BeginRead`), while the tick's `MaxRestoreCellsPerTick` budget lasts (shared over grids in range order; the rest waits for the next tick in the same order):
+   - `Heal`: for each solid cell in `[CellMin, CellMax] ∩ grid AABB` (z, y, x order): `Hp = min(255, Hp + ceil(HpFraction × 255))` through `BrickWrite.Set`; each live instance (`Flags & Destroyed == 0`) with a cell in the box: `FunctionHp = min(def.FunctionHp, FunctionHp + HpFraction × def.FunctionHp)`. Destroyed instances stay destroyed (the editor replaces them, SPEC-51).
+   - `Place`: only if `Block` is a palette block, the cell is air, inside the AABB, and its brick exists (creating bricks is structural): find or append the palette entry `{Block, Orient, Color}`, write the cell at full HP with `BrickWrite.Set`, append `CellRestored`. Anything else is dropped and counted.
 4. Apply events in sorted order: `Radius > 0` → §5.3.4, else §5.3.3. Accumulate `PendingImpulse` unless `Flags.NoImpulse`: if `PendingImpulse.Tick != Tick` reset it to zero with `Tick = Tick`; `p = t.TransformPoint(LocalPoint)`; `LinearWorld += WorldImpulse`; `AngularWorld += cross(p − comWorld, WorldImpulse)`.
 5. If any cell changed: `g.Revision += 1` (once per tick); `GridDamageStats.LastDamageTick = Tick`, `LastDamageSource` = `Source` of the last event of this grid's sorted range whose effective damage was > 0 (`Entity.Null` for the detach pass alone).
 6. Core loss: if `coreBefore ≥ 0` and the instance was destroyed this tick → `CoreLost = 1`, `CoreWorldPos` = world centre of its root cell, `g.AnchorInstance = −1`.
@@ -697,7 +743,8 @@ Cost O(retired blobs); 0 B GC (`tmp` is a persistent list cleared each frame).
 |---|---|---|
 | `DamageStreams.Damage.BeginWrite/EndWrite` (SPEC-02 §4.12) | main thread, in `OnUpdate`, `forEachCount ≥ 1`; `End` exactly once per `Begin` | Events are resolved this tick if registered before `DamageResolveSystem`, else next tick. Missing `End` → the stream is resolved without a dependency → safety exception (fail loudly) |
 | `DamageStreams.Explosions.BeginWrite/EndWrite`, `ScheduleDrainExplosions(ref state, output)` | as above; one drain per tick (SPEC-21) | Drain output sorted (§4.4); streams disposed |
-| `BeginRemovedRead/EndRemovedRead` | caller runs after `DamageResolveSystem` and before `GameplayEndCommandBufferSystem` | View valid until the reader job completes; next tick's resolver waits for it |
+| `BeginRemovedRead/EndRemovedRead`, `BeginRestoredRead/EndRestoredRead` | caller runs after `DamageResolveSystem` and before `GameplayEndCommandBufferSystem` | View valid until the reader job completes; next tick's resolver waits for it |
+| `DamageStreams.Impulses` / `Restores` `.BeginWrite/EndWrite` / `PostFromMainThread` (ADR-0016) | any producer, SPEC-02 §4.12 rules | Impulses applied by `ImpactEventSystem` this tick if registered before it, else next tick; restores applied by the resolver under `MaxRestoreCellsPerTick`, in sorted order |
 | `DrainCoreLost` | presentation, main thread | Completes `CoreLostWriteHandle`; moves all accumulated events (across ticks) into `output` |
 | `GridDissolveRequest` entity | created via any ECB; one per grid per tick | Consumed by `ShipDeathSystem` (§5.6) |
 | `DamageConfig.FromDefinition` | managed, at boot (`Game.App`) | Copies every field; cue hashes = `def.cue.Id.Hash` or 0 |
@@ -970,6 +1017,19 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - **Acceptance criteria:**
   - [ ] Each command runs in a playing Editor through `tools/playtest/g.sh` and prints one JSON line.
 - **Tests:** `DamageCommandsTests.Hash_PrintsJson`, `.Hit_RemovesCells` (EditMode, `Tests/EditMode/DevTools/`).
+
+### DMG-019 — Impulse and restore channels (ADR-0016)
+- **Milestone:** M3
+- **Tier:** frontier — F1/F3: a second path that writes cells inside the resolver's per-grid job, and a second impulse input to the only impulse writer
+- **Depends on:** `DMG-006`, `DMG-007`, `SPEC-02`
+- **Do:** Add the `Impulses`/`Restores` channels to `DamageStreams` and `DamageStreamsSystem`; `ImpactEventSystem` step 1b; resolver restore gathering (step 1) and pass (§5.3.1 step 3b); `CellRestored` flatten and `BeginRestoredRead/EndRestoredRead`; config field and stats counters.
+- **Files:** `Assets/Game/Voxel/Damage/{ImpulseRequest,ImpulseRequestFlags,CellRestoreMode,CellRestoreRequest,CellRestored,CellRestoredView,DamageStreams,DamageStreamsData,DamageConfig}.cs`, `Assets/Game/Voxel/Damage/Systems/{DamageStreamsSystem,ImpactEventSystem,DamageResolveSystem}.cs`, `Assets/Game/Tests/EditMode/Voxel/Damage/RequestChannelTests.cs`
+- **Acceptance criteria:**
+  - [ ] An `ImpulseRequest` of 1,000 N·s at the centre of mass of a 1,000 kg grid changes its linear velocity by 1 m/s in the tick it is applied; a planar grid gets no vertical or pitch/roll change; requests in two orders give identical results.
+  - [ ] `Heal` with `HpFraction = 0.5` on a box raises every damaged cell by 128 HP quanta (capped at 255) and live instances' `FunctionHp` by half their maximum; destroyed instances stay destroyed; no cell outside the box changes.
+  - [ ] `Place` of `block_hull` into an air cell of an existing brick adds the cell at full HP, marks the brick for mesh and collider rebuild and publishes one `CellRestored`; into a solid cell, a missing brick or with an instance block it is dropped and counted.
+  - [ ] More restore cells than `MaxRestoreCellsPerTick` continue the next tick in the same order; results identical with 1 and 8 workers.
+- **Tests:** `RequestChannelTests.Impulse_ChangesVelocity`, `.Impulse_PlanarClamp`, `.Impulse_OrderIndependent`, `.Heal_Box`, `.Heal_DestroyedInstanceStays`, `.Place_AddsCell`, `.Place_InvalidDropped`, `.Restore_BudgetDefers`, `.Restore_DeterministicAcrossWorkers`.
 
 ### DMG-018 — M4: per-brick component labels for >1M-cell stations
 - **Milestone:** M4

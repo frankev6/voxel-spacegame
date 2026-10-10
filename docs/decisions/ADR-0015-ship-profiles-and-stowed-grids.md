@@ -14,7 +14,7 @@
    - Each spec appends its root component types for the profiles it serves to the singleton buffer `RootComponentRegistration {GridProfile Profile; ComponentType Type}` from a `[CreateAfter(typeof(GridSpawnSystem))]` system. This is the root-level twin of `FunctionalComponentRegistration`.
    - `GridSpawnSystem.ConvertToRoot` adds the profile's types in its existing batch. Types the requester already added keep their values; the rest start zeroed.
 2. **Values through components, initialised by owners.**
-   - **Requester values.** A requester sets per-spawn values by adding the component itself before conversion (main-thread `EntityManager` or any ECB, Burst included): `Allegiance`, `AiBrain { ProfileIndex }`, `StarSystemMember`, `OwnedBy` (ADR-0016).
+   - **Requester values.** A requester sets per-spawn values by adding the component itself before conversion (main-thread `EntityManager` or any ECB, Burst included): `Allegiance`, `AiBrain { ProfileIndex }`, `StarSystemMember`, `OwnedBy` (extensibility review X6).
    - **Never in a profile.** `Allegiance` is in no profile, because its zero value is the player faction. A grid without it is `Allegiance.None`.
    - **Owner init.** Every owner fills its zeroed components on the first update in `GameInitGroup`, using the `Initialized`/`Bound`/`SourceRevision` flags that already exist. The per-spec `*Setup.Add` helpers are removed; their `RootTypes` sets remain as the registration lists.
 3. **Stowed grids.** A grid that must enter the simulation at an exact tick (for example a launched craft) is spawned ahead of time and **stowed**: `GridStowApi.Stow` disables the root and its `LinkedEntityGroup`, so physics, rendering, hash, AI, damage, LOD and rebase all skip it.
