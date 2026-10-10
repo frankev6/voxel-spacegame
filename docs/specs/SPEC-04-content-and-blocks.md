@@ -166,17 +166,39 @@ namespace Game.Data.Definitions
 |---|---|---|
 | `BlockDefinition` | SPEC-04 | `block_`, `weapon_` |
 | `ItemDefinition` (non-block) | SPEC-04 / SPEC-50 | `item_`, `resource_`, `module_`, `officer_`, `paint_` |
+| Every `*ConfigDefinition` (one instance each): `GameConfigDefinition` (SPEC-01), `VoxelConfigDefinition` (SPEC-10), `VoxelRenderConfigDefinition`, `VoxelPaletteDefinition` (SPEC-11), `PhysicsVoxelConfigDefinition` (SPEC-12), `DamageConfigDefinition` (SPEC-13), `FlightConfigDefinition` (SPEC-20), `AiConfigDefinition` (SPEC-23), `StreamingConfigDefinition` (SPEC-31), `TravelConfigDefinition` (SPEC-32), `EncounterConfigDefinition` (SPEC-33), `EconomyConfigDefinition` (SPEC-50), `VfxConfigDefinition` (SPEC-63), `AudioConfigDefinition` (SPEC-64) | owning spec | `config_` |
 | `ShipBlueprintDefinition` | SPEC-10 | `ship_` |
 | `WeaponDefinition` | SPEC-21 | `wpn_` |
+| `PowerTuningDefinition` | SPEC-22 | `tuning_` |
+| `AiProfileDefinition` | SPEC-23 | `ai_` |
+| `FormationDefinition` | SPEC-23 | `formation_` |
 | `AbilityDefinition` | SPEC-24 | `ability_` |
+| `GalaxyGenerationDefinition` | SPEC-30 | `galaxy_` |
+| `StarSystemTemplateDefinition` | SPEC-30 | `systpl_` |
+| `AuthoredStarSystemDefinition` | SPEC-30 | `starsys_` |
+| `BodyTemplateDefinition` | SPEC-30 | `body_` |
+| `BodyVisualDefinition` | SPEC-30 | `bodyvis_` |
 | `FactionDefinition` | SPEC-33 | `faction_` |
 | `EncounterDefinition` | SPEC-33 | `encounter_` |
-| `BodyTemplateDefinition` | SPEC-30 | `body_` |
-| `LootTableDefinition` | SPEC-50 | `loot_` |
-| `AudioCueDefinition` | SPEC-64 | `sfx_`, `music_` |
-| `StoryBeatDefinition` | SPEC-41 | `beat_` |
-| `QuestDefinition` | SPEC-42 | `quest_` |
+| `FactCatalogDefinition` | SPEC-40 | `facts_` |
+| `NarrativeConfigDefinition` | SPEC-40 | `narrative_` |
+| `SpeakerDefinition` | SPEC-41 | `speaker_` |
+| `IllustrationDefinition` | SPEC-41 | `illustration_` |
+| `DialogCommandTableDefinition`, `DialogProgramDefinition` | SPEC-41 | `dialog_` |
+| `StoryBeatDefinition` | SPEC-42 | `beat_` |
+| `QuestDefinition` | SPEC-42 | `quest_`, `contract_` |
 | `ClueDefinition` | SPEC-42 | `clue_` |
+| `RumorDefinition` | SPEC-42 | `rumor_` |
+| `MysteryDefinition` | SPEC-42 | `mystery_` |
+| `LootTableDefinition` | SPEC-50 | `loot_` |
+| `MerchantDefinition` | SPEC-50 | `merchant_` |
+| `FxDefinition` | SPEC-63 | `fx_` |
+| `AudioCueDefinition` | SPEC-64 | `cue_` |
+| `ArtDirectionDefinition` | SPEC-80 | `artdir_` |
+| `BrickMaterialDefinition` | SPEC-80 | `brickmat_` |
+| `BlockVisualDefinition` | SPEC-80 | `vis_` |
+
+A new definition type adds its row here in the same commit as its class (code review checks it); `DATA-E003` catches a class with no prefix at all.
 
 A definition class without any `[ContentIdPrefix]` in its hierarchy fails validation (`DATA-E003`), so every new type must declare one.
 
@@ -211,6 +233,7 @@ namespace Game.Data.Definitions
         public UnityEngine.Sprite Icon => icon;
 
         // ---- SPEC-50 economy fields go below this line (ECO tasks). Do not edit the fields above. ----
+        // ECO-001 adds: [SerializeField] private bool tradeable = true; public bool Tradeable => tradeable && Category != ItemCategory.Quest;
     }
 }
 ```
@@ -1036,7 +1059,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 | 5 | `block_thruster_medium` has no exhaust clearance in legacy data | Keep none (adding it would invalidate legacy ships) | Owner |
 | 6 | Keep `block_portal_small` and the prismatic mirrors (no v1 behaviour) | Keep as content with `UtilityKind` set; systems ignore them; editor palette shows them only in Creative | Owner |
 | 7 | Meaning of `ArmorClass` and `MaterialLayer` values | All legacy blocks 0; `MaterialLayer` 63 reserved for `block_missing`; SPEC-11/13 define tables | SPEC-11, SPEC-13 |
-| 8 | Cargo capacity unit | 50 "capacity units"; SPEC-50 defines what a unit is | SPEC-50 |
+| 8 | Cargo capacity unit | **Answered (SPEC-50 decision 1):** 10 capacity units = 1 cargo slot, so a block with 50 units adds 5 slots | SPEC-50 |
 | 9 | Should `CellHp` be a `half` in the blob (synthesis sketch) | `float`; memory is irrelevant at < 1,000 blocks | Tech lead |
 | 10 | Do non-block `ItemDefinition`s need subclasses (paint colour, module modifiers)? | No subclass in SPEC-04; SPEC-50/51 may add `*Definition : ItemDefinition` subclasses (prefixes from §4.3) | SPEC-50, SPEC-51 |
 | 11 | Shield emitter values (capacity 300, regen 15/s, delay 3 s) | Keep as initial values; SPEC-22 retunes | SPEC-22 |

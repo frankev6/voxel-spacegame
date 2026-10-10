@@ -756,7 +756,7 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
 - **Depends on:** `CORE-001`, `DATA-001`, `NAR-001`, `VOX-001`, `DMG-001`, `SYS-001`, `FLT-001`
 - **Do:**
   1. Create every type of §4 in the folders of decision 12.
-  2. Append `Salvage = 25` to `RngPurpose` (SPEC-02 append-only rule).
+  2. Make sure `RngPurpose.Salvage = 25` exists (SPEC-02 §4.2 lists it; add it if CORE-001 predates it, append-only).
   3. Add the `tradeable` field below SPEC-04's marked line.
 - **Files:**
   - `Assets/Game/Data/Definitions/Items/ItemDefinition.cs` (below the line);

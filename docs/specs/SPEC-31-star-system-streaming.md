@@ -269,7 +269,7 @@ namespace Game.Galaxy.Streaming
 
 ### 4.6 Definition
 
-`StreamingConfigDefinition : ContentDefinition` (`config_streaming`, `Assets/Game/Data/Definitions/World/`): one serialized field per `StreamingConfig` field, same defaults; validation `SYS-E001` (`T2UnloadFactor < 1.05` or `BubbleUnloadFactor < 1.05`), `SYS-E002` (`BubbleRadiusM < 200`).
+`[ContentIdPrefix("config_")] StreamingConfigDefinition : ContentDefinition` (`config_streaming`, `Assets/Game/Data/Definitions/World/`): one serialized field per `StreamingConfig` field, same defaults; validation `SYS-E001` (`T2UnloadFactor < 1.05` or `BubbleUnloadFactor < 1.05`), `SYS-E002` (`BubbleRadiusM < 200`).
 
 ## 5. Systems, services and flow
 

@@ -150,8 +150,7 @@ namespace Game.Persistence.Data
     public readonly struct SlotRef : System.IEquatable<SlotRef> { public SlotRef(ProfileId profile, SlotId slot); public readonly ProfileId Profile; public readonly SlotId Slot; }
 
     public enum SlotKind : byte { Manual = 0, Quick = 1, Auto = 2 }
-    public enum SaveReason : byte { Manual = 0, Quick = 1, AutoTimer = 2, AutoSceneTransition = 3, AutoStarSystemEntered = 4, Quit = 5, NewGame = 6 }  // add at end only
-    public enum SaveBlockReason : byte { None = 0, NoSession = 1, InCombat = 2, Transitioning = 3, PlayerDead = 4, EditorOpen = 5 }
+    // SaveReason and SaveBlockReason are SPEC-02's Game.Core.Save enums (SPEC-02 §4.7, Q4); this module declares no copies.
     public enum SaveErrorKind : byte { None = 0, Blocked = 1, IoError = 2, DiskFull = 3, ParticipantFailed = 4, Unreadable = 5, NewerFormat = 6, NotFound = 7, SlotLimit = 8 }
     public enum SlotStatus : byte { Ok = 0, MetaMissing = 1, Corrupt = 2, BackupOnly = 3, NewerFormat = 4 }
     public enum AutosaveTrigger : byte { Timer = 0, SceneTransition = 1, StarSystemEntered = 2, Quit = 3 }
@@ -278,7 +277,7 @@ namespace Game.Persistence.Services
     public interface ISaveContext
     {
         bool HasActiveSession { get; }
-        Game.Persistence.Data.SaveBlockReason GetBlockReason();                  // None when saving is allowed
+        Game.Core.Save.SaveBlockReason GetBlockReason();                  // None when saving is allowed
         void DescribeForMeta(Game.Persistence.Data.SaveMeta meta);               // fills CommanderName, LocationText, PlaytimeSeconds
         bool TryCaptureSlotThumbnail(out Game.Persistence.Data.ThumbnailRequest thumbnail); // Key must be "slot"
         void CollectThumbnails(System.Collections.Generic.List<Game.Persistence.Data.ThumbnailRequest> changed,
@@ -336,9 +335,9 @@ namespace Game.Persistence.Services
 
         // State and operations
         public bool IsBusy { get; }
-        public bool CanSave(out Game.Persistence.Data.SaveBlockReason reason);
+        public bool CanSave(out Game.Core.Save.SaveBlockReason reason);
         public void ResetForNewGame();                                  // clears preserved chunks, seeded palette, thumbnail cache, CurrentSlot
-        public UnityEngine.Awaitable<Game.Persistence.Data.SaveResult> SaveAsync(Game.Persistence.Data.SlotRef slot, Game.Persistence.Data.SaveReason reason, string displayName = null);
+        public UnityEngine.Awaitable<Game.Persistence.Data.SaveResult> SaveAsync(Game.Persistence.Data.SlotRef slot, Game.Core.Save.SaveReason reason, string displayName = null);
         public UnityEngine.Awaitable<Game.Persistence.Data.LoadResult> ReadAsync(Game.Persistence.Data.SlotRef slot);
         public Game.Data.Validation.ValidationReport Restore(Game.Persistence.Container.LoadedSave save);   // main thread
         public Game.Data.Validation.ValidationReport LastLoadReport { get; }
@@ -352,7 +351,7 @@ namespace Game.Persistence.Services
         public void Dispose();
 
         // Synchronous seams for tests (InternalsVisibleTo):
-        internal CapturedSave CaptureNow(Game.Persistence.Data.SlotRef slot, Game.Persistence.Data.SaveReason reason, string displayName);
+        internal CapturedSave CaptureNow(Game.Persistence.Data.SlotRef slot, Game.Core.Save.SaveReason reason, string displayName);
         internal Game.Persistence.Data.SaveResult WriteCaptured(CapturedSave captured);          // thread-agnostic
         internal Game.Persistence.Data.LoadResult ReadNow(Game.Persistence.Data.SlotRef slot);    // thread-agnostic
         internal bool HandleWantsToQuit();
@@ -479,7 +478,7 @@ namespace Game.Voxel.Data
 | 30 | `FACN` | SPEC-33 | `Game.Galaxy` | faction relations |
 | 40 | `QUST` | SPEC-42 | `Game.Narrative` | quests, stage baselines, clues, mysteries |
 | 50 | `DLGS` | SPEC-41 | `Game.Narrative` | dialog state (once-only lines, active beat) |
-| 60 | `INVT` | SPEC-50 | `Game.Economy` | wallet, cargo and hotbar with slot indices and capacity, merchant stock |
+| 60 | `INVT` | SPEC-50 | `Game.Economy` | wallet, cargo slots (overflow included) with slot indices and capacity, merchant stock (no hotbar) |
 | 70 | `FLET` | SPEC-01 | `Game.App` | fleet records, flagship, ship structures as VOXS (damage written back first) |
 | 80 | `GLXY` | SPEC-30 | `Game.Galaxy` | per-star-system deltas, edited structures as Partial VOXS |
 | 90 | `PLOC` | SPEC-31 | `Game.Galaxy` | player location: `StarSystemId`, `UniversePosition` (double3), yaw, docked body |
@@ -519,7 +518,7 @@ No ECS systems. `SaveService` and `AutosaveScheduler` are managed services (arch
 
 ### 5.1 Boot and wiring (SPEC-01 does this; listed so both specs agree)
 
-1. `GameRoot.Awake` step 6: `save = new SaveService(SavePaths.CreateDefault(), content, pause, new SaveServiceConfig())`.
+1. `GameRoot.Awake` step 6: `save = new SaveService(savePaths, content, pause, new SaveServiceConfig())`, where `savePaths` is `SavePaths.CreateDefault()`, or `new SavePaths(GameRootTestHooks.SaveRoot)` when a test set that hook (SPEC-01 §5.1, SPEC-71 TST-003; editor and development builds only).
 2. Step 8 (`GameSession`): `save.AttachContext(sessionSaveContext)`; register participants in any order: `save.Register(x)` for each row of §4.8 that exists (missing rows are allowed; their chunks are written by nobody and restored as "no data").
 3. Every frame (`GameRoot.Update`): `save.Autosave.Update(Time.unscaledDeltaTime)`.
 4. `SceneFlow` calls `save.Autosave.Request(AutosaveTrigger.SceneTransition)` before leaving the World scene (to the Blueprint Lab or the main menu) and `Request(StarSystemEntered)` after each `StarSystemEntered` event.
@@ -697,7 +696,7 @@ SPEC-61 must show every `OperationCompleted` with `Success == false`, every load
 
 Reasons: `Timer → AutoTimer`, `SceneTransition → AutoSceneTransition`, `StarSystemEntered → AutoStarSystemEntered`.
 
-Quit (`Application.wantsToQuit += HandleWantsToQuit` in the constructor when `Application.isPlaying`; removed in `Dispose`):
+Quit. **`SaveService` owns the quit hook itself:** its constructor subscribes `Application.wantsToQuit += HandleWantsToQuit` when `Application.isPlaying`, and `Dispose` removes it. No other code (SPEC-01 included) subscribes `wantsToQuit` or calls the handler; `HandleWantsToQuit` is `internal` (tests reach it through `InternalsVisibleTo("Game.Tests.EditMode")`).
 1. If `quitApproved` → return true.
 2. If no session or `!CanSave(out r)` → `GameLog.Info("Save", "Quit without saving: " + r)`; return true. (The pause-menu Quit button, SPEC-61, warns the player when `CanSave` is false.)
 3. Start `QuitSave()`: await the running operation, then `SaveAsync(NextAutosaveSlot, Quit)`, racing a real-time timeout of `QuitSaveTimeoutSeconds`; then `quitApproved = true; Application.Quit()`. Return false.
@@ -797,7 +796,7 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 - **Tier:** standard — transcribes the exact code of §4.5–§4.7 (bodies throw NotImplementedException)
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`
 - **Do:** Create every public type of §4.5, §4.6 and §4.7 with the given members; bodies `throw new System.NotImplementedException()` except constructors of the ID structs and DTO field defaults. Create `SaveChunkRegistry.Default` with the §4.8 rows (this is data, implement it). Add `InternalsVisibleTo` for the test assemblies if `AssemblyInfo.cs` lacks them (it already lists them).
-- **Files:** `Assets/Game/Persistence/Data/{ProfileId,SlotId,SlotRef,SlotKind,SaveReason,SaveBlockReason,SaveErrorKind,SlotStatus,AutosaveTrigger,SlotInfo,ProfileInfo,ThumbnailRequest,SaveResult,LoadResult,SaveOperationResult,SaveServiceConfig,SaveMeta,ProfileDescriptor}.cs`; `Assets/Game/Persistence/Container/{ChunkFlags,ContainerHeader,RawChunk,ContainerReadStatus,SaveContainerWriter,SaveContainerReader,Crc32,SaveIdPalette,NewtonsoftSaveJsonCodec,LoadedSave,SaveFileComparer}.cs`; `Assets/Game/Persistence/Services/{ISaveContext,SavePaths,ChunkRegistration,SaveChunkRegistry,SaveService,CapturedSave,AutosaveScheduler}.cs`; `Assets/Game/Voxel/Data/{VoxsSource,VoxsDecoded,VoxsBlockNames,VoxsEncodeOptions,VoxsCodec,VoxsSnapshotBlock}.cs`
+- **Files:** `Assets/Game/Persistence/Data/{ProfileId,SlotId,SlotRef,SlotKind,SaveErrorKind,SlotStatus,AutosaveTrigger,SlotInfo,ProfileInfo,ThumbnailRequest,SaveResult,LoadResult,SaveOperationResult,SaveServiceConfig,SaveMeta,ProfileDescriptor}.cs`; `Assets/Game/Persistence/Container/{ChunkFlags,ContainerHeader,RawChunk,ContainerReadStatus,SaveContainerWriter,SaveContainerReader,Crc32,SaveIdPalette,NewtonsoftSaveJsonCodec,LoadedSave,SaveFileComparer}.cs`; `Assets/Game/Persistence/Services/{ISaveContext,SavePaths,ChunkRegistration,SaveChunkRegistry,SaveService,CapturedSave,AutosaveScheduler}.cs`; `Assets/Game/Voxel/Data/{VoxsSource,VoxsDecoded,VoxsBlockNames,VoxsEncodeOptions,VoxsCodec,VoxsSnapshotBlock}.cs`
 - **Acceptance criteria:**
   - [ ] `tools/compile.sh` passes; `Game.Persistence` references only `Game.Core`, `Game.Data` and allowed packages; no `Game.Voxel` reference.
   - [ ] `SaveChunkRegistry.Default.Entries` equals the §4.8 table (keys, orders, owners).

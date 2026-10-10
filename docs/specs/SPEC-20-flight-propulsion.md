@@ -87,6 +87,8 @@ namespace Game.Simulation.Commands
     public struct PlayerEdgeCounters
     {
         public byte Interact, Ability1, Ability2, Ability3, Ability4, TargetNext, TargetUnderCursor, TargetClear, AutofireToggle;
+        public byte Cruise;              // SPEC-03 Flight/Cruise; not a ship edge: consumed only by SPEC-32 TravelService (M4) as a
+                                         // variable-rate edge. Present from M0 so the struct (and SPEC-71 replays) never change size
     }
 
     /// <summary>Singleton written once per frame by PlayerInputSampleSystem (SPEC-03) only. Implements SPEC-20 §4.1.</summary>
@@ -320,13 +322,14 @@ Order inside the tick (architecture §5): `ShipCommandGroup` (player apply, AI) 
 
 ### 5.1 `PlayerCommandApplySystem`
 
-`OnCreate`: `RequireForUpdate<GameplayActive>`, `RequireForUpdate<PlayerCommand>`; create the `PlayerEdgeConsumed` singleton (`EntityManager.CreateEntity` in `OnCreate` is allowed) with `Value = default`; build `playerQuery = WithAll<PlayerShip, ShipCommand>().WithNone<Hulk>()` and `anyPlayerQuery = WithAll<PlayerShip>()`.
+`OnCreate`: `RequireForUpdate<GameplayActive>`, `RequireForUpdate<PlayerCommand>`; create the `PlayerEdgeConsumed` singleton (`EntityManager.CreateEntity` in `OnCreate` is allowed) with `Value = default`; build `playerQuery = WithAll<PlayerShip, ShipCommand>().WithNone<Hulk>()` and `anyPlayerQuery = WithAll<PlayerShip>()`. From M3 (added by SPEC-32 TRV-007) it also creates the `PlayerControlLock` singleton (`Game.Simulation.Commands`, SPEC-32 §4.2) with `Flags = None`.
 
 Per tick (marker `PlayerCommandApplySystem.Apply`), main thread then one job:
 1. `pc = SystemAPI.GetSingleton<PlayerCommand>()` (written on the main thread by a managed system: no job to complete). `ref consumed = ref SystemAPI.GetSingletonRW<PlayerEdgeConsumed>().ValueRW.Value` (only this system touches it; no jobs).
 2. If `playerQuery.IsEmptyIgnoreFilter` (no live player ship): `consumed = pc.Edges` (drop pending presses); return.
-3. Edges: for each of the 9 counters in declaration order: `if (pc.Edges.X != consumed.X) { edges |= ShipCommandEdges.X; consumed.X = (byte)(consumed.X + 1); }` — one per tick (decision 8).
+3. Edges: for each of the 9 ship counters in declaration order (`Interact` … `AutofireToggle`; `Cruise` is skipped, it is not a ship edge): `if (pc.Edges.X != consumed.X) { edges |= ShipCommandEdges.X; consumed.X = (byte)(consumed.X + 1); }` — one per tick (decision 8).
 4. `cmd = new ShipCommand { Thrust = clamp(pc.Thrust, −1, 1), Turn = clamp(pc.Turn, −1, 1), AimWorld = pc.AimWorld, AimValid = pc.AimValid, Flags = pc.Flags, Edges = edges, FireGroups = pc.FireGroups }`; non-finite floats → 0 (`AimWorld` non-finite → `AimValid = 0`).
+4b. **Control lock** (M3, TRV-007): `lockFlags = SystemAPI.GetSingleton<PlayerControlLock>().Flags` (written on the main thread by `TravelService`; no job to complete). If `Movement`: `Thrust = 0`, `Turn = 0`, `Flags = (Flags & ~Boost) | Brake`. If `Actions`: `FireGroups = 0`, `Edges = None` (the counters were still consumed in step 3, so presses made while locked never fire later). `AimWorld`/`AimValid` are unchanged.
 5. `state.Dependency = new PlayerCommandWriteJob { Command = cmd }.Schedule(playerQuery, state.Dependency)` (`IJobEntity`, single-threaded `Schedule`; writes `ShipCommand` of every matching entity; with two player ships both get it, and SPEC-62/61 warn).
 
 Hulk player ship: excluded by `WithNone<Hulk>` → step 2 drops edges; its `ShipCommand` keeps the last value but `PropulsionSystem` skips hulks.
@@ -412,13 +415,14 @@ sequenceDiagram
 |---|---|---|
 | `ShipCommand` (component) | On every ship root (`FlightSetup.Add`) | Read by PWR/WPN/ABL; written only by the writers of §4.6; `Edges` rewritten every tick by its writer |
 | `PlayerCommand` (singleton) | Created by `PlayerInputSampleSystem.OnCreate` (SPEC-03) | Read only by `PlayerCommandApplySystem` and variable-rate edge consumers |
+| `PlayerControlLock` (singleton, M3) | Created by `PlayerCommandApplySystem.OnCreate` | Only writer: SPEC-32 `TravelService` (main thread, outside the fixed step); read by step 4b |
 | `FlightSetup.Add(em, root)` | Main thread outside system updates; `root` is a spawn request entity (SPEC-10) | Adds `ShipCommand`, `FlightState`, `FlightThruster` (zero) |
 | `PlanarConstraintSetup.Add(em, root)` | As above; caller also sets `GridSpawnFlags.PlanarInertia` (SPEC-01 does) | Adds `PlanarConstraint` |
 | `GridSpaceMath.*` | Valid blob refs (`ref` access, traps T1.7) | Pure |
 | `FlightMath.*`, `ThrustAllocator.Solve` | Arrays of equal length | Pure, deterministic |
 | `FlightConfigFactory.Create` | Boot (SPEC-01) | Copies fields |
 
-**Variable-rate edge consumers** (SPEC-31 interaction, any presentation code): keep a private `PlayerEdgeCounters lastSeen`; each frame, for counter `X`, `while (lastSeen.X != PlayerCommand.Edges.X) { lastSeen.X++; handle one press; }`. They never read `ShipCommand.Edges`.
+**Variable-rate edge consumers** (SPEC-31 interaction, SPEC-32 `Cruise`, any presentation code): keep a private `PlayerEdgeCounters lastSeen`; each frame, for counter `X`, `while (lastSeen.X != PlayerCommand.Edges.X) { lastSeen.X++; handle one press; }`. They never read `ShipCommand.Edges`.
 
 **AI writers** (SPEC-23): write `Thrust`, `Turn`, `AimWorld/AimValid`, `FireGroups`, `Flags` as needed and **always** write `Edges` (0 unless an ability or target change is requested this tick). Use `FlightState.LocalVelocity/YawRate` and the caps for steering.
 
@@ -522,7 +526,8 @@ sequenceDiagram
   - [ ] Ticks after the consuming tick have `Edges = 0` while analog fields keep following `PlayerCommand`.
   - [ ] No player ship (or a hulk): consumed = counters; no edge later when a ship appears.
   - [ ] `OnUpdate` has no `Complete()`, no `CompleteDependency()`, and only `GetSingletonRW<PlayerEdgeConsumed>` (code review).
-- **Tests:** `PlayerCommandApplyTests.Edge_OncePerCounterStep`, `.Edge_ClearedNextTick`, `.NoShip_DropsEdges`, `.Hulk_DropsEdges`, `.NonFinite_Sanitised`.
+  - [ ] A `Cruise` counter change produces no `ShipCommandEdges` bit and leaves `PlayerEdgeConsumed.Value.Cruise` untouched.
+- **Tests:** `PlayerCommandApplyTests.Cruise_NotAShipEdge`, `PlayerCommandApplyTests.Edge_OncePerCounterStep`, `.Edge_ClearedNextTick`, `.NoShip_DropsEdges`, `.Hulk_DropsEdges`, `.NonFinite_Sanitised`.
 
 ### FLT-006 — Thruster registration and ThrusterInitSystem
 - **Milestone:** M1

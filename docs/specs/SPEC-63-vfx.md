@@ -203,6 +203,7 @@ public enum FxMode : byte
 }
 
 /// Implements SPEC-63 §4.2. Content id prefix: "fx_" (e.g. fx_hit_kinetic_default).
+[ContentIdPrefix("fx_")]
 public sealed class FxDefinition : ContentDefinition
 {
     [SerializeField] FxKind kind;
@@ -244,7 +245,8 @@ public struct FxQualityBudget
     public int MaxTracers, MaxBeams, MaxPlumes, MaxShields;
 }
 
-/// Implements SPEC-63 §4.2. Exactly one instance: Assets/Game/Content/Vfx/vfx_config.asset (id "vfx_config").
+/// Implements SPEC-63 §4.2. Exactly one instance: Assets/Game/Content/Vfx/config_vfx.asset (id "config_vfx").
+[ContentIdPrefix("config_")]
 public sealed class VfxConfigDefinition : ContentDefinition
 {
     [SerializeField] FxDefinition[] defaults = new FxDefinition[13]; // index = (int)FxKind; [0] stays null
@@ -571,8 +573,8 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Milestone:** M2
 - **Tier:** standard — content authoring against the contract in §6.3
 - **Depends on:** `VFX-003`
-- **Do:** Author template graphs honouring §6.3: `FxHitTemplate.vfx` (8 sparks + 1 flash per event, life 0.25–0.5 s), `FxExplosionSmallTemplate.vfx` (24 particles, life 0.6–1.0 s, radius = size), `FxExplosionLargeTemplate.vfx` (pooled; 400 particles, life 1.5–2.5 s), `FxMuzzleTemplate.vfx` (4 particles, life 0.08 s along `direction`), `FxShieldSparkTemplate.vfx` (12 particles, life 0.3 s). Create `FxDefinition` assets `fx_hit_kinetic_default`, `fx_hit_energy_default` (same graph, different `defaultColor`), `fx_explosion_small_default`, `fx_explosion_large_default` (Pooled, poolSize 4), `fx_muzzle_default`, `fx_shield_ripple_default`, and `vfx_config.asset` with `defaults` filled for every kind present (Debris, Tracer, Beam, Thruster, ShieldShell, Warp are filled by their tasks; until then `Validate` warnings, not errors, for those kinds — change the rule to error in VFX-014). Register all assets in the `ContentDatabase` (SPEC-04 mechanism).
-- **Files:** `Assets/Game/Presentation/Vfx/Templates/{FxHitTemplate,FxExplosionSmallTemplate,FxExplosionLargeTemplate,FxMuzzleTemplate,FxShieldSparkTemplate}.vfx`; `Assets/Game/Content/Vfx/{fx_hit_kinetic_default,fx_hit_energy_default,fx_explosion_small_default,fx_explosion_large_default,fx_muzzle_default,fx_shield_ripple_default,vfx_config}.asset`
+- **Do:** Author template graphs honouring §6.3: `FxHitTemplate.vfx` (8 sparks + 1 flash per event, life 0.25–0.5 s), `FxExplosionSmallTemplate.vfx` (24 particles, life 0.6–1.0 s, radius = size), `FxExplosionLargeTemplate.vfx` (pooled; 400 particles, life 1.5–2.5 s), `FxMuzzleTemplate.vfx` (4 particles, life 0.08 s along `direction`), `FxShieldSparkTemplate.vfx` (12 particles, life 0.3 s). Create `FxDefinition` assets `fx_hit_kinetic_default`, `fx_hit_energy_default` (same graph, different `defaultColor`), `fx_explosion_small_default`, `fx_explosion_large_default` (Pooled, poolSize 4), `fx_muzzle_default`, `fx_shield_ripple_default`, and `config_vfx.asset` with `defaults` filled for every kind present (Debris, Tracer, Beam, Thruster, ShieldShell, Warp are filled by their tasks; until then `Validate` warnings, not errors, for those kinds — change the rule to error in VFX-014). Register all assets in the `ContentDatabase` (SPEC-04 mechanism).
+- **Files:** `Assets/Game/Presentation/Vfx/Templates/{FxHitTemplate,FxExplosionSmallTemplate,FxExplosionLargeTemplate,FxMuzzleTemplate,FxShieldSparkTemplate}.vfx`; `Assets/Game/Content/Vfx/{fx_hit_kinetic_default,fx_hit_energy_default,fx_explosion_small_default,fx_explosion_large_default,fx_muzzle_default,fx_shield_ripple_default,config_vfx}.asset`
 - **Acceptance criteria:**
   - [ ] `FxRig.Create` with these assets logs no contract error.
   - [ ] PlayMode: 100 `HitKinetic` events in one frame produce `100 × 8` spawn requests in one `OnFxBatch` (spy on `Stats.BatchesSubmitted == 1`) and visible particles (`aliveParticleCount > 0` within 5 frames).
@@ -584,7 +586,7 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Tier:** frontier — F4: owns the 06 debris gate
 - **Depends on:** `VFX-004`
 - **Do:** Author `FxDebrisTemplate.vfx` per §6.3 (capacity 65,536, Output Particle Mesh cube, Lit, no shadows, scale-to-zero over the last 25% of life, exposed `float DebrisLifetimeMax` set by the rig from config). Create `fx_debris_default.asset` (Batched, particlesPerEvent 1, maxEventsPerFrame 20,000, maxLifetime 6, cullDistance 2000, minQuality Low) and fill `defaults[Debris]`. Implement the debris-specific parts of `FxBatchJob` if VFX-003 stubbed them. Write the GPU benchmark (§8): PlayMode, SPEC-71 perf fixture, test config with `debrisLifetimeMin = debrisLifetimeMax = 20` so 50,000 particles stay alive; spawn 20,000 + 20,000 + 10,000 debris events over three frames at positions from `Random(63001)` inside a sphere of radius 50 m at the origin, velocities ≤ 2 m/s; measure 300 frames with and 300 without the rig bound.
-- **Files:** `Assets/Game/Presentation/Vfx/Templates/FxDebrisTemplate.vfx`, `Assets/Game/Content/Vfx/fx_debris_default.asset`, `Assets/Game/Content/Vfx/vfx_config.asset`, `Assets/Game/Tests/PlayMode/Presentation/Vfx/DebrisGpuBenchmarkTests.cs`, `Assets/Game/Tests/PlayMode/Presentation/Vfx/DebrisPlayModeTests.cs`
+- **Files:** `Assets/Game/Presentation/Vfx/Templates/FxDebrisTemplate.vfx`, `Assets/Game/Content/Vfx/fx_debris_default.asset`, `Assets/Game/Content/Vfx/config_vfx.asset`, `Assets/Game/Tests/PlayMode/Presentation/Vfx/DebrisGpuBenchmarkTests.cs`, `Assets/Game/Tests/PlayMode/Presentation/Vfx/DebrisPlayModeTests.cs`
 - **Acceptance criteria:**
   - [ ] Each debris particle uses its event colour and velocity (readback test: one event with colour (255,0,0) and velocity (10,0,0) → particle moves +X and renders red in a 64×64 capture).
   - [ ] Live estimate never exceeds 50,000 at High, 25,000 at Medium, 10,000 at Low over a 600-frame stress run at 20,000 events/frame.
@@ -689,10 +691,10 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Tier:** standard — content authoring plus one validation rule change
 - **Depends on:** `VFX-004`, `TRV-001`
 - **Do:** Author `FxWarpTemplate.vfx` (pooled: streak tunnel along `direction`, 2.5 s, 600 particles), `fx_warp_default.asset` (Pooled, poolSize 2), fill `defaults[Warp]`; change `VfxConfigDefinition.Validate` so a null default for any kind 1..12 is an error.
-- **Files:** `Assets/Game/Presentation/Vfx/Templates/FxWarpTemplate.vfx`, `Assets/Game/Content/Vfx/fx_warp_default.asset`, `Assets/Game/Content/Vfx/vfx_config.asset`, `Assets/Game/Data/Definitions/Vfx/VfxConfigDefinition.cs`
+- **Files:** `Assets/Game/Presentation/Vfx/Templates/FxWarpTemplate.vfx`, `Assets/Game/Content/Vfx/fx_warp_default.asset`, `Assets/Game/Content/Vfx/config_vfx.asset`, `Assets/Game/Data/Definitions/Vfx/VfxConfigDefinition.cs`
 - **Acceptance criteria:**
   - [ ] A `Warp` event plays one pooled instance at the event position; a third concurrent warp steals the oldest instance.
-  - [ ] `vfx_config.asset` passes the strict rule.
+  - [ ] `config_vfx.asset` passes the strict rule.
 - **Tests:** `WarpFxTests.WarpEvent_PlaysPooledInstance`, `WarpFxTests.ThirdWarp_StealsOldest`, `FxContentTests.VfxConfig_AllDefaultsPresent`.
 
 ## 10. Open questions
@@ -704,7 +706,7 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 | 3 | SPEC-13: confirm debris emission (one `FxEvents.Debris` per removed cell and per tier-1 island cell; 64 sampled cells when a chunk body dissolves) and that `FxUploadSystem` never reads `CellRemoved` | Yes as stated | Tech lead |
 | 4 | SPEC-13: name and fields of the chunk-body lifetime component | `ChunkBody { float TimeLeft; float Lifetime; }`; SPEC-13 adds `ChunkDissolve` at chunk creation | Tech lead |
 | 5 | SPEC-11: does the voxel/chunk shader expose a per-instance `_DissolveAmount` (DOTS instanced)? | Yes, 0 = solid, 1 = gone (alpha-clip dissolve with noise) | Tech lead |
-| 6 | SPEC-11/SPEC-04: where is the 256-entry cell colour palette? | A `Color32[256]` on a SPEC-11 definition; `GameRoot` passes it to `FxRig.Create`; else `vfx_config.fallbackCellPalette` (grey ramp) | Tech lead |
+| 6 | SPEC-11/SPEC-04: where is the 256-entry cell colour palette? | A `Color32[256]` on a SPEC-11 definition; `GameRoot` passes it to `FxRig.Create`; else `config_vfx.fallbackCellPalette` (grey ramp) | Tech lead |
 | 7 | SPEC-21: projectile, beam and weapon visual fields (§6.5) | As in §6.5; projectile entities carry no Entities Graphics render components (this spec draws them); missiles are drawn as tracers in M2 | Tech lead |
 | 8 | SPEC-21: per-weapon FX overrides | `WeaponDefinition` gets optional `FxDefinition hitFx, muzzleFx`; their `Id.Hash` (`ContentHash`) is baked into the weapon blob and written to `FxEvent.Fx` | Tech lead |
 | 9 | SPEC-20: thruster visual fields (§6.5) | `ThrusterState { float Intensity }` written by `PropulsionSystem`; `ThrusterVisual { float3 NozzleLocal, ExhaustDirLocal; float NozzleRadius }` written once at spawn | Tech lead |

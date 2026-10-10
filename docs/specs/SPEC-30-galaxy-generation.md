@@ -5,7 +5,7 @@
 | **Status** | Draft |
 | **Area code** | GAL (task IDs are `GAL-001`, `GAL-002`, …) |
 | **Module(s)** | `Game.Galaxy` (folder `Assets/Game/Galaxy/`); world content definitions in `Game.Data` (folder `Assets/Game/Data/Definitions/World/`); one bridge system in `Game.Presentation` (folder `Assets/Game/Presentation/World/`); content assets in `Assets/Game/Content/Galaxy/` and `Assets/Game/Content/Bodies/` |
-| **Depends on specs** | SPEC-02 (`StableHash`, `RngStreams`, `SimClock`, `EventBus<T>`, `ISaveParticipant`, `SaveWriter`/`SaveReader`, `GameInitGroup`, `GameplayActive`, `ContentHash`, `PersistentId`), SPEC-04 (`ContentDefinition`, `ContentCatalog`, validation API), SPEC-10 (`ShipBlueprintDefinition`, `VoxelStructure`, `VoxelGrid`, `GridSpawnRequest`), SPEC-12 (`PhysicsLayers`, graphical smoothing), SPEC-40 (`ConditionRef`, `ILogicContext`), SPEC-01 (`GameSession` holds `GalaxyState`; service construction) |
+| **Depends on specs** | SPEC-02 (`StableHash`, `RngStreams`, `SimClock`, `EventBus<T>`, `ISaveParticipant`, `SaveWriter`/`SaveReader`, `GameInitGroup`, `GameplayActive`, `ContentHash`, `PersistentId`), SPEC-04 (`ContentDefinition`, `ContentCatalog`, validation API), SPEC-10 (`ShipBlueprintDefinition`, `VoxelStructure`, `VoxelGrid`, `GridSpawnRequest`), SPEC-12 (`PhysicsLayers`, graphical smoothing), SPEC-40 (`CompiledCondition`, `ILogicSourceOwner`, `ILogicContext`), SPEC-01 (`GameSession` holds `GalaxyState`; service construction) |
 | **Depended on by** | SPEC-31 (content, deltas, frames), SPEC-32 (lane graph, frames), SPEC-33 (star-system seeds, danger), SPEC-05 (`GLXY` chunk), SPEC-42 (resolve star systems/bodies, reveal), SPEC-61 (galaxy map model), SPEC-62/63 (`OriginShifted`), SPEC-01 (new game / restore entry points) |
 | **Milestone** | M3 |
 
@@ -35,7 +35,7 @@ The galaxy is pure data computed from `(GalaxySeed, GeneratorVersion)` plus the 
 - The save container, slots and participant registration → SPEC-05; `GameSession`, `PersistentId` allocation, new-game/load orchestration → SPEC-01.
 - Camera, trail and VFX reaction to `OriginShifted` → SPEC-62, SPEC-63.
 - Galaxy map and system map screens (views) → SPEC-61. Rumor markers on the map → SPEC-42.
-- `ConditionRef`, `ILogicContext`, fact names → SPEC-40 / SPEC-42.
+- `CompiledCondition`, `ILogicContext`, fact names → SPEC-40 / SPEC-42.
 
 ## 3. Decisions (binding)
 
@@ -145,7 +145,7 @@ public static class GalaxyConstants
 
 ### 4.3 World content definitions (public contract)
 
-All in `Assets/Game/Data/Definitions/World/`, namespace `Game.Data.Definitions`, one public type per file. **Property rule:** every `[SerializeField] private` field below has a read-only public property with the PascalCase name (`radiusMinM` → `RadiusMinM`); lists are exposed as `IReadOnlyList<T>`. `Validate` overrides call `base.Validate` first and report the codes of §5.9. `ConditionRef` is SPEC-40's serializable condition wrapper (`Game.Data.Logic`, §10 Q5).
+All in `Assets/Game/Data/Definitions/World/`, namespace `Game.Data.Definitions`, one public type per file. **Property rule:** every `[SerializeField] private` field below has a read-only public property with the PascalCase name (`radiusMinM` → `RadiusMinM`); lists are exposed as `IReadOnlyList<T>`. `Validate` overrides call `base.Validate` first and report the codes of §5.9. Lane conditions are SPEC-40's `Game.Data.Logic.CompiledCondition` (§10 Q5). `GalaxyGenerationDefinition` implements `Game.Data.Logic.ILogicSourceOwner`; its `CompileLogic`/`BindLogic` bodies are written by SPEC-32 TRV-003 (SPEC-32 §5.1).
 
 ```csharp
 [System.Serializable] public struct WeightedBodyTemplate
@@ -168,7 +168,7 @@ All in `Assets/Game/Data/Definitions/World/`, namespace `Game.Data.Definitions`,
 {
     public AuthoredStarSystemDefinition a, b;
     public LaneKind kind = LaneKind.Hyperlane;
-    public Game.Data.Logic.ConditionRef condition;      // empty = always open
+    public Game.Data.Logic.CompiledCondition condition = new Game.Data.Logic.CompiledCondition();  // empty source = always open
     [UnityEngine.TextArea(1, 3)] public string lockedMessage;   // shown on the map while closed
     public BodyTemplateDefinition gateTemplateA, gateTemplateB; // null = galaxy default for the kind
     public bool hiddenUntilKnown;
@@ -349,7 +349,7 @@ public struct LaneDef
 /// <summary>Managed lane gate condition (only authored lanes are gated in v1).</summary>
 public sealed class LaneGateSpec
 {
-    public Game.Data.Logic.ConditionRef Condition;
+    public Game.Data.Logic.CompiledCondition Condition;   // the authored lane's object (not copied); bound at boot by SPEC-40
     public string LockedMessage;
 }
 
@@ -528,7 +528,9 @@ public sealed class GalaxyState : System.IDisposable
     public StarSystemId CurrentStarSystem;
     public bool HasPlayerLocation;
     public PlayerLocation PlayerLocation;
-    public StarSystemId RouteDestination;                 // written by SPEC-32
+    public StarSystemId RouteDestination { get; set; }    // written by SPEC-32; the setter increments Revision when the value changes
+    public uint Revision { get; }                         // +1 on every AddKnown/AddVisited that returns true, on a RouteDestination change
+                                                          // and on Clear (never reset; consumers compare stamps)
     public System.Collections.Generic.IReadOnlyList<uint> Known { get; }    // sorted ascending
     public System.Collections.Generic.IReadOnlyList<uint> Visited { get; }  // sorted ascending
     public bool AddKnown(StarSystemId id); public bool AddVisited(StarSystemId id);
@@ -557,7 +559,7 @@ public struct FrameOrigin : IComponentData
     public Unity.Mathematics.double3 OriginInStarSystem;   // binding (architecture §6.5)
     public StarSystemId StarSystem;                        // star system this frame belongs to; None before the first load
     public uint ShiftSequence;                             // +1 on every rebase (threshold or request)
-    public Unity.Mathematics.float3 LastShiftDelta;        // newLocal = oldLocal + delta for the last threshold rebase; zero for requests
+    public Unity.Mathematics.float3 LastShiftDelta;        // newLocal = oldLocal + delta for the last rebase; zero when it changed star system
     public byte LastShiftChangedStarSystem;                // 1 when the last rebase came from a request with a different star system
     public uint AppliedRequestSerial;                      // Serial of the last OriginRebaseRequest applied
 }
@@ -568,7 +570,12 @@ public struct OriginRebaseRequest : IComponentData, IEnableableComponent
     public Unity.Mathematics.double3 NewOrigin;
     public StarSystemId StarSystem;
     public uint Serial;                                    // monotonically increasing, starts at 1
+    public byte PlacePlayer;                               // 1: ShiftJob places the PlayerShip root (SPEC-31 Q2, SPEC-32)
+    public PlayerPlacement Placement;                      // star-system frame; read only when PlacePlayer == 1
 }
+
+/// <summary>Where the player ship is put by a placement request (star-system frame, yaw only, ADR-0003).</summary>
+public struct PlayerPlacement { public Unity.Mathematics.double3 PositionM; public float YawRad; }
 
 /// <summary>Shared, low cardinality (≤ 2 values). On every star-system-owned entity: grid roots, bricks, functional entities, body anchors. Never on the player ship or its children.</summary>
 public struct StarSystemMember : ISharedComponentData { public StarSystemId Id; }
@@ -581,13 +588,15 @@ public struct StarSystemMember : ISharedComponentData { public StarSystemId Id; 
 /// same-frame consumers read FrameOrigin.ShiftSequence/LastShiftDelta instead (§5.10).</summary>
 public readonly struct OriginShifted
 {
-    public readonly Unity.Mathematics.float3 Delta;    // binding; zero when StarSystemChanged == 1 or for a request rebase
+    public readonly Unity.Mathematics.float3 Delta;    // binding; zero when StarSystemChanged == 1 (same-star-system requests carry their delta)
     public readonly byte StarSystemChanged;            // 1: everything local was replaced; consumers reset (camera cut, clear trails)
     public readonly uint StarSystemValue;              // StarSystemId.Value of the frame after the rebase
     public readonly uint Sequence;                     // FrameOrigin.ShiftSequence after the rebase
     public OriginShifted(Unity.Mathematics.float3 delta, byte changed, uint starSystemValue, uint seq) { Delta = delta; StarSystemChanged = changed; StarSystemValue = starSystemValue; Sequence = seq; }
 }
 ```
+
+The Core singleton `OriginShiftRecord` (SPEC-02 §4, `Game.Core.Components`) mirrors the last rebase for `Game.Simulation`, which cannot read `FrameOrigin` (SPEC-21 `ProjectileStore`, SPEC-23 AI anchors): `{ uint Sequence; float3 Delta; byte StarSystemChanged; }`. `OriginRebaseSystem.OnCreate` adds it to the `FrameOrigin` entity (all zero); `DecideJob` writes it together with `FrameOrigin` (`Sequence = ShiftSequence`, `Delta = LastShiftDelta`, `StarSystemChanged = LastShiftChangedStarSystem`). It holds only the last rebase; consumers that see `Sequence` jump by more than 1 treat it like a star-system change (SPEC-21, SPEC-23 already do).
 
 `Game.Galaxy/AssemblyInfo.cs` adds `[assembly: RegisterGenericComponentType(typeof(Game.Data.Components.ManagedEventQueue<Game.Core.Events.OriginShifted>))]` and `ManagedEventChannels.RegisterAll` gets `system.RegisterChannel<OriginShifted>();` (SPEC-02 §5.6 rule 3).
 
@@ -622,9 +631,11 @@ public interface ILaneAccess
     bool IsLaneOpen(int laneIndex);               // gate condition true (ungated lanes: always true)
     string GetLockedMessage(int laneIndex);       // "" when open
     int GetFuelCost(int laneIndex);
+    uint Revision { get; }                        // +1 whenever any IsLaneOpen result may have changed (the "ILaneAccess change counter" of §5.12)
 }
 
-/// <summary>Implemented by SPEC-33. Owner faction of a star system (0 = none).</summary>
+/// <summary>Implemented by SPEC-33 (TerritoryService). Owner faction of a star system as an Allegiance faction index;
+/// 255 = no owner (0 is the player faction, SPEC-33 decision 1). GetOwnerColorToken returns "" for no owner.</summary>
 public interface IStarSystemOwnership { byte GetOwnerFaction(StarSystemId id); string GetOwnerColorToken(StarSystemId id); }
 
 /// <summary>Implemented by SPEC-31 (StarSystemLoader). Lets delta writes reach the loaded star system.</summary>
@@ -654,7 +665,8 @@ public sealed class GalaxyService : System.IDisposable, IGalaxyFrameTick
     public StarSystemContent GetContent(StarSystemId id);   // completes prefetch or generates now; applies deltas; cached
     public void ReleaseContent(StarSystemId id);       // disposes the cache entry
     public void SetLiveDeltaSink(IGalaxyLiveDeltaSink sink);
-    public void RequestOriginReset(StarSystemId id, double3 newOrigin); // enables OriginRebaseRequest with Serial+1
+    public uint RequestOriginReset(StarSystemId id, double3 newOrigin); // enables OriginRebaseRequest with Serial+1; returns the serial
+    public uint RequestOriginReset(StarSystemId id, double3 newOrigin, in PlayerPlacement placement); // same, and places the player ship
     public uint LastOriginRequestSerial { get; }
 
     // Queries
@@ -691,7 +703,7 @@ public sealed class GalaxyService : System.IDisposable, IGalaxyFrameTick
 public struct UniversePositionIsAnalytic : IComponentData { }
 
 // internal, Assets/Game/Galaxy/Generation/
-internal struct RebaseDecision { public byte Rebase; public byte FromRequest; public byte StarSystemChanged; public double3 NewOrigin; public float3 Delta; }
+internal struct RebaseDecision { public byte Rebase; public byte FromRequest; public byte StarSystemChanged; public double3 NewOrigin; public float3 Delta; public byte PlacePlayer; public PlayerPlacement Placement; }
 internal struct LaneCandidate { public int A, B; public double LengthLy; }        // indices into StarSystems, A < B
 ```
 
@@ -712,7 +724,7 @@ All generation code lives in `Assets/Game/Galaxy/Generation/` (namespace `Game.G
 5. Moons in authored star systems: `SubSlot` = the moon's index among the moons with the same `parentKey`, in list order; `Slot` = the parent planet's slot. `ParentKey` = the planet's `LocalKey`. Other roles: `SubSlot = 0`, `ParentKey = 0`.
 6. Run §5.2 and §5.3 (layout and lanes), §5.4 (hash). Return the `GalaxyDef` (all `NativeArray`s `Allocator.Persistent`).
 
-Lane-gate specs: for every authored lane whose `condition` is non-empty, append `new LaneGateSpec { Condition, LockedMessage }` to `LaneGates` and set `LaneDef.GateIndex = 1 + index`.
+Lane-gate specs: for every authored lane whose `condition.Source` is not empty, append `new LaneGateSpec { Condition, LockedMessage }` to `LaneGates` and set `LaneDef.GateIndex = 1 + index`.
 
 ### 5.2 Layout job `GalaxyLayoutJob`
 
@@ -944,7 +956,7 @@ The applier never consumes RNG and never reorders generated bodies.
   3. call `liveSink?.OnBodyDeltaChanged(body)`.
   - `AddStorySpawn` returns `BodyId(StorySpawn, slot, 0)`.
 - **`MarkVisited(id)`**: `AddVisited(id)`, `AddKnown(id)`, and `AddKnown` for every neighbour whose star system is not `HiddenUntilKnown` and whose lane is not `HiddenUntilKnown`. `IncrementVisit` on the delta happens in SPEC-31, on star-system entry.
-- **`RequestOriginReset(id, origin)`**: main thread; `serial = ++LastOriginRequestSerial`; set `OriginRebaseRequest { NewOrigin, StarSystem = id, Serial }` on the `FrameOrigin` entity and enable it.
+- **`RequestOriginReset(id, origin[, placement])`**: main thread; `serial = ++LastOriginRequestSerial`; set `OriginRebaseRequest { NewOrigin, StarSystem = id, Serial, PlacePlayer = placement given ? 1 : 0, Placement }` on the `FrameOrigin` entity and enable it; return `serial`. A second request before the first is applied overwrites it (the higher serial wins; callers wait for `FrameOrigin.AppliedRequestSerial ≥ serial`).
 - **`Tick(ctx)`** (T1): for each scheduled prefetch whose handle `IsCompleted`, leave it in place; `GetContent` will finalize it. `Tick` does nothing else in v1. It exists so SPEC-31/32/33 services share one ordered per-frame entry point.
 
 `GalaxyFrameTicker` order (`TickOrder`):
@@ -997,22 +1009,34 @@ Per frame, entirely in jobs with no main-thread sync point (markers `OriginRebas
       - `Rebase = 1`, `FromRequest = 1`, `NewOrigin = request.NewOrigin`;
       - `StarSystemChanged = request.StarSystem != FrameOrigin.StarSystem`;
       - `Delta = changed ? 0 : (float3)(FrameOrigin.OriginInStarSystem − NewOrigin)`;
+      - `PlacePlayer = request.PlacePlayer`, `Placement = request.Placement`;
       - disable the request; set `AppliedRequestSerial`.
    2. Else, if a player root exists and `length(playerLocal) > 2000`:
       - `Rebase = 1`, `FromRequest = 0`;
       - `NewOrigin = FrameOrigin.OriginInStarSystem + (double3)playerLocal`;
       - `Delta = (float3)(old − NewOrigin)`, i.e. `−playerLocal`.
    3. If `Rebase`:
-      - update `FrameOrigin` (`OriginInStarSystem = NewOrigin`, `StarSystem` from the request if `FromRequest`, `ShiftSequence++`, `LastShiftDelta = FromRequest ? 0 : Delta`, `LastShiftChangedStarSystem = StarSystemChanged`);
-      - enqueue `OriginShifted(Delta (0 if changed), changed, FrameOrigin.StarSystem.Value, ShiftSequence)` with `SortKey = ShiftSequence`.
+      - update `FrameOrigin` (`OriginInStarSystem = NewOrigin`, `StarSystem` from the request if `FromRequest`, `ShiftSequence++`, `LastShiftDelta = Delta` (already 0 when the star system changed), `LastShiftChangedStarSystem = StarSystemChanged`);
+      - write `OriginShiftRecord { Sequence = ShiftSequence, Delta, StarSystemChanged }`;
+      - enqueue `OriginShifted(Delta, changed, FrameOrigin.StarSystem.Value, ShiftSequence)` with `SortKey = ShiftSequence`.
+
+   Same-star-system requests (SPEC-32 cruise, M4) therefore shift every consumer exactly like a threshold rebase: VFX, debris, trails, camera, projectiles and AI anchors move by `Delta`.
 2. **`ShiftJob` (`IJobEntity`, `ScheduleParallel`)** over roots with `LocalTransform` (`WithNone<Parent>`). It reads `RebaseDecision` and returns immediately when `Rebase == 0`.
    - With `UniversePosition`: `Position = (float3)(UniversePosition.Value − NewOrigin)`.
    - Without it: `Position += Delta`; when `StarSystemChanged == 1`, skip (those entities belong to the star system being unloaded).
    - If the entity has `PhysicsGraphicalInterpolationBuffer`: `PreviousTransform.pos += Delta`, or set it to the new pose when the star system changed. This prevents a one-frame smear (03-B9c).
+2b. **`PlaceJob` (`IJobEntity`, single-threaded `Schedule`, after `ShiftJob`)** over roots with `PlayerShip`, `LocalTransform`, `PhysicsVelocity` (`WithNone<Parent>`). It returns immediately unless `Rebase == 1 && PlacePlayer == 1`. Then:
+   - `oldYaw = Planar.YawFromForward(math.mul(Rotation, new float3(0, 0, 1)))`;
+   - `Position = (float3)(Placement.PositionM − NewOrigin)`; `Rotation = Planar.YawRotation(Placement.YawRad)`;
+   - `PhysicsVelocity.Linear = math.mul(quaternion.RotateY(Placement.YawRad − oldYaw), Linear)`; `Angular` unchanged (the speed is kept in ship-local terms, SPEC-32 decision 6);
+   - if it has `UniversePosition`: `Value = Placement.PositionM`;
+   - if it has `PhysicsGraphicalInterpolationBuffer`: `PreviousTransform` = the new pose (no smear).
+
+   This is the only velocity write outside Unity Physics and the impulse writers (architecture §8: placement re-expression only).
 3. **`SyncJob` (`IJobEntity`, `ScheduleParallel`)** over roots with `UniversePosition` and `LocalTransform`, `WithNone<Parent, UniversePositionIsAnalytic>`: `UniversePosition = FrameOrigin.OriginInStarSystem + (double3)Position`. It reads the post-rebase origin from the `RebaseDecision`, or from `FrameOrigin` when there was no rebase.
 
 Everything else that holds positions reacts to the shift; this spec does not implement those reactions.
-- **Same frame:** read `FrameOrigin.ShiftSequence` and `LastShiftDelta` and compare with the last seen sequence. Presentation systems that keep their own world-space buffers do this: camera (SPEC-62), trails/VFX/debris buffers (SPEC-63), audio emitters (SPEC-64).
+- **Same frame:** read `FrameOrigin.ShiftSequence` and `LastShiftDelta` (Presentation and Galaxy) or `OriginShiftRecord` (Simulation) and compare with the last seen sequence. Presentation systems that keep their own world-space buffers do this: camera (SPEC-62), trails/VFX/debris buffers (SPEC-63), audio emitters (SPEC-64).
 - **Next frame:** `EventBus<OriginShifted>`, for managed listeners that tolerate a one-frame delay.
 
 ### 5.11 `GalaxySaveParticipant` (`GLXY`, order 80, version 1)
@@ -1036,7 +1060,7 @@ Implements `ISaveParticipant` over the `GalaxyState` owned by `GameSession`.
 
 ### 5.12 `GalaxyMapModel`
 
-A managed class in `Galaxy/Services/`, constructed by SPEC-01 with `(GalaxyService, ILaneAccess, IStarSystemOwnership)`. Read-only for the UI (SPEC-61).
+A managed class in `Galaxy/Services/`, constructed by SPEC-01 with `(GalaxyService, ILaneAccess, IStarSystemOwnership)`. Either interface may be `null` (its spec's task is not done yet): a `null` `ILaneAccess` means every lane is open with fuel cost 0 and `Revision` 0; a `null` `IStarSystemOwnership` means no owner (`OwnerColorToken` = ""). Read-only for the UI (SPEC-61).
 
 ```csharp
 public readonly struct StarSystemMapEntry { public readonly StarSystemId Id; public readonly double2 PositionLy; public readonly string Name; public readonly bool Known, Visited, Current, IsStory, IsRouteTarget; public readonly byte Danger; public readonly string OwnerColorToken; }
@@ -1055,7 +1079,7 @@ Visibility:
 - A lane is listed if both ends are `Known` and the lane is not `HiddenUntilKnown`, or if both ends are `Visited`.
 - Unknown star systems are not listed at all, so the map never leaks hidden content.
 
-`Refresh` compares a version stamp (`GalaxyState` change counter + `ILaneAccess` change counter + current star system) and rebuilds only when it changed. Entries are reused lists with no per-frame allocation when nothing changed. SPEC-61's view model calls `Refresh()` when the map screen opens and on `StarSystemEntered`/`FactChanged`.
+`Refresh` compares a version stamp (`GalaxyState.Revision`, `ILaneAccess.Revision`, the current star system) and rebuilds only when it changed. Entries are reused lists with no per-frame allocation when nothing changed. SPEC-61's view model calls `Refresh()` when the map screen opens and on `StarSystemEntered`/`FactChanged`.
 
 ## 6. Public API
 
@@ -1218,7 +1242,7 @@ Visibility:
 - **Milestone:** M3
 - **Tier:** frontier — F1/F2/F5: single floating-origin owner, parallel jobs, ordering with streaming, camera and VFX
 - **Depends on:** `GAL-001`, `SPEC-02`
-- **Do:** Implement `OriginRebaseSystem` (§5.10) and `GalaxyService.RequestOriginReset`.
+- **Do:** Implement `OriginRebaseSystem` (§5.10, including `PlaceJob` and the `OriginShiftRecord` write) and both `GalaxyService.RequestOriginReset` overloads.
 - **Files:** `Assets/Game/Galaxy/Systems/OriginRebaseSystem.cs`; `Assets/Game/Tests/EditMode/Galaxy/OriginRebaseSystemTests.cs`; `Assets/Game/Tests/PlayMode/Galaxy/OriginRebasePerfTests.cs`
 - **Acceptance criteria:**
   - [ ] Player at local x = 2,001 → after one update local ≈ 0, `FrameOrigin.OriginInStarSystem.x` increased by 2,001, `ShiftSequence` +1, one `OriginShifted` with `Delta = (−2001, 0, 0)`.
@@ -1226,9 +1250,12 @@ Visibility:
   - [ ] Child entities (bricks) are not modified.
   - [ ] Request with a different star system: all `UniversePosition` roots placed at `UP − NewOrigin`, `StarSystemChanged = 1`, `Delta = 0`.
   - [ ] `UniversePositionIsAnalytic` roots are not synced.
+  - [ ] Request with placement (different star system): the player root ends at `Placement.PositionM − NewOrigin` with yaw `Placement.YawRad`; its linear velocity keeps its magnitude and its angle relative to the ship's forward axis; its angular velocity is unchanged.
+  - [ ] Same-star-system request with `Delta = d`: `LastShiftDelta == d`, `OriginShifted.Delta == d`, `OriginShiftRecord == { ShiftSequence, d, 0 }`, and non-`UniversePosition` roots move by `d`.
+  - [ ] `RequestOriginReset` returns increasing serials; `FrameOrigin.AppliedRequestSerial` equals the returned serial after the next update.
   - [ ] No main-thread `Complete()` (verified by the test running the system with a pending writer job on `LocalTransform` and asserting no `InvalidOperationException`).
   - [ ] Perf: 5,000 roots ≤ 0.5 ms.
-- **Tests:** `OriginRebaseSystemTests.Threshold_Rebases`, `.UniversePosition_ExactAcrossRebases`, `.Children_Untouched`, `.Request_ChangesStarSystem`, `.Analytic_NotSynced`, `.Smoothing_HistoryShifted`; `OriginRebasePerfTests.Rebase_5000Roots`.
+- **Tests:** `OriginRebaseSystemTests.Placement_PoseAndVelocity`, `.SameStarSystemRequest_ShiftsConsumers`, `.Record_MirrorsFrameOrigin`, `.Serials_Returned`, `OriginRebaseSystemTests.Threshold_Rebases`, `.UniversePosition_ExactAcrossRebases`, `.Children_Untouched`, `.Request_ChangesStarSystem`, `.Analytic_NotSynced`, `.Smoothing_HistoryShifted`; `OriginRebasePerfTests.Rebase_5000Roots`.
 
 ### GAL-010 — GLXY save participant
 - **Milestone:** M3
@@ -1257,11 +1284,16 @@ Visibility:
 - **Milestone:** M3
 - **Tier:** standard — content authoring from the vision's star-system list with given definitions
 - **Depends on:** `GAL-003`, `SPEC-72`
-- **Do:** Create `galaxy_main` (fixed seed, `proceduralStarSystemCount = 0`), the default gate templates, and the authored star systems of the M3 slice. Their names and bodies come from SPEC-42's opening chapter list, or, until SPEC-42 publishes it, three placeholders: `starsys_haven` (start, one station `haven_station`, two planets), `starsys_drift` (belt + POI), `starsys_relay` (hub with a gate pair). Add authored lanes `haven–drift`, `drift–relay`, `haven–relay` (the last gated by `ConditionRef` `fact:chapter1_relay_open`).
+- **Do:**
+  1. Create `galaxy_main` (fixed seed, `proceduralStarSystemCount = 0`, start star system `starsys_ark_start`, `startBodyKey = "ark_station"`) and the default gate templates (`defaultHyperlaneGate` = `body_jump_point`, `defaultAncientGate` = `body_gate_active`, both role `LaneGate`).
+  2. Create exactly the three authored star systems, their bodies and the two lanes of SPEC-42 §4.12 (IDs with the `starsys_` prefix: `starsys_ark_start`, `starsys_drift`, `starsys_whisper`; positions and danger as listed there). The `ark_start ↔ whisper` lane has `condition` source `$gate_ark_start_active`, `lockedMessage` "The gate is dormant." and `gateTemplateA`/`gateTemplateB` = `body_gate_dormant`.
+  3. Give every body template the `storyTag` of SPEC-42 §4.10 (for example `body_resource_cache` → `resource_cache`, `body_derelict_ship` → `derelict`). Templates that SPEC-72 MIG-014 already created as stubs are completed here, not duplicated.
 - **Files:** `Assets/Game/Content/Galaxy/*.asset`; `Assets/Game/Content/Bodies/*.asset`
 - **Acceptance criteria:**
   - [ ] Content validates with zero GAL errors; `GalaxyService.NewGame` succeeds in a PlayMode smoke test.
-- **Tests:** `GalaxyContentSmokeTests.MainGalaxy_GeneratesAndValidates` (PlayMode).
+  - [ ] The lane `ark_start ↔ whisper` is closed on a new game and open after `set_fact gate_ark_start_active true` (through SPEC-32's `ILaneAccess` once TRV-003 exists).
+  - [ ] `TryResolveBody(starsys_ark_start, "ark_station")` and `TryResolveBody(starsys_drift, "drift_cache")` succeed.
+- **Tests:** `GalaxyContentSmokeTests.MainGalaxy_GeneratesAndValidates`, `.OpeningChapter_BodiesResolve`, `.WhisperLane_GatedByFact` (PlayMode).
 
 ### GAL-013 — Performance gates
 - **Milestone:** M3
@@ -1292,7 +1324,7 @@ Visibility:
 | 2 | Names for procedural star systems | `"<prefix> <letter>-<NNNN>"` (§5.7) | Owner |
 | 3 | Do destroyed celestial bodies leave wrecks? | No: SPEC-31 spawns nothing for `Destroyed` | Owner |
 | 4 | Galaxy size for M4 | `galaxyRadiusLy` 60, 200 star systems | Owner |
-| 5 | `ConditionRef` shape for gated lanes | SPEC-40's serializable condition wrapper; text form `fact:<name>` | SPEC-40 |
+| 5 | Condition shape for gated lanes | **Answered:** SPEC-40 `CompiledCondition` with the SPEC-40 text syntax (`$gate_ark_start_active`) | SPEC-40 |
 | 15 | Non-destructible bodies | `destructible = false` → SPEC-13 `DamageImmune` tag on the grid | SPEC-13 |
 
 ## 11. References

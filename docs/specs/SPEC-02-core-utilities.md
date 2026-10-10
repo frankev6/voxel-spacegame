@@ -187,6 +187,7 @@ public enum RngPurpose : ushort
     EncounterFleet = 22,         // SPEC-33 fleet composition
     EncounterPlacement = 23,     // SPEC-33 spawn placement
     Territory = 24,              // SPEC-33 faction territory
+    Salvage = 25,                // SPEC-50 salvage yields
     Test = 1000,
 }
 
@@ -225,6 +226,16 @@ public struct SimClock : Unity.Entities.IComponentData
     public uint Tick;                          // completed fixed ticks this session; 0 during the first tick
     public double UniversalTime;               // seconds since campaign start at the start of the current tick
     public double SessionStartUniversalTime;   // UniversalTime when this session's gameplay began (from the save)
+}
+
+/// <summary>Mirror of the last floating-origin rebase for modules that cannot read SPEC-30's FrameOrigin (Simulation).
+/// On the FrameOrigin entity; created by OriginRebaseSystem.OnCreate (all zero) and written only by its DecideJob (SPEC-30 §5.10).
+/// Holds the last rebase only: a consumer whose last applied Sequence is more than 1 behind treats it as a star-system change.</summary>
+public struct OriginShiftRecord : Unity.Entities.IComponentData
+{
+    public uint Sequence;                      // FrameOrigin.ShiftSequence after the rebase; 0 = no rebase yet
+    public Unity.Mathematics.float3 Delta;     // newLocal = oldLocal + Delta; zero when StarSystemChanged == 1
+    public byte StarSystemChanged;             // 1: everything local was replaced
 }
 ```
 `PersistentId` is in §4.1.
@@ -1129,7 +1140,7 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
   2. Method bodies not given in §4 throw `new System.NotImplementedException("CORE-0xx")` naming the task that implements them (StableHash/ContentId → CORE-002, RngStreams/SimTime → CORE-003, GameLog → CORE-004, Services → CORE-005, EventBus/EventHub → CORE-006, Save → CORE-007, math → CORE-010, settings → CORE-011, drain system → CORE-009). `PauseToken`, `ContentHash`, `PersistentId`, enums, events payloads, interfaces, groups and `GameplayEndCommandBufferSystem` are complete as written.
   3. `ManagedEventChannels.RegisterAll` has an empty body with the comment shown in §4.6.
   4. Every public type has a `/// <summary>` naming its SPEC-02 section.
-- **Files:** `Assets/Game/Core/{ContentHash,ContentId,StableHash,RngPurpose,RngStreams,SimTime,Services,LogLevel,LogCategories,GameLog,IPauseService,PauseToken,InputContext,IWorldPointerGate,MathD,Planar}.cs`; `Assets/Game/Core/Components/{GameplayActive,SimClock,PersistentId}.cs`; `Assets/Game/Core/Systems/{GameInitGroup,GameplayPrePhysicsGroup,ShipCommandGroup,AbilityActivationGroup,GameplayPostPhysicsGroup,GameplayEndCommandBufferSystem,VoxelRebuildGroup,WorldGroup,PresentationBridgeGroup}.cs`; `Assets/Game/Core/Events/{EventBus,EventHub,EventChannel,SessionResetReason,SessionReset,GameSaved,GameLoaded,PauseStateChanged,InputContextChanged,SettingsChanged,SceneTransitionStarted,SceneTransitionFinished}.cs`; `Assets/Game/Core/Save/{ISaveParticipant,SaveReason,SaveBlockReason,ISaveIdPalette,ISaveIdPaletteReader,ISaveJsonCodec,ISaveDeferredBlock,SaveKey,SaveFormatException,SaveBlock,SaveWriter,SaveReader}.cs`; `Assets/Game/Core/Flow/{GameScene,SceneEntryReason,BlueprintLabMode,BlueprintLabArgs,SceneReadyContext,SceneExitContext,ISceneReady,ISceneExiting,SceneHookOrder,FlowResult,NewGameArgs,IGameFlow,ISessionModel,ISessionWriteback,INewGameInitializer,ISaveBlocker}.cs`; `Assets/Game/Core/Settings/{SettingsSection,GameSettings,AudioSettingsData,VideoSettingsData,ControlSettingsData,GameplaySettingsData,AccessibilitySettingsData,ISettingsService}.cs`; `Assets/Game/Data/Components/{ManagedEventEnvelope,ManagedEventQueue}.cs`; `Assets/Game/Presentation/Systems/{ManagedEventDrainSystem,ManagedEventChannels}.cs`
+- **Files:** `Assets/Game/Core/{ContentHash,ContentId,StableHash,RngPurpose,RngStreams,SimTime,Services,LogLevel,LogCategories,GameLog,IPauseService,PauseToken,InputContext,IWorldPointerGate,MathD,Planar}.cs`; `Assets/Game/Core/Components/{GameplayActive,SimClock,PersistentId,OriginShiftRecord}.cs`; `Assets/Game/Core/Systems/{GameInitGroup,GameplayPrePhysicsGroup,ShipCommandGroup,AbilityActivationGroup,GameplayPostPhysicsGroup,GameplayEndCommandBufferSystem,VoxelRebuildGroup,WorldGroup,PresentationBridgeGroup}.cs`; `Assets/Game/Core/Events/{EventBus,EventHub,EventChannel,SessionResetReason,SessionReset,GameSaved,GameLoaded,PauseStateChanged,InputContextChanged,SettingsChanged,SceneTransitionStarted,SceneTransitionFinished}.cs`; `Assets/Game/Core/Save/{ISaveParticipant,SaveReason,SaveBlockReason,ISaveIdPalette,ISaveIdPaletteReader,ISaveJsonCodec,ISaveDeferredBlock,SaveKey,SaveFormatException,SaveBlock,SaveWriter,SaveReader}.cs`; `Assets/Game/Core/Flow/{GameScene,SceneEntryReason,BlueprintLabMode,BlueprintLabArgs,SceneReadyContext,SceneExitContext,ISceneReady,ISceneExiting,SceneHookOrder,FlowResult,NewGameArgs,IGameFlow,ISessionModel,ISessionWriteback,INewGameInitializer,ISaveBlocker}.cs`; `Assets/Game/Core/Settings/{SettingsSection,GameSettings,AudioSettingsData,VideoSettingsData,ControlSettingsData,GameplaySettingsData,AccessibilitySettingsData,ISettingsService}.cs`; `Assets/Game/Data/Components/{ManagedEventEnvelope,ManagedEventQueue}.cs`; `Assets/Game/Presentation/Systems/{ManagedEventDrainSystem,ManagedEventChannels}.cs`
 - **Acceptance criteria:**
   - [ ] `tools/compile.sh` passes with zero new warnings.
   - [ ] `AssemblyRulesTests` and `ConventionsTests` pass (no `Debug.Log` outside `GameLog.cs`, no `new Random(`).

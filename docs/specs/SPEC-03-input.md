@@ -73,7 +73,7 @@ This avoids the old prototype's polling of `Keyboard.current` from many scripts,
    - `PlayerCommand` keeps a single writer (architecture §6.4);
    - a press made during a frame with 0 fixed ticks is not lost;
    - a frame with 6 ticks fires it once.
-5. **Mouse aim intersects the flight plane `Y = 0` in the local frame.** It uses the previous frame's `MainCameraState`, because SPEC-62 writes it later in the frame. A one-frame camera lag in the aim point is acceptable and deterministic for replay, since replays inject `PlayerCommand` directly (SPEC-71).
+5. **Mouse aim is what the cursor covers.** A ray from the camera through the cursor is cast against `PhysicsLayers.PickingQuery` (grids and celestial bodies), ignoring the player's own grid; the first hit is the aim point. When nothing is hit, the ray's intersection with the flight plane `Y = 0` is used (SPEC-21 Q6). It uses the previous frame's `MainCameraState`, because SPEC-62 writes it later in the frame. A one-frame camera lag in the aim point is acceptable and deterministic for replay, since replays inject `PlayerCommand` directly (SPEC-71).
 6. **Mouse buttons do not fire through UI.** When `IWorldPointerGate.IsWorldPointerAllowed(pointer)` is false, mouse-driven fire groups and `TargetUnderCursor` are suppressed. Keyboard actions are unaffected.
 7. **Default bindings are part of this spec (§4.2).** Players change them through rebinding. Overrides are stored as the Input System JSON in `ControlSettingsData.BindingOverridesJson` and applied at boot and on change.
 8. **Display strings come from the Input System.** They use `InputBinding.ToDisplayString(DisplayStringOptions.DontIncludeInteractions)` for the first binding of the current control scheme `KeyboardMouse`. UI never hard-codes key names.
@@ -117,6 +117,7 @@ Action names are PascalCase and unique within their map. The **action path** use
 | `TargetUnderCursor` | Button (press) | `<Keyboard>/r` | edge `TargetUnderCursor` |
 | `TargetClear` | Button (press) | `<Keyboard>/t` | edge `TargetClear` |
 | `AutofireToggle` | Button (press) | `<Keyboard>/z` | edge `AutofireToggle` |
+| `Cruise` | Button (press) | `<Keyboard>/j` | edge counter `Cruise` (SPEC-32 supercruise, consumed from M4; the action and counter exist from M0) |
 | `CameraOrbitHold` | Button (held) | `<Mouse>/middleButton` | SPEC-62 |
 | `CameraLook` | Value / Vector2 | `<Mouse>/delta` | SPEC-62 (read only while orbit is held) |
 | `CameraZoom` | Value / Axis | `<Mouse>/scroll/y` (processor `scale(factor=0.008333)` so 1 notch = 1) | SPEC-62 |
@@ -216,6 +217,17 @@ namespace Game.Presentation.Input
     /// <summary>ICameraInput (SPEC-62) over InputService actions; mode-aware (Flight vs Editor map).</summary>
     public sealed class InputCameraInput : Game.Presentation.Services.ICameraInput { public InputCameraInput(Game.Input.InputService input); }
 
+    /// <summary>Closest raycast hit that is not on the ignored body (the player's own grid). Implements SPEC-03 §5.2 step 7.5.</summary>
+    public struct IgnoreBodyClosestHitCollector : Unity.Physics.ICollector<Unity.Physics.RaycastHit>
+    {
+        public IgnoreBodyClosestHitCollector(Unity.Entities.Entity ignore, float maxFraction);
+        public bool EarlyOutOnFirstHit => false;
+        public float MaxFraction { get; private set; }     // shrinks to the accepted hit's fraction
+        public int NumHits { get; private set; }           // 0 or 1
+        public Unity.Physics.RaycastHit ClosestHit;
+        public bool AddHit(Unity.Physics.RaycastHit hit);  // hit.Entity == ignore → false; else keep it, MaxFraction = hit.Fraction, true
+    }
+
     /// <summary>Builds SPEC-51's EditorInputFrame from the Editor map once per frame.</summary>
     public sealed class EditorInputSampler
     {
@@ -232,7 +244,7 @@ namespace Game.Presentation.Input
 - `AimValid` (`byte`);
 - `FireGroups` (`uint`);
 - `Flags` (`ShipCommandFlags`: `Boost` = 1, `Brake` = 2);
-- `Edges` (`PlayerEdgeCounters`, one `byte` per edge: `Interact`, `Ability1`…`Ability4`, `TargetNext`, `TargetUnderCursor`, `TargetClear`, `AutofireToggle`);
+- `Edges` (`PlayerEdgeCounters`, one `byte` per edge: `Interact`, `Ability1`…`Ability4`, `TargetNext`, `TargetUnderCursor`, `TargetClear`, `AutofireToggle`, `Cruise`; 10 bytes);
 - `FrameIndex` (`uint`).
 
 `InputCameraInput` and `EditorInputSampler` are created by SPEC-01 (step 11 passes `new InputCameraInput(input)` to `CameraRigService`). SPEC-51's `ShipEditorHost` receives an `EditorInputSampler` instance.
@@ -302,7 +314,8 @@ Position: `GameInitGroup`, after `OriginRebaseSystem`, before `GridSpawnSystem` 
    2. `inv = math.inverse(ViewProjection)`;
    3. `near = inv × (ndc, −1, 1)`, `far = inv × (ndc, 1, 1)`, both divided by w;
    4. `dir = normalize(far − near)`;
-   5. `Planar.RayPlaneY(near, dir, 0f, out hit, out _)` → `AimWorld = hit`, `AimValid = 1`; on failure (a ray parallel to the plane or pointing away), keep the previous `AimWorld` and set `AimValid = 0`.
+   5. **Pick:** if `SystemAPI.TryGetSingleton<PhysicsWorldSingleton>(out var pw)` (a read: it completes only the jobs that write the physics world): `ignore` = the first entity of `playerQuery` (`WithAll<PlayerShip>().WithNone<Parent>()`), or `Entity.Null`. Cast `RaycastInput { Start = near, End = near + dir × 5000f, Filter = PhysicsLayers.PickingQuery }` with `new IgnoreBodyClosestHitCollector(ignore, 1f)` (§4.4). On a hit: `AimWorld = hit.Position`, `AimValid = 1`; go to step 8.
+   6. **Plane fallback:** `Planar.RayPlaneY(near, dir, 0f, out hit, out _)` → `AimWorld = hit`, `AimValid = 1`; on failure (a ray parallel to the plane or pointing away), keep the previous `AimWorld` and set `AimValid = 0`.
 
    Without a `MainCameraState`, `AimValid = 0`.
 8. **Fire groups:** bit 0 = `FirePrimary.IsPressed() && allowed`; bit 1 = `FireSecondary.IsPressed() && allowed`; bit 2 = `FireTertiary.IsPressed()`.
@@ -418,16 +431,18 @@ When the Editor map is disabled, set `frame = default`.
 ### INP-005 — PlayerInputSampleSystem
 - **Milestone:** M1
 - **Tier:** frontier — F5/F1: the latching contract every frame rate depends on (architecture §5.1); determinism gate input
-- **Depends on:** `INP-002`, `FLT-001`, `CAM-001`
-- **Do:** Implement `PlayerInputSampleSystem` (§5.2) with `Bind`/`Unbind`. Add the bind call at SPEC-01 §5.2 step 9.1: `world.GetExistingSystemManaged<PlayerInputSampleSystem>().Bind(input, ui)`.
+- **Depends on:** `INP-002`, `FLT-001`, `CAM-001`, `PHY-001`
+- **Do:** Implement `PlayerInputSampleSystem` (§5.2) with `Bind`/`Unbind`, and `IgnoreBodyClosestHitCollector` (§4.4). Add the bind call at SPEC-01 §5.2 step 9.1: `world.GetExistingSystemManaged<PlayerInputSampleSystem>().Bind(input, ui)`.
 - **Files:** `Assets/Game/Presentation/Input/PlayerInputSampleSystem.cs`; `Assets/Game/App/Boot/GameComposition.cs` (one line); `Assets/Game/Tests/EditMode/Input/PlayerInputSampleSystemTests.cs`
 - **Acceptance criteria:**
   - [ ] With `InputTestFixture`: W → `Thrust.y == 1`; Q → `Thrust.x == −1`; D → `Turn == 1`.
   - [ ] Pressing F once over 3 frames increments `Edges.Interact` by exactly 1.
   - [ ] Aim with a known `MainCameraState` (top-down orthographic-equivalent matrices) maps the screen centre to the camera's ground point within 1e-3 m.
   - [ ] The pointer over a blocking UI rectangle (fake gate) suppresses bits 0 and 1 but not bit 2.
+  - [ ] Pick: a static box collider (filter of a grid) 100 m in front of the camera under the cursor → `AimWorld` on its near face within 1e-3 m; the same box carrying `PlayerShip` is ignored and the plane point is used; no collider → plane point.
+  - [ ] Pressing J once increments `Edges.Cruise` by exactly 1.
   - [ ] 0 B allocated per update.
-- **Tests:** `PlayerInputSampleSystemTests.Analog_Mapping`, `.Edge_CountsOnce`, `.Aim_ScreenCenter`, `.PointerBlocked_SuppressesMouseFire`, `.Unbound_Neutral`, `.NoAlloc`.
+- **Tests:** `PlayerInputSampleSystemTests.Aim_PicksCollider`, `.Aim_IgnoresPlayer`, `.Aim_PlaneFallback`, `.Cruise_Counts`, `PlayerInputSampleSystemTests.Analog_Mapping`, `.Edge_CountsOnce`, `.Aim_ScreenCenter`, `.PointerBlocked_SuppressesMouseFire`, `.Unbound_Neutral`, `.NoAlloc`.
 
 ### INP-006 — Camera and editor samplers
 - **Milestone:** M1

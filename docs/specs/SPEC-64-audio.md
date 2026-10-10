@@ -138,6 +138,7 @@ public enum AudioBus : byte { Sfx = 0, Ui = 1, Music = 2, Ambience = 3 }
 public enum CoalesceMode : byte { None = 0, PerCue = 1, PerCell = 2 }
 
 /// Implements SPEC-64 §4.3. Content id prefix "cue_" (e.g. cue_weapon_laser_fire).
+[ContentIdPrefix("cue_")]
 public sealed class AudioCueDefinition : ContentDefinition
 {
     [SerializeField] AudioClip[] clips = new AudioClip[0];        // >= 1; never the same clip twice in a row when >= 2
@@ -168,7 +169,8 @@ public sealed class AudioCueDefinition : ContentDefinition
 [System.Serializable] public struct SceneMusicEntry { public string sceneName; public MusicContext context; }
 public enum MusicContext : byte { Silent = 0, Menu = 1, World = 2, Editor = 3 }
 
-/// Implements SPEC-64 §4.3. Exactly one instance: Assets/Game/Content/Audio/audio_config.asset (id "audio_config").
+/// Implements SPEC-64 §4.3. Exactly one instance: Assets/Game/Content/Audio/config_audio.asset (id "config_audio").
+[ContentIdPrefix("config_")]
 public sealed class AudioConfigDefinition : ContentDefinition
 {
     [SerializeField] AudioMixer mixer;                              // Assets/Game/Audio/Mixer/GameMixer.mixer
@@ -385,7 +387,7 @@ Clips come from `Assets/Game/Audio/Sfx/` or `Assets/Game/Audio/Music/` with the 
 | MainMenu (music) | `cue_music_menu` | Music | 02 The Restricted Hangar.wav | 0.1 | 0 | 1 | 0 | 0 | None | no (loop) |
 | SpaceStation (music) | `cue_music_station` | Music | 03 Promising Development.wav | 0.1 | 0 | 1 | 0 | 0 | None | no (loop) |
 
-New cues with no legacy entry (placeholder clips; spatial 1, max 6, prio 120, cooldown 0.05, PerCell, combat yes unless stated): `cue_impact_energy` (explosion_hull_impact.wav, 0.25, pitch 1.3), `cue_impact_explosive` (EXPLOSION-Cruncher_HY_PC-005.wav, 0.4), `cue_impact_ram` (EXPLOSION-Cruncher_HY_PC-005.wav, 0.6, pitch 0.8), `cue_shield_hit` (PROJECTILE-Laser Bursts_HY_PC-005.wav, 0.2, pitch 1.5), `cue_cell_break` (Rooted_Dirt_break3_placeholder.ogg, 0.4, pitch 0.7, combat no), `cue_break_off` (EXPLOSION-Cruncher_HY_PC-005.wav, 0.5, pitch 0.8), `cue_ship_death` (EXPLOSION-Cruncher_HY_PC-005.wav, 0.8, max 2, prio 40), `cue_warp` (DSGNMisc_MOVEMENT-Mecha Large Takeoff_HY_PC-004.wav, 0.6, spatial 0, combat no), `cue_ui_trade` (DSGNTonl_USABLE-Coin Toss_HY_PC-002.wav, Ui, 0.5), `cue_stinger_discovery` (Fantasy_Stinger_1.mp3, Music, 0.5). `audio_config` maps `musicEditor` → `cue_music_station`, `ambienceWorld` → null (no ambience clip exists yet), `engineLoop` → null, `beamLoop` → null, `uiSounds`: Hover → `cue_ui_hover`, Click → `cue_ui_click`, Open → `cue_ui_view_open`, Close → `cue_ui_view_close`, Back → `cue_ui_view_close`, Error → `cue_ui_fail`, Success → `cue_ui_success`, SlotHover → `cue_ui_slot_hover`, SlotClick → `cue_ui_slot_click`, Notify → `cue_ui_success`, Tab → `cue_ui_click`.
+New cues with no legacy entry (placeholder clips; spatial 1, max 6, prio 120, cooldown 0.05, PerCell, combat yes unless stated): `cue_impact_energy` (explosion_hull_impact.wav, 0.25, pitch 1.3), `cue_impact_explosive` (EXPLOSION-Cruncher_HY_PC-005.wav, 0.4), `cue_impact_ram` (EXPLOSION-Cruncher_HY_PC-005.wav, 0.6, pitch 0.8), `cue_shield_hit` (PROJECTILE-Laser Bursts_HY_PC-005.wav, 0.2, pitch 1.5), `cue_cell_break` (Rooted_Dirt_break3_placeholder.ogg, 0.4, pitch 0.7, combat no), `cue_break_off` (EXPLOSION-Cruncher_HY_PC-005.wav, 0.5, pitch 0.8), `cue_ship_death` (EXPLOSION-Cruncher_HY_PC-005.wav, 0.8, max 2, prio 40), `cue_warp` (DSGNMisc_MOVEMENT-Mecha Large Takeoff_HY_PC-004.wav, 0.6, spatial 0, combat no), `cue_ui_trade` (DSGNTonl_USABLE-Coin Toss_HY_PC-002.wav, Ui, 0.5), `cue_stinger_discovery` (Fantasy_Stinger_1.mp3, Music, 0.5). `config_audio` maps `musicEditor` → `cue_music_station`, `ambienceWorld` → null (no ambience clip exists yet), `engineLoop` → null, `beamLoop` → null, `uiSounds`: Hover → `cue_ui_hover`, Click → `cue_ui_click`, Open → `cue_ui_view_open`, Close → `cue_ui_view_close`, Back → `cue_ui_view_close`, Error → `cue_ui_fail`, Success → `cue_ui_success`, SlotHover → `cue_ui_slot_hover`, SlotClick → `cue_ui_slot_click`, Notify → `cue_ui_success`, Tab → `cue_ui_click`.
 
 `ComfyUI_00018_.mp3` and `upbeat.mp3` are **not mapped** and stay `Blocked` until the owner rules (AUD-011).
 
@@ -521,7 +523,7 @@ Timing tests run with safety checks off (SPEC-71 perf fixture). Functional tests
 - **Milestone:** M2
 - **Tier:** standard — converter with the explicit field map of §6.4
 - **Depends on:** `AUD-006`
-- **Do:** Write `LegacyAudioCueImporter` (Editor menu `Game/Audio/Import Legacy Audio Library`): reads `Import/Legacy/content/Audio/AudioLibrary.json` with Newtonsoft (`MissingMemberHandling.Error`), creates or updates one `AudioCueDefinition` per row of the §6.4 table in `Assets/Game/Content/Audio/`, finds clips by file name under `Assets/Game/Audio/`, fails with a listed error for any row whose clip is missing. Create the new cues listed under the table and `audio_config.asset` with the mapping given there. `AudioService.BindTo` creates (or sets) `CombatAudioCues` from the config's combat cues. Register all assets in the `ContentDatabase`.
+- **Do:** Write `LegacyAudioCueImporter` (Editor menu `Game/Audio/Import Legacy Audio Library`): reads `Import/Legacy/content/Audio/AudioLibrary.json` with Newtonsoft (`MissingMemberHandling.Error`), creates or updates one `AudioCueDefinition` per row of the §6.4 table in `Assets/Game/Content/Audio/`, finds clips by file name under `Assets/Game/Audio/`, fails with a listed error for any row whose clip is missing. Create the new cues listed under the table and `config_audio.asset` with the mapping given there. `AudioService.BindTo` creates (or sets) `CombatAudioCues` from the config's combat cues. Register all assets in the `ContentDatabase`.
 - **Files:** `Assets/Game/Editor/Audio/LegacyAudioCueImporter.cs`, `Assets/Game/Content/Audio/*.asset`, `Assets/Game/Presentation/Audio/AudioService.cs`
 - **Acceptance criteria:**
   - [ ] Running the importer twice creates exactly the 20 legacy cues once, with the table's volumes and clips; the second run changes nothing (asset hashes equal).
