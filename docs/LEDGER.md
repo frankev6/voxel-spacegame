@@ -488,7 +488,7 @@
 | ART-004 | Block-kit style test: five blocks per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002 | yes | todo |  |  |  |  |
 | ART-005 | Interactive HTML design board | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002, ART-003, ART-004 | no | todo |  |  |  |  |
 | ART-006 | Owner shortlist of finalist directions | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-005 | no | todo |  |  |  |  |
-| ART-007 | Brick material baker, preview mesher, reference shader and art validator | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-10 |  |  |
+| ART-007 | Brick material baker, preview mesher, reference shader and art validator | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-10 |  | Baker, preview mesher and SH_BrickReference done on branch task/ART-007-brick-tools (083c482); ArtDatabaseValidator waits for CORE-002, DATA-004, DATA-005 (owner chose ART-004 first) |
 | ART-008 | Look-test content for each finalist | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-004, ART-006, ART-007 | no | todo |  |  |  |  |
 | ART-009 | Look-test scenes with HUD mock | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002, ART-008 | no | todo |  |  |  |  |
 | ART-010 | Look-test capture pack and metrics | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-009 | no | todo |  |  |  |  |
@@ -555,6 +555,24 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-10 — ART-007 progress; owner picks ART-004 next (claude, claude-opus-5-5)
+- **ART-007 progress (branch `task/ART-007-brick-tools`, 083c482).**
+  - `BrickMaterialBaker`: bakes 61 distinct layers in 1.9 s (budget 60 s). Arrays are BC7/BC7/BC5 at 256 × 256 × 64 with 9 mips, plus layer params and palette textures, and an input hash for ART-W001.
+  - `BrickPreviewMeshBuilder`: a 16³ cube gives 3,072 triangles.
+  - `SH_BrickReference`: hand-written URP HLSL, which SPEC-80 §5.3 allows, so the file is `.shader` rather than `.shadergraph`.
+- **Shader checks** (batch mode with a Metal device):
+  - `ShaderHasError` false.
+  - SRP Batcher compatibility code 0 (compatible). The Material-inspector screenshot the acceptance criteria ask for still needs the GUI Editor.
+  - Test-hull renders in all three directions' §10.14.3 parameters show paint, team colours, emissive, scorch, cracks with embers, exposed internals, halftone and the toon ramp.
+- **Tests:** 9 tests (baker 7, mesher 4, shader 2 — the counts include extras beyond the spec list). EditMode 34/34.
+- **Extensions and interpretations:**
+  - `PreviewCell.FlagSolid` (bit 1) marks solid cells; the spec defines only bit 0.
+  - `uv1` is the face UV in cells, so the shader can tile macro-panels.
+  - Paint keeps the texture's luminance relative to the layer mean (its last mip).
+  - An empty slot (`copyOf` −1, no textures) copies layer 63.
+- **Pending:** `ArtDatabaseValidator`, which needs `ContentCatalog`, so the chain is CORE-002 → DATA-004 → DATA-005.
+- **Owner answer (sequencing):** "ART-004 block kit (Recommended)". The ART-007 validator is parked until after ART-004.
 
 ### 2026-10-10 — DATA-002 ValidationReport, done (claude, claude-opus-5-5)
 - Implemented `ValidationReport`, `ValidationScope`, `ValidationEntry` and `ContentValidationException` per SPEC-04 §4.8.
