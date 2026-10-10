@@ -1,6 +1,6 @@
 # Extensibility review before buildout
 
-**Status (2026-10-10): PROPOSED, waiting for the owner.** Nothing here is applied yet. Items marked **ADR** change `01-architecture.md` and need owner approval (architecture header). Items marked **errata** are fixes inside the current architecture. Once a decision is made, each accepted item becomes an ADR (where marked) plus spec edits in one commit per item, and this file records the outcome per item.
+**Status (2026-10-10): APPLIED.** The owner approved every item as recommended, with voxel small craft for X7. The outcomes, commits and deviations from the text below are in §5; the proposal text is kept as written.
 
 ## 1. Question and method
 
@@ -368,3 +368,21 @@ A new spec (for example SPEC-25 "Carriers and small craft", area `CRF`, M3 or M4
 - **Registration rows elsewhere.** `BlockModuleId.Hangar`, `AbilityKind` values, `ShipProfile.SmallCraft` (if not already present), one SPEC-01 boot-singleton row, and a §5 placement row.
 
 No existing system's code path changes. The same holds for P2 (a new handler plus data), P3 (`InhibitRequest`/`CellRestoreRequest` producers plus a `DamageTypeDefinition`) and P4 (an `ImpulseRequest` producer, `StatModifierSource`, or `InhibitRequest`).
+
+## 5. Outcome (2026-10-10)
+
+| Item | Commit | ADR | Applied as proposed? |
+|---|---|---|---|
+| X9 Mirror enums | `e3e6c86` | — | Yes. `DamageType` and `StatId` are in `Game.Data.Combat` |
+| X8 Channel + guarded access | `05b264e` | — | Yes. `SimEventChannel<T>` and `GuardedHandles` live in `Game.Data.Streams` (SPEC-02 §4.12, new task CORE-012), because Core may not declare `SystemState` users. The singletons keep their `Acquire`/`Release`/`CompleteAccess` names |
+| X1 + X11 Block modules, dead utility kinds | `c14cc48` | 0013 | Yes, with two staging choices: `WeaponMountModule` exists from M0 with the muzzle, and DATA-010 adds the `weapon` link at M2 (weapon blocks stay functional before M2); ability grants stay a block list. Portal and mirrors migrate as props |
+| X2 Power and stats contributions | `6cbe31a` | 0014 | Yes. Demand is a `PowerRequest` buffer element per consuming module (a block may hold several), with `ConsumerIndex` bound by `PowerInitSystem`. New task WPN-018 |
+| X3 Profiles, stowed and transient grids | `a7806e9` | 0015 | Yes. `Allegiance` is deliberately in no profile (its zero value is the player faction). **Correction:** SPEC-31 already gave armed stations combat and turret AI by calling the helpers; the issue was a second copy of the sequence, not missing components |
+| X4 Request channels | `f57d425` | 0016 | Yes. Restores have two modes, `Heal` and `Place` (one palette cell); recreating destroyed functional blocks stays the editor's job. `StatusSystem` (SPEC-22) owns inhibits and stat modifiers. `PostFromMainThread` added for narrative/dev producers. New tasks DMG-019, PHY-022, PWR-010 |
+| X6 Instigator | `e0d0c8e` | — | Yes. `OwnedBy` lives in `Game.Data.Components`, so SPEC-13 rams can read it. `ShipDestroyed` gained killer fields |
+| X5 AI abilities and lifecycles | `881f68a` | — | Yes, with one correction and one reduction. **Correction:** AI not using abilities was SPEC-23's open question 1 with the default "no", not an oversight; it is now answered "yes" through per-profile `AiAbilityRule`s. **Reduction:** the v1 deliveries keep their flat `WeaponDefinition` fields, and only new deliveries use the optional `[SerializeReference] WeaponDeliveryData`. This avoids reshuffling SPEC-72's weapon migration |
+| X10 Damage tables | `36177a0` | — | Yes. `dmg_*` and `armor_*` content and `DamageTableBlob`; `PowerTuning.ShieldTypeMultiplier` moved into the table |
+| X7 Small craft | `a2840ef` | 0017 | Yes, with one simplification: launch overlap uses SPEC-13's existing `SplitGrace` contact suppression (set by `Unstow`) instead of a collision-filter group index. Grid colliders are cached per brick and have a single writer, so changing filters would have added a writer. `FleetMember` keeps its name and now covers wings |
+| X12 Notes | `6b3ee37` | — | SPEC-21 Q10 (point defence; `ProjectileFlags.Targetable` reserved) and SPEC-61 Q19 (ship-system HUD panels) |
+
+`check-docs` after every commit: 33 specs, 0 errors (496 tasks at the end).

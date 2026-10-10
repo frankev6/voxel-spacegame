@@ -541,7 +541,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 |---|---|---|---|---|---|---|
 | 1 | 2026-10-09 | architecture §3, §5, §7.4, §8 | The integration pass applied architecture errata without an ADR (as the earlier errata commit `c4f09f6` did): `Game.Tests.Common`; galaxy services realised inside `GalaxyServicesBridgeSystem`; `BodyOnRailsSystem` and `FactionStandingSystem` in the fixed step; `SalvageMarkSystem`; jump flow; new single writers (`PlayerControlLock`, `FactionRelations`, `PlayerCombatStatus`, travel state, encounter instances, `VoxelGrid.Kind`); `PhysicsVelocity` exceptions (planar, mass re-expression, placement) | Errata stand as written | Owner | |
 | 2 | 2026-10-09 | DESIGN-SYSTEM §11, SPEC-80 §4.4 | Faction and travel-cover tokens are *functional* (read by code before the design approval): their names are binding now, their values wait for §12 | Names binding, placeholder values | Owner (at ART-013) | |
-| 3 | 2026-10-10 | architecture §5, §6, §7.1, §8; SPEC-01, 04, 10, 12, 13, 20–24, 33, 51, 72, 80; 06 | Extensibility review `docs/specs/_EXTENSIBILITY-REVIEW.md`: approve ADR items X1 (block function modules), X2 (power/stats contributions), X3 (ship profiles + stowed grids, tick-exact launch), X4 (request channels: impulse, cell restore, inhibit, stat-modifier sources); choose the small-craft representation X7; apply errata X5, X6, X8–X11 | Nothing applied; specs as written | Owner | |
+| 3 | 2026-10-10 | architecture §5, §6, §7.1, §8; SPEC-01, 04, 10, 12, 13, 20–24, 33, 51, 72, 80; 06 | Extensibility review `docs/specs/_EXTENSIBILITY-REVIEW.md`: approve ADR items X1 (block function modules), X2 (power/stats contributions), X3 (ship profiles + stowed grids, tick-exact launch), X4 (request channels: impulse, cell restore, inhibit, stat-modifier sources); choose the small-craft representation X7; apply errata X5, X6, X8–X11 | Nothing applied; specs as written | Owner | **Answered 2026-10-10: apply all as recommended; X7 = voxel small craft.** Applied in `e3e6c86`…`6b3ee37` (ADR-0013…0017); outcomes in the review §5 |
 
 ## Measurements
 
@@ -553,6 +553,26 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-10 — Extensibility review applied (lead, claude-opus-5-5)
+- **Owner decision.** Apply all items as recommended; voxel small craft for X7.
+- **Commits.** Ten commits, `e3e6c86` through `6b3ee37`:
+  - X9: shared combat enums.
+  - X8: `SimEventChannel<T>` + `GuardedHandles`, new task CORE-012.
+  - X1/X11: block modules, ADR-0013.
+  - X2: feature-owned power demand and stats, ADR-0014.
+  - X3: grid profiles, stowed and transient grids, ADR-0015.
+  - X4: request channels for impulses, restores, inhibits and stat modifiers, ADR-0016.
+  - X6: instigator.
+  - X5: AI ability rules and kind-agnostic ability and weapon lifecycles.
+  - X10: damage tables.
+  - X7: voxel small craft, fleets and wings at M3, swarm and launch gates, ADR-0017.
+  - X12: open questions.
+- **New tasks:** CORE-012, WPN-018, DMG-019, PHY-022, PWR-010. AI-013…015 moved to M3. `check-docs`: 33 specs, 496 tasks, 0 errors.
+- **Corrections to the review.**
+  - AI ability use was SPEC-23 Q1's documented default (now answered).
+  - SPEC-31 already armed stations; the issue was a duplicated helper list.
+  - Details are in `docs/specs/_EXTENSIBILITY-REVIEW.md` §5.
 
 ### 2026-10-10 — Extensibility review before buildout (lead, claude-opus-5-5)
 - Walked four probe features (fighter bay, new weapon delivery, ion/repair destruction, tractor/cloak/nebula) through every spec. Today a fighter bay must edit existing code paths in 9 specs; the proposals reduce that to registrations plus one new spec.
