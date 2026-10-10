@@ -1,0 +1,557 @@
+{
+  "direction": "drydock",
+  "generator": "ArtSource/StyleTest/build_style_test.py",
+  "blender": "5.2.2 LTS",
+  "view_transform": "Khronos PBR Neutral",
+  "compositor": "bloom + saturation + contrast",
+  "cell_metres": 0.5,
+  "camera": {
+    "type": "orthographic",
+    "pitch_deg": 55,
+    "yaw_deg": 30.0
+  },
+  "meshes": [
+    {
+      "block": "block_hull",
+      "triangles": 96,
+      "parts": {
+        "block_hull": 96
+      },
+      "footprint_cells": 16,
+      "budget": 192,
+      "budget_rule": "bricks: \u2264 2 triangles per exposed face"
+    },
+    {
+      "block": "block_hull_angled",
+      "triangles": 104,
+      "parts": {
+        "block_hull_angled": 104
+      },
+      "footprint_cells": 16,
+      "budget": 192,
+      "budget_rule": "bricks: \u2264 2 triangles per exposed face"
+    },
+    {
+      "block": "block_thruster_small",
+      "triangles": 188,
+      "parts": {
+        "block_thruster_small": 188
+      },
+      "footprint_cells": 2,
+      "budget": 600,
+      "budget_rule": "DESIGN-SYSTEM \u00a710.11 LOD0"
+    },
+    {
+      "block": "weapon_plasma_turret_small",
+      "triangles": 324,
+      "parts": {
+        "weapon_plasma_turret_small": 192,
+        "weapon_plasma_turret_small_Yaw": 132
+      },
+      "footprint_cells": 2,
+      "budget": 600,
+      "budget_rule": "DESIGN-SYSTEM \u00a710.11 LOD0"
+    },
+    {
+      "block": "block_core_small",
+      "triangles": 88,
+      "parts": {
+        "block_core_small": 88
+      },
+      "footprint_cells": 1,
+      "budget": 150,
+      "budget_rule": "DESIGN-SYSTEM \u00a710.11 LOD0"
+    }
+  ],
+  "textures": [
+    {
+      "name": "hull_plain_s0_albedo.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s0_mask.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s0_normal.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s0_emission.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s1_albedo.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s1_mask.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s1_normal.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s1_emission.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s2_albedo.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s2_mask.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s2_normal.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s2_emission.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s3_albedo.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s3_mask.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s3_normal.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_plain_s3_emission.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s0_albedo.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s0_mask.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s0_normal.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s0_emission.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s1_albedo.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s1_mask.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s1_normal.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s1_emission.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s2_albedo.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s2_mask.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s2_normal.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s2_emission.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s3_albedo.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s3_mask.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s3_normal.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "hull_heavy_s3_emission.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "stencil_block_thruster_small.png",
+      "size": [
+        256,
+        64
+      ]
+    },
+    {
+      "name": "stencil_weapon_plasma_turret_small.png",
+      "size": [
+        256,
+        64
+      ]
+    },
+    {
+      "name": "stencil_block_core_small.png",
+      "size": [
+        256,
+        64
+      ]
+    }
+  ],
+  "renders": [
+    {
+      "file": "block_hull_005.png",
+      "size": [
+        986,
+        925
+      ],
+      "ortho_scale_m": 3.331081,
+      "ppc_target": 148.0,
+      "ppc": 148.0,
+      "view": "005"
+    },
+    {
+      "file": "block_hull_050.png",
+      "size": [
+        99,
+        92
+      ],
+      "ortho_scale_m": 3.344594,
+      "ppc_target": 14.8,
+      "ppc": 14.8,
+      "view": "050"
+    },
+    {
+      "file": "block_hull_150.png",
+      "size": [
+        33,
+        31
+      ],
+      "ortho_scale_m": 3.367347,
+      "ppc_target": 4.9,
+      "ppc": 4.9,
+      "view": "150"
+    },
+    {
+      "file": "block_hull_300.png",
+      "size": [
+        17,
+        16
+      ],
+      "ortho_scale_m": 3.4,
+      "ppc_target": 2.5,
+      "ppc": 2.5,
+      "view": "300"
+    },
+    {
+      "file": "block_hull_angled_005.png",
+      "size": [
+        986,
+        925
+      ],
+      "ortho_scale_m": 3.331081,
+      "ppc_target": 148.0,
+      "ppc": 148.0,
+      "view": "005"
+    },
+    {
+      "file": "block_hull_angled_050.png",
+      "size": [
+        99,
+        92
+      ],
+      "ortho_scale_m": 3.344594,
+      "ppc_target": 14.8,
+      "ppc": 14.8,
+      "view": "050"
+    },
+    {
+      "file": "block_hull_angled_150.png",
+      "size": [
+        33,
+        31
+      ],
+      "ortho_scale_m": 3.367347,
+      "ppc_target": 4.9,
+      "ppc": 4.9,
+      "view": "150"
+    },
+    {
+      "file": "block_hull_angled_300.png",
+      "size": [
+        17,
+        16
+      ],
+      "ortho_scale_m": 3.4,
+      "ppc_target": 2.5,
+      "ppc": 2.5,
+      "view": "300"
+    },
+    {
+      "file": "block_thruster_small_005.png",
+      "size": [
+        461,
+        540
+      ],
+      "ortho_scale_m": 1.824324,
+      "ppc_target": 148.0,
+      "ppc": 148.0,
+      "view": "005"
+    },
+    {
+      "file": "block_thruster_small_050.png",
+      "size": [
+        46,
+        54
+      ],
+      "ortho_scale_m": 1.824324,
+      "ppc_target": 14.8,
+      "ppc": 14.8,
+      "view": "050"
+    },
+    {
+      "file": "block_thruster_small_150.png",
+      "size": [
+        15,
+        18
+      ],
+      "ortho_scale_m": 1.836735,
+      "ppc_target": 4.9,
+      "ppc": 4.9,
+      "view": "150"
+    },
+    {
+      "file": "block_thruster_small_300.png",
+      "size": [
+        8,
+        9
+      ],
+      "ortho_scale_m": 1.8,
+      "ppc_target": 2.5,
+      "ppc": 2.5,
+      "view": "300"
+    },
+    {
+      "file": "weapon_plasma_turret_small_005.png",
+      "size": [
+        448,
+        522
+      ],
+      "ortho_scale_m": 1.763514,
+      "ppc_target": 148.0,
+      "ppc": 148.0,
+      "view": "005"
+    },
+    {
+      "file": "weapon_plasma_turret_small_050.png",
+      "size": [
+        45,
+        52
+      ],
+      "ortho_scale_m": 1.756757,
+      "ppc_target": 14.8,
+      "ppc": 14.8,
+      "view": "050"
+    },
+    {
+      "file": "weapon_plasma_turret_small_150.png",
+      "size": [
+        15,
+        17
+      ],
+      "ortho_scale_m": 1.734694,
+      "ppc_target": 4.9,
+      "ppc": 4.9,
+      "view": "150"
+    },
+    {
+      "file": "weapon_plasma_turret_small_300.png",
+      "size": [
+        8,
+        9
+      ],
+      "ortho_scale_m": 1.8,
+      "ppc_target": 2.5,
+      "ppc": 2.5,
+      "view": "300"
+    },
+    {
+      "file": "block_core_small_005.png",
+      "size": [
+        373,
+        431
+      ],
+      "ortho_scale_m": 1.456081,
+      "ppc_target": 148.0,
+      "ppc": 148.0,
+      "view": "005"
+    },
+    {
+      "file": "block_core_small_050.png",
+      "size": [
+        37,
+        43
+      ],
+      "ortho_scale_m": 1.452703,
+      "ppc_target": 14.8,
+      "ppc": 14.8,
+      "view": "050"
+    },
+    {
+      "file": "block_core_small_150.png",
+      "size": [
+        12,
+        14
+      ],
+      "ortho_scale_m": 1.428571,
+      "ppc_target": 4.9,
+      "ppc": 4.9,
+      "view": "150"
+    },
+    {
+      "file": "block_core_small_300.png",
+      "size": [
+        8,
+        8
+      ],
+      "ortho_scale_m": 1.6,
+      "ppc_target": 2.5,
+      "ppc": 2.5,
+      "view": "300"
+    },
+    {
+      "file": "damage_strip.png",
+      "size": [
+        291,
+        183
+      ],
+      "ortho_scale_m": 9.831081,
+      "ppc_target": 14.8,
+      "ppc": 14.8,
+      "view": "050"
+    },
+    {
+      "file": "damage_strip_005.png",
+      "size": [
+        1179,
+        744
+      ],
+      "ortho_scale_m": 9.825,
+      "ppc_target": 60.0,
+      "ppc": 60.0,
+      "view": "close"
+    }
+  ]
+}

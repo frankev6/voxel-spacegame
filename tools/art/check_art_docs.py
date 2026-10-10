@@ -12,6 +12,13 @@ Python 3 standard library only (SPEC-80 §4.6). Subcommands are added by the tas
                  detectable, at most 12 per direction, with a "Source: <url> · Licence: <Public domain|CC0|Own work>"
                  line directly under it; no unreferenced files in img/<direction>/.
                The board format is described in docs/design/moodboards/README.md.
+
+  blocks       ART-004: docs/design/board/img/blocks/<direction>/ (written by ArtSource/StyleTest/build_style_test.py)
+               - stats.json, composite.png (1920 × 1080), damage_strip.png and <block>_{050,150,300}.png for the five blocks;
+               - every render listed in stats.json exists with the recorded size, and its pixels per cell
+                 (long side ÷ (orthographic scale ÷ 0.5 m)) is within ±10 % of DESIGN-SYSTEM §4 (14.8 / 4.9 / 2.5);
+               - every mesh is within its triangle budget (DESIGN-SYSTEM §10.11; hull patches ≤ 2 per exposed face);
+               - ArtSource/StyleTest/<direction>/style_test.blend exists.
 """
 import argparse
 import os
@@ -224,13 +231,77 @@ def check_image(errors, rel, n, board_dir, direction, src, licence_line):
         errors.append(f"{where}: JPEG quality {q}, must be {JPEG_QUALITY}")
 
 
+BLOCKS = ["block_hull", "block_hull_angled", "block_thruster_small", "weapon_plasma_turret_small", "block_core_small"]
+REFERENCE_PPC = {"050": 14.8, "150": 4.9, "300": 2.5}       # DESIGN-SYSTEM §4
+CELL_METRES = 0.5
+
+
+def png_size(path):
+    """(width, height) from the IHDR chunk; ValueError if the file is not a PNG."""
+    with open(path, "rb") as f:
+        head = f.read(24)
+    if head[:8] != b"\x89PNG\r\n\x1a\n" or head[12:16] != b"IHDR":
+        raise ValueError("not a PNG")
+    return int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big")
+
+
+def check_blocks(errors):
+    import json
+    for direction in DIRECTIONS:
+        out = os.path.join(DESIGN, "board", "img", "blocks", direction)
+        rel = os.path.relpath(out, ROOT)
+        blend = os.path.join(ROOT, "ArtSource", "StyleTest", direction, "style_test.blend")
+        if not os.path.exists(blend):
+            errors.append(f"{os.path.relpath(blend, ROOT)}: missing")
+        stats_path = os.path.join(out, "stats.json")
+        if not os.path.exists(stats_path):
+            errors.append(f"{rel}/stats.json: missing")
+            continue
+        stats = json.load(open(stats_path, encoding="utf-8"))
+        required = ["composite.png", "damage_strip.png"] + [f"{b}_{d}.png" for b in BLOCKS for d in REFERENCE_PPC]
+        for name in required:
+            if not os.path.exists(os.path.join(out, name)):
+                errors.append(f"{rel}/{name}: missing")
+        composite = os.path.join(out, "composite.png")
+        if os.path.exists(composite) and png_size(composite) != (1920, 1080):
+            errors.append(f"{rel}/composite.png: {png_size(composite)}, must be 1920 × 1080")
+        listed = set()
+        for r in stats.get("renders", []):
+            path = os.path.join(out, r["file"])
+            listed.add(r["file"])
+            if not os.path.exists(path):
+                errors.append(f"{rel}/{r['file']}: listed in stats.json but missing")
+                continue
+            size = png_size(path)
+            if list(size) != list(r["size"]):
+                errors.append(f"{rel}/{r['file']}: {size} but stats.json says {tuple(r['size'])}")
+            ppc = max(size) / (r["ortho_scale_m"] / CELL_METRES)
+            target = REFERENCE_PPC.get(r["view"])
+            if target and abs(ppc - target) > 0.10 * target:
+                errors.append(f"{rel}/{r['file']}: {ppc:.2f} px per cell, §4 wants {target} ± 10 %")
+        for name in required[2:]:
+            if name not in listed:
+                errors.append(f"{rel}/{name}: not listed in stats.json renders")
+        meshes = {m["block"]: m for m in stats.get("meshes", [])}
+        for block in BLOCKS:
+            m = meshes.get(block)
+            if m is None:
+                errors.append(f"{rel}/stats.json: no mesh entry for {block}")
+            elif m["triangles"] > m["budget"]:
+                errors.append(f"{rel}/stats.json: {block} has {m['triangles']} triangles, budget {m['budget']} ({m['budget_rule']})")
+        print(f"blocks: {direction}: {len(stats.get('renders', []))} renders, "
+              + ", ".join(f"{b.replace('block_', '').replace('weapon_', '')} {meshes[b]['triangles']}/{meshes[b]['budget']}" for b in BLOCKS if b in meshes))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("deliverable", choices=["moodboards"])
+    ap.add_argument("deliverable", choices=["moodboards", "blocks"])
     args = ap.parse_args()
     errors = []
     if args.deliverable == "moodboards":
         check_moodboards(errors)
+    elif args.deliverable == "blocks":
+        check_blocks(errors)
     for e in errors:
         print("ERROR", e)
     print(f"check_art_docs {args.deliverable}: {len(errors)} errors")
