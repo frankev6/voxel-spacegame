@@ -19,6 +19,15 @@ Python 3 standard library only (SPEC-80 §4.6). Subcommands are added by the tas
                  (long side ÷ (orthographic scale ÷ 0.5 m)) is within ±10 % of DESIGN-SYSTEM §4 (14.8 / 4.9 / 2.5);
                - every mesh is within its triangle budget (DESIGN-SYSTEM §10.11; hull patches ≤ 2 per exposed face);
                - ArtSource/StyleTest/<direction>/style_test.blend exists.
+
+  board        ART-005: docs/design/board/ (index.html, board.css, board.js, tokens/*.css)
+               - tokens/*.css equal what tools/art/export_board_tokens.py generates from the .uss sheets (so every token
+                 value the board reads with getComputedStyle equals its sheet);
+               - the only external URLs are on fonts.googleapis.com and fonts.gstatic.com;
+               - every local file the page references exists (src/href, CSS url(), block renders and mood images in board.js);
+               - the HUD zone table in board.js equals DESIGN-SYSTEM §10.4.2, and the colour-vision matrices in index.html
+                 equal tools/art/check_tokens.py MACHADO;
+               - page weight (page files plus every referenced image) is at most 25 MB.
 """
 import argparse
 import os
@@ -293,15 +302,98 @@ def check_blocks(errors):
               + ", ".join(f"{b.replace('block_', '').replace('weapon_', '')} {meshes[b]['triangles']}/{meshes[b]['budget']}" for b in BLOCKS if b in meshes))
 
 
+ALLOWED_HOSTS = {"fonts.googleapis.com", "fonts.gstatic.com"}
+MAX_PAGE_BYTES = 25 * 1024 * 1024
+
+
+def check_board(errors):
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import export_board_tokens
+    from check_tokens import MACHADO
+    board = os.path.join(DESIGN, "board")
+    rel = os.path.relpath(board, ROOT)
+    files = ["index.html", "board.css", "board.js"]
+    for f in files:
+        if not os.path.exists(os.path.join(board, f)):
+            errors.append(f"{rel}/{f}: missing")
+    if errors:
+        return
+    if export_board_tokens.main(["--check"]) != 0:
+        errors.append(f"{rel}/tokens: out of date with the .uss sheets (run tools/art/export_board_tokens.py)")
+    token_files = sorted(f"tokens/{n}" for n in os.listdir(os.path.join(board, "tokens")) if n.endswith(".css"))
+    texts = {f: open(os.path.join(board, f), encoding="utf-8").read() for f in files + token_files}
+
+    for f, text in texts.items():
+        for m in re.finditer(r"https?://([^/\s\"')]+)", text):
+            if m.group(1) not in ALLOWED_HOSTS:
+                errors.append(f"{rel}/{f}: external host '{m.group(1)}' (allowed: {', '.join(sorted(ALLOWED_HOSTS))})")
+
+    referenced = set()
+    html = texts["index.html"]
+    for m in re.finditer(r'(?:src|href)="([^"#:]+)"', html):
+        referenced.add(os.path.normpath(os.path.join(board, m.group(1))))
+    for f in ["board.css"] + token_files:
+        for m in re.finditer(r'url\(\s*["\']?([^"\')]+)["\']?\s*\)', texts[f]):
+            if not m.group(1).startswith(("http", "data:", "#")):
+                referenced.add(os.path.normpath(os.path.join(board, os.path.dirname(f), m.group(1))))
+    js = texts["board.js"]
+    directions = re.findall(r'^\s+"([a-z-]+)": \{\s*$', js[js.index("const DATA"):js.index("const MOOD")], re.M)
+    blocks = re.findall(r'\["(\w+)", "[^"]+"\]', js[js.index("const BLOCKS"):js.index("const COLOR_TOKENS")])
+    for d in directions:
+        for b in blocks:
+            for v in ("005", "050", "150", "300"):
+                referenced.add(os.path.join(board, "img", "blocks", d, f"{b}_{v}.png"))
+        for name in ("composite.png", "damage_strip.png", "damage_strip_005.png"):
+            referenced.add(os.path.join(board, "img", "blocks", d, name))
+    mood = js[js.index("const MOOD"):js.index("const BLOCKS")]
+    for d, body in re.findall(r'"([a-z-]+)": \[(.*?\])\],?\s*(?=\n\s*"[a-z-]+": \[|\n\s*\};)', mood, re.S):
+        for name in re.findall(r'\["([a-z0-9-]+)", "', body):
+            referenced.add(os.path.normpath(os.path.join(DESIGN, "moodboards", "img", d, name + ".jpg")))
+        on_disk = {n[:-4] for n in os.listdir(os.path.join(DESIGN, "moodboards", "img", d)) if n.endswith(".jpg")} \
+            if os.path.isdir(os.path.join(DESIGN, "moodboards", "img", d)) else set()
+        for missing in sorted(on_disk - set(re.findall(r'\["([a-z0-9-]+)", "', body))):
+            errors.append(f"{rel}/board.js: mood image {d}/{missing}.jpg is not shown on the board")
+    total = sum(os.path.getsize(os.path.join(board, f)) for f in texts)
+    for path in sorted(referenced):
+        if not os.path.exists(path):
+            errors.append(f"{rel}: referenced file {os.path.relpath(path, ROOT)} not found")
+        elif os.path.isfile(path):
+            total += os.path.getsize(path)
+    if total > MAX_PAGE_BYTES:
+        errors.append(f"{rel}: page weight {total / 1048576:.1f} MB, budget 25 MB")
+
+    zones_js = {m[0]: tuple(int(v) for v in m[1:]) for m in re.findall(r'\["(Z-[A-Z]+)", (\d+), (\d+), (\d+), (\d+)\]', js)}
+    doc = open(DESIGN_SYSTEM, encoding="utf-8").read()
+    zones_doc = {m[0]: tuple(int(v) for v in m[1:]) for m in re.findall(r"^\| (Z-[A-Z]+) \| (\d+), (\d+), (\d+), (\d+) \|", doc, re.M)}
+    if not zones_doc:
+        errors.append("DESIGN-SYSTEM.md: §10.4.2 zone table not found")
+    elif zones_js != zones_doc:
+        errors.append(f"{rel}/board.js: HUD zones {zones_js} differ from DESIGN-SYSTEM §10.4.2 {zones_doc}")
+
+    for kind, matrix in MACHADO.items():
+        m = re.search(rf'id="cvd-{kind}"[^>]*>\s*<feColorMatrix type="matrix" values="([^"]+)"', html)
+        if not m:
+            errors.append(f"{rel}/index.html: no feColorMatrix for {kind}")
+            continue
+        values = [float(v) for v in m.group(1).split()]
+        expected = [x for row in matrix for x in (*row, 0, 0)] + [0, 0, 0, 1, 0]
+        if len(values) != 20 or any(abs(a - b) > 1e-6 for a, b in zip(values, expected)):
+            errors.append(f"{rel}/index.html: {kind} matrix differs from tools/art/check_tokens.py MACHADO")
+    print(f"board: {len(directions)} directions, {len(referenced)} referenced files, page weight {total / 1048576:.1f} MB, "
+          f"{len(zones_js)} HUD zones")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("deliverable", choices=["moodboards", "blocks"])
+    ap.add_argument("deliverable", choices=["moodboards", "blocks", "board"])
     args = ap.parse_args()
     errors = []
     if args.deliverable == "moodboards":
         check_moodboards(errors)
     elif args.deliverable == "blocks":
         check_blocks(errors)
+    elif args.deliverable == "board":
+        check_board(errors)
     for e in errors:
         print("ERROR", e)
     print(f"check_art_docs {args.deliverable}: {len(errors)} errors")
