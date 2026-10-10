@@ -205,7 +205,7 @@ namespace Game.Simulation
     /// <summary>Spawn helper called by ShipSpawnService (SPEC-01) and SPEC-31/33 spawners on the request entity, main thread.</summary>
     public static class CombatGridSetup
     {
-        /// Adds Allegiance(value), WeaponControl, ShipTarget; then PowerGridSetup.AddComponents (SPEC-22) and AbilityGridSetup.Add (SPEC-24).
+        /// Adds Allegiance(value), WeaponControl, ShipTarget, WeaponStats; then PowerGridSetup.AddComponents (SPEC-22) and AbilityGridSetup.Add (SPEC-24).
         public static void AddAll(EntityManager em, Entity root, Allegiance allegiance);
     }
 }
@@ -290,6 +290,17 @@ namespace Game.Simulation.Weapons
         public Unity.Entities.Entity Value;
         public uint SinceTick;           // SimClock.Tick when Value last changed
     }
+
+    /// <summary>Feature stats of weapons (ADR-0014). Added by CombatGridSetup. Only writer: WeaponStatsSystem (§5.12).</summary>
+    public struct WeaponStats : Unity.Entities.IComponentData
+    {
+        public float SustainedDps;       // Σ WeaponDef.SustainedDps of alive mounts (before multipliers)
+        public float MaxWeaponRange;     // m, max WeaponDef.Range of alive mounts; 0 if none (SPEC-23 reads)
+        public float WeaponDraw;         // E/s at full demand
+        public int AliveWeaponCount;
+        public int InitialWeaponCount;   // AliveWeaponCount at the first recompute
+        public uint SourceRevision;      // ShipStats.FunctionalRevision these totals were built from (0 = never)
+    }
 }
 ```
 
@@ -314,7 +325,7 @@ namespace Game.Simulation.Weapons
         public ushort Weapon;            // WeaponDef index
         public DamageType Type;
         public ProjectileFlags Flags;
-        public float DamageMultiplier;   // shooter ShipStats.DamageMultiplier at fire time (1 without SPEC-22)
+        public float DamageMultiplier;   // shooter ShipStatMultipliers.Get(StatId.WeaponDamage) at fire time (1 without SPEC-22)
     }
 
     /// <summary>Singleton owned by ProjectileStepSystem (created in OnCreate). Access per SPEC-12 §5.1. Read by SPEC-63 tracers. Follows the
@@ -403,7 +414,9 @@ Common to all: `projectileRadius` 0.1 m (flak 0.2, missile 0.3); `fireConeDeg` 3
 
 | System | Group, order | Burst | Requires |
 |---|---|---|---|
-| `WeaponInitSystem` | `GameInitGroup`, `[UpdateAfter(typeof(GridSpawnSystem))]` | yes | `GameplayActive`, `BlockDefsRef`, `OrientationTablesRef` |
+| `WeaponInitSystem` | `GameInitGroup`, `[UpdateAfter(typeof(GridSpawnSystem))]`, `[UpdateBefore(typeof(PowerInitSystem))]` | yes | `GameplayActive`, `BlockDefsRef`, `BlockModulesRef`, `OrientationTablesRef` |
+| `WeaponPowerDemandSystem` | `PowerDemandGroup` (SPEC-22; runs after `ShipCommandGroup`, so after targeting and AI) | yes | `GameplayActive`, `WeaponDefsRef` |
+| `WeaponStatsSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(ShipStatsAggregateSystem))]` | yes | `GameplayActive`, `WeaponDefsRef`, `BlockModulesRef` |
 | `PlayerTargetingSystem` | `ShipCommandGroup`, `[UpdateAfter(typeof(PlayerCommandApplySystem))]` | yes | `GameplayActive`, `SpatialHash`, `FactionRelations`, `WeaponTuning`, `SimClock` |
 | `WeaponAimSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(PlanarConstraintSystem))]` | yes | `GameplayActive`, `WeaponDefsRef`, `WeaponTuning`, `SpatialHash` |
 | `WeaponFireSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(WeaponAimSystem))]`, `[UpdateBefore(typeof(AbilityActivationGroup))]` | yes | `GameplayActive`, `WeaponDefsRef`, `WeaponTuning`, `ProjectileStore`, `SimClock` |
@@ -475,7 +488,7 @@ Inputs: muzzle `m`, shooter velocity `vs` (root `PhysicsVelocity.Linear`), targe
 
 Job 1 `WeaponFireJob : IJobChunk` (`ScheduleParallel`) over weapon entities; writes `WeaponState`, `BeamState` (own entity) and a `NativeStream` of `ShotRequest { float3 Position; float3 Velocity; Entity Source; Entity Target; uint ShotId; uint DeathTick; ushort Weapon; DamageType Type; ProjectileFlags Flags; float DamageMultiplier; }` at foreach index `unfilteredChunkIndex` (`forEachCount = query.CalculateChunkCountWithoutFiltering()`). Also enqueues muzzle `FxEvent`/`SfxEvent`. Per weapon (`w`, root data as in §5.4; `tick = SimClock.Tick`):
 1. Skip (and set `Firing = 0`) if `WeaponIndex == 0`, root missing, `Hulk`, `Dormant`, `GridSpawning`, or `HasAim == 0`.
-2. Cooldowns: `CooldownRemainingTicks = max(0, CooldownRemainingTicks − 1)`; `CooldownTicks = w.TriggerIntervalTicks / FireRateMultiplier` (`ShipStats.FireRateMultiplier`, 1 if absent); `if (RoundsLeftInBurst > 0) BurstRemainingTicks −= 1`.
+2. Cooldowns: `CooldownRemainingTicks = max(0, CooldownRemainingTicks − 1)`; `CooldownTicks = w.TriggerIntervalTicks / FireRateMultiplier` (`ShipStatMultipliers.Get(StatId.FireRate)`, 1 if absent); `if (RoundsLeftInBurst > 0) BurstRemainingTicks −= 1`.
 3. **Wants to fire:** `held = (cmd.FireGroups & Group) != 0`; `auto = WeaponControl.Autofire == 1 && target exists && InRange && hostile(target)`; `wants = (held || auto) && (Aligned || (IsFixed && held))`; powered = entity has no `Powered` or it is enabled.
 4. **Trigger:** if `wants && powered && RoundsLeftInBurst == 0 && CooldownRemainingTicks ≤ 0 && (beam ? BeamState.Active == 0 : true)` → `CooldownRemainingTicks += CooldownTicks`; beams: start pulse (`Active = 1`, `TicksLeft = BeamPulseTicks`), emit muzzle Fx/Sfx, done; others: `RoundsLeftInBurst = BurstCount`, `BurstRemainingTicks = 0`.
 5. **Rounds:** while `RoundsLeftInBurst > 0 && BurstRemainingTicks ≤ 0 && powered`: release one round (step 6); `RoundsLeftInBurst−−`; `BurstRemainingTicks += BurstIntervalTicks` (0 → all rounds this tick).
@@ -551,6 +564,14 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 
 `IJobEntity` (`ScheduleParallel`) over weapon entities with `WeaponAim`, `WeaponMount`, `LocalTransform`, `FunctionalBlock`, `WithChangeFilter<WeaponAim>`: skip fixed weapons. `rest` = the entity's spawn `LocalTransform` (position `(Origin + 0.5)·s`, rotation `R(orient)`, scale `s`, SPEC-10 §4.5); `yawQ = quaternion.AxisAngle(UpLocal, Yaw)`; `LocalTransform.Position = PivotLocal + rotate(yawQ, restPosition − PivotLocal)`, `Rotation = mul(yawQ, R(orient))`, `Scale = s`. This is the only writer of a weapon entity's `LocalTransform` after spawn; nothing in the simulation reads it (traps T2.7).
 
+### 5.12 Weapon power demand and weapon stats (ADR-0014)
+
+**Registration and init** (in `WeaponInitSystem`): `OnCreate` also calls `PowerRegistration.RegisterConsumer(registrations, BlockModuleId.WeaponMount)`; the mount init job additionally calls `PowerRegistration.SetConsumer(requests, WeaponMount, w.PowerDraw, PowerTuning.PriorityWeapon)` for new entities (`PowerTuning` absent → skip; M1 has no power).
+
+**`WeaponPowerDemandSystem`** (`PowerDemandGroup`, Burst `IJobEntity`, `ScheduleParallel` over weapon entities with `PowerRequest`, `WeaponState`, `WeaponMount`, `FunctionalBlock`): `root = FunctionalBlock.Grid`; `cmd = ShipCommand[root]` (absent → zero); `held = (cmd.FireGroups & WeaponState.Group) != 0`; `auto = WeaponControl[root].Autofire == 1 && ShipTarget[root].Value != Entity.Null` (absent → false); `SetRequesting(requests, WeaponMount, WeaponIndex != 0 && (held || auto))`. The only writer of the weapon elements' `Requesting` (SPEC-22 decision 7: weapons draw while their group is held or autofire has a target).
+
+**`WeaponStatsSystem`** (Burst `IJobEntity`, `ScheduleParallel` over roots with `WeaponStats`, `ShipStats`, `BlockInstance`; `WithNone<Hulk>`; skip `GridSpawning`, `Dormant`): if `SourceRevision == ShipStats.FunctionalRevision` → return. Else zero it and for each alive instance with a `WeaponMount` row with `WeaponIndex != 0`: `w = WeaponDefs[row.WeaponIndex]`; `SustainedDps += w.SustainedDps`; `MaxWeaponRange = max(MaxWeaponRange, w.Range)`; `WeaponDraw += w.PowerDraw`; `AliveWeaponCount++`. If `SourceRevision == 0` → `InitialWeaponCount = AliveWeaponCount`. `SourceRevision = FunctionalRevision`. Complexity O(1) per untouched ship.
+
 ### 5.11 Determinism notes
 
 - Shot order in the store = weapon chunk order (stream index order), deterministic for a given entity layout; event order downstream is re-sorted by SPEC-13/22 keys, so it does not matter.
@@ -561,7 +582,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 
 | Call / type | Pre-conditions | Post-conditions / errors |
 |---|---|---|
-| `CombatGridSetup.AddAll(em, root, allegiance)` | Main thread, outside system updates; `root` is a spawn request entity | Adds `Allegiance`, `WeaponControl`, `ShipTarget` and the SPEC-22/24 setup components; calling twice throws `InvalidOperationException` |
+| `CombatGridSetup.AddAll(em, root, allegiance)` | Main thread, outside system updates; `root` is a spawn request entity | Adds `Allegiance`, `WeaponControl`, `ShipTarget`, `WeaponStats` and the SPEC-22/24 setup components; calling twice throws `InvalidOperationException` |
 | `WeaponContent.CreateSingletons` | Boot (SPEC-01) | `WeaponDefsRef`, `WeaponTuning`, default `FactionRelations` |
 | `ProjectileStore.ApplyPendingShift` | Inside this spec's single-threaded jobs only | Rows follow the floating origin (Core `OriginShiftRecord`, SPEC-23 Q4); star-system change clears the store |
 | `ProjectileStore` presentation read (SPEC-63) | Main thread outside the fixed step after `CompleteAccess()`, or a job chained with `Acquire`/`Release` | Rows are the state at the end of the last tick |
@@ -784,6 +805,18 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
   - [ ] Two core losses in one tick are published in ascending `PersistentId` order.
   - [ ] A grid destroyed before the bridge runs still yields an event with its `PersistentId` and `Faction = 255`.
 - **Tests:** `ShipDestroyedBridgeTests.AiShip_FieldsFilled`, `.Player_IsPlayer`, `.SameTick_SortedById`, `.DestroyedGrid_StillReported`.
+
+### WPN-018 — Weapon power demand and weapon stats
+- **Milestone:** M2
+- **Tier:** standard — three small jobs fully given in §5.12
+- **Depends on:** `WPN-004`, `WPN-007`, `PWR-001`
+- **Do:** Implement §5.12: consumer registration and `SetConsumer` in `WeaponInitSystem`, `WeaponPowerDemandSystem`, `WeaponStats` in `CombatGridSetup.AddAll`, `WeaponStatsSystem`.
+- **Files:** `Assets/Game/Simulation/Weapons/{WeaponInitSystem,WeaponMountInitJob,WeaponPowerDemandSystem,WeaponStatsSystem,WeaponStats}.cs`, `Assets/Game/Simulation/CombatGridSetup.cs`, `Assets/Game/Tests/EditMode/Simulation/Weapons/WeaponPowerAndStatsTests.cs`
+- **Acceptance criteria:**
+  - [ ] A weapon entity's `WeaponMount` element has `Draw == WeaponDef.PowerDraw` and `Priority == PriorityWeapon` after spawn; `Requesting` is 1 in the tick its group is first held and 0 the tick after release.
+  - [ ] Autofire with a target requests power without a held group.
+  - [ ] `ship_fighter`: `WeaponStats.AliveWeaponCount == 14`, `SustainedDps` equals the sum from §4.9, `InitialWeaponCount == 14`; destroying one weapon recomputes once and lowers `SustainedDps`.
+- **Tests:** `WeaponPowerAndStatsTests.Init_SetsConsumer`, `.Demand_HeldGroup_SameTick`, `.Demand_Autofire`, `.Stats_Spawn`, `.Stats_WeaponDestroyed`.
 
 ### WPN-016 — Per-instance fire groups (M4)
 - **Milestone:** M4

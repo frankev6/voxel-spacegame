@@ -177,8 +177,10 @@ SimulationSystemGroup
 │  │  │  ├─ PlayerCommandApplySystem     FLT  PlayerCommand → player ship's ShipCommand
 │  │  │  └─ AI decision + steering       AI   → ShipCommand (staggered)
 │  │  ├─ BodyOnRailsSystem               SYS  analytic orbits from UniversalTime (tick-exact moving colliders)
-│  │  ├─ PowerAllocationSystem           PWR  sets Powered enable bits
-│  │  ├─ ShipStatsAggregateSystem        PWR  recompute ShipStats for dirty ships
+│  │  ├─ PowerDemandGroup                PWR  (custom, ADR-0014) each consuming feature writes its PowerRequest.Requesting
+│  │  ├─ PowerAllocationSystem           PWR  grants by priority; sets Powered enable bits
+│  │  ├─ ShipStatsAggregateSystem        PWR  shared ShipStats, ShipStatMultipliers, PowerStats/ShieldStats for dirty ships
+│  │  ├─ feature stats systems           FLT/WPN PropulsionStats, WeaponStats (ADR-0014)
 │  │  ├─ PropulsionSystem                FLT  thruster impulses; never overwrites velocity
 │  │  ├─ PlanarConstraintSystem          FLT  keeps Y = 0 and rotation about Y only
 │  │  ├─ WeaponAimSystem                 WPN
@@ -306,7 +308,8 @@ These types cross module boundaries. **Their names and owning module are binding
 | `PlayerCommand` | singleton: same fields as `ShipCommand` plus latched edge flags | Written only by `PlayerInputSampleSystem` |
 | `PlayerShip` | tag on the player's current ship | |
 | `Allegiance` | `byte Faction; byte Team` | `ContentId` → byte index via `FactionTable` |
-| `ShipStats` | aggregated mass, thrust, turn rate, power gen/storage, DPS, shield capacity | Written only by `ShipStatsAggregateSystem` |
+| `ShipStats` | shared part: mass, mass fraction, bounds, `FunctionalRevision`; multipliers in `ShipStatMultipliers` | Written only by `ShipStatsAggregateSystem`. Feature totals live in feature-owned stats components (`PropulsionStats`, `WeaponStats`, `PowerStats`, `ShieldStats`; ADR-0014) |
+| `PowerRequest` | buffer on functional entities: `{BlockModuleId Module; byte Priority, Requesting; float Draw; short ConsumerIndex}` | One element per power-consuming module; written by the module's owning feature (ADR-0014) |
 | `ShipPower` + buffer `PowerConsumer` + enableable `Powered` | | |
 | `ShieldState` | analytic ellipsoid in grid space + HP | |
 | `ShieldHit` | event: `Entity Grid; float3 LocalPoint; float Amount; DamageType Type; Entity Source` | Producers test shields first (analytically) and emit this instead of a `DamageEvent` |
@@ -386,7 +389,9 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | `PlayerControlLock` | `TravelService` | Read by `PlayerCommandApplySystem` |
 | `FactionRelations` (after boot), faction standings | `FactionStandingSystem` (requests from `FactionService`) | Read |
 | `PlayerCombatStatus` | `PlayerCombatStatusSystem` | Read |
-| `ShipStats` | `ShipStatsAggregateSystem` | Read |
+| `ShipStats`, `ShipStatMultipliers`, `PowerStats`, `ShieldStats` | `ShipStatsAggregateSystem` | Read |
+| `PropulsionStats` / `WeaponStats` | `PropulsionStatsSystem` (SPEC-20) / `WeaponStatsSystem` (SPEC-21) | Read |
+| `PowerRequest` element of module m | The feature that owns m (`Draw`/`Priority` at init, `Requesting` in `PowerDemandGroup`); `ConsumerIndex`: `PowerInitSystem` | Read by `PowerAllocationSystem` |
 | `Powered` bits, `ShipPower` | `PowerAllocationSystem` | Read |
 | `ShieldState` HP | `ShieldSystem` (resolves shield hits before grid damage) | Read |
 | Root `LocalTransform` shift for floating origin | `OriginRebaseSystem` | — |

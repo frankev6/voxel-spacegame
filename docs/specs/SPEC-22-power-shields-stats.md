@@ -36,12 +36,12 @@ Every ship has an energy budget, an analytic shield and a set of aggregated stat
 1. **Files sit directly in `Assets/Game/Simulation/Power/` with namespace `Game.Simulation.Power`.** Reason: five specs share `Game.Simulation`; one area folder per spec (same rule as SPEC-10 Decision 15) prevents file collisions.
 2. **Energy is a per-ship scalar pool.** `ShipPower.Stored` (E) is refilled by `Generation` (E/s) and capped by `Capacity` (E). There is no per-block energy. Reason: simple, deterministic, readable on the HUD.
 3. **Consumers are all-or-nothing per tick.** A requesting consumer either gets its full `Draw × dt` or nothing. Reason: no fractional weapon states; easy to test.
-4. **Allocation order is fixed: priority descending, then `InstanceIndex` ascending.** Priorities (from `PowerTuning`): shield emitters 200, thrusters 150, ability one-shot costs 120, weapons 100. Reason: shields and engines stay up longest; weapons brown out first; order is deterministic.
+4. **Allocation order is fixed: priority descending, then `InstanceIndex` ascending, then `BlockModuleId`.** Each consumer's priority is set by the feature that owns its module, from `PowerTuning`: shield emitters 200, thrusters 150, ability one-shot costs 120, weapons 100 (a later feature adds its own tuning field). Reason: shields and engines stay up longest; weapons brown out first; order is deterministic.
 5. **A denied consumer stays off for `BrownoutHoldTicks` (30 ticks = 0.5 s).** Reason: no flicker at the budget edge.
-6. **Demand is derived inside `PowerAllocationSystem` from this tick's inputs** (`ShipCommand.FireGroups`, thrust/turn, `ShieldControl`, `AbilitySlot` state). No other system writes a demand. Reason: same-tick response to the trigger and single writer of `PowerConsumer` (architecture §8).
+6. **Demand is written by the feature that owns each consuming module (ADR-0014).** Every power-consuming module registers a `PowerRequest` element on its functional entity (`PowerRegistration.RegisterConsumer`); its owner fills `Draw`/`Priority` at init and writes `Requesting` every tick from a system in `PowerDemandGroup` (after `ShipCommandGroup`, before `PowerAllocationSystem`). The allocator never inspects weapons, thrusters or shields. Ability one-shot costs keep their per-ship channel (`AbilitySlot.PendingPower`, decision 8). Reason: same-tick response, single writer per field, and a new consumer never edits this spec.
 7. **Weapons draw while their fire group is held, not per shot.** Reason: the draw table in §4.9 is per second and sustainable; the old per-shot drain plus per-second beam drain double-charged (02-C22).
 8. **Ability energy is a one-shot cost granted with one tick of latency** through `ShipPower.AbilityGrantMask` (§5.3 step 7). Reason: only `PowerAllocationSystem` writes `ShipPower`.
-9. **Stats are split into cheap and expensive parts.** Mass-derived values update when `PhysicsMass` changes; thrust, power, DPS and shield totals recompute only when the alive functional set changes (signature check, §5.4). Reason: architecture §11.1 (incremental, never global).
+9. **Stats are shared plus feature-owned (ADR-0014), each split into cheap and expensive parts.** `ShipStats` holds only the shared part (mass, mass fraction, bounds, alive-functional signature and `FunctionalRevision`); `ShipStatMultipliers` holds the product of active modifiers per `StatId`. Every feature with ship-level totals owns a `<Feature>Stats` root component recomputed by its own system when `FunctionalRevision` changes (here `PowerStats`, `ShieldStats`; SPEC-20 `PropulsionStats`; SPEC-21 `WeaponStats`). Mass-derived values update when `PhysicsMass` changes. Reason: architecture §11.1 (incremental, never global); a new feature never edits the aggregate.
 10. **One shield per ship: an analytic ellipsoid in grid space** fitted to the grid's spawn bounds (`VoxelGrid.CellMin/CellMax`) plus padding, refitted only when the alive functional set changes. All powered alive emitters add their capacity and regen to it. Reason: architecture §6.4; cheap segment tests.
 11. **Shield HP changes only in `ShieldSystem`.** Producers (SPEC-21) test shields analytically against last tick's `ShieldState` and emit `ShieldHit`; `ShieldSystem` applies hits in a stable order and converts overflow into `DamageEvent`s. Reason: architecture §8.
 12. **Energy and shield HP are not saved.** A loaded or newly spawned ship starts with `Stored = Capacity` and full shields. Reason: saves happen outside combat (00-vision M3 scope); no extra save chunk.
@@ -74,33 +74,63 @@ namespace Game.Simulation.Power
         public ShipPowerFlags Flags;
     }
 
-    public enum PowerConsumerKind : byte { Weapon = 0, ShieldEmitter = 1, Thruster = 2 }
-
     [System.Flags] public enum PowerConsumerFlags : byte { None = 0, Granted = 1, Requesting = 2, Alive = 4, BrownedOut = 8 }
 
-    /// <summary>One energy consumer of the ship, sorted by (Priority desc, InstanceIndex asc). Built by PowerInitSystem;
-    /// per-tick fields written only by PowerAllocationSystem.</summary>
+    /// <summary>One energy consumer of the ship = one PowerRequest element of one functional entity, sorted by (Priority desc,
+    /// InstanceIndex asc, Module asc). Built by PowerInitSystem; per-tick fields written only by PowerAllocationSystem.</summary>
     [InternalBufferCapacity(0)]
     public struct PowerConsumer : IBufferElementData
     {
         public Entity Functional;       // the block's functional entity
         public int InstanceIndex;       // index into the grid's BlockInstance buffer
-        public PowerConsumerKind Kind;
-        public byte Priority;           // from PowerTuning by kind
-        public byte FireGroups;         // weapons: WeaponDef.DefaultFireGroups (bit g = group g+1); others 0
+        public Game.Data.Blocks.BlockModuleId Module;   // the consuming module
+        public byte Priority;           // copied from the PowerRequest element at init
+        public byte RequestIndex;       // index of the element in the entity's PowerRequest buffer
         public PowerConsumerFlags Flags;
-        public float Draw;              // E/s while requesting
+        public float Draw;              // E/s while requesting (copied at init)
         public uint DeniedUntilTick;    // brownout hold: no request is granted while SimClock.Tick < this
+    }
+
+    /// <summary>One power-consuming module of a functional entity (ADR-0014). One element per consuming module of the block.
+    /// Writers, per element: the feature that owns `Module` (Draw and Priority once at init in GameInitGroup before PowerInitSystem;
+    /// Requesting every tick from a system in PowerDemandGroup); ConsumerIndex: PowerInitSystem. Nobody else writes it.</summary>
+    [InternalBufferCapacity(2)]
+    public struct PowerRequest : IBufferElementData   // 12 bytes
+    {
+        public Game.Data.Blocks.BlockModuleId Module;
+        public byte Priority;           // from PowerTuning (owner's field)
+        public byte Requesting;         // 1 = wants its Draw this tick
+        public byte Reserved;
+        public float Draw;              // E/s while requesting, ≥ 0
+        public short ConsumerIndex;     // index in the grid's PowerConsumer buffer; −1 until PowerInitSystem bound it
+        public short Reserved2;
+    }
+
+    /// <summary>Demand writers run here (ADR-0014): after ShipCommandGroup (OrderFirst), before PowerAllocationSystem. Members order
+    /// themselves only relative to each other if needed; they never touch another module's element.</summary>
+    [UpdateInGroup(typeof(Game.Core.Systems.GameplayPrePhysicsGroup))]
+    [UpdateBefore(typeof(PowerAllocationSystem))]
+    public partial class PowerDemandGroup : ComponentSystemGroup { }
+
+    /// <summary>Registration helper for power-consuming modules (call from a [CreateAfter(typeof(GridSpawnSystem))] system's OnCreate).</summary>
+    public static class PowerRegistration
+    {
+        /// Appends {module, PowerRequest}, {module, PowerLink} and {module, Powered} to the FunctionalComponentRegistration buffer (SPEC-10).
+        public static void RegisterConsumer(DynamicBuffer<Game.Voxel.Model.FunctionalComponentRegistration> registrations, Game.Data.Blocks.BlockModuleId module);
+        /// Init helper for owners: finds the element with `module` (appends it if missing) and sets Draw and Priority; Requesting = 0.
+        public static void SetConsumer(DynamicBuffer<PowerRequest> requests, Game.Data.Blocks.BlockModuleId module, float draw, byte priority);
+        /// Demand helper: sets Requesting of the element with `module` (no-op if missing). Linear scan over ≤ 4 elements.
+        public static void SetRequesting(DynamicBuffer<PowerRequest> requests, Game.Data.Blocks.BlockModuleId module, bool requesting);
     }
 
     /// <summary>Enable bit on functional entities: the block has power this tick. Only writer: PowerAllocationSystem.</summary>
     public struct Powered : IComponentData, IEnableableComponent { }
 
-    /// <summary>On every functional entity with a PowerSource, PowerStorage, Thruster, WeaponMount or ShieldEmitter module (registered
-    /// with FunctionalComponentRegistration, so it starts zeroed). Only writer: PowerInitSystem.</summary>
+    /// <summary>On every functional entity of a power-consuming module (registered by PowerRegistration.RegisterConsumer, so it starts
+    /// zeroed). Only writer: PowerInitSystem.</summary>
     public struct PowerLink : IComponentData
     {
-        public short ConsumerIndex;     // index in the grid's PowerConsumer buffer; -1 = not a consumer
+        public short ConsumerCount;     // PowerRequest elements bound to PowerConsumer entries; 0 = not a consumer
         public byte Bound;              // 0 = new entity (spawn, rebuild or edit), 1 = bound by PowerInitSystem
         public byte Reserved;
     }
@@ -117,41 +147,49 @@ namespace Game.Simulation.Power
     [System.Flags] public enum ShipStatsFlags : byte { None = 0, Initialized = 1, HasMass = 2 }
 
     // StatId is designed here but lives in Assets/Game/Data/Combat/StatId.cs (namespace Game.Data.Combat, architecture §3.2) so ability
-    // content uses it directly:  public enum StatId : byte { Thrust = 0, MaxSpeed = 1, FireRate = 2, WeaponDamage = 3, ShieldRegen = 4, TurnRate = 5 }  // add at end only
+    // content uses it directly:  public enum StatId : byte { Thrust = 0, MaxSpeed = 1, FireRate = 2, WeaponDamage = 3, ShieldRegen = 4, TurnRate = 5 }  // add at end only (≤ 15 values)
 
-    /// <summary>Aggregated ship stats on the grid root (architecture §6.4). Only writer: ShipStatsAggregateSystem.</summary>
+    /// <summary>Shared ship stats on the grid root (architecture §6.4, ADR-0014). Only writer: ShipStatsAggregateSystem.
+    /// Feature totals live in feature-owned components (PowerStats, ShieldStats here; SPEC-20 PropulsionStats; SPEC-21 WeaponStats).</summary>
     public struct ShipStats : IComponentData
     {
-        // Cheap part: recomputed when PhysicsMass changed or after a full recompute
+        // Mass part: recomputed when PhysicsMass changed
         public float Mass;              // kg = 1 / PhysicsMass.InverseMass; 0 until the body exists
         public float InitialMass;       // kg, first non-zero Mass seen; never changes afterwards
         public float MassFraction;      // Mass / InitialMass (1 at spawn), hull-health proxy for AI and HUD
-        public float ForwardAccel;      // m/s² = ForwardThrust × ThrustMultiplier / Mass
-        public float ReverseAccel;      // m/s²
-        public float StrafeAccel;       // m/s²
-        public float YawAccelDeg;       // deg/s² = degrees((YawTorque × ThrustMultiplier + GyroYawTorque) × InverseInertia.y)
-        public float TurnRateDeg;       // deg/s: 90 / t90 with t90 = 2·sqrt((π/2) / yawAccelRad); 0 if yawAccel = 0
-        // Expensive part: recomputed when the alive functional set changed
-        public float ForwardThrust, ReverseThrust, StrafeThrust;  // N (strafe = min of left and right)
-        public float YawTorque;         // N·m = min(Σ positive yaw torques, Σ |negative yaw torques|) of the thrusters
-        public float GyroYawTorque;     // N·m = FlightMath.GyroYawTorque(FlightConfig, InverseInertia.y) (SPEC-20); 0 for hulks or without FlightConfig; mass part
-        public float PowerGeneration;   // E/s
-        public float PowerCapacity;     // E
-        public float WeaponDraw, ShieldDraw, ThrusterDraw;        // E/s at full demand
-        public float SustainedDps;      // Σ WeaponDef.SustainedDps of alive weapons (before multipliers)
-        public float MaxWeaponRange;    // m, max WeaponDef.Range of alive weapons; 0 if none
-        public float ShieldCapacity, ShieldRegen, ShieldRechargeDelay;   // Σ capacity, Σ regen, min delay (s) of alive emitters
-        public int AliveFunctionalCount, AliveWeaponCount, AliveThrusterCount, AliveShieldEmitterCount, AlivePowerSourceCount;
-        public int InitialWeaponCount;  // AliveWeaponCount at the first full recompute
+        // Functional part: recomputed when the alive functional set changed
+        public int AliveFunctionalCount;
         public float3 BoundsMin, BoundsMax;   // grid space, from VoxelGrid.CellMin/CellMax: CellMin·CellSize .. (CellMax+1)·CellSize
         public float3 BoundsCenter;     // (BoundsMin + BoundsMax) / 2
         public float BoundingRadius;    // length(BoundsMax - BoundsCenter)
-        // Modifier part: recomputed when ShipStatModifier changed (product of active modifiers, 1 if none)
-        public float ThrustMultiplier, MaxSpeedMultiplier, FireRateMultiplier, DamageMultiplier, ShieldRegenMultiplier, TurnRateMultiplier;
-        // Bookkeeping
         public ulong FunctionalSignature;     // §5.4 step 2
-        public uint FunctionalRevision;       // +1 every time FunctionalSignature changes (SPEC-24 resyncs abilities on change)
+        public uint FunctionalRevision;       // +1 every time FunctionalSignature changes; feature stats and SPEC-24 resync on change
         public ShipStatsFlags Flags;
+    }
+
+    /// <summary>Product of active ShipStatModifier multipliers per StatId (1 if none). Only writer: ShipStatsAggregateSystem.</summary>
+    public struct ShipStatMultipliers : IComponentData
+    {
+        public FixedList64Bytes<float> Values;   // index = (int)StatId; length = highest StatId + 1; filled with 1 at init
+        public float Get(StatId id) => (int)id < Values.Length ? Values[(int)id] : 1f;
+    }
+
+    /// <summary>Power totals of alive blocks (feature stats, ADR-0014). Only writer: ShipStatsAggregateSystem (power job).</summary>
+    public struct PowerStats : IComponentData
+    {
+        public float Generation;        // E/s = Σ PowerSource rows
+        public float Capacity;          // E = Σ PowerStorage rows
+        public float DrawAtFullDemand;  // E/s = Σ consumer Draw
+        public int AliveSourceCount;    // blocks with a PowerSource or PowerStorage module
+        public uint SourceRevision;     // ShipStats.FunctionalRevision these totals were built from
+    }
+
+    /// <summary>Shield totals of alive emitters (feature stats). Only writer: ShipStatsAggregateSystem (power job).</summary>
+    public struct ShieldStats : IComponentData
+    {
+        public float Capacity, Regen, RechargeDelay, Draw;   // Σ capacity, Σ regen/s, min delay (s), Σ draw (E/s)
+        public int AliveEmitterCount;
+        public uint SourceRevision;
     }
 
     /// <summary>Active stat modifier on the grid root. Only writer: AbilityModifierSyncSystem (SPEC-24).</summary>
@@ -322,11 +360,12 @@ namespace Game.Simulation.Power
     public static class PowerGridSetup
     {
         /// Adds the PWR root components to a spawn request entity (future grid root) with initial values:
-        /// ShipPower (zeroed, Flags None), PowerConsumer (empty), ShipStats (zeroed), ShipStatModifier (empty),
-        /// ShieldState (zeroed), ShieldRipple (8 elements, all zero), ShieldControl { RequestedOn = 1 }.
+        /// ShipPower (zeroed, Flags None), PowerConsumer (empty), ShipStats (zeroed), ShipStatMultipliers (zeroed; filled on the
+        /// first aggregate), PowerStats (zeroed), ShieldStats (zeroed), ShipStatModifier (empty), ShieldState (zeroed),
+        /// ShieldRipple (8 elements, all zero), ShieldControl { RequestedOn = 1 }.
         /// Call on the main thread outside system updates, only for GridKind Ship or Station. One AddComponent(ComponentTypeSet).
         public static void AddComponents(EntityManager em, Entity requestEntity);
-        public static ComponentTypeSet RootTypes { get; }   // the 7 types above
+        public static ComponentTypeSet RootTypes { get; }   // the 10 types above
     }
 }
 ```
@@ -336,8 +375,9 @@ namespace Game.Simulation.Power
 | State | Only writer |
 |---|---|
 | `ShipPower`, `PowerConsumer` per-tick fields, `Powered` | `PowerAllocationSystem` (init values: `PowerInitSystem`) |
-| `PowerLink`, `PowerConsumer` table layout | `PowerInitSystem` |
-| `ShipStats` | `ShipStatsAggregateSystem` |
+| `PowerLink`, `PowerConsumer` table layout, `PowerRequest.ConsumerIndex` | `PowerInitSystem` |
+| `PowerRequest` element of module m | The feature that owns m: `Draw`/`Priority` at init, `Requesting` in `PowerDemandGroup` (shield emitters: `PowerInitSystem` and `ShieldPowerDemandSystem`) |
+| `ShipStats`, `ShipStatMultipliers`, `PowerStats`, `ShieldStats` | `ShipStatsAggregateSystem` |
 | `ShieldState`, `ShieldRipple` | `ShieldSystem` (`PowerInitSystem` only sets `Flags = FillOnNextUpdate` at init) |
 | `ShieldControl` | `ShieldToggleEffectSystem` (SPEC-24) |
 | `ShipStatModifier` | `AbilityModifierSyncSystem` (SPEC-24) |
@@ -345,7 +385,7 @@ namespace Game.Simulation.Power
 
 ### 4.8 Memory
 
-Per combat grid root: `ShipPower` 28 B, `ShipStats` ≈ 220 B, `ShieldState` 64 B, `ShieldRipple` 8 × 20 B in chunk, `PowerConsumer` 24 B per consumer outside the chunk, `ShipStatModifier` 4 × 8 B. Per functional entity: `PowerLink` 4 B + `Powered` 0 B (enable bit). A 1M-cell station with 2,000 functional blocks costs ≈ 56 KB. Asteroids and hulks split from ships get none of these (Decision 13).
+Per combat grid root: `ShipPower` 28 B, `ShipStats` ≈ 72 B, `ShipStatMultipliers` 64 B, `PowerStats` 20 B, `ShieldStats` 24 B, `ShieldState` 64 B, `ShieldRipple` 8 × 20 B in chunk, `PowerConsumer` 24 B per consumer outside the chunk, `ShipStatModifier` 4 × 8 B. Per consuming functional entity: `PowerLink` 4 B + `Powered` 0 B (enable bit) + `PowerRequest` 2 × 8 B in chunk. A 1M-cell station with 2,000 functional blocks costs ≈ 56 KB. Asteroids and hulks split from ships get none of these (Decision 13).
 
 ### 4.9 Energy and shield balance (initial values)
 
@@ -374,10 +414,10 @@ The old prototype's "energy 200 → 1 in ~10 s of autofire" is impossible with t
 ```mermaid
 flowchart LR
     subgraph Init[GameInitGroup]
-      GS[GridSpawnSystem VOX] --> PI[PowerInitSystem]
+      GS[GridSpawnSystem VOX] --> FI[feature inits: ThrusterInit FLT, WeaponInit WPN] --> PI[PowerInitSystem]
     end
     subgraph Pre[GameplayPrePhysicsGroup]
-      SC[ShipCommandGroup] --> PA[PowerAllocationSystem] --> SA[ShipStatsAggregateSystem]
+      SC[ShipCommandGroup] --> PD[PowerDemandGroup: thruster FLT, weapon WPN, shield PWR demand] --> PA[PowerAllocationSystem] --> SA[ShipStatsAggregateSystem] --> FS[feature stats: PropulsionStats FLT, WeaponStats WPN]
     end
     subgraph Post[GameplayPostPhysicsGroup]
       PS[ProjectileStepSystem WPN] --> BS[BeamStepSystem WPN] --> EX[ExplosionSystem WPN] --> SH[ShieldSystem] --> DR[DamageResolveSystem DMG]
@@ -389,60 +429,60 @@ Every system: `[BurstCompile]` `ISystem`, `RequireForUpdate<GameplayActive>()`, 
 
 ### 5.1 Registration (`PowerRegistrationSystem`)
 
-`[UpdateInGroup(typeof(GameInitGroup))] [CreateAfter(typeof(GridSpawnSystem))]`, `OnCreate` only (then `state.Enabled = false`): append to the `FunctionalComponentRegistration` singleton buffer, for each module id in {PowerSource, PowerStorage, Thruster, WeaponMount, ShieldEmitter}: `{Module, ComponentType.ReadWrite<PowerLink>()}` and `{Module, ComponentType.ReadWrite<Powered>()}`. New functional entities therefore carry `PowerLink { Bound = 0 }` and an enabled `Powered`.
+`[UpdateInGroup(typeof(GameInitGroup))] [CreateAfter(typeof(GridSpawnSystem))]`, `OnCreate` only (then `state.Enabled = false`): `PowerRegistration.RegisterConsumer(buffer, BlockModuleId.ShieldEmitter)` (this spec owns shield emitters). Thrusters and weapon mounts are registered by SPEC-20 and SPEC-21 the same way; a later consuming module (a hangar) registers itself. Blocks with only `PowerSource`/`PowerStorage` modules need no component: generation and capacity come from their rows.
+
+**Adding a power consumer (pattern for every spec, ADR-0014):** (1) register with `RegisterConsumer(module)`; (2) in a `GameInitGroup` system `[UpdateAfter(typeof(GridSpawnSystem))] [UpdateBefore(typeof(PowerInitSystem))]`, for new functional entities of the module (`PowerLink.Bound == 0`) call `SetConsumer(requests, module, draw, priority)`; (3) in a system `[UpdateInGroup(typeof(PowerDemandGroup))]` write `SetRequesting(requests, module, …)` every tick from this tick's inputs; (4) gate the feature on `Powered` (enabled = every consumer of the block granted).
 
 ### 5.2 `PowerInitSystem`
 
-`[UpdateInGroup(typeof(GameInitGroup))] [UpdateAfter(typeof(GridSpawnSystem))]`. Reads `BlockDefsRef`, `WeaponDefsRef` (SPEC-21), `PowerTuning`, `VoxelGrid`, `BlockInstance`. Writes `PowerLink`, `PowerConsumer`, `ShipPower`, `ShieldState.Flags`, `ShipStats.Flags`. No structural changes.
+`[UpdateInGroup(typeof(GameInitGroup))] [UpdateAfter(typeof(GridSpawnSystem))]`. Reads `BlockDefsRef`, `BlockModulesRef`, `PowerTuning`, `VoxelGrid`, `BlockInstance`, `PowerRequest`. Writes `PowerLink`, `PowerConsumer`, `ShipPower`, the shield emitters' `PowerRequest` elements, `ShieldState.Flags`, `ShipStats.Flags`. No structural changes.
 
+0. **Job `ShieldEmitterRequestInitJob`** (`IJobEntity`, `ScheduleParallel`, functional entities with `PowerRequest`, `PowerLink`, `FunctionalBlock`, `[WithChangeFilter(typeof(PowerLink))]`, `PowerLink.Bound == 0`): if the block has a `ShieldEmitter` row → `SetConsumer(requests, ShieldEmitter, row.PowerDraw, PriorityShieldEmitter)`.
 1. **Job `PowerRebindDetectJob`** (`IJobEntity`, `.Schedule()` single-threaded, `[WithChangeFilter(typeof(PowerLink))]`): for each functional entity with `PowerLink.Bound == 0`, clear `ShipPowerFlags.Initialized` on `FunctionalBlock.Grid` through a `ComponentLookup<ShipPower>` (skip if the grid has no `ShipPower`). Single-threaded because two entities may share a grid.
 2. **Job `PowerInitJob`** (`IJobEntity`, `ScheduleParallel`, roots with `ShipPower`, `WithNone<GridSpawnRequest>`): skip if `Initialized` is set. Else:
-   1. Build a `NativeList<PowerConsumer>(Allocator.Temp)`: for instance `i` in index order with `Block != 0`, `def = Blocks[Block]`, `def.Kind == Functional`, by the block's module rows (`BlockModulesBlob.TryGet`, SPEC-04 §4.6): `WeaponMount` → `Draw = WeaponDefs[row.WeaponIndex].PowerDraw`, `FireGroups = …DefaultFireGroups`, `Priority = PriorityWeapon`; `ShieldEmitter` → `Draw = row.PowerDraw`, `Priority = PriorityShieldEmitter`; `Thruster` → `Draw = row.PowerDraw`, `Priority = PriorityThruster` (a block with several consumer modules adds one consumer per module). `Functional = inst.Functional`, `InstanceIndex = i`, `Flags = None`, `DeniedUntilTick = 0`. A weapon with `WeaponIndex == 0` gets `Draw = 0, FireGroups = 0`.
-   2. Sort with `NativeSortExtension.Sort` by `(Priority desc, InstanceIndex asc)`; copy into the `PowerConsumer` buffer (clear first).
-   3. For every live instance with `Functional != Entity.Null` that has `PowerLink`: write `PowerLink { ConsumerIndex = position in the sorted list or −1, Bound = 1 }`. *Parallel write through a lookup: each functional entity belongs to exactly one grid and each grid is processed by one worker, so writes are disjoint (comment required above `[NativeDisableParallelForRestriction]`).*
+   1. Build a `NativeList<PowerConsumer>(Allocator.Temp)`: for instance `i` in index order with `Block != 0` and `Functional` existing with a `PowerRequest` buffer: for each element `r` (index `k`): `{ Functional, InstanceIndex = i, Module = r.Module, Priority = r.Priority, RequestIndex = k, Draw = r.Draw, Flags = None, DeniedUntilTick = 0 }`.
+   2. Sort with `NativeSortExtension.Sort` by `(Priority desc, InstanceIndex asc, Module asc)`; copy into the `PowerConsumer` buffer (clear first).
+   3. For every consumer at sorted position `j`: `PowerRequest[c.Functional][c.RequestIndex].ConsumerIndex = j`. For every live instance with `Functional != Entity.Null` that has `PowerLink`: write `PowerLink { ConsumerCount = its number of consumers, Bound = 1 }`. *Parallel write through a lookup: each functional entity belongs to exactly one grid and each grid is processed by one worker, so writes are disjoint (comment required above `[NativeDisableParallelForRestriction]`).*
    4. `Capacity = Σ` over alive (`Block != 0 && (Flags & Destroyed) == 0`) instances of their `PowerStorage` rows' `Storage`; `Generation = Σ` their `PowerSource` rows' `Generation`. `ShipPower = { Stored = Capacity, Capacity, Generation, Flags = Initialized }`.
    5. `ShieldState.Flags = FillOnNextUpdate` (all other fields left; `ShieldSystem` fits and fills). `ShipStats.Flags &= ~Initialized` (forces a full recompute next tick).
 3. Complexity: O(instances of new grids · log). Zero work for existing grids except the change-filtered chunk scan.
 
 ### 5.3 `PowerAllocationSystem`
 
-`[UpdateInGroup(typeof(GameplayPrePhysicsGroup))]` with no ordering attribute: it is the first normal-bucket member, and `ShipCommandGroup` (OrderFirst) always runs before it (SPEC-02 §5.8, Decision 13). Reads `ShipCommand` (SPEC-20), `ShipStats` (last tick's generation and capacity), `BlockInstance`, `ShieldControl`, `AbilitySlot` (SPEC-24, optional `BufferLookup`), `Hulk`, `GridSpawning`, `SimClock`. Writes `ShipPower`, `PowerConsumer`, `Powered`.
+`[UpdateInGroup(typeof(GameplayPrePhysicsGroup))]`, `[UpdateAfter(typeof(PowerDemandGroup))]` (the group itself declares `UpdateBefore` this system; `ShipCommandGroup` is OrderFirst). Reads `PowerRequest` (read-only `BufferLookup`), `PowerStats` (last tick's generation and capacity), `BlockInstance`, `AbilitySlot` (SPEC-24, optional `BufferLookup`), `Hulk`, `GridSpawning`, `SimClock`. Writes `ShipPower`, `PowerConsumer`, `Powered`.
 
-**Job A `PowerAllocateJob`** (`IJobEntity`, `ScheduleParallel` over roots with `ShipPower`, `PowerConsumer`, `ShipStats`; one worker per root):
+**Job A `PowerAllocateJob`** (`IJobEntity`, `ScheduleParallel` over roots with `ShipPower`, `PowerConsumer`, `PowerStats`; one worker per root):
 1. If `!Initialized` or `GridSpawning` enabled → return.
 2. If the root has `Hulk`: `Stored = 0, Generation = 0, Capacity = 0`, every consumer `Flags = None` (keep `Alive` bit computed as below), `AbilityGrantMask = 0`, `Flags |= Dead`; return.
-3. `tick = SimClock.Tick`, `dt = 1/60`. If `ShipStats.Flags` has `Initialized`: `Generation = ShipStats.PowerGeneration`, `Capacity = ShipStats.PowerCapacity`, `Stored = min(Stored, Capacity)`.
+3. `tick = SimClock.Tick`, `dt = 1/60`. If `PowerStats.SourceRevision != 0`: `Generation = PowerStats.Generation`, `Capacity = PowerStats.Capacity`, `Stored = min(Stored, Capacity)`.
 4. `budget = Stored + Generation × dt`. `demand = 0`, `granted = 0`, `brownout = false`.
-5. `cmd = ShipCommand` (zero if absent). `moving = any(cmd.Thrust ≠ 0) || cmd.Turn ≠ 0`.
+5. (No command inspection: demand comes from `PowerRequest`, decision 6.)
 6. For each consumer `c` in buffer order (already sorted), process in two passes split at `PriorityAbility`: pass 1 all consumers with `Priority > PriorityAbility`, then step 7, then pass 2 the rest. Per consumer:
    - `alive = inst.Block != 0 && (inst.Flags & Destroyed) == 0` for `inst = BlockInstance[c.InstanceIndex]`.
-   - `requesting = alive && (Weapon: (cmd.FireGroups & c.FireGroups) ≠ 0 || autofire; ShieldEmitter: ShieldControl.RequestedOn == 1; Thruster: moving)`, where `autofire = WeaponControl.Autofire == 1 && ShipTarget.Value != Entity.Null` (SPEC-21 root components, read through lookups; absent → false; SPEC-23 Q2).
+   - `requesting = alive && PowerRequest[c.Functional][c.RequestIndex].Requesting == 1` (an entity or element that no longer exists → false).
    - If `requesting`: `demand += c.Draw`. If `tick < c.DeniedUntilTick` → not granted. Else `need = c.Draw × dt`; if `need ≤ budget` → granted, `budget −= need`, `granted += c.Draw`; else not granted, `c.DeniedUntilTick = tick + BrownoutHoldTicks`, `brownout = true`.
    - `c.Flags = (alive ? Alive : 0) | (requesting ? Requesting : 0) | (granted ? Granted : 0) | (tick < c.DeniedUntilTick ? BrownedOut : 0)`.
 7. Abilities: `mask = 0`. If the root has an `AbilitySlot` buffer: for slot `s` in index order (`s < 32`) with `State == PendingPower`: `need = slot.PendingCost`; if `need ≤ budget` → `budget −= need`, `mask |= 1u << s`. `AbilityGrantMask = mask`, `AbilityGrantTick = tick`.
 8. `Stored = clamp(budget, 0, Capacity)`; `DemandPerSecond = demand`; `GrantedPerSecond = granted`; `Flags` = `Initialized | (brownout ? Brownout : 0)`.
 
-**Job B `PoweredApplyJob`** (`IJobChunk`, `ScheduleParallel` over functional entities with `FunctionalBlock`, `PowerLink`, `Powered`; depends on A): for entity `k`: `g = FunctionalBlock.Grid`; if `g` has no `ShipPower` → enabled = true (non-combat grid, nothing to gate). Else `p = ShipPower[g]`: if `p.Flags` has `Dead` or not `Initialized` → false; else if `ConsumerIndex < 0` → `alive(instance)`; else `c = PowerConsumer[g][ConsumerIndex]` → `(c.Flags & Alive) ≠ 0 && (c.Flags & BrownedOut) == 0`. Write with `chunk.SetComponentEnabled(ref poweredHandle, k, value)` — each chunk belongs to one worker, so enable-bit writes are race-free (traps T2.6).
+**Job B `PoweredApplyJob`** (`IJobChunk`, `ScheduleParallel` over functional entities with `FunctionalBlock`, `PowerLink`, `Powered`; depends on A): for entity `k`: `g = FunctionalBlock.Grid`; if `g` has no `ShipPower` → enabled = true (non-combat grid, nothing to gate). Else `p = ShipPower[g]`: if `p.Flags` has `Dead` or not `Initialized` → false; else if `ConsumerCount == 0` → `alive(instance)`; else true iff for **every** element `e` of the entity's `PowerRequest` buffer, `c = PowerConsumer[g][e.ConsumerIndex]` has `Alive` and not `BrownedOut`. Write with `chunk.SetComponentEnabled(ref poweredHandle, k, value)` — each chunk belongs to one worker, so enable-bit writes are race-free (traps T2.6).
 
 Complexity: O(consumers + ability slots) per ship, O(functional entities) for job B. Budget §8.
 
 ### 5.4 `ShipStatsAggregateSystem`
 
-`[UpdateInGroup(typeof(GameplayPrePhysicsGroup))] [UpdateAfter(typeof(PowerAllocationSystem))]`. Reads `BlockInstance`, `BlockDefsRef`, `WeaponDefsRef`, `OrientationTablesRef`, `VoxelGrid`, `PhysicsMass`, `ShipStatModifier`, `Dormant` (SPEC-11), `Hulk`, `GridSpawning`. Writes `ShipStats`.
+`[UpdateInGroup(typeof(GameplayPrePhysicsGroup))] [UpdateAfter(typeof(PowerAllocationSystem))]`. Reads `BlockInstance`, `BlockDefsRef`, `BlockModulesRef`, `VoxelGrid`, `PhysicsMass`, `ShipStatModifier`, `PowerRequest`, `Dormant` (SPEC-11), `Hulk`, `GridSpawning`. Writes `ShipStats`, `ShipStatMultipliers`, `PowerStats`, `ShieldStats`. Feature stats of other specs run after it (`[UpdateAfter(typeof(ShipStatsAggregateSystem))]`): SPEC-20 `PropulsionStatsSystem`, SPEC-21 `WeaponStatsSystem`.
 
-**Job `ShipStatsJob`** (`IJobChunk`, `ScheduleParallel` over roots with `ShipStats`, `BlockInstance`, `VoxelGrid`; `WithNone<Hulk>`). Per chunk: `instChanged = chunk.DidChange(ref blockInstanceHandle, LastSystemVersion)`, `massChanged = chunk.DidChange(ref physicsMassHandle, …)`, `modChanged = chunk.DidChange(ref modifierHandle, …)`. Per entity:
+**Job 1 `ShipStatsJob`** (`IJobChunk`, `ScheduleParallel` over roots with `ShipStats`, `ShipStatMultipliers`, `BlockInstance`, `VoxelGrid`; `WithNone<Hulk>`). Per chunk: `instChanged = chunk.DidChange(ref blockInstanceHandle, LastSystemVersion)`, `massChanged = chunk.DidChange(ref physicsMassHandle, …)`, `modChanged = chunk.DidChange(ref modifierHandle, …)`. Per entity:
 1. Skip if `GridSpawning` enabled or `Dormant` enabled.
 2. `full = !Initialized`. If `!full && instChanged`: compute `sig` over alive functional instances in index order: `count++`, `h = StableHash.Combine(h, (ulong)i)` starting from `h = 0x9E3779B97F4A7C15`; `sig = StableHash.Combine(h, count)`. If `sig ≠ FunctionalSignature` → `full = true`.
-3. If `full`: zero the expensive part, then for each alive instance `i` (`def = Blocks[Block]`, `def.Kind == Functional`): `AliveFunctionalCount++`, and for each module row the block has (`BlockModulesBlob.TryGet`):
-   - PowerSource: `PowerGeneration += row.Generation`; PowerStorage: `PowerCapacity += row.Storage`; `AlivePowerSourceCount++` once per block that has either.
-   - Thruster: `F = row.ThrustNewtons`; `d = Orientations.Rotate(new float3(0,0,−1), inst.Orient)` (force direction on the ship, SPEC-04 Decision 9); `ForwardThrust += F·max(0, d.z)`, `ReverseThrust += F·max(0, −d.z)`, `right += F·max(0, d.x)`, `left += F·max(0, −d.x)`; `r = GridSpaceMath.InstanceCenter(...) − com` (com = `PhysicsMass.CenterOfMass`, or `BoundsCenter` if no mass); `τ = cross(r, F·d).y`; `τ > 0 ? posYaw += τ : negYaw += −τ`; `ThrusterDraw += row.PowerDraw`; `AliveThrusterCount++`.
-   - WeaponMount: `w = WeaponDefs[row.WeaponIndex]` (skip if index 0); `SustainedDps += w.SustainedDps`; `MaxWeaponRange = max(MaxWeaponRange, w.Range)`; `WeaponDraw += w.PowerDraw`; `AliveWeaponCount++`.
-   - ShieldEmitter: `ShieldCapacity += row.Capacity`; `ShieldRegen += row.RegenPerSecond`; `ShieldRechargeDelay = AliveShieldEmitterCount == 0 ? row.RechargeDelaySeconds : min(…, row.RechargeDelaySeconds)`; `ShieldDraw += row.PowerDraw`; `AliveShieldEmitterCount++`.
-   Then `StrafeThrust = min(left, right)`, `YawTorque = min(posYaw, negYaw)`; bounds from `VoxelGrid.CellMin/CellMax` and `CellSize` (§4.2); `FunctionalSignature = sig` (recomputed if step 2 was skipped); `FunctionalRevision++`; if `!Initialized` → `InitialWeaponCount = AliveWeaponCount`; set `Initialized`.
-4. If `full || massChanged`: if the root has `PhysicsMass` with `InverseMass > 0`: `Mass = 1 / InverseMass`, `HasMass`; if `InitialMass == 0` → `InitialMass = Mass`; `MassFraction = Mass / InitialMass`. Accelerations: `ForwardAccel = ForwardThrust × ThrustMultiplier / Mass` (same for reverse and strafe); `GyroYawTorque = Hulk || !HasSingleton<FlightConfig> ? 0 : FlightMath.GyroYawTorque(flightConfig, InverseInertia.y)` (the gyro of SPEC-20 decision 11 turns even ships without side thrusters); `yawAccelRad = (YawTorque × ThrustMultiplier + GyroYawTorque) × TurnRateMultiplier × InverseInertia.y`; `YawAccelDeg = degrees(yawAccelRad)`; `TurnRateDeg = yawAccelRad > 0 ? 90 / (2·sqrt((π/2) / yawAccelRad)) : 0`. Without mass: all accelerations 0, `MassFraction = 1`.
-5. If `full || modChanged`: each multiplier = product of `Multiplier` over modifier elements with that `StatId` (1 if none); `Thrust`→`ThrustMultiplier`, `MaxSpeed`→`MaxSpeedMultiplier`, `FireRate`→`FireRateMultiplier`, `WeaponDamage`→`DamageMultiplier`, `ShieldRegen`→`ShieldRegenMultiplier`, `TurnRate`→`TurnRateMultiplier`. Then redo step 4's acceleration lines.
+3. If `full`: `AliveFunctionalCount` = count of alive functional instances; bounds from `VoxelGrid.CellMin/CellMax` and `CellSize` (§4.2); `FunctionalSignature = sig` (recomputed if step 2 was skipped); `FunctionalRevision++`; set `Initialized`.
+4. If `full || massChanged`: if the root has `PhysicsMass` with `InverseMass > 0`: `Mass = 1 / InverseMass`, `HasMass`; if `InitialMass == 0` → `InitialMass = Mass`; `MassFraction = Mass / InitialMass`. Without mass: `MassFraction = 1`.
+5. If `full || modChanged`: `ShipStatMultipliers.Values` = for each `StatId` value the product of `Multiplier` over modifier elements with that `Stat` (1 if none).
 
-Complexity: O(1) per untouched ship; O(instances) for ships whose `BlockInstance` chunk changed (signature) and again for a full recompute. Stats are read by others one tick later at worst.
+**Job 2 `PowerStatsJob`** (`IJobEntity`, `ScheduleParallel` over roots with `ShipStats`, `PowerStats`, `ShieldStats`, `BlockInstance`; depends on job 1; `WithNone<Hulk>`): if `PowerStats.SourceRevision == ShipStats.FunctionalRevision` → return. Else zero both and, for each alive instance (`def.Kind == Functional`), for each row the block has (`BlockModulesBlob.TryGet`): `PowerSource` → `Generation += row.Generation`; `PowerStorage` → `Capacity += row.Storage`; `AliveSourceCount++` once per block with either; `ShieldEmitter` → `ShieldStats.Capacity += row.Capacity`, `Regen += row.RegenPerSecond`, `RechargeDelay = AliveEmitterCount == 0 ? row.RechargeDelaySeconds : min(…)`, `Draw += row.PowerDraw`, `AliveEmitterCount++`. `DrawAtFullDemand = Σ` `Draw` of the instance's `PowerRequest` elements (any module). Set both `SourceRevision = FunctionalRevision`.
+
+Complexity: O(1) per untouched ship; O(instances) for ships whose `BlockInstance` chunk changed (signature) and once more per feature when the revision changed. Feature stats are read by others one tick later at worst.
 
 ### 5.5 `ShieldSystem`
 
@@ -452,7 +492,7 @@ Complexity: O(1) per untouched ship; O(instances) for ships whose `BlockInstance
 
 **Job 2 `ShieldUpdateJob`** (`IJobChunk`, `ScheduleParallel` over roots with `ShieldState`, `ShieldRipple`, `ShipStats`, `PowerConsumer`; depends on job 1). Writes overflow through `DamageStreams.Damage.BeginWrite(ref state, ProducerKind.ShieldOverflow, chunkCount)` at foreach index = `unfilteredChunkIndex`. Per entity, with `tick`, `dt = 1/60`, `T = PowerTuning`:
 1. If `GridSpawning` enabled → skip (hits on it are dropped). If `Hulk`: `Hp = 0, MaxHp = 0, Active = 0`; every hit in range → full overflow (step 6 overflow rule with `absorbed = 0`); continue.
-2. **Capacity and regen:** iterate consumers of kind `ShieldEmitter`: `on = (Flags & Alive) && (Flags & Granted)`; `cap += on ? row.Capacity : 0` (`row` = the `ShieldEmitterParams` row of `BlockInstance[c.InstanceIndex].Block`), `regen += on ? row.RegenPerSecond : 0`, `delay = min delay of alive emitters` (default 4 s if none). `MaxHp = cap`; `RegenPerSecond = regen × ShipStats.ShieldRegenMultiplier`; `Hp = min(Hp, MaxHp)`.
+2. **Capacity and regen:** iterate consumers with `Module == ShieldEmitter`: `on = (Flags & Alive) && (Flags & Granted)`; `cap += on ? row.Capacity : 0` (`row` = the `ShieldEmitterParams` row of `BlockInstance[c.InstanceIndex].Block`), `regen += on ? row.RegenPerSecond : 0`, `delay = min delay of alive emitters` (default 4 s if none). `MaxHp = cap`; `RegenPerSecond = regen × ShipStatMultipliers.Get(StatId.ShieldRegen)`; `Hp = min(Hp, MaxHp)`.
 3. **Shape:** if `ShapeRevision ≠ ShipStats.FunctionalRevision` or `!Initialized`: `half = (BoundsMax − BoundsMin) / 2`; `Radii = max(half × ShieldPaddingScale + ShieldPaddingMetres, ShieldMinRadiusMetres)`; `Center = BoundsCenter`; `BoundingRadius = cmax(Radii)`; `ShapeRevision = FunctionalRevision`; set `Initialized`.
 4. **Fill:** if `FillOnNextUpdate`: `Hp = MaxHp`, clear the flag and `Collapsed`.
 5. **Up/down:** `requested = ShieldControl.RequestedOn == 1`. If `!requested || MaxHp ≤ 0` → `Active = 0`. Else if `Collapsed` → `Active = Hp ≥ ShieldRestartFraction × MaxHp ? 1 : 0` (clear `Collapsed` when it becomes 1). Else `Active = Hp > 0 ? 1 : 0`.
@@ -464,6 +504,10 @@ Complexity: O(1) per untouched ship; O(instances) for ships whose `BlockInstance
 
 Job 2 also disposes nothing: the hits list and map are disposed with `.Dispose(state.Dependency)` after job 2. Complexity: O(H log H) gather with H hits per tick (≤ 4,096 expected), O(emitters) per shielded ship.
 
+
+### 5.5b `ShieldPowerDemandSystem`
+
+`[UpdateInGroup(typeof(PowerDemandGroup))]`, Burst `IJobEntity` (`ScheduleParallel`) over functional entities with `PowerRequest`, `FunctionalBlock`: `root = FunctionalBlock.Grid`; `PowerRegistration.SetRequesting(requests, ShieldEmitter, ShieldControl[root].RequestedOn == 1)` (no `ShieldControl` → false). The only writer of the shield emitters' `Requesting`.
 ### 5.6 `PowerBudgetValidator` (editor and boot)
 
 `IContentDatabaseValidator` (SPEC-04 §4.8), `Order = 220`. For every `ShipBlueprintDefinition` (SPEC-10): decode the structure through `BlueprintLibrary`, sum Generation, Capacity, WeaponDraw, ShieldDraw, ThrusterDraw over its functional blocks with the formulas of §5.4, and emit **warning** `PWR-W001` "`<id>`: sustain `<s>` s < 30 s (rule R1)" when R1 fails and `PWR-W002` when R2 fails. Never an error: content may intentionally break the rule (for example a glass-cannon boss).
@@ -519,11 +563,11 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 - **Milestone:** M2
 - **Tier:** standard — transcribes the types in §4.1–§4.6 exactly
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`, `DMG-001`
-- **Do:** Create every type of §4.1–§4.6 with the exact fields, flags and comments; `ShieldMath`, `PowerGridSetup.AddComponents` and `PowerContent` bodies throw `NotImplementedException("PWR-0xx")` naming the implementing task; `PowerTuning.Defaults` is real. `StatId` goes to `Assets/Game/Data/Combat/StatId.cs` (namespace `Game.Data.Combat`).
-- **Files:** `Assets/Game/Simulation/Power/{ShipPowerFlags,ShipPower,PowerConsumerKind,PowerConsumerFlags,PowerConsumer,Powered,PowerLink,ShipStatsFlags,ShipStats,ShipStatModifier,ShieldFlags,ShieldState,ShieldRipple,ShieldControl,ShieldHitFlags,ShieldHit,ShieldHitStreams,ShieldMath,PowerTuning,PowerContent,PowerGridSetup}.cs`; `Assets/Game/Data/Definitions/Power/PowerTuningDefinition.cs`; `Assets/Game/Data/Combat/StatId.cs`
+- **Do:** Create every type of §4.1–§4.6 with the exact fields, flags and comments; `ShieldMath`, `PowerGridSetup.AddComponents`, `PowerRegistration` and `PowerContent` bodies throw `NotImplementedException("PWR-0xx")` naming the implementing task; `PowerTuning.Defaults` and `ShipStatMultipliers.Get` are real; `PowerDemandGroup` is complete as written. `StatId` goes to `Assets/Game/Data/Combat/StatId.cs` (namespace `Game.Data.Combat`).
+- **Files:** `Assets/Game/Simulation/Power/{ShipPowerFlags,ShipPower,PowerConsumerFlags,PowerConsumer,PowerRequest,PowerDemandGroup,PowerRegistration,Powered,PowerLink,ShipStatsFlags,ShipStats,ShipStatMultipliers,PowerStats,ShieldStats,ShipStatModifier,ShieldFlags,ShieldState,ShieldRipple,ShieldControl,ShieldHitFlags,ShieldHit,ShieldHitStreams,ShieldMath,PowerTuning,PowerContent,PowerGridSetup}.cs`; `Assets/Game/Data/Definitions/Power/PowerTuningDefinition.cs`; `Assets/Game/Data/Combat/StatId.cs`
 - **Acceptance criteria:**
   - [ ] All files compile in `Game.Simulation` / `Game.Data` with no new assembly reference.
-  - [ ] `UnsafeUtility.SizeOf<PowerConsumer>() == 24`, `SizeOf<PowerLink>() == 4`, `SizeOf<ShieldRipple>() == 20`.
+  - [ ] `UnsafeUtility.SizeOf<PowerConsumer>() == 24`, `SizeOf<PowerLink>() == 4`, `SizeOf<PowerRequest>() == 12`, `SizeOf<ShieldRipple>() == 20`.
   - [ ] `PowerTuning.Defaults` equals the `PowerTuningDefinition` field defaults.
 - **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/PowerContractTests.cs`: `Sizes_MatchSpec`, `TuningDefaults_MatchDefinitionDefaults`, `StatId_ValuesAreStable`.
 
@@ -556,20 +600,21 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 - **Milestone:** M2
 - **Tier:** frontier — F1 foundation of every combat grid; F2 parallel lookup writes
 - **Depends on:** `PWR-003`, `WPN-001`, `VOX-001`, `SPEC-10`
-- **Do:** Implement `PowerRegistrationSystem` (§5.1) and `PowerInitSystem` (§5.2) with both jobs.
-- **Files:** `Assets/Game/Simulation/Power/{PowerRegistrationSystem,PowerInitSystem,PowerRebindDetectJob,PowerInitJob}.cs`
+- **Do:** Implement `PowerRegistration` (§4.1), `PowerRegistrationSystem` (§5.1) and `PowerInitSystem` (§5.2) with its three jobs. Tests use a test-only `TestConsumerInitSystem` (GameInitGroup, before `PowerInitSystem`) that fills `Thruster` and `WeaponMount` elements from their rows, so this task does not wait for SPEC-20/21.
+- **Files:** `Assets/Game/Simulation/Power/{PowerRegistration,PowerRegistrationSystem,PowerInitSystem,ShieldEmitterRequestInitJob,PowerRebindDetectJob,PowerInitJob}.cs`; `Assets/Game/Tests/EditMode/Simulation/Power/TestConsumerInitSystem.cs`
 - **Acceptance criteria:**
   - [ ] Spawning `ship_fighter` (EcsTestWorld + `GridSpawnSystem`) yields 14 weapon, 14 thruster and 0 shield consumers sorted by (priority desc, instance asc); every functional entity has `PowerLink.Bound == 1`; `Stored == Capacity == 200`, `Generation == 40`.
   - [ ] A `GridRebuildRequest` with a structure that adds one shield emitter re-initialises the grid in the same frame (15 consumers, shield first).
-  - [ ] Grids without `ShipPower` are ignored; non-consumer functional entities get `ConsumerIndex == -1`.
+  - [ ] Grids without `ShipPower` are ignored; non-consumer functional entities have no `PowerRequest` and `ConsumerCount == 0`; every bound element's `ConsumerIndex` points at a consumer with the same `Functional` and `Module`.
+  - [ ] A test block with two consuming modules yields two consumers on one entity; `Powered` is enabled only while both are not browned out.
   - [ ] No structural change outside `OnCreate`; leak detection clean.
 - **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/PowerInitSystemTests.cs`: `Spawn_BuildsSortedConsumers`, `Spawn_SetsFullStorage`, `Rebuild_Reinitialises`, `NoShipPower_Ignored`, `NonConsumer_IndexMinusOne`.
 
 ### PWR-005 — `PowerAllocationSystem`
 - **Milestone:** M2
 - **Tier:** frontier — F2 enable bits from parallel jobs; F4 budgeted hot path
-- **Depends on:** `PWR-004`, `FLT-001`, `ABL-001`, `WPN-001`
-- **Do:** Implement jobs A and B exactly as §5.3, including the two-pass split for ability costs and the hulk branch.
+- **Depends on:** `PWR-004`, `ABL-001`
+- **Do:** Implement jobs A and B exactly as §5.3, including the two-pass split for ability costs and the hulk branch. Tests drive demand by setting `PowerRequest.Requesting` directly.
 - **Files:** `Assets/Game/Simulation/Power/{PowerAllocationSystem,PowerAllocateJob,PoweredApplyJob}.cs`
 - **Acceptance criteria:**
   - [ ] Gen 40, cap 200, one weapon group held with draw 46 E/s: first brownout at tick 1,980 ± 1 (33 s); afterwards the lowest-priority, highest-index weapons stay off for ≥ 30 ticks at a time.
@@ -582,24 +627,23 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 ### PWR-006 — `ShipStatsAggregateSystem`
 - **Milestone:** M2
 - **Tier:** frontier — F3 change-filter/signature logic silently goes stale if wrong; F4 hot path
-- **Depends on:** `PWR-004`, `FLT-001`, `WPN-001`, `SPEC-12`
-- **Do:** Implement §5.4 (`IJobChunk` with `DidChange` filters, signature, full/cheap/modifier parts, `GyroYawTorque`). Thruster positions use `GridSpaceMath.InstanceCenter` from SPEC-20 (FLT-001); weapon values come from SPEC-21's blob (WPN-001).
-- **Files:** `Assets/Game/Simulation/Power/{ShipStatsAggregateSystem,ShipStatsJob}.cs`
+- **Depends on:** `PWR-004`, `SPEC-12`
+- **Do:** Implement §5.4 (job 1 with `DidChange` filters, signature, mass and multiplier parts; job 2 `PowerStatsJob`). Propulsion and weapon totals are not computed here (SPEC-20 `PropulsionStatsSystem`, SPEC-21 `WeaponStatsSystem`, ADR-0014).
+- **Files:** `Assets/Game/Simulation/Power/{ShipStatsAggregateSystem,ShipStatsJob,PowerStatsJob}.cs`
 - **Acceptance criteria:**
-  - [ ] `ship_fighter` after spawn: `AliveWeaponCount == 14`, `SustainedDps` equals the sum from SPEC-21 §4.9, `PowerGeneration == 40`, `ForwardThrust > 0`, `FunctionalRevision == 1`.
-  - [ ] Destroying one weapon (set `BlockInstance.Flags |= Destroyed` in the test) increments `FunctionalRevision` once and lowers `SustainedDps`; damaging hull cells only (no functional change) does not increment it.
-  - [ ] Changing `PhysicsMass` updates `Mass` and accelerations without a full recompute (`FunctionalRevision` unchanged).
-  - [ ] A `ShipStatModifier { Thrust, 3 }` makes `ThrustMultiplier == 3` and triples `ForwardAccel`.
-  - [ ] A ship with no side-facing thrusters has `YawTorque == 0`, `GyroYawTorque > 0` and `TurnRateDeg > 0`; a hulk has `GyroYawTorque == 0`.
+  - [ ] `ship_fighter` after spawn: `PowerStats.Generation == 40`, `PowerStats.Capacity == 200`, `AliveFunctionalCount` equals its functional block count, `FunctionalRevision == 1`, `PowerStats.SourceRevision == 1`.
+  - [ ] Destroying one weapon (set `BlockInstance.Flags |= Destroyed` in the test) increments `FunctionalRevision` once and recomputes `PowerStats`; damaging hull cells only (no functional change) does not increment it.
+  - [ ] Changing `PhysicsMass` updates `Mass` and `MassFraction` without a revision change.
+  - [ ] A `ShipStatModifier { Thrust, 3 }` makes `ShipStatMultipliers.Get(StatId.Thrust) == 3`; other stats stay 1.
   - [ ] Dormant ships are not updated; hulks are not updated.
-- **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/ShipStatsAggregateSystemTests.cs`: `Gyro_TurnsWithoutSideThrusters`, `Spawn_FullRecompute`, `WeaponDestroyed_IncrementsRevision`, `HullDamageOnly_NoRecompute`, `MassChange_CheapUpdateOnly`, `Modifier_AppliesMultiplier`, `Dormant_Skipped`, `Hulk_Skipped`.
+- **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/ShipStatsAggregateSystemTests.cs`: `Spawn_FullRecompute`, `WeaponDestroyed_IncrementsRevision`, `HullDamageOnly_NoRecompute`, `MassChange_CheapUpdateOnly`, `Modifier_AppliesMultiplier`, `PowerStats_FollowRevision`, `Dormant_Skipped`, `Hulk_Skipped`.
 
 ### PWR-007 — `ShieldSystem`
 - **Milestone:** M2
 - **Tier:** frontier — F2 NativeStream consumer and sorted per-grid parallel apply; F3 ordering
 - **Depends on:** `PWR-005`, `PWR-006`, `PWR-002`, `DMG-001`, `VFX-001`, `SPEC-02`
-- **Do:** Create the `ShieldHitStreams` singleton with its `SimEventChannel<ShieldHit>` (SPEC-02, not re-implemented) in `ShieldSystem.OnCreate` and dispose it in `OnDestroy`; implement §5.5 jobs 1 and 2, ripple ring, FX events, overflow `DamageEvent`s through SPEC-13's `ShieldOverflow` producer slot, hulk branch.
-- **Files:** `Assets/Game/Simulation/Power/{ShieldSystem,ShieldHitGatherJob,ShieldUpdateJob}.cs`
+- **Do:** Create the `ShieldHitStreams` singleton with its `SimEventChannel<ShieldHit>` (SPEC-02, not re-implemented) in `ShieldSystem.OnCreate` and dispose it in `OnDestroy`; implement `ShieldPowerDemandSystem` (§5.5b), §5.5 jobs 1 and 2, ripple ring, FX events, overflow `DamageEvent`s through SPEC-13's `ShieldOverflow` producer slot, hulk branch.
+- **Files:** `Assets/Game/Simulation/Power/{ShieldSystem,ShieldHitGatherJob,ShieldUpdateJob,ShieldPowerDemandSystem}.cs`
 - **Acceptance criteria:**
   - [ ] Fresh ship with one emitter: `MaxHp == 3000`, `Hp == 3000`, `Active == 1` after the first update; radii ≥ 3 m and contain every bound corner.
   - [ ] 10 Energy hits of 300: shield absorbs `10 × 375 = 3750` → collapses on the 8th hit; overflow of the 8th and the full 9th/10th hits become `DamageEvent`s whose `LocalPoint` lies inside a solid cell's bounds (± 0.05 cell).
@@ -638,7 +682,7 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 | 2 | Who calls `PowerGridSetup.AddComponents` (and SPEC-21's `WeaponGridSetup`, SPEC-24's `AbilityGridSetup`) | The ship/station spawn helper (`ShipSpawnService`, SPEC-01/31/33) calls `CombatGridSetup.AddAll(em, request)` (SPEC-21 §4.8) for every Ship and Station request; Blueprint Lab and asteroid spawns do not | SPEC-01 / SPEC-31 |
 | 3 | Legacy coreless blueprints have no power | Keep: they cannot fire; encounter content must not use them as combatants until SPEC-72 or the owner adds a core | Owner / SPEC-72 |
 | 4 | Thruster power draw (SPEC-04 OQ 4) | 0 E/s; thrusters are still consumers (always granted) so a later non-zero draw works without code changes | SPEC-20 |
-| 5 | Does SPEC-20's `PropulsionSystem` read `ShipStats.ThrustMultiplier`, `MaxSpeedMultiplier`, `TurnRateMultiplier` and skip thrusters whose `Powered` bit is off | Yes (needed for the speed boost ability and brownouts) | SPEC-20 |
+| 5 | Does SPEC-20's `PropulsionSystem` read the `Thrust`, `MaxSpeed`, `TurnRate` multipliers (`ShipStatMultipliers.Get`, ADR-0014) and skip thrusters whose `Powered` bit is off | Yes (needed for the speed boost ability and brownouts) | SPEC-20 |
 | 6 | SPEC-13 `DamageStreams` producer slot for shield overflow | SPEC-13 provides a producer kind `ShieldOverflow` with a per-tick `NativeStream` owned by `ShieldSystem` (same owner-allocates pattern as `ShieldHitStreams`) | SPEC-13 |
 | 7 | Should energy and shield HP be saved | No (Decision 12) | Owner |
 | 8 | Should a ship's `InitialMass` survive save/load so `MassFraction` stays meaningful after loading a damaged ship | No for M3: after load `InitialMass` = loaded mass; revisit when SPEC-05 saves ship damage | SPEC-05 |

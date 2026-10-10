@@ -131,7 +131,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField] private AiRole role;
         [UnityEngine.SerializeField, UnityEngine.Range(1, 120)] private int thinkIntervalTicks = 10;
         [UnityEngine.SerializeField, UnityEngine.Min(100)] private float sensorRange = 1500;          // m: target search radius
-        [UnityEngine.SerializeField, UnityEngine.Range(0.2f, 1.2f)] private float preferredRangeFraction = 0.7f; // of ShipStats.MaxWeaponRange
+        [UnityEngine.SerializeField, UnityEngine.Range(0.2f, 1.2f)] private float preferredRangeFraction = 0.7f; // of WeaponStats.MaxWeaponRange (SPEC-21)
         [UnityEngine.SerializeField, UnityEngine.Min(10)] private float minEngageRange = 80;           // m
         [UnityEngine.SerializeField] private AiFacing facing = AiFacing.FaceTarget;
         [UnityEngine.SerializeField, UnityEngine.Range(0, 1)] private float throttle = 0.85f;         // max fraction of the speed caps
@@ -310,10 +310,10 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (`AiS
 
 ### 5.4 `AiDecisionSystem`
 
-`AiThinkJob : IJobEntity` (`ScheduleParallel`) over roots with `AiBrain`, `ShipTarget`, `WeaponControl`, `Allegiance`, `LocalTransform`, `PersistentId`, `WithNone<PlayerShip, Hulk>`; reads the hash (`BeginRead/EndRead`), `FactionRelations`, `ShipStats` (optional), `Dormant`, `GridSpawning`, `PhysicsVelocity`. Writes only its own entity's `AiBrain`, `ShipTarget`, `WeaponControl`.
+`AiThinkJob : IJobEntity` (`ScheduleParallel`) over roots with `AiBrain`, `ShipTarget`, `WeaponControl`, `Allegiance`, `LocalTransform`, `PersistentId`, `WithNone<PlayerShip, Hulk>`; reads the hash (`BeginRead/EndRead`), `FactionRelations`, `ShipStats`, `WeaponStats` (optional), `Dormant`, `GridSpawning`, `PhysicsVelocity`. Writes only its own entity's `AiBrain`, `ShipTarget`, `WeaponControl`.
 1. Skip if `GridSpawning` enabled. `interval = profile.ThinkIntervalTicks × (Dormant ? DormantThinkMultiplier : 1)`; skip unless `(Tick + (uint)PersistentId.Value) % interval == 0`. `ThinkCount++`, `LastThinkTick = Tick`; `rng` per decision 7.
 2. **Target validity:** current `ShipTarget.Value` must exist in the hash (`FindIndex ≥ 0`), be `Kind ∈ {Ship, Station}` and hostile; else clear.
-3. **Target choice** (Role `Civilian`: never; otherwise every think): `QuerySphere(own centre, SensorRange)`; candidates = hostile proxies of kind Ship/Station other than self. `score = d / max(1, range) − (PlayerShip flag ? PlayerBias : 0) − (index == current ? Stickiness : 0)` with `d` = centre distance and `range = ShipStats.MaxWeaponRange` (or `SensorRange` without stats); lowest score wins, ties by lower proxy index. Write `ShipTarget` (and `SinceTick` on change).
+3. **Target choice** (Role `Civilian`: never; otherwise every think): `QuerySphere(own centre, SensorRange)`; candidates = hostile proxies of kind Ship/Station other than self. `score = d / max(1, range) − (PlayerShip flag ? PlayerBias : 0) − (index == current ? Stickiness : 0)` with `d` = centre distance and `range = WeaponStats.MaxWeaponRange` (or `SensorRange` without stats); lowest score wins, ties by lower proxy index. Write `ShipTarget` (and `SinceTick` on change).
 4. **State** (`hull = ShipStats.MassFraction` or 1; `toAnchor = |pos − Anchor|`):
    - Role `Turret` → `Hold`.
    - `FleeHullFraction > 0 && hull < FleeHullFraction` and a hostile exists within `SensorRange` → `Flee`.
@@ -321,7 +321,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (`AiS
    - Target set → `Engage`, unless `LeashRadius > 0 && toAnchor > 1.5 × LeashRadius` → `Return` (and clear the target).
    - No target: `LeashRadius > 0 && toAnchor > LeashRadius` → `Return`; else `Patrol` if `PatrolRadius > 0`, else `Idle`.
    - `Return` ends when `toAnchor < ArrivalRadius × 2`.
-5. **Goal** (`range = max(MinEngageRange, ShipStats.MaxWeaponRange × PreferredRangeFraction)`; positions on the plane, `y = 0`):
+5. **Goal** (`range = max(MinEngageRange, WeaponStats.MaxWeaponRange × PreferredRangeFraction)`; positions on the plane, `y = 0`):
    - `Engage`: `toSelf = normalize(xz(pos − targetCentre))` (zero → +X); every `OrbitFlipThinks` thinks flip `OrbitSign` with probability 0.5; `dir = rotateY(toSelf, OrbitSign × OrbitStepRad)`; `GoalPosition = targetCentre + dir × range`; `GoalHeadingYaw = FaceTarget ? yaw toward the target : yaw of (target direction rotated by OrbitSign × 90°)`; `GoalSpeedFraction = Throttle`.
    - `Flee`: away from the nearest hostile: `GoalPosition = pos + normalize(xz(pos − threat)) × 1500`; heading along it; speed 1.
    - `Return`: `GoalPosition = Anchor`; heading toward it; speed `Throttle`.
@@ -335,7 +335,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (`AiS
 `AiSteerJob : IJobEntity` (`ScheduleParallel`) over roots with `AiBrain`, `ShipCommand`, `FlightState`, `LocalTransform`, `WithNone<PlayerShip, Hulk>`. Every tick:
 1. `cmd = default` (`Edges = 0`, `FireGroups = 0` — decision 6). Roles `Turret`, or no `FlightState` → write `cmd` with `AimWorld = target centre`, `AimValid = target ? 1 : 0` and return.
 2. `fwd = Planar.ForwardFromYaw(Planar.YawFromForward(rotate(rot, (0,0,1))))`; `e = Planar.WrapAngle(GoalHeadingYaw − currentYaw)`; `Turn = clamp(e / (FlightState.YawRateCap × 0.5), −1, 1)` (cap 0 → Turn 0).
-3. `to = GoalPosition − pos` (XZ); `dist = length(to)`; arrival: `dist < ArrivalRadius` → desired world velocity 0; else `vDes = normalize(to) × min(GoalSpeedFraction × FlightState.ForwardCap, sqrt(2 × aBrake × max(0, dist − ArrivalRadius)))` with `aBrake = max(0.5, 0.5 × ShipStats.ForwardAccel)` (or 2 m/s² without stats).
+3. `to = GoalPosition − pos` (XZ); `dist = length(to)`; arrival: `dist < ArrivalRadius` → desired world velocity 0; else `vDes = normalize(to) × min(GoalSpeedFraction × FlightState.ForwardCap, sqrt(2 × aBrake × max(0, dist − ArrivalRadius)))` with `aBrake = max(0.5, 0.5 × PropulsionStats.ForwardAccel)` (or 2 m/s² without stats).
 4. Local: `v = FlightMath.ToLocalPlanar(vDes, rot)`; `Thrust.x = clamp(v.x / max(1, StrafeCap), −1, 1)`; `Thrust.y = v.y ≥ 0 ? clamp(v.y / max(1, ForwardCap), 0, 1) : clamp(v.y / max(1, ReverseCap), −1, 0)`; if `|Thrust.y| < 0.002` and the current forward speed exceeds 1 m/s, set `Thrust.y = −0.002 × sign(current forward speed)` so flight assist stops the ship instead of coasting (SPEC-20 decision 4).
 5. `AimWorld` = target centre (weapons lead themselves), `AimValid = target set ? 1 : 0`. Write `ShipCommand`.
 
@@ -364,7 +364,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (`AiS
 | No hostile in range | Patrol/Idle; `Autofire = 0`; `ShipTarget` cleared |
 | Target becomes a hulk or is destroyed | Cleared at the next think; autofire stops (SPEC-21 also requires a hostile target) |
 | Unarmed ship (`MaxWeaponRange == 0`) with role Combat | Treated as Civilian for state choice (flees hostiles) |
-| No `ShipStats` (before SPEC-22 init) | Defaults: hull 1, range = `SensorRange × 0.5`, `aBrake = 2` |
+| No `ShipStats`/`WeaponStats`/`PropulsionStats` (before SPEC-22 init) | Defaults: hull 1, range = `SensorRange × 0.5`, `aBrake = 2` |
 | Player ship has `AiBrain` (bug) | Excluded by `WithNone<PlayerShip>` everywhere |
 | Ship far away (`Dormant`) | Thinks every `interval × 6` ticks; steering continues |
 | Proxy count > 127 in one query | Output truncated to the lowest indices; consumers use the count to warn once |

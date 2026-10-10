@@ -45,7 +45,7 @@ This spec turns "who controls the ship" into physical motion. A ship is flown th
 8. **Edges are consumed one per tick.** `PlayerCommandApplySystem` turns each `PlayerEdgeCounters` counter difference into one `ShipCommandEdges` bit for one tick and advances its consumed copy by one. `ShipCommand.Edges` is valid only during the tick it was written; every `ShipCommand` writer rewrites `Edges` every tick (0 when nothing happened). Variable-rate consumers (SPEC-31 interaction) read `PlayerCommand` counters with their own consumed copy instead. Reason: SPEC-03 decision 4; a 6-tick frame fires an edge once and a 0-tick frame loses nothing.
 9. **Planar constraint by impulses and inertia.** SPEC-12 locks X/Z rotation in `PhysicsMass`; `PlanarConstraintSystem` removes vertical velocity and pulls `Position.y` back to 0 with a velocity bias (`PlaneCorrection` per tick). It never writes `LocalTransform`. Reason: architecture §8 (only `OriginRebaseSystem` shifts transforms; Unity Physics integrates).
 10. **The thruster list is rebuilt per ship when `VoxelGrid.Revision` changes** (O(block instances) per changed ship, carrying throttles over by instance index), never per tick. Reason: architecture §11.1; no dependency on SPEC-22 in M1.
-11. **M1 runs without SPEC-22.** In M1 every thruster is treated as powered and every multiplier is 1. FLT-012 (M2) reads `ShipStats` multipliers and `Powered` when present. Reason: M1 exit gate "fly a ship built from blocks" precedes power (M2).
+11. **M1 runs without SPEC-22.** In M1 every thruster is treated as powered and every multiplier is 1. FLT-012 (M2) reads `ShipStatMultipliers` and `Powered` when present, makes thrusters power consumers (ADR-0014: `PowerRequest` element, `ThrusterPowerDemandSystem`) and owns `PropulsionStats`. Reason: M1 exit gate "fly a ship built from blocks" precedes power (M2).
 12. **Turn sign:** `Turn = +1` turns right: yaw increases, +Z rotates toward +X, `Angular.y > 0` (SPEC-02 `Planar`, SPEC-03 bindings). Ship forward = grid +Z, up = +Y.
 13. **Folders and namespaces:** `Assets/Game/Simulation/Commands/` → `Game.Simulation.Commands`; `Assets/Game/Simulation/Flight/` → `Game.Simulation.Flight` (jobs in `Flight/Jobs/`, same namespace); `Assets/Game/Simulation/Common/` → `Game.Simulation.Common`; `PlanarConstraint` in `Assets/Game/Data/Components/` → `Game.Data.Components` (Voxel code reads it, SPEC-13).
 14. **Profiler markers** `<SystemName>.<Step>` on main-thread steps; jobs are profiled by name.
@@ -283,7 +283,25 @@ namespace Game.Simulation.Flight
     /// <summary>Spawn-time helpers called by ShipSpawnService (SPEC-01) on the request entity, main thread, outside system updates.</summary>
     public static class FlightSetup
     {
-        public static void Add(Unity.Entities.EntityManager em, Unity.Entities.Entity root);   // ShipCommand, FlightState, FlightThruster buffer (all zero/empty)
+        public static void Add(Unity.Entities.EntityManager em, Unity.Entities.Entity root);   // ShipCommand, FlightState, FlightThruster buffer, PropulsionStats (all zero/empty)
+    }
+
+    /// <summary>Feature stats of propulsion (ADR-0014). On every ship root (FlightSetup). Only writer: PropulsionStatsSystem (M2).</summary>
+    public struct PropulsionStats : Unity.Entities.IComponentData
+    {
+        // Functional part: recomputed when ShipStats.FunctionalRevision != SourceRevision
+        public float ForwardThrust, ReverseThrust, StrafeThrust;  // N (strafe = min of left and right)
+        public float YawTorque;         // N·m = min(Σ positive yaw torques, Σ |negative yaw torques|) of the thrusters
+        public float ThrusterDraw;      // E/s at full throttle
+        public int AliveThrusterCount;
+        public uint SourceRevision;
+        // Mass part: recomputed when the functional part, PhysicsMass or ShipStatMultipliers changed
+        public float GyroYawTorque;     // N·m = FlightMath.GyroYawTorque(FlightConfig, InverseInertia.y)
+        public float ForwardAccel;      // m/s² = ForwardThrust × Thrust multiplier / ShipStats.Mass
+        public float ReverseAccel;      // m/s²
+        public float StrafeAccel;       // m/s²
+        public float YawAccelDeg;       // deg/s² = degrees((YawTorque × Thrust mult + GyroYawTorque) × TurnRate mult × InverseInertia.y)
+        public float TurnRateDeg;       // deg/s: 90 / t90 with t90 = 2·sqrt((π/2) / yawAccelRad); 0 if yawAccel = 0
     }
 
     public static class PlanarConstraintSetup
@@ -302,7 +320,9 @@ namespace Game.Simulation.Flight
 | `ShipCommand` of the `PlayerShip` | `PlayerCommandApplySystem` |
 | `ShipCommand` of AI ships | SPEC-23 steering (queries `WithNone<PlayerShip>`) |
 | `FlightState`, `FlightThruster`, `ThrusterState` | `PropulsionSystem` |
-| `ThrusterVisual` | `ThrusterInitSystem` |
+| `ThrusterVisual`; the `Thruster` element's `Draw`/`Priority` in `PowerRequest` (M2) | `ThrusterInitSystem` |
+| The `Thruster` element's `Requesting` (M2) | `ThrusterPowerDemandSystem` |
+| `PropulsionStats` (M2) | `PropulsionStatsSystem` |
 | `PhysicsVelocity` | as architecture §8; this spec adds impulses from `PropulsionSystem` and `PlanarConstraintSystem` only |
 
 Memory: per ship root `ShipCommand` 40 B + `FlightState` 64 B + buffer header; `FlightThruster` 48 B per thruster outside the chunk; per thruster entity `ThrusterState` 4 B + `ThrusterVisual` 28 B. 50 ships × 20 thrusters ≈ 80 KB.
@@ -314,11 +334,13 @@ Memory: per ship root `ShipCommand` 40 B + `FlightState` 64 B + buffer header; `
 | System | Group and order | Burst | Requires |
 |---|---|---|---|
 | `PlayerCommandApplySystem` | `ShipCommandGroup`, `OrderFirst = true` | yes | `GameplayActive`, `PlayerCommand` |
-| `ThrusterInitSystem` | `GameInitGroup`, `[UpdateAfter(typeof(GridSpawnSystem))]` | yes | `GameplayActive`, `BlockDefsRef`, `OrientationTablesRef` |
-| `PropulsionSystem` | `GameplayPrePhysicsGroup`; M1: no ordering attribute (first after `ShipCommandGroup`); M2 (FLT-012): `[UpdateAfter(typeof(ShipStatsAggregateSystem))]` | yes | `GameplayActive`, `FlightConfig`, `BlockDefsRef`, `OrientationTablesRef` |
+| `ThrusterInitSystem` | `GameInitGroup`, `[UpdateAfter(typeof(GridSpawnSystem))]`; M2 (FLT-012) also `[UpdateBefore(typeof(PowerInitSystem))]` | yes | `GameplayActive`, `BlockDefsRef`, `BlockModulesRef`, `OrientationTablesRef` |
+| `ThrusterPowerDemandSystem` (M2) | `PowerDemandGroup` (SPEC-22) | yes | `GameplayActive` |
+| `PropulsionStatsSystem` (M2) | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(ShipStatsAggregateSystem))]`, `[UpdateBefore(typeof(PropulsionSystem))]` | yes | `GameplayActive`, `FlightConfig`, `BlockModulesRef` |
+| `PropulsionSystem` | `GameplayPrePhysicsGroup`; M1: no ordering attribute (first after `ShipCommandGroup`); M2 (FLT-012): `[UpdateAfter(typeof(PropulsionStatsSystem))]` | yes | `GameplayActive`, `FlightConfig`, `BlockDefsRef`, `OrientationTablesRef` |
 | `PlanarConstraintSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(PropulsionSystem))]` | yes | `GameplayActive`, `FlightConfig` |
 
-Order inside the tick (architecture §5): `ShipCommandGroup` (player apply, AI) → `PowerAllocationSystem` → `ShipStatsAggregateSystem` → `PropulsionSystem` → `PlanarConstraintSystem` → `WeaponAimSystem` (SPEC-21 declares `[UpdateAfter(typeof(PlanarConstraintSystem))]`) → … → physics.
+Order inside the tick (architecture §5): `ShipCommandGroup` (player apply, AI) → `PowerDemandGroup` → `PowerAllocationSystem` → `ShipStatsAggregateSystem` → `PropulsionStatsSystem` → `PropulsionSystem` → `PlanarConstraintSystem` → `WeaponAimSystem` (SPEC-21 declares `[UpdateAfter(typeof(PlanarConstraintSystem))]`) → … → physics.
 
 ### 5.1 `PlayerCommandApplySystem`
 
@@ -355,7 +377,7 @@ Per ship (`dt = SimTime.FixedTimestep`, `c = FlightConfig`):
 1. **Body:** `InverseMass ≤ 0` → skip (kinematic/static). `M = 1 / InverseMass`; `invIyy = PhysicsMass.InverseInertia.y`; `Iyy = invIyy > 0 ? 1 / invIyy : 0`; `com = PhysicsMass.CenterOfMass`; `rot = LocalTransform.Rotation`.
 2. **Thruster list** (marker none; inside job): if `(Flags & Initialized) == 0` or `SourceRevision != VoxelGrid.Revision`: build a new list in a `FixedList4096Bytes<FlightThruster>`-sized scratch or a `NativeList` (`Allocator.Temp`) by walking `BlockInstance` in index order: instance `i` with `Block != 0`, `(Flags & Destroyed) == 0`, `def.HasModule(BlockModuleId.Thruster)`, `Functional != Entity.Null` and existing: `d = BlockDirToGrid((0,0,−1), ot, Orient)`; `h = (d.x, 0, d.z)`; `|h| < 0.01` → skip; `ForceDirLocal = normalize(h)`; `PositionLocal = InstanceCenter(...)`; `MaxForce` = `ThrustNewtons` of the block's `ThrusterParams` row (`BlockModulesBlob.TryGet`, SPEC-04 §4.6); `Throttle` = the old entry's throttle with the same `InstanceIndex` (merge walk; both lists are in index order), else 0. Replace the buffer contents; `SourceRevision = Revision`; set `Initialized`.
 3. **Kinematics:** `v = PhysicsVelocity.Linear`; `local = FlightMath.ToLocalPlanar(v, rot)`; `ωy = math.rotate(math.mul(rot, PhysicsMass.InertiaOrientation), PhysicsVelocity.Angular).y`.
-4. **Targets:** multipliers `ms = mt = mr = 1` (M2: `ShipStats.MaxSpeedMultiplier`, `ThrustMultiplier`, `TurnRateMultiplier` if present and `Initialized`). `boost = (cmd.Flags & Boost) != 0 && (cmd.Flags & Brake) == 0`. `SpeedCaps(c, ms, boost, …)`, `yawCap = YawRateCap(c, mr)`. `Targets(...)`:
+4. **Targets:** multipliers `ms = mt = mr = 1` (M2: `ShipStatMultipliers.Get(StatId.MaxSpeed / Thrust / TurnRate)` if the root has `ShipStatMultipliers`). `boost = (cmd.Flags & Boost) != 0 && (cmd.Flags & Brake) == 0`. `SpeedCaps(c, ms, boost, …)`, `yawCap = YawRateCap(c, mr)`. `Targets(...)`:
    - `Brake` → target velocity `(0, 0)`, target yaw rate 0.
    - Else `tx = clamp(Thrust.x, −1, 1) × strafeCap`; `tz = Thrust.y > 0 ? Thrust.y × forwardCap : Thrust.y < 0 ? Thrust.y × reverseCap : clamp(local.y, −reverseCap, forwardCap)`; `tω = clamp(Turn, −1, 1) × yawCap`.
    - Sanitise: any non-finite command field is treated as 0.
@@ -403,12 +425,21 @@ sequenceDiagram
     IN->>PA: PlayerCommand (analog, flags, edge counters)
     PA->>PA: one edge per counter difference → ShipCommand (PlayerShip)
     AI->>AI: ShipCommand (AI ships, Edges rewritten every tick)
-    PW->>PR: Powered bits, ShipStats multipliers
+    PW->>PR: Powered bits, ShipStatMultipliers
     PR->>PH: thruster impulses at positions + gyro angular impulse
     PL->>PH: vertical impulse (Y → 0)
     PH->>PH: integrate, contacts (rams push both ships)
 ```
 
+
+### 5.7 Power demand and propulsion stats (M2, FLT-012; ADR-0014)
+
+**`ThrusterPowerDemandSystem`** (`PowerDemandGroup`, Burst `IJobEntity`, `ScheduleParallel` over thruster entities with `PowerRequest`, `FunctionalBlock`, `ThrusterState`): `cmd = ShipCommand[FunctionalBlock.Grid]` (absent → zero); `moving = any(cmd.Thrust ≠ 0) || cmd.Turn ≠ 0`; `PowerRegistration.SetRequesting(requests, Thruster, moving)`. The only writer of the thruster elements' `Requesting`.
+
+**`PropulsionStatsSystem`** (Burst `IJobEntity`, `ScheduleParallel` over roots with `PropulsionStats`, `ShipStats`, `BlockInstance`, `VoxelGrid`; `WithNone<Hulk>`, so hulks keep their last values and are never read for flight; skip `GridSpawning` and `Dormant`):
+1. **Functional part**, if `SourceRevision != ShipStats.FunctionalRevision`: zero it; for each alive instance with a `Thruster` row: `F = row.ThrustNewtons`; `d = Orientations.Rotate(new float3(0,0,−1), inst.Orient)` (force direction on the ship, SPEC-04 decision 9); `ForwardThrust += F·max(0, d.z)`, `ReverseThrust += F·max(0, −d.z)`, `right += F·max(0, d.x)`, `left += F·max(0, −d.x)`; `r = GridSpaceMath.InstanceCenter(...) − com` (com = `PhysicsMass.CenterOfMass`, or `ShipStats.BoundsCenter` without mass); `τ = cross(r, F·d).y`; `τ > 0 ? posYaw += τ : negYaw += −τ`; `ThrusterDraw += row.PowerDraw`; `AliveThrusterCount++`. Then `StrafeThrust = min(left, right)`, `YawTorque = min(posYaw, negYaw)`, `SourceRevision = FunctionalRevision`.
+2. **Mass part**, if step 1 ran or the chunk's `ShipStats` or `ShipStatMultipliers` changed (`DidChange`): with `m = ShipStats.Mass > 0`, `mt = Get(Thrust)`, `mr = Get(TurnRate)`: `ForwardAccel = ForwardThrust × mt / Mass` (same for reverse and strafe); `GyroYawTorque = FlightMath.GyroYawTorque(FlightConfig, InverseInertia.y)`; `yawAccelRad = (YawTorque × mt + GyroYawTorque) × mr × InverseInertia.y`; `YawAccelDeg = degrees(yawAccelRad)`; `TurnRateDeg = yawAccelRad > 0 ? 90 / (2·sqrt((π/2) / yawAccelRad)) : 0`. Without mass: all accelerations 0.
+Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 ## 6. Public API
 
 | Call / type | Pre-conditions | Post-conditions / errors |
@@ -416,7 +447,7 @@ sequenceDiagram
 | `ShipCommand` (component) | On every ship root (`FlightSetup.Add`) | Read by PWR/WPN/ABL; written only by the writers of §4.6; `Edges` rewritten every tick by its writer |
 | `PlayerCommand` (singleton) | Created by `PlayerInputSampleSystem.OnCreate` (SPEC-03) | Read only by `PlayerCommandApplySystem` and variable-rate edge consumers |
 | `PlayerControlLock` (singleton, M3) | Created by `PlayerCommandApplySystem.OnCreate` | Only writer: SPEC-32 `TravelService` (main thread, outside the fixed step); read by step 4b |
-| `FlightSetup.Add(em, root)` | Main thread outside system updates; `root` is a spawn request entity (SPEC-10) | Adds `ShipCommand`, `FlightState`, `FlightThruster` (zero) |
+| `FlightSetup.Add(em, root)` | Main thread outside system updates; `root` is a spawn request entity (SPEC-10) | Adds `ShipCommand`, `FlightState`, `FlightThruster`, `PropulsionStats` (zero) |
 | `PlanarConstraintSetup.Add(em, root)` | As above; caller also sets `GridSpawnFlags.PlanarInertia` (SPEC-01 does) | Adds `PlanarConstraint` |
 | `GridSpaceMath.*` | Valid blob refs (`ref` access, traps T1.7) | Pure |
 | `FlightMath.*`, `ThrustAllocator.Solve` | Arrays of equal length | Pure, deterministic |
@@ -599,11 +630,14 @@ sequenceDiagram
 - **Milestone:** M2
 - **Tier:** frontier — F5: ordering with SPEC-22's systems and power gating of a velocity writer
 - **Depends on:** `FLT-007`, `PWR-001`
-- **Do:** Add `[UpdateAfter(typeof(ShipStatsAggregateSystem))]` to `PropulsionSystem`; read `ShipStats` multipliers when the root has `ShipStats` with `Initialized`; treat a thruster as unusable when it has `Powered` and the bit is disabled (§5.3 steps 4 and 6). Ledger note to SPEC-22 to include `FlightMath.GyroYawTorque` in `ShipStats.YawTorque` (integration).
-- **Files:** `Assets/Game/Simulation/Flight/{PropulsionSystem,PropulsionJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Flight/PropulsionPowerTests.cs`
+- **Do:** (1) `ThrusterInitSystem`: `PowerRegistration.RegisterConsumer(Thruster)` in `OnCreate`; for new thruster entities `SetConsumer(requests, Thruster, row.PowerDraw, PowerTuning.PriorityThruster)`; add `[UpdateBefore(typeof(PowerInitSystem))]`. (2) `ThrusterPowerDemandSystem` (§5.7). (3) `PropulsionStats` in `FlightSetup.Add` and `PropulsionStatsSystem` (§5.7). (4) `PropulsionSystem`: `[UpdateAfter(typeof(PropulsionStatsSystem))]`, multipliers from `ShipStatMultipliers`, a thruster with `Powered` disabled is unusable (§5.3 steps 4 and 6).
+- **Files:** `Assets/Game/Simulation/Flight/{PropulsionSystem,PropulsionJob,ThrusterInitSystem,ThrusterPowerDemandSystem,PropulsionStatsSystem,PropulsionStats,FlightSetup}.cs`, `Assets/Game/Tests/EditMode/Simulation/Flight/{PropulsionPowerTests,PropulsionStatsTests}.cs`
 - **Acceptance criteria:**
-  - [ ] `ThrustMultiplier = 2` doubles forward acceleration; `MaxSpeedMultiplier = 1.5` raises the cap; an unpowered thruster never fires.
-- **Tests:** `PropulsionPowerTests.ThrustMultiplier_Applies`, `.MaxSpeedMultiplier_Applies`, `.Unpowered_DoesNotFire`.
+  - [ ] Thrust multiplier 2 doubles forward acceleration; max-speed multiplier 1.5 raises the cap; an unpowered thruster never fires.
+  - [ ] A moving ship's thrusters have `Requesting == 1` in the same tick the command starts; an idle ship's are 0.
+  - [ ] `PropulsionStats` after spawn: `ForwardThrust > 0`, `AliveThrusterCount` equals the thruster count, `SourceRevision == ShipStats.FunctionalRevision`; destroying a thruster recomputes it once.
+  - [ ] A ship with no side-facing thrusters has `YawTorque == 0`, `GyroYawTorque > 0` and `TurnRateDeg > 0`; hulks are not updated; a thrust multiplier of 3 triples `ForwardAccel` without a functional recompute.
+- **Tests:** `PropulsionPowerTests.ThrustMultiplier_Applies`, `.MaxSpeedMultiplier_Applies`, `.Unpowered_DoesNotFire`, `.Demand_SameTick`; `PropulsionStatsTests.Spawn_Totals`, `.ThrusterDestroyed_Recomputes`, `.Gyro_TurnsWithoutSideThrusters`, `.Multiplier_CheapUpdate`.
 
 ## 10. Open questions
 
@@ -613,7 +647,7 @@ sequenceDiagram
 | 2 | Core gyro (decision 6) acceptable as the source of turning for aft-only ships? | Yes; values set by FLT-010 | Owner |
 | 3 | Is boost unlimited, or does it cost energy/heat? | Unlimited in v1; SPEC-24 abilities give stronger boosts | Owner |
 | 4 | One global speed cap, or per-class caps (fighters faster)? | Global cap; heavier ships reach it slower | Owner |
-| 5 | SPEC-22: `ShipStats.YawTorque` adds `FlightMath.GyroYawTorque(config, InverseInertia.y)` for non-hulk ships, recomputed with the mass part (§5.4 step 4 there); `PWR-006` takes `GridSpaceMath` from FLT-001 instead of WPN-001 | Yes | SPEC-22 |
+| 5 | SPEC-22: `ShipStats.YawTorque` adds `FlightMath.GyroYawTorque(config, InverseInertia.y)` for non-hulk ships, recomputed with the mass part (§5.4 step 4 there); **superseded by ADR-0014:** this spec owns `PropulsionStats` (§5.7) including the gyro term; `PWR-006` takes `GridSpaceMath` from FLT-001 instead of WPN-001 | Yes | SPEC-22 |
 | 6 | SPEC-01 §5.7 step 4: `ShipSpawnService` calls `FlightSetup.Add(em, root)` next to `PlanarConstraintSetup.Add` | Yes | SPEC-01 |
 | 7 | Architecture §8 `PhysicsVelocity` row: add `PlanarConstraintSystem` (vertical impulses only) | Yes | Tech lead |
 | 8 | If contacts push planar ships off the plane by > 0.1 m (FLT-009), replace the impulse correction with a Unity Physics LimitedDOF joint (linear Y, angular X/Z locked) per ship | Keep impulses unless measured | Tech lead |

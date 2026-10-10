@@ -1106,6 +1106,7 @@ Reader rules:
 | `WorldGroup` | `SimulationSystemGroup` | normal | `UpdateAfter(VoxelRebuildGroup)`, `UpdateBefore(TransformSystemGroup)` | `GameplayActive` |
 | `PresentationBridgeGroup` | `PresentationSystemGroup` | OrderFirst | `UpdateAfter(BeginPresentationEntityCommandBufferSystem)` | — |
 | `ManagedEventDrainSystem` | `PresentationBridgeGroup` | OrderLast | — | — |
+| `PowerDemandGroup` (declared by SPEC-22 in `Game.Simulation`, ADR-0014, because it orders against `PowerAllocationSystem`) | `GameplayPrePhysicsGroup` | normal | `UpdateBefore(PowerAllocationSystem)` | — |
 
 Placement rules for other specs (architecture §5): members of `GameplayPrePhysicsGroup` other than `ShipCommandGroup` order themselves with `[UpdateAfter]`/`[UpdateBefore]` in the §5 list order (`PowerAllocationSystem` → `ShipStatsAggregateSystem` → `PropulsionSystem` → `PlanarConstraintSystem` → `WeaponAimSystem` → `WeaponFireSystem` → `AbilityActivationGroup` → `ColliderSwapSystem`); each system declares the attribute towards its predecessor. Members of `GameplayPostPhysicsGroup` do the same in §5 order and must not use `OrderLast` (reserved for `GameplayEndCommandBufferSystem` and SPEC-01's `SimClockAdvanceSystem`). No spec may put an `UpdateBefore/After` on a system in a different bucket (Decision 13).
 
