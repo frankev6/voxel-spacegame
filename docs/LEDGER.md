@@ -18,7 +18,7 @@
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
-| A0 | 14 | 1 | 0 | 1 | 0 | 0 | 16 | 0 |
+| A0 | 14 | 0 | 0 | 1 | 1 | 0 | 16 | 3 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 <!-- summary:end -->
@@ -482,20 +482,20 @@
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | no | todo |  |  |  |  |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | no | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
-| ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-10 |  |  |
-| ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | no | todo |  |  |  |  |
+| ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
+| ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | todo |  |  |  |  |
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | review | claude (claude-opus-5-5) | 2026-10-10 | a61dde8 | Needs an independent frontier review (no subagents this session). Links only; image set waits for owner OK to download |
 | ART-004 | Block-kit style test: five blocks per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002 | no | todo |  |  |  |  |
 | ART-005 | Interactive HTML design board | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002, ART-003, ART-004 | no | todo |  |  |  |  |
 | ART-006 | Owner shortlist of finalist directions | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-005 | no | todo |  |  |  |  |
-| ART-007 | Brick material baker, preview mesher, reference shader and art validator | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-001 | no | todo |  |  |  |  |
+| ART-007 | Brick material baker, preview mesher, reference shader and art validator | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-001 | yes | todo |  |  |  |  |
 | ART-008 | Look-test content for each finalist | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-004, ART-006, ART-007 | no | todo |  |  |  |  |
 | ART-009 | Look-test scenes with HUD mock | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002, ART-008 | no | todo |  |  |  |  |
 | ART-010 | Look-test capture pack and metrics | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-009 | no | todo |  |  |  |  |
 | ART-011 | Owner look-test review and one revision round | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-010 | no | todo |  |  |  |  |
 | ART-012 | Finalize the design system for approval | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-011 | no | todo |  |  |  |  |
 | ART-013 | GATE: Owner approves design system | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-012 | no | todo |  |  |  |  |
-| AST-001 | Public contract types: asset manifest, naming rules and licence register | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | ART-001 | no | todo |  |  |  |  |
+| AST-001 | Public contract types: asset manifest, naming rules and licence register | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | ART-001 | yes | todo |  |  |  |  |
 | AST-002 | Art import rules and asset validator | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | AST-001 | no | todo |  |  |  |  |
 | AST-003 | Licence audit of carried-over placeholders | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | AST-001 | no | todo |  |  |  |  |
 | ART-014 | Apply the approved direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A1 | standard | ART-013 | no | todo |  |  |  |  |
@@ -555,6 +555,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-10 — ART-001 art contract types, tokens and placeholder fonts (claude, claude-opus-5-5)
+- **What.** The 15 types of SPEC-80 §4.1–§4.3 in `Assets/Game/Data/Definitions/Art/`. `tokens.uss` rewritten byte-for-byte to §4.4: the bootstrap version predated SPEC-80 and pointed at the unlicensed Kontrapunkt font. `OfficeCodePro-{Regular,Bold}_SDF.asset` are TextCore FontAssets with the DESIGN-SYSTEM §10.9 settings: SDF AA, 90 pt sampling, padding 9, 1024² atlas, dynamic, multi-atlas. They were made by a throwaway editor script that was then deleted. Unity clears dynamic glyph data on save, so the §10.9 character set fills in at runtime. Folders `Content/Art`, `Art/LookTest` and `Editor/Art` were added, plus the glossary section *Art and presentation* (SPEC-80 Q13).
+- **Open question 9 answered: yes.** `TokenFontTests.FontBodyToken_ResolvesToPlaceholderFontAsset` (PlayMode, with a test-only `TokenFontTest.uss`) resolves `-unity-font-definition: var(--font-body)` to the font asset, so the fallback classes `.font-*` are not needed.
+- **Checks.** `tools/compile.sh` clean with zero warnings. EditMode 10/10 pass (`ArtContractTests` ×4 is new). PlayMode 2/2 pass. Reimporting `tokens.uss` after the fonts exist logs no warnings.
 
 ### 2026-10-10 — DATA-001 public contract types (claude, claude-opus-5-5)
 - **What.** 60 files transcribed from SPEC-04 §4.2–§4.9 in `Game.Data` (`Blocks/`, `Components/`, `Definitions/{Common,Items,Blocks}/`, `Validation/`, `Services/`, `ContentDatabase`), plus `Tests/EditMode/Data/ContractShapeTests.cs`. Stub bodies throw `NotImplementedException("DATA-00x")` naming the task that implements them.
