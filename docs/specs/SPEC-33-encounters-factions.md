@@ -989,7 +989,7 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
   - `StartCombat(i, scope)`.
 
   In `NarrativeWorldEventBridge`, map `FactionRelationChanged` to `NotifyDependency(Relation, catalog.IndexOf(faction))`, and `EncounterDefeated` to `add defeated_<encounter> 1` (SPEC-40 §5.6).
-- **Files:** `Assets/Game/App/Services/LogicWorldAdapter.cs`; `Assets/Game/Narrative/Services/NarrativeWorldEventBridge.cs` (or its App location per SPEC-40); `Assets/Game/Tests/EditMode/App/LogicWorldAdapterEncounterTests.cs`
+- **Files:** `Assets/Game/App/Services/LogicWorldAdapter.cs`; `Assets/Game/App/Services/NarrativeWorldEventBridge.cs` (SPEC-40 NAR-012); `Assets/Game/Tests/EditMode/App/LogicWorldAdapterEncounterTests.cs`
 - **Acceptance criteria:**
   - [ ] Each wired member calls its owner once with the mapped arguments (fakes).
   - [ ] `spawn_encounter encounter_raiders here 2` with a body scope anchors on that body.

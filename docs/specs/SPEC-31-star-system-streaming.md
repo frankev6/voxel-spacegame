@@ -149,7 +149,9 @@ namespace Game.Galaxy.Interaction
 {
     using Unity.Entities; using Game.Galaxy.Data; using Game.Data.Definitions;
 
-    /// <summary>Makes an entity a possible interaction target. Added by StarSystemLoader (bodies, body grids) and SPEC-50 (salvageable hulks).</summary>
+    /// <summary>Makes an entity a possible interaction target. Added by StarSystemLoader (bodies, body grids), SPEC-33 (hailable encounter
+    /// leaders, Kind Hail) and SPEC-50's SalvageMarkSystem (non-body, non-player hulks, Kind Salvage; one batch per frame in WorldGroup).
+    /// InteractionQuerySystem treats all of them alike; nothing else in the query changes.</summary>
     public struct Interactable : IComponentData
     {
         public InteractionKind Kind;
@@ -207,7 +209,8 @@ namespace Game.Galaxy.Services
     public enum LoaderState : byte { Idle = 0, Unloading = 1, Loading = 2, Ready = 3 }
 
     /// <summary>Owner of the loaded star system. Implements SPEC-31 §5.1–§5.8.</summary>
-    public sealed class StarSystemLoader : IGalaxyFrameTick, IGalaxyLiveDeltaSink, Game.Core.Flow.ISceneReady, Game.Core.Flow.ISceneExiting, System.IDisposable
+    /// ITravelLoader (SPEC-32 §4, Game.Galaxy.Travel) is added to the base list by SPEC-32 TRV-006 together with its two members below.
+    public sealed class StarSystemLoader : IGalaxyFrameTick, IGalaxyLiveDeltaSink, ITravelLoader, Game.Core.Flow.ISceneReady, Game.Core.Flow.ISceneExiting, System.IDisposable
     {
         public StarSystemLoader(GalaxyService galaxy, Unity.Entities.World world, Game.Voxel.Grid.VoxelStructureRegistry registry,
                                 Game.Voxel.Grid.BlueprintLibrary blueprints, IPersistentIdAllocator ids, Game.Data.Services.ContentCatalog catalog);
@@ -218,6 +221,9 @@ namespace Game.Galaxy.Services
         public bool IsReady => State == LoaderState.Ready;
         /// SPEC-32: unloads the current star system and loads `target` with the player placed at `arrival` (star-system frame).
         public bool BeginStarSystemChange(StarSystemId target, double3 arrivalPositionM, float arrivalYawRad, StarSystemEntryReason reason);
+        // SPEC-32 ITravelLoader (Game.Galaxy.Travel), bodies written by TRV-006:
+        public bool IsArrivalReady { get; }             // IsReady && Loaded == last BeginStarSystemChange target && IsAreaReady(its arrival)
+        public bool IsAreaReady(double3 positionM);     // §5.1 scene-ready T2 rule for any star-system-frame point
         public void Tick(in GalaxyFrameContext ctx);
         public void OnBodyDeltaChanged(BodyId body);    // IGalaxyLiveDeltaSink
         public void FlushStructures();                  // IGalaxyLiveDeltaSink: capture damaged persistent bodies now (before save)
@@ -290,12 +296,12 @@ namespace Game.Galaxy.Streaming
 2. `id = State.CurrentStarSystem`; if invalid or `!galaxy.Galaxy.TryGetIndex(id)` → `GameLog.Error` (SPEC-30 §7 row) and use `Galaxy.StartStarSystem`, `HasPlayerLocation = false`.
 3. If `!State.HasPlayerLocation` → `State.PlayerLocation = galaxy.GetStartLocation()`, `HasPlayerLocation = true`.
 4. Start a load (§5.2) with `reason` = `NewGame` (session flag from SPEC-01), `Load`, or `ReturnFromEditor` (scene entry reason), arrival = `PlayerLocation`.
-`IsSceneReadyComplete`: `State == Ready` **and** every body whose T2 sphere contains the arrival point has its grid with `GridSpawning` disabled (the player never spawns inside an unloaded station).
+`IsSceneReadyComplete`: `State == Ready` **and** `IsAreaReady(arrival)`: every body whose T2 sphere (bounding radius + `T2LoadDistanceM`) contains the point has its grid root and `GridSpawning` disabled (the player never spawns inside an unloaded station). SPEC-32 uses the same `IsAreaReady` for jump arrivals (`IsArrivalReady`) and cruise hops.
 
 ### 5.2 Load (state machine, one step per `Tick` unless stated)
 
 1. **Unload** (only if something is loaded): §5.3. `State = Unloading` → continue the same frame.
-2. **Origin:** `galaxy.RequestOriginReset(id, arrival.PositionM)` (SPEC-30; with player placement per §10 Q2 when the player ship exists, i.e. jumps). `State = Loading`. Wait until `FrameOrigin.StarSystem == id && FrameOrigin.AppliedRequestSerial ≥ requestSerial` (next frame's init group applies it).
+2. **Origin:** `requestSerial = reason == Jump ? galaxy.RequestOriginReset(id, arrival.PositionM, new PlayerPlacement { PositionM = arrival.PositionM, YawRad = arrival.YawRad }) : galaxy.RequestOriginReset(id, arrival.PositionM)` (SPEC-30 §4.8; on world entry the player ship does not exist yet and is spawned at the arrival by SPEC-01). `State = Loading`. Wait until `FrameOrigin.StarSystem == id && FrameOrigin.AppliedRequestSerial ≥ requestSerial` (next frame's init group applies it).
 3. **Content:** `content = galaxy.GetContent(id)` (completes a prefetch; R9: exactly one generation per load).
 4. **T1 anchors** (one frame, marker `StarSystemLoader.CreateAnchors`): build per-archetype groups (celestial with collider, celestial without, orbiting variants, voxel-body anchors, belts); `em.CreateEntity(archetype, entities)` per group; fill components in a Burst `IJobParallelFor` through lookups and complete it (outside the fixed step): `StarSystemBody`, `BodyOrbit`, `UniversePosition = OrbitMath.Position(spec, UniversalTime)`, `LocalTransform = (UniversePosition − FrameOrigin, yaw rotation, scale 1)`; colliders: `SphereCollider.Create(new SphereGeometry { Radius = RadiusM }, PhysicsLayers.Celestial, PhysicsLayers.CelestialMaterial)` created once per distinct radius in this star system (cached, disposed at unload through `DeferredDisposal`); `SpatialBody { Radius }`; `Interactable` for bodies without a structure. `em.AddSharedComponent(allEntities, new StarSystemMember { Id = id })` once. Visual child entities (§5.9) in the same batch. Destroyed celestial bodies (SPEC-30 state) get no visual and no collider.
 5. **Entry bookkeeping:** `delta = State.GetOrCreateDelta(id)`; `delta.IncrementVisit()`; `galaxy.MarkVisited(id)`; `State.CurrentStarSystem = id`; `CurrentStarSystemInfo { id, Loaded = 1, BodyCount }`; `EventBus<StarSystemEntered>.Publish(...)`.
@@ -410,7 +416,7 @@ sequenceDiagram
 |---|---|---|
 | `StarSystemLoader.BeginStarSystemChange` | `State == Ready`; `target` exists | false otherwise; true → unload, load, `StarSystemEntered(Jump)` |
 | `IGalaxyLiveDeltaSink.FlushStructures` | Main thread, outside system updates (SPEC-01 `RunWritebacks`) | Damaged persistent bodies captured into deltas |
-| `IShipSpawner.Spawn` | Loaded star system; main thread outside system updates | Ship with `StarSystemMember = args.StarSystem` and the setup components of SPEC-01 §5.7 |
+| `IShipSpawner.Spawn` | Loaded star system; main thread, outside the fixed step, no `SystemAPI`/`Entities` iteration in progress (`GalaxyFrameTicker` callbacks qualify) | Ship with `StarSystemMember = args.StarSystem` and the setup components of SPEC-01 §5.7 |
 | `DockingService.Dock/Undock` | Main thread | `DockStateChanged` published once per change |
 | `Interactable` (component) | Added before or after spawn | Considered by the next `InteractionQuerySystem` run |
 | `InteractionTarget`, `CurrentStarSystemInfo` | Read-only for others | Values of this frame |
@@ -601,8 +607,8 @@ sequenceDiagram
 
 | # | Question | Default if unanswered | Decider |
 |---|---|---|---|
-| 1 | Architecture §5 lists `BodyOnRailsSystem` in `WorldGroup`; decision 5 moves it to `GameplayPrePhysicsGroup` so moving colliders are tick-exact | Move it (architecture erratum) | Tech lead |
-| 2 | SPEC-30 `OriginRebaseRequest` needs player placement for jumps: `byte PlacePlayer; double3 PlayerPosition; quaternion PlayerRotation`; `ShiftJob` then sets the `PlayerShip` root's `UniversePosition`, `LocalTransform` and graphical-smoothing history, keeping its velocity | Add the fields; SPEC-32 sets them | SPEC-30 |
+| 1 | Architecture §5 lists `BodyOnRailsSystem` in `WorldGroup`; decision 5 moves it to `GameplayPrePhysicsGroup` so moving colliders are tick-exact | **Applied** in architecture §5 (2026-10-09) | Tech lead |
+| 2 | SPEC-30 `OriginRebaseRequest` needs player placement for jumps: `byte PlacePlayer; double3 PlayerPosition; quaternion PlayerRotation`; `ShiftJob` then sets the `PlayerShip` root's `UniversePosition`, `LocalTransform` and graphical-smoothing history, keeping its velocity | **Answered:** SPEC-30 §4.7 `OriginRebaseRequest.PlacePlayer` + `PlayerPlacement { PositionM, YawRad }` and the placement overload of `RequestOriginReset`; `PlaceJob` keeps the speed in ship-local terms | SPEC-30 |
 | 3 | Persist damage of large bodies (> 65,536 cells) in M3? | No; GAL-016 brick diffs in M4 | Owner |
 | 4 | Asteroid damage persistence | Only "destroyed" is persisted | Owner |
 | 5 | Station allegiance before SPEC-33 exists | `Allegiance.None` (neutral, never targeted by `TargetNext`) | SPEC-33 |

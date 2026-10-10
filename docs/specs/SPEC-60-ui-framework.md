@@ -103,7 +103,7 @@ namespace Game.UI.Data
         public int ToastPoolSize = 8;
         public float MinUiScale = 0.8f;
         public float MaxUiScale = 1.5f;
-        public string[] SoundCueIds = new string[6];   // index = (int)UISound; AudioCueDefinition ids, e.g. "sfx_ui_click"
+        public string[] SoundCueIds = new string[6];   // index = (int)UISound; AudioCueDefinition ids, e.g. "cue_ui_click" (SPEC-64 §6.4)
     }
 
     /// A toast request. Amount 0 = no amount prefix; otherwise "+12 Hull" / "−3 Hull".

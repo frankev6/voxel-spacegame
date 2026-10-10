@@ -560,7 +560,7 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Milestone:** A1
 - **Tier:** standard — fixed cue list and loudness rules
 - **Depends on:** `SPEC-80`, `AST-003`, `SPEC-64`
-- **Do:** Source or make, per the approved §x.9 and §10.18–§10.19, the cues `sfx_ui_click`, `sfx_ui_hover`, `sfx_ui_open`, `sfx_ui_close`, `sfx_ui_tab`, `sfx_ui_confirm`, `sfx_ui_cancel`, `sfx_ui_error`, `sfx_ui_success`, `sfx_ui_notify`, `sfx_ui_slot_pick`, `sfx_ui_slot_drop`, `sfx_ui_type`, `sfx_editor_place`, `sfx_editor_remove`, `sfx_editor_rotate`, `sfx_editor_paint`, `sfx_editor_invalid`, `sfx_editor_commit`, `sfx_editor_undo`, `sfx_editor_redo`, `sfx_editor_symmetry`, with 2–3 variations for `click`, `hover`, `place`, `remove`; `AudioCueDefinition` assets; licence rows.
+- **Do:** Source or make, per the approved §x.9 and §10.18–§10.19, the cues `cue_ui_click`, `cue_ui_hover`, `cue_ui_open`, `cue_ui_close`, `cue_ui_tab`, `cue_ui_confirm`, `cue_ui_cancel`, `cue_ui_error`, `cue_ui_success`, `cue_ui_notify`, `cue_ui_slot_pick`, `cue_ui_slot_drop`, `cue_ui_type`, `cue_editor_place`, `cue_editor_remove`, `cue_editor_rotate`, `cue_editor_paint`, `cue_editor_invalid`, `cue_editor_commit`, `cue_editor_undo`, `cue_editor_redo`, `cue_editor_symmetry`, with 2–3 variations for `click`, `hover`, `place`, `remove`; `AudioCueDefinition` assets; licence rows.
 - **Files:** `Assets/Game/Audio/Sfx/SFX_Ui_*`, `SFX_Editor_*`; `Assets/Game/Content/Audio/sfx_*.asset`; `docs/design/LICENSES.md`
 - **Acceptance criteria:**
   - [ ] Short-term loudness ≤ −20 LUFS, peaks ≤ −1 dBTP (measurement report in the log); every file `verified`.

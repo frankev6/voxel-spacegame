@@ -697,6 +697,8 @@ namespace Game.Narrative
         public void OnSessionRestored();
         public void SetWorldReady(bool ready);
         public void SetPlayerFree(bool free);
+        public void SetPlayerCanTalk(bool canTalk);          // set each frame by NarrativeTickBridgeSystem (§5.3)
+        public bool PlayerCanTalk { get; }                   // read by NarrativeWorldEventBridge for Interact/Hail (§5.6)
         public void NotifyDependency(in Game.Data.Logic.LogicDependency dependency);   // items, credits, quests, location, time, relation
         public void Tick();
         public bool IsWorldReady { get; }
@@ -733,7 +735,7 @@ namespace Game.Data.Definitions
     public sealed class NarrativeConfigDefinition : ContentDefinition
     {
         [UnityEngine.SerializeField, UnityEngine.Min(1)] private int hullDamagePerPoint = 20;      // damage_ship amount × this = DamageEvent HP
-        [UnityEngine.SerializeField] private string[] knownBodyTags = System.Array.Empty<string>(); // validator vocabulary until SPEC-30 provides tags
+        [UnityEngine.SerializeField] private string[] knownBodyTags = System.Array.Empty<string>(); // extra validator vocabulary; the main source is every BodyTemplateDefinition.storyTag (SPEC-30)
         [UnityEngine.SerializeField] private string[] knownStarSystems = System.Array.Empty<string>(); // fallback IDs until SPEC-30 provides a resolver
         public int HullDamagePerPoint => hullDamagePerPoint;
         public System.Collections.Generic.IReadOnlyList<string> KnownBodyTags => knownBodyTags;
@@ -750,10 +752,10 @@ Converted content and the opening chapter use these IDs from other specs. Each o
 
 | Legacy | v2 ID | Owner |
 |---|---|---|
-| system `ark_start`, `basesolarsystemdata` | `starsystem_ark_start`, `starsystem_whisper` | SPEC-30 |
+| system `ark_start`, `basesolarsystemdata` | `starsys_ark_start`, `starsys_whisper` | SPEC-30 |
 | `npc_probe_tutorial`, `npc_story_hunter`, `npc_enemy_1`, `npc_traveling_merchant` | `encounter_xeno_probe_tutorial`, `encounter_whisper_hunter`, `encounter_raiders`, `encounter_traveling_merchant` | SPEC-33 |
 | `encounter_combat_01`, `encounter_glass_worm`, `encounter_doppelganger`, `encounter_pirate_boss`, `encounter_jungle_beasts`, `encounter_solar_parasite`, `encounter_extraction` | `encounter_raiders`, `encounter_glass_worms`, `encounter_doppelganger`, `encounter_scavenger_king`, `encounter_jungle_beasts`, `encounter_solar_parasite`, `encounter_extraction_guardians` | SPEC-33 |
-| `UI_Success`, `UI_Fail`, `UI_Button_Click`, `UI_View_Open` | `sfx_ui_success`, `sfx_ui_fail`, `sfx_ui_click`, `sfx_ui_view_open` | SPEC-64 |
+| `UI_Success`, `UI_Fail`, `UI_Button_Click`, `UI_View_Open` | `cue_ui_success`, `cue_ui_fail`, `cue_ui_click`, `cue_ui_view_open` | SPEC-64 |
 | ships `ship_fighter`, `ship_frigate`, `ship_vestari` | unchanged | SPEC-10/72 |
 | loot `BaseLootTable`, `CreativeModeLootTable` | `loot_base`, `loot_creative` | SPEC-50 |
 | item `717185106` | `item_strange_matter_container_full` everywhere | SPEC-50 §4.9 |
@@ -781,8 +783,8 @@ Complexity O(len + depth). Allocation: editor only. Diagnostics go to `report.Er
 ### 5.2 Fact catalog and store
 
 **`RefResolverRegistry.CreateDefault(content)`**:
-1. Register `CatalogRefResolver<T>` for every kind whose definition type exists in `Game.Data.Definitions`: `Item→ItemDefinition`, `Quest→QuestDefinition`, `Clue→ClueDefinition`, `Beat→StoryBeatDefinition`, `Mystery→MysteryDefinition`, `LootTable→LootTableDefinition`, `Merchant→MerchantDefinition`. Each owning spec adds one line here for `Entity`, `StarSystem`, `Faction`, `Encounter`, `Blueprint`, `AudioCue` when its definition type lands (open questions 1–5).
-2. Until a `StarSystem` resolver exists, register a `ListRefResolver(RefKind.StarSystem, NarrativeConfigDefinition.KnownStarSystems)`.
+1. Register `CatalogRefResolver<T>` for every kind whose definition type exists in `Game.Data.Definitions`: `Item→ItemDefinition`, `Quest→QuestDefinition`, `Clue→ClueDefinition`, `Beat→StoryBeatDefinition`, `Mystery→MysteryDefinition`, `LootTable→LootTableDefinition`, `Merchant→MerchantDefinition`, `StarSystem→AuthoredStarSystemDefinition`, `Faction→FactionDefinition`, `Encounter→EncounterDefinition`, `Blueprint→ShipBlueprintDefinition`, `AudioCue→AudioCueDefinition`. A kind whose definition type does not exist yet (its spec's `-001` task is not done) is skipped with `NAR-W001`.
+2. Until `AuthoredStarSystemDefinition` exists (GAL-001), register a `ListRefResolver(RefKind.StarSystem, NarrativeConfigDefinition.KnownStarSystems)` instead.
 
 **`FactCatalog.Build(content, refs, report)`**:
 1. Collect declarations from `content.All<FactCatalogDefinition>()` (ordinal ID order). Check each: name format (`NAR-E015`), reserved prefix (`NAR-E020`), duplicate across catalogs (`NAR-E018`), Bool default ∈ {0,1} (`NAR-E021`), flags needing `Note`/`JournalText` (`NAR-E022`), `Min ≤ Max`.
@@ -827,7 +829,14 @@ Complexity O(F log F), F ≤ 20,000. Boot cost included in §8.
 
 **Dependency index (`DependencyIndex`, Game.Narrative)**: built once per system at boot from `CollectDependencies` of every condition the system owns. CSR layout per dependency kind: `int[] start` (length = keys + 1), `int[] owners`. `Collect(changed, HashSet<int> dirtyOwners)` is O(Σ subscribers of changed keys). No allocation after construction (the `HashSet` is reused).
 
-**`NarrativeTickBridgeSystem`** (`Game.Presentation`, managed `SystemBase`, `[UpdateInGroup(typeof(PresentationBridgeGroup))]`, `[UpdateAfter(typeof(ManagedEventDrainSystem))]`; no `RequireForUpdate` so it also runs in menus): each frame, if `Services.TryGet<NarrativeService>(out n)`: `n.SetWorldReady(SystemAPI.HasSingleton<GameplayActive>())`, `n.SetPlayerFree(<UINavigator has no modal screen> && !dialogService.IsActive)`, then `n.Tick()`. It reads no other ECS data.
+**`NarrativeTickBridgeSystem`** (`Game.Presentation`, managed `SystemBase`, `[UpdateInGroup(typeof(PresentationBridgeGroup))]`, `[UpdateAfter(typeof(ManagedEventDrainSystem))]`; no `RequireForUpdate` so it also runs in menus): each frame, if `Services.TryGet<NarrativeService>(out n)`:
+1. `n.SetWorldReady(SystemAPI.HasSingleton<GameplayActive>() && SystemAPI.HasSingleton<WorldSceneActive>())`;
+2. `travelIdle = !Services.TryGet<TravelService>(out t) || t.Phase == TravelPhase.Idle`;
+3. `n.SetPlayerCanTalk(navigator has no Modals entry && !dialogService.IsActive && travelIdle)`;
+4. `n.SetPlayerFree(navigator has no Screens or Modals entry && !dialogService.IsActive && travelIdle && <a PlayerShip root exists without Hulk> && PlayerCombatStatus.HostilesEngaging == 0)` — `PlayerCombatStatus` read after `EntityManager.CompleteDependencyBeforeRO<PlayerCombatStatus>()`, absent → 0 (SPEC-42 §5.1);
+5. `n.Tick()`.
+
+Before SPEC-32/33/23 exist, the missing terms are `true`/0. It reads no other ECS data.
 
 **`NarrativeService.Tick()` (called once per frame by `NarrativeTickBridgeSystem`):**
 1. If not world-ready or no session: return.
@@ -863,14 +872,14 @@ Effects never partially apply a list: costs are checked before the first `Apply`
 
 | Member | Routed to (owner) | Default until the owner provides the API (open question) |
 |---|---|---|
-| `CurrentStarSystemIndex`, `CurrentStarSystemOwnerFactionIndex` | SPEC-31 current star system + SPEC-30 definition / SPEC-33 territory | 0 |
+| `CurrentStarSystemIndex`, `CurrentStarSystemOwnerFactionIndex` | SPEC-31 current star system + SPEC-30 definition / SPEC-33 `TerritoryService` (catalog index of the owner `FactionDefinition`, wired by ENC-009) | 0 |
 | `UniversalTime` | `SimClock` (SPEC-02) | 0 |
-| `GetRelation`, `AdjustRelation` | SPEC-33 faction service | facts `relation_<faction id>` are **not** used; returns 0 / no-op + error once |
+| `GetRelation`, `AdjustRelation` | SPEC-33 `FactionService.GetRelation(FactionDefinition)` / `AdjustRelation(FactionDefinition, int)` (concrete service, no interface; wired by ENC-009) | facts `relation_<faction id>` are **not** used; returns 0 / no-op + error once |
 | `GiveShip` | fleet owner (SPEC-01 `GameSession.Fleet` / SPEC-51) | error once |
-| `SpawnEncounter`, `StartCombat` | SPEC-33 `EncounterDirector` request API | error once |
+| `SpawnEncounter`, `StartCombat` | SPEC-33 `EncounterDirectorService.SpawnEncounter(def, anchor, count, EncounterSource.Narrative)` / `StartCombat(def, anchor)` (wired by ENC-009; anchor mapping in ENC-009) | error once |
 | `RemoveBody`, `ReplaceBody` | SPEC-31 body delta API | error once |
-| `RequestLaneJump` | SPEC-32 `TravelService` | error once |
-| `OpenMerchant` | SPEC-61 merchant screen via `UINavigator` + SPEC-50 `MerchantService.OpenSession` | calls `onClosed` immediately |
+| `RequestLaneJump` | SPEC-32 `TravelService.RequestJump(id, JumpSource.Narrative)` (wired by TRV-011, SPEC-32 §5.7) | error once |
+| `OpenMerchant` | SPEC-50 `MerchantLauncher.Open(def, onClosed, member: 0)` (wired by ECO-008; it opens SPEC-61's trade screen) | calls `onClosed` immediately |
 | `OpenShipEditor` | SPEC-01 `SceneFlow` → Blueprint Lab / SPEC-51 | error once |
 | `RepairPlayerShip` | SPEC-51 repair API | error once |
 | `DamagePlayerShip` | SPEC-13 `DamageEvent` request on the player grid: one event, `Amount = amount × HullDamagePerPoint`, `Radius = 1.5` cells, `Type = Kinetic`, point = seeded random solid surface cell (`RngPurpose.Narrative`, salt = `UniversalTime` bits) | error once |
@@ -881,17 +890,20 @@ Effects never partially apply a list: costs are checked before the first `Apply`
 
 Subscribes in its constructor, unsubscribes in `Dispose`. Maps every event's `ContentHash` to a slot with `FactCatalog.GeneratedSlot(family, hash.Value)` (O(1), no strings) and applies a pre-built `AddFactEffect(allowReserved: true)` per touched slot (created lazily, cached in an `int[]` indexed by slot) so no allocation happens per event after warm-up. All writes use `FactWriteSource.WorldEvent`.
 
-| Event (owner) | Required payload (open questions 2–5) | Narrative handling |
+| Event (owner) | Payload (as defined by the owner) | Narrative handling |
 |---|---|---|
-| `BodyInteracted` (SPEC-31) | `BodyId Body`, `ContentHash Template`, `bool IsHulk`, `PersistentId Hulk` | `IsHulk` → ignore (SPEC-50 salvage handles it). Else `add interacted_<template> 1`, then `beatService.OnBodyInteracted(handle)` (SPEC-42 §5.3); if it returns false → `EventBus<InteractionUnhandled>.Publish` (Game.Narrative event, SPEC-61 shows "Nothing of interest") |
-| `StarSystemEntered` (SPEC-31/32) | `StarSystemId System`, `ContentHash Anchor` (authored star system, `default` if procedural), `bool FirstVisit` | `add sys_star_systems_entered 1`; if `Anchor` non-default: `add visited_<anchor> 1`; `NotifyDependency(Location)`; `beatService.OnStarSystemEntered(FirstVisit)` |
-| `LaneJumped` (SPEC-32) | — | `NotifyDependency(Location)` |
-| `BodyDestroyed` (SPEC-31) | `BodyId Body`, `ContentHash Template` | `add destroyed_<template> 1` |
-| `ShipDestroyed` (SPEC-13) | `PersistentId Ship`, `ContentHash Blueprint`, `ContentHash Encounter`, `bool IsPlayerShip` | not player: `add destroyed_<blueprint> 1`; encounter non-default: `add destroyed_<encounter> 1` |
-| `EncounterDefeated` (SPEC-33, new) | `PersistentId Instance`, `ContentHash Encounter` | `add defeated_<encounter> 1` |
-| `TerritoryEntered` (SPEC-33, M4) | `ContentHash Faction` | `add sys_territories_entered 1`; `NotifyDependency(Location)` |
-| `ItemAcquired` (SPEC-50) | `int ItemIndex`, `int Count`, `AcquireSource Source` | `add acquired_<item> Count` (slot via the item's `Id.Hash`) |
+| `BodyInteracted` (SPEC-31 §4.1) | `uint StarSystemValue; ulong BodyKey; byte Kind; ulong GridPersistentId` (`BodyKey = 0` for non-body targets) | **SPEC-42 §5.6 rules first:** `Kind == Salvage` or `BodyKey == 0` (hulks) → ignore (SPEC-50 handles salvage). `Kind == LaneGate` → continue only if `TravelService.Phase == Idle` after SPEC-32's handler (the jump was refused). `Kind == Hail` → `encounters.TryGetInstanceByMember(GridPersistentId, out info)` → `beatService.OnHail(info.Definition.Id.Hash, GridPersistentId, canTalk)`; stop. Otherwise: `template` = `GalaxyService` template hash of `BodyId.FromLocalKey(StarSystemValue, BodyKey)`; `add interacted_<template> 1`; build the `LogicBodyHandle`; `beatService.OnBodyInteracted(handle, canTalk)` (SPEC-42 §5.2); `false` and `Kind == Inspect` → `EventBus<InteractionUnhandled>.Publish` (SPEC-61 shows "Nothing of interest") |
+| `StarSystemEntered` (SPEC-31 §4.1) | `uint StarSystemValue; StarSystemEntryReason Reason; uint VisitCount` | `add sys_star_systems_entered 1`; anchor = the authored star system with that `StarSystemValue` (`GalaxyService` lookup built once at boot; none for procedural) → `add visited_<anchor> 1`; `NotifyDependency(Location)`; `beatService.OnStarSystemEntered(StarSystemValue, firstVisit: VisitCount == 1)` |
+| `LaneJumped` (SPEC-32 §4.1) | `uint FromStarSystemValue, ToStarSystemValue; int LaneIndex; JumpSource Source` | `NotifyDependency(Location)` |
+| `BodyDestroyed` (SPEC-31 §4.1) | `uint StarSystemValue; ulong BodyKey` | `template` from `GalaxyService` as above → `add destroyed_<template> 1` |
+| `ShipDestroyed` (SPEC-21 §4.6b) | `ulong PersistentId; ContentHash Blueprint, Encounter; uint EncounterInstance, Tick; byte IsPlayer, Faction, Kind` | `IsPlayer == 1` → nothing. Else `Blueprint` non-zero → `add destroyed_<blueprint> 1`; `Encounter` non-zero → `add destroyed_<encounter> 1` |
+| `EncounterDefeated` (SPEC-33 §4.3) | `uint InstanceId; ContentHash Encounter; uint StarSystemValue` | `add defeated_<encounter> 1` |
+| `FactionRelationChanged` (SPEC-33 §4.3) | `ContentHash Faction; int OldRelation, NewRelation; byte OldStance, NewStance` | `NotifyDependency(Relation, catalog index of the faction)` (wired by ENC-009) |
+| `TerritoryEntered` (SPEC-33, M4) | `ContentHash Faction; uint StarSystemValue` | `add sys_territories_entered 1`; `NotifyDependency(Location)` |
+| `ItemAcquired` (SPEC-50 §4.2) | `ContentHash Item; int ItemIndex; int Count; AcquireSource Source` | `add acquired_<item> Count`, slot from `Item` (the hash; `ItemIndex` is the catalog index for logging only) |
 | `SessionReset` (SPEC-01) | — | nothing (restore already happened through participants) |
+
+`canTalk` for Interact/Hail is the value `NarrativeTickBridgeSystem` computed last frame (§5.3, SPEC-42 §5.1), stored in `NarrativeService.PlayerCanTalk`.
 
 Unknown hashes (no generated slot) are ignored except one `GameLog.WarnOnce` per hash.
 
@@ -938,7 +950,7 @@ Steps:
 5. For every option apply the requirement map, then the action map (tables below), in legacy order. Options whose legacy text is one of `Leave`, `Ignore`, `Ignore Signal`, `Leave them`, `Leave Quickly`, `Walk Away`, `Undock`, `Back`, `Back to Ship`, `Run Silent`, `Continue Patrol` also get the tag `#leave` (Esc chooses them, SPEC-41 §5.7). `showReq` wraps the option in `<<if …>>`/`<<endif>>` (hidden); `enableReq` and implicit costs become the inline option condition (greyed). `style: quest` → tag `#quest`. `consume: true` → inline condition `visited_count("<target node>") == 0` AND-ed.
 6. An option whose action list has no flow action: `TRADE`/`REPAIR_ALL_SHIPS` → append `<<jump <current node>>>`; otherwise append `<<stop>>`.
 7. Encounters referenced by `PLAY_NESTED` are emitted in **nested form**: `END(TRUE)` → `<<complete_beat beat_x>>` + `<<return>>`; `END(FALSE)` → `<<return>>`; their beat trigger is `Manual`.
-8. Write beats (trigger/where/salience/repeat per SPEC-42 §4.10 placement table), quests (step 10), facts (flag table) and clue assets.
+8. Write beats with **every** `StoryBeatDefinition` field of SPEC-42 §4.1, values from the SPEC-42 §4.10 placement table: `trigger`, `where` (`starSystem`, `bodyTags[]`, `hailEncounter`), `condition`, `salience`, `weight`, `repeat`, `firstVisitOnly`, `yarnNode`, `onStart`, `onComplete` and `debug` (true for beats the table marks debug-only); fields the table leaves empty keep their defaults, quests (step 10), facts (flag table) and clue assets.
 9. Write the manifest: one row per legacy string `(source JSON path, text, output file, line ID or quest field)`.
 10. Quests: per the quest map below.
 
@@ -986,7 +998,7 @@ Steps:
 | `spawn.entity(entityId, anchor, count)` | `<<spawn_encounter <encounter map> <tag map(anchor)> count>>` |
 | `flow.queue_encounter(id)` | `<<queue_beat <beat id>>>` |
 | `world.replace_entity(…exitgate…)` | `<<set_fact gate_ark_start_active true>>` (the only use) |
-| `world.exit_system` | `<<request_lane_jump starsystem_whisper>>` (the only use) |
+| `world.exit_system` | `<<request_lane_jump starsys_whisper>>` (the only use) |
 
 **Legacy flag table** (every key the legacy content writes or reads; `→ clue` assets are defined in SPEC-42 §4.11; `→ item` assets in SPEC-50 §4.9):
 
@@ -1411,15 +1423,15 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 
 | # | Question | Default if unanswered | Decider |
 |---|---|---|---|
-| 1 | SPEC-30: what definition type identifies an authored star system (for `StarSystemRef`, `visited_*`, `in_star_system`)? | SPEC-30 adds `StarSystemDefinition : ContentDefinition` with prefix `starsystem_`; until then `NarrativeConfigDefinition.knownStarSystems` (`starsystem_ark_start`, `starsystem_whisper`) backs a `ListRefResolver` | SPEC-30 |
-| 2 | SPEC-31: `BodyInteracted` payload and body tags | managed event `BodyInteracted { BodyId Body; ContentHash Template; bool IsHulk; PersistentId Hulk }`; `BodyTemplateDefinition.tags : string[]` with the vocabulary in SPEC-42 §4.10; `StarSystemEntered { StarSystemId System; ContentHash Anchor; bool FirstVisit }`; `BodyDestroyed { BodyId Body; ContentHash Template }` | SPEC-31 |
-| 3 | SPEC-33: encounter IDs of §4.13, `EncounterDefeated { PersistentId Instance; ContentHash Encounter }` event, spawn/combat request API, faction relation API | as written; `IEncounterCommands { void Spawn(ContentId encounter, string anchorTag, int count, LogicBodyHandle? at); void StartCombat(ContentId encounter, LogicBodyHandle? at); }`, `IFactionRelations { int Get(ContentId faction); void Adjust(ContentId faction, int delta); }` registered in `Services` | SPEC-33 |
-| 4 | SPEC-13/23: `ShipDestroyed` payload | managed event `{ PersistentId Ship; ContentHash Blueprint; ContentHash Encounter; bool IsPlayerShip }` | SPEC-13 |
-| 5 | SPEC-64: audio cue IDs for the four legacy UI sounds | `sfx_ui_success`, `sfx_ui_fail`, `sfx_ui_click`, `sfx_ui_view_open` | SPEC-64 |
+| 1 | SPEC-30: what definition type identifies an authored star system (for `StarSystemRef`, `visited_*`, `in_star_system`)? | **Answered:** SPEC-30 `AuthoredStarSystemDefinition` (prefix `starsys_`); the `StarSystem` ref kind registers `CatalogRefResolver<AuthoredStarSystemDefinition>` (§5.2 step 1) and the `ListRefResolver` fallback is removed when GAL-001 exists | SPEC-30 |
+| 2 | SPEC-31: `BodyInteracted` payload and body tags | **Answered:** SPEC-31 §4.1 payloads (adopted in §5.6); one `storyTag` per body template (SPEC-30), not `tags[]`, with the vocabulary of SPEC-42 §4.10 | SPEC-31 |
+| 3 | SPEC-33: encounter IDs of §4.13, `EncounterDefeated` event, spawn/combat request API, faction relation API | **Answered:** IDs as in §4.13; payloads of SPEC-33 §4.3; no `IEncounterCommands`/`IFactionRelations` interfaces — ENC-009 wires §5.5 to the concrete `FactionService`, `TerritoryService` and `EncounterDirectorService` | SPEC-33 |
+| 4 | `ShipDestroyed` payload | **Answered:** owned by SPEC-21 §4.6b (WPN-017) and adopted in §5.6 | SPEC-21 |
+| 5 | SPEC-64: audio cue IDs for the four legacy UI sounds | **Answered:** `cue_ui_success`, `cue_ui_fail`, `cue_ui_click`, `cue_ui_view_open` (SPEC-64 §6.4) | SPEC-64 |
 | 6 | SPEC-01: where narrative boot sits | `GameRoot` calls `NarrativeBootstrap.Build` right after constructing `GameSession` (step 8) and before `UIRoot`; the per-frame `Tick` is driven by `NarrativeTickBridgeSystem` (§5.3) | SPEC-01 |
 | 7 | SPEC-02: `SaveWriter`/`SaveReader` names | SPEC-05 §4.10 names (`WriteInt32`, `WriteString`, `ReadInt32`, `ReadString`); if SPEC-02 differs, map 1:1 — the §4.11 call sequence is binding | SPEC-02 |
-| 8 | SPEC-02: `RngPurpose` values | NAR-001 appends `Narrative`; SPEC-50 appends `Loot`, `MerchantStock`, `Salvage` | SPEC-02 |
-| 9 | SPEC-04: new ID prefixes `facts_`, `narrative_` (and SPEC-41/42/50 prefixes) | Added to SPEC-04's prefix table; `StoryBeatDefinition` is owned by SPEC-42, not SPEC-41 | SPEC-04 |
+| 8 | SPEC-02: `RngPurpose` values | **Answered:** `Narrative = 12`, `Loot = 6`, `Merchant = 7`, `Salvage = 25` all exist in SPEC-02 §4.2 | SPEC-02 |
+| 9 | SPEC-04: new ID prefixes `facts_`, `narrative_` (and SPEC-41/42/50 prefixes) | **Answered:** SPEC-04 §4.3 registry lists them; `StoryBeatDefinition` (`beat_`) is owned by SPEC-42 | SPEC-04 |
 | 10 | Owner: should `damage_ship` (legacy `CHANGE_HULL(−n)`) really damage voxels? | Yes, one `DamageEvent` of `n × 20` HP at a random surface cell; `repair_ship` stays a warning until SPEC-51 has repair | Owner |
 | 11 | Owner: legacy `CHANGE_RESEARCH` has no system in v2 | Converted to the journal fact `research_points` | Owner |
 

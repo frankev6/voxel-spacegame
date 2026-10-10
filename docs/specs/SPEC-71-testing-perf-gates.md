@@ -356,9 +356,9 @@ Leaks are reported by Unity as error logs, so they fail the test through the gua
 
 `.cmdrec` is UTF-8 text with one record per line; `#` starts a comment.
 - **Header lines:** `cmdrec 1`, `start <tick>`, `end <tick>`, optionally `seed <u64 hex>` and `content <ContentCatalog.IdentityHash hex>`.
-- **Records:** `<tick> <thrustX> <thrustY> <turn> <aimX> <aimY> <aimZ> <aimValid> <flags> <fireGroups> <e0> … <e8>`, one line per tick where the command changed.
+- **Records:** `<tick> <thrustX> <thrustY> <turn> <aimX> <aimY> <aimZ> <aimValid> <flags> <fireGroups> <e0> … <e9>`, one line per tick where the command changed.
   - Floats use `"R"` round-trip invariant culture.
-  - `e0…e8` are the 9 absolute `PlayerEdgeCounters` bytes in declaration order (SPEC-20 §4.1).
+  - `e0…e9` are the 10 absolute `PlayerEdgeCounters` bytes in declaration order (SPEC-20 §4.1; `e9` = `Cruise`, always present).
   - Ticks are ascending.
 
 `Parse` fails with the line number on a malformed or non-ascending line.
