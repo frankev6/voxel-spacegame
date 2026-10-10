@@ -1104,7 +1104,7 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 | # | Question | Default if unanswered | Decider |
 |---|---|---|---|
 | 1 | Is a 7–10 tick (117–167 ms) delay between a cell change and the matching collider acceptable? Projectiles are exact regardless (decision 4); only physical contact with freshly destroyed space lags | Yes | Owner |
-| 2 | Architecture §8 rows: `PhysicsVelocity` adds "`GridMassUpdateSystem` (exact re-expression when the mass frame changes, decision 12)"; `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` creation by `GridBodyInitSystem` or a `GridBodyFactory` caller is not a write (SPEC-13 Q14) | Apply as written | Tech lead |
+| 2 | Architecture §8 rows: `PhysicsVelocity` adds "`GridMassUpdateSystem` (exact re-expression when the mass frame changes, decision 12)"; `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` creation by `GridBodyInitSystem` or a `GridBodyFactory` caller is not a write (SPEC-13 Q14) | **Applied** in architecture §8 (2026-10-09). Apply as written | Tech lead |
 | 3 | SPEC-10 `GridSpawnSystem` prefills `GridMass` from the cached `VoxelStructure.GetMass` at conversion and disables `GridMassRecompute` | Yes (saves an O(cells) recompute per spawn) | SPEC-10 |
 | 4 | SPEC-10 `BrickDirtyScheduleSystem` (and the edit path of `GridSpawnSystem`) access `ColliderDirtyQueue` with `Acquire/Release` / `CompleteAccess` (§5.1) instead of `GetSingletonRW` | Yes | SPEC-10 |
 | 5 | SPEC-13 `SplitSystem` creates hulk bodies with `GridBodyFactory` (provisional collider + `PhysicsWorldIndex`) so the hulk moves from the next tick; chunk colliders use `PhysicsLayers.ChunkMaterial` | Yes | SPEC-13 |

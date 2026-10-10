@@ -159,6 +159,7 @@ namespace Game.Voxel.Damage
     public struct GridDamageStats : IComponentData
     {
         public uint LastDamageTick;
+        public Entity LastDamageSource;   // Source of the last event of the latest damaging tick (resolver order); SPEC-33 provocation reads it
         public int CellsDestroyed;     // cumulative, reason Destroyed
         public int CellsDetached;      // cumulative, reasons DetachedParticle/DetachedBody
         public int InstancesDestroyed; // cumulative
@@ -200,10 +201,14 @@ namespace Game.Voxel.Damage
     /// <summary>On new hulk roots and chunk bodies until SPEC-31 copies the parent's StarSystemMember (open question 4).</summary>
     public struct SplitOrigin : IComponentData { public Entity Parent; }
 
-    public enum GridDespawnMode : byte { Dissolve = 0, Silent = 1 }
+    public enum GridDissolveMode : byte { Dissolve = 0, Silent = 1 }
 
     /// <summary>Request entity (one per grid). Consumer: ShipDeathSystem, which destroys the request entity.</summary>
-    public struct GridDespawnRequest : IComponentData { public Entity Grid; public GridDespawnMode Mode; }
+    public struct GridDissolveRequest : IComponentData { public Entity Grid; public GridDissolveMode Mode; }
+
+    /// <summary>Tag: the grid takes no damage (indestructible bodies, SPEC-30 Q15; SPEC-31 adds it for `destructible == false`).
+    /// DamageResolveSystem drops events on it in Gather (no cells, no knockback); projectiles and beams still stop on it.</summary>
+    public struct DamageImmune : IComponentData { }
 
     /// <summary>Added to a grid being dissolved. Writer: ShipDeathSystem.</summary>
     public struct GridDissolving : IComponentData { public uint StartTick; public int NextSlot; public int Emitted; public int Stride; }
@@ -260,10 +265,16 @@ namespace Game.Voxel.Damage
         // Presentation bridge (ManagedEventDrainSystem), once per frame; completes ShipDeathSystem's last write first.
         public void DrainCoreLost(NativeList<GridCoreLost> output);
 
+        // ChunkColliderCleanupSystem (§5.9), main thread outside the fixed step: completes SplitSystem's last write, then moves
+        // the chunk collider blobs SplitSystem replaced (slot reuse) into output and clears its list.
+        public void DrainRetiredChunkBlobs(NativeList<BlobAssetReference<Unity.Physics.Collider>> output);
+
         public DamageTickStats LastTickStats { get; }                  // copied at the start of the next tick
     }
 
-    /// <summary>Read-only view of this tick's CellRemoved list, grouped by grid in resolver order.</summary>
+    /// <summary>Read-only view of this tick's CellRemoved list, grouped by grid in resolver order. Both arrays are deferred job
+    /// arrays (NativeList.AsDeferredJobArray): use them only inside jobs scheduled on the handle BeginRemovedRead combined into
+    /// state.Dependency, never on the main thread (SPEC-12 Q8).</summary>
     public struct CellRemovedView
     {
         [ReadOnly] public NativeArray<CellRemoved> Cells;
@@ -453,7 +464,7 @@ Memory: per-tick lists are bounded by budgets (≤ 16,384 island cells ⇒ ≤ ~
 | Palette | root buffer `PaletteElem { PaletteEntry Value }`; cell `Ref` < 0x8000 indexes it |
 | Instance cells | `Ref = 0x8000 | instanceIndex`; footprint = `BlockDef.Cells` rotated by `Orient` about `Origin` (SPEC-04 §3 decision 8) |
 | `BrickDirty.Flags` | `Mesh = 1, Collider = 2`; this spec adds `Urgent = 0x80` (mesh/collider this frame, ahead of budget order) |
-| Brick transform | child of the root, `LocalTransform.Position = Coord·16·CellSize`, identity rotation, scale 1 |
+| Brick transform | child of the root, `LocalTransform.Position = Coord·16·CellSize`, identity rotation, `Scale = CellSize` (brick meshes are in cell units, SPEC-10 §4.5) |
 | Functional entity | child of the root; `LocalTransform` = instance root cell centre and orientation in grid-local space |
 | Archetypes | `GridArchetypes.Root(GridKind)` and `GridArchetypes.Brick` component sets, including `DamageSetup` components |
 | `LinkedEntityGroup` | on every root: root, every brick, every functional entity (traps T1.6) |
@@ -524,7 +535,7 @@ Example: 25 t ship and 3 t ship close at 30 m/s → solver impulse ≈ 2.7 t·30
 
 Position: after `ShieldSystem`/`ExplosionSystem`/`BeamStepSystem`; the only writer of the state in §3 decision 1. Steps (all Burst jobs chained on `state.Dependency` combined with every registered producer handle and every `RemovedReaderHandles` of last tick):
 
-1. **Gather** (`IJob`): for each registered damage stream in registration order, for each foreach index ascending, read events; drop events whose `Grid` lacks `VoxelGrid`, whose `Amount ≤ 0`, or with any non-finite field (count in `EventsDropped`); append `SortEntry { GridIndex, SourceIndex = Source.Index (−1 for Null), Producer, Sequence, StreamOrder, EventIndex }`. Dispose the streams with the job handle.
+1. **Gather** (`IJob`): for each registered damage stream in registration order, for each foreach index ascending, read events; drop events whose `Grid` lacks `VoxelGrid`, whose `Grid` has `DamageImmune`, whose `Amount ≤ 0`, or with any non-finite field (count in `EventsDropped`); append `SortEntry { GridIndex, SourceIndex = Source.Index (−1 for Null), Producer, Sequence, StreamOrder, EventIndex }`. Dispose the streams with the job handle.
 2. **Sort** (`IJob`): stable sort `SortEntry` by `(GridIndex, SourceIndex, Producer, Sequence, StreamOrder)` → `SortedEvents`.
 3. **Plan** (`IJob`): build `GridRanges` from runs of equal `GridIndex`; merge in grids that have `PendingDetachCurrent` entries but no events (entries are already ordered by grid then island then slot); ranges ordered by `Grid.Index`. Clear `Removed`/`RemovedGrids` (after last tick's readers, step 0).
 4. **Resolve** (`IJobParallelForDefer` over `GridRanges`, batch 1): per range, see §5.3.1–§5.3.7. Writes through lookups carrying `[NativeDisableParallelForRestriction]` with the comment "each grid's bricks, instances and DMG components are written only by its own range (SPEC-13 §3 decision 4)". Outputs per range index: `CellRemoved` NativeStream, `TouchedBricks` stream, `DestroyList` stream, explosion stream (registered via `BeginExplosionWrite(forEachCount = rangeCount)`), `GridResults[range]`.
@@ -536,7 +547,7 @@ Position: after `ShieldSystem`/`ExplosionSystem`/`BeamStepSystem`; the only writ
 2. `coreBefore = g.AnchorInstance`; `ordinal = 0` (event ordinal for dithering).
 3. **Detach pass**: for each `PendingDetachCurrent` entry of this grid (in stored order): for each set bit of `Mask` (ascending local index): if the cell is solid → `RemoveCell(cell, entry.Reason)` (§5.3.6, no seeds). Afterwards, for each instance whose cells were all removed by detach: `FunctionHp = 0` **without** destroying its functional entity (it now belongs to the new body); if it was `AnchorInstance` (impossible for anchors; defensive) set `AnchorInstance = −1`.
 4. Apply events in sorted order: `Radius > 0` → §5.3.4, else §5.3.3. Accumulate `PendingImpulse` unless `Flags.NoImpulse`: if `PendingImpulse.Tick != Tick` reset it to zero with `Tick = Tick`; `p = t.TransformPoint(LocalPoint)`; `LinearWorld += WorldImpulse`; `AngularWorld += cross(p − comWorld, WorldImpulse)`.
-5. If any cell changed: `g.Revision += 1` (once per tick); `GridDamageStats.LastDamageTick = Tick`.
+5. If any cell changed: `g.Revision += 1` (once per tick); `GridDamageStats.LastDamageTick = Tick`, `LastDamageSource` = `Source` of the last event of this grid's sorted range whose effective damage was > 0 (`Entity.Null` for the detach pass alone).
 6. Core loss: if `coreBefore ≥ 0` and the instance was destroyed this tick → `CoreLost = 1`, `CoreWorldPos` = world centre of its root cell, `g.AnchorInstance = −1`.
 
 #### 5.3.2 Cell access
@@ -635,11 +646,11 @@ Position: after `IntegritySystem`. Records into the GameplayEnd ECB from one `IJ
 4. **Chunk** (pool):
    1. Slot: first slot with `Live == 0` in ascending order; none → evict the live slot with the smallest `EndTick` (ties lowest slot): emit up to 64 `CellDebris` particles for its cells, then reuse.
    2. Pool entity missing (first use, or destroyed by star-system unload) → `ecb.CreateEntity(chunkArchetype)` once per slot (archetype cached in `OnCreate`: `LocalTransform, LocalToWorld, PhysicsVelocity, PhysicsMass, PhysicsCollider, PhysicsDamping, PhysicsWorldIndex, PhysicsGraphicalSmoothing, PhysicsGraphicalInterpolationBuffer, ChunkBody, ChunkCell, ChunkColliderBlob, SplitGrace, SplitOrigin, Disabled`).
-   3. Collider: greedy boxes over the island's cell set re-based to its cell AABB min (`X` runs, then grow in `Y`, then `Z`; at most `ChunkMaxBoxes`; beyond that, one box of the AABB), `BoxCollider.Create` per box with `PhysicsLayers.ChunkBody` filter (SPEC-12) and material friction 0.3, restitution 0.1, `CollideRaiseCollisionEvents`; combine with `CompoundCollider.Create`; dispose the child blobs. The slot's previous `ChunkColliderBlob` goes to `DeferredDisposalSystem` (release ≥ 3 frames later, traps T4.2).
+   3. Collider: greedy boxes over the island's cell set re-based to its cell AABB min (`X` runs, then grow in `Y`, then `Z`; at most `ChunkMaxBoxes`; beyond that, one box of the AABB), `BoxCollider.Create` per box with filter `PhysicsLayers.ChunkBody` and material `PhysicsLayers.ChunkMaterial` (SPEC-12 §4.2); combine with `CompoundCollider.Create`; dispose the child blobs. The slot's previous `ChunkColliderBlob` is appended to the `RetiredChunkBlobs` list in `DamageStreamsData` (a job cannot call the main-thread `DeferredDisposal` helpers); `ChunkColliderCleanupSystem` (§5.9) hands it to `DeferredDisposalSystem` (frame- and tick-gated, SPEC-10 §5.10, traps T4.2).
    4. Record: `RemoveComponent<Disabled>`; `LocalTransform { Position = comWorld, Rotation = t.Rotation, Scale = 1 }`; `PhysicsGraphicalInterpolationBuffer` reset to that pose; `PhysicsVelocity { Linear = vIsland + dir·ChunkSeparationSpeed, Angular = ω in the chunk's inertia space + tumble }` where tumble = random unit vector (`Random.CreateFromIndex(hash(Tick, parent.Index, ordinal))`) × `lerp(ChunkTumbleMin, ChunkTumbleMax, r)` (chunks are 3D, ADR-0003); `PhysicsMass.CreateDynamic(collider mass properties scaled to M, M)`; `PhysicsDamping { Linear = 0.02, Angular = 0.05 }`; `PhysicsCollider`; `ChunkBody { SpawnTick = Tick, EndTick = Tick + 60·lerp(ChunkLifetimeMinSeconds, ChunkLifetimeMaxSeconds, (n − 9)/(ChunkMaxCells − 9)), DissolveStartTick = EndTick − 60·ChunkDissolveSeconds, CellSize = s, LocalOrigin = minCorner − comLocal, CellCount = n, Slot, Live = 1 }`; `ChunkCell` buffer; `SplitGrace { parent, Tick + SplitGraceTicks }`; `SplitOrigin { parent }`.
 5. **Hulk** (same tick, ECB on deferred entities; chosen over a `GridSpawnRequest` because that would leave a one-frame gap and the ECB copy is bounded by `SplitCellBudgetPerTick`: ≤ ~70 bricks × 16 KB ≈ 1.1 MB ECB memory per tick worst case):
    1. `id = PersistentIdAllocator.Next++`.
-   2. Root `h = ecb.CreateEntity(GridArchetypes.Root(kind))` with `kind = parent.Kind == Asteroid ? Asteroid : Hulk`; `VoxelGrid { BrickMin/BrickDims` of the island's bricks, `CellSize = s, Revision = 1, AnchorInstance = −1, Kind = kind }`; `LocalTransform` = parent's (identical pose, identical cell coordinates, so functional local transforms stay valid); `PersistentId { id }`; `PhysicsVelocity { Linear = vIsland + dir·HulkSeparationSpeed, Angular = ω in the hulk's inertia space }`; `PhysicsMass` from step 3 (if the parent has `PlanarConstraint`: `InertiaOrientation = identity`, `InverseInertia = (0, 1/I_yy, 0)`, and add `PlanarConstraint`); copy `PhysicsDamping` when the parent has it; `PaletteElem` buffer = copy of the parent's; `BlockInstance` buffer = the island's instances in ascending old index (old → new map); `SplitGrace`, `SplitOrigin`; `Hulk` + `HulkInfo { Split, Tick, parent PersistentId, parent.Kind }` when `kind == Hulk`.
+   2. Root `h = ecb.CreateEntity(GridArchetypes.Root(kind))` with `kind = parent.Kind == Asteroid ? Asteroid : Hulk`; `VoxelGrid { BrickMin/BrickDims` of the island's bricks, `CellSize = s, Revision = 1, AnchorInstance = −1, Kind = kind }`; `LocalTransform` = parent's (identical pose, identical cell coordinates, so functional local transforms stay valid); `PersistentId { id }`. **Body through SPEC-12's `GridBodyFactory`** (§5.6 of SPEC-12, "for other creators"): `ecb.AddComponent(h, GridBodyFactory.DynamicBodyTypes())`; `ecb.AddSharedComponent(h, GridBodyFactory.WorldIndex())`; `PhysicsCollider { Value = GridBodyFactory.CreateProvisionalCollider(islandCellMin, islandCellMax, s, false) }` (created in this job; `GridBodyInitSystem` adopts it next tick); `PhysicsVelocity { Linear = vIsland + dir·HulkSeparationSpeed, Angular = ω in the hulk's inertia space }`; `PhysicsMass` from step 3 (if the parent has `PlanarConstraint`: `InertiaOrientation = identity`, `InverseInertia = (0, 1/I_yy, 0)`, and add `PlanarConstraint`); `PhysicsDamping` = the parent's, else `GridBodyFactory.DefaultDamping(config)`; `PhysicsGraphicalInterpolationBuffer` at the pose; `GridBodyInit` and `GridMassRecompute` left enabled (creation is initialisation, not a write: architecture §8); `PaletteElem` buffer = copy of the parent's; `BlockInstance` buffer = the island's instances in ascending old index (old → new map); `SplitGrace`, `SplitOrigin`; `Hulk` + `HulkInfo { Split, Tick, parent PersistentId, parent.Kind }` when `kind == Hulk`.
    3. Per island brick mask: `b = ecb.CreateEntity(GridArchetypes.Brick)`; `Brick { Grid = h, Coord, SolidCount = popcount }`; `ecb.SetBuffer<BrickCells>(b)` resized to 4,096: masked cells copied (instance `Ref` remapped through the map), others air; `BrickSolidMask = mask`; `BrickDirty` enabled `Mesh | Collider | Urgent`; `BrickIntegrity` Unknown; `Parent { h }`; brick `LocalTransform` (§4.9).
    4. `BrickSlot` buffer on `h` (dense, `Entity.Null` default, new bricks at their slots); `LinkedEntityGroup` on `h` = `h`, its bricks, moved functional entities (ECB remaps deferred entities).
    5. Each moved instance's functional entity: `SetComponent(FunctionalBlock { Grid = h, InstanceIndex = new })`, `SetComponent(Parent { h })`.
@@ -652,7 +663,7 @@ Position: after `IntegritySystem`. Records into the GameplayEnd ECB from one `IJ
 Position: after `SplitSystem`, before `GridMassUpdateSystem`. One `IJob` with one ECB, created **after** `SplitSystem`'s.
 
 1. **Core loss**: for each `GridResults` entry with `CoreLost` (in order) whose root has no `Hulk`: record `AddComponent<Hulk>`, `AddComponent(HulkInfo { CoreLost, Tick, own PersistentId, Kind })`; write `VoxelGrid.Kind = Hulk` directly (this job is the only writer after spawn; open question 6); write `ExplosionRequest { CoreWorldPos, CoreBreachRadiusCells·s, CoreBreachDamage, Explosive, Grid, Explosion, Sequence = 0 }`; append `GridCoreLost` to `CoreLost`; `SfxEvent CueCoreLost`. AI, power, shields and propulsion stop because their queries exclude `Hulk` (open question 10).
-2. **Despawn requests** (`GridDespawnRequest` entities, ordered by request entity index): always destroy the request entity. Grid missing → nothing. `Silent` → append the root to the destroy list. `Dissolve` → `AddComponent(GridDissolving { StartTick = Tick, NextSlot = 0, Emitted = 0, Stride = max(1, ceil(exposedEstimate / DissolveParticleCap)) })` where `exposedEstimate = Σ over bricks of min(SolidCount, 1536)`.
+2. **Despawn requests** (`GridDissolveRequest` entities, ordered by request entity index): always destroy the request entity. Grid missing → nothing. `Silent` → append the root to the destroy list. `Dissolve` → `AddComponent(GridDissolving { StartTick = Tick, NextSlot = 0, Emitted = 0, Stride = max(1, ceil(exposedEstimate / DissolveParticleCap)) })` where `exposedEstimate = Σ over bricks of min(SolidCount, 1536)`.
 3. **Dissolve progress** (grids with `GridDissolving`): from `NextSlot` in slot order, for exposed solid cells (≥ 1 air face neighbour), every `Stride`-th one, emit `FxEvent CellDebris` with `Vel = VelocityAtPoint + Dissolved kick`, up to `DissolveParticlesPerTick` per tick; when all slots are processed or `Emitted ≥ DissolveParticleCap`, append the root to the destroy list. The grid stays physical and damageable while dissolving (cells are not modified; interior cells are never visible).
 4. **Destroy pass**: merge `DestroyList` (resolver) with this system's list; sort by `(Index, Version)`; drop duplicates and entities that no longer exist (`EntityStorageInfoLookup.Exists`); drop entities whose grid root is also in the list when they are in that root's `LinkedEntityGroup`; record `DestroyEntity` for the rest. Grid roots are destroyed through their `LinkedEntityGroup` (traps T1.6).
 
@@ -674,6 +685,13 @@ Position: after `SplitSystem`, before `GridMassUpdateSystem`. One `IJob` with on
 - Budgets count items, never time.
 - `CellStateHasher.ComputeWorldHash`: grids ordered by `PersistentId.Value`; for each: `Combine(id, Kind, BrickMin, BrickDims)`; for each slot in order with a brick: `Combine(slot, Hash64(4,096 cells as bytes))`; for each instance: `Combine(Block, asuint(FunctionHp))`. Chunk bodies contribute `Combine(liveCount, Σ CellCount)`.
 
+### 5.9 `ChunkColliderCleanupSystem`
+
+`PresentationSystemGroup`, `[UpdateBefore(typeof(DeferredDisposalSystem))]`, `ISystem` (main thread; not Burst: it calls the managed-free `DeferredDisposal` helpers only, so Burst is optional). Requires `DamageStreams` and `DeferredDisposalQueue` — **not** `GameplayActive` (SPEC-01 decision 5: chunk entities destroyed by a star-system unload or scene teardown must still release their blobs). Per frame:
+1. `streams.DrainRetiredChunkBlobs(tmp)`; each → `DeferredDisposal.RetireBlob(ref q, blob)`.
+2. Query `WithAll<ChunkColliderBlob>().WithNone<ChunkBody>()` (chunk entities that were destroyed; the cleanup component keeps them alive): each `Value` → `RetireBlob`; then `EntityManager.RemoveComponent<ChunkColliderBlob>(query)` (one batch call; allowed: presentation group, outside the fixed step).
+Cost O(retired blobs); 0 B GC (`tmp` is a persistent list cleared each frame).
+
 ## 6. Public API
 
 | API | Pre-conditions | Post-conditions / errors |
@@ -682,7 +700,7 @@ Position: after `SplitSystem`, before `GridMassUpdateSystem`. One `IJob` with on
 | `BeginExplosionWrite/EndExplosionWrite`, `ScheduleDrainExplosions` | as above; one drain per tick (SPEC-21) | Drain output sorted (§4.4); streams disposed |
 | `BeginRemovedRead/EndRemovedRead` | caller runs after `DamageResolveSystem` and before `GameplayEndCommandBufferSystem` | View valid until the reader job completes; next tick's resolver waits for it |
 | `DrainCoreLost` | presentation, main thread | Completes `CoreLostWriteHandle`; moves all accumulated events (across ticks) into `output` |
-| `GridDespawnRequest` entity | created via any ECB; one per grid per tick | Consumed by `ShipDeathSystem` (§5.6) |
+| `GridDissolveRequest` entity | created via any ECB; one per grid per tick | Consumed by `ShipDeathSystem` (§5.6) |
 | `DamageConfig.FromDefinition` | managed, at boot (`Game.App`) | Copies every field; cue hashes = `def.cue.Id.Hash` or 0 |
 | `CellStateHasher.*` | main thread, outside jobs (tests, harness) | Completes dependencies; deterministic per §5.8 |
 | `DamageSetup.*` | SPEC-10 archetype construction | Component lists only |
@@ -743,7 +761,7 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - **Tier:** standard — transcribes the exact code of §4.2–§4.6 (bodies throw `NotImplementedException`)
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`
 - **Do:** Create every public type of §4.2–§4.6 with the exact fields, enums, comments and signatures; method bodies `throw new System.NotImplementedException()`, except `DamageConfig.Default` (returns the commented values) and `DamageConfig.Multiplier`. `DamageConfigDefinition` gets one `[SerializeField]` per `DamageConfig` field with the same defaults plus the four cue references. Create the folders of §4.1.
-- **Files:** `Assets/Game/Voxel/Damage/{DamageType,DamageProducer,DamageEventFlags,DamageEvent,CellRemovedReason,CellRemoved,ExplosionRequest,Hulk,HulkCause,HulkInfo,GridDamageStats,PendingImpulse,GridIntegrityState,IntegritySeed,BrickConnectivity,BrickIntegrity,SplitGrace,SplitOrigin,GridDespawnMode,GridDespawnRequest,GridDissolving,ChunkBody,ChunkCell,ChunkColliderBlob,DamageStreams,CellRemovedView,GridRemovedRange,GridCoreLost,DamageTickStats,DamageConfig,DamageSetup,DamageMath,GridDda,CellStateHasher}.cs`; `Assets/Game/Data/Definitions/Damage/DamageConfigDefinition.cs`
+- **Files:** `Assets/Game/Voxel/Damage/{DamageType,DamageProducer,DamageEventFlags,DamageEvent,CellRemovedReason,CellRemoved,ExplosionRequest,Hulk,HulkCause,HulkInfo,DamageImmune,GridDamageStats,PendingImpulse,GridIntegrityState,IntegritySeed,BrickConnectivity,BrickIntegrity,SplitGrace,SplitOrigin,GridDissolveMode,GridDissolveRequest,GridDissolving,ChunkBody,ChunkCell,ChunkColliderBlob,DamageStreams,CellRemovedView,GridRemovedRange,GridCoreLost,DamageTickStats,DamageConfig,DamageSetup,DamageMath,GridDda,CellStateHasher}.cs`; `Assets/Game/Data/Definitions/Damage/DamageConfigDefinition.cs`
 - **Acceptance criteria:**
   - [ ] `tools/compile.sh` passes with zero warnings in `Game.Voxel` and `Game.Data`.
   - [ ] `DamageType` has exactly `Kinetic, Energy, Explosive, Ram` (byte) in that order.
@@ -813,7 +831,9 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
   - [ ] Pending detach entries are applied before the tick's events.
   - [ ] Each grid's `Revision` increases by exactly 1 in a tick with changes and 0 otherwise.
   - [ ] No `Complete()` call in the system (code review + `ConventionsGuardTests`).
-- **Tests:** `DamageResolveSystemTests.Results_IndependentOfStreamOrderAndWorkers`, `.DetachPass_RunsBeforeEvents`, `.Revision_BumpsOncePerTick`, `.DroppedEvents_AreCounted`, `.PendingImpulse_AccumulatesWithTick`.
+  - [ ] Events on a grid with `DamageImmune` change no cell, add no `PendingImpulse` and count in `EventsDropped`.
+  - [ ] After a tick in which grid G took damage from sources A then B (resolver order), `LastDamageSource == B` and `LastDamageTick == Tick`.
+- **Tests:** `DamageResolveSystemTests.DamageImmune_NoCellChange`, `.LastDamageSource_IsLastApplied`, `DamageResolveSystemTests.Results_IndependentOfStreamOrderAndWorkers`, `.DetachPass_RunsBeforeEvents`, `.Revision_BumpsOncePerTick`, `.DroppedEvents_AreCounted`, `.PendingImpulse_AccumulatesWithTick`.
 
 ### DMG-007 — ImpactEventSystem (rams and knockback)
 - **Milestone:** M2
@@ -872,20 +892,21 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - **Milestone:** M2
 - **Tier:** frontier — F2: collider blobs living across frames, deferred disposal, pooled entities
 - **Depends on:** `DMG-010`, `SPEC-12`
-- **Do:** Implement §5.5 steps 3–4 and 6: island kinematics, pool slots and eviction, greedy box collider (`ChunkMaxBoxes` cap), ECB recording, lifetime shrink and disable, `ChunkDissolve` FX, deferred blob disposal.
-- **Files:** `Assets/Game/Voxel/Damage/Jobs/{IslandKinematics,ChunkBoxBuilder,RecordChunkJob,ChunkLifetimeJob}.cs`, `Assets/Game/Tests/EditMode/Voxel/Damage/ChunkBodyTests.cs`
+- **Do:** Implement §5.5 steps 3–4 and 6: island kinematics, pool slots and eviction, greedy box collider (`ChunkMaxBoxes` cap, `PhysicsLayers.ChunkBody`/`ChunkMaterial`), ECB recording, lifetime shrink and disable, `ChunkDissolve` FX; the `RetiredChunkBlobs` list with `DrainRetiredChunkBlobs`, and `ChunkColliderCleanupSystem` (§5.9).
+- **Files:** `Assets/Game/Voxel/Damage/Jobs/{IslandKinematics,ChunkBoxBuilder,RecordChunkJob,ChunkLifetimeJob}.cs`, `Assets/Game/Voxel/Damage/Systems/ChunkColliderCleanupSystem.cs`, `Assets/Game/Tests/EditMode/Voxel/Damage/ChunkBodyTests.cs`
 - **Acceptance criteria:**
   - [ ] A 100-cell island becomes one enabled chunk at the end of the detection tick with `PhysicsVelocity.Linear` within 0.01 m/s of `v + ω×r + separation` and mass equal to the summed `CellMass`.
   - [ ] Greedy boxes cover exactly the island's cells (volume equality) for 200 seeded islands, or fall back to one AABB box above 32 boxes.
   - [ ] 80 chunk-tier islands over several ticks never produce more than 64 live chunks; evicted chunks emit particles.
   - [ ] A chunk disables itself at `EndTick`; its old collider blob is released through `DeferredDisposalSystem` no earlier than 3 frames later; leak detection reports nothing.
-- **Tests:** `ChunkBodyTests.Chunk_InheritsMomentum`, `.GreedyBoxes_VolumeEqualsCells`, `.Pool_CapsAt64_AndEvicts`, `.Lifetime_DisablesAndReleasesBlob`.
+  - [ ] Destroying all `ChunkBody` entities (unload) with no `GameplayActive` singleton: every blob is retired and disposed within 5 frames; no leak.
+- **Tests:** `ChunkBodyTests.Unload_ReleasesBlobsWithoutGameplay`, `ChunkBodyTests.Chunk_InheritsMomentum`, `.GreedyBoxes_VolumeEqualsCells`, `.Pool_CapsAt64_AndEvicts`, `.Lifetime_DisablesAndReleasesBlob`.
 
 ### DMG-012 — Hulk grids from splits
 - **Milestone:** M2
 - **Tier:** frontier — F3/F5: structure copy with instance remap, functional re-parenting, LEG rewrite, same-tick creation
-- **Depends on:** `DMG-011`, `FND-001`
-- **Do:** Implement §5.5 step 5: `PersistentId` from the allocator block, root/brick creation on deferred entities with copied cells and remapped instance refs, palette copy, `BrickSlot`, LEGs of both grids, functional entity re-parenting, mass/inertia (planar lock when the parent is planar), velocity, `SplitGrace`, `SplitOrigin`, `HulkInfo`.
+- **Depends on:** `DMG-011`, `FND-001`, `SPEC-12`
+- **Do:** Implement §5.5 step 5: `PersistentId` from the allocator block, root/brick creation on deferred entities with copied cells and remapped instance refs, palette copy, `BrickSlot`, LEGs of both grids, functional entity re-parenting, the body through `GridBodyFactory` (provisional collider, mass/inertia with the planar lock when the parent is planar, velocity, damping), `SplitGrace`, `SplitOrigin`, `HulkInfo`.
 - **Files:** `Assets/Game/Voxel/Damage/Jobs/RecordHulkJob.cs`, `Assets/Game/Tests/EditMode/Voxel/Damage/HulkSplitTests.cs`
 - **Acceptance criteria:**
   - [ ] Cutting a 2,000-cell section with two thrusters off a ship: at the end of the tick a hulk exists whose cells (by `CellStateHasher.ComputeGridHash` over the cells) equal the island; at the end of the next tick the parent no longer contains them; total solid cells are conserved.
@@ -893,7 +914,9 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
   - [ ] Destroying the parent root afterwards does not destroy the hulk or its thrusters.
   - [ ] The hulk's `PersistentId` is unique and `PersistentIdAllocator.Next` advanced by 1; with an empty block the split is deferred.
   - [ ] Hulk linear velocity equals the parent's velocity at the island COM plus 0.75 m/s separation (±0.01).
-- **Tests:** `HulkSplitTests.Hulk_ExistsSameTick_CellsConserved`, `.Functional_ReparentedAndInLeg`, `.ParentDestroy_LeavesHulk`, `.PersistentId_FromBlock_DefersWhenEmpty`, `.Velocity_IsRigidPlusSeparation`.
+  - [ ] The hulk root has `PhysicsWorldIndex(0)`, a provisional box collider over the island's cell bounds, and enabled `GridBodyInit`/`GridMassRecompute`; two ticks later SPEC-12 has adopted it (`GridColliderState.Phase != None`).
+  - [ ] Hulk bricks have `LocalTransform.Scale == CellSize`.
+- **Tests:** `HulkSplitTests.Body_ViaGridBodyFactory`, `.BrickScale_IsCellSize`, `HulkSplitTests.Hulk_ExistsSameTick_CellsConserved`, `.Functional_ReparentedAndInLeg`, `.ParentDestroy_LeavesHulk`, `.PersistentId_FromBlock_DefersWhenEmpty`, `.Velocity_IsRigidPlusSeparation`.
 
 ### DMG-013 — ShipDeathSystem, despawn dissolve and the destroy pass
 - **Milestone:** M2
@@ -967,18 +990,18 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 | 1 | SPEC-10 internals this spec relies on (§4.9) | Exactly the §4.9 table; SPEC-10 includes `DamageSetup.GridRootComponents()`/`BrickComponents()` in its archetypes | SPEC-10 |
 | 2 | Contact suppression for `SplitGrace` | SPEC-12 runs a contacts job in `PhysicsSimulationGroup` that disables contacts between a body with `SplitGrace` and `SplitGrace.Other` while `Tick < UntilTick` | SPEC-12 |
 | 3 | `PersistentId` for hulks in Burst | Core type `PersistentIdAllocator : IComponentData { ulong Next; ulong End; }` singleton; `GameSession` grants blocks of 4,096 IDs (refill when `End − Next < 1,024`, checked once per frame by a SPEC-01 bridge); only `SplitSystem` advances `Next`; unused IDs of a block are never reused | SPEC-01, SPEC-02 |
-| 4 | `StarSystemMember` for split grids and chunks (Voxel cannot name the Galaxy type) | SPEC-31's streaming system, each frame, copies the parent's `StarSystemMember` to entities with `SplitOrigin` (root + LEG members) and removes `SplitOrigin`; parent without it (player ship) → none. Chunk bodies: SPEC-31 destroys all `ChunkBody` entities on star-system unload | SPEC-31 |
-| 5 | Should hulks broken off the player ship really have no `StarSystemMember`? They would survive a jump | Follow the architecture erratum (none); SPEC-31 destroys or adopts `Hulk` grids without `StarSystemMember` that are not the player ship at jump time | Owner |
-| 6 | Writer of `VoxelGrid.Kind` after spawn | `ShipDeathSystem` only | Tech lead (architecture §8 update) |
+| 4 | `StarSystemMember` for split grids and chunks (Voxel cannot name the Galaxy type) | **Answered by SPEC-31 §5.12 (adoption):** split grids and chunks adopt the parent's `StarSystemMember`; pieces of the player ship adopt the loaded star system (so they are unloaded with it). Chunk bodies are destroyed at unload; their blobs are released by `ChunkColliderCleanupSystem` (§5.9) | SPEC-31 |
+| 5 | Should hulks broken off the player ship really have no `StarSystemMember`? They would survive a jump | **Answered by SPEC-31 §5.12:** they adopt the loaded star system and stay behind as wrecks | Owner |
+| 6 | Writer of `VoxelGrid.Kind` after spawn | **Answered:** `ShipDeathSystem` only (architecture §8 row `VoxelGrid.Kind`) | Tech lead |
 | 7 | May `GridMassUpdateSystem`/`BrickDirtyScheduleSystem` record ECB commands? | No; they record none on roots, bricks or functional entities | SPEC-12, SPEC-10 |
 | 8 | `FxEvent.Color` for cell debris | `Color = paletteColorByte | (MaterialLayer << 8)`; bit 31 = 0; SPEC-63 resolves through the ship palette texture. New `FxKind` values: `CellDebris`, `RamImpact`, `ChunkDissolve` | SPEC-63 |
-| 9 | Cross-module ordering attributes | `SpatialHashBuildSystem [UpdateBefore(ImpactEventSystem)]`; `ProjectileStepSystem [UpdateAfter(ImpactEventSystem)]`; `ExplosionSystem`, `ShieldSystem`, `BeamStepSystem [UpdateBefore(DamageResolveSystem)]` | SPEC-21, 22, 23 |
+| 9 | Cross-module ordering attributes | `SpatialHashBuildSystem` is `OrderFirst` in `GameplayPostPhysicsGroup` (SPEC-23 §5.0), so it needs no attribute against `ImpactEventSystem`; `ProjectileStepSystem [UpdateAfter(ImpactEventSystem)]`; `ExplosionSystem`, `ShieldSystem`, `BeamStepSystem [UpdateBefore(DamageResolveSystem)]` | SPEC-21, 22, 23 |
 | 10 | How consumers stop on hulks and moved blocks | AI/power/shield/propulsion queries use `WithNone<Hulk>`; power consumer buffers ignore entities whose `FunctionalBlock.Grid` differs from the ship and rebuild when `VoxelGrid.Revision` changes | SPEC-20, 22, 23 |
 | 11 | Who creates the configured `DamageConfig` | `Game.App` at boot: `SetSingleton(DamageConfig.FromDefinition(db.Get<DamageConfigDefinition>("config_damage")))`; prefix `config_` added to SPEC-04's prefix table | SPEC-01, SPEC-04 |
 | 12 | Chunk body rendering | SPEC-63 draws each `ChunkCell` as an instanced unit cube (`RenderMeshInstanced`, ≤ 32,000 instances) with the chunk's smoothed `LocalToWorld`, `LocalOrigin` and `CellSize`; colour as question 8 | SPEC-63 |
 | 13 | `PhysicsLayers` names used here | `PhysicsLayers.ChunkBody`: chunk bodies collide with grids, other chunks and static bodies; projectile and explosion queries do not hit chunks (chunks are not damageable) | SPEC-12 |
 | 17 | Provisional collider of a hulk created by `SplitSystem` | SPEC-12 treats it like a freshly spawned grid: provisional box over `BrickMin/BrickDims` until its first compound is swapped in | SPEC-12 |
-| 14 | Mass/velocity initialisation of new bodies vs. single writers | `SplitSystem` sets initial `PhysicsMass` and `PhysicsVelocity` of bodies it creates (creation, not assignment); `GridMassUpdateSystem` owns `PhysicsMass` afterwards and must initialise its incremental state for grids it has never seen | Tech lead (architecture §8 update) |
+| 14 | Mass/velocity initialisation of new bodies vs. single writers | `SplitSystem` sets initial `PhysicsMass` and `PhysicsVelocity` of bodies it creates (creation, not assignment); `GridMassUpdateSystem` owns `PhysicsMass` afterwards and must initialise its incremental state for grids it has never seen. **Answered:** architecture §8 `PhysicsVelocity` row (creation is initialisation) | Tech lead |
 | 15 | Should damaged functional blocks work at reduced strength? | No: full function while the instance lives | Owner |
 | 16 | Grids spawned by `GridSpawnSystem` mid-session start at a frame boundary, not a tick | Determinism tests spawn everything before tick 0 | SPEC-10, SPEC-71 |
 

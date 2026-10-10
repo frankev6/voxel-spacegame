@@ -285,7 +285,7 @@ Per-frame algorithm:
 7. `Service.ReportCombatSignals(CombatSignals)`; copy counters into `Service.Stats`.
 
 ### 5.4 `AudioLoopBridgeSystem` (managed `SystemBase`)
-`PresentationBridgeGroup`, `[UpdateAfter(typeof(AudioEventDrainSystem))]`, `RequireForUpdate<GameplayActive>()`.
+`PresentationBridgeGroup`, `[UpdateAfter(typeof(AudioEventDrainSystem))]`, `RequireForUpdate<GameplayActive>()`. `OnStopRunning` (the World or Lab was left) stops every loop voice at once, so no loop outlives its scene.
 1. Engine loop (voice 0, cue `engineLoop`): `intensity` = max `ThrusterState.Intensity` over thruster entities whose `FunctionalBlock.Grid` has `PlayerShip` (Burst `IJob`, `.Run()`). Target volume = `intensity`; pitch = `0.8 + 0.4 × intensity`; position = the player grid root `LocalToWorld.Position`.
 2. Beam loops (voices 1..6, cue `beamLoop`): active beams (`BeamState.Active != 0`) within `beamLoopRadius` of the listener, sorted by distance, nearest 6. A beam keeps its voice while it stays in the set (map `Entity → voice` in a `NativeHashMap`, lookup only); free voices go to newcomers in distance order. Position = beam start (world).
 3. Voice 7 is spare (unused in v1).

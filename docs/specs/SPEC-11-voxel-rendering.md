@@ -157,8 +157,12 @@ public struct BrickMeshQueue : IComponentData                // singleton; produ
     public NativeList<BrickMeshRequest> Damage, Neighbour, Spawn, Lod;   // FIFO lists
     public NativeArray<int> Heads;                           // 4 read positions
     public NativeHashMap<Entity, byte> Pending;              // brick → lowest priority value queued
+    public NativeReference<JobHandle> Access;                // main thread only; never passed to a job (SPEC-12 §5.1 pattern)
     public static BrickMeshQueue Create();                   // lists capacity 1,024, map capacity 4,096, Persistent
-    public void Dispose();
+    public void Dispose();                                   // Access.Value.Complete(), then dispose every container
+    public JobHandle Acquire(JobHandle dependsOn) => JobHandle.CombineDependencies(dependsOn, Access.Value);
+    public void Release(JobHandle lastJob) { Access.Value = lastJob; }
+    public void CompleteAccess() { Access.Value.Complete(); }   // never inside FixedStepSimulationSystemGroup
     /// Adds unless the brick is already queued with an equal or better priority; a better priority adds a second entry
     /// and updates Pending (the stale entry is skipped on dequeue). Burst-compatible.
     public void Enqueue(Entity brick, Entity grid, MeshPriority p);
@@ -293,7 +297,7 @@ Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `Hollow
 - Per frame:
   1. `VoxelRenderRuntime.IsReady == 0` or `BrickMeshBatch.InFlight == 1` → return.
   2. `n = clamp((int)(MeshApplyBudgetMs * 1000 / AvgApplyMicros), MeshBatchMin, MeshBatchMax)`.
-  3. Dequeue up to n requests (marker `Dequeue`). Skip a request whose brick no longer exists or lacks `Brick`. `Lod` = `BrickLodDesired.Lod`, forced to ≥ 1 when the grid has `Dormant` enabled. Fill `Work`.
+  3. `queue.CompleteAccess()` (main thread pattern, SPEC-12 §5.1), then dequeue up to n requests (marker `Dequeue`). Skip a request whose brick no longer exists or lacks `Brick`. `Lod` = `BrickLodDesired.Lod`, forced to ≥ 1 when the grid has `Dormant` enabled. Fill `Work`.
   4. No items → return.
   5. Schedule `BrickSnapshotJob` (§5.1) on `state.Dependency`, complete it (marker `Snapshot`).
   6. `data = Mesh.AllocateWritableMeshData(Work.Length)`; store in the managed state (`PendingData`, `HasPendingData = true`).
@@ -316,7 +320,7 @@ Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `Hollow
 
 ### 5.6 `BrickRenderCleanupSystem`
 
-- **Group:** `PresentationSystemGroup`, `[UpdateBefore(typeof(DeferredDisposalSystem))]`. Burst `ISystem`.
+- **Group:** `PresentationSystemGroup`, `[UpdateBefore(typeof(DeferredDisposalSystem))]`. Burst `ISystem`. Requires `DeferredDisposalQueue` only — **not** `GameplayActive` (SPEC-01 decision 5: bricks destroyed by scene teardown are cleaned up in the frames after it).
 - Query: `BrickRenderState` without `Brick` (destroyed bricks keep only cleanup components). Job (`Schedule`, single worker) appends `RetireMesh(Mesh, MeshId)` to `DeferredDisposalQueue` for entries with `HasMesh == 1`; then `BeginInitializationEntityCommandBufferSystem` ECB `RemoveComponent<BrickRenderState>(query)` (query-wide, one command).
 - Cost O(destroyed bricks).
 
@@ -328,7 +332,7 @@ Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `Hollow
   1. `VoxelViewer.Valid == 0` → all grids non-dormant and all bricks LOD0 desired (only writes values that change); return.
   2. `GridDormancyJob : IJobEntity` (`ScheduleParallel`) over roots: bounding sphere of the grid (centre = `LocalToWorld` of the `CellMin..CellMax` centre × CellSize, radius = half diagonal × CellSize); `d = max(0, |centre − AnchorPosition| − radius)`; currently dormant → stays dormant while `d > DormantDistance × (1 − LodHysteresis)`; currently active → becomes dormant when `d > DormantDistance`.
   3. `BrickLodJob : IJobEntity` (`ScheduleParallel`) over bricks with `BrickRenderState`: sphere centre = `math.transform(LocalToWorld.Value, 8)`, radius = `8√3 × scale` (scale = length of LTW column 0); `d = max(0, |centre − CameraPosition| − radius)`; current desired 0 → 1 when `d > Lod1Distance`; 1 → 0 when `d < Lod1Distance × (1 − LodHysteresis)`; grid dormant → 1. Write only on change.
-  4. `LodEnqueueJob : IJobChunk` (`Schedule`, change filter on `BrickLodDesired`): `HasMesh == 1` and `Desired != ShownLod` → `BrickMeshQueue.Enqueue(brick, grid, Lod)`.
+  4. `LodEnqueueJob : IJobChunk` (`Schedule`, change filter on `BrickLodDesired`): `HasMesh == 1` and `Desired != ShownLod` → `BrickMeshQueue.Enqueue(brick, grid, Lod)`. Job access per SPEC-12 §5.1: `q = SystemAPI.GetSingleton<BrickMeshQueue>()` (read-only), schedule on `q.Acquire(state.Dependency)`, then `q.Release(handle)`.
 - Complexity O(bricks) per frame in parallel jobs (2,500 bricks ≈ 20 µs worker time); 0 main-thread loops.
 
 ### 5.8 `PropRenderSystem`
@@ -357,7 +361,7 @@ Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `Hollow
 
 | Call / type | Pre | Post / errors |
 |---|---|---|
-| `BrickMeshQueue.Enqueue(brick, grid, p)` | Caller holds the singleton RW (main thread or a job with the queue as a field) | Queued unless already queued with equal or better priority |
+| `BrickMeshQueue.Enqueue(brick, grid, p)` | SPEC-12 §5.1 access: inside a job scheduled with `Acquire`/`Release`, or on the main thread after `CompleteAccess()`; never through `GetSingletonRW` | Queued unless already queued with equal or better priority |
 | `VoxelRenderRuntime.IsReady` | — | 1 after `BrickMeshApplySystem`'s first update; SPEC-10 spawn waits for it |
 | `Dormant` | — | Enabled ⇔ grid farther than `DormantDistance` from `VoxelViewer.AnchorPosition` (hysteresis); readers skip expensive work |
 | `BrickRenderStats.Gather(em)` | Main thread | Mesh memory totals for the memory gate |
@@ -520,7 +524,7 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
   - [ ] Never more than one batch in flight; batch size stays within `[MeshBatchMin, MeshBatchMax]`.
   - [ ] The mesh job has no ECS dependencies (job debugger: safety system reports no lookups on it).
   - [ ] Main-thread cost ≤ 0.5 ms for a 128-brick batch (snapshot included).
-- **Tests:** `BrickMeshQueueTests.PriorityOrder`, `.UpgradeDedup`, `.StaleSkipped`; `BrickMeshBuildSystemTests.OneBatchInFlight`, `.AdaptiveBatchSize`, `.DestroyedBricks_Skipped`, `.MainThreadCost`.
+- **Tests:** `BrickMeshQueueTests.PriorityOrder`, `.UpgradeDedup`, `.StaleSkipped`, `.JobProducer_MainThreadConsumer_NoSafetyErrors` (a fixed-step job enqueues through `Acquire`/`Release` while this system dequeues after `CompleteAccess`, with the job safety system on); `BrickMeshBuildSystemTests.OneBatchInFlight`, `.AdaptiveBatchSize`, `.DestroyedBricks_Skipped`, `.MainThreadCost`.
 
 ### REN-011 — BrickMeshApplySystem, cleanup and statistics
 - **Milestone:** M1

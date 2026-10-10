@@ -260,7 +260,7 @@ public sealed class VoxelStructure : IDisposable             // behaviour in §5
     public VoxelStructure Clone();                           // deep copy; not pinned, not read-only
     public static StructureDiff Diff(VoxelStructure from, VoxelStructure to, Allocator a);
     public StructureMassData GetMass(in VoxelContent content);   // cached by Revision
-    public ulong ComputeContentHash(IBlockIdMap ids);            // StableHash of the VOXS payload
+    public ulong ComputeContentHash(Game.Voxel.Data.VoxsBlockNames names);   // StableHash of the VOXS payload (§5.4)
     public long NativeBytes { get; }                         // Σ capacities × element sizes of all containers
     public void Clear();
     public void Dispose();                                   // throws InvalidOperationException if pinned; second call is a no-op
@@ -292,7 +292,7 @@ public sealed class VoxelStructureRegistry : ScriptableObject // runtime instanc
 
 public sealed class BlueprintLibrary : IDisposable            // owned by SPEC-01's composition root
 {
-    public BlueprintLibrary(ContentCatalog catalog, VoxelContent content, IBlockIdMap ids);
+    public BlueprintLibrary(ContentCatalog catalog, VoxelContent content);   // decodes with VoxelStructureCodec.TryDecode(payload, catalog, …)
     public bool TryGet(ContentHash blueprint, out VoxelStructure structure);   // decodes on first use; read-only; cached
     public void ReleaseUnpinnedLarge();                       // disposes cached structures with > 65,536 cells and PinCount == 0
     public int CachedCount { get; }
@@ -368,10 +368,14 @@ public struct FunctionalComponentRegistration : IBufferElementData { public Func
 public struct GridPrototypes : IComponentData                // singleton; internal to GridSpawnSystem, read by SPEC-13
 { public Entity Brick; public FixedList128Bytes<Entity> FunctionalByKind; /* index = (int)FunctionKind, 8 entries */ public uint NextSerial; public int RegistrationCount; }
 
-public struct RetiredBlob { public BlobAssetReference<Collider> Blob; public uint DueFrame; }
+public struct RetiredBlob { public BlobAssetReference<Collider> Blob; public uint DueFrame; public uint DueTick; }
 public struct RetiredMesh { public UnityObjectRef<Mesh> Mesh; public BatchMeshID Id; public uint DueFrame; }
 public struct DeferredDisposalQueue : IComponentData         // singleton; appended on the main thread only
-{ public NativeList<RetiredBlob> Blobs; public NativeList<RetiredMesh> Meshes; public uint Frame; }
+{
+    public NativeList<RetiredBlob> Blobs; public NativeList<RetiredMesh> Meshes; public uint Frame;
+    public uint Tick;          // SimClock.Tick mirrored by DeferredDisposalSystem each frame (0 when no SimClock)
+    public byte HasClock;      // 1 while a SimClock singleton exists
+}
 
 public struct VoxelConfig : IComponentData                   // singleton, created by SPEC-01 from VoxelConfigDefinition
 { public int SpawnBricksPerFrame; public byte RequireRenderer; public float DefaultCellSize; }
@@ -425,7 +429,7 @@ public struct GridCellReader                                 // read-only job he
 }
 ```
 
-`VoxelRaycast`, `ICellSolidQuery`, `VoxelRayHit` (§5.5), `VoxelStructureCodec`, `IBlockIdMap`, `VoxelCodecException` (§5.6), `MassAccumulator` (§5.4), `BenchmarkStructures` (§5.11) and `DeferredDisposal` (§5.10) are specified with their algorithms.
+`VoxelRaycast`, `ICellSolidQuery`, `VoxelRayHit` (§5.5), `VoxelStructureCodec`, `VoxsSourceBuffers` (§5.6), `MassAccumulator` (§5.4), `BenchmarkStructures` (§5.11) and `DeferredDisposal` (§5.10) are specified with their algorithms.
 
 ### 4.7 Definitions (`Assets/Game/Data/Definitions/Voxel/`, namespace `Game.Data.Definitions`)
 
@@ -437,7 +441,7 @@ public sealed class ShipBlueprintDefinition : ContentDefinition
     [SerializeField] private string displayName;
     [SerializeField] private float cellSize = 0.5f;          // > 0
     [SerializeField] private int payloadVersion = 1;         // VOXS payload layout version
-    [SerializeField, HideInInspector] private byte[] payload; // VoxelStructureCodec output; written by SPEC-72 and SPEC-51 export
+    [SerializeField, HideInInspector] private byte[] payload; // VOXS bytes (SPEC-05 VoxsCodec, VoxsEncodeOptions.ForAsset); written by SPEC-72 and SPEC-51 export
     [SerializeField] private int cellCount;                  // cached summary for UI and validation
     [SerializeField] private Vector3Int boundsMin, boundsMax;
     public string DisplayName => displayName; public float CellSize => cellSize; public int PayloadVersion => payloadVersion;
@@ -510,7 +514,7 @@ Complexity O(cells).
 - `GetBlocks(out)`: for bricks in `SortedBrickOrder`, local index 0..4,095 (uniform: the same cell 4,096 times): each palette cell → `StructureBlock{placement, -1}`. Then each live instance in index order → `StructureBlock{placement, index}`.
 - `Diff(from, to)`: `StructureDiffJob` (Burst, `IJob`). (a) Palette blocks: for every brick coord present in either structure (union, sorted (z,y,x)), compare cell by cell the resolved `(Block, Orient, Color)` of palette cells (instance cells and air count as "none"); differences go to `Removed` (from's block) and `Added` (to's block). Dense pages are first compared with `UnsafeUtility.MemCmp`; equal pages with element-wise equal palettes are skipped. (b) Instances: multiset difference keyed by `(Block, Origin, Orient, Color)` (sort both lists, then merge). Output sorted by `(Origin.z, Origin.y, Origin.x, Block, Orient, Color)`. HP and flags are ignored. O(cells of both).
 - `MassAccumulator` (static, Burst): `AddCell(ref StructureMassData d, int3 cell, float cellSize, float mass)` adds `m`, `m·p`, `m·p²` per axis, `m·(px·py, py·pz, pz·px)` and `m·s²/6` with `p = CellCenter(cell)` in double; `RemoveCell` subtracts the same terms; `Add(ref a, in b)` sums two accumulators. `GetMass(content)`: if `MassRevision == Revision` return the cache; else `StructureMassJob : IJobParallelFor` over bricks writes one `StructureMassData` per brick, then a serial sum in `SortedBrickOrder` (bit-identical across runs). Cell mass = `def.CellMass` of the cell's block.
-- `ComputeContentHash(ids)`: `StableHash.Hash64` of the bytes from `VoxelStructureCodec.Encode` (no compaction).
+- `ComputeContentHash(names)`: `StableHash.Hash64` of the bytes from `VoxelStructureCodec.Encode(this, names, VoxsEncodeOptions.ForSaveChunk)` (no compaction, no deflate).
 
 ### 5.5 Grid-space DDA (`VoxelRaycast`, `Model/`)
 
@@ -532,22 +536,30 @@ Algorithm (Amanatides–Woo):
 5. `t > maxCells` → false.
 Complexity ≤ `3·maxCells` steps; 0 allocations.
 
-### 5.6 VOXS codec (`VoxelStructureCodec`, `Model/`)
+### 5.6 VOXS adapter (`VoxelStructureCodec`, `Model/`)
+
+The VOXS byte format and its only codec are SPEC-05's `VoxsCodec` (`Game.Voxel.Data`, SPEC-05 §4.7 and §5.7). This module has **no byte layout of its own**; `VoxelStructureCodec` only converts between `VoxelStructure` and SPEC-05's `VoxsSource`/`VoxsDecoded`.
 
 ```csharp
-public interface IBlockIdMap
-{   // implemented over ContentCatalog (CatalogBlockIdMap, Grid/) and by tests
-    ContentId GetId(ushort blockIndex);
-    ushort ResolveOrMissing(ContentId id, string context);   // records unresolved; returns BlockDefsBlob.MissingBlockIndex
+/// <summary>Owns the arrays a VoxsSource built from a VoxelStructure needs (uniform bricks expanded). Dispose after encoding.</summary>
+public sealed class VoxsSourceBuffers : IDisposable
+{
+    public Game.Voxel.Data.VoxsSource Source;     // Palette/Instances are views over the structure's lists (valid while it is unchanged)
+    public void Dispose();                        // frees BrickCoords and Cells; idempotent
 }
 public static class VoxelStructureCodec
 {
-    public const int LayoutVersion = 1;
-    public static void Encode(VoxelStructure s, IBlockIdMap ids, NativeList<byte> output);
-    public static VoxelStructure Decode(ReadOnlySpan<byte> payload, IBlockIdMap ids, string context);  // throws VoxelCodecException on malformed data
+    public static VoxsSourceBuffers ToSource(VoxelStructure s, Allocator allocator);
+    public static byte[] Encode(VoxelStructure s, Game.Voxel.Data.VoxsBlockNames names, Game.Voxel.Data.VoxsEncodeOptions options);
+    public static bool TryDecode(ReadOnlySpan<byte> data, ContentCatalog catalog, out VoxelStructure result, out string error);
+    public static VoxelStructure FromDecoded(Game.Voxel.Data.VoxsDecoded d);   // copies; the caller still disposes d
 }
 ```
-SPEC-05 §VOXS is the normative byte layout. Until SPEC-05 publishes it, implement Appendix A; if SPEC-05 differs, SPEC-05 wins. Layout-independent requirements: bricks in `SortedBrickOrder`; palette and instances written as stored (tombstones included) so decode → encode is byte-identical; block IDs written as `ContentId` strings, never `BlockIndex`; decode rebuilds masks, counts and `BrickIndex`, then calls `OptimizeStorage()`; unknown IDs map to the Missing block with a warning (never reject, ADR-0007). Encoding runs on a worker thread when called by SPEC-05 (it touches no Unity objects).
+
+- `ToSource(s, a)`: `CellSize = s.CellSize`; `AnchorInstance = -1` (structures store no anchor; `GridSpawnSystem` recomputes it at conversion); `Palette = s.Palette.AsArray()`, `Instances = s.Instances.AsArray()` (views); `order = s.SortedBrickOrder(Temp)`; `BrickCoords` (length K) and `Cells` (K × 4,096) allocated with `a`; brick `order[k]` → coords[k], and its cells copied with `UnsafeUtility.MemCpy` (dense page) or `MemCpyReplicate` (uniform) into `Cells[k × 4096 …]`. The cell order inside a brick is SPEC-10's local index, which equals `VoxsCodec.CellIndex` (asserted once in a test). `Partial = false`. O(cells), one copy.
+- `Encode(s, names, o)`: `using var b = ToSource(s, Allocator.TempJob); return VoxsCodec.Encode(b.Source, names, o);`. Safe on a worker thread only when `s` is not mutated meanwhile; savers use SPEC-05's `VoxsSnapshotBlock.Capture(b.Source, names)` on the main thread instead.
+- `TryDecode(data, catalog, out r, out e)`: `VoxsCodec.TryDecode(data, catalog, Allocator.TempJob, out d, out e)`; on success `r = FromDecoded(d)`; `d.Dispose()`. Failure → `r = null`, `e` from SPEC-05 (never an exception; unknown IDs map to the Missing block inside `VoxsCodec`, ADR-0007).
+- `FromDecoded(d)`: new structure with `d.CellSize`; palette and instances copied as stored (tombstones included, so decode → encode is byte-identical); per brick `SetBrickDense(coord, slice)` (rebuilds the mask, `SolidCount` and `BrickIndex`); then `OptimizeStorage()` (uniform bricks become uniform pages). `d.AnchorInstance` is ignored. `d.Partial == true` is rejected here (`InvalidOperationException`): partial payloads are applied by their owners (SPEC-30 deltas).
 
 ### 5.7 `GridSpawnSystem` (`Grid/`)
 
@@ -563,7 +575,7 @@ Per frame (`budget = VoxelConfig.SpawnBricksPerFrame`; markers `GridSpawnSystem.
 4. **Continue spawning** (`CreateBricks`; roots with `GridSpawning` enabled, sorted by Serial) while `budget > 0`: `n = min(budget, source.Bricks.Length − NextBrick)`:
    a. `Instantiate(brickPrototype, n, Allocator.Temp)`, then `AddComponent<BrickRenderState>(entities)` (Instantiate strips cleanup types).
    b. `BrickFillJob : IJobParallelFor` (inner batch 8) over the n records: `Brick{Grid, Coord, SolidCount, ChangedRevision 0}`; `BrickCells.ResizeUninitialized(4096)` then dense → `UnsafeUtility.MemCpy` 16,384 B from the page, uniform → `UnsafeUtility.MemCpyReplicate` of the uniform cell 4,096 times; `BrickSolidMask` 64 words from `Masks[i]`; `LocalTransform`; `Parent = root`. Complete it (init group, bounded by the budget).
-   c. Write `BrickSlot[SlotIndex(coord)] = entity`; append the entities to the LEG; enqueue `BrickMeshQueue` requests with priority `Spawn` if the queue exists.
+   c. Write `BrickSlot[SlotIndex(coord)] = entity`; append the entities to the LEG; enqueue `BrickMeshQueue` requests with priority `Spawn` if the queue exists (main thread: `CompleteAccess()` once per update before the first enqueue, SPEC-12 §5.1).
    d. Call every `IGridSpawnHook.OnEntitiesCreated(em, root, entities)`.
    e. `NextBrick += n; budget -= n`. When `NextBrick == source.Bricks.Length`: disable `GridSpawning`, unpin the source; if the source came from a blueprint, call `BlueprintLibrary.ReleaseUnpinnedLarge()`.
 5. **Start new requests** (`Convert`; entities with `GridSpawnRequest`, sorted by `Entity.Index` then `Version`): the first request of the frame is always converted (so large grids cannot starve), later ones only while `budget > 0`:
@@ -587,7 +599,7 @@ Complexity per frame: O(created bricks) memory copy (≤ 16.8 MB at 1,024 bricks
      - `Flags & Mesh` and `SolidCount > 0` → `BrickMeshQueue.Enqueue(brick, grid, MeshPriority.Damage)`.
      - For each face `f` set in `BorderMask`: `n = BrickSlot[SlotIndex(coord + FaceDirection(f))]`; if `n != Null` → `BrickMeshQueue.Enqueue(n, grid, MeshPriority.Neighbour)`.
      - `Flags = None`, `BorderMask = None`, disable `BrickDirty`.
-  4. Queue singletons are taken with `SystemAPI.GetSingletonRW` (ECS orders their other users through the dependency).
+  4. Queue singletons follow SPEC-12 §5.1 (job access): `var mq = SystemAPI.GetSingleton<BrickMeshQueue>(); var cq = SystemAPI.GetSingleton<ColliderDirtyQueue>(); dep = mq.Acquire(cq.Acquire(state.Dependency))`; schedule the job on `dep` with both queues as fields; `mq.Release(h); cq.Release(h); state.Dependency = h`. Never `GetSingletonRW` on them in the fixed step (it would complete other systems' jobs).
 - Complexity O(dirty bricks); 0 B GC.
 
 ### 5.9 Grid edits (M3, `GridEditRequest`)
@@ -604,10 +616,11 @@ Cost: O(edited bricks); one place/remove touches 1–8 bricks.
 
 - **Group:** `[UpdateInGroup(typeof(PresentationSystemGroup), OrderLast = true)]`. `ISystem`; `OnUpdate` is not Burst-compiled (it calls `EntitiesGraphicsSystem.UnregisterMesh` and `Object.Destroy`). Requires `DeferredDisposalQueue`.
 - Per frame (marker `DeferredDisposalSystem.Free`):
-  1. `q.Frame++`.
-  2. Every `RetiredBlob` with `DueFrame ≤ Frame`: `Blob.Dispose()`; swap-back remove.
+  1. `q.Frame++`; `q.HasClock = SimClock exists ? 1 : 0`; `q.Tick = HasClock ? SimClock.Tick : 0`.
+  2. Every `RetiredBlob` with `DueFrame ≤ Frame` **and** (`HasClock == 0` or `Tick ≥ DueTick`): `Blob.Dispose()`; swap-back remove. Reason: while the fixed step is paused (pause menu, SPEC-32 jump transit) no physics step replaces the `PhysicsWorld`, which still references blobs retired before the pause, and per-frame queries (interaction, camera occlusion) read it; a frame count alone would free them under it.
   3. Every `RetiredMesh` with `DueFrame ≤ Frame`: `entitiesGraphics.UnregisterMesh(Id)` (skip when `Id == BatchMeshID.Null` or the system is absent), `Object.Destroy(Mesh.Value)`; swap-back remove.
-- Producers call the static helpers `DeferredDisposal.RetireBlob(ref DeferredDisposalQueue q, BlobAssetReference<Collider> b)` and `DeferredDisposal.RetireMesh(ref q, UnityObjectRef<Mesh> mesh, BatchMeshID id)` on the main thread; both set `DueFrame = q.Frame + 3` (architecture §11.3, §11.8: at least 3 frames).
+- Producers call the static helpers `DeferredDisposal.RetireBlob(ref DeferredDisposalQueue q, BlobAssetReference<Collider> b)` and `DeferredDisposal.RetireMesh(ref q, UnityObjectRef<Mesh> mesh, BatchMeshID id)` on the main thread; both set `DueFrame = q.Frame + 3` (architecture §11.3, §11.8: at least 3 frames); `RetireBlob` also sets `DueTick = q.Tick + 2` (two fixed steps, so at least one `PhysicsWorld` rebuild happened after retirement). Meshes are not referenced by the physics world and are frame-gated only.
+- **No `RequireForUpdate<GameplayActive>`** (SPEC-01 decision 5: cleanup must also run between scenes).
 - Complexity O(retired items). Teardown: `GridSpawnSystem.OnDestroy` disposes remaining blobs; meshes are destroyed with the scene.
 
 ### 5.11 Benchmark structures (`BenchmarkStructures`, `Model/`)
@@ -656,7 +669,7 @@ sequenceDiagram
 | `GridStructureSync.WriteBack(em, root, registry)` | Main thread, not during another system's update | Changed bricks copied into the source; bricks destroyed at runtime removed from it; instance `FunctionHp/Flags/CellsAlive` copied; `SyncedRevision = Revision`; returns bricks copied; returns 0 without `WriteBack` |
 | `BrickWrite.Set(...)` | Caller is a cell writer (architecture §8) with RW access to the brick | Maintains mask, `SolidCount`, `ChangedRevision`; sets `Mesh` on any change, `Collider` on a solidity change, and `BorderMask |= BorderFaces(i)` on a solidity change or an Hp-tier change (tier = `Hp >> 6`); caller enables `BrickDirty`, bumps `VoxelGrid.Revision` once per tick, and destroys the brick through the GameplayEnd ECB when `SolidCount` reaches 0 |
 | `VoxelRaycast.Cast` | `maxCells ≥ 0` | Deterministic first solid cell; false if none |
-| `VoxelStructureCodec.Decode` | — | Never rejects unknown IDs; throws `VoxelCodecException` on truncated or invalid data |
+| `VoxelStructureCodec.TryDecode` | Main thread (SPEC-05 `VoxsCodec.TryDecode` records unresolved IDs) | Never rejects unknown IDs; returns false with an error on truncated or invalid data; never throws for bad data |
 
 Registration of functional component types (SPEC-20/21/22): a system with `[CreateAfter(typeof(GridSpawnSystem))]` appends `FunctionalComponentRegistration{Kind, ComponentType.ReadWrite<T>()}` to the singleton buffer in its `OnCreate` (a buffer append, not a structural change). Registered components start zero-initialised; the registering spec fills them in its own `GameInitGroup` system ordered after `GridSpawnSystem`.
 
@@ -673,9 +686,9 @@ Registration of functional component types (SPEC-20/21/22): a system with `[Crea
 | Despawn while `GridSpawning` | Unpin, write back the bricks that exist, destroy |
 | Brick reaches `SolidCount == 0` in a fixed tick | The writer destroys it through the GameplayEnd ECB; `BrickDirtyScheduleSystem` still enqueues collider work and neighbour remeshes and skips its own mesh |
 | Footprint crosses brick borders | `SetCell` creates bricks as needed |
-| Instance count would exceed 32,768 | `PlaceResult.InstancesFull`; decode of such data throws `VoxelCodecException` |
+| Instance count would exceed 32,768 | `PlaceResult.InstancesFull`; decode of such data fails (SPEC-05 decoder limits) |
 | Palette full (32,767) | `PlaceResult.PaletteFull`; callers may `Compact()` and retry |
-| Decode meets an unknown block ID | Missing block via `IBlockIdMap.ResolveOrMissing`; one warning per ID |
+| Decode meets an unknown block ID | Missing block (SPEC-05 `VoxsCodec`); one warning per ID |
 | `GridCellReader` asked for a cell outside `BrickDims` | Air, no exception |
 | Ray origin inside a solid cell | Hit at distance 0, `EnteredFace = 255` |
 | No registrations for a `FunctionKind` | Base functional archetype; no error |
@@ -722,9 +735,9 @@ Totals for `HollowStation1M` (872 bricks, 504,192 exposed faces, ≈ 1,000 boxes
 | ECS chunk data (872 × 300) | 0.26 MB |
 | Meshes, GPU (504,192 × 21.6) | 10.9 MB |
 | Mesh CPU copies (0 if SPEC-11 releases them; worst case equal to GPU) | 0 – 10.9 MB |
-| Colliders: cached brick blobs + grid compound copy + one retired compound for 3 frames | ≈ 1.8 MB peak |
+| Colliders (SPEC-12 §4.8): cached brick blobs + grid compound + one retired compound | ≈ 2.3 MB peak, ≈ 1.1 MB steady |
 | Source structure | 0 in steady state (blueprints > 65,536 cells are released after spawn; `WriteBack` sources are fleet ships, not stations) |
-| **Total** | **≈ 27.7 MB (≈ 38.6 MB worst case)** ≤ 40 MB |
+| **Total** | **≈ 28.2 MB (≈ 39.1 MB worst case)** ≤ 40 MB |
 
 Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 MB + meshes ≈ 45 MB → ≈ 110 MB; it cannot meet 40 MB with dense bricks at LOD0. It is measured and reported by VOX-002, not gated. Fallback if the owner makes thin shells a gate (requires an ADR because it changes the `BrickCells` contract): **sparse bricks** — bricks with `SolidCount ≤ 1,024` store `BrickSparseCells : IBufferElementData { ushort Local; Cell Value; }` sorted by `Local` (6 B per solid cell) instead of `BrickCells`, `BrickWrite` densifies when a write would exceed 1,024 entries; plus SPEC-11 rendering bricks beyond 150 m at LOD1 (≤ 25% triangles). Estimated thin-shell total with both: ≈ 6 MB cells + ≈ 15 MB meshes + 4 MB colliders ≈ 25 MB.
 
@@ -735,7 +748,7 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 - **Tier:** standard — transcribes the exact code in §4
 - **Depends on:** `CORE-001`, `DATA-001`
 - **Do:** Create every type of §4.1–§4.7 with the exact fields, enums and signatures; method bodies `throw new System.NotImplementedException()` except one-line properties and `Cell` helpers. Create folders `Assets/Game/Voxel/Model/`, `Assets/Game/Voxel/Grid/`, `Assets/Game/Data/Definitions/Voxel/`. Add the `[ContentIdPrefix]` attributes shown.
-- **Files:** `Assets/Game/Voxel/Model/{Cell,CellFlags,PaletteEntry,BlockInstance,BlockInstanceFlags,GridKind,GridMotion,GridSpawnFlags,BlockPlacement,PlaceResult,VoxelContent,BrickMath,BrickMaskBits,BrickSolidMask,StructureMassData,StructureHeader,BrickRecord,VoxelStructureData,StructureBlock,StructureDiff,VoxelStructure,VoxelStructureRegistryRef,GridSpawnRequest,GridRebuildRequest,GridDespawnRequest,GridSpawning,GridRebuilt,GridBodyInit,GridSource,GridEditedBrick,GridEditRequest,VoxelGrid,BrickSlot,Brick,BrickCells,BrickDirtyFlags,BrickDirty,FunctionalBlock,FunctionalComponentRegistration,GridPrototypes,RetiredBlob,RetiredMesh,DeferredDisposalQueue,VoxelConfig,ICellSolidQuery,VoxelRayHit,VoxelRaycast,StructureCellQuery,GridCellQuery,IBlockIdMap,VoxelStructureCodec,VoxelCodecException,MassAccumulator,BenchmarkStructures}.cs`; `Assets/Game/Voxel/Grid/{IGridSpawnHook,VoxelStructureRegistry,BlueprintLibrary,GridSpawnParams,GridSpawnApi,GridStructureSync,BrickWrite,GridCellReader,VoxelConfigFactory,DeferredDisposal,CatalogBlockIdMap}.cs`; `Assets/Game/Data/Definitions/Voxel/{ShipBlueprintDefinition,VoxelConfigDefinition}.cs`
+- **Files:** `Assets/Game/Voxel/Model/{Cell,CellFlags,PaletteEntry,BlockInstance,BlockInstanceFlags,GridKind,GridMotion,GridSpawnFlags,BlockPlacement,PlaceResult,VoxelContent,BrickMath,BrickMaskBits,BrickSolidMask,StructureMassData,StructureHeader,BrickRecord,VoxelStructureData,StructureBlock,StructureDiff,VoxelStructure,VoxelStructureRegistryRef,GridSpawnRequest,GridRebuildRequest,GridDespawnRequest,GridSpawning,GridRebuilt,GridBodyInit,GridSource,GridEditedBrick,GridEditRequest,VoxelGrid,BrickSlot,Brick,BrickCells,BrickDirtyFlags,BrickDirty,FunctionalBlock,FunctionalComponentRegistration,GridPrototypes,RetiredBlob,RetiredMesh,DeferredDisposalQueue,VoxelConfig,ICellSolidQuery,VoxelRayHit,VoxelRaycast,StructureCellQuery,GridCellQuery,VoxelStructureCodec,VoxsSourceBuffers,MassAccumulator,BenchmarkStructures}.cs`; `Assets/Game/Voxel/Grid/{IGridSpawnHook,VoxelStructureRegistry,BlueprintLibrary,GridSpawnParams,GridSpawnApi,GridStructureSync,BrickWrite,GridCellReader,VoxelConfigFactory,DeferredDisposal}.cs`; `Assets/Game/Data/Definitions/Voxel/{ShipBlueprintDefinition,VoxelConfigDefinition}.cs`
 - **Acceptance criteria:**
   - [ ] `tools/compile.sh` passes with zero warnings in `Game.Voxel` and `Game.Data`.
   - [ ] `UnsafeUtility.SizeOf<Cell>() == 4`, `<PaletteEntry>() == 4`, `<BlockInstance>() == 32`, `<Brick>() == 28`, `<BrickMaskBits>() == 512`, `<BrickRecord>() == 32`.
@@ -833,16 +846,16 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 ### VOX-009 — VOXS codec
 - **Milestone:** M1
 - **Tier:** frontier — F3: binary encoding
-- **Depends on:** `VOX-007`, `PERS-001`
-- **Do:** Implement `VoxelStructureCodec.Encode/Decode` against SPEC-05 §VOXS (Appendix A until it exists), `VoxelCodecException`, `ComputeContentHash`, a test `IBlockIdMap`.
-- **Files:** `Assets/Game/Voxel/Model/{VoxelStructureCodec,VoxelCodecException,IBlockIdMap,VoxelStructure}.cs`; `Assets/Game/Tests/EditMode/Voxel/VoxelCodecTests.cs`
+- **Depends on:** `VOX-007`, `SPEC-05`
+- **Do:** Implement the adapter of §5.6 (`VoxsSourceBuffers`, `VoxelStructureCodec.ToSource/Encode/TryDecode/FromDecoded`) over SPEC-05's `VoxsCodec`, and `ComputeContentHash`. Write no byte-level code: every byte is SPEC-05's.
+- **Files:** `Assets/Game/Voxel/Model/{VoxelStructureCodec,VoxsSourceBuffers,VoxelStructure}.cs`; `Assets/Game/Tests/EditMode/Voxel/VoxelCodecTests.cs`
 - **Acceptance criteria:**
-  - [ ] Encode → Decode → Encode is byte-identical for an empty structure, `Ship20k`, `HollowStation1M`, `SolidAsteroid1M` and a 5,000-op edited structure with tombstones and damage.
-  - [ ] Decoded structures equal the originals cell by cell and instance by instance.
-  - [ ] An unknown block ID decodes to `MissingBlockIndex` and is reported once.
-  - [ ] Every truncated prefix of a small payload throws `VoxelCodecException` and no other exception type.
-  - [ ] `HollowStation1M` payload ≤ 120 KB; decode ≤ 150 ms.
-- **Tests:** `VoxelCodecTests.RoundTrip_ByteIdentical`, `.Decode_EqualsOriginal`, `.UnknownId_MapsToMissing`, `.Truncated_Throws`, `.HollowStation_SizeAndDecodeTime` (`Performance`).
+  - [ ] Encode → TryDecode → Encode is byte-identical for an empty structure, `Ship20k`, `HollowStation1M`, `SolidAsteroid1M` and a 5,000-op edited structure with tombstones and damage.
+  - [ ] Decoded structures equal the originals cell by cell and instance by instance, and uniform bricks are uniform pages again.
+  - [ ] `VoxsCodec.CellIndex(local) == BrickMath.LocalIndex(local)` for all 4,096 locals.
+  - [ ] An unknown block ID decodes to the Missing block and is reported once.
+  - [ ] `HollowStation1M`: `ToSource` + encode ≤ 60 ms; decode + `FromDecoded` ≤ 150 ms.
+- **Tests:** `VoxelCodecTests.RoundTrip_ByteIdentical`, `.Decode_EqualsOriginal`, `.CellIndex_MatchesLocalIndex`, `.UnknownId_MapsToMissing`, `.HollowStation_EncodeDecodeTime` (`Performance`).
 
 ### VOX-010 — Voxel definitions and config factory
 - **Milestone:** M1
@@ -859,8 +872,8 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 - **Milestone:** M1
 - **Tier:** frontier — F2: cached native structures live for the session; handles cross the managed/ECS boundary
 - **Depends on:** `VOX-009`, `VOX-010`
-- **Do:** Implement `VoxelStructureRegistry` (list of structures, never-reused handles, hooks), `BlueprintLibrary` (hash → definition map built from `catalog.All<ShipBlueprintDefinition>()`; decode with `CatalogBlockIdMap`; `SetReadOnly`; cache by hash; `ReleaseUnpinnedLarge`), `CatalogBlockIdMap` (`GetBlock(i).Id`, `TryGetBlockIndex`, `ResolveBlockOrMissing`).
-- **Files:** `Assets/Game/Voxel/Grid/{VoxelStructureRegistry,BlueprintLibrary,CatalogBlockIdMap}.cs`; `Assets/Game/Tests/EditMode/Voxel/{StructureRegistryTests,BlueprintLibraryTests}.cs`
+- **Do:** Implement `VoxelStructureRegistry` (list of structures, never-reused handles, hooks), `BlueprintLibrary` (hash → definition map built from `catalog.All<ShipBlueprintDefinition>()`; decode with `VoxelStructureCodec.TryDecode(def.Payload, catalog, …)`; a failed decode logs one error and the blueprint is treated as unknown; `SetReadOnly`; cache by hash; `ReleaseUnpinnedLarge`).
+- **Files:** `Assets/Game/Voxel/Grid/{VoxelStructureRegistry,BlueprintLibrary}.cs`; `Assets/Game/Tests/EditMode/Voxel/{StructureRegistryTests,BlueprintLibraryTests}.cs`
 - **Acceptance criteria:**
   - [ ] Handles are unique and never reused after `Release`; `Get` of a released handle returns null.
   - [ ] A second `TryGet` of a blueprint returns the same instance without decoding (decode counter); it rejects mutation.
@@ -883,7 +896,7 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 - **Milestone:** M1
 - **Tier:** frontier — F1/F5: builds every grid; ordering with SPEC-11/12/13/31
 - **Depends on:** `VOX-006`, `VOX-011`, `VOX-012`, `REN-001`, `PHY-001`, `TST-001`
-- **Do:** Implement `VoxelSingletons`, `GridSpawnApi` spawn overloads, `GridSpawnSystem` §5.7 steps 1, 4 and 5 with `BrickFillJob` and `FunctionalFillJob`, hooks, `PersistentId` copy, profiler markers.
+- **Do:** Implement `VoxelSingletons`, `GridSpawnApi` spawn overloads, `GridSpawnSystem` §5.7 steps 1, 4 and 5 with `BrickFillJob` and `FunctionalFillJob`, hooks, `PersistentId` copy, profiler markers. In step 5b also set `GridMass { Data = source.GetMass(content) }` (cached by revision, SPEC-12 Q3) and disable `GridMassRecompute`, so no O(cells) recompute runs after a spawn.
 - **Files:** `Assets/Game/Voxel/Grid/{GridSpawnSystem,GridSpawnApi,VoxelSingletons,BrickFillJob,FunctionalFillJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/GridSpawnSystemTests.cs`; `Assets/Game/Tests/PlayMode/Voxel/GridSpawnPerfTests.cs`
 - **Acceptance criteria:**
   - [ ] Spawning `Ship20k` with 3 functional blocks yields 1 root, 18 bricks, 3 functional entities; every brick's cells and mask equal the structure's; `BrickSlot` maps every coord; the LEG has 22 entries; `Instances[i].Functional` points at the entity; the root has `PersistentId` equal to the request's.
@@ -893,7 +906,8 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
   - [ ] Invalid requests (empty structure, both sources, unknown hash) are destroyed with one error log each.
   - [ ] A registered component type for `FunctionKind.Thruster` is present on spawned thruster entities.
   - [ ] Creating 1,024 dense bricks ≤ 6 ms main thread (median of 20).
-- **Tests:** `GridSpawnSystemTests.Spawn_Ship20k_CreatesExpectedEntities`, `.RequesterComponents_Preserved`, `.Hook_ReceivesAllCreated`, `.Budget_SpreadsAcrossFrames`, `.UniformBrick_Expanded`, `.InvalidRequests_Destroyed`, `.FunctionalRegistration_Applied`, `.Headless_NoRenderComponents`; `GridSpawnPerfTests.Create1024Bricks_Under6ms`.
+  - [ ] After spawning `Ship20k`, `GridMass.Data` equals `structure.GetMass(content)` exactly and `GridMassRecompute` is disabled.
+- **Tests:** `GridSpawnSystemTests.Spawn_PrefillsMass`, `GridSpawnSystemTests.Spawn_Ship20k_CreatesExpectedEntities`, `.RequesterComponents_Preserved`, `.Hook_ReceivesAllCreated`, `.Budget_SpreadsAcrossFrames`, `.UniformBrick_Expanded`, `.InvalidRequests_Destroyed`, `.FunctionalRegistration_Applied`, `.Headless_NoRenderComponents`; `GridSpawnPerfTests.Create1024Bricks_Under6ms`.
 
 ### VOX-014 — Rebuild, despawn and write-back
 - **Milestone:** M1
@@ -929,10 +943,11 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 - **Do:** Implement §5.10 and the `DeferredDisposal` helpers.
 - **Files:** `Assets/Game/Voxel/Grid/{DeferredDisposalSystem,DeferredDisposal}.cs`; `Assets/Game/Tests/EditMode/Voxel/DeferredDisposalTests.cs`
 - **Acceptance criteria:**
-  - [ ] A retired blob is valid after 2 updates and disposed after the 3rd.
+  - [ ] A retired blob is valid after 2 updates and disposed after the 3rd (no `SimClock`, or the clock advancing ≥ 1 tick per frame).
+  - [ ] With a `SimClock` that does not advance (paused), a retired blob survives 100 updates; it is disposed in the first update after `Tick` reaches `DueTick`.
   - [ ] A retired mesh is unregistered and destroyed after the 3rd update (Entities Graphics present: PlayMode test).
   - [ ] World disposal with pending blobs leaks nothing.
-- **Tests:** `DeferredDisposalTests.Blob_DisposedAfterThreeFrames`, `.Mesh_UnregisteredAfterThreeFrames`, `.WorldDispose_NoLeaks`.
+- **Tests:** `DeferredDisposalTests.Blob_WaitsForTicksWhilePaused`, `DeferredDisposalTests.Blob_DisposedAfterThreeFrames`, `.Mesh_UnregisteredAfterThreeFrames`, `.WorldDispose_NoLeaks`.
 
 ### VOX-017 — Benchmark structures
 - **Milestone:** M1
@@ -975,7 +990,7 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 | 1 | Does `GameplayActive` exist in the BlueprintLab scene (VOX systems require it)? | Yes; SPEC-01 creates it in World and BlueprintLab | SPEC-01 / SPEC-51 |
 | 2 | Who creates `VoxelConfig`, `VoxelStructureRegistryRef`, `BlueprintLibrary` and the registry? | SPEC-01's composition root right after `ContentService.CreateSingletons`: `BlueprintLibrary`, then `VoxelStructureRegistry.CreateRuntime(library)`, then the two singletons; disposes in reverse order at shutdown | SPEC-01 |
 | 3 | SPEC-04 prefix registry lacks `config_` | `config_` for `VoxelConfigDefinition`, `VoxelRenderConfigDefinition`, `VoxelPhysicsConfigDefinition`, `VoxelPaletteDefinition`; SPEC-04 adds the row | SPEC-04 |
-| 4 | VOXS byte layout not yet published by SPEC-05 | Appendix A | SPEC-05 |
+| 4 | VOXS byte layout | **Answered:** SPEC-05 §4.7/§5.7 (`VoxsCodec`) is the only layout; §5.6 is an adapter | SPEC-05 |
 | 5 | Must SPEC-13 maintain `BlockInstance.CellsAlive`? | Yes, decrement when an instance cell becomes air | SPEC-13 |
 | 6 | Hulk grids created by `SplitSystem` (GameplayEnd ECB) | SPEC-13 records `Instantiate(GridPrototypes.Brick)` / moves existing bricks with the ECB, gives the hulk a full root archetype (§4.5) with `GridSource.StructureHandle = -1`, a new `Serial` taken from `GridPrototypes.NextSerial` inside its job (single writer: SplitSystem's playback order), `GridSpawning` disabled, `GridBodyInit` enabled; updates both roots' `BrickSlot` and LEG | SPEC-13 |
 | 7 | `StarSystemMember` and `PersistentId` for hulks created by `SplitSystem` | SPEC-31 adds a `WorldGroup` system that batch-adds the parent's `StarSystemMember` to entities with `Brick`, `FunctionalBlock` or `VoxelGrid` that lack it and whose grid root is not the player ship; `PersistentId` for hulks comes from a `PersistentIdAllocator` singleton maintained by SPEC-01 | SPEC-31 / SPEC-01 |
@@ -990,24 +1005,3 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 - Audit: `00-synthesis.md` §6b, §6e, §8 phase 2; `01-voxel-core.md` §5, §6.1–§6.6, §6.9, B1, B3, B5, B6, B8, B9; `04-persistence-data.md` B3, §6.4; LEDGER R22–R26.
 - Binding: architecture §5.1 (snapshots, deterministic events), §6.3, §8, §11; conventions §2; [07-implementation-traps.md](../07-implementation-traps.md) T1.1–T1.7, T2.1–T2.10.
 - Unity: Entities `LinkedEntityGroup`, `ICleanupComponentData`, `[CreateAfter]`, `UnityObjectRef<T>`, `DynamicBuffer.ResizeUninitialized`, `UnsafeUtility.MemCpyReplicate`; Entities Graphics `RenderMeshUtility.AddComponents`, `MaterialMeshInfo` (enableable).
-
-### Appendix A — default VOXS payload layout v1 (used until SPEC-05 §VOXS exists)
-
-Little-endian. `str` = `u16 byteLength` + UTF-8 bytes. Floats are raw IEEE-754 bits.
-
-```
-u32  magic         = 0x31535856 ("VXS1")
-u16  layoutVersion = 1
-f32  cellSize
-u16  idCount;        idCount × str           // block ContentIds in first-use order over palette[1..] then instances
-u16  paletteCount;   paletteCount × { u16 blockLocal (0 = none, else 1-based into ids), u8 orient, u8 color }   // includes entry 0
-u16  instanceCount;  instanceCount × { u16 blockLocal (0 = tombstone), u8 orient, u8 color, i32 ox, i32 oy, i32 oz,
-                                        f32 functionHp, u16 cellsAlive, u8 flags }
-u32  brickCount;     brickCount × brick      // SortedBrickOrder (z, y, x)
-brick := i32 bx, i32 by, i32 bz, u8 encoding
-         encoding 0 (uniform): u16 ref, u8 hp, u8 flags
-         encoding 1 (rle):     u16 runCount; runCount × { u16 length (1..4096), u16 ref }   // covers 4096 cells, local order
-                               u16 hpCount;   hpCount × { u16 localIndex, u8 hp }           // solid cells with hp != 255, ascending
-                               u16 flagCount; flagCount × { u16 localIndex, u8 flags }      // cells with flags != 0, ascending
-```
-Decode validates: magic; version ≤ 1; every count fits the remaining bytes; RLE lengths sum to exactly 4,096; palette refs < paletteCount; instance refs < instanceCount; local indices < 4,096 and strictly ascending; a solid cell never has hp 0. Any violation → `VoxelCodecException(context, byteOffset, reason)`.
