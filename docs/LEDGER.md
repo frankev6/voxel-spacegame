@@ -556,6 +556,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
 
+### 2026-10-10 — Owner answers: Blender install, ART-003 review, next task
+- **Blender install:** "I download the DMG (Recommended)". Blender 5.2.2 LTS (`blender-5.2.2-macos-arm64.dmg`, 346 MB, from download.blender.org) is installed at `/Applications/Blender.app`. Its SHA-256 matches the published `blender-5.2.2.sha256`, it is notarized by the Stichting Blender Foundation (68UA947AUU), and it runs headless (`-b`, Python 3.13.13). ART-004 is unblocked.
+- **ART-003 review:** "Leave it at review". ART-003 stays `review`, and ART-005 stays blocked until an independent frontier review.
+- **Next task:** "ART-007 look-test tools (Recommended)".
+
 ### 2026-10-10 — ART-003 mood-board images (claude, claude-opus-5-5)
 - Added 13 public-domain images from Wikimedia Commons under the owner's approval: DRYDOCK 6 (ISS render, Apollo 15 service module, McCandless MMU, *Earthrise*, Apollo 11 command module after re-entry, ISO 7010 warning layout), NOCTURNE 3 (Hubble *Pillars of Creation* 2014, Webb *Cosmic Cliffs* via STScI, USGS Kamoamoa fissure), PULP HORIZON 4 (NASA Ames Stanford torus and Bernal sphere paintings by Don Davis and Rick Guidice).
 - Each is JPEG quality 85, long side ≤ 1600 px, ≤ 400 KB, with its Commons source and licence line; 3.7 MB in total. Licence taken from Commons metadata; CC BY and CC BY-SA versions (ESA releases, McCandless retouches, heat-shield close-ups) were left out. No public-domain image was found for ship-breaking yards, the Chrysler Building or Ben Day dots; they stay links.
