@@ -18,7 +18,7 @@
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
-| A0 | 11 | 1 | 0 | 2 | 2 | 0 | 16 | 1 |
+| A0 | 10 | 1 | 0 | 3 | 2 | 0 | 16 | 1 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 <!-- summary:end -->
@@ -486,7 +486,7 @@
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | review | claude (claude-opus-5-5) | 2026-10-10 | a3d0d92 | Needs an independent frontier review (no subagents this session). 13 public-domain images added (owner-approved) |
 | ART-004 | Block-kit style test: five blocks per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002 | yes | review | claude (claude-opus-5-5) | 2026-10-10 | 5cebb6b | Needs independent frontier review and a second reviewer for the 150 m glyph test (criterion 3; likely fails for 1-cell-wide blocks, see log) |
-| ART-005 | Interactive HTML design board | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002, ART-003, ART-004 | no | in-progress | claude (claude-opus-5-5) | 2026-10-10 |  |  |
+| ART-005 | Interactive HTML design board | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002, ART-003, ART-004 | no | review | claude (claude-opus-5-5) | 2026-10-10 | a6b2fe2 | Needs independent frontier review; Safari file:// check pending; ready for the owner's ART-006 shortlist |
 | ART-006 | Owner shortlist of finalist directions | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-005 | no | todo |  |  |  |  |
 | ART-007 | Brick material baker, preview mesher, reference shader and art validator | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-10 |  | Baker, preview mesher and SH_BrickReference done on branch task/ART-007-brick-tools (083c482); ArtDatabaseValidator waits for CORE-002, DATA-004, DATA-005 (owner chose ART-004 first) |
 | ART-008 | Look-test content for each finalist | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-004, ART-006, ART-007 | no | todo |  |  |  |  |
@@ -555,6 +555,31 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-10 — ART-005 design board, in review (claude, claude-opus-5-5)
+- **What was built.** `docs/design/board/{index.html,board.css,board.js}`: plain HTML, CSS and JS with no build step and no `fetch`. The only external host is Google Fonts.
+  - **Tabs:** DRYDOCK, NOCTURNE, PULP HORIZON and Compare & score.
+  - **Per direction:**
+    - all 25 UI colour tokens, read live from the generated token CSS with WCAG badges on bg and surface-1, plus faction tokens;
+    - hull neutrals, function colours and the team-slot table;
+    - a type specimen for every text token plus mono and body-strong;
+    - every component state listed in the task, styled per §x.8: DRYDOCK accent bar and stencil caps; NOCTURNE translucent panels, corner brackets, ghost buttons and thin bars; PULP HORIZON print-shadow cards and chunky bars;
+    - a 1920 × 1080 HUD mock on the §10.4.2 zones with each direction's variant (NOCTURNE hull and shield arcs, PULP HORIZON dashboard strip), with a zone-outline toggle;
+    - ART-004 renders at true pixel size, enlarged with hard pixels;
+    - the damage strip;
+    - VFX colour and timing pulses at the §x.7 durations;
+    - space swatches;
+    - the public-domain mood images with a link to each board.
+  - **Global toggles:** colour-vision simulation (SVG `feColorMatrix` with the same Machado matrices as `check_tokens.py`, applied to the whole page) and reduced motion.
+  - **Scorecard:** editable §8.3 scores with weighted totals, the §1.3 approval fields, and "Copy as Markdown", which outputs the §1.3 block plus the score table. Saved in `localStorage`, with every access wrapped in `try/catch`.
+- **Check.** `tools/art/check_art_docs.py board` verifies that tokens match the sheets (`export_board_tokens --check`), that only the allowed hosts appear, that every referenced local file exists (90 files), that HUD zones equal §10.4.2, that the CVD matrices equal `MACHADO`, and page weight. Result: 0 errors. A negative test with a foreign host and a moved zone produced 2 errors.
+- **Measurements.**
+  - Headless Chrome from `file://`: 0 console messages; a positive-control page that logs an error was captured, so capture works.
+  - HUD zone rectangles read back from the DOM equal §10.4.2 exactly.
+  - Page weight 11.3 MB (budget 25 MB); first contentful paint 220 ms (budget 3 s).
+  - Fonts load from Google Fonts; an offline banner appears when they don't.
+- **Not verified:** Safari from `file://`. The owner or reviewer should open `docs/design/board/index.html` in Safari once.
+- **Status.** `review` (frontier). It started before the ART-003 and ART-004 reviews by owner decision. The next step is ART-006: the owner's shortlist, using this board.
 
 ### 2026-10-10 — Owner answers: glyph rule at 150 m, ART-005 before reviews
 - **Glyph rule (after the ART-004 finding):** "Colour at 150 m (Recommended)". At 150 m, 1-cell-wide functional blocks are identified by silhouette and function colour or light; their glyph is a 50 m feature. Applied in DESIGN-SYSTEM §3 P3, §4 R1, §5.5 and §12 row 1, and in SPEC-80 `ART-004` criterion 3 (now: glyph recognisable at 50 m, function colour identifiable at 150 m).
