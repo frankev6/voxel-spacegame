@@ -322,7 +322,7 @@ namespace Game.Simulation.Weapons
 {
     using Unity.Collections; using Unity.Entities; using Unity.Jobs; using Unity.Mathematics; using Game.Data.Combat;
 
-    [System.Flags] public enum ProjectileFlags : byte { None = 0, Homing = 1, ExplodeOnExpire = 2, Dead = 4, PlayerSource = 8 }
+    [System.Flags] public enum ProjectileFlags : byte { None = 0, Homing = 1, ExplodeOnExpire = 2, Dead = 4, PlayerSource = 8, Targetable = 16 /* reserved for point defence (§10 Q10); unused in v1 */ }
 
     /// <summary>One live projectile (64 bytes). Implements SPEC-21 §4.6.</summary>
     public struct ProjectileRow
@@ -900,6 +900,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 | 7 | SPEC-63/64 producer pattern: take `FxEventQueue`/`SfxEventQueue` with `GetSingleton` (read-only) and `[NativeDisableContainerSafetyRestriction]` on the `ParallelWriter`, instead of `GetSingletonRW` in fixed-step systems | **Applied** in SPEC-02 §5.6, SPEC-63 §6.2, SPEC-64 §6.2 (2026-10-09). Yes | SPEC-63, SPEC-64 |
 | 8 | SPEC-72 MIG-009 writes the §4.9 values (not the unit-converted legacy values) | **Applied** in SPEC-72 §4.6, MIG-009 (2026-10-09). Yes | SPEC-72 |
 | 9 | Should hulks be targetable with `TargetNext`? | No (only hostile ships and stations); `TargetUnderCursor` can pick anything | Owner |
+| 10 | Point defence against projectiles (review X12): projectiles are rows, not in the spatial hash, and have no HP; point-defence guns can target grids (including small craft) today | v1 has no point defence against missiles. When needed: a per-tick uniform grid over `ProjectileStore` rows flagged `Targetable` (flag reserved now), a PD delivery handler (§4.6c) that tests it, and a row HP or kill-on-hit rule | Owner (when a PD weapon is designed) |
 
 ## 11. References
 
