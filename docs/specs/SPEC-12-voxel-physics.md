@@ -221,13 +221,13 @@ namespace Game.Voxel.PhysicsBody
     public struct ColliderDirtyQueue : IComponentData
     {
         public NativeList<ColliderRequest> Requests;
-        public NativeReference<JobHandle> Access;      // main thread only; never passed to a job
+        public Game.Data.Streams.GuardedHandles Access;   // main thread only; never passed to a job (SPEC-02 §4.12)
 
-        public static ColliderDirtyQueue Create();     // Requests capacity 1,024; Access = default; Allocator.Persistent
-        public void Dispose();                         // Access.Value.Complete(), then dispose both containers
-        public JobHandle Acquire(JobHandle dependsOn) => JobHandle.CombineDependencies(dependsOn, Access.Value);
-        public void Release(JobHandle lastJob) { Access.Value = lastJob; }   // lastJob must depend on the handle returned by Acquire
-        public void CompleteAccess() { Access.Value.Complete(); }            // never inside FixedStepSimulationSystemGroup
+        public static ColliderDirtyQueue Create();     // Requests capacity 1,024; Access = GuardedHandles.Create(); Allocator.Persistent
+        public void Dispose();                         // Access.Dispose() (completes), then dispose the list
+        public JobHandle Acquire(JobHandle dependsOn) => Access.Acquire(dependsOn);
+        public void Release(JobHandle lastJob) => Access.Release(lastJob);   // lastJob must depend on the handle returned by Acquire
+        public void CompleteAccess() => Access.CompleteAccess();             // never inside FixedStepSimulationSystemGroup
         /// <summary>Appends one request. Inside a job scheduled with Acquire/Release, or on the main thread after CompleteAccess.</summary>
         public void Enqueue(uint serial, Entity grid, Entity brick, int3 coord, ColliderPriority priority)
             => Requests.Add(new ColliderRequest { Serial = serial, Grid = grid, Brick = brick, Coord = coord, Priority = priority });
@@ -236,13 +236,13 @@ namespace Game.Voxel.PhysicsBody
     /// <summary>Singleton owning grid records, pending updates, mask snapshots and every collider blob of this spec (decision 9).</summary>
     public struct ColliderBuildCache : IComponentData
     {
-        public NativeReference<JobHandle> Access;      // main thread only
+        public Game.Data.Streams.GuardedHandles Access;   // main thread only (SPEC-02 §4.12)
         internal ColliderCacheContainers C;            // §4.7 (internal)
-        public static ColliderBuildCache Create();     // capacities in §4.7
-        public void Dispose();                         // completes Access; disposes every owned blob (installed, children, pending, retired) and container
-        public JobHandle Acquire(JobHandle dependsOn) => JobHandle.CombineDependencies(dependsOn, Access.Value);
-        public void Release(JobHandle lastJob) { Access.Value = lastJob; }
-        public void CompleteAccess() { Access.Value.Complete(); }
+        public static ColliderBuildCache Create();     // capacities in §4.7; Access = GuardedHandles.Create()
+        public void Dispose();                         // Access.Dispose() (completes); disposes every owned blob (installed, children, pending, retired) and container
+        public JobHandle Acquire(JobHandle dependsOn) => Access.Acquire(dependsOn);
+        public void Release(JobHandle lastJob) => Access.Release(lastJob);
+        public void CompleteAccess() => Access.CompleteAccess();
     }
 
     /// <summary>Singleton holding the one in-flight build batch (§5.8). Main-thread state + batch-owned job memory.</summary>
@@ -539,7 +539,7 @@ sequenceDiagram
 
 ### 5.1 Handle-guarded singleton access (all pipeline users)
 
-Every user follows exactly one of these two patterns. Any other access is a defect.
+The guard itself is SPEC-02's `GuardedHandles` (§4.12 there), embedded as `Access` in every guarded singleton of every spec; this section is the binding usage pattern for all of them. Every user follows exactly one of these two patterns. Any other access is a defect.
 
 **In a fixed-step system (job access):**
 ```csharp

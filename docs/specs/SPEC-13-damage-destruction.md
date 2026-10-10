@@ -80,8 +80,7 @@ namespace Game.Voxel.Damage
     //   /// <summary>Binding (architecture §6.2). Add values at the end only.</summary>
     //   public enum DamageType : byte { Kinetic = 0, Energy = 1, Explosive = 2, Ram = 3 }
 
-    /// <summary>Who produced a DamageEvent; part of the sort key (§3 decision 3). Add values at the end only.</summary>
-    public enum DamageProducer : byte { Unknown = 0, Impact = 1, Projectile = 2, Beam = 3, Explosion = 4, ShieldOverflow = 5, Ability = 6, Test = 255 }
+    // Who produced an event (part of the sort key, §3 decision 3) is Game.Data.Combat.ProducerKind (SPEC-02 §4.12), shared by every channel.
 
     [System.Flags] public enum DamageEventFlags : byte { None = 0, NoImpulse = 1, NoKick = 2 }
 
@@ -98,7 +97,7 @@ namespace Game.Voxel.Damage
         public Entity Source;          // attribution and sort key; Entity.Null allowed
         public float3 WorldImpulse;    // N·s at the hit point, applied next tick (§3 decision 13)
         // ---- SPEC-13 additions ----
-        public DamageProducer Producer;
+        public ProducerKind Producer;
         public uint Sequence;          // unique per (Source, Producer) within a tick; assigned by the producer
         public DamageEventFlags Flags;
     }
@@ -130,7 +129,7 @@ namespace Game.Voxel.Damage
         public DamageType Type;
         public Entity Source;
         // ---- SPEC-13 additions ----
-        public DamageProducer Producer; // Explosion for reactor/core breaches written by DMG
+        public ProducerKind Producer;   // Explosion for reactor/core breaches written by DMG
         public uint Sequence;
     }
 
@@ -247,18 +246,16 @@ namespace Game.Voxel.Damage
     {
         [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction] internal DamageStreamsData* Data;
 
-        // DamageEvent producers (SPEC-13, 21, 22, 24): allocate a TempJob NativeStream with forEachCount indices,
-        // registered in call order; combines the last consumer handle into state.Dependency.
-        public NativeStream.Writer BeginDamageWrite(ref SystemState state, int forEachCount);
-        public void EndDamageWrite(JobHandle writerJob);                 // call once after scheduling the writer job
+        // DamageEvent channel (SPEC-02 §4.12). Producers (SPEC-13, 21, 22, 24 and any later spec): Damage.BeginWrite(ref state, ProducerKind, n)
+        // → schedule the writer job → Damage.EndWrite(handle). The single consumer is DamageResolveSystem.
+        public Game.Data.Streams.SimEventChannel<DamageEvent> Damage;
+        // ExplosionRequest channel. Producers: SPEC-13 (reactors, core breaches), 21, 24. The single consumer is SPEC-21 ExplosionSystem,
+        // through ScheduleDrainExplosions.
+        public Game.Data.Streams.SimEventChannel<ExplosionRequest> Explosions;
 
-        // ExplosionRequest producers (SPEC-13, 21, 24):
-        public NativeStream.Writer BeginExplosionWrite(ref SystemState state, int forEachCount);
-        public void EndExplosionWrite(JobHandle writerJob);
-
-        // The single ExplosionRequest consumer (SPEC-21 ExplosionSystem): stable-sorted by (Source.Index, Producer, Sequence),
-        // then stream order. Disposes the consumed streams. Requests registered after this call wait for the next tick.
-        public JobHandle ScheduleDrainExplosions(NativeList<ExplosionRequest> output, JobHandle dependsOn);
+        // The ExplosionRequest consumer: Explosions.BeginRead, SimEventGather, stable sort by (Source.Index, Producer, Sequence, gather
+        // position), Explosions.EndRead. Requests registered after this call are drained next tick.
+        public JobHandle ScheduleDrainExplosions(ref SystemState state, NativeList<ExplosionRequest> output);
 
         // Same-tick CellRemoved readers (run after DamageResolveSystem, before GameplayEndCommandBufferSystem):
         public CellRemovedView BeginRemovedRead(ref SystemState state);  // combines the resolver's write handle
@@ -298,7 +295,7 @@ namespace Game.Voxel.Damage
 }
 ```
 
-`DamageStreamsData` (internal, `Allocator.Persistent`, owned by `DamageStreamsSystem`): `UnsafeList<NativeStream>` damage registrations + `UnsafeList<JobHandle>` producer handles; the same pair for explosions; `JobHandle DamageConsumerHandle`, `ExplosionConsumerHandle`; `NativeList<CellRemoved> Removed`, `NativeList<GridRemovedRange> RemovedGrids`, `JobHandle RemovedWriteHandle`, `UnsafeList<JobHandle> RemovedReaderHandles`; `NativeList<GridCoreLost> CoreLost` + `JobHandle CoreLostWriteHandle`; `DamageTickStats Current, Last`; the DMG-internal per-tick lists of §4.8 and their handles.
+`DamageStreamsData` (internal, `Allocator.Persistent`, owned by `DamageStreamsSystem`; the two channels hold their own registrations): `NativeList<CellRemoved> Removed`, `NativeList<GridRemovedRange> RemovedGrids`, `JobHandle RemovedWriteHandle`, `UnsafeList<JobHandle> RemovedReaderHandles`; `NativeList<GridCoreLost> CoreLost` + `JobHandle CoreLostWriteHandle`; `DamageTickStats Current, Last`; the DMG-internal per-tick lists of §4.8 and their handles.
 
 ### 4.5 Configuration (public contract)
 
@@ -504,14 +501,14 @@ All six systems: `[BurstCompile]` `ISystem`, `[UpdateInGroup(typeof(GameplayPost
 
 Owner of all DMG native memory. **Structural only in `OnCreate`** (creates the `DamageStreams` and `DamageConfig` singletons with `EntityManager`; `DamageConfig.Default` unless one exists).
 
-`OnCreate`: allocate `DamageStreamsData` (Persistent) and every list of §4.4/§4.8 with initial capacities (registrations 16, `Removed` 4,096, ranges 256, masks 64, chunk pool `MaxLiveChunks`, ram pairs 1,024). `OnDestroy`: complete every stored handle, dispose every still-registered stream and every list, free the struct.
+`OnCreate`: create the two channels (`SimEventChannel<DamageEvent>.Create("damage")`, `SimEventChannel<ExplosionRequest>.Create("explosions")`); allocate `DamageStreamsData` (Persistent) and every list of §4.4/§4.8 with initial capacities (`Removed` 4,096, ranges 256, masks 64, chunk pool `MaxLiveChunks`, ram pairs 1,024). `OnDestroy`: dispose both channels (they complete their handles), complete every stored handle, dispose every list, free the struct.
 
 `OnUpdate` (main thread, no job, < 10 µs):
 1. `Last = Current`; `Current = default; Current.Tick = SimClock.Tick`.
-2. Stale registrations (no consumer ran last tick): for each damage/explosion stream still registered, `stream.Dispose(handle)`, `GameLog.WarnOnce("Damage", "stale-stream", ...)`, clear the lists.
+2. `Damage.BeginTick(SimClock.Tick)`; `Explosions.BeginTick(SimClock.Tick)` (disposes registrations no consumer read for a whole tick, SPEC-02 §5.13).
 3. Swap `PendingDetachCurrent` ↔ `PendingDetachNext`; schedule `ClearListJob` on the new `Next` depending on last tick's resolver handle; store it as `DetachNextWritable` (SplitSystem combines it before writing).
 
-Producer contract (for SPEC-13/21/22/24): in `OnUpdate`, `var w = streams.BeginDamageWrite(ref state, query.CalculateChunkCountWithoutFiltering());` → schedule an `IJobChunk` that calls `w.BeginForEachIndex(unfilteredChunkIndex)` once per chunk, `w.Write(evt)` per event, `w.EndForEachIndex()` → `state.Dependency = handle; streams.EndDamageWrite(handle);`. Producers set `Producer` and a per-`(Source, Producer)` unique `Sequence` (for example the projectile's shot counter). A system that writes from a single-threaded job uses `forEachCount = 1`, index 0.
+Producer contract (for every producer): in `OnUpdate`, `var streams = SystemAPI.GetSingleton<DamageStreams>(); var w = streams.Damage.BeginWrite(ref state, ProducerKind.X, query.CalculateChunkCountWithoutFiltering());` → schedule an `IJobChunk` that calls `w.BeginForEachIndex(unfilteredChunkIndex)` once per chunk, `w.Write(evt)` per event, `w.EndForEachIndex()` → `state.Dependency = handle; streams.Damage.EndWrite(handle);`. Explosions use `streams.Explosions` the same way. Producers set `Producer` and a per-`(Source, Producer)` unique `Sequence` (for example the projectile's shot counter). A system that writes from a single-threaded job uses `forEachCount = 1`, index 0.
 
 ### 5.2 `ImpactEventSystem`
 
@@ -537,7 +534,7 @@ Example: 25 t ship and 3 t ship close at 30 m/s → solver impulse ≈ 2.7 t·30
 
 Position: after `ShieldSystem`/`ExplosionSystem`/`BeamStepSystem`; the only writer of the state in §3 decision 1. Steps (all Burst jobs chained on `state.Dependency` combined with every registered producer handle and every `RemovedReaderHandles` of last tick):
 
-1. **Gather** (`IJob`): for each registered damage stream in registration order, for each foreach index ascending, read events; drop events whose `Grid` lacks `VoxelGrid`, whose `Grid` has `DamageImmune`, whose `Amount ≤ 0`, or with any non-finite field (count in `EventsDropped`); append `SortEntry { GridIndex, SourceIndex = Source.Index (−1 for Null), Producer, Sequence, StreamOrder, EventIndex }`. Dispose the streams with the job handle.
+1. **Gather** (`IJob`): `set = streams.Damage.BeginRead(ref state)`; for each registration of `set` in order, for each foreach index ascending, read events; drop events whose `Grid` lacks `VoxelGrid`, whose `Grid` has `DamageImmune`, whose `Amount ≤ 0`, or with any non-finite field (count in `EventsDropped`); append `SortEntry { GridIndex, SourceIndex = Source.Index (−1 for Null), Producer, Sequence, StreamOrder, EventIndex }`. Dispose the streams with the job handle.
 2. **Sort** (`IJob`): stable sort `SortEntry` by `(GridIndex, SourceIndex, Producer, Sequence, StreamOrder)` → `SortedEvents`.
 3. **Plan** (`IJob`): build `GridRanges` from runs of equal `GridIndex`; merge in grids that have `PendingDetachCurrent` entries but no events (entries are already ordered by grid then island then slot); ranges ordered by `Grid.Index`. Clear `Removed`/`RemovedGrids` (after last tick's readers, step 0).
 4. **Resolve** (`IJobParallelForDefer` over `GridRanges`, batch 1): per range, see §5.3.1–§5.3.7. Writes through lookups carrying `[NativeDisableParallelForRestriction]` with the comment "each grid's bricks, instances and DMG components are written only by its own range (SPEC-13 §3 decision 4)". Outputs per range index: `CellRemoved` NativeStream, `TouchedBricks` stream, `DestroyList` stream, explosion stream (registered via `BeginExplosionWrite(forEachCount = rangeCount)`), `GridResults[range]`.
@@ -698,8 +695,8 @@ Cost O(retired blobs); 0 B GC (`tmp` is a persistent list cleared each frame).
 
 | API | Pre-conditions | Post-conditions / errors |
 |---|---|---|
-| `DamageStreams.BeginDamageWrite/EndDamageWrite` | main thread, in `OnUpdate`, `forEachCount ≥ 1`; `End` exactly once per `Begin` | Events are resolved this tick if registered before `DamageResolveSystem`, else next tick. Missing `End` → the stream is resolved without a dependency → safety exception (fail loudly) |
-| `BeginExplosionWrite/EndExplosionWrite`, `ScheduleDrainExplosions` | as above; one drain per tick (SPEC-21) | Drain output sorted (§4.4); streams disposed |
+| `DamageStreams.Damage.BeginWrite/EndWrite` (SPEC-02 §4.12) | main thread, in `OnUpdate`, `forEachCount ≥ 1`; `End` exactly once per `Begin` | Events are resolved this tick if registered before `DamageResolveSystem`, else next tick. Missing `End` → the stream is resolved without a dependency → safety exception (fail loudly) |
+| `DamageStreams.Explosions.BeginWrite/EndWrite`, `ScheduleDrainExplosions(ref state, output)` | as above; one drain per tick (SPEC-21) | Drain output sorted (§4.4); streams disposed |
 | `BeginRemovedRead/EndRemovedRead` | caller runs after `DamageResolveSystem` and before `GameplayEndCommandBufferSystem` | View valid until the reader job completes; next tick's resolver waits for it |
 | `DrainCoreLost` | presentation, main thread | Completes `CoreLostWriteHandle`; moves all accumulated events (across ticks) into `output` |
 | `GridDissolveRequest` entity | created via any ECB; one per grid per tick | Consumed by `ShipDeathSystem` (§5.6) |
@@ -763,7 +760,7 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - **Tier:** standard — transcribes the exact code of §4.2–§4.6 (bodies throw `NotImplementedException`)
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`
 - **Do:** Create every public type of §4.2–§4.6 with the exact fields, enums, comments and signatures; method bodies `throw new System.NotImplementedException()`, except `DamageConfig.Default` (returns the commented values) and `DamageConfig.Multiplier`. `DamageConfigDefinition` gets one `[SerializeField]` per `DamageConfig` field with the same defaults plus the four cue references. Create the folders of §4.1.
-- **Files:** `Assets/Game/Data/Combat/DamageType.cs`; `Assets/Game/Voxel/Damage/{DamageProducer,DamageEventFlags,DamageEvent,CellRemovedReason,CellRemoved,ExplosionRequest,Hulk,HulkCause,HulkInfo,DamageImmune,GridDamageStats,PendingImpulse,GridIntegrityState,IntegritySeed,BrickConnectivity,BrickIntegrity,SplitGrace,SplitOrigin,GridDissolveMode,GridDissolveRequest,GridDissolving,ChunkBody,ChunkCell,ChunkColliderBlob,DamageStreams,CellRemovedView,GridRemovedRange,GridCoreLost,DamageTickStats,DamageConfig,DamageSetup,DamageMath,GridDda,CellStateHasher}.cs`; `Assets/Game/Data/Definitions/Damage/DamageConfigDefinition.cs`
+- **Files:** `Assets/Game/Data/Combat/DamageType.cs`; `Assets/Game/Voxel/Damage/{DamageEventFlags,DamageEvent,CellRemovedReason,CellRemoved,ExplosionRequest,Hulk,HulkCause,HulkInfo,DamageImmune,GridDamageStats,PendingImpulse,GridIntegrityState,IntegritySeed,BrickConnectivity,BrickIntegrity,SplitGrace,SplitOrigin,GridDissolveMode,GridDissolveRequest,GridDissolving,ChunkBody,ChunkCell,ChunkColliderBlob,DamageStreams,CellRemovedView,GridRemovedRange,GridCoreLost,DamageTickStats,DamageConfig,DamageSetup,DamageMath,GridDda,CellStateHasher}.cs`; `Assets/Game/Data/Definitions/Damage/DamageConfigDefinition.cs`
 - **Acceptance criteria:**
   - [ ] `tools/compile.sh` passes with zero warnings in `Game.Voxel` and `Game.Data`.
   - [ ] `DamageType` has exactly `Kinetic, Energy, Explosive, Ram` (byte) in that order.
@@ -774,8 +771,8 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 ### DMG-002 — DamageStreams and DamageStreamsSystem
 - **Milestone:** M2
 - **Tier:** frontier — F1/F2: the damage event pipeline; NativeStreams and job handles chained across systems; Persistent memory
-- **Depends on:** `DMG-001`, `SPEC-10`
-- **Do:** Implement `DamageStreamsData`, every `DamageStreams` method (§4.4, §6) and `DamageStreamsSystem` (§5.1) including stale-stream cleanup, the pending-detach swap with `ClearListJob`, and `DrainCoreLost`. Add the test helper `TestDamageProducerSystem` (writes a given list of events through the producer contract).
+- **Depends on:** `DMG-001`, `SPEC-10`, `SPEC-02`
+- **Do:** Implement `DamageStreamsData`, every `DamageStreams` method (§4.4, §6; the two channels are SPEC-02's `SimEventChannel<T>`, not re-implemented) and `DamageStreamsSystem` (§5.1) including the `BeginTick` calls, the pending-detach swap with `ClearListJob`, and `DrainCoreLost`. Add the test helper `TestDamageProducerSystem` (writes a given list of events through the producer contract).
 - **Files:** `Assets/Game/Voxel/Damage/DamageStreams.cs`, `Assets/Game/Voxel/Damage/DamageStreamsData.cs`, `Assets/Game/Voxel/Damage/Systems/DamageStreamsSystem.cs`, `Assets/Game/Tests/EditMode/Voxel/Damage/{DamageStreamsTests,TestDamageProducerSystem}.cs`
 - **Acceptance criteria:**
   - [ ] Two producer systems writing from parallel `IJobChunk`s produce no safety errors with safety checks on; a consumer job sees all their events in registration order then index order.

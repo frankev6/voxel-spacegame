@@ -215,38 +215,18 @@ namespace Game.Simulation.Power
         public float Radius;            // blast radius in metres (0 for point hits)
         public float3 WorldImpulse;     // copied to the overflow DamageEvent
         public ShieldHitFlags Flags;
-        public byte ProducerKind;       // CombatProducerKind (SPEC-21 §4.1): Projectile 1, Beam 2, Explosion 3
+        public Game.Data.Combat.ProducerKind Producer;   // SPEC-02 §4.12: Projectile, Beam, Explosion, Ability…
         public uint Sequence;           // producer sequence for the stable sort key
     }
 
-    public enum ShieldHitProducer : byte { Projectiles = 0, Beams = 1, Explosions = 2 }   // read order of the consumer
-
-    /// <summary>Singleton registry of this tick's ShieldHit streams (same pattern as SPEC-13 DamageStreams). Created and owned by
-    /// ShieldSystem (OnCreate allocates ShieldHitStreamsData with Allocator.Persistent; OnDestroy completes and disposes everything).
-    /// Accessed with SystemAPI.GetSingleton (read-only: the struct only holds a pointer), so producers never create a sync point.</summary>
-    public unsafe struct ShieldHitStreams : IComponentData
+    /// <summary>Singleton holding the ShieldHit channel (SPEC-02 §4.12). Created by ShieldSystem.OnCreate (SimEventChannel<ShieldHit>.Create("shield_hits"))
+    /// and disposed in its OnDestroy. Taken with SystemAPI.GetSingleton (read-only) by producers and the consumer: no sync points.
+    /// Producers (SPEC-21 projectiles, beams, explosions, and any later spec): Hits.BeginWrite(ref state, ProducerKind.X, n) → writer job →
+    /// Hits.EndWrite(handle). The single consumer is ShieldSystem (Hits.BeginTick, BeginRead, EndRead).</summary>
+    public struct ShieldHitStreams : IComponentData
     {
-        [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction] internal ShieldHitStreamsData* Data;
-
-        /// Producer (main thread, in OnUpdate): disposes this producer's stream from an earlier tick if it was never read (stale,
-        /// GameLog.WarnOnce), allocates a TempJob NativeStream with forEachCount indices, records Tick = SimClock.Tick, and returns its writer.
-        public NativeStream.Writer BeginWrite(ref SystemState state, ShieldHitProducer producer, int forEachCount);
-        /// Producer: call once after scheduling the job that writes the stream.
-        public void EndWrite(ShieldHitProducer producer, JobHandle writerJob);
-        /// Consumer (ShieldSystem): readers for the three producers in enum order (an empty reader with count 0 for a producer that did
-        /// not write this tick); combines every producer handle into state.Dependency.
-        public ShieldHitReadSet BeginRead(ref SystemState state, uint tick);
-        /// Consumer: disposes the streams read this tick after readerJob.
-        public void EndRead(JobHandle readerJob);
+        public Game.Data.Streams.SimEventChannel<ShieldHit> Hits;
     }
-
-    public struct ShieldHitReadSet
-    {
-        public NativeStream.Reader Projectiles, Beams, Explosions;
-        public int ProjectilesForEachCount, BeamsForEachCount, ExplosionsForEachCount;   // 0 = not written this tick
-    }
-
-    // internal unsafe struct ShieldHitStreamsData { NativeStream[3] streams; JobHandle[3] writeHandles; uint[3] ticks; JobHandle readHandle; }
 }
 ```
 
@@ -361,7 +341,7 @@ namespace Game.Simulation.Power
 | `ShieldState`, `ShieldRipple` | `ShieldSystem` (`PowerInitSystem` only sets `Flags = FillOnNextUpdate` at init) |
 | `ShieldControl` | `ShieldToggleEffectSystem` (SPEC-24) |
 | `ShipStatModifier` | `AbilityModifierSyncSystem` (SPEC-24) |
-| `ShieldHitStreams` producer slots | `ProjectileStepSystem` / `BeamStepSystem` / `ExplosionSystem` (SPEC-21), one `ShieldHitProducer` each, through `BeginWrite`/`EndWrite`; storage owned by `ShieldSystem` |
+| `ShieldHitStreams.Hits` registrations | Any producer through `Hits.BeginWrite`/`EndWrite` (SPEC-21 today: `ProjectileStepSystem`, `BeamStepSystem`, `ExplosionSystem`); channel owned and read by `ShieldSystem` |
 
 ### 4.8 Memory
 
@@ -469,9 +449,9 @@ Complexity: O(1) per untouched ship; O(instances) for ships whose `BlockInstance
 
 `[UpdateInGroup(typeof(GameplayPostPhysicsGroup))] [UpdateAfter(typeof(ExplosionSystem))]` (the next system, `DamageResolveSystem`, declares `UpdateAfter(ShieldSystem)`). Reads `ShieldHitStreams`, `PowerConsumer`, `ShipStats`, `ShieldControl`, `LocalTransform`, `PhysicsVelocity`, `Hulk`, `GridSpawning`, `SimClock`, `PowerTuning`, `GridCellReader` (SPEC-10). Writes `ShieldState`, `ShieldRipple`, its own `DamageStreams` producer slot (`ShieldOverflow`, SPEC-13), `FxEventQueue`.
 
-**Job 1 `ShieldHitGatherJob`** (`IJob`): `set = streams.BeginRead(ref state, SimClock.Tick)` on the main thread (streams written in another tick come back empty). Read `set.Projectiles`, then `Beams`, then `Explosions`, each foreach index ascending, into `NativeList<ShieldHit> hits` (`Allocator.TempJob`). Sort by `(Grid.Index, Source.Index, ProducerKind, Sequence)` (architecture §5.1). Build `NativeParallelHashMap<Entity, int2> ranges` (start, count) per grid in one linear pass. Hash map is used for lookup only (traps T1.5).
+**Job 1 `ShieldHitGatherJob`** (`IJob`): on the main thread `streams.Hits.BeginTick(SimClock.Tick)`, then `set = streams.Hits.BeginRead(ref state)`. `SimEventGather` reads every registration in order, foreach index ascending, into `NativeList<ShieldHit> hits` (`Allocator.TempJob`). Sort by `(Grid.Index, Source.Index, Producer, Sequence, gather position)` (architecture §5.1). After job 2 is scheduled: `streams.Hits.EndRead(job2Handle)`. Build `NativeParallelHashMap<Entity, int2> ranges` (start, count) per grid in one linear pass. Hash map is used for lookup only (traps T1.5).
 
-**Job 2 `ShieldUpdateJob`** (`IJobChunk`, `ScheduleParallel` over roots with `ShieldState`, `ShieldRipple`, `ShipStats`, `PowerConsumer`; depends on job 1). Opens the `ShieldOverflow` damage stream at foreach index = `unfilteredChunkIndex`. Per entity, with `tick`, `dt = 1/60`, `T = PowerTuning`:
+**Job 2 `ShieldUpdateJob`** (`IJobChunk`, `ScheduleParallel` over roots with `ShieldState`, `ShieldRipple`, `ShipStats`, `PowerConsumer`; depends on job 1). Writes overflow through `DamageStreams.Damage.BeginWrite(ref state, ProducerKind.ShieldOverflow, chunkCount)` at foreach index = `unfilteredChunkIndex`. Per entity, with `tick`, `dt = 1/60`, `T = PowerTuning`:
 1. If `GridSpawning` enabled → skip (hits on it are dropped). If `Hulk`: `Hp = 0, MaxHp = 0, Active = 0`; every hit in range → full overflow (step 6 overflow rule with `absorbed = 0`); continue.
 2. **Capacity and regen:** iterate consumers of kind `ShieldEmitter`: `on = (Flags & Alive) && (Flags & Granted)`; `cap += on ? Shield.Capacity : 0` (from `Blocks[BlockInstance[c.InstanceIndex].Block].Function.Shield`), `regen += on ? Shield.RegenPerSecond : 0`, `delay = min delay of alive emitters` (default 4 s if none). `MaxHp = cap`; `RegenPerSecond = regen × ShipStats.ShieldRegenMultiplier`; `Hp = min(Hp, MaxHp)`.
 3. **Shape:** if `ShapeRevision ≠ ShipStats.FunctionalRevision` or `!Initialized`: `half = (BoundsMax − BoundsMin) / 2`; `Radii = max(half × ShieldPaddingScale + ShieldPaddingMetres, ShieldMinRadiusMetres)`; `Center = BoundsCenter`; `BoundingRadius = cmax(Radii)`; `ShapeRevision = FunctionalRevision`; set `Initialized`.
@@ -501,7 +481,7 @@ When SPEC-13 adds `Hulk`: next `PowerAllocationSystem` tick empties power and cl
 | `PowerContent(catalog)` / `CreateSingletons(em)` | Exactly one `PowerTuningDefinition` | Creates the `PowerSingletons` entity once; second call is a no-op; zero or two tuning assets → `ContentValidationException` with code `PWR-E001` |
 | `ShieldMath.*` | Radii all > 0 | Pure; never NaN for finite inputs; `SegmentEnters` false for zero-length segments |
 | Readers (HUD, AI, WPN) | — | Read `ShipPower`, `ShipStats`, `ShieldState` fields as documented; values are from the current tick after the writer ran, else from the previous tick |
-| `ShieldHitStreams` producers (SPEC-21) | `GetSingleton<ShieldHitStreams>()` (read-only); `w = BeginWrite(ref state, producer, forEachCount)`; schedule the writer job; `EndWrite(producer, handle)`. Never `GetSingletonRW`, never write fields | `ShieldSystem` reads it this tick only; `EndRead` disposes it |
+| `ShieldHitStreams.Hits` producers | `GetSingleton<ShieldHitStreams>()` (read-only); `w = Hits.BeginWrite(ref state, ProducerKind.X, forEachCount)`; schedule the writer job; `Hits.EndWrite(handle)`. Never `GetSingletonRW`, never write fields | Read by `ShieldSystem` this tick if registered before it, else next tick (SPEC-02 §5.13) |
 
 ## 7. Edge cases and failure behaviour
 
@@ -514,7 +494,7 @@ When SPEC-13 adds `Hulk`: next `PowerAllocationSystem` tick empties power and cl
 | Shield emitter browned out | It contributes no capacity; `Hp` clamps to the new `MaxHp` |
 | `ShieldControl.RequestedOn = 0` | `Active = 0`, no draw, no regen; `Hp` kept; on again → up immediately if `Hp ≥ 25 %` of `MaxHp`, else waits for regen |
 | Hits on a grid that has no `ShieldState` | Cannot happen (producers only emit `ShieldHit` for grids with `Active == 1`); if it does, ignored |
-| A producer did not run this tick | `BeginRead` returns an empty reader (count 0) for it; a stream written in an earlier tick and never read is disposed by the next `BeginWrite` of that producer, or by `ShieldSystem.OnDestroy` |
+| A producer did not run this tick | Nothing registered, nothing read. A registration nobody read for a whole tick is disposed at the next `BeginTick` with one warning (SPEC-02 §5.13) |
 | `ShipCommand` missing on a combat grid | Treated as zero (no weapon demand, no thrust demand) |
 | `PhysicsMass` missing or `InverseMass == 0` (kinematic, static, or not yet created) | `Mass = 0`, accelerations 0, `MassFraction = 1`; stats recompute when it appears (change filter) |
 | Rebuild or edit replaces functional entities | `PowerLink.Bound == 0` on the new entities triggers a re-init of that grid in the same frame (§5.2 step 1) |
@@ -618,8 +598,8 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 ### PWR-007 — `ShieldSystem`
 - **Milestone:** M2
 - **Tier:** frontier — F2 NativeStream consumer and sorted per-grid parallel apply; F3 ordering
-- **Depends on:** `PWR-005`, `PWR-006`, `PWR-002`, `DMG-001`, `VFX-001`
-- **Do:** Implement `ShieldHitStreams` (`ShieldHitStreamsData`, `BeginWrite/EndWrite/BeginRead/EndRead`, creation in `ShieldSystem.OnCreate`, disposal in `OnDestroy`), §5.5 jobs 1 and 2, ripple ring, FX events, overflow `DamageEvent`s through SPEC-13's `ShieldOverflow` producer slot, hulk branch.
+- **Depends on:** `PWR-005`, `PWR-006`, `PWR-002`, `DMG-001`, `VFX-001`, `SPEC-02`
+- **Do:** Create the `ShieldHitStreams` singleton with its `SimEventChannel<ShieldHit>` (SPEC-02, not re-implemented) in `ShieldSystem.OnCreate` and dispose it in `OnDestroy`; implement §5.5 jobs 1 and 2, ripple ring, FX events, overflow `DamageEvent`s through SPEC-13's `ShieldOverflow` producer slot, hulk branch.
 - **Files:** `Assets/Game/Simulation/Power/{ShieldSystem,ShieldHitGatherJob,ShieldUpdateJob}.cs`
 - **Acceptance criteria:**
   - [ ] Fresh ship with one emitter: `MaxHp == 3000`, `Hp == 3000`, `Active == 1` after the first update; radii ≥ 3 m and contain every bound corner.

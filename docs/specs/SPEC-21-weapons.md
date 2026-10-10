@@ -320,14 +320,16 @@ namespace Game.Simulation.Weapons
     public struct ProjectileStore : IComponentData
     {
         public NativeList<ProjectileRow> Rows;           // fire order; compacted stably after each step
-        public NativeReference<JobHandle> Access;        // main thread only
+        public Game.Data.Streams.GuardedHandles Access;  // main thread only (SPEC-02 §4.12)
         public NativeReference<ProjectileStoreStats> Stats;
         public NativeReference<uint> AppliedShiftSequence;   // last OriginShiftRecord.Sequence applied to Rows (read by SPEC-63 to correct a pending shift)
         public static ProjectileStore Create(int capacity);   // Allocator.Persistent
-        public void Dispose();                                // completes Access first
-        public JobHandle Acquire(JobHandle dependsOn) => JobHandle.CombineDependencies(dependsOn, Access.Value);
-        public void Release(JobHandle lastJob) { Access.Value = lastJob; }
-        public void CompleteAccess() { Access.Value.Complete(); }   // never in FixedStepSimulationSystemGroup
+        public void Dispose();                                // Access.Dispose() (completes) first
+        public JobHandle Acquire(JobHandle dependsOn) => Access.Acquire(dependsOn);           // ProjectileStepSystem, WeaponFireSystem
+        public void Release(JobHandle lastJob) => Access.Release(lastJob);
+        public JobHandle BeginRead(JobHandle dependsOn) => Access.BeginRead(dependsOn);       // read-only jobs
+        public void EndRead(JobHandle readerJob) => Access.EndRead(readerJob);
+        public void CompleteAccess() => Access.CompleteAccess();   // never in FixedStepSimulationSystemGroup
         /// Inside a single-threaded job: if record.Sequence != applied → (StarSystemChanged == 1 or Sequence − applied > 1 (a rebase was missed)) ? clear all rows : Position += Delta for every row; applied = Sequence. Idempotent.
         public static void ApplyPendingShift(ref NativeList<ProjectileRow> rows, in Game.Core.Components.OriginShiftRecord record, ref NativeReference<uint> applied);
     }
@@ -482,36 +484,36 @@ Job 2 `ShotAppendJob : IJob` (after job 1; `ProjectileStore.Acquire/Release`): f
 
 ### 5.6 `ProjectileStepSystem`
 
-1. `streams` = `DamageStreams` (SPEC-13); `n = Rows.Length` is not known on the main thread, so the stream index count is a fixed upper bound: `batches = ceil(MaxProjectiles / 64)`. `dw = streams.BeginDamageWrite(ref state, batches)`, `ew = streams.BeginExplosionWrite(ref state, batches)`, `sw = ShieldHitStreams.BeginWrite(ref state, ShieldHitProducer.Projectiles, batches)` (§10 Q3).
+1. `streams` = `DamageStreams` (SPEC-13); `n = Rows.Length` is not known on the main thread, so the stream index count is a fixed upper bound: `batches = ceil(MaxProjectiles / 64)`. `dw = streams.Damage.BeginWrite(ref state, ProducerKind.Projectile, batches)`, `ew = streams.Explosions.BeginWrite(ref state, ProducerKind.Projectile, batches)`, `sw = shieldHits.Hits.BeginWrite(ref state, ProducerKind.Projectile, batches)` with `shieldHits = SystemAPI.GetSingleton<ShieldHitStreams>()` (SPEC-02 §4.12 channels).
 2. Job `ProjectileShiftJob : IJob` (`ApplyPendingShift`; a no-op when `ShotAppendJob` already applied it this tick), then job `ProjectileStepJob : IJobParallelForBatch` over `Rows` (deferred length; batch size 64), dependencies: `state.Dependency`, `ProjectileStore.Acquire`, stream begin handles. Every batch calls `BeginForEachIndex(startIndex / 64)` on all three writers (empty index when the batch has no events), then for each row `r` (skip `Dead`):
    1. **Homing:** `Target` exists → `toT = normalize(targetCentre − Position)`; rotate `Velocity` toward `toT` by at most `HomingTurnRateRad × dt` (Rodrigues about `cross(v, toT)`), keep speed.
    2. `p0 = Position`, `p1 = p0 + Velocity × dt`.
    3. `hit = CombatHitTest.Segment(p0, p1, ProjectileRadius, Source, ...)` (§5.9).
    4. **Hull hit** on grid `G` at world point `h`, world dir `u = normalize(Velocity)`: if `Damage > 0`: write `DamageEvent { Grid = G, LocalPoint = WorldToGridPoint(h), LocalDir = WorldToGridDir(u), Amount = Damage × DamageMultiplier, Radius = 0, Penetration = PenetrationCells, Type, Source, WorldImpulse = u × ImpulsePerHit, Producer = Projectile, Sequence = ShotId, Flags = None }`. If `ExplosionRadius > 0`: write `ExplosionRequest { WorldPos = h, Radius, Amount = ExplosionDamage × DamageMultiplier, Type = Explosive, Source, Producer = Projectile, Sequence = ShotId }`. Hit `FxEvent` (`HitKinetic` for Kinetic/Explosive, `HitEnergy` for Energy) at `h`, `Dir = −u`, `Vel` = hit grid velocity, `Scale = clamp(Damage / 50, 0.5, 3)`, `Fx = HitFx`; hit `SfxEvent` from `CombatAudioCues` by type, volume `clamp(Damage / 200, 0.3, 1)`. Mark `Dead`, `Hits++`.
-   5. **Shield hit** on grid `G` at local surface point `q` (grid space): write `ShieldHit { Grid = G, LocalPoint = q, Amount = Damage × DamageMultiplier, Type, Source, LocalDir = WorldToGridDir(u), Penetration = PenetrationCells, Radius = 0, WorldImpulse = u × ImpulsePerHit, Flags = None, ProducerKind = 1, Sequence = ShotId }`; explosive rounds additionally write the `ExplosionRequest` at the world surface point. No Fx here (SPEC-22 `ShieldSystem` emits ripples). Mark `Dead`.
+   5. **Shield hit** on grid `G` at local surface point `q` (grid space): write `ShieldHit { Grid = G, LocalPoint = q, Amount = Damage × DamageMultiplier, Type, Source, LocalDir = WorldToGridDir(u), Penetration = PenetrationCells, Radius = 0, WorldImpulse = u × ImpulsePerHit, Flags = None, Producer = Projectile, Sequence = ShotId }`; explosive rounds additionally write the `ExplosionRequest` at the world surface point. No Fx here (SPEC-22 `ShieldSystem` emits ripples). Mark `Dead`.
    6. **Celestial hit:** hit Fx only; mark `Dead`.
    7. **No hit:** `Position = p1`; if `tick ≥ DeathTick`: `ExplodeOnExpire` → `ExplosionRequest` at `p1`; mark `Dead`, `Expired++`.
    8. `EndForEachIndex` on all writers per batch.
 3. Job `ProjectileCompactJob : IJob`: stable compaction removing `Dead` rows; update `Live`, `PeakLive`.
-4. `streams.EndDamageWrite(h)`, `EndExplosionWrite(h)`, `ShieldHitStreams.EndWrite(Projectiles, h)`; `ProjectileStore.Release(h)`; `state.Dependency = h`.
+4. `streams.Damage.EndWrite(h)`, `streams.Explosions.EndWrite(h)`, `shieldHits.Hits.EndWrite(h)`; `ProjectileStore.Release(h)`; `state.Dependency = h`.
 
 Explosion requests written here are drained this tick by `ExplosionSystem` (registered before the drain).
 
 ### 5.7 `BeamStepSystem`
 
-`BeamStepJob : IJobChunk` (`ScheduleParallel`) over weapon entities with `BeamState`, `WeaponAim`, `WeaponMount`, `FunctionalBlock`; streams at foreach index `unfilteredChunkIndex`. Per entity with `Active == 1`:
+`BeamStepJob : IJobChunk` (`ScheduleParallel`) over weapon entities with `BeamState`, `WeaponAim`, `WeaponMount`, `FunctionalBlock`; writers `streams.Damage.BeginWrite(ref state, ProducerKind.Beam, chunkCount)` and `shieldHits.Hits.BeginWrite(ref state, ProducerKind.Beam, chunkCount)`, foreach index `unfilteredChunkIndex`. Per entity with `Active == 1`:
 1. Root missing, `Hulk` or not powered → `Active = 0`, `TicksLeft = 0`, continue.
 2. `muzzleWorld`/`MuzzleLocal` as §5.4 step 1 (post-physics pose this time, so the beam starts where the ship is drawn); `dir = rootT.TransformDirection(FireDirLocal)`; `p1 = muzzleWorld + dir × BeamRange`.
 3. `hit = CombatHitTest.Segment(muzzleWorld, p1, BeamWidth × 0.5, Source = root, ...)`.
-4. `amount = Damage × DamageMultiplier / BeamPulseTicks`; hull hit → `DamageEvent` (`Penetration = PenetrationCells`, `Producer = Beam`, `Sequence = (uint)InstanceIndex`, `WorldImpulse = dir × ImpulsePerHit / BeamPulseTicks`); shield hit → `ShieldHit` (`ProducerKind = 2`, same sequence); `EndWorld = hit point`, `HitSomething = 1`; no hit → `EndWorld = p1`, `HitSomething = 0`. Hit Fx every 6th tick of the pulse (`TicksLeft % 6 == 0`) at the hit point.
+4. `amount = Damage × DamageMultiplier / BeamPulseTicks`; hull hit → `DamageEvent` (`Penetration = PenetrationCells`, `Producer = Beam`, `Sequence = (uint)InstanceIndex`, `WorldImpulse = dir × ImpulsePerHit / BeamPulseTicks`); shield hit → `ShieldHit` (`Producer = Beam`, same sequence); `EndWorld = hit point`, `HitSomething = 1`; no hit → `EndWorld = p1`, `HitSomething = 0`. Hit Fx every 6th tick of the pulse (`TicksLeft % 6 == 0`) at the hit point.
 5. `TicksLeft−−`; `0` → `Active = 0`.
 
 ### 5.8 `ExplosionSystem`
 
-1. `list = NativeList<ExplosionRequest>(Allocator.TempJob)`; `h0 = streams.ScheduleDrainExplosions(list, state.Dependency)` (sorted by SPEC-13).
-2. `ExplosionJob : IJob` after `h0` (single-threaded; requests are few), damage writer with `forEachCount = 1`, shield writer (`Explosions`) with `forEachCount = 1`. For each request `e` in order:
+1. `list = NativeList<ExplosionRequest>(Allocator.TempJob)`; `h0 = streams.ScheduleDrainExplosions(ref state, list)` (sorted by SPEC-13; combines into `state.Dependency`).
+2. `ExplosionJob : IJob` after `h0` (single-threaded; requests are few), damage writer `streams.Damage.BeginWrite(ref state, ProducerKind.Explosion, 1)`, shield writer `shieldHits.Hits.BeginWrite(ref state, ProducerKind.Explosion, 1)`. For each request `e` in order:
    1. `QuerySphere(e.WorldPos, e.Radius)` → grid proxies (skip `Celestial`), ascending `Entity.Index`.
-   2. For each grid `G` (skip if `GridSpawning`, `EditorPreview` grids are never damaged): `c = WorldToGridPoint(e.WorldPos)`. Shield `Active` and `ShieldMath.SphereOverlaps(c, e.Radius, Center, Radii)` → `ShieldHit { Grid = G, LocalPoint = c, Amount, Type, Source, LocalDir = 0, Penetration = 0, Radius, WorldImpulse = impulse, Flags = Blast, ProducerKind = 3, Sequence }`. Else, if the sphere intersects the grid's cell bounds box (`CellMin·s .. (CellMax+1)·s`, grid space): `DamageEvent { Grid = G, LocalPoint = c, LocalDir = 0, Amount, Radius, Penetration = 0, Type, Source, WorldImpulse = impulse, Producer = Explosion, Sequence = e.Sequence }`. `impulse = normalize(gridCentreWorld − e.WorldPos) × Amount × ExplosionImpulsePerDamage × (1 − clamp(dist / Radius, 0, 1))²` (zero vector if the centre coincides).
+   2. For each grid `G` (skip if `GridSpawning`, `EditorPreview` grids are never damaged): `c = WorldToGridPoint(e.WorldPos)`. Shield `Active` and `ShieldMath.SphereOverlaps(c, e.Radius, Center, Radii)` → `ShieldHit { Grid = G, LocalPoint = c, Amount, Type, Source, LocalDir = 0, Penetration = 0, Radius, WorldImpulse = impulse, Flags = Blast, Producer = Explosion, Sequence }`. Else, if the sphere intersects the grid's cell bounds box (`CellMin·s .. (CellMax+1)·s`, grid space): `DamageEvent { Grid = G, LocalPoint = c, LocalDir = 0, Amount, Radius, Penetration = 0, Type, Source, WorldImpulse = impulse, Producer = Explosion, Sequence = e.Sequence }`. `impulse = normalize(gridCentreWorld − e.WorldPos) × Amount × ExplosionImpulsePerDamage × (1 − clamp(dist / Radius, 0, 1))²` (zero vector if the centre coincides).
    3. One `FxEvent { Radius < 4 ? ExplosionSmall : ExplosionLarge, e.WorldPos, (0,1,0), Vel = 0, Scale = Radius }` and one `SfxEvent` (`CombatAudioCues.ExplosionSmall/Large`).
 3. Dispose `list` with the job handle; end writers; `state.Dependency = handle`.
 
@@ -689,7 +691,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 - **Milestone:** M2
 - **Tier:** frontier — F2/F4: parallel NativeStream producers into three consumers; owns the 5,000-projectile gate
 - **Depends on:** `WPN-003`, `WPN-007`, `PWR-001`, `SPEC-13`
-- **Do:** Implement §5.6 (homing, hits, fuses, compaction). Uses `ShieldHitStreams.BeginWrite/EndWrite` (SPEC-22 §4, answered Q3).
+- **Do:** Implement §5.6 (homing, hits, fuses, compaction). Uses `ShieldHitStreams.Hits.BeginWrite/EndWrite` (SPEC-02 §4.12 channel held by SPEC-22).
 - **Files:** `Assets/Game/Simulation/Weapons/{ProjectileStepSystem,ProjectileStepJob,ProjectileCompactJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Weapons/ProjectileStepTests.cs`
 - **Acceptance criteria:**
   - [ ] Hull hit writes one `DamageEvent` with the §5.6 fields; shield hit writes one `ShieldHit`; explosive rounds also write an `ExplosionRequest`; fuse expiry explodes at `p1`.

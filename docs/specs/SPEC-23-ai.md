@@ -92,19 +92,18 @@ namespace Game.Simulation.Spatial
         public NativeHashMap<long, int2> Cells;          // cell key → (start, count) in EntryIndices (lookup only, never iterated)
         public NativeList<int> EntryIndices;             // proxy indices grouped by cell, ascending within a cell
         public NativeReference<SpatialHashState> State;
-        public NativeReference<JobHandle> WriteHandle;   // main thread only
-        public NativeReference<JobHandle> ReadersHandle; // main thread only
+        public Game.Data.Streams.GuardedHandles Access;  // main thread only (SPEC-02 §4.12): builder = Acquire/Release, readers = BeginRead/EndRead
 
         public static SpatialHash Create(float cellSize);   // Allocator.Persistent; capacities: proxies 512, entries 4,096
-        public void Dispose();                               // completes both handles first
+        public void Dispose();                               // Access.Dispose() (completes) first
 
         public static long CellKey(int2 cell) => ((long)cell.x << 32) ^ (uint)cell.y;
         public int2 CellOf(float3 p) => (int2)math.floor(p.xz / State.Value.CellSize);  // main-thread convenience; jobs pass CellSize
 
         // Job access (§5.1)
-        public JobHandle BeginRead(JobHandle dependsOn) => JobHandle.CombineDependencies(dependsOn, WriteHandle.Value);
-        public void EndRead(JobHandle readerJob) { ReadersHandle.Value = JobHandle.CombineDependencies(ReadersHandle.Value, readerJob); }
-        public void CompleteAll() { WriteHandle.Value.Complete(); ReadersHandle.Value.Complete(); }   // never inside FixedStepSimulationSystemGroup
+        public JobHandle BeginRead(JobHandle dependsOn) => Access.BeginRead(dependsOn);
+        public void EndRead(JobHandle readerJob) => Access.EndRead(readerJob);
+        public void CompleteAccess() => Access.CompleteAccess();   // never inside FixedStepSimulationSystemGroup
 
         // Queries (Burst, usable inside jobs; read-only)
         public int QuerySegment(float3 p0, float3 p1, float inflate, ref FixedList512Bytes<int> output);
@@ -281,9 +280,9 @@ Per AI ship: `AiBrain` 64 B. Hash: 64 B per proxy + ≈ 4 entries per proxy × 4
 
 ### 5.1 `SpatialHash` access rules
 
-- **Builder** (`SpatialHashBuildSystem` only): `dep = Combine(state.Dependency, WriteHandle.Value, ReadersHandle.Value)`; schedule the build chain; `WriteHandle.Value = h; ReadersHandle.Value = default; state.Dependency = h`.
+- **Builder** (`SpatialHashBuildSystem` only): `dep = hash.Access.Acquire(state.Dependency)`; schedule the build chain; `hash.Access.Release(h); state.Dependency = h`.
 - **Job readers** (any fixed-step system): `var hash = SystemAPI.GetSingleton<SpatialHash>(); var dep = hash.BeginRead(state.Dependency);` schedule jobs with the hash as a `[ReadOnly]` field; `hash.EndRead(handle); state.Dependency = handle;`.
-- **Main-thread readers** outside the fixed step (HUD radar, harness): `hash.CompleteAll()` first.
+- **Main-thread readers** outside the fixed step (HUD radar, harness): `hash.CompleteAccess()` first.
 - Never `GetSingletonRW<SpatialHash>`; never write proxy data outside the builder.
 
 ### 5.2 `SpatialHashBuildSystem`
@@ -352,7 +351,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (`AiS
 
 | Call / type | Pre-conditions | Post-conditions / errors |
 |---|---|---|
-| `SpatialHash` queries | §5.1 access; inside a job or after `CompleteAll()` | Ascending, deduplicated indices; total count returned |
+| `SpatialHash` queries | §5.1 access; inside a job or after `CompleteAccess()` | Ascending, deduplicated indices; total count returned |
 | `SpatialBody` | Added by SPEC-31 to celestial roots with colliders | Appears as a `Celestial` proxy next tick |
 | `AiSetup.Add(em, root, profile)` | Main thread outside system updates; after `CombatGridSetup.AddAll` | Adds `AiBrain`; unknown profile → default with `GameLog.Warn` |
 | `AiContent.CreateSingletons` | Boot (SPEC-01) | `AiConfig` with the profiles blob |
@@ -393,7 +392,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (`AiS
 
 ### AI-001 — Public contract types
 - **Milestone:** M1
-- **Tier:** standard — transcribes the exact code of §4 (bodies throw `NotImplementedException`, except `CellKey`, `BeginRead`, `EndRead`, `CompleteAll`, `Get`)
+- **Tier:** standard — transcribes the exact code of §4 (bodies throw `NotImplementedException`, except `CellKey`, `BeginRead`, `EndRead`, `CompleteAccess`, `Get`)
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`, `WPN-001`
 - **Do:** Create every type of §4.1–§4.4 in the folders of decision 10.
 - **Files:** `Assets/Game/Simulation/Spatial/{ProxyKind,ProxyFlags,SpatialProxy,SpatialBody,SpatialHashState,SpatialHash}.cs`; `Assets/Game/Simulation/Ai/{AiProfile,AiProfilesBlob,AiConfig,AiState,AiBrain,PlayerCombatStatus,AiSetup,AiContent,FleetMember}.cs`; `Assets/Game/Data/Definitions/Ai/{AiFacing,AiRole,AiProfileDefinition,AiConfigDefinition,FormationDefinition}.cs`

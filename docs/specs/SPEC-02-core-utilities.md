@@ -28,6 +28,7 @@
 - Flow contracts used across modules: `GameScene`, `ISceneReady`, `ISceneExiting`, `IGameFlow`, `NewGameArgs`, `BlueprintLabArgs`, `ISessionModel`, `ISessionWriteback`, `INewGameInitializer`, `ISaveBlocker`.
 - Settings model: `ISettingsService`, `GameSettings` and its section classes.
 - `MathD`, `Planar`.
+- Simulation event channels and guarded access: `SimEventChannel<T>`, `SimEventReadSet`, `SimEventGather`, `GuardedHandles`, `ProducerKind` (files in `Game.Data`, Decision 20).
 - Custom system groups `GameInitGroup`, `GameplayPrePhysicsGroup`, `ShipCommandGroup`, `AbilityActivationGroup`, `GameplayPostPhysicsGroup`, `VoxelRebuildGroup`, `WorldGroup`, `PresentationBridgeGroup`, the `GameplayEndCommandBufferSystem`, and the `GameplayActive` tag.
 
 **Out of scope (and who owns it instead):**
@@ -59,6 +60,7 @@
 17. **Folder layout.** Root of `Assets/Game/Core/` (namespace `Game.Core`) holds identity, hashing, randomness, time, services, logging, pause, input and math. Sub-folders, each its own namespace: `Components/` (`Game.Core.Components`), `Systems/` (`Game.Core.Systems`), `Events/` (`Game.Core.Events`), `Save/` (`Game.Core.Save`), `Flow/` (`Game.Core.Flow`), `Settings/` (`Game.Core.Settings`), and SPEC-64's `Audio/` (`Game.Core.Audio`). Reason: conventions §1 allows extra folders with a reason; Core is many small contracts grouped by concern.
 18. **The locator is always written `Game.Core.Services`** in any module that has a `Services/` sub-folder (`Game.Data.Services`, `Game.UI.Services`, `Game.Presentation.Services`, `Game.App.Services` exist or are specified). Inside such a module the bare identifier `Services` resolves to the module's own `…Services` namespace and does not compile. Reason: C# name lookup; keeps the binding name `Services` (architecture §6.1).
 19. **`SimClock` is read on the main thread only** (`SystemAPI.GetSingleton<SimClock>()` in `OnUpdate`), and its values are passed into jobs as fields. No job reads `SimClock` through a lookup. Reason: `SimClockAdvanceSystem` writes it on the main thread each tick.
+20. **Simulation event channels and guarded access are owned here and placed in `Game.Data`** (`Assets/Game/Data/Streams/`, namespace `Game.Data.Streams`; `ProducerKind` in `Assets/Game/Data/Combat/`), because they need `SystemState` and Collections types that Decision 1 keeps out of Core, and every simulation module references `Game.Data`. One implementation replaces the per-spec registries and handle code (extensibility review X8). Reason: architecture §5.1 deterministic order stated and tested once.
 
 ## 4. Data model
 
@@ -838,6 +840,92 @@ public unsafe partial class GameplayEndCommandBufferSystem : EntityCommandBuffer
 }
 ```
 
+### 4.12 Simulation event channels and guarded access (owned here, placed in `Game.Data` per Decision 20)
+
+```csharp
+// Assets/Game/Data/Combat/ProducerKind.cs   (namespace Game.Data.Combat)
+/// <summary>Who produced a simulation event; part of every deterministic sort key (architecture §5.1). One enum for every channel
+/// (damage, explosions, shield hits, impulses, restores, inhibits). Add values at the end only. Implements SPEC-02 §4.12.</summary>
+public enum ProducerKind : byte
+{ Unknown = 0, Impact = 1, Projectile = 2, Beam = 3, Explosion = 4, ShieldOverflow = 5, Ability = 6, Status = 7, Repair = 8, Test = 255 }
+
+// Assets/Game/Data/Streams/GuardedHandles.cs   (namespace Game.Data.Streams)
+/// <summary>Job-handle guard embedded in every singleton that owns native memory shared by several systems (architecture §5.1;
+/// the access pattern of SPEC-12 §5.1). Main thread only; never passed into a job. Implements SPEC-02 §4.12.</summary>
+public struct GuardedHandles
+{
+    public Unity.Collections.NativeReference<Unity.Jobs.JobHandle> Exclusive;   // last job with exclusive access (writers)
+    public Unity.Collections.NativeReference<Unity.Jobs.JobHandle> Readers;     // shared readers since the last exclusive access
+
+    public static GuardedHandles Create();                 // Allocator.Persistent, both handles default
+    public bool IsCreated => Exclusive.IsCreated;
+    /// Exclusive access: waits for the last writer and every reader. Pair with exactly one Release.
+    public Unity.Jobs.JobHandle Acquire(Unity.Jobs.JobHandle dependsOn)
+        => Unity.Jobs.JobHandle.CombineDependencies(dependsOn, Exclusive.Value, Readers.Value);
+    /// lastJob must depend on the handle Acquire returned.
+    public void Release(Unity.Jobs.JobHandle lastJob) { Exclusive.Value = lastJob; Readers.Value = default; }
+    /// Shared read access: waits for the last writer only; readers run in parallel. Pair with exactly one EndRead.
+    public Unity.Jobs.JobHandle BeginRead(Unity.Jobs.JobHandle dependsOn)
+        => Unity.Jobs.JobHandle.CombineDependencies(dependsOn, Exclusive.Value);
+    public void EndRead(Unity.Jobs.JobHandle readerJob)
+    { Readers.Value = Unity.Jobs.JobHandle.CombineDependencies(Readers.Value, readerJob); }
+    /// Main thread outside FixedStepSimulationSystemGroup only: completes every guarded job.
+    public void CompleteAccess() { Exclusive.Value.Complete(); Readers.Value.Complete(); }
+    public void Dispose();                                 // CompleteAccess, then dispose both references; no-op if !IsCreated
+}
+
+// Assets/Game/Data/Streams/SimEventChannel.cs   (namespace Game.Data.Streams)
+/// <summary>Per-tick registry of deterministic simulation event streams of one event type (architecture §5.1). Any number of
+/// producers register a NativeStream each, in call order (= system update order, deterministic); exactly one consumer reads every
+/// registration in that order. The struct holds only a pointer, so the owning singleton is taken with SystemAPI.GetSingleton
+/// (read-only) by producers and consumer alike: no sync points. Implements SPEC-02 §4.12; algorithm §5.13.</summary>
+public unsafe struct SimEventChannel<T> where T : unmanaged
+{
+    [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction] internal SimEventChannelData<T>* Data;
+
+    public static SimEventChannel<T> Create(Unity.Collections.FixedString32Bytes name);   // Allocator.Persistent; name for logs
+    public bool IsCreated => Data != null;
+    public void Dispose();                                 // completes every stored handle, disposes every stream still registered
+
+    /// Channel owner, once per tick before producers or the consumer run (or anywhere in the tick; see §5.13 step 1).
+    public void BeginTick(uint tick);
+
+    /// Producer, main thread inside OnUpdate: registers a new NativeStream (Allocator.TempJob) with forEachCount indices.
+    public Unity.Collections.NativeStream.Writer BeginWrite(ref Unity.Entities.SystemState state, Game.Data.Combat.ProducerKind producer, int forEachCount);
+    /// Producer: exactly once after scheduling the job that writes the stream returned by the matching BeginWrite.
+    public void EndWrite(Unity.Jobs.JobHandle writerJob);
+
+    /// Consumer, main thread inside OnUpdate: every registration not yet read, in registration order. Combines all their
+    /// writer handles into state.Dependency. Registrations made after this call are read by the next BeginRead.
+    public SimEventReadSet BeginRead(ref Unity.Entities.SystemState state);
+    /// Consumer: exactly once after scheduling the last job that uses the read set; disposes those streams and the set after it.
+    public void EndRead(Unity.Jobs.JobHandle readerJob);
+
+    public int PendingCount { get; }                       // registrations not yet read (tests, harness)
+}
+
+/// <summary>This tick's registrations of one channel, in registration order. Arrays are Allocator.TempJob, disposed by EndRead.</summary>
+public struct SimEventReadSet
+{
+    [Unity.Collections.ReadOnly] public Unity.Collections.NativeArray<Unity.Collections.NativeStream.Reader> Readers;
+    [Unity.Collections.ReadOnly] public Unity.Collections.NativeArray<Game.Data.Combat.ProducerKind> Producers;
+    [Unity.Collections.ReadOnly] public Unity.Collections.NativeArray<int> ForEachCounts;
+    public int Count => Readers.Length;
+}
+
+/// <summary>Burst helper for consumers: appends every event of a read set to output, registrations in order, foreach indices ascending.
+/// Consumers then stable-sort with their own key (the gather order is the tie-break).</summary>
+public static class SimEventGather
+{
+    public static Unity.Jobs.JobHandle Schedule<T>(SimEventReadSet set, Unity.Collections.NativeList<T> output, Unity.Jobs.JobHandle dependsOn) where T : unmanaged;
+}
+// internal: struct SimEventChannelData<T> { UnsafeList<Registration> Pending; FixedString32Bytes Name; uint Tick; JobHandle LastConsumer; byte OpenWrite; }
+//           (plus byte StaleWarned)
+//           struct Registration { NativeStream Stream; JobHandle Writer; ProducerKind Producer; int ForEachCount; uint Tick; }
+```
+
+Every deterministic simulation stream is one `SimEventChannel<T>` held as a field of its owner's singleton: SPEC-13 `DamageStreams.Damage` and `.Explosions`, SPEC-22 `ShieldHitStreams.Hits`, and the request channels of SPEC-13/22/24 (`ImpulseRequest`, `CellRestoreRequest`, `InhibitRequest`). Every singleton that owns native memory shared across systems embeds one `GuardedHandles Access` and forwards `Acquire`/`Release`/`BeginRead`/`EndRead`/`CompleteAccess` to it (SPEC-11 `BrickMeshQueue`, SPEC-12 `ColliderDirtyQueue`/`ColliderBuildCache`, SPEC-21 `ProjectileStore`, SPEC-23 `SpatialHash`). No spec writes its own handle bookkeeping or stream registry.
+
 ## 5. Systems, services and flow
 
 ### 5.1 `StableHash` (CORE-002)
@@ -1062,6 +1150,19 @@ Exact formulas are in §4.10. Additional rules: `WrapAngle(x)`: `x - 2π * floor
 
 Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)] static void ResetStatics()` in the same file: `Services`, `EventHub` (also resets every `EventBus<T>` through channel detach), `GameLog`. Immutable statics (`const`, `static readonly` of immutable types, xxHash tables) need no reset. SPEC-01's `StaticStateAuditTests` enforces this for every `Game.*` assembly.
 
+### 5.13 `SimEventChannel<T>` and `GuardedHandles` (CORE-012)
+
+`SimEventChannel<T>` (all methods main thread; Burst-compatible structs, no managed allocations):
+1. **`BeginTick(tick)`**: for each pending registration with `Tick + 1 < tick` (written at least one full tick ago and never read: the consumer did not run), `Stream.Dispose(Writer)`, remove it, and log once per channel (`StaleWarned` flag in the data block; `GameLog.Burst.Warn("[Core] stale stream: " + Name)` so Burst owners can call it); then `Data->Tick = tick`. Owners call it first in their `OnUpdate`; calling it twice in a tick is a no-op the second time.
+2. **`BeginWrite(ref state, producer, n)`**: `n ≥ 1` (else `ArgumentOutOfRangeException`). If `OpenWrite == 1` (a previous `BeginWrite` without `EndWrite`) → `InvalidOperationException` (fail loudly). Allocate `new NativeStream(n, Allocator.TempJob)`; append `Registration { Stream, Writer = default, Producer = producer, ForEachCount = n, Tick = Data->Tick }`; `OpenWrite = 1`; `state.Dependency = JobHandle.CombineDependencies(state.Dependency, LastConsumer)` (a producer never overtakes the consumer of the previous registration set); return `Stream.AsWriter()`.
+3. **`EndWrite(h)`**: requires `OpenWrite == 1`; sets the last registration's `Writer = h`; `OpenWrite = 0`.
+4. **`BeginRead(ref state)`**: `k = Pending.Length`. Allocate the three arrays of length `k` (`Allocator.TempJob`), fill them from `Pending[0..k)` in order (`Readers[i] = Pending[i].Stream.AsReader()`), combine every `Pending[i].Writer` into `state.Dependency`, and remember `k` as the number of registrations taken. Return the set. A second `BeginRead` before `EndRead` → `InvalidOperationException`.
+5. **`EndRead(h)`**: for the `k` taken registrations `Stream.Dispose(h)`; dispose the three arrays with `h`; remove them from `Pending` (keeping later ones in order); `LastConsumer = h`.
+6. **`Dispose()`**: complete `LastConsumer` and every pending `Writer`, dispose every pending stream and the data block.
+7. **`SimEventGather.Schedule`**: one Burst `IJob`; for `r` in `0..Count`, for index in `0..ForEachCounts[r]`: `BeginForEachIndex`, read all, `EndForEachIndex`, append to `output`. Output order = registration order, then index order, then write order: the deterministic order of architecture §5.1. Consumers sort with `NativeSortExtension` on a key that ends with the gather position (stable by construction).
+
+`GuardedHandles` is complete as written in §4.12 (bodies are one-liners). Pattern rules (binding for every user, unchanged from SPEC-12 §5.1): fixed-step systems use `Acquire`/`Release` (writers) or `BeginRead`/`EndRead` (readers) around the jobs they schedule; main-thread users outside the fixed step call `CompleteAccess()` first; nobody calls `GetSingletonRW` on a guarded singleton or writes its fields after `Create()`.
+
 ## 6. Public API
 
 | API | Preconditions | Postconditions / errors |
@@ -1081,6 +1182,9 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
 | `GameSettings.Clamp` | — | all values within §4.9 ranges |
 | `Planar.*`, `MathD.*` | finite inputs | formulas of §4.10/§5.10; Burst-compatible |
 | Groups | — | runtime order as §5.8; no Entities ordering warnings |
+| `SimEventChannel<T>.BeginWrite/EndWrite` | main thread, inside `OnUpdate`; `forEachCount ≥ 1`; one `EndWrite` per `BeginWrite` before the next `BeginWrite` on the same channel | Registered in call order; read by the next `BeginRead`; unread for a full tick → disposed with one warning |
+| `SimEventChannel<T>.BeginRead/EndRead` | the channel's single consumer, main thread, inside `OnUpdate` | Every registration not yet read, in order; streams disposed after the reader job |
+| `GuardedHandles.*` | main thread; `CompleteAccess` never inside `FixedStepSimulationSystemGroup` | Jobs scheduled between `Acquire`/`Release` or `BeginRead`/`EndRead` never race (safety checks on) |
 
 ## 7. Edge cases and failure behaviour
 
@@ -1117,6 +1221,9 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
 | Reader skips unread tail of a newer block version | `EndBlock` jumps to the block end (forward compatible) |
 | Settings with NaN or out-of-range values | `Clamp` restores defaults/ranges |
 | Group attribute targeting another bucket | Forbidden (Decision 13); `SystemGroupOrderTests` fails on any Entities ordering warning |
+| A channel's consumer did not run this tick | Registrations stay pending; at the next tick's `BeginTick` those older than one tick are disposed with one warning per channel; no leak |
+| `BeginWrite` twice without `EndWrite` | `InvalidOperationException` naming the channel (fail loudly) |
+| A producer registers after the consumer's `BeginRead` | Its events are read by the next tick's consumer (one tick later, still deterministic) |
 
 ## 8. Performance budget
 
@@ -1127,6 +1234,7 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
 | `EventBus<T>.Publish` + `DrainAll` of 1,000 events to 3 handlers | ≤ 0.3 ms, 0 B GC after warm-up | `EventBusPerfTests.Drain1000` |
 | `ManagedEventDrainSystem` with 0 events | ≤ 0.02 ms per frame, 0 B GC | `ManagedEventDrainSystemTests.NoEvents_NoAllocation` |
 | `ManagedEventDrainSystem` transfer of 1,000 envelopes | ≤ 0.5 ms main thread | `ManagedEventDrainPerfTests.Transfer1000` |
+| `SimEventChannel<T>` `BeginWrite`+`EndWrite` or `BeginRead`+`EndRead` | ≤ 5 µs main thread each, 0 B GC | `SimEventChannelTests.Overhead` (`Performance`) |
 | `SaveWriter` 1 MiB of mixed primitives | ≤ 3 ms, ≤ 1 pooled growth per doubling | `SaveWriterPerfTests.Write1MiB` |
 | Menus/flight frame GC | 0 B/frame contributed by Core | 06 frame budget; covered by the tests above |
 
@@ -1138,10 +1246,10 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
 - **Depends on:** —
 - **Do:**
   1. Create every type of §4.1–§4.11 in the files and namespaces given there (one public type per file; file name = type name; `EventBus<T>` in `EventBus.cs`; `ManagedEventEnvelope<T>`/`ManagedEventQueue<T>` in `Game.Data`; `ManagedEventDrainSystem`/`ManagedEventChannels` in `Game.Presentation`).
-  2. Method bodies not given in §4 throw `new System.NotImplementedException("CORE-0xx")` naming the task that implements them (StableHash/ContentId → CORE-002, RngStreams/SimTime → CORE-003, GameLog → CORE-004, Services → CORE-005, EventBus/EventHub → CORE-006, Save → CORE-007, math → CORE-010, settings → CORE-011, drain system → CORE-009). `PauseToken`, `ContentHash`, `PersistentId`, enums, events payloads, interfaces, groups and `GameplayEndCommandBufferSystem` are complete as written.
+  2. Method bodies not given in §4 throw `new System.NotImplementedException("CORE-0xx")` naming the task that implements them (StableHash/ContentId → CORE-002, RngStreams/SimTime → CORE-003, GameLog → CORE-004, Services → CORE-005, EventBus/EventHub → CORE-006, Save → CORE-007, math → CORE-010, settings → CORE-011, drain system → CORE-009, `SimEventChannel`/`SimEventGather` → CORE-012). `GuardedHandles` is complete as written except `Create`/`Dispose`, which are also real (two lines each). `PauseToken`, `ContentHash`, `PersistentId`, enums, events payloads, interfaces, groups and `GameplayEndCommandBufferSystem` are complete as written.
   3. `ManagedEventChannels.RegisterAll` has an empty body with the comment shown in §4.6.
   4. Every public type has a `/// <summary>` naming its SPEC-02 section.
-- **Files:** `Assets/Game/Core/{ContentHash,ContentId,StableHash,RngPurpose,RngStreams,SimTime,Services,LogLevel,LogCategories,GameLog,IPauseService,PauseToken,InputContext,IWorldPointerGate,MathD,Planar}.cs`; `Assets/Game/Core/Components/{GameplayActive,SimClock,PersistentId,OriginShiftRecord}.cs`; `Assets/Game/Core/Systems/{GameInitGroup,GameplayPrePhysicsGroup,ShipCommandGroup,AbilityActivationGroup,GameplayPostPhysicsGroup,GameplayEndCommandBufferSystem,VoxelRebuildGroup,WorldGroup,PresentationBridgeGroup}.cs`; `Assets/Game/Core/Events/{EventBus,EventHub,EventChannel,SessionResetReason,SessionReset,GameSaved,GameLoaded,PauseStateChanged,InputContextChanged,SettingsChanged,SceneTransitionStarted,SceneTransitionFinished}.cs`; `Assets/Game/Core/Save/{ISaveParticipant,SaveReason,SaveBlockReason,ISaveIdPalette,ISaveIdPaletteReader,ISaveJsonCodec,ISaveDeferredBlock,SaveKey,SaveFormatException,SaveBlock,SaveWriter,SaveReader}.cs`; `Assets/Game/Core/Flow/{GameScene,SceneEntryReason,BlueprintLabMode,BlueprintLabArgs,SceneReadyContext,SceneExitContext,ISceneReady,ISceneExiting,SceneHookOrder,FlowResult,NewGameArgs,IGameFlow,ISessionModel,ISessionWriteback,INewGameInitializer,ISaveBlocker}.cs`; `Assets/Game/Core/Settings/{SettingsSection,GameSettings,AudioSettingsData,VideoSettingsData,ControlSettingsData,GameplaySettingsData,AccessibilitySettingsData,ISettingsService}.cs`; `Assets/Game/Data/Components/{ManagedEventEnvelope,ManagedEventQueue}.cs`; `Assets/Game/Presentation/Systems/{ManagedEventDrainSystem,ManagedEventChannels}.cs`
+- **Files:** `Assets/Game/Core/{ContentHash,ContentId,StableHash,RngPurpose,RngStreams,SimTime,Services,LogLevel,LogCategories,GameLog,IPauseService,PauseToken,InputContext,IWorldPointerGate,MathD,Planar}.cs`; `Assets/Game/Core/Components/{GameplayActive,SimClock,PersistentId,OriginShiftRecord}.cs`; `Assets/Game/Core/Systems/{GameInitGroup,GameplayPrePhysicsGroup,ShipCommandGroup,AbilityActivationGroup,GameplayPostPhysicsGroup,GameplayEndCommandBufferSystem,VoxelRebuildGroup,WorldGroup,PresentationBridgeGroup}.cs`; `Assets/Game/Core/Events/{EventBus,EventHub,EventChannel,SessionResetReason,SessionReset,GameSaved,GameLoaded,PauseStateChanged,InputContextChanged,SettingsChanged,SceneTransitionStarted,SceneTransitionFinished}.cs`; `Assets/Game/Core/Save/{ISaveParticipant,SaveReason,SaveBlockReason,ISaveIdPalette,ISaveIdPaletteReader,ISaveJsonCodec,ISaveDeferredBlock,SaveKey,SaveFormatException,SaveBlock,SaveWriter,SaveReader}.cs`; `Assets/Game/Core/Flow/{GameScene,SceneEntryReason,BlueprintLabMode,BlueprintLabArgs,SceneReadyContext,SceneExitContext,ISceneReady,ISceneExiting,SceneHookOrder,FlowResult,NewGameArgs,IGameFlow,ISessionModel,ISessionWriteback,INewGameInitializer,ISaveBlocker}.cs`; `Assets/Game/Core/Settings/{SettingsSection,GameSettings,AudioSettingsData,VideoSettingsData,ControlSettingsData,GameplaySettingsData,AccessibilitySettingsData,ISettingsService}.cs`; `Assets/Game/Data/Components/{ManagedEventEnvelope,ManagedEventQueue}.cs`; `Assets/Game/Data/Combat/ProducerKind.cs`; `Assets/Game/Data/Streams/{GuardedHandles,SimEventChannel,SimEventReadSet,SimEventGather}.cs`; `Assets/Game/Presentation/Systems/{ManagedEventDrainSystem,ManagedEventChannels}.cs`
 - **Acceptance criteria:**
   - [ ] `tools/compile.sh` passes with zero new warnings.
   - [ ] `AssemblyRulesTests` and `ConventionsTests` pass (no `Debug.Log` outside `GameLog.cs`, no `new Random(`).
@@ -1289,6 +1397,21 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
   - [ ] Autosave snapping: 7 → 5, 8 → 10, 12 → 10, 13 → 15, 22 → 15, 23 → 30, 99 → 30, −3 → 0.
   - [ ] `Clone` shares no references; `CopyFrom(…, Audio)` changes only audio fields; `DiffersFrom` reports exactly the changed sections.
 - **Tests:** `GameSettingsTests.Defaults_MatchSpec`, `.Clamp_EnforcesRanges`, `.Clamp_NaN_ToDefault`, `.Autosave_Snaps`, `.Clone_IsDeep`, `.CopyFrom_OnlyFlaggedSections`, `.DiffersFrom_ReportsSections`.
+
+### CORE-012 — Simulation event channels
+- **Milestone:** M0
+- **Tier:** frontier — F2 native memory and job handles shared across systems; F3 deterministic ordering for every simulation stream
+- **Depends on:** `CORE-001`, `CORE-004`
+- **Do:** Implement `SimEventChannel<T>`, `SimEventChannelData<T>`, `SimEventReadSet` and `SimEventGather` per §5.13. Tests use their own `World` (Decision 16) with two producer systems (parallel `IJobChunk` writers) and one consumer system on a test event type.
+- **Files:** `Assets/Game/Data/Streams/{SimEventChannel,SimEventChannelData,SimEventReadSet,SimEventGather}.cs`, `Assets/Game/Tests/EditMode/Core/SimEventChannelTests.cs`, `Assets/Game/Tests/EditMode/Core/GuardedHandlesTests.cs`
+- **Acceptance criteria:**
+  - [ ] Two producers writing from parallel jobs (8 workers) and one consumer: the gathered list equals registration order, then index order, on 20 runs; no safety errors with safety checks on.
+  - [ ] A registration written after the consumer's `BeginRead` arrives in the next tick's read set.
+  - [ ] With the consumer disabled, every registration is disposed at the following tick's `BeginTick`, one warning per channel, leak detection `EnabledWithStackTrace` clean.
+  - [ ] `BeginWrite` twice without `EndWrite` and `BeginRead` twice without `EndRead` throw `InvalidOperationException`.
+  - [ ] `GuardedHandles`: a writer between `Acquire`/`Release` and two readers between `BeginRead`/`EndRead` in different systems raise no safety errors; `CompleteAccess` leaves no running job.
+  - [ ] Overhead within §8.
+- **Tests:** `SimEventChannelTests.Order_RegistrationThenIndex_Deterministic`, `.LateRegistration_ReadNextTick`, `.NoConsumer_DisposedNextTick_NoLeak`, `.DoubleBegin_Throws`, `.Overhead` (`Performance`); `GuardedHandlesTests.WriterAndReaders_NoSafetyErrors`, `.CompleteAccess_CompletesAll`.
 
 ## 10. Open questions
 

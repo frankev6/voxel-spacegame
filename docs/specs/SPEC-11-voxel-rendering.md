@@ -157,12 +157,12 @@ public struct BrickMeshQueue : IComponentData                // singleton; produ
     public NativeList<BrickMeshRequest> Damage, Neighbour, Spawn, Lod;   // FIFO lists
     public NativeArray<int> Heads;                           // 4 read positions
     public NativeHashMap<Entity, byte> Pending;              // brick → lowest priority value queued
-    public NativeReference<JobHandle> Access;                // main thread only; never passed to a job (SPEC-12 §5.1 pattern)
-    public static BrickMeshQueue Create();                   // lists capacity 1,024, map capacity 4,096, Persistent
-    public void Dispose();                                   // Access.Value.Complete(), then dispose every container
-    public JobHandle Acquire(JobHandle dependsOn) => JobHandle.CombineDependencies(dependsOn, Access.Value);
-    public void Release(JobHandle lastJob) { Access.Value = lastJob; }
-    public void CompleteAccess() { Access.Value.Complete(); }   // never inside FixedStepSimulationSystemGroup
+    public Game.Data.Streams.GuardedHandles Access;          // main thread only; never passed to a job (SPEC-02 §4.12, SPEC-12 §5.1 pattern)
+    public static BrickMeshQueue Create();                   // lists capacity 1,024, map capacity 4,096, Persistent; Access = GuardedHandles.Create()
+    public void Dispose();                                   // Access.Dispose() (completes), then dispose every container
+    public JobHandle Acquire(JobHandle dependsOn) => Access.Acquire(dependsOn);
+    public void Release(JobHandle lastJob) => Access.Release(lastJob);
+    public void CompleteAccess() => Access.CompleteAccess();  // never inside FixedStepSimulationSystemGroup
     /// Adds unless the brick is already queued with an equal or better priority; a better priority adds a second entry
     /// and updates Pending (the stale entry is skipped on dequeue). Burst-compatible.
     public void Enqueue(Entity brick, Entity grid, MeshPriority p);

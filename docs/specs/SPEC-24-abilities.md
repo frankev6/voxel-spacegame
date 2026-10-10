@@ -27,7 +27,7 @@ Abilities are what blocks let a ship *do* besides fly and shoot: a speed boost f
 - Energy budget and the grant: SPEC-22. Applying stat multipliers: SPEC-22 `ShipStatsAggregateSystem` and its consumers (SPEC-20, SPEC-21).
 - Shield behaviour after `ShieldControl` changes: SPEC-22. HUD ability bar: SPEC-61.
 - AI use of abilities: not in v1 (SPEC-23 Q1).
-- Damaging abilities: v1 has none; a future kind would write `DamageEvent`/`ExplosionRequest` with `DamageProducer.Ability` (SPEC-13).
+- Damaging abilities: v1 has none; a future kind would write `DamageEvent`/`ExplosionRequest` with `ProducerKind.Ability` (SPEC-02 §4.12).
 
 ## 3. Decisions (binding)
 
