@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 63 | 0 | 0 | 0 | 3 | 0 | 66 | 17 |
+| M0 | 62 | 0 | 0 | 0 | 4 | 0 | 66 | 17 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 3 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
@@ -59,9 +59,9 @@
 | INP-002 | InputService contexts and display strings | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-001 | no | todo |  |  |  |  |
 | INP-003 | Rebinding and overrides | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-002 | no | todo |  |  |  |  |
 | DATA-001 | Public contract types | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 12a585b | `ContentDefinition.Id` cache already implemented (DATA-004 overlap) |
-| DATA-002 | ValidationReport implementation | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-10 |  |  |
+| DATA-002 | ValidationReport implementation | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | fcaa9d3 |  |
 | DATA-003 | Orientation tables | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-001 | yes | todo |  |  |  |  |
-| DATA-004 | Definition self-validation and ID rules | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-002 | no | todo |  |  |  |  |
+| DATA-004 | Definition self-validation and ID rules | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-002 | yes | todo |  |  |  |  |
 | DATA-005 | ContentCatalog | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-004 | no | todo |  |  |  |  |
 | DATA-006 | Block blob builder and placement maths | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-003, DATA-005 | no | todo |  |  |  |  |
 | DATA-007 | ContentService and ECS singletons | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-006 | no | todo |  |  |  |  |
@@ -555,6 +555,17 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-10 — DATA-002 ValidationReport, done (claude, claude-opus-5-5)
+- Implemented `ValidationReport`, `ValidationScope`, `ValidationEntry` and `ContentValidationException` per SPEC-04 §4.8.
+  - Null strings become `""`.
+  - `Sorted()` orders ordinally by AssetPath, Field, Code and Message, then by severity.
+  - `ToText` prints one `[E] CODE path field: message` line per entry, then `... N more` when capped, then `N errors, M warnings, K infos`.
+  - `LogTo` writes errors first, so the cap never hides an error behind warnings. It ends with one summary line (`Context: summary (N not shown)`) at the highest severity present.
+  - The exception message is the context plus `ToText(50)`.
+- Contract additions: internal constructors for `ValidationEntry` and `ValidationScope`, which the public contract cannot build otherwise.
+- `ValidationReportTests`: 5 tests (the 4 in the spec plus `Exception_CarriesReport`). Compile has 0 warnings; EditMode 21/21.
+- `ContentValidationContext` is left for DATA-004.
 
 ### 2026-10-10 — CORE-004 GameLog, done (claude, claude-opus-5-5)
 - `GameLog` implemented per SPEC-02 §5.4: `[Category] message` format, per-category minimum levels (ordinal dictionary, default Info in the Editor and development builds, Warning in release), `Exception` (never filtered), `WarnOnce`/`ErrorOnce` counters with a `"<null>"` key for null, `GameLog.Burst.Warn/Error`, and a `SubsystemRegistration` reset.
