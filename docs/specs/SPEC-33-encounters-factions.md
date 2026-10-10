@@ -688,7 +688,7 @@ The face point is the player position for every source. With a `FormationDefinit
    - mark `spawnedThisVisit` and, for `uniqueGlobal`, `globallyUsed`;
    - `AliveMembers = Members.Count`.
 
-   **AI behaviour by kind** (anchor = `AiSetup`'s anchor, which is the spawn pose):
+   **AI behaviour by kind** (anchor = the spawn position, set by SPEC-23's first AI update):
    - `Ambush` and `Combat` source: after spawning, set each member's `AiBrain.Anchor` and `GoalPosition` to the player's local position. This is a main-thread `SetComponentData` on new entities, allowed: the director runs outside the fixed step. The ships head for the player and engage within their sensor range.
    - `Patrol` and `Merchant`: keep the spawn anchor.
 8. **Pending** (decision 8): append `PendingEncounter { def.Id, id, star system = the anchor's star system or loader.Loaded, anchor, combat }`. Pending entries for the loaded star system are spawned by Tick step P once possible.

@@ -202,7 +202,7 @@ namespace Game.Simulation.Ai
         public AiState State;
         public sbyte OrbitSign;          // +1 or −1
         public byte FireBlocked;         // 1 = an ally is in the line of fire (autofire suspended)
-        public byte Reserved;
+        public byte Initialized;         // 0 = zeroed by profile conversion; AiAnchorShiftSystem completes it (§5.3 step 0)
         public ushort ProfileIndex;
         public ushort ThinkCount;
         public float3 Anchor;            // local frame
@@ -222,12 +222,14 @@ namespace Game.Simulation.Ai
         public uint LastDamagedTick;     // GridDamageStats.LastDamageTick of the player ship (0 = never)
     }
 
-    /// <summary>Spawn helper (SPEC-01 ShipSpawnService, SPEC-31/33 spawners), main thread, on the request entity.</summary>
+    /// <summary>Root composition for AI (ADR-0015). AiBrain is registered for GridProfile NpcShip, Station and SmallCraft; a requester that
+    /// wants a specific profile adds `AiBrain { ProfileIndex }` before conversion (0 = the default profile copy). AiAnchorShiftSystem
+    /// completes the brain on its first update (§5.3 step 0).</summary>
     public static class AiSetup
     {
-        /// Adds AiBrain { State = Idle, ProfileIndex = resolved (None → AiConfig.DefaultProfileIndex), Anchor = request pose position,
-        /// GoalPosition = Anchor, OrbitSign = +1 }. Requires CombatGridSetup to have run (ShipTarget, WeaponControl).
-        public static void Add(EntityManager em, Entity root, Game.Core.ContentId profile);
+        public static void Register(DynamicBuffer<Game.Voxel.Model.RootComponentRegistration> registrations);   // called by AiAnchorShiftSystem.OnCreate
+        /// Managed: IndexOf<AiProfileDefinition>(profile); ContentId.None or unknown → 0 (default; unknown also logs GameLog.Warn once).
+        public static ushort ProfileIndexOf(Game.Data.Services.ContentCatalog catalog, Game.Core.ContentId profile);
     }
 
     public static class AiContent
@@ -302,11 +304,13 @@ Complexity: O(P log P + E log E), E = entries (≈ 1–16 per proxy).
 
 ### 5.3 `AiAnchorShiftSystem`
 
-`IJobEntity` (single-threaded) over `AiBrain` + `LocalTransform`, reading the Core singleton `OriginShiftRecord` (§10 Q4) through a `ComponentLookup` on its entity. For each brain with `ShiftSequence != record.Sequence`:
+`IJobEntity` (single-threaded) over `AiBrain` + `LocalTransform`, reading the Core singleton `OriginShiftRecord` (§10 Q4) through a `ComponentLookup` on its entity.
+0. **First update** (`Initialized == 0`): `State = Idle`, `Anchor = GoalPosition = LocalTransform.Position`, `GoalHeadingYaw` = current yaw, `OrbitSign = +1`, `ShiftSequence = record.Sequence`, `Initialized = 1` (the requester's `ProfileIndex` is kept); continue with the next brain.
+For each other brain with `ShiftSequence != record.Sequence`:
 1. If `record.StarSystemChanged == 1` or `record.Sequence − ShiftSequence > 1` (a rebase was missed because two rebases happened before any fixed tick) → `Anchor = GoalPosition = LocalTransform.Position` (old anchors are meaningless or unrecoverable).
 2. Else `Anchor += record.Delta`, `GoalPosition += record.Delta`.
 3. `ShiftSequence = record.Sequence`.
-Brains created after a rebase start with `ShiftSequence = record.Sequence` (`AiSetup` cannot read it: the first run of this system sets it without shifting when `ShiftSequence == 0`).
+Brains created after a rebase start with `ShiftSequence = record.Sequence` (step 0).
 
 ### 5.4 `AiDecisionSystem`
 
@@ -353,7 +357,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (`AiS
 |---|---|---|
 | `SpatialHash` queries | §5.1 access; inside a job or after `CompleteAccess()` | Ascending, deduplicated indices; total count returned |
 | `SpatialBody` | Added by SPEC-31 to celestial roots with colliders | Appears as a `Celestial` proxy next tick |
-| `AiSetup.Add(em, root, profile)` | Main thread outside system updates; after `CombatGridSetup.AddAll` | Adds `AiBrain`; unknown profile → default with `GameLog.Warn` |
+| `AiSetup.Register(buffer)` / `ProfileIndexOf(catalog, id)` | Once from `AiAnchorShiftSystem.OnCreate` / managed spawners | AI profiles get `AiBrain`; requesters pass the index through `AiBrain.ProfileIndex`; unknown profile → 0 with one warning |
 | `AiContent.CreateSingletons` | Boot (SPEC-01) | `AiConfig` with the profiles blob |
 | `PlayerCombatStatus` | Read on the main thread outside system updates (SPEC-01 save blocker) after `EntityManager.CompleteDependencyBeforeRO<PlayerCombatStatus>()` | Values of the last tick |
 
@@ -437,10 +441,10 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (`AiS
 - **Milestone:** M2
 - **Tier:** standard — exact rules in §4.3 and §5.3
 - **Depends on:** `AI-003`, `SPEC-02`
-- **Do:** Implement `AiSetup.Add` and `AiAnchorShiftSystem`.
+- **Do:** Implement `AiSetup.Register`/`ProfileIndexOf` and `AiAnchorShiftSystem` including step 0 (ADR-0015).
 - **Files:** `Assets/Game/Simulation/Ai/{AiSetup,AiAnchorShiftSystem}.cs`, `Assets/Game/Tests/EditMode/Simulation/Ai/AiSetupTests.cs`
 - **Acceptance criteria:**
-  - [ ] Unknown profile → default + warning; anchor = request pose position; a shift record moves anchors and goals by its delta exactly once; a star-system change resets them to the ship position.
+  - [ ] Unknown profile → index 0 + one warning; after the first update the anchor = the spawn position and `Initialized == 1`; a requester-set `ProfileIndex` is kept; a shift record moves anchors and goals by its delta exactly once; a star-system change resets them to the ship position.
 - **Tests:** `AiSetupTests.UnknownProfile_Default`, `.Anchor_FromPose`, `.Shift_AppliedOnce`, `.StarSystemChange_ResetsAnchor`.
 
 ### AI-006 — AiDecisionSystem

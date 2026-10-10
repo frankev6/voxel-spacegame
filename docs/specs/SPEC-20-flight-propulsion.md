@@ -6,7 +6,7 @@
 | **Area code** | FLT (task IDs are `FLT-001`, `FLT-002`, …) |
 | **Module(s)** | `Game.Simulation` (folders `Assets/Game/Simulation/Commands/`, `Assets/Game/Simulation/Flight/`, `Assets/Game/Simulation/Common/`); `Game.Data` (`Assets/Game/Data/Components/PlanarConstraint.cs`, `Assets/Game/Data/Definitions/Flight/`) |
 | **Depends on specs** | SPEC-02 (`SimTime`, `SimClock`, `ShipCommandGroup`, `GameplayPrePhysicsGroup`, `GameInitGroup`, `GameLog.Burst`, `Planar`); SPEC-03 (writes `PlayerCommand`); SPEC-04 (`BlockDefsRef`, `OrientationTablesRef`, `BlockModuleId`, `ThrusterParams`, `BlockModulesRef`, block frame convention); SPEC-10 (`VoxelGrid`, `BlockInstance`, `FunctionalBlock`, `FunctionalComponentRegistration`, `GridSpawnSystem`, `GridSpawning`, `GridSpawnFlags.PlanarInertia`); SPEC-12 (body components, `PhysicsMass` with planar inertia); SPEC-13 contract (`Hulk`); SPEC-22 contract, M2 only (`ShipStats` multipliers, `Powered`) |
-| **Depended on by** | SPEC-03 (`PlayerCommand`, `ShipCommandFlags`, `PlayerEdgeCounters`); SPEC-01 (`FlightSetup`, `PlanarConstraintSetup`, `FlightConfig` boot singleton); SPEC-13 (`PlanarConstraint`); SPEC-21 (`ShipCommand.FireGroups/AimWorld/Edges`, `GridSpaceMath`); SPEC-22 (`ShipCommand`, `FlightMath.GyroYawTorque`, `GridSpaceMath`); SPEC-23 (writes AI `ShipCommand`, reads `FlightState`); SPEC-24 (ability edges); SPEC-31 (`PlayerShip`, interact edge counter); SPEC-61 (`PlayerShip`, `FlightState`, boost flag); SPEC-62 (`PlayerShip`, smoothing); SPEC-63/64 (`ThrusterState`, `ThrusterVisual`) |
+| **Depended on by** | SPEC-03 (`PlayerCommand`, `ShipCommandFlags`, `PlayerEdgeCounters`); SPEC-01 (`FlightConfig` boot singleton); SPEC-13 (`PlanarConstraint`); SPEC-21 (`ShipCommand.FireGroups/AimWorld/Edges`, `GridSpaceMath`); SPEC-22 (`ShipCommand`, `FlightMath.GyroYawTorque`, `GridSpaceMath`); SPEC-23 (writes AI `ShipCommand`, reads `FlightState`); SPEC-24 (ability edges); SPEC-31 (`PlayerShip`, interact edge counter); SPEC-61 (`PlayerShip`, `FlightState`, boost flag); SPEC-62 (`PlayerShip`, smoothing); SPEC-63/64 (`ThrusterState`, `ThrusterVisual`) |
 | **Milestone** | M1 (FLT-012 in M2) |
 
 > Read [01-architecture.md](../01-architecture.md) (§5, §5.1, §6.4, §8, §11), [02-conventions.md](../02-conventions.md), [03-glossary.md](../03-glossary.md), [07-implementation-traps.md](../07-implementation-traps.md) §2 and §4, [ADR-0003](../decisions/ADR-0003-planar-flight.md), and [SPEC-12](SPEC-12-voxel-physics.md) before this spec. This spec may not contradict them.
@@ -21,7 +21,7 @@ This spec turns "who controls the ship" into physical motion. A ship is flown th
 - `ShipCommand`, `ShipCommandFlags`, `ShipCommandEdges`, `PlayerCommand`, `PlayerEdgeCounters`, `PlayerEdgeConsumed`, `PlayerShip` (architecture §6.4).
 - `PlayerCommandApplySystem`: player command → the player ship's `ShipCommand`, including edge consumption.
 - Thruster functional components (`ThrusterState`, `ThrusterVisual`) and their registration/initialisation.
-- `FlightConfig` (+ definition), `FlightState`, `FlightThruster` buffer, `FlightSetup`, `PlanarConstraint` (+ setup), `GridSpaceMath`, `FlightMath`, `ThrustAllocator`.
+- `FlightConfig` (+ definition), `FlightState`, `FlightThruster` buffer, `FlightSetup` (profile registration, ADR-0015), `PlanarConstraint`, `GridSpaceMath`, `FlightMath`, `ThrustAllocator`.
 - `PropulsionSystem` (flight assist, allocation, impulses, thruster intensities) and `PlanarConstraintSystem`.
 - Flight tuning against legacy blueprints, flight scenarios, determinism and performance tests.
 
@@ -280,10 +280,14 @@ namespace Game.Simulation.Flight
         public static float Solve(in ThrustProblem p, Unity.Collections.NativeArray<ThrustActuator> actuators, Unity.Collections.NativeArray<float> u);
     }
 
-    /// <summary>Spawn-time helpers called by ShipSpawnService (SPEC-01) on the request entity, main thread, outside system updates.</summary>
+    /// <summary>Root composition of flying grids (ADR-0015). Registered once; GridSpawnSystem adds the types at conversion.</summary>
     public static class FlightSetup
     {
-        public static void Add(Unity.Entities.EntityManager em, Unity.Entities.Entity root);   // ShipCommand, FlightState, FlightThruster buffer, PropulsionStats (all zero/empty)
+        /// ShipCommand, FlightState, FlightThruster buffer, PropulsionStats, Game.Data.Components.PlanarConstraint (all zero/empty).
+        public static Unity.Entities.ComponentTypeSet RootTypes { get; }
+        /// Appends RootTypes for GridProfile PlayerShip, NpcShip, SmallCraft, Dummy, and PlayerShip (tag) for GridProfile.PlayerShip,
+        /// to the RootComponentRegistration buffer (SPEC-10 §5.13). Called by ThrusterInitSystem.OnCreate.
+        public static void Register(Unity.Entities.DynamicBuffer<Game.Voxel.Model.RootComponentRegistration> registrations);
     }
 
     /// <summary>Feature stats of propulsion (ADR-0014). On every ship root (FlightSetup). Only writer: PropulsionStatsSystem (M2).</summary>
@@ -304,10 +308,6 @@ namespace Game.Simulation.Flight
         public float TurnRateDeg;       // deg/s: 90 / t90 with t90 = 2·sqrt((π/2) / yawAccelRad); 0 if yawAccel = 0
     }
 
-    public static class PlanarConstraintSetup
-    {
-        public static void Add(Unity.Entities.EntityManager em, Unity.Entities.Entity root);   // Game.Data.Components.PlanarConstraint
-    }
 }
 ```
 
@@ -358,7 +358,7 @@ Hulk player ship: excluded by `WithNone<Hulk>` → step 2 drops edges; its `Ship
 
 ### 5.2 `ThrusterInitSystem`
 
-`OnCreate` (`[CreateAfter(typeof(GridSpawnSystem))]`): append to the `FunctionalComponentRegistration` singleton buffer `{ BlockModuleId.Thruster, ComponentType.ReadWrite<ThrusterState>() }` and `{ BlockModuleId.Thruster, ComponentType.ReadWrite<ThrusterVisual>() }` (SPEC-10 §6; a buffer append, not a structural change).
+`OnCreate` (`[CreateAfter(typeof(GridSpawnSystem))]`): `FlightSetup.Register(rootRegistrations)` (ADR-0015); append to the `FunctionalComponentRegistration` singleton buffer `{ BlockModuleId.Thruster, ComponentType.ReadWrite<ThrusterState>() }` and `{ BlockModuleId.Thruster, ComponentType.ReadWrite<ThrusterVisual>() }` (SPEC-10 §6; a buffer append, not a structural change).
 
 Per frame: `ThrusterVisualInitJob : IJobEntity` (`ScheduleParallel`) over entities with `FunctionalBlock`, `ThrusterVisual`, **`WithChangeFilter<FunctionalBlock>`** (new entities from `FunctionalFillJob` and entities re-parented by SPEC-13 change it). For each: `g = FunctionalBlock.Grid` (lookup `VoxelGrid`, `BlockInstance`); missing → skip. `inst = BlockInstance[g][InstanceIndex]`; `def = Blocks[inst.Block]`; `!def.HasModule(BlockModuleId.Thruster)` → skip. Then:
 - `size = def.BoundsMax − def.BoundsMin + 1`; `c = (def.BoundsMin + def.BoundsMax) / 2f`;
@@ -444,11 +444,10 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 
 | Call / type | Pre-conditions | Post-conditions / errors |
 |---|---|---|
-| `ShipCommand` (component) | On every ship root (`FlightSetup.Add`) | Read by PWR/WPN/ABL; written only by the writers of §4.6; `Edges` rewritten every tick by its writer |
+| `ShipCommand` (component) | On every flying ship root (`FlightSetup.RootTypes`, ADR-0015) | Read by PWR/WPN/ABL; written only by the writers of §4.6; `Edges` rewritten every tick by its writer |
 | `PlayerCommand` (singleton) | Created by `PlayerInputSampleSystem.OnCreate` (SPEC-03) | Read only by `PlayerCommandApplySystem` and variable-rate edge consumers |
 | `PlayerControlLock` (singleton, M3) | Created by `PlayerCommandApplySystem.OnCreate` | Only writer: SPEC-32 `TravelService` (main thread, outside the fixed step); read by step 4b |
-| `FlightSetup.Add(em, root)` | Main thread outside system updates; `root` is a spawn request entity (SPEC-10) | Adds `ShipCommand`, `FlightState`, `FlightThruster`, `PropulsionStats` (zero) |
-| `PlanarConstraintSetup.Add(em, root)` | As above; caller also sets `GridSpawnFlags.PlanarInertia` (SPEC-01 does) | Adds `PlanarConstraint` |
+| `FlightSetup.Register(buffer)` | Once, from `ThrusterInitSystem.OnCreate` | Grids converted with a flying profile (PlayerShip, NpcShip, SmallCraft, Dummy) carry `ShipCommand`, `FlightState`, `FlightThruster`, `PropulsionStats`, `PlanarConstraint`; PlayerShip also `PlayerShip`. SPEC-10 sets `PlanarInertia` for those profiles |
 | `GridSpaceMath.*` | Valid blob refs (`ref` access, traps T1.7) | Pure |
 | `FlightMath.*`, `ThrustAllocator.Solve` | Arrays of equal length | Pure, deterministic |
 | `FlightConfigFactory.Create` | Boot (SPEC-01) | Copies fields |
@@ -504,7 +503,7 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Tier:** standard — transcribes the exact code of §4 (bodies throw `NotImplementedException`, except `FlightConfig.Default`, `FlightMath.YawRateCap`, the `GridSpaceMath` one-liners)
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`
 - **Do:** Create every type of §4.1–§4.5 in the listed folders and namespaces, with exact fields and comments. Create the folders of decision 13.
-- **Files:** `Assets/Game/Simulation/Commands/{ShipCommandFlags,ShipCommandEdges,ShipCommand,PlayerEdgeCounters,PlayerCommand,PlayerEdgeConsumed,PlayerShip}.cs`; `Assets/Game/Data/Components/PlanarConstraint.cs`; `Assets/Game/Simulation/Flight/{FlightFlags,FlightState,FlightThruster,ThrusterState,ThrusterVisual,FlightConfig,FlightConfigFactory,FlightMath,ThrustProblem,ThrustActuator,ThrustAllocator,FlightSetup,PlanarConstraintSetup}.cs`; `Assets/Game/Simulation/Common/GridSpaceMath.cs`; `Assets/Game/Data/Definitions/Flight/FlightConfigDefinition.cs`
+- **Files:** `Assets/Game/Simulation/Commands/{ShipCommandFlags,ShipCommandEdges,ShipCommand,PlayerEdgeCounters,PlayerCommand,PlayerEdgeConsumed,PlayerShip}.cs`; `Assets/Game/Data/Components/PlanarConstraint.cs`; `Assets/Game/Simulation/Flight/{FlightFlags,FlightState,FlightThruster,ThrusterState,ThrusterVisual,FlightConfig,FlightConfigFactory,FlightMath,ThrustProblem,ThrustActuator,ThrustAllocator,FlightSetup}.cs`; `Assets/Game/Simulation/Common/GridSpaceMath.cs`; `Assets/Game/Data/Definitions/Flight/FlightConfigDefinition.cs`
 - **Acceptance criteria:**
   - [ ] Compiles; no component holds a managed type; `PlanarConstraint` is in `Game.Data.Components`.
   - [ ] SPEC-03's `PlayerInputSampleSystem` field list (SPEC-03 §4.4) matches `PlayerCommand` exactly.
@@ -648,7 +647,7 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 | 3 | Is boost unlimited, or does it cost energy/heat? | Unlimited in v1; SPEC-24 abilities give stronger boosts | Owner |
 | 4 | One global speed cap, or per-class caps (fighters faster)? | Global cap; heavier ships reach it slower | Owner |
 | 5 | SPEC-22: `ShipStats.YawTorque` adds `FlightMath.GyroYawTorque(config, InverseInertia.y)` for non-hulk ships, recomputed with the mass part (§5.4 step 4 there); **superseded by ADR-0014:** this spec owns `PropulsionStats` (§5.7) including the gyro term; `PWR-006` takes `GridSpaceMath` from FLT-001 instead of WPN-001 | Yes | SPEC-22 |
-| 6 | SPEC-01 §5.7 step 4: `ShipSpawnService` calls `FlightSetup.Add(em, root)` next to `PlanarConstraintSetup.Add` | Yes | SPEC-01 |
+| 6 | SPEC-01 §5.7 step 4: `ShipSpawnService` calls `FlightSetup.Add(em, root)` next to `PlanarConstraintSetup.Add` | **Superseded by ADR-0015:** flight types come from the grid profile (`FlightSetup.Register`); the helpers are removed | SPEC-01 |
 | 7 | Architecture §8 `PhysicsVelocity` row: add `PlanarConstraintSystem` (vertical impulses only) | Yes | Tech lead |
 | 8 | If contacts push planar ships off the plane by > 0.1 m (FLT-009), replace the impulse correction with a Unity Physics LimitedDOF joint (linear Y, angular X/Z locked) per ship | Keep impulses unless measured | Tech lead |
 

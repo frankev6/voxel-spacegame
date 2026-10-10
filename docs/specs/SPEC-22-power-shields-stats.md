@@ -45,7 +45,7 @@ Every ship has an energy budget, an analytic shield and a set of aggregated stat
 10. **One shield per ship: an analytic ellipsoid in grid space** fitted to the grid's spawn bounds (`VoxelGrid.CellMin/CellMax`) plus padding, refitted only when the alive functional set changes. All powered alive emitters add their capacity and regen to it. Reason: architecture §6.4; cheap segment tests.
 11. **Shield HP changes only in `ShieldSystem`.** Producers (SPEC-21) test shields analytically against last tick's `ShieldState` and emit `ShieldHit`; `ShieldSystem` applies hits in a stable order and converts overflow into `DamageEvent`s. Reason: architecture §8.
 12. **Energy and shield HP are not saved.** A loaded or newly spawned ship starts with `Stored = Capacity` and full shields. Reason: saves happen outside combat (00-vision M3 scope); no extra save chunk.
-13. **Combat root components are added by the spawner, not by a system.** The spawner calls `PowerGridSetup.AddComponents` on the spawn request entity before `GridSpawnSystem` converts it (SPEC-10 Decision 9). Functional-entity components are registered through SPEC-10's `FunctionalComponentRegistration`. Values are initialised by `PowerInitSystem` in `GameInitGroup`. Reason: no structural changes in Simulation systems; spawn-frame initialisation is independent of frame rate.
+13. **Root components come from the grid profile (ADR-0015).** `PowerGridSetup.Register` adds `RootTypes` to every combat profile; `GridSpawnSystem` adds them zeroed at conversion. Functional-entity components are registered through SPEC-10's `FunctionalComponentRegistration`. Values, including first-init ones, are set by `PowerInitSystem` in `GameInitGroup`. Reason: no structural changes in Simulation systems; any spawner, Burst ones included, gets the same ship; spawn-frame initialisation is independent of frame rate.
 14. **Hulks have no power and no shield.** Reason: glossary *Hulk*.
 15. **Dormant grids skip the stats recompute** (architecture §11.9) but keep power allocation and shield regen (both O(consumers), cheap).
 16. **Grids with `GridSpawning` enabled are skipped by every per-tick system here.** Reason: their physics body and bricks are not ready (SPEC-10 Decision 14).
@@ -357,15 +357,15 @@ namespace Game.Simulation.Power
 ```csharp
 namespace Game.Simulation.Power
 {
+    /// <summary>Root composition of powered grids (ADR-0015). Registered once; GridSpawnSystem adds the types zeroed at conversion.</summary>
     public static class PowerGridSetup
     {
-        /// Adds the PWR root components to a spawn request entity (future grid root) with initial values:
-        /// ShipPower (zeroed, Flags None), PowerConsumer (empty), ShipStats (zeroed), ShipStatMultipliers (zeroed; filled on the
-        /// first aggregate), PowerStats (zeroed), ShieldStats (zeroed), ShipStatModifier (empty), ShieldState (zeroed),
-        /// ShieldRipple (8 elements, all zero), ShieldControl { RequestedOn = 1 }.
-        /// Call on the main thread outside system updates, only for GridKind Ship or Station. One AddComponent(ComponentTypeSet).
-        public static void AddComponents(EntityManager em, Entity requestEntity);
+        /// ShipPower, PowerConsumer, ShipStats, ShipStatMultipliers, PowerStats, ShieldStats, ShipStatModifier, ShieldState,
+        /// ShieldRipple, ShieldControl (all zero/empty). First-init values (ShieldControl.RequestedOn = 1, 8 ripple elements) are set by
+        /// PowerInitJob (§5.2 step 2.5) the first time it initialises a grid.
         public static ComponentTypeSet RootTypes { get; }   // the 10 types above
+        /// Appends RootTypes for every combat profile (PlayerShip, NpcShip, Station, SmallCraft, Dummy). Called by PowerRegistrationSystem.OnCreate.
+        public static void Register(DynamicBuffer<Game.Voxel.Model.RootComponentRegistration> registrations);
     }
 }
 ```
@@ -444,7 +444,7 @@ Every system: `[BurstCompile]` `ISystem`, `RequireForUpdate<GameplayActive>()`, 
    2. Sort with `NativeSortExtension.Sort` by `(Priority desc, InstanceIndex asc, Module asc)`; copy into the `PowerConsumer` buffer (clear first).
    3. For every consumer at sorted position `j`: `PowerRequest[c.Functional][c.RequestIndex].ConsumerIndex = j`. For every live instance with `Functional != Entity.Null` that has `PowerLink`: write `PowerLink { ConsumerCount = its number of consumers, Bound = 1 }`. *Parallel write through a lookup: each functional entity belongs to exactly one grid and each grid is processed by one worker, so writes are disjoint (comment required above `[NativeDisableParallelForRestriction]`).*
    4. `Capacity = Σ` over alive (`Block != 0 && (Flags & Destroyed) == 0`) instances of their `PowerStorage` rows' `Storage`; `Generation = Σ` their `PowerSource` rows' `Generation`. `ShipPower = { Stored = Capacity, Capacity, Generation, Flags = Initialized }`.
-   5. `ShieldState.Flags = FillOnNextUpdate` (all other fields left; `ShieldSystem` fits and fills). `ShipStats.Flags &= ~Initialized` (forces a full recompute next tick).
+   5. `ShieldState.Flags = FillOnNextUpdate` (all other fields left; `ShieldSystem` fits and fills). **First initialisation of the grid** (`ShieldRipple.Length == 0`): resize `ShieldRipple` to 8 zeroed elements and set `ShieldControl.RequestedOn = 1` (shields start up; later re-inits keep the player's toggle). `ShipStats.Flags &= ~Initialized` (forces a full recompute next tick).
 3. Complexity: O(instances of new grids · log). Zero work for existing grids except the change-filtered chunk scan.
 
 ### 5.3 `PowerAllocationSystem`
@@ -520,7 +520,7 @@ When SPEC-13 adds `Hulk`: next `PowerAllocationSystem` tick empties power and cl
 
 | API | Pre-conditions | Post-conditions / errors |
 |---|---|---|
-| `PowerGridSetup.AddComponents(em, request)` | Main thread, outside system updates; `request` has `GridSpawnRequest`; grid kind Ship or Station | Adds the 7 root types (§4.6) in one call. Calling twice throws `InvalidOperationException` |
+| `PowerGridSetup.Register(buffer)` | Once, from `PowerRegistrationSystem.OnCreate` | Grids converted with a combat profile carry the 10 root types (§4.6), zeroed |
 | `PowerContent(catalog)` / `CreateSingletons(em)` | Exactly one `PowerTuningDefinition` | Creates the `PowerSingletons` entity once; second call is a no-op; zero or two tuning assets → `ContentValidationException` with code `PWR-E001` |
 | `ShieldMath.*` | Radii all > 0 | Pure; never NaN for finite inputs; `SegmentEnters` false for zero-length segments |
 | Readers (HUD, AI, WPN) | — | Read `ShipPower`, `ShipStats`, `ShieldState` fields as documented; values are from the current tick after the writer ran, else from the previous tick |
@@ -563,7 +563,7 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 - **Milestone:** M2
 - **Tier:** standard — transcribes the types in §4.1–§4.6 exactly
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`, `DMG-001`
-- **Do:** Create every type of §4.1–§4.6 with the exact fields, flags and comments; `ShieldMath`, `PowerGridSetup.AddComponents`, `PowerRegistration` and `PowerContent` bodies throw `NotImplementedException("PWR-0xx")` naming the implementing task; `PowerTuning.Defaults` and `ShipStatMultipliers.Get` are real; `PowerDemandGroup` is complete as written. `StatId` goes to `Assets/Game/Data/Combat/StatId.cs` (namespace `Game.Data.Combat`).
+- **Do:** Create every type of §4.1–§4.6 with the exact fields, flags and comments; `ShieldMath`, `PowerGridSetup.Register`, `PowerRegistration` and `PowerContent` bodies throw `NotImplementedException("PWR-0xx")` naming the implementing task; `PowerTuning.Defaults` and `ShipStatMultipliers.Get` are real; `PowerDemandGroup` is complete as written. `StatId` goes to `Assets/Game/Data/Combat/StatId.cs` (namespace `Game.Data.Combat`).
 - **Files:** `Assets/Game/Simulation/Power/{ShipPowerFlags,ShipPower,PowerConsumerFlags,PowerConsumer,PowerRequest,PowerDemandGroup,PowerRegistration,Powered,PowerLink,ShipStatsFlags,ShipStats,ShipStatMultipliers,PowerStats,ShieldStats,ShipStatModifier,ShieldFlags,ShieldState,ShieldRipple,ShieldControl,ShieldHitFlags,ShieldHit,ShieldHitStreams,ShieldMath,PowerTuning,PowerContent,PowerGridSetup}.cs`; `Assets/Game/Data/Definitions/Power/PowerTuningDefinition.cs`; `Assets/Game/Data/Combat/StatId.cs`
 - **Acceptance criteria:**
   - [ ] All files compile in `Game.Simulation` / `Game.Data` with no new assembly reference.
@@ -588,19 +588,19 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 - **Milestone:** M2
 - **Tier:** standard — field-by-field definition plus a small baker
 - **Depends on:** `PWR-001`, `SPEC-04`
-- **Do:** Implement `PowerTuningDefinition` getters and `Validate` (all fields within their attribute ranges; `PWR-E002` otherwise), `PowerContent` (§4.5, §6), `PowerGridSetup.AddComponents` (§4.6: one `AddComponent(entity, RootTypes)` then set `ShieldControl{1}` and resize `ShieldRipple` to 8 zeroed elements). Author the asset `Assets/Game/Content/Tuning/tuning_power.asset` with the defaults and add it to the database through the SPEC-04 builder.
+- **Do:** Implement `PowerTuningDefinition` getters and `Validate` (all fields within their attribute ranges; `PWR-E002` otherwise), `PowerContent` (§4.5, §6), `PowerGridSetup.RootTypes`/`Register` (§4.6, ADR-0015). Author the asset `Assets/Game/Content/Tuning/tuning_power.asset` with the defaults and add it to the database through the SPEC-04 builder.
 - **Files:** `Assets/Game/Data/Definitions/Power/PowerTuningDefinition.cs`; `Assets/Game/Simulation/Power/{PowerContent,PowerGridSetup}.cs`; `Assets/Game/Content/Tuning/tuning_power.asset`
 - **Acceptance criteria:**
   - [ ] `PowerContent` with zero or two tuning assets throws `ContentValidationException` containing `PWR-E001`.
   - [ ] `CreateSingletons` twice creates one entity holding `PowerTuning`.
-  - [ ] After `AddComponents`, the request entity has the 7 types, `ShieldControl.RequestedOn == 1` and 8 ripple elements; a second call throws.
-- **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/PowerContentTests.cs`: `NoTuning_Throws`, `TwoTunings_Throws`, `CreateSingletons_Idempotent`, `GridSetup_AddsRootTypes`, `GridSetup_Twice_Throws`.
+  - [ ] `Register` appends the 10 types for each of the five combat profiles and nothing for `None`.
+- **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/PowerContentTests.cs`: `NoTuning_Throws`, `TwoTunings_Throws`, `CreateSingletons_Idempotent`, `GridSetup_RegistersForCombatProfiles`.
 
 ### PWR-004 — Registration and `PowerInitSystem`
 - **Milestone:** M2
 - **Tier:** frontier — F1 foundation of every combat grid; F2 parallel lookup writes
 - **Depends on:** `PWR-003`, `WPN-001`, `VOX-001`, `SPEC-10`
-- **Do:** Implement `PowerRegistration` (§4.1), `PowerRegistrationSystem` (§5.1) and `PowerInitSystem` (§5.2) with its three jobs. Tests use a test-only `TestConsumerInitSystem` (GameInitGroup, before `PowerInitSystem`) that fills `Thruster` and `WeaponMount` elements from their rows, so this task does not wait for SPEC-20/21.
+- **Do:** Implement `PowerRegistration` (§4.1), `PowerRegistrationSystem` (§5.1, also calling `PowerGridSetup.Register`) and `PowerInitSystem` (§5.2) with its three jobs, including the first-init values of step 2.5. Tests use a test-only `TestConsumerInitSystem` (GameInitGroup, before `PowerInitSystem`) that fills `Thruster` and `WeaponMount` elements from their rows, so this task does not wait for SPEC-20/21.
 - **Files:** `Assets/Game/Simulation/Power/{PowerRegistration,PowerRegistrationSystem,PowerInitSystem,ShieldEmitterRequestInitJob,PowerRebindDetectJob,PowerInitJob}.cs`; `Assets/Game/Tests/EditMode/Simulation/Power/TestConsumerInitSystem.cs`
 - **Acceptance criteria:**
   - [ ] Spawning `ship_fighter` (EcsTestWorld + `GridSpawnSystem`) yields 14 weapon, 14 thruster and 0 shield consumers sorted by (priority desc, instance asc); every functional entity has `PowerLink.Bound == 1`; `Stored == Capacity == 200`, `Generation == 40`.
@@ -679,7 +679,7 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 | # | Question | Default if unanswered | Decider |
 |---|---|---|---|
 | 1 | Retune `block_shield_small` (SPEC-04 §4.10 row) to capacity 3,000, regen 120/s, delay 4 s, draw 8 E/s | Yes; SPEC-04 updates its value table and SPEC-72 writes these values | SPEC-04 / owner |
-| 2 | Who calls `PowerGridSetup.AddComponents` (and SPEC-21's `WeaponGridSetup`, SPEC-24's `AbilityGridSetup`) | The ship/station spawn helper (`ShipSpawnService`, SPEC-01/31/33) calls `CombatGridSetup.AddAll(em, request)` (SPEC-21 §4.8) for every Ship and Station request; Blueprint Lab and asteroid spawns do not | SPEC-01 / SPEC-31 |
+| 2 | Who calls `PowerGridSetup.AddComponents` (and SPEC-21's `WeaponGridSetup`, SPEC-24's `AbilityGridSetup`) | **Superseded by ADR-0015:** nobody; the types come from the grid profile (`Register`), and spawners choose the profile (SPEC-01/31/33) | SPEC-01 / SPEC-31 |
 | 3 | Legacy coreless blueprints have no power | Keep: they cannot fire; encounter content must not use them as combatants until SPEC-72 or the owner adds a core | Owner / SPEC-72 |
 | 4 | Thruster power draw (SPEC-04 OQ 4) | 0 E/s; thrusters are still consumers (always granted) so a later non-zero draw works without code changes | SPEC-20 |
 | 5 | Does SPEC-20's `PropulsionSystem` read the `Thrust`, `MaxSpeed`, `TurnRate` multipliers (`ShipStatMultipliers.Get`, ADR-0014) and skip thrusters whose `Powered` bit is off | Yes (needed for the speed boost ability and brownouts) | SPEC-20 |

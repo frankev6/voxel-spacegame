@@ -38,7 +38,7 @@ It replaces the old prototype's scattered singletons, managers living in content
 - UI screens and presenters (Main menu, Loading, Settings, Defeat dialog content): SPEC-61.
 - Input maps: SPEC-03.
 - Lab editing: SPEC-51.
-- `CombatGridSetup` (SPEC-21), AI setup (SPEC-23) and `PlanarConstraint` (SPEC-20), which `ShipSpawnService` only calls.
+- Root components of ships (SPEC-20/21/22/23/24): they come from the grid profile `ShipSpawnService` chooses (ADR-0015); this spec only adds the requester values (`Allegiance`, `AiBrain.ProfileIndex`, `StarSystemMember`).
 
 ## 3. Decisions (binding)
 
@@ -539,14 +539,12 @@ Main thread; `async Awaitable<FlowResult>`.
 - **`SimClockWriteback : ISessionWriteback`** (order 0). If a `SimClock` singleton exists in the World, `session.UniversalTime = SimClock.UniversalTime`.
 - **`ShipSpawnService.Spawn(args)`**:
   1. `id = args.PersistentId != 0 ? args.PersistentId : ids.Allocate()`.
-  2. `p = new GridSpawnParams { Pose = new RigidTransform(yawOnly(args.Rotation), args.Position), LinearVelocity = args.LinearVelocity, Kind = GridKind.Ship, Motion = GridMotion.Dynamic, Flags = PlanarInertia | (args.IsPlayer ? WriteBack : 0), PersistentId = id }`. Here `yawOnly(q) = Planar.YawRotation(Planar.YawFromForward(math.mul(q, new float3(0, 0, 1))))`.
+  2. `p = new GridSpawnParams { Pose = new RigidTransform(yawOnly(args.Rotation), args.Position), LinearVelocity = args.LinearVelocity, Kind = GridKind.Ship, Motion = GridMotion.Dynamic, Flags = args.IsPlayer ? WriteBack : 0, Profile = args.IsPlayer ? GridProfile.PlayerShip : args.WithAi ? GridProfile.NpcShip : GridProfile.Dummy, PersistentId = id }` (the flying profiles imply `PlanarInertia`, SPEC-10 §5.13). Here `yawOnly(q) = Planar.YawRotation(Planar.YawFromForward(math.mul(q, new float3(0, 0, 1))))`.
   3. `root = args.Structure != null ? GridSpawnApi.RequestSpawn(em, registry, registry.Register(args.Structure), p) : GridSpawnApi.RequestSpawnBlueprint(em, catalog.Get<ShipBlueprintDefinition>(args.Blueprint).Hash, p)`.
-  4. Add the gameplay components on `root` with the main-thread `EntityManager` (allowed: `ShipSpawnService` is never called inside a system update):
-     - `CombatGridSetup.AddAll(em, root, args.Allegiance)` (SPEC-21);
-     - `PlanarConstraintSetup.Add(em, root)` and `FlightSetup.Add(em, root)` (SPEC-20);
-     - if `args.IsPlayer`: `em.AddComponent<PlayerShip>(root)`;
-     - else: `em.AddSharedComponent(root, new StarSystemMember { Id = galaxy.State.CurrentStarSystem })`;
-     - if `args.WithAi`: `AiSetup.Add(em, root, args.AiProfile)` (SPEC-23; always after `CombatGridSetup.AddAll`).
+  4. Add the requester values on `root` with the main-thread `EntityManager` (allowed: `ShipSpawnService` is never called inside a system update); every other gameplay component comes from the profile at conversion (ADR-0015):
+     - `em.AddComponentData(root, args.Allegiance)` (SPEC-21; never part of a profile);
+     - if `!args.IsPlayer`: `em.AddSharedComponent(root, new StarSystemMember { Id = galaxy.State.CurrentStarSystem })`;
+     - if `args.WithAi`: `em.AddComponentData(root, new AiBrain { ProfileIndex = AiSetup.ProfileIndexOf(catalog, args.AiProfile) })` (SPEC-23 completes it on its first update).
   5. Record `id → root` in a `Dictionary<ulong, Entity>` maintained by an `IGridSpawnHook`. Entries are removed on despawn, detected when `TryGetRoot` finds a dead entity.
   6. Return `id`.
 
@@ -810,9 +808,10 @@ If no save exists, "Load last save" is disabled.
 - **Acceptance criteria:**
   - [ ] An NPC spawn has `StarSystemMember` equal to the current star system; the player spawn has none.
   - [ ] Rotation with pitch and roll is reduced to yaw.
+  - [ ] The request carries `Profile = PlayerShip` / `NpcShip` / `Dummy` for player / AI / non-AI spawns, `Allegiance` with the given value and (AI) `AiBrain.ProfileIndex`; after one `GridSpawnSystem` update the root has the profile's components (ADR-0015).
   - [ ] An unknown blueprint returns id 0 with one error.
   - [ ] `TryGetRoot` works after spawn and is false after despawn.
-  - [ ] `IShipSpawner.Spawn` with `StarSystem = S` gives the root `StarSystemMember { Id = S }`; the ship has `ShipCommand`, `FlightState` and `PlanarConstraint`.
+  - [ ] `IShipSpawner.Spawn` with `StarSystem = S` gives the root `StarSystemMember { Id = S }`; after one `GridSpawnSystem` update the ship has `ShipCommand`, `FlightState` and `PlanarConstraint` (from its profile).
 - **Tests:** `ShipSpawnServiceTests.GalaxyArgs_UsesStarSystem`, `ShipSpawnServiceTests.Npc_HasStarSystemMember`, `.Player_NoMember`, `.YawOnly`, `.UnknownBlueprint`, `.RootLookup`.
 
 ### FND-013 — Blueprint Lab entry and exit

@@ -176,7 +176,7 @@ namespace Game.Simulation
 {
     using Unity.Collections; using Unity.Entities;
 
-    /// <summary>Faction and team of a grid root (architecture §6.4). Written only at spawn (CombatGridSetup); SPEC-33 may reassign through its own system.</summary>
+    /// <summary>Faction and team of a grid root (architecture §6.4). Added with its value by the spawn requester (ADR-0015); SPEC-33 may reassign through its own system.</summary>
     public struct Allegiance : IComponentData, System.IEquatable<Allegiance>
     {
         public byte Faction;    // index into FactionRelations; 255 = none (asteroids, derelicts)
@@ -202,11 +202,13 @@ namespace Game.Simulation
         public void Dispose();
     }
 
-    /// <summary>Spawn helper called by ShipSpawnService (SPEC-01) and SPEC-31/33 spawners on the request entity, main thread.</summary>
+    /// <summary>Root composition of combat grids (ADR-0015). Allegiance is NOT in it (its zero value is the player faction): requesters add
+    /// Allegiance themselves before conversion; a grid without it counts as Allegiance.None.</summary>
     public static class CombatGridSetup
     {
-        /// Adds Allegiance(value), WeaponControl, ShipTarget, WeaponStats; then PowerGridSetup.AddComponents (SPEC-22) and AbilityGridSetup.Add (SPEC-24).
-        public static void AddAll(EntityManager em, Entity root, Allegiance allegiance);
+        public static ComponentTypeSet RootTypes { get; }   // WeaponControl, ShipTarget, WeaponStats (zero)
+        /// Appends RootTypes for every combat profile (PlayerShip, NpcShip, Station, SmallCraft, Dummy). Called by WeaponInitSystem.OnCreate.
+        public static void Register(DynamicBuffer<Game.Voxel.Model.RootComponentRegistration> registrations);
     }
 }
 ```
@@ -291,7 +293,7 @@ namespace Game.Simulation.Weapons
         public uint SinceTick;           // SimClock.Tick when Value last changed
     }
 
-    /// <summary>Feature stats of weapons (ADR-0014). Added by CombatGridSetup. Only writer: WeaponStatsSystem (§5.12).</summary>
+    /// <summary>Feature stats of weapons (ADR-0014). In CombatGridSetup.RootTypes (ADR-0015). Only writer: WeaponStatsSystem (§5.12).</summary>
     public struct WeaponStats : Unity.Entities.IComponentData
     {
         public float SustainedDps;       // Σ WeaponDef.SustainedDps of alive mounts (before multipliers)
@@ -457,7 +459,7 @@ sequenceDiagram
 
 ### 5.2 `WeaponInitSystem`
 
-`OnCreate` (`[CreateAfter(typeof(GridSpawnSystem))]`): register `WeaponState`, `WeaponMount`, `WeaponAim`, `BeamState` for `BlockModuleId.WeaponMount` in `FunctionalComponentRegistration`.
+`OnCreate` (`[CreateAfter(typeof(GridSpawnSystem))]`): `CombatGridSetup.Register(rootRegistrations)` (ADR-0015); register `WeaponState`, `WeaponMount`, `WeaponAim`, `BeamState` for `BlockModuleId.WeaponMount` in `FunctionalComponentRegistration`.
 
 Per frame: `WeaponMountInitJob : IJobEntity` (`ScheduleParallel`) over `FunctionalBlock`, `WeaponMount`, `WeaponState`, `BeamState`, **`WithChangeFilter<FunctionalBlock>`**: `inst = BlockInstance[Grid][InstanceIndex]`, `def = Blocks[inst.Block]`; `!modules.TryGet(BlockModuleId.WeaponMount, inst.Block, out WeaponMountParams m)` → skip. `w = WeaponDefs[m.WeaponIndex]`. `PivotLocal = InstanceCenter(...)`; `MuzzleLocal = BlockPointToGrid(m.MuzzleOffsetCells, ...)`; `ForwardLocal = BlockDirToGrid((0,0,1))`; `UpLocal = BlockDirToGrid((0,1,0))`; `WeaponIndex = m.WeaponIndex`; `Initialized = 1`. On first initialisation only (`Initialized` was 0): `WeaponState { Group = w.DefaultFireGroups, CooldownRemainingTicks = 0, CooldownTicks = w.TriggerIntervalTicks }`; `BeamState.Width = w.BeamWidth`, `Fx = w.HitFx`. Re-parented entities (SPEC-13 hulk splits) keep their `WeaponState`.
 
@@ -582,7 +584,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 
 | Call / type | Pre-conditions | Post-conditions / errors |
 |---|---|---|
-| `CombatGridSetup.AddAll(em, root, allegiance)` | Main thread, outside system updates; `root` is a spawn request entity | Adds `Allegiance`, `WeaponControl`, `ShipTarget`, `WeaponStats` and the SPEC-22/24 setup components; calling twice throws `InvalidOperationException` |
+| `CombatGridSetup.Register(buffer)` | Once, from `WeaponInitSystem.OnCreate` | Grids converted with a combat profile carry `WeaponControl`, `ShipTarget`, `WeaponStats`; requesters add `Allegiance` |
 | `WeaponContent.CreateSingletons` | Boot (SPEC-01) | `WeaponDefsRef`, `WeaponTuning`, default `FactionRelations` |
 | `ProjectileStore.ApplyPendingShift` | Inside this spec's single-threaded jobs only | Rows follow the floating origin (Core `OriginShiftRecord`, SPEC-23 Q4); star-system change clears the store |
 | `ProjectileStore` presentation read (SPEC-63) | Main thread outside the fixed step after `CompleteAccess()`, or a job chained with `Acquire`/`Release` | Rows are the state at the end of the last tick |
@@ -747,11 +749,11 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 - **Milestone:** M2
 - **Tier:** standard — call sequence and formula given (§4.3, §5.10)
 - **Depends on:** `WPN-004`, `PWR-001`, `ABL-001`
-- **Do:** Implement `CombatGridSetup.AddAll` and `WeaponVisualSyncSystem` (§5.10).
+- **Do:** Implement `CombatGridSetup.RootTypes`/`Register` (ADR-0015) and `WeaponVisualSyncSystem` (§5.10).
 - **Files:** `Assets/Game/Simulation/CombatGridSetup.cs`, `Assets/Game/Presentation/Weapons/WeaponVisualSyncSystem.cs`, `Assets/Game/Tests/EditMode/Simulation/Weapons/CombatGridSetupTests.cs`
 - **Acceptance criteria:**
-  - [ ] `AddAll` adds exactly the listed components; a turret's entity rotates about its pivot by `Yaw`; fixed weapons never move.
-- **Tests:** `CombatGridSetupTests.AddsComponents`, `.Twice_Throws`, `WeaponVisualTests.Turret_RotatesAboutPivot`.
+  - [ ] A grid spawned with `GridProfile.NpcShip` has exactly the registered combat components and keeps a requester-added `Allegiance`; a `None` grid has none; a turret's entity rotates about its pivot by `Yaw`; fixed weapons never move.
+- **Tests:** `CombatGridSetupTests.ProfileAddsComponents`, `.RequesterAllegiance_Kept`, `WeaponVisualTests.Turret_RotatesAboutPivot`.
 
 ### WPN-012 — Combat scenarios and determinism
 - **Milestone:** M2
@@ -810,7 +812,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 - **Milestone:** M2
 - **Tier:** standard — three small jobs fully given in §5.12
 - **Depends on:** `WPN-004`, `WPN-007`, `PWR-001`
-- **Do:** Implement §5.12: consumer registration and `SetConsumer` in `WeaponInitSystem`, `WeaponPowerDemandSystem`, `WeaponStats` in `CombatGridSetup.AddAll`, `WeaponStatsSystem`.
+- **Do:** Implement §5.12: consumer registration and `SetConsumer` in `WeaponInitSystem`, `WeaponPowerDemandSystem`, `WeaponStats` in `CombatGridSetup.RootTypes`, `WeaponStatsSystem`.
 - **Files:** `Assets/Game/Simulation/Weapons/{WeaponInitSystem,WeaponMountInitJob,WeaponPowerDemandSystem,WeaponStatsSystem,WeaponStats}.cs`, `Assets/Game/Simulation/CombatGridSetup.cs`, `Assets/Game/Tests/EditMode/Simulation/Weapons/WeaponPowerAndStatsTests.cs`
 - **Acceptance criteria:**
   - [ ] A weapon entity's `WeaponMount` element has `Draw == WeaponDef.PowerDraw` and `Priority == PriorityWeapon` after spawn; `Requesting` is 1 in the tick its group is first held and 0 the tick after release.

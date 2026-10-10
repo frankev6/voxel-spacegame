@@ -6,7 +6,7 @@
 | **Area code** | ABL (task IDs are `ABL-001`, `ABL-002`, …) |
 | **Module(s)** | `Game.Simulation` (folder `Assets/Game/Simulation/Abilities/`); `Game.Data` (`Assets/Game/Data/Definitions/Abilities/`) |
 | **Depends on specs** | SPEC-02 (`SimClock`, `SimTime`, `ContentHash`, `AbilityActivationGroup`); SPEC-04 (`BlockDef.AbilityIndices`, DATA-010 `grantedAbilities`); SPEC-10 (`BlockInstance`); SPEC-13 (`Hulk`); SPEC-20 (`ShipCommand.Edges`, `PlayerShip`); SPEC-22 (`ShipPower.AbilityGrantMask/Tick`, `ShipStats.FunctionalRevision`, `ShipStatModifier`, `StatId`, `ShieldControl`, `ShieldState`); SPEC-63/64 (`FxEvent`, `SfxEvent`) |
-| **Depended on by** | SPEC-21 (`AbilityGridSetup` from `CombatGridSetup`); SPEC-22 (`AbilitySlot` state and cost); SPEC-04 (`AbilityDefinition` for DATA-010); SPEC-61 (HUD reads `AbilitySlot`); SPEC-72 (MIG-010 writes the two legacy abilities); SPEC-01 (`AbilityContent` boot singleton) |
+| **Depended on by** | SPEC-10 (profile registration, ADR-0015); SPEC-22 (`AbilitySlot` state and cost); SPEC-04 (`AbilityDefinition` for DATA-010); SPEC-61 (HUD reads `AbilitySlot`); SPEC-72 (MIG-010 writes the two legacy abilities); SPEC-01 (`AbilityContent` boot singleton) |
 | **Milestone** | M2 |
 
 > Read [01-architecture.md](../01-architecture.md) (§5, §8), [02-conventions.md](../02-conventions.md), [SPEC-22](SPEC-22-power-shields-stats.md) decisions 6–8 and §5.3 step 7, and [SPEC-20](SPEC-20-flight-propulsion.md) decision 8 before this spec. This spec may not contradict them.
@@ -157,10 +157,11 @@ namespace Game.Simulation.Abilities
     /// <summary>Enabled by AbilitySystem when active stat boosts changed; AbilityModifierSyncSystem rebuilds ShipStatModifier and disables it.</summary>
     public struct AbilityModifiersDirty : IComponentData, IEnableableComponent { }
 
-    /// <summary>Called by CombatGridSetup (SPEC-21) on the spawn request entity.</summary>
+    /// <summary>Root composition for abilities (ADR-0015). Registered once by AbilitySystem.OnCreate.</summary>
     public static class AbilityGridSetup
     {
-        public static void Add(EntityManager em, Entity root);   // AbilitySlot buffer (empty), AbilityState (zero), AbilityModifiersDirty (disabled)
+        public static ComponentTypeSet RootTypes { get; }   // AbilitySlot buffer (empty), AbilityState (zero), AbilityModifiersDirty (added enabled: one harmless first sync)
+        public static void Register(DynamicBuffer<Game.Voxel.Model.RootComponentRegistration> registrations);   // every combat profile
     }
 }
 ```
@@ -211,7 +212,7 @@ Tick timeline for a costed ability pressed during frame f: tick N `PlayerCommand
 
 | Call / type | Pre-conditions | Post-conditions / errors |
 |---|---|---|
-| `AbilityGridSetup.Add(em, root)` | Main thread, outside system updates; called by `CombatGridSetup` | Adds `AbilitySlot` (empty), `AbilityState`, `AbilityModifiersDirty` (disabled) |
+| `AbilityGridSetup.Register(buffer)` | Once, from `AbilitySystem.OnCreate` (`[CreateAfter(typeof(GridSpawnSystem))]`) | Grids converted with a combat profile carry `AbilitySlot`, `AbilityState`, `AbilityModifiersDirty` |
 | `AbilityContent.CreateSingletons` | Boot (SPEC-01) | `AbilityDefsRef` |
 | `AbilitySlot` (read) | SPEC-22, SPEC-61 | Values of this tick after `AbilitySystem` ran, else of the previous tick |
 
@@ -256,7 +257,7 @@ Scale notes: per ship per tick O(slots ≤ 8); the instance walk happens only on
 - **Milestone:** M2
 - **Tier:** standard — fields, values and validation are listed
 - **Depends on:** `ABL-001`, `SPEC-04`
-- **Do:** Getters and validation; `AbilityContent.CreateSingletons` (blob, entry 0 = none); `AbilityGridSetup.Add`. Ledger note to SPEC-01 for the BootSingletons row. The two assets are written by SPEC-72 MIG-010; create hand-made test assets in the test folder.
+- **Do:** Getters and validation; `AbilityContent.CreateSingletons` (blob, entry 0 = none); `AbilityGridSetup.RootTypes`/`Register` (called from `AbilitySystem.OnCreate`, ADR-0015). Ledger note to SPEC-01 for the BootSingletons row. The two assets are written by SPEC-72 MIG-010; create hand-made test assets in the test folder.
 - **Files:** `Assets/Game/Data/Definitions/Abilities/AbilityDefinition.cs`, `Assets/Game/Simulation/Abilities/{AbilityContent,AbilityGridSetup}.cs`, `Assets/Game/Tests/EditMode/Simulation/Abilities/AbilityContentTests.cs`
 - **Acceptance criteria:**
   - [ ] Blob entries equal the §4.1 table (seconds → ticks); validation codes reported.

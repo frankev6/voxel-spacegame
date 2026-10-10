@@ -293,7 +293,7 @@ These types cross module boundaries. **Their names and owning module are binding
 | `Brick` | `IComponentData`: `Entity Grid; int3 Coord; ushort SolidCount` + buffer `BrickCells` (4096 × `Cell`) + `BrickSolidMask` (512 B) + enableable `BrickDirty` | 16³ cells. Both buffers are declared `[InternalBufferCapacity(0)]` so their data lives outside the chunk |
 | `BlockInstance` | buffer element on the grid: `ushort Block; byte Orient, Color; int3 Origin; float FunctionHp; Entity Functional` | Multi-cell and functional blocks |
 | `FunctionalBlock` | `IComponentData`: `Entity Grid; int InstanceIndex` | On thruster/weapon/reactor/shield/core entities |
-| `GridSpawnRequest` | entity with `ContentHash Blueprint` **or** `int StructureHandle` (index into the managed `VoxelStructureRegistry`), pose, `GridKind`, allegiance, `PersistentId` | Consumed by `GridSpawnSystem`. Unmanaged only |
+| `GridSpawnRequest` | entity with `ContentHash Blueprint` **or** `int StructureHandle` (index into the managed `VoxelStructureRegistry`), pose, `GridKind`, `GridProfile`, `PersistentId` | Consumed by `GridSpawnSystem`. Unmanaged only. Requester components on it (allegiance, AI profile, star system, owner) stay on the root (ADR-0015) |
 | `PhysicsLayers` | static class: the named `CollisionFilter`s for grids, debris, chunk bodies, bodies, sensors and query filters for projectiles, explosions and picking | Owned by SPEC-12. **The only place collision filters are defined** |
 | `DamageEvent` | `Entity Grid; float3 LocalPoint, LocalDir; float Amount, Radius, Penetration; DamageType Type; Entity Source; float3 WorldImpulse` | Grid-space. Written to `DamageStreams` by producers |
 | `CellRemoved` | `Entity Grid; int3 Cell; ushort Block; byte Color; float3 WorldPos, WorldVel, Kick` | Output of the resolver; consumed by split, VFX, audio, salvage |
@@ -350,8 +350,9 @@ These types cross module boundaries. **Their names and owning module are binding
 
 ### 7.1 Spawn a ship
 
-1. Game code asks `ShipSpawnService.Spawn(blueprintOrStructure, pose, allegiance)` (Game.App / Galaxy), which creates a `GridSpawnRequest` entity.
-2. `GridSpawnSystem` (init group) creates the grid root, one entity per non-empty brick (cells memcpy'd from the structure), and one entity per functional block. It marks every brick `BrickDirty = Mesh | Collider`.
+1. Game code asks `ShipSpawnService.Spawn(blueprintOrStructure, pose, allegiance)` (Game.App / Galaxy), which creates a `GridSpawnRequest` entity with a `GridProfile` and adds the requester values (`Allegiance`, `AiBrain.ProfileIndex`, `StarSystemMember`). Any system may do the same through an ECB (ADR-0015).
+2. `GridSpawnSystem` (init group) creates the grid root with the profile's registered root components (`RootComponentRegistration`), one entity per non-empty brick (cells memcpy'd from the structure), and one entity per functional block with its modules' registered components. It marks every brick `BrickDirty = Mesh | Collider`. Owners initialise their zeroed components on their first update.
+2b. Grids that must appear at an exact tick (launched craft) are spawned ahead, **stowed** (`GridStowApi.Stow`, disabled), and **unstowed** from the fixed step through the GameplayEnd ECB (SPEC-10 §5.13).
 3. Bricks get meshes and colliders over the next frames from `VoxelRebuildGroup` (budgeted). The root gets a provisional box collider until the first full compound is ready.
 
 ### 7.2 One hit
@@ -383,7 +384,7 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | Grid `PhysicsCollider` | `ColliderSwapSystem` | — |
 | `PhysicsMass` | `GridMassUpdateSystem` | — |
 | `VoxelGrid.Kind` | `GridSpawnSystem` (initial), `ShipDeathSystem` (Ship → Hulk) | Read |
-| `PhysicsVelocity` | Unity Physics + `PropulsionSystem` (impulses only) + `ImpactEventSystem` (impulses only) + `PlanarConstraintSystem` (vertical impulses only) + `GridMassUpdateSystem` (exact re-expression about the new centre of mass only) + `OriginRebaseSystem` (placement re-expression only: rotates the player's linear velocity by the placement yaw change). **Nobody else assigns velocity.** Creating `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` on a new body (`GridBodyInitSystem`, `SplitSystem` through `GridBodyFactory`) is initialisation, not a write | Read |
+| `PhysicsVelocity` | Unity Physics + `PropulsionSystem` (impulses only) + `ImpactEventSystem` (impulses only) + `PlanarConstraintSystem` (vertical impulses only) + `GridMassUpdateSystem` (exact re-expression about the new centre of mass only) + `OriginRebaseSystem` (placement re-expression only: rotates the player's linear velocity by the placement yaw change). **Nobody else assigns velocity.** Creating `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` on a new body (`GridBodyInitSystem`, `SplitSystem` through `GridBodyFactory`), and re-enabling a stowed grid with its pose and velocities (`GridStowApi.Unstow`, ADR-0015), is initialisation, not a write | Read |
 | `ShipCommand` (player ship) | `PlayerCommandApplySystem` | Read |
 | `ShipCommand` (AI ship) | `AiSteeringSystem` | Read |
 | `PlayerControlLock` | `TravelService` | Read by `PlayerCommandApplySystem` |
