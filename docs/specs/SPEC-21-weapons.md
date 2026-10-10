@@ -329,13 +329,40 @@ namespace Game.Simulation.Weapons
         public JobHandle Acquire(JobHandle dependsOn) => JobHandle.CombineDependencies(dependsOn, Access.Value);
         public void Release(JobHandle lastJob) { Access.Value = lastJob; }
         public void CompleteAccess() { Access.Value.Complete(); }   // never in FixedStepSimulationSystemGroup
-        /// Inside a single-threaded job: if record.Sequence != applied → StarSystemChanged ? clear all rows : Position += Delta for every row; applied = Sequence. Idempotent.
+        /// Inside a single-threaded job: if record.Sequence != applied → (StarSystemChanged == 1 or Sequence − applied > 1 (a rebase was missed)) ? clear all rows : Position += Delta for every row; applied = Sequence. Idempotent.
         public static void ApplyPendingShift(ref NativeList<ProjectileRow> rows, in Game.Core.Components.OriginShiftRecord record, ref NativeReference<uint> applied);
     }
 
     public struct ProjectileStoreStats { public int Live, PeakLive, Fired, DroppedFull, Hits, Expired; }
 }
 ```
+
+### 4.6b `ShipDestroyed` (managed event, `Assets/Game/Core/Events/ShipDestroyed.cs`, namespace `Game.Core.Events`)
+
+This spec owns the payload and its bridge (architecture §6.6; SPEC-02 §5.6 rules 1–3). A ship or station counts as destroyed when its core is lost (SPEC-13 `GridCoreLost`); the hulk that remains is not a second event.
+
+```csharp
+public readonly struct ShipDestroyed
+{
+    public readonly ulong PersistentId;               // the grid's PersistentId (0 for unsaveable test grids)
+    public readonly Game.Core.ContentHash Blueprint;  // GridSource.Blueprint (0 for structure spawns such as the player's fleet ships)
+    public readonly Game.Core.ContentHash Encounter;  // SPEC-33 EncounterTag.Encounter (0 = none; filled from M3, ENC-007)
+    public readonly uint EncounterInstance;           // SPEC-33 EncounterTag.Instance (0 = none)
+    public readonly uint Tick;                        // SimClock.Tick of the core loss
+    public readonly byte IsPlayer;                    // 1 when the grid had PlayerShip
+    public readonly byte Faction;                     // Allegiance.Faction (255 = none / no Allegiance)
+    public readonly byte Kind;                        // (byte)HulkInfo.Kind: the GridKind before death (Ship = 0, Station = 1, Asteroid = 2)
+    public ShipDestroyed(ulong persistentId, Game.Core.ContentHash blueprint, Game.Core.ContentHash encounter, uint encounterInstance,
+                         uint tick, byte isPlayer, byte faction, byte kind);
+}
+```
+
+`ShipDestroyedBridgeSystem` (`Assets/Game/Simulation/Weapons/ShipDestroyedBridgeSystem.cs`, `ISystem`, main thread, not Burst-compiled): `PresentationBridgeGroup`, `[UpdateBefore(typeof(ManagedEventDrainSystem))]`; requires `DamageStreams` only (not `GameplayActive`: a core loss in the last tick before a scene exit is still reported). Per frame:
+1. `streams.DrainCoreLost(pending)` (`pending`: persistent `NativeList<GridCoreLost>`, cleared each frame). Empty → return.
+2. `em.CompleteDependencyBeforeRO` for `PlayerShip`, `Allegiance`, `GridSource`, `HulkInfo` and (from M3) `EncounterTag`; then for each event in list order: if `em.Exists(Grid)`: `IsPlayer = HasComponent<PlayerShip>`, `Faction = Allegiance.Faction` (255 if absent), `Blueprint = GridSource.Blueprint`, `Kind = (byte)HulkInfo.Kind` (0 if absent), `Encounter`/`EncounterInstance` from `EncounterTag` when present; if it no longer exists, those fields are 0/255.
+3. `em.CompleteDependencyBeforeRO<ManagedEventQueue<ShipDestroyed>>()`; enqueue `ManagedEventEnvelope<ShipDestroyed> { Tick = e.Tick, SortKey = e.PersistentId, Payload }` (main-thread producer, SPEC-02 §5.6). `ManagedEventDrainSystem` publishes it the same frame.
+
+`Game.Simulation/AssemblyInfo.cs` registers `ManagedEventQueue<ShipDestroyed>`; `ManagedEventChannels.RegisterAll` gets `system.RegisterChannel<ShipDestroyed>();`. Consumers: SPEC-01 `DefeatWatcher` (`IsPlayer == 1`), SPEC-40 narrative bridge, SPEC-33 director (`EncounterDefeated`), SPEC-63/64 nothing (they react to `CellRemoved`/FX).
 
 ### 4.7 Tuning definition
 
@@ -381,6 +408,7 @@ Common to all: `projectileRadius` 0.1 m (flak 0.2, missile 0.3); `fireConeDeg` 3
 | `BeamStepSystem` | `GameplayPostPhysicsGroup`, `[UpdateAfter(typeof(ProjectileStepSystem))]`, `[UpdateBefore(typeof(DamageResolveSystem))]` | yes | same |
 | `ExplosionSystem` | `GameplayPostPhysicsGroup`, `[UpdateAfter(typeof(BeamStepSystem))]`, `[UpdateBefore(typeof(DamageResolveSystem))]` | yes | `GameplayActive`, `DamageStreams`, `ShieldHitStreams`, `SpatialHash`, `WeaponTuning` |
 | `WeaponVisualSyncSystem` | `WorldGroup` (variable rate, before transforms) | yes | `GameplayActive` |
+| `ShipDestroyedBridgeSystem` | `PresentationBridgeGroup`, `[UpdateBefore(typeof(ManagedEventDrainSystem))]` | no (main thread) | `DamageStreams` (§4.6b) |
 
 SPEC-22's `ShieldSystem` declares `[UpdateAfter(typeof(ExplosionSystem))]`. `ProjectileStepSystem.OnCreate` creates the `ProjectileStore` singleton (capacity `WeaponTuning.MaxProjectiles` if present, else 8,192); `OnDestroy` completes and disposes it. It implements `ISystemStartStop`: `OnStartRunning` and `OnStopRunning` clear the store (`CompleteAccess`, `Rows.Clear()`), so no projectile survives a scene change.
 
@@ -662,7 +690,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 - **Milestone:** M2
 - **Tier:** frontier — F2/F4: parallel NativeStream producers into three consumers; owns the 5,000-projectile gate
 - **Depends on:** `WPN-003`, `WPN-007`, `PWR-001`, `SPEC-13`
-- **Do:** Implement §5.6 (homing, hits, fuses, compaction). Uses `ShieldHitStreams.BeginWrite/EndWrite` (open question 3; if SPEC-22 keeps its original field API, follow §6 of SPEC-22 and record the sync cost in the ledger).
+- **Do:** Implement §5.6 (homing, hits, fuses, compaction). Uses `ShieldHitStreams.BeginWrite/EndWrite` (SPEC-22 §4, answered Q3).
 - **Files:** `Assets/Game/Simulation/Weapons/{ProjectileStepSystem,ProjectileStepJob,ProjectileCompactJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Weapons/ProjectileStepTests.cs`
 - **Acceptance criteria:**
   - [ ] Hull hit writes one `DamageEvent` with the §5.6 fields; shield hit writes one `ShieldHit`; explosive rounds also write an `ExplosionRequest`; fuse expiry explodes at `p1`.
@@ -741,6 +769,19 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
   - [ ] Snapshot lists every weapon of the player ship with current values.
 - **Tests:** `WeaponDebugTests.Snapshot_ListsWeapons`.
 
+### WPN-017 — ShipDestroyed payload and bridge
+- **Milestone:** M2
+- **Tier:** standard — payload and per-frame steps fully given in §4.6b
+- **Depends on:** `WPN-001`, `DMG-001`, `CORE-001`
+- **Do:** Create `ShipDestroyed` (§4.6b) and `ShipDestroyedBridgeSystem`; register the queue and the channel (SPEC-02 §5.6 rule 3). Change SPEC-13's `DrainCoreLost` comment to name this system as its caller. The `EncounterTag` read is added by SPEC-33 ENC-007 (step 2 of its Do).
+- **Files:** `Assets/Game/Core/Events/ShipDestroyed.cs`; `Assets/Game/Simulation/Weapons/ShipDestroyedBridgeSystem.cs`; `Assets/Game/Simulation/AssemblyInfo.cs`; `Assets/Game/Presentation/Systems/ManagedEventChannels.cs` (one line); `Assets/Game/Tests/EditMode/Simulation/Weapons/ShipDestroyedBridgeTests.cs`
+- **Acceptance criteria:**
+  - [ ] A core loss on an AI ship with `Allegiance.Faction = 3` spawned from blueprint B publishes exactly one `ShipDestroyed { Blueprint = B, Faction = 3, IsPlayer = 0, Kind = 0 }` on the `EventBus` the same frame.
+  - [ ] A core loss on the player ship gives `IsPlayer = 1`.
+  - [ ] Two core losses in one tick are published in ascending `PersistentId` order.
+  - [ ] A grid destroyed before the bridge runs still yields an event with its `PersistentId` and `Faction = 255`.
+- **Tests:** `ShipDestroyedBridgeTests.AiShip_FieldsFilled`, `.Player_IsPlayer`, `.SameTick_SortedById`, `.DestroyedGrid_StillReported`.
+
 ### WPN-016 — Per-instance fire groups (M4)
 - **Milestone:** M4
 - **Tier:** frontier — F1: adds per-instance data to the structure format and saves
@@ -757,7 +798,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 |---|---|---|---|
 | 1 | `WeaponDefinition` (Game.Data) cannot reference SPEC-13's `DamageType` (Game.Voxel). Keep the mirror enum `WeaponDamageType` with equal values (WPN-002 tests equality), or move `DamageType` down to Game.Data through an ADR? | Keep the mirror enum | Tech lead |
 | 2 | Friendly fire on (decision 4)? | Yes | Owner |
-| 3 | SPEC-22 `ShieldHitStreams`: producers access it with `GetSingletonRW` and write fields on the main thread, which completes the previous producer's jobs (sync points). Change to a registration API like SPEC-13 `DamageStreams`: `BeginWrite(ref state, ShieldHitProducer, forEachCount) → NativeStream.Writer`, `EndWrite(producer, JobHandle)`; consumers combine stored handles | Adopt; SPEC-22 PWR-001/007 implement it | SPEC-22 |
+| 3 | SPEC-22 `ShieldHitStreams`: producers access it with `GetSingletonRW` and write fields on the main thread, which completes the previous producer's jobs (sync points). Change to a registration API like SPEC-13 `DamageStreams`: `BeginWrite(ref state, ShieldHitProducer, forEachCount) → NativeStream.Writer`, `EndWrite(producer, JobHandle)`; consumers combine stored handles | **Applied** in SPEC-22 §4 (`ShieldHitProducer`, `BeginWrite/EndWrite/BeginRead/EndRead`) | SPEC-22 |
 | 4 | SPEC-63 tracers read `ProjectileStore` rows (§6) instead of projectile entities | Yes | SPEC-63 |
 | 5 | The store follows the floating origin through the Core `OriginShiftRecord` (SPEC-23 Q4), which SPEC-02/SPEC-30 must add | Yes | SPEC-02, SPEC-30 |
 | 6 | SPEC-03 aim: ray from the camera through the cursor against `PhysicsLayers.PickingQuery` (excluding the player's grid) first, plane `Y = 0` as fallback, so the 3D aim point is on what the cursor covers | Yes | SPEC-03 |

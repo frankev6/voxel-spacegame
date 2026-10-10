@@ -126,11 +126,12 @@ namespace Game.Simulation.Power
         public float ForwardAccel;      // m/s² = ForwardThrust × ThrustMultiplier / Mass
         public float ReverseAccel;      // m/s²
         public float StrafeAccel;       // m/s²
-        public float YawAccelDeg;       // deg/s² = degrees(YawTorque × ThrustMultiplier × InverseInertia.y)
+        public float YawAccelDeg;       // deg/s² = degrees((YawTorque × ThrustMultiplier + GyroYawTorque) × InverseInertia.y)
         public float TurnRateDeg;       // deg/s: 90 / t90 with t90 = 2·sqrt((π/2) / yawAccelRad); 0 if yawAccel = 0
         // Expensive part: recomputed when the alive functional set changed
         public float ForwardThrust, ReverseThrust, StrafeThrust;  // N (strafe = min of left and right)
-        public float YawTorque;         // N·m = min(Σ positive yaw torques, Σ |negative yaw torques|)
+        public float YawTorque;         // N·m = min(Σ positive yaw torques, Σ |negative yaw torques|) of the thrusters
+        public float GyroYawTorque;     // N·m = FlightMath.GyroYawTorque(FlightConfig, InverseInertia.y) (SPEC-20); 0 for hulks or without FlightConfig; mass part
         public float PowerGeneration;   // E/s
         public float PowerCapacity;     // E
         public float WeaponDraw, ShieldDraw, ThrusterDraw;        // E/s at full demand
@@ -215,16 +216,34 @@ namespace Game.Simulation.Power
         public uint Sequence;           // producer sequence for the stable sort key
     }
 
-    /// <summary>Singleton holding this tick's ShieldHit streams, one per producer. Each producer system allocates and
-    /// disposes its own field (owner-allocates, owner-disposes); ShieldSystem only reads.</summary>
-    public struct ShieldHitStreams : IComponentData
+    public enum ShieldHitProducer : byte { Projectiles = 0, Beams = 1, Explosions = 2 }   // read order of the consumer
+
+    /// <summary>Singleton registry of this tick's ShieldHit streams (same pattern as SPEC-13 DamageStreams). Created and owned by
+    /// ShieldSystem (OnCreate allocates ShieldHitStreamsData with Allocator.Persistent; OnDestroy completes and disposes everything).
+    /// Accessed with SystemAPI.GetSingleton (read-only: the struct only holds a pointer), so producers never create a sync point.</summary>
+    public unsafe struct ShieldHitStreams : IComponentData
     {
-        public NativeStream Projectiles;    // written by ProjectileStepSystem (SPEC-21), foreach index = chunk index
-        public NativeStream Beams;          // written by BeamStepSystem (SPEC-21)
-        public NativeStream Explosions;     // written by ExplosionSystem (SPEC-21), foreach index = request batch index
-        public int ProjectilesForEachCount, BeamsForEachCount, ExplosionsForEachCount;  // 0 = stream not created this tick
-        public uint Tick;                   // SimClock.Tick the streams were written in (stale streams are ignored)
+        [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction] internal ShieldHitStreamsData* Data;
+
+        /// Producer (main thread, in OnUpdate): disposes this producer's stream from an earlier tick if it was never read (stale,
+        /// GameLog.WarnOnce), allocates a TempJob NativeStream with forEachCount indices, records Tick = SimClock.Tick, and returns its writer.
+        public NativeStream.Writer BeginWrite(ref SystemState state, ShieldHitProducer producer, int forEachCount);
+        /// Producer: call once after scheduling the job that writes the stream.
+        public void EndWrite(ShieldHitProducer producer, JobHandle writerJob);
+        /// Consumer (ShieldSystem): readers for the three producers in enum order (an empty reader with count 0 for a producer that did
+        /// not write this tick); combines every producer handle into state.Dependency.
+        public ShieldHitReadSet BeginRead(ref SystemState state, uint tick);
+        /// Consumer: disposes the streams read this tick after readerJob.
+        public void EndRead(JobHandle readerJob);
     }
+
+    public struct ShieldHitReadSet
+    {
+        public NativeStream.Reader Projectiles, Beams, Explosions;
+        public int ProjectilesForEachCount, BeamsForEachCount, ExplosionsForEachCount;   // 0 = not written this tick
+    }
+
+    // internal unsafe struct ShieldHitStreamsData { NativeStream[3] streams; JobHandle[3] writeHandles; uint[3] ticks; JobHandle readHandle; }
 }
 ```
 
@@ -305,8 +324,8 @@ namespace Game.Simulation.Power
         public PowerContent(Game.Data.Services.ContentCatalog catalog);   // reads the single PowerTuningDefinition; throws
                                                                           // ContentValidationException if 0 or >1 exist
         public PowerTuning Tuning { get; }
-        public void CreateSingletons(EntityManager em);                    // idempotent; one entity "PowerSingletons" with
-                                                                          // PowerTuning and ShieldHitStreams (all fields default)
+        public void CreateSingletons(EntityManager em);                    // idempotent; one entity "PowerSingletons" with PowerTuning
+                                                                          // (ShieldHitStreams is created by ShieldSystem.OnCreate)
         public void DestroySingletons(EntityManager em);
     }
 }
@@ -339,7 +358,7 @@ namespace Game.Simulation.Power
 | `ShieldState`, `ShieldRipple` | `ShieldSystem` (`PowerInitSystem` only sets `Flags = FillOnNextUpdate` at init) |
 | `ShieldControl` | `ShieldToggleEffectSystem` (SPEC-24) |
 | `ShipStatModifier` | `AbilityModifierSyncSystem` (SPEC-24) |
-| `ShieldHitStreams.Projectiles/Beams/Explosions` | `ProjectileStepSystem` / `BeamStepSystem` / `ExplosionSystem` (SPEC-21), one field each |
+| `ShieldHitStreams` producer slots | `ProjectileStepSystem` / `BeamStepSystem` / `ExplosionSystem` (SPEC-21), one `ShieldHitProducer` each, through `BeginWrite`/`EndWrite`; storage owned by `ShieldSystem` |
 
 ### 4.8 Memory
 
@@ -414,7 +433,7 @@ Every system: `[BurstCompile]` `ISystem`, `RequireForUpdate<GameplayActive>()`, 
 5. `cmd = ShipCommand` (zero if absent). `moving = any(cmd.Thrust ≠ 0) || cmd.Turn ≠ 0`.
 6. For each consumer `c` in buffer order (already sorted), process in two passes split at `PriorityAbility`: pass 1 all consumers with `Priority > PriorityAbility`, then step 7, then pass 2 the rest. Per consumer:
    - `alive = inst.Block != 0 && (inst.Flags & Destroyed) == 0` for `inst = BlockInstance[c.InstanceIndex]`.
-   - `requesting = alive && (Weapon: (cmd.FireGroups & c.FireGroups) ≠ 0; ShieldEmitter: ShieldControl.RequestedOn == 1; Thruster: moving)`.
+   - `requesting = alive && (Weapon: (cmd.FireGroups & c.FireGroups) ≠ 0 || autofire; ShieldEmitter: ShieldControl.RequestedOn == 1; Thruster: moving)`, where `autofire = WeaponControl.Autofire == 1 && ShipTarget.Value != Entity.Null` (SPEC-21 root components, read through lookups; absent → false; SPEC-23 Q2).
    - If `requesting`: `demand += c.Draw`. If `tick < c.DeniedUntilTick` → not granted. Else `need = c.Draw × dt`; if `need ≤ budget` → granted, `budget −= need`, `granted += c.Draw`; else not granted, `c.DeniedUntilTick = tick + BrownoutHoldTicks`, `brownout = true`.
    - `c.Flags = (alive ? Alive : 0) | (requesting ? Requesting : 0) | (granted ? Granted : 0) | (tick < c.DeniedUntilTick ? BrownedOut : 0)`.
 7. Abilities: `mask = 0`. If the root has an `AbilitySlot` buffer: for slot `s` in index order (`s < 32`) with `State == PendingPower`: `need = slot.PendingCost`; if `need ≤ budget` → `budget −= need`, `mask |= 1u << s`. `AbilityGrantMask = mask`, `AbilityGrantTick = tick`.
@@ -438,7 +457,7 @@ Complexity: O(consumers + ability slots) per ship, O(functional entities) for jo
    - Weapon: `w = WeaponDefs[WeaponIndex]` (skip if index 0); `SustainedDps += w.SustainedDps`; `MaxWeaponRange = max(MaxWeaponRange, w.Range)`; `WeaponDraw += w.PowerDraw`; `AliveWeaponCount++`.
    - ShieldEmitter: `ShieldCapacity += Shield.Capacity`; `ShieldRegen += Shield.RegenPerSecond`; `ShieldRechargeDelay = AliveShieldEmitterCount == 0 ? delay : min(…, delay)`; `ShieldDraw += Shield.PowerDraw`; `AliveShieldEmitterCount++`.
    Then `StrafeThrust = min(left, right)`, `YawTorque = min(posYaw, negYaw)`; bounds from `VoxelGrid.CellMin/CellMax` and `CellSize` (§4.2); `FunctionalSignature = sig` (recomputed if step 2 was skipped); `FunctionalRevision++`; if `!Initialized` → `InitialWeaponCount = AliveWeaponCount`; set `Initialized`.
-4. If `full || massChanged`: if the root has `PhysicsMass` with `InverseMass > 0`: `Mass = 1 / InverseMass`, `HasMass`; if `InitialMass == 0` → `InitialMass = Mass`; `MassFraction = Mass / InitialMass`. Accelerations: `ForwardAccel = ForwardThrust × ThrustMultiplier / Mass` (same for reverse and strafe); `yawAccelRad = YawTorque × ThrustMultiplier × TurnRateMultiplier × InverseInertia.y`; `YawAccelDeg = degrees(yawAccelRad)`; `TurnRateDeg = yawAccelRad > 0 ? 90 / (2·sqrt((π/2) / yawAccelRad)) : 0`. Without mass: all accelerations 0, `MassFraction = 1`.
+4. If `full || massChanged`: if the root has `PhysicsMass` with `InverseMass > 0`: `Mass = 1 / InverseMass`, `HasMass`; if `InitialMass == 0` → `InitialMass = Mass`; `MassFraction = Mass / InitialMass`. Accelerations: `ForwardAccel = ForwardThrust × ThrustMultiplier / Mass` (same for reverse and strafe); `GyroYawTorque = Hulk || !HasSingleton<FlightConfig> ? 0 : FlightMath.GyroYawTorque(flightConfig, InverseInertia.y)` (the gyro of SPEC-20 decision 11 turns even ships without side thrusters); `yawAccelRad = (YawTorque × ThrustMultiplier + GyroYawTorque) × TurnRateMultiplier × InverseInertia.y`; `YawAccelDeg = degrees(yawAccelRad)`; `TurnRateDeg = yawAccelRad > 0 ? 90 / (2·sqrt((π/2) / yawAccelRad)) : 0`. Without mass: all accelerations 0, `MassFraction = 1`.
 5. If `full || modChanged`: each multiplier = product of `Multiplier` over modifier elements with that `StatId` (1 if none); `Thrust`→`ThrustMultiplier`, `MaxSpeed`→`MaxSpeedMultiplier`, `FireRate`→`FireRateMultiplier`, `WeaponDamage`→`DamageMultiplier`, `ShieldRegen`→`ShieldRegenMultiplier`, `TurnRate`→`TurnRateMultiplier`. Then redo step 4's acceleration lines.
 
 Complexity: O(1) per untouched ship; O(instances) for ships whose `BlockInstance` chunk changed (signature) and again for a full recompute. Stats are read by others one tick later at worst.
@@ -447,7 +466,7 @@ Complexity: O(1) per untouched ship; O(instances) for ships whose `BlockInstance
 
 `[UpdateInGroup(typeof(GameplayPostPhysicsGroup))] [UpdateAfter(typeof(ExplosionSystem))]` (the next system, `DamageResolveSystem`, declares `UpdateAfter(ShieldSystem)`). Reads `ShieldHitStreams`, `PowerConsumer`, `ShipStats`, `ShieldControl`, `LocalTransform`, `PhysicsVelocity`, `Hulk`, `GridSpawning`, `SimClock`, `PowerTuning`, `GridCellReader` (SPEC-10). Writes `ShieldState`, `ShieldRipple`, its own `DamageStreams` producer slot (`ShieldOverflow`, SPEC-13), `FxEventQueue`.
 
-**Job 1 `ShieldHitGatherJob`** (`IJob`): if `ShieldHitStreams.Tick ≠ SimClock.Tick` treat all streams as empty. Read `Projectiles`, then `Beams`, then `Explosions`, each foreach index ascending, into `NativeList<ShieldHit> hits` (`Allocator.TempJob`). Sort by `(Grid.Index, Source.Index, ProducerKind, Sequence)` (architecture §5.1). Build `NativeParallelHashMap<Entity, int2> ranges` (start, count) per grid in one linear pass. Hash map is used for lookup only (traps T1.5).
+**Job 1 `ShieldHitGatherJob`** (`IJob`): `set = streams.BeginRead(ref state, SimClock.Tick)` on the main thread (streams written in another tick come back empty). Read `set.Projectiles`, then `Beams`, then `Explosions`, each foreach index ascending, into `NativeList<ShieldHit> hits` (`Allocator.TempJob`). Sort by `(Grid.Index, Source.Index, ProducerKind, Sequence)` (architecture §5.1). Build `NativeParallelHashMap<Entity, int2> ranges` (start, count) per grid in one linear pass. Hash map is used for lookup only (traps T1.5).
 
 **Job 2 `ShieldUpdateJob`** (`IJobChunk`, `ScheduleParallel` over roots with `ShieldState`, `ShieldRipple`, `ShipStats`, `PowerConsumer`; depends on job 1). Opens the `ShieldOverflow` damage stream at foreach index = `unfilteredChunkIndex`. Per entity, with `tick`, `dt = 1/60`, `T = PowerTuning`:
 1. If `GridSpawning` enabled → skip (hits on it are dropped). If `Hulk`: `Hp = 0, MaxHp = 0, Active = 0`; every hit in range → full overflow (step 6 overflow rule with `absorbed = 0`); continue.
@@ -479,7 +498,7 @@ When SPEC-13 adds `Hulk`: next `PowerAllocationSystem` tick empties power and cl
 | `PowerContent(catalog)` / `CreateSingletons(em)` | Exactly one `PowerTuningDefinition` | Creates the `PowerSingletons` entity once; second call is a no-op; zero or two tuning assets → `ContentValidationException` with code `PWR-E001` |
 | `ShieldMath.*` | Radii all > 0 | Pure; never NaN for finite inputs; `SegmentEnters` false for zero-length segments |
 | Readers (HUD, AI, WPN) | — | Read `ShipPower`, `ShipStats`, `ShieldState` fields as documented; values are from the current tick after the writer ran, else from the previous tick |
-| `ShieldHitStreams` producers (SPEC-21) | Allocate the stream in their own `OnUpdate` with `NativeStream.ScheduleConstruct(out s, forEachCount, dependency, Allocator.TempJob)`, dispose the previous tick's stream first with `.Dispose(state.Dependency)`, set the count field and `Tick = SimClock.Tick` | `ShieldSystem` reads it this tick only |
+| `ShieldHitStreams` producers (SPEC-21) | `GetSingleton<ShieldHitStreams>()` (read-only); `w = BeginWrite(ref state, producer, forEachCount)`; schedule the writer job; `EndWrite(producer, handle)`. Never `GetSingletonRW`, never write fields | `ShieldSystem` reads it this tick only; `EndRead` disposes it |
 
 ## 7. Edge cases and failure behaviour
 
@@ -492,7 +511,7 @@ When SPEC-13 adds `Hulk`: next `PowerAllocationSystem` tick empties power and cl
 | Shield emitter browned out | It contributes no capacity; `Hp` clamps to the new `MaxHp` |
 | `ShieldControl.RequestedOn = 0` | `Active = 0`, no draw, no regen; `Hp` kept; on again → up immediately if `Hp ≥ 25 %` of `MaxHp`, else waits for regen |
 | Hits on a grid that has no `ShieldState` | Cannot happen (producers only emit `ShieldHit` for grids with `Active == 1`); if it does, ignored |
-| `ShieldHitStreams.Tick ≠ SimClock.Tick` (producer did not run this tick) | That stream treated as empty |
+| A producer did not run this tick | `BeginRead` returns an empty reader (count 0) for it; a stream written in an earlier tick and never read is disposed by the next `BeginWrite` of that producer, or by `ShieldSystem.OnDestroy` |
 | `ShipCommand` missing on a combat grid | Treated as zero (no weapon demand, no thrust demand) |
 | `PhysicsMass` missing or `InverseMass == 0` (kinematic, static, or not yet created) | `Mass = 0`, accelerations 0, `MassFraction = 1`; stats recompute when it appears (change filter) |
 | Rebuild or edit replaces functional entities | `PowerLink.Bound == 0` on the new entities triggers a re-init of that grid in the same frame (§5.2 step 1) |
@@ -547,7 +566,7 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 - **Files:** `Assets/Game/Data/Definitions/Power/PowerTuningDefinition.cs`; `Assets/Game/Simulation/Power/{PowerContent,PowerGridSetup}.cs`; `Assets/Game/Content/Tuning/tuning_power.asset`
 - **Acceptance criteria:**
   - [ ] `PowerContent` with zero or two tuning assets throws `ContentValidationException` containing `PWR-E001`.
-  - [ ] `CreateSingletons` twice creates one entity holding `PowerTuning` and `ShieldHitStreams`.
+  - [ ] `CreateSingletons` twice creates one entity holding `PowerTuning`.
   - [ ] After `AddComponents`, the request entity has the 7 types, `ShieldControl.RequestedOn == 1` and 8 ripple elements; a second call throws.
 - **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/PowerContentTests.cs`: `NoTuning_Throws`, `TwoTunings_Throws`, `CreateSingletons_Idempotent`, `GridSetup_AddsRootTypes`, `GridSetup_Twice_Throws`.
 
@@ -567,7 +586,7 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 ### PWR-005 — `PowerAllocationSystem`
 - **Milestone:** M2
 - **Tier:** frontier — F2 enable bits from parallel jobs; F4 budgeted hot path
-- **Depends on:** `PWR-004`, `FLT-001`, `ABL-001`
+- **Depends on:** `PWR-004`, `FLT-001`, `ABL-001`, `WPN-001`
 - **Do:** Implement jobs A and B exactly as §5.3, including the two-pass split for ability costs and the hulk branch.
 - **Files:** `Assets/Game/Simulation/Power/{PowerAllocationSystem,PowerAllocateJob,PoweredApplyJob}.cs`
 - **Acceptance criteria:**
@@ -581,22 +600,23 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 ### PWR-006 — `ShipStatsAggregateSystem`
 - **Milestone:** M2
 - **Tier:** frontier — F3 change-filter/signature logic silently goes stale if wrong; F4 hot path
-- **Depends on:** `PWR-004`, `WPN-001`, `SPEC-12`
-- **Do:** Implement §5.4 (`IJobChunk` with `DidChange` filters, signature, full/cheap/modifier parts). Add `GridSpaceMath` usage from SPEC-21 for thruster positions.
+- **Depends on:** `PWR-004`, `FLT-001`, `WPN-001`, `SPEC-12`
+- **Do:** Implement §5.4 (`IJobChunk` with `DidChange` filters, signature, full/cheap/modifier parts, `GyroYawTorque`). Thruster positions use `GridSpaceMath.InstanceCenter` from SPEC-20 (FLT-001); weapon values come from SPEC-21's blob (WPN-001).
 - **Files:** `Assets/Game/Simulation/Power/{ShipStatsAggregateSystem,ShipStatsJob}.cs`
 - **Acceptance criteria:**
   - [ ] `ship_fighter` after spawn: `AliveWeaponCount == 14`, `SustainedDps` equals the sum from SPEC-21 §4.9, `PowerGeneration == 40`, `ForwardThrust > 0`, `FunctionalRevision == 1`.
   - [ ] Destroying one weapon (set `BlockInstance.Flags |= Destroyed` in the test) increments `FunctionalRevision` once and lowers `SustainedDps`; damaging hull cells only (no functional change) does not increment it.
   - [ ] Changing `PhysicsMass` updates `Mass` and accelerations without a full recompute (`FunctionalRevision` unchanged).
   - [ ] A `ShipStatModifier { Thrust, 3 }` makes `ThrustMultiplier == 3` and triples `ForwardAccel`.
+  - [ ] A ship with no side-facing thrusters has `YawTorque == 0`, `GyroYawTorque > 0` and `TurnRateDeg > 0`; a hulk has `GyroYawTorque == 0`.
   - [ ] Dormant ships are not updated; hulks are not updated.
-- **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/ShipStatsAggregateSystemTests.cs`: `Spawn_FullRecompute`, `WeaponDestroyed_IncrementsRevision`, `HullDamageOnly_NoRecompute`, `MassChange_CheapUpdateOnly`, `Modifier_AppliesMultiplier`, `Dormant_Skipped`, `Hulk_Skipped`.
+- **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/ShipStatsAggregateSystemTests.cs`: `Gyro_TurnsWithoutSideThrusters`, `Spawn_FullRecompute`, `WeaponDestroyed_IncrementsRevision`, `HullDamageOnly_NoRecompute`, `MassChange_CheapUpdateOnly`, `Modifier_AppliesMultiplier`, `Dormant_Skipped`, `Hulk_Skipped`.
 
 ### PWR-007 — `ShieldSystem`
 - **Milestone:** M2
 - **Tier:** frontier — F2 NativeStream consumer and sorted per-grid parallel apply; F3 ordering
 - **Depends on:** `PWR-005`, `PWR-006`, `PWR-002`, `DMG-001`, `VFX-001`
-- **Do:** Implement §5.5 jobs 1 and 2, ripple ring, FX events, overflow `DamageEvent`s through SPEC-13's `ShieldOverflow` producer slot, hulk branch.
+- **Do:** Implement `ShieldHitStreams` (`ShieldHitStreamsData`, `BeginWrite/EndWrite/BeginRead/EndRead`, creation in `ShieldSystem.OnCreate`, disposal in `OnDestroy`), §5.5 jobs 1 and 2, ripple ring, FX events, overflow `DamageEvent`s through SPEC-13's `ShieldOverflow` producer slot, hulk branch.
 - **Files:** `Assets/Game/Simulation/Power/{ShieldSystem,ShieldHitGatherJob,ShieldUpdateJob}.cs`
 - **Acceptance criteria:**
   - [ ] Fresh ship with one emitter: `MaxHp == 3000`, `Hp == 3000`, `Active == 1` after the first update; radii ≥ 3 m and contain every bound corner.

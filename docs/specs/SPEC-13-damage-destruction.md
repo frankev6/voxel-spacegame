@@ -262,7 +262,7 @@ namespace Game.Voxel.Damage
         public CellRemovedView BeginRemovedRead(ref SystemState state);  // combines the resolver's write handle
         public void EndRemovedRead(JobHandle readerJob);
 
-        // Presentation bridge (ManagedEventDrainSystem), once per frame; completes ShipDeathSystem's last write first.
+        // SPEC-21 ShipDestroyedBridgeSystem, once per frame (presentation, main thread); completes ShipDeathSystem's last write first.
         public void DrainCoreLost(NativeList<GridCoreLost> output);
 
         // ChunkColliderCleanupSystem (§5.9), main thread outside the fixed step: completes SplitSystem's last write, then moves

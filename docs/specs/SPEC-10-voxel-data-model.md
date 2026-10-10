@@ -989,7 +989,7 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 |---|---|---|---|
 | 1 | Does `GameplayActive` exist in the BlueprintLab scene (VOX systems require it)? | Yes; SPEC-01 creates it in World and BlueprintLab | SPEC-01 / SPEC-51 |
 | 2 | Who creates `VoxelConfig`, `VoxelStructureRegistryRef`, `BlueprintLibrary` and the registry? | SPEC-01's composition root right after `ContentService.CreateSingletons`: `BlueprintLibrary`, then `VoxelStructureRegistry.CreateRuntime(library)`, then the two singletons; disposes in reverse order at shutdown | SPEC-01 |
-| 3 | SPEC-04 prefix registry lacks `config_` | `config_` for `VoxelConfigDefinition`, `VoxelRenderConfigDefinition`, `VoxelPhysicsConfigDefinition`, `VoxelPaletteDefinition`; SPEC-04 adds the row | SPEC-04 |
+| 3 | SPEC-04 prefix registry lacks `config_` | `config_` for `VoxelConfigDefinition`, `VoxelRenderConfigDefinition`, `PhysicsVoxelConfigDefinition`, `VoxelPaletteDefinition`; SPEC-04 adds the row | SPEC-04 |
 | 4 | VOXS byte layout | **Answered:** SPEC-05 §4.7/§5.7 (`VoxsCodec`) is the only layout; §5.6 is an adapter | SPEC-05 |
 | 5 | Must SPEC-13 maintain `BlockInstance.CellsAlive`? | Yes, decrement when an instance cell becomes air | SPEC-13 |
 | 6 | Hulk grids created by `SplitSystem` (GameplayEnd ECB) | SPEC-13 records `Instantiate(GridPrototypes.Brick)` / moves existing bricks with the ECB, gives the hulk a full root archetype (§4.5) with `GridSource.StructureHandle = -1`, a new `Serial` taken from `GridPrototypes.NextSerial` inside its job (single writer: SplitSystem's playback order), `GridSpawning` disabled, `GridBodyInit` enabled; updates both roots' `BrickSlot` and LEG | SPEC-13 |

@@ -450,11 +450,14 @@ Pre: `definitions` contains every `FxDefinition` of the `ContentDatabase`; `conf
 ### 6.2 Producer pattern (SPEC-13/20/21/22)
 
 ```csharp
-// In OnUpdate of a producing ISystem (fixed step). Do NOT RequireForUpdate<FxEventQueue>; GetSingletonRW throws
+// In OnUpdate of a producing ISystem (fixed step). Do NOT RequireForUpdate<FxEventQueue>; GetSingleton throws
 // a clear error in a test world that forgot FxEventQueueCreateSystem — tests add typeof(FxEventQueueCreateSystem).
-var fx = SystemAPI.GetSingletonRW<FxEventQueue>().ValueRW.Queue.AsParallelWriter();
+// Read-only access (never GetSingletonRW in the fixed step: it would serialise producers and complete other systems' jobs).
+var fx = SystemAPI.GetSingleton<FxEventQueue>().Queue.AsParallelWriter();
 state.Dependency = new MyJob { Fx = fx /* ... */ }.ScheduleParallel(state.Dependency);
-// in the job: Fx.Enqueue(FxEvents.Hit(FxKind.HitKinetic, point, normal, targetVel, amount));
+// in the job struct: [NativeDisableContainerSafetyRestriction] public NativeQueue<FxEvent>.ParallelWriter Fx;
+// in the job:        Fx.Enqueue(FxEvents.Hit(FxKind.HitKinetic, point, normal, targetVel, amount));
+// FxUploadSystem (§5.2 step 1) takes the queue RW and CompleteDependency() completes every producer before draining.
 ```
 
 ### 6.3 Batched and pooled graph contract (every graph referenced by an `FxDefinition`)

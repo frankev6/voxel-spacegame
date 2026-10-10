@@ -352,7 +352,9 @@ Pre: `config` passed validation; `content` contains every cue. Post (constructor
 
 ```csharp
 // In a producer's OnUpdate (fixed step). Tests add typeof(SfxEventQueueCreateSystem) to their EcsTestWorld.
-var sfx = SystemAPI.GetSingletonRW<SfxEventQueue>().ValueRW.Queue.AsParallelWriter();
+var sfx = SystemAPI.GetSingleton<SfxEventQueue>().Queue.AsParallelWriter();   // read-only; never GetSingletonRW in the fixed step
+// in the job struct: [NativeDisableContainerSafetyRestriction] public NativeQueue<SfxEvent>.ParallelWriter Sfx;
+// AudioEventDrainSystem (§5.3 step 1) takes the queue RW and CompleteDependency() completes every producer first.
 SystemAPI.TryGetSingleton<CombatAudioCues>(out var cues);           // absent in tests: all hashes 0 → emit nothing
 // in the job: if (cues.ImpactKinetic.Value != 0) sfx.Enqueue(SfxEvents.At(cues.ImpactKinetic, point, vol));
 ```

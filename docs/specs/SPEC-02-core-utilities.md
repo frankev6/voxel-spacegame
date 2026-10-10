@@ -951,11 +951,12 @@ Payload rules (binding for every spec that adds a managed event):
 Producer pattern (Burst `ISystem`, any group):
 ```csharp
 var tick = SystemAPI.HasSingleton<SimClock>() ? SystemAPI.GetSingleton<SimClock>().Tick : 0u;
-var writer = SystemAPI.GetSingletonRW<ManagedEventQueue<ShipDestroyed>>().ValueRW.Queue.AsParallelWriter();
+var writer = SystemAPI.GetSingleton<ManagedEventQueue<ShipDestroyed>>().Queue.AsParallelWriter();   // read-only access
 state.Dependency = new EmitJob { Writer = writer, Tick = tick }.ScheduleParallel(state.Dependency);
-// inside the job: Writer.Enqueue(new ManagedEventEnvelope<ShipDestroyed> { Tick = Tick, SortKey = pid.Value, Payload = e });
+// in the job struct:  [NativeDisableContainerSafetyRestriction] public NativeQueue<ManagedEventEnvelope<ShipDestroyed>>.ParallelWriter Writer;
+// inside the job:     Writer.Enqueue(new ManagedEventEnvelope<ShipDestroyed> { Tick = Tick, SortKey = pid.Value, Payload = e });
 ```
-Producers **must** use `GetSingletonRW` (never `GetSingleton`) so the entity dependency system chains every job that writes the same queue. A main-thread producer calls `.Queue.Enqueue(...)` directly.
+Producers take the queue **read-only** (`GetSingleton`) and mark the writer `[NativeDisableContainerSafetyRestriction]`. Reason: concurrent `ParallelWriter.Enqueue` is thread-safe, and read-only access lets producers in different systems run in parallel; `GetSingletonRW` in the fixed step would serialise every producer and complete other systems' jobs (SPEC-21 Q7, item 34). Order does not matter because the drain sorts. The drain (step 4 below) declares RW access and completes every producer job (readers included) before it reads. A main-thread producer outside the fixed step calls `em.CompleteDependencyBeforeRO<ManagedEventQueue<T>>()` and then `.Queue.Enqueue(...)` directly; the same rule holds for every presentation stream (SPEC-63 `FxEventQueue`, SPEC-64 `SfxEventQueue`).
 
 `ManagedEventDrainSystem`:
 1. `OnCreate`: create `List<IManagedEventChannel> channels` and `HashSet<System.Type> registered`; call `ManagedEventChannels.RegisterAll(this)`. No `RequireForUpdate` (managed events also flow in menus).
