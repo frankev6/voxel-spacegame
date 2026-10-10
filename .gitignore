@@ -39,3 +39,6 @@ Thumbs.db
 /Assets/Temp/
 /Assets/Temp.meta
 __pycache__/
+
+# Blender backups
+*.blend1

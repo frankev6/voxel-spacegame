@@ -18,7 +18,7 @@
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
-| A0 | 12 | 1 | 0 | 1 | 2 | 0 | 16 | 2 |
+| A0 | 11 | 1 | 0 | 2 | 2 | 0 | 16 | 1 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 <!-- summary:end -->
@@ -485,7 +485,7 @@
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | review | claude (claude-opus-5-5) | 2026-10-10 | a3d0d92 | Needs an independent frontier review (no subagents this session). 13 public-domain images added (owner-approved) |
-| ART-004 | Block-kit style test: five blocks per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-10 |  |  |
+| ART-004 | Block-kit style test: five blocks per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002 | yes | review | claude (claude-opus-5-5) | 2026-10-10 | 5cebb6b | Needs independent frontier review and a second reviewer for the 150 m glyph test (criterion 3; likely fails for 1-cell-wide blocks, see log) |
 | ART-005 | Interactive HTML design board | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002, ART-003, ART-004 | no | todo |  |  |  |  |
 | ART-006 | Owner shortlist of finalist directions | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-005 | no | todo |  |  |  |  |
 | ART-007 | Brick material baker, preview mesher, reference shader and art validator | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-10 |  | Baker, preview mesher and SH_BrickReference done on branch task/ART-007-brick-tools (083c482); ArtDatabaseValidator waits for CORE-002, DATA-004, DATA-005 (owner chose ART-004 first) |
@@ -555,6 +555,41 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-10 — ART-004 block-kit style test, in review (claude, claude-opus-5-5)
+- **What was built.** `ArtSource/StyleTest/build_style_test.py` runs in two modes. Under the system Python (with Pillow) it drives the build and composes the composite. Inside Blender 5.2.2 it builds and renders, per direction:
+  - procedural 256 px `hull_plain` and `hull_heavy` layers for damage stages 0–3, saved under `ArtSource/StyleTest/<dir>/textures/` (normal maps 16-bit);
+  - the five blocks, following §x.5, §10.6 and §10.15;
+  - lighting and post per §x.4: key pitch 35°/25°/45°, fill or rim light, ambient, bloom, saturation, and contrast pivoted on mid-grey in log space;
+  - orthographic renders at 55° pitch, at 148 / 14.8 / 4.9 / 2.5 px per cell, plus the damage strip, `stats.json` and `style_test.blend`.
+- **Measurements.** Pixels per cell are exact: within 0 % of §4. Triangles, LOD0 against budget (hull patches against 2 per exposed face):
+
+  | Block | DRYDOCK | NOCTURNE | PULP | Budget |
+  |---|---|---|---|---|
+  | hull | 96 | 96 | 96 | 192 |
+  | hull_angled | 104 | 104 | 104 | 192 |
+  | thruster | 188 | 184 | 136 | 600 |
+  | turret (base + yaw) | 324 | 320 | 272 | 600 |
+  | core | 88 | 84 | 82 | 150 |
+
+  `check_art_docs.py blocks` reports 0 errors.
+- **Calibration and fixes found along the way.**
+  - A Blender sun of strength 1 lights white diffuse to 1/π, so URP intensities are multiplied by π.
+  - Texture PNGs are stored as Non-Color with sRGB encoded by hand; Blender's own save encoded twice and tilted normals 33°.
+  - `ShaderNodeMix` colour sockets are picked by identifier (`A_Color` and so on).
+  - In Blender 5 the glare type is a menu input.
+- **Findings for the owner and the reviewer.**
+  1. **1-cell-wide functional blocks at 150 m.** A glyph on a 1 × 1 face is about 5 px in every direction. Only the function colour reads; the chevron, crosshair and diamond do not. Acceptance criterion 3 (glyph recognisable at 150 m) will likely fail for all three blocks in all three directions. This is a DESIGN-SYSTEM rule question (R1 already says 4 px needs at least 2 cells), not a modelling fix.
+  2. **NOCTURNE.** Obsidian plates almost vanish at 150 and 300 m; only seams and rim light carry them (§6.9 risk confirmed). Emissive glyphs with bloom make the functional blocks the most legible of the three. Damage cracks read strongly.
+  3. **PULP HORIZON.** The constant 1.5 px ink outline swamps the 1-cell blocks at 150–300 m; the turret becomes an ink blob. Flat fields and halftone damage read well at 50 m.
+  4. **DRYDOCK.** Bone and gunmetal plates read clearly. The 1-cell function band dominates 2-cell blocks. Stencil codes (`THR-S`, `WPN-PL`, `CORE`) read at 5 m but not at 50 m.
+- **Interpretations.**
+  - Glyphs, bands and stencils are thin decal geometry, counted in the budgets, not trim-sheet textures.
+  - The angled patch is 4 × 4 wedges, a stepped slope.
+  - The core follows §5.3 (green top panel and beacon) rather than a full 1-cell band.
+  - Stencil text uses the placeholder Office Code Pro Bold (OFL); the direction fonts arrive with ART-008.
+  - Each 300 m render is a few pixels; the composite enlarges it with nearest-neighbour pixels.
+- **Status.** `review` (frontier). It needs an independent frontier review, and a second reviewer who has not seen the block names must judge the 150 m glyph renders (criterion 3); name that reviewer here. `.gitattributes` now marks `*.blend` binary, `.gitignore` ignores `*.blend1`, and outputs total 8.2 MB (board budget 25 MB).
 
 ### 2026-10-10 — ART-007 progress; owner picks ART-004 next (claude, claude-opus-5-5)
 - **ART-007 progress (branch `task/ART-007-brick-tools`, 083c482).**
