@@ -1477,7 +1477,7 @@ def stats_html(st, base=None):
 # Rendering
 # ======================================================================================================================
 
-SCALES3 = {"Frigate": 64, "Cargo ship": 118, "Cruiser": 150, "Dreadnought": 280}
+SCALES3 = {"Frigate": 64, "Cargo ship": 128, "Cruiser": 150, "Dreadnought": 280}
 BARS3 = {"Frigate": 10, "Cargo ship": 20, "Cruiser": 20, "Dreadnought": 50}
 
 
