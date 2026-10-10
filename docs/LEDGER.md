@@ -13,12 +13,12 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 64 | 1 | 0 | 0 | 1 | 0 | 66 | 10 |
-| M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 2 |
+| M0 | 64 | 0 | 0 | 0 | 2 | 0 | 66 | 16 |
+| M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 3 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
-| M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 0 |
+| M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
-| A0 | 15 | 0 | 0 | 1 | 0 | 0 | 16 | 0 |
+| A0 | 15 | 0 | 0 | 1 | 0 | 0 | 16 | 1 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 <!-- summary:end -->
@@ -35,7 +35,7 @@
 <!-- tasks:begin -->
 | ID | Title | Spec | Milestone | Tier | Depends on | Ready | Status | Owner | Updated | Commit | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| FND-001 | Public contract types | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | CORE-001, DATA-001 | no | todo |  |  |  |  |
+| FND-001 | Public contract types | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | FND-002 | Bootstrap, GameRoot and explicit World creation | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-001 | no | todo |  |  |  |  |
 | FND-003 | PauseService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001 | no | todo |  |  |  |  |
 | FND-004 | SettingsService and SettingsApplier | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001, PERS-001 | no | todo |  |  |  |  |
@@ -58,9 +58,9 @@
 | INP-001 | Public contract types and the actions asset | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | CORE-001 | yes | todo |  |  |  |  |
 | INP-002 | InputService contexts and display strings | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-001 | no | todo |  |  |  |  |
 | INP-003 | Rebinding and overrides | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-002 | no | todo |  |  |  |  |
-| DATA-001 | Public contract types | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | CORE-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-10 |  |  |
-| DATA-002 | ValidationReport implementation | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-001 | no | todo |  |  |  |  |
-| DATA-003 | Orientation tables | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-001 | no | todo |  |  |  |  |
+| DATA-001 | Public contract types | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 12a585b | `ContentDefinition.Id` cache already implemented (DATA-004 overlap) |
+| DATA-002 | ValidationReport implementation | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-001 | yes | todo |  |  |  |  |
+| DATA-003 | Orientation tables | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-001 | yes | todo |  |  |  |  |
 | DATA-004 | Definition self-validation and ID rules | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-002 | no | todo |  |  |  |  |
 | DATA-005 | ContentCatalog | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-004 | no | todo |  |  |  |  |
 | DATA-006 | Block blob builder and placement maths | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-003, DATA-005 | no | todo |  |  |  |  |
@@ -79,8 +79,8 @@
 | PERS-010 | Fixture harness, container fixtures and the 04-B1 EditMode regression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | no | todo |  |  |  |  |
 | PERS-011 | Round-trip byte equality (framework level) | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | no | todo |  |  |  |  |
 | PERS-012 | Save performance and size gates | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-008 | no | todo |  |  |  |  |
-| VOX-001 | Public contract types | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M0 | standard | CORE-001, DATA-001 | no | todo |  |  |  |  |
-| AUD-001 | Public contract types | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | CORE-001, DATA-001 | no | todo |  |  |  |  |
+| VOX-001 | Public contract types | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M0 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
+| AUD-001 | Public contract types | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | AUD-002 | Mixer asset, voice settings and import rules | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | AUD-001 | no | todo |  |  |  |  |
 | AUD-003 | AudioService core: root, single listener, voice pools, volumes, pause | [SPEC-64](specs/SPEC-64-audio.md) | M0 | frontier | AUD-002 | no | todo |  |  |  |  |
 | DEV-001 | Public contract types | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | CORE-001 | yes | todo |  |  |  |  |
@@ -92,7 +92,7 @@
 | DEV-020 | Release-strip guarantee | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | no | todo |  |  |  |  |
 | TST-001 | Test kit core | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | frontier | CORE-001 | yes | todo |  |  |  |  |
 | TST-008 | Iteration gates | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | standard | TST-001 | no | todo |  |  |  |  |
-| MIG-001 | Public contract types | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | DATA-001 | no | todo |  |  |  |  |
+| MIG-001 | Public contract types | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | DATA-001 | yes | todo |  |  |  |  |
 | MIG-002 | Legacy JSON index and strict reading | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | no | todo |  |  |  |  |
 | MIG-003 | Legacy ID map | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | no | todo |  |  |  |  |
 | MIG-004 | Asset writer, manifest, runner and report | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-002, MIG-003, SPEC-04 | no | todo |  |  |  |  |
@@ -187,7 +187,7 @@
 | CAM-004 | Rig service, camera prefab, Menu/Hold modes and the sync system shell | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-003, FND-001 | no | todo |  |  |  |  |
 | CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-004, FLT-001, VOX-001, INP-001 | no | todo |  |  |  |  |
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | no | todo |  |  |  |  |
-| VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | no | todo |  |  |  |  |
+| VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | no | todo |  |  |  |  |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | no | todo |  |  |  |  |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | no | todo |  |  |  |  |
@@ -351,7 +351,7 @@
 | ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | no | todo |  |  |  |  |
 | ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | no | todo |  |  |  |  |
 | ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-009, SPEC-70 | no | todo |  |  |  |  |
-| NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | no | todo |  |  |  |  |
+| NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | no | todo |  |  |  |  |
 | NAR-003 | Type checker, registry, compiler and binder | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-002 | no | todo |  |  |  |  |
 | NAR-004 | Condition and expression nodes | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003 | no | todo |  |  |  |  |
@@ -482,7 +482,7 @@
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | no | todo |  |  |  |  |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | no | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
-| ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | no | todo |  |  |  |  |
+| ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | todo |  |  |  |  |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | no | todo |  |  |  |  |
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | review | claude (claude-opus-5-5) | 2026-10-10 | a61dde8 | Needs an independent frontier review (no subagents this session). Links only; image set waits for owner OK to download |
 | ART-004 | Block-kit style test: five blocks per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002 | no | todo |  |  |  |  |
@@ -555,6 +555,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-10 — DATA-001 public contract types (claude, claude-opus-5-5)
+- **What.** 60 files transcribed from SPEC-04 §4.2–§4.9 in `Game.Data` (`Blocks/`, `Components/`, `Definitions/{Common,Items,Blocks}/`, `Validation/`, `Services/`, `ContentDatabase`), plus `Tests/EditMode/Data/ContractShapeTests.cs`. Stub bodies throw `NotImplementedException("DATA-00x")` naming the task that implements them.
+- **Choices.** `ContentDefinition.Id` caching is implemented now (two lines), because the spec's cache fields would otherwise be unused and warn; DATA-004 keeps ID rules and validation. `OrientationTables` does not hold its `static readonly OrientationData` yet: with a throwing generator, the static initialiser would fail on first touch, so DATA-003 adds it. `OrientationData` span properties are expression-bodied, since a class cannot store a `ReadOnlySpan`. The empty folder `Assets/Game/Editor/Content/` is left to DATA-008, because git does not keep empty folders.
+- **Checks.** `tools/compile.sh` clean with zero warnings. EditMode 6/6 pass (`ContractShapeTests` ×2 plus the four `Project` guards).
 
 ### 2026-10-10 — CORE-001 public contract types (claude, claude-opus-5-5)
 - **What.** 88 files transcribed from SPEC-02 §4.1–§4.12 into `Game.Core` (root, `Components/`, `Systems/`, `Events/`, `Save/`, `Flow/`, `Settings/`), `Game.Data` (`Components/`, `Combat/ProducerKind`, `Streams/`) and `Game.Presentation/Systems`. Bodies not given in §4 throw `NotImplementedException("CORE-0xx")`; `GuardedHandles` is complete, including `Create`/`Dispose`.
