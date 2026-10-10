@@ -603,6 +603,24 @@ Newest first. One entry per finished task or notable event: what changed, measur
     - CRADLE → the Stolen CRADLE (S).
 
   Every card has a designation and maker, a story, its fit, ship system, built-ins, asymmetry, variants, what it is weak to, and six stat bars. Refit cards show stat deltas and +/− change lists.
+- **Owner feedback (verbatim, 2026-10-10)** on batch 3:
+
+  > i like this batch 3 a lot more.
+  >
+  > you know how one of the game's systems is ramming. and some ships are meant to be used as rammers. where is that here if it is at all?
+
+  > ok and btw based on our lore these are the clans, but we are missing the human faction with the ARK tech and their ships. keep in mind humans are strangers in this galaxy
+
+- **Batch 3 additions.**
+  - **ARK expedition** (the humans, strangers in the galaxy): PETREL pathfinder, GARDENER fabricator tender, ICEBREAKER ram cruiser and HOLDFAST mobile drydock.
+    - The lore comes from the legacy narrative: earlier Arks lost ahead of this one, and the Silence behind it.
+    - The tier badge is "ARK tech". The hulls are Earth patterns printed by the ARK: crew-repairable, with adapter points for clan parts, red and green nav lights, and hazard stripes.
+    - The refit bay has a new row: PETREL → Mission 12 (an earlier Ark's wreck, with Silence damage) → Gone native (Vestari emitter, Khuchad slab, Alliance module).
+  - **Rammers section.**
+    - Ram damage is collision impulse, so a rammer needs a mass-forward replaceable prow, a load-bearing spine, thrust plus reverse thrust, and nothing fragile at the bow.
+    - New ships: TARPAN (Khuchad ram frigate) and TALLY (S) FIRESHIP (a one-way Scavenger refit), alongside the ICEBREAKER.
+    - Every card now has a seventh stat, Ram.
+  - **The rammers default was chosen without an answer** (option 1 of three offered: a dedicated rammers set).
 - **Next:** the owner marks silhouettes from either batch; the approved plan views are then built in 3D with the new pieces, plating and blocks, checked, rendered and added to the look book.
 
 ### 2026-10-10 — Look book round 3: connected ships, cruisers and dreadnoughts, capital weapons, defended stations, five aliens (claude, claude-opus-5-5)

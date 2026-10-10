@@ -126,6 +126,290 @@ def S(fac):
 
 
 # ======================================================================================================================
+# ARK EXPEDITION: the humans, strangers in this galaxy. Earth patterns printed by the ARK's fabricators, built to be
+# repaired by their own crews with whatever they find. Nav lights: red to port, green to starboard
+# ======================================================================================================================
+
+def nav(s, xp, yp, xs, ys):
+    s.circ(xp, yp, 0.7, "navr")
+    s.circ(xs, ys, 0.7, "navg")
+
+
+def ark_petrel(v="base"):
+    s = S("ark")
+    if v == "m12":
+        s.taper([(0, 0), (0, 8), (0, 30), (0, 40)], [8, 9.4, 9.4, 4], "base")
+        for y in (10, 20, 30):
+            s.line([(-4.7, y), (4.7, y)], "seam")
+        s.circ(0, 36, 3.6, "cab")
+        s.taper([(-4.6, 24), (-13, 33)], [1.2, 1.0], "frame")
+        s.circ(-14, 34.4, 2.6, "frame")
+        s.oct(4.6, 9, 8, 20, 1.6, "plate")
+        s.engine(0, 0, 4.6, 3)
+        with s.scope("silence"):
+            pts = [(5.2, 20), (9.6, 24), (8.6, 31), (3.6, 36), (1.8, 30), (3.2, 25)]
+            s.poly(pts, "vglow")
+            s.poly(pts, "void")
+        s.line([(-4.6, 4), (-4.6, 18)], "pipe")
+        return s, dict(name="PETREL · MISSION 12", desig="Earlier Ark pattern, found adrift", tier="stranger",
+                       story="The same job from an earlier Ark: round modules, one engine, no turret. Its logs are older than they should be, "
+                             "and a bite out of its starboard bow is simply gone, not broken. Salvageable, if you dare.",
+                       plus=["Older pattern parts the ARK can no longer print", "Survey logs from Mission 12"],
+                       minus=["No guns", "Silence damage: that part of the hull is gone, not broken"],
+                       stats=(1, 1, 0, 2, 0, 1, 0))
+    s.oct(-3.6, 0, 3.6, 33, 1.0, "base")
+    for y in (8, 15, 22):
+        s.line([(-3.6, y), (3.6, y)], "seam")
+    s.oct(-3.4, 30, 3.4, 41, 1.8, "cab")
+    s.oct(-3.4, 35.4, 3.4, 37, 0, "frame")
+    s.windows(0, 32, 33, 1.3)
+    s.truss((-3.6, 26), (-15, 38), 1.8)
+    s.circ(-16.2, 39.2, 2.6, "frame")
+    s.circ(-16.2, 39.2, 1.9, "cab")
+    s.line([(-17.8, 39.2), (-14.6, 39.2)], "seam")
+    s.slab([(-3.6, 4), (-11.4, 7), (-11.4, 13), (-3.6, 13)], "rad")
+    for y in (8.4, 10.4):
+        s.line([(-10.8, y), (-4, y)], "seam")
+    for (y0, y1) in ((8, 17), (18.4, 27.4)):
+        s.oct(3.6, y0, 8.4, y1, 2, "accent")
+        s.hazard(3.8, y1 - 1.6, 8.2, y1 - 0.4)
+    s.turret(0, 18.6, 1.5, 2)
+    s.engine(0, 0, 4.4, 3)
+    s.engine(-2.9, 2, 1.6, 1.2)
+    s.engine(2.9, 2, 1.6, 1.2)
+    nav(s, -3.6, 30.6, 3.6, 30.6)
+    if v == "native":
+        with s.scope("vestari"):
+            s.poly([(-16.2, 44), (-14.2, 41.4), (-16.2, 38.8), (-18.2, 41.4)], "plate")
+            s.circ(-16.2, 41.4, 0.7, "laser")
+        with s.scope("khuchad"):
+            s.slab([(-3.6, 14), (-8.6, 15), (-9, 27), (-3.6, 29)])
+            s.ticks(-8.2, 17, 2, 1.2, 1.6, 90)
+        with s.scope("alliance"):
+            s.oct(3.6, 18.4, 9, 27.4, 0.6, "plate")
+            s.containers(4, 18.8, 8.6, 27, 2, 2, seed=3)
+        s.line([(-3.6, 14), (-3.6, 29)], "weld")
+        s.line([(3.6, 18.4), (3.6, 27.4)], "weld")
+        return s, dict(name="PETREL · GONE NATIVE", desig="Field refit with clan parts", tier="stranger",
+                       story="The expedition can't make shields like the Vestari or armour like the Khuchad, so it takes them. A Vestari emitter on the sensor boom, "
+                             "a Khuchad slab bolted to port, an Alliance cargo module where a fuel drum was. It flies like a PETREL and confuses everyone who scans it.",
+                       plus=["A Vestari shield emitter: a real shield at last", "Khuchad armour slab on the port side", "An Alliance cargo module"],
+                       minus=["One fuel drum gone: shorter range", "Nobody's spare parts fit: repairs are slow", "Every clan reads it as a thief"],
+                       stats=(2, 3, 3, 3, 2, 2, 0))
+    return s, dict(
+        name="PETREL", cls="Frigate", desig="PETREL-class pathfinder · ARK pattern 7", tier="stranger",
+        story="First into every unknown system. A strangers' ship has no charts, so the PETREL makes them: a magnetometer boom to port, "
+              "drop tanks of fuel to starboard, one turret, and a radiator wing so it can sit silent for days and listen. "
+              "Lanes open through what you know, and this is the ship that finds out.",
+        fit="1 twin autocannon turret · survey boom · 2 drop tanks",
+        system="Listen: goes cold (engines and radiator off) and reads everything in range",
+        built="Printed pattern (the ARK can rebuild it from scratch) · Crew-repairable · No shield emitter (the expedition can't make one yet)",
+        asym="Survey boom and radiator to port, fuel drums to starboard.",
+        weak="Any warship. It survives by not being seen.",
+        variants="PETREL · Mission 12 (older Ark pattern, found adrift) · PETREL · Gone native (clan parts bolted on): both in the refit bay",
+        stats=(2, 1, 0, 4, 1, 2, 0))
+
+
+def ark_gardener():
+    s = S("ark")
+    s.oct(-2.4, -4, 2.4, 96, 0.6, "frame")
+    s.oct(-7, 72, 7, 98, 4, "cab")
+    s.hazard(-7, 86, 7, 87.6)
+    s.windows(0, 76, 84, 1.8)
+    for sx in (-1, 1):
+        s.taper([(sx * 5, 96), (sx * 9, 104), (sx * 6, 108)], [1.2, 1.0, 0.8], "frame")
+    s.oct(-11, 38, 11, 68, 2.4, "plate")
+    s.oct(-8, 46, 8, 49, 0, "accent")
+    s.oct(-8, 56, 8, 59, 0, "accent")
+    for x in (-6, 0, 6):
+        s.oct(x - 1, 40, x + 1, 44, 0.3, "win")
+    for y in (8, 20, 32):
+        s.oct(2.4, y, 15, y + 10.4, 1, "frame")
+        s.oct(3.4, y + 1, 14, y + 9.4, 0.8, "ore")
+        s.circ(8.6, y + 5.2, 2.2, "crust")
+    s.slab([(-2.4, 6), (-20, 4), (-21, 32), (-2.4, 34)], "rad")
+    for y in range(9, 32, 4):
+        s.line([(-20, y), (-3, y)], "seam")
+    s.oct(-12, 64, -2.4, 74, 1.6, "base")
+    s.oct(-11, 68, -4, 73, 1, "cab")
+    s.turret(-7, 58, 1.6, 2, ang=180)
+    s.turret(0, 92, 1.4, 1)
+    s.oct(-8, -10, 8, 4, 2.4, "base")
+    s.engine(-3.6, -10, 5, 3.4)
+    s.engine(3.6, -10, 5, 3.4)
+    nav(s, -7, 96, 7, 96)
+    return s, dict(
+        name="GARDENER", cls="Cargo ship", desig="GARDENER-class fabricator tender · ARK pattern 2", tier="stranger",
+        story="Ore in, blocks out. The GARDENER takes raw rock in its hoppers and prints hull blocks for the fleet, which is how a few strangers keep ships "
+              "flying a lifetime from home. The bow vault holds the expedition's seed library. Its name comes from an old Ark AI that still asks if it is safe to plant yet.",
+        fit="2 light turrets · fabricator (ore to blocks) · seed vault · 2 manipulator arms",
+        system="Print: rebuilds destroyed blocks on a nearby ship from its ore stock",
+        built="Printed pattern · Crew-repairable · Civilian frame",
+        asym="Ore hoppers to starboard, radiator wing and bridge to port.",
+        weak="Slow and soft. Losing it costs the expedition more than any warship.",
+        variants="GARDENER · Harvest: hoppers swapped for a mining laser",
+        stats=(3, 1, 0, 1, 1, 4, 1))
+
+
+def ark_icebreaker():
+    s = S("ark")
+    s.poly([(-9, 2), (9, 2), (11, 14), (11, 40), (15, 52), (17, 74), (15, 90), (-15, 90), (-17, 74), (-15, 52), (-11, 40), (-11, 14)], "base")
+    for (x, y) in ((11, 24), (15, 52), (17, 74)):
+        s.line([(-x, y), (x, y)], "seam")
+    for sx in (-1, 1):
+        s.line([(sx * 11, 40), (sx * 15, 52)], "seam")
+    s.oct(-2.2, 2, 2.2, 124, 0.6, "frame")
+    prow = [[(-15, 88), (15, 88), (12, 98), (0, 112), (-12, 98)], [(-12, 98), (0, 112), (12, 98), (8, 108), (0, 120), (-8, 108)],
+            [(-8, 108), (0, 120), (8, 108), (4, 118), (0, 127), (-4, 118)]]
+    for i, pr in enumerate(prow):
+        s.slab(pr, "plate")
+    s.poly([(-12.4, 97), (0, 111), (0, 113.4), (-12.4, 99.4)], "haz")
+    s.poly([(12.4, 97), (0, 111), (0, 113.4), (12.4, 99.4)], "haz")
+    for (y0, y1) in ((16, 28), (29, 40)):
+        s.slab([(-11, y0), (-15.6, y0 + 1), (-15.6, y1 - 1), (-11, y1)], "plate")
+    s.oct(15, 54, 20, 70, 1.2, "frame")
+    s.taper([(17.6, 69), (17.6, 78)], [1.2, 0.8], "gun")
+    s.poly([(16.6, 78), (18.6, 78), (17.6, 81)], "accent")
+    s.oct(-6, 10, 6, 22, 2, "cab")
+    s.windows(0, 12, 20, 1.6)
+    s.turret(-9, 70, 2.4, 2, ang=180)
+    s.turret(9, 34, 2.4, 2, ang=0)
+    s.turret(0, 52, 2.8, 3)
+    for x in (-9, -3, 3, 9):
+        s.engine(x, 0, 5, 3.6)
+    s.engine2(-16.4, 80, 3, 2.4, 90)
+    s.engine2(13.6, 60, 3, 2.4, 90)
+    nav(s, -15, 87, 15, 87)
+    return s, dict(
+        name="ICEBREAKER", cls="Cruiser", desig="ICEBREAKER-class ram cruiser · ARK pattern 11", tier="stranger",
+        story="Built to break ice rings for water, it taught the expedition its first lesson here: when your guns are worse than everyone else's, use mass. "
+              "Three replaceable prow plates on a keel beam that runs the full length, the bridge as far aft as it goes, turrets set back from the bow, and reverse thrusters to pull free after a hit.",
+        fit="1 dorsal triple · 2 twin turrets set back from the bow · harpoon winch (starboard) · 3 replaceable prow plates",
+        system="Full burn: +80% thrust for 4 s, then the reverse thrusters fire to pull it out",
+        built="Printed pattern · Keel beam (impacts travel down the spine, not through the hull) · Spare prow plates carried on the port flank",
+        asym="Spare prow plates to port, harpoon winch to starboard.",
+        weak="Anything that turns faster or keeps its distance. Between rams it is an average cruiser with poor guns.",
+        variants="ICEBREAKER · Polar: harpoon and winch for towing ice instead of fighting",
+        stats=(4, 4, 1, 3, 2, 1, 5))
+
+
+def ark_holdfast():
+    s = S("ark")
+    s.poly([(-40, 0), (2, 0), (2, 238), (-12, 238), (-20, 230), (-46, 230), (-54, 214), (-54, 188), (-62, 182), (-62, 136), (-54, 130),
+            (-54, 92), (-62, 86), (-62, 40), (-54, 34), (-50, 12)], "base")
+    for y in range(30, 230, 30):
+        s.line([(-54, y), (2, y)], "seam")
+    s.line([(-28, 4), (-28, 228)], "seam")
+    s.oct(-40, 232, -8, 254, 6, "cab")
+    s.windows(-24, 236, 250, 2.8)
+    s.oct(-54, 236, -40, 240, 0, "accent")
+    for (y0, y1) in ((40, 90), (130, 180)):
+        s.slab([(-62, y0), (-84, y0 + 6), (-84, y1 - 6), (-62, y1)], "rad")
+        for y in range(y0 + 8, y1 - 4, 6):
+            s.line([(-82, y), (-64, y)], "seam")
+    s.oct(-44, 96, -10, 126, 4, "plate")
+    s.oct(-38, 106, -16, 116, 2, "accent")
+    for sx_x in (8, 74):
+        s.truss((sx_x, 4), (sx_x, 246), 7)
+    for y in (6, 82, 160, 242):
+        s.truss((2, y), (78, y), 5)
+    s.oct(2, 118, 78, 124, 0, "frame")
+    s.hazard(2, 120, 78, 122)
+    s.oct(36, 116, 44, 126, 1, "plate")
+    with s.scope("ark"):
+        hull = [(33, 30), (51, 30), (53, 100), (57, 150), (55, 186), (42, 216), (29, 186), (27, 150), (31, 100)]
+        s.poly(hull, "ghost")
+        for y in (60, 90, 150, 180):
+            s.line([(30, y), (56, y)], "truss")
+    for (x, y) in ((-40, 210), (-14, 210), (-40, 30), (-14, 60), (78, 246), (8, 246), (78, 6), (-30, 150)):
+        s.turret(x, y, 3.4, 2)
+    s.oct(-50, -10, -2, 6, 3, "plate")
+    for x in (-42, -30, -18, -8):
+        s.engine(x, -10, 6.6, 4)
+    for x in (8, 74):
+        s.engine(x, -2, 6, 4)
+    nav(s, -84, 174, 80, 246)
+    return s, dict(
+        name="HOLDFAST", cls="Dreadnought", desig="HOLDFAST-class mobile drydock · ARK pattern 1", tier="stranger",
+        story="The expedition's only capital ship is a shipyard. Half of it is hull (habitat, fabricators, reactor, radiators), "
+              "half is an open cradle where a new ship is printed block by block, here an ICEBREAKER half-built. Strangers can't count on anyone else's yards, so they brought their own.",
+        fit="8 twin turrets on the hull and cradle corners · gantry crane · a ship-sized build cradle",
+        system="Rush build: finishes the ship in the cradle, or repairs any ship docked in it",
+        built="Printed pattern · Crew-repairable · Yard (builds and repairs ships between fights)",
+        asym="Solid hull to port, open build cradle to starboard.",
+        weak="The cradle side is open frame, and anything in it is unfinished. Hit it while it's building.",
+        variants="Every HOLDFAST is different, depending on what is in the cradle",
+        stats=(5, 3, 1, 1, 3, 4, 2))
+
+
+# ======================================================================================================================
+# RAMMERS: ramming is a game system (collision impulse = mass x speed, and both ships take the hit)
+# ======================================================================================================================
+
+def kh_tarpan():
+    s = S("khuchad")
+    s.poly([(-5, 0), (5, 0), (6.4, 6), (6, 18), (4, 24), (-4.6, 24), (-6, 16), (-6, 4)], "base")
+    plates = [[(-7, 20), (6, 18.6), (8.4, 26), (2.6, 34), (-6, 30)], [(-6, 30), (2.6, 34), (8.4, 26), (9.6, 32), (4.6, 40), (-3, 38)],
+              [(-3, 38), (4.6, 40), (9.6, 32), (8.6, 40), (5, 46.4), (0.6, 45)]]
+    for p in plates:
+        s.slab(p)
+    s.line([(9.6, 32), (5, 46.4)], "tick")
+    s.ticks(-5, 31, 4, 1.2, 1.6, 30)
+    s.oct(-2.6, 8, 2.2, 15, 1, "cab")
+    s.turret(0, 3.6, 1.4, 2, ang=270)
+    for x in (-3.4, 0.4, 4):
+        s.engine(x, 0, 3.4, 2.6)
+    s.engine(-7.6, 3, 2.6, 2)
+    s.engine(7.6, 3, 2.6, 2)
+    return s, dict(
+        name="TARPAN", cls="Frigate", desig="TARPAN-class ram frigate · Khuchad Clan", tier="low",
+        story="The pack's battering ram: five engines behind three layers of soot plate, with the prow canted to starboard like every Khuchad lance. "
+              "It hits first to stagger a target and crack its armour, and the CORSACs pour through the hole. Few TARPAN crews ram twice; the ones who do get painted on the ORDU.",
+        fit="1 rear-facing autocannon · triple-layer ram prow",
+        system="Charge: +100% thrust for 3 s; the prow hardens for the impact",
+        built="Trophy plating · Pack link",
+        asym="Prow canted to starboard; armour layers sweep from the port side.",
+        weak="Any ship that sidesteps it. It barely turns, and after a ram it is a slow brick with one gun.",
+        variants="TARPAN Bannerman: a chief's TARPAN with the clan's colours on the prow",
+        stats=(2, 4, 0, 4, 1, 0, 5))
+
+
+def sc_fireship():
+    s = S("alliance")
+    s.oct(-2.6, -2, 2.6, 94, 0.6, "frame")
+    s.hull([(86, 10), (94, 9), (100, 5.4), (104.4, 1.6)], "base")
+    with s.scope("scav"):
+        for i, y0 in enumerate(range(24, 84, 12)):
+            for sx in (-1, 1):
+                x0, x1 = (-14, -2.6) if sx < 0 else (2.6, 14)
+                s.oct(x0, y0, x1, y0 + 11.4, 0.4, "plate" if (i + (sx > 0)) % 2 else "base")
+                s.line([(x0 + 1, y0 + 2), (x1 - 1, y0 + 9)], "seam")
+        s.slab([(-12, 92), (12, 92), (8, 108), (0, 116), (-8, 108)], "plate")
+        s.slab([(-8, 108), (0, 116), (8, 108), (4, 116), (0, 121), (-4, 116)], "base")
+        s.poly([(-11.6, 93.4), (11.6, 93.4), (11, 96), (-11, 96)], "accent")
+        for (x, y) in ((-18, 4), (18, 4), (-10, -10), (10, -10), (0, -12)):
+            s.engine2(x, y, 5.4, 4)
+        s.truss((-12, 8), (-18, 6), 3)
+        s.truss((12, 8), (18, 6), 3)
+        s.oct(-12, -6, 12, 8, 2.4, "base")
+        s.oct(-3, 70, 3, 78, 1.2, "accent")
+        s.circ(0, 74, 2, "cab")
+        s.line([(-14, 24), (-14, 84)], "weld")
+        s.line([(14, 24), (14, 84)], "weld")
+    s.oct(-17, 6, -6, 22, 2.2, "base")
+    s.oct(-15.6, 14, -7.4, 21, 1.4, "cab")
+    with s.scope("pochteca"):
+        s.oct(-8.6, 88, 8.6, 90.6, 0, "band")
+    return s, dict(
+        name="TALLY (S) FIRESHIP", desig="Scavenger refit · one-way", tier="outlaw",
+        story="A TALLY with its containers filled with scrap and slag for mass, three more engines, a welded ram on the bow and a lifeboat pod on top. "
+              "The crew aims it, locks the throttle and bails out. Scavengers use them to break blockades and station gates.",
+        plus=["Containers packed with scrap: twice the mass, and ram damage is mass × speed", "5 salvaged engines run past their limit", "A crude welded ram"],
+        minus=["No guns", "It doesn't come back", "Hull −50%: it only has to last one hit"],
+        stats=(1, 2, 0, 3, 0, 0, 5))
+
+
+# ======================================================================================================================
 # KHUCHAD CLAN: low tech, bulky, pack and chief. Armour to port (the shield arm), ram or gun to starboard (the lance arm)
 # ======================================================================================================================
 
@@ -1008,7 +1292,7 @@ def si_silence():
 # Page content
 # ======================================================================================================================
 
-TIERS = {"low": "LOW TECH", "mid": "MIDLINE", "high": "HIGH TECH", "outlaw": "OUTLAW", "redacted": "REDACTED"}
+TIERS = {"stranger": "ARK TECH", "low": "LOW TECH", "mid": "MIDLINE", "high": "HIGH TECH", "outlaw": "OUTLAW", "redacted": "REDACTED"}
 
 # Faction liveries per art direction, from DESIGN-SYSTEM.md (DRYDOCK, NOCTURNE); dark primaries lifted slightly for plan views.
 PAL = {
@@ -1038,11 +1322,23 @@ PAL = {
     "vanguard": (dict(base="#ECE7DC", plate="#101317", frame="#C9C2B2", cab="#F7F3EA", accent="#FFC86B", trim="#D8CFBD", glow="#FFC86B", laser="#FFD88A"),
                  dict(base="#DADDE2", plate="#0A0C10", frame="#AEB3BC", cab="#F2F4F7", accent="#FFC86B", trim="#C2C6CE", glow="#FFC86B", laser="#FFD88A")),
     "silence": (dict(void="#060508", accent="#6E3BFF", glow="#6E3BFF"), dict(void="#000000", accent="#6E3BFF", glow="#6E3BFF")),
-    "ark": (dict(base="#CFC8B8", plate="#3B3E42", frame="#26282B", cab="#EFEBE2", accent="#F2B705", glow="#FFE2B0", win="#FFE2B0", tur="#1E2023", trim="#F2B705"),
-            dict(base="#2C3139", plate="#6B7380", frame="#121418", cab="#C9CED6", accent="#FFE9C7", glow="#FFE9C7", win="#FFE9C7", tur="#0C0E10", trim="#FFE9C7")),
+    "ark": (dict(base="#CFC8B8", plate="#3B3E42", frame="#26282B", cab="#EFEBE2", accent="#F2B705", glow="#FFE2B0", win="#FFE2B0", tur="#1E2023", trim="#9A9C9E", rad="#6C7075", ore="#6B6355", crust="#3E3A34", ghost="#9AA0A8", laser="#FFE2B0"),
+            dict(base="#2C3139", plate="#6B7380", frame="#4A505A", cab="#C9CED6", accent="#FFE9C7", glow="#FFE9C7", win="#FFE9C7", tur="#0C0E10", trim="#8A919C", rad="#424954", ore="#4A4640", crust="#2A2724", ghost="#6B7380", laser="#FFE9C7")),
 }
 
 FACTIONS = [
+    dict(key="ark", name="ARK expedition", tier="stranger", tag="The humans · strangers in this galaxy · the player's faction",
+         lore="The A.R.K. expedition was supposed to save humanity, and a long time passed before it arrived. Earlier Arks went ahead and were lost; "
+              "their wrecks and beacons turn up across the galaxy. Behind the expedition there is nothing: only the Silence.",
+         doctrine="Nothing local and nothing wasted. Every ARK ship is an Earth pattern printed by the ARK's fabricators and built to be repaired by its own crew "
+                  "from whatever they can find. They are few, far from home and outgunned by every clan: no native shields, no energy weapons worth the name. "
+                  "So every hull has one job the expedition can't afford to lose (find the way, feed the fleet, break through, rebuild), and every hull has adapter "
+                  "points for the alien parts its crew takes. They are built from the same standard blocks the player uses: the most legible, most modifiable hulls in the galaxy.",
+         paint="Bone and graphite plates, safety-yellow drop tanks and fabricators, hazard stripes on every edge that can hit something, red and green navigation lights "
+               "and stencilled pattern numbers. Next to the clans they look plain, practical and foreign.",
+         builtin="Printed pattern (the ARK can rebuild any of them from scratch) · Crew-repairable · Adapter points (clan parts can be bolted on)",
+         mods="Field refits with clan parts (gone native), and wrecks of earlier Ark patterns to recover. Both are in the refit bay.",
+         ships=[lambda: ark_petrel("base"), ark_gardener, ark_icebreaker, ark_holdfast]),
     dict(key="khuchad", name="Khuchad Clan", tier="low", tag="Low tech · bulky · pack and chief",
          lore="A warfare tradition. Hegemonic and grabby: they take a world, strip what is easy and move on. Low-to-midline tech, in large numbers of small ships with one large ship leading the pack.",
          doctrine="Pack and chief. Cheap, thick-skinned frigates hunt in packs of six to twelve around one huge chief-ship that is also the clan's moving camp. "
@@ -1090,6 +1386,9 @@ FACTIONS = [
 ]
 
 REFITS = [
+    dict(title="PETREL pathfinder (ARK)", cls="Frigate",
+         note="The player's own path: an older Ark's wreck, and the same hull wearing clan parts.",
+         ships=[lambda: ark_petrel("base"), lambda: ark_petrel("m12"), lambda: ark_petrel("native")]),
     dict(title="PARCEL light freighter", cls="Frigate",
          note="Same hull, opposite choices: Scavengers trade hull for speed, Itztli trade speed for armour.",
          ships=[lambda: al_parcel("base"), lambda: al_parcel("s"), lambda: al_parcel("i")]),
@@ -1147,7 +1446,17 @@ def palette_css():
     return "\n".join(out)
 
 
-STAT_NAMES = ("Hull", "Armour", "Shield", "Speed", "Firepower", "Cargo")
+STAT_NAMES = ("Hull", "Armour", "Shield", "Speed", "Firepower", "Cargo", "Ram")
+
+RAM = {"CORSAC": 1, "KULAN": 2, "ARGALI": 4, "ORDU": 2, "CONSORTIUM": 1, "KING'S COURT": 3, "PARCEL (I) ESCORT": 1,
+       "WELLHEAD": 1, "WELLHEAD (K) PRIZE": 2}
+
+
+def full(m):
+    st = m["stats"]
+    if st is None or len(st) == 7:
+        return st
+    return tuple(st) + (RAM.get(m["name"], 0),)
 
 
 def stats_html(st, base=None):
@@ -1201,7 +1510,7 @@ def ship_card(s, m, faction):
             f'<div class="thumb">{sprite3(s, SCALES3[cls], mono=True)}</div><span class="tier t-{m["tier"]}">{TIERS[m["tier"]]}</span>'
             f'{sprite3(s, SCALES3[cls], BARS3[cls])}'
             f'<div class="nm">{m["name"]}</div><div class="role">{m["desig"]} · {cls.lower()} · {size_txt(s)}</div>'
-            f'{stats_html(m["stats"])}<p>{m["story"]}</p><dl class="codex">{codex}</dl>'
+            f'{stats_html(full(m))}<p>{m["story"]}</p><dl class="codex">{codex}</dl>'
             f'<p class="weak"><b>Weak to:</b> {m["weak"]}</p></button>')
 
 
@@ -1214,7 +1523,7 @@ def refit_card(s, m, base_stats, cls, is_base):
             f'<div class="thumb">{sprite3(s, SCALES3[cls], mono=True)}</div><span class="tier t-{m["tier"]}">{"BASE HULL" if is_base else TIERS[m["tier"]]}</span>'
             f'{sprite3(s, SCALES3[cls], BARS3[cls])}'
             f'<div class="nm">{m["name"]}</div><div class="role">{m["desig"]} · {size_txt(s)}</div>'
-            f'{stats_html(m["stats"], None if is_base else base_stats)}<p>{m["story"]}</p>{diff}</button>')
+            f'{stats_html(full(m), None if is_base else base_stats)}<p>{m["story"]}</p>{diff}</button>')
 
 
 def render():
@@ -1226,7 +1535,7 @@ def render():
 <ol>{res}</ol>
 <h3>How it maps onto our universe</h3>
 <p class="blurb">The factions already exist in your content: the lore below each faction name is from <code>Import/Legacy/content/Factions</code>, and the colours
-are the faction liveries in <code>DESIGN-SYSTEM.md</code>, one per art direction. House names, ship names and stories are mine and yours to change.</p>
+are the faction liveries in <code>DESIGN-SYSTEM.md</code>; the ARK lore is from the legacy narrative, one per art direction. House names, ship names and stories are mine and yours to change.</p>
 <table class="map"><tr><th>Starsector</th><th>Ours</th><th>Shape language</th></tr>
 <tr><td>Low tech (Hegemony)</td><td><b>Khuchad Clan</b></td><td>Bulky, lamellar armour to port, ram or gun to starboard, packs around a chief-ship</td></tr>
 <tr><td>Midline (Persean League)</td><td><b>Triple Alliance</b> (Tlaxcala)</td><td>Hybrid: standard spines with module bays; cargo plus guns; house colour bands</td></tr>
@@ -1234,7 +1543,8 @@ are the faction liveries in <code>DESIGN-SYSTEM.md</code>, one per art direction
 <tr><td>Pirates, Luddic Path refits</td><td><b>Scavengers</b> (S), Khuchad prizes (K)</td><td>Refits of other people's hulls: trusses, bolted engines, primer and mismatched paint</td></tr>
 <tr><td>Elite and auxiliary refits (XIV, LG, (A))</td><td><b>Itztli security refits</b> (I)</td><td>Same hull, more armour and guns, obsidian band</td></tr>
 <tr><td>Remnant, Omega, Threat, Dweller, Domain derelicts</td><td><b>Vanguard</b>, <b>the Silence</b> (and the xeno aliens already built)</td><td>Rule-breaking: three-fold symmetry, no engines, flutes and chevrons, void</td></tr>
-<tr><td>The player</td><td><b>ARK expedition</b></td><td>The round-3 line-A ships (bone, graphite, safety yellow)</td></tr></table>
+<tr><td>(none: here the humans are the strangers)</td><td><b>ARK expedition</b>, the player</td><td>Earth patterns from the ARK printers: legible standard blocks, hazard stripes, nav lights, adapter points for clan parts</td></tr></table>
+<p class="blurb"><b>Strangers and natives.</b> The Khuchad, the Alliance and the Vestari are the galaxy's own clans; the humans of the ARK are the newcomers. So the human ships are deliberately the odd ones out: plainer, foreign, and the only ones built to take other people's parts.</p>
 <p class="blurb"><b>Matchups.</b> Khuchad beat the Alliance up close (armour and rams against average shields). The Alliance beats the Vestari with numbers and missiles
 (shields overload and there are too few Vestari to replace losses). The Vestari beat the Khuchad by never letting them close. Frigates matter everywhere:
 a CORSAC pack on an ARGALI's open side, an AUDITOR's harpoon on a fleeing EDICT.</p>
@@ -1252,10 +1562,25 @@ a CORSAC pack on an ARGALI's open side, an AUDITOR's harpoon on a fleeing EDICT.
                     f'<p class="blurb"><b>Paint.</b> {fa["paint"]}</p>'
                     f'<p class="blurb"><b>Built into every hull.</b> {fa["builtin"]} &nbsp; <b>Mods they make.</b> {fa["mods"]}</p>'
                     f'<div class="grid4">{"".join(cards)}</div></section>')
+    rc = []
+    for fn, fac in ((kh_tarpan, "Khuchad Clan"), (ark_icebreaker, "ARK expedition")):
+        s, m = fn()
+        rc.append(ship_card(s, m, fac))
+    s, m = sc_fireship()
+    rc.append(refit_card(s, m, full(al_tally("base")[1]), "Cargo ship", False))
+    secs.append("<section class=\"fac rammers\"><h2>Rammers</h2>"
+                "<p class=\"blurb\">Ramming is a game system: ram damage comes from collision impulse (mass × speed), and with voxel destruction both ships take the hit. "
+                "So a rammer needs its own build: mass up front in a solid, replaceable prow; a spine that carries the shock so the rammer doesn't snap; "
+                "lots of thrust, plus reverse thrust to pull free; and nothing fragile near the bow. Its counter is anything that turns faster or keeps its distance. "
+                "Every card now has a <b>Ram</b> bar.</p>"
+                "<p class=\"blurb\">Who rams: the <b>Khuchad</b> live for it (TARPAN, the ARGALI's breaching ram, the KULAN's bow). The <b>ARK</b> learned it out of necessity (ICEBREAKER). "
+                "<b>Scavengers</b> do it once per ship (the FIRESHIP). The <b>Alliance</b> would rather harpoon you and tow you in. The <b>Vestari</b> never ram: with so few of them, "
+                "trading a hull and its crew for one hit is unthinkable. Batch 2 also has rammers: PENITENT (NOCTURNE frigate) and the MAUSOLEUM's ram.</p>"
+                f"<div class=\"grid4\">{''.join(rc)}</div></section>")
     rows = []
     for rf in REFITS:
         built = [fn() for fn in rf["ships"]]
-        base_stats = built[0][1]["stats"]
+        base_stats = full(built[0][1])
         cards = [refit_card(s, m, base_stats, rf["cls"], i == 0) for i, (s, m) in enumerate(built)]
         rows.append(f'<div class="rrow"><div class="cls"><b>{rf["title"]}</b><span>{rf["note"]}</span><span class="sc">same scale across the row</span></div>'
                     + "".join(cards) + "</div>")
@@ -1283,7 +1608,7 @@ CSS3 = """
 .sw{display:inline-flex;gap:3px;margin-left:auto}.sw i{display:inline-block;width:16px;height:16px;border-radius:3px;border:1px solid rgba(255,255,255,.2)}
 .pdd .sw .nc,.pnc .sw .dd{display:none}
 .tier{font-size:10px;font-weight:800;letter-spacing:.12em;padding:3px 7px;border-radius:4px;color:#fff;white-space:nowrap}
-.t-low{background:#A8471E}.t-mid{background:#1F7A4D}.t-high{background:#2F7FD0}.t-outlaw{background:#8E2B25}.t-redacted{background:#000;color:#FFC86B;border:1px solid #FFC86B}
+.t-stranger{background:#F2B705;color:#16181B}.t-low{background:#A8471E}.t-mid{background:#1F7A4D}.t-high{background:#2F7FD0}.t-outlaw{background:#8E2B25}.t-redacted{background:#000;color:#FFC86B;border:1px solid #FFC86B}
 .card .tier{position:absolute;top:12px;right:12px}
 .grid4{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;margin:12px 0}
 .rrow{display:grid;grid-template-columns:150px repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
@@ -1297,7 +1622,7 @@ CSS3 = """
 .diff li.p::before{content:"+";position:absolute;left:2px;color:#7BE39A;font-weight:700}.diff li.m::before{content:"−";position:absolute;left:2px;color:#F08A6A;font-weight:700}
 .rd{font-style:normal;color:#E9E6DF;letter-spacing:-.05em}
 .lore b{color:#FFC86B}
-.spr .band{fill:var(--band)}.spr .c1{fill:var(--c1)}.spr .c2{fill:var(--c2)}.spr .c3{fill:var(--c3)}.spr .c4{fill:var(--c4)}.spr .deck{fill:var(--deck)}
+.spr .navr{fill:#FF3B30}.spr .navg{fill:#34E36B}.spr .band{fill:var(--band)}.spr .c1{fill:var(--c1)}.spr .c2{fill:var(--c2)}.spr .c3{fill:var(--c3)}.spr .c4{fill:var(--c4)}.spr .deck{fill:var(--deck)}
 .spr .vglow{fill:var(--accent);filter:url(#vblur);opacity:.9}
 .spr .tick{fill:none;stroke:var(--accent);stroke-width:calc(var(--sw)*1.8)}
 .spr .lline{fill:none;stroke:var(--accent);stroke-width:calc(var(--sw)*1.1);opacity:.85}
@@ -1307,7 +1632,7 @@ CSS3 = """
 .spr .deckl{fill:none;stroke:var(--cab);stroke-width:calc(var(--sw)*1.2);stroke-dasharray:calc(var(--sw)*5) calc(var(--sw)*3);opacity:.75}
 .spr .cable{fill:none;stroke:var(--frame);stroke-width:calc(var(--sw)*2.6)}
 .spr .pipe{fill:none;stroke:var(--trim);stroke-width:calc(var(--sw)*2.6)}
-.mono .tick,.mono .lline,.mono .truss,.mono .weld,.mono .flute,.mono .deckl,.mono .pipe,.mono .vglow{display:none}
+.mono .navr,.mono .navg,.mono .tick,.mono .lline,.mono .truss,.mono .weld,.mono .flute,.mono .deckl,.mono .pipe,.mono .vglow{display:none}
 .mono .cable{fill:none !important;stroke:#111 !important;stroke-width:calc(var(--sw)*3) !important}
 .pnc .card3 .spr .base,.pnc .card3 .spr .plate{stroke:var(--accent);stroke-opacity:.35;stroke-width:calc(var(--sw)*.8)}
 @keyframes prism{0%{fill:#FF7B7B}20%{fill:#FFD86B}40%{fill:#7BFFA8}60%{fill:#6BD8FF}80%{fill:#B88BFF}100%{fill:#FF7B7B}}
