@@ -937,7 +937,7 @@ Measured station geometry and allocation totals:
 ### VOX-013 — GridSpawnSystem: spawn path and singletons
 - **Milestone:** M1
 - **Tier:** frontier — F1/F5: builds every grid; ordering with SPEC-11/12/13/31
-- **Depends on:** `VOX-006`, `VOX-011`, `VOX-012`, `REN-001`, `PHY-001`, `TST-001`
+- **Depends on:** `VOX-006`, `VOX-011`, `VOX-012`, `REN-001`, `PHY-001`, `DMG-001`, `TST-001`
 - **Do:** Implement `VoxelSingletons`, `GridSpawnApi` spawn overloads, `GridSpawnSystem` §5.7 steps 1, 4 and 5 with `BrickFillJob` and `FunctionalFillJob`, hooks, `PersistentId` copy, profile types from `RootComponentRegistration` and `GridStowApi` (§5.13), profiler markers. In step 5b also set `GridMass { Data = source.GetMass(content) }` (cached by revision, SPEC-12 Q3) and disable `GridMassRecompute`, so no O(cells) recompute runs after a spawn.
 - **Files:** `Assets/Game/Voxel/Grid/{GridSpawnSystem,GridSpawnApi,GridStowApi,VoxelSingletons,BrickFillJob,FunctionalFillJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/GridSpawnSystemTests.cs`; `Assets/Game/Tests/PlayMode/Voxel/GridSpawnPerfTests.cs`
 - **Acceptance criteria:**
@@ -1062,6 +1062,8 @@ Measured station geometry and allocation totals:
 | 24 | SPEC-05 repair treats block-zero tombstones as missing definitions and compacts valid instance indices | Preserve unreferenced tombstones; reserve D3 conversion for actual invalid/drifted references | Tech lead | Resolved 2026-10-11: the three-slot regression reproduced a collapse to one slot. Repair now retains block-zero entries with no referencing cells; no wire-format change. SPEC-05 Q26 records the shared rule. |
 | 25 | FromDecoded lacks free-instance pool reconstruction and raw VOXS allows an empty palette | Rebuild free indices ascending; reserve palette entry zero for raw empty payloads | Tech lead | Resolved 2026-10-11: restored tombstones are immediately reusable in deterministic LIFO order; structure-generated payloads remain byte-identical. |
 | 26 | ToSource uses Temp for sorted order but Encode is documented safe on a managed worker | Use TempJob for the immediately disposed order array | Tech lead | Resolved 2026-10-11: follows trap T2.10; managed-worker encoding is tested against main-thread bytes. |
+
+| 27 | GridStowApi.Unstow needs SplitGrace from DMG-001, which VOX-013 does not list | Make the existing contract dependency explicit | Tech lead | Resolved 2026-10-11: VOX-013 depends on DMG-001; implement that ready M1 contract task before spawning. |
 
 ## 11. References
 

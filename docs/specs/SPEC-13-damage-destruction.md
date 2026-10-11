@@ -350,8 +350,9 @@ namespace Game.Data.Definitions
     [UnityEngine.CreateAssetMenu(menuName = "Game/Content/Damage Config", fileName = "config_damage")]
     public sealed class DamageConfigDefinition : ContentDefinition
     {
-        // One serialized field per DamageConfig field below, same name in camelCase, same default value,
-        // plus four AudioCueDefinition references: ramImpactCue, cellBreakCue, splitCue, coreLostCue (may be null).
+        // One serialized field per numeric DamageConfig tuning field below, camelCase with the same default.
+        // Table is built at boot, not serialized (Game.Data cannot reference Game.Voxel). Cue hashes are derived
+        // from four AudioCueDefinition references: ramImpactCue, cellBreakCue, splitCue, coreLostCue (may be null).
     }
 }
 namespace Game.Voxel.Damage
@@ -845,13 +846,13 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - **Milestone:** M1
 - **Tier:** standard — transcribes the exact code of §4.2–§4.6 (bodies throw `NotImplementedException`)
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`
-- **Do:** Create every public type of §4.2–§4.6 with the exact fields, enums, comments and signatures; method bodies `throw new System.NotImplementedException()`, except `DamageConfig.Default` (returns the commented values) and `DamageConfig.Multiplier`. `DamageConfigDefinition` gets one `[SerializeField]` per `DamageConfig` field with the same defaults plus the four cue references. Create the folders of §4.1.
-- **Files:** `Assets/Game/Data/Combat/DamageType.cs`; `Assets/Game/Voxel/Damage/{DamageEventFlags,DamageEvent,CellRemovedReason,CellRemoved,ExplosionRequest,Hulk,HulkCause,HulkInfo,DamageImmune,GridDamageStats,PendingImpulse,GridIntegrityState,IntegritySeed,BrickConnectivity,BrickIntegrity,SplitGrace,SplitOrigin,GridDissolveMode,GridDissolveRequest,GridDissolving,ChunkBody,ChunkCell,ChunkColliderBlob,DamageStreams,CellRemovedView,GridRemovedRange,GridCoreLost,DamageTickStats,DamageConfig,DamageSetup,DamageMath,GridDda,CellStateHasher}.cs`; `Assets/Game/Data/Definitions/Damage/DamageConfigDefinition.cs`
+- **Do:** Create every public type of §4.2–§4.6 with the exact fields, enums, comments and signatures; method bodies `throw new System.NotImplementedException()`, except `DamageConfig.Default` (returns the commented values), `DamageConfig.Multiplier` and the exact `DamageSetup` component lists. Bring forward §4.7's `DamageTypeRow`/`DamageTableBlob` value types so the config compiles; `DamageStreamsData` is an internal opaque placeholder until DMG-002. `DamageConfigDefinition` serializes the numeric tuning fields with the same defaults and the four cue references; runtime table/hash fields are derived (Q18–20). Create the folders of §4.1.
+- **Files:** `Assets/Game/Data/Combat/DamageType.cs`; `Assets/Game/Voxel/Damage/{DamageEventFlags,DamageEvent,CellRemovedReason,CellRemoved,ExplosionRequest,ImpulseRequestFlags,ImpulseRequest,CellRestoreMode,CellRestoreRequest,CellRestored,Hulk,HulkCause,HulkInfo,DamageImmune,GridDamageStats,PendingImpulse,GridIntegrityState,IntegritySeed,BrickConnectivity,BrickIntegrity,SplitGrace,SplitOrigin,GridDissolveMode,GridDissolveRequest,GridDissolving,ChunkBody,ChunkCell,ChunkColliderBlob,DamageStreams,DamageStreamsData,CellRemovedView,CellRestoredView,GridRemovedRange,GridCoreLost,DamageTickStats,DamageConfig,DamageTypeRow,DamageTableBlob,DamageSetup,DamageMath,GridDda,CellStateHasher}.cs`; `Assets/Game/Data/Definitions/Damage/DamageConfigDefinition.cs`
 - **Acceptance criteria:**
-  - [ ] `tools/compile.sh` passes with zero warnings in `Game.Voxel` and `Game.Data`.
-  - [ ] `DamageType` has exactly `Kinetic, Energy, Explosive, Ram` (byte) in that order.
-  - [ ] Every component and buffer is unmanaged (`UnsafeUtility.IsUnmanaged`), and `IntegritySeed`, `ChunkCell` have `[InternalBufferCapacity(0)]`.
-  - [ ] With the default table (§4.7), `Multiplier(DamageType.Explosive, 3) == 2.0f`; armor class 7 returns the class-0 value; an unknown type returns 1.
+  - [x] `tools/compile.sh` passes with zero warnings in `Game.Voxel` and `Game.Data`.
+  - [x] `DamageType` has exactly `Kinetic, Energy, Explosive, Ram` (byte) in that order.
+  - [x] Every component and buffer is unmanaged (`UnsafeUtility.IsUnmanaged`), and `IntegritySeed`, `ChunkCell` have `[InternalBufferCapacity(0)]`.
+  - [x] With the default table (§4.7), `Multiplier(DamageType.Explosive, 3) == 2.0f`; armor class 7 returns the class-0 value; an unknown type returns 1.
 - **Tests:** `DamageContractTests.DamageType_HasBindingValues`, `.Components_AreUnmanaged`, `.Buffers_HaveZeroInternalCapacity`, `.Config_DefaultMultipliers` (EditMode, `Tests/EditMode/Voxel/Damage/`).
 
 ### DMG-002 — DamageStreams and DamageStreamsSystem
@@ -1084,25 +1085,29 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | SPEC-10 internals this spec relies on (§4.9) | Exactly the §4.9 table; SPEC-10 includes `DamageSetup.GridRootComponents()`/`BrickComponents()` in its archetypes | SPEC-10 |
-| 2 | Contact suppression for `SplitGrace` | SPEC-12 runs a contacts job in `PhysicsSimulationGroup` that disables contacts between a body with `SplitGrace` and `SplitGrace.Other` while `Tick < UntilTick` | SPEC-12 |
-| 3 | `PersistentId` for hulks in Burst | Core type `PersistentIdAllocator : IComponentData { ulong Next; ulong End; }` singleton; `GameSession` grants blocks of 4,096 IDs (refill when `End − Next < 1,024`, checked once per frame by a SPEC-01 bridge); only `SplitSystem` advances `Next`; unused IDs of a block are never reused | SPEC-01, SPEC-02 |
-| 4 | `StarSystemMember` for split grids and chunks (Voxel cannot name the Galaxy type) | **Answered by SPEC-31 §5.12 (adoption):** split grids and chunks adopt the parent's `StarSystemMember`; pieces of the player ship adopt the loaded star system (so they are unloaded with it). Chunk bodies are destroyed at unload; their blobs are released by `ChunkColliderCleanupSystem` (§5.9) | SPEC-31 |
-| 5 | Should hulks broken off the player ship really have no `StarSystemMember`? They would survive a jump | **Answered by SPEC-31 §5.12:** they adopt the loaded star system and stay behind as wrecks | Owner |
-| 6 | Writer of `VoxelGrid.Kind` after spawn | **Answered:** `ShipDeathSystem` only (architecture §8 row `VoxelGrid.Kind`) | Tech lead |
-| 7 | May `GridMassUpdateSystem`/`BrickDirtyScheduleSystem` record ECB commands? | No; they record none on roots, bricks or functional entities | SPEC-12, SPEC-10 |
-| 8 | `FxEvent.Color` for cell debris | `Color = paletteColorByte | (MaterialLayer << 8)`; bit 31 = 0; SPEC-63 resolves through the ship palette texture. New `FxKind` values: `CellDebris`, `RamImpact`, `ChunkDissolve` | SPEC-63 |
-| 9 | Cross-module ordering attributes | **Applied** in SPEC-23 §5.0 (2026-10-09). `SpatialHashBuildSystem` is `OrderFirst` in `GameplayPostPhysicsGroup` (SPEC-23 §5.0), so it needs no attribute against `ImpactEventSystem`; `ProjectileStepSystem [UpdateAfter(ImpactEventSystem)]`; `ExplosionSystem`, `ShieldSystem`, `BeamStepSystem [UpdateBefore(DamageResolveSystem)]` | SPEC-21, 22, 23 |
-| 10 | How consumers stop on hulks and moved blocks | AI/power/shield/propulsion queries use `WithNone<Hulk>`; power consumer buffers ignore entities whose `FunctionalBlock.Grid` differs from the ship and rebuild when `VoxelGrid.Revision` changes | SPEC-20, 22, 23 |
-| 11 | Who creates the configured `DamageConfig` | `Game.App` at boot: `SetSingleton(DamageConfig.FromDefinition(db.Get<DamageConfigDefinition>("config_damage")))`; prefix `config_` added to SPEC-04's prefix table | SPEC-01, SPEC-04 |
-| 12 | Chunk body rendering | SPEC-63 draws each `ChunkCell` as an instanced unit cube (`RenderMeshInstanced`, ≤ 32,000 instances) with the chunk's smoothed `LocalToWorld`, `LocalOrigin` and `CellSize`; colour as question 8 | SPEC-63 |
-| 13 | `PhysicsLayers` names used here | `PhysicsLayers.ChunkBody`: chunk bodies collide with grids, other chunks and static bodies; projectile and explosion queries do not hit chunks (chunks are not damageable) | SPEC-12 |
-| 17 | Provisional collider of a hulk created by `SplitSystem` | SPEC-12 treats it like a freshly spawned grid: provisional box over `BrickMin/BrickDims` until its first compound is swapped in | SPEC-12 |
-| 14 | Mass/velocity initialisation of new bodies vs. single writers | `SplitSystem` sets initial `PhysicsMass` and `PhysicsVelocity` of bodies it creates (creation, not assignment); `GridMassUpdateSystem` owns `PhysicsMass` afterwards and must initialise its incremental state for grids it has never seen. **Answered:** architecture §8 `PhysicsVelocity` row (creation is initialisation) | Tech lead |
-| 15 | Should damaged functional blocks work at reduced strength? | No: full function while the instance lives | Owner |
-| 16 | Grids spawned by `GridSpawnSystem` mid-session start at a frame boundary, not a tick | Determinism tests spawn everything before tick 0 | SPEC-10, SPEC-71 |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | SPEC-10 internals this spec relies on (§4.9) | Exactly the §4.9 table; SPEC-10 includes `DamageSetup.GridRootComponents()`/`BrickComponents()` in its archetypes | SPEC-10 | |
+| 2 | Contact suppression for `SplitGrace` | SPEC-12 runs a contacts job in `PhysicsSimulationGroup` that disables contacts between a body with `SplitGrace` and `SplitGrace.Other` while `Tick < UntilTick` | SPEC-12 | |
+| 3 | `PersistentId` for hulks in Burst | Core type `PersistentIdAllocator : IComponentData { ulong Next; ulong End; }` singleton; `GameSession` grants blocks of 4,096 IDs (refill when `End − Next < 1,024`, checked once per frame by a SPEC-01 bridge); only `SplitSystem` advances `Next`; unused IDs of a block are never reused | SPEC-01, SPEC-02 | |
+| 4 | `StarSystemMember` for split grids and chunks (Voxel cannot name the Galaxy type) | **Answered by SPEC-31 §5.12 (adoption):** split grids and chunks adopt the parent's `StarSystemMember`; pieces of the player ship adopt the loaded star system (so they are unloaded with it). Chunk bodies are destroyed at unload; their blobs are released by `ChunkColliderCleanupSystem` (§5.9) | SPEC-31 | |
+| 5 | Should hulks broken off the player ship really have no `StarSystemMember`? They would survive a jump | **Answered by SPEC-31 §5.12:** they adopt the loaded star system and stay behind as wrecks | Owner | |
+| 6 | Writer of `VoxelGrid.Kind` after spawn | **Answered:** `ShipDeathSystem` only (architecture §8 row `VoxelGrid.Kind`) | Tech lead | |
+| 7 | May `GridMassUpdateSystem`/`BrickDirtyScheduleSystem` record ECB commands? | No; they record none on roots, bricks or functional entities | SPEC-12, SPEC-10 | |
+| 8 | `FxEvent.Color` for cell debris | `Color = paletteColorByte | (MaterialLayer << 8)`; bit 31 = 0; SPEC-63 resolves through the ship palette texture. New `FxKind` values: `CellDebris`, `RamImpact`, `ChunkDissolve` | SPEC-63 | |
+| 9 | Cross-module ordering attributes | **Applied** in SPEC-23 §5.0 (2026-10-09). `SpatialHashBuildSystem` is `OrderFirst` in `GameplayPostPhysicsGroup` (SPEC-23 §5.0), so it needs no attribute against `ImpactEventSystem`; `ProjectileStepSystem [UpdateAfter(ImpactEventSystem)]`; `ExplosionSystem`, `ShieldSystem`, `BeamStepSystem [UpdateBefore(DamageResolveSystem)]` | SPEC-21, 22, 23 | |
+| 10 | How consumers stop on hulks and moved blocks | AI/power/shield/propulsion queries use `WithNone<Hulk>`; power consumer buffers ignore entities whose `FunctionalBlock.Grid` differs from the ship and rebuild when `VoxelGrid.Revision` changes | SPEC-20, 22, 23 | |
+| 11 | Who creates the configured `DamageConfig` | `Game.App` at boot: `SetSingleton(DamageConfig.FromDefinition(db.Get<DamageConfigDefinition>("config_damage")))`; prefix `config_` added to SPEC-04's prefix table | SPEC-01, SPEC-04 | |
+| 12 | Chunk body rendering | SPEC-63 draws each `ChunkCell` as an instanced unit cube (`RenderMeshInstanced`, ≤ 32,000 instances) with the chunk's smoothed `LocalToWorld`, `LocalOrigin` and `CellSize`; colour as question 8 | SPEC-63 | |
+| 13 | `PhysicsLayers` names used here | `PhysicsLayers.ChunkBody`: chunk bodies collide with grids, other chunks and static bodies; projectile and explosion queries do not hit chunks (chunks are not damageable) | SPEC-12 | |
+| 17 | Provisional collider of a hulk created by `SplitSystem` | SPEC-12 treats it like a freshly spawned grid: provisional box over `BrickMin/BrickDims` until its first compound is swapped in | SPEC-12 | |
+| 14 | Mass/velocity initialisation of new bodies vs. single writers | `SplitSystem` sets initial `PhysicsMass` and `PhysicsVelocity` of bodies it creates (creation, not assignment); `GridMassUpdateSystem` owns `PhysicsMass` afterwards and must initialise its incremental state for grids it has never seen. **Answered:** architecture §8 `PhysicsVelocity` row (creation is initialisation) | Tech lead | |
+| 15 | Should damaged functional blocks work at reduced strength? | No: full function while the instance lives | Owner | |
+| 16 | Grids spawned by `GridSpawnSystem` mid-session start at a frame boundary, not a tick | Determinism tests spawn everything before tick 0 | SPEC-10, SPEC-71 | |
+
+| 18 | DamageConfig requires DamageTableBlob before DMG-003; DamageStreams names an absent internal owner | Bring forward the two blob value types; declare an opaque internal owner placeholder | Tech lead | Resolved 2026-10-11: DMG-001 includes DamageTypeRow/ DamageTableBlob and an empty DamageStreamsData. DMG-002 still owns its allocation and implementation; DMG-003 owns table assets/building. |
+| 19 | One serialized field per DamageConfig includes a Voxel blob and derived ContentHash fields that Game.Data cannot author | Serialize 43 numeric tuning fields and four AudioCueDefinition references only | Tech lead | Resolved 2026-10-11: preserve module boundaries; Table and cue hashes are runtime projections. Definition numeric defaults match DamageConfig.Default. |
+| 20 | DamageSetup has specified component lists but no task implementing its stub before spawning needs it | Implement the exact pure lists in DMG-001 | Tech lead | Resolved 2026-10-11: root stats/impulse/integrity/seed and brick integrity lists are usable without implementing any damage system. |
 
 ## 11. References
 
