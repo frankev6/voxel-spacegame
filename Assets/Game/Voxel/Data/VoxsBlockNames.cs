@@ -1,9 +1,20 @@
+using System;
+using Game.Data.Services;
+
 namespace Game.Voxel.Data
 {
-    /// <summary>Implements SPEC-05 §4.7. Immutable BlockIndex → ContentId string table, safe to read from the save worker thread.</summary>
+    /// <summary>SPEC-05 §4.7: immutable names copied on the main thread for worker encoding.</summary>
     public sealed class VoxsBlockNames
     {
-        public static VoxsBlockNames FromCatalog(Game.Data.Services.ContentCatalog catalog) { throw new System.NotImplementedException("PERS-007"); }   // main thread
-        public string Get(ushort blockIndex) { throw new System.NotImplementedException("PERS-007"); }                                                  // null for Air
+        readonly string[] names;
+        VoxsBlockNames(string[] names) { this.names = names; }
+        public static VoxsBlockNames FromCatalog(ContentCatalog catalog)
+        {
+            if (catalog == null) throw new ArgumentNullException(nameof(catalog));
+            var names = new string[catalog.BlockCount + 1];
+            for (int i = 1; i < names.Length; i++) names[i] = catalog.GetBlock((ushort)i).Id.Value;
+            return new VoxsBlockNames(names);
+        }
+        public string Get(ushort blockIndex) => blockIndex < names.Length ? names[blockIndex] : null;
     }
 }

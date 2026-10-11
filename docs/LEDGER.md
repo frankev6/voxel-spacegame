@@ -569,6 +569,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 28 | 2026-10-11 | SPEC-05 PERS-005 | Header ticks vs millisecond JSON; dropped-autosave result; queue capacity; where step 17 runs (SPEC-05 open question 18) | Resolved as listed there | Tech lead | resolved in PERS-005 |
 | 29 | 2026-10-11 | SPEC-05 PERS-006 | A preserved newer-version chunk would collide with its participant's chunk on the next save (SPEC-05 open question 19) | Resolved: the participant is skipped and the newer chunk written back | Tech lead | resolved in PERS-006 |
 
+| 30 | 2026-10-11 | SPEC-05 PERS-007 | VOXS runtime fields, full-palette fallback and bounded decompression (SPEC-05 Q20) | Reconstruct runtime state; deterministic Missing fallback; 256 MiB body/cell limits | Tech lead | Resolved as specified in SPEC-05 Q20; v1 wire format unchanged |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).

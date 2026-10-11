@@ -15,6 +15,13 @@ namespace Game.Voxel.Data
         public NativeList<Cell> Cells;                       // BrickCoords.Length × 4096
         public NativeList<int3> RemovedBricks;
         public int DriftWarningCount;                        // content drift fixes applied (§5.7)
-        public void Dispose() { throw new System.NotImplementedException("PERS-007"); }
+        public void Dispose()
+        {
+            if (Palette.IsCreated) Palette.Dispose();
+            if (Instances.IsCreated) Instances.Dispose();
+            if (BrickCoords.IsCreated) BrickCoords.Dispose();
+            if (Cells.IsCreated) Cells.Dispose();
+            if (RemovedBricks.IsCreated) RemovedBricks.Dispose();
+        }
     }
 }

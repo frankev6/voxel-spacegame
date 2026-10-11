@@ -983,27 +983,28 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | Import old-prototype `state.json` saves? | No; v2 starts with no save compatibility (old saves were already rejected by 04-B1) | Owner |
-| 2 | SPEC-02 `SaveWriter`/`SaveReader` shape (§4.10) | SPEC-02 adopts §4.10; differences are adapted in PERS-004 using SPEC-02 names; missing capabilities use the listed fallbacks | SPEC-02 |
-| 3 | `GameSaved` / `GameLoaded` fields | As in §4.10 | SPEC-02 |
-| 4 | Owner of `FLET` and `SESS` | SPEC-01 (`Game.App` session-level participants, architecture §3) | SPEC-01 |
-| 5 | Owner of `PLOC` | SPEC-31 | SPEC-31 / SPEC-32 |
-| 6 | `VoxsCodec.CellIndex` must equal SPEC-10's `BrickCells` layout | `x + 16 * (y + 16 * z)` | SPEC-10 |
-| 7 | Palette entry 0 semantics (`Cell.Ref 0` = air) | Palette entry 0 is a reserved air entry `(Block 0, 0, 0)`; the codec writes the palette verbatim either way | SPEC-10 |
-| 8 | `VoxelStructure ↔ VoxsSource/VoxsDecoded` adapters | SPEC-10 adds `VoxelStructure.AsVoxsSource()` and `VoxelStructure.FromVoxs(VoxsDecoded)`; the codec does not know `VoxelStructure` | SPEC-10 |
-| 9 | `VOX-001` milestone | M0 (needed by PERS-001/007 and SPEC-72 blueprints in M0) | SPEC-10 / tech lead |
-| 10 | Save on quit while in combat | Quit without saving; pause-menu Quit shows a warning when `CanSave` is false | Owner |
-| 11 | Autosave interval and ring size | 300 s, 3 slots, 60 s min spacing | Owner |
-| 12 | Cloud sync | Not in v1 | Owner |
-| 13 | Should `ListSlots` show autosaves of other profiles | No; per active profile | SPEC-61 |
-| 14 | Combat definition for `SaveBlockReason.InCombat` | `ISaveContext` returns `InCombat` when any hostile ship is within the T3 bubble and targeting the player, or the player took damage in the last 10 s (SPEC-01 implements, data from SPEC-23/13) | SPEC-01 |
-| 15 | Ship thumbnail size | 256×256 RGBA32 (SPEC-51 renders) | SPEC-51 |
-| 16 | §4.5 declares `SaveResult`, `LoadResult`, `SaveOperationResult` and `ChunkRegistration` as readonly structs with readonly fields but no constructor, so nothing can set them (and the compiler warns) | PERS-001 adds one constructor per struct taking every field in declaration order | Tech lead |
-| 17 | §5.2 says what happens when `meta.json` is missing or invalid, but not when a valid `meta.json` sits next to a missing `world.sav` | A valid meta counts as `Ok` only when `world.sav` exists; otherwise the same rules apply as without a meta (`world.bak` only → `BackupOnly`, nothing → `Corrupt`) (PERS-002) | Tech lead |
-| 18 | PERS-005 details (found 2026-10-11) | **Resolved in PERS-005:** (a) `SavedUtc` is cut to whole milliseconds at capture, because `meta.json`/META keep milliseconds and the header's `savedUtcTicks` must match them exactly. (b) A dropped autosave (busy) returns `Blocked` with the Transitioning text and raises nothing. (c) `MaxQueuedOperations` counts waiting operations, not the running one. (d) `CurrentSlot`, `profile.json`, `GameSaved` and `OperationCompleted` happen in the main-thread finish (step 17), not in `WriteCaptured`. (e) `Autosave.NotifySaved()` joins with PERS-009 | Tech lead |
-| 19 | A chunk newer than its participant is preserved (§5.6 step 2c), but the next save would write both the preserved chunk and the participant's own chunk under the same key, which the container refuses (found in PERS-006, 2026-10-11) | **Resolved in PERS-006:** while a preserved chunk exists for a participant's key, capture skips that participant and the preserved (newer) chunk is written back unchanged: a downgraded build never overwrites newer data. `ResetForNewGame` and the next load clear it. Also: a file that exists but can't be read counts as `NotAContainer` for the backup fallback, and `OperationCompleted.WarningCount` counts warnings plus errors | Tech lead |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | Import old-prototype `state.json` saves? | No; v2 starts with no save compatibility (old saves were already rejected by 04-B1) | Owner | |
+| 2 | SPEC-02 `SaveWriter`/`SaveReader` shape (§4.10) | SPEC-02 adopts §4.10; differences are adapted in PERS-004 using SPEC-02 names; missing capabilities use the listed fallbacks | SPEC-02 | |
+| 3 | `GameSaved` / `GameLoaded` fields | As in §4.10 | SPEC-02 | |
+| 4 | Owner of `FLET` and `SESS` | SPEC-01 (`Game.App` session-level participants, architecture §3) | SPEC-01 | |
+| 5 | Owner of `PLOC` | SPEC-31 | SPEC-31 / SPEC-32 | |
+| 6 | `VoxsCodec.CellIndex` must equal SPEC-10's `BrickCells` layout | `x + 16 * (y + 16 * z)` | SPEC-10 | |
+| 7 | Palette entry 0 semantics (`Cell.Ref 0` = air) | Palette entry 0 is a reserved air entry `(Block 0, 0, 0)`; the codec writes the palette verbatim either way | SPEC-10 | |
+| 8 | `VoxelStructure ↔ VoxsSource/VoxsDecoded` adapters | SPEC-10 adds `VoxelStructure.AsVoxsSource()` and `VoxelStructure.FromVoxs(VoxsDecoded)`; the codec does not know `VoxelStructure` | SPEC-10 | |
+| 9 | `VOX-001` milestone | M0 (needed by PERS-001/007 and SPEC-72 blueprints in M0) | SPEC-10 / tech lead | |
+| 10 | Save on quit while in combat | Quit without saving; pause-menu Quit shows a warning when `CanSave` is false | Owner | |
+| 11 | Autosave interval and ring size | 300 s, 3 slots, 60 s min spacing | Owner | |
+| 12 | Cloud sync | Not in v1 | Owner | |
+| 13 | Should `ListSlots` show autosaves of other profiles | No; per active profile | SPEC-61 | |
+| 14 | Combat definition for `SaveBlockReason.InCombat` | `ISaveContext` returns `InCombat` when any hostile ship is within the T3 bubble and targeting the player, or the player took damage in the last 10 s (SPEC-01 implements, data from SPEC-23/13) | SPEC-01 | |
+| 15 | Ship thumbnail size | 256×256 RGBA32 (SPEC-51 renders) | SPEC-51 | |
+| 16 | §4.5 declares `SaveResult`, `LoadResult`, `SaveOperationResult` and `ChunkRegistration` as readonly structs with readonly fields but no constructor, so nothing can set them (and the compiler warns) | PERS-001 adds one constructor per struct taking every field in declaration order | Tech lead | |
+| 17 | §5.2 says what happens when `meta.json` is missing or invalid, but not when a valid `meta.json` sits next to a missing `world.sav` | A valid meta counts as `Ok` only when `world.sav` exists; otherwise the same rules apply as without a meta (`world.bak` only → `BackupOnly`, nothing → `Corrupt`) (PERS-002) | Tech lead | |
+| 18 | PERS-005 details (found 2026-10-11) | **Resolved in PERS-005:** (a) `SavedUtc` is cut to whole milliseconds at capture, because `meta.json`/META keep milliseconds and the header's `savedUtcTicks` must match them exactly. (b) A dropped autosave (busy) returns `Blocked` with the Transitioning text and raises nothing. (c) `MaxQueuedOperations` counts waiting operations, not the running one. (d) `CurrentSlot`, `profile.json`, `GameSaved` and `OperationCompleted` happen in the main-thread finish (step 17), not in `WriteCaptured`. (e) `Autosave.NotifySaved()` joins with PERS-009 | Tech lead | |
+| 19 | A chunk newer than its participant is preserved (§5.6 step 2c), but the next save would write both the preserved chunk and the participant's own chunk under the same key, which the container refuses (found in PERS-006, 2026-10-11) | **Resolved in PERS-006:** while a preserved chunk exists for a participant's key, capture skips that participant and the preserved (newer) chunk is written back unchanged: a downgraded build never overwrites newer data. `ResetForNewGame` and the next load clear it. Also: a file that exists but can't be read counts as `NotAContainer` for the backup fallback, and `OperationCompleted.WarningCount` counts warnings plus errors | Tech lead | |
+| 20 | VOXS v1 omits `CellsAlive`, instance flags and `Reserved`, but acceptance asks for instance equality; a full palette may lack D3's fallback; malformed compact blobs can expand to gigabytes | Preserve v1 bytes; bounded, deterministic repair | Tech lead | **Resolved in PERS-007:** runtime-only `Functional` and `Reserved` reset; `CellsAlive` is rebuilt from references (saturated to ushort), `Destroyed` is inferred for Functional definitions with nonpositive FunctionHp. Equality covers serialized fields and reconstructed state. D3 uses an existing `(MissingBlock,0,0)` entry; if all 32768 slots are occupied without it, slot 32767 becomes that fallback with an additional drift warning (existing references also become Missing). Body inflation and decoded cell storage are each capped at 256 MiB before allocation. Empty bricks, solid HP zero, invalid cell size/anchor and duplicate removed coordinates reject. These are validation/resource limits, not a wire-format change |
 
 ## 11. References
 
