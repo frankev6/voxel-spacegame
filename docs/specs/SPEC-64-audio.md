@@ -461,7 +461,7 @@ Timing tests run with safety checks off (SPEC-71 perf fixture). Functional tests
 - **Milestone:** M0
 - **Tier:** standard — asset setup with the exact structure of §4.4 and §6.5
 - **Depends on:** `AUD-001`
-- **Do:** In the Editor create `Assets/Game/Audio/Mixer/GameMixer.mixer` (Assets ▸ Create ▸ Audio Mixer): rename the root group `Master`; add child groups `Music`, `Sfx`, `Ui`, `Ambience`; right-click each group's Volume ▸ "Expose … to script"; in the Exposed Parameters list rename them exactly `MasterVolume`, `MusicVolume`, `SfxVolume`, `UiVolume`, `AmbienceVolume`. A worker without Editor UI access sets the task `blocked` with *Notes* `needs-human: mixer asset`. Set `ProjectSettings/AudioManager.asset` Real Voice Count 64 and Virtual Voice Count 512. Implement `AudioImportPostprocessor` (§6.5) and reimport `Assets/Game/Audio/`.
+- **Do:** In the Editor create `Assets/Game/Audio/Mixer/GameMixer.mixer` (Assets ▸ Create ▸ Audio Mixer): rename the root group `Master`; add child groups `Music`, `Sfx`, `Ui`, `Ambience`; right-click each group's Volume ▸ "Expose … to script"; in the Exposed Parameters list rename them exactly `MasterVolume`, `MusicVolume`, `SfxVolume`, `UiVolume`, `AmbienceVolume`. Under Frank’s CLI-only instruction, a temporary Editor script may use the installed Editor mixer-authoring API to create the exact same asset, then verify the saved groups and exposed parameters through runtime AudioMixer APIs (Q13). Set `ProjectSettings/AudioManager.asset` Real Voice Count 64 and Virtual Voice Count 512. Implement `AudioImportPostprocessor` (§6.5) and reimport `Assets/Game/Audio/`.
 - **Files:** `Assets/Game/Audio/Mixer/GameMixer.mixer`, `ProjectSettings/AudioManager.asset`, `Assets/Game/Editor/Audio/AudioImportPostprocessor.cs`, `Assets/Game/Tests/EditMode/Presentation/Audio/AudioAssetTests.cs`
 - **Acceptance criteria:**
   - [ ] `mixer.FindMatchingGroups("Master/Music")` (and Sfx, Ui, Ambience) each return one group.
@@ -618,6 +618,7 @@ Timing tests run with safety checks off (SPEC-71 perf fixture). Functional tests
 | 10 | Station music (`cue_music_station`) | Used for the BlueprintLab `Editor` context and as a scripted override at stations through `SetMusicOverride` | Owner |
 | 11 | Which specs own the managed event types `SessionReset` and `StarSystemEntered`? | `SessionReset`: SPEC-01 (`FND-001`); `StarSystemEntered`: SPEC-31 (`SYS-001`) | Tech lead |
 | 12 | §4.3 lists the cue and config validation rules without codes | AUD-001 uses AUD-E001 clips empty or null, AUD-E002 minDistance ≥ maxDistance, AUD-E003 Ui cue with spatialBlend > 0; AUD-E010 mixer or group missing, AUD-E011 uiSounds not 11 or one missing, AUD-E012 music cue missing/not Music bus/not looping, AUD-E013 ambienceWorld not an Ambience loop, AUD-E014 combat cue missing, AUD-E015 combatEnterSignals < 1, AUD-E016 sceneMusic lacks a scene | Tech lead |
+| 13 | AUD-002 assumes manual Editor UI, but Frank requires CLI/headless jobs | **Answer (resolved in AUD-002):** use the installed Unity Editor mixer-authoring API through a temporary reflected Editor job, delete it after creation, and verify the saved mixer with AudioMixer.FindMatchingGroups/GetFloat. No runtime reflection or package/assembly change. This produces the specified asset without owner intervention. | Tech lead |
 
 ## 11. References
 
