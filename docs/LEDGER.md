@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 8 | 1 | 0 | 0 | 57 | 0 | 66 | 2 |
+| M0 | 8 | 0 | 0 | 0 | 58 | 0 | 66 | 3 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -99,8 +99,8 @@
 | MIG-005 | Item converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-004 | yes | done | astra (gpt-6) | 2026-10-11 | 4b524c7 | 35 items, icon references, dropped-field report; repeat imports byte-stable |
 | MIG-006 | Block converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-005 | yes | done | astra (gpt-6) | 2026-10-11 | 3bb208c | 21 blocks; exact geometry/modules; byte-stable reruns |
 | MIG-007 | Legacy Euler to orientation | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | b264f44 | Integer RyRxRz, one-degree snapping, all 64 Unity Euler combinations |
-| MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | no | todo |  |  |  |  |
+| MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 270db7f | 13 ships; exact counts; VOXS verified; Q39/40 |
+| MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | yes | todo |  |  |  |  |
 | FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | yes | todo |  |  |  |  |
 | FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | no | todo |  |  |  |  |
 | FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | no | todo |  |  |  |  |
@@ -579,6 +579,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 36 | 2026-10-11 | SPEC-03 INP-003 | Conflict removal loses an existing custom binding (SPEC-03 Q6) | Restore prior overrides on rejection; suppress Global during rebind; ADR-0021 for required test fixture | Tech lead | Resolved in INP-003; preserves the player’s old binding |
 | 37 | 2026-10-11 | SPEC-72 MIG-005 | Placeholder path coupling and omitted dropped fields (SPEC-72 Q14) | Editor-only source-reference asset; reuse existing icons; report every dropped field | Tech lead | Resolved in MIG-005; no new art or owner look decision |
 | 38 | 2026-10-11 | SPEC-72 MIG-006 | Deterministic SerializeReference identities (SPEC-72 Q15) | Managed-reference IDs equal each unique BlockModuleId | Tech lead | Resolved in MIG-006; repeated assets, manifest and report are byte-identical |
+| 39 | 2026-10-11 | SPEC-72 MIG-008 / SPEC-10 | M0 blueprint validation depends on M1 stub (SPEC-72 Q16 / SPEC-10 Q15) | Bring the existing validator forward; keep setter/config work in VOX-010 | Tech lead | Resolved in MIG-008; no public API or assembly change |
+| 40 | 2026-10-11 | SPEC-72 MIG-008 | Imported ships require a start blueprint (SPEC-72 Q17) | One-time empty-link assignment of ship_base for development | Tech lead | Resolved; Frank should review eventual gameplay starting ship |
 
 ## Measurements
 
@@ -595,6 +597,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — MIG-008 ship blueprint migration (astra, gpt-6)
+- Imported all **13** legacy ships with exact SPEC-72 §5.4 counts. Functional-first overlap resolution, cube orientation and colour validation, instance-root flags, negative brick coordinates and single-core anchors are verified. Every payload decodes back to identical arrays and each instance owns its full footprint. Five coreless ships remain coreless under the documented owner default; overlap drops remain as specified.
+- Q39 brings the existing blueprint validator forward from M1 so M0 content can validate. Q40 assigns the empty development start-blueprint link to **ship_base** (four cells, one core); Frank should choose the gameplay starting ship later. Description/price cannot fit the blueprint contract and are explicitly reported as dropped. Temporary Editor job removed.
+- Real reruns: **69 Unchanged**, byte-identical manifest/report, **0 errors**, 67 specified migration warnings and 77 informational entries. Eight new tests pass. Full live suites: **371 EditMode**, **16 PlayMode**, **18/18 perf**; zero C# warnings; docs clean. Content construction **0.308 ms median**. M0 **58/66 done**; MIG-016 ready.
 
 ### 2026-10-11 — MIG-006 block migration (astra, gpt-6)
 - Generated all **21** SPEC-04 block definitions, including independent footprint/clearance checks, exact module values, orientations, attachment masks, and existing prop-mesh references. Expected warnings only: 2 mesh-bounds, 3 overlap-clearance cells and the portal clearance fix (plus the existing missing-start-blueprint warning). No new art.
