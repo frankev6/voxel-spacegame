@@ -744,34 +744,44 @@ Own budgets: `GridSpawnSystem` ≤ 6 ms main thread in a frame creating 1,024 br
 
 ### 8.2 Memory model (architecture §11.10)
 
-Bytes per item (VOX-002 measures every row; estimates marked ≈):
+VOX-002 measured on 2026-10-11, Unity 6000.6.5f1 / Apple M5 Pro. **MB below is decimal (1,000,000 B)**; exact bytes are retained so the result does not depend on rounding. Both explicit tests passed headlessly. Evidence: `Logs/tools/vox002-{reference,thin-shell}.txt`, `vox002-results.xml`, `vox002-headless.log`; the temporary spike was removed after recording its results.
 
-| Item | Bytes | Where |
+| Item | Measured bytes | Method / scope |
 |---|---|---|
-| Cell | 4 | `BrickCells` |
-| ECS dense brick, heap | 16,384 cells + 512 mask = 16,896 | outside the chunk (capacity 0) |
-| ECS brick, chunk data | ≈ 300 (Brick 28, LocalTransform 32, LocalToWorld 64, Parent 8, BrickDirty 2, buffer headers 2×16, BrickRenderState 24, BrickLodDesired 1, Entities Graphics ≈ 110) | chunk |
-| Structure dense brick | 16,384 page + 512 mask + 32 record + ≈ 20 map = 16,948 | `VoxelStructure` |
-| Structure uniform brick | 564 | `VoxelStructure` |
-| Brick mesh vertex (SPEC-11 packed) | 8 | GPU; CPU copy released per SPEC-11 |
-| Brick mesh index | 2 | GPU |
-| Exposed face, welded flat wall | ≈ 1.2 vertices × 8 + 6 × 2 = ≈ 21.6 | SPEC-11 |
-| Collider box (`BoxCollider` blob) | ≈ 530 | SPEC-12 (measured in PHY-002) |
-| Compound child entry | 40 + ≈ 32 BVH share | SPEC-12 |
+| Cell | 4 | `UnsafeUtility.SizeOf<Cell>()` |
+| ECS dense brick, heap | 16,384 cells + 512 mask = **16,896** | Actual dynamic-buffer capacities, both internal capacities zero |
+| ECS brick, chunk data | **275** entity/component bytes before per-type alignment; **58 entities/chunk** | Includes Entity, BrickRenderState (24), three buffer headers (48), transforms, bounds and MaterialMeshInfo. Chunk components are 64 + 24 B per chunk; shared membership/filter occupy no per-entity bytes. Actual full chunk allocation counted below, including meta chunks |
+| Structure dense brick | 16,384 page + 512 mask + **28 record** + map share = **16,956.95** reference / **16,954.33** thin-shell | Type sizes plus installed map allocation formula at measured capacities; excludes native-list spare capacity/control blocks |
+| Structure uniform brick | 512 mask + 28 record + map share = **572.95** / **570.33** | Same scope; source structure is released after spawn, so excluded from steady/peak grid totals |
+| Structure coordinate map | **28,736** reference / **114,752** thin-shell | NativeHashMap capacity 1,024/4,096, buckets 2,048/8,192; package allocation formula yields data 28,672/114,688 plus measured 64-byte helper |
+| Brick mesh vertex | **8** | PackedBrickVertex size; GPU payload and retained CPU payload |
+| Brick mesh index | **2** | UInt16 |
+| Exposed face, welded uniform geometry | **21.0520** reference / **21.0338** thin-shell | Slice-weld count, per brick/direction/slice, identical attributes; includes vertices and six indices per quad |
+| Collider box blob | **492** | `BoxCollider.MemorySize` |
+| Compound child entry / aggregate overhead | **40** entry; **89.5** per child total overhead in 64-box sample | 64 distinct box blobs produce a 37,216-byte compound: `(37,216 − 64×492)/64`; residual 49.5 includes BVH, header and alignment, not just BVH |
 
-Totals for `HollowStation1M` (872 bricks, 504,192 exposed faces, ≈ 1,000 boxes):
+Measured station geometry and allocation totals:
 
-| Part | Estimate |
-|---|---|
-| ECS cells + masks (872 × 16,896) | 14.7 MB |
-| ECS chunk data (872 × 300) | 0.26 MB |
-| Meshes, GPU (504,192 × 21.6) | 10.9 MB |
-| Mesh CPU copies (0 if SPEC-11 releases them; worst case equal to GPU) | 0 – 10.9 MB |
-| Colliders (SPEC-12 §4.8): cached brick blobs + grid compound + one retired compound | ≈ 2.3 MB peak, ≈ 1.1 MB steady |
-| Source structure | 0 in steady state (blueprints > 65,536 cells are released after spawn; `WriteBack` sources are fleet ships, not stations) |
-| **Total** | **≈ 28.2 MB (≈ 39.1 MB worst case)** ≤ 40 MB |
+| Part | HollowStation1M (reference) | ThinShellStation1M (stress) |
+|---|---:|---:|
+| Solid cells / bricks | 1,008,128 / 872 | 1,043,464 / 3,784 |
+| Exposed faces / welded vertices / indices | 504,192 / 570,496 / 3,025,152 | 2,086,936 / 2,356,632 / 12,521,616 |
+| ECS cells + masks | 14,733,312 B | 63,934,464 B |
+| Brick chunks + meta chunks (16 KiB each) | 16 + 1 = 278,528 B | 66 + 1 = 1,097,728 B |
+| Mesh GPU payload | 10,614,272 B | 43,896,288 B |
+| Retained mesh CPU payload | 10,614,272 B | 43,896,288 B |
+| Exact greedy cover: boxes | 1,024 | 4,096 |
+| Cached brick collider blobs | 586,016 B | 2,188,320 B |
+| One grid compound | 667,296 B | 2,531,232 B |
+| Collider steady (cache + installed) | 1,253,312 B | 4,719,552 B |
+| Collider peak (cache + installed + pending + retired) | 2,587,904 B | 9,782,016 B |
+| Source structure after spawn | 0 B | 0 B |
+| **Total peak, CPU mesh copies retained** | **38,828,288 B (38.828 MB)** | **162,606,784 B (162.607 MB)** |
+| Total peak, CPU mesh copies released | 28,214,016 B | 118,710,496 B |
 
-Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 MB + meshes ≈ 45 MB → ≈ 110 MB; it cannot meet 40 MB with dense bricks at LOD0. It is measured and reported by VOX-002, not gated. Fallback if the owner makes thin shells a gate (requires an ADR because it changes the `BrickCells` contract): **sparse bricks** — bricks with `SolidCount ≤ 1,024` store `BrickSparseCells : IBufferElementData { ushort Local; Cell Value; }` sorted by `Local` (6 B per solid cell) instead of `BrickCells`, `BrickWrite` densifies when a write would exceed 1,024 entries; plus SPEC-11 rendering bricks beyond 150 m at LOD1 (≤ 25% triangles). Estimated thin-shell total with both: ≈ 6 MB cells + ≈ 15 MB meshes + 4 MB colliders ≈ 25 MB.
+**Decision: no-go for dense storage.** Reference retained-copy peak exceeds the **36 MB** headroom gate (also exceeds 36 MiB). VOX-003 remains `todo`; proposed ADR-0023 records the sparse-contract change. No gate was relaxed. The installed package's RenderMeshUtility component set was measured with its one shared RenderMeshArray removed to match the runtime-ID path; BrickRenderState was added after Instantiate (cleanup components are not cloned). A test-only low-cardinality shared membership stood in for the not-yet-implemented galaxy hook. This is the specified memory-model spike, not a finished-renderer GPU residency or whole-process memory measurement: root/queue/framework allocations, Mesh object overhead, allocator bookkeeping and future runtime peaks remain for the integration gate.
+
+**Fallback estimates, not measurements:** reference has 728 eligible bricks (745,472 cells at ≤1,024 solid cells/brick). Six-byte sparse entries reduce cells/masks to 7,278,592 B, projecting **31,373,568 B** retained-copy peak before extra buffer headers, capacity slack and chunk changes. VOX-003 must measure its implementation. Thin shell has 3,784 eligible bricks, projecting 8,198,192 B cells/masks and **106,870,512 B** retained-copy LOD0 peak. Combining sparse storage, CPU-copy release and a *hypothetical* quarter of LOD0 mesh bytes yields about **30,052,008 B** thin-shell peak; the LOD1 triangle-ratio gate alone does not prove that byte ratio. Thin shells remain a reported stress case, not a new owner gate (Q17).
 
 ## 9. Tasks
 
@@ -1018,23 +1028,25 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | Does `GameplayActive` exist in the BlueprintLab scene (VOX systems require it)? | Yes; SPEC-01 creates it in World and BlueprintLab | SPEC-01 / SPEC-51 |
-| 2 | Who creates `VoxelConfig`, `VoxelStructureRegistryRef`, `BlueprintLibrary` and the registry? | SPEC-01's composition root right after `ContentService.CreateSingletons`: `BlueprintLibrary`, then `VoxelStructureRegistry.CreateRuntime(library)`, then the two singletons; disposes in reverse order at shutdown | SPEC-01 |
-| 3 | SPEC-04 prefix registry lacks `config_` | `config_` for `VoxelConfigDefinition`, `VoxelRenderConfigDefinition`, `PhysicsVoxelConfigDefinition`, `VoxelPaletteDefinition`; SPEC-04 adds the row | SPEC-04 |
-| 4 | VOXS byte layout | **Answered:** SPEC-05 §4.7/§5.7 (`VoxsCodec`) is the only layout; §5.6 is an adapter | SPEC-05 |
-| 5 | Must SPEC-13 maintain `BlockInstance.CellsAlive`? | Yes, decrement when an instance cell becomes air | SPEC-13 |
-| 6 | Hulk grids created by `SplitSystem` (GameplayEnd ECB) | SPEC-13 records `Instantiate(GridPrototypes.Brick)` / moves existing bricks with the ECB, gives the hulk a full root archetype (§4.5) with `GridSource.StructureHandle = -1`, a new `Serial` taken from `GridPrototypes.NextSerial` inside its job (single writer: SplitSystem's playback order), `GridSpawning` disabled, `GridBodyInit` enabled; updates both roots' `BrickSlot` and LEG | SPEC-13 |
-| 7 | `StarSystemMember` and `PersistentId` for hulks created by `SplitSystem` | SPEC-31 adds a `WorldGroup` system that batch-adds the parent's `StarSystemMember` to entities with `Brick`, `FunctionalBlock` or `VoxelGrid` that lack it and whose grid root is not the player ship; `PersistentId` for hulks comes from a `PersistentIdAllocator` singleton maintained by SPEC-01 | SPEC-31 / SPEC-01 |
-| 8 | Which `CellFlags` bits does SPEC-13 need beyond `Scorched`? | None; claim bits 2..7 here | SPEC-13 |
-| 9 | Should SPEC-31 unload call write-back? | Yes: `GridStructureSync.WriteBackAll(em, query, registry)` before the shared-filter destroy; stations from blueprints use `CaptureChanges` for deltas | SPEC-31 |
-| 10 | Prop meshes are authored at 1 unit = 1 cell | Yes (functional `LocalTransform.Scale = CellSize`); REN-002 checks `hull_1x1` bounds ≈ 1 unit | SPEC-11 / SPEC-81 |
-| 11 | Should damage persist for AI ships spawned from blueprints? | No; they are transient (no write-back) | Owner |
-| 12 | Is the 4-cell-wall `HollowStation1M` the 06 reference station? | Yes (decision 18); thin shells reported only | Owner |
-| 13 | `BrickRecord` (§4.3) is commented "32 bytes" and VOX-001 checks `SizeOf<BrickRecord>() == 32`, but its fields (int3, int, Cell, ushort, ushort, uint) total 28 bytes with 4-byte alignment. Pad to 32 or correct the number? | The fields as written: 28 bytes. The VOX-001 test checks 28; the §8.2 structure-brick total is 4 bytes smaller (16,944) | Tech lead |
-| 14 | `VoxelStructure.ComputeContentHash` (§4.3), `VoxsSourceBuffers.Source` and `VoxelStructureCodec.ToSource/Encode/FromDecoded` (§5.6) take SPEC-05 types (`VoxsBlockNames`, `VoxsSource`, `VoxsDecoded`, `VoxsEncodeOptions`) that PERS-001 creates, and PERS-001 depends on VOX-001 | VOX-001 creates those files with only the members whose types exist (`VoxsSourceBuffers.Dispose`, `VoxelStructureCodec.TryDecode`); VOX-009, which depends on SPEC-05, adds the rest | Tech lead |
-| 15 | M0 migration needs blueprint validation before VOX-010 | **Answer (resolved in MIG-008):** bring the existing Validate body and migration integration fixtures forward (SPEC-72 Q16). Keep EditorSetPayload, config factory and the VOX-010 acceptance suite in M1. Game.Data validates its v1 asset contract without a forbidden Game.Voxel dependency. | Tech lead |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | Does `GameplayActive` exist in the BlueprintLab scene (VOX systems require it)? | Yes; SPEC-01 creates it in World and BlueprintLab | SPEC-01 / SPEC-51 | |
+| 2 | Who creates `VoxelConfig`, `VoxelStructureRegistryRef`, `BlueprintLibrary` and the registry? | SPEC-01's composition root right after `ContentService.CreateSingletons`: `BlueprintLibrary`, then `VoxelStructureRegistry.CreateRuntime(library)`, then the two singletons; disposes in reverse order at shutdown | SPEC-01 | |
+| 3 | SPEC-04 prefix registry lacks `config_` | `config_` for `VoxelConfigDefinition`, `VoxelRenderConfigDefinition`, `PhysicsVoxelConfigDefinition`, `VoxelPaletteDefinition`; SPEC-04 adds the row | SPEC-04 | |
+| 4 | VOXS byte layout | **Answered:** SPEC-05 §4.7/§5.7 (`VoxsCodec`) is the only layout; §5.6 is an adapter | SPEC-05 | |
+| 5 | Must SPEC-13 maintain `BlockInstance.CellsAlive`? | Yes, decrement when an instance cell becomes air | SPEC-13 | |
+| 6 | Hulk grids created by `SplitSystem` (GameplayEnd ECB) | SPEC-13 records `Instantiate(GridPrototypes.Brick)` / moves existing bricks with the ECB, gives the hulk a full root archetype (§4.5) with `GridSource.StructureHandle = -1`, a new `Serial` taken from `GridPrototypes.NextSerial` inside its job (single writer: SplitSystem's playback order), `GridSpawning` disabled, `GridBodyInit` enabled; updates both roots' `BrickSlot` and LEG | SPEC-13 | |
+| 7 | `StarSystemMember` and `PersistentId` for hulks created by `SplitSystem` | SPEC-31 adds a `WorldGroup` system that batch-adds the parent's `StarSystemMember` to entities with `Brick`, `FunctionalBlock` or `VoxelGrid` that lack it and whose grid root is not the player ship; `PersistentId` for hulks comes from a `PersistentIdAllocator` singleton maintained by SPEC-01 | SPEC-31 / SPEC-01 | |
+| 8 | Which `CellFlags` bits does SPEC-13 need beyond `Scorched`? | None; claim bits 2..7 here | SPEC-13 | |
+| 9 | Should SPEC-31 unload call write-back? | Yes: `GridStructureSync.WriteBackAll(em, query, registry)` before the shared-filter destroy; stations from blueprints use `CaptureChanges` for deltas | SPEC-31 | |
+| 10 | Prop meshes are authored at 1 unit = 1 cell | Yes (functional `LocalTransform.Scale = CellSize`); REN-002 checks `hull_1x1` bounds ≈ 1 unit | SPEC-11 / SPEC-81 | |
+| 11 | Should damage persist for AI ships spawned from blueprints? | No; they are transient (no write-back) | Owner | |
+| 12 | Is the 4-cell-wall `HollowStation1M` the 06 reference station? | Yes (decision 18); thin shells reported only | Owner | |
+| 13 | `BrickRecord` (§4.3) is commented "32 bytes" and VOX-001 checks `SizeOf<BrickRecord>() == 32`, but its fields (int3, int, Cell, ushort, ushort, uint) total 28 bytes with 4-byte alignment. Pad to 32 or correct the number? | The fields as written: 28 bytes. The VOX-001 test checks 28; the §8.2 structure-brick total is 4 bytes smaller (16,944) | Tech lead | |
+| 14 | `VoxelStructure.ComputeContentHash` (§4.3), `VoxsSourceBuffers.Source` and `VoxelStructureCodec.ToSource/Encode/FromDecoded` (§5.6) take SPEC-05 types (`VoxsBlockNames`, `VoxsSource`, `VoxsDecoded`, `VoxsEncodeOptions`) that PERS-001 creates, and PERS-001 depends on VOX-001 | VOX-001 creates those files with only the members whose types exist (`VoxsSourceBuffers.Dispose`, `VoxelStructureCodec.TryDecode`); VOX-009, which depends on SPEC-05, adds the rest | Tech lead | |
+| 15 | M0 migration needs blueprint validation before VOX-010 | **Answer (resolved in MIG-008):** bring the existing Validate body and migration integration fixtures forward (SPEC-72 Q16). Keep EditorSetPayload, config factory and the VOX-010 acceptance suite in M1. Game.Data validates its v1 asset contract without a forbidden Game.Voxel dependency. | Tech lead | |
+| 16 | Measured reference retained-copy peak is 38,828,288 B, above VOX-002's 36 MB headroom gate | Follow the no-go path; propose sparse storage | Tech lead | Resolved 2026-10-11: no-go recorded; VOX-003 todo and ADR-0023 proposed. No binding storage change yet. |
+| 17 | Thin-shell retained-copy peak is 162,606,784 B; should it become a hard gate? | Keep it a stress report; sparse plus later LOD/copy-release options require measurement | Owner | Reported 2026-10-11. Existing default retained; no new owner decision assumed. |
 
 ## 11. References
 

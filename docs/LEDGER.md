@@ -116,7 +116,7 @@
 | INP-007 | Frame-rate independence test | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-005, SPEC-20 | no | todo |  |  |  |  |
 | DATA-011 | v2 block additions (reactor, cargo) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | standard | DATA-009 | yes | todo |  |  |  |  |
 | VOX-002 | SPIKE: memory model for the reference and thin-shell stations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| VOX-003 | Sparse-brick fallback (only if VOX-002 is no-go) | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-002 | no | todo |  |  |  |  |
+| VOX-003 | Sparse-brick fallback (only if VOX-002 is no-go) | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-002 | no | todo |  |  |  | No-go measured by VOX-002; ADR-0023 proposed before contract changes |
 | VOX-004 | Brick maths and mask operations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 508c75f | Brick coordinates, faces and 4096-bit mask operations; 8 tests |
 | VOX-005 | VoxelStructure storage core | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-004 | yes | todo |  |  |  |  |
 | VOX-006 | Block placement, removal and compaction | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005, SPEC-04 | no | todo |  |  |  |  |
@@ -609,6 +609,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 53 | 2026-10-11 | SPEC-11 REN-001 | AABB is in an unreferenced assembly of the installed Entities package | Reference Unity.Mathematics.Extensions | Tech lead | Resolved in SPEC-11 Q13 by accepted ADR-0022; no package or module-boundary change |
 | 54 | 2026-10-11 | SPEC-12 PHY-001 | Chunk-query prose conflicts with DebugAllQuery's exact filter | Gameplay queries exclude chunks except SpawnClearance; debug-all includes all bodies | Tech lead | Resolved in SPEC-12 Q10; exact filter code unchanged |
 | 55 | 2026-10-11 | SPEC-12 PHY-001 | Initial capacities omitted for some pipeline containers | Cache 256; batch brick/child/apply 512, assemblies 64 | Tech lead | Resolved in SPEC-12 Q11; align related pools, retain dynamic growth |
+| 56 | 2026-10-11 | SPEC-10 VOX-002 | Dense reference peak with retained mesh copies is 38,828,288 B, above 36 MB | No-go; VOX-003 todo, sparse-contract ADR proposed | Tech lead | Resolved: SPEC-10 Q16 and proposed ADR-0023; no gate relaxed |
+| 57 | 2026-10-11 | SPEC-10 VOX-002 | Thin-shell peak is 162,606,784 B with both mesh copies; make it a hard gate? | Keep the documented stress-only default | Owner | Reported in SPEC-10 Q17; fallback estimates recorded, no new gate or visual policy assumed |
 
 ## Measurements
 
@@ -616,6 +618,10 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-11 | VOX-002 | Reference retained-copy peak | **38,828,288 B — no-go** for 36 MB headroom | 872 bricks; 504,192 faces; 570,496 welded vertices; 58 entities/chunk; 17 brick/meta chunks; Apple M5 Pro / Unity 6000.6.5f1 |
+| 2026-10-11 | VOX-002 | Thin-shell stress | **162,606,784 B** retained-copy peak; 118,710,496 B released-copy model | 3,784 bricks; 2,086,936 faces; not a hard gate |
+| 2026-10-11 | VOX-002 | Collider and source-map bytes | Box 492 B; 64-box compound 37,216 B; child entry 40 B; map header 64 B | Reference collider peak 2,587,904 B; exact data/type/capacity tables in SPEC-10 §8.2 |
+| 2026-10-11 | VOX-002 | Sparse fallback projection | Reference 31,373,568 B before new overhead | Estimate only; VOX-003 must measure actual storage/headers/capacity slack |
 | 2026-10-11 | PERS-007 | VOXS encode/decode 1M | 13.09 / 15.03 ms median; 13.27 / 15.06 ms p95 | Apple M5 Pro; gates 150 / 100 ms; 7 samples after 3 warmups |
 | 2026-10-11 | PERS-012 | Capture / typical read+restore / 50 slots | 0.120 / 14.871 / 2.667 ms median; 0.127 / 15.307 / 8.872 ms p95 | Apple M5 Pro; 10 samples + 2 warmups; gates 5 / 500 / 50 ms |
 | 2026-10-11 | PERS-012 | Reference VOXS encode / decode | 12.487 / 13.210 ms median; 12.736 / 13.469 ms p95 | Gates 150 / 100 ms |
@@ -629,6 +635,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — VOX-002 memory spike measured (astra, gpt-6)
+
+- Both explicit headless reports pass with exact expected cell/brick counts. Reference has 504,192 faces / 570,496 welded vertices; thin shell has 2,086,936 / 2,356,632. Matching runtime-render ECS layout holds 58 entities per chunk, including BrickRenderState added after Instantiate; meta chunks are included in byte totals.
+- **No-go:** reference retained-copy peak **38,828,288 B**, exceeding 36 MB (and 36 MiB). VOX-003 remains todo and ADR-0023 is proposed. Sparse payload projection is 31,373,568 B before additional headers/slack; it is not an implementation pass.
+- Thin-shell retained-copy peak **162,606,784 B** is report-only (Q57). No owner gate changed. Full per-item, geometry, mesh, compound and map-capacity measurements are in SPEC-10 §8.2 and local evidence Logs/tools/vox002-*. The spike source is removed as specified; its diagnostic copy is retained under Logs/tools for reproducibility.
+- After removing the temporary spike: headless compile zero C# warnings; EditMode **425 passed + 1 explicit skipped**, PlayMode **31 passed**, perf **23/23**, all processes exit 0; docs zero errors/warnings.
 
 ### 2026-10-11 — PHY-001 physics contracts (astra, gpt-6)
 
