@@ -162,7 +162,7 @@
 | PHY-012 | GridColliderCleanupSystem and teardown | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 43a56cc | Deferred ownership; scene/world teardown; Q99–100 |
 | PHY-013 | GridMassUpdateSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-006, PHY-008, DMG-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0c9720a | Deterministic recompute; incremental removal; point-velocity preservation |
 | PHY-015 | Debug, statistics and harness hooks | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011 | yes | done | astra (gpt-6) | 2026-10-11 | a08fe17 | Guarded stats and cumulative reset; recursive grid-local box bounds |
-| PHY-016 | GridBodyFactory contract test for split creators | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-008 | yes | todo |  |  |  |  |
+| PHY-016 | GridBodyFactory contract test for split creators | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-008 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
 | PHY-017 | Physics behaviour scenarios | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011, PHY-013, SPEC-10 | yes | todo |  |  |  |  |
 | PHY-018 | Collider and mass determinism across frame rates | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, PHY-013 | yes | todo |  |  |  |  |
 | PHY-019 | Performance gates and memory | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-012, PHY-013, PHY-015, SPEC-10, TST-001 | yes | todo |  |  |  |  |
