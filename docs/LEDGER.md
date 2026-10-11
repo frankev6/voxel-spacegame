@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 43 | 0 | 2 | 0 | 21 | 0 | 66 | 12 |
+| M0 | 43 | 0 | 1 | 0 | 22 | 0 | 66 | 13 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -56,8 +56,8 @@
 | CORE-011 | Settings model | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 8f2e125 |  |
 | CORE-012 | Simulation event channels | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001, CORE-004 | yes | todo |  |  |  |  |
 | INP-001 | Public contract types and the actions asset | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 943e0fd | Edit-mode Dispose trap: SPEC-03 Q4 |
-| INP-002 | InputService contexts and display strings | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  | Blocked on CORE-006: InputContextChanged is published through EventBus<T> (ledger Q13) |
-| INP-003 | Rebinding and overrides | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-002 | no | todo |  |  |  |  |
+| INP-002 | InputService contexts and display strings | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | bad1ed2 | Also ApplyBindingOverrides/SaveBindingOverridesJson; SPEC-03 Q4, Q5 resolved |
+| INP-003 | Rebinding and overrides | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-002 | yes | todo |  |  |  |  |
 | DATA-001 | Public contract types | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 12a585b | `ContentDefinition.Id` cache already implemented (DATA-004 overlap) |
 | DATA-002 | ValidationReport implementation | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | fcaa9d3 |  |
 | DATA-003 | Orientation tables | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-001 | yes | todo |  |  |  |  |
@@ -566,6 +566,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — INP-002 InputService contexts (claude, claude-opus-5-5)
+- `InputService` per SPEC-03 §5.1: contexts, display strings with a cache, sensitivities, and a `Dispose` that works in edit mode. `ApplyBindingOverrides` and `SaveBindingOverridesJson` came forward from INP-003 because the constructor needs them; rebinding and reset remain INP-003.
+- `ConventionsTests` enforces decision 1. `ProjectSetup` creates and registers `InputSystem.inputsettings.asset` with `shortcutKeysConsumeInput = true` (ledger question 12 resolved).
+- Found: `EditorBuildSettings` still names a project-wide actions asset from the template that no longer exists; harmless and left as is.
+- 5 tests pass; EditMode 111/111.
 
 ### 2026-10-11 — FND-003 PauseService (claude, claude-opus-5-5)
 - `PauseService` in `Game.App.Services` per SPEC-01 §5.6; `ConventionsTests` enforces decision 10, so `Time.timeScale` is assigned only in `PauseService.cs`.
