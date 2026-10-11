@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 55 | 0 | 0 | 0 | 47 | 0 | 102 | 12 |
+| M1 | 54 | 0 | 0 | 0 | 48 | 0 | 102 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -107,8 +107,8 @@
 | MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 270db7f | 13 ships; exact counts; VOXS verified; Q39/40 |
 | MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | yes | done | astra (gpt-6) | 2026-10-11 | 75cb5fd | Migration gate: 69 unchanged; full 0.580s; max ship 42.4ms |
 | FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | yes | done | astra (gpt-6) | 2026-10-11 | 2718913 | Unique managed/Burst grants; saved high-water mark; explicit refill dependency wait |
-| FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | no | todo |  |  |  |  |
+| FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | yes | done | astra (gpt-6) | 2026-10-11 | 8a8bd6f | Session flow/SESS; ordered save preparation; bounded thumbnail readback (ADR-0034) |
+| FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | yes | todo |  |  |  |  |
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | no | todo |  |  |  |  |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | no | todo |  |  |  |  |
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | no | todo |  |  |  |  |
@@ -722,6 +722,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — FND-009 session flow and SESS persistence (astra, gpt-6)
+
+- Wired the composition-owned session, IGameFlow and persistent-ID allocator. New games reset existing models and run ordered initializers; restore keeps the session identity; exit writes back campaign time; scene recovery clears the session. SESS v1 preserves all six fields and rejects malformed state before mutating the session.
+- Accepted **ADR-0034 / SPEC-01 Q14–18 / SPEC-05 Q27 / ledger Q107–111**: every save prepares ordered writebacks before participants; optional GPU thumbnails have a two-frame wait and producer-owned cleanup; exit saves run before Exiting under a flow reservation/pause, and quit-without-saving skips the save. New game creates a default profile only when none is selected. Future galaxy, fleet, combat-status and camera integrations remain with their named tasks.
+- Required session tests and extra save edges pass: byte-identical real save/restore, reset/initializer/event order, save-block precedence, disallowed flows, failed preparation cleanup, malformed/truncated SESS atomicity, missing-chunk defaults and completed/late thumbnail handling. Headless capture omits the image; real camera pixel verification remains CAM-004.
+- Full validation: compile **zero C# warnings**, EditMode **615 passed + 1 explicit skipped**, PlayMode **48 passed**, perf **38/38**, docs **503 tasks / zero errors**. Implementation `8a8bd6f`.
+- Next: flight contract/registration prerequisites (FLT-001 onward) before FND-010 player spawning, whose specified PlayerShip/profile types are not present yet. Continue ready M1 work; no owner wait.
 
 ### 2026-10-11 — FND-008 persistent-ID allocation and refill (astra, gpt-6)
 
