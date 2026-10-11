@@ -26,10 +26,11 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 - **Ship lines follow Starsector's depth without copying it.** Approved 2D silhouettes come before any 3D build. Form follows function. Use asymmetry with a reason, and refit variants. Human hulls are blocky, alien hulls smooth. Factions come from the existing lore in `Import/Legacy/content/Factions` and the DESIGN-GUIDE faction section.
 - **Look-book ships are concepts, not final designs**, and the 2D ship lines are not approved yet.
 
-## 2. Where things stand (2026-10-11, M0 passed; M1 next)
+## 2. Where things stand (2026-10-11, M0 passed; M1 underway)
 
 - **M0 Foundations passed:** 71/71 tasks, including five system-review fixes, are merged locally. The [ledger](LEDGER.md) records the review scope, evidence and exit gate. Frank authorized this session's review; it was not an independent second-author review.
-- **Verified baseline:** compile zero C# warnings; headless EditMode **411 passed + 1 explicit skipped**, PlayMode **31 passed**, perf **23/23**, Python tool checks **6 passed**, docs **501 tasks / zero errors**. Separate safety-on suites pass 411/31. Boot/MainMenu/World each passed two start/stop cycles without retained roots, worlds, services or events. Play-to-menu **0.176 s**.
+- **Verified baseline:** latest compile zero C# warnings; live EditMode **425 passed**, PlayMode **31 passed**, perf **23/23**; docs **501 tasks / zero errors**. The M0 exit review separately verified clean headless and safety-on runs (411/31 at that point), six Python tool checks, two boot/re-entry cycles per scene, and **0.176 s** Play-to-menu.
+- **M1 progress:** VOX-004 brick maths/masks, REN-001 rendering contracts and PHY-001 physics contracts are done and merged. Queue/batch teardown covers pending jobs and owned blobs. Q51–55 resolve contract arithmetic/accessibility, one existing-package reference (ADR-0022), the debug-query exception and unspecified container capacities. Rendering uses ADR-0018's expanded snapshot shape bits.
 - **What exists:** correctly composed boot/content/input/audio/pause/save/scene flow; deterministic core and native event streams; VOXS/save framework with round-trip and failure-path tests; repeatable migration of 35 items, 21 blocks and 13 ships; dev commands/scenarios and release stripping. Gameplay, voxel rendering/physics, camera and screens are M1+. Audio remains silent until AUD-007 config/cues in M2.
 - **Review repairs:** TST-009 serializes Unity tools and validates test inventories. PERS-016/017/018 fix capture leaks, committed-save reporting/stale sidecars, and null JSON metadata. CORE-013 retains all disposal jobs and handles abandoned reads (trap T2.13). Decisions are Q47–50 in the ledger/specs.
 - **Shutdown anomaly:** old MIG-007 crash evidence is retained. After CORE-013, clean headless runs exit 0 with no aged TempJob warnings. The old crash's exact cause remains unproven; investigate if it recurs.
@@ -39,6 +40,6 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 3. Next
 
-1. **M1:** choose ready voxel/core/render/physics contract tasks. VOX-004 brick maths is ready; REN-001/PHY-001 enable later integration. Run VOX-002's measured memory spike before committing to the storage fallback; follow its go/no-go rule.
+1. **M1:** choose ready voxel/core/render/physics contract tasks. VOX-004 and REN-001/PHY-001 are done. Run VOX-002's measured memory spike next, before committing to the storage fallback; follow its go/no-go rule. PHY-002 is also ready for the nested-collider capability spike.
 2. **ART-007:** finish the validator on its existing branch, bring it up to date with main and merge locally when convenient.
 3. Keep advancing ready M1 tasks, then its system review and exit gate. Art-track owner gates and no-new-3D-ship restrictions stay in force.
