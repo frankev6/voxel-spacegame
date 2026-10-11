@@ -553,6 +553,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 12 | 2026-10-11 | SPEC-03 §4.2, INP-002 | No task sets `shortcutKeysConsumeInput` in `ProjectSetup` (SPEC-03 open question 5) | INP-002 adds it | Tech lead | |
 | 13 | 2026-10-11 | SPEC-01 FND-003, FND-004, SPEC-03 INP-002 | FND-003, FND-004 and INP-002 publish through `EventBus<T>` (CORE-006) but do not depend on it (SPEC-01 open question 6) | Both blocked until CORE-006 is done; add `CORE-006` to their *Depends on* | Tech lead | |
 | 14 | 2026-10-11 | SPEC-05 PERS-001 | Readonly result structs had no constructors (SPEC-05 open question 16) | All-field constructors added | Tech lead | |
+| 15 | 2026-10-11 | SPEC-05 PERS-002 | Slot status when `meta.json` is valid but `world.sav` is missing (SPEC-05 open question 17) | `Ok` needs `world.sav`; else `BackupOnly`/`Corrupt` | Tech lead | |
 
 ## Measurements
 

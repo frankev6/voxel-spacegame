@@ -1001,6 +1001,7 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 | 14 | Combat definition for `SaveBlockReason.InCombat` | `ISaveContext` returns `InCombat` when any hostile ship is within the T3 bubble and targeting the player, or the player took damage in the last 10 s (SPEC-01 implements, data from SPEC-23/13) | SPEC-01 |
 | 15 | Ship thumbnail size | 256×256 RGBA32 (SPEC-51 renders) | SPEC-51 |
 | 16 | §4.5 declares `SaveResult`, `LoadResult`, `SaveOperationResult` and `ChunkRegistration` as readonly structs with readonly fields but no constructor, so nothing can set them (and the compiler warns) | PERS-001 adds one constructor per struct taking every field in declaration order | Tech lead |
+| 17 | §5.2 says what happens when `meta.json` is missing or invalid, but not when a valid `meta.json` sits next to a missing `world.sav` | A valid meta counts as `Ok` only when `world.sav` exists; otherwise the same rules apply as without a meta (`world.bak` only → `BackupOnly`, nothing → `Corrupt`) (PERS-002) | Tech lead |
 
 ## 11. References
 
