@@ -937,7 +937,7 @@ Measured station geometry and allocation totals:
 ### VOX-013 — GridSpawnSystem: spawn path and singletons
 - **Milestone:** M1
 - **Tier:** frontier — F1/F5: builds every grid; ordering with SPEC-11/12/13/31
-- **Depends on:** `VOX-006`, `VOX-011`, `VOX-012`, `REN-001`, `PHY-001`, `DMG-001`, `TST-001`
+- **Depends on:** `VOX-006`, `VOX-011`, `VOX-012`, `REN-001`, `VOX-021`, `PHY-001`, `DMG-001`, `TST-001`
 - **Do:** Implement `VoxelSingletons`, `GridSpawnApi` spawn overloads, `GridSpawnSystem` §5.7 steps 1, 4 and 5 with `BrickFillJob` and `FunctionalFillJob`, hooks, `PersistentId` copy, profile types from `RootComponentRegistration` and `GridStowApi` (§5.13), profiler markers. In step 5b also set `GridMass { Data = source.GetMass(content) }` (cached by revision, SPEC-12 Q3) and disable `GridMassRecompute`, so no O(cells) recompute runs after a spawn.
 - **Files:** `Assets/Game/Voxel/Grid/{GridSpawnSystem,GridSpawnApi,GridStowApi,VoxelSingletons,BrickFillJob,FunctionalFillJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/GridSpawnSystemTests.cs`; `Assets/Game/Tests/PlayMode/Voxel/GridSpawnPerfTests.cs`
 - **Acceptance criteria:**
@@ -969,7 +969,7 @@ Measured station geometry and allocation totals:
 ### VOX-015 — BrickDirtyScheduleSystem
 - **Milestone:** M1
 - **Tier:** frontier — F2/F3: deterministic queue order feeds deterministic colliders
-- **Depends on:** `VOX-012`, `REN-001`, `PHY-001`
+- **Depends on:** `VOX-012`, `REN-001`, `VOX-021`, `PHY-001`
 - **Do:** Implement §5.8 with `BrickDirtyDrainJob` (single-worker `IJobChunk`) using the queue `Enqueue` methods from REN-001/PHY-001.
 - **Files:** `Assets/Game/Voxel/Grid/{BrickDirtyScheduleSystem,BrickDirtyDrainJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/BrickDirtyScheduleTests.cs`
 - **Acceptance criteria:**
@@ -1026,6 +1026,18 @@ Measured station geometry and allocation totals:
   - [ ] One place + edit request costs ≤ 2 ms main thread on a 100k-block ship (06 editor gate share).
 - **Tests:** `GridEditTests.MirroredEdits_MatchDraft`, `.BoundsGrowth_RemapsSlots`, `.FunctionalAddRemove`; `GridEditPerfTests.PlaceRemove_Under2ms`.
 
+### VOX-021 — Mesh rebuild priority queue
+- **Milestone:** M1
+- **Tier:** frontier — F2: native producer/consumer ownership across jobs and main-thread draining
+- **Depends on:** `REN-001`
+- **Do:** Implement the existing `BrickMeshQueue.Enqueue/TryDequeue/Count` contract in SPEC-11 §4.2. Moved from REN-010 to resolve the SPEC-10 spawning dependency cycle (SPEC-11 Q14, this spec Q28). Keep Acquire/Release/CompleteAccess and container ownership unchanged.
+- **Files:** `Assets/Game/Voxel/Rendering/BrickMeshQueue.cs`; `Assets/Game/Tests/EditMode/Voxel/Rendering/BrickMeshQueueTests.cs`
+- **Acceptance criteria:**
+  - [ ] Dequeue order is Damage, Neighbour, Spawn, Lod, FIFO within each; a brick queued at Spawn then at Damage is built once, from the Damage list.
+  - [ ] Equal/worse priorities do not duplicate pending bricks; obsolete entries are skipped; Count is the number of pending bricks.
+  - [ ] A Burst job producer followed by a main-thread consumer uses Acquire/Release/CompleteAccess without job safety errors; guard handles are never passed into the job.
+- **Tests:** `BrickMeshQueueTests.PriorityOrder`, `.UpgradeDedup`, `.StaleSkipped`, `.JobProducer_MainThreadConsumer_NoSafetyErrors` (with Burst safety checks on).
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
@@ -1064,6 +1076,8 @@ Measured station geometry and allocation totals:
 | 26 | ToSource uses Temp for sorted order but Encode is documented safe on a managed worker | Use TempJob for the immediately disposed order array | Tech lead | Resolved 2026-10-11: follows trap T2.10; managed-worker encoding is tested against main-thread bytes. |
 
 | 27 | GridStowApi.Unstow needs SplitGrace from DMG-001, which VOX-013 does not list | Make the existing contract dependency explicit | Tech lead | Resolved 2026-10-11: VOX-013 depends on DMG-001; implement that ready M1 contract task before spawning. |
+
+| 28 | Spawn/dirty scheduling call queue methods deferred to REN-010, which depends on SPEC-10 | Consume the extracted VOX-021 queue task | Tech lead | Resolved 2026-10-11: explicit dependency breaks the cycle; SPEC-11 Q14 preserves the queue contract and moves its tests. |
 
 ## 11. References
 

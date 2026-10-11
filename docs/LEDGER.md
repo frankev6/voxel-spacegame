@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 78 | 0 | 0 | 0 | 22 | 0 | 100 | 12 |
+| M1 | 79 | 0 | 0 | 0 | 22 | 0 | 101 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 4 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -126,12 +126,13 @@
 | VOX-010 | Voxel definitions and config factory | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | edb5c0c | Blueprint setter, default config, boot singleton; 2 tests, Q64 |
 | VOX-011 | Structure registry and BlueprintLibrary | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-009, VOX-010 | yes | done | astra (gpt-6) | 2026-10-11 | b630046 | Borrowed non-reused handles; immutable lazy cache, bounded eviction, boot ownership; 6 required tests |
 | VOX-012 | ECS cell write and read helpers | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-004 | yes | done | astra (gpt-6) | 2026-10-11 | 0b52cc8 | Burst cell reads/writes, masks, counts, dirty flags and borders; Q63 |
-| VOX-013 | GridSpawnSystem: spawn path and singletons | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-006, VOX-011, VOX-012, REN-001, PHY-001, DMG-001, TST-001 | yes | todo |  |  |  |  |
+| VOX-013 | GridSpawnSystem: spawn path and singletons | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-006, VOX-011, VOX-012, REN-001, VOX-021, PHY-001, DMG-001, TST-001 | no | todo |  |  |  |  |
 | VOX-014 | Rebuild, despawn and write-back | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | no | todo |  |  |  |  |
-| VOX-015 | BrickDirtyScheduleSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-012, REN-001, PHY-001 | yes | todo |  |  |  |  |
+| VOX-015 | BrickDirtyScheduleSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-012, REN-001, VOX-021, PHY-001 | no | todo |  |  |  |  |
 | VOX-016 | DeferredDisposalSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | no | todo |  |  |  |  |
 | VOX-017 | Benchmark structures | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-005, VOX-006 | yes | done | astra (gpt-6) | 2026-10-11 | a80b2f7 | Five deterministic shapes; reference build 87.43 ms; count/dependency fixes Q66–67 |
 | VOX-019 | Damage persistence scenario | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-014 | no | todo |  |  |  |  |
+| VOX-021 | Mesh rebuild priority queue | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | REN-001 | yes | todo |  |  |  |  |
 | REN-001 | Public contract types | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | VOX-001, DATA-001 | yes | done | astra (gpt-6) | 2026-10-11 | 42dfd86 | Rendering contracts; queue/batch ownership; ADR-0018 layout; Q51–53 |
 | REN-002 | SPIKE: Entities Graphics with thousands of runtime brick meshes | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-10 | no | todo |  |  |  |  |
 | REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002 | no | todo |  |  |  |  |
@@ -634,6 +635,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 72 | 2026-10-11 | SPEC-13 DMG-001 | Data definition cannot serialize a Voxel native table or derived hashes | Numeric tuning plus four cue references; derive runtime data | Tech lead | Resolved in SPEC-13 Q19; 43 matching numeric defaults |
 | 73 | 2026-10-11 | SPEC-13 DMG-001 | DamageSetup helper bodies have no implementation task | Return the exact specified component lists now | Tech lead | Resolved in SPEC-13 Q20; no damage systems brought forward |
 | 74 | 2026-10-11 | SPEC-10 VOX-013 | Unstow requires SplitGrace from DMG-001 | Add DMG-001 dependency before spawning | Tech lead | Resolved in SPEC-10 Q27; ready contract task taken first |
+| 75 | 2026-10-11 | SPEC-10 VOX-021 / SPEC-11 REN-010 | Mesh queue implementation is behind a voxel dependency cycle | Extract specified queue methods/tests into ready VOX-021 | Tech lead | Resolved in SPEC-11 Q14 and SPEC-10 Q28; no contract change |
 
 ## Measurements
 

@@ -519,14 +519,13 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Milestone:** M1
 - **Tier:** frontier — F2/F4: cross-frame jobs, budgets, queue priorities
 - **Depends on:** `REN-005`, `REN-006`, `REN-007`
-- **Do:** Implement `BrickMeshQueue` methods and `BrickMeshBuildSystem` per §5.4 with `BrickMeshJob`.
-- **Files:** `Assets/Game/Voxel/Rendering/{BrickMeshQueue,BrickMeshBuildSystem,BrickMeshJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/Rendering/{BrickMeshQueueTests,BrickMeshBuildSystemTests}.cs`
+- **Do:** Implement `BrickMeshBuildSystem` per §5.4 with `BrickMeshJob`; the queue methods are implemented by VOX-021 (Q14).
+- **Files:** `Assets/Game/Voxel/Rendering/{BrickMeshBuildSystem,BrickMeshJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/Rendering/BrickMeshBuildSystemTests.cs`
 - **Acceptance criteria:**
-  - [ ] Dequeue order is Damage, Neighbour, Spawn, Lod, FIFO within each; a brick queued at Spawn then at Damage is built once, from the Damage list.
   - [ ] Never more than one batch in flight; batch size stays within `[MeshBatchMin, MeshBatchMax]`.
   - [ ] The mesh job has no ECS dependencies (job debugger: safety system reports no lookups on it).
   - [ ] Main-thread cost ≤ 0.5 ms for a 128-brick batch (snapshot included).
-- **Tests:** `BrickMeshQueueTests.PriorityOrder`, `.UpgradeDedup`, `.StaleSkipped`, `.JobProducer_MainThreadConsumer_NoSafetyErrors` (a fixed-step job enqueues through `Acquire`/`Release` while this system dequeues after `CompleteAccess`, with the job safety system on); `BrickMeshBuildSystemTests.OneBatchInFlight`, `.AdaptiveBatchSize`, `.DestroyedBricks_Skipped`, `.MainThreadCost`.
+- **Tests:** `BrickMeshBuildSystemTests.OneBatchInFlight`, `.AdaptiveBatchSize`, `.DestroyedBricks_Skipped`, `.MainThreadCost`.
 
 ### REN-011 — BrickMeshApplySystem, cleanup and statistics
 - **Milestone:** M1
@@ -608,6 +607,8 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 12 | Public VoxelRenderRuntime.Managed names an internal class, which C# rejects | Make the class public while keeping its implementation fields internal | Tech lead | Resolved 2026-10-11 in REN-001: class visibility permits the specified public field; mutable managed state remains module-owned. |
 | 13 | The specified AABB type is in an unreferenced Entities assembly | Add the installed Unity.Mathematics.Extensions reference | Tech lead | Resolved 2026-10-11 by accepted ADR-0022; Game.Voxel already permits the Entities package, with no new package or field change. |
 
+
+| 14 | Spawning needs BrickMeshQueue.Enqueue but REN-010 depends on finished SPEC-10 through snapshot gathering | Split the existing queue methods and four tests into SPEC-10 VOX-021, depending only on REN-001 | Tech lead | Resolved 2026-10-11: VOX-013/015 depend on VOX-021; REN-010 already depends on SPEC-10 through REN-005. This keeps the contract-only cross-spec dependency grammar. No new queue API or renderer implementation is introduced. |
 
 ## 11. References
 
