@@ -7,8 +7,20 @@ namespace Game.Core.Settings
         public byte TextScaleIndex = 0;              // 0 = 100 %, 1 = 115 %, 2 = 130 % (SPEC-60 TextScale)
         public bool ReduceMotion = false;
         public float ScreenShakeScale = 1f;          // [0, 1]
-        public void CopyFrom(AccessibilitySettingsData o) { throw new System.NotImplementedException("CORE-011"); }
-        public void Clamp() { throw new System.NotImplementedException("CORE-011"); }
-        public bool ValueEquals(AccessibilitySettingsData o) { throw new System.NotImplementedException("CORE-011"); }
+        public void CopyFrom(AccessibilitySettingsData o)
+        {
+            UiScale = o.UiScale; TextScaleIndex = o.TextScaleIndex; ReduceMotion = o.ReduceMotion; ScreenShakeScale = o.ScreenShakeScale;
+        }
+        public void Clamp()
+        {
+            var d = new AccessibilitySettingsData();
+            UiScale = SettingsClamp.Range(UiScale, 0.8f, 1.5f, d.UiScale);
+            if (TextScaleIndex > 2) TextScaleIndex = 2;
+            ScreenShakeScale = SettingsClamp.Range(ScreenShakeScale, 0f, 1f, d.ScreenShakeScale);
+        }
+        public bool ValueEquals(AccessibilitySettingsData o)
+        {
+            return UiScale == o.UiScale && TextScaleIndex == o.TextScaleIndex && ReduceMotion == o.ReduceMotion && ScreenShakeScale == o.ScreenShakeScale;
+        }
     }
 }
