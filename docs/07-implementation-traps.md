@@ -127,6 +127,11 @@ How to use this file: before you start a task, read the sections whose tags matc
 - **Right:** retain every handle returned by `Dispose(JobHandle)`, combine it with existing cleanup work, and complete that whole chain before the owner returns from `Dispose`. If a read set is abandoned before its normal end, complete its registered producers before freeing its streams.
 - **Check:** set job workers to zero in a focused ownership test so background workers cannot hide missing cleanup dependencies. CORE-013 reproduced leaks and an open-read safety error this way.
 
+### T2.14 Managed convenience overloads inside Burst
+- **Wrong:** `new ComponentTypeSet(typeof(PhysicsCollider))` or `new FixedString128Bytes("message")` in a Burst job. These compile as C# but the installed Burst compiler rejects their managed type/string paths (PHY-008).
+- **Right:** use `ComponentType.ReadWrite<T>()` or `ReadOnly<T>()`, and the literal conversion `FixedString128Bytes message = "message"`. A six-component set needs `FixedList128Bytes<ComponentType>`; direct constructors stop at five arguments.
+- **Check:** run the jobs and check for Burst errors as well as C# errors. Asynchronous Burst diagnostics may arrive in a later test, so an early passing test alone does not validate Burst compilation.
+
 ---
 
 ## 3. Rendering `[Voxel/REN, Presentation, Art]`

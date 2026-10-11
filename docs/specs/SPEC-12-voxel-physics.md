@@ -555,7 +555,7 @@ state.Dependency = handle;                                         // ECS orders
 ```
 **On the main thread outside `FixedStepSimulationSystemGroup`** (init group, `VoxelRebuildGroup`, presentation, tests, harness): call `CompleteAccess()` on each singleton, then read or write the containers directly; do not schedule a job that uses them without `Acquire`/`Release`.
 
-Never call `SystemAPI.GetSingletonRW` on these three types, never write their struct fields after `Create()`, never pass `Access` into a job. `ColliderBatchQueue.State` is touched only on the main thread (by `ColliderSwapSystem`, `BrickColliderBuildSystem`, `GridColliderCleanupSystem`); batch job memory (`B`) is touched by batch jobs only between schedule and completion, and by the finalize step after completion.
+Never call `SystemAPI.GetSingletonRW` on these three types, never write their struct fields after `Create()`, never pass `Access` into a job. `ColliderBatchQueue.State` is touched only on the main thread (by `ColliderSwapSystem`, `BrickColliderBuildSystem`, `GridColliderCleanupSystem`); batch job memory (`B`) is touched by batch jobs only between schedule and completion, and by the finalize step after completion. Cleanup and body-reset may read the immutable `Bricks`/`Assemblies` descriptors to identify referenced update slots while construction is running (Q23). Body-reset jobs hold cache access, which orders descriptor reads before finalization or planning can clear/resize the lists; they never read batch results or masks.
 
 ### 5.2 Box merging (`BrickBoxMerger`)
 
@@ -608,11 +608,11 @@ Filter and material per grid: `Grid`/`GridMaterial`, or `EditorPreview`/`EditorP
 
 ### 5.6 `GridBodyInitSystem`
 
-**Queries:** `init` = roots with `GridBodyInit` **enabled** and `GridSpawning` **disabled**; `rebuild` = roots with `GridRebuilt` enabled and `GridSpawning` disabled. If both are empty (`IsEmpty`), return.
+**Queries:** `init` = roots with `GridBodyInit` **enabled** and `GridSpawning` **disabled**; `rebuild` = roots with `GridRebuilt` enabled and `GridSpawning` disabled. If both are structurally empty (`IsEmptyIgnoreFilter`), return. Enableable filtering is performed by the asynchronous gather: `IsEmpty` would synchronize enableable writers on the main thread (Q22).
 
 **Per tick** (marker `GridBodyInitSystem.Init`):
 1. `roots = initQuery ∪ rebuildQuery` collected with `ToEntityListAsync(state.WorldUpdateAllocator, …)` (no sync); one single-threaded `GridBodyInitJob : IJob` (Burst) chained after both list handles, `queue.Acquire`, `cache.Acquire` and `state.Dependency`. The job sorts roots by `VoxelGrid.Serial` and processes them in that order. ECB: `GameplayEndCommandBufferSystem.Singleton.CreateCommandBuffer` (non-parallel, single job: no sort keys).
-2. **Rebuild root** (`GridRebuilt` enabled): find the record (by Serial); retire every `Children` blob and every pending update (compounds, masks); clear `Children`; keep `Installed`; `GridColliderState.Phase = Provisional` (the old compound stays installed); enable `GridMassRecompute`; enqueue every brick (step 6) with priority `Spawn`; disable `GridRebuilt`. No body component changes. Next root.
+2. **Rebuild root** (`GridRebuilt` enabled): find the record (by Serial); retire every `Children` blob and every pending update (compounds, masks); updates referenced by the current batch are detached from the record and marked Discarded until finalization owns their results, so their slots cannot be recycled early (Q23); clear `Children`; keep `Installed`; `GridColliderState.Phase = Provisional` (the old compound stays installed); enable `GridMassRecompute`; enqueue every brick (step 6) with priority `Spawn`; disable `GridRebuilt`. No body component changes. Next root.
 3. **Init root** (`GridBodyInit` enabled). Read `GridBodyInit init`, `VoxelGrid g`, `GridSource src`, `GridMass gm`, `LocalTransform t`. `planar = (src.Flags & PlanarInertia) != 0`; `preview = (src.Flags & EditorPreview) != 0`; `hasBody` = root already has `PhysicsCollider` (created by a `GridBodyFactory` caller, i.e. SPEC-13).
    - **Mass gate:** `init.Motion == Dynamic`, `!hasBody`, `gm.Data.CellCount == 0` → enable `GridMassRecompute` and skip this root (it stays enabled; `GridMassUpdateSystem` fills `GridMass` post-physics; the body is created next tick).
    - **Record:** create `GridColliderRecord { Root, Serial = g.Serial, CellSize = g.CellSize, Motion = init.Motion, IsEditorPreview = preview }` (if a record with this Serial exists, reuse it after retiring its contents).
@@ -945,11 +945,11 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Do:** Implement `GridBodyInitSystem` (§5.6) and `GridBodyFactory`. Use `EcsTestWorld` (SPEC-71) with `GridSpawnSystem` to spawn `Ship20k` (Dynamic, planar), `HollowStation1M` (Static), a Kinematic grid and an EditorPreview grid.
 - **Files:** `Assets/Game/Voxel/PhysicsBody/{GridBodyInitSystem,GridBodyFactory}.cs`, `Assets/Game/Voxel/PhysicsBody/Jobs/GridBodyInitJob.cs`, `Assets/Game/Tests/EditMode/Voxel/Physics/GridBodyInitTests.cs`
 - **Acceptance criteria:**
-  - [ ] After spawn completes, the next tick's ECB gives the root exactly the component set of its motion plus `PhysicsWorldIndex(0)`; `GridColliderState.Phase == Provisional`; the provisional box covers the cell bounds and does not push an overlapping dynamic body.
-  - [ ] Dynamic root with empty `GridMass` waits exactly one tick for the recompute, then gets an exact `PhysicsMass`.
-  - [ ] Initial velocities from `GridBodyInit` are applied (angular in inertia space); planar grid angular x/z = 0.
-  - [ ] A root that already has a body (factory caller) keeps its velocity, its provisional blob is adopted (no leak, no double dispose) and its bricks are queued as `Split`.
-  - [ ] `GridRebuilt` keeps the installed compound, resets cached bricks, re-queues every brick and enables `GridMassRecompute`.
+  - [x] After spawn completes, the next tick's ECB gives the root exactly the component set of its motion plus `PhysicsWorldIndex(0)`; `GridColliderState.Phase == Provisional`; the provisional box covers the cell bounds and does not push an overlapping dynamic body.
+  - [x] Dynamic root with empty `GridMass` waits exactly one tick for the recompute, then gets an exact `PhysicsMass`.
+  - [x] Initial velocities from `GridBodyInit` are applied (angular in inertia space); planar grid angular x/z = 0.
+  - [x] A root that already has a body (factory caller) keeps its velocity, its provisional blob is adopted (no leak, no double dispose) and its bricks are queued as `Split`.
+  - [x] `GridRebuilt` keeps the installed compound, resets cached bricks, re-queues every brick and enables `GridMassRecompute`.
 - **Tests:** `GridBodyInitTests.Dynamic_GetsBodyComponents`, `.Static_OnlyCollider`, `.Kinematic_InfiniteMass`, `.EditorPreview_QueryOnlyFilter`, `.EmptyMass_WaitsOneTick`, `.ExistingBody_AdoptsProvisional_KeepsVelocity`, `.Rebuild_KeepsCompound_RequeuesBricks`, `.Provisional_DoesNotPush`.
 
 ### PHY-009 — ColliderSnapshotSystem and install schedule
@@ -1139,6 +1139,8 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 | 19 | Empty newest updates say retire nothing, but older pending compounds still own memory and the edge table requires ChildCount zero | Preserve installed ownership; retire/free pending prefix; expose zero logical children | Tech lead | Resolved: keep PhysicsCollider and installed tick/phase/box count, set ChildCount=0, and retire any uninstalled prefix compounds through normal pool cleanup. |
 | 20 | Cleanup needs MaxBatchAgeFrames but intentionally does not require PhysicsVoxelConfig | Read optional config, otherwise use the default two-frame limit | Tech lead | Resolved: cleanup remains runnable after config/gameplay teardown and always completes inactive batches; unfinished forced completions are counted. |
 | 21 | Cleanup precedes the disposal clock mirror, so queue.Tick can lag current physics by catch-up ticks | Stamp the local retirement view from the current SimClock | Tech lead | Resolved: retain the three-frame delay and require two ticks after actual retirement; never shorten the paused PhysicsWorld lifetime using the previous frame tick. No singleton-field writer changes. |
+| 22 | The body-init IsEmpty fast path synchronizes enableable writers in Entities 6.6 | Use IsEmptyIgnoreFilter and asynchronous enableable filtering | Tech lead | Resolved: retain the no-fixed-step-sync contract; empty filtered lists do no body work. |
+| 23 | Rebuild reset must not recycle updates or apply old results while a batch still references them | Detach referenced updates as Discarded; finalize owns their later retirement | Tech lead | Resolved: body-reset reads only immutable batch descriptors under cache ownership, which orders it before descriptor clearing/reuse. New updates may proceed without reviving stale children. |
 
 ## 11. References
 
