@@ -1052,6 +1052,8 @@ Measured station geometry and allocation totals:
 
 | 19 | Does GridCellReader.TryGetCell return true for air inside an existing brick? | False for air, missing brick or outside grid; true only for a solid cell | Tech lead | Resolved 2026-10-11: the return value denotes a present solid cell, consistent with IsSolid. The Burst reader test covers existing-brick air, empty slot and out-of-grid lookup. |
 
+| 20 | SPEC-01 boot table passes a catalog to the definition-taking VoxelConfigFactory | Resolve config_voxel from the catalog at boot, then call the specified factory | Tech lead | Resolved 2026-10-11: corrected SPEC-01 call site and wired the BootSingleton-tagged config in table order; verified by ConfigFactory_CopiesValues. |
+
 ## 11. References
 
 - Audit: `00-synthesis.md` §6b, §6e, §8 phase 2; `01-voxel-core.md` §5, §6.1–§6.6, §6.9, B1, B3, B5, B6, B8, B9; `04-persistence-data.md` B3, §6.4; LEDGER R22–R26.

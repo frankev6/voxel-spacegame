@@ -28,7 +28,11 @@ namespace Game.Data.Definitions
             if (payloadVersion > 1) scope.Error("VOX-E003", nameof(payloadVersion), "Blueprint payload version is newer than supported v1.");
         }
 #if UNITY_EDITOR
-        public void EditorSetPayload(byte[] bytes, int cells, Vector3Int min, Vector3Int max) { throw new System.NotImplementedException("VOX-010"); }
+        public void EditorSetPayload(byte[] bytes, int cells, Vector3Int min, Vector3Int max)
+        {
+            payload = bytes == null ? null : (byte[])bytes.Clone();
+            cellCount = cells; boundsMin = min; boundsMax = max;
+        }
 #endif
     }
 }

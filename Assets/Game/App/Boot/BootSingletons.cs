@@ -3,6 +3,7 @@ using Game.Data.Components;
 using Game.Core;
 using Game.Data.Definitions;
 using Game.Voxel.PhysicsBody;
+using Game.Voxel.Grid;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -21,7 +22,7 @@ namespace Game.App.Boot
             using (var entities = q.ToEntityArray(Allocator.Temp))
                 foreach (var e in entities) created.Add(e);
 
-            // TODO(VOX-010): VoxelConfig = VoxelConfigFactory.Create(catalog).
+            Create(em, VoxelConfigFactory.Create(catalog.Get<VoxelConfigDefinition>(new ContentId("config_voxel"))), created);
             // TODO(REN-009): VoxelRenderConfig.
             var physics = catalog.Get<PhysicsVoxelConfigDefinition>(new ContentId("config_physics"));
             Create(em, PhysicsVoxelConfigFactory.Create(physics), created);

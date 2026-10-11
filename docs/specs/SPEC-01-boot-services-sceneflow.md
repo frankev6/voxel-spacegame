@@ -360,7 +360,7 @@ Creates ECS configuration singletons from content, once per boot, **in table ord
 | Singleton | Created by (call) | Added by |
 |---|---|---|
 | `BlockDefsRef`, `OrientationTablesRef` | `ContentService.CreateSingletons` (step 2) | DATA-007 |
-| `VoxelConfig` | `VoxelConfigFactory.Create(catalog)` | VOX config task |
+| `VoxelConfig` | `VoxelConfigFactory.Create(catalog.Get<VoxelConfigDefinition>("config_voxel"))` | VOX config task |
 | `VoxelRenderConfig` | `VoxelRenderConfigFactory.Create(catalog)` | REN config task |
 | `PhysicsVoxelConfig` | `PhysicsVoxelConfigFactory.Create(catalog.Get<PhysicsVoxelConfigDefinition>("config_physics"))` | PHY config task |
 | `PhysicsStep` | `PhysicsVoxelConfigFactory.CreatePhysicsStep(catalog.Get<PhysicsVoxelConfigDefinition>("config_physics"))` | PHY config task |

@@ -620,6 +620,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 63 | 2026-10-11 | SPEC-10 VOX-012 | TryGetCell return value for air in an existing brick was ambiguous | Return true only for solid cells | Tech lead | Resolved in SPEC-10 Q19; Burst read coverage includes air and missing cells |
 
+| 64 | 2026-10-11 | SPEC-10 VOX-010 / SPEC-01 | Boot table factory argument differs from declared definition parameter | Resolve config_voxel from catalog before calling factory | Tech lead | Resolved in SPEC-10 Q20 and SPEC-01 table; boot config is tagged before scene snapshot |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
