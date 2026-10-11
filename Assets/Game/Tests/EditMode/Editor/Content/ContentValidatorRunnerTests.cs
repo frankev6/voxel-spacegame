@@ -100,7 +100,8 @@ namespace Game.Tests.EditMode.Editor.Content
             var db = ScriptableObject.CreateInstance<ContentDatabase>();
             try
             {
-                var good = new List<ContentDefinition> { Block("block_missing", BlockKind.Structural), Item("item_missing") };
+                var good = new List<ContentDefinition> { Block("block_missing", BlockKind.Structural), Item("item_missing"),
+                                                         Create<Game.Data.Definitions.GameConfigDefinition>("config_game") };   // FND-E003 needs exactly one
                 db.EditorSetDefinitions(good);
                 Assert.AreEqual(0, ContentValidationCli.RunAndGetExitCode(db), "valid content");
                 good.Add(Item("item_bad", so => Set(so, "maxStack", 0)));

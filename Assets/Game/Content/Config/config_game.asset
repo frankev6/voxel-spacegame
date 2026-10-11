@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2f5759b1420944f9898af53b84d9aae, type: 3}
+  m_Name: config_game
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.GameConfigDefinition
+  id: config_game
+  formerIds: []
+  startBlueprint: {fileID: 0}
+  defaultCommanderName: Commander
+  devQuickStartSeed: 12345
+  sceneReadyTimeoutSeconds: 30
+  persistentIdBlockSize: 4096
+  persistentIdRefillThreshold: 1024
+  defeatDelaySeconds: 3
+  combatDamageWindowSeconds: 10
+  settingsSaveDebounceSeconds: 0.5

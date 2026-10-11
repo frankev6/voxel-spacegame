@@ -4,8 +4,14 @@ using Game.App.Services;
 using Game.App.Settings;
 using Game.Core;
 using Game.Core.Settings;
+using Game.Data.Definitions;
+using Game.Data.Services;
 using Game.Input;
 using Game.Persistence.Container;
+using Game.Persistence.Data;
+using Game.Persistence.Services;
+using Unity.Entities;
+using UnityEngine;
 
 namespace Game.App.Boot
 {
@@ -15,18 +21,30 @@ namespace Game.App.Boot
     {
         internal readonly List<IDisposable> DisposeStack = new List<IDisposable>();
 
+        /// <summary>Step names in construction order (FND-005 test hook).</summary>
+        internal readonly List<string> StepLog = new List<string>();
+        /// <summary>Type names in disposal order of the last Dispose (FND-005 test hook).</summary>
+        internal static readonly List<string> LastDisposeLog = new List<string>();
+        /// <summary>Test hook: Build throws after the step with this name. Reset by tests.</summary>
+        [StaticStateOk("test hook, reset by CompositionTests")] internal static string FailAfterStep;
+        /// <summary>Test hook: a failed Build stops Play Mode in the Editor unless a test turns this off.</summary>
+        [StaticStateOk("test hook, reset by CompositionTests")] internal static bool StopPlayModeOnFailure = true;
+
         internal SettingsService Settings { get; private set; }
+        internal ContentService Content { get; private set; }
         internal InputService Input { get; private set; }
         internal PauseService Pause { get; private set; }
+        internal SaveService Save { get; private set; }
+        internal GameConfigDefinition GameConfig { get; private set; }
 
         GameComposition() { }
 
-        internal static GameComposition Build(GameRoot root, GameRootConfig config, SettingsPaths settingsPaths)
+        internal static GameComposition Build(Transform root, GameRootConfig config, SavePaths savePaths, SettingsPaths settingsPaths)
         {
             var c = new GameComposition();
             try
             {
-                c.BuildSteps(root, config, settingsPaths);
+                c.BuildSteps(root, config, savePaths, settingsPaths);
                 return c;
             }
             catch (Exception e)
@@ -34,46 +52,74 @@ namespace Game.App.Boot
                 c.Dispose();
                 GameLog.Exception(LogCategories.Boot, e, "GameComposition.Build");
 #if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
+                if (StopPlayModeOnFailure) UnityEditor.EditorApplication.isPlaying = false;
 #endif
                 throw;
             }
         }
 
-        void BuildSteps(GameRoot root, GameRootConfig config, SettingsPaths settingsPaths)
+        void BuildSteps(Transform root, GameRootConfig config, SavePaths savePaths, SettingsPaths settingsPaths)
         {
+            var world = World.DefaultGameObjectInjectionWorld ?? throw new InvalidOperationException("GameComposition: no Default World (Bootstrap creates it first)");
+            var em = world.EntityManager;
+
             // 1. Settings (FND-004).
             Settings = Push(new SettingsService(new NewtonsoftSaveJsonCodec(), settingsPaths));
             Settings.Load();
-            Game.Core.Services.Register(Settings);
-            Game.Core.Services.Register<ISettingsService>(Settings);
+            Register(Settings); Register<ISettingsService>(Settings);
+            Step("1 settings");
 
-            // 2. TODO(FND-005): content = new ContentService(config.ContentDatabase); content.CreateSingletons(em);
-            //    BootSingletons.CreateAll(em, content.Catalog); blueprints; VoxelStructureRegistry; VoxelStructureRegistryRef.
+            // 2. Content (FND-005, DATA-007): validates and throws ContentValidationException, so boot fails loudly.
+            if (config?.ContentDatabase == null) throw new InvalidOperationException("GameRootConfig.ContentDatabase is not set on the GameRoot prefab");
+            Content = Push(new ContentService(config.ContentDatabase));
+            Content.CreateSingletons(em);
+            BootSingletons.CreateAll(em, Content.Catalog);
+            Register(Content);
+            Content.Catalog.TryGet(new ContentId("config_game"), out GameConfigDefinition gameConfig);
+            GameConfig = gameConfig;                                       // FND-E003 guarantees exactly one in a validated database
+            // TODO(VOX-011): blueprints = new BlueprintLibrary(...); registry = VoxelStructureRegistry.CreateRuntime(blueprints);
+            //                VoxelStructureRegistryRef singleton; register BlueprintLibrary and VoxelStructureRegistry.
+            Step("2 content");
 
             // 3. Input (INP-002).
             Input = Push(new InputService(Settings.Current.Controls));
-            Game.Core.Services.Register(Input);
+            Register(Input);
+            Step("3 input");
 
-            // 4. TODO(AUD-003): audio = new AudioService(...); audio.BindTo(world).
+            // 4. TODO(AUD-003): audio = new AudioService(audioConfig, content.Database, SettingsMapping.ToVolumes(...), root); audio.BindTo(world).
 
             // 5. Pause (FND-003). TODO(AUD-003): audio.BindPause(pause).
             Pause = Push(new PauseService());
-            Game.Core.Services.Register(Pause);
-            Game.Core.Services.Register<IPauseService>(Pause);
+            Register(Pause); Register<IPauseService>(Pause);
+            Step("5 pause");
 
-            // 6. TODO(PERS-005): save = new SaveService(savePaths, content, pause, new SaveServiceConfig()).
+            // 6. Save (PERS-002 profiles and slots; PERS-005 adds the pipeline).
+            Save = new SaveService(savePaths, Content, Pause, new SaveServiceConfig());   // TODO(PERS-005): Push(save) once its Dispose exists
+            Register(Save);
+            Step("6 save");
+
             // 7. TODO(FND-006): flow = new SceneFlow(world, pause, save, gameConfig).
-            // 8–13: session, galaxy, travel, spawner, factions, map, economy, narrative, UI, camera, FX and dialog are added by their
-            //       tasks, in the rows of SPEC-01 §5.2 (FND-009, GAL-008, TRV-006, FND-012, ENC-007, GAL-011, ECO-008, UI-003, …).
+            // 8. TODO(FND-009): session = new GameSession(flow, save, world, content, gameConfig); save.AttachContext(session); SESS, FLET;
+            //    Services.Register<IGameFlow>(session), <IPersistentIdAllocator>(session).
+            // 8.1–13: galaxy, travel, spawner, factions, map, economy, narrative, UI, camera, FX and dialog are added by their tasks, in the
+            //    rows of SPEC-01 §5.2 (GAL-008, TRV-006, FND-012, ENC-007, GAL-011, ECO-008, UI-003, …).
 
-            // 14. Settings applier (FND-004): follows SettingsChanged, then pushes every section once.
+            // 14. Settings applier (FND-004): follows SettingsChanged, then pushes every section once (SPEC-01 open question 7).
             Push(new SettingsApplier(Settings));
             SettingsApplier.ApplyAll(Settings.Current);
+            Step("14 settings applier");
 
             // 15. TODO(FND-006): flow.SnapshotBootEntities().
-            // 16. TODO(DEV-003): dev = DevRuntimeHost.Create(root.transform) (#if UNITY_EDITOR || DEVELOPMENT_BUILD).
+            // 16. TODO(DEV-003): dev = DevRuntimeHost.Create(root) (#if UNITY_EDITOR || DEVELOPMENT_BUILD); Services.Register(dev).
         }
+
+        void Step(string name)
+        {
+            StepLog.Add(name);
+            if (FailAfterStep != null && FailAfterStep == name) throw new InvalidOperationException("GameComposition test failure after step " + name);
+        }
+
+        static void Register<T>(T service) where T : class => Game.Core.Services.Register(service);
 
         T Push<T>(T service) where T : IDisposable
         {
@@ -84,13 +130,15 @@ namespace Game.App.Boot
         /// <summary>Disposes DisposeStack in reverse (one failure cannot leak the rest), then Services.Reset.</summary>
         public void Dispose()
         {
+            LastDisposeLog.Clear();
             for (int i = DisposeStack.Count - 1; i >= 0; i--)
             {
+                LastDisposeLog.Add(DisposeStack[i].GetType().Name);
                 try { DisposeStack[i].Dispose(); }
                 catch (Exception e) { GameLog.Exception(LogCategories.Boot, e, "GameComposition.Dispose " + DisposeStack[i].GetType().Name); }
             }
             DisposeStack.Clear();
-            Settings = null; Input = null; Pause = null;
+            Settings = null; Content = null; Input = null; Pause = null; Save = null; GameConfig = null;
             Game.Core.Services.Reset();
         }
     }

@@ -1,5 +1,6 @@
 using Game.App.Settings;
 using Game.Core;
+using Game.Persistence.Services;
 using Game.Core.Events;
 using Unity.Entities;
 using UnityEngine;
@@ -24,10 +25,16 @@ namespace Game.App.Boot
                 return;
             }
             Instance = this;
-            // TODO(TST-003): read Game.App.Testing.GameRootTestHooks (SaveRoot, SettingsPath, SkipIntroScreens) in the Editor and
-            // development builds. SavePaths arrives with the SaveService line (PERS-005).
+            // §5.1: test hooks redirect both paths in the Editor and development builds; release builds use the defaults.
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var savePaths = Game.App.Testing.GameRootTestHooks.SaveRoot != null ? new SavePaths(Game.App.Testing.GameRootTestHooks.SaveRoot) : SavePaths.CreateDefault();
+            var settingsPaths = Game.App.Testing.GameRootTestHooks.SettingsPath != null ? new SettingsPaths(Game.App.Testing.GameRootTestHooks.SettingsPath) : SettingsPaths.Default;
+#else
+            var savePaths = SavePaths.CreateDefault();
             var settingsPaths = SettingsPaths.Default;
-            Composition = GameComposition.Build(this, config, settingsPaths);
+#endif
+            // TODO(FND-006): pass GameRootTestHooks.SkipIntroScreens to SceneFlow.StartupAsync.
+            Composition = GameComposition.Build(transform, config, savePaths, settingsPaths);
         }
 
         void Start()

@@ -27,8 +27,22 @@ namespace Game.Data.Definitions
         public float CombatDamageWindowSeconds => combatDamageWindowSeconds;
         public float SettingsSaveDebounceSeconds => settingsSaveDebounceSeconds;
 
-        /// <summary>FND-E001 (no start blueprint), FND-E002 (a number outside its range).</summary>
+        /// <summary>FND-E002 (a number outside its range). FND-E001 (no start blueprint) is a warning here: no ship blueprint exists before
+        /// VOX-010/MIG-008, and boot must not fail for it. GameConfigValidator makes it an error once any blueprint exists (SPEC-01 open
+        /// question 8).</summary>
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
-        { throw new System.NotImplementedException("FND-005"); }
+        {
+            base.Validate(scope, context);
+            if (startBlueprint == null)
+                scope.Warning("FND-E001", nameof(startBlueprint), "No start blueprint: New Game is unavailable until one is set.");
+            void Range(bool ok, string field, string message) { if (!ok) scope.Error("FND-E002", field, message); }
+            Range(sceneReadyTimeoutSeconds >= 5f && sceneReadyTimeoutSeconds <= 120f, nameof(sceneReadyTimeoutSeconds), $"Scene ready timeout {sceneReadyTimeoutSeconds} s is outside 5..120.");
+            Range(persistentIdBlockSize >= 256 && persistentIdBlockSize <= 65536, nameof(persistentIdBlockSize), $"Persistent id block size {persistentIdBlockSize} is outside 256..65536.");
+            Range(persistentIdRefillThreshold >= 0 && persistentIdRefillThreshold < persistentIdBlockSize, nameof(persistentIdRefillThreshold), $"Refill threshold {persistentIdRefillThreshold} must be at least 0 and below the block size {persistentIdBlockSize}.");
+            Range(defeatDelaySeconds >= 0f && defeatDelaySeconds <= 10f, nameof(defeatDelaySeconds), $"Defeat delay {defeatDelaySeconds} s is outside 0..10.");
+            Range(combatDamageWindowSeconds > 0f, nameof(combatDamageWindowSeconds), $"Combat damage window {combatDamageWindowSeconds} s must be greater than 0.");
+            Range(settingsSaveDebounceSeconds >= 0f, nameof(settingsSaveDebounceSeconds), $"Settings save debounce {settingsSaveDebounceSeconds} s must not be negative.");
+            Range(!string.IsNullOrWhiteSpace(defaultCommanderName), nameof(defaultCommanderName), "The default commander name is empty.");
+        }
     }
 }
