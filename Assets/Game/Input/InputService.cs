@@ -14,6 +14,8 @@ namespace Game.Input
         readonly Dictionary<string, string> displayCache = new Dictionary<string, string>(StringComparer.Ordinal);
         float mouseSensitivity = 1f, zoomSensitivity = 1f;
         bool disposed;
+        InputActionRebindingExtensions.RebindingOperation rebind;
+        InputActionMap rebindingMap;
 
         /// <summary>Creates Controls, applies the binding overrides, copies the sensitivities and enables Global only (context None).</summary>
         public InputService(Game.Core.Settings.ControlSettingsData controls)
@@ -40,7 +42,8 @@ namespace Game.Input
         {
             if (context == CurrentContext) return;
             MapOf(CurrentContext)?.Disable();       // cancels in-progress actions: held buttons read released
-            MapOf(context)?.Enable();
+            var nextMap = MapOf(context);
+            if (nextMap != rebindingMap) nextMap?.Enable();
             var prev = CurrentContext;
             CurrentContext = context;
             EventBus<InputContextChanged>.Publish(new InputContextChanged(prev, context));
@@ -82,15 +85,86 @@ namespace Game.Input
         static bool InScheme(InputBinding b) => b.groups != null && b.groups.Split(InputBinding.Separator).Contains(Scheme);
 
         public event Action BindingsChanged;                                     // after rebind, reset or ApplyBindingOverrides
-        public bool IsRebinding => throw new NotImplementedException("INP-003");
-        public void StartRebind(string actionPath, int bindingIndex, Action<RebindResult> done) { throw new NotImplementedException("INP-003"); } // Esc cancels
-        public void CancelRebind() { throw new NotImplementedException("INP-003"); }
+        public bool IsRebinding => rebind != null;
+
+        public void StartRebind(string actionPath, int bindingIndex, Action<RebindResult> done)
+        {
+            CancelRebind();
+            var action = disposed || actionPath == null ? null : Controls.asset.FindAction(actionPath, false);
+            if (action == null || bindingIndex < 0 || bindingIndex >= action.bindings.Count || action.bindings[bindingIndex].isComposite)
+            {
+                done?.Invoke(new RebindResult(RebindStatus.Failed, actionPath, "?", null));
+                return;
+            }
+            var previous = action.bindings[bindingIndex];
+            rebindingMap = action.actionMap;
+            rebindingMap.Disable();
+            Controls.Global.Disable(); // Escape belongs only to the operation while it is active.
+            InputActionRebindingExtensions.RebindingOperation operation = null;
+            try
+            {
+                operation = action.PerformInteractiveRebinding(bindingIndex)
+                    .WithCancelingThrough("<Keyboard>/escape")
+                    .WithControlsExcluding("<Mouse>/position").WithControlsExcluding("<Mouse>/delta")
+                    .OnMatchWaitForAnother(0.1f);
+                rebind = operation;
+                operation.OnComplete(op =>
+                {
+                    string conflict = FindConflict(action, action.bindings[bindingIndex].effectivePath);
+                    if (conflict != null) action.ApplyBindingOverride(bindingIndex, previous);
+                    FinishRebind(op, actionPath, done, conflict == null ? RebindStatus.Completed : RebindStatus.Conflict, conflict);
+                });
+                operation.OnCancel(op => FinishRebind(op, actionPath, done, RebindStatus.Cancelled, null));
+                operation.Start();
+            }
+            catch (Exception e)
+            {
+                // Setup failures must not strand a disabled map or an unmanaged operation.
+                if (rebind == operation) rebind = null;
+                rebindingMap = null; operation?.Dispose(); RestoreMaps();
+                GameLog.Warn(LogCategories.Input, "Could not start rebinding: " + e.Message);
+                done?.Invoke(new RebindResult(RebindStatus.Failed, actionPath, GetBindingDisplay(actionPath), null));
+            }
+        }
+        string FindConflict(InputAction action, string path)
+        {
+            if (string.IsNullOrEmpty(path)) return null;
+            foreach (var map in Controls.asset.actionMaps)
+            {
+                if (map != action.actionMap && map != Controls.Global.Get()) continue;
+                foreach (var other in map.actions)
+                {
+                    if (other == action) continue;
+                    foreach (var binding in other.bindings)
+                        if (!binding.isComposite && string.Equals(binding.effectivePath, path, StringComparison.OrdinalIgnoreCase))
+                            return map.name + "/" + other.name;
+                }
+            }
+            return null;
+        }
+        void FinishRebind(InputActionRebindingExtensions.RebindingOperation operation, string actionPath, Action<RebindResult> done, RebindStatus status, string conflict)
+        {
+            if (rebind != operation) return;
+            rebind = null; rebindingMap = null;
+            operation.Dispose(); RestoreMaps(); displayCache.Clear();
+            var result = new RebindResult(status, actionPath, GetBindingDisplay(actionPath), conflict);
+            try { if (status == RebindStatus.Completed) BindingsChanged?.Invoke(); }
+            finally { done?.Invoke(result); }
+        }
+        void RestoreMaps()
+        {
+            Controls.asset.Disable();
+            if (disposed) return;
+            Controls.Global.Enable(); MapOf(CurrentContext)?.Enable();
+        }
+        public void CancelRebind() => rebind?.Cancel();
 
         public string SaveBindingOverridesJson() => Controls.asset.SaveBindingOverridesAsJson();
 
         /// <summary>"" or null → defaults; invalid JSON → defaults + warning. Raises BindingsChanged (SPEC-03 §5.1).</summary>
         public void ApplyBindingOverrides(string json)
         {
+            CancelRebind();
             if (string.IsNullOrEmpty(json)) Controls.asset.RemoveAllBindingOverrides();
             else
             {
@@ -104,8 +178,14 @@ namespace Game.Input
             BindingsChanged?.Invoke();
         }
 
-        public void ResetBinding(string actionPath, int bindingIndex) { throw new NotImplementedException("INP-003"); }
-        public void ResetAllBindings() { throw new NotImplementedException("INP-003"); }
+        public void ResetBinding(string actionPath, int bindingIndex)
+        {
+            CancelRebind();
+            var action = actionPath == null ? null : Controls.asset.FindAction(actionPath, false);
+            if (action == null || bindingIndex < 0 || bindingIndex >= action.bindings.Count) return;
+            action.RemoveBindingOverride(bindingIndex); BindingsChanged?.Invoke();
+        }
+        public void ResetAllBindings() => ApplyBindingOverrides(null);
 
         public float MouseSensitivity { get => mouseSensitivity; set => mouseSensitivity = Clamp(value); }          // [0.1, 5], from ControlSettingsData
         public bool InvertCameraY { get; set; }
@@ -117,9 +197,13 @@ namespace Game.Input
         {
             if (disposed) return;
             disposed = true;
-            Controls.asset.Disable();
-            if (UnityEngine.Application.isPlaying) Controls.Dispose();
-            else UnityEngine.Object.DestroyImmediate(Controls.asset);
+            try { CancelRebind(); }
+            finally
+            {
+                Controls.asset.Disable();
+                if (UnityEngine.Application.isPlaying) Controls.Dispose();
+                else UnityEngine.Object.DestroyImmediate(Controls.asset);
+            }
         }
     }
 }

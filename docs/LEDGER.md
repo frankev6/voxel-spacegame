@@ -576,6 +576,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 33 | 2026-10-11 | SPEC-72 MIG-007 | Nonfinite Euler inputs and quarter-turn integer overflow (SPEC-72 Q12) | Reject nonfinite; reduce finite full turns before integer rounding | Tech lead | Resolved in MIG-007; exact cube matrices and the 1-degree tolerance remain unchanged |
 | 34 | 2026-10-11 | SPEC-72 MIG-004 | Hand-edited link manifest adoption, first-run report equality, missing-field callbacks (SPEC-72 Q13) | Hash only owned/forced writes; stable reports after initial creation; guarded field setters; invalid manifests fail closed | Tech lead | Resolved in MIG-004; preserves protected assets on subsequent runs |
 | 35 | 2026-10-11 | SPEC-71 TST-008 | Iteration setting and live CLI contract gaps (SPEC-71 Q7) | Both reloads disabled per ADR-0020; installed API schema; complete results and exit-status validation | Tech lead | Resolved in TST-008; wall-clock measurements include CLI overhead |
+| 36 | 2026-10-11 | SPEC-03 INP-003 | Conflict removal loses an existing custom binding (SPEC-03 Q6) | Restore prior overrides on rejection; suppress Global during rebind; ADR-0021 for required test fixture | Tech lead | Resolved in INP-003; preserves the player’s old binding |
 
 ## Measurements
 

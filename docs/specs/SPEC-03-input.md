@@ -283,7 +283,7 @@ Results are cached in a `Dictionary<string, string>` that is cleared on `Binding
    - `.WithControlsExcluding("<Mouse>/position").WithControlsExcluding("<Mouse>/delta")`;
    - `.OnMatchWaitForAnother(0.1f)`.
 3. `OnComplete`: detect a conflict, meaning any other action in the **same map** or in Global whose effective binding path equals the new one.
-   - **Conflict:** remove the override (`action.RemoveBindingOverride(index)`) and report `Conflict` with the other action's path. The UI offers to rebind again.
+   - **Conflict:** restore the previous override (or remove it if there was none; Q6) and report `Conflict` with the other action's path. The UI offers to rebind again.
    - **Otherwise:** report `Completed` and raise `BindingsChanged`.
 4. `OnCancel` → `Cancelled`.
 5. Always dispose `op` and re-enable the map if the current context uses it.
@@ -485,6 +485,8 @@ When the Editor map is disabled, set `frame = default`.
 | 3 | Fire groups beyond 3 | 3 groups in v1 (LMB, RMB, Space) | Owner |
 | 4 | The generated `Controls.Dispose()` calls `Object.Destroy(asset)`, which logs an error in edit mode, so EditMode tests that dispose an `InputService` fail on the unexpected log (found in INP-001) | `InputService.Dispose` disables the maps, then destroys `Controls.asset` with `Object.DestroyImmediate` when `!Application.isPlaying` and calls `Controls.Dispose()` otherwise | Tech lead |
 | 5 | No task sets `InputSystem.settings.shortcutKeysConsumeInput = true` in `ProjectSetup` (§4.2 Editor) | INP-002 adds it to `ProjectSetup.ApplyAll`/`Check` with a `ProjectSettingsGuardTests` case | Tech lead |
+
+| 6 | Removing a conflicting override loses a previously successful custom binding, contrary to §7’s “old binding kept” | **Answer (resolved in INP-003):** capture and restore the prior binding overrides on conflict; defaults remain defaults when no override existed. Disable Global while rebinding so cancellation cannot fire Back. ADR-0021 permits the already-installed InputTestFixture assembly reference required by the task. | Tech lead |
 
 ## 11. References
 
