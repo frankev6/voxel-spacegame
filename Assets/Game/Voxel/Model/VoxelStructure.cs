@@ -1,5 +1,7 @@
 using System;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using System.Collections.Generic;
 using Unity.Mathematics;
 
 namespace Game.Voxel.Model
@@ -9,35 +11,271 @@ namespace Game.Voxel.Model
     /// ComputeContentHash (§5.4) is added by VOX-009 together with the SPEC-05 VOXS types it needs (SPEC-10 open question 14).</summary>
     public sealed class VoxelStructure : IDisposable
     {
-        public VoxelStructure(float cellSize = 0.5f) { throw new System.NotImplementedException("VOX-005"); }            // Allocator.Persistent; Palette gets entry 0
-        public VoxelStructureData Data => throw new NotImplementedException("VOX-005");
-        public float CellSize => throw new NotImplementedException("VOX-005");
-        public uint Revision => throw new NotImplementedException("VOX-005");
-        public bool IsReadOnly => throw new NotImplementedException("VOX-005");
-        public bool IsPinned => throw new NotImplementedException("VOX-005");
-        public int BrickCount => throw new NotImplementedException("VOX-005");
-        public int SolidCellCount => throw new NotImplementedException("VOX-005");   // Σ SolidCount, O(bricks)
-        public bool TryGetCellBounds(out int3 min, out int3 max) { throw new System.NotImplementedException("VOX-005"); }
-        public Cell GetCell(int3 cell) { throw new System.NotImplementedException("VOX-005"); }
-        public void SetCell(int3 cell, Cell value) { throw new System.NotImplementedException("VOX-005"); }              // raw write (codec, editor internals, tests)
+        VoxelStructureData data;
+
+        public VoxelStructure(float cellSize = 0.5f)
+        {
+            if (!math.isfinite(cellSize) || cellSize <= 0) throw new ArgumentOutOfRangeException(nameof(cellSize));
+            try
+            {
+                data.Header = new NativeReference<StructureHeader>(Allocator.Persistent);
+                data.Header.Value = new StructureHeader { CellSize = cellSize };
+                data.Palette = new NativeList<PaletteEntry>(Allocator.Persistent);
+                data.Palette.Add(default);
+                data.Instances = new NativeList<BlockInstance>(Allocator.Persistent);
+                data.FreeInstances = new NativeList<int>(Allocator.Persistent);
+                data.Bricks = new NativeList<BrickRecord>(Allocator.Persistent);
+                data.Masks = new NativeList<BrickMaskBits>(Allocator.Persistent);
+                data.BrickIndex = new NativeHashMap<int3, int>(0, Allocator.Persistent);
+                data.CellPages = new NativeList<Cell>(Allocator.Persistent);
+                data.FreePages = new NativeList<int>(Allocator.Persistent);
+            }
+            catch { DisposeStorage(); throw; }
+        }
+        public VoxelStructureData Data => data;
+        public float CellSize => data.Header.Value.CellSize;
+        public uint Revision => data.Header.Value.Revision;
+        public bool IsReadOnly => data.Header.Value.ReadOnly != 0;
+        public bool IsPinned => data.Header.Value.PinCount != 0;
+        public int BrickCount => data.Bricks.Length;
+        public int SolidCellCount
+        {
+            get
+            {
+                int count = 0;
+                for (int i = 0; i < data.Bricks.Length; i++) count += data.Bricks[i].SolidCount;
+                return count;
+            }
+        }
+        public bool TryGetCellBounds(out int3 min, out int3 max)
+        {
+            var header = data.Header.Value;
+            if (header.BoundsValid == 0)
+            {
+                min = new int3(int.MaxValue); max = new int3(int.MinValue);
+                for (int i = 0; i < data.Bricks.Length; i++)
+                    if (data.Masks[i].TryGetBounds(out var lo, out var hi))
+                    {
+                        int3 origin = data.Bricks[i].Coord << BrickMath.Shift;
+                        min = math.min(min, origin + lo); max = math.max(max, origin + hi);
+                    }
+                if (data.Bricks.Length == 0) min = max = default;
+                header.CellMin = min; header.CellMax = max; header.BoundsValid = 1;
+                data.Header.Value = header;
+            }
+            min = header.CellMin; max = header.CellMax;
+            return data.Bricks.Length != 0;
+        }
+        public Cell GetCell(int3 cell)
+        {
+            if (!data.BrickIndex.TryGetValue(BrickMath.BrickOf(cell), out int index)) return default;
+            var record = data.Bricks[index];
+            return record.Page < 0 ? record.Uniform : data.CellPages[record.Page * BrickMath.CellsPerBrick + BrickMath.LocalIndex(BrickMath.LocalOf(cell))];
+        }
+        public void SetCell(int3 cell, Cell value)
+        {
+            RequireMutable();
+            if (value.IsAir) value = default;
+            int3 coord = BrickMath.BrickOf(cell);
+            int local = BrickMath.LocalIndex(BrickMath.LocalOf(cell));
+            bool exists = data.BrickIndex.TryGetValue(coord, out int index);
+            var record = exists ? data.Bricks[index] : new BrickRecord { Coord = coord, Page = -1 };
+            Cell old = !exists ? default : record.Page < 0 ? record.Uniform : data.CellPages[record.Page * BrickMath.CellsPerBrick + local];
+            if (old.Equals(value)) return;
+            if (record.Page < 0)
+            {
+                record.Page = TakePage();
+                FillPage(record.Page, record.Uniform);
+                record.Uniform = default;
+            }
+            if (!exists)
+            {
+                index = data.Bricks.Length;
+                data.Bricks.Add(record); data.Masks.Add(default); data.BrickIndex.Add(coord, index);
+            }
+            data.CellPages[record.Page * BrickMath.CellsPerBrick + local] = value;
+            var mask = data.Masks[index]; mask.Set(local, !value.IsAir); data.Masks[index] = mask;
+            record.SolidCount = (ushort)(record.SolidCount + (value.IsAir ? 0 : 1) - (old.IsAir ? 0 : 1));
+            record.ChangedRevision = Changed();
+            data.Bricks[index] = record;
+            if (record.SolidCount == 0) RemoveAt(index);
+        }
         public PlaceResult TryPlaceBlock(in BlockPlacement p, in VoxelContent content) { throw new System.NotImplementedException("VOX-006"); }
         public bool TryRemoveBlockAt(int3 cell, in VoxelContent content, out BlockPlacement removed) { throw new System.NotImplementedException("VOX-006"); }
         public bool TryGetBlockAt(int3 cell, out BlockPlacement block, out int instanceIndex) { throw new System.NotImplementedException("VOX-006"); }
         public ushort FindOrAddPalette(PaletteEntry e) { throw new System.NotImplementedException("VOX-006"); }          // returns 0 if full (32767 entries used)
-        public void SetBrickDense(int3 coord, NativeArray<Cell> cells4096) { throw new System.NotImplementedException("VOX-005"); }   // replaces/creates a brick; deletes it if all air
-        public void SetBrickUniform(int3 coord, Cell value) { throw new System.NotImplementedException("VOX-005"); }     // value must be solid
-        public bool RemoveBrick(int3 coord) { throw new System.NotImplementedException("VOX-005"); }
-        public void OptimizeStorage() { throw new System.NotImplementedException("VOX-005"); }                           // full identical dense bricks → uniform; frees pages
+        public void SetBrickDense(int3 coord, NativeArray<Cell> cells4096)
+        {
+            RequireMutable();
+            if (cells4096.Length != BrickMath.CellsPerBrick) throw new ArgumentException("A brick must contain 4096 cells", nameof(cells4096));
+            var mask = new BrickMaskBits();
+            int count = 0;
+            for (int i = 0; i < cells4096.Length; i++)
+                if (!cells4096[i].IsAir) { mask.Set(i, true); count++; }
+            if (count == 0) { RemoveBrick(coord); return; }
+            bool exists = data.BrickIndex.TryGetValue(coord, out int index);
+            var record = exists ? data.Bricks[index] : new BrickRecord { Coord = coord, Page = -1 };
+            if (exists)
+            {
+                bool same = true;
+                for (int i = 0; i < cells4096.Length && same; i++)
+                {
+                    Cell old = record.Page < 0 ? record.Uniform : data.CellPages[record.Page * BrickMath.CellsPerBrick + i];
+                    same = old.Equals(cells4096[i].IsAir ? default : cells4096[i]);
+                }
+                if (same) return;
+            }
+            if (record.Page < 0) record.Page = TakePage();
+            for (int i = 0; i < cells4096.Length; i++)
+                data.CellPages[record.Page * BrickMath.CellsPerBrick + i] = cells4096[i].IsAir ? default : cells4096[i];
+            record.Uniform = default; record.SolidCount = (ushort)count; record.ChangedRevision = Changed();
+            if (exists) { data.Bricks[index] = record; data.Masks[index] = mask; }
+            else { data.BrickIndex.Add(coord, data.Bricks.Length); data.Bricks.Add(record); data.Masks.Add(mask); }
+        }
+        public void SetBrickUniform(int3 coord, Cell value)
+        {
+            RequireMutable();
+            if (value.IsAir) throw new ArgumentException("Uniform bricks must be solid", nameof(value));
+            bool exists = data.BrickIndex.TryGetValue(coord, out int index);
+            if (exists)
+            {
+                var old = data.Bricks[index];
+                if (old.Page < 0 && old.Uniform.Equals(value)) return;
+                if (old.Page >= 0) data.FreePages.Add(old.Page);
+            }
+            var record = new BrickRecord { Coord = coord, Page = -1, Uniform = value, SolidCount = BrickMath.CellsPerBrick, ChangedRevision = Changed() };
+            if (exists) { data.Bricks[index] = record; data.Masks[index] = BrickMaskBits.Full(); }
+            else { data.BrickIndex.Add(coord, data.Bricks.Length); data.Bricks.Add(record); data.Masks.Add(BrickMaskBits.Full()); }
+        }
+        public bool RemoveBrick(int3 coord)
+        {
+            RequireMutable();
+            if (!data.BrickIndex.TryGetValue(coord, out int index)) return false;
+            RemoveAt(index); Changed(); return true;
+        }
+        public void OptimizeStorage()
+        {
+            RequireMutable();
+            for (int i = 0; i < data.Bricks.Length; i++)
+            {
+                var record = data.Bricks[i];
+                if (record.Page < 0 || record.SolidCount != BrickMath.CellsPerBrick) continue;
+                int start = record.Page * BrickMath.CellsPerBrick;
+                Cell value = data.CellPages[start]; bool same = true;
+                for (int j = 1; j < BrickMath.CellsPerBrick && same; j++) same = value.Equals(data.CellPages[start + j]);
+                if (!same) continue;
+                data.FreePages.Add(record.Page); record.Page = -1; record.Uniform = value; data.Bricks[i] = record;
+            }
+        }
         public void Compact() { throw new System.NotImplementedException("VOX-006"); }                                   // §5.3
-        public void SetReadOnly() { throw new System.NotImplementedException("VOX-005"); }                               // irreversible
-        public void Pin() { throw new System.NotImplementedException("VOX-005"); } public void Unpin() { throw new System.NotImplementedException("VOX-005"); }   // PinCount ±1 (Unpin below 0 throws)
-        public NativeArray<int> SortedBrickOrder(Allocator a) { throw new System.NotImplementedException("VOX-005"); }   // indices into Bricks sorted by (z, y, x)
+        public void SetReadOnly()
+        {
+            RequireUnpinned(); var header = data.Header.Value; header.ReadOnly = 1; data.Header.Value = header;
+        }
+        public void Pin()
+        {
+            var header = data.Header.Value; header.PinCount = checked(header.PinCount + 1); data.Header.Value = header;
+        }
+        public void Unpin()
+        {
+            var header = data.Header.Value;
+            if (header.PinCount == 0) throw new InvalidOperationException("Structure is not pinned");
+            header.PinCount--; data.Header.Value = header;
+        }
+        public NativeArray<int> SortedBrickOrder(Allocator a)
+        {
+            var order = new NativeArray<int>(data.Bricks.Length, a, NativeArrayOptions.UninitializedMemory);
+            for (int i = 0; i < order.Length; i++) order[i] = i;
+            order.Sort(new BrickOrder { Bricks = data.Bricks.AsArray() });
+            return order;
+        }
+        struct BrickOrder : IComparer<int>
+        {
+            public NativeArray<BrickRecord> Bricks;
+            public int Compare(int a, int b)
+            {
+                int3 x = Bricks[a].Coord, y = Bricks[b].Coord;
+                int z = x.z.CompareTo(y.z); if (z != 0) return z;
+                int v = x.y.CompareTo(y.y); return v != 0 ? v : x.x.CompareTo(y.x);
+            }
+        }
         public void GetBlocks(NativeList<StructureBlock> output) { throw new System.NotImplementedException("VOX-007"); }// §5.4 canonical order
         public VoxelStructure Clone() { throw new System.NotImplementedException("VOX-007"); }                           // deep copy; not pinned, not read-only
         public static StructureDiff Diff(VoxelStructure from, VoxelStructure to, Allocator a) { throw new System.NotImplementedException("VOX-007"); }
         public StructureMassData GetMass(in VoxelContent content) { throw new System.NotImplementedException("VOX-007"); }   // cached by Revision
-        public long NativeBytes => throw new NotImplementedException("VOX-005");     // Σ capacities × element sizes of all containers
-        public void Clear() { throw new System.NotImplementedException("VOX-005"); }
-        public void Dispose() { throw new System.NotImplementedException("VOX-005"); }                                   // throws InvalidOperationException if pinned; second call is a no-op
+        public long NativeBytes => !data.IsCreated ? 0 : UnsafeUtility.SizeOf<StructureHeader>()
+            + (long)data.Palette.Capacity * UnsafeUtility.SizeOf<PaletteEntry>()
+            + (long)data.Instances.Capacity * UnsafeUtility.SizeOf<BlockInstance>()
+            + (long)data.FreeInstances.Capacity * sizeof(int)
+            + (long)data.Bricks.Capacity * UnsafeUtility.SizeOf<BrickRecord>()
+            + (long)data.Masks.Capacity * UnsafeUtility.SizeOf<BrickMaskBits>()
+            + (long)data.BrickIndex.Capacity * 20
+            + (long)data.CellPages.Capacity * UnsafeUtility.SizeOf<Cell>()
+            + (long)data.FreePages.Capacity * sizeof(int);
+        public void Clear()
+        {
+            RequireMutable();
+            data.Palette.Clear(); data.Palette.Add(default); data.Instances.Clear(); data.FreeInstances.Clear();
+            data.Bricks.Clear(); data.Masks.Clear(); data.BrickIndex.Clear(); data.CellPages.Clear(); data.FreePages.Clear();
+            Changed();
+        }
+        public void Dispose()
+        {
+            if (!data.IsCreated) return;
+            RequireUnpinned(); DisposeStorage();
+        }
+        void DisposeStorage()
+        {
+            if (data.Header.IsCreated) data.Header.Dispose();
+            if (data.Palette.IsCreated) data.Palette.Dispose();
+            if (data.Instances.IsCreated) data.Instances.Dispose();
+            if (data.FreeInstances.IsCreated) data.FreeInstances.Dispose();
+            if (data.Bricks.IsCreated) data.Bricks.Dispose();
+            if (data.Masks.IsCreated) data.Masks.Dispose();
+            if (data.BrickIndex.IsCreated) data.BrickIndex.Dispose();
+            if (data.CellPages.IsCreated) data.CellPages.Dispose();
+            if (data.FreePages.IsCreated) data.FreePages.Dispose();
+            data = default;
+        }
+        void RequireUnpinned()
+        {
+            if (!data.IsCreated) throw new ObjectDisposedException(nameof(VoxelStructure));
+            if (IsPinned) throw new InvalidOperationException("Structure is pinned");
+        }
+        void RequireMutable()
+        {
+            RequireUnpinned();
+            if (IsReadOnly) throw new InvalidOperationException("Structure is read-only");
+        }
+        uint Changed()
+        {
+            var header = data.Header.Value;
+            header.Revision++; header.BoundsValid = 0; header.MassRevision = 0;
+            data.Header.Value = header; return header.Revision;
+        }
+        int TakePage()
+        {
+            if (data.FreePages.Length > 0)
+            {
+                int last = data.FreePages.Length - 1, page = data.FreePages[last];
+                data.FreePages.RemoveAt(last); return page;
+            }
+            int next = data.CellPages.Length / BrickMath.CellsPerBrick;
+            data.CellPages.Resize(data.CellPages.Length + BrickMath.CellsPerBrick, NativeArrayOptions.ClearMemory);
+            return next;
+        }
+        void FillPage(int page, Cell value)
+        {
+            int start = page * BrickMath.CellsPerBrick;
+            for (int i = 0; i < BrickMath.CellsPerBrick; i++) data.CellPages[start + i] = value;
+        }
+        void RemoveAt(int index)
+        {
+            var record = data.Bricks[index];
+            if (record.Page >= 0) data.FreePages.Add(record.Page);
+            data.Bricks.RemoveAtSwapBack(index); data.Masks.RemoveAtSwapBack(index);
+            data.BrickIndex.Remove(record.Coord);
+            if (index < data.Bricks.Length) data.BrickIndex[data.Bricks[index].Coord] = index;
+        }
     }
 }

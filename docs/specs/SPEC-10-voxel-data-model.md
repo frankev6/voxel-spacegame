@@ -207,7 +207,7 @@ public struct StructureHeader
     public StructureMassData Mass;
 }
 
-public struct BrickRecord                                    // 32 bytes
+public struct BrickRecord                                    // 28 bytes (Q13)
 {
     public int3 Coord;             // brick coordinate
     public int Page;               // page number in CellPages (page p = cells [p*4096, p*4096+4096)); -1 = uniform
