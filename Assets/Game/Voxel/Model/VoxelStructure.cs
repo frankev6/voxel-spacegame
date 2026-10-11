@@ -3,6 +3,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using System.Collections.Generic;
 using Game.Data.Blocks;
+using Unity.Jobs;
 using Unity.Mathematics;
 
 namespace Game.Voxel.Model
@@ -372,9 +373,48 @@ namespace Game.Voxel.Model
                 });
             }
         }
-        public VoxelStructure Clone() { throw new System.NotImplementedException("VOX-007"); }                           // deep copy; not pinned, not read-only
-        public static StructureDiff Diff(VoxelStructure from, VoxelStructure to, Allocator a) { throw new System.NotImplementedException("VOX-007"); }
-        public StructureMassData GetMass(in VoxelContent content) { throw new System.NotImplementedException("VOX-007"); }   // cached by Revision
+        public VoxelStructure Clone()
+        {
+            var clone = new VoxelStructure(CellSize);
+            try
+            {
+                var header = data.Header.Value; header.PinCount = 0; header.ReadOnly = 0; clone.data.Header.Value = header;
+                Copy(data.Palette, clone.data.Palette); Copy(data.Instances, clone.data.Instances); Copy(data.FreeInstances, clone.data.FreeInstances);
+                Copy(data.Bricks, clone.data.Bricks); Copy(data.Masks, clone.data.Masks); Copy(data.CellPages, clone.data.CellPages); Copy(data.FreePages, clone.data.FreePages);
+                for (int i = 0; i < data.Bricks.Length; i++) clone.data.BrickIndex.Add(data.Bricks[i].Coord, i);
+                clone.data.BrickIndex.TrimExcess(); return clone;
+            }
+            catch { clone.Dispose(); throw; }
+        }
+        static void Copy<T>(NativeList<T> source, NativeList<T> target) where T : unmanaged
+        { target.Clear(); target.AddRange(source.AsArray()); target.TrimExcess(); }                           // deep copy; not pinned, not read-only
+        public static StructureDiff Diff(VoxelStructure from, VoxelStructure to, Allocator a)
+        {
+            var result = new StructureDiff();
+            try
+            {
+                result.Removed = new NativeList<BlockPlacement>(a); result.Added = new NativeList<BlockPlacement>(a);
+                new StructureDiffJob { From = from.data, To = to.data, Removed = result.Removed, Added = result.Added }.Run();
+                return result;
+            }
+            catch { result.Dispose(); throw; }
+        }
+        public StructureMassData GetMass(in VoxelContent content)
+        {
+            var header = data.Header.Value;
+            if (header.MassRevision == header.Revision) return header.Mass;
+            using var results = new NativeArray<StructureMassData>(data.Bricks.Length, Allocator.TempJob);
+            new StructureMassJob
+            {
+                Bricks = data.Bricks.AsArray(), Cells = data.CellPages.AsArray(), Palette = data.Palette.AsArray(),
+                Instances = data.Instances.AsArray(), Blocks = content.Blocks, CellSize = CellSize, Results = results
+            }.Schedule(data.Bricks.Length, 1).Complete();
+            using var order = SortedBrickOrder(Allocator.Temp);
+            var total = new StructureMassData();
+            for (int i = 0; i < order.Length; i++) MassAccumulator.Add(ref total, results[order[i]]);
+            header.Mass = total; header.MassRevision = header.Revision; data.Header.Value = header;
+            return total;
+        }   // cached by Revision
         public long NativeBytes => !data.IsCreated ? 0 : UnsafeUtility.SizeOf<StructureHeader>()
             + (long)data.Palette.Capacity * UnsafeUtility.SizeOf<PaletteEntry>()
             + (long)data.Instances.Capacity * UnsafeUtility.SizeOf<BlockInstance>()
