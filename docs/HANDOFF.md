@@ -29,31 +29,32 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 ## 2. Where things stand (2026-10-11, M0 in progress)
 
 - **Design gate passed.** NOCTURNE is binding, as [DESIGN-GUIDE.md](design/DESIGN-GUIDE.md) (`ART-013`). The slope kit is in [ADR-0018](decisions/ADR-0018-slope-block-kit.md).
-- **M0 Foundations: 53 of 66 tasks done** (see the [ledger](LEDGER.md) summary and log). Done:
+- **M0 Foundations: 55 of 66 tasks done** (see the [ledger](LEDGER.md) summary and log). Done:
   - Core: `CORE-001`…`012`;
   - Data: `DATA-001`…`009`;
   - Boot: `FND-001`…`007` and `FND-014`;
   - Persistence: `PERS-001`…`012`;
-  - plus `INP-001`/`002`, `MIG-001`…`004`/`007`, `DEV-001`/`002`, `AUD-001`, `VOX-001` and `TST-001`.
+  - plus `INP-001`…`003`, `MIG-001`…`004`/`007`, `DEV-001`/`002`, `AUD-001`, `VOX-001` and `TST-001`/`008`.
 - **What runs today:** Play from Boot creates the Default World and GameRoot. Settings, content, input, pause, save and SceneFlow are composed in order. MainMenu ↔ World ↔ BlueprintLab transitions tear everything down cleanly. SimClock ticks in the World and stops on pause. Saves and loads work end to end (atomic, with backup and never-reject loading), with autosave and a quit save.
 - **Not yet:** no gameplay. There are no voxel ships, rendering, flight, combat or UI screens: those are M1+ (voxel model and renderer first). The scenes are still empty.
-- **Spec defects found and fixed while building**, each with a resolved open question in its spec and the ledger (questions 17–34):
+- **Spec defects found and fixed while building**, each with a resolved open question in its spec and the ledger (questions 17–36):
   - nested native containers, and padding in a sort hash (SPEC-02);
   - test rate managers (SPEC-71);
   - the settings applier, the start blueprint, the `WorldTime` singleton destroyed by teardown, and the static audit scope (SPEC-01);
   - deferred-block disposal, millisecond timestamps, and newer chunks on resave (SPEC-05);
   - VOXS runtime-state reconstruction, bounded decoding and the full-palette Missing fallback (Q30); managed save workers require TempJob rather than Temp scratch (Q31).
-- **Migration:** MIG-007 converts all cube Euler rotations; MIG-004 adds the protected asset writer, manifest, runner and reports. Q34 prevents an empty-link fill from making hand-edited fields overwritable. EditMode is now **351 passed + 1 explicit skipped**; perf **18/18**. TST-008 should harden process exit checks: a previous passing perf run had a native Unity shutdown crash; the latest did not. Evidence is in the ledger.
+- **Migration:** MIG-007 converts all cube Euler rotations; MIG-004 adds the protected asset writer, manifest, runner and reports. Q34 prevents an empty-link fill from making hand-edited fields overwritable. Latest live EditMode is **356 passed** (explicit guard excluded); PlayMode **16**, perf **18/18**. INP-003 supports rebinding with conflict/escape protection. TST-008 measures **1.70 s compile / 0.16 s Play-to-menu / 29.80 s EditMode**; both reloads are disabled (ADR-0020). Live CLI discovery/results handling is fixed and process failures are no longer hidden by XML. A previous headless perf shutdown crash remains recorded for M0 review; live runs did not repeat it.
 - **Latest persistence implementation:** `PERS-007` provides deterministic VOXS encoding/decoding and `PERS-008` adds immutable native snapshots. Worker save/load and success/failure disposal paths are covered. `PERS-011` verifies byte-identical save/load/save into fresh binary, JSON and voxel participants, with unknown chunks preserved. `PERS-010` commits immutable v1 fixtures and proves removed content loads successfully with two explicit warnings. `PERS-012` measures all M0 save gates: reference ship ~15 KB compressed, capture well below 5 ms, typical read/restore ~15 ms, and 50-slot listing ~3 ms on the Apple M5 Pro. Full measurements are in the ledger.
 - **Frank should review:** Q30's exceptional full-palette fallback (slot 32767 becomes Missing) and 256 MiB decoded body/cell limits. These use the authorized tech-lead default and do not block work.
 - **Still open for Frank:** ledger questions 6 (b) large hull blocks, 6 (c) smooth alien cells, 7 factions and rosters. None blocks M0.
+- **Tool state:** a task-owned headless Editor is open for fast live CLI work (log `Logs/Editor.log`); close it when no longer useful. Live tests may serialize dynamic font glyph caches; restore that incidental diff before commits.
 - **Branches:** `main` holds everything except `task/ART-007-brick-tools`.
 - **Reviews:** no per-task reviews (ADR-0019). The M0 system review runs before the M0 exit gate. `ART-004` stays in `review` for its 150 m glyph criterion.
 
 ## 3. Next
 
-1. **M0, remaining 13:**
-   - ready now: `MIG-005`, `DEV-003`, `INP-003`, `AUD-002`, `TST-008`;
+1. **M0, remaining 11:**
+   - ready now: `MIG-005`, `DEV-003`, `AUD-002`;
    - then `MIG-005`…`016`, `DEV-004`…`006`/`020`, `AUD-003`.
 2. **`ART-007`:** finish the art validator on its branch and merge it.
 3. **M0 system review** (04-workflow §8), then the M0 exit gate. After that, M1: the voxel model, renderer and physics, the first visible ships.

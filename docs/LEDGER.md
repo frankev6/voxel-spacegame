@@ -13,11 +13,11 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 12 | 0 | 0 | 0 | 54 | 0 | 66 | 4 |
+| M0 | 11 | 0 | 0 | 0 | 55 | 0 | 66 | 3 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
-| M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
+| M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -57,7 +57,7 @@
 | CORE-012 | Simulation event channels | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001, CORE-004 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 7458403 | 0.9 µs per pair; read set de-nested (OQ 11) |
 | INP-001 | Public contract types and the actions asset | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 943e0fd | Edit-mode Dispose trap: SPEC-03 Q4 |
 | INP-002 | InputService contexts and display strings | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | bad1ed2 | Also ApplyBindingOverrides/SaveBindingOverridesJson; SPEC-03 Q4, Q5 resolved |
-| INP-003 | Rebinding and overrides | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-002 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| INP-003 | Rebinding and overrides | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-002 | yes | done | astra (gpt-6) | 2026-10-11 | 7f46337 | Interactive rebind, conflict restore, Escape suppression, JSON and reset |
 | DATA-001 | Public contract types | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 12a585b | `ContentDefinition.Id` cache already implemented (DATA-004 overlap) |
 | DATA-002 | ValidationReport implementation | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | fcaa9d3 |  |
 | DATA-003 | Orientation tables | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4339108 | Generation 0.083 ms (gate 1 ms) |
@@ -468,7 +468,7 @@
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | no | todo |  |  |  |  |
 | MIG-014 | Body template stubs | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-004, GAL-001 | no | todo |  |  |  |  |
 | MIG-015 | Hand-off package | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-002, MIG-003 | yes | todo |  |  |  |  |
-| INP-008 | Gamepad scheme | [SPEC-03](specs/SPEC-03-input.md) | M4 | standard | INP-003 | no | todo |  |  |  |  |
+| INP-008 | Gamepad scheme | [SPEC-03](specs/SPEC-03-input.md) | M4 | standard | INP-003 | yes | todo |  |  |  |  |
 | REN-015 | LOD2 grid proxies | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M4 | frontier | REN-012 | no | todo |  |  |  |  |
 | PHY-021 | Region compounds for very large grids (only if PHY-019 shows assembly over budget) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M4 | frontier | PHY-019 | no | todo |  |  |  |  |
 | DMG-018 | M4: per-brick component labels for >1M-cell stations | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | frontier | DMG-016 | no | todo |  |  |  |  |
@@ -593,6 +593,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — INP-003 interactive rebinding (astra, gpt-6)
+- Implemented interactive rebind/cancel, same-map and Global conflict detection, map restoration for the current context, per-binding/all resets and disposal. Global is disabled during rebind, so Escape cancels without firing Back.
+- Four specified InputTestFixture tests pass: G survives JSON round-trip, W conflicts with Flight/Thrust, F5 conflicts with Global/QuickSave, Escape is consumed, a second operation cancels the first, reset restores F, and malformed JSON falls back safely. Q36 / SPEC-03 Q6 preserves an existing custom binding on rejection. ADR-0021 adds only the already-installed Input System test-fixture assembly reference; no package or runtime dependency changes.
+- Compile: zero C# warnings. Full live EditMode **356 passed** (explicit guard excluded), full PlayMode **16 passed**, performance **18/18 pass**; docs clean. Removed incidental font cache serialization. M0 **55/66 done**. Next: MIG-005 item conversion.
 
 ### 2026-10-11 — TST-008 iteration gates and live tooling (astra, gpt-6)
 - Added the three-run iteration script. Apple M5 Pro, Unity 6000.6.5f1, a task-owned headless Editor with the live CLI: medians **1.697 s** no-change compile (10 s), **0.159 s** Play-to-menu (1 s), **29.800 s** full EditMode (60 s). Timings include CLI transport/script overhead. All three rows PASS, including restoration of scenes and test hooks; Play checks use a disposable profile.
