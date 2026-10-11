@@ -90,7 +90,7 @@ flowchart TB
 
 | Package | Allowed in |
 |---|---|
-| Entities, Collections, Burst, Mathematics | Core, Data, Voxel, Simulation, Galaxy, ShipEditor, Presentation, App, tests. `Game.Core` uses Entities only to declare the custom system groups, `GameplayActive`, `SimClock` and `GameplayEndCommandBufferSystem` |
+| Entities, Collections, Burst, Mathematics | Core, Data, Voxel, Simulation, Galaxy, ShipEditor, Presentation, App, tests. `Game.Core` uses Entities only to declare the custom system groups, `GameplayActive`, `WorldSceneActive`, `SimClock` and `GameplayEndCommandBufferSystem` |
 | Unity Physics | Voxel, Simulation, Galaxy, Presentation, App, tests. `Game.Core` references it only for `[UpdateBefore/After(typeof(PhysicsSystemGroup))]` on its group declarations |
 | Entities Graphics | Voxel, Presentation |
 | Input System | Input, Presentation, App, DevTools, tests |
@@ -153,6 +153,7 @@ Shutdown runs in reverse order. No service may create another service. No `FindO
 
 - One default `World`. Systems are created automatically but **every gameplay system declares `state.RequireForUpdate<GameplayActive>()`** (or a more specific singleton) so nothing runs in the menu.
 - `SceneFlow` creates the `GameplayActive` singleton entity when the World scene is ready and destroys it on exit.
+- `GameplayActive` and `SimClock` exist in the World and the Blueprint Lab; the tag `WorldSceneActive` (Core, SPEC-01 §4.1) exists only in the World. Systems that need a loaded galaxy (streaming, encounters, travel, territory, origin rebasing) also `RequireForUpdate<WorldSceneActive>` (SPEC-01 decision 6).
 - Entities that belong to a loaded star system carry the **shared** component `StarSystemMember { StarSystemId }` (`ISharedComponentData`, low cardinality: at most 2 star systems are loaded). This includes grid roots, their bricks and functional entities. Unloading a star system is one `EntityManager.DestroyEntity(query)` with a shared-component filter: a chunk-level batch destroy. The player ship and its children carry **no** `StarSystemMember`, because they travel between star systems.
 - No subscenes for gameplay content in v1. Configuration singletons are created by `Game.App` at boot from the `ContentDatabase` (`GameConfig` singleton, block blob singleton).
 
@@ -164,6 +165,7 @@ This is the complete group tree. Every new system must be placed in exactly one 
 
 ```
 InitializationSystemGroup
+├─ PersistentIdRefillSystem              FND  managed; UpdateBefore GameInitGroup; tops up the PersistentIdAllocator block (also between scenes)
 └─ GameInitGroup                         (custom; OrderLast)
    ├─ OriginRebaseSystem                 GAL  single floating-origin owner
    ├─ PlayerInputSampleSystem            INP  managed; writes PlayerCommand singleton
@@ -202,7 +204,8 @@ SimulationSystemGroup
 │     ├─ ShipDeathSystem                 DMG  core lost → Hulk state
 │     ├─ GridMassUpdateSystem            PHY  incremental mass, centre of mass, inertia
 │     ├─ BrickDirtyScheduleSystem        VOX  marks bricks for remesh / collider rebuild
-│     └─ GameplayEndCommandBufferSystem  CORE THE ONLY structural sync point in the fixed step
+│     ├─ GameplayEndCommandBufferSystem  CORE THE ONLY structural sync point in the fixed step
+│     └─ SimClockAdvanceSystem           FND  OrderLast, after the ECB system: Tick += 1, UniversalTime from Tick
 ├─ VoxelRebuildGroup                     (custom; after FixedStep; variable rate)
 │  ├─ BrickMeshBuildSystem               REN  budgeted Burst jobs → MeshDataArray
 │  └─ BrickColliderBuildSystem           PHY  budgeted Burst jobs → blobs, swapped next tick
@@ -259,7 +262,7 @@ These types cross module boundaries. **Their names and owning module are binding
 | `RngStreams` | `static Unity.Mathematics.Random For(ulong seed, RngPurpose purpose, ulong salt)` | All randomness. `RngPurpose` is an enum; add values, never reorder |
 | `EventBus<T>` | `Subscribe`, `Unsubscribe`, `Publish` (deferred), `Drain()` once per frame | Per-handler try/catch; re-entrancy safe |
 | `Services` | `Register<T>`, `Get<T>`, `TryGet<T>`, `Reset()` | Reset on `SubsystemRegistration` |
-| `GameplayActive`, `SimClock`, custom groups, `GameplayEndCommandBufferSystem` | ECS declarations | The only Entities types in Core (with `PersistentId` and `PersistentIdAllocator`) |
+| `GameplayActive`, `WorldSceneActive`, `SimClock`, custom groups, `GameplayEndCommandBufferSystem` | ECS declarations | The only Entities types in Core (with `PersistentId` and `PersistentIdAllocator`) |
 | `IPersistentIdAllocator` / `PersistentIdAllocator` | managed `ulong Allocate()` / singleton `{ ulong Next, End; }` | `GameSession` implements the interface and refills the singleton block that Burst systems draw from |
 | `ISaveParticipant` | `string Key {get;}` (4-char), `int Version {get;}`, `void Capture(SaveWriter)`, `void Restore(SaveReader, int fromVersion)` | Implemented by owning modules |
 | `InputContext` | `enum { None, Flight, Editor, Menu, Dialog, TextEntry }` | Plus the always-on Global map |
