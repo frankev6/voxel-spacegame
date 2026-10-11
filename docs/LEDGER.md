@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 80 | 0 | 0 | 0 | 20 | 0 | 100 | 14 |
+| M1 | 79 | 0 | 0 | 0 | 21 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -121,7 +121,7 @@
 | VOX-005 | VoxelStructure storage core | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-004 | yes | done | astra (gpt-6) | 2026-10-11 | 3e2c25e | Dense/uniform storage, recycled pages, revisions, bounds and ownership; 7 tests |
 | VOX-006 | Block placement, removal and compaction | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6a33cf7 | Placement/removal, palette/instance reuse, compaction; GetBlocks brought forward (Q65) |
 | VOX-007 | Clone, diff, block enumeration and mass | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-006 | yes | done | astra (gpt-6) | 2026-10-11 | 37cb539 | Deep clone; canonical Burst diff; double mass sums/cache; 6 tests |
-| VOX-008 | Grid-space DDA raycast | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Grid-space DDA, empty-brick skipping and query parity |
+| VOX-008 | Grid-space DDA raycast | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005 | yes | done | astra (gpt-6) | 2026-10-11 | 139396c | Deterministic DDA, empty-brick query skipping; 10k reference rays and ECS parity |
 | VOX-009 | VOXS codec | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-007, VOX-017, SPEC-05 | yes | done | astra (gpt-6) | 2026-10-11 | dd88202 | VOXS adapter/hash; exact round trips; tombstone/worker fixes Q68–70; 8 tests |
 | VOX-010 | Voxel definitions and config factory | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | edb5c0c | Blueprint setter, default config, boot singleton; 2 tests, Q64 |
 | VOX-011 | Structure registry and BlueprintLibrary | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-009, VOX-010 | yes | done | astra (gpt-6) | 2026-10-11 | b630046 | Borrowed non-reused handles; immutable lazy cache, bounded eviction, boot ownership; 6 required tests |
@@ -661,6 +661,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — VOX-008 grid-space raycasting (astra, gpt-6)
+
+- Implemented allocation-free DDA with direction normalization, zero-direction rejection, distance-zero interior hits, X/Y/Z boundary ordering and empty-brick lookup skipping. Structure masks and the shared ECS reader provide equivalent query adapters. Boundary distances use doubles internally to avoid accumulated drift; public grid-local inputs/results stay floats.
+- Five required tests passed. **10,000** seed-123 rays through a seed-7 random 64³ structure matched the independent 0.001-cell reference (**6,028 hits**, 0.114 s focused test). The reference also checks tiny segments with slabs so grazing intersections between samples are not missed. **1,000** further rays matched structure/ECS results. A ray through 100 empty bricks made **101 cell + 100 brick queries**, below 300.
+- Compile zero C# warnings; full EditMode **503 passed + 1 explicit skipped**, PlayMode **31 passed**, perf **27/27**; docs zero errors. Next DMG-001 contracts (SplitGrace is needed by grid unstow), then VOX-013 spawning and VOX-014 lifecycle before the sparse fallback.
 
 ### 2026-10-11 — VOX-011 registry, blueprint cache and boot ownership (astra, gpt-6)
 
