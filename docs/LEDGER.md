@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 29 | 0 | 0 | 0 | 37 | 0 | 66 | 9 |
+| M0 | 28 | 0 | 0 | 0 | 38 | 0 | 66 | 9 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -69,8 +69,8 @@
 | DATA-009 | System placeholder content and the database asset | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-008 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | d710afe |  |
 | PERS-001 | Public contract types | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | CORE-001, DATA-001, VOX-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 75f6583 | Result-struct constructors: SPEC-05 Q16 |
 | PERS-002 | Save paths, profiles, slots and meta files | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 20bb0aa | META-chunk fallback completes with PERS-003; SPEC-05 Q17 |
-| PERS-003 | Binary container, CRC32 and compression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
-| PERS-004 | ID palette and SaveWriter/SaveReader integration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-003, SPEC-02 | no | todo |  |  |  |  |
+| PERS-003 | Binary container, CRC32 and compression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 5b594d6 | fuzz 1,000 flips + 200 truncations clean |
+| PERS-004 | ID palette and SaveWriter/SaveReader integration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-003, SPEC-02 | yes | todo |  |  |  |  |
 | PERS-005 | Save pipeline: capture, worker, atomic write, thumbnails, queue | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-002, PERS-004, SPEC-04 | no | todo |  |  |  |  |
 | PERS-006 | Load pipeline and restore orchestration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005 | no | todo |  |  |  |  |
 | PERS-007 | VOXS codec | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001, SPEC-04 | yes | todo |  |  |  |  |
@@ -573,6 +573,23 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-003 binary container, CRC32 and compression (claude, claude-opus-5-5)
+- Implemented:
+  - `Crc32`: IEEE, slice-by-8, plus `Append`;
+  - `SaveContainerWriter`: format 1. It deflates only when the payload is ≥ `minCompressBytes` and the result is shorter, and output is deterministic;
+  - `SaveContainerReader`: §5.5 steps 1–7. It never throws; a bad chunk is marked corrupt with `PERS-E011`. An uncompressed chunk whose raw length ≠ stored length is treated as a corrupt chunk;
+  - `SaveFileComparer`: skips volatile header bytes, the META payload, and the META entry's flags as well as its lengths and CRC, since a different META can cross the deflate threshold.
+- `ListSlots` META fallback wired. A new internal `SaveContainerReader.TryReadChunkFromPrefix` checks the header and table CRC on the first 64 KB and extracts `META`; a full `Read` would reject a prefix on the total-length check.
+- Tests:
+  - known vectors;
+  - round trips for 0 B, 63 B, 64 B, incompressible and 10 MB payloads, with the deflate flag set only when smaller;
+  - deterministic bytes;
+  - every corruption class, including unknown header and chunk flags behind a valid CRC;
+  - comparer first-difference reporting;
+  - META read from a 200 KB file;
+  - fuzz: 1,000 single-byte flips and 200 truncations never throw and are never reported `Ok`.
+- EditMode 254/254 (+1 explicit).
 
 ### 2026-10-11 — FND-002 Bootstrap, GameRoot and explicit World creation (claude, claude-opus-5-5)
 - Boot sequence:
