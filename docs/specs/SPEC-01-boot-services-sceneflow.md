@@ -446,8 +446,8 @@ Main thread; `async Awaitable<FlowResult>`.
 
 #### 5.4.4 `EnterSandboxAsync(args)` (dev only)
 
-1. `session.BeginSandbox(args.Seed)`: a session without a galaxy delta history, `IsCreativeSession = true`.
-2. `TransitionAsync(World, DevQuickStart)`.
+1. Reserve the session operation (Busy if another operation/save is active), pause, and perform the ordinary exit save when leaving World.
+2. `TransitionAsync(World, DevQuickStart, betweenScenes: ...)`: after teardown, `session.BeginSandbox(args.Seed)` resets in place with `IsCreativeSession = true`, no campaign initializers or galaxy history, and the requested optional-player flag (Q23).
 3. `StarSystemLoader` sees `GalaxyService.Galaxy == null` and loads nothing.
 4. `PlayerShipSpawner` spawns the flagship at local (0,0,0) when `args.SpawnPlayer`.
 
@@ -871,9 +871,9 @@ If no save exists, "Load last save" is disabled.
 - **Tier:** standard — steps in §5.4.4
 - **Depends on:** `FND-010`
 - **Do:** Implement `EnterSandboxAsync` and `GameSession.BeginSandbox` (§5.4.4). The harness `sandbox` command (SPEC-70) calls it.
-- **Files:** `Assets/Game/App/Flow/SceneFlow.cs`; `Assets/Game/App/Session/GameSession.cs`; `Assets/Game/Tests/PlayMode/App/SandboxTests.cs`
+- **Files:** `Assets/Game/App/Flow/SceneFlow.cs`; `Assets/Game/App/Session/GameSession.cs`; `Assets/Game/Tests/PlayMode/App/SandboxTests.cs`; `Assets/Game/App/Session/PlayerShipSpawner.cs` (optional player); existing `PlayerShipTests` fixture reused
 - **Acceptance criteria:**
-  - [ ] Sandbox with `SpawnPlayer = true`: the World is ready, the player ship is at the origin, and no `StarSystemMember` entities exist.
+  - [x] Sandbox with `SpawnPlayer = true`: the World is ready, the player ship is at the origin, and no `StarSystemMember` entities exist.
 - **Tests:** `SandboxTests.Sandbox_SpawnsPlayer`.
 
 ## 10. Open questions
@@ -906,6 +906,8 @@ If no save exists, "Load last save" is disabled.
 | 21 | Recovered FLET structures must warn in the load report, but ISaveParticipant exposes no report | Scoped SaveService warning callback | Tech lead | Resolved FND-010 / ADR-0036: composition routes recoveries to the active report without changing ISaveParticipant or the FLET format. Missing/empty FLET uses the configured start blueprint and allocates a new id after SESS restoration; corrupt flagship payloads retain their valid saved id. |
 
 | 22 | Missing/damaged SESS resets the allocation counter below ids surviving in FLET | Advance the counter past valid restored fleet ids before allocating any fallback | Tech lead | Resolved FND-010: the composition callback reserves through the highest valid FLET id, including a dropped record, while preserving any higher SESS counter. Repair clears outstanding grants and reports FND-W002 during participant restore. Missing, malformed and stale-low SESS cases are tested; no file-format or allocator-interface change. |
+
+| 23 | Sandbox entry resets the session before old World writeback, and its optional player/session defaults are unspecified | Reset between scenes under the normal operation reservation | Tech lead | Resolved FND-016: save/teardown precede sandbox reset; creative session, configured start fleet, zero times and seed 0 mapped to 1; campaign initializers do not run. IsSandbox is runtime state for GAL-008 to clear rather than generate the galaxy. SpawnPlayer=false suppresses only the live grid; new game/load/end reset that flag. Release builds return NotAllowed; DEV-008 owns harness dispatch. |
 
 ## 11. References
 

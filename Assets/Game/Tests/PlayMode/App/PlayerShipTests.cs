@@ -43,7 +43,7 @@ namespace Game.Tests.PlayMode.App
             public void InitializeNewGame(in NewGameArgs args)
                 => session.Fleet.ReplaceStructure(session.Fleet.Flagship.PersistentId, BenchmarkStructures.Ship20k(hull));
         }
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             public readonly EcsTestWorld World;
             public readonly ContentService Content;

@@ -117,7 +117,16 @@ namespace Game.App.Flow
             }
         }
 
-        // TODO(FND-016): public Awaitable<FlowResult> EnterSandboxAsync(SandboxArgs args) (editor/dev builds only).
+        /// <summary>Dev-only creative World without galaxy streaming (SPEC-01 §5.4.4).</summary>
+        public Awaitable<FlowResult> EnterSandboxAsync(SandboxArgs args)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (!disposed && session != null) return session.EnterSandboxAsync(args);
+#endif
+            var completed = new AwaitableCompletionSource<FlowResult>();
+            completed.SetResult(FlowResult.NotAllowed);
+            return completed.Awaitable;
+        }
 
         /// <summary>§5.4.1. New game, load, quit and the lab go through GameSession (IGameFlow), which calls this.</summary>
         internal async Awaitable<FlowResult> TransitionAsync(GameScene target, SceneEntryReason reason, BlueprintLabArgs lab = default, Func<Awaitable> betweenScenes = null)

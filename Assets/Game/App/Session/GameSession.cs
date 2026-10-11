@@ -76,6 +76,8 @@ namespace Game.App.Session
         bool operationPending, disposed, worldReady;
         BlueprintLabMode labMode;
         internal bool PlayerDefeated;
+        internal bool IsSandbox { get; private set; }
+        internal bool SpawnPlayerInWorld { get; private set; } = true;
         public FleetModel Fleet { get; }
         internal FleetSaveParticipant FleetParticipant { get; private set; }
         internal PlayerShipSpawner PlayerSpawner { get; private set; }
@@ -150,7 +152,10 @@ namespace Game.App.Session
         public void OnSceneReady(in SceneReadyContext context) => worldReady = context.Scene == GameScene.World;
         public bool IsSceneReadyComplete(in SceneReadyContext context) => true;
 
-        internal void BeginNewGame(in NewGameArgs args)
+        internal void BeginNewGame(in NewGameArgs args) => ResetForNewSession(args, false);
+        internal void BeginSandbox(ulong seed)
+            => ResetForNewSession(new NewGameArgs(gameConfig.DefaultCommanderName, seed == 0 ? 1ul : seed, true, ContentId.None), true);
+        void ResetForNewSession(in NewGameArgs args, bool sandbox)
         {
             save.ResetForNewGame();
             if (save.ActiveProfile.Value == null) save.SetActiveProfile(save.CreateProfile(gameConfig.DefaultCommanderName).Id);
@@ -161,9 +166,10 @@ namespace Game.App.Session
             if (CommanderName.Length > 32) CommanderName = CommanderName.Substring(0, 32);
             CampaignSeed = args.GalaxySeed != 0 ? args.GalaxySeed : (ulong)System.Diagnostics.Stopwatch.GetTimestamp() | 1ul;
             UniversalTime = 0; PlaytimeSeconds = 0; IsCreativeSession = args.Creative; PlayerDefeated = false;
-            // TODO(GAL-008): galaxy.NewGame and the canonical start location before new-game initializers.
+            IsSandbox = sandbox; SpawnPlayerInWorld = true;
+            // TODO(GAL-008): clear galaxy state for IsSandbox; otherwise galaxy.NewGame and the canonical start location.
             if (FleetParticipant != null) Fleet.Add(FleetParticipant.CreateStartShip(), true);
-            foreach (var initializer in initializers) initializer.InitializeNewGame(args);
+            if (!sandbox) foreach (var initializer in initializers) initializer.InitializeNewGame(args);
             EventBus<SessionReset>.Publish(new SessionReset(SessionResetReason.NewGame));
             HasActiveSession = true;
         }
@@ -181,6 +187,7 @@ namespace Game.App.Session
         internal void EndSession()
         {
             ResetPersistentIds(1, false); worldReady = false; PlayerDefeated = false;
+            IsSandbox = false; SpawnPlayerInWorld = true;
             ReleaseFleetWorld();
             foreach (var model in models) model.ResetToEmpty();
             EventBus<SessionReset>.Publish(new SessionReset(SessionResetReason.Cleared));
@@ -189,6 +196,7 @@ namespace Game.App.Session
         {
             ResetPersistentIds(next, false);
             CommanderName = commander; CampaignSeed = seed; UniversalTime = time; PlaytimeSeconds = playtime; IsCreativeSession = creative;
+            IsSandbox = false; SpawnPlayerInWorld = true;
             PlayerDefeated = false;
         }
         internal void ResetSavedState() => ApplySavedState(gameConfig.DefaultCommanderName, gameConfig.DevQuickStartSeed, 0, 0, 1, false);
@@ -236,6 +244,26 @@ namespace Game.App.Session
             try { return await action(); }
             catch (Exception e) { GameLog.Exception(LogCategories.Flow, e, "session flow"); return FlowResult.Failed; }
             finally { operationPending = false; }
+        }
+        internal Awaitable<FlowResult> EnterSandboxAsync(SandboxArgs args)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var access = Access(true);
+            if (access != FlowResult.Ok) return Complete(access);
+            if (save.IsBusy) return Complete(FlowResult.Busy);
+            return Execute(async () =>
+            {
+                using var pause = flow.PauseForExitSave();
+                if (CurrentScene == GameScene.World) await SaveBeforeSceneExit();
+                return await flow.TransitionAsync(GameScene.World, SceneEntryReason.DevQuickStart, betweenScenes: () => Between(() =>
+                {
+                    BeginSandbox(args.Seed);
+                    SpawnPlayerInWorld = args.SpawnPlayer;
+                }));
+            });
+#else
+            return Complete(FlowResult.NotAllowed);
+#endif
         }
         public Awaitable<FlowResult> NewGameAsync(NewGameArgs args)
         {

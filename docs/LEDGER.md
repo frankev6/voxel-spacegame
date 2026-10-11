@@ -681,6 +681,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 115 | 2026-10-11 | SPEC-01 FND-010 / SPEC-05 | Recovered fleet records cannot warn through the active load report | Scoped restore-warning callback | Tech lead | ADR-0036, SPEC-01 Q21 / SPEC-05 Q28; no ISaveParticipant or binary-format change; missing fleet uses a new allocated id, corrupt flagship payload preserves its valid id |
 | 116 | 2026-10-11 | SPEC-12 PHY-024 / FND-010 | Loading pause prevents the fixed tick needed for player collider readiness | Fresh spawn body initialization in GameInitGroup | Tech lead | SPEC-12 Q26 / ADR-0037; fresh roots only, end-init ECB; split adoption remains fixed-step |
 | 117 | 2026-10-11 | SPEC-01 FND-010 | Partial save recovery can reuse an existing fleet id when SESS is missing, damaged or stale-low | Reserve through the highest restored fleet id | Tech lead | SPEC-01 Q22: composition callback advances only when necessary, clears grants and reports FND-W002; preserves higher counters and existing ship identities |
+| 118 | 2026-10-11 | SPEC-01 FND-016 | Sandbox reset can destroy a live fleet before old World writeback; optional player defaults unspecified | Reset after teardown using the session operation reservation | Tech lead | SPEC-01 Q23: creative deterministic sandbox, no campaign initializers, optional live grid only, normal new-game/load resets flags; galaxy integration remains GAL-008 and harness dispatch DEV-008 |
 
 
 

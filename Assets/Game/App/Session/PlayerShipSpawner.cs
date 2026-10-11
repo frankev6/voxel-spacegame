@@ -23,7 +23,7 @@ namespace Game.App.Session
         public int SceneExitOrder => SceneHookOrder.PlayerShip;
         public void OnSceneReady(in SceneReadyContext context)
         {
-            if (context.Scene != GameScene.World || !session.HasActiveSession) return;
+            if (context.Scene != GameScene.World || !session.HasActiveSession || !session.SpawnPlayerInWorld) return;
             record = session.Fleet.Flagship;
             if (record == null) { GameLog.Error(LogCategories.Flow, "No flagship to spawn"); return; }
             int handle = record.Register(registry);
