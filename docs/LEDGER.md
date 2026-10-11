@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 74 | 0 | 0 | 0 | 27 | 0 | 101 | 12 |
+| M1 | 73 | 0 | 0 | 0 | 28 | 0 | 101 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 4 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 3 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -131,7 +131,7 @@
 | VOX-015 | BrickDirtyScheduleSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-012, REN-001, VOX-021, PHY-001 | yes | todo |  |  |  |  |
 | VOX-016 | DeferredDisposalSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | yes | done | astra (gpt-6) | 2026-10-11 | b0141a5 | Frame/tick-safe cleanup; paused100, no leaks, actual GPU unregister verified |
 | VOX-017 | Benchmark structures | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-005, VOX-006 | yes | done | astra (gpt-6) | 2026-10-11 | a80b2f7 | Five deterministic shapes; reference build 87.43 ms; count/dependency fixes Q66–67 |
-| VOX-019 | Damage persistence scenario | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-014 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| VOX-019 | Damage persistence scenario | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-014 | yes | done | astra (gpt-6) | 2026-10-11 | 30d39f7 | 04-B3 + explicit save boundary; 50 fixed-step changes, matching hashes, zero leaks |
 | VOX-021 | Mesh rebuild priority queue | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | REN-001 | yes | done | astra (gpt-6) | 2026-10-11 | bb07e09 | Guarded priority/FIFO mesh queue; stale promotion invalidation; 4 tests; Q75–76 |
 | REN-001 | Public contract types | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | VOX-001, DATA-001 | yes | done | astra (gpt-6) | 2026-10-11 | 42dfd86 | Rendering contracts; queue/batch ownership; ADR-0018 layout; Q51–53 |
 | REN-002 | SPIKE: Entities Graphics with thousands of runtime brick meshes | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-10 | no | todo |  |  |  |  |
@@ -680,6 +680,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — VOX-019 damage persistence scenarios (astra, gpt-6)
+
+- Added both required PlayMode scenarios with a test system in GameplayPostPhysicsGroup. One fixed tick changes exactly **50 cells** (40 HP/flag changes, 10 removals) and increments the grid revision once; the fleet-owned source stays unchanged until write-back. Logical cell hashes match after despawn/respawn from the same handle, leaving **19,990 solid cells**.
+- The save-time case explicitly copies four dirty bricks, confirms a second write-back copies zero, and disables subsequent despawn write-back so it cannot conceal a failed save copy. Both scenarios use the deterministic test-world tick runner and test-local cell digests, independent of DMG-014's unimplemented world hasher. Each warms up, resets global native tracking, then verifies **zero remaining tracked allocations** after its measured run.
+- Test-only implementation **30d39f7**; no runtime correction or technical decision needed. Compile zero C# warnings; full EditMode **533 passed + 1 explicit skipped**, PlayMode **35 passed**, perf **29/29**, docs **502 tasks / zero errors**. Next VOX-015 dirty scheduling. The existing GridSpawnSystem lookup-creation diagnostic is an optimization follow-up for the M1 system review; it does not affect the measured spawn gate (0.314 ms).
 
 ### 2026-10-11 — VOX-016 deferred disposal (astra, gpt-6)
 
