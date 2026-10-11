@@ -1048,7 +1048,7 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Do:** A test that plays SPEC-13's creator role: create a root with `GridArchetypes`-equivalent components through an ECB using `GridBodyFactory` exactly as §5.6 describes, then run the PHY systems for 20 ticks. Publish the exact call sequence in the test's XML summary for SPEC-13 implementers.
 - **Files:** `Assets/Game/Tests/EditMode/Voxel/Physics/GridBodyFactoryContractTests.cs`
 - **Acceptance criteria:**
-  - [ ] The body moves from the tick after creation; its first full compound installs at its deterministic `InstallTick`; the provisional blob is retired once (no leak, no double dispose).
+  - [x] The body moves from the tick after creation; its first full compound installs at its deterministic `InstallTick`; the provisional blob is retired once (no leak, no double dispose).
 - **Tests:** `GridBodyFactoryContractTests.SplitCreatedRoot_LifecycleToReady`.
 
 ### PHY-017 — Physics behaviour scenarios
