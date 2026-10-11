@@ -1000,6 +1000,7 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 | 13 | Should `ListSlots` show autosaves of other profiles | No; per active profile | SPEC-61 |
 | 14 | Combat definition for `SaveBlockReason.InCombat` | `ISaveContext` returns `InCombat` when any hostile ship is within the T3 bubble and targeting the player, or the player took damage in the last 10 s (SPEC-01 implements, data from SPEC-23/13) | SPEC-01 |
 | 15 | Ship thumbnail size | 256×256 RGBA32 (SPEC-51 renders) | SPEC-51 |
+| 16 | §4.5 declares `SaveResult`, `LoadResult`, `SaveOperationResult` and `ChunkRegistration` as readonly structs with readonly fields but no constructor, so nothing can set them (and the compiler warns) | PERS-001 adds one constructor per struct taking every field in declaration order | Tech lead |
 
 ## 11. References
 
