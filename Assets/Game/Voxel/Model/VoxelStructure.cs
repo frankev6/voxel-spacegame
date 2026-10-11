@@ -242,16 +242,45 @@ namespace Game.Voxel.Model
         public void OptimizeStorage()
         {
             RequireMutable();
-            for (int i = 0; i < data.Bricks.Length; i++)
+            for (int i = 0; i < data.Bricks.Length; i++) OptimizeRecord(i);
+        }
+        internal void OptimizeBrick(int3 coord)
+        {
+            RequireMutable();
+            if (data.BrickIndex.TryGetValue(coord, out int index)) OptimizeRecord(index);
+        }
+        void OptimizeRecord(int index)
+        {
+            var record = data.Bricks[index];
+            if (record.Page < 0 || record.SolidCount != BrickMath.CellsPerBrick) return;
+            int start = record.Page * BrickMath.CellsPerBrick; Cell value = data.CellPages[start];
+            for (int j = 1; j < BrickMath.CellsPerBrick; j++) if (!value.Equals(data.CellPages[start + j])) return;
+            data.FreePages.Add(record.Page); record.Page = -1; record.Uniform = value; data.Bricks[index] = record;
+        }
+        internal void CopyRuntimeMetadata(float cellSize, NativeArray<PaletteEntry> palette, NativeArray<BlockInstance> instances)
+        {
+            RequireMutable();
+            bool changed = data.Palette.Length != palette.Length || data.Instances.Length != instances.Length || CellSize != cellSize;
+            if (!changed)
+                for (int i = 0; i < palette.Length; i++)
+                {
+                    var a = data.Palette[i]; var b = palette[i];
+                    if (a.Block != b.Block || a.Orient != b.Orient || a.Color != b.Color) { changed = true; break; }
+                }
+            data.Palette.Clear(); data.Palette.AddRange(palette);
+            int oldLength = data.Instances.Length; data.Instances.ResizeUninitialized(instances.Length); data.FreeInstances.Clear();
+            for (int i = 0; i < instances.Length; i++)
             {
-                var record = data.Bricks[i];
-                if (record.Page < 0 || record.SolidCount != BrickMath.CellsPerBrick) continue;
-                int start = record.Page * BrickMath.CellsPerBrick;
-                Cell value = data.CellPages[start]; bool same = true;
-                for (int j = 1; j < BrickMath.CellsPerBrick && same; j++) same = value.Equals(data.CellPages[start + j]);
-                if (!same) continue;
-                data.FreePages.Add(record.Page); record.Page = -1; record.Uniform = value; data.Bricks[i] = record;
+                var value = instances[i]; value.Functional = Unity.Entities.Entity.Null;
+                if (i < oldLength && !changed)
+                {
+                    var old = data.Instances[i];
+                    changed = old.Block != value.Block || old.Orient != value.Orient || old.Color != value.Color || math.any(old.Origin != value.Origin)
+                        || old.FunctionHp != value.FunctionHp || old.CellsAlive != value.CellsAlive || old.Flags != value.Flags || old.Reserved != value.Reserved;
+                }
+                data.Instances[i] = value; if (value.Block == 0) data.FreeInstances.Add(i);
             }
+            if (changed) { var header = data.Header.Value; header.CellSize = cellSize; data.Header.Value = header; Changed(); }
         }
         public void Compact()
         {

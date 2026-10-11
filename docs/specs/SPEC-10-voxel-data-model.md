@@ -595,7 +595,7 @@ public static class VoxelStructureCodec
 
 Per frame (`budget = VoxelConfig.SpawnBricksPerFrame`; markers `GridSpawnSystem.<Step>`):
 1. **Prototypes** (`Prototypes`): if `RequireRenderer == 1` and `VoxelRenderRuntime.IsReady == 0` → return (requests wait). If prototypes are missing or `RegistrationCount` changed: brick prototype = `CreateEntity(brickBaseArchetype)` (Brick, BrickCells, BrickSolidMask, BrickDirty, LocalTransform, LocalToWorld, Parent, BrickLodDesired, BrickPropInstance, Prefab) → `RenderMeshUtility.AddComponents(e, em, new RenderMeshDescription(ShadowCastingMode.On, receiveShadows: true), new MaterialMeshInfo(runtime.BrickMaterial, runtime.PlaceholderMesh))` (one shared `RenderMeshArray`-free registration; never a per-brick array) → disable `MaterialMeshInfo`, disable `BrickDirty`. If `RegistrationCount` changed, destroy every cached functional prototype and clear both maps. Functional prototypes are created on first use in step 5c, one per distinct `BlockDef.ModuleMask`: base functional types + the types registered with `Module = None` + the union of the types registered for every module id in the mask (each type once) + render components with `runtime.PropMaterial`; `NoRender` grids use the render-free map (ADR-0013).
-2. **Despawns** (`Despawn`; roots with `GridDespawnRequest` enabled, sorted by `VoxelGrid.Serial`): `EntityManager.CompleteAllTrackedJobs()` once if any; per root: if `GridSource.Flags & WriteBack` → `GridStructureSync.WriteBack`; if `GridSpawning` still enabled → unpin the source; then `DestroyEntity(NativeArray roots)` in one batch (LEG cascade). Not budgeted.
+2. **Despawns** (`Despawn`; roots with `GridDespawnRequest` enabled, including Disabled roots, sorted by `VoxelGrid.Serial`): `EntityManager.CompleteAllTrackedJobs()` once if any; per root: release pending rebuild/current spawn read tokens, then if `GridSource.Flags & WriteBack` → terminal `GridStructureSync` write-back (ADR-0026, only already-created baseline coordinates count as removals); then `DestroyEntity(NativeArray roots)` in one batch (LEG cascade). Not budgeted.
 3. **Rebuilds** (`Rebuild`; roots with `GridRebuildRequest`, sorted by Serial): `DestroyEntity` (batch) of all brick entities from `BrickSlot` and all `BlockInstance.Functional`; LEG := `[root]`; pin the new source, unpin the old; set `GridSource`; recompute `BrickMin/Dims/CellMin/CellMax/AnchorInstance`; resize and zero `BrickSlot`; copy palette and instances; `Revision++`; enable `GridSpawning{0}` and `GridRebuilt`; create functional entities (step 5c); `RemoveComponent<GridRebuildRequest>` (batch). Bricks follow in step 4.
 4. **Continue spawning** (`CreateBricks`; roots with `GridSpawning` enabled, sorted by Serial) while `budget > 0`: `n = min(budget, source.Bricks.Length − NextBrick)`:
    a. `Instantiate(brickPrototype, n, Allocator.Temp)`, then `AddComponent<BrickRenderState>(entities)` when rendering (Instantiate strips cleanup types). Headless batches create the same brick base without Prefab or rendering/cleanup components.
@@ -611,6 +611,8 @@ Per frame (`budget = VoxelConfig.SpawnBricksPerFrame`; markers `GridSpawnSystem.
 6. **Edits** (M3, VOX-020): roots with `GridEditRequest` enabled → §5.9.
 
 Complexity per frame: O(created bricks) memory copy (≤ 16.8 MB at 1,024 bricks) + O(functional blocks of converted requests). Exceptions are not caught; invalid requests are destroyed with one error log.
+
+Lifecycle details follow [ADR-0026](../decisions/ADR-0026-grid-lifecycle-baseline.md). Spawn/rebuild also fill internal `GridSpawnBrick[]` with original occupied coordinates in source-record order. `CaptureChanges` replaces its output containers, copies palette/instance metadata without ECS references, captures bricks with ChangedRevision > 0, and reports sorted missing baseline coordinates. Never-spawned coordinates are excluded while GridSpawning is enabled. Ordinary write-back defers unfinished spawns; terminal despawn releases its read before writing only the created portion. Rebuild has a separate pending read token; it preserves root serial/pose/identity/unrelated components, increments Revision and sets SyncedRevision to the new baseline. Invalid rebuilds leave the old grid intact. Metadata write-back invalidates cached mass and rebuilds free instance indices; copied bricks alone are optimized.
 
 ### 5.8 `BrickDirtyScheduleSystem` (`Grid/`)
 
@@ -716,7 +718,7 @@ Registration of functional component types (SPEC-20/21/22): a system with `[Crea
 | Structure mutated while pinned | `InvalidOperationException` from the mutator |
 | Blueprint structure mutated | Mutators return `PlaceResult.ReadOnly`; raw writes throw |
 | `registry.Release` of a structure still used by a live grid's `GridSource` | Allowed; an existing spawn read finishes through its token (ADR-0024), while later write-back logs `GameLog.Warn` and skips |
-| Despawn while `GridSpawning` | Unpin, write back the bricks that exist, destroy |
+| Despawn while `GridSpawning` | Release read tokens; write changed created bricks and remove only destroyed already-created baseline bricks; preserve uncreated source bricks, then destroy (ADR-0026) |
 | Brick reaches `SolidCount == 0` in a fixed tick | The writer destroys it through the GameplayEnd ECB; `BrickDirtyScheduleSystem` still enqueues collider work and neighbour remeshes and skips its own mesh |
 | Footprint crosses brick borders | `SetCell` creates bricks as needed |
 | Instance count would exceed 32,768 | `PlaceResult.InstancesFull`; decode of such data fails (SPEC-05 decoder limits) |
@@ -964,11 +966,11 @@ Measured station geometry and allocation totals:
 - **Do:** Implement `GridSpawnSystem` steps 2–3, `GridSpawnApi.RequestRebuild/RequestDespawn`, `GridStructureSync.WriteBack/CaptureChanges/WriteBackAll` (bricks with `ChangedRevision > SyncedRevision`; bricks absent from `BrickSlot` removed from the source; `OptimizeStorage` on written bricks).
 - **Files:** `Assets/Game/Voxel/Grid/{GridSpawnSystem,GridSpawnApi,GridStructureSync}.cs`; `Assets/Game/Tests/EditMode/Voxel/GridLifecycleTests.cs`
 - **Acceptance criteria:**
-  - [ ] Damage through `BrickWrite.Set` to 3 bricks, then `WriteBack`, copies exactly 3 bricks; a second `WriteBack` copies 0.
-  - [ ] Despawn with `WriteBack` → respawn from the same structure reproduces the damaged cells (regression 04-B3).
-  - [ ] A brick destroyed at runtime is removed from the source by write-back.
-  - [ ] Rebuild replaces bricks and functional entities, keeps the root and its non-voxel components, and enables `GridRebuilt`.
-  - [ ] Despawn destroys root, bricks and functional entities (entity count returns to baseline).
+  - [x] Damage through `BrickWrite.Set` to 3 bricks, then `WriteBack`, copies exactly 3 bricks; a second `WriteBack` copies 0.
+  - [x] Despawn with `WriteBack` → respawn from the same structure reproduces the damaged cells (regression 04-B3).
+  - [x] A brick destroyed at runtime is removed from the source by write-back.
+  - [x] Rebuild replaces bricks and functional entities, keeps the root and its non-voxel components, and enables `GridRebuilt`.
+  - [x] Despawn destroys root, bricks and functional entities (entity count returns to baseline).
 - **Tests:** `GridLifecycleTests.WriteBack_CopiesOnlyChanged`, `.DespawnRespawn_KeepsDamage`, `.WriteBack_RemovesDestroyedBricks`, `.Rebuild_KeepsRoot`, `.Despawn_DestroysAll`, `.CaptureChanges_SinceSpawn`.
 
 ### VOX-015 — BrickDirtyScheduleSystem
@@ -1090,6 +1092,10 @@ Measured station geometry and allocation totals:
 | 31 | An ECB-only stow API cannot inspect enable bits or optional interpolation presence | Caller checks fully initialized precondition; Unstow ensures and resets interpolation | Tech lead | Resolved 2026-10-11 by ADR-0025; signatures unchanged, Playback tests cover Disabled group and pose/velocity/interpolation/grace. |
 | 32 | VOX-013 still requires 18 Ship20k bricks after Q22 corrected its geometry to 10 | Correct derived entity counts; put test functionals in existing brick bounds | Tech lead | Resolved 2026-10-11: core (5,11,5), thrusters (15,11,5)/(25,11,5) stay within the ten brick slots, giving 14 LEG entries. |
 | 33 | Headless bricks get GPU cleanup components although no renderer owns their cleanup | Omit BrickRenderState when rendering is disabled | Tech lead | Resolved 2026-10-11: preserve brick data/LOD/prop buffers, but no Entities Graphics or GPU cleanup component; destruction then releases headless entities immediately. |
+
+| 34 | CaptureChanges lacks source access and cannot distinguish destroyed bricks from empty slots | Store original occupied coordinates per grid | Tech lead | Resolved 2026-10-11 by ADR-0026: 12 bytes per source brick plus buffer overhead, included in the pending VOX-003 measurement; capture remains relative to initialization after saves. |
+| 35 | Partial spawn write-back would mutate pinned storage and delete uncreated bricks; rebuild needs an independent pending read | Define terminal partial write-back and rebuild token transfer | Tech lead | Resolved 2026-10-11 by ADR-0026: ordinary saves defer partial spawns; terminal despawn releases owned reads and preserves uncreated coordinates; rebuild preserves identity and resets its revision baseline. |
+| 36 | OptimizeStorage scans all full bricks; copied runtime metadata can leave cached mass stale | Optimize only copied bricks and invalidate metadata revisions | Tech lead | Resolved 2026-10-11: internal structure helpers share existing optimization logic, clear ECS references and reconstruct free indices without changing the public API. |
 
 ## 11. References
 

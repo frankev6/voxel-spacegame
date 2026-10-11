@@ -642,6 +642,10 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 79 | 2026-10-11 | SPEC-10 VOX-013 | ECB-only stow cannot inspect initialization or optional interpolation | Caller enforces precondition; Unstow ensures interpolation | Tech lead | Accepted ADR-0025; SPEC-10 Q31 |
 | 80 | 2026-10-11 | SPEC-10 VOX-013 | Acceptance retained old 18-brick Ship20k count | Ten bricks and three functionals give fourteen LEG entries | Tech lead | Resolved SPEC-10 Q32, consistent with Q22 geometry |
 | 81 | 2026-10-11 | SPEC-10 VOX-013 | Headless GPU cleanup component has no renderer to release it | Omit rendering cleanup on headless bricks | Tech lead | Resolved SPEC-10 Q33 |
+| 82 | 2026-10-11 | SPEC-10 VOX-014 | CaptureChanges cannot distinguish empty from destroyed slots | Internal original-coordinate baseline, retained across saves | Tech lead | Accepted ADR-0026; SPEC-10 Q34; account for memory in VOX-003 |
+| 83 | 2026-10-11 | SPEC-10 VOX-014 | Partial write-back risks deleting uncreated cells; rebuild overlaps an old spawn read | Terminal partial write-back and independent pending rebuild token | Tech lead | Accepted ADR-0026; SPEC-10 Q35 |
+| 84 | 2026-10-11 | SPEC-10 VOX-014 | Global optimization and stale metadata mass cache violate incremental write-back | Optimize copied bricks only; invalidate metadata revisions | Tech lead | Resolved SPEC-10 Q36 |
+
 
 
 ## Measurements

@@ -25,7 +25,7 @@ namespace Game.Voxel.Grid
     public partial struct GridSpawnSystem : ISystem
     {
         Entity singletons;
-        EntityQuery requests, spawning, registryQuery;
+        EntityQuery requests, spawning, registryQuery, despawns, rebuilds;
         EntityArchetype brickBase;
         int rendererWait;
         byte brickRendered;
@@ -35,6 +35,8 @@ namespace Game.Voxel.Grid
         static readonly ProfilerMarker PrototypesMarker = new ProfilerMarker("GridSpawnSystem.Prototypes");
         static readonly ProfilerMarker ConvertMarker = new ProfilerMarker("GridSpawnSystem.Convert");
         static readonly ProfilerMarker BricksMarker = new ProfilerMarker("GridSpawnSystem.CreateBricks");
+        static readonly ProfilerMarker DespawnMarker = new ProfilerMarker("GridSpawnSystem.Despawn");
+        static readonly ProfilerMarker RebuildMarker = new ProfilerMarker("GridSpawnSystem.Rebuild");
         static readonly ProfilerMarker FunctionalMarker = new ProfilerMarker("GridSpawnSystem.CreateFunctional");
 
         public void OnCreate(ref SystemState state)
@@ -48,6 +50,12 @@ namespace Game.Voxel.Grid
             types.AddRange(DamageSetup.BrickComponents()); brickBase = em.CreateArchetype(types.ToArray());
             requests = state.GetEntityQuery(ComponentType.ReadOnly<GridSpawnRequest>());
             spawning = state.GetEntityQuery(ComponentType.ReadOnly<GridSpawning>(), ComponentType.ReadOnly<VoxelGrid>(), ComponentType.ReadOnly<SpawnReadToken>());
+            despawns = state.GetEntityQuery(new EntityQueryDesc
+            {
+                All = new[] { ComponentType.ReadOnly<GridDespawnRequest>(), ComponentType.ReadOnly<VoxelGrid>() },
+                Options = EntityQueryOptions.IncludeDisabledEntities
+            });
+            rebuilds = state.GetEntityQuery(ComponentType.ReadOnly<GridRebuildRequest>(), ComponentType.ReadOnly<VoxelGrid>());
             registryQuery = state.GetEntityQuery(ComponentType.ReadOnly<VoxelStructureRegistryRef>());
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<VoxelConfig>();
             state.RequireForUpdate<BlockDefsRef>(); state.RequireForUpdate<OrientationTablesRef>(); state.RequireForUpdate(registryQuery);
@@ -80,6 +88,8 @@ namespace Game.Voxel.Grid
             var prototypes = em.GetComponentData<GridPrototypes>(singletons);
             using (PrototypesMarker.Auto()) PreparePrototypes(em, runtime, ref prototypes);
             var content = new VoxelContent { Blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value, Orientations = SystemAPI.GetSingleton<OrientationTablesRef>().Value };
+            using (DespawnMarker.Auto()) Despawn(ref state, registry);
+            using (RebuildMarker.Auto()) Rebuild(ref state, registry, content, runtime, ref prototypes);
             int budget = math.max(0, config.SpawnBricksPerFrame);
             var queue = em.GetComponentData<BrickMeshQueue>(singletons); queue.CompleteAccess();
             using (var roots = spawning.ToEntityArray(Allocator.Temp))
@@ -204,6 +214,7 @@ namespace Game.Voxel.Grid
                     Entity = entity, Request = request, Token = token, Mass = source.GetMass(content),
                     Grid = new VoxelGrid { BrickMin = brickMin, BrickDims = dims, CellMin = cellMin, CellMax = cellMax,
                         CellSize = source.Data.Header.Value.CellSize, Revision = 1, AnchorInstance = anchor, Kind = request.Kind, Serial = prototypes.NextSerial++ },
+                    Bricks = (BrickRecord*)source.Data.Bricks.GetUnsafeReadOnlyPtr(), BrickLength = source.BrickCount,
                     Palette = (PaletteEntry*)source.Data.Palette.GetUnsafeReadOnlyPtr(), PaletteLength = source.Data.Palette.Length,
                     Instances = (BlockInstance*)source.Data.Instances.GetUnsafeReadOnlyPtr(), InstanceLength = source.Data.Instances.Length
                 });
@@ -214,7 +225,7 @@ namespace Game.Voxel.Grid
             var types = new List<ComponentType> { typeof(VoxelGrid), typeof(BrickSlot), typeof(PaletteEntry), typeof(BlockInstance),
                 typeof(LocalTransform), typeof(LocalToWorld), typeof(LinkedEntityGroup), typeof(PersistentId), typeof(GridSource), typeof(GridSpawning),
                 typeof(GridDespawnRequest), typeof(GridRebuilt), typeof(GridBodyInit), typeof(GridEditRequest), typeof(GridEditedBrick),
-                typeof(GridMass), typeof(GridMassRecompute), typeof(GridColliderState), typeof(Dormant), typeof(SpawnReadToken) };
+                typeof(GridSpawnBrick), typeof(GridMass), typeof(GridMassRecompute), typeof(GridColliderState), typeof(Dormant), typeof(SpawnReadToken) };
             types.AddRange(DamageSetup.GridRootComponents()); AddTypes(em, selected.AsArray(), types);
             for (GridProfile profile = GridProfile.PlayerShip; profile <= GridProfile.Dummy; profile++)
             {
@@ -223,15 +234,7 @@ namespace Game.Voxel.Grid
                 if (group.Length == 0) continue;
                 foreach (var set in profileSets) if (set.Profile == profile) em.AddComponent(group.AsArray(), set.Types);
             }
-            new RootFillJob
-            {
-                Data = data.AsArray(), Grids = state.GetComponentLookup<VoxelGrid>(), Tokens = state.GetComponentLookup<SpawnReadToken>(),
-                Transforms = state.GetComponentLookup<LocalTransform>(), Ids = state.GetComponentLookup<PersistentId>(), Sources = state.GetComponentLookup<GridSource>(),
-                Spawning = state.GetComponentLookup<GridSpawning>(), Bodies = state.GetComponentLookup<GridBodyInit>(), Masses = state.GetComponentLookup<GridMass>(),
-                Recompute = state.GetComponentLookup<GridMassRecompute>(), Despawn = state.GetComponentLookup<GridDespawnRequest>(), Rebuilt = state.GetComponentLookup<GridRebuilt>(),
-                Edit = state.GetComponentLookup<GridEditRequest>(), Dormant = state.GetComponentLookup<Dormant>(), Palettes = state.GetBufferLookup<PaletteEntry>(),
-                Instances = state.GetBufferLookup<BlockInstance>(), Slots = state.GetBufferLookup<BrickSlot>(), Groups = state.GetBufferLookup<LinkedEntityGroup>()
-            }.Schedule(selected.Length, 1).Complete();
+            FillRoots(ref state, data.AsArray());
             em.RemoveComponent<GridSpawnRequest>(selected.AsArray());
             foreach (var d in data)
             {
@@ -239,6 +242,94 @@ namespace Game.Voxel.Grid
                 CreateFunctional(ref state, registry, source, d.Entity, content, runtime, ref prototypes);
                 Continue(ref state, registry, d.Entity, runtime, prototypes.Brick, ref queue, ref budget);
             }
+        }
+
+        static void FillRoots(ref SystemState state, NativeArray<RootFillData> data)
+        {
+            new RootFillJob
+            {
+                Data = data, Grids = state.GetComponentLookup<VoxelGrid>(), Tokens = state.GetComponentLookup<SpawnReadToken>(),
+                Transforms = state.GetComponentLookup<LocalTransform>(), Ids = state.GetComponentLookup<PersistentId>(), Sources = state.GetComponentLookup<GridSource>(),
+                Spawning = state.GetComponentLookup<GridSpawning>(), Bodies = state.GetComponentLookup<GridBodyInit>(), Masses = state.GetComponentLookup<GridMass>(),
+                Recompute = state.GetComponentLookup<GridMassRecompute>(), Despawn = state.GetComponentLookup<GridDespawnRequest>(), Rebuilt = state.GetComponentLookup<GridRebuilt>(),
+                Edit = state.GetComponentLookup<GridEditRequest>(), Dormant = state.GetComponentLookup<Dormant>(), Palettes = state.GetBufferLookup<PaletteEntry>(),
+                Instances = state.GetBufferLookup<BlockInstance>(), Slots = state.GetBufferLookup<BrickSlot>(), Groups = state.GetBufferLookup<LinkedEntityGroup>(), Baselines = state.GetBufferLookup<GridSpawnBrick>()
+            }.Schedule(data.Length, 1).Complete();
+        }
+
+        void Despawn(ref SystemState state, VoxelStructureRegistry registry)
+        {
+            var em = state.EntityManager;
+            using var roots = despawns.ToEntityArray(Allocator.Temp);
+            if (roots.Length == 0) return;
+            em.CompleteAllTrackedJobs(); roots.Sort(new SerialOrder { Grids = state.GetComponentLookup<VoxelGrid>(true) });
+            foreach (var root in roots)
+            {
+                if (em.HasComponent<RebuildReadToken>(root)) registry.EndRead(em.GetComponentData<RebuildReadToken>(root).Value);
+                if (em.HasComponent<SpawnReadToken>(root)) registry.EndRead(em.GetComponentData<SpawnReadToken>(root).Value);
+                GridStructureSync.WriteBackCore(em, root, registry, true);
+            }
+            em.DestroyEntity(roots);
+        }
+
+        unsafe void Rebuild(ref SystemState state, VoxelStructureRegistry registry, VoxelContent content, VoxelRenderRuntime runtime,
+            ref GridPrototypes prototypes)
+        {
+            var em = state.EntityManager;
+            using var roots = rebuilds.ToEntityArray(Allocator.Temp);
+            if (roots.Length == 0) return;
+            em.CompleteAllTrackedJobs(); roots.Sort(new SerialOrder { Grids = state.GetComponentLookup<VoxelGrid>(true) });
+            using var selected = new NativeList<Entity>(Allocator.Temp);
+            using var children = new NativeList<Entity>(Allocator.TempJob);
+            using var data = new NativeList<RootFillData>(Allocator.TempJob);
+            foreach (var root in roots)
+            {
+                var request = em.GetComponentData<GridRebuildRequest>(root);
+                int token = em.HasComponent<RebuildReadToken>(root) ? em.GetComponentData<RebuildReadToken>(root).Value : 0;
+                var source = token == 0 ? registry.Get(request.StructureHandle) : registry.ReadSource(token);
+                bool valid = source != null && source.Data.IsCreated && source.BrickCount > 0;
+                int3 lo = default, hi = default, min = default, dims = default;
+                if (valid)
+                {
+                    source.TryGetCellBounds(out lo, out hi); min = BrickMath.BrickOf(lo); dims = BrickMath.BrickOf(hi) - min + 1;
+                    valid = math.all(dims > 0) && (long)dims.x * dims.y * dims.z <= 262144 && math.isfinite(source.CellSize) && source.CellSize > 0
+                        && (token == 0 || registry.MatchesRead(token, source, request.StructureHandle, default));
+                }
+                if (!valid) { registry.EndRead(token); GameLog.Error("Voxel", "rebuild rejected: invalid source"); continue; }
+                if (token == 0) token = registry.PinSpawnRead(source, request.StructureHandle, default);
+                if (em.HasComponent<SpawnReadToken>(root)) registry.EndRead(em.GetComponentData<SpawnReadToken>(root).Value);
+                registry.BindRead(token, root);
+                var grid = em.GetComponentData<VoxelGrid>(root);
+                grid.BrickMin = min; grid.BrickDims = dims; grid.CellMin = lo; grid.CellMax = hi; grid.CellSize = source.CellSize;
+                grid.Revision++; grid.AnchorInstance = -1;
+                for (int i = 0; i < source.Data.Instances.Length; i++)
+                {
+                    var instance = source.Data.Instances[i];
+                    if (instance.Block != 0 && instance.CellsAlive > 0 && content.Blocks.Value.Blocks[instance.Block].IsCore) { grid.AnchorInstance = i; break; }
+                }
+                new CollectGridChildrenJob
+                {
+                    Slots = em.GetBuffer<BrickSlot>(root).AsNativeArray(), Instances = em.GetBuffer<BlockInstance>(root).AsNativeArray(),
+                    Storage = state.GetEntityStorageInfoLookup(), Children = children
+                }.Run();
+                selected.Add(root);
+                data.Add(new RootFillData
+                {
+                    Entity = root, Grid = grid, Token = token, Mass = source.GetMass(content), Rebuild = 1,
+                    Request = new GridSpawnRequest { StructureHandle = request.StructureHandle, Flags = request.Flags },
+                    Bricks = (BrickRecord*)source.Data.Bricks.GetUnsafeReadOnlyPtr(), BrickLength = source.BrickCount,
+                    Palette = (PaletteEntry*)source.Data.Palette.GetUnsafeReadOnlyPtr(), PaletteLength = source.Data.Palette.Length,
+                    Instances = (BlockInstance*)source.Data.Instances.GetUnsafeReadOnlyPtr(), InstanceLength = source.Data.Instances.Length
+                });
+            }
+            if (children.Length > 0) em.DestroyEntity(children.AsArray());
+            if (selected.Length > 0)
+            {
+                em.AddComponent<SpawnReadToken>(selected.AsArray());
+                FillRoots(ref state, data.AsArray());
+                foreach (var d in data) CreateFunctional(ref state, registry, registry.ReadSource(d.Token), d.Entity, content, runtime, ref prototypes);
+            }
+            em.RemoveComponent<GridRebuildRequest>(roots); em.RemoveComponent<RebuildReadToken>(roots);
         }
 
         static void AddTypes(EntityManager em, NativeArray<Entity> entities, List<ComponentType> types)

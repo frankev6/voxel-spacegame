@@ -20,7 +20,9 @@ namespace Game.Voxel.Grid
         public StructureMassData Mass;
         [NativeDisableUnsafePtrRestriction] public PaletteEntry* Palette;
         [NativeDisableUnsafePtrRestriction] public BlockInstance* Instances;
-        public int PaletteLength, InstanceLength, Token;
+        [NativeDisableUnsafePtrRestriction] public BrickRecord* Bricks;
+        public int PaletteLength, InstanceLength, BrickLength, Token;
+        public byte Rebuild;
     }
 
     /// <summary>Batched root initialization; each iteration owns one root and its buffers (SPEC-10 §5.7).</summary>
@@ -46,19 +48,23 @@ namespace Game.Voxel.Grid
         [NativeDisableParallelForRestriction] public BufferLookup<BlockInstance> Instances;
         [NativeDisableParallelForRestriction] public BufferLookup<BrickSlot> Slots;
         [NativeDisableParallelForRestriction] public BufferLookup<LinkedEntityGroup> Groups;
+        [NativeDisableParallelForRestriction] public BufferLookup<GridSpawnBrick> Baselines;
         public void Execute(int i)
         {
             var d = Data[i]; var e = d.Entity; var r = d.Request;
             Grids[e] = d.Grid; Tokens[e] = new SpawnReadToken { Value = d.Token };
-            Transforms[e] = LocalTransform.FromPositionRotationScale(r.Pose.pos, r.Pose.rot, 1);
-            Ids[e] = new PersistentId(r.PersistentId);
-            Sources[e] = new GridSource { StructureHandle = r.StructureHandle, Blueprint = r.Blueprint, SyncedRevision = 1, Flags = r.Flags };
+            if (d.Rebuild == 0)
+            {
+                Transforms[e] = LocalTransform.FromPositionRotationScale(r.Pose.pos, r.Pose.rot, 1);
+                Ids[e] = new PersistentId(r.PersistentId);
+                Bodies[e] = new GridBodyInit { Motion = r.Motion, LinearVelocity = r.LinearVelocity, AngularVelocity = r.AngularVelocity };
+                Bodies.SetComponentEnabled(e, true); Dormant.SetComponentEnabled(e, false);
+            }
+            Sources[e] = new GridSource { StructureHandle = r.StructureHandle, Blueprint = r.Blueprint, SyncedRevision = d.Grid.Revision, Flags = r.Flags };
             Spawning[e] = default; Spawning.SetComponentEnabled(e, true);
-            Bodies[e] = new GridBodyInit { Motion = r.Motion, LinearVelocity = r.LinearVelocity, AngularVelocity = r.AngularVelocity };
-            Bodies.SetComponentEnabled(e, true);
             Masses[e] = new GridMass { Data = d.Mass }; Recompute.SetComponentEnabled(e, false);
-            Despawn.SetComponentEnabled(e, false); Rebuilt.SetComponentEnabled(e, false);
-            Edit.SetComponentEnabled(e, false); Dormant.SetComponentEnabled(e, false);
+            Despawn.SetComponentEnabled(e, false); Rebuilt.SetComponentEnabled(e, d.Rebuild != 0);
+            Edit.SetComponentEnabled(e, false);
             var palette = Palettes[e]; palette.ResizeUninitialized(d.PaletteLength);
             UnsafeUtility.MemCpy(palette.GetUnsafePtr(), d.Palette, d.PaletteLength * UnsafeUtility.SizeOf<PaletteEntry>());
             var instances = Instances[e]; instances.ResizeUninitialized(d.InstanceLength);
@@ -66,6 +72,8 @@ namespace Game.Voxel.Grid
             for (int j = 0; j < instances.Length; j++) { var instance = instances[j]; instance.Functional = Entity.Null; instances[j] = instance; }
             var slots = Slots[e]; slots.ResizeUninitialized(d.Grid.BrickDims.x * d.Grid.BrickDims.y * d.Grid.BrickDims.z);
             UnsafeUtility.MemClear(slots.GetUnsafePtr(), slots.Length * UnsafeUtility.SizeOf<BrickSlot>());
+            var baseline = Baselines[e]; baseline.ResizeUninitialized(d.BrickLength);
+            for (int j = 0; j < d.BrickLength; j++) baseline[j] = new GridSpawnBrick { Coord = d.Bricks[j].Coord };
             var group = Groups[e]; group.Clear(); group.Add(new LinkedEntityGroup { Value = e });
         }
     }

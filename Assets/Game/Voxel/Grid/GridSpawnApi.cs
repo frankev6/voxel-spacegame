@@ -55,8 +55,23 @@ namespace Game.Voxel.Grid
             LinearVelocity = p.LinearVelocity, AngularVelocity = p.AngularVelocity, Kind = p.Kind, Motion = p.Motion,
             Flags = handle < 0 ? p.Flags & ~GridSpawnFlags.WriteBack : p.Flags, Profile = p.Profile
         };
-        public static void RequestRebuild(EntityManager em, VoxelStructureRegistry registry, Entity root, int structureHandle, GridSpawnFlags flags) { throw new System.NotImplementedException("VOX-014"); }
-        public static void RequestDespawn(EntityManager em, Entity root) { throw new System.NotImplementedException("VOX-014"); }          // enables GridDespawnRequest
+        public static void RequestRebuild(EntityManager em, VoxelStructureRegistry registry, Entity root, int structureHandle, GridSpawnFlags flags)
+        {
+            if (!em.Exists(root) || !em.HasComponent<VoxelGrid>(root)) throw new ArgumentException("Rebuild requires a live grid", nameof(root));
+            var source = Resolve(registry, structureHandle);
+            int previous = em.HasComponent<RebuildReadToken>(root) ? em.GetComponentData<RebuildReadToken>(root).Value : 0;
+            int token = registry.PinSpawnRead(source, structureHandle, default);
+            try
+            {
+                var request = new GridRebuildRequest { StructureHandle = structureHandle, Flags = flags };
+                if (em.HasComponent<GridRebuildRequest>(root)) em.SetComponentData(root, request); else em.AddComponentData(root, request);
+                var read = new RebuildReadToken { Value = token };
+                if (em.HasComponent<RebuildReadToken>(root)) em.SetComponentData(root, read); else em.AddComponentData(root, read);
+                registry.BindRead(token, root, true); registry.EndRead(previous);
+            }
+            catch { registry.EndRead(token); throw; }
+        }
+        public static void RequestDespawn(EntityManager em, Entity root) { em.SetComponentEnabled<GridDespawnRequest>(root, true); }          // enables GridDespawnRequest
         public static void RequestEdit(EntityManager em, Entity root, NativeArray<int3> changedBrickCoords) { throw new System.NotImplementedException("VOX-020"); }   // M3
     }
 }

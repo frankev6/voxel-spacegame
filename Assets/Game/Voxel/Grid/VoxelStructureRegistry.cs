@@ -21,6 +21,7 @@ namespace Game.Voxel.Grid
             public Entity Bound;
             public int Handle;
             public ContentHash Blueprint;
+            public bool Rebuild;
         }
         readonly Dictionary<int, SpawnRead> spawnReads = new Dictionary<int, SpawnRead>();
         readonly List<int> cancelled = new List<int>();
@@ -67,7 +68,8 @@ namespace Game.Voxel.Grid
         internal VoxelStructure ReadSource(int token) => spawnReads.TryGetValue(token, out var read) ? read.Source : null;
         internal bool MatchesRead(int token, VoxelStructure source, int handle, ContentHash blueprint)
             => spawnReads.TryGetValue(token, out var read) && ReferenceEquals(read.Source, source) && read.Handle == handle && read.Blueprint == blueprint;
-        internal void BindRead(int token, Entity root) => spawnReads[token].Bound = root;
+        internal void BindRead(int token, Entity root, bool rebuild = false)
+        { spawnReads[token].Bound = root; spawnReads[token].Rebuild = rebuild; }
         internal void EndRead(int token)
         {
             if (!spawnReads.TryGetValue(token, out var read)) return;
@@ -80,8 +82,11 @@ namespace Game.Voxel.Grid
             foreach (var pair in spawnReads)
             {
                 Entity entity = pair.Value.Bound;
-                if (entity != Entity.Null && (!em.Exists(entity) || !em.HasComponent<SpawnReadToken>(entity)
-                    || em.GetComponentData<SpawnReadToken>(entity).Value != pair.Key)) cancelled.Add(pair.Key);
+                if (entity == Entity.Null) continue;
+                bool matches = em.Exists(entity) && (pair.Value.Rebuild
+                    ? em.HasComponent<RebuildReadToken>(entity) && em.GetComponentData<RebuildReadToken>(entity).Value == pair.Key
+                    : em.HasComponent<SpawnReadToken>(entity) && em.GetComponentData<SpawnReadToken>(entity).Value == pair.Key);
+                if (!matches) cancelled.Add(pair.Key);
             }
             foreach (int token in cancelled) EndRead(token);
             cancelled.Clear();
