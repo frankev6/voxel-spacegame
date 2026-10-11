@@ -1013,12 +1013,12 @@ Evidence retained locally in ignored `Logs/tools/vox003-{reference,thin-shell}.t
 - **Tier:** frontier — F2: deferred disposal of native blobs and GPU meshes
 - **Depends on:** `VOX-013`
 - **Do:** Implement §5.10 and the `DeferredDisposal` helpers.
-- **Files:** `Assets/Game/Voxel/Grid/{DeferredDisposalSystem,DeferredDisposal}.cs`; `Assets/Game/Tests/EditMode/Voxel/DeferredDisposalTests.cs`
+- **Files:** `Assets/Game/Voxel/Grid/{DeferredDisposalSystem,DeferredDisposal}.cs`; `Assets/Game/Tests/EditMode/Voxel/DeferredDisposalTests.cs`; `Assets/Game/Tests/PlayMode/Voxel/DeferredDisposalTests.cs`
 - **Acceptance criteria:**
-  - [ ] A retired blob is valid after 2 updates and disposed after the 3rd (no `SimClock`, or the clock advancing ≥ 1 tick per frame).
-  - [ ] With a `SimClock` that does not advance (paused), a retired blob survives 100 updates; it is disposed in the first update after `Tick` reaches `DueTick`.
-  - [ ] A retired mesh is unregistered and destroyed after the 3rd update (Entities Graphics present: PlayMode test).
-  - [ ] World disposal with pending blobs leaks nothing.
+  - [x] A retired blob is valid after 2 updates and disposed after the 3rd (no `SimClock`, or the clock advancing ≥ 1 tick per frame).
+  - [x] With a `SimClock` that does not advance (paused), a retired blob survives 100 updates; it is disposed in the first update after `Tick` reaches `DueTick`.
+  - [x] A retired mesh is unregistered and destroyed after the 3rd update (Entities Graphics present: PlayMode test).
+  - [x] World disposal with pending blobs leaks nothing.
 - **Tests:** `DeferredDisposalTests.Blob_WaitsForTicksWhilePaused`, `DeferredDisposalTests.Blob_DisposedAfterThreeFrames`, `.Mesh_UnregisteredAfterThreeFrames`, `.WorldDispose_NoLeaks`.
 
 ### VOX-017 — Benchmark structures
