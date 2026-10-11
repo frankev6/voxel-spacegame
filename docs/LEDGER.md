@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 65 | 0 | 0 | 0 | 37 | 0 | 102 | 14 |
+| M1 | 64 | 0 | 0 | 0 | 38 | 0 | 102 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 3 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -158,10 +158,10 @@
 | PHY-008 | GridBodyInitSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-003, PHY-006, PHY-007, SPEC-10 | yes | todo |  |  |  |  |
 | PHY-009 | ColliderSnapshotSystem and install schedule | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-007, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | db7c5b7 | Tick snapshots, deterministic buckets, six required tests pass |
 | PHY-010 | BrickColliderBuildSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-005, PHY-009 | yes | done | astra (gpt-6) | 2026-10-11 | 08211f4 | Snapshot-only budgeted batches; 1000 bricks / 4 batches, byte-identical compound |
-| PHY-011 | ColliderSwapSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-010 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| PHY-012 | GridColliderCleanupSystem and teardown | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, SPEC-10 | no | todo |  |  |  |  |
+| PHY-011 | ColliderSwapSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-010 | yes | done | astra (gpt-6) | 2026-10-11 | 4542bf7 | Due-prefix installs; asynchronous finalize; Q98 empty-prefix ownership |
+| PHY-012 | GridColliderCleanupSystem and teardown | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, SPEC-10 | yes | todo |  |  |  |  |
 | PHY-013 | GridMassUpdateSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-006, PHY-008, DMG-001 | no | todo |  |  |  |  |
-| PHY-015 | Debug, statistics and harness hooks | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011 | no | todo |  |  |  |  |
+| PHY-015 | Debug, statistics and harness hooks | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011 | yes | todo |  |  |  |  |
 | PHY-016 | GridBodyFactory contract test for split creators | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-008 | no | todo |  |  |  |  |
 | PHY-017 | Physics behaviour scenarios | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011, PHY-013, SPEC-10 | no | todo |  |  |  |  |
 | PHY-018 | Collider and mass determinism across frame rates | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, PHY-013 | no | todo |  |  |  |  |
@@ -703,6 +703,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — PHY-011 collider swap (astra, gpt-6)
+
+- Added Burst fixed-step scheduling for completed-batch handover and newest-due-prefix installation. The batch retains its finalization handle for teardown; cache and ECS dependencies order install after handover. No fixed-step Complete, CompleteDependency or GetSingletonRW calls.
+- Six required tests cover exact urgent ticks, newer-wins retirement, once-only lateness, unfinished batches, state publication and destroyed roots. Swap returned in **0.0059 ms** while a deliberately **500 ms** job remained unfinished; this is an asynchronous-behaviour check, not the PHY-019 performance gate.
+- Q98 / SPEC-12 Q19 resolves empty-prefix ownership: preserve the installed collider/tick/phase/box count, expose zero logical children, and retire older pending compounds while freeing updates.
+- Validation: explicit compile zero C# warnings; focused **6/6**; EditMode **578 passed + 1 explicit skipped**, PlayMode **37 passed**, perf **31/31**, docs **503 tasks / zero errors**.
+- Next: PHY-012 cleanup, then body initialization/mass updates and renderer work. No owner decision blocks the next task.
 
 ### 2026-10-11 — PHY-010 collider batch construction (astra, gpt-6)
 
