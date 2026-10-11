@@ -1037,8 +1037,8 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Do:** Implement `GridColliderStats.Gather/ResetCounters` and `ColliderDebug.CollectBoxes` (§5.14). Provide the harness fields of §5.14 to SPEC-70 through these APIs (no harness code here).
 - **Files:** `Assets/Game/Voxel/PhysicsBody/{GridColliderStats,ColliderDebug}.cs`, `Assets/Game/Tests/EditMode/Voxel/Physics/ColliderDebugTests.cs`
 - **Acceptance criteria:**
-  - [ ] `CollectBoxes` on a provisional grid returns one box with `Provisional = 1`; on a ready grid, the union of returned boxes contains every solid cell.
-  - [ ] Byte counters equal the sum of `MemorySize` of every owned blob (checked by walking the cache in the test).
+  - [x] `CollectBoxes` on a provisional grid returns one box with `Provisional = 1`; on a ready grid, the union of returned boxes contains every solid cell.
+  - [x] Byte counters equal the sum of `MemorySize` of every owned blob (checked by walking the cache in the test).
 - **Tests:** `ColliderDebugTests.Provisional_OneBox`, `.Ready_BoxesCoverCells`, `.Stats_BytesMatchBlobs`.
 
 ### PHY-016 — GridBodyFactory contract test for split creators
