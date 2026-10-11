@@ -13,5 +13,14 @@ namespace Game.Tests.EditMode.Project
             var issues = ProjectSetup.Check();
             Assert.IsEmpty(issues, "Run menu Game > Project Setup > Apply Required Settings.\n" + string.Join("\n", issues));
         }
+
+        [Test]
+        public void AutoBootstrapDefine_Required()
+        {
+            Assert.IsNull(ProjectSetup.CheckDefines("FOO;" + ProjectSetup.DisableAutoBootstrapDefine));
+            StringAssert.Contains(ProjectSetup.DisableAutoBootstrapDefine, ProjectSetup.CheckDefines("FOO;BAR"), "removing the define fails the guard");
+            Assert.IsNotNull(ProjectSetup.CheckDefines(""));
+            Assert.IsNotNull(ProjectSetup.CheckDefines(null));
+        }
     }
 }

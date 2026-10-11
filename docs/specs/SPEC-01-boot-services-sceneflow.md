@@ -882,6 +882,7 @@ If no save exists, "Load last save" is disabled.
 | 4 | Multiple ships in the fleet (M4) | `FleetModel` supports many; M3 uses only the flagship | Owner |
 | 5 | Release builds starting in a non-Boot scene | Not supported; always Boot | Tech lead |
 | 6 | FND-003 publishes `PauseStateChanged` through `EventBus<T>` (CORE-006), but its *Depends on* lists only FND-001, so it was ready before the bus exists (found 2026-10-11) | FND-003 waits for CORE-006 (status `blocked`); add `CORE-006` to its *Depends on* | Tech lead |
+| 7 | §5.2 row 14 calls `SettingsApplier.ApplyAll`, but no row constructs the `SettingsApplier` instance that follows `SettingsChanged`; and FND-004 (row 1) and INP-002 (row 3) were done before `GameComposition` existed, so their lines had no file to go in (found in FND-002, 2026-10-11) | **Resolved in FND-002:** row 14 also constructs `new SettingsApplier(settings)` (pushed onto `DisposeStack`) before `ApplyAll`; FND-002 added rows 1, 3 and 14 for the finished tasks. Rows 7 and 15 stay placeholders until FND-006 creates `SceneFlow` | Tech lead |
 
 ## 11. References
 

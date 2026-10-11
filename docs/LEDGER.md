@@ -561,6 +561,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 20 | 2026-10-11 | SPEC-71 TST-001 | Unity's rate managers can't step exact tick counts in tests (SPEC-71 open question 4) | Resolved: a counted rate manager; reduced worlds get ECB systems and group anchors | Tech lead | resolved in TST-001 |
 | 21 | 2026-10-11 | SPEC-71 TST-001 | EditMode loops never end a profiler frame (SPEC-71 open question 5) | Resolved: `RunEcs` samples `CurrentValue` deltas | Tech lead | resolved in TST-001 |
 | 22 | 2026-10-11 | SPEC-71 TST-001 | Reference-settings rule would leave the micro-gates unenforced in the Editor (SPEC-71 open question 6) | Resolved: `PerfRun.Gate` records and asserts micro-gates without the settings check | Tech lead | resolved in TST-001 |
+| 23 | 2026-10-11 | SPEC-01 FND-002 | No §5.2 row constructed the `SettingsApplier` instance (SPEC-01 open question 7) | Resolved: row 14 constructs it before `ApplyAll` | Tech lead | resolved in FND-002 |
 
 ## Measurements
 

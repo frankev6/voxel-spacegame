@@ -23,6 +23,8 @@ namespace Game.Editor
         public const float MaximumDeltaTime = 0.1f;                   // §5.1 catch-up cap: at most 6 fixed ticks per frame
         public const string ScenesFolder = "Assets/Game/Scenes";
         public const string RenderPipelineAsset = "Assets/Game/Settings/Rendering/URP_Default.asset";
+        /// <summary>SPEC-01 decision 1: Bootstrap creates the runtime World itself, never Entities' automatic bootstrap.</summary>
+        public const string DisableAutoBootstrapDefine = "UNITY_DISABLE_AUTOMATIC_SYSTEM_BOOTSTRAP_RUNTIME_WORLD";
 
         /// <summary>Build order is binding: docs/01-architecture.md §4.1.</summary>
         public static readonly string[] Scenes = { "Boot", "MainMenu", "World", "BlueprintLab" };
@@ -48,6 +50,10 @@ namespace Game.Editor
 
             var rp = AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>(RenderPipelineAsset);
             if (rp != null && GraphicsSettings.defaultRenderPipeline != rp) GraphicsSettings.defaultRenderPipeline = rp;
+
+            var defines = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone);
+            if (CheckDefines(defines) != null)
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, string.IsNullOrEmpty(defines) ? DisableAutoBootstrapDefine : defines + ";" + DisableAutoBootstrapDefine);
 
             EnsureInputSettings();
             EnsureScenes();
@@ -78,9 +84,19 @@ namespace Game.Editor
             Expect(UnityEditor.EditorBuildSettings.TryGetConfigObject(InputSettingsConfigKey, out UnityEngine.InputSystem.InputSettings input) &&
                    AssetDatabase.GetAssetPath(input) == InputSettingsAsset && input.shortcutKeysConsumeInput,
                    $"Input System settings should be {InputSettingsAsset} with shortcutKeysConsumeInput = true (SPEC-03 §4.2)");
+            var defineIssue = CheckDefines(PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone));
+            if (defineIssue != null) issues.Add(defineIssue);
             var build = EditorBuildSettings.scenes.Select(s => Path.GetFileNameWithoutExtension(s.path)).ToArray();
             Expect(build.SequenceEqual(Scenes), $"build scenes should be [{string.Join(", ", Scenes)}] (are [{string.Join(", ", build)}])");
             return issues;
+        }
+
+        /// <summary>The Standalone scripting define check, pure so tests can feed it a define list without recompiling. Null = OK.</summary>
+        public static string CheckDefines(string standaloneDefines)
+        {
+            var list = (standaloneDefines ?? "").Split(';').Select(d => d.Trim());
+            return list.Contains(DisableAutoBootstrapDefine) ? null
+                : $"Standalone scripting defines should include {DisableAutoBootstrapDefine} (SPEC-01 decision 1)";
         }
 
         const string InputSettingsConfigKey = "com.unity.input.settings";   // InputSettingsProvider.kEditorBuildSettingsConfigKey
