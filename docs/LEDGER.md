@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 60 | 0 | 0 | 0 | 42 | 0 | 102 | 16 |
+| M1 | 59 | 0 | 0 | 0 | 43 | 0 | 102 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -162,7 +162,7 @@
 | PHY-012 | GridColliderCleanupSystem and teardown | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 43a56cc | Deferred ownership; scene/world teardown; Q99–100 |
 | PHY-013 | GridMassUpdateSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-006, PHY-008, DMG-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0c9720a | Deterministic recompute; incremental removal; point-velocity preservation |
 | PHY-015 | Debug, statistics and harness hooks | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011 | yes | done | astra (gpt-6) | 2026-10-11 | a08fe17 | Guarded stats and cumulative reset; recursive grid-local box bounds |
-| PHY-016 | GridBodyFactory contract test for split creators | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-008 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PHY-016 | GridBodyFactory contract test for split creators | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-008 | yes | done | astra (gpt-6) | 2026-10-11 | 4db5812 | ECB-created hulk moves next tick; exact tick-28 install, one retirement, no native leaks |
 | PHY-017 | Physics behaviour scenarios | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011, PHY-013, SPEC-10 | yes | todo |  |  |  |  |
 | PHY-018 | Collider and mass determinism across frame rates | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, PHY-013 | yes | todo |  |  |  |  |
 | PHY-019 | Performance gates and memory | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-012, PHY-013, PHY-015, SPEC-10, TST-001 | yes | todo |  |  |  |  |
@@ -707,6 +707,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — PHY-016 split-creator factory contract (astra, gpt-6)
+
+- Added the required creator-role test with voxel root/brick components recorded through the gameplay-end ECB and the exact GridBodyFactory body sequence. XML documentation and test-result output publish the call order for SPEC-13 implementers.
+- The full spawn/body/mass/physics/snapshot/build/swap/cleanup pipeline runs **20 lifecycle ticks**: creation at **20**, first movement at **21**, Split-priority full compound installed at **28** (RoundUp(21+7,4)). The old provisional blob enters deferred disposal exactly once, is freed, and root destruction drains the remaining colliders. Repeated lifecycle reports **zero new native leaks**; installs 1, late installs 0.
+- Validation: focused **1/1**; compile zero C# warnings; EditMode **601 passed + 1 explicit skipped**, PlayMode **37 passed**, perf **31/31**, docs **503 tasks / zero errors**. No production API or spec decision changed.
+- Next: PHY-017's five behaviour scenarios, followed by determinism and performance/memory gates.
 
 ### 2026-10-11 — PHY-015 collider statistics and debug boxes (astra, gpt-6)
 
