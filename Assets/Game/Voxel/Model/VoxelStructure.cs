@@ -2,6 +2,7 @@ using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using System.Collections.Generic;
+using Game.Data.Blocks;
 using Unity.Mathematics;
 
 namespace Game.Voxel.Model
@@ -100,10 +101,94 @@ namespace Game.Voxel.Model
             data.Bricks[index] = record;
             if (record.SolidCount == 0) RemoveAt(index);
         }
-        public PlaceResult TryPlaceBlock(in BlockPlacement p, in VoxelContent content) { throw new System.NotImplementedException("VOX-006"); }
-        public bool TryRemoveBlockAt(int3 cell, in VoxelContent content, out BlockPlacement removed) { throw new System.NotImplementedException("VOX-006"); }
-        public bool TryGetBlockAt(int3 cell, out BlockPlacement block, out int instanceIndex) { throw new System.NotImplementedException("VOX-006"); }
-        public ushort FindOrAddPalette(PaletteEntry e) { throw new System.NotImplementedException("VOX-006"); }          // returns 0 if full (32767 entries used)
+        public PlaceResult TryPlaceBlock(in BlockPlacement p, in VoxelContent content)
+        {
+            RequireUnpinned();
+            if (IsReadOnly) return PlaceResult.ReadOnly;
+            if (p.Block == 0 || p.Block >= content.Blocks.Value.Blocks.Length) return PlaceResult.InvalidBlock;
+            ref var def = ref content.Blocks.Value.Blocks[p.Block];
+            if (p.Orient >= 24 || (def.AllowedOrientations & (1u << p.Orient)) == 0) return PlaceResult.OrientationNotAllowed;
+            using var footprint = new NativeList<int3>(def.Cells.Length, Allocator.Temp);
+            BlockPlacementMath.GetCells(ref def, ref content.Orientations.Value, p.Orient, p.Origin, footprint);
+            for (int i = 0; i < footprint.Length; i++)
+                if (math.any(footprint[i] < -1048576) || math.any(footprint[i] > 1048575)) return PlaceResult.OutOfRange;
+            for (int i = 0; i < footprint.Length; i++) if (!GetCell(footprint[i]).IsAir) return PlaceResult.Occupied;
+            if (!def.RequiresInstance)
+            {
+                ushort palette = FindOrAddPalette(new PaletteEntry { Block = p.Block, Orient = p.Orient, Color = p.Color });
+                if (palette == 0) return PlaceResult.PaletteFull;
+                SetCell(p.Origin, Cell.Palette(palette));
+            }
+            else
+            {
+                int slot;
+                if (data.FreeInstances.Length != 0)
+                {
+                    int last = data.FreeInstances.Length - 1;
+                    slot = data.FreeInstances[last]; data.FreeInstances.RemoveAt(last);
+                }
+                else
+                {
+                    if (data.Instances.Length > Cell.MaxInstanceIndex) return PlaceResult.InstancesFull;
+                    slot = data.Instances.Length; data.Instances.Add(default);
+                }
+                data.Instances[slot] = new BlockInstance
+                {
+                    Block = p.Block, Orient = p.Orient, Color = p.Color, Origin = p.Origin,
+                    FunctionHp = def.FunctionHp, CellsAlive = (ushort)footprint.Length
+                };
+                for (int i = 0; i < footprint.Length; i++)
+                    SetCell(footprint[i], Cell.Instance(slot, 255, i == 0 ? (byte)CellFlags.InstanceRoot : (byte)0));
+            }
+            return PlaceResult.Ok;
+        }
+        public bool TryRemoveBlockAt(int3 cell, in VoxelContent content, out BlockPlacement removed)
+        {
+            RequireMutable();
+            if (!TryGetBlockAt(cell, out removed, out int instanceIndex)) return false;
+            if (instanceIndex < 0) SetCell(cell, default);
+            else
+            {
+                ref var def = ref content.Blocks.Value.Blocks[removed.Block];
+                using var footprint = new NativeList<int3>(def.Cells.Length, Allocator.Temp);
+                BlockPlacementMath.GetCells(ref def, ref content.Orientations.Value, removed.Orient, removed.Origin, footprint);
+                for (int i = 0; i < footprint.Length; i++)
+                {
+                    Cell value = GetCell(footprint[i]);
+                    if (value.IsInstance && value.InstanceIndex == instanceIndex) SetCell(footprint[i], default);
+                }
+                data.Instances[instanceIndex] = default; data.FreeInstances.Add(instanceIndex);
+            }
+            return true;
+        }
+        public bool TryGetBlockAt(int3 cell, out BlockPlacement block, out int instanceIndex)
+        {
+            Cell value = GetCell(cell); block = default; instanceIndex = -1;
+            if (value.IsAir) return false;
+            if (value.IsInstance)
+            {
+                instanceIndex = value.InstanceIndex;
+                var instance = data.Instances[instanceIndex];
+                block = new BlockPlacement { Block = instance.Block, Origin = instance.Origin, Orient = instance.Orient, Color = instance.Color };
+            }
+            else
+            {
+                var entry = data.Palette[value.PaletteIndex];
+                block = new BlockPlacement { Block = entry.Block, Origin = cell, Orient = entry.Orient, Color = entry.Color };
+            }
+            return true;
+        }
+        public ushort FindOrAddPalette(PaletteEntry e)
+        {
+            RequireMutable();
+            for (int i = 1; i < data.Palette.Length; i++)
+            {
+                var entry = data.Palette[i];
+                if (entry.Block == e.Block && entry.Orient == e.Orient && entry.Color == e.Color) return (ushort)i;
+            }
+            if (data.Palette.Length > Cell.MaxPaletteIndex) return 0;
+            ushort index = (ushort)data.Palette.Length; data.Palette.Add(e); Changed(); return index;
+        }
         public void SetBrickDense(int3 coord, NativeArray<Cell> cells4096)
         {
             RequireMutable();
@@ -167,7 +252,65 @@ namespace Game.Voxel.Model
                 data.FreePages.Add(record.Page); record.Page = -1; record.Uniform = value; data.Bricks[i] = record;
             }
         }
-        public void Compact() { throw new System.NotImplementedException("VOX-006"); }                                   // §5.3
+        public void Compact()
+        {
+            RequireMutable();
+            OptimizeStorage();
+            using var order = SortedBrickOrder(Allocator.Temp);
+            using var compact = new VoxelStructure(CellSize);
+            var next = compact.data;
+            var paletteMap = new NativeArray<ushort>(data.Palette.Length, Allocator.Temp);
+            var instanceMap = default(NativeArray<int>);
+            try
+            {
+                instanceMap = new NativeArray<int>(data.Instances.Length, Allocator.Temp);
+                for (int k = 0; k < order.Length; k++)
+                {
+                    var record = data.Bricks[order[k]];
+                    int length = record.Page < 0 ? 1 : BrickMath.CellsPerBrick;
+                    for (int i = 0; i < length; i++)
+                    {
+                        Cell value = record.Page < 0 ? record.Uniform : data.CellPages[record.Page * BrickMath.CellsPerBrick + i];
+                        if (value.IsAir || value.IsInstance || paletteMap[value.PaletteIndex] != 0) continue;
+                        paletteMap[value.PaletteIndex] = (ushort)next.Palette.Length;
+                        next.Palette.Add(data.Palette[value.PaletteIndex]);
+                    }
+                }
+                for (int i = 0; i < data.Instances.Length; i++)
+                    if (data.Instances[i].Block != 0)
+                    { instanceMap[i] = next.Instances.Length; next.Instances.Add(data.Instances[i]); }
+                var header = data.Header.Value;
+                header.Revision++; header.BoundsValid = 0; header.MassRevision = 0;
+                next.Header.Value = header;
+                for (int k = 0; k < order.Length; k++)
+                {
+                    var record = data.Bricks[order[k]];
+                    if (record.Page < 0) record.Uniform = Remap(record.Uniform, paletteMap, instanceMap);
+                    else
+                    {
+                        int start = record.Page * BrickMath.CellsPerBrick;
+                        record.Page = next.CellPages.Length / BrickMath.CellsPerBrick;
+                        for (int i = 0; i < BrickMath.CellsPerBrick; i++) next.CellPages.Add(Remap(data.CellPages[start + i], paletteMap, instanceMap));
+                    }
+                    record.ChangedRevision = header.Revision;
+                    next.BrickIndex.Add(record.Coord, next.Bricks.Length);
+                    next.Bricks.Add(record); next.Masks.Add(data.Masks[order[k]]);
+                }
+                // Capacity setters round up; TrimExcess uses the package’s exact-size reallocation.
+                next.Palette.TrimExcess(); next.Instances.TrimExcess(); next.FreeInstances.TrimExcess();
+                next.Bricks.TrimExcess(); next.Masks.TrimExcess(); next.CellPages.TrimExcess();
+                next.FreePages.TrimExcess(); next.BrickIndex.TrimExcess();
+                // Transfer both owners only after the replacement is complete. The temporary owner frees the old storage.
+                compact.data = data; data = next;
+            }
+            finally { paletteMap.Dispose(); if (instanceMap.IsCreated) instanceMap.Dispose(); }
+        }
+        static Cell Remap(Cell value, NativeArray<ushort> paletteMap, NativeArray<int> instanceMap)
+        {
+            if (value.IsAir) return default;
+            value.Ref = value.IsInstance ? (ushort)(Cell.InstanceBit | instanceMap[value.InstanceIndex]) : paletteMap[value.PaletteIndex];
+            return value;
+        }
         public void SetReadOnly()
         {
             RequireUnpinned(); var header = data.Header.Value; header.ReadOnly = 1; data.Header.Value = header;
@@ -199,7 +342,36 @@ namespace Game.Voxel.Model
                 int v = x.y.CompareTo(y.y); return v != 0 ? v : x.x.CompareTo(y.x);
             }
         }
-        public void GetBlocks(NativeList<StructureBlock> output) { throw new System.NotImplementedException("VOX-007"); }// §5.4 canonical order
+        public void GetBlocks(NativeList<StructureBlock> output)
+        {
+            output.Clear();
+            using var order = SortedBrickOrder(Allocator.Temp);
+            for (int k = 0; k < order.Length; k++)
+            {
+                var record = data.Bricks[order[k]];
+                for (int i = 0; i < BrickMath.CellsPerBrick; i++)
+                {
+                    Cell cell = record.Page < 0 ? record.Uniform : data.CellPages[record.Page * BrickMath.CellsPerBrick + i];
+                    if (cell.IsAir || cell.IsInstance) continue;
+                    var palette = data.Palette[cell.PaletteIndex];
+                    output.Add(new StructureBlock
+                    {
+                        Placement = new BlockPlacement { Block = palette.Block, Origin = BrickMath.CellOf(record.Coord, i), Orient = palette.Orient, Color = palette.Color },
+                        InstanceIndex = -1
+                    });
+                }
+            }
+            for (int i = 0; i < data.Instances.Length; i++)
+            {
+                var instance = data.Instances[i];
+                if (instance.Block == 0) continue;
+                output.Add(new StructureBlock
+                {
+                    Placement = new BlockPlacement { Block = instance.Block, Origin = instance.Origin, Orient = instance.Orient, Color = instance.Color },
+                    InstanceIndex = i
+                });
+            }
+        }
         public VoxelStructure Clone() { throw new System.NotImplementedException("VOX-007"); }                           // deep copy; not pinned, not read-only
         public static StructureDiff Diff(VoxelStructure from, VoxelStructure to, Allocator a) { throw new System.NotImplementedException("VOX-007"); }
         public StructureMassData GetMass(in VoxelContent content) { throw new System.NotImplementedException("VOX-007"); }   // cached by Revision

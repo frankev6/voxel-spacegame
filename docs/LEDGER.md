@@ -622,6 +622,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 64 | 2026-10-11 | SPEC-10 VOX-010 / SPEC-01 | Boot table factory argument differs from declared definition parameter | Resolve config_voxel from catalog before calling factory | Tech lead | Resolved in SPEC-10 Q20 and SPEC-01 table; boot config is tagged before scene snapshot |
 
+| 65 | 2026-10-11 | SPEC-10 VOX-006 | Compaction acceptance uses GetBlocks from dependent VOX-007 | Bring only GetBlocks forward | Tech lead | Resolved in SPEC-10 Q21; required equivalence uses real API, clone/diff/mass remain VOX-007 |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).

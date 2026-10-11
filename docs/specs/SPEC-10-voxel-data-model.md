@@ -524,7 +524,7 @@ Deterministic; used before encoding blueprints and by the editor before save. Mu
 1. `order = SortedBrickOrder`. Scan cells of all bricks in `order` (uniform: one check) and mark used palette entries. Palette remap: entry 0 stays 0; used entries get new indices 1..U in order of first use.
 2. Instance remap: live instances (`Block != 0`) get new indices 0..L−1 in ascending old index.
 3. Rewrite every cell `Ref` through the maps; rebuild `Palette`, `Instances`; clear `FreeInstances`.
-4. Repack: new `CellPages` holds the dense bricks in `order`; uniform bricks keep `Page = -1`; clear `FreePages`; reorder `Bricks`/`Masks` to `order`; rebuild `BrickIndex`; trim every capacity to its length.
+4. Repack: new `CellPages` holds the dense bricks in `order`; uniform bricks keep `Page = -1`; clear `FreePages`; reorder `Bricks`/`Masks` to `order`; rebuild `BrickIndex`; trim every capacity to its length (`NativeList.TrimExcess()`, not its power-of-two-rounding capacity setter; `NativeHashMap.TrimExcess()` for its native layout).
 5. `Revision++`; every record's `ChangedRevision = Revision`.
 Complexity O(cells).
 
@@ -851,7 +851,7 @@ Measured station geometry and allocation totals:
 - **Milestone:** M1
 - **Tier:** frontier — F1/F3: the footprint/instance mapping is the 01-B1 fix
 - **Depends on:** `VOX-005`, `SPEC-04`
-- **Do:** Implement `TryPlaceBlock`, `TryRemoveBlockAt`, `TryGetBlockAt`, `FindOrAddPalette` (§5.2) and `Compact` (§5.3) with `BlockPlacementMath.GetCells`. Test catalog: SPEC-04's `ContentService.CreateForTests` + `TestContentFactory` with `block_hull`, `block_hull_angled`, `block_thruster_medium` (10 cells), `block_core_cross` (7 cells), `block_capacitor_small` from SPEC-04 §4.10.
+- **Do:** Implement `TryPlaceBlock`, `TryRemoveBlockAt`, `TryGetBlockAt`, `FindOrAddPalette` (§5.2) and `Compact` (§5.3) with `BlockPlacementMath.GetCells`. Bring forward `GetBlocks` (§5.4) from VOX-007 to verify this task’s required resolved-block equivalence. Test catalog: SPEC-04's `ContentService.CreateForTests` + `TestContentFactory` with `block_hull`, `block_hull_angled`, `block_thruster_medium` (10 cells), `block_core_cross` (7 cells), `block_capacitor_small` from SPEC-04 §4.10.
 - **Files:** `Assets/Game/Voxel/Model/VoxelStructure.cs`; `Assets/Game/Tests/EditMode/Voxel/{VoxelTestContent,BlockPlacementTests,CompactTests}.cs`
 - **Acceptance criteria:**
   - [ ] Placing `block_thruster_medium` at origin (3,4,5) in each of its 16 allowed orientations makes exactly its 10 rotated cells reference one instance with the root flagged `InstanceRoot`; removing via any of its cells clears all 10 (regression 01-B1).
@@ -864,7 +864,7 @@ Measured station geometry and allocation totals:
 - **Milestone:** M1
 - **Tier:** frontier — F3: the diff feeds the BOM; mass feeds physics
 - **Depends on:** `VOX-006`
-- **Do:** Implement `Clone`, `GetBlocks`, `Diff` with `StructureDiffJob` (§5.4), `MassAccumulator`, `GetMass` with `StructureMassJob` and the ordered serial sum.
+- **Do:** Implement `Clone`, `Diff` with `StructureDiffJob` (retain `GetBlocks`, brought forward to VOX-006) (§5.4), `MassAccumulator`, `GetMass` with `StructureMassJob` and the ordered serial sum.
 - **Files:** `Assets/Game/Voxel/Model/{VoxelStructure,StructureDiff,StructureDiffJob,MassAccumulator,StructureMassJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/{StructureDiffTests,StructureMassTests}.cs`
 - **Acceptance criteria:**
   - [ ] `Diff(a, a.Clone())` is empty; applying `Removed`/`Added` of `Diff(a, b)` to a clone of `a` yields `GetBlocks` equal to `b`'s (1,000-op seeded edits).
@@ -1053,6 +1053,8 @@ Measured station geometry and allocation totals:
 | 19 | Does GridCellReader.TryGetCell return true for air inside an existing brick? | False for air, missing brick or outside grid; true only for a solid cell | Tech lead | Resolved 2026-10-11: the return value denotes a present solid cell, consistent with IsSolid. The Burst reader test covers existing-brick air, empty slot and out-of-grid lookup. |
 
 | 20 | SPEC-01 boot table passes a catalog to the definition-taking VoxelConfigFactory | Resolve config_voxel from the catalog at boot, then call the specified factory | Tech lead | Resolved 2026-10-11: corrected SPEC-01 call site and wired the BootSingleton-tagged config in table order; verified by ConfigFactory_CopiesValues. |
+
+| 21 | VOX-006 compaction acceptance requires GetBlocks, but that method belongs to dependent VOX-007 | Bring only the specified GetBlocks implementation forward to VOX-006 | Tech lead | Resolved 2026-10-11: required placement-set preservation is checked through the real API; clone/diff/mass remain VOX-007. |
 
 ## 11. References
 
