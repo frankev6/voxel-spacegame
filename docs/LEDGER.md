@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 1 | 0 | 0 | 0 | 68 | 0 | 69 | 1 |
+| M0 | 0 | 0 | 0 | 0 | 69 | 0 | 69 | 0 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -80,7 +80,7 @@
 | PERS-011 | Round-trip byte equality (framework level) | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006, PERS-008 | yes | done | astra (gpt-6) | 2026-10-11 | ca73bba | Fresh binary/JSON/VOXS round trips; unknown chunk byte equality; Q32 |
 | PERS-012 | Save performance and size gates | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-008 | yes | done | astra (gpt-6) | 2026-10-11 | 43b3c6f | All M0 save gates pass; 1M ship 15,230 B; capture 0.12 ms |
 | PERS-016 | Release snapshots when session capture fails | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-008 | yes | done | astra (gpt-6) | 2026-10-11 | 9040fdd | Session callback failure cleanup and recovery; native leak checks |
-| PERS-017 | Make save commit outcomes and slot metadata consistent | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005, PERS-006 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PERS-017 | Make save commit outcomes and slot metadata consistent | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005, PERS-006 | yes | done | astra (gpt-6) | 2026-10-11 | 527aa5f | Post-commit sidecar failures warn; embedded metadata wins |
 | VOX-001 | Public contract types | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c37ad48 | BrickRecord 28 B (ledger Q9); VOXS adapter members wait for VOX-009 (Q10) |
 | AUD-001 | Public contract types | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | f793298 | Validation codes: SPEC-64 Q12 |
 | AUD-002 | Mixer asset, voice settings and import rules | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | AUD-001 | yes | done | astra (gpt-6) | 2026-10-11 | d1d654c | Mixer 5 volumes; 64/512 voices; imports; SFX 8.79MiB |
@@ -102,7 +102,7 @@
 | MIG-005 | Item converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-004 | yes | done | astra (gpt-6) | 2026-10-11 | 4b524c7 | 35 items, icon references, dropped-field report; repeat imports byte-stable |
 | MIG-006 | Block converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-005 | yes | done | astra (gpt-6) | 2026-10-11 | 3bb208c | 21 blocks; exact geometry/modules; byte-stable reruns |
 | MIG-007 | Legacy Euler to orientation | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | b264f44 | Integer RyRxRz, one-degree snapping, all 64 Unity Euler combinations |
-| MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | no | done | astra (gpt-6) | 2026-10-11 | 270db7f | 13 ships; exact counts; VOXS verified; Q39/40 |
+| MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 270db7f | 13 ships; exact counts; VOXS verified; Q39/40 |
 | MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | yes | done | astra (gpt-6) | 2026-10-11 | 75cb5fd | Migration gate: 69 unchanged; full 0.580s; max ship 42.4ms |
 | FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | yes | todo |  |  |  |  |
 | FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | no | todo |  |  |  |  |
@@ -616,6 +616,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-017 save commit outcomes and metadata (astra, gpt-6)
+
+- M0 review found that a metadata write failure after File.Replace reported failure despite a committed world.sav and advanced backup. Q48 / SPEC-05 Q24 makes replacement the commit point: later sidecar failures warn and return success. The complete container remains loadable and async completion/GameSaved reflect the disk outcome.
+- Listing compares readable embedded META with the sidecar and prefers committed data on mismatch (MetaMissing), including same-timestamp saves. Total listing reads remain bounded to 64 KiB per slot, with at most 32 KiB for the optional sidecar. Oversized sidecars fall back to the container prefix.
+- Real filesystem failure tests cover first save, overwrite, backup equality and async event/state. Compile zero C# warnings; full EditMode **403 passed**, PlayMode **31 passed**, perf **23/23**; listing 50 slots **5.392 ms** median / **14.12 ms** p95, against 50 ms.
+- Implementation `527aa5f`. M0 **69/69**, broader review continues. Next review checks include malformed profile/META JSON null handling and clean headless exit reproduction.
 
 ### 2026-10-11 — PERS-016 session capture failure cleanup (astra, gpt-6)
 
