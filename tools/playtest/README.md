@@ -18,17 +18,32 @@ Game-flow scripts (`newgame.sh`, `toworld.sh`, `scenario.sh`) are added by SPEC-
 
 ## Harness commands (`Assets/Game/DevTools/Editor/GameTestHarness.cs`)
 
-| Command | Purpose |
+| Command (args, defaults) | Purpose |
 |---|---|
-| `snapshot [--ui --ecs --logs --mark]` | Frame/time, scenes, visible UI text, camera + AudioListener count, ECS summary, deduplicated logs since mark |
-| `logs [--level all/warn/error] [--mark]`, `mark` | Deduplicated console: one line per unique message with a count and the first `Assets/Game` frame |
-| `ui`, `click --target <name or text>` | Read visible UI Toolkit text; click elements by name or label |
-| `key --keys W,Space [--hold s] [--release]` | Keyboard injection through Input System state events |
-| `mouse --x --y --button left/right --down --dx --dy --scroll` | Virtual "AgentMouse" (native mouse disabled during play, restored on exit) |
-| `unfocused_input [--enable]` | Route input to the game while the Editor is unfocused (on by default in play mode) |
-| `ecs [--filter]`, `entities --component <Type>` | ECS counts and component values (reflection) |
-| `get --type T --path a.b`, `invoke --type T --method M --args`, `find --type T` | Reflection reads/calls and scene lookups |
-| `perf` | Main-thread ms, draws, triangles, GC alloc per frame, memory, entity total |
+| `snapshot [--logs true] [--mark true] [--ecs true] [--ui true]` | Frame/time, scenes, visible UI text, camera + AudioListener count, ECS summary, deduplicated logs since mark |
+| `logs [--level all\|warn\|error] [--mark true] [--max 80]` | Deduplicated console since the mark: one line per unique message with a count and the first `Assets/Game` frame |
+| `mark` | Move the log mark |
+| `ui [--max 60] [--chars 200]` | Visible UI Toolkit text per document (buttons, labels, fields) with element names |
+| `click --target <name or text> [--index 0]` | Click a visible element by name (`#name`) or text; `index` picks one of several matches |
+| `key --keys W,Space [--hold 0.12] [--release false]` | Keyboard injection through Input System state events; `hold 0` keeps the keys down until `--release` |
+| `mouse [--x -1] [--y -1] [--button none\|left\|right\|middle] [--down true] [--scroll 0] [--dx 0] [--dy 0]` | Virtual "AgentMouse" (game-view pixels, origin bottom-left, −1 keeps; native mouse disabled during play, restored on exit) |
+| `unfocused_input [--enable true]` | Route input to the game while the Editor is unfocused (on by default in play mode) |
+| `ecs [--filter ""] [--max 60]` | ECS component counts, optionally filtered by name |
+| `entities --component <Type> [--max 10]` | Entities with a component and its field values |
+| `get --type T [--path a.b] [--depth 1]` | Reflection read of a static or singleton member (debugging only; scenarios must not use it) |
+| `invoke --type T --method M [--args a,b] [--path ""]` | Reflection call with primitive args (debugging only) |
+| `find --type T [--max 30]` | Scene objects with a component type, with positions |
+| `perf` | Main-thread ms (15-frame average), draws, triangles, GC alloc per frame, memory, entity totals |
+
+Harness command names may omit the `gh_` prefix in `g.sh`. `HarnessCommandTests` checks that every `[CliCommand]` has a row here with all its arguments.
+
+## Game commands (SPEC-70 §6.3)
+
+Runtime dev commands, reachable as `gh_<name>` and in the in-game console. Each SPEC-70 task appends its rows here as its command lands.
+
+| Command (args, defaults) | Purpose |
+|---|---|
+| — | none yet (DEV-003 adds `help`, `op`, `until`) |
 
 Useful built-ins: `editor_play`, `editor_stop`, `open_scene`, `recompile`, `recompile_status`, `editor_status`,
 `capture_game_view`, `get_performance_stats`, `run_tests`, `eval`, `run_script`. List them with `unity command`.

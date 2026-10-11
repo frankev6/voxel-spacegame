@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 51 | 0 | 2 | 0 | 13 | 0 | 66 | 17 |
+| M0 | 50 | 0 | 2 | 0 | 14 | 0 | 66 | 16 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
@@ -84,7 +84,7 @@
 | AUD-002 | Mixer asset, voice settings and import rules | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | AUD-001 | no | todo |  |  |  |  |
 | AUD-003 | AudioService core: root, single listener, voice pools, volumes, pause | [SPEC-64](specs/SPEC-64-audio.md) | M0 | frontier | AUD-002 | no | todo |  |  |  |  |
 | DEV-001 | Public contract types | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | ecc6d9b |  |
-| DEV-002 | Verify and document the as-built generic harness | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | — | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| DEV-002 | Verify and document the as-built generic harness | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 974ae81 |  |
 | DEV-003 | DevRuntimeHost, command registry, operations, help/op/until | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-001, FND-001 | yes | todo |  |  |  |  |
 | DEV-004 | Runtime input injection and UI query | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | no | todo |  |  |  |  |
 | DEV-005 | Scenario language: parser, expressions and built-in probes | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-003 | no | todo |  |  |  |  |
@@ -564,6 +564,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — DEV-002 harness docs (claude, claude-opus-5-5)
+- `GameTestHarness.cs` agrees with SPEC-70 §6.1; only the defaults of `gh_get`, `gh_invoke` and `gh_find` were missing from the table.
+- `tools/playtest/README.md` gives each of the 15 commands its own row with all its arguments and defaults, and gains a *Game commands* section for later tasks to append to.
+- `HarnessCommandTests.EveryCliCommand_IsDocumentedInReadme` passes, and fails when an argument is removed from the README (checked); EditMode 56/56.
 
 ### 2026-10-11 — DEV-001 dev runtime contracts (claude, claude-opus-5-5)
 - 13 files in `Assets/Game/App/DevRuntime/`, all inside `#if UNITY_EDITOR || DEVELOPMENT_BUILD`. The `DevCommandResult` factories are real: `Text` is never null, and `Pending` requires an operation id of at least 1.
