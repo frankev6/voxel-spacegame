@@ -36,7 +36,7 @@ This spec turns voxel bricks into pixels at a cost proportional to the number of
 
 1. **One mesh per brick, registered once.** A brick's `Mesh` is created and registered with `EntitiesGraphicsSystem.RegisterMesh` on its first build, referenced by `BatchMeshID` in `MaterialMeshInfo`, rewritten in place with `Mesh.ApplyAndDisposeWritableMeshData` on every rebuild, and unregistered and destroyed through `DeferredDisposalSystem` when the brick dies (architecture §11.3). No per-entity `RenderMeshArray`.
 2. **One shared registered material for all bricks** (`BrickMaterial`), one for props (`PropMaterial`). `BlockDef.MaterialLayer` (0..63) is a `Texture2DArray` slice, not a separate material, so one draw-command family covers every block look. Per-cell variation comes from vertex data (layer, palette colour, damage), never from material instances.
-3. **Packed vertex: 8 bytes** — `Position` UNorm8×4 `(x, y, z, 0)` with x,y,z = half-cell coordinates 0..32 inside the brick (ADR-0027), and `TexCoord0` UNorm8×4 `(normalIndex, layer, colour, aoDamageFlags)`. Shaders recover integers with `round(v * 255)` and multiply positions by 0.5 to obtain cell units. Indices are 16-bit (a brick never exceeds 49,152 vertices for 2,048 isolated cubes × 24; the mesher enforces the UInt16 limit for every input). Meshes are in cell units; the brick entity's `LocalTransform.Scale = CellSize`.
+3. **Packed vertex: 8 bytes** — `Position` UNorm8×4 `(x, y, z, 0)` with x,y,z = half-cell coordinates 0..32 inside the brick (ADR-0027), and `TexCoord0` UNorm8×4 `(normalIndex, layer, colour, aoDamageFlags)`. Shaders recover integers with `round(v * 255)` and multiply positions by 0.5 to obtain cell units. Mesher indices are uint; GPU indices use UInt16 when vertex count ≤ 65,536 and UInt32 otherwise (ADR-0030). A legal painted long-slope tiling needs at least 73,728 vertices; the isolated cube checkerboard still uses 49,152. Meshes are in cell units; the brick entity's `LocalTransform.Scale = CellSize`.
 4. **Jobs that may outlive the frame read only snapshots.** `BrickMeshBuildSystem` copies each brick plus a 1-cell border from its 26 neighbours into an 18³ `uint` snapshot (23,328 B) owned by the system, then schedules the mesher on the snapshot. Results are applied only after `JobHandle.IsCompleted` (architecture §5.1).
 5. **Culled faces, not greedy, at LOD0.** A face is emitted iff the neighbour cell (inside or outside the brick) does not cover it fully. Greedy merging is used only at LOD1/LOD2 because it fights per-cell colour, AO and damage. Coplanar vertices with identical attributes are welded inside each axis slice.
 6. **Budgeted, prioritised rebuilds.** At most one mesh batch is in flight; a batch holds 16..128 bricks sized so the main-thread apply stays under 2.0 ms. Priority order: `Damage` > `Neighbour` > `Spawn` > `Lod`, FIFO within a priority (SPEC-10 enqueues; this spec dequeues).
@@ -219,7 +219,7 @@ public struct VoxelViewer : IComponentData                          // singleton
 
 `VoxelRenderManagedState : ScriptableObject` (public type for the public `VoxelRenderRuntime.Managed` field; its fields are internal; runtime instance, `HideFlags.DontSave`): `List<Mesh> ApplyList`, `Mesh Scratch`, `Mesh.MeshDataArray PendingData`, `bool HasPendingData`, `MaterialPropertyBlock[] PropBlocks`, `GraphicsBuffer[] PropInstanceBuffers`, `GraphicsBuffer GridMatrices`, `List<int> PropCounts`. Destroyed by `BrickMeshApplySystem.OnDestroy`.
 
-`BrickRenderStats` (static): `BrickRenderTotals Gather(EntityManager em)` → `{ long GpuBytes; long CpuCopyBytes; int Meshes; long Vertices; long Indices; }` with `GpuBytes = Σ (VertexCount × 8 + IndexCount × 2)` and `CpuCopyBytes = ReleaseCpuMeshCopies ? 0 : GpuBytes`.
+`BrickRenderStats` (static): `BrickRenderTotals Gather(EntityManager em)` → `{ long GpuBytes; long CpuCopyBytes; int Meshes; long Vertices; long Indices; }` with `GpuBytes = Σ (VertexCount × 8 + IndexCount × (VertexCount <= 65536 ? 2 : 4))` and `CpuCopyBytes = ReleaseCpuMeshCopies ? 0 : GpuBytes`.
 
 ### 4.3 Definitions (`Assets/Game/Data/Definitions/Voxel/`, namespace `Game.Data.Definitions`)
 
@@ -275,7 +275,7 @@ Cost: ~5,832 cell reads per brick (≈ 15 µs). The job is scheduled on `state.D
 
 ### 5.2 LOD0 mesher (`BrickMesher.MeshLod0`, Burst, *internal*)
 
-Input: one 18³ snapshot, `BrickShapeTables`; output: vertices (`PackedBrickVertex`), 16-bit indices, bounds. Scratch is `Allocator.Temp`.
+Input: one 18³ snapshot, `BrickShapeTables`; output: vertices (`PackedBrickVertex`), uint indices, bounds (conditional 16/32-bit GPU upload, ADR-0030). Scratch is `Allocator.Temp`.
 1. **Row masks.** For each of the 18×18 rows (y,z ∈ [−1,16]) build 18-bit masks: `solid` (class ≠ 0), `structural` (class 1), and `full[f]` for the 6 faces (`Shapes.FullFaces[shape*24+orient]` bit f, ADR-0018). O(5,832).
 2. **Axis faces**, for each direction `d` (PosX, NegX, PosY, NegY, PosZ, NegZ) and each slice s = 0..15 along d's axis:
    - For each row inside the slice: `candidates` = structural cells (bits 1..16 of the row) whose shape has a polygon with `Plane == d` (Cube always; Wedge per table — precompute per row a mask `hasPlane[d]` from the cells' (shape, orient)); `hidden` = cells whose neighbour across d has `full[opposite(d)]`; for ±X the neighbour bit is the row shifted by 1; for ±Y/±Z it is the adjacent row. `exposed = candidates & ~hidden`.
@@ -284,7 +284,7 @@ Input: one 18³ snapshot, `BrickShapeTables`; output: vertices (`PackedBrickVert
    - **Indices:** quads emit two triangles; if `ao0 + ao2 < ao1 + ao3` use diagonal (v1, v3): `(v0,v1,v3),(v1,v2,v3)`, else `(v0,v1,v2),(v0,v2,v3)`; triangles emit `(v0,v1,v2)`. Vertex order comes from `ShapeFace` (clockwise front faces).
 3. **Diagonal faces** (all sloped polygons, `Plane == 255`), cell order z,y,x: emitted without welding, AO = 3, never culled.
 4. Pack vertices in half-cell units (`cell*2 + ShapeFace vertex`); bounds = min/max of emitted coordinates multiplied by 0.5 (cell units). Fractional face-vertex AO takes the minimum of its enclosing integer-corner AO levels (ADR-0027); whole-cell corners use the formula above. Zero vertices → empty result.
-Complexity: O(5,832 + exposed faces). Typical surface brick (≤ 1,024 faces): ≤ 60 µs (gate). The isolated-cube checkerboard has 49,152 vertices; enforce the UInt16 index limit for all inputs (ADR-0027).
+Complexity: O(5,832 + exposed faces). Typical surface brick (≤ 1,024 faces): ≤ 60 µs (gate). The isolated-cube checkerboard has 49,152 vertices; use uint indices to preserve legal larger slope inputs (ADR-0030).
 
 ### 5.3 LOD1 mesher (`BrickMesher.MeshLod1`, Burst, *internal*)
 
@@ -305,7 +305,7 @@ Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `Hollow
   4. No items → return.
   5. Schedule `BrickSnapshotJob` (§5.1) on `state.Dependency`, complete it (marker `Snapshot`).
   6. `data = Mesh.AllocateWritableMeshData(Work.Length)`; store in the managed state (`PendingData`, `HasPendingData = true`).
-  7. Schedule `BrickMeshJob : IJobParallelFor` (inner batch 1) over the items, **not** chained to `state.Dependency` (it reads only `Snapshots`, the shape blob and its own `Work` slot): runs `MeshLod0` or `MeshLod1` into Temp lists, then on `data[i]`: `SetVertexBufferParams(vertexCount, layout)` with the two UNorm8×4 attributes (layout `NativeArray<VertexAttributeDescriptor>` held by the managed state, created once), `SetIndexBufferParams(indexCount, IndexFormat.UInt16)`, copy, `subMeshCount = 1`, `SetSubMesh(0, new SubMeshDescriptor(0, indexCount) { bounds, firstVertex = 0, vertexCount }, DontRecalculateBounds | DontValidateIndices | DontNotifyMeshUsers)`; writes counts and bounds to `Work[i]`.
+  7. Schedule `BrickMeshJob : IJobParallelFor` (inner batch 1) over the items, **not** chained to `state.Dependency` (it reads only `Snapshots`, the shape blob and its own `Work` slot): runs `MeshLod0` or `MeshLod1` into Temp lists, then on `data[i]`: `SetVertexBufferParams(vertexCount, layout)` with the two UNorm8×4 attributes (layout `NativeArray<VertexAttributeDescriptor>` held by the managed state, created once), `SetIndexBufferParams(indexCount, vertexCount <= 65536 ? IndexFormat.UInt16 : IndexFormat.UInt32)`, copy vertices and convert uint indices to ushort only for UInt16 (otherwise copy uint directly), `subMeshCount = 1`, `SetSubMesh(0, new SubMeshDescriptor(0, indexCount) { bounds, firstVertex = 0, vertexCount }, DontRecalculateBounds | DontValidateIndices | DontNotifyMeshUsers)`; writes counts and bounds to `Work[i]`.
   8. `Handle = job handle; InFlight = 1; ScheduledFrame = frame`.
 - Per-frame cost when idle: one queue `Count` check (< 5 µs).
 
@@ -369,7 +369,7 @@ Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `Hollow
 | `VoxelRenderRuntime.IsReady` | — | 1 after `BrickMeshApplySystem`'s first update; SPEC-10 spawn waits for it |
 | `Dormant` | — | Enabled ⇔ grid farther than `DormantDistance` from `VoxelViewer.AnchorPosition` (hysteresis); readers skip expensive work |
 | `BrickRenderStats.Gather(em)` | Main thread | Mesh memory totals for the memory gate |
-| `BrickMesher.MeshLod0/MeshLod1(NativeArray<uint> snapshot, ref BrickShapeTables, NativeList<PackedBrickVertex>, NativeList<ushort>, out float3 min, out float3 max)` | Snapshot of 5,832 cells | Pure; used by SPEC-51 for editor previews of unspawned structures |
+| `BrickMesher.MeshLod0/MeshLod1(NativeArray<uint> snapshot, ref BrickShapeTables, NativeList<PackedBrickVertex>, NativeList<uint>, out float3 min, out float3 max)` | Snapshot of 5,832 cells | Pure; used by SPEC-51 for editor previews of unspawned structures |
 | `BrickSnapshotUtility.FromStructure(VoxelStructureData, int3 brick, ref BlockDefsBlob, ref OrientationTablesBlob, NativeArray<uint> out)` | Brick exists | Same snapshot as §5.1 from a `VoxelStructure` (editor, tests) |
 
 ## 7. Edge cases and failure behaviour
@@ -475,12 +475,12 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Do:** Implement `BrickMesher.MeshLod0` per §5.2 with row masks, AO, slice welding, AO-based diagonal flip.
 - **Files:** `Assets/Game/Voxel/Rendering/BrickMesher.cs`; `Assets/Game/Tests/EditMode/Voxel/Rendering/BrickMesherTests.cs`; `Assets/Game/Tests/PlayMode/Voxel/BrickMesherPerfTests.cs`
 - **Acceptance criteria:**
-  - [ ] For 500 random snapshots (seed 11), the set of emitted faces equals a brute-force reference (a face exists iff the cell is structural and the neighbour does not fully cover that side), including faces on brick borders.
-  - [ ] Triangles == 2 × exposed quads + exposed triangles; ≤ 2 per exposed face.
-  - [ ] Every triangle's winding matches its face normal; AO values equal a brute-force evaluation.
-  - [ ] A uniform-colour 16×16 wall face emits 289 vertices (welding works).
-  - [ ] Typical damaged hull brick ≤ 60 µs median (Burst, safety off, single thread).
-- **Tests:** `BrickMesherTests.Faces_MatchBruteForce`, `.BorderCulling_UsesNeighbours`, `.Lod0_TwoTrianglesPerExposedFace`, `.Winding_MatchesNormals`, `.AO_MatchesBruteForce`, `.Welding_FlatWall289`; `BrickMesherPerfTests.Lod0_TypicalDamagedHullBrick_Under60us`, `.Lod0_Checkerboard_Report`.
+  - [x] For 500 random snapshots (seed 11), the set of emitted faces equals a brute-force reference (a face exists iff the cell is structural and the neighbour does not fully cover that side), including faces on brick borders.
+  - [x] Triangles == 2 × exposed quads + exposed triangles; ≤ 2 per exposed face.
+  - [x] Every triangle's winding matches its face normal; AO values equal a brute-force evaluation.
+  - [x] A uniform-colour 16×16 wall face emits 289 vertices (welding works).
+  - [x] Typical damaged hull brick ≤ 60 µs median (Burst, safety off, single thread).
+- **Tests:** `BrickMesherTests.Faces_MatchBruteForce`, `.BorderCulling_UsesNeighbours`, `.Lod0_TwoTrianglesPerExposedFace`, `.Winding_MatchesNormals`, `.AO_MatchesBruteForce`, `.Welding_FlatWall289`; `BrickMesherPerfTests.Lod0_TypicalDamagedHullBrick_Under60us`, `.Lod0_Checkerboard_Report` (also verify ADR-0030's legal painted long-slope tiling uses indices above 65,535 without wrapping).
 
 ### REN-007 — LOD1 mesher
 - **Milestone:** M1
@@ -617,6 +617,7 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 16 | Approved long slopes need half-cell vertices but the old format only encodes whole corners | Keep eight-byte vertices and use half-cell integer coordinates | Tech lead | Resolved 2026-10-11 by accepted ADR-0027: exact five-shape geometry, shader ×0.5 position decode, 33×33 weld grid, cell-unit bounds and UVs; REN-004 criteria cover 120 entries. |
 | 17 | Long-slope normal ordering and tangents were unspecified | Pair-major, then magnitude swap, then sign bits; positive zero-axis tangent | Tech lead | Resolved 2026-10-11: §4.1 gives exact indices 18..41 and C#/HLSL parity tests. No visual or shape change. |
 | 18 | Snapshot helper lacks orientation input and work has no warning storage | Replace unused shape-table input with orientations; add SnapshotFlags | Tech lead | Resolved by accepted ADR-0029; canonical inverse rotation, defined bad-content fallback, per-work warning retention. |
+| 19 | Legal painted long-slope bricks exceed UInt16 vertex addressing | uint mesher indices with conditional 16/32-bit GPU upload | Tech lead | Resolved ADR-0030: proven 73,728-vertex lower bound; no dropped geometry or relaxed memory/performance gate. |
 
 ## 11. References
 

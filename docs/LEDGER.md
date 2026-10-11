@@ -653,6 +653,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 89 | 2026-10-11 | SPEC-11 REN-004 | Long-slope normal order/tangents unspecified | Pair, magnitude-swap, sign order and positive zero-axis tangent | Tech lead | Resolved SPEC-11 Q17; 42-entry C#/HLSL tables agree |
 | 90 | 2026-10-11 | SPEC-04 DATA-012 / SPEC-11 | Approved long slope has no per-cell definition/blob support or implementation task | Canonical Shapes plus approved-kit validation and inherited angled-hull tuning | Tech lead | Resolved SPEC-04 Q14–15 / ADR-0028; no new shapes or visual assets |
 | 91 | 2026-10-11 | SPEC-11 REN-005 | Missing orientation input and retained snapshot diagnostics | Canonical orientation table input and per-work SnapshotFlags | Tech lead | Resolved SPEC-11 Q18 / accepted ADR-0029; no duplicate rotation implementation |
+| 92 | 2026-10-11 | SPEC-11 REN-006 | Legal painted long-slope brick needs at least 73,728 vertices | uint mesher indices; UInt16 upload when possible, UInt32 otherwise | Tech lead | Resolved SPEC-11 Q19 / SPEC-10 Q40 / accepted ADR-0030; reference-station GPU memory unchanged |
 
 
 

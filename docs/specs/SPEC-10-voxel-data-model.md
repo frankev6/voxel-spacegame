@@ -763,7 +763,7 @@ VOX-002 measured on 2026-10-11, Unity 6000.6.5f1 / Apple M5 Pro. **MB below is d
 | Structure uniform brick | 512 mask + 28 record + map share = **572.95** / **570.33** | Same scope; source structure is released after spawn, so excluded from steady/peak grid totals |
 | Structure coordinate map | **28,736** reference / **114,752** thin-shell | NativeHashMap capacity 1,024/4,096, buckets 2,048/8,192; package allocation formula yields data 28,672/114,688 plus measured 64-byte helper |
 | Brick mesh vertex | **8** | PackedBrickVertex size; GPU payload and retained CPU payload |
-| Brick mesh index | **2** | UInt16 |
+| Brick mesh index | **2 or 4** | UInt16 when vertices ≤ 65,536, otherwise UInt32 (ADR-0030); reference cube station remains 2 |
 | Exposed face, welded uniform geometry | **21.0520** reference / **21.0338** thin-shell | Slice-weld count, per brick/direction/slice, identical attributes; includes vertices and six indices per quad |
 | Collider box blob | **492** | `BoxCollider.MemorySize` |
 | Compound child entry / aggregate overhead | **40** entry; **89.5** per child total overhead in 64-box sample | 64 distinct box blobs produce a 37,216-byte compound: `(37,216 − 64×492)/64`; residual 49.5 includes BVH, header and alignment, not just BVH |
@@ -1123,6 +1123,7 @@ Evidence retained locally in ignored `Logs/tools/vox003-{reference,thin-shell}.t
 
 | 38 | Dirty scheduling orders after the not-yet-implemented mass system | Put the equivalent UpdateBefore annotation on PHY-013 | Tech lead | Resolved 2026-10-11: SPEC-12 requires GridMassUpdateSystem before BrickDirtyScheduleSystem. No empty production stub or extra task dependency is needed. |
 | 39 | Enableable-query IsEmpty synchronizes dirty writers in installed Entities | Use IsEmptyIgnoreFilter as structural early-out, filter enabled chunks in the scheduled job | Tech lead | Resolved 2026-10-11 from EntityQueryImpl.IsEmpty/SyncFilterTypes: preserve the fixed-step no-sync rule; an all-disabled world may schedule an empty job. |
+| 40 | Approved painted slope bricks exceed UInt16 addressing | Conditional UInt16/UInt32 GPU indices, uint scratch | Tech lead | Resolved by ADR-0030 / SPEC-11 Q19. Cube benchmark memory values remain unchanged; larger slope meshes report actual four-byte index storage. |
 
 ## 11. References
 
