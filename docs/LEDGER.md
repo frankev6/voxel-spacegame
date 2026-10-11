@@ -660,6 +660,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 96 | 2026-10-11 | SPEC-12 PHY-010 | Mesh ordering names a system not yet implemented | Use REN-010's existing reverse ordering declaration | Tech lead | Resolved SPEC-12 Q17; same mesh-before-collider edge |
 | 97 | 2026-10-11 | SPEC-12 PHY-010 | Partial predecessors must not allow newer assemblies to overtake | Require full assembly selection and revisit newly eligible candidates | Tech lead | Resolved SPEC-12 Q18; preserves Built-prefix and urgent priority rules |
 | 98 | 2026-10-11 | SPEC-12 PHY-011 | Empty update retains installed geometry but older pending compounds must be retired | Preserve installed owner and clear logical children while freeing prefix | Tech lead | Resolved SPEC-12 Q19; no pending compound leak or stale child count |
+| 99 | 2026-10-11 | SPEC-12 PHY-012 | Cleanup uses configuration without requiring that singleton | Optional config with default two-frame age limit | Tech lead | Resolved SPEC-12 Q20; cleanup survives config/gameplay teardown |
+| 100 | 2026-10-11 | SPEC-12 PHY-012 | Previous-frame queue tick can shorten retirement lifetime after catch-up | Stamp the local retirement view with the current SimClock tick | Tech lead | Resolved SPEC-12 Q21; preserves two post-retirement ticks even when physics pauses |
 
 
 

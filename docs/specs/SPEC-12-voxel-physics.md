@@ -680,10 +680,10 @@ Note: `JobHandle.IsCompleted` is read in `OnUpdate`. If the installed Burst vers
 
 Per frame (markers `Sweep`, `Retire`), main thread, also when `GameplayActive` is absent:
 1. `cache.CompleteAccess()`. `active = SystemAPI.HasSingleton<GameplayActive>()`.
-2. If the batch is in flight and (`!active` or `frame − ScheduledFrame ≥ MaxBatchAgeFrames`): complete, `Finalize`, `InFlight = 0`.
+2. If the batch is in flight and (`!active` or `frame − ScheduledFrame ≥ MaxBatchAgeFrames`): complete (count `ForcedBatchCompletes` if unfinished), `Finalize`, `InFlight = 0`. Use the configured maximum when present, otherwise the default two frames: cleanup must not depend on a surviving config singleton (Q20).
 3. **Sweep**: for each record (reverse order, swap-back removal): `!EntityStorageInfoLookup.Exists(Root)` or (`!active`) → retire `Installed`, every `Children` blob, every pending update (compound, masks); mark updates referenced by nothing as Free; remove the record and its `GridIndex` entry.
 4. If `!active`: `queue.CompleteAccess()`, `queue.Requests.Clear()`.
-5. **Retire**: move every `Retired` blob to `DeferredDisposalQueue` with `DeferredDisposal.RetireBlob` (`DueFrame = Frame + 3`), clear `Retired`.
+5. **Retire**: move every `Retired` blob to `DeferredDisposalQueue` with `DeferredDisposal.RetireBlob` (`DueFrame = Frame + 3`), clear `Retired`. Before the calls, stamp the local queue copy's `Tick` from the current `SimClock` when present (Q21); its containers still belong to the singleton, and `DeferredDisposalSystem` remains the writer of singleton clock fields. This makes `DueTick = currentTick + 2` even after catch-up ticks.
 
 Why not a cleanup component: the record already knows its root; a per-frame existence sweep over ≤ a few hundred records costs < 10 µs and has no structural changes.
 
@@ -1000,10 +1000,10 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Do:** Implement §5.10 and verify teardown paths: despawn, LEG cascade, batch destroy by query (stand-in for star-system unload), `GameplayActive` removal, world disposal with a batch in flight.
 - **Files:** `Assets/Game/Voxel/PhysicsBody/GridColliderCleanupSystem.cs`, `Assets/Game/Tests/EditMode/Voxel/Physics/ColliderCleanupTests.cs`
 - **Acceptance criteria:**
-  - [ ] Every blob of a destroyed grid reaches `DeferredDisposalQueue` within one frame and is disposed ≥ 3 frames later; none is disposed twice.
-  - [ ] Removing `GameplayActive` with a batch in flight leaves an empty cache after one frame.
-  - [ ] Disposing the world with a batch in flight leaks nothing (leak detection `EnabledWithStackTrace`).
-  - [ ] The system runs without `GameplayActive`.
+  - [x] Every blob of a destroyed grid reaches `DeferredDisposalQueue` within one frame and is disposed ≥ 3 frames later; none is disposed twice.
+  - [x] Removing `GameplayActive` with a batch in flight leaves an empty cache after one frame.
+  - [x] Disposing the world with a batch in flight leaks nothing (leak detection `EnabledWithStackTrace`).
+  - [x] The system runs without `GameplayActive`.
 - **Tests:** `ColliderCleanupTests.DestroyedRoot_BlobsRetired`, `.BatchDestroyByQuery_NoLeak`, `.GameplayInactive_CacheEmptied`, `.WorldDispose_BatchInFlight_NoLeak`, `.RunsWithoutGameplayActive`.
 
 ### PHY-013 — GridMassUpdateSystem
@@ -1137,6 +1137,8 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 | 17 | PHY-010 is ready before BrickMeshBuildSystem exists | Declare ordering on the later mesh system | Tech lead | Resolved: REN-010 already specifies UpdateBefore(BrickColliderBuildSystem); this is the same ordering edge, without a nonexistent forward type reference. |
 | 18 | The phrase selected in this batch can include a partial older update, contradicting the Built-prefix invariant | Require the older assembly in the batch; revisit candidates after prerequisites become fully selected | Tech lead | Resolved: partial predecessors block later updates; completed selections permit ordered same-batch overlays. Urgent work is uncapped once its per-grid prerequisites are satisfied. |
 | 19 | Empty newest updates say retire nothing, but older pending compounds still own memory and the edge table requires ChildCount zero | Preserve installed ownership; retire/free pending prefix; expose zero logical children | Tech lead | Resolved: keep PhysicsCollider and installed tick/phase/box count, set ChildCount=0, and retire any uninstalled prefix compounds through normal pool cleanup. |
+| 20 | Cleanup needs MaxBatchAgeFrames but intentionally does not require PhysicsVoxelConfig | Read optional config, otherwise use the default two-frame limit | Tech lead | Resolved: cleanup remains runnable after config/gameplay teardown and always completes inactive batches; unfinished forced completions are counted. |
+| 21 | Cleanup precedes the disposal clock mirror, so queue.Tick can lag current physics by catch-up ticks | Stamp the local retirement view from the current SimClock | Tech lead | Resolved: retain the three-frame delay and require two ticks after actual retirement; never shorten the paused PhysicsWorld lifetime using the previous frame tick. No singleton-field writer changes. |
 
 ## 11. References
 
