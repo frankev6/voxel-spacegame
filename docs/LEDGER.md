@@ -65,7 +65,7 @@
 | DATA-005 | ContentCatalog | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-004 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 37f513a |  |
 | DATA-006 | Block blob builder and placement maths | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-003, DATA-005 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 8eb3aca |  |
 | DATA-007 | ContentService and ECS singletons | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-006 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | fc1d170 | Synthetic2000 8.2 ms (gate 100), 150 defs 0.5 ms (gate 20); shipped-content run waits for DATA-009 |
-| DATA-008 | Editor database builder, postprocessor, validator runner and CLI | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-005 | yes | todo |  |  |  |  |
+| DATA-008 | Editor database builder, postprocessor, validator runner and CLI | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-005 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
 | DATA-009 | System placeholder content and the database asset | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-008 | no | todo |  |  |  |  |
 | PERS-001 | Public contract types | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | CORE-001, DATA-001, VOX-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 75f6583 | Result-struct constructors: SPEC-05 Q16 |
 | PERS-002 | Save paths, profiles, slots and meta files | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 20bb0aa | META-chunk fallback completes with PERS-003; SPEC-05 Q17 |
