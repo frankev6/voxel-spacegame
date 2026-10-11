@@ -359,6 +359,7 @@ def tetra_block():
 
 BLOCK_TYPES = {
     # key: (name, per-cell pieces, slope directions it adds, block size in cells (x, y, z), planes in block space)
+    "cube": ("Cube", lambda: [], [], (1, 1, 1), []),
     "w11": ("Slope", lambda: slope_block(1, 1), [(0, 1, 1)], (1, 1, 1), [((0, -1, 1), 0)]),
     "s12": ("Long slope 1×2", lambda: slope_block(1, 2), [(0, 1, 2)], (1, 2, 1), [((0, -1, 2), 0)]),
     "tet": ("Corner", tetra_block, [(1, 1, 1)], (1, 1, 1), [((1, 1, 1), 1)]),
@@ -743,7 +744,7 @@ def render(draft=False):
     for f in os.listdir(OUT_IMG):
         if f.endswith(".jpg"):
             os.remove(os.path.join(OUT_IMG, f))
-    for key in sorted({b for k in KITS for b in k[2]}):
+    for key in ["cube"] + sorted({b for k in KITS for b in k[2]}):
         block_svg(key, os.path.join(OUT_IMG, f"block_{key}.svg"))
     for vk in ["free"] + [k[0] for k in KITS]:
         s = demo_ship(vk)
