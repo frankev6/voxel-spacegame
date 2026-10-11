@@ -171,7 +171,7 @@
 | DMG-001 | Public contract types | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 9310e7c | Public damage/restore/impulse contracts, 43 config defaults, table lookup; 4 tests; Q71–74 |
 | FLT-001 | Public contract types | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0ddf5bf | Unmanaged flight/input contracts; exact SPEC-03 fields; Q112 comment corrections |
 | FLT-002 | Grid-space and flight maths | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | ec30fc9 | Grid geometry, gyro, caps and assist targets; eight required tests |
-| FLT-003 | Flight config definition and factory | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | todo |  |  |  |  |
+| FLT-003 | Flight config definition and factory | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Config validation, factory, asset and boot singleton |
 | FLT-004 | Thrust allocator | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001 | yes | todo |  |  |  |  |
 | FLT-005 | PlayerCommandApplySystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001, DMG-001 | yes | todo |  |  |  |  |
 | FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | yes | todo |  |  |  |  |
