@@ -348,7 +348,7 @@ Order inside the tick (architecture §5): `ShipCommandGroup` (player apply, AI) 
 
 Per tick (marker `PlayerCommandApplySystem.Apply`), main thread then one job:
 1. `pc = SystemAPI.GetSingleton<PlayerCommand>()` (written on the main thread by a managed system: no job to complete). `ref consumed = ref SystemAPI.GetSingletonRW<PlayerEdgeConsumed>().ValueRW.Value` (only this system touches it; no jobs).
-2. If `playerQuery.IsEmptyIgnoreFilter` (no live player ship): `consumed = pc.Edges` (drop pending presses); return.
+2. If `playerQuery.IsEmptyIgnoreFilter` (no live player ship): copy the nine ship counters from `pc.Edges`, preserving `consumed.Cruise` (drop pending ship presses; Q13); return.
 3. Edges: for each of the 9 ship counters in declaration order (`Interact` … `AutofireToggle`; `Cruise` is skipped, it is not a ship edge): `if (pc.Edges.X != consumed.X) { edges |= ShipCommandEdges.X; consumed.X = (byte)(consumed.X + 1); }` — one per tick (decision 8).
 4. `cmd = new ShipCommand { Thrust = clamp(pc.Thrust, −1, 1), Turn = clamp(pc.Turn, −1, 1), AimWorld = pc.AimWorld, AimValid = pc.AimValid, Flags = pc.Flags, Edges = edges, FireGroups = pc.FireGroups }`; non-finite floats → 0 (`AimWorld` non-finite → `AimValid = 0`).
 4b. **Control lock** (M3, TRV-007): `lockFlags = SystemAPI.GetSingleton<PlayerControlLock>().Flags` (written on the main thread by `TravelService`; no job to complete). If `Movement`: `Thrust = 0`, `Turn = 0`, `Flags = (Flags & ~Boost) | Brake`. If `Actions`: `FireGroups = 0`, `Edges = None` (the counters were still consumed in step 3, so presses made while locked never fire later). `AimWorld`/`AimValid` are unchanged.
@@ -553,11 +553,11 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Do:** Implement §5.1 with `PlayerCommandWriteJob`. Test with a hand-written `PlayerCommand` singleton (no SPEC-03 code needed).
 - **Files:** `Assets/Game/Simulation/Commands/{PlayerCommandApplySystem,PlayerCommandWriteJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Flight/PlayerCommandApplyTests.cs`
 - **Acceptance criteria:**
-  - [ ] A counter that advanced by 2 produces the edge on two consecutive ticks, then none.
-  - [ ] Ticks after the consuming tick have `Edges = 0` while analog fields keep following `PlayerCommand`.
-  - [ ] No player ship (or a hulk): consumed = counters; no edge later when a ship appears.
-  - [ ] `OnUpdate` has no `Complete()`, no `CompleteDependency()`, and only `GetSingletonRW<PlayerEdgeConsumed>` (code review).
-  - [ ] A `Cruise` counter change produces no `ShipCommandEdges` bit and leaves `PlayerEdgeConsumed.Value.Cruise` untouched.
+  - [x] A counter that advanced by 2 produces the edge on two consecutive ticks, then none.
+  - [x] Ticks after the consuming tick have `Edges = 0` while analog fields keep following `PlayerCommand`.
+  - [x] No player ship (or a hulk): the nine consumed ship counters = input counters; Cruise is untouched; no edge later when a ship appears.
+  - [x] `OnUpdate` has no `Complete()`, no `CompleteDependency()`, and only `GetSingletonRW<PlayerEdgeConsumed>` (code review).
+  - [x] A `Cruise` counter change produces no `ShipCommandEdges` bit and leaves `PlayerEdgeConsumed.Value.Cruise` untouched.
 - **Tests:** `PlayerCommandApplyTests.Cruise_NotAShipEdge`, `PlayerCommandApplyTests.Edge_OncePerCounterStep`, `.Edge_ClearedNextTick`, `.NoShip_DropsEdges`, `.Hulk_DropsEdges`, `.NonFinite_Sanitised`.
 
 ### FLT-006 — Thruster registration and ThrusterInitSystem
@@ -657,6 +657,8 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 | 11 | A stale warm start can violate newly reduced bounds, especially when a zero column skips every update | Clamp all warm-start values before computing the residual | Tech lead | Resolved FLT-004: finite inputs, valid Min ≤ Max, equal array lengths; a Max=Min=0 actuator remains zero even with a degenerate column. This matches §5.3's caller clamp and makes standalone use safe after actuator loss. No allocation or API/type change. |
 
 | 12 | Native float dot reductions differ by one ULP between managed and strict Burst on the reference machine | Accumulate three dot-product terms in double, cast once to float | Tech lead | Resolved FLT-004: the initial failing seeded case had identical coordinate traces but residual bits 1172050705 vs 1172050704. Explicit scalar float grouping also differed. Double product/sum accumulation with one final cast passes all six tests, including 100 problems × 127 intermediate states and two independently scheduled Burst solves against managed outputs. Public fields, fixed coordinate order and solver objective are unchanged; FLT-011 still owns whole-flight cost gates. |
+
+| 13 | No-player step 2 copies the Cruise counter despite its separate travel owner and the Cruise acceptance criterion | Drop only the nine ship counters, preserve consumed.Cruise | Tech lead | Resolved FLT-005: live player, hulk and absent-player paths all leave Cruise untouched. The specified Cruise_NotAShipEdge test covers all three. Other pending edges are dropped when no live ship exists; byte counter wrap consumes one press. |
 
 ## 11. References
 
