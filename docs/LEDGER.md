@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 11 | 0 | 0 | 0 | 55 | 0 | 66 | 3 |
+| M0 | 10 | 0 | 0 | 0 | 56 | 0 | 66 | 3 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -96,8 +96,8 @@
 | MIG-002 | Legacy JSON index and strict reading | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 6c78f67 |  |
 | MIG-003 | Legacy ID map | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4955b51 |  |
 | MIG-004 | Asset writer, manifest, runner and report | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-002, MIG-003, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | ab6e4b3 | Protected writes, manifest, runner and reports; 9 tests |
-| MIG-005 | Item converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-004 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| MIG-006 | Block converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-005 | no | todo |  |  |  |  |
+| MIG-005 | Item converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-004 | yes | done | astra (gpt-6) | 2026-10-11 | 4b524c7 | 35 items, icon references, dropped-field report; repeat imports byte-stable |
+| MIG-006 | Block converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-005 | yes | todo |  |  |  |  |
 | MIG-007 | Legacy Euler to orientation | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | b264f44 | Integer RyRxRz, one-degree snapping, all 64 Unity Euler combinations |
 | MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | no | todo |  |  |  |  |
 | MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | no | todo |  |  |  |  |
@@ -594,6 +594,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — MIG-005 non-block item migration (astra, gpt-6)
+- Generated all **35** item definitions with the exact SPEC-72 value table, unchanged descriptions and assigned legacy-named sprite sub-assets. Added the Editor-only source-reference asset (Q37 / SPEC-72 Q14), so production converter code does not depend on the placeholder folder. No new art. The report lists **30** intentional data-drop/normalization entries, including socket fields omitted from the abbreviated spec table.
+- The temporary headless generation script and meta were deleted after success. Two repeat imports report **35 Unchanged**, with byte-identical manifest and report. Content validation has **0 errors**; only the existing missing-start-blueprint warning remains. Directory refresh now runs only when a new asset folder needs importing.
+- The three specified converter tests check all fields against the independent table, all icon names/descriptions and dropped-field reports. Compile: zero C# warnings. Full live EditMode **359 passed**, full PlayMode **16 passed**, performance **18/18 pass**. Shipped ContentService construction **0.173 ms median** (20 ms gate). Docs clean. M0 **56/66 done**; MIG-006 is ready.
 
 ### 2026-10-11 — INP-003 interactive rebinding (astra, gpt-6)
 - Implemented interactive rebind/cancel, same-map and Global conflict detection, map restoration for the current context, per-binding/all resets and disposal. Global is disabled during rebind, so Escape cancels without firing Back.
