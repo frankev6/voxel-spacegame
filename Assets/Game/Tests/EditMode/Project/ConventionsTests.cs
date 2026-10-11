@@ -25,6 +25,7 @@ namespace Game.Tests.EditMode.Project
             ("TODO needs a task ID: TODO(ABC-123)", new Regex(@"\bTODO\b(?!\([A-Z]{2,4}-\d{3}\))")),
             ("never reference placeholder art from code", new Regex(@"_Placeholder")),
             ("Time.timeScale is written only by PauseService (SPEC-01 decision 10)", new Regex(@"\bTime\.timeScale\s*=(?!=)")),
+            ("device state is read only through InputService (SPEC-03 decision 1)", new Regex(@"\b(Keyboard|Mouse|Gamepad)\.current\b")),
         };
 
         static IEnumerable<string> RuntimeSources()
@@ -54,6 +55,8 @@ namespace Game.Tests.EditMode.Project
                         if (isGameLog && rule.StartsWith("no bare Debug.Log")) continue;
                         if (isBootstrap && rule.StartsWith("no Resources.Load")) continue;
                         if (Path.GetFileName(file) == "PauseService.cs" && rule.StartsWith("Time.timeScale")) continue;
+                        if (rule.StartsWith("device state") && (file.Replace('\\', '/').Contains("/Game/Input/") ||
+                            Path.GetFileName(file) == "PlayerInputSampleSystem.cs" || Path.GetFileName(file) == "EditorInputSampler.cs")) continue;
                         if (pattern.IsMatch(code)) problems.Add($"{Rel(file)}:{i + 1}: {rule}\n    {line.Trim()}");
                     }
                 }

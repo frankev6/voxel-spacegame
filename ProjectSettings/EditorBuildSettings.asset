@@ -18,4 +18,5 @@ EditorBuildSettings:
     path: Assets/Game/Scenes/BlueprintLab.unity
     guid: 09ce24a67e21c4f40b91fe893b78bd59
   m_configObjects:
+    com.unity.input.settings: {fileID: 11400000, guid: 402f85614dd144383928a7e3bdc2332f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

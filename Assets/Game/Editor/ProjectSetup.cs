@@ -49,6 +49,7 @@ namespace Game.Editor
             var rp = AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>(RenderPipelineAsset);
             if (rp != null && GraphicsSettings.defaultRenderPipeline != rp) GraphicsSettings.defaultRenderPipeline = rp;
 
+            EnsureInputSettings();
             EnsureScenes();
             AssetDatabase.SaveAssets();
             Debug.Log("ProjectSetup.ApplyAll: done");
@@ -74,9 +75,30 @@ namespace Game.Editor
             Expect(GraphicsSettings.defaultRenderPipeline != null &&
                    AssetDatabase.GetAssetPath(GraphicsSettings.defaultRenderPipeline) == RenderPipelineAsset,
                    $"default render pipeline should be {RenderPipelineAsset}");
+            Expect(UnityEditor.EditorBuildSettings.TryGetConfigObject(InputSettingsConfigKey, out UnityEngine.InputSystem.InputSettings input) &&
+                   AssetDatabase.GetAssetPath(input) == InputSettingsAsset && input.shortcutKeysConsumeInput,
+                   $"Input System settings should be {InputSettingsAsset} with shortcutKeysConsumeInput = true (SPEC-03 §4.2)");
             var build = EditorBuildSettings.scenes.Select(s => Path.GetFileNameWithoutExtension(s.path)).ToArray();
             Expect(build.SequenceEqual(Scenes), $"build scenes should be [{string.Join(", ", Scenes)}] (are [{string.Join(", ", build)}])");
             return issues;
+        }
+
+        const string InputSettingsConfigKey = "com.unity.input.settings";   // InputSettingsProvider.kEditorBuildSettingsConfigKey
+        const string InputSettingsAsset = "Assets/Game/Input/InputSystem.inputsettings.asset";
+
+        /// <summary>SPEC-03 §4.2: shortcut keys (Ctrl+Z) consume input so plain-key neighbours (Z) do not also fire.</summary>
+        static void EnsureInputSettings()
+        {
+            var settings = AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputSettings>(InputSettingsAsset);
+            if (settings == null)
+            {
+                settings = ScriptableObject.CreateInstance<UnityEngine.InputSystem.InputSettings>();
+                AssetDatabase.CreateAsset(settings, InputSettingsAsset);
+            }
+            settings.shortcutKeysConsumeInput = true;
+            EditorUtility.SetDirty(settings);
+            EditorBuildSettings.AddConfigObject(InputSettingsConfigKey, settings, true);
+            UnityEngine.InputSystem.InputSystem.settings = settings;
         }
 
         static void EnsureScenes()
