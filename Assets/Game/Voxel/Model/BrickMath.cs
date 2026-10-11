@@ -14,11 +14,32 @@ namespace Game.Voxel.Model
         public static int LocalIndex(int x, int y, int z) => x | (y << 4) | (z << 8);
         public static int3 LocalFromIndex(int i) => new int3(i & 15, (i >> 4) & 15, i >> 8);
         public static int3 CellOf(int3 brick, int localIndex) => (brick << Shift) + LocalFromIndex(localIndex);
-        public static int SlotIndex(int3 brick, int3 brickMin, int3 brickDims) { throw new System.NotImplementedException("VOX-004"); }   // -1 if outside; else d.x + dims.x*(d.y + dims.y*d.z), d = brick - brickMin
+        public static int SlotIndex(int3 brick, int3 brickMin, int3 brickDims)
+        {
+            int3 d = brick - brickMin;
+            return math.any(d < 0) || math.any(d >= brickDims) ? -1 : d.x + brickDims.x * (d.y + brickDims.y * d.z);
+        }
         public static float3 CellMinCorner(int3 cell, float cellSize) => (float3)cell * cellSize;
         public static float3 CellCenter(int3 cell, float cellSize) => ((float3)cell + 0.5f) * cellSize;
         public static int3 CellAt(float3 gridLocalPoint, float cellSize) => (int3)math.floor(gridLocalPoint / cellSize);
-        public static BlockFaceMask BorderFaces(int localIndex) { throw new System.NotImplementedException("VOX-004"); } // brick faces the cell touches: x==0 → NegX, x==15 → PosX, y==0 → NegY, ...
-        public static int3 FaceDirection(BlockFace f) { throw new System.NotImplementedException("VOX-004"); }           // PosX→(1,0,0), NegX→(-1,0,0), PosY, NegY, PosZ, NegZ (SPEC-04 order)
+        public static BlockFaceMask BorderFaces(int localIndex)
+        {
+            int3 local = LocalFromIndex(localIndex);
+            var faces = BlockFaceMask.None;
+            if (local.x == 0) faces |= BlockFaceMask.NegX;
+            if (local.x == Mask) faces |= BlockFaceMask.PosX;
+            if (local.y == 0) faces |= BlockFaceMask.NegY;
+            if (local.y == Mask) faces |= BlockFaceMask.PosY;
+            if (local.z == 0) faces |= BlockFaceMask.NegZ;
+            if (local.z == Mask) faces |= BlockFaceMask.PosZ;
+            return faces;
+        }
+        public static int3 FaceDirection(BlockFace f) => f switch
+        {
+            BlockFace.PosX => new int3(1, 0, 0), BlockFace.NegX => new int3(-1, 0, 0),
+            BlockFace.PosY => new int3(0, 1, 0), BlockFace.NegY => new int3(0, -1, 0),
+            BlockFace.PosZ => new int3(0, 0, 1), BlockFace.NegZ => new int3(0, 0, -1),
+            _ => throw new System.ArgumentOutOfRangeException(nameof(f)),
+        };
     }
 }
