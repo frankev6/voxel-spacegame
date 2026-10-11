@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 70 | 1 | 0 | 0 | 31 | 0 | 102 | 14 |
+| M1 | 70 | 0 | 0 | 0 | 32 | 0 | 102 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 3 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -138,7 +138,7 @@
 | REN-002 | SPIKE: Entities Graphics with thousands of runtime brick meshes | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-10 | yes | todo |  |  |  |  |
 | REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002 | no | todo |  |  |  |  |
 | REN-004 | Normals, packing and shape tables | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6b076af | Five shapes × 24 rotations; exact half-cell packing; 42 normals; Q88–89 |
-| REN-005 | Snapshot gathering | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004, SPEC-10, SPEC-04 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| REN-005 | Snapshot gathering | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004, SPEC-10, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 93cd973 | 27-neighbour snapshots, per-cell slopes, bounded props and retained flags; ADR-0029/Q91 |
 | REN-006 | LOD0 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | todo |  |  |  |  |
 | REN-007 | LOD1 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-006 | no | todo |  |  |  |  |
 | REN-008 | Brick and prop shaders, placeholder art | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | todo |  |  |  |  |
@@ -687,6 +687,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — REN-005 render snapshots (astra, gpt-6)
+
+- Implemented the Burst parallel snapshot job with read-only ECS lookups, 27 neighbour regions and disjoint 5,832-cell / 512-prop output slices. Structure previews share semantic decoding and support uniform/dense/sparse source records. All 24 long-slope rotations resolve High/Low from canonical footprint offsets.
+- Accepted ADR-0029 / Q91: use canonical orientation tables instead of the now-unused shape-table helper input; retain invalid-reference and prop-overflow flags in BrickMeshWork for later apply logging. No jobs log or retain live cell memory beyond the completed snapshot job.
+- Four required tests cover every Ship20k brick, all 27 random neighbouring bricks, exact half shapes, missing halos, malformed refs, prop roots and overflow. Initial test-helper compile mistakes were fixed before the successful runs.
+- Validation: zero C# warnings; EditMode 551 passed + 1 explicit skipped, PlayMode 35 passed, performance 29/29; docs 503 tasks / zero errors. Grid spawn 1024 bricks 0.3121 ms median. Snapshot scheduling/system budget integration remains REN-010/013, as specified.
 
 ### 2026-10-11 — DATA-012 approved slope-kit data (astra, gpt-6)
 
