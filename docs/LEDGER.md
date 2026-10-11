@@ -650,6 +650,11 @@ Newest first. One entry per finished task or notable event: what changed, measur
   - The silhouette build now writes reference SVGs for built ships and marks their cards "Built in 3D".
   - Look book: new **ARK · round 4** tab, with the approved silhouette beside the 3D plan view and the shots in both worlds.
   - **Open:** turrets, the flak and the engines are kit blocks at twice their frigate size, as the cruisers already do with the triple battery. A destroyer needs its own kit sizes, or a rule for scaled blocks.
+  - **Answered (owner, verbatim, 2026-10-11):**
+
+    > its fine this is just visual concepts not necessarily the final look of the ships.
+
+    The look-dev ships are concepts, not final hulls, so the block sizes are not a kit decision.
 - **Next:** the owner marks silhouettes from either batch; the approved plan views are then built in 3D with the new pieces, plating and blocks, checked, rendered and added to the look book.
 
 ### 2026-10-10 — Look book round 3: connected ships, cruisers and dreadnoughts, capital weapons, defended stations, five aliens (claude, claude-opus-5-5)
