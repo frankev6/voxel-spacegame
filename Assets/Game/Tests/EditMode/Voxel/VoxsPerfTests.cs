@@ -15,7 +15,7 @@ namespace Game.Tests.EditMode.Voxel
         static void Gate(string name, Action action, double budget)
         {
             var group = new SampleGroup(name, SampleUnit.Millisecond);
-            Measure.Method(action).SampleGroup(group).WarmupCount(3).MeasurementCount(7).IterationsPerMeasurement(1).Run();
+            Measure.Method(action).SampleGroup(group).WarmupCount(2).MeasurementCount(10).IterationsPerMeasurement(1).Run();
             var stat = PerfRun.Gate(name, group.Samples.ToArray(), budget);
             TestContext.WriteLine($"{name}: median {stat.Median:F3} ms; p95 {stat.P95:F3} ms");
         }

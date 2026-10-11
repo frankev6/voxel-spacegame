@@ -51,6 +51,8 @@ namespace Game.Tests.EditMode.Voxel
             var coords = new List<int3>(); var cells = new List<Cell[]>(); var surface = new List<(int, int)>();
             bool Inside(int3 p) { double x = (p.x + .5) / 40, y = (p.y + .5) / 25, z = (p.z + .5) / 240; return x*x + y*y + z*z <= 1; }
             var rng = RngStreams.For(1, RngPurpose.Test, 0);
+            // Damage must not change the positions chosen for the reference thrusters.
+            var damageRng = RngStreams.For(1, RngPurpose.Test, 1);
             for (int z = -15; z < 15; z++) for (int y = -2; y < 2; y++) for (int x = -3; x < 3; x++)
             {
                 int3 coord = new int3(x,y,z); var brick = new Cell[4096]; bool any = false;
@@ -59,7 +61,7 @@ namespace Game.Tests.EditMode.Voxel
                 {
                     int3 p = coord * 16 + new int3(n & 15, (n >> 4) & 15, n >> 8);
                     if (!Inside(p)) continue;
-                    any = true; brick[n] = Cell.Palette((ushort)(1 + (p.z + 240) / 120), damaged && rng.NextInt(100) == 0 ? (byte)128 : (byte)255);
+                    any = true; brick[n] = Cell.Palette((ushort)(1 + (p.z + 240) / 120), damaged && damageRng.NextInt(100) == 0 ? (byte)128 : (byte)255);
                     if (!Inside(p + new int3(0,0,1))) edge.Add(n);
                 }
                 if (!any) continue;
@@ -73,7 +75,7 @@ namespace Game.Tests.EditMode.Voxel
             {
                 int chosen = rng.NextInt(i, surface.Count); var temp = surface[i]; surface[i] = surface[chosen]; surface[chosen] = temp;
                 var (b,n) = surface[i];
-                s.Source.Cells[b*4096+n] = Cell.Instance(i);
+                s.Source.Cells[b*4096+n] = Cell.Instance(i, s.Source.Cells[b*4096+n].Hp);
                 s.Source.Instances[i] = new BlockInstance { Block = Block(catalog,"block_thruster_small"), Origin = coords[b]*16 + new int3(n&15,(n>>4)&15,n>>8), FunctionHp = 50, CellsAlive = 1 };
             }
             return s;
