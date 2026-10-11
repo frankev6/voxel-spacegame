@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 43 | 0 | 1 | 0 | 22 | 0 | 66 | 13 |
+| M0 | 42 | 0 | 1 | 0 | 23 | 0 | 66 | 12 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -47,7 +47,7 @@
 | CORE-002 | StableHash and content identity | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | b4a06ce | 0.046 µs per 16-char hash, 0 B GC; SPEC-02 vector labels corrected |
 | CORE-003 | Random streams and fixed-step time | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-002 | yes | todo |  |  |  |  |
 | CORE-004 | GameLog | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | eccf02b |  |
-| CORE-005 | Services locator | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| CORE-005 | Services locator | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | d75b9ac |  |
 | CORE-006 | EventBus and EventHub | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-004 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 3f0a613 | Drain1000 median 0.025 ms (gate 0.3), 0 B GC |
 | CORE-007 | Binary save primitives | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-002 | yes | todo |  |  |  |  |
 | CORE-008 | System groups and pipeline order | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | todo |  |  |  |  |
@@ -566,6 +566,9 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — CORE-005 Services (claude, claude-opus-5-5)
+- `Services` per SPEC-02 §5.3. 7 tests pass, including a 0 B `TryGet` and a reset that clears types registered again after an earlier reset. EditMode 118/118.
 
 ### 2026-10-11 — INP-002 InputService contexts (claude, claude-opus-5-5)
 - `InputService` per SPEC-03 §5.1: contexts, display strings with a cache, sensitivities, and a `Dispose` that works in edit mode. `ApplyBindingOverrides` and `SaveBindingOverridesJson` came forward from INP-003 because the constructor needs them; rebinding and reset remain INP-003.
