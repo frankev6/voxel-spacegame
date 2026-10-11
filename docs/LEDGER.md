@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 24 | 0 | 0 | 0 | 42 | 0 | 66 | 9 |
+| M0 | 23 | 0 | 0 | 0 | 43 | 0 | 66 | 8 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -42,7 +42,7 @@
 | FND-005 | Composition root and BootSingletons | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-002, FND-003, FND-004, SPEC-02, SPEC-04 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 9caac2b | rows 1/2/3/5/6/14; OQ 8 |
 | FND-006 | SceneFlow transitions and teardown | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-005 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 1b67ff9 | teardown 200k: 3.5 ms; OQ 9; trap T2.12 |
 | FND-007 | SimClock lifecycle and SimClockAdvanceSystem | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-006 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 7e06cca | exact 120-tick and 10-min checks |
-| FND-014 | Static state audit and Play Mode re-entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-006 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| FND-014 | Static state audit and Play Mode re-entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-006 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | ac9e5ba | 18 statics fixed/annotated; re-entry 13 ms |
 | CORE-001 | Public contract types | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 4c3a121 | Drain-system lifecycle stub: open question 5 |
 | CORE-002 | StableHash and content identity | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | b4a06ce | 0.046 µs per 16-char hash, 0 B GC; SPEC-02 vector labels corrected |
 | CORE-003 | Random streams and fixed-step time | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-002 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 9a669c6 |  |
@@ -576,6 +576,17 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — FND-014 static state audit and Play Mode re-entry (claude, claude-opus-5-5)
+- `StaticStateAuditTests` checks every static field in the runtime `Game.*` assemblies.
+  - A field passes if its type has a SubsystemRegistration reset, if it is a readonly immutable type (unmanaged structs included), or if it carries `[StaticStateOk]`.
+  - Static auto-property backing fields are audited too. A self-test proves that `static int x` and a static auto-property are caught.
+- The first run found 18 fields:
+  - `PerfMarkers` now disposes its recorders in SubsystemRegistration; they would otherwise have kept recording across Play sessions;
+  - the rest (slots reset by `Services`/`EventHub`/`Bootstrap`, regexes, encodings, constant tables, a stateless comparer, test hooks) carry a `[StaticStateOk]` reason.
+  - SPEC-01 open question 10, ledger 26.
+- `PlayModeReentryTests` (EditMode): Boot → MainMenu, exit, enter again. Services and event-channel counts match, there is exactly one GameRoot, and nothing is pending. Enter-to-menu takes **13 ms** median (gate ≤ 1 s; the scenes are still empty).
+- `EventHub.ChannelCount` added (internal). EditMode 272/272 (+1 explicit), PlayMode 16/16.
 
 ### 2026-10-11 — FND-007 SimClock lifecycle and SimClockAdvanceSystem (claude, claude-opus-5-5)
 - `SimClockAdvanceSystem`: a Burst `ISystem`, `OrderLast` in `GameplayPostPhysicsGroup` after the GameplayEnd ECB. It requires `GameplayActive` and `SimClock`, and recomputes `UniversalTime` from the tick.
