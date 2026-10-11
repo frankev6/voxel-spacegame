@@ -959,10 +959,10 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Do:** Implement `ColliderInstallSchedule` and `ColliderSnapshotSystem` (§5.5, §5.7). Change nothing in SPEC-10; `BrickDirtyScheduleSystem` uses `ColliderDirtyQueue.Acquire/Release` (SPEC-10 integration item; coordinate through the ledger).
 - **Files:** `Assets/Game/Voxel/PhysicsBody/{ColliderInstallSchedule,ColliderSnapshotSystem}.cs`, `Assets/Game/Voxel/PhysicsBody/Jobs/ColliderCollectJob.cs`, `Assets/Game/Tests/EditMode/Voxel/Physics/ColliderSnapshotTests.cs`
 - **Acceptance criteria:**
-  - [ ] `InstallTick` table of §5.5 reproduced for ticks 0..20 with D = 7, B = 4; non-decreasing in T.
-  - [ ] Requests of one grid in one bucket form one update; a second request for a coord replaces the mask; destroyed or empty bricks are recorded as removed.
-  - [ ] Requests for unknown serials are dropped and counted.
-  - [ ] The mask copy reflects the cells at the end of the request tick (damage written earlier in the same tick is included).
+  - [x] `InstallTick` table of §5.5 reproduced for ticks 0..20 with D = 7, B = 4; non-decreasing in T.
+  - [x] Requests of one grid in one bucket form one update; a second request for a coord replaces the mask; destroyed or empty bricks are recorded as removed.
+  - [x] Requests for unknown serials are dropped and counted.
+  - [x] The mask copy reflects the cells at the end of the request tick (damage written earlier in the same tick is included).
 - **Tests:** `ColliderSnapshotTests.InstallTick_Table`, `.SameBucket_OneUpdate`, `.DuplicateCoord_NewestMaskWins`, `.DestroyedBrick_Removed`, `.UnknownSerial_Dropped`, `.MaskTakenAtRequestTick`.
 
 ### PHY-010 — BrickColliderBuildSystem
