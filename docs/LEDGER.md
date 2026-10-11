@@ -607,6 +607,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 51 | 2026-10-11 | SPEC-11 REN-001 | ShapeFace's listed fields occupy 52 bytes, not the stated 56 | Preserve fields; correct size assertion to 52 | Tech lead | Resolved in SPEC-11 Q11; measured by RenderContractTests |
 | 52 | 2026-10-11 | SPEC-11 REN-001 | Public VoxelRenderRuntime.Managed references a class labelled internal | Public class, internal fields | Tech lead | Resolved in SPEC-11 Q12; preserves the specified runtime field |
 | 53 | 2026-10-11 | SPEC-11 REN-001 | AABB is in an unreferenced assembly of the installed Entities package | Reference Unity.Mathematics.Extensions | Tech lead | Resolved in SPEC-11 Q13 by accepted ADR-0022; no package or module-boundary change |
+| 54 | 2026-10-11 | SPEC-12 PHY-001 | Chunk-query prose conflicts with DebugAllQuery's exact filter | Gameplay queries exclude chunks except SpawnClearance; debug-all includes all bodies | Tech lead | Resolved in SPEC-12 Q10; exact filter code unchanged |
+| 55 | 2026-10-11 | SPEC-12 PHY-001 | Initial capacities omitted for some pipeline containers | Cache 256; batch brick/child/apply 512, assemblies 64 | Tech lead | Resolved in SPEC-12 Q11; align related pools, retain dynamic growth |
 
 ## Measurements
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Game.Voxel.Model;
 using Game.Voxel.Rendering;
+using Game.Voxel.PhysicsBody;
 using NUnit.Framework;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
@@ -19,7 +20,7 @@ namespace Game.Tests.EditMode.Voxel
         // FxEventQueue are added here by REN-001/PHY-001/VFX-001; SPEC-64's SfxEventQueue lives in Game.Voxel too (AUD-001).
         static readonly HashSet<Type> ContainerSingletons = new HashSet<Type>
         { typeof(DeferredDisposalQueue), typeof(GridPrototypes), typeof(Game.Voxel.PresentationStreams.SfxEventQueue),
-          typeof(VoxelRenderConfig), typeof(VoxelRenderRuntime), typeof(BrickMeshQueue), typeof(BrickMeshBatch) };
+          typeof(VoxelRenderConfig), typeof(VoxelRenderRuntime), typeof(BrickMeshQueue), typeof(BrickMeshBatch), typeof(ColliderDirtyQueue), typeof(ColliderBuildCache), typeof(ColliderBatchQueue) };
 
         [Test]
         public void StructSizes_MatchSpec()

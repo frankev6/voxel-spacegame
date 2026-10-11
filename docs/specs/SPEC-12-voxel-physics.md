@@ -145,7 +145,7 @@ Interaction matrix (✓ = contacts or trigger events; derived from the filters, 
 | **Sensor** | ✓ | — | — | — | — |
 | **EditorPreview** | — | — | — | — | — |
 
-Query hits: Projectile/Beam → Grid, Celestial. Explosion, CameraOcclusion → Grid. Picking → Grid, Celestial. Interaction → Grid, Celestial, Sensor. SpawnClearance → Grid, ChunkBody, Celestial. EditorPick → Grid, EditorPreview. No query filter hits ChunkBody except SpawnClearance (chunks are not damageable, SPEC-13 open question 13).
+Query hits: Projectile/Beam → Grid, Celestial. Explosion, CameraOcclusion → Grid. Picking → Grid, Celestial. Interaction → Grid, Celestial, Sensor. SpawnClearance → Grid, ChunkBody, Celestial. EditorPick → Grid, EditorPreview. No gameplay query filter hits ChunkBody except SpawnClearance (chunks are not damageable, SPEC-13 open question 13). DebugAllQuery deliberately hits every body category, including chunks (Q10).
 
 ### 4.3 Components on grid roots (`PhysicsBody/`)
 
@@ -491,6 +491,8 @@ namespace Game.Voxel.PhysicsBody
 2. An update referenced by the in-flight batch is in state Building or Built-in-batch and is never freed before finalize.
 3. Every blob is referenced by exactly one owner: a record's `Installed`, a record's `Children`, an update's `Compound`, a batch result, or `Retired`.
 4. `Collecting` and `CollectingBricks` contain only updates in state Collecting.
+
+Initial capacities not annotated above use **256** for cache lists/maps, **512** for batch brick/mask/result/child/apply lists, and **64** for batch assembly/result lists; native references start cleared (Q11). Lists/maps can grow.
 
 ### 4.8 Memory model (architecture §11.10)
 
@@ -1112,17 +1114,19 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | Is a 7–10 tick (117–167 ms) delay between a cell change and the matching collider acceptable? Projectiles are exact regardless (decision 4); only physical contact with freshly destroyed space lags | Yes | Owner |
-| 2 | Architecture §8 rows: `PhysicsVelocity` adds "`GridMassUpdateSystem` (exact re-expression when the mass frame changes, decision 12)"; `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` creation by `GridBodyInitSystem` or a `GridBodyFactory` caller is not a write (SPEC-13 Q14) | **Applied** in architecture §8 (2026-10-09). Apply as written | Tech lead |
-| 3 | SPEC-10 `GridSpawnSystem` prefills `GridMass` from the cached `VoxelStructure.GetMass` at conversion and disables `GridMassRecompute` | **Applied** in SPEC-10 VOX-013 (2026-10-09). Yes (saves an O(cells) recompute per spawn) | SPEC-10 |
-| 4 | SPEC-10 `BrickDirtyScheduleSystem` (and the edit path of `GridSpawnSystem`) access `ColliderDirtyQueue` with `Acquire/Release` / `CompleteAccess` (§5.1) instead of `GetSingletonRW` | Yes | SPEC-10 |
-| 5 | SPEC-13 `SplitSystem` creates hulk bodies with `GridBodyFactory` (provisional collider + `PhysicsWorldIndex`) so the hulk moves from the next tick; chunk colliders use `PhysicsLayers.ChunkMaterial` | Yes | SPEC-13 |
-| 6 | Urgent collider work is not capped (decision 7). If PHY-019's skirmish shows batches over 512 urgent bricks, cap urgent work and accept late installs, or raise the delay? | Raise `InstallDelayTicks` to 10 before capping | Tech lead |
-| 7 | SPEC-31: celestial bodies use `PhysicsLayers.Celestial`/`CelestialMaterial`, sensors `Sensor`/`SensorMaterial`; stations on rails are Kinematic grids moved with velocities, not teleported | Yes | SPEC-31 |
-| 8 | SPEC-13 §4.4: `CellRemovedView` arrays are deferred job arrays usable inside jobs scheduled after `BeginRemovedRead` | **Applied** in SPEC-13 §4.4 (2026-10-09). Yes | SPEC-13 |
-| 9 | Should ships use non-zero linear damping as a gameplay speed limit? | No: SPEC-20 limits speed through propulsion; `GridLinearDamping = 0` | Owner (SPEC-20) |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | Is a 7–10 tick (117–167 ms) delay between a cell change and the matching collider acceptable? Projectiles are exact regardless (decision 4); only physical contact with freshly destroyed space lags | Yes | Owner | |
+| 2 | Architecture §8 rows: `PhysicsVelocity` adds "`GridMassUpdateSystem` (exact re-expression when the mass frame changes, decision 12)"; `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` creation by `GridBodyInitSystem` or a `GridBodyFactory` caller is not a write (SPEC-13 Q14) | **Applied** in architecture §8 (2026-10-09). Apply as written | Tech lead | |
+| 3 | SPEC-10 `GridSpawnSystem` prefills `GridMass` from the cached `VoxelStructure.GetMass` at conversion and disables `GridMassRecompute` | **Applied** in SPEC-10 VOX-013 (2026-10-09). Yes (saves an O(cells) recompute per spawn) | SPEC-10 | |
+| 4 | SPEC-10 `BrickDirtyScheduleSystem` (and the edit path of `GridSpawnSystem`) access `ColliderDirtyQueue` with `Acquire/Release` / `CompleteAccess` (§5.1) instead of `GetSingletonRW` | Yes | SPEC-10 | |
+| 5 | SPEC-13 `SplitSystem` creates hulk bodies with `GridBodyFactory` (provisional collider + `PhysicsWorldIndex`) so the hulk moves from the next tick; chunk colliders use `PhysicsLayers.ChunkMaterial` | Yes | SPEC-13 | |
+| 6 | Urgent collider work is not capped (decision 7). If PHY-019's skirmish shows batches over 512 urgent bricks, cap urgent work and accept late installs, or raise the delay? | Raise `InstallDelayTicks` to 10 before capping | Tech lead | |
+| 7 | SPEC-31: celestial bodies use `PhysicsLayers.Celestial`/`CelestialMaterial`, sensors `Sensor`/`SensorMaterial`; stations on rails are Kinematic grids moved with velocities, not teleported | Yes | SPEC-31 | |
+| 8 | SPEC-13 §4.4: `CellRemovedView` arrays are deferred job arrays usable inside jobs scheduled after `BeginRemovedRead` | **Applied** in SPEC-13 §4.4 (2026-10-09). Yes | SPEC-13 | |
+| 9 | Should ships use non-zero linear damping as a gameplay speed limit? | No: SPEC-20 limits speed through propulsion; `GridLinearDamping = 0` | Owner (SPEC-20) | |
+| 10 | The prose says only SpawnClearance queries chunks, but DebugAllQuery explicitly includes all bodies | Restrict the prose rule to gameplay queries; preserve DebugAllQuery | Tech lead | Resolved 2026-10-11 in PHY-001: exact filter code retained; tests cover all nine queries and the diagnostic exception. |
+| 11 | Several pipeline container capacities are not specified | Cache lists/maps 256; batch brick/child/apply lists 512, assembly lists 64 | Tech lead | Resolved 2026-10-11 in PHY-001: align unspecified initial capacities with their related pools; native references clear; normal growth remains allowed. |
 
 ## 11. References
 
