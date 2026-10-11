@@ -6,6 +6,6 @@ namespace Game.Data
     {
         [UnityEngine.SerializeField] private System.Collections.Generic.List<Game.Data.Definitions.ContentDefinition> definitions = new();
         public System.Collections.Generic.IReadOnlyList<Game.Data.Definitions.ContentDefinition> Definitions => definitions;
-        internal void EditorSetDefinitions(System.Collections.Generic.List<Game.Data.Definitions.ContentDefinition> sortedById) { throw new System.NotImplementedException("DATA-008"); } // Game.Editor + tests only
+        internal void EditorSetDefinitions(System.Collections.Generic.List<Game.Data.Definitions.ContentDefinition> sortedById) { definitions = new System.Collections.Generic.List<Game.Data.Definitions.ContentDefinition>(sortedById); } // Game.Editor + tests only
     }
 }
