@@ -2,6 +2,7 @@
 
 Driver (system Python):  python3 ArtSource/LookDev/lookdev.py [--direction drydock] [--stage kit,scenes] [--draft]
                          python3 ArtSource/LookDev/lookdev.py --stage check     (build rules: attachment, mounts, shapes)
+                         python3 ArtSource/LookDev/lookdev.py --stage r4 --direction drydock,nocturne   (round 4 ships)
 Inside Blender:          blender -b --factory-startup --python lookdev.py -- --blender --direction X --stage S --out DIR
 
 Outputs go to docs/design/lookbook/img/r2/<direction>/ (scenes as JPEG, icons as WebP). Round 1 renders stay in
@@ -17,6 +18,7 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
 OUT_ROOT = os.path.join(ROOT, "docs", "design", "lookbook", "img", "r3")
+R4_ROOT = os.path.join(ROOT, "docs", "design", "lookbook", "img", "r4")
 BLENDER = "/Applications/Blender.app/Contents/MacOS/Blender"
 sys.path.insert(0, HERE)
 
@@ -61,6 +63,9 @@ def blender_main(argv):
         ld_scenes.stage_kit(S, scene, mats, out, only)
     elif stage == "check":
         ld_scenes.stage_check(S, only)
+    elif stage == "r4":
+        import ld_r4
+        ld_r4.stage_r4(S, scene, mats, out, only, draft)
     else:
         ld_scenes.stage_scenes(S, scene, mats, out, only, draft)
     print(f"LOOKDEV done {direction} {stage} in {time.time() - t0:.1f}s")
@@ -71,7 +76,7 @@ def blender_main(argv):
 # ======================================================================================================================
 
 def run_blender(direction, stage, draft=False, only=None):
-    out = os.path.join(OUT_ROOT, direction)
+    out = os.path.join(R4_ROOT if stage == "r4" else OUT_ROOT, direction)
     cmd = [BLENDER, "-b", "--factory-startup", "--python", os.path.abspath(__file__), "--", "--blender",
            "--direction", direction, "--stage", stage, "--out", out]
     if draft:
@@ -88,10 +93,10 @@ def run_blender(direction, stage, draft=False, only=None):
     print(f"{direction} {stage}: {'ok' if ok else 'FAILED'} rc={rc} {time.time() - t0:.0f}s  log={log}")
     if ok and stage == "kit":
         icons_to_webp(os.path.join(out, "icons"))
-    if stage == "check":
+    if stage in ("check", "r4"):
         print("\n".join(l[6:] for l in txt.splitlines() if l.startswith("CHECK ")))
         rows = [json.loads(l[10:]) for l in txt.splitlines() if l.startswith("CHECKJSON ")]
-        merge_js(os.path.join(LOOKBOOK, "buildcheck.js"), "BUILDCHECK", {direction: rows})
+        merge_js(os.path.join(LOOKBOOK, "buildcheck.js"), "BUILDCHECK", {("r4" if stage == "r4" else direction): rows})
     if not ok:
         tail = [l for l in txt.splitlines() if "Error" in l or "Traceback" in l or "line " in l][-25:]
         print("\n".join(tail))

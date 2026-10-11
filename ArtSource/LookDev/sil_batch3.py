@@ -1850,6 +1850,29 @@ def sprite_h(s, bar=None, mono=False, pad=0.03, cls="spr"):
     return "".join(out)
 
 
+# Silhouettes that have been built in 3D (ld_ark.py), with their look-book key: their cards say so, and the page build
+# writes a standalone reference SVG per art direction into the look book's round-4 image folder.
+BUILT_3D = {"HALO": ("halo", lambda: aw_halo())}
+
+
+def reference_svgs(css, defs, out_dir):
+    import os
+    for name, (key, fn) in BUILT_3D.items():
+        s, m = fn()
+        for mode, d in (("pdd", "drydock"), ("pnc", "nocturne")):
+            inner = sprite_h(s, 10)
+            head, body = inner[:inner.index(">") + 1], inner[inner.index(">") + 1:-len("</svg>")]
+            vb = head[head.index('viewBox="') + 9:].split('"')[0]
+            sw = head[head.index("--sw:"):].split('"')[0]
+            vx, vy, vw, vh = (float(v) for v in vb.split())
+            svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="{1200 * vh / vw:.0f}" viewBox="{vb}">{defs}'
+                   f'<style><![CDATA[{css}]]></style><rect x="{vx}" y="{vy}" width="{vw}" height="{vh}" fill="#0D1428"/>'
+                   f'<g class="{mode}"><g class="card3"><g class="spr" style="{sw}">{body}</g></g></g></svg>')
+            os.makedirs(os.path.join(out_dir, d), exist_ok=True)
+            with open(os.path.join(out_dir, d, f"{key}_silhouette.svg"), "w") as fh:
+                fh.write(svg)
+
+
 def hero_card(s, m):
     codex = "".join(f"<dt>{k}</dt><dd>{m[f]}</dd>" for k, f in (("Fit", "fit"), ("System", "system"), ("Built in", "built"),
                                                                    ("Asymmetry", "asym"), ("Variants", "variants")) if m.get(f))
@@ -1903,7 +1926,13 @@ def ship_card(s, m, faction):
             f'{sprite3(s, SCALES3[cls], BARS3[cls])}'
             f'<div class="nm">{m["name"]}</div><div class="role">{m["desig"]} · {cls.lower()} · {size_txt(s)}</div>'
             f'{stats_html(full(m))}<p>{m["story"]}</p><dl class="codex">{codex}</dl>'
-            f'<p class="weak"><b>Weak to:</b> {m["weak"]}</p></button>')
+            f'<p class="weak"><b>Weak to:</b> {m["weak"]}</p>{built_note(m)}</button>')
+
+
+def built_note(m):
+    if m["name"] not in BUILT_3D:
+        return ""
+    return '<p class="built3d">Built in 3D: see the ARK tab in the look book (<code>docs/design/lookbook/index.html</code>)</p>'
 
 
 def refit_card(s, m, base_stats, cls, is_base):
@@ -2036,6 +2065,7 @@ CSS3 = """
 .pnc .card3 .spr .base,.pnc .card3 .spr .plate{stroke:var(--accent);stroke-opacity:.35;stroke-width:calc(var(--sw)*.8)}
 @keyframes prism{0%{fill:#FF7B7B}20%{fill:#FFD86B}40%{fill:#7BFFA8}60%{fill:#6BD8FF}80%{fill:#B88BFF}100%{fill:#FF7B7B}}
 .pnc .f-vanguard .accent{animation:prism 6s linear infinite}
+.built3d{font-size:12px;color:#7BE39A;margin:-8px 0 14px !important;font-weight:600}
 .card.hero{grid-column:1/-1}
 .card svg.wide{aspect-ratio:auto;height:auto;width:100%;display:block}
 .hero .thumb{width:15%}

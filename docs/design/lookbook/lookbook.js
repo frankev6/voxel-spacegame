@@ -1,5 +1,5 @@
 /* Look Book. Round 3: DRYDOCK, NOCTURNE and OPERA with connected ships, cruisers and dreadnoughts, capital weapons,
-   defended stations and five alien types. Rounds 1 and 2 stay available as an archive. Renders come from
+   defended stations and five alien types. Round 4 (ARK tab): ships built in 3D from approved batch-3 silhouettes. Rounds 1 and 2 stay available as an archive. Renders come from
    ArtSource/LookDev/lookdev.py (Blender); lineups.js and buildcheck.js are written by the same tool.
    Game screens are HTML at 1920x1080 composited over the renders and scaled to fit. */
 "use strict";
@@ -490,15 +490,73 @@ function archivePage() {
   return p;
 }
 
+/* ---------------------------------------------------------------- round 4: ships built from approved batch-3 silhouettes */
+
+const R4 = [
+  { key: "drydock", base: "img/r4/drydock", name: "DRYDOCK" },
+  { key: "nocturne", base: "img/r4/nocturne", name: "NOCTURNE" },
+];
+
+const R4_SHIPS = [{
+  key: "halo", name: "HALO", line: "ARK war line · fire-control destroyer · ARK war pattern 24", length: "86 m",
+  story: "The expedition can't make shields, so the HALO is the team's shield: six point-defence turrets and a flak battery that shoot down missiles and fighters aimed at anyone nearby. "
+    + "The fire-control dish on its port boom marks one target, and every linked ARK gun in range fires on it together. It punches by making everyone else hit.",
+  parts: [
+    "<b>Heat to port:</b> a radiator deck with 16 fins (they glow when the reactor runs hot), and the fire-control dish on a lattice boom",
+    "<b>Ammunition to starboard:</b> the flak magazine, a plated safety-yellow box against the hull, with a flak turret on top and a hazard band at its bow end",
+    "<b>Six point-defence turrets</b> (rotary cannons): two on the forward sponsons, one on the bridge roof, one amidships, two on the engine block",
+    "<b>Twin coilgun turret</b> on the bone armour prow; the prow and the bridge are the bone standard blocks, the hull is graphite",
+    "<b>Red fire-team stripe</b> across the hull, two main engines and two manoeuvring thrusters, reactor and core inside",
+    "<b>New:</b> the <code>arkw</code> livery (both worlds) and the <code>ark</code> plating: even 1.5 m blocks, bolts and stencilled pattern numbers",
+  ],
+  open: "Turrets, the flak and the engines use the existing kit blocks at twice their frigate size (as the cruisers already do with the triple battery). A destroyer needs its own sizes in the kit, or a rule for scaled blocks.",
+}];
+
+function arkPage() {
+  const p = el("div", "dir ark");
+  const dd = R4[0], nc = R4[1];
+  for (const sh of R4_SHIPS) {
+    const hero = el("div", "hero");
+    hero.innerHTML = `<img src="${img(dd, sh.key + "_hero.jpg")}" alt="${sh.name} in DRYDOCK">
+      <div class="hero-text"><div class="hkick">Round 4 · batch 3 in 3D · the first build</div><h2 class="hn">${sh.name}</h2><p>${sh.line} · ${sh.length}</p><p>${sh.story}</p></div>`;
+    hero.dataset.zoom = "img";
+    p.appendChild(hero);
+    const stats = ((window.BUILDCHECK || {}).r4 || []).find(r => r.name === sh.name);
+    const ch = el("div", "changed");
+    ch.innerHTML = `<h4>What is built where</h4><ul>${sh.parts.map(s => `<li>${s}</li>`).join("")}</ul>`
+      + (stats ? `<p class="lead">Build check: ${stats.ok ? "passes" : "FAILS"} (every block attached through shared faces, every module on its mount face). ${stats.cells.toLocaleString()} cells of 0.5 m, ${stats.mods} modules, ${stats.shapes} distinct cut shapes.</p>` : "")
+      + `<p class="lead"><b>Open question:</b> ${sh.open}</p>`;
+    p.appendChild(ch);
+    let s = section("Silhouette to blocks", "the approved plan view beside the 3D build seen from straight above; bow to the right, port at the top");
+    let g = el("div", "g2");
+    g.appendChild(shot(dd, sh.key + "_silhouette.svg", "Approved silhouette (batch 3), DRYDOCK paint"));
+    g.appendChild(shot(dd, sh.key + "_plan.jpg", "The 3D build from above"));
+    s.appendChild(g);
+    p.appendChild(s);
+    for (const d of [dd, nc]) {
+      s = section(`In ${d.name}`, d === dd ? "graphite, bone blocks, safety yellow" : "blackened graphite, ash-grey blocks, sodium yellow");
+      g = el("div", "g2");
+      if (d === nc) g.appendChild(shot(d, sh.key + "_hero.jpg", `${sh.name} near Vesper-9`));
+      g.appendChild(shot(d, sh.key + "_game.jpg", "The game camera: 55° pitch, 40° field of view"));
+      g.appendChild(shot(d, sh.key + "_rear.jpg", "Stern: two main engines, the hot radiator deck to port, the magazine to starboard"));
+      g.appendChild(shot(d, sh.key + "_detail.jpg", "Bridge, bone prow and the fire-control boom"));
+      if (d === nc) g.appendChild(shot(d, sh.key + "_plan.jpg", "From above"));
+      s.appendChild(g);
+      p.appendChild(s);
+    }
+  }
+  return p;
+}
+
 const pages = {};
-const TABS = R3.map(d => ({ key: d.key, name: d.name })).concat([{ key: "aliens", name: "ALIENS" }, { key: "compare", name: "Compare", cls: "cmp-tab" }, { key: "archive", name: "Earlier rounds", cls: "arch-tab" }]);
+const TABS = R3.map(d => ({ key: d.key, name: d.name })).concat([{ key: "ark", name: "ARK · round 4" }, { key: "aliens", name: "ALIENS" }, { key: "compare", name: "Compare", cls: "cmp-tab" }, { key: "archive", name: "Earlier rounds", cls: "arch-tab" }]);
 
 function show(key) {
   if (!TABS.some(t => t.key === key)) key = "drydock";
   for (const b of document.querySelectorAll("#tabs button")) b.setAttribute("aria-selected", b.dataset.key === key ? "true" : "false");
   const main = $("#main");
   if (!pages[key]) {
-    pages[key] = key === "compare" ? comparePage() : key === "aliens" ? aliensPage() : key === "archive" ? archivePage() : directionPage(R3.find(d => d.key === key));
+    pages[key] = key === "compare" ? comparePage() : key === "aliens" ? aliensPage() : key === "ark" ? arkPage() : key === "archive" ? archivePage() : directionPage(R3.find(d => d.key === key));
   }
   main.replaceChildren(pages[key]);
   requestAnimationFrame(fit);

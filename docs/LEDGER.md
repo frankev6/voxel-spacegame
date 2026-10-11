@@ -637,6 +637,19 @@ Newest first. One entry per finished task or notable event: what changed, measur
     - From the bow: an ice-and-rock impact plug, the command block and dishes, two habitat drums (one holds the seed vault), a foundry fed by a captured asteroid to port, shipyard gantries to starboard, a hangar deck, then the reactor, radiators, propellant tanks and seven fusion engines.
     - A HOLDFAST, a GARDENER and an ICEBREAKER are docked at true scale.
     - The starboard radiator wing was cut down to print the first fleet; its bare frame remains.
+- **Owner pick (verbatim, 2026-10-11):**
+
+  > ok the first 3d block ship we'll build out is Batch 3: HALO (ARK war line)
+
+- **HALO built in 3D** (`ArtSource/LookDev/ld_ark.py`). It follows the approved plan view: aft engine block, main hull, the waist under the bridge, forward point-defence sponsons and the bone armour prow.
+  - Port side: a radiator deck with 16 fins, and the fire-control dish on a lattice boom. Starboard side: the flak magazine with its flak turret.
+  - Weapons: 6 point-defence turrets and a twin coilgun turret. The red fire-team stripe runs across the hull.
+  - It passes the build check: 108,345 cells, 32 modules, every block attached and every module on its mount face.
+  - New `arkw` livery for DRYDOCK and NOCTURNE, and new `ark` plating (even 1.5 m blocks, bolts, stencilled pattern numbers).
+  - New render stage `lookdev.py --stage r4`, which writes `img/r4/<direction>/halo_{hero,game,rear,plan,detail}.jpg` and adds the check results to `buildcheck.js` under `r4`.
+  - The silhouette build now writes reference SVGs for built ships and marks their cards "Built in 3D".
+  - Look book: new **ARK · round 4** tab, with the approved silhouette beside the 3D plan view and the shots in both worlds.
+  - **Open:** turrets, the flak and the engines are kit blocks at twice their frigate size, as the cruisers already do with the triple battery. A destroyer needs its own kit sizes, or a rule for scaled blocks.
 - **Next:** the owner marks silhouettes from either batch; the approved plan views are then built in 3D with the new pieces, plating and blocks, checked, rendered and added to the look book.
 
 ### 2026-10-10 — Look book round 3: connected ships, cruisers and dreadnoughts, capital weapons, defended stations, five aliens (claude, claude-opus-5-5)

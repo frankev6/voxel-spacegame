@@ -33,6 +33,14 @@ PLATING = {
                              grille=0.05, subpanel=0.08),
                   windows=dict(rows_m=3.0, z0_m=1.1, w_m=0.09, h_m=0.34, pitch_m=0.5, on=0.6, arch=True),
                   wear=0.35, chips=0.2),
+    # batch 3, the ARK (printed Earth patterns): even 1.5 m standard blocks, bolted, stencilled pattern numbers, hazard chevrons
+    "ark": dict(px=2048, seed=83, base_m=1.5, merge=0.25, maxd=3, stop=(0.0, 0.12, 0.38, 0.7), min_m=0.25,
+                snap_m=0.125, long_bias=0.7, raise_p=0.28, inset_p=0.16, relief=0.1, bevel_m=0.02, seam_m=0.007,
+                tint=0.035, paint_top=0.1, paint_p=0.03, patch_p=0.06, black_p=0.0,
+                feats=dict(bolts=0.55, stencil=0.12, chevron=0.04, hatch=0.06, grille=0.05, subpanel=0.14, vents=0.05,
+                           pipes=0.04, tread=0.04),
+                windows=dict(rows_m=3.0, z0_m=1.1, w_m=0.12, h_m=0.2, pitch_m=0.42, on=0.7),
+                wear=0.4, chips=0.25),
     # line A (round-3 ships), finer and calmer, so the earlier designs gain the same sense of scale
     "yard": dict(px=2048, seed=63, base_m=1.5, merge=0.4, maxd=3, stop=(0.0, 0.15, 0.4, 0.75), min_m=0.25,
                  snap_m=0.125, long_bias=0.8, raise_p=0.25, inset_p=0.15, relief=0.09, bevel_m=0.018, seam_m=0.006,

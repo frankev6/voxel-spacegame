@@ -113,5 +113,16 @@ window.BUILDCHECK = {
    "shapes": 219,
    "u": 1
   }
+ ],
+ "r4": [
+  {
+   "big": 0,
+   "cells": 108345,
+   "mods": 32,
+   "name": "HALO",
+   "ok": true,
+   "shapes": 1387,
+   "u": 1
+  }
  ]
 };

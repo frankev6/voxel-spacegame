@@ -830,6 +830,9 @@ def build():
     with open(OUT, "w") as fh:
         fh.write(html)
     print("wrote", OUT)
+    css = PAGE[PAGE.index("<style>") + 7:PAGE.index("</style>")].replace("/*CSS3*/", B3.CSS3 + B3.palette_css())
+    defs = PAGE[PAGE.index("<defs>"):PAGE.index("</defs>") + 7]
+    B3.reference_svgs(css, defs, os.path.join(os.path.dirname(OUT), "img", "r4"))
 
 
 PAGE = """<!doctype html>
