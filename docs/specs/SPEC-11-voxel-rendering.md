@@ -18,7 +18,7 @@ This spec turns voxel bricks into pixels at a cost proportional to the number of
 ## 2. Scope
 
 **In scope:**
-- Packed vertex format, normal/tangent tables, shape tables (Cube, Wedge × 24 orientations).
+- Packed vertex format, normal/tangent tables, shape tables (all five ADR-0018 cell shapes × 24 orientations).
 - Snapshot gathering (18³ `MeshCell`s), LOD0 culled-face mesher with AO and welding, LOD1 downsampled greedy mesher, LOD2 per-grid proxy (M4).
 - `BrickMeshBuildSystem`, `BrickMeshApplySystem`, `BrickRenderCleanupSystem`, `GridLodSystem` (LOD and `Dormant`), `PropRenderSystem`.
 - Mesh lifetime: create, `RegisterMesh` once, in-place `ApplyAndDisposeWritableMeshData`, explicit bounds, `RenderBounds`, retire through `DeferredDisposalSystem`.
@@ -179,6 +179,7 @@ public struct BrickMeshWork                                  // one brick in the
     public int VertexCount, IndexCount;                      // written by the mesher
     public float3 BoundsMin, BoundsMax;                      // cell units, written by the mesher
     public int PropStart, PropCount;                         // into BrickMeshBatch.Props
+    public byte SnapshotFlags;                              // invalid reference/content bit 0; prop overflow bit 1 (ADR-0029)
 }
 
 public struct BrickMeshBatch : IComponentData                // singleton
@@ -266,10 +267,10 @@ Material properties (names are the contract): `_AlbedoArray`, `_NormalArray`, `_
 
 ### 5.1 Snapshot gathering (`BrickSnapshotJob`, *internal*)
 
-`IJobParallelFor` over the batch work items (inner batch 1), all lookups `[ReadOnly]`: `BrickCells`, `BrickSparseCells`, `BrickSlot`, `VoxelGrid`, `PaletteEntry`, `BlockInstance`, `BlockDefsRef` blob, `BrickShapeTables`. For item i (brick b with coord c in grid g):
+`IJobParallelFor` over the batch work items (inner batch 1), all lookups `[ReadOnly]`: `BrickCells`, `BrickSparseCells`, `BrickSlot`, `VoxelGrid`, `PaletteEntry`, `BlockInstance`, `Brick`, `BlockDefsRef` blob, `OrientationTablesBlob`. For item i (brick b with coord c in grid g):
 1. Resolve the 27 brick buffers (offsets −1..1 per axis) through `BrickSlot` of g; missing → treated as air.
-2. For every snapshot position (x,y,z) ∈ [−1,16]³ (5,832): pick the source brick and local index; `cell = BrickWrite.Get(dense, sparse, local)` (ADR-0023; snapshot remains dense); air → 0; else resolve `(Block, Orient, Color)` from the palette entry or instance; `def = Blocks[Block]`; class = `def.Kind == Structural ? 1 : 2`; for class 1: palette shape = `def.Shape`; instance shape = `def.GetShape(footprintIndex)`, where inverse orientation maps `gridCell - instance.Origin` into the unrotated footprint and a canonical Cells lookup finds the index (ADR-0028). A missing footprint match uses the missing-content fallback below. Layer = `def.MaterialLayer`; full-face coverage is looked up from `Shapes.FullFaces[shape*24+orient]` by the mesher (ADR-0018); damage = `3 − (Hp >> 6)`; write `MeshCell.Encode(...)` to `Snapshots[i*5832 + SnapIndex(x,y,z)]`. A palette/instance index out of range → class 1, Cube, layer 63, colour 0 (the "missing" look) and `GameLog.WarnOnce` from the apply system (the job sets a flag).
-3. Props (interior only): for each cell that is a palette cell of a Prop block, or an instance cell with `InstanceRoot` whose block is Prop: append `BrickPropInstance{Block, LocalIndex, Orient, Color}` to `Props[i*512 + k]`; more than 512 → stop and set an overflow flag (`GameLog.WarnOnce`).
+2. For every snapshot position (x,y,z) ∈ [−1,16]³ (5,832): pick the source brick and local index; `cell = BrickWrite.Get(dense, sparse, local)` (ADR-0023; snapshot remains dense); air → 0; else resolve `(Block, Orient, Color)` from the palette entry or instance; `def = Blocks[Block]`; class = `def.Kind == Structural ? 1 : 2`; for class 1: palette shape = `def.Shape`; instance shape = `def.GetShape(footprintIndex)`, where inverse orientation maps `gridCell - instance.Origin` into the unrotated footprint and a canonical Cells lookup finds the index (ADR-0028). A missing footprint match uses the missing-content fallback below. Layer = `def.MaterialLayer`; full-face coverage is looked up from `Shapes.FullFaces[shape*24+orient]` by the mesher (ADR-0018); damage = `3 − (Hp >> 6)`; write `MeshCell.Encode(...)` to `Snapshots[i*5832 + SnapIndex(x,y,z)]`. An invalid palette/instance/block reference, reserved block-zero entry, invalid shape/orientation, palette entry requiring an instance, or unmatched instance footprint → class 1, Cube, orientation 0, layer 63, colour 0, preserving damage/scorch (the "missing" look). Set Work.SnapshotFlags bit 0; the apply system issues GameLog.WarnOnce (ADR-0029).
+3. Props (interior only): for each cell that is a palette cell of a Prop block, or an instance cell with `InstanceRoot` whose block is Prop: append `BrickPropInstance{Block, LocalIndex, Orient, Color}` to `Props[i*512 + k]`; more than 512 → omit extras and set Work.SnapshotFlags bit 1 (apply issues `GameLog.WarnOnce`); continue gathering the snapshot. Reset PropStart=i*512, PropCount and SnapshotFlags at the start of each item; meshing preserves them.
 Cost: ~5,832 cell reads per brick (≈ 15 µs). The job is scheduled on `state.Dependency` and **completed before `BrickMeshBuildSystem.OnUpdate` returns** (VoxelRebuildGroup is not the fixed step; ≤ 128 bricks ≈ 0.3 ms wall on 8 workers). This is the only point that touches live ECS cell memory.
 
 ### 5.2 LOD0 mesher (`BrickMesher.MeshLod0`, Burst, *internal*)
@@ -369,7 +370,7 @@ Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `Hollow
 | `Dormant` | — | Enabled ⇔ grid farther than `DormantDistance` from `VoxelViewer.AnchorPosition` (hysteresis); readers skip expensive work |
 | `BrickRenderStats.Gather(em)` | Main thread | Mesh memory totals for the memory gate |
 | `BrickMesher.MeshLod0/MeshLod1(NativeArray<uint> snapshot, ref BrickShapeTables, NativeList<PackedBrickVertex>, NativeList<ushort>, out float3 min, out float3 max)` | Snapshot of 5,832 cells | Pure; used by SPEC-51 for editor previews of unspawned structures |
-| `BrickSnapshotUtility.FromStructure(VoxelStructureData, int3 brick, ref BlockDefsBlob, ref BrickShapeTables, NativeArray<uint> out)` | Brick exists | Same snapshot as §5.1 from a `VoxelStructure` (editor, tests) |
+| `BrickSnapshotUtility.FromStructure(VoxelStructureData, int3 brick, ref BlockDefsBlob, ref OrientationTablesBlob, NativeArray<uint> out)` | Brick exists | Same snapshot as §5.1 from a `VoxelStructure` (editor, tests) |
 
 ## 7. Edge cases and failure behaviour
 
@@ -458,13 +459,13 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 ### REN-005 — Snapshot gathering
 - **Milestone:** M1
 - **Tier:** frontier — F2/F3: the only reader of live cell memory for meshing; cross-brick borders
-- **Depends on:** `REN-004`, `SPEC-10`
+- **Depends on:** `REN-004`, `SPEC-10`, `SPEC-04`
 - **Do:** Implement `BrickSnapshotJob` (§5.1) and `BrickSnapshotUtility.FromStructure`.
 - **Files:** `Assets/Game/Voxel/Rendering/{BrickSnapshotJob,BrickSnapshotUtility}.cs`; `Assets/Game/Tests/EditMode/Voxel/Rendering/SnapshotTests.cs`
 - **Acceptance criteria:**
-  - [ ] ECS snapshot equals the structure snapshot for every brick of `Ship20k` and a random 3×3×3-brick structure (all 26 neighbour directions populated).
-  - [ ] Missing neighbours read as air; out-of-range refs produce the missing look and set the flag.
-  - [ ] Prop lists contain exactly the prop roots inside the brick.
+  - [x] ECS snapshot equals the structure snapshot for every brick of `Ship20k` and a random 3×3×3-brick structure (all 26 neighbour directions populated).
+  - [x] Missing neighbours read as air; out-of-range refs produce the missing look and set the flag.
+  - [x] Prop lists contain exactly the prop roots inside the brick.
 - **Tests:** `SnapshotTests.EcsEqualsStructure`, `.MissingNeighbours_Air`, `.BadRef_MissingLook`, `.Props_Collected`.
 
 ### REN-006 — LOD0 mesher
@@ -615,6 +616,7 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 
 | 16 | Approved long slopes need half-cell vertices but the old format only encodes whole corners | Keep eight-byte vertices and use half-cell integer coordinates | Tech lead | Resolved 2026-10-11 by accepted ADR-0027: exact five-shape geometry, shader ×0.5 position decode, 33×33 weld grid, cell-unit bounds and UVs; REN-004 criteria cover 120 entries. |
 | 17 | Long-slope normal ordering and tangents were unspecified | Pair-major, then magnitude swap, then sign bits; positive zero-axis tangent | Tech lead | Resolved 2026-10-11: §4.1 gives exact indices 18..41 and C#/HLSL parity tests. No visual or shape change. |
+| 18 | Snapshot helper lacks orientation input and work has no warning storage | Replace unused shape-table input with orientations; add SnapshotFlags | Tech lead | Resolved by accepted ADR-0029; canonical inverse rotation, defined bad-content fallback, per-work warning retention. |
 
 ## 11. References
 

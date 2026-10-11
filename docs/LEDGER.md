@@ -138,7 +138,7 @@
 | REN-002 | SPIKE: Entities Graphics with thousands of runtime brick meshes | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-10 | yes | todo |  |  |  |  |
 | REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002 | no | todo |  |  |  |  |
 | REN-004 | Normals, packing and shape tables | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6b076af | Five shapes × 24 rotations; exact half-cell packing; 42 normals; Q88–89 |
-| REN-005 | Snapshot gathering | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004, SPEC-10 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| REN-005 | Snapshot gathering | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004, SPEC-10, SPEC-04 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
 | REN-006 | LOD0 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | todo |  |  |  |  |
 | REN-007 | LOD1 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-006 | no | todo |  |  |  |  |
 | REN-008 | Brick and prop shaders, placeholder art | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | todo |  |  |  |  |
@@ -652,6 +652,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 88 | 2026-10-11 | SPEC-11 REN-004 | Long-slope half-cell geometry cannot use old integer whole-cell render coordinates | Keep byte layout; half-cell units decoded ×0.5 | Tech lead | Resolved SPEC-11 Q16 / accepted ADR-0027; five shapes, 120 orientations, exact geometry, unchanged bytes per vertex |
 | 89 | 2026-10-11 | SPEC-11 REN-004 | Long-slope normal order/tangents unspecified | Pair, magnitude-swap, sign order and positive zero-axis tangent | Tech lead | Resolved SPEC-11 Q17; 42-entry C#/HLSL tables agree |
 | 90 | 2026-10-11 | SPEC-04 DATA-012 / SPEC-11 | Approved long slope has no per-cell definition/blob support or implementation task | Canonical Shapes plus approved-kit validation and inherited angled-hull tuning | Tech lead | Resolved SPEC-04 Q14–15 / ADR-0028; no new shapes or visual assets |
+| 91 | 2026-10-11 | SPEC-11 REN-005 | Missing orientation input and retained snapshot diagnostics | Canonical orientation table input and per-work SnapshotFlags | Tech lead | Resolved SPEC-11 Q18 / accepted ADR-0029; no duplicate rotation implementation |
 
 
 

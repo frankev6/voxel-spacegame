@@ -14,5 +14,6 @@ namespace Game.Voxel.Rendering
         public int VertexCount, IndexCount;
         public float3 BoundsMin, BoundsMax;
         public int PropStart, PropCount;
+        public byte SnapshotFlags; // bit 0 invalid content/reference; bit 1 prop overflow (ADR-0029)
     }
 }
