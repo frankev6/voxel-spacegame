@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 69 | 1 | 0 | 0 | 32 | 0 | 102 | 13 |
+| M1 | 69 | 0 | 0 | 0 | 33 | 0 | 102 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 3 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -139,8 +139,8 @@
 | REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002 | no | todo |  |  |  |  |
 | REN-004 | Normals, packing and shape tables | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6b076af | Five shapes × 24 rotations; exact half-cell packing; 42 normals; Q88–89 |
 | REN-005 | Snapshot gathering | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004, SPEC-10, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 93cd973 | 27-neighbour snapshots, per-cell slopes, bounded props and retained flags; ADR-0029/Q91 |
-| REN-006 | LOD0 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| REN-007 | LOD1 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-006 | no | todo |  |  |  |  |
+| REN-006 | LOD0 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | done | astra (gpt-6) | 2026-10-11 | 1de74e0 | LOD0 culling/AO/welding; 36.3 µs median; large slope indices safe; ADR-0030/Q92 |
+| REN-007 | LOD1 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-006 | yes | todo |  |  |  |  |
 | REN-008 | Brick and prop shaders, placeholder art | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | todo |  |  |  |  |
 | REN-009 | Render config definitions and factory | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | REN-001, REN-008 | no | todo |  |  |  |  |
 | REN-010 | BrickMeshBuildSystem | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-005, REN-006, REN-007 | no | todo |  |  |  |  |
@@ -688,6 +688,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — REN-006 LOD0 meshing (astra, gpt-6)
+
+- Implemented row-mask face culling, all five shapes, half-cell AO, 33×33 slice welding, AO-based quad diagonals and exact cell-unit bounds. All 500 seeded snapshots match the brute-force triangle reference; independent winding/AO checks and the 289-vertex wall check pass.
+- Accepted ADR-0030 / Q92 after proving a legal tiled long-slope brick needs at least 73,728 vertices. Actual meshing produces 77,568 vertices / 40,960 triangles, maximum index 77,567, without wrap. Both mesher contracts now return uint indices; REN-010 must choose UInt16 upload up to 65,536 vertices and UInt32 beyond, and REN-011 must count the actual width. Reference cube-station memory remains unchanged. No geometry is dropped.
+- Damaged slab (529 vertices / 640 triangles), 1,000 synchronous single-threaded Burst samples with safety disabled: **36.3 µs median / 40.1 µs p95**, under 60 µs. Isolated painted cube checkerboard: 49,152 vertices / 24,576 triangles, **742.8 / 755.2 µs** (report only).
+- Validation: explicit compile zero C# warnings; EditMode **557 passed + 1 explicit skipped**, PlayMode **37 passed**, performance **31/31**, docs **503 tasks / zero errors**. No test or budget was removed. The earlier 35.2 µs focused median is superseded by the full-run measurement above.
+- Next: REN-007 downsampling/greedy LOD1. ART-007 and future preview/upload consumers must use ADR-0027 half-cell positions and ADR-0030 index width when integrated.
 
 ### 2026-10-11 — REN-005 render snapshots (astra, gpt-6)
 
