@@ -1,3 +1,9 @@
+using Game.Data.Combat;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Entities;
+using Unity.Jobs;
+
 namespace Game.Data.Streams
 {
     /// <summary>Per-tick registry of deterministic simulation event streams of one event type (architecture §5.1). Any number of
@@ -6,53 +12,170 @@ namespace Game.Data.Streams
     /// (read-only) by producers and consumer alike: no sync points. Implements SPEC-02 §4.12; algorithm §5.13.</summary>
     public unsafe struct SimEventChannel<T> where T : unmanaged
     {
-        [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction] internal SimEventChannelData<T>* Data;
+        [NativeDisableUnsafePtrRestriction] internal SimEventChannelData<T>* Data;
 
-        public static SimEventChannel<T> Create(Unity.Collections.FixedString32Bytes name) { throw new System.NotImplementedException("CORE-012"); }   // Allocator.Persistent; name for logs
+        /// <summary>Allocator.Persistent; name for logs.</summary>
+        public static SimEventChannel<T> Create(FixedString32Bytes name)
+        {
+            var data = (SimEventChannelData<T>*)UnsafeUtility.MallocTracked(UnsafeUtility.SizeOf<SimEventChannelData<T>>(),
+                UnsafeUtility.AlignOf<SimEventChannelData<T>>(), Allocator.Persistent, 0);
+            UnsafeUtility.MemClear(data, UnsafeUtility.SizeOf<SimEventChannelData<T>>());
+            data->Pending = new UnsafeList<SimEventRegistration>(4, Allocator.Persistent);
+            data->Inbox = new NativeList<T>(4, Allocator.Persistent);
+            data->ReadStreams = new UnsafeList<NativeStream>(4, Allocator.Persistent);
+            data->Name = name;
+            return new SimEventChannel<T> { Data = data };
+        }
+
         public bool IsCreated => Data != null;
-        public void Dispose() { throw new System.NotImplementedException("CORE-012"); }                                 // completes every stored handle, disposes every stream still registered
 
-        /// <summary>Channel owner, once per tick before producers or the consumer run (or anywhere in the tick; see §5.13 step 1).</summary>
-        public void BeginTick(uint tick) { throw new System.NotImplementedException("CORE-012"); }
+        /// <summary>Completes every stored handle, disposes every stream still registered. No-op if !IsCreated.</summary>
+        public void Dispose()
+        {
+            if (Data == null) return;
+            Data->LastConsumer.Complete();
+            if (Data->OpenRead != 0) DisposeReadSet(default);
+            for (int i = 0; i < Data->Pending.Length; i++)
+            {
+                Data->Pending[i].Writer.Complete();
+                Data->Pending[i].Stream.Dispose();
+            }
+            Data->Pending.Dispose();
+            Data->Inbox.Dispose();
+            Data->ReadStreams.Dispose();
+            UnsafeUtility.FreeTracked(Data, Allocator.Persistent);
+            Data = null;
+        }
+
+        /// <summary>Channel owner, once per tick before producers or the consumer run (or anywhere in the tick; see §5.13 step 1).
+        /// Disposes registrations written at least one full tick ago and never read (the consumer did not run), warning once per channel.</summary>
+        public void BeginTick(uint tick)
+        {
+            CheckCreated();
+            int first = Data->OpenRead != 0 ? Data->Taken : 0;     // never pull streams out from under an open read set
+            bool removed = false;
+            for (int i = Data->Pending.Length - 1; i >= first; i--)
+            {
+                var r = Data->Pending[i];
+                if (r.Tick + 1 >= tick) continue;
+                if (Data->OpenWrite != 0 && i == Data->Pending.Length - 1) continue;
+                Data->LastConsumer = JobHandle.CombineDependencies(Data->LastConsumer, r.Stream.Dispose(r.Writer));
+                Data->Pending.RemoveAt(i);
+                removed = true;
+            }
+            if (removed && Data->StaleWarned == 0)
+            {
+                Data->StaleWarned = 1;
+                var msg = new FixedString128Bytes("[Core] stale stream: ");
+                msg.Append(Data->Name);
+                Game.Core.GameLog.Burst.Warn(msg);
+            }
+            Data->Tick = tick;
+        }
 
         /// <summary>Producer, main thread inside OnUpdate: registers a new NativeStream (Allocator.TempJob) with forEachCount indices.</summary>
-        public Unity.Collections.NativeStream.Writer BeginWrite(ref Unity.Entities.SystemState state, Game.Data.Combat.ProducerKind producer, int forEachCount) { throw new System.NotImplementedException("CORE-012"); }
+        public NativeStream.Writer BeginWrite(ref SystemState state, ProducerKind producer, int forEachCount)
+        {
+            CheckCreated();
+            if (forEachCount < 1) throw new System.ArgumentOutOfRangeException(nameof(forEachCount), forEachCount, "SimEventChannel.BeginWrite needs forEachCount >= 1");
+            if (Data->OpenWrite != 0) throw new System.InvalidOperationException($"SimEventChannel {Data->Name}: BeginWrite called twice without EndWrite");
+            var stream = new NativeStream(forEachCount, Allocator.TempJob);
+            Data->Pending.Add(new SimEventRegistration { Stream = stream, Producer = producer, ForEachCount = forEachCount, Tick = Data->Tick });
+            Data->OpenWrite = 1;
+            state.Dependency = JobHandle.CombineDependencies(state.Dependency, Data->LastConsumer);
+            return stream.AsWriter();
+        }
+
         /// <summary>Producer: exactly once after scheduling the job that writes the stream returned by the matching BeginWrite.</summary>
-        public void EndWrite(Unity.Jobs.JobHandle writerJob) { throw new System.NotImplementedException("CORE-012"); }
+        public void EndWrite(JobHandle writerJob)
+        {
+            CheckCreated();
+            if (Data->OpenWrite == 0) throw new System.InvalidOperationException($"SimEventChannel {Data->Name}: EndWrite without BeginWrite");
+            ref var last = ref Data->Pending.ElementAt(Data->Pending.Length - 1);
+            last.Writer = writerJob;
+            Data->OpenWrite = 0;
+        }
 
         /// <summary>Consumer, main thread inside OnUpdate: every registration not yet read, in registration order. Combines all their
         /// writer handles into state.Dependency. Registrations made after this call are read by the next BeginRead.</summary>
-        public SimEventReadSet BeginRead(ref Unity.Entities.SystemState state) { throw new System.NotImplementedException("CORE-012"); }
-        /// <summary>Consumer: exactly once after scheduling the last job that uses the read set; disposes those streams and the set after it.</summary>
-        public void EndRead(Unity.Jobs.JobHandle readerJob) { throw new System.NotImplementedException("CORE-012"); }
+        public SimEventReadSet BeginRead(ref SystemState state)
+        {
+            CheckCreated();
+            if (Data->OpenRead != 0) throw new System.InvalidOperationException($"SimEventChannel {Data->Name}: BeginRead called twice without EndRead");
+            if (Data->OpenWrite != 0) throw new System.InvalidOperationException($"SimEventChannel {Data->Name}: BeginRead during an open BeginWrite");
+            if (Data->Inbox.Length > 0) MoveInboxToFront();
 
-        public int PendingCount => throw new System.NotImplementedException("CORE-012");                       // registrations not yet read (tests, harness)
+            int k = Data->Pending.Length;
+            var set = new SimEventReadSet
+            {
+                Streams = &Data->ReadStreams,
+                Producers = new NativeArray<ProducerKind>(k, Allocator.TempJob, NativeArrayOptions.UninitializedMemory),
+                ForEachCounts = new NativeArray<int>(k, Allocator.TempJob, NativeArrayOptions.UninitializedMemory),
+            };
+            var dep = state.Dependency;
+            for (int i = 0; i < k; i++)
+            {
+                var r = Data->Pending[i];
+                Data->ReadStreams.Add(r.Stream);
+                set.Producers[i] = r.Producer;
+                set.ForEachCounts[i] = r.ForEachCount;
+                dep = JobHandle.CombineDependencies(dep, r.Writer);
+            }
+            state.Dependency = dep;
+            Data->Taken = k;
+            Data->OpenRead = 1;
+            Data->ReadSet = set;
+            return set;
+        }
+
+        /// <summary>Consumer: exactly once after scheduling the last job that uses the read set; disposes those streams and the set after it.</summary>
+        public void EndRead(JobHandle readerJob)
+        {
+            CheckCreated();
+            if (Data->OpenRead == 0) throw new System.InvalidOperationException($"SimEventChannel {Data->Name}: EndRead without BeginRead");
+            DisposeReadSet(readerJob);
+            Data->LastConsumer = readerJob;
+        }
+
+        /// <summary>Registrations not yet read (tests, harness).</summary>
+        public int PendingCount { get { CheckCreated(); return Data->Pending.Length - (Data->OpenRead != 0 ? Data->Taken : 0); } }
 
         /// <summary>Main thread OUTSIDE FixedStepSimulationSystemGroup (narrative effects, services, dev commands; ADR-0016): appends one event to the
         /// channel's inbox, read by the consumer's next BeginRead as the first registration (ProducerKind.MainThread). Not frame-rate deterministic:
         /// never used by replayed simulation.</summary>
-        public void PostFromMainThread(in T evt) { throw new System.NotImplementedException("CORE-012"); }
-    }
+        public void PostFromMainThread(in T evt)
+        {
+            CheckCreated();
+            Data->Inbox.Add(evt);
+        }
 
-    /// <summary>Heap block behind a SimEventChannel (internal, SPEC-02 §4.12, §5.13).</summary>
-    internal struct SimEventChannelData<T> where T : unmanaged
-    {
-        public Unity.Collections.LowLevel.Unsafe.UnsafeList<SimEventRegistration> Pending;
-        public Unity.Collections.FixedString32Bytes Name;
-        public uint Tick;
-        public Unity.Jobs.JobHandle LastConsumer;
-        public byte OpenWrite;
-        public byte StaleWarned;
-        public Unity.Collections.NativeList<T> Inbox;          // PostFromMainThread
-    }
+        void MoveInboxToFront()
+        {
+            var stream = new NativeStream(1, Allocator.TempJob);
+            var w = stream.AsWriter();
+            w.BeginForEachIndex(0);
+            for (int i = 0; i < Data->Inbox.Length; i++) w.Write(Data->Inbox[i]);
+            w.EndForEachIndex();
+            Data->Inbox.Clear();
+            Data->Pending.InsertRange(0, 1);
+            Data->Pending[0] = new SimEventRegistration { Stream = stream, Producer = ProducerKind.MainThread, ForEachCount = 1, Tick = Data->Tick };
+        }
 
-    /// <summary>One producer's stream in a channel (internal, SPEC-02 §4.12 "Registration", §5.13).</summary>
-    internal struct SimEventRegistration
-    {
-        public Unity.Collections.NativeStream Stream;
-        public Unity.Jobs.JobHandle Writer;
-        public Game.Data.Combat.ProducerKind Producer;
-        public int ForEachCount;
-        public uint Tick;
+        void DisposeReadSet(JobHandle after)
+        {
+            for (int i = 0; i < Data->Taken; i++) Data->Pending[i].Stream.Dispose(after);
+            Data->Pending.RemoveRange(0, Data->Taken);
+            Data->ReadStreams.Clear();
+            Data->ReadSet.Producers.Dispose(after);
+            Data->ReadSet.ForEachCounts.Dispose(after);
+            Data->ReadSet = default;
+            Data->Taken = 0;
+            Data->OpenRead = 0;
+        }
+
+        void CheckCreated()
+        {
+            if (Data == null) throw new System.ObjectDisposedException("SimEventChannel", "the channel is not created or was disposed");
+        }
     }
 }

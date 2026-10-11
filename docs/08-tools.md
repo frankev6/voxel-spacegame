@@ -57,6 +57,9 @@ These work with no Editor open (verified 2026-10-10):
   - Set `ShaderUtil.allowAsyncCompilation = false`.
   - Throw away the first `camera.Render()` after `NewScene`, because it draws only the clear colour.
   - These runs re-save `ProjectSettings/QualitySettings.asset` with a version bump. Revert it with `git checkout -- ProjectSettings/QualitySettings.asset`.
+- **Native memory in tests:**
+  - `UnsafeUtility.CheckForLeaks()` returns the tracked allocations still alive *and resets* the tracked set, writing its report with `Debug.Log`. Call it once after a warm-up as a baseline, then again at the end; skip `LogAssert.NoUnexpectedReceived` in that test.
+  - A `NativeArray` of native containers (for example `NativeStream.Reader`) is a nested container: any job that holds it throws, its `Dispose(JobHandle)` included. Give each job its container in its own field (CORE-012).
 - **SRP Batcher check:** call the internal `ShaderUtil.GetSRPBatcherCompatibilityCode(shader, 0)` by reflection. A result of 0 means the shader is compatible.
 - **Textures under `-nographics`:** `EditorUtility.CompressTexture` and `Texture2DArray.SetPixelData` work; `Graphics.CopyTexture` does not.
 - **Log noise you can ignore:**

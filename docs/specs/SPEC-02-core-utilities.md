@@ -909,13 +909,16 @@ public unsafe struct SimEventChannel<T> where T : unmanaged
     public void PostFromMainThread(in T evt);
 }
 
-/// <summary>This tick's registrations of one channel, in registration order. Arrays are Allocator.TempJob, disposed by EndRead.</summary>
-public struct SimEventReadSet
+/// <summary>This tick's registrations of one channel, in registration order. Arrays are Allocator.TempJob, disposed by EndRead.
+/// No NativeArray of readers: that is a nested native container, which jobs reject (open question 11).</summary>
+public unsafe struct SimEventReadSet
 {
-    [Unity.Collections.ReadOnly] public Unity.Collections.NativeArray<Unity.Collections.NativeStream.Reader> Readers;
     [Unity.Collections.ReadOnly] public Unity.Collections.NativeArray<Game.Data.Combat.ProducerKind> Producers;
     [Unity.Collections.ReadOnly] public Unity.Collections.NativeArray<int> ForEachCounts;
-    public int Count => Readers.Length;
+    public int Count => Producers.Length;
+    /// Main thread, between BeginRead and EndRead: the reader of one registration, to put in a job field.
+    public Unity.Collections.NativeStream.Reader Reader(int index);
+    // internal: UnsafeList<NativeStream>* Streams (the channel's ReadStreams list)
 }
 
 /// <summary>Burst helper for consumers: appends every event of a read set to output, registrations in order, foreach indices ascending.
@@ -923,9 +926,13 @@ public struct SimEventReadSet
 public static class SimEventGather
 {
     public static Unity.Jobs.JobHandle Schedule<T>(SimEventReadSet set, Unity.Collections.NativeList<T> output, Unity.Jobs.JobHandle dependsOn) where T : unmanaged;
+    /// One registration's events; the owner of each event type adds [assembly: RegisterGenericJobType(typeof(SimEventGather.Job<TEvent>))].
+    [Unity.Burst.BurstCompile] public struct Job<T> : Unity.Jobs.IJob where T : unmanaged
+    { [Unity.Collections.ReadOnly] public Unity.Collections.NativeStream.Reader Reader; public int ForEachCount; public Unity.Collections.NativeList<T> Output; public void Execute(); }
 }
 // internal: struct SimEventChannelData<T> { UnsafeList<Registration> Pending; FixedString32Bytes Name; uint Tick; JobHandle LastConsumer; byte OpenWrite; }
-//           (plus byte StaleWarned; NativeList<T> Inbox for PostFromMainThread)
+//           (plus byte StaleWarned; NativeList<T> Inbox for PostFromMainThread; byte OpenRead; int Taken; SimEventReadSet ReadSet;
+//            UnsafeList<NativeStream> ReadStreams behind ReadSet.Reader)
 //           struct Registration { NativeStream Stream; JobHandle Writer; ProducerKind Producer; int ForEachCount; uint Tick; }
 ```
 
@@ -1159,13 +1166,13 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
 ### 5.13 `SimEventChannel<T>` and `GuardedHandles` (CORE-012)
 
 `SimEventChannel<T>` (all methods main thread; Burst-compatible structs, no managed allocations):
-1. **`BeginTick(tick)`**: for each pending registration with `Tick + 1 < tick` (written at least one full tick ago and never read: the consumer did not run), `Stream.Dispose(Writer)`, remove it, and log once per channel (`StaleWarned` flag in the data block; `GameLog.Burst.Warn("[Core] stale stream: " + Name)` so Burst owners can call it); then `Data->Tick = tick`. Owners call it first in their `OnUpdate`; calling it twice in a tick is a no-op the second time.
+1. **`BeginTick(tick)`**: for each pending registration with `Tick + 1 < tick` (written at least one full tick ago and never read: the consumer did not run), `Stream.Dispose(Writer)` (the returned handle joins `LastConsumer`, so `Dispose` and the next producer cover it), remove it, and log once per channel (`StaleWarned` flag in the data block; `GameLog.Burst.Warn("[Core] stale stream: " + Name)` so Burst owners can call it); then `Data->Tick = tick`. Owners call it first in their `OnUpdate`; calling it twice in a tick is a no-op the second time.
 2. **`BeginWrite(ref state, producer, n)`**: `n ≥ 1` (else `ArgumentOutOfRangeException`). If `OpenWrite == 1` (a previous `BeginWrite` without `EndWrite`) → `InvalidOperationException` (fail loudly). Allocate `new NativeStream(n, Allocator.TempJob)`; append `Registration { Stream, Writer = default, Producer = producer, ForEachCount = n, Tick = Data->Tick }`; `OpenWrite = 1`; `state.Dependency = JobHandle.CombineDependencies(state.Dependency, LastConsumer)` (a producer never overtakes the consumer of the previous registration set); return `Stream.AsWriter()`.
 3. **`EndWrite(h)`**: requires `OpenWrite == 1`; sets the last registration's `Writer = h`; `OpenWrite = 0`.
-4. **`BeginRead(ref state)`**: if the inbox is non-empty, move it into a new registration (one `NativeStream` with one index, `ProducerKind.MainThread`) inserted **first**, then clear the inbox. `k = Pending.Length`. Allocate the three arrays of length `k` (`Allocator.TempJob`), fill them from `Pending[0..k)` in order (`Readers[i] = Pending[i].Stream.AsReader()`), combine every `Pending[i].Writer` into `state.Dependency`, and remember `k` as the number of registrations taken. Return the set. A second `BeginRead` before `EndRead` → `InvalidOperationException`.
-5. **`EndRead(h)`**: for the `k` taken registrations `Stream.Dispose(h)`; dispose the three arrays with `h`; remove them from `Pending` (keeping later ones in order); `LastConsumer = h`.
+4. **`BeginRead(ref state)`**: if the inbox is non-empty, move it into a new registration (one `NativeStream` with one index, `ProducerKind.MainThread`) inserted **first**, then clear the inbox. `k = Pending.Length`. Allocate the two arrays of length `k` (`Allocator.TempJob`), fill them and the channel's `ReadStreams` list from `Pending[0..k)` in order, combine every `Pending[i].Writer` into `state.Dependency`, and remember `k` as the number of registrations taken. `BeginRead` during an open `BeginWrite` also throws `InvalidOperationException`. Return the set. A second `BeginRead` before `EndRead` → `InvalidOperationException`.
+5. **`EndRead(h)`**: for the `k` taken registrations `Stream.Dispose(h)`; dispose the two arrays with `h` and clear `ReadStreams`; remove them from `Pending` (keeping later ones in order); `LastConsumer = h`.
 6. **`Dispose()`**: complete `LastConsumer` and every pending `Writer`, dispose every pending stream and the data block.
-7. **`SimEventGather.Schedule`**: one Burst `IJob`; for `r` in `0..Count`, for index in `0..ForEachCounts[r]`: `BeginForEachIndex`, read all, `EndForEachIndex`, append to `output`. Output order = registration order, then index order, then write order: the deterministic order of architecture §5.1. Consumers sort with `NativeSortExtension` on a key that ends with the gather position (stable by construction).
+7. **`SimEventGather.Schedule`**: one Burst `IJob` (`Job<T>`) per registration, chained in registration order, each holding that registration's `Reader(r)` in a field so the safety system tracks it; each job, for index in `0..ForEachCounts[r]`: `BeginForEachIndex`, read all, `EndForEachIndex`, append to `output`. Output order = registration order, then index order, then write order: the deterministic order of architecture §5.1. Consumers sort with `NativeSortExtension` on a key that ends with the gather position (stable by construction).
 
 `GuardedHandles` is complete as written in §4.12 (bodies are one-liners). Pattern rules (binding for every user, unchanged from SPEC-12 §5.1): fixed-step systems use `Acquire`/`Release` (writers) or `BeginRead`/`EndRead` (readers) around the jobs they schedule; main-thread users outside the fixed step call `CompleteAccess()` first; nobody calls `GetSingletonRW` on a guarded singleton or writes its fields after `Create()`.
 
@@ -1433,6 +1440,7 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
 | 8 | Does any spec need more `RngPurpose` values? | Append at the end with the next free number in the same commit as the first use | Each spec |
 | 9 | Accessibility `TextScaleIndex` mirrors SPEC-60's `TextScale` enum by number | Keep the mapping 0/1/2; SPEC-01 converts | SPEC-60 |
 | 10 | CORE-001 says bodies not given in §4 throw `NotImplementedException`, but `ManagedEventDrainSystem` runs in every default world: a throwing `OnUpdate` would log an error each frame in Play Mode and fail the PlayMode smoke test's `LogAssert.NoUnexpectedReceived` (found in CORE-001, 2026-10-10) | Until CORE-009 its `OnCreate` only calls `ManagedEventChannels.RegisterAll(this)` and `OnUpdate`/`OnDestroy` are empty with `TODO(CORE-009)`; `RegisterChannel<T>`, `ChannelCount` and the internal channel types throw | Tech lead |
+| 11 | §4.12 gave `SimEventReadSet` a `NativeArray<NativeStream.Reader>`: a nested native container. Unity rejects it in any job, the gather job and the array's own `Dispose(JobHandle)` included ("Nested native containers are illegal in jobs"; found in CORE-012, 2026-10-11) | **Resolved in CORE-012:** the set keeps `Producers` and `ForEachCounts` and hands out readers through `Reader(i)` on the main thread; `SimEventGather` chains one job per registration with the reader in a field. Every consumer (SPEC-13, SPEC-22) already reads through `SimEventGather`. Each event type's owner adds `RegisterGenericJobType(typeof(SimEventGather.Job<TEvent>))` for player builds | Tech lead |
 
 ## 11. References
 

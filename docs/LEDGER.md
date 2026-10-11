@@ -555,6 +555,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 14 | 2026-10-11 | SPEC-05 PERS-001 | Readonly result structs had no constructors (SPEC-05 open question 16) | All-field constructors added | Tech lead | |
 | 15 | 2026-10-11 | SPEC-05 PERS-002 | Slot status when `meta.json` is valid but `world.sav` is missing (SPEC-05 open question 17) | `Ok` needs `world.sav`; else `BackupOnly`/`Corrupt` | Tech lead | |
 | 16 | 2026-10-11 | SPEC-64 AUD-001 | Audio validation rules had no codes (SPEC-64 open question 12) | AUD-E001…E003 (cue), AUD-E010…E016 (config) | Tech lead | |
+| 17 | 2026-10-11 | SPEC-02 CORE-012 | `SimEventReadSet.Readers` was a `NativeArray<NativeStream.Reader>`, a nested native container that jobs reject (SPEC-02 open question 11) | Resolved: readers handed out per job through `Reader(i)`; `SimEventGather` chains one job per registration | Tech lead | resolved in CORE-012 |
 
 ## Measurements
 
