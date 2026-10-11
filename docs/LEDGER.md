@@ -682,6 +682,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 116 | 2026-10-11 | SPEC-12 PHY-024 / FND-010 | Loading pause prevents the fixed tick needed for player collider readiness | Fresh spawn body initialization in GameInitGroup | Tech lead | SPEC-12 Q26 / ADR-0037; fresh roots only, end-init ECB; split adoption remains fixed-step |
 | 117 | 2026-10-11 | SPEC-01 FND-010 | Partial save recovery can reuse an existing fleet id when SESS is missing, damaged or stale-low | Reserve through the highest restored fleet id | Tech lead | SPEC-01 Q22: composition callback advances only when necessary, clears grants and reports FND-W002; preserves higher counters and existing ship identities |
 | 118 | 2026-10-11 | SPEC-01 FND-016 | Sandbox reset can destroy a live fleet before old World writeback; optional player defaults unspecified | Reset after teardown using the session operation reservation | Tech lead | SPEC-01 Q23: creative deterministic sandbox, no campaign initializers, optional live grid only, normal new-game/load resets flags; galaxy integration remains GAL-008 and harness dispatch DEV-008 |
+| 119 | 2026-10-11 | SPEC-20 FLT-004 | General equal-throttle symmetry contradicts fixed-order PGS with a redundant gyro; stale bounds can invalidate warm starts | Preserve the specified solver and project initial bounds | Tech lead | SPEC-20 Q10–12: analytic symmetric fixture plus redundant counterexample; clamp warm starts; double dot-product accumulation fixes observed managed/Burst ULP drift; no new allocation objective |
 
 
 

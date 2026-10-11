@@ -396,12 +396,13 @@ Complexity: O(thrusters × sweeps) per ship per tick, O(instances) per ship whos
 ### 5.4 `ThrustAllocator.Solve` (projected Gauss–Seidel)
 
 Minimise `Σ_i w_i² (Σ_k A_ik u_k − b_i)²` subject to `Min_k ≤ u_k ≤ Max_k`, rows `i ∈ {Fx, Fz, τ}`.
+0. Clamp the warm start to the current actuator bounds before forming the residual (Q11).
 1. `r = Σ_k Column_k × u_k − Target` (float3).
 2. Repeat `Sweeps` times; for `k = 0..K−1` in order:
    1. `wa = Weights × Column_k` (component-wise); `den = dot(wa, wa)`; `den < 1e-12` → continue.
    2. `Δ = −dot(wa, Weights × r) / den`.
    3. `uNew = clamp(u_k + Δ, Min_k, Max_k)`; `r += Column_k × (uNew − u_k)`; `u_k = uNew`.
-3. Return `dot(Weights × r, Weights × r)`.
+3. Return `dot(Weights × r, Weights × r)`. All three-component dot products accumulate float inputs as double products/sums, then round once to float (Q12); vectors, residuals and throttles remain float.
 Properties (tested): the residual never increases; the result is a deterministic function of inputs and warm start; with a single forward thruster at the centre line and the gyro, a forward command yields `u = min(required/MaxForce, 1)` and zero gyro.
 
 ### 5.5 `PlanarConstraintSystem`
@@ -538,11 +539,11 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Do:** Implement `ThrustAllocator.Solve` exactly as §5.4 (Burst-compatible, no allocation).
 - **Files:** `Assets/Game/Simulation/Flight/ThrustAllocator.cs`, `Assets/Game/Tests/EditMode/Simulation/Flight/ThrustAllocatorTests.cs`
 - **Acceptance criteria:**
-  - [ ] Residual is non-increasing per update (checked after every update in a debug test build).
-  - [ ] Bounds always respected; unusable actuators (`Max = 0`) stay 0.
-  - [ ] Symmetric twin aft thrusters + gyro, pure forward target: equal throttles, gyro 0.
-  - [ ] One off-centre aft thruster, gyro capacity 0, forward target: the thruster fires and the residual torque is non-zero (the ship will yaw).
-  - [ ] Same inputs and warm start → bit-identical outputs (Burst and managed).
+  - [x] Residual is non-increasing per update (checked after every update in a debug test build).
+  - [x] Bounds always respected; unusable actuators (`Max = 0`) stay 0.
+  - [x] Weighted-orthogonal symmetric twin aft thrusters + gyro, pure forward target: equal throttles, gyro 0. General redundant layouts obey the residual objective, not a symmetric-throttle tie-break (Q10).
+  - [x] One off-centre aft thruster, gyro capacity 0, forward target: the thruster fires and the residual torque is non-zero (the ship will yaw).
+  - [x] Same inputs and warm start → bit-identical outputs (Burst and managed).
 - **Tests:** `ThrustAllocatorTests.Residual_NonIncreasing`, `.Bounds_Respected`, `.Symmetric_EqualThrottles`, `.OffCentre_NoGyro_LeavesTorque`, `.Saturation_ScalesDown`, `.Deterministic`.
 
 ### FLT-005 — PlayerCommandApplySystem
@@ -651,6 +652,11 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 | 7 | Architecture §8 `PhysicsVelocity` row: add `PlanarConstraintSystem` (vertical impulses only) | Yes | Tech lead |  |
 | 8 | If contacts push planar ships off the plane by > 0.1 m (FLT-009), replace the impulse correction with a Unity Physics LimitedDOF joint (linear Y, angular X/Z locked) per ship | Keep impulses unless measured | Tech lead |  |
 | 9 | Contract comments/file list drifted from the declared fields and ADR-0015 | Preserve declared fields and profile ownership | Tech lead | Resolved FLT-001: FlightThruster fields occupy 44 bytes, not the old 48-byte comment; no padding is invented. Include PropulsionStats from §4.5 in the task file list. PlayerShip is added by profile registration, not a per-spawn helper. FLT-006 also lists FlightSetup, whose registration is explicitly required by §5.2, and aligns the remaining memory-summary comment to 44 bytes. |
+
+| 10 | Fixed-order PGS does not guarantee equal throttles for every symmetric layout with a redundant gyro | Preserve Decision 7 and §5.4, narrow the symmetry fixture to the analytic orthogonal case | Tech lead | Resolved FLT-004: columns (0,1,-1), (0,1,1), (0,0,1), target (0,1,0), weights (1,1,1) yield (0.5,0.5,0). With torque weight 2 and six sweeps from zero, the specified algorithm yields approximately (0.3799113,0.6078581,-0.2279468), residual 0.00014959. Both are tested. No extra symmetry/energy objective or changed update order is introduced. Floating-point descent checks independently recompute each update's residual in double precision with a 1e-5 relative/absolute tolerance. |
+| 11 | A stale warm start can violate newly reduced bounds, especially when a zero column skips every update | Clamp all warm-start values before computing the residual | Tech lead | Resolved FLT-004: finite inputs, valid Min ≤ Max, equal array lengths; a Max=Min=0 actuator remains zero even with a degenerate column. This matches §5.3's caller clamp and makes standalone use safe after actuator loss. No allocation or API/type change. |
+
+| 12 | Native float dot reductions differ by one ULP between managed and strict Burst on the reference machine | Accumulate three dot-product terms in double, cast once to float | Tech lead | Resolved FLT-004: the initial failing seeded case had identical coordinate traces but residual bits 1172050705 vs 1172050704. Explicit scalar float grouping also differed. Double product/sum accumulation with one final cast passes all six tests, including 100 problems × 127 intermediate states and two independently scheduled Burst solves against managed outputs. Public fields, fixed coordinate order and solver objective are unchanged; FLT-011 still owns whole-flight cost gates. |
 
 ## 11. References
 
