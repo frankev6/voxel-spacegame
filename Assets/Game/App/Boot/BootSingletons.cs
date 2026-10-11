@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Game.Data.Components;
 using Game.Core;
+using Game.Core.Components;
 using Game.Data.Definitions;
 using Game.Voxel.PhysicsBody;
 using Game.Voxel.Grid;
@@ -27,7 +28,9 @@ namespace Game.App.Boot
             var physics = catalog.Get<PhysicsVoxelConfigDefinition>(new ContentId("config_physics"));
             Create(em, PhysicsVoxelConfigFactory.Create(physics), created);
             Create(em, PhysicsVoxelConfigFactory.CreatePhysicsStep(physics), created);
-            // Later rows (DMG, PWR, FLT, ENC-001, WPN, AI, ABL, SYS, ECO-007, FND-008) are added by their tasks (SPEC-01 §5.3).
+            // Later rows (DMG, PWR, FLT, ENC-001, WPN, AI, ABL, SYS, ECO-007) are added by their tasks (SPEC-01 §5.3).
+
+            Create(em, default(PersistentIdAllocator), created);
 
             foreach (var e in created)
                 if (!em.HasComponent<BootSingleton>(e)) em.AddComponent<BootSingleton>(e);

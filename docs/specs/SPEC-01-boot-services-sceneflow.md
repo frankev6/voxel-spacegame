@@ -326,7 +326,7 @@ Every row is one step. A step's object is pushed onto `DisposeStack` when it is 
 | 5 | `pause = new PauseService()`; `audio.BindPause(pause)` | `PauseService`, `IPauseService` | FND-003 |
 | 6 | `save = new SaveService(savePaths, content, pause, new SaveServiceConfig())` (§5.1; SPEC-05 subscribes `Application.wantsToQuit` itself) | `SaveService` | PERS (service task) |
 | 7 | `flow = new SceneFlow(world, pause, save, gameConfig)` | `SceneFlow` | FND-006 |
-| 8 | `session = new GameSession(flow, save, world, content, gameConfig)`; `save.AttachContext(session)`; register `SessionSaveParticipant` (`SESS`), `FleetSaveParticipant` (`FLET`); `Services.Register<IGameFlow>(session)`, `<IPersistentIdAllocator>(session)` | `GameSession`, `IGameFlow`, `IPersistentIdAllocator` | FND-009 |
+| 8 | `session = new GameSession(flow, save, world, content, gameConfig)`; `save.AttachContext(session)`; register `SessionSaveParticipant` (`SESS`), `FleetSaveParticipant` (`FLET`); `Services.Register<GameSession>(session)`, `<IGameFlow>(session)`, `<IPersistentIdAllocator>(session)` | `GameSession`, `IGameFlow`, `IPersistentIdAllocator` | FND-009 |
 | 8.1 | `ticker = new GalaxyFrameTicker()`; `galaxy = new GalaxyService(content.Catalog, session.Galaxy, world, ticker)`; register `GalaxySaveParticipant` | `GalaxyFrameTicker`, `GalaxyService` | GAL-008 |
 | 8.2a | `docking = new DockingService()`; `loader = new StarSystemLoader(galaxy, world, registry, blueprints, session, content.Catalog)`; `ticker.Register(loader)`; `flow.RegisterReady(loader)`; `flow.RegisterExiting(loader)`; `session.RegisterWriteback(new GalaxyFlushWriteback(loader))` (§4.5; order 90, so it runs before `FleetWriteback`); register `PlayerLocationSaveParticipant(session.Galaxy, docking)` (`PLOC`) | `DockingService`, `StarSystemLoader`, `IGalaxyLiveDeltaSink` | SYS service task |
 | 8.2b | `travel = new TravelService(galaxy, loader, docking, world, content.Catalog, pause, audio)`; `ticker.Register(travel)`; `session.RegisterSaveBlocker(travel)`; `flow.RegisterExiting(travel)` | `TravelService`, `ILaneAccess` | TRV-006 |
@@ -557,11 +557,13 @@ Main thread; `async Awaitable<FlowResult>`.
 - Main thread: `ref var c = ref SystemAPI.GetSingletonRW<SimClock>().ValueRW; c.Tick += 1; c.UniversalTime = c.SessionStartUniversalTime + c.Tick * SimTime.FixedTimestepD;`.
 
 **`PersistentIdRefillSystem`** (`Game.App/Systems`, managed `SystemBase`, ending in neither `BridgeSystem` nor listed in §5 of the architecture, so this spec lists it there in FND-008's commit). It sits in `InitializationSystemGroup` with `[UpdateBefore(typeof(GameInitGroup))]`. It has no `RequireForUpdate<GameplayActive>`, so it also tops up between scenes. Each frame:
-1. `ref var a = ref SystemAPI.GetSingletonRW<PersistentIdAllocator>().ValueRW` (main-thread; this completes only jobs writing the allocator, i.e. last frame's `SplitSystem`).
-2. If `a.End − a.Next < threshold` and `Services.TryGet<GameSession>(out s) && s.HasActiveSession`: grant a new block, `start = s.GrantBlock(blockSize)`.
+1. `EntityManager.CompleteDependencyBeforeRW<PersistentIdAllocator>()`, then `ref var a = ref SystemAPI.GetSingletonRW<PersistentIdAllocator>().ValueRW`. This initialization-time wait completes readers/writers of only the allocator, including last frame's `SplitSystem`; singleton access itself never completes them (Q12).
+2. If `a.Next == a.End || a.End − a.Next < threshold` (Q13: empty always refills, including valid threshold 0) and `Services.TryGet<GameSession>(out s) && s.HasActiveSession`: grant a new block, `start = s.GrantBlock(blockSize)`.
 
    `GrantBlock` returns the old `NextPersistentId` and advances it by `blockSize`. The singleton then becomes `a.Next = start`, `a.End = start + blockSize`. Unused ids of the old block are dropped (Decision 9).
 3. When no session is active, set `a = default` (empty), so Burst consumers defer.
+
+Session start/load/end also clears outstanding ECS grants after that same component dependency completion, before changing the counter. FND-008 implements the allocation portion of `GameSession` with internal initialization/reset methods; FND-009 calls them from the complete session lifecycle. Its allocation round-trip test uses the exact SESS `UInt64` counter field; full SESS serialization and composition remain FND-009 (Q11).
 
 ### 5.9 Defeat flow
 
@@ -754,9 +756,9 @@ If no save exists, "Load last save" is disabled.
   3. Add the `PersistentIdAllocator` row to `BootSingletons`.
 - **Files:** `Assets/Game/App/Systems/PersistentIdRefillSystem.cs`; `Assets/Game/App/Session/GameSession.cs` (allocation part); `Assets/Game/Tests/EditMode/App/PersistentIdTests.cs`
 - **Acceptance criteria:**
-  - [ ] 10,000 managed and 10,000 singleton allocations interleaved yield 20,000 unique ids.
-  - [ ] After save and load, new ids are greater than every id issued before the save.
-  - [ ] With no session, the singleton is empty.
+  - [x] 10,000 managed and 10,000 singleton allocations interleaved yield 20,000 unique ids.
+  - [x] After save and load, new ids are greater than every id issued before the save.
+  - [x] With no session, the singleton is empty.
 - **Tests:** `PersistentIdTests.Unique_MixedSources`, `.AfterLoad_Monotonic`, `.NoSession_Empty`.
 
 ### FND-009 — GameSession: new game, end, IGameFlow, ISaveContext, SESS
@@ -874,18 +876,22 @@ If no save exists, "Load last save" is disabled.
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | Should a new game ask for a seed? | No; seed 0 → generated (§5.5); the dev console can pass one | Owner |
-| 2 | Autosave when leaving the World for the main menu | Yes (Decision in §5.4.1 step 2.2) unless the player chose "quit without saving" | Owner |
-| 3 | Defeat options | "Load last save" and "Main menu"; no respawn | Owner |
-| 4 | Multiple ships in the fleet (M4) | `FleetModel` supports many; M3 uses only the flagship | Owner |
-| 5 | Release builds starting in a non-Boot scene | Not supported; always Boot | Tech lead |
-| 6 | FND-003 publishes `PauseStateChanged` through `EventBus<T>` (CORE-006), but its *Depends on* lists only FND-001, so it was ready before the bus exists (found 2026-10-11) | FND-003 waits for CORE-006 (status `blocked`); add `CORE-006` to its *Depends on* | Tech lead |
-| 7 | §5.2 row 14 calls `SettingsApplier.ApplyAll`, but no row constructs the `SettingsApplier` instance that follows `SettingsChanged`; and FND-004 (row 1) and INP-002 (row 3) were done before `GameComposition` existed, so their lines had no file to go in (found in FND-002, 2026-10-11) | **Resolved in FND-002:** row 14 also constructs `new SettingsApplier(settings)` (pushed onto `DisposeStack`) before `ApplyAll`; FND-002 added rows 1, 3 and 14 for the finished tasks. Rows 7 and 15 stay placeholders until FND-006 creates `SceneFlow` | Tech lead |
-| 8 | `FND-E001` makes a missing start blueprint an error, but no ship blueprint exists before VOX-010/MIG-008 (M1), and a runtime validation error fails boot (found in FND-005, 2026-10-11) | **Resolved in FND-005:** `GameConfigDefinition.Validate` reports `FND-E001` as a warning ("New Game is unavailable"); `GameConfigValidator` raises it to an error as soon as the database holds any `ShipBlueprintDefinition`, and enforces `FND-E003`. Also: `[StaticStateOk]` is field-only, so `GameRootTestHooks` carries it on each field; `SaveService` joins `DisposeStack` in PERS-005, when its `Dispose` exists | Tech lead |
-| 9 | FND-006 against what exists at M0 (found in FND-006, 2026-10-11) | **Resolved in FND-006:** (a) `StartupAsync` leaves scenes that are not one of the four alone (PlayMode test scenes, look-dev scenes), so tests are not hijacked into the main menu. (b) Entities creates its `WorldTime` singleton lazily on the first `World.SetTime`, which happened after the boot snapshot, so every teardown destroyed it; `SnapshotBootEntities` now calls `world.SetTime(world.Time)` first (07-implementation-traps T2.12). (c) `SetRootScreens` and every root-screen and notification call wait for `IRootScreenSet` (HUD-002) and `UIRoot` (UI-003); the session calls (write-backs, `EndSession`, `UniversalTime`) wait for FND-009; the autosave calls for PERS-009. Until FND-009/FND-013, starting in World or BlueprintLab enters that scene directly | Tech lead |
-| 10 | FND-014's audit rule skips compiler-generated fields, which would also skip the backing fields of static auto-properties (`static int Count { get; set; }`); and it lists only a few immutable types (found in FND-014, 2026-10-11) | **Resolved in FND-014:** auto-property backing fields are audited (annotate with `[field: StaticStateOk(...)]`); readonly unmanaged structs count as immutable; source-generated code (the Entities type registry, Burst direct-call stubs) is skipped; only runtime `Game.*` assemblies are audited (editor and test assemblies never live inside a Play session). Regexes, encodings, constant tables and stateless comparers carry `[StaticStateOk]` with their reason | Tech lead |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | Should a new game ask for a seed? | No; seed 0 → generated (§5.5); the dev console can pass one | Owner |  |
+| 2 | Autosave when leaving the World for the main menu | Yes (Decision in §5.4.1 step 2.2) unless the player chose "quit without saving" | Owner |  |
+| 3 | Defeat options | "Load last save" and "Main menu"; no respawn | Owner |  |
+| 4 | Multiple ships in the fleet (M4) | `FleetModel` supports many; M3 uses only the flagship | Owner |  |
+| 5 | Release builds starting in a non-Boot scene | Not supported; always Boot | Tech lead |  |
+| 6 | FND-003 publishes `PauseStateChanged` through `EventBus<T>` (CORE-006), but its *Depends on* lists only FND-001, so it was ready before the bus exists (found 2026-10-11) | FND-003 waits for CORE-006 (status `blocked`); add `CORE-006` to its *Depends on* | Tech lead |  |
+| 7 | §5.2 row 14 calls `SettingsApplier.ApplyAll`, but no row constructs the `SettingsApplier` instance that follows `SettingsChanged`; and FND-004 (row 1) and INP-002 (row 3) were done before `GameComposition` existed, so their lines had no file to go in (found in FND-002, 2026-10-11) | **Resolved in FND-002:** row 14 also constructs `new SettingsApplier(settings)` (pushed onto `DisposeStack`) before `ApplyAll`; FND-002 added rows 1, 3 and 14 for the finished tasks. Rows 7 and 15 stay placeholders until FND-006 creates `SceneFlow` | Tech lead |  |
+| 8 | `FND-E001` makes a missing start blueprint an error, but no ship blueprint exists before VOX-010/MIG-008 (M1), and a runtime validation error fails boot (found in FND-005, 2026-10-11) | **Resolved in FND-005:** `GameConfigDefinition.Validate` reports `FND-E001` as a warning ("New Game is unavailable"); `GameConfigValidator` raises it to an error as soon as the database holds any `ShipBlueprintDefinition`, and enforces `FND-E003`. Also: `[StaticStateOk]` is field-only, so `GameRootTestHooks` carries it on each field; `SaveService` joins `DisposeStack` in PERS-005, when its `Dispose` exists | Tech lead |  |
+| 9 | FND-006 against what exists at M0 (found in FND-006, 2026-10-11) | **Resolved in FND-006:** (a) `StartupAsync` leaves scenes that are not one of the four alone (PlayMode test scenes, look-dev scenes), so tests are not hijacked into the main menu. (b) Entities creates its `WorldTime` singleton lazily on the first `World.SetTime`, which happened after the boot snapshot, so every teardown destroyed it; `SnapshotBootEntities` now calls `world.SetTime(world.Time)` first (07-implementation-traps T2.12). (c) `SetRootScreens` and every root-screen and notification call wait for `IRootScreenSet` (HUD-002) and `UIRoot` (UI-003); the session calls (write-backs, `EndSession`, `UniversalTime`) wait for FND-009; the autosave calls for PERS-009. Until FND-009/FND-013, starting in World or BlueprintLab enters that scene directly | Tech lead |  |
+| 10 | FND-014's audit rule skips compiler-generated fields, which would also skip the backing fields of static auto-properties (`static int Count { get; set; }`); and it lists only a few immutable types (found in FND-014, 2026-10-11) | **Resolved in FND-014:** auto-property backing fields are audited (annotate with `[field: StaticStateOk(...)]`); readonly unmanaged structs count as immutable; source-generated code (the Entities type registry, Burst direct-call stubs) is skipped; only runtime `Game.*` assemblies are audited (editor and test assemblies never live inside a Play session). Regexes, encodings, constant tables and stateless comparers carry `[StaticStateOk]` with their reason | Tech lead |  |
+| 11 | FND-008 requires an allocation save/load test before FND-009 implements GameSession/SESS | Build only the allocation portion and test the exact saved counter field | Tech lead | Resolved 2026-10-11: internal world/config initializer and ResetPersistentIds feed FND-009's later lifecycle; the UInt64 counter round trip discards pre-load grants. FND-009 also registers the concrete GameSession required by the refill lookup, alongside its interfaces. Full SESS/container integration remains FND-009; no substitute save format. |
+| 12 | §5.8 incorrectly says GetSingletonRW completes outstanding allocator jobs | Explicit component-specific dependency completion in initialization | Tech lead | Resolved 2026-10-11: installed Entities API says neither singleton read nor write waits. CompleteDependencyBeforeRW precedes refill and session-reset access; the mixed-source test deliberately leaves its Burst consumer scheduled across refill calls. |
+
+| 13 | Config validation permits threshold 0, but a strict remaining < threshold test never refills an empty block | Always refill an empty block; zero disables only early refill | Tech lead | Resolved 2026-10-11: preserve the valid config range and test zero-threshold session activation in NoSession_Empty. |
 
 ## 11. References
 

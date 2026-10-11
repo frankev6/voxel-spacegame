@@ -665,6 +665,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 101 | 2026-10-11 | SPEC-12 PHY-008 | IsEmpty synchronizes enableable query writers | Asynchronous filtering with structural-empty fast path | Tech lead | Resolved SPEC-12 Q22; no fixed-step query sync |
 | 102 | 2026-10-11 | SPEC-12 PHY-008 | Rebuild can invalidate updates referenced by an unfinished batch | Detach/discard referenced slots and retire results at finalization | Tech lead | Resolved SPEC-12 Q23; cache guard protects immutable descriptor reads and later reuse |
 | 103 | 2026-10-11 | SPEC-12 PHY-019 | Live overlap peaks at 3,275,424 B, above the original 2.5 MiB collider allocation | Allocate 3.5 MiB within unchanged 36/40 MB whole-voxel limits | Tech lead | Resolved SPEC-12 Q24 / accepted ADR-0033: four versions coexist; preserve install/retirement delays. Corrected reference model 32,227,328 B; TST-004 still owns integration |
+| 104 | 2026-10-11 | SPEC-01 FND-008 | Allocation round trip precedes full GameSession/SESS implementation | Test exact UInt64 counter field; stage allocation-only session members | Tech lead | Resolved SPEC-01 Q11: FND-009 owns complete SESS/composition; restore clears outstanding grants |
+| 105 | 2026-10-11 | SPEC-01 FND-008 | GetSingletonRW does not complete the prior Burst ID consumer | Explicit component-specific wait before refill/reset | Tech lead | Resolved SPEC-01 Q12: CompleteDependencyBeforeRW in initialization, exercised by outstanding consumer jobs |
+| 106 | 2026-10-11 | SPEC-01 FND-008 | Valid zero refill threshold otherwise leaves the Burst pool empty forever | Empty blocks always refill; zero means no early top-up | Tech lead | Resolved SPEC-01 Q13; zero-threshold activation covered in NoSession_Empty |
 
 
 
@@ -676,6 +679,7 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-11 | FND-008 | Persistent-ID check without refill | 0.000083 / 0.000084 ms median/p95; gate 0.01 ms | Apple M5 Pro; reference settings; Check profiler marker, 60 warmup + 300 initialization updates; valid zero threshold |
 | 2026-10-11 | PHY-019 | Brick rebuild | Noise 19.9 / 23.5 µs median/p95; full 1.1 / 1.3 µs; slab 0.6 / 0.7 µs | Apple M5 Pro, Unity 6000.6.5f1, Burst on, safety/debugger/leaks off; 60 warmup + 300 frames; 1,000 distinct 50% noise masks; serial Run includes call overhead |
 | 2026-10-11 | PHY-019 | Station idle / spawn | Idle 0.013833 / 0.017874 ms median/p95; spawn 0.024395 / 0.220916 ms, max 0.314877 ms; ready ≤ 8 frames | Inclusive physics-system + gameplay ECB markers; 42 completed spawns / 300 measured frames, after 60 warmup; CurrentValue deltas verified nonzero in headless mode |
 | 2026-10-11 | PHY-019 | Radius-3 station hit | 0.308300 / 0.333600 ms median/p95 | 112 removed cells; 4 changed bricks + actual 872-child assembly; 60 warmup + 300 frames; serial Burst work plus Run overhead; remeshing remains SPEC-13's combined gate |
