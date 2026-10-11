@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 48 | 0 | 0 | 0 | 56 | 0 | 104 | 17 |
+| M1 | 47 | 1 | 0 | 0 | 56 | 0 | 104 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -173,7 +173,7 @@
 | FLT-001 | Public contract types | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0ddf5bf | Unmanaged flight/input contracts; exact SPEC-03 fields; Q112 comment corrections |
 | FLT-002 | Grid-space and flight maths | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | ec30fc9 | Grid geometry, gyro, caps and assist targets; eight required tests |
 | FLT-003 | Flight config definition and factory | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | f21a981 | Exact defaults, FLT-E001 diagnostics, catalog asset and boot singleton |
-| FLT-004 | Thrust allocator | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001 | yes | todo |  |  |  |  |
+| FLT-004 | Thrust allocator | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Deterministic bounded PGS allocator and six required tests |
 | FLT-005 | PlayerCommandApplySystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001, DMG-001 | yes | todo |  |  |  |  |
 | FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 2388784 | Four flying profiles, player-only tag, change-filtered Burst nozzle init; three tests |
 | FLT-007 | PropulsionSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-002, FLT-004, FLT-006, DMG-001, SPEC-12 | no | todo |  |  |  |  |
