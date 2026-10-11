@@ -169,7 +169,8 @@ InitializationSystemGroup
 └─ GameInitGroup                         (custom; OrderLast)
    ├─ OriginRebaseSystem                 GAL  single floating-origin owner
    ├─ PlayerInputSampleSystem            INP  managed; writes PlayerCommand singleton
-   └─ GridSpawnSystem                    VOX  structural; GridSpawnRequest → grid root + bricks + functional entities (batch APIs)
+   ├─ GridSpawnSystem                    VOX  structural; GridSpawnRequest → grid root + bricks + functional entities (batch APIs)
+   └─ GridSpawnBodyInitSystem            PHY  fresh spawn bodies through end-init ECB, including while paused (ADR-0037)
 
 SimulationSystemGroup
 ├─ FixedStepSimulationSystemGroup        60 Hz, runs 0..N times per frame
@@ -390,7 +391,7 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | Grid `PhysicsCollider` | `ColliderSwapSystem` | — |
 | `PhysicsMass` | `GridMassUpdateSystem` | — |
 | `VoxelGrid.Kind` | `GridSpawnSystem` (initial), `ShipDeathSystem` (Ship → Hulk) | Read |
-| `PhysicsVelocity` | Unity Physics + `PropulsionSystem` (impulses only) + `ImpactEventSystem` (impulses only: collisions, damage knockback and the `ImpulseRequest` channel, ADR-0016; **every new mechanic that pushes bodies posts to that channel**) + `PlanarConstraintSystem` (vertical impulses only) + `GridMassUpdateSystem` (exact re-expression about the new centre of mass only) + `OriginRebaseSystem` (placement re-expression only: rotates the player's linear velocity by the placement yaw change). **Nobody else assigns velocity.** Creating `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` on a new body (`GridBodyInitSystem`, `SplitSystem` through `GridBodyFactory`), and re-enabling a stowed grid with its pose and velocities (`GridStowApi.Unstow`, ADR-0015), is initialisation, not a write | Read |
+| `PhysicsVelocity` | Unity Physics + `PropulsionSystem` (impulses only) + `ImpactEventSystem` (impulses only: collisions, damage knockback and the `ImpulseRequest` channel, ADR-0016; **every new mechanic that pushes bodies posts to that channel**) + `PlanarConstraintSystem` (vertical impulses only) + `GridMassUpdateSystem` (exact re-expression about the new centre of mass only) + `OriginRebaseSystem` (placement re-expression only: rotates the player's linear velocity by the placement yaw change). **Nobody else assigns velocity.** Creating `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` on a new body (`GridSpawnBodyInitSystem`, `GridBodyInitSystem`, `SplitSystem` through `GridBodyFactory`), and re-enabling a stowed grid with its pose and velocities (`GridStowApi.Unstow`, ADR-0015), is initialisation, not a write | Read |
 | `ShipCommand` (player ship) | `PlayerCommandApplySystem` | Read |
 | `ShipCommand` (AI ship) | `AiSteeringSystem` | Read |
 | `PlayerControlLock` | `TravelService` | Read by `PlayerCommandApplySystem` |

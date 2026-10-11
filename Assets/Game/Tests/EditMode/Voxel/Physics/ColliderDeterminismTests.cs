@@ -136,7 +136,7 @@ namespace Game.Tests.EditMode.Voxel.Physics
             int previous = JobsUtility.JobWorkerCount; JobsUtility.JobWorkerCount = workers;
             try
             {
-                using var f = new Fixture(physics: true, extra: new[] { typeof(SimClockAdvanceSystem), typeof(GridMassUpdateSystem),
+                using var f = new Fixture(physics: true, extra: new[] { typeof(GridSpawnBodyInitSystem), typeof(SimClockAdvanceSystem), typeof(GridMassUpdateSystem),
                     typeof(BrickDirtyScheduleSystem), typeof(ColliderSnapshotSystem), typeof(BrickColliderBuildSystem), typeof(GridColliderCleanupSystem),
                     typeof(DeferredDisposalSystem), typeof(DeterminismDamageSystem), typeof(DeterminismRecordSystem) });
                 using (var physics = f.Em.CreateEntityQuery(typeof(PhysicsStep)))

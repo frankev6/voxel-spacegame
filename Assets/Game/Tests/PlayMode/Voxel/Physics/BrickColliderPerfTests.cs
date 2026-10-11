@@ -54,10 +54,11 @@ namespace Game.Tests.PlayMode.Voxel.Physics.Perf
         public PhysicsMainRecorder(Fixture f)
         {
             var world = f.Test.World;
-            var systems = new[] { world.GetExistingSystem<GridBodyInitSystem>(), world.GetExistingSystem<ColliderSwapSystem>(),
+            var systems = new[] { world.GetExistingSystem<GridSpawnBodyInitSystem>(), world.GetExistingSystem<GridBodyInitSystem>(), world.GetExistingSystem<ColliderSwapSystem>(),
                 world.GetExistingSystem<GridMassUpdateSystem>(), world.GetExistingSystem<ColliderSnapshotSystem>(),
                 world.GetExistingSystem<BrickColliderBuildSystem>(), world.GetExistingSystem<GridColliderCleanupSystem>(),
-                world.GetExistingSystemManaged<GameplayEndCommandBufferSystem>().SystemHandle };
+                world.GetExistingSystemManaged<GameplayEndCommandBufferSystem>().SystemHandle,
+                world.GetExistingSystemManaged<EndInitializationEntityCommandBufferSystem>().SystemHandle };
             var handles = new List<ProfilerRecorderHandle>(); ProfilerRecorderHandle.GetAvailable(handles);
             foreach (var system in systems)
             {

@@ -54,7 +54,7 @@ namespace Game.Tests.PlayMode.Voxel.Physics
                 Hull = content.Catalog.GetBlockIndex(content.Catalog.Get<BlockDefinition>(new ContentId("block_hull")));
                 library = new BlueprintLibrary(content.Catalog, new VoxelContent { Blocks = content.BlockDefs, Orientations = content.Orientations });
                 registry = VoxelStructureRegistry.CreateRuntime(library);
-                var systems = new List<Type> { typeof(GridSpawnSystem), typeof(GridBodyInitSystem), typeof(GridMassUpdateSystem),
+                var systems = new List<Type> { typeof(GridSpawnSystem), typeof(GridSpawnBodyInitSystem), typeof(GridBodyInitSystem), typeof(GridMassUpdateSystem),
                     typeof(BrickDirtyScheduleSystem), typeof(ColliderSnapshotSystem), typeof(BrickColliderBuildSystem), typeof(ColliderSwapSystem),
                     typeof(GridColliderCleanupSystem), typeof(DeferredDisposalSystem), typeof(GameplayEndCommandBufferSystem) };
                 systems.AddRange(extra);

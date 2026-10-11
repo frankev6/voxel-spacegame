@@ -516,6 +516,7 @@ VOX-002 measured the reference station's actual 1,024-box geometry: cached brick
 | System | Group and order | Burst | Requires | Role |
 |---|---|---|---|---|
 | `ColliderSwapSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(AbilityActivationGroup))]` (SPEC-02 §5.8) | yes (see §5.9 note) | `GameplayActive`, `SimClock`, the three pipeline singletons | finalize a completed batch, install due compounds |
+| `GridSpawnBodyInitSystem` | `GameInitGroup`, `[UpdateAfter(typeof(GridSpawnSystem))]` | yes | `GameplayActive`, `SimClock`, `PhysicsVoxelConfig`, `BlockDefsRef`, `EndInitializationEntityCommandBufferSystem.Singleton`, pipeline singletons | fresh spawned bodies even while loading is paused (ADR-0037) |
 | `GridBodyInitSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(ColliderSwapSystem))]` | yes | `GameplayActive`, `SimClock`, `PhysicsVoxelConfig`, `BlockDefsRef`, `GameplayEndCommandBufferSystem.Singleton`, pipeline singletons | create bodies, provisional colliders, enqueue first builds |
 | `SplitGraceContactSystem` (M2) | `PhysicsSimulationGroup` (Unity Physics, inside `PhysicsSystemGroup`), `[UpdateAfter(typeof(PhysicsCreateBodyPairsGroup))]`, `[UpdateBefore(typeof(PhysicsCreateContactsGroup))]` | yes | `GameplayActive`, `SimClock`, `SimulationSingleton`, `PhysicsWorldSingleton` | disable contacts of split pieces with their parent |
 | `GridMassUpdateSystem` | `GameplayPostPhysicsGroup`; SPEC-13's `ShipDeathSystem` declares `[UpdateBefore]` it; declares `[UpdateBefore(typeof(BrickDirtyScheduleSystem))]` (SPEC-10 Q38) | yes | `GameplayActive`, `BlockDefsRef` | mass removal, recompute, `PhysicsMass` + velocity re-expression |
@@ -608,6 +609,8 @@ Filter and material per grid: `Grid`/`GridMaterial`, or `EditorPreview`/`EditorP
 
 ### 5.6 `GridBodyInitSystem`
 
+**Fresh spawn path (ADR-0037, PHY-024):** `GridSpawnBodyInitSystem` runs after `GridSpawnSystem` in `GameInitGroup`, selects enabled `GridBodyInit` with disabled `GridSpawning`, `GridRebuilt`, `GridMassRecompute` and absent `PhysicsCollider`, and uses the same job/factory through the end-initialization ECB. Its rebuild list is empty. This initializes provisional bodies without fixed ticks. Existing-body split adoption and rebuilds continue in the fixed-step path below; fresh spawns with pending mass also wait for that path.
+
 **Queries:** `init` = roots with `GridBodyInit` **enabled** and `GridSpawning` **disabled**; `rebuild` = roots with `GridRebuilt` enabled and `GridSpawning` disabled. If both are structurally empty (`IsEmptyIgnoreFilter`), return. Enableable filtering is performed by the asynchronous gather: `IsEmpty` would synchronize enableable writers on the main thread (Q22).
 
 **Per tick** (marker `GridBodyInitSystem.Init`):
@@ -628,7 +631,7 @@ Filter and material per grid: `Grid`/`GridMaterial`, or `EditorPreview`/`EditorP
 5. `queue.Release`, `cache.Release`, `state.Dependency = handle`.
 6. **Enqueue all bricks:** for `slot = 0..BrickSlot.Length−1` (slot order = (z, y, x)): brick `b != Entity.Null` → `queue.Enqueue(g.Serial, root, b, Brick[b].Coord, priority)`.
 
-The new body takes part in physics from tick `T+1` (ECB playback at the end of tick `T`).
+The fixed-step path’s new body takes part in physics from tick `T+1` (ECB playback at the end of tick `T`). Fresh-spawn bodies from the initialization path exist before the next fixed tick.
 
 **`GridBodyFactory` for other creators (SPEC-13 `SplitSystem`, hulk roots):** record `AddComponent(root, DynamicBodyTypes())`, set `PhysicsCollider { Value = CreateProvisionalCollider(...) }` (its own island cell bounds), `PhysicsVelocity`, `PhysicsMass` (exact island mass; `CreateDynamicMass` may be used with island accumulators), `PhysicsDamping` (copy the parent's or `DefaultDamping`), smoothing and interpolation buffer at the hulk pose; `AddSharedComponent(root, WorldIndex())`; leave `GridBodyInit` enabled and `GridMassRecompute` enabled. `GridBodyInitSystem` adopts the provisional blob next tick (step 3, `hasBody`) and queues the first build as `Split` (deterministic install).
 
@@ -1129,12 +1132,12 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Milestone:** M1
 - **Tier:** frontier — F1/F2: initialization/fixed-step ownership and scene-ready deadlock
 - **Depends on:** `PHY-008`, `PHY-016`, `PHY-018`
-- **Do:** Add a GameInitGroup path after GridSpawnSystem for fresh roots with no PhysicsCollider, finished spawning and valid prefetched mass. Reuse GridBodyInitJob/factory ownership, writing initial body components through EndInitializationEntityCommandBufferSystem so a paused ready hook can observe its provisional collider. Leave existing-body split adoption and rebuild handling in the fixed step. Document the ordering in an accepted ADR and architecture/spec. No forced gameplay ticks or pause-token release.
-- **Files:** `Assets/Game/Voxel/PhysicsBody/GridSpawnBodyInitSystem.cs`; `Assets/Game/Tests/EditMode/Voxel/Physics/PausedSpawnBodyTests.cs`; `docs/decisions/ADR-0037-paused-spawn-body-initialization.md`
+- **Do:** Add a GameInitGroup path after GridSpawnSystem for fresh roots with no PhysicsCollider, finished spawning and valid prefetched mass. Reuse GridBodyInitJob/factory ownership, writing initial body components through EndInitializationEntityCommandBufferSystem so a paused ready hook can observe its provisional collider. Leave existing-body split adoption and rebuild handling in the fixed step. Document the ordering in an accepted ADR and architecture/spec. No forced gameplay ticks or pause-token release. Include the new initializer and end-init ECB in the existing inclusive physics main-thread performance recorder.
+- **Files:** `Assets/Game/Voxel/PhysicsBody/GridSpawnBodyInitSystem.cs`; `Assets/Game/Tests/EditMode/Voxel/Physics/{PausedSpawnBodyTests,ColliderDeterminismTests}.cs`; `Assets/Game/Tests/PlayMode/Voxel/Physics/{PhysicsScenarioTests,BrickColliderPerfTests}.cs`; `docs/decisions/ADR-0037-paused-spawn-body-initialization.md`
 - **Acceptance criteria:**
-  - [ ] A fresh dynamic grid gets its provisional collider and exact mass with zero fixed ticks; its requested pose/velocity and SimClock are unchanged.
-  - [ ] Existing-body split adoption is skipped by the variable initialization path and still enters the deterministic fixed-step pipeline.
-  - [ ] No duplicate cache records, ownership leaks or changed damage install ticks; all functional and performance gates pass.
+  - [x] A fresh dynamic grid gets its provisional collider and exact mass with zero fixed ticks; its requested pose/velocity and SimClock are unchanged.
+  - [x] Existing-body split adoption is skipped by the variable initialization path and still enters the deterministic fixed-step pipeline.
+  - [x] No duplicate cache records, ownership leaks or changed damage install ticks; all functional and performance gates pass.
 - **Tests:** `PausedSpawnBodyTests.FreshSpawn_ReadyWithoutTicks`, `.ExistingBody_StillAdoptedInFixedStep`; existing collider determinism, lifecycle and PHY-019 gates.
 
 ## 10. Open questions
