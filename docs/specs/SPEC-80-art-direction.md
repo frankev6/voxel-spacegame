@@ -607,8 +607,8 @@ Filled by `ART-013` only.
 
 | Field | Value |
 |---|---|
-| Chosen direction | — |
-| Borrowed elements | — |
-| Approved by | — |
-| Approval date | — |
-| DESIGN-SYSTEM.md decision log rows | — |
+| Chosen direction | NOCTURNE, as rendered in the look book and written in [DESIGN-GUIDE.md](../design/DESIGN-GUIDE.md) |
+| Borrowed elements | None yet; DRYDOCK, OPERA and the aliens are kept as reference (DESIGN-GUIDE §10) |
+| Approved by | Frank (owner): "yes I approve" |
+| Approval date | 2026-10-11 |
+| DESIGN-SYSTEM.md decision log rows | DESIGN-GUIDE §13 rows 1–5 (the guide replaced DESIGN-SYSTEM.md as the source of truth; `ART-008`…`ART-012` were not run before the gate, see the ledger) |

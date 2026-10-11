@@ -2,7 +2,7 @@
 
 **Status: BINDING order of work.** Milestones run in order. Within a milestone, any task whose dependencies are `done` may start.
 
-**Owner decision 2026-10-10: the design system comes first.** No other work proceeds until the owner approves the design system (`ART-013`). The only exceptions are the tasks the look tests themselves need: `CORE-001`, `DATA-001`, the SPEC-04 validation chain that `ART-007` registers into (`DATA-002`, `DATA-004`, `DATA-005`, `DATA-008`), and SPEC-81 `AST-001`…`AST-003` (ledger open question 4).
+**Design system approved 2026-10-11 (NOCTURNE, [DESIGN-GUIDE.md](design/DESIGN-GUIDE.md)); gate `ART-013` passed, so M0 may start.** History: owner decision 2026-10-10, the design system comes first. No other work proceeded until the owner approved the design system (`ART-013`). The only exceptions are the tasks the look tests themselves need: `CORE-001`, `DATA-001`, the SPEC-04 validation chain that `ART-007` registers into (`DATA-002`, `DATA-004`, `DATA-005`, `DATA-008`), and SPEC-81 `AST-001`…`AST-003` (ledger open question 4).
 
 Task status lives in [LEDGER.md](LEDGER.md). Task definitions live in the specs.
 

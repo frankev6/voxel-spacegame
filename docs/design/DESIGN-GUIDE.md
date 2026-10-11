@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **SOURCE OF TRUTH for the look of the game** (owner, 2026-10-11). Design-system gate `ART-013`: see §12 |
+| **Status** | **BINDING — approved 2026-10-11 (NOCTURNE).** The source of truth for the look of the game; design-system gate `ART-013` passed |
 | **Owner** | Frank |
 | **Main guide** | NOCTURNE, as rendered in the look book (rounds 2–4), not as first written in the proposal |
 | **Visual reference** | [Look book](lookbook/index.html) and [ship silhouettes](lookbook/silhouettes.html), kept as they are (§10) |
@@ -307,8 +307,8 @@ The look book and silhouette page are **frozen as visual reference**. New look-d
 
 | # | Decision | Default until answered | Decider |
 |---|---|---|---|
-| 1 | Is this guide the design-system approval (gate `ART-013`), so that game systems can start? | Not yet: the gate stays open, and M0–M4 wait as the roadmap says | Owner |
-| 2 | How hulls become game blocks: cut cells, a fixed slope set, or cube and wedge (ledger question 6) | Specs as written (cube and wedge); the look book keeps showing cut cells | Owner |
+| 1 | Is this guide the design-system approval (gate `ART-013`), so that game systems can start? | **Answered 2026-10-11: yes** (§13 row 5). The in-engine look test (`ART-008`…`ART-011`) runs after the renderer exists, as a check | Owner |
+| 2 | How hulls become game blocks: cut cells, a fixed slope set, or cube and wedge (ledger question 6) | Specs as written (cube and wedge) until the slope study (look book, *Slopes* tab) is reviewed. Owner, 2026-10-11: "lets model the different sloped blocks so we can see how many are needed (ideally as least as possible)" | Owner |
 | 3 | Which ship lines and factions are approved (the silhouettes, ledger question 7) | None approved | Owner |
 | 4 | Industrial gothic VFX (§9) and damage (§5.4) in engine | As written here, checked in the first look test | Lead worker |
 
@@ -321,4 +321,5 @@ The look book and silhouette page are **frozen as visual reference**. New look-d
 | 1 | 2026-10-10 | At 150 m, 1-cell-wide functional blocks are identified by silhouette and function colour; their glyph is a 50 m feature | Owner | DESIGN-SYSTEM §12 row 1 (carried over) |
 | 2 | 2026-10-10 | Round 2: "no ui changes, its good" for NOCTURNE; NOCTURNE 3D to go "horror sci-fi … like the ALIEN franchise movies" | Owner | §1, §8 |
 | 3 | 2026-10-11 | NOCTURNE is the main guide; this guide is the source of truth; the look book stays as it is as visual reference; DRYDOCK, the aliens and the silhouettes are kept; the silhouettes are not approved | Owner | Whole guide; §10 |
+| 5 | 2026-10-11 | **Design system approved: NOCTURNE, as this guide.** Owner, verbatim: "yes I approve" (answer to: does choosing NOCTURNE plus this guide count as the design-system approval). Production art (SPEC-81, A1) and the game milestones M0–M4 may start | Owner | Gate `ART-013`; ledger *Owner gates*; ROADMAP; SPEC-80 §12 |
 | 4 | 2026-10-11 | Key light pitched 40° (overrides R4's 25° for NOCTURNE); hazard colours `#B23A2A` and `#0D0E0C`; function colours are the light colours of §3.3; NOCTURNE damage and VFX are physical (ember, scorch, smoke), not "light dying" | Lead worker (claude-opus-5-5), from the look-book renders the owner chose | §3.3, §4.1, §5.4, §9 |

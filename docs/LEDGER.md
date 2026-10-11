@@ -27,7 +27,7 @@
 
 | Gate | Spec | Status | Approved on | Notes |
 |---|---|---|---|---|
-| Design system / art direction approved | SPEC-80 | waiting for proposal review | — | Blocks all SPEC-81 asset production. **Since 2026-10-10 it also blocks M0–M4** except the look-test prerequisites (open question 4) |
+| Design system / art direction approved | SPEC-80 | approved | 2026-10-11 | NOCTURNE, as [DESIGN-GUIDE.md](design/DESIGN-GUIDE.md). Owner: "yes I approve". M0–M4 and SPEC-81 (A1) are unblocked |
 | Yarn Spinner 3 adoption | SPEC-41 | waiting for spike | — | Fallback format defined in SPEC-41 |
 
 ## Tasks
@@ -487,14 +487,14 @@
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | review | claude (claude-opus-5-5) | 2026-10-10 | a3d0d92 | Needs an independent frontier review (no subagents this session). 13 public-domain images added (owner-approved) |
 | ART-004 | Block-kit style test: five blocks per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002 | yes | review | claude (claude-opus-5-5) | 2026-10-10 | 5cebb6b | Needs independent frontier review and a second reviewer for the 150 m glyph test (criterion 3; likely fails for 1-cell-wide blocks, see log) |
 | ART-005 | Interactive HTML design board | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002, ART-003, ART-004 | no | review | claude (claude-opus-5-5) | 2026-10-10 | a6b2fe2 | Needs independent frontier review; Safari file:// check pending; ready for the owner's ART-006 shortlist |
-| ART-006 | Owner shortlist of finalist directions | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-005 | no | todo |  |  |  |  |
+| ART-006 | Owner shortlist of finalist directions | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-005 | no | done | frank (human) | 2026-10-11 | COMMIT | Owner chose one direction, NOCTURNE (2026-10-11), instead of two finalists |
 | ART-007 | Brick material baker, preview mesher, reference shader and art validator | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-10 |  | Baker, preview mesher and SH_BrickReference done on branch task/ART-007-brick-tools (083c482); ArtDatabaseValidator waits for CORE-002, DATA-004, DATA-005 (owner chose ART-004 first) |
-| ART-008 | Look-test content for each finalist | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-004, ART-006, ART-007 | no | todo |  |  |  |  |
-| ART-009 | Look-test scenes with HUD mock | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002, ART-008 | no | todo |  |  |  |  |
-| ART-010 | Look-test capture pack and metrics | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-009 | no | todo |  |  |  |  |
-| ART-011 | Owner look-test review and one revision round | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-010 | no | todo |  |  |  |  |
-| ART-012 | Finalize the design system for approval | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-011 | no | todo |  |  |  |  |
-| ART-013 | GATE: Owner approves design system | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-012 | no | todo |  |  |  |  |
+| ART-008 | Look-test content for each finalist | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-004, ART-006, ART-007 | no | todo |  | 2026-10-11 |  | Re-scoped by the gate approval 2026-10-11: runs after the renderer exists (M1), as a check, not a gate |
+| ART-009 | Look-test scenes with HUD mock | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-002, ART-008 | no | todo |  | 2026-10-11 |  | Re-scoped 2026-10-11: after the renderer exists, as a check |
+| ART-010 | Look-test capture pack and metrics | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-009 | no | todo |  | 2026-10-11 |  | Re-scoped 2026-10-11: after the renderer exists, as a check |
+| ART-011 | Owner look-test review and one revision round | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-010 | no | todo |  | 2026-10-11 |  | Re-scoped 2026-10-11: after the renderer exists, as a check |
+| ART-012 | Finalize the design system for approval | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-011 | no | review | claude (claude-opus-5-5) | 2026-10-11 | d60cdf7 | Replaced by DESIGN-GUIDE.md (d60cdf7); golden captures wait for the in-engine look test. Needs independent frontier review |
+| ART-013 | GATE: Owner approves design system | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-012 | no | done | frank (human) | 2026-10-11 | COMMIT | Approved 2026-10-11: NOCTURNE as DESIGN-GUIDE.md. Owner: "yes I approve" |
 | AST-001 | Public contract types: asset manifest, naming rules and licence register | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | ART-001 | yes | todo |  |  |  |  |
 | AST-002 | Art import rules and asset validator | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | AST-001 | no | todo |  |  |  |  |
 | AST-003 | Licence audit of carried-over placeholders | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | AST-001 | no | todo |  |  |  |  |
@@ -545,7 +545,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 4 | 2026-10-10 | ROADMAP, SPEC-80, SPEC-81 | Owner: "our first thing is to nail the look of the game in terms of blocks, ui, meshes, colors, textures, etc. nothing proceeds until the design system is spot on". Which code may run before `ART-013`? | Only what the look tests need: `CORE-001`, `DATA-001`, `DATA-002`, `DATA-004`, `DATA-005`, `DATA-008` (for `ART-007`'s validator), and `AST-001`…`AST-003`. Everything else in M0–M4 waits | Owner | **Answered 2026-10-10 (owner, verbatim):** "Whatever you deep necessary within the scope in order to showcase the most faithful depictions so that our decisions are based on accurate visuals". The lead worker decides which code runs before `ART-013`, limited to what makes the look tests faithful to the final game |
 | 5 | 2026-10-10 | SPEC-02 CORE-001, CORE-009 | `ManagedEventDrainSystem` stub: throwing lifecycle methods would break Play Mode (SPEC-02 open question 10) | Empty `OnUpdate`/`OnDestroy` with `TODO(CORE-009)`; the public API throws | Tech lead | |
 | 6 | 2026-10-10 | SPEC-04 §4.2, SPEC-11 §4, SPEC-12; look book round 3 | How do the look-dev hulls become game blocks? (a) Tapers: the hulls use cut cells (each 0.5 m cell clipped by up to three straight planes that continue across neighbours; 407–1,189 distinct shapes per direction, the 45° `Wedge` covers 8–21% of cut cells), the specs allow only `Cube` and `Wedge` (shape packed in one bit). Options: generic cut cells with a few quantised planes per cell (needs an ADR changing the packed format), a fixed slope catalogue (1:1, 1:2, 1:3 and their corners) with tapers limited to it, or Cube and Wedge only (stepped tapers). (b) Large hull blocks (2×2×2, 3×3×3) as one placeable block that a module splits back into cells. (c) Alien hulls as signed-distance cells meshed by surface nets | Specs as written (Cube, Wedge); the look book keeps showing cut cells, large blocks and smooth alien cells so the decision is made on the real look | Owner | |
-| 8 | 2026-10-11 | DESIGN-GUIDE §12, SPEC-80 `ART-013`, ROADMAP | The owner chose NOCTURNE and made DESIGN-GUIDE.md the source of truth. Does that count as the design-system approval (`ART-013`), so M0–M4 can start? | No: the gate stays open, M0–M4 wait | Owner | |
+| 8 | 2026-10-11 | DESIGN-GUIDE §12, SPEC-80 `ART-013`, ROADMAP | The owner chose NOCTURNE and made DESIGN-GUIDE.md the source of truth. Does that count as the design-system approval (`ART-013`), so M0–M4 can start? | No: the gate stays open, M0–M4 wait | Owner | **Answered 2026-10-11 (verbatim): "yes I approve".** Gate passed; the look test runs after the renderer exists |
 | 7 | 2026-10-10 | SPEC-33, DESIGN-SYSTEM factions; look book round 4 | Batch 3 builds the ship lines on the legacy factions and adds proposals: Triple Alliance house names (Pochteca Freight, Itztli Arms, Caisson Heavy Industries), ship names, refit codes (S) Scavenger, (I) Itztli, (K) Khuchad prize, the Khuchad port-armour/starboard-weapon doctrine, and redacted hints linking the Vanguard to the Aksharans. Where do batch 2's Knell choir and Caisson line sit in the roster? | Proposals only, nothing binding; Caisson is shown as the Alliance's third house; the Knell choir stays an independent order | Owner | |
 
 ## Measurements
@@ -558,6 +558,20 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — GATE: design system approved, NOCTURNE (frank, human; recorded by claude, claude-opus-5-5)
+- **Owner, verbatim** (answering whether NOCTURNE plus DESIGN-GUIDE.md counts as the design-system approval):
+
+  > 1. yes I approve
+  > 2. lets model the different sloped blocks so we can see how many are needed (ideally as least as possible)
+
+- `ART-013` is done and the *Owner gates* row is approved. DESIGN-GUIDE.md is BINDING. SPEC-80 §12 is filled in. The ROADMAP's design-first hold is lifted, so M0 may start and SPEC-81 (A1) is unblocked; `ART-014` is next on the art track.
+- **Deviations from SPEC-80, by the owner's choice:**
+  - One direction was chosen instead of two finalists (`ART-006`).
+  - The in-engine look test (`ART-008`…`ART-011`) moves to after the renderer exists, as a check rather than a gate.
+  - `ART-012` was replaced by the guide (in review).
+  - DESIGN-SYSTEM.md keeps its direction sections in place as the proposal record, instead of moving them to Appendix A.
+- **Next:** the slope study for open question 6 (point 2 above).
 
 ### 2026-10-11 — Design guide: NOCTURNE as the source of truth (claude, claude-opus-5-5)
 - **Owner decision (verbatim, 2026-10-11):**
