@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 50 | 0 | 0 | 0 | 53 | 0 | 103 | 16 |
+| M1 | 50 | 0 | 1 | 0 | 53 | 0 | 104 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -108,7 +108,7 @@
 | MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | yes | done | astra (gpt-6) | 2026-10-11 | 75cb5fd | Migration gate: 69 unchanged; full 0.580s; max ship 42.4ms |
 | FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | yes | done | astra (gpt-6) | 2026-10-11 | 2718913 | Unique managed/Burst grants; saved high-water mark; explicit refill dependency wait |
 | FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | yes | done | astra (gpt-6) | 2026-10-11 | 8a8bd6f | Session flow/SESS; ordered save preparation; bounded thumbnail readback (ADR-0034) |
-| FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Fleet ownership, FLET recovery and M1 player spawn/writeback |
+| FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | yes | blocked | astra (gpt-6) | 2026-10-11 |  | PHY-024 paused body creation; WIP 16df29b on task/FND-010-fleet-player |
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | no | todo |  |  |  |  |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | no | todo |  |  |  |  |
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | no | todo |  |  |  |  |
@@ -168,6 +168,7 @@
 | PHY-019 | Performance gates and memory | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-012, PHY-013, PHY-015, SPEC-10, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | fcd09c2 | Six reference gates; zero late installs; ADR-0033 corrects collider overlap allocation |
 | PHY-020 | Fallback: flat grid compound of boxes (only if PHY-002 is no-go for nested compounds) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002 | yes | done | astra (gpt-6) | 2026-10-11 | dd85d8c | not needed (PHY-002 go) |
 | PHY-023 | Urgent collider deadlines across catch-up frames | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-018, PHY-019 | yes | done | astra (gpt-6) | 2026-10-11 | a912ab2 | ADR-0035 urgent deadline completion outside fixed step; strict determinism and full gates pass |
+| PHY-024 | Spawn bodies while scene loading is paused | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-008, PHY-016, PHY-018 | yes | todo |  |  |  |  |
 | DMG-001 | Public contract types | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 9310e7c | Public damage/restore/impulse contracts, 43 config defaults, table lookup; 4 tests; Q71–74 |
 | FLT-001 | Public contract types | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0ddf5bf | Unmanaged flight/input contracts; exact SPEC-03 fields; Q112 comment corrections |
 | FLT-002 | Grid-space and flight maths | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | ec30fc9 | Grid geometry, gyro, caps and assist targets; eight required tests |
@@ -176,7 +177,7 @@
 | FLT-005 | PlayerCommandApplySystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001, DMG-001 | yes | todo |  |  |  |  |
 | FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 2388784 | Four flying profiles, player-only tag, change-filtered Burst nozzle init; three tests |
 | FLT-007 | PropulsionSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-002, FLT-004, FLT-006, DMG-001, SPEC-12 | no | todo |  |  |  |  |
-| FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | yes | todo |  |  |  |  |
+| FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | no | todo |  |  |  |  |
 | FLT-009 | Flight behaviour scenarios | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-005, FLT-007, FLT-008, SPEC-10 | no | todo |  |  |  |  |
 | FLT-010 | Flight tuning against legacy blueprints | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-009, SPEC-72 | no | todo |  |  |  |  |
 | FLT-011 | Flight performance and determinism | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-007, FLT-008, TST-001 | no | todo |  |  |  |  |
@@ -676,6 +677,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 111 | 2026-10-11 | SPEC-01 FND-009 | New game can run without a selected profile | Create configured-default profile only when none is selected | Tech lead | SPEC-01 Q18; existing active profile and redirected save roots preserved |
 | 112 | 2026-10-11 | SPEC-20 FLT-001 | Contract size/file-list and player-tag comments disagree with field/profile contracts | Keep fields; correct comments; include PropulsionStats | Tech lead | SPEC-20 Q9: 44-byte FlightThruster; ADR-0015 profile owns PlayerShip; no layout change. FLT-006 lists its required FlightSetup implementation and corrects the remaining memory-summary comment |
 | 113 | 2026-10-11 | SPEC-12 PHY-023 | Background batch completion can miss an urgent install during six-tick catch-up | Finish deadline-critical work outside the fixed step | Tech lead | Accepted ADR-0035 / SPEC-12 Q25: next-frame deadline completion in the variable-rate builder; PHY-023 verified: delayed batch and strict determinism pass; full suites green |
+| 116 | 2026-10-11 | SPEC-12 PHY-024 / FND-010 | Loading pause prevents the fixed tick needed for player collider readiness | Fresh spawn body initialization in GameInitGroup | Tech lead | SPEC-12 Q26 / ADR-0037; fresh roots only, end-init ECB; split adoption remains fixed-step. Q114–115 are reserved on the unmerged FND-010 branch |
 
 
 
@@ -727,6 +729,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — FND-010 paused-spawn dependency found (astra, gpt-6)
+
+- Code tracing found a real ready-hook deadlock: SceneFlow holds a pause token until the player collider exists, but GridBodyInitSystem runs only in fixed ticks. Added PHY-024 for fresh-spawn initialization outside simulation, preserving split adoption/determinism in the existing fixed pipeline.
+- FND-010's initial fleet ownership and scoped restore-warning work is compile-clean but unfinished, committed only as `16df29b` on task/FND-010-fleet-player. ADR-0036 and questions 114–115 are reserved there. Resume/rebase that branch after PHY-024; its participant, integration and tests remain to do.
 
 ### 2026-10-11 — FLT-006 flight registration and thruster visuals (astra, gpt-6)
 

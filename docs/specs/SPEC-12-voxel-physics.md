@@ -1125,6 +1125,18 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
   - [x] Existing collider determinism runs preserve identical records and zero late installs; full functional/performance suites pass with measured completion cost recorded.
 - **Tests:** `ColliderDeadlineTests.Urgent_ReadyBeforeCatchUp`, `.NonUrgent_PreservesAgeLimit`; existing `ColliderDeterminismTests` and PHY-019 gates.
 
+### PHY-024 — Spawn bodies while scene loading is paused
+- **Milestone:** M1
+- **Tier:** frontier — F1/F2: initialization/fixed-step ownership and scene-ready deadlock
+- **Depends on:** `PHY-008`, `PHY-016`, `PHY-018`
+- **Do:** Add a GameInitGroup path after GridSpawnSystem for fresh roots with no PhysicsCollider, finished spawning and valid prefetched mass. Reuse GridBodyInitJob/factory ownership, writing initial body components through EndInitializationEntityCommandBufferSystem so a paused ready hook can observe its provisional collider. Leave existing-body split adoption and rebuild handling in the fixed step. Document the ordering in an accepted ADR and architecture/spec. No forced gameplay ticks or pause-token release.
+- **Files:** `Assets/Game/Voxel/PhysicsBody/GridSpawnBodyInitSystem.cs`; `Assets/Game/Tests/EditMode/Voxel/Physics/PausedSpawnBodyTests.cs`; `docs/decisions/ADR-0037-paused-spawn-body-initialization.md`
+- **Acceptance criteria:**
+  - [ ] A fresh dynamic grid gets its provisional collider and exact mass with zero fixed ticks; its requested pose/velocity and SimClock are unchanged.
+  - [ ] Existing-body split adoption is skipped by the variable initialization path and still enters the deterministic fixed-step pipeline.
+  - [ ] No duplicate cache records, ownership leaks or changed damage install ticks; all functional and performance gates pass.
+- **Tests:** `PausedSpawnBodyTests.FreshSpawn_ReadyWithoutTicks`, `.ExistingBody_StillAdoptedInFixedStep`; existing collider determinism, lifecycle and PHY-019 gates.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
@@ -1156,6 +1168,8 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 | 23 | Rebuild reset must not recycle updates or apply old results while a batch still references them | Detach referenced updates as Discarded; finalize owns their later retirement | Tech lead | Resolved: body-reset reads only immutable batch descriptors under cache ownership, which orders it before descriptor clearing/reuse. New updates may proceed without reviving stale children. |
 | 24 | Four compound versions coexist during overlapping deterministic updates, exceeding the three-version memory estimate | Allocate 3.5 MiB to reference collider blobs within unchanged whole-voxel limits | Tech lead | Resolved PHY-019 / ADR-0033: measured 3,275,424 B (old 2.5 MiB no-go), final steady 1,263,456 B; corrected reference model 32,227,328 B. Keep installation and retirement lifetimes; integration remains TST-004. |
 | 25 | An urgent batch can still be unfinished when a six-tick catch-up frame reaches its install tick | Finish deadline-critical batches in the variable-rate build stage before that frame | Tech lead | Resolved by accepted ADR-0035 / PHY-023: complete deadline-critical batches in the existing variable-rate builder using the six-tick horizon; fixed-step installation stays nonblocking. Two FLT-002 full suites recorded 3 late installs at pattern 3 / 17 workers; originals retained in Logs/test-results/flt002-{initial,repeated}-collider-late.xml. Validation is recorded in the ledger. |
+
+| 26 | SceneFlow holds a pause while PlayerShipSpawner waits for PhysicsCollider, but body initialization requires a fixed tick | Initialize fresh spawned bodies in GameInitGroup through the end-initialization ECB | Tech lead | PHY-024 / ADR-0037: fresh spawn roots only; reuse existing body job/factory and cache ownership. Split adoption/rebuilds remain fixed-step; never advance gameplay to satisfy a loading hook. |
 
 ## 11. References
 
