@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **PROPOSAL — awaiting owner approval** |
+| **Status** | **PROPOSAL, superseded as the source of truth by [DESIGN-GUIDE.md](DESIGN-GUIDE.md)** (owner, 2026-10-11: NOCTURNE as rendered in the look book). The direction sections (§5–§9) are reference only; §4 and §10–§11 stay binding through the guide (DESIGN-GUIDE §0.3) |
 | **Owner** | Frank |
 | **Process spec** | [SPEC-80 Art direction and design system](../specs/SPEC-80-art-direction.md) (area `ART`) |
 | **Production spec** | [SPEC-81 Asset production](../specs/SPEC-81-asset-production.md) (area `AST`), blocked behind the gate `ART-013` |

@@ -35,7 +35,7 @@ The owner must approve one coherent look before any production art is made ([ADR
 ## 3. Decisions (binding)
 
 1. **No SPEC-81 task with milestone A1 or A2 starts before `ART-013` is `done`.** Reason: ADR-0009.
-2. **DESIGN-SYSTEM.md is the single source of design values;** this spec never repeats a value it can reference. Reason: one place to change.
+2. **[DESIGN-GUIDE.md](../design/DESIGN-GUIDE.md) is the single source of design values** (owner, 2026-10-11; it replaced DESIGN-SYSTEM.md in that role and adopts DESIGN-SYSTEM §4 and §10–§11 by reference). This spec never repeats a value it can reference. Reason: one place to change.
 3. **`Assets/Game/UI/Theme/tokens.uss` is owned by this spec.** It is created by `ART-001` with placeholder values and rewritten only by `ART-014` or by a task that cites a DESIGN-SYSTEM §12 decision row. Token names never change. Reason: single writer; other specs already use the names.
 4. **Blocks and items keep their runtime presentation fields in SPEC-04** (`materialLayer`, `propMesh`, `icon`). `BlockVisualDefinition` holds only art extras (LOD1 mesh, moving parts, sockets, default paint). Reason: no second source of truth for SPEC-04 fields.
 5. **Exactly one `ArtDirectionDefinition` has `isActive = true`** in the database; runtime code finds the look through it. Reason: no SPEC-04 change needed, swap in one place.
