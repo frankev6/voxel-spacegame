@@ -981,6 +981,17 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
   - [ ] Load to playable ≤ 2 s (median of 5) on the reference machine; logged in the ledger.
 - **Tests:** `FullWorldRoundTripScenario.SaveLoadSave_IsByteIdentical`, `.LoadToPlayable_Under2Seconds` (`[Category("Scenario")]`, `[Category("Performance")]`).
 
+### PERS-016 — Release snapshots when session capture fails
+- **Milestone:** M0
+- **Tier:** frontier — F5: native ownership on every capture failure path
+- **Depends on:** `PERS-008`
+- **Do:** Cover the entire main-thread capture with failure handling, including session metadata and thumbnail callbacks. Release all captured writers/deferred blocks; return ParticipantFailed with the failing key or context stage, without writing files. Preserve the existing async completion path and queue recovery.
+- **Files:** `Assets/Game/Persistence/Services/SaveService.cs`; `Assets/Game/Tests/EditMode/Persistence/{SavePipelineTests,FakeSaveContext}.cs`
+- **Acceptance criteria:**
+  - [ ] Metadata, slot-thumbnail and thumbnail-list callback exceptions release every captured block without encoding and leave existing files byte-identical.
+  - [ ] SaveAsync returns ParticipantFailed, raises failure completion once, clears its ticket, and permits a subsequent successful save.
+- **Tests:** `SavePipelineTests.ContextCaptureFailure_LeavesFilesUntouched`; `.ContextCaptureFailure_AsyncCompletesAndRecovers`.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
