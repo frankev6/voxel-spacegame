@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 76 | 0 | 0 | 0 | 25 | 0 | 101 | 14 |
+| M1 | 75 | 0 | 0 | 0 | 26 | 0 | 101 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 4 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 3 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -116,7 +116,7 @@
 | INP-007 | Frame-rate independence test | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-005, SPEC-20 | no | todo |  |  |  |  |
 | DATA-011 | v2 block additions (reactor, cargo) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | standard | DATA-009 | yes | done | astra (gpt-6) | 2026-10-11 | 7158bf8 | Reactor/cargo registered; specified modules and existing art references validated |
 | VOX-002 | SPIKE: memory model for the reference and thin-shell stations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 6393ecd | No-go: reference 38,828,288 B retained-copy peak; ADR-0023 proposed |
-| VOX-003 | Sparse-brick fallback (only if VOX-002 is no-go) | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-002, VOX-014 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Accept/refine ADR-0023; complete sparse storage/callers and measure reference headroom |
+| VOX-003 | Sparse-brick fallback (only if VOX-002 is no-go) | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-002, VOX-014 | yes | done | astra (gpt-6) | 2026-10-11 | 3d14ffa | Sparse fallback: 31.540 MB reference peak; ADR-0023/Q85; all gates pass |
 | VOX-004 | Brick maths and mask operations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 508c75f | Brick coordinates, faces and 4096-bit mask operations; 8 tests |
 | VOX-005 | VoxelStructure storage core | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-004 | yes | done | astra (gpt-6) | 2026-10-11 | 3e2c25e | Dense/uniform storage, recycled pages, revisions, bounds and ownership; 7 tests |
 | VOX-006 | Block placement, removal and compaction | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6a33cf7 | Placement/removal, palette/instance reuse, compaction; GetBlocks brought forward (Q65) |
@@ -680,6 +680,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — VOX-003 sparse fallback and memory go (astra, gpt-6)
+
+- Accepted ADR-0023/Q85 and implemented six-byte sorted sparse ECS cells, source sparse pages, exact 1025-cell densification, explicit dense repacking and shared reads throughout clone/diff/mass, compaction, codec, spawn/write-back and ray/placement paths. Uniform bricks and VOXS bytes remain unchanged; binding architecture and downstream snapshot/physics/damage specs are updated.
+- Reference memory model now **31,539,808 B** retained-copy peak, below **36,000,000 B** with **4,460,192 B headroom**: **go**. Actual cells/masks 7,278,592 B, root heap 35,168 B (10,464 B baseline), all world/meta chunks 409,600 B; both mesh copies and collider overlap included. Source NativeBytes before release 11,059,664 B, after spawn/release 0 B. Thin-shell stress remains **107,292,880 B**. SPEC-10 §8.3 preserves exact boundaries and local measurement evidence; whole-renderer integration remains TST-004.
+- Required 30,000-write sparse/dense fuzz and threshold tests pass. All 138 voxel tests and full EditMode **530 passed + 1 explicit skipped**, PlayMode **32 passed**, perf **29/29**. Compile zero C# warnings; docs **502 tasks / zero errors**. Sparse codec encode/decode **32.08/51.34 ms**, 100k-cell diff **1.256 ms** (10 ms budget), station build **82.52 ms**, dense spawn **0.318 ms**; unchanged write-back **0.00030 ms**.
+- Implementation **3d14ffa**. M1 continues with remaining ready scheduling, cleanup and integration tasks; no owner decision blocks implementation.
 
 ### 2026-10-11 — VOX-014 grid lifecycle and damage write-back (astra, gpt-6)
 
