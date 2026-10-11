@@ -338,9 +338,192 @@ namespace Game.Persistence.Services
         static bool IsAutosave(SaveReason r) => r == SaveReason.AutoTimer || r == SaveReason.AutoStarSystemEntered || r == SaveReason.AutoSceneTransition;
         static bool RaisesWhenBlocked(SaveReason r) => r == SaveReason.Manual || r == SaveReason.Quick || r == SaveReason.Quit;
 
-        public UnityEngine.Awaitable<LoadResult> ReadAsync(SlotRef slot) { throw new System.NotImplementedException("PERS-006"); }
-        public Game.Data.Validation.ValidationReport Restore(LoadedSave save) { throw new System.NotImplementedException("PERS-006"); }   // main thread
-        public Game.Data.Validation.ValidationReport LastLoadReport => throw new System.NotImplementedException("PERS-006");
+        #region Load (PERS-006, SPEC-05 §5.6)
+
+        /// <summary>Queued like saves (§5.3); reads on a background thread. On failure raises OperationCompleted and changes nothing else (R28).</summary>
+        public async UnityEngine.Awaitable<LoadResult> ReadAsync(SlotRef slot)
+        {
+            var ticket = new object();
+            if (!Enqueue(ticket, false))
+            {
+                var full = new LoadResult(false, SaveErrorKind.IoError, SaveMessages.IoError(SaveMessages.TooManyQueued), null);
+                OperationCompleted?.Invoke(new SaveOperationResult(true, false, full.Error, full.Message, slot, default, 0, null));
+                return full;
+            }
+            try
+            {
+                while (queue.Count > 0 && queue[0] != ticket) await UnityEngine.Awaitable.NextFrameAsync();
+                LoadResult result;
+                await UnityEngine.Awaitable.BackgroundThreadAsync();
+                try { result = ReadNow(slot); }
+                finally { await UnityEngine.Awaitable.MainThreadAsync(); }
+                if (!result.Success) OperationCompleted?.Invoke(new SaveOperationResult(true, false, result.Error, result.Message, slot, default, 0, null));
+                return result;
+            }
+            finally { queue.Remove(ticket); }
+        }
+
+        /// <summary>§5.6 steps 1–7, thread-agnostic. Never throws; never touches participants.</summary>
+        internal LoadResult ReadNow(SlotRef slot)
+        {
+            var report = new Game.Data.Validation.ValidationReport("Load " + slot.Profile.Value + "/" + slot.Slot.Value);
+            string worldFile = paths.WorldFile(slot), backupFile = paths.BackupFile(slot);
+            // 1–3.
+            var worldChunks = new List<RawChunk>();
+            var worldReport = new Game.Data.Validation.ValidationReport(report.Context);
+            var worldStatus = TryRead(worldFile, out var worldHeader, worldChunks, worldReport, "world.sav", out bool worldMissing);
+            var chunks = worldChunks; var header = worldHeader; bool fromBackup = false;
+            if (worldStatus == ContainerReadStatus.Ok) report.Merge(worldReport);
+            else
+            {
+                // 4.
+                if (worldStatus == ContainerReadStatus.NewerFormat)
+                    return new LoadResult(false, SaveErrorKind.NewerFormat, SaveMessages.NewerFormat, null);
+                var bakChunks = new List<RawChunk>();
+                var bakStatus = TryRead(backupFile, out var bakHeader, bakChunks, new Game.Data.Validation.ValidationReport(report.Context), "world.bak", out bool bakMissing);
+                if (bakStatus == ContainerReadStatus.Ok)
+                {
+                    chunks = bakChunks; header = bakHeader; fromBackup = true;
+                    report.Warning("PERS-W010", "world.bak", "", "Loaded the backup save (one save older)");
+                }
+                else if (worldStatus == ContainerReadStatus.CorruptChunks) report.Merge(worldReport);
+                else if (worldMissing && bakMissing) return new LoadResult(false, SaveErrorKind.NotFound, SaveMessages.NotFound, null);
+                else return new LoadResult(false, SaveErrorKind.Unreadable, SaveMessages.Unreadable, null);
+            }
+
+            // 5.
+            SaveMeta meta = null;
+            var metaChunk = Find(chunks, "META");
+            if (metaChunk != null && !metaChunk.Corrupt)
+            {
+                try { meta = json.Deserialize<SaveMeta>(metaChunk.Payload); }
+                catch (Exception e) { report.Warning("PERS-W013", "META", "", "The save's description (META) is unreadable: " + e.Message); }
+            }
+            else report.Warning("PERS-W013", "META", "", "The save has no readable description (META)");
+            SaveIdPalette palette;
+            var idpl = Find(chunks, "IDPL");
+            try
+            {
+                if (idpl == null || idpl.Corrupt) throw new SaveFormatException("IDPL chunk missing or corrupt", -1);
+                palette = SaveIdPalette.Parse(idpl.Payload);
+            }
+            catch (Exception e)
+            {
+                report.Error("PERS-E012", "IDPL", "", "The content id table (IDPL) is unreadable; saved content becomes placeholders: " + e.Message);
+                palette = SaveIdPalette.CreateEmpty();
+            }
+
+            // 6.
+            var staged = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+            try
+            {
+                string dir = paths.ThumbsDir(slot);
+                if (Directory.Exists(dir))
+                    foreach (var file in Directory.GetFiles(dir, "*.png")) staged[Path.GetFileNameWithoutExtension(file)] = File.ReadAllBytes(file);
+            }
+            catch (Exception) { }
+
+            // 7.
+            return new LoadResult(true, SaveErrorKind.None, null, new LoadedSave(slot, header, meta, fromBackup, chunks, report, palette, staged));
+        }
+
+        static ContainerReadStatus TryRead(string file, out ContainerHeader header, List<RawChunk> chunks, Game.Data.Validation.ValidationReport report, string label, out bool missing)
+        {
+            header = default;
+            missing = !File.Exists(file);
+            if (missing) return ContainerReadStatus.NotAContainer;
+            try { return SaveContainerReader.Read(File.ReadAllBytes(file), out header, chunks, report, label); }
+            catch (Exception) { return ContainerReadStatus.NotAContainer; }      // unreadable file (I/O): same as not a container
+        }
+
+        static RawChunk Find(IReadOnlyList<RawChunk> chunks, string key)
+        {
+            foreach (var c in chunks) if (c.Key == key) return c;
+            return null;
+        }
+
+        /// <summary>§5.6 Restore, main thread. Never throws for data problems; a LoadedSave may be restored once.</summary>
+        public Game.Data.Validation.ValidationReport Restore(LoadedSave save)
+        {
+            if (save == null) throw new ArgumentNullException(nameof(save));
+            if (save.Restored) throw new InvalidOperationException("This LoadedSave was already restored");
+            save.Restored = true;
+            // 1.
+            content?.Catalog.ClearUnresolved();
+            var report = save.Report;
+            PreservedChunks.Clear();
+            LoadedPalette = save.Palette;
+            var registered = new HashSet<string>(StringComparer.Ordinal);
+            // 2.
+            foreach (var p in participants)
+            {
+                registered.Add(p.Key);
+                var chunk = Find(save.Chunks, p.Key);
+                if (chunk == null)
+                {
+                    RestoreDefaults(p, report);
+                    report.Info("PERS-I020", p.Key, "", $"No data for {p.Key}; defaults used");
+                    continue;
+                }
+                if (chunk.Corrupt) { RestoreDefaults(p, report); continue; }
+                if (chunk.Version > p.Version)
+                {
+                    PreservedChunks.Add(chunk);
+                    RestoreDefaults(p, report);
+                    report.Warning("PERS-W021", p.Key, "", $"{p.Key} was saved by a newer version (chunk version {chunk.Version} > {p.Version}); kept unchanged, defaults used");
+                    continue;
+                }
+                try
+                {
+                    var reader = new SaveReader(chunk.Payload, save.Palette, json);
+                    p.Restore(reader, chunk.Version);
+                    if (!reader.IsAtEnd) report.Warning("PERS-W024", p.Key, "", $"{p.Key} left {reader.Remaining} unread bytes");
+                }
+                catch (Exception e)
+                {
+                    report.Error("PERS-E022", p.Key, "", $"{p.Key} could not be restored: {e.GetType().Name}: {e.Message}; defaults used");
+                    RestoreDefaults(p, report);
+                }
+            }
+            // 3.
+            foreach (var c in save.Chunks)
+            {
+                if (c.Key == "META" || c.Key == "IDPL" || registered.Contains(c.Key)) continue;
+                PreservedChunks.Add(c);
+                report.Info("PERS-I025", c.Key, "", $"Unknown chunk {c.Key} kept unchanged");
+            }
+            // 4.
+            if (content != null)
+                foreach (var u in content.Catalog.Unresolved)
+                    report.Warning("PERS-W001", u.Context, "", $"Unknown content '{u.Id}' ({u.ExpectedType}) in {u.Context}; replaced by a placeholder");
+            // 5.
+            if (content != null && save.Header.DatabaseHash32 != (uint)content.DatabaseHash)
+                report.Info("PERS-I002", "world.sav", "", "Saved with different content");
+            // 6.
+            thumbnailCache.Clear();
+            foreach (var kv in save.StagedThumbnails) thumbnailCache[kv.Key] = kv.Value;
+            currentSlot = save.Slot;
+            SetProfileLastSlot(save.Slot);
+            LastLoadReport = report;
+            report.LogTo("Save");
+            int warnings = report.WarningCount + report.ErrorCount;
+            EventBus<GameLoaded>.Publish(new GameLoaded(save.Slot.Profile.Value, save.Slot.Slot.Value, warnings));
+            OperationCompleted?.Invoke(new SaveOperationResult(true, true, SaveErrorKind.None, SaveMessages.Loaded(warnings), save.Slot, default, warnings, report));
+            // TODO(PERS-009): Autosave.NotifySaved() (restarts the timer).
+            // 7.
+            return report;
+        }
+
+        /// <summary>Restore(SaveReader.Empty, 0); an exception there is PERS-E023.</summary>
+        static void RestoreDefaults(ISaveParticipant p, Game.Data.Validation.ValidationReport report)
+        {
+            try { p.Restore(SaveReader.Empty, 0); }
+            catch (Exception e) { report.Error("PERS-E023", p.Key, "", $"{p.Key} could not reset to defaults: {e.GetType().Name}: {e.Message}"); }
+        }
+
+        public Game.Data.Validation.ValidationReport LastLoadReport { get; private set; }
+
+        #endregion
         public event Action<SaveOperationResult> OperationCompleted;
 
         // Thumbnails
@@ -390,6 +573,7 @@ namespace Game.Persistence.Services
             // 3.
             foreach (var p in participants)
             {
+                if (IsPreserved(p.Key)) continue;                         // a newer-version chunk is written back instead (open question 19)
                 var w = new SaveWriter(captured.Palette, json);
                 captured.Participants.Add((p.Key, (ushort)p.Version, w));
                 try { p.Capture(w); }
@@ -436,6 +620,12 @@ namespace Game.Persistence.Services
             captured.Preserved.AddRange(PreservedChunks);
             captured.CaptureMs = captured.Total.Elapsed.TotalMilliseconds;
             return captured;
+        }
+
+        bool IsPreserved(string key)
+        {
+            foreach (var c in PreservedChunks) if (c.Key == key) return true;
+            return false;
         }
 
         /// <summary>Default display names (§5.2): manual → "Save {n}", quick → "Quick Save", auto → "Autosave".</summary>
@@ -591,7 +781,6 @@ namespace Game.Persistence.Services
         }
 
         // Synchronous seams for tests (InternalsVisibleTo):
-        internal LoadResult ReadNow(SlotRef slot) { throw new System.NotImplementedException("PERS-006"); }                         // thread-agnostic
         internal bool HandleWantsToQuit() { throw new System.NotImplementedException("PERS-009"); }
     }
 }

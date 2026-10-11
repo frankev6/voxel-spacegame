@@ -11,5 +11,17 @@ namespace Game.Persistence.Container
         public bool FromBackup { get; }
         public IReadOnlyList<RawChunk> Chunks { get; }
         public Game.Data.Validation.ValidationReport Report { get; }   // read-phase entries; Restore appends
+
+        internal SaveIdPalette Palette { get; }
+        internal Dictionary<string, byte[]> StagedThumbnails { get; }
+        internal bool Restored { get; set; }
+
+        internal LoadedSave(Game.Persistence.Data.SlotRef slot, ContainerHeader header, Game.Persistence.Data.SaveMeta meta, bool fromBackup,
+                            IReadOnlyList<RawChunk> chunks, Game.Data.Validation.ValidationReport report, SaveIdPalette palette,
+                            Dictionary<string, byte[]> stagedThumbnails)
+        {
+            Slot = slot; Header = header; Meta = meta; FromBackup = fromBackup; Chunks = chunks; Report = report;
+            Palette = palette; StagedThumbnails = stagedThumbnails;
+        }
     }
 }

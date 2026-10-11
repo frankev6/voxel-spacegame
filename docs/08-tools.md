@@ -62,6 +62,7 @@ These work with no Editor open (verified 2026-10-10):
   - `EcsTestWorld.Create(types)` builds a world with only those systems (plus their groups, the default command buffer systems and ordering anchors). `StepTicks(n)` runs exactly n fixed ticks; `StepFrame(dt)` catches up like the game, at most 6 ticks. A `SimClock` advances by itself unless `SimClockAdvanceSystem` is in the world.
   - Derive EditMode fixtures from `GameTestBase` and create worlds with `CreateWorld(...)`: they are disposed even when the test throws.
   - Perf gates: `PerfRun.Gate(name, samples, budget)` for loops a test times itself; `new PerfRun(name)…RunEcs/RunFrames` for per-tick or per-frame gates (inconclusive outside the reference settings).
+  - `LogAssert.ignoreFailingMessages` is reset when each test starts, so setting it in `[SetUp]` has no effect: set it inside the test (or `LogAssert.Expect` the lines).
   - `[Explicit]` tests run when a `-testFilter` names them, so a filter such as `TestKit` also runs the leak-guard test, which fails by design.
 - **Native memory in tests:**
   - `UnsafeUtility.CheckForLeaks()` returns the tracked allocations still alive *and resets* the tracked set, writing its report with `Debug.Log`. Call it once after a warm-up as a baseline, then again at the end; skip `LogAssert.NoUnexpectedReceived` in that test.

@@ -18,6 +18,12 @@ namespace Game.Tests.EditMode.Persistence
         public bool ThrowOnEncode;
         public readonly List<FakeDeferredBlock> Blocks = new List<FakeDeferredBlock>();
         public int RestoredValue = -1;
+        public int RestoredFromVersion = -1;
+        public int RestoreCalls;
+        public bool ThrowOnRestore, ThrowOnDefaultRestore, ReadAll = true;
+        public string RestoredContent;
+        /// <summary>Restore calls of every fake, in call order (cleared by tests).</summary>
+        public static readonly List<string> RestoreLog = new List<string>();
 
         public FakeParticipant(string key, int version = 1) { Key = key; Version = version; }
 
@@ -35,7 +41,24 @@ namespace Game.Tests.EditMode.Persistence
             writer.WriteString("end");
         }
 
-        public void Restore(SaveReader reader, int fromVersion) { RestoredValue = fromVersion == 0 ? 0 : reader.ReadInt32(); }
+        public void Restore(SaveReader reader, int fromVersion)
+        {
+            RestoreCalls++;
+            RestoreLog.Add(Key + "@" + fromVersion);
+            RestoredFromVersion = fromVersion;
+            if (fromVersion == 0)
+            {
+                if (ThrowOnDefaultRestore) throw new InvalidOperationException("default restore failure for the test");
+                RestoredValue = 0;
+                return;
+            }
+            if (ThrowOnRestore) throw new InvalidOperationException("restore failure for the test");
+            RestoredValue = reader.ReadInt32();
+            RestoredContent = reader.ReadContentId().Value;
+            if (!ReadAll) return;
+            if (WithDeferred) reader.ReadByteArray();
+            reader.ReadString();
+        }
     }
 
     /// <summary>Counts Encode and Dispose; the live count proves every block is disposed on every path.</summary>
