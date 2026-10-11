@@ -621,6 +621,22 @@ Newest first. One entry per finished task or notable event: what changed, measur
     - New ships: TARPAN (Khuchad ram frigate) and TALLY (S) FIRESHIP (a one-way Scavenger refit), alongside the ICEBREAKER.
     - Every card now has a seventh stat, Ram.
   - **The rammers default was chosen without an answer** (option 1 of three offered: a dedicated rammers set).
+- **Owner request (verbatim, 2026-10-11):**
+
+  > make a new additional ship line for ark targetted specifically for war. these ships are just strong punchers and they work well together and are the main bulk of the ARK force.
+  >
+  > also make a silhouette for the ARK its a station size mothership exploration vessel.
+
+- **Batch 3 additions, continued.**
+  - **ARK war line** (palette `arkw`: graphite hulls, bone armour blocks, safety-yellow magazines, a red fire-team stripe): SQUALL strike frigate (spinal coilgun, flies in pairs), HALO fire-control destroyer (point defence for the team, marks the target), TEMPEST line cruiser (the bulk of the fleet, every gun forward, prow of standard armour blocks) and THUNDERHEAD battleship (four heavy triples, a flared armour mantlet in place of shields).
+    - Teamwork is built in: a fire link lets every linked gun volley on the HALO's mark, and standard blocks let armour swap between hulls.
+    - Shared build rule: heat to port, ammunition to starboard.
+    - A fire-team plate shows the formation at true scale against a Khuchad ARGALI.
+    - New card class: Destroyer (100 m scale).
+  - **THE ARK**: the expedition mothership, 1,499 m long and 727 m wide, on a wide card turned bow-right.
+    - From the bow: an ice-and-rock impact plug, the command block and dishes, two habitat drums (one holds the seed vault), a foundry fed by a captured asteroid to port, shipyard gantries to starboard, a hangar deck, then the reactor, radiators, propellant tanks and seven fusion engines.
+    - A HOLDFAST, a GARDENER and an ICEBREAKER are docked at true scale.
+    - The starboard radiator wing was cut down to print the first fleet; its bare frame remains.
 - **Next:** the owner marks silhouettes from either batch; the approved plan views are then built in 3D with the new pieces, plating and blocks, checked, rendered and added to the look book.
 
 ### 2026-10-10 — Look book round 3: connected ships, cruisers and dreadnoughts, capital weapons, defended stations, five aliens (claude, claude-opus-5-5)

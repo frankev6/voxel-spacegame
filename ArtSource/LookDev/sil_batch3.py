@@ -117,6 +117,14 @@ class S3(Sp):
     def chevron(self, x, y, w, h, t, c="accent"):
         self.poly([(x - w / 2, y - h), (x, y), (x + w / 2, y - h), (x + w / 2, y - h + t), (x, y + t), (x - w / 2, y - h + t)], c)
 
+    def embed(self, other, x, y, ang):
+        """Another ship's drawing placed at (x, y), turned `ang` degrees anticlockwise, in its own faction scope."""
+        self.els.append(f'<g class="f-{other.fac}" transform="translate({F(x)},{F(-y)}) rotate({F(-ang)})">')
+        self.els += other.els
+        self.els.append("</g>")
+        x0, y0, x1, y1 = other.bbox()
+        self.pts += [(px + x, py + y) for px, py in rot([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], ang)]
+
     def wrapped(self):
         return [f'<g class="f-{self.fac}">'] + self.els + ["</g>"]
 
@@ -340,6 +348,332 @@ def ark_holdfast():
         weak="The cradle side is open frame, and anything in it is unfinished. Hit it while it's building.",
         variants="Every HOLDFAST is different, depending on what is in the cradle",
         stats=(5, 3, 1, 1, 3, 4, 2))
+
+
+# ======================================================================================================================
+# ARK WAR LINE: the bulk of the expedition's fighting force. Four printed patterns built to fight as one team: a HALO marks
+# a target and every linked gun fires on it at once. Shared build rule: heat to port, ammunition to starboard
+# ======================================================================================================================
+
+def aw_squall():
+    s = S("arkw")
+    s.poly([(-5, 0), (5, 0), (6, 6), (6, 28), (4.6, 33), (-4.6, 33), (-6, 28), (-6, 6)], "base")
+    for (y0, y1, w0, w1) in ((26, 31, 6.6, 6), (31, 36, 6, 4.6), (36, 40, 4.6, 3)):
+        s.slab([(-w0, y0), (w0, y0), (w1, y1), (-w1, y1)], "plate")
+    s.slab([(-6, 7), (-15, 10), (-15, 21), (-6, 24)], "rad")
+    for y in (12, 15, 18):
+        s.line([(-14.4, y), (-6.6, y + 0.6)], "seam")
+    s.oct(6, 8, 11, 24, 1.6, "accent")
+    s.hazard(6.3, 21.4, 10.7, 22.8)
+    s.line([(6, 15), (11, 15)], "seam")
+    s.oct(-6, 10.4, 6, 11.8, 0, "band")
+    s.oct(-5.4, 15, -2, 23, 1, "cab")
+    s.windows(-3.7, 16.4, 21.6, 1.3)
+    s.oct(-1.3, 6, 1.3, 58, 0.3, "frame")
+    for y in (40, 44.5, 49, 53.5):
+        s.oct(-2.2, y, 2.2, y + 1.4, 0.2, "trim")
+    s.turret(3, 4, 1.3, 1, ang=300)
+    s.engine(-2.8, 0, 3.6, 2.6)
+    s.engine(2.8, 0, 3.6, 2.6)
+    s.engine(8.5, 8, 2.4, 1.8)
+    nav(s, -15, 20, 11, 23.6)
+    return s, dict(
+        name="SQUALL", cls="Frigate", desig="SQUALL-class strike frigate · ARK war pattern 21", tier="stranger",
+        story="A coilgun longer than the ship, with a frigate built around its breech. The gun is fixed forward, so the whole ship aims it. "
+              "SQUALLs fly in pairs: one fires while the other recharges, and when a HALO marks a target both fire with the rest of the team. "
+              "The slugs are printed from ore in the magazine on its starboard side, so a SQUALL never runs out while the GARDENERs are working.",
+        fit="1 spinal coilgun (fixed forward) · 1 point-defence turret · prow of 3 armour blocks",
+        system="Volley: holds its shot until the team fires, then all linked guns hit the marked target at once",
+        built="Printed pattern · Fire link (shares targets with every ARK warship in range) · Standard blocks (armour swaps with any ARK hull)",
+        asym="Coilgun radiator to port, slug magazine to starboard: the war line's rule, heat to port and ammunition to starboard.",
+        weak="Anything on its flank. The gun only points where the ship does, so a fast frigate that stays beside it is safe.",
+        variants="SQUALL · Lancer: the coilgun swapped for a torpedo rail",
+        stats=(2, 3, 0, 4, 4, 0, 1))
+
+
+def aw_halo():
+    s = S("arkw")
+    s.poly([(-7, 0), (7, 0), (8.6, 6), (8.6, 36), (6.4, 40), (6.4, 52), (-6.4, 52), (-6.4, 40), (-8.6, 36), (-8.6, 6)], "base")
+    for y in (20, 34):
+        s.line([(-8.6, y), (8.6, y)], "seam")
+    s.poly([(-12.6, 52), (12.6, 52), (12.6, 60), (8, 64), (-8, 64), (-12.6, 60)], "base")
+    s.poly([(-12, 0), (12, 0), (12, 6), (8.6, 9), (-8.6, 9), (-12, 6)], "base")
+    s.slab([(-8, 64), (8, 64), (5.6, 72), (-5.6, 72)], "plate")
+    s.slab([(-5.6, 72), (5.6, 72), (2.4, 78), (-2.4, 78)], "plate")
+    s.slab([(-8.6, 9), (-16, 12), (-16, 30), (-8.6, 33)], "rad")
+    for y in (15, 19, 23, 27):
+        s.line([(-15.4, y), (-9.2, y)], "seam")
+    s.truss((-6.4, 44), (-19, 56), 2.4)
+    s.circ(-21.4, 58.4, 6.6, "frame")
+    s.circ(-21.4, 58.4, 5.2, "cab")
+    s.line([(-25.6, 58.4), (-17.2, 58.4)], "seam")
+    s.circ(-21.4, 58.4, 1.1, "frame")
+    s.oct(8.6, 12, 14.4, 40, 1.8, "accent")
+    s.hazard(8.9, 37, 14.1, 38.6)
+    s.oct(-8.6, 35.6, 8.6, 37.2, 0, "band")
+    s.oct(-4.4, 38, 4.4, 50, 1.6, "cab")
+    s.windows(0, 40, 48, 1.6)
+    s.turret(0, 67, 2.4, 2)
+    for (x, y, a) in ((-10.4, 57, 150), (10.4, 57, 30), (-4.4, 46, 180), (4.6, 30, 0), (-9.6, 3, 220), (9.6, 3, 320)):
+        s.turret(x, y, 1.4, 1, ang=a)
+    s.turret(11.5, 24, 2, 2, ang=0)
+    s.engine(-3.6, 0, 4.4, 3)
+    s.engine(3.6, 0, 4.4, 3)
+    nav(s, -16, 28, 14.4, 34)
+    return s, dict(
+        name="HALO", cls="Destroyer", desig="HALO-class fire-control destroyer · ARK war pattern 24", tier="stranger",
+        story="The expedition can't make shields, so the HALO is the team's shield: six point-defence turrets and a flak battery that shoot down missiles and fighters "
+              "aimed at anyone nearby. The fire-control dish on its port boom marks one target, and every linked ARK gun in range fires on it together. "
+              "Its own guns are light. It punches by making everyone else hit.",
+        fit="1 twin coilgun turret · 6 point-defence turrets · 1 flak battery · fire-control dish",
+        system="Mark: paints one target; linked ships' volleys on it hit together and land harder",
+        built="Printed pattern · Fire link (the hub: the team's targets come from here) · Standard blocks",
+        asym="Fire-control dish on a boom to port, flak magazine to starboard.",
+        weak="Losing it. Kill the HALO first and the team fires one ship at a time, with no point defence.",
+        variants="HALO · Lamp: the dish swapped for a long-range survey array, for escorting PETRELs",
+        stats=(3, 2, 0, 3, 2, 0, 0))
+
+
+def aw_tempest():
+    s = S("arkw")
+    s.poly([(-11, 0), (11, 0), (12, 10), (12, 46), (15, 50), (15, 68), (20, 74), (20, 100), (13, 108), (-13, 108), (-20, 100), (-20, 74), (-15, 68), (-15, 50), (-12, 46), (-12, 10)], "base")
+    for y in (24, 46, 68):
+        s.line([(-15, y), (15, y)], "seam")
+    for sx in (-1, 1):
+        s.line([(sx * 15, 74), (sx * 15, 100)], "seam")
+    swapped = {(0, 1), (2, 0)}
+    for r, (y0, y1, w0, w1, n) in enumerate(((108, 116, 13, 10.6, 4), (116, 123, 10.6, 7.4, 3), (123, 129, 7.4, 4, 2), (129, 133, 4, 1.6, 1))):
+        for i in range(n):
+            a0, a1 = -w0 + 2 * w0 * i / n, -w0 + 2 * w0 * (i + 1) / n
+            b0, b1 = -w1 + 2 * w1 * i / n, -w1 + 2 * w1 * (i + 1) / n
+            s.slab([(a0, y0), (a1, y0), (b1, y1), (b0, y1)], "trim" if (r, i) in swapped else "plate")
+    s.slab([(-12, 12), (-26, 16), (-26, 40), (-12, 44)], "rad")
+    s.slab([(-15, 50), (-23, 53), (-23, 64), (-15, 67)], "rad")
+    for y in (20, 25, 30, 35):
+        s.line([(-25.4, y), (-12.6, y)], "seam")
+    for y in (56, 61):
+        s.line([(-22.4, y), (-15.6, y)], "seam")
+    s.oct(12, 14, 19, 62, 2, "accent")
+    for y in (30, 46):
+        s.line([(12, y), (19, y)], "seam")
+    s.hazard(12.3, 59, 18.7, 60.6)
+    s.oct(-15, 69, 15, 71, 0, "band")
+    s.oct(-6, 26, 6, 42, 2, "cab")
+    s.windows(0, 28, 40, 1.6)
+    s.turret(0, 97, 4.4, 3)
+    s.turret(0, 80, 4.4, 3)
+    s.turret(-15, 87, 2.6, 2, ang=125)
+    s.turret(15, 87, 2.6, 2, ang=55)
+    s.turret(-9, 18, 1.4, 1, ang=200)
+    s.turret(9, 68, 1.4, 1, ang=0)
+    for x in (-9, -3, 3, 9):
+        s.engine(x, 0, 5, 3.6)
+    nav(s, -26, 36, 19, 58)
+    return s, dict(
+        name="TEMPEST", cls="Cruiser", desig="TEMPEST-class line cruiser · ARK war pattern 22", tier="stranger",
+        story="The bulk of the fleet, printed in more numbers than anything else. Every gun sits forward of the bridge, so the TEMPEST puts its whole weight on whatever is ahead of it: "
+              "two heavy triple coilgun turrets, one firing over the other, and a twin on each shoulder. The prow is printed in standard armour blocks; "
+              "two of these are fresh replacements, and any GARDENER can print more.",
+        fit="2 heavy triple turrets (superfiring) · 2 twin turrets · 2 point-defence turrets · prow of 10 standard armour blocks",
+        system="Hold the line: the prow blocks lock and harden for 5 s; it can't turn while they're locked",
+        built="Printed pattern · Fire link · Standard blocks (damaged blocks swap out between fights)",
+        asym="Radiators to port, magazine and slug printer to starboard. Two replacement prow blocks still unpainted.",
+        weak="Its stern. Every gun faces forward, so a ship that gets behind it faces two point-defence turrets.",
+        variants="TEMPEST · Bastion: the shoulder twins swapped for missile racks",
+        stats=(4, 4, 0, 2, 4, 0, 1))
+
+
+def aw_thunderhead():
+    s = S("arkw")
+    s.poly([(-20, 0), (20, 0), (24, 12), (24, 40), (28, 46), (28, 150), (-28, 150), (-28, 46), (-24, 40), (-24, 12)], "base")
+    for y in (40, 70, 100, 128):
+        s.line([(-28, y), (28, y)], "seam")
+    front = [(-66, 178), (-34, 206), (0, 226), (28, 212), (46, 186)]
+    back = [(40, 176), (28, 150), (-28, 150), (-58, 162)]
+    s.poly(front + back, "base")
+    inner = [(-48, 176), (-26, 196), (0, 210), (20, 200), (32, 182)]
+    s.poly(front + inner[::-1], "plate")
+    for (a, b) in zip(front, inner):
+        s.line([a, b], "seam")
+    for f0, f1, i0, i1 in zip(front, front[1:], inner, inner[1:]):
+        s.line([((f0[0] + i0[0]) / 2, (f0[1] + i0[1]) / 2), ((f1[0] + i1[0]) / 2, (f1[1] + i1[1]) / 2)], "seam")
+    s.poly([(-66, 178), (-34, 206), (-33.2, 203.6), (-64.2, 176.6)], "haz")
+    s.slab([(-28, 48), (-56, 56), (-56, 140), (-28, 146)], "rad")
+    for y in range(62, 140, 8):
+        s.line([(-55, y), (-29, y)], "seam")
+    s.oct(28, 50, 40, 146, 4, "accent")
+    for y in (82, 114):
+        s.line([(28, y), (40, y)], "seam")
+    s.hazard(28.5, 142, 39.5, 144)
+    s.oct(24, 18, 34, 40, 2, "ore")
+    s.oct(-28, 120, 28, 123, 0, "band")
+    s.oct(-26, 92, -10, 116, 3, "cab")
+    s.windows(-18, 95, 113, 2)
+    s.truss((-18, 92), (-18, 80), 2.4)
+    s.circ(-18, 76, 4, "frame")
+    s.circ(-18, 76, 3, "cab")
+    for (y, a) in ((182, 90), (160, 90), (64, 270), (40, 270)):
+        s.turret(4, y, 7, 3, ang=a)
+    for (x, y, a) in ((-20, 140, 150), (21, 140, 30), (-21, 30, 200), (19, 88, 0)):
+        s.turret(x, y, 3, 2, ang=a)
+    for (x, y, a) in ((-44, 176, 150), (30, 182, 30), (-10, 8, 240), (12, 8, 300), (34, 46, 0), (-52, 146, 180)):
+        s.turret(x, y, 1.6, 1, ang=a)
+    for x in (-18, -11, -4, 4, 11, 18):
+        s.engine(x, 0, 6, 4)
+    nav(s, -66, 179, 46, 187)
+    return s, dict(
+        name="THUNDERHEAD", cls="Dreadnought", desig="THUNDERHEAD-class battleship · ARK war pattern 20", tier="stranger",
+        story="A pattern the clans had never seen: an Earth battleship. Four heavy triple turrets on the centreline, two firing forward and two aft, and in place of the shield "
+              "it can't make, a flared armour mantlet 110 m wide across its bow. The mantlet reaches further to port, over the radiators, and the line forms in its shadow: "
+              "TEMPESTs at its shoulders, HALOs behind the gaps, SQUALLs on the flanks. It is the anvil the rest of the team hits against.",
+        fit="4 heavy triple turrets · 4 twin turrets · 6 point-defence turrets · bow mantlet · slug foundry",
+        system="Shelter: the mantlet hardens and the battleship holds course, so ships behind it take no fire from ahead",
+        built="Printed pattern · Fire link (the flagship: commands the team's volleys) · Standard blocks · Slug foundry (prints ammunition for the whole team)",
+        asym="Mantlet wider to port, over the radiators. Bridge and fire-control tower to port, slug foundry and magazines to starboard.",
+        weak="It turns like a station. Anything that comes from the side, or from below the mantlet's edge, faces turrets, not armour.",
+        variants="THUNDERHEAD · Breakwater: no aft turrets; a second mantlet for holding a lane open",
+        stats=(5, 5, 0, 1, 5, 1, 2))
+
+
+def aw_team():
+    """The fire team at true scale, bow up, enemy ahead. Not a ship card: a doctrine plate."""
+    s = S("arkw")
+    placed = [(aw_thunderhead, 0, 0), (aw_tempest, -102, 14), (aw_tempest, 94, 14), (aw_halo, -64, -86), (aw_halo, 62, -86),
+              (aw_squall, -196, 168), (aw_squall, -172, 150), (aw_squall, 172, 150), (aw_squall, 196, 168)]
+    tgt = (0, 470)
+    for fn, x, y in placed:
+        sh, m = fn()
+        if m["name"] == "HALO":
+            s.line([(x - 21.4, y + 58.4), (tgt[0], tgt[1] - 74)], "markline")
+        else:
+            s.line([(x, y + (226 if m["name"] == "THUNDERHEAD" else 132 if m["name"] == "TEMPEST" else 58)), tgt], "fireline")
+    for fn, x, y in placed:
+        sh, m = fn()
+        s.embed(sh, x, y, 0)
+    s.embed(kh_argali()[0], tgt[0], tgt[1] + 63, 180)
+    s.ring(tgt[0], tgt[1], 74, 78, "accent")
+    return s
+
+
+# ======================================================================================================================
+# THE ARK: the expedition's mothership. Station-sized; it crossed the dark between stars and is now home port, shipyard and capital
+# ======================================================================================================================
+
+def ark_mothership():
+    s = S("ark")
+    # keel, running the full length
+    s.oct(-36, 140, 36, 1370, 10, "base")
+    for y in range(200, 1360, 60):
+        s.line([(-36, y), (36, y)], "seam")
+    s.oct(-6, 140, 6, 1370, 2, "frame")
+    # drive: seven fusion engines on a thrust frame, propellant tanks ahead of it
+    s.oct(-112, 20, 112, 150, 14, "plate")
+    for y in (60, 100):
+        s.line([(-112, y), (112, y)], "seam")
+    for x in range(-90, 91, 30):
+        s.engine(x, 20, 24, 22)
+    for (x0, x1) in ((-106, -62), (-56, -14), (14, 56), (62, 106)):
+        s.oct(x0, 160, x1, 300, 16, "accent")
+        s.oct(x0, 280, x1, 286, 0, "frame")
+    # reactor and radiator wings: port wing whole; starboard wing cut down to print the first fleet, its frame left bare
+    s.oct(-62, 300, 62, 384, 10, "plate")
+    s.circ(0, 342, 24, "frame")
+    s.circ(0, 342, 14, "glow")
+    s.slab([(-62, 306), (-330, 330), (-330, 500), (-62, 520)], "rad")
+    for x in range(-312, -70, 22):
+        s.line([(x, 330 + (x + 330) * -0.09 + 4), (x, 500 + (x + 330) * 0.08 - 4)], "seam")
+    s.slab([(62, 306), (170, 316), (170, 424), (62, 438)], "rad")
+    for x in range(80, 170, 22):
+        s.line([(x, 312), (x, 434)], "seam")
+    s.line([(170, 316), (170, 424)], "weld")
+    s.truss((170, 330), (330, 340), 10)
+    s.truss((170, 410), (330, 400), 10)
+    s.truss((330, 330), (330, 410), 10)
+    # hangar deck between the reactor and the yards: the PETRELs launch from here
+    s.oct(-58, 392, 58, 548, 10, "plate")
+    for y in (410, 444, 478, 512):
+        s.oct(-50, y, -10, y + 24, 2, "frame")
+        s.oct(10, y, 50, y + 24, 2, "frame")
+    # foundry to port, fed by a captured asteroid clamped to its flank
+    s.oct(-150, 560, -14, 800, 14, "base")
+    for y in (620, 680, 740):
+        s.line([(-150, y), (-14, y)], "seam")
+    s.oct(-120, 650, -60, 710, 8, "glow")
+    s.oct(-112, 658, -68, 702, 6, "frame")
+    rock = []
+    for i in range(30):
+        a = 2 * math.pi * i / 30
+        r = 112 + 14 * math.sin(3 * a + 0.4) + 9 * math.sin(5 * a + 1.7) + 5 * math.sin(9 * a)
+        rock.append((-268 + math.cos(a) * r * 0.86, 690 + math.sin(a) * r))
+    s.poly(rock, "ore")
+    for (x, y, r) in ((-300, 740, 22), (-250, 620, 14), (-320, 650, 10), (-230, 770, 9), (-290, 700, 7)):
+        s.circ(x, y, r, "crust")
+    s.poly([(-176, 640), (-210, 600), (-200, 590), (-166, 632)], "frame")
+    for y in (650, 672, 694, 716, 738):
+        s.line([(-160, y), (-196, y + 6)], "seam")
+    s.truss((-150, 600), (-196, 610), 10)
+    s.truss((-150, 780), (-200, 768), 10)
+    s.oct(-160, 590, -150, 790, 2, "frame")
+    # shipyards to starboard: a gantry cradle with a HOLDFAST in it, plus a GARDENER and an ICEBREAKER on pylons
+    for x in (100, 300):
+        s.truss((x, 530), (x, 860), 12)
+    for y in (530, 860):
+        s.truss((14, y), (300, y), 12)
+    s.embed(ark_holdfast()[0], 202, 562, 0)
+    s.truss((300, 640), (318, 640), 6)
+    s.embed(ark_gardener()[0], 338, 600, 0)
+    s.truss((300, 800), (316, 800), 6)
+    s.embed(ark_icebreaker()[0], 338, 740, 0)
+    # two habitat drums spinning for gravity, the forward one the seed vault
+    for (y0, y1, c) in ((880, 1040, "base"), (1070, 1220, "cab")):
+        s.oct(-150, y0, 150, y1, 30, c)
+        for x in range(-130, 131, 26):
+            s.line([(x, y0 + 4), (x, y1 - 4)], "seam")
+        s.oct(-124, (y0 + y1) / 2 - 3, 124, (y0 + y1) / 2 + 3, 0, "frame")
+    s.windows(-144, 896, 1024, 8)
+    s.windows(144, 896, 1024, 8)
+    s.oct(-40, 1040, 40, 1070, 6, "plate")
+    s.hazard(-40, 1052, 40, 1058)
+    # command block and long-range dishes (the big one to port, aimed back the way they came)
+    s.oct(-52, 1240, 52, 1340, 12, "cab")
+    s.windows(0, 1252, 1328, 6)
+    s.oct(-52, 1286, 52, 1292, 0, "accent")
+    s.truss((-52, 1300), (-100, 1300), 10)
+    s.circ(-130, 1300, 32, "frame")
+    s.circ(-130, 1300, 26, "plate")
+    s.circ(-130, 1300, 5, "frame")
+    s.truss((52, 1320), (80, 1326), 6)
+    s.circ(94, 1328, 15, "frame")
+    s.circ(94, 1328, 11, "cab")
+    # bow shield: a plug of ice and rock that took the crossing's impacts, worn further on the port side
+    s.oct(-30, 1340, 30, 1368, 4, "frame")
+    bow = [(-150, 1366), (148, 1366), (160, 1400), (154, 1446), (112, 1484), (40, 1506), (-30, 1502), (-88, 1482), (-124, 1452), (-156, 1404)]
+    s.poly(bow, "ore")
+    for (x, y, r) in ((-110, 1440, 16), (-60, 1478, 9), (20, 1470, 12), (90, 1450, 8), (-140, 1400, 7), (120, 1410, 10), (-20, 1420, 6)):
+        s.circ(x, y, r, "crust")
+    s.line([(-150, 1372), (148, 1372)], "seam")
+    # point defence and heavy batteries
+    for (x, y, a) in ((-150, 960, 180), (150, 960, 0), (-150, 1150, 180), (150, 1150, 0), (-100, 160, 220), (100, 160, 320),
+                      (-150, 1380, 140), (150, 1380, 40), (-14, 560, 180), (14, 880, 0), (-62, 330, 180), (62, 330, 0)):
+        s.turret(x, y, 6, 1, ang=a)
+    for (x, y, a) in ((-44, 1252, 120), (44, 1252, 60), (-140, 800, 200)):
+        s.turret(x, y, 9, 3, ang=a)
+    s.circ(-330, 415, 6, "navr")
+    s.circ(356, 720, 6, "navg")
+    return s, dict(
+        name="THE ARK", cls="Mothership", desig="A.R.K. · expedition mothership · the only one of its pattern", tier="stranger",
+        story="The ship that carried the expedition across the dark between stars, and now its home port, shipyard and capital. It was never meant to fight or land. "
+              "From the bow: a plug of ice and rock that took the impacts of the crossing, worn unevenly; the command block and long-range dishes, the largest aimed back the way they came; "
+              "two habitat drums that spin for gravity, the forward one holding the seed vault; then the yards. To port the foundry eats a captured asteroid clamped to its flank. "
+              "To starboard the gantries print the fleet: a HOLDFAST, a GARDENER and an ICEBREAKER are docked here at true scale. Aft, the reactor and radiators, "
+              "and seven fusion engines that will never be lit again at full power. The starboard radiator wing was cut down to print the first PETRELs and has never been replaced.",
+        fit="12 point-defence turrets · 3 heavy batteries · foundry · hangar deck · 2 habitat drums · seed vault · shipyard gantries",
+        system="Home port: any ARK ship docked here is repaired and rearmed, and the foundry prints new hulls from ore",
+        built="The original pattern library (every ARK ship is printed from it) · Shipyard · Foundry · Habitat (the expedition's people live here)",
+        asym="Foundry and captured asteroid to port, shipyards to starboard. Full radiator wing to port, the starboard one cut down to bare frame.",
+        weak="Everything, if it's caught alone. It is the whole expedition in one hull; the war line exists so that never happens.",
+        variants="None. There were other Arks: Mission 12's PETREL is one of the few pieces ever found.",
+        stats=(5, 4, 0, 0, 3, 5, 0))
 
 
 # ======================================================================================================================
@@ -1322,6 +1656,10 @@ PAL = {
     "vanguard": (dict(base="#ECE7DC", plate="#101317", frame="#C9C2B2", cab="#F7F3EA", accent="#FFC86B", trim="#D8CFBD", glow="#FFC86B", laser="#FFD88A"),
                  dict(base="#DADDE2", plate="#0A0C10", frame="#AEB3BC", cab="#F2F4F7", accent="#FFC86B", trim="#C2C6CE", glow="#FFC86B", laser="#FFD88A")),
     "silence": (dict(void="#060508", accent="#6E3BFF", glow="#6E3BFF"), dict(void="#000000", accent="#6E3BFF", glow="#6E3BFF")),
+    "arkw": (dict(base="#5A5E64", plate="#D8D1C0", frame="#1E2023", cab="#EFEBE2", accent="#F2B705", glow="#FFE2B0", win="#FFE2B0", tur="#17191B", trim="#A8AAA3",
+                  rad="#33373C", band="#D2402F", ore="#6B6355", crust="#3E3A34", ghost="#9AA0A8", laser="#FFE2B0"),
+             dict(base="#1E2229", plate="#636B78", frame="#454B55", cab="#B9BFC8", accent="#FFD27A", glow="#FFE9C7", win="#FFE9C7", tur="#08090B", trim="#3A4048",
+                  rad="#14181D", band="#FF5A4A", ore="#4A4640", crust="#2A2724", ghost="#6B7380", laser="#FFE9C7")),
     "ark": (dict(base="#CFC8B8", plate="#3B3E42", frame="#26282B", cab="#EFEBE2", accent="#F2B705", glow="#FFE2B0", win="#FFE2B0", tur="#1E2023", trim="#9A9C9E", rad="#6C7075", ore="#6B6355", crust="#3E3A34", ghost="#9AA0A8", laser="#FFE2B0"),
             dict(base="#2C3139", plate="#6B7380", frame="#4A505A", cab="#C9CED6", accent="#FFE9C7", glow="#FFE9C7", win="#FFE9C7", tur="#0C0E10", trim="#8A919C", rad="#424954", ore="#4A4640", crust="#2A2724", ghost="#6B7380", laser="#FFE9C7")),
 }
@@ -1339,6 +1677,18 @@ FACTIONS = [
          builtin="Printed pattern (the ARK can rebuild any of them from scratch) · Crew-repairable · Adapter points (clan parts can be bolted on)",
          mods="Field refits with clan parts (gone native), and wrecks of earlier Ark patterns to recover. Both are in the refit bay.",
          ships=[lambda: ark_petrel("base"), ark_gardener, ark_icebreaker, ark_holdfast]),
+    dict(key="arkw", name="ARK war line", tier="stranger", tag="The humans at war · the bulk of the expedition's fighting force · built to fight as one team",
+         lore="The same expedition and the same printers. The ARK's civilian patterns keep the expedition alive; these four keep it from being taken.",
+         doctrine="One ship of the ARK loses to one ship of any clan: no shields, no energy weapons, crews that are few and far from home. So the war line never fights alone. "
+                  "Every hull is a heavy kinetic puncher (coilguns firing slugs printed from ore), and every one carries a fire link. A HALO marks a target and every linked gun fires on it in the same second; "
+                  "one volley does what no single ARK ship can. The THUNDERHEAD's mantlet stands in for the shields they can't make, the HALOs' point defence covers the team, "
+                  "TEMPESTs are the weight of the line, and SQUALL pairs dart in from the flanks. All four share one build rule, heat to port and ammunition to starboard, "
+                  "so any crew can fight any ship and a damaged hull can be patched with blocks from another.",
+         paint="The civilian palette turned around: graphite hulls instead of bone, bone armour blocks, the same safety-yellow on every magazine, and one red stripe across each hull "
+               "that marks its fire team. Fresh replacement blocks stay unpainted until the next refit.",
+         builtin="Printed pattern · Fire link (linked ships volley together on a marked target) · Standard blocks (armour swaps between any ARK hulls)",
+         mods="Clan parts bolt on here too (see the PETREL in the refit bay); the war patterns also have their own swaps (SQUALL Lancer, TEMPEST Bastion, THUNDERHEAD Breakwater).",
+         ships=[aw_squall, aw_halo, aw_tempest, aw_thunderhead], extra="team"),
     dict(key="khuchad", name="Khuchad Clan", tier="low", tag="Low tech · bulky · pack and chief",
          lore="A warfare tradition. Hegemonic and grabby: they take a world, strip what is easy and move on. Low-to-midline tech, in large numbers of small ships with one large ship leading the pack.",
          doctrine="Pack and chief. Cheap, thick-skinned frigates hunt in packs of six to twelve around one huge chief-ship that is also the clan's moving camp. "
@@ -1477,8 +1827,50 @@ def stats_html(st, base=None):
 # Rendering
 # ======================================================================================================================
 
-SCALES3 = {"Frigate": 64, "Cargo ship": 128, "Cruiser": 150, "Dreadnought": 280}
-BARS3 = {"Frigate": 10, "Cargo ship": 20, "Cruiser": 20, "Dreadnought": 50}
+SCALES3 = {"Frigate": 64, "Destroyer": 100, "Cargo ship": 128, "Cruiser": 150, "Dreadnought": 280}
+BARS3 = {"Frigate": 10, "Destroyer": 10, "Cargo ship": 20, "Cruiser": 20, "Dreadnought": 50}
+
+
+def sprite_h(s, bar=None, mono=False, pad=0.03, cls="spr"):
+    """A plan view turned bow-right (port at the top), for ships and plates too long for a square card."""
+    x0, y0, x1, y1 = s.bbox()
+    L, W = y1 - y0, x1 - x0
+    p = max(L, W) * pad
+    vx, vy, vw, vh = y0 - p, x0 - p, L + 2 * p, W + 2 * p
+    sw = vw / 1000
+    out = [f'<svg class="{"mono" if mono else cls} wide" viewBox="{F(vx)} {F(vy)} {F(vw)} {F(vh)}" xmlns="http://www.w3.org/2000/svg" style="--sw:{sw:.3f}">'
+           '<g transform="rotate(90)">']
+    out += s.wrapped()
+    out.append("</g>")
+    if bar and not mono:
+        bx, by = vx + p, vy + vh - p * 0.4
+        out.append(f'<g class="bar"><line x1="{F(bx)}" y1="{F(by)}" x2="{F(bx + bar)}" y2="{F(by)}" stroke-width="{F(sw * 2.5)}"/>'
+                   f'<text x="{F(bx)}" y="{F(by - sw * 8)}" font-size="{F(sw * 16)}">{bar} m</text></g>')
+    out.append("</svg>")
+    return "".join(out)
+
+
+def hero_card(s, m):
+    codex = "".join(f"<dt>{k}</dt><dd>{m[f]}</dd>" for k, f in (("Fit", "fit"), ("System", "system"), ("Built in", "built"),
+                                                                   ("Asymmetry", "asym"), ("Variants", "variants")) if m.get(f))
+    return (f'<button class="card card3 hero" data-key="{m["name"]}" data-name="{m["name"]} (ARK expedition)">'
+            f'<div class="thumb">{sprite_h(s, mono=True)}</div><span class="tier t-{m["tier"]}">{TIERS[m["tier"]]}</span>'
+            f'{sprite_h(s, 100)}'
+            f'<div class="nm">{m["name"]}</div><div class="role">{m["desig"]} · {m["cls"].lower()} · {size_txt(s)}</div>'
+            f'<div class="hcols"><div>{stats_html(full(m))}<p>{m["story"]}</p></div><div><dl class="codex">{codex}</dl>'
+            f'<p class="weak"><b>Weak to:</b> {m["weak"]}</p></div></div></button>')
+
+
+def team_plate():
+    s = aw_team()
+    return ('<div class="team"><div class="plate">' + sprite_h(s, 100, pad=0.04, cls="spr tp") + '</div>'
+            '<div class="tnote"><b>The fire team, at true scale.</b> Enemy ahead (to the right): a Khuchad ARGALI. '
+            '<ul><li><b>THUNDERHEAD</b> in the centre; its mantlet takes the fire from ahead.</li>'
+            '<li><b>TEMPESTs</b> at its shoulders, just behind the mantlet\'s wings, every gun facing forward.</li>'
+            '<li><b>HALOs</b> behind the gaps: point defence over everyone, and the mark (yellow).</li>'
+            '<li><b>SQUALL pairs</b> out on the flanks, ready to dart in.</li></ul>'
+            'When the HALO marks the target, every linked gun fires in the same second (red). One volley does what no single ARK ship can. '
+            'Break the team (kill the HALOs, get behind the TEMPESTs, come in under the mantlet\'s edge) and it fights one ship at a time.</div></div>')
 
 
 def sprite3(s, scale_m, bar=None, mono=False):
@@ -1543,13 +1935,20 @@ are the faction liveries in <code>DESIGN-SYSTEM.md</code>; the ARK lore is from 
 <tr><td>Pirates, Luddic Path refits</td><td><b>Scavengers</b> (S), Khuchad prizes (K)</td><td>Refits of other people's hulls: trusses, bolted engines, primer and mismatched paint</td></tr>
 <tr><td>Elite and auxiliary refits (XIV, LG, (A))</td><td><b>Itztli security refits</b> (I)</td><td>Same hull, more armour and guns, obsidian band</td></tr>
 <tr><td>Remnant, Omega, Threat, Dweller, Domain derelicts</td><td><b>Vanguard</b>, <b>the Silence</b> (and the xeno aliens already built)</td><td>Rule-breaking: three-fold symmetry, no engines, flutes and chevrons, void</td></tr>
-<tr><td>(none: here the humans are the strangers)</td><td><b>ARK expedition</b>, the player</td><td>Earth patterns from the ARK printers: legible standard blocks, hazard stripes, nav lights, adapter points for clan parts</td></tr></table>
+<tr><td>(none: here the humans are the strangers)</td><td><b>ARK expedition</b>, the player</td><td>Earth patterns from the ARK printers: legible standard blocks, hazard stripes, nav lights, adapter points for clan parts. The war line is the same patterns in graphite, built to fight as a team</td></tr></table>
 <p class="blurb"><b>Strangers and natives.</b> The Khuchad, the Alliance and the Vestari are the galaxy's own clans; the humans of the ARK are the newcomers. So the human ships are deliberately the odd ones out: plainer, foreign, and the only ones built to take other people's parts.</p>
 <p class="blurb"><b>Matchups.</b> Khuchad beat the Alliance up close (armour and rams against average shields). The Alliance beats the Vestari with numbers and missiles
 (shields overload and there are too few Vestari to replace losses). The Vestari beat the Khuchad by never letting them close. Frigates matter everywhere:
 a CORSAC pack on an ARGALI's open side, an AUDITOR's harpoon on a fleeing EDICT.</p>
 <p class="src">Sources: {src}</p></details></section>""")
     for fa in FACTIONS:
+        if fa["key"] == "ark":
+            s, m = ark_mothership()
+            secs.append('<section class="fac f-ark mother"><h2><span class="tier t-stranger">ARK TECH</span> The ARK<small>The expedition mothership · station-sized · '
+                        'home port, shipyard and capital</small></h2>'
+                        '<p class="blurb">Turned bow-right to fit the page (port side at the top). Everything docked to it is at true scale: '
+                        'the HOLDFAST in the starboard gantry is 254 m long.</p>'
+                        f'<div class="grid4">{hero_card(s, m)}</div></section>')
         cards = []
         for fn in fa["ships"]:
             s, m = fn()
@@ -1561,7 +1960,7 @@ a CORSAC pack on an ARGALI's open side, an AUDITOR's harpoon on a fleeing EDICT.
                     f'<p class="blurb lore"><b>Your lore.</b> {fa["lore"]}</p><p class="blurb"><b>Doctrine.</b> {fa["doctrine"]}</p>'
                     f'<p class="blurb"><b>Paint.</b> {fa["paint"]}</p>'
                     f'<p class="blurb"><b>Built into every hull.</b> {fa["builtin"]} &nbsp; <b>Mods they make.</b> {fa["mods"]}</p>'
-                    f'<div class="grid4">{"".join(cards)}</div></section>')
+                    f'<div class="grid4">{"".join(cards)}</div>{team_plate() if fa.get("extra") == "team" else ""}</section>')
     rc = []
     for fn, fac in ((kh_tarpan, "Khuchad Clan"), (ark_icebreaker, "ARK expedition")):
         s, m = fn()
@@ -1637,5 +2036,13 @@ CSS3 = """
 .pnc .card3 .spr .base,.pnc .card3 .spr .plate{stroke:var(--accent);stroke-opacity:.35;stroke-width:calc(var(--sw)*.8)}
 @keyframes prism{0%{fill:#FF7B7B}20%{fill:#FFD86B}40%{fill:#7BFFA8}60%{fill:#6BD8FF}80%{fill:#B88BFF}100%{fill:#FF7B7B}}
 .pnc .f-vanguard .accent{animation:prism 6s linear infinite}
-@media (max-width:900px){.rrow{grid-template-columns:1fr}}
+.card.hero{grid-column:1/-1}
+.card svg.wide{aspect-ratio:auto;height:auto;width:100%;display:block}
+.hero .thumb{width:15%}
+.hcols{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+.team{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:center;background:var(--card);border:2px solid var(--line);border-radius:10px;padding:12px;margin:4px 0 12px}
+.tnote{font-size:13px;line-height:1.45;color:#CFD3DC}.tnote b{color:var(--ink)}.tnote ul{margin:6px 0;padding-left:18px}
+.spr .fireline{fill:none;stroke:var(--band);stroke-width:calc(var(--sw)*3.5);stroke-dasharray:calc(var(--sw)*14) calc(var(--sw)*8);opacity:.85}
+.spr .markline{fill:none;stroke:var(--accent);stroke-width:calc(var(--sw)*3.5);stroke-dasharray:calc(var(--sw)*5) calc(var(--sw)*6)}
+@media (max-width:900px){.rrow{grid-template-columns:1fr}.hcols,.team{grid-template-columns:1fr}}
 """
