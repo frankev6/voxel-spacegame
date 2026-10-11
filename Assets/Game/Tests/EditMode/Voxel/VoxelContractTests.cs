@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Game.Voxel.Model;
+using Game.Voxel.Rendering;
 using NUnit.Framework;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
@@ -17,7 +18,8 @@ namespace Game.Tests.EditMode.Voxel
         // Module singletons allowed to hold native containers (SPEC-10 decision 9). SPEC-11/12 queue and cache singletons and SPEC-63's
         // FxEventQueue are added here by REN-001/PHY-001/VFX-001; SPEC-64's SfxEventQueue lives in Game.Voxel too (AUD-001).
         static readonly HashSet<Type> ContainerSingletons = new HashSet<Type>
-        { typeof(DeferredDisposalQueue), typeof(GridPrototypes), typeof(Game.Voxel.PresentationStreams.SfxEventQueue) };
+        { typeof(DeferredDisposalQueue), typeof(GridPrototypes), typeof(Game.Voxel.PresentationStreams.SfxEventQueue),
+          typeof(VoxelRenderConfig), typeof(VoxelRenderRuntime), typeof(BrickMeshQueue), typeof(BrickMeshBatch) };
 
         [Test]
         public void StructSizes_MatchSpec()

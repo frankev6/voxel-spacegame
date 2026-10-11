@@ -604,6 +604,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 49 | 2026-10-11 | SPEC-05 PERS-018 | JSON null bypasses object-read failure handling (SPEC-05 Q25) | Reject absent objects only at profile/META boundaries | Tech lead | Resolved; profile skip warning and non-fatal PERS-W013 |
 
 | 50 | 2026-10-11 | SPEC-02 CORE-013 | EndRead drops native disposal handles; open-read disposal races writers (SPEC-02 Q15) | Keep all cleanup jobs in LastConsumer; complete pending writers before disposal | Tech lead | Resolved by explicit ownership chain; historical shutdown-crash relationship remains unproven |
+| 51 | 2026-10-11 | SPEC-11 REN-001 | ShapeFace's listed fields occupy 52 bytes, not the stated 56 | Preserve fields; correct size assertion to 52 | Tech lead | Resolved in SPEC-11 Q11; measured by RenderContractTests |
+| 52 | 2026-10-11 | SPEC-11 REN-001 | Public VoxelRenderRuntime.Managed references a class labelled internal | Public class, internal fields | Tech lead | Resolved in SPEC-11 Q12; preserves the specified runtime field |
+| 53 | 2026-10-11 | SPEC-11 REN-001 | AABB is in an unreferenced assembly of the installed Entities package | Reference Unity.Mathematics.Extensions | Tech lead | Resolved in SPEC-11 Q13 by accepted ADR-0022; no package or module-boundary change |
 
 ## Measurements
 

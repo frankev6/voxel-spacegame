@@ -67,36 +67,36 @@ public struct PackedBrickVertex
 }
 
 /// Snapshot cell, 32 bits.
-/// bits 0-1 class (0 air, 1 structural, 2 other solid: prop/functional) | bit 2 shape (0 Cube, 1 Wedge) | bits 3-7 orient
-/// bits 8-13 material layer | bits 14-21 colour | bits 22-23 damage (3 - (Hp >> 6)) | bit 24 scorched
-/// bits 25-30 world faces fully covered (BlockFaceMask; 0 unless class 1)
+/// ADR-0018: bits 0-1 class (0 air, 1 structural, 2 other solid), 2-4 shape, 5-9 orient,
+/// 10-15 material layer, 16-23 colour, 24-25 damage (3 - (Hp >> 6)), 26 scorched; 27-31 reserved.
+/// Full faces are read from BrickShapeTables.FullFaces[shape*24 + orient].
 public static class MeshCell
 {
-    public static uint Encode(int cls, int shape, int orient, int layer, int colour, int damage, bool scorched, int fullFaces);
+    public static uint Encode(int cls, int shape, int orient, int layer, int colour, int damage, bool scorched);
     public static int Class(uint c) => (int)(c & 3);
-    public static int Shape(uint c) => (int)((c >> 2) & 1);
-    public static int Orient(uint c) => (int)((c >> 3) & 31);
-    public static int Layer(uint c) => (int)((c >> 8) & 63);
-    public static int Colour(uint c) => (int)((c >> 14) & 255);
-    public static int Damage(uint c) => (int)((c >> 22) & 3);
-    public static bool Scorched(uint c) => ((c >> 24) & 1) != 0;
-    public static int FullFaces(uint c) => (int)((c >> 25) & 63);
+    public static int Shape(uint c) => (int)((c >> 2) & 7);
+    public static int Orient(uint c) => (int)((c >> 5) & 31);
+    public static int Layer(uint c) => (int)((c >> 10) & 63);
+    public static int Colour(uint c) => (int)((c >> 16) & 255);
+    public static int Damage(uint c) => (int)((c >> 24) & 3);
+    public static bool Scorched(uint c) => ((c >> 26) & 1) != 0;
     public const int SnapSize = 18, SnapCells = 5832;            // 18³
     public static int SnapIndex(int x, int y, int z) => (x + 1) + 18 * (y + 1) + 324 * (z + 1);   // x,y,z ∈ [-1, 16]
 }
 
-/// 18 normals: 0..5 axis (BlockFace order PosX, NegX, PosY, NegY, PosZ, NegZ);
+/// 42 normals (ADR-0018): 0..5 axis (BlockFace order PosX, NegX, PosY, NegY, PosZ, NegZ);
 /// 6..17 edge diagonals: 6 + 4*pair + signs; pair 0 = (0,a,b), 1 = (a,0,b), 2 = (a,b,0); signs bit0 → a < 0, bit1 → b < 0; vectors / √2.
+/// 18..41: the 24 permutations/signs of (0,1,2)/√5; exact ordering and tangents are implemented by REN-004.
 /// Tangents: PosX (0,0,-1); NegX (0,0,1); PosY (1,0,0); NegY (1,0,0); PosZ (1,0,0); NegZ (-1,0,0);
 /// diagonal pair 0 → (1,0,0), pair 1 → (0,1,0), pair 2 → (0,0,1). Bitangent = cross(normal, tangent). Must equal BrickVertexDecode.hlsl.
 public static class VoxelNormals
 {
-    public const int Count = 18;
+    public const int Count = 42; // ADR-0018: long-slope normals occupy 18..41
     public static float3 Normal(int i); public static float3 Tangent(int i);
-    public static int IndexOf(int3 scaledNormal);                // scaledNormal components in {-1,0,1}; -1 if not in the table
+    public static int IndexOf(int3 scaledNormal);                // scaledNormal components in {-2,-1,0,1,2} (ADR-0018); -1 if not in the table
 }
 
-public struct ShapeFace                                          // 56 bytes, blob element
+public struct ShapeFace                                          // 52 bytes, blob element (Q11)
 {
     public byte Plane;          // BlockFace of the cell side the polygon lies on, 255 = diagonal (never culled)
     public byte Normal;         // VoxelNormals index
@@ -117,6 +117,8 @@ public struct BrickShapeTables                                   // blob, built 
 Canonical shapes (SPEC-04 §4.2, corner coordinates `[0,1]³`): **Cube** — 6 full quads. **Wedge** (`y + z ≤ 1`) — `NegY` full quad, `NegZ` full quad, `NegX` triangle (0,0,0)(0,0,1)(0,1,0), `PosX` triangle (1,0,0)(1,1,0)(1,0,1), diagonal quad (0,1,0)(1,1,0)(1,0,1)(0,0,1) with normal index 6. Orientation `o` maps a corner `v` to `R(o)·(2v − 1)` then back with `(w + 1)/2` (integer exact; `R` = `OrientationTablesBlob.Matrices[o]`), `Plane` through `RotateFace`, `Normal` through `VoxelNormals.IndexOf(R·n)`; the builder re-orders vertices to satisfy the winding rule.
 
 ### 4.2 Components and singletons
+
+`AABB` comes from the installed Entities package's `Unity.Mathematics.Extensions` assembly; Game.Voxel references it per ADR-0022.
 
 ```csharp
 public struct VoxelRenderConfig : IComponentData            // singleton, created by SPEC-01 with VoxelRenderConfigFactory
@@ -213,7 +215,7 @@ public struct VoxelViewer : IComponentData                          // singleton
 { public float3 CameraPosition; public float3 AnchorPosition; /* player ship */ public byte Valid; }
 ```
 
-`VoxelRenderManagedState : ScriptableObject` (*internal*, runtime instance, `HideFlags.DontSave`): `List<Mesh> ApplyList`, `Mesh Scratch`, `Mesh.MeshDataArray PendingData`, `bool HasPendingData`, `MaterialPropertyBlock[] PropBlocks`, `GraphicsBuffer[] PropInstanceBuffers`, `GraphicsBuffer GridMatrices`, `List<int> PropCounts`. Destroyed by `BrickMeshApplySystem.OnDestroy`.
+`VoxelRenderManagedState : ScriptableObject` (public type for the public `VoxelRenderRuntime.Managed` field; its fields are internal; runtime instance, `HideFlags.DontSave`): `List<Mesh> ApplyList`, `Mesh Scratch`, `Mesh.MeshDataArray PendingData`, `bool HasPendingData`, `MaterialPropertyBlock[] PropBlocks`, `GraphicsBuffer[] PropInstanceBuffers`, `GraphicsBuffer GridMatrices`, `List<int> PropCounts`. Destroyed by `BrickMeshApplySystem.OnDestroy`.
 
 `BrickRenderStats` (static): `BrickRenderTotals Gather(EntityManager em)` → `{ long GpuBytes; long CpuCopyBytes; int Meshes; long Vertices; long Indices; }` with `GpuBytes = Σ (VertexCount × 8 + IndexCount × 2)` and `CpuCopyBytes = ReleaseCpuMeshCopies ? 0 : GpuBytes`.
 
@@ -252,7 +254,7 @@ public sealed class VoxelPaletteDefinition : ContentDefinition         // single
 
 | File | Owner | Content |
 |---|---|---|
-| `BrickVertexDecode.hlsl` | code | `BrickVertex DecodeBrickVertex(float4 posRaw, float4 uvRaw)` returning `positionCells` (float3), `normalIndex`, `layer`, `colour`, `ao` (0..1 = ao/3), `damage` (0..3), `scorched`; the 18-entry normal and tangent tables (identical to `VoxelNormals`); `float2 BrickFaceUV(float3 positionCells, uint normalIndex, float tileCells)` = `(dot(p, T), dot(p, B)) / tileCells` |
+| `BrickVertexDecode.hlsl` | code | `BrickVertex DecodeBrickVertex(float4 posRaw, float4 uvRaw)` returning `positionCells` (float3), `normalIndex`, `layer`, `colour`, `ao` (0..1 = ao/3), `damage` (0..3), `scorched`; the 42-entry normal and tangent tables (ADR-0018) (identical to `VoxelNormals`); `float2 BrickFaceUV(float3 positionCells, uint normalIndex, float tileCells)` = `(dot(p, T), dot(p, B)) / tileCells` |
 | `BrickLit.shader` | code | URP, `#pragma target 4.5`, `#pragma multi_compile _ DOTS_INSTANCING_ON`, `#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"`; passes `UniversalForward`, `ShadowCaster`, `DepthOnly`, `DepthNormals`; SRP-batcher `UnityPerMaterial` CBUFFER with every property below; vertex stage decodes, transforms with `TransformObjectToWorld` (object space = cell units); fragment builds `BrickSurfaceInput`, calls `BrickSurface`, then `UniversalFragmentPBR` |
 | `BrickSurface.hlsl` | **art** (SPEC-81) | `void BrickSurface(BrickSurfaceInput i, inout SurfaceData s)`; placeholder implementation: albedo = `_AlbedoArray[layer].rgb × lerp(1, palette[colour].rgb, _AlbedoArray.a)`; normal from `_NormalArray`; metallic/smoothness/occlusion from `_MaskArray`; emission = `_MaskArray.b × _EmissionColor`; occlusion ×= `ao`; cracks: `damage > 0` → lerp albedo to `_CrackColor` by `_CrackArray[damage-1].r`; scorched → albedo × `_ScorchColor` |
 | `PropInstanced.shader` | code | URP lit, procedural instancing `#pragma instancing_options procedural:PropSetup`; reads `StructuredBuffer<PropInstanceGpu> _PropInstances` and `StructuredBuffer<float4x4> _GridMatrices`, global `float3x3 _OrientMatrices[24]`; albedo = `_BaseMap` × palette colour |
@@ -265,14 +267,14 @@ Material properties (names are the contract): `_AlbedoArray`, `_NormalArray`, `_
 
 `IJobParallelFor` over the batch work items (inner batch 1), all lookups `[ReadOnly]`: `BrickCells`, `BrickSlot`, `VoxelGrid`, `PaletteEntry`, `BlockInstance`, `BlockDefsRef` blob, `BrickShapeTables`. For item i (brick b with coord c in grid g):
 1. Resolve the 27 brick buffers (offsets −1..1 per axis) through `BrickSlot` of g; missing → treated as air.
-2. For every snapshot position (x,y,z) ∈ [−1,16]³ (5,832): pick the source brick and local index; `cell = cells[local]`; air → 0; else resolve `(Block, Orient, Color)` from the palette entry or instance; `def = Blocks[Block]`; class = `def.Kind == Structural ? 1 : 2`; for class 1: shape = `def.Shape`, layer = `def.MaterialLayer`, fullFaces = `Shapes.FullFaces[shape*24+orient]`; damage = `3 − (Hp >> 6)`; write `MeshCell.Encode(...)` to `Snapshots[i*5832 + SnapIndex(x,y,z)]`. A palette/instance index out of range → class 1, Cube, layer 63, colour 0 (the "missing" look) and `GameLog.WarnOnce` from the apply system (the job sets a flag).
+2. For every snapshot position (x,y,z) ∈ [−1,16]³ (5,832): pick the source brick and local index; `cell = cells[local]`; air → 0; else resolve `(Block, Orient, Color)` from the palette entry or instance; `def = Blocks[Block]`; class = `def.Kind == Structural ? 1 : 2`; for class 1: shape = `def.Shape`, layer = `def.MaterialLayer`; full-face coverage is looked up from `Shapes.FullFaces[shape*24+orient]` by the mesher (ADR-0018); damage = `3 − (Hp >> 6)`; write `MeshCell.Encode(...)` to `Snapshots[i*5832 + SnapIndex(x,y,z)]`. A palette/instance index out of range → class 1, Cube, layer 63, colour 0 (the "missing" look) and `GameLog.WarnOnce` from the apply system (the job sets a flag).
 3. Props (interior only): for each cell that is a palette cell of a Prop block, or an instance cell with `InstanceRoot` whose block is Prop: append `BrickPropInstance{Block, LocalIndex, Orient, Color}` to `Props[i*512 + k]`; more than 512 → stop and set an overflow flag (`GameLog.WarnOnce`).
 Cost: ~5,832 cell reads per brick (≈ 15 µs). The job is scheduled on `state.Dependency` and **completed before `BrickMeshBuildSystem.OnUpdate` returns** (VoxelRebuildGroup is not the fixed step; ≤ 128 bricks ≈ 0.3 ms wall on 8 workers). This is the only point that touches live ECS cell memory.
 
 ### 5.2 LOD0 mesher (`BrickMesher.MeshLod0`, Burst, *internal*)
 
 Input: one 18³ snapshot, `BrickShapeTables`; output: vertices (`PackedBrickVertex`), 16-bit indices, bounds. Scratch is `Allocator.Temp`.
-1. **Row masks.** For each of the 18×18 rows (y,z ∈ [−1,16]) build 18-bit masks: `solid` (class ≠ 0), `structural` (class 1), and `full[f]` for the 6 faces (FullFaces bit f). O(5,832).
+1. **Row masks.** For each of the 18×18 rows (y,z ∈ [−1,16]) build 18-bit masks: `solid` (class ≠ 0), `structural` (class 1), and `full[f]` for the 6 faces (`Shapes.FullFaces[shape*24+orient]` bit f, ADR-0018). O(5,832).
 2. **Axis faces**, for each direction `d` (PosX, NegX, PosY, NegY, PosZ, NegZ) and each slice s = 0..15 along d's axis:
    - For each row inside the slice: `candidates` = structural cells (bits 1..16 of the row) whose shape has a polygon with `Plane == d` (Cube always; Wedge per table — precompute per row a mask `hasPlane[d]` from the cells' (shape, orient)); `hidden` = cells whose neighbour across d has `full[opposite(d)]`; for ±X the neighbour bit is the row shifted by 1; for ±Y/±Z it is the adjacent row. `exposed = candidates & ~hidden`.
    - Iterate set bits of `exposed` (`math.tzcnt`). For the cell's polygon on plane d: compute per-vertex AO: for the corner with tangent signs (su, sv) on the face's two in-plane axes: `s1 = solid(cell + n + su·u)`, `s2 = solid(cell + n + sv·v)`, `cr = solid(cell + n + su·u + sv·v)`; `ao = (s1 && s2) ? 0 : 3 − (s1 + s2 + cr)`.
@@ -407,7 +409,7 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Files:** `Assets/Game/Voxel/Rendering/{PackedBrickVertex,MeshCell,VoxelNormals,ShapeFace,BrickShapeTables,BrickShapeTablesBuilder,VoxelRenderConfig,VoxelRenderConfigFactory,VoxelRenderRuntime,VoxelRenderManagedState,MeshPriority,BrickMeshRequest,BrickMeshQueue,BrickMeshWork,BrickMeshBatch,BrickRenderState,BrickLodDesired,BrickPropInstance,Dormant,VoxelViewer,BrickRenderStats,BrickRenderTotals,PropInstanceGpu,BrickMesher,BrickSnapshotUtility}.cs`; `Assets/Game/Data/Definitions/Voxel/{VoxelRenderConfigDefinition,VoxelPaletteDefinition}.cs`
 - **Acceptance criteria:**
   - [ ] `tools/compile.sh` passes with zero warnings.
-  - [ ] `SizeOf<PackedBrickVertex>() == 8`, `SizeOf<ShapeFace>() == 56`, `SizeOf<BrickPropInstance>() == 6`.
+  - [ ] `SizeOf<PackedBrickVertex>() == 8`, `SizeOf<ShapeFace>() == 52`, `SizeOf<BrickPropInstance>() == 6`.
   - [ ] `BrickPropInstance` has `[InternalBufferCapacity(0)]`; `Dormant` is enableable.
 - **Tests:** `RenderContractTests.StructSizes_MatchSpec`, `.QueueCreateDispose_NoLeaks`.
 
@@ -590,18 +592,22 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | Who writes `VoxelViewer` and when? | SPEC-62 `CameraTargetSyncSystem` every frame: `CameraPosition` = main camera, `AnchorPosition` = player ship root position (camera target), `Valid = 1` in gameplay | SPEC-62 |
-| 2 | Is `Dormant` based on the player ship or the camera? | Player ship (`AnchorPosition`); architecture §11.9 says "far from the player" | Tech lead |
-| 3 | `Dormant` is a simulation-affecting flag written in a variable-rate group; determinism tests | Determinism scenarios keep every grid within 2,000 m of the player so `Dormant` never toggles | SPEC-71 |
-| 4 | Final palette: how many colours and who owns them | 256 slots, placeholder fills legacy 0..16; SPEC-80 replaces the asset | SPEC-80 |
-| 5 | Transparent or glass blocks | Not supported in v1; a second material and per-brick second entity would need an ADR | Owner |
-| 6 | Should hulks render darker (dead ship look)? | `[MaterialProperty("_HulkTint")]` component reserved; SPEC-63/80 decide | SPEC-80 |
-| 7 | URP shadow distance | 300 m in `URP_Default.asset` (SPEC-62/80 owns the asset); LOD1 at 400 m | SPEC-62 |
-| 8 | Damage tier thresholds | `damage = 3 − (Hp >> 6)` (fixed; matches `BrickWrite` border-tier rule) | SPEC-13 |
-| 9 | Prop mesh authoring scale and pivot | 1 unit = 1 cell, pivot at root cell centre (SPEC-04 §11) | SPEC-81 |
-| 10 | ADR-0018 adds three shapes (`HipCorner`, `LongSlopeHigh`, `LongSlopeLow`): the snapshot shape field needs 3 bits, `VoxelNormals` needs the 24 normals `(0,1,2)/√5` (permutations and signs), and `BrickShapeTables` covers 5 × 24 entries | Snapshot layout: bits 0-1 class, 2-4 shape, 5-9 orient, 10-15 layer, 16-23 colour, 24-25 damage, 26 scorched, 27-31 free; full faces are no longer stored per cell but read from `BrickShapeTables.FullFaces[shape*24+orient]` during meshing. `VoxelNormals.Count` = 42 (indices 18-41 the long-slope normals); REN-004 criteria apply to all 5 shapes | SPEC-11 lead |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | Who writes `VoxelViewer` and when? | SPEC-62 `CameraTargetSyncSystem` every frame: `CameraPosition` = main camera, `AnchorPosition` = player ship root position (camera target), `Valid = 1` in gameplay | SPEC-62 | |
+| 2 | Is `Dormant` based on the player ship or the camera? | Player ship (`AnchorPosition`); architecture §11.9 says "far from the player" | Tech lead | |
+| 3 | `Dormant` is a simulation-affecting flag written in a variable-rate group; determinism tests | Determinism scenarios keep every grid within 2,000 m of the player so `Dormant` never toggles | SPEC-71 | |
+| 4 | Final palette: how many colours and who owns them | 256 slots, placeholder fills legacy 0..16; SPEC-80 replaces the asset | SPEC-80 | |
+| 5 | Transparent or glass blocks | Not supported in v1; a second material and per-brick second entity would need an ADR | Owner | |
+| 6 | Should hulks render darker (dead ship look)? | `[MaterialProperty("_HulkTint")]` component reserved; SPEC-63/80 decide | SPEC-80 | |
+| 7 | URP shadow distance | 300 m in `URP_Default.asset` (SPEC-62/80 owns the asset); LOD1 at 400 m | SPEC-62 | |
+| 8 | Damage tier thresholds | `damage = 3 − (Hp >> 6)` (fixed; matches `BrickWrite` border-tier rule) | SPEC-13 | |
+| 9 | Prop mesh authoring scale and pivot | 1 unit = 1 cell, pivot at root cell centre (SPEC-04 §11) | SPEC-81 | |
+| 10 | ADR-0018 adds three shapes (`HipCorner`, `LongSlopeHigh`, `LongSlopeLow`): the snapshot shape field needs 3 bits, `VoxelNormals` needs the 24 normals `(0,1,2)/√5` (permutations and signs), and `BrickShapeTables` covers 5 × 24 entries | Snapshot layout: bits 0-1 class, 2-4 shape, 5-9 orient, 10-15 layer, 16-23 colour, 24-25 damage, 26 scorched, 27-31 free; full faces are no longer stored per cell but read from `BrickShapeTables.FullFaces[shape*24+orient]` during meshing. `VoxelNormals.Count` = 42 (indices 18-41 the long-slope normals); REN-004 criteria apply to all 5 shapes | SPEC-11 lead | Resolved 2026-10-11: applied the ADR-0018 default layout; encode drops fullFaces, coverage comes from shape tables. REN-004 implements all five shapes. |
+| 11 | ShapeFace is labelled 56 bytes but its exact fields occupy 52 | Keep the listed fields; correct the size assertion to 52 | Tech lead | Resolved 2026-10-11 in REN-001: four byte fields + four 12-byte int3 fields = 52, with 4-byte alignment; no artificial padding or field change. |
+| 12 | Public VoxelRenderRuntime.Managed names an internal class, which C# rejects | Make the class public while keeping its implementation fields internal | Tech lead | Resolved 2026-10-11 in REN-001: class visibility permits the specified public field; mutable managed state remains module-owned. |
+| 13 | The specified AABB type is in an unreferenced Entities assembly | Add the installed Unity.Mathematics.Extensions reference | Tech lead | Resolved 2026-10-11 by accepted ADR-0022; Game.Voxel already permits the Entities package, with no new package or field change. |
+
 
 ## 11. References
 

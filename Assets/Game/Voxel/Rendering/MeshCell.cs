@@ -1,0 +1,26 @@
+using Unity.Collections;
+using Unity.Entities;
+using Unity.Jobs;
+using Unity.Mathematics;
+using UnityEngine;
+using UnityEngine.Rendering;
+
+namespace Game.Voxel.Rendering
+{
+    /// <summary>Implements SPEC-11 §4 (rendering contract).</summary>
+    // ADR-0018: three shape bits; coverage is looked up in BrickShapeTables, not stored here.
+    public static class MeshCell
+    {
+        public static uint Encode(int cls, int shape, int orient, int layer, int colour, int damage, bool scorched)
+            => throw new System.NotImplementedException("REN-004");
+        public static int Class(uint c) => (int)(c & 3);
+        public static int Shape(uint c) => (int)((c >> 2) & 7);
+        public static int Orient(uint c) => (int)((c >> 5) & 31);
+        public static int Layer(uint c) => (int)((c >> 10) & 63);
+        public static int Colour(uint c) => (int)((c >> 16) & 255);
+        public static int Damage(uint c) => (int)((c >> 24) & 3);
+        public static bool Scorched(uint c) => ((c >> 26) & 1) != 0;
+        public const int SnapSize = 18, SnapCells = 5832;
+        public static int SnapIndex(int x, int y, int z) => (x + 1) + 18 * (y + 1) + 324 * (z + 1);
+    }
+}
