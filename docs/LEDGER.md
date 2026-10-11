@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 7 | 1 | 0 | 0 | 58 | 0 | 66 | 2 |
+| M0 | 7 | 0 | 0 | 0 | 59 | 0 | 66 | 2 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -100,7 +100,7 @@
 | MIG-006 | Block converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-005 | yes | done | astra (gpt-6) | 2026-10-11 | 3bb208c | 21 blocks; exact geometry/modules; byte-stable reruns |
 | MIG-007 | Legacy Euler to orientation | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | b264f44 | Integer RyRxRz, one-degree snapping, all 64 Unity Euler combinations |
 | MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 270db7f | 13 ships; exact counts; VOXS verified; Q39/40 |
-| MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | yes | done | astra (gpt-6) | 2026-10-11 | 75cb5fd | Migration gate: 69 unchanged; full 0.580s; max ship 42.4ms |
 | FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | yes | todo |  |  |  |  |
 | FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | no | todo |  |  |  |  |
 | FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | no | todo |  |  |  |  |
@@ -593,10 +593,16 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 | 2026-10-11 | PERS-012 | Reference VOXS encode / decode | 12.487 / 13.210 ms median; 12.736 / 13.469 ms p95 | Gates 150 / 100 ms |
 | 2026-10-11 | PERS-012 | Reference ship compressed / damaged variant | 15,230 B / 34,810 B | Gate 81,920 B on pristine; damaged report only |
 | 2026-10-11 | TST-008 | No-change compile / Play-to-menu / EditMode suite | 1.697 / 0.159 / 29.800 s median | Apple M5 Pro; 3 runs each through live CLI; gates 10 / 1 / 60 s; all PASS |
+| 2026-10-11 | MIG-016 | Full migration / slowest ship / ship memory bound | 579.6 ms median (613.1 max) / 42.38 ms / 748,853 B | Apple M5 Pro; budgets 60 s / 200 ms / 10 MiB; all pass |
 
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — MIG-016 real migration gate (astra, gpt-6)
+- Four permanent gate tests run the real migration twice, check zero validation errors, byte-identical assets/report/manifest, all **69 Unchanged** outcomes and the exact 13-ship table. The performance test also measures each ship's first asset write in a disposable content folder with unchanged copied legacy inputs; temporary assets/input folders are removed.
+- Apple M5 Pro: full migration **579.6 ms median / 613.1 ms max** (60 s budget); slowest first-write ship **42.38 ms** (200 ms budget); per-ship working-set upper bound **748,853 B** (10 MiB budget). Memory combines managed heap growth with no intervening collection, conservative source/decoded/RLE native buffers and measured generated-asset storage. Unity's managed allocation-by-thread API returns zero and GC.Alloc profiler samples are durations, so neither is treated as byte evidence.
+- Compile zero C# warnings, full live **375 EditMode**, **16 PlayMode**, **21/21 performance records**; docs clean. M0 **59/66 done**. HANDOFF updated; audio and dev runtime remain.
 
 ### 2026-10-11 — MIG-008 ship blueprint migration (astra, gpt-6)
 - Imported all **13** legacy ships with exact SPEC-72 §5.4 counts. Functional-first overlap resolution, cube orientation and colour validation, instance-root flags, negative brick coordinates and single-core anchors are verified. Every payload decodes back to identical arrays and each instance owns its full footprint. Five coreless ships remain coreless under the documented owner default; overlap drops remain as specified.
