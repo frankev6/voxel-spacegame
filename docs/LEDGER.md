@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 59 | 0 | 0 | 0 | 43 | 0 | 102 | 15 |
+| M1 | 58 | 0 | 0 | 0 | 44 | 0 | 102 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -163,7 +163,7 @@
 | PHY-013 | GridMassUpdateSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-006, PHY-008, DMG-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0c9720a | Deterministic recompute; incremental removal; point-velocity preservation |
 | PHY-015 | Debug, statistics and harness hooks | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011 | yes | done | astra (gpt-6) | 2026-10-11 | a08fe17 | Guarded stats and cumulative reset; recursive grid-local box bounds |
 | PHY-016 | GridBodyFactory contract test for split creators | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-008 | yes | done | astra (gpt-6) | 2026-10-11 | 4db5812 | ECB-created hulk moves next tick; exact tick-28 install, one retirement, no native leaks |
-| PHY-017 | Physics behaviour scenarios | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011, PHY-013, SPEC-10 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PHY-017 | Physics behaviour scenarios | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011, PHY-013, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 374bfd4 | Five real-physics scenarios; ram momentum error 0; damage-hole exact install tick |
 | PHY-018 | Collider and mass determinism across frame rates | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, PHY-013 | yes | todo |  |  |  |  |
 | PHY-019 | Performance gates and memory | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-012, PHY-013, PHY-015, SPEC-10, TST-001 | yes | todo |  |  |  |  |
 | PHY-020 | Fallback: flat grid compound of boxes (only if PHY-002 is no-go for nested compounds) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002 | yes | done | astra (gpt-6) | 2026-10-11 | dd85d8c | not needed (PHY-002 go) |
@@ -707,6 +707,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — PHY-017 integrated physics behaviour (astra, gpt-6)
+
+- Added five required PlayMode scenarios in an isolated scene, using shipped content/physics config, procedural Ship20k/HollowStation1M geometry and the real fixed-step spawn, body, mass, dirty, snapshot, build, swap, physics and disposal systems. No production changes or new spec decisions were needed.
+- Head-on ram at **20 m/s**: after 120 ticks both ships move (**8.829297 / 11.17070 m/s**), measured momentum relative error **0** (gate 2%). Off-centre impulse produces **0.007996768 rad/s yaw**, zero angular x/z; the planar spawn keeps its up axis and zero pitch/roll velocity through 120 ticks despite initial x/z angular input.
+- A **4×4×4** removal uses BrickWrite/BrickDirty and mass recompute. The focused run's request at **tick 7** leaves the physics ray blocked until the prescribed **tick 16**, then clear at installation and afterward; zero late installs. A ready resting ship stays within **1 mm** during all **six provisional ticks** of an overlapping station (the count may depend on non-urgent build completion).
+- Validation: focused **5/5**; compile zero C# warnings; EditMode **601 passed + 1 explicit skipped**, PlayMode **42 passed**, perf **31/31**, docs **503 tasks / zero errors**. The existing GridSpawn lookup-allocation advisory is unchanged; physics cost gates are next in PHY-019.
+- Next: PHY-018 frame/worker determinism, then PHY-019 physics budgets and memory.
 
 ### 2026-10-11 — PHY-016 split-creator factory contract (astra, gpt-6)
 
