@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 50 | 0 | 2 | 0 | 14 | 0 | 66 | 16 |
+| M0 | 48 | 0 | 3 | 0 | 15 | 0 | 66 | 14 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
@@ -94,7 +94,7 @@
 | TST-008 | Iteration gates | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | standard | TST-001 | no | todo |  |  |  |  |
 | MIG-001 | Public contract types | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c327a64 |  |
 | MIG-002 | Legacy JSON index and strict reading | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | todo |  |  |  |  |
-| MIG-003 | Legacy ID map | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| MIG-003 | Legacy ID map | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4955b51 |  |
 | MIG-004 | Asset writer, manifest, runner and report | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-002, MIG-003, SPEC-04 | no | todo |  |  |  |  |
 | MIG-005 | Item converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-004 | no | todo |  |  |  |  |
 | MIG-006 | Block converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-005 | no | todo |  |  |  |  |
@@ -564,6 +564,10 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — MIG-003 legacy ID map (claude, claude-opus-5-5)
+- `LegacyIdMap.Default`: 145 rows from SPEC-72 §4.4, with audio cues from SPEC-64 §6.4. Alias rows (`1`, `500`, `satelite_1`, …) carry a Note that starts with "alias of".
+- `LegacyIdMapTests` (3) pass: over 120 keys in the legacy export resolve (the blank `entityId`, `encounterId` and `systemId` values in the export are skipped); every v2 ID is valid and unique apart from aliases. EditMode 59/59.
 
 ### 2026-10-11 — DEV-002 harness docs (claude, claude-opus-5-5)
 - `GameTestHarness.cs` agrees with SPEC-70 §6.1; only the defaults of `gh_get`, `gh_invoke` and `gh_find` were missing from the table.
