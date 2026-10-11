@@ -992,6 +992,19 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
   - [ ] SaveAsync returns ParticipantFailed, raises failure completion once, clears its ticket, and permits a subsequent successful save.
 - **Tests:** `SavePipelineTests.ContextCaptureFailure_LeavesFilesUntouched`; `.ContextCaptureFailure_AsyncCompletesAndRecovers`; `VoxsSnapshotBlockTests.AllPaths_Dispose` (actual native snapshots through each context failure).
 
+### PERS-017 — Make save commit outcomes and slot metadata consistent
+- **Milestone:** M0
+- **Tier:** frontier — F5: atomic save commit and post-commit failure semantics
+- **Depends on:** `PERS-005`, `PERS-006`
+- **Do:** Treat replacement of world.sav as the commit point. A later metadata-sidecar write failure warns and reports the committed save as successful. Slot listing uses readable embedded META to detect stale sidecars and show committed data, with bounded prefix reads. Resolve §5.4's impossible promise that an exception after replacement leaves the old file untouched.
+- **Files:** `Assets/Game/Persistence/Services/SaveService.cs`; `Assets/Game/Tests/EditMode/Persistence/SavePipelineTests.cs`
+- **Acceptance criteria:**
+  - [ ] Forced metadata I/O failure after first save or overwrite leaves a readable new container, the correct previous backup, and returns success with a warning.
+  - [ ] Slot listing reports committed metadata even with an old valid sidecar, including two saves sharing a millisecond timestamp.
+  - [ ] Async completion and GameSaved agree with the disk commit; deferred blocks remain released; pre-commit failure tests stay green.
+  - [ ] Listing 50 slots remains below its 50 ms gate.
+- **Tests:** `SavePipelineTests.MetadataWriteFailure_ReportsCommittedSave`; `.StaleSidecar_UsesEmbeddedMeta`; `.MetadataWriteFailure_AsyncReportsSuccess`; `SavePerfTests.ListSlots_50`.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
