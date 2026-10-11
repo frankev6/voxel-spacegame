@@ -37,6 +37,8 @@ flowchart LR
 
 **Exit gates:** Play from `Boot`, `MainMenu` or `World` boots correctly; Enter Play Mode ≤ 1 s with domain reload off and no leaked state between plays; save round-trip test passes; all legacy blocks and ships import with zero validator errors; `tools/compile.sh`, `tools/test.sh editmode` and `tools/check-docs.py` all pass.
 
+**M0 gate status: passed 2026-10-11.** The [ledger](LEDGER.md) records the system review, five repairs, safety/functional/performance evidence and remaining nonblocking historical-crash uncertainty.
+
 ## M1 — Voxel core and flight
 
 **Goal:** ships and a 1M-cell station render and collide at scale, and the player can fly a ship built from blocks.

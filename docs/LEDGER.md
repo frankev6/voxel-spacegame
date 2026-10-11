@@ -618,10 +618,23 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 | 2026-10-11 | TST-008 | No-change compile / Play-to-menu / EditMode suite | 1.697 / 0.159 / 29.800 s median | Apple M5 Pro; 3 runs each through live CLI; gates 10 / 1 / 60 s; all PASS |
 | 2026-10-11 | MIG-016 | Full migration / slowest ship / ship memory bound | 579.6 ms median (613.1 max) / 42.38 ms / 748,853 B | Apple M5 Pro; budgets 60 s / 200 ms / 10 MiB; all pass |
 
+| 2026-10-11 | M0 system review | Reference perf pass | 23/23; capture 0.155 ms, read+restore 15.41 ms, list50 6.212 ms; event write/read 1.4/2.4 µs | Apple M5 Pro; safety/debugger/leaks off; separate safety-on 411/31 suite passes |
+
 
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — M0 exit gate passed — system-review: astra (gpt-6)
+
+- **Scope:** all 66 original M0 tasks plus five review repairs (71/71). Reviewed boot/composition and teardown, shared state/event ownership and deterministic order, content identities/blobs/validation, VOXS and save capture/read/write lifetimes, repeatable migration, input/audio disposal, dev scenarios and release exclusion. Applied the workflow §7.2/§8 and implementation-trap checklist where these systems exist; rendering, collision and gameplay systems remain M1+ scope. Frank explicitly authorized this session's review; it is **not an independent second-author review**.
+- **Findings fixed:** TST-009 shared Unity tool/test ownership; PERS-016 abandoned capture snapshots; PERS-017 post-commit sidecar outcomes and stale metadata; PERS-018 null JSON objects; CORE-013 dropped disposal handles and open-read producer races. Each has a claimed task, implementation, regression evidence and ledger closure. Decisions Q47–50 resolve spec omissions without public layout/API changes.
+- **Functional/safety evidence:** clean headless EditMode **411 passed + 1 explicit skipped**, PlayMode **31 passed**, all processes exit 0. A separate live pass with Burst safety checks, job debugger and EnabledWithStackTrace leak detection held on also passes **411/31** (Logs/tools/m0-safety-review.json and XML). Six Python tool tests pass. Latest compile has zero C# warnings; check-docs reports **33 specs / 501 tasks / zero errors or warnings**.
+- **Boot/re-entry:** Boot, MainMenu and World each passed two complete start/stop cycles (m0-boot-review.json). Running: exactly one GameRoot, Default World and listener, no runtime errors/exceptions. Stopped: zero Default Worlds, services and pending events; timeScale 1. Iteration medians **2.223 s compile / 0.176 s Play-to-menu / 35.396 s EditMode** are within 10/1/60 s; the final safety suite took 36.93 s.
+- **Persistence/content integration:** round-trip byte equality and unknown/newer chunk preservation pass, including actual native VOXS snapshots and failure cleanup. Legacy migration repeats all **35 items, 21 blocks and 13 ships** with stable bytes and zero validator errors; existing documented warnings remain nonfatal.
+- **Performance:** explicit reference-setting pass (Burst safety/job debugger off, leak detection disabled) passes **23/23** records. Capture **0.155 ms**, read+restore **15.41 ms**, list 50 slots **6.212 ms**; encode/decode 1M **13.19/13.33 ms**; reference compressed ship **15,230 B**; event write/read pair **1.4/2.4 µs**; 200k teardown **7.691 ms**. Evidence retained under Logs/tools/m0-reference-perf. Restoring Editor settings returned a transport timeout; fresh readback confirmed all original values restored before continuing.
+- **Shutdown follow-up:** clean headless functional/perf logs contain zero aged TempJob warnings or native-crash markers after CORE-013. Four regressions proved the concrete ownership defect. The old MIG-007 native crash remains retained; its exact cause is unproven and no crash reproduced in the clean runs. Reinvestigate if it recurs; no known M0 gate failure remains.
+- **Gate result:** M0 passes ROADMAP's objective gates. No separate M0 owner-signoff requirement is specified. Continue M1 in ROADMAP order; owner art/narrative gates remain intact. Frank should review Q30's bounded/full-palette fallback, Q40's development starting ship, and Q48's commit-point clarification; no owner question blocks implementation.
 
 ### 2026-10-11 — CORE-013 event stream cleanup ownership (astra, gpt-6)
 
