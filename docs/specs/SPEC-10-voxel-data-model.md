@@ -1039,8 +1039,8 @@ Evidence retained locally in ignored `Logs/tools/vox003-{reference,thin-shell}.t
 - **Do:** PlayMode scenario: register a fleet-owned structure, spawn it with `WriteBack`, damage 50 cells through `BrickWrite.Set` from a test system in the fixed step (bumping `VoxelGrid.Revision`), despawn, respawn from the same handle, compare cell-state hashes; repeat with `WriteBack` called at "save" time instead of despawn.
 - **Files:** `Assets/Game/Tests/PlayMode/Voxel/DamagePersistenceScenarioTests.cs`
 - **Acceptance criteria:**
-  - [ ] The cell-state hash after respawn equals the hash before despawn.
-  - [ ] Zero exceptions and zero leaks in the run.
+  - [x] The cell-state hash after respawn equals the hash before despawn.
+  - [x] Zero exceptions and zero leaks in the run.
 - **Tests:** `DamagePersistenceScenarioTests.DespawnRespawn_KeepsDamage_04B3`, `.SaveWriteBack_KeepsDamage`.
 
 ### VOX-020 — Incremental grid edits for the editor preview
