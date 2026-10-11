@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 33 | 0 | 1 | 0 | 32 | 0 | 66 | 11 |
+| M0 | 33 | 0 | 0 | 0 | 33 | 0 | 66 | 11 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -38,7 +38,7 @@
 | FND-001 | Public contract types | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 338c29a | GameRootConfig.UiConfig/CameraConfig wait for SPEC-60/62 |
 | FND-002 | Bootstrap, GameRoot and explicit World creation | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-001 | yes | todo |  |  |  |  |
 | FND-003 | PauseService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | f7b5e9b |  |
-| FND-004 | SettingsService and SettingsApplier | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001, PERS-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  | Blocked on CORE-006: SettingsChanged is published through EventBus<T> (ledger Q13) |
+| FND-004 | SettingsService and SettingsApplier | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001, PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | a4c31aa | SettingsService + applier; 4 tests |
 | FND-005 | Composition root and BootSingletons | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-002, FND-003, FND-004, SPEC-02, SPEC-04 | no | todo |  |  |  |  |
 | FND-006 | SceneFlow transitions and teardown | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-005 | no | todo |  |  |  |  |
 | FND-007 | SimClock lifecycle and SimClockAdvanceSystem | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-006 | no | todo |  |  |  |  |
@@ -566,6 +566,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — FND-004 settings service (claude, claude-opus-5-5)
+- `SettingsService` loads and saves `settings.json` under `persistentDataPath` with an atomic temp-file write and a 0.5 s save debounce. A corrupt file falls back to defaults, is renamed to `settings.broken.json` and logs a Settings warning. `Apply` publishes `SettingsChanged` only for the sections that changed.
+- `SettingsApplier` applies video (skipped in batch mode), audio volumes and input settings. Consumers that don't exist yet (audio mixer, camera, UI scale) are reached through `Services.TryGet` and skipped when absent; comments mark where PERS-009, UI and camera tasks hook in.
+- `SettingsServiceTests` (4) pass; EditMode 208/208.
 
 ### 2026-10-11 — DATA-009 placeholder content and database (claude, claude-opus-5-5)
 - `Assets/Game/Content/` area folders (empty ones keep a `.gitkeep`; Unity ignores dotfiles), `ContentDatabase.asset`, `block_missing` (material layer 63) and `item_missing`, with the SPEC-04 §4.10 values.
