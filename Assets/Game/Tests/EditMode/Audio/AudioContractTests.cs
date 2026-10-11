@@ -25,7 +25,7 @@ namespace Game.Tests.EditMode.Audio
         }
 
         [Test]
-        public void AudioService_ConstructsAndDoesNothing()
+        public void AudioService_ConstructsSilentCoreWithoutConfig()
         {
             using var svc = new AudioService(null, null, AudioVolumes.Default, null);
             svc.ApplyVolumes(AudioVolumes.Default); svc.PlayUi(UiSound.Click); svc.PlayCue(default); svc.ClearMusicOverride(1f);

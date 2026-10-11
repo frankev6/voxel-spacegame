@@ -322,7 +322,7 @@ Every row is one step. A step's object is pushed onto `DisposeStack` when it is 
 | 1 | `settings = new SettingsService(new NewtonsoftSaveJsonCodec(), settingsPaths)` (§5.1); `settings.Load()` | `SettingsService`, `ISettingsService` | FND-004 |
 | 2 | `content = new ContentService(config.ContentDatabase)` (validates; throws `ContentValidationException` → boot fails loudly); `content.CreateSingletons(em)`; `BootSingletons.CreateAll(em, content.Catalog)` (§5.3); `blueprints = new BlueprintLibrary(...)`; `registry = VoxelStructureRegistry.CreateRuntime(blueprints)`; create `VoxelStructureRegistryRef` singleton | `ContentService`, `BlueprintLibrary`, `VoxelStructureRegistry` | FND-005, DATA-007, VOX (registry task) |
 | 3 | `input = new InputService(settings.Current.Controls)` | `InputService` | INP (service task) |
-| 4 | `audio = new AudioService(audioConfig, content.Database, SettingsMapping.ToVolumes(settings.Current.Audio), transform)`; `audio.BindTo(world)` (the world exists since step 2) | `AudioService`, `IAudioService` | AUD (service task) |
+| 4 | `audio = new AudioService(audioConfig, config.ContentDatabase, SettingsMapping.ToVolumes(settings.Current.Audio), transform)`; `audio.BindTo(world)` (the world exists since step 2) | `AudioService`, `IAudioService` | AUD (service task) |
 | 5 | `pause = new PauseService()`; `audio.BindPause(pause)` | `PauseService`, `IPauseService` | FND-003 |
 | 6 | `save = new SaveService(savePaths, content, pause, new SaveServiceConfig())` (§5.1; SPEC-05 subscribes `Application.wantsToQuit` itself) | `SaveService` | PERS (service task) |
 | 7 | `flow = new SceneFlow(world, pause, save, gameConfig)` | `SceneFlow` | FND-006 |

@@ -246,10 +246,10 @@ sequenceDiagram
 
 ### 5.2 `AudioService` (managed service #4; plain C# class plus thin `AudioRoot : MonoBehaviour`)
 Construction (`new AudioService(config, content, initialVolumes, parent)`), in this order:
-1. Create `GameObject "AudioRoot"` under `parent` with `AudioRoot` (`[DefaultExecutionOrder(10000)]`, calls `service.Update(Time.unscaledDeltaTime)` in `LateUpdate`).
+1. Create `GameObject "AudioRoot"` under `parent` (or adopt the empty FND-002 prefab placeholder, rejecting a nonempty one) with `AudioRoot` (`[DefaultExecutionOrder(10000)]`, calls `service.Update(Time.unscaledDeltaTime)` in `LateUpdate`).
 2. Create child `"AudioListener"` with the only `AudioListener`.
 3. Create children `SfxVoice_00..39` (Sfx group, `spatialBlend` set per play, `rolloffMode = Logarithmic`, `playOnAwake = false`), `UiVoice_0..7` (Ui group, 2D, `ignoreListenerPause = true`), `MusicA`, `MusicB`, `Stinger` (Music group, 2D, `ignoreListenerPause = true`, `loop` per cue), `Ambience` (Ambience group, 2D, loop), `LoopVoice_0..7` (Sfx group, 3D, loop).
-4. Build the cue table: every `AudioCueDefinition` returned by the `ContentDatabase` (open question 3) gets slot `1..N` in database order; `NativeHashMap<ulong,int> cueSlotByHash` (`ContentHash.Value` → slot, lookup only) and `NativeArray<SfxCueInfo> cueInfo` (Persistent). Store `pendingVolumes = initialVolumes`.
+4. Build the cue table: every `AudioCueDefinition` in `ContentDatabase.Definitions` (open question 3) gets slot `1..N` in database order; `NativeHashMap<ulong,int> cueSlotByHash` (`ContentHash.Value` → slot, lookup only) and `NativeArray<SfxCueInfo> cueInfo` (Persistent). Store `pendingVolumes = initialVolumes`.
 5. Subscribe to `SceneManager.activeSceneChanged` (unsubscribed in `Dispose`).
 
 `Update(float dt)` (called from `AudioRoot.LateUpdate`, main thread, every frame including menus):
@@ -346,7 +346,7 @@ public sealed class AudioService : IAudioService, IDisposable
     // internal (systems only): StartSfxVoice, ReportCombatSignals, ShiftSpatialVoices(float3), StopSfxAndLoops(), Update(float)
 }
 ```
-Pre: `config` passed validation; `content` contains every cue. Post (constructor): exactly one `AudioListener` exists in the process; 60 `AudioSource`s exist under `AudioRoot`; no further `AudioSource` or `AudioListener` is ever created. Errors: a null mixer group at construction is `GameLog.Error` and that bus routes to `Master`.
+Pre: when present, `config` passed validation and `content` contains every cue. Until AUD-007 creates audio content, a null config creates the listener and silent voice pools, with no mixer writes (Q14). Post (constructor): exactly one `AudioListener` exists in the process; 60 `AudioSource`s exist under `AudioRoot`; no further `AudioSource` or `AudioListener` is ever created. Errors: a null mixer group at construction is `GameLog.Error` and that bus routes to `Master`.
 
 ### 6.2 Producer pattern
 
@@ -606,9 +606,9 @@ Timing tests run with safety checks off (SPEC-71 perf fixture). Functional tests
 
 | # | Question | Default if unanswered | Decider |
 |---|---|---|---|
-| 1 | SPEC-01: construction and wiring of `AudioService` | `GameRoot.Awake` step 4: `new AudioService(audioConfig, contentService.Database, settings.AudioVolumes, transform)`, registered as `AudioService` and `IAudioService`; after `PauseService` exists: `audio.BindPause(pause)`; after the default world exists: `audio.BindTo(world)`; on every volume change: `audio.ApplyVolumes(v)`; shutdown: `Unbind`, `Dispose` | Tech lead |
+| 1 | SPEC-01: construction and wiring of `AudioService` | `GameRoot.Awake` step 4: `new AudioService(audioConfig, config.ContentDatabase, settings.AudioVolumes, transform)`, registered as `AudioService` and `IAudioService`; after `PauseService` exists: `audio.BindPause(pause)`; after the default world exists: `audio.BindTo(world)`; on every volume change: `audio.ApplyVolumes(v)`; shutdown: `Unbind`, `Dispose` | Tech lead |
 | 2 | SPEC-01: default volumes | `AudioVolumes.Default` (0.8 / 0.6 / 0.8 / 0.7 / 0.6) | Owner |
-| 3 | SPEC-04: how does `AudioService` enumerate and resolve cues? | `ContentDatabase.GetAll<AudioCueDefinition>()` (stable database order) and `TryGet<T>(ContentHash, out T)` / `TryGet<T>(ContentId, out T)` | Tech lead |
+| 3 | SPEC-04: how does `AudioService` enumerate and resolve cues? | **Resolved in AUD-003:** enumerate ContentDatabase.Definitions in stored order and select AudioCueDefinition; lookup tables are built at construction. ContentCatalog owns typed ID/hash lookup. Composition passes GameRootConfig.ContentDatabase directly (ContentService has no Database property). Do not invent APIs on either type. | Tech lead |
 | 4 | SPEC-62: what does the listener follow? | The camera rig registers a `ListenerPivot` transform: at the followed ship's position with the camera's rotation; it calls `SetListenerTarget` on enable and `ClearListenerTarget` on disable, and never adds an `AudioListener` | Tech lead |
 | 5 | SPEC-21: weapon fire cues | `WeaponDefinition.fireCue : AudioCueDefinition`; its `Id.Hash` (`ContentHash`) baked into the weapon blob | Tech lead |
 | 6 | SPEC-20/21: loop-voice inputs | Same components as SPEC-63 §6.5 (`ThrusterState.Intensity`; `BeamState.Active`, muzzle start) | Tech lead |
@@ -619,6 +619,7 @@ Timing tests run with safety checks off (SPEC-71 perf fixture). Functional tests
 | 11 | Which specs own the managed event types `SessionReset` and `StarSystemEntered`? | `SessionReset`: SPEC-01 (`FND-001`); `StarSystemEntered`: SPEC-31 (`SYS-001`) | Tech lead |
 | 12 | §4.3 lists the cue and config validation rules without codes | AUD-001 uses AUD-E001 clips empty or null, AUD-E002 minDistance ≥ maxDistance, AUD-E003 Ui cue with spatialBlend > 0; AUD-E010 mixer or group missing, AUD-E011 uiSounds not 11 or one missing, AUD-E012 music cue missing/not Music bus/not looping, AUD-E013 ambienceWorld not an Ambience loop, AUD-E014 combat cue missing, AUD-E015 combatEnterSignals < 1, AUD-E016 sceneMusic lacks a scene | Tech lead |
 | 13 | AUD-002 assumes manual Editor UI, but Frank requires CLI/headless jobs | **Answer (resolved in AUD-002):** use the installed Unity Editor mixer-authoring API through a temporary reflected Editor job, delete it after creation, and verify the saved mixer with AudioMixer.FindMatchingGroups/GetFloat. No runtime reflection or package/assembly change. This produces the specified asset without owner intervention. | Tech lead |
+| 14 | AUD-003 must compose audio in M0, but config_audio/cue content is AUD-007 in M2 | **Answer (resolved in AUD-003):** boot resolves config_audio when available and always constructs/registers the core service. A null config is a silent staging mode: one listener, all 60 pools, pause/follow/disposal, no mixer writes or playback. Missing groups in an existing config still error and fall back to Master. AUD-007 supplies the fully validated config and cues; no fake content or weakened content validation. | Tech lead |
 
 ## 11. References
 

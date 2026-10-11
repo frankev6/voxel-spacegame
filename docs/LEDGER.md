@@ -582,6 +582,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 39 | 2026-10-11 | SPEC-72 MIG-008 / SPEC-10 | M0 blueprint validation depends on M1 stub (SPEC-72 Q16 / SPEC-10 Q15) | Bring the existing validator forward; keep setter/config work in VOX-010 | Tech lead | Resolved in MIG-008; no public API or assembly change |
 | 40 | 2026-10-11 | SPEC-72 MIG-008 | Imported ships require a start blueprint (SPEC-72 Q17) | One-time empty-link assignment of ship_base for development | Tech lead | Resolved; Frank should review eventual gameplay starting ship |
 | 41 | 2026-10-11 | SPEC-64 AUD-002 | Manual mixer creation conflicts with Frank’s CLI-only direction (SPEC-64 Q13) | Temporary installed-Editor API job plus runtime asset readback | Tech lead | Resolved in AUD-002; reflection stays in deleted one-off job |
+| 42 | 2026-10-11 | SPEC-64 AUD-003 | M0 core precedes M2 audio config/cues; database lookup API mismatch (SPEC-64 Q3/Q14) | Silent null-config core; enumerate Definitions; normal routing with validated config | Tech lead | Resolved in AUD-003; full boot integration without placeholder cues |
 
 ## Measurements
 

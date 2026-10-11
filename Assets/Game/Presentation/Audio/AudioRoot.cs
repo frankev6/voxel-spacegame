@@ -1,5 +1,12 @@
+using UnityEngine;
 namespace Game.Presentation.Audio
 {
-    /// <summary>Parent of the audio listener and the pooled AudioSources (SPEC-64 §5). Empty until AUD-003.</summary>
-    public sealed class AudioRoot : UnityEngine.MonoBehaviour { }
+    /// <summary>SPEC-64 §5.2: one late-frame driver owned by AudioService, under the persistent GameRoot.</summary>
+    [DefaultExecutionOrder(10000)]
+    public sealed class AudioRoot : MonoBehaviour
+    {
+        internal AudioService Service;
+        void LateUpdate() => Service?.Update(Time.unscaledDeltaTime);
+        void OnDestroy() => Service?.Dispose();
+    }
 }

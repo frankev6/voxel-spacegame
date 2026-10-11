@@ -4,6 +4,8 @@ using Game.App.Flow;
 using Game.App.Services;
 using Game.App.Settings;
 using Game.Core;
+using Game.Core.Audio;
+using Game.Presentation.Audio;
 using Game.Core.Settings;
 using Game.Data.Definitions;
 using Game.Data.Services;
@@ -34,6 +36,7 @@ namespace Game.App.Boot
         internal SettingsService Settings { get; private set; }
         internal ContentService Content { get; private set; }
         internal InputService Input { get; private set; }
+        internal AudioService Audio { get; private set; }
         internal PauseService Pause { get; private set; }
         internal SaveService Save { get; private set; }
         internal GameConfigDefinition GameConfig { get; private set; }
@@ -88,10 +91,15 @@ namespace Game.App.Boot
             Register(Input);
             Step("3 input");
 
-            // 4. TODO(AUD-003): audio = new AudioService(audioConfig, content.Database, SettingsMapping.ToVolumes(...), root); audio.BindTo(world).
+            // 4. Audio core exists in M0; cue/config content lands in AUD-007 (SPEC-64 Q14).
+            Content.Catalog.TryGet(new ContentId("config_audio"), out AudioConfigDefinition audioConfig);
+            Audio = Push(new AudioService(audioConfig, config.ContentDatabase, SettingsMapping.ToVolumes(Settings.Current.Audio), root));
+            Audio.BindTo(world); Register(Audio); Register<IAudioService>(Audio);
+            Step("4 audio");
 
-            // 5. Pause (FND-003). TODO(AUD-003): audio.BindPause(pause).
+            // 5. Pause (FND-003), shared by audio (AUD-003).
             Pause = Push(new PauseService());
+            Audio.BindPause(Pause);
             Register(Pause); Register<IPauseService>(Pause);
             Step("5 pause");
 
@@ -147,7 +155,7 @@ namespace Game.App.Boot
                 catch (Exception e) { GameLog.Exception(LogCategories.Boot, e, "GameComposition.Dispose " + DisposeStack[i].GetType().Name); }
             }
             DisposeStack.Clear();
-            Settings = null; Content = null; Input = null; Pause = null; Save = null; GameConfig = null; Flow = null;
+            Settings = null; Content = null; Input = null; Audio = null; Pause = null; Save = null; GameConfig = null; Flow = null;
             Game.Core.Services.Reset();
         }
     }

@@ -24,7 +24,7 @@ namespace Game.Tests.PlayMode.Boot
     /// Each test that tears the boot down boots again in TearDown, so later tests see a normal game.</summary>
     public sealed class CompositionTests
     {
-        static readonly string[] ExpectedSteps = { "1 settings", "2 content", "3 input", "5 pause", "6 save", "7 flow", "14 settings applier", "15 snapshot" };
+        static readonly string[] ExpectedSteps = { "1 settings", "2 content", "3 input", "4 audio", "5 pause", "6 save", "7 flow", "14 settings applier", "15 snapshot" };
 
         string tempRoot;
 
@@ -57,7 +57,7 @@ namespace Game.Tests.PlayMode.Boot
             var composition = GameRoot.Instance.Composition;
             CollectionAssert.AreEqual(ExpectedSteps, composition.StepLog, "SPEC-01 §5.2 order");
             var built = composition.DisposeStack.Select(d => d.GetType().Name).ToList();
-            CollectionAssert.AreEqual(new[] { "SettingsService", "ContentService", "InputService", "PauseService", "SaveService", "SceneFlow", "SettingsApplier" }, built);
+            CollectionAssert.AreEqual(new[] { "SettingsService", "ContentService", "InputService", "AudioService", "PauseService", "SaveService", "SceneFlow", "SettingsApplier" }, built);
             yield return Shutdown();
             built.Reverse();
             CollectionAssert.AreEqual(built, GameComposition.LastDisposeLog, "disposed in reverse");
@@ -82,7 +82,7 @@ namespace Game.Tests.PlayMode.Boot
                 var e = Assert.Throws<InvalidOperationException>(() =>
                     GameComposition.Build(host.transform, config, new SavePaths(Path.Combine(tempRoot, "saves")), new SettingsPaths(Path.Combine(tempRoot, "settings.json"))));
                 StringAssert.Contains("5 pause", e.Message);
-                CollectionAssert.AreEqual(new[] { "PauseService", "InputService", "ContentService", "SettingsService" }, GameComposition.LastDisposeLog,
+                CollectionAssert.AreEqual(new[] { "PauseService", "AudioService", "InputService", "ContentService", "SettingsService" }, GameComposition.LastDisposeLog,
                     "everything built before the failure is disposed, newest first");
                 Assert.AreEqual(0, Game.Core.Services.Count);
             }
