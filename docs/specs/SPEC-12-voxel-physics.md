@@ -507,7 +507,7 @@ Initial capacities not annotated above use **256** for cache lists/maps, **512**
 | Grid record | ≈ 96 + children 32 per brick | managed by the cache |
 | `GridMass` + `GridColliderState` per root | 88 + 20 | chunk data |
 
-VOX-002 measured the reference station's actual 1,024-box geometry: cached brick blobs **586,016 B**, installed compound **667,296 B**, steady **1,253,312 B** and cache + installed + pending + retired peak **2,587,904 B**. Thin-shell actual 4,096-box geometry: cached **2,188,320 B**, installed **2,531,232 B**, steady **4,719,552 B**, peak **9,782,016 B**. SPEC-10 §8.2 carries the exact model and exclusions. PHY-019 must still measure the implemented live pipeline. PHY-002 confirms nested compounds, copied ownership and standalone/compound sizes; Q12 records the estimate/API correction.
+VOX-002 measured the reference station's actual 1,024-box geometry: cached brick blobs **586,016 B**, installed compound **667,296 B**, steady **1,253,312 B** and cache + installed + pending + retired peak **2,587,904 B**. Thin-shell actual 4,096-box geometry: cached **2,188,320 B**, installed **2,531,232 B**, steady **4,719,552 B**, peak **9,782,016 B**. SPEC-10 §8.2 carries the exact model and exclusions. PHY-019 now measures the implemented live pipeline: four consecutive damage buckets peak at **3,275,424 B** (installed 670,096; cached 590,016; pending 671,296; retired 669,024; completed batch 674,992), returning to **1,263,456 B** after those holes. This is **26.6%** above the old replacement model: four compound versions can overlap. Accepted [ADR-0033](../decisions/ADR-0033-collider-overlap-memory-budget.md) / Q24 allocates **3.5 MiB** to reference collider blobs and corrects the retained-copy reference total to **32,227,328 B**, without changing the 36 MB headroom or 40 MB whole-voxel limits. Native pool capacity and integration overhead remain separate; thin-shell live overlap has not been measured. PHY-002 confirms nested compounds, copied ownership and standalone/compound sizes; Q12 records the estimate/API correction.
 
 ## 5. Systems, services and flow
 
@@ -824,7 +824,7 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 | 1M-cell station idle (all voxel systems ≤ 2 ms main thread) | this spec's share ≤ 0.1 ms main thread when nothing changes | `PhysicsIdlePerfTests.Station1M_IdleUnder0_1ms` (PHY-019) |
 | Spawn a 1M-cell grid: collidable within 30 frames | full compound installed ≤ 12 frames after `GridSpawning` turns off; no frame > 1 ms main thread in this spec's systems | `ColliderSpawnPerfTests.Station1M_ReadyWithin12Frames` (PHY-019) |
 | One explosive hit (r = 3 cells) on a 1M-cell grid: ≤ 1 ms total job time incl. remesh and collider (SPEC-13 owns the gate) | this spec's share ≤ 0.5 ms job time (≤ 8 bricks + one 872-child assembly) | `ColliderPipelinePerfTests.Hit1M_ColliderJobsUnder0_5ms` (PHY-019) |
-| Memory | collider share of the 40 MB station gate ≤ 2.5 MB peak (§4.8) | `ColliderMemoryTests.HollowStation1M_Under2_5MB` (PHY-019) |
+| Memory | collider blob share of the 40 MB station gate ≤ 3.5 MiB peak (§4.8, ADR-0033; original 2.5 MiB no-go) | `ColliderMemoryTests.HollowStation1M_Under3_5MB` (PHY-019) |
 | Determinism | same install ticks and collider hashes at 30/60/144 FPS; `LateInstalls == 0` | `ColliderDeterminismTests.*` (PHY-018) |
 
 ### 8.2 Own budgets
@@ -1078,8 +1078,8 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Do:** Performance tests per §8.1 with reference settings (safety checks off, asserted; 60-frame warm-up; 300 measured frames; median and p95). Also measure a 30-ship skirmish stand-in: 30 `Ship20k` grids each losing 20 random cells per tick for 600 ticks (urgent bricks per batch, assemblies per second, worker ms per frame). Record everything in the ledger *Measurements*; update §4.8 numbers in this spec if they differ by more than 20%.
 - **Files:** `Assets/Game/Tests/PlayMode/Voxel/Physics/{BrickColliderPerfTests,PhysicsIdlePerfTests,ColliderSpawnPerfTests,ColliderPipelinePerfTests,ColliderMemoryTests}.cs`
 - **Acceptance criteria:**
-  - [ ] Every §8.1 target met, or a ledger *Open questions* row with the measured numbers and a proposal (PHY-021 if assembly is the problem).
-  - [ ] Skirmish stand-in: `LateInstalls == 0`; worker time of collider jobs ≤ 2 ms per frame median.
+  - [x] Every §8.1 target met, or a ledger *Open questions* row with the measured numbers and a proposal (PHY-021 if assembly is the problem).
+  - [x] Skirmish stand-in: `LateInstalls == 0`; worker time of collider jobs ≤ 2 ms per frame median.
 - **Tests:** the five classes named in §8.1 plus `ColliderPipelinePerfTests.Skirmish30Ships_NoLateInstalls`.
 
 ### PHY-020 — Fallback: flat grid compound of boxes (only if PHY-002 is no-go for nested compounds)
@@ -1141,6 +1141,7 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 | 21 | Cleanup precedes the disposal clock mirror, so queue.Tick can lag current physics by catch-up ticks | Stamp the local retirement view from the current SimClock | Tech lead | Resolved: retain the three-frame delay and require two ticks after actual retirement; never shorten the paused PhysicsWorld lifetime using the previous frame tick. No singleton-field writer changes. |
 | 22 | The body-init IsEmpty fast path synchronizes enableable writers in Entities 6.6 | Use IsEmptyIgnoreFilter and asynchronous enableable filtering | Tech lead | Resolved: retain the no-fixed-step-sync contract; empty filtered lists do no body work. |
 | 23 | Rebuild reset must not recycle updates or apply old results while a batch still references them | Detach referenced updates as Discarded; finalize owns their later retirement | Tech lead | Resolved: body-reset reads only immutable batch descriptors under cache ownership, which orders it before descriptor clearing/reuse. New updates may proceed without reviving stale children. |
+| 24 | Four compound versions coexist during overlapping deterministic updates, exceeding the three-version memory estimate | Allocate 3.5 MiB to reference collider blobs within unchanged whole-voxel limits | Tech lead | Resolved PHY-019 / ADR-0033: measured 3,275,424 B (old 2.5 MiB no-go), final steady 1,263,456 B; corrected reference model 32,227,328 B. Keep installation and retirement lifetimes; integration remains TST-004. |
 
 ## 11. References
 

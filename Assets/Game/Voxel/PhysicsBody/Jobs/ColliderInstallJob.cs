@@ -2,6 +2,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Profiling;
 using Unity.Physics;
 
 namespace Game.Voxel.PhysicsBody
@@ -10,6 +11,7 @@ namespace Game.Voxel.PhysicsBody
     [BurstCompile]
     internal struct ColliderInstallJob : IJob
     {
+        static readonly ProfilerMarker ExecuteMarker = new ProfilerMarker(ProfilerCategory.Scripts, "ColliderInstallJob.Execute");
         public ColliderCacheContainers Cache;
         public ComponentLookup<PhysicsCollider> Colliders;
         public ComponentLookup<GridColliderState> States;
@@ -17,6 +19,7 @@ namespace Game.Voxel.PhysicsBody
         public uint Tick;
         public void Execute()
         {
+            using var marker = ExecuteMarker.Auto();
             for (int r = 0; r < Cache.Grids.Length; r++)
             {
                 var record = Cache.Grids[r]; int prefix = 0;

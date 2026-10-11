@@ -68,6 +68,10 @@ These work with no Editor open (verified 2026-10-10):
   - Perf gates: `PerfRun.Gate(name, samples, budget)` for loops a test times itself; `new PerfRun(name)…RunEcs/RunFrames` for per-tick or per-frame gates (inconclusive outside the reference settings).
   - `LogAssert.ignoreFailingMessages` is reset when each test starts, so setting it in `[SetUp]` has no effect: set it inside the test (or `LogAssert.Expect` the lines).
   - `[Explicit]` tests run when a `-testFilter` names them, so a filter such as `TestKit` also runs the leak-guard test, which fails by design.
+- **CPU profiler recorders in headless tests (PHY-019):**
+  - `new ProfilerRecorder(handle, ...)` needs `StartImmediately` (or `Start()`); `Default` only selects sum/wrap behavior. Assert both `Valid` and `IsRunning`.
+  - With `-nographics`, even PlayMode `yield return null` can leave `Count = 0` and `LastValue = 0` while `CurrentValue` accumulates real samples. For a synchronous world update, use its before/after `CurrentValue` delta. Never accept zero/absent timing as a pass.
+  - Inclusive ECS system names come from `EntityManager.EntityManagerDebug.GetSystemProfilerMarkerName`. Discover exact matching handles in both Scripts and Burst Jobs categories; only the active implementation emits samples. Sum whole-system markers without also adding their nested step markers.
 - **Native memory in tests:**
   - `UnsafeUtility.CheckForLeaks()` returns the tracked allocations still alive *and resets* the tracked set, writing its report with `Debug.Log`. Call it once after a warm-up as a baseline, then again at the end; skip `LogAssert.NoUnexpectedReceived` in that test.
   - A `NativeArray` of native containers (for example `NativeStream.Reader`) is a nested container: any job that holds it throws, its `Dispose(JobHandle)` included. Give each job its container in its own field (CORE-012).

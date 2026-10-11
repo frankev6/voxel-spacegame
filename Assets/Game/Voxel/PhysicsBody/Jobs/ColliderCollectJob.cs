@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Profiling;
 
 namespace Game.Voxel.PhysicsBody
 {
@@ -10,6 +11,7 @@ namespace Game.Voxel.PhysicsBody
     [BurstCompile]
     internal struct ColliderCollectJob : IJob
     {
+        static readonly ProfilerMarker ExecuteMarker = new ProfilerMarker(ProfilerCategory.Scripts, "ColliderCollectJob.Execute");
         public NativeList<ColliderRequest> Requests;
         public ColliderCacheContainers Cache;
         [ReadOnly] public BufferLookup<BrickSolidMask> Masks;
@@ -19,6 +21,7 @@ namespace Game.Voxel.PhysicsBody
         public int Delay, Bucket;
         public void Execute()
         {
+            using var marker = ExecuteMarker.Auto();
             int dropped = 0;
             for (int i = 0; i < Requests.Length; i++)
             {

@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Profiling;
 
 namespace Game.Voxel.PhysicsBody
 {
@@ -8,6 +9,7 @@ namespace Game.Voxel.PhysicsBody
     [BurstCompile]
     internal struct GridAssembleJob : IJobParallelFor
     {
+        static readonly ProfilerMarker ExecuteMarker = new ProfilerMarker(ProfilerCategory.Scripts, "GridAssembleJob.Execute");
         [ReadOnly] public NativeArray<AssemblyItem> Items;
         [ReadOnly] public NativeArray<BrickChild> Children;
         [ReadOnly] public NativeArray<int> Apply;
@@ -16,6 +18,7 @@ namespace Game.Voxel.PhysicsBody
         public NativeArray<AssemblyResult> Results;
         public void Execute(int index)
         {
+            using var marker = ExecuteMarker.Auto();
             var item = Items[index]; var children = new NativeList<BrickChild>(item.ChildCount + item.ApplyCount, Allocator.Temp);
             try
             {

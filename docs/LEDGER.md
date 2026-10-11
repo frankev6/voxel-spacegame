@@ -664,6 +664,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 100 | 2026-10-11 | SPEC-12 PHY-012 | Previous-frame queue tick can shorten retirement lifetime after catch-up | Stamp the local retirement view with the current SimClock tick | Tech lead | Resolved SPEC-12 Q21; preserves two post-retirement ticks even when physics pauses |
 | 101 | 2026-10-11 | SPEC-12 PHY-008 | IsEmpty synchronizes enableable query writers | Asynchronous filtering with structural-empty fast path | Tech lead | Resolved SPEC-12 Q22; no fixed-step query sync |
 | 102 | 2026-10-11 | SPEC-12 PHY-008 | Rebuild can invalidate updates referenced by an unfinished batch | Detach/discard referenced slots and retire results at finalization | Tech lead | Resolved SPEC-12 Q23; cache guard protects immutable descriptor reads and later reuse |
+| 103 | 2026-10-11 | SPEC-12 PHY-019 | Live overlap peaks at 3,275,424 B, above the original 2.5 MiB collider allocation | Allocate 3.5 MiB within unchanged 36/40 MB whole-voxel limits | Tech lead | Resolved SPEC-12 Q24 / accepted ADR-0033: four versions coexist; preserve install/retirement delays. Corrected reference model 32,227,328 B; TST-004 still owns integration |
 
 
 
@@ -675,6 +676,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-11 | PHY-019 | Brick rebuild | Noise 19.9 / 23.5 µs median/p95; full 1.1 / 1.3 µs; slab 0.6 / 0.7 µs | Apple M5 Pro, Unity 6000.6.5f1, Burst on, safety/debugger/leaks off; 60 warmup + 300 frames; 1,000 distinct 50% noise masks; serial Run includes call overhead |
+| 2026-10-11 | PHY-019 | Station idle / spawn | Idle 0.013833 / 0.017874 ms median/p95; spawn 0.024395 / 0.220916 ms, max 0.314877 ms; ready ≤ 8 frames | Inclusive physics-system + gameplay ECB markers; 42 completed spawns / 300 measured frames, after 60 warmup; CurrentValue deltas verified nonzero in headless mode |
+| 2026-10-11 | PHY-019 | Radius-3 station hit | 0.308300 / 0.333600 ms median/p95 | 112 removed cells; 4 changed bricks + actual 872-child assembly; 60 warmup + 300 frames; serial Burst work plus Run overhead; remeshing remains SPEC-13's combined gate |
+| 2026-10-11 | PHY-019 | 30-ship skirmish stand-in | Worker median/p95/mean 0.038312 / 3.620159 / 0.816310 ms; urgent median/max 300/300 bricks; 450 assemblies/s; zero late installs | 30 × Ship20k; 20 distinct occupied cells/ship/tick; 60 damage warmup + 600 measured ticks; real mass recompute excluded from collider-only worker sum; p95 reported, gate is median ≤ 2 ms |
+| 2026-10-11 | PHY-019 | Live collider memory | Peak 3,275,424 B; steady 1,263,456 B; **original 2.5 MiB no-go**, revised 3.5 MiB pass | 300 frames / four damage buckets; unique ownership across cache, pending, retired, completed batch and deferred queue. ADR-0033 / Q103; corrected retained reference model 32,227,328 B; whole integration remains TST-004 |
 | 2026-10-11 | REN-002 | Idle 2,500 registered meshes | Presentation 0.313042 / 0.339875 ms median/p95; active RenderLoop 0.746250 / 0.877166 ms; 5,035 draws | Apple M5 Pro, Unity 6000.6.5f1, Metal MultiThreaded, 1920×1080 linear target, URP 4 cascades / 300 m, safety off; 60 warmup + 300 CPU samples |
 | 2026-10-11 | REN-002 | GPU idle | **6.434792 / 10.494958 ms median/p95 — no-go** vs 6 ms | 300 unique positive FrameTiming samples; capture continued beyond the 300 CPU samples because Editor GPU timings arrive sparsely; initial single-threaded results superseded |
 | 2026-10-11 | REN-002 | Moving root delta | **1.625292 ms median delta — no-go** vs 0.5 ms | Paired static transform/presentation medians 0.029708 / 0.318000 ms; moving 0.030875 / 1.942125 ms; moving p95 0.037167 / 1.996417 ms; 300 samples each |

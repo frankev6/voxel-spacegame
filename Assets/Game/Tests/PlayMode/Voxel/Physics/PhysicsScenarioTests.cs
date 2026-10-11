@@ -39,7 +39,7 @@ namespace Game.Tests.PlayMode.Voxel.Physics
             Assert.IsTrue(unload.isDone, "Scenario scene unload timed out");
         }
 
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             readonly ContentService content;
             readonly BlueprintLibrary library;
@@ -48,7 +48,7 @@ namespace Game.Tests.PlayMode.Voxel.Physics
             public readonly EcsTestWorld Test;
             public EntityManager Em => Test.EntityManager;
             public readonly ushort Hull;
-            public Fixture()
+            public Fixture(params Type[] extra)
             {
                 content = new ContentService(Resources.Load<GameRoot>("GameRoot").Config.ContentDatabase);
                 Hull = content.Catalog.GetBlockIndex(content.Catalog.Get<BlockDefinition>(new ContentId("block_hull")));
@@ -57,6 +57,7 @@ namespace Game.Tests.PlayMode.Voxel.Physics
                 var systems = new List<Type> { typeof(GridSpawnSystem), typeof(GridBodyInitSystem), typeof(GridMassUpdateSystem),
                     typeof(BrickDirtyScheduleSystem), typeof(ColliderSnapshotSystem), typeof(BrickColliderBuildSystem), typeof(ColliderSwapSystem),
                     typeof(GridColliderCleanupSystem), typeof(DeferredDisposalSystem), typeof(GameplayEndCommandBufferSystem) };
+                systems.AddRange(extra);
                 foreach (var type in DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.Default))
                     if (type.Namespace != null && (type.Namespace.StartsWith("Unity.Physics") || type.Namespace == "Unity.Transforms")) systems.Add(type);
                 Test = EcsTestWorld.Create(systems.ToArray()); Test.AddGameplayActive(); Test.AddSimClock(); content.CreateSingletons(Em);
@@ -77,6 +78,8 @@ namespace Game.Tests.PlayMode.Voxel.Physics
                     LinearVelocity = velocity, AngularVelocity = angular,
                 });
             }
+            public Entity SpawnRegistered(int handle, GridMotion motion = GridMotion.Static) => GridSpawnApi.RequestSpawn(Em, registry, handle,
+                new GridSpawnParams { Pose = RigidTransform.identity, Motion = motion, Flags = GridSpawnFlags.NoRender | GridSpawnFlags.Transient });
             public void Tick(int count = 1) => Test.StepTicks(count);
             public void Ready(params Entity[] roots)
             {

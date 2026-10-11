@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Profiling;
 using Game.Voxel.Model;
 
 namespace Game.Voxel.PhysicsBody
@@ -9,6 +10,7 @@ namespace Game.Voxel.PhysicsBody
     [BurstCompile]
     internal struct BrickColliderJob : IJobParallelFor
     {
+        static readonly ProfilerMarker ExecuteMarker = new ProfilerMarker(ProfilerCategory.Scripts, "BrickColliderJob.Execute");
         [ReadOnly] public NativeArray<BrickBuildItem> Items;
         [ReadOnly] public NativeArray<BrickMaskBits> Masks;
         public NativeArray<BrickBuildResult> Results;
@@ -16,6 +18,7 @@ namespace Game.Voxel.PhysicsBody
         public float Bevel;
         public void Execute(int index)
         {
+            using var marker = ExecuteMarker.Auto();
             var item = Items[index];
             if (item.Removed != 0) { Results[index] = new BrickBuildResult { Removed = 1 }; return; }
             var scratch = new NativeList<BrickBox>(64, Allocator.Temp);

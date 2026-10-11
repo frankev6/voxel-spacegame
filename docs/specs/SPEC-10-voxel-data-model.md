@@ -804,11 +804,13 @@ Accepted ADR-0023 is implemented. The same independent geometry/mesh/collider mo
 | All ECS chunks including meta | 409,600 B (25 chunks) | 1,310,720 B (80 chunks) |
 | Mesh GPU payload | 10,614,272 B | 43,896,288 B |
 | Retained mesh CPU payload | 10,614,272 B | 43,896,288 B |
-| Collider replacement peak | 2,587,904 B | 9,782,016 B |
-| **Total retained-copy peak** | **31,539,808 B (31.540 MB)** | **107,292,880 B (107.293 MB)** |
-| Total with mesh CPU copies released | 20,925,536 B | 63,396,592 B |
+| Collider replacement peak | 3,275,424 B (live PHY-019 overlap) | 9,782,016 B (historical model) |
+| **Total retained-copy peak** | **32,227,328 B (32.227 MB)** | **107,292,880 B (107.293 MB)** |
+| Hypothetical total without mesh CPU payload | 21,613,056 B | 63,396,592 B |
 
-**Go:** reference is below 36,000,000 B with 4,460,192 B headroom. The source's pre-spawn NativeBytes is 11,059,664 B reference / 27,460,112 B thin shell, including actual flat-page capacity and slack; the measured post-spawn model releases that source (0 B afterward), consistently with VOX-002's blueprint-eviction boundary. The source sparse pool reserves 1,024 entries/page and is not modeled as six bytes per occupied source cell. These are actual ECS capacities plus independently counted mesh payloads and measured collider blobs, not GPU residency or whole-process memory. Queue internals, Mesh object/allocator bookkeeping and full renderer integration remain TST-004's gate. Thin shells remain a stress case under Q17; sparse storage alone does not meet 40 MB for that geometry.
+**PHY-019 correction ([ADR-0033](../decisions/ADR-0033-collider-overlap-memory-budget.md)):** VOX-003 originally reported 31,539,808 B with a 2,587,904 B collider model. Four overlapping live compound versions raise the measured collider peak to 3,275,424 B (+687,520 B). The table above updates that one term; it does not claim a rerun of the renderer or integrated process gate. The 36 MB and 40 MB total limits remain unchanged. Thin-shell live overlap is not measured. CPU-copy release is unavailable for mutable meshes in the current path (SPEC-11 Q22); that row is only a payload estimate.
+
+**Go:** reference is below 36,000,000 B with 3,772,672 B headroom after the PHY-019 correction. The source's pre-spawn NativeBytes is 11,059,664 B reference / 27,460,112 B thin shell, including actual flat-page capacity and slack; the measured post-spawn model releases that source (0 B afterward), consistently with VOX-002's blueprint-eviction boundary. The source sparse pool reserves 1,024 entries/page and is not modeled as six bytes per occupied source cell. These are actual ECS capacities plus independently counted mesh payloads and measured collider blobs, not GPU residency or whole-process memory. Queue internals, Mesh object/allocator bookkeeping and full renderer integration remain TST-004's gate. Thin shells remain a stress case under Q17; sparse storage alone does not meet 40 MB for that geometry.
 
 Evidence retained locally in ignored `Logs/tools/vox003-{reference,thin-shell}.txt`, `vox003-SparseMemorySpike.cs`, `vox003-memory-results.xml` (2/2 passed) and `vox003-memory.log`. Temporary measurement scripts were deleted after the run, per tools §3.
 
