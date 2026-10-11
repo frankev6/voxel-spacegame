@@ -11,6 +11,6 @@ namespace Game.Voxel.Rendering
     public struct ShapeFace
     {
         public byte Plane, Normal, VertexCount, IsFull;
-        public int3 V0, V1, V2, V3;
+        public int3 V0, V1, V2, V3; // Half-cell units (0..2) within one cell, ADR-0027.
     }
 }

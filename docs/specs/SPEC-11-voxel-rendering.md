@@ -36,7 +36,7 @@ This spec turns voxel bricks into pixels at a cost proportional to the number of
 
 1. **One mesh per brick, registered once.** A brick's `Mesh` is created and registered with `EntitiesGraphicsSystem.RegisterMesh` on its first build, referenced by `BatchMeshID` in `MaterialMeshInfo`, rewritten in place with `Mesh.ApplyAndDisposeWritableMeshData` on every rebuild, and unregistered and destroyed through `DeferredDisposalSystem` when the brick dies (architecture §11.3). No per-entity `RenderMeshArray`.
 2. **One shared registered material for all bricks** (`BrickMaterial`), one for props (`PropMaterial`). `BlockDef.MaterialLayer` (0..63) is a `Texture2DArray` slice, not a separate material, so one draw-command family covers every block look. Per-cell variation comes from vertex data (layer, palette colour, damage), never from material instances.
-3. **Packed vertex: 8 bytes** — `Position` UNorm8×4 `(x, y, z, 0)` with x,y,z = cell-corner coordinates 0..16 inside the brick, and `TexCoord0` UNorm8×4 `(normalIndex, layer, colour, aoDamageFlags)`. Shaders recover integers with `round(v * 255)`. Indices are 16-bit (a brick never exceeds 36,864 vertices: worst case 2,048 isolated wedges × 18). Meshes are in cell units; the brick entity's `LocalTransform.Scale = CellSize`.
+3. **Packed vertex: 8 bytes** — `Position` UNorm8×4 `(x, y, z, 0)` with x,y,z = half-cell coordinates 0..32 inside the brick (ADR-0027), and `TexCoord0` UNorm8×4 `(normalIndex, layer, colour, aoDamageFlags)`. Shaders recover integers with `round(v * 255)` and multiply positions by 0.5 to obtain cell units. Indices are 16-bit (a brick never exceeds 49,152 vertices for 2,048 isolated cubes × 24; the mesher enforces the UInt16 limit for every input). Meshes are in cell units; the brick entity's `LocalTransform.Scale = CellSize`.
 4. **Jobs that may outlive the frame read only snapshots.** `BrickMeshBuildSystem` copies each brick plus a 1-cell border from its 26 neighbours into an 18³ `uint` snapshot (23,328 B) owned by the system, then schedules the mesher on the snapshot. Results are applied only after `JobHandle.IsCompleted` (architecture §5.1).
 5. **Culled faces, not greedy, at LOD0.** A face is emitted iff the neighbour cell (inside or outside the brick) does not cover it fully. Greedy merging is used only at LOD1/LOD2 because it fights per-cell colour, AO and damage. Coplanar vertices with identical attributes are welded inside each axis slice.
 6. **Budgeted, prioritised rebuilds.** At most one mesh batch is in flight; a batch holds 16..128 bricks sized so the main-thread apply stays under 2.0 ms. Priority order: `Damage` > `Neighbour` > `Spawn` > `Lod`, FIFO within a priority (SPEC-10 enqueues; this spec dequeues).
@@ -54,7 +54,7 @@ All types are **public contract** unless marked *internal*; folder `Assets/Game/
 ### 4.1 Packed formats and tables
 
 ```csharp
-/// 8-byte brick vertex. Lo = Position UNorm8x4 (x, y, z, 0); Hi = TexCoord0 UNorm8x4 (normal, layer, colour, aoDamageFlags).
+/// 8-byte brick vertex. Lo = Position UNorm8x4 (half-cell x, y, z, 0); Hi = TexCoord0 UNorm8x4 (normal, layer, colour, aoDamageFlags).
 public struct PackedBrickVertex
 {
     public uint Lo, Hi;
@@ -86,9 +86,9 @@ public static class MeshCell
 
 /// 42 normals (ADR-0018): 0..5 axis (BlockFace order PosX, NegX, PosY, NegY, PosZ, NegZ);
 /// 6..17 edge diagonals: 6 + 4*pair + signs; pair 0 = (0,a,b), 1 = (a,0,b), 2 = (a,b,0); signs bit0 → a < 0, bit1 → b < 0; vectors / √2.
-/// 18..41: the 24 permutations/signs of (0,1,2)/√5; exact ordering and tangents are implemented by REN-004.
+/// 18..41: 18 + 8*pair + 4*swap + signs; pairs/signs as above; swap 0 uses (a,b) magnitudes (1,2), swap 1 uses (2,1); vectors / √5.
 /// Tangents: PosX (0,0,-1); NegX (0,0,1); PosY (1,0,0); NegY (1,0,0); PosZ (1,0,0); NegZ (-1,0,0);
-/// diagonal pair 0 → (1,0,0), pair 1 → (0,1,0), pair 2 → (0,0,1). Bitangent = cross(normal, tangent). Must equal BrickVertexDecode.hlsl.
+/// diagonal pair 0 → (1,0,0), pair 1 → (0,1,0), pair 2 → (0,0,1). Bitangent = cross(normal, tangent). Long slopes use the same zero-axis tangent as their pair. Must equal BrickVertexDecode.hlsl.
 public static class VoxelNormals
 {
     public const int Count = 42; // ADR-0018: long-slope normals occupy 18..41
@@ -102,19 +102,19 @@ public struct ShapeFace                                          // 52 bytes, bl
     public byte Normal;         // VoxelNormals index
     public byte VertexCount;    // 3 or 4
     public byte IsFull;         // 1 = covers the whole cell side
-    public int3 V0, V1, V2, V3; // cell-corner coordinates (0/1), ordered so cross(V1-V0, V2-V0)·n > 0 (Unity clockwise front faces)
+    public int3 V0, V1, V2, V3; // half-cell coordinates (0/1/2), ADR-0027, ordered so cross(V1-V0, V2-V0)·n > 0 (Unity clockwise front faces)
 }
 
 public struct BrickShapeTables                                   // blob, built once by BrickShapeTablesBuilder
 {
     public BlobArray<ShapeFace> Faces;
     public BlobArray<ushort> FirstFace;  // [shape*24 + orient]
-    public BlobArray<byte> FaceCount;    // [shape*24 + orient]  (Cube 6, Wedge 5)
+    public BlobArray<byte> FaceCount;    // [shape*24 + orient]  (Cube 6, Wedge 5, HipCorner 5, LongSlopeHigh 6, LongSlopeLow 5)
     public BlobArray<byte> FullFaces;    // [shape*24 + orient]  world BlockFaceMask of fully covered sides
 }
 ```
 
-Canonical shapes (SPEC-04 §4.2, corner coordinates `[0,1]³`): **Cube** — 6 full quads. **Wedge** (`y + z ≤ 1`) — `NegY` full quad, `NegZ` full quad, `NegX` triangle (0,0,0)(0,0,1)(0,1,0), `PosX` triangle (1,0,0)(1,1,0)(1,0,1), diagonal quad (0,1,0)(1,1,0)(1,0,1)(0,0,1) with normal index 6. Orientation `o` maps a corner `v` to `R(o)·(2v − 1)` then back with `(w + 1)/2` (integer exact; `R` = `OrientationTablesBlob.Matrices[o]`), `Plane` through `RotateFace`, `Normal` through `VoxelNormals.IndexOf(R·n)`; the builder re-orders vertices to satisfy the winding rule.
+Canonical shapes preserve SPEC-04 §4.2 and ADR-0018, using half-cell corner coordinates `[0,2]³` (ADR-0027): Cube is the full cell; Wedge `y+z≤2`; HipCorner `y+z≤2 && x+z≤2`; LongSlopeHigh `y+2z≤4`; LongSlopeLow `y+2z≤2`. The two long-slope pieces meet at a half-height edge and remain independently damageable. Full faces are all six for Cube, NegY/NegZ for Wedge and High, and NegZ for Hip/Low. Every canonical polygon is a triangle or quad. Rotate each vertex as `R(o)·(v−1)+1`, Plane through RotateFace and scaled normal through VoxelNormals.IndexOf(R·n), then reorder vertices to satisfy the winding rule. IndexOf matches the exact signed integer directions in the table; unsupported vectors return -1.
 
 ### 4.2 Components and singletons
 
@@ -279,17 +279,17 @@ Input: one 18³ snapshot, `BrickShapeTables`; output: vertices (`PackedBrickVert
 2. **Axis faces**, for each direction `d` (PosX, NegX, PosY, NegY, PosZ, NegZ) and each slice s = 0..15 along d's axis:
    - For each row inside the slice: `candidates` = structural cells (bits 1..16 of the row) whose shape has a polygon with `Plane == d` (Cube always; Wedge per table — precompute per row a mask `hasPlane[d]` from the cells' (shape, orient)); `hidden` = cells whose neighbour across d has `full[opposite(d)]`; for ±X the neighbour bit is the row shifted by 1; for ±Y/±Z it is the adjacent row. `exposed = candidates & ~hidden`.
    - Iterate set bits of `exposed` (`math.tzcnt`). For the cell's polygon on plane d: compute per-vertex AO: for the corner with tangent signs (su, sv) on the face's two in-plane axes: `s1 = solid(cell + n + su·u)`, `s2 = solid(cell + n + sv·v)`, `cr = solid(cell + n + su·u + sv·v)`; `ao = (s1 && s2) ? 0 : 3 − (s1 + s2 + cr)`.
-   - **Welding:** a 17×17 table per (d, s) plane, reset by a stamp counter, stores `(packed vertex, index)` per corner position; a vertex with identical packed value at the same corner reuses the index, otherwise a new vertex is appended and stored.
+   - **Welding:** a 33×33 half-cell table per (d, s) plane, reset by a stamp counter, stores `(packed vertex, index)` per corner position; a vertex with identical packed value at the same corner reuses the index, otherwise a new vertex is appended and stored.
    - **Indices:** quads emit two triangles; if `ao0 + ao2 < ao1 + ao3` use diagonal (v1, v3): `(v0,v1,v3),(v1,v2,v3)`, else `(v0,v1,v2),(v0,v2,v3)`; triangles emit `(v0,v1,v2)`. Vertex order comes from `ShapeFace` (clockwise front faces).
-3. **Diagonal faces** (Wedge slopes, `Plane == 255`), cell order z,y,x: emitted without welding, AO = 3, never culled.
-4. Bounds = min/max of emitted corner coordinates; zero vertices → empty result.
-Complexity: O(5,832 + exposed faces). Typical surface brick (≤ 1,024 faces): ≤ 60 µs (gate). Vertex count ≤ 36,864 by construction (assert in debug).
+3. **Diagonal faces** (all sloped polygons, `Plane == 255`), cell order z,y,x: emitted without welding, AO = 3, never culled.
+4. Pack vertices in half-cell units (`cell*2 + ShapeFace vertex`); bounds = min/max of emitted coordinates multiplied by 0.5 (cell units). Fractional face-vertex AO takes the minimum of its enclosing integer-corner AO levels (ADR-0027); whole-cell corners use the formula above. Zero vertices → empty result.
+Complexity: O(5,832 + exposed faces). Typical surface brick (≤ 1,024 faces): ≤ 60 µs (gate). The isolated-cube checkerboard has 49,152 vertices; enforce the UInt16 index limit for all inputs (ADR-0027).
 
 ### 5.3 LOD1 mesher (`BrickMesher.MeshLod1`, Burst, *internal*)
 
 1. Downsample the 16³ interior to 8³ super-cells of 2×2×2: solid if ≥ 4 of 8 children have class ≠ 0; attribute key = most frequent `(layer << 8 | colour)` among class-1 children (tie → smallest key); a solid super-cell with no class-1 child is skipped (functional entities draw themselves).
 2. Border neighbours (for culling only): the neighbour super-cell across a brick face counts as solid if ≥ 2 of the 4 border snapshot cells facing the super-cell are solid. Diagonal neighbours are ignored.
-3. For each direction and each of the 8 slices: build an 8×8 grid of keys for exposed faces (0 = none); greedy-merge rectangles of equal key (grow along u, then v); emit one quad per rectangle with corner coordinates ×2 (cell units, 0..16), AO = 3, damage 0, normal index = d.
+3. For each direction and each of the 8 slices: build an 8×8 grid of keys for exposed faces (0 = none); greedy-merge rectangles of equal key (grow along u, then v); emit one quad per rectangle with super-cell corner coordinates ×4 for packing (half-cell units, 0..32; bounds remain cell units), AO = 3, damage 0, normal index = d.
 4. Bounds as in LOD0.
 Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `HollowStation1M`, `Ship20k` and 200 random-noise bricks).
 
@@ -447,12 +447,12 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Milestone:** M1
 - **Tier:** frontier — F3: a table error silently corrupts every mesh
 - **Depends on:** `REN-001`, `SPEC-04`
-- **Do:** Implement `PackedBrickVertex.Pack`, `MeshCell` encode/decode, `VoxelNormals` (§4.1 order), `BrickShapeTablesBuilder.Build(ref OrientationTablesBlob)` (canonical Cube and Wedge, 24 orientations, winding re-order, `FullFaces`), and `BrickVertexDecode.hlsl` tables.
+- **Do:** Implement `PackedBrickVertex.Pack`, `MeshCell` encode/decode, `VoxelNormals` (§4.1 order), `BrickShapeTablesBuilder.Build(ref OrientationTablesBlob)` (all five canonical ADR-0018 shapes, 24 orientations, winding re-order, `FullFaces`), and `BrickVertexDecode.hlsl` tables.
 - **Files:** `Assets/Game/Voxel/Rendering/{PackedBrickVertex,MeshCell,VoxelNormals,BrickShapeTablesBuilder}.cs`; `Assets/Game/Voxel/Rendering/Shaders/BrickVertexDecode.hlsl`; `Assets/Game/Tests/EditMode/Voxel/Rendering/{ShapeTablesTests,PackingTests}.cs`
 - **Acceptance criteria:**
-  - [ ] For all 48 (shape, orient): every polygon satisfies `cross(v1−v0, v2−v0)·n > 0`, its vertices lie on its plane, and `IsFull` faces cover the whole side; the union of polygons is a closed surface (each edge shared by exactly two polygons).
-  - [ ] Wedge `FullFaces` for orientation `o` equals `RotateFace(NegY,o) | RotateFace(NegZ,o)`.
-  - [ ] Pack/unpack round-trips every field; C# normals/tangents equal the HLSL tables (parsed from the `.hlsl` text).
+  - [x] For all 120 (shape, orient): every polygon satisfies `cross(v1−v0, v2−v0)·n > 0`, its vertices lie on its plane, and `IsFull` faces cover the whole side; the union of polygons is a closed surface (each edge shared by exactly two polygons).
+  - [x] FullFaces equals the rotated canonical mask for every shape: Cube all six, Wedge/High NegY and NegZ, Hip/Low NegZ.
+  - [x] Pack/unpack round-trips every field; C# normals/tangents equal the HLSL tables (parsed from the `.hlsl` text).
 - **Tests:** `ShapeTablesTests.Winding_AllShapesAllOrients`, `.ClosedSurface`, `.FullFaces_MatchRotation`; `PackingTests.Vertex_RoundTrip`, `.MeshCell_RoundTrip`, `.Normals_MatchHlsl`.
 
 ### REN-005 — Snapshot gathering
@@ -612,6 +612,9 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 14 | Spawning needs BrickMeshQueue.Enqueue but REN-010 depends on finished SPEC-10 through snapshot gathering | Split the existing queue methods and four tests into SPEC-10 VOX-021, depending only on REN-001 | Tech lead | Resolved 2026-10-11: VOX-013/015 depend on VOX-021; REN-010 already depends on SPEC-10 through REN-005. This keeps the contract-only cross-spec dependency grammar. No new queue API or renderer implementation is introduced. |
 
 | 15 | Priority-only stale detection revives an old request if the brick is consumed and requeued at its old priority before draining | Invalidate the prior entry permanently on upgrade, without changing public storage fields | Tech lead | Resolved 2026-10-11: StaleSkipped reproduced wrong FIFO order and would return the old grid. Upgrade scans the old priority list backward and clears that entry; pending-map priority and FIFO lists otherwise retain their contract. |
+
+| 16 | Approved long slopes need half-cell vertices but the old format only encodes whole corners | Keep eight-byte vertices and use half-cell integer coordinates | Tech lead | Resolved 2026-10-11 by accepted ADR-0027: exact five-shape geometry, shader ×0.5 position decode, 33×33 weld grid, cell-unit bounds and UVs; REN-004 criteria cover 120 entries. |
+| 17 | Long-slope normal ordering and tangents were unspecified | Pair-major, then magnitude swap, then sign bits; positive zero-axis tangent | Tech lead | Resolved 2026-10-11: §4.1 gives exact indices 18..41 and C#/HLSL parity tests. No visual or shape change. |
 
 ## 11. References
 

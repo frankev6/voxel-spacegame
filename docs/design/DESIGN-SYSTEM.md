@@ -1086,8 +1086,8 @@ SPEC-11 implements the brick shader; this section is the **art-facing contract**
 
 | Field | Minimum bits | Source |
 |---|---|---|
-| Position in brick-local cells (0–16 per axis) | 5 per axis (a `byte4` is fine) | Mesher |
-| Face index (+X, −X, +Y, −Y, +Z, −Z, wedge slope) | 3 | Mesher |
+| Position in brick-local cells (0–16 per axis) | 6 per axis: half-cell ticks 0–32 packed in bytes, decoded ×0.5 (ADR-0027) | Mesher |
+| Normal index (42 axis/diagonal/long-slope directions, ADR-0018) | 6 | Mesher |
 | Brick layer (`materialLayer`) | 6 | `BlockDef.MaterialLayer` |
 | Paint index (`PaletteEntry.Color`) | 8 | Grid palette |
 | Ambient occlusion | 2 | Mesher (4 levels) |

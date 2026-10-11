@@ -7,7 +7,7 @@ using UnityEngine.Rendering;
 
 namespace Game.Voxel.Rendering
 {
-    /// <summary>Implements SPEC-11 §4 (rendering contract).</summary>
+    /// <summary>SPEC-11 §4 / ADR-0027: positions are integer half-cell units (0..32); shader decoding returns cell units.</summary>
     public struct PackedBrickVertex
     {
         public uint Lo, Hi;

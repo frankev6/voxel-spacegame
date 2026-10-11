@@ -12,7 +12,9 @@ namespace Game.Voxel.Rendering
     public static class MeshCell
     {
         public static uint Encode(int cls, int shape, int orient, int layer, int colour, int damage, bool scorched)
-            => throw new System.NotImplementedException("REN-004");
+            => (uint)(cls & 3) | ((uint)(shape & 7) << 2) | ((uint)(orient & 31) << 5)
+                | ((uint)(layer & 63) << 10) | ((uint)(colour & 255) << 16)
+                | ((uint)(damage & 3) << 24) | (scorched ? 1u << 26 : 0);
         public static int Class(uint c) => (int)(c & 3);
         public static int Shape(uint c) => (int)((c >> 2) & 7);
         public static int Orient(uint c) => (int)((c >> 5) & 31);

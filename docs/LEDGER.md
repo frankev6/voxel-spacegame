@@ -648,6 +648,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 85 | 2026-10-11 | SPEC-10 VOX-003 | Sparse fallback proposal lacks exact representation and source-page ownership | Accept ADR-0023 with six-byte sorted entries, flat fixed-capacity source pages and shared readers | Tech lead | Accepted after VOX-014; capacity slack and ADR-0026 baseline included in measurement |
 | 86 | 2026-10-11 | SPEC-10 VOX-015 / SPEC-12 PHY-013 | Ready dirty scheduler orders against an absent mass system | Later mass system declares equivalent UpdateBefore | Tech lead | Resolved SPEC-10 Q38 / SPEC-12 Q16; final pipeline order unchanged |
 | 87 | 2026-10-11 | SPEC-10 VOX-015 | Enableable IsEmpty synchronizes writers, contradicting the fixed-step no-sync rule | Structural IsEmptyIgnoreFilter early-out plus job enabled-mask filtering | Tech lead | Resolved SPEC-10 Q39 from installed EntityQueryImpl; all-disabled worlds may schedule an empty job |
+| 88 | 2026-10-11 | SPEC-11 REN-004 | Long-slope half-cell geometry cannot use old integer whole-cell render coordinates | Keep byte layout; half-cell units decoded ×0.5 | Tech lead | Resolved SPEC-11 Q16 / accepted ADR-0027; five shapes, 120 orientations, exact geometry, unchanged bytes per vertex |
+| 89 | 2026-10-11 | SPEC-11 REN-004 | Long-slope normal order/tangents unspecified | Pair, magnitude-swap, sign order and positive zero-axis tangent | Tech lead | Resolved SPEC-11 Q17; 42-entry C#/HLSL tables agree |
 
 
 
