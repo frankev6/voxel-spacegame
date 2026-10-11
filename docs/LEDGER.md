@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 36 | 0 | 1 | 0 | 29 | 0 | 66 | 10 |
+| M0 | 35 | 0 | 1 | 0 | 30 | 0 | 66 | 9 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -64,7 +64,7 @@
 | DATA-004 | Definition self-validation and ID rules | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-002 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 8c7d0be | E048/E049 also implemented here |
 | DATA-005 | ContentCatalog | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-004 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 37f513a |  |
 | DATA-006 | Block blob builder and placement maths | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-003, DATA-005 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 8eb3aca |  |
-| DATA-007 | ContentService and ECS singletons | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-006 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| DATA-007 | ContentService and ECS singletons | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-006 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | fc1d170 | Synthetic2000 8.2 ms (gate 100), 150 defs 0.5 ms (gate 20); shipped-content run waits for DATA-009 |
 | DATA-008 | Editor database builder, postprocessor, validator runner and CLI | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-005 | yes | todo |  |  |  |  |
 | DATA-009 | System placeholder content and the database asset | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-008 | no | todo |  |  |  |  |
 | PERS-001 | Public contract types | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | CORE-001, DATA-001, VOX-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 75f6583 | Result-struct constructors: SPEC-05 Q16 |
@@ -566,6 +566,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — DATA-007 ContentService (claude, claude-opus-5-5)
+- `ContentService` per SPEC-04 §5.1–§5.2. The runtime validation pass uses the new internal `ContentValidationContext` constructor. Blobs are disposed if construction fails after allocating them. A world gets at most one `ContentSingletons` entity.
+- Measured: 2,000 definitions with 500 blocks construct in a median 8.2 ms (gate ≤ 100 ms), with a block blob of about 90 KB (gate ≤ 256 KB). No content database ships yet (DATA-009), so the shipped-content test runs on a synthetic 150-definition set: 0.5 ms (gate ≤ 20 ms). It switches to the real asset automatically once that exists.
+- 6 tests pass; EditMode 195/195.
 
 ### 2026-10-11 — DATA-006 block blob and placement maths (claude, claude-opus-5-5)
 - `BlockDefsBlobBuilder` and `BlockModulesBlob` per SPEC-04 §5.5; `BlockPlacementMath` per §5.6. The hash ignores prop meshes and changes with any hashed field or module row.
