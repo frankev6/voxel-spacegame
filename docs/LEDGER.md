@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 50 | 0 | 1 | 0 | 53 | 0 | 104 | 15 |
+| M1 | 49 | 0 | 1 | 0 | 54 | 0 | 104 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -168,7 +168,7 @@
 | PHY-019 | Performance gates and memory | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-012, PHY-013, PHY-015, SPEC-10, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | fcd09c2 | Six reference gates; zero late installs; ADR-0033 corrects collider overlap allocation |
 | PHY-020 | Fallback: flat grid compound of boxes (only if PHY-002 is no-go for nested compounds) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002 | yes | done | astra (gpt-6) | 2026-10-11 | dd85d8c | not needed (PHY-002 go) |
 | PHY-023 | Urgent collider deadlines across catch-up frames | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-018, PHY-019 | yes | done | astra (gpt-6) | 2026-10-11 | a912ab2 | ADR-0035 urgent deadline completion outside fixed step; strict determinism and full gates pass |
-| PHY-024 | Spawn bodies while scene loading is paused | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-008, PHY-016, PHY-018 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Fresh spawn bodies without fixed ticks |
+| PHY-024 | Spawn bodies while scene loading is paused | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-008, PHY-016, PHY-018 | yes | done | astra (gpt-6) | 2026-10-11 | e201b39 | Fresh bodies through end-init ECB at zero ticks; split adoption unchanged |
 | DMG-001 | Public contract types | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 9310e7c | Public damage/restore/impulse contracts, 43 config defaults, table lookup; 4 tests; Q71–74 |
 | FLT-001 | Public contract types | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0ddf5bf | Unmanaged flight/input contracts; exact SPEC-03 fields; Q112 comment corrections |
 | FLT-002 | Grid-space and flight maths | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | ec30fc9 | Grid geometry, gyro, caps and assist targets; eight required tests |
@@ -177,7 +177,7 @@
 | FLT-005 | PlayerCommandApplySystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001, DMG-001 | yes | todo |  |  |  |  |
 | FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 2388784 | Four flying profiles, player-only tag, change-filtered Burst nozzle init; three tests |
 | FLT-007 | PropulsionSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-002, FLT-004, FLT-006, DMG-001, SPEC-12 | no | todo |  |  |  |  |
-| FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | no | todo |  |  |  |  |
+| FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | yes | todo |  |  |  |  |
 | FLT-009 | Flight behaviour scenarios | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-005, FLT-007, FLT-008, SPEC-10 | no | todo |  |  |  |  |
 | FLT-010 | Flight tuning against legacy blueprints | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-009, SPEC-72 | no | todo |  |  |  |  |
 | FLT-011 | Flight performance and determinism | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-007, FLT-008, TST-001 | no | todo |  |  |  |  |
@@ -729,6 +729,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — PHY-024 paused spawn body initialization (astra, gpt-6)
+
+- Accepted **ADR-0037 / SPEC-12 Q26 / ledger Q116**. GridSpawnBodyInitSystem initializes fresh roots after GridSpawnSystem and plays initial components through the end-init ECB. Existing GridBodyInitJob/factory and cache ownership are reused; fixed-step split adoption/rebuilds remain unchanged. No gameplay tick or pause release is needed for a provisional collider.
+- Both required tests pass: exact mass, pose/velocity and unchanged SimClock at zero ticks; an existing split body is untouched until fixed-step adoption. The production initializer is included in the existing collider determinism and physics scenario fixtures. Four frame patterns and 1/17 workers still produce identical damage records and zero late installs.
+- Performance accounting now includes GridSpawnBodyInitSystem and the end-init ECB as well as the existing inclusive stages. Reference station spawn main median/p95/max **0.024729 / 0.220084 / 0.257750 ms**, full collider ready in at most **7 frames** (42 spawns/300 frames); idle median/p95 **0.013749 / 0.017707 ms**. 30-ship damage has zero late installs; deadline completion max **0.513042 ms**, 11 forced completions (diagnostic), worker median **0.041354 ms**. No gate was relaxed.
+- Full validation: compile **zero C# warnings**, EditMode **634 passed + 1 explicit skipped**, PlayMode **48 passed**, perf **38/38**, docs **505 tasks / zero errors**. Implementation `e201b39`.
+- Next: rebase/resume FND-010's saved branch and finish fleet/FLET/player integration; then remaining M1 work.
 
 ### 2026-10-11 — FND-010 paused-spawn dependency found (astra, gpt-6)
 
