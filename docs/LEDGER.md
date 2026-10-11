@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 55 | 0 | 1 | 0 | 10 | 0 | 66 | 15 |
+| M0 | 53 | 0 | 2 | 0 | 11 | 0 | 66 | 16 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
@@ -38,7 +38,7 @@
 | FND-001 | Public contract types | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 338c29a | GameRootConfig.UiConfig/CameraConfig wait for SPEC-60/62 |
 | FND-002 | Bootstrap, GameRoot and explicit World creation | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-001 | yes | todo |  |  |  |  |
 | FND-003 | PauseService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001 | yes | blocked | claude (claude-opus-5-5) | 2026-10-11 |  | Blocked on CORE-006: PauseStateChanged is published through EventBus<T> (SPEC-01 Q6, ledger Q13) |
-| FND-004 | SettingsService and SettingsApplier | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001, PERS-001 | no | todo |  |  |  |  |
+| FND-004 | SettingsService and SettingsApplier | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001, PERS-001 | yes | todo |  |  |  |  |
 | FND-005 | Composition root and BootSingletons | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-002, FND-003, FND-004, SPEC-02, SPEC-04 | no | todo |  |  |  |  |
 | FND-006 | SceneFlow transitions and teardown | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-005 | no | todo |  |  |  |  |
 | FND-007 | SimClock lifecycle and SimClockAdvanceSystem | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-006 | no | todo |  |  |  |  |
@@ -67,9 +67,9 @@
 | DATA-007 | ContentService and ECS singletons | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-006 | no | todo |  |  |  |  |
 | DATA-008 | Editor database builder, postprocessor, validator runner and CLI | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-005 | no | todo |  |  |  |  |
 | DATA-009 | System placeholder content and the database asset | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-008 | no | todo |  |  |  |  |
-| PERS-001 | Public contract types | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | CORE-001, DATA-001, VOX-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
-| PERS-002 | Save paths, profiles, slots and meta files | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-001 | no | todo |  |  |  |  |
-| PERS-003 | Binary container, CRC32 and compression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001 | no | todo |  |  |  |  |
+| PERS-001 | Public contract types | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | CORE-001, DATA-001, VOX-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 75f6583 | Result-struct constructors: SPEC-05 Q16 |
+| PERS-002 | Save paths, profiles, slots and meta files | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-001 | yes | todo |  |  |  |  |
+| PERS-003 | Binary container, CRC32 and compression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001 | yes | todo |  |  |  |  |
 | PERS-004 | ID palette and SaveWriter/SaveReader integration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-003, SPEC-02 | no | todo |  |  |  |  |
 | PERS-005 | Save pipeline: capture, worker, atomic write, thumbnails, queue | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-002, PERS-004, SPEC-04 | no | todo |  |  |  |  |
 | PERS-006 | Load pipeline and restore orchestration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005 | no | todo |  |  |  |  |
@@ -563,6 +563,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-001 persistence contract types (claude, claude-opus-5-5)
+- 40 files: `Game.Persistence` Data/Container/Services types and the `Game.Voxel.Data` VOXS types of SPEC-05 §4.5–§4.7; stubs name PERS-002…PERS-009. `Game.Persistence` still references only Core, Data and packages.
+- `SaveChunkRegistry` implemented: `Default` holds the ten participant rows of §4.8 (META and IDPL stay with the container); the constructor rejects bad or reserved keys, duplicates and orders that are not positive multiples of 10.
+- SPEC-05 open question 16: the readonly result structs get all-field constructors.
+- `SaveChunkRegistryTests` (2) pass; EditMode 53/53.
+- VOX-009 can now add the VOXS adapter members deferred by SPEC-10 open question 14.
 
 ### 2026-10-11 — DATA-004 ID rules and definition validation (claude, claude-opus-5-5)
 - `ContentIdRules`, `ItemDefinition.Validate` (E020–E024, W023; placeholders `block_missing`/`item_missing` need no icon), `BlockDefinition.Validate` (E030–E045), `TryGetModule`, `ComputeMirrorOffset`, and `Validate` overrides with the E041 ranges for the seven v1 modules.
