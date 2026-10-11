@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 61 | 0 | 0 | 0 | 5 | 0 | 66 | 17 |
+| M0 | 60 | 0 | 0 | 0 | 6 | 0 | 66 | 18 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 10 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
@@ -35,9 +35,9 @@
 <!-- tasks:begin -->
 | ID | Title | Spec | Milestone | Tier | Depends on | Ready | Status | Owner | Updated | Commit | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| FND-001 | Public contract types | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | CORE-001, DATA-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
-| FND-002 | Bootstrap, GameRoot and explicit World creation | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-001 | no | todo |  |  |  |  |
-| FND-003 | PauseService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001 | no | todo |  |  |  |  |
+| FND-001 | Public contract types | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 338c29a | GameRootConfig.UiConfig/CameraConfig wait for SPEC-60/62 |
+| FND-002 | Bootstrap, GameRoot and explicit World creation | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-001 | yes | todo |  |  |  |  |
+| FND-003 | PauseService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001 | yes | todo |  |  |  |  |
 | FND-004 | SettingsService and SettingsApplier | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001, PERS-001 | no | todo |  |  |  |  |
 | FND-005 | Composition root and BootSingletons | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-002, FND-003, FND-004, SPEC-02, SPEC-04 | no | todo |  |  |  |  |
 | FND-006 | SceneFlow transitions and teardown | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-005 | no | todo |  |  |  |  |
@@ -560,6 +560,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — FND-001 boot and flow contract types (claude, claude-opus-5-5)
+- SPEC-01 §4 types as listed in the task: `WorldSceneActive`, `StaticStateOkAttribute`, `GameConfigDefinition` (fields, ranges and defaults of §4.2; `Validate` is FND-005), `GameRootConfig` (`ContentDatabase`, `UiDocument`; `UiConfig` and `CameraConfig` come with SPEC-60/62), `SceneFlowState`, `SandboxArgs`, `ShipSpawnArgs` (no `Allegiance` until FND-012), shells of `GameRoot`, `Bootstrap`, `GameComposition`, `BootSingletons`, `BootSingleton`.
+- Architecture §4.3 (`WorldSceneActive` only in the World, SPEC-01 decision 6), §5 tree (`PersistentIdRefillSystem`, `SimClockAdvanceSystem`), §6.1 and §3 table.
+- `FoundationContractTests` (2) pass; EditMode 27/27; no compile warnings.
 
 ### 2026-10-11 — VOX-001 voxel contract types (claude, claude-opus-5-5)
 - 68 files: every SPEC-10 §4 type in `Game.Voxel` (`Model/`, `Grid/`) and the two voxel definitions in `Game.Data`, including the ADR-0015 additions (`GridProfile`, `RootComponentRegistration`, `GridStowApi`). Stub bodies name the implementing task (VOX-004…VOX-020).
