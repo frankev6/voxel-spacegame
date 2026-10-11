@@ -325,7 +325,7 @@ namespace Game.Simulation.Flight
 | `PropulsionStats` (M2) | `PropulsionStatsSystem` |
 | `PhysicsVelocity` | as architecture §8; this spec adds impulses from `PropulsionSystem` and `PlanarConstraintSystem` only |
 
-Memory: per ship root `ShipCommand` 40 B + `FlightState` 64 B + buffer header; `FlightThruster` 48 B per thruster outside the chunk; per thruster entity `ThrusterState` 4 B + `ThrusterVisual` 28 B. 50 ships × 20 thrusters ≈ 80 KB.
+Memory: per ship root `ShipCommand` 40 B + `FlightState` 64 B + buffer header; `FlightThruster` 44 B per thruster outside the chunk; per thruster entity `ThrusterState` 4 B + `ThrusterVisual` 28 B. 50 ships × 20 thrusters ≈ 80 KB.
 
 ## 5. Systems, services and flow
 
@@ -564,10 +564,10 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Tier:** standard — formulas and placement given in §5.2
 - **Depends on:** `FLT-002`, `SPEC-10`
 - **Do:** Implement §5.2. Use `EcsTestWorld` with `GridSpawnSystem` and a test blueprint containing four thrusters in different orientations.
-- **Files:** `Assets/Game/Simulation/Flight/{ThrusterInitSystem,ThrusterVisualInitJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Flight/ThrusterInitTests.cs`
+- **Files:** `Assets/Game/Simulation/Flight/{FlightSetup,ThrusterInitSystem,ThrusterVisualInitJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Flight/ThrusterInitTests.cs`
 - **Acceptance criteria:**
-  - [ ] Every spawned thruster entity has `ThrusterState` and an initialised `ThrusterVisual`; `ExhaustDirLocal` is opposite to the force direction of `GridSpaceMath`.
-  - [ ] A second frame without new entities does no work (change filter).
+  - [x] Every spawned thruster entity has `ThrusterState` and an initialised `ThrusterVisual`; `ExhaustDirLocal` is opposite to the force direction of `GridSpaceMath`.
+  - [x] A second frame without new entities does no work (change filter).
 - **Tests:** `ThrusterInitTests.Registered_ComponentsPresent`, `.Visual_MatchesOrientation`, `.ChangeFilter_IdleFrameSkips`.
 
 ### FLT-007 — PropulsionSystem
@@ -650,7 +650,7 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 | 6 | SPEC-01 §5.7 step 4: `ShipSpawnService` calls `FlightSetup.Add(em, root)` next to `PlanarConstraintSetup.Add` | **Superseded by ADR-0015:** flight types come from the grid profile (`FlightSetup.Register`); the helpers are removed | SPEC-01 |  |
 | 7 | Architecture §8 `PhysicsVelocity` row: add `PlanarConstraintSystem` (vertical impulses only) | Yes | Tech lead |  |
 | 8 | If contacts push planar ships off the plane by > 0.1 m (FLT-009), replace the impulse correction with a Unity Physics LimitedDOF joint (linear Y, angular X/Z locked) per ship | Keep impulses unless measured | Tech lead |  |
-| 9 | Contract comments/file list drifted from the declared fields and ADR-0015 | Preserve declared fields and profile ownership | Tech lead | Resolved FLT-001: FlightThruster fields occupy 44 bytes, not the old 48-byte comment; no padding is invented. Include PropulsionStats from §4.5 in the task file list. PlayerShip is added by profile registration, not a per-spawn helper. |
+| 9 | Contract comments/file list drifted from the declared fields and ADR-0015 | Preserve declared fields and profile ownership | Tech lead | Resolved FLT-001: FlightThruster fields occupy 44 bytes, not the old 48-byte comment; no padding is invented. Include PropulsionStats from §4.5 in the task file list. PlayerShip is added by profile registration, not a per-spawn helper. FLT-006 also lists FlightSetup, whose registration is explicitly required by §5.2, and aligns the remaining memory-summary comment to 44 bytes. |
 
 ## 11. References
 
