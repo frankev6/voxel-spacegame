@@ -548,15 +548,67 @@ function arkPage() {
   return p;
 }
 
+/* ---------------------------------------------------------------- slope blocks for builders (ledger open question 6) */
+
+const SLOPE_BLOCKS = [
+  ["w11", "Slope", "1 × 1 · 45°"],
+  ["hip", "Hip corner", "1 × 1 · where two 45° slopes meet"],
+  ["s12", "Long slope", "1 × 2 · 27°, one block"],
+  ["hip12", "Long hip corner", "2 × 2 · where two long slopes meet"],
+];
+const SLOPE_KITS = [
+  ["spec", "Today's spec", "cube + slope", "9.0 %", "Every diagonal edge where two slopes meet becomes a stair step."],
+  ["k2", "2 blocks", "slope, hip corner", "1.5 %", "Everything at 45°. At that angle the corner where two slopes meet is the same block whichever way it faces, so one hip corner closes ridges, pyramid noses and chamfered edges."],
+  ["k3", "3 blocks", "slope, hip corner, long slope 1×2", "3.3 %", "Adds a shallow 27° slope for long flat runs: decks, glacis armour, wings. Its edges have no corner block, so wherever it meets another slope the edge steps (see the nose)."],
+  ["k4", "4 blocks", "kit 3 + long hip corner 2×2", "2.3 %", "Closes the ridge where two long slopes meet, but not a long-slope nose or a long slope meeting a 45° edge: those are different corners again. A fully closed 1×2 family needs about four blocks of its own."],
+];
+
+function slopesPage() {
+  const p = el("div", "dir slopes");
+  const d = { base: "img/r4/slopes" };
+  p.appendChild(el("p", "lead", "How few sloped blocks do builders need? Each block below is <b>one placeable block</b> (the long slope is a single 1×2 block) and rotates any way. The cube is always there. Each kit builds the same small frigate the way a player with that kit would: faces only at the kit's angles, and only the kit's blocks."));
+  const ch = el("div", "changed");
+  ch.innerHTML = `<h4>What the study found</h4><ul>
+    <li><b>Two blocks build everything at 45°:</b> the slope and the hip corner. At 45° the corner where two slopes meet is the same shape in every orientation, so one block closes ridges, pyramid noses and chamfered edges</li>
+    <li><b>Every extra angle brings its own corners.</b> A 1×2 slope needs a ridge corner, a nose corner and a corner where it meets a 45° edge, all different blocks. That is why kits 3 and 4 still step at the nose</li>
+    <li>The classic builder set (slope, three-face corner, inverted corner) did worse than slope plus hip corner (8.4 % of cells off against 1.5 %): the hip corner is the block that matters</li>
+    <li>"Cells off" is the share of cut cells, across every round-3 hull and the HALO designed on the kit's angles, that the kit cannot build within 10 % of the cell</li></ul>`;
+  p.appendChild(ch);
+  let s = section("The blocks", "cut faces in ochre; the dashed box is the block's size in cells (0.5 m each)");
+  const g = el("div", "g4");
+  for (const [k, n, sub] of SLOPE_BLOCKS) {
+    const f = el("figure", "shot");
+    f.innerHTML = `<img src="${img(d, "block_" + k + ".svg")}" alt="${n}" loading="lazy" style="background:#0A0F1A;aspect-ratio:1/1;object-fit:contain;height:auto"><figcaption><b>${n}</b> · ${sub}</figcaption>`;
+    g.appendChild(f);
+  }
+  s.appendChild(g);
+  p.appendChild(s);
+  for (const [k, n, blocks, off, note] of SLOPE_KITS) {
+    s = section(`${n}: ${blocks}`, `cells off: ${off} · ${note}`);
+    const g2 = el("div", "g2");
+    g2.appendChild(shot(d, `demo_${k}.jpg`, `${n}: the demo frigate`));
+    g2.appendChild(shot(d, `demo_${k}_nose.jpg`, `${n}: the nose, where the kits differ`));
+    s.appendChild(g2);
+    p.appendChild(s);
+  }
+  s = section("Reference", "the same frigate with free cut cells, as the look-dev renders do it");
+  const g3 = el("div", "g2");
+  g3.appendChild(shot(d, "demo_free.jpg", "Free cut cells"));
+  g3.appendChild(shot(d, "demo_free_nose.jpg", "Free cut cells: the nose"));
+  s.appendChild(g3);
+  p.appendChild(s);
+  return p;
+}
+
 const pages = {};
-const TABS = R3.map(d => ({ key: d.key, name: d.name })).concat([{ key: "ark", name: "ARK · round 4" }, { key: "aliens", name: "ALIENS" }, { key: "compare", name: "Compare", cls: "cmp-tab" }, { key: "archive", name: "Earlier rounds", cls: "arch-tab" }]);
+const TABS = R3.map(d => ({ key: d.key, name: d.name })).concat([{ key: "ark", name: "ARK · round 4" }, { key: "slopes", name: "Slopes" }, { key: "aliens", name: "ALIENS" }, { key: "compare", name: "Compare", cls: "cmp-tab" }, { key: "archive", name: "Earlier rounds", cls: "arch-tab" }]);
 
 function show(key) {
   if (!TABS.some(t => t.key === key)) key = "drydock";
   for (const b of document.querySelectorAll("#tabs button")) b.setAttribute("aria-selected", b.dataset.key === key ? "true" : "false");
   const main = $("#main");
   if (!pages[key]) {
-    pages[key] = key === "compare" ? comparePage() : key === "aliens" ? aliensPage() : key === "ark" ? arkPage() : key === "archive" ? archivePage() : directionPage(R3.find(d => d.key === key));
+    pages[key] = key === "compare" ? comparePage() : key === "aliens" ? aliensPage() : key === "ark" ? arkPage() : key === "slopes" ? slopesPage() : key === "archive" ? archivePage() : directionPage(R3.find(d => d.key === key));
   }
   main.replaceChildren(pages[key]);
   requestAnimationFrame(fit);

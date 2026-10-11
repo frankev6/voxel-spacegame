@@ -308,7 +308,7 @@ The look book and silhouette page are **frozen as visual reference**. New look-d
 | # | Decision | Default until answered | Decider |
 |---|---|---|---|
 | 1 | Is this guide the design-system approval (gate `ART-013`), so that game systems can start? | **Answered 2026-10-11: yes** (§13 row 5). The in-engine look test (`ART-008`…`ART-011`) runs after the renderer exists, as a check | Owner |
-| 2 | How hulls become game blocks: cut cells, a fixed slope set, or cube and wedge (ledger question 6) | Specs as written (cube and wedge) until the slope study (look book, *Slopes* tab) is reviewed. Owner, 2026-10-11: "lets model the different sloped blocks so we can see how many are needed (ideally as least as possible)" | Owner |
+| 2 | How hulls become game blocks: cut cells, a fixed slope set, or cube and wedge (ledger question 6) | Specs as written (cube and wedge) until the owner picks a kit from the slope study (look book, *Slopes* tab): slope + hip corner (2 blocks), plus a long 1×2 slope (3), or plus a long hip corner (4). Owner, 2026-10-11: "lets model the different sloped blocks so we can see how many are needed (ideally as least as possible)" | Owner |
 | 3 | Which ship lines and factions are approved (the silhouettes, ledger question 7) | None approved | Owner |
 | 4 | Industrial gothic VFX (§9) and damage (§5.4) in engine | As written here, checked in the first look test | Lead worker |
 

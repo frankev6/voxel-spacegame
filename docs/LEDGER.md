@@ -544,7 +544,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 3 | 2026-10-10 | architecture §5, §6, §7.1, §8; SPEC-01, 04, 10, 12, 13, 20–24, 33, 51, 72, 80; 06 | Extensibility review `docs/specs/_EXTENSIBILITY-REVIEW.md`: approve ADR items X1 (block function modules), X2 (power/stats contributions), X3 (ship profiles + stowed grids, tick-exact launch), X4 (request channels: impulse, cell restore, inhibit, stat-modifier sources); choose the small-craft representation X7; apply errata X5, X6, X8–X11 | Nothing applied; specs as written | Owner | **Answered 2026-10-10: apply all as recommended; X7 = voxel small craft.** Applied in `e3e6c86`…`6b3ee37` (ADR-0013…0017); outcomes in the review §5 |
 | 4 | 2026-10-10 | ROADMAP, SPEC-80, SPEC-81 | Owner: "our first thing is to nail the look of the game in terms of blocks, ui, meshes, colors, textures, etc. nothing proceeds until the design system is spot on". Which code may run before `ART-013`? | Only what the look tests need: `CORE-001`, `DATA-001`, `DATA-002`, `DATA-004`, `DATA-005`, `DATA-008` (for `ART-007`'s validator), and `AST-001`…`AST-003`. Everything else in M0–M4 waits | Owner | **Answered 2026-10-10 (owner, verbatim):** "Whatever you deep necessary within the scope in order to showcase the most faithful depictions so that our decisions are based on accurate visuals". The lead worker decides which code runs before `ART-013`, limited to what makes the look tests faithful to the final game |
 | 5 | 2026-10-10 | SPEC-02 CORE-001, CORE-009 | `ManagedEventDrainSystem` stub: throwing lifecycle methods would break Play Mode (SPEC-02 open question 10) | Empty `OnUpdate`/`OnDestroy` with `TODO(CORE-009)`; the public API throws | Tech lead | |
-| 6 | 2026-10-10 | SPEC-04 §4.2, SPEC-11 §4, SPEC-12; look book round 3 | How do the look-dev hulls become game blocks? (a) Tapers: the hulls use cut cells (each 0.5 m cell clipped by up to three straight planes that continue across neighbours; 407–1,189 distinct shapes per direction, the 45° `Wedge` covers 8–21% of cut cells), the specs allow only `Cube` and `Wedge` (shape packed in one bit). Options: generic cut cells with a few quantised planes per cell (needs an ADR changing the packed format), a fixed slope catalogue (1:1, 1:2, 1:3 and their corners) with tapers limited to it, or Cube and Wedge only (stepped tapers). (b) Large hull blocks (2×2×2, 3×3×3) as one placeable block that a module splits back into cells. (c) Alien hulls as signed-distance cells meshed by surface nets | Specs as written (Cube, Wedge); the look book keeps showing cut cells, large blocks and smooth alien cells so the decision is made on the real look | Owner | |
+| 6 | 2026-10-10 | SPEC-04 §4.2, SPEC-11 §4, SPEC-12; look book round 3 | How do the look-dev hulls become game blocks? (a) Tapers: the hulls use cut cells (each 0.5 m cell clipped by up to three straight planes that continue across neighbours; 407–1,189 distinct shapes per direction, the 45° `Wedge` covers 8–21% of cut cells), the specs allow only `Cube` and `Wedge` (shape packed in one bit). Options: generic cut cells with a few quantised planes per cell (needs an ADR changing the packed format), a fixed slope catalogue (1:1, 1:2, 1:3 and their corners) with tapers limited to it, or Cube and Wedge only (stepped tapers). (b) Large hull blocks (2×2×2, 3×3×3) as one placeable block that a module splits back into cells. (c) Alien hulls as signed-distance cells meshed by surface nets | Specs as written (Cube, Wedge); the look book keeps showing cut cells, large blocks and smooth alien cells so the decision is made on the real look | Owner | **Study 2026-10-11 (look book, Slopes tab):** options: (1) slope + hip corner, all 45° (2 blocks, 1.5 % of cells off); (2) plus a long 1×2 slope for flat runs (3 blocks, edges step where it meets another slope); (3) plus a long hip corner (4 blocks). Large blocks (b) and alien cells (c) are still to answer. Waiting for the owner |
 | 8 | 2026-10-11 | DESIGN-GUIDE §12, SPEC-80 `ART-013`, ROADMAP | The owner chose NOCTURNE and made DESIGN-GUIDE.md the source of truth. Does that count as the design-system approval (`ART-013`), so M0–M4 can start? | No: the gate stays open, M0–M4 wait | Owner | **Answered 2026-10-11 (verbatim): "yes I approve".** Gate passed; the look test runs after the renderer exists |
 | 7 | 2026-10-10 | SPEC-33, DESIGN-SYSTEM factions; look book round 4 | Batch 3 builds the ship lines on the legacy factions and adds proposals: Triple Alliance house names (Pochteca Freight, Itztli Arms, Caisson Heavy Industries), ship names, refit codes (S) Scavenger, (I) Itztli, (K) Khuchad prize, the Khuchad port-armour/starboard-weapon doctrine, and redacted hints linking the Vanguard to the Aksharans. Where do batch 2's Knell choir and Caisson line sit in the roster? | Proposals only, nothing binding; Caisson is shown as the Alliance's third house; the Knell choir stays an independent order | Owner | |
 
@@ -572,6 +572,37 @@ Newest first. One entry per finished task or notable event: what changed, measur
   - `ART-012` was replaced by the guide (in review).
   - DESIGN-SYSTEM.md keeps its direction sections in place as the proposal record, instead of moving them to Appendix A.
 - **Next:** the slope study for open question 6 (point 2 above).
+
+### 2026-10-11 — Slope study: how few sloped blocks builders need (claude, claude-opus-5-5)
+- **Owner, verbatim, during the study:**
+
+  > dude 20 slopes is insane my boy I though you were going to propose like 3 or 4. also remember it doesn't have to be all 1x1s it can be 1x2s or 1x3s or 2x3
+
+  > you're optimizing for visual parity with the existing ships which i don't care about, i wan something sensible so builders can build with
+
+- **First pass, set aside.** It counted the shapes the look-dev hulls use per cell:
+  - 3,129 distinct cut shapes;
+  - snapped to a 1:1 grid, 40 shapes, of which 11 cover 99 % of cut cells;
+  - on a 1:2 grid, 253 shapes.
+
+  The owner rejected this: it optimises for parity with the concept ships, and it counts per-cell pieces rather than placeable blocks.
+- **Builder kit study** (`ArtSource/LookDev/ld_slopes.py`, look book tab **Slopes**):
+  - A block is one placeable block that rotates freely (the long slope is a single 1×2 block), and the cube is always included.
+  - Each kit builds the same demo frigate on its own angles, using only its blocks.
+  - "Cells off" is the share of cut cells, across every round-3 hull and the HALO, that the kit cannot build within 10 %.
+
+  | Kit | Cells off |
+  |---|---|
+  | Today's spec (slope only) | 9.0 % |
+  | Classic set (slope, three-face corner, inverted corner) | 8.4 % |
+  | **Slope + hip corner** | **1.5 %** |
+  | + long slope 1×2 | 3.3 % |
+  | + long hip corner 2×2 | 2.3 % |
+
+- **Finding:**
+  - At 45° the corner where two slopes meet is the same block in every orientation, so two blocks close everything.
+  - Every extra angle brings its own family of corners: a ridge corner, a nose corner, and one for meeting a 45° edge.
+- Open question 6 is updated with the options; it waits for the owner.
 
 ### 2026-10-11 — Design guide: NOCTURNE as the source of truth (claude, claude-opus-5-5)
 - **Owner decision (verbatim, 2026-10-11):**
