@@ -26,33 +26,34 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 - **Ship lines follow Starsector's depth without copying it.** Approved 2D silhouettes come before any 3D build. Form follows function. Use asymmetry with a reason, and refit variants. Human hulls are blocky, alien hulls smooth. Factions come from the existing lore in `Import/Legacy/content/Factions` and the DESIGN-GUIDE faction section.
 - **Look-book ships are concepts, not final designs**, and the 2D ship lines are not approved yet.
 
-## 2. Where things stand (2026-10-11)
+## 2. Where things stand (2026-10-11, M0 in progress)
 
-- **Design gate passed.** Frank approved NOCTURNE, written up as [DESIGN-GUIDE.md](design/DESIGN-GUIDE.md), the binding source of truth (`ART-013`, 2026-10-11).
-  - [DESIGN-SYSTEM.md](design/DESIGN-SYSTEM.md) and the [look book](design/lookbook/) stay as reference.
-  - The ROADMAP's design-first hold is lifted, so M0 may start.
-- **Slope kit chosen:** cube, slope, hip corner and long slope 1×2 ([ADR-0018](decisions/ADR-0018-slope-block-kit.md)).
-  - SPEC-04 §4.2 is updated.
-  - SPEC-04 open question 14 and SPEC-11 open question 10 hold the per-cell shapes and the snapshot bits.
+- **Design gate passed.** NOCTURNE is binding, as [DESIGN-GUIDE.md](design/DESIGN-GUIDE.md) (`ART-013`). The slope kit is in [ADR-0018](decisions/ADR-0018-slope-block-kit.md).
+- **M0 Foundations: 37 of 66 tasks done** (see the [ledger](LEDGER.md) summary and log). Done so far:
+  - Core: `CORE-001`…`CORE-012` (all);
+  - Data: `DATA-001`…`DATA-009` (all);
+  - plus `FND-001`…`FND-004`, `INP-001`/`002`, `PERS-001`/`002`, `MIG-001`…`003`, `DEV-001`/`002`, `AUD-001`, `VOX-001` and `TST-001`.
+- **The test kit exists** (`Game.Tests.Common`, TST-001): `EcsTestWorld`, `GameTestBase` and `PerfRun`. `tools/test.sh perf` ends with a PASS/FAIL table, and every perf gate so far passes. See [08-tools.md](08-tools.md) §3.
+- **Boot works** (FND-002): `Bootstrap` creates the Default World, then `GameRoot` composes settings, input, pause and the settings applier. `SceneFlow` (FND-006) is next on that path.
+- **Spec defects found and fixed while building**, each with a resolved open question in its spec and in the ledger (questions 17–23):
+  - SPEC-02 nested native containers and padding in the event-sort hash;
+  - the SPEC-71 rate managers;
+  - the SPEC-01 settings applier.
 - **Still open for Frank:**
-  - ledger open question 6 (b), large hull blocks (2×2×2, 3×3×3) as single placeable blocks;
-  - 6 (c), smooth alien cells;
-  - question 7, the faction and roster proposals.
-  None blocks M0.
-- **Branches:**
-  - `main` is at round 3 of the look book (`e25acbc`).
-  - `task/design-guide` contains `task/lookdev-r4` and fast-forwards `main` cleanly: it holds round 4, the design guide, the gate, the slope study, ADR-0018 and this page.
-  - `task/ART-007-brick-tools` (`083c482`) is not merged. `ART-007` is in progress: its art validator waits for `CORE-002`, `DATA-004` and `DATA-005`.
-- **Reviews:** per-task reviews are gone (ADR-0019); `ART-004` stays in `review` for its open 150 m glyph criterion.
-- **Done in M0:** `CORE-001`, `CORE-004`, `DATA-001`, `DATA-002`.
+  - ledger questions 6 (b): large hull blocks;
+  - 6 (c): smooth alien cells;
+  - 7: factions and rosters.
+  None of these blocks M0.
+- **Branches:** `main` holds everything. Only `task/ART-007-brick-tools` is unmerged: its art validator now has all its dependencies (`CORE-002`, `DATA-004`, `DATA-005` are done).
+- **Reviews:** no per-task reviews (ADR-0019). The M0 system review runs before the M0 exit gate. `ART-004` stays in `review` for its 150 m glyph criterion.
 
 ## 3. Next
 
-1. Fast-forward `main` to `task/design-guide` (locally).
-2. **Start M0 Foundations.** The ledger shows 17 M0 tasks ready.
-   - The `standard` ones include `FND-001`, `CORE-010`, `CORE-011`, `INP-001`, `DATA-004`, `VOX-001`, `AUD-001`, `DEV-001`, `DEV-002` and `MIG-001`.
-   - The `frontier` ones (`CORE-002`, `CORE-005`, `CORE-006`, `CORE-008`, `CORE-012`, `DATA-003`, `TST-001`) need a frontier-class model and a review.
-3. **Art track:** `ART-014` applies the NOCTURNE tokens and fonts in Unity (A1).
-4. **Later:**
-   - the in-engine look test (`ART-008`…`ART-011`) runs once the voxel renderer exists (M1);
-   - more ships get built in 3D only when Frank picks them.
+1. **M0, going wide** (ready now: `PERS-003`, `PERS-007`, `MIG-004`, `MIG-007`, `DEV-003`, `INP-003`, `AUD-002`, `TST-008`):
+   - then `FND-005` → `FND-006` → `FND-007`/`FND-014`;
+   - the persistence chain `PERS-004`…`PERS-012`;
+   - the migration chain `MIG-005`…`MIG-016`;
+   - the dev harness `DEV-004`…`DEV-006`.
+2. **`ART-007`:** finish the art validator on its branch and merge it.
+3. **M0 system review** (04-workflow §8) once the M0 systems exist, then the M0 exit gate.
+4. **Art track:** `ART-014` applies the NOCTURNE tokens and fonts in Unity (A1). The in-engine look test (`ART-008`…`ART-011`) waits for the voxel renderer (M1).
