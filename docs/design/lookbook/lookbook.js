@@ -559,7 +559,7 @@ const SLOPE_BLOCKS = [
 const SLOPE_KITS = [
   ["spec", "Today's spec", "cube + slope", "9.0 %", "Every diagonal edge where two slopes meet becomes a stair step."],
   ["k2", "Option 1 · 2 blocks", "slope, hip corner", "1.5 %", "Everything at 45°. At that angle the corner where two slopes meet is the same block whichever way it faces, so one hip corner closes ridges, pyramid noses and chamfered edges."],
-  ["k3", "Option 2 · 3 blocks", "slope, hip corner, long slope 1×2", "3.3 %", "Adds a shallow 27° slope for long flat runs: decks, glacis armour, wings. Its edges have no corner block, so wherever it meets another slope the edge steps (see the nose)."],
+  ["k3", "Option 2 · 3 blocks · CHOSEN (owner, 2026-10-11)", "slope, hip corner, long slope 1×2", "3.3 %", "Adds a shallow 27° slope for long flat runs: decks, glacis armour, wings. Its edges have no corner block, so wherever it meets another slope the edge steps (see the nose)."],
   ["k4", "Option 3 · 4 blocks", "option 2 + long hip corner 2×2", "2.3 %", "Closes the ridge where two long slopes meet, but not a long-slope nose or a long slope meeting a 45° edge: those are different corners again. A fully closed 1×2 family needs about four blocks of its own."],
 ];
 

@@ -91,7 +91,7 @@ namespace Game.Data.Blocks
 
     public enum BlockKind : byte { Structural = 0, Prop = 1, Functional = 2 }        // binding (architecture §6.2)
 
-    public enum BlockShape : byte { Cube = 0, Wedge = 1 }                            // add values at the end only
+    public enum BlockShape : byte { Cube = 0, Wedge = 1, HipCorner = 2, LongSlopeHigh = 3, LongSlopeLow = 4 }   // add values at the end only (ADR-0018)
 
     public enum BlockFace : byte { PosX = 0, NegX = 1, PosY = 2, NegY = 3, PosZ = 4, NegZ = 5 }
 
@@ -114,12 +114,15 @@ namespace Game.Data.Blocks
 }
 ```
 
-Block shape geometry (canonical, in cell-centred coordinates `[-0.5, 0.5]³`; SPEC-11 meshes it, SPEC-12 may treat Wedge as a full cube for collision):
+Block shape geometry (canonical, in cell-centred coordinates `[-0.5, 0.5]³`; SPEC-11 meshes it, SPEC-12 may treat any sloped shape as a full cube for collision). The kit is ADR-0018: cube, slope (`Wedge`), hip corner and the long slope 1×2, which is one placeable block whose two cells store `LongSlopeHigh` and `LongSlopeLow`:
 
 | Shape | Solid region | Full faces | Notes |
 |---|---|---|---|
 | `Cube` | whole cell | all 6 | Default |
 | `Wedge` | `y + z ≤ 0` | `NegY`, `NegZ` | Slope normal `(0, 1, 1)/√2` (faces up-forward); triangular faces on ±X. Symmetric under the X reflection, so a wedge is its own mirror partner. Matches the legacy `hull_1x1_angled` mesh |
+| `HipCorner` | `y + z ≤ 0` and `x + z ≤ 0` | `NegZ` | Where two slopes meet on a ridge, a nose or a chamfered edge. Two slope faces, normals `(0, 1, 1)/√2` and `(1, 0, 1)/√2`. Symmetric under swapping x and y, so it is its own mirror partner |
+| `LongSlopeHigh` | `y + 2z ≤ 0.5` | `NegY`, `NegZ` | The tall cell of the long slope 1×2 (rise 1 over 2 cells, normal `(0, 1, 2)/√5`): full height at its −Y side, half height at +Y. Own mirror partner |
+| `LongSlopeLow` | `y + 2z ≤ −0.5` | `NegZ` | The low cell of the long slope, placed at +Y of the tall cell: half height at −Y, zero at +Y. Own mirror partner |
 
 ### 4.3 `ContentDefinition`, ID rules and prefixes (public contract)
 
@@ -1136,6 +1139,7 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 | 11 | Shield emitter values (capacity 300, regen 15/s, delay 3 s) | Keep as initial values; SPEC-22 retunes | SPEC-22 |
 | 12 | Does a ContentId with uppercase letters need lower-casing on read (saves typed by hand)? | No; IDs are compared exactly; invalid IDs are unresolved | Tech lead |
 | 13 | Where is `ContentService` registered/constructed | `GameRoot.Awake` step 2 (architecture §4.2) by SPEC-01; `CreateSingletons` right after the default World exists, before any gameplay system updates | SPEC-01 |
+| 14 | ADR-0018 multi-cell structural blocks: how does `BlockDefinition` give each cell of the long slope 1×2 its own shape (`LongSlopeHigh` at cell (0,0,0), `LongSlopeLow` at (0,1,0))? | An optional per-cell `shapes` array parallel to `Cells` (structural blocks only; defaults to `shape` for every cell); validator error if lengths differ. Content rows `block_hull_hip` (HipCorner) and `block_hull_slope_long` (two cells) are added with it | SPEC-04 lead |
 
 ## 11. References
 

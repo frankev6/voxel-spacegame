@@ -601,6 +601,7 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 7 | URP shadow distance | 300 m in `URP_Default.asset` (SPEC-62/80 owns the asset); LOD1 at 400 m | SPEC-62 |
 | 8 | Damage tier thresholds | `damage = 3 − (Hp >> 6)` (fixed; matches `BrickWrite` border-tier rule) | SPEC-13 |
 | 9 | Prop mesh authoring scale and pivot | 1 unit = 1 cell, pivot at root cell centre (SPEC-04 §11) | SPEC-81 |
+| 10 | ADR-0018 adds three shapes (`HipCorner`, `LongSlopeHigh`, `LongSlopeLow`): the snapshot shape field needs 3 bits, `VoxelNormals` needs the 24 normals `(0,1,2)/√5` (permutations and signs), and `BrickShapeTables` covers 5 × 24 entries | Snapshot layout: bits 0-1 class, 2-4 shape, 5-9 orient, 10-15 layer, 16-23 colour, 24-25 damage, 26 scorched, 27-31 free; full faces are no longer stored per cell but read from `BrickShapeTables.FullFaces[shape*24+orient]` during meshing. `VoxelNormals.Count` = 42 (indices 18-41 the long-slope normals); REN-004 criteria apply to all 5 shapes | SPEC-11 lead |
 
 ## 11. References
 

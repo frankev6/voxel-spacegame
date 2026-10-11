@@ -182,7 +182,7 @@ The key light is pitched 40° above the flight plane. This overrides DESIGN-SYST
 
 ### 5.1 Hull language (Binding)
 
-- **Hunched and ribbed.** Hulls are heavy at the shoulders, with exposed ribs (vertical fins on the hull walls), slit windows in rows, and vents and pipe runs. The cut-cell slopes and large blocks used in the look book are the intended look; how they become game blocks is still open (§12, item 2).
+- **Hunched and ribbed.** Hulls are heavy at the shoulders, with exposed ribs (vertical fins on the hull walls), slit windows in rows, and vents and pipe runs. Game hulls are built from the slope kit of [ADR-0018](../decisions/ADR-0018-slope-block-kit.md): cube, slope, hip corner and long slope 1×2 (owner, 2026-10-11). Use 45° slopes and hip corners for chamfers, ridges and noses, and long slopes for sleek decks, glacis and noses where they meet flat faces. The look book's free cut cells are concept renders. Large blocks are still open (§12, item 2).
 - **Capital ships carry the cathedral:** spires, flying buttresses, keel spikes, organ-pipe silos and lancet arches. Smaller ships stay plain and industrial, so the cathedral reads as rank.
 - **Every hull has a lit side and a slit-lit dark side.** Windows, strobes and engines carry the dark side; the rim light carries the silhouette.
 - **Large ships use large blocks:** 1 m (2×2×2 cells) for cruisers and 1.5 m (3×3×3) for dreadnoughts, with human-sized windows, hatches and small guns on top.
@@ -308,7 +308,7 @@ The look book and silhouette page are **frozen as visual reference**. New look-d
 | # | Decision | Default until answered | Decider |
 |---|---|---|---|
 | 1 | Is this guide the design-system approval (gate `ART-013`), so that game systems can start? | **Answered 2026-10-11: yes** (§13 row 5). The in-engine look test (`ART-008`…`ART-011`) runs after the renderer exists, as a check | Owner |
-| 2 | How hulls become game blocks: cut cells, a fixed slope set, or cube and wedge (ledger question 6) | Specs as written (cube and wedge) until the owner picks a kit from the slope study (look book, *Slopes* tab): slope + hip corner (2 blocks), plus a long 1×2 slope (3), or plus a long hip corner (4). Owner, 2026-10-11: "lets model the different sloped blocks so we can see how many are needed (ideally as least as possible)" | Owner |
+| 2 | How hulls become game blocks (ledger question 6) | **Slopes answered 2026-10-11: option 2**, cube + slope + hip corner + long slope 1×2 (ADR-0018). Still open: large hull blocks (2×2×2, 3×3×3) and smooth alien cells | Owner |
 | 3 | Which ship lines and factions are approved (the silhouettes, ledger question 7) | None approved | Owner |
 | 4 | Industrial gothic VFX (§9) and damage (§5.4) in engine | As written here, checked in the first look test | Lead worker |
 
@@ -322,4 +322,5 @@ The look book and silhouette page are **frozen as visual reference**. New look-d
 | 2 | 2026-10-10 | Round 2: "no ui changes, its good" for NOCTURNE; NOCTURNE 3D to go "horror sci-fi … like the ALIEN franchise movies" | Owner | §1, §8 |
 | 3 | 2026-10-11 | NOCTURNE is the main guide; this guide is the source of truth; the look book stays as it is as visual reference; DRYDOCK, the aliens and the silhouettes are kept; the silhouettes are not approved | Owner | Whole guide; §10 |
 | 5 | 2026-10-11 | **Design system approved: NOCTURNE, as this guide.** Owner, verbatim: "yes I approve" (answer to: does choosing NOCTURNE plus this guide count as the design-system approval). Production art (SPEC-81, A1) and the game milestones M0–M4 may start | Owner | Gate `ART-013`; ledger *Owner gates*; ROADMAP; SPEC-80 §12 |
+| 6 | 2026-10-11 | Slope kit: cube, slope, hip corner, long slope 1×2. Owner: "option 2 is better" | Owner | §5.1; ADR-0018 |
 | 4 | 2026-10-11 | Key light pitched 40° (overrides R4's 25° for NOCTURNE); hazard colours `#B23A2A` and `#0D0E0C`; function colours are the light colours of §3.3; NOCTURNE damage and VFX are physical (ember, scorch, smoke), not "light dying" | Lead worker (claude-opus-5-5), from the look-book renders the owner chose | §3.3, §4.1, §5.4, §9 |
