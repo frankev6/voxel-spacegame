@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 30 | 0 | 0 | 0 | 36 | 0 | 66 | 9 |
+| M0 | 29 | 0 | 0 | 0 | 37 | 0 | 66 | 9 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -36,10 +36,10 @@
 | ID | Title | Spec | Milestone | Tier | Depends on | Ready | Status | Owner | Updated | Commit | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | FND-001 | Public contract types | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 338c29a | GameRootConfig.UiConfig/CameraConfig wait for SPEC-60/62 |
-| FND-002 | Bootstrap, GameRoot and explicit World creation | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| FND-002 | Bootstrap, GameRoot and explicit World creation | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | ddccd7f | rows 1/3/5/14; OQ 7 |
 | FND-003 | PauseService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | f7b5e9b |  |
 | FND-004 | SettingsService and SettingsApplier | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001, PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | a4c31aa | SettingsService + applier; 4 tests |
-| FND-005 | Composition root and BootSingletons | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-002, FND-003, FND-004, SPEC-02, SPEC-04 | no | todo |  |  |  |  |
+| FND-005 | Composition root and BootSingletons | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-002, FND-003, FND-004, SPEC-02, SPEC-04 | yes | todo |  |  |  |  |
 | FND-006 | SceneFlow transitions and teardown | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-005 | no | todo |  |  |  |  |
 | FND-007 | SimClock lifecycle and SimClockAdvanceSystem | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-006 | no | todo |  |  |  |  |
 | FND-014 | Static state audit and Play Mode re-entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-006 | no | todo |  |  |  |  |
@@ -573,6 +573,19 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — FND-002 Bootstrap, GameRoot and explicit World creation (claude, claude-opus-5-5)
+- Boot sequence:
+  - `Bootstrap` (`BeforeSceneLoad`) creates the `Default World` explicitly, then instantiates `Resources/GameRoot` as `DontDestroyOnLoad`.
+  - `SubsystemRegistration` resets `GameRoot.Instance`.
+  - `GameRoot` builds the composition in `Awake`, ticks the settings debounce, flushes on quit, and in `OnDestroy` disposes the composition, resets `EventHub`, removes and disposes the World, and clears `Instance`.
+- `GameComposition.Build` runs §5.2 rows 1 (settings), 3 (input, INP-002), 5 (pause) and 14 (applier). On failure it disposes in reverse, logs, rethrows and stops Play Mode in the Editor. Later rows are comments that name their tasks. Row 14 also constructs the `SettingsApplier` instance (SPEC-01 open question 7, ledger 23).
+- `GameRoot.prefab` has children `UI` (an empty `UIDocument` until UI-003), `AudioRoot` and `CameraRoot`, and is wired to `ContentDatabase.asset`. `ProjectSetup` adds and checks `UNITY_DISABLE_AUTOMATIC_SYSTEM_BOOTSTRAP_RUNTIME_WORLD` for Standalone; the define is now applied.
+- Tests:
+  - PlayMode `BootTests`: one GameRoot and one Default World; a second boot is a no-op; destroying GameRoot disposes the World and resets services.
+  - EditMode `BootPlayModeExitTests`: a real enter/exit of Play Mode disposes the World and clears `Instance`.
+  - The guard fails without the define.
+  - No `settings.json` was written by the test runs. EditMode 243/243 (+1 explicit), PlayMode 5/5.
 
 ### 2026-10-11 — TST-001 test kit core (claude, claude-opus-5-5)
 - New `Game.Tests.Common` assembly, referenced by both test assemblies. It holds:
