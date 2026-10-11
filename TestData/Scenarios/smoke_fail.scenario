@@ -1,0 +1,6 @@
+scenario smoke_fail
+desc "Intentional CLI failure fixture; excluded from smoke/regression suites"
+status active
+tags negative
+timeout 10
+assert false "intentional failure"

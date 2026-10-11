@@ -590,6 +590,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 45 | 2026-10-11 | SPEC-70 DEV-005 | Expression grammar and R28 example contradictions (SPEC-70 Q15) | Highest unary precedence, uppercase tags, explicit future test registrations; active default | Tech lead | Resolved; no fake production features |
 
+| 46 | 2026-10-11 | SPEC-70 DEV-006 | Result filename collisions and intentional failure fixture (SPEC-70 Q16) | Run ID/suffix filenames; negative fixture tag; JSON for start errors | Tech lead | Resolved; real failures retain exit codes without failing positive smoke selection |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).

@@ -132,7 +132,7 @@ public sealed class ScenarioRun
     public string Name { get; }  public string FilePath { get; }  public int RunId { get; }
     public ScenarioOutcome Outcome { get; }  public int ExitCode { get; }      // 0/1/2 per §3.8; Ignored → 0
     public string Message { get; }  public int CurrentLine { get; }  public double ElapsedSeconds { get; }
-    public string ResultJsonPath { get; }                                     // Logs/playtest/scenarios/<name>-<UTC yyyyMMdd-HHmmss>.json
+    public string ResultJsonPath { get; }                                     // Logs/playtest/scenarios/<name>-<UTC yyyyMMdd-HHmmss>-<runId>[-<collision>].json
 }
 ```
 
@@ -644,6 +644,8 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 | 14 | DEV-004 needs UIRoot before UI-003; how is its document obtained in M0? | **Answered:** DevUiQuery accepts an explicit root resolver for its real-panel tests; default resolver reads a registered UIDocument service. UI-003 registers its owned document at composition (alongside UIRoot) and unregisters it on disposal. With no UI in M0, commands report UI root unavailable. No scene search or placeholder UI. | Tech lead |
 
 | 15 | DEV-005 grammar conflicts with highest-precedence `!`, uppercase R28 tags, and missing future registrations in its example | **Answered:** follow the acceptance precedence (`!`/unary minus highest), allow uppercase in tags only, and test the exact R28 example with explicitly registered parse-only fixtures for future commands/probes. Production still rejects unregistered names. Omitted status is active; header timeout defaults to 300 s and wait timeout to 30 s. | Tech lead |
+
+| 16 | Same-second runs overwrite result files; how should the intentional failing smoke fit active suites? | **Answered:** append runId (and a collision suffix if needed) to result filenames. Tag smoke_fail as negative, not smoke/regression; direct invocation still exits 1. Parse/start failures also write JSON. Script polling timeout stops the run (error/exit 2); transport timeouts remain exit 3. | Tech lead |
 
 ## 11. References
 

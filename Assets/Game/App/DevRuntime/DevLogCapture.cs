@@ -9,7 +9,7 @@ namespace Game.App.DevRuntime
     public sealed class DevLogCapture : MonoBehaviour
     {
         readonly object sync = new object();
-        readonly Queue<(long sequence, string text)> messages = new Queue<(long, string)>(200);
+        readonly Queue<(long sequence, string text, LogType type)> messages = new Queue<(long, string, LogType)>(200);
         long errors, exceptions, warnings, sequence;
         public long Errors { get { lock (sync) return errors; } }
         public long Exceptions { get { lock (sync) return exceptions; } }
@@ -25,6 +25,14 @@ namespace Game.App.DevRuntime
                 if (message.sequence > after && message.text.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0) return true;
             return false;
         }
+        public string[] ErrorMessagesSince(long after, int max)
+        {
+            var result = new List<string>();
+            lock (sync) foreach (var message in messages)
+                if (message.sequence > after && (message.type == LogType.Error || message.type == LogType.Assert || message.type == LogType.Exception))
+                { result.Add(message.text); if (result.Count >= max) break; }
+            return result.ToArray();
+        }
         void OnEnable() { Application.logMessageReceivedThreaded += Capture; }
         void OnDisable() { Application.logMessageReceivedThreaded -= Capture; }
         void Capture(string message, string stackTrace, LogType type)
@@ -35,7 +43,7 @@ namespace Game.App.DevRuntime
                 else if (type == LogType.Exception) exceptions++;
                 else if (type == LogType.Warning) warnings++;
                 if (messages.Count == 200) messages.Dequeue();
-                messages.Enqueue((++sequence, type + ": " + message));
+                messages.Enqueue((++sequence, type + ": " + message, type));
             }
         }
     }

@@ -1,0 +1,7 @@
+scenario smoke_boot
+desc "Boot reaches MainMenu with the single persistent listener"
+status active
+tags smoke
+timeout 30
+wait scene == "MainMenu" timeout=20
+assert audio.listeners == 1 "one audio listener"

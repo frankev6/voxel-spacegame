@@ -35,6 +35,7 @@ namespace Game.App.DevRuntime
         }
         readonly Dictionary<int, Operation> operations = new Dictionary<int, Operation>();
         readonly List<int> running = new List<int>();
+        readonly List<Scenarios.ScenarioRunner> scenarios = new List<Scenarios.ScenarioRunner>();
         int lastId;
         bool disposed;
         public DevCommandRegistry Commands { get; private set; }
@@ -62,6 +63,13 @@ namespace Game.App.DevRuntime
             }
             catch { host.Dispose(); throw; }
         }
+        public Scenarios.ScenarioRunner RunScenario(Scenarios.ScenarioScript script, string path, int runId, string outputDirectory = null)
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(DevRuntimeHost));
+            var runner = new Scenarios.ScenarioRunner(script, path, runId, Context, outputDirectory);
+            if (!runner.Finished) scenarios.Add(runner);
+            return runner;
+        }
         public int AddOperation(IDevOperation operation)
         {
             if (disposed) throw new ObjectDisposedException(nameof(DevRuntimeHost));
@@ -88,7 +96,9 @@ namespace Game.App.DevRuntime
             }
             for (int i = count - 1; i >= 0; i--)
                 if (operations[running[i]].Status != DevOperationStatus.Running) running.RemoveAt(i);
-            // DEV-006 advances scenario runners after operations.
+            int scenarioCount = scenarios.Count;
+            for (int i = 0; i < scenarioCount; i++) scenarios[i].Step();
+            for (int i = scenarioCount - 1; i >= 0; i--) if (scenarios[i].Finished) scenarios.RemoveAt(i);
         }
         void LateUpdate() { /* DEV-012 adds overlay rendering. */ }
         void OnDestroy() { Cleanup(); }
@@ -98,6 +108,8 @@ namespace Game.App.DevRuntime
             disposed = true;
             foreach (var op in operations.Values) if (op.Status == DevOperationStatus.Running) op.Fail("play mode exited");
             running.Clear();
+            foreach (var scenario in scenarios) scenario.Abort("play mode exited");
+            scenarios.Clear();
             Context?.Dispose();
             Input?.Dispose();
             Events?.Dispose();

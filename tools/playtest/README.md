@@ -47,6 +47,9 @@ Runtime dev commands, reachable as `gh_<name>` and in the in-game console. Each 
 | `gh_dev` (`--cmd`) | Execute any runtime command line |
 | `gh_op` (`--id`) | Poll `running/succeeded/failed` status without blocking |
 | `gh_until` (`--cond`) | Evaluate a typed scenario expression once; returns true/false |
+| `gh_scenario` (`--file`) | Start a file; enter Play from Boot if needed; JSON run ID |
+| `gh_scenario_status` (`--run`) | JSON outcome, exit code, line, elapsed seconds and result path |
+| `gh_scenario_stop` (`--run`) | Stop and write an error result |
 
 Useful built-ins: `editor_play`, `editor_stop`, `open_scene`, `recompile`, `recompile_status`, `editor_status`,
 `capture_game_view`, `get_performance_stats`, `run_tests`, `eval`, `run_script`. List them with `unity command`.
@@ -58,3 +61,7 @@ Useful built-ins: `editor_play`, `editor_stop`, `open_scene`, `recompile`, `reco
 - Unfocused Editors drop keyboard/mouse unless input settings are relaxed; the harness does that during play only.
 - A modal dialog in the Editor blocks its main thread and the CLI times out. Close the dialog.
 - `eval` bodies can't contain `using` lines; use `run_script --file <path outside Assets>` for full C# files.
+
+## Scenario scripts
+
+`scenario.sh <name or path> [timeout=600]` starts and polls a scenario once per second. It prints the outcome and JSON path; exits 0 (pass/draft), 1 (failed), 2 (error), or 3 (Editor unreachable). `scenarios.sh [tag=regression]` runs active files with that tag, in name order, and writes `Logs/playtest/scenarios/summary.json`. Use `tag=smoke` for the Boot smoke. The intentional `smoke_fail` CLI fixture is tagged `negative`, so it does not fail smoke/regression suites. Result filenames include a run ID to avoid overwriting concurrent runs in the same second.
