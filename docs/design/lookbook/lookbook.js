@@ -592,11 +592,9 @@ function slopesPage() {
     p.appendChild(s);
   }
   s = section("WRAITH rebuilt with options 1 and 2", "same layout and sizes, tapers redrawn at each kit's angles, only the kit's blocks; both pass the build check");
-  const gw = el("div", "g2");
   const fw = shot(d, "wraith_compare.jpg", "Left to right: original, option 1 (slope + hip corner), option 2 (+ long slope 1×2). Option 2's nose steps where its long slopes meet the 45° chamfers");
-  fw.classList.add("wide");
-  gw.appendChild(fw);
-  s.appendChild(gw);
+  fw.querySelector("img").style.aspectRatio = "auto";
+  s.appendChild(fw);
   p.appendChild(s);
   s = section("Reference", "the same frigate with free cut cells, as the look-dev renders do it");
   const g3 = el("div", "g2");
