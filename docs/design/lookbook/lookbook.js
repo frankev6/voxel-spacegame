@@ -558,9 +558,9 @@ const SLOPE_BLOCKS = [
 ];
 const SLOPE_KITS = [
   ["spec", "Today's spec", "cube + slope", "9.0 %", "Every diagonal edge where two slopes meet becomes a stair step."],
-  ["k2", "2 blocks", "slope, hip corner", "1.5 %", "Everything at 45°. At that angle the corner where two slopes meet is the same block whichever way it faces, so one hip corner closes ridges, pyramid noses and chamfered edges."],
-  ["k3", "3 blocks", "slope, hip corner, long slope 1×2", "3.3 %", "Adds a shallow 27° slope for long flat runs: decks, glacis armour, wings. Its edges have no corner block, so wherever it meets another slope the edge steps (see the nose)."],
-  ["k4", "4 blocks", "kit 3 + long hip corner 2×2", "2.3 %", "Closes the ridge where two long slopes meet, but not a long-slope nose or a long slope meeting a 45° edge: those are different corners again. A fully closed 1×2 family needs about four blocks of its own."],
+  ["k2", "Option 1 · 2 blocks", "slope, hip corner", "1.5 %", "Everything at 45°. At that angle the corner where two slopes meet is the same block whichever way it faces, so one hip corner closes ridges, pyramid noses and chamfered edges."],
+  ["k3", "Option 2 · 3 blocks", "slope, hip corner, long slope 1×2", "3.3 %", "Adds a shallow 27° slope for long flat runs: decks, glacis armour, wings. Its edges have no corner block, so wherever it meets another slope the edge steps (see the nose)."],
+  ["k4", "Option 3 · 4 blocks", "option 2 + long hip corner 2×2", "2.3 %", "Closes the ridge where two long slopes meet, but not a long-slope nose or a long slope meeting a 45° edge: those are different corners again. A fully closed 1×2 family needs about four blocks of its own."],
 ];
 
 function slopesPage() {
@@ -572,7 +572,7 @@ function slopesPage() {
     <li><b>Two blocks build everything at 45°:</b> the slope and the hip corner. At 45° the corner where two slopes meet is the same shape in every orientation, so one block closes ridges, pyramid noses and chamfered edges</li>
     <li><b>Every extra angle brings its own corners.</b> A 1×2 slope needs a ridge corner, a nose corner and a corner where it meets a 45° edge, all different blocks. That is why kits 3 and 4 still step at the nose</li>
     <li>The classic builder set (slope, three-face corner, inverted corner) did worse than slope plus hip corner (8.4 % of cells off against 1.5 %): the hip corner is the block that matters</li>
-    <li>"Cells off" is the share of cut cells, across every round-3 hull and the HALO designed on the kit's angles, that the kit cannot build within 10 % of the cell</li></ul>`;
+    <li>"Cells off" is the share of cut cells that the kit cannot build within 10 %, across every round-3 hull and the HALO, each redesigned on <i>that kit's</i> angles. The hulls differ between kits, so the numbers are not a ranking: a kit with more blocks can never do worse on the same hull. Option 2 scores higher only because its long slopes create edges that have no corner block</li></ul>`;
   p.appendChild(ch);
   let s = section("The blocks", "cut faces in ochre; the dashed box is the block's size in cells (0.5 m each)");
   const g = el("div", "g4");
@@ -591,6 +591,13 @@ function slopesPage() {
     s.appendChild(g2);
     p.appendChild(s);
   }
+  s = section("WRAITH rebuilt with options 1 and 2", "same layout and sizes, tapers redrawn at each kit's angles, only the kit's blocks; both pass the build check");
+  const gw = el("div", "g2");
+  const fw = shot(d, "wraith_compare.jpg", "Left to right: original, option 1 (slope + hip corner), option 2 (+ long slope 1×2). Option 2's nose steps where its long slopes meet the 45° chamfers");
+  fw.classList.add("wide");
+  gw.appendChild(fw);
+  s.appendChild(gw);
+  p.appendChild(s);
   s = section("Reference", "the same frigate with free cut cells, as the look-dev renders do it");
   const g3 = el("div", "g2");
   g3.appendChild(shot(d, "demo_free.jpg", "Free cut cells"));

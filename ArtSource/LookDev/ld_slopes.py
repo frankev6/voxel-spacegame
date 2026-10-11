@@ -502,6 +502,46 @@ def kit_report(types, long_nose=False):
     return dict(use=use, bad=bad, cut=tot)
 
 
+def wraith_rebuilt(kit):
+    """The NOCTURNE WRAITH as a builder would rebuild it with a kit: same layout and sizes, tapers redrawn at the
+    kit's angles (45 degrees for k2; 1 in 2 where the original tapered gently for k3), then limited to its blocks."""
+    from ld_ships import Ship
+    k = 2 if kit == "k3" else 1
+    s = Ship("WRAITH", 21, "company")
+    # main hull: 45-degree chamfers along its length; the nose closes at the kit's angle
+    s.loft([(0, 4, 0, 8, 3, 1), (26, 4, 0, 8, 3, 1)])
+    nose = [((1, 0, 0), 4), ((-1, 0, 0), 4), ((0, 0, -1), 0), ((0, -1, 0), -26), ((0, 1, 0), 36),
+            ((1, 0, 1), 4 + 8 - 3), ((-1, 0, 1), 4 + 8 - 3), ((1, 0, -1), 4 - 1), ((-1, 0, -1), 4 - 1)]
+    if k == 1:
+        nose += [((1, 1, 0), 30), ((-1, 1, 0), 30), ((0, 1, 1), 34), ((0, 1, -1), 30)]
+    else:
+        nose += [((2, 1, 0), 34), ((-2, 1, 0), 34), ((0, 1, 2), 42), ((0, 1, -2), 30)]
+    s.convex(nose, ((-4, 26, 0), (4, 36, 8)))
+    # the engine block at the stern
+    s.loft([(-6, 5, 0, 8, 3, 2), (2, 5, 0, 8, 3, 2)], "hull2")
+    # gun pods on stub wings; their fronts close at the kit's angle
+    s.loft([(5, 3, 1, 3, 1, 0), (14, 3, 1, 3, 1, 0), (14 + k, 2, 1, 3, 1, 0)], "armor", cx=7, mirror=True)
+    # tail fins: one cell thick, their tops falling toward the bow at the kit's angle
+    for sx in (1, -1):
+        x0, x1 = (3, 4) if sx > 0 else (-4, -3)
+        top = ((0, 1, 1), 10) if k == 1 else ((0, 1, 2), 24)
+        s.convex([((1, 0, 0), x1), ((-1, 0, 0), -x0), ((0, 1, 0), 2), ((0, -1, 0), 4), ((0, 0, 1), 14), ((0, 0, -1), -6), top],
+                 ((x0, -4, 6), (x1, 2, 14)), "hull2")
+    s.paint(lambda x, y, z: z < 1.5, "armor")
+    s.paint(lambda x, y, z: 18 <= y < 19, "accent")
+    s.mod("cockpit", -2, 22, 8)
+    s.mod("gatling", 8, 9, -1, rot=(0, 180, 0), mirror=True)
+    s.mod("autocannon", -1, 21, -2, rot=(0, 180, 0))
+    s.mod("thruster_l", -2, -12, 1)
+    s.mod("thruster_s", 8, 2, 1, mirror=True)
+    s.mod("sensor", -1, 12, 8)
+    s.mod("core_1", 0, 14, 2)
+    s.prune()
+    O, oidx, opl = oriented(option_pieces(KITS_BY_KEY[kit][2]))
+    quantize(s, list(range(int(oidx.max()) + 1)), O, oidx, opl)
+    return s
+
+
 def block_svg(key, path):
     """An isometric drawing of one block: its size in cells (dashed), the cut faces in ochre."""
     from ld_geom import _clip_polys
