@@ -565,6 +565,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 24 | 2026-10-11 | SPEC-01 FND-005 | `FND-E001` (no start blueprint) would fail every boot before ship blueprints exist (SPEC-01 open question 8) | Resolved: a warning on the definition, an error from `GameConfigValidator` once any blueprint exists | Tech lead | resolved in FND-005 |
 | 25 | 2026-10-11 | SPEC-01 FND-006 | Startup in non-game scenes; the lazily created `WorldTime` singleton destroyed by teardown; calls into services that don't exist yet (SPEC-01 open question 9) | Resolved: non-game scenes left alone; `WorldTime` forced before the snapshot; missing collaborators are TODOs naming their tasks | Tech lead | resolved in FND-006 |
 | 26 | 2026-10-11 | SPEC-01 FND-014 | Audit scope: auto-property backing fields, unmanaged readonly structs, generated code (SPEC-01 open question 10) | Resolved: backing fields audited, unmanaged readonly structs allowed, generated code and editor/test assemblies skipped | Tech lead | resolved in FND-014 |
+| 27 | 2026-10-11 | SPEC-02 PERS-005 | No way to dispose the deferred blocks of an abandoned save (SPEC-02 open question 14) | Resolved: `SaveWriter.DisposeDeferredBlocks()`; deferred blocks must tolerate a second Dispose | Tech lead | resolved in PERS-005 |
+| 28 | 2026-10-11 | SPEC-05 PERS-005 | Header ticks vs millisecond JSON; dropped-autosave result; queue capacity; where step 17 runs (SPEC-05 open question 18) | Resolved as listed there | Tech lead | resolved in PERS-005 |
 
 ## Measurements
 

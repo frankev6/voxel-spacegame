@@ -96,7 +96,7 @@ namespace Game.App.Boot
             Step("5 pause");
 
             // 6. Save (PERS-002 profiles and slots; PERS-005 adds the pipeline).
-            Save = new SaveService(savePaths, Content, Pause, new SaveServiceConfig());   // TODO(PERS-005): Push(save) once its Dispose exists
+            Save = Push(new SaveService(savePaths, Content, Pause, new SaveServiceConfig()));
             Register(Save);
             Step("6 save");
 

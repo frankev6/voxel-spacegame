@@ -1002,6 +1002,7 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 | 15 | Ship thumbnail size | 256×256 RGBA32 (SPEC-51 renders) | SPEC-51 |
 | 16 | §4.5 declares `SaveResult`, `LoadResult`, `SaveOperationResult` and `ChunkRegistration` as readonly structs with readonly fields but no constructor, so nothing can set them (and the compiler warns) | PERS-001 adds one constructor per struct taking every field in declaration order | Tech lead |
 | 17 | §5.2 says what happens when `meta.json` is missing or invalid, but not when a valid `meta.json` sits next to a missing `world.sav` | A valid meta counts as `Ok` only when `world.sav` exists; otherwise the same rules apply as without a meta (`world.bak` only → `BackupOnly`, nothing → `Corrupt`) (PERS-002) | Tech lead |
+| 18 | PERS-005 details (found 2026-10-11) | **Resolved in PERS-005:** (a) `SavedUtc` is cut to whole milliseconds at capture, because `meta.json`/META keep milliseconds and the header's `savedUtcTicks` must match them exactly. (b) A dropped autosave (busy) returns `Blocked` with the Transitioning text and raises nothing. (c) `MaxQueuedOperations` counts waiting operations, not the running one. (d) `CurrentSlot`, `profile.json`, `GameSaved` and `OperationCompleted` happen in the main-thread finish (step 17), not in `WriteCaptured`. (e) `Autosave.NotifySaved()` joins with PERS-009 | Tech lead |
 
 ## 11. References
 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
+using Game.Core;
+using Game.Core.Events;
 using Game.Core.Save;
 using Game.Persistence.Container;
 using Game.Persistence.Data;
@@ -21,6 +23,19 @@ namespace Game.Persistence.Services
         ProfileId activeProfile;
         SlotRef? currentSlot;
 
+        // PERS-005: participants, session state carried between saves, the operation queue.
+        ISaveContext context;
+        readonly List<ISaveParticipant> participants = new List<ISaveParticipant>();
+        /// <summary>Unknown chunks of the loaded save, written back unchanged (decision 4); filled by PERS-006.</summary>
+        internal readonly List<RawChunk> PreservedChunks = new List<RawChunk>();
+        /// <summary>The loaded save's palette, seeded into the next save while preserved chunks refer to it; set by PERS-006.</summary>
+        internal SaveIdPalette LoadedPalette;
+        readonly Dictionary<string, byte[]> thumbnailCache = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+        readonly List<object> queue = new List<object>();   // queue[0] is the running operation
+        bool disposed;
+        /// <summary>Test hook (§5.4 step 13): runs after world.sav.tmp is written and before it replaces world.sav.</summary>
+        internal Action TestHookBeforeReplace;
+
         /// <summary>PERS-002 stores the dependencies; PERS-005 adds participant registration and the operation queue.</summary>
         public SaveService(SavePaths paths, Game.Data.Services.ContentService content, Game.Core.IPauseService pause,
                            SaveServiceConfig config, SaveChunkRegistry registry = null)
@@ -31,8 +46,20 @@ namespace Game.Persistence.Services
             this.config = config ?? new SaveServiceConfig();
             this.registry = registry ?? SaveChunkRegistry.Default;
         }
-        public void AttachContext(ISaveContext context) { throw new System.NotImplementedException("PERS-005"); }
-        public void Register(Game.Core.Save.ISaveParticipant participant) { throw new System.NotImplementedException("PERS-005"); }   // InvalidOperationException: unknown key, duplicate key, META/IDPL
+        public void AttachContext(ISaveContext context) { this.context = context; }
+
+        /// <summary>Kept in registry order. InvalidOperationException for META/IDPL, a key missing from the registry, or a duplicate.</summary>
+        public void Register(ISaveParticipant participant)
+        {
+            if (participant == null) throw new ArgumentNullException(nameof(participant));
+            string key = participant.Key;
+            if (key == "META" || key == "IDPL") throw new InvalidOperationException($"Save participant key {key} is reserved for the container");
+            if (!registry.TryGetOrder(key, out _)) throw new InvalidOperationException($"Save participant key {key} is not in SaveChunkRegistry (SPEC-05 §4.8)");
+            foreach (var p in participants) if (p.Key == key) throw new InvalidOperationException($"Save participant key {key} is already registered");
+            if (participant.Version < 1 || participant.Version > ushort.MaxValue) throw new InvalidOperationException($"Save participant {key} has version {participant.Version} (1..65535)");
+            participants.Add(participant);
+            participants.Sort((a, b) => { registry.TryGetOrder(a.Key, out var x); registry.TryGetOrder(b.Key, out var y); return x.CompareTo(y); });
+        }
 
         // Profiles
         #region Profiles and slots (PERS-002, SPEC-05 §5.2)
@@ -248,27 +275,322 @@ namespace Game.Persistence.Services
         #endregion
 
         // State and operations
-        public bool IsBusy => throw new System.NotImplementedException("PERS-005");
-        public bool CanSave(out SaveBlockReason reason) { throw new System.NotImplementedException("PERS-005"); }
-        public void ResetForNewGame() { throw new System.NotImplementedException("PERS-005"); }                                  // clears preserved chunks, seeded palette, thumbnail cache, CurrentSlot
-        public UnityEngine.Awaitable<SaveResult> SaveAsync(SlotRef slot, SaveReason reason, string displayName = null) { throw new System.NotImplementedException("PERS-005"); }
+        /// <summary>True while an operation runs or waits in the queue (§5.3).</summary>
+        public bool IsBusy => queue.Count > 0;
+
+        /// <summary>Reason from ISaveContext; NoSession without a context or an active session.</summary>
+        public bool CanSave(out SaveBlockReason reason)
+        {
+            if (context == null || !context.HasActiveSession) { reason = SaveBlockReason.NoSession; return false; }
+            reason = context.GetBlockReason();
+            return reason == SaveBlockReason.None;
+        }
+
+        /// <summary>Clears preserved chunks, the seeded palette, the thumbnail cache and CurrentSlot.</summary>
+        public void ResetForNewGame()
+        {
+            PreservedChunks.Clear();
+            LoadedPalette = null;
+            thumbnailCache.Clear();
+            currentSlot = null;
+        }
+
+        /// <summary>§5.3 queue, then §5.4: capture on the main thread, serialize and write on a background thread, finish on the main thread.</summary>
+        public async UnityEngine.Awaitable<SaveResult> SaveAsync(SlotRef slot, SaveReason reason, string displayName = null)
+        {
+            if (IsAutosave(reason) && IsBusy)                                         // §5.3 rule 1: the scheduler keeps it pending
+                return new SaveResult(false, SaveErrorKind.Blocked, SaveMessages.Blocked(SaveBlockReason.Transitioning), slot, 0, 0, 0);
+            var ticket = new object();
+            if (!Enqueue(ticket, reason == SaveReason.Quit))
+            {
+                var full = new SaveResult(false, SaveErrorKind.IoError, SaveMessages.IoError(SaveMessages.TooManyQueued), slot, 0, 0, 0);
+                RaiseCompleted(full, reason);
+                return full;
+            }
+            try
+            {
+                while (queue.Count > 0 && queue[0] != ticket) await UnityEngine.Awaitable.NextFrameAsync();
+                var captured = CaptureNow(slot, reason, displayName);
+                SaveResult result;
+                if (captured.Failure.HasValue) result = captured.Failure.Value;
+                else
+                {
+                    await UnityEngine.Awaitable.BackgroundThreadAsync();
+                    try { result = WriteCaptured(captured); }
+                    finally { await UnityEngine.Awaitable.MainThreadAsync(); }
+                }
+                FinishSave(captured, result);
+                return result;
+            }
+            finally { queue.Remove(ticket); }
+        }
+
+        /// <summary>§5.3 rules 2–3. False when the queue is full.</summary>
+        bool Enqueue(object ticket, bool quit)
+        {
+            int waiting = Math.Max(0, queue.Count - 1);
+            if (quit) { queue.Insert(Math.Min(1, queue.Count), ticket); return true; }
+            if (queue.Count > 0 && waiting >= config.MaxQueuedOperations) return false;
+            queue.Add(ticket);
+            return true;
+        }
+
+        static bool IsAutosave(SaveReason r) => r == SaveReason.AutoTimer || r == SaveReason.AutoStarSystemEntered || r == SaveReason.AutoSceneTransition;
+        static bool RaisesWhenBlocked(SaveReason r) => r == SaveReason.Manual || r == SaveReason.Quick || r == SaveReason.Quit;
+
         public UnityEngine.Awaitable<LoadResult> ReadAsync(SlotRef slot) { throw new System.NotImplementedException("PERS-006"); }
         public Game.Data.Validation.ValidationReport Restore(LoadedSave save) { throw new System.NotImplementedException("PERS-006"); }   // main thread
         public Game.Data.Validation.ValidationReport LastLoadReport => throw new System.NotImplementedException("PERS-006");
-#pragma warning disable CS0067 // raised by PERS-005/006
         public event Action<SaveOperationResult> OperationCompleted;
-#pragma warning restore CS0067
 
         // Thumbnails
-        public bool TryLoadThumbnail(SlotRef slot, string key, out UnityEngine.Texture2D texture) { throw new System.NotImplementedException("PERS-005"); }  // caller destroys texture
-        public bool TryGetSessionThumbnail(string key, out byte[] png) { throw new System.NotImplementedException("PERS-005"); }
+        /// <summary>Main thread. Reads thumbs/&lt;key&gt;.png of a slot; the caller destroys the texture.</summary>
+        public bool TryLoadThumbnail(SlotRef slot, string key, out UnityEngine.Texture2D texture)
+        {
+            texture = null;
+            string file = paths.ThumbnailFile(slot, key);
+            if (!File.Exists(file)) return false;
+            try
+            {
+                var tex = new UnityEngine.Texture2D(2, 2);
+                if (!UnityEngine.ImageConversion.LoadImage(tex, File.ReadAllBytes(file))) { UnityEngine.Object.DestroyImmediate(tex); return false; }
+                texture = tex;
+                return true;
+            }
+            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException) { return false; }
+        }
+
+        /// <summary>The PNG of a thumbnail written (or carried) by this session's saves.</summary>
+        public bool TryGetSessionThumbnail(string key, out byte[] png) => thumbnailCache.TryGetValue(key, out png);
 
         public AutosaveScheduler Autosave => throw new System.NotImplementedException("PERS-009");
-        public void Dispose() { throw new System.NotImplementedException("PERS-005"); }
+
+        /// <summary>Safe to call twice. TODO(PERS-009): unsubscribe Application.wantsToQuit.</summary>
+        public void Dispose()
+        {
+            if (disposed) return;
+            disposed = true;
+            OperationCompleted = null;
+            participants.Clear();
+            context = null;
+        }
+
+        /// <summary>§5.4 steps 1–7, main thread.</summary>
+        internal CapturedSave CaptureNow(SlotRef slot, SaveReason reason, string displayName)
+        {
+            var captured = new CapturedSave { Slot = slot, Reason = reason, Total = System.Diagnostics.Stopwatch.StartNew() };
+            // 1.
+            if (!CanSave(out var blocked))
+            {
+                captured.Failure = new SaveResult(false, SaveErrorKind.Blocked, SaveMessages.Blocked(blocked), slot, 0, 0, 0);
+                return captured;
+            }
+            // 2.
+            captured.Palette = PreservedChunks.Count > 0 && LoadedPalette != null ? SaveIdPalette.SeededFrom(LoadedPalette) : SaveIdPalette.CreateEmpty();
+            // 3.
+            foreach (var p in participants)
+            {
+                var w = new SaveWriter(captured.Palette, json);
+                captured.Participants.Add((p.Key, (ushort)p.Version, w));
+                try { p.Capture(w); }
+                catch (Exception e)
+                {
+                    captured.Release();
+                    GameLog.Exception("Save", e, $"capture of chunk {p.Key}");
+                    captured.Failure = new SaveResult(false, SaveErrorKind.ParticipantFailed, SaveMessages.ParticipantFailed(p.Key), slot, 0, 0, 0);
+                    return captured;
+                }
+            }
+            // 4. SavedUtc is cut to whole milliseconds: the JSON keeps milliseconds, and the header ticks must match META exactly.
+            var now = DateTime.UtcNow;
+            now = new DateTime(now.Ticks - now.Ticks % TimeSpan.TicksPerMillisecond, DateTimeKind.Utc);
+            var meta = new SaveMeta
+            {
+                FormatVersion = ContainerHeader.CurrentFormatVersion,
+                GameVersion = UnityEngine.Application.version,
+                DatabaseHash = (content != null ? content.DatabaseHash : 0UL).ToString("x16", CultureInfo.InvariantCulture),
+                ProfileId = slot.Profile.Value,
+                SlotId = slot.Slot.Value,
+                DisplayName = string.IsNullOrWhiteSpace(displayName) ? DefaultDisplayName(slot) : displayName,
+                Reason = reason,
+                SavedUtc = now,
+            };
+            context.DescribeForMeta(meta);
+            // 5.
+            if (context.TryCaptureSlotThumbnail(out var slotThumb) && slotThumb != null && slotThumb.Rgba32 != null)
+            {
+                slotThumb.Key = "slot";
+                captured.SlotThumbnail = slotThumb;
+                meta.Thumbnail = "thumbs/slot.png";
+            }
+            context.CollectThumbnails(captured.ChangedThumbnails, captured.KeepThumbnails);
+            // 6.
+            captured.Meta = meta;
+            captured.Header = new ContainerHeader
+            {
+                DatabaseHash32 = (uint)(content != null ? content.DatabaseHash : 0UL),
+                SavedUtcTicks = meta.SavedUtc.Ticks,
+                PlaytimeSeconds = meta.PlaytimeSeconds,
+            };
+            // 7.
+            captured.Preserved.AddRange(PreservedChunks);
+            captured.CaptureMs = captured.Total.Elapsed.TotalMilliseconds;
+            return captured;
+        }
+
+        /// <summary>Default display names (§5.2): manual → "Save {n}", quick → "Quick Save", auto → "Autosave".</summary>
+        static string DefaultDisplayName(SlotRef slot)
+        {
+            string id = slot.Slot.Value ?? "";
+            if (id == "quick") return "Quick Save";
+            if (id.StartsWith("auto_", StringComparison.Ordinal)) return "Autosave";
+            var m = ManualFolder.Match(id);
+            return m.Success ? "Save " + int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture) : id;
+        }
+
+        /// <summary>§5.4 steps 8–16. Thread-agnostic: no Unity API except ImageConversion.EncodeArrayToPNG. Never throws; leaves
+        /// world.sav, world.bak and meta.json untouched on failure and removes this slot's .tmp files.</summary>
+        internal SaveResult WriteCaptured(CapturedSave captured)
+        {
+            if (captured.Failure.HasValue) return captured.Failure.Value;
+            var slot = captured.Slot;
+            long bytesLength = 0;
+            try
+            {
+                // 8.
+                var chunks = new List<RawChunk>(captured.Participants.Count + captured.Preserved.Count + 2);
+                var participantChunks = new List<RawChunk>(captured.Participants.Count);
+                foreach (var (key, version, writer) in captured.Participants)
+                {
+                    var payload = writer.ToArray(b => { try { return b.Encode(); } finally { b.Dispose(); } });
+                    writer.Reset();                                                // its blocks are disposed: forget them
+                    participantChunks.Add(new RawChunk { Key = key, Version = version, Payload = payload });
+                }
+                captured.Release();
+                // 9–11.
+                captured.Meta.WorldBytes = 0;
+                chunks.Add(new RawChunk { Key = "META", Version = 1, Payload = json.Serialize(captured.Meta) });
+                chunks.Add(new RawChunk { Key = "IDPL", Version = 1, Payload = captured.Palette.Serialize() });
+                chunks.AddRange(participantChunks);
+                chunks.AddRange(captured.Preserved);
+                var bytesOut = SaveContainerWriter.Write(captured.Header, chunks, config.MinCompressBytes);
+                bytesLength = bytesOut.Length;
+
+                // 12–13.
+                Directory.CreateDirectory(paths.SlotDir(slot));
+                string tmp = paths.TempFile(slot), world = paths.WorldFile(slot);
+                if (File.Exists(tmp)) File.Delete(tmp);
+                using (var fs = new FileStream(tmp, FileMode.CreateNew, FileAccess.Write, FileShare.None, 65536, FileOptions.WriteThrough))
+                {
+                    fs.Write(bytesOut, 0, bytesOut.Length);
+                    fs.Flush(true);
+                }
+                TestHookBeforeReplace?.Invoke();
+                if (File.Exists(world)) File.Replace(tmp, world, paths.BackupFile(slot), ignoreMetadataErrors: true);
+                else File.Move(tmp, world);
+
+                // 14. Thumbnail failures never fail the save.
+                try { WriteThumbnails(captured); }
+                catch (Exception e) { GameLog.Warn("Save", $"Thumbnails of {slot.Profile.Value}/{slot.Slot.Value} were not written: {e.Message}"); }
+
+                // 15.
+                captured.Meta.WorldBytes = bytesOut.Length;
+                WriteReplacing(paths.MetaFile(slot), json.Serialize(captured.Meta));
+                return new SaveResult(true, SaveErrorKind.None, IsAutosave(captured.Reason) ? SaveMessages.Autosaved : SaveMessages.Saved,
+                                      slot, bytesOut.Length, captured.CaptureMs, captured.Total.Elapsed.TotalMilliseconds);
+            }
+            catch (Exception e)
+            {
+                // 16.
+                captured.Release();
+                DeleteTempFiles(slot);
+                bool diskFull = false;
+                if (e is IOException)
+                {
+                    try { diskFull = new DriveInfo(Path.GetPathRoot(Path.GetFullPath(paths.Root))).AvailableFreeSpace < bytesLength + 1024 * 1024; }
+                    catch (Exception) { }
+                }
+                return diskFull
+                    ? new SaveResult(false, SaveErrorKind.DiskFull, SaveMessages.DiskFull, slot, 0, captured.CaptureMs, captured.Total.Elapsed.TotalMilliseconds)
+                    : new SaveResult(false, SaveErrorKind.IoError, SaveMessages.IoError(e.Message), slot, 0, captured.CaptureMs, captured.Total.Elapsed.TotalMilliseconds);
+            }
+        }
+
+        /// <summary>§5.4 step 14: the session cache follows the captured changes; files on disk follow the cache, untouched when equal.</summary>
+        void WriteThumbnails(CapturedSave captured)
+        {
+            foreach (var t in captured.ChangedThumbnails)
+                if (t?.Key != null && t.Rgba32 != null) thumbnailCache[t.Key] = EncodePng(t);
+            var stale = new List<string>();
+            foreach (var key in thumbnailCache.Keys) if (key != "slot" && !captured.KeepThumbnails.Contains(key)) stale.Add(key);
+            foreach (var key in stale) thumbnailCache.Remove(key);
+            if (captured.SlotThumbnail != null) thumbnailCache["slot"] = EncodePng(captured.SlotThumbnail);
+            else thumbnailCache.Remove("slot");
+
+            string dir = paths.ThumbsDir(captured.Slot);
+            if (thumbnailCache.Count > 0) Directory.CreateDirectory(dir);
+            foreach (var kv in thumbnailCache)
+            {
+                string file = paths.ThumbnailFile(captured.Slot, kv.Key);
+                if (File.Exists(file) && new ReadOnlySpan<byte>(File.ReadAllBytes(file)).SequenceEqual(kv.Value)) continue;
+                WriteReplacing(file, kv.Value);
+            }
+            if (Directory.Exists(dir))
+                foreach (var file in Directory.GetFiles(dir, "*.png"))
+                    if (!thumbnailCache.ContainsKey(Path.GetFileNameWithoutExtension(file))) File.Delete(file);
+        }
+
+        static byte[] EncodePng(ThumbnailRequest t)
+            => UnityEngine.ImageConversion.EncodeArrayToPNG(t.Rgba32, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm, (uint)t.Width, (uint)t.Height);
+
+        void DeleteTempFiles(SlotRef slot)
+        {
+            foreach (var f in new[] { paths.TempFile(slot), paths.MetaFile(slot) + ".tmp" })
+                try { if (File.Exists(f)) File.Delete(f); } catch (Exception) { }
+            string dir = paths.ThumbsDir(slot);
+            try { if (Directory.Exists(dir)) foreach (var f in Directory.GetFiles(dir, "*.tmp")) File.Delete(f); } catch (Exception) { }
+        }
+
+        /// <summary>§5.4 steps 17–18 (main thread). Blocked autosaves are the only silent outcome (decision 14).</summary>
+        void FinishSave(CapturedSave captured, SaveResult result)
+        {
+            if (result.Success)
+            {
+                currentSlot = captured.Slot;
+                SetProfileLastSlot(captured.Slot);
+                // TODO(PERS-009): Autosave.NotifySaved().
+                EventBus<GameSaved>.Publish(new GameSaved(captured.Slot.Profile.Value, captured.Slot.Slot.Value, captured.Reason));
+                GameLog.Info("Save", $"Saved {captured.Slot.Profile.Value}/{captured.Slot.Slot.Value} ({result.Bytes} bytes, capture {result.CaptureMs:F1} ms, total {result.TotalMs:F1} ms)");
+                RaiseCompleted(result, captured.Reason);
+                return;
+            }
+            if (result.Error == SaveErrorKind.Blocked)
+            {
+                if (RaisesWhenBlocked(captured.Reason)) RaiseCompleted(result, captured.Reason);
+                return;
+            }
+            GameLog.Error("Save", $"Save to {captured.Slot.Profile.Value}/{captured.Slot.Slot.Value} failed: {result.Error}: {result.Message}");
+            RaiseCompleted(result, captured.Reason);
+        }
+
+        void RaiseCompleted(SaveResult r, SaveReason reason)
+            => OperationCompleted?.Invoke(new SaveOperationResult(false, r.Success, r.Error, r.Message, r.Slot, reason, 0, null));
+
+        /// <summary>profile.json LastSlotId = the slot (tmp + replace); a missing or unreadable profile is left alone.</summary>
+        void SetProfileLastSlot(SlotRef slot)
+        {
+            try
+            {
+                string file = paths.ProfileFile(slot.Profile);
+                if (!File.Exists(file)) return;
+                var d = json.Deserialize<ProfileDescriptor>(File.ReadAllBytes(file));
+                d.LastSlotId = slot.Slot.Value;
+                WriteReplacing(file, json.Serialize(d));
+            }
+            catch (Exception e) { GameLog.Warn("Save", $"Could not update profile {slot.Profile.Value}: {e.Message}"); }
+        }
 
         // Synchronous seams for tests (InternalsVisibleTo):
-        internal CapturedSave CaptureNow(SlotRef slot, SaveReason reason, string displayName) { throw new System.NotImplementedException("PERS-005"); }
-        internal SaveResult WriteCaptured(CapturedSave captured) { throw new System.NotImplementedException("PERS-005"); }          // thread-agnostic
         internal LoadResult ReadNow(SlotRef slot) { throw new System.NotImplementedException("PERS-006"); }                         // thread-agnostic
         internal bool HandleWantsToQuit() { throw new System.NotImplementedException("PERS-009"); }
     }

@@ -37,6 +37,19 @@ namespace Game.Core.Save
 
         public void Reset() { Check(); length = 0; openBlocks.Clear(); deferred.Clear(); }   // open blocks and deferred blocks discarded
 
+        /// <summary>For an abandoned save (SPEC-05 §5.4 steps 3 and 16): disposes every deferred block not yet encoded and forgets them.
+        /// Each Dispose runs in its own try/catch so one failure cannot leak the rest. Works with open blocks and after Dispose of the
+        /// writer. SPEC-02 open question 14.</summary>
+        public void DisposeDeferredBlocks()
+        {
+            foreach (var d in deferred)
+            {
+                try { d.Block?.Dispose(); }
+                catch (Exception e) { Game.Core.GameLog.Exception("Save", e, "disposing a deferred save block"); }
+            }
+            deferred.Clear();
+        }
+
         public void WriteByte(byte value) { Span(1)[0] = value; }
         public void WriteSByte(sbyte value) { Span(1)[0] = (byte)value; }
         public void WriteBool(bool value) { Span(1)[0] = value ? (byte)1 : (byte)0; }

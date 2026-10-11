@@ -57,7 +57,7 @@ namespace Game.Tests.PlayMode.Boot
             var composition = GameRoot.Instance.Composition;
             CollectionAssert.AreEqual(ExpectedSteps, composition.StepLog, "SPEC-01 §5.2 order");
             var built = composition.DisposeStack.Select(d => d.GetType().Name).ToList();
-            CollectionAssert.AreEqual(new[] { "SettingsService", "ContentService", "InputService", "PauseService", "SceneFlow", "SettingsApplier" }, built);
+            CollectionAssert.AreEqual(new[] { "SettingsService", "ContentService", "InputService", "PauseService", "SaveService", "SceneFlow", "SettingsApplier" }, built);
             yield return Shutdown();
             built.Reverse();
             CollectionAssert.AreEqual(built, GameComposition.LastDisposeLog, "disposed in reverse");
