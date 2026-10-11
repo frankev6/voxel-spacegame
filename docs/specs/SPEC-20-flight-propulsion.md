@@ -107,7 +107,7 @@ namespace Game.Simulation.Commands
     /// <summary>Singleton: counters already turned into ShipCommandEdges. Only writer: PlayerCommandApplySystem (created in its OnCreate).</summary>
     public struct PlayerEdgeConsumed : IComponentData { public PlayerEdgeCounters Value; }
 
-    /// <summary>Tag on the player's current ship root (architecture §6.4). Added by ShipSpawnService (SPEC-01).</summary>
+    /// <summary>Tag on the player's current ship root (architecture §6.4). Added by the PlayerShip grid profile (ADR-0015).</summary>
     public struct PlayerShip : IComponentData { }
 }
 ```
@@ -149,7 +149,7 @@ namespace Game.Simulation.Flight
 
     /// <summary>One usable thruster of the ship, grid-local. Rebuilt when VoxelGrid.Revision changes. Only writer: PropulsionSystem.</summary>
     [InternalBufferCapacity(0)]
-    public struct FlightThruster : IBufferElementData   // 48 bytes
+    public struct FlightThruster : IBufferElementData   // 44 bytes (Q9)
     {
         public Entity Thruster;          // functional entity
         public int InstanceIndex;        // BlockInstance index
@@ -503,10 +503,10 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Tier:** standard — transcribes the exact code of §4 (bodies throw `NotImplementedException`, except `FlightConfig.Default`, `FlightMath.YawRateCap`, the `GridSpaceMath` one-liners)
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`
 - **Do:** Create every type of §4.1–§4.5 in the listed folders and namespaces, with exact fields and comments. Create the folders of decision 13.
-- **Files:** `Assets/Game/Simulation/Commands/{ShipCommandFlags,ShipCommandEdges,ShipCommand,PlayerEdgeCounters,PlayerCommand,PlayerEdgeConsumed,PlayerShip}.cs`; `Assets/Game/Data/Components/PlanarConstraint.cs`; `Assets/Game/Simulation/Flight/{FlightFlags,FlightState,FlightThruster,ThrusterState,ThrusterVisual,FlightConfig,FlightConfigFactory,FlightMath,ThrustProblem,ThrustActuator,ThrustAllocator,FlightSetup}.cs`; `Assets/Game/Simulation/Common/GridSpaceMath.cs`; `Assets/Game/Data/Definitions/Flight/FlightConfigDefinition.cs`
+- **Files:** `Assets/Game/Simulation/Commands/{ShipCommandFlags,ShipCommandEdges,ShipCommand,PlayerEdgeCounters,PlayerCommand,PlayerEdgeConsumed,PlayerShip}.cs`; `Assets/Game/Data/Components/PlanarConstraint.cs`; `Assets/Game/Simulation/Flight/{FlightFlags,FlightState,FlightThruster,ThrusterState,ThrusterVisual,FlightConfig,FlightConfigFactory,FlightMath,ThrustProblem,ThrustActuator,ThrustAllocator,FlightSetup,PropulsionStats}.cs`; `Assets/Game/Simulation/Common/GridSpaceMath.cs`; `Assets/Game/Data/Definitions/Flight/FlightConfigDefinition.cs`
 - **Acceptance criteria:**
-  - [ ] Compiles; no component holds a managed type; `PlanarConstraint` is in `Game.Data.Components`.
-  - [ ] SPEC-03's `PlayerInputSampleSystem` field list (SPEC-03 §4.4) matches `PlayerCommand` exactly.
+  - [x] Compiles; no component holds a managed type; `PlanarConstraint` is in `Game.Data.Components`.
+  - [x] SPEC-03's `PlayerInputSampleSystem` field list (SPEC-03 §4.4) matches `PlayerCommand` exactly.
 - **Tests:** `FlightContractTests.PlayerCommand_HasSpec03Fields` (reflection), `.Components_AreUnmanaged`.
 
 ### FLT-002 — Grid-space and flight maths
@@ -640,16 +640,17 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | Flight assist always on, or a player toggle (full Newtonian)? | Always on in v1; a toggle needs an action in SPEC-03 | Owner |
-| 2 | Core gyro (decision 6) acceptable as the source of turning for aft-only ships? | Yes; values set by FLT-010 | Owner |
-| 3 | Is boost unlimited, or does it cost energy/heat? | Unlimited in v1; SPEC-24 abilities give stronger boosts | Owner |
-| 4 | One global speed cap, or per-class caps (fighters faster)? | Global cap; heavier ships reach it slower | Owner |
-| 5 | SPEC-22: `ShipStats.YawTorque` adds `FlightMath.GyroYawTorque(config, InverseInertia.y)` for non-hulk ships, recomputed with the mass part (§5.4 step 4 there); **superseded by ADR-0014:** this spec owns `PropulsionStats` (§5.7) including the gyro term; `PWR-006` takes `GridSpaceMath` from FLT-001 instead of WPN-001 | Yes | SPEC-22 |
-| 6 | SPEC-01 §5.7 step 4: `ShipSpawnService` calls `FlightSetup.Add(em, root)` next to `PlanarConstraintSetup.Add` | **Superseded by ADR-0015:** flight types come from the grid profile (`FlightSetup.Register`); the helpers are removed | SPEC-01 |
-| 7 | Architecture §8 `PhysicsVelocity` row: add `PlanarConstraintSystem` (vertical impulses only) | Yes | Tech lead |
-| 8 | If contacts push planar ships off the plane by > 0.1 m (FLT-009), replace the impulse correction with a Unity Physics LimitedDOF joint (linear Y, angular X/Z locked) per ship | Keep impulses unless measured | Tech lead |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | Flight assist always on, or a player toggle (full Newtonian)? | Always on in v1; a toggle needs an action in SPEC-03 | Owner |  |
+| 2 | Core gyro (decision 6) acceptable as the source of turning for aft-only ships? | Yes; values set by FLT-010 | Owner |  |
+| 3 | Is boost unlimited, or does it cost energy/heat? | Unlimited in v1; SPEC-24 abilities give stronger boosts | Owner |  |
+| 4 | One global speed cap, or per-class caps (fighters faster)? | Global cap; heavier ships reach it slower | Owner |  |
+| 5 | SPEC-22: `ShipStats.YawTorque` adds `FlightMath.GyroYawTorque(config, InverseInertia.y)` for non-hulk ships, recomputed with the mass part (§5.4 step 4 there); **superseded by ADR-0014:** this spec owns `PropulsionStats` (§5.7) including the gyro term; `PWR-006` takes `GridSpaceMath` from FLT-001 instead of WPN-001 | Yes | SPEC-22 |  |
+| 6 | SPEC-01 §5.7 step 4: `ShipSpawnService` calls `FlightSetup.Add(em, root)` next to `PlanarConstraintSetup.Add` | **Superseded by ADR-0015:** flight types come from the grid profile (`FlightSetup.Register`); the helpers are removed | SPEC-01 |  |
+| 7 | Architecture §8 `PhysicsVelocity` row: add `PlanarConstraintSystem` (vertical impulses only) | Yes | Tech lead |  |
+| 8 | If contacts push planar ships off the plane by > 0.1 m (FLT-009), replace the impulse correction with a Unity Physics LimitedDOF joint (linear Y, angular X/Z locked) per ship | Keep impulses unless measured | Tech lead |  |
+| 9 | Contract comments/file list drifted from the declared fields and ADR-0015 | Preserve declared fields and profile ownership | Tech lead | Resolved FLT-001: FlightThruster fields occupy 44 bytes, not the old 48-byte comment; no padding is invented. Include PropulsionStats from §4.5 in the task file list. PlayerShip is added by profile registration, not a per-spawn helper. |
 
 ## 11. References
 
