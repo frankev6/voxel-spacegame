@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 49 | 0 | 1 | 0 | 54 | 0 | 104 | 15 |
+| M1 | 49 | 0 | 0 | 0 | 55 | 0 | 104 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -108,8 +108,8 @@
 | MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | yes | done | astra (gpt-6) | 2026-10-11 | 75cb5fd | Migration gate: 69 unchanged; full 0.580s; max ship 42.4ms |
 | FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | yes | done | astra (gpt-6) | 2026-10-11 | 2718913 | Unique managed/Burst grants; saved high-water mark; explicit refill dependency wait |
 | FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | yes | done | astra (gpt-6) | 2026-10-11 | 8a8bd6f | Session flow/SESS; ordered save preparation; bounded thumbnail readback (ADR-0034) |
-| FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Resumed after PHY-024; finish fleet participant, player hooks and tests |
-| FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | no | todo |  |  |  |  |
+| FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-11 | 745e10a | Fleet/FLET ownership, player spawn/writeback, report warnings and recovered-id reservation |
+| FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | yes | todo |  |  |  |  |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | no | todo |  |  |  |  |
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | no | todo |  |  |  |  |
 | INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | no | todo |  |  |  |  |
@@ -732,6 +732,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — FND-010 fleet persistence and player spawning (astra, gpt-6)
+
+- Implemented sorted FleetModel ownership and mutation notifications, FLET v1 deferred VOXS snapshots, source/configured blueprint recovery, player ready/exit hooks and pre-capture/exit writeback. Registry borrows are released before edits/disposal; fleet thumbnail keys survive save cleanup. Implementation `745e10a` (initial ownership/report work `5459fc8`).
+- Required tests prove byte-identical FLET re-save, flagship preservation and unchanged model identity, paused player readiness with **zero simulation ticks**, and **50 removed cells** still missing in both the restored structure and respawned grid. The 20k benchmark supplies damage-test geometry; no new ship art was authored.
+- Accepted **ADR-0036 / Q114–115** routes recoverable participant warnings into the active load report and completion counts. Added scope/nesting/failure checks. **Q117 / SPEC-01 Q22** repairs missing, malformed and stale-low SESS counters before restored fleet ids could be reused; those three regressions pass.
+- Final validation: compile **0 C# warnings**, EditMode **645 passed + 1 explicit skipped**, PlayMode **50 passed**, perf **38/38**, docs **505 tasks / 0 errors**. Existing physics gates remain green: station spawn main-thread median/p95 **0.02446 / 0.2245 ms**, idle **0.01381 / 0.0185 ms**; save-capture fixture median **0.1627 ms**. These retain their existing test scope, not full renderer/gameplay measurements.
+- M1 location remains origin/identity yaw under Q114; FND-012 replaces the direct request boundary, GAL-008/SYS add canonical location. The headless tests disable renderer readiness only in their fixture; runtime keeps the renderer gate for REN integration. Next: FND-016 sandbox, then remaining ready M1 work.
 
 ### 2026-10-11 — PHY-024 paused spawn body initialization (astra, gpt-6)
 
