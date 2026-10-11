@@ -597,6 +597,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 47 | 2026-10-11 | SPEC-05 PERS-016 | Session capture exceptions leak snapshots after participants finish (SPEC-05 Q23) | Guard all capture stages and report ParticipantFailed with stage | Tech lead | Resolved; release blocks before ordinary completion and queue recovery |
 
+| 48 | 2026-10-11 | SPEC-05 PERS-017 | Post-replacement sidecar errors falsely report failed saves; listing trusts stale JSON (SPEC-05 Q24) | world.sav replacement commits; later sidecar failure warns, embedded META wins | Tech lead | Resolved; no rollback of committed saves or misleading completion event |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).

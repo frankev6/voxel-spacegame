@@ -212,17 +212,29 @@ namespace Game.Persistence.Services
 
         /// <summary>Status rules of §5.2. A valid meta.json gives Ok when world.sav exists. Otherwise (and when meta.json is missing or invalid):
         /// world.sav → MetaMissing (Meta from its META chunk when readable), only world.bak → BackupOnly, nothing → Corrupt.
+        /// Readable embedded metadata also supersedes a valid but stale sidecar (Q24).
         /// MetaVersion above 1 → NewerFormat.</summary>
         SlotInfo ReadSlot(SlotRef slot)
         {
             var info = new SlotInfo { Ref = slot, Kind = KindOf(slot.Slot.Value) };
             string world = paths.WorldFile(slot), backup = paths.BackupFile(slot), metaFile = paths.MetaFile(slot);
             SaveMeta meta = null;
+            int prefixBudget = 64 * 1024;
             try
             {
                 if (File.Exists(metaFile))
                 {
-                    var bytes = File.ReadAllBytes(metaFile);
+                    // Keep total listing I/O bounded; reserve at least half for authoritative container META.
+                    using var stream = new FileStream(metaFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    if (stream.Length > 32 * 1024) throw new SaveFormatException("Metadata sidecar exceeds listing budget", -1);
+                    var bytes = new byte[(int)stream.Length];
+                    int read = 0;
+                    while (read < bytes.Length)
+                    {
+                        int n = stream.Read(bytes, read, bytes.Length - read);
+                        if (n == 0) throw new EndOfStreamException();
+                        read += n; prefixBudget -= n;
+                    }
                     var version = Newtonsoft.Json.Linq.JObject.Parse(System.Text.Encoding.UTF8.GetString(bytes))["MetaVersion"];
                     if (version != null && version.Type == Newtonsoft.Json.Linq.JTokenType.Integer && (int)version > 1)
                     { info.Status = SlotStatus.NewerFormat; info.WorldBytes = SizeOf(world); return info; }
@@ -234,9 +246,19 @@ namespace Game.Persistence.Services
             if (File.Exists(world))
             {
                 info.WorldBytes = SizeOf(world);
+                // world.sav is the commit point; a crash or sidecar write failure may leave older, valid JSON.
+                // Compare the complete metadata, not only time/size (two saves can share a millisecond).
+                var embedded = TryReadMetaChunk(world, prefixBudget);
+                if (embedded != null)
+                {
+                    embedded.WorldBytes = info.WorldBytes;
+                    bool matches = meta != null && new ReadOnlySpan<byte>(json.Serialize(meta)).SequenceEqual(json.Serialize(embedded));
+                    info.Status = matches ? SlotStatus.Ok : SlotStatus.MetaMissing;
+                    info.Meta = embedded;
+                    return info;
+                }
                 if (meta != null) { info.Status = SlotStatus.Ok; info.Meta = meta; return info; }
                 info.Status = SlotStatus.MetaMissing;
-                info.Meta = TryReadMetaChunk(world);
                 return info;
             }
             if (File.Exists(backup)) { info.Status = SlotStatus.BackupOnly; info.Meta = meta; info.WorldBytes = SizeOf(backup); return info; }
@@ -245,14 +267,14 @@ namespace Game.Persistence.Services
         }
 
         /// <summary>Reads the META chunk from the first 64 KB of world.sav (header + table + META, CRCs checked). Null when unreadable.</summary>
-        SaveMeta TryReadMetaChunk(string world)
+        SaveMeta TryReadMetaChunk(string world, int maxBytes)
         {
             try
             {
                 byte[] head;
                 using (var s = new FileStream(world, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    head = new byte[(int)Math.Min(s.Length, 64 * 1024)];
+                    head = new byte[(int)Math.Min(s.Length, maxBytes)];
                     int read = 0;
                     while (read < head.Length) { int n = s.Read(head, read, head.Length - read); if (n <= 0) break; read += n; }
                 }
@@ -659,7 +681,8 @@ namespace Game.Persistence.Services
         }
 
         /// <summary>§5.4 steps 8–16. Thread-agnostic: no Unity API except ImageConversion.EncodeArrayToPNG. Never throws; leaves
-        /// world.sav, world.bak and meta.json untouched on failure and removes this slot's .tmp files.</summary>
+        /// world.sav, world.bak and meta.json untouched on pre-commit failure and removes this slot's .tmp files.
+        /// Metadata failure after replacement warns and returns success because the container is committed.</summary>
         internal SaveResult WriteCaptured(CapturedSave captured)
         {
             if (captured.Failure.HasValue) return captured.Failure.Value;
@@ -705,7 +728,14 @@ namespace Game.Persistence.Services
 
                 // 15.
                 captured.Meta.WorldBytes = bytesOut.Length;
-                WriteReplacing(paths.MetaFile(slot), json.Serialize(captured.Meta));
+                try { WriteReplacing(paths.MetaFile(slot), json.Serialize(captured.Meta)); }
+                catch (Exception e)
+                {
+                    // The container is already committed. Do not report failure or roll back a good save.
+                    // ListSlots detects an old sidecar against embedded META (SPEC-05 Q24).
+                    DeleteTempFiles(slot);
+                    GameLog.Warn("Save", $"Save committed, but metadata of {slot.Profile.Value}/{slot.Slot.Value} was not written: {e.Message}");
+                }
                 return new SaveResult(true, SaveErrorKind.None, IsAutosave(captured.Reason) ? SaveMessages.Autosaved : SaveMessages.Saved,
                                       slot, bytesOut.Length, captured.CaptureMs, captured.Total.Elapsed.TotalMilliseconds);
             }

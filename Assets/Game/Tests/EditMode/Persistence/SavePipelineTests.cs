@@ -233,6 +233,70 @@ namespace Game.Tests.EditMode.Persistence
             Assert.AreEqual(0, FakeDeferredBlock.Live);
         }
 
+        [TestCase(false)]
+        [TestCase(true)]
+        public void MetadataWriteFailure_ReportsCommittedSave(bool overwrite)
+        {
+            byte[] previous = null;
+            if (overwrite) { Assert.IsTrue(SaveNow().Success); previous = File.ReadAllBytes(paths.WorldFile(slot)); }
+            Directory.CreateDirectory(paths.MetaFile(slot) + ".tmp"); // real I/O failure, after the container replacement
+            a.Value = 99; a.WithDeferred = true;
+            LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("Save committed, but metadata"));
+            var captured = service.CaptureNow(slot, SaveReason.Manual, "Committed");
+            var result = service.WriteCaptured(captured);
+            Assert.IsTrue(result.Success, result.Message);
+            Assert.AreEqual(0, FakeDeferredBlock.Live);
+            var chunks = ReadChunks(paths.WorldFile(slot), out _);
+            Assert.AreEqual(99, new SaveReader(chunks.Single(x => x.Key == "TSTA").Payload).ReadInt32());
+            if (overwrite) CollectionAssert.AreEqual(previous, File.ReadAllBytes(paths.BackupFile(slot)));
+            else Assert.IsFalse(File.Exists(paths.BackupFile(slot)));
+            var listed = service.ListSlots(slot.Profile).Single();
+            Assert.AreEqual(SlotStatus.MetaMissing, listed.Status);
+            Assert.AreEqual("Committed", listed.Meta.DisplayName);
+            Assert.AreEqual(result.Bytes, listed.Meta.WorldBytes);
+            Assert.IsFalse(File.Exists(paths.TempFile(slot)));
+        }
+
+        [Test]
+        public void StaleSidecar_UsesEmbeddedMeta()
+        {
+            Assert.IsTrue(SaveNow().Success);
+            byte[] oldSidecar = File.ReadAllBytes(paths.MetaFile(slot));
+            var oldMeta = new NewtonsoftSaveJsonCodec().Deserialize<SaveMeta>(oldSidecar);
+            var captured = service.CaptureNow(slot, SaveReason.Manual, "Save 2"); // same string length
+            captured.Meta.SavedUtc = oldMeta.SavedUtc;
+            captured.Header.SavedUtcTicks = oldMeta.SavedUtc.Ticks;
+            Assert.IsTrue(service.WriteCaptured(captured).Success);
+            File.WriteAllBytes(paths.MetaFile(slot), oldSidecar);
+            var listed = service.ListSlots(slot.Profile).Single();
+            Assert.AreEqual(SlotStatus.MetaMissing, listed.Status);
+            Assert.AreEqual("Save 2", listed.Meta.DisplayName);
+            Assert.AreEqual(oldMeta.SavedUtc, listed.Meta.SavedUtc, "timestamp alone cannot detect stale metadata");
+        }
+
+        [UnityTest]
+        public IEnumerator MetadataWriteFailure_AsyncReportsSuccess()
+        {
+            Assert.IsTrue(SaveNow().Success);
+            Directory.CreateDirectory(paths.MetaFile(slot) + ".tmp");
+            var saved = new List<GameSaved>();
+            Action<GameSaved> handler = e => saved.Add(e);
+            EventBus<GameSaved>.Subscribe(handler);
+            try
+            {
+                LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("Save committed, but metadata"));
+                var operation = service.SaveAsync(slot, SaveReason.Manual, "Committed").GetAwaiter();
+                double deadline = UnityEditor.EditorApplication.timeSinceStartup + 10;
+                while (!operation.IsCompleted && UnityEditor.EditorApplication.timeSinceStartup < deadline) yield return null;
+                Assert.IsTrue(operation.IsCompleted); Assert.IsTrue(operation.GetResult().Success);
+                Assert.AreEqual(1, completed.Count); Assert.IsTrue(completed[0].Success);
+                EventHub.DrainAll(); Assert.AreEqual(1, saved.Count);
+                Assert.AreEqual(slot, service.CurrentSlot); Assert.IsFalse(service.IsBusy);
+                Assert.AreEqual("Committed", service.ListSlots(slot.Profile).Single().Meta.DisplayName);
+            }
+            finally { EventBus<GameSaved>.Unsubscribe(handler); }
+        }
+
         [Test]
         public void DeferredBlocks_AreDisposedOnAllPaths()
         {
