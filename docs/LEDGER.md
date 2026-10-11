@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 52 | 1 | 1 | 0 | 49 | 0 | 103 | 16 |
+| M1 | 52 | 0 | 1 | 0 | 50 | 0 | 103 | 17 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -167,7 +167,7 @@
 | PHY-018 | Collider and mass determinism across frame rates | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, PHY-013 | yes | done | astra (gpt-6) | 2026-10-11 | 8c26c92 | Four frame patterns × 1/17 workers; per-tick bytes/mass/velocity identical; zero late installs |
 | PHY-019 | Performance gates and memory | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-012, PHY-013, PHY-015, SPEC-10, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | fcd09c2 | Six reference gates; zero late installs; ADR-0033 corrects collider overlap allocation |
 | PHY-020 | Fallback: flat grid compound of boxes (only if PHY-002 is no-go for nested compounds) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002 | yes | done | astra (gpt-6) | 2026-10-11 | dd85d8c | not needed (PHY-002 go) |
-| PHY-023 | Urgent collider deadlines across catch-up frames | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-018, PHY-019 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PHY-023 | Urgent collider deadlines across catch-up frames | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-018, PHY-019 | yes | done | astra (gpt-6) | 2026-10-11 | a912ab2 | ADR-0035 urgent deadline completion outside fixed step; strict determinism and full gates pass |
 | DMG-001 | Public contract types | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 9310e7c | Public damage/restore/impulse contracts, 43 config defaults, table lookup; 4 tests; Q71–74 |
 | FLT-001 | Public contract types | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0ddf5bf | Unmanaged flight/input contracts; exact SPEC-03 fields; Q112 comment corrections |
 | FLT-002 | Grid-space and flight maths | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | blocked | astra (gpt-6) | 2026-10-11 |  | Validation awaits PHY-023; code and eight passing tests retained on task/FLT-002-flight-math |
@@ -176,7 +176,7 @@
 | FLT-005 | PlayerCommandApplySystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001, DMG-001 | yes | todo |  |  |  |  |
 | FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | no | todo |  |  |  |  |
 | FLT-007 | PropulsionSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-002, FLT-004, FLT-006, DMG-001, SPEC-12 | no | todo |  |  |  |  |
-| FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | no | todo |  |  |  |  |
+| FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | yes | todo |  |  |  |  |
 | FLT-009 | Flight behaviour scenarios | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-005, FLT-007, FLT-008, SPEC-10 | no | todo |  |  |  |  |
 | FLT-010 | Flight tuning against legacy blueprints | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-009, SPEC-72 | no | todo |  |  |  |  |
 | FLT-011 | Flight performance and determinism | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-007, FLT-008, TST-001 | no | todo |  |  |  |  |
@@ -675,7 +675,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 110 | 2026-10-11 | SPEC-01 FND-009 | Future galaxy/fleet/combat/camera contracts absent at current dependency stage | Keep task-owned integration points and configured SESS defaults | Tech lead | SPEC-01 Q17: GAL-008, FND-010, AI-008 and CAM-004 wiring remains with those tasks |
 | 111 | 2026-10-11 | SPEC-01 FND-009 | New game can run without a selected profile | Create configured-default profile only when none is selected | Tech lead | SPEC-01 Q18; existing active profile and redirected save roots preserved |
 | 112 | 2026-10-11 | SPEC-20 FLT-001 | Contract size/file-list and player-tag comments disagree with field/profile contracts | Keep fields; correct comments; include PropulsionStats | Tech lead | SPEC-20 Q9: 44-byte FlightThruster; ADR-0015 profile owns PlayerShip; no layout change |
-| 113 | 2026-10-11 | SPEC-12 PHY-023 | Background batch completion can miss an urgent install during six-tick catch-up | Finish deadline-critical work outside the fixed step | Tech lead | Accepted ADR-0035 / SPEC-12 Q25: next-frame deadline completion in the variable-rate builder; PHY-023 full validation pending |
+| 113 | 2026-10-11 | SPEC-12 PHY-023 | Background batch completion can miss an urgent install during six-tick catch-up | Finish deadline-critical work outside the fixed step | Tech lead | Accepted ADR-0035 / SPEC-12 Q25: next-frame deadline completion in the variable-rate builder; PHY-023 verified: delayed batch and strict determinism pass; full suites green |
 
 
 
@@ -687,6 +687,8 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-11 | PHY-023 | Urgent deadline completion | Reference 30-ship workload: median/p95 0/0 ms, max 0.085417 ms; six forced completions; zero late installs | Apple M5 Pro; Deadline marker, reference settings, 60 warmup + 600 measured ticks; worker median/p95 0.034209 / 3.338420 ms; same 38 perf gates pass |
+| 2026-10-11 | PHY-023 | Six-tick catch-up diagnostic | Deadline completion max 0.528208 ms; all 12 determinism runs identical, zero late installs | Default safety settings, not a reference timing gate; one station + two ships, 96 sampled ticks/run, 1/17 workers. Deliberate 500 ms stalled batch test waits outside fixed step and installs exactly at tick 8 |
 | 2026-10-11 | FND-008 | Persistent-ID check without refill | 0.000083 / 0.000084 ms median/p95; gate 0.01 ms | Apple M5 Pro; reference settings; Check profiler marker, 60 warmup + 300 initialization updates; valid zero threshold |
 | 2026-10-11 | PHY-019 | Brick rebuild | Noise 19.9 / 23.5 µs median/p95; full 1.1 / 1.3 µs; slab 0.6 / 0.7 µs | Apple M5 Pro, Unity 6000.6.5f1, Burst on, safety/debugger/leaks off; 60 warmup + 300 frames; 1,000 distinct 50% noise masks; serial Run includes call overhead |
 | 2026-10-11 | PHY-019 | Station idle / spawn | Idle 0.013833 / 0.017874 ms median/p95; spawn 0.024395 / 0.220916 ms, max 0.314877 ms; ready ≤ 8 frames | Inclusive physics-system + gameplay ECB markers; 42 completed spawns / 300 measured frames, after 60 warmup; CurrentValue deltas verified nonzero in headless mode |
@@ -725,6 +727,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — PHY-023 urgent collider deadline repair (astra, gpt-6)
+
+- Accepted **ADR-0035 / SPEC-12 Q25 / ledger Q113**. The variable-rate builder uses `SimTime.MaxTicksPerFrame` to finish deadline-critical work before the next catch-up frame. Existing in-flight work cannot monopolize the batch slot across that boundary. Newly scheduled due assemblies also finish before returning. Fixed-step swap remains nonblocking and remains the sole collider installer.
+- A deliberately stalled 500 ms batch now finishes outside fixed-step execution and installs at exactly tick 8, with zero late installs. The non-urgent age limit, per-grid order, ownership and strict zero-late assertions remain intact; no sleeps or hidden waits were added to the determinism driver.
+- Full EditMode determinism: 12 runs across four frame patterns and 1/17 workers have identical records and zero late installs. Catch-up deadline marker max **0.528208 ms** under normal safety settings (diagnostic). Reference 30-ship workload: deadline median/p95/max **0 / 0 / 0.085417 ms**, six forced completions; worker median/p95 **0.034209 / 3.338420 ms**, zero late installs. No budget was relaxed; the existing non-urgent-predecessor backlog diagnostic remains documented.
+- Full validation: compile **zero C# warnings**, EditMode **619 passed + 1 explicit skipped**, PlayMode **48 passed**, perf **38/38**, docs **504 tasks / zero errors**. Implementation `a912ab2`. The two original FLT-002 failure reports remain preserved under Logs/test-results.
+- Next: resume/rebase task/FLT-002-flight-math and rerun its complete validation, including the eight math tests that preceded the original failure. Then continue flight/config/registration and remaining M1 work.
 
 ### 2026-10-11 — FLT-002 validation exposed urgent collider deadline race (astra, gpt-6)
 
