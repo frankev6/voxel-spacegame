@@ -13,13 +13,13 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 62 | 0 | 0 | 0 | 4 | 0 | 66 | 17 |
+| M0 | 61 | 1 | 0 | 0 | 4 | 0 | 66 | 16 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 3 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
-| A0 | 10 | 1 | 0 | 3 | 2 | 0 | 16 | 1 |
-| A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 0 |
+| A0 | 7 | 1 | 0 | 4 | 4 | 0 | 16 | 1 |
+| A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 <!-- summary:end -->
 
@@ -79,7 +79,7 @@
 | PERS-010 | Fixture harness, container fixtures and the 04-B1 EditMode regression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | no | todo |  |  |  |  |
 | PERS-011 | Round-trip byte equality (framework level) | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | no | todo |  |  |  |  |
 | PERS-012 | Save performance and size gates | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-008 | no | todo |  |  |  |  |
-| VOX-001 | Public contract types | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M0 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
+| VOX-001 | Public contract types | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M0 | standard | CORE-001, DATA-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
 | AUD-001 | Public contract types | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | AUD-002 | Mixer asset, voice settings and import rules | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | AUD-001 | no | todo |  |  |  |  |
 | AUD-003 | AudioService core: root, single listener, voice pools, volumes, pause | [SPEC-64](specs/SPEC-64-audio.md) | M0 | frontier | AUD-002 | no | todo |  |  |  |  |
@@ -498,7 +498,7 @@
 | AST-001 | Public contract types: asset manifest, naming rules and licence register | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | ART-001 | yes | todo |  |  |  |  |
 | AST-002 | Art import rules and asset validator | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | AST-001 | no | todo |  |  |  |  |
 | AST-003 | Licence audit of carried-over placeholders | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | AST-001 | no | todo |  |  |  |  |
-| ART-014 | Apply the approved direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A1 | standard | ART-013 | no | todo |  |  |  |  |
+| ART-014 | Apply the approved direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A1 | standard | ART-013 | yes | todo |  |  |  |  |
 | AST-004 | Fonts and type ramp | [SPEC-81](specs/SPEC-81-asset-production.md) | A1 | standard | SPEC-80, AST-002 | no | todo |  |  |  |  |
 | AST-005 | Brick layers: hull and internals (layers 0–19) | [SPEC-81](specs/SPEC-81-asset-production.md) | A1 | standard | SPEC-80, SPEC-11, AST-002 | no | todo |  |  |  |  |
 | AST-006 | Brick layers: station, asteroid, Otherness, debug and missing (layers 20–63) | [SPEC-81](specs/SPEC-81-asset-production.md) | A1 | standard | AST-005 | no | todo |  |  |  |  |
