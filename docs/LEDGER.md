@@ -13,8 +13,8 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 34 | 0 | 1 | 0 | 31 | 0 | 66 | 9 |
-| M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
+| M0 | 33 | 0 | 1 | 0 | 32 | 0 | 66 | 11 |
+| M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
@@ -66,14 +66,14 @@
 | DATA-006 | Block blob builder and placement maths | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-003, DATA-005 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 8eb3aca |  |
 | DATA-007 | ContentService and ECS singletons | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-006 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | fc1d170 | Synthetic2000 8.2 ms (gate 100), 150 defs 0.5 ms (gate 20); shipped-content run waits for DATA-009 |
 | DATA-008 | Editor database builder, postprocessor, validator runner and CLI | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-005 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4e68557 |  |
-| DATA-009 | System placeholder content and the database asset | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-008 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| DATA-009 | System placeholder content and the database asset | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-008 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | d710afe |  |
 | PERS-001 | Public contract types | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | CORE-001, DATA-001, VOX-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 75f6583 | Result-struct constructors: SPEC-05 Q16 |
 | PERS-002 | Save paths, profiles, slots and meta files | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 20bb0aa | META-chunk fallback completes with PERS-003; SPEC-05 Q17 |
 | PERS-003 | Binary container, CRC32 and compression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001 | yes | todo |  |  |  |  |
 | PERS-004 | ID palette and SaveWriter/SaveReader integration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-003, SPEC-02 | no | todo |  |  |  |  |
 | PERS-005 | Save pipeline: capture, worker, atomic write, thumbnails, queue | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-002, PERS-004, SPEC-04 | no | todo |  |  |  |  |
 | PERS-006 | Load pipeline and restore orchestration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005 | no | todo |  |  |  |  |
-| PERS-007 | VOXS codec | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001, SPEC-04 | no | todo |  |  |  |  |
+| PERS-007 | VOXS codec | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001, SPEC-04 | yes | todo |  |  |  |  |
 | PERS-008 | Deferred VOXS snapshots in saves | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-007, PERS-005 | no | todo |  |  |  |  |
 | PERS-009 | Autosave scheduler and save on quit | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | no | todo |  |  |  |  |
 | PERS-010 | Fixture harness, container fixtures and the 04-B1 EditMode regression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | no | todo |  |  |  |  |
@@ -95,10 +95,10 @@
 | MIG-001 | Public contract types | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c327a64 |  |
 | MIG-002 | Legacy JSON index and strict reading | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 6c78f67 |  |
 | MIG-003 | Legacy ID map | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4955b51 |  |
-| MIG-004 | Asset writer, manifest, runner and report | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-002, MIG-003, SPEC-04 | no | todo |  |  |  |  |
+| MIG-004 | Asset writer, manifest, runner and report | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-002, MIG-003, SPEC-04 | yes | todo |  |  |  |  |
 | MIG-005 | Item converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-004 | no | todo |  |  |  |  |
 | MIG-006 | Block converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-005 | no | todo |  |  |  |  |
-| MIG-007 | Legacy Euler to orientation | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-001, SPEC-04 | no | todo |  |  |  |  |
+| MIG-007 | Legacy Euler to orientation | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-001, SPEC-04 | yes | todo |  |  |  |  |
 | MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | no | todo |  |  |  |  |
 | MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | no | todo |  |  |  |  |
 | FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | no | todo |  |  |  |  |
@@ -109,7 +109,7 @@
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | no | todo |  |  |  |  |
 | INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | no | todo |  |  |  |  |
 | INP-007 | Frame-rate independence test | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-005, SPEC-20 | no | todo |  |  |  |  |
-| DATA-011 | v2 block additions (reactor, cargo) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | standard | DATA-009 | no | todo |  |  |  |  |
+| DATA-011 | v2 block additions (reactor, cargo) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | standard | DATA-009 | yes | todo |  |  |  |  |
 | VOX-002 | SPIKE: memory model for the reference and thin-shell stations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | todo |  |  |  |  |
 | VOX-003 | Sparse-brick fallback (only if VOX-002 is no-go) | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-002 | no | todo |  |  |  |  |
 | VOX-004 | Brick maths and mask operations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | todo |  |  |  |  |
@@ -566,6 +566,10 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — DATA-009 placeholder content and database (claude, claude-opus-5-5)
+- `Assets/Game/Content/` area folders (empty ones keep a `.gitkeep`; Unity ignores dotfiles), `ContentDatabase.asset`, `block_missing` (material layer 63) and `item_missing`, with the SPEC-04 §4.10 values.
+- `ProjectContentTests` (2) pass; the shipped-content performance test now runs on the real database. EditMode 204/204. Unblocks the ART-007 validator chain, MIG-004 and VOX-010.
 
 ### 2026-10-11 — DATA-008 editor content tooling (claude, claude-opus-5-5)
 - Database builder, postprocessor, validator runner (DATA-E010/E011/W012, extension validators ordered by \`Order\`, a throwing validator becomes DATA-E099), CLI with exit codes, build gate, the Game/Content menu, the mirror-partner creator, and drawers for orientation and face masks.
