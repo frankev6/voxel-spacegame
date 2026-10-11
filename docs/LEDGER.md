@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 31 | 0 | 0 | 0 | 35 | 0 | 66 | 9 |
+| M0 | 30 | 0 | 0 | 0 | 36 | 0 | 66 | 9 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -90,8 +90,8 @@
 | DEV-005 | Scenario language: parser, expressions and built-in probes | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-003 | no | todo |  |  |  |  |
 | DEV-006 | Scenario runner, results JSON and CLI/scripts | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-004, DEV-005 | no | todo |  |  |  |  |
 | DEV-020 | Release-strip guarantee | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | no | todo |  |  |  |  |
-| TST-001 | Test kit core | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | frontier | CORE-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
-| TST-008 | Iteration gates | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | standard | TST-001 | no | todo |  |  |  |  |
+| TST-001 | Test kit core | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c082a4c | kit + perf hook; 8 gates on PerfRun; OQ 4–6 |
+| TST-008 | Iteration gates | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | standard | TST-001 | yes | todo |  |  |  |  |
 | MIG-001 | Public contract types | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c327a64 |  |
 | MIG-002 | Legacy JSON index and strict reading | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 6c78f67 |  |
 | MIG-003 | Legacy ID map | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4955b51 |  |
@@ -572,6 +572,19 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — TST-001 test kit core (claude, claude-opus-5-5)
+- New `Game.Tests.Common` assembly, referenced by both test assemblies. It holds:
+  - `EcsTestWorld`, with its own counted rate manager: exact `StepTicks` and capped catch-up `StepFrame`. It auto-advances `SimClock` and adds groups, ECB systems and ordering anchors, so reduced worlds log no warnings.
+  - `GameTestBase`, with tracked worlds and leak detection;
+  - `PerfStat`, `PerfSettings`, `PerfRun` (JSON records in `Logs/perf/`, plus `PerfRun.Gate` for loops a test times itself);
+  - `Game.Core.Diagnostics.PerfMarkers`, which discovers `Type.Step` markers.
+- `tools/test.sh perf` runs EditMode and PlayMode `Performance` tests, then the new `tools/perf_summary.py` (PASS/FAIL table, exit 1 on a failing record). All 8 existing gates moved onto `PerfRun` and all pass.
+- Deviations (SPEC-71 open questions 4–6, ledger 20–22):
+  - a fresh Unity catch-up manager plus float 1/60 gives 2 ticks for 0.05 s;
+  - EditMode never ends a profiler frame, so `RunEcs` reads `CurrentValue` deltas;
+  - the micro-gates record without the reference-settings check, which would leave them unenforced in the Editor.
+- Measured: `EcsTestWorld.Create`+`Dispose` within 20 ms and `StepTicks(1)` within 0.1 ms (both tested). EditMode 241/241 (+1 explicit leak guard, which fails as designed), PlayMode 3/3.
 
 ### 2026-10-11 — CORE-009 ECS→managed event bridge (claude, claude-opus-5-5)
 - `ManagedEventDrainSystem` per SPEC-02 §5.6. It registers channels idempotently, one named singleton queue each. Each frame it completes the producers, sorts the batch by (Tick, SortKey, payload hash), publishes, then runs `EventHub.DrainAll`. `OnDestroy` disposes every queue.
