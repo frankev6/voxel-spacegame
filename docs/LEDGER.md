@@ -14,9 +14,9 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 61 | 1 | 0 | 0 | 40 | 0 | 102 | 14 |
+| M1 | 61 | 0 | 0 | 0 | 41 | 0 | 102 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
-| M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 3 |
+| M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
@@ -160,11 +160,11 @@
 | PHY-010 | BrickColliderBuildSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-005, PHY-009 | yes | done | astra (gpt-6) | 2026-10-11 | 08211f4 | Snapshot-only budgeted batches; 1000 bricks / 4 batches, byte-identical compound |
 | PHY-011 | ColliderSwapSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-010 | yes | done | astra (gpt-6) | 2026-10-11 | 4542bf7 | Due-prefix installs; asynchronous finalize; Q98 empty-prefix ownership |
 | PHY-012 | GridColliderCleanupSystem and teardown | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 43a56cc | Deferred ownership; scene/world teardown; Q99–100 |
-| PHY-013 | GridMassUpdateSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-006, PHY-008, DMG-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PHY-013 | GridMassUpdateSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-006, PHY-008, DMG-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0c9720a | Deterministic recompute; incremental removal; point-velocity preservation |
 | PHY-015 | Debug, statistics and harness hooks | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011 | yes | todo |  |  |  |  |
 | PHY-016 | GridBodyFactory contract test for split creators | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-008 | yes | todo |  |  |  |  |
-| PHY-017 | Physics behaviour scenarios | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011, PHY-013, SPEC-10 | no | todo |  |  |  |  |
-| PHY-018 | Collider and mass determinism across frame rates | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, PHY-013 | no | todo |  |  |  |  |
+| PHY-017 | Physics behaviour scenarios | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011, PHY-013, SPEC-10 | yes | todo |  |  |  |  |
+| PHY-018 | Collider and mass determinism across frame rates | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, PHY-013 | yes | todo |  |  |  |  |
 | PHY-019 | Performance gates and memory | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-012, PHY-013, PHY-015, SPEC-10, TST-001 | no | todo |  |  |  |  |
 | PHY-020 | Fallback: flat grid compound of boxes (only if PHY-002 is no-go for nested compounds) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002 | yes | done | astra (gpt-6) | 2026-10-11 | dd85d8c | not needed (PHY-002 go) |
 | DMG-001 | Public contract types | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 9310e7c | Public damage/restore/impulse contracts, 43 config defaults, table lookup; 4 tests; Q71–74 |
@@ -302,7 +302,7 @@
 | PERS-014 | Regression scenario 04-B1: load after a content change (end to end) | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | standard | PERS-010, SPEC-01, SPEC-50, SPEC-61, TST-001 | no | todo |  |  |  |  |
 | PERS-015 | Full-world round trip with all real participants | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-011, PERS-012, SPEC-01, SPEC-30, SPEC-31, SPEC-33, SPEC-40, SPEC-41, SPEC-42, SPEC-50 | no | todo |  |  |  |  |
 | VOX-020 | Incremental grid edits for the editor preview | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M3 | frontier | VOX-014 | yes | todo |  |  |  |  |
-| PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | no | todo |  |  |  |  |
+| PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | yes | todo |  |  |  |  |
 | DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | no | todo |  |  |  |  |
 | AI-013 | Fleet data and formations | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-003 | no | todo |  |  |  |  |
 | AI-014 | FleetSystem and member thinking | [SPEC-23](specs/SPEC-23-ai.md) | M3 | frontier | AI-013, AI-007 | no | todo |  |  |  |  |
@@ -707,6 +707,15 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — PHY-013 grid mass updates (astra, gpt-6)
+
+- Implemented conditional removed-cell reading, exact incremental subtraction, asynchronous root/slot ordering, parallel per-brick sums and canonical serial reduction. One deduplicated application pass updates only non-empty Dynamic bodies and re-expresses velocity about the new mass frame. Dense and sparse cells and palette/instance block resolution share the existing voxel contracts.
+- Six required tests pass. **1,000 seeded removals** across Destroyed/DetachedParticle/DetachedBody agree with full recompute within 1e-9 relative for accumulators, COM and tensor. **1,008,128 cells / four recomputes / 1 and 17 workers** produce bit-identical fields. Dissolution is ignored; Static/Kinematic masses remain untouched; zero cells leave the previous PhysicsMass/velocity intact.
+- Removing **2,250 cells** from a non-planar spinning ship changes retained-point velocities by at most **7.82071e-6 m/s**, below 1e-3. PHY-008's empty-mass test now uses the real recompute system and creates the body on the following tick; its temporary boundary stub is gone.
+- No new spec/API decision was needed. Applied T2.14's literal conversion to the existing Reexpress diagnostic so the full apply job compiles in Burst. DamageStreams integration remains conditional until DMG-002 implements its existing contract; the specified hand-built event tests cover removal/apply now. Restored cells remain M3 PHY-022.
+- Validation: focused **7/7** (six new cases plus body-init integration); explicit compile zero C# warnings; EditMode **597 passed + 1 explicit skipped**, PlayMode **37 passed**, perf **31/31**, docs **503 tasks / zero errors**. Physics timing/memory gates remain PHY-019.
+- Next: PHY-015 stats/debug, PHY-016 factory lifecycle and PHY-017/018/019 integrated physics checks; renderer fallback and shaders remain ready.
 
 ### 2026-10-11 — PHY-008 grid body initialization (astra, gpt-6)
 
