@@ -1112,6 +1112,18 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
   - [ ] Removing then restoring the same cells returns mass, centre of mass and tensor to their original values within 1e-9 relative.
 - **Tests:** `GridMassRestoreTests.RemoveThenRestore_RoundTrips`.
 
+### PHY-023 — Urgent collider deadlines across catch-up frames
+- **Milestone:** M1
+- **Tier:** frontier — F1/F3: asynchronous completion must not choose the physics install tick
+- **Depends on:** `PHY-018`, `PHY-019`
+- **Do:** Repair the intermittent late installs found during FLT-002's full suite (Q25). Before the next frame can run six fixed ticks, complete and finalize batches needed for an urgent deadline in the variable-rate build stage. Preserve the fixed-step no-wait rule, snapshot ownership, deterministic install ticks and non-urgent budgets. Record the final timing policy in an accepted ADR and this spec. Do not weaken the zero-late determinism assertion or hide completion in the test harness.
+- **Files:** `Assets/Game/Voxel/PhysicsBody/BrickColliderBuildSystem.cs`; `Assets/Game/Tests/EditMode/Voxel/Physics/ColliderDeadlineTests.cs`; `docs/decisions/ADR-0035-urgent-collider-deadlines.md`
+- **Acceptance criteria:**
+  - [ ] A deliberately delayed urgent batch is ready before a following six-tick catch-up frame reaches its due tick.
+  - [ ] A non-urgent unfinished batch remains asynchronous until its existing age limit; completed batches retain normal ownership cleanup.
+  - [ ] Existing collider determinism runs preserve identical records and zero late installs; full functional/performance suites pass with measured completion cost recorded.
+- **Tests:** `ColliderDeadlineTests.Urgent_ReadyBeforeCatchUp`, `.NonUrgent_PreservesAgeLimit`; existing `ColliderDeterminismTests` and PHY-019 gates.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
@@ -1142,6 +1154,7 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 | 22 | The body-init IsEmpty fast path synchronizes enableable writers in Entities 6.6 | Use IsEmptyIgnoreFilter and asynchronous enableable filtering | Tech lead | Resolved: retain the no-fixed-step-sync contract; empty filtered lists do no body work. |
 | 23 | Rebuild reset must not recycle updates or apply old results while a batch still references them | Detach referenced updates as Discarded; finalize owns their later retirement | Tech lead | Resolved: body-reset reads only immutable batch descriptors under cache ownership, which orders it before descriptor clearing/reuse. New updates may proceed without reviving stale children. |
 | 24 | Four compound versions coexist during overlapping deterministic updates, exceeding the three-version memory estimate | Allocate 3.5 MiB to reference collider blobs within unchanged whole-voxel limits | Tech lead | Resolved PHY-019 / ADR-0033: measured 3,275,424 B (old 2.5 MiB no-go), final steady 1,263,456 B; corrected reference model 32,227,328 B. Keep installation and retirement lifetimes; integration remains TST-004. |
+| 25 | An urgent batch can still be unfinished when a six-tick catch-up frame reaches its install tick | Finish deadline-critical batches in the variable-rate build stage before that frame | Tech lead | Open: PHY-023. FLT-002 full suite recorded 3 late installs at pattern 3 / 17 workers; focused repeat passed, confirming intermittent scheduling exposure. Original failure retained in Logs/test-results/flt002-initial-collider-late.xml. |
 
 ## 11. References
 
