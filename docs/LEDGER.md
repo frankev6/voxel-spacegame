@@ -13,8 +13,8 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 5 | 1 | 0 | 0 | 60 | 0 | 66 | 1 |
-| M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 14 |
+| M0 | 5 | 0 | 0 | 0 | 61 | 0 | 66 | 1 |
+| M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -82,7 +82,7 @@
 | VOX-001 | Public contract types | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c37ad48 | BrickRecord 28 B (ledger Q9); VOXS adapter members wait for VOX-009 (Q10) |
 | AUD-001 | Public contract types | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | f793298 | Validation codes: SPEC-64 Q12 |
 | AUD-002 | Mixer asset, voice settings and import rules | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | AUD-001 | yes | done | astra (gpt-6) | 2026-10-11 | d1d654c | Mixer 5 volumes; 64/512 voices; imports; SFX 8.79MiB |
-| AUD-003 | AudioService core: root, single listener, voice pools, volumes, pause | [SPEC-64](specs/SPEC-64-audio.md) | M0 | frontier | AUD-002 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| AUD-003 | AudioService core: root, single listener, voice pools, volumes, pause | [SPEC-64](specs/SPEC-64-audio.md) | M0 | frontier | AUD-002 | yes | done | astra (gpt-6) | 2026-10-11 | fdd1a3a | Single listener; 60 pooled voices; volumes/pause/follow/disposal |
 | DEV-001 | Public contract types | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | ecc6d9b |  |
 | DEV-002 | Verify and document the as-built generic harness | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 974ae81 |  |
 | DEV-003 | DevRuntimeHost, command registry, operations, help/op/until | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-001, FND-001 | yes | todo |  |  |  |  |
@@ -189,7 +189,7 @@
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | no | todo |  |  |  |  |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | no | todo |  |  |  |  |
-| AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | no | todo |  |  |  |  |
+| AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | todo |  |  |  |  |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | todo |  |  |  |  |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | no | todo |  |  |  |  |
 | DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | no | todo |  |  |  |  |
@@ -600,6 +600,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — AUD-003 audio service core (astra, gpt-6)
+
+- Composed the audio service at Boot step 4, adopting the existing empty AudioRoot placeholder. One persistent listener and exactly 60 routed voices; deferred volume writes, pause propagation, target following and idempotent native/managed cleanup.
+- Q42 records silent M0 startup without config_audio (cue authoring remains AUD-007). Content enumeration uses the actual database API. No playback selection was pulled forward from later tasks.
+- Validation: compile zero C# warnings; full EditMode **382 passed**, PlayMode **21 passed**, perf **21/21**. Added volume math and the five required service regressions. Boot initially caught duplicate AudioRoot creation; fixed by adopting the prefab placeholder and reran all suites.
+- Implementation `fdd1a3a`. M0 **61/66**; next DEV-003.
 
 ### 2026-10-11 — AUD-002 mixer and audio imports (astra, gpt-6)
 - Authored GameMixer with Master plus Music/Sfx/Ui/Ambience, all five correctly named volume parameters, one Default snapshot and an all-groups Editor view. Q41 / SPEC-64 Q13 resolves the manual-UI instruction against Frank’s CLI-only direction: a temporary job used the installed Editor authoring API; runtime API readback and tests verified the saved asset. The job and meta are removed; no runtime reflection.
