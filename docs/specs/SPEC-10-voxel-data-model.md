@@ -1033,9 +1033,9 @@ Measured station geometry and allocation totals:
 - **Do:** Implement the existing `BrickMeshQueue.Enqueue/TryDequeue/Count` contract in SPEC-11 §4.2. Moved from REN-010 to resolve the SPEC-10 spawning dependency cycle (SPEC-11 Q14, this spec Q28). Keep Acquire/Release/CompleteAccess and container ownership unchanged.
 - **Files:** `Assets/Game/Voxel/Rendering/BrickMeshQueue.cs`; `Assets/Game/Tests/EditMode/Voxel/Rendering/BrickMeshQueueTests.cs`
 - **Acceptance criteria:**
-  - [ ] Dequeue order is Damage, Neighbour, Spawn, Lod, FIFO within each; a brick queued at Spawn then at Damage is built once, from the Damage list.
-  - [ ] Equal/worse priorities do not duplicate pending bricks; obsolete entries are skipped; Count is the number of pending bricks.
-  - [ ] A Burst job producer followed by a main-thread consumer uses Acquire/Release/CompleteAccess without job safety errors; guard handles are never passed into the job.
+  - [x] Dequeue order is Damage, Neighbour, Spawn, Lod, FIFO within each; a brick queued at Spawn then at Damage is built once, from the Damage list.
+  - [x] Equal/worse priorities do not duplicate pending bricks; obsolete entries are skipped; Count is the number of pending bricks.
+  - [x] A Burst job producer followed by a main-thread consumer uses Acquire/Release/CompleteAccess without job safety errors; guard handles are never passed into the job.
 - **Tests:** `BrickMeshQueueTests.PriorityOrder`, `.UpgradeDedup`, `.StaleSkipped`, `.JobProducer_MainThreadConsumer_NoSafetyErrors` (with Burst safety checks on).
 
 ## 10. Open questions

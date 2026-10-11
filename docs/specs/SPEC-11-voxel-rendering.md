@@ -165,8 +165,9 @@ public struct BrickMeshQueue : IComponentData                // singleton; produ
     public JobHandle Acquire(JobHandle dependsOn) => Access.Acquire(dependsOn);
     public void Release(JobHandle lastJob) => Access.Release(lastJob);
     public void CompleteAccess() => Access.CompleteAccess();  // never inside FixedStepSimulationSystemGroup
-    /// Adds unless the brick is already queued with an equal or better priority; a better priority adds a second entry
-    /// and updates Pending (the stale entry is skipped on dequeue). Burst-compatible.
+    /// Adds unless the brick is already queued with an equal or better priority; a better priority permanently invalidates
+    /// the previous entry (Brick = Entity.Null), adds a new entry and updates Pending. Dequeue skips invalid/stale entries.
+    /// This preserves FIFO if a consumed brick is requeued before its old list drains (Q15). Burst-compatible.
     public void Enqueue(Entity brick, Entity grid, MeshPriority p);
     public bool TryDequeue(out BrickMeshRequest r);          // Damage, Neighbour, Spawn, Lod order; skips stale entries; removes from Pending
     public int Count { get; }
@@ -609,6 +610,8 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 
 
 | 14 | Spawning needs BrickMeshQueue.Enqueue but REN-010 depends on finished SPEC-10 through snapshot gathering | Split the existing queue methods and four tests into SPEC-10 VOX-021, depending only on REN-001 | Tech lead | Resolved 2026-10-11: VOX-013/015 depend on VOX-021; REN-010 already depends on SPEC-10 through REN-005. This keeps the contract-only cross-spec dependency grammar. No new queue API or renderer implementation is introduced. |
+
+| 15 | Priority-only stale detection revives an old request if the brick is consumed and requeued at its old priority before draining | Invalidate the prior entry permanently on upgrade, without changing public storage fields | Tech lead | Resolved 2026-10-11: StaleSkipped reproduced wrong FIFO order and would return the old grid. Upgrade scans the old priority list backward and clears that entry; pending-map priority and FIFO lists otherwise retain their contract. |
 
 ## 11. References
 

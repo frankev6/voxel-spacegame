@@ -636,6 +636,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 73 | 2026-10-11 | SPEC-13 DMG-001 | DamageSetup helper bodies have no implementation task | Return the exact specified component lists now | Tech lead | Resolved in SPEC-13 Q20; no damage systems brought forward |
 | 74 | 2026-10-11 | SPEC-10 VOX-013 | Unstow requires SplitGrace from DMG-001 | Add DMG-001 dependency before spawning | Tech lead | Resolved in SPEC-10 Q27; ready contract task taken first |
 | 75 | 2026-10-11 | SPEC-10 VOX-021 / SPEC-11 REN-010 | Mesh queue implementation is behind a voxel dependency cycle | Extract specified queue methods/tests into ready VOX-021 | Tech lead | Resolved in SPEC-11 Q14 and SPEC-10 Q28; no contract change |
+| 76 | 2026-10-11 | SPEC-11 queue / VOX-021 | Consumed/requeued brick can revive an older stale entry | Permanently invalidate the old entry on priority upgrade | Tech lead | Resolved in SPEC-11 Q15; required StaleSkipped test reproduces old FIFO/grid bug |
 
 ## Measurements
 
