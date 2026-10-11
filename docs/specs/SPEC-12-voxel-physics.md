@@ -496,18 +496,18 @@ Initial capacities not annotated above use **256** for cache lists/maps, **512**
 
 ### 4.8 Memory model (architecture §11.10)
 
-| Item | Bytes (estimate; PHY-002 measures) | Notes |
+| Item | Bytes (Unity Physics 6.6.0; PHY-002) | Notes |
 |---|---|---|
-| `BoxCollider` blob, standalone | ≈ 530 | header, convex hull data, geometry |
-| Box as a compound child | ≈ 530 + 40 (child entry) + ≈ 37 (BVH share) | copied inline into the parent |
-| Brick blob, 1 box | ≈ 530 | most hull bricks: a slab is one box |
-| Brick blob, 64 boxes (cap) | ≈ 39 KB | worst case after coarsening |
-| Grid compound | Σ child blob sizes + ≈ 77 per child | a full copy of every brick blob |
+| `BoxCollider` blob, standalone | 492 | measured MemorySize |
+| Box as a compound child | 492 + 40 (child entry) + 49.5 / 47.36 (BVH/header/alignment share) | copied inline; aggregate overhead 89.5 B/child at 64, 87.36 B/child at 1,000 |
+| Brick blob, 1 box | 492 | standalone box; most hull bricks: a slab is one box |
+| Brick blob, 64 boxes (cap) | 37,216 | 1,000-box measurement: 579,360 B |
+| Grid compound | Σ child blob sizes + measured aggregate overhead | topology-dependent BVH/header/alignment; measure actual geometry, not a fixed per-child constant |
 | Mask snapshot | 512 | freed when the batch copies it |
 | Grid record | ≈ 96 + children 32 per brick | managed by the cache |
 | `GridMass` + `GridColliderState` per root | 88 + 20 | chunk data |
 
-Reference station `HollowStation1M` (872 bricks, ≈ 1,000 boxes): cached brick blobs ≈ 0.53 MB; installed compound ≈ 0.6 MB; peak during one re-assembly: + pending compound 0.6 MB + retired compound 0.6 MB for 3 frames → **≈ 2.3 MB peak, ≈ 1.1 MB steady**. SPEC-10 §8.2's collider line (≈ 1.8 MB) is updated to this value through PHY-019 measurements. `ThinShellStation1M` (3,784 bricks, ≈ 4,200 boxes): ≈ 4.8 MB steady.
+VOX-002 measured the reference station's actual 1,024-box geometry: cached brick blobs **586,016 B**, installed compound **667,296 B**, steady **1,253,312 B** and cache + installed + pending + retired peak **2,587,904 B**. Thin-shell actual 4,096-box geometry: cached **2,188,320 B**, installed **2,531,232 B**, steady **4,719,552 B**, peak **9,782,016 B**. SPEC-10 §8.2 carries the exact model and exclusions. PHY-019 must still measure the implemented live pipeline. PHY-002 confirms nested compounds, copied ownership and standalone/compound sizes; Q12 records the estimate/API correction.
 
 ## 5. Systems, services and flow
 
@@ -761,7 +761,7 @@ The `GetSingletonRW` calls here are Unity Physics' documented pattern inside `Ph
 
 ### 5.13 `PhysicsStep` values (`PhysicsVoxelConfigFactory.CreatePhysicsStep`)
 
-Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravity = float3.zero`, `SolverIterationCount = def.SolverIterations` (4), `MultiThreaded = 1`, `SynchronizeCollisionWorld = 1`, `CollisionTolerance = 0.1f`, `EnableSolverStabilizationHeuristic = false`, `IncrementalDynamicBroadphase = false`, `IncrementalStaticBroadphase = true` (if the field exists in the installed version; PHY-002 records it). SPEC-01 `BootSingletons` creates one entity with this `PhysicsStep` and one with `PhysicsVoxelConfig`.
+Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravity = float3.zero`, `SolverIterationCount = def.SolverIterations` (4), `MultiThreaded = 1`, `SynchronizeCollisionWorld = 1`, `CollisionTolerance = 0.1f`, `SolverStabilizationHeuristicSettings.EnableSolverStabilization = false`, `IncrementalDynamicBroadphase = false`, `IncrementalStaticBroadphase = true` (both fields exist in Unity Physics 6.6.0, verified by PHY-002). SPEC-01 `BootSingletons` creates one entity with this `PhysicsStep` and one with `PhysicsVoxelConfig`.
 
 ### 5.14 Statistics and debug
 
@@ -1127,6 +1127,7 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 | 9 | Should ships use non-zero linear damping as a gameplay speed limit? | No: SPEC-20 limits speed through propulsion; `GridLinearDamping = 0` | Owner (SPEC-20) | |
 | 10 | The prose says only SpawnClearance queries chunks, but DebugAllQuery explicitly includes all bodies | Restrict the prose rule to gameplay queries; preserve DebugAllQuery | Tech lead | Resolved 2026-10-11 in PHY-001: exact filter code retained; tests cover all nine queries and the diagnostic exception. |
 | 11 | Several pipeline container capacities are not specified | Cache lists/maps 256; batch brick/child/apply lists 512, assembly lists 64 | Tech lead | Resolved 2026-10-11 in PHY-001: align unspecified initial capacities with their related pools; native references clear; normal growth remains allowed. |
+| 12 | Installed Physics API and collider sizes differ from estimates | Use measured MemorySize and installed PhysicsStep members | Tech lead | Resolved 2026-10-11 in PHY-002: §4.8 records measured bytes; §5.13 uses the nested stabilization property; both incremental broadphase flags exist. No package or public game API change. |
 
 ## 11. References
 

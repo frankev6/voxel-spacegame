@@ -611,6 +611,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 55 | 2026-10-11 | SPEC-12 PHY-001 | Initial capacities omitted for some pipeline containers | Cache 256; batch brick/child/apply 512, assemblies 64 | Tech lead | Resolved in SPEC-12 Q11; align related pools, retain dynamic growth |
 | 56 | 2026-10-11 | SPEC-10 VOX-002 | Dense reference peak with retained mesh copies is 38,828,288 B, above 36 MB | No-go; VOX-003 todo, sparse-contract ADR proposed | Tech lead | Resolved: SPEC-10 Q16 and proposed ADR-0023; no gate relaxed |
 | 57 | 2026-10-11 | SPEC-10 VOX-002 | Thin-shell peak is 162,606,784 B with both mesh copies; make it a hard gate? | Keep the documented stress-only default | Owner | Reported in SPEC-10 Q17; fallback estimates recorded, no new gate or visual policy assumed |
+| 58 | 2026-10-11 | SPEC-12 PHY-002 | Installed collider bytes and PhysicsStep stabilization member differ from estimates | Use measured bytes and nested stabilization property; static broadphase field exists | Tech lead | Resolved in SPEC-12 Q12 / §4.8 / §5.13; no public game API change |
 
 ## Measurements
 
@@ -618,6 +619,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-11 | PHY-002 | 1–2: Burst construction / copied ownership | 32 parallel persistent builds pass; disposed children leave 4/4 nested rays and distances correct | BoxCollider.Create + CompoundCollider.Create inside Burst IJobParallelFor |
+| 2026-10-11 | PHY-002 | 3–5: nested contacts / None / pair disable | Nested: 1 pair, 16 contact points, 4 collision events; None: 0/0/0 and ray hit; disabled: 1/0/0 | Pair job between PhysicsCreateBodyPairsGroup and PhysicsCreateContactsGroup; separation normal 0.85 m versus 0.8 m suppressed |
+| 2026-10-11 | PHY-002 | 6: collider MemorySize | Box 492 B; compounds64/1000 37,216 / 579,360 B | Aggregate overhead (including header/BVH/alignment) 89.5 / 87.36 B per child; child entry 40 B |
+| 2026-10-11 | PHY-002 | 7: build64 / assemble872 / assemble3784 | Median 0.0231 / 0.2258 / 1.0585 ms; p95 0.0246 / 0.2298 / 1.0643 ms | Apple M5 Pro / Unity 6000.6.5f1 / Physics 6.6.0; Burst, safety/debugger/leaks off, 8 warmups + 51 samples; includes Run/call overhead; assembly uses distinct cached unit boxes |
+| 2026-10-11 | PHY-002 | 8–9: installed API / Burst OnUpdate | IncrementalStaticBroadphase exists (bool); JobHandle.IsCompleted compiles and executes in Burst-attributed OnUpdate | Stabilization property is SolverStabilizationHeuristicSettings.EnableSolverStabilization; §5.13 corrected |
+| 2026-10-11 | PHY-002 | 10: smoothed child pose / nested decision | **GO**; child LocalToWorld error 0 m over 30 frames at 120 Hz / 60 Hz physics; smoothing offset 0.500001 m | Installed smoothing + transform systems, Unity FixedRateCatchUpManager; headless transform readback, not pixel/GPU validation; PHY-020 not needed |
 | 2026-10-11 | VOX-002 | Reference retained-copy peak | **38,828,288 B — no-go** for 36 MB headroom | 872 bricks; 504,192 faces; 570,496 welded vertices; 58 entities/chunk; 17 brick/meta chunks; Apple M5 Pro / Unity 6000.6.5f1 |
 | 2026-10-11 | VOX-002 | Thin-shell stress | **162,606,784 B** retained-copy peak; 118,710,496 B released-copy model | 3,784 bricks; 2,086,936 faces; not a hard gate |
 | 2026-10-11 | VOX-002 | Collider and source-map bytes | Box 492 B; 64-box compound 37,216 B; child entry 40 B; map header 64 B | Reference collider peak 2,587,904 B; exact data/type/capacity tables in SPEC-10 §8.2 |
@@ -631,6 +638,8 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | 2026-10-11 | M0 system review | Reference perf pass | 23/23; capture 0.155 ms, read+restore 15.41 ms, list50 6.212 ms; event write/read 1.4/2.4 µs | Apple M5 Pro; safety/debugger/leaks off; separate safety-on 411/31 suite passes |
 
+
+PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
 
