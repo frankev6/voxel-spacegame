@@ -13,9 +13,9 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 14 | 0 | 0 | 0 | 52 | 0 | 66 | 5 |
+| M0 | 13 | 0 | 0 | 0 | 53 | 0 | 66 | 5 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
-| M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
+| M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -95,8 +95,8 @@
 | MIG-001 | Public contract types | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c327a64 |  |
 | MIG-002 | Legacy JSON index and strict reading | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 6c78f67 |  |
 | MIG-003 | Legacy ID map | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4955b51 |  |
-| MIG-004 | Asset writer, manifest, runner and report | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-002, MIG-003, SPEC-04 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| MIG-005 | Item converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-004 | no | todo |  |  |  |  |
+| MIG-004 | Asset writer, manifest, runner and report | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-002, MIG-003, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | ab6e4b3 | Protected writes, manifest, runner and reports; 9 tests |
+| MIG-005 | Item converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-004 | yes | todo |  |  |  |  |
 | MIG-006 | Block converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-005 | no | todo |  |  |  |  |
 | MIG-007 | Legacy Euler to orientation | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | b264f44 | Integer RyRxRz, one-degree snapping, all 64 Unity Euler combinations |
 | MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | no | todo |  |  |  |  |
@@ -287,7 +287,7 @@
 | TST-006 | Ten-minute combat soak | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | standard | TST-005, SPEC-70 | no | todo |  |  |  |  |
 | MIG-009 | Weapon converter and weapon links | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-006, MIG-011, WPN-001, SPEC-04 | no | todo |  |  |  |  |
 | MIG-010 | Ability converter and ability grants | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-006, ABL-001, SPEC-04 | no | todo |  |  |  |  |
-| MIG-011 | Audio cue converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-004, AUD-001 | no | todo |  |  |  |  |
+| MIG-011 | Audio cue converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-004, AUD-001 | yes | todo |  |  |  |  |
 | FND-011 | Load flow end to end (R28) | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | frontier | FND-010, SPEC-30, SPEC-31 | no | todo |  |  |  |  |
 | FND-013 | Blueprint Lab entry and exit | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | frontier | FND-011, EDT-001 | no | todo |  |  |  |  |
 | FND-015 | Boot from any scene and the defeat flow | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | standard | FND-011, HUD-001 | no | todo |  |  |  |  |
@@ -590,6 +590,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — MIG-004 protected migration writer and runner (astra, gpt-6)
+- Implemented asset creation and GUID-preserving updates, strict sorted manifests, guarded field writes, empty-only links, converter discovery/order, catalog rebuilds, Force confirmation, CLI and deterministic reports. CLI smoke run exits 0 with zero errors and the existing missing-start-blueprint warning. Committed the initial empty manifest/report; converters follow.
+- Nine migration tests cover unchanged bytes/GUID, hand edits and Force, protected link fills across manifest reloads, link arrays, missing fields, invalid manifests, path escapes/type collisions, deletion/recreation and failing fill callbacks. Q34 / SPEC-72 Q13 resolves manifest adoption of hand edits and defines report byte equality across unchanged runs. No owner decision required.
+- Compile: zero C# warnings. Full EditMode **351 passed + 1 explicit skipped**; perf **18/18 pass**. Latest full PlayMode baseline remains **16 passed**; changes are Editor-only. Docs clean. M0 **53/66**; MIG-005 is ready.
+- Tooling follow-up for TST-008: the prior MIG-007 perf run wrote passing results but had a native Mono shutdown crash after native allocation lifetime notices. Preserved `Logs/tools/mig007-perf-editmode-shutdown-crash.log` and its dump under Logs. The current full/perf runs passed without that crash; strengthen test-process exit handling during TST-008.
 
 ### 2026-10-11 — MIG-007 legacy Euler conversion (astra, gpt-6)
 - Implemented exact integer Ry·Rx·Rz rotation matching with the specified one-degree snapping tolerance. All 64 right-angle combinations match Unity Quaternion.Euler on all three axes; shipped export vectors and wraparound cases pass.
