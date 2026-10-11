@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 99 | 0 | 0 | 0 | 1 | 0 | 100 | 17 |
+| M1 | 98 | 0 | 0 | 0 | 2 | 0 | 100 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -132,7 +132,7 @@
 | VOX-016 | DeferredDisposalSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | no | todo |  |  |  |  |
 | VOX-017 | Benchmark structures | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-005 | no | todo |  |  |  |  |
 | VOX-019 | Damage persistence scenario | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-014 | no | todo |  |  |  |  |
-| REN-001 | Public contract types | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | VOX-001, DATA-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| REN-001 | Public contract types | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | VOX-001, DATA-001 | yes | done | astra (gpt-6) | 2026-10-11 | 42dfd86 | Rendering contracts; queue/batch ownership; ADR-0018 layout; Q51–53 |
 | REN-002 | SPIKE: Entities Graphics with thousands of runtime brick meshes | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-10 | no | todo |  |  |  |  |
 | REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002 | no | todo |  |  |  |  |
 | REN-004 | Normals, packing and shape tables | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-04 | no | todo |  |  |  |  |
@@ -627,6 +627,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — REN-001 rendering contracts (astra, gpt-6)
+
+- Added SPEC-11 public formats, blobs, components, configs and helper signatures; future algorithms throw task-labelled stubs. Queue/batch factories allocate Persistent containers, and disposal waits for their jobs before releasing memory. Container singleton audit includes the four approved rendering owners.
+- Applied ADR-0018's three-bit snapshot shape layout and 42-normal contract. Q51 corrects ShapeFace's arithmetic size to **52 B** without changing fields; Q52 makes the managed-state type public with internal fields; Q53 / accepted ADR-0022 adds the existing Entities mathematics-extensions assembly required by AABB.
+- Required layout and allocation tests pass, including jobs pending at disposal. Full live EditMode **421 passed**, PlayMode **31 passed**, perf **23/23**, compile zero C# warnings, docs zero errors/warnings. Implementation `42dfd86`. Next: PHY-001 contracts, then VOX-002's measured memory gate.
 
 ### 2026-10-11 — VOX-004 brick maths and masks (astra, gpt-6)
 
