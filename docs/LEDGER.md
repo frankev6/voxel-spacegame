@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 3 | 0 | 0 | 0 | 63 | 0 | 66 | 2 |
+| M0 | 2 | 0 | 0 | 0 | 64 | 0 | 66 | 2 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -87,8 +87,8 @@
 | DEV-002 | Verify and document the as-built generic harness | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 974ae81 |  |
 | DEV-003 | DevRuntimeHost, command registry, operations, help/op/until | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-001, FND-001 | yes | done | astra (gpt-6) | 2026-10-11 | beab746 | Registry, operations, logs/events and CLI; idle 0 GC |
 | DEV-004 | Runtime input injection and UI query | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | yes | done | astra (gpt-6) | 2026-10-11 | 47e764b | Timed state events; AgentMouse cleanup; real-panel UI query |
-| DEV-005 | Scenario language: parser, expressions and built-in probes | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-003 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| DEV-006 | Scenario runner, results JSON and CLI/scripts | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-004, DEV-005 | no | todo |  |  |  |  |
+| DEV-005 | Scenario language: parser, expressions and built-in probes | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-003 | yes | done | astra (gpt-6) | 2026-10-11 | 2f1e10c | Scenario parser, typed expressions and M0 probes; R28 parse verified |
+| DEV-006 | Scenario runner, results JSON and CLI/scripts | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-004, DEV-005 | yes | todo |  |  |  |  |
 | DEV-020 | Release-strip guarantee | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | yes | todo |  |  |  |  |
 | TST-001 | Test kit core | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c082a4c | kit + perf hook; 8 gates on PerfRun; OQ 4–6 |
 | TST-008 | Iteration gates | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | standard | TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | c6057e6 | Live iteration gates pass; both reloads disabled; reliable CLI test results |
@@ -607,6 +607,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — DEV-005 scenario language and probes (astra, gpt-6)
+
+- Added location-preserving tokenizer/parser, headers and statements, typed expression trees, variables and explicit probe registry. M0 probes cover scene/frame/tick, context/pause, ready/UI, per-run logs/events, cached ECS queries, enabled listeners and maths. `until` now evaluates real expressions. Scenario contexts own/dispose cached queries and independent counter baselines.
+- Q45 / SPEC-70 Q15 resolves unary precedence, uppercase R28 tags and omitted-status default; the exact R28 example parses with explicit test-only future registrations, while production rejects unknown commands/probes.
+- Compile zero C# warnings; full EditMode **393 passed**, PlayMode **26 passed**, perf **22/22**. Seven specified parser/evaluation tests pass. Live CLI confirms boot services/entities and one listener, math and event probes, and mixed-kind errors. Temporary test scene's extra camera listener was correctly counted; Boot scene is clean. M0 input context is still None until INP-004.
+- Implementation `2f1e10c`. M0 **64/66**; next DEV-006, then DEV-020 and system review.
 
 ### 2026-10-11 — DEV-004 runtime input and UI query (astra, gpt-6)
 
