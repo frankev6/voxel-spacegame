@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 93 | 0 | 0 | 0 | 7 | 0 | 100 | 18 |
+| M1 | 92 | 0 | 0 | 0 | 8 | 0 | 100 | 17 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -150,7 +150,7 @@
 | PHY-002 | SPIKE: Unity Physics capabilities for nested voxel compounds | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | dd85d8c | Nested GO; all ten checks recorded |
 | PHY-003 | Physics config definition, factory and PhysicsStep | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-001, SPEC-04 | no | todo |  |  |  |  |
 | PHY-004 | Brick box merger | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | e1679aa | Exact greedy box covers, 2/4-cell coarsening, bounds fallback; 7 tests |
-| PHY-005 | Brick blob builder and grid compound assembler | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002, PHY-004 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PHY-005 | Brick blob builder and grid compound assembler | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002, PHY-004 | yes | done | astra (gpt-6) | 2026-10-11 | a54c29f | Eight tests; all merge levels / copied ownership / nested coordinates |
 | PHY-006 | Mass maths | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | todo |  |  |  |  |
 | PHY-007 | Pipeline singletons and access discipline | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | todo |  |  |  |  |
 | PHY-008 | GridBodyInitSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-003, PHY-006, PHY-007, SPEC-10 | no | todo |  |  |  |  |
@@ -645,6 +645,12 @@ PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedu
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PHY-005 brick and grid collider builders (astra, gpt-6)
+
+- Implemented SPEC-12 §5.3/§5.4: empty → Null, one box stays a BoxCollider, multiple boxes become a copied compound with temporary child disposal. Grid assembly preserves caller-owned children and applies brick coordinates × 16 × cell size. Coordinate comparison is (z, y, x) without integer-subtraction overflow.
+- Eight required tests pass under Burst/managed use. Coverage checks nine seeded masks × four caps, proves all four merge levels were reached, casts quarter-cell and cell-centre lattices in both directions plus cell-local segments, and checks exact air stays empty. Nested positive/negative offsets, sorted child transforms, child disposal and leak detection pass.
+- Diagnostic 50% noise brick build: **9.7 µs median / 12.8 µs p95**, current test safety settings; formal reference gate remains PHY-019. Compile zero C# warnings, full headless EditMode **440 passed + 1 explicit skipped**, PlayMode **31 passed**, perf **23/23**, all process exits 0; docs zero errors/warnings. Implementation `a54c29f`. No new spec question or contract change.
 
 ### 2026-10-11 — PHY-002 nested physics capability spike (astra, gpt-6)
 
