@@ -552,7 +552,7 @@ Main thread, capture (`CaptureNow`):
 4. `meta = new SaveMeta { FormatVersion = 1, GameVersion = Application.version, DatabaseHash = content.DatabaseHash.ToString("x16"), ProfileId, SlotId, DisplayName, Reason, SavedUtc = DateTime.UtcNow }`; `context.DescribeForMeta(meta)`.
 5. Thumbnails: `context.TryCaptureSlotThumbnail(out slotThumb)`; `context.CollectThumbnails(changed, keep)`.
 6. Header: `databaseHash32 = (uint)content.DatabaseHash`, `savedUtcTicks = meta.SavedUtc.Ticks`, `playtimeSeconds = meta.PlaytimeSeconds`.
-7. Copy the preserved unknown chunks list. Record capture time (`Stopwatch`) → `CaptureMs`.
+7. Copy the preserved unknown chunks list. Record capture time (`Stopwatch`) → `CaptureMs`. Any exception outside a participant in steps 1–7 also releases every captured writer/deferred block and returns `ParticipantFailed` naming the session context/metadata/thumbnail stage; no file is touched (Q23).
 
 Background thread (`await Awaitable.BackgroundThreadAsync()`), `WriteCaptured`:
 8. For each participant writer: `payload = w.ToArray(b => { var bytes = b.Encode(); b.Dispose(); return bytes; })`.
@@ -986,11 +986,11 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 - **Tier:** frontier — F5: native ownership on every capture failure path
 - **Depends on:** `PERS-008`
 - **Do:** Cover the entire main-thread capture with failure handling, including session metadata and thumbnail callbacks. Release all captured writers/deferred blocks; return ParticipantFailed with the failing key or context stage, without writing files. Preserve the existing async completion path and queue recovery.
-- **Files:** `Assets/Game/Persistence/Services/SaveService.cs`; `Assets/Game/Tests/EditMode/Persistence/{SavePipelineTests,FakeSaveContext}.cs`
+- **Files:** `Assets/Game/Persistence/Services/SaveService.cs`; `Assets/Game/Tests/EditMode/Persistence/{SavePipelineTests,FakeSaveContext,VoxsSnapshotBlockTests}.cs`
 - **Acceptance criteria:**
   - [ ] Metadata, slot-thumbnail and thumbnail-list callback exceptions release every captured block without encoding and leave existing files byte-identical.
   - [ ] SaveAsync returns ParticipantFailed, raises failure completion once, clears its ticket, and permits a subsequent successful save.
-- **Tests:** `SavePipelineTests.ContextCaptureFailure_LeavesFilesUntouched`; `.ContextCaptureFailure_AsyncCompletesAndRecovers`.
+- **Tests:** `SavePipelineTests.ContextCaptureFailure_LeavesFilesUntouched`; `.ContextCaptureFailure_AsyncCompletesAndRecovers`; `VoxsSnapshotBlockTests.AllPaths_Dispose` (actual native snapshots through each context failure).
 
 ## 10. Open questions
 
@@ -1018,6 +1018,8 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 | 20 | VOXS v1 omits `CellsAlive`, instance flags and `Reserved`, but acceptance asks for instance equality; a full palette may lack D3's fallback; malformed compact blobs can expand to gigabytes | Preserve v1 bytes; bounded, deterministic repair | Tech lead | **Resolved in PERS-007:** runtime-only `Functional` and `Reserved` reset; `CellsAlive` is rebuilt from references (saturated to ushort), `Destroyed` is inferred for Functional definitions with nonpositive FunctionHp. Equality covers serialized fields and reconstructed state. D3 uses an existing `(MissingBlock,0,0)` entry; if all 32768 slots are occupied without it, slot 32767 becomes that fallback with an additional drift warning (existing references also become Missing). Body inflation and decoded cell storage are each capped at 256 MiB before allocation. Empty bricks, solid HP zero, invalid cell size/anchor and duplicate removed coordinates reject. These are validation/resource limits, not a wire-format change |
 | 21 | The thread-agnostic encoder's run scratch used Temp, which Unity forbids on a managed save worker | Short-lived TempJob scratch | Tech lead | **Resolved in PERS-008:** use TempJob for the one reusable run buffer and dispose it in the encoder's finally; snapshot arrays remain Persistent. Verified through both Task.Run and SaveAsync's background-thread path |
 | 22 | PERS-011's deferred-VOXS round trip was marked ready before the snapshot implementation it exercises | Depend on PERS-008 as well as PERS-006 | Tech lead | **Resolved in PERS-011:** add the actual prerequisite; tests restore into fresh participants after the original native arrays have been disposed |
+
+| 23 | Session metadata or thumbnail callbacks can throw after native snapshots are captured, but §5.4 only handled participant exceptions | Entire capture shares failure cleanup | Tech lead | **Resolved in PERS-016:** return ParticipantFailed naming the failing stage, release all captured resources, and use the ordinary main-thread completion/queue cleanup; existing files remain untouched |
 
 ## 11. References
 

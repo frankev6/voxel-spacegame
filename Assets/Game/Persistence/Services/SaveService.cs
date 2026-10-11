@@ -569,64 +569,77 @@ namespace Game.Persistence.Services
         internal CapturedSave CaptureNow(SlotRef slot, SaveReason reason, string displayName)
         {
             var captured = new CapturedSave { Slot = slot, Reason = reason, Total = System.Diagnostics.Stopwatch.StartNew() };
-            // 1.
-            if (!CanSave(out var blocked))
+            string stage = "session context";
+            string diagnostic = "capture of " + stage;
+            try
             {
-                captured.Failure = new SaveResult(false, SaveErrorKind.Blocked, SaveMessages.Blocked(blocked), slot, 0, 0, 0);
-                return captured;
-            }
-            // 2.
-            captured.Palette = PreservedChunks.Count > 0 && LoadedPalette != null ? SaveIdPalette.SeededFrom(LoadedPalette) : SaveIdPalette.CreateEmpty();
-            // 3.
-            foreach (var p in participants)
-            {
-                if (IsPreserved(p.Key)) continue;                         // a newer-version chunk is written back instead (open question 19)
-                var w = new SaveWriter(captured.Palette, json);
-                captured.Participants.Add((p.Key, (ushort)p.Version, w));
-                try { p.Capture(w); }
-                catch (Exception e)
+                // 1.
+                if (!CanSave(out var blocked))
                 {
-                    captured.Release();
-                    GameLog.Exception("Save", e, $"capture of chunk {p.Key}");
-                    captured.Failure = new SaveResult(false, SaveErrorKind.ParticipantFailed, SaveMessages.ParticipantFailed(p.Key), slot, 0, 0, 0);
+                    captured.Failure = new SaveResult(false, SaveErrorKind.Blocked, SaveMessages.Blocked(blocked), slot, 0, 0, 0);
                     return captured;
                 }
+                // 2.
+                captured.Palette = PreservedChunks.Count > 0 && LoadedPalette != null ? SaveIdPalette.SeededFrom(LoadedPalette) : SaveIdPalette.CreateEmpty();
+                // 3.
+                foreach (var p in participants)
+                {
+                    if (IsPreserved(p.Key)) continue;                         // a newer-version chunk is written back instead (open question 19)
+                    stage = p.Key;
+                    diagnostic = "capture of chunk " + stage;
+                    var w = new SaveWriter(captured.Palette, json);
+                    captured.Participants.Add((p.Key, (ushort)p.Version, w));
+                    p.Capture(w);
+                }
+                stage = "session metadata";
+                diagnostic = "capture of " + stage;
+                // 4. SavedUtc is cut to whole milliseconds: the JSON keeps milliseconds, and the header ticks must match META exactly.
+                var now = DateTime.UtcNow;
+                now = new DateTime(now.Ticks - now.Ticks % TimeSpan.TicksPerMillisecond, DateTimeKind.Utc);
+                var meta = new SaveMeta
+                {
+                    FormatVersion = ContainerHeader.CurrentFormatVersion,
+                    GameVersion = UnityEngine.Application.version,
+                    DatabaseHash = (content != null ? content.DatabaseHash : 0UL).ToString("x16", CultureInfo.InvariantCulture),
+                    ProfileId = slot.Profile.Value,
+                    SlotId = slot.Slot.Value,
+                    DisplayName = string.IsNullOrWhiteSpace(displayName) ? DefaultDisplayName(slot) : displayName,
+                    Reason = reason,
+                    SavedUtc = now,
+                };
+                context.DescribeForMeta(meta);
+                // 5.
+                stage = "slot thumbnail";
+                diagnostic = "capture of " + stage;
+                if (context.TryCaptureSlotThumbnail(out var slotThumb) && slotThumb != null && slotThumb.Rgba32 != null)
+                {
+                    slotThumb.Key = "slot";
+                    captured.SlotThumbnail = slotThumb;
+                    meta.Thumbnail = "thumbs/slot.png";
+                }
+                stage = "session thumbnails";
+                diagnostic = "capture of " + stage;
+                context.CollectThumbnails(captured.ChangedThumbnails, captured.KeepThumbnails);
+                // 6.
+                captured.Meta = meta;
+                captured.Header = new ContainerHeader
+                {
+                    DatabaseHash32 = (uint)(content != null ? content.DatabaseHash : 0UL),
+                    SavedUtcTicks = meta.SavedUtc.Ticks,
+                    PlaytimeSeconds = meta.PlaytimeSeconds,
+                };
+                // 7.
+                captured.Preserved.AddRange(PreservedChunks);
+                captured.CaptureMs = captured.Total.Elapsed.TotalMilliseconds;
+                return captured;
             }
-            // 4. SavedUtc is cut to whole milliseconds: the JSON keeps milliseconds, and the header ticks must match META exactly.
-            var now = DateTime.UtcNow;
-            now = new DateTime(now.Ticks - now.Ticks % TimeSpan.TicksPerMillisecond, DateTimeKind.Utc);
-            var meta = new SaveMeta
+            catch (Exception e)
             {
-                FormatVersion = ContainerHeader.CurrentFormatVersion,
-                GameVersion = UnityEngine.Application.version,
-                DatabaseHash = (content != null ? content.DatabaseHash : 0UL).ToString("x16", CultureInfo.InvariantCulture),
-                ProfileId = slot.Profile.Value,
-                SlotId = slot.Slot.Value,
-                DisplayName = string.IsNullOrWhiteSpace(displayName) ? DefaultDisplayName(slot) : displayName,
-                Reason = reason,
-                SavedUtc = now,
-            };
-            context.DescribeForMeta(meta);
-            // 5.
-            if (context.TryCaptureSlotThumbnail(out var slotThumb) && slotThumb != null && slotThumb.Rgba32 != null)
-            {
-                slotThumb.Key = "slot";
-                captured.SlotThumbnail = slotThumb;
-                meta.Thumbnail = "thumbs/slot.png";
+                captured.Release();
+                GameLog.Exception("Save", e, diagnostic);
+                captured.Failure = new SaveResult(false, SaveErrorKind.ParticipantFailed, SaveMessages.ParticipantFailed(stage), slot, 0, 0, 0);
+                return captured;
             }
-            context.CollectThumbnails(captured.ChangedThumbnails, captured.KeepThumbnails);
-            // 6.
-            captured.Meta = meta;
-            captured.Header = new ContainerHeader
-            {
-                DatabaseHash32 = (uint)(content != null ? content.DatabaseHash : 0UL),
-                SavedUtcTicks = meta.SavedUtc.Ticks,
-                PlaytimeSeconds = meta.PlaytimeSeconds,
-            };
-            // 7.
-            captured.Preserved.AddRange(PreservedChunks);
-            captured.CaptureMs = captured.Total.Elapsed.TotalMilliseconds;
-            return captured;
         }
 
         bool IsPreserved(string key)

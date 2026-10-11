@@ -594,6 +594,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 46 | 2026-10-11 | SPEC-70 DEV-006 | Result filename collisions and intentional failure fixture (SPEC-70 Q16) | Run ID/suffix filenames; negative fixture tag; JSON for start errors | Tech lead | Resolved; real failures retain exit codes without failing positive smoke selection |
 
+| 47 | 2026-10-11 | SPEC-05 PERS-016 | Session capture exceptions leak snapshots after participants finish (SPEC-05 Q23) | Guard all capture stages and report ParticipantFailed with stage | Tech lead | Resolved; release blocks before ordinary completion and queue recovery |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).

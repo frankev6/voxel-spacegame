@@ -161,6 +161,60 @@ namespace Game.Tests.EditMode.Persistence
             Assert.AreEqual(0, a.Blocks[0].Encodes, "never encoded");
         }
 
+        [TestCase("session metadata")]
+        [TestCase("slot thumbnail")]
+        [TestCase("session thumbnails")]
+        public void ContextCaptureFailure_LeavesFilesUntouched(string stage)
+        {
+            Assert.IsTrue(SaveNow().Success);
+            a.Value = 1; Assert.IsTrue(SaveNow().Success);
+            var before = Snapshot();
+            a.WithDeferred = true; b.WithDeferred = true; c.WithDeferred = true;
+            context.ThrowAt = stage;
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("capture of " + stage));
+            LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("context capture failure: " + stage));
+            var result = SaveNow();
+            Assert.AreEqual(SaveErrorKind.ParticipantFailed, result.Error);
+            StringAssert.Contains(stage, result.Message);
+            AssertSameFiles(before, Snapshot());
+            Assert.AreEqual(0, FakeDeferredBlock.Live);
+            foreach (var participant in new[] { a, b, c })
+            {
+                Assert.AreEqual(0, participant.Blocks[0].Encodes);
+                Assert.AreEqual(1, participant.Blocks[0].Disposes);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ContextCaptureFailure_AsyncCompletesAndRecovers()
+        {
+            a.WithDeferred = true;
+            foreach (string stage in new[] { "session metadata", "slot thumbnail", "session thumbnails" })
+            {
+                completed.Clear();
+                context.ThrowAt = stage;
+                LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("capture of " + stage));
+                LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("context capture failure: " + stage));
+                LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("failed: ParticipantFailed"));
+                var failure = service.SaveAsync(slot, SaveReason.Manual).GetAwaiter();
+                double deadline = UnityEditor.EditorApplication.timeSinceStartup + 10;
+                while (!failure.IsCompleted && UnityEditor.EditorApplication.timeSinceStartup < deadline) yield return null;
+                Assert.IsTrue(failure.IsCompleted);
+                Assert.AreEqual(SaveErrorKind.ParticipantFailed, failure.GetResult().Error);
+                Assert.IsFalse(service.IsBusy);
+                Assert.AreEqual(1, completed.Count); Assert.IsFalse(completed[0].Success);
+                Assert.AreEqual(0, FakeDeferredBlock.Live);
+                context.ThrowAt = null;
+                var success = service.SaveAsync(slot, SaveReason.Manual).GetAwaiter();
+                deadline = UnityEditor.EditorApplication.timeSinceStartup + 10;
+                while (!success.IsCompleted && UnityEditor.EditorApplication.timeSinceStartup < deadline) yield return null;
+                Assert.IsTrue(success.IsCompleted); Assert.IsTrue(success.GetResult().Success);
+                Assert.IsFalse(service.IsBusy);
+                Assert.AreEqual(2, completed.Count); Assert.IsTrue(completed[1].Success);
+                Assert.AreEqual(0, FakeDeferredBlock.Live);
+            }
+        }
+
         [Test]
         public void WriteFailure_LeavesPreviousSave()
         {

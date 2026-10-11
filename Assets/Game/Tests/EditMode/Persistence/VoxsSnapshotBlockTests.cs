@@ -90,12 +90,21 @@ namespace Game.Tests.EditMode.Persistence
             try
             {
                 // Warmed success, a later participant failing capture, a filesystem failure,
-                // and codec failure on the save worker must all release persistent copies.
-                for (int path = 0; path < 4; path++)
+                // codec failure on the save worker and each session capture callback must release persistent copies.
+                var context = new FakeSaveContext(); service.AttachContext(context);
+                var firstCell = source.Source.Cells[0];
+                for (int path = 0; path < 7; path++)
                 {
                     participant.Captured.Clear(); later.ThrowOnCapture = path == 1;
                     if (path == 2) { Directory.Delete(root, true); File.WriteAllText(root, "blocks directory creation"); }
                     if (path == 3) { File.Delete(root); source.Source.Cells[0] = new Game.Voxel.Model.Cell { Hp = 1 }; }
+                    if (path >= 4)
+                    {
+                        source.Source.Cells[0] = firstCell;
+                        context.ThrowAt = path == 4 ? "session metadata" : path == 5 ? "slot thumbnail" : "session thumbnails";
+                        LogAssert.Expect(LogType.Error, new Regex("capture of " + context.ThrowAt));
+                        LogAssert.Expect(LogType.Exception, new Regex("context capture failure: " + context.ThrowAt));
+                    }
                     if (path == 1)
                     {
                         LogAssert.Expect(LogType.Error, new Regex("capture of chunk TSTB"));

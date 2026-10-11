@@ -14,20 +14,25 @@ namespace Game.Tests.EditMode.Persistence
         public readonly List<ThumbnailRequest> Changed = new List<ThumbnailRequest>();
         public readonly HashSet<string> Keep = new HashSet<string>();
 
+        public string ThrowAt;
+        void CheckFailure(string stage) { if (ThrowAt == stage) throw new System.InvalidOperationException("context capture failure: " + stage); }
+
         public int BlockChecks;
         public SaveBlockReason GetBlockReason() { BlockChecks++; return Block; }
 
         public void DescribeForMeta(SaveMeta meta)
         {
+            CheckFailure("session metadata");
             meta.CommanderName = "Tester";
             meta.LocationText = "Test Space";
             meta.PlaytimeSeconds = 42.5;
         }
 
-        public bool TryCaptureSlotThumbnail(out ThumbnailRequest thumbnail) { thumbnail = SlotThumbnail; return thumbnail != null; }
+        public bool TryCaptureSlotThumbnail(out ThumbnailRequest thumbnail) { CheckFailure("slot thumbnail"); thumbnail = SlotThumbnail; return thumbnail != null; }
 
         public void CollectThumbnails(List<ThumbnailRequest> changed, HashSet<string> keep)
         {
+            CheckFailure("session thumbnails");
             changed.AddRange(Changed);
             keep.UnionWith(Keep);
             Changed.Clear();                                          // "changed" means changed since the last save
