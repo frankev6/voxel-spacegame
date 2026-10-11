@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Game.Data.Combat;
 using Game.Data.Streams;
+using Game.Tests.Common.Perf;
 using NUnit.Framework;
 using Unity.Burst;
 using Unity.Burst.Intrinsics;
@@ -267,12 +268,11 @@ namespace Game.Tests.EditMode.Core
             for (int i = 0; i < 200; i++) Pair(out _, out _);
             var w = new double[1001]; var r = new double[1001];
             for (int i = 0; i < w.Length; i++) Pair(out w[i], out r[i]);
-            System.Array.Sort(w); System.Array.Sort(r);
-            Measure.Custom(new SampleGroup("BeginWrite+EndWrite", SampleUnit.Microsecond), w[500]);
-            Measure.Custom(new SampleGroup("BeginRead+EndRead", SampleUnit.Microsecond), r[500]);
-            UnityEngine.Debug.Log($"SimEventChannel overhead: write pair median {w[500]:F2} µs, read pair median {r[500]:F2} µs");
-            Assert.LessOrEqual(w[500], 5.0, "BeginWrite+EndWrite median ≤ 5 µs");
-            Assert.LessOrEqual(r[500], 5.0, "BeginRead+EndRead median ≤ 5 µs");
+            var run = new PerfRun(TestContext.CurrentContext.Test.FullName).AddSamples("BeginWrite+EndWrite", w, "us").AddSamples("BeginRead+EndRead", r, "us");
+            run.Write("BeginWrite+EndWrite", budgetMedian: 5.0);
+            run.AssertMedian("BeginWrite+EndWrite", 5.0);
+            run.AssertMedian("BeginRead+EndRead", 5.0);
+            UnityEngine.Debug.Log($"SimEventChannel overhead: write pair median {run.Get("BeginWrite+EndWrite").Median:F2} µs, read pair median {run.Get("BeginRead+EndRead").Median:F2} µs");
             Assert.That(() => { Pair(out _, out _); }, Is.Not.AllocatingGCMemory());
         }
     }

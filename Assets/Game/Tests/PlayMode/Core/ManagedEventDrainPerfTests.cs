@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Game.Core.Events;
 using Game.Data.Components;
 using Game.Presentation.Systems;
+using Game.Tests.Common.Perf;
 using NUnit.Framework;
 using Unity.Entities;
 using Unity.PerformanceTesting;
@@ -14,7 +15,7 @@ namespace Game.Tests.PlayMode.Core
     /// <summary>Test-only payload for the transfer gate.</summary>
     public readonly struct BridgePerfEvent { public readonly uint A; public readonly ulong B; public BridgePerfEvent(uint a, ulong b) { A = a; B = b; } }
 
-    /// <summary>CORE-009 gate (SPEC-02 §8): transfer of 1,000 envelopes ≤ 0.5 ms on the main thread. TST-001 moves this onto PerfRun.</summary>
+    /// <summary>CORE-009 gate (SPEC-02 §8): transfer of 1,000 envelopes ≤ 0.5 ms on the main thread.</summary>
     public sealed class ManagedEventDrainPerfTests
     {
         [Test, Performance, Category("Performance")]
@@ -42,10 +43,8 @@ namespace Game.Tests.PlayMode.Core
             for (int i = 0; i < 20; i++) Frame();
             var times = new double[31];
             for (int i = 0; i < times.Length; i++) times[i] = Frame();
-            Array.Sort(times);
-            Measure.Custom(new SampleGroup("Transfer1000", SampleUnit.Millisecond), times[15]);
-            UnityEngine.Debug.Log($"ManagedEventDrainSystem transfer of 1,000 envelopes (sort, publish, drain to one handler): median {times[15]:F4} ms");
-            Assert.LessOrEqual(times[15], 0.5, "median ≤ 0.5 ms");
+            var stat = PerfRun.Gate("Transfer1000", times, 0.5);
+            UnityEngine.Debug.Log($"ManagedEventDrainSystem transfer of 1,000 envelopes (sort, publish, drain to one handler): median {stat.Median:F4} ms");
             Assert.AreNotEqual(0UL, sink);
             EventHub.Reset();
         }

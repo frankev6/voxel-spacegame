@@ -1,0 +1,41 @@
+{
+    "name": "Game.Tests.Common",
+    "rootNamespace": "Game.Tests.Common",
+    "references": [
+        "Game.Core",
+        "Game.Data",
+        "Game.Input",
+        "Game.Persistence",
+        "Game.Economy",
+        "Game.Voxel",
+        "Game.Simulation",
+        "Game.Galaxy",
+        "Game.Narrative",
+        "Game.ShipEditor",
+        "Game.UI",
+        "Game.Presentation",
+        "Game.App",
+        "Unity.Entities",
+        "Unity.Entities.Hybrid",
+        "Unity.Transforms",
+        "Unity.Collections",
+        "Unity.Burst",
+        "Unity.Mathematics",
+        "Unity.Physics",
+        "UnityEngine.TestRunner",
+        "Unity.PerformanceTesting"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

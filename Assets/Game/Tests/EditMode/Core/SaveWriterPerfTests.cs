@@ -1,11 +1,12 @@
 using System;
 using Game.Core.Save;
+using Game.Tests.Common.Perf;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
 
 namespace Game.Tests.EditMode.Core
 {
-    /// <summary>CORE-007 gate (SPEC-02 §8): 1 MiB of mixed primitives in ≤ 3 ms. TST-001 moves this onto PerfRun.</summary>
+    /// <summary>CORE-007 gate (SPEC-02 §8): 1 MiB of mixed primitives in ≤ 3 ms.</summary>
     public sealed class SaveWriterPerfTests
     {
         static int WriteMiB()
@@ -27,9 +28,8 @@ namespace Game.Tests.EditMode.Core
             Measure.Method(() => WriteMiB()).WarmupCount(3).MeasurementCount(15).SampleGroup(new SampleGroup("Write1MiB", SampleUnit.Millisecond)).Run();
             var t = new double[15];
             for (int k = 0; k < t.Length; k++) { var sw = System.Diagnostics.Stopwatch.StartNew(); WriteMiB(); t[k] = sw.Elapsed.TotalMilliseconds; }
-            Array.Sort(t);
-            UnityEngine.Debug.Log($"SaveWriter 1 MiB mixed: median {t[7]:F3} ms");
-            Assert.LessOrEqual(t[7], 3.0, "median ≤ 3 ms");
+            var stat = PerfRun.Gate("Write1MiB", t, 3.0);
+            UnityEngine.Debug.Log($"SaveWriter 1 MiB mixed: median {stat.Median:F3} ms");
         }
     }
 }

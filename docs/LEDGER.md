@@ -558,6 +558,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 17 | 2026-10-11 | SPEC-02 CORE-012 | `SimEventReadSet.Readers` was a `NativeArray<NativeStream.Reader>`, a nested native container that jobs reject (SPEC-02 open question 11) | Resolved: readers handed out per job through `Reader(i)`; `SimEventGather` chains one job per registration | Tech lead | resolved in CORE-012 |
 | 18 | 2026-10-11 | SPEC-02 CORE-009 | `SessionReset` is a §6.6 managed event and unmanaged, but has no ECS producer (SPEC-02 open question 12) | Resolved: `ManagedEventChannelsTests` skips a checked managed-only list | Tech lead | resolved in CORE-009 |
 | 19 | 2026-10-11 | SPEC-02 CORE-009 | The drain's payload-hash tie-break hashed padding bytes, so equal-key events sorted nondeterministically (SPEC-02 open question 13) | Resolved: hash field bytes only | Tech lead | resolved in CORE-009 |
+| 20 | 2026-10-11 | SPEC-71 TST-001 | Unity's rate managers can't step exact tick counts in tests (SPEC-71 open question 4) | Resolved: a counted rate manager; reduced worlds get ECB systems and group anchors | Tech lead | resolved in TST-001 |
+| 21 | 2026-10-11 | SPEC-71 TST-001 | EditMode loops never end a profiler frame (SPEC-71 open question 5) | Resolved: `RunEcs` samples `CurrentValue` deltas | Tech lead | resolved in TST-001 |
+| 22 | 2026-10-11 | SPEC-71 TST-001 | Reference-settings rule would leave the micro-gates unenforced in the Editor (SPEC-71 open question 6) | Resolved: `PerfRun.Gate` records and asserts micro-gates without the settings check | Tech lead | resolved in TST-001 |
 
 ## Measurements
 

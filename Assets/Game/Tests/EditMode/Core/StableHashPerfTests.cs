@@ -1,4 +1,5 @@
 using Game.Core;
+using Game.Tests.Common.Perf;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
 using UnityEngine.TestTools.Constraints;
@@ -6,8 +7,7 @@ using Is = UnityEngine.TestTools.Constraints.Is;
 
 namespace Game.Tests.EditMode.Core
 {
-    /// <summary>CORE-002 gate (SPEC-02 §8): Hash64 of a 16-character id ≤ 0.3 µs and 0 B GC over 10,000 iterations.
-    /// TST-001 moves the measurement onto PerfRun/PerfSettings when the test kit exists.</summary>
+    /// <summary>CORE-002 gate (SPEC-02 §8): Hash64 of a 16-character id ≤ 0.3 µs and 0 B GC over 10,000 iterations.</summary>
     public sealed class StableHashPerfTests
     {
         const string Id16 = "block_thruster_m";   // 16 characters
@@ -27,11 +27,15 @@ namespace Game.Tests.EditMode.Core
             HashMany();   // warm up (JIT, encoders)
             Assert.That(() => { HashMany(); }, Is.Not.AllocatingGCMemory(), "0 B GC");
             Measure.Method(() => HashMany()).WarmupCount(3).MeasurementCount(15).SampleGroup(new SampleGroup("Hash64_x10000", SampleUnit.Microsecond)).Run();
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-            for (int round = 0; round < 5; round++) HashMany();
-            double perCallUs = sw.Elapsed.TotalMilliseconds * 1000.0 / (5.0 * Iterations);
-            UnityEngine.Debug.Log($"StableHash.Hash64(16 chars): {perCallUs:F4} µs per call");
-            Assert.LessOrEqual(perCallUs, 0.3, "≤ 0.3 µs per call");
+            var perCallUs = new double[15];
+            for (int round = 0; round < perCallUs.Length; round++)
+            {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                HashMany();
+                perCallUs[round] = sw.Elapsed.TotalMilliseconds * 1000.0 / Iterations;
+            }
+            var stat = PerfRun.Gate("Hash64_PerCall", perCallUs, 0.3, "us");
+            UnityEngine.Debug.Log($"StableHash.Hash64(16 chars): median {stat.Median:F4} µs per call");
         }
     }
 }

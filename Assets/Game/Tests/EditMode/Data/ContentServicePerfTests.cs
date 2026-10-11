@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Game.Data.Blocks;
 using Game.Data.Definitions;
 using Game.Data.Services;
+using Game.Tests.Common.Perf;
 using NUnit.Framework;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.PerformanceTesting;
@@ -10,12 +11,12 @@ using UnityEditor;
 
 namespace Game.Tests.EditMode.Data
 {
-    /// <summary>DATA-007 gates (SPEC-04 §8). TST-001 moves these onto PerfRun.</summary>
+    /// <summary>DATA-007 gates (SPEC-04 §8).</summary>
     public sealed class ContentServicePerfTests
     {
         [TearDown] public void TearDown() => TestContentFactory.DestroyAll();
 
-        static double MedianConstructMs(IReadOnlyList<ContentDefinition> defs, int runs)
+        static double[] ConstructMs(IReadOnlyList<ContentDefinition> defs, int runs)
         {
             UnityEngine.Debug.unityLogger.logEnabled = false;   // the boot summary line per construction would dominate the timing
             try
@@ -29,8 +30,7 @@ namespace Game.Tests.EditMode.Data
                     t[i] = sw.Elapsed.TotalMilliseconds;
                     s.Dispose();
                 }
-                Array.Sort(t);
-                return t[runs / 2];
+                return t;
             }
             finally { UnityEngine.Debug.unityLogger.logEnabled = true; }
         }
@@ -41,18 +41,15 @@ namespace Game.Tests.EditMode.Data
             // No ContentDatabase ships before DATA-009: until it exists this measures a 150-definition synthetic set of the expected size.
             var db = AssetDatabase.LoadAssetAtPath<Game.Data.ContentDatabase>("Assets/Game/Content/ContentDatabase.asset");
             IReadOnlyList<ContentDefinition> defs = db != null ? db.Definitions : SyntheticContent.Make(150, 40, 7);
-            double ms = MedianConstructMs(defs, 11);
-            Measure.Custom(new SampleGroup("Construct_Shipped", SampleUnit.Millisecond), ms);
+            double ms = PerfRun.Gate("Construct_Shipped", ConstructMs(defs, 11), 20.0).Median;
             UnityEngine.Debug.Log($"ContentService ({(db != null ? "shipped" : "synthetic 150")}): median {ms:F2} ms");
-            Assert.LessOrEqual(ms, 20.0);
         }
 
         [Test, Performance, Category("Performance")]
         public void Construct_Synthetic2000()
         {
             var defs = SyntheticContent.Make(2000, 500, 12345);
-            double ms = MedianConstructMs(defs, 7);
-            Measure.Custom(new SampleGroup("Construct_Synthetic2000", SampleUnit.Millisecond), ms);
+            double ms = PerfRun.Gate("Construct_Synthetic2000", ConstructMs(defs, 7), 100.0).Median;
             using var s = ContentService.CreateForTests(defs);
             long bytes = 0;
             ref var blob = ref s.BlockDefs.Value;
@@ -60,7 +57,6 @@ namespace Game.Tests.EditMode.Data
                 bytes += UnsafeUtility.SizeOf<BlockDef>() + 12L * (blob.Blocks[k].Cells.Length + blob.Blocks[k].Clearance.Length) + 2L * blob.Blocks[k].AbilityIndices.Length;
             UnityEngine.Debug.Log($"ContentService synthetic 2000 / 500 blocks: median {ms:F2} ms, BlockDefsBlob ≈ {bytes / 1024.0:F1} KB");
             Assert.AreEqual(500, s.Catalog.BlockCount);
-            Assert.LessOrEqual(ms, 100.0);
             Assert.LessOrEqual(bytes, 256 * 1024);
         }
     }

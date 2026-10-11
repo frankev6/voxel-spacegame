@@ -22,13 +22,14 @@ All scripts find the project root themselves, so you can run them from anywhere 
 | `tools/compile.sh` | Compiles the project and prints C# errors; exits 1 on any error. With an open Editor it recompiles through the CLI in seconds. Without one, it does a headless batch compile (§3) |
 | `tools/test.sh editmode [filter]` | EditMode tests; results in `Logs/test-results/editmode.xml` |
 | `tools/test.sh playmode [filter]` | PlayMode tests |
-| `tools/test.sh perf [filter]` | `Performance` tests, with medians against the budgets |
+| `tools/test.sh perf [filter]` | The `Performance` category in EditMode and PlayMode, then `tools/perf_summary.py` over the `Logs/perf/*.json` records written during the run. Exits non-zero if a test or a record failed |
+| `python3 tools/perf_summary.py [--dir D] [--since T]` | Table of perf records: test, gate, median, p95, budget, PASS/FAIL; exit 1 on any FAIL |
 | `tools/check-docs.py` | Spec and ledger consistency; run it after editing any doc |
 | `tools/ledger-sync.py` | Adds ledger rows for new spec tasks (never deletes) |
 | `tools/playtest/g.sh <cmd>` | Runs a command in the running Editor: snapshot, logs, UI clicks, keys, mouse, ECS reads. See [tools/playtest/README.md](../tools/playtest/README.md) |
 | `tools/playtest/shot.sh`, `perf.sh`, `waitscene.sh`, `to.sh` | Screenshot, frame stats, wait for a scene, hard timeout (macOS has no `timeout`) |
 
-**Where output goes:** `Logs/tools/` (script logs), `Logs/test-results/`, `Logs/playtest/`. Never write tool output to `Temp/` (Unity deletes it on exit) or `Assets/`.
+**Where output goes:** `Logs/tools/` (script logs), `Logs/test-results/`, `Logs/perf/` (one JSON record per perf test), `Logs/playtest/`. Never write tool output to `Temp/` (Unity deletes it on exit) or `Assets/`.
 
 ## 3. Unity with no Editor open (headless)
 
@@ -57,6 +58,11 @@ These work with no Editor open (verified 2026-10-10):
   - Set `ShaderUtil.allowAsyncCompilation = false`.
   - Throw away the first `camera.Render()` after `NewScene`, because it draws only the clear colour.
   - These runs re-save `ProjectSettings/QualitySettings.asset` with a version bump. Revert it with `git checkout -- ProjectSettings/QualitySettings.asset`.
+- **The test kit (`Game.Tests.Common`, SPEC-71):**
+  - `EcsTestWorld.Create(types)` builds a world with only those systems (plus their groups, the default command buffer systems and ordering anchors). `StepTicks(n)` runs exactly n fixed ticks; `StepFrame(dt)` catches up like the game, at most 6 ticks. A `SimClock` advances by itself unless `SimClockAdvanceSystem` is in the world.
+  - Derive EditMode fixtures from `GameTestBase` and create worlds with `CreateWorld(...)`: they are disposed even when the test throws.
+  - Perf gates: `PerfRun.Gate(name, samples, budget)` for loops a test times itself; `new PerfRun(name)…RunEcs/RunFrames` for per-tick or per-frame gates (inconclusive outside the reference settings).
+  - `[Explicit]` tests run when a `-testFilter` names them, so a filter such as `TestKit` also runs the leak-guard test, which fails by design.
 - **Native memory in tests:**
   - `UnsafeUtility.CheckForLeaks()` returns the tracked allocations still alive *and resets* the tracked set, writing its report with `Debug.Log`. Call it once after a warm-up as a baseline, then again at the end; skip `LogAssert.NoUnexpectedReceived` in that test.
   - A `NativeArray` of native containers (for example `NativeStream.Reader`) is a nested container: any job that holds it throws, its `Dispose(JobHandle)` included. Give each job its container in its own field (CORE-012).
