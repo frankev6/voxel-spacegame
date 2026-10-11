@@ -637,6 +637,12 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 74 | 2026-10-11 | SPEC-10 VOX-013 | Unstow requires SplitGrace from DMG-001 | Add DMG-001 dependency before spawning | Tech lead | Resolved in SPEC-10 Q27; ready contract task taken first |
 | 75 | 2026-10-11 | SPEC-10 VOX-021 / SPEC-11 REN-010 | Mesh queue implementation is behind a voxel dependency cycle | Extract specified queue methods/tests into ready VOX-021 | Tech lead | Resolved in SPEC-11 Q14 and SPEC-10 Q28; no contract change |
 | 76 | 2026-10-11 | SPEC-11 queue / VOX-021 | Consumed/requeued brick can revive an older stale entry | Permanently invalidate the old entry on priority upgrade | Tech lead | Resolved in SPEC-11 Q15; required StaleSkipped test reproduces old FIFO/grid bug |
+| 77 | 2026-10-11 | SPEC-10 VOX-013 | Double pinning and missing cancellation across released handles/scene exit | Registry-owned read tokens and explicit teardown cancellation | Tech lead | Accepted ADR-0024; SPEC-10 Q29 |
+| 78 | 2026-10-11 | SPEC-10 VOX-013 / SPEC-03 INP-005 | Spawn ordering attribute would violate module references | Presentation input declares UpdateBefore(GridSpawnSystem) | Tech lead | Resolved SPEC-10 Q30 and SPEC-03 §5.2 |
+| 79 | 2026-10-11 | SPEC-10 VOX-013 | ECB-only stow cannot inspect initialization or optional interpolation | Caller enforces precondition; Unstow ensures interpolation | Tech lead | Accepted ADR-0025; SPEC-10 Q31 |
+| 80 | 2026-10-11 | SPEC-10 VOX-013 | Acceptance retained old 18-brick Ship20k count | Ten bricks and three functionals give fourteen LEG entries | Tech lead | Resolved SPEC-10 Q32, consistent with Q22 geometry |
+| 81 | 2026-10-11 | SPEC-10 VOX-013 | Headless GPU cleanup component has no renderer to release it | Omit rendering cleanup on headless bricks | Tech lead | Resolved SPEC-10 Q33 |
+
 
 ## Measurements
 

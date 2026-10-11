@@ -17,7 +17,7 @@ namespace Game.Tests.EditMode.Voxel
         public ContentService Service { get; }
         public VoxelContent Content => new VoxelContent { Blocks = Service.BlockDefs, Orientations = Service.Orientations };
         public ushort Index(string id) => Service.Catalog.GetBlockIndex(Service.Catalog.Get<BlockDefinition>(new ContentId(id)));
-        public VoxelTestContent()
+        public VoxelTestContent(bool includeExplosive = false)
         {
             var defs = new List<ContentDefinition>
             {
@@ -35,6 +35,11 @@ namespace Game.Tests.EditMode.Voxel
                     new BlockModule[] { new PowerStorageModule { Params = new PowerStorageParams { Storage = 40 } } },
                     so => { Set(so, "functionHp", 400f); Set(so, "cellMass", 35f); })
             };
+            if (includeExplosive) defs.Add(Block("block_test_reactor", BlockKind.Functional, modules: new BlockModule[]
+            {
+                new PowerSourceModule { Params = new PowerSourceParams { Generation = 20 } },
+                new ExplosiveModule { Params = new ExplosiveParams { BlastRadiusCells = 4, BlastDamage = 50 } }
+            }));
             try { Service = ContentService.CreateForTests(defs); }
             catch { DestroyAll(); throw; }
         }

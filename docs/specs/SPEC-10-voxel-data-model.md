@@ -283,7 +283,7 @@ public interface IGridSpawnHook
     void OnEntitiesCreated(EntityManager em, Entity root, NativeArray<Entity> created);
 }
 
-public sealed class VoxelStructureRegistry : ScriptableObject // runtime instance only (CreateInstance, HideFlags.DontSave)
+public sealed class VoxelStructureRegistry : ScriptableObject, Game.Core.Flow.ISceneExiting, IDisposable // runtime instance only; ADR-0024
 {
     public static VoxelStructureRegistry CreateRuntime(BlueprintLibrary blueprints);
     public int Register(VoxelStructure structure);           // handle ≥ 0; a handle is never reused in a session
@@ -293,6 +293,10 @@ public sealed class VoxelStructureRegistry : ScriptableObject // runtime instanc
     public void AddSpawnHook(IGridSpawnHook hook);
     public void RemoveSpawnHook(IGridSpawnHook hook);
     public IReadOnlyList<IGridSpawnHook> SpawnHooks { get; }
+    public void CancelSpawnReads(); // teardown only, after completing tracked jobs; idempotent (ADR-0024)
+    public int SceneExitOrder { get; }
+    public void OnSceneExiting(in Game.Core.Flow.SceneExitContext context); // cancels owned spawn reads before scene destruction
+    public void Dispose(); // cancels owned pins; never disposes registered structures (ADR-0024)
 }
 
 public sealed class BlueprintLibrary : IDisposable            // owned by SPEC-01's composition root
@@ -389,7 +393,7 @@ public struct VoxelConfig : IComponentData                   // singleton, creat
 ```
 
 **Root archetype after conversion:** `VoxelGrid, BrickSlot[], PaletteEntry[], BlockInstance[], LocalTransform, LocalToWorld, LinkedEntityGroup[], PersistentId, GridSource, GridSpawning, GridDespawnRequest(off), GridRebuilt(off), GridBodyInit, GridEditRequest(off), GridEditedBrick[]` + SPEC-12 `GridMass, GridMassRecompute, GridColliderState` + SPEC-11 `Dormant(off)` + every requester component. SPEC-12 adds the Unity Physics components later (through the GameplayEnd ECB).
-**Brick archetype:** `Brick, BrickCells[4096], BrickSolidMask[64], BrickDirty(off), LocalTransform, LocalToWorld, Parent` + SPEC-11 `BrickRenderState, BrickLodDesired, BrickPropInstance[]` + Entities Graphics components (unless `NoRender`) + `StarSystemMember` via the hook. `LocalTransform = { Position = Coord·16·CellSize, Rotation = identity, Scale = CellSize }`: brick meshes are in cell units.
+**Brick archetype:** `Brick, BrickCells[4096], BrickSolidMask[64], BrickDirty(off), LocalTransform, LocalToWorld, Parent` + SPEC-11 `BrickLodDesired, BrickPropInstance[]` + `BrickRenderState` and Entities Graphics components only when rendering (Q33) + `StarSystemMember` via the hook. `LocalTransform = { Position = Coord·16·CellSize, Rotation = identity, Scale = CellSize }`: brick meshes are in cell units.
 **Functional archetype:** `FunctionalBlock, LocalTransform, LocalToWorld, Parent` + registered types + Entities Graphics components + `StarSystemMember` via the hook. `LocalTransform = { Position = (Origin + 0.5)·CellSize, Rotation = OrientationTablesBlob.Rotations[Orient], Scale = CellSize }` (prop meshes are pivoted at the root cell centre, 1 unit = 1 cell).
 
 ### 4.6 Helpers (`Grid/`)
@@ -414,7 +418,7 @@ public static class GridStowApi
 {
     /// Disables the root and its LinkedEntityGroup (ecb.SetEnabled(root, false)). Precondition: GridSpawning and GridBodyInit are disabled.
     public static void Stow(EntityCommandBuffer.ParallelWriter ecb, int sortKey, Entity root);
-    /// Re-enables the group and sets LocalTransform {pose, scale 1}, PhysicsVelocity {linear, angular} and, if present,
+    /// Re-enables the group and sets LocalTransform {pose, scale 1}, PhysicsVelocity {linear, angular} and ensures and resets
     /// PhysicsGraphicalInterpolationBuffer {PreviousTransform = pose, PreviousVelocity = velocity} (no smoothing streak).
     /// graceOther != Entity.Null also adds SPEC-13 SplitGrace { Other = graceOther, UntilTick = graceUntilTick } (launch from a
     /// carrier without contacts until the craft is clear; ADR-0017).
@@ -583,9 +587,10 @@ public static class VoxelStructureCodec
 
 ### 5.7 `GridSpawnSystem` (`Grid/`)
 
-- **Group:** `GameInitGroup`, `[UpdateAfter(typeof(PlayerInputSampleSystem))]` (last in the group). **The module's only structural system; main thread.** `OnUpdate` is not Burst-compiled (it dereferences `UnityObjectRef` and calls `RenderMeshUtility`); all per-brick work runs in Burst jobs completed inside the system (allowed: init group, not fixed step).
+- **Group:** `GameInitGroup`, `PlayerInputSampleSystem` declares `[UpdateBefore(typeof(GridSpawnSystem))]` from Presentation (no reverse Voxel→Presentation reference; Q30). **The module's only structural system; main thread.** `OnUpdate` is not Burst-compiled (it dereferences `UnityObjectRef` and calls `RenderMeshUtility`); all per-brick work runs in Burst jobs completed inside the system (allowed: init group, not fixed step).
 - **Requires:** `GameplayActive`, `VoxelConfig`, `BlockDefsRef`, `OrientationTablesRef`, `VoxelStructureRegistryRef`.
-- **Singletons (`OnCreate`):** `VoxelSingletons.CreateAll(EntityManager)` creates one entity holding `GridPrototypes{NextSerial = 1}` (both prototype maps capacity 32, `Allocator.Persistent`; disposed in `DisposeAll`), `DeferredDisposalQueue` (lists of capacity 1,024, `Allocator.Persistent`), the `FunctionalComponentRegistration` buffer, and the REN/PHY singletons through `BrickMeshQueue.Create()`, `BrickMeshBatch.Create()`, `VoxelRenderRuntime.Create()`, `VoxelViewer` (default value), `ColliderDirtyQueue.Create()`, `ColliderBuildCache.Create()`, `ColliderBatchQueue.Create()` (SPEC-11/12 contract methods whose exact bodies those specs give). `OnDestroy`: `state.CompleteDependency()`, dispose every remaining `DeferredDisposalQueue` blob, then `VoxelSingletons.DisposeAll`.
+- **Spawn read ownership:** [ADR-0024](../decisions/ADR-0024-spawn-read-pin-lifetime.md). Request APIs acquire one registry-owned read token immediately; conversion adopts it. Direct/blueprint requests acquire one during conversion. Internal SpawnReadToken follows the request/root until completion; active reads retain their source even if its public handle is released. Reconcile destroyed bound entities before processing; scene exit and registry/system disposal cancel outstanding reads.
+- **Singletons (`OnCreate`):** `VoxelSingletons.CreateAll(EntityManager)` creates one entity holding `GridPrototypes{NextSerial = 1}` (both prototype maps capacity 32, `Allocator.Persistent`; disposed in `DisposeAll`), `DeferredDisposalQueue` (lists of capacity 1,024, `Allocator.Persistent`), the `FunctionalComponentRegistration` buffer, the `RootComponentRegistration` buffer, and the REN/PHY singletons through `BrickMeshQueue.Create()`, `BrickMeshBatch.Create()`, `VoxelRenderRuntime.Create()`, `VoxelViewer` (default value), `ColliderDirtyQueue.Create()`, `ColliderBuildCache.Create()`, `ColliderBatchQueue.Create()` (SPEC-11/12 contract methods whose exact bodies those specs give). `OnDestroy`: `state.CompleteDependency()`, dispose every remaining `DeferredDisposalQueue` blob, then `VoxelSingletons.DisposeAll`.
 - **Reads:** requests, `VoxelConfig`, block blobs, `FunctionalComponentRegistration`, SPEC-11 `VoxelRenderRuntime`. **Writes:** everything it creates; `VoxelGrid.Revision` at spawn/rebuild/edit; appends to SPEC-11 `BrickMeshQueue` (spawn, rebuild, edit) and SPEC-12 `ColliderDirtyQueue` (edit only; spawn/rebuild collider work is enqueued by SPEC-12's body init).
 
 Per frame (`budget = VoxelConfig.SpawnBricksPerFrame`; markers `GridSpawnSystem.<Step>`):
@@ -593,13 +598,13 @@ Per frame (`budget = VoxelConfig.SpawnBricksPerFrame`; markers `GridSpawnSystem.
 2. **Despawns** (`Despawn`; roots with `GridDespawnRequest` enabled, sorted by `VoxelGrid.Serial`): `EntityManager.CompleteAllTrackedJobs()` once if any; per root: if `GridSource.Flags & WriteBack` → `GridStructureSync.WriteBack`; if `GridSpawning` still enabled → unpin the source; then `DestroyEntity(NativeArray roots)` in one batch (LEG cascade). Not budgeted.
 3. **Rebuilds** (`Rebuild`; roots with `GridRebuildRequest`, sorted by Serial): `DestroyEntity` (batch) of all brick entities from `BrickSlot` and all `BlockInstance.Functional`; LEG := `[root]`; pin the new source, unpin the old; set `GridSource`; recompute `BrickMin/Dims/CellMin/CellMax/AnchorInstance`; resize and zero `BrickSlot`; copy palette and instances; `Revision++`; enable `GridSpawning{0}` and `GridRebuilt`; create functional entities (step 5c); `RemoveComponent<GridRebuildRequest>` (batch). Bricks follow in step 4.
 4. **Continue spawning** (`CreateBricks`; roots with `GridSpawning` enabled, sorted by Serial) while `budget > 0`: `n = min(budget, source.Bricks.Length − NextBrick)`:
-   a. `Instantiate(brickPrototype, n, Allocator.Temp)`, then `AddComponent<BrickRenderState>(entities)` (Instantiate strips cleanup types).
+   a. `Instantiate(brickPrototype, n, Allocator.Temp)`, then `AddComponent<BrickRenderState>(entities)` when rendering (Instantiate strips cleanup types). Headless batches create the same brick base without Prefab or rendering/cleanup components.
    b. `BrickFillJob : IJobParallelFor` (inner batch 8) over the n records: `Brick{Grid, Coord, SolidCount, ChangedRevision 0}`; `BrickCells.ResizeUninitialized(4096)` then dense → `UnsafeUtility.MemCpy` 16,384 B from the page, uniform → `UnsafeUtility.MemCpyReplicate` of the uniform cell 4,096 times; `BrickSolidMask` 64 words from `Masks[i]`; `LocalTransform`; `Parent = root`. Complete it (init group, bounded by the budget).
-   c. Write `BrickSlot[SlotIndex(coord)] = entity`; append the entities to the LEG; enqueue `BrickMeshQueue` requests with priority `Spawn` if the queue exists (main thread: `CompleteAccess()` once per update before the first enqueue, SPEC-12 §5.1).
+   c. Write `BrickSlot[SlotIndex(coord)] = entity`; append the entities to the LEG; enqueue `BrickMeshQueue` requests with priority `Spawn` for rendered bricks (Q33). The owner calls `CompleteAccess()` once per update before the first enqueue (SPEC-12 §5.1); a serial Burst job borrows only the native queue containers for the batch.
    d. Call every `IGridSpawnHook.OnEntitiesCreated(em, root, entities)`.
    e. `NextBrick += n; budget -= n`. When `NextBrick == source.Bricks.Length`: disable `GridSpawning`, unpin the source; if the source came from a blueprint, call `BlueprintLibrary.ReleaseUnpinnedLarge()`.
 5. **Start new requests** (`Convert`; entities with `GridSpawnRequest`, sorted by `Entity.Index` then `Version`): the first request of the frame is always converted (so large grids cannot starve), later ones only while `budget > 0`:
-   a. Resolve the source: `StructureHandle ≥ 0` → `registry.Get`; else `registry.TryGetBlueprint(Blueprint)`. Validate: exactly one source set; structure found, not disposed, ≥ 1 brick; brick dims product ≤ 262,144; `CellSize > 0`; `Blueprint` source with `WriteBack` → the flag is cleared with one warning. Failure → `GameLog.Error("Voxel", "spawn rejected: <reason>")`, `DestroyEntity(request)`, continue. `PersistentId == 0` without `EditorPreview` or `Transient` → `GameLog.WarnOnce` (grid is not saveable) and continue. Pin the source.
+   a. Resolve the source: `StructureHandle ≥ 0` → `registry.Get`; else `registry.TryGetBlueprint(Blueprint)`. Validate: exactly one source set; structure found, not disposed, ≥ 1 brick; brick dims product ≤ 262,144; `CellSize > 0`; `Blueprint` source with `WriteBack` → the flag is cleared with one warning. Failure → `GameLog.Error("Voxel", "spawn rejected: <reason>")`, `DestroyEntity(request)`, continue. `PersistentId == 0` without `EditorPreview` or `Transient` → `GameLog.WarnOnce` (grid is not saveable) and continue. Adopt the API read token, or acquire one for a direct/blueprint request (never pin twice; ADR-0024).
    b. `ConvertToRoot`: `AddComponent(entity, ComponentTypeSet)` for the root archetype of §4.5 in at most 3 sets; set `VoxelGrid{BrickMin, BrickDims, CellSize, Revision = 1, AnchorInstance = lowest live instance with def.IsCore else -1, Kind, Serial = NextSerial++, CellMin, CellMax}`, `LocalTransform{Pose.pos, Pose.rot, 1}`, `PersistentId{request.PersistentId}`, `GridSource{handle or -1, Blueprint, SyncedRevision = 1, Flags}`, `GridBodyInit{Motion, velocities}` (enabled), `GridSpawning{0}` (enabled), palette and instance buffers (`AddRange`), `BrickSlot` resized to the dims product and zeroed, LEG = `[root]`; then, if `Profile != None`, `AddComponent(entity, set)` for the profile's registered types (types the requester already added keep their values; others start zeroed; sets of at most 15 types, built once per profile and rebuilt when `RootComponentRegistration` changes); remove `GridSpawnRequest`.
    c. Functional entities (`CreateFunctional`): for each live instance with `def.Kind == Functional`, grouped by `def.ModuleMask` (groups ordered by mask value, instances in index order inside a group): get or create the prototype for the mask (step 1), `Instantiate(prototype, count)`; `FunctionalFillJob` sets `FunctionalBlock{root, index}`, `LocalTransform` (§4.5), `Parent = root`, and when rendering `MaterialMeshInfo(PropMaterial, PropMeshIds[def.PropMeshIndex])` (enabled) and `RenderBounds = PropMeshBounds[def.PropMeshIndex]`; write `Instances[index].Functional`; append to the LEG; call the hooks. Prop blocks get no entity.
    d. Continue with step 4 for this root in the same frame.
@@ -705,12 +710,12 @@ Registration of functional component types (SPEC-20/21/22): a system with `[Crea
 
 | Situation | Required behaviour |
 |---|---|
-| Spawn request with an empty, disposed, unknown or released source | One `GameLog.Error("Voxel", "spawn rejected: <reason>")`, request entity destroyed, source unpinned if pinned |
+| Spawn request with an empty, disposed, unknown or released source and no existing read token | One `GameLog.Error("Voxel", "spawn rejected: <reason>")`, request entity destroyed, source unpinned if pinned |
 | Both or neither of `Blueprint`/`StructureHandle` set | Rejected as above (reason `source`) |
 | Grid larger than 262,144 brick slots | Rejected as above (reason `too large`) |
 | Structure mutated while pinned | `InvalidOperationException` from the mutator |
 | Blueprint structure mutated | Mutators return `PlaceResult.ReadOnly`; raw writes throw |
-| `registry.Release` of a structure still used by a live grid's `GridSource` | Allowed; later write-back of that grid logs `GameLog.Warn` and skips |
+| `registry.Release` of a structure still used by a live grid's `GridSource` | Allowed; an existing spawn read finishes through its token (ADR-0024), while later write-back logs `GameLog.Warn` and skips |
 | Despawn while `GridSpawning` | Unpin, write back the bricks that exist, destroy |
 | Brick reaches `SolidCount == 0` in a fixed tick | The writer destroys it through the GameplayEnd ECB; `BrickDirtyScheduleSystem` still enqueues collider work and neighbour remeshes and skips its own mesh |
 | Footprint crosses brick borders | `SetCell` creates bricks as needed |
@@ -721,7 +726,7 @@ Registration of functional component types (SPEC-20/21/22): a system with `[Crea
 | Ray origin inside a solid cell | Hit at distance 0, `EnteredFace = 255` |
 | No registrations for a module id | Base functional archetype for that module; no error |
 | `Profile != None` with no registrations for it | Root gets only the base archetype; no error (M0/M1 worlds before SPEC-20+ exist) |
-| `Stow` on a grid still spawning or before its body exists | Debug assertion; release builds stow anyway and the spawn resumes on unstow (GridSpawnSystem skips disabled roots) |
+| `Stow` on a grid still spawning or before its body exists | Caller asserts the precondition through its own lookups (ADR-0025). The ECB-only helper cannot inspect state; it records the disable. GridSpawnSystem skips disabled roots. |
 | Stowed grids and destroy-by-query cleanups | Every cleanup that destroys by query (SPEC-31 unload) uses `EntityQueryOptions.IncludeDisabledEntities`; nothing else needs to see stowed grids |
 | Block with several modules | One entity carrying the union of their registered types (a type registered by two modules is added once) |
 | `RequireRenderer == 1` and no ready renderer for 300 consecutive frames | `GameLog.WarnOnce("Voxel", "spawn waiting for renderer")`; keep waiting |
@@ -941,15 +946,15 @@ Measured station geometry and allocation totals:
 - **Do:** Implement `VoxelSingletons`, `GridSpawnApi` spawn overloads, `GridSpawnSystem` §5.7 steps 1, 4 and 5 with `BrickFillJob` and `FunctionalFillJob`, hooks, `PersistentId` copy, profile types from `RootComponentRegistration` and `GridStowApi` (§5.13), profiler markers. In step 5b also set `GridMass { Data = source.GetMass(content) }` (cached by revision, SPEC-12 Q3) and disable `GridMassRecompute`, so no O(cells) recompute runs after a spawn.
 - **Files:** `Assets/Game/Voxel/Grid/{GridSpawnSystem,GridSpawnApi,GridStowApi,VoxelSingletons,BrickFillJob,FunctionalFillJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/GridSpawnSystemTests.cs`; `Assets/Game/Tests/PlayMode/Voxel/GridSpawnPerfTests.cs`
 - **Acceptance criteria:**
-  - [ ] Spawning `Ship20k` with 3 functional blocks yields 1 root, 18 bricks, 3 functional entities; every brick's cells and mask equal the structure's; `BrickSlot` maps every coord; the LEG has 22 entries; `Instances[i].Functional` points at the entity; the root has `PersistentId` equal to the request's.
-  - [ ] Components added by the requester before the spawn frame remain on the root; a test hook receives every created brick and functional entity exactly once.
-  - [ ] `Lattice2500` with `SpawnBricksPerFrame = 1024` takes exactly 3 updates; `GridSpawning` is disabled after the third; the source is unpinned then.
-  - [ ] A uniform structure brick spawns as 4,096 identical cells.
-  - [ ] Invalid requests (empty structure, both sources, unknown hash) are destroyed with one error log each.
-  - [ ] A type registered in `RootComponentRegistration` for `GridProfile.NpcShip` is on the root of an `NpcShip` request and absent on a `None` request; a value the requester added before conversion is kept.
-  - [ ] A component type registered for `BlockModuleId.Thruster` is present on spawned thruster entities; a block with modules {PowerSource, Explosive} gets the union of both modules' types, each once; two blocks with the same module mask share one prototype.
-  - [ ] Creating 1,024 dense bricks ≤ 6 ms main thread (median of 20).
-  - [ ] After spawning `Ship20k`, `GridMass.Data` equals `structure.GetMass(content)` exactly and `GridMassRecompute` is disabled.
+  - [x] Spawning `Ship20k` with 3 functional blocks yields 1 root, 10 bricks, 3 functional entities; every brick's cells and mask equal the structure's; `BrickSlot` maps every coord; the LEG has 14 entries; `Instances[i].Functional` points at the entity; the root has `PersistentId` equal to the request's.
+  - [x] Components added by the requester before the spawn frame remain on the root; a test hook receives every created brick and functional entity exactly once.
+  - [x] `Lattice2500` with `SpawnBricksPerFrame = 1024` takes exactly 3 updates; `GridSpawning` is disabled after the third; the source is unpinned then.
+  - [x] A uniform structure brick spawns as 4,096 identical cells.
+  - [x] Invalid requests (empty structure, both sources, unknown hash) are destroyed with one error log each.
+  - [x] A type registered in `RootComponentRegistration` for `GridProfile.NpcShip` is on the root of an `NpcShip` request and absent on a `None` request; a value the requester added before conversion is kept.
+  - [x] A component type registered for `BlockModuleId.Thruster` is present on spawned thruster entities; a block with modules {PowerSource, Explosive} gets the union of both modules' types, each once; two blocks with the same module mask share one prototype.
+  - [x] Creating 1,024 dense bricks ≤ 6 ms main thread (median of 20).
+  - [x] After spawning `Ship20k`, `GridMass.Data` equals `structure.GetMass(content)` exactly and `GridMassRecompute` is disabled.
 - **Tests:** `GridSpawnSystemTests.Spawn_PrefillsMass`, `GridSpawnSystemTests.Spawn_Ship20k_CreatesExpectedEntities`, `.RequesterComponents_Preserved`, `.Hook_ReceivesAllCreated`, `.Budget_SpreadsAcrossFrames`, `.UniformBrick_Expanded`, `.InvalidRequests_Destroyed`, `.FunctionalRegistration_Applied`, `.ProfileRegistration_Applied`, `.Stow_Unstow_TickExact`, `.Headless_NoRenderComponents`; `GridSpawnPerfTests.Create1024Bricks_Under6ms`.
 
 ### VOX-014 — Rebuild, despawn and write-back
@@ -1078,6 +1083,13 @@ Measured station geometry and allocation totals:
 | 27 | GridStowApi.Unstow needs SplitGrace from DMG-001, which VOX-013 does not list | Make the existing contract dependency explicit | Tech lead | Resolved 2026-10-11: VOX-013 depends on DMG-001; implement that ready M1 contract task before spawning. |
 
 | 28 | Spawn/dirty scheduling call queue methods deferred to REN-010, which depends on SPEC-10 | Consume the extracted VOX-021 queue task | Tech lead | Resolved 2026-10-11: explicit dependency breaks the cycle; SPEC-11 Q14 preserves the queue contract and moves its tests. |
+
+| 29 | API submission and conversion both pin; released handles and scene exit can lose unfinished read ownership | Registry-owned read tokens, adopted on conversion and cancelled at completion/teardown | Tech lead | Resolved 2026-10-11 by accepted ADR-0024; public spawn payload/signatures remain unchanged. |
+
+| 30 | UpdateAfter(PlayerInputSampleSystem) would require forbidden Voxel→Presentation reference; “last” would conflict with later init consumers | Declare the ordering on the Presentation input system | Tech lead | Resolved 2026-10-11: SPEC-03 §5.2 owns UpdateBefore(GridSpawnSystem); GridSpawnSystem stays in the normal GameInitGroup ordering bucket. |
+| 31 | An ECB-only stow API cannot inspect enable bits or optional interpolation presence | Caller checks fully initialized precondition; Unstow ensures and resets interpolation | Tech lead | Resolved 2026-10-11 by ADR-0025; signatures unchanged, Playback tests cover Disabled group and pose/velocity/interpolation/grace. |
+| 32 | VOX-013 still requires 18 Ship20k bricks after Q22 corrected its geometry to 10 | Correct derived entity counts; put test functionals in existing brick bounds | Tech lead | Resolved 2026-10-11: core (5,11,5), thrusters (15,11,5)/(25,11,5) stay within the ten brick slots, giving 14 LEG entries. |
+| 33 | Headless bricks get GPU cleanup components although no renderer owns their cleanup | Omit BrickRenderState when rendering is disabled | Tech lead | Resolved 2026-10-11: preserve brick data/LOD/prop buffers, but no Entities Graphics or GPU cleanup component; destruction then releases headless entities immediately. |
 
 ## 11. References
 

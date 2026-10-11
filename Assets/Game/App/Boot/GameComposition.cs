@@ -119,6 +119,7 @@ namespace Game.App.Boot
             // 7. Scene flow (FND-006).
             Flow = Push(new SceneFlow(world, Pause, Save, GameConfig));
             Register(Flow);
+            Flow.RegisterExiting(Registry);
             Step("7 flow");
 
             // 8. TODO(FND-009): session = new GameSession(flow, save, world, content, gameConfig); save.AttachContext(session); SESS, FLET;
@@ -162,6 +163,7 @@ namespace Game.App.Boot
             public void Dispose()
             {
                 if (registry == null) return;
+                registry.Dispose();
                 if (Application.isPlaying) UnityEngine.Object.Destroy(registry);
                 else UnityEngine.Object.DestroyImmediate(registry);
             }
@@ -170,6 +172,11 @@ namespace Game.App.Boot
         /// <summary>Disposes DisposeStack in reverse (one failure cannot leak the rest), then Services.Reset.</summary>
         public void Dispose()
         {
+            var world = World.DefaultGameObjectInjectionWorld;
+            try { if (world != null && world.IsCreated) world.EntityManager.CompleteAllTrackedJobs(); }
+            catch (Exception e) { GameLog.Exception(LogCategories.Boot, e, "GameComposition.Dispose jobs"); }
+            // Borrowed fleet structures must be unpinned before their owners dispose them.
+            if (Registry != null) Registry.CancelSpawnReads();
             LastDisposeLog.Clear();
             for (int i = DisposeStack.Count - 1; i >= 0; i--)
             {

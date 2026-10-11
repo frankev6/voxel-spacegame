@@ -1,3 +1,4 @@
+using System;
 using Game.Core;
 using Game.Voxel.Model;
 using Unity.Collections;
@@ -10,10 +11,50 @@ namespace Game.Voxel.Grid
     /// <summary>Implements SPEC-10 §4.6. Spawn, rebuild, despawn and edit requests for managed callers (App, Galaxy, ShipEditor, tests).</summary>
     public static class GridSpawnApi
     {
-        public static Entity RequestSpawn(EntityManager em, VoxelStructureRegistry registry, int structureHandle, in GridSpawnParams p) { throw new System.NotImplementedException("VOX-013"); }
-        public static Entity RequestSpawn(EntityCommandBuffer ecb, VoxelStructureRegistry registry, int structureHandle, in GridSpawnParams p) { throw new System.NotImplementedException("VOX-013"); } // BeginInitialization ECB
-        public static Entity RequestSpawnBlueprint(EntityManager em, ContentHash blueprint, in GridSpawnParams p) { throw new System.NotImplementedException("VOX-013"); }     // WriteBack is cleared
-        public static Entity RequestSpawnBlueprint(EntityCommandBuffer ecb, ContentHash blueprint, in GridSpawnParams p) { throw new System.NotImplementedException("VOX-013"); }
+        public static Entity RequestSpawn(EntityManager em, VoxelStructureRegistry registry, int structureHandle, in GridSpawnParams p)
+        {
+            var source = Resolve(registry, structureHandle);
+            int token = registry.PinSpawnRead(source, structureHandle, default); Entity entity = Entity.Null;
+            try
+            {
+                entity = em.CreateEntity(typeof(GridSpawnRequest), typeof(SpawnReadToken));
+                em.SetComponentData(entity, Request(default, structureHandle, p));
+                em.SetComponentData(entity, new SpawnReadToken { Value = token }); registry.BindRead(token, entity);
+                return entity;
+            }
+            catch { registry.EndRead(token); if (entity != Entity.Null && em.Exists(entity)) em.DestroyEntity(entity); throw; }
+        }
+        public static Entity RequestSpawn(EntityCommandBuffer ecb, VoxelStructureRegistry registry, int structureHandle, in GridSpawnParams p)
+        {
+            var source = Resolve(registry, structureHandle); int token = registry.PinSpawnRead(source, structureHandle, default);
+            try
+            {
+                Entity entity = ecb.CreateEntity(); ecb.AddComponent(entity, Request(default, structureHandle, p));
+                ecb.AddComponent(entity, new SpawnReadToken { Value = token }); return entity;
+            }
+            catch { registry.EndRead(token); throw; }
+        } // BeginInitialization ECB
+        public static Entity RequestSpawnBlueprint(EntityManager em, ContentHash blueprint, in GridSpawnParams p)
+        {
+            Entity entity = em.CreateEntity(typeof(GridSpawnRequest)); em.SetComponentData(entity, Request(blueprint, -1, p)); return entity;
+        }     // WriteBack is cleared
+        public static Entity RequestSpawnBlueprint(EntityCommandBuffer ecb, ContentHash blueprint, in GridSpawnParams p)
+        {
+            Entity entity = ecb.CreateEntity(); ecb.AddComponent(entity, Request(blueprint, -1, p)); return entity;
+        }
+        static VoxelStructure Resolve(VoxelStructureRegistry registry, int handle)
+        {
+            if (registry == null) throw new ArgumentNullException(nameof(registry));
+            var source = registry.Get(handle);
+            if (source == null || !source.Data.IsCreated) throw new ArgumentException("Spawn handle must refer to a live structure", nameof(handle));
+            return source;
+        }
+        static GridSpawnRequest Request(ContentHash blueprint, int handle, in GridSpawnParams p) => new GridSpawnRequest
+        {
+            Blueprint = blueprint, StructureHandle = handle, PersistentId = p.PersistentId, Pose = p.Pose,
+            LinearVelocity = p.LinearVelocity, AngularVelocity = p.AngularVelocity, Kind = p.Kind, Motion = p.Motion,
+            Flags = handle < 0 ? p.Flags & ~GridSpawnFlags.WriteBack : p.Flags, Profile = p.Profile
+        };
         public static void RequestRebuild(EntityManager em, VoxelStructureRegistry registry, Entity root, int structureHandle, GridSpawnFlags flags) { throw new System.NotImplementedException("VOX-014"); }
         public static void RequestDespawn(EntityManager em, Entity root) { throw new System.NotImplementedException("VOX-014"); }          // enables GridDespawnRequest
         public static void RequestEdit(EntityManager em, Entity root, NativeArray<int3> changedBrickCoords) { throw new System.NotImplementedException("VOX-020"); }   // M3

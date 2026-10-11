@@ -299,7 +299,7 @@ Persisting is the settings presenter's job (SPEC-61): after `Completed`, it writ
 
 ### 5.2 `PlayerInputSampleSystem` (per frame)
 
-Position: `GameInitGroup`, after `OriginRebaseSystem`, before `GridSpawnSystem` (architecture §5). Managed `SystemBase`, allowed in Presentation (conventions §2.2). No `RequireForUpdate<GameplayActive>`: it creates the `PlayerCommand` singleton in `OnCreate` and must keep it neutral in menus. Profiler marker `PlayerInputSampleSystem.Sample`.
+Position: `GameInitGroup`, after `OriginRebaseSystem`, before `GridSpawnSystem` (architecture §5), declared here with `[UpdateBefore(typeof(GridSpawnSystem))]` because Voxel cannot reference Presentation (SPEC-10 Q30). Managed `SystemBase`, allowed in Presentation (conventions §2.2). No `RequireForUpdate<GameplayActive>`: it creates the `PlayerCommand` singleton in `OnCreate` and must keep it neutral in menus. Profiler marker `PlayerInputSampleSystem.Sample`.
 
 1. If unbound: write `PlayerCommand` with zero analog, `FireGroups = 0`, `Flags = 0`, `AimValid = 0`, and unchanged counters; return.
 2. `cmd = GetSingleton<PlayerCommand>()`. Its counters are kept; everything else is rewritten.

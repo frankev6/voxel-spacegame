@@ -1,18 +1,32 @@
 using System;
 using System.Collections.Generic;
 using Game.Core;
+using Game.Core.Flow;
+using Unity.Entities;
 using Game.Voxel.Model;
 using UnityEngine;
 
 namespace Game.Voxel.Grid
 {
     /// <summary>Implements SPEC-10 §4.4. Runtime registry borrows structures; releasing a handle never disposes its owner's storage.</summary>
-    public sealed class VoxelStructureRegistry : ScriptableObject
+    public sealed class VoxelStructureRegistry : ScriptableObject, ISceneExiting, IDisposable
     {
         readonly List<VoxelStructure> structures = new List<VoxelStructure>();
         readonly List<IGridSpawnHook> hooks = new List<IGridSpawnHook>();
         BlueprintLibrary blueprints;
         IReadOnlyList<IGridSpawnHook> hookView;
+        sealed class SpawnRead
+        {
+            public VoxelStructure Source;
+            public Entity Bound;
+            public int Handle;
+            public ContentHash Blueprint;
+        }
+        readonly Dictionary<int, SpawnRead> spawnReads = new Dictionary<int, SpawnRead>();
+        readonly List<int> cancelled = new List<int>();
+        int nextRead = 1;
+        bool disposed;
+
 
         public static VoxelStructureRegistry CreateRuntime(BlueprintLibrary blueprints)
         {
@@ -41,6 +55,52 @@ namespace Game.Voxel.Grid
             for (int i = 0; i < hooks.Count; i++) if (ReferenceEquals(hooks[i], hook)) { hooks.RemoveAt(i); return; }
         }
         public IReadOnlyList<IGridSpawnHook> SpawnHooks => hookView;
-        void OnDestroy() { structures.Clear(); hooks.Clear(); blueprints = null; }
+        internal int PinSpawnRead(VoxelStructure source, int handle, ContentHash blueprint)
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(VoxelStructureRegistry));
+            int token = nextRead; nextRead = checked(nextRead + 1);
+            source.Pin();
+            try { spawnReads.Add(token, new SpawnRead { Source = source, Handle = handle, Blueprint = blueprint }); }
+            catch { source.Unpin(); throw; }
+            return token;
+        }
+        internal VoxelStructure ReadSource(int token) => spawnReads.TryGetValue(token, out var read) ? read.Source : null;
+        internal bool MatchesRead(int token, VoxelStructure source, int handle, ContentHash blueprint)
+            => spawnReads.TryGetValue(token, out var read) && ReferenceEquals(read.Source, source) && read.Handle == handle && read.Blueprint == blueprint;
+        internal void BindRead(int token, Entity root) => spawnReads[token].Bound = root;
+        internal void EndRead(int token)
+        {
+            if (!spawnReads.TryGetValue(token, out var read)) return;
+            spawnReads.Remove(token); read.Source.Unpin();
+            if (!read.Blueprint.IsNone) blueprints.ReleaseUnpinnedLarge();
+        }
+        internal void ReconcileReads(EntityManager em)
+        {
+            cancelled.Clear();
+            foreach (var pair in spawnReads)
+            {
+                Entity entity = pair.Value.Bound;
+                if (entity != Entity.Null && (!em.Exists(entity) || !em.HasComponent<SpawnReadToken>(entity)
+                    || em.GetComponentData<SpawnReadToken>(entity).Value != pair.Key)) cancelled.Add(pair.Key);
+            }
+            foreach (int token in cancelled) EndRead(token);
+            cancelled.Clear();
+        }
+        public void CancelSpawnReads()
+        {
+            foreach (var read in spawnReads.Values) read.Source.Unpin();
+            spawnReads.Clear(); cancelled.Clear();
+        }
+        public int SceneExitOrder => -10000;
+        public void OnSceneExiting(in SceneExitContext context)
+        {
+            CancelSpawnReads(); blueprints.ReleaseUnpinnedLarge();
+        }
+        public void Dispose()
+        {
+            if (disposed) return;
+            CancelSpawnReads(); structures.Clear(); hooks.Clear(); disposed = true;
+        }
+        void OnDestroy() { Dispose(); blueprints = null; }
     }
 }
