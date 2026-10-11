@@ -1122,6 +1122,18 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
   - [ ] Their `BlockDef` entries have the module masks `{PowerSource, Explosive}` / `{Cargo}`, categories Power / Utility, and 8 / 2 cells.
 - **Tests:** `ProjectContentTests.ProjectContent_HasZeroValidationErrors` (existing), `ProjectContentTests.V2Additions_HaveExpectedFunctions`.
 
+### DATA-012 — Approved slope kit per-cell data and content
+- **Milestone:** M1
+- **Tier:** frontier — public blob schema and canonical shape mapping
+- **Depends on:** `DATA-006`, `DATA-009`
+- **Do:** Implement Q14 under ADR-0028: optional authored shapes, canonical baked shapes, validation limited to the approved kit, and hip/long-slope content. Include resolved per-cell shapes in the block hash; document snapshot lookup.
+- **Files:** `Assets/Game/Data/Definitions/Blocks/BlockDefinition.cs`; `Assets/Game/Data/Blocks/BlockDef.cs`; `Assets/Game/Data/Blocks/BlockDefsBlobBuilder.cs`; `Assets/Game/Content/Blocks/block_hull_hip.asset`; `Assets/Game/Content/Blocks/block_hull_slope_long.asset`; `Assets/Game/Tests/EditMode/Data/SlopeKitTests.cs`
+- **Acceptance criteria:**
+  - [ ] Empty authored shapes inherit the default; explicit shapes follow cells through canonical sorting and affect the canonical hash; single-cell root Shape agrees with its resolved shape.
+  - [ ] Invalid shape values, lengths, non-structural overrides and unapproved multi-cell structural footprints fail validation. The approved long slope has High at the root and Low at +Y.
+  - [ ] Both registered assets pass project validation, have the specified values and reuse existing icons. No new visual assets or ships.
+- **Tests:** `SlopeKitTests.Validation_ApprovedKitOnly`, `SlopeKitTests.Bake_CanonicalShapeMappingAndHash`, `SlopeKitTests.ShippedKit_ValuesAndInstances`; existing full validation/performance suites.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider |
