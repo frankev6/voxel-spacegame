@@ -1005,6 +1005,17 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
   - [ ] Listing 50 slots remains below its 50 ms gate.
 - **Tests:** `SavePipelineTests.MetadataWriteFailure_ReportsCommittedSave`; `.StaleSidecar_UsesEmbeddedMeta`; `.MetadataWriteFailure_AsyncReportsSuccess`; `SavePerfTests.ListSlots_50`.
 
+### PERS-018 — Handle null JSON metadata as unreadable
+- **Milestone:** M0
+- **Tier:** standard — existing profile skip and META warning rules
+- **Depends on:** `PERS-002`, `PERS-006`
+- **Do:** Handle JSON null and empty input explicitly at profile/META object read boundaries. Skip an unreadable profile with one warning; retain successful container loading with PERS-W013 for missing metadata. Keep the generic JSON codec's valid null semantics unchanged.
+- **Files:** `Assets/Game/Persistence/Services/SaveService.cs`; `Assets/Game/Tests/EditMode/Persistence/{ProfileAndSlotTests,LoadPipelineTests}.cs`
+- **Acceptance criteria:**
+  - [ ] Empty/null profiles never abort listing other profiles and emit one warning each.
+  - [ ] Empty/null META keeps the load successful, produces one PERS-W013 and does not affect participant restoration.
+- **Tests:** `ProfileAndSlotTests.NullProfile_IsSkipped`; `LoadPipelineTests.NullMeta_IsReportedWithoutRejectingLoad`.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
