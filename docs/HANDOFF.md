@@ -29,31 +29,28 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 ## 2. Where things stand (2026-10-11, M0 in progress)
 
 - **Design gate passed.** NOCTURNE is binding, as [DESIGN-GUIDE.md](design/DESIGN-GUIDE.md) (`ART-013`). The slope kit is in [ADR-0018](decisions/ADR-0018-slope-block-kit.md).
-- **M0 Foundations: 37 of 66 tasks done** (see the [ledger](LEDGER.md) summary and log). Done so far:
-  - Core: `CORE-001`…`CORE-012` (all);
-  - Data: `DATA-001`…`DATA-009` (all);
-  - plus `FND-001`…`FND-004`, `INP-001`/`002`, `PERS-001`/`002`, `MIG-001`…`003`, `DEV-001`/`002`, `AUD-001`, `VOX-001` and `TST-001`.
-- **The test kit exists** (`Game.Tests.Common`, TST-001): `EcsTestWorld`, `GameTestBase` and `PerfRun`. `tools/test.sh perf` ends with a PASS/FAIL table, and every perf gate so far passes. See [08-tools.md](08-tools.md) §3.
-- **Boot works** (FND-002): `Bootstrap` creates the Default World, then `GameRoot` composes settings, input, pause and the settings applier. `SceneFlow` (FND-006) is next on that path.
-- **Spec defects found and fixed while building**, each with a resolved open question in its spec and in the ledger (questions 17–23):
-  - SPEC-02 nested native containers and padding in the event-sort hash;
-  - the SPEC-71 rate managers;
-  - the SPEC-01 settings applier.
-- **Still open for Frank:**
-  - ledger questions 6 (b): large hull blocks;
-  - 6 (c): smooth alien cells;
-  - 7: factions and rosters.
-  None of these blocks M0.
-- **Branches:** `main` holds everything. Only `task/ART-007-brick-tools` is unmerged: its art validator now has all its dependencies (`CORE-002`, `DATA-004`, `DATA-005` are done).
+- **M0 Foundations: 46 of 66 tasks done** (see the [ledger](LEDGER.md) summary and log). Done:
+  - Core: `CORE-001`…`012`;
+  - Data: `DATA-001`…`009`;
+  - Boot: `FND-001`…`007` and `FND-014`;
+  - Persistence: `PERS-001`…`006` and `PERS-009`;
+  - plus `INP-001`/`002`, `MIG-001`…`003`, `DEV-001`/`002`, `AUD-001`, `VOX-001` and `TST-001`.
+- **What runs today:** Play from Boot creates the Default World and GameRoot. Settings, content, input, pause, save and SceneFlow are composed in order. MainMenu ↔ World ↔ BlueprintLab transitions tear everything down cleanly. SimClock ticks in the World and stops on pause. Saves and loads work end to end (atomic, with backup and never-reject loading), with autosave and a quit save.
+- **Not yet:** no gameplay. There are no voxel ships, rendering, flight, combat or UI screens: those are M1+ (voxel model and renderer first). The scenes are still empty.
+- **Spec defects found and fixed while building**, each with a resolved open question in its spec and the ledger (questions 17–29):
+  - nested native containers, and padding in a sort hash (SPEC-02);
+  - test rate managers (SPEC-71);
+  - the settings applier, the start blueprint, the `WorldTime` singleton destroyed by teardown, and the static audit scope (SPEC-01);
+  - deferred-block disposal, millisecond timestamps, and newer chunks on resave (SPEC-05).
+- **Still open for Frank:** ledger questions 6 (b) large hull blocks, 6 (c) smooth alien cells, 7 factions and rosters. None blocks M0.
+- **Branches:** `main` holds everything except `task/ART-007-brick-tools`.
 - **Reviews:** no per-task reviews (ADR-0019). The M0 system review runs before the M0 exit gate. `ART-004` stays in `review` for its 150 m glyph criterion.
 
 ## 3. Next
 
-1. **M0, going wide** (ready now: `PERS-003`, `PERS-007`, `MIG-004`, `MIG-007`, `DEV-003`, `INP-003`, `AUD-002`, `TST-008`):
-   - then `FND-005` → `FND-006` → `FND-007`/`FND-014`;
-   - the persistence chain `PERS-004`…`PERS-012`;
-   - the migration chain `MIG-005`…`MIG-016`;
-   - the dev harness `DEV-004`…`DEV-006`.
+1. **M0, remaining 20:**
+   - ready now: `PERS-007` VOXS codec, `PERS-010`/`011`, `MIG-004`, `MIG-007`, `DEV-003`, `INP-003`, `AUD-002`, `TST-008`;
+   - then `PERS-008`/`012`, `MIG-005`…`016`, `DEV-004`…`006`/`020`, `AUD-003`.
 2. **`ART-007`:** finish the art validator on its branch and merge it.
-3. **M0 system review** (04-workflow §8) once the M0 systems exist, then the M0 exit gate.
-4. **Art track:** `ART-014` applies the NOCTURNE tokens and fonts in Unity (A1). The in-engine look test (`ART-008`…`ART-011`) waits for the voxel renderer (M1).
+3. **M0 system review** (04-workflow §8), then the M0 exit gate. After that, M1: the voxel model, renderer and physics, the first visible ships.
+4. **Art track:** `ART-014` applies the NOCTURNE tokens and fonts in Unity (A1).
