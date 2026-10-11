@@ -1058,7 +1058,7 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Do:** PlayMode scenarios in a test scene with the full voxel pipeline: (1) ram: a 20k-cell ship at 20 m/s hits a resting 20k-cell ship head-on; (2) torque: an impulse applied at an off-centre point of a planar ship produces yaw only; (3) collider follows damage: remove a 4×4×4 block of cells with `BrickWrite` + `BrickDirty` (stand-in for SPEC-13) and fire a ray through the hole after `InstallTick`; (4) spawn a station around a resting ship: no push during `Provisional`; (5) planar ship spawned with angular velocity on X keeps zero X/Z rotation.
 - **Files:** `Assets/Game/Tests/PlayMode/Voxel/Physics/PhysicsScenarioTests.cs`
 - **Acceptance criteria:**
-  - [ ] (1) Both ships move after contact; total linear momentum is conserved within 2%. (2) Yaw rate changes, X/Z angular velocity stays 0. (3) The ray passes the hole after `InstallTick` and hits the wall before it. (4) The resting ship's position changes by < 1 mm while the station is `Provisional`. (5) As stated.
+  - [x] (1) Both ships move after contact; total linear momentum is conserved within 2%. (2) Yaw rate changes, X/Z angular velocity stays 0. (3) The ray passes the hole after `InstallTick` and hits the wall before it. (4) The resting ship's position changes by < 1 mm while the station is `Provisional`. (5) As stated.
 - **Tests:** `PhysicsScenarioTests.Ram_PushesBoth_MomentumConserved`, `.OffCentreImpulse_YawOnly`, `.Hole_ColliderUpdatesAtInstallTick`, `.ProvisionalStation_DoesNotPush`, `.Planar_NoPitchRoll`.
 
 ### PHY-018 — Collider and mass determinism across frame rates
