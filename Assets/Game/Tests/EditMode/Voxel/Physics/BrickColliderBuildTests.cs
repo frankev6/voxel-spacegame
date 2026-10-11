@@ -80,9 +80,10 @@ namespace Game.Tests.EditMode.Voxel.Physics
             Config(16,2);int older=Update(1,20);ColliderPipeline.Seal(ref cache.C,older);
             int newer=Update(1,1,ColliderPriority.Damage,8,0,3);
             Step(2);Assert.AreEqual(16,batch.B.Bricks.Length);Assert.AreEqual(0,batch.B.Assemblies.Length);Assert.AreEqual(0,cache.C.Updates[newer].BricksScheduled);Finish();
-            Step(3);Assert.AreEqual(5,batch.B.Bricks.Length);Assert.AreEqual(2,batch.B.Assemblies.Length);
-            Assert.AreEqual(older,batch.B.Assemblies[0].Update);Assert.AreEqual(newer,batch.B.Assemblies[1].Update);
-            Finish();Assert.AreEqual(UpdateState.Built,cache.C.Updates[older].State);Assert.AreEqual(UpdateState.Built,cache.C.Updates[newer].State);
+            // Tick 8 is reachable in the next six-tick frame: ADR-0035 finalizes this batch before returning.
+            Step(3);Assert.AreEqual(5,cache.C.Stats.Value.LastBatchBricks);Assert.AreEqual(2,cache.C.Stats.Value.LastBatchAssemblies);
+            Assert.AreEqual(0,batch.State.Value.InFlight);ColliderPipelineInvariants.Check(cache,batch);
+            Assert.AreEqual(UpdateState.Built,cache.C.Updates[older].State);Assert.AreEqual(UpdateState.Built,cache.C.Updates[newer].State);
             // Old compound retains cell 0; the newer overlay moves that brick's occupied cell to x=3.
             var oldBlob=cache.C.Updates[older].Compound;var newBlob=cache.C.Updates[newer].Compound;
             var ray=new RaycastInput{Start=new float3(.25f,2,.25f),End=new float3(.25f,-2,.25f),Filter=PhysicsLayers.ProjectileQuery};

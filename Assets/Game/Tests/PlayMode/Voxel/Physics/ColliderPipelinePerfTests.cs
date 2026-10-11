@@ -126,7 +126,9 @@ namespace Game.Tests.PlayMode.Voxel.Physics.Perf
                 for (int c = 0; c < 20000; c++) decks[r][c] = c;
             }
             f.Ready(roots); using var recorder = new PhysicsWorkerRecorder(); var random = new Unity.Mathematics.Random(0x301919u);
-            var worker = new double[600]; var urgent = new List<double>(); int assemblyCount = 0, previousBatches = GridColliderStats.Gather(f.Em).Batches;
+            using var deadline = ProfilerRecorder.StartNew(ProfilerCategory.Scripts, "BrickColliderBuildSystem.Deadline");
+            Assert.IsTrue(deadline.Valid); Assert.IsTrue(deadline.IsRunning);
+            var worker = new double[600]; var waits = new double[600]; var urgent = new List<double>(); int assemblyCount = 0, previousBatches = GridColliderStats.Gather(f.Em).Batches;
             for (int tick = 0; tick < 660; tick++)
             {
                 for (int r = 0; r < roots.Length; r++)
@@ -138,20 +140,24 @@ namespace Game.Tests.PlayMode.Voxel.Physics.Perf
                     }
                     PhysicsPerfDamage.Finish(f, roots[r]);
                 }
-                double before = recorder.CurrentMs; f.Tick(); yield return null;
+                double before = recorder.CurrentMs; long beforeDeadline = deadline.CurrentValue; f.Tick(); yield return null;
                 double ms = recorder.Since(before); var stats = GridColliderStats.Gather(f.Em);
                 Assert.AreEqual(0, stats.LateInstalls, "Tick " + tick);
                 if (tick >= 60)
                 {
                     worker[tick - 60] = ms;
+                    waits[tick - 60] = (deadline.Count == 0 ? deadline.CurrentValue - beforeDeadline : deadline.LastValue) * 1e-6;
                     if (stats.Batches != previousBatches) { urgent.Add(stats.LastBatchUrgentBricks); assemblyCount += stats.LastBatchAssemblies; }
                 }
                 previousBatches = stats.Batches;
             }
             for (int i = 0; i < 16; i++) { f.Tick(); yield return null; }
             Assert.AreEqual(0, GridColliderStats.Gather(f.Em).LateInstalls); foreach (int count in remaining) Assert.AreEqual(6800, count);
-            var run = new PerfRun(TestContext.CurrentContext.Test.FullName).AddSamples("SkirmishColliderWorkers", worker).AddSamples("UrgentBricksPerBatch", urgent, "bricks");
+            var run = new PerfRun(TestContext.CurrentContext.Test.FullName).AddSamples("SkirmishColliderWorkers", worker)
+                .AddSamples("DeadlineCompletionMain", waits).AddSamples("UrgentBricksPerBatch", urgent, "bricks");
+            // A normally completed batch may need no forced deadline wait at this one-tick frame rate.
             Assert.Greater(run.Get("SkirmishColliderWorkers").Mean, 0); run.Write("SkirmishColliderWorkers", 2); run.AssertMedian("SkirmishColliderWorkers", 2);
+            TestContext.WriteLine($"Variable-rate deadline completion median/p95/max {run.Get("DeadlineCompletionMain").Median:F6}/{run.Get("DeadlineCompletionMain").P95:F6}/{run.Get("DeadlineCompletionMain").Max:F6} ms; forced completions {GridColliderStats.Gather(f.Em).ForcedBatchCompletes} (ADR-0035).");
             TestContext.WriteLine($"30 ships, 60 damage warmup + 600 measured ticks, 20 distinct cells/ship/tick; no late installs. Workers median/p95/mean {run.Get("SkirmishColliderWorkers").Median:F6}/{run.Get("SkirmishColliderWorkers").P95:F6}/{run.Get("SkirmishColliderWorkers").Mean:F6} ms; urgent median/max {run.Get("UrgentBricksPerBatch").Median}/{run.Get("UrgentBricksPerBatch").Max}; assemblies/s {assemblyCount / 10.0:F1}. Mass uses real recompute; its time is excluded from the collider-job sum.");
         }
     }

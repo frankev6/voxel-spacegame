@@ -675,7 +675,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 110 | 2026-10-11 | SPEC-01 FND-009 | Future galaxy/fleet/combat/camera contracts absent at current dependency stage | Keep task-owned integration points and configured SESS defaults | Tech lead | SPEC-01 Q17: GAL-008, FND-010, AI-008 and CAM-004 wiring remains with those tasks |
 | 111 | 2026-10-11 | SPEC-01 FND-009 | New game can run without a selected profile | Create configured-default profile only when none is selected | Tech lead | SPEC-01 Q18; existing active profile and redirected save roots preserved |
 | 112 | 2026-10-11 | SPEC-20 FLT-001 | Contract size/file-list and player-tag comments disagree with field/profile contracts | Keep fields; correct comments; include PropulsionStats | Tech lead | SPEC-20 Q9: 44-byte FlightThruster; ADR-0015 profile owns PlayerShip; no layout change |
-| 113 | 2026-10-11 | SPEC-12 PHY-023 | Background batch completion can miss an urgent install during six-tick catch-up | Finish deadline-critical work outside the fixed step | Tech lead | Open: PHY-023 will close intermittent pattern-3 / 17-worker late installs found during FLT-002 validation |
+| 113 | 2026-10-11 | SPEC-12 PHY-023 | Background batch completion can miss an urgent install during six-tick catch-up | Finish deadline-critical work outside the fixed step | Tech lead | Accepted ADR-0035 / SPEC-12 Q25: next-frame deadline completion in the variable-rate builder; PHY-023 full validation pending |
 
 
 

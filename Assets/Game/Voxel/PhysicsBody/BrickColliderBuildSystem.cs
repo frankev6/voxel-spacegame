@@ -1,3 +1,4 @@
+using Game.Core;
 using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Voxel.Model;
@@ -22,6 +23,7 @@ namespace Game.Voxel.PhysicsBody
         static readonly ProfilerMarker Plan = new ProfilerMarker(ProfilerCategory.Scripts, "BrickColliderBuildSystem.Plan");
         static readonly ProfilerMarker Copy = new ProfilerMarker(ProfilerCategory.Scripts, "BrickColliderBuildSystem.Copy");
         static readonly ProfilerMarker Schedule = new ProfilerMarker(ProfilerCategory.Scripts, "BrickColliderBuildSystem.Schedule");
+        static readonly ProfilerMarker Deadline = new ProfilerMarker(ProfilerCategory.Scripts, "BrickColliderBuildSystem.Deadline");
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<SimClock>(); state.RequireForUpdate<PhysicsVoxelConfig>();
@@ -33,19 +35,19 @@ namespace Game.Voxel.PhysicsBody
             var cache = SystemAPI.GetSingleton<ColliderBuildCache>(); var batch = SystemAPI.GetSingleton<ColliderBatchQueue>();
             var config = SystemAPI.GetSingleton<PhysicsVoxelConfig>(); uint frame = SystemAPI.GetSingleton<DeferredDisposalQueue>().Frame;
             using (Access.Auto()) cache.CompleteAccess();
+            uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
             var status = batch.State.Value;
             if (status.InFlight != 0)
             {
                 bool complete = status.Handle.IsCompleted;
-                if (!complete && frame - status.ScheduledFrame < config.MaxBatchAgeFrames) return;
+                bool deadline = HasUrgentDeadline(cache.C, tick);
+                if (!complete && !deadline && frame - status.ScheduledFrame < config.MaxBatchAgeFrames) return;
                 using (Finalize.Auto())
                 {
-                    status.Handle.Complete();
-                    if (!complete) { var stats = cache.C.Stats.Value; stats.ForcedBatchCompletes++; cache.C.Stats.Value = stats; }
-                    ColliderPipeline.Finalize(ref cache, ref batch); batch.State.Value = default;
+                    if (deadline) { using var marker = Deadline.Auto(); CompleteBatch(ref cache, ref batch); }
+                    else CompleteBatch(ref cache, ref batch);
                 }
             }
-            uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
             using (Seal.Auto())
                 for (int i = 0; i < cache.C.Updates.Length; i++)
                 {
@@ -70,6 +72,36 @@ namespace Game.Voxel.PhysicsBody
                 batch.State.Value = new ColliderBatchState { Handle = assembled, InFlight = 1, ScheduledFrame = frame };
                 var stats = cache.C.Stats.Value; stats.Batches++; cache.C.Stats.Value = stats;
             }
+            // ADR-0035: the next frame may run six ticks before this builder runs again.
+            // Finish only deadline-critical assemblies here; installing them remains fixed-step work.
+            for (int i = 0; i < batch.B.Assemblies.Length; i++)
+                if (DueNextFrame(cache.C.Updates[batch.B.Assemblies[i].Update], tick))
+                {
+                    using var marker = Deadline.Auto();
+                    CompleteBatch(ref cache, ref batch);
+                    break;
+                }
+        }
+        static bool DueNextFrame(in ColliderUpdate update, uint nextTick)
+            => update.InstallTick != 0 && ColliderInstallSchedule.IsUrgent(update.Priority) &&
+                update.InstallTick <= (ulong)nextTick + SimTime.MaxTicksPerFrame - 1;
+        static bool HasUrgentDeadline(in ColliderCacheContainers cache, uint nextTick)
+        {
+            for (int i = 0; i < cache.Updates.Length; i++)
+            {
+                var update = cache.Updates[i];
+                if ((update.State == UpdateState.Collecting || update.State == UpdateState.Pending || update.State == UpdateState.Building) &&
+                    DueNextFrame(update, nextTick)) return true;
+            }
+            return false;
+        }
+        static void CompleteBatch(ref ColliderBuildCache cache, ref ColliderBatchQueue batch)
+        {
+            var status = batch.State.Value;
+            bool forced = !status.Handle.IsCompleted;
+            status.Handle.Complete();
+            if (forced) { var stats = cache.C.Stats.Value; stats.ForcedBatchCompletes++; cache.C.Stats.Value = stats; }
+            ColliderPipeline.Finalize(ref cache, ref batch); batch.State.Value = default;
         }
         struct Candidate : System.IComparable<Candidate>
         {

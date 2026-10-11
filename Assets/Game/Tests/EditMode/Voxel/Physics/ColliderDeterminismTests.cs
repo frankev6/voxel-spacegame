@@ -13,6 +13,7 @@ using Unity.Jobs;
 using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Mathematics;
 using Unity.Physics;
+using Unity.Profiling;
 using Unity.Transforms;
 using Fixture = Game.Tests.EditMode.Voxel.Physics.GridBodyInitTests.Fixture;
 
@@ -164,11 +165,17 @@ namespace Game.Tests.EditMode.Voxel.Physics
                 }
                 uint start = f.Singleton<SimClock>().Tick; const int ticks = 96;
                 f.Em.CreateSingleton(new DeterminismRun { Start = start, End = start + ticks }); GridColliderStats.ResetCounters(f.Em);
+                using var deadline = ProfilerRecorder.StartNew(ProfilerCategory.Scripts, "BrickColliderBuildSystem.Deadline");
+                Assert.IsTrue(deadline.Valid); Assert.IsTrue(deadline.IsRunning);
+                long deadlineTotal = 0, deadlineMax = 0;
                 int frame = 0;
                 while (f.Singleton<SimClock>().Tick < start + ticks)
                 {
                     int count = pattern switch { 0 => 1, 1 => frame % 2 == 0 ? 2 : 3, 2 => frame % 2, _ => 6 };
+                    long before = deadline.CurrentValue;
                     f.Test.StepFrame(count * Game.Tests.Common.EcsTestWorld.TickSeconds); frame++;
+                    long elapsed = deadline.CurrentValue - before; deadlineTotal += elapsed;
+                    if (elapsed > deadlineMax) deadlineMax = elapsed;
                     Assert.Less(frame, 300);
                 }
                 Assert.AreEqual(0, GridColliderStats.Gather(f.Em).LateInstalls, $"Pattern {pattern}, workers {workers}");
@@ -177,6 +184,7 @@ namespace Game.Tests.EditMode.Voxel.Physics
                 Assert.AreEqual(20000 - 512, f.Em.GetComponentData<GridMass>(a).Data.CellCount);
                 Assert.AreEqual(20000 - 512, f.Em.GetComponentData<GridMass>(b).Data.CellCount);
                 TestContext.WriteLine($"Pattern {pattern}, workers {workers}: {frame} frames, {ticks} sampled ticks, {record.Records.Length} records, no late installs");
+                TestContext.WriteLine($"Deadline completion total/max {deadlineTotal * 1e-6:F6}/{deadlineMax * 1e-6:F6} ms across the run; default safety settings, not a reference performance gate.");
                 var result = record.Records.AsArray().ToArray();
                 uint[] events = { 0, 1, 4, 7, 12, 25, 49, 73 };
                 for (int i = 0; i < result.Length; i++)
