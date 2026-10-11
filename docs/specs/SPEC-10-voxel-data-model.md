@@ -1032,6 +1032,8 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 | 10 | Prop meshes are authored at 1 unit = 1 cell | Yes (functional `LocalTransform.Scale = CellSize`); REN-002 checks `hull_1x1` bounds ≈ 1 unit | SPEC-11 / SPEC-81 |
 | 11 | Should damage persist for AI ships spawned from blueprints? | No; they are transient (no write-back) | Owner |
 | 12 | Is the 4-cell-wall `HollowStation1M` the 06 reference station? | Yes (decision 18); thin shells reported only | Owner |
+| 13 | `BrickRecord` (§4.3) is commented "32 bytes" and VOX-001 checks `SizeOf<BrickRecord>() == 32`, but its fields (int3, int, Cell, ushort, ushort, uint) total 28 bytes with 4-byte alignment. Pad to 32 or correct the number? | The fields as written: 28 bytes. The VOX-001 test checks 28; the §8.2 structure-brick total is 4 bytes smaller (16,944) | Tech lead |
+| 14 | `VoxelStructure.ComputeContentHash` (§4.3), `VoxsSourceBuffers.Source` and `VoxelStructureCodec.ToSource/Encode/FromDecoded` (§5.6) take SPEC-05 types (`VoxsBlockNames`, `VoxsSource`, `VoxsDecoded`, `VoxsEncodeOptions`) that PERS-001 creates, and PERS-001 depends on VOX-001 | VOX-001 creates those files with only the members whose types exist (`VoxsSourceBuffers.Dispose`, `VoxelStructureCodec.TryDecode`); VOX-009, which depends on SPEC-05, adds the rest | Tech lead |
 
 ## 11. References
 
