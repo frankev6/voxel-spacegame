@@ -213,8 +213,7 @@ namespace Game.Persistence.Services
             return info;
         }
 
-        /// <summary>Reads the META chunk from the first 64 KB of world.sav (header + table + META). Null when unreadable; the container
-        /// reader arrives with PERS-003, until then this returns null.</summary>
+        /// <summary>Reads the META chunk from the first 64 KB of world.sav (header + table + META, CRCs checked). Null when unreadable.</summary>
         SaveMeta TryReadMetaChunk(string world)
         {
             try
@@ -226,10 +225,7 @@ namespace Game.Persistence.Services
                     int read = 0;
                     while (read < head.Length) { int n = s.Read(head, read, head.Length - read); if (n <= 0) break; read += n; }
                 }
-                var chunks = new List<RawChunk>();
-                SaveContainerReader.Read(head, out _, chunks, new Game.Data.Validation.ValidationReport("ListSlots"), world);
-                foreach (var c in chunks)
-                    if (c.Key == "META" && !c.Corrupt && c.Payload != null) return json.Deserialize<SaveMeta>(c.Payload);
+                if (SaveContainerReader.TryReadChunkFromPrefix(head, "META", out var payload)) return json.Deserialize<SaveMeta>(payload);
             }
             catch (Exception) { }   // ListSlots never throws: any failure here means "no META available"
             return null;
