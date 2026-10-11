@@ -956,8 +956,8 @@ Complexity O(n) in bytes, zero GC allocation for strings ≤ 512 UTF-8 bytes.
 | `"item_fuel"` | 0 | `0xF1D231B0FE914DC8` |
 | `"faction_vestari"` | 0 | `0x4F914742E8527D13` |
 | `"config_game"` | 0 | `0xC55C4B09BD9D8A60` |
-| `"Kraków_ünïcödé"` (UTF-8, 20 bytes) | 0 | `0xD028B4D41FD1611B` |
-| 97-char `"block_thruster_large_mk2_with_a_long_suffix_exceeding_sixty_four_bytes_for_path_test_0123456789"` | 0 | `0x5B6AC785A9FB5E77` |
+| `"Kraków_ünïcödé"` (UTF-8 NFC, 19 bytes) | 0 | `0xD028B4D41FD1611B` |
+| 95-char `"block_thruster_large_mk2_with_a_long_suffix_exceeding_sixty_four_bytes_for_path_test_0123456789"` | 0 | `0x5B6AC785A9FB5E77` |
 | 300 chars, char *i* = `"abcdefghijklmnopqrstuvwxyz0123456789_"[i % 37]` | 0 | `0x7CD2B0369ED482C7` |
 
 Sanity buffer (reference xxHash test buffer, 2,367 bytes): `ulong gen = 2654435761UL; for i in 0..2366: buf[i] = (byte)(gen >> 56); gen *= 11400714785074694797UL;` (unchecked). With `P64 = 11400714785074694797UL`:
