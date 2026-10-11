@@ -108,7 +108,7 @@
 | MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | yes | done | astra (gpt-6) | 2026-10-11 | 75cb5fd | Migration gate: 69 unchanged; full 0.580s; max ship 42.4ms |
 | FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | yes | done | astra (gpt-6) | 2026-10-11 | 2718913 | Unique managed/Burst grants; saved high-water mark; explicit refill dependency wait |
 | FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | yes | done | astra (gpt-6) | 2026-10-11 | 8a8bd6f | Session flow/SESS; ordered save preparation; bounded thumbnail readback (ADR-0034) |
-| FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | yes | blocked | astra (gpt-6) | 2026-10-11 |  | PHY-024 paused body creation; WIP 16df29b on task/FND-010-fleet-player |
+| FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Resumed after PHY-024; finish fleet participant, player hooks and tests |
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | no | todo |  |  |  |  |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | no | todo |  |  |  |  |
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | no | todo |  |  |  |  |
