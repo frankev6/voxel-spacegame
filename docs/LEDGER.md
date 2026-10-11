@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 47 | 0 | 3 | 0 | 16 | 0 | 66 | 13 |
+| M0 | 46 | 0 | 3 | 0 | 17 | 0 | 66 | 12 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -68,7 +68,7 @@
 | DATA-008 | Editor database builder, postprocessor, validator runner and CLI | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-005 | no | todo |  |  |  |  |
 | DATA-009 | System placeholder content and the database asset | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-008 | no | todo |  |  |  |  |
 | PERS-001 | Public contract types | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | CORE-001, DATA-001, VOX-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 75f6583 | Result-struct constructors: SPEC-05 Q16 |
-| PERS-002 | Save paths, profiles, slots and meta files | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-001 | yes | todo |  |  |  |  |
+| PERS-002 | Save paths, profiles, slots and meta files | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 20bb0aa | META-chunk fallback completes with PERS-003; SPEC-05 Q17 |
 | PERS-003 | Binary container, CRC32 and compression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001 | yes | todo |  |  |  |  |
 | PERS-004 | ID palette and SaveWriter/SaveReader integration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-003, SPEC-02 | no | todo |  |  |  |  |
 | PERS-005 | Save pipeline: capture, worker, atomic write, thumbnails, queue | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-002, PERS-004, SPEC-04 | no | todo |  |  |  |  |
@@ -565,6 +565,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-002 profiles and slots (claude, claude-opus-5-5)
+- `SavePaths`, `NewtonsoftSaveJsonCodec`, and the profile and slot part of `SaveService`: profile files are written to a temporary file and then replaced; `ListSlots` never throws and sorts newest first.
+- `MetaMissing` slots read their `META` chunk through `SaveContainerReader`, which arrives with PERS-003; until then their `Meta` is null.
+- SPEC-05 open question 17 (ledger 15): a valid `meta.json` without `world.sav` is not `Ok`.
+- 6 tests pass; EditMode 69/69.
 
 ### 2026-10-11 — MIG-002 legacy JSON index and strict reading (claude, claude-opus-5-5)
 - `LegacyContentIndex` (ordinal order, `$path`/`$type` required, duplicate `$path` reported), `LegacyJson` (`MissingMemberHandling.Error`, metadata read as ordinary properties, no date parsing, a new settings object per call) and `LegacyRefConverter`. Every MIG-E002 names the file and the JSON path.
