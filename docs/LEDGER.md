@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 43 | 0 | 3 | 0 | 20 | 0 | 66 | 12 |
+| M0 | 43 | 0 | 2 | 0 | 21 | 0 | 66 | 12 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -37,7 +37,7 @@
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | FND-001 | Public contract types | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 338c29a | GameRootConfig.UiConfig/CameraConfig wait for SPEC-60/62 |
 | FND-002 | Bootstrap, GameRoot and explicit World creation | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-001 | yes | todo |  |  |  |  |
-| FND-003 | PauseService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  | Blocked on CORE-006: PauseStateChanged is published through EventBus<T> (SPEC-01 Q6, ledger Q13) |
+| FND-003 | PauseService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | f7b5e9b |  |
 | FND-004 | SettingsService and SettingsApplier | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001, PERS-001 | yes | blocked | claude (claude-opus-5-5) | 2026-10-11 |  | Blocked on CORE-006: SettingsChanged is published through EventBus<T> (ledger Q13) |
 | FND-005 | Composition root and BootSingletons | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-002, FND-003, FND-004, SPEC-02, SPEC-04 | no | todo |  |  |  |  |
 | FND-006 | SceneFlow transitions and teardown | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-005 | no | todo |  |  |  |  |
@@ -566,6 +566,10 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — FND-003 PauseService (claude, claude-opus-5-5)
+- `PauseService` in `Game.App.Services` per SPEC-01 §5.6; `ConventionsTests` enforces decision 10, so `Time.timeScale` is assigned only in `PauseService.cs`.
+- 4 tests pass; EditMode 106/106. Ledger question 13 resolved.
 
 ### 2026-10-11 — CORE-006 EventBus and EventHub (claude, claude-opus-5-5)
 - Implemented per SPEC-02 §5.5. Every §7 row about handlers, cascades and re-entrancy is covered by a test.
