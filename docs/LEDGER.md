@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 1 | 0 | 0 | 0 | 65 | 0 | 66 | 1 |
+| M0 | 0 | 0 | 0 | 0 | 66 | 0 | 66 | 0 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -89,7 +89,7 @@
 | DEV-004 | Runtime input injection and UI query | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | yes | done | astra (gpt-6) | 2026-10-11 | 47e764b | Timed state events; AgentMouse cleanup; real-panel UI query |
 | DEV-005 | Scenario language: parser, expressions and built-in probes | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-003 | yes | done | astra (gpt-6) | 2026-10-11 | 2f1e10c | Scenario parser, typed expressions and M0 probes; R28 parse verified |
 | DEV-006 | Scenario runner, results JSON and CLI/scripts | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-004, DEV-005 | yes | done | astra (gpt-6) | 2026-10-11 | 74fe510 | Scenario runner, JSON, CLI/scripts; exits 0/1/2 verified |
-| DEV-020 | Release-strip guarantee | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| DEV-020 | Release-strip guarantee | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | yes | done | astra (gpt-6) | 2026-10-11 | b4e7461 | Real release compilation; namespace/assembly and build-content checks |
 | TST-001 | Test kit core | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c082a4c | kit + perf hook; 8 gates on PerfRun; OQ 4–6 |
 | TST-008 | Iteration gates | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | standard | TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | c6057e6 | Live iteration gates pass; both reloads disabled; reliable CLI test results |
 | MIG-001 | Public contract types | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c327a64 |  |
@@ -609,6 +609,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — DEV-020 release-strip guarantee (astra, gpt-6)
+
+- Slow EditMode fixture compiles actual non-development player scripts into Logs/tools/release-scripts and checks the Game.App bytes and produced assembly names. Build preprocessor rejects dev components/scripts in enabled build scenes, prefab dependencies, Resources and preloaded assets; scene callback covers scenes processed by explicit build requests.
+- Mutation readback: removing DevResultKind's guard made the namespace test fail (1 passed, 1 failed, evidence Logs/tools/dev020-missing-guard-results.xml). Source restored with cp. A temporary headless job verified clean content passes, a Resources prefab with DevLogCapture is rejected, and restored content passes (Logs/tools/dev020-build-check.log); job/probe assets removed.
+- Compile zero C# warnings; clean full EditMode **395 passed**, PlayMode **31 passed**, perf **23/23**. Restored release Game.App.dll has no dev namespace and no DevTools DLL is emitted.
+- Implementation `b4e7461`. All original M0 tasks **66/66** done. System review now begins; the milestone gate is not yet claimed. Frank explicitly authorized this session to review its integrated implementation; this is not represented as an independent review.
 
 ### 2026-10-11 — DEV-006 scenario execution and CLI (astra, gpt-6)
 
