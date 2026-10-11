@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 84 | 0 | 0 | 0 | 16 | 0 | 100 | 15 |
+| M1 | 83 | 0 | 0 | 0 | 17 | 0 | 100 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -120,9 +120,9 @@
 | VOX-004 | Brick maths and mask operations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 508c75f | Brick coordinates, faces and 4096-bit mask operations; 8 tests |
 | VOX-005 | VoxelStructure storage core | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-004 | yes | done | astra (gpt-6) | 2026-10-11 | 3e2c25e | Dense/uniform storage, recycled pages, revisions, bounds and ownership; 7 tests |
 | VOX-006 | Block placement, removal and compaction | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6a33cf7 | Placement/removal, palette/instance reuse, compaction; GetBlocks brought forward (Q65) |
-| VOX-007 | Clone, diff, block enumeration and mass | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-006 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Deep clone, Burst structure diff and deterministic mass |
+| VOX-007 | Clone, diff, block enumeration and mass | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-006 | yes | done | astra (gpt-6) | 2026-10-11 | 37cb539 | Deep clone; canonical Burst diff; double mass sums/cache; 6 tests |
 | VOX-008 | Grid-space DDA raycast | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005 | yes | todo |  |  |  |  |
-| VOX-009 | VOXS codec | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-007, SPEC-05 | no | todo |  |  |  |  |
+| VOX-009 | VOXS codec | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-007, SPEC-05 | yes | todo |  |  |  |  |
 | VOX-010 | Voxel definitions and config factory | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | edb5c0c | Blueprint setter, default config, boot singleton; 2 tests, Q64 |
 | VOX-011 | Structure registry and BlueprintLibrary | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-009, VOX-010 | no | todo |  |  |  |  |
 | VOX-012 | ECS cell write and read helpers | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-004 | yes | done | astra (gpt-6) | 2026-10-11 | 0b52cc8 | Burst cell reads/writes, masks, counts, dirty flags and borders; Q63 |
@@ -654,6 +654,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — VOX-007 clone, diff and mass (astra, gpt-6)
+
+- Implemented deep native clone with exact list capacities and reset pin/read-only flags; Burst IJob diff with sorted brick union, unchanged dense-page skip, resolved palette comparisons and instance multiset merge; per-brick parallel double mass sums with canonical serial reduction and revision cache. GetBlocks remains the implementation brought forward in VOX-006.
+- Six specified tests pass: clone independence, 1,000-op edited-target reconstruction (including compacted palette/instance indices), HP/flag-independent diffs, brute-force mass within 1e-9 at three cell sizes, cached mass invalidation and three bit-identical computations. Diff of 100,000 cells / 10 changed blocks: **0.1274 ms median / 0.1379 ms p95**, budget 10 ms (21 samples, five warmups, Apple M5 Pro).
+- Validation: compile zero C# warnings; full EditMode **482 passed + 1 explicit skipped**, PlayMode **31 passed**, perf **24/24**, docs zero errors. Next benchmark generators, then VOX-009 structure codec.
 
 ### 2026-10-11 — VOX-006 block placement and compaction (astra, gpt-6)
 
