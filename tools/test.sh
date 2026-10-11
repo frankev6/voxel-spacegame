@@ -8,20 +8,25 @@ kind=${1:-editmode}; filter=$2
 run_mode() {   # run_mode <EditMode|PlayMode> <results name> <category or "">
   local mode=$1 name=$2 category=$3
   local out="$PROJECT_ROOT/Logs/test-results/$name.xml"
+  local run_exit=0
+  rm -f "$out"
   if editor_open; then
-    local args=(--testMode "$mode" --resultsPath "$out")
-    [[ -n "$filter" ]] && args+=(--testFilter "$filter")
-    [[ -n "$category" ]] && args+=(--testCategory "$category")
-    unity command run_tests "${args[@]}" --timeout 1800 --format json > "$OUT_DIR/test-$name.json" 2>&1
-    [[ -f "$out" ]] || { echo "run_tests did not write $out:"; head -c 2000 "$OUT_DIR/test-$name.json"; echo; echo "(close the Editor to run headless instead)"; return 1; }
+    python3 "$TOOLS_DIR/live-tests.py" "$PROJECT_ROOT" "$mode" "$filter" "$category" "$out"
+    run_exit=$?
   else
     local args=(-batchmode -nographics -projectPath "$PROJECT_ROOT" -runTests -testPlatform "$mode" -testResults "$out" -logFile "$OUT_DIR/test-$name.log")
     [[ -n "$filter" ]] && args+=(-testFilter "$filter")
     [[ -n "$category" ]] && args+=(-testCategory "$category")
-    rm -f "$out"
     "$(unity_editor)" "${args[@]}" >/dev/null 2>&1
+    run_exit=$?
   fi
   python3 "$TOOLS_DIR/test_summary.py" "$out"
+  local summary_exit=$?
+  if (( run_exit != 0 )); then
+    echo "Unity test process/command failed (exit $run_exit); see $OUT_DIR/test-$name.log or .json"
+    return 1
+  fi
+  return $summary_exit
 }
 
 mkdir -p Logs/test-results

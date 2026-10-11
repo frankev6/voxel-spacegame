@@ -23,6 +23,7 @@ All scripts find the project root themselves, so you can run them from anywhere 
 | `tools/test.sh editmode [filter]` | EditMode tests; results in `Logs/test-results/editmode.xml` |
 | `tools/test.sh playmode [filter]` | PlayMode tests |
 | `tools/test.sh perf [filter]` | The `Performance` category in EditMode and PlayMode, then `tools/perf_summary.py` over the `Logs/perf/*.json` records written during the run. Exits non-zero if a test or a record failed |
+| `tools/iteration-gates.sh` | Requires an idle open Editor; three compile, Play-to-menu and full EditMode runs; prints medians and PASS/FAIL, writes `Logs/iteration/results.json`, restores scenes, and uses a throwaway profile |
 | `python3 tools/perf_summary.py [--dir D] [--since T]` | Table of perf records: test, gate, median, p95, budget, PASS/FAIL; exit 1 on any FAIL |
 | `tools/check-docs.py` | Spec and ledger consistency; run it after editing any doc |
 | `tools/ledger-sync.py` | Adds ledger rows for new spec tasks (never deletes) |
@@ -35,8 +36,9 @@ All scripts find the project root themselves, so you can run them from anywhere 
 
 These work with no Editor open (verified 2026-10-10):
 
+- **Live Editor discovery:** the installed CLI returns `data.instances`, not a top-level list; `_env.sh` matches the exact project path. Live compilation also writes `Logs/tools/compile.log` and fails on timeout/unreachable state.
 - **Compile:** `tools/compile.sh` batch-compiles in about 10–20 s. It reports errors only, so check `Logs/tools/compile.log` for `warning CS` yourself: the Definition of Done allows no new warnings.
-- **Tests:** `tools/test.sh editmode|playmode` run headless.
+- **Tests:** `tools/test.sh editmode|playmode` run headless. With an open Editor, `tools/live-tests.py` uses Pipeline `run_tests --mode --filter --filter_type --async_tests`, polls `test_status`, and writes the structured cases to the same XML path. Explicit tests are excluded by the live API; the full headless suite reports that test as skipped. Both paths discard stale XML and reject nonzero process/CLI exits even if passing results were written. A live name/category combination is currently unsupported; close the Editor for that combined filter.
 - **Call the Editor binary directly.** For batch runs, don't use the CLI's `unity run` or `unity test`: they wait on its sign-in helper and can hang in non-interactive shells. `tools/_env.sh` provides `unity_editor`, which returns the binary's path. Commands sent to a live Editor (`unity command …`) are fine.
 - **One-off Editor jobs**, for example creating FontAssets:
   1. Write a temporary static method under `Assets/Game/Editor/` that ends with `EditorApplication.Exit(0)`.

@@ -41,7 +41,7 @@ namespace Game.Editor
             PlayerSettings.defaultCursor = null;
 
             EditorSettings.enterPlayModeOptionsEnabled = true;  // no domain reload: statics must reset in SubsystemRegistration
-            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
 
             Time.fixedDeltaTime = FixedTimestep; // "Fixed Timestep" in ProjectSettings/TimeManager.asset must read 0.016666668
             Time.maximumDeltaTime = MaximumDeltaTime;
@@ -72,8 +72,9 @@ namespace Game.Editor
             Expect(PlayerSettings.runInBackground, "runInBackground should be true");
             Expect(PlayerSettings.colorSpace == ColorSpace.Linear, "color space should be Linear");
             Expect(EditorSettings.enterPlayModeOptionsEnabled &&
-                   (EditorSettings.enterPlayModeOptions & EnterPlayModeOptions.DisableDomainReload) != 0,
-                   "Enter Play Mode Options should be on with domain reload disabled");
+                   (EditorSettings.enterPlayModeOptions & (EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload)) ==
+                       (EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload),
+                   "Enter Play Mode Options should be on with domain and scene reload disabled");
             Expect(Mathf.Abs(Time.fixedDeltaTime - FixedTimestep) < 1e-6f, $"fixed timestep should be 1/60 (is {Time.fixedDeltaTime})");
             Expect(Mathf.Abs(Time.maximumDeltaTime - MaximumDeltaTime) < 1e-6f, $"maximum allowed timestep should be {MaximumDeltaTime} (is {Time.maximumDeltaTime})");
             Expect(GetProjectSettingInt("ProjectSettings/ProjectSettings.asset", "activeInputHandler") == 1, "active input handling should be Input System only");

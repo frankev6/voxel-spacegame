@@ -14,9 +14,10 @@ editor_open() {
 import json,sys,os
 try: d=json.load(sys.stdin)
 except Exception: sys.exit(1)
-rows = d if isinstance(d,list) else d.get('instances') or d.get('data') or []
+data = d.get('data', d) if isinstance(d,dict) else d
+rows = data if isinstance(data,list) else data.get('instances', [])
 root=os.path.realpath('$PROJECT_ROOT')
-ok=any(os.path.realpath(str(r.get('project') or r.get('projectPath') or ''))==root and str(r.get('state','')).lower()=='ready' for r in rows if isinstance(r,dict))
+ok=any(os.path.realpath(str(r.get('project') or r.get('projectPath') or ''))==root and str(r.get('state','')).lower() in ('ready','playing','compiling','reloading') for r in rows if isinstance(r,dict))
 sys.exit(0 if ok else 1)"
 }
 

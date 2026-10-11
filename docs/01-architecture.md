@@ -130,7 +130,7 @@ Two kinds of types are needed by many modules, so they sit low in the graph even
 | `BlueprintLab` | 3 | Empty build grid environment for the ship editor (no economy) |
 
 - Managers never live in content scenes. `Bootstrap` (`[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)]`) guarantees `GameRoot` exists whichever scene you press Play in.
-- **Enter Play Mode Options are on with domain reload disabled.** Every static field must be reset in a `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` method. Prefer no mutable statics at all.
+- **Enter Play Mode Options are on with domain and scene reload disabled** (ADR-0020). Every static field must be reset in a `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` method. Prefer no mutable statics at all.
 - `SceneFlow` (in `Game.App`) is the only code that loads or unloads scenes.
 
 ### 4.2 Services (managed side)

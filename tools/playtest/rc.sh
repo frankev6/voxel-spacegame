@@ -14,6 +14,7 @@ done
 echo "recompile: $st after ${i}s"
 errs=$(awk -v s=$start 'NR>s' Logs/Editor.log 2>/dev/null | grep -E "error CS[0-9]+" | sed -E 's/^.*((Assets|Packages)\/)/\1/' | sort -u)
 [[ -n "$errs" ]] && echo "$errs" | head -60
+awk -v s=$start 'NR>s' Logs/Editor.log 2>/dev/null | grep -E "warning CS[0-9]+" | sort -u | head -60
 for i in $(seq 1 90); do
   s2=$(unity command editor_status --format json 2>/dev/null | python3 -c "import json,sys
 try:
@@ -23,4 +24,4 @@ except Exception: print('unreachable')")
   sleep 1
 done
 echo "editor: $s2"
-[[ -z "$errs" && "$st" != "failed" ]] && echo "COMPILE OK" || { echo "COMPILE FAILED"; exit 1; }
+[[ -z "$errs" && ( "$st" == "completed" || "$st" == "up_to_date" || "$st" == "idle" ) && "$s2" == "ready False False"* ]] && echo "COMPILE OK" || { echo "COMPILE FAILED"; exit 1; }

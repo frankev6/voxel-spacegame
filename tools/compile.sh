@@ -4,7 +4,9 @@
 #   Editor closed -> headless batch import + compile (slower; first run imports everything).
 . "$(dirname "$0")/_env.sh"
 if editor_open; then
-  exec "$TOOLS_DIR/playtest/rc.sh"
+  setopt pipefail
+  "$TOOLS_DIR/playtest/rc.sh" 2>&1 | tee "$OUT_DIR/compile.log"
+  exit $?
 fi
 log="$OUT_DIR/compile.log"
 echo "No open Editor for this project: running a headless batch compile (log: $log)"
