@@ -1426,6 +1426,18 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
   - [ ] Overhead within §8.
 - **Tests:** `SimEventChannelTests.Order_RegistrationThenIndex_Deterministic`, `.LateRegistration_ReadNextTick`, `.NoConsumer_DisposedNextTick_NoLeak`, `.DoubleBegin_Throws`, `.Overhead` (`Performance`); `GuardedHandlesTests.WriterAndReaders_NoSafetyErrors`, `.CompleteAccess_CompletesAll`.
 
+### CORE-013 — Own all simulation event cleanup jobs
+- **Milestone:** M0
+- **Tier:** frontier — F2 native disposal dependencies across channel lifetime
+- **Depends on:** `CORE-012`
+- **Do:** Retain every stream/read-set disposal handle in LastConsumer, preserving prior cleanup work. Dispose must complete the whole chain before releasing channel storage, including an abandoned open read with pending producers. Keep all public types/API and deterministic registration order unchanged.
+- **Files:** `Assets/Game/Data/Streams/SimEventChannel.cs`; `Assets/Game/Tests/EditMode/Core/SimEventChannelTests.cs`
+- **Acceptance criteria:**
+  - [ ] With zero job workers, completed reads followed by Dispose leave no pending native cleanup allocation; repeated read cycles and stale cleanup remain covered.
+  - [ ] Disposing an open read waits for its registered producer and frees its native streams/arrays with safety checks enabled.
+  - [ ] Existing deterministic ordering, late registration and zero-GC/performance gates remain green.
+- **Tests:** `SimEventChannelTests.Dispose_CompletesReadCleanup`; `.Dispose_OpenReadCompletesProducer`; existing `.Overhead` and ordering tests.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider |
