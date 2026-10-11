@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 58 | 0 | 0 | 0 | 44 | 0 | 102 | 14 |
+| M1 | 57 | 0 | 0 | 0 | 45 | 0 | 102 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -164,7 +164,7 @@
 | PHY-015 | Debug, statistics and harness hooks | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011 | yes | done | astra (gpt-6) | 2026-10-11 | a08fe17 | Guarded stats and cumulative reset; recursive grid-local box bounds |
 | PHY-016 | GridBodyFactory contract test for split creators | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-008 | yes | done | astra (gpt-6) | 2026-10-11 | 4db5812 | ECB-created hulk moves next tick; exact tick-28 install, one retirement, no native leaks |
 | PHY-017 | Physics behaviour scenarios | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011, PHY-013, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 374bfd4 | Five real-physics scenarios; ram momentum error 0; damage-hole exact install tick |
-| PHY-018 | Collider and mass determinism across frame rates | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, PHY-013 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PHY-018 | Collider and mass determinism across frame rates | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, PHY-013 | yes | done | astra (gpt-6) | 2026-10-11 | 8c26c92 | Four frame patterns × 1/17 workers; per-tick bytes/mass/velocity identical; zero late installs |
 | PHY-019 | Performance gates and memory | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-012, PHY-013, PHY-015, SPEC-10, TST-001 | yes | todo |  |  |  |  |
 | PHY-020 | Fallback: flat grid compound of boxes (only if PHY-002 is no-go for nested compounds) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002 | yes | done | astra (gpt-6) | 2026-10-11 | dd85d8c | not needed (PHY-002 go) |
 | DMG-001 | Public contract types | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 9310e7c | Public damage/restore/impulse contracts, 43 config defaults, table lookup; 4 tests; Q71–74 |
@@ -707,6 +707,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — PHY-018 frame and worker determinism (astra, gpt-6)
+
+- Added both required tests over the real fixed-step physics/collider/mass pipeline. One **1,008,128-cell station** and two **20,000-cell ships** each lose **512 cells** through eight fixed-tick 4×4×4 removals. BrickWrite/BrickDirty feed collider snapshots; the real mass recompute/application path handles the stand-in damage (DamageStreams remains DMG-002).
+- All **four frame patterns** (1; alternating 2/3; alternating 0/1; 6 ticks/frame) and **1 / 17 workers** produce identical per-tick installed collider bytes, InstalledTick, PhysicsMass and PhysicsVelocity. Each run records **288 records / 96 ticks**; the full required pair executes 12 runs. Every prescribed install tick is also checked against the schedule, each collider changes, and **LateInstalls = 0** throughout.
+- Non-urgent spawning is intentionally frame-driven by decision 6, so an identical ready state is prepared first with frame-boundary warm-up completion. The measured window uses production asynchronous batch scheduling; the recording job adds **no fixed-step completion**. Physics uses §5.13 settings; mass/velocity compare defined float bits rather than padding (T2.11).
+- Validation: focused **2/2**; compile zero C# warnings; EditMode **603 passed + 1 explicit skipped**, PlayMode **42 passed**, perf **31/31**, docs **503 tasks / zero errors**. No production fixes or new decisions were necessary.
+- Next: PHY-019 timing, skirmish and memory gates; renderer fallback and the remaining M1 integration follow in ROADMAP order.
 
 ### 2026-10-11 — PHY-017 integrated physics behaviour (astra, gpt-6)
 
