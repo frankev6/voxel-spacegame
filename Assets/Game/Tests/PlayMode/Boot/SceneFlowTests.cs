@@ -203,6 +203,30 @@ namespace Game.Tests.PlayMode.Boot
             finally { Flow.UnregisterReady(hook); Flow.ReadyTimeoutSeconds = saved; }
         }
 
+        /// <summary>FND-007 in the real Default World: the clock advances in the World and stops under a pause token.</summary>
+        [UnityTest]
+        public IEnumerator SimClock_AdvancesInWorld_StopsWhenPaused()
+        {
+            yield return Go(GameScene.World, SceneEntryReason.NewGame);
+            uint Tick() { using var q = Em.CreateEntityQuery(ComponentType.ReadOnly<SimClock>()); return q.GetSingleton<SimClock>().Tick; }
+            float until = Time.realtimeSinceStartup + 2f;              // headless frames can be ~1 ms: wait on the condition, not a frame count
+            while (Tick() < 3 && Time.realtimeSinceStartup < until) yield return null;
+            uint running = Tick();
+            Assert.GreaterOrEqual(running, 3u, "fixed ticks ran in the World");
+            using (Services.Get<IPauseService>().Acquire("SimClockTest"))
+            {
+                yield return null;
+                uint paused = Tick();
+                float pauseEnd = Time.realtimeSinceStartup + 0.25f;     // 15 ticks' worth of real time
+                while (Time.realtimeSinceStartup < pauseEnd) yield return null;
+                Assert.AreEqual(paused, Tick(), "no tick advances while paused");
+            }
+            until = Time.realtimeSinceStartup + 2f;
+            while (Tick() <= running && Time.realtimeSinceStartup < until) yield return null;
+            Assert.Greater(Tick(), running, "ticks resume");
+            yield return Go(GameScene.MainMenu, SceneEntryReason.QuitToMenu);
+        }
+
         [UnityTest, Performance, Category("Performance")]
         public IEnumerator Teardown_200k()
         {
