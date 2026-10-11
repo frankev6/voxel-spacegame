@@ -193,7 +193,7 @@ flowchart LR
 
 ## 6. Public API
 
-### 6.1 Generic CLI commands (as built in `GameTestHarness.cs`; DEV-002 reconciles this table with the code)
+### 6.1 Generic CLI commands (as built in `GameTestHarness.cs`; reconciled with the code by DEV-002 on 2026-10-11)
 
 | Command | Args (default) | Purpose |
 |---|---|---|
@@ -205,7 +205,7 @@ flowchart LR
 | `gh_key` | `keys` (comma list of `Key` names), `hold` (0.12 s; 0 = until `release`), `release` (false) | Keyboard state-event injection |
 | `gh_mouse` | `x`, `y` (−1 = keep; game-view pixels, origin bottom-left), `button` none\|left\|right\|middle, `down` (true), `scroll`, `dx`, `dy` | Virtual AgentMouse |
 | `gh_unfocused_input` | `enable` (true) | Route input to the game while the Editor is unfocused |
-| `gh_get` / `gh_invoke` / `gh_find` | `type`, `path`, `depth` / `type`, `method`, `args`, `path` / `type`, `max` | Reflection reads, calls, scene lookups (debugging only; scenarios must not use them) |
+| `gh_get` / `gh_invoke` / `gh_find` | `type`, `path` (""), `depth` (1) / `type`, `method`, `args` (""), `path` ("") / `type`, `max` (30) | Reflection reads, calls, scene lookups (debugging only; scenarios must not use them) |
 | `gh_ecs` | `filter` (""), `max` (60) | Component counts |
 | `gh_entities` | `component`, `max` (10) | Entities with a component and its field values |
 | `gh_perf` | — (DEV-011 adds `voxel`, `combat`, `markers`, `json`, all false) | Main-thread ms, draws, triangles, GC alloc/frame, memory, entities |
