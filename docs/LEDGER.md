@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 67 | 0 | 0 | 0 | 35 | 0 | 102 | 14 |
+| M1 | 66 | 0 | 0 | 0 | 36 | 0 | 102 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 3 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -156,8 +156,8 @@
 | PHY-006 | Mass maths | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | 1c4b85f | Six tests; tensor / canonical Jacobi / planar locks / point velocity preservation |
 | PHY-007 | Pipeline singletons and access discipline | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001, PHY-005 | yes | done | astra (gpt-6) | 2026-10-11 | a936342 | Five tests; pools / ordered Burst finalize / ownership and counter audits; Q59–61 |
 | PHY-008 | GridBodyInitSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-003, PHY-006, PHY-007, SPEC-10 | yes | todo |  |  |  |  |
-| PHY-009 | ColliderSnapshotSystem and install schedule | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-007, SPEC-10 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| PHY-010 | BrickColliderBuildSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-005, PHY-009 | no | todo |  |  |  |  |
+| PHY-009 | ColliderSnapshotSystem and install schedule | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-007, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | db7c5b7 | Tick snapshots, deterministic buckets, six required tests pass |
+| PHY-010 | BrickColliderBuildSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-005, PHY-009 | yes | todo |  |  |  |  |
 | PHY-011 | ColliderSwapSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-010 | no | todo |  |  |  |  |
 | PHY-012 | GridColliderCleanupSystem and teardown | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, SPEC-10 | no | todo |  |  |  |  |
 | PHY-013 | GridMassUpdateSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-006, PHY-008, DMG-001 | no | todo |  |  |  |  |
@@ -699,6 +699,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — PHY-009 collider snapshot collection (astra, gpt-6)
+
+- Implemented the specified install-tick arithmetic and window closure, plus ColliderSnapshotSystem after BrickDirtyScheduleSystem. The Burst collection job chains queue/cache ownership and ECS lookups; it never completes a job in the fixed step and retains copied masks only.
+- Six required tests pass: ticks 0–20 match the 7-tick delay / 4-tick bucket table; same-grid requests coalesce by window and escalate priority; latest duplicate masks replace/reuse slots; destroyed, empty, mismatched or malformed bricks become removals; unknown serials are counted and dropped. The tick-order integration schedules a mask writer before the existing dirty producer and proves collection sees that write and remains detached from subsequent live edits.
+- No SPEC-10 changes or contract changes were needed; its existing Acquire/Release producer integrates directly. Initial test compile used a nonexistent EntityManager lookup helper; it was corrected to a scheduled test writer system before validation.
+- Validation: compile zero C# warnings; focused **6/6**; EditMode **566 passed + 1 explicit skipped**, PlayMode **37 passed**, perf **31/31**, docs **503 tasks / zero errors**. Collider pipeline performance/determinism gates remain PHY-018/019 as specified.
+- Next: PHY-010 seals/plans/builds owned snapshots outside the fixed step. REN-003's concrete fallback, shader/config work and PHY-008 also remain ready; no owner decision is needed for this continuation.
 
 ### 2026-10-11 — REN-002 Metal renderer spike (astra, gpt-6)
 
