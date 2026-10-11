@@ -484,6 +484,7 @@ When the Editor map is disabled, set `frame = default`.
 | 2 | Interact on F (and Fleet screen on K) | Yes | Owner |
 | 3 | Fire groups beyond 3 | 3 groups in v1 (LMB, RMB, Space) | Owner |
 | 4 | The generated `Controls.Dispose()` calls `Object.Destroy(asset)`, which logs an error in edit mode, so EditMode tests that dispose an `InputService` fail on the unexpected log (found in INP-001) | `InputService.Dispose` disables the maps, then destroys `Controls.asset` with `Object.DestroyImmediate` when `!Application.isPlaying` and calls `Controls.Dispose()` otherwise | Tech lead |
+| 5 | No task sets `InputSystem.settings.shortcutKeysConsumeInput = true` in `ProjectSetup` (§4.2 Editor) | INP-002 adds it to `ProjectSetup.ApplyAll`/`Check` with a `ProjectSettingsGuardTests` case | Tech lead |
 
 ## 11. References
 
