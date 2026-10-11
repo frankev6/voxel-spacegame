@@ -879,10 +879,10 @@ Measured station geometry and allocation totals:
 - **Do:** Implement `VoxelRaycast.Cast` (§5.5) with empty-brick skipping, `StructureCellQuery`, `GridCellReader` and `GridCellQuery`.
 - **Files:** `Assets/Game/Voxel/Model/{VoxelRaycast,StructureCellQuery,GridCellQuery}.cs`; `Assets/Game/Voxel/Grid/GridCellReader.cs`; `Assets/Game/Tests/EditMode/Voxel/VoxelRaycastTests.cs`
 - **Acceptance criteria:**
-  - [ ] 10,000 seeded rays against a random 64³ structure match a brute-force fine-step reference (step 0.001 cells) in hit cell and entered face.
-  - [ ] Rays along cell boundaries obey the X-before-Y-before-Z tie rule.
-  - [ ] A ray through 100 empty bricks performs ≤ 3 steps per brick (counted by a test query).
-  - [ ] ECS and structure queries return identical hits for the same data.
+  - [x] 10,000 seeded rays against a random 64³ structure match a brute-force fine-step reference (step 0.001 cells) in hit cell and entered face.
+  - [x] Rays along cell boundaries obey the X-before-Y-before-Z tie rule.
+  - [x] A ray through 100 empty bricks performs ≤ 3 steps per brick (counted by a test query).
+  - [x] ECS and structure queries return identical hits for the same data.
 - **Tests:** `VoxelRaycastTests.Random_MatchesBruteForce`, `.StartInsideSolid_DistanceZero`, `.TieBreak_XYZ`, `.EmptyBricks_Skipped`, `.EcsAndStructure_Agree`.
 
 ### VOX-009 — VOXS codec
