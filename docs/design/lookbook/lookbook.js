@@ -591,8 +591,8 @@ function slopesPage() {
     s.appendChild(g2);
     p.appendChild(s);
   }
-  s = section("WRAITH rebuilt with options 1 and 2", "same layout and sizes, tapers redrawn at each kit's angles, only the kit's blocks; both pass the build check");
-  const fw = shot(d, "wraith_compare.jpg", "Left to right: original, option 1 (slope + hip corner), option 2 (+ long slope 1×2). Option 2's nose steps where its long slopes meet the 45° chamfers");
+  s = section("WRAITH redesigned for options 1 and 2", "the same dropship, built the way a builder would with each kit; every sloped cell is exactly one of the kit's blocks, and both pass the build check");
+  const fw = shot(d, "wraith_compare.jpg", "Left to right: original, option 1 (45° chamfers and a short armoured ram, hip corners wherever two slopes meet), option 2 (the same hull, pods and hips, plus a long 1×2 glacis ram and fin tops). Front, side and rear");
   fw.querySelector("img").style.aspectRatio = "auto";
   s.appendChild(fw);
   p.appendChild(s);
