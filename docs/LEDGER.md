@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 17 | 0 | 0 | 0 | 49 | 0 | 66 | 8 |
+| M0 | 16 | 0 | 0 | 0 | 50 | 0 | 66 | 7 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -76,7 +76,7 @@
 | PERS-007 | VOXS codec | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | f553a03 | VOXS v1 + Burst runs; 200 round trips, 1000 flips; Q30 |
 | PERS-008 | Deferred VOXS snapshots in saves | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-007, PERS-005 | yes | done | astra (gpt-6) | 2026-10-11 | ec9a6ae | Persistent snapshots; worker round trip and all-path disposal; Q31 |
 | PERS-009 | Autosave scheduler and save on quit | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 5b1e06b | 10 tests; 0 B/frame |
-| PERS-010 | Fixture harness, container fixtures and the 04-B1 EditMode regression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PERS-010 | Fixture harness, container fixtures and the 04-B1 EditMode regression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | done | astra (gpt-6) | 2026-10-11 | 6a50bb4 | Immutable v1 fixtures; 04-B1 real-content regression |
 | PERS-011 | Round-trip byte equality (framework level) | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006, PERS-008 | yes | done | astra (gpt-6) | 2026-10-11 | ca73bba | Fresh binary/JSON/VOXS round trips; unknown chunk byte equality; Q32 |
 | PERS-012 | Save performance and size gates | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-008 | yes | todo |  |  |  |  |
 | VOX-001 | Public contract types | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c37ad48 | BrickRecord 28 B (ledger Q9); VOXS adapter members wait for VOX-009 (Q10) |
@@ -585,6 +585,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-010 container fixtures and 04-B1 regression (astra, gpt-6)
+- Added SaveFixtureHarness (write-once files, chunk readers and test service construction), the Editor fixture menu, and three immutable v1 containers: minimal **375 B**, missing IDs **393 B**, unknown chunk **400 B**. Generated via the documented temporary headless Editor script, then removed the script and meta. The menu invokes the test harness by reflection, preserving assembly boundaries.
+- Tests load minimal state, preserve ZZZZ payload/version, compare current-writer bytes with the fixtures, and reject overwriting a fixture. The real shipped ContentService regression replaces both removed IDs with their placeholders, reports exactly **2 PERS-W001** warnings, and raises **OperationCompleted.Success = true**, **WarningCount = 2**.
+- Compile: zero C# warnings. Full EditMode **333 passed + 1 explicit skipped**; perf **12/12 passed**; docs clean. Full PlayMode baseline remains **16 passed** (PERS-008); this task adds Editor/test code only.
+- M0 **50/66 done**. Next persistence task: PERS-012 (capture, size, typical load and listing gates). No new owner decisions; git stays local.
 
 ### 2026-10-11 — PERS-011 framework save round trip (astra, gpt-6)
 - Three deterministic participants exercise binary values/content IDs, JSON state and two deferred VOXS structures. Source arrays are disposed before loading into fresh participants, so the re-save cannot accidentally reuse original state.
