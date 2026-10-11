@@ -477,73 +477,80 @@ namespace Game.Persistence.Services
         /// <summary>§5.6 Restore, main thread. Never throws for data problems; a LoadedSave may be restored once.</summary>
         public Game.Data.Validation.ValidationReport Restore(LoadedSave save)
         {
+            if (restoring) throw new InvalidOperationException("A restore is already active");
             if (save == null) throw new ArgumentNullException(nameof(save));
             if (save.Restored) throw new InvalidOperationException("This LoadedSave was already restored");
             save.Restored = true;
             // 1.
             content?.Catalog.ClearUnresolved();
             var report = save.Report;
-            PreservedChunks.Clear();
-            LoadedPalette = save.Palette;
-            var registered = new HashSet<string>(StringComparer.Ordinal);
-            // 2.
-            foreach (var p in participants)
+            restoring = true; activeRestoreReport = report;
+            try
             {
-                registered.Add(p.Key);
-                var chunk = Find(save.Chunks, p.Key);
-                if (chunk == null)
+                PreservedChunks.Clear();
+                LoadedPalette = save.Palette;
+                var registered = new HashSet<string>(StringComparer.Ordinal);
+                // 2.
+                foreach (var p in participants)
                 {
-                    RestoreDefaults(p, report);
-                    report.Info("PERS-I020", p.Key, "", $"No data for {p.Key}; defaults used");
-                    continue;
+                    registered.Add(p.Key);
+                    var chunk = Find(save.Chunks, p.Key);
+                    if (chunk == null)
+                    {
+                        RestoreDefaults(p, report);
+                        report.Info("PERS-I020", p.Key, "", $"No data for {p.Key}; defaults used");
+                        continue;
+                    }
+                    if (chunk.Corrupt) { RestoreDefaults(p, report); continue; }
+                    if (chunk.Version > p.Version)
+                    {
+                        PreservedChunks.Add(chunk);
+                        RestoreDefaults(p, report);
+                        report.Warning("PERS-W021", p.Key, "", $"{p.Key} was saved by a newer version (chunk version {chunk.Version} > {p.Version}); kept unchanged, defaults used");
+                        continue;
+                    }
+                    try
+                    {
+                        var reader = new SaveReader(chunk.Payload, save.Palette, json);
+                        p.Restore(reader, chunk.Version);
+                        if (!reader.IsAtEnd) report.Warning("PERS-W024", p.Key, "", $"{p.Key} left {reader.Remaining} unread bytes");
+                    }
+                    catch (Exception e)
+                    {
+                        report.Error("PERS-E022", p.Key, "", $"{p.Key} could not be restored: {e.GetType().Name}: {e.Message}; defaults used");
+                        RestoreDefaults(p, report);
+                    }
                 }
-                if (chunk.Corrupt) { RestoreDefaults(p, report); continue; }
-                if (chunk.Version > p.Version)
+                activeRestoreReport = null;
+                // 3.
+                foreach (var c in save.Chunks)
                 {
-                    PreservedChunks.Add(chunk);
-                    RestoreDefaults(p, report);
-                    report.Warning("PERS-W021", p.Key, "", $"{p.Key} was saved by a newer version (chunk version {chunk.Version} > {p.Version}); kept unchanged, defaults used");
-                    continue;
+                    if (c.Key == "META" || c.Key == "IDPL" || registered.Contains(c.Key)) continue;
+                    PreservedChunks.Add(c);
+                    report.Info("PERS-I025", c.Key, "", $"Unknown chunk {c.Key} kept unchanged");
                 }
-                try
-                {
-                    var reader = new SaveReader(chunk.Payload, save.Palette, json);
-                    p.Restore(reader, chunk.Version);
-                    if (!reader.IsAtEnd) report.Warning("PERS-W024", p.Key, "", $"{p.Key} left {reader.Remaining} unread bytes");
-                }
-                catch (Exception e)
-                {
-                    report.Error("PERS-E022", p.Key, "", $"{p.Key} could not be restored: {e.GetType().Name}: {e.Message}; defaults used");
-                    RestoreDefaults(p, report);
-                }
+                // 4.
+                if (content != null)
+                    foreach (var u in content.Catalog.Unresolved)
+                        report.Warning("PERS-W001", u.Context, "", $"Unknown content '{u.Id}' ({u.ExpectedType}) in {u.Context}; replaced by a placeholder");
+                // 5.
+                if (content != null && save.Header.DatabaseHash32 != (uint)content.DatabaseHash)
+                    report.Info("PERS-I002", "world.sav", "", "Saved with different content");
+                // 6.
+                thumbnailCache.Clear();
+                foreach (var kv in save.StagedThumbnails) thumbnailCache[kv.Key] = kv.Value;
+                currentSlot = save.Slot;
+                SetProfileLastSlot(save.Slot);
+                LastLoadReport = report;
+                report.LogTo("Save");
+                int warnings = report.WarningCount + report.ErrorCount;
+                EventBus<GameLoaded>.Publish(new GameLoaded(save.Slot.Profile.Value, save.Slot.Slot.Value, warnings));
+                OperationCompleted?.Invoke(new SaveOperationResult(true, true, SaveErrorKind.None, SaveMessages.Loaded(warnings), save.Slot, default, warnings, report));
+                Autosave.NotifySaved();                                       // restarts the timer
+                // 7.
+                return report;
             }
-            // 3.
-            foreach (var c in save.Chunks)
-            {
-                if (c.Key == "META" || c.Key == "IDPL" || registered.Contains(c.Key)) continue;
-                PreservedChunks.Add(c);
-                report.Info("PERS-I025", c.Key, "", $"Unknown chunk {c.Key} kept unchanged");
-            }
-            // 4.
-            if (content != null)
-                foreach (var u in content.Catalog.Unresolved)
-                    report.Warning("PERS-W001", u.Context, "", $"Unknown content '{u.Id}' ({u.ExpectedType}) in {u.Context}; replaced by a placeholder");
-            // 5.
-            if (content != null && save.Header.DatabaseHash32 != (uint)content.DatabaseHash)
-                report.Info("PERS-I002", "world.sav", "", "Saved with different content");
-            // 6.
-            thumbnailCache.Clear();
-            foreach (var kv in save.StagedThumbnails) thumbnailCache[kv.Key] = kv.Value;
-            currentSlot = save.Slot;
-            SetProfileLastSlot(save.Slot);
-            LastLoadReport = report;
-            report.LogTo("Save");
-            int warnings = report.WarningCount + report.ErrorCount;
-            EventBus<GameLoaded>.Publish(new GameLoaded(save.Slot.Profile.Value, save.Slot.Slot.Value, warnings));
-            OperationCompleted?.Invoke(new SaveOperationResult(true, true, SaveErrorKind.None, SaveMessages.Loaded(warnings), save.Slot, default, warnings, report));
-            Autosave.NotifySaved();                                       // restarts the timer
-            // 7.
-            return report;
+            finally { activeRestoreReport = null; restoring = false; }
         }
 
         /// <summary>Restore(SaveReader.Empty, 0); an exception there is PERS-E023.</summary>
@@ -551,6 +558,16 @@ namespace Game.Persistence.Services
         {
             try { p.Restore(SaveReader.Empty, 0); }
             catch (Exception e) { report.Error("PERS-E023", p.Key, "", $"{p.Key} could not reset to defaults: {e.GetType().Name}: {e.Message}"); }
+        }
+
+        Game.Data.Validation.ValidationReport activeRestoreReport;
+        bool restoring;
+
+        /// <summary>Appends a recoverable participant warning to the active load report (SPEC-05, ADR-0036).</summary>
+        public void ReportRestoreWarning(string code, string chunkKey, string field, string message)
+        {
+            if (activeRestoreReport == null) throw new InvalidOperationException("No participant restore is active");
+            activeRestoreReport.Warning(code, chunkKey, field, message);
         }
 
         public Game.Data.Validation.ValidationReport LastLoadReport { get; private set; }

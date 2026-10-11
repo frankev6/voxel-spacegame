@@ -342,6 +342,7 @@ namespace Game.Persistence.Services
         public UnityEngine.Awaitable<Game.Persistence.Data.LoadResult> ReadAsync(Game.Persistence.Data.SlotRef slot);
         public Game.Data.Validation.ValidationReport Restore(Game.Persistence.Container.LoadedSave save);   // main thread
         public Game.Data.Validation.ValidationReport LastLoadReport { get; }
+        public void ReportRestoreWarning(string code, string chunkKey, string field, string message); // ADR-0036: only during Restore
         public event System.Action<Game.Persistence.Data.SaveOperationResult> OperationCompleted;
 
         // Thumbnails
@@ -1056,6 +1057,8 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 | 26 | Unreferenced block-zero tombstones were treated as missing definitions by repair, breaking SPEC-10 byte-identical round trips | Preserve ordinary tombstones; retain existing D3 behavior for cells referencing invalid/drifted instances | Tech lead | Resolved in VOX-009: preserve unreferenced block-zero entries before D3 classification; the adapter rebuilds its free-slot pool. The three-slot regression now retains the live instance at index 1 and both reusable tombstones. No wire-format change. |
 
 | 27 | Session writebacks miss direct autosaves; thumbnail DTO cannot represent pending readback | Explicit preparation hook and bounded pending thumbnails | Tech lead | Resolved FND-009 / ADR-0034: PrepareCapture before every participant, then at most two frame yields for Pending thumbnails before background serialization. Failures preserve files; late GPU resources remain producer-owned. |
+
+| 28 | Participants can recover a record but cannot append a warning to the active load report | Scoped warning callback, preserving ISaveParticipant | Tech lead | Resolved FND-010 / ADR-0036: ReportRestoreWarning appends only during synchronous Restore; try/finally clears the scope, nested restores are rejected, and ordinary completion includes warnings in its report/count. |
 
 ## 11. References
 
