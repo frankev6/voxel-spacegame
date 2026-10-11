@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 78 | 0 | 0 | 0 | 23 | 0 | 101 | 12 |
+| M1 | 77 | 0 | 0 | 0 | 24 | 0 | 101 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 4 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -126,10 +126,10 @@
 | VOX-010 | Voxel definitions and config factory | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | edb5c0c | Blueprint setter, default config, boot singleton; 2 tests, Q64 |
 | VOX-011 | Structure registry and BlueprintLibrary | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-009, VOX-010 | yes | done | astra (gpt-6) | 2026-10-11 | b630046 | Borrowed non-reused handles; immutable lazy cache, bounded eviction, boot ownership; 6 required tests |
 | VOX-012 | ECS cell write and read helpers | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-004 | yes | done | astra (gpt-6) | 2026-10-11 | 0b52cc8 | Burst cell reads/writes, masks, counts, dirty flags and borders; Q63 |
-| VOX-013 | GridSpawnSystem: spawn path and singletons | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-006, VOX-011, VOX-012, REN-001, VOX-021, PHY-001, DMG-001, TST-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Spawn singletons, budgeted brick/functional filling, profiles and pin lifecycle |
-| VOX-014 | Rebuild, despawn and write-back | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | no | todo |  |  |  |  |
+| VOX-013 | GridSpawnSystem: spawn path and singletons | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-006, VOX-011, VOX-012, REN-001, VOX-021, PHY-001, DMG-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | b6d6708 | Budgeted Burst fill, profiles/stow, read-token teardown; 522/32, perf28; 1024 bricks 0.308 ms |
+| VOX-014 | Rebuild, despawn and write-back | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | yes | todo |  |  |  |  |
 | VOX-015 | BrickDirtyScheduleSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-012, REN-001, VOX-021, PHY-001 | yes | todo |  |  |  |  |
-| VOX-016 | DeferredDisposalSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | no | todo |  |  |  |  |
+| VOX-016 | DeferredDisposalSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | yes | todo |  |  |  |  |
 | VOX-017 | Benchmark structures | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-005, VOX-006 | yes | done | astra (gpt-6) | 2026-10-11 | a80b2f7 | Five deterministic shapes; reference build 87.43 ms; count/dependency fixes Q66–67 |
 | VOX-019 | Damage persistence scenario | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-014 | no | todo |  |  |  |  |
 | VOX-021 | Mesh rebuild priority queue | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | REN-001 | yes | done | astra (gpt-6) | 2026-10-11 | bb07e09 | Guarded priority/FIFO mesh queue; stale promotion invalidation; 4 tests; Q75–76 |
@@ -674,6 +674,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — VOX-013 budgeted grid spawning (astra, gpt-6)
+
+- Implemented spawn singletons before the boot snapshot, batched root/brick/functional creation, cell/mask and transform filling, linked groups/brick slots, hooks, root profiles and module-union prototypes. Cached source mass initializes GridMass without a recompute; headless grids omit rendering and GPU cleanup components. Fixed-step stow/unstow uses ECB playback for the whole linked group and resets pose, velocity, interpolation and optional grace.
+- ADR-0024 gives each request one registry-owned read token, retained across released public handles and cancelled on completion, destroyed requests/roots, scene exit or composition/world teardown. Composition cancels reads before structure owners dispose. ADR-0025 resolves the ECB-only stow API's impossible conditional component inspection. Q77–81 also record input/spawn ordering without a forbidden module reference, corrected Ship20k entity counts, and headless cleanup ownership.
+- All eleven required integration tests pass: Ship20k has ten bricks plus three functional entities (fourteen linked entries); all cells/masks match; Lattice2500 completes in exactly three 1024-brick-budget updates; source pin count returns to zero. Shutdown testing found and removed a forbidden GetExistingSystemManaged call inside OnDestroy. The required 1024 dense-brick gate measures **0.308 ms median / 0.360 ms p95**, twenty samples, five warmups, headless, against 6 ms.
+- Compile zero C# warnings; full EditMode **522 passed + 1 explicit skipped**, PlayMode **32 passed**, perf **28/28**, docs **502 tasks / zero errors**. Implementation **b6d6708**. Next VOX-014 rebuild/despawn/write-back, then VOX-003's complete sparse fallback.
 
 ### 2026-10-11 — VOX-021 mesh priority queue (astra, gpt-6)
 
