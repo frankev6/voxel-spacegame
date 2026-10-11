@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 44 | 0 | 3 | 0 | 19 | 0 | 66 | 13 |
+| M0 | 43 | 0 | 3 | 0 | 20 | 0 | 66 | 12 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -48,7 +48,7 @@
 | CORE-003 | Random streams and fixed-step time | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-002 | yes | todo |  |  |  |  |
 | CORE-004 | GameLog | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | eccf02b |  |
 | CORE-005 | Services locator | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | todo |  |  |  |  |
-| CORE-006 | EventBus and EventHub | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-004 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| CORE-006 | EventBus and EventHub | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-004 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 3f0a613 | Drain1000 median 0.025 ms (gate 0.3), 0 B GC |
 | CORE-007 | Binary save primitives | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-002 | yes | todo |  |  |  |  |
 | CORE-008 | System groups and pipeline order | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | todo |  |  |  |  |
 | CORE-009 | ECS→managed event bridge | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-006, CORE-008 | no | todo |  |  |  |  |
@@ -566,6 +566,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — CORE-006 EventBus and EventHub (claude, claude-opus-5-5)
+- Implemented per SPEC-02 §5.5. Every §7 row about handlers, cascades and re-entrancy is covered by a test.
+- Measured: publishing and draining 1,000 events with 3 handlers takes a median 0.025 ms (gate ≤ 0.3 ms) and allocates 0 B after warm-up.
+- Unblocks FND-003, FND-004 and INP-002 (ledger question 13) and CORE-009. EditMode 102/102.
 
 ### 2026-10-11 — CORE-002 StableHash and content identity (claude, claude-opus-5-5)
 - \`StableHash\` on Unity xxHash3 per SPEC-02 §5.1; every frozen string, sanity-buffer (both seeds) and \`Combine\` vector matches, and a Burst job agrees with managed code.
