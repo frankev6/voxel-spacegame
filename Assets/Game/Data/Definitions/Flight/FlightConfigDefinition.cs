@@ -3,7 +3,7 @@ using Game.Data.Validation;
 
 namespace Game.Data.Definitions
 {
-    /// <summary>Single config_flight definition (SPEC-20 §4.4); validation is implemented by FLT-003.</summary>
+    /// <summary>Single config_flight definition and validation (SPEC-20 §4.4, §7).</summary>
     [ContentIdPrefix("config_")]
     [CreateAssetMenu(menuName = "Game/Content/Flight Config", fileName = "config_flight")]
     public sealed class FlightConfigDefinition : ContentDefinition
@@ -42,6 +42,13 @@ namespace Game.Data.Definitions
         public float IntensityRise => intensityRise;
         public float IntensityFall => intensityFall;
 
-        public override void Validate(ValidationScope scope, ContentValidationContext context) => throw new System.NotImplementedException("FLT-003");
+        public override void Validate(ValidationScope scope, ContentValidationContext context)
+        {
+            base.Validate(scope, context);
+            if (maxForwardSpeed <= 0)
+                scope.Error("FLT-E001", nameof(maxForwardSpeed), "Maximum forward speed must be positive.");
+            if (allocationSweeps < 1)
+                scope.Error("FLT-E001", nameof(allocationSweeps), "Allocation requires at least one sweep.");
+        }
     }
 }

@@ -2,9 +2,27 @@ using Game.Data.Definitions;
 
 namespace Game.Simulation.Flight
 {
-    /// <summary>Definition-to-ECS flight configuration (SPEC-20 §4.4); implemented by FLT-003.</summary>
+    /// <summary>Definition-to-ECS flight configuration (SPEC-20 §4.4).</summary>
     public static class FlightConfigFactory
     {
-        public static FlightConfig Create(FlightConfigDefinition def) => throw new System.NotImplementedException("FLT-003");
+        public static FlightConfig Create(FlightConfigDefinition def) => new FlightConfig
+        {
+            MaxForwardSpeed = def.MaxForwardSpeed,
+            ReverseSpeedFraction = def.ReverseSpeedFraction,
+            StrafeSpeedFraction = def.StrafeSpeedFraction,
+            BoostSpeedMultiplier = def.BoostSpeedMultiplier,
+            BoostThrottle = def.BoostThrottle,
+            MaxYawRateDeg = def.MaxYawRateDeg,
+            LinearAssistGain = def.LinearAssistGain,
+            AngularAssistGain = def.AngularAssistGain,
+            TorqueWeight = def.TorqueWeight,
+            AllocationSweeps = def.AllocationSweeps,
+            CoreYawAccelDeg = def.CoreYawAccelDeg,
+            CoreMaxYawTorque = def.CoreMaxYawTorque,
+            ThrottleEpsilon = def.ThrottleEpsilon,
+            PlaneCorrection = def.PlaneCorrection,
+            IntensityRise = def.IntensityRise,
+            IntensityFall = def.IntensityFall,
+        };
     }
 }

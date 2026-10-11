@@ -528,7 +528,7 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Do:** Implement `FlightConfigDefinition` (fields, getters, validation FLT-E001: `maxForwardSpeed ≤ 0` or `allocationSweeps < 1`), `FlightConfigFactory.Create`, and the asset `Assets/Game/Content/Config/config_flight.asset` with defaults. Ledger note to SPEC-01 for its `BootSingletons` row (`FlightConfig`).
 - **Files:** `Assets/Game/Data/Definitions/Flight/FlightConfigDefinition.cs`, `Assets/Game/Simulation/Flight/FlightConfigFactory.cs`, `Assets/Game/Content/Config/config_flight.asset`, `Assets/Game/Tests/EditMode/Simulation/Flight/FlightConfigTests.cs`
 - **Acceptance criteria:**
-  - [ ] Default asset → `FlightConfig.Default` exactly; FLT-E001 reported with asset path and field.
+  - [x] Default asset → `FlightConfig.Default` exactly; FLT-E001 reported with asset path and field.
 - **Tests:** `FlightConfigTests.DefaultAsset_EqualsDefault`, `.Validate_E001`.
 
 ### FLT-004 — Thrust allocator
