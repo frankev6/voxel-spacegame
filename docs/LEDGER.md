@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 27 | 0 | 0 | 0 | 39 | 0 | 66 | 9 |
+| M0 | 26 | 0 | 0 | 0 | 40 | 0 | 66 | 9 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -39,8 +39,8 @@
 | FND-002 | Bootstrap, GameRoot and explicit World creation | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | ddccd7f | rows 1/3/5/14; OQ 7 |
 | FND-003 | PauseService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | f7b5e9b |  |
 | FND-004 | SettingsService and SettingsApplier | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001, PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | a4c31aa | SettingsService + applier; 4 tests |
-| FND-005 | Composition root and BootSingletons | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-002, FND-003, FND-004, SPEC-02, SPEC-04 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
-| FND-006 | SceneFlow transitions and teardown | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-005 | no | todo |  |  |  |  |
+| FND-005 | Composition root and BootSingletons | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-002, FND-003, FND-004, SPEC-02, SPEC-04 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 9caac2b | rows 1/2/3/5/6/14; OQ 8 |
+| FND-006 | SceneFlow transitions and teardown | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-005 | yes | todo |  |  |  |  |
 | FND-007 | SimClock lifecycle and SimClockAdvanceSystem | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-006 | no | todo |  |  |  |  |
 | FND-014 | Static state audit and Play Mode re-entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-006 | no | todo |  |  |  |  |
 | CORE-001 | Public contract types | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 4c3a121 | Drain-system lifecycle stub: open question 5 |
@@ -574,6 +574,21 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — FND-005 composition root and BootSingletons (claude, claude-opus-5-5)
+- `GameComposition.Build` runs §5.2 rows 1 (settings), 2 (content, content singletons, `BootSingletons.CreateAll`, `config_game`; no voxel lines yet), 3 (input), 5 (pause), 6 (save) and 14 (applier).
+  - Rows 7, 8, 15 and 16 are comments naming FND-006, FND-009 and DEV-003; their types don't exist yet.
+  - It records a step log, and disposal order on dispose. Test hooks inject a failing step and keep Play Mode running in tests.
+  - `SaveService` joins `DisposeStack` in PERS-005: its `Dispose` throws until then.
+- `GameRootTestHooks` (`Game.App.Testing`, SPEC-71 shape, Editor and dev builds) redirect the save and settings paths in `GameRoot.Awake`.
+- `BootSingletons.CreateAll` tags the content singletons with `BootSingleton` and has a `Create<T>` helper for the factory rows.
+- `config_game.asset` is added to the database.
+  - `GameConfigDefinition.Validate` reports `FND-E002` ranges, and `FND-E001` as a warning.
+  - The new `GameConfigValidator` enforces `FND-E003` and raises `FND-E001` to an error once ship blueprints exist (SPEC-01 open question 8, ledger 24).
+- Tests:
+  - PlayMode `CompositionTests` (4): order and reverse disposal; a throwing step disposes the earlier services and logs one error; boot singletons are tagged; with the hooks set, nothing is written under `persistentDataPath`, and the settings and a profile land in the temp folder.
+  - `GameConfigValidatorTests` (3).
+- EditMode 264/264 (+1 explicit), PlayMode 9/9.
 
 ### 2026-10-11 — PERS-004 ID palette and SaveWriter/SaveReader integration (claude, claude-opus-5-5)
 - `SaveIdPalette` per SPEC-05 §4.3:
