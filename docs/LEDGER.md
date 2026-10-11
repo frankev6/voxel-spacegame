@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 4 | 0 | 0 | 0 | 62 | 0 | 66 | 3 |
+| M0 | 3 | 0 | 0 | 0 | 63 | 0 | 66 | 2 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -86,7 +86,7 @@
 | DEV-001 | Public contract types | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | ecc6d9b |  |
 | DEV-002 | Verify and document the as-built generic harness | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 974ae81 |  |
 | DEV-003 | DevRuntimeHost, command registry, operations, help/op/until | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-001, FND-001 | yes | done | astra (gpt-6) | 2026-10-11 | beab746 | Registry, operations, logs/events and CLI; idle 0 GC |
-| DEV-004 | Runtime input injection and UI query | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| DEV-004 | Runtime input injection and UI query | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | yes | done | astra (gpt-6) | 2026-10-11 | 47e764b | Timed state events; AgentMouse cleanup; real-panel UI query |
 | DEV-005 | Scenario language: parser, expressions and built-in probes | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-003 | yes | todo |  |  |  |  |
 | DEV-006 | Scenario runner, results JSON and CLI/scripts | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-004, DEV-005 | no | todo |  |  |  |  |
 | DEV-020 | Release-strip guarantee | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | yes | todo |  |  |  |  |
@@ -605,6 +605,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — DEV-004 runtime input and UI query (astra, gpt-6)
+
+- Runtime key/mouse/click/ui commands share the registry with their existing CLI wrappers. Timed keyboard/mouse release uses unscaled time; action presses follow resolved controls; teardown releases keys, removes owned virtual devices and restores disabled native mice. Idle pump remains allocation-free.
+- UI queries inspect visible panel elements and submit buttons through NavigationSubmitEvent. Q44 / SPEC-70 Q14 records the missing M0 UI dependency: real-panel tests use an explicit resolver, and UI-003 will register its owned document for production queries. No placeholder UI or global scene search.
+- Compile zero C# warnings; full EditMode **386 passed**, PlayMode **26 passed**, perf **22/22**. Three specified tests pass. CLI readback confirms all four wrappers route to the host; absent M0 UI reports unavailable. Host idle **0.0000067 ms**, zero GC allocation markers.
+- Implementation `47e764b`. M0 **63/66**; remaining DEV-005/006/020.
 
 ### 2026-10-11 — DEV-003 runtime harness core (astra, gpt-6)
 
