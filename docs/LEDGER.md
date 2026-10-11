@@ -573,6 +573,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 31 | 2026-10-11 | SPEC-05 PERS-008 | Codec Temp scratch fails on a managed background thread (SPEC-05 Q21) | TempJob scratch disposed before Encode returns | Tech lead | Resolved in PERS-008; Persistent capture ownership unchanged |
 | 32 | 2026-10-11 | SPEC-05 PERS-011 | Deferred VOXS round trip had no snapshot-task prerequisite (SPEC-05 Q22) | Add PERS-008 | Tech lead | Resolved in PERS-011; fresh restore recipients prevent tests from accidentally reusing captured state |
+| 33 | 2026-10-11 | SPEC-72 MIG-007 | Nonfinite Euler inputs and quarter-turn integer overflow (SPEC-72 Q12) | Reject nonfinite; reduce finite full turns before integer rounding | Tech lead | Resolved in MIG-007; exact cube matrices and the 1-degree tolerance remain unchanged |
 
 ## Measurements
 

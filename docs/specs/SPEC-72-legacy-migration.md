@@ -790,6 +790,7 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 | 9 | Narrative beat/quest IDs | Owners decide; suggestion `beat_<legacy encounter id>`, quests keep `quest_*` | SPEC-41 / SPEC-42 |
 | 10 | Who owns `BodyTemplateDefinition` | SPEC-30 | SPEC-30 / SPEC-31 |
 | 11 | Ship thumbnails from the old game | Not migrated (files not in v2); SPEC-51 renders new ones | SPEC-51 |
+| 12 | Nonfinite Euler angles and integer-cast overflow for very large finite inputs | **Answer (resolved in MIG-007):** reject NaN/infinity with Orientation.Invalid and infinite error; reduce finite angles modulo 360 in double precision before rounding to quarters, preserving the specified one-degree tolerance and rotation order | Tech lead |
 
 ## 11. References
 
