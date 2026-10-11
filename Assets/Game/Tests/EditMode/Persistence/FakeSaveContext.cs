@@ -14,7 +14,8 @@ namespace Game.Tests.EditMode.Persistence
         public readonly List<ThumbnailRequest> Changed = new List<ThumbnailRequest>();
         public readonly HashSet<string> Keep = new HashSet<string>();
 
-        public SaveBlockReason GetBlockReason() => Block;
+        public int BlockChecks;
+        public SaveBlockReason GetBlockReason() { BlockChecks++; return Block; }
 
         public void DescribeForMeta(SaveMeta meta)
         {

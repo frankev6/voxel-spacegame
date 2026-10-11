@@ -32,7 +32,9 @@ namespace Game.Persistence.Services
         internal SaveIdPalette LoadedPalette;
         readonly Dictionary<string, byte[]> thumbnailCache = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         readonly List<object> queue = new List<object>();   // queue[0] is the running operation
-        bool disposed;
+        bool disposed, subscribedToQuit, quitApproved;
+        /// <summary>Quit routine's final step; tests replace it (Application.Quit does nothing in edit mode).</summary>
+        internal Action QuitAction = UnityEngine.Application.Quit;
         /// <summary>Test hook (§5.4 step 13): runs after world.sav.tmp is written and before it replaces world.sav.</summary>
         internal Action TestHookBeforeReplace;
 
@@ -45,6 +47,8 @@ namespace Game.Persistence.Services
             this.pause = pause;
             this.config = config ?? new SaveServiceConfig();
             this.registry = registry ?? SaveChunkRegistry.Default;
+            Autosave = new AutosaveScheduler(this, this.config, pause);
+            if (UnityEngine.Application.isPlaying) { UnityEngine.Application.wantsToQuit += HandleWantsToQuit; subscribedToQuit = true; }   // §5.9
         }
         public void AttachContext(ISaveContext context) { this.context = context; }
 
@@ -509,7 +513,7 @@ namespace Game.Persistence.Services
             int warnings = report.WarningCount + report.ErrorCount;
             EventBus<GameLoaded>.Publish(new GameLoaded(save.Slot.Profile.Value, save.Slot.Slot.Value, warnings));
             OperationCompleted?.Invoke(new SaveOperationResult(true, true, SaveErrorKind.None, SaveMessages.Loaded(warnings), save.Slot, default, warnings, report));
-            // TODO(PERS-009): Autosave.NotifySaved() (restarts the timer).
+            Autosave.NotifySaved();                                       // restarts the timer
             // 7.
             return report;
         }
@@ -546,13 +550,16 @@ namespace Game.Persistence.Services
         /// <summary>The PNG of a thumbnail written (or carried) by this session's saves.</summary>
         public bool TryGetSessionThumbnail(string key, out byte[] png) => thumbnailCache.TryGetValue(key, out png);
 
-        public AutosaveScheduler Autosave => throw new System.NotImplementedException("PERS-009");
+        public AutosaveScheduler Autosave { get; }
 
-        /// <summary>Safe to call twice. TODO(PERS-009): unsubscribe Application.wantsToQuit.</summary>
+        internal bool HasActiveSessionContext => context != null && context.HasActiveSession;
+
+        /// <summary>Safe to call twice. Removes the Application.wantsToQuit handler (§5.9).</summary>
         public void Dispose()
         {
             if (disposed) return;
             disposed = true;
+            if (subscribedToQuit) { UnityEngine.Application.wantsToQuit -= HandleWantsToQuit; subscribedToQuit = false; }
             OperationCompleted = null;
             participants.Clear();
             context = null;
@@ -748,7 +755,7 @@ namespace Game.Persistence.Services
             {
                 currentSlot = captured.Slot;
                 SetProfileLastSlot(captured.Slot);
-                // TODO(PERS-009): Autosave.NotifySaved().
+                Autosave.NotifySaved();
                 EventBus<GameSaved>.Publish(new GameSaved(captured.Slot.Profile.Value, captured.Slot.Slot.Value, captured.Reason));
                 GameLog.Info("Save", $"Saved {captured.Slot.Profile.Value}/{captured.Slot.Slot.Value} ({result.Bytes} bytes, capture {result.CaptureMs:F1} ms, total {result.TotalMs:F1} ms)");
                 RaiseCompleted(result, captured.Reason);
@@ -781,6 +788,33 @@ namespace Game.Persistence.Services
         }
 
         // Synchronous seams for tests (InternalsVisibleTo):
-        internal bool HandleWantsToQuit() { throw new System.NotImplementedException("PERS-009"); }
+        /// <summary>§5.9 quit: true approves the quit now; false starts a quit save, after which the routine quits itself.</summary>
+        internal bool HandleWantsToQuit()
+        {
+            if (quitApproved) return true;
+            if (!HasActiveSessionContext || !CanSave(out var reason) || activeProfile.Value == null)
+            {
+                CanSave(out reason);
+                GameLog.Info("Save", "Quit without saving: " + reason);
+                return true;
+            }
+            _ = QuitSaveAsync();
+            return false;
+        }
+
+        /// <summary>Waits for the running operation, saves with reason Quit, racing QuitSaveTimeoutSeconds of real time; then quits.</summary>
+        async UnityEngine.Awaitable QuitSaveAsync()
+        {
+            var deadline = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                var save = SaveAsync(NextAutosaveSlot(activeProfile), SaveReason.Quit).GetAwaiter();   // Quit jumps the queue (§5.3)
+                while (!save.IsCompleted && deadline.Elapsed.TotalSeconds < config.QuitSaveTimeoutSeconds) await UnityEngine.Awaitable.NextFrameAsync();
+                if (!save.IsCompleted) GameLog.Warn("Save", $"Quit save did not finish within {config.QuitSaveTimeoutSeconds} s; quitting anyway (the previous save is intact)");
+            }
+            catch (Exception e) { GameLog.Exception("Save", e, "quit save"); }
+            quitApproved = true;
+            QuitAction?.Invoke();
+        }
     }
 }

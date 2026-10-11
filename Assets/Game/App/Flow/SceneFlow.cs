@@ -132,8 +132,10 @@ namespace Game.App.Flow
             if (CurrentScene == GameScene.World || CurrentScene == GameScene.BlueprintLab)
             {
                 // 2.1 TODO(FND-009): session.RunWritebacks() (SimClock write-back in the World, fleet write-back).
-                // 2.2 TODO(PERS-009): autosave through save.Autosave.Request(AutosaveTrigger.SceneTransition) when leaving the World for any
-                //     reason but LoadGame, ErrorRecovery or NewGame; then wait for !save.IsBusy (at most SaveWaitSeconds).
+                // 2.2 Autosave when leaving the World, except for a load, a new game or recovery; then wait for it (at most SaveWaitSeconds).
+                if (CurrentScene == GameScene.World && save != null && reason != SceneEntryReason.LoadGame && reason != SceneEntryReason.NewGame
+                    && reason != SceneEntryReason.ErrorRecovery)
+                    await AutosaveBeforeExitAsync();
                 var exitContext = new SceneExitContext(CurrentScene, target, reason);
                 foreach (var hook in exitingHooks.ToArray())
                 {
@@ -169,8 +171,19 @@ namespace Game.App.Flow
             // 6.
             // TODO(HUD-002): set the root screen (MainMenu → screens.MainMenu, World → FlightHud, BlueprintLab → ShipEditor).
             Finish(target, reason, true);
-            // TODO(PERS-009): if target == World and reason is NewGame or LoadGame: save.Autosave.NotifySaved().
+            if (target == GameScene.World && (reason == SceneEntryReason.NewGame || reason == SceneEntryReason.LoadGame)) save?.Autosave.NotifySaved();
             return FlowResult.Ok;
+        }
+
+        /// <summary>Step 2.2: the scheduler starts the save on its next Update (GameRoot runs it every frame) when saving is allowed.</summary>
+        async Awaitable AutosaveBeforeExitAsync()
+        {
+            save.Autosave.Request(Game.Persistence.Data.AutosaveTrigger.SceneTransition);
+            float deadline = Time.realtimeSinceStartup + SaveWaitSeconds;
+            await Awaitable.NextFrameAsync();
+            await Awaitable.NextFrameAsync();
+            while (save.IsBusy && Time.realtimeSinceStartup < deadline) await Awaitable.NextFrameAsync();
+            if (save.IsBusy) GameLog.Warn(LogCategories.Flow, $"The exit autosave did not finish within {SaveWaitSeconds} s; continuing");
         }
 
         /// <summary>§5.4.6 MainMenu at startup: treat the loaded scene as entered without reloading it.</summary>
