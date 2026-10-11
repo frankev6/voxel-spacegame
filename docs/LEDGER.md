@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 46 | 1 | 0 | 0 | 57 | 0 | 104 | 16 |
+| M1 | 46 | 0 | 0 | 0 | 58 | 0 | 104 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -174,7 +174,7 @@
 | FLT-002 | Grid-space and flight maths | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | ec30fc9 | Grid geometry, gyro, caps and assist targets; eight required tests |
 | FLT-003 | Flight config definition and factory | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | f21a981 | Exact defaults, FLT-E001 diagnostics, catalog asset and boot singleton |
 | FLT-004 | Thrust allocator | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001 | yes | done | astra (gpt-6) | 2026-10-11 | 3c34a39 | Fixed-order PGS, projected warm starts, bit-identical managed/Burst results; Q119 |
-| FLT-005 | PlayerCommandApplySystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001, DMG-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Fixed-tick player commands, latched edges and non-finite input sanitization |
+| FLT-005 | PlayerCommandApplySystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001, DMG-001 | yes | done | astra (gpt-6) | 2026-10-11 | 9271f44 | Fixed-tick command bridge; nine latched edges; Cruise preserved; six required tests |
 | FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 2388784 | Four flying profiles, player-only tag, change-filtered Burst nozzle init; three tests |
 | FLT-007 | PropulsionSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-002, FLT-004, FLT-006, DMG-001, SPEC-12 | yes | todo |  |  |  |  |
 | FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | yes | todo |  |  |  |  |
@@ -735,6 +735,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — FLT-005 player command bridge (astra, gpt-6)
+
+- Implemented fixed-tick player command application, one pending press per counter per tick, byte wrap, no-player/hulk edge dropping, and component-wise finite/clamped movement and aim. The consumed-counter singleton is created before the boot snapshot; the parallel-safe command job has no fixed-step synchronization point.
+- Six required tests cover multiple player roots, AI isolation, edge clearing, wrap, hulks, no ship, and non-finite inputs. Q120 resolves the no-player reset inconsistency: Cruise remains untouched on every path.
+- Validation: compile **zero C# warnings**; EditMode **657 passed + 1 explicit skipped**, PlayMode **51 passed**, perf **38/38**; docs **505 tasks / zero errors**. Physics spawn main median/p95 **0.02427/0.221 ms**; idle **0.01391/0.01896 ms**.
+- Implementation: `9271f44`. Next: FLT-007 propulsion, then FLT-008 plane constraint and remaining M1 work.
 
 ### 2026-10-11 — FLT-004 deterministic thrust allocator (astra, gpt-6)
 
