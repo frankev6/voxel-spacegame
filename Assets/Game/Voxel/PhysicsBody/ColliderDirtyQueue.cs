@@ -8,7 +8,9 @@ using Game.Voxel.Model;
 
 namespace Game.Voxel.PhysicsBody
 {
-    /// <summary>Implements SPEC-12 §4 (physics contract).</summary>
+    /// <summary>Request queue with handle-guarded access (SPEC-12 §4.4/§5.1). Fixed-step users read the singleton, schedule
+    /// jobs with Requests after Acquire(dependency), then Release(lastJob). Outside fixed step call CompleteAccess before direct use.
+    /// Never use GetSingletonRW, mutate this struct after Create, or pass Access into jobs.</summary>
     public struct ColliderDirtyQueue : IComponentData
     {
         public NativeList<ColliderRequest> Requests;

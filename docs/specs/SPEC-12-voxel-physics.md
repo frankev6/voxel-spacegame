@@ -488,11 +488,11 @@ namespace Game.Voxel.PhysicsBody
 
 **Invariants** (asserted by `ColliderPipelineInvariants.Check(in cache, in batch)` in debug builds and in tests):
 1. Each record's `Updates` holds indices of updates with that record's Serial in strictly increasing `Seq`, and the Built updates form a prefix of that list (decision 8: no update is Built while an older one of the same grid is not).
-2. An update referenced by the in-flight batch is in state Building or Built-in-batch and is never freed before finalize.
+2. An update referenced by the in-flight batch is in state Building, Built-in-batch, or Discarded after its record disappears, and is never freed before finalize (Q13).
 3. Every blob is referenced by exactly one owner: a record's `Installed`, a record's `Children`, an update's `Compound`, a batch result, or `Retired`.
 4. `Collecting` and `CollectingBricks` contain only updates in state Collecting.
 
-Initial capacities not annotated above use **256** for cache lists/maps, **512** for batch brick/mask/result/child/apply lists, and **64** for batch assembly/result lists; native references start cleared (Q11). Lists/maps can grow.
+Initial capacities not annotated above use **256** for cache lists/maps, **512** for batch brick/mask/result/child/apply lists, and **64** for batch assembly/result lists; native references start cleared (Q11). Lists/maps can grow. Internal per-record children/update-index lists start at **32/8**; each pooled update’s brick list starts at **32**, retains capacity when recycled and is disposed with the cache. `PendingBricks` counts unscheduled update entries (including removals); scheduling consumes one, while `PendingUpdates` includes built updates still waiting for installation (Q14).
 
 ### 4.8 Memory model (architecture §11.10)
 
@@ -658,7 +658,7 @@ Per frame (markers `BrickColliderBuildSystem.<Step>`), main thread:
 
 **`ColliderPipeline.Finalize(ref cache, ref batch)`** (Burst static, callable from a job or the main thread; after the batch handle completed):
 1. For each brick item `i` in order: update `u`; if `u.State == Discarded` or its record is gone → retire `Results[i].Blob`; else apply to `R.Children` (removed → remove the coord and retire its blob; else replace (retire the old blob) or insert sorted).
-2. For each assembly `a`: `u.Compound = Result.Compound`, `u.ChildCount/BoxCount`, `u.State = Built`; discarded → retire the compound and free `u`.
+2. For each assembly `a`: `u.Compound = Result.Compound`, `u.ChildCount/BoxCount`, `u.State = Built`; discarded → retire the compound. After consuming all brick and assembly results, free discarded updates referenced by this completed batch, including partial updates with no assembly (Q13).
 3. Clear every batch list. `st.InFlight = 0` is set by the caller (main thread).
 
 ### 5.9 `ColliderSwapSystem`
@@ -929,7 +929,7 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 ### PHY-007 — Pipeline singletons and access discipline
 - **Milestone:** M1
 - **Tier:** frontier — F2: native containers shared across fixed-step jobs, frames and teardown
-- **Depends on:** `PHY-001`
+- **Depends on:** `PHY-001`, `PHY-005`
 - **Do:** Implement the three singletons fully (§4.4, §4.7): container management, update pool, mask pool, record add/remove with `GridIndex` fix-up, `Retired` bookkeeping, byte counters, `ColliderPipeline.Finalize` (§5.8), `ColliderPipelineInvariants.Check`, `Dispose` ownership rules (decision 9). Document the §5.1 pattern in the XML summary of each singleton.
 - **Files:** `Assets/Game/Voxel/PhysicsBody/{ColliderDirtyQueue,ColliderBuildCache,ColliderBatchQueue,ColliderPipeline,ColliderPipelineInvariants,ColliderPipelineTypes}.cs`, `Assets/Game/Tests/EditMode/Voxel/Physics/ColliderPipelineDataTests.cs`
 - **Acceptance criteria:**
@@ -1128,6 +1128,9 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 | 10 | The prose says only SpawnClearance queries chunks, but DebugAllQuery explicitly includes all bodies | Restrict the prose rule to gameplay queries; preserve DebugAllQuery | Tech lead | Resolved 2026-10-11 in PHY-001: exact filter code retained; tests cover all nine queries and the diagnostic exception. |
 | 11 | Several pipeline container capacities are not specified | Cache lists/maps 256; batch brick/child/apply lists 512, assembly lists 64 | Tech lead | Resolved 2026-10-11 in PHY-001: align unspecified initial capacities with their related pools; native references clear; normal growth remains allowed. |
 | 12 | Installed Physics API and collider sizes differ from estimates | Use measured MemorySize and installed PhysicsStep members | Tech lead | Resolved 2026-10-11 in PHY-002: §4.8 records measured bytes; §5.13 uses the nested stabilization property; both incremental broadphase flags exist. No package or public game API change. |
+| 13 | A discarded partial batch may have no assembly; invariant 2 omitted Discarded although cleanup permits removal during a batch | Keep the slot while referenced; retire every result, then recycle after the whole batch finishes | Tech lead | Resolved 2026-10-11 in PHY-007: §4.7/§5.8 clarified; removal detaches records while retaining in-flight update/mask ownership until finalization. |
+| 14 | Per-record/pool list capacities and PendingBricks counting were unspecified | Children 32, record update indices 8, update bricks 32; count unscheduled entries | Tech lead | Resolved 2026-10-11 in PHY-007: retained pool capacity, cleared consumed mask slots and incremental counters; full ownership audits verify counters. |
+| 15 | Pipeline sorted insertion/audits reuse CompareCoords implemented by PHY-005, but the task lacked that dependency | Add PHY-005 to PHY-007 dependencies | Tech lead | Resolved 2026-10-11; dependency was already done before the claim, so no in-progress prerequisite was bypassed. |
 
 ## 11. References
 

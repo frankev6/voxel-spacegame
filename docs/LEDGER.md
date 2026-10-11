@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 89 | 0 | 0 | 0 | 11 | 0 | 100 | 16 |
+| M1 | 88 | 1 | 0 | 0 | 11 | 0 | 100 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -152,7 +152,7 @@
 | PHY-004 | Brick box merger | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | e1679aa | Exact greedy box covers, 2/4-cell coarsening, bounds fallback; 7 tests |
 | PHY-005 | Brick blob builder and grid compound assembler | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002, PHY-004 | yes | done | astra (gpt-6) | 2026-10-11 | a54c29f | Eight tests; all merge levels / copied ownership / nested coordinates |
 | PHY-006 | Mass maths | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | 1c4b85f | Six tests; tensor / canonical Jacobi / planar locks / point velocity preservation |
-| PHY-007 | Pipeline singletons and access discipline | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PHY-007 | Pipeline singletons and access discipline | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001, PHY-005 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
 | PHY-008 | GridBodyInitSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-003, PHY-006, PHY-007, SPEC-10 | no | todo |  |  |  |  |
 | PHY-009 | ColliderSnapshotSystem and install schedule | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-007, SPEC-10 | no | todo |  |  |  |  |
 | PHY-010 | BrickColliderBuildSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-005, PHY-009 | no | todo |  |  |  |  |
@@ -612,6 +612,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 56 | 2026-10-11 | SPEC-10 VOX-002 | Dense reference peak with retained mesh copies is 38,828,288 B, above 36 MB | No-go; VOX-003 todo, sparse-contract ADR proposed | Tech lead | Resolved: SPEC-10 Q16 and proposed ADR-0023; no gate relaxed |
 | 57 | 2026-10-11 | SPEC-10 VOX-002 | Thin-shell peak is 162,606,784 B with both mesh copies; make it a hard gate? | Keep the documented stress-only default | Owner | Reported in SPEC-10 Q17; fallback estimates recorded, no new gate or visual policy assumed |
 | 58 | 2026-10-11 | SPEC-12 PHY-002 | Installed collider bytes and PhysicsStep stabilization member differ from estimates | Use measured bytes and nested stabilization property; static broadphase field exists | Tech lead | Resolved in SPEC-12 Q12 / §4.8 / §5.13; no public game API change |
+| 59 | 2026-10-11 | SPEC-12 PHY-007 | Discarded partial updates have no assembly to trigger freeing; invariant 2 omitted Discarded | Retain referenced slots until all batch results are consumed, then recycle | Tech lead | Resolved in SPEC-12 Q13 / §4.7 / §5.8; partial discard covered by the required finalization test |
+| 60 | 2026-10-11 | SPEC-12 PHY-007 | Inner list capacities and PendingBricks semantics unspecified | 32 child entries / 8 update indices / 32 update bricks; PendingBricks = unscheduled entries | Tech lead | Resolved in SPEC-12 Q14; retain pool capacity and clear consumed mask slots |
+| 61 | 2026-10-11 | SPEC-12 PHY-007 | Sorted insertion/audits reuse PHY-005's coordinate helper | Add the implementation dependency | Tech lead | Resolved in SPEC-12 Q15; PHY-005 was already done at claim time |
 
 ## Measurements
 

@@ -8,7 +8,9 @@ using Game.Voxel.Model;
 
 namespace Game.Voxel.PhysicsBody
 {
-    /// <summary>Implements SPEC-12 §4 (physics contract).</summary>
+    /// <summary>Owns one asynchronous batch (SPEC-12 §4.4/§5.1). State is main-thread-only; jobs receive B, never State.
+    /// B is exclusive to batch jobs until their handle completes; finalization runs after completion with cache Acquire/Release.
+    /// Outside fixed step complete cache access before finalization. Never use GetSingletonRW or mutate singleton fields after Create.</summary>
     public struct ColliderBatchQueue : IComponentData
     {
         internal NativeReference<ColliderBatchState> State;
