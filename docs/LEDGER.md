@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 13 | 0 | 0 | 0 | 53 | 0 | 66 | 5 |
+| M0 | 12 | 0 | 0 | 0 | 54 | 0 | 66 | 4 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -91,7 +91,7 @@
 | DEV-006 | Scenario runner, results JSON and CLI/scripts | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | frontier | DEV-004, DEV-005 | no | todo |  |  |  |  |
 | DEV-020 | Release-strip guarantee | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | no | todo |  |  |  |  |
 | TST-001 | Test kit core | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c082a4c | kit + perf hook; 8 gates on PerfRun; OQ 4–6 |
-| TST-008 | Iteration gates | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | standard | TST-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| TST-008 | Iteration gates | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | standard | TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | c6057e6 | Live iteration gates pass; both reloads disabled; reliable CLI test results |
 | MIG-001 | Public contract types | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c327a64 |  |
 | MIG-002 | Legacy JSON index and strict reading | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 6c78f67 |  |
 | MIG-003 | Legacy ID map | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4955b51 |  |
@@ -587,10 +587,17 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 | 2026-10-11 | PERS-012 | Capture / typical read+restore / 50 slots | 0.120 / 14.871 / 2.667 ms median; 0.127 / 15.307 / 8.872 ms p95 | Apple M5 Pro; 10 samples + 2 warmups; gates 5 / 500 / 50 ms |
 | 2026-10-11 | PERS-012 | Reference VOXS encode / decode | 12.487 / 13.210 ms median; 12.736 / 13.469 ms p95 | Gates 150 / 100 ms |
 | 2026-10-11 | PERS-012 | Reference ship compressed / damaged variant | 15,230 B / 34,810 B | Gate 81,920 B on pristine; damaged report only |
+| 2026-10-11 | TST-008 | No-change compile / Play-to-menu / EditMode suite | 1.697 / 0.159 / 29.800 s median | Apple M5 Pro; 3 runs each through live CLI; gates 10 / 1 / 60 s; all PASS |
 
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — TST-008 iteration gates and live tooling (astra, gpt-6)
+- Added the three-run iteration script. Apple M5 Pro, Unity 6000.6.5f1, a task-owned headless Editor with the live CLI: medians **1.697 s** no-change compile (10 s), **0.159 s** Play-to-menu (1 s), **29.800 s** full EditMode (60 s). Timings include CLI transport/script overhead. All three rows PASS, including restoration of scenes and test hooks; Play checks use a disposable profile.
+- The settings test found scene reload still enabled. ADR-0020 and Q35 / SPEC-71 Q7 apply and guard both reload flags, with existing boot/reentry regressions passing. Corrected nested CLI instance discovery and obsolete live test arguments; live tests now poll complete structured results and export XML. Stale results are removed, and process/CLI failures cannot be hidden by passing XML. Manual failure probes rejected failed tests and failed commands.
+- Full live EditMode **352 passed** in each of the final three runs (the explicit leak-guard test is excluded by the CLI); full PlayMode **16 passed**, perf **18/18 pass**. Compile has zero C# warnings; docs clean. Removed incidental dynamic font-cache serialization after live tests. M0 **54/66 done**.
+- The task-owned Editor remains open for the next implementation tasks. No repeat of the earlier native shutdown crash during these live runs; its retained evidence remains for the M0 system review.
 
 ### 2026-10-11 — MIG-004 protected migration writer and runner (astra, gpt-6)
 - Implemented asset creation and GUID-preserving updates, strict sorted manifests, guarded field writes, empty-only links, converter discovery/order, catalog rebuilds, Force confirmation, CLI and deterministic reports. CLI smoke run exits 0 with zero errors and the existing missing-start-blueprint warning. Committed the initial empty manifest/report; converters follow.
