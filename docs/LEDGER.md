@@ -572,8 +572,8 @@ Newest first. One entry per finished task or notable event: what changed, measur
 - `ProjectContentTests` (2) pass; the shipped-content performance test now runs on the real database. EditMode 204/204. Unblocks the ART-007 validator chain, MIG-004 and VOX-010.
 
 ### 2026-10-11 — DATA-008 editor content tooling (claude, claude-opus-5-5)
-- Database builder, postprocessor, validator runner (DATA-E010/E011/W012, extension validators ordered by \`Order\`, a throwing validator becomes DATA-E099), CLI with exit codes, build gate, the Game/Content menu, the mirror-partner creator, and drawers for orientation and face masks.
-- \`ContentValidatorRunnerTests\` (7) pass. The real \`ContentDatabase.asset\` and its placeholders arrive with DATA-009.
+- Database builder, postprocessor, validator runner (DATA-E010/E011/W012, extension validators ordered by `Order`, a throwing validator becomes DATA-E099), CLI with exit codes, build gate, the Game/Content menu, the mirror-partner creator, and drawers for orientation and face masks.
+- `ContentValidatorRunnerTests` (7) pass. The real `ContentDatabase.asset` and its placeholders arrive with DATA-009.
 
 ### 2026-10-11 — DATA-007 ContentService (claude, claude-opus-5-5)
 - `ContentService` per SPEC-04 §5.1–§5.2. The runtime validation pass uses the new internal `ContentValidationContext` constructor. Blobs are disposed if construction fails after allocating them. A world gets at most one `ContentSingletons` entity.
@@ -627,15 +627,15 @@ Newest first. One entry per finished task or notable event: what changed, measur
 - Unblocks FND-003, FND-004 and INP-002 (ledger question 13) and CORE-009. EditMode 102/102.
 
 ### 2026-10-11 — CORE-002 StableHash and content identity (claude, claude-opus-5-5)
-- \`StableHash\` on Unity xxHash3 per SPEC-02 §5.1; every frozen string, sanity-buffer (both seeds) and \`Combine\` vector matches, and a Burst job agrees with managed code.
+- `StableHash` on Unity xxHash3 per SPEC-02 §5.1; every frozen string, sanity-buffer (both seeds) and `Combine` vector matches, and a Burst job agrees with managed code.
 - SPEC-02 §5.1 labelled two vector strings wrongly ("97-char", "20 bytes"); they are 95 characters and 19 UTF-8 bytes, and the frozen hashes match those strings. The labels are corrected.
-- Measured: 0.046 µs per \`Hash64\` of a 16-character id (gate ≤ 0.3 µs), 0 B GC. 14 tests; EditMode 89/89.
+- Measured: 0.046 µs per `Hash64` of a 16-character id (gate ≤ 0.3 µs), 0 B GC. 14 tests; EditMode 89/89.
 
 ### 2026-10-11 — ADR-0019: system reviews instead of per-task reviews (frank, human; recorded by claude, claude-opus-5-5)
 - **Owner, verbatim:** "bro you are the frontier!", then "also remove hardcoded blockers requiring review for every small implementation. our first buildout i would rather we go wide and then have an in-depth review when systems are built, because reviewing one item at a time misses the larger picture of those components working together holistically, and also just slows us down"
-- [ADR-0019](decisions/ADR-0019-system-reviews-instead-of-per-task-reviews.md) accepted. Tasks of either tier are \`done\` at their Definition of Done, and dependents start at once. Each milestone gets an in-depth system review before its exit gate ([04-workflow §8](04-workflow.md)), logged as \`system-review: name (model)\`.
-- Updated: 04-workflow §4, §7 and the new §8; AGENTS.md §2; ROADMAP; HANDOFF; the ledger header; \`tools/check-docs.py\` no longer requires \`reviewed-by:\`.
-- \`ART-003\`, \`ART-005\` and \`ART-012\` were waiting only for a review and are now \`done\`. \`ART-004\` stays in \`review\` for its open 150 m glyph criterion.
+- [ADR-0019](decisions/ADR-0019-system-reviews-instead-of-per-task-reviews.md) accepted. Tasks of either tier are `done` at their Definition of Done, and dependents start at once. Each milestone gets an in-depth system review before its exit gate ([04-workflow §8](04-workflow.md)), logged as `system-review: name (model)`.
+- Updated: 04-workflow §4, §7 and the new §8; AGENTS.md §2; ROADMAP; HANDOFF; the ledger header; `tools/check-docs.py` no longer requires `reviewed-by:`.
+- `ART-003`, `ART-005` and `ART-012` were waiting only for a review and are now `done`. `ART-004` stays in `review` for its open 150 m glyph criterion.
 
 ### 2026-10-11 — AUD-001 audio contracts (claude, claude-opus-5-5)
 - Stream types (`SfxEvent` is 32 bytes, `SfxEventQueueCreateSystem`, `CombatAudioCues`, `SfxEvents`), Core audio types, both audio definitions with validation, the Presentation types, a no-op `AudioService` and an empty `AudioRoot`.
