@@ -484,7 +484,7 @@ For each `ShipItem` file (13, ordinal path order), with `catalog` = current cont
 6. Encoding into structure arrays (SPEC-10 types, `CellSize = 0.5`):
    - Palette: entry 0 = `(Block 0, Orient 0, Color 0)` (air). Single-cell blocks that don't `RequireInstance`: find-or-append `(blockIndex, o, color)`; cell `Ref` = palette index.
    - Instances: append `BlockInstance { Block = blockIndex, Orient = o, Color = color, Origin = origin, FunctionHp = def.FunctionHp, Functional = Entity.Null }`; each cell `Ref = 0x8000 | instanceIndex`.
-   - Every placed cell: `Hp = 255`, `Flags = 0` (unless SPEC-10 requires a flag for instance cells; then use SPEC-10's helper).
+   - Every placed cell: `Hp = 255`, `Flags = 0` (instance root uses CellFlags.InstanceRoot per SPEC-10 §5.2; other cells remain 0).
    - Bricks: `brick = cell >> 4` (arithmetic shift, correct for negatives), `local = cell & 15`; bricks are created on first use in a `Dictionary<int3, int>` with 4,096 zero cells each; `Cells[brick × 4096 + VoxsCodec.CellIndex(local)]`.
    - `AnchorInstance` = the instance index of the core if exactly one placed block has a `Core` module; none → −1 and `MIG-W052`; more than one → −1 and `MIG-W053`.
 7. `bytes = VoxsCodec.Encode(source, VoxsBlockNames.FromCatalog(catalog), VoxsEncodeOptions.ForAsset)`; verify by `TryDecode` and comparing palette/instances/cells (mismatch → `MIG-E054`, not written).
@@ -687,7 +687,8 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
   - [ ] Every ship's VOXS decodes (`TryDecode`) to the same arrays; every multi-cell block's cells all reference its instance; no cell is referenced by two blocks.
   - [ ] Unit cases: two overlapping thrusters keep the first; a hull overlapping a thruster is dropped even if listed first; negative coordinates land in the right brick (`(−1, 0, 0)` → brick `(−1,0,0)`, local `(15,0,0)`); a core yields `AnchorInstance` = its instance index.
   - [ ] Running the converter twice leaves all 13 assets `Unchanged`.
-- **Tests:** `LegacyShipBuilderTests.Overlap_FunctionalFirst`, `.NegativeCoordinates_BrickMath`, `.MultiCellBlocks_ReferenceInstance`, `.Anchor_FromSingleCore`; `ShipConverterTests.RealExport_MatchesExpectedTable`, `.Voxs_RoundTrips`, `.SecondRun_Unchanged`.
+- **Integration prerequisite (Q16):** implement the existing ShipBlueprintDefinition.Validate contract here so imported M0 assets can pass content validation. VOX-010 retains the payload setter and config factory.
+- **Tests:** `ShipConverterTests.Blueprint_ValidationForMigration`; `LegacyShipBuilderTests.Overlap_FunctionalFirst`, `.NegativeCoordinates_BrickMath`, `.MultiCellBlocks_ReferenceInstance`, `.Anchor_FromSingleCore`; `ShipConverterTests.RealExport_MatchesExpectedTable`, `.Voxs_RoundTrips`, `.SecondRun_Unchanged`.
 
 ### MIG-009 — Weapon converter and weapon links
 - **Milestone:** M2
@@ -794,6 +795,8 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 | 13 | Manifest link updates can adopt hand edits; report Created vs Unchanged conflicts with first-run byte equality; SerializedObject cannot intercept missing properties | **Answer (resolved in MIG-004):** refresh hashes at owned/forced writes only, including owned link fills; never adopt protected bytes through a link. Unsaved dirty assets are protected too. Invalid manifests fail closed. Compare report bytes across unchanged runs; first-run Created remains truthful. Converter fill callbacks use internal writer.Set to warn and skip individual missing fields. | Tech lead |
 | 14 | Hard-coded placeholder art paths conflict with AGENTS; the dropped-data table omits socket fields and some normalized categories | **Answer (resolved in MIG-005):** Editor-only LegacyMigrationSources holds the icon-sheet and (MIG-006) prop-model references, so converters depend on that asset and sprite names, not placeholder paths. Keep existing source art. Report every dropped nonempty RequiredSocketType, Modifiers, non-None EffectType, PaletteIndex and changed legacy Category, including omissions in the abbreviated table. | Tech lead |
 | 15 | How should regenerated SerializeReference modules retain byte-stable identities? | **Answer (resolved in MIG-006):** before assigning a module through SerializedProperty, register its positive BlockModuleId as the Unity managed-reference ID on that asset (Unity rejects changes after first serialization). Module IDs are unique per block (SPEC-04), stable and append-only; verify real re-import bytes and manifests. | Tech lead |
+| 16 | M0 imports blueprints, but ShipBlueprintDefinition.Validate is a VOX-010 (M1) stub | **Answer (resolved in MIG-008):** bring the already specified VOX-E001/E002/E003 validator forward into MIG-008; retain setter/config work and its tests in VOX-010. Game.Data checks the supported v1 asset contract without referencing Game.Voxel; migration verifies that VoxsCodec.Version is accepted. Finite positive cell size also rejects NaN/infinity. | Tech lead |
+| 17 | Imported ships turn the previously deferred FND-E001 start-blueprint check into an error | **Answer (resolved in MIG-008):** assign ship_base to an empty shipped config_game.startBlueprint once for development. It is the smallest imported blueprint (four cells) with a core. Preserve any existing assignment; the migration runner does not rewrite the config. Frank can choose the eventual starting ship when gameplay is available. | Tech lead |
 
 ## 11. References
 

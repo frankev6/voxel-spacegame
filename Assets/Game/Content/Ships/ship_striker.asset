@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_striker
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_striker
+  formerIds: []
+  displayName: Striker
+  cellSize: 0.5
+  payloadVersion: 1
+  payload: 564f5853010001005d904d4ec3301085676c270d4d022ba45236dc84052cb885152052110eadd24448ac720f3814fb52710138033cdbb15318c5e36ffe5e6c13d1e50f4cce6fcdfaee51af7a6396cf75b5593fe98da9b64da5bbbe6deb4e038d39f55dddaaedb75dddeaa6be7fe81b49448c2fa363412414dccd159c8ca4148d947892197209d1cb35487ab213224c24914424355529d06caac65cea738a89013b990cd871c0d2f91d2346e0b2b0c2033b761d1fbee3240cc1860538479891137d15ea9fa80a726a92cb0f787f5846e6f30cbe04a45828bdf3dcfef49b73bb15f66a01520b5f2cddb1ed435b785b12f3f8f0e30a6c0d6317859f036641eac8699483bba56df505ebf7e751e88f9813fc05y
+  cellCount: 74
+  boundsMin: {x: -4, y: 0, z: -4}
+  boundsMax: {x: 3, y: 3, z: 2}

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_shuttle
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_shuttle
+  formerIds: []
+  displayName: Shuttle
+  cellSize: 0.5
+  payloadVersion: 1
+  payload: 564f5853010001004d513152c33010dc93255b4ee228010618d2a4e3191469f885270443184c92719c81d233d0d2f2091ade00ef6168e8e14e72081ef9bcda3bddedca00ce3400d3b92897b3db7cbe29cbe10ee6d3c575595c1e04a69e579b755d54f9fa6e5a968340ce96551188f17d315d2d17f9aa9cf23eaf375555d421955fdd3c701b1e4416a41df51c598e8c417004285ec629e7540ad585caa01266a01ca7fa64fb696491ea11703e61d4d92297fc211b90ee017a08bc4c0cb86e8bd22d724a0c7b44016902f1fc3783860ca2b8613d896a2801582dc70e9721e5be9c3042221126d392d55dc18982e66d2429eef5e18d210b67c00eb671088f84278f1f8fa58457241f7e4fe1e53c690e317b6924128c956a1df939aa9da383042f5067be4dbc139846ff4c7899961a8a1119b1f82ac3ac3f63a15349c78c075ea0f30207e18c379bb55632efec9df6813dd97f1f49255363b99dd6c761f8a55fc6caa4e7135f200f933f9177d24f24f5396add03bfy
+  cellCount: 127
+  boundsMin: {x: -5, y: 2, z: -15}
+  boundsMax: {x: 5, y: 4, z: 1}

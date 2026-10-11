@@ -893,7 +893,7 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 - **Milestone:** M1
 - **Tier:** standard — definitions listed field by field
 - **Depends on:** `VOX-001`
-- **Do:** Implement `ShipBlueprintDefinition` (getters, `Validate` with the §7 codes, `EditorSetPayload`), `VoxelConfigDefinition`, `VoxelConfigFactory.Create`. Create `Assets/Game/Content/Config/config_voxel.asset` with the defaults.
+- **Do:** Implement `ShipBlueprintDefinition` (`Validate` is brought forward to MIG-008 for the M0 gate; retain its verification here, plus `EditorSetPayload`), `VoxelConfigDefinition`, `VoxelConfigFactory.Create`. Create `Assets/Game/Content/Config/config_voxel.asset` with the defaults.
 - **Files:** `Assets/Game/Data/Definitions/Voxel/{ShipBlueprintDefinition,VoxelConfigDefinition}.cs`; `Assets/Game/Voxel/Grid/VoxelConfigFactory.cs`; `Assets/Game/Content/Config/config_voxel.asset`; `Assets/Game/Tests/EditMode/Voxel/VoxelDefinitionTests.cs`
 - **Acceptance criteria:**
   - [ ] Each of `VOX-E001`, `VOX-E002`, `VOX-E003` has a failing and a passing fixture.
@@ -1034,6 +1034,7 @@ Stress case `ThinShellStation1M` (3,784 bricks, ≈ 2.09M faces): cells ≈ 64 M
 | 12 | Is the 4-cell-wall `HollowStation1M` the 06 reference station? | Yes (decision 18); thin shells reported only | Owner |
 | 13 | `BrickRecord` (§4.3) is commented "32 bytes" and VOX-001 checks `SizeOf<BrickRecord>() == 32`, but its fields (int3, int, Cell, ushort, ushort, uint) total 28 bytes with 4-byte alignment. Pad to 32 or correct the number? | The fields as written: 28 bytes. The VOX-001 test checks 28; the §8.2 structure-brick total is 4 bytes smaller (16,944) | Tech lead |
 | 14 | `VoxelStructure.ComputeContentHash` (§4.3), `VoxsSourceBuffers.Source` and `VoxelStructureCodec.ToSource/Encode/FromDecoded` (§5.6) take SPEC-05 types (`VoxsBlockNames`, `VoxsSource`, `VoxsDecoded`, `VoxsEncodeOptions`) that PERS-001 creates, and PERS-001 depends on VOX-001 | VOX-001 creates those files with only the members whose types exist (`VoxsSourceBuffers.Dispose`, `VoxelStructureCodec.TryDecode`); VOX-009, which depends on SPEC-05, adds the rest | Tech lead |
+| 15 | M0 migration needs blueprint validation before VOX-010 | **Answer (resolved in MIG-008):** bring the existing Validate body and migration integration fixtures forward (SPEC-72 Q16). Keep EditorSetPayload, config factory and the VOX-010 acceptance suite in M1. Game.Data validates its v1 asset contract without a forbidden Game.Voxel dependency. | Tech lead |
 
 ## 11. References
 

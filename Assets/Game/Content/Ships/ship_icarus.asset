@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_icarus
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_icarus
+  formerIds: []
+  displayName: Icarus
+  cellSize: 0.5
+  payloadVersion: 1
+  payload: 564f5853010001006553bd6e1341109ed9db3baf7ff3679304016e50249e81020928788b93032705712691630b89ea2a0a9a085a9487c80bf0064454a14242a2868a0a899f996fceeb039fbc73dfce7c3b3bf3cd9988eefd91c7770ecbe3c7cff2a345598e0cce8f668bd37931cba7c593a78be9de8b627272fc3c3f9d4eca323f2c26d37cbe98cd8af9f53a70524e24563b8de68988e517883dedba402db74ff4f2a12072e31a05bfab2811ae13f2a307823822f2d11711929acf90de930c6ac411b9887c444944e92acad11791cb6879628568b8446e895cf439f305a6448afa32e64acef5b972443dad590b3fbb05ef7746e91279cbacb1016c9f2a79df0545120ba51b14bf11265b18bc1e80c0c026866e859fc1e9a08b731a4ae520d2899e1e1e15d69c768158af840bc6e5639002ac8f58cbadec2a29a59329feca08b75142e2b4bd14f88755fbcbe2af87b2d9927d47d66d5943596d42f36c25b434ddfd860eef6279bd4463c97fc5aff7a8ead79a980849431f671d886e609e33bac890cba59595bfead472ad6dfbb0efb9d1a96f28b08df0e53fbdff1c690b2a9e9e9775878ddeb5795ddd1c20731fb6a3f6336feaeb0047a8b908475edd6883dc85ed55b86c435f57bc7e062dd247f1671023ec2833c14775597f79e8325db61b866078fb4a8d91d9665b23e77b42da10b06322e37198a00c391b553601f93b7c62cccef2876b481befc2743e30c4b799ffe62da57cdb97484bc02664d2c85fy
+  cellCount: 305
+  boundsMin: {x: -7, y: -2, z: -17}
+  boundsMax: {x: 6, y: 5, z: 11}

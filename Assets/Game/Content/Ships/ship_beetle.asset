@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_beetle
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_beetle
+  formerIds: []
+  displayName: Beetle
+  cellSize: 0.5
+  payloadVersion: 1
+  payload: 564f5853010001004d8f4d4ec4300c85eda40db4f3d3d98c34680ec3029038039ba8d389348894a2b41512ab5e8833c01e893d02c4011057001cbb68882ac77ecffedc00c031d049f28d6faa2bbbebbd5f485a35c1d92a346dbb14a1db85beed5cb0b5db5ef6f5ead69537cdb56debd27bbb71656dbb3e04d769e2217d391815d9293c5e9ce943d02a03b83ba5cc48969067a8e1fc843230c998995143409a7f411c88f625d78ca202da9071a978c114068aafb103a337f9177f8ee85f726a2d8071d2bb5671fa03612029e702d898a83d3653e3ae2744b6313e4bb0e251adfe948735a0d8b08c08c26bc6141cdf99017366cc78ee0d755c76bf22e9805d3e0b155ba60c9da7f232b59f2a58fa440125b1f846be9ee353535205f60by
+  cellCount: 91
+  boundsMin: {x: -4, y: 0, z: -6}
+  boundsMax: {x: 3, y: 3, z: 3}

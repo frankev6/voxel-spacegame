@@ -1,6 +1,6 @@
 # Legacy migration report
 
-Converters: Items (100), Blocks (110)
+Converters: Items (100), Blocks (110), Ships (300)
 
 ## Assets
 
@@ -62,16 +62,41 @@ Converters: Items (100), Blocks (110)
 |Assets/Game/Content/Items/resource_crew.asset|Unchanged|
 |Assets/Game/Content/Items/resource_fuel.asset|Unchanged|
 |Assets/Game/Content/Items/resource_palladium.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_base.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_bastion.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_beetle.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_butterfly.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_crescent.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_fighter.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_freighter.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_frigate.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_icarus.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_red_elite.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_shuttle.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_striker.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_vestari.asset|Unchanged|
 
 ## Ships
 
 | Ship | Legacy voxels | Empty keys | Placed | Dropped overlaps | Cells | Palette | Instances | Cores |
 |---|---|---|---|---|---|---|---|---|
+|ship_base|4|0|4|0|4|1|1|1|
+|ship_bastion|343|0|334|9|361|3|3|0|
+|ship_beetle|66|0|64|2|91|2|6|1|
+|ship_butterfly|757|0|757|0|815|14|21|1|
+|ship_crescent|270|2|259|9|306|11|24|1|
+|ship_fighter|965|0|965|0|1005|46|29|1|
+|ship_freighter|343|0|334|9|361|3|3|0|
+|ship_frigate|119|0|119|0|127|19|9|1|
+|ship_icarus|270|2|258|10|305|3|23|0|
+|ship_red_elite|789|0|787|2|819|2|22|0|
+|ship_shuttle|119|0|119|0|127|19|9|1|
+|ship_striker|50|0|44|6|74|2|14|0|
+|ship_vestari|946|0|946|0|972|36|21|1|
 
 ## Entries
 
 ```text
-[W] FND-E001 Assets/Game/Content/Config/config_game.asset startBlueprint: No start blueprint: New Game is unavailable until one is set.
 [I] MIG-I091 content/Items/Blocks/Cores/block_core_cross.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Cores/block_core_small.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Hulls/block_hull.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate.
@@ -129,15 +154,102 @@ Converters: Items (100), Blocks (110)
 [I] MIG-I091 content/Items/Modules/strange_matter_container_full.json: Dropped: legacy Category Misc, RequiredSocketType Core, 3 Modifiers.
 [I] MIG-I091 content/Items/Officers/officer_august.json: Dropped: RequiredSocketType Core.
 [I] MIG-I091 content/Items/Officers/officer_gunner_vax.json: Dropped: RequiredSocketType Core, 2 Modifiers.
-0 errors, 7 warnings, 51 infos
+[I] MIG-I091 content/Items/Ships/ship_base.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[I] MIG-I090 content/Items/Ships/ship_base.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+[I] MIG-I091 content/Items/Ships/ship_bastion.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[W] MIG-W052 content/Items/Ships/ship_bastion.json AnchorInstance: Ship has no core; imported without an anchor.
+[I] MIG-I090 content/Items/Ships/ship_bastion.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+[W] MIG-W030 content/Items/Ships/ship_bastion.json voxels[143]: block_hull overlaps block_thruster_medium at voxel 305; dropped.
+[W] MIG-W030 content/Items/Ships/ship_bastion.json voxels[222]: block_thruster_medium overlaps block_thruster_medium at voxel 221; dropped.
+[W] MIG-W030 content/Items/Ships/ship_bastion.json voxels[224]: block_thruster_medium overlaps block_thruster_medium at voxel 223; dropped.
+[W] MIG-W030 content/Items/Ships/ship_bastion.json voxels[225]: block_thruster_medium overlaps block_thruster_medium at voxel 223; dropped.
+[W] MIG-W030 content/Items/Ships/ship_bastion.json voxels[251]: block_hull overlaps block_hull at voxel 165; dropped.
+[W] MIG-W030 content/Items/Ships/ship_bastion.json voxels[27]: block_hull overlaps block_hull at voxel 26; dropped.
+[W] MIG-W030 content/Items/Ships/ship_bastion.json voxels[303]: block_thruster_medium overlaps block_thruster_medium at voxel 223; dropped.
+[W] MIG-W030 content/Items/Ships/ship_bastion.json voxels[304]: block_thruster_medium overlaps block_thruster_medium at voxel 221; dropped.
+[W] MIG-W030 content/Items/Ships/ship_bastion.json voxels[72]: block_hull overlaps block_hull at voxel 71; dropped.
+[I] MIG-I091 content/Items/Ships/ship_beetle.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[I] MIG-I090 content/Items/Ships/ship_beetle.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+[W] MIG-W030 content/Items/Ships/ship_beetle.json voxels[38]: block_thruster_medium overlaps block_thruster_medium at voxel 36; dropped.
+[W] MIG-W030 content/Items/Ships/ship_beetle.json voxels[39]: block_thruster_medium overlaps block_thruster_medium at voxel 37; dropped.
+[I] MIG-I091 content/Items/Ships/ship_butterfly.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[I] MIG-I090 content/Items/Ships/ship_butterfly.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+[I] MIG-I091 content/Items/Ships/ship_crescent.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[I] MIG-I090 content/Items/Ships/ship_crescent.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+[W] MIG-W030 content/Items/Ships/ship_crescent.json voxels[132]: block_hull overlaps block_thruster_medium at voxel 240; dropped.
+[W] MIG-W030 content/Items/Ships/ship_crescent.json voxels[141]: block_thruster_medium overlaps block_thruster_medium at voxel 140; dropped.
+[W] MIG-W030 content/Items/Ships/ship_crescent.json voxels[162]: block_thruster_medium overlaps block_thruster_medium at voxel 140; dropped.
+[W] MIG-W030 content/Items/Ships/ship_crescent.json voxels[181]: block_hull overlaps block_thruster_medium at voxel 240; dropped.
+[W] MIG-W030 content/Items/Ships/ship_crescent.json voxels[186]: block_hull overlaps block_thruster_medium at voxel 140; dropped.
+[W] MIG-W030 content/Items/Ships/ship_crescent.json voxels[232]: block_thruster_medium overlaps block_thruster_medium at voxel 231; dropped.
+[W] MIG-W030 content/Items/Ships/ship_crescent.json voxels[235]: block_thruster_medium overlaps block_thruster_medium at voxel 231; dropped.
+[W] MIG-W050 content/Items/Ships/ship_crescent.json voxels[236]: Empty block key skipped.
+[W] MIG-W050 content/Items/Ships/ship_crescent.json voxels[237]: Empty block key skipped.
+[W] MIG-W030 content/Items/Ships/ship_crescent.json voxels[241]: block_thruster_medium overlaps block_thruster_medium at voxel 240; dropped.
+[W] MIG-W030 content/Items/Ships/ship_crescent.json voxels[242]: block_thruster_medium overlaps block_thruster_medium at voxel 240; dropped.
+[I] MIG-I091 content/Items/Ships/ship_fighter.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[I] MIG-I090 content/Items/Ships/ship_fighter.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+[I] MIG-I091 content/Items/Ships/ship_freighter.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[W] MIG-W052 content/Items/Ships/ship_freighter.json AnchorInstance: Ship has no core; imported without an anchor.
+[I] MIG-I090 content/Items/Ships/ship_freighter.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+[W] MIG-W030 content/Items/Ships/ship_freighter.json voxels[143]: block_hull overlaps block_thruster_medium at voxel 305; dropped.
+[W] MIG-W030 content/Items/Ships/ship_freighter.json voxels[222]: block_thruster_medium overlaps block_thruster_medium at voxel 221; dropped.
+[W] MIG-W030 content/Items/Ships/ship_freighter.json voxels[224]: block_thruster_medium overlaps block_thruster_medium at voxel 223; dropped.
+[W] MIG-W030 content/Items/Ships/ship_freighter.json voxels[225]: block_thruster_medium overlaps block_thruster_medium at voxel 223; dropped.
+[W] MIG-W030 content/Items/Ships/ship_freighter.json voxels[251]: block_hull overlaps block_hull at voxel 165; dropped.
+[W] MIG-W030 content/Items/Ships/ship_freighter.json voxels[27]: block_hull overlaps block_hull at voxel 26; dropped.
+[W] MIG-W030 content/Items/Ships/ship_freighter.json voxels[303]: block_thruster_medium overlaps block_thruster_medium at voxel 223; dropped.
+[W] MIG-W030 content/Items/Ships/ship_freighter.json voxels[304]: block_thruster_medium overlaps block_thruster_medium at voxel 221; dropped.
+[W] MIG-W030 content/Items/Ships/ship_freighter.json voxels[72]: block_hull overlaps block_hull at voxel 71; dropped.
+[I] MIG-I091 content/Items/Ships/ship_frigate.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[I] MIG-I090 content/Items/Ships/ship_frigate.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+[I] MIG-I091 content/Items/Ships/ship_icarus.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[W] MIG-W052 content/Items/Ships/ship_icarus.json AnchorInstance: Ship has no core; imported without an anchor.
+[I] MIG-I090 content/Items/Ships/ship_icarus.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+[W] MIG-W030 content/Items/Ships/ship_icarus.json voxels[133]: block_hull overlaps block_thruster_medium at voxel 241; dropped.
+[W] MIG-W030 content/Items/Ships/ship_icarus.json voxels[142]: block_thruster_medium overlaps block_thruster_medium at voxel 141; dropped.
+[W] MIG-W030 content/Items/Ships/ship_icarus.json voxels[163]: block_thruster_medium overlaps block_thruster_medium at voxel 141; dropped.
+[W] MIG-W030 content/Items/Ships/ship_icarus.json voxels[182]: block_hull overlaps block_thruster_medium at voxel 241; dropped.
+[W] MIG-W030 content/Items/Ships/ship_icarus.json voxels[187]: block_hull overlaps block_thruster_medium at voxel 141; dropped.
+[W] MIG-W030 content/Items/Ships/ship_icarus.json voxels[21]: block_hull overlaps block_hull at voxel 20; dropped.
+[W] MIG-W030 content/Items/Ships/ship_icarus.json voxels[233]: block_thruster_medium overlaps block_thruster_medium at voxel 232; dropped.
+[W] MIG-W030 content/Items/Ships/ship_icarus.json voxels[236]: block_thruster_medium overlaps block_thruster_medium at voxel 232; dropped.
+[W] MIG-W050 content/Items/Ships/ship_icarus.json voxels[237]: Empty block key skipped.
+[W] MIG-W050 content/Items/Ships/ship_icarus.json voxels[238]: Empty block key skipped.
+[W] MIG-W030 content/Items/Ships/ship_icarus.json voxels[242]: block_thruster_medium overlaps block_thruster_medium at voxel 241; dropped.
+[W] MIG-W030 content/Items/Ships/ship_icarus.json voxels[243]: block_thruster_medium overlaps block_thruster_medium at voxel 241; dropped.
+[I] MIG-I091 content/Items/Ships/ship_red_elite.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[W] MIG-W052 content/Items/Ships/ship_red_elite.json AnchorInstance: Ship has no core; imported without an anchor.
+[I] MIG-I090 content/Items/Ships/ship_red_elite.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+[W] MIG-W030 content/Items/Ships/ship_red_elite.json voxels[15]: block_hull overlaps block_hull at voxel 14; dropped.
+[W] MIG-W030 content/Items/Ships/ship_red_elite.json voxels[203]: block_hull overlaps block_thruster_medium at voxel 788; dropped.
+[I] MIG-I091 content/Items/Ships/ship_shuttle.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[I] MIG-I090 content/Items/Ships/ship_shuttle.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+[I] MIG-I091 content/Items/Ships/ship_striker.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[W] MIG-W052 content/Items/Ships/ship_striker.json AnchorInstance: Ship has no core; imported without an anchor.
+[I] MIG-I090 content/Items/Ships/ship_striker.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+[W] MIG-W030 content/Items/Ships/ship_striker.json voxels[10]: weapon_plasma_turret_small overlaps weapon_plasma_turret_small at voxel 6; dropped.
+[W] MIG-W030 content/Items/Ships/ship_striker.json voxels[14]: block_hull overlaps block_thruster_medium at voxel 25; dropped.
+[W] MIG-W030 content/Items/Ships/ship_striker.json voxels[28]: block_thruster_medium overlaps block_thruster_medium at voxel 25; dropped.
+[W] MIG-W030 content/Items/Ships/ship_striker.json voxels[39]: block_hull overlaps block_hull at voxel 38; dropped.
+[W] MIG-W041 content/Items/Ships/ship_striker.json voxels[4]: Rotation snapped to a cube rotation.
+[W] MIG-W041 content/Items/Ships/ship_striker.json voxels[5]: Rotation snapped to a cube rotation.
+[W] MIG-W041 content/Items/Ships/ship_striker.json voxels[7]: Rotation snapped to a cube rotation.
+[W] MIG-W030 content/Items/Ships/ship_striker.json voxels[8]: weapon_plasma_turret_small overlaps weapon_plasma_turret_small at voxel 7; dropped.
+[W] MIG-W041 content/Items/Ships/ship_striker.json voxels[8]: Rotation snapped to a cube rotation.
+[W] MIG-W030 content/Items/Ships/ship_striker.json voxels[9]: weapon_plasma_turret_small overlaps weapon_plasma_turret_small at voxel 7; dropped.
+[W] MIG-W041 content/Items/Ships/ship_striker.json voxels[9]: Rotation snapped to a cube rotation.
+[I] MIG-I091 content/Items/Ships/ship_vestari.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
+[I] MIG-I090 content/Items/Ships/ship_vestari.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
+0 errors, 67 warnings, 77 infos
 ```
 
 ## Summary
 
-0 errors, 7 warnings, 51 infos
+0 errors, 67 warnings, 77 infos
 
 Created: 0
 Updated: 0
-Unchanged: 56
+Unchanged: 69
 SkippedHandEdited: 0
 Failed: 0

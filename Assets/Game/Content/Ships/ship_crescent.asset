@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_crescent
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_crescent
+  formerIds: []
+  displayName: Crescent
+  cellSize: 0.5
+  payloadVersion: 1
+  payload: 564f5853010001006d54bd6e1341109ed9ddfbb1cfbed8898d1d04b841483c030512a1e02d2c279c14c419478e2d24aaab2868101434280fc10bf0064454a14242a2868a0a09c4ccb7771b4746f2ce7d3bf3edccec377726a2fb23228ada87e5e2e8e9f4785d96430f57c7cbf5e9aa584ee7c5e327ebf9f879313b593c9b9ece6765393d2c66f3e96abd5c16abeb75e0a49c49ac767a5acf673a5a2c0befe84829a684c5a609a7620d53c62436e2547e19bb646cd22c31fb442f1e0a2233f12849dd4891a544f9f4e8401007442ef802d262b5cf23273e9bd788033201b9806c40d16594832f20135373e212d1a041a64126f88cf745d2411c11bd3b4899acb4f76dc29564e87265885429b2b25edf82f7a76a462c91b76a8872d82e5512b8070a392243514ada92c1dd53f5bfe1b662a56a8792bad214c0292c7b0fd7ce38069624599d4832e84be2d0128a19f8b5520bcc58cbb384d04422a34d7056f84ef91f189d4e2caac23ad760ae936a25d4b02d325692aaf33b83dd4247d622e3a8f20dfe9298803f9ef26a209bbeecdbb26ecb1ac88ad837adfd06810c9944733fd890f2bd76df6aba0f125ae5d9ffde765ba0084350752ade52d3f215d1e5827edbc178ce78e3f2f2690830116a07994c933aa8d66cbbb01f19ea4408b80dd576113ebf22d6efa16c3aaabc9e9775973d3d138754bab899237317b6adf62bf7f47107476873118ebcbcd1023983ed5428b6a38f0bde3ec3b8d067515a54488deac47b4ab6786bcffdcb9a43a5a8b9713a00c3f94f02a5f3d86f7635723616d28e803df6824323ccba9fa2a0b73199a1f2a5a8c8fb8531e5dca1c43594b0f5f7e0302f819f18e3c891f42ff795f563bffe3beb41388dfc03y
+  cellCount: 306
+  boundsMin: {x: -7, y: -2, z: -17}
+  boundsMax: {x: 6, y: 5, z: 11}

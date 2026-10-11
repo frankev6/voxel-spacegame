@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.GameConfigDefinition
   id: config_game
   formerIds: []
-  startBlueprint: {fileID: 0}
+  startBlueprint: {fileID: 11400000, guid: 21ca6b20c5bd74f4198e0819107fa7eb, type: 2}
   defaultCommanderName: Commander
   devQuickStartSeed: 12345
   sceneReadyTimeoutSeconds: 30

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_freighter
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_freighter
+  formerIds: []
+  displayName: Freighter
+  cellSize: 0.5
+  payloadVersion: 1
+  payload: 564f5853010001008d525b4ac340143df7c6d290a46df2a1ad5f2e40740bfeb88f825aa89822d4e6c7af2c407003822e40a9ff8a1ba8e80ef4db3548d13b779c3cac0143727232e7ccbd67260360ef4b2e0e0ed2d3c393e1384bd3754b67e36976361b4d8793d1d1713659034072fba0163cf6e1730b38df17e6150c50d62622063eb738273bcb002e0694438742ca9973198ac8e01b350860031f4460363c52ecb029d7516d211a594d09eaf2bde92c0a36a16aa85d7660f0852ad542192a08d548c764c75de1d6b59424d462afe4ba0a2eedc77bdfae1d3d7912d2d53cd98cdd06bc250fa5c335f24c70481a4febb61971d56a9b765792c96e257ffb2aee40d5a448b6ab78b9819fed6f4a6a712e93e24a2e9bb4cce17c91cb702daf9e4b472b3e1bb1e68e5d46aab7fe65adc59ff74d0616fdc6fe36092507387001bdfac803e96b5b7151fd78369b270746f16aa07b422bf3ab1543edf7cf8a8f722cf10dy
+  cellCount: 361
+  boundsMin: {x: -6, y: -1, z: -4}
+  boundsMax: {x: 5, y: 4, z: 19}

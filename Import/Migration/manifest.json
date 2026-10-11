@@ -54,5 +54,18 @@
   "Assets/Game/Content/Items/paint_16_white.asset": "e0a81a7820a99ede",
   "Assets/Game/Content/Items/resource_crew.asset": "7514adb6c99a0cad",
   "Assets/Game/Content/Items/resource_fuel.asset": "c6a0c1e4b688a6ec",
-  "Assets/Game/Content/Items/resource_palladium.asset": "21190ff89cfb291c"
+  "Assets/Game/Content/Items/resource_palladium.asset": "21190ff89cfb291c",
+  "Assets/Game/Content/Ships/ship_base.asset": "67d8fa23a3bfc3ac",
+  "Assets/Game/Content/Ships/ship_bastion.asset": "e165906d311def8a",
+  "Assets/Game/Content/Ships/ship_beetle.asset": "c048d4705fc2ca84",
+  "Assets/Game/Content/Ships/ship_butterfly.asset": "10ceb80a24f1cd63",
+  "Assets/Game/Content/Ships/ship_crescent.asset": "e28785cc96e0a42c",
+  "Assets/Game/Content/Ships/ship_fighter.asset": "e6b7b66cd02b9f86",
+  "Assets/Game/Content/Ships/ship_freighter.asset": "d977689c004059e1",
+  "Assets/Game/Content/Ships/ship_frigate.asset": "686f13fb98cb7e27",
+  "Assets/Game/Content/Ships/ship_icarus.asset": "9da4b7adcb8a48f0",
+  "Assets/Game/Content/Ships/ship_red_elite.asset": "18d1f005087654a3",
+  "Assets/Game/Content/Ships/ship_shuttle.asset": "abab0f1a1312a12f",
+  "Assets/Game/Content/Ships/ship_striker.asset": "332a60c990ed2008",
+  "Assets/Game/Content/Ships/ship_vestari.asset": "3168c86ef2049992"
 }

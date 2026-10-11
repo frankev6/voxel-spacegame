@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_base
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_base
+  formerIds: []
+  displayName: base Ship
+  cellSize: 0.5
+  payloadVersion: 1
+  payload: 564f585301000100636060b067000226aea49cfce4ecf88cd29c1c01083339bf2835be383731278709a8809183819189838181859d81619a3323500028dacdc2d0c0c0c80064bd976660040a32310000y
+  cellCount: 4
+  boundsMin: {x: 0, y: 2, z: -4}
+  boundsMax: {x: 0, y: 2, z: -1}
