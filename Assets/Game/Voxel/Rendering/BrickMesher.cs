@@ -149,7 +149,96 @@ namespace Game.Voxel.Rendering
         }
         static void Triangle(uint a, uint b, uint c, ref Output output)
         { output.Indices.Add(a); output.Indices.Add(b); output.Indices.Add(c); }
+        /// <summary>SPEC-11 §5.3: majority downsampling and exact greedy rectangles of matching attributes.</summary>
         public static void MeshLod1(NativeArray<uint> snapshot, ref BrickShapeTables shapes, NativeList<PackedBrickVertex> vertices,
-            NativeList<uint> indices, out float3 min, out float3 max) => throw new System.NotImplementedException("REN-007");
+            NativeList<uint> indices, out float3 min, out float3 max)
+        {
+            vertices.Clear(); indices.Clear();
+            var output = new Output { Vertices = vertices, Indices = indices, Min = new float3(float.PositiveInfinity), Max = new float3(float.NegativeInfinity) };
+            using var super = new NativeArray<uint>(512, Allocator.Temp);
+            using var faceKeys = new NativeArray<uint>(64, Allocator.Temp);
+            Downsample(snapshot, super);
+            for (int direction = 0; direction < 6; direction++) for (int slice = 0; slice < 8; slice++)
+            {
+                BuildFaceKeys(snapshot, super, direction, slice, faceKeys);
+                Greedy(faceKeys, direction, slice, ref output);
+            }
+            min = vertices.Length == 0 ? float3.zero : output.Min; max = vertices.Length == 0 ? float3.zero : output.Max;
+        }
+        static int SuperIndex(int3 p) => p.x + 8 * p.y + 64 * p.z;
+        static void Downsample(NativeArray<uint> snapshot, NativeArray<uint> super)
+        {
+            for (int z = 0; z < 8; z++) for (int y = 0; y < 8; y++) for (int x = 0; x < 8; x++)
+            {
+                int solids = 0; var keys = new FixedList64Bytes<uint>();
+                for (int c = 0; c < 8; c++)
+                {
+                    uint child = snapshot[MeshCell.SnapIndex(2*x+(c&1), 2*y+((c>>1)&1), 2*z+(c>>2))];
+                    int cls = MeshCell.Class(child); if (cls != 0) solids++;
+                    if (cls == 1) keys.Add((uint)(MeshCell.Layer(child) * 256 + MeshCell.Colour(child)));
+                }
+                if (solids < 4) continue;
+                uint best = uint.MaxValue; int bestCount = 0;
+                for (int i = 0; i < keys.Length; i++)
+                {
+                    int count = 0; for (int j = 0; j < keys.Length; j++) if (keys[j] == keys[i]) count++;
+                    if (count > bestCount || count == bestCount && keys[i] < best) { best = keys[i]; bestCount = count; }
+                }
+                // Solid occupancy is independent of whether any structural child supplies a visible attribute.
+                super[x + 8*y + 64*z] = 0x80000000u | (bestCount == 0 ? 0 : best + 1);
+            }
+        }
+        static void BuildFaceKeys(NativeArray<uint> snapshot, NativeArray<uint> super, int direction, int slice, NativeArray<uint> keys)
+        {
+            int axis = direction / 2, u = (axis + 1) % 3, v = (axis + 2) % 3, sign = (direction & 1) == 0 ? 1 : -1;
+            for (int row = 0; row < 8; row++) for (int col = 0; col < 8; col++)
+            {
+                int3 p = default; p[axis] = slice; p[u] = col; p[v] = row;
+                uint key = super[SuperIndex(p)] & 0x7FFFFFFFu;
+                if (key != 0)
+                {
+                    int3 neighbour = p; neighbour[axis] += sign; bool hidden;
+                    if (neighbour[axis] >= 0 && neighbour[axis] < 8) hidden = (super[SuperIndex(neighbour)] & 0x80000000u) != 0;
+                    else
+                    {
+                        int solids = 0; int3 border = p * 2; border[axis] = sign < 0 ? -1 : 16;
+                        for (int a = 0; a < 2; a++) for (int b = 0; b < 2; b++)
+                        {
+                            int3 sample = border; sample[u] += a; sample[v] += b;
+                            if (MeshCell.Class(snapshot[MeshCell.SnapIndex(sample.x,sample.y,sample.z)]) != 0) solids++;
+                        }
+                        hidden = solids >= 2;
+                    }
+                    if (hidden) key = 0;
+                }
+                keys[col + 8*row] = key;
+            }
+        }
+        static void Greedy(NativeArray<uint> keys, int direction, int slice, ref Output output)
+        {
+            int axis = direction / 2, u = (axis + 1) % 3, v = (axis + 2) % 3;
+            for (int row = 0; row < 8; row++) for (int col = 0; col < 8; col++)
+            {
+                uint key = keys[col + 8*row]; if (key == 0) continue;
+                int width = 1; while (col + width < 8 && keys[col + width + 8*row] == key) width++;
+                int height = 1;
+                while (row + height < 8)
+                {
+                    bool same = true;
+                    for (int x = 0; x < width; x++) if (keys[col+x + 8*(row+height)] != key) { same = false; break; }
+                    if (!same) break; height++;
+                }
+                for (int y = 0; y < height; y++) for (int x = 0; x < width; x++) keys[col+x + 8*(row+y)] = 0;
+                uint attribute = key - 1; uint4 ids = default;
+                for (int corner = 0; corner < 4; corner++)
+                {
+                    int3 p = default; p[axis] = slice + ((direction & 1) == 0 ? 1 : 0);
+                    p[u] = col + (corner == 1 || corner == 2 ? width : 0); p[v] = row + (corner >= 2 ? height : 0); p *= 4;
+                    ids[corner] = output.Add(PackedBrickVertex.Pack(p.x,p.y,p.z,direction,(int)(attribute >> 8),(int)(attribute & 255),3,0,false));
+                }
+                if ((direction & 1) == 0) { Triangle(ids.x,ids.y,ids.z,ref output); Triangle(ids.x,ids.z,ids.w,ref output); }
+                else { Triangle(ids.x,ids.w,ids.z,ref output); Triangle(ids.x,ids.z,ids.y,ref output); }
+            }
+        }
     }
 }

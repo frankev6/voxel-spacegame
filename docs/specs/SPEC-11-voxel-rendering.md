@@ -288,9 +288,9 @@ Complexity: O(5,832 + exposed faces). Typical surface brick (≤ 1,024 faces): �
 
 ### 5.3 LOD1 mesher (`BrickMesher.MeshLod1`, Burst, *internal*)
 
-1. Downsample the 16³ interior to 8³ super-cells of 2×2×2: solid if ≥ 4 of 8 children have class ≠ 0; attribute key = most frequent `(layer << 8 | colour)` among class-1 children (tie → smallest key); a solid super-cell with no class-1 child is skipped (functional entities draw themselves).
+1. Downsample the 16³ interior to 8³ super-cells of 2×2×2: solid if ≥ 4 of 8 children have class ≠ 0; attribute key = most frequent `(layer << 8 | colour)` among class-1 children (tie → smallest key); a solid super-cell with no class-1 child emits no faces but still occludes neighbours (functional entities draw themselves).
 2. Border neighbours (for culling only): the neighbour super-cell across a brick face counts as solid if ≥ 2 of the 4 border snapshot cells facing the super-cell are solid. Diagonal neighbours are ignored.
-3. For each direction and each of the 8 slices: build an 8×8 grid of keys for exposed faces (0 = none); greedy-merge rectangles of equal key (grow along u, then v); emit one quad per rectangle with super-cell corner coordinates ×4 for packing (half-cell units, 0..32; bounds remain cell units), AO = 3, damage 0, normal index = d.
+3. For each direction and each of the 8 slices: build an 8×8 grid of keys for exposed faces (store attribute key + 1; 0 = none so layer 0/colour 0 remains visible, Q20); greedy-merge rectangles of equal key (grow along u, then v); emit one quad per rectangle with super-cell corner coordinates ×4 for packing (half-cell units, 0..32; bounds remain cell units), AO = 3, damage 0, normal index = d.
 4. Bounds as in LOD0.
 Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `HollowStation1M`, `Ship20k` and 200 random-noise bricks).
 
@@ -489,9 +489,9 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Do:** Implement `BrickMesher.MeshLod1` per §5.3.
 - **Files:** `Assets/Game/Voxel/Rendering/BrickMesher.cs`; `Assets/Game/Tests/EditMode/Voxel/Rendering/BrickLod1Tests.cs`
 - **Acceptance criteria:**
-  - [ ] Greedy rectangles exactly tile the exposed super-cell faces (area check against a brute-force count).
-  - [ ] LOD1 triangles ≤ 25% of LOD0 over `HollowStation1M`, `Ship20k` and 200 random-noise bricks.
-  - [ ] All positions are within 0..16 and even.
+  - [x] Greedy rectangles exactly tile the exposed super-cell faces (area check against a brute-force count).
+  - [x] LOD1 triangles ≤ 25% of LOD0 over `HollowStation1M`, `Ship20k` and 200 random-noise bricks.
+  - [x] All positions are within 0..16 and even.
 - **Tests:** `BrickLod1Tests.Greedy_TilesExactly`, `.TriangleRatio_AtMost25Percent`, `.Positions_EvenAndInRange`.
 
 ### REN-008 — Brick and prop shaders, placeholder art
@@ -618,6 +618,7 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 17 | Long-slope normal ordering and tangents were unspecified | Pair-major, then magnitude swap, then sign bits; positive zero-axis tangent | Tech lead | Resolved 2026-10-11: §4.1 gives exact indices 18..41 and C#/HLSL parity tests. No visual or shape change. |
 | 18 | Snapshot helper lacks orientation input and work has no warning storage | Replace unused shape-table input with orientations; add SnapshotFlags | Tech lead | Resolved by accepted ADR-0029; canonical inverse rotation, defined bad-content fallback, per-work warning retention. |
 | 19 | Legal painted long-slope bricks exceed UInt16 vertex addressing | uint mesher indices with conditional 16/32-bit GPU upload | Tech lead | Resolved ADR-0030: proven 73,728-vertex lower bound; no dropped geometry or relaxed memory/performance gate. |
+| 20 | LOD1 attribute key zero collides with the empty-face sentinel; all-prop super-cells still need occupancy | Store key + 1 separately from the solid bit | Tech lead | Resolved: zero paint/layer remains visible, tie-break compares original keys, and solid non-structural super-cells occlude without emitting. |
 
 ## 11. References
 
