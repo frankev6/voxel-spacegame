@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 88 | 1 | 0 | 0 | 11 | 0 | 100 | 15 |
+| M1 | 88 | 0 | 0 | 0 | 12 | 0 | 100 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -152,7 +152,7 @@
 | PHY-004 | Brick box merger | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | e1679aa | Exact greedy box covers, 2/4-cell coarsening, bounds fallback; 7 tests |
 | PHY-005 | Brick blob builder and grid compound assembler | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002, PHY-004 | yes | done | astra (gpt-6) | 2026-10-11 | a54c29f | Eight tests; all merge levels / copied ownership / nested coordinates |
 | PHY-006 | Mass maths | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | 1c4b85f | Six tests; tensor / canonical Jacobi / planar locks / point velocity preservation |
-| PHY-007 | Pipeline singletons and access discipline | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001, PHY-005 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PHY-007 | Pipeline singletons and access discipline | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001, PHY-005 | yes | done | astra (gpt-6) | 2026-10-11 | a936342 | Five tests; pools / ordered Burst finalize / ownership and counter audits; Q59–61 |
 | PHY-008 | GridBodyInitSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-003, PHY-006, PHY-007, SPEC-10 | no | todo |  |  |  |  |
 | PHY-009 | ColliderSnapshotSystem and install schedule | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-007, SPEC-10 | no | todo |  |  |  |  |
 | PHY-010 | BrickColliderBuildSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-005, PHY-009 | no | todo |  |  |  |  |
@@ -648,6 +648,13 @@ PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedu
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PHY-007 collider pipeline data and ownership (astra, gpt-6)
+
+- Added record/map swap-back repair, reusable mask/update pools, collecting lookup maintenance, sorted child handover, retirement and incremental byte/count statistics. Finalize runs as a Burst job over C/B only; Access and batch State stay on the main thread. All three singleton summaries document the required access pattern.
+- Debug invariant checks cover ordered update prefixes, live batch references, exactly one blob owner (borrowed assembly snapshots excluded), collecting maps, mask/free pools and counters. Five required tests pass: **10,000 record operations** in **0.480 s**, **1,000 randomized pipeline cycles** in **0.064 s**, ordered multi-update replacement/removal, partial/full discard, and leak-free teardown with a pending build plus blobs in every owner.
+- Q59 clarifies that partial discarded updates remain allocated until the batch finishes, even without an assembly. Q60 defines inner capacities and PendingBricks as unscheduled entries. Q61 adds the already-completed PHY-005 dependency for the shared coordinate comparer. No public contract/assembly change.
+- Compile zero C# warnings; full headless EditMode **456 passed + 1 explicit skipped**, PlayMode **31 passed**, perf **23/23**, all process exits 0; docs zero errors/warnings. Implementation `a936342`; handoff updated. Next: resolve ADR-0023 and implement VOX-003's measured sparse fallback.
 
 ### 2026-10-11 — PHY-006 deterministic mass maths (astra, gpt-6)
 
