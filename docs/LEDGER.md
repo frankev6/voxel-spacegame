@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 42 | 0 | 1 | 0 | 23 | 0 | 66 | 12 |
+| M0 | 41 | 0 | 1 | 0 | 24 | 0 | 66 | 12 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -50,8 +50,8 @@
 | CORE-005 | Services locator | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | d75b9ac |  |
 | CORE-006 | EventBus and EventHub | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-004 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 3f0a613 | Drain1000 median 0.025 ms (gate 0.3), 0 B GC |
 | CORE-007 | Binary save primitives | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-002 | yes | todo |  |  |  |  |
-| CORE-008 | System groups and pipeline order | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
-| CORE-009 | ECS→managed event bridge | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-006, CORE-008 | no | todo |  |  |  |  |
+| CORE-008 | System groups and pipeline order | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 8edb9ad | No changes to the groups were needed |
+| CORE-009 | ECS→managed event bridge | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-006, CORE-008 | yes | todo |  |  |  |  |
 | CORE-010 | Math helpers | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4998e40 |  |
 | CORE-011 | Settings model | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 8f2e125 |  |
 | CORE-012 | Simulation event channels | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001, CORE-004 | yes | todo |  |  |  |  |
@@ -566,6 +566,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — CORE-008 system groups and pipeline order (claude, claude-opus-5-5)
+- The group declarations from CORE-001 already match SPEC-02 §5.8. `SystemGroupOrderTests` (9) cover every criterion on the full default world (Unity Physics and Entities Graphics included), plus the `GameplayActive` requirement and same-tick ECB playback on a reduced world.
+- Note for test writers: the ECB singleton sits on the system's entity, so queries need `EntityQueryOptions.IncludeSystems`. A reduced world needs a `PhysicsSystemGroup` for the pre- and post-physics groups to sort correctly.
+- EditMode 127/127.
 
 ### 2026-10-11 — CORE-005 Services (claude, claude-opus-5-5)
 - `Services` per SPEC-02 §5.3. 7 tests pass, including a 0 B `TryGet` and a reset that clears types registered again after an earlier reset. EditMode 118/118.
