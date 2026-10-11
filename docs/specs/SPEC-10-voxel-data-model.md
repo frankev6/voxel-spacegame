@@ -444,7 +444,7 @@ public struct GridCellReader                                 // read-only job he
     public static GridCellReader Create(ref SystemState state);   // call in OnCreate
     public void Update(ref SystemState state);                    // call first thing in OnUpdate
     public Entity GetBrick(Entity grid, int3 brickCoord);         // Entity.Null if outside or absent
-    public bool TryGetCell(Entity grid, int3 cell, out Cell value);   // false and air if absent
+    public bool TryGetCell(Entity grid, int3 cell, out Cell value);   // false and air if absent or air
     public bool IsSolid(Entity grid, int3 cell);                  // mask bit test
 }
 ```
@@ -1049,6 +1049,8 @@ Measured station geometry and allocation totals:
 | 17 | Thin-shell retained-copy peak is 162,606,784 B; should it become a hard gate? | Keep it a stress report; sparse plus later LOD/copy-release options require measurement | Owner | Reported 2026-10-11. Existing default retained; no new owner decision assumed. |
 
 | 18 | VOX-003 requires storage, codec, spawn and write-back implementations that are still absent | Build and verify the dense foundations first, then apply the fallback across them | Tech lead | Resolved 2026-10-11: add VOX-014 as a dependency (transitively VOX-005/009/012/013); return VOX-003 to todo. ADR-0023 stays proposed until the complete representation change. No memory gate waived. |
+
+| 19 | Does GridCellReader.TryGetCell return true for air inside an existing brick? | False for air, missing brick or outside grid; true only for a solid cell | Tech lead | Resolved 2026-10-11: the return value denotes a present solid cell, consistent with IsSolid. The Burst reader test covers existing-brick air, empty slot and out-of-grid lookup. |
 
 ## 11. References
 
