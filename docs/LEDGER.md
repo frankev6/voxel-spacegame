@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 47 | 1 | 0 | 0 | 56 | 0 | 104 | 16 |
+| M1 | 47 | 0 | 0 | 0 | 57 | 0 | 104 | 17 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -173,10 +173,10 @@
 | FLT-001 | Public contract types | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0ddf5bf | Unmanaged flight/input contracts; exact SPEC-03 fields; Q112 comment corrections |
 | FLT-002 | Grid-space and flight maths | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | ec30fc9 | Grid geometry, gyro, caps and assist targets; eight required tests |
 | FLT-003 | Flight config definition and factory | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | f21a981 | Exact defaults, FLT-E001 diagnostics, catalog asset and boot singleton |
-| FLT-004 | Thrust allocator | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Deterministic bounded PGS allocator and six required tests |
+| FLT-004 | Thrust allocator | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001 | yes | done | astra (gpt-6) | 2026-10-11 | 3c34a39 | Fixed-order PGS, projected warm starts, bit-identical managed/Burst results; Q119 |
 | FLT-005 | PlayerCommandApplySystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001, DMG-001 | yes | todo |  |  |  |  |
 | FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 2388784 | Four flying profiles, player-only tag, change-filtered Burst nozzle init; three tests |
-| FLT-007 | PropulsionSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-002, FLT-004, FLT-006, DMG-001, SPEC-12 | no | todo |  |  |  |  |
+| FLT-007 | PropulsionSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-002, FLT-004, FLT-006, DMG-001, SPEC-12 | yes | todo |  |  |  |  |
 | FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | yes | todo |  |  |  |  |
 | FLT-009 | Flight behaviour scenarios | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-005, FLT-007, FLT-008, SPEC-10 | no | todo |  |  |  |  |
 | FLT-010 | Flight tuning against legacy blueprints | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-009, SPEC-72 | no | todo |  |  |  |  |
@@ -734,6 +734,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — FLT-004 deterministic thrust allocator (astra, gpt-6)
+
+- Implemented allocation-free fixed-order projected Gauss–Seidel, clamped warm starts, fixed sweeps and weighted residual return. Internal production steps allow the required per-coordinate debug checks. Implementation `3c34a39`.
+- Six required tests pass: **12,000** coordinate updates independently recomputed in double precision do not increase residual beyond the documented float tolerance; bounds include stale throttles/zero columns; symmetric analytic, off-centre/no-gyro and saturation cases pass. **100 seeded problems × 127 intermediate states** and two independently scheduled Burst solves match managed values bit for bit.
+- **Q119 / SPEC-20 Q10–12:** retain Decision 7 over the overly broad symmetry criterion (redundant gyro solutions need not use equal throttles); document/test the counterexample. Project stale warm starts before residual construction. Initial strict-Burst/managed float reductions differed by one ULP in the returned residual; double product/sum accumulation with one float cast fixes parity without changing fields, objective or ordering.
+- Final checks: compile **0 C# warnings**, EditMode **651 passed + 1 explicit skipped**, PlayMode **51 passed**, perf **38/38**, docs **505 tasks / 0 errors**. Existing physics spawn main median/p95 **0.02435 / 0.2214 ms** and idle **0.01381 / 0.01866 ms** remain green. Whole-flight allocation cost remains FLT-011, after PropulsionSystem exists.
+- Next: FLT-005 player command application, then FLT-007 propulsion and FLT-008 plane constraint; remaining M1 work follows.
 
 ### 2026-10-11 — FND-016 sandbox entry (astra, gpt-6)
 
