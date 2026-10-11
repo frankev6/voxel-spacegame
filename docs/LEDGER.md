@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 1 | 0 | 0 | 0 | 66 | 0 | 67 | 1 |
+| M0 | 0 | 0 | 0 | 0 | 67 | 0 | 67 | 0 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -92,7 +92,7 @@
 | DEV-020 | Release-strip guarantee | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | yes | done | astra (gpt-6) | 2026-10-11 | b4e7461 | Real release compilation; namespace/assembly and build-content checks |
 | TST-001 | Test kit core | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c082a4c | kit + perf hook; 8 gates on PerfRun; OQ 4–6 |
 | TST-008 | Iteration gates | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | standard | TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | c6057e6 | Live iteration gates pass; both reloads disabled; reliable CLI test results |
-| TST-009 | Serialize Unity tool operations and validate live-test identity | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | frontier | TST-008 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| TST-009 | Serialize Unity tool operations and validate live-test identity | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | frontier | TST-008 | yes | done | astra (gpt-6) | 2026-10-11 | 25598ab | Project lock, exact test inventory; overlap refusal verified |
 | MIG-001 | Public contract types | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c327a64 |  |
 | MIG-002 | Legacy JSON index and strict reading | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 6c78f67 |  |
 | MIG-003 | Legacy ID map | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4955b51 |  |
@@ -610,6 +610,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — TST-009 Unity tool ownership and test identity (astra, gpt-6)
+
+- Compile, test, iteration and playtest wrappers share an OS project lock, including nested commands. Process exit releases ownership. Live tests preflight external activity and verify the exact requested test inventory plus summary counts before writing XML; failed preflight preserves previous results.
+- Six Python unit tests pass. Real overlap checks rejected a competing compile without changing its log and rejected PlayMode while an external Pipeline request ran, preserving previous XML. That external request completed normally (4 passed). Evidence: Logs/tools/tst009-overlap.log and tst009-external-run.json.
+- Compile clean with zero C# warnings; full EditMode **395 passed**, PlayMode **31 passed**, perf **23/23**. The installed Pipeline still exposes no server run ID: direct GUI/CLI bypasses the lock, and identical-suite external replacement cannot be distinguished. Inventory validation detects wrong mode/filter, without claiming stronger server identity.
+- Implementation `25598ab`. M0 **67/67** including this review fix; broader system review continues.
 
 ### 2026-10-11 — M0 system review started (astra, gpt-6)
 
