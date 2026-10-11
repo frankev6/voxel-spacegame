@@ -930,7 +930,7 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 ### PERS-011 — Round-trip byte equality (framework level)
 - **Milestone:** M0
 - **Tier:** standard — test of decision 12 with fake deterministic participants
-- **Depends on:** `PERS-006`
+- **Depends on:** `PERS-006`, `PERS-008`
 - **Do:** Test: save with 3 fake participants (one using `WriteJson`, one binary, one with two deferred VOXS structures) → load → `Restore` → save to another slot → `SaveFileComparer.EqualIgnoringVolatile` is true. Repeat with a preserved unknown chunk present.
 - **Files:** `Assets/Game/Tests/EditMode/Persistence/RoundTripTests.cs`
 - **Acceptance criteria:**
@@ -1006,6 +1006,7 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 | 19 | A chunk newer than its participant is preserved (§5.6 step 2c), but the next save would write both the preserved chunk and the participant's own chunk under the same key, which the container refuses (found in PERS-006, 2026-10-11) | **Resolved in PERS-006:** while a preserved chunk exists for a participant's key, capture skips that participant and the preserved (newer) chunk is written back unchanged: a downgraded build never overwrites newer data. `ResetForNewGame` and the next load clear it. Also: a file that exists but can't be read counts as `NotAContainer` for the backup fallback, and `OperationCompleted.WarningCount` counts warnings plus errors | Tech lead | |
 | 20 | VOXS v1 omits `CellsAlive`, instance flags and `Reserved`, but acceptance asks for instance equality; a full palette may lack D3's fallback; malformed compact blobs can expand to gigabytes | Preserve v1 bytes; bounded, deterministic repair | Tech lead | **Resolved in PERS-007:** runtime-only `Functional` and `Reserved` reset; `CellsAlive` is rebuilt from references (saturated to ushort), `Destroyed` is inferred for Functional definitions with nonpositive FunctionHp. Equality covers serialized fields and reconstructed state. D3 uses an existing `(MissingBlock,0,0)` entry; if all 32768 slots are occupied without it, slot 32767 becomes that fallback with an additional drift warning (existing references also become Missing). Body inflation and decoded cell storage are each capped at 256 MiB before allocation. Empty bricks, solid HP zero, invalid cell size/anchor and duplicate removed coordinates reject. These are validation/resource limits, not a wire-format change |
 | 21 | The thread-agnostic encoder's run scratch used Temp, which Unity forbids on a managed save worker | Short-lived TempJob scratch | Tech lead | **Resolved in PERS-008:** use TempJob for the one reusable run buffer and dispose it in the encoder's finally; snapshot arrays remain Persistent. Verified through both Task.Run and SaveAsync's background-thread path |
+| 22 | PERS-011's deferred-VOXS round trip was marked ready before the snapshot implementation it exercises | Depend on PERS-008 as well as PERS-006 | Tech lead | **Resolved in PERS-011:** add the actual prerequisite; tests restore into fresh participants after the original native arrays have been disposed |
 
 ## 11. References
 
