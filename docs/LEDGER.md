@@ -13,8 +13,8 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 25 | 0 | 0 | 0 | 41 | 0 | 66 | 10 |
-| M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 12 |
+| M0 | 24 | 0 | 0 | 0 | 42 | 0 | 66 | 9 |
+| M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 0 |
@@ -41,7 +41,7 @@
 | FND-004 | SettingsService and SettingsApplier | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001, PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | a4c31aa | SettingsService + applier; 4 tests |
 | FND-005 | Composition root and BootSingletons | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-002, FND-003, FND-004, SPEC-02, SPEC-04 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 9caac2b | rows 1/2/3/5/6/14; OQ 8 |
 | FND-006 | SceneFlow transitions and teardown | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-005 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 1b67ff9 | teardown 200k: 3.5 ms; OQ 9; trap T2.12 |
-| FND-007 | SimClock lifecycle and SimClockAdvanceSystem | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-006 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| FND-007 | SimClock lifecycle and SimClockAdvanceSystem | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-006 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 7e06cca | exact 120-tick and 10-min checks |
 | FND-014 | Static state audit and Play Mode re-entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-006 | yes | todo |  |  |  |  |
 | CORE-001 | Public contract types | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 4c3a121 | Drain-system lifecycle stub: open question 5 |
 | CORE-002 | StableHash and content identity | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | b4a06ce | 0.046 µs per 16-char hash, 0 B GC; SPEC-02 vector labels corrected |
@@ -101,7 +101,7 @@
 | MIG-007 | Legacy Euler to orientation | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-001, SPEC-04 | yes | todo |  |  |  |  |
 | MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | no | todo |  |  |  |  |
 | MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | no | todo |  |  |  |  |
-| FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | no | todo |  |  |  |  |
+| FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | yes | todo |  |  |  |  |
 | FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | no | todo |  |  |  |  |
 | FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | no | todo |  |  |  |  |
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | no | todo |  |  |  |  |
@@ -575,6 +575,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — FND-007 SimClock lifecycle and SimClockAdvanceSystem (claude, claude-opus-5-5)
+- `SimClockAdvanceSystem`: a Burst `ISystem`, `OrderLast` in `GameplayPostPhysicsGroup` after the GameplayEnd ECB. It requires `GameplayActive` and `SimClock`, and recomputes `UniversalTime` from the tick.
+- `SimClockWriteback` (order 0) writes back only when the clock sits with `WorldSceneActive`, so the Lab never writes. It takes a setter, so FND-009 passes `t => session.UniversalTime = t`. SimClock creation at World and Lab entry came with FND-006.
+- Tests:
+  - EditMode `SimClockTests` (4): 120 ticks give exactly start + 2.0, and 10 minutes give no drift; pre- and post-physics systems read N during tick N; no advance on zero-delta frames or without `GameplayActive`; Lab vs World write-back.
+  - PlayMode: in the real Default World the clock runs in the World, stops under a pause token and resumes. The test waits on conditions, because headless frames can be about 1 ms.
+- EditMode 268/268 (+1 explicit), PlayMode 16/16.
 
 ### 2026-10-11 — FND-006 SceneFlow transitions and teardown (claude, claude-opus-5-5)
 - `SceneFlow` per SPEC-01 §5.4:
