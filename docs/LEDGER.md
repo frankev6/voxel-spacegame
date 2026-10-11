@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 68 | 0 | 0 | 0 | 34 | 0 | 102 | 14 |
+| M1 | 67 | 0 | 0 | 0 | 35 | 0 | 102 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 3 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -135,8 +135,8 @@
 | VOX-019 | Damage persistence scenario | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-014 | yes | done | astra (gpt-6) | 2026-10-11 | 30d39f7 | 04-B3 + explicit save boundary; 50 fixed-step changes, matching hashes, zero leaks |
 | VOX-021 | Mesh rebuild priority queue | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | REN-001 | yes | done | astra (gpt-6) | 2026-10-11 | bb07e09 | Guarded priority/FIFO mesh queue; stale promotion invalidation; 4 tests; Q75–76 |
 | REN-001 | Public contract types | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | VOX-001, DATA-001 | yes | done | astra (gpt-6) | 2026-10-11 | 42dfd86 | Rendering contracts; queue/batch ownership; ADR-0018 layout; Q51–53 |
-| REN-002 | SPIKE: Entities Graphics with thousands of runtime brick meshes | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-10 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002 | no | todo |  |  |  |  |
+| REN-002 | SPIKE: Entities Graphics with thousands of runtime brick meshes | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 66a5baf | No-go: movement delta 1.625 ms, GPU 6.435 ms; REN-003 activated, ADR-0032 proposed |
+| REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002 | yes | todo |  |  |  |  |
 | REN-004 | Normals, packing and shape tables | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6b076af | Five shapes × 24 rotations; exact half-cell packing; 42 normals; Q88–89 |
 | REN-005 | Snapshot gathering | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004, SPEC-10, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 93cd973 | 27-neighbour snapshots, per-cell slopes, bounded props and retained flags; ADR-0029/Q91 |
 | REN-006 | LOD0 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | done | astra (gpt-6) | 2026-10-11 | 1de74e0 | LOD0 culling/AO/welding; 36.3 µs median; large slope indices safe; ADR-0030/Q92 |
@@ -699,6 +699,16 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — REN-002 Metal renderer spike (astra, gpt-6)
+
+- **No-go for 2,500 mutable registered brick meshes.** With one shared material, one moving root, 512 welded quads / 578 eight-byte vertices per mesh, 1920×1080, URP four shadow cascades over 300 m and Burst safety off, movement adds **1.625292 ms** versus the 0.5 ms gate. Idle GPU median **6.434792 ms**, p95 **10.494958 ms**, from 300 unique positive samples, exceeds 6 ms. Idle presentation **0.313042 ms** passes its own 0.6 ms gate; draw calls **5,035**. Final runs explicitly used Metal MultiThreaded; preliminary single-threaded measurements are superseded.
+- All six explicit capability/measurement tests pass as probes; their numbers drive the no-go rather than an assertion hiding the remaining probes. Exact UNorm8 pixel decode covers all 64 layers and 256 palette indices. In-place apply, mesh bounds and ECS RenderBounds for 128 meshes take **0.101791 / 0.115875 ms median/p95**, with visible changed pixels and unchanged registration IDs. The final inclusive apply probe supersedes the narrower 0.112 ms marker. Churn: 10,000 rewrites, 2,000 three-frame retire cycles, retired IDs read back null and final native leak count **0** after warm-up reset.
+- `UploadMeshData(true)` changes isReadable to false and prevents later writable-mesh apply. Runtime mesh memory stays **23,128 B** before/after and after five frames. Set ReleaseCpuMeshCopies default false (Q95 / SPEC-11 Q22). Existing retained-copy memory gate remains valid. Imported single-cell hull is centred at zero and exactly 1×1×1 units; SPEC-10 Q10 is resolved.
+- ADR-0031 / Q94 permits the existing Entities AABB assembly in PlayMode tests. Proposed ADR-0032 activates the preselected pooled-renderer fallback; REN-003 must finalize contracts, bound allocator slack and prove gates. A full page per small brick would violate memory headroom, so its proposal explicitly flags that requirement. No runtime renderer architecture changes are silently made by the spike.
+- Measurement limit: this Editor does not expose a usable full Render Thread frame counter; active RenderLoop is **0.746250 / 0.877166 ms**, and the zero full-thread counters are not a pass. GPU sampling is sparse, so the capture continues to 300 distinct timestamps. The movement failure independently decides no-go. Tools guidance records -force-gfx-mt and safe settings restoration.
+- Validation after removing temporary code/shader and restoring settings: compile zero C# warnings; EditMode **560 passed + 1 explicit skipped**, PlayMode **37 passed**, perf **31/31**, docs **503 tasks / zero errors**. Evidence/source remains locally in `Logs/tools/ren002-*` and `Logs/test-results/ren002-*`; no visual assets were retained.
+- Next: continue M1 physics snapshot collection (PHY-009); REN-003 remains ready for its concrete fallback implementation. Shader/config work and PHY-008 are also ready; no owner review is being awaited.
 
 ### 2026-10-11 — REN-007 LOD1 meshing (astra, gpt-6)
 
