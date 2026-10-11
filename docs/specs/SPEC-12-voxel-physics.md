@@ -520,7 +520,7 @@ VOX-002 measured the reference station's actual 1,024-box geometry: cached brick
 | `SplitGraceContactSystem` (M2) | `PhysicsSimulationGroup` (Unity Physics, inside `PhysicsSystemGroup`), `[UpdateAfter(typeof(PhysicsCreateBodyPairsGroup))]`, `[UpdateBefore(typeof(PhysicsCreateContactsGroup))]` | yes | `GameplayActive`, `SimClock`, `SimulationSingleton`, `PhysicsWorldSingleton` | disable contacts of split pieces with their parent |
 | `GridMassUpdateSystem` | `GameplayPostPhysicsGroup`; SPEC-13's `ShipDeathSystem` declares `[UpdateBefore]` it; declares `[UpdateBefore(typeof(BrickDirtyScheduleSystem))]` (SPEC-10 Q38) | yes | `GameplayActive`, `BlockDefsRef` | mass removal, recompute, `PhysicsMass` + velocity re-expression |
 | `ColliderSnapshotSystem` | `GameplayPostPhysicsGroup`, `[UpdateAfter(typeof(BrickDirtyScheduleSystem))]` (last before `GameplayEndCommandBufferSystem`, which is `OrderLast`) | yes | `GameplayActive`, `SimClock`, `PhysicsVoxelConfig`, pipeline singletons | drain requests, copy masks, collect updates |
-| `BrickColliderBuildSystem` | `VoxelRebuildGroup`, `[UpdateAfter(typeof(BrickMeshBuildSystem))]` | yes (main-thread code is Burst-compatible) | `GameplayActive`, `SimClock`, `PhysicsVoxelConfig`, `DeferredDisposalQueue`, pipeline singletons | seal, plan and schedule batches |
+| `BrickColliderBuildSystem` | `VoxelRebuildGroup`; REN-010 declares `[UpdateBefore(typeof(BrickColliderBuildSystem))]` on its mesh system (Q17) | yes (main-thread code is Burst-compatible) | `GameplayActive`, `SimClock`, `PhysicsVoxelConfig`, `DeferredDisposalQueue`, pipeline singletons | seal, plan and schedule batches |
 | `GridColliderCleanupSystem` | `PresentationSystemGroup`, `[UpdateBefore(typeof(DeferredDisposalSystem))]` | yes | pipeline singletons, `DeferredDisposalQueue` — **not** `GameplayActive` (SPEC-01 decision 5) | retire blobs of destroyed grids, hand `Retired` to deferred disposal, teardown |
 
 Unity Physics placement: `PhysicsSystemGroup` is inside `FixedStepSimulationSystemGroup` between `GameplayPrePhysicsGroup` and `GameplayPostPhysicsGroup` (SPEC-02). Placing `SplitGraceContactSystem` in Unity's `PhysicsSimulationGroup` uses an existing group; it does not create one.
@@ -649,10 +649,10 @@ Per frame (markers `BrickColliderBuildSystem.<Step>`), main thread:
 1. **Access**: `cache.CompleteAccess()`; `frame = DeferredDisposalQueue.Frame`; `st = batch.State.Value`.
 2. **Finalize**: if `st.InFlight == 1`: if `!st.Handle.IsCompleted` and `frame − st.ScheduledFrame < MaxBatchAgeFrames` → return. Else `st.Handle.Complete()` (count `ForcedBatchCompletes` if it was not completed), run `ColliderPipeline.Finalize(ref cache, ref batch)` (below).
 3. **Seal**: every Collecting update whose window is closed → Pending.
-4. **Plan**: candidates = updates in state Pending or Building, ordered by `(IsUrgent(Priority) ? 0 : 1, CreateOrder)`. Walk them; skip an update if an older update of the same grid (earlier in `record.Updates`) is neither Built nor selected in this batch. Counters `bricks = 0`, `assemblies = 0` for non-urgent work. For a selected update `u`:
+4. **Plan**: candidates = updates in state Pending or Building, ordered by `(IsUrgent(Priority) ? 0 : 1, CreateOrder)`. Walk them; skip an update if an older update of the same grid (earlier in `record.Updates`) is neither Built nor selected with its complete assembly in this batch (partial selection does not satisfy the prerequisite, Q18). Counters `bricks = 0`, `assemblies = 0` for non-urgent work. For a selected update `u`:
    - remaining bricks `k = u.Bricks.Length − u.BricksScheduled`; urgent → take all `k`; non-urgent → take `min(k, MaxBricksPerBatch − bricks)` and stop the walk when it reaches 0.
    - if after this batch all bricks of `u` are scheduled → `u` gets an assembly item (non-urgent assemblies count against `MaxAssembliesPerBatch`; at the limit, take no more bricks of non-urgent updates that would need an assembly).
-   - `u.State = Building`.
+   - `u.State = Building`. Revisit skipped candidates after older updates become fully selected; priority never allows a partial predecessor to be overtaken (Q18).
 5. **Copy**: for each taken brick: append `BrickBuildItem` (with `Removed = MaskSlot < 0`) and its mask to `B.Masks` (free the cache slot); `u.BricksScheduled += taken`. For each assembly of update `u` of record `R`: copy `R.Children` into `B.AssemblyChildren`; `AssemblyApply` = indices of this batch's brick items of every update of `R` selected in this batch up to and including `u`, in item order.
 6. **Schedule** (only if any item): `BrickColliderJob : IJobParallelFor` over `B.Bricks` (inner batch 1) → `B.Results[i] = Build(...)` (`Removed` items produce Null); then `GridAssembleJob : IJobParallelFor` over `B.Assemblies` (inner batch 1), depending on the brick job: start from the copied children, apply each `AssemblyApply` item in order (replace by coord, insert in sorted position, or remove when the result is removed), then `Assemble` unless empty (empty → Null result, `ChildCount = 0`). **Not** chained to `state.Dependency`. `st.Handle = handle; st.InFlight = 1; st.ScheduledFrame = frame`; `Batches++`; stats `LastBatch*`.
 
@@ -972,11 +972,11 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Do:** Implement §5.8 (seal, plan, copy, schedule, finalize on completion or age) with `BrickColliderJob` and `GridAssembleJob`.
 - **Files:** `Assets/Game/Voxel/PhysicsBody/BrickColliderBuildSystem.cs`, `Assets/Game/Voxel/PhysicsBody/Jobs/{BrickColliderJob,GridAssembleJob,ColliderFinalizeJob}.cs`, `Assets/Game/Tests/EditMode/Voxel/Physics/BrickColliderBuildTests.cs`
 - **Acceptance criteria:**
-  - [ ] Collecting updates are sealed only when their window is closed; ASAP updates the first frame.
-  - [ ] Non-urgent work never exceeds `MaxBricksPerBatch` bricks or `MaxAssembliesPerBatch` assemblies per batch; urgent updates are always fully taken.
-  - [ ] A newer update of a grid is never scheduled before older ones are built or in the same batch; same-batch assembly applies older updates' results first.
-  - [ ] A 1,000-brick initial build completes over ≥ 4 batches and produces one assembly; the result equals a single-shot `Assemble` of all bricks (byte-equal blobs).
-  - [ ] No job of a batch reads ECS memory (static check: job structs contain no lookups or type handles).
+  - [x] Collecting updates are sealed only when their window is closed; ASAP updates the first frame.
+  - [x] Non-urgent work never exceeds `MaxBricksPerBatch` bricks or `MaxAssembliesPerBatch` assemblies per batch; urgent updates are always fully taken.
+  - [x] A newer update of a grid is never scheduled before older ones are built or in the same batch; same-batch assembly applies older updates' results first.
+  - [x] A 1,000-brick initial build completes over ≥ 4 batches and produces one assembly; the result equals a single-shot `Assemble` of all bricks (byte-equal blobs).
+  - [x] No job of a batch reads ECS memory (static check: job structs contain no lookups or type handles).
 - **Tests:** `BrickColliderBuildTests.Seal_OnlyClosedWindows`, `.Budget_NonUrgentCapped`, `.Urgent_NeverDeferred`, `.PerGridOrder_Respected`, `.PartialBuild_EqualsSingleShot`, `.Jobs_HaveNoEcsAccess`.
 
 ### PHY-011 — ColliderSwapSystem
@@ -1133,6 +1133,9 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 | 15 | Pipeline sorted insertion/audits reuse CompareCoords implemented by PHY-005, but the task lacked that dependency | Add PHY-005 to PHY-007 dependencies | Tech lead | Resolved 2026-10-11; dependency was already done before the claim, so no in-progress prerequisite was bypassed. |
 
 | 16 | VOX-015 is ready before GridMassUpdateSystem exists | Declare mass-before-dirty ordering on the later mass system | Tech lead | Resolved 2026-10-11: PHY-013 supplies UpdateBefore(BrickDirtyScheduleSystem), equivalent to the previous forward UpdateAfter dependency. |
+
+| 17 | PHY-010 is ready before BrickMeshBuildSystem exists | Declare ordering on the later mesh system | Tech lead | Resolved: REN-010 already specifies UpdateBefore(BrickColliderBuildSystem); this is the same ordering edge, without a nonexistent forward type reference. |
+| 18 | The phrase selected in this batch can include a partial older update, contradicting the Built-prefix invariant | Require the older assembly in the batch; revisit candidates after prerequisites become fully selected | Tech lead | Resolved: partial predecessors block later updates; completed selections permit ordered same-batch overlays. Urgent work is uncapped once its per-grid prerequisites are satisfied. |
 
 ## 11. References
 
