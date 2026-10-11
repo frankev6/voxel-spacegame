@@ -645,6 +645,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 82 | 2026-10-11 | SPEC-10 VOX-014 | CaptureChanges cannot distinguish empty from destroyed slots | Internal original-coordinate baseline, retained across saves | Tech lead | Accepted ADR-0026; SPEC-10 Q34; account for memory in VOX-003 |
 | 83 | 2026-10-11 | SPEC-10 VOX-014 | Partial write-back risks deleting uncreated cells; rebuild overlaps an old spawn read | Terminal partial write-back and independent pending rebuild token | Tech lead | Accepted ADR-0026; SPEC-10 Q35 |
 | 84 | 2026-10-11 | SPEC-10 VOX-014 | Global optimization and stale metadata mass cache violate incremental write-back | Optimize copied bricks only; invalidate metadata revisions | Tech lead | Resolved SPEC-10 Q36 |
+| 85 | 2026-10-11 | SPEC-10 VOX-003 | Sparse fallback proposal lacks exact representation and source-page ownership | Accept ADR-0023 with six-byte sorted entries, flat fixed-capacity source pages and shared readers | Tech lead | Accepted after VOX-014; capacity slack and ADR-0026 baseline included in measurement |
+
 
 
 

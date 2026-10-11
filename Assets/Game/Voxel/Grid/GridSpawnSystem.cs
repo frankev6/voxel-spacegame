@@ -45,7 +45,7 @@ namespace Game.Voxel.Grid
             singletons = VoxelSingletons.CreateAll(em);
             rootRegistrations = new NativeList<RootComponentRegistration>(Allocator.Persistent);
             profileSets = new NativeList<ProfileSet>(Allocator.Persistent);
-            var types = new List<ComponentType> { typeof(Brick), typeof(BrickCells), typeof(BrickSolidMask), typeof(BrickDirty),
+            var types = new List<ComponentType> { typeof(Brick), typeof(BrickCells), typeof(BrickSparseCells), typeof(BrickSolidMask), typeof(BrickDirty),
                 typeof(LocalTransform), typeof(LocalToWorld), typeof(Parent), typeof(BrickLodDesired), typeof(BrickPropInstance), typeof(Prefab) };
             types.AddRange(DamageSetup.BrickComponents()); brickBase = em.CreateArchetype(types.ToArray());
             requests = state.GetEntityQuery(ComponentType.ReadOnly<GridSpawnRequest>());
@@ -363,8 +363,8 @@ namespace Game.Voxel.Grid
             }
             new BrickFillJob
             {
-                Entities = entities, Records = source.Data.Bricks.AsArray(), Pages = source.Data.CellPages.AsArray(), Masks = source.Data.Masks.AsArray(),
-                Root = root, Start = start, CellSize = grid.CellSize, Bricks = state.GetComponentLookup<Brick>(), Cells = state.GetBufferLookup<BrickCells>(),
+                Entities = entities, Records = source.Data.Bricks.AsArray(), Pages = source.Data.CellPages.AsArray(), SparsePages = source.Data.SparsePages.AsArray(), Masks = source.Data.Masks.AsArray(),
+                Root = root, Start = start, CellSize = grid.CellSize, Bricks = state.GetComponentLookup<Brick>(), Cells = state.GetBufferLookup<BrickCells>(), Sparse = state.GetBufferLookup<BrickSparseCells>(),
                 SolidMasks = state.GetBufferLookup<BrickSolidMask>(), Transforms = state.GetComponentLookup<LocalTransform>(), Parents = state.GetComponentLookup<Parent>(),
                 Dirty = state.GetComponentLookup<BrickDirty>()
             }.Schedule(count, 8).Complete();

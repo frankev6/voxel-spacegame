@@ -42,6 +42,7 @@ namespace Game.Tests.EditMode.Voxel
                 using var diff = VoxelStructure.Diff(source, clone, Allocator.TempJob);
                 Assert.AreEqual(0, diff.Added.Length); Assert.AreEqual(0, diff.Removed.Length);
                 Assert.AreEqual(clone.Data.CellPages.Length, clone.Data.CellPages.Capacity);
+                Assert.AreEqual(clone.Data.SparsePages.Length, clone.Data.SparsePages.Capacity);
                 Assert.IsTrue(Placements(source).SetEquals(Placements(clone)));
                 int count = source.SolidCellCount; clone.Clear();
                 Assert.AreEqual(count, source.SolidCellCount); Assert.Greater(count, 0);

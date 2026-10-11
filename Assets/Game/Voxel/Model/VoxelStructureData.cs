@@ -16,6 +16,8 @@ namespace Game.Voxel.Model
         public NativeHashMap<int3, int> BrickIndex;              // coord → index into Bricks (lookup only, never iterated)
         public NativeList<Cell> CellPages;                       // dense pages of 4096 cells, local linear order
         public NativeList<int> FreePages;                        // free page numbers, LIFO reuse
+        public NativeList<BrickSparseCells> SparsePages;        // flat pages of 1024 sorted entries; count is BrickRecord.SolidCount
+        public NativeList<int> FreeSparsePages;                 // free sparse page indices, LIFO reuse
         public bool IsCreated => Header.IsCreated;
     }
 }

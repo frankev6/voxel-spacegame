@@ -21,17 +21,11 @@ namespace Game.Voxel.Model
                 buffers.Source.BrickCoords = new NativeArray<int3>(data.Bricks.Length, allocator, NativeArrayOptions.UninitializedMemory);
                 buffers.Source.Cells = new NativeArray<Cell>(checked(data.Bricks.Length * BrickMath.CellsPerBrick), allocator, NativeArrayOptions.UninitializedMemory);
                 using var order = structure.SortedBrickOrder(Allocator.TempJob);
-                Cell* target = (Cell*)buffers.Source.Cells.GetUnsafePtr();
-                Cell* pages = (Cell*)data.CellPages.GetUnsafeReadOnlyPtr();
                 for (int k = 0; k < order.Length; k++)
                 {
                     var record = data.Bricks[order[k]]; buffers.Source.BrickCoords[k] = record.Coord;
-                    if (record.Page < 0)
-                    {
-                        Cell value = record.Uniform;
-                        UnsafeUtility.MemCpyReplicate(target + k * BrickMath.CellsPerBrick, &value, UnsafeUtility.SizeOf<Cell>(), BrickMath.CellsPerBrick);
-                    }
-                    else UnsafeUtility.MemCpy(target + k * BrickMath.CellsPerBrick, pages + record.Page * BrickMath.CellsPerBrick, BrickMath.CellsPerBrick * UnsafeUtility.SizeOf<Cell>());
+                    SparseCellStorage.Expand(record, data.CellPages.AsArray(), data.SparsePages.AsArray(),
+                        buffers.Source.Cells.GetSubArray(k * BrickMath.CellsPerBrick, BrickMath.CellsPerBrick));
                 }
                 return buffers;
             }

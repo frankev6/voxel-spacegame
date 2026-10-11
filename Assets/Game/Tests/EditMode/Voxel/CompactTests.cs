@@ -71,8 +71,8 @@ namespace Game.Tests.EditMode.Voxel
             }
             Assert.AreEqual(data.Palette.Length - 1, used.Count);
             foreach (var instance in data.Instances) Assert.AreNotEqual(0, instance.Block);
-            Assert.AreEqual(0, data.FreeInstances.Length); Assert.AreEqual(0, data.FreePages.Length);
-            Assert.AreEqual(data.CellPages.Length, data.CellPages.Capacity);
+            Assert.AreEqual(0, data.FreeInstances.Length); Assert.AreEqual(0, data.FreePages.Length); Assert.AreEqual(0, data.FreeSparsePages.Length);
+            Assert.AreEqual(data.CellPages.Length, data.CellPages.Capacity); Assert.AreEqual(data.SparsePages.Length, data.SparsePages.Capacity);
             Assert.AreEqual(data.Bricks.Length, data.Bricks.Capacity); Assert.AreEqual(data.Masks.Length, data.Masks.Capacity);
             Assert.AreEqual(data.Palette.Length, data.Palette.Capacity); Assert.AreEqual(data.Instances.Length, data.Instances.Capacity);
             Assert.AreEqual(91, structure.GetCell(new int3(48)).Hp); Assert.AreEqual((byte)CellFlags.Scorched, structure.GetCell(new int3(48)).Flags);
@@ -88,12 +88,14 @@ namespace Game.Tests.EditMode.Voxel
             CollectionAssert.AreEqual(first.Data.Instances.AsArray().ToArray(), second.Data.Instances.AsArray().ToArray());
             CollectionAssert.AreEqual(first.Data.Bricks.AsArray().ToArray(), second.Data.Bricks.AsArray().ToArray());
             CollectionAssert.AreEqual(first.Data.CellPages.AsArray().ToArray(), second.Data.CellPages.AsArray().ToArray());
+            CollectionAssert.AreEqual(first.Data.SparsePages.AsArray().ToArray(), second.Data.SparsePages.AsArray().ToArray());
             using var order = first.SortedBrickOrder(Allocator.Temp);
             for (int i = 0; i < order.Length; i++) Assert.AreEqual(i, order[i]);
-            var palette = first.Data.Palette.AsArray().ToArray(); var cells = first.Data.CellPages.AsArray().ToArray();
+            var palette = first.Data.Palette.AsArray().ToArray(); var cells = first.Data.CellPages.AsArray().ToArray(); var sparse = first.Data.SparsePages.AsArray().ToArray();
             first.Compact();
             CollectionAssert.AreEqual(palette, first.Data.Palette.AsArray().ToArray());
             CollectionAssert.AreEqual(cells, first.Data.CellPages.AsArray().ToArray());
+            CollectionAssert.AreEqual(sparse, first.Data.SparsePages.AsArray().ToArray());
         }
     }
 }

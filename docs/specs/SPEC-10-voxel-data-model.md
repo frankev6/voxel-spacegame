@@ -23,7 +23,7 @@ This spec defines how voxel data is stored and how a stored structure becomes li
 - `VoxelStructure` (managed owner) and `VoxelStructureData` (native storage): sparse paged bricks, uniform-brick compression, cell get/set, block place/remove with footprint and orientation, compaction, clone, diff, revision, mass accumulation, content hash.
 - `VoxelStructureRegistry` (handles used by `GridSpawnRequest`), `BlueprintLibrary`, `ShipBlueprintDefinition`, VOXS codec (conversion between `VoxelStructure` and the SPEC-05 VOXS payload).
 - Grid-space DDA raycast over a structure and over a live grid.
-- ECS layout: `VoxelGrid`, `BrickSlot`, `Brick`, `BrickCells`, `BrickSolidMask`, `BrickDirty`, `FunctionalBlock`, spawn/rebuild/despawn/edit requests.
+- ECS layout: `VoxelGrid`, `BrickSlot`, `Brick`, `BrickCells`, `BrickSparseCells`, `BrickSolidMask`, `BrickDirty`, `FunctionalBlock`, spawn/rebuild/despawn/edit requests.
 - `GridSpawnSystem` (incl. the `StarSystemMember` tagging hook and `PersistentId` copy), `BrickDirtyScheduleSystem`, `DeferredDisposalSystem`; write-back API; cell write helpers.
 - Memory model, benchmark structures and the integrated voxel perf-gate suite.
 
@@ -42,8 +42,8 @@ This spec defines how voxel data is stored and how a stored structure becomes li
 4. **Palette ⇔ `!BlockDef.RequiresInstance`; instance ⇔ `RequiresInstance`** (SPEC-04 decision 13). Single-cell Structural and single-cell Prop blocks use the palette; Functional and multi-cell blocks use a `BlockInstance`, and every footprint cell points at it. Reason: 01-B1 by construction.
 5. **Bricks are 16³ and stored in linear order `index = x | y << 4 | z << 8` (x fastest).** Morton order is not used. Reason: a mask row (16 x-cells) is one `ushort`; meshing, greedy boxes and downsampling work on rows with shifts; structure ↔ ECS copies are one `memcpy`.
 6. **Brick coordinate = `cell >> 4`, local = `cell & 15`** (arithmetic shift, correct for negative cells). Grid space: cell `c` occupies `[c, c+1) × CellSize` metres from the grid origin; the grid origin is the root entity's `LocalTransform`.
-7. **ECS bricks are always dense: `BrickCells` has exactly 4,096 entries** (architecture §6.3). `VoxelStructure` additionally compresses full bricks whose 4,096 cells are identical into one `Cell` ("uniform brick", `Page == -1`); spawn expands them with a replicate copy. Air bricks never exist in either form. Reason: binding ECS contract stays simple for SPEC-13; cached blueprints and saves of solid asteroids/armour shrink 30×.
-8. **`BrickCells` and `BrickSolidMask` are `[InternalBufferCapacity(0)]` buffers** (4,096 `Cell`s and 64 `ulong` words), so their 16 KB + 512 B live outside the chunk (architecture §6.3, §11.5).
+7. **Sparse fallback is active (accepted ADR-0023).** Both ECS cell buffers exist: dense means BrickCells has 4,096 entries and BrickSparseCells is empty; sparse means BrickCells is empty and BrickSparseCells has at most 1,024 sorted solid entries. Inserting solid cell 1,025 densifies and releases sparse heap storage; dense damage writes do not automatically repack. VoxelStructure also supports uniform full bricks (Page == -1). Empty bricks are destroyed by their owner. Cell values, masks and persisted VOXS bytes are unchanged.
+8. **`BrickCells`, `BrickSparseCells` and `BrickSolidMask` have `[InternalBufferCapacity(0)]`**. Dense cells use 16,384 bytes; sparse entries use six bytes each plus actual allocation slack; the mask always uses 512 bytes (architecture §6.3, §11.5).
 9. **ECS refers to structures only by `int StructureHandle`** into the managed `VoxelStructureRegistry`, and to blueprints by `ContentHash`. The registry is a runtime `ScriptableObject` reached from ECS through the singleton `VoxelStructureRegistryRef { UnityObjectRef<VoxelStructureRegistry> }`; only `GridSpawnSystem` (main thread) dereferences it inside ECS. No managed type appears in any component; per-entity components never hold native containers (only module singletons such as `DeferredDisposalQueue` do, and jobs receive those containers as job fields). Reason: architecture §6.3, conventions §2.14, §3.3 "ECS never reads managed statics".
 10. **A spawn request entity becomes the grid root.** Components the requester puts on it (`Allegiance`, `StarSystemMember`, `PlayerShip`, AI state) stay on the root. `GridSpawnSystem` adds `PersistentId` from `GridSpawnRequest.PersistentId`. Reason: Voxel cannot reference Simulation/Galaxy types.
 11. **`StarSystemMember` tagging hook:** after creating brick or functional entities for a root, `GridSpawnSystem` calls every registered `IGridSpawnHook.OnEntitiesCreated(em, root, created)`. SPEC-31 registers the hook that batch-adds the root's `StarSystemMember` (if any) to `created`. Reason: architecture §6.5 puts `StarSystemMember` on roots, bricks and functional entities; `Game.Voxel` cannot name the type.
@@ -210,7 +210,7 @@ public struct StructureHeader
 public struct BrickRecord                                    // 28 bytes (Q13)
 {
     public int3 Coord;             // brick coordinate
-    public int Page;               // page number in CellPages (page p = cells [p*4096, p*4096+4096)); -1 = uniform
+    public int Page;               // >=0 dense page; -1 uniform; <=-2 sparse page index = -2-Page (ADR-0023)
     public Cell Uniform;           // valid when Page == -1
     public ushort SolidCount;      // 1..4096
     public ushort Reserved;
@@ -227,7 +227,9 @@ public struct VoxelStructureData                             // copy = same stor
     public NativeList<BrickMaskBits> Masks;                  // parallel to Bricks
     public NativeHashMap<int3, int> BrickIndex;              // coord → index into Bricks (lookup only, never iterated)
     public NativeList<Cell> CellPages;                       // dense pages of 4096 cells, local linear order
-    public NativeList<int> FreePages;                        // free page numbers, LIFO reuse
+    public NativeList<int> FreePages;                        // free dense page numbers, LIFO reuse
+    public NativeList<BrickSparseCells> SparsePages;          // flat 1024-entry pages; live length is record.SolidCount
+    public NativeList<int> FreeSparsePages;                  // sparse page indices, LIFO reuse
     public bool IsCreated => Header.IsCreated;
 }
 
@@ -361,7 +363,9 @@ public struct Brick : IComponentData                         // 28 bytes
     public uint ChangedRevision;
 }
 
-[InternalBufferCapacity(0)] public struct BrickCells : IBufferElementData { public Cell Value; }   // exactly 4096 entries
+[InternalBufferCapacity(0)] public struct BrickCells : IBufferElementData { public Cell Value; }   // 4096 when dense, zero when sparse
+[StructLayout(LayoutKind.Sequential, Pack = 2)]
+[InternalBufferCapacity(0)] public struct BrickSparseCells : IBufferElementData { public ushort Local; public Cell Value; } // 6 bytes, sorted and solid
 
 [Flags] public enum BrickDirtyFlags : byte { None = 0, Mesh = 1, Collider = 2 }
 
@@ -393,7 +397,7 @@ public struct VoxelConfig : IComponentData                   // singleton, creat
 ```
 
 **Root archetype after conversion:** `VoxelGrid, BrickSlot[], PaletteEntry[], BlockInstance[], LocalTransform, LocalToWorld, LinkedEntityGroup[], PersistentId, GridSource, GridSpawning, GridDespawnRequest(off), GridRebuilt(off), GridBodyInit, GridEditRequest(off), GridEditedBrick[]` + SPEC-12 `GridMass, GridMassRecompute, GridColliderState` + SPEC-11 `Dormant(off)` + every requester component. SPEC-12 adds the Unity Physics components later (through the GameplayEnd ECB).
-**Brick archetype:** `Brick, BrickCells[4096], BrickSolidMask[64], BrickDirty(off), LocalTransform, LocalToWorld, Parent` + SPEC-11 `BrickLodDesired, BrickPropInstance[]` + `BrickRenderState` and Entities Graphics components only when rendering (Q33) + `StarSystemMember` via the hook. `LocalTransform = { Position = Coord·16·CellSize, Rotation = identity, Scale = CellSize }`: brick meshes are in cell units.
+**Brick archetype:** `Brick, BrickCells[], BrickSparseCells[], BrickSolidMask[64], BrickDirty(off), LocalTransform, LocalToWorld, Parent` + SPEC-11 `BrickLodDesired, BrickPropInstance[]` + `BrickRenderState` and Entities Graphics components only when rendering (Q33) + `StarSystemMember` via the hook. `LocalTransform = { Position = Coord·16·CellSize, Rotation = identity, Scale = CellSize }`: brick meshes are in cell units.
 **Functional archetype:** `FunctionalBlock, LocalTransform, LocalToWorld, Parent` + registered types + Entities Graphics components + `StarSystemMember` via the hook. `LocalTransform = { Position = (Origin + 0.5)·CellSize, Rotation = OrientationTablesBlob.Rotations[Orient], Scale = CellSize }` (prop meshes are pivoted at the root cell centre, 1 unit = 1 cell).
 
 ### 4.6 Helpers (`Grid/`)
@@ -435,16 +439,16 @@ public static class GridStructureSync                        // main thread, out
 
 public static class BrickWrite                               // Burst; the cell write path for SPEC-13 and GridEditRequest
 {
-    public static Cell Get(DynamicBuffer<BrickCells> cells, int localIndex);
+    public static Cell Get(DynamicBuffer<BrickCells> cells, DynamicBuffer<BrickSparseCells> sparse, int localIndex);
     /// Writes one cell; maintains mask, SolidCount, ChangedRevision and dirty flags. Returns true if anything changed.
-    public static bool Set(ref Brick brick, DynamicBuffer<BrickCells> cells, DynamicBuffer<BrickSolidMask> mask, ref BrickDirty dirty,
+    public static bool Set(ref Brick brick, DynamicBuffer<BrickCells> cells, DynamicBuffer<BrickSparseCells> sparse, DynamicBuffer<BrickSolidMask> mask, ref BrickDirty dirty,
                            int localIndex, Cell value, uint revision);
 }
 
 public struct GridCellReader                                 // read-only job helper; every lookup is [ReadOnly]
 {
     [ReadOnly] public ComponentLookup<VoxelGrid> Grids; [ReadOnly] public BufferLookup<BrickSlot> Slots;
-    [ReadOnly] public BufferLookup<BrickCells> Cells; [ReadOnly] public BufferLookup<BrickSolidMask> Masks;
+    [ReadOnly] public BufferLookup<BrickCells> Cells; [ReadOnly] public BufferLookup<BrickSparseCells> Sparse; [ReadOnly] public BufferLookup<BrickSolidMask> Masks;
     public static GridCellReader Create(ref SystemState state);   // call in OnCreate
     public void Update(ref SystemState state);                    // call first thing in OnUpdate
     public Entity GetBrick(Entity grid, int3 brickCoord);         // Entity.Null if outside or absent
@@ -492,16 +496,13 @@ public sealed class VoxelConfigDefinition : ContentDefinition      // single ins
 
 ### 5.1 Structure storage algorithms (`VoxelStructure`)
 
-`GetCell(c)`: `b = BrickOf(c)`; `BrickIndex.TryGetValue(b)` → none: air. Record `r`: `r.Page < 0` → `r.Uniform`, else `CellPages[r.Page*4096 + LocalIndex(LocalOf(c))]`. O(1), 0 allocations.
+`GetCell(c)`: `b = BrickOf(c)`; `BrickIndex.TryGetValue(b)` → none: air. Record `r`: Page == -1 returns Uniform; Page >= 0 indexes CellPages; Page <= -2 binary-searches the first SolidCount entries of sparse page (-2-Page). Dense/uniform O(1), sparse O(log 1024), zero allocations.
 
-`SetCell(c, v)` (throws `InvalidOperationException` if pinned or read-only):
-1. Look up the record. If none and `v` is air → return (no revision bump). If none → take a page (pop `FreePages`, else grow `CellPages` by 4,096 default cells), add `BrickRecord{Coord, Page, SolidCount 0}`, a zeroed mask, a map entry.
-2. If the record is uniform and `v != Uniform` → densify: take a page, fill it with 4,096 copies of `Uniform`, `Page = page`.
-3. `old = cell`; equal → return. Write. Update the mask bit and `SolidCount` (±1 when solidity changes).
-4. If `SolidCount == 0` → delete the brick: push its page to `FreePages`, swap-remove the record and mask, fix the moved record's `BrickIndex` entry, remove the map entry.
-5. `Header.Revision++`, `record.ChangedRevision = Revision`, `BoundsValid = 0`.
+`SetCell(c, v)` (throws if pinned or read-only): absent air and identical writes are no-ops. A new brick takes a sparse page and starts empty. Sorted sparse entries are inserted/removed/updated; inserting solid cell 1,025 takes a dense page and copies entries, returning the sparse page to its free pool. Editing a uniform brick expands it to dense first. Dense writes retain dense storage. Every actual write maintains mask/count/revision/bounds; reaching zero returns the owning page to the appropriate free pool and swap-removes the brick and map entry.
 
-`OptimizeStorage()`: for each dense record with `SolidCount == 4096`: compare its 4,096 cells with cell 0; all equal → `Page = -1`, `Uniform = cell 0`, push the page to `FreePages`. O(full bricks × 4,096). Does not bump `Revision`. Called by `Compact`, by codec decode, by `BenchmarkStructures` and by `GridStructureSync.WriteBack` for the bricks it wrote.
+Source sparse pages reserve 1,024 six-byte entries in flat SparsePages; FreeSparsePages stores reusable page indices. BrickRecord.Page <= -2 encodes the page index as -2-Page. Dense pages still have 4,096 cells; -1 remains uniform. No nested native containers. SetBrickDense accepts a full logical brick but stores at most 1,024 solids sparsely. NativeBytes counts allocated capacities, including unused source sparse slots.
+
+`OptimizeStorage()` repacks dense bricks with at most 1,024 solids into sparse pages; full identical dense bricks become uniform. It does not change Revision. Compact rebuilds only live pages and trims capacities. Write-back calls the same optimization for copied bricks only. ECS dense damage writes do not repack automatically.
 
 Bounds (`TryGetCellBounds`): if `BoundsValid == 0`, recompute from every record's `Masks[i].TryGetBounds` + `Coord*16`; O(bricks × 64 words).
 
@@ -580,7 +581,7 @@ public static class VoxelStructureCodec
 }
 ```
 
-- `ToSource(s, a)`: `CellSize = s.CellSize`; `AnchorInstance = -1` (structures store no anchor; `GridSpawnSystem` recomputes it at conversion); `Palette = s.Palette.AsArray()`, `Instances = s.Instances.AsArray()` (views); `order = s.SortedBrickOrder(TempJob)`; `BrickCoords` (length K) and `Cells` (K × 4,096) allocated with `a`; brick `order[k]` → coords[k], and its cells copied with `UnsafeUtility.MemCpy` (dense page) or `MemCpyReplicate` (uniform) into `Cells[k × 4096 …]`. The cell order inside a brick is SPEC-10's local index, which equals `VoxsCodec.CellIndex` (asserted once in a test). `Partial = false`. O(cells), one copy.
+- `ToSource(s, a)`: `CellSize = s.CellSize`; `AnchorInstance = -1` (structures store no anchor; `GridSpawnSystem` recomputes it at conversion); `Palette = s.Palette.AsArray()`, `Instances = s.Instances.AsArray()` (views); `order = s.SortedBrickOrder(TempJob)`; `BrickCoords` (length K) and `Cells` (K × 4,096) allocated with `a`; brick `order[k]` → coords[k], and its cells copied with `UnsafeUtility.MemCpy` (dense page) or uniform replication or sparse expansion into `Cells[k × 4096 …]`. The cell order inside a brick is SPEC-10's local index, which equals `VoxsCodec.CellIndex` (asserted once in a test). `Partial = false`. O(cells), one copy.
 - `Encode(s, names, o)`: `using var b = ToSource(s, Allocator.TempJob); return VoxsCodec.Encode(b.Source, names, o);`. Safe on a worker thread only when `s` is not mutated meanwhile; savers use SPEC-05's `VoxsSnapshotBlock.Capture(b.Source, names)` on the main thread instead.
 - `TryDecode(data, catalog, out r, out e)`: `VoxsCodec.TryDecode(data, catalog, Allocator.TempJob, out d, out e)`; on success `r = FromDecoded(d)`; `d.Dispose()`. Failure → `r = null`, `e` from SPEC-05 (never an exception; unknown IDs map to the Missing block inside `VoxsCodec`, ADR-0007).
 - `FromDecoded(d)`: new structure with `d.CellSize`; palette and instances copied as stored (tombstones included, so structure encode → decode → encode is byte-identical); a raw empty payload with zero palette entries gets the structure-required reserved entry 0. Rebuild `FreeInstances` from block-zero slots in ascending index order (LIFO reuses the highest first); per brick `SetBrickDense(coord, slice)` (rebuilds the mask, `SolidCount` and `BrickIndex`); then `OptimizeStorage()` (uniform bricks become uniform pages). `d.AnchorInstance` is ignored. `d.Partial == true` is rejected here (`InvalidOperationException`): partial payloads are applied by their owners (SPEC-30 deltas).
@@ -594,12 +595,12 @@ public static class VoxelStructureCodec
 - **Reads:** requests, `VoxelConfig`, block blobs, `FunctionalComponentRegistration`, SPEC-11 `VoxelRenderRuntime`. **Writes:** everything it creates; `VoxelGrid.Revision` at spawn/rebuild/edit; appends to SPEC-11 `BrickMeshQueue` (spawn, rebuild, edit) and SPEC-12 `ColliderDirtyQueue` (edit only; spawn/rebuild collider work is enqueued by SPEC-12's body init).
 
 Per frame (`budget = VoxelConfig.SpawnBricksPerFrame`; markers `GridSpawnSystem.<Step>`):
-1. **Prototypes** (`Prototypes`): if `RequireRenderer == 1` and `VoxelRenderRuntime.IsReady == 0` → return (requests wait). If prototypes are missing or `RegistrationCount` changed: brick prototype = `CreateEntity(brickBaseArchetype)` (Brick, BrickCells, BrickSolidMask, BrickDirty, LocalTransform, LocalToWorld, Parent, BrickLodDesired, BrickPropInstance, Prefab) → `RenderMeshUtility.AddComponents(e, em, new RenderMeshDescription(ShadowCastingMode.On, receiveShadows: true), new MaterialMeshInfo(runtime.BrickMaterial, runtime.PlaceholderMesh))` (one shared `RenderMeshArray`-free registration; never a per-brick array) → disable `MaterialMeshInfo`, disable `BrickDirty`. If `RegistrationCount` changed, destroy every cached functional prototype and clear both maps. Functional prototypes are created on first use in step 5c, one per distinct `BlockDef.ModuleMask`: base functional types + the types registered with `Module = None` + the union of the types registered for every module id in the mask (each type once) + render components with `runtime.PropMaterial`; `NoRender` grids use the render-free map (ADR-0013).
+1. **Prototypes** (`Prototypes`): if `RequireRenderer == 1` and `VoxelRenderRuntime.IsReady == 0` → return (requests wait). If prototypes are missing or `RegistrationCount` changed: brick prototype = `CreateEntity(brickBaseArchetype)` (Brick, BrickCells, BrickSparseCells, BrickSolidMask, BrickDirty, LocalTransform, LocalToWorld, Parent, BrickLodDesired, BrickPropInstance, Prefab) → `RenderMeshUtility.AddComponents(e, em, new RenderMeshDescription(ShadowCastingMode.On, receiveShadows: true), new MaterialMeshInfo(runtime.BrickMaterial, runtime.PlaceholderMesh))` (one shared `RenderMeshArray`-free registration; never a per-brick array) → disable `MaterialMeshInfo`, disable `BrickDirty`. If `RegistrationCount` changed, destroy every cached functional prototype and clear both maps. Functional prototypes are created on first use in step 5c, one per distinct `BlockDef.ModuleMask`: base functional types + the types registered with `Module = None` + the union of the types registered for every module id in the mask (each type once) + render components with `runtime.PropMaterial`; `NoRender` grids use the render-free map (ADR-0013).
 2. **Despawns** (`Despawn`; roots with `GridDespawnRequest` enabled, including Disabled roots, sorted by `VoxelGrid.Serial`): `EntityManager.CompleteAllTrackedJobs()` once if any; per root: release pending rebuild/current spawn read tokens, then if `GridSource.Flags & WriteBack` → terminal `GridStructureSync` write-back (ADR-0026, only already-created baseline coordinates count as removals); then `DestroyEntity(NativeArray roots)` in one batch (LEG cascade). Not budgeted.
 3. **Rebuilds** (`Rebuild`; roots with `GridRebuildRequest`, sorted by Serial): `DestroyEntity` (batch) of all brick entities from `BrickSlot` and all `BlockInstance.Functional`; LEG := `[root]`; pin the new source, unpin the old; set `GridSource`; recompute `BrickMin/Dims/CellMin/CellMax/AnchorInstance`; resize and zero `BrickSlot`; copy palette and instances; `Revision++`; enable `GridSpawning{0}` and `GridRebuilt`; create functional entities (step 5c); `RemoveComponent<GridRebuildRequest>` (batch). Bricks follow in step 4.
 4. **Continue spawning** (`CreateBricks`; roots with `GridSpawning` enabled, sorted by Serial) while `budget > 0`: `n = min(budget, source.Bricks.Length − NextBrick)`:
    a. `Instantiate(brickPrototype, n, Allocator.Temp)`, then `AddComponent<BrickRenderState>(entities)` when rendering (Instantiate strips cleanup types). Headless batches create the same brick base without Prefab or rendering/cleanup components.
-   b. `BrickFillJob : IJobParallelFor` (inner batch 8) over the n records: `Brick{Grid, Coord, SolidCount, ChangedRevision 0}`; `BrickCells.ResizeUninitialized(4096)` then dense → `UnsafeUtility.MemCpy` 16,384 B from the page, uniform → `UnsafeUtility.MemCpyReplicate` of the uniform cell 4,096 times; `BrickSolidMask` 64 words from `Masks[i]`; `LocalTransform`; `Parent = root`. Complete it (init group, bounded by the budget).
+   b. `BrickFillJob : IJobParallelFor` (inner batch 8) over the n records: `Brick{Grid, Coord, SolidCount, ChangedRevision 0}`; at most 1,024 solids → resize/fill BrickSparseCells and leave BrickCells empty; otherwise resize BrickCells to 4,096, copying a dense page or replicating a uniform cell, with sparse storage empty; `BrickSolidMask` 64 words from `Masks[i]`; `LocalTransform`; `Parent = root`. Complete it (init group, bounded by the budget).
    c. Write `BrickSlot[SlotIndex(coord)] = entity`; append the entities to the LEG; enqueue `BrickMeshQueue` requests with priority `Spawn` for rendered bricks (Q33). The owner calls `CompleteAccess()` once per update before the first enqueue (SPEC-12 §5.1); a serial Burst job borrows only the native queue containers for the batch.
    d. Call every `IGridSpawnHook.OnEntitiesCreated(em, root, entities)`.
    e. `NextBrick += n; budget -= n`. When `NextBrick == source.Bricks.Length`: disable `GridSpawning`, unpin the source; if the source came from a blueprint, call `BlueprintLibrary.ReleaseUnpinnedLarge()`.
@@ -786,9 +787,30 @@ Measured station geometry and allocation totals:
 | **Total peak, CPU mesh copies retained** | **38,828,288 B (38.828 MB)** | **162,606,784 B (162.607 MB)** |
 | Total peak, CPU mesh copies released | 28,214,016 B | 118,710,496 B |
 
-**Decision: no-go for dense storage.** Reference retained-copy peak exceeds the **36 MB** headroom gate (also exceeds 36 MiB). VOX-003 remains `todo`; proposed ADR-0023 records the sparse-contract change. No gate was relaxed. The installed package's RenderMeshUtility component set was measured with its one shared RenderMeshArray removed to match the runtime-ID path; BrickRenderState was added after Instantiate (cleanup components are not cloned). A test-only low-cardinality shared membership stood in for the not-yet-implemented galaxy hook. This is the specified memory-model spike, not a finished-renderer GPU residency or whole-process memory measurement: root/queue/framework allocations, Mesh object overhead, allocator bookkeeping and future runtime peaks remain for the integration gate.
+**Decision: no-go for dense storage.** Reference retained-copy peak exceeds the **36 MB** headroom gate (also exceeds 36 MiB). VOX-003 follows this no-go; ADR-0023 now accepts the sparse-contract change after VOX-014 foundations. No gate was relaxed. The installed package's RenderMeshUtility component set was measured with its one shared RenderMeshArray removed to match the runtime-ID path; BrickRenderState was added after Instantiate (cleanup components are not cloned). A test-only low-cardinality shared membership stood in for the not-yet-implemented galaxy hook. This is the specified memory-model spike, not a finished-renderer GPU residency or whole-process memory measurement: root/queue/framework allocations, Mesh object overhead, allocator bookkeeping and future runtime peaks remain for the integration gate.
 
-**Fallback estimates, not measurements:** reference has 728 eligible bricks (745,472 cells at ≤1,024 solid cells/brick). Six-byte sparse entries reduce cells/masks to 7,278,592 B, projecting **31,373,568 B** retained-copy peak before extra buffer headers, capacity slack and chunk changes. VOX-003 must measure its implementation. Thin shell has 3,784 eligible bricks, projecting 8,198,192 B cells/masks and **106,870,512 B** retained-copy LOD0 peak. Combining sparse storage, CPU-copy release and a *hypothetical* quarter of LOD0 mesh bytes yields about **30,052,008 B** thin-shell peak; the LOD1 triangle-ratio gate alone does not prove that byte ratio. Thin shells remain a reported stress case, not a new owner gate (Q17).
+**Fallback estimates, not measurements:** reference has 728 eligible bricks (745,472 cells at ≤1,024 solid cells/brick). Six-byte sparse entries reduce cells/masks to 7,278,592 B, projecting **31,373,568 B** retained-copy peak before extra buffer headers, capacity slack and chunk changes. VOX-003 measures its implementation in §8.3. Thin shell has 3,784 eligible bricks, projecting 8,198,192 B cells/masks and **106,870,512 B** retained-copy LOD0 peak. Combining sparse storage, CPU-copy release and a *hypothetical* quarter of LOD0 mesh bytes yields about **30,052,008 B** thin-shell peak; the LOD1 triangle-ratio gate alone does not prove that byte ratio. Thin shells remain a reported stress case, not a new owner gate (Q17).
+
+### 8.3 VOX-003 measured sparse fallback (2026-10-11)
+
+Accepted ADR-0023 is implemented. The same independent geometry/mesh/collider model was rerun with **actual GridSpawnSystem ECS buffers**, capacity-zero sparse entries (verified six bytes), and the installed renderer component set. Reference spawning has 728 sparse / 144 dense bricks; thin shell has 3,784 sparse bricks. Dense buffers on sparse bricks have zero heap capacity. Chunk capacity is 53 bricks; counts below include all world chunks and meta chunks, including root/prototype/singleton overhead. Root heap includes ADR-0026 removal provenance, slots, linked entities, palette and instances.
+
+| Actual capacity / retained payload | Reference station | Thin shell (stress only) |
+|---|---:|---:|
+| Dense cell heap | 2,359,296 B | 0 B |
+| Sparse cell heap | 4,472,832 B | 6,260,784 B |
+| Mask heap | 446,464 B | 1,937,408 B |
+| Root buffer heap (baseline subset) | 35,168 B (10,464 B) | 209,376 B (45,408 B) |
+| All ECS chunks including meta | 409,600 B (25 chunks) | 1,310,720 B (80 chunks) |
+| Mesh GPU payload | 10,614,272 B | 43,896,288 B |
+| Retained mesh CPU payload | 10,614,272 B | 43,896,288 B |
+| Collider replacement peak | 2,587,904 B | 9,782,016 B |
+| **Total retained-copy peak** | **31,539,808 B (31.540 MB)** | **107,292,880 B (107.293 MB)** |
+| Total with mesh CPU copies released | 20,925,536 B | 63,396,592 B |
+
+**Go:** reference is below 36,000,000 B with 4,460,192 B headroom. The source's pre-spawn NativeBytes is 11,059,664 B reference / 27,460,112 B thin shell, including actual flat-page capacity and slack; the measured post-spawn model releases that source (0 B afterward), consistently with VOX-002's blueprint-eviction boundary. The source sparse pool reserves 1,024 entries/page and is not modeled as six bytes per occupied source cell. These are actual ECS capacities plus independently counted mesh payloads and measured collider blobs, not GPU residency or whole-process memory. Queue internals, Mesh object/allocator bookkeeping and full renderer integration remain TST-004's gate. Thin shells remain a stress case under Q17; sparse storage alone does not meet 40 MB for that geometry.
+
+Evidence retained locally in ignored `Logs/tools/vox003-{reference,thin-shell}.txt`, `vox003-SparseMemorySpike.cs`, `vox003-memory-results.xml` (2/2 passed) and `vox003-memory.log`. Temporary measurement scripts were deleted after the run, per tools §3.
 
 ## 9. Tasks
 
@@ -824,8 +846,8 @@ Measured station geometry and allocation totals:
 - **Do:** If VOX-002 records **go**, set this task `dropped` with the measurement reference. If **no-go**: after the ADR is accepted, implement `BrickSparseCells` per §8.2 in `VoxelStructure`, ECS spawn, `BrickWrite`, `GridCellReader` and the codec; update §4 and §5 of this spec in the same commit.
 - **Files:** `Assets/Game/Voxel/Model/BrickSparseCells.cs`; changes to `VoxelStructure.cs`, `BrickWrite.cs`, `GridCellReader.cs`, `GridSpawnSystem.cs`, `VoxelStructureCodec.cs`; `Assets/Game/Tests/EditMode/Voxel/SparseBrickTests.cs`
 - **Acceptance criteria:**
-  - [ ] Every VOX test passes with sparse storage enabled.
-  - [ ] Reference station memory ≤ 36 MB measured.
+  - [x] Every VOX test passes with sparse storage enabled.
+  - [x] Reference station memory ≤ 36 MB measured.
 - **Tests:** `SparseBrickTests.SparseDense_Equivalent_Fuzz`, `.DensifyAtThreshold`.
 
 ### VOX-004 — Brick maths and mask operations
@@ -1096,6 +1118,8 @@ Measured station geometry and allocation totals:
 | 34 | CaptureChanges lacks source access and cannot distinguish destroyed bricks from empty slots | Store original occupied coordinates per grid | Tech lead | Resolved 2026-10-11 by ADR-0026: 12 bytes per source brick plus buffer overhead, included in the pending VOX-003 measurement; capture remains relative to initialization after saves. |
 | 35 | Partial spawn write-back would mutate pinned storage and delete uncreated bricks; rebuild needs an independent pending read | Define terminal partial write-back and rebuild token transfer | Tech lead | Resolved 2026-10-11 by ADR-0026: ordinary saves defer partial spawns; terminal despawn releases owned reads and preserves uncreated coordinates; rebuild preserves identity and resets its revision baseline. |
 | 36 | OptimizeStorage scans all full bricks; copied runtime metadata can leave cached mass stale | Optimize only copied bricks and invalidate metadata revisions | Tech lead | Resolved 2026-10-11: internal structure helpers share existing optimization logic, clear ECS references and reconstruct free indices without changing the public API. |
+
+| 37 | VOX-003 needs exact sparse invariants, source ownership and caller migration | Accept ADR-0023 after dense lifecycle foundations | Tech lead | Resolved 2026-10-11: six-byte sorted ECS entries, flat 1024-entry source page pool, preserved uniform/dense records, densification at 1025, and shared reads across every adapter; actual capacities are measured. |
 
 ## 11. References
 

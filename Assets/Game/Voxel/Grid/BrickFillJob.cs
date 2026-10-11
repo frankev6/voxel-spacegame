@@ -16,6 +16,7 @@ namespace Game.Voxel.Grid
         [ReadOnly] public NativeArray<Entity> Entities;
         [ReadOnly] public NativeArray<BrickRecord> Records;
         [ReadOnly] public NativeArray<Cell> Pages;
+        [ReadOnly] public NativeArray<BrickSparseCells> SparsePages;
         [ReadOnly] public NativeArray<BrickMaskBits> Masks;
         public Entity Root;
         public int Start;
@@ -24,6 +25,7 @@ namespace Game.Voxel.Grid
         [NativeDisableParallelForRestriction] public ComponentLookup<Brick> Bricks;
         [NativeDisableParallelForRestriction] public ComponentLookup<BrickDirty> Dirty;
         [NativeDisableParallelForRestriction] public BufferLookup<BrickCells> Cells;
+        [NativeDisableParallelForRestriction] public BufferLookup<BrickSparseCells> Sparse;
         [NativeDisableParallelForRestriction] public BufferLookup<BrickSolidMask> SolidMasks;
         [NativeDisableParallelForRestriction] public ComponentLookup<LocalTransform> Transforms;
         [NativeDisableParallelForRestriction] public ComponentLookup<Parent> Parents;
@@ -31,10 +33,30 @@ namespace Game.Voxel.Grid
         {
             Entity entity = Entities[index]; Dirty.SetComponentEnabled(entity, false); int sourceIndex = Start + index; var record = Records[sourceIndex];
             Bricks[entity] = new Brick { Grid = Root, Coord = record.Coord, SolidCount = record.SolidCount };
-            var cells = Cells[entity]; cells.ResizeUninitialized(BrickMath.CellsPerBrick);
-            if (record.Page < 0) UnsafeUtility.MemCpyReplicate(cells.GetUnsafePtr(), &record.Uniform, UnsafeUtility.SizeOf<Cell>(), BrickMath.CellsPerBrick);
-            else UnsafeUtility.MemCpy(cells.GetUnsafePtr(), (Cell*)Pages.GetUnsafeReadOnlyPtr() + record.Page * BrickMath.CellsPerBrick,
-                BrickMath.CellsPerBrick * UnsafeUtility.SizeOf<Cell>());
+            var cells = Cells[entity]; var sparse = Sparse[entity];
+            if (record.SolidCount <= SparseCellStorage.Limit)
+            {
+                cells.Clear(); sparse.ResizeUninitialized(record.SolidCount);
+                if (record.Page <= -2)
+                    UnsafeUtility.MemCpy(sparse.GetUnsafePtr(), (BrickSparseCells*)SparsePages.GetUnsafeReadOnlyPtr()
+                        + SparseCellStorage.PageIndex(record.Page) * SparseCellStorage.Limit, record.SolidCount * UnsafeUtility.SizeOf<BrickSparseCells>());
+                else
+                {
+                    int at = 0;
+                    for (int i = 0; i < BrickMath.CellsPerBrick; i++)
+                    {
+                        var value = SparseCellStorage.Read(record, Pages, SparsePages, i);
+                        if (!value.IsAir) sparse[at++] = new BrickSparseCells { Local = (ushort)i, Value = value };
+                    }
+                }
+            }
+            else
+            {
+                sparse.Clear(); cells.ResizeUninitialized(BrickMath.CellsPerBrick);
+                if (record.Page == -1) UnsafeUtility.MemCpyReplicate(cells.GetUnsafePtr(), &record.Uniform, UnsafeUtility.SizeOf<Cell>(), BrickMath.CellsPerBrick);
+                else UnsafeUtility.MemCpy(cells.GetUnsafePtr(), (Cell*)Pages.GetUnsafeReadOnlyPtr() + record.Page * BrickMath.CellsPerBrick,
+                    BrickMath.CellsPerBrick * UnsafeUtility.SizeOf<Cell>());
+            }
             var mask = Masks[sourceIndex]; var solid = SolidMasks[entity]; solid.ResizeUninitialized(BrickMath.MaskWords);
             UnsafeUtility.MemCpy(solid.GetUnsafePtr(), mask.Words, BrickMath.MaskWords * sizeof(ulong));
             Transforms[entity] = LocalTransform.FromPositionRotationScale((float3)record.Coord * (16 * CellSize), quaternion.identity, CellSize);

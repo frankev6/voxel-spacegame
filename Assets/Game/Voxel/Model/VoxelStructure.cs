@@ -31,6 +31,8 @@ namespace Game.Voxel.Model
                 data.BrickIndex = new NativeHashMap<int3, int>(0, Allocator.Persistent);
                 data.CellPages = new NativeList<Cell>(Allocator.Persistent);
                 data.FreePages = new NativeList<int>(Allocator.Persistent);
+                data.SparsePages = new NativeList<BrickSparseCells>(Allocator.Persistent);
+                data.FreeSparsePages = new NativeList<int>(Allocator.Persistent);
             }
             catch { DisposeStorage(); throw; }
         }
@@ -72,35 +74,53 @@ namespace Game.Voxel.Model
         {
             if (!data.BrickIndex.TryGetValue(BrickMath.BrickOf(cell), out int index)) return default;
             var record = data.Bricks[index];
-            return record.Page < 0 ? record.Uniform : data.CellPages[record.Page * BrickMath.CellsPerBrick + BrickMath.LocalIndex(BrickMath.LocalOf(cell))];
+            return Read(record, BrickMath.LocalIndex(BrickMath.LocalOf(cell)));
         }
+        Cell Read(BrickRecord record, int local) => SparseCellStorage.Read(record, data.CellPages.AsArray(), data.SparsePages.AsArray(), local);
         public void SetCell(int3 cell, Cell value)
         {
-            RequireMutable();
-            if (value.IsAir) value = default;
-            int3 coord = BrickMath.BrickOf(cell);
-            int local = BrickMath.LocalIndex(BrickMath.LocalOf(cell));
+            RequireMutable(); if (value.IsAir) value = default;
+            int3 coord = BrickMath.BrickOf(cell); int local = BrickMath.LocalIndex(BrickMath.LocalOf(cell));
             bool exists = data.BrickIndex.TryGetValue(coord, out int index);
             var record = exists ? data.Bricks[index] : new BrickRecord { Coord = coord, Page = -1 };
-            Cell old = !exists ? default : record.Page < 0 ? record.Uniform : data.CellPages[record.Page * BrickMath.CellsPerBrick + local];
+            Cell old = exists ? Read(record, local) : default;
             if (old.Equals(value)) return;
-            if (record.Page < 0)
+            int count = record.SolidCount + (value.IsAir ? 0 : 1) - (old.IsAir ? 0 : 1);
+            if (!exists) record.Page = SparseCellStorage.EncodePage(TakeSparsePage());
+            if (record.Page == -1)
             {
-                record.Page = TakePage();
-                FillPage(record.Page, record.Uniform);
-                record.Uniform = default;
+                record.Page = TakePage(); FillPage(record.Page, record.Uniform); record.Uniform = default;
+            }
+            else if (record.Page <= -2 && count > SparseCellStorage.Limit)
+            {
+                int sparse = SparseCellStorage.PageIndex(record.Page), start = sparse * SparseCellStorage.Limit;
+                record.Page = TakePage(); FillPage(record.Page, default);
+                for (int i = 0; i < record.SolidCount; i++)
+                { var entry = data.SparsePages[start + i]; data.CellPages[record.Page * BrickMath.CellsPerBrick + entry.Local] = entry.Value; }
+                data.FreeSparsePages.Add(sparse);
+            }
+            if (record.Page >= 0) data.CellPages[record.Page * BrickMath.CellsPerBrick + local] = value;
+            else
+            {
+                int start = SparseCellStorage.PageIndex(record.Page) * SparseCellStorage.Limit;
+                int found = SparseCellStorage.Find(data.SparsePages.AsArray(), start, record.SolidCount, local);
+                if (value.IsAir)
+                {
+                    for (int i = found; i < record.SolidCount - 1; i++) data.SparsePages[start + i] = data.SparsePages[start + i + 1];
+                    data.SparsePages[start + count] = default;
+                }
+                else
+                {
+                    int position = found >= 0 ? found : ~found;
+                    if (found < 0) for (int i = record.SolidCount; i > position; i--) data.SparsePages[start + i] = data.SparsePages[start + i - 1];
+                    data.SparsePages[start + position] = new BrickSparseCells { Local = (ushort)local, Value = value };
+                }
             }
             if (!exists)
-            {
-                index = data.Bricks.Length;
-                data.Bricks.Add(record); data.Masks.Add(default); data.BrickIndex.Add(coord, index);
-            }
-            data.CellPages[record.Page * BrickMath.CellsPerBrick + local] = value;
+            { index = data.Bricks.Length; data.Bricks.Add(record); data.Masks.Add(default); data.BrickIndex.Add(coord, index); }
             var mask = data.Masks[index]; mask.Set(local, !value.IsAir); data.Masks[index] = mask;
-            record.SolidCount = (ushort)(record.SolidCount + (value.IsAir ? 0 : 1) - (old.IsAir ? 0 : 1));
-            record.ChangedRevision = Changed();
-            data.Bricks[index] = record;
-            if (record.SolidCount == 0) RemoveAt(index);
+            record.SolidCount = (ushort)count; record.ChangedRevision = Changed(); data.Bricks[index] = record;
+            if (count == 0) RemoveAt(index);
         }
         public PlaceResult TryPlaceBlock(in BlockPlacement p, in VoxelContent content)
         {
@@ -194,26 +214,30 @@ namespace Game.Voxel.Model
         {
             RequireMutable();
             if (cells4096.Length != BrickMath.CellsPerBrick) throw new ArgumentException("A brick must contain 4096 cells", nameof(cells4096));
-            var mask = new BrickMaskBits();
-            int count = 0;
-            for (int i = 0; i < cells4096.Length; i++)
-                if (!cells4096[i].IsAir) { mask.Set(i, true); count++; }
+            var mask = new BrickMaskBits(); int count = 0;
+            for (int i = 0; i < cells4096.Length; i++) if (!cells4096[i].IsAir) { mask.Set(i, true); count++; }
             if (count == 0) { RemoveBrick(coord); return; }
             bool exists = data.BrickIndex.TryGetValue(coord, out int index);
             var record = exists ? data.Bricks[index] : new BrickRecord { Coord = coord, Page = -1 };
             if (exists)
             {
                 bool same = true;
-                for (int i = 0; i < cells4096.Length && same; i++)
-                {
-                    Cell old = record.Page < 0 ? record.Uniform : data.CellPages[record.Page * BrickMath.CellsPerBrick + i];
-                    same = old.Equals(cells4096[i].IsAir ? default : cells4096[i]);
-                }
+                for (int i = 0; i < cells4096.Length && same; i++) same = Read(record, i).Equals(cells4096[i].IsAir ? default : cells4096[i]);
                 if (same) return;
             }
-            if (record.Page < 0) record.Page = TakePage();
-            for (int i = 0; i < cells4096.Length; i++)
-                data.CellPages[record.Page * BrickMath.CellsPerBrick + i] = cells4096[i].IsAir ? default : cells4096[i];
+            if (count <= SparseCellStorage.Limit)
+            {
+                if (record.Page >= -1) { ReleasePage(record); record.Page = SparseCellStorage.EncodePage(TakeSparsePage()); }
+                int start = SparseCellStorage.PageIndex(record.Page) * SparseCellStorage.Limit, at = 0;
+                for (int i = 0; i < cells4096.Length; i++)
+                    if (!cells4096[i].IsAir) data.SparsePages[start + at++] = new BrickSparseCells { Local = (ushort)i, Value = cells4096[i] };
+                for (int i = at; i < SparseCellStorage.Limit; i++) data.SparsePages[start + i] = default;
+            }
+            else
+            {
+                if (record.Page < 0) { ReleasePage(record); record.Page = TakePage(); }
+                for (int i = 0; i < cells4096.Length; i++) data.CellPages[record.Page * BrickMath.CellsPerBrick + i] = cells4096[i].IsAir ? default : cells4096[i];
+            }
             record.Uniform = default; record.SolidCount = (ushort)count; record.ChangedRevision = Changed();
             if (exists) { data.Bricks[index] = record; data.Masks[index] = mask; }
             else { data.BrickIndex.Add(coord, data.Bricks.Length); data.Bricks.Add(record); data.Masks.Add(mask); }
@@ -226,8 +250,8 @@ namespace Game.Voxel.Model
             if (exists)
             {
                 var old = data.Bricks[index];
-                if (old.Page < 0 && old.Uniform.Equals(value)) return;
-                if (old.Page >= 0) data.FreePages.Add(old.Page);
+                if (old.Page == -1 && old.Uniform.Equals(value)) return;
+                ReleasePage(old);
             }
             var record = new BrickRecord { Coord = coord, Page = -1, Uniform = value, SolidCount = BrickMath.CellsPerBrick, ChangedRevision = Changed() };
             if (exists) { data.Bricks[index] = record; data.Masks[index] = BrickMaskBits.Full(); }
@@ -251,9 +275,21 @@ namespace Game.Voxel.Model
         }
         void OptimizeRecord(int index)
         {
-            var record = data.Bricks[index];
-            if (record.Page < 0 || record.SolidCount != BrickMath.CellsPerBrick) return;
-            int start = record.Page * BrickMath.CellsPerBrick; Cell value = data.CellPages[start];
+            var record = data.Bricks[index]; if (record.Page < 0) return;
+            int start = record.Page * BrickMath.CellsPerBrick;
+            if (record.SolidCount <= SparseCellStorage.Limit)
+            {
+                int page = TakeSparsePage(), at = page * SparseCellStorage.Limit;
+                for (int i = 0; i < BrickMath.CellsPerBrick; i++)
+                {
+                    Cell cell = data.CellPages[start + i];
+                    if (!cell.IsAir) data.SparsePages[at++] = new BrickSparseCells { Local = (ushort)i, Value = cell };
+                }
+                data.FreePages.Add(record.Page); record.Page = SparseCellStorage.EncodePage(page); record.Uniform = default; data.Bricks[index] = record;
+                return;
+            }
+            if (record.SolidCount != BrickMath.CellsPerBrick) return;
+            Cell value = data.CellPages[start];
             for (int j = 1; j < BrickMath.CellsPerBrick; j++) if (!value.Equals(data.CellPages[start + j])) return;
             data.FreePages.Add(record.Page); record.Page = -1; record.Uniform = value; data.Bricks[index] = record;
         }
@@ -284,56 +320,47 @@ namespace Game.Voxel.Model
         }
         public void Compact()
         {
-            RequireMutable();
-            OptimizeStorage();
-            using var order = SortedBrickOrder(Allocator.Temp);
+            RequireMutable(); OptimizeStorage();
             using var compact = new VoxelStructure(CellSize);
             var next = compact.data;
+            using var order = SortedBrickOrder(Allocator.Temp);
             var paletteMap = new NativeArray<ushort>(data.Palette.Length, Allocator.Temp);
-            var instanceMap = default(NativeArray<int>);
+            var instanceMap = new NativeArray<int>(data.Instances.Length, Allocator.Temp);
+            var cells = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Temp);
             try
             {
-                instanceMap = new NativeArray<int>(data.Instances.Length, Allocator.Temp);
                 for (int k = 0; k < order.Length; k++)
                 {
                     var record = data.Bricks[order[k]];
-                    int length = record.Page < 0 ? 1 : BrickMath.CellsPerBrick;
+                    int length = record.Page == -1 ? 1 : record.Page <= -2 ? record.SolidCount : BrickMath.CellsPerBrick;
                     for (int i = 0; i < length; i++)
                     {
-                        Cell value = record.Page < 0 ? record.Uniform : data.CellPages[record.Page * BrickMath.CellsPerBrick + i];
+                        Cell value = record.Page <= -2 ? data.SparsePages[SparseCellStorage.PageIndex(record.Page) * SparseCellStorage.Limit + i].Value : Read(record, i);
                         if (value.IsAir || value.IsInstance || paletteMap[value.PaletteIndex] != 0) continue;
-                        paletteMap[value.PaletteIndex] = (ushort)next.Palette.Length;
-                        next.Palette.Add(data.Palette[value.PaletteIndex]);
+                        paletteMap[value.PaletteIndex] = (ushort)next.Palette.Length; next.Palette.Add(data.Palette[value.PaletteIndex]);
                     }
                 }
                 for (int i = 0; i < data.Instances.Length; i++)
-                    if (data.Instances[i].Block != 0)
-                    { instanceMap[i] = next.Instances.Length; next.Instances.Add(data.Instances[i]); }
-                var header = data.Header.Value;
-                header.Revision++; header.BoundsValid = 0; header.MassRevision = 0;
-                next.Header.Value = header;
+                    if (data.Instances[i].Block != 0) { instanceMap[i] = next.Instances.Length; next.Instances.Add(data.Instances[i]); }
                 for (int k = 0; k < order.Length; k++)
                 {
                     var record = data.Bricks[order[k]];
-                    if (record.Page < 0) record.Uniform = Remap(record.Uniform, paletteMap, instanceMap);
+                    if (record.Page == -1) compact.SetBrickUniform(record.Coord, Remap(record.Uniform, paletteMap, instanceMap));
                     else
                     {
-                        int start = record.Page * BrickMath.CellsPerBrick;
-                        record.Page = next.CellPages.Length / BrickMath.CellsPerBrick;
-                        for (int i = 0; i < BrickMath.CellsPerBrick; i++) next.CellPages.Add(Remap(data.CellPages[start + i], paletteMap, instanceMap));
+                        SparseCellStorage.Expand(record, data.CellPages.AsArray(), data.SparsePages.AsArray(), cells);
+                        for (int i = 0; i < cells.Length; i++) cells[i] = Remap(cells[i], paletteMap, instanceMap);
+                        compact.SetBrickDense(record.Coord, cells); compact.OptimizeBrick(record.Coord);
                     }
-                    record.ChangedRevision = header.Revision;
-                    next.BrickIndex.Add(record.Coord, next.Bricks.Length);
-                    next.Bricks.Add(record); next.Masks.Add(data.Masks[order[k]]);
                 }
-                // Capacity setters round up; TrimExcess uses the package’s exact-size reallocation.
+                var header = data.Header.Value; header.Revision++; header.BoundsValid = 0; header.MassRevision = 0; next.Header.Value = header;
+                for (int i = 0; i < next.Bricks.Length; i++) { var record = next.Bricks[i]; record.ChangedRevision = header.Revision; next.Bricks[i] = record; }
                 next.Palette.TrimExcess(); next.Instances.TrimExcess(); next.FreeInstances.TrimExcess();
-                next.Bricks.TrimExcess(); next.Masks.TrimExcess(); next.CellPages.TrimExcess();
-                next.FreePages.TrimExcess(); next.BrickIndex.TrimExcess();
-                // Transfer both owners only after the replacement is complete. The temporary owner frees the old storage.
+                next.Bricks.TrimExcess(); next.Masks.TrimExcess(); next.CellPages.TrimExcess(); next.FreePages.TrimExcess();
+                next.SparsePages.TrimExcess(); next.FreeSparsePages.TrimExcess(); next.BrickIndex.TrimExcess();
                 compact.data = data; data = next;
             }
-            finally { paletteMap.Dispose(); if (instanceMap.IsCreated) instanceMap.Dispose(); }
+            finally { paletteMap.Dispose(); instanceMap.Dispose(); cells.Dispose(); }
         }
         static Cell Remap(Cell value, NativeArray<ushort> paletteMap, NativeArray<int> instanceMap)
         {
@@ -381,7 +408,7 @@ namespace Game.Voxel.Model
                 var record = data.Bricks[order[k]];
                 for (int i = 0; i < BrickMath.CellsPerBrick; i++)
                 {
-                    Cell cell = record.Page < 0 ? record.Uniform : data.CellPages[record.Page * BrickMath.CellsPerBrick + i];
+                    Cell cell = Read(record, i);
                     if (cell.IsAir || cell.IsInstance) continue;
                     var palette = data.Palette[cell.PaletteIndex];
                     output.Add(new StructureBlock
@@ -410,6 +437,7 @@ namespace Game.Voxel.Model
                 var header = data.Header.Value; header.PinCount = 0; header.ReadOnly = 0; clone.data.Header.Value = header;
                 Copy(data.Palette, clone.data.Palette); Copy(data.Instances, clone.data.Instances); Copy(data.FreeInstances, clone.data.FreeInstances);
                 Copy(data.Bricks, clone.data.Bricks); Copy(data.Masks, clone.data.Masks); Copy(data.CellPages, clone.data.CellPages); Copy(data.FreePages, clone.data.FreePages);
+                Copy(data.SparsePages, clone.data.SparsePages); Copy(data.FreeSparsePages, clone.data.FreeSparsePages);
                 for (int i = 0; i < data.Bricks.Length; i++) clone.data.BrickIndex.Add(data.Bricks[i].Coord, i);
                 clone.data.BrickIndex.TrimExcess(); return clone;
             }
@@ -435,7 +463,7 @@ namespace Game.Voxel.Model
             using var results = new NativeArray<StructureMassData>(data.Bricks.Length, Allocator.TempJob);
             new StructureMassJob
             {
-                Bricks = data.Bricks.AsArray(), Cells = data.CellPages.AsArray(), Palette = data.Palette.AsArray(),
+                Bricks = data.Bricks.AsArray(), Cells = data.CellPages.AsArray(), Sparse = data.SparsePages.AsArray(), Palette = data.Palette.AsArray(),
                 Instances = data.Instances.AsArray(), Blocks = content.Blocks, CellSize = CellSize, Results = results
             }.Schedule(data.Bricks.Length, 1).Complete();
             using var order = SortedBrickOrder(Allocator.Temp);
@@ -454,12 +482,14 @@ namespace Game.Voxel.Model
             + (long)data.Masks.Capacity * UnsafeUtility.SizeOf<BrickMaskBits>()
             + (long)data.BrickIndex.Capacity * 20
             + (long)data.CellPages.Capacity * UnsafeUtility.SizeOf<Cell>()
-            + (long)data.FreePages.Capacity * sizeof(int);
+            + (long)data.FreePages.Capacity * sizeof(int)
+            + (long)data.SparsePages.Capacity * UnsafeUtility.SizeOf<BrickSparseCells>()
+            + (long)data.FreeSparsePages.Capacity * sizeof(int);
         public void Clear()
         {
             RequireMutable();
             data.Palette.Clear(); data.Palette.Add(default); data.Instances.Clear(); data.FreeInstances.Clear();
-            data.Bricks.Clear(); data.Masks.Clear(); data.BrickIndex.Clear(); data.CellPages.Clear(); data.FreePages.Clear();
+            data.Bricks.Clear(); data.Masks.Clear(); data.BrickIndex.Clear(); data.CellPages.Clear(); data.FreePages.Clear(); data.SparsePages.Clear(); data.FreeSparsePages.Clear();
             Changed();
         }
         public void Dispose()
@@ -478,6 +508,8 @@ namespace Game.Voxel.Model
             if (data.BrickIndex.IsCreated) data.BrickIndex.Dispose();
             if (data.CellPages.IsCreated) data.CellPages.Dispose();
             if (data.FreePages.IsCreated) data.FreePages.Dispose();
+            if (data.SparsePages.IsCreated) data.SparsePages.Dispose();
+            if (data.FreeSparsePages.IsCreated) data.FreeSparsePages.Dispose();
             data = default;
         }
         void RequireUnpinned()
@@ -507,6 +539,22 @@ namespace Game.Voxel.Model
             data.CellPages.Resize(data.CellPages.Length + BrickMath.CellsPerBrick, NativeArrayOptions.ClearMemory);
             return next;
         }
+        int TakeSparsePage()
+        {
+            int page;
+            if (data.FreeSparsePages.Length > 0)
+            { int last = data.FreeSparsePages.Length - 1; page = data.FreeSparsePages[last]; data.FreeSparsePages.RemoveAt(last); }
+            else
+            { page = data.SparsePages.Length / SparseCellStorage.Limit; data.SparsePages.Resize(data.SparsePages.Length + SparseCellStorage.Limit, NativeArrayOptions.ClearMemory); }
+            int start = page * SparseCellStorage.Limit;
+            for (int i = 0; i < SparseCellStorage.Limit; i++) data.SparsePages[start + i] = default;
+            return page;
+        }
+        void ReleasePage(BrickRecord record)
+        {
+            if (record.Page >= 0) data.FreePages.Add(record.Page);
+            else if (record.Page <= -2) data.FreeSparsePages.Add(SparseCellStorage.PageIndex(record.Page));
+        }
         void FillPage(int page, Cell value)
         {
             int start = page * BrickMath.CellsPerBrick;
@@ -515,7 +563,7 @@ namespace Game.Voxel.Model
         void RemoveAt(int index)
         {
             var record = data.Bricks[index];
-            if (record.Page >= 0) data.FreePages.Add(record.Page);
+            ReleasePage(record);
             data.Bricks.RemoveAtSwapBack(index); data.Masks.RemoveAtSwapBack(index);
             data.BrickIndex.Remove(record.Coord);
             if (index < data.Bricks.Length) data.BrickIndex[data.Bricks[index].Coord] = index;

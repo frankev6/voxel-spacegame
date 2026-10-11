@@ -34,7 +34,11 @@ namespace Game.Voxel.Model
                 var b = hasB ? To.Bricks[bi] : default;
                 if (hasA && hasB && samePalette)
                 {
-                    if (a.Page < 0 && b.Page < 0 && a.Uniform.Equals(b.Uniform)) continue;
+                    if (a.Page == -1 && b.Page == -1 && a.Uniform.Equals(b.Uniform)) continue;
+                    if (a.Page <= -2 && b.Page <= -2 && a.SolidCount == b.SolidCount && UnsafeUtility.MemCmp(
+                        (BrickSparseCells*)From.SparsePages.GetUnsafeReadOnlyPtr() + SparseCellStorage.PageIndex(a.Page) * SparseCellStorage.Limit,
+                        (BrickSparseCells*)To.SparsePages.GetUnsafeReadOnlyPtr() + SparseCellStorage.PageIndex(b.Page) * SparseCellStorage.Limit,
+                        a.SolidCount * UnsafeUtility.SizeOf<BrickSparseCells>()) == 0) continue;
                     if (a.Page >= 0 && b.Page >= 0 && UnsafeUtility.MemCmp(
                         (Cell*)From.CellPages.GetUnsafeReadOnlyPtr() + a.Page * BrickMath.CellsPerBrick,
                         (Cell*)To.CellPages.GetUnsafeReadOnlyPtr() + b.Page * BrickMath.CellsPerBrick,
@@ -42,8 +46,8 @@ namespace Game.Voxel.Model
                 }
                 for (int i = 0; i < BrickMath.CellsPerBrick; i++)
                 {
-                    Cell ac = !hasA ? default : a.Page < 0 ? a.Uniform : From.CellPages[a.Page * BrickMath.CellsPerBrick + i];
-                    Cell bc = !hasB ? default : b.Page < 0 ? b.Uniform : To.CellPages[b.Page * BrickMath.CellsPerBrick + i];
+                    Cell ac = !hasA ? default : SparseCellStorage.Read(a, From.CellPages.AsArray(), From.SparsePages.AsArray(), i);
+                    Cell bc = !hasB ? default : SparseCellStorage.Read(b, To.CellPages.AsArray(), To.SparsePages.AsArray(), i);
                     bool ap = !ac.IsAir && !ac.IsInstance, bp = !bc.IsAir && !bc.IsInstance;
                     PaletteEntry ae = ap ? From.Palette[ac.PaletteIndex] : default;
                     PaletteEntry be = bp ? To.Palette[bc.PaletteIndex] : default;

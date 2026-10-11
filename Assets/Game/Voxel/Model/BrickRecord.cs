@@ -7,7 +7,7 @@ namespace Game.Voxel.Model
     public struct BrickRecord
     {
         public int3 Coord;             // brick coordinate
-        public int Page;               // page number in CellPages (page p = cells [p*4096, p*4096+4096)); -1 = uniform
+        public int Page;               // >=0: dense page; -1: uniform; <=-2: sparse page index = -2-Page (ADR-0023)
         public Cell Uniform;           // valid when Page == -1
         public ushort SolidCount;      // 1..4096
         public ushort Reserved;

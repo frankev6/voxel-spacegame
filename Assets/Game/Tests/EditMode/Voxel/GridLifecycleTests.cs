@@ -60,12 +60,13 @@ namespace Game.Tests.EditMode.Voxel
             var grid = EM.GetComponentData<VoxelGrid>(root);
             return EM.GetBuffer<BrickSlot>(root)[BrickMath.SlotIndex(coord, grid.BrickMin, grid.BrickDims)].Brick;
         }
+        Cell Read(Entity brick, int local) => BrickWrite.Get(EM.GetBuffer<BrickCells>(brick), EM.GetBuffer<BrickSparseCells>(brick), local);
         void Damage(Entity root, int3 coord, int index = 0)
         {
             Entity entity = BrickAt(root, coord); var brick = EM.GetComponentData<Brick>(entity); var dirty = EM.GetComponentData<BrickDirty>(entity);
             var grid = EM.GetComponentData<VoxelGrid>(root); grid.Revision++;
-            var cells = EM.GetBuffer<BrickCells>(entity); var value = cells[index].Value; value.Hp = 51; value.Flags = 3;
-            Assert.IsTrue(BrickWrite.Set(ref brick, cells, EM.GetBuffer<BrickSolidMask>(entity), ref dirty, index, value, grid.Revision));
+            var cells = EM.GetBuffer<BrickCells>(entity); var sparse = EM.GetBuffer<BrickSparseCells>(entity); var value = BrickWrite.Get(cells, sparse, index); value.Hp = 51; value.Flags = 3;
+            Assert.IsTrue(BrickWrite.Set(ref brick, cells, sparse, EM.GetBuffer<BrickSolidMask>(entity), ref dirty, index, value, grid.Revision));
             EM.SetComponentData(root, grid); EM.SetComponentData(entity, brick); EM.SetComponentData(entity, dirty); EM.SetComponentEnabled<BrickDirty>(entity, true);
         }
         void DestroyBrick(Entity root, int3 coord)
@@ -106,7 +107,7 @@ namespace Game.Tests.EditMode.Voxel
             GridSpawnApi.RequestDespawn(EM, root); Tick(); Assert.IsFalse(EM.Exists(root));
             var next = GridSpawnApi.RequestSpawn(EM, registry, handle, new GridSpawnParams
             { PersistentId = 87, Pose = RigidTransform.identity, Flags = GridSpawnFlags.NoRender | GridSpawnFlags.WriteBack });
-            Tick(); Assert.AreEqual(51, EM.GetBuffer<BrickCells>(BrickAt(next, new int3(1,0,0)))[0].Value.Hp);
+            Tick(); Assert.AreEqual(51, Read(BrickAt(next, new int3(1,0,0)), 0).Hp);
 
             var lattice = Own(BenchmarkStructures.Lattice2500(content.Index("block_hull")));
             var partial = Spawn(lattice, out _); Assert.IsTrue(lattice.IsPinned);
@@ -138,7 +139,7 @@ namespace Game.Tests.EditMode.Voxel
             Assert.AreEqual(oldGrid.Revision + 1, EM.GetComponentData<VoxelGrid>(root).Revision);
             Assert.IsTrue(EM.IsComponentEnabled<GridRebuilt>(root)); Assert.IsFalse(replacement.IsPinned);
             foreach (var entity in oldChildren) Assert.IsFalse(EM.Exists(entity));
-            Assert.IsTrue(EM.GetBuffer<BrickCells>(BrickAt(root, new int3(2,0,0)))[8].Value.IsAir);
+            Assert.IsTrue(Read(BrickAt(root, new int3(2,0,0)), 8).IsAir);
             Assert.AreEqual(0, GridStructureSync.WriteBack(EM, root, registry));
         }
         [Test] public void Despawn_DestroysAll()

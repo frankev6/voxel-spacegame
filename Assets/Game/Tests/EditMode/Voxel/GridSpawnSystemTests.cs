@@ -110,11 +110,12 @@ namespace Game.Tests.EditMode.Voxel
                 Assert.AreEqual(source.CellSize, transform.Scale);
                 Assert.AreEqual((float3)record.Coord * (16 * source.CellSize), transform.Position);
                 var cells = EM.GetBuffer<BrickCells>(entity); var masks = EM.GetBuffer<BrickSolidMask>(entity);
-                Assert.AreEqual(4096, cells.Length); Assert.AreEqual(64, masks.Length);
-                for (int i = 0; i < cells.Length; i++)
+                var sparse = EM.GetBuffer<BrickSparseCells>(entity);
+                Assert.AreEqual(record.SolidCount <= 1024 ? 0 : 4096, cells.Length); Assert.AreEqual(64, masks.Length);
+                for (int i = 0; i < 4096; i++)
                 {
-                    var expected = record.Page < 0 ? record.Uniform : source.Data.CellPages[record.Page * 4096 + i];
-                    Assert.AreEqual(expected, cells[i].Value);
+                    var expected = source.GetCell(BrickMath.CellOf(record.Coord, i));
+                    Assert.AreEqual(expected, BrickWrite.Get(cells, sparse, i));
                     Assert.AreEqual(!expected.IsAir, (masks[i >> 6].Bits & (1UL << (i & 63))) != 0);
                 }
             }

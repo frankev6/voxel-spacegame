@@ -12,6 +12,7 @@ namespace Game.Voxel.Model
     {
         [ReadOnly] public NativeArray<BrickRecord> Bricks;
         [ReadOnly] public NativeArray<Cell> Cells;
+        [ReadOnly] public NativeArray<BrickSparseCells> Sparse;
         [ReadOnly] public NativeArray<PaletteEntry> Palette;
         [ReadOnly] public NativeArray<BlockInstance> Instances;
         [ReadOnly] public BlobAssetReference<BlockDefsBlob> Blocks;
@@ -20,9 +21,12 @@ namespace Game.Voxel.Model
         public void Execute(int index)
         {
             var brick = Bricks[index]; var result = new StructureMassData();
-            for (int local = 0; local < BrickMath.CellsPerBrick; local++)
+            int length = brick.Page <= -2 ? brick.SolidCount : BrickMath.CellsPerBrick;
+            for (int i = 0; i < length; i++)
             {
-                Cell cell = brick.Page < 0 ? brick.Uniform : Cells[brick.Page * BrickMath.CellsPerBrick + local];
+                int local = i; Cell cell;
+                if (brick.Page <= -2) { var entry = Sparse[SparseCellStorage.PageIndex(brick.Page) * SparseCellStorage.Limit + i]; local = entry.Local; cell = entry.Value; }
+                else cell = brick.Page == -1 ? brick.Uniform : Cells[brick.Page * BrickMath.CellsPerBrick + local];
                 if (cell.IsAir) continue;
                 ushort block = cell.IsInstance ? Instances[cell.InstanceIndex].Block : Palette[cell.PaletteIndex].Block;
                 MassAccumulator.AddCell(ref result, BrickMath.CellOf(brick.Coord, local), CellSize, Blocks.Value.Blocks[block].CellMass);

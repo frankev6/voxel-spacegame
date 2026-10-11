@@ -105,7 +105,7 @@ namespace Game.Tests.EditMode.Voxel
             writer.Write(h.CellMax.x); writer.Write(h.CellMax.y); writer.Write(h.CellMax.z); writer.Write(h.MassRevision);
             writer.Write(structure.NativeBytes); writer.Write(data.BrickIndex.Count); writer.Write(data.BrickIndex.Capacity);
             Write(writer, data.Palette); Write(writer, data.Instances); Write(writer, data.FreeInstances);
-            Write(writer, data.Bricks); Write(writer, data.Masks); Write(writer, data.CellPages); Write(writer, data.FreePages);
+            Write(writer, data.Bricks); Write(writer, data.Masks); Write(writer, data.CellPages); Write(writer, data.FreePages); Write(writer, data.SparsePages); Write(writer, data.FreeSparsePages);
             for (int i = 0; i < data.Bricks.Length; i++) writer.Write(data.BrickIndex[data.Bricks[i].Coord]);
             return stream.ToArray();
         }

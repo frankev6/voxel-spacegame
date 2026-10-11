@@ -87,7 +87,7 @@ namespace Game.Tests.EditMode.Voxel
                     if (a.Source.Cells.Length != 0)
                         Assert.AreEqual(0, UnsafeUtility.MemCmp(a.Source.Cells.GetUnsafeReadOnlyPtr(), b.Source.Cells.GetUnsafeReadOnlyPtr(), (long)a.Source.Cells.Length * 4));
                     foreach (var record in original.Data.Bricks)
-                        if (record.Page < 0) Assert.AreEqual(-1, decoded.Data.Bricks[decoded.Data.BrickIndex[record.Coord]].Page);
+                        if (record.Page == -1) Assert.AreEqual(-1, decoded.Data.Bricks[decoded.Data.BrickIndex[record.Coord]].Page);
                 }
             }
         }

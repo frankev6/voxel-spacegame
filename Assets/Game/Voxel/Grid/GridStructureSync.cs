@@ -70,16 +70,28 @@ namespace Game.Voxel.Grid
         static int CopyChanged(EntityManager em, Entity root, VoxelStructure target, uint since)
         {
             int copied = 0;
-            foreach (var slot in em.GetBuffer<BrickSlot>(root))
+            var expanded = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Temp);
+            try
             {
-                Entity entity = slot.Brick;
-                if (entity == Entity.Null || !em.Exists(entity) || !em.HasComponent<Brick>(entity)) continue;
-                var brick = em.GetComponentData<Brick>(entity);
-                if (brick.ChangedRevision <= since) continue;
-                target.SetBrickDense(brick.Coord, em.GetBuffer<BrickCells>(entity).Reinterpret<Cell>().AsNativeArray());
-                target.OptimizeBrick(brick.Coord); copied++;
+                foreach (var slot in em.GetBuffer<BrickSlot>(root))
+                {
+                    Entity entity = slot.Brick;
+                    if (entity == Entity.Null || !em.Exists(entity) || !em.HasComponent<Brick>(entity)) continue;
+                    var brick = em.GetComponentData<Brick>(entity);
+                    if (brick.ChangedRevision <= since) continue;
+                    var dense = em.GetBuffer<BrickCells>(entity);
+                    if (dense.Length != 0) target.SetBrickDense(brick.Coord, dense.Reinterpret<Cell>().AsNativeArray());
+                    else
+                    {
+                        for (int i = 0; i < expanded.Length; i++) expanded[i] = default;
+                        foreach (var entry in em.GetBuffer<BrickSparseCells>(entity)) expanded[entry.Local] = entry.Value;
+                        target.SetBrickDense(brick.Coord, expanded);
+                    }
+                    target.OptimizeBrick(brick.Coord); copied++;
+                }
+                return copied;
             }
-            return copied;
+            finally { expanded.Dispose(); }
         }
         static bool Live(EntityManager em, DynamicBuffer<BrickSlot> slots, VoxelGrid grid, int3 coord)
         {

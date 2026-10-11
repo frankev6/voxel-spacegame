@@ -10,15 +10,15 @@ namespace Game.Voxel.Grid
     public struct GridCellReader
     {
         [ReadOnly] public ComponentLookup<VoxelGrid> Grids; [ReadOnly] public BufferLookup<BrickSlot> Slots;
-        [ReadOnly] public BufferLookup<BrickCells> Cells; [ReadOnly] public BufferLookup<BrickSolidMask> Masks;
+        [ReadOnly] public BufferLookup<BrickCells> Cells; [ReadOnly] public BufferLookup<BrickSparseCells> Sparse; [ReadOnly] public BufferLookup<BrickSolidMask> Masks;
         public static GridCellReader Create(ref SystemState state) => new GridCellReader
         {
             Grids = state.GetComponentLookup<VoxelGrid>(true), Slots = state.GetBufferLookup<BrickSlot>(true),
-            Cells = state.GetBufferLookup<BrickCells>(true), Masks = state.GetBufferLookup<BrickSolidMask>(true)
+            Cells = state.GetBufferLookup<BrickCells>(true), Sparse = state.GetBufferLookup<BrickSparseCells>(true), Masks = state.GetBufferLookup<BrickSolidMask>(true)
         };
         public void Update(ref SystemState state)
         {
-            Grids.Update(ref state); Slots.Update(ref state); Cells.Update(ref state); Masks.Update(ref state);
+            Grids.Update(ref state); Slots.Update(ref state); Cells.Update(ref state); Sparse.Update(ref state); Masks.Update(ref state);
         }
         public Entity GetBrick(Entity grid, int3 brickCoord)
         {
@@ -34,7 +34,9 @@ namespace Game.Voxel.Grid
             value = default;
             Entity brick = GetBrick(grid, BrickMath.BrickOf(cell));
             if (!Cells.HasBuffer(brick)) return false;
-            value = BrickWrite.Get(Cells[brick], BrickMath.LocalIndex(BrickMath.LocalOf(cell)));
+            int local = BrickMath.LocalIndex(BrickMath.LocalOf(cell));
+            var cells = Cells[brick];
+            value = cells.Length != 0 ? cells[local].Value : BrickWrite.Get(cells, Sparse[brick], local);
             return !value.IsAir;
         }
         public bool IsSolid(Entity grid, int3 cell)

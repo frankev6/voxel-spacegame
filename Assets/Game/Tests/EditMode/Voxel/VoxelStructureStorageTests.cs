@@ -53,7 +53,7 @@ namespace Game.Tests.EditMode.Voxel
             using var structure = new VoxelStructure();
             var first = new int3(-16, 0, 0); var second = new int3(32, 0, 0);
             structure.SetCell(first, Cell.Palette(1)); structure.SetCell(second, Cell.Palette(2));
-            int pageLength = structure.Data.CellPages.Length;
+            int pageLength = structure.Data.SparsePages.Length;
             int page = structure.Data.Bricks[structure.Data.BrickIndex[BrickMath.BrickOf(first)]].Page;
             structure.SetCell(first, default);
             Assert.AreEqual(1, structure.BrickCount);
@@ -63,18 +63,18 @@ namespace Game.Tests.EditMode.Voxel
             structure.SetCell(replacement, Cell.Palette(3));
             Assert.AreEqual(page, structure.Data.Bricks[structure.Data.BrickIndex[BrickMath.BrickOf(replacement)]].Page);
             Assert.AreEqual(default(Cell), structure.GetCell(new int3(64, 0, 0)));
-            Assert.AreEqual(pageLength, structure.Data.CellPages.Length);
+            Assert.AreEqual(pageLength, structure.Data.SparsePages.Length);
             Assert.IsTrue(structure.RemoveBrick(BrickMath.BrickOf(second)));
             Assert.IsFalse(structure.RemoveBrick(BrickMath.BrickOf(second)));
             structure.SetCell(replacement, default);
             Assert.AreEqual(0, structure.BrickCount);
             Assert.IsFalse(structure.TryGetCellBounds(out _, out _));
-            Assert.AreEqual(pageLength, structure.Data.CellPages.Length);
+            Assert.AreEqual(pageLength, structure.Data.SparsePages.Length);
             long allocated = structure.NativeBytes;
-            Assert.GreaterOrEqual(allocated, pageLength * 4L);
+            Assert.GreaterOrEqual(allocated, pageLength * 6L);
             structure.Clear();
             Assert.AreEqual(1, structure.Data.Palette.Length);
-            Assert.AreEqual(0, structure.Data.CellPages.Length);
+            Assert.AreEqual(0, structure.Data.SparsePages.Length);
             structure.SetCell(first, Cell.Palette(4));
             Assert.AreEqual(Cell.Palette(4), structure.GetCell(first));
         }
