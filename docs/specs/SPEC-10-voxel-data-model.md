@@ -917,10 +917,10 @@ Measured station geometry and allocation totals:
 - **Do:** Implement `VoxelStructureRegistry` (list of structures, never-reused handles, hooks), `BlueprintLibrary` (hash → definition map built from `catalog.All<ShipBlueprintDefinition>()`; decode with `VoxelStructureCodec.TryDecode(def.Payload, catalog, …)`; a failed decode logs one error and the blueprint is treated as unknown; `SetReadOnly`; cache by hash; `ReleaseUnpinnedLarge`).
 - **Files:** `Assets/Game/Voxel/Grid/{VoxelStructureRegistry,BlueprintLibrary}.cs`; `Assets/Game/Tests/EditMode/Voxel/{StructureRegistryTests,BlueprintLibraryTests}.cs`
 - **Acceptance criteria:**
-  - [ ] Handles are unique and never reused after `Release`; `Get` of a released handle returns null.
-  - [ ] A second `TryGet` of a blueprint returns the same instance without decoding (decode counter); it rejects mutation.
-  - [ ] `ReleaseUnpinnedLarge` disposes only unpinned structures above 65,536 cells.
-  - [ ] `Dispose` leaves no native leaks.
+  - [x] Handles are unique and never reused after `Release`; `Get` of a released handle returns null.
+  - [x] A second `TryGet` of a blueprint returns the same instance without decoding (decode counter); it rejects mutation.
+  - [x] `ReleaseUnpinnedLarge` disposes only unpinned structures above 65,536 cells.
+  - [x] `Dispose` leaves no native leaks.
 - **Tests:** `StructureRegistryTests.Handles_UniqueNeverReused`, `.Hooks_AddRemove`; `BlueprintLibraryTests.TryGet_CachesAndIsReadOnly`, `.UnknownHash_ReturnsFalse`, `.ReleaseUnpinnedLarge_KeepsPinned`, `.Dispose_NoLeaks`.
 
 ### VOX-012 — ECS cell write and read helpers

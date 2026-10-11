@@ -13,6 +13,8 @@ using Game.Input;
 using Game.Persistence.Container;
 using Game.Persistence.Data;
 using Game.Persistence.Services;
+using Game.Voxel.Grid;
+using Game.Voxel.Model;
 using Unity.Entities;
 using UnityEngine;
 
@@ -35,6 +37,8 @@ namespace Game.App.Boot
 
         internal SettingsService Settings { get; private set; }
         internal ContentService Content { get; private set; }
+        internal BlueprintLibrary Blueprints { get; private set; }
+        internal VoxelStructureRegistry Registry { get; private set; }
         internal InputService Input { get; private set; }
         internal AudioService Audio { get; private set; }
         internal PauseService Pause { get; private set; }
@@ -82,8 +86,12 @@ namespace Game.App.Boot
             Register(Content);
             Content.Catalog.TryGet(new ContentId("config_game"), out GameConfigDefinition gameConfig);
             GameConfig = gameConfig;                                       // FND-E003 guarantees exactly one in a validated database
-            // TODO(VOX-011): blueprints = new BlueprintLibrary(...); registry = VoxelStructureRegistry.CreateRuntime(blueprints);
-            //                VoxelStructureRegistryRef singleton; register BlueprintLibrary and VoxelStructureRegistry.
+            Blueprints = Push(new BlueprintLibrary(Content.Catalog, new VoxelContent { Blocks = Content.BlockDefs, Orientations = Content.Orientations }));
+            Register(Blueprints);
+            Registry = VoxelStructureRegistry.CreateRuntime(Blueprints);
+            Push(new RegistryLifetime(Registry)); Register(Registry);
+            var registryEntity = em.CreateSingleton(new VoxelStructureRegistryRef { Value = Registry });
+            em.AddComponent<BootSingleton>(registryEntity);
             Step("2 content");
 
             // 3. Input (INP-002).
@@ -147,6 +155,18 @@ namespace Game.App.Boot
             return service;
         }
 
+        sealed class RegistryLifetime : IDisposable
+        {
+            readonly VoxelStructureRegistry registry;
+            public RegistryLifetime(VoxelStructureRegistry registry) { this.registry = registry; }
+            public void Dispose()
+            {
+                if (registry == null) return;
+                if (Application.isPlaying) UnityEngine.Object.Destroy(registry);
+                else UnityEngine.Object.DestroyImmediate(registry);
+            }
+        }
+
         /// <summary>Disposes DisposeStack in reverse (one failure cannot leak the rest), then Services.Reset.</summary>
         public void Dispose()
         {
@@ -158,7 +178,7 @@ namespace Game.App.Boot
                 catch (Exception e) { GameLog.Exception(LogCategories.Boot, e, "GameComposition.Dispose " + DisposeStack[i].GetType().Name); }
             }
             DisposeStack.Clear();
-            Settings = null; Content = null; Input = null; Audio = null; Pause = null; Save = null; GameConfig = null; Flow = null;
+            Settings = null; Content = null; Blueprints = null; Registry = null; Input = null; Audio = null; Pause = null; Save = null; GameConfig = null; Flow = null;
             Game.Core.Services.Reset();
         }
     }
