@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 82 | 0 | 0 | 0 | 18 | 0 | 100 | 14 |
+| M1 | 81 | 0 | 0 | 0 | 19 | 0 | 100 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -122,9 +122,9 @@
 | VOX-006 | Block placement, removal and compaction | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6a33cf7 | Placement/removal, palette/instance reuse, compaction; GetBlocks brought forward (Q65) |
 | VOX-007 | Clone, diff, block enumeration and mass | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-006 | yes | done | astra (gpt-6) | 2026-10-11 | 37cb539 | Deep clone; canonical Burst diff; double mass sums/cache; 6 tests |
 | VOX-008 | Grid-space DDA raycast | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005 | yes | todo |  |  |  |  |
-| VOX-009 | VOXS codec | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-007, VOX-017, SPEC-05 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Structure codec adapter and tombstone-preserving round trip |
+| VOX-009 | VOXS codec | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-007, VOX-017, SPEC-05 | yes | done | astra (gpt-6) | 2026-10-11 | dd88202 | VOXS adapter/hash; exact round trips; tombstone/worker fixes Q68–70; 8 tests |
 | VOX-010 | Voxel definitions and config factory | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | edb5c0c | Blueprint setter, default config, boot singleton; 2 tests, Q64 |
-| VOX-011 | Structure registry and BlueprintLibrary | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-009, VOX-010 | no | todo |  |  |  |  |
+| VOX-011 | Structure registry and BlueprintLibrary | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-009, VOX-010 | yes | todo |  |  |  |  |
 | VOX-012 | ECS cell write and read helpers | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-004 | yes | done | astra (gpt-6) | 2026-10-11 | 0b52cc8 | Burst cell reads/writes, masks, counts, dirty flags and borders; Q63 |
 | VOX-013 | GridSpawnSystem: spawn path and singletons | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-006, VOX-011, VOX-012, REN-001, PHY-001, TST-001 | no | todo |  |  |  |  |
 | VOX-014 | Rebuild, despawn and write-back | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | no | todo |  |  |  |  |
@@ -661,6 +661,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — VOX-009 structure VOXS adapter (astra, gpt-6)
+
+- Implemented canonical structure-to-source expansion, encoding through the existing codec, full-payload decoding, palette/instance restoration, uniform optimization and content hash. Source buffers own only coordinate/cell copies. No second byte format was introduced.
+- Regression proved raw repair collapsed a valid three-slot instance table to one; unreferenced block-zero tombstones now retain their slots, while existing D3 drift repair still applies (Q68 / SPEC-05 Q26). Restored free indices are ascending/LIFO; raw empty palettes get reserved slot zero (Q69). Worker-safe encoding uses TempJob sort storage (Q70). Failure evidence: Logs/tools/vox009-tombstone-before-fix.xml.
+- Eight tests pass: required five plus tombstone reuse, partial/truncation rejection and managed-worker byte equality. Empty, Ship20k, reference station, asteroid and 5,000-op damaged/tombstoned structures round-trip byte-identically, compressed and uncompressed. Reference adapter+encode **22.48 ms median / 23.75 ms p95**, decode+adapter **58.21 / 60.42 ms**, budgets 60/150 ms (11 samples). Separate perf records preserve both gates.
+- Validation: compile zero C# warnings; full EditMode **492 passed + 1 explicit skipped**, PlayMode **31 passed**, perf **27/27**, docs zero errors. Next VOX-011 registry/cache and boot integration.
 
 ### 2026-10-11 — VOX-017 benchmark structures (astra, gpt-6)
 
