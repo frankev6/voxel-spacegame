@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 33 | 0 | 0 | 0 | 33 | 0 | 66 | 11 |
+| M0 | 32 | 0 | 0 | 0 | 34 | 0 | 66 | 10 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -54,7 +54,7 @@
 | CORE-009 | ECS→managed event bridge | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-006, CORE-008 | yes | todo |  |  |  |  |
 | CORE-010 | Math helpers | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4998e40 |  |
 | CORE-011 | Settings model | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 8f2e125 |  |
-| CORE-012 | Simulation event channels | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001, CORE-004 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| CORE-012 | Simulation event channels | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001, CORE-004 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 7458403 | 0.9 µs per pair; read set de-nested (OQ 11) |
 | INP-001 | Public contract types and the actions asset | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 943e0fd | Edit-mode Dispose trap: SPEC-03 Q4 |
 | INP-002 | InputService contexts and display strings | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | bad1ed2 | Also ApplyBindingOverrides/SaveBindingOverridesJson; SPEC-03 Q4, Q5 resolved |
 | INP-003 | Rebinding and overrides | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-002 | yes | todo |  |  |  |  |
@@ -567,6 +567,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — CORE-012 simulation event channels (claude, claude-opus-5-5)
+- `SimEventChannel<T>` (one Persistent data block behind a pointer), `SimEventReadSet`, `SimEventGather` per SPEC-02 §5.13. Stale registrations are disposed at the `BeginTick` one full tick after they were written, with one warning per channel; their disposal handles join `LastConsumer`.
+- **Spec defect fixed (SPEC-02 open question 11, ledger 17):** the specified `NativeArray<NativeStream.Reader>` is a nested native container, and every job rejects it. The read set now hands out readers through `Reader(i)`, and the gather chains one Burst job per registration. Consumers in SPEC-13/22 already go through `SimEventGather`, so nothing else changes. Each event type's owner adds `RegisterGenericJobType(typeof(SimEventGather.Job<TEvent>))`.
+- Tests: two parallel `IJobChunk` producers on 8 workers (3,000 + 2,000 events over many chunks) gather in registration-then-index order, identical over 20 runs. Late registrations arrive in the next tick. Stale streams leave no leak by `CheckForLeaks`; the test fails if the dispose is removed. Misuse throws. The main-thread inbox comes first. `GuardedHandles` with one writer and two readers raises no safety errors.
+- Measured: `BeginWrite`+`EndWrite` and `BeginRead`+`EndRead` each 0.9 µs median, 0 B GC (gate ≤ 5 µs). EditMode 215/215.
 
 ### 2026-10-11 — FND-004 settings service (claude, claude-opus-5-5)
 - `SettingsService` loads and saves `settings.json` under `persistentDataPath` with an atomic temp-file write and a 0.5 s save debounce. A corrupt file falls back to defaults, is renamed to `settings.broken.json` and logs a Settings warning. `Apply` publishes `SettingsChanged` only for the sections that changed.
