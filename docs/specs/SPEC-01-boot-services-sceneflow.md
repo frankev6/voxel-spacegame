@@ -881,6 +881,7 @@ If no save exists, "Load last save" is disabled.
 | 3 | Defeat options | "Load last save" and "Main menu"; no respawn | Owner |
 | 4 | Multiple ships in the fleet (M4) | `FleetModel` supports many; M3 uses only the flagship | Owner |
 | 5 | Release builds starting in a non-Boot scene | Not supported; always Boot | Tech lead |
+| 6 | FND-003 publishes `PauseStateChanged` through `EventBus<T>` (CORE-006), but its *Depends on* lists only FND-001, so it was ready before the bus exists (found 2026-10-11) | FND-003 waits for CORE-006 (status `blocked`); add `CORE-006` to its *Depends on* | Tech lead |
 
 ## 11. References
 

@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 56 | 0 | 0 | 0 | 10 | 0 | 66 | 16 |
+| M0 | 55 | 0 | 1 | 0 | 10 | 0 | 66 | 15 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
@@ -37,7 +37,7 @@
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | FND-001 | Public contract types | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 338c29a | GameRootConfig.UiConfig/CameraConfig wait for SPEC-60/62 |
 | FND-002 | Bootstrap, GameRoot and explicit World creation | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-001 | yes | todo |  |  |  |  |
-| FND-003 | PauseService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| FND-003 | PauseService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001 | yes | blocked | claude (claude-opus-5-5) | 2026-10-11 |  | Blocked on CORE-006: PauseStateChanged is published through EventBus<T> (SPEC-01 Q6, ledger Q13) |
 | FND-004 | SettingsService and SettingsApplier | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001, PERS-001 | no | todo |  |  |  |  |
 | FND-005 | Composition root and BootSingletons | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-002, FND-003, FND-004, SPEC-02, SPEC-04 | no | todo |  |  |  |  |
 | FND-006 | SceneFlow transitions and teardown | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-005 | no | todo |  |  |  |  |
@@ -551,6 +551,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 10 | 2026-10-11 | SPEC-10 VOX-001, VOX-009; SPEC-05 PERS-001 | The VOXS adapter members need SPEC-05 types that PERS-001 creates after VOX-001 (SPEC-10 open question 14) | VOX-009 adds them; VOX-001 creates the files without them | Tech lead | |
 | 11 | 2026-10-11 | SPEC-03 INP-001, INP-002 | The generated `Controls.Dispose()` errors in edit mode (SPEC-03 open question 4) | `InputService.Dispose` uses `DestroyImmediate` outside Play Mode | Tech lead | |
 | 12 | 2026-10-11 | SPEC-03 §4.2, INP-002 | No task sets `shortcutKeysConsumeInput` in `ProjectSetup` (SPEC-03 open question 5) | INP-002 adds it | Tech lead | |
+| 13 | 2026-10-11 | SPEC-01 FND-003 | FND-003 needs `EventBus<T>` (CORE-006) but does not depend on it (SPEC-01 open question 6) | FND-003 blocked until CORE-006 is done | Tech lead | |
 
 ## Measurements
 
