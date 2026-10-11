@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 52 | 1 | 0 | 0 | 50 | 0 | 103 | 17 |
+| M1 | 52 | 0 | 0 | 0 | 51 | 0 | 103 | 18 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -170,11 +170,11 @@
 | PHY-023 | Urgent collider deadlines across catch-up frames | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-018, PHY-019 | yes | done | astra (gpt-6) | 2026-10-11 | a912ab2 | ADR-0035 urgent deadline completion outside fixed step; strict determinism and full gates pass |
 | DMG-001 | Public contract types | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 9310e7c | Public damage/restore/impulse contracts, 43 config defaults, table lookup; 4 tests; Q71–74 |
 | FLT-001 | Public contract types | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0ddf5bf | Unmanaged flight/input contracts; exact SPEC-03 fields; Q112 comment corrections |
-| FLT-002 | Grid-space and flight maths | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Resumed after PHY-023; rebase and full validation pending |
+| FLT-002 | Grid-space and flight maths | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | ec30fc9 | Grid geometry, gyro, caps and assist targets; eight required tests |
 | FLT-003 | Flight config definition and factory | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | todo |  |  |  |  |
 | FLT-004 | Thrust allocator | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001 | yes | todo |  |  |  |  |
 | FLT-005 | PlayerCommandApplySystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001, DMG-001 | yes | todo |  |  |  |  |
-| FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | no | todo |  |  |  |  |
+| FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | yes | todo |  |  |  |  |
 | FLT-007 | PropulsionSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-002, FLT-004, FLT-006, DMG-001, SPEC-12 | no | todo |  |  |  |  |
 | FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | yes | todo |  |  |  |  |
 | FLT-009 | Flight behaviour scenarios | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-005, FLT-007, FLT-008, SPEC-10 | no | todo |  |  |  |  |
@@ -727,6 +727,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — FLT-002 grid-space and flight maths (astra, gpt-6)
+
+- Implemented instance/point/direction transforms, capped gyro torque, directional speed caps, world-to-local planar velocity and assist targets. Brake wins over boost; boost changes only the forward speed cap; coasting is clamped to the directional caps.
+- All eight required tests pass, including the shipped two-cell thruster centres at orientations 0/8, all 24 orthonormal orientations and transformed round trips. Resumed after PHY-023 and verified the previously failing full-suite combination: strict collider determinism and zero-late gates pass.
+- Full validation: compile **zero C# warnings**, EditMode **627 passed + 1 explicit skipped**, PlayMode **48 passed**, perf **38/38**, docs **504 tasks / zero errors**. Implementation `ec30fc9`.
+- Next: FLT-003 config and FLT-006 profile registration, then fleet/player spawning and remaining M1 work. No new spec decisions.
 
 ### 2026-10-11 — PHY-023 urgent collider deadline repair (astra, gpt-6)
 
