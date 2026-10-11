@@ -1068,7 +1068,7 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Do:** EditMode test world stepping the real fixed-step groups with a driver that runs 1 tick per frame (60 FPS), 2–3 ticks per frame (30 FPS pattern), 0/1 alternating (144 FPS pattern) and 6 ticks per frame (10 FPS). Scripted cell removals at fixed ticks on three grids (one 1M-cell station, two ships). Record, per tick: `(Serial, InstalledTick, hash of installed blob bytes)`, `PhysicsMass`, `PhysicsVelocity`. Run with worker count 1 and max.
 - **Files:** `Assets/Game/Tests/EditMode/Voxel/Physics/ColliderDeterminismTests.cs`
 - **Acceptance criteria:**
-  - [ ] Identical per-tick records for all four frame patterns and both worker counts; `LateInstalls == 0` in every run.
+  - [x] Identical per-tick records for all four frame patterns and both worker counts; `LateInstalls == 0` in every run.
 - **Tests:** `ColliderDeterminismTests.InstallTicks_IndependentOfFramePattern`, `.Mass_IndependentOfWorkerCount`.
 
 ### PHY-019 — Performance gates and memory
