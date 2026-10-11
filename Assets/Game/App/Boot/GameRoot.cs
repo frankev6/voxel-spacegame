@@ -12,7 +12,7 @@ namespace Game.App.Boot
     public sealed class GameRoot : MonoBehaviour
     {
         [SerializeField] private GameRootConfig config;
-        internal static GameRoot Instance;                        // reset in SubsystemRegistration (Bootstrap)
+        [StaticStateOk("reset by Bootstrap.ResetStatics in SubsystemRegistration")] internal static GameRoot Instance;
         internal GameComposition Composition { get; private set; }
         internal GameRootConfig Config => config;
 

@@ -4,7 +4,7 @@ namespace Game.Core.Events
     /// delivery happens in EventHub.DrainAll (once per frame) or EventBus&lt;T&gt;.Drain (tests).</summary>
     public static class EventBus<T> where T : struct
     {
-        static EventChannel<T> channel;   // created on first use; EventHub.Reset detaches it
+        [StaticStateOk("detached by EventHub.Reset, which runs in SubsystemRegistration")] static EventChannel<T> channel;   // created on first use
 
         static EventChannel<T> Channel => channel ??= EventHub.Register(new EventChannel<T>(DetachChannel));
         static void DetachChannel() { channel = null; }

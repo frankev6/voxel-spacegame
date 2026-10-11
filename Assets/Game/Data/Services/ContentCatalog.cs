@@ -27,7 +27,7 @@ namespace Game.Data.Services
 
         sealed class ReferenceComparer : IEqualityComparer<ContentDefinition>
         {
-            public static readonly ReferenceComparer Instance = new ReferenceComparer();
+            [Game.Core.StaticStateOk("stateless comparer")] public static readonly ReferenceComparer Instance = new ReferenceComparer();
             public bool Equals(ContentDefinition a, ContentDefinition b) => ReferenceEquals(a, b);
             public int GetHashCode(ContentDefinition d) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(d);   // in-memory only
         }

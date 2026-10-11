@@ -7,7 +7,7 @@ namespace Game.Persistence.Services
     public sealed class SaveChunkRegistry
     {
         /// <summary>The §4.8 table; immutable. Adding a participant = adding a row here and in the spec table in the same commit.</summary>
-        public static SaveChunkRegistry Default { get; } = new SaveChunkRegistry(new[]
+        [field: Game.Core.StaticStateOk("immutable registry built once")] public static SaveChunkRegistry Default { get; } = new SaveChunkRegistry(new[]
         {
             new ChunkRegistration("SESS", 10, "SPEC-01", "galaxy seed, UniversalTime, playtime, the PersistentId counter, session flags (creative), new-game options"),
             new ChunkRegistration("FACT", 20, "SPEC-40", "FactStore"),

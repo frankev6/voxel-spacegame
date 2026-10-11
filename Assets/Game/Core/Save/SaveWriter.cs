@@ -13,7 +13,7 @@ namespace Game.Core.Save
     public sealed class SaveWriter : IDisposable
     {
         public const int DefaultCapacity = 4096;
-        static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, false);   // lone surrogates → U+FFFD (frozen behaviour)
+        [StaticStateOk("immutable, stateless encoding")] static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, false);   // lone surrogates → U+FFFD (frozen behaviour)
 
         readonly ISaveIdPalette palette;
         readonly ISaveJsonCodec json;

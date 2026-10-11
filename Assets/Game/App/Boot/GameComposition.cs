@@ -25,7 +25,7 @@ namespace Game.App.Boot
         /// <summary>Step names in construction order (FND-005 test hook).</summary>
         internal readonly List<string> StepLog = new List<string>();
         /// <summary>Type names in disposal order of the last Dispose (FND-005 test hook).</summary>
-        internal static readonly List<string> LastDisposeLog = new List<string>();
+        [StaticStateOk("test hook, rewritten by every Dispose")] internal static readonly List<string> LastDisposeLog = new List<string>();
         /// <summary>Test hook: Build throws after the step with this name. Reset by tests.</summary>
         [StaticStateOk("test hook, reset by CompositionTests")] internal static string FailAfterStep;
         /// <summary>Test hook: a failed Build stops Play Mode in the Editor unless a test turns this off.</summary>

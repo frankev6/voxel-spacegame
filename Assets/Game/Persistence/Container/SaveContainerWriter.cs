@@ -12,7 +12,7 @@ namespace Game.Persistence.Container
         internal const int TableEntrySize = 20;
         internal const int MaxChunks = 4096;
         internal const int MaxRawLength = 268_435_456;
-        internal static readonly byte[] Magic = { 0x53, 0x53, 0x47, 0x53 };   // "SSGS"
+        [Game.Core.StaticStateOk("constant, never written")] internal static readonly byte[] Magic = { 0x53, 0x53, 0x47, 0x53 };   // "SSGS"
 
         /// <summary>Compresses and checksums each chunk, writes header + table + payloads. Thread-agnostic. Always writes the newest
         /// format; header.FormatVersion, HeaderFlags, ChunkCount and HeaderCrc32 are ignored (computed). A payload is deflated only when

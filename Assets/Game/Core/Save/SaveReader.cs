@@ -12,7 +12,7 @@ namespace Game.Core.Save
     public sealed class SaveReader
     {
         public const int MaxStringBytes = 16 * 1024 * 1024;
-        static readonly UTF8Encoding StrictUtf8 = new UTF8Encoding(false, throwOnInvalidBytes: true);
+        [StaticStateOk("immutable, stateless encoding")] static readonly UTF8Encoding StrictUtf8 = new UTF8Encoding(false, throwOnInvalidBytes: true);
 
         [StaticStateOk("immutable: zero-length payload, every read throws and Position stays 0")]
         static readonly SaveReader EmptyReader = new SaveReader(Array.Empty<byte>());

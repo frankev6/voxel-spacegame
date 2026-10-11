@@ -14,6 +14,12 @@ namespace Game.Core.Diagnostics
         static readonly List<(string name, double ms)> scratch = new List<(string name, double ms)>();
 #endif
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// <summary>Domain reload is off: recorders from the last Play session are disposed when the next one starts.</summary>
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics() => StopRecording();
+#endif
+
         /// <summary>Idempotent: a second call only adds markers that appeared since (systems created later).</summary>
         public static void StartRecording(int capacityFrames = 1)
         {

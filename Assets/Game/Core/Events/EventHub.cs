@@ -51,6 +51,8 @@ namespace Game.Core.Events
         }
 
         public static bool IsDraining => draining;
+        /// <summary>Registered channels (one per payload type in use); diagnostics and the Play Mode re-entry test.</summary>
+        internal static int ChannelCount => channels.Count;
         public static int PendingCount => pending.Count;                    // pending entries across all types (stale entries included)
 
         /// <summary>SubsystemRegistration and tests: clears all buses, handlers and pending events.</summary>

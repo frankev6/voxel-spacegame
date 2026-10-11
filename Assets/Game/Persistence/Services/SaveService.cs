@@ -175,9 +175,9 @@ namespace Game.Persistence.Services
         /// <summary>Set by a successful save or load (PERS-005/006).</summary>
         internal void MarkCurrentSlot(SlotRef slot) { currentSlot = slot; }
 
-        static readonly Regex ProfileFolder = new Regex("^p[0-9]{3}$", RegexOptions.CultureInvariant);
-        static readonly Regex SlotFolder = new Regex("^(manual_[0-9]{3}|quick|auto_[0-9])$", RegexOptions.CultureInvariant);
-        static readonly Regex ManualFolder = new Regex("^manual_([0-9]{3})$", RegexOptions.CultureInvariant);
+        [Game.Core.StaticStateOk("immutable regex")] static readonly Regex ProfileFolder = new Regex("^p[0-9]{3}$", RegexOptions.CultureInvariant);
+        [Game.Core.StaticStateOk("immutable regex")] static readonly Regex SlotFolder = new Regex("^(manual_[0-9]{3}|quick|auto_[0-9])$", RegexOptions.CultureInvariant);
+        [Game.Core.StaticStateOk("immutable regex")] static readonly Regex ManualFolder = new Regex("^manual_([0-9]{3})$", RegexOptions.CultureInvariant);
 
         /// <summary>Status rules of §5.2. A valid meta.json gives Ok when world.sav exists. Otherwise (and when meta.json is missing or invalid):
         /// world.sav → MetaMissing (Meta from its META chunk when readable), only world.bak → BackupOnly, nothing → Corrupt.

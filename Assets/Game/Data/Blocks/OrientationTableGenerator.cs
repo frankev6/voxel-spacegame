@@ -7,7 +7,7 @@ namespace Game.Data.Blocks
     /// <summary>Generates the 24-orientation tables (SPEC-04 §4.7, §5.3). Decision 7: orientation 0 is identity; yaw-only orientations are 0, 4, 8, 12.</summary>
     public static class OrientationTableGenerator
     {
-        internal static readonly int3[] FaceVectors =
+        [Game.Core.StaticStateOk("constant table, never written after the static constructor")] internal static readonly int3[] FaceVectors =
         { new int3(1, 0, 0), new int3(-1, 0, 0), new int3(0, 1, 0), new int3(0, -1, 0), new int3(0, 0, 1), new int3(0, 0, -1) };
 
         /// <summary>§5.3 steps 1–5.</summary>

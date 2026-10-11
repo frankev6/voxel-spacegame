@@ -6,7 +6,7 @@ namespace Game.Persistence.Container
     /// 0xCBF43926. Slice-by-8 tables. Thread-safe. Implements SPEC-05 §4.2, §4.5.</summary>
     public static class Crc32
     {
-        static readonly uint[] Table = BuildTable();       // 8 × 256 entries
+        [Game.Core.StaticStateOk("constant table, never written after the static constructor")] static readonly uint[] Table = BuildTable();       // 8 × 256 entries
 
         static uint[] BuildTable()
         {

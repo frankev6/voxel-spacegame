@@ -7,7 +7,11 @@ namespace Game.Core
     /// so an interface and a concrete registration of the same object are independent slots.</summary>
     public static class Services
     {
-        static class Slot<T> where T : class { internal static T Instance; internal static bool Tracked; }
+        static class Slot<T> where T : class
+        {
+            [StaticStateOk("cleared by Services.Reset, which runs in SubsystemRegistration")] internal static T Instance;
+            [StaticStateOk("cleared by Services.Reset, which runs in SubsystemRegistration")] internal static bool Tracked;
+        }
 
         static readonly List<Action> resetters = new List<Action>(64);   // one per type ever registered since the last Reset
         static int count;
