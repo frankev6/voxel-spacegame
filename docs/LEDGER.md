@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 32 | 0 | 0 | 0 | 34 | 0 | 66 | 10 |
+| M0 | 31 | 0 | 0 | 0 | 35 | 0 | 66 | 9 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -51,7 +51,7 @@
 | CORE-006 | EventBus and EventHub | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-004 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 3f0a613 | Drain1000 median 0.025 ms (gate 0.3), 0 B GC |
 | CORE-007 | Binary save primitives | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-002 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 8d0f489 | Write1MiB median 2.29 ms (gate 3 ms) |
 | CORE-008 | System groups and pipeline order | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 8edb9ad | No changes to the groups were needed |
-| CORE-009 | ECS→managed event bridge | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-006, CORE-008 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| CORE-009 | ECS→managed event bridge | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-006, CORE-008 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 134dadc | idle 0.0001 ms; 1,000 in 0.11 ms; OQ 12, 13 |
 | CORE-010 | Math helpers | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4998e40 |  |
 | CORE-011 | Settings model | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 8f2e125 |  |
 | CORE-012 | Simulation event channels | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001, CORE-004 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 7458403 | 0.9 µs per pair; read set de-nested (OQ 11) |
@@ -569,6 +569,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — CORE-009 ECS→managed event bridge (claude, claude-opus-5-5)
+- `ManagedEventDrainSystem` per SPEC-02 §5.6. It registers channels idempotently, one named singleton queue each. Each frame it completes the producers, sorts the batch by (Tick, SortKey, payload hash), publishes, then runs `EventHub.DrainAll`. `OnDestroy` disposes every queue.
+- **Spec defect fixed (SPEC-02 open question 13, ledger 19):** the payload hash covered padding bytes, which are undefined, so equal-key events sorted differently between runs. The 20-run test caught it. The hash now covers field bytes only.
+- **Test scope (open question 12, ledger 18):** `ManagedEventChannelsTests` skips the managed-only `SessionReset`. No ECS-produced payload exists yet, so the test checks none until SPEC-13/30 add theirs.
+- Tests: a parallel Burst producer on 8 workers (1,000 events) delivers sorted and identical over 20 runs. Two producers on one queue raise no safety errors. World disposal leaks nothing (`CheckForLeaks`). Registering twice creates one singleton. The transfer publishes before `DrainAll`.
+- Measured: idle drain 0.0001 ms median, 0 B GC (gate ≤ 0.02 ms). Transfer of 1,000 envelopes 0.11 ms median in PlayMode (gate ≤ 0.5 ms). EditMode 224/224, PlayMode 3/3.
 
 ### 2026-10-11 — CORE-012 simulation event channels (claude, claude-opus-5-5)
 - `SimEventChannel<T>` (one Persistent data block behind a pointer), `SimEventReadSet`, `SimEventGather` per SPEC-02 §5.13. Stale registrations are disposed at the `BeginTick` one full tick after they were written, with one warning per channel; their disposal handles join `LastConsumer`.
