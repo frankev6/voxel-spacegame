@@ -29,6 +29,14 @@ namespace Game.App.DevRuntime.Ui
             text = (text ?? "").Replace('\n', ' ').Replace('\r', ' ').Trim();
             return text.Length > max ? text.Substring(0, max) + "…" : text;
         }
+        public bool ContainsText(string text) => Contains(resolveRoot(), text);
+        static bool Contains(VisualElement element, string text)
+        {
+            if (element == null) return false;
+            if (element is TextElement label && Shown(label) && !string.IsNullOrEmpty(label.text) && label.text.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            for (int i = 0; i < element.hierarchy.childCount; i++) if (Contains(element.hierarchy[i], text)) return true;
+            return false;
+        }
         public string Text(int max = 60, int chars = 200)
         {
             if (max < 1 || chars < 1) throw new ArgumentException("max and chars must be positive");

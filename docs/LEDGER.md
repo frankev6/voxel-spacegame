@@ -588,6 +588,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 44 | 2026-10-11 | SPEC-70 DEV-004 / SPEC-60 UI-003 | UI query precedes UIRoot (SPEC-70 Q14) | Explicit test root resolver; production UIDocument service registered by UI-003 | Tech lead | Resolved; unavailable until real UI exists, no scene search |
 
+| 45 | 2026-10-11 | SPEC-70 DEV-005 | Expression grammar and R28 example contradictions (SPEC-70 Q15) | Highest unary precedence, uppercase tags, explicit future test registrations; active default | Tech lead | Resolved; no fake production features |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).

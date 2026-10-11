@@ -17,6 +17,7 @@ namespace Game.App.DevRuntime
             EventBus<GameSaved>.Subscribe(OnGameSaved);
             EventBus<GameLoaded>.Subscribe(OnGameLoaded);
         }
+        internal Dictionary<string, long> Snapshot() => new Dictionary<string, long>(counts, StringComparer.Ordinal);
         public long Count(string name) => counts.TryGetValue(name, out long count) ? count : throw new ArgumentException("unknown event '" + name + "'");
         void OnSessionReset(SessionReset e) { counts[nameof(SessionReset)]++; }
         void OnGameSaved(GameSaved e) { counts[nameof(GameSaved)]++; }

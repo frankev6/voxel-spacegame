@@ -39,6 +39,7 @@ namespace Game.App.DevRuntime
         bool disposed;
         public DevCommandRegistry Commands { get; private set; }
         public DevContext Context { get; private set; }
+        public Scenarios.ScenarioProbeRegistry Probes { get; private set; }
         public DevLogCapture Logs { get; private set; }
         public DevInputInjector Input { get; private set; }
         public DevUiQuery Ui { get; private set; }
@@ -56,6 +57,7 @@ namespace Game.App.DevRuntime
                 host.Ui = new DevUiQuery();
                 host.Context = new DevContext(host);
                 host.Commands = DevCommandRegistry.CreateDefault();
+                host.Probes = Scenarios.ScenarioProbeRegistry.CreateDefault();
                 return host;
             }
             catch { host.Dispose(); throw; }
@@ -96,6 +98,7 @@ namespace Game.App.DevRuntime
             disposed = true;
             foreach (var op in operations.Values) if (op.Status == DevOperationStatus.Running) op.Fail("play mode exited");
             running.Clear();
+            Context?.Dispose();
             Input?.Dispose();
             Events?.Dispose();
             if (Logs != null) Logs.enabled = false;

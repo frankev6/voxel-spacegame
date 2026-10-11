@@ -219,13 +219,13 @@ header      := 'scenario' NAME | 'desc' STRING | 'status' ('draft'|'active') | '
 step        := 'wait' expr ['timeout=' NUMBER] | 'wait' 'ticks=' INT | 'wait' 'frames=' INT
              | 'assert' expr [STRING] | 'let' NAME '=' expr | 'expect_errors' INT
              | COMMAND (KEY '=' VALUE | WORD)*                # any registered dev command, same syntax as the console
-expr        := or ;  or := and ('||' and)* ;  and := not ('&&' not)* ;  not := '!' not | cmp
+expr        := or ;  or := and ('||' and)* ;  and := cmp ('&&' cmp)*
 cmp         := sum [('=='|'!='|'<'|'<='|'>'|'>=') sum] ;  sum := term (('+'|'-') term)* ;  term := unary (('*'|'/') unary)*
-unary       := '-' unary | primary
+unary       := ('!'|'-') unary | primary
 primary     := NUMBER | STRING | 'true' | 'false' | '$' NAME | probe | '(' expr ')'
 probe       := NAME ('.' NAME)* ['(' [expr (',' expr)*] ')']
 ```
-Rules: `scenario` must be the first statement; NAME is `[a-z0-9_]+`; STRING is `"…"` with `\"` and `\\` escapes; numbers are invariant-culture doubles; `==` on strings is ordinal; mixing kinds in a comparison is a runtime error (exit 2); unknown probe or command is a parse error (exit 2) reported with the line number.
+Rules: `scenario` must be the first statement; NAME is `[a-z0-9_]+` (tags also allow uppercase, e.g. `R28`; variable/probe names start with a letter or underscore); STRING is `"…"` with `\"` and `\\` escapes; numbers are invariant-culture doubles; `==` on strings is ordinal; mixing kinds in a comparison is a runtime error (exit 2); unknown probe or command is a parse error (exit 2) reported with the line number.
 
 Built-in probes (DEV-005 unless noted):
 
@@ -642,6 +642,8 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 | 13 | DEV-003 precedes seven managed-event payloads and the camera/player contracts. How is the M0 host staged? | **Answered:** subscribe to the three existing types (SessionReset, GameSaved, GameLoaded); reserve all ten counter names with zero until their owning payload tasks add typed subscriptions. CAM-004/DEV-009 wire camera/player lookups when available; return null/Entity.Null in M0. DEV-004 adds input/UI, DEV-005 expressions, DEV-006 runners. No speculative shared contracts or assembly changes. | Tech lead |
 
 | 14 | DEV-004 needs UIRoot before UI-003; how is its document obtained in M0? | **Answered:** DevUiQuery accepts an explicit root resolver for its real-panel tests; default resolver reads a registered UIDocument service. UI-003 registers its owned document at composition (alongside UIRoot) and unregisters it on disposal. With no UI in M0, commands report UI root unavailable. No scene search or placeholder UI. | Tech lead |
+
+| 15 | DEV-005 grammar conflicts with highest-precedence `!`, uppercase R28 tags, and missing future registrations in its example | **Answered:** follow the acceptance precedence (`!`/unary minus highest), allow uppercase in tags only, and test the exact R28 example with explicitly registered parse-only fixtures for future commands/probes. Production still rejects unregistered names. Omitted status is active; header timeout defaults to 300 s and wait timeout to 30 s. | Tech lead |
 
 ## 11. References
 

@@ -1,7 +1,8 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+using Game.App.DevRuntime.Scenarios;
 namespace Game.App.DevRuntime.Commands
 {
-    /// <summary>Expression entry point; DEV-005 supplies the evaluator (SPEC-70 DEV-003).</summary>
+    /// <summary>Evaluate a scenario expression once (SPEC-70 DEV-005).</summary>
     public sealed class UntilDevCommand : IDevCommand
     {
         public string Name => "until";
@@ -10,7 +11,10 @@ namespace Game.App.DevRuntime.Commands
         public DevCommandResult Execute(DevArgs args, DevContext ctx)
         {
             string error = DevCommandRegistry.UnknownArgument(args, Name, "cond");
-            return DevCommandResult.Fail(error ?? "expressions not available");
+            if (error != null) return DevCommandResult.Fail(error);
+            if (!args.Has("cond") || args.Positional.Count != 0) return DevCommandResult.Fail("expected " + Usage);
+            var expression = ScenarioParser.ParseExpression(args.GetString("cond", ""), ctx.Host.Probes);
+            return DevCommandResult.Ok(ScenarioExpression.RequireBool(expression.Evaluate(ctx)) ? "true" : "false");
         }
     }
 }
