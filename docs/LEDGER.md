@@ -559,6 +559,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
 
+### 2026-10-11 — Tools reference and handoff page (claude, claude-opus-5-5)
+- **Owner, verbatim:** "before we start M0, do we have somewhere documenting tool usage for this project? and also is there a "start here" type of file for new workers continuing work?", then "please fix all".
+- New [08-tools.md](08-tools.md): every tool, the headless Unity recipes and traps (until now only in a worker's private notes), art and Blender tools, git rules.
+- New [HANDOFF.md](HANDOFF.md): the owner's standing rules, where things stand, what's next. AGENTS.md links it first.
+- AGENTS.md §2: the art rule now points to DESIGN-GUIDE.md, and "git stays local, never push" is a non-negotiable. README.md and docs/README.md no longer say the design system awaits approval.
+- Not changed: the binding docs 01–03 still link DESIGN-SYSTEM.md for tokens, which stays valid because the guide adopts its §10–§11.
+
 ### 2026-10-11 — GATE: design system approved, NOCTURNE (frank, human; recorded by claude, claude-opus-5-5)
 - **Owner, verbatim** (answering whether NOCTURNE plus DESIGN-GUIDE.md counts as the design-system approval):
 

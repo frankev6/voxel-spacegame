@@ -8,8 +8,10 @@ This repository is a clean restart of an earlier prototype (see [ADR-0001](docs/
 
 | If you are… | Read |
 |---|---|
+| Continuing someone's work | [docs/HANDOFF.md](docs/HANDOFF.md), then [AGENTS.md](AGENTS.md) |
 | Implementing anything | [AGENTS.md](AGENTS.md), then [docs/README.md](docs/README.md) |
-| The owner reviewing direction | [docs/00-vision.md](docs/00-vision.md), [docs/ROADMAP.md](docs/ROADMAP.md), [docs/design/DESIGN-SYSTEM.md](docs/design/DESIGN-SYSTEM.md) (needs your approval) |
+| Looking for a command or tool | [docs/08-tools.md](docs/08-tools.md) |
+| The owner reviewing direction | [docs/00-vision.md](docs/00-vision.md), [docs/ROADMAP.md](docs/ROADMAP.md), [docs/design/DESIGN-GUIDE.md](docs/design/DESIGN-GUIDE.md) (approved 2026-10-11), the [look book](docs/design/lookbook/) |
 | Checking progress | [docs/LEDGER.md](docs/LEDGER.md) |
 
 ## Open the project
@@ -31,11 +33,13 @@ tools/playtest/g.sh snapshot     # live state of the running game via the Unity 
 
 ```
 AGENTS.md            rules for every worker
-docs/                vision, architecture, conventions, glossary, workflow, testing, budgets, roadmap,
-                     ledger, specs/, decisions/ (ADRs), design/ (design system), reference/ (prototype audit)
+docs/                handoff, vision, architecture, conventions, glossary, workflow, testing, budgets, tools,
+                     roadmap, ledger, specs/, decisions/ (ADRs), design/ (design guide, look book),
+                     reference/ (prototype audit)
+ArtSource/           Blender look-dev and style-test scripts (procedural, no imported art)
 Assets/Game/         all game code and assets, one assembly per module (docs/01-architecture.md §3)
 Import/Legacy/       content exported from the prototype; converter input only
-tools/               compile/test/doc scripts and the playtest CLI loop
+tools/               compile/test/doc/art-check scripts and the playtest CLI loop
 ```
 
 ## Source control

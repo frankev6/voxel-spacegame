@@ -2,7 +2,7 @@
 
 You are implementing **Spaceship Game V2**, a Unity 6.6 DOTS game: build ships from functional voxel blocks, fly between star systems uncovering a mystery, and watch massive voxel ships and stations break apart realistically.
 
-This file is the entry point. It is short on purpose; the binding details are in `docs/`.
+This file is the entry point. It is short on purpose; the binding details are in `docs/`. **Continuing someone's work? Read [docs/HANDOFF.md](docs/HANDOFF.md) first**: the owner's standing rules, where things stand and what's next.
 
 ## 1. Read before touching anything
 
@@ -13,8 +13,10 @@ This file is the entry point. It is short on purpose; the binding details are in
 5. [docs/04-workflow.md](docs/04-workflow.md): how to claim, do and finish a task
 6. [docs/05-testing.md](docs/05-testing.md) and [docs/06-performance-budgets.md](docs/06-performance-budgets.md): checks and gates
 7. [docs/07-implementation-traps.md](docs/07-implementation-traps.md): the DOTS/physics/rendering/UI mistakes that compile but fail later (**binding**, with a review checklist)
-8. The spec for your task in [docs/specs/](docs/specs/), plus the *Decisions* and *Data model* of every spec it depends on
-9. [docs/LEDGER.md](docs/LEDGER.md): what is done, in progress and blocked
+8. [docs/08-tools.md](docs/08-tools.md): every tool, how to run Unity headless, Blender look-dev, and their traps
+9. The spec for your task in [docs/specs/](docs/specs/), plus the *Decisions* and *Data model* of every spec it depends on
+10. [docs/LEDGER.md](docs/LEDGER.md): what is done, in progress and blocked
+11. For anything visual (art, UI, blocks, ships): [docs/design/DESIGN-GUIDE.md](docs/design/DESIGN-GUIDE.md) (**binding** source of truth for the look)
 
 ## 2. The non-negotiables
 
@@ -25,7 +27,8 @@ This file is the entry point. It is short on purpose; the binding details are in
 - **Respect module boundaries.** Each assembly may reference only what architecture §3 allows. `AssemblyRulesTests` enforces this; don't "fix" it by editing the test.
 - **One writer per piece of state** (architecture §8). If you need to change state you don't own, send an event or request.
 - **Simulation is deterministic and fixed-step.** No `UnityEngine.Random`, `System.Random` or `GetHashCode` in simulation or saves. No `Time.deltaTime` in gameplay.
-- **Art is placeholder.** Never reference `Assets/Game/Art/_Placeholder/` from code; use definitions and theme tokens. No new third-party art. New art waits for the owner's approval of the design system (SPEC-80).
+- **Art follows [DESIGN-GUIDE.md](docs/design/DESIGN-GUIDE.md)** (approved 2026-10-11). Never reference `Assets/Game/Art/_Placeholder/` from code; use definitions and theme tokens. No copyrighted or third-party images (no Starsector art); fonts are SIL OFL 1.1 only; AI-generated assets only with the owner's approval of each asset.
+- **Git stays local.** Commit locally; never push or touch a remote until the owner says so (Git LFS first, ADR-0008).
 - **No old code.** The old prototype is a reference for feel and content only. Content arrives through `Import/Legacy/` and the converters in SPEC-72.
 - **Done means done**: acceptance criteria checked, tests written and passing, `tools/compile.sh` clean, ledger updated with the commit hash and a log entry.
 
@@ -41,7 +44,7 @@ tools/ledger-sync.py                  # add ledger rows for new spec tasks
 tools/playtest/g.sh snapshot          # live game state from the running Editor (see tools/playtest/README.md)
 ```
 
-The Unity CLI lives at `~/.unity/bin/unity` (the scripts add it to `PATH`). The project uses `com.unity.pipeline` so the CLI can drive an open Editor.
+The Unity CLI lives at `~/.unity/bin/unity` (the scripts add it to `PATH`). The project uses `com.unity.pipeline` so the CLI can drive an open Editor. The full tool reference, including headless Unity runs, art tools and known traps, is [docs/08-tools.md](docs/08-tools.md).
 
 ## 4. Where things go
 
