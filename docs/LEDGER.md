@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 17 | 1 | 0 | 0 | 48 | 0 | 66 | 8 |
+| M0 | 17 | 0 | 0 | 0 | 49 | 0 | 66 | 8 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -77,7 +77,7 @@
 | PERS-008 | Deferred VOXS snapshots in saves | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-007, PERS-005 | yes | done | astra (gpt-6) | 2026-10-11 | ec9a6ae | Persistent snapshots; worker round trip and all-path disposal; Q31 |
 | PERS-009 | Autosave scheduler and save on quit | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 5b1e06b | 10 tests; 0 B/frame |
 | PERS-010 | Fixture harness, container fixtures and the 04-B1 EditMode regression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | todo |  |  |  |  |
-| PERS-011 | Round-trip byte equality (framework level) | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006, PERS-008 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PERS-011 | Round-trip byte equality (framework level) | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006, PERS-008 | yes | done | astra (gpt-6) | 2026-10-11 | ca73bba | Fresh binary/JSON/VOXS round trips; unknown chunk byte equality; Q32 |
 | PERS-012 | Save performance and size gates | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-008 | yes | todo |  |  |  |  |
 | VOX-001 | Public contract types | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c37ad48 | BrickRecord 28 B (ledger Q9); VOXS adapter members wait for VOX-009 (Q10) |
 | AUD-001 | Public contract types | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | f793298 | Validation codes: SPEC-64 Q12 |
@@ -585,6 +585,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-011 framework save round trip (astra, gpt-6)
+- Three deterministic participants exercise binary values/content IDs, JSON state and two deferred VOXS structures. Source arrays are disposed before loading into fresh participants, so the re-save cannot accidentally reuse original state.
+- Save to a second slot is byte-identical excluding the specified volatile fields. An unknown version-42 chunk survives with identical flags, payload and seeded ID palette. A changed binary value is detected at that chunk's table entry.
+- Added the missing PERS-008 prerequisite (Q32 / SPEC-05 Q22); no runtime code or format change. Full EditMode **329 passed + 1 explicit skipped**, perf **12/12 passed**; compile and docs clean. Most recent full PlayMode remains **16 passed** from PERS-008; PERS-011 changes tests/docs only.
+- M0 **49/66 done**. HANDOFF updated; PERS-010 fixtures and PERS-012 save gates remain ready. No owner decision added beyond Q30 already recorded.
 
 ### 2026-10-11 — PERS-008 deferred VOXS snapshots (astra, gpt-6)
 - `VoxsSnapshotBlock` copies all five arrays into owned Persistent allocations at capture. Main-thread mutation cannot change worker bytes; Dispose is idempotent and Encode after disposal throws explicitly. Partial capture allocations are released if copying fails.
