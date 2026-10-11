@@ -10,7 +10,7 @@ namespace Game.Voxel.Model
 {
 
     /// <summary>Implements SPEC-10 §4.3. Managed owner of one structure's native storage; behaviour in §5.1–§5.4.
-    /// ComputeContentHash (§5.4) is added by VOX-009 together with the SPEC-05 VOXS types it needs (SPEC-10 open question 14).</summary>
+    /// VOXS content identity uses the canonical SPEC-05 payload (§5.4).</summary>
     public sealed class VoxelStructure : IDisposable
     {
         VoxelStructureData data;
@@ -415,6 +415,8 @@ namespace Game.Voxel.Model
             header.Mass = total; header.MassRevision = header.Revision; data.Header.Value = header;
             return total;
         }   // cached by Revision
+        public ulong ComputeContentHash(Game.Voxel.Data.VoxsBlockNames names) => Game.Core.StableHash.Hash64(VoxelStructureCodec.Encode(this, names, Game.Voxel.Data.VoxsEncodeOptions.ForSaveChunk));
+
         public long NativeBytes => !data.IsCreated ? 0 : UnsafeUtility.SizeOf<StructureHeader>()
             + (long)data.Palette.Capacity * UnsafeUtility.SizeOf<PaletteEntry>()
             + (long)data.Instances.Capacity * UnsafeUtility.SizeOf<BlockInstance>()

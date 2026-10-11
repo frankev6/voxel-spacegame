@@ -347,7 +347,13 @@ namespace Game.Voxel.Data
             int fallback = -1;
             for (int i = 0; i < original; i++)
             {
-                var instance = d.Instances[i]; var def = catalog.GetBlock(instance.Block);
+                var instance = d.Instances[i];
+                // Unreferenced block-zero slots are ordinary tombstones, not content drift. Preserve their wire indices.
+                if (instance.Block == 0 && counts[i] == 0)
+                {
+                    d.Instances[kept] = instance; remap[i] = (ushort)(0x8000 | kept++); continue;
+                }
+                var def = catalog.GetBlock(instance.Block);
                 if (def == null || instance.Block == missing || !def.RequiresInstance)
                 {
                     Drift(d, instanceNames[i]);

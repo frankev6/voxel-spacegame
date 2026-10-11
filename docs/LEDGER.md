@@ -627,6 +627,10 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 66 | 2026-10-11 | SPEC-10 VOX-017 | Benchmark brick counts contradict the specified geometry | Preserve geometry; correct asteroid to 408 bricks and Ship20k to 10 | Tech lead | Resolved in SPEC-10 Q22; asteroid 998,592 cells independently enumerated |
 | 67 | 2026-10-11 | SPEC-10 VOX-017 / VOX-009 | Generator palette helper and codec benchmark dependencies were omitted | VOX-017 depends on VOX-006; VOX-009 depends on VOX-017 | Tech lead | Resolved in SPEC-10 Q23; no feature or acceptance scope removed |
 
+| 68 | 2026-10-11 | SPEC-10 VOX-009 / SPEC-05 | VOXS repair collapses ordinary instance tombstones and shifts live indices | Preserve unreferenced block-zero slots before D3 repair | Tech lead | Resolved in SPEC-10 Q24 / SPEC-05 Q26; regression reproduced 3 slots collapsing to 1; no wire-format change |
+| 69 | 2026-10-11 | SPEC-10 VOX-009 | Adapter omitted free-slot restoration and raw empty-palette normalization | Ascending free-slot reconstruction; reserved palette zero | Tech lead | Resolved in SPEC-10 Q25; deterministic reuse and usable decoded empty structures |
+| 70 | 2026-10-11 | SPEC-10 VOX-009 | Temp sort allocation violates documented worker-safe Encode | Use a promptly disposed TempJob order array | Tech lead | Resolved in SPEC-10 Q26; managed-worker byte equality test |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).

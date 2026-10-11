@@ -576,10 +576,10 @@ public static class VoxelStructureCodec
 }
 ```
 
-- `ToSource(s, a)`: `CellSize = s.CellSize`; `AnchorInstance = -1` (structures store no anchor; `GridSpawnSystem` recomputes it at conversion); `Palette = s.Palette.AsArray()`, `Instances = s.Instances.AsArray()` (views); `order = s.SortedBrickOrder(Temp)`; `BrickCoords` (length K) and `Cells` (K × 4,096) allocated with `a`; brick `order[k]` → coords[k], and its cells copied with `UnsafeUtility.MemCpy` (dense page) or `MemCpyReplicate` (uniform) into `Cells[k × 4096 …]`. The cell order inside a brick is SPEC-10's local index, which equals `VoxsCodec.CellIndex` (asserted once in a test). `Partial = false`. O(cells), one copy.
+- `ToSource(s, a)`: `CellSize = s.CellSize`; `AnchorInstance = -1` (structures store no anchor; `GridSpawnSystem` recomputes it at conversion); `Palette = s.Palette.AsArray()`, `Instances = s.Instances.AsArray()` (views); `order = s.SortedBrickOrder(TempJob)`; `BrickCoords` (length K) and `Cells` (K × 4,096) allocated with `a`; brick `order[k]` → coords[k], and its cells copied with `UnsafeUtility.MemCpy` (dense page) or `MemCpyReplicate` (uniform) into `Cells[k × 4096 …]`. The cell order inside a brick is SPEC-10's local index, which equals `VoxsCodec.CellIndex` (asserted once in a test). `Partial = false`. O(cells), one copy.
 - `Encode(s, names, o)`: `using var b = ToSource(s, Allocator.TempJob); return VoxsCodec.Encode(b.Source, names, o);`. Safe on a worker thread only when `s` is not mutated meanwhile; savers use SPEC-05's `VoxsSnapshotBlock.Capture(b.Source, names)` on the main thread instead.
 - `TryDecode(data, catalog, out r, out e)`: `VoxsCodec.TryDecode(data, catalog, Allocator.TempJob, out d, out e)`; on success `r = FromDecoded(d)`; `d.Dispose()`. Failure → `r = null`, `e` from SPEC-05 (never an exception; unknown IDs map to the Missing block inside `VoxsCodec`, ADR-0007).
-- `FromDecoded(d)`: new structure with `d.CellSize`; palette and instances copied as stored (tombstones included, so decode → encode is byte-identical); per brick `SetBrickDense(coord, slice)` (rebuilds the mask, `SolidCount` and `BrickIndex`); then `OptimizeStorage()` (uniform bricks become uniform pages). `d.AnchorInstance` is ignored. `d.Partial == true` is rejected here (`InvalidOperationException`): partial payloads are applied by their owners (SPEC-30 deltas).
+- `FromDecoded(d)`: new structure with `d.CellSize`; palette and instances copied as stored (tombstones included, so structure encode → decode → encode is byte-identical); a raw empty payload with zero palette entries gets the structure-required reserved entry 0. Rebuild `FreeInstances` from block-zero slots in ascending index order (LIFO reuses the highest first); per brick `SetBrickDense(coord, slice)` (rebuilds the mask, `SolidCount` and `BrickIndex`); then `OptimizeStorage()` (uniform bricks become uniform pages). `d.AnchorInstance` is ignored. `d.Partial == true` is rejected here (`InvalidOperationException`): partial payloads are applied by their owners (SPEC-30 deltas).
 
 ### 5.7 `GridSpawnSystem` (`Grid/`)
 
@@ -889,7 +889,7 @@ Measured station geometry and allocation totals:
 - **Milestone:** M1
 - **Tier:** frontier — F3: binary encoding
 - **Depends on:** `VOX-007`, `VOX-017`, `SPEC-05`
-- **Do:** Implement the adapter of §5.6 (`VoxsSourceBuffers`, `VoxelStructureCodec.ToSource/Encode/TryDecode/FromDecoded`) over SPEC-05's `VoxsCodec`, and `ComputeContentHash`. Write no byte-level code: every byte is SPEC-05's.
+- **Do:** Preserve unreferenced block-zero tombstones in the existing SPEC-05 repair pass (Q24), then implement the adapter of §5.6 (`VoxsSourceBuffers`, `VoxelStructureCodec.ToSource/Encode/TryDecode/FromDecoded`) over SPEC-05's `VoxsCodec`, and `ComputeContentHash`. Write no byte-level code: every byte is SPEC-05's.
 - **Files:** `Assets/Game/Voxel/Model/{VoxelStructureCodec,VoxsSourceBuffers,VoxelStructure}.cs`; `Assets/Game/Tests/EditMode/Voxel/VoxelCodecTests.cs`
 - **Acceptance criteria:**
   - [ ] Encode → TryDecode → Encode is byte-identical for an empty structure, `Ship20k`, `HollowStation1M`, `SolidAsteroid1M` and a 5,000-op edited structure with tombstones and damage.
@@ -1058,6 +1058,10 @@ Measured station geometry and allocation totals:
 
 | 22 | §5.11 lists 245 asteroid bricks and 18 Ship20k bricks, inconsistent with its geometry | Preserve geometry, correct the derived counts | Tech lead | Resolved 2026-10-11: independent enumeration gives asteroid 998,592 cells / 408 bricks; ceil(80/16) × ceil(10/16) × ceil(25/16) gives Ship20k 10 bricks. |
 | 23 | Benchmark generators use VOX-006 palette insertion; codec acceptance requires these generators | Make both existing implementation dependencies explicit | Tech lead | Resolved 2026-10-11: add VOX-006 to VOX-017 and VOX-017 to VOX-009. VOX-006 was already done at claim time. |
+
+| 24 | SPEC-05 repair treats block-zero tombstones as missing definitions and compacts valid instance indices | Preserve unreferenced tombstones; reserve D3 conversion for actual invalid/drifted references | Tech lead | Resolved 2026-10-11: the three-slot regression reproduced a collapse to one slot. Repair now retains block-zero entries with no referencing cells; no wire-format change. SPEC-05 Q26 records the shared rule. |
+| 25 | FromDecoded lacks free-instance pool reconstruction and raw VOXS allows an empty palette | Rebuild free indices ascending; reserve palette entry zero for raw empty payloads | Tech lead | Resolved 2026-10-11: restored tombstones are immediately reusable in deterministic LIFO order; structure-generated payloads remain byte-identical. |
+| 26 | ToSource uses Temp for sorted order but Encode is documented safe on a managed worker | Use TempJob for the immediately disposed order array | Tech lead | Resolved 2026-10-11: follows trap T2.10; managed-worker encoding is tested against main-thread bytes. |
 
 ## 11. References
 

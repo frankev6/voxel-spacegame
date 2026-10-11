@@ -655,6 +655,7 @@ Complexity O(K × 4096 × 3) cell visits; no allocation per cell. Budget §8.
 5. Content-drift fixes (each increments `DriftWarningCount` and logs `GameLog.WarnOnce("VOXS-drift-" + id, ...)`):
    - D1: palette entry whose block is Missing stays as `(MissingBlock, orient, color)`.
    - D2: palette entry whose block now `RequiresInstance` → entry becomes `(MissingBlock, orient, color)`.
+   - Unreferenced block-zero instance entries are tombstones: preserve their serialized fields and positions unless another D3 removal remaps later indices. They are not missing content and do not trigger a drift warning (Q26).
    - D3: instance whose block is Missing, or no longer `RequiresInstance` → every cell referencing it is re-pointed to a palette entry `(block or MissingBlock if missing, instance.Orient, instance.Color)` (find-or-append; palette length must stay ≤ 32768, else fall back to entry `(MissingBlock, 0, 0)` index), and the instance is removed; remaining instance indices are compacted and every `0x8000 | i` ref is rewritten in one pass over `Cells`.
    - D4: instance whose referencing-cell count differs from its block's `Cells.Length` → kept unchanged (SPEC-10/13 handle partial instances).
    - `AnchorInstance` is remapped through the compaction; if its instance was removed → −1.
@@ -1048,6 +1049,8 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 | 24 | §5.4 claimed a sidecar error after File.Replace leaves the previous save untouched; a valid older meta.json also masked the committed META | Atomic world.sav replacement is the commit point | Tech lead | **Resolved in PERS-017:** later metadata write errors warn and return success; embedded META wins over stale sidecars in bounded slot-listing reads, even with identical timestamps. Pre-commit failures retain old world/backup/meta files. No binary format or public API changes |
 
 | 25 | Valid JSON null (or empty input) deserializes to no object without throwing | Treat absent profile/META objects as unreadable at their boundaries | Tech lead | **Resolved in PERS-018:** profile listing skips and warns; META produces PERS-W013 while loading/restoring otherwise valid chunks. Generic participant JSON still permits null |
+
+| 26 | Unreferenced block-zero tombstones were treated as missing definitions by repair, breaking SPEC-10 byte-identical round trips | Preserve ordinary tombstones; retain existing D3 behavior for cells referencing invalid/drifted instances | Tech lead | Resolved in VOX-009: preserve unreferenced block-zero entries before D3 classification; the adapter rebuilds its free-slot pool. The three-slot regression now retains the live instance at index 1 and both reusable tombstones. No wire-format change. |
 
 ## 11. References
 

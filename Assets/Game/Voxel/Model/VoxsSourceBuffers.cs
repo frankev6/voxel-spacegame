@@ -1,12 +1,17 @@
 using System;
+using Game.Voxel.Data;
 
 namespace Game.Voxel.Model
 {
-
-    /// <summary>Implements SPEC-10 §5.6. Owns the arrays a VoxsSource built from a VoxelStructure needs (uniform bricks expanded). Dispose after encoding.
-    /// The `Source` field (SPEC-05 VoxsSource) is added by VOX-009 with the SPEC-05 types (SPEC-10 open question 14).</summary>
+    /// <summary>Implements SPEC-10 §5.6. Owns expanded brick coordinates/cells; palette and instance arrays borrow structure storage.</summary>
     public sealed class VoxsSourceBuffers : IDisposable
     {
-        public void Dispose() { throw new System.NotImplementedException("VOX-009"); }                        // frees BrickCoords and Cells; idempotent
+        public VoxsSource Source;
+        public void Dispose()
+        {
+            if (Source.BrickCoords.IsCreated) Source.BrickCoords.Dispose();
+            if (Source.Cells.IsCreated) Source.Cells.Dispose();
+            Source = default;
+        }
     }
 }
