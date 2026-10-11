@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 28 | 0 | 0 | 0 | 38 | 0 | 66 | 9 |
+| M0 | 27 | 0 | 0 | 0 | 39 | 0 | 66 | 9 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -70,8 +70,8 @@
 | PERS-001 | Public contract types | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | CORE-001, DATA-001, VOX-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 75f6583 | Result-struct constructors: SPEC-05 Q16 |
 | PERS-002 | Save paths, profiles, slots and meta files | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 20bb0aa | META-chunk fallback completes with PERS-003; SPEC-05 Q17 |
 | PERS-003 | Binary container, CRC32 and compression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 5b594d6 | fuzz 1,000 flips + 200 truncations clean |
-| PERS-004 | ID palette and SaveWriter/SaveReader integration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-003, SPEC-02 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
-| PERS-005 | Save pipeline: capture, worker, atomic write, thumbnails, queue | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-002, PERS-004, SPEC-04 | no | todo |  |  |  |  |
+| PERS-004 | ID palette and SaveWriter/SaveReader integration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-003, SPEC-02 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | e569704 | no §4.10 fallback needed |
+| PERS-005 | Save pipeline: capture, worker, atomic write, thumbnails, queue | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-002, PERS-004, SPEC-04 | yes | todo |  |  |  |  |
 | PERS-006 | Load pipeline and restore orchestration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005 | no | todo |  |  |  |  |
 | PERS-007 | VOXS codec | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001, SPEC-04 | yes | todo |  |  |  |  |
 | PERS-008 | Deferred VOXS snapshots in saves | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-007, PERS-005 | no | todo |  |  |  |  |
@@ -573,6 +573,15 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-004 ID palette and SaveWriter/SaveReader integration (claude, claude-opus-5-5)
+- `SaveIdPalette` per SPEC-05 §4.3:
+  - indices follow first use; `None` ↔ 0xFFFF;
+  - `SeededFrom` keeps the loaded prefix and leaves the source untouched;
+  - `Parse` throws `SaveFormatException` on truncation, more than 65,535 entries, an entry over 256 bytes or trailing bytes;
+  - the writer refuses the 65,536th distinct id and ids over 256 bytes, so it never writes what it can't read back.
+- **§4.10 check:** SPEC-02's `SaveWriter`/`SaveReader` have every capability §4.10 assumes, so **no fallback applies**. The only name difference is `WriteByteArray(ReadOnlySpan<byte>)` in place of `byte[]`, and the reader also takes a `byte[]`.
+- `SaveIdPaletteTests` (7) pass, including a round trip through `SaveWriter.WriteContentId` → `SaveReader.ReadContentId` (u16 LE indices).
 
 ### 2026-10-11 — PERS-003 binary container, CRC32 and compression (claude, claude-opus-5-5)
 - Implemented:
