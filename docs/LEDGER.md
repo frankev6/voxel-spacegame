@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 97 | 0 | 0 | 0 | 3 | 0 | 100 | 19 |
+| M1 | 96 | 0 | 0 | 0 | 4 | 0 | 100 | 19 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -115,8 +115,8 @@
 | INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | no | todo |  |  |  |  |
 | INP-007 | Frame-rate independence test | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-005, SPEC-20 | no | todo |  |  |  |  |
 | DATA-011 | v2 block additions (reactor, cargo) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | standard | DATA-009 | yes | todo |  |  |  |  |
-| VOX-002 | SPIKE: memory model for the reference and thin-shell stations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| VOX-003 | Sparse-brick fallback (only if VOX-002 is no-go) | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-002 | no | todo |  |  |  | No-go measured by VOX-002; ADR-0023 proposed before contract changes |
+| VOX-002 | SPIKE: memory model for the reference and thin-shell stations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 6393ecd | No-go: reference 38,828,288 B retained-copy peak; ADR-0023 proposed |
+| VOX-003 | Sparse-brick fallback (only if VOX-002 is no-go) | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-002 | yes | todo |  |  |  | No-go measured by VOX-002; ADR-0023 proposed before contract changes |
 | VOX-004 | Brick maths and mask operations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 508c75f | Brick coordinates, faces and 4096-bit mask operations; 8 tests |
 | VOX-005 | VoxelStructure storage core | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-004 | yes | todo |  |  |  |  |
 | VOX-006 | Block placement, removal and compaction | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005, SPEC-04 | no | todo |  |  |  |  |
@@ -636,12 +636,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
 
-### 2026-10-11 — VOX-002 memory spike measured (astra, gpt-6)
+### 2026-10-11 — VOX-002 memory spike completed (astra, gpt-6)
 
 - Both explicit headless reports pass with exact expected cell/brick counts. Reference has 504,192 faces / 570,496 welded vertices; thin shell has 2,086,936 / 2,356,632. Matching runtime-render ECS layout holds 58 entities per chunk, including BrickRenderState added after Instantiate; meta chunks are included in byte totals.
 - **No-go:** reference retained-copy peak **38,828,288 B**, exceeding 36 MB (and 36 MiB). VOX-003 remains todo and ADR-0023 is proposed. Sparse payload projection is 31,373,568 B before additional headers/slack; it is not an implementation pass.
 - Thin-shell retained-copy peak **162,606,784 B** is report-only (Q57). No owner gate changed. Full per-item, geometry, mesh, compound and map-capacity measurements are in SPEC-10 §8.2 and local evidence Logs/tools/vox002-*. The spike source is removed as specified; its diagnostic copy is retained under Logs/tools for reproducibility.
-- After removing the temporary spike: headless compile zero C# warnings; EditMode **425 passed + 1 explicit skipped**, PlayMode **31 passed**, perf **23/23**, all processes exit 0; docs zero errors/warnings.
+- After removing the temporary spike: headless compile zero C# warnings; EditMode **425 passed + 1 explicit skipped**, PlayMode **31 passed**, perf **23/23**, all processes exit 0; docs zero errors/warnings. Implementation/evidence commit `6393ecd`.
 
 ### 2026-10-11 — PHY-001 physics contracts (astra, gpt-6)
 
