@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 10 | 0 | 0 | 0 | 56 | 0 | 66 | 3 |
+| M0 | 9 | 0 | 0 | 0 | 57 | 0 | 66 | 3 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -97,9 +97,9 @@
 | MIG-003 | Legacy ID map | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4955b51 |  |
 | MIG-004 | Asset writer, manifest, runner and report | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-002, MIG-003, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | ab6e4b3 | Protected writes, manifest, runner and reports; 9 tests |
 | MIG-005 | Item converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-004 | yes | done | astra (gpt-6) | 2026-10-11 | 4b524c7 | 35 items, icon references, dropped-field report; repeat imports byte-stable |
-| MIG-006 | Block converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-005 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| MIG-006 | Block converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-005 | yes | done | astra (gpt-6) | 2026-10-11 | 3bb208c | 21 blocks; exact geometry/modules; byte-stable reruns |
 | MIG-007 | Legacy Euler to orientation | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | b264f44 | Integer RyRxRz, one-degree snapping, all 64 Unity Euler combinations |
-| MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | no | todo |  |  |  |  |
+| MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | yes | todo |  |  |  |  |
 | MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | no | todo |  |  |  |  |
 | FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | yes | todo |  |  |  |  |
 | FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | no | todo |  |  |  |  |
@@ -578,6 +578,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 35 | 2026-10-11 | SPEC-71 TST-008 | Iteration setting and live CLI contract gaps (SPEC-71 Q7) | Both reloads disabled per ADR-0020; installed API schema; complete results and exit-status validation | Tech lead | Resolved in TST-008; wall-clock measurements include CLI overhead |
 | 36 | 2026-10-11 | SPEC-03 INP-003 | Conflict removal loses an existing custom binding (SPEC-03 Q6) | Restore prior overrides on rejection; suppress Global during rebind; ADR-0021 for required test fixture | Tech lead | Resolved in INP-003; preserves the player’s old binding |
 | 37 | 2026-10-11 | SPEC-72 MIG-005 | Placeholder path coupling and omitted dropped fields (SPEC-72 Q14) | Editor-only source-reference asset; reuse existing icons; report every dropped field | Tech lead | Resolved in MIG-005; no new art or owner look decision |
+| 38 | 2026-10-11 | SPEC-72 MIG-006 | Deterministic SerializeReference identities (SPEC-72 Q15) | Managed-reference IDs equal each unique BlockModuleId | Tech lead | Resolved in MIG-006; repeated assets, manifest and report are byte-identical |
 
 ## Measurements
 
@@ -594,6 +595,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — MIG-006 block migration (astra, gpt-6)
+- Generated all **21** SPEC-04 block definitions, including independent footprint/clearance checks, exact module values, orientations, attachment masks, and existing prop-mesh references. Expected warnings only: 2 mesh-bounds, 3 overlap-clearance cells and the portal clearance fix (plus the existing missing-start-blueprint warning). No new art.
+- Q38 / SPEC-72 Q15 registers stable BlockModuleId reference IDs **before** serialization; Unity rejects reassigning an already serialized reference. Two real reruns report **56 Unchanged**, with byte-identical assets, manifests and reports. The temporary generation job was removed.
+- All four specified tests pass. Full sequential live suites: **363 EditMode**, **16 PlayMode**, **18/18 perf**; zero C# warnings; docs clean. Shipped content construction **0.302 ms median**. An overlapping suite request exposed the live runner's shared result channel; that run was discarded and all checks rerun sequentially. Add a concurrency guard in M0 system review.
+- M0 **57/66 done**. Next: MIG-008 ship conversion; DEV-003 and AUD-002 also ready. HANDOFF updated.
 
 ### 2026-10-11 — MIG-005 non-block item migration (astra, gpt-6)
 - Generated all **35** item definitions with the exact SPEC-72 value table, unchanged descriptions and assigned legacy-named sprite sub-assets. Added the Editor-only source-reference asset (Q37 / SPEC-72 Q14), so production converter code does not depend on the placeholder folder. No new art. The report lists **30** intentional data-drop/normalization entries, including socket fields omitted from the abbreviated spec table.
