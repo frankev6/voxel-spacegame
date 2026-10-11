@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 15 | 0 | 0 | 0 | 51 | 0 | 66 | 6 |
+| M0 | 14 | 0 | 0 | 0 | 52 | 0 | 66 | 5 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -98,7 +98,7 @@
 | MIG-004 | Asset writer, manifest, runner and report | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-002, MIG-003, SPEC-04 | yes | todo |  |  |  |  |
 | MIG-005 | Item converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-004 | no | todo |  |  |  |  |
 | MIG-006 | Block converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-005 | no | todo |  |  |  |  |
-| MIG-007 | Legacy Euler to orientation | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-001, SPEC-04 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| MIG-007 | Legacy Euler to orientation | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | b264f44 | Integer RyRxRz, one-degree snapping, all 64 Unity Euler combinations |
 | MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | no | todo |  |  |  |  |
 | MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | no | todo |  |  |  |  |
 | FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | yes | todo |  |  |  |  |
@@ -589,6 +589,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — MIG-007 legacy Euler conversion (astra, gpt-6)
+- Implemented exact integer Ry·Rx·Rz rotation matching with the specified one-degree snapping tolerance. All 64 right-angle combinations match Unity Quaternion.Euler on all three axes; shipped export vectors and wraparound cases pass.
+- Q33 / SPEC-72 Q12 defines nonfinite rejection and safe modulo reduction before integer conversion for extreme finite angles. No runtime or public-contract change.
+- Compile has zero C# warnings; full EditMode **342 passed + 1 explicit skipped**; performance **18/18 pass**. Latest full PlayMode baseline remains **16 passed**; this task is Editor-only. Docs clean. M0 **52/66 done**.
 
 ### 2026-10-11 — PERS-012 save performance and size gates (astra, gpt-6)
 - Added the specified workloads: capture of five 20k-cell ships plus the reference 1M-cell ship and six small participants; typical save with SESS 1 KB, 2,000 facts, 30 quests, 200 stacks, five ships, 50 star-system delta headers, ten 50-brick Partial VOXS structures and PLOC. They use real snapshots, container compression and VOXS restore.
