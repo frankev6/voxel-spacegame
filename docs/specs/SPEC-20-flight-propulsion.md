@@ -516,9 +516,9 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Do:** Implement `GridSpaceMath` and `FlightMath` (`GyroYawTorque`, `SpeedCaps`, `ToLocalPlanar`, `Targets`).
 - **Files:** `Assets/Game/Simulation/Common/GridSpaceMath.cs`, `Assets/Game/Simulation/Flight/FlightMath.cs`, `Assets/Game/Tests/EditMode/Simulation/Flight/{GridSpaceMathTests,FlightMathTests}.cs`
 - **Acceptance criteria:**
-  - [ ] `InstanceCenter` of `block_thruster_small` (cells (0,0,0),(0,0,1)) at origin (4,0,7), orientation 0, cell 0.5 m = (2.25, 0.25, 4.0); at the 180° yaw orientation (index 8, SPEC-04 §5.3) = (2.25, 0.25, 3.5).
-  - [ ] Force direction of a thruster at orientation 8 is grid +Z (it pushes the ship forward), matching SPEC-22's formula.
-  - [ ] `Targets`: coasting keeps forward speed inside caps; Brake gives zero targets; boost raises only the forward cap.
+  - [x] `InstanceCenter` of `block_thruster_small` (cells (0,0,0),(0,0,1)) at origin (4,0,7), orientation 0, cell 0.5 m = (2.25, 0.25, 4.0); at the 180° yaw orientation (index 8, SPEC-04 §5.3) = (2.25, 0.25, 3.5).
+  - [x] Force direction of a thruster at orientation 8 is grid +Z (it pushes the ship forward), matching SPEC-22's formula.
+  - [x] `Targets`: coasting keeps forward speed inside caps; Brake gives zero targets; boost raises only the forward cap.
 - **Tests:** `GridSpaceMathTests.InstanceCenter_Examples`, `.BlockDirToGrid_AllOrientations_Orthonormal`, `.WorldGrid_RoundTrip`; `FlightMathTests.Gyro_Capped`, `.Caps_Boost`, `.Targets_Coast`, `.Targets_Brake`, `.ToLocalPlanar_Yaw90`.
 
 ### FLT-003 — Flight config definition and factory
