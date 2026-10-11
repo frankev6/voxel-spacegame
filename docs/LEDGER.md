@@ -14,10 +14,10 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 57 | 0 | 0 | 0 | 45 | 0 | 102 | 13 |
+| M1 | 56 | 0 | 0 | 0 | 46 | 0 | 102 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
-| M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
+| M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -165,7 +165,7 @@
 | PHY-016 | GridBodyFactory contract test for split creators | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-008 | yes | done | astra (gpt-6) | 2026-10-11 | 4db5812 | ECB-created hulk moves next tick; exact tick-28 install, one retirement, no native leaks |
 | PHY-017 | Physics behaviour scenarios | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011, PHY-013, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 374bfd4 | Five real-physics scenarios; ram momentum error 0; damage-hole exact install tick |
 | PHY-018 | Collider and mass determinism across frame rates | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, PHY-013 | yes | done | astra (gpt-6) | 2026-10-11 | 8c26c92 | Four frame patterns × 1/17 workers; per-tick bytes/mass/velocity identical; zero late installs |
-| PHY-019 | Performance gates and memory | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-012, PHY-013, PHY-015, SPEC-10, TST-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PHY-019 | Performance gates and memory | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-012, PHY-013, PHY-015, SPEC-10, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | fcd09c2 | Six reference gates; zero late installs; ADR-0033 corrects collider overlap allocation |
 | PHY-020 | Fallback: flat grid compound of boxes (only if PHY-002 is no-go for nested compounds) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002 | yes | done | astra (gpt-6) | 2026-10-11 | dd85d8c | not needed (PHY-002 go) |
 | DMG-001 | Public contract types | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 9310e7c | Public damage/restore/impulse contracts, 43 config defaults, table lookup; 4 tests; Q71–74 |
 | FLT-001 | Public contract types | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | todo |  |  |  |  |
@@ -477,7 +477,7 @@
 | MIG-015 | Hand-off package | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-002, MIG-003 | yes | todo |  |  |  |  |
 | INP-008 | Gamepad scheme | [SPEC-03](specs/SPEC-03-input.md) | M4 | standard | INP-003 | yes | todo |  |  |  |  |
 | REN-015 | LOD2 grid proxies | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M4 | frontier | REN-012 | no | todo |  |  |  |  |
-| PHY-021 | Region compounds for very large grids (only if PHY-019 shows assembly over budget) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M4 | frontier | PHY-019 | no | todo |  |  |  |  |
+| PHY-021 | Region compounds for very large grids (only if PHY-019 shows assembly over budget) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M4 | frontier | PHY-019 | yes | todo |  |  |  |  |
 | DMG-018 | M4: per-brick component labels for >1M-cell stations | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | frontier | DMG-016 | no | todo |  |  |  |  |
 | WPN-016 | Per-instance fire groups (M4) | [SPEC-21](specs/SPEC-21-weapons.md) | M4 | frontier | WPN-011 | no | todo |  |  |  |  |
 | GAL-014 | Brick-level structure diffs | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M4 | frontier | GAL-010 | no | todo |  |  |  |  |
@@ -713,6 +713,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — PHY-019 collider performance and live memory (astra, gpt-6)
+
+- Implemented the six required performance cases with asserted reference settings, 60-frame warm-up and 300 measured frames (600 damage ticks for the skirmish). Inclusive ECS markers count main-thread bookkeeping; five explicit worker markers count collider jobs. Nonzero/valid/running checks prevent absent headless profiler data from passing. The namespace-wide settings scope restores normal safety settings afterward.
+- Focused measurements are in the table above. Full performance rerun: noise p95 **23.3 µs**, radius-3 station hit **0.3225 ms median**, idle **0.01415 ms median**; 30-ship worker median/p95 **0.04019 / 3.764 ms**, zero late installs. All timing gates pass; 300 urgent bricks/batch is below Q6's 512-brick trigger. The skirmish p95 remains visible even though its specified gate is median.
+- Live ownership sampling found **3,275,424 B** of collider blobs, **26.6%** above the former three-version model. Recorded the original **2.5 MiB no-go**, accepted **ADR-0033 / SPEC-12 Q24 / ledger Q103**, and allocated **3.5 MiB** within the unchanged 36/40 MB whole-voxel limits. Corrected reference retained-copy model: **32,227,328 B**. No install or retirement lifetime was shortened; no duplicate blob owners were found. Full integrated memory/renderer accounting remains TST-004.
+- Validation: compile **zero C# warnings**, EditMode **603 passed + 1 explicit skipped**, PlayMode **48 passed**, perf **37/37**, docs **503 tasks / zero errors**. Implementation `fcd09c2`; only runtime changes are profiling scopes. Updated HANDOFF and headless recorder guidance.
+- Next: FND-008 persistent-ID allocation/refill and remaining ready M1 work, including the renderer fallback. No owner wait.
 
 ### 2026-10-11 — PHY-018 frame and worker determinism (astra, gpt-6)
 
