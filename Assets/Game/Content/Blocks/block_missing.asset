@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034775fdc0f1d496eabade816d4bab44, type: 3}
+  m_Name: block_missing
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.BlockDefinition
+  id: block_missing
+  formerIds: []
+  displayName: Missing block
+  description: 
+  category: 0
+  rarity: 0
+  basePrice: 0
+  maxStack: 999
+  icon: {fileID: 0}
+  kind: 0
+  shape: 0
+  cells:
+  - {x: 0, y: 0, z: 0}
+  clearance: []
+  allowedOrientations:
+    Bits: 16777215
+  attachFaces: 63
+  mirrorPartner: {fileID: 0}
+  cellHp: 100
+  functionHp: 0
+  cellMass: 25
+  armorClass: 0
+  materialLayer: 63
+  propMesh: {fileID: 0}
+  blockCategory: 0
+  modules: []
+  references:
+    version: 2
+    RefIds: []
