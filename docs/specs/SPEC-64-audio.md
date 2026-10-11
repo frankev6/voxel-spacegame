@@ -617,6 +617,7 @@ Timing tests run with safety checks off (SPEC-71 perf fixture). Functional tests
 | 9 | Licences of the carried-over clips, especially `ComfyUI_00018_.mp3` and `upbeat.mp3` | Both `Blocked`; all others `Unverified` (dev builds only) until AUD-011 | Owner |
 | 10 | Station music (`cue_music_station`) | Used for the BlueprintLab `Editor` context and as a scripted override at stations through `SetMusicOverride` | Owner |
 | 11 | Which specs own the managed event types `SessionReset` and `StarSystemEntered`? | `SessionReset`: SPEC-01 (`FND-001`); `StarSystemEntered`: SPEC-31 (`SYS-001`) | Tech lead |
+| 12 | §4.3 lists the cue and config validation rules without codes | AUD-001 uses AUD-E001 clips empty or null, AUD-E002 minDistance ≥ maxDistance, AUD-E003 Ui cue with spatialBlend > 0; AUD-E010 mixer or group missing, AUD-E011 uiSounds not 11 or one missing, AUD-E012 music cue missing/not Music bus/not looping, AUD-E013 ambienceWorld not an Ambience loop, AUD-E014 combat cue missing, AUD-E015 combatEnterSignals < 1, AUD-E016 sceneMusic lacks a scene | Tech lead |
 
 ## 11. References
 
