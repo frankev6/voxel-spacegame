@@ -6,6 +6,8 @@
 
 Task status lives in [LEDGER.md](LEDGER.md). Task definitions live in the specs.
 
+**Every milestone's exit gate also needs its system review** ([04-workflow §8](04-workflow.md), [ADR-0019](decisions/ADR-0019-system-reviews-instead-of-per-task-reviews.md)): tasks are `done` at their Definition of Done, and the milestone's systems are reviewed in depth together before the gate passes.
+
 ```mermaid
 flowchart LR
     M0[M0 Foundations] --> M1[M1 Voxel core + flight]

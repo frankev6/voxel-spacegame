@@ -14,7 +14,7 @@ MILESTONE_ORDER = ["M0", "M1", "M2", "M3", "M4", "A0", "A1", "A2"]
 STATUSES = ["todo", "in-progress", "blocked", "review", "done", "dropped"]
 
 # Task tiers (docs/04-workflow.md §7). "frontier" tasks are reserved for frontier-class models (Claude Opus / GPT Astra class)
-# at their highest reasoning setting, and need an independent frontier review before `done`. "standard" tasks may be taken
+# at their highest reasoning setting (system reviews per milestone replace per-task reviews, ADR-0019). "standard" tasks may be taken
 # by standard-class models (Claude Sonnet / GPT Sol class) or better.
 TIERS = ["frontier", "standard"]
 # Model names that may NOT own a frontier task (matched case-insensitively against the "(model)" part of Owner).

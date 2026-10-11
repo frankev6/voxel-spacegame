@@ -45,7 +45,7 @@
 | `todo` | Ready to be claimed when dependencies are done |
 | `in-progress` | Claimed; owner is working on it |
 | `blocked` | Can't proceed; the *Notes* column says on what (task ID, ADR or owner decision) |
-| `review` | Implementation finished, waiting for review or an owner check |
+| `review` | Implementation finished, waiting for an owner check or an open acceptance criterion (per-task code review is not a status since ADR-0019) |
 | `done` | Definition of Done met, merged |
 | `dropped` | Removed from scope by an ADR or the owner; keep the row |
 
@@ -65,11 +65,11 @@ Some work needs the owner's explicit approval before it starts or ships. These a
 
 ## 7. Task tiers (which model may take which task)
 
-Every task in a spec has a **Tier**. It says how much capability the task needs so that the foundation is built by the strongest workers and nothing subtle ships broken.
+Every task in a spec has a **Tier**. It says how much capability the task needs so that the foundation is built by the strongest workers. Since [ADR-0019](decisions/ADR-0019-system-reviews-instead-of-per-task-reviews.md) no task waits for a per-task review: code is reviewed in depth per system (§8).
 
 | Tier | Who may take it | Extra requirement before `done` |
 |---|---|---|
-| `frontier` | Frontier-class models at their highest reasoning setting (Claude Opus class, GPT Astra class), or a senior human engineer | An **independent review** by a second frontier-class session that did not write the code. Record `reviewed-by: name (model)` in the ledger *Notes*. |
+| `frontier` | Frontier-class models at their highest reasoning setting (Claude Opus class, GPT Astra class), or a senior human engineer | The normal Definition of Done; covered later by the system review (§8) |
 | `standard` | Standard-class models (Claude Sonnet class, GPT Sol class) or better | The normal Definition of Done |
 
 ### 7.1 What makes a task `frontier`
@@ -98,14 +98,14 @@ Contract tasks (`-001`) are `standard` when the spec's §4 gives the exact code,
 ### 7.2 Rules
 
 1. **A standard-class model must not claim a `frontier` task**, even if it is the only ready task. Pick another task or stop.
-2. **Owner format** in the ledger is `name (model)`, for example `alex (claude-opus-5-5)` or `frank (human)`. `tools/check-docs.py` rejects a `frontier` task owned by a non-frontier model, and a `frontier` task marked `done` without `reviewed-by:`.
+2. **Owner format** in the ledger is `name (model)`, for example `alex (claude-opus-5-5)` or `frank (human)`. `tools/check-docs.py` rejects a `frontier` task owned by a non-frontier model.
 3. **Escalate, don't push through.** If a `standard` task turns out to need a frontier concern, stop: set it `blocked` with *Notes* `needs-frontier: <reason>` and add an Open questions row. Frontier concerns here include:
    - changing a Burst job's parallel writes;
    - changing a contract type;
    - changing a binary format;
    - changing system ordering;
    - meeting a perf budget the spec's algorithm doesn't reach.
-4. **What a frontier review checks:**
+4. **What the system review checks for frontier work (§8):**
    - conformance to the spec's Decisions and Data model;
    - job safety, with tests run with Burst safety checks and leak detection on (`NativeLeakDetection.Mode = EnabledWithStackTrace`);
    - determinism;
@@ -113,3 +113,13 @@ Contract tasks (`-001`) are `standard` when the spec's §4 gives the exact code,
    - the perf gate measured and logged in *Measurements*;
    - no hidden allocation in hot paths.
 5. **Who changes a tier.** Only the owner or tech lead changes a task's tier, by editing the spec and giving the reason.
+
+## 8. System reviews ([ADR-0019](decisions/ADR-0019-system-reviews-instead-of-per-task-reviews.md))
+
+The first buildout goes wide: tasks are `done` at their Definition of Done and dependents start at once. Code is then reviewed in depth as whole systems, because one-task reviews miss how components work together.
+
+- **When:** when a milestone's systems are built, and always before its exit gate (ROADMAP). The owner may also ask for a review of any part at any time.
+- **Who:** a frontier-class session that did not write the code under review.
+- **What:** the §7.2 rule 4 checklist for every frontier task in scope, the cross-module flows and their ordering, integration and scenario tests, and the milestone's perf gates.
+- **Output:** findings become new tasks in the owning specs (`tools/ledger-sync.py`) or ledger log entries. The ledger log records `system-review: name (model)` with the scope and the findings; a milestone gate passes only after that entry.
+

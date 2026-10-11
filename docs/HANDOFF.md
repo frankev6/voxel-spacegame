@@ -14,7 +14,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 | Commit locally only; never push | No `git push` and no remote operations. Merging to local `main` is fine |
 | Use the Unity CLI where possible | `tools/*.sh` and the CLI over manual Editor work ([08-tools.md](08-tools.md)) |
 | Keep the ledger current; record owner decisions verbatim | Quote Frank's words in the ledger log and in the *Answer* column of open questions |
-| No subagents unless Frank allows them | Work in one session. `frontier` tasks stay at `review` until a separate session reviews them (04-workflow §7) |
+| No subagents unless Frank allows them | Work in one session |
+| Go wide, review systems later (ADR-0019) | No per-task review gate: tasks are `done` at their Definition of Done; an in-depth system review runs per milestone, before its gate (04-workflow §8) |
 | Give options, not a single proposal | Every decision for Frank comes as 2–4 options with trade-offs, recommended first |
 | No Starsector art and no copyrighted images in the repository | Procedural or own-work art only |
 | Fonts are SIL OFL 1.1 only | |
@@ -42,7 +43,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
   - `main` is at round 3 of the look book (`e25acbc`).
   - `task/design-guide` contains `task/lookdev-r4` and fast-forwards `main` cleanly: it holds round 4, the design guide, the gate, the slope study, ADR-0018 and this page.
   - `task/ART-007-brick-tools` (`083c482`) is not merged. `ART-007` is in progress: its art validator waits for `CORE-002`, `DATA-004` and `DATA-005`.
-- **Waiting for an independent frontier review** (status `review`): `ART-003`, `ART-004`, `ART-005`, `ART-012`.
+- **Reviews:** per-task reviews are gone (ADR-0019); `ART-004` stays in `review` for its open 150 m glyph criterion.
 - **Done in M0:** `CORE-001`, `CORE-004`, `DATA-001`, `DATA-002`.
 
 ## 3. Next

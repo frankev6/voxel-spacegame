@@ -5,7 +5,7 @@ Checks:
 - every spec has the header table and the 11 template sections;
 - task IDs are unique and use the spec's area code; task -001 exists ("Public contract types");
 - every task has Milestone (valid), Tier (valid), Depends on, Do, Files, Acceptance criteria, Tests;
-- frontier-tier tasks are owned only by frontier-class models and are `done` only with "reviewed-by:" in Notes;
+- frontier-tier tasks are owned only by frontier-class models (per-task reviews were replaced by system reviews, ADR-0019);
 - dependency tokens are valid: own task IDs, another spec's <CODE>-001, or SPEC-NN;
 - no task depends on a task scheduled in a later milestone; no dependency cycles;
 - the ledger has exactly one row per spec task (run tools/ledger-sync.py to fix), valid statuses;
@@ -113,8 +113,6 @@ def main():
                     errors.append(f"ledger: {tid} owner '{owner}' must be 'name (model)', e.g. 'alex (claude-opus-5-5)' or 'sam (human)'")
                 elif tid in idx and idx[tid][0].tier == "frontier" and NON_FRONTIER_MODEL_RE.search(m.group("model")):
                     errors.append(f"ledger: {tid} is a frontier task but is owned by a non-frontier model '{m.group('model')}' (04-workflow §7)")
-            if st == "done" and tid in idx and idx[tid][0].tier == "frontier" and "reviewed-by:" not in (r.get("Notes") or ""):
-                errors.append(f"ledger: {tid} is a frontier task marked done without 'reviewed-by: name (model)' in Notes (04-workflow §7)")
 
     # spec map
     arch = open(os.path.join(ROOT, "docs", "01-architecture.md"), encoding="utf-8").read()
