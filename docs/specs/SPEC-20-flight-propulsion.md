@@ -410,7 +410,7 @@ Properties (tested): the residual never increases; the result is a deterministic
 `PlanarImpulseJob : IJobEntity` (`ScheduleParallel`) over roots with `PlanarConstraint`, `PhysicsVelocity`, `PhysicsMass`, `LocalTransform` (hulks included; SPEC-13 gives planar hulks the tag):
 1. `InverseMass ≤ 0` → skip.
 2. `y = LocalTransform.Position.y`; `vyTarget = −PlaneCorrection × y / dt`; `J = (vyTarget − PhysicsVelocity.Linear.y) / InverseMass`; `PhysicsVelocity.ApplyLinearImpulse(PhysicsMass, new float3(0, J, 0))`.
-3. Diagnostics only: if `abs(Rotation.value.x) + abs(Rotation.value.z) > 1e-3` or `|Angular.x| + |Angular.z| > 1e-4` (planar inertia makes both impossible) → `GameLog.Burst.Warn("FLT: planar body tilted")` once per entity index (a `NativeParallelHashSet` is not needed: use a per-job flag and log once per job run). No correction (decision 9).
+3. Diagnostics only: if `abs(Rotation.value.x) + abs(Rotation.value.z) > 1e-3` or `|Angular.x| + |Angular.z| > 1e-4` (planar inertia makes both impossible) → `GameLog.Burst.Warn("FLT: planar body tilted")` once per system lifetime (Q16): an owned persistent `NativeReference<int>` uses atomic compare-exchange across parallel executions. No correction (decision 9).
 
 ### 5.6 Flow
 
@@ -592,8 +592,8 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Do:** Implement §5.5.
 - **Files:** `Assets/Game/Simulation/Flight/{PlanarConstraintSystem,PlanarImpulseJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Flight/PlanarConstraintTests.cs`
 - **Acceptance criteria:**
-  - [ ] A planar body started at y = 1 m with vertical velocity 5 m/s ends within 1 mm of y = 0 after 60 ticks; X/Z rotation stays exactly 0.
-  - [ ] Non-planar bodies are untouched.
+  - [x] A planar body started at y = 1 m with vertical velocity 5 m/s ends within 1 mm of y = 0 after 60 ticks; X/Z rotation stays exactly 0.
+  - [x] Non-planar bodies are untouched.
 - **Tests:** `PlanarConstraintTests.ReturnsToPlane`, `.NoTilt`, `.NonPlanar_Untouched`.
 
 ### FLT-009 — Flight behaviour scenarios
@@ -662,6 +662,8 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 
 | 14 | Propulsion reads module rows but its required-singleton table omits BlockModulesRef | Require the module singleton before scheduling | Tech lead | Resolved FLT-007: add the missing boot-data guard; the thruster rebuild uses the existing BlockModulesBlob.TryGet API. No contract change. |
 | 15 | Default LinearAssistGain 0.5 makes the final braking approach exponential, so exact zero has no finite M×v/ΣF stopping time | Test the analytical saturated bound with gain 1 and convergence separately with shipped defaults | Tech lead | Resolved FLT-007: preserve §5.3's assist formula. Brake_Stops compares unit-gain stopping ticks to M×v/ΣF within two ticks, and separately requires the default half-gain fixture to reach below 0.01 m/s. Brake suppresses boost in both cases. |
+
+| 16 | A per-job value flag cannot guarantee one diagnostic across parallel job copies and would log a persistent tilt every tick | One atomic diagnostic latch per system lifetime | Tech lead | Resolved FLT-008: retain parallel impulses; own a 4-byte NativeReference in OnCreate/OnDestroy, atomically claim the first tilt warning. No per-tick allocation, completion or transform correction. This resolves the conflicting per-entity/per-job wording and follows conventions §6's no-repeated-frame-logging rule. |
 
 ## 11. References
 
