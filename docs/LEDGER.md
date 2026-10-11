@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 96 | 0 | 0 | 0 | 4 | 0 | 100 | 19 |
+| M1 | 95 | 0 | 0 | 0 | 5 | 0 | 100 | 18 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -149,7 +149,7 @@
 | PHY-001 | Public contract types | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 1f27ec6 | Physics contracts, exact filters, native/blob ownership; 4 required tests |
 | PHY-002 | SPIKE: Unity Physics capabilities for nested voxel compounds | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | todo |  |  |  |  |
 | PHY-003 | Physics config definition, factory and PhysicsStep | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-001, SPEC-04 | no | todo |  |  |  |  |
-| PHY-004 | Brick box merger | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PHY-004 | Brick box merger | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | e1679aa | Exact greedy box covers, 2/4-cell coarsening, bounds fallback; 7 tests |
 | PHY-005 | Brick blob builder and grid compound assembler | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002, PHY-004 | no | todo |  |  |  |  |
 | PHY-006 | Mass maths | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | todo |  |  |  |  |
 | PHY-007 | Pipeline singletons and access discipline | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | todo |  |  |  |  |
@@ -635,6 +635,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PHY-004 brick box merger (astra, gpt-6)
+
+- Implemented the specified x-run/y/z greedy cover, conservative 2/4-cell super-cell covers and bounded fallback. Scratch masks are stack values; output storage is the only native allocation. No public contract change or new spec decision.
+- Seven required tests pass: exact union/disjointness for **10,000** seeded masks across five densities plus structured masks; coarse supersets; box limits and bounds fallback; full/slab/checkerboard; repeated/Burst-versus-managed order. The 10,000-mask test took **1.389 s** in the full suite.
+- Compile zero C# warnings; full live EditMode **432 passed** in **40.37 s**, PlayMode **31 passed**, perf **23/23**; docs zero errors/warnings. Implementation `e1679aa`. Next: PHY-002's installed-Physics capability spike; sparse storage still requires ADR-0023 resolution.
 
 ### 2026-10-11 — VOX-002 memory spike completed (astra, gpt-6)
 
