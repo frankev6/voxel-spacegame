@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 26 | 0 | 0 | 0 | 40 | 0 | 66 | 9 |
+| M0 | 25 | 0 | 0 | 0 | 41 | 0 | 66 | 10 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -40,9 +40,9 @@
 | FND-003 | PauseService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | f7b5e9b |  |
 | FND-004 | SettingsService and SettingsApplier | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-001, PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | a4c31aa | SettingsService + applier; 4 tests |
 | FND-005 | Composition root and BootSingletons | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-002, FND-003, FND-004, SPEC-02, SPEC-04 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 9caac2b | rows 1/2/3/5/6/14; OQ 8 |
-| FND-006 | SceneFlow transitions and teardown | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-005 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
-| FND-007 | SimClock lifecycle and SimClockAdvanceSystem | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-006 | no | todo |  |  |  |  |
-| FND-014 | Static state audit and Play Mode re-entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-006 | no | todo |  |  |  |  |
+| FND-006 | SceneFlow transitions and teardown | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-005 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 1b67ff9 | teardown 200k: 3.5 ms; OQ 9; trap T2.12 |
+| FND-007 | SimClock lifecycle and SimClockAdvanceSystem | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | frontier | FND-006 | yes | todo |  |  |  |  |
+| FND-014 | Static state audit and Play Mode re-entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M0 | standard | FND-006 | yes | todo |  |  |  |  |
 | CORE-001 | Public contract types | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 4c3a121 | Drain-system lifecycle stub: open question 5 |
 | CORE-002 | StableHash and content identity | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | b4a06ce | 0.046 µs per 16-char hash, 0 B GC; SPEC-02 vector labels corrected |
 | CORE-003 | Random streams and fixed-step time | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-002 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 9a669c6 |  |
@@ -575,6 +575,26 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — FND-006 SceneFlow transitions and teardown (claude, claude-opus-5-5)
+- `SceneFlow` per SPEC-01 §5.4:
+  - serialized transitions (a second request answers `Busy` at once);
+  - a pause token for the transition;
+  - `SceneTransitionStarted`/`Finished` events;
+  - exiting hooks, then teardown: destroy `GameplayActive`, then every entity outside the boot snapshot in one batch, then up to 10 cleanup frames;
+  - World/Lab entry entities; ready hooks with a total unscaled timeout;
+  - recovery to the main menu with `ErrorRecovery` and `success: false`;
+  - `StartupAsync`, the hook registries and `SnapshotBootEntities`.
+- `GameSceneNames` added. The composition gains rows 7 (flow) and 15 (snapshot); `GameRoot.Start` runs `StartupAsync`.
+- **Bug found by the round-trip test:** Entities creates its `WorldTime` singleton on the first `World.SetTime`, after the boot snapshot, so every teardown destroyed the world clock. The snapshot now forces it first. Logged as SPEC-01 open question 9 (ledger 25) and trap T2.12, with T2.11 for the CORE-012/009 lessons.
+- Not wired yet, until their types exist: session calls (FND-009), autosave (PERS-009), root screens and notifications (HUD-002, UI-003). Non-game scenes are left alone at startup.
+- Tests: PlayMode `SceneFlowTests` (6):
+  - MainMenu → World → MainMenu twice, with no leftovers, including prefab and disabled entities;
+  - the Lab has `GameplayActive` without `WorldSceneActive`;
+  - `Busy`;
+  - a throwing hook and a 1 s timeout both recover to the main menu;
+  - teardown of 200,000 entities: **3.5 ms median** (gate ≤ 50 ms).
+- EditMode 264/264 (+1 explicit), PlayMode 15/15.
 
 ### 2026-10-11 — FND-005 composition root and BootSingletons (claude, claude-opus-5-5)
 - `GameComposition.Build` runs §5.2 rows 1 (settings), 2 (content, content singletons, `BootSingletons.CreateAll`, `config_game`; no voxel lines yet), 3 (input), 5 (pause), 6 (save) and 14 (applier).
