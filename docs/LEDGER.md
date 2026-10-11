@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 75 | 0 | 0 | 0 | 26 | 0 | 101 | 13 |
+| M1 | 74 | 0 | 0 | 0 | 27 | 0 | 101 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 4 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 3 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -129,7 +129,7 @@
 | VOX-013 | GridSpawnSystem: spawn path and singletons | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-006, VOX-011, VOX-012, REN-001, VOX-021, PHY-001, DMG-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | b6d6708 | Budgeted Burst fill, profiles/stow, read-token teardown; 522/32, perf28; 1024 bricks 0.308 ms |
 | VOX-014 | Rebuild, despawn and write-back | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | yes | done | astra (gpt-6) | 2026-10-11 | d91def5 | Incremental saves/capture, rebuild identity, partial/stowed despawn; 528/32, perf29 |
 | VOX-015 | BrickDirtyScheduleSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-012, REN-001, VOX-021, PHY-001 | yes | todo |  |  |  |  |
-| VOX-016 | DeferredDisposalSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| VOX-016 | DeferredDisposalSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | yes | done | astra (gpt-6) | 2026-10-11 | b0141a5 | Frame/tick-safe cleanup; paused100, no leaks, actual GPU unregister verified |
 | VOX-017 | Benchmark structures | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-005, VOX-006 | yes | done | astra (gpt-6) | 2026-10-11 | a80b2f7 | Five deterministic shapes; reference build 87.43 ms; count/dependency fixes Q66–67 |
 | VOX-019 | Damage persistence scenario | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-014 | yes | todo |  |  |  |  |
 | VOX-021 | Mesh rebuild priority queue | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | REN-001 | yes | done | astra (gpt-6) | 2026-10-11 | bb07e09 | Guarded priority/FIFO mesh queue; stale promotion invalidation; 4 tests; Q75–76 |
@@ -680,6 +680,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — VOX-016 deferred disposal (astra, gpt-6)
+
+- Added the Presentation OrderLast cleanup system and retirement helpers. Blobs wait three frames and two clock ticks, meshes wait three frames; cleanup continues without GameplayActive. Paused physics retains retired blobs until its clock reaches DueTick. GridSpawnSystem retains queue ownership and teardown disposal.
+- Required tests verify two-frame survival/third-frame disposal, **100 paused updates** plus the exact resumed-tick boundary, and pending world teardown with **zero tracked native leaks**. PlayMode covers absent-renderer mesh destruction. A separate GPU-enabled Metal batch run verified a real Entities Graphics mesh registration survives two updates, unregisters on the third, and is destroyed at frame end (**1/1 passed**, `Logs/test-results/vox016-gpu.xml`). Restored the incidental QualitySettings serialization change from a pre-run copy.
+- Compile zero C# warnings; full EditMode **533 passed + 1 explicit skipped**, PlayMode **33 passed**, perf **29/29**, docs **502 tasks / zero errors**. Implementation **b0141a5**. No spec decision or owner gate needed; next VOX-019 damage persistence integration.
 
 ### 2026-10-11 — VOX-003 sparse fallback and memory go (astra, gpt-6)
 
