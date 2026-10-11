@@ -16,7 +16,7 @@ namespace Game.Data.Definitions
         [SerializeField, Min(100f)] private float lod2Distance = 2000f;
         [SerializeField, Range(0f, 0.5f)] private float lodHysteresis = 0.1f;
         [SerializeField, Min(500f)] private float dormantDistance = 3000f;
-        [SerializeField] private bool releaseCpuMeshCopies = true;
+        [SerializeField] private bool releaseCpuMeshCopies = false;
         public Material BrickMaterial => brickMaterial;
         public Material PropMaterial => propMaterial;
         public VoxelPaletteDefinition Palette => palette;

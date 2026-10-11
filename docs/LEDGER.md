@@ -655,6 +655,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 91 | 2026-10-11 | SPEC-11 REN-005 | Missing orientation input and retained snapshot diagnostics | Canonical orientation table input and per-work SnapshotFlags | Tech lead | Resolved SPEC-11 Q18 / accepted ADR-0029; no duplicate rotation implementation |
 | 92 | 2026-10-11 | SPEC-11 REN-006 | Legal painted long-slope brick needs at least 73,728 vertices | uint mesher indices; UInt16 upload when possible, UInt32 otherwise | Tech lead | Resolved SPEC-11 Q19 / SPEC-10 Q40 / accepted ADR-0030; reference-station GPU memory unchanged |
 | 93 | 2026-10-11 | SPEC-11 REN-007 | LOD1 key zero conflicts with empty sentinel | Offset stored face keys by one and retain separate occupancy | Tech lead | Resolved SPEC-11 Q20; no public contract change |
+| 94 | 2026-10-11 | SPEC-11 REN-002 | PlayMode RenderBounds requires an explicit package assembly reference | Add existing Unity.Mathematics.Extensions reference | Tech lead | Resolved SPEC-11 Q21 / ADR-0031; test-only dependency |
+| 95 | 2026-10-11 | SPEC-11 REN-002 | Released meshes reject later writable-mesh apply | Default ReleaseCpuMeshCopies to false | Tech lead | Resolved SPEC-11 Q22; preserve mutable-mesh correctness and retained-copy memory accounting |
 
 
 
@@ -665,6 +667,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-11 | REN-002 | Idle 2,500 registered meshes | Presentation 0.313042 / 0.339875 ms median/p95; active RenderLoop 0.746250 / 0.877166 ms; 5,035 draws | Apple M5 Pro, Unity 6000.6.5f1, Metal MultiThreaded, 1920×1080 linear target, URP 4 cascades / 300 m, safety off; 60 warmup + 300 CPU samples |
+| 2026-10-11 | REN-002 | GPU idle | **6.434792 / 10.494958 ms median/p95 — no-go** vs 6 ms | 300 unique positive FrameTiming samples; capture continued beyond the 300 CPU samples because Editor GPU timings arrive sparsely; initial single-threaded results superseded |
+| 2026-10-11 | REN-002 | Moving root delta | **1.625292 ms median delta — no-go** vs 0.5 ms | Paired static transform/presentation medians 0.029708 / 0.318000 ms; moving 0.030875 / 1.942125 ms; moving p95 0.037167 / 1.996417 ms; 300 samples each |
+| 2026-10-11 | REN-002 | Rewrite 128 meshes | 0.101791 / 0.115875 ms apply median/p95; exact changed pixels; IDs unchanged | 300 batches, AllocateWritableMeshData + Burst fill + apply flags + explicit mesh/RenderBounds; apply marker includes both Mesh.bounds and ECS RenderBounds assignment, excludes fill |
+| 2026-10-11 | REN-002 | UNorm8 packed format | Exact pixel decode, all 64 layers and 256 colour indices | 8-byte layout on Metal; no Float16 fallback needed; DX12/Vulkan unavailable on this host |
+| 2026-10-11 | REN-002 | CPU copy release | 23,128 B before/after release, unchanged after 5 frames; later apply throws isReadable=false | Default ReleaseCpuMeshCopies=false; do not claim measured memory savings |
+| 2026-10-11 | REN-002 | Lifetime and units | 10,000 rewrites + 2,000 delayed retire cycles: zero new native leaks/errors; single-cell hull size (1,1,1) | Native leak tracker reset after warmup, final count asserted 0; imported base_1x1_hull mesh is centred at origin; retired IDs read back null |
+
 | 2026-10-11 | PHY-005 | 50% noise brick construction diagnostic | 9.7 µs median / 12.8 µs p95 | Apple M5 Pro; Burst Run including call overhead, 4 warmups / 101 samples, current test safety settings; formal gate remains PHY-019 |
 | 2026-10-11 | PHY-002 | 1–2: Burst construction / copied ownership | 32 parallel persistent builds pass; disposed children leave 4/4 nested rays and distances correct | BoxCollider.Create + CompoundCollider.Create inside Burst IJobParallelFor |
 | 2026-10-11 | PHY-002 | 3–5: nested contacts / None / pair disable | Nested: 1 pair, 16 contact points, 4 collision events; None: 0/0/0 and ray hit; disabled: 1/0/0 | Pair job between PhysicsCreateBodyPairsGroup and PhysicsCreateContactsGroup; separation normal 0.85 m versus 0.8 m suppressed |

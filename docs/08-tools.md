@@ -57,10 +57,11 @@ These work with no Editor open (verified 2026-10-10):
   - `tools/test.sh editmode DevReleaseStripTests` performs the real release compilation and checks Game.App.dll for dev namespaces and the output for DevTools assemblies (DEV-020). A missing-guard mutation must make the test fail; back up and restore the source with `cp`.
   - "Function pointer types are not supported by the SerializationWeaver" lines about `Unity.Entities.dll` are noise.
 - **Rendering or real shader compilation needs the GPU:**
-  - Run `-batchmode` **without** `-nographics`. Metal works headless.
+  - Run `-batchmode` **without** `-nographics`. Metal works headless. For renderer performance, also pass `-force-gfx-mt`: batch PlayMode otherwise selected SingleThreaded despite the project setting (REN-002). Log `SystemInfo.renderingThreadingMode` to verify.
   - Set `ShaderUtil.allowAsyncCompilation = false`.
   - Throw away the first `camera.Render()` after `NewScene`, because it draws only the clear colour.
-  - These runs re-save `ProjectSettings/QualitySettings.asset` with a version bump. Revert it with `git checkout -- ProjectSettings/QualitySettings.asset`.
+  - Back up `ProjectSettings/QualitySettings.asset` before the run and restore that backup with `cp` afterward; GPU runs may re-save its version. Do not restore from Git over uncommitted settings. Back up/restore PlayerSettings too if enabling `enableFrameTimingStats` for measurement.
+  - In this Metal Editor, `Render Thread` is absent and the `CPU Render Thread Frame Time` counter reports zero even with multithreaded rendering. `RenderLoop` provides active render work, not full thread frame time. FrameTiming GPU results arrive sparsely: collect 300 unique positive timestamps for a 300-sample GPU report; never treat absent/zero timings as a passed gate.
 - **The test kit (`Game.Tests.Common`, SPEC-71):**
   - `EcsTestWorld.Create(types)` builds a world with only those systems (plus their groups, the default command buffer systems and ordering anchors). `StepTicks(n)` runs exactly n fixed ticks; `StepFrame(dt)` catches up like the game, at most 6 ticks. A `SimClock` advances by itself unless `SimClockAdvanceSystem` is in the world.
   - Derive EditMode fixtures from `GameTestBase` and create worlds with `CreateWorld(...)`: they are disposed even when the test throws.

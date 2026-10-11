@@ -237,7 +237,7 @@ public sealed class VoxelRenderConfigDefinition : ContentDefinition   // single 
     [SerializeField, Min(100f)] private float lod2Distance = 2000f;
     [SerializeField, Range(0f, 0.5f)] private float lodHysteresis = 0.1f;
     [SerializeField, Min(500f)] private float dormantDistance = 3000f;
-    [SerializeField] private bool releaseCpuMeshCopies = true;
+    [SerializeField] private bool releaseCpuMeshCopies = false;
     // public getters with the same names (PascalCase)
 }
 
@@ -430,9 +430,10 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
   Record results in the ledger *Measurements* and set `ReleaseCpuMeshCopies` default from (e).
 - **Files:** `Assets/Game/Tests/PlayMode/Voxel/Spikes/EntitiesGraphicsSpike.cs` (temporary); `docs/LEDGER.md`
 - **Acceptance criteria:**
-  - [ ] **Go** if: (a) main thread ≤ 0.6 ms, render thread ≤ 6 ms, GPU ≤ 6 ms; (b) ≤ 0.5 ms; (c) visible change and ≤ 2.5 ms for 128; (d) exact decode; (f) clean. Otherwise **no-go**: REN-003 becomes `todo`, an ADR draft for the fallback renderer is written.
-  - [ ] If (d) fails: switch to `Position` Float16×4 (x, y, z, packed normal/ao/damage as an integer-valued half) + `TexCoord0` UNorm8×4 (12 B), update §3.3 and SPEC-10 §8.2 numbers.
+  - [x] **Go** if: (a) main thread ≤ 0.6 ms, render thread ≤ 6 ms, GPU ≤ 6 ms; (b) ≤ 0.5 ms; (c) visible change and ≤ 2.5 ms for 128; (d) exact decode; (f) clean. Otherwise **no-go**: REN-003 becomes `todo`, an ADR draft for the fallback renderer is written.
+  - [x] If (d) fails: switch to `Position` Float16×4 (x, y, z, packed normal/ao/damage as an integer-valued half) + `TexCoord0` UNorm8×4 (12 B), update §3.3 and SPEC-10 §8.2 numbers.
 - **Tests:** `EntitiesGraphicsSpike.Idle2500`, `.Moving2500`, `.InPlaceRewrite128`, `.PackedFormatDecode`, `.CpuCopyRelease`, `.Churn10000` (`[Explicit]`).
+- **Result (2026-10-11): no-go.** Moving transform/presentation median delta 1.625292 ms > 0.5 ms; idle GPU median 6.434792 ms > 6 ms. Metal packed pixels and visible rewrites pass, lifetime check is clean. CPU-copy release prevents later apply, so default false. See ledger Measurements and proposed ADR-0032; REN-003 is activated. The Editor exposes active RenderLoop timing but not a usable full render-thread frame counter; zero counter values are not treated as a pass.
 
 ### REN-003 — Fallback renderer (only if REN-002 is no-go)
 - **Milestone:** M1
@@ -619,6 +620,8 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 18 | Snapshot helper lacks orientation input and work has no warning storage | Replace unused shape-table input with orientations; add SnapshotFlags | Tech lead | Resolved by accepted ADR-0029; canonical inverse rotation, defined bad-content fallback, per-work warning retention. |
 | 19 | Legal painted long-slope bricks exceed UInt16 vertex addressing | uint mesher indices with conditional 16/32-bit GPU upload | Tech lead | Resolved ADR-0030: proven 73,728-vertex lower bound; no dropped geometry or relaxed memory/performance gate. |
 | 20 | LOD1 attribute key zero collides with the empty-face sentinel; all-prop super-cells still need occupancy | Store key + 1 separately from the solid bit | Tech lead | Resolved: zero paint/layer remains visible, tie-break compares original keys, and solid non-structural super-cells occlude without emitting. |
+| 21 | PlayMode rendering tests cannot compile RenderBounds without its defining assembly | Reference existing Entities mathematics extensions | Tech lead | Resolved by ADR-0031: add Unity.Mathematics.Extensions to Game.Tests.PlayMode; no package/runtime API change. |
+| 22 | Can dynamic meshes release CPU copies after each apply? | Keep copies for mutable registered meshes | Tech lead | Resolved by REN-002 on Metal: UploadMeshData(true) prevents subsequent writable-mesh apply and shows no drop in the runtime-memory counter; releaseCpuMeshCopies defaults to false. |
 
 ## 11. References
 
