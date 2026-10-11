@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 90 | 0 | 0 | 0 | 10 | 0 | 100 | 17 |
+| M1 | 89 | 0 | 0 | 0 | 11 | 0 | 100 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -151,7 +151,7 @@
 | PHY-003 | Physics config definition, factory and PhysicsStep | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | e14cc32 | Default asset / E001-E002 / factories / both boot rows integrated |
 | PHY-004 | Brick box merger | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | e1679aa | Exact greedy box covers, 2/4-cell coarsening, bounds fallback; 7 tests |
 | PHY-005 | Brick blob builder and grid compound assembler | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-002, PHY-004 | yes | done | astra (gpt-6) | 2026-10-11 | a54c29f | Eight tests; all merge levels / copied ownership / nested coordinates |
-| PHY-006 | Mass maths | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PHY-006 | Mass maths | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | 1c4b85f | Six tests; tensor / canonical Jacobi / planar locks / point velocity preservation |
 | PHY-007 | Pipeline singletons and access discipline | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | todo |  |  |  |  |
 | PHY-008 | GridBodyInitSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-003, PHY-006, PHY-007, SPEC-10 | no | todo |  |  |  |  |
 | PHY-009 | ColliderSnapshotSystem and install schedule | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-007, SPEC-10 | no | todo |  |  |  |  |
@@ -645,6 +645,12 @@ PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedu
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PHY-006 deterministic mass maths (astra, gpt-6)
+
+- Implemented double-precision tensor construction, 16-sweep cyclic Jacobi with stable eigenvalue order and canonical right-handed axes, dynamic/kinematic PhysicsMass, corner-based angular expansion and velocity re-expression. Planar inertia locks x/z exactly. Non-finite re-expression preserves the old velocity and logs once through a Burst-compatible atomic flag reset at SubsystemRegistration.
+- Six required tests pass: analytic boxes at three scales; L-shape plus **500 random structures** reconstruct tensors within **1e-9 relative**; **128** repeated managed/Burst eigensystems give bit-identical repeats in each execution mode; **1,000** planar/free mass-frame changes preserve **8** sampled point velocities each within **1e-4 m/s**. The test oracle sums cells independently because VOX-007 is not this task's dependency.
+- Compile zero C# warnings; full headless EditMode **451 passed + 1 explicit skipped**, PlayMode **31 passed**, perf **23/23**, all process exits 0; docs zero errors/warnings. Implementation `1c4b85f`; handoff updated. No contract change or new spec question. Next: PHY-007 pipeline containers/ownership.
 
 ### 2026-10-11 — PHY-003 physics configuration and boot (astra, gpt-6)
 
