@@ -27,6 +27,13 @@ namespace Game.Data.Definitions
         public float GridLinearDamping => gridLinearDamping;
         public float GridAngularDamping => gridAngularDamping;
         public int SolverIterations => solverIterations;
-        public override void Validate(ValidationScope scope, ContentValidationContext context) => throw new System.NotImplementedException("PHY-003");   // PHY-E001..E002 (§7)
+        public override void Validate(ValidationScope scope, ContentValidationContext context)
+        {
+            base.Validate(scope, context);
+            if (installDelayTicks <= 6)
+                scope.Error("PHY-E001", nameof(installDelayTicks), "Install delay must exceed the six-tick catch-up cap.");
+            if (bevelFraction > 0.25f)
+                scope.Error("PHY-E002", nameof(bevelFraction), "Bevel fraction must not exceed 0.25 of a cell.");
+        }
     }
 }

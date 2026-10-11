@@ -1,17 +1,38 @@
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.Entities;
-using Unity.Jobs;
+using Game.Data.Definitions;
 using Unity.Mathematics;
 using Unity.Physics;
-using Game.Voxel.Model;
 
 namespace Game.Voxel.PhysicsBody
 {
-    /// <summary>Implements SPEC-12 §4 (physics contract).</summary>
+    /// <summary>Copies validated content to boot configuration (SPEC-12 §4.5, §5.13).</summary>
     public static class PhysicsVoxelConfigFactory
     {
-        public static PhysicsVoxelConfig Create(Game.Data.Definitions.PhysicsVoxelConfigDefinition def) => throw new System.NotImplementedException("PHY-003");   // copies the fields
-        public static Unity.Physics.PhysicsStep CreatePhysicsStep(Game.Data.Definitions.PhysicsVoxelConfigDefinition def) => throw new System.NotImplementedException("PHY-003"); // §5.13
+        public static PhysicsVoxelConfig Create(PhysicsVoxelConfigDefinition def) => new PhysicsVoxelConfig
+        {
+            InstallDelayTicks = def.InstallDelayTicks,
+            InstallBucketTicks = def.InstallBucketTicks,
+            MaxBricksPerBatch = def.MaxBricksPerBatch,
+            MaxAssembliesPerBatch = def.MaxAssembliesPerBatch,
+            MaxBoxesPerBrick = def.MaxBoxesPerBrick,
+            MaxBatchAgeFrames = def.MaxBatchAgeFrames,
+            BevelFraction = def.BevelFraction,
+            GridLinearDamping = def.GridLinearDamping,
+            GridAngularDamping = def.GridAngularDamping,
+        };
+
+        public static PhysicsStep CreatePhysicsStep(PhysicsVoxelConfigDefinition def)
+        {
+            var step = PhysicsStep.Default;
+            step.SimulationType = SimulationType.UnityPhysics;
+            step.Gravity = float3.zero;
+            step.SolverIterationCount = def.SolverIterations;
+            step.MultiThreaded = 1;
+            step.SynchronizeCollisionWorld = 1;
+            step.CollisionTolerance = 0.1f;
+            step.SolverStabilizationHeuristicSettings.EnableSolverStabilization = false;
+            step.IncrementalDynamicBroadphase = false;
+            step.IncrementalStaticBroadphase = true;
+            return step;
+        }
     }
 }
