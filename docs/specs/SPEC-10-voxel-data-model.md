@@ -651,8 +651,8 @@ All take the `BlockIndex` of a single-cell Structural Cube block and colour 0; d
 |---|---|---|---|
 | `HollowStation1M` (reference) | box x∈[0,256), y∈[0,128), z∈[0,256) minus x∈[4,252), y∈[4,124), z∈[4,252) | 1,008,128 | 872 |
 | `ThinShellStation1M` (stress) | box [0,512)×[0,256)×[0,512) minus [1,511)×[1,255)×[1,511) | 1,043,464 | 3,784 |
-| `SolidAsteroid1M` | cells whose centre lies within 62.0 cells of (64,64,64) | brute-force count (≈ 998,000) | 245 |
-| `Ship20k` | solid box 80×10×25 at the origin | 20,000 | 18 |
+| `SolidAsteroid1M` | cells whose centre lies within 62.0 cells of (64,64,64) | 998,592 (brute-force verified) | 408 |
+| `Ship20k` | solid box 80×10×25 at the origin | 20,000 | 10 |
 | `Lattice2500` | one cell at local (0,0,0) of each brick bx∈[0,25), by∈[0,4), bz∈[0,25) | 2,500 | 2,500 |
 
 ### 5.13 Profiles, stowed and transient grids (ADR-0015)
@@ -888,7 +888,7 @@ Measured station geometry and allocation totals:
 ### VOX-009 — VOXS codec
 - **Milestone:** M1
 - **Tier:** frontier — F3: binary encoding
-- **Depends on:** `VOX-007`, `SPEC-05`
+- **Depends on:** `VOX-007`, `VOX-017`, `SPEC-05`
 - **Do:** Implement the adapter of §5.6 (`VoxsSourceBuffers`, `VoxelStructureCodec.ToSource/Encode/TryDecode/FromDecoded`) over SPEC-05's `VoxsCodec`, and `ComputeContentHash`. Write no byte-level code: every byte is SPEC-05's.
 - **Files:** `Assets/Game/Voxel/Model/{VoxelStructureCodec,VoxsSourceBuffers,VoxelStructure}.cs`; `Assets/Game/Tests/EditMode/Voxel/VoxelCodecTests.cs`
 - **Acceptance criteria:**
@@ -995,7 +995,7 @@ Measured station geometry and allocation totals:
 ### VOX-017 — Benchmark structures
 - **Milestone:** M1
 - **Tier:** standard — generators fully defined in §5.11
-- **Depends on:** `VOX-005`
+- **Depends on:** `VOX-005`, `VOX-006`
 - **Do:** Implement `BenchmarkStructures.HollowStation1M/ThinShellStation1M/SolidAsteroid1M/Ship20k/Lattice2500(ushort block)` returning new `VoxelStructure`s.
 - **Files:** `Assets/Game/Voxel/Model/BenchmarkStructures.cs`; `Assets/Game/Tests/EditMode/Voxel/BenchmarkStructuresTests.cs`
 - **Acceptance criteria:**
@@ -1055,6 +1055,9 @@ Measured station geometry and allocation totals:
 | 20 | SPEC-01 boot table passes a catalog to the definition-taking VoxelConfigFactory | Resolve config_voxel from the catalog at boot, then call the specified factory | Tech lead | Resolved 2026-10-11: corrected SPEC-01 call site and wired the BootSingleton-tagged config in table order; verified by ConfigFactory_CopiesValues. |
 
 | 21 | VOX-006 compaction acceptance requires GetBlocks, but that method belongs to dependent VOX-007 | Bring only the specified GetBlocks implementation forward to VOX-006 | Tech lead | Resolved 2026-10-11: required placement-set preservation is checked through the real API; clone/diff/mass remain VOX-007. |
+
+| 22 | §5.11 lists 245 asteroid bricks and 18 Ship20k bricks, inconsistent with its geometry | Preserve geometry, correct the derived counts | Tech lead | Resolved 2026-10-11: independent enumeration gives asteroid 998,592 cells / 408 bricks; ceil(80/16) × ceil(10/16) × ceil(25/16) gives Ship20k 10 bricks. |
+| 23 | Benchmark generators use VOX-006 palette insertion; codec acceptance requires these generators | Make both existing implementation dependencies explicit | Tech lead | Resolved 2026-10-11: add VOX-006 to VOX-017 and VOX-017 to VOX-009. VOX-006 was already done at claim time. |
 
 ## 11. References
 

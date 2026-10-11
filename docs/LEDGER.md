@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 83 | 0 | 0 | 0 | 17 | 0 | 100 | 15 |
+| M1 | 82 | 1 | 0 | 0 | 17 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -122,7 +122,7 @@
 | VOX-006 | Block placement, removal and compaction | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6a33cf7 | Placement/removal, palette/instance reuse, compaction; GetBlocks brought forward (Q65) |
 | VOX-007 | Clone, diff, block enumeration and mass | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-006 | yes | done | astra (gpt-6) | 2026-10-11 | 37cb539 | Deep clone; canonical Burst diff; double mass sums/cache; 6 tests |
 | VOX-008 | Grid-space DDA raycast | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005 | yes | todo |  |  |  |  |
-| VOX-009 | VOXS codec | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-007, SPEC-05 | yes | todo |  |  |  |  |
+| VOX-009 | VOXS codec | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-007, VOX-017, SPEC-05 | no | todo |  |  |  |  |
 | VOX-010 | Voxel definitions and config factory | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | edb5c0c | Blueprint setter, default config, boot singleton; 2 tests, Q64 |
 | VOX-011 | Structure registry and BlueprintLibrary | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-009, VOX-010 | no | todo |  |  |  |  |
 | VOX-012 | ECS cell write and read helpers | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-004 | yes | done | astra (gpt-6) | 2026-10-11 | 0b52cc8 | Burst cell reads/writes, masks, counts, dirty flags and borders; Q63 |
@@ -130,7 +130,7 @@
 | VOX-014 | Rebuild, despawn and write-back | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | no | todo |  |  |  |  |
 | VOX-015 | BrickDirtyScheduleSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-012, REN-001, PHY-001 | yes | todo |  |  |  |  |
 | VOX-016 | DeferredDisposalSystem | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-013 | no | todo |  |  |  |  |
-| VOX-017 | Benchmark structures | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-005 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Deterministic benchmark generators for voxel gates and codecs |
+| VOX-017 | Benchmark structures | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-005, VOX-006 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Deterministic benchmark generators for voxel gates and codecs |
 | VOX-019 | Damage persistence scenario | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | standard | VOX-014 | no | todo |  |  |  |  |
 | REN-001 | Public contract types | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | VOX-001, DATA-001 | yes | done | astra (gpt-6) | 2026-10-11 | 42dfd86 | Rendering contracts; queue/batch ownership; ADR-0018 layout; Q51–53 |
 | REN-002 | SPIKE: Entities Graphics with thousands of runtime brick meshes | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-10 | no | todo |  |  |  |  |
@@ -623,6 +623,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 64 | 2026-10-11 | SPEC-10 VOX-010 / SPEC-01 | Boot table factory argument differs from declared definition parameter | Resolve config_voxel from catalog before calling factory | Tech lead | Resolved in SPEC-10 Q20 and SPEC-01 table; boot config is tagged before scene snapshot |
 
 | 65 | 2026-10-11 | SPEC-10 VOX-006 | Compaction acceptance uses GetBlocks from dependent VOX-007 | Bring only GetBlocks forward | Tech lead | Resolved in SPEC-10 Q21; required equivalence uses real API, clone/diff/mass remain VOX-007 |
+
+| 66 | 2026-10-11 | SPEC-10 VOX-017 | Benchmark brick counts contradict the specified geometry | Preserve geometry; correct asteroid to 408 bricks and Ship20k to 10 | Tech lead | Resolved in SPEC-10 Q22; asteroid 998,592 cells independently enumerated |
+| 67 | 2026-10-11 | SPEC-10 VOX-017 / VOX-009 | Generator palette helper and codec benchmark dependencies were omitted | VOX-017 depends on VOX-006; VOX-009 depends on VOX-017 | Tech lead | Resolved in SPEC-10 Q23; no feature or acceptance scope removed |
 
 ## Measurements
 
