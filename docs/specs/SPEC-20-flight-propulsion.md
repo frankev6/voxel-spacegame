@@ -337,7 +337,7 @@ Memory: per ship root `ShipCommand` 40 B + `FlightState` 64 B + buffer header; `
 | `ThrusterInitSystem` | `GameInitGroup`, `[UpdateAfter(typeof(GridSpawnSystem))]`; M2 (FLT-012) also `[UpdateBefore(typeof(PowerInitSystem))]` | yes | `GameplayActive`, `BlockDefsRef`, `BlockModulesRef`, `OrientationTablesRef` |
 | `ThrusterPowerDemandSystem` (M2) | `PowerDemandGroup` (SPEC-22) | yes | `GameplayActive` |
 | `PropulsionStatsSystem` (M2) | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(ShipStatsAggregateSystem))]`, `[UpdateBefore(typeof(PropulsionSystem))]` | yes | `GameplayActive`, `FlightConfig`, `BlockModulesRef` |
-| `PropulsionSystem` | `GameplayPrePhysicsGroup`; M1: no ordering attribute (first after `ShipCommandGroup`); M2 (FLT-012): `[UpdateAfter(typeof(PropulsionStatsSystem))]` | yes | `GameplayActive`, `FlightConfig`, `BlockDefsRef`, `OrientationTablesRef` |
+| `PropulsionSystem` | `GameplayPrePhysicsGroup`; M1: no ordering attribute (first after `ShipCommandGroup`); M2 (FLT-012): `[UpdateAfter(typeof(PropulsionStatsSystem))]` | yes | `GameplayActive`, `FlightConfig`, `BlockDefsRef`, `BlockModulesRef`, `OrientationTablesRef` |
 | `PlanarConstraintSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(PropulsionSystem))]` | yes | `GameplayActive`, `FlightConfig` |
 
 Order inside the tick (architecture §5): `ShipCommandGroup` (player apply, AI) → `PowerDemandGroup` → `PowerAllocationSystem` → `ShipStatsAggregateSystem` → `PropulsionStatsSystem` → `PropulsionSystem` → `PlanarConstraintSystem` → `WeaponAimSystem` (SPEC-21 declares `[UpdateAfter(typeof(PlanarConstraintSystem))]`) → … → physics.
@@ -578,11 +578,11 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Do:** Implement §5.3 (`PropulsionJob`, `ThrusterIdleJob`) for M1 (multipliers 1, all thrusters usable).
 - **Files:** `Assets/Game/Simulation/Flight/{PropulsionSystem,PropulsionJob,ThrusterIdleJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Flight/PropulsionTests.cs`
 - **Acceptance criteria:**
-  - [ ] Thruster list rebuilt only when `VoxelGrid.Revision` changes; throttles carried over by instance index.
-  - [ ] Forward command on a symmetric test ship reaches `MaxForwardSpeed` (± 1%) and holds it; releasing W coasts (speed change < 0.5% over 120 ticks); Brake stops within the time predicted by `M × v / ΣF` (± 2 ticks).
-  - [ ] Strafe drift is removed with no input; yaw rate returns to 0 with no turn input.
-  - [ ] No code path assigns `PhysicsVelocity.Linear/Angular` (code review + test: a resting ship hit by a test impulse keeps the impulse's velocity minus what thrusters can remove in one tick).
-  - [ ] Hulk: thruster intensities reach 0 once and the ship receives no impulses.
+  - [x] Thruster list rebuilt only when `VoxelGrid.Revision` changes; throttles carried over by instance index.
+  - [x] Forward command on a symmetric test ship reaches `MaxForwardSpeed` (± 1%) and holds it; releasing W coasts (speed change < 0.5% over 120 ticks); Brake stops within the time predicted by `M × v / ΣF` (± 2 ticks) in the unit-assist-gain saturated fixture; the default half-gain fixture also converges below 0.01 m/s (Q15).
+  - [x] Strafe drift is removed with no input; yaw rate returns to 0 with no turn input.
+  - [x] No code path assigns `PhysicsVelocity.Linear/Angular` (code review + test: a resting ship hit by a test impulse keeps the impulse's velocity minus what thrusters can remove in one tick).
+  - [x] Hulk: thruster intensities reach 0 once and the ship receives no impulses.
 - **Tests:** `PropulsionTests.ThrusterList_RebuildOnRevision`, `.Forward_ReachesCap`, `.Coast_KeepsSpeed`, `.Brake_Stops`, `.Assist_KillsDrift`, `.Assist_StopsSpin`, `.NoVelocityAssignment`, `.Hulk_IdlesThrusters`.
 
 ### FLT-008 — PlanarConstraintSystem
@@ -659,6 +659,9 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 | 12 | Native float dot reductions differ by one ULP between managed and strict Burst on the reference machine | Accumulate three dot-product terms in double, cast once to float | Tech lead | Resolved FLT-004: the initial failing seeded case had identical coordinate traces but residual bits 1172050705 vs 1172050704. Explicit scalar float grouping also differed. Double product/sum accumulation with one final cast passes all six tests, including 100 problems × 127 intermediate states and two independently scheduled Burst solves against managed outputs. Public fields, fixed coordinate order and solver objective are unchanged; FLT-011 still owns whole-flight cost gates. |
 
 | 13 | No-player step 2 copies the Cruise counter despite its separate travel owner and the Cruise acceptance criterion | Drop only the nine ship counters, preserve consumed.Cruise | Tech lead | Resolved FLT-005: live player, hulk and absent-player paths all leave Cruise untouched. The specified Cruise_NotAShipEdge test covers all three. Other pending edges are dropped when no live ship exists; byte counter wrap consumes one press. |
+
+| 14 | Propulsion reads module rows but its required-singleton table omits BlockModulesRef | Require the module singleton before scheduling | Tech lead | Resolved FLT-007: add the missing boot-data guard; the thruster rebuild uses the existing BlockModulesBlob.TryGet API. No contract change. |
+| 15 | Default LinearAssistGain 0.5 makes the final braking approach exponential, so exact zero has no finite M×v/ΣF stopping time | Test the analytical saturated bound with gain 1 and convergence separately with shipped defaults | Tech lead | Resolved FLT-007: preserve §5.3's assist formula. Brake_Stops compares unit-gain stopping ticks to M×v/ΣF within two ticks, and separately requires the default half-gain fixture to reach below 0.01 m/s. Brake suppresses boost in both cases. |
 
 ## 11. References
 
