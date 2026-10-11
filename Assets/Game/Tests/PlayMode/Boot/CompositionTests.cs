@@ -24,7 +24,7 @@ namespace Game.Tests.PlayMode.Boot
     /// Each test that tears the boot down boots again in TearDown, so later tests see a normal game.</summary>
     public sealed class CompositionTests
     {
-        static readonly string[] ExpectedSteps = { "1 settings", "2 content", "3 input", "5 pause", "6 save", "14 settings applier" };
+        static readonly string[] ExpectedSteps = { "1 settings", "2 content", "3 input", "5 pause", "6 save", "7 flow", "14 settings applier", "15 snapshot" };
 
         string tempRoot;
 
@@ -57,7 +57,7 @@ namespace Game.Tests.PlayMode.Boot
             var composition = GameRoot.Instance.Composition;
             CollectionAssert.AreEqual(ExpectedSteps, composition.StepLog, "SPEC-01 §5.2 order");
             var built = composition.DisposeStack.Select(d => d.GetType().Name).ToList();
-            CollectionAssert.AreEqual(new[] { "SettingsService", "ContentService", "InputService", "PauseService", "SettingsApplier" }, built);
+            CollectionAssert.AreEqual(new[] { "SettingsService", "ContentService", "InputService", "PauseService", "SceneFlow", "SettingsApplier" }, built);
             yield return Shutdown();
             built.Reverse();
             CollectionAssert.AreEqual(built, GameComposition.LastDisposeLog, "disposed in reverse");

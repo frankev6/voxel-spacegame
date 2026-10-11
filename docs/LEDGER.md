@@ -563,6 +563,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 22 | 2026-10-11 | SPEC-71 TST-001 | Reference-settings rule would leave the micro-gates unenforced in the Editor (SPEC-71 open question 6) | Resolved: `PerfRun.Gate` records and asserts micro-gates without the settings check | Tech lead | resolved in TST-001 |
 | 23 | 2026-10-11 | SPEC-01 FND-002 | No §5.2 row constructed the `SettingsApplier` instance (SPEC-01 open question 7) | Resolved: row 14 constructs it before `ApplyAll` | Tech lead | resolved in FND-002 |
 | 24 | 2026-10-11 | SPEC-01 FND-005 | `FND-E001` (no start blueprint) would fail every boot before ship blueprints exist (SPEC-01 open question 8) | Resolved: a warning on the definition, an error from `GameConfigValidator` once any blueprint exists | Tech lead | resolved in FND-005 |
+| 25 | 2026-10-11 | SPEC-01 FND-006 | Startup in non-game scenes; the lazily created `WorldTime` singleton destroyed by teardown; calls into services that don't exist yet (SPEC-01 open question 9) | Resolved: non-game scenes left alone; `WorldTime` forced before the snapshot; missing collaborators are TODOs naming their tasks | Tech lead | resolved in FND-006 |
 
 ## Measurements
 

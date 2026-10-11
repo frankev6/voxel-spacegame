@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Game.App.Flow;
 using Game.App.Services;
 using Game.App.Settings;
 using Game.Core;
@@ -36,6 +37,7 @@ namespace Game.App.Boot
         internal PauseService Pause { get; private set; }
         internal SaveService Save { get; private set; }
         internal GameConfigDefinition GameConfig { get; private set; }
+        internal SceneFlow Flow { get; private set; }
 
         GameComposition() { }
 
@@ -98,7 +100,11 @@ namespace Game.App.Boot
             Register(Save);
             Step("6 save");
 
-            // 7. TODO(FND-006): flow = new SceneFlow(world, pause, save, gameConfig).
+            // 7. Scene flow (FND-006).
+            Flow = Push(new SceneFlow(world, Pause, Save, GameConfig));
+            Register(Flow);
+            Step("7 flow");
+
             // 8. TODO(FND-009): session = new GameSession(flow, save, world, content, gameConfig); save.AttachContext(session); SESS, FLET;
             //    Services.Register<IGameFlow>(session), <IPersistentIdAllocator>(session).
             // 8.1–13: galaxy, travel, spawner, factions, map, economy, narrative, UI, camera, FX and dialog are added by their tasks, in the
@@ -109,7 +115,10 @@ namespace Game.App.Boot
             SettingsApplier.ApplyAll(Settings.Current);
             Step("14 settings applier");
 
-            // 15. TODO(FND-006): flow.SnapshotBootEntities().
+            // 15. Boot entity snapshot (FND-006, decision 5).
+            Flow.SnapshotBootEntities();
+            Step("15 snapshot");
+
             // 16. TODO(DEV-003): dev = DevRuntimeHost.Create(root) (#if UNITY_EDITOR || DEVELOPMENT_BUILD); Services.Register(dev).
         }
 
@@ -138,7 +147,7 @@ namespace Game.App.Boot
                 catch (Exception e) { GameLog.Exception(LogCategories.Boot, e, "GameComposition.Dispose " + DisposeStack[i].GetType().Name); }
             }
             DisposeStack.Clear();
-            Settings = null; Content = null; Input = null; Pause = null; Save = null; GameConfig = null;
+            Settings = null; Content = null; Input = null; Pause = null; Save = null; GameConfig = null; Flow = null;
             Game.Core.Services.Reset();
         }
     }

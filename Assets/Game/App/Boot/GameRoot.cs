@@ -33,13 +33,15 @@ namespace Game.App.Boot
             var savePaths = SavePaths.CreateDefault();
             var settingsPaths = SettingsPaths.Default;
 #endif
-            // TODO(FND-006): pass GameRootTestHooks.SkipIntroScreens to SceneFlow.StartupAsync.
+            // TODO(UI-003): GameRootTestHooks.SkipIntroScreens skips the MainMenu splash once the splash exists.
             Composition = GameComposition.Build(transform, config, savePaths, settingsPaths);
         }
 
-        void Start()
+        async void Start()
         {
-            // TODO(FND-006): SceneFlow.StartupAsync() (§5.4.6).
+            if (Composition?.Flow == null) return;
+            try { await Composition.Flow.StartupAsync(); }                 // §5.4.6; failures recover inside SceneFlow
+            catch (System.Exception e) { GameLog.Exception(LogCategories.Flow, e, "SceneFlow.StartupAsync"); }
         }
 
         void Update()

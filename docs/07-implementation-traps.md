@@ -109,6 +109,18 @@ How to use this file: before you start a task, read the sections whose tags matc
 
   Run tests with `NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace`.
 
+### T2.11 Nested native containers and padding bytes
+- **Wrong:**
+  - a `NativeArray<NativeStream.Reader>` (or any container of containers) passed to a job: every job rejects it, its own `Dispose(JobHandle)` included;
+  - hashing a whole struct's bytes for ordering: padding bytes are undefined, so equal values hash differently from run to run.
+- **Right:**
+  - one container per job field (chain jobs if needed);
+  - hash field bytes only (SPEC-02 open questions 11 and 13).
+
+### T2.12 Lazily created singletons and the boot snapshot
+- **Wrong:** a system or Unity package creates a singleton entity on first use, after SceneFlow's boot snapshot. Teardown then destroys it on every scene exit. Entities' own `WorldTime` entity, created by the first `World.SetTime`, was one (FND-006).
+- **Right:** create singletons in `OnCreate`, or force them into existence before `SnapshotBootEntities` (it calls `world.SetTime(world.Time)`). `SceneFlowTests.RoundTrip_NoLeftovers` names the archetype of anything that survives or reappears.
+
 ---
 
 ## 3. Rendering `[Voxel/REN, Presentation, Art]`
