@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 21 | 0 | 0 | 0 | 45 | 0 | 66 | 10 |
+| M0 | 20 | 0 | 0 | 0 | 46 | 0 | 66 | 9 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -75,7 +75,7 @@
 | PERS-006 | Load pipeline and restore orchestration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | d9532a4 | 14 tests, all §7 load rows; OQ 19 |
 | PERS-007 | VOXS codec | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001, SPEC-04 | yes | todo |  |  |  |  |
 | PERS-008 | Deferred VOXS snapshots in saves | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-007, PERS-005 | no | todo |  |  |  |  |
-| PERS-009 | Autosave scheduler and save on quit | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| PERS-009 | Autosave scheduler and save on quit | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 5b1e06b | 10 tests; 0 B/frame |
 | PERS-010 | Fixture harness, container fixtures and the 04-B1 EditMode regression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | todo |  |  |  |  |
 | PERS-011 | Round-trip byte equality (framework level) | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | todo |  |  |  |  |
 | PERS-012 | Save performance and size gates | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-008 | no | todo |  |  |  |  |
@@ -579,6 +579,16 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-009 autosave scheduler and save on quit (claude, claude-opus-5-5)
+- `AutosaveScheduler` per SPEC-05 §5.9:
+  - the 300 s timer counts unpaused time only;
+  - Timer and StarSystemEntered requests within 60 s of a save are dropped; SceneTransition always goes through;
+  - a blocked request re-checks every 10 s;
+  - 0 B per idle frame.
+- `SaveService` subscribes `Application.wantsToQuit` while playing and unsubscribes in `Dispose`. `HandleWantsToQuit` approves at once with no session or when blocked; otherwise it saves with reason `Quit` (jumping the queue), gives up after 10 s, then quits.
+- Wired: `GameRoot.Update` drives the scheduler. SceneFlow requests the scene-transition autosave on leaving the World (not for a load, new game or recovery) and calls `NotifySaved` after entering by new game or load. Saves and loads call `NotifySaved`.
+- Tests: `AutosaveSchedulerTests` (6) and `QuitSaveTests` (4). EditMode 309/309 (+1 explicit), PlayMode 16/16.
 
 ### 2026-10-11 — PERS-006 load pipeline and restore orchestration (claude, claude-opus-5-5)
 - Load path per SPEC-05 §5.6:
