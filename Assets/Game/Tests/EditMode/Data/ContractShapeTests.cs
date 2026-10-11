@@ -20,6 +20,15 @@ namespace Game.Tests.EditMode.Data
         }
 
         [Test]
+        public void BlockShape_HasBindingValues()   // ADR-0018
+        {
+            Assert.AreEqual(typeof(byte), Enum.GetUnderlyingType(typeof(BlockShape)));
+            CollectionAssert.AreEqual(new[] { BlockShape.Cube, BlockShape.Wedge, BlockShape.HipCorner, BlockShape.LongSlopeHigh, BlockShape.LongSlopeLow },
+                                      Enum.GetValues(typeof(BlockShape)).Cast<BlockShape>().ToArray());
+            for (byte i = 0; i < 5; i++) Assert.AreEqual(i, (byte)Enum.GetValues(typeof(BlockShape)).Cast<BlockShape>().ElementAt(i));
+        }
+
+        [Test]
         public void OrientationMask_Allows_RespectsBits()
         {
             var yaw = new OrientationMask { Bits = OrientationMask.YawOnlyBits };

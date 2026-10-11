@@ -103,7 +103,7 @@ namespace Game.Tests.EditMode.Data
             AssertOnly("DATA-E035", Block("block_a", BlockKind.Structural, modules: new BlockModule[] { new CargoModule { Params = new CargoParams { Capacity = 1 } } }), "structural with a module");
             AssertOnly("DATA-E035", Block("block_b", BlockKind.Functional, modules: Array.Empty<BlockModule>()), "functional without modules");
             AssertOnly("DATA-E037", Block("block_c", BlockKind.Prop, edit: so => Set(so, "shape", (int)BlockShape.Wedge)), "prop that is not a cube");
-            AssertClean(Block("block_d", BlockKind.Structural, edit: so => Set(so, "shape", (int)BlockShape.Wedge)), "structural blocks may use any shape");
+            AssertClean(Block("block_d", BlockKind.Structural, edit: so => Set(so, "shape", (int)BlockShape.HipCorner)), "structural blocks may use any shape");
             AssertOnly("DATA-E038", Block("block_e", BlockKind.Prop, edit: so => Set(so, "propMesh", null)), "prop without mesh");
             AssertOnly("DATA-E038", Block("block_f", BlockKind.Functional, edit: so => Set(so, "propMesh", null)), "functional without mesh");
             AssertOnly("DATA-E039", Block("block_g", BlockKind.Structural, edit: so => Set(so, "cellHp", 0f)), "cell HP 0");
