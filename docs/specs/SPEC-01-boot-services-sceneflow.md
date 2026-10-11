@@ -597,7 +597,8 @@ If no save exists, "Load last save" is disabled.
 1. `Fleet.ResetToEmpty()`;
 2. read the records, decoding each structure with `VoxsCodec.TryDecode` and the SPEC-10 adapter;
 3. a ship whose structure fails to decode is rebuilt from its `SourceBlueprint` (`GameLog.Warn`). If that is also missing, the ship is dropped, unless it is the flagship, which is replaced with `startBlueprint` and its id kept;
-4. exactly one flagship is enforced: the first record flagged as flagship wins; if none is flagged, the lowest id.
+4. before publishing the records, reserve every valid restored fleet id through GameSession (Q22);
+5. exactly one flagship is enforced: the first record flagged as flagship wins; if none is flagged, the lowest id.
 
 ## 6. Public API
 
@@ -780,14 +781,14 @@ If no save exists, "Load last save" is disabled.
 - **Tier:** frontier — F3/F5: write-back of damaged cells and identity across spawn, save and edit
 - **Depends on:** `FND-009`, `VOX-001`, `PERS-001`
 - **Do:** Implement `FleetModel` (including the `Changed` event, raised once per mutating call after the change), `FleetShipRecord`, `FleetSaveParticipant` (§5.10), `PlayerShipSpawner` (§5.7), and `FleetWriteback`.
-- **Files:** `Assets/Game/App/Session/{FleetModel,FleetShipRecord,FleetSaveParticipant,PlayerShipSpawner,FleetWriteback}.cs`; `Assets/Game/Tests/EditMode/App/FleetTests.cs`; `Assets/Game/Tests/PlayMode/App/PlayerShipTests.cs`
+- **Files:** `Assets/Game/App/Session/{FleetModel,FleetShipRecord,FleetSaveParticipant,PlayerShipSpawner,FleetWriteback}.cs`; `Assets/Game/Tests/EditMode/App/FleetTests.cs`; `Assets/Game/Tests/PlayMode/App/PlayerShipTests.cs`; `Assets/Game/Tests/EditMode/Persistence/LoadPipelineTests.cs` (ADR-0036 warning scope)
 - **Acceptance criteria:**
-  - [ ] New game: the flagship spawns at the start location with its `PersistentId`, `PlayerShip` tag, and no `StarSystemMember`.
-  - [ ] Damage 50 cells → save → load: the respawned ship has the same 50 cells missing.
-  - [ ] An undecodable structure is rebuilt from its blueprint; the flagship is never lost.
-  - [ ] `FLET` round trip is byte-identical.
-  - [ ] `Add`, `Remove`, `ReplaceStructure` and `ResetToEmpty` each raise `Changed` exactly once; a refused `Remove` (flagship) raises nothing.
-- **Tests:** `FleetTests.Changed_OncePerMutation`, `FleetTests.FlagshipRules`, `.FLET_RoundTrip`, `.CorruptStructure_Fallback`; `PlayerShipTests.Spawn_AtStart`, `.Damage_SurvivesSaveLoad`.
+  - [x] New game: the flagship spawns at the start location with its `PersistentId`, `PlayerShip` tag, and no `StarSystemMember`.
+  - [x] Damage 50 cells → save → load: the respawned ship has the same 50 cells missing.
+  - [x] An undecodable structure is rebuilt from its blueprint; the flagship is never lost.
+  - [x] `FLET` round trip is byte-identical.
+  - [x] `Add`, `Remove`, `ReplaceStructure` and `ResetToEmpty` each raise `Changed` exactly once; a refused `Remove` (flagship) raises nothing.
+- **Tests:** `FleetTests.Changed_OncePerMutation`, `FleetTests.FlagshipRules`, `.FLET_RoundTrip`, `.CorruptStructure_Fallback`, `.RestoredFleet_RepairsSessionCounter`; `PlayerShipTests.Spawn_AtStart`, `.Damage_SurvivesSaveLoad`; `LoadPipelineTests.ParticipantWarning_ReachesReportAndCompletion_OnlyDuringRestore`, `.ParticipantWarning_FailedRestore_ClosesScopeAndAllowsNextLoad` (ADR-0036).
 
 ### FND-011 — Load flow end to end (R28)
 - **Milestone:** M3
@@ -903,6 +904,8 @@ If no save exists, "Load last save" is disabled.
 | 19 | FND-010 is M1, but its spawn path calls M2 FND-012 and M3 galaxy types | Use the existing grid request API for the M1 player path | Tech lead | Resolved FND-010: PlayerShipSpawner issues one WriteBack/PlayerShip-profile request at origin with identity yaw, retaining its root and exactly one registry handle on the fleet record. No StarSystemMember or unavailable Allegiance/AI types are fabricated. FND-012 replaces this request boundary with ShipSpawnService; GAL-008/SYS add the canonical location integration. Register player hooks only for active sessions; no-session diagnostic World entries have no player. |
 | 20 | FleetShipRecord has a handle but no registry owner; exit must release the borrow before later edits | Bind the registry internally when registering; release on scene exit/dispose | Tech lead | Resolved FND-010: record owns its structure and registry borrow, never the registry itself. Player exit clears the root and releases the borrow after writebacks; recovery/disposal also releases it. ReplaceStructure rejects a live handle. |
 | 21 | Recovered FLET structures must warn in the load report, but ISaveParticipant exposes no report | Scoped SaveService warning callback | Tech lead | Resolved FND-010 / ADR-0036: composition routes recoveries to the active report without changing ISaveParticipant or the FLET format. Missing/empty FLET uses the configured start blueprint and allocates a new id after SESS restoration; corrupt flagship payloads retain their valid saved id. |
+
+| 22 | Missing/damaged SESS resets the allocation counter below ids surviving in FLET | Advance the counter past valid restored fleet ids before allocating any fallback | Tech lead | Resolved FND-010: the composition callback reserves through the highest valid FLET id, including a dropped record, while preserving any higher SESS counter. Repair clears outstanding grants and reports FND-W002 during participant restore. Missing, malformed and stale-low SESS cases are tested; no file-format or allocator-interface change. |
 
 ## 11. References
 

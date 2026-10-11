@@ -365,6 +365,68 @@ namespace Game.Tests.EditMode.Persistence
             Assert.Throws<InvalidOperationException>(() => loader.Restore(save));
         }
 
+        sealed class WarningParticipant : ISaveParticipant
+        {
+            public Action OnRestore;
+            public string Key => "TSTA";
+            public int Version => 1;
+            public void Capture(SaveWriter writer) => writer.WriteInt32(42);
+            public void Restore(SaveReader reader, int fromVersion)
+            {
+                if (fromVersion > 0) Assert.AreEqual(42, reader.ReadInt32());
+                OnRestore?.Invoke();
+            }
+        }
+
+        [Test]
+        public void ParticipantWarning_ReachesReportAndCompletion_OnlyDuringRestore()
+        {
+            var participant = new WarningParticipant();
+            var loader = Service(null, participant);
+            Save(loader);
+            var save = Read(loader);
+            Action warn = () => loader.ReportRestoreWarning("TEST-W001", "TSTA", "Structure", "Recovered structure");
+            Assert.Throws<InvalidOperationException>(() => warn());
+            bool visited = false;
+            participant.OnRestore = () =>
+            {
+                visited = true;
+                StringAssert.Contains("already active", Assert.Throws<InvalidOperationException>(() => loader.Restore(save)).Message);
+                warn();
+            };
+            var completed = new List<SaveOperationResult>();
+            loader.OperationCompleted += r =>
+            {
+                completed.Add(r);
+                Assert.Throws<InvalidOperationException>(() => warn(), "completion handlers are outside participant restore");
+            };
+            var events = new List<GameLoaded>();
+            EventBus<GameLoaded>.Subscribe(events.Add);
+            var report = loader.Restore(save);
+            EventHub.DrainAll();
+            Assert.IsTrue(visited);
+            CollectionAssert.AreEqual(new[] { "TEST-W001" }, Codes(report));
+            Assert.AreSame(report, loader.LastLoadReport);
+            Assert.AreEqual(1, completed.Single().WarningCount);
+            Assert.AreEqual(1, events.Single().WarningCount);
+            Assert.Throws<InvalidOperationException>(() => warn());
+        }
+
+        [Test]
+        public void ParticipantWarning_FailedRestore_ClosesScopeAndAllowsNextLoad()
+        {
+            LogAssert.ignoreFailingMessages = true;
+            var participant = new WarningParticipant();
+            var loader = Service(null, participant);
+            Save(loader);
+            participant.OnRestore = () => throw new InvalidOperationException("Broken participant and defaults");
+            var report = loader.Restore(Read(loader));
+            CollectionAssert.AreEqual(new[] { "PERS-E022", "PERS-E023" }, Codes(report));
+            Assert.Throws<InvalidOperationException>(() => loader.ReportRestoreWarning("TEST-W001", "TSTA", "", "late"));
+            participant.OnRestore = () => loader.ReportRestoreWarning("TEST-W002", "TSTA", "", "recovered");
+            CollectionAssert.AreEqual(new[] { "TEST-W002" }, Codes(loader.Restore(Read(loader))));
+        }
+
         [Test]
         public void Restore_PublishesGameLoaded()
         {

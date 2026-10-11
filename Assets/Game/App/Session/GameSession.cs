@@ -12,6 +12,7 @@ using Game.Core;
 using Game.Core.Components;
 using Game.Data.Definitions;
 using Unity.Entities;
+using Game.Voxel.Grid;
 
 namespace Game.App.Session
 {
@@ -29,6 +30,7 @@ namespace Game.App.Session
             this.world = world ?? throw new ArgumentNullException(nameof(world));
             if (config == null) throw new ArgumentNullException(nameof(config));
             gameConfig = config; CommanderName = config.DefaultCommanderName;
+            Fleet = new FleetModel(); RegisterModel(Fleet);
             PersistentIdBlockSize = config.PersistentIdBlockSize;
             PersistentIdRefillThreshold = config.PersistentIdRefillThreshold;
             if (PersistentIdBlockSize < 256 || PersistentIdBlockSize > 65536 ||
@@ -74,6 +76,10 @@ namespace Game.App.Session
         bool operationPending, disposed, worldReady;
         BlueprintLabMode labMode;
         internal bool PlayerDefeated;
+        public FleetModel Fleet { get; }
+        internal FleetSaveParticipant FleetParticipant { get; private set; }
+        internal PlayerShipSpawner PlayerSpawner { get; private set; }
+        VoxelStructureRegistry fleetRegistry;
         public bool IsCreativeSession { get; private set; }
         public string CommanderName { get; private set; }
         public ulong CampaignSeed { get; private set; }
@@ -91,7 +97,30 @@ namespace Game.App.Session
             flow.RegisterReady(this);
             RegisterWriteback(new SimClockWriteback(world, value => UniversalTime = value));
             // TODO(GAL-008): bind GalaxyService and GalaxyState; M1 enters World without streaming.
-            // TODO(FND-010): own FleetModel, register its writeback and construct the flagship.
+            // Composition binds the existing blueprint library/registry through BindFleet.
+        }
+
+        internal void BindFleet(BlueprintLibrary blueprints, VoxelStructureRegistry registry, ContentCatalog catalog)
+        {
+            if (FleetParticipant != null) throw new InvalidOperationException("Fleet already bound");
+            fleetRegistry = registry;
+            FleetParticipant = new FleetSaveParticipant(Fleet, catalog, blueprints, gameConfig, this,
+                message => save.ReportRestoreWarning("FND-W001", "FLET", "Structure", message), ReserveRestoredFleetIds);
+            PlayerSpawner = new PlayerShipSpawner(this, world, registry);
+            flow.RegisterReady(PlayerSpawner); flow.RegisterExiting(PlayerSpawner);
+            RegisterWriteback(new FleetWriteback(world, registry, PlayerSpawner));
+        }
+        void ReserveRestoredFleetIds(ulong highestId)
+        {
+            if (highestId < NextPersistentId) return;
+            ResetPersistentIds(checked(highestId + 1), false);
+            save.ReportRestoreWarning("FND-W002", "SESS", "NextPersistentId", "Advanced the session id counter past restored fleet ships.");
+        }
+        void ReleaseFleetWorld()
+        {
+            // Session boundaries happen after teardown, or during final composition disposal. Finish readers before releasing ownership.
+            if (world.IsCreated) world.EntityManager.CompleteAllTrackedJobs();
+            fleetRegistry?.CancelSpawnReads(); PlayerSpawner?.Release();
         }
 
         public void RegisterModel(ISessionModel model) { if (model == null) throw new ArgumentNullException(nameof(model)); if (!models.Contains(model)) models.Add(model); }
@@ -126,13 +155,14 @@ namespace Game.App.Session
             save.ResetForNewGame();
             if (save.ActiveProfile.Value == null) save.SetActiveProfile(save.CreateProfile(gameConfig.DefaultCommanderName).Id);
             ResetPersistentIds(1, false);
+            ReleaseFleetWorld();
             foreach (var model in models) model.ResetToEmpty();
             CommanderName = string.IsNullOrWhiteSpace(args.CommanderName) ? gameConfig.DefaultCommanderName : args.CommanderName.Trim();
             if (CommanderName.Length > 32) CommanderName = CommanderName.Substring(0, 32);
             CampaignSeed = args.GalaxySeed != 0 ? args.GalaxySeed : (ulong)System.Diagnostics.Stopwatch.GetTimestamp() | 1ul;
             UniversalTime = 0; PlaytimeSeconds = 0; IsCreativeSession = args.Creative; PlayerDefeated = false;
             // TODO(GAL-008): galaxy.NewGame and the canonical start location before new-game initializers.
-            // TODO(FND-010): create the flagship from the start blueprint before new-game initializers.
+            if (FleetParticipant != null) Fleet.Add(FleetParticipant.CreateStartShip(), true);
             foreach (var initializer in initializers) initializer.InitializeNewGame(args);
             EventBus<SessionReset>.Publish(new SessionReset(SessionResetReason.NewGame));
             HasActiveSession = true;
@@ -151,6 +181,7 @@ namespace Game.App.Session
         internal void EndSession()
         {
             ResetPersistentIds(1, false); worldReady = false; PlayerDefeated = false;
+            ReleaseFleetWorld();
             foreach (var model in models) model.ResetToEmpty();
             EventBus<SessionReset>.Publish(new SessionReset(SessionResetReason.Cleared));
         }
@@ -184,7 +215,10 @@ namespace Game.App.Session
             meta.LocationText = "Sandbox"; // TODO(GAL-008): current star-system display name.
         }
         public void CollectThumbnails(List<ThumbnailRequest> changed, HashSet<string> keep)
-        { /* TODO(FND-010): preserve fleet thumbnail keys when fleet records exist. */ }
+        {
+            foreach (var ship in Fleet.Ships)
+                keep.Add("ship_" + ship.PersistentId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
 
         FlowResult Access(bool allowed)
         {
@@ -294,7 +328,10 @@ namespace Game.App.Session
         public void Dispose()
         {
             if (disposed) return; disposed = true;
-            flow?.UnregisterReady(this); flow?.BindSession(null); save?.AttachContext(null);
+            flow?.UnregisterReady(this);
+            if (PlayerSpawner != null) { flow?.UnregisterReady(PlayerSpawner); flow?.UnregisterExiting(PlayerSpawner); }
+            flow?.BindSession(null); save?.AttachContext(null);
+            ReleaseFleetWorld(); PlayerSpawner?.Dispose(); Fleet.Dispose();
             DisposeThumbnailCaptures();
             if (world.IsCreated) ResetPersistentIds(NextPersistentId, false);
             models.Clear(); writebacks.Clear(); initializers.Clear(); blockers.Clear();
