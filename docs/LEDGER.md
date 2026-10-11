@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 60 | 0 | 0 | 0 | 6 | 0 | 66 | 18 |
+| M0 | 59 | 0 | 0 | 0 | 7 | 0 | 66 | 17 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 10 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 1 |
@@ -52,7 +52,7 @@
 | CORE-007 | Binary save primitives | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-002 | no | todo |  |  |  |  |
 | CORE-008 | System groups and pipeline order | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001 | yes | todo |  |  |  |  |
 | CORE-009 | ECS→managed event bridge | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-006, CORE-008 | no | todo |  |  |  |  |
-| CORE-010 | Math helpers | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| CORE-010 | Math helpers | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4998e40 |  |
 | CORE-011 | Settings model | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | standard | CORE-001 | yes | todo |  |  |  |  |
 | CORE-012 | Simulation event channels | [SPEC-02](specs/SPEC-02-core-utilities.md) | M0 | frontier | CORE-001, CORE-004 | yes | todo |  |  |  |  |
 | INP-001 | Public contract types and the actions asset | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | CORE-001 | yes | todo |  |  |  |  |
@@ -560,6 +560,10 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — CORE-010 math helpers (claude, claude-opus-5-5)
+- `MathD` and `Planar` implemented with the exact formulas of SPEC-02 §4.10/§5.10.
+- `PlanarTests` (4) and `MathDTests` (2) pass, including the 1 mm round trip at origins up to 7.7e10 m; EditMode 33/33.
 
 ### 2026-10-11 — FND-001 boot and flow contract types (claude, claude-opus-5-5)
 - SPEC-01 §4 types as listed in the task: `WorldSceneActive`, `StaticStateOkAttribute`, `GameConfigDefinition` (fields, ranges and defaults of §4.2; `Validate` is FND-005), `GameRootConfig` (`ContentDatabase`, `UiDocument`; `UiConfig` and `CameraConfig` come with SPEC-60/62), `SceneFlowState`, `SandboxArgs`, `ShipSpawnArgs` (no `Allegiance` until FND-012), shells of `GameRoot`, `Bootstrap`, `GameComposition`, `BootSingletons`, `BootSingleton`.
