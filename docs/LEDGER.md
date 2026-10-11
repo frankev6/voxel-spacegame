@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 22 | 0 | 0 | 0 | 44 | 0 | 66 | 8 |
+| M0 | 21 | 0 | 0 | 0 | 45 | 0 | 66 | 10 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -72,12 +72,12 @@
 | PERS-003 | Binary container, CRC32 and compression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 5b594d6 | fuzz 1,000 flips + 200 truncations clean |
 | PERS-004 | ID palette and SaveWriter/SaveReader integration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-003, SPEC-02 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | e569704 | no §4.10 fallback needed |
 | PERS-005 | Save pipeline: capture, worker, atomic write, thumbnails, queue | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-002, PERS-004, SPEC-04 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | d063181 | 11 tests; OQ SPEC-02 14, SPEC-05 18 |
-| PERS-006 | Load pipeline and restore orchestration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| PERS-006 | Load pipeline and restore orchestration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | d9532a4 | 14 tests, all §7 load rows; OQ 19 |
 | PERS-007 | VOXS codec | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001, SPEC-04 | yes | todo |  |  |  |  |
 | PERS-008 | Deferred VOXS snapshots in saves | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-007, PERS-005 | no | todo |  |  |  |  |
-| PERS-009 | Autosave scheduler and save on quit | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | no | todo |  |  |  |  |
-| PERS-010 | Fixture harness, container fixtures and the 04-B1 EditMode regression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | no | todo |  |  |  |  |
-| PERS-011 | Round-trip byte equality (framework level) | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | no | todo |  |  |  |  |
+| PERS-009 | Autosave scheduler and save on quit | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | todo |  |  |  |  |
+| PERS-010 | Fixture harness, container fixtures and the 04-B1 EditMode regression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | todo |  |  |  |  |
+| PERS-011 | Round-trip byte equality (framework level) | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | todo |  |  |  |  |
 | PERS-012 | Save performance and size gates | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-008 | no | todo |  |  |  |  |
 | VOX-001 | Public contract types | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c37ad48 | BrickRecord 28 B (ledger Q9); VOXS adapter members wait for VOX-009 (Q10) |
 | AUD-001 | Public contract types | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | f793298 | Validation codes: SPEC-64 Q12 |
@@ -579,6 +579,21 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-006 load pipeline and restore orchestration (claude, claude-opus-5-5)
+- Load path per SPEC-05 §5.6:
+  - `ReadNow`: world.sav, falling back to world.bak (`PERS-W010`); failures are `NotFound`, `NewerFormat` and `Unreadable`; META (`PERS-W013`) and IDPL (`PERS-E012`, empty palette) checks; staged thumbnails;
+  - `ReadAsync`: queued; on failure it raises `OperationCompleted` and changes nothing else;
+  - `Restore`: participants in registry order, each isolated. Codes: `I020` missing chunk, `W021` newer chunk (preserved), `E022`/`E023` throwing participant, `W024` unread bytes, `I025` unknown chunk preserved, `W001` unknown content, `I002` other content. It also sets the session thumbnails, `CurrentSlot`, `profile.json`, `LastLoadReport`, `GameLoaded` and `OperationCompleted`. A second restore throws.
+- The next save seeds the palette from the loaded one, so preserved chunks keep valid indices. A preserved newer-version chunk is written back in place of its participant's capture (SPEC-05 open question 19, ledger 29). `LoadedSave` gains an internal constructor, palette and staged thumbnails.
+- Tests: `LoadPipelineTests` (14), one per §7 load row, each with its exact report code:
+  - registry order;
+  - missing, older and newer chunks; a throwing participant; unread bytes;
+  - `ZZZZ` kept byte-for-byte with its palette references valid, and dropped by `ResetForNewGame`;
+  - backup fallback; corrupt chunks in both files; both headers corrupt; a newer format; damaged META/IDPL;
+  - unknown content becomes the `block_missing` placeholder, with `W001` + `I002`;
+  - a failed read touches nothing; a double restore throws; `GameLoaded`.
+- EditMode 299/299 (+1 explicit), PlayMode 16/16.
 
 ### 2026-10-11 — PERS-005 save pipeline (claude, claude-opus-5-5)
 - `SaveService` save path per SPEC-05 §5.3–§5.4:
