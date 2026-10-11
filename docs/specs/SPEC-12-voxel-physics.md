@@ -664,12 +664,12 @@ Per frame (markers `BrickColliderBuildSystem.<Step>`), main thread:
 ### 5.9 `ColliderSwapSystem`
 
 Per tick (marker `ColliderSwapSystem.Install`):
-1. `st = batch.State.Value`. If `st.InFlight == 1` and `st.Handle.IsCompleted` → schedule `ColliderFinalizeJob : IJob` (calls `Finalize`) on `cache.Acquire(JobHandle.CombineDependencies(state.Dependency, st.Handle))`; set `st.InFlight = 0`; `cache.Release(finalizeHandle)`.
+1. `st = batch.State.Value`. If `st.InFlight == 1` and `st.Handle.IsCompleted` → schedule `ColliderFinalizeJob : IJob` (calls `Finalize`) on `cache.Acquire(JobHandle.CombineDependencies(state.Dependency, st.Handle))`; set `st.InFlight = 0`, retain `st.Handle = finalizeHandle` until handover completes (batch-memory ownership also covers teardown); `cache.Release(finalizeHandle)`.
 2. Schedule `ColliderInstallJob : IJob` (Burst, single-threaded) on `cache.Acquire(state.Dependency)` with `ComponentLookup<PhysicsCollider>` (RW), `ComponentLookup<GridColliderState>` (RW), `EntityStorageInfoLookup`, `t = SimClock.Tick`. For each record `R` (any order; records are independent):
    1. Walk `R.Updates` from the oldest: extend the installable prefix while the update is Built and Due (§5.5). Stop at the first other update; if it is Late, count it once.
    2. Prefix empty → next record.
    3. `n` = newest update of the prefix. Root missing (`!Exists`) or without `PhysicsCollider` → mark the prefix Discarded (retire compounds), next record.
-   4. `n.Compound` is Null (all bricks gone) → keep the current collider; retire nothing; drop the prefix.
+   4. `n.Compound` is Null (all bricks gone) → keep the current collider and its installed ownership, set `GridColliderState.ChildCount = 0`, leave its installed tick/phase/box count unchanged, then free the prefix (retiring any older pending compounds, Q19).
    5. Else: `PhysicsCollider[root] = new PhysicsCollider { Value = n.Compound }`; retire `R.Installed`; `R.Installed = n.Compound`; retire the compounds of the other prefix updates; `GridColliderState`: `Phase = Ready`, `InstalledTick = t`, `ChildCount`, `BoxCount`; `Installs++`.
    6. Remove the prefix from `R.Updates` and free those updates.
 3. `cache.Release(installHandle)`; `state.Dependency = installHandle`.
@@ -986,11 +986,11 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Do:** Implement §5.9 (`ColliderFinalizeJob` scheduling when the batch is complete, `ColliderInstallJob` with due/late rules, retirement).
 - **Files:** `Assets/Game/Voxel/PhysicsBody/ColliderSwapSystem.cs`, `Assets/Game/Voxel/PhysicsBody/Jobs/ColliderInstallJob.cs`, `Assets/Game/Tests/EditMode/Voxel/Physics/ColliderSwapTests.cs`
 - **Acceptance criteria:**
-  - [ ] An urgent update installs at exactly its `InstallTick` when built in time, and never earlier.
-  - [ ] When an older and a newer update are both due, only the newer compound is installed; the older is retired.
-  - [ ] A not-built due update counts one `LateInstalls` and installs when built.
-  - [ ] `ColliderSwapSystem.OnUpdate` calls no `Complete()`, `CompleteDependency()` or `GetSingletonRW` (code review + a test that runs it with an unfinished batch handle and asserts the main thread is not blocked: a deliberately slow batch job is still running after `OnUpdate` returns).
-  - [ ] `GridColliderState` is `Ready` with correct counts after the first install.
+  - [x] An urgent update installs at exactly its `InstallTick` when built in time, and never earlier.
+  - [x] When an older and a newer update are both due, only the newer compound is installed; the older is retired.
+  - [x] A not-built due update counts one `LateInstalls` and installs when built.
+  - [x] `ColliderSwapSystem.OnUpdate` calls no `Complete()`, `CompleteDependency()` or `GetSingletonRW` (code review + a test that runs it with an unfinished batch handle and asserts the main thread is not blocked: a deliberately slow batch job is still running after `OnUpdate` returns).
+  - [x] `GridColliderState` is `Ready` with correct counts after the first install.
 - **Tests:** `ColliderSwapTests.Urgent_InstallsAtInstallTick`, `.NewerUpdate_Wins`, `.Late_CountedOnce`, `.Swap_DoesNotBlockOnRunningBatch`, `.State_ReadyAfterInstall`, `.RootDestroyed_PrefixDiscarded`.
 
 ### PHY-012 — GridColliderCleanupSystem and teardown
@@ -1136,6 +1136,7 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 
 | 17 | PHY-010 is ready before BrickMeshBuildSystem exists | Declare ordering on the later mesh system | Tech lead | Resolved: REN-010 already specifies UpdateBefore(BrickColliderBuildSystem); this is the same ordering edge, without a nonexistent forward type reference. |
 | 18 | The phrase selected in this batch can include a partial older update, contradicting the Built-prefix invariant | Require the older assembly in the batch; revisit candidates after prerequisites become fully selected | Tech lead | Resolved: partial predecessors block later updates; completed selections permit ordered same-batch overlays. Urgent work is uncapped once its per-grid prerequisites are satisfied. |
+| 19 | Empty newest updates say retire nothing, but older pending compounds still own memory and the edge table requires ChildCount zero | Preserve installed ownership; retire/free pending prefix; expose zero logical children | Tech lead | Resolved: keep PhysicsCollider and installed tick/phase/box count, set ChildCount=0, and retire any uninstalled prefix compounds through normal pool cleanup. |
 
 ## 11. References
 
