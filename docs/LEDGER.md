@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 23 | 0 | 0 | 0 | 43 | 0 | 66 | 8 |
+| M0 | 22 | 0 | 0 | 0 | 44 | 0 | 66 | 8 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -71,8 +71,8 @@
 | PERS-002 | Save paths, profiles, slots and meta files | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 20bb0aa | META-chunk fallback completes with PERS-003; SPEC-05 Q17 |
 | PERS-003 | Binary container, CRC32 and compression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 5b594d6 | fuzz 1,000 flips + 200 truncations clean |
 | PERS-004 | ID palette and SaveWriter/SaveReader integration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-003, SPEC-02 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | e569704 | no §4.10 fallback needed |
-| PERS-005 | Save pipeline: capture, worker, atomic write, thumbnails, queue | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-002, PERS-004, SPEC-04 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
-| PERS-006 | Load pipeline and restore orchestration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005 | no | todo |  |  |  |  |
+| PERS-005 | Save pipeline: capture, worker, atomic write, thumbnails, queue | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-002, PERS-004, SPEC-04 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | d063181 | 11 tests; OQ SPEC-02 14, SPEC-05 18 |
+| PERS-006 | Load pipeline and restore orchestration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005 | yes | todo |  |  |  |  |
 | PERS-007 | VOXS codec | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001, SPEC-04 | yes | todo |  |  |  |  |
 | PERS-008 | Deferred VOXS snapshots in saves | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-007, PERS-005 | no | todo |  |  |  |  |
 | PERS-009 | Autosave scheduler and save on quit | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | no | todo |  |  |  |  |
@@ -578,6 +578,26 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-005 save pipeline (claude, claude-opus-5-5)
+- `SaveService` save path per SPEC-05 §5.3–§5.4:
+  - `Register` (registry order; reserved, unknown and duplicate keys refused), `AttachContext`, `CanSave`;
+  - the operation queue: a busy autosave is dropped, Quit jumps the queue, more than 4 waiting gives `IoError`;
+  - `CaptureNow` on the main thread, then `WriteCaptured` on a background thread: deferred encode, IDPL after the participants, META, container, tmp with write-through, then replace into world.sav with world.bak;
+  - thumbnails, `meta.json` last, `DiskFull`/`IoError` classification with tmp cleanup, the main-thread finish with `GameSaved` and `OperationCompleted`;
+  - `ResetForNewGame`, the session thumbnail cache, `TryLoadThumbnail`, `Dispose`.
+- New `SaveMessages` holds the §5.8 texts.
+- SPEC-02 gains `SaveWriter.DisposeDeferredBlocks()` (open question 14, ledger 27). SPEC-05 open question 18 (ledger 28) covers the millisecond `SavedUtc`, the dropped-autosave result, the queue capacity and where step 17 runs.
+- The composition now disposes `SaveService` (row 6).
+- Tests: `SavePipelineTests` (11), with `FakeSaveContext` and `FakeParticipant`/`FakeDeferredBlock`:
+  - chunk order META, IDPL, TSTA, TSTB, TSTC, with `meta.json` equal to META except `WorldBytes`;
+  - world.bak byte-for-byte;
+  - a capture failure and a write failure leave every file byte-identical with no `.tmp`;
+  - deferred blocks disposed on success, encode failure and blocked paths;
+  - a blocked manual save is reported and a blocked autosave is silent;
+  - the queue rules, with FIFO order checked;
+  - thumbnails written, deleted, cached and not rewritten when unchanged.
+- EditMode 283/283 (+1 explicit), PlayMode 16/16.
 
 ### 2026-10-11 — FND-014 static state audit and Play Mode re-entry (claude, claude-opus-5-5)
 - `StaticStateAuditTests` checks every static field in the runtime `Game.*` assemblies.
