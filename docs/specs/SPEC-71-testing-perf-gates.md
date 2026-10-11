@@ -576,6 +576,19 @@ The game gates it owns are those listed in §5.7.
   - [ ] The settings test passes.
 - **Tests:** `ProjectSettingsTests.EnterPlayMode_ReloadsDisabled`.
 
+### TST-009 — Serialize Unity tool operations and validate live-test identity
+- **Milestone:** M0
+- **Tier:** frontier — F5: cross-process ownership of the Editor test/result channel
+- **Depends on:** `TST-008`
+- **Do:** Fix the M0 system-review finding that overlapping live suite requests overwrite the shared Pipeline result channel. Use an OS-released project lock for compile, test and iteration entry points (nested calls reuse ownership). Reject an already-running external test before starting. Enumerate the requested mode/filter test inventory and verify the completed result's names, counts and statuses against it before exporting XML. Preserve bounded request/result evidence. Direct Pipeline calls bypass the shell lock, so do not claim a server-issued run ID that the installed API does not provide.
+- **Files:** `tools/unity_tool_lock.py`, `tools/live-tests.py`, `tools/{compile,test,iteration-gates}.sh`, `tools/playtest/rc.sh`, `tools/tests/test_unity_tools.py`, `docs/08-tools.md`
+- **Acceptance criteria:**
+  - [ ] A competing tool invocation fails before changing XML/logs or dispatching a Unity mutation.
+  - [ ] OS process exit releases ownership; nested iteration calls do not deadlock.
+  - [ ] Results from another mode/filter or inconsistent summary are rejected.
+  - [ ] Full live EditMode, PlayMode and perf runs still pass; direct interrupted-run recovery refuses to clobber an active request.
+- **Tests:** Python unittest cases for competing/released locks, nested ownership, inventory mismatch and inconsistent summaries; live overlap smoke plus full Unity suites.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider |

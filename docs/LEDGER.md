@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 0 | 0 | 0 | 0 | 66 | 0 | 66 | 0 |
+| M0 | 1 | 0 | 0 | 0 | 66 | 0 | 67 | 1 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -92,6 +92,7 @@
 | DEV-020 | Release-strip guarantee | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M0 | standard | DEV-003 | yes | done | astra (gpt-6) | 2026-10-11 | b4e7461 | Real release compilation; namespace/assembly and build-content checks |
 | TST-001 | Test kit core | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | frontier | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c082a4c | kit + perf hook; 8 gates on PerfRun; OQ 4–6 |
 | TST-008 | Iteration gates | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | standard | TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | c6057e6 | Live iteration gates pass; both reloads disabled; reliable CLI test results |
+| TST-009 | Serialize Unity tool operations and validate live-test identity | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M0 | frontier | TST-008 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
 | MIG-001 | Public contract types | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c327a64 |  |
 | MIG-002 | Legacy JSON index and strict reading | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 6c78f67 |  |
 | MIG-003 | Legacy ID map | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4955b51 |  |
@@ -609,6 +610,12 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — M0 system review started (astra, gpt-6)
+
+- Scope: boot/composition/scene teardown, deterministic core/content contracts, persistence/VOXS, legacy migration, input/audio lifetimes, harness and release strip. Frank's explicit instruction authorizes this session to perform the review; it is not an independent second-author review.
+- First confirmed finding: Pipeline has one shared async result channel with no run ID or result-mode field. Earlier overlapping EditMode/PlayMode requests returned the wrong suite. Added TST-009 for project-level tool ownership, preflight and exact requested test-inventory checks. No gate pass is claimed while review/fixes remain.
+- Revisit the retained MIG-007 headless shutdown crash with clean headless functional/perf runs; previous live runs and the DEV-020 one-off job exited cleanly, but that does not establish its original cause.
 
 ### 2026-10-11 — DEV-020 release-strip guarantee (astra, gpt-6)
 
