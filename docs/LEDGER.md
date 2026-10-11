@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 63 | 1 | 0 | 0 | 38 | 0 | 102 | 14 |
+| M1 | 63 | 0 | 0 | 0 | 39 | 0 | 102 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 3 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -159,7 +159,7 @@
 | PHY-009 | ColliderSnapshotSystem and install schedule | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-007, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | db7c5b7 | Tick snapshots, deterministic buckets, six required tests pass |
 | PHY-010 | BrickColliderBuildSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-005, PHY-009 | yes | done | astra (gpt-6) | 2026-10-11 | 08211f4 | Snapshot-only budgeted batches; 1000 bricks / 4 batches, byte-identical compound |
 | PHY-011 | ColliderSwapSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-010 | yes | done | astra (gpt-6) | 2026-10-11 | 4542bf7 | Due-prefix installs; asynchronous finalize; Q98 empty-prefix ownership |
-| PHY-012 | GridColliderCleanupSystem and teardown | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, SPEC-10 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PHY-012 | GridColliderCleanupSystem and teardown | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-011, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 43a56cc | Deferred ownership; scene/world teardown; Q99–100 |
 | PHY-013 | GridMassUpdateSystem | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-006, PHY-008, DMG-001 | no | todo |  |  |  |  |
 | PHY-015 | Debug, statistics and harness hooks | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-011 | yes | todo |  |  |  |  |
 | PHY-016 | GridBodyFactory contract test for split creators | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-008 | no | todo |  |  |  |  |
@@ -705,6 +705,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — PHY-012 collider cleanup and teardown (astra, gpt-6)
+
+- Added presentation cleanup before deferred disposal: complete aged/inactive batches, sweep missing roots in reverse, preserve in-flight discarded slots, clear inactive requests, and transfer every retired blob to the existing frame/tick queue. Production GridSpawnSystem/VoxelSingletons teardown owns all final disposal.
+- Five required tests pass with real brick/assembly jobs and borrowed cached children: a dead record transfers its three existing blobs immediately and its two batch results after age-two finalization; disposal waits three frames and two ticks. Bulk unload of **32 linked groups / 96 collider blobs** and world disposal with a batch in flight report **zero new native leaks**, using EnabledWithStackTrace after warm-up. LEG cascade and inactive/config-absent cleanup pass.
+- Q99 / SPEC-12 Q20 preserves cleanup without a config singleton by using the documented two-frame default. Q100 / Q21 fixes stale retirement ticks after catch-up: the local queue view takes current SimClock.Tick, preserving two future physics ticks if the game pauses. Singleton field ownership is unchanged. The paused catch-up case is included in the required no-gameplay test.
+- Validation: focused **5/5**; explicit compile zero C# warnings; EditMode **583 passed + 1 explicit skipped**, PlayMode **37 passed**, perf **31/31**, docs **503 tasks / zero errors**. An initial test held ticks constant and correctly retained two blobs; its frame/tick progression was fixed. Formal cleanup timing remains PHY-019.
+- Next: PHY-008 body initialization, then PHY-013 mass updates; renderer fallback/shader work remains ready.
 
 ### 2026-10-11 — PHY-011 collider swap (astra, gpt-6)
 
