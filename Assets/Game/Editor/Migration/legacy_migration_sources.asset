@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27bd2f39492a342d1b309420d6a12d47, type: 3}
+  m_Name: legacy_migration_sources
+  m_EditorClassIdentifier: Game.Editor::Game.Editor.Migration.LegacyMigrationSources
+  itemIcons: {fileID: 2800000, guid: f8a50dec0611c624ca8569633b602306, type: 3}

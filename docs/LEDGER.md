@@ -577,6 +577,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 34 | 2026-10-11 | SPEC-72 MIG-004 | Hand-edited link manifest adoption, first-run report equality, missing-field callbacks (SPEC-72 Q13) | Hash only owned/forced writes; stable reports after initial creation; guarded field setters; invalid manifests fail closed | Tech lead | Resolved in MIG-004; preserves protected assets on subsequent runs |
 | 35 | 2026-10-11 | SPEC-71 TST-008 | Iteration setting and live CLI contract gaps (SPEC-71 Q7) | Both reloads disabled per ADR-0020; installed API schema; complete results and exit-status validation | Tech lead | Resolved in TST-008; wall-clock measurements include CLI overhead |
 | 36 | 2026-10-11 | SPEC-03 INP-003 | Conflict removal loses an existing custom binding (SPEC-03 Q6) | Restore prior overrides on rejection; suppress Global during rebind; ADR-0021 for required test fixture | Tech lead | Resolved in INP-003; preserves the player’s old binding |
+| 37 | 2026-10-11 | SPEC-72 MIG-005 | Placeholder path coupling and omitted dropped fields (SPEC-72 Q14) | Editor-only source-reference asset; reuse existing icons; report every dropped field | Tech lead | Resolved in MIG-005; no new art or owner look decision |
 
 ## Measurements
 

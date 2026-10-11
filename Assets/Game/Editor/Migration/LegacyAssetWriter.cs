@@ -60,8 +60,8 @@ namespace Game.Editor.Migration
                 }
                 if (existing == null)
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(path));
-                    AssetDatabase.Refresh();
+                    string directory = Path.GetDirectoryName(path);
+                    if (!AssetDatabase.IsValidFolder(directory)) { Directory.CreateDirectory(directory); AssetDatabase.Refresh(); }
                     AssetDatabase.CreateAsset(tmp, path);
                     existing = tmp; tmp = null; outcome = WriteOutcome.Created;
                 }

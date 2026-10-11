@@ -237,7 +237,7 @@ Unchanged keys are listed once per row. `→ null` = not converted.
 
 ### 4.5 Value tables for SPEC-04 targets
 
-**Non-block items** (`ItemDefinition`, area `Items`). Property paths: `id`, `displayName`, `description`, `category`, `rarity`, `basePrice`, `maxStack`, `icon`. `maxStack` = 999 if `isStackable` else 1. `icon` = the sub-sprite of `Assets/Game/Art/_Placeholder/Icons/item_icons_sheet.png` whose name equals the legacy `ItemImage.name` (all legacy icons are `spritetest2_transparent_<n>` and exist there). Description: legacy text unchanged.
+**Non-block items** (`ItemDefinition`, area `Items`). Property paths: `id`, `displayName`, `description`, `category`, `rarity`, `basePrice`, `maxStack`, `icon`. `maxStack` = 999 if `isStackable` else 1. `icon` = the sub-sprite of the sheet assigned to the Editor-only `LegacyMigrationSources` asset whose name equals legacy `ItemImage.name` (all legacy icons are `spritetest2_transparent_<n>`). The initial source is the existing `item_icons_sheet.png`; converter code never references the placeholder folder (Q14). Description: legacy text unchanged.
 
 | v2 ID | Display name | Category | Rarity | Price | Stack | Dropped legacy data (`MIG-I091`) |
 |---|---|---|---|---|---|---|
@@ -792,6 +792,7 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 | 11 | Ship thumbnails from the old game | Not migrated (files not in v2); SPEC-51 renders new ones | SPEC-51 |
 | 12 | Nonfinite Euler angles and integer-cast overflow for very large finite inputs | **Answer (resolved in MIG-007):** reject NaN/infinity with Orientation.Invalid and infinite error; reduce finite angles modulo 360 in double precision before rounding to quarters, preserving the specified one-degree tolerance and rotation order | Tech lead |
 | 13 | Manifest link updates can adopt hand edits; report Created vs Unchanged conflicts with first-run byte equality; SerializedObject cannot intercept missing properties | **Answer (resolved in MIG-004):** refresh hashes at owned/forced writes only, including owned link fills; never adopt protected bytes through a link. Unsaved dirty assets are protected too. Invalid manifests fail closed. Compare report bytes across unchanged runs; first-run Created remains truthful. Converter fill callbacks use internal writer.Set to warn and skip individual missing fields. | Tech lead |
+| 14 | Hard-coded placeholder art paths conflict with AGENTS; the dropped-data table omits socket fields and some normalized categories | **Answer (resolved in MIG-005):** Editor-only LegacyMigrationSources holds the icon-sheet reference, so converters depend on that asset and sprite names, not placeholder paths. Keep existing source art. Report every dropped nonempty RequiredSocketType, Modifiers, non-None EffectType, PaletteIndex and changed legacy Category, including omissions in the abbreviated table. | Tech lead |
 
 ## 11. References
 
