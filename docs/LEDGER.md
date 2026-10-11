@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 88 | 0 | 0 | 0 | 12 | 0 | 100 | 15 |
+| M1 | 88 | 0 | 0 | 0 | 12 | 0 | 100 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 1 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 1 |
@@ -116,7 +116,7 @@
 | INP-007 | Frame-rate independence test | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-005, SPEC-20 | no | todo |  |  |  |  |
 | DATA-011 | v2 block additions (reactor, cargo) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | standard | DATA-009 | yes | done | astra (gpt-6) | 2026-10-11 | 7158bf8 | Reactor/cargo registered; specified modules and existing art references validated |
 | VOX-002 | SPIKE: memory model for the reference and thin-shell stations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 6393ecd | No-go: reference 38,828,288 B retained-copy peak; ADR-0023 proposed |
-| VOX-003 | Sparse-brick fallback (only if VOX-002 is no-go) | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-002 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | No-go measured by VOX-002; ADR-0023 proposed before contract changes |
+| VOX-003 | Sparse-brick fallback (only if VOX-002 is no-go) | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-002, VOX-014 | no | todo | astra (gpt-6) | 2026-10-11 |  | Q62: waits for VOX-014 foundations; ADR-0023 still proposed |
 | VOX-004 | Brick maths and mask operations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 508c75f | Brick coordinates, faces and 4096-bit mask operations; 8 tests |
 | VOX-005 | VoxelStructure storage core | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-004 | yes | todo |  |  |  |  |
 | VOX-006 | Block placement, removal and compaction | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-005, SPEC-04 | no | todo |  |  |  |  |
@@ -616,6 +616,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 60 | 2026-10-11 | SPEC-12 PHY-007 | Inner list capacities and PendingBricks semantics unspecified | 32 child entries / 8 update indices / 32 update bricks; PendingBricks = unscheduled entries | Tech lead | Resolved in SPEC-12 Q14; retain pool capacity and clear consumed mask slots |
 | 61 | 2026-10-11 | SPEC-12 PHY-007 | Sorted insertion/audits reuse PHY-005's coordinate helper | Add the implementation dependency | Tech lead | Resolved in SPEC-12 Q15; PHY-005 was already done at claim time |
 
+| 62 | 2026-10-11 | SPEC-10 VOX-003 | Sparse fallback lists callers that are stubs or absent | Add VOX-014 dependency; build dense foundations first | Tech lead | Resolved in SPEC-10 Q18; VOX-003 returned to todo, memory gate remains mandatory |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
@@ -646,6 +648,11 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — VOX-003 dependency correction (astra, gpt-6)
+
+- Inspection found VoxelStructure/BrickWrite/GridCellReader stubs and no GridSpawnSystem or structure codec. VOX-003 cannot verify its required cross-path equivalence yet. Added VOX-014 as a transitive foundation dependency and returned the task to todo (Q62 / SPEC-10 Q18).
+- ADR-0023 remains proposed; no binding contract or code changed. Continue VOX-005, then remaining ready M1 foundations; sparse implementation and its 36 MB measurement remain required. Documentation checks pass.
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
 

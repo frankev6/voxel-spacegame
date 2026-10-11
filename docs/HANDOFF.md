@@ -41,6 +41,6 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 3. Next
 
-1. **M1:** choose ready voxel/core/render/physics contract tasks. VOX-004 and REN-001/PHY-001 are done; VOX-002 recorded no-go. Resolve proposed ADR-0023 before changing the dense-cell contract in VOX-003. PHY-002 confirmed nested compounds and PHY-005 is implemented; DATA-011/PHY-003 added content and boot physics configuration, and PHY-006 implements mass maths. PHY-007 is also done. Next resolve ADR-0023 and implement VOX-003 before the remaining voxel storage/readers, then continue ready M1 work.
+1. **M1:** choose ready voxel/core/render/physics contract tasks. VOX-004 and REN-001/PHY-001 are done; VOX-002 recorded no-go. Resolve proposed ADR-0023 before changing the dense-cell contract in VOX-003. PHY-002 confirmed nested compounds and PHY-005 is implemented; DATA-011/PHY-003 added content and boot physics configuration, and PHY-006 implements mass maths. PHY-007 is also done. Q62 corrects VOX-003 sequencing: its callers are stubs/absent, so build VOX-005 and the dense foundations through VOX-014 first, then resolve ADR-0023 and implement/measure the complete sparse fallback.
 2. **ART-007:** finish the validator on its existing branch, bring it up to date with main and merge locally when convenient.
 3. Keep advancing ready M1 tasks, then its system review and exit gate. Art-track owner gates and no-new-3D-ship restrictions stay in force.

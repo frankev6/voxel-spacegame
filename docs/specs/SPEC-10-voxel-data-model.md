@@ -813,7 +813,7 @@ Measured station geometry and allocation totals:
 ### VOX-003 — Sparse-brick fallback (only if VOX-002 is no-go)
 - **Milestone:** M1
 - **Tier:** frontier — F1/F3: changes the brick storage contract
-- **Depends on:** `VOX-002`
+- **Depends on:** `VOX-002`, `VOX-014`
 - **Do:** If VOX-002 records **go**, set this task `dropped` with the measurement reference. If **no-go**: after the ADR is accepted, implement `BrickSparseCells` per §8.2 in `VoxelStructure`, ECS spawn, `BrickWrite`, `GridCellReader` and the codec; update §4 and §5 of this spec in the same commit.
 - **Files:** `Assets/Game/Voxel/Model/BrickSparseCells.cs`; changes to `VoxelStructure.cs`, `BrickWrite.cs`, `GridCellReader.cs`, `GridSpawnSystem.cs`, `VoxelStructureCodec.cs`; `Assets/Game/Tests/EditMode/Voxel/SparseBrickTests.cs`
 - **Acceptance criteria:**
@@ -1047,6 +1047,8 @@ Measured station geometry and allocation totals:
 | 15 | M0 migration needs blueprint validation before VOX-010 | **Answer (resolved in MIG-008):** bring the existing Validate body and migration integration fixtures forward (SPEC-72 Q16). Keep EditorSetPayload, config factory and the VOX-010 acceptance suite in M1. Game.Data validates its v1 asset contract without a forbidden Game.Voxel dependency. | Tech lead | |
 | 16 | Measured reference retained-copy peak is 38,828,288 B, above VOX-002's 36 MB headroom gate | Follow the no-go path; propose sparse storage | Tech lead | Resolved 2026-10-11: no-go recorded; VOX-003 todo and ADR-0023 proposed. No binding storage change yet. |
 | 17 | Thin-shell retained-copy peak is 162,606,784 B; should it become a hard gate? | Keep it a stress report; sparse plus later LOD/copy-release options require measurement | Owner | Reported 2026-10-11. Existing default retained; no new owner decision assumed. |
+
+| 18 | VOX-003 requires storage, codec, spawn and write-back implementations that are still absent | Build and verify the dense foundations first, then apply the fallback across them | Tech lead | Resolved 2026-10-11: add VOX-014 as a dependency (transitively VOX-005/009/012/013); return VOX-003 to todo. ADR-0023 stays proposed until the complete representation change. No memory gate waived. |
 
 ## 11. References
 
