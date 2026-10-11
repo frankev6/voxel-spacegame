@@ -275,7 +275,7 @@ These types cross module boundaries. **Their names and owning module are binding
 | `BlockIndex` | `ushort`; 0 = air | Runtime index, rebuilt every boot from `ContentDatabase` order. **Never saved** — saves use `ContentId` palettes |
 | `Orientation` | `byte` 0..23 | The 24 proper rotations of a cube. `OrientationTables` blob: `Rotate(int3, o)`, `Compose(a,b)`, `Mirror(o, axis)`, `Inverse(o)` |
 | `BlockKind` | `enum : byte { Structural, Prop, Functional }` | Structural = brick-meshed; Prop = instanced mesh; Functional = has an entity (iff it has at least one module) |
-| `BlockDef` | blob struct: `Index`, `MirrorIndex`, `Kind`, `Cells` (footprint), `Clearance`, `AllowedOrientations` (24-bit mask), `AttachFaces`, `CellHp`, `CellMass`, `MaterialLayer`, `PropMeshIndex`, `ModuleMask`, `Category` | Built from `BlockDefinition` ScriptableObjects |
+| `BlockDef` | blob struct: `Index`, `MirrorIndex`, `Kind`, `Cells` (footprint), `Shapes` (resolved per-cell, ADR-0028), `Clearance`, `AllowedOrientations` (24-bit mask), `AttachFaces`, `CellHp`, `CellMass`, `MaterialLayer`, `PropMeshIndex`, `ModuleMask`, `Category` | Built from `BlockDefinition` ScriptableObjects |
 | `BlockModule` / `BlockModuleId` / `BlockModulesBlob` | serializable module classes on `BlockDefinition`; append-only id list; one blob of module rows (singleton `BlockModulesRef`) | ADR-0013. A block function is a module; systems read the rows of the modules they own and register functional components per module id |
 | `BlockDefsBlob` | `BlobArray<BlockDef>` indexed by `BlockIndex` | ECS singleton `BlockDefsRef` |
 | `ContentDatabase` | ScriptableObject with direct references to every content asset | The only content entry point |

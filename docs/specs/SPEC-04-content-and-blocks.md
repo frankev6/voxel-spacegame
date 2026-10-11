@@ -7,7 +7,7 @@
 | **Module(s)** | `Game.Data` (folder `Assets/Game/Data/`); content tooling in `Game.Editor` (folder `Assets/Game/Editor/Content/`); content assets in `Assets/Game/Content/` |
 | **Depends on specs** | SPEC-02 (`ContentId`, `StableHash`, `GameLog`); SPEC-21 (`WeaponDefinition`, only for DATA-010); SPEC-24 (`AbilityDefinition`, only for DATA-010) |
 | **Depended on by** | SPEC-01 (constructs `ContentService`, creates the ECS singletons), SPEC-05 (content IDs in saves, Missing placeholders), SPEC-10/11/12/13 (`BlockDefsBlob`, orientation tables, placement math), SPEC-20/21/22/24 (function params), SPEC-30…33, SPEC-40…42 (`ContentDefinition`, `ValidationReport`), SPEC-50 (`ItemDefinition` base), SPEC-51 (placement, mirror, orientation rotation), SPEC-72 (target types and the legacy block value table §4.10) |
-| **Milestone** | M0 (DATA-011 in M1, DATA-010 in M2) |
+| **Milestone** | M0 (DATA-011/012 in M1, DATA-010 in M2) |
 
 > Read [01-architecture.md](../01-architecture.md), [02-conventions.md](../02-conventions.md) and [03-glossary.md](../03-glossary.md) before this spec. This spec may not contradict them.
 
@@ -53,7 +53,7 @@ This spec defines how every piece of authored content is identified, stored, val
 10. **Mirroring uses chiral partners defined against the local X reflection.** A block's mirror partner has footprint `Sx(F) + MirrorOffset` (set equality). `MirrorIndex` = self for achiral blocks. Mirrored placement is computed by §5.6, never by negating Euler angles. Reason: 06-C2/C3.
 11. **`ItemDefinition.cs` is owned by this spec.** SPEC-50 may add economy fields to it in its own task, below the marked line, and must not change or remove the base fields in §4.4. Reason: one class, two designers, no merge ambiguity.
 12. **Block functions are composable modules (ADR-0013).** A functional block carries a list of `BlockModule`s (at most one per `BlockModuleId`); each module bakes one unmanaged row into `BlockModulesBlob`, and systems read only the rows of the modules they own. `BlockCategory` is display-only. Reason: a new function (hangar, repair bay) is a new module, never an edit of an enum, a fat struct or a central switch; mixed blocks (reactor + explosive, core + power) are free.
-13. **Structural blocks are single-cell and use the grid palette; a block uses a `BlockInstance` iff it is Functional or has more than one cell** (`BlockDef.RequiresInstance`). A block is Functional iff it has at least one module. Reason: architecture §6.3 `Cell.Ref` semantics; the brick mesher only ever meshes single-cell structural cells.
+13. **Single-cell structural blocks use the grid palette; a block uses a `BlockInstance` iff it is Functional or has more than one cell** (`BlockDef.RequiresInstance`). ADR-0018/0028 permit the two-cell long slope with per-cell shapes; other multi-cell structural kits remain owner gates. A block is Functional iff it has at least one module. Each structural cell is meshed independently.
 14. **Content errors fail loudly**: in the editor (postprocessor + console), in CI (`-executeMethod`, exit code 1), at build time (build fails) and at boot (`ContentValidationException`). Never silently at runtime. Reason: conventions §6.
 15. **Missing content degrades, never rejects.** Unknown IDs read from saves resolve to `block_missing` / `item_missing` and are recorded for a warning (SPEC-05 surfaces them). Reason: 04-B1.
 16. **Content assets live in `Assets/Game/Content/<Area>/<id>.asset`; the database asset is `Assets/Game/Content/ContentDatabase.asset`.** All definition *classes* are in `Assets/Game/Data/Definitions/<Area>/` with namespace `Game.Data.Definitions` (architecture §3.2 wins over the sub-folder namespace rule).
@@ -256,6 +256,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField] private Game.Data.Blocks.BlockKind kind;
         [UnityEngine.SerializeField] private Game.Data.Blocks.BlockShape shape;                  // Structural only; Cube otherwise
         [UnityEngine.SerializeField] private UnityEngine.Vector3Int[] cells = { UnityEngine.Vector3Int.zero }; // unrotated footprint, must contain (0,0,0)
+        [UnityEngine.SerializeField] private Game.Data.Blocks.BlockShape[] shapes = System.Array.Empty<Game.Data.Blocks.BlockShape>(); // optional, parallel to authored cells
         [UnityEngine.SerializeField] private UnityEngine.Vector3Int[] clearance = System.Array.Empty<UnityEngine.Vector3Int>(); // must-stay-empty cells, block-local
         [UnityEngine.SerializeField] private Game.Data.Blocks.OrientationMask allowedOrientations = Game.Data.Blocks.OrientationMask.All;
         [UnityEngine.SerializeField] private Game.Data.Blocks.BlockFaceMask attachFaces = Game.Data.Blocks.BlockFaceMask.All;
@@ -280,6 +281,8 @@ namespace Game.Data.Definitions
         public Game.Data.Blocks.BlockKind Kind => kind;
         public Game.Data.Blocks.BlockShape Shape => shape;
         public System.Collections.Generic.IReadOnlyList<UnityEngine.Vector3Int> Cells => cells;
+        public System.Collections.Generic.IReadOnlyList<Game.Data.Blocks.BlockShape> Shapes => shapes;
+        public Game.Data.Blocks.BlockShape GetShape(int footprintIndex); // explicit shape or default Shape
         public System.Collections.Generic.IReadOnlyList<UnityEngine.Vector3Int> Clearance => clearance;
         public Game.Data.Blocks.OrientationMask AllowedOrientations => allowedOrientations;
         public Game.Data.Blocks.BlockFaceMask AttachFaces => attachFaces;
@@ -428,11 +431,13 @@ namespace Game.Data.Blocks
         public int PropMeshIndex;            // index into ContentService.PropMeshes, -1 = none
         public Game.Core.ContentHash IdHash; // ContentId.Hash: lets ECS code map a BlockIndex back to its content (diagnostics, saves go through the catalog)
         public Unity.Entities.BlobArray<Unity.Mathematics.int3> Cells;      // [0] == (0,0,0); rest sorted by (z, y, x)
+        public Unity.Entities.BlobArray<BlockShape> Shapes; // resolved, parallel to canonical Cells (ADR-0028)
         public Unity.Entities.BlobArray<Unity.Mathematics.int3> Clearance;  // sorted by (z, y, x)
         public Unity.Entities.BlobArray<ushort> AbilityIndices;             // IndexOf<AbilityDefinition>; empty until DATA-010
         public ulong ModuleMask;             // bit (int)BlockModuleId set for every module of the block (§4.6); 0 for non-functional blocks
         public BlockCategory Category;       // display only
 
+        public BlockShape GetShape(int footprintIndex); // Shapes[index], or Shape if empty (synthetic callers)
         public bool RequiresInstance => Kind == BlockKind.Functional || Cells.Length > 1;
         public bool HasModule(BlockModuleId id) => (ModuleMask & (1ul << (int)id)) != 0;
         public bool IsCore => HasModule(BlockModuleId.Core);
@@ -706,7 +711,7 @@ SPEC-72 writes exactly these values (MIG-006). Footprints and clearance are bloc
 
 ¹ Legacy clearance cells that fall inside the block's own footprint are dropped (railgun `(0,0,1)`, ark lance `(0,0,1)`, `(0,0,2)`). The portal's legacy clearance `(1,0,0)` is dropped so the block stays achiral. All legacy blocks are achiral (`mirrorPartner` = null), `ArmorClass` 0, `MaterialLayer` 0, `maxStack` 999, category `Block`. Mesh paths are `Assets/Game/Art/_Placeholder/Meshes/<file>.obj`.
 
-**System placeholders and v2 additions** (authored by DATA-009 and DATA-011, not migrated):
+**System placeholders and v2 additions** (authored by DATA-009, DATA-011 and DATA-012, not migrated):
 
 | ID | Kind | Shape | Cells | Orient. | Attach | CellHp | FuncHp | Mass | Category: modules | Price / rarity | Prop mesh |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -714,6 +719,10 @@ SPEC-72 writes exactly these values (MIG-006). Footprints and clearance are bloc
 | `item_missing` (ItemDefinition) | — | — | — | — | — | — | — | — | — | 0 / Common, category Misc, maxStack 999, display name "Missing item" | — |
 | `block_reactor_small` | Functional | Cube | box 2×2×2 | All | All | 150 | 1200 | 50 | Power: PowerSource (gen 60), Explosive (radius 4 cells, damage 400) | 300 / Rare | hulls : `base_2x2_hull_base_2x2_hull` |
 | `block_cargo_small` | Functional | Cube | box 2×1×1 | All | All | 100 | 200 | 20 | Utility: Cargo (50) | 20 / Common | hulls : `base_1x2_hull.001_base_1x2_hull.001` |
+| `block_hull_hip` | Structural | HipCorner | 1 | All | All | 50 | 0 | 15 | Structure: — | 4 / Common | — |
+| `block_hull_slope_long` | Structural | LongSlopeHigh; shapes High/Low | (0,0,0),(0,1,0) | All | All | 50 | 0 | 15 | Structure: — | 8 / Common | — |
+
+Slope-kit defaults (ADR-0028): display names "Hip Corner Hull 1x1" / "Long Slope Hull 1x2", reuse the `block_hull_angled` icon; armor/material 0, stack 999, no clearance/modules. HP/mass are per cell, inherited from angled hull; prices are provisional gameplay tuning.
 
 With these, the M3 block list in [00-vision.md](../00-vision.md) is covered: hull (`block_hull`), armour slope (`block_hull_angled`), core, reactor, capacitor, 2 thrusters, 3 weapons, shield emitter, cargo.
 
@@ -797,12 +806,12 @@ Complexity: O(D·depth + D log D). Errors are collected, never thrown here.
 
 1. `blocks = catalog.All<BlockDefinition>()` (index `i+1` for element `i`). Allocate `Blocks` with `blocks.Count + 1` entries; entry 0 = air: all fields zero, `PropMeshIndex = −1`, empty arrays, `ModuleMask = 0`, `Category = Structure`.
 2. Prop meshes: iterate blocks in index order; for each non-null `PropMesh` not yet seen (reference equality) append to `PropMeshes`; `PropMeshIndex` = its position, or −1.
-3. For each block `b` at index `k`: `Cells` = `(0,0,0)` first then the remaining cells sorted by `(z, y, x)`; `Clearance` sorted by `(z, y, x)`; `BoundsMin/Max` over `Cells`; `MirrorIndex` = `catalog.GetBlockIndex(b.MirrorPartner)`; `MirrorOffset` = §5.6 step 1 (validated earlier, so it exists); copy scalar fields; `ModuleMask` = OR of `1ul << (int)m.Id` over `b.Modules`; `Category = b.BlockCategory`; `AbilityIndices` empty (DATA-010 fills them); `IdHash = b.Id.Hash`; `MissingBlockIndex` = index of `catalog.MissingBlock`.
+3. For each block `b` at index `k`: `Cells` = `(0,0,0)` first then the remaining cells sorted by `(z, y, x)`; `Shapes` = resolved authored shape for each matching canonical cell (empty authored array inherits `shape`); scalar `Shape` = resolved root shape; `Clearance` sorted by `(z, y, x)`; `BoundsMin/Max` over `Cells`; `MirrorIndex` = `catalog.GetBlockIndex(b.MirrorPartner)`; `MirrorOffset` = §5.6 step 1 (validated earlier, so it exists); copy scalar fields; `ModuleMask` = OR of `1ul << (int)m.Id` over `b.Modules`; `Category = b.BlockCategory`; `AbilityIndices` empty (DATA-010 fills them); `IdHash = b.Id.Hash`; `MissingBlockIndex` = index of `catalog.MissingBlock`.
 3b. **Modules blob:** `maxId` = highest `BlockModuleId` value; `Tables` has `maxId + 1` entries. For each id `m` in ascending order: the blocks having a module with that id, in block-index order, get rows `0..n−1`; `RowByBlock[k]` = the row or −1; `RowSize` = that module's `RowSize` (all modules of one id share the row type); `DataOffset` = running offset rounded up to 16. Each row is written with `module.BakeRow(new BlockModuleBakeContext(catalog, b), RowData + DataOffset + row × RowSize)`. Tables of unused ids have `RowSize = 0` and all `RowByBlock = −1`.
-4. `BlockDefsHash = StableHash.Hash64(canonical)`, where `canonical` is, for `k = 1..N`, little-endian: `IdHash.Value u64, Kind u8, Shape u8, AttachFaces u8, MaterialLayer u8, ArmorClass u8, AllowedOrientations u32, MirrorIndex u16, MirrorOffset 3×i32, CellHp f32, FunctionHp f32, CellMass f32, Cells.Length u16 + 3×i32 each, Clearance.Length u16 + 3×i32 each, AbilityIndices.Length u16 + u16 each, ModuleMask u64, Category u8`; then, for each module id ascending and each block with that module in index order, `block index u16` followed by the row's raw bytes (rows hold only blittable fields: f32 as IEEE bits, ints little-endian; padding bytes are zero because rows are written into zero-initialised memory). `PropMeshIndex` is excluded (presentation only).
+4. `BlockDefsHash = StableHash.Hash64(canonical)`, where `canonical` is, for `k = 1..N`, little-endian: `IdHash.Value u64, Kind u8, Shape u8, AttachFaces u8, MaterialLayer u8, ArmorClass u8, AllowedOrientations u32, MirrorIndex u16, MirrorOffset 3×i32, CellHp f32, FunctionHp f32, CellMass f32, Cells.Length u16 + 3×i32 each, resolved Shapes u8 per cell (same length), Clearance.Length u16 + 3×i32 each, AbilityIndices.Length u16 + u16 each, ModuleMask u64, Category u8`; then, for each module id ascending and each block with that module in index order, `block index u16` followed by the row's raw bytes (rows hold only blittable fields: f32 as IEEE bits, ints little-endian; padding bytes are zero because rows are written into zero-initialised memory). `PropMeshIndex` is excluded (presentation only).
 5. Return both blobs (`Allocator.Persistent`).
 
-Complexity O(Σ cells). Memory: ~(120 B + 12 B × cells) per block; < 64 KB for 200 blocks.
+Complexity O(Σ cells). Memory: ~(128 B + 13 B × cells) per block; < 64 KB for 200 blocks.
 
 ### 5.6 Placement maths (`BlockPlacementMath`, static, Burst-compatible)
 
@@ -875,7 +884,7 @@ flowchart LR
 | DATA-E033 | Error | Clearance cell inside the footprint, or duplicate clearance cell |
 | DATA-E034 | Error | `AllowedOrientations` is 0 or has bits above 23 |
 | DATA-E035 | Error | Kind/module mismatch: Structural or Prop with any module, or Functional without modules |
-| DATA-E036 | Error | Structural block with more than one cell |
+| DATA-E036 | Error | Structural shape/footprint outside approved kit: single Cube/Wedge/HipCorner, or exactly root High + +Y Low with scalar shape High |
 | DATA-E037 | Error | Non-structural block with `Shape ≠ Cube` |
 | DATA-E038 | Error | Prop or Functional block without `propMesh` |
 | DATA-E039 | Error | `cellHp ≤ 0` or `cellMass ≤ 0` |
@@ -888,6 +897,9 @@ flowchart LR
 | DATA-E047 | Error | (from DATA-010) `WeaponMountModule` without `weapon` (before DATA-010 the field does not exist and the mount is unarmed) |
 | DATA-E048 | Error | Null entry in `modules`, or two modules with the same `Id` |
 | DATA-E049 | Error | Category mismatch: Structural must be `Structure`, Prop must be `Detail`, Functional must be neither |
+| DATA-E050 | Error | Shape or explicit shapes entry outside the five approved enum values |
+| DATA-E051 | Error | Nonempty shapes length differs from Cells length |
+| DATA-E052 | Error | Non-structural block with nonempty shapes override |
 | DATA-E099 | Error | An `IContentDatabaseValidator` threw |
 
 ## 6. Public API
@@ -935,7 +947,7 @@ Preconditions: `orient < 24` (else results are undefined; debug builds assert), 
 
 ### 6.4 Authoring rules (inspector)
 
-- `kind = Structural` → no modules, `blockCategory = Structure`, one cell, `propMesh` null.
+- `kind = Structural` → no modules, `blockCategory = Structure`, one approved single cell or the approved two-cell long slope, `propMesh` null. Optional shapes are parallel to authored cells; empty inherits shape. Standalone long-slope halves are invalid.
 - `kind = Prop` → no modules, `blockCategory = Detail`, `shape = Cube`, `propMesh` required.
 - `kind = Functional` → at least one module (at most one per `BlockModuleId`), `blockCategory` not Structure/Detail, `shape = Cube`, `propMesh` required, `functionHp > 0`.
 - A chiral block needs a partner asset whose `cells` are the X-mirror (`ContentTools` menu "Create Mirror Partner" in DATA-008 generates it).
@@ -1127,31 +1139,32 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 - **Tier:** frontier — public blob schema and canonical shape mapping
 - **Depends on:** `DATA-006`, `DATA-009`
 - **Do:** Implement Q14 under ADR-0028: optional authored shapes, canonical baked shapes, validation limited to the approved kit, and hip/long-slope content. Include resolved per-cell shapes in the block hash; document snapshot lookup.
-- **Files:** `Assets/Game/Data/Definitions/Blocks/BlockDefinition.cs`; `Assets/Game/Data/Blocks/BlockDef.cs`; `Assets/Game/Data/Blocks/BlockDefsBlobBuilder.cs`; `Assets/Game/Content/Blocks/block_hull_hip.asset`; `Assets/Game/Content/Blocks/block_hull_slope_long.asset`; `Assets/Game/Tests/EditMode/Data/SlopeKitTests.cs`
+- **Files:** `Assets/Game/Data/Definitions/Blocks/BlockDefinition.cs`; `Assets/Game/Data/Blocks/BlockDef.cs`; `Assets/Game/Data/Blocks/BlockDefsBlobBuilder.cs`; `Assets/Game/Content/Blocks/block_hull_hip.asset`; `Assets/Game/Content/Blocks/block_hull_slope_long.asset`; `Assets/Game/Tests/EditMode/Data/SlopeKitTests.cs`; existing content memory accounting and migration-owned asset/manifest reserialization
 - **Acceptance criteria:**
-  - [ ] Empty authored shapes inherit the default; explicit shapes follow cells through canonical sorting and affect the canonical hash; single-cell root Shape agrees with its resolved shape.
-  - [ ] Invalid shape values, lengths, non-structural overrides and unapproved multi-cell structural footprints fail validation. The approved long slope has High at the root and Low at +Y.
-  - [ ] Both registered assets pass project validation, have the specified values and reuse existing icons. No new visual assets or ships.
+  - [x] Empty authored shapes inherit the default; explicit shapes follow cells through canonical sorting and affect the canonical hash; single-cell root Shape agrees with its resolved shape.
+  - [x] Invalid shape values, lengths, non-structural overrides and unapproved multi-cell structural footprints fail validation. The approved long slope has High at the root and Low at +Y.
+  - [x] Both registered assets pass project validation, have the specified values and reuse existing icons. No new visual assets or ships.
 - **Tests:** `SlopeKitTests.Validation_ApprovedKitOnly`, `SlopeKitTests.Bake_CanonicalShapeMappingAndHash`, `SlopeKitTests.ShippedKit_ValuesAndInstances`; existing full validation/performance suites.
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | Prefix list for other specs' definitions (§4.3) | Use the table; owning spec may change its own row and must notify SPEC-04 | Owning spec leads |
-| 2 | Should legacy core build limits be cells instead of blocks? | `MaxCells` = legacy `MaxVoxelsSupported × 4` (4000 / 8000) so every legacy ship fits; `MaxExtentCells` = legacy `MaxBuildDimensions` | Owner (with SPEC-51) |
-| 3 | Thrust scale: legacy modifier × 2000 N | Keep; SPEC-20 retunes in M1 using `ShipStats` thrust-to-weight | SPEC-20 |
-| 4 | Thruster power draw | 0 (legacy thrusters consumed nothing) | SPEC-22 |
-| 5 | `block_thruster_medium` has no exhaust clearance in legacy data | Keep none (adding it would invalidate legacy ships) | Owner |
-| 6 | Keep `block_portal_small` and the prismatic mirrors (no v1 behaviour) | **Answered (2026-10-10, owner, extensibility review X11):** they stay as content but become `Prop` blocks with no module (category Detail), so no dead function contract ships; a later spec can give them modules | Owner |
-| 7 | Meaning of `ArmorClass` and `MaterialLayer` values | All legacy blocks 0; `MaterialLayer` 63 reserved for `block_missing`; SPEC-11/13 define tables | SPEC-11, SPEC-13 |
-| 8 | Cargo capacity unit | **Answered (SPEC-50 decision 1):** 10 capacity units = 1 cargo slot, so a block with 50 units adds 5 slots | SPEC-50 |
-| 9 | Should `CellHp` be a `half` in the blob (synthesis sketch) | `float`; memory is irrelevant at < 1,000 blocks | Tech lead |
-| 10 | Do non-block `ItemDefinition`s need subclasses (paint colour, module modifiers)? | No subclass in SPEC-04; SPEC-50/51 may add `*Definition : ItemDefinition` subclasses (prefixes from §4.3) | SPEC-50, SPEC-51 |
-| 11 | Shield emitter values (capacity 300, regen 15/s, delay 3 s) | Keep as initial values; SPEC-22 retunes | SPEC-22 |
-| 12 | Does a ContentId with uppercase letters need lower-casing on read (saves typed by hand)? | No; IDs are compared exactly; invalid IDs are unresolved | Tech lead |
-| 13 | Where is `ContentService` registered/constructed | `GameRoot.Awake` step 2 (architecture §4.2) by SPEC-01; `CreateSingletons` right after the default World exists, before any gameplay system updates | SPEC-01 |
-| 14 | ADR-0018 multi-cell structural blocks: how does `BlockDefinition` give each cell of the long slope 1×2 its own shape (`LongSlopeHigh` at cell (0,0,0), `LongSlopeLow` at (0,1,0))? | An optional per-cell `shapes` array parallel to `Cells` (structural blocks only; defaults to `shape` for every cell); validator error if lengths differ. Content rows `block_hull_hip` (HipCorner) and `block_hull_slope_long` (two cells) are added with it | SPEC-04 lead |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | Prefix list for other specs' definitions (§4.3) | Use the table; owning spec may change its own row and must notify SPEC-04 | Owning spec leads |  |
+| 2 | Should legacy core build limits be cells instead of blocks? | `MaxCells` = legacy `MaxVoxelsSupported × 4` (4000 / 8000) so every legacy ship fits; `MaxExtentCells` = legacy `MaxBuildDimensions` | Owner (with SPEC-51) |  |
+| 3 | Thrust scale: legacy modifier × 2000 N | Keep; SPEC-20 retunes in M1 using `ShipStats` thrust-to-weight | SPEC-20 |  |
+| 4 | Thruster power draw | 0 (legacy thrusters consumed nothing) | SPEC-22 |  |
+| 5 | `block_thruster_medium` has no exhaust clearance in legacy data | Keep none (adding it would invalidate legacy ships) | Owner |  |
+| 6 | Keep `block_portal_small` and the prismatic mirrors (no v1 behaviour) | **Answered (2026-10-10, owner, extensibility review X11):** they stay as content but become `Prop` blocks with no module (category Detail), so no dead function contract ships; a later spec can give them modules | Owner |  |
+| 7 | Meaning of `ArmorClass` and `MaterialLayer` values | All legacy blocks 0; `MaterialLayer` 63 reserved for `block_missing`; SPEC-11/13 define tables | SPEC-11, SPEC-13 |  |
+| 8 | Cargo capacity unit | **Answered (SPEC-50 decision 1):** 10 capacity units = 1 cargo slot, so a block with 50 units adds 5 slots | SPEC-50 |  |
+| 9 | Should `CellHp` be a `half` in the blob (synthesis sketch) | `float`; memory is irrelevant at < 1,000 blocks | Tech lead |  |
+| 10 | Do non-block `ItemDefinition`s need subclasses (paint colour, module modifiers)? | No subclass in SPEC-04; SPEC-50/51 may add `*Definition : ItemDefinition` subclasses (prefixes from §4.3) | SPEC-50, SPEC-51 |  |
+| 11 | Shield emitter values (capacity 300, regen 15/s, delay 3 s) | Keep as initial values; SPEC-22 retunes | SPEC-22 |  |
+| 12 | Does a ContentId with uppercase letters need lower-casing on read (saves typed by hand)? | No; IDs are compared exactly; invalid IDs are unresolved | Tech lead |  |
+| 13 | Where is `ContentService` registered/constructed | `GameRoot.Awake` step 2 (architecture §4.2) by SPEC-01; `CreateSingletons` right after the default World exists, before any gameplay system updates | SPEC-01 |  |
+| 14 | ADR-0018 multi-cell structural blocks: how does `BlockDefinition` give each cell of the long slope 1×2 its own shape (`LongSlopeHigh` at cell (0,0,0), `LongSlopeLow` at (0,1,0))? | An optional per-cell `shapes` array parallel to `Cells` (structural blocks only; defaults to `shape` for every cell); validator error if lengths differ. Content rows `block_hull_hip` (HipCorner) and `block_hull_slope_long` (two cells) are added with it | Tech lead | Resolved: ADR-0028 / DATA-012; canonical baked Shapes and approved-kit validation implement the documented default. |
+| 15 | Missing task and initial gameplay values for the approved slope kit | Add DATA-012; inherit angled-hull per-cell values and existing icon | Tech lead | Resolved: ADR-0028, §4.10 values; larger blocks remain owner-gated. |
 
 ## 11. References
 

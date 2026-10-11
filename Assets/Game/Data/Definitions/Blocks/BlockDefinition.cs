@@ -9,6 +9,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField] private Game.Data.Blocks.BlockKind kind;
         [UnityEngine.SerializeField] private Game.Data.Blocks.BlockShape shape;                  // Structural only; Cube otherwise
         [UnityEngine.SerializeField] private UnityEngine.Vector3Int[] cells = { UnityEngine.Vector3Int.zero }; // unrotated footprint, must contain (0,0,0)
+        [UnityEngine.SerializeField] private Game.Data.Blocks.BlockShape[] shapes = System.Array.Empty<Game.Data.Blocks.BlockShape>(); // optional, parallel to authored cells
         [UnityEngine.SerializeField] private UnityEngine.Vector3Int[] clearance = System.Array.Empty<UnityEngine.Vector3Int>(); // must-stay-empty cells, block-local
         [UnityEngine.SerializeField] private Game.Data.Blocks.OrientationMask allowedOrientations = Game.Data.Blocks.OrientationMask.All;
         [UnityEngine.SerializeField] private Game.Data.Blocks.BlockFaceMask attachFaces = Game.Data.Blocks.BlockFaceMask.All;
@@ -33,6 +34,8 @@ namespace Game.Data.Definitions
         public Game.Data.Blocks.BlockKind Kind => kind;
         public Game.Data.Blocks.BlockShape Shape => shape;
         public System.Collections.Generic.IReadOnlyList<UnityEngine.Vector3Int> Cells => cells;
+        public System.Collections.Generic.IReadOnlyList<Game.Data.Blocks.BlockShape> Shapes => shapes;
+        public Game.Data.Blocks.BlockShape GetShape(int footprintIndex) => shapes == null || shapes.Length == 0 ? shape : shapes[footprintIndex];
         public System.Collections.Generic.IReadOnlyList<UnityEngine.Vector3Int> Clearance => clearance;
         public Game.Data.Blocks.OrientationMask AllowedOrientations => allowedOrientations;
         public Game.Data.Blocks.BlockFaceMask AttachFaces => attachFaces;
@@ -52,7 +55,7 @@ namespace Game.Data.Definitions
         }
         public bool RequiresInstance => kind == Game.Data.Blocks.BlockKind.Functional || cells.Length > 1;
 
-        /// <summary>DATA-E020…E024 (item rules), then DATA-E030…E045, E048 and E049 (SPEC-04 §5.8). Module params report DATA-E041 through
+        /// <summary>DATA-E020…E024 (item rules), then DATA-E030…E045 and E048…E052 (SPEC-04 §5.8). Module params report DATA-E041 through
         /// BlockModule.Validate; their fields are prefixed with "modules[i].".</summary>
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
@@ -62,6 +65,7 @@ namespace Game.Data.Definitions
                 scope.Error("DATA-E034", nameof(allowedOrientations), $"Allowed orientations 0x{allowedOrientations.Bits:X} must be non-empty and use only bits 0..23.");
             bool modulesOk = ValidateModules(scope);
             ValidateKind(scope, modulesOk);
+            ValidateShapes(scope);
             if (!(cellHp > 0f) || !(cellMass > 0f))
                 scope.Error("DATA-E039", !(cellHp > 0f) ? nameof(cellHp) : nameof(cellMass), $"Cell HP ({cellHp}) and cell mass ({cellMass}) must be greater than 0.");
             if (materialLayer >= 64) scope.Error("DATA-E045", nameof(materialLayer), $"Material layer {materialLayer} is outside 0..63.");
@@ -117,8 +121,6 @@ namespace Game.Data.Definitions
             bool functional = kind == Game.Data.Blocks.BlockKind.Functional;
             if (functional ? moduleCount == 0 : moduleCount > 0)
                 scope.Error("DATA-E035", nameof(modules), functional ? "A functional block needs at least one module." : $"A {kind} block must not have modules.");
-            if (kind == Game.Data.Blocks.BlockKind.Structural && cells != null && cells.Length > 1)
-                scope.Error("DATA-E036", nameof(cells), $"A structural block has exactly one cell, not {cells.Length}.");
             if (kind != Game.Data.Blocks.BlockKind.Structural && shape != Game.Data.Blocks.BlockShape.Cube)
                 scope.Error("DATA-E037", nameof(shape), $"A {kind} block must use shape Cube, not {shape}.");
             if (kind != Game.Data.Blocks.BlockKind.Structural && propMesh == null)
@@ -132,6 +134,31 @@ namespace Game.Data.Definitions
                 _ => blockCategory != Game.Data.Blocks.BlockCategory.Structure && blockCategory != Game.Data.Blocks.BlockCategory.Detail,
             };
             if (!categoryOk) scope.Error("DATA-E049", nameof(blockCategory), $"Category {blockCategory} does not fit a {kind} block.");
+        }
+
+        void ValidateShapes(Game.Data.Validation.ValidationScope scope)
+        {
+            int count = shapes?.Length ?? 0;
+            if (count != 0 && count != (cells?.Length ?? 0))
+            { scope.Error("DATA-E051", nameof(shapes), "Explicit shapes must be parallel to cells."); return; }
+            bool valuesOk = (byte)shape <= (byte)Game.Data.Blocks.BlockShape.LongSlopeLow;
+            for (int i = 0; i < count; i++) valuesOk &= (byte)shapes[i] <= (byte)Game.Data.Blocks.BlockShape.LongSlopeLow;
+            if (!valuesOk) { scope.Error("DATA-E050", nameof(shapes), "Only the five approved cell shapes are valid."); return; }
+            if (kind != Game.Data.Blocks.BlockKind.Structural)
+            {
+                if (count != 0) scope.Error("DATA-E052", nameof(shapes), "Per-cell shape overrides are structural only.");
+                return;
+            }
+            if (cells == null || cells.Length == 0) return; // footprint validation reports this
+            bool approved = cells.Length == 1 && GetShape(0) <= Game.Data.Blocks.BlockShape.HipCorner;
+            if (cells.Length == 2 && shape == Game.Data.Blocks.BlockShape.LongSlopeHigh)
+            {
+                int high = System.Array.IndexOf(cells, UnityEngine.Vector3Int.zero);
+                int low = System.Array.IndexOf(cells, UnityEngine.Vector3Int.up);
+                approved = high >= 0 && low >= 0 && GetShape(high) == Game.Data.Blocks.BlockShape.LongSlopeHigh
+                    && GetShape(low) == Game.Data.Blocks.BlockShape.LongSlopeLow;
+            }
+            if (!approved) scope.Error("DATA-E036", nameof(cells), "Structural blocks must use the approved single-cell kit or root High / +Y Low long slope.");
         }
 
         void ValidateMirror(Game.Data.Validation.ValidationScope scope)

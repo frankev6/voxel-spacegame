@@ -26,6 +26,7 @@ MonoBehaviour:
   cells:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 1}
+  shapes: 
   clearance:
   - {x: 0, y: 0, z: 2}
   - {x: 0, y: 0, z: 3}

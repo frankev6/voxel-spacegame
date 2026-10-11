@@ -35,7 +35,7 @@ namespace Game.Data.Blocks
             defs[0] = default;
             defs[0].PropMeshIndex = -1;
             defs[0].Category = BlockCategory.Structure;
-            builder.Allocate(ref defs[0].Cells, 0); builder.Allocate(ref defs[0].Clearance, 0); builder.Allocate(ref defs[0].AbilityIndices, 0);
+            builder.Allocate(ref defs[0].Cells, 0); builder.Allocate(ref defs[0].Shapes, 0); builder.Allocate(ref defs[0].Clearance, 0); builder.Allocate(ref defs[0].AbilityIndices, 0);
 
             for (int i = 0; i < n; i++)
             {
@@ -60,6 +60,15 @@ namespace Game.Data.Blocks
                 var clearance = Canonical(b.Clearance, rootFirst: false);
                 var cellArray = builder.Allocate(ref d.Cells, cells.Count);
                 for (int c = 0; c < cells.Count; c++) cellArray[c] = cells[c];
+                var shapeArray = builder.Allocate(ref d.Shapes, cells.Count);
+                var authoredShapes = new Dictionary<int3, BlockShape>(cells.Count);
+                for (int c = 0; c < b.Cells.Count; c++)
+                {
+                    var position = b.Cells[c];
+                    authoredShapes.Add(new int3(position.x, position.y, position.z), b.GetShape(c));
+                }
+                for (int c = 0; c < cells.Count; c++) shapeArray[c] = authoredShapes[cells[c]];
+                d.Shape = shapeArray[0];
                 var clearArray = builder.Allocate(ref d.Clearance, clearance.Count);
                 for (int c = 0; c < clearance.Count; c++) clearArray[c] = clearance[c];
                 builder.Allocate(ref d.AbilityIndices, 0);   // DATA-010 fills them
@@ -77,6 +86,7 @@ namespace Game.Data.Blocks
                 canonical.Write(d.MirrorOffset.x); canonical.Write(d.MirrorOffset.y); canonical.Write(d.MirrorOffset.z);
                 canonical.Write(d.CellHp); canonical.Write(d.FunctionHp); canonical.Write(d.CellMass);
                 canonical.Write((ushort)cells.Count); foreach (var c in cells) { canonical.Write(c.x); canonical.Write(c.y); canonical.Write(c.z); }
+                for (int c = 0; c < cells.Count; c++) canonical.Write((byte)shapeArray[c]);
                 canonical.Write((ushort)clearance.Count); foreach (var c in clearance) { canonical.Write(c.x); canonical.Write(c.y); canonical.Write(c.z); }
                 canonical.Write((ushort)0);   // AbilityIndices.Length
                 canonical.Write(d.ModuleMask); canonical.Write((byte)d.Category);

@@ -651,6 +651,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 87 | 2026-10-11 | SPEC-10 VOX-015 | Enableable IsEmpty synchronizes writers, contradicting the fixed-step no-sync rule | Structural IsEmptyIgnoreFilter early-out plus job enabled-mask filtering | Tech lead | Resolved SPEC-10 Q39 from installed EntityQueryImpl; all-disabled worlds may schedule an empty job |
 | 88 | 2026-10-11 | SPEC-11 REN-004 | Long-slope half-cell geometry cannot use old integer whole-cell render coordinates | Keep byte layout; half-cell units decoded ×0.5 | Tech lead | Resolved SPEC-11 Q16 / accepted ADR-0027; five shapes, 120 orientations, exact geometry, unchanged bytes per vertex |
 | 89 | 2026-10-11 | SPEC-11 REN-004 | Long-slope normal order/tangents unspecified | Pair, magnitude-swap, sign order and positive zero-axis tangent | Tech lead | Resolved SPEC-11 Q17; 42-entry C#/HLSL tables agree |
+| 90 | 2026-10-11 | SPEC-04 DATA-012 / SPEC-11 | Approved long slope has no per-cell definition/blob support or implementation task | Canonical Shapes plus approved-kit validation and inherited angled-hull tuning | Tech lead | Resolved SPEC-04 Q14–15 / ADR-0028; no new shapes or visual assets |
 
 
 

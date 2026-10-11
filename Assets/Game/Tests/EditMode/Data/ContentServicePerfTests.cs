@@ -54,7 +54,7 @@ namespace Game.Tests.EditMode.Data
             long bytes = 0;
             ref var blob = ref s.BlockDefs.Value;
             for (int k = 0; k < blob.Blocks.Length; k++)
-                bytes += UnsafeUtility.SizeOf<BlockDef>() + 12L * (blob.Blocks[k].Cells.Length + blob.Blocks[k].Clearance.Length) + 2L * blob.Blocks[k].AbilityIndices.Length;
+                bytes += UnsafeUtility.SizeOf<BlockDef>() + 12L * (blob.Blocks[k].Cells.Length + blob.Blocks[k].Clearance.Length) + blob.Blocks[k].Shapes.Length + 2L * blob.Blocks[k].AbilityIndices.Length;
             UnityEngine.Debug.Log($"ContentService synthetic 2000 / 500 blocks: median {ms:F2} ms, BlockDefsBlob ≈ {bytes / 1024.0:F1} KB");
             Assert.AreEqual(500, s.Catalog.BlockCount);
             Assert.LessOrEqual(bytes, 256 * 1024);
