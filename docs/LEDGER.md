@@ -619,6 +619,7 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-11 | PHY-005 | 50% noise brick construction diagnostic | 9.7 µs median / 12.8 µs p95 | Apple M5 Pro; Burst Run including call overhead, 4 warmups / 101 samples, current test safety settings; formal gate remains PHY-019 |
 | 2026-10-11 | PHY-002 | 1–2: Burst construction / copied ownership | 32 parallel persistent builds pass; disposed children leave 4/4 nested rays and distances correct | BoxCollider.Create + CompoundCollider.Create inside Burst IJobParallelFor |
 | 2026-10-11 | PHY-002 | 3–5: nested contacts / None / pair disable | Nested: 1 pair, 16 contact points, 4 collision events; None: 0/0/0 and ray hit; disabled: 1/0/0 | Pair job between PhysicsCreateBodyPairsGroup and PhysicsCreateContactsGroup; separation normal 0.85 m versus 0.8 m suppressed |
 | 2026-10-11 | PHY-002 | 6: collider MemorySize | Box 492 B; compounds64/1000 37,216 / 579,360 B | Aggregate overhead (including header/BVH/alignment) 89.5 / 87.36 B per child; child entry 40 B |
