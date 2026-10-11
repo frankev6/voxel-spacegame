@@ -13,3 +13,6 @@ MonoBehaviour:
   m_Name: legacy_migration_sources
   m_EditorClassIdentifier: Game.Editor::Game.Editor.Migration.LegacyMigrationSources
   itemIcons: {fileID: 2800000, guid: f8a50dec0611c624ca8569633b602306, type: 3}
+  blockModels:
+  - {fileID: 919132149155446097, guid: 63a3bcd06c5b4114096dfe9e982274e0, type: 3}
+  - {fileID: 919132149155446097, guid: 4db76e41d19377c438038c4f6150b3be, type: 3}

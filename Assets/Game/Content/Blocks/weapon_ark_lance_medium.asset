@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034775fdc0f1d496eabade816d4bab44, type: 3}
+  m_Name: weapon_ark_lance_medium
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.BlockDefinition
+  id: weapon_ark_lance_medium
+  formerIds: []
+  displayName: Ark Lance M.k 2
+  description: 
+  category: 0
+  rarity: 3
+  basePrice: 250
+  maxStack: 999
+  icon: {fileID: -193307583, guid: f8a50dec0611c624ca8569633b602306, type: 3}
+  kind: 2
+  shape: 0
+  cells:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 1, z: 0}
+  - {x: 0, y: 0, z: 1}
+  - {x: 0, y: 1, z: 1}
+  - {x: 0, y: 0, z: 2}
+  - {x: 0, y: 1, z: 2}
+  clearance:
+  - {x: 0, y: 0, z: 3}
+  - {x: 0, y: 0, z: 4}
+  allowedOrientations:
+    Bits: 65535
+  attachFaces: 47
+  mirrorPartner: {fileID: 0}
+  cellHp: 200
+  functionHp: 1200
+  cellMass: 30
+  armorClass: 0
+  materialLayer: 0
+  propMesh: {fileID: 9050292016473493326, guid: 4db76e41d19377c438038c4f6150b3be, type: 3}
+  blockCategory: 5
+  modules:
+  - rid: 5
+  references:
+    version: 2
+    RefIds:
+    - rid: 5
+      type: {class: WeaponMountModule, ns: Game.Data.Blocks, asm: Game.Data}
+      data:
+        MuzzleOffsetCells:
+          x: 0
+          y: 0.5
+          z: 2.5

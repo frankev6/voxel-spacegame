@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034775fdc0f1d496eabade816d4bab44, type: 3}
+  m_Name: block_core_small
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.BlockDefinition
+  id: block_core_small
+  formerIds: []
+  displayName: Core 1x1
+  description: 
+  category: 0
+  rarity: 0
+  basePrice: 100
+  maxStack: 999
+  icon: {fileID: 1080427082, guid: f8a50dec0611c624ca8569633b602306, type: 3}
+  kind: 2
+  shape: 0
+  cells:
+  - {x: 0, y: 0, z: 0}
+  clearance: []
+  allowedOrientations:
+    Bits: 16777215
+  attachFaces: 63
+  mirrorPartner: {fileID: 0}
+  cellHp: 300
+  functionHp: 300
+  cellMass: 60
+  armorClass: 0
+  materialLayer: 0
+  propMesh: {fileID: -6246702637828986727, guid: 4db76e41d19377c438038c4f6150b3be, type: 3}
+  blockCategory: 2
+  modules:
+  - rid: 1
+  - rid: 2
+  - rid: 3
+  references:
+    version: 2
+    RefIds:
+    - rid: 1
+      type: {class: CoreModule, ns: Game.Data.Blocks, asm: Game.Data}
+      data:
+        Params:
+          MaxCells: 4000
+          MaxExtentCells: 100
+    - rid: 2
+      type: {class: PowerSourceModule, ns: Game.Data.Blocks, asm: Game.Data}
+      data:
+        Params:
+          Generation: 40
+    - rid: 3
+      type: {class: PowerStorageModule, ns: Game.Data.Blocks, asm: Game.Data}
+      data:
+        Params:
+          Storage: 200
