@@ -14,6 +14,8 @@ namespace Game.App.DevRuntime
         public EntityManager EntityManager => World != null && World.IsCreated ? World.EntityManager : default;
         public bool TryGetService<T>(out T service) where T : class => Game.Core.Services.TryGet(out service);
         public DevLogCapture Logs => Host.Logs;
+        public Input.DevInputInjector Input => Host.Input;
+        public Ui.DevUiQuery Ui => Host.Ui;
         public DevEventCounter Events => Host.Events;
         // CAM-004 and DEV-009 wire the camera service/player query when those contracts land (SPEC-70 Q13).
         public Camera GameplayCamera => null;

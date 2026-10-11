@@ -586,6 +586,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 43 | 2026-10-11 | SPEC-70 DEV-003 | Host precedes seven managed-event payloads and camera/player types (SPEC-70 Q13) | Three existing subscriptions, reserved zero counters and null lookups until owning tasks land | Tech lead | Resolved; staged contracts without speculative APIs |
 
+| 44 | 2026-10-11 | SPEC-70 DEV-004 / SPEC-60 UI-003 | UI query precedes UIRoot (SPEC-70 Q14) | Explicit test root resolver; production UIDocument service registered by UI-003 | Tech lead | Resolved; unavailable until real UI exists, no scene search |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).

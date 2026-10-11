@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Game.Core;
+using Game.App.DevRuntime.Input;
+using Game.App.DevRuntime.Ui;
 using UnityEngine;
 
 namespace Game.App.DevRuntime
@@ -38,6 +40,8 @@ namespace Game.App.DevRuntime
         public DevCommandRegistry Commands { get; private set; }
         public DevContext Context { get; private set; }
         public DevLogCapture Logs { get; private set; }
+        public DevInputInjector Input { get; private set; }
+        public DevUiQuery Ui { get; private set; }
         public DevEventCounter Events { get; private set; }
         public static DevRuntimeHost Create(Transform parent)
         {
@@ -48,6 +52,8 @@ namespace Game.App.DevRuntime
             {
                 host.Logs = root.AddComponent<DevLogCapture>();
                 host.Events = new DevEventCounter();
+                host.Input = new DevInputInjector();
+                host.Ui = new DevUiQuery();
                 host.Context = new DevContext(host);
                 host.Commands = DevCommandRegistry.CreateDefault();
                 return host;
@@ -70,6 +76,7 @@ namespace Game.App.DevRuntime
         public void Update()
         {
             if (disposed) return;
+            Input?.Pump(Time.unscaledTimeAsDouble);
             // Capture the count so commands that append operations during Tick wait until the next frame.
             int count = running.Count;
             for (int i = 0; i < count; i++)
@@ -79,7 +86,7 @@ namespace Game.App.DevRuntime
             }
             for (int i = count - 1; i >= 0; i--)
                 if (operations[running[i]].Status != DevOperationStatus.Running) running.RemoveAt(i);
-            // DEV-004 pumps input before operations; DEV-006 advances scenario runners after them.
+            // DEV-006 advances scenario runners after operations.
         }
         void LateUpdate() { /* DEV-012 adds overlay rendering. */ }
         void OnDestroy() { Cleanup(); }
@@ -89,6 +96,7 @@ namespace Game.App.DevRuntime
             disposed = true;
             foreach (var op in operations.Values) if (op.Status == DevOperationStatus.Running) op.Fail("play mode exited");
             running.Clear();
+            Input?.Dispose();
             Events?.Dispose();
             if (Logs != null) Logs.enabled = false;
             Game.Core.Services.Unregister(this);

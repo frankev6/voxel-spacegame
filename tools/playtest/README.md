@@ -39,7 +39,7 @@ Harness command names may omit the `gh_` prefix in `g.sh`. `HarnessCommandTests`
 
 ## Game commands (SPEC-70 §6.3)
 
-Runtime dev commands, reachable as `gh_<name>` and in the in-game console. Each SPEC-70 task appends its rows here as its command lands.
+Runtime dev commands, reachable as `gh_<name>` and in the in-game console. Each SPEC-70 task appends its rows here as its command lands. `gh_key`, `gh_mouse`, `gh_click` and `gh_ui` now route to this registry whenever the runtime host exists; their generic Editor fallback is preserved. The registry names and arguments match the generic table above. Input holds use unscaled time; native mice disabled by AgentMouse are restored when the host is destroyed. UI commands report unavailable until UI-003 supplies its document.
 
 | Command (args, defaults) | Purpose |
 |---|---|

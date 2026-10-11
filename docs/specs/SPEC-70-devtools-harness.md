@@ -641,6 +641,8 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 
 | 13 | DEV-003 precedes seven managed-event payloads and the camera/player contracts. How is the M0 host staged? | **Answered:** subscribe to the three existing types (SessionReset, GameSaved, GameLoaded); reserve all ten counter names with zero until their owning payload tasks add typed subscriptions. CAM-004/DEV-009 wire camera/player lookups when available; return null/Entity.Null in M0. DEV-004 adds input/UI, DEV-005 expressions, DEV-006 runners. No speculative shared contracts or assembly changes. | Tech lead |
 
+| 14 | DEV-004 needs UIRoot before UI-003; how is its document obtained in M0? | **Answered:** DevUiQuery accepts an explicit root resolver for its real-panel tests; default resolver reads a registered UIDocument service. UI-003 registers its owned document at composition (alongside UIRoot) and unregisters it on disposal. With no UI in M0, commands report UI root unavailable. No scene search or placeholder UI. | Tech lead |
+
 ## 11. References
 
 - `docs/reference/audit-2026-10/00-synthesis.md` §6m (harness, lessons, plan); `LEDGER.md` TOOLING v1–v5, R10, R15, R16, R18 (modal blocks CLI), R19, R25, R26, R28, R30.

@@ -763,6 +763,7 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 - **Depends on:** `UI-002`, `CORE-001`
 - **Do:** Implement `UIRoot` §5.1 steps 1–8 (dialog services and accessibility may be stubs until UI-011/UI-013: construct them, leave their bodies to those tasks), `Register`, `GetLayer`, `Tick` (calls notifications/tooltip tick when present), `HandleBackPressed`, `Dispose`, the sound hooks of §5.10, and `InputServiceBridge` (§6) over SPEC-03.
 - **Files:** `Assets/Game/UI/Services/UIRoot.cs`, `Assets/Game/UI/Services/InputServiceBridge.cs`
+- **Harness integration:** register the owned `UIDocument` in `Services` alongside `UIRoot`, and unregister it on disposal; SPEC-70 Q14 uses it for dev UI query without scene searches.
 - **Acceptance criteria:**
   - [ ] Construction with a valid config yields `#ui-root` with six layers reachable via `GetLayer`.
   - [ ] Invalid config (duplicate key, null UXML) throws and logs one `GameLog.Error("UI", …)`.

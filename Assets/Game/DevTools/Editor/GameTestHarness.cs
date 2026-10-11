@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Globalization;
+using Game.App.DevRuntime;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Pipeline.Commands;
@@ -36,6 +38,16 @@ namespace Game.DevTools.Editor
             if (EditorApplication.isPlaying && SessionState.GetBool(UnfocusedKey, true)) ApplyUnfocusedInput(true);
             if (!EditorApplication.isPlaying) RestoreNativeMice(); // never leave a native mouse disabled after a reload
         }
+
+        static bool RuntimeCommand(string line, out string text)
+        {
+            text = null;
+            if (!EditorApplication.isPlaying || !Game.Core.Services.TryGet<DevRuntimeHost>(out var host) || host == null) return false;
+            var result = host.Commands.Execute(line, host.Context);
+            text = result.Kind == DevResultKind.Failed ? "failed: " + result.Text : result.Text;
+            return true;
+        }
+        static string Number(float value) => value.ToString("R", CultureInfo.InvariantCulture);
 
         // ------------------------------------------------------------ unfocused input
         // The agent usually drives the Editor while it is NOT the focused app. During play mode only, route all
@@ -113,6 +125,7 @@ namespace Game.DevTools.Editor
                                     [CliArg("hold", "seconds to hold (default 0.12)")] float hold = 0.12f,
                                     [CliArg("release", "release these keys now")] bool release = false)
         {
+            if (RuntimeCommand("key keys=" + DevJsonWriter.Quote(keys) + " hold=" + Number(hold) + " release=" + release, out var result)) return result;
             if (!pumpHooked) { EditorApplication.update += Pump; pumpHooked = true; }
             var parsed = new List<Key>();
             foreach (var k in keys.Split(',').Select(x => x.Trim()).Where(x => x.Length > 0))
@@ -184,6 +197,7 @@ namespace Game.DevTools.Editor
                                       [CliArg("dy", "mouse delta y (look)")] float dy = 0)
         {
             if (!EditorApplication.isPlaying) return "not playing";
+            if (RuntimeCommand("mouse x=" + Number(x) + " y=" + Number(y) + " button=" + DevJsonWriter.Quote(button) + " down=" + down + " scroll=" + Number(scroll) + " dx=" + Number(dx) + " dy=" + Number(dy), out var result)) return result;
             var m = AgentMouse();
             var st = new MouseState();
             var pos = x >= 0 ? new Vector2(x, y) : m.position.ReadValue();
@@ -379,12 +393,13 @@ namespace Game.DevTools.Editor
         [CliCommand("gh_ui", "Visible UI Toolkit text per UIDocument (buttons, labels, fields) with element names.")]
         public static string Ui([CliArg("max", "max items per document")] int max = 60,
                                 [CliArg("chars", "max chars per item")] int chars = 200)
-            => UiText(max, chars);
+            => RuntimeCommand("ui max=" + max + " chars=" + chars, out var result) ? result : UiText(max, chars);
 
         [CliCommand("gh_click", "Click a visible UI Toolkit element by name (#name) or by text (case-insensitive contains).")]
         public static string Click([CliArg("target", "element name or visible text")] string target,
                                    [CliArg("index", "which match to click when several match")] int index = 0)
         {
+            if (RuntimeCommand("click target=" + DevJsonWriter.Quote(target) + " index=" + index, out var result)) return result;
             var t = target.TrimStart('#');
             var matches = new List<(UIDocument doc, VisualElement el)>();
             foreach (var d in Docs())
