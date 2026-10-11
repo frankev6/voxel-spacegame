@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 19 | 0 | 0 | 0 | 47 | 0 | 66 | 9 |
+| M0 | 18 | 0 | 0 | 0 | 48 | 0 | 66 | 9 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -74,11 +74,11 @@
 | PERS-005 | Save pipeline: capture, worker, atomic write, thumbnails, queue | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-002, PERS-004, SPEC-04 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | d063181 | 11 tests; OQ SPEC-02 14, SPEC-05 18 |
 | PERS-006 | Load pipeline and restore orchestration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | d9532a4 | 14 tests, all §7 load rows; OQ 19 |
 | PERS-007 | VOXS codec | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | f553a03 | VOXS v1 + Burst runs; 200 round trips, 1000 flips; Q30 |
-| PERS-008 | Deferred VOXS snapshots in saves | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-007, PERS-005 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PERS-008 | Deferred VOXS snapshots in saves | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-007, PERS-005 | yes | done | astra (gpt-6) | 2026-10-11 | ec9a6ae | Persistent snapshots; worker round trip and all-path disposal; Q31 |
 | PERS-009 | Autosave scheduler and save on quit | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 5b1e06b | 10 tests; 0 B/frame |
 | PERS-010 | Fixture harness, container fixtures and the 04-B1 EditMode regression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | todo |  |  |  |  |
 | PERS-011 | Round-trip byte equality (framework level) | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | todo |  |  |  |  |
-| PERS-012 | Save performance and size gates | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-008 | no | todo |  |  |  |  |
+| PERS-012 | Save performance and size gates | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-008 | yes | todo |  |  |  |  |
 | VOX-001 | Public contract types | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c37ad48 | BrickRecord 28 B (ledger Q9); VOXS adapter members wait for VOX-009 (Q10) |
 | AUD-001 | Public contract types | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | f793298 | Validation codes: SPEC-64 Q12 |
 | AUD-002 | Mixer asset, voice settings and import rules | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | AUD-001 | yes | todo |  |  |  |  |
@@ -584,6 +584,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-008 deferred VOXS snapshots (astra, gpt-6)
+- `VoxsSnapshotBlock` copies all five arrays into owned Persistent allocations at capture. Main-thread mutation cannot change worker bytes; Dispose is idempotent and Encode after disposal throws explicitly. Partial capture allocations are released if copying fails.
+- The fake structure participant saves and restores two VOXS payloads through the real SaveService. Tests cover Task.Run and SaveAsync worker execution, main-thread capture failure after a structure participant, filesystem write failure, encoder failure, and zero remaining native leaks.
+- Integration found Unity rejects `Allocator.Temp` on managed worker threads. Q31 / SPEC-05 Q21 and trap T2.10 record the fix: one TempJob scratch buffer, disposed before Encode returns. No wire-format or public-contract change.
+- Checks: zero C# warnings; full EditMode **326 passed + 1 explicit skipped**, PlayMode **16 passed**, perf **12/12 passed**, docs clean. Codec medians with worker-safe scratch: encode **12.65 ms**, decode **14.51 ms** (gates 150/100 ms).
+- M0 **48/66 done**; PERS-012 is ready. HANDOFF §2–3 updated. Decisions for Frank: Q30's pathological full-palette fallback and decoded-data cap; Q31 is a tool/runtime correction. Git remains local.
 
 ### 2026-10-11 — PERS-007 VOXS codec (astra, gpt-6)
 - Implemented the v1 VOXS encoder/decoder, immutable block-name snapshot and idempotent native disposal. Burst direct-call run loops choose X/Y/Z traversal by byte cost, with uniform-brick encoding; Deflate rejects truncated streams and trailing compressed bytes. Sorting and content IDs preserve deterministic bytes.
