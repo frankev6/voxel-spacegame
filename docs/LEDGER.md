@@ -552,6 +552,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 11 | 2026-10-11 | SPEC-03 INP-001, INP-002 | The generated `Controls.Dispose()` errors in edit mode (SPEC-03 open question 4) | `InputService.Dispose` uses `DestroyImmediate` outside Play Mode | Tech lead | |
 | 12 | 2026-10-11 | SPEC-03 §4.2, INP-002 | No task sets `shortcutKeysConsumeInput` in `ProjectSetup` (SPEC-03 open question 5) | INP-002 adds it | Tech lead | |
 | 13 | 2026-10-11 | SPEC-01 FND-003, SPEC-03 INP-002 | FND-003 and INP-002 publish through `EventBus<T>` (CORE-006) but do not depend on it (SPEC-01 open question 6) | Both blocked until CORE-006 is done; add `CORE-006` to their *Depends on* | Tech lead | |
+| 14 | 2026-10-11 | SPEC-05 PERS-001 | Readonly result structs had no constructors (SPEC-05 open question 16) | All-field constructors added | Tech lead | |
 
 ## Measurements
 
