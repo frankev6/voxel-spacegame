@@ -21,7 +21,7 @@ namespace Game.Tests.EditMode.Voxel.Physics
 {
     public sealed class GridBodyInitTests
     {
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             public readonly VoxelTestContent Content = new VoxelTestContent();
             readonly BlueprintLibrary library;
@@ -32,9 +32,10 @@ namespace Game.Tests.EditMode.Voxel.Physics
             public ColliderBuildCache Cache => Singleton<ColliderBuildCache>();
             public ColliderDirtyQueue Queue => Singleton<ColliderDirtyQueue>();
             public ColliderBatchQueue Batch => Singleton<ColliderBatchQueue>();
-            public Fixture(bool physics = false)
+            public Fixture(bool physics = false, params Type[] extra)
             {
                 var systems = new List<Type> { typeof(GridSpawnSystem), typeof(GridBodyInitSystem), typeof(ColliderSwapSystem), typeof(GameplayEndCommandBufferSystem) };
+                systems.AddRange(extra);
                 if (physics)
                     foreach (var type in DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.Default))
                         if (type.Namespace != null && (type.Namespace.StartsWith("Unity.Physics") || type.Namespace == "Unity.Transforms")) systems.Add(type);
@@ -119,11 +120,11 @@ namespace Game.Tests.EditMode.Voxel.Physics
         }
         [Test] public void EmptyMass_WaitsOneTick()
         {
-            using var f = new Fixture(); var root = f.Spawn(); var exact = f.Em.GetComponentData<GridMass>(root);
+            using var f = new Fixture(extra: new[] { typeof(GridMassUpdateSystem) }); var root = f.Spawn(); var exact = f.Em.GetComponentData<GridMass>(root);
             f.Em.SetComponentData(root, new GridMass()); f.Tick(); Assert.IsFalse(f.Em.HasComponent<PhysicsCollider>(root));
-            Assert.IsTrue(f.Em.IsComponentEnabled<GridBodyInit>(root)); Assert.IsTrue(f.Em.IsComponentEnabled<GridMassRecompute>(root)); Assert.AreEqual(0, f.Queue.Requests.Length);
-            // PHY-013 supplies the post-physics mass writer later; provide its exact boundary output for this init test.
-            f.Em.SetComponentData(root, exact); f.Em.SetComponentEnabled<GridMassRecompute>(root, false); f.Tick(); Provisional(f, root);
+            Assert.IsTrue(f.Em.IsComponentEnabled<GridBodyInit>(root)); Assert.IsFalse(f.Em.IsComponentEnabled<GridMassRecompute>(root)); Assert.AreEqual(0, f.Queue.Requests.Length);
+            Assert.AreEqual(exact.Data, f.Em.GetComponentData<GridMass>(root).Data);
+            f.Tick(); Provisional(f, root);
             var grid = f.Em.GetComponentData<VoxelGrid>(root);
             Assert.AreEqual(GridMassMath.CreateDynamicMass(exact.Data, grid.CellMin, grid.CellMax, grid.CellSize, true), f.Em.GetComponentData<PhysicsMass>(root));
         }

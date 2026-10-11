@@ -1013,10 +1013,10 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Do:** Implement §5.11 (removal from `CellRemoved` when `DamageStreams` exists, two-stage recompute, apply with `Reexpress`). Removal and apply jobs are tested with hand-built `CellRemoved` arrays (the `DamageStreams` glue is exercised end to end by SPEC-13's tests).
 - **Files:** `Assets/Game/Voxel/PhysicsBody/GridMassUpdateSystem.cs`, `Assets/Game/Voxel/PhysicsBody/Jobs/{GridMassRemoveJob,RecomputeListJob,BrickMassJob,RecomputeSumJob,PhysicsMassApplyJob}.cs`, `Assets/Game/Tests/EditMode/Voxel/Physics/GridMassUpdateTests.cs`
 - **Acceptance criteria:**
-  - [ ] Removing cells incrementally equals a full recompute of the remaining cells within 1e-9 relative for mass, COM and tensor.
-  - [ ] Recompute of the same cells is bit-identical across runs and worker counts (1 and max).
-  - [ ] `Dissolved` removals do not change mass; Kinematic and Static roots never get `PhysicsMass` writes.
-  - [ ] Removing one end of a spinning ship keeps the world velocity of the remaining cells within 1e-3 m/s.
+  - [x] Removing cells incrementally equals a full recompute of the remaining cells within 1e-9 relative for mass, COM and tensor.
+  - [x] Recompute of the same cells is bit-identical across runs and worker counts (1 and max).
+  - [x] `Dissolved` removals do not change mass; Kinematic and Static roots never get `PhysicsMass` writes.
+  - [x] Removing one end of a spinning ship keeps the world velocity of the remaining cells within 1e-3 m/s.
 - **Tests:** `GridMassUpdateTests.Incremental_EqualsRecompute`, `.Recompute_Deterministic_WorkerCounts`, `.Dissolved_Ignored`, `.KinematicStatic_NotWritten`, `.SpinningShip_LosesEnd_PointVelocitiesKept`, `.CellCountZero_NoWrite`.
 
 ### PHY-014 — SplitGrace contact suppression

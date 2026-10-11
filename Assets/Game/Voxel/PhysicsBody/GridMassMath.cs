@@ -89,7 +89,10 @@ namespace Game.Voxel.PhysicsBody
             if (planar) { next.Angular.x = 0; next.Angular.z = 0; }
             if (math.all(math.isfinite(next.Linear)) && math.all(math.isfinite(next.Angular))) v = next;
             else if (Interlocked.CompareExchange(ref nonFiniteReported.Data, 1, 0) == 0)
-                GameLog.Burst.Error(new FixedString128Bytes("GridMassMath.Reexpress: non-finite result; velocity unchanged."));
+            {
+                FixedString128Bytes message = "GridMassMath.Reexpress: non-finite result; velocity unchanged.";
+                GameLog.Burst.Error(message);
+            }
         }
 
         /// <summary>Cyclic Jacobi, stable ascending eigenvalues and deterministic right-handed eigenvectors (§5.11).</summary>
