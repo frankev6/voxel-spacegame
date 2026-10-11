@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 16 | 0 | 0 | 0 | 50 | 0 | 66 | 7 |
+| M0 | 15 | 0 | 0 | 0 | 51 | 0 | 66 | 6 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -78,7 +78,7 @@
 | PERS-009 | Autosave scheduler and save on quit | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 5b1e06b | 10 tests; 0 B/frame |
 | PERS-010 | Fixture harness, container fixtures and the 04-B1 EditMode regression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | done | astra (gpt-6) | 2026-10-11 | 6a50bb4 | Immutable v1 fixtures; 04-B1 real-content regression |
 | PERS-011 | Round-trip byte equality (framework level) | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006, PERS-008 | yes | done | astra (gpt-6) | 2026-10-11 | ca73bba | Fresh binary/JSON/VOXS round trips; unknown chunk byte equality; Q32 |
-| PERS-012 | Save performance and size gates | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-008 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
+| PERS-012 | Save performance and size gates | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-008 | yes | done | astra (gpt-6) | 2026-10-11 | 43b3c6f | All M0 save gates pass; 1M ship 15,230 B; capture 0.12 ms |
 | VOX-001 | Public contract types | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | c37ad48 | BrickRecord 28 B (ledger Q9); VOXS adapter members wait for VOX-009 (Q10) |
 | AUD-001 | Public contract types | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | CORE-001, DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | f793298 | Validation codes: SPEC-64 Q12 |
 | AUD-002 | Mixer asset, voice settings and import rules | [SPEC-64](specs/SPEC-64-audio.md) | M0 | standard | AUD-001 | yes | todo |  |  |  |  |
@@ -581,10 +581,20 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
 | 2026-10-11 | PERS-007 | VOXS encode/decode 1M | 13.09 / 15.03 ms median; 13.27 / 15.06 ms p95 | Apple M5 Pro; gates 150 / 100 ms; 7 samples after 3 warmups |
+| 2026-10-11 | PERS-012 | Capture / typical read+restore / 50 slots | 0.120 / 14.871 / 2.667 ms median; 0.127 / 15.307 / 8.872 ms p95 | Apple M5 Pro; 10 samples + 2 warmups; gates 5 / 500 / 50 ms |
+| 2026-10-11 | PERS-012 | Reference VOXS encode / decode | 12.487 / 13.210 ms median; 12.736 / 13.469 ms p95 | Gates 150 / 100 ms |
+| 2026-10-11 | PERS-012 | Reference ship compressed / damaged variant | 15,230 B / 34,810 B | Gate 81,920 B on pristine; damaged report only |
 
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-012 save performance and size gates (astra, gpt-6)
+- Added the specified workloads: capture of five 20k-cell ships plus the reference 1M-cell ship and six small participants; typical save with SESS 1 KB, 2,000 facts, 30 quests, 200 stacks, five ships, 50 star-system delta headers, ten 50-brick Partial VOXS structures and PLOC. They use real snapshots, container compression and VOXS restore.
+- Apple M5 Pro, Unity 6000.6.5f1, **10 measurements after 2 warmups**. Medians / p95: capture (including disposal) **0.120 / 0.127 ms** (5 ms); typical read + restore **14.871 / 15.307 ms** (500 ms); 50-slot listing **2.667 / 8.872 ms** (50 ms); VOXS encode **12.487 / 12.736 ms** (150 ms); decode **13.210 / 13.469 ms** (100 ms). These are method micro-gates per SPEC-71 Q6, not rendered-frame measurements.
+- Reference ship FLET payload **15,230 compressed bytes** (81,920-byte gate); 1% damage variant **34,810 bytes**, report only. Damage uses an independent seeded stream so thruster positions are identical. Autosave idle averages **0.0000046 ms per call** in 1,000-call batches; existing zero-allocation checks pass. Framework byte-equality gate passes in PERS-011. The full load-to-playable gate belongs to M3/PERS-015.
+- Compile: no C# warnings. Full EditMode **339 passed + 1 explicit skipped**, **37.3 s**; performance suite **18/18 pass** (17 gated records and one size report). Full PlayMode baseline remains **16 passed** from PERS-008; only tests changed. Docs clean.
+- All M0 persistence tasks are done. M0 total **51/66**; remaining ready work is migration, dev runtime, input rebinding, audio setup and iteration gates. HANDOFF updated. No new owner decisions or remote operations.
 
 ### 2026-10-11 — PERS-010 container fixtures and 04-B1 regression (astra, gpt-6)
 - Added SaveFixtureHarness (write-once files, chunk readers and test service construction), the Editor fixture menu, and three immutable v1 containers: minimal **375 B**, missing IDs **393 B**, unknown chunk **400 B**. Generated via the documented temporary headless Editor script, then removed the script and meta. The menu invokes the test harness by reflection, preserving assembly boundaries.
