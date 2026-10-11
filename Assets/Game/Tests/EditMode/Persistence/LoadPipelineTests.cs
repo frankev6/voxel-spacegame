@@ -280,6 +280,23 @@ namespace Game.Tests.EditMode.Persistence
             Assert.AreEqual("This save was made by a newer version of the game.", r.Message);
         }
 
+        [TestCase("null")]
+        [TestCase("")]
+        public void NullMeta_IsReportedWithoutRejectingLoad(string payload)
+        {
+            WriteContainer(paths.WorldFile(slot), new RawChunk { Key = "META", Version = 1, Payload = System.Text.Encoding.UTF8.GetBytes(payload) },
+                Idpl("block_test"), new RawChunk { Key = "TSTA", Version = 3, Payload = FakePayload(73, 0) });
+            var participant = new FakeParticipant("TSTA", 3);
+            var loader = Service(null, participant);
+            var save = Read(loader);
+            Assert.IsNull(save.Meta);
+            CollectionAssert.AreEqual(new[] { "PERS-W013" }, Codes(save.Report));
+            LogAssert.Expect(UnityEngine.LogType.Warning, new System.Text.RegularExpressions.Regex("PERS-W013"));
+            loader.Restore(save);
+            Assert.AreEqual(73, participant.RestoredValue);
+            CollectionAssert.AreEqual(new[] { "PERS-W013" }, Codes(save.Report));
+        }
+
         [Test]
         public void MetaAndPaletteDamage_AreReported()
         {

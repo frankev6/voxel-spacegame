@@ -83,6 +83,7 @@ namespace Game.Persistence.Services
                 try
                 {
                     var d = json.Deserialize<ProfileDescriptor>(File.ReadAllBytes(file));
+                    if (d == null) throw new SaveFormatException("Profile JSON does not contain an object", -1);
                     result.Add(new ProfileInfo { Id = id, DisplayName = d.DisplayName, CreatedUtc = d.CreatedUtc, LastSlotId = d.LastSlotId });
                 }
                 catch (Exception e) when (e is IOException || e is SaveFormatException || e is UnauthorizedAccessException)
@@ -422,7 +423,11 @@ namespace Game.Persistence.Services
             var metaChunk = Find(chunks, "META");
             if (metaChunk != null && !metaChunk.Corrupt)
             {
-                try { meta = json.Deserialize<SaveMeta>(metaChunk.Payload); }
+                try
+                {
+                    meta = json.Deserialize<SaveMeta>(metaChunk.Payload);
+                    if (meta == null) throw new SaveFormatException("META JSON does not contain an object", -1);
+                }
                 catch (Exception e) { report.Warning("PERS-W013", "META", "", "The save's description (META) is unreadable: " + e.Message); }
             }
             else report.Warning("PERS-W013", "META", "", "The save has no readable description (META)");

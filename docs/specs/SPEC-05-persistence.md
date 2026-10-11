@@ -1047,6 +1047,8 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 
 | 24 | §5.4 claimed a sidecar error after File.Replace leaves the previous save untouched; a valid older meta.json also masked the committed META | Atomic world.sav replacement is the commit point | Tech lead | **Resolved in PERS-017:** later metadata write errors warn and return success; embedded META wins over stale sidecars in bounded slot-listing reads, even with identical timestamps. Pre-commit failures retain old world/backup/meta files. No binary format or public API changes |
 
+| 25 | Valid JSON null (or empty input) deserializes to no object without throwing | Treat absent profile/META objects as unreadable at their boundaries | Tech lead | **Resolved in PERS-018:** profile listing skips and warns; META produces PERS-W013 while loading/restoring otherwise valid chunks. Generic participant JSON still permits null |
+
 ## 11. References
 
 - Audit background: `docs/reference/audit-2026-10/04-persistence-data.md` B1, B3, B6, B7, B19, B21, B22, §6.3–§6.4, §6.9; `00-synthesis.md` §6i; `01-voxel-core.md` §6.9; LEDGER R27, R28.

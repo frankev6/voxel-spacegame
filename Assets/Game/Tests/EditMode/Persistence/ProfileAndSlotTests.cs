@@ -56,6 +56,20 @@ namespace Game.Tests.EditMode.Persistence
             Assert.AreEqual(2, Service().ListProfiles().Count, "unreadable profile skipped");
         }
 
+        [TestCase("null")]
+        [TestCase("")]
+        public void NullProfile_IsSkipped(string payload)
+        {
+            using var service = Service();
+            var broken = service.CreateProfile("Broken");
+            var valid = service.CreateProfile("Valid");
+            File.WriteAllText(paths.ProfileFile(broken.Id), payload);
+            UnityEngine.TestTools.LogAssert.Expect(UnityEngine.LogType.Warning, new System.Text.RegularExpressions.Regex("Skipping unreadable profile"));
+            var profiles = service.ListProfiles();
+            Assert.AreEqual(1, profiles.Count);
+            Assert.AreEqual(valid.Id, profiles[0].Id);
+        }
+
         [Test]
         public void ListSlots_StatusRules()
         {

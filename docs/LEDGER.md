@@ -600,6 +600,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 48 | 2026-10-11 | SPEC-05 PERS-017 | Post-replacement sidecar errors falsely report failed saves; listing trusts stale JSON (SPEC-05 Q24) | world.sav replacement commits; later sidecar failure warns, embedded META wins | Tech lead | Resolved; no rollback of committed saves or misleading completion event |
 
+| 49 | 2026-10-11 | SPEC-05 PERS-018 | JSON null bypasses object-read failure handling (SPEC-05 Q25) | Reject absent objects only at profile/META boundaries | Tech lead | Resolved; profile skip warning and non-fatal PERS-W013 |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
