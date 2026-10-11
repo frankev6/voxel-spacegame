@@ -617,17 +617,17 @@ Lifecycle details follow [ADR-0026](../decisions/ADR-0026-grid-lifecycle-baselin
 
 ### 5.8 `BrickDirtyScheduleSystem` (`Grid/`)
 
-- **Group:** `GameplayPostPhysicsGroup`, `[UpdateAfter(typeof(GridMassUpdateSystem))]`, `[UpdateBefore(typeof(GameplayEndCommandBufferSystem))]`. Burst `ISystem`. Requires `GameplayActive`.
+- **Group:** `GameplayPostPhysicsGroup`, `[UpdateBefore(typeof(GameplayEndCommandBufferSystem))]`. PHY-013 declares `[UpdateBefore(typeof(BrickDirtyScheduleSystem))]` on GridMassUpdateSystem, preserving mass-before-dirty ordering without a forward dependency on an absent system (Q38). Burst `ISystem`. Requires `GameplayActive`.
 - **Reads:** `Brick`, `BrickSlot`, `VoxelGrid`. **Writes:** `BrickDirty` (consumer: clears and disables), appends to `BrickMeshQueue` (SPEC-11) and `ColliderDirtyQueue` (SPEC-12).
 - Per tick:
-  1. If no brick has `BrickDirty` enabled (query `IsEmpty` check on the enableable query — no sync), return.
+  1. If the structural brick query is `IsEmptyIgnoreFilter`, return without synchronizing. Otherwise schedule the enabled-mask query: all-disabled chunks are skipped by the job iterator. Do not use `IsEmpty` here: installed Entities calls SyncFilterTypes/SyncEnableableTypes and waits for dirty writers (Q39).
   2. Schedule `BrickDirtyDrainJob : IJobChunk` with **`Schedule` (one worker)** over bricks with `BrickDirty` enabled, chained to `state.Dependency`, so chunk order — and therefore queue order — is deterministic.
   3. Per brick: `grid = Brick.Grid`, `serial = VoxelGrid[grid].Serial`.
-     - `Flags & Collider` → `ColliderDirtyQueue.Enqueue(serial, grid, brick, coord, ColliderPriority.Damage)` (the queue dedupes).
+     - `Flags & Collider` → `ColliderDirtyQueue.Enqueue(serial, grid, brick, coord, ColliderPriority.Damage)` (requests are deduplicated by ColliderSnapshotSystem, SPEC-12 §5.5).
      - `Flags & Mesh` and `SolidCount > 0` → `BrickMeshQueue.Enqueue(brick, grid, MeshPriority.Damage)`.
      - For each face `f` set in `BorderMask`: `n = BrickSlot[SlotIndex(coord + FaceDirection(f))]`; if `n != Null` → `BrickMeshQueue.Enqueue(n, grid, MeshPriority.Neighbour)`.
      - `Flags = None`, `BorderMask = None`, disable `BrickDirty`.
-  4. Queue singletons follow SPEC-12 §5.1 (job access): `var mq = SystemAPI.GetSingleton<BrickMeshQueue>(); var cq = SystemAPI.GetSingleton<ColliderDirtyQueue>(); dep = mq.Acquire(cq.Acquire(state.Dependency))`; schedule the job on `dep` with both queues as fields; `mq.Release(h); cq.Release(h); state.Dependency = h`. Never `GetSingletonRW` on them in the fixed step (it would complete other systems' jobs).
+  4. Queue singletons follow SPEC-12 §5.1 (job access): `var mq = SystemAPI.GetSingleton<BrickMeshQueue>(); var cq = SystemAPI.GetSingleton<ColliderDirtyQueue>(); dep = mq.Acquire(cq.Acquire(state.Dependency))`; schedule the job on `dep` with only queue native containers as fields, constructing local queue views inside Execute; Access guards are main-thread-only (SPEC-02 §4.12); `mq.Release(h); cq.Release(h); state.Dependency = h`. Never `GetSingletonRW` on them in the fixed step (it would complete other systems' jobs).
 - Complexity O(dirty bricks); 0 B GC.
 
 ### 5.9 Grid edits (M3, `GridEditRequest`)
@@ -1002,10 +1002,10 @@ Evidence retained locally in ignored `Logs/tools/vox003-{reference,thin-shell}.t
 - **Do:** Implement §5.8 with `BrickDirtyDrainJob` (single-worker `IJobChunk`) using the queue `Enqueue` methods from REN-001/PHY-001.
 - **Files:** `Assets/Game/Voxel/Grid/{BrickDirtyScheduleSystem,BrickDirtyDrainJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/BrickDirtyScheduleTests.cs`
 - **Acceptance criteria:**
-  - [ ] A brick dirtied with `Mesh|Collider` and `BorderMask = PosX` yields one collider entry, one own mesh entry and one neighbour entry for the +X brick; `BrickDirty` is disabled with zero flags.
-  - [ ] Queue contents are identical across 10 runs with the same entity history and with 1 and max worker threads.
-  - [ ] A brick with `SolidCount == 0` gets a collider entry and neighbour entries but no own mesh entry.
-  - [ ] 0 B GC allocation per update.
+  - [x] A brick dirtied with `Mesh|Collider` and `BorderMask = PosX` yields one collider entry, one own mesh entry and one neighbour entry for the +X brick; `BrickDirty` is disabled with zero flags.
+  - [x] Queue contents are identical across 10 runs with the same entity history and with 1 and max worker threads.
+  - [x] A brick with `SolidCount == 0` gets a collider entry and neighbour entries but no own mesh entry.
+  - [x] 0 B GC allocation per update.
 - **Tests:** `BrickDirtyScheduleTests.Drain_EnqueuesExpected`, `.Order_IsDeterministic`, `.EmptyBrick_SkipsOwnMesh`, `.NoDirty_EarlyOut`, `.NoGcAlloc`.
 
 ### VOX-016 — DeferredDisposalSystem
@@ -1120,6 +1120,9 @@ Evidence retained locally in ignored `Logs/tools/vox003-{reference,thin-shell}.t
 | 36 | OptimizeStorage scans all full bricks; copied runtime metadata can leave cached mass stale | Optimize only copied bricks and invalidate metadata revisions | Tech lead | Resolved 2026-10-11: internal structure helpers share existing optimization logic, clear ECS references and reconstruct free indices without changing the public API. |
 
 | 37 | VOX-003 needs exact sparse invariants, source ownership and caller migration | Accept ADR-0023 after dense lifecycle foundations | Tech lead | Resolved 2026-10-11: six-byte sorted ECS entries, flat 1024-entry source page pool, preserved uniform/dense records, densification at 1025, and shared reads across every adapter; actual capacities are measured. |
+
+| 38 | Dirty scheduling orders after the not-yet-implemented mass system | Put the equivalent UpdateBefore annotation on PHY-013 | Tech lead | Resolved 2026-10-11: SPEC-12 requires GridMassUpdateSystem before BrickDirtyScheduleSystem. No empty production stub or extra task dependency is needed. |
+| 39 | Enableable-query IsEmpty synchronizes dirty writers in installed Entities | Use IsEmptyIgnoreFilter as structural early-out, filter enabled chunks in the scheduled job | Tech lead | Resolved 2026-10-11 from EntityQueryImpl.IsEmpty/SyncFilterTypes: preserve the fixed-step no-sync rule; an all-disabled world may schedule an empty job. |
 
 ## 11. References
 
