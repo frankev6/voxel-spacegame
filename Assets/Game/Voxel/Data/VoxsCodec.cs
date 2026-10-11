@@ -113,7 +113,9 @@ namespace Game.Voxel.Data
                 Coord(w, p.Origin); w.WriteSingle(p.FunctionHp);
             }
             w.WriteVarUInt32((uint)kept);
-            var runs = new UnsafeList<byte>(16384, Allocator.Temp);
+            // Managed save workers have no Unity Temp memory scope. This short-lived
+            // buffer is disposed before Encode returns, including on failure.
+            var runs = new UnsafeList<byte>(16384, Allocator.TempJob);
             try
             {
                 foreach (int b in sorted)

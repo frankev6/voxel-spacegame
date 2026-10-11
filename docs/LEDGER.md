@@ -571,6 +571,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 30 | 2026-10-11 | SPEC-05 PERS-007 | VOXS runtime fields, full-palette fallback and bounded decompression (SPEC-05 Q20) | Reconstruct runtime state; deterministic Missing fallback; 256 MiB body/cell limits | Tech lead | Resolved as specified in SPEC-05 Q20; v1 wire format unchanged |
 
+| 31 | 2026-10-11 | SPEC-05 PERS-008 | Codec Temp scratch fails on a managed background thread (SPEC-05 Q21) | TempJob scratch disposed before Encode returns | Tech lead | Resolved in PERS-008; Persistent capture ownership unchanged |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).

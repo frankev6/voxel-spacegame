@@ -106,6 +106,7 @@ How to use this file: before you start a task, read the sections whose tags matc
   - `Temp` for main-thread or inside-job scratch;
   - `TempJob` (or `state.WorldUpdateAllocator`) for per-tick job data, disposed with `.Dispose(state.Dependency)`;
   - `Persistent` only in an owner with an `OnDestroy` dispose.
+  - On a managed background thread (not a Unity job worker), `Temp` has no memory scope and allocation fails. Use `TempJob` for scratch disposed before the method returns, or `Persistent` for owned snapshots (PERS-008).
 
   Run tests with `NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace`.
 
