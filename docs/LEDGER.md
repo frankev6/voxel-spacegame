@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 20 | 0 | 0 | 0 | 46 | 0 | 66 | 9 |
+| M0 | 19 | 0 | 0 | 0 | 47 | 0 | 66 | 9 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -73,8 +73,8 @@
 | PERS-004 | ID palette and SaveWriter/SaveReader integration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-003, SPEC-02 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | e569704 | no §4.10 fallback needed |
 | PERS-005 | Save pipeline: capture, worker, atomic write, thumbnails, queue | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-002, PERS-004, SPEC-04 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | d063181 | 11 tests; OQ SPEC-02 14, SPEC-05 18 |
 | PERS-006 | Load pipeline and restore orchestration | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-005 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | d9532a4 | 14 tests, all §7 load rows; OQ 19 |
-| PERS-007 | VOXS codec | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001, SPEC-04 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| PERS-008 | Deferred VOXS snapshots in saves | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-007, PERS-005 | no | todo |  |  |  |  |
+| PERS-007 | VOXS codec | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | f553a03 | VOXS v1 + Burst runs; 200 round trips, 1000 flips; Q30 |
+| PERS-008 | Deferred VOXS snapshots in saves | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | frontier | PERS-007, PERS-005 | yes | todo |  |  |  |  |
 | PERS-009 | Autosave scheduler and save on quit | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 5b1e06b | 10 tests; 0 B/frame |
 | PERS-010 | Fixture harness, container fixtures and the 04-B1 EditMode regression | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | todo |  |  |  |  |
 | PERS-011 | Round-trip byte equality (framework level) | [SPEC-05](specs/SPEC-05-persistence.md) | M0 | standard | PERS-006 | yes | todo |  |  |  |  |
@@ -577,10 +577,18 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-11 | PERS-007 | VOXS encode/decode 1M | 13.09 / 15.03 ms median; 13.27 / 15.06 ms p95 | Apple M5 Pro; gates 150 / 100 ms; 7 samples after 3 warmups |
 
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — PERS-007 VOXS codec (astra, gpt-6)
+- Implemented the v1 VOXS encoder/decoder, immutable block-name snapshot and idempotent native disposal. Burst direct-call run loops choose X/Y/Z traversal by byte cost, with uniform-brick encoding; Deflate rejects truncated streams and trailing compressed bytes. Sorting and content IDs preserve deterministic bytes.
+- Content repair covers Missing IDs, palette-to-instance drift, instance-to-palette drift, compaction and anchor remapping. Tech-lead decision Q30 / SPEC-05 Q20 documents reconstructed runtime instance state, full-palette fallback and 256 MiB decoded-data limits. Frank should review the pathological full-palette fallback (slot 32767 becomes Missing) and resource cap; normal saves retain the specified layout.
+- Tests: 200 seeded 1–40-brick round trips; reference ellipsoid with 300 thrusters; element equality; traversal choice; all format limits; truncation and trailing bytes; 1,000 byte flips; full-palette drift; managed/Burst equality; zero native leaks. Full EditMode **323 passed + 1 explicit skipped** (32.1 s), PlayMode **16 passed**, perf **12/12 passed**. Compile: zero C# warnings; doc check clean.
+- Apple M5 Pro: 1M-cell encode median **13.09 ms**, p95 **13.27 ms** (150 ms gate); decode median **15.03 ms**, p95 **15.06 ms** (100 ms gate). PERS-012 owns save/container size and capture gates.
+- Follow-up: PERS-008 is ready; M0 now 47/66 done. No remote operations.
 
 ### 2026-10-11 — PERS-009 autosave scheduler and save on quit (claude, claude-opus-5-5)
 - `AutosaveScheduler` per SPEC-05 §5.9:
