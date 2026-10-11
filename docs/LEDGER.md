@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 45 | 0 | 0 | 0 | 59 | 0 | 104 | 15 |
+| M1 | 44 | 0 | 0 | 0 | 60 | 0 | 104 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -177,10 +177,10 @@
 | FLT-005 | PlayerCommandApplySystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001, DMG-001 | yes | done | astra (gpt-6) | 2026-10-11 | 9271f44 | Fixed-tick command bridge; nine latched edges; Cruise preserved; six required tests |
 | FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 2388784 | Four flying profiles, player-only tag, change-filtered Burst nozzle init; three tests |
 | FLT-007 | PropulsionSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-002, FLT-004, FLT-006, DMG-001, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-11 | 52335f4 | Revision cache, allocator, impulses and hulk idling; eight required tests |
-| FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Vertical impulse constraint and physical integration tests |
-| FLT-009 | Flight behaviour scenarios | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-005, FLT-007, FLT-008, SPEC-10 | no | todo |  |  |  |  |
+| FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-11 | 0be9bf9 | Vertical impulse constraint; real integration; three required tests |
+| FLT-009 | Flight behaviour scenarios | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-005, FLT-007, FLT-008, SPEC-10 | yes | todo |  |  |  |  |
 | FLT-010 | Flight tuning against legacy blueprints | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-009, SPEC-72 | no | todo |  |  |  |  |
-| FLT-011 | Flight performance and determinism | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-007, FLT-008, TST-001 | no | todo |  |  |  |  |
+| FLT-011 | Flight performance and determinism | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-007, FLT-008, TST-001 | yes | todo |  |  |  |  |
 | WPN-001 | Public contract types | [SPEC-21](specs/SPEC-21-weapons.md) | M1 | standard | CORE-001, DATA-001, VOX-001, DMG-001, FLT-001 | yes | todo |  |  |  |  |
 | AI-001 | Public contract types | [SPEC-23](specs/SPEC-23-ai.md) | M1 | standard | CORE-001, DATA-001, VOX-001, WPN-001 | no | todo |  |  |  |  |
 | UI-001 | Public contract types | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | CORE-001, INP-001 | yes | todo |  |  |  |  |
@@ -737,6 +737,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — FLT-008 planar impulse constraint (astra, gpt-6)
+
+- Added the post-propulsion parallel impulse job: removes vertical velocity with position bias, preserves horizontal motion, and leaves every transform write to Unity Physics. Hulks remain constrained; non-planar and kinematic bodies are skipped.
+- Three required tests use actual Unity Physics integration: live and hulk bodies return within **1 mm after 60 ticks**, off-centre impulses retain exactly zero pitch/roll, and unconstrained/kinematic bodies retain their vertical trajectory. Q122 replaces the copied per-job warning flag with one atomic diagnostic latch per system lifetime.
+- The first full suite caught delayed Burst diagnostics from a FixedString constructor (T2.14); repaired to literal conversion. Final validation: compile **zero C# warnings**; EditMode **668 passed + 1 explicit skipped**, no Burst errors; PlayMode **51 passed**; perf **38/38**; docs **505 tasks / zero errors**. Physics main median/p95 **0.02467/0.2197 ms**, idle **0.01387/0.01850 ms**.
+- Implementation: `0be9bf9`. Next: FLT-009 combined flight scenarios, then FLT-011 cost/determinism and FLT-010 tuning evidence.
 
 ### 2026-10-11 — FLT-007 physical propulsion (astra, gpt-6)
 
