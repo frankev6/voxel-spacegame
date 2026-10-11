@@ -13,7 +13,7 @@
 <!-- summary:begin -->
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
-| M0 | 39 | 0 | 1 | 0 | 26 | 0 | 66 | 10 |
+| M0 | 38 | 0 | 1 | 0 | 27 | 0 | 66 | 9 |
 | M1 | 100 | 0 | 0 | 0 | 0 | 0 | 100 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 0 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 2 |
@@ -60,7 +60,7 @@
 | INP-003 | Rebinding and overrides | [SPEC-03](specs/SPEC-03-input.md) | M0 | standard | INP-002 | yes | todo |  |  |  |  |
 | DATA-001 | Public contract types | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | CORE-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 12a585b | `ContentDefinition.Id` cache already implemented (DATA-004 overlap) |
 | DATA-002 | ValidationReport implementation | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | fcaa9d3 |  |
-| DATA-003 | Orientation tables | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-001 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-11 |  |  |
+| DATA-003 | Orientation tables | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 4339108 | Generation 0.083 ms (gate 1 ms) |
 | DATA-004 | Definition self-validation and ID rules | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | standard | DATA-002 | yes | done | claude (claude-opus-5-5) | 2026-10-11 | 8c7d0be | E048/E049 also implemented here |
 | DATA-005 | ContentCatalog | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-004 | yes | todo |  |  |  |  |
 | DATA-006 | Block blob builder and placement maths | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M0 | frontier | DATA-003, DATA-005 | no | todo |  |  |  |  |
@@ -566,6 +566,10 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 ## Log
 
 Newest first. One entry per finished task or notable event: what changed, measurements, follow-ups.
+
+### 2026-10-11 — DATA-003 orientation tables (claude, claude-opus-5-5)
+- The 24-orientation group per SPEC-04 §5.3, managed and as a blob. Every test vector matches (identity and yaw, AxisTurn, Inverse, Mirror on X, Y and Z, Compose, FaceTable, orientations 1/5/16/20). Composition is closed and associative over all 24³ triples, and the blob equals the managed tables.
+- Measured: generation takes a median 0.083 ms (gate ≤ 1 ms). EditMode 169/169.
 
 ### 2026-10-11 — CORE-007 binary save primitives (claude, claude-opus-5-5)
 - `SaveWriter`, `SaveReader` and `SaveKey` per SPEC-02 §5.7. Every encoding example matches byte for byte. A fuzz test with 10,000 seeded truncations and bit flips raises only `SaveFormatException` (or succeeds).
