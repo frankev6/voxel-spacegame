@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 56 | 0 | 0 | 0 | 46 | 0 | 102 | 12 |
+| M1 | 55 | 0 | 0 | 0 | 47 | 0 | 102 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -106,8 +106,8 @@
 | MIG-007 | Legacy Euler to orientation | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | b264f44 | Integer RyRxRz, one-degree snapping, all 64 Unity Euler combinations |
 | MIG-008 | Ship blueprint converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | frontier | MIG-006, MIG-007, SPEC-05, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 270db7f | 13 ships; exact counts; VOXS verified; Q39/40 |
 | MIG-016 | Migration gate test | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M0 | standard | MIG-008 | yes | done | astra (gpt-6) | 2026-10-11 | 75cb5fd | Migration gate: 69 unchanged; full 0.580s; max ship 42.4ms |
-| FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  |  |
-| FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | no | todo |  |  |  |  |
+| FND-008 | PersistentId allocation and refill | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-007 | yes | done | astra (gpt-6) | 2026-10-11 | 2718913 | Unique managed/Burst grants; saved high-water mark; explicit refill dependency wait |
+| FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | yes | todo |  |  |  |  |
 | FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | no | todo |  |  |  |  |
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | no | todo |  |  |  |  |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | no | todo |  |  |  |  |
@@ -717,6 +717,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — FND-008 persistent-ID allocation and refill (astra, gpt-6)
+
+- Added the allocation portion of `GameSession`: managed `Allocate`, overflow-safe block reservation, next-ungranted saved counter, and session reset that clears outstanding ECS grants. `BootSingletons` creates the empty allocator before the boot snapshot; the managed initialization refill runs before GameInitGroup, including between scenes.
+- Required tests pass: **10,000 managed + 10,000 scheduled Burst IDs are unique**; a saved/restored UInt64 counter resumes beyond all prior grants; missing/inactive sessions clear the pool. The mixed-source test leaves jobs outstanding across refill calls rather than hiding the dependency wait behind test-world completion.
+- Resolved **SPEC-01 Q11–13 / ledger Q104–106**: allocation-only session members and exact counter-field round trip precede full FND-009 SESS/composition; concrete GameSession registration is required alongside interfaces. Installed Entities singleton access does not wait, so explicitly complete only allocator dependencies in initialization/reset. A valid zero refill threshold means refill only when empty.
+- No-refill marker **0.000083 / 0.000084 ms median/p95** against 0.01 ms, reference settings, 60 warmup + 300 updates. Full validation: compile zero C# warnings, EditMode **606 passed + 1 explicit skipped**, PlayMode **48 passed**, perf **38/38**, docs **503 tasks / zero errors**. Implementation `2718913`.
+- Next: FND-009 completes session flow, SESS and composition; fleet integration remains FND-010. Continue ready M1 work without owner waits.
 
 ### 2026-10-11 — PHY-019 collider performance and live memory (astra, gpt-6)
 
