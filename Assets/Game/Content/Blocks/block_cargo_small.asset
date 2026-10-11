@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034775fdc0f1d496eabade816d4bab44, type: 3}
+  m_Name: block_cargo_small
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.BlockDefinition
+  id: block_cargo_small
+  formerIds: []
+  displayName: Cargo Pod Small
+  description: 
+  category: 0
+  rarity: 0
+  basePrice: 20
+  maxStack: 999
+  icon: {fileID: -527274513, guid: f8a50dec0611c624ca8569633b602306, type: 3}
+  kind: 2
+  shape: 0
+  cells:
+  - {x: 0, y: 0, z: 0}
+  - {x: 1, y: 0, z: 0}
+  clearance: []
+  allowedOrientations:
+    Bits: 16777215
+  attachFaces: 63
+  mirrorPartner: {fileID: 0}
+  cellHp: 100
+  functionHp: 200
+  cellMass: 20
+  armorClass: 0
+  materialLayer: 0
+  propMesh: {fileID: -8369488423095239176, guid: 63a3bcd06c5b4114096dfe9e982274e0, type: 3}
+  blockCategory: 7
+  modules:
+  - rid: 7
+  references:
+    version: 2
+    RefIds:
+    - rid: 7
+      type: {class: CargoModule, ns: Game.Data.Blocks, asm: Game.Data}
+      data:
+        Params:
+          Capacity: 50
