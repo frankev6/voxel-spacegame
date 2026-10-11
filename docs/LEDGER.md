@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 51 | 0 | 0 | 0 | 52 | 0 | 103 | 17 |
+| M1 | 50 | 0 | 0 | 0 | 53 | 0 | 103 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -174,7 +174,7 @@
 | FLT-003 | Flight config definition and factory | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | f21a981 | Exact defaults, FLT-E001 diagnostics, catalog asset and boot singleton |
 | FLT-004 | Thrust allocator | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001 | yes | todo |  |  |  |  |
 | FLT-005 | PlayerCommandApplySystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-001, DMG-001 | yes | todo |  |  |  |  |
-| FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Profile registration and change-filtered thruster visuals |
+| FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 2388784 | Four flying profiles, player-only tag, change-filtered Burst nozzle init; three tests |
 | FLT-007 | PropulsionSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-002, FLT-004, FLT-006, DMG-001, SPEC-12 | no | todo |  |  |  |  |
 | FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | yes | todo |  |  |  |  |
 | FLT-009 | Flight behaviour scenarios | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-005, FLT-007, FLT-008, SPEC-10 | no | todo |  |  |  |  |
@@ -727,6 +727,14 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — FLT-006 flight registration and thruster visuals (astra, gpt-6)
+
+- FlightSetup registers the five root types on PlayerShip/NpcShip/SmallCraft/Dummy and PlayerShip only on the player profile. ThrusterInitSystem registers state/visual components at creation; its parallel Burst job computes grid-space nozzle centre, exhaust direction and radius only for changed FunctionalBlock chunks.
+- Three required tests spawn a VOXS test blueprint with four yaw-oriented thrusters. They verify all six profile choices, thruster components, orientation/nozzle geometry and that an idle frame preserves a sentinel visual because its FunctionalBlock did not change. Initial fixture-only duplicate catalog insertion was corrected; all final gates pass.
+- Extended existing **SPEC-20 Q9 / ledger Q112** documentation correction: FLT-006 lists its explicitly required FlightSetup implementation, and the remaining memory summary says 44 bytes per FlightThruster. No architecture or layout change.
+- Full validation: compile **zero C# warnings**, EditMode **632 passed + 1 explicit skipped**, PlayMode **48 passed**, perf **38/38**, docs **504 tasks / zero errors**. Implementation `2388784`.
+- Next: FND-010 fleet/FLET/player spawn and the M1 sandbox path; then remaining flight and renderer work.
 
 ### 2026-10-11 — FLT-003 flight configuration (astra, gpt-6)
 
