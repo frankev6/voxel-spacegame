@@ -3,17 +3,24 @@
 # perf runs the Performance category in EditMode and PlayMode, then tools/perf_summary.py over the Logs/perf records written
 # during the run (SPEC-71 §5.3); it exits non-zero if a test or a perf record failed.
 . "$(dirname "$0")/_env.sh"
+if [[ "$GAME_UNITY_TOOL_LOCK_ROOT" != "${PROJECT_ROOT:A}" ]]; then
+  exec python3 "$TOOLS_DIR/unity_tool_lock.py" "$PROJECT_ROOT" -- "$TOOLS_DIR/test.sh" "$@"
+fi
 kind=${1:-editmode}; filter=$2
 
 run_mode() {   # run_mode <EditMode|PlayMode> <results name> <category or "">
   local mode=$1 name=$2 category=$3
   local out="$PROJECT_ROOT/Logs/test-results/$name.xml"
   local run_exit=0
-  rm -f "$out"
   if editor_open; then
     python3 "$TOOLS_DIR/live-tests.py" "$PROJECT_ROOT" "$mode" "$filter" "$category" "$out"
     run_exit=$?
+    if (( run_exit != 0 )); then
+      echo "Live Unity test request failed; no result summary accepted. See $OUT_DIR/test-$name.json"
+      return 1
+    fi
   else
+    rm -f "$out"
     local args=(-batchmode -nographics -projectPath "$PROJECT_ROOT" -runTests -testPlatform "$mode" -testResults "$out" -logFile "$OUT_DIR/test-$name.log")
     [[ -n "$filter" ]] && args+=(-testFilter "$filter")
     [[ -n "$category" ]] && args+=(-testCategory "$category")

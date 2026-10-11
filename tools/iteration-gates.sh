@@ -1,6 +1,9 @@
 #!/bin/zsh
 # SPEC-71 TST-008: three real runs per developer-iteration gate; needs this project open in an idle Editor.
 . "$(dirname "$0")/_env.sh"
+if [[ "$GAME_UNITY_TOOL_LOCK_ROOT" != "${PROJECT_ROOT:A}" ]]; then
+  exec python3 "$TOOLS_DIR/unity_tool_lock.py" "$PROJECT_ROOT" -- "$TOOLS_DIR/iteration-gates.sh" "$@"
+fi
 python3 - "$PROJECT_ROOT" <<'PY'
 import json, pathlib, shutil, statistics, subprocess, sys, tempfile, time
 root = pathlib.Path(sys.argv[1])

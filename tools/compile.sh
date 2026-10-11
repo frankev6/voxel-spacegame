@@ -3,6 +3,9 @@
 #   Editor open  -> recompile through the Unity CLI (seconds).
 #   Editor closed -> headless batch import + compile (slower; first run imports everything).
 . "$(dirname "$0")/_env.sh"
+if [[ "$GAME_UNITY_TOOL_LOCK_ROOT" != "${PROJECT_ROOT:A}" ]]; then
+  exec python3 "$TOOLS_DIR/unity_tool_lock.py" "$PROJECT_ROOT" -- "$TOOLS_DIR/compile.sh" "$@"
+fi
 if editor_open; then
   setopt pipefail
   "$TOOLS_DIR/playtest/rc.sh" 2>&1 | tee "$OUT_DIR/compile.log"

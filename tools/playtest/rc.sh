@@ -1,6 +1,9 @@
 #!/bin/zsh
 # rc.sh [--no-trigger]  Recompile through the CLI, wait, print compile errors and Editor state. Exit 1 on errors.
 . "$(dirname "$0")/_env.sh"
+if [[ "$GAME_UNITY_TOOL_LOCK_ROOT" != "${PROJECT_ROOT:A}" ]]; then
+  exec python3 "$TOOLS_DIR/unity_tool_lock.py" "$PROJECT_ROOT" -- "$TOOLS_DIR/playtest/rc.sh" "$@"
+fi
 start=$(wc -l < Logs/Editor.log 2>/dev/null | tr -d ' '); start=${start:-0}
 [[ "$1" != "--no-trigger" ]] && unity command recompile --format json >/dev/null 2>&1
 for i in $(seq 1 180); do
