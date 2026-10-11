@@ -446,7 +446,7 @@ No runtime systems. Everything runs in the Editor on the main thread.
 4. Converters: `TypeCache.GetTypesDerivedFrom<ILegacyConverter>()`, non-abstract with a parameterless constructor, sorted by `Order` then `Name`.
 5. `AssetDatabase.StartAssetEditing()` is **not** used (assets must be loadable between converters). For each converter: `context.Catalog = ContentCatalog.Build(database.Definitions, scratchReport)` (the scratch report is discarded; content errors are reported once at step 8); run `Convert(context)` inside try/catch (exception → `MIG-E099` naming the converter; continue); then `AssetDatabase.SaveAssets()` and `ContentDatabaseBuilder.Rebuild()`.
 6. `context.HandOff` is built lazily the first time a converter with `Order ≥ 500` runs.
-7. Update the manifest: for every outcome `Created`/`Updated`/`Unchanged`, `manifest.SetHash(path, StableHash.Hash64(File.ReadAllBytes(path)))`; save.
+7. Save the manifest. The writer refreshes hashes immediately after owned/forced writes and owned link fills; filling a hand-edited asset’s empty link must not adopt its other fields as migration-owned (Q13).
 8. `ContentValidatorRunner.Run(out contentReport)` (SPEC-04); `report.Merge(contentReport)`.
 9. Write `Import/Migration/report.md` (§5.6). Log one summary line; `report.LogTo("Migration")`. Return `report`.
 
@@ -457,7 +457,7 @@ No runtime systems. Everything runs in the Editor on the main thread.
 1. `path = $"{contentRoot}/{area}/{id}.asset"`; create the folder if missing.
 2. `existing = AssetDatabase.LoadMainAssetAtPath(path)`. Different type than `T` → `MIG-E010`, `Failed`.
 3. If `existing != null` and not `force`: `current = StableHash.Hash64(File.ReadAllBytes(path))`; if the manifest has no hash for `path`, or the hash differs → `SkippedHandEdited`, `MIG-I011` "kept hand-edited asset", return `existing`.
-4. `tmp = ScriptableObject.CreateInstance<T>()`; `so = new SerializedObject(tmp)`; set `id`; call `fill(so)`; `so.ApplyModifiedPropertiesWithoutUndo()`. A property path that `FindProperty` returns null for → `MIG-W090` (field missing in the target type) and the value is skipped.
+4. `tmp = ScriptableObject.CreateInstance<T>()`; `so = new SerializedObject(tmp)`; set `id`; call `fill(so)`; `so.ApplyModifiedPropertiesWithoutUndo()`. Converter fills use the internal `writer.Set(so, path, setter)` helper: missing property → `MIG-W090` and that setter is skipped; subsequent fields still run (Q13).
 5. New asset: `AssetDatabase.CreateAsset(tmp, path)` → `Created`. Existing: `before = File.ReadAllBytes(path)`; `EditorUtility.CopySerialized(tmp, existing)` (keeps the GUID); `AssetDatabase.SaveAssetIfDirty(existing)`; compare bytes → `Unchanged` or `Updated`; `Object.DestroyImmediate(tmp)`.
 6. Never writes outside `contentRoot`.
 
@@ -569,7 +569,7 @@ Deterministic (no timestamps, ordinal sorting, LF line endings):
 
 | Situation | Required behaviour |
 |---|---|
-| Running twice with no changes | Every asset `Unchanged`; `report.md` and `manifest.json` byte-identical |
+| Running twice with no changes | Every asset `Unchanged`; two unchanged runs have byte-identical reports and manifests (the initial run truthfully reports Created; Q13) |
 | Asset tuned by hand, then re-run | `SkippedHandEdited` + `MIG-I011`; nothing overwritten; links filled only if empty |
 | Asset deleted by hand, then re-run | Re-created |
 | Hand-made asset already at a target path (not in manifest) | Treated as hand-edited (kept) unless Force |
@@ -791,6 +791,7 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 | 10 | Who owns `BodyTemplateDefinition` | SPEC-30 | SPEC-30 / SPEC-31 |
 | 11 | Ship thumbnails from the old game | Not migrated (files not in v2); SPEC-51 renders new ones | SPEC-51 |
 | 12 | Nonfinite Euler angles and integer-cast overflow for very large finite inputs | **Answer (resolved in MIG-007):** reject NaN/infinity with Orientation.Invalid and infinite error; reduce finite angles modulo 360 in double precision before rounding to quarters, preserving the specified one-degree tolerance and rotation order | Tech lead |
+| 13 | Manifest link updates can adopt hand edits; report Created vs Unchanged conflicts with first-run byte equality; SerializedObject cannot intercept missing properties | **Answer (resolved in MIG-004):** refresh hashes at owned/forced writes only, including owned link fills; never adopt protected bytes through a link. Unsaved dirty assets are protected too. Invalid manifests fail closed. Compare report bytes across unchanged runs; first-run Created remains truthful. Converter fill callbacks use internal writer.Set to warn and skip individual missing fields. | Tech lead |
 
 ## 11. References
 
