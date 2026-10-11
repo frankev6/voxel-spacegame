@@ -51,9 +51,9 @@ These work with no Editor open (verified 2026-10-10):
   3. Delete the script and its `.meta` afterwards.
 - **Player script compilation (development and release) without building:** use a one-off job that calls `UnityEditor.Build.Player.PlayerBuildInterface.CompilePlayerScripts`.
   - Pass `ScriptCompilationSettings { target = BuildTarget.StandaloneOSX, group = BuildTargetGroup.Standalone, options = ScriptCompilationOptions.DevelopmentBuild }` for development, and `ScriptCompilationOptions.None` for release.
-  - Use an output folder under `Temp/`.
+  - Use an output folder under `Logs/tools/` (DEV-020 uses `Logs/tools/release-scripts/`), so Unity shutdown does not delete the evidence.
   - The result's `assemblies` list contains `Game.App.dll` when compilation succeeded.
-  - This checks the `#if UNITY_EDITOR || DEVELOPMENT_BUILD` wrapping of dev-only code (verified 2026-10-11, DEV-001).
+  - `tools/test.sh editmode DevReleaseStripTests` performs the real release compilation and checks Game.App.dll for dev namespaces and the output for DevTools assemblies (DEV-020). A missing-guard mutation must make the test fail; back up and restore the source with `cp`.
   - "Function pointer types are not supported by the SerializationWeaver" lines about `Unity.Entities.dll` are noise.
 - **Rendering or real shader compilation needs the GPU:**
   - Run `-batchmode` **without** `-nographics`. Metal works headless.
