@@ -165,7 +165,7 @@ namespace Game.Persistence.Data
     public sealed class ProfileInfo { public ProfileId Id; public string DisplayName; public System.DateTime CreatedUtc; public string LastSlotId; }
 
     /// <summary>One image to store in the slot's thumbs folder. Pixels are RGBA32, bottom row first (Texture2D layout).</summary>
-    public sealed class ThumbnailRequest { public string Key; public byte[] Rgba32; public int Width; public int Height; }
+    public sealed class ThumbnailRequest { public string Key; public byte[] Rgba32; public int Width; public int Height; public bool Pending; }
 
     public readonly struct SaveResult
     {
@@ -278,6 +278,7 @@ namespace Game.Persistence.Services
     {
         bool HasActiveSession { get; }
         Game.Core.Save.SaveBlockReason GetBlockReason();                  // None when saving is allowed
+        void PrepareCapture();                                         // main-thread ordered writebacks before any participant (ADR-0034)
         void DescribeForMeta(Game.Persistence.Data.SaveMeta meta);               // fills CommanderName, LocationText, PlaytimeSeconds
         bool TryCaptureSlotThumbnail(out Game.Persistence.Data.ThumbnailRequest thumbnail); // Key must be "slot"
         void CollectThumbnails(System.Collections.Generic.List<Game.Persistence.Data.ThumbnailRequest> changed,
@@ -547,12 +548,14 @@ No ECS systems. `SaveService` and `AutosaveScheduler` are managed services (arch
 
 Main thread, capture (`CaptureNow`):
 1. If `!CanSave(out r)`: result `Blocked` with message §5.8. Raise `OperationCompleted` only for `Manual`, `Quick`, `Quit`. Stop.
-2. `palette = (preservedChunks.Count > 0 && loadedPalette != null) ? SaveIdPalette.SeededFrom(loadedPalette) : SaveIdPalette.CreateEmpty()`.
+2. `context.PrepareCapture()` runs ordered session writebacks (ADR-0034). Then `palette = (preservedChunks.Count > 0 && loadedPalette != null) ? SaveIdPalette.SeededFrom(loadedPalette) : SaveIdPalette.CreateEmpty()`.
 3. For each registered participant in registry order: `w = new SaveWriter(palette, jsonCodec)`; `p.Capture(w)`; keep `(key, (ushort)p.Version, w)`. Any exception: dispose every deferred block already captured (main thread), log `GameLog.Error("Save", ...)`, result `ParticipantFailed` naming the key; no file is touched. Stop.
 4. `meta = new SaveMeta { FormatVersion = 1, GameVersion = Application.version, DatabaseHash = content.DatabaseHash.ToString("x16"), ProfileId, SlotId, DisplayName, Reason, SavedUtc = DateTime.UtcNow }`; `context.DescribeForMeta(meta)`.
 5. Thumbnails: `context.TryCaptureSlotThumbnail(out slotThumb)`; `context.CollectThumbnails(changed, keep)`.
 6. Header: `databaseHash32 = (uint)content.DatabaseHash`, `savedUtcTicks = meta.SavedUtc.Ticks`, `playtimeSeconds = meta.PlaytimeSeconds`.
 7. Copy the preserved unknown chunks list. Record capture time (`Stopwatch`) → `CaptureMs`. Any exception outside a participant in steps 1–7 also releases every captured writer/deferred block and returns `ParticipantFailed` naming the session context/metadata/thumbnail stage; no file is touched (Q23).
+
+After capture, remain on the main thread for at most two `NextFrameAsync` yields while any thumbnail has `Pending = true`. Omit late/failed thumbnails, leaving GPU cleanup to the producer. This wait is outside `CaptureMs` (ADR-0034).
 
 Background thread (`await Awaitable.BackgroundThreadAsync()`), `WriteCaptured`:
 8. For each participant writer: `payload = w.ToArray(b => { var bytes = b.Encode(); b.Dispose(); return bytes; })`.
@@ -1051,6 +1054,8 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 | 25 | Valid JSON null (or empty input) deserializes to no object without throwing | Treat absent profile/META objects as unreadable at their boundaries | Tech lead | **Resolved in PERS-018:** profile listing skips and warns; META produces PERS-W013 while loading/restoring otherwise valid chunks. Generic participant JSON still permits null |
 
 | 26 | Unreferenced block-zero tombstones were treated as missing definitions by repair, breaking SPEC-10 byte-identical round trips | Preserve ordinary tombstones; retain existing D3 behavior for cells referencing invalid/drifted instances | Tech lead | Resolved in VOX-009: preserve unreferenced block-zero entries before D3 classification; the adapter rebuilds its free-slot pool. The three-slot regression now retains the live instance at index 1 and both reusable tombstones. No wire-format change. |
+
+| 27 | Session writebacks miss direct autosaves; thumbnail DTO cannot represent pending readback | Explicit preparation hook and bounded pending thumbnails | Tech lead | Resolved FND-009 / ADR-0034: PrepareCapture before every participant, then at most two frame yields for Pending thumbnails before background serialization. Failures preserve files; late GPU resources remain producer-owned. |
 
 ## 11. References
 

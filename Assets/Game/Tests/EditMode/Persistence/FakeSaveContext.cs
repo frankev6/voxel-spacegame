@@ -17,6 +17,10 @@ namespace Game.Tests.EditMode.Persistence
         public string ThrowAt;
         void CheckFailure(string stage) { if (ThrowAt == stage) throw new System.InvalidOperationException("context capture failure: " + stage); }
 
+        public int PreparationCalls;
+        public System.Action OnPrepare;
+        public void PrepareCapture() { CheckFailure("session preparation"); PreparationCalls++; OnPrepare?.Invoke(); }
+
         public int BlockChecks;
         public SaveBlockReason GetBlockReason() { BlockChecks++; return Block; }
 

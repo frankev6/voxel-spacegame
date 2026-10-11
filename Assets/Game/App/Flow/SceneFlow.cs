@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.Core;
+using Game.App.Session;
 using Game.Core.Components;
 using Game.Core.Events;
 using Game.Core.Flow;
@@ -19,7 +20,9 @@ namespace Game.App.Flow
     public sealed class SceneFlow : IDisposable
     {
         const int MaxCleanupFrames = 10;
-        const float SaveWaitSeconds = 10f;
+        GameSession session;
+        internal void BindSession(GameSession value) => session = value;
+        internal PauseToken PauseForExitSave() => pause.Acquire("SceneFlow exit save");
 
         readonly World world;
         readonly IPauseService pause;
@@ -99,8 +102,7 @@ namespace Game.App.Flow
                     return await EnterInPlaceAsync(GameScene.MainMenu, SceneEntryReason.Startup);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 case GameScene.World:
-                    // TODO(FND-009): session.NewGameAsync(new NewGameArgs(gameConfig.DefaultCommanderName, gameConfig.DevQuickStartSeed, false,
-                    //   ContentId.None)) with reason DevQuickStart. Until the session exists the World is entered directly.
+                    if (session != null) return await session.DevQuickStartAsync();
                     return await TransitionAsync(GameScene.World, SceneEntryReason.DevQuickStart);
                 case GameScene.BlueprintLab:
                     // TODO(FND-013): EnterBlueprintLabAsync(new BlueprintLabArgs(Creative, 0, ContentId.None)) with a BeginSandbox(1) session.
@@ -128,25 +130,22 @@ namespace Game.App.Flow
             pauseToken = pause.Acquire("SceneFlow");
             // TODO(HUD-002): ui.Navigator.SetRoot(screens.Loading) when screens are set.
 
-            // 2. Exit the current scene.
-            if (CurrentScene == GameScene.World || CurrentScene == GameScene.BlueprintLab)
-            {
-                // 2.1 TODO(FND-009): session.RunWritebacks() (SimClock write-back in the World, fleet write-back).
-                // 2.2 Autosave when leaving the World, except for a load, a new game or recovery; then wait for it (at most SaveWaitSeconds).
-                if (CurrentScene == GameScene.World && save != null && reason != SceneEntryReason.LoadGame && reason != SceneEntryReason.NewGame
-                    && reason != SceneEntryReason.ErrorRecovery)
-                    await AutosaveBeforeExitAsync();
-                var exitContext = new SceneExitContext(CurrentScene, target, reason);
-                foreach (var hook in exitingHooks.ToArray())
-                {
-                    try { hook.OnSceneExiting(exitContext); }
-                    catch (Exception e) { GameLog.Exception(LogCategories.Flow, e, "ISceneExiting " + hook.GetType().Name); }
-                }
-                await TeardownAsync();
-            }
-
             try
             {
+                // 2. Exit the current scene.
+                if (CurrentScene == GameScene.World || CurrentScene == GameScene.BlueprintLab)
+                {
+                    session?.RunWritebacks();
+                    // Session flow saves before setting Exiting; its operation reservation rejects competing flow calls.
+                    var exitContext = new SceneExitContext(CurrentScene, target, reason);
+                    foreach (var hook in exitingHooks.ToArray())
+                    {
+                        try { hook.OnSceneExiting(exitContext); }
+                        catch (Exception e) { GameLog.Exception(LogCategories.Flow, e, "ISceneExiting " + hook.GetType().Name); }
+                    }
+                    await TeardownAsync();
+                }
+
                 // 3.
                 State = SceneFlowState.Loading;
                 if (betweenScenes != null) await betweenScenes();
@@ -173,17 +172,6 @@ namespace Game.App.Flow
             Finish(target, reason, true);
             if (target == GameScene.World && (reason == SceneEntryReason.NewGame || reason == SceneEntryReason.LoadGame)) save?.Autosave.NotifySaved();
             return FlowResult.Ok;
-        }
-
-        /// <summary>Step 2.2: the scheduler starts the save on its next Update (GameRoot runs it every frame) when saving is allowed.</summary>
-        async Awaitable AutosaveBeforeExitAsync()
-        {
-            save.Autosave.Request(Game.Persistence.Data.AutosaveTrigger.SceneTransition);
-            float deadline = Time.realtimeSinceStartup + SaveWaitSeconds;
-            await Awaitable.NextFrameAsync();
-            await Awaitable.NextFrameAsync();
-            while (save.IsBusy && Time.realtimeSinceStartup < deadline) await Awaitable.NextFrameAsync();
-            if (save.IsBusy) GameLog.Warn(LogCategories.Flow, $"The exit autosave did not finish within {SaveWaitSeconds} s; continuing");
         }
 
         /// <summary>§5.4.6 MainMenu at startup: treat the loaded scene as entered without reloading it.</summary>
@@ -218,7 +206,7 @@ namespace Game.App.Flow
         void CreateSceneEntities(GameScene target)
         {
             if (target != GameScene.World && target != GameScene.BlueprintLab) return;
-            double start = 0;   // TODO(FND-009): session.UniversalTime in the World (SPEC-01 decision 7)
+            double start = target == GameScene.World && session != null ? session.UniversalTime : 0;
             var e = target == GameScene.World
                 ? Em.CreateEntity(typeof(GameplayActive), typeof(SimClock), typeof(WorldSceneActive))
                 : Em.CreateEntity(typeof(GameplayActive), typeof(SimClock));
@@ -253,7 +241,7 @@ namespace Game.App.Flow
             try
             {
                 await TeardownAsync();
-                // TODO(FND-009): session.EndSession() (clears models, HasActiveSession = false).
+                session?.EndSession();
                 var op = SceneManager.LoadSceneAsync(GameScene.MainMenu.ToSceneName(), LoadSceneMode.Single);
                 while (op != null && !op.isDone) await Awaitable.NextFrameAsync();
             }

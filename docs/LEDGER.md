@@ -668,6 +668,11 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 104 | 2026-10-11 | SPEC-01 FND-008 | Allocation round trip precedes full GameSession/SESS implementation | Test exact UInt64 counter field; stage allocation-only session members | Tech lead | Resolved SPEC-01 Q11: FND-009 owns complete SESS/composition; restore clears outstanding grants |
 | 105 | 2026-10-11 | SPEC-01 FND-008 | GetSingletonRW does not complete the prior Burst ID consumer | Explicit component-specific wait before refill/reset | Tech lead | Resolved SPEC-01 Q12: CompleteDependencyBeforeRW in initialization, exercised by outstanding consumer jobs |
 | 106 | 2026-10-11 | SPEC-01 FND-008 | Valid zero refill threshold otherwise leaves the Burst pool empty forever | Empty blocks always refill; zero means no early top-up | Tech lead | Resolved SPEC-01 Q13; zero-threshold activation covered in NoSession_Empty |
+| 107 | 2026-10-11 | SPEC-01/05 FND-009 | Direct autosaves miss session writebacks | ISaveContext.PrepareCapture before participant capture | Tech lead | Accepted ADR-0034 / SPEC-01 Q14 / SPEC-05 Q27 |
+| 108 | 2026-10-11 | SPEC-01/05 FND-009 | Async slot readback cannot fit completed-only thumbnails | Pending DTO state; wait ≤ 2 frames; producer owns GPU cleanup | Tech lead | Accepted ADR-0034 / SPEC-01 Q15; no-camera/headless optional image omitted |
+| 109 | 2026-10-11 | SPEC-01 FND-009 | Transitioning blocks its own exit save; false quit flag still saved | Reserve flow and save before Exiting; honor saveFirst=false | Tech lead | SPEC-01 Q16 / ADR-0034; writeback failures join recovery |
+| 110 | 2026-10-11 | SPEC-01 FND-009 | Future galaxy/fleet/combat/camera contracts absent at current dependency stage | Keep task-owned integration points and configured SESS defaults | Tech lead | SPEC-01 Q17: GAL-008, FND-010, AI-008 and CAM-004 wiring remains with those tasks |
+| 111 | 2026-10-11 | SPEC-01 FND-009 | New game can run without a selected profile | Create configured-default profile only when none is selected | Tech lead | SPEC-01 Q18; existing active profile and redirected save roots preserved |
 
 
 

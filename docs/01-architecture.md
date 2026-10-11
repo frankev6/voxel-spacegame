@@ -367,7 +367,7 @@ These types cross module boundaries. **Their names and owning module are binding
 
 ### 7.3 Save and load
 
-`SaveService.Save(slot)`: each `ISaveParticipant` captures a snapshot on the main thread → a worker serializes and compresses → atomic replace. `Load(slot)`: `SceneFlow` unloads gameplay, `GameSession` restores **in place** and raises `SessionReset` once, the galaxy regenerates from the seed and applies deltas, then the player ship spawns at the saved `UniversePosition`. Loading never executes narrative effects.
+`SaveService.Save(slot)`: `ISaveContext.PrepareCapture()` runs ordered writebacks (ADR-0034), then each `ISaveParticipant` captures a snapshot on the main thread → a worker serializes and compresses → atomic replace. `Load(slot)`: `SceneFlow` unloads gameplay, `GameSession` restores **in place** and raises `SessionReset` once, the galaxy regenerates from the seed and applies deltas, then the player ship spawns at the saved `UniversePosition`. Loading never executes narrative effects.
 
 ### 7.4 Jump to another star system
 

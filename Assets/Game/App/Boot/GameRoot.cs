@@ -47,8 +47,9 @@ namespace Game.App.Boot
         void Update()
         {
             float dt = Time.unscaledDeltaTime;
+            Composition?.Session?.Tick(dt);
             Composition?.Save?.Autosave.Update(dt);
-            // TODO(FND-009): session.Tick(dt). TODO(UI-003): uiRoot.Tick(dt).
+            // TODO(UI-003): uiRoot.Tick(dt).
             Composition?.Settings?.Tick(dt);                      // debounced save
         }
 

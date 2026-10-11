@@ -161,6 +161,7 @@ namespace Game.Tests.EditMode.Persistence
             Assert.AreEqual(0, a.Blocks[0].Encodes, "never encoded");
         }
 
+        [TestCase("session preparation")]
         [TestCase("session metadata")]
         [TestCase("slot thumbnail")]
         [TestCase("session thumbnails")]
@@ -180,6 +181,7 @@ namespace Game.Tests.EditMode.Persistence
             Assert.AreEqual(0, FakeDeferredBlock.Live);
             foreach (var participant in new[] { a, b, c })
             {
+                if (participant.Blocks.Count == 0) continue; // preparation failed before any snapshots existed
                 Assert.AreEqual(0, participant.Blocks[0].Encodes);
                 Assert.AreEqual(1, participant.Blocks[0].Disposes);
             }
@@ -189,7 +191,7 @@ namespace Game.Tests.EditMode.Persistence
         public IEnumerator ContextCaptureFailure_AsyncCompletesAndRecovers()
         {
             a.WithDeferred = true;
-            foreach (string stage in new[] { "session metadata", "slot thumbnail", "session thumbnails" })
+            foreach (string stage in new[] { "session preparation", "session metadata", "slot thumbnail", "session thumbnails" })
             {
                 completed.Clear();
                 context.ThrowAt = stage;
@@ -425,6 +427,42 @@ namespace Game.Tests.EditMode.Persistence
             service.ResetForNewGame();
             Assert.IsFalse(service.HasCurrentSlot);
             Assert.IsFalse(service.TryGetSessionThumbnail("ship_1", out _));
+        }
+        [Test]
+        public void Preparation_PrecedesEveryParticipant()
+        {
+            context.OnPrepare = () => a.Value = 12345;
+            var captured = service.CaptureNow(slot, SaveReason.AutoTimer, null);
+            Assert.IsFalse(captured.Failure.HasValue);
+            Assert.AreEqual(1, context.PreparationCalls);
+            Assert.AreEqual(12345, new SaveReader(captured.Participants[0].Writer.ToArray()).ReadInt32());
+            captured.Release();
+            context.Block = SaveBlockReason.InCombat;
+            var blocked = service.CaptureNow(slot, SaveReason.AutoTimer, null);
+            Assert.IsTrue(blocked.Failure.HasValue); Assert.AreEqual(1, context.PreparationCalls, "blocked saves do not write back");
+        }
+
+        [UnityTest]
+        public IEnumerator PendingThumbnails_FinishOrDropBeforeWorker()
+        {
+            foreach (bool finishes in new[] { true, false })
+            {
+                var pending = new ThumbnailRequest { Key = "slot", Width = 8, Height = 4, Pending = true };
+                context.SlotThumbnail = pending;
+                var captured = service.CaptureNow(slot, SaveReason.Manual, null);
+                var wait = service.FinishPendingThumbnailsAsync(captured).GetAwaiter();
+                if (finishes) { pending.Rgba32 = FakeSaveContext.Image("slot", 42).Rgba32; pending.Pending = false; }
+                double deadline = UnityEditor.EditorApplication.timeSinceStartup + 5;
+                while (!wait.IsCompleted && UnityEditor.EditorApplication.timeSinceStartup < deadline) yield return null;
+                Assert.IsTrue(wait.IsCompleted); wait.GetResult();
+                Assert.AreEqual(finishes, captured.SlotThumbnail != null);
+                Assert.AreEqual(finishes ? "thumbs/slot.png" : null, captured.Meta.Thumbnail);
+                // A late producer can finish safely, but the worker must never regain a dropped request.
+                if (!finishes) { pending.Rgba32 = FakeSaveContext.Image("slot", 99).Rgba32; pending.Pending = false; }
+                Assert.AreEqual(finishes, captured.SlotThumbnail != null);
+                Assert.IsTrue(service.WriteCaptured(captured).Success);
+                Assert.AreEqual(finishes, File.Exists(Path.Combine(paths.SlotDir(slot), "thumbs", "slot.png")));
+            }
         }
     }
 }

@@ -380,10 +380,11 @@ Creates ECS configuration singletons from content, once per boot, **in table ord
 #### 5.4.1 Transition algorithm `TransitionAsync(GameScene target, SceneEntryReason reason, BlueprintLabArgs lab, Func<Awaitable> betweenScenes)`
 
 Main thread; `async Awaitable<FlowResult>`.
+0. `GameSession` reserves the flow operation before awaiting an exit save. Other `IGameFlow` calls return `Busy`. A preparation pause covers the save and transition. The exit save runs while SceneFlow is still Idle, so GetBlockReason does not reject the save as Transitioning. Quit with saveFirst=false skips saving; explicit quit-save failure returns without teardown.
 1. If `State != Idle`, return `Busy`. Set `State = Exiting` and `Progress = 0`. `EventBus.Publish(SceneTransitionStarted(current, target, reason))`. `pauseToken = pause.Acquire("SceneFlow")`. Show `Loading` as root (`ui.Navigator.SetRoot(screens.Loading)`); input context becomes `Menu` through the navigator.
 2. **Exit the current scene**, if it is World or BlueprintLab:
    1. `session.RunWritebacks()`. This includes the SimClock write-back (World only) and the fleet write-back (§5.7).
-   2. If leaving the World for any reason other than `LoadGame`, `ErrorRecovery` or `NewGame`: `await save.SaveAsync(...)` through `save.Autosave.Request(AutosaveTrigger.SceneTransition)`, then await `!save.IsBusy` (at most 10 s; a timeout logs and continues).
+   2. The session has already performed the requested exit save before entering Exiting (step 0, ADR-0034). No second save is requested here.
    3. `ISceneExiting` hooks in order, each in try/catch.
    4. **Teardown:**
       1. `em.CompleteAllTrackedJobs()`;
@@ -435,7 +436,7 @@ Main thread; `async Awaitable<FlowResult>`.
 |---|---|---|
 | `NewGameAsync(args)` | MainMenu, World (after confirm) | `TransitionAsync(World, NewGame, betweenScenes: session.BeginNewGame(args))` |
 | `LoadGameAsync(slotId)` | MainMenu, World | `r = await save.ReadAsync(slot)`; failure → `Failed` with no transition. Else `TransitionAsync(World, LoadGame, betweenScenes: session.RestoreFrom(r))` |
-| `SaveGameAsync(slotId, reason)` | World | `CanSave` false → `Blocked`; `RunWritebacks()`; `await save.SaveAsync(...)` |
+| `SaveGameAsync(slotId, reason)` | World | `CanSave` false → `Blocked`; `await save.SaveAsync(...)` (PrepareCapture performs the writebacks) |
 | `QuitToMainMenuAsync(saveFirst)` | World, BlueprintLab | `saveFirst` → save as above, then `TransitionAsync(MainMenu, QuitToMenu, betweenScenes: session.EndSession)` |
 | `EnterBlueprintLabAsync(args)` | MainMenu (Creative), World (FleetShip, docked — SPEC-51 checks) | FleetShip: capture the player pose into `GalaxyState.PlayerLocation` (`galaxy.CapturePlayerLocation()`) before teardown. `TransitionAsync(BlueprintLab, EnterBlueprintLab, lab: args)` |
 | `ExitBlueprintLabAsync()` | BlueprintLab | Creative → `TransitionAsync(MainMenu, ExitBlueprintLab)`. FleetShip → `TransitionAsync(World, ExitBlueprintLab)`: the star system regenerates and the player respawns from the (possibly replaced) structure with the same `PersistentId` at the captured location |
@@ -464,7 +465,7 @@ Main thread; `async Awaitable<FlowResult>`.
 
 ### 5.5 `GameSession` behaviour
 
-- **`BeginNewGame(args)`** (between scenes):
+- **`BeginNewGame(args)`** (between scenes; until a profile picker exists, create a profile using the configured default commander name only if no active profile is selected):
   1. `save.ResetForNewGame()`;
   2. every registered `ISessionModel.ResetToEmpty()` in registration order;
   3. `CommanderName = args.CommanderName`;
@@ -478,8 +479,8 @@ Main thread; `async Awaitable<FlowResult>`.
   11. `HasActiveSession = true`.
 - **`RestoreFrom(loadResult)`** (between scenes):
   1. `report = save.Restore(loadResult.Save)`. Participants restore `SESS`, `FLET`, `GLXY`, `PLOC` and the rest in place.
-  2. `galaxy.OnSessionRestored()`.
-  3. Publish `SessionReset(Loaded)` exactly once.
+  2. Publish `SessionReset(Loaded)` exactly once.
+  3. `galaxy.OnSessionRestored()` (Decision 8 owns the ordering; Q17).
   4. `HasActiveSession = true`.
   5. If `report.ErrorCount > 0`, show a notification "Loaded with N problems; see the log". Missing content never blocks the load (04-B1).
 - **`EndSession()`**: every model `ResetToEmpty()`; publish `SessionReset(Cleared)`; `HasActiveSession = false`.
@@ -495,7 +496,7 @@ Main thread; `async Awaitable<FlowResult>`.
 
   SPEC-05 uses SPEC-02's `Game.Core.Save.SaveBlockReason` directly (SPEC-05 has no enum of its own).
 - **`DescribeForMeta(meta)`**: `CommanderName`; `LocationText = galaxy.GetStarSystemName(current)`; `PlaytimeSeconds`.
-- **Thumbnails**: `TryCaptureSlotThumbnail` renders the main camera to a 320×180 `RenderTexture` and reads it back with `AsyncGPUReadback`. The request carries the pending readback; SPEC-05 waits ≤ 2 frames. In the Lab it returns false.
+- **Thumbnails** ([ADR-0034](../decisions/ADR-0034-session-save-preparation.md)): `PrepareCapture` runs writebacks for every save before participant capture. `TryCaptureSlotThumbnail` renders the main camera to a 320×180 `RenderTexture` and reads it back with `AsyncGPUReadback`. The request carries the pending readback; SPEC-05 waits ≤ 2 frames. In the Lab it returns false.
 
 ### 5.6 `PauseService`, `SettingsService`, `SettingsApplier`
 
@@ -768,10 +769,10 @@ If no save exists, "Load last save" is disabled.
 - **Do:** Implement `GameSession` (§5.4.3, §5.5) except the fleet parts (FND-010), `SessionSaveParticipant` (§5.10), and the `ISaveContext` members. Galaxy calls are skipped while `GalaxyService` is not registered (M1); the new game then starts in the sandbox path.
 - **Files:** `Assets/Game/App/Session/{GameSession,SessionSaveParticipant}.cs`; `Assets/Game/Tests/EditMode/App/{GameSessionTests,SessionSaveParticipantTests}.cs`
 - **Acceptance criteria:**
-  - [ ] `NewGameAsync` resets every registered model once, runs initializers in order, and publishes exactly one `SessionReset(NewGame)`.
-  - [ ] `GetBlockReason` returns each reason under its condition (table-driven test).
-  - [ ] `SESS` round trip is byte-identical.
-  - [ ] `IGameFlow` calls from a disallowed scene return `NotAllowed` and never throw.
+  - [x] `NewGameAsync` resets every registered model once, runs initializers in order, and publishes exactly one `SessionReset(NewGame)`.
+  - [x] `GetBlockReason` returns each reason under its condition (table-driven test).
+  - [x] `SESS` round trip is byte-identical.
+  - [x] `IGameFlow` calls from a disallowed scene return `NotAllowed` and never throw.
 - **Tests:** `GameSessionTests.NewGame_ResetsAndInitializes`, `.BlockReasons_Table`, `.DisallowedScene_NotAllowed`; `SessionSaveParticipantTests.RoundTrip`.
 
 ### FND-010 — Fleet model, FLET and the player ship
@@ -892,6 +893,12 @@ If no save exists, "Load last save" is disabled.
 | 12 | §5.8 incorrectly says GetSingletonRW completes outstanding allocator jobs | Explicit component-specific dependency completion in initialization | Tech lead | Resolved 2026-10-11: installed Entities API says neither singleton read nor write waits. CompleteDependencyBeforeRW precedes refill and session-reset access; the mixed-source test deliberately leaves its Burst consumer scheduled across refill calls. |
 
 | 13 | Config validation permits threshold 0, but a strict remaining < threshold test never refills an empty block | Always refill an empty block; zero disables only early refill | Tech lead | Resolved 2026-10-11: preserve the valid config range and test zero-threshold session activation in NoSession_Empty. |
+
+| 14 | Direct timer/quit saves do not call GameSession.SaveGameAsync, so their snapshots miss writebacks | PrepareCapture in the save context | Tech lead | Resolved FND-009 / ADR-0034: invoke once after the final block check, before all participants; preparation failure leaves files untouched. |
+| 15 | Async thumbnail readback cannot fit the completed-pixel DTO, and the M1 camera does not exist yet | Pending thumbnail state and explicit camera binding | Tech lead | Resolved FND-009 / ADR-0034: at most two frame yields before background writing; late/failed images omitted, producer still frees GPU resources. CAM-004 binds its camera through composition; headless/no-camera returns false. |
+| 16 | Entering Exiting before requesting an autosave blocks that same save; quit-without-saving also requested one | Reserve the flow call and save while SceneFlow is still Idle | Tech lead | Resolved FND-009: operation reservation rejects competing IGameFlow calls, exit save precedes transition, and saveFirst=false skips it. Exceptions during exit writebacks also enter SceneFlow recovery. |
+| 17 | Session dependencies do not include the later galaxy, fleet, combat-status or camera types | Implement current session/flow and explicit task-owned integration points | Tech lead | Resolved FND-009: GAL-008 adds galaxy state/calls; FND-010 fleet; AI-008 the cached combat-status read after AI-001; CAM-004 binds the camera. Existing ISaveBlocker covers save vetoes meanwhile; no parallel substitute models. Decision 8 takes precedence over the old restore paragraph: publish Loaded before galaxy notification. Missing SESS defaults use configured commander/seed, zero time, counter 1 and creative=false. |
+| 18 | New game can be invoked before a profile picker has selected a profile | Create one using the configured commander label only when no active profile exists | Tech lead | Resolved FND-009: preserve an already selected profile; create under SaveService's configured root, including test path redirection. |
 
 ## 11. References
 

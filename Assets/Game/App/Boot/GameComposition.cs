@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Game.App.Flow;
+using Game.App.Session;
+using Game.Core.Flow;
 using Game.App.Services;
 using Game.App.Settings;
 using Game.Core;
@@ -45,6 +47,7 @@ namespace Game.App.Boot
         internal SaveService Save { get; private set; }
         internal GameConfigDefinition GameConfig { get; private set; }
         internal SceneFlow Flow { get; private set; }
+        internal GameSession Session { get; private set; }
 
         GameComposition() { }
 
@@ -122,8 +125,12 @@ namespace Game.App.Boot
             Flow.RegisterExiting(Registry);
             Step("7 flow");
 
-            // 8. TODO(FND-009): session = new GameSession(flow, save, world, content, gameConfig); save.AttachContext(session); SESS, FLET;
-            //    Services.Register<IGameFlow>(session), <IPersistentIdAllocator>(session).
+            Session = Push(new GameSession(Flow, Save, world, Content, GameConfig));
+            Save.AttachContext(Session); Save.Register(new SessionSaveParticipant(Session));
+            Register(Session); Register<IGameFlow>(Session); Register<IPersistentIdAllocator>(Session);
+            Step("8 session");
+            // TODO(FND-010): register the fleet participant and player-spawn/writeback hooks.
+            // TODO(CAM-004): Session.SetThumbnailCamera(camera.Camera) after constructing the rig in step 11.
             // 8.1–13: galaxy, travel, spawner, factions, map, economy, narrative, UI, camera, FX and dialog are added by their tasks, in the
             //    rows of SPEC-01 §5.2 (GAL-008, TRV-006, FND-012, ENC-007, GAL-011, ECO-008, UI-003, …).
 

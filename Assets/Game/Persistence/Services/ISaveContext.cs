@@ -8,6 +8,7 @@ namespace Game.Persistence.Services
     {
         bool HasActiveSession { get; }
         Game.Core.Save.SaveBlockReason GetBlockReason();                  // None when saving is allowed
+        void PrepareCapture();                                         // ordered writebacks before participants (ADR-0034)
         void DescribeForMeta(SaveMeta meta);                              // fills CommanderName, LocationText, PlaytimeSeconds
         bool TryCaptureSlotThumbnail(out ThumbnailRequest thumbnail);     // Key must be "slot"
         void CollectThumbnails(List<ThumbnailRequest> changed, HashSet<string> keep);  // keep = every non-slot key that must exist after the save

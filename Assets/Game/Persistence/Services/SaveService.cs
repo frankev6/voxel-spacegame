@@ -342,6 +342,7 @@ namespace Game.Persistence.Services
                 if (captured.Failure.HasValue) result = captured.Failure.Value;
                 else
                 {
+                    await FinishPendingThumbnailsAsync(captured);
                     await UnityEngine.Awaitable.BackgroundThreadAsync();
                     try { result = WriteCaptured(captured); }
                     finally { await UnityEngine.Awaitable.MainThreadAsync(); }
@@ -606,6 +607,9 @@ namespace Game.Persistence.Services
                     captured.Failure = new SaveResult(false, SaveErrorKind.Blocked, SaveMessages.Blocked(blocked), slot, 0, 0, 0);
                     return captured;
                 }
+                stage = "session preparation";
+                diagnostic = "capture of " + stage;
+                context.PrepareCapture();
                 // 2.
                 captured.Palette = PreservedChunks.Count > 0 && LoadedPalette != null ? SaveIdPalette.SeededFrom(LoadedPalette) : SaveIdPalette.CreateEmpty();
                 // 3.
@@ -638,7 +642,7 @@ namespace Game.Persistence.Services
                 // 5.
                 stage = "slot thumbnail";
                 diagnostic = "capture of " + stage;
-                if (context.TryCaptureSlotThumbnail(out var slotThumb) && slotThumb != null && slotThumb.Rgba32 != null)
+                if (context.TryCaptureSlotThumbnail(out var slotThumb) && slotThumb != null && (slotThumb.Pending || slotThumb.Rgba32 != null))
                 {
                     slotThumb.Key = "slot";
                     captured.SlotThumbnail = slotThumb;
@@ -666,6 +670,23 @@ namespace Game.Persistence.Services
                 GameLog.Exception("Save", e, diagnostic);
                 captured.Failure = new SaveResult(false, SaveErrorKind.ParticipantFailed, SaveMessages.ParticipantFailed(stage), slot, 0, 0, 0);
                 return captured;
+            }
+        }
+
+        // ADR-0034: no pending producer is shared with the background writer after this boundary.
+        internal async UnityEngine.Awaitable FinishPendingThumbnailsAsync(CapturedSave captured)
+        {
+            for (int frame = 0; frame < 2 && HasPending(); frame++) await UnityEngine.Awaitable.NextFrameAsync();
+            if (captured.SlotThumbnail != null && (captured.SlotThumbnail.Pending || captured.SlotThumbnail.Rgba32 == null))
+            { captured.SlotThumbnail = null; captured.Meta.Thumbnail = null; }
+            for (int i = captured.ChangedThumbnails.Count - 1; i >= 0; i--)
+                if (captured.ChangedThumbnails[i] == null || captured.ChangedThumbnails[i].Pending || captured.ChangedThumbnails[i].Rgba32 == null)
+                    captured.ChangedThumbnails.RemoveAt(i);
+            bool HasPending()
+            {
+                if (captured.SlotThumbnail != null && captured.SlotThumbnail.Pending) return true;
+                foreach (var thumbnail in captured.ChangedThumbnails) if (thumbnail != null && thumbnail.Pending) return true;
+                return false;
             }
         }
 
