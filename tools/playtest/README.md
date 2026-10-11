@@ -43,7 +43,10 @@ Runtime dev commands, reachable as `gh_<name>` and in the in-game console. Each 
 
 | Command (args, defaults) | Purpose |
 |---|---|
-| — | none yet (DEV-003 adds `help`, `op`, `until`) |
+| `gh_help` (`--cmd=""`) | List runtime commands or show one usage; play mode required |
+| `gh_dev` (`--cmd`) | Execute any runtime command line |
+| `gh_op` (`--id`) | Poll `running/succeeded/failed` status without blocking |
+| `gh_until` (`--cond`) | Evaluate once; expressions unavailable until DEV-005 |
 
 Useful built-ins: `editor_play`, `editor_stop`, `open_scene`, `recompile`, `recompile_status`, `editor_status`,
 `capture_game_view`, `get_performance_stats`, `run_tests`, `eval`, `run_script`. List them with `unity command`.

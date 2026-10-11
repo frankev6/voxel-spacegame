@@ -584,6 +584,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 41 | 2026-10-11 | SPEC-64 AUD-002 | Manual mixer creation conflicts with Frank’s CLI-only direction (SPEC-64 Q13) | Temporary installed-Editor API job plus runtime asset readback | Tech lead | Resolved in AUD-002; reflection stays in deleted one-off job |
 | 42 | 2026-10-11 | SPEC-64 AUD-003 | M0 core precedes M2 audio config/cues; database lookup API mismatch (SPEC-64 Q3/Q14) | Silent null-config core; enumerate Definitions; normal routing with validated config | Tech lead | Resolved in AUD-003; full boot integration without placeholder cues |
 
+| 43 | 2026-10-11 | SPEC-70 DEV-003 | Host precedes seven managed-event payloads and camera/player types (SPEC-70 Q13) | Three existing subscriptions, reserved zero counters and null lookups until owning tasks land | Tech lead | Resolved; staged contracts without speculative APIs |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
@@ -596,6 +598,7 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 | 2026-10-11 | PERS-012 | Reference ship compressed / damaged variant | 15,230 B / 34,810 B | Gate 81,920 B on pristine; damaged report only |
 | 2026-10-11 | TST-008 | No-change compile / Play-to-menu / EditMode suite | 1.697 / 0.159 / 29.800 s median | Apple M5 Pro; 3 runs each through live CLI; gates 10 / 1 / 60 s; all PASS |
 | 2026-10-11 | MIG-016 | Full migration / slowest ship / ship memory bound | 579.6 ms median (613.1 max) / 42.38 ms / 748,853 B | Apple M5 Pro; budgets 60 s / 200 ms / 10 MiB; all pass |
+
 
 ## Log
 

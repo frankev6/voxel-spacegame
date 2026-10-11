@@ -127,7 +127,10 @@ namespace Game.App.Boot
             Flow.SnapshotBootEntities();
             Step("15 snapshot");
 
-            // 16. TODO(DEV-003): dev = DevRuntimeHost.Create(root) (#if UNITY_EDITOR || DEVELOPMENT_BUILD); Services.Register(dev).
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Register(Push(Game.App.DevRuntime.DevRuntimeHost.Create(root)));
+            Step("16 dev runtime");
+#endif
         }
 
         void Step(string name)

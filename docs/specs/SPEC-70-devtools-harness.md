@@ -639,6 +639,8 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 | 11 | SPEC-60: theme classes for a code-built screen | Generic classes `panel`, `label`, `label--mono`, `text-field`, `list` exist in the theme | Tech lead |
 | 12 | Where do non-asset test inputs live? | `TestData/` at the project root (`Scenarios/`, `Replays/`, `Golden/`); see Proposed change in the report | Tech lead |
 
+| 13 | DEV-003 precedes seven managed-event payloads and the camera/player contracts. How is the M0 host staged? | **Answered:** subscribe to the three existing types (SessionReset, GameSaved, GameLoaded); reserve all ten counter names with zero until their owning payload tasks add typed subscriptions. CAM-004/DEV-009 wire camera/player lookups when available; return null/Entity.Null in M0. DEV-004 adds input/UI, DEV-005 expressions, DEV-006 runners. No speculative shared contracts or assembly changes. | Tech lead |
+
 ## 11. References
 
 - `docs/reference/audit-2026-10/00-synthesis.md` §6m (harness, lessons, plan); `LEDGER.md` TOOLING v1–v5, R10, R15, R16, R18 (modal blocks CLI), R19, R25, R26, R28, R30.

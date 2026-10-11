@@ -31,7 +31,7 @@ namespace Game.Tests.PlayMode.Boot
             Assert.AreEqual(Bootstrap.WorldName, World.DefaultGameObjectInjectionWorld.Name);
             Assert.IsTrue(Services.IsRegistered<ISettingsService>() && Services.IsRegistered<IPauseService>(), "composition steps 1 and 5 ran");
             var root = GameRoot.Instance.transform;
-            CollectionAssert.AreEquivalent(new[] { "UI", "AudioRoot", "CameraRoot" }, Enumerable.Range(0, root.childCount).Select(i => root.GetChild(i).name));
+            CollectionAssert.AreEquivalent(new[] { "UI", "AudioRoot", "CameraRoot", "DevRuntimeHost" }, Enumerable.Range(0, root.childCount).Select(i => root.GetChild(i).name));
 
             Bootstrap.Boot();                                         // a second boot is a no-op
             yield return null;
