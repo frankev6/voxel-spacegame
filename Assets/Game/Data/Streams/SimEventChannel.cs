@@ -34,12 +34,10 @@ namespace Game.Data.Streams
         {
             if (Data == null) return;
             Data->LastConsumer.Complete();
-            if (Data->OpenRead != 0) DisposeReadSet(default);
-            for (int i = 0; i < Data->Pending.Length; i++)
-            {
-                Data->Pending[i].Writer.Complete();
-                Data->Pending[i].Stream.Dispose();
-            }
+            // An abandoned BeginRead may still include running producers. Complete them before freeing its set.
+            for (int i = 0; i < Data->Pending.Length; i++) Data->Pending[i].Writer.Complete();
+            if (Data->OpenRead != 0) DisposeReadSet(default).Complete();
+            for (int i = 0; i < Data->Pending.Length; i++) Data->Pending[i].Stream.Dispose();
             Data->Pending.Dispose();
             Data->Inbox.Dispose();
             Data->ReadStreams.Dispose();
@@ -133,8 +131,8 @@ namespace Game.Data.Streams
         {
             CheckCreated();
             if (Data->OpenRead == 0) throw new System.InvalidOperationException($"SimEventChannel {Data->Name}: EndRead without BeginRead");
-            DisposeReadSet(readerJob);
-            Data->LastConsumer = readerJob;
+            // Own both the reader and every asynchronous deallocation, including older stale cleanup.
+            Data->LastConsumer = DisposeReadSet(JobHandle.CombineDependencies(Data->LastConsumer, readerJob));
         }
 
         /// <summary>Registrations not yet read (tests, harness).</summary>
@@ -161,16 +159,18 @@ namespace Game.Data.Streams
             Data->Pending[0] = new SimEventRegistration { Stream = stream, Producer = ProducerKind.MainThread, ForEachCount = 1, Tick = Data->Tick };
         }
 
-        void DisposeReadSet(JobHandle after)
+        JobHandle DisposeReadSet(JobHandle after)
         {
-            for (int i = 0; i < Data->Taken; i++) Data->Pending[i].Stream.Dispose(after);
+            var cleanup = after;
+            for (int i = 0; i < Data->Taken; i++)
+                cleanup = JobHandle.CombineDependencies(cleanup, Data->Pending[i].Stream.Dispose(after));
             Data->Pending.RemoveRange(0, Data->Taken);
             Data->ReadStreams.Clear();
-            Data->ReadSet.Producers.Dispose(after);
-            Data->ReadSet.ForEachCounts.Dispose(after);
+            cleanup = JobHandle.CombineDependencies(cleanup, Data->ReadSet.Producers.Dispose(after), Data->ReadSet.ForEachCounts.Dispose(after));
             Data->ReadSet = default;
             Data->Taken = 0;
             Data->OpenRead = 0;
+            return cleanup;
         }
 
         void CheckCreated()

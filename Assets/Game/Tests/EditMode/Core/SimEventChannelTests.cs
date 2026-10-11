@@ -248,6 +248,57 @@ namespace Game.Tests.EditMode.Core
             Assert.AreEqual(0, Collect().Count, "the inbox is consumed once");
         }
 
+        [TestCase(1, false)]
+        [TestCase(8, false)]
+        [TestCase(8, true)]
+        public void Dispose_CompletesReadCleanup(int cycles, bool stale)
+        {
+            // No worker can opportunistically finish unowned disposal jobs before the assertion.
+            JobsUtility.JobWorkerCount = 0;
+            UnsafeUtility.CheckForLeaks();
+            ref var state = ref world.Unmanaged.ResolveSystemStateRef(prodA.SystemHandle);
+            for (uint i = 0; i < cycles; i++)
+            {
+                channel.BeginTick(i * 3 + 1);
+                var writer = channel.BeginWrite(ref state, ProducerKind.Test, 1);
+                writer.BeginForEachIndex(0); writer.Write(new Ev()); writer.EndForEachIndex();
+                channel.EndWrite(default);
+                if (stale)
+                {
+                    if (i == 0) LogAssert.Expect(LogType.Warning, "[Core] stale stream: test");
+                    channel.BeginTick(i * 3 + 3);
+                }
+                channel.BeginRead(ref state);
+                channel.EndRead(default);
+            }
+            channel.Dispose();
+            Assert.AreEqual(0, UnsafeUtility.CheckForLeaks(), "Dispose includes stream and read-set cleanup jobs");
+        }
+
+        [Test]
+        public void Dispose_OpenReadCompletesProducer()
+        {
+            bool safety = BurstCompiler.Options.EnableBurstSafetyChecks;
+            bool debugger = JobsUtility.JobDebuggerEnabled;
+            try
+            {
+                BurstCompiler.Options.EnableBurstSafetyChecks = true;
+                JobsUtility.JobDebuggerEnabled = true;
+                JobsUtility.JobWorkerCount = 0;
+                channel.BeginTick(1);
+                prodA.Update(); // scheduled writer cannot run until completed on the main thread
+                UnsafeUtility.CheckForLeaks();
+                channel.BeginRead(ref world.Unmanaged.ResolveSystemStateRef(consumer.SystemHandle));
+                channel.Dispose(); // no EndRead: must finish writer before freeing the open set
+                Assert.AreEqual(0, UnsafeUtility.CheckForLeaks());
+            }
+            finally
+            {
+                BurstCompiler.Options.EnableBurstSafetyChecks = safety;
+                JobsUtility.JobDebuggerEnabled = debugger;
+            }
+        }
+
         [Test, Performance, Category("Performance")]
         public void Overhead()
         {

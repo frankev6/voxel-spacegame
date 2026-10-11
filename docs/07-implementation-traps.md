@@ -122,6 +122,11 @@ How to use this file: before you start a task, read the sections whose tags matc
 - **Wrong:** a system or Unity package creates a singleton entity on first use, after SceneFlow's boot snapshot. Teardown then destroys it on every scene exit. Entities' own `WorldTime` entity, created by the first `World.SetTime`, was one (FND-006).
 - **Right:** create singletons in `OnCreate`, or force them into existence before `SnapshotBootEntities` (it calls `world.SetTime(world.Time)`). `SceneFlowTests.RoundTrip_NoLeftovers` names the archetype of anything that survives or reappears.
 
+### T2.13 Disposal jobs have their own handles
+- **Wrong:** `array.Dispose(readerJob); lastJob = readerJob;` and completing only `lastJob` during shutdown. The reader can be complete while deallocation is still queued.
+- **Right:** retain every handle returned by `Dispose(JobHandle)`, combine it with existing cleanup work, and complete that whole chain before the owner returns from `Dispose`. If a read set is abandoned before its normal end, complete its registered producers before freeing its streams.
+- **Check:** set job workers to zero in a focused ownership test so background workers cannot hide missing cleanup dependencies. CORE-013 reproduced leaks and an open-read safety error this way.
+
 ---
 
 ## 3. Rendering `[Voxel/REN, Presentation, Art]`
