@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 26 | 0 | 0 | 0 | 79 | 0 | 105 | 16 |
+| M1 | 25 | 0 | 0 | 0 | 80 | 0 | 105 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -186,8 +186,8 @@
 | AI-001 | Public contract types | [SPEC-23](specs/SPEC-23-ai.md) | M1 | standard | CORE-001, DATA-001, VOX-001, WPN-001 | no | todo |  |  |  |  |
 | UI-001 | Public contract types | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | CORE-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 01dcff0 | Exact data/view contracts, 123 style names; service/control shells per spec |
 | UI-002 | Theme skeleton, panel settings and root UXML | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | a494f84 | Panel/theme/config and six non-picking layers; three asset tests pass; Q147 |
-| UI-003 | UIRoot construction, layers and sound hooks | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-002, CORE-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |  |
-| UI-004 | UINavigator stack, pause token and input context | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-003 | no | todo |  |  |  |  |
+| UI-003 | UIRoot construction, layers and sound hooks | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-002, CORE-001 | yes | done | astra (gpt-6) | 2026-10-12 | fdade56 | Root/document boot lifecycle, prewarm, sound hooks; live flight preserved; Q148–150 |
+| UI-004 | UINavigator stack, pause token and input context | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-003 | yes | todo |  |  |  |  |
 | UI-005 | Text entry context and world-pointer gate | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-004 | no | todo |  |  |  |  |
 | UI-006 | MVVM base, converters and number strings | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-001 | yes | todo |  |  |  |  |
 | UI-007 | Base controls: buttons, panel, list, inputs, key hint, markers, HUD plates | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-002, UI-006 | no | todo |  |  |  |  |
@@ -825,6 +825,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — UI-003 done — astra (gpt-6)
+
+- **Implementation fdade56:** boot step 9 now constructs the persistent UIRoot/InputServiceBridge from GameRoot's configured UIDocument/UIConfig. The root validates config/layers, caches screen assets, supports registration/prewarm, owns dynamic click/hover sound hooks and tears down callbacks/registrations. AppUiSoundSink honors configured cue overrides or explicit semantic mapping (UI/audio ordinals differ). Composition tests now include the UI construction/disposal step. No new screens, art or performance tuning.
+- **Resolved Q148–150 / SPEC-60 Q12–14:** registration/build is staged before UI-004 stack operations; Back/context ownership remains with ADR-0044 until its coordinated removal. Focus/picking, converters, tooltip/toast ticks, dialogs and accessibility follow their owning tasks. Accepted ADR-0046 adds the installed Unity.InputSystem assembly reference needed by the prescribed bridge (no package change). Confirm maps to audio Success; actual audio playback/content remains its owning tasks.
+- **Validation:** compile **zero C# warnings**; full EditMode **714 pass, 1 advisory failure, 1 explicit skip** (MeshBuild128 **0.8705 ms** vs 0.5); final full PlayMode **76 pass, 12 GPU-only skips**, including all five new UIRootTests and the existing playable/save-load checks. Docs **506 tasks / zero errors**.
+- **Actual GPU game:** isolated `newgame.sh 42` launched in **1.740 s**, root service/document available with all six layers, real W reached **14.523 m/s**, Escape gave paused/None then resumed/Flight. Live error log **zero errors**. `Logs/playtest/fighter-ui-root.png` confirms the transparent empty UI leaves the Fighter visible; raw evidence under `Logs/playtest/ui003/`. The existing first-spawn lookup-performance warning remains advisory. Editor closed and incidental settings restored from backups.
+- **Next:** UI-004 navigation (or ready UI-006/007 support), then UI-005 pointer/focus integration. **Do not strand flight in None by simply removing the fallback while the navigator has no scene roots:** HUD-002's root screens are later M3 work. Resolve that staging at the handover while preserving existing flight/Escape tests and the actual playable loop. Full HUD/menu presentation is still pending; this checkpoint connects the root without claiming visible screens.
 
 ### 2026-10-12 — UI-002 done — astra (gpt-6)
 
