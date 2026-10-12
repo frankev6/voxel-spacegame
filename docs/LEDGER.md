@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 1 | 1 | 1 | 0 | 105 | 0 | 108 | 0 |
+| M1 | 1 | 0 | 1 | 0 | 106 | 0 | 108 | 0 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -210,7 +210,7 @@
 | DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | no | todo |  |  |  |  |
 | DEV-015 | In-game dev console | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-003, UI-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 8cf2df1 | F1 console; history/completion, async results, 0 B closed; ADR-0049 |
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | yes | done | astra (gpt-6) | 2026-10-12 | f1f6cd2 | Console/CLI replay; real seed-7 Fighter 300 ticks, 0 m error; live 1790-tick recording and screenshot; Q175 |
-| DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Six future-system regression drafts and strict parse-only vocabulary verification |
+| DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | yes | done | astra (gpt-6) | 2026-10-12 | f891b9d | Six drafts parse; active Boot passes and all six drafts are ignored; activation prerequisites Q177 |
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 9349e78 | Sparse text recorder/replay; five required tests; even-tick 30/60/144 commands match |
 | TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | done | astra (gpt-6) | 2026-10-12 | 1392d35 | Real Boot/flow fixture; four tests; temp saves/settings and unchanged real profile timestamps |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-12 | a56c266 | Full pipeline: 15-frame readiness, idle 0.224481 ms; total memory performance deferred (Q174); zero tuning |
@@ -861,6 +861,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DEV-019 done — astra (gpt-6)
+
+- **Changed:** all six SPEC-70 regression drafts are checked in: station dialog, inventory-safe editor cancellation, paint-only commit round trip, ship death without ECB errors, pause-menu load and two-leg lane travel. Explicit parse-only fixtures contain only declared future vocabulary. No future gameplay is claimed implemented. SPEC-70 Q24 / ledger Q177 records the editor input/Ark dialog prerequisites before activation; implementation `f891b9d`.
+- **Checks:** compile zero C# warnings; full EditMode **766 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **4.4635 ms**, MeshBuild128 **1.1224 ms**). ScenarioDraftTests.AllDrafts_Parse passes. Targeted PlayMode ScenarioFileTests **1 passed, 6 skipped**, each with reason `draft`; real Boot smoke passes. No runtime code changed; DEV-016 remains the latest full PlayMode suite. Evidence `Logs/playtest/dev019/`. Docs clean; zero optimization passes.
+- **Next:** built M1 system review, then the first M2 spawning/combat slice. M1 is **106/108 done**: DEV-009/012 still await real world-location/current-system support. Check FND-012's actual galaxy-service prerequisites before claiming; ledger Ready describes declared dependencies, not implementation availability. Preserve approved Nocturne visuals and investigate the previously recorded GUI shutdown allocations in the review.
+
 
 ### 2026-10-12 — DEV-007 done — astra (gpt-6)
 
