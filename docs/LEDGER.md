@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 27 | 0 | 0 | 0 | 78 | 0 | 105 | 16 |
+| M1 | 26 | 0 | 0 | 0 | 79 | 0 | 105 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -185,8 +185,8 @@
 | WPN-001 | Public contract types | [SPEC-21](specs/SPEC-21-weapons.md) | M1 | standard | CORE-001, DATA-001, VOX-001, DMG-001, FLT-001 | yes | todo |  |  |  |  |
 | AI-001 | Public contract types | [SPEC-23](specs/SPEC-23-ai.md) | M1 | standard | CORE-001, DATA-001, VOX-001, WPN-001 | no | todo |  |  |  |  |
 | UI-001 | Public contract types | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | CORE-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 01dcff0 | Exact data/view contracts, 123 style names; service/control shells per spec |
-| UI-002 | Theme skeleton, panel settings and root UXML | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |  |
-| UI-003 | UIRoot construction, layers and sound hooks | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-002, CORE-001 | no | todo |  |  |  |  |
+| UI-002 | Theme skeleton, panel settings and root UXML | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | a494f84 | Panel/theme/config and six non-picking layers; three asset tests pass; Q147 |
+| UI-003 | UIRoot construction, layers and sound hooks | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-002, CORE-001 | yes | todo |  |  |  |  |
 | UI-004 | UINavigator stack, pause token and input context | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-003 | no | todo |  |  |  |  |
 | UI-005 | Text entry context and world-pointer gate | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-004 | no | todo |  |  |  |  |
 | UI-006 | MVVM base, converters and number strings | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-001 | yes | todo |  |  |  |  |
@@ -822,6 +822,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — UI-002 done — astra (gpt-6)
+
+- **Implementation a494f84:** token-based base/utility sheets and ordered Game.tss imports, an accessibility sheet reserved for UI-013, 1920×1080 / MatchWidthOrHeight 0.5 PanelSettings, UIConfig links, and transparent UIRoot with six non-picking layers in the canonical order. Assets authored through the headless Unity temporary-script recipe; the script and meta were removed. Existing tokens and fonts unchanged; component/screen imports follow as those tasks land.
+- **Validation:** all three ThemeFilesTests pass against imported assets and UI-owned styles. Compile **zero C# warnings**; full EditMode **714 pass, 1 advisory failure, 1 explicit skip** (MeshBuild128 **0.8698 ms** vs 0.5); full PlayMode **71 pass, 12 GPU-only skips**. Docs **506 tasks / zero errors**. No optimization passes; no new assets requiring art approval.
+- **Resolved Q147 / SPEC-60 Q11:** Directions/ contains SPEC-80 token sources, so it is exempt from the no-literal UI style audit alongside tokens.uss/accessibility.uss. Component and screen sheets remain audited. No production style assertion was disabled.
+- **Next:** UI-003 root/service composition and UI-004 navigator, then UI-005 focus/pointer integration; UI-006 binding support is also ready. Preserve the single input-context owner during that handover. No visible game change in this asset-only task: the latest real Fighter screenshot remains `Logs/playtest/fighter-command-launch.png`. HANDOFF updated.
 
 ### 2026-10-12 — UI-001 done — astra (gpt-6)
 
