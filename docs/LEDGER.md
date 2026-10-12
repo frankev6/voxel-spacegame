@@ -14,10 +14,10 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 15 | 1 | 1 | 0 | 91 | 0 | 108 | 7 |
+| M1 | 15 | 0 | 1 | 0 | 92 | 0 | 108 | 8 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 8 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
-| M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
+| M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -148,8 +148,8 @@
 | REN-009 | Render config definitions and factory | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | REN-001, REN-008 | yes | done | astra (gpt-6) | 2026-10-12 | 6407fb5 | Validated materials/palette factory, explicit boot lifetime; Q138 |
 | REN-010 | BrickMeshBuildSystem | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-005, REN-006, REN-007 | yes | done | astra (gpt-6) | 2026-10-12 | be4b370 | Snapshot-only Burst batches verified; performance deferred: 0.864 ms vs 0.5 ms, zero tuning passes |
 | REN-011 | BrickMeshApplySystem, cleanup and statistics | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-010, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-12 | 18a0e45 | Pooled apply/cleanup, shared registration, camera transforms; six GPU checks pass |
-| REN-012 | GridLodSystem, Dormant and LOD switching | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Distance LOD and dormancy integration |
-| REN-013 | Rendering gate suite | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-012, REN-008 | no | todo |  |  |  |  |
+| REN-012 | GridLodSystem, Dormant and LOD switching | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011 | yes | done | astra (gpt-6) | 2026-10-12 | 6b2f87e | Hysteresis, conditional versions, async apply recovery; live Fighter LOD1 → LOD0 |
+| REN-013 | Rendering gate suite | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-012, REN-008 | yes | todo |  |  |  |  |
 | REN-014 | Prop block instancing | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011, REN-008 | yes | todo |  |  |  |  |
 | PHY-001 | Public contract types | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 1f27ec6 | Physics contracts, exact filters, native/blob ownership; 4 required tests |
 | PHY-002 | SPIKE: Unity Physics capabilities for nested voxel compounds | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | dd85d8c | Nested GO; all ten checks recorded |
@@ -482,7 +482,7 @@
 | MIG-014 | Body template stubs | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-004, GAL-001 | no | todo |  |  |  |  |
 | MIG-015 | Hand-off package | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-002, MIG-003 | yes | todo |  |  |  |  |
 | INP-008 | Gamepad scheme | [SPEC-03](specs/SPEC-03-input.md) | M4 | standard | INP-003 | yes | todo |  |  |  |  |
-| REN-015 | LOD2 grid proxies | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M4 | frontier | REN-012 | no | todo |  |  |  |  |
+| REN-015 | LOD2 grid proxies | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M4 | frontier | REN-012 | yes | todo |  |  |  |  |
 | PHY-021 | Region compounds for very large grids (only if PHY-019 shows assembly over budget) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M4 | frontier | PHY-019 | yes | todo |  |  |  |  |
 | DMG-018 | M4: per-brick component labels for >1M-cell stations | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | frontier | DMG-016 | no | todo |  |  |  |  |
 | WPN-016 | Per-instance fire groups (M4) | [SPEC-21](specs/SPEC-21-weapons.md) | M4 | frontier | WPN-011 | no | todo |  |  |  |  |
@@ -841,6 +841,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — REN-012 done — astra (gpt-6)
+
+- **Implementation:** `6b2f87e` adds GridLodSystem and its three jobs: grid dormancy from player distance, brick LOD from camera distance, conditional writes and guarded serial enqueue. Q162 / SPEC-11 Q32 repairs invalid-viewer restoration and late opposite-LOD mesh apply by watching both desired and applied state. Q163 / Q33 uses full inclusive cell bounds and root scale. No art/material changes.
+- **Live game:** a second imported Fighter at (120, 0, 600) applied LOD1 on all **4/4 bricks**, then LOD0 on **4/4** during real W+boost flight. Player z **289.4137 m**, peak **72.65659 m/s**, Flight context; zero runtime errors. Inspected capture `Logs/playtest/fighter-distance-lod.png` (simulation held after the crossing, rendering active). Evidence `Logs/playtest/ren012/`. An initial demonstration waited too long after braking and overshot; the final check records the crossing itself.
+- **Validation:** all six required checks pass. Compile zero C# warnings; full EditMode **749 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.3959 ms** vs 3; MeshBuild128 **1.1392 ms** vs 0.5). Full PlayMode **94 passed, 0 failed, 12 GPU skips**. Dedicated filtered perf records **0.00555 ms median / 0.0181 ms p95** scheduling 5,000 bricks against 0.1 ms; 0 initial tuning passes. The perf command exits 1 because its PlayMode half has no matching tests; its one actual gate passes, and the full PlayMode suite passes separately. Docs 509 tasks, clean.
+- **Discovered follow-up / next:** FND-019 records a reproducible existing environment restart defect: direct NewGame within Play can lose the persistent camera's Skybox override. Fresh Play restores the approved procedural sky. `restart-missing-sky.png` and the observation note preserve evidence. Fix FND-019 next, then return to remaining M1 rendering/props and integration; do not retune the approved look. HANDOFF updated.
 
 ### 2026-10-12 — INP-007 done — astra (gpt-6)
 
