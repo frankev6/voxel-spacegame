@@ -41,7 +41,7 @@ This spec turns simulation facts into pictures: flying voxel cubes when cells br
 ## 3. Decisions (binding)
 
 1. **One unmanaged queue, drained once per frame.** All producers append `FxEvent`s to `FxEventQueue.Queue` (`NativeQueue<FxEvent>`, `Allocator.Persistent`) through `ParallelWriter`. The queue accumulates across the 0..N fixed ticks of a frame; `FxUploadSystem` empties it exactly once per frame. Reason: presentation runs once per frame while simulation runs 0..N ticks.
-2. **The stream types live in `Game.Voxel`** (`Assets/Game/Voxel/PresentationStreams/`, namespace `Game.Voxel.PresentationStreams`). Reason: `Game.Voxel` is the lowest producer and allows Entities; this follows the `ExplosionRequest` precedent in architecture §6.3. No other spec may create these types.
+2. **FxKind lives in `Game.Data.Definitions`** (`Data/Definitions/Vfx/`, ADR-0050), because FxDefinition needs it. **The remaining stream types live in `Game.Voxel`** (`Assets/Game/Voxel/PresentationStreams/`, namespace `Game.Voxel.PresentationStreams`). Reason: `Game.Voxel` is the lowest producer and allows Entities; this follows the `ExplosionRequest` precedent in architecture §6.3. No other spec may create these types.
 3. **`FxEvent` keeps the binding fields of architecture §6.6** (`Kind, Pos, Dir, Vel, Scale, Color`) and adds `Flags` and `Fx`. Total size 56 bytes.
 4. **Content references are `ContentHash`.** `FxEvent.Fx` is the `ContentHash` (architecture §6.1) of a specific `FxDefinition`; `default(ContentHash)` (`Value == 0`) means "the default for `Kind`". Reason: `ContentId` is managed and never appears in ECS data; hashes are stable across builds.
 5. **Event-driven effects go through VFX Graph `GraphicsBuffer`s.** One `VisualEffect` per batched `FxDefinition`, fed by one `GraphicsBuffer` of `FxGpuEvent` and one `SendEvent("OnFxBatch")` per frame. No `GameObject` is created after `FxRig.Create`. Reason: 02-C29; 100k particles at under 1 ms GPU.
@@ -62,7 +62,7 @@ This spec turns simulation facts into pictures: flying voxel cubes when cells br
 ### 4.1 Stream types (public contract, `Game.Voxel`, folder `Assets/Game/Voxel/PresentationStreams/`)
 
 ```csharp
-namespace Game.Voxel.PresentationStreams
+namespace Game.Data.Definitions
 {
     /// Implements SPEC-63 §4.1. Add values at the end only; never reorder (values are stored in FxDefinition assets).
     public enum FxKind : byte
@@ -82,6 +82,11 @@ namespace Game.Voxel.PresentationStreams
         ShieldShell = 12,    // state: shield shell look (never sent as an event)
     }
 
+}
+
+namespace Game.Voxel.PresentationStreams
+{
+    // Uses Game.Data.Definitions.FxKind and Game.Data.Streams.GuardedHandles (ADR-0050).
     [System.Flags]
     public enum FxEventFlags : byte
     {
@@ -109,6 +114,7 @@ namespace Game.Voxel.PresentationStreams
     public struct FxEventQueue : IComponentData
     {
         public NativeQueue<FxEvent> Queue;
+        public GuardedHandles Access; // main-thread scheduling only; shared atomic producers, exclusive drain
     }
 
     /// Material property for chunk-body dissolve. SPEC-13 adds it (Value = 0) to every chunk-body render entity;
@@ -133,12 +139,14 @@ namespace Game.Voxel.PresentationStreams
     public partial struct FxEventQueueCreateSystem : ISystem
     {
         NativeQueue<FxEvent> queue;
+        GuardedHandles access;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             queue = new NativeQueue<FxEvent>(Allocator.Persistent);
-            state.EntityManager.CreateSingleton(new FxEventQueue { Queue = queue }, "FxEventQueue");
+            access = GuardedHandles.Create();
+            state.EntityManager.CreateSingleton(new FxEventQueue { Queue = queue, Access = access }, "FxEventQueue");
             state.Enabled = false; // never updates; exists to own the allocation
         }
 
@@ -149,7 +157,9 @@ namespace Game.Voxel.PresentationStreams
         public void OnDestroy(ref SystemState state)
         {
             state.EntityManager.CompleteAllTrackedJobs();
+            access.CompleteAccess();
             if (queue.IsCreated) queue.Dispose();
+            access.Dispose();
         }
     }
 }
@@ -184,7 +194,9 @@ namespace Game.Voxel.PresentationStreams
             using var q = em.CreateEntityQuery(ComponentType.ReadWrite<FxEventQueue>());
             if (q.IsEmpty) return;                       // no presentation in this world (tests)
             em.CompleteDependencyBeforeRW<FxEventQueue>();
-            q.GetSingleton<FxEventQueue>().Queue.Enqueue(e);
+            var stream = q.GetSingleton<FxEventQueue>();
+            stream.Access.CompleteAccess();
+            stream.Queue.Enqueue(e);
         }
     }
 }
@@ -228,7 +240,7 @@ public sealed class FxDefinition : ContentDefinition
     public int PoolSize => poolSize; public float MaxLifetime => maxLifetime; public float CullDistance => cullDistance;
     public float LodDistance => lodDistance; public float LodParticleFactor => lodParticleFactor; public VfxQuality MinQuality => minQuality;
 
-    public override void Validate(ValidationReport report)
+    public override void Validate(ValidationScope scope, ContentValidationContext context)
     {
         // Errors (asset path + field): kind == None; Batched/Pooled with graph == null; Instanced with mesh or material null;
         // Instanced with kind not in {Beam, Thruster, Tracer, ShieldShell}; Batched/Pooled with kind in that set;
@@ -263,7 +275,7 @@ public sealed class VfxConfigDefinition : ContentDefinition
     [SerializeField] float shieldRippleSeconds = 0.6f, shieldHitFlashSeconds = 0.15f;
     [SerializeField] float chunkDissolveSeconds = 2f;
     // Read-only properties with the same names in PascalCase; Budget(VfxQuality q) returns low/medium/high.
-    public override void Validate(ValidationReport report)
+    public override void Validate(ValidationScope scope, ContentValidationContext context)
     {
         // Errors: defaults.Length != 13; defaults[k] == null for every k in 1..12; defaults[k].Kind != (FxKind)k;
         // fallbackCellPalette.Length != 256; debrisLifetimeMin > debrisLifetimeMax; tracerColorByDamageType.Length != 4.
@@ -349,7 +361,7 @@ All VFX systems are in `PresentationBridgeGroup`. Ordering: `FxUploadSystem` fir
 - **Owned memory:** `NativeList<FxEvent> drained` (Persistent, initial capacity 32,768), `NativeArray<FxGpuEvent> gpuEvents` (Persistent, length = Σ slot `MaxEventsPerFrame`, allocated in `Bind`), `NativeArray<int> slotCounts`, `NativeArray<int> counters` (one per `FxStats` counter); disposed in `OnDestroy` and on re-`Bind`.
 
 Per-frame algorithm:
-1. `ref var q = ref SystemAPI.GetSingletonRW<FxEventQueue>().ValueRW; CompleteDependency();` (completes every producer job that wrote the queue).
+1. `var q = SystemAPI.GetSingleton<FxEventQueue>(); q.Access.CompleteAccess();` (outside fixed-step; completes every registered native queue producer, ADR-0050).
 2. Run `FxDrainJob` (Burst `IJob`, `.Run()`): `drained.Clear()`; dequeue until empty or `drained.Length == 65536`; if items remain, `counters[EventsOverHardCap] = q.Queue.Count`, then `q.Queue.Clear()`.
 3. If `Rig == null`: `stats.Bound = false`, add `drained.Length` to `EventsOverHardCap`, return.
 4. Reference point `refPos` = position of the first `PlayerShip` root `LocalToWorld`, else `float3.zero`.
@@ -459,11 +471,14 @@ Pre: `definitions` contains every `FxDefinition` of the `ContentDatabase`; `conf
 // In OnUpdate of a producing ISystem (fixed step). Do NOT RequireForUpdate<FxEventQueue>; GetSingleton throws
 // a clear error in a test world that forgot FxEventQueueCreateSystem — tests add typeof(FxEventQueueCreateSystem).
 // Read-only access (never GetSingletonRW in the fixed step: it would serialise producers and complete other systems' jobs).
-var fx = SystemAPI.GetSingleton<FxEventQueue>().Queue.AsParallelWriter();
-state.Dependency = new MyJob { Fx = fx /* ... */ }.ScheduleParallel(state.Dependency);
+var stream = SystemAPI.GetSingleton<FxEventQueue>();
+var fx = stream.Queue.AsParallelWriter();
+state.Dependency = new MyJob { Fx = fx /* ... */ }.ScheduleParallel(stream.Access.BeginRead(state.Dependency));
+stream.Access.EndRead(state.Dependency); // shared atomic enqueue; the guard stays on the main thread
 // in the job struct: [NativeDisableContainerSafetyRestriction] public NativeQueue<FxEvent>.ParallelWriter Fx;
 // in the job:        Fx.Enqueue(FxEvents.Hit(FxKind.HitKinetic, point, normal, targetVel, amount));
-// FxUploadSystem (§5.2 step 1) takes the queue RW and CompleteDependency() completes every producer before draining.
+// FxUploadSystem (§5.2 step 1) completes guarded access before draining. Concurrent atomic enqueues use shared access;
+// a scheduled exclusive drain/clear uses Access.Acquire/Release. Never pass the guard into a job.
 ```
 
 ### 6.3 Batched and pooled graph contract (every graph referenced by an `FxDefinition`)
@@ -541,10 +556,10 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 
 ### VFX-001 — Public contract types
 - **Milestone:** M1
-- **Tier:** standard — transcribes the exact code of §4.1 and the field lists of §4.2/§4.3
+- **Tier:** frontier — native queue ownership and guarded producer access (ADR-0050), plus exact content/GPU layouts
 - **Depends on:** `CORE-001`, `DATA-001`
 - **Do:** Create the stream types, `FxEventQueueCreateSystem` and `FxEvents` exactly as in §4.1; `VfxQuality`, `FxMode`, `FxDefinition`, `FxQualityBudget`, `VfxConfigDefinition` exactly as in §4.2 with the `Validate` rules in their comments; `FxGpuEvent`, the four instance structs, `FxStats` as in §4.3; an empty `FxRig : MonoBehaviour` with the §6.1 signatures throwing `NotImplementedException`. Make sure `Game.Voxel.asmdef` references `Unity.Entities.Graphics` (allowed by architecture §3.1; `[MaterialProperty]` needs it).
-- **Files:** `Assets/Game/Voxel/PresentationStreams/{FxKind,FxEventFlags,FxEvent,FxEventQueue,FxEventQueueCreateSystem,FxEvents,ChunkDissolve}.cs`; `Assets/Game/Data/Definitions/Vfx/{VfxQuality,FxMode,FxDefinition,FxQualityBudget,VfxConfigDefinition}.cs`; `Assets/Game/Presentation/Vfx/Data/{FxGpuEvent,TracerInstance,BeamInstance,PlumeInstance,ShieldInstance,FxStats}.cs`; `Assets/Game/Presentation/Vfx/FxRig.cs`
+- **Files:** `Assets/Game/Voxel/PresentationStreams/{FxEventFlags,FxEvent,FxEventQueue,FxEventQueueCreateSystem,FxEvents,ChunkDissolve}.cs`; `Assets/Game/Data/Definitions/Vfx/{FxKind,VfxQuality,FxMode,FxDefinition,FxQualityBudget,VfxConfigDefinition}.cs`; `Assets/Game/Presentation/Vfx/Data/{FxGpuEvent,TracerInstance,BeamInstance,PlumeInstance,ShieldInstance,FxStats}.cs`; `Assets/Game/Presentation/Vfx/FxRig.cs`
 - **Acceptance criteria:**
   - [ ] `UnsafeUtility.SizeOf<FxEvent>() == 56`, `SizeOf<FxGpuEvent>() == 80`, `SizeOf<ShieldInstance>() == 224`, the other instance structs 48.
   - [ ] A world containing `FxEventQueueCreateSystem` has exactly one `FxEventQueue` singleton; disposing the world leaks nothing.
@@ -711,23 +726,27 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | SPEC-01: does `GameRoot` create the rig? | Yes: after `UIRoot`, `GameRoot` calls `FxRig.Create(transform, config, allFxDefinitions, cellPalette, settings.VfxQuality)` then `rig.BindTo(World.DefaultGameObjectInjectionWorld)`; on shutdown `rig.Unbind(world)` and `rig.Dispose()` | Tech lead |
-| 2 | SPEC-01/SPEC-61: where is the VFX quality stored and how is a change applied? | `SettingsService` stores `VfxQuality` (default `High`); the settings apply code calls `rig.SetQuality(q)` | Tech lead |
-| 3 | SPEC-13: confirm debris emission (one `FxEvents.Debris` per removed cell and per tier-1 island cell; 64 sampled cells when a chunk body dissolves) and that `FxUploadSystem` never reads `CellRemoved` | Yes as stated | Tech lead |
-| 4 | SPEC-13: name and fields of the chunk-body lifetime component | `ChunkBody { float TimeLeft; float Lifetime; }`; SPEC-13 adds `ChunkDissolve` at chunk creation | Tech lead |
-| 5 | SPEC-11: does the voxel/chunk shader expose a per-instance `_DissolveAmount` (DOTS instanced)? | Yes, 0 = solid, 1 = gone (alpha-clip dissolve with noise) | Tech lead |
-| 6 | SPEC-11/SPEC-04: where is the 256-entry cell colour palette? | A `Color32[256]` on a SPEC-11 definition; `GameRoot` passes it to `FxRig.Create`; else `config_vfx.fallbackCellPalette` (grey ramp) | Tech lead |
-| 7 | SPEC-21: projectile, beam and weapon visual fields (§6.5) | As in §6.5; projectile entities carry no Entities Graphics render components (this spec draws them); missiles are drawn as tracers in M2 | Tech lead |
-| 8 | SPEC-21: per-weapon FX overrides | `WeaponDefinition` gets optional `FxDefinition hitFx, muzzleFx`; their `Id.Hash` (`ContentHash`) is baked into the weapon blob and written to `FxEvent.Fx` | Tech lead |
-| 9 | SPEC-20: thruster visual fields (§6.5) | `ThrusterState { float Intensity }` written by `PropulsionSystem`; `ThrusterVisual { float3 NozzleLocal, ExhaustDirLocal; float NozzleRadius }` written once at spawn | Tech lead |
-| 10 | SPEC-22: shield state and ripple ring buffer (§6.5) | As in §6.5; ShieldSystem writes the oldest of 8 `ShieldRipple` slots on each hit | Tech lead |
-| 11 | SPEC-30: how do ECS-side presentation consumers receive `OriginShifted` in the frame it happens? | `OriginRebaseSystem` also keeps a singleton `OriginShifted : IComponentData { float3 Delta; uint Sequence; }`; each shift sets `Delta` (amount added to every root local position) and increments `Sequence`; at most one shift per frame | Tech lead |
-| 12 | SPEC-04: does `ContentDefinition` expose `public virtual void Validate(ValidationReport report)`? | Yes; `ValidationReport.Error(Object asset, string field, string message)` and `Warn(...)` | Tech lead |
-| 13 | Is `UnityEngine.VFX.VisualEffectAsset` (engine module type) allowed in `Game.Data` although VFX Graph is listed for Presentation only (architecture §3.1)? | Yes: the type is in the engine's VFX module; `Game.Data` does not reference `Unity.VisualEffectGraph.Runtime` | Tech lead |
-| 14 | Should hits leave persistent scorch/burn marks on hulls? | No in v1 (cells are removed instead) | Owner |
-| 15 | Which specs own the managed event types `SessionReset` and `StarSystemEntered`? | `SessionReset`: SPEC-01 (`FND-001`); `StarSystemEntered`: SPEC-31 (`SYS-001`) | Tech lead |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | SPEC-01: does `GameRoot` create the rig? | Yes: after `UIRoot`, `GameRoot` calls `FxRig.Create(transform, config, allFxDefinitions, cellPalette, settings.VfxQuality)` then `rig.BindTo(World.DefaultGameObjectInjectionWorld)`; on shutdown `rig.Unbind(world)` and `rig.Dispose()` | Tech lead | — |
+| 2 | SPEC-01/SPEC-61: where is the VFX quality stored and how is a change applied? | `SettingsService` stores `VfxQuality` (default `High`); the settings apply code calls `rig.SetQuality(q)` | Tech lead | — |
+| 3 | SPEC-13: confirm debris emission (one `FxEvents.Debris` per removed cell and per tier-1 island cell; 64 sampled cells when a chunk body dissolves) and that `FxUploadSystem` never reads `CellRemoved` | Yes as stated | Tech lead | — |
+| 4 | SPEC-13: name and fields of the chunk-body lifetime component | `ChunkBody { float TimeLeft; float Lifetime; }`; SPEC-13 adds `ChunkDissolve` at chunk creation | Tech lead | — |
+| 5 | SPEC-11: does the voxel/chunk shader expose a per-instance `_DissolveAmount` (DOTS instanced)? | Yes, 0 = solid, 1 = gone (alpha-clip dissolve with noise) | Tech lead | — |
+| 6 | SPEC-11/SPEC-04: where is the 256-entry cell colour palette? | A `Color32[256]` on a SPEC-11 definition; `GameRoot` passes it to `FxRig.Create`; else `config_vfx.fallbackCellPalette` (grey ramp) | Tech lead | — |
+| 7 | SPEC-21: projectile, beam and weapon visual fields (§6.5) | As in §6.5; projectile entities carry no Entities Graphics render components (this spec draws them); missiles are drawn as tracers in M2 | Tech lead | — |
+| 8 | SPEC-21: per-weapon FX overrides | `WeaponDefinition` gets optional `FxDefinition hitFx, muzzleFx`; their `Id.Hash` (`ContentHash`) is baked into the weapon blob and written to `FxEvent.Fx` | Tech lead | — |
+| 9 | SPEC-20: thruster visual fields (§6.5) | `ThrusterState { float Intensity }` written by `PropulsionSystem`; `ThrusterVisual { float3 NozzleLocal, ExhaustDirLocal; float NozzleRadius }` written once at spawn | Tech lead | — |
+| 10 | SPEC-22: shield state and ripple ring buffer (§6.5) | As in §6.5; ShieldSystem writes the oldest of 8 `ShieldRipple` slots on each hit | Tech lead | — |
+| 11 | SPEC-30: how do ECS-side presentation consumers receive `OriginShifted` in the frame it happens? | `OriginRebaseSystem` also keeps a singleton `OriginShifted : IComponentData { float3 Delta; uint Sequence; }`; each shift sets `Delta` (amount added to every root local position) and increments `Sequence`; at most one shift per frame | Tech lead | — |
+| 12 | SPEC-04: does `ContentDefinition` expose `public virtual void Validate(ValidationReport report)`? | Yes; `ValidationReport.Error(Object asset, string field, string message)` and `Warn(...)` | Tech lead | — |
+| 13 | Is `UnityEngine.VFX.VisualEffectAsset` (engine module type) allowed in `Game.Data` although VFX Graph is listed for Presentation only (architecture §3.1)? | Yes: the type is in the engine's VFX module; `Game.Data` does not reference `Unity.VisualEffectGraph.Runtime` | Tech lead | — |
+| 14 | Should hits leave persistent scorch/burn marks on hulls? | No in v1 (cells are removed instead) | Owner | — |
+| 15 | Which specs own the managed event types `SessionReset` and `StarSystemEntered`? | `SessionReset`: SPEC-01 (`FND-001`); `StarSystemEntered`: SPEC-31 (`SYS-001`) | Tech lead | — |
+
+| 16 | FxDefinition cannot reference FxKind in Voxel | Shared enum in Data | Tech lead | Resolved ADR-0050: Game.Data.Definitions.FxKind, unchanged byte values; remaining streams stay in Voxel. |
+| 17 | Queue producer handles are not owned by the specified queue contract | Embed GuardedHandles | Tech lead | Resolved ADR-0050: shared atomic enqueue registration, exclusive drain, complete and dispose guard with queue; VFX-001 raised to frontier. |
+| 18 | Validation signature and diagnostics differ from implemented SPEC-04 | Canonical scope/context validation | Tech lead | Resolved: use Validate(ValidationScope, ContentValidationContext). FxDefinition codes VFX-E001 None, E002 missing graph, E003 missing mesh/material, E004 mode/kind mismatch, E005 debris, E006 large/warp pooled. Config codes E010 defaults length, E011 missing default, E012 wrong kind, E013 palette length, E014 lifetime order, E015 damage-colour length. Strict defaults until VFX-004's documented staged relaxation. |
 
 ## 11. References
 

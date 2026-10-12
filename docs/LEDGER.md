@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 11 | 0 | 1 | 0 | 96 | 0 | 108 | 6 |
+| M1 | 10 | 1 | 1 | 0 | 96 | 0 | 108 | 5 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 9 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -200,7 +200,7 @@
 | CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-004, FLT-001, VOX-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-11 | f19e2a5 | Flight follow, input, cuts; exact moving-target damping (Q129–130) |
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 111f9fd | CPU 0.002833 ms; 0 B/update; 10 s circle pitch/GC pass (Q131) |
 | CAM-012 | Keep the imported player ship framed during fast close-zoom flight | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-005, FND-001 | yes | done | astra (gpt-6) | 2026-10-12 | 42287c3 | Bounds-aware focus keeps fast Fighter framed; live 53.39 m/s capture; Q154 |
-| VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Shared VFX contracts, queue lifetime and validation |
+| VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | frontier | CORE-001, DATA-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Shared VFX contracts, queue lifetime and validation |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | done | astra (gpt-6) | 2026-10-12 | b8521e9 | UI/cue playback and ducking; four tests pass, 0 B over 1000 UI calls |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | todo |  |  |  |  |
@@ -737,6 +737,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 165 | 2026-10-12 | SPEC-11 REN-014 | Gather-only prop draw bounds go stale as ships move | Recompute world union from per-grid local bounds with matrix uploads | Tech lead | Resolved SPEC-11 Q34; no public contract or art change |
 | 166 | 2026-10-12 | SPEC-64 AUD-005 | Managed 2D playback precedes SFX allocator/music director | Use existing pools and victim rules; preserve base music gains; defer spatial path | Tech lead | Resolved SPEC-64 Q15; AUD-006 centralizes allocation and AUD-008 supplies crossfade gains |
 | 167 | 2026-10-12 | SPEC-70 DEV-015 / SPEC-60 | Code-built console cannot use UXML-only root; teleport not implemented | Explicit CreateView fallback; registry-only completion | Tech lead | Accepted ADR-0049; SPEC-70 Q21 / SPEC-60 Q20 preserve canonical navigation and command scope |
+| 168 | SPEC-63 VFX-001: FxKind would create Data→Voxel cycle | Shared enum in Game.Data.Definitions | Tech lead | Resolved ADR-0050 / SPEC-63 Q16: unchanged values, no new assembly reference. |
+| 169 | SPEC-63 VFX-001: native queue lacks owned producer handles | GuardedHandles on FxEventQueue | Tech lead | Resolved ADR-0050 / SPEC-63 Q17: shared atomic enqueue, exclusive drain, guarded disposal; frontier scope. AUD-006 reconciles the existing SFX queue before asynchronous producers. |
+| 170 | SPEC-63 VFX-001: obsolete validation API and unstated diagnostic codes | Canonical ValidationScope/context | Tech lead | Resolved ADR-0050 / SPEC-63 Q18: stable VFX codes, asset/field diagnostics, strict defaults until VFX-004 staged content relaxation. |
 
 
 
