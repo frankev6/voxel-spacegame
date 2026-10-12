@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 25 | 0 | 0 | 0 | 80 | 0 | 105 | 16 |
+| M1 | 24 | 0 | 0 | 0 | 81 | 0 | 105 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -187,8 +187,8 @@
 | UI-001 | Public contract types | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | CORE-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 01dcff0 | Exact data/view contracts, 123 style names; service/control shells per spec |
 | UI-002 | Theme skeleton, panel settings and root UXML | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | a494f84 | Panel/theme/config and six non-picking layers; three asset tests pass; Q147 |
 | UI-003 | UIRoot construction, layers and sound hooks | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-002, CORE-001 | yes | done | astra (gpt-6) | 2026-10-12 | fdade56 | Root/document boot lifecycle, prewarm, sound hooks; live flight preserved; Q148–150 |
-| UI-004 | UINavigator stack, pause token and input context | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-003 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |  |
-| UI-005 | Text entry context and world-pointer gate | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-004 | no | todo |  |  |  |  |
+| UI-004 | UINavigator stack, pause token and input context | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-003 | yes | done | astra (gpt-6) | 2026-10-12 | 23b3cf5 | Navigator owns context/pause; live Resume/Escape restore Fighter controls; ADR-0047 |
+| UI-005 | Text entry context and world-pointer gate | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-004 | yes | todo |  |  |  |  |
 | UI-006 | MVVM base, converters and number strings | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-001 | yes | todo |  |  |  |  |
 | UI-007 | Base controls: buttons, panel, list, inputs, key hint, markers, HUD plates | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-002, UI-006 | no | todo |  |  |  |  |
 | CAM-001 | Public contract types | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CORE-001 | yes | done | astra (gpt-6) | 2026-10-11 | f078fc9 | Exact contracts, unmanaged view, two required tests; deferred Fx members Q126 |
@@ -827,6 +827,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — UI-004 done — astra (gpt-6)
+
+- **Implementation 23b3cf5:** UINavigator owns cached screen construction, stack/root operations, deferred callback navigation, one pause token, input context, covered screens, HUD hiding, focus and open/close sounds. Removes ADR-0044's direct input writer. The temporary App adapter selects transparent scene roots and an external-pause blocker through navigation only; World Back opens a minimal Paused/Resume overlay. HUD-002 replaces these temporary views/adapter with the full scene UI. No new art or performance tuning.
+- **Resolved Q151–152 / SPEC-60 Q15–16 / ADR-0047:** bound both pending and drained reentrant operations to 16; failed pushes do not focus/play open sound. Stage real scene context through the navigator until the M3 screen roots exist, preserving the playable Fighter and external pause safety.
+- **Validation:** compile **zero C# warnings**; all **15 prescribed navigator tests pass**, including **0 B across 10,000 Sync calls**. Full EditMode **728 pass, 2 advisory timing failures, 1 explicit skip**: Write1MiB **3.4472 ms** vs 3 ms, MeshBuild128 **1.0427 ms** vs 0.5 ms. Both deferred with zero tuning passes. Full headless PlayMode **76 pass, 12 GPU-only skips**, including real flight/pause/save-load regressions. Docs **506 tasks / zero errors**.
+- **Actual GPU game:** `newgame.sh 42` launched in **2.027 s**. Real W reached **14.64485 m/s**; Escape opened Menu with one pause token. Resume click and a separate Escape close each restored Flight with zero tokens. Another W input reached **21.97824 m/s**. Live error log **zero errors**. Actual captures `Logs/playtest/fighter-navigation-paused.png` and `fighter-navigation-flight.png` were inspected and the paused view shown to Frank; raw evidence under `Logs/playtest/ui004/`. Focus/repaint the Game view before capture if its background render target is stale. Editor closed and incidental settings restored from backups.
+- **Next:** UI-005 focus and pointer gating, so UI interaction cannot leak into flight/world clicks. UI-006 binding and UI-007 controls follow. Full HUD/menu design, backdrop and final art remain pending. HANDOFF updated; numeric misses do not block later work.
 
 ### 2026-10-12 — UI-003 done — astra (gpt-6)
 
