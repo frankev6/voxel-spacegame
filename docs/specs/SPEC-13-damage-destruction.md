@@ -903,11 +903,11 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - **Do:** Implement §5.3.3 (DDA with overflow carry and penetration) and §5.3.4 (two-pass blast with occlusion) as internal functions on `CellWriter`, plus §5.3.7 instance rules (FunctionHp, collapse fraction, functional destroy, reactor `ExplosionRequest`, core-lost flag).
 - **Files:** `Assets/Game/Voxel/Damage/Jobs/{PointDamage,BlastDamage,InstanceDamage}.cs`, `Assets/Game/Tests/EditMode/Voxel/Damage/{PointDamageTests,BlastDamageTests,InstanceDamageTests}.cs`
 - **Acceptance criteria:**
-  - [ ] A 250-damage kinetic hit with penetration 3 on a row of 100 HP hull cells removes exactly 2 cells and leaves the third at 50 HP (±1 quantum).
-  - [ ] A ray entering through an air hole damages the first solid cell behind it.
-  - [ ] A radius-3-cell, 400-damage blast at the centre of a solid 16³ box removes a crater that is symmetric under the 48 cube symmetries when occlusion is off, and smaller (fewer cells) with occlusion on.
-  - [ ] Destroying 5 of the 10 cells of `block_thruster_medium` destroys the whole instance and queues its functional entity.
-  - [ ] Destroying a `block_reactor_small` instance writes one `ExplosionRequest` with radius `4·CellSize` and amount 400.
+  - [x] A 250-damage kinetic hit with penetration 3 on a row of 100 HP hull cells removes exactly 2 cells and leaves the third at 50 HP (±1 quantum).
+  - [x] A ray entering through an air hole damages the first solid cell behind it.
+  - [x] A radius-3-cell, 400-damage blast at a central cell centre of a solid 16³ box removes a crater that is symmetric under the 48 cube symmetries when occlusion is off. The separate occlusion comparison uses 1600 damage so rays reach cells behind shielding and removes fewer cells with occlusion on (Q27).
+  - [x] Destroying 5 of the 10 cells of `block_thruster_medium` destroys the whole instance and queues its functional entity.
+  - [x] Destroying a `block_reactor_small` instance writes one `ExplosionRequest` with radius `4·CellSize` and amount 400.
 - **Tests:** `PointDamageTests.Penetration_OverflowCarries`, `.EntersThroughHole`, `.ZeroDirection_HitsSingleCell`; `BlastDamageTests.Crater_IsSymmetric_NoOcclusion`, `.Occlusion_ShieldsInterior`, `.RadiusClamp_Warns`; `InstanceDamageTests.HalfFootprintLost_DestroysInstance`, `.FunctionHpZero_DestroysInstance`, `.Reactor_WritesExplosionRequest`, `.CoreDestroyed_SetsCoreLost`.
 
 ### DMG-006 — DamageResolveSystem pipeline
@@ -1121,6 +1121,8 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 | 24 | Cell-writer internal outputs, nonexistent Urgent dirty bit, and finite ray sampling | Reuse existing dirty/priority contracts; per-grid native scratch outputs; stratified reference samples | Tech lead | Resolved DMG-004: CellWriter owns disposable per-grid lists and a touched hash set, later flattened by the resolver; only Flatten enables dirty bits. BrickDirtyFlags has Mesh/Collider only; the existing scheduler already maps runtime writes to urgent ColliderPriority.Damage, so no new flag/API is needed. HP changes within one visual bin preserve prior dirty flags while updating ChangedRevision. DDA uses half-open positive-length ray intervals, crossing tied axes together; the 10,000-sample reference stratifies across analytically computed plane intervals so arbitrarily thin cells cannot disappear between uniform samples (observed seeded ray 296). Instance collapse remains DMG-005. |
 
 | 26 | Bound the staged whole-grid integrity flood before DMG-008/009 | MaxFullFloodCells = 16384; retain deferred seeds and warn once per grid | Tech lead | Resolved FND-020 review / ADR-0057, citing architecture §11.1: preflight occupied counts before flooding, count IntegritySizeDeferred, and keep work queued until under cap or replaced by the hybrid implementation. Single-pass label/slot buckets preserve canonical masks. |
+
+| 27 | Radius-3 / 400-damage crater cannot demonstrate fewer removals from occlusion; Burst warning scope | Keep the 400-damage symmetry check; use 1600 for the shielding comparison; warn once per resolver lifetime | Tech lead | Resolved DMG-005: with 100 HP hull and a cell-centred blast, 400 damage removes the 19 immediate cells; DDA has no strictly intermediate cells on those rays, so shielding cannot reduce removals. The 1600-damage comparison reaches the next layer and tests pre-event HP occlusion. CellWriter reports clamping; the serial resolver emits one Burst-safe warning per world-owned resolver lifetime using native state (no managed hot-path state). Sub-half-cell blasts force Penetration = 1 as specified. |
 
 ## 11. References
 

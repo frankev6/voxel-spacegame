@@ -25,13 +25,16 @@ namespace Game.Voxel.Damage
     public unsafe partial struct DamageResolveSystem : ISystem
     {
         DamageAccess access;
+        NativeReference<byte> radiusWarning;
         static readonly ProfilerMarker Resolve = new ProfilerMarker(ProfilerCategory.Scripts, "DamageResolveSystem.Resolve");
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
+            radiusWarning = new NativeReference<byte>(Allocator.Persistent);
             access = DamageAccess.Create(ref state);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<DamageStreams>(); state.RequireForUpdate<DamageConfig>();
             state.RequireForUpdate<BlockDefsRef>(); state.RequireForUpdate<BlockModulesRef>(); state.RequireForUpdate<OrientationTablesRef>(); state.RequireForUpdate<SimClock>();
         }
+        [BurstCompile] public void OnDestroy(ref SystemState state) { state.CompleteDependency(); radiusWarning.Dispose(); }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             using var marker = Resolve.Auto(); access.Update(ref state);
@@ -43,7 +46,7 @@ namespace Game.Voxel.Damage
             var explosions = streams.Explosions.BeginWrite(ref state, ProducerKind.Explosion, 1);
             var handle = new ResolveJob
             {
-                Access = access, Config = SystemAPI.GetSingleton<DamageConfig>(), Tick = SystemAPI.GetSingleton<SimClock>().Tick,
+                RadiusWarning = radiusWarning, Access = access, Config = SystemAPI.GetSingleton<DamageConfig>(), Tick = SystemAPI.GetSingleton<SimClock>().Tick,
                 Blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value, Modules = SystemAPI.GetSingleton<BlockModulesRef>().Value,
                 Orientations = SystemAPI.GetSingleton<OrientationTablesRef>().Value, Events = data->SortedEvents,
                 Pending = data->PendingDetachCurrent, Removed = data->Removed, Ranges = data->RemovedGrids,
@@ -56,6 +59,7 @@ namespace Game.Voxel.Damage
         { public NativeList<DamageEvent> Events; public void Execute() => Events.Clear(); }
         [BurstCompile] struct ResolveJob : IJob
         {
+            public NativeReference<byte> RadiusWarning;
             public DamageAccess Access;
             public DamageConfig Config;
             public uint Tick;
@@ -166,6 +170,22 @@ namespace Game.Voxel.Damage
                     int touchedStart = Touched.Length; Touched.AddRange(writer.Touched.AsArray()); DestroyList.AddRange(writer.DestroyList.AsArray());
                     Results.Add(new DamageGridResult { Grid = root, TouchedBrickStart = touchedStart, TouchedBrickCount = writer.Touched.Length,
                         CoreLost = writer.CoreLost ? (byte)1 : (byte)0, CoreWorldPos = writer.CoreWorldPos });
+                    if (writer.BlastRadiusClamped && RadiusWarning.Value == 0)
+                    {
+                        RadiusWarning.Value = 1;
+                        var message = default(FixedString128Bytes);
+                        // Unmanaged construction is required by Burst (SPEC-13 Q22).
+                        message.Append('['); message.Append('D'); message.Append('a'); message.Append('m'); message.Append('a'); message.Append('g');
+                        message.Append('e'); message.Append(']'); message.Append(' '); message.Append('b'); message.Append('l'); message.Append('a');
+                        message.Append('s'); message.Append('t'); message.Append(' '); message.Append('r'); message.Append('a'); message.Append('d');
+                        message.Append('i'); message.Append('u'); message.Append('s'); message.Append(' '); message.Append('c'); message.Append('l');
+                        message.Append('a'); message.Append('m'); message.Append('p'); message.Append('e'); message.Append('d'); message.Append(' ');
+                        message.Append('t'); message.Append('o'); message.Append(' '); message.Append('c'); message.Append('o'); message.Append('n');
+                        message.Append('f'); message.Append('i'); message.Append('g'); message.Append('u'); message.Append('r'); message.Append('e');
+                        message.Append('d'); message.Append(' '); message.Append('c'); message.Append('e'); message.Append('l'); message.Append('l');
+                        message.Append(' '); message.Append('c'); message.Append('a'); message.Append('p'); message.Append('.');
+                        Game.Core.GameLog.Burst.Warn(message);
+                    }
                     Explosions = writer.Explosions;
                     writer.Dispose();
                 }

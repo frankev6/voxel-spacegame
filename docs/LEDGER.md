@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 84 | 0 | 0 | 0 | 5 | 0 | 89 | 10 |
+| M2 | 83 | 1 | 0 | 0 | 5 | 0 | 89 | 9 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -766,6 +766,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 186 | 2026-10-12 | SPEC-12 Q27 / SPEC-13 Q25 | Immediate post-split restart can precede collider adoption and retain pending combat events | Cleanup ownership and stop-lifecycle drain, ADR-0055 | Tech lead | Resolved: unadopted provisional blobs retain a cleanup owner, adopted blobs remain cache-owned; stopping gameplay clears cross-session pending channels and detach state. |
 | 187 | 2026-10-12 | SPEC-02 Q16 | Event streams may await the next simulation tick beyond TempJob frame lifetime | Persistent stream allocation, ADR-0056 | Tech lead | Resolved: retain explicit channel disposal/fences; no event-order or API change and no fixed-step sync point. |
 | 188 | 2026-10-12 | SPEC-13 Q26 / architecture §11.1 | Bound the staged full-grid integrity pass | 16384 occupied cells; queued seeds and once-per-grid warning | Tech lead | Resolved ADR-0057: DamageConfig.MaxFullFloodCells guards before flood allocation; IntegritySizeDeferred counts skips. DMG-008/009 own the replacement. |
+| 189 | 2026-10-12 | SPEC-13 Q27 / DMG-005 | Blast occlusion test geometry and warning scope | Preserve 400-damage symmetry; use 1600 damage to reach shielded cells; warn once per resolver lifetime using native state | Tech lead | Resolved DMG-005; no owner gate |
 
 ## Measurements
 
@@ -875,6 +876,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DMG-005 point/blast and instance damage — astra (gpt-6)
+
+1. **Implemented:** completes the FND-020 point/blast/instance path with a once-per-resolver radius-clamp warning, one-cell penetration for sub-half-cell blasts, and reactor instigator fallback to the source grid when no shooter exists. The warning uses an owner-disposed native latch and Burst-safe logging; no managed hot-path state, extra sync point, new API or art change. Point DDA still carries overflow through air and armour; blast remains two-pass over pre-event HP.
+2. **Required behavior:** all ten focused tests pass: 250 damage removes two 100-HP cells and leaves the third at 50 HP within one quantum; rays enter fresh holes; zero-direction hits stay in one cell; the 400-damage crater has 19 cells and all 48 cube symmetries; shielding reduces the stronger crater from **57 to 27** cells; 5/10 thruster cells trigger full collapse and queue its functional entity; function HP zero also collapses; reactor emits exactly one 400-damage, 4-cell-radius request; core loss clears the anchor and records the world centre. Repeated radius-clamped events warn once and stay inside the cap. Q189 / SPEC-13 Q27 explains why the independent occlusion comparison requires 1600 damage; no gameplay tuning or owner gate.
+3. **Validation:** focused **10 passed, 0 failed**; compile zero CS warnings. Full EditMode **800 passed, 0 failed, 1 skipped** (exit 0). Full PlayMode **116 passed, 0 failed, 29 skipped** (exit 0), including all four firing-range scenarios. Docs check has zero errors/warnings. Local-only Git; pre-existing QualitySettings change excluded. **spec-required: 10, extra: 0**. No new perf gate in this task; **zero optimization passes**. Evidence: `Logs/playtest/dmg005/`. DMG-006 retains the remaining resolver work; later WPN/DMG/VFX rows stay open.
 
 ### 2026-10-12 — FND-020 external review fixes — astra (gpt-6)
 

@@ -23,6 +23,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
         readonly SystemHandle spawn;
         readonly List<VoxelStructure> sources = new List<VoxelStructure>();
         readonly List<NativeStream> explosionStreams = new List<NativeStream>();
+        public NativeStream LastExplosionStream => explosionStreams[explosionStreams.Count - 1];
         public EntityManager EM => World.EntityManager;
         public TestGridFactory()
         {
@@ -72,6 +73,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
         public CellWriter Writer(Entity root)
         {
             ref var state = ref World.Unmanaged.ResolveSystemStateRef(spawn);
+            using var moduleQuery = EM.CreateEntityQuery(typeof(Game.Data.Components.BlockModulesRef));
             var stream = new NativeStream(1, Allocator.TempJob); explosionStreams.Add(stream);
             var w = new CellWriter
             {
@@ -82,7 +84,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
                     Dense = state.GetBufferLookup<BrickCells>(), Sparse = state.GetBufferLookup<BrickSparseCells>(), Masks = state.GetBufferLookup<BrickSolidMask>(),
                     Bricks = state.GetComponentLookup<Brick>(), Dirty = state.GetComponentLookup<BrickDirty>()
                 },
-                Explosions = stream.AsWriter(),
+                Explosions = stream.AsWriter(), Orientations = Content.Service.Orientations, Modules = moduleQuery.GetSingleton<Game.Data.Components.BlockModulesRef>().Value,
                 Config = DamageConfig.Default, Transform = LocalTransform.Identity,
                 Mass = new Unity.Physics.PhysicsMass { Transform = RigidTransform.identity }, Tick = 7,
                 Row = new DamageTypeRow { KickMin = 6, KickMax = 18 }

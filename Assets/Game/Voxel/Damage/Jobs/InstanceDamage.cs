@@ -39,7 +39,7 @@ namespace Game.Voxel.Damage.Jobs
                 {
                     WorldPos = Transform.TransformPoint(((float3)instance.Origin + .5f) * Access.Definition.CellSize),
                     Radius = explosive.BlastRadiusCells * Access.Definition.CellSize, Amount = explosive.BlastDamage,
-                    Type = DamageType.Explosive, Source = Access.Grid, Instigator = Event.Instigator == Entity.Null ? Event.Source : Event.Instigator,
+                    Type = DamageType.Explosive, Source = Access.Grid, Instigator = Event.Instigator != Entity.Null ? Event.Instigator : Event.Source != Entity.Null ? Event.Source : Access.Grid,
                     Producer = ProducerKind.Explosion, Sequence = (uint)index
                 });
             if (Access.Definition.AnchorInstance == index)

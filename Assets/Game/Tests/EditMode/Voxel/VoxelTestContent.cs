@@ -40,6 +40,11 @@ namespace Game.Tests.EditMode.Voxel
                 new PowerSourceModule { Params = new PowerSourceParams { Generation = 20 } },
                 new ExplosiveModule { Params = new ExplosiveParams { BlastRadiusCells = 4, BlastDamage = 50 } }
             }));
+            if (includeExplosive) defs.Add(Block("block_reactor_small", BlockKind.Functional, modules: new BlockModule[]
+            {
+                new PowerSourceModule { Params = new PowerSourceParams { Generation = 20 } },
+                new ExplosiveModule { Params = new ExplosiveParams { BlastRadiusCells = 4, BlastDamage = 400 } }
+            }));
             try { Service = ContentService.CreateForTests(defs); }
             catch { DestroyAll(); throw; }
         }
