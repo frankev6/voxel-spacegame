@@ -519,7 +519,7 @@ sequenceDiagram
 Used by the ship editor and flight aiming to ignore clicks meant for the UI.
 1. If `Navigator.WorldPointerBlocked` → false.
 2. If `clock.FrameCount - Navigator.LastStackChangeFrame <= 1` → false (06-B9: the click that closes a view must not also place a block).
-3. `var p = RuntimePanelUtils.ScreenToPanel(panel, new Vector2(screenPos.x, UnityEngine.Screen.height - screenPos.y));`
+3. Convert and then flip in panel space: `var p = RuntimePanelUtils.ScreenToPanel(panel, screenPosBottomLeft); p.y = panel.visualTree.layout.height - p.y;`. This full-screen panel owns the actual viewport height; do not use `Screen.height`, which can describe the Editor window during ECS player-loop callbacks (Q17).
 4. If `panel.Pick(p) != null` → false (every non-interactive container is `picking-mode="Ignore"`, so a pick means a pickable element).
 5. Return true.
 
@@ -610,7 +610,7 @@ State: `ToastSlot[ToastPoolSize]` (element instantiated from `ToastUxml` into `t
 ```csharp
 namespace Game.UI.Services
 {
-    public sealed class UIRoot : System.IDisposable
+    public sealed class UIRoot : System.IDisposable, Game.Core.IWorldPointerGate
     {
         public UIRoot(UnityEngine.UIElements.UIDocument document, Game.UI.Data.UIConfig config,
                       Game.Core.IPauseService pause, IInputContextTarget contextTarget,
@@ -789,7 +789,7 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 - **Tier:** frontier — F5: input context derivation interacting with focus, navigator and SPEC-03 maps
 - **Depends on:** `UI-004`
 - **Do:** Implement §5.4 (focus tracking) and §5.5 (`IsWorldPointerAllowed`), and Back step 1 (blur while typing).
-- **Files:** `Assets/Game/UI/Services/UIRoot.cs`, `Assets/Game/UI/Services/UINavigator.cs`
+- **Files:** `Assets/Game/UI/Services/UIRoot.cs`, `Assets/Game/UI/Services/UINavigator.cs`, `Assets/Game/App/Boot/GameComposition.cs` (register the existing Core `IWorldPointerGate` contract and bind it to the flight sampler)
 - **Acceptance criteria:**
   - [ ] Focusing a `TextField` sets context `TextEntry`; blurring restores the top screen's context (06-B5).
   - [ ] Esc while typing blurs only; second Esc reaches the top screen.
@@ -916,6 +916,7 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 
 | 15 | Reentrant Back and one-at-a-time navigation loops, deferred Pop return value, failed push focus | Bounded FIFO and successful-view focus only | Tech lead | Resolved UI-004 / ADR-0047: Back is queued like other mutations; cap queued and drained operations at 16. Queued Pop returns acceptance, then checks membership when executed. Failed pushes remain hidden without focus/open sound; pause/context are recomputed even after partial failure. |
 | 16 | Removing the temporary input bridge before M3 scene screens disables flight | Navigator-owned temporary scene roots | Tech lead | Resolved by ADR-0047: transparent M1 scene root, minimal Paused/Resume view and an external-pause blocker; App bridge navigates before input sampling, never writes context or acquires pause. HUD-002 replaces this adapter and its temporary views. |
+| 17 | UI-005 live ECS picking uses Editor-window Screen.height instead of the Game view | Flip Y after ScreenToPanel using the actual panel height | Tech lead | Resolved in UI-005: live sampler read 2286×1427 while the game and UI were 1920×1080; a pointer at (164,958) incorrectly picked panel y469 instead of y122 and fired through a HUD button. Convert bottom-left coordinates to panel scale, then use panel.visualTree.layout.height − p.y. The prescribed pointer tests use the target viewport height independently of Screen.height. |
 
 ## 11. References
 

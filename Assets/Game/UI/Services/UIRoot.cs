@@ -10,12 +10,13 @@ using UnityEngine.UIElements;
 namespace Game.UI.Services
 {
     /// <summary>Implements SPEC-60 §5.1/5.10: owns one document, its layers, screen assets and root callbacks.</summary>
-    public sealed class UIRoot : IDisposable
+    public sealed class UIRoot : IDisposable, IWorldPointerGate
     {
         static readonly ProfilerMarker TickMarker = new ProfilerMarker(ProfilerCategory.Scripts, "UIRoot.Tick");
         static readonly ProfilerMarker BuildMarker = new ProfilerMarker(ProfilerCategory.Scripts, "UINavigator.Build");
         readonly UIDocument document;
         readonly IUISoundSink sound;
+        readonly IFrameClock clock;
         readonly Dictionary<string, ScreenAsset> assets = new Dictionary<string, ScreenAsset>(StringComparer.Ordinal);
         readonly VisualElement[] layers = new VisualElement[6];
         Button lastHover;
@@ -23,7 +24,7 @@ namespace Game.UI.Services
         public UIRoot(UIDocument document, UIConfig config, IPauseService pause, IInputContextTarget contextTarget,
             IUISoundSink sound, IFrameClock clock)
         {
-            this.document = document; this.sound = sound ?? new NullUISoundSink();
+            this.clock = clock; this.document = document; this.sound = sound ?? new NullUISoundSink();
             try
             {
                 if (document == null || config == null || config.PanelSettings == null || config.RootUxml == null)
@@ -58,7 +59,9 @@ namespace Game.UI.Services
                 RootElement.RegisterCallback<ClickEvent>(OnClick);
                 RootElement.RegisterCallback<PointerOverEvent>(OnPointerOver);
                 RootElement.RegisterCallback<PointerOutEvent>(OnPointerOut);
-                // TODO(UI-005): focus callbacks and pointer gating. TODO(UI-006): converter registration.
+                RootElement.RegisterCallback<FocusInEvent>(OnFocusIn, TrickleDown.TrickleDown);
+                RootElement.RegisterCallback<FocusOutEvent>(OnFocusOut, TrickleDown.TrickleDown);
+                // TODO(UI-006): converter registration.
                 // TODO(UI-009): tooltip lifecycle. TODO(UI-010): notification lifecycle. TODO(UI-011): dialog registration.
                 // TODO(UI-013): ApplyAccessibility; until then use the specified construction defaults.
                 config.PanelSettings.scale = 1;
@@ -114,7 +117,24 @@ namespace Game.UI.Services
             }
         }
         public void HandleBackPressed() => Navigator.Back();
-        public bool IsWorldPointerAllowed(Vector2 screenPosBottomLeft) => throw new NotImplementedException("UI-005");
+        public bool IsWorldPointerAllowed(Vector2 screenPosBottomLeft)
+        {
+            if (disposed || Panel == null || Navigator.WorldPointerBlocked
+                || clock.FrameCount - Navigator.LastStackChangeFrame <= 1) return false;
+            // ECS player-loop callbacks can see Editor-window Screen.height. Flip in the actual
+            // panel's coordinates so world input and UI agree even in an unfocused Editor.
+            var position = RuntimePanelUtils.ScreenToPanel(Panel, screenPosBottomLeft);
+            position.y = Panel.visualTree.layout.height - position.y;
+            return Panel.Pick(position) == null;
+        }
+        static bool IsTextEntry(Focusable target)
+        {
+            var element = target as VisualElement;
+            return element is TextField || element?.GetFirstAncestorOfType<TextField>() != null;
+        }
+        void OnFocusIn(FocusInEvent evt) => Navigator.SetTextEntry(IsTextEntry(evt.target as Focusable));
+        void OnFocusOut(FocusOutEvent evt)
+        { if (!IsTextEntry(evt.relatedTarget)) Navigator.SetTextEntry(false); }
         public void ApplyAccessibility(in AccessibilityOptions options) => throw new NotImplementedException("UI-013");
         internal void PlaySound(UISound value) => sound.Play(value);
         void OnClick(ClickEvent evt)
@@ -132,12 +152,15 @@ namespace Game.UI.Services
         {
             if (disposed) return;
             disposed = true;
+            RootElement?.UnregisterCallback<FocusInEvent>(OnFocusIn, TrickleDown.TrickleDown);
+            RootElement?.UnregisterCallback<FocusOutEvent>(OnFocusOut, TrickleDown.TrickleDown);
             RootElement?.UnregisterCallback<ClickEvent>(OnClick);
             RootElement?.UnregisterCallback<PointerOverEvent>(OnPointerOver);
             RootElement?.UnregisterCallback<PointerOutEvent>(OnPointerOut);
             Navigator?.DisposeOwnedScreens();
             lastHover = null;
             Game.Core.Services.Unregister(this);
+            Game.Core.Services.Unregister<IWorldPointerGate>(this);
             Game.Core.Services.Unregister(Navigator);
             if (ownsDocument && document != null)
             {

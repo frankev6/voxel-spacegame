@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 24 | 0 | 0 | 0 | 81 | 0 | 105 | 16 |
+| M1 | 24 | 1 | 0 | 0 | 81 | 0 | 106 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -197,6 +197,7 @@
 | CAM-004 | Rig service, camera prefab, Menu/Hold modes and the sync system shell | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-003, FND-001 | yes | done | astra (gpt-6) | 2026-10-11 | ece7b8b | Persistent rig, menu/hold, ECS view and boot bindings; ADR-0039 single listener; ten required tests |
 | CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-004, FLT-001, VOX-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-11 | f19e2a5 | Flight follow, input, cuts; exact moving-target damping (Q129–130) |
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 111f9fd | CPU 0.002833 ms; 0 B/update; 10 s circle pitch/GC pass (Q131) |
+| CAM-012 | Keep the imported player ship framed during fast close-zoom flight | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-005, FND-001 | yes | todo |  |  |  |  |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | todo |  |  |  |  |
@@ -719,6 +720,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 150 | 2026-10-12 | SPEC-60 UI-003 | UI/audio sound enum ordinals differ | Named mapping and configured cue overrides | Tech lead | Resolved SPEC-60 Q14: Confirm maps to audio Success, no enum cast; audio playback/content remains its own task. |
 | 151 | 2026-10-12 | SPEC-60 UI-004 | Deferred Back/Pop, callback loops and failed push focus | Bounded FIFO, accepted queued Pop, successful focus only | Tech lead | Resolved SPEC-60 Q15 / ADR-0047; postconditions recomputed after partial failures. |
 | 152 | 2026-10-12 | SPEC-60 UI-004 / HUD-002 | M3 scene roots are absent during navigator handover | Temporary roots and App navigation adapter | Tech lead | Resolved SPEC-60 Q16 / ADR-0047: remove direct input writer, retain flight/pause via navigator; HUD-002 replaces adapter/views. |
+| 153 | 2026-10-12 | SPEC-60 UI-005 | Screen.height is Editor-window sized inside ECS input sampling | Flip Y in the actual panel space | Tech lead | Resolved SPEC-60 Q17: live HUD click leaked into fire; use panel height after ScreenToPanel, and test against independent viewport dimensions. |
 
 
 

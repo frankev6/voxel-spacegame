@@ -146,12 +146,13 @@ namespace Game.App.Boot
             UI = Push(new UIRoot(config.UiDocument, config.UiConfig, Pause, inputBridge,
                 new AppUiSoundSink(Audio, config.UiConfig), new UnityFrameClock()));
             Register(UI); Register(UI.Navigator); Register(config.UiDocument);
+            Game.Core.Services.Register<IWorldPointerGate>(UI);
             world.GetExistingSystemManaged<SceneNavigationBridgeSystem>().Bind(Flow, Pause, UI);
             inputBridge.BindBack(UI.HandleBackPressed);
             Step("9 ui");
 
-            // 9.1 Flight input. UI-005 rebinds the gate when pointer picking is implemented; ADR-0047 supplies scene roots through the navigator.
-            world.GetExistingSystemManaged<PlayerInputSampleSystem>().Bind(Input, null);
+            // 9.1 Flight input uses the live UI pointer gate; ADR-0047 supplies scene roots through the navigator.
+            world.GetExistingSystemManaged<PlayerInputSampleSystem>().Bind(Input, UI);
 
             // 11. Camera (CAM-004/005), with context-gated input.
             Camera = Push(new CameraRigService(config.CameraConfig, root.Find("CameraRoot") ?? root, new InputCameraInput(Input)));

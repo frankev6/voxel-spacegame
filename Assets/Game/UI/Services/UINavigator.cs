@@ -31,7 +31,7 @@ namespace Game.UI.Services
         readonly List<UIScreen> stack = new List<UIScreen>(16);
         readonly Queue<PendingOp> pending = new Queue<PendingOp>(16);
         PauseToken token;
-        bool holdsToken, hudHidden, mutating, draining, disposed;
+        bool holdsToken, hudHidden, mutating, draining, disposed, textEntry;
         InputContext lastContext;
         internal UINavigator(UIRoot root, IPauseService pause, IInputContextTarget contextTarget, IFrameClock clock)
             : this(pause, contextTarget, clock, root.GetLayer(UILayer.Hud)) { this.root = root; }
@@ -127,8 +127,8 @@ namespace Game.UI.Services
                         if (result) { focus = Top; sound = UISound.Close; }
                         break;
                     case Kind.Back:
+                        if (textEntry) { root?.Panel?.focusController?.focusedElement?.Blur(); break; }
                         if (Top == null) break;
-                        // TODO(UI-005): blur focused text entry before invoking screen Back.
                         bool consumed;
                         try { consumed = Top.OnBack(); }
                         catch (Exception e) { Log(e); consumed = true; }
@@ -203,6 +203,11 @@ namespace Game.UI.Services
         }
         void NavigationLoop() { pending.Clear(); GameLog.Error("UI", "navigation loop"); }
         static void Log(Exception e) => GameLog.Error("UI", e.GetType().Name + ": " + e.Message);
+        internal void SetTextEntry(bool value)
+        {
+            if (disposed || textEntry == value) return;
+            textEntry = value; Sync();
+        }
         internal void Sync()
         {
             CheckAlive(); bool ownsMutation = !mutating;
@@ -221,7 +226,7 @@ namespace Game.UI.Services
             }
             if (wantPause && !holdsToken) { token = pause.Acquire("UINavigator"); holdsToken = true; }
             else if (!wantPause && holdsToken) { token.Dispose(); token = default; holdsToken = false; }
-            var context = Top?.Context ?? InputContext.None;
+            var context = textEntry ? InputContext.TextEntry : Top?.Context ?? InputContext.None;
             if (context != lastContext) { contextTarget.SetContext(context); lastContext = context; }
             if (hide != hudHidden) { hud?.EnableInClassList(UIStyleClasses.IsHidden, hide); hudHidden = hide; }
             for (int i = 0; i < stack.Count; i++)
@@ -241,7 +246,7 @@ namespace Game.UI.Services
             mutating = true;
             try
             {
-                bool changed = false; RemoveFrom(0, ref changed); pending.Clear(); SyncCore();
+                bool changed = false; RemoveFrom(0, ref changed); pending.Clear(); textEntry = false; SyncCore();
                 for (int i = 0; i < registered.Count; i++) registered[i].Root?.RemoveFromHierarchy();
                 registry.Clear(); registered.Clear(); keys.Clear(); StackChanged = null;
             }

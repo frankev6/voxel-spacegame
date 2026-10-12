@@ -484,6 +484,18 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
   - [x] M1 no-occlusion CPU (≤0.05 ms) and zero-GC gates of §8 pass on the reference machine; CAM-007 owns raycast timing and CAM-006 owns origin accuracy (Q14).
 - **Tests:** `CameraPerformanceTests.FlightFrame_Under0_15ms`, `CameraPerformanceTests.FlightFrame_ZeroGc`, `CameraPerformanceTests.CircleFlight_PitchInRangeEveryFrame`.
 
+### CAM-012 — Keep the imported player ship framed during fast close-zoom flight
+- **Milestone:** M1
+- **Tier:** frontier — F5: camera focus, real target bounds and the playable flight loop
+- **Depends on:** `CAM-005`, `FND-001`
+- **Do:** Reproduce the UI-005 live finding: the imported Fighter at about 53 m/s, ten zoom-in notches from the default distance and a 25-degree orbit offset is clipped by the bottom of the viewport (`Logs/playtest/fighter-input-isolation.png`). Correct flight framing so follow lag/look-ahead cannot push an otherwise fitting ship out of view. Account for the actual target bounds, camera pitch, FOV and aspect; preserve deliberate close inspection when the hull cannot fit even when centered. Specify the correction in §5 before implementing it, preserving the existing input, damping and origin contracts. Run the real imported ship and capture before/after evidence; this is a gameplay correctness task, not performance tuning or new art.
+- **Files:** `Assets/Game/Presentation/Services/CameraRigService.cs`, `Assets/Game/Presentation/Systems/CameraTargetSyncSystem.cs`, `Assets/Game/Tests/PlayMode/Presentation/FlightFramingTests.cs`
+- **Acceptance criteria:**
+  - [ ] With the existing Fighter, a close zoom that fits the stationary ship continues to show its bounds during sustained 53 m/s flight and heading/orbit changes at 16:9 and 4:3.
+  - [ ] When the player deliberately zooms closer than the hull fits, its center remains in view; no silent reset of the requested zoom or orbit.
+  - [ ] Existing camera/flight tests pass; an actual game capture demonstrates the corrected fast-flight framing.
+- **Tests:** `FlightFramingTests.Fighter_FastFlight_KeepsFittingHullInViewport`, `FlightFramingTests.CloseInspection_KeepsCenterWithoutResettingInput`.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
