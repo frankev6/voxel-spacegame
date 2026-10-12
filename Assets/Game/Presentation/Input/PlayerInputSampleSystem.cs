@@ -25,7 +25,7 @@ namespace Game.Presentation.Input
         EntityQuery players, cameras, physics;
         InputService input;
         IWorldPointerGate pointerGate;
-        InputAction thrust, strafe, turn, boost, brake, firePrimary, fireSecondary, fireTertiary;
+        InputAction thrust, strafe, turn, strafeModifier, boost, brake, firePrimary, fireSecondary, fireTertiary;
         InputAction interact, ability1, ability2, ability3, ability4, targetNext, targetUnderCursor, targetClear, autofire, cruise;
         static readonly ProfilerMarker Sample = new ProfilerMarker(ProfilerCategory.Scripts, "PlayerInputSampleSystem.Sample");
         protected override void OnCreate()
@@ -41,6 +41,7 @@ namespace Game.Presentation.Input
             input = service; pointerGate = gate;
             if (input == null) return;
             var flight = input.Controls.Flight;
+            strafeModifier = flight.Get().FindAction("StrafeModifier", true);
             thrust = flight.Thrust; strafe = flight.Strafe; turn = flight.Turn; boost = flight.Boost; brake = flight.Brake;
             firePrimary = flight.FirePrimary; fireSecondary = flight.FireSecondary; fireTertiary = flight.FireTertiary;
             interact = flight.Interact; ability1 = flight.Ability1; ability2 = flight.Ability2; ability3 = flight.Ability3; ability4 = flight.Ability4;
@@ -58,7 +59,12 @@ namespace Game.Presentation.Input
             {
                 command.Thrust = math.clamp(new float2(strafe.ReadValue<float>(), thrust.ReadValue<float>()), -1, 1);
                 command.Turn = math.clamp(turn.ReadValue<float>(), -1, 1);
-                if (boost.IsPressed()) command.Flags |= ShipCommandFlags.Boost;
+                if (strafeModifier.IsPressed())
+                {
+                    command.Thrust.x = math.clamp(command.Thrust.x + command.Turn, -1, 1);
+                    command.Turn = 0;
+                }
+                else if (boost.IsPressed()) command.Flags |= ShipCommandFlags.Boost;
                 if (brake.IsPressed()) command.Flags |= ShipCommandFlags.Brake;
                 bool allowed = false;
                 if (Mouse.current != null)

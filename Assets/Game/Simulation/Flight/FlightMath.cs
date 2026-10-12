@@ -34,7 +34,8 @@ namespace Game.Simulation.Flight
             thrust = math.clamp(math.select(float2.zero, thrust, math.isfinite(thrust)), -1f, 1f);
             turn = math.isfinite(turn) ? math.clamp(turn, -1f, 1f) : 0;
             float forward = thrust.y > 0 ? thrust.y * forwardCap : thrust.y < 0 ? thrust.y * reverseCap :
-                math.clamp(localVelocity.y, -reverseCap, forwardCap);
+                math.clamp(localVelocity.y, -reverseCap, forwardCap) *
+                math.max(0, 1 - c.CoastDeceleration * Game.Core.SimTime.FixedTimestep / math.max(c.LinearAssistGain, .0001f));
             targetVelocity = new float2(thrust.x * strafeCap, forward);
             targetYawRate = turn * yawRateCap;
         }

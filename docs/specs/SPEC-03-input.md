@@ -106,7 +106,8 @@ Action names are PascalCase and unique within their map. The **action path** use
 | `Thrust` | Value / Axis (1D composite) | positive `<Keyboard>/w`, negative `<Keyboard>/s` | forward (+) / reverse (−) |
 | `Strafe` | Value / Axis (1D composite) | positive `<Keyboard>/e`, negative `<Keyboard>/q` | strafe right (+) / left (−) |
 | `Turn` | Value / Axis (1D composite) | positive `<Keyboard>/d`, negative `<Keyboard>/a` | turn right (+, yaw increases) / left |
-| `Boost` | Button (held) | `<Keyboard>/leftShift` | `ShipCommandFlags.Boost` |
+| `StrafeModifier` | Button (held) | `<Keyboard>/shift` | Add Turn input to Strafe and set commanded Turn to zero (ADR-0052, FLT-013) |
+| `Boost` | Button (held) | `<Keyboard>/leftCtrl` | `ShipCommandFlags.Boost`; suppressed during StrafeModifier |
 | `Brake` | Button (held) | `<Keyboard>/x` | `ShipCommandFlags.Brake` |
 | `FirePrimary` | Button (held) | `<Mouse>/leftButton` | fire group bit 0 |
 | `FireSecondary` | Button (held) | `<Mouse>/rightButton` | fire group bit 1 |
@@ -309,7 +310,8 @@ Position: `GameInitGroup`, after `OriginRebaseSystem`, before `GridSpawnSystem` 
 2. `cmd = GetSingleton<PlayerCommand>()`. Its counters are kept; everything else is rewritten.
 3. `flightOn = input.Controls.Flight.enabled`. If false: zero the analog fields, `FireGroups`, `Flags` and `AimValid`, write the singleton and return. Counters are not touched, so no press is invented or lost.
 4. **Analog:** `Thrust = new float2(Strafe.ReadValue<float>(), Thrust.ReadValue<float>())`, each component clamped to [−1, 1]; `Turn = clamp(Turn.ReadValue<float>(), −1, 1)`.
-5. **Flags:** `Boost` if `Boost.IsPressed()`; `Brake` if `Brake.IsPressed()`.
+4b. **Strafe modifier (ADR-0052):** when `StrafeModifier.IsPressed()`, set `Thrust.x = clamp(Thrust.x + Turn, −1, 1)` and `Turn = 0`. These are actions, so remapping still works.
+5. **Flags:** `Boost` if `Boost.IsPressed()` and the strafe modifier is not held; `Brake` if `Brake.IsPressed()`.
 6. **Pointer:**
    - `p = Mouse.current?.position.ReadValue()`; if there is no mouse, `AimValid = 0` and skip to step 8.
    - `allowed = pointerGate.IsWorldPointerAllowed(p)`.

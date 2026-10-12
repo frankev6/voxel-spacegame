@@ -74,6 +74,16 @@ namespace Game.Simulation.Flight
             int gyroIndex = thrusters.Length;
             actuators[gyroIndex] = new ThrustActuator { Column = new float3(0, 0, gyroTorque), Min = -1, Max = 1 };
             throttles[gyroIndex] = flight.Gyro;
+            // Bound impossible requests before comparing axes: a target speed is not an unlimited engine.
+            // Each bound is an outer bound only; the allocator still resolves coupled force/torque.
+            float3 minimum = 0, maximum = 0;
+            for (int k = 0; k < actuators.Length; k++)
+            {
+                var actuator = actuators[k];
+                minimum += math.min(actuator.Column * actuator.Min, actuator.Column * actuator.Max);
+                maximum += math.max(actuator.Column * actuator.Min, actuator.Column * actuator.Max);
+            }
+            problem.Target = math.clamp(problem.Target, minimum, maximum);
             ThrustAllocator.Solve(problem, actuators, throttles);
             bool firing = false;
             for (int k = 0; k < thrusters.Length; k++)

@@ -355,6 +355,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "StrafeModifier",
+                    "type": "Button",
+                    "id": "a4d88efa-fea6-4b6c-a3a8-0a2de8cde077",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -460,7 +469,7 @@
                 {
                     "name": "",
                     "id": "a0786bbf-0e12-56c0-a3bd-6ab480984d16",
-                    "path": "<Keyboard>/leftShift",
+                    "path": "<Keyboard>/leftCtrl",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
@@ -718,6 +727,17 @@
                     "processors": "",
                     "groups": "KeyboardMouse",
                     "action": "OpenFleet",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "db69f76c-64f8-40f7-8ed7-bbbe1a2077f5",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "StrafeModifier",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

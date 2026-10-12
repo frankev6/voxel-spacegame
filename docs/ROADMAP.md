@@ -70,6 +70,8 @@ flowchart LR
 | SPEC-63 VFX | Debris particles, hits, explosions, beams |
 | SPEC-64 Audio | Event drain, voice caps, mixer |
 
+**First playable checkpoint (owner priority, 2026-10-12):** correct the Fighter controls (FLT-013), then a stationary-target firing range: real weapons remove hull cells, rendering/colliders update, sustained-fire frame timing is recorded. Demonstrate this before the complete milestone; structural breakup is the next checkpoint. Use existing local grid spawning without waiting for AI or galaxy travel. V2 implementation only; never copy V1 code.
+
 **Exit gates:** combat/destruction systems work together; determinism test passes at 30/60/144 FPS; 10-minute soak with zero errors and zero leaks. Record combat performance results and defer missed numeric targets; they do not block M3.
 
 ## M3 — Vertical slice

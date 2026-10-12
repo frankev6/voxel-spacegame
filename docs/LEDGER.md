@@ -235,7 +235,7 @@
 | DMG-016 | Performance gates | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-014 | no | todo |  |  |  |  |
 | DMG-017 | Harness commands | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014, DEV-001 | no | todo |  |  |  |  |
 | FLT-012 | Power and stat integration (M2) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, PWR-001 | no | todo |  |  |  |  |
-| FLT-013 | Owner flight-control correction before the firing range | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, FLT-009, INP-005 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Owner-requested V2 controls, then shooting-range priority |
+| FLT-013 | Owner flight-control correction before the firing range | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, FLT-009, SPEC-03 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Owner-requested V2 controls, then shooting-range priority |
 | WPN-002 | Weapon content: definitions, blob, boot singletons | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, SPEC-04 | no | todo |  |  |  |  |
 | WPN-003 | CombatHitTest | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-001, SPEC-10, AI-001, PWR-001 | no | todo |  |  |  |  |
 | WPN-004 | WeaponInitSystem and mounts | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-002, SPEC-10, SPEC-20 | no | todo |  |  |  |  |
@@ -758,6 +758,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 179 | 2026-10-12 | SPEC-13 DMG-002 | Tick stats reset races pending job writes; internal ownership details | Dependent reset job and explicit phase fences | Tech lead | Resolved SPEC-13 Q21: no fixed-step completion; stats reset depends on previous phase/readers, later writers chain it, and container copies preserve detach swaps. Main-thread stats reads complete publication outside fixed simulation. CellMask uses 64 inline ulongs. |
 | 180 | 2026-10-12 | SPEC-13 DMG-002 | Shared stale-stream warning fails inside Burst owner (BC1016) | Build identical warning from unmanaged characters | Tech lead | Resolved SPEC-13 Q22: preserve existing logging and lifetime behavior; eliminate managed-string conversion. Full suite verifies actual Burst compilation, which focused asynchronous tests missed. |
 | 181 | 2026-10-12 | SPEC-13 DMG-003 | Catalog-wide validation and boot damage-table ownership | Internal validation catalog; replace fallback config and own blob at boot | Tech lead | Resolved SPEC-13 Q23: definitions determine contiguous table dimensions; E005/E006 cover config values/ranges. Boot disposal completes jobs, resets the surviving singleton and releases its table. Four authored types plus a test-only fifth value; no production enum or existing public API change. |
+| 182 | 2026-10-12 | SPEC-20 FLT-013 / SPEC-03 | Owner flight-control correction and shooting priority | ADR-0052; V2 implementation, physical directional thrust | Tech lead | Resolved SPEC-20 Q20: Shift strafes, Ctrl boosts, gentle thruster-limited coasting, capacity-bounded assist; prove actual Fighter controls. Stationary-target shooting is the next M2 checkpoint. Frank: “dont copy v1, PLEASE, just make your own version with our new architecture”. |
 
 ## Measurements
 

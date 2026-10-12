@@ -114,12 +114,12 @@ namespace Game.Tests.EditMode.Simulation.Flight
             Assert.Less(math.abs(Velocity(root).Angular.y), .00001f);
         }
         [Test]
-        public void Coast_KeepsSpeed()
+        public void Coast_SlowsGently()
         {
             var root = Ship(); Command(root, new float2(0, 1)); Tick(100);
             float initial = Velocity(root).Linear.z;
             Command(root); Tick(120);
-            Assert.That(Velocity(root).Linear.z, Is.EqualTo(initial).Within(initial * .005f));
+            Assert.That(Velocity(root).Linear.z, Is.EqualTo(initial * math.pow(1 - FlightConfig.Default.CoastDeceleration * SimTime.FixedTimestep, 120)).Within(initial * .005f));
         }
         [Test]
         public void Brake_Stops()
@@ -145,7 +145,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
         {
             var root = Ship(); EM.SetComponentData(root, new PhysicsVelocity { Linear = new float3(25, 0, 20) });
             Tick(120); Assert.Less(math.abs(Velocity(root).Linear.x), .01f);
-            Assert.That(Velocity(root).Linear.z, Is.EqualTo(20).Within(.01f));
+            Assert.That(Velocity(root).Linear.z, Is.EqualTo(20 * math.pow(1 - FlightConfig.Default.CoastDeceleration * SimTime.FixedTimestep, 120)).Within(.01f));
         }
         [Test]
         public void Assist_StopsSpin()
@@ -164,7 +164,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
             var after = Velocity(root);
             Assert.That(after.Linear.x, Is.InRange(20 - Force / Mass * SimTime.FixedTimestep - .0001f, 20));
             Assert.AreEqual(7, after.Linear.y);
-            Assert.That(after.Linear.z, Is.EqualTo(30).Within(.0001f));
+            Assert.That(after.Linear.z, Is.EqualTo(30 * (1 - FlightConfig.Default.CoastDeceleration * SimTime.FixedTimestep)).Within(.0001f));
             Assert.Greater(after.Linear.x, 0);
         }
         [Test]

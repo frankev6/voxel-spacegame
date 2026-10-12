@@ -21,6 +21,7 @@ MonoBehaviour:
   boostThrottle: 1.25
   maxYawRateDeg: 120
   linearAssistGain: 0.5
+  coastDeceleration: 0.08
   angularAssistGain: 0.5
   torqueWeight: 2
   allocationSweeps: 6

@@ -476,6 +476,16 @@ namespace Game.Input
                     ""interactions"": """",
                     ""initialStateCheck"": false,
                     ""priority"": 0
+                },
+                {
+                    ""name"": ""StrafeModifier"",
+                    ""type"": ""Button"",
+                    ""id"": ""a4d88efa-fea6-4b6c-a3a8-0a2de8cde077"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -581,7 +591,7 @@ namespace Game.Input
                 {
                     ""name"": """",
                     ""id"": ""a0786bbf-0e12-56c0-a3bd-6ab480984d16"",
-                    ""path"": ""<Keyboard>/leftShift"",
+                    ""path"": ""<Keyboard>/leftCtrl"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KeyboardMouse"",
@@ -839,6 +849,17 @@ namespace Game.Input
                     ""processors"": """",
                     ""groups"": ""KeyboardMouse"",
                     ""action"": ""OpenFleet"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""db69f76c-64f8-40f7-8ed7-bbbe1a2077f5"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""StrafeModifier"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -2794,6 +2815,7 @@ namespace Game.Input
             m_Flight_OpenGalaxyMap = m_Flight.FindAction("OpenGalaxyMap", throwIfNotFound: true);
             m_Flight_OpenSystemMap = m_Flight.FindAction("OpenSystemMap", throwIfNotFound: true);
             m_Flight_OpenFleet = m_Flight.FindAction("OpenFleet", throwIfNotFound: true);
+            m_Flight_StrafeModifier = m_Flight.FindAction("StrafeModifier", throwIfNotFound: true);
             // Menu
             m_Menu = asset.FindActionMap("Menu", throwIfNotFound: true);
             m_Menu_OpenInventory = m_Menu.FindAction("OpenInventory", throwIfNotFound: true);
@@ -3117,6 +3139,7 @@ namespace Game.Input
         private readonly InputAction m_Flight_OpenGalaxyMap;
         private readonly InputAction m_Flight_OpenSystemMap;
         private readonly InputAction m_Flight_OpenFleet;
+        private readonly InputAction m_Flight_StrafeModifier;
         /// <summary>
         /// Provides access to input actions defined in input action map "Flight".
         /// </summary>
@@ -3237,6 +3260,10 @@ namespace Game.Input
             /// </summary>
             public InputAction @OpenFleet => m_Wrapper.m_Flight_OpenFleet;
             /// <summary>
+            /// Provides access to the underlying input action "Flight/StrafeModifier".
+            /// </summary>
+            public InputAction @StrafeModifier => m_Wrapper.m_Flight_StrafeModifier;
+            /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
             public InputActionMap Get() { return m_Wrapper.m_Flight; }
@@ -3343,6 +3370,9 @@ namespace Game.Input
                 @OpenFleet.started += instance.OnOpenFleet;
                 @OpenFleet.performed += instance.OnOpenFleet;
                 @OpenFleet.canceled += instance.OnOpenFleet;
+                @StrafeModifier.started += instance.OnStrafeModifier;
+                @StrafeModifier.performed += instance.OnStrafeModifier;
+                @StrafeModifier.canceled += instance.OnStrafeModifier;
             }
 
             /// <summary>
@@ -3435,6 +3465,9 @@ namespace Game.Input
                 @OpenFleet.started -= instance.OnOpenFleet;
                 @OpenFleet.performed -= instance.OnOpenFleet;
                 @OpenFleet.canceled -= instance.OnOpenFleet;
+                @StrafeModifier.started -= instance.OnStrafeModifier;
+                @StrafeModifier.performed -= instance.OnStrafeModifier;
+                @StrafeModifier.canceled -= instance.OnStrafeModifier;
             }
 
             /// <summary>
@@ -4701,6 +4734,13 @@ namespace Game.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnOpenFleet(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "StrafeModifier" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnStrafeModifier(InputAction.CallbackContext context);
         }
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Menu" which allows adding and removing callbacks.

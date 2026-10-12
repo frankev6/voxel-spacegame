@@ -28,7 +28,7 @@ namespace Game.Tests.EditMode.Input
             B("Global", "Screenshot", K + "f12"); B("Global", "DevConsole", K + "f1");
             V("Flight", "Thrust", "Axis", "1DAxis:" + K + "s," + K + "w"); V("Flight", "Strafe", "Axis", "1DAxis:" + K + "q," + K + "e");
             V("Flight", "Turn", "Axis", "1DAxis:" + K + "a," + K + "d");
-            B("Flight", "Boost", K + "leftShift"); B("Flight", "Brake", K + "x"); B("Flight", "FirePrimary", M + "leftButton");
+            B("Flight", "StrafeModifier", K + "shift"); B("Flight", "Boost", K + "leftCtrl"); B("Flight", "Brake", K + "x"); B("Flight", "FirePrimary", M + "leftButton");
             B("Flight", "FireSecondary", M + "rightButton"); B("Flight", "FireTertiary", K + "space"); B("Flight", "Interact", K + "f");
             for (int i = 1; i <= 4; i++) B("Flight", $"Ability{i}", K + i);
             B("Flight", "TargetNext", K + "tab"); B("Flight", "TargetUnderCursor", K + "r"); B("Flight", "TargetClear", K + "t");

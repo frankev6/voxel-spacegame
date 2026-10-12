@@ -14,6 +14,7 @@ namespace Game.Simulation.Flight
             BoostThrottle = def.BoostThrottle,
             MaxYawRateDeg = def.MaxYawRateDeg,
             LinearAssistGain = def.LinearAssistGain,
+            CoastDeceleration = def.CoastDeceleration,
             AngularAssistGain = def.AngularAssistGain,
             TorqueWeight = def.TorqueWeight,
             AllocationSweeps = def.AllocationSweeps,

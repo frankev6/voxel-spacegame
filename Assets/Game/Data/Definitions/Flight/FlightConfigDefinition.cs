@@ -15,6 +15,7 @@ namespace Game.Data.Definitions
         [SerializeField, Range(1, 2)] private float boostThrottle = 1.25f;
         [SerializeField, Range(5, 720)] private float maxYawRateDeg = 120f;
         [SerializeField, Range(0.05f, 1)] private float linearAssistGain = 0.5f;
+        [SerializeField, Min(0)] private float coastDeceleration = 0.08f;
         [SerializeField, Range(0.05f, 1)] private float angularAssistGain = 0.5f;
         [SerializeField, Range(0.1f, 10)] private float torqueWeight = 2f;
         [SerializeField, Range(1, 16)] private int allocationSweeps = 6;
@@ -32,6 +33,7 @@ namespace Game.Data.Definitions
         public float BoostThrottle => boostThrottle;
         public float MaxYawRateDeg => maxYawRateDeg;
         public float LinearAssistGain => linearAssistGain;
+        public float CoastDeceleration => coastDeceleration;
         public float AngularAssistGain => angularAssistGain;
         public float TorqueWeight => torqueWeight;
         public int AllocationSweeps => allocationSweeps;
@@ -47,6 +49,8 @@ namespace Game.Data.Definitions
             base.Validate(scope, context);
             if (maxForwardSpeed <= 0)
                 scope.Error("FLT-E001", nameof(maxForwardSpeed), "Maximum forward speed must be positive.");
+            if (float.IsNaN(coastDeceleration) || float.IsInfinity(coastDeceleration) || coastDeceleration < 0)
+                scope.Error("FLT-E001", nameof(coastDeceleration), "Coast deceleration must be finite and nonnegative.");
             if (allocationSweeps < 1)
                 scope.Error("FLT-E001", nameof(allocationSweeps), "Allocation requires at least one sweep.");
         }

@@ -75,10 +75,20 @@ namespace Game.Tests.EditMode.Input
         { Assert.AreEqual(1, Command.AimValid); Assert.Less(math.distance(expected, Command.AimWorld), .001f); }
         [Test] public void Analog_Mapping()
         {
-            Frame(Key.W, Key.Q, Key.D, Key.LeftShift); Assert.AreEqual(new float2(-1, 1), Command.Thrust); Assert.AreEqual(1, Command.Turn);
+            Frame(Key.W, Key.Q, Key.D, Key.LeftCtrl); Assert.AreEqual(new float2(-1, 1), Command.Thrust); Assert.AreEqual(1, Command.Turn);
             Assert.AreEqual(ShipCommandFlags.Boost, Command.Flags);
             Frame(Key.S, Key.E, Key.A, Key.X); Assert.AreEqual(new float2(1, -1), Command.Thrust); Assert.AreEqual(-1, Command.Turn);
             Assert.AreEqual(ShipCommandFlags.Brake, Command.Flags);
+            Frame(Key.W, Key.D, Key.LeftShift); Assert.AreEqual(new float2(1, 1), Command.Thrust); Assert.AreEqual(0, Command.Turn);
+            Assert.AreEqual(ShipCommandFlags.None, Command.Flags);
+            Frame(Key.S, Key.A, Key.RightShift); Assert.AreEqual(new float2(-1, -1), Command.Thrust); Assert.AreEqual(0, Command.Turn);
+            Frame(Key.E, Key.D, Key.LeftShift); Assert.AreEqual(new float2(1, 0), Command.Thrust); Assert.AreEqual(0, Command.Turn);
+            Frame(Key.D); Assert.AreEqual(float2.zero, Command.Thrust); Assert.AreEqual(1, Command.Turn);
+            // Existing user overrides remain valid, but Shift strafe never accidentally boosts.
+            input.Controls.Flight.Boost.ApplyBindingOverride("<Keyboard>/leftShift");
+            Frame(Key.LeftShift, Key.D); Assert.AreEqual(ShipCommandFlags.None, Command.Flags); Assert.AreEqual(0, Command.Turn);
+            input.Controls.Flight.Get().FindAction("StrafeModifier").ApplyBindingOverride("<Keyboard>/leftAlt");
+            Frame(Key.LeftAlt, Key.A); Assert.AreEqual(new float2(-1, 0), Command.Thrust); Assert.AreEqual(0, Command.Turn);
             input.SetContext(InputContext.Menu); Frame(Key.W); Assert.AreEqual(float2.zero, Command.Thrust); Assert.AreEqual(0, Command.Turn);
         }
         [Test] public void Edge_CountsOnce()

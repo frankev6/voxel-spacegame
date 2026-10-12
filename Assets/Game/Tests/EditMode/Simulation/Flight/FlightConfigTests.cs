@@ -45,6 +45,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
         {
             Invalid("maxForwardSpeed", 0);
             Invalid("allocationSweeps", 0);
+            Invalid("coastDeceleration", -1);
         }
 
         static void Invalid(string field, int value)

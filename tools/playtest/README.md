@@ -80,3 +80,7 @@ With a ready player, run `g.sh record --action start`, fly with the normal contr
 Files use SPEC-71's `cmdrec 1` text format with a `.pcr` suffix. Names allow 1–80 letters, digits, underscores or hyphens, without an extension. Playback preserves tick spacing and starts at the current tick; it does not restore a ship's starting pose. Session changes and timeout stop playback. Exact endpoint comparison currently uses local position and one fixed tick per input frame; arbitrary catch-up schedules retain SPEC-71 Q8's limitations.
 
 `TestData/Replays/fighter_flight_demo.pcr` is a live seed-7 Fighter recording: 1,790 ticks, forward thrust/boost followed by right strafe and coasting. Start a fresh seed-7 game before replaying it. The automatic 300-tick acceptance test provides the exact endpoint comparison; this variable-frame recording is a visual demonstration.
+
+## Flight controls (FLT-013)
+
+W/S requests forward/reverse thrust, A/D turns, Shift+A/D strafes while the turn command is zero, Q/E also strafes, Left Ctrl boosts, X brakes. Releasing thrust gently slows the ship through its opposing thrusters. Small maneuvering thrusters take longer to brake than the main engines take to accelerate. All movement follows the current ship orientation and physical thrust/mass; rotation does not instantly rotate momentum.

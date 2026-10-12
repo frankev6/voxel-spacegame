@@ -38,7 +38,7 @@ This spec turns "who controls the ship" into physical motion. A ship is flown th
 1. **`ShipCommand` is the only control interface.** Player and AI write the same component; flight, power and weapons read it. Reason: architecture §6.4.
 2. **Thrusters push, they never set velocity.** `PropulsionSystem` applies one impulse per firing thruster at the thruster's position (`ApplyImpulse` with `PhysicsMass`), plus one angular impulse from the core gyro. `PlanarConstraintSystem` applies vertical impulses only. Reason: architecture §8, traps T4.1, M1 exit gate (off-centre thrust turns the ship; rams push).
 3. **Flight assist is always on in v1** and is part of propulsion, not of the input: the command is a target (strafe velocity, forward velocity or coast, yaw rate), and the allocator chooses throttles that reach it within the thrusters' limits. `Brake` targets zero velocity and zero yaw rate. Reason: controllable ships with physical thrusters; one model for player and AI.
-4. **Forward coasting.** With `Thrust.y == 0` the forward target is the current forward speed clamped to the caps, so the ship coasts; lateral drift and yaw rate are always driven to their targets (0 with no input). Reason: readable combat on a plane; no ice-skating.
+4. **Gentle forward coasting (ADR-0052).** With `Thrust.y == 0`, the capped forward target decays using `max(0, 1 - CoastDeceleration * SimTime.FixedTimestep / LinearAssistGain)`. Default rate 0.08/s; actual braking is bounded by opposing thrusters. Lateral drift and yaw rate are driven toward their targets (0 with no input). Brake requests a full stop.
 5. **Thruster geometry comes from the block frame** (SPEC-04 decision 9): force direction = block-local −Z rotated by the instance orientation; application point = the instance's footprint centre; both grid-local. Only the horizontal (XZ) part of the direction is used; a thruster with less than 1% horizontal component contributes nothing. Reason: planar flight; vertical thrust would fight the plane constraint.
 6. **The core provides a reaction torque** about Y: `GyroTorque = min(Iyy × CoreYawAccel, CoreMaxYawTorque)` for every live ship (not a hulk). Small ships turn on their core alone; large ships need thrusters to turn quickly. Reason: legacy ships have aft-only thrusters and must still turn in place; building lateral thrusters pays off on big ships (pillar 2).
 7. **Throttle allocation is deterministic** projected Gauss–Seidel on a weighted least-squares problem with box bounds, a fixed number of sweeps, actuators in a fixed order, warm-started from last tick's throttles (§5.4). Reason: same inputs → same throttles at any frame rate.
@@ -181,6 +181,7 @@ namespace Game.Simulation.Flight
         public float BoostThrottle;        // 1.25 (max thruster throttle while boosting)
         public float MaxYawRateDeg;        // 120 deg/s
         public float LinearAssistGain;     // 0.5: fraction of the velocity error corrected per tick before saturation
+        public float CoastDeceleration;    // 0.08 per second, thruster-limited neutral braking
         public float AngularAssistGain;    // 0.5
         public float TorqueWeight;         // 2.0: allocation weight of yaw relative to linear force
         public int AllocationSweeps;       // 6
@@ -192,7 +193,7 @@ namespace Game.Simulation.Flight
         public float IntensityFall;        // 0.15: EMA factor when falling
         public static FlightConfig Default => new FlightConfig {
             MaxForwardSpeed = 120f, ReverseSpeedFraction = 0.5f, StrafeSpeedFraction = 0.6f, BoostSpeedMultiplier = 1.5f,
-            BoostThrottle = 1.25f, MaxYawRateDeg = 120f, LinearAssistGain = 0.5f, AngularAssistGain = 0.5f, TorqueWeight = 2f,
+            BoostThrottle = 1.25f, MaxYawRateDeg = 120f, LinearAssistGain = 0.5f, CoastDeceleration = 0.08f, AngularAssistGain = 0.5f, TorqueWeight = 2f,
             AllocationSweeps = 6, CoreYawAccelDeg = 60f, CoreMaxYawTorque = 2.0e6f, ThrottleEpsilon = 0.001f,
             PlaneCorrection = 0.2f, IntensityRise = 0.35f, IntensityFall = 0.15f };
     }
@@ -209,7 +210,7 @@ public sealed class FlightConfigDefinition : ContentDefinition      // single in
     // One [SerializeField] per FlightConfig field, camelCase, same defaults, with these attributes:
     // maxForwardSpeed [Min(1)], reverseSpeedFraction [Range(0,1)], strafeSpeedFraction [Range(0,1)],
     // boostSpeedMultiplier [Range(1,3)], boostThrottle [Range(1,2)], maxYawRateDeg [Range(5,720)],
-    // linearAssistGain [Range(0.05,1)], angularAssistGain [Range(0.05,1)], torqueWeight [Range(0.1,10)],
+    // coastDeceleration [Min(0)], finite; linearAssistGain [Range(0.05,1)], angularAssistGain [Range(0.05,1)], torqueWeight [Range(0.1,10)],
     // allocationSweeps [Range(1,16)], coreYawAccelDeg [Range(0,720)], coreMaxYawTorque [Min(0)],
     // throttleEpsilon [Range(0,0.05)], planeCorrection [Range(0.01,1)], intensityRise [Range(0.01,1)], intensityFall [Range(0.01,1)]
     // Public getters with the same names in PascalCase.
@@ -379,13 +380,14 @@ Per ship (`dt = SimTime.FixedTimestep`, `c = FlightConfig`):
 3. **Kinematics:** `v = PhysicsVelocity.Linear`; `local = FlightMath.ToLocalPlanar(v, rot)`; `ωy = math.rotate(math.mul(rot, PhysicsMass.InertiaOrientation), PhysicsVelocity.Angular).y`.
 4. **Targets:** multipliers `ms = mt = mr = 1` (M2: `ShipStatMultipliers.Get(StatId.MaxSpeed / Thrust / TurnRate)` if the root has `ShipStatMultipliers`). `boost = (cmd.Flags & Boost) != 0 && (cmd.Flags & Brake) == 0`. `SpeedCaps(c, ms, boost, …)`, `yawCap = YawRateCap(c, mr)`. `Targets(...)`:
    - `Brake` → target velocity `(0, 0)`, target yaw rate 0.
-   - Else `tx = clamp(Thrust.x, −1, 1) × strafeCap`; `tz = Thrust.y > 0 ? Thrust.y × forwardCap : Thrust.y < 0 ? Thrust.y × reverseCap : clamp(local.y, −reverseCap, forwardCap)`; `tω = clamp(Turn, −1, 1) × yawCap`.
+   - Else `tx = clamp(Thrust.x, −1, 1) × strafeCap`; `tz = Thrust.y > 0 ? Thrust.y × forwardCap : Thrust.y < 0 ? Thrust.y × reverseCap : clamp(local.y, −reverseCap, forwardCap) × max(0, 1 − CoastDeceleration × dt / LinearAssistGain)`; `tω = clamp(Turn, −1, 1) × yawCap`.
    - Sanitise: any non-finite command field is treated as 0.
 5. **Required generalized force** (ship frame): `Fx = M × (tx − local.x) × LinearAssistGain / dt`; `Fz = M × (tz − local.y) × LinearAssistGain / dt`; `τ = Iyy × (tω − ωy) × AngularAssistGain / dt`.
 6. **Actuators** (`Allocator.Temp` arrays, thrusters in buffer order, then the gyro):
    - thruster `k`: usable = entity exists (and M2: `Powered` enabled if the entity has `Powered`); `r = PositionLocal − com`; `τk = cross(r, ForceDirLocal).y`; `Column = MaxForce × mt × (ForceDirLocal.x, ForceDirLocal.z, τk)`; `Min = 0`; `Max = usable ? (boost ? BoostThrottle : 1) : 0`; warm start `u = clamp(Throttle, Min, Max)`.
    - gyro: `GyroTorque = FlightMath.GyroYawTorque(c, invIyy) × mr`; `Column = (0, 0, GyroTorque)`; `Min = −1`, `Max = 1`; warm start `FlightState.Gyro`.
-7. **Solve:** `Weights = (1/sF, 1/sF, TorqueWeight/sT)` with `sF = max(1, M × 10)` and `sT = max(1, Iyy × 1)`; `ThrustAllocator.Solve` with `AllocationSweeps`. Throttles `< ThrottleEpsilon` (absolute value for the gyro) → 0.
+7. **Capacity bounds (ADR-0052):** compute component-wise sums of `min(Column × Min, Column × Max)` and corresponding maxima over usable actuators; clamp the requested generalized force to these bounds. These independent bounds do not replace coupled allocation.
+   **Solve:** `Weights = (1/sF, 1/sF, TorqueWeight/sT)` with `sF = max(1, M × 10)` and `sT = max(1, Iyy × 1)`; `ThrustAllocator.Solve` with `AllocationSweeps`. Throttles `< ThrottleEpsilon` (absolute value for the gyro) → 0.
 8. **Impulses:** for each thruster with `u > 0`: `F = math.rotate(rot, ForceDirLocal) × (MaxForce × mt × u)`; `p = LocalTransform.TransformPoint(PositionLocal)`; `PhysicsVelocity.ApplyImpulse(PhysicsMass, LocalTransform.Position, rot, F × dt, p)`. Gyro: `L = (0, Gyro × GyroTorque × dt, 0)` world → `PhysicsVelocity.ApplyAngularImpulse(PhysicsMass, math.rotate(math.inverse(math.mul(rot, PhysicsMass.InertiaOrientation)), L))`.
 9. **Write back:** throttles into `FlightThruster.Throttle`, `FlightState.Gyro`, `GyroTorque`, `LocalVelocity`, `YawRate = ωy`, caps, targets; `Firing` flag = any thruster `u > 0`. `ThrusterState.Intensity` per thruster: `target = saturate(u)`; `a = target > I ? IntensityRise : IntensityFall`; `I = I + (target − I) × a`; `I < 0.005` → 0.
 
@@ -435,7 +437,7 @@ sequenceDiagram
 
 ### 5.7 Power demand and propulsion stats (M2, FLT-012; ADR-0014)
 
-**`ThrusterPowerDemandSystem`** (`PowerDemandGroup`, Burst `IJobEntity`, `ScheduleParallel` over thruster entities with `PowerRequest`, `FunctionalBlock`, `ThrusterState`): `cmd = ShipCommand[FunctionalBlock.Grid]` (absent → zero); `moving = any(cmd.Thrust ≠ 0) || cmd.Turn ≠ 0`; `PowerRegistration.SetRequesting(requests, Thruster, moving)`. The only writer of the thruster elements' `Requesting`.
+**`ThrusterPowerDemandSystem`** (`PowerDemandGroup`, Burst `IJobEntity`, `ScheduleParallel` over thruster entities with `PowerRequest`, `FunctionalBlock`, `ThrusterState`): `cmd = ShipCommand[FunctionalBlock.Grid]` (absent → zero); `moving = any(cmd.Thrust ≠ 0) || cmd.Turn ≠ 0 || (cmd.Flags & Brake) != 0`; also request while the owning root has nonzero planar velocity or yaw, because coast/drift/spin assist consumes real thrusters (ADR-0052). Read `PhysicsVelocity` and `PhysicsMass` through cached read-only lookups; do not depend on last-tick intensity to start demand. `PowerRegistration.SetRequesting(requests, Thruster, moving || assisting)`. The only writer of the thruster elements' `Requesting`.
 
 **`PropulsionStatsSystem`** (Burst `IJobEntity`, `ScheduleParallel` over roots with `PropulsionStats`, `ShipStats`, `BlockInstance`, `VoxelGrid`; `WithNone<Hulk>`, so hulks keep their last values and are never read for flight; skip `GridSpawning` and `Dormant`):
 1. **Functional part**, if `SourceRevision != ShipStats.FunctionalRevision`: zero it; for each alive instance with a `Thruster` row: `F = row.ThrustNewtons`; `d = Orientations.Rotate(new float3(0,0,−1), inst.Orient)` (force direction on the ship, SPEC-04 decision 9); `ForwardThrust += F·max(0, d.z)`, `ReverseThrust += F·max(0, −d.z)`, `right += F·max(0, d.x)`, `left += F·max(0, −d.x)`; `r = GridSpaceMath.InstanceCenter(...) − com` (com = `PhysicsMass.CenterOfMass`, or `ShipStats.BoundsCenter` without mass); `τ = cross(r, F·d).y`; `τ > 0 ? posYaw += τ : negYaw += −τ`; `ThrusterDraw += row.PowerDraw`; `AliveThrusterCount++`. Then `StrafeThrust = min(left, right)`, `YawTorque = min(posYaw, negYaw)`, `SourceRevision = FunctionalRevision`.
@@ -519,7 +521,7 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Acceptance criteria:**
   - [x] `InstanceCenter` of `block_thruster_small` (cells (0,0,0),(0,0,1)) at origin (4,0,7), orientation 0, cell 0.5 m = (2.25, 0.25, 4.0); at the 180° yaw orientation (index 8, SPEC-04 §5.3) = (2.25, 0.25, 3.5).
   - [x] Force direction of a thruster at orientation 8 is grid +Z (it pushes the ship forward), matching SPEC-22's formula.
-  - [x] `Targets`: coasting keeps forward speed inside caps; Brake gives zero targets; boost raises only the forward cap.
+  - [x] `Targets`: coasting gently decelerates forward speed inside caps (ADR-0052); Brake gives zero targets; boost raises only the forward cap.
 - **Tests:** `GridSpaceMathTests.InstanceCenter_Examples`, `.BlockDirToGrid_AllOrientations_Orthonormal`, `.WorldGrid_RoundTrip`; `FlightMathTests.Gyro_Capped`, `.Caps_Boost`, `.Targets_Coast`, `.Targets_Brake`, `.ToLocalPlanar_Yaw90`.
 
 ### FLT-003 — Flight config definition and factory
@@ -579,11 +581,11 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Files:** `Assets/Game/Simulation/Flight/{PropulsionSystem,PropulsionJob,ThrusterIdleJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Flight/PropulsionTests.cs`
 - **Acceptance criteria:**
   - [x] Thruster list rebuilt only when `VoxelGrid.Revision` changes; throttles carried over by instance index.
-  - [x] Forward command on a symmetric test ship reaches `MaxForwardSpeed` (± 1%) and holds it; releasing W coasts (speed change < 0.5% over 120 ticks); Brake stops within the time predicted by `M × v / ΣF` (± 2 ticks) in the unit-assist-gain saturated fixture; the default half-gain fixture also converges below 0.01 m/s (Q15).
+  - [x] Forward command on a symmetric test ship reaches `MaxForwardSpeed` (± 1%) and holds it; releasing W gently slows through available opposing thrusters (ADR-0052: default speed multiplier `(1 − 0.08/60)^120` when unsaturated); Brake stops within the time predicted by `M × v / ΣF` (± 2 ticks) in the unit-assist-gain saturated fixture; the default half-gain fixture also converges below 0.01 m/s (Q15).
   - [x] Strafe drift is removed with no input; yaw rate returns to 0 with no turn input.
   - [x] No code path assigns `PhysicsVelocity.Linear/Angular` (code review + test: a resting ship hit by a test impulse keeps the impulse's velocity minus what thrusters can remove in one tick).
   - [x] Hulk: thruster intensities reach 0 once and the ship receives no impulses.
-- **Tests:** `PropulsionTests.ThrusterList_RebuildOnRevision`, `.Forward_ReachesCap`, `.Coast_KeepsSpeed`, `.Brake_Stops`, `.Assist_KillsDrift`, `.Assist_StopsSpin`, `.NoVelocityAssignment`, `.Hulk_IdlesThrusters`.
+- **Tests:** `PropulsionTests.ThrusterList_RebuildOnRevision`, `.Forward_ReachesCap`, `.Coast_SlowsGently`, `.Brake_Stops`, `.Assist_KillsDrift`, `.Assist_StopsSpin`, `.NoVelocityAssignment`, `.Hulk_IdlesThrusters`.
 
 ### FLT-008 — PlanarConstraintSystem
 - **Milestone:** M1
@@ -642,14 +644,14 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 ### FLT-013 — Owner flight-control correction before the firing range
 - **Milestone:** M2
 - **Tier:** frontier — integrated input, fixed-step propulsion and actual Fighter handling
-- **Depends on:** `FLT-007`, `FLT-009`, `INP-005`
+- **Depends on:** `FLT-007`, `FLT-009`, `SPEC-03`
 - **Do:** Implement Frank's 2026-10-12 request using V2 only: Shift redirects turn input into strafe, boost moves to Ctrl, forward coasting gently decelerates through available thrusters. Verify reverse and ship-local thrust after turning against the actual imported Fighter. Bound assist force requests by installed actuator capacity so impossible requests do not dominate allocation. Keep physical impulse ownership, mass, thruster direction/strength and off-centre torque; no copied V1 code or hull changes. Record the stationary-target shooting range as the next M2 integration priority.
 - **Files:** `Assets/Game/Input/Controls.inputactions`, `Assets/Game/Input/Controls.cs`; `Assets/Game/Presentation/Input/PlayerInputSampleSystem.cs`; `Assets/Game/Simulation/Flight/{FlightConfig,FlightConfigFactory,FlightMath,PropulsionJob}.cs`; `Assets/Game/Data/Definitions/Flight/FlightConfigDefinition.cs`; `Assets/Game/Content/Config/config_flight.asset`; existing input/flight tests; `Assets/Game/Tests/PlayMode/Simulation/Flight/FlightControlCorrectionTests.cs`; related specs, ADR, handoff and playtest controls reference.
 - **Acceptance criteria:**
-  - [ ] Shift+A/D strafes without a commanded turn; W/S remains forward/reverse; Q/E remains direct strafe; Ctrl boosts; mappings remain rebindable and menu-safe.
-  - [ ] Neutral forward motion decays gently, bounded by reverse thrusters; X brakes harder. No synthetic lateral engine or velocity overwrite.
-  - [ ] Real Fighter demonstrates reverse, both strafe directions and thrust along its rotated forward axis. Removing directional thrusters removes that capability. Report mass/force and measured motion rather than inflating all thrust values.
-  - [ ] Live flight verified and captured; existing flight/determinism checks and full suites remain functionally passing.
+  - [x] Shift+A/D strafes without a commanded turn; W/S remains forward/reverse; Q/E remains direct strafe; Ctrl boosts; mappings remain rebindable and menu-safe.
+  - [x] Neutral forward motion decays gently, bounded by reverse thrusters; X brakes harder. No synthetic lateral engine or velocity overwrite.
+  - [x] Real Fighter demonstrates reverse, both strafe directions and thrust along its rotated forward axis. Removing directional thrusters removes that capability. Report mass/force and measured motion rather than inflating all thrust values.
+  - [x] Live flight verified and captured; existing flight/determinism checks and full suites remain functionally passing.
 - **Tests:** update `InputAssetTests`, `PlayerInputSampleSystemTests.Analog_Mapping`, `FlightMathTests.Targets_Coast`, existing propulsion coast expectations and config validation; add `FlightControlCorrectionTests.Fighter_DirectionalThrust`, `.Fighter_TurnAndStrafe`, `.Fighter_CoastAndBrake`.
 
 ## 10. Open questions
@@ -682,6 +684,8 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 
 | 18 | Legacy Small acceleration targets conflict with the migrated thrust/mass ratios | Preserve the physical model and shared thrust rows; report the shortfall and content follow-up | Tech lead | Resolved FLT-010: all 13 blueprints are Small. Full-thrust bounds require a medium row ≥165,960 N for Red Elite but ≤20,700 N for Striker. No straightforward shared-row scaling satisfies both. Complete the evidence/proposal task without claiming every target passed; do not invent per-ship acceleration overrides or modify unapproved ship layouts. Ledger Measurements records baseline and provisional results. |
 | 19 | Approve FLT-010 gyro values and the content balance follow-up | 180°/s² core yaw acceleration, 2.5 MN·m core torque, other config and thrust rows unchanged | Owner | Pending owner sign-off (ledger Q125): all 13 turn in ≤1.2 s; seven powered blueprints miss the acceleration range, ship_base has no thrust, and Medium/Large remain unvalidated. Three options and trade-offs are in the ledger. |
+
+| 20 | Owner requests Shift strafe, gentle coast and thruster-based reverse/turn handling | ADR-0052, V2 implementation only | Tech lead | Resolved FLT-013: Shift modifies A/D; Ctrl boosts; config-controlled neutral braking through real thrusters; capacity-bounded assist. Fighter directional and live checks required. No V1 code copied. |
 
 ## 11. References
 

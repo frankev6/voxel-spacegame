@@ -13,6 +13,7 @@ namespace Game.Simulation.Flight
         public float BoostThrottle;        // 1.25 (max thruster throttle while boosting)
         public float MaxYawRateDeg;        // 120 deg/s
         public float LinearAssistGain;     // 0.5: fraction of the velocity error corrected per tick before saturation
+        public float CoastDeceleration;    // 0.08/s: neutral forward braking, limited by real thrusters
         public float AngularAssistGain;    // 0.5
         public float TorqueWeight;         // 2.0: allocation weight of yaw relative to linear force
         public int AllocationSweeps;       // 6
@@ -24,7 +25,7 @@ namespace Game.Simulation.Flight
         public float IntensityFall;        // 0.15: EMA factor when falling
         public static FlightConfig Default => new FlightConfig {
             MaxForwardSpeed = 120f, ReverseSpeedFraction = 0.5f, StrafeSpeedFraction = 0.6f, BoostSpeedMultiplier = 1.5f,
-            BoostThrottle = 1.25f, MaxYawRateDeg = 120f, LinearAssistGain = 0.5f, AngularAssistGain = 0.5f, TorqueWeight = 2f,
+            BoostThrottle = 1.25f, MaxYawRateDeg = 120f, LinearAssistGain = 0.5f, CoastDeceleration = 0.08f, AngularAssistGain = 0.5f, TorqueWeight = 2f,
             AllocationSweeps = 6, CoreYawAccelDeg = 60f, CoreMaxYawTorque = 2.0e6f, ThrottleEpsilon = 0.001f,
             PlaneCorrection = 0.2f, IntensityRise = 0.35f, IntensityFall = 0.15f };
     }

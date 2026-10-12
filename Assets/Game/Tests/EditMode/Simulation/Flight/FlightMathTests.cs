@@ -34,7 +34,9 @@ namespace Game.Tests.EditMode.Simulation.Flight
             {
                 FlightMath.Targets(config, default, 0, ShipCommandFlags.None, new float2(12, speed), 120, 60, 72, 2,
                     out var velocity, out var yaw);
-                Assert.AreEqual(new float2(0, math.clamp(speed, -60, 120)), velocity); Assert.AreEqual(0, yaw);
+                Assert.AreEqual(0, velocity.x);
+                float expected = math.clamp(speed, -60, 120) * (1 - config.CoastDeceleration * Game.Core.SimTime.FixedTimestep / config.LinearAssistGain);
+                Assert.That(velocity.y, Is.EqualTo(expected).Within(.00002f)); Assert.AreEqual(0, yaw);
             }
             FlightMath.Targets(config, new float2(.5f, -1), -.5f, ShipCommandFlags.None, default, 120, 60, 72, 2,
                 out var reverse, out var turn);
