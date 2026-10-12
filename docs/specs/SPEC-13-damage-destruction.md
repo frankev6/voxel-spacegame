@@ -529,7 +529,7 @@ Armour classes: `armor_standard` (0, all legacy blocks, SPEC-04 §4.10), `armor_
 | `TouchedBricks` | `{ Entity Grid; int SlotIndex; Entity Brick; }` | resolve job (NativeStream, index = range) → Integrity |
 | `DestroyList` | `Entity` | resolve job (NativeStream) and SplitSystem → ShipDeathSystem destroy pass |
 | `Islands` | `IslandRecord { Entity Grid; int MaskStart, MaskCount; int CellCount; int3 CellMin, CellMax; byte HasFunctional; int Ordinal; }` | Integrity → Split |
-| `IslandMasks` | `{ int SlotIndex; CellMask Mask; }` (`CellMask` = 4096 bits in `FixedBytes512`) | Integrity → Split |
+| `IslandMasks` | `{ int SlotIndex; CellMask Mask; }` (`CellMask` = 4096 bits in 64 inline ulongs (Q21)) | Integrity → Split |
 | `PendingDetachNext` / `PendingDetachCurrent` | `{ Entity Grid; int SlotIndex; CellMask Mask; CellRemovedReason Reason; int IslandOrdinal; }` | Split (tick N) → resolver (tick N+1); swapped by `DamageStreamsSystem` |
 | `ChunkPool` | `{ Entity Body; uint EndTick; byte Live; }` × `MaxLiveChunks` | SplitSystem only (persistent) |
 | `RamPairs` | `NativeHashMap<ulong, uint>` pair key → last ram tick (lookup only, never iterated for ordering) | ImpactEventSystem only (persistent) |
@@ -583,10 +583,10 @@ All six systems: `[BurstCompile]` `ISystem`, `[UpdateInGroup(typeof(GameplayPost
 
 Owner of all DMG native memory. **Structural only in `OnCreate`** (creates the `DamageStreams` and `DamageConfig` singletons with `EntityManager`; `DamageConfig.Default` unless one exists).
 
-`OnCreate`: create the four channels (`SimEventChannel<DamageEvent>.Create("damage")`, `<ExplosionRequest>("explosions")`, `<ImpulseRequest>("impulses")`, `<CellRestoreRequest>("restores")`); allocate `DamageStreamsData` (Persistent) and every list of §4.4/§4.8 with initial capacities (`Removed` 4,096, ranges 256, masks 64, chunk pool `MaxLiveChunks`, ram pairs 1,024). `OnDestroy`: dispose both channels (they complete their handles), complete every stored handle, dispose every list, free the struct.
+`OnCreate`: create the four channels (`SimEventChannel<DamageEvent>.Create("damage")`, `<ExplosionRequest>("explosions")`, `<ImpulseRequest>("impulses")`, `<CellRestoreRequest>("restores")`); allocate `DamageStreamsData` (Persistent) and every list of §4.4/§4.8 with initial capacities (`Removed` 4,096, ranges 256, masks 64, chunk pool `MaxLiveChunks`, ram pairs 1,024). `OnDestroy`: dispose all four channels (they complete their handles), complete every stored handle, dispose every list, free the struct.
 
-`OnUpdate` (main thread, no job, < 10 µs):
-1. `Last = Current`; `Current = default; Current.Tick = SimClock.Tick`.
+`OnUpdate` (main-thread scheduling, < 10 µs advisory):
+1. Schedule a tick-reset job after all previous phase/removed-reader handles: `Last = Current`; `Current = default; Current.Tick = SimClock.Tick`. Later phase writers depend on `TickResetHandle`; the main thread never races a job writing statistics (Q21).
 2. `BeginTick(SimClock.Tick)` on `Damage`, `Explosions`, `Impulses` and `Restores` (disposes registrations no consumer read for a whole tick, SPEC-02 §5.13).
 3. Swap `PendingDetachCurrent` ↔ `PendingDetachNext`; schedule `ClearListJob` on the new `Next` depending on last tick's resolver handle; store it as `DetachNextWritable` (SplitSystem combines it before writing).
 
@@ -859,13 +859,13 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - **Milestone:** M2
 - **Tier:** frontier — F1/F2: the damage event pipeline; NativeStreams and job handles chained across systems; Persistent memory
 - **Depends on:** `DMG-001`, `SPEC-10`, `SPEC-02`
-- **Do:** Implement `DamageStreamsData`, every `DamageStreams` method (§4.4, §6; the two channels are SPEC-02's `SimEventChannel<T>`, not re-implemented) and `DamageStreamsSystem` (§5.1) including the `BeginTick` calls, the pending-detach swap with `ClearListJob`, and `DrainCoreLost`. Add the test helper `TestDamageProducerSystem` (writes a given list of events through the producer contract).
+- **Do:** Implement `DamageStreamsData`, every `DamageStreams` method (§4.4, §6; the four channels are SPEC-02's `SimEventChannel<T>`, not re-implemented) and `DamageStreamsSystem` (§5.1) including the `BeginTick` calls, the pending-detach swap with `ClearListJob`, and `DrainCoreLost`. Add the test helper `TestDamageProducerSystem` (writes a given list of events through the producer contract).
 - **Files:** `Assets/Game/Voxel/Damage/DamageStreams.cs`, `Assets/Game/Voxel/Damage/DamageStreamsData.cs`, `Assets/Game/Voxel/Damage/Systems/DamageStreamsSystem.cs`, `Assets/Game/Tests/EditMode/Voxel/Damage/{DamageStreamsTests,TestDamageProducerSystem}.cs`
 - **Acceptance criteria:**
-  - [ ] Two producer systems writing from parallel `IJobChunk`s produce no safety errors with safety checks on; a consumer job sees all their events in registration order then index order.
-  - [ ] A stream registered with no consumer is disposed next tick (leak detection `EnabledWithStackTrace` reports nothing) and logs once.
-  - [ ] `OnDestroy` frees everything with handles still pending.
-  - [ ] `ScheduleDrainExplosions` output is identical for the same requests written by 1 or 8 worker threads.
+  - [x] Two producer systems writing from parallel `IJobChunk`s produce no safety errors with safety checks on; a consumer job sees all their events in registration order then index order.
+  - [x] A stream registered with no consumer is disposed next tick (leak detection `EnabledWithStackTrace` reports nothing) and logs once.
+  - [x] `OnDestroy` frees everything with handles still pending.
+  - [x] `ScheduleDrainExplosions` output is identical for the same requests written by 1 or 8 worker threads.
 - **Tests:** `DamageStreamsTests.TwoParallelProducers_NoSafetyErrors`, `.Consumer_ReadsInRegistrationAndIndexOrder`, `.StaleStream_IsDisposedAndLoggedOnce`, `.Destroy_WithPendingHandles_NoLeak`, `.DrainExplosions_IsThreadCountIndependent`.
 
 ### DMG-003 — Damage config asset and boot hookup
@@ -1108,6 +1108,10 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 | 18 | DamageConfig requires DamageTableBlob before DMG-003; DamageStreams names an absent internal owner | Bring forward the two blob value types; declare an opaque internal owner placeholder | Tech lead | Resolved 2026-10-11: DMG-001 includes DamageTypeRow/ DamageTableBlob and an empty DamageStreamsData. DMG-002 still owns its allocation and implementation; DMG-003 owns table assets/building. |
 | 19 | One serialized field per DamageConfig includes a Voxel blob and derived ContentHash fields that Game.Data cannot author | Serialize 43 numeric tuning fields and four AudioCueDefinition references only | Tech lead | Resolved 2026-10-11: preserve module boundaries; Table and cue hashes are runtime projections. Definition numeric defaults match DamageConfig.Default. |
 | 20 | DamageSetup has specified component lists but no task implementing its stub before spawning needs it | Implement the exact pure lists in DMG-001 | Tech lead | Resolved 2026-10-11: root stats/impulse/integrity/seed and brick integrity lists are usable without implementing any damage system. |
+
+| 21 | Main-thread tick statistics race pending job writes; internal handle and mask representation details were unspecified | Ordered reset job and explicit internal phase fences | Tech lead | Resolved DMG-002: schedule Current→Last/reset after prior phase and removed/restored reader handles, retain TickResetHandle and chain later writers after it. Capture containers by value in jobs, so main-thread detach-list swaps cannot redirect pending work. Internal resolver/integrity/split/death/impact handles own pending jobs through teardown. LastTickStats is a main-thread read outside fixed simulation and completes its publication handle. Drain methods replace output; callers dispose previously drained blob ownership before reuse. CellMask uses 64 inline ulongs because installed Collections has no public FixedBytes512 type. The first gameplay tick sizes the chunk pool from the configured boot value, which is supplied after automatic OnCreate. |
+
+| 22 | First Burst-compiled damage owner exposes a managed-string conversion in the shared channel stale warning | Preserve the warning with unmanaged character appends | Tech lead | Resolved DMG-002: SimEventChannel.BeginTick constructs the same fixed-string warning without System.String conversion. Full-suite Burst compilation exposed BC1016 after the focused managed-fallback tests passed. No channel API or stale-stream behavior changes. |
 
 ## 11. References
 

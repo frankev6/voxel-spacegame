@@ -64,7 +64,11 @@ namespace Game.Data.Streams
             if (removed && Data->StaleWarned == 0)
             {
                 Data->StaleWarned = 1;
-                var msg = new FixedString128Bytes("[Core] stale stream: ");
+                // Construct the warning without a managed-string conversion: BeginTick is called from Burst owners.
+                var msg = default(FixedString128Bytes);
+                msg.Append('['); msg.Append('C'); msg.Append('o'); msg.Append('r'); msg.Append('e'); msg.Append(']'); msg.Append(' ');
+                msg.Append('s'); msg.Append('t'); msg.Append('a'); msg.Append('l'); msg.Append('e'); msg.Append(' ');
+                msg.Append('s'); msg.Append('t'); msg.Append('r'); msg.Append('e'); msg.Append('a'); msg.Append('m'); msg.Append(':'); msg.Append(' ');
                 msg.Append(Data->Name);
                 Game.Core.GameLog.Burst.Warn(msg);
             }

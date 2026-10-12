@@ -1,4 +1,7 @@
 using Game.Data.Combat;
+using Game.Data.Streams;
+using Unity.Burst;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -22,22 +25,75 @@ namespace Game.Voxel.Damage
 
         // The ExplosionRequest consumer: Explosions.BeginRead, SimEventGather, stable sort by (Source.Index, Producer, Sequence, gather
         // position), Explosions.EndRead. Requests registered after this call are drained next tick.
-        public JobHandle ScheduleDrainExplosions(ref SystemState state, NativeList<ExplosionRequest> output) { throw new System.NotImplementedException("DMG-002"); }
+        public JobHandle ScheduleDrainExplosions(ref SystemState state, NativeList<ExplosionRequest> output)
+        {
+            var set = Explosions.BeginRead(ref state);
+            var cleared = new ClearExplosionsJob { Output = output }.Schedule(state.Dependency);
+            var gathered = SimEventGather.Schedule(set, output, cleared);
+            Explosions.EndRead(gathered);
+            state.Dependency = new SortExplosionsJob { Output = output }.Schedule(gathered);
+            return state.Dependency;
+        }
 
         // Same-tick CellRemoved readers (run after DamageResolveSystem, before GameplayEndCommandBufferSystem):
-        public CellRemovedView BeginRemovedRead(ref SystemState state) { throw new System.NotImplementedException("DMG-002"); }  // combines the resolver's write handle
-        public void EndRemovedRead(JobHandle readerJob) { throw new System.NotImplementedException("DMG-002"); }
+        public CellRemovedView BeginRemovedRead(ref SystemState state)
+        {
+            state.Dependency = JobHandle.CombineDependencies(state.Dependency, Data->RemovedWriteHandle);
+            return new CellRemovedView { Cells = Data->Removed.AsDeferredJobArray(), Grids = Data->RemovedGrids.AsDeferredJobArray() };
+        }  // combines the resolver's write handle
+        public void EndRemovedRead(JobHandle readerJob) => Data->RemovedReaderHandles.Add(readerJob);
         // Same-tick CellRestored readers (SPEC-12 mass): same rules as BeginRemovedRead.
-        public CellRestoredView BeginRestoredRead(ref SystemState state) { throw new System.NotImplementedException("DMG-002"); }
-        public void EndRestoredRead(JobHandle readerJob) { throw new System.NotImplementedException("DMG-002"); }
+        public CellRestoredView BeginRestoredRead(ref SystemState state)
+        {
+            state.Dependency = JobHandle.CombineDependencies(state.Dependency, Data->RemovedWriteHandle);
+            return new CellRestoredView { Cells = Data->Restored.AsDeferredJobArray(), Grids = Data->RestoredGrids.AsDeferredJobArray() };
+        }
+        public void EndRestoredRead(JobHandle readerJob) => Data->RemovedReaderHandles.Add(readerJob);
 
         // SPEC-21 ShipDestroyedBridgeSystem, once per frame (presentation, main thread); completes ShipDeathSystem's last write first.
-        public void DrainCoreLost(NativeList<GridCoreLost> output) { throw new System.NotImplementedException("DMG-002"); }
+        public void DrainCoreLost(NativeList<GridCoreLost> output)
+        {
+            Data->CoreLostWriteHandle.Complete(); output.Clear(); output.AddRange(Data->CoreLost.AsArray()); Data->CoreLost.Clear();
+        }
 
         // ChunkColliderCleanupSystem (§5.9), main thread outside the fixed step: completes SplitSystem's last write, then moves
         // the chunk collider blobs SplitSystem replaced (slot reuse) into output and clears its list.
-        public void DrainRetiredChunkBlobs(NativeList<BlobAssetReference<Unity.Physics.Collider>> output) { throw new System.NotImplementedException("DMG-002"); }
+        public void DrainRetiredChunkBlobs(NativeList<BlobAssetReference<Unity.Physics.Collider>> output)
+        {
+            JobHandle.CombineDependencies(Data->SplitHandle, Data->RetiredChunkBlobsWriteHandle).Complete();
+            output.Clear(); output.AddRange(Data->RetiredChunkBlobs.AsArray()); Data->RetiredChunkBlobs.Clear();
+        }
 
-        public DamageTickStats LastTickStats => throw new System.NotImplementedException("DMG-002");                  // copied at the start of the next tick
+        // Main thread outside fixed simulation only: the completed prior tick is published by a dependent job (Q21).
+        public DamageTickStats LastTickStats { get { Data->TickResetHandle.Complete(); return Data->Last; } }                  // copied at the start of the next tick
+
+        [BurstCompile] struct ClearExplosionsJob : IJob
+        {
+            public NativeList<ExplosionRequest> Output;
+            public void Execute() => Output.Clear();
+        }
+        [BurstCompile] struct SortExplosionsJob : IJob
+        {
+            public NativeList<ExplosionRequest> Output;
+            struct Indexed : System.IComparable<Indexed>
+            {
+                public ExplosionRequest Value; public int GatherIndex;
+                public int CompareTo(Indexed b)
+                {
+                    int c = Value.Source.Index.CompareTo(b.Value.Source.Index);
+                    if (c == 0) c = ((byte)Value.Producer).CompareTo((byte)b.Value.Producer);
+                    if (c == 0) c = Value.Sequence.CompareTo(b.Value.Sequence);
+                    return c != 0 ? c : GatherIndex.CompareTo(b.GatherIndex);
+                }
+            }
+            public void Execute()
+            {
+                var indexed = new NativeArray<Indexed>(Output.Length, Allocator.Temp);
+                for (int i = 0; i < Output.Length; i++) indexed[i] = new Indexed { Value = Output[i], GatherIndex = i };
+                indexed.Sort();
+                for (int i = 0; i < Output.Length; i++) Output[i] = indexed[i].Value;
+                indexed.Dispose();
+            }
+        }
     }
 }
