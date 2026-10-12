@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 84 | 1 | 0 | 0 | 4 | 0 | 89 | 10 |
+| M2 | 84 | 0 | 0 | 0 | 5 | 0 | 89 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -216,7 +216,7 @@
 | TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | done | astra (gpt-6) | 2026-10-12 | 1392d35 | Real Boot/flow fixture; four tests; temp saves/settings and unchanged real profile timestamps |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-12 | a56c266 | Full pipeline: 15-frame readiness, idle 0.224481 ms; total memory performance deferred (Q174); zero tuning |
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
-| FND-020 | Playable stationary-target shooting and physical breakup | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-017, FND-018, FLT-001, DMG-001, WPN-001, VFX-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Owner-prioritized real shooting and physical breakup; ADR-0053 |
+| FND-020 | Playable stationary-target shooting and physical breakup | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-017, FND-018, FLT-001, DMG-001, WPN-001, VFX-001 | yes | done | astra (gpt-6) | 2026-10-12 | ee607dd3 | Playable modular station, Space fire, current-cell holes and moving rendered splits; live proof and full suites recorded |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
 | PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | todo |  |  |  |  |
 | DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-12 | e3377fa | Four channels, owned phase memory, stable explosion drains; 5 tests; Q179–180 |
@@ -874,6 +874,15 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — FND-020 playable shooting and test-station breakup — astra (gpt-6)
+
+- **Implemented:** `ee607dd3` connects installed plasma mounts, mouse aim and **Space/left mouse** fire to the projectile store, current-cell hit testing, ordered damage, point/blast/instance removal, connectivity and physical grid splits. Hull meshes and colliders update, functional blocks transfer with their section, and core loss/explosions use the canonical damage channels. The procedural station has layered hull walls, slopes/long slope, a hollow single-bridge thruster pod, a redundant two-bridge cargo/reactor platform and a wider twin-reactor bay. `tools/playtest/range.sh 7` starts/reset the range; `range` works in the dev console. Tertiary fire moves to G. No V1 code, new ship hull or AI-generated asset.
+- **Owner direction:** “spacebar should be shooting”; “dont use vestari, make a test station we can shoot, that has various possible combination of blocks and structures so we can test everything like breaking off, etc”. The imported Fighter remains the player; the target is the requested procedural fixture. Nocturne brightness, animated sky, sphere/atmosphere and spatial debris are preserved.
+- **Live evidence:** inspected `Logs/playtest/station-final-before.png`, `station-final-firing-2.png`, `station-final-breakaway.png`, `station-final-damaged.png` and `station-final-reset.png`; firing/breakup images shown in the conversation. A three-second real Space hold destroyed **14 station cells** and detached **204**; the visible thruster pod moved at **(-0.7497753, 0, 0.01835992) m/s**. Further shots opened the centre hull and damaged separated grids. Two direct resets restored the intact range with **zero errors/allocation warnings**. Final shutdown has no native leak report. Readbacks/logs/scripts: `Logs/playtest/fnd020/`.
+- **Validation:** compile zero C# warnings; final full EditMode **786 passed, 2 advisory timing misses, 1 explicit skip**; full headless PlayMode **116 passed, 0 failed, 29 expected skips**. All four required range tests pass: real Space fire/static target, front holes then rear-wall damage, moving rendered split with functional reparenting, and immediate restart. Pause is covered within real-fire testing. Earlier regressions fixed: rebind fixture key conflict, new writer buffer initialization, optional cleanup ECB lookup, migration weapon-link idempotence, and the boot disposal expectation. No correctness failure remains.
+- **Measured/deferred performance:** live sustained fire, **20 samples of 15-frame Editor averages**: median **8.64 ms**, nearest-rank p95 **13.48 ms**, max **13.92 ms**. These include Editor/harness overhead and do **not** bound individual frame stutters or replace player-build profiling. Final advisory misses: Write1MiB **3.4503 ms / 3**, MeshBuild128 **1.0283 ms / 0.5**; station encode passed on the final run. **Zero optimization passes.**
+- **Decisions/follow-ups:** Q184–187 / ADR-0053–0056 cover the staged canonical implementation, ECS-tracked root serial allocation, unadopted split-collider ownership and Persistent cross-tick event streams. Split bricks explicitly receive render cleanup state; runtime cleanup fixes were driven by live evidence. Block migration now resolves the new plasma links and retains byte-stable manifests. Broader DMG/WPN/VFX tasks remain open: serial/full-grid internals, physical-grid-only debris, missing power/shields/AI/beams, final impact effects/audio, pooling and large-battle work are explicit limitations. Continue with DMG-005's complete required tests/criteria, then dependency order; do not wait for owner art gates or advisory numbers. Existing owner decisions remain pending; no new owner question. Pre-existing QualitySettings serialization change is preserved unstaged; Git stayed local.
 
 ### 2026-10-12 — DMG-004 done; playable firing/breakup checkpoint queued — astra (gpt-6)
 
