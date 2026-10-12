@@ -200,7 +200,7 @@ public readonly struct RebindResult
 }
 ```
 
-### 4.4 Presentation side (public contract, `Game.Presentation`)
+### 4.4 Presentation and App adapters (public contracts, ADR-0048)
 
 ```csharp
 namespace Game.Presentation.Input
@@ -228,11 +228,15 @@ namespace Game.Presentation.Input
         public bool AddHit(Unity.Physics.RaycastHit hit);  // hit.Entity == ignore → false; else keep it, MaxFraction = hit.Fraction, true
     }
 
+}
+
+namespace Game.App.EditorHost
+{
     /// <summary>Builds SPEC-51's EditorInputFrame from the Editor map once per frame.</summary>
     public sealed class EditorInputSampler
     {
         public EditorInputSampler(Game.Input.InputService input, Game.Core.IWorldPointerGate pointerGate);
-        public void Sample(ref Game.ShipEditor.EditorInputFrame frame);   // fills every field; actions edge-triggered this frame
+        public void Sample(ref Game.ShipEditor.Data.EditorInputFrame frame);   // fills every field; actions edge-triggered this frame
     }
 }
 ```
@@ -247,7 +251,7 @@ namespace Game.Presentation.Input
 - `Edges` (`PlayerEdgeCounters`, one `byte` per edge: `Interact`, `Ability1`…`Ability4`, `TargetNext`, `TargetUnderCursor`, `TargetClear`, `AutofireToggle`, `Cruise`; 10 bytes);
 - `FrameIndex` (`uint`).
 
-`InputCameraInput` and `EditorInputSampler` are created by SPEC-01 (step 11 passes `new InputCameraInput(input)` to `CameraRigService`). SPEC-51's `ShipEditorHost` receives an `EditorInputSampler` instance.
+SPEC-01 step 11 passes `new InputCameraInput(input)` to `CameraRigService`. SPEC-51's App host creates and receives `Game.App.EditorHost.EditorInputSampler` in EDT-024 (ADR-0048).
 
 ## 5. Systems, services and flow
 
@@ -339,7 +343,7 @@ Mode is read from `input.CurrentContext`:
 ### 5.4 `EditorInputSampler.Sample(ref frame)`
 
 1. `frame.PointerScreen = Pointer.ReadValue<Vector2>()`; `PointerAllowed = gate.IsWorldPointerAllowed(...)`.
-2. `PrimaryPressed/Held/Released` come from `Primary`'s `WasPressedThisFrame`/`IsPressed`/`WasReleasedThisFrame`. `Secondary` is read the same way.
+2. `PrimaryPressed/Held/Released` come from `Primary`'s `WasPressedThisFrame`/`IsPressed`/`WasReleasedThisFrame`. `SecondaryPressed/Released` come from the corresponding press/release edges (SPEC-51 has no SecondaryHeld field).
 3. `Shift/Ctrl/Alt` come from the modifier actions.
 4. `ToolWheel = ModCtrl ? ToolWheel.ReadValue<float>() : 0`.
 5. `Actions` = OR of the `EditorActions` bits whose action `WasPressedThisFrame()`, using the mapping table of SPEC-51 §4 (one bit per action of §4.2 Editor).
@@ -449,8 +453,8 @@ When the Editor map is disabled, set `frame = default`.
 - **Milestone:** M1
 - **Tier:** standard — §5.3 and §5.4 mapping tables
 - **Depends on:** `INP-002`, `CAM-001`
-- **Do:** Extend CAM-005’s Flight `InputCameraInput` with its Editor branch (§5.3), test the shared adapter, and implement `EditorInputSampler` (§5.4; the `EditorActions` mapping table comes from SPEC-51 §4 once EDT-001 exists; until then the test uses its own enum copy).
-- **Files:** `Assets/Game/Presentation/Input/{InputCameraInput,EditorInputSampler}.cs`; `Assets/Game/Tests/EditMode/Input/SamplerTests.cs`
+- **Do:** Extend CAM-005’s Flight `InputCameraInput` with its Editor branch (§5.3), test the shared adapter, and implement `Game.App.EditorHost.EditorInputSampler` (§5.4). Declare the exact `EditorActions` and `EditorInputFrame` types from SPEC-51 §4.2 now; EDT-001 reuses them (ADR-0048).
+- **Files:** `Assets/Game/Presentation/Input/InputCameraInput.cs`; `Assets/Game/App/EditorHost/EditorInputSampler.cs`; `Assets/Game/ShipEditor/Data/{EditorActions,EditorInputFrame}.cs`; `Assets/Game/Tests/EditMode/Input/SamplerTests.cs`
 - **Acceptance criteria:**
   - [ ] Orbit delta is zero unless the hold is pressed; the adapter/rig path applies Y inversion once.
   - [ ] In the Editor, Ctrl+scroll feeds `ToolWheel` and plain scroll feeds `Zoom`.
@@ -493,6 +497,8 @@ When the Editor map is disabled, set `frame = default`.
 
 
 | 8 | Player sampler precedes UI composition and origin rebasing; singleton reads do not implicitly wait | Bind with no pointer blocker until UIRoot exists, defer the absent ordering edge, explicitly complete physics readers | Tech lead | Resolved 2026-10-12: null pointer gate permits world pointer input while there is no UI; disabled Flight/unbound service stays neutral. UI-003 rebinds the actual gate; FND-017 owns temporary scene/pause contexts. GAL-009 must run before sampling when introduced. Physics query completion is explicit, preserving the stated read boundary without assuming singleton access waits. |
+
+| 9 | Editor sampler placement violates the Presentation boundary and its frame does not exist before EDT-001 | App host; stage the canonical input types in INP-006 | Tech lead | Resolved by [ADR-0048](../decisions/ADR-0048-editor-input-sampler-boundary.md): App/EditorHost sampler uses Game.ShipEditor.Data frame/actions; no assembly changes or enum copy. EDT-024 composes it later. |
 
 ## 11. References
 

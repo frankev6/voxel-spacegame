@@ -99,6 +99,8 @@ public struct PlacedBlockInfo { public int3 Origin; public ushort Block; public 
 
 ### 4.2 Public contract types (`Game.ShipEditor`, EDT-001)
 
+`EditorActions` and `EditorInputFrame` are declared early by INP-006 and reused here (ADR-0048).
+
 ```csharp
 namespace Game.ShipEditor.Data
 {
@@ -693,7 +695,7 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 - **Milestone:** M3
 - **Tier:** standard — transcribes §4.2 and §4.4 exactly and the §6 shells
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`, `ECO-001`, `UI-001`, `HUD-001`
-- **Do:** Create every type of §4.2 (namespaces `Game.ShipEditor.Data`, `Game.ShipEditor.Services`), the view models, command interfaces, `ShipEditorPanels` (empty `Mount`) and `BlueprintBrowserView` shell of §4.4, and §6 class shells with `NotImplementedException` bodies. Create `ShipEditorConfig.asset` with the default values and placeholder colours.
+- **Do:** Reuse INP-006's `EditorActions` and `EditorInputFrame` (ADR-0048); create every remaining type of §4.2 (namespaces `Game.ShipEditor.Data`, `Game.ShipEditor.Services`), the view models, command interfaces, `ShipEditorPanels` (empty `Mount`) and `BlueprintBrowserView` shell of §4.4, and §6 class shells with `NotImplementedException` bodies. Create `ShipEditorConfig.asset` with the default values and placeholder colours.
 - **Files:** `Assets/Game/ShipEditor/Data/*.cs` (one type per file), `Assets/Game/ShipEditor/Data/ShipEditorConfig.asset`, `Assets/Game/ShipEditor/Services/{IEditCommitTarget,IBlueprintStore,ShipEditorEntryArgs,EditSession,ShipEditorController}.cs`, `Assets/Game/UI/ViewModels/{ShipEditorViewModel,EditorPaletteViewModel,EditorPaletteItemViewModel,EditorColorViewModel,EditorStatsViewModel,EditorBomViewModel,EditorBomRowViewModel,EditorIssuesViewModel,EditorIssueRowViewModel,BlueprintBrowserViewModel,BlueprintRowViewModel}.cs`, `Assets/Game/UI/Views/{IShipEditorCommands,IBlueprintBrowserCommands,ShipEditorPanels,BlueprintBrowserView}.cs`
 - **Acceptance criteria:**
   - [ ] Compiles; names and signatures match §4.2, §4.4, §6.
@@ -942,7 +944,7 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 - **Milestone:** M3
 - **Tier:** frontier — F5: input, UI, camera, session and renderers ordered every frame
 - **Depends on:** `EDT-011`, `EDT-015`, `EDT-019`, `EDT-021`, `SPEC-62`, `INP-001`
-- **Do:** `ShipEditorHost` (§5.15 steps 1–5), `EditorInputSampler` (Editor map → `EditorInputFrame`), `ShipEditorPresenter` (view models, commands, throttled refresh, leave prompt §5.9, commit toast), `EditorHostServices`.
+- **Do:** `ShipEditorHost` (§5.15 steps 1–5), compose INP-006's existing `EditorInputSampler` (Editor map → `EditorInputFrame`, ADR-0048), `ShipEditorPresenter` (view models, commands, throttled refresh, leave prompt §5.9, commit toast), `EditorHostServices`.
 - **Files:** `Assets/Game/App/EditorHost/{ShipEditorHost,EditorInputSampler,ShipEditorPresenter,EditorHostServices}.cs`
 - **Acceptance criteria:**
   - [ ] Dirty draft + Esc (nothing active) shows the three-option prompt; Esc on the prompt keeps editing.
@@ -997,29 +999,30 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | SPEC-10: batched write API on `VoxelStructure` | `bool ApplyEdits(NativeArray<VoxelEdit>, ref BlockDefsBlob, NativeList<int3> touchedBricks)`, all-or-nothing, `VoxelEdit` as §4.1; `ClearCell` keeps the instance record; `RemoveBlock(origin)` removes the whole block | Tech lead (SPEC-10) |
-| 2 | SPEC-10: read API | `GetCell`, `TryGetBlockAt` (→ `PlacedBlockInfo`), `GetInstance`, `Clone`, `GetBrickCoords`, `TryGetBrickCells`, `CopyBrickSnapshot18`, `GetPalette`, `CellSize`, `SolidCellCount` as §4.1 | Tech lead (SPEC-10) |
-| 3 | SPEC-10/05: blueprint serialization | `VoxelStructureSerializer.Write(VoxelStructure, SaveWriter)` / `Read(SaveReader, ContentService)` with a `ContentId` palette (same encoding as save `VOXS` chunks) | Tech lead (SPEC-10) |
-| 4 | SPEC-11: mesher entry point, slicing and prop meshes | `BrickMesher.Schedule(cells18, in BrickMeshContext{ Defs, Palette, MaxCellY, BrickCoord }, MeshDataArray, index, deps)`; `PropMeshTable` config SO indexed by `PropMeshIndex`, pivot at the origin cell centre; colour table of 16 entries `BlockColorPalette` | Tech lead (SPEC-11) |
-| 5 | SPEC-04: footprint and function data | `BlockDef.Cells` contains (0,0,0) and is face-connected (validator); `AttachFaces` bit order +X,−X,+Y,−Y,+Z,−Z in block-local space; `BlockDef.Category`, `ModuleMask` and module rows (SPEC-04 §4.6, ADR-0013); `ContentService.BlockDefs`/`Orientations` blob references; `BlockDefinition.DisplayName`, `Icon`; mirror pairs validated by SPEC-04 | Tech lead (SPEC-04) |
-| 6 | SPEC-50: block ↔ item link and atomic apply | **Answered:** identity (`BlockDefinition : ItemDefinition`, SPEC-04 decision 6); SPEC-50 §4.3 `CountOf`, `CanApply`, `TryApplyAtomic`, `Changed` | Tech lead (SPEC-50) |
-| 7 | SPEC-22: per-block stat contribution usable outside Simulation | **Answered (ADR-0013):** SPEC-04 `BlockStatMath.Of(BlockDefinition, byte orient)` sums each module's `ContributeStats`; runtime totals come from the same module rows, so editor and runtime agree | Tech lead (SPEC-04) |
-| 8 | SPEC-03: Editor map actions | Primary LMB; Secondary RMB; Pointer; ToolWheel (scroll); Undo Ctrl/Cmd+Z; Redo Ctrl/Cmd+Shift+Z and Ctrl+Y; Copy/Cut/Paste Ctrl+C/X/V; Delete Delete/Backspace; RotateYaw R, RotatePitch T, RotateRoll G (Shift reverses); tools 1–9 (Place, Line, Box, Fill, Remove, Replace, Paint, Eyedropper, Select); MirrorX X, MirrorY V, MirrorZ Z; SliceToggle L, SliceUp ], SliceDown [; XRay H; BoxModeCycle B; Move arrows / PageUp / PageDown; MirrorSelection M; SelectAll Ctrl+A. Modifier shortcuts must not also trigger the plain key (`shortcutKeysConsumeInput`) | Tech lead (SPEC-03) |
-| 9 | SPEC-01: scene flow hooks | **Answered:** `IGameFlow.EnterBlueprintLabAsync(BlueprintLabArgs)` / `ExitBlueprintLabAsync()` (SPEC-01 §5.4.3); SPEC-01's ready hook (order 700) calls `ShipEditorHost.Create` | Tech lead (SPEC-01) |
-| 10 | SPEC-05: blueprint folder and save dirty | `saves/<profile>/blueprints/<id>.ssbp`; no dirty/autosave call from the editor (Lab exit autosaves through SPEC-01) | Tech lead (SPEC-05) |
-| 11 | SPEC-40/41: `open_ship_editor` effect | The effect calls `ShipEditorLauncher.EditPlayerShip`; the launcher defers until the dialog has ended (SPEC-41 `DialogEnded`) | Tech lead (SPEC-41) |
-| 12 | SPEC-13: can a multi-cell instance lose some cells and survive? | Yes; the editor reserves missing cells (§3 decision 9) | Tech lead (SPEC-13) |
-| 13 | Salvage when a damaged block is removed in the editor | None in M3 (BOM line "lost"); SPEC-50 may add salvage later | Owner |
-| 14 | Per-ship build budget (from the core block) | None in M3; only `MaxCells` (1,000,000) and `MaxExtentCells` (256 × 128 × 256) | Owner |
-| 15 | Module sockets | Deferred; no task until module content is designed | Owner |
-| 16 | Test flight from the Blueprint Lab | Not in v1 | Owner |
-| 17 | May an invalid design be saved as a blueprint? | No: blueprint save requires zero errors (warnings allowed) | Owner |
-| 18 | When is the player "docked" for editing? | M3: only through the station dialog effect (implicitly docked); Fleet "Edit" uses SPEC-31's docked flag (`PlayerDocked` singleton) when it exists | Tech lead (SPEC-31) |
-| 19 | SPEC-10/11 (M4): live grid replace and hide | `GridStructureReplaceRequest { Entity Grid; int StructureHandle; }` processed by SPEC-10 in `GameInitGroup` as a batch rebuild keeping the root; SPEC-11 enableable `GridHidden` | Tech lead (SPEC-10) |
-| 20 | Ship forward axis for thrust stats | Grid +Z forward, +Y up (same as SPEC-62 §10 Q7) | Tech lead (SPEC-20) |
-| 21 | Glossary says the Blueprint Lab is economy-free, but ROADMAP M3 requires commit against inventory before in-world edit (M4) | The BlueprintLab scene hosts creative sessions and economy ship-edit sessions (§3 decision 17); glossary wording to be updated by the owner | Owner |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | SPEC-10: batched write API on `VoxelStructure` | `bool ApplyEdits(NativeArray<VoxelEdit>, ref BlockDefsBlob, NativeList<int3> touchedBricks)`, all-or-nothing, `VoxelEdit` as §4.1; `ClearCell` keeps the instance record; `RemoveBlock(origin)` removes the whole block | Tech lead (SPEC-10) |  |
+| 2 | SPEC-10: read API | `GetCell`, `TryGetBlockAt` (→ `PlacedBlockInfo`), `GetInstance`, `Clone`, `GetBrickCoords`, `TryGetBrickCells`, `CopyBrickSnapshot18`, `GetPalette`, `CellSize`, `SolidCellCount` as §4.1 | Tech lead (SPEC-10) |  |
+| 3 | SPEC-10/05: blueprint serialization | `VoxelStructureSerializer.Write(VoxelStructure, SaveWriter)` / `Read(SaveReader, ContentService)` with a `ContentId` palette (same encoding as save `VOXS` chunks) | Tech lead (SPEC-10) |  |
+| 4 | SPEC-11: mesher entry point, slicing and prop meshes | `BrickMesher.Schedule(cells18, in BrickMeshContext{ Defs, Palette, MaxCellY, BrickCoord }, MeshDataArray, index, deps)`; `PropMeshTable` config SO indexed by `PropMeshIndex`, pivot at the origin cell centre; colour table of 16 entries `BlockColorPalette` | Tech lead (SPEC-11) |  |
+| 5 | SPEC-04: footprint and function data | `BlockDef.Cells` contains (0,0,0) and is face-connected (validator); `AttachFaces` bit order +X,−X,+Y,−Y,+Z,−Z in block-local space; `BlockDef.Category`, `ModuleMask` and module rows (SPEC-04 §4.6, ADR-0013); `ContentService.BlockDefs`/`Orientations` blob references; `BlockDefinition.DisplayName`, `Icon`; mirror pairs validated by SPEC-04 | Tech lead (SPEC-04) |  |
+| 6 | SPEC-50: block ↔ item link and atomic apply | **Answered:** identity (`BlockDefinition : ItemDefinition`, SPEC-04 decision 6); SPEC-50 §4.3 `CountOf`, `CanApply`, `TryApplyAtomic`, `Changed` | Tech lead (SPEC-50) |  |
+| 7 | SPEC-22: per-block stat contribution usable outside Simulation | **Answered (ADR-0013):** SPEC-04 `BlockStatMath.Of(BlockDefinition, byte orient)` sums each module's `ContributeStats`; runtime totals come from the same module rows, so editor and runtime agree | Tech lead (SPEC-04) |  |
+| 8 | SPEC-03: Editor map actions | Primary LMB; Secondary RMB; Pointer; ToolWheel (scroll); Undo Ctrl/Cmd+Z; Redo Ctrl/Cmd+Shift+Z and Ctrl+Y; Copy/Cut/Paste Ctrl+C/X/V; Delete Delete/Backspace; RotateYaw R, RotatePitch T, RotateRoll G (Shift reverses); tools 1–9 (Place, Line, Box, Fill, Remove, Replace, Paint, Eyedropper, Select); MirrorX X, MirrorY V, MirrorZ Z; SliceToggle L, SliceUp ], SliceDown [; XRay H; BoxModeCycle B; Move arrows / PageUp / PageDown; MirrorSelection M; SelectAll Ctrl+A. Modifier shortcuts must not also trigger the plain key (`shortcutKeysConsumeInput`) | Tech lead (SPEC-03) |  |
+| 9 | SPEC-01: scene flow hooks | **Answered:** `IGameFlow.EnterBlueprintLabAsync(BlueprintLabArgs)` / `ExitBlueprintLabAsync()` (SPEC-01 §5.4.3); SPEC-01's ready hook (order 700) calls `ShipEditorHost.Create` | Tech lead (SPEC-01) |  |
+| 10 | SPEC-05: blueprint folder and save dirty | `saves/<profile>/blueprints/<id>.ssbp`; no dirty/autosave call from the editor (Lab exit autosaves through SPEC-01) | Tech lead (SPEC-05) |  |
+| 11 | SPEC-40/41: `open_ship_editor` effect | The effect calls `ShipEditorLauncher.EditPlayerShip`; the launcher defers until the dialog has ended (SPEC-41 `DialogEnded`) | Tech lead (SPEC-41) |  |
+| 12 | SPEC-13: can a multi-cell instance lose some cells and survive? | Yes; the editor reserves missing cells (§3 decision 9) | Tech lead (SPEC-13) |  |
+| 13 | Salvage when a damaged block is removed in the editor | None in M3 (BOM line "lost"); SPEC-50 may add salvage later | Owner |  |
+| 14 | Per-ship build budget (from the core block) | None in M3; only `MaxCells` (1,000,000) and `MaxExtentCells` (256 × 128 × 256) | Owner |  |
+| 15 | Module sockets | Deferred; no task until module content is designed | Owner |  |
+| 16 | Test flight from the Blueprint Lab | Not in v1 | Owner |  |
+| 17 | May an invalid design be saved as a blueprint? | No: blueprint save requires zero errors (warnings allowed) | Owner |  |
+| 18 | When is the player "docked" for editing? | M3: only through the station dialog effect (implicitly docked); Fleet "Edit" uses SPEC-31's docked flag (`PlayerDocked` singleton) when it exists | Tech lead (SPEC-31) |  |
+| 19 | SPEC-10/11 (M4): live grid replace and hide | `GridStructureReplaceRequest { Entity Grid; int StructureHandle; }` processed by SPEC-10 in `GameInitGroup` as a batch rebuild keeping the root; SPEC-11 enableable `GridHidden` | Tech lead (SPEC-10) |  |
+| 20 | Ship forward axis for thrust stats | Grid +Z forward, +Y up (same as SPEC-62 §10 Q7) | Tech lead (SPEC-20) |  |
+| 21 | Glossary says the Blueprint Lab is economy-free, but ROADMAP M3 requires commit against inventory before in-world edit (M4) | The BlueprintLab scene hosts creative sessions and economy ship-edit sessions (§3 decision 17); glossary wording to be updated by the owner | Owner |  |
+| 22 | INP-006 and EDT-024 duplicate sampler ownership, and input types arrive too late | Reuse canonical App sampler and input types | Tech lead | Resolved by [ADR-0048](../decisions/ADR-0048-editor-input-sampler-boundary.md): INP-006 declares the exact two input types and App sampler; EDT-001 reuses them and EDT-024 composes it. |
 
 ## 11. References
 

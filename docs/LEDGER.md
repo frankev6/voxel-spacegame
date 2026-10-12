@@ -729,6 +729,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 158 | 2026-10-12 | SPEC-60 UI-006 | Clock range and cache lifetime unspecified | Explicit duration formatting and immutable private caches | Tech lead | Resolved SPEC-60 Q18: floor seconds, invalid/negative zero, expand long minutes, range-check Get2Digits; register converters through the existing UIRoot hook. |
 | 159 | 2026-10-12 | SPEC-01 FND-018 | Spatial cues requested before celestial streaming | Procedural distant placeholder and stationary local particles | Tech lead | Resolved SPEC-01 Q26: owner explicitly corrected the initial bake. Planet must be a physical finite sphere with surface/atmosphere, separate from the nebula/star sky. A subsequent request requires that sky to be procedural and animated; no sky texture remains. Owner retained the first procedural rendering brightness/density: “no don't reduce its good” (DESIGN-GUIDE decision 7). SYS-011 replaces staged cosmetics; no celestial persistence. |
 | 160 | 2026-10-12 | SPEC-60 UI-007 | KeyHint unset-path/null resolver policy | Empty display until configured, reject missing resolver | Tech lead | Resolved SPEC-60 Q19; imports added through Game.tss. Contrast audit remains UI-012, as specified. |
+| 161 | 2026-10-12 | SPEC-03 INP-006 / SPEC-51 | Editor sampler violates module boundary and needs undeclared types | App host, stage canonical frame/actions | Tech lead | Resolved SPEC-03 Q9 / SPEC-51 Q22 by accepted ADR-0048; no assembly changes. EDT-024 composes the existing sampler. |
 
 
 
