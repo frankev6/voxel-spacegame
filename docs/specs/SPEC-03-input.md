@@ -41,7 +41,7 @@ This avoids the old prototype's polling of `Keyboard.current` from many scripts,
 - `EditorInputSampler`, which builds the `EditorInputFrame` defined by SPEC-51 from the Editor map.
 
 **Out of scope (and who owns it instead):**
-- Deciding which context is active: `UINavigator` (SPEC-60), the only caller of `SetContext` after UI-004. Before then, the sole owner is SceneInputContextBridgeSystem (ADR-0044).
+- Deciding which context is active: `UINavigator` (SPEC-60), through InputServiceBridge, is the only production caller of `SetContext` (UI-004 / ADR-0047). The former direct scene bridge from ADR-0044 is removed; the temporary App adapter only navigates.
 - `PlayerCommand`/`ShipCommand` type definitions and their consumption: SPEC-20.
 - Camera behaviour: SPEC-62.
 - The settings screen: SPEC-61.

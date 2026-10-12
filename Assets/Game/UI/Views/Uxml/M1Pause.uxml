@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="grow center" picking-mode="Ignore">
+        <ui:Label name="m1-pause-title" text="Paused" class="text-display text-xl" picking-mode="Ignore" />
+        <ui:Button name="m1-pause-resume" text="Resume" class="btn btn--primary" />
+    </ui:VisualElement>
+</ui:UXML>

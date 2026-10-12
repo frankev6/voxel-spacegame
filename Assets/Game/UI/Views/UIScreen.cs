@@ -20,7 +20,11 @@ namespace Game.UI.Views
 
         /// Called once by UINavigator when the screen is first needed. Sets Root, then calls OnBuild().
         internal void Build(Game.UI.Services.UINavigator navigator, UnityEngine.UIElements.VisualElement root)
-        { Navigator = navigator; Root = root; OnBuild(); }
+        {
+            Navigator = navigator; Root = root;
+            try { OnBuild(); }
+            catch { Navigator = null; Root = null; throw; }
+        }
 
         /// Query named elements, set Root.dataSource, register callbacks. Called exactly once.
         protected abstract void OnBuild();

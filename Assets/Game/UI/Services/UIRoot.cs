@@ -96,7 +96,7 @@ namespace Game.UI.Services
             using (BuildMarker.Auto())
             {
                 if (!assets.TryGetValue(screen.Key, out var asset)) throw new InvalidOperationException("UIConfig missing screen '" + screen.Key + "'");
-                var tree = asset.Uxml.Instantiate(); tree.name = UINames.ScreenRoot(screen.Key);
+                var tree = asset.Uxml.Instantiate(); tree.name = UINames.ScreenRoot(screen.Key); tree.pickingMode = PickingMode.Ignore;
                 tree.AddToClassList(UIStyleClasses.Screen); tree.AddToClassList(UIStyleClasses.IsHidden);
                 tree.AddToClassList(screen.Layer == UILayer.Hud ? UIStyleClasses.ScreenHud
                     : screen.Layer == UILayer.Screens ? UIStyleClasses.ScreenScreens : UIStyleClasses.ScreenModals);
@@ -116,6 +116,7 @@ namespace Game.UI.Services
         public void HandleBackPressed() => Navigator.Back();
         public bool IsWorldPointerAllowed(Vector2 screenPosBottomLeft) => throw new NotImplementedException("UI-005");
         public void ApplyAccessibility(in AccessibilityOptions options) => throw new NotImplementedException("UI-013");
+        internal void PlaySound(UISound value) => sound.Play(value);
         void OnClick(ClickEvent evt)
         { if (evt.target is Button button && button.enabledInHierarchy) sound.Play(UISound.Click); }
         void OnPointerOver(PointerOverEvent evt)

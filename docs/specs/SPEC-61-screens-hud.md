@@ -445,7 +445,7 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 - **Milestone:** M3
 - **Tier:** frontier — F5: boot order, scene flow root switching, session rebind across App, UI and Presentation
 - **Depends on:** `HUD-001`, `SPEC-60`, `FND-001`
-- **Do:** Implement `UiComposition`: create all view models, views (registered on `UIRoot`), and presenters with their services (§5.4); register screen UXML entries in `UIConfig` (`Prewarm` true for `hud`, `pause`, `loading`, `confirm`, `text-prompt`); bind `HudSyncSystem` and the hotkey router; `SessionReset` handling. Provide the three root screens to `SceneFlow` (SPEC-01 calls `SetRoot`, §10 Q12).
+- **Do:** Remove/unbind ADR-0047's temporary SceneNavigationBridgeSystem and replace its M1 root/pause/blocker registrations before enabling full scene-root switching; the navigator remains the sole input owner.  Implement `UiComposition`: create all view models, views (registered on `UIRoot`), and presenters with their services (§5.4); register screen UXML entries in `UIConfig` (`Prewarm` true for `hud`, `pause`, `loading`, `confirm`, `text-prompt`); bind `HudSyncSystem` and the hotkey router; `SessionReset` handling. Provide the three root screens to `SceneFlow` (SPEC-01 calls `SetRoot`, §10 Q12).
 - **Files:** `Assets/Game/App/Presenters/UiComposition.cs`, `Assets/Game/UI/Data/UIConfig.asset`
 - **Acceptance criteria:**
   - [ ] After boot into each scene exactly one root screen is in the stack and visible (R13).

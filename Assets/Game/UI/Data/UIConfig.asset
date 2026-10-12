@@ -16,7 +16,16 @@ MonoBehaviour:
   RootUxml: {fileID: 9197481963319205126, guid: 4c16474e26ee4ab28307b15aec7e53b0, type: 3}
   ToastUxml: {fileID: 0}
   TooltipUxml: {fileID: 0}
-  Screens: []
+  Screens:
+  - Key: m1-scene-root
+    Uxml: {fileID: 9197481963319205126, guid: 002c65be05254b1a83e2b75d5a535e8f, type: 3}
+    Prewarm: 0
+  - Key: m1-pause
+    Uxml: {fileID: 9197481963319205126, guid: f43136b705f243078457136bd68faccd, type: 3}
+    Prewarm: 0
+  - Key: m1-input-blocker
+    Uxml: {fileID: 9197481963319205126, guid: 002c65be05254b1a83e2b75d5a535e8f, type: 3}
+    Prewarm: 0
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32
