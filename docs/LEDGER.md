@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 30 | 0 | 0 | 0 | 75 | 0 | 105 | 12 |
+| M1 | 29 | 1 | 0 | 0 | 75 | 0 | 105 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 7 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -110,7 +110,7 @@
 | FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | yes | done | astra (gpt-6) | 2026-10-11 | 8a8bd6f | Session flow/SESS; ordered save preparation; bounded thumbnail readback (ADR-0034) |
 | FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-11 | 745e10a | Fleet/FLET ownership, player spawn/writeback, report warnings and recovered-id reservation |
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | yes | done | astra (gpt-6) | 2026-10-11 | 4efcb47 | Serialized creative sandbox, optional player; normal campaign resets flags |
-| FND-017 | Imported ship flight checkpoint | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-010, REN-001, INP-001, DEV-001 | yes | todo |  |  |  | Owner priority; execute after REN-011, INP-005 and DEV-008 implementations |
+| FND-017 | Imported ship flight checkpoint | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-010, REN-001, INP-001, DEV-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Owner priority; REN-011/INP-005 ready; context hookup precedes DEV-008 ready predicate |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | no | todo |  |  |  |  |
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 66702c3 | Real input mapping, latched edges, collider/plane aim; ten required tests pass |
 | INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | yes | todo |  |  |  |  |
