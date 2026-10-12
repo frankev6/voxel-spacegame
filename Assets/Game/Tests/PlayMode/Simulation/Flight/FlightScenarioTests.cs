@@ -114,6 +114,11 @@ namespace Game.Tests.PlayMode.Simulation.Flight
                     Flags = GridSpawnFlags.NoRender | GridSpawnFlags.Transient, Profile = profile, LinearVelocity = velocity
                 });
             }
+            public Entity SpawnBlueprint(ShipBlueprintDefinition definition, float3 position = default)
+            {
+                Assert.IsTrue(library.TryGet(definition.Id.Hash, out var source), definition.IdString);
+                return SpawnSource(source.Clone(), position);
+            }
             public void Tick(int count = 1) => Test.StepTicks(count);
             public void Ready(params Entity[] roots)
             {

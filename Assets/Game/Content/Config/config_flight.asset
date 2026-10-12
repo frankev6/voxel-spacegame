@@ -24,8 +24,8 @@ MonoBehaviour:
   angularAssistGain: 0.5
   torqueWeight: 2
   allocationSweeps: 6
-  coreYawAccelDeg: 60
-  coreMaxYawTorque: 2000000
+  coreYawAccelDeg: 180
+  coreMaxYawTorque: 2500000
   throttleEpsilon: 0.001
   planeCorrection: 0.2
   intensityRise: 0.35

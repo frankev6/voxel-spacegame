@@ -17,12 +17,16 @@ namespace Game.Tests.EditMode.Simulation.Flight
         const string AssetPath = "Assets/Game/Content/Config/config_flight.asset";
 
         [Test]
-        public void DefaultAsset_EqualsDefault()
+        public void Defaults_AndConfiguredAsset_BootCorrectly()
         {
             var definition = AssetDatabase.LoadAssetAtPath<FlightConfigDefinition>(AssetPath);
             Assert.IsNotNull(definition);
             Assert.AreEqual("config_flight", definition.IdString);
-            Assert.AreEqual(FlightConfig.Default, FlightConfigFactory.Create(definition));
+            var defaults = ScriptableObject.CreateInstance<FlightConfigDefinition>();
+            try { Assert.AreEqual(FlightConfig.Default, FlightConfigFactory.Create(defaults)); }
+            finally { Object.DestroyImmediate(defaults); }
+            // FLT-010 owns shipped tuning; the fallback/constructor defaults remain the original contract.
+            var expected = FlightConfigFactory.Create(definition);
             var report = new ValidationReport("FLT-003");
             definition.Validate(report.For(AssetPath), null);
             Assert.AreEqual(0, report.ErrorCount, report.ToText());
@@ -31,7 +35,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
             using var world = EcsTestWorld.Create();
             content.CreateSingletons(world.EntityManager);
             BootSingletons.CreateAll(world.EntityManager, content.Catalog);
-            Assert.AreEqual(FlightConfig.Default, world.GetSingleton<FlightConfig>());
+            Assert.AreEqual(expected, world.GetSingleton<FlightConfig>());
             using var configs = world.EntityManager.CreateEntityQuery(typeof(FlightConfig), typeof(BootSingleton));
             Assert.AreEqual(1, configs.CalculateEntityCount());
         }

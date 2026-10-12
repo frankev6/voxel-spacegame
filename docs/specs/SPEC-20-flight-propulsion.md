@@ -529,8 +529,8 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Do:** Implement `FlightConfigDefinition` (fields, getters, validation FLT-E001: `maxForwardSpeed ≤ 0` or `allocationSweeps < 1`), `FlightConfigFactory.Create`, and the asset `Assets/Game/Content/Config/config_flight.asset` with defaults. Ledger note to SPEC-01 for its `BootSingletons` row (`FlightConfig`).
 - **Files:** `Assets/Game/Data/Definitions/Flight/FlightConfigDefinition.cs`, `Assets/Game/Simulation/Flight/FlightConfigFactory.cs`, `Assets/Game/Content/Config/config_flight.asset`, `Assets/Game/Tests/EditMode/Simulation/Flight/FlightConfigTests.cs`
 - **Acceptance criteria:**
-  - [x] Default asset → `FlightConfig.Default` exactly; FLT-E001 reported with asset path and field.
-- **Tests:** `FlightConfigTests.DefaultAsset_EqualsDefault`, `.Validate_E001`.
+  - [x] Definition defaults → `FlightConfig.Default` exactly; the initial asset uses those defaults, then FLT-010 owns its tuning (Q17). The configured asset’s factory output matches the boot singleton; FLT-E001 reports asset path and field.
+- **Tests:** `FlightConfigTests.Defaults_AndConfiguredAsset_BootCorrectly`, `.Validate_E001`.
 
 ### FLT-004 — Thrust allocator
 - **Milestone:** M1
@@ -613,7 +613,7 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Do:** For every migrated legacy ship blueprint, spawn it in a test scene and record mass, Iyy, forward acceleration (full W), time to `MaxForwardSpeed`, turn-in-place rate and time to 90°. Propose `FlightConfig` values and, if needed, new `ThrustNewtons` values for the SPEC-04 §4.10 thruster rows so that: small ships (< 3,000 cells) accelerate at 8–20 m/s² and turn 90° in ≤ 1.2 s; medium (3,000–30,000) 3–8 m/s², 90° in ≤ 3 s; large (> 30,000) 0.8–3 m/s², 90° in ≤ 8 s. Write the table and the proposal to the ledger *Measurements* and an *Open questions* row for owner sign-off; apply the `FlightConfig` values to the asset; content value changes go to SPEC-04/SPEC-72 owners.
 - **Files:** `Assets/Game/Tests/PlayMode/Simulation/Flight/FlightTuningReport.cs` (a test that prints the table), `Assets/Game/Content/Config/config_flight.asset`, `docs/LEDGER.md`
 - **Acceptance criteria:**
-  - [ ] Table for every legacy blueprint recorded; proposal recorded; owner sign-off requested.
+  - [x] Table for every legacy blueprint recorded; proposal recorded; owner sign-off requested (ledger Q125, pending; no approval inferred). Q18 records the measured acceleration shortfall.
 - **Tests:** `FlightTuningReport.PrintTable` (no assertion beyond "every blueprint spawned and measured").
 
 ### FLT-011 — Flight performance and determinism
@@ -664,6 +664,11 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 | 15 | Default LinearAssistGain 0.5 makes the final braking approach exponential, so exact zero has no finite M×v/ΣF stopping time | Test the analytical saturated bound with gain 1 and convergence separately with shipped defaults | Tech lead | Resolved FLT-007: preserve §5.3's assist formula. Brake_Stops compares unit-gain stopping ticks to M×v/ΣF within two ticks, and separately requires the default half-gain fixture to reach below 0.01 m/s. Brake suppresses boost in both cases. |
 
 | 16 | A per-job value flag cannot guarantee one diagnostic across parallel job copies and would log a persistent tilt every tick | One atomic diagnostic latch per system lifetime | Tech lead | Resolved FLT-008: retain parallel impulses; own a 4-byte NativeReference in OnCreate/OnDestroy, atomically claim the first tilt warning. No per-tick allocation, completion or transform correction. This resolves the conflicting per-entity/per-job wording and follows conventions §6's no-repeated-frame-logging rule. |
+
+| 17 | FLT-010 tuning supersedes FLT-003’s original shipped-default equality; measurement times and acceleration window were unspecified | Preserve fallback defaults and validate the configured asset at boot; fixed measurement definitions | Tech lead | Resolved FLT-010: definition constructor and FlightConfig.Default retain §4 defaults; the shipped asset is independently tunable and its factory output must match BootSingletons. Report acceleration as local forward speed after 15 ticks / 0.25 s, cap time at 99% (the half-gain assist is asymptotic), turn rate at 10 s and first positive 90° crossing. A 120 s forward window reports non-arrivals explicitly; zero forward thrust is reported separately. |
+
+| 18 | Legacy Small acceleration targets conflict with the migrated thrust/mass ratios | Preserve the physical model and shared thrust rows; report the shortfall and content follow-up | Tech lead | Resolved FLT-010: all 13 blueprints are Small. Full-thrust bounds require a medium row ≥165,960 N for Red Elite but ≤20,700 N for Striker. No straightforward shared-row scaling satisfies both. Complete the evidence/proposal task without claiming every target passed; do not invent per-ship acceleration overrides or modify unapproved ship layouts. Ledger Measurements records baseline and provisional results. |
+| 19 | Approve FLT-010 gyro values and the content balance follow-up | 180°/s² core yaw acceleration, 2.5 MN·m core torque, other config and thrust rows unchanged | Owner | Pending owner sign-off (ledger Q125): all 13 turn in ≤1.2 s; seven powered blueprints miss the acceleration range, ship_base has no thrust, and Medium/Large remain unvalidated. Three options and trade-offs are in the ledger. |
 
 ## 11. References
 

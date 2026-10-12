@@ -686,6 +686,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 120 | 2026-10-11 | SPEC-20 FLT-005 | No-player counter reset incorrectly consumes Cruise despite its travel ownership | Preserve Cruise while dropping pending ship edges | Tech lead | SPEC-20 Q13: all live/hulk/no-player paths leave Cruise untouched; nine ship counters retain specified per-tick/drop behavior |
 | 121 | 2026-10-11 | SPEC-20 FLT-007 | Propulsion's required data omits module rows; half-gain braking has an exponential final approach | Require BlockModulesRef and distinguish saturated stopping time from assist convergence | Tech lead | SPEC-20 Q14–15: existing module API; unit-gain analytical stopping fixture plus default-gain convergence; physical impulse algorithm unchanged |
 | 122 | 2026-10-11 | SPEC-20 FLT-008 | Per-job diagnostic flag is copied across parallel workers and repeats every tick | Atomic once-per-system warning latch | Tech lead | SPEC-20 Q16: four owned native bytes; one warning, no transform correction or per-tick synchronization |
+| 123 | 2026-10-11 | SPEC-20 FLT-010 | Shipped tuning invalidates initial-default asset equality; measurement definitions unspecified | Preserve fallback defaults and measure configured content separately | Tech lead | SPEC-20 Q17: configured factory/boot equality, 0.25 s acceleration, 99% cap, 10 s turn rate, first 90° crossing, explicit 120 s/non-thrust limits |
+| 124 | 2026-10-11 | SPEC-20 FLT-010 | Legacy acceleration targets cannot be achieved by straightforward shared-row thrust scaling | Record the shortfall; retain content rows and avoid inventing per-ship overrides | Tech lead | Resolved SPEC-20 Q18: all 13 blueprints are Small; one medium on 20,745 kg Red Elite needs ≥165,960 N for 8 m/s², while two mediums on 2,070 kg Striker need ≤20,700 N each for 20 m/s². Tuning evidence/proposal is complete; content balance and owner sign-off remain separate |
+| 125 | 2026-10-11 | SPEC-20 FLT-010 | Approve provisional yaw tuning and the legacy balance follow-up | Option 1 below: 180°/s², 2.5 MN·m core gyro; retain thrust rows pending blueprint balance | Owner | **Pending owner sign-off**, requested here per autonomous-run instructions; Measurements gives three options. All 13 t90 values ≤1.2 s; powered acceleration 1.928–38.647 m/s² misses 8–20 on seven ships; ship_base has no thrusters (Q40). Medium/large classes unvalidated |
 
 
 
@@ -740,6 +743,58 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
+
+### FLT-010 legacy flight tuning (2026-10-11)
+
+Apple M5 Pro / Unity 6000.6.5f1; actual migrated immutable blueprints, canonical grid mass and Unity Physics at 60 Hz. Two independent clones per row measure straight full-W and turn-in-place. All 13 are **Small (<3,000 cells)**; no Medium/Large evidence exists in this catalog. Acceleration is local forward speed after 15 ticks divided by 0.25 s; cap time means **99% of 120 m/s**, avoiding the half-gain assist's asymptotic tail. Turn rate is at 10 s; t90 is the first positive 90° crossing. Forward runs last at least 10 s, then stop at cap or 120 s. Peak is within that window, not a separate stability gate. Counts show total usable thrusters and (small/medium/large). These are physics fixtures; no new ship art or layouts were authored.
+
+**Baseline fallback — forward=120, yawCap=120, coreAccel=60, coreTorque=2000000.**
+
+| Blueprint | Cells | Mass kg | Iyy kg m² | Forward N | Thrusters S/M/L | Accel m/s² (0–0.25 s) | t99% cap s | Turn deg/s (10 s) | t90 s | Peak forward m/s |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| ship_base | 4 | 135.0 | 51.5 | 0 | 0 (0/0/0) | 0.000 | no forward thrust | 119.800 | 1.750 | 0.000 |
+| ship_bastion | 361 | 9175.0 | 157831.1 | 120000 | 3 (0/3/0) | 13.079 | 9.083 | 119.800 | 1.500 | 120.002 |
+| ship_beetle | 91 | 2650.0 | 6732.6 | 80000 | 2 (0/2/0) | 30.173 | 5.067 | 119.800 | 0.867 | 120.632 |
+| ship_butterfly | 815 | 20780.0 | 399306.8 | 200000 | 8 (6/2/0) | 9.625 | 12.350 | 119.800 | 1.350 | 118.870 |
+| ship_crescent | 306 | 8035.0 | 132640.1 | 120000 | 3 (0/3/0) | 14.935 | 7.967 | 119.800 | 1.350 | 120.014 |
+| ship_fighter | 1005 | 24620.0 | 444116.5 | 180000 | 14 (13/1/0) | 7.311 | 16.250 | 119.800 | 1.217 | 118.812 |
+| ship_freighter | 361 | 9175.0 | 157831.1 | 120000 | 3 (0/3/0) | 13.079 | 9.083 | 119.800 | 1.500 | 120.002 |
+| ship_frigate | 127 | 3130.0 | 17988.0 | 80000 | 4 (4/0/0) | 25.559 | 4.650 | 119.800 | 0.933 | 120.262 |
+| ship_icarus | 305 | 7975.0 | 132609.2 | 120000 | 3 (0/3/0) | 15.047 | 7.900 | 119.800 | 1.350 | 120.013 |
+| ship_red_elite | 819 | 20745.0 | 321273.6 | 40000 | 1 (0/1/0) | 1.928 | 61.617 | 119.800 | 1.717 | 118.805 |
+| ship_shuttle | 127 | 3130.0 | 17988.0 | 80000 | 4 (4/0/0) | 25.559 | 4.650 | 119.800 | 0.933 | 120.262 |
+| ship_striker | 74 | 2070.0 | 4600.0 | 80000 | 2 (0/2/0) | 38.191 | 3.883 | 119.800 | 0.850 | 120.770 |
+| ship_vestari | 972 | 24185.0 | 1108438.0 | 160000 | 8 (8/0/0) | 6.616 | 17.967 | 119.800 | 1.567 | 118.876 |
+
+**Provisional shipped tuning — forward=120, yawCap=120, coreAccel=180, coreTorque=2500000.**
+
+| Blueprint | Cells | Mass kg | Iyy kg m² | Forward N | Thrusters S/M/L | Accel m/s² (0–0.25 s) | t99% cap s | Turn deg/s (10 s) | t90 s | Peak forward m/s |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| ship_base | 4 | 135.0 | 51.5 | 0 | 0 (0/0/0) | 0.000 | no forward thrust | 119.800 | 1.083 | 0.000 |
+| ship_bastion | 361 | 9175.0 | 157831.1 | 120000 | 3 (0/3/0) | 13.079 | 9.083 | 119.800 | 1.050 | 120.002 |
+| ship_beetle | 91 | 2650.0 | 6732.6 | 80000 | 2 (0/2/0) | 30.189 | 3.950 | 119.800 | 0.850 | 120.868 |
+| ship_butterfly | 815 | 20780.0 | 399306.8 | 200000 | 8 (6/2/0) | 9.625 | 12.350 | 119.800 | 1.017 | 118.870 |
+| ship_crescent | 306 | 8035.0 | 132640.1 | 120000 | 3 (0/3/0) | 14.935 | 7.967 | 119.800 | 1.017 | 120.014 |
+| ship_fighter | 1005 | 24620.0 | 444116.5 | 180000 | 14 (13/1/0) | 7.311 | 16.250 | 119.800 | 1.000 | 118.812 |
+| ship_freighter | 361 | 9175.0 | 157831.1 | 120000 | 3 (0/3/0) | 13.079 | 9.083 | 119.800 | 1.050 | 120.002 |
+| ship_frigate | 127 | 3130.0 | 17988.0 | 80000 | 4 (4/0/0) | 25.559 | 4.650 | 119.800 | 0.883 | 120.301 |
+| ship_icarus | 305 | 7975.0 | 132609.2 | 120000 | 3 (0/3/0) | 15.047 | 7.900 | 119.800 | 1.017 | 120.013 |
+| ship_red_elite | 819 | 20745.0 | 321273.6 | 40000 | 1 (0/1/0) | 1.928 | 61.617 | 119.800 | 1.083 | 118.805 |
+| ship_shuttle | 127 | 3130.0 | 17988.0 | 80000 | 4 (4/0/0) | 25.559 | 4.650 | 119.800 | 0.883 | 120.301 |
+| ship_striker | 74 | 2070.0 | 4600.0 | 80000 | 2 (0/2/0) | 38.647 | 3.217 | 119.800 | 0.833 | 120.892 |
+| ship_vestari | 972 | 24185.0 | 1108438.0 | 160000 | 8 (8/0/0) | 6.616 | 17.967 | 119.800 | 1.167 | 118.876 |
+
+**Proposal and limits.** Apply `coreYawAccelDeg=180` and `coreMaxYawTorque=2,500,000` to the shipped asset; retain all other FlightConfig settings (120 m/s forward, 120°/s yaw cap, six allocation sweeps and existing assist gains). The intermediate 180°/s², 2 MN·m candidate left Vestari at 1.267 s; raising the torque cap to 2.5 MN·m brings it to 1.167 s. Every blueprint now meets the Small turning target. Fallback/definition defaults stay 60°/s² and 2 MN·m for reproducibility; boot uses the asset.
+
+The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exceed 20 m/s²; Fighter, Red Elite and Vestari are below 8 m/s². `ship_base` is the documented four-cell development placeholder with no thrusters (Q40), so it cannot reach the speed cap. Shared thrust-row scaling cannot reconcile the full-thrust mass ratios: Red Elite has one medium thruster and needs at least 165,960 N to accelerate at 8 m/s², while Striker has two of the same row and needs at most 20,700 N each to stay at 20 m/s². The measured allocator already uses almost all available forward force on both. Deliberately wasting force through torque imbalance is not a balance solution. Keep the existing small/medium/large rows at 20,000/40,000/40,000 N; SPEC-04/SPEC-72 content owners should revisit the approved layouts/masses or the class targets after Frank decides. Striker's migration already drops one overlapping legacy thruster; this report measures the valid migrated result, not the raw JSON count.
+
+**Owner sign-off requested (Q125), pending; the autonomous run continues.** Options, recommended first:
+
+1. **Keep the provisional yaw values**, then balance legacy blueprint propulsion/mass with the content owners after ship-design approval. Meets turning now; preserves physical thrust and the stated acceleration targets as follow-up work.
+2. Keep the original 60°/s², 2 MN·m gyro for a heavier feel. Preserves fallback tuning, but nine of thirteen blueprints miss the 1.2 s turning target; acceleration still needs content work.
+3. Keep the provisional yaw values and revise the Small acceleration target to preserve the legacy spread. Avoids layout changes, but accepts a roughly 20× acceleration range among powered ships and requires an explicit design decision.
+
+Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
 
