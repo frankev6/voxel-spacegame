@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 35 | 0 | 0 | 0 | 69 | 0 | 104 | 14 |
+| M1 | 35 | 0 | 0 | 0 | 69 | 0 | 104 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 7 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -136,7 +136,7 @@
 | VOX-021 | Mesh rebuild priority queue | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | REN-001 | yes | done | astra (gpt-6) | 2026-10-11 | bb07e09 | Guarded priority/FIFO mesh queue; stale promotion invalidation; 4 tests; Q75–76 |
 | REN-001 | Public contract types | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | VOX-001, DATA-001 | yes | done | astra (gpt-6) | 2026-10-11 | 42dfd86 | Rendering contracts; queue/batch ownership; ADR-0018 layout; Q51–53 |
 | REN-002 | SPIKE: Entities Graphics with thousands of runtime brick meshes | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 66a5baf | No-go: movement delta 1.625 ms, GPU 6.435 ms; REN-003 activated, ADR-0032 proposed |
-| REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Pooled renderer; resolve and accept concrete ADR-0032 contract |
+| REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002, REN-008 | no | todo |  | 2026-10-11 |  | Q132: shared shader prerequisite REN-008; ADR-0032 remains proposed |
 | REN-004 | Normals, packing and shape tables | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6b076af | Five shapes × 24 rotations; exact half-cell packing; 42 normals; Q88–89 |
 | REN-005 | Snapshot gathering | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004, SPEC-10, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 93cd973 | 27-neighbour snapshots, per-cell slopes, bounded props and retained flags; ADR-0029/Q91 |
 | REN-006 | LOD0 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | done | astra (gpt-6) | 2026-10-11 | 1de74e0 | LOD0 culling/AO/welding; 36.3 µs median; large slope indices safe; ADR-0030/Q92 |
@@ -695,6 +695,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 129 | 2026-10-11 | SPEC-62 CAM-005 | Input/rig specs apply orbit settings twice and duplicate adapter ownership | Raw pixels, one Input-namespace adapter, settings in rig | Tech lead | Resolved SPEC-62 Q12 / SPEC-03 Q7; CAM-005 Flight branch, INP-006 Editor branch/tests, zoom sensitivity once |
 | 130 | 2026-10-11 | SPEC-62 CAM-005 | Endpoint damping misses moving-target FPS tolerance by 0.767 m | Exact exponential cascade with linear target motion | Tech lead | Resolved SPEC-62 Q13; original 30/60/144 X: 232.0124/231.2455/230.7731 m. Test/tolerance unchanged; equal-rate and small-step limits; task tier frontier |
 | 131 | 2026-10-11 | SPEC-62 CAM-011 | M1 camera gate mentions M3 raycast/origin paths | Enforce no-occlusion 0.05 ms and zero GC now | Tech lead | Resolved SPEC-62 Q14; CAM-007 owns real-raycast timing ≤0.15 ms, CAM-006 owns origin accuracy; no stub timing accepted |
+| 132 | 2026-10-11 | SPEC-11 REN-003 | Fallback needs missing shared surface shader; apply/cleanup systems are future work | REN-008 first; future REN-010/011 consume pooled contract | Tech lead | Resolved SPEC-11 Q23; added shader dependency and returned REN-003 to todo; no contract or gate success asserted |
 
 
 
@@ -805,6 +806,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-11 — REN-003 prerequisite correction — astra (gpt-6)
+
+- Inspection before implementation found no BrickSurface.hlsl (owned by REN-008) and no apply/cleanup systems (REN-010/011). Q132 / SPEC-11 Q23 adds REN-008 as the fallback shader prerequisite, returns REN-003 to todo, and assigns future callers to their existing tasks. ADR-0032 remains proposed; no runtime contract changed and no fallback success claimed.
+- Next: implement and verify REN-008’s shared shader contract, then resume the pooled renderer with bounded allocation slack, deferred lifetime and measured memory. Docs: 505 tasks / zero errors. Claim branch contains only this prerequisite correction.
 
 ### 2026-10-11 — CAM-011 done — astra (gpt-6)
 

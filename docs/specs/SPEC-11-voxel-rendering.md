@@ -438,8 +438,8 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 ### REN-003 — Fallback renderer (only if REN-002 is no-go)
 - **Milestone:** M1
 - **Tier:** frontier — F2/F4: GPU buffer pools, indirect drawing, budgets
-- **Depends on:** `REN-002`
-- **Do:** If REN-002 records **go**, set `dropped` with the measurement reference. If **no-go**, after the ADR is accepted implement §5.10 and switch `BrickMeshApplySystem`/`BrickRenderCleanupSystem` to it; update §3 decisions 1–3 in the same commit.
+- **Depends on:** `REN-002`, `REN-008`
+- **Do:** If REN-002 records **go**, set `dropped` with the measurement reference. If **no-go**, after the ADR is accepted implement §5.10 against REN-008’s shared surface shader, and specify the pooled apply/cleanup integration for REN-010/011 (those systems do not exist yet, Q23); update §3 decisions 1–3 in the same commit. REN-011 implements the pooled callers.
 - **Files:** `Assets/Game/Voxel/Rendering/{BrickPoolRenderer,PageAllocator,BrickCullJob}.cs`; `Assets/Game/Voxel/Rendering/Shaders/BrickLitIndirect.shader`; `Assets/Game/Tests/PlayMode/Voxel/BrickPoolRendererTests.cs`
 - **Acceptance criteria:**
   - [ ] All REN tests pass on the fallback; REN-002 (a)–(c) targets met.
@@ -622,6 +622,7 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 20 | LOD1 attribute key zero collides with the empty-face sentinel; all-prop super-cells still need occupancy | Store key + 1 separately from the solid bit | Tech lead | Resolved: zero paint/layer remains visible, tie-break compares original keys, and solid non-structural super-cells occlude without emitting. |
 | 21 | PlayMode rendering tests cannot compile RenderBounds without its defining assembly | Reference existing Entities mathematics extensions | Tech lead | Resolved by ADR-0031: add Unity.Mathematics.Extensions to Game.Tests.PlayMode; no package/runtime API change. |
 | 22 | Can dynamic meshes release CPU copies after each apply? | Keep copies for mutable registered meshes | Tech lead | Resolved by REN-002 on Metal: UploadMeshData(true) prevents subsequent writable-mesh apply and shows no drop in the runtime-memory counter; releaseCpuMeshCopies defaults to false. |
+| 23 | Fallback task precedes its shared surface shader and asks to switch apply/cleanup systems that do not exist yet | Finish REN-008’s shared shader first, then build the standalone pool and specify future integration | Tech lead | Resolved 2026-10-11: REN-003 now depends on REN-008 and returns to todo until it is done. REN-010/011 will consume the accepted pooled contract instead of building a disposable registered-mesh implementation. No fallback implementation or performance success is claimed yet; ADR-0032 remains proposed. |
 
 ## 11. References
 
