@@ -1,0 +1,21 @@
+// ADR-0032: GPU-only growth, no persistent CPU geometry mirror or readback.
+#pragma kernel CopyWords
+#pragma kernel FillOwners
+ByteAddressBuffer _CopySource;
+RWByteAddressBuffer _CopyDestination;
+uint _CopyStart, _CopyEnd;
+int _CopyOffset;
+uint _CopyAdd, _OwnerSlot;
+[numthreads(256, 1, 1)]
+void CopyWords(uint3 id : SV_DispatchThreadID)
+{
+    uint word = _CopyStart + id.x;
+    if (word < _CopyEnd) _CopyDestination.Store((word + _CopyOffset) * 4, _CopySource.Load(word * 4) + _CopyAdd);
+}
+
+[numthreads(256, 1, 1)]
+void FillOwners(uint3 id : SV_DispatchThreadID)
+{
+    uint word = _CopyStart + id.x;
+    if (word < _CopyEnd) _CopyDestination.Store(word * 4, _OwnerSlot);
+}

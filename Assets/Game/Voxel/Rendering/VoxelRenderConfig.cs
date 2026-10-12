@@ -11,6 +11,7 @@ namespace Game.Voxel.Rendering
     public struct VoxelRenderConfig : IComponentData
     {
         public UnityObjectRef<Material> BrickMaterial, PropMaterial;
+        public UnityObjectRef<ComputeShader> BrickPoolCopy;
         public UnityObjectRef<Texture2D> Palette;
         public NativeArray<UnityObjectRef<Mesh>> PropMeshes;
         public int MeshBatchMin, MeshBatchMax;

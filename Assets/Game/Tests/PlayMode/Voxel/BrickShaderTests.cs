@@ -132,7 +132,7 @@ namespace Game.Tests.PlayMode.Voxel
             TestContext.WriteLine(shader.name + " SRP Batcher code " + result + ": " + reason);
             Assert.AreEqual(0, result, reason);
         }
-        static void CompileVariants(Shader shader, bool prop)
+        internal static void CompileVariants(Shader shader, bool prop)
         {
             var compile = typeof(ShaderUtil).GetMethod("CompileShaderVariant", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
             string[][] variants = prop ? new[] { Array.Empty<string>(), new[] { "DOTS_INSTANCING_ON" }, new[] { "PROCEDURAL_INSTANCING_ON" }, new[] { "PROCEDURAL_INSTANCING_ON", "_MAIN_LIGHT_SHADOWS", "_MAIN_LIGHT_SHADOWS_CASCADE", "_ADDITIONAL_LIGHTS", "_CLUSTER_LIGHT_LOOP" } }

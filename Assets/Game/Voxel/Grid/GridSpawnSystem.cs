@@ -113,11 +113,7 @@ namespace Game.Voxel.Grid
                 if (em.Exists(prototypes.Brick)) em.DestroyEntity(prototypes.Brick);
                 prototypes.Brick = em.CreateEntity(brickBase); brickRendered = rendered;
                 em.SetComponentEnabled<BrickDirty>(prototypes.Brick, false);
-                if (rendered != 0)
-                {
-                    AddRender(em, prototypes.Brick, runtime.BrickMaterial, runtime.PlaceholderMesh);
-                    em.SetComponentEnabled<MaterialMeshInfo>(prototypes.Brick, false);
-                }
+                // ADR-0032: pooled bricks have no Entities Graphics components.
             }
             CacheProfileSets(em);
             int registrations = em.GetBuffer<FunctionalComponentRegistration>(singletons).Length;

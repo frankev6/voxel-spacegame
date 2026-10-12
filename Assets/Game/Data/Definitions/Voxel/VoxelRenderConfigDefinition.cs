@@ -8,6 +8,7 @@ namespace Game.Data.Definitions
     {
         [SerializeField] private Material brickMaterial;
         [SerializeField] private Material propMaterial;
+        [SerializeField] private ComputeShader brickPoolCopy;
         [SerializeField] private VoxelPaletteDefinition palette;
         [SerializeField, Range(16, 128)] private int meshBatchMin = 16;
         [SerializeField, Range(16, 256)] private int meshBatchMax = 128;
@@ -19,6 +20,7 @@ namespace Game.Data.Definitions
         [SerializeField] private bool releaseCpuMeshCopies = false;
         public Material BrickMaterial => brickMaterial;
         public Material PropMaterial => propMaterial;
+        public ComputeShader BrickPoolCopy => brickPoolCopy;
         public VoxelPaletteDefinition Palette => palette;
         public int MeshBatchMin => meshBatchMin;
         public int MeshBatchMax => meshBatchMax;
