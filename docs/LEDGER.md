@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 28 | 1 | 0 | 0 | 76 | 0 | 105 | 12 |
+| M1 | 28 | 0 | 0 | 0 | 77 | 0 | 105 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 7 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -202,8 +202,8 @@
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | todo |  |  |  |  |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | todo |  |  |  |  |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | no | todo |  |  |  |  |
-| DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |  |
-| DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | no | todo |  |  |  |  |
+| DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0b4269c | Real launch/probes, isolated profile, live edit-mode launch 1.370 s; Q144–146 |
+| DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | todo |  |  |  |  |
 | DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | no | todo |  |  |  |  |
 | DEV-015 | In-game dev console | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-003, UI-001, INP-001 | no | todo |  |  |  |  |
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | no | todo |  |  |  |  |
@@ -821,6 +821,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DEV-008 done — astra (gpt-6)
+
+- **Implementation 0b4269c:** runtime newgame/sandbox commands and typed player.exists/player.ready probes call production flow, physics and input readiness. CLI wrappers enter Play from Boot asynchronously; newgame.sh polls the real operation within a 90 s deadline and prints a snapshot. Shared production test fixture retains real boot and isolated disk paths. Removed obsolete parser fixtures now provided by production registrations.
+- **Live game:** from edit mode, `tools/playtest/newgame.sh 42` reached readiness in **1.370 s**; repeat **0.229 s**. Both player id **1**, spawn **(0,0,0)**. Real W input reached **14.64485 m/s** and z **102.1245 m** at observation. Actual GPU game screenshot `Logs/playtest/fighter-command-launch.png` shown to Frank; evidence under `Logs/playtest/dev008/`. Empty sandbox seed 17 completed with GameplayActive, no player, and false player probes. Old World autosave stayed in isolated **p001/auto_0**, **1,740 B**. No live errors; one existing GridSpawnSystem lookup-performance warning on first spawn, left advisory.
+- **Validation:** compile **zero C# warnings**; full EditMode **709 pass, 1 advisory failure, 1 explicit skip** (MeshBuild128 **0.8758 ms** vs 0.5); full headless PlayMode **71 pass, 12 GPU-only skips**, including all three required command tests and the existing flight integration tests. Docs **506 tasks / zero errors**. No optimization passes. Unity settings restored from pre-run backups; no temporary asset scripts.
+- **Resolved gaps:** Q144 / SPEC-70 Q17 explicitly rejects a nonempty start-scenario argument until that content/consumer exists; the default uses the configured Fighter. Q145 / Q18 makes pre-boot dispatch asynchronous and applies/restores the intro hook around the boot it owns. Q146 / Q19 prevents switching an active player session's profile before sandbox autosave; it requires harness ownership. None needs owner input.
+- **Next:** UI-001 onward through the ready M1 UI foundation and navigation, preserving the working flight loop. Full HUD screens remain in M3 with their existing dependencies. No benchmark tuning; no new art decisions. HANDOFF updated with the one-command launch recipe.
 
 ### 2026-10-12 — FND-017 done — astra (gpt-6)
 
