@@ -78,7 +78,7 @@ The old prototype had no automated tests, and its determinism, leaks and frame d
    - Replays never contain spawns, star-system jumps (SPEC-32 decision 10), director rolls (SPEC-33 decision 6) or `Dormant` toggles (SPEC-11 Q3).
 
    Reason: spawns, jumps and dormancy are frame-granular by design. The gate measures the simulation itself.
-6. **Replay is per tick, not per frame.** `PlayerCommandReplaySystem` overwrites `PlayerCommand` after `PlayerInputSampleSystem` with the script value for the tick about to run (`SimClock.Tick`). Edge counters are absolute values from the script, so re-writing on frames without ticks is idempotent. Reason: SPEC-03/20 latch edges per frame and consume them per tick; this makes replays identical at any frame rate.
+6. **Replay is indexed by simulation tick at the frame input stage (ADR-0051).** `PlayerCommandReplaySystem` overwrites `PlayerCommand` after `PlayerInputSampleSystem` with the script value for the tick about to run (`SimClock.Tick`). Edge counters are absolute values from the script, so re-writing on frames without ticks is idempotent. Reason: SPEC-03/20 latch edges per frame and consume them per tick; the even-tick scripts used by the 30/60/144 FPS gate produce identical commands. Arbitrary odd-tick changes or other catch-up schedules are not covered by that frame-stage guarantee.
 7. **Profiler markers are discovered, not registered.**
    - `PerfMarkers` lists recorders for every available marker in `ProfilerCategory.Scripts` whose name matches `^[A-Z][A-Za-z0-9]*\.[A-Z][A-Za-z0-9]*$`, the architecture §11.11 naming.
    - Systems keep `static readonly ProfilerMarker` fields created with `new ProfilerMarker("<Type>.<Step>")`, which is Burst-compatible.
@@ -365,8 +365,10 @@ Leaks are reported by Unity as error logs, so they fail the test through the gua
 
 `Parse` fails with the line number on a malformed or non-ascending line.
 
+**Endpoints and metadata (ADR-0051):** first Set establishes StartTick; every Set extends EndTick to at least tick + 1, including an unchanged held value. Same-tick Set replaces that tick. FrameIndex is transient: excluded from text/change comparisons and supplied by replay. Optional seed/content headers survive text round trips. Recorder Start fixes StartTick to the current clock tick and samples immediately; Stop fixes the exclusive EndTick to the current clock tick and discards any sample at that endpoint.
+
 **`PlayerCommandRecorder.Start(world)`:**
-- add or enable a recording hook system in `GameInitGroup` after `PlayerInputSampleSystem`;
+- add or enable a recording hook system in `GameInitGroup` after `PlayerCommandReplaySystem` (which follows `PlayerInputSampleSystem`);
 - each frame, if `SimClock.Tick` differs from the last recorded tick or the command changed: `Set(SimClock.Tick, PlayerCommand)`.
 
 `Stop` returns the script with `EndTick = Tick`.
@@ -484,9 +486,9 @@ The game gates it owns are those listed in §5.7.
 - **Tier:** standard — text format and per-tick overwrite rule fully given in §5.4
 - **Depends on:** `TST-001`, `FLT-001`, `INP-001`
 - **Do:** Implement `PlayerCommandScript` (format, `Parse`/`ToText`/`Load`/`Save`, `At`, the even-tick check), `PlayerCommandRecorder` with its hook system, and `PlayerCommandReplaySystem` (§5.4).
-- **Files:** `Assets/Game/App/Testing/{PlayerCommandScript,PlayerCommandRecorder,PlayerCommandRecordSystem,PlayerCommandReplaySystem}.cs`; `Assets/Game/Tests/EditMode/TestKit/ReplayTests.cs`
+- **Files:** `Assets/Game/App/Testing/{PlayerCommandScript,PlayerCommandRecorder,PlayerCommandRecordSystem,PlayerCommandReplaySystem}.cs`; `Assets/Game/Simulation/Commands/PlayerCommand.cs` (ownership comment); `Assets/Game/Tests/EditMode/TestKit/ReplayTests.cs`
 - **Acceptance criteria:**
-  - [ ] `Parse(ToText(s))` equals `s` field by field, with floats bit-exact.
+  - [ ] `Parse(ToText(s))` equals `s` for every serialized field, with floats bit-exact (FrameIndex is transient, ADR-0051).
   - [ ] **Replay into an `EcsTestWorld`** (with `PlayerCommandApplySystem`): the `ShipCommand` sequence per tick is identical at frame steps of 1/30, 1/60 and 1/144 s.
   - [ ] An edge recorded once fires exactly once in each variant.
   - [ ] The replay stops at `EndTick`.
@@ -603,6 +605,10 @@ The game gates it owns are those listed in §5.7.
 | 6 | Decision 4 makes every perf run inconclusive outside the reference settings, but the existing main-thread micro-gates (StableHash, EventBus, SaveWriter, ContentService, orientation tables, SimEventChannel, the managed-event drain) would then never be enforced in the Editor; and `LogAssert.NoUnexpectedReceived()` in `[TearDown]` does not see the test body's plain logs (found in TST-001) | **Resolved in TST-001:** micro-gates that time their own loop go through `PerfRun.Gate(name, samples, budget)`, which writes the `Logs/perf` record and asserts the median without the settings check; `RunFrames`/`RunEcs` keep decision 4. `GameTestBase` keeps the teardown call; error logs fail tests through Unity's default check (`ignoreFailingMessages = false`), and plain logs and warnings do not fail | Tech lead |
 
 | 7 | Applied settings disabled only domain reload; live wrappers used an obsolete CLI schema and ignored process failure | **Answer (resolved in TST-008):** apply and guard both reload flags (ADR-0020); use the installed Pipeline command schema and complete structured results, export XML, clear stale results and reject failed process/CLI execution even when XML reports passes. Iteration timings include CLI transport and script wall time with an idle open Editor. | Tech lead |
+
+| 8 | Replay/record managed systems and PlayerCommand override absent from architecture; endpoints/FrameIndex unspecified | Follow ADR-0051 | Tech lead |
+
+**Answer to Q8 (resolved):** accepted ADR-0051 registers dev-only frame-stage hooks, makes the overwrite explicit, defines programmatic/recorded endpoints and transient FrameIndex, and bounds the cross-FPS guarantee to the stated even-tick scenarios.
 
 ## 11. References
 

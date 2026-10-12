@@ -740,6 +740,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 168 | 2026-10-12 | SPEC-63 VFX-001 | FxKind would create Data→Voxel cycle | Shared enum in Game.Data.Definitions | Tech lead | Resolved ADR-0050 / SPEC-63 Q16: unchanged values, no new assembly reference. |
 | 169 | 2026-10-12 | SPEC-63 VFX-001 | native queue lacks owned producer handles | GuardedHandles on FxEventQueue | Tech lead | Resolved ADR-0050 / SPEC-63 Q17: shared atomic enqueue, exclusive drain, guarded disposal; frontier scope. AUD-006 reconciles the existing SFX queue before asynchronous producers. |
 | 170 | 2026-10-12 | SPEC-63 VFX-001 | obsolete validation API and unstated diagnostic codes | Canonical ValidationScope/context | Tech lead | Resolved ADR-0050 / SPEC-63 Q18: stable VFX codes, asset/field diagnostics, strict defaults until VFX-004 staged content relaxation. |
+| 171 | 2026-10-12 | SPEC-71 TST-002 | Replay override absent from architecture; endpoints/metadata unclear | Explicit dev hooks and frame-stage replay contract | Tech lead | Resolved ADR-0051 / SPEC-71 Q8: sampler → replay → recorder, transient FrameIndex, defined script bounds, even-tick 30/60/144 guarantee only. |
 
 
 

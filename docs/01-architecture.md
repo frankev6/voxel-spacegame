@@ -170,6 +170,8 @@ InitializationSystemGroup
 └─ GameInitGroup                         (custom; OrderLast)
    ├─ OriginRebaseSystem                 GAL  single floating-origin owner
    ├─ PlayerInputSampleSystem            INP  managed; writes PlayerCommand singleton
+   ├─ PlayerCommandReplaySystem          TST  managed, dev-only; explicit PlayerCommand override after sampling (ADR-0051)
+   ├─ PlayerCommandRecordSystem          TST  managed, dev-only; records the effective command after replay (ADR-0051)
    ├─ GridSpawnSystem                    VOX  structural; GridSpawnRequest → grid root + bricks + functional entities (batch APIs)
    └─ GridSpawnBodyInitSystem            PHY  fresh spawn bodies through end-init ECB, including while paused (ADR-0037)
 
@@ -312,7 +314,7 @@ These types cross module boundaries. **Their names and owning module are binding
 | Type | Shape (binding parts) | Notes |
 |---|---|---|
 | `ShipCommand` | per ship: `float2 Thrust` (x = strafe, y = forward, −1..1), `float Turn` (−1..1), `float3 AimWorld`, `uint FireGroups` (bitmask), `byte Flags` (boost, brake…) | The single interface between "who controls the ship" (player or AI) and "how the ship moves/fires" |
-| `PlayerCommand` | singleton: same fields as `ShipCommand` plus latched edge flags | Written only by `PlayerInputSampleSystem` |
+| `PlayerCommand` | singleton: same fields as `ShipCommand` plus latched edge flags | Written by `PlayerInputSampleSystem`; dev-only replay override after it (ADR-0051) |
 | `PlayerShip` | tag on the player's current ship | |
 | `Allegiance` | `byte Faction; byte Team` | `ContentId` → byte index via `FactionTable` |
 | `OwnedBy` | `Entity Owner; ulong OwnerPersistentId` in `Game.Data.Components` (designed by SPEC-21) | On roots launched or spawned by another root. Damage, shield-hit and explosion events carry `Instigator` = owner (or the shooter); provocation and kill credit use it |
