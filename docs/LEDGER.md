@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 33 | 0 | 0 | 0 | 71 | 0 | 104 | 13 |
+| M1 | 32 | 0 | 0 | 0 | 72 | 0 | 104 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 7 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -142,7 +142,7 @@
 | REN-006 | LOD0 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | done | astra (gpt-6) | 2026-10-11 | 1de74e0 | LOD0 culling/AO/welding; 36.3 µs median; large slope indices safe; ADR-0030/Q92 |
 | REN-007 | LOD1 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-006 | yes | done | astra (gpt-6) | 2026-10-11 | 5cbebeb | LOD1 exact coverage; triangle ratios 0.406% / 0.557% / 6.195% |
 | REN-008 | Brick and prop shaders, placeholder art | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | done | astra (gpt-6) | 2026-10-11 | 4c504f4 | Canonical shaders/ADR-0040; GPU 4/4, 112 Metal/D3D11 variants; procedural assets |
-| REN-009 | Render config definitions and factory | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | REN-001, REN-008 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |  |
+| REN-009 | Render config definitions and factory | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | REN-001, REN-008 | yes | done | astra (gpt-6) | 2026-10-12 | 6407fb5 | Validated materials/palette factory, explicit boot lifetime; Q138 |
 | REN-010 | BrickMeshBuildSystem | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-005, REN-006, REN-007 | yes | todo |  |  |  |  |
 | REN-011 | BrickMeshApplySystem, cleanup and statistics | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-010, SPEC-10 | no | todo |  |  |  |  |
 | REN-012 | GridLodSystem, Dormant and LOD switching | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011 | no | todo |  |  |  |  |
@@ -812,6 +812,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — REN-009 done — astra (gpt-6)
+
+- Boot now receives the pooled brick material, copy shader, approved NOCTURNE palette and ContentService prop meshes through explicit config assets. Factory copies all values and creates the 256×1 point/clamp RGBA32 texture; disposable boot ownership releases native storage and texture on shutdown/failure. Missing inputs/invalid palette length fail validation. Q138 resolves ownership and the superseded legacy-palette instruction.
+- Three prescribed tests pass, including real boot singleton creation/disposal and exact palette pixels. Compile **zero C# warnings**, full EditMode **696 passed + 1 explicit skipped**, headless PlayMode **65 passed + 6 GPU-only skipped**, docs **505 tasks / zero errors**. Implementation **6407fb5**. No optimization passes used; next REN-010 mesh-building integration.
 
 ### 2026-10-12 — REN-003 done — astra (gpt-6)
 
