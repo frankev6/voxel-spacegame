@@ -147,7 +147,7 @@
 | REN-009 | Render config definitions and factory | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | REN-001, REN-008 | yes | done | astra (gpt-6) | 2026-10-12 | 6407fb5 | Validated materials/palette factory, explicit boot lifetime; Q138 |
 | REN-010 | BrickMeshBuildSystem | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-005, REN-006, REN-007 | yes | done | astra (gpt-6) | 2026-10-12 | be4b370 | Snapshot-only Burst batches verified; performance deferred: 0.864 ms vs 0.5 ms, zero tuning passes |
 | REN-011 | BrickMeshApplySystem, cleanup and statistics | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-010, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-12 | 18a0e45 | Pooled apply/cleanup, shared registration, camera transforms; six GPU checks pass |
-| REN-012 | GridLodSystem, Dormant and LOD switching | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011 | yes | todo |  |  |  |  |
+| REN-012 | GridLodSystem, Dormant and LOD switching | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Distance LOD and dormancy integration |
 | REN-013 | Rendering gate suite | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-012, REN-008 | no | todo |  |  |  |  |
 | REN-014 | Prop block instancing | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011, REN-008 | yes | todo |  |  |  |  |
 | PHY-001 | Public contract types | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 1f27ec6 | Physics contracts, exact filters, native/blob ownership; 4 required tests |
