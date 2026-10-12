@@ -8,7 +8,7 @@ namespace Game.Data.Definitions
     [CreateAssetMenu(menuName = "Game/Content/VFX Config", fileName = "config_vfx")]
     public sealed class VfxConfigDefinition : ContentDefinition
     {
-        [SerializeField] FxDefinition[] defaults = new FxDefinition[13]; // index = (int)FxKind; [0] stays null
+        [SerializeField] FxDefinition[] defaults = new FxDefinition[14]; // index = (int)FxKind; [0] stays null
         [SerializeField] FxQualityBudget low    = new FxQualityBudget { DebrisLiveCap = 10000, DebrisSpawnPerFrame = 4000,  ParticleFactor = 0.25f, MaxTracers = 4096,  MaxBeams = 64,  MaxPlumes = 256,  MaxShields = 32 };
         [SerializeField] FxQualityBudget medium = new FxQualityBudget { DebrisLiveCap = 25000, DebrisSpawnPerFrame = 10000, ParticleFactor = 0.5f,  MaxTracers = 8192,  MaxBeams = 128, MaxPlumes = 512,  MaxShields = 64 };
         [SerializeField] FxQualityBudget high   = new FxQualityBudget { DebrisLiveCap = 50000, DebrisSpawnPerFrame = 20000, ParticleFactor = 1f,    MaxTracers = 16384, MaxBeams = 256, MaxPlumes = 1024, MaxShields = 128 };
@@ -44,7 +44,7 @@ namespace Game.Data.Definitions
         public override void Validate(ValidationScope scope, ContentValidationContext context)
         {
             base.Validate(scope, context);
-            if (defaults == null || defaults.Length != 13) scope.Error("VFX-E010", nameof(defaults), "Defaults must have 13 entries indexed by FxKind.");
+            if (defaults == null || defaults.Length != 14) scope.Error("VFX-E010", nameof(defaults), "Defaults must have 14 entries indexed by FxKind.");
             else for (int k = 1; k < defaults.Length; k++)
             {
                 if (defaults[k] == null) scope.Error("VFX-E011", $"defaults[{k}]", "A default is required for each effect kind.");

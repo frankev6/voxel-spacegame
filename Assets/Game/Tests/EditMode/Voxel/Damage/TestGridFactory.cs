@@ -16,8 +16,9 @@ namespace Game.Tests.EditMode.Voxel.Damage
     /// <summary>DMG-004 fixtures built through the production structure and grid spawn path.</summary>
     internal sealed class TestGridFactory : IDisposable
     {
-        public readonly VoxelTestContent Content = new VoxelTestContent(includeExplosive: true);
-        public readonly World World = new World("Damage grid fixtures");
+        public readonly VoxelTestContent Content;
+        public readonly World World;
+        readonly bool ownsWorld;
         readonly BlueprintLibrary library;
         readonly VoxelStructureRegistry registry;
         readonly SystemHandle spawn;
@@ -25,14 +26,17 @@ namespace Game.Tests.EditMode.Voxel.Damage
         readonly List<NativeStream> explosionStreams = new List<NativeStream>();
         public NativeStream LastExplosionStream => explosionStreams[explosionStreams.Count - 1];
         public EntityManager EM => World.EntityManager;
-        public TestGridFactory()
+        public TestGridFactory(World world = null, bool includeArmored = false)
         {
+            Content = new VoxelTestContent(includeExplosive: true, includeArmored: includeArmored);
+            ownsWorld = world == null; World = world ?? new World("Damage grid fixtures");
             library = new BlueprintLibrary(Content.Service.Catalog, Content.Content);
             registry = VoxelStructureRegistry.CreateRuntime(library);
             Content.Service.CreateSingletons(EM);
             EM.CreateSingleton(new VoxelStructureRegistryRef { Value = registry });
             EM.CreateSingleton(new VoxelConfig { SpawnBricksPerFrame = 1024, DefaultCellSize = .5f });
-            EM.CreateEntity(typeof(GameplayActive)); spawn = World.CreateSystem<GridSpawnSystem>();
+            using var active = EM.CreateEntityQuery(typeof(GameplayActive));
+            if (active.IsEmpty) EM.CreateEntity(typeof(GameplayActive)); spawn = World.GetOrCreateSystem<GridSpawnSystem>();
         }
         VoxelStructure Source() { var s = new VoxelStructure(); sources.Add(s); return s; }
         public VoxelStructure Box(int3 min, int3 max, bool hollow = false)
@@ -98,7 +102,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
         }
         public void Dispose()
         {
-            World.Dispose(); foreach (var stream in explosionStreams) stream.Dispose(); UnityEngine.Object.DestroyImmediate(registry);
+            if (ownsWorld) World.Dispose(); foreach (var stream in explosionStreams) stream.Dispose(); UnityEngine.Object.DestroyImmediate(registry);
             foreach (var s in sources) s.Dispose(); library.Dispose(); Content.Dispose();
         }
     }

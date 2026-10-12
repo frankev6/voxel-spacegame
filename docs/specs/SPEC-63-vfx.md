@@ -82,6 +82,7 @@ namespace Game.Data.Definitions
         Warp = 10,           // event: lane-jump departure/arrival (pooled hero effect)
         Tracer = 11,         // state: projectile tracer look (never sent as an event)
         ShieldShell = 12,    // state: shield shell look (never sent as an event)
+        RamImpact = 13,      // collision contact/energy event (SPEC-13 §5.2, ADR-0058)
     }
 
 }
@@ -263,7 +264,7 @@ public struct FxQualityBudget
 [ContentIdPrefix("config_")]
 public sealed class VfxConfigDefinition : ContentDefinition
 {
-    [SerializeField] FxDefinition[] defaults = new FxDefinition[13]; // index = (int)FxKind; [0] stays null
+    [SerializeField] FxDefinition[] defaults = new FxDefinition[14]; // index = (int)FxKind; [0] stays null
     [SerializeField] FxQualityBudget low    = new FxQualityBudget { DebrisLiveCap = 10000, DebrisSpawnPerFrame = 4000,  ParticleFactor = 0.25f, MaxTracers = 4096,  MaxBeams = 64,  MaxPlumes = 256,  MaxShields = 32 };
     [SerializeField] FxQualityBudget medium = new FxQualityBudget { DebrisLiveCap = 25000, DebrisSpawnPerFrame = 10000, ParticleFactor = 0.5f,  MaxTracers = 8192,  MaxBeams = 128, MaxPlumes = 512,  MaxShields = 64 };
     [SerializeField] FxQualityBudget high   = new FxQualityBudget { DebrisLiveCap = 50000, DebrisSpawnPerFrame = 20000, ParticleFactor = 1f,    MaxTracers = 16384, MaxBeams = 256, MaxPlumes = 1024, MaxShields = 128 };
@@ -279,7 +280,7 @@ public sealed class VfxConfigDefinition : ContentDefinition
     // Read-only properties with the same names in PascalCase; Budget(VfxQuality q) returns low/medium/high.
     public override void Validate(ValidationScope scope, ContentValidationContext context)
     {
-        // Errors: defaults.Length != 13; defaults[k] == null for every k in 1..12; defaults[k].Kind != (FxKind)k;
+        // Errors: defaults.Length != 14; defaults[k] == null for every k in 1..13; defaults[k].Kind != (FxKind)k;
         // fallbackCellPalette.Length != 256; debrisLifetimeMin > debrisLifetimeMax; tracerColorByDamageType.Length != 4.
     }
 }
@@ -749,6 +750,8 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 | 16 | FxDefinition cannot reference FxKind in Voxel | Shared enum in Data | Tech lead | Resolved ADR-0050: Game.Data.Definitions.FxKind, unchanged byte values; remaining streams stay in Voxel. |
 | 17 | Queue producer handles are not owned by the specified queue contract | Embed GuardedHandles | Tech lead | Resolved ADR-0050: shared atomic enqueue registration, exclusive drain, complete and dispose guard with queue; VFX-001 raised to frontier. |
 | 18 | Validation signature and diagnostics differ from implemented SPEC-04 | Canonical scope/context validation | Tech lead | Resolved: use Validate(ValidationScope, ContentValidationContext). FxDefinition codes VFX-E001 None, E002 missing graph, E003 missing mesh/material, E004 mode/kind mismatch, E005 debris, E006 large/warp pooled. Config codes E010 defaults length, E011 missing default, E012 wrong kind, E013 palette length, E014 lifetime order, E015 damage-colour length. Strict defaults until VFX-004's documented staged relaxation. |
+
+| 19 | RamImpact requested by SPEC-13 is absent from FxKind | Append RamImpact = 13 and extend defaults to 14 entries | Tech lead | Resolved DMG-007 / ADR-0058: preserve values 0–12; producer supplies contact point, A-to-B normal and energy-based scale. VFX-003 still owns visual content; no asset or art direction is created here. |
 
 ## 11. References
 

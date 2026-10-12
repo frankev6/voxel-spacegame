@@ -16,5 +16,6 @@ namespace Game.Data.Definitions
         Warp = 10,           // event: lane-jump departure/arrival (pooled hero effect)
         Tracer = 11,         // state: projectile tracer look (never sent as an event)
         ShieldShell = 12,    // state: shield shell look (never sent as an event)
+        RamImpact = 13,      // collision contact/energy event (SPEC-13 §5.2, ADR-0058)
     }
 }

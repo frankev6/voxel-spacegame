@@ -932,11 +932,11 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - **Do:** Implement §5.2 steps 1–5 (`ApplyImpulses`, `Collect`, `Aggregate`, `Emit`, `Prune`), `FxEvent`/`SfxEvent` emission through the SPEC-02 queues.
 - **Files:** `Assets/Game/Voxel/Damage/Systems/ImpactEventSystem.cs`, `Assets/Game/Voxel/Damage/Jobs/{ApplyPendingImpulseJob,CollectRamContactsJob,EmitRamDamageJob}.cs`, `Assets/Game/Tests/EditMode/Voxel/Damage/ImpactEventSystemTests.cs`
 - **Acceptance criteria:**
-  - [ ] Two 20k-kg grids colliding head-on at 20 m/s produce exactly one ram `DamageEvent` per grid in the first contact tick, and none in the next 5 ticks.
-  - [ ] Two grids resting in contact with thrust pressing them together produce no ram damage.
-  - [ ] Ram damage on a hull-vs-Armored-plate contact gives the hull side the larger `Amount` (hardness split).
-  - [ ] Pending impulse of tick N changes velocity in tick N+1 only; for a `PlanarConstraint` grid the Y component and X/Z angular components are removed.
-  - [ ] Ram damage totals are identical at 30, 60 and 144 FPS for a scripted collision (fixed-step consumption, 02-C02).
+  - [x] Two 20k-kg grids colliding head-on at 20 m/s produce exactly one ram `DamageEvent` per grid in the first contact tick, and none in the next 5 ticks.
+  - [x] Two grids resting in contact with thrust pressing them together produce no ram damage.
+  - [x] Ram damage on a hull-vs-Armored-plate contact gives the hull side the larger `Amount` (hardness split).
+  - [x] Pending impulse of tick N changes velocity in tick N+1 only; for a `PlanarConstraint` grid the Y component and X/Z angular components are removed.
+  - [x] Ram damage totals are identical at 30, 60 and 144 FPS for a scripted collision (fixed-step consumption, 02-C02).
 - **Tests:** `ImpactEventSystemTests.HeadOn_OneEventPerSide`, `.RestingContact_NoDamage`, `.HardnessSplit_FavoursArmour`, `.PendingImpulse_AppliedNextTick`, `.Planar_ImpulseProjected`, `.RamDamage_FrameRateIndependent`.
 
 ### DMG-008 — Brick connectivity summaries
@@ -1125,6 +1125,8 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 | 27 | Radius-3 / 400-damage crater cannot demonstrate fewer removals from occlusion; Burst warning scope | Keep the 400-damage symmetry check; use 1600 for the shielding comparison; warn once per resolver lifetime | Tech lead | Resolved DMG-005: with 100 HP hull and a cell-centred blast, 400 damage removes the 19 immediate cells; DDA has no strictly intermediate cells on those rays, so shielding cannot reduce removals. The 1600-damage comparison reaches the next layer and tests pre-event HP occlusion. CellWriter reports clamping; the serial resolver emits one Burst-safe warning per world-owned resolver lifetime using native state (no managed hot-path state). Sub-half-cell blasts force Penetration = 1 as specified. |
 
 | 28 | Deferred range count versus fixed-count event channel; hasher dependency; restore scope | Per-range temporary streams, serial channel publication, bring forward hasher, keep repair pass in DMG-019 | Tech lead | Resolved DMG-006: plan determines range count in a job; deferred stream construction and IJobParallelForDefer avoid a fixed-step completion. Flatten publishes reactor requests in canonical range order into the existing one-index Explosion channel; no API change. CellStateHasher is brought forward from DMG-014 for the explicitly required determinism check; that task still owns the integrated 600-tick scenarios. DMG-019 explicitly owns restoration, its budgets and nine tests; DMG-006 leaves a task-ID marker at that pass. ComputeGridHash hashes kind/bounds, logical cell bytes and instance block/function HP; ComputeWorldHash adds persistent IDs and live chunk totals, as §5.8. Independent test Worlds reuse entity indices with different versions; removed-list comparisons first validate live handles and normalize grid references by PersistentId, then compare every payload field exactly. |
+
+| 29 | RamImpact enum is missing and Unity collision normals use the opposite convention | Append effect kind via ADR-0058; invert at collection boundary | Tech lead | Resolved DMG-007: RamImpact = 13 extends SPEC-63 defaults to 14 without renumbering. Unity CollisionEvent.Normal is B-to-A; Collect negates it before sorting the pair, then flips again if swapping. A is nudged along -Normal and B along +Normal. ImpulseRequest consumption stays in DMG-019; pending damage impulses remain read-only here. |
 
 ## 11. References
 

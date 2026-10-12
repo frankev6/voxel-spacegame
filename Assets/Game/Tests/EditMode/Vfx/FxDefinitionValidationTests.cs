@@ -46,14 +46,14 @@ namespace Game.Tests.EditMode.Vfx
             finally { Object.DestroyImmediate(material); }
 
             var config = Create<VfxConfigDefinition>("config_vfx");
-            Assert.AreEqual(12, Validate(config).Entries.Count(e => e.Code == "VFX-E011"));
+            Assert.AreEqual(13, Validate(config).Entries.Count(e => e.Code == "VFX-E011"));
             Edit(config, so => so.FindProperty("defaults").arraySize = 12);
             Has(Validate(config), "VFX-E010", "defaults");
-            var definitions = Enumerable.Range(1, 12).Select(k => Fx((FxKind)k, FxMode.Batched)).ToArray();
+            var definitions = Enumerable.Range(1, 13).Select(k => Fx((FxKind)k, FxMode.Batched)).ToArray();
             Edit(config, so =>
             {
-                var p = so.FindProperty("defaults"); p.arraySize = 13;
-                for (int k = 1; k <= 12; k++) p.GetArrayElementAtIndex(k).objectReferenceValue = definitions[k - 1];
+                var p = so.FindProperty("defaults"); p.arraySize = 14;
+                for (int k = 1; k <= 13; k++) p.GetArrayElementAtIndex(k).objectReferenceValue = definitions[k - 1];
             });
             Assert.AreEqual(0, Validate(config).ErrorCount, "Config validates references, definitions validate their own content");
             Edit(config, so =>
