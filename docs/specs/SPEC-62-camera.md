@@ -351,11 +351,11 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Milestone:** M1
 - **Tier:** standard — transcribes the exact code in §4.1, §4.3 and §6 shells
 - **Depends on:** `CORE-001`
-- **Do:** Create the types of §4.1, `MapViewTransform` (§4.3, methods throw `NotImplementedException`), and `CameraRigService`, `ICameraInput`, `IFxFrameReader` shells (§6). If SPEC-63's `FxKind`/`FxEvent` do not exist yet, `ShakeRule.Kind` and `IFxFrameReader` are added by CAM-008 instead (leave a `// TODO(CAM-008)` comment).
+- **Do:** Create the types of §4.1, `MapViewTransform` (§4.3, methods throw `NotImplementedException`), and `CameraRigService`, `ICameraInput`, `IFxFrameReader` shells (§6). If SPEC-63's `FxKind`/`FxEvent` do not exist yet, `ShakeRule.Kind` and `IFxFrameReader.Current` are added by CAM-008 instead (the empty interface keeps CAM-004 binding independent; Q9) (leave a `// TODO(CAM-008)` comment).
 - **Files:** `Assets/Game/Presentation/Data/{CameraMode,CameraYawMode,EditorView,CameraSettings,ShakeRule,CameraConfig}.cs`, `Assets/Game/Presentation/Components/MainCameraState.cs`, `Assets/Game/Presentation/Services/{ICameraInput,IFxFrameReader,CameraRigService}.cs`, `Assets/Game/UI/Data/MapViewTransform.cs`
 - **Acceptance criteria:**
-  - [ ] `tools/compile.sh` passes; all names and signatures match §4 and §6.
-  - [ ] `MainCameraState` is unmanaged (no reference fields).
+  - [x] `tools/compile.sh` passes; all names and signatures match §4 and §6.
+  - [x] `MainCameraState` is unmanaged (no reference fields).
 - **Tests:** `Assets/Game/Tests/EditMode/Presentation/CameraContractTests.cs`: `MainCameraState_IsUnmanaged` (`UnsafeUtility.IsUnmanaged<MainCameraState>()`), `CameraConfig_Defaults_MatchSpec`.
 
 ### CAM-002 — ADR: custom camera rig instead of Cinemachine
@@ -482,16 +482,18 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | SPEC-03: camera actions and bindings | Flight map: `CameraOrbitHold` (Button, middle mouse), `CameraLook` (Vector2, pointer delta), `CameraZoom` (float, scroll y / 120 per notch), `CameraRecenter` (Button, C). Editor map: `Orbit` (Vector2 pointer delta while middle mouse or Alt+left mouse), `Pan` (Vector2 delta while Shift+middle mouse), `Zoom` (scroll), `Focus` (F), `ViewIso` (Numpad 5), `ViewTop` (Numpad 7), `ViewFront` (Numpad 1), `ViewSide` (Numpad 3) | Tech lead (SPEC-03) |
-| 2 | SPEC-01: construction slot and binding of camera services | `GameRoot` constructs `CameraRigService` right after step 9 (`UIRoot`), registers it in `Services`, calls `CameraTargetSyncSystem.Bind(rig, fxReader)`, forwards `CameraSettings` on settings change, and sets `Menu`/`Flight` on scene ready | Tech lead (SPEC-01) |
-| 3 | SPEC-12: name of the camera query filter in `PhysicsLayers` | `PhysicsLayers.CameraOcclusionQuery` — hits grids (ships, stations, asteroids, hulks), not debris, chunk bodies or sensors | Tech lead (SPEC-12) |
-| 4 | SPEC-63: how the camera reads the frame's `FxEvent`s | SPEC-63 keeps the frame's events readable as a `NativeArray<FxEvent>.ReadOnly` until the end of `PresentationBridgeGroup`; `FxFrameReader` exposes it; `CameraTargetSyncSystem` runs after `FxUploadSystem` | Tech lead (SPEC-63) |
-| 5 | Which `FxKind`s shake, and how much | Explosion: 0.5 / 300 m; ship destroyed: 1.0 / 600 m; ram impact: 0.4 / 200 m; projectile hit: 0.05 / 80 m (rows only for kinds that exist in SPEC-63's enum) | Owner |
-| 6 | SPEC-64: where the `AudioListener` lives | On `MainCamera.prefab` | Tech lead (SPEC-64) |
-| 7 | SPEC-20: ship forward axis and graphical smoothing on the player ship | Forward = grid +Z, up = +Y; the player ship has `PhysicsGraphicalSmoothing` | Tech lead (SPEC-20) |
-| 8 | Should the flight yaw default to following the ship heading or stay north-up? | `FollowHeading` (controls are ship-relative); `Free` available in settings | Owner |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | SPEC-03: camera actions and bindings | Flight map: `CameraOrbitHold` (Button, middle mouse), `CameraLook` (Vector2, pointer delta), `CameraZoom` (float, scroll y / 120 per notch), `CameraRecenter` (Button, C). Editor map: `Orbit` (Vector2 pointer delta while middle mouse or Alt+left mouse), `Pan` (Vector2 delta while Shift+middle mouse), `Zoom` (scroll), `Focus` (F), `ViewIso` (Numpad 5), `ViewTop` (Numpad 7), `ViewFront` (Numpad 1), `ViewSide` (Numpad 3) | Tech lead (SPEC-03) |  |
+| 2 | SPEC-01: construction slot and binding of camera services | `GameRoot` constructs `CameraRigService` right after step 9 (`UIRoot`), registers it in `Services`, calls `CameraTargetSyncSystem.Bind(rig, fxReader)`, forwards `CameraSettings` on settings change, and sets `Menu`/`Flight` on scene ready | Tech lead (SPEC-01) |  |
+| 3 | SPEC-12: name of the camera query filter in `PhysicsLayers` | `PhysicsLayers.CameraOcclusionQuery` — hits grids (ships, stations, asteroids, hulks), not debris, chunk bodies or sensors | Tech lead (SPEC-12) |  |
+| 4 | SPEC-63: how the camera reads the frame's `FxEvent`s | SPEC-63 keeps the frame's events readable as a `NativeArray<FxEvent>.ReadOnly` until the end of `PresentationBridgeGroup`; `FxFrameReader` exposes it; `CameraTargetSyncSystem` runs after `FxUploadSystem` | Tech lead (SPEC-63) |  |
+| 5 | Which `FxKind`s shake, and how much | Explosion: 0.5 / 300 m; ship destroyed: 1.0 / 600 m; ram impact: 0.4 / 200 m; projectile hit: 0.05 / 80 m (rows only for kinds that exist in SPEC-63's enum) | Owner |  |
+| 6 | SPEC-64: where the `AudioListener` lives | On `MainCamera.prefab` | Tech lead (SPEC-64) |  |
+| 7 | SPEC-20: ship forward axis and graphical smoothing on the player ship | Forward = grid +Z, up = +Y; the player ship has `PhysicsGraphicalSmoothing` | Tech lead (SPEC-20) |  |
+| 8 | Should the flight yaw default to following the ship heading or stay north-up? | `FollowHeading` (controls are ship-relative); `Free` available in settings | Owner |  |
+
+| 9 | Deferring the whole IFxFrameReader interface to CAM-008 prevents CAM-004 Bind from compiling (CAM-008 depends on CAM-005) | Add an empty binding interface now; defer only its FxEvent property | Tech lead | Resolved CAM-001: retain the §6 interface name with a CAM-008 TODO for Current, and defer ShakeRule.Kind as instructed. No FxKind/FxEvent substitute is invented; VFX-001 owns those contracts. |
 
 ## 11. References
 
