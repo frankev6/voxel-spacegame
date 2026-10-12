@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 85 | 1 | 0 | 0 | 3 | 0 | 89 | 9 |
+| M2 | 85 | 0 | 0 | 0 | 4 | 0 | 89 | 11 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -221,11 +221,11 @@
 | PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | todo |  |  |  |  |
 | DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-12 | e3377fa | Four channels, owned phase memory, stable explosion drains; 5 tests; Q179–180 |
 | DMG-003 | Damage config asset and boot hookup | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-001 | yes | done | astra (gpt-6) | 2026-10-12 | c1d6af2 | Shipped config/4 damage types/4 armor classes, validation and boot-owned table; 3 tests; Q181 |
-| DMG-004 | Cell access, quantization and RemoveCell | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-002 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Cell damage foundation for owner-prioritized playable firing range |
-| DMG-005 | Point and blast damage | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | no | todo |  |  |  |  |
+| DMG-004 | Cell access, quantization and RemoveCell | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-002 | yes | done | astra (gpt-6) | 2026-10-12 | 8b20d15 | Cell writes, DDA, deterministic quantization and debris kinematics; 10 required tests pass |
+| DMG-005 | Point and blast damage | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | todo |  |  |  |  |
 | DMG-006 | DamageResolveSystem pipeline | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-005 | no | todo |  |  |  |  |
 | DMG-007 | ImpactEventSystem (rams and knockback) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, PHY-001 | no | todo |  |  |  |  |
-| DMG-008 | Brick connectivity summaries | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | no | todo |  |  |  |  |
+| DMG-008 | Brick connectivity summaries | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | todo |  |  |  |  |
 | DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | no | todo |  |  |  |  |
 | DMG-010 | SplitSystem: plan, particle tier, deferred detach and debris FX | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-009, VFX-001, AUD-001 | no | todo |  |  |  |  |
 | DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | no | todo |  |  |  |  |
@@ -871,6 +871,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DMG-004 done; playable firing/breakup checkpoint queued — astra (gpt-6)
+
+- **Implemented:** `8b20d15` adds deterministic damage maths, half-open DDA, dense/sparse cached cell access and the shared cell writer. Removal updates masks/counts/revisions, touches face-neighbour meshes, clears empty brick slots and emits cells with inherited rigid motion and reason-specific kicks. HP-only changes preserve dirty flags within one visual bin. Ten required tests pass, including 500 seeded rays with 10,000 reference samples each and 10,000 sub-quantum HP samples. Instance collapse/resolver integration follows.
+- **Verification:** compile zero C# warnings; focused damage suite **22 passed**; full EditMode **785 passed, 3 advisory timing failures, 1 explicit skip**; full headless PlayMode **112 passed, 0 failed, 29 expected skips**. Evidence `Logs/playtest/dmg004/`. Timing misses: Write1MiB **3.4990 ms / 3**, MeshBuild128 **1.0913 ms / 0.5**, station encode **76.9774 ms / 60**. Performance deferred, **zero optimization passes**; no reruns to chase timing.
+- **Decisions:** Q183 resolves the stale Urgent dirty flag and thin-cell reference sampling. Q184 / ADR-0053 records Frank's new explicit checkpoint: “Get that playable and show me it working.” **FND-020 is next:** larger stationary Vestari target, real input/projectiles, holes and independently moving physical sections in one playable slice. Broader combat tasks remain open; simple staged internals retain V2 ownership and existing render/physics paths. No V1 code or new hull artwork.
+- **Workspace:** an existing `ProjectSettings/QualitySettings.asset` serialization change was present before this run and remains unstaged; it was not authored or reverted by this task. No remote Git operation.
+
 
 ### 2026-10-12 — FLT-013 done — astra (gpt-6)
 
