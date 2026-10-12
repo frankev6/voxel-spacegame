@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 35 | 0 | 0 | 0 | 69 | 0 | 104 | 13 |
+| M1 | 34 | 0 | 0 | 0 | 70 | 0 | 104 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 7 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -136,13 +136,13 @@
 | VOX-021 | Mesh rebuild priority queue | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | REN-001 | yes | done | astra (gpt-6) | 2026-10-11 | bb07e09 | Guarded priority/FIFO mesh queue; stale promotion invalidation; 4 tests; Q75–76 |
 | REN-001 | Public contract types | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | VOX-001, DATA-001 | yes | done | astra (gpt-6) | 2026-10-11 | 42dfd86 | Rendering contracts; queue/batch ownership; ADR-0018 layout; Q51–53 |
 | REN-002 | SPIKE: Entities Graphics with thousands of runtime brick meshes | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 66a5baf | No-go: movement delta 1.625 ms, GPU 6.435 ms; REN-003 activated, ADR-0032 proposed |
-| REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002, REN-008 | no | todo |  | 2026-10-11 |  | Q132: shared shader prerequisite REN-008; ADR-0032 remains proposed |
+| REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002, REN-008 | yes | todo |  | 2026-10-11 |  | Q132: shared shader prerequisite REN-008; ADR-0032 remains proposed |
 | REN-004 | Normals, packing and shape tables | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6b076af | Five shapes × 24 rotations; exact half-cell packing; 42 normals; Q88–89 |
 | REN-005 | Snapshot gathering | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004, SPEC-10, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 93cd973 | 27-neighbour snapshots, per-cell slopes, bounded props and retained flags; ADR-0029/Q91 |
 | REN-006 | LOD0 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | done | astra (gpt-6) | 2026-10-11 | 1de74e0 | LOD0 culling/AO/welding; 36.3 µs median; large slope indices safe; ADR-0030/Q92 |
 | REN-007 | LOD1 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-006 | yes | done | astra (gpt-6) | 2026-10-11 | 5cbebeb | LOD1 exact coverage; triangle ratios 0.406% / 0.557% / 6.195% |
-| REN-008 | Brick and prop shaders, placeholder art | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Shared brick/prop shaders and procedural placeholder builder |
-| REN-009 | Render config definitions and factory | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | REN-001, REN-008 | no | todo |  |  |  |  |
+| REN-008 | Brick and prop shaders, placeholder art | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | done | astra (gpt-6) | 2026-10-11 | 4c504f4 | Canonical shaders/ADR-0040; GPU 4/4, 112 Metal/D3D11 variants; procedural assets |
+| REN-009 | Render config definitions and factory | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | REN-001, REN-008 | yes | todo |  |  |  |  |
 | REN-010 | BrickMeshBuildSystem | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-005, REN-006, REN-007 | yes | todo |  |  |  |  |
 | REN-011 | BrickMeshApplySystem, cleanup and statistics | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-010, SPEC-10 | no | todo |  |  |  |  |
 | REN-012 | GridLodSystem, Dormant and LOD switching | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011 | no | todo |  |  |  |  |
@@ -807,6 +807,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-11 — REN-008 done — astra (gpt-6)
+
+- Implemented `BrickLit`, shared `BrickSurface`/material layout and `PropInstanced` with forward, shadow, depth and depth-normal passes. ADR-0040 / Q133 uses the approved art contract, retains the eight-byte vertex and keeps exposure distinct from scorch. No legacy bitmap, AI-generated asset or new ship geometry.
+- Procedural builder and persisted materials/textures verified by asset readback: three 64×256² arrays, nine mips (BC7 albedo/mask, BC5 normals); three 2048² prop textures, twelve mips; correct sRGB/linear spaces, palette/parameter dimensions and canonical references. Provenance is in `docs/design/LICENSES.md`. Final art and presentation property writers remain with their existing tasks.
+- GPU PlayMode **4/4** on multithreaded Metal; **112** Metal/D3D11 pass/stage/keyword variants compiled with zero errors. Both shaders report SRP Batcher code **0** after real draws. Palette/AO pixels, damage cracks (**15,633/28,900** surface pixels changed), three separately painted props on two grid transforms, and prop/brick shadows (**1,750 / 2,761** darker receiver pixels) pass. Captured pixels were visually inspected (`Logs/rendering/ren008-*.png`); logs/results: `ren008-gpu`, `ren008-assets`. Coroutines must submit procedural draws before camera culling (08-tools); teardown restores optional global matrices safely.
+- Validation: compile **zero C# warnings**, EditMode **693 passed + 1 explicit skipped**, headless PlayMode **64 passed + 4 GPU-only skipped**, separate GPU **4 passed**, perf **47/47**, docs **505 tasks / zero errors**. Implementation **4c504f4**. REN-003 and REN-009 are now unblocked.
+
 
 ### 2026-10-11 — REN-003 prerequisite correction — astra (gpt-6)
 
