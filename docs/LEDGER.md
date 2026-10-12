@@ -14,9 +14,9 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 7 | 0 | 1 | 0 | 100 | 0 | 108 | 2 |
+| M1 | 6 | 0 | 1 | 0 | 101 | 0 | 108 | 1 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 10 |
-| M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
+| M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
@@ -203,7 +203,7 @@
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | frontier | CORE-001, DATA-001 | yes | done | astra (gpt-6) | 2026-10-12 | bb25b99 | Guarded queue, shared kinds, GPU layouts and validation; ADR-0050 |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | done | astra (gpt-6) | 2026-10-12 | bd35dac | Four scenes listener-free; same listener across real flow; mutation proven |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | done | astra (gpt-6) | 2026-10-12 | b8521e9 | UI/cue playback and ducking; four tests pass, 0 B over 1000 UI calls |
-| AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Provenance inventory and release-build guard |
+| AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | done | astra (gpt-6) | 2026-10-12 | 8879cfa | 19 clips: 2 Blocked, 17 Unverified; release guard and four tests |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | no | todo |  |  |  |  |
 | DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0b4269c | Real launch/probes, isolated profile, live edit-mode launch 1.370 s; Q144–146 |
 | DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | blocked | astra (gpt-6) | 2026-10-12 |  | Needs implemented FND-012 and SPEC-30/31 coordinates; contract-only Ready is premature (Q155) |
@@ -471,7 +471,7 @@
 | CAM-010 | Map view transform | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-001 | yes | todo |  |  |  |  |
 | VFX-013 | Floating-origin shift and clears | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | frontier | VFX-003, GAL-001, SYS-001, FND-001 | no | todo |  |  |  |  |
 | VFX-014 | Warp effect and strict config validation | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | standard | VFX-004, TRV-001 | no | todo |  |  |  |  |
-| AUD-011 | GATE: Owner confirms licences of the carried-over audio | [SPEC-64](specs/SPEC-64-audio.md) | M3 | standard | AUD-010 | no | todo |  |  |  |  |
+| AUD-011 | GATE: Owner confirms licences of the carried-over audio | [SPEC-64](specs/SPEC-64-audio.md) | M3 | standard | AUD-010 | yes | todo |  |  |  |  |
 | AUD-012 | Floating-origin shift and clears | [SPEC-64](specs/SPEC-64-audio.md) | M3 | frontier | AUD-006, GAL-001, SYS-001 | no | todo |  |  |  |  |
 | DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-001, INP-001 | no | todo |  |  |  |  |
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | no | todo |  |  |  |  |
@@ -850,6 +850,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — AUD-010 done — astra (gpt-6)
+
+- **Changed:** editor-only audio provenance types, saved inventory of all **19 clips** and release-build preprocessor. `ComfyUI_00018_.mp3` and `upbeat.mp3` are **Blocked** with the specified note; the other **17 are Unverified**, source carried over from the prototype, licence unknown. A temporary Unity CLI authoring script created the asset and was deleted. Development builds remain permitted; release validation lists every referenced clip without exactly one Confirmed row.
+- **Validation:** all **four required tests pass**. Inventory coverage detects a newly unlisted clip; existing cues reference no blocked clip; release validation names both unverified test clips, accepts their confirmed state and rejects a blocked state; development validation passes. Compile zero C# warnings; full EditMode **765 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4249 ms** vs 3; MeshBuild128 **1.1375 ms** vs 0.5). Evidence `Logs/playtest/aud010/`. No runtime/boot/flow changes; latest full PlayMode remains TST-003's **107 passed, 16 GPU skips**. No owned perf gate or optimization pass.
+- **Next:** REN-013 rendering regressions, then voxel integration/harness checks and M1 system review. AUD-011 owner licence review remains pending under its documented default; it does not block development. AUD-007 still owns audible cue/config content. No new owner decision; approved environment unchanged.
 
 ### 2026-10-12 — TST-003 done — astra (gpt-6)
 
