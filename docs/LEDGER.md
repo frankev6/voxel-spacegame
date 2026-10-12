@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 86 | 0 | 0 | 0 | 1 | 0 | 87 | 10 |
+| M2 | 85 | 0 | 0 | 0 | 2 | 0 | 87 | 9 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -219,7 +219,7 @@
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
 | PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | todo |  |  |  |  |
 | DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-12 | e3377fa | Four channels, owned phase memory, stable explosion drains; 5 tests; Q179–180 |
-| DMG-003 | Damage config asset and boot hookup | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Author damage and armor tables; validate content and install config at boot |
+| DMG-003 | Damage config asset and boot hookup | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-001 | yes | done | astra (gpt-6) | 2026-10-12 | c1d6af2 | Shipped config/4 damage types/4 armor classes, validation and boot-owned table; 3 tests; Q181 |
 | DMG-004 | Cell access, quantization and RemoveCell | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-002 | yes | todo |  |  |  |  |
 | DMG-005 | Point and blast damage | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | no | todo |  |  |  |  |
 | DMG-006 | DamageResolveSystem pipeline | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-005 | no | todo |  |  |  |  |
@@ -756,6 +756,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 178 | 2026-10-12 | SPEC-05 PERS-019 | Four native Fleet snapshots leaked on Play exit while quit-save awaited thumbnails | Track ownership until worker claims the capture | Tech lead | Resolved SPEC-05 Q29: synchronous waiting-snapshot disposal, exclusive worker handoff, no post-disposal completion/quit callback. Tracked stacks in Logs/playtest/m1-review/tracked-editor.log identify all four allocations. |
 | 179 | 2026-10-12 | SPEC-13 DMG-002 | Tick stats reset races pending job writes; internal ownership details | Dependent reset job and explicit phase fences | Tech lead | Resolved SPEC-13 Q21: no fixed-step completion; stats reset depends on previous phase/readers, later writers chain it, and container copies preserve detach swaps. Main-thread stats reads complete publication outside fixed simulation. CellMask uses 64 inline ulongs. |
 | 180 | 2026-10-12 | SPEC-13 DMG-002 | Shared stale-stream warning fails inside Burst owner (BC1016) | Build identical warning from unmanaged characters | Tech lead | Resolved SPEC-13 Q22: preserve existing logging and lifetime behavior; eliminate managed-string conversion. Full suite verifies actual Burst compilation, which focused asynchronous tests missed. |
+| 181 | 2026-10-12 | SPEC-13 DMG-003 | Catalog-wide validation and boot damage-table ownership | Internal validation catalog; replace fallback config and own blob at boot | Tech lead | Resolved SPEC-13 Q23: definitions determine contiguous table dimensions; E005/E006 cover config values/ranges. Boot disposal completes jobs, resets the surviving singleton and releases its table. Four authored types plus a test-only fifth value; no production enum or existing public API change. |
 
 ## Measurements
 
@@ -865,6 +866,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DMG-003 done — astra (gpt-6)
+
+- **Changed:** all 43 numeric config fields and four cue hashes project from content; nine shipped assets supply default config, four damage types and four armor classes. The table is indexed by authored type/class values, independent of catalog order. Boot replaces the eager fallback DamageConfig, owns the native table alongside rendering config, and restores Default before releasing it on shutdown. Implementation `c1d6af2`.
+- **Decisions/validation:** SPEC-13 Q23 / ledger Q181 supplies the current catalog internally to editor/runtime definition validation. DMG-E001–E004 reject malformed multiplier arrays, duplicate/missing known damage types, invalid kicks and noncontiguous armor indices. E005/E006 cover config budgets, finite/nonnegative values and ranges. A test-only fifth numeric enum value works without a production enum or algorithm change; cue hashes copy correctly. No owner gate or tuning decision.
+- **Checks:** all three required config tests pass, covering all 16 multipliers, kicks/shields/bypass, boot singleton replacement/disposal, extension and required validation failures. Compile zero C# warnings; final full EditMode **775 passed, 3 advisory timing misses, 1 explicit skip**; full PlayMode **109 passed, 0 failed, 29 GPU/draft skips**. Write1MiB **4.3121 ms** vs 3, MeshBuild128 **1.0744 ms** vs 0.5 and StructureStationEncode **76.8512 ms** vs 60 remain performance deferred, zero tuning. Evidence `Logs/playtest/dmg003/`. An earlier PlayMode run was cancelled for the missing-type validation correction; its incomplete log is labeled, and its generated test scene was removed after final verification.
+- **Checkpoint/next:** DMG-002 and DMG-003 are complete and locally merged. Continue **DMG-004** cell health/removal, then point/blast resolver and ramming for the first visible damage checkpoint, followed by weapons. No cell-damage gameplay is claimed yet. M1 DEV-009/012 still await later world-location/current-system implementation; no new blocker. Frank can review resolved Q179–181; existing owner-only art/tuning items remain as recorded. Approved Nocturne environment unchanged.
 
 ### 2026-10-12 — DMG-002 done — astra (gpt-6)
 
