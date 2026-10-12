@@ -3,7 +3,7 @@ using Unity.Mathematics;
 
 namespace Game.Simulation.Commands
 {
-    /// <summary>Singleton written once per frame by PlayerInputSampleSystem (SPEC-03) only. Implements SPEC-20 §4.1.</summary>
+    /// <summary>Singleton written once per frame by PlayerInputSampleSystem (SPEC-03), with the dev-only replay override of ADR-0051. Implements SPEC-20 §4.1.</summary>
     public struct PlayerCommand : IComponentData
     {
         public float2 Thrust;

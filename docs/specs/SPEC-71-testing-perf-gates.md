@@ -359,7 +359,7 @@ Leaks are reported by Unity as error logs, so they fail the test through the gua
 `.cmdrec` is UTF-8 text with one record per line; `#` starts a comment.
 - **Header lines:** `cmdrec 1`, `start <tick>`, `end <tick>`, optionally `seed <u64 hex>` and `content <ContentCatalog.IdentityHash hex>`.
 - **Records:** `<tick> <thrustX> <thrustY> <turn> <aimX> <aimY> <aimZ> <aimValid> <flags> <fireGroups> <e0> … <e9>`, one line per tick where the command changed.
-  - Floats use `"R"` round-trip invariant culture.
+  - Finite floats use `"R"` round-trip invariant culture, preserving negative zero (ADR-0051); non-finite values are rejected.
   - `e0…e9` are the 10 absolute `PlayerEdgeCounters` bytes in declaration order (SPEC-20 §4.1; `e9` = `Cruise`, always present).
   - Ticks are ascending.
 
@@ -488,10 +488,10 @@ The game gates it owns are those listed in §5.7.
 - **Do:** Implement `PlayerCommandScript` (format, `Parse`/`ToText`/`Load`/`Save`, `At`, the even-tick check), `PlayerCommandRecorder` with its hook system, and `PlayerCommandReplaySystem` (§5.4).
 - **Files:** `Assets/Game/App/Testing/{PlayerCommandScript,PlayerCommandRecorder,PlayerCommandRecordSystem,PlayerCommandReplaySystem}.cs`; `Assets/Game/Simulation/Commands/PlayerCommand.cs` (ownership comment); `Assets/Game/Tests/EditMode/TestKit/ReplayTests.cs`
 - **Acceptance criteria:**
-  - [ ] `Parse(ToText(s))` equals `s` for every serialized field, with floats bit-exact (FrameIndex is transient, ADR-0051).
-  - [ ] **Replay into an `EcsTestWorld`** (with `PlayerCommandApplySystem`): the `ShipCommand` sequence per tick is identical at frame steps of 1/30, 1/60 and 1/144 s.
-  - [ ] An edge recorded once fires exactly once in each variant.
-  - [ ] The replay stops at `EndTick`.
+  - [x] `Parse(ToText(s))` equals `s` for every serialized field, with finite floats bit-exact (FrameIndex is transient, ADR-0051).
+  - [x] **Replay into an `EcsTestWorld`** (with `PlayerCommandApplySystem`): the `ShipCommand` sequence per tick is identical at frame steps of 1/30, 1/60 and 1/144 s.
+  - [x] An edge recorded once fires exactly once in each variant.
+  - [x] The replay stops at `EndTick`.
 - **Tests:** `ReplayTests.Text_RoundTrip`, `.Replay_SameShipCommands_AllFrameRates`, `.Edge_FiresOnce`, `.StopsAtEnd`, `.Parse_ErrorLine`.
 
 ### TST-003 — Game flow fixture and boot test hooks
@@ -595,20 +595,18 @@ The game gates it owns are those listed in §5.7.
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | Should soak tests run nightly on a separate machine? | Manual before each milestone exit | Owner |
-| 2 | Native memory measurement API for the soak | `Profiler.GetTotalAllocatedMemoryLong` plus entity counts until a better counter is available | Tech lead |
-| 3 | Requested changes to other specs | `_INTEGRATION-TODO.md` items 16, 52, 91–93 | Tech lead |
-| 4 | §5.1 steps the fixed group with Unity's `FixedRateSimpleManager`/`FixedRateCatchUpManager`, but a fresh catch-up manager runs a tick at t=0 and then catches up from 0, and float `1/60f` makes `StepFrame(0.05f)` run 2 ticks instead of 3 (found in TST-001, 2026-10-11) | **Resolved in TST-001:** `EcsTestWorld` drives the fixed group with its own counted rate manager, which pushes fixed time and the group allocator as Unity's managers do. `StepTicks(n)` runs exactly n; `StepFrame(dt)` runs the whole ticks of an accumulator (1e-6 tolerance), at most 6, dropping excess time like the catch-up manager. Reduced worlds also get the default command buffer systems and every group their attributes order against (empty anchors), so they log no ordering warnings | Tech lead |
-| 5 | `PerfRun.RunEcs` samples markers per tick, but an EditMode loop never ends a profiler frame, so `ProfilerRecorder.LastValue` never changes (found in TST-001) | **Resolved in TST-001:** `RunEcs` samples the recorder's `CurrentValue` before and after each tick (internal `PerfMarkers.TryGetCurrentFrameMs`); `RunFrames` keeps `LastValue` | Tech lead |
-| 6 | Decision 4 makes every perf run inconclusive outside the reference settings, but the existing main-thread micro-gates (StableHash, EventBus, SaveWriter, ContentService, orientation tables, SimEventChannel, the managed-event drain) would then never be enforced in the Editor; and `LogAssert.NoUnexpectedReceived()` in `[TearDown]` does not see the test body's plain logs (found in TST-001) | **Resolved in TST-001:** micro-gates that time their own loop go through `PerfRun.Gate(name, samples, budget)`, which writes the `Logs/perf` record and asserts the median without the settings check; `RunFrames`/`RunEcs` keep decision 4. `GameTestBase` keeps the teardown call; error logs fail tests through Unity's default check (`ignoreFailingMessages = false`), and plain logs and warnings do not fail | Tech lead |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | Should soak tests run nightly on a separate machine? | Manual before each milestone exit | Owner | — |
+| 2 | Native memory measurement API for the soak | `Profiler.GetTotalAllocatedMemoryLong` plus entity counts until a better counter is available | Tech lead | — |
+| 3 | Requested changes to other specs | `_INTEGRATION-TODO.md` items 16, 52, 91–93 | Tech lead | — |
+| 4 | §5.1 steps the fixed group with Unity's `FixedRateSimpleManager`/`FixedRateCatchUpManager`, but a fresh catch-up manager runs a tick at t=0 and then catches up from 0, and float `1/60f` makes `StepFrame(0.05f)` run 2 ticks instead of 3 (found in TST-001, 2026-10-11) | **Resolved in TST-001:** `EcsTestWorld` drives the fixed group with its own counted rate manager, which pushes fixed time and the group allocator as Unity's managers do. `StepTicks(n)` runs exactly n; `StepFrame(dt)` runs the whole ticks of an accumulator (1e-6 tolerance), at most 6, dropping excess time like the catch-up manager. Reduced worlds also get the default command buffer systems and every group their attributes order against (empty anchors), so they log no ordering warnings | Tech lead | — |
+| 5 | `PerfRun.RunEcs` samples markers per tick, but an EditMode loop never ends a profiler frame, so `ProfilerRecorder.LastValue` never changes (found in TST-001) | **Resolved in TST-001:** `RunEcs` samples the recorder's `CurrentValue` before and after each tick (internal `PerfMarkers.TryGetCurrentFrameMs`); `RunFrames` keeps `LastValue` | Tech lead | — |
+| 6 | Decision 4 makes every perf run inconclusive outside the reference settings, but the existing main-thread micro-gates (StableHash, EventBus, SaveWriter, ContentService, orientation tables, SimEventChannel, the managed-event drain) would then never be enforced in the Editor; and `LogAssert.NoUnexpectedReceived()` in `[TearDown]` does not see the test body's plain logs (found in TST-001) | **Resolved in TST-001:** micro-gates that time their own loop go through `PerfRun.Gate(name, samples, budget)`, which writes the `Logs/perf` record and asserts the median without the settings check; `RunFrames`/`RunEcs` keep decision 4. `GameTestBase` keeps the teardown call; error logs fail tests through Unity's default check (`ignoreFailingMessages = false`), and plain logs and warnings do not fail | Tech lead | — |
 
-| 7 | Applied settings disabled only domain reload; live wrappers used an obsolete CLI schema and ignored process failure | **Answer (resolved in TST-008):** apply and guard both reload flags (ADR-0020); use the installed Pipeline command schema and complete structured results, export XML, clear stale results and reject failed process/CLI execution even when XML reports passes. Iteration timings include CLI transport and script wall time with an idle open Editor. | Tech lead |
+| 7 | Applied settings disabled only domain reload; live wrappers used an obsolete CLI schema and ignored process failure | **Answer (resolved in TST-008):** apply and guard both reload flags (ADR-0020); use the installed Pipeline command schema and complete structured results, export XML, clear stale results and reject failed process/CLI execution even when XML reports passes. Iteration timings include CLI transport and script wall time with an idle open Editor. | Tech lead | — |
 
-| 8 | Replay/record managed systems and PlayerCommand override absent from architecture; endpoints/FrameIndex unspecified | Follow ADR-0051 | Tech lead |
-
-**Answer to Q8 (resolved):** accepted ADR-0051 registers dev-only frame-stage hooks, makes the overwrite explicit, defines programmatic/recorded endpoints and transient FrameIndex, and bounds the cross-FPS guarantee to the stated even-tick scenarios.
+| 8 | Replay/record managed systems and PlayerCommand override absent from architecture; endpoints/FrameIndex unspecified | Follow ADR-0051 | Tech lead | Resolved: explicit dev-only hooks, frame-stage/even-tick bounds, finite float round trips, transient FrameIndex and defined script endpoints. |
 
 ## 11. References
 
