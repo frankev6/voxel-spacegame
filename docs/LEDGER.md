@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 9 | 0 | 1 | 0 | 98 | 0 | 108 | 4 |
+| M1 | 8 | 0 | 1 | 0 | 99 | 0 | 108 | 3 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -211,7 +211,7 @@
 | DEV-015 | In-game dev console | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-003, UI-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 8cf2df1 | F1 console; history/completion, async results, 0 B closed; ADR-0049 |
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | no | todo |  |  |  |  |
 | DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | no | todo |  |  |  |  |
-| TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Command recording, text format and replay across frame rates |
+| TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 9349e78 | Sparse text recorder/replay; five required tests; even-tick 30/60/144 commands match |
 | TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | todo |  |  |  |  |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | no | todo |  |  |  |  |
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
@@ -849,6 +849,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — TST-002 done — astra (gpt-6)
+
+- **Changed:** sparse PlayerCommand recording, invariant `.cmdrec` text/files and development replay after the production input sampler. ADR-0051 / Q171 registers the override and hook order, defines exclusive endpoints, preserves finite float bits and all absolute edge counters, and excludes transient FrameIndex from files. The guarantee is the specified even-tick scripts at 30/60/144 FPS, not arbitrary catch-up schedules.
+- **Validation:** all **five required tests pass**: record/file round trip, identical **120-tick ShipCommand** sequences at all three frame rates, one Interact press exactly once, exclusive-end stop and line-numbered parse errors. Compile zero C# warnings; full EditMode **761 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4060 ms** vs 3; MeshBuild128 **1.0364 ms** vs 0.5); full PlayMode **103 passed, 16 GPU skips**. Evidence `Logs/playtest/tst002/`. Zero optimization passes.
+- **Next:** TST-003 real boot/flow fixture, then remaining M1 integration checks and system review. DEV-016 will expose recording/replay commands; no live-flight replay demonstration is claimed here. Approved environment unchanged; no new owner decision.
 
 ### 2026-10-12 — AUD-004 done — astra (gpt-6)
 
