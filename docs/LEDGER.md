@@ -14,8 +14,8 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 20 | 1 | 1 | 0 | 84 | 0 | 106 | 13 |
-| M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 6 |
+| M1 | 20 | 0 | 1 | 0 | 85 | 0 | 106 | 13 |
+| M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 8 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -183,7 +183,7 @@
 | FLT-010 | Flight tuning against legacy blueprints | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-009, SPEC-72 | yes | done | astra (gpt-6) | 2026-10-11 | c9526c2 | 13 blueprints measured; provisional yaw 180°/s² / 2.5 MN·m; all t90 ≤1.2 s; acceleration shortfall Q124, owner sign-off pending Q125 |
 | FLT-011 | Flight performance and determinism | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-007, FLT-008, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0278edb | Six flight cost/GC gates pass; 600 ticks × 3 ships identical across 8 runs |
 | WPN-001 | Public contract types | [SPEC-21](specs/SPEC-21-weapons.md) | M1 | standard | CORE-001, DATA-001, VOX-001, DMG-001, FLT-001 | yes | done | astra (gpt-6) | 2026-10-12 | c250d87 | 64 B projectiles; factions; unmanaged contracts; Q156 staging; performance deferred |
-| AI-001 | Public contract types | [SPEC-23](specs/SPEC-23-ai.md) | M1 | standard | CORE-001, DATA-001, VOX-001, WPN-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Spatial and AI contracts toward targeting and spawning |
+| AI-001 | Public contract types | [SPEC-23](specs/SPEC-23-ai.md) | M1 | standard | CORE-001, DATA-001, VOX-001, WPN-001 | yes | done | astra (gpt-6) | 2026-10-12 | d5f0523 | Spatial/AI/fleet contracts; 64 B proxy; Q157 staging; performance deferred |
 | UI-001 | Public contract types | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | CORE-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 01dcff0 | Exact data/view contracts, 123 style names; service/control shells per spec |
 | UI-002 | Theme skeleton, panel settings and root UXML | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | a494f84 | Panel/theme/config and six non-picking layers; three asset tests pass; Q147 |
 | UI-003 | UIRoot construction, layers and sound hooks | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-002, CORE-001 | yes | done | astra (gpt-6) | 2026-10-12 | fdade56 | Root/document boot lifecycle, prewarm, sound hooks; live flight preserved; Q148–150 |
@@ -212,7 +212,7 @@
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | todo |  |  |  |  |
 | TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | todo |  |  |  |  |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | no | todo |  |  |  |  |
-| FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | no | todo |  |  |  |  |
+| FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
 | PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | todo |  |  |  |  |
 | DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | todo |  |  |  |  |
@@ -258,7 +258,7 @@
 | PWR-008 | Power budget validator and balance tests | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-006, SPEC-72, WPN-001 | no | todo |  |  |  |  |
 | PWR-009 | Performance tests | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-005, PWR-006, PWR-007 | no | todo |  |  |  |  |
 | PWR-010 | `StatusSystem`: inhibits and stat modifiers (ADR-0016) | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001, PWR-005, SPEC-02 | no | todo |  |  |  |  |
-| AI-002 | SpatialHash queries | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-001 | no | todo |  |  |  |  |
+| AI-002 | SpatialHash queries | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-001 | yes | todo |  |  |  |  |
 | AI-003 | AI content and boot singletons | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-001, SPEC-04 | no | todo |  |  |  |  |
 | AI-004 | SpatialHashBuildSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-002, SPEC-10, PWR-001, DMG-001 | no | todo |  |  |  |  |
 | AI-005 | AI setup and anchor shift | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-003, SPEC-02 | no | todo |  |  |  |  |
@@ -833,6 +833,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — AI-001 done — astra (gpt-6)
+
+- **Implementation d5f0523:** filled the canonical SpatialHash contract and added spatial proxy/body/state types, AI profile/config/state/brain/combat status, setup and content signatures, fleet membership, formation definitions and ability rules. This opens the targeting/hash/spawner implementation dependencies; AI flight/combat behavior remains in its M2 tasks, not claimed playable here.
+- **Resolved Q157 / SPEC-23 Q6:** preserved the explicit **64 B** SpatialProxy contract with sequential trailing padding (listed fields occupy 48 B); no field removed or reordered and no optimization pass. Staged the canonical AbilityDefinition content identity for ABL-001; included the spec's ability-rule types omitted from its older task file list. Content lists are read-only; AI-E002 validation signature is staged for AI-003.
+- **Validation:** compile **zero C# warnings**; both specified AiContractTests pass. Full EditMode **734 pass, 1 advisory timing miss, 1 explicit skip** (MeshBuild128 **0.8887 ms** vs 0.5; performance deferred, zero tuning). Full headless PlayMode **85 pass, 12 GPU-only skips**. Docs **507 tasks / zero errors**. Evidence `Logs/playtest/ai001/`; pre-run QualitySettings restored.
+- **Next:** INP-004 real input-bridge held-key pause/resume regression, then remaining M1 integrations. DEV-009 remains blocked on implemented canonical spawn/world-coordinate services; contract-only Ready on FND-012 does not prove those services exist. No visual change or new owner decision; the verified Fighter flight screenshot remains current.
 
 ### 2026-10-12 — WPN-001 done — astra (gpt-6)
 
