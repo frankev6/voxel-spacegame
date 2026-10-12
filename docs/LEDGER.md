@@ -14,9 +14,9 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 36 | 1 | 0 | 0 | 67 | 0 | 104 | 14 |
+| M1 | 36 | 0 | 0 | 0 | 68 | 0 | 104 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
-| M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 5 |
+| M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 7 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
@@ -194,8 +194,8 @@
 | CAM-002 | ADR: custom camera rig instead of Cinemachine | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | — | yes | done | astra (gpt-6) | 2026-10-11 | a0df398 | ADR-0038 Proposed, all five reasons; no package or runtime change |
 | CAM-003 | Camera math helpers | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0e4a19d | Five specified tests; 30/60/144 FPS damping agrees within 1e-4 |
 | CAM-004 | Rig service, camera prefab, Menu/Hold modes and the sync system shell | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-003, FND-001 | yes | done | astra (gpt-6) | 2026-10-11 | ece7b8b | Persistent rig, menu/hold, ECS view and boot bindings; ADR-0039 single listener; ten required tests |
-| CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-004, FLT-001, VOX-001, INP-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Flight follow, orbit/zoom, target cuts and input adapter |
-| CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | no | todo |  |  |  |  |
+| CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-004, FLT-001, VOX-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-11 | f19e2a5 | Flight follow, input, cuts; exact moving-target damping (Q129–130) |
+| CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | yes | todo |  |  |  |  |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | todo |  |  |  |  |
@@ -462,8 +462,8 @@
 | HUD-019 | Loading and dock screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-010, SYS-001, ECO-001, EDT-001 | no | todo |  |  |  |  |
 | HUD-020 | Full-screen layout regression suite | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-003, HUD-004, HUD-005, HUD-006, HUD-007, HUD-011, HUD-012, HUD-013, HUD-014, HUD-016, HUD-017, HUD-018, HUD-019 | no | todo |  |  |  |  |
 | CAM-006 | Origin warp and teleport cut | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, GAL-001 | no | todo |  |  |  |  |
-| CAM-007 | Occlusion pull-in | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, PHY-001 | no | todo |  |  |  |  |
-| CAM-009 | Editor orbit mode | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-005 | no | todo |  |  |  |  |
+| CAM-007 | Occlusion pull-in | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, PHY-001 | yes | todo |  |  |  |  |
+| CAM-009 | Editor orbit mode | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-005 | yes | todo |  |  |  |  |
 | CAM-010 | Map view transform | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-001 | yes | todo |  |  |  |  |
 | VFX-013 | Floating-origin shift and clears | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | frontier | VFX-003, GAL-001, SYS-001, FND-001 | no | todo |  |  |  |  |
 | VFX-014 | Warp effect and strict config validation | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | standard | VFX-004, TRV-001 | no | todo |  |  |  |  |
@@ -803,6 +803,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-11 — CAM-005 done — astra (gpt-6)
+
+- Implemented flight follow, heading/orbit/recenter/zoom, bounded look-ahead and immediate new-target cuts. Boot now supplies the Flight-context InputCameraInput adapter.
+- Q129 resolves double-applied orbit settings and adapter namespace/ownership across SPEC-03/62: raw pixel input, rig applies sensitivity/inversion once; INP-006 owns Editor sampling and adapter tests. Q130 fixes endpoint damping that missed the required FPS tolerance: exact exponential cascade with linear target motion, stable equal-rate/small-step limits. At 100 m/s for 2 s the 30/60/144 FPS final X values all print **230.4243 m**, passing the unchanged **0.05 m** tolerance.
+- Validation: compile **zero C# warnings**, EditMode **693 passed + 1 explicit skipped**, PlayMode **61 passed**, perf **44/44**, docs **505 tasks / zero errors**. All eight prescribed camera tests pass; no new API/assembly dependencies or runtime static state. Implementation: `f19e2a5`. Next: CAM-011 inclusive camera timing/allocation and circle framing gates.
+
 
 ### 2026-10-11 — CAM-004 persistent camera and composition (astra, gpt-6)
 
