@@ -15,10 +15,15 @@ namespace Game.Voxel.Rendering
         internal void Dispose()
         {
             Pool?.Dispose(); Pool = null;
-            if (PropInstanceBuffers != null) foreach (var buffer in PropInstanceBuffers) buffer?.Dispose();
-            PropInstanceBuffers = null; GridMatrices?.Dispose(); GridMatrices = null;
+            DisposeProps();
             Release(BrickMaterial); Release(PropMaterial); Release(Placeholder);
             BrickMaterial = null; PropMaterial = null; Placeholder = null;
+        }
+        internal void DisposeProps()
+        {
+            if (PropInstanceBuffers != null) foreach (var buffer in PropInstanceBuffers) buffer?.Dispose();
+            PropInstanceBuffers = null; GridMatrices?.Dispose(); GridMatrices = null;
+            PropBlocks = null; PropCounts.Clear();
         }
         static void Release(Object value)
         { if (value) { if (Application.isPlaying) Destroy(value); else DestroyImmediate(value); } }

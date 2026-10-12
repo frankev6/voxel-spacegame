@@ -352,9 +352,9 @@ Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `Hollow
 
 - **Group:** `PresentationBridgeGroup`, `[UpdateAfter(typeof(BrickMeshApplySystem))]`. `ISystem`; `OnUpdate` not Burst-compiled (GraphicsBuffer and `Graphics` calls).
 - Per frame:
-  1. If the change-filtered query over `BrickPropInstance` reports a change, or a grid with props was created or destroyed: `PropGatherJob` (Burst, single job) collects every brick's prop list into per-prop-mesh lists of `PropInstanceGpu { float3 LocalCellCenter; uint Packed; /* orient 5 bits | colour 8 bits << 5 | gridSlot 16 bits << 13 */ }` (local = brick coord × 16 + local + 0.5, cell units), assigns a dense `gridSlot` per root, and per-mesh world bounds; upload with `GraphicsBuffer.SetData` (buffers grow ×2 when needed, old ones released).
-  2. Every frame: `GridMatrixJob` writes `LocalToWorld × scale(CellSize)` per grid slot; upload `_GridMatrices` (O(grids with props)).
-  3. For each prop mesh with count > 0: `Graphics.RenderMeshPrimitives(new RenderParams(PropMaterial) { matProps = PropBlocks[m], worldBounds = bounds[m], shadowCastingMode = On, receiveShadows = true }, mesh, 0, count)`.
+  1. If the change-filtered query over `BrickPropInstance` reports a change, or a grid with props was created or destroyed: `PropGatherJob` (Burst, single job) collects every brick's prop list into per-prop-mesh lists of `PropInstanceGpu { float3 LocalCellCenter; uint Packed; /* orient 5 bits | colour 8 bits << 5 | gridSlot 16 bits << 13 */ }` (local = brick coord × 16 + local + 0.5, cell units), assigns a dense `gridSlot` per root, and conservative per-grid local bounds (including rotated mesh extents); upload with `GraphicsBuffer.SetData` (buffers grow ×2 when needed, old ones released).
+  2. Every frame: `GridMatrixJob` writes `LocalToWorld × scale(CellSize)` per grid slot and transforms the cached local bounds into a conservative world union shared by mesh draws; upload `_GridMatrices` (O(grids with props)). Bounds must follow moving grids even when prop lists are unchanged (Q34).
+  3. For each prop mesh with count > 0: `Graphics.RenderMeshPrimitives(new RenderParams(PropMaterial) { matProps = PropBlocks[m], worldBounds = unionBounds, shadowCastingMode = On, receiveShadows = true }, mesh, 0, count)`.
 - Budget ≤ 0.3 ms main thread per frame for 10,000 props; ≤ 1 ms on a rebuild frame.
 
 ### 5.9 LOD2 (M4, `GridProxySystem`)
@@ -588,11 +588,11 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Tier:** frontier — F2: GraphicsBuffer lifetime and change-driven uploads
 - **Depends on:** `REN-011`, `REN-008`
 - **Do:** Implement `PropRenderSystem` (§5.8) with `PropGatherJob` and `GridMatrixJob`, using a test Prop block definition (`block_test_prop`, created by `TestContentFactory` in tests only).
-- **Files:** `Assets/Game/Voxel/Rendering/{PropRenderSystem,PropGatherJob,GridMatrixJob,PropInstanceGpu}.cs`; `Assets/Game/Tests/PlayMode/Voxel/PropRenderTests.cs`
+- **Files:** `Assets/Game/Voxel/Rendering/{PropRenderSystem,PropGatherJob,GridMatrixJob,PropInstanceGpu,VoxelRenderManagedState}.cs`; `Assets/Game/Tests/PlayMode/Voxel/PropRenderTests.cs`
 - **Acceptance criteria:**
-  - [ ] 10,000 props on 20 moving grids render (screenshot check of one prop) at ≤ 0.3 ms main thread per frame; rebuild frame ≤ 1 ms.
-  - [ ] Removing a prop's cell removes the instance after the brick's next apply.
-  - [ ] Buffers are released on `OnDestroy` (no GraphicsBuffer leak warnings).
+  - [x] 10,000 props on 20 moving grids render (screenshot check of one prop) at ≤ 0.3 ms main thread per frame; rebuild frame ≤ 1 ms.
+  - [x] Removing a prop's cell removes the instance after the brick's next apply.
+  - [x] Buffers are released on `OnDestroy` (no GraphicsBuffer leak warnings).
 - **Tests:** `PropRenderTests.Props_Render`, `.PropRemoved_Disappears`, `.Budget10000`, `.NoBufferLeaks`.
 
 ### REN-015 — LOD2 grid proxies
@@ -654,6 +654,8 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 
 | 32 | Invalid-viewer early return skips restoration, and desired-only change filtering misses an opposite-LOD mesh applied later | Always enqueue after desired updates; watch desired and applied render state | Tech lead | Resolved REN-012: invalid viewer clears dormancy/desires and still runs enqueue. Either desired or applied state changing triggers mismatch checks, so async apply cannot leave a stale LOD. Covered within the specified hysteresis and invalid-viewer tests. |
 | 33 | Grid bounds are inclusive cell indices, but the distance-sphere formula omits cell extent and root scale | Include CellMax + 1 and uniform root scale | Tech lead | Resolved REN-012: centre and half diagonal use the full occupied cell volume, then apply the root transform/scale. Brick LTW already includes CellSize, so its radius uses LTW scale exactly once. |
+
+| 34 | Gather-only world bounds go stale when ships move without changing props | Cache local bounds at gather; update conservative union with grid matrices every frame | Tech lead | Resolved REN-014: flat mesh-sorted native instance storage avoids nested containers, shared managed GPU ownership is disposed idempotently by either system teardown, and bounds remain O(grids). The required pixel test moves the prop outside its original bounds. |
 
 ## 11. References
 

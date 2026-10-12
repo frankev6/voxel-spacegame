@@ -734,6 +734,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 162 | 2026-10-12 | SPEC-11 REN-012 | LOD restore skipped for invalid viewer or late async apply | Always enqueue; filter desired OR applied state | Tech lead | Resolved SPEC-11 Q32; no new public contract |
 | 163 | 2026-10-12 | SPEC-11 REN-012 | Inclusive grid bounds omit volume extent/scale in distance sphere | CellMax + 1; transform centre and scale radius | Tech lead | Resolved SPEC-11 Q33; exact occupied cell volume |
 | 164 | 2026-10-12 | SPEC-01 FND-019 | Direct restart borrows a camera Skybox pending deferred destruction | Bind after one frame, preserving scene ownership | Tech lead | Resolved SPEC-01 Q27; failing direct-restart regression proves the lifetime race |
+| 165 | 2026-10-12 | SPEC-11 REN-014 | Gather-only prop draw bounds go stale as ships move | Recompute world union from per-grid local bounds with matrix uploads | Tech lead | Resolved SPEC-11 Q34; no public contract or art change |
 
 
 
