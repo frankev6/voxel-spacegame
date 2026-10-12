@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 85 | 1 | 0 | 0 | 2 | 0 | 88 | 9 |
+| M2 | 85 | 0 | 0 | 0 | 3 | 0 | 88 | 9 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -235,7 +235,7 @@
 | DMG-016 | Performance gates | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-014 | no | todo |  |  |  |  |
 | DMG-017 | Harness commands | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014, DEV-001 | no | todo |  |  |  |  |
 | FLT-012 | Power and stat integration (M2) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, PWR-001 | no | todo |  |  |  |  |
-| FLT-013 | Owner flight-control correction before the firing range | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, FLT-009, SPEC-03 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Owner-requested V2 controls, then shooting-range priority |
+| FLT-013 | Owner flight-control correction before the firing range | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, FLT-009, SPEC-03 | yes | done | astra (gpt-6) | 2026-10-12 | 1bc23e8 | Shift strafe, Ctrl boost, gentle coast, bounded assist; live Fighter verified; Q182 |
 | WPN-002 | Weapon content: definitions, blob, boot singletons | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, SPEC-04 | no | todo |  |  |  |  |
 | WPN-003 | CombatHitTest | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-001, SPEC-10, AI-001, PWR-001 | no | todo |  |  |  |  |
 | WPN-004 | WeaponInitSystem and mounts | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-002, SPEC-10, SPEC-20 | no | todo |  |  |  |  |
@@ -868,6 +868,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — FLT-013 done — astra (gpt-6)
+
+- **Changed:** V2-only control correction (`1bc23e8`, ADR-0052): rebindable Shift modifier redirects A/D into strafe with zero turn; default boost moves to Left Ctrl, with existing overrides preserved and boost suppressed during strafe mode. Neutral forward assist requests gentle 0.08/s deceleration through actual opposing thrusters. Generalized force requests are bounded by installed actuator capacity before the existing solver. No velocity overwrite, new engine, hull edit or copied V1 code.
+- **Measured handling:** actual 24,620 kg Fighter has 180 kN forward and 40 kN reverse/per side. Production physics tests measure forward **7.22805**, reverse **1.53696**, right **1.55107**, left **1.55112 m/s²** after a 90° rotation; removing reverse thrusters removes reverse capability. Turn-then-strafe gives **3.24939 m/s** lateral change with **0°** measured facing drift. From 20 m/s, two seconds of coast leaves **17.10869**, full brake **16.83856 m/s**, eventually stopping; no instantaneous momentum rotation is promised.
+- **Live proof:** fresh Editor/seed-7 Fighter, real key injection: S reaches **−4.65227 m/s**; Shift+D gives lateral thrust 1, Turn 0, no boost and stable facing; after **60.9505°** rotation, W gives **21.5889 m/s** local forward with negligible lateral drift; 189 coasting ticks reduce this to **16.8104 m/s**; Left Ctrl+W produces Boost. Zero runtime errors. Screenshot `Logs/playtest/fighter-controls-corrected.png`; full data/logs in `Logs/playtest/flt013/`.
+- **Checks:** compile zero C# warnings; full EditMode **776 passed, 2 advisory timing misses, 1 explicit skip**; full headless PlayMode **112 passed, 0 failed, 29 expected skips**. Deferred Write1MiB **5.1710 ms** vs 3, MeshBuild128 **1.1423 ms** vs 0.5; zero performance tuning passes. Initial float-formula test needed a 2e-5 rounding tolerance. A live full-suite attempt aborted when Play stopped and left Pipeline status stale; cancelled, retained incomplete evidence, closed Editor, then completed the headless suite and a fresh live demonstration. Tools note records recovery without a Pipeline repair detour.
+- **Decision/next:** SPEC-20 Q20 / ledger Q182 resolves the technical defaults under Frank's request: “dont copy v1, PLEASE, just make your own version with our new architecture”. Frank should assess control feel; this is not a blocking review. FLT-012 must request power for active coast/drift assist when power lands. Stationary-target firing range is the next M2 checkpoint: DMG-004 cell removal, damage resolution and production weapon integration, live sustained-fire timing; structural breakup follows. No shooting or destruction implementation is claimed by this task. Existing owner/art gates remain; local Git only.
 
 ### 2026-10-12 — DMG-003 done — astra (gpt-6)
 
