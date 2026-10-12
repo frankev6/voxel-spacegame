@@ -39,6 +39,9 @@ namespace Game.Tests.PlayMode.Voxel
         public readonly Entity Root;
         public readonly int BrickCount;
         public int Frames { get; private set; }
+        public IReadOnlyList<Type> SystemTypes { get; private set; }
+        public long SourceBytes => source.NativeBytes;
+        readonly int sourceHandle;
         public Action BeforeFrame;
         public Action AfterFrame;
         readonly ContentService content;
@@ -78,6 +81,7 @@ namespace Game.Tests.PlayMode.Voxel
                 typeof(BrickMeshBuildSystem), typeof(BrickMeshApplySystem), typeof(BrickRenderCleanupSystem), typeof(GridLodSystem), typeof(BrickPoolRenderSystem), typeof(PropRenderSystem) };
             foreach (var type in DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.Default))
                 if (type.Namespace != null && (type.Namespace.StartsWith("Unity.Physics", StringComparison.Ordinal) || type.Namespace == "Unity.Transforms" || type.Namespace == "Unity.Rendering")) systems.Add(type);
+            SystemTypes = systems;
             Test = EcsTestWorld.Create(systems.ToArray()); Test.AddGameplayActive(); Test.AddSimClock(); content.CreateSingletons(Em);
             Em.CreateSingleton(new VoxelStructureRegistryRef { Value = registry });
             Em.CreateSingleton(new VoxelConfig { SpawnBricksPerFrame = 1024, DefaultCellSize = .5f, RequireRenderer = 1 });
@@ -85,12 +89,13 @@ namespace Game.Tests.PlayMode.Voxel
             Em.CreateSingleton(PhysicsVoxelConfigFactory.Create(physics)); Em.CreateSingleton(PhysicsVoxelConfigFactory.CreatePhysicsStep(physics));
             renderConfig = VoxelRenderConfigFactory.Create(content.Catalog.Get<VoxelRenderConfigDefinition>(new ContentId("config_voxel_render")), content.PropMeshes); Em.CreateSingleton(renderConfig);
             ushort hull = content.Catalog.GetBlockIndex(content.Catalog.Get<BlockDefinition>(new ContentId("block_hull")));
-            source = shape == "lattice" ? BenchmarkStructures.Lattice2500(hull) : shape == "station" ? BenchmarkStructures.HollowStation1M(hull) : BenchmarkStructures.Ship20k(hull);
-            BrickCount = shape == "lattice" ? 2500 : shape == "station" ? 872 : 10;
-            Root = GridSpawnApi.RequestSpawn(Em, registry, registry.Register(source), new GridSpawnParams { Pose = RigidTransform.identity, Motion = GridMotion.Static, Flags = GridSpawnFlags.Transient });
+            source = shape == "lattice" ? BenchmarkStructures.Lattice2500(hull) : shape == "station" ? BenchmarkStructures.HollowStation1M(hull) : shape == "thin" ? BenchmarkStructures.ThinShellStation1M(hull) : BenchmarkStructures.Ship20k(hull);
+            BrickCount = shape == "lattice" ? 2500 : shape == "station" ? 872 : shape == "thin" ? 3784 : 10;
+            sourceHandle = registry.Register(source);
+            Root = GridSpawnApi.RequestSpawn(Em, registry, sourceHandle, new GridSpawnParams { Pose = RigidTransform.identity, Motion = GridMotion.Static, Flags = GridSpawnFlags.Transient });
             Camera = new GameObject("REN-013 camera").AddComponent<Camera>(); Camera.orthographic = true; Camera.aspect = 1920f/1080; Camera.nearClipPlane = .1f; Camera.farClipPlane = 1500;
-            Vector3 center = shape == "lattice" ? new Vector3(100,16,100) : shape == "station" ? new Vector3(64,32,64) : new Vector3(20,2.5f,6.25f);
-            Camera.orthographicSize = shape == "lattice" ? 145 : shape == "station" ? 100 : 18;
+            Vector3 center = shape == "lattice" ? new Vector3(100,16,100) : shape == "station" ? new Vector3(64,32,64) : shape == "thin" ? new Vector3(128,64,128) : new Vector3(20,2.5f,6.25f);
+            Camera.orthographicSize = shape == "lattice" ? 145 : shape == "station" ? 100 : shape == "thin" ? 200 : 18;
             Camera.transform.position = center + (shape == "ship" ? new Vector3(42,30,-55) : new Vector3(130,110,-190)); Camera.transform.LookAt(center);
             Camera.clearFlags = CameraClearFlags.SolidColor; Camera.backgroundColor = Color.black;
             var extra = Camera.GetUniversalAdditionalCameraData(); extra.renderPostProcessing = false; extra.antialiasing = AntialiasingMode.None;
@@ -104,15 +109,21 @@ namespace Game.Tests.PlayMode.Voxel
             if (camera != Camera) return;
             BeforeFrame?.Invoke(); Test.StepTicks(1); Frames++; AfterFrame?.Invoke();
         }
-        public IEnumerator Ready()
+        public bool IsReady(bool collision = false)
+        {
+            if (Frames == 0 || !Em.HasComponent<GridSpawning>(Root) || Em.IsComponentEnabled<GridSpawning>(Root)) return false;
+            if (collision && (!Em.HasComponent<GridColliderState>(Root) || Em.GetComponentData<GridColliderState>(Root).Phase != GridColliderPhase.Ready ||
+                !Em.HasComponent<Unity.Physics.PhysicsCollider>(Root) || !Em.GetComponentData<Unity.Physics.PhysicsCollider>(Root).IsValid)) return false;
+            return BrickRenderStats.Gather(Em).Meshes == BrickCount && Singleton<BrickMeshBatch>().InFlight == 0 && Pool.VisibleCount > 0;
+        }
+        public void ReleaseSource() { registry.Release(sourceHandle); source.Dispose(); }
+        public IEnumerator Ready(bool collision = false)
         {
             double until = Time.realtimeSinceStartupAsDouble + 60;
             while (Time.realtimeSinceStartupAsDouble < until)
             {
                 yield return null;
-                if (Frames == 0 || !Em.HasComponent<GridSpawning>(Root) || Em.IsComponentEnabled<GridSpawning>(Root)) continue;
-                var stats = BrickRenderStats.Gather(Em);
-                if (stats.Meshes == BrickCount && Singleton<BrickMeshBatch>().InFlight == 0 && Pool.VisibleCount > 0) yield break;
+                if (IsReady(collision)) yield break;
             }
             Assert.Fail("Spawn/mesh/apply did not become visible; frames=" + Frames);
         }
@@ -138,11 +149,17 @@ namespace Game.Tests.PlayMode.Voxel
     internal sealed class BrickRenderRecorder : IDisposable
     {
         readonly List<ProfilerRecorder> recorders = new List<ProfilerRecorder>();
-        public BrickRenderRecorder(BrickRenderFixture fixture, bool moving)
+        public BrickRenderRecorder(BrickRenderFixture fixture, bool moving, bool allVoxel = false)
         {
             var world = fixture.Test.World;
             var systems = new List<SystemHandle> { world.GetExistingSystemManaged<EntitiesGraphicsSystem>().SystemHandle, world.GetExistingSystem<BrickPoolRenderSystem>() };
-            if (moving) systems.Add(world.GetExistingSystemManaged<TransformSystemGroup>().SystemHandle);
+            if (allVoxel)
+            {
+                systems.Clear(); systems.Add(world.GetExistingSystemManaged<EntitiesGraphicsSystem>().SystemHandle);
+                foreach (var type in fixture.SystemTypes)
+                    if (type.Namespace != null && type.Namespace.StartsWith("Game.Voxel", StringComparison.Ordinal) && !typeof(ComponentSystemGroup).IsAssignableFrom(type)) systems.Add(world.GetExistingSystem(type));
+            }
+            else if (moving) systems.Add(world.GetExistingSystemManaged<TransformSystemGroup>().SystemHandle);
             else systems.AddRange(new[] { world.GetExistingSystem<BrickMeshBuildSystem>(), world.GetExistingSystem<BrickMeshApplySystem>(), world.GetExistingSystem<BrickRenderCleanupSystem>(), world.GetExistingSystem<GridLodSystem>(), world.GetExistingSystem<PropRenderSystem>() });
             var handles = new List<ProfilerRecorderHandle>(); ProfilerRecorderHandle.GetAvailable(handles);
             foreach (var system in systems)
