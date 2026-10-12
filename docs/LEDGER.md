@@ -697,6 +697,8 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-11 | FLT-009 | Off-centre thrust / ram | Lever 2.9999998 m; first-tick yaw −0.12755036 rad/s with gyro disabled. Ram A/B forward speeds 13.49946 / 16.50054 m/s; relative momentum error 3.1789144e-8 | Apple M5 Pro; real spawn, collider, propulsion and Unity Physics integration; non-rendered synthetic fixtures |
+| 2026-10-11 | FLT-009 | Thruster loss / turn / edges | Acceleration 19.801975 → 10.204095 m/s²; yaw prediction 0.11423472 rad/s. Aft-only yaw 2.0909076 vs cap 2.0943952 rad/s after 180 ticks. Eight ability edges at each of 30/60/144 FPS | Shipped config; loss removes cells with BrickWrite and supplies the future damage system's instance-removal result |
 | 2026-10-11 | PHY-023 | Urgent deadline completion | Reference 30-ship workload: median/p95 0/0 ms, max 0.085417 ms; six forced completions; zero late installs | Apple M5 Pro; Deadline marker, reference settings, 60 warmup + 600 measured ticks; worker median/p95 0.034209 / 3.338420 ms; same 38 perf gates pass |
 | 2026-10-11 | PHY-023 | Six-tick catch-up diagnostic | Deadline completion max 0.528208 ms; all 12 determinism runs identical, zero late installs | Default safety settings, not a reference timing gate; one station + two ships, 96 sampled ticks/run, 1/17 workers. Deliberate 500 ms stalled batch test waits outside fixed step and installs exactly at tick 8 |
 | 2026-10-11 | FND-008 | Persistent-ID check without refill | 0.000083 / 0.000084 ms median/p95; gate 0.01 ms | Apple M5 Pro; reference settings; Check profiler marker, 60 warmup + 300 initialization updates; valid zero threshold |

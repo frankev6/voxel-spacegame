@@ -603,7 +603,7 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Do:** PlayMode scenes with the full M1 pipeline (spawn, body, flight). Scenarios: (1) **off-centre torque** (M1 exit gate): a ship whose only thruster is 3 m right of the centre line, gyro set to 0 in a test `FlightConfig`, holds W → yaw rate becomes negative-or-positive as predicted by `cross(r, F).y`; (2) **ram** (M1 exit gate): ship A at 30 m/s into resting ship B → B moves, A slows, momentum conserved within 3%; (3) **lost thruster**: remove one of two aft thrusters with `BrickWrite` → forward command now yaws less than gyro capacity allows or holds heading using the gyro, as `ThrustAllocator` predicts; (4) **turn in place** with aft-only thrusters (gyro) reaches `YawRateCap` or the gyro limit; (5) **edges** at 30/60/144 FPS: the same number of ability edges reach `ShipCommand`.
 - **Files:** `Assets/Game/Tests/PlayMode/Simulation/Flight/FlightScenarioTests.cs`
 - **Acceptance criteria:**
-  - [ ] Each scenario's assertion as stated, measured over fixed tick counts.
+  - [x] Each scenario's assertion as stated, measured over fixed tick counts.
 - **Tests:** `FlightScenarioTests.OffCentreThruster_Yaws`, `.Ram_PushesShips`, `.LostThruster_ChangesHandling`, `.AftOnly_TurnsInPlace`, `.Edges_FrameRateIndependent`.
 
 ### FLT-010 — Flight tuning against legacy blueprints
