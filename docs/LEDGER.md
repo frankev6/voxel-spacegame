@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 10 | 0 | 1 | 0 | 97 | 0 | 108 | 5 |
+| M1 | 9 | 0 | 1 | 0 | 98 | 0 | 108 | 4 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -201,7 +201,7 @@
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 111f9fd | CPU 0.002833 ms; 0 B/update; 10 s circle pitch/GC pass (Q131) |
 | CAM-012 | Keep the imported player ship framed during fast close-zoom flight | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-005, FND-001 | yes | done | astra (gpt-6) | 2026-10-12 | 42287c3 | Bounds-aware focus keeps fast Fighter framed; live 53.39 m/s capture; Q154 |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | frontier | CORE-001, DATA-001 | yes | done | astra (gpt-6) | 2026-10-12 | bb25b99 | Guarded queue, shared kinds, GPU layouts and validation; ADR-0050 |
-| AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Scene and real-flow listener regression |
+| AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | done | astra (gpt-6) | 2026-10-12 | bd35dac | Four scenes listener-free; same listener across real flow; mutation proven |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | done | astra (gpt-6) | 2026-10-12 | b8521e9 | UI/cue playback and ducking; four tests pass, 0 B over 1000 UI calls |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | todo |  |  |  |  |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | no | todo |  |  |  |  |
@@ -848,6 +848,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — AUD-004 done — astra (gpt-6)
+
+- **Changed:** the two required listener regressions. EditMode inspects every enabled build scene, including inactive objects. PlayMode traverses Boot → MainMenu → World → BlueprintLab → MainMenu through production SceneFlow, finding exactly one enabled listener owned by the persistent GameRoot and the same instance throughout; no missing-listener warning occurs.
+- **Mutation proof:** a temporary CLI Editor script added a listener to Boot. The scene test failed with **Boot: AUD004_MutatedListener contains an AudioListener**. Restored the exact pre-mutation scene with cp and verified byte equality; temporary script/meta removed. Evidence `Logs/playtest/aud004/`.
+- **Validation:** compile zero C# warnings; full EditMode **756 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4690 ms** vs 3, MeshBuild128 **1.0300 ms** vs 0.5); full PlayMode **103 passed, 16 GPU skips**. The focused listener flow also passes. Its log assertion targets missing-listener messages; Unity still fails unexpected error logs, while the pre-existing GridSpawnSystem lookup performance warning is not promoted to a listener failure. No runtime changes, no tuning passes, no new owner decision.
+- **Next:** TST-002 command record/replay, then remaining M1 checks and system review. Audio cue content remains AUD-007; no audible-gameplay claim. Approved environment unchanged.
 
 ### 2026-10-12 — VFX-001 done — astra (gpt-6)
 
