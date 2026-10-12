@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 8 | 0 | 1 | 0 | 99 | 0 | 108 | 3 |
+| M1 | 7 | 0 | 1 | 0 | 100 | 0 | 108 | 2 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -212,7 +212,7 @@
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | no | todo |  |  |  |  |
 | DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | no | todo |  |  |  |  |
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 9349e78 | Sparse text recorder/replay; five required tests; even-tick 30/60/144 commands match |
-| TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Real Boot/flow fixture with isolated save/settings paths |
+| TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | done | astra (gpt-6) | 2026-10-12 | 1392d35 | Real Boot/flow fixture; four tests; temp saves/settings and unchanged real profile timestamps |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | no | todo |  |  |  |  |
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
@@ -850,6 +850,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — TST-003 done — astra (gpt-6)
+
+- **Changed:** shared GameFlowFixture loads the actual Boot scene and uses the production bootstrap, session, spawner, collider readiness, input context and save/settings services. It supplies wait/pause helpers, last-20-log timeout diagnostics, leak detection and idempotent cleanup. Existing FND-005 hooks already redirect SPEC-01/05 paths; SPEC-71 Q9 / ledger Q172 reconciles obsolete pseudo-APIs and grants Common test-only boot access. Null-graphics runs alone bypass renderer readiness; GPU runs preserve it. The splash hook remains staged until HUD-003 creates a splash.
+- **Validation:** all **four required tests pass**, including NewGame(42), creative sandbox, real save and settings files beneath Temp/TestRuns, unchanged real profile/settings timestamps, and deletion/reset in teardown. Full PlayMode **107 passed, 16 GPU skips**; full EditMode **761 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4681 ms** vs 3; MeshBuild128 **1.0440 ms** vs 0.5). Compile zero C# warnings, docs clean. Evidence `Logs/playtest/tst003/`. Zero optimization passes.
+- **Next:** AUD-010 audio provenance, REN-013 rendering regressions, then remaining M1 integration checks and system review. No new owner decision or art change.
 
 ### 2026-10-12 — TST-002 done — astra (gpt-6)
 
