@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 32 | 0 | 0 | 0 | 72 | 0 | 104 | 12 |
+| M1 | 31 | 0 | 0 | 0 | 73 | 0 | 104 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 7 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -143,8 +143,8 @@
 | REN-007 | LOD1 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-006 | yes | done | astra (gpt-6) | 2026-10-11 | 5cbebeb | LOD1 exact coverage; triangle ratios 0.406% / 0.557% / 6.195% |
 | REN-008 | Brick and prop shaders, placeholder art | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | done | astra (gpt-6) | 2026-10-11 | 4c504f4 | Canonical shaders/ADR-0040; GPU 4/4, 112 Metal/D3D11 variants; procedural assets |
 | REN-009 | Render config definitions and factory | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | REN-001, REN-008 | yes | done | astra (gpt-6) | 2026-10-12 | 6407fb5 | Validated materials/palette factory, explicit boot lifetime; Q138 |
-| REN-010 | BrickMeshBuildSystem | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-005, REN-006, REN-007 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |  |
-| REN-011 | BrickMeshApplySystem, cleanup and statistics | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-010, SPEC-10 | no | todo |  |  |  |  |
+| REN-010 | BrickMeshBuildSystem | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-005, REN-006, REN-007 | yes | done | astra (gpt-6) | 2026-10-12 | be4b370 | Snapshot-only Burst batches verified; performance deferred: 0.864 ms vs 0.5 ms, zero tuning passes |
+| REN-011 | BrickMeshApplySystem, cleanup and statistics | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-010, SPEC-10 | yes | todo |  |  |  |  |
 | REN-012 | GridLodSystem, Dormant and LOD switching | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011 | no | todo |  |  |  |  |
 | REN-013 | Rendering gate suite | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-012, REN-008 | no | todo |  |  |  |  |
 | REN-014 | Prop block instancing | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011, REN-008 | no | todo |  |  |  |  |
@@ -813,6 +813,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — REN-010 done — astra (gpt-6)
+
+- Added priority dequeue, completed ECS snapshots, independent Burst mesh jobs and owned unsafe result lists per work slot (ADR-0032). Only one batch stays in flight until apply consumes it; adaptive sizing, dormant LOD, destroyed requests and re-dirty queue behavior pass. Shutdown completes and frees all output; config capacity grows safely. ADR-0043 / Q139 adds the installed bounds assembly to EditMode tests.
+- Validation: compile **zero C# warnings**; EditMode **699 passed, 1 advisory timing failure, 1 explicit skipped**; headless PlayMode **65 passed + 6 GPU-only skipped**; perf **47 pass, 1 advisory fail**; docs **505 tasks / zero errors**. MeshBuild128 median **0.8760 ms** in the full suite / **0.8640 ms** in perf versus **0.5 ms** target (whole-world update includes snapshot/scheduling). **Performance deferred**, zero optimization passes used; no thresholds changed. Implementation **be4b370**.
+- Next: REN-011 apply/cleanup and explicit camera bridge, then INP-005 and DEV-008. Live-slice follow-ups discovered: World has no lights (use DESIGN-GUIDE §4.1 values); real input needs a context owner while the UI navigator is not implemented; the default start ship is still the four-cell ship_base. Resolve these in the playable integration work, without introducing new ship designs.
 
 ### 2026-10-12 — REN-009 done — astra (gpt-6)
 
