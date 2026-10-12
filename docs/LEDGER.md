@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 19 | 0 | 1 | 0 | 86 | 0 | 106 | 12 |
+| M1 | 18 | 0 | 1 | 0 | 87 | 0 | 106 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 8 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -189,8 +189,8 @@
 | UI-003 | UIRoot construction, layers and sound hooks | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-002, CORE-001 | yes | done | astra (gpt-6) | 2026-10-12 | fdade56 | Root/document boot lifecycle, prewarm, sound hooks; live flight preserved; Q148–150 |
 | UI-004 | UINavigator stack, pause token and input context | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-003 | yes | done | astra (gpt-6) | 2026-10-12 | 23b3cf5 | Navigator owns context/pause; live Resume/Escape restore Fighter controls; ADR-0047 |
 | UI-005 | Text entry context and world-pointer gate | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-004 | yes | done | astra (gpt-6) | 2026-10-12 | 4cdc9a9 | Text focus/Back and live flight pointer gating; viewport fix Q153; 7 required tests pass |
-| UI-006 | MVVM base, converters and number strings | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | View-model notifications, converters and runtime binding |
-| UI-007 | Base controls: buttons, panel, list, inputs, key hint, markers, HUD plates | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-002, UI-006 | no | todo |  |  |  |  |
+| UI-006 | MVVM base, converters and number strings | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | 25da402 | Binding/converters; 6 EditMode + 3 PlayMode tests |
+| UI-007 | Base controls: buttons, panel, list, inputs, key hint, markers, HUD plates | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-002, UI-006 | yes | todo |  |  |  |  |
 | CAM-001 | Public contract types | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CORE-001 | yes | done | astra (gpt-6) | 2026-10-11 | f078fc9 | Exact contracts, unmanaged view, two required tests; deferred Fx members Q126 |
 | CAM-002 | ADR: custom camera rig instead of Cinemachine | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | — | yes | done | astra (gpt-6) | 2026-10-11 | a0df398 | ADR-0038 Proposed, all five reasons; no package or runtime change |
 | CAM-003 | Camera math helpers | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0e4a19d | Five specified tests; 30/60/144 FPS damping agrees within 1e-4 |
@@ -725,6 +725,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 155 | 2026-10-12 | SPEC-70 DEV-009 | Contract-only Ready omits absent ship-spawn and universe services | Keep full scope blocked until canonical prerequisites exist | Tech lead | Resolved SPEC-70 Q20: FND-012 plus SPEC-30/31 coordinates/current-system state required; no alternate dev spawner or fabricated metadata. Continue WPN-001/AI-001 and other ready work. |
 | 156 | 2026-10-12 | SPEC-21 WPN-001 | Contract staging cycle and stale task/type annotations | Canonical SpatialHash shell; include existing stats/shot types | Tech lead | Resolved SPEC-21 Q11: AI-001 fills its shell, VFX-001 fills FxDefinition; WeaponShot is 80 B by existing fields, ProjectileRow stays 64 B; no API or runtime behavior change. |
 | 157 | 2026-10-12 | SPEC-23 AI-001 | Missing ability reference and proxy layout/staging details | Canonical ability shell and explicit 64 B layout | Tech lead | Resolved SPEC-23 Q6: ABL-001 fills AbilityDefinition; include prescribed ability-rule types, read-only content lists and config validation signature; preserve proxy fields with trailing padding. |
+| 158 | 2026-10-12 | SPEC-60 UI-006 | Clock range and cache lifetime unspecified | Explicit duration formatting and immutable private caches | Tech lead | Resolved SPEC-60 Q18: floor seconds, invalid/negative zero, expand long minutes, range-check Get2Digits; register converters through the existing UIRoot hook. |
 
 
 
@@ -833,6 +834,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — UI-006 done — astra (gpt-6)
+
+- **Implementation:** `25da402` connects UIRoot converters, immutable number strings and actual UXML notifications; Q158 resolves clock formatting. Six required EditMode and three PlayMode tests pass; unchanged values do not poll and notification exercise allocates 0 B.
+- **Validation:** compile zero C# warnings; full EditMode 740 passed, one advisory MeshBuild128 miss (0.8894 ms), one explicit skip; PlayMode 89 passed, 12 GPU-only skips. Evidence `Logs/playtest/ui006/`. No optimization passes.
+- **Owner steering / next:** “can you add the background from nocturne to the game, and a big placeholder planet (same as nocturne), and some small particle debris so we have some spacial reference when moving across because right now its improssible to tell if its moving at all. follow the nocturne art direction”. Prioritize this playable World presentation before UI-007; preserve approved reference and use procedural assets.
 
 ### 2026-10-12 — INP-004 done — astra (gpt-6)
 
