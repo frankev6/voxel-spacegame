@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 16 | 0 | 1 | 0 | 90 | 0 | 107 | 10 |
+| M1 | 15 | 0 | 1 | 0 | 91 | 0 | 107 | 9 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 8 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -115,7 +115,7 @@
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | 5fcd282 | Real bridge/nav/sampler: held W neutral on pause, resumes without phantom edges |
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 66702c3 | Real input mapping, latched edges, collider/plane aim; ten required tests pass |
 | INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | yes | done | astra (gpt-6) | 2026-10-12 | a90d5ec | Editor camera + 34 action mappings; four required tests pass; ADR-0048 |
-| INP-007 | Frame-rate independence test | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-005, SPEC-20 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Real device sampling across render rates |
+| INP-007 | Frame-rate independence test | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-005, SPEC-20 | yes | done | astra (gpt-6) | 2026-10-12 | 4942ca7 | 30/60/144 FPS: identical 4/3 edges and 60 thrust ticks |
 | DATA-011 | v2 block additions (reactor, cargo) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | standard | DATA-009 | yes | done | astra (gpt-6) | 2026-10-11 | 7158bf8 | Reactor/cargo registered; specified modules and existing art references validated |
 | DATA-012 | Approved slope kit per-cell data and content | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | frontier | DATA-006, DATA-009 | yes | done | astra (gpt-6) | 2026-10-11 | 88b13a0 | Canonical per-cell shapes, approved-kit validation and two definitions; ADR-0028/Q90 |
 | VOX-002 | SPIKE: memory model for the reference and thin-shell stations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 6393ecd | No-go: reference 38,828,288 B retained-copy peak; ADR-0023 proposed |
@@ -838,6 +838,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — INP-007 done — astra (gpt-6)
+
+- **Implementation:** `4942ca7` adds the two specified PlayMode tests using real queued keyboard events → PlayerInputSampleSystem → fixed-step PlayerCommandApplySystem → per-tick ShipCommand history. Time.captureDeltaTime drives 30/60/144 FPS. No production changes were needed.
+- **Measured behavior:** each rate produces **120 ticks, 4 Interact, 3 Ability1 and 60 held-thrust ticks / 1.000000 s**. At 30 FPS all 60 rendered frames run two ticks; at 144 FPS **168 frames run zero ticks**, including an initial one-frame press that is retained correctly. Both required tests pass.
+- **Validation:** compile zero C# warnings; full EditMode **743 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4942 ms** vs 3; MeshBuild128 **1.1066 ms** vs 0.5). Full PlayMode **94 passed, 0 failed, 12 GPU skips**. Evidence `Logs/playtest/inp007/`; docs clean; no tuning.
+- **Next:** REN-012 connects existing LOD meshes to camera distance and dormancy, followed by remaining ready M1 integration and system review. Approved Nocturne appearance unchanged; no new owner decision.
 
 ### 2026-10-12 — INP-006 done — astra (gpt-6)
 
