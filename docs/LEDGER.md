@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 33 | 1 | 0 | 0 | 70 | 0 | 104 | 13 |
+| M1 | 33 | 0 | 0 | 0 | 71 | 0 | 104 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 7 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -136,7 +136,7 @@
 | VOX-021 | Mesh rebuild priority queue | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | REN-001 | yes | done | astra (gpt-6) | 2026-10-11 | bb07e09 | Guarded priority/FIFO mesh queue; stale promotion invalidation; 4 tests; Q75–76 |
 | REN-001 | Public contract types | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | VOX-001, DATA-001 | yes | done | astra (gpt-6) | 2026-10-11 | 42dfd86 | Rendering contracts; queue/batch ownership; ADR-0018 layout; Q51–53 |
 | REN-002 | SPIKE: Entities Graphics with thousands of runtime brick meshes | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 66a5baf | No-go: movement delta 1.625 ms, GPU 6.435 ms; REN-003 activated, ADR-0032 proposed |
-| REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002, REN-008 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Resume after REN-008; finalize ADR-0032 and measure pooled fallback |
+| REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002, REN-008 | yes | done | astra (gpt-6) | 2026-10-12 | de1b11d | Pooled geometry/pixels verified; performance deferred (ADR-0042), initial passes exhausted |
 | REN-004 | Normals, packing and shape tables | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6b076af | Five shapes × 24 rotations; exact half-cell packing; 42 normals; Q88–89 |
 | REN-005 | Snapshot gathering | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004, SPEC-10, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 93cd973 | 27-neighbour snapshots, per-cell slopes, bounded props and retained flags; ADR-0029/Q91 |
 | REN-006 | LOD0 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | done | astra (gpt-6) | 2026-10-11 | 1de74e0 | LOD0 culling/AO/welding; 36.3 µs median; large slope indices safe; ADR-0030/Q92 |
@@ -811,6 +811,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — REN-003 done — astra (gpt-6)
+
+- Implemented shared packed GPU pools, best-fit allocation, generational handles, three-frame retirement, growth copies, Burst culling and coalesced indirect draws using the canonical surface shader. Implementation **de1b11d**. REN-010/011 own the mesh-build/apply/camera integration; this task does not demonstrate a playable ship.
+- Functional evidence: 10,000 allocator operations; growth/reuse and reference pixel parity **0/255** including damage/AO/shadows; **48** Metal/D3D11 variants. Reference station pool + native + non-render baseline **31,814,428 B**; integrated batch peak remains TST-004.
+- Validation: compile **zero C# warnings**; EditMode **693 passed + 1 explicit skipped**; headless PlayMode **65 passed + 6 GPU-only skipped**; perf **47/47**. Separate GPU allocator/pixel tests pass. The latest dedicated timing test could not capture complete native frames: **performance deferred**, no GPU pass claimed. Earlier diagnostic execution/elapsed **5.714083 / 6.335625 ms** is diagnostic only (Q137). Initial two-pass allowance exhausted; no further isolated tuning.
+- Next: REN-009 configuration, REN-010/011 integration, real player sampling, imported-ship flight and screenshots. This follows the owner's revised playable-slice goal.
 
 ### 2026-10-12 — Owner policy: build systems before performance tuning
 
