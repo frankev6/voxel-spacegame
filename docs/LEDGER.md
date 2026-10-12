@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 42 | 0 | 0 | 0 | 62 | 0 | 104 | 15 |
+| M1 | 41 | 0 | 0 | 0 | 63 | 0 | 104 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -179,7 +179,7 @@
 | FLT-007 | PropulsionSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-002, FLT-004, FLT-006, DMG-001, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-11 | 52335f4 | Revision cache, allocator, impulses and hulk idling; eight required tests |
 | FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-11 | 0be9bf9 | Vertical impulse constraint; real integration; three required tests |
 | FLT-009 | Flight behaviour scenarios | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-005, FLT-007, FLT-008, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 4b4054d | Five physical scenarios; torque, ram, lost thruster, turn and frame-independent edges |
-| FLT-010 | Flight tuning against legacy blueprints | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-009, SPEC-72 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Legacy blueprint flight measurements and provisional tuning proposal |
+| FLT-010 | Flight tuning against legacy blueprints | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-009, SPEC-72 | yes | done | astra (gpt-6) | 2026-10-11 | c9526c2 | 13 blueprints measured; provisional yaw 180°/s² / 2.5 MN·m; all t90 ≤1.2 s; acceleration shortfall Q124, owner sign-off pending Q125 |
 | FLT-011 | Flight performance and determinism | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-007, FLT-008, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0278edb | Six flight cost/GC gates pass; 600 ticks × 3 ships identical across 8 runs |
 | WPN-001 | Public contract types | [SPEC-21](specs/SPEC-21-weapons.md) | M1 | standard | CORE-001, DATA-001, VOX-001, DMG-001, FLT-001 | yes | todo |  |  |  |  |
 | AI-001 | Public contract types | [SPEC-23](specs/SPEC-23-ai.md) | M1 | standard | CORE-001, DATA-001, VOX-001, WPN-001 | no | todo |  |  |  |  |
@@ -797,6 +797,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-11 — FLT-010 legacy flight tuning evidence (astra, gpt-6)
+
+- Measured every migrated blueprint through real spawning and Unity Physics. The reproducible report prints both original fallback and shipped asset settings, including mass, Iyy, thrust/counts, 0.25 s forward acceleration, time to 99% speed cap, 10 s turn rate and first 90° turn. Full tables are in Measurements.
+- Applied provisional core yaw **180°/s² / 2.5 MN·m**. All 13 Small blueprints now turn in **0.833–1.167 s**. The 2 MN·m intermediate candidate missed only Vestari (1.267 s). Other config fields and thrust rows remain unchanged. Q123 preserves original fallback defaults while checking configured boot output.
+- Powered acceleration is **1.928–38.647 m/s²**; seven ships miss 8–20 and the Q40 base has no thrusters. Q124 records incompatible full-thrust mass ratios for shared-row scaling. Q125 requests owner sign-off with three options; **pending**, not an approval. Medium/Large classes lack examples. No new 3D ships or AI assets were created; content-layout balancing awaits the owner decision.
+- Validation: compile **zero C# warnings**; EditMode **668 passed + 1 explicit skipped**, PlayMode **61 passed**, perf **44/44**, docs **505 tasks / zero errors**. Flight worker median **0.09054 ms**, cache rebuild **1.165 µs**, flight managed allocation **0 B**. Implementation: `c9526c2`.
+- Next: CAM-001 and the ready M1 camera chain; renderer/UI work and the M1 system review remain. Continue autonomously while owner tuning decisions remain pending.
 
 ### 2026-10-11 — FLT-011 flight cost and determinism gates (astra, gpt-6)
 
