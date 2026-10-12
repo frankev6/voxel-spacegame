@@ -202,7 +202,7 @@
 | CAM-012 | Keep the imported player ship framed during fast close-zoom flight | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-005, FND-001 | yes | done | astra (gpt-6) | 2026-10-12 | 42287c3 | Bounds-aware focus keeps fast Fighter framed; live 53.39 m/s capture; Q154 |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
-| AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | todo |  |  |  |  |
+| AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Pooled managed playback, UI cooldowns and stinger ducking |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | todo |  |  |  |  |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | no | todo |  |  |  |  |
 | DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0b4269c | Real launch/probes, isolated profile, live edit-mode launch 1.370 s; Q144–146 |
