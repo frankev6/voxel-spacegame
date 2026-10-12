@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 44 | 0 | 0 | 0 | 60 | 0 | 104 | 16 |
+| M1 | 43 | 0 | 0 | 0 | 61 | 0 | 104 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -178,8 +178,8 @@
 | FLT-006 | Thruster registration and ThrusterInitSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 2388784 | Four flying profiles, player-only tag, change-filtered Burst nozzle init; three tests |
 | FLT-007 | PropulsionSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-002, FLT-004, FLT-006, DMG-001, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-11 | 52335f4 | Revision cache, allocator, impulses and hulk idling; eight required tests |
 | FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-11 | 0be9bf9 | Vertical impulse constraint; real integration; three required tests |
-| FLT-009 | Flight behaviour scenarios | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-005, FLT-007, FLT-008, SPEC-10 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Combined physical flight and input scenarios |
-| FLT-010 | Flight tuning against legacy blueprints | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-009, SPEC-72 | no | todo |  |  |  |  |
+| FLT-009 | Flight behaviour scenarios | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-005, FLT-007, FLT-008, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 4b4054d | Five physical scenarios; torque, ram, lost thruster, turn and frame-independent edges |
+| FLT-010 | Flight tuning against legacy blueprints | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-009, SPEC-72 | yes | todo |  |  |  |  |
 | FLT-011 | Flight performance and determinism | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-007, FLT-008, TST-001 | yes | todo |  |  |  |  |
 | WPN-001 | Public contract types | [SPEC-21](specs/SPEC-21-weapons.md) | M1 | standard | CORE-001, DATA-001, VOX-001, DMG-001, FLT-001 | yes | todo |  |  |  |  |
 | AI-001 | Public contract types | [SPEC-23](specs/SPEC-23-ai.md) | M1 | standard | CORE-001, DATA-001, VOX-001, WPN-001 | no | todo |  |  |  |  |
@@ -739,6 +739,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — FLT-009 combined flight scenarios (astra, gpt-6)
+
+- Added five required PlayMode scenarios using the real spawn/body/collider/flight/physics pipeline and non-rendered synthetic fixtures. Off-centre thrust (2.9999998 m lever, gyro disabled) produces −0.12755036 rad/s yaw. Ramming at 30 m/s produces 13.49946 / 16.50054 m/s forward velocities with **3.1789144e-8** relative momentum error.
+- BrickWrite thruster removal reduces acceleration **19.801975 → 10.204095 m/s²**; the measured yaw matches applied thruster plus bounded gyro torque. Aft-only turning reaches **2.0909076 rad/s** against **2.0943952** cap. Exactly eight ability edges arrive at 30/60/144 FPS. Measurements repeat in focused and full suites.
+- Validation: compile **zero C# warnings**; EditMode **668 passed + 1 explicit skipped**, PlayMode **56 passed**, perf **38/38**; docs **505 tasks / zero errors**. Existing GridSpawnSystem lookup-creation runtime warning is recorded in HANDOFF for the M1 system review; no warning suppression was added.
+- Implementation: `4b4054d`. Next: FLT-011 flight cost/determinism, then FLT-010 legacy tuning evidence and remaining M1 work. No art assets or new player ship designs were authored.
 
 ### 2026-10-11 — FLT-008 planar impulse constraint (astra, gpt-6)
 
