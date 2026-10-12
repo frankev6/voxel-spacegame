@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 19 | 0 | 1 | 0 | 87 | 0 | 107 | 11 |
+| M1 | 18 | 0 | 1 | 0 | 88 | 0 | 107 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 8 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -111,7 +111,7 @@
 | FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-11 | 745e10a | Fleet/FLET ownership, player spawn/writeback, report warnings and recovered-id reservation |
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | yes | done | astra (gpt-6) | 2026-10-11 | 4efcb47 | Serialized creative sandbox, optional player; normal campaign resets flags |
 | FND-017 | Imported ship flight checkpoint | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-010, REN-001, INP-001, DEV-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0e253e1 | Imported Fighter renders, flies, collides and saves/loads; real screenshots; ADR-0044/0045 |
-| FND-018 | Nocturne flight environment and movement reference | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-017 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Owner priority: Nocturne backdrop, storm planet and spatial debris |
+| FND-018 | Nocturne flight environment and movement reference | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-017 | yes | done | astra (gpt-6) | 2026-10-12 | c55d61f | Animated procedural sky; physical planet/atmosphere; flight-reference particles |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | 5fcd282 | Real bridge/nav/sampler: held W neutral on pause, resumes without phantom edges |
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 66702c3 | Real input mapping, latched edges, collider/plane aim; ten required tests pass |
 | INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | yes | todo |  |  |  |  |
@@ -200,7 +200,7 @@
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 111f9fd | CPU 0.002833 ms; 0 B/update; 10 s circle pitch/GC pass (Q131) |
 | CAM-012 | Keep the imported player ship framed during fast close-zoom flight | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-005, FND-001 | yes | done | astra (gpt-6) | 2026-10-12 | 42287c3 | Bounds-aware focus keeps fast Fighter framed; live 53.39 m/s capture; Q154 |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
-| AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | no | todo |  |  |  |  |
+| AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | todo |  |  |  |  |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | todo |  |  |  |  |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | no | todo |  |  |  |  |
@@ -211,7 +211,7 @@
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | no | todo |  |  |  |  |
 | DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | no | todo |  |  |  |  |
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | todo |  |  |  |  |
-| TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | no | todo |  |  |  |  |
+| TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | todo |  |  |  |  |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | no | todo |  |  |  |  |
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
@@ -726,8 +726,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 155 | 2026-10-12 | SPEC-70 DEV-009 | Contract-only Ready omits absent ship-spawn and universe services | Keep full scope blocked until canonical prerequisites exist | Tech lead | Resolved SPEC-70 Q20: FND-012 plus SPEC-30/31 coordinates/current-system state required; no alternate dev spawner or fabricated metadata. Continue WPN-001/AI-001 and other ready work. |
 | 156 | 2026-10-12 | SPEC-21 WPN-001 | Contract staging cycle and stale task/type annotations | Canonical SpatialHash shell; include existing stats/shot types | Tech lead | Resolved SPEC-21 Q11: AI-001 fills its shell, VFX-001 fills FxDefinition; WeaponShot is 80 B by existing fields, ProjectileRow stays 64 B; no API or runtime behavior change. |
 | 157 | 2026-10-12 | SPEC-23 AI-001 | Missing ability reference and proxy layout/staging details | Canonical ability shell and explicit 64 B layout | Tech lead | Resolved SPEC-23 Q6: ABL-001 fills AbilityDefinition; include prescribed ability-rule types, read-only content lists and config validation signature; preserve proxy fields with trailing padding. |
-| 159 | 2026-10-12 | SPEC-01 FND-018 | Spatial cues requested before celestial streaming | Procedural distant placeholder and stationary local particles | Tech lead | Resolved SPEC-01 Q26: existing Nocturne source, scene-owned cosmetics; SYS-011 replaces the distant backdrop. No fake celestial persistence. |
 | 158 | 2026-10-12 | SPEC-60 UI-006 | Clock range and cache lifetime unspecified | Explicit duration formatting and immutable private caches | Tech lead | Resolved SPEC-60 Q18: floor seconds, invalid/negative zero, expand long minutes, range-check Get2Digits; register converters through the existing UIRoot hook. |
+| 159 | 2026-10-12 | SPEC-01 FND-018 | Spatial cues requested before celestial streaming | Procedural distant placeholder and stationary local particles | Tech lead | Resolved SPEC-01 Q26: owner explicitly corrected the initial bake. Planet must be a physical finite sphere with surface/atmosphere, separate from the nebula/star sky. A subsequent request requires that sky to be procedural and animated; no sky texture remains. Owner retained the first procedural rendering brightness/density: “no don't reduce its good” (DESIGN-GUIDE decision 7). SYS-011 replaces staged cosmetics; no celestial persistence. |
 
 
 
@@ -836,6 +836,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — FND-018 done — astra (gpt-6)
+
+- **Implementation:** `c55d61f` connects the animated procedural Nocturne sky, a physical 1,400 m radius storm planet at (1400, −2000, 1700), its separate atmosphere shell and 1,400 stationary world-space cosmetic particles. Reused the own-work look-book surface source; fixed a UV bake seam. No new ships, AI assets, simulation writers or celestial save data. SYS-011 replaces the staged planet.
+- **Owner directions:** “the planet should not be baked into the background, it should be a phisical sphere in the background with the texture and atmosphere so the ships can move above and past it”; then “can you make the background procedural and animated”. Both implemented; the sky texture was removed. Owner rejected reducing the first procedural rendering: **“no don't reduce its good”**. Its original brightness/star density are restored and binding in DESIGN-GUIDE §13 decision 7. Q159 / SPEC-01 Q26 records staging.
+- **Actual game:** real boosted flight reached **120 m/s**, player z **7497.969 m**; planet stayed fixed while its camera depth changed **+2692.55 → −1605.44 m**, proving it was passed. Zero runtime errors. The final procedural-sky screenshot is `Logs/playtest/nocturne-procedural-sky.png`; movement/geometry evidence is in `Logs/playtest/fnd018/`. Earlier bake screenshots there are superseded and are not the final implementation.
+- **Validation:** compile zero C# warnings; full EditMode **739 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4936 ms** vs 3; MeshBuild128 **1.1713 ms** vs 0.5); full headless PlayMode **90 passed, 12 GPU-only skips**. Required scene/motion/cleanup test passed in GPU mode and full headless mode. Docs 508 tasks, zero errors/warnings. No performance tuning; timing misses remain deferred under ADR-0042.
+- **Next:** owner: “ok continue on with your main work you were doing before I asked you to add background and planet”. Resume UI-007, then remaining ready M1 input/rendering/integration and system review. Preserve the approved environment. HANDOFF updated.
 
 ### 2026-10-12 — UI-006 done — astra (gpt-6)
 
