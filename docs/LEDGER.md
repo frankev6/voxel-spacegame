@@ -112,7 +112,7 @@
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | yes | done | astra (gpt-6) | 2026-10-11 | 4efcb47 | Serialized creative sandbox, optional player; normal campaign resets flags |
 | FND-017 | Imported ship flight checkpoint | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-010, REN-001, INP-001, DEV-001 | yes | todo |  |  |  | Owner priority; execute after REN-011, INP-005 and DEV-008 implementations |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | no | todo |  |  |  |  |
-| INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | yes | todo |  |  |  |  |
+| INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |  |
 | INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | yes | todo |  |  |  |  |
 | INP-007 | Frame-rate independence test | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-005, SPEC-20 | no | todo |  |  |  |  |
 | DATA-011 | v2 block additions (reactor, cargo) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | standard | DATA-009 | yes | done | astra (gpt-6) | 2026-10-11 | 7158bf8 | Reactor/cargo registered; specified modules and existing art references validated |
