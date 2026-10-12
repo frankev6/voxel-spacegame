@@ -12,6 +12,7 @@ using Unity.Transforms;
 
 namespace Game.Simulation.Weapons
 {
+    // TODO(WPN-010): shields, effects and full explosion tests.
     /// <summary>SPEC-21 §5.8: drains same-tick projectile and prior-tick reactor/core explosions into hull damage.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup)), UpdateAfter(typeof(ProjectileStepSystem)), UpdateBefore(typeof(DamageResolveSystem))]
     public partial struct ExplosionSystem : ISystem

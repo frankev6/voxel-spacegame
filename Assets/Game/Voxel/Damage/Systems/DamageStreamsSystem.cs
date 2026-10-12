@@ -17,6 +17,7 @@ using Unity.Profiling;
 
 namespace Game.Voxel.Damage
 {
+    // TODO(DMG-007): consume pending impulses and aggregate ram contacts in ImpactEventSystem.
     /// <summary>SPEC-13 section 5.1: world-lifetime damage memory and tick boundaries; Q21 schedules stats reset safely.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup), OrderFirst = true)]
     [UpdateBefore(typeof(GridMassUpdateSystem))]

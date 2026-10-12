@@ -12,6 +12,7 @@ using Unity.Mathematics;
 
 namespace Game.Simulation.Weapons
 {
+    // TODO(WPN-004): complete mount initialization contract validation and required tests.
     /// <summary>SPEC-21 §5.2: registers combat composition and initializes installed mount geometry.</summary>
     [BurstCompile, CreateAfter(typeof(GridSpawnSystem)), UpdateInGroup(typeof(GameInitGroup)), UpdateAfter(typeof(GridSpawnSystem))]
     public partial struct WeaponInitSystem : ISystem

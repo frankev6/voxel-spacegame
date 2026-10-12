@@ -12,6 +12,7 @@ using Unity.Mathematics;
 
 namespace Game.Simulation.Weapons
 {
+    // TODO(WPN-008): parallel stream/compaction pipeline, homing, shield hits and full projectile contract tests.
     /// <summary>SPEC-21 §5.6 projectiles and lifetime. ADR-0053 uses an ordered grid broad phase for the initial range.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup)), UpdateAfter(typeof(DamageStreamsSystem)), UpdateBefore(typeof(DamageResolveSystem))]
     public partial struct ProjectileStepSystem : ISystem, ISystemStartStop

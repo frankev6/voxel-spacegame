@@ -926,7 +926,7 @@ If no save exists, "Load last save" is disabled.
   - [x] Severing a section produces an independently moving, rendered physical piece that retains the correct cells and rigid motion; target remainder remains damageable.
   - [x] Scene exit/restart clears projectiles and range bodies with no stale stream/job/native allocation errors; pause neutralizes fire.
   - [x] Actual gameplay screenshots before/after firing and breakup are inspected and shown to Frank; sustained-fire frame measurements and limitations are recorded, with at most two initial tuning passes.
-- **Tests:** `FiringRangeTests.RealFire_DamagesStationaryTarget`, `.Shots_PassThroughHole`, `.SeveredSection_BecomesMovingBody`, `.Restart_ClearsCombatState` (PlayMode); compile and full EditMode/PlayMode suites; live input/capture and sustained-fire measurements.
+- **Tests:** `FiringRangeTests.RealFire_DamagesStationaryTarget`, `.Shots_PassThroughHole`, `.SeveredSection_BecomesMovingBody`, `.Restart_ClearsCombatState` (PlayMode); compile and full EditMode/PlayMode suites; live input/capture and sustained-fire measurements. External-review requirements: `IntegrityReviewTests.OverCap_DefersDeterministicallyAndRetainsSeed`, `.StationBreakaway_MasksMatchPreviousSlotScan` (EditMode); strengthen the existing ship image regression with foreground/regional checks, profile sustained-fire allocation call stacks, and preserve green default suites with warning-only timing targets.
 
 ## 10. Open questions
 

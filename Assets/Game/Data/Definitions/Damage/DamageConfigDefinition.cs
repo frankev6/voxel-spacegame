@@ -25,6 +25,7 @@ namespace Game.Data.Definitions
         [SerializeField] private float ramRadiusMaxCells = 4f;
         [SerializeField] private int ramPairCooldownTicks = 6;
         [SerializeField] private int maxRestoreCellsPerTick = 4096;
+        [SerializeField] private int maxFullFloodCells = 16384;
         [SerializeField] private int integrityNodeBudgetPerGrid = 131072;
         [SerializeField] private int maxIntegrityGridsPerTick = 64;
         [SerializeField] private int maxSeedsPerGrid = 8192;
@@ -69,6 +70,7 @@ namespace Game.Data.Definitions
         public float RamRadiusMaxCells => ramRadiusMaxCells;
         public int RamPairCooldownTicks => ramPairCooldownTicks;
         public int MaxRestoreCellsPerTick => maxRestoreCellsPerTick;
+        public int MaxFullFloodCells => maxFullFloodCells;
         public int IntegrityNodeBudgetPerGrid => integrityNodeBudgetPerGrid;
         public int MaxIntegrityGridsPerTick => maxIntegrityGridsPerTick;
         public int MaxSeedsPerGrid => maxSeedsPerGrid;
@@ -119,6 +121,7 @@ namespace Game.Data.Definitions
             if (float.IsNaN(ramRadiusMaxCells) || float.IsInfinity(ramRadiusMaxCells) || ramRadiusMaxCells < 0) scope.Error("DMG-E005", nameof(ramRadiusMaxCells), "Must be finite and nonnegative.");
             if (ramPairCooldownTicks < 1) scope.Error("DMG-E005", nameof(ramPairCooldownTicks), "Budget must be at least 1.");
             if (maxRestoreCellsPerTick < 1) scope.Error("DMG-E005", nameof(maxRestoreCellsPerTick), "Budget must be at least 1.");
+            if (maxFullFloodCells < 1) scope.Error("DMG-E005", nameof(maxFullFloodCells), "Cap must be at least 1.");
             if (integrityNodeBudgetPerGrid < 1) scope.Error("DMG-E005", nameof(integrityNodeBudgetPerGrid), "Budget must be at least 1.");
             if (maxIntegrityGridsPerTick < 1) scope.Error("DMG-E005", nameof(maxIntegrityGridsPerTick), "Budget must be at least 1.");
             if (maxSeedsPerGrid < 1) scope.Error("DMG-E005", nameof(maxSeedsPerGrid), "Budget must be at least 1.");

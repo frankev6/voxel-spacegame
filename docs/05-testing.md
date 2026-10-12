@@ -32,6 +32,8 @@ The Editor can stay open while you work; the scripts talk to it through the Unit
 - Performance tests use `PerfRun` and assert with `PerfSettings.AssertReference` (SPEC-71); they never time with `Stopwatch` directly.
 - A task whose tests need the kit lists `TST-001` in **Depends on** (not `SPEC-71`). Only tasks that need the game-flow fixture or replay (TST-002/003) depend on `SPEC-71`.
 
+Owner direction (2026-10-12): write the tests listed by each task spec; add extra edge-case tests only for save/load and migration, and one functional test per owner-requested feature. Explicit review-requested tests are required. Each task log records `spec-required: N, extra: M`. The table below describes test kinds, not an instruction to add coverage beyond that scope.
+
 ## 3. Required kinds of tests
 
 | Kind | Required for | Example |
@@ -48,7 +50,7 @@ The Editor can stay open while you work; the scripts talk to it through the Unit
 ## 4. Definition of Done (every task)
 
 - [ ] Every functional acceptance criterion in the task is met and checked. Numeric performance criteria are advisory (ADR-0042), including older spec wording that calls them gates.
-- [ ] Tests listed in the task exist; functional, correctness and safety assertions pass, including existing regression tests (`tools/test.sh editmode`). Record performance-only assertion failures separately; they do not prevent completion. A mixed test must still establish its functional assertions; a failed timing assertion is not evidence those ran.
+- [ ] Tests listed in the task exist; functional, correctness and safety assertions pass, including existing regression tests (`tools/test.sh editmode`). Default EditMode and PlayMode suites must be green-or-real-failure. Performance-only timing, footprint and readiness checks warn with measured values and unchanged targets, while mixed tests retain hard functional assertions. Keep PerfRun JSON records and explicit perf summary FAIL rows unchanged.
 - [ ] `tools/compile.sh` shows zero errors and zero new warnings in `Game.*` assemblies.
 - [ ] No rule in [02-conventions.md](02-conventions.md) is broken (self-review checklist in [04-workflow.md](04-workflow.md)).
 - [ ] Record relevant performance results, missed targets or unavailable measurements, and the initial optimization pass count in the ledger. At most two passes per system/feature across workers and handoffs; measurement troubleshooting for a number uses the same allowance. Do not fabricate a passing result, relax test thresholds or repeat runs just to obtain green. Defer further tuning and continue integration/live gameplay.

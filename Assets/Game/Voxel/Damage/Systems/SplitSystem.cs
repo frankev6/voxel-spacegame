@@ -18,6 +18,7 @@ using Unity.Transforms;
 
 namespace Game.Voxel.Damage
 {
+    // TODO(DMG-010): particle tier and debris FX/audio. TODO(DMG-011): pooled chunk tier/lifetime. TODO(DMG-012): complete hulk lifecycle tests.
     /// <summary>SPEC-13 §5.5 hulk creation. ADR-0053 initially represents every detached island as a physical grid.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup))]
     [UpdateAfter(typeof(IntegritySystem)), UpdateBefore(typeof(GridMassUpdateSystem)), UpdateBefore(typeof(BrickDirtyScheduleSystem))]

@@ -18,6 +18,7 @@ using Unity.Profiling;
 
 namespace Game.Voxel.Damage
 {
+    // TODO(DMG-006): parallel per-grid ranges, restoration and pending-impulse integration; full required tests.
     /// <summary>FND-020 / ADR-0053: canonical, ordered damage resolution; DMG-006 adds parallel range execution.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup))]
     [UpdateAfter(typeof(DamageStreamsSystem)), UpdateBefore(typeof(GridMassUpdateSystem)), UpdateBefore(typeof(BrickDirtyScheduleSystem))]

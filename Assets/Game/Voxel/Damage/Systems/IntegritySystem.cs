@@ -21,16 +21,19 @@ namespace Game.Voxel.Damage
     public unsafe partial struct IntegritySystem : ISystem
     {
         ConnectivityJob job; EntityQuery grids;
+        NativeParallelHashSet<Entity> sizeWarnings;
         static readonly ProfilerMarker Race = new ProfilerMarker(ProfilerCategory.Scripts, "IntegritySystem.Race");
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
+            sizeWarnings = new NativeParallelHashSet<Entity>(64, Allocator.Persistent);
             grids = new EntityQueryBuilder(Allocator.Temp).WithAll<VoxelGrid, IntegritySeed>().Build(ref state);
             job.Seeds = state.GetBufferLookup<IntegritySeed>();
             job.Reader = GridCellReader.Create(ref state); job.Instances = state.GetBufferLookup<BlockInstance>(true);
             job.Palettes = state.GetBufferLookup<PaletteEntry>(true); job.Bricks = state.GetComponentLookup<Brick>(true);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<DamageStreams>(); state.RequireForUpdate<BlockDefsRef>();
-            state.RequireForUpdate<OrientationTablesRef>();
+            state.RequireForUpdate<OrientationTablesRef>(); state.RequireForUpdate<DamageConfig>();
         }
+        [BurstCompile] public void OnDestroy(ref SystemState state) { state.CompleteDependency(); sizeWarnings.Dispose(); }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             using var marker = Race.Auto(); job.Reader.Update(ref state); job.Instances.Update(ref state); job.Palettes.Update(ref state); job.Bricks.Update(ref state);
@@ -40,12 +43,14 @@ namespace Game.Voxel.Damage
             var data = SystemAPI.GetSingleton<DamageStreams>().Data;
             job.Removed = data->Removed; job.Ranges = data->RemovedGrids; job.Islands = data->Islands; job.Masks = data->IslandMasks;
             job.Blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value; job.Orientations = SystemAPI.GetSingleton<OrientationTablesRef>().Value;
-            job.Stats = data;
+            job.Stats = data; job.SizeWarnings = sizeWarnings; job.CellCap = SystemAPI.GetSingleton<DamageConfig>().MaxFullFloodCells;
             state.Dependency = job.Schedule(JobHandle.CombineDependencies(state.Dependency, data->ResolverHandle)); data->IntegrityHandle = state.Dependency;
         }
         [BurstCompile] struct ConnectivityJob : IJob
         {
             public GridCellReader Reader;
+            public int CellCap;
+            public NativeParallelHashSet<Entity> SizeWarnings;
             [ReadOnly] public NativeList<Entity> Roots;
             public BufferLookup<IntegritySeed> Seeds;
             [ReadOnly] public BufferLookup<BlockInstance> Instances;
@@ -64,16 +69,21 @@ namespace Game.Voxel.Damage
                 public int CompareTo(Node b)
                 { int c = Position.z.CompareTo(b.Position.z); if (c == 0) c = Position.y.CompareTo(b.Position.y); return c == 0 ? Position.x.CompareTo(b.Position.x) : c; }
             }
+            struct Bucket : System.IComparable<Bucket>
+            {
+                public int Label, Slot; public CellMask Mask;
+                public int CompareTo(Bucket b) { int c = Label.CompareTo(b.Label); return c == 0 ? Slot.CompareTo(b.Slot) : c; }
+            }
             struct Component { public int Count; public int3 Min, Max; public bool Anchored, Functional; }
             public void Execute()
             {
                 Islands.Clear(); Masks.Clear();
                 using var changed = new NativeList<Entity>(Allocator.Temp);
-                foreach (var root in Roots) if (Seeds[root].Length > 0) { changed.Add(root); Seeds[root].Clear(); }
+                foreach (var root in Roots) if (Seeds[root].Length > 0) { changed.Add(root); }
                 foreach (var range in Ranges)
                 {
                     for (int i = range.Start; i < range.Start + range.Count; i++)
-                        if (Removed[i].Reason == CellRemovedReason.Destroyed) { changed.Add(range.Grid); break; }
+                        if (Removed[i].Reason == CellRemovedReason.Destroyed) { changed.Add(range.Grid); if (Seeds[range.Grid].Length == 0) Seeds[range.Grid].Add(new IntegritySeed { Cell = Removed[i].Cell }); break; }
                 }
                 changed.Sort(new RootOrder());
                 for (int i = 0; i < changed.Length; i++)
@@ -85,6 +95,30 @@ namespace Game.Voxel.Damage
             {
                 Stats->Current.IntegrityGrids++;
                 var grid = Reader.Grids[root]; var slots = Reader.Slots[root]; var instances = Instances[root]; var palette = Palettes[root];
+                // TODO(DMG-008): replace the bounded full-grid fallback with cached brick summaries.
+                // TODO(DMG-009): hybrid race traversal, node budgets and force-after-deferral semantics.
+                long occupied = 0;
+                foreach (var slot in slots) if (slot.Brick != Entity.Null) occupied += Bricks[slot.Brick].SolidCount;
+                if (occupied > CellCap)
+                {
+                    var seeds = Seeds[root];
+                    if (seeds.Length == 0) seeds.Add(new IntegritySeed { Cell = grid.BrickMin * 16 });
+                    Stats->Current.IntegritySizeDeferred++;
+                    if (SizeWarnings.Add(root))
+                    {
+                        // Character appends avoid a managed string conversion inside Burst (SPEC-13 Q22).
+                        var warning = default(FixedString128Bytes);
+                        warning.Append('['); warning.Append('D'); warning.Append('a'); warning.Append('m'); warning.Append('a'); warning.Append('g'); warning.Append('e'); warning.Append(']');
+                        warning.Append(' '); warning.Append('f'); warning.Append('l'); warning.Append('o'); warning.Append('o'); warning.Append('d'); warning.Append(' '); warning.Append('d');
+                        warning.Append('e'); warning.Append('f'); warning.Append('e'); warning.Append('r'); warning.Append('r'); warning.Append('e'); warning.Append('d'); warning.Append(';');
+                        warning.Append(' '); warning.Append('s'); warning.Append('e'); warning.Append('e'); warning.Append('d'); warning.Append('s'); warning.Append(' '); warning.Append('k');
+                        warning.Append('e'); warning.Append('p'); warning.Append('t'); warning.Append('.'); warning.Append(' '); warning.Append('c'); warning.Append('a'); warning.Append('p');
+                        warning.Append('=');
+                        warning.Append(CellCap); Game.Core.GameLog.Burst.Warn(warning);
+                    }
+                    return;
+                }
+                Seeds[root].Clear();
                 using var nodes = new NativeList<Node>(Allocator.Temp);
                 foreach (var slot in slots)
                 {
@@ -131,20 +165,30 @@ namespace Game.Voxel.Damage
                 for (int i = 0; i < components.Length; i++)
                     if (components[i].Anchored) { anchor = i; break; }
                     else if (components[i].Count > components[anchor].Count) anchor = i;
+                // Aggregate once per occupied node; sorted buckets preserve component/slot emission order.
+                using var bucketIndex = new NativeHashMap<int2, int>(nodes.Length, Allocator.Temp);
+                using var buckets = new NativeList<Bucket>(Allocator.Temp);
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    if (labels[i] == anchor + 1) continue;
+                    int slot = BrickMath.SlotIndex(BrickMath.BrickOf(nodes[i].Position), grid.BrickMin, grid.BrickDims);
+                    var key = new int2(labels[i], slot);
+                    if (!bucketIndex.TryGetValue(key, out int index))
+                    {
+                        index = buckets.Length; bucketIndex.Add(key, index);
+                        buckets.Add(new Bucket { Label = labels[i], Slot = slot });
+                    }
+                    int local = BrickMath.LocalIndex(BrickMath.LocalOf(nodes[i].Position));
+                    ref var bucket = ref buckets.ElementAt(index); bucket.Mask.Words[local >> 6] |= 1UL << (local & 63);
+                }
+                buckets.Sort(); int next = 0;
                 for (int component = 0; component < components.Length; component++)
                 {
                     if (component == anchor) continue;
                     var description = components[component]; int start = Masks.Length;
-                    // Slot order is deterministic and keeps PendingDetach in canonical grid/island/slot order.
-                    for (int slotIndex = 0; slotIndex < slots.Length; slotIndex++)
+                    while (next < buckets.Length && buckets[next].Label == component + 1)
                     {
-                        var mask = new CellMask(); bool any = false;
-                        for (int i = 0; i < nodes.Length; i++)
-                        {
-                            if (labels[i] != component + 1 || BrickMath.SlotIndex(BrickMath.BrickOf(nodes[i].Position), grid.BrickMin, grid.BrickDims) != slotIndex) continue;
-                            int local = BrickMath.LocalIndex(BrickMath.LocalOf(nodes[i].Position)); mask.Words[local >> 6] |= 1UL << (local & 63); any = true;
-                        }
-                        if (any) Masks.Add(new IslandMask { SlotIndex = slotIndex, Mask = mask });
+                        var bucket = buckets[next++]; Masks.Add(new IslandMask { SlotIndex = bucket.Slot, Mask = bucket.Mask });
                     }
                     Islands.Add(new IslandRecord { Grid = root, MaskStart = start, MaskCount = Masks.Length - start, CellCount = description.Count,
                         CellMin = description.Min, CellMax = description.Max, HasFunctional = description.Functional ? (byte)1 : (byte)0, Ordinal = component });

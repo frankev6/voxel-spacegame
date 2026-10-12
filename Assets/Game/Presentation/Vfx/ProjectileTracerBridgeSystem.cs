@@ -7,6 +7,7 @@ using UnityEngine.Rendering;
 
 namespace Game.Presentation.Vfx
 {
+    // TODO(VFX-006): final tracer batching/style variants and required tests. TODO(VFX-005): separate debris particle path remains unimplemented.
     /// <summary>FND-020 live projectile visualization, reading the canonical store. VFX-006 adds full tracer batching/style variants.</summary>
     [UpdateInGroup(typeof(PresentationBridgeGroup))]
     public partial class ProjectileTracerBridgeSystem : SystemBase

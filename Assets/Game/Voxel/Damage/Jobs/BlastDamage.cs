@@ -8,6 +8,7 @@ namespace Game.Voxel.Damage.Jobs
         struct BlastCell { public int3 Cell; public float Damage; }
         public void BlastDamage()
         {
+            // TODO(DMG-005): emit the specified radius-clamp warning and complete blast/occlusion tests.
             float radius = math.min(Event.Radius / Access.Definition.CellSize, Config.MaxBlastRadiusCells);
             if (radius < .5f) { PointDamage(); return; }
             float3 centre = Event.LocalPoint / Access.Definition.CellSize;

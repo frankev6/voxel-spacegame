@@ -15,6 +15,7 @@ using Unity.Transforms;
 
 namespace Game.Simulation.Weapons
 {
+    // TODO(WPN-007): parallel stream/flatten pipeline, power integration, beam delivery/pulses and full firing contract tests.
     /// <summary>SPEC-21 §5.5 delivery-agnostic fire. ADR-0053 initially schedules one ordered mount job.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPrePhysicsGroup)), UpdateAfter(typeof(WeaponAimSystem)), UpdateBefore(typeof(AbilityActivationGroup))]
     public partial struct WeaponFireSystem : ISystem, ISystemStartStop

@@ -9,6 +9,7 @@ using Game.Simulation.Spatial;
 
 namespace Game.Simulation.Weapons
 {
+    // TODO(WPN-003): spatial-hash broadphase, shield hits and required tests.
     /// <summary>Implements SPEC-21 weapon contract: CombatHitTest.</summary>
     public struct CombatHitTest   // job field; Create in OnCreate, Update first in OnUpdate
     {

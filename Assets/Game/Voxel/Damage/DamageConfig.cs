@@ -30,6 +30,7 @@ namespace Game.Voxel.Damage
         // Restores (ADR-0016)
         public int   MaxRestoreCellsPerTick;    // 4096
         // Integrity
+        public int MaxFullFloodCells;           // 16384; staged fallback only, DMG-008/009 replace it
         public int IntegrityNodeBudgetPerGrid;  // 131072
         public int MaxIntegrityGridsPerTick;    // 64
         public int MaxSeedsPerGrid;             // 8192
@@ -80,6 +81,7 @@ namespace Game.Voxel.Damage
             RamRadiusMaxCells = 4f,
             RamPairCooldownTicks = 6,
             MaxRestoreCellsPerTick = 4096,
+            MaxFullFloodCells = 16384,
             IntegrityNodeBudgetPerGrid = 131072,
             MaxIntegrityGridsPerTick = 64,
             MaxSeedsPerGrid = 8192,
@@ -138,6 +140,7 @@ namespace Game.Voxel.Damage
                 RamRadiusMaxCells = def.RamRadiusMaxCells,
                 RamPairCooldownTicks = def.RamPairCooldownTicks,
                 MaxRestoreCellsPerTick = def.MaxRestoreCellsPerTick,
+                MaxFullFloodCells = def.MaxFullFloodCells,
                 IntegrityNodeBudgetPerGrid = def.IntegrityNodeBudgetPerGrid,
                 MaxIntegrityGridsPerTick = def.MaxIntegrityGridsPerTick,
                 MaxSeedsPerGrid = def.MaxSeedsPerGrid,

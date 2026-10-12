@@ -333,7 +333,7 @@ namespace Game.Voxel.Damage
     {
         public uint Tick;
         public int EventsIn, EventsDropped, GridsResolved, CellsDestroyed, CellsDetached, InstancesDestroyed;
-        public int IntegrityGrids, IntegrityDeferred, IslandsFound;
+        public int IntegrityGrids, IntegrityDeferred, IntegritySizeDeferred, IslandsFound;
         public int HulksCreated, ChunksCreated, ParticleIslands, SplitsDeferred, DebrisParticles, RamEvents;
         public int ImpulsesApplied, ImpulsesDropped, CellsHealed, CellsPlaced, RestoresDropped, RestoresDeferred;   // ADR-0016 channels
     }
@@ -389,6 +389,7 @@ namespace Game.Voxel.Damage
         public int   MaxRestoreCellsPerTick;    // 4096
         // Integrity
         public int IntegrityNodeBudgetPerGrid;  // 131072
+        public int MaxFullFloodCells;           // 16384, temporary fallback cap (ADR-0057)
         public int MaxIntegrityGridsPerTick;    // 64
         public int MaxSeedsPerGrid;             // 8192
         public int IntegrityForceAfterDeferrals;// 4
@@ -1118,6 +1119,8 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 | 23 | Cross-definition validation needs the current catalog; config error codes, table extent and boot lifetime were unspecified | Share the catalog internally with validation; boot owns the blob and replaces the fallback singleton | Tech lead | Resolved DMG-003: the internal ContentValidationContext carries the current catalog in both editor and runtime passes. DMG-E001 covers multiplier shape/nonnegative finite values, E002 unique contiguous damage indices covering all declared enum values, E003 kick range, E004 unique contiguous armor indices; config E005 covers positive integer budgets, finite nonnegative numbers and particle/chunk ordering, E006 inverted lifetime/tumble ranges. Table extent comes from definitions, not a four-type switch; tests use a fifth numeric enum value without changing the production enum. Boot writes the owner's existing DamageConfig (or creates it in isolated worlds), owns the table alongside render config, completes jobs before disposal and restores Default on the surviving singleton. Cue references remain empty as specified by Default; AUD-007 supplies cue content. |
 
 | 24 | Cell-writer internal outputs, nonexistent Urgent dirty bit, and finite ray sampling | Reuse existing dirty/priority contracts; per-grid native scratch outputs; stratified reference samples | Tech lead | Resolved DMG-004: CellWriter owns disposable per-grid lists and a touched hash set, later flattened by the resolver; only Flatten enables dirty bits. BrickDirtyFlags has Mesh/Collider only; the existing scheduler already maps runtime writes to urgent ColliderPriority.Damage, so no new flag/API is needed. HP changes within one visual bin preserve prior dirty flags while updating ChangedRevision. DDA uses half-open positive-length ray intervals, crossing tied axes together; the 10,000-sample reference stratifies across analytically computed plane intervals so arbitrarily thin cells cannot disappear between uniform samples (observed seeded ray 296). Instance collapse remains DMG-005. |
+
+| 26 | Bound the staged whole-grid integrity flood before DMG-008/009 | MaxFullFloodCells = 16384; retain deferred seeds and warn once per grid | Tech lead | Resolved FND-020 review / ADR-0057, citing architecture §11.1: preflight occupied counts before flooding, count IntegritySizeDeferred, and keep work queued until under cap or replaced by the hybrid implementation. Single-pass label/slot buckets preserve canonical masks. |
 
 ## 11. References
 

@@ -13,6 +13,7 @@ using Unity.Transforms;
 
 namespace Game.Simulation.Weapons
 {
+    // TODO(WPN-006): target lead/autofire and full aim tests.
     /// <summary>SPEC-21 §5.4 manual mount aim. Target-lead/autofire remain WPN-005/006.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPrePhysicsGroup)), UpdateBefore(typeof(AbilityActivationGroup))]
     public partial struct WeaponAimSystem : ISystem

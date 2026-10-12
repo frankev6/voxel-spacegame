@@ -36,7 +36,7 @@
    - [ ] Every `TODO` has a task ID.
    - [ ] Tests named and placed per conventions §7.
    - [ ] The review checklist at the end of [07-implementation-traps.md](07-implementation-traps.md) passes for every section that applies.
-3. Update [LEDGER.md](LEDGER.md): status `done`, commit hash, and one entry in the *Log* (what changed, measurements, follow-ups). Once functional requirements pass, missed performance targets do not prevent `done`; put `performance deferred` in Notes and record targets/results (or unavailable measurements), initial pass count and follow-up. Do not add deferred tuning as a dependency of working features.
+3. Update [LEDGER.md](LEDGER.md): status `done`, commit hash, and one entry in the *Log* (what changed, measurements, follow-ups), including `spec-required: N, extra: M` test counts. Follow the owner’s test-volume scope in 05-testing: spec-listed tests, extra edge cases only for save/load and migration, and one functional test per owner-requested feature. Once functional requirements pass, missed performance targets do not prevent `done`; put `performance deferred` in Notes and record targets/results (or unavailable measurements), initial pass count and follow-up. Do not add deferred tuning as a dependency of working features.
 4. Commit `<TASK-ID>: <summary>` on `task/<TASK-ID>-<slug>`, then merge to `main` (rebase first). One task per merge.
 
 ## 4. Statuses

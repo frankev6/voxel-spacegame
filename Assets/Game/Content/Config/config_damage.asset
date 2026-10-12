@@ -31,6 +31,7 @@ MonoBehaviour:
   ramRadiusMaxCells: 4
   ramPairCooldownTicks: 6
   maxRestoreCellsPerTick: 4096
+  maxFullFloodCells: 16384
   integrityNodeBudgetPerGrid: 131072
   maxIntegrityGridsPerTick: 64
   maxSeedsPerGrid: 8192

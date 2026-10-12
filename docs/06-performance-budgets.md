@@ -22,6 +22,10 @@ Keep budgets and honest failure reports for comparison; do not change assertions
 | Heavy combat (see combat gates) | ≤ 10 ms median, ≤ 14 ms p95 | ≤ 12 ms | 0 B/frame |
 | Menus and editor UI | ≤ 4 ms | ≤ 8 ms | ≤ 1 KB/frame |
 
+## Temporary integrity work bound
+
+ADR-0057 / architecture §11.1 limits the staged full-grid integrity flood to `DamageConfig.MaxFullFloodCells` occupied cells (default **16384**). Larger changed grids keep their seeds and increment `IntegritySizeDeferred`; they are not flooded until within the configured cap or replaced by DMG-008/009. This safety/work bound is binding, unlike the advisory timing targets.
+
 ## Voxel gates (SPEC-10/11/12)
 
 | Gate | Target | Old prototype for comparison |
