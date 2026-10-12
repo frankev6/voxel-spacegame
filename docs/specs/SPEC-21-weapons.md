@@ -370,7 +370,7 @@ namespace Game.Simulation.Weapons
 ```csharp
 namespace Game.Simulation.Weapons
 {
-    /// <summary>One released round / pellet / pulse this tick (64 bytes). Implements SPEC-21 §4.6c.</summary>
+    /// <summary>One released round / pellet / pulse this tick (80 bytes). Implements SPEC-21 §4.6c.</summary>
     public struct WeaponShot
     {
         public Entity Weapon, Grid, Instigator, Target;   // Target = ShipTarget for homing deliveries, else Null
@@ -690,8 +690,8 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 - **Milestone:** M1
 - **Tier:** standard — transcribes the exact code of §4 (bodies throw `NotImplementedException`, except `Allegiance`, `FactionRelations.Get/IsHostile/CreateDefault/Dispose`, `ProjectileStore` one-liners)
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`, `DMG-001`, `FLT-001`
-- **Do:** Create every type of §4.1–§4.6 and §5.9's public types in the folders of decision 15. `WeaponDefinition` references SPEC-63's `FxDefinition` and SPEC-64's `AudioCueDefinition`; if they do not exist yet, create them as empty `ContentDefinition` subclasses with a `// TODO(VFX-001)` / `// TODO(AUD-001)` note (their tasks fill them).
-- **Files:** `Assets/Game/Data/Components/OwnedBy.cs`; `Assets/Game/Data/Definitions/Weapons/{WeaponDelivery,ProjectileVisual,WeaponFireGroups,WeaponDefinition,WeaponTuningDefinition}.cs`; `Assets/Game/Simulation/{Allegiance,FactionStance,FactionRelations,CombatGridSetup}.cs`; `Assets/Game/Simulation/Weapons/{WeaponDef,WeaponDefsBlob,WeaponDefsRef,WeaponTuning,WeaponContent,WeaponMount,WeaponAim,WeaponState,BeamState,WeaponAimMode,WeaponControl,ShipTarget,ProjectileFlags,ProjectileRow,ProjectileStore,ProjectileStoreStats,HitKind,CombatHit,CombatHitTest}.cs`
+- **Do:** Create every type of §4.1–§4.6 (including §4.6c shots/delivery data; §4.6b ShipDestroyed belongs to WPN-017), §4.7 tuning and §5.9's public types in the folders of decision 15. `WeaponDefinition` references SPEC-63's `FxDefinition` and SPEC-64's `AudioCueDefinition`; if they do not exist yet, create them as empty `ContentDefinition` subclasses with a `// TODO(VFX-001)` / `// TODO(AUD-001)` note (their tasks fill them).
+- **Files:** `Assets/Game/Data/Components/OwnedBy.cs`; `Assets/Game/Data/Definitions/Weapons/{WeaponDelivery,ProjectileVisual,WeaponFireGroups,WeaponDefinition,WeaponDeliveryData,WeaponTuningDefinition}.cs`; `Assets/Game/Simulation/{Allegiance,FactionStance,FactionRelations,CombatGridSetup}.cs`; `Assets/Game/Simulation/Weapons/{WeaponDef,WeaponDefsBlob,WeaponDefsRef,WeaponTuning,WeaponContent,WeaponMount,WeaponAim,WeaponState,BeamState,WeaponAimMode,WeaponControl,ShipTarget,WeaponStats,WeaponShot,WeaponShots,ProjectileFlags,ProjectileRow,ProjectileStore,ProjectileStoreStats,HitKind,CombatHit,CombatHitTest}.cs`
 - **Acceptance criteria:**
   - [ ] Compiles; components unmanaged; `ProjectileRow` is 64 bytes (`UnsafeUtility.SizeOf`).
   - [ ] `FactionRelations.CreateDefault`: 0↔1 hostile, 2 neutral, diagonal friendly.
@@ -901,6 +901,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 | 8 | SPEC-72 MIG-009 writes the §4.9 values (not the unit-converted legacy values) | **Applied** in SPEC-72 §4.6, MIG-009 (2026-10-09). Yes | SPEC-72 |
 | 9 | Should hulks be targetable with `TargetNext`? | No (only hostile ships and stations); `TargetUnderCursor` can pick anything | Owner |
 | 10 | Point defence against projectiles (review X12): projectiles are rows, not in the spatial hash, and have no HP; point-defence guns can target grids (including small craft) today | v1 has no point defence against missiles. When needed: a per-tick uniform grid over `ProjectileStore` rows flagged `Targetable` (flag reserved now), a PD delivery handler (§4.6c) that tests it, and a row HP or kill-on-hit rule | Owner (when a PD weapon is designed) |
+| 11 | WPN-001 references SpatialHash before AI-001 (which depends on WPN-001), and the task file list predates WeaponStats / delivery shots | **Resolved (2026-10-12):** include WeaponStats, WeaponShot, WeaponShots and WeaponDeliveryData from the existing data model; stage only the canonical Game.Simulation.Spatial.SpatialHash type identity with TODO(AI-001), so the exact CombatHitTest signature compiles without inventing another API. AI-001 fills that shell. FxDefinition uses the task's prescribed TODO(VFX-001) shell. ShipDestroyed remains WPN-017. WeaponShot's existing fields occupy 80 bytes, not its stale 64-byte comment; ProjectileRow remains 64 bytes. No fields, namespaces or runtime algorithms changed. | Tech lead |
 
 ## 11. References
 
