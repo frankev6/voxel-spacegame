@@ -917,12 +917,12 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - **Do:** Implement `DamageResolveSystem` steps 1–5 of §5.3 (Gather, stable Sort, Plan with pending-detach merge, Resolve per range with the detach pass, Flatten with single-threaded `BrickDirty` enabling), `PendingImpulse` accumulation, `GridDamageStats`, `Revision`, profiler markers.
 - **Files:** `Assets/Game/Voxel/Damage/Systems/DamageResolveSystem.cs`, `Assets/Game/Voxel/Damage/Jobs/{GatherDamageJob,SortDamageJob,PlanGridRangesJob,ResolveGridJob,FlattenRemovedJob}.cs`, `Assets/Game/Tests/EditMode/Voxel/Damage/DamageResolveSystemTests.cs`
 - **Acceptance criteria:**
-  - [ ] The same 2,000 events on 10 grids, fed in 3 different stream orders and with worker counts 1 and max, yield an identical `CellStateHasher` hash and identical `Removed` lists.
-  - [ ] Pending detach entries are applied before the tick's events.
-  - [ ] Each grid's `Revision` increases by exactly 1 in a tick with changes and 0 otherwise.
-  - [ ] No `Complete()` call in the system (code review + `ConventionsGuardTests`).
-  - [ ] Events on a grid with `DamageImmune` change no cell, add no `PendingImpulse` and count in `EventsDropped`.
-  - [ ] After a tick in which grid G took damage from sources A then B (resolver order), `LastDamageSource == B` and `LastDamageTick == Tick`.
+  - [x] The same 2,000 events on 10 grids, fed in 3 different stream orders and with worker counts 1 and max, yield an identical `CellStateHasher` hash and identical `Removed` lists.
+  - [x] Pending detach entries are applied before the tick's events.
+  - [x] Each grid's `Revision` increases by exactly 1 in a tick with changes and 0 otherwise.
+  - [x] No `Complete()` call in the system (code review + `ConventionsGuardTests`).
+  - [x] Events on a grid with `DamageImmune` change no cell, add no `PendingImpulse` and count in `EventsDropped`.
+  - [x] After a tick in which grid G took damage from sources A then B (resolver order), `LastDamageSource == B` and `LastDamageTick == Tick`.
 - **Tests:** `DamageResolveSystemTests.DamageImmune_NoCellChange`, `.LastDamageSource_IsLastApplied`, `DamageResolveSystemTests.Results_IndependentOfStreamOrderAndWorkers`, `.DetachPass_RunsBeforeEvents`, `.Revision_BumpsOncePerTick`, `.DroppedEvents_AreCounted`, `.PendingImpulse_AccumulatesWithTick`.
 
 ### DMG-007 — ImpactEventSystem (rams and knockback)
@@ -1123,6 +1123,8 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 | 26 | Bound the staged whole-grid integrity flood before DMG-008/009 | MaxFullFloodCells = 16384; retain deferred seeds and warn once per grid | Tech lead | Resolved FND-020 review / ADR-0057, citing architecture §11.1: preflight occupied counts before flooding, count IntegritySizeDeferred, and keep work queued until under cap or replaced by the hybrid implementation. Single-pass label/slot buckets preserve canonical masks. |
 
 | 27 | Radius-3 / 400-damage crater cannot demonstrate fewer removals from occlusion; Burst warning scope | Keep the 400-damage symmetry check; use 1600 for the shielding comparison; warn once per resolver lifetime | Tech lead | Resolved DMG-005: with 100 HP hull and a cell-centred blast, 400 damage removes the 19 immediate cells; DDA has no strictly intermediate cells on those rays, so shielding cannot reduce removals. The 1600-damage comparison reaches the next layer and tests pre-event HP occlusion. CellWriter reports clamping; the serial resolver emits one Burst-safe warning per world-owned resolver lifetime using native state (no managed hot-path state). Sub-half-cell blasts force Penetration = 1 as specified. |
+
+| 28 | Deferred range count versus fixed-count event channel; hasher dependency; restore scope | Per-range temporary streams, serial channel publication, bring forward hasher, keep repair pass in DMG-019 | Tech lead | Resolved DMG-006: plan determines range count in a job; deferred stream construction and IJobParallelForDefer avoid a fixed-step completion. Flatten publishes reactor requests in canonical range order into the existing one-index Explosion channel; no API change. CellStateHasher is brought forward from DMG-014 for the explicitly required determinism check; that task still owns the integrated 600-tick scenarios. DMG-019 explicitly owns restoration, its budgets and nine tests; DMG-006 leaves a task-ID marker at that pass. ComputeGridHash hashes kind/bounds, logical cell bytes and instance block/function HP; ComputeWorldHash adds persistent IDs and live chunk totals, as §5.8. Independent test Worlds reuse entity indices with different versions; removed-list comparisons first validate live handles and normalize grid references by PersistentId, then compare every payload field exactly. |
 
 ## 11. References
 

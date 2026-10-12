@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 83 | 0 | 0 | 0 | 6 | 0 | 89 | 10 |
+| M2 | 82 | 1 | 0 | 0 | 6 | 0 | 89 | 9 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -231,7 +231,7 @@
 | DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | no | todo |  |  |  | partial in FND-020: all pieces temporarily use hulk grids / chunk pool, colliders, lifetime and required tests |
 | DMG-012 | Hulk grids from splits | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-011, FND-001, SPEC-12 | no | todo |  |  |  | partial in FND-020: hulk cells/instances, bodies and functional transfer / remaining lifecycle, integration and required tests |
 | DMG-013 | ShipDeathSystem, despawn dissolve and the destroy pass | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-012 | no | todo |  |  |  | partial in FND-020: initial core-loss and destroyed-instance cleanup / despawn dissolve, final death presentation and required tests |
-| DMG-014 | Determinism hash and frame-rate determinism tests | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-013, TST-001 | no | todo |  |  |  |  |
+| DMG-014 | Determinism hash and frame-rate determinism tests | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-013, TST-001 | no | todo |  |  |  | partial in DMG-006: CellStateHasher / integrated 600-tick frame-rate and worker-count scenarios |
 | DMG-015 | Regression scenarios R25/R26 and soak | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014 | no | todo |  |  |  |  |
 | DMG-016 | Performance gates | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-014 | no | todo |  |  |  |  |
 | DMG-017 | Harness commands | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014, DEV-001 | no | todo |  |  |  |  |
@@ -312,7 +312,7 @@
 | PERS-015 | Full-world round trip with all real participants | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-011, PERS-012, SPEC-01, SPEC-30, SPEC-31, SPEC-33, SPEC-40, SPEC-41, SPEC-42, SPEC-50 | no | todo |  |  |  |  |
 | VOX-020 | Incremental grid edits for the editor preview | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M3 | frontier | VOX-014 | yes | todo |  |  |  |  |
 | PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | yes | todo |  |  |  |  |
-| DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | no | todo |  |  |  |  |
+| DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | no | todo |  |  |  | partial in DMG-002: channels/contracts and readback / impulse consumer and bounded heal/place passes with nine required tests |
 | AI-013 | Fleet data and formations | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-003 | no | todo |  |  |  |  |
 | AI-014 | FleetSystem and member thinking | [SPEC-23](specs/SPEC-23-ai.md) | M3 | frontier | AI-013, AI-007 | no | todo |  |  |  |  |
 | AI-015 | Fleet and swarm scenario and performance | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-014 | no | todo |  |  |  |  |
@@ -767,6 +767,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 187 | 2026-10-12 | SPEC-02 Q16 | Event streams may await the next simulation tick beyond TempJob frame lifetime | Persistent stream allocation, ADR-0056 | Tech lead | Resolved: retain explicit channel disposal/fences; no event-order or API change and no fixed-step sync point. |
 | 188 | 2026-10-12 | SPEC-13 Q26 / architecture §11.1 | Bound the staged full-grid integrity pass | 16384 occupied cells; queued seeds and once-per-grid warning | Tech lead | Resolved ADR-0057: DamageConfig.MaxFullFloodCells guards before flood allocation; IntegritySizeDeferred counts skips. DMG-008/009 own the replacement. |
 | 189 | 2026-10-12 | SPEC-13 Q27 / DMG-005 | Blast occlusion test geometry and warning scope | Preserve 400-damage symmetry; use 1600 damage to reach shielded cells; warn once per resolver lifetime using native state | Tech lead | Resolved DMG-005; no owner gate |
+| 190 | 2026-10-12 | SPEC-13 Q28 / DMG-006 | Deferred range outputs, hasher dependency and repair scope | Per-range native streams; canonical serial explosion publication; bring forward CellStateHasher; repair pass remains DMG-019 | Tech lead | Resolved; no public API change, fixed-step completion or owner gate |
 
 ## Measurements
 
@@ -876,6 +877,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DMG-006 canonical per-grid damage pipeline — astra (gpt-6)
+
+1. **Implemented:** Gather validates events (including non-finite fields and incomplete spawning grids), stable Sort includes gather position, Plan merges event and detach-only ranges, Resolve runs one exclusive grid per worker, and Flatten publishes removals/touches/destroys/explosions in canonical range order. Only Flatten enables BrickDirty bits or adds cross-grid counters. Per-range streams and scratch lists retain disposal handles; no fixed-step Complete, new assembly reference, public API change or extra cell writer. Pending impulses, source/instigator stats and single revision increments are maintained.
+2. **Determinism/functional evidence:** focused resolver + blast tests **10 passed** (seven new required resolver cases, three existing blast cases). Six runs of **2,000 events / 10 grids / 3 stream orders / 1 and 17 workers** give hash **8620D17719A337C1** and the same **500 removed-cell records**, comparing every field after checking current entity handles and normalizing grid identity by PersistentId. World recreation changes Entity versions; it does not change logical grid identity. Detach-only ranges, detach-before-hit, immunity, dropped-event counts/warnings, last applied source, once-per-tick revisions, dirty-bit publication and impulse reset/accumulation pass. Final compile has zero CS warnings; full EditMode **807 passed, 0 failed, 1 skipped** (exit 0). Full PlayMode **116 passed, 0 failed, 29 skipped** (exit 0), including all four production firing-range scenarios. No C#/Burst compilation errors; docs check clean. Pre-existing QualitySettings change is preserved and excluded; Git stayed local.
+3. **Scope/decisions:** Q190 / SPEC-13 Q28 explains deferred stream construction and serial forwarding into the existing Explosion channel. CellStateHasher is brought forward for this task's specified check; DMG-014 keeps the full 600-tick integrated scenarios. Repair gathering, cell writes and budgets remain DMG-019 with a TODO at the exact insertion point. Controls, Nocturne, station and Space fire are unchanged. **spec-required: 7, extra: 0**; **zero optimization passes**, no task-specific perf gate. Evidence: `Logs/playtest/dmg006/`. Next: DMG-007 ramming and next-tick knockback.
 
 ### 2026-10-12 — DMG-005 point/blast and instance damage — astra (gpt-6)
 
