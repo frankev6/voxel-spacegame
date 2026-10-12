@@ -753,6 +753,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 176 | 2026-10-12 | SPEC-70 DEV-007 | Coroutine parameterization and unimplemented draft vocabulary | Native UnityTest ValueSource; header-only draft inspection | Tech lead | Resolved SPEC-70 Q23: one sorted case per smoke/regression file, drafts ignored before resolving steps, active cases use strict parser/real runner and the specified frame bound. |
 | 177 | 2026-10-12 | SPEC-70 DEV-019 | Future editor input cannot yet be exercised | Keep explicit draft activation prerequisites | Tech lead | Resolved SPEC-70 Q24: provisional viewport clicks, refund text, changed paint colour and Ark leave option must be bound by owning systems before activation. Parse-only fixtures expose only declared future vocabulary; no production stubs. R30 verifies return target identity and both entry rings. |
+| 178 | 2026-10-12 | SPEC-05 PERS-019 | Four native Fleet snapshots leaked on Play exit while quit-save awaited thumbnails | Track ownership until worker claims the capture | Tech lead | Resolved SPEC-05 Q29: synchronous waiting-snapshot disposal, exclusive worker handoff, no post-disposal completion/quit callback. Tracked stacks in Logs/playtest/m1-review/tracked-editor.log identify all four allocations. |
 
 ## Measurements
 

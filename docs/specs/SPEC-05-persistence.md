@@ -771,6 +771,7 @@ Fixtures live in `Assets/Game/Tests/EditMode/Persistence/Fixtures/` as `.sav.byt
 | IDPL overflow (> 65,535 IDs) | `SaveFormatException` from the participant → `ParticipantFailed` |
 | VOXS with unknown block | `block_missing`, recorded unresolved |
 | VOXS truncated / malformed | `TryDecode` false; owning participant falls back (FLET: rebuild from the blueprint; GLXY: drop the delta) and logs |
+| Dispose while a captured save awaits thumbnail frames | Release waiting snapshots synchronously; a worker that already claimed a capture retains ownership through encoding. No later completion/quit callback from the disposed service (Q29). |
 | Enter Play Mode without domain reload | `SaveService` holds no statics; `wantsToQuit` handler removed in `Dispose` |
 
 ## 8. Performance budget
@@ -1071,6 +1072,8 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 | 27 | Session writebacks miss direct autosaves; thumbnail DTO cannot represent pending readback | Explicit preparation hook and bounded pending thumbnails | Tech lead | Resolved FND-009 / ADR-0034: PrepareCapture before every participant, then at most two frame yields for Pending thumbnails before background serialization. Failures preserve files; late GPU resources remain producer-owned. |
 
 | 28 | Participants can recover a record but cannot append a warning to the active load report | Scoped warning callback, preserving ISaveParticipant | Tech lead | Resolved FND-010 / ADR-0036: ReportRestoreWarning appends only during synchronous Restore; try/finally clears the scope, nested restores are rejected, and ordinary completion includes warnings in its report/count. |
+
+| 29 | Play exit invokes quit-save but may stop before thumbnail yields complete | Explicit capture ownership through worker handoff | Tech lead | Resolved PERS-019: Dispose releases waiting deferred snapshots synchronously under the same lock used by worker handoff. An already encoding worker retains sole ownership and finishes its atomic write; disposed services publish no completion or quit callback. Correct the observed Unity 6.6 Play-exit assumption in §5.9. |
 
 ## 11. References
 

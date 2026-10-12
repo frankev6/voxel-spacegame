@@ -33,6 +33,9 @@ namespace Game.Persistence.Services
         readonly Dictionary<string, byte[]> thumbnailCache = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         readonly List<object> queue = new List<object>();   // queue[0] is the running operation
         bool disposed, subscribedToQuit, quitApproved;
+        // PERS-019: protected until the background writer takes sole ownership. Dispose may run without another frame.
+        readonly object captureOwnership = new object();
+        readonly HashSet<CapturedSave> waitingCaptures = new HashSet<CapturedSave>();
         /// <summary>Quit routine's final step; tests replace it (Application.Quit does nothing in edit mode).</summary>
         internal Action QuitAction = UnityEngine.Application.Quit;
         /// <summary>Test hook (§5.4 step 13): runs after world.sav.tmp is written and before it replaces world.sav.</summary>
@@ -325,6 +328,7 @@ namespace Game.Persistence.Services
         /// <summary>§5.3 queue, then §5.4: capture on the main thread, serialize and write on a background thread, finish on the main thread.</summary>
         public async UnityEngine.Awaitable<SaveResult> SaveAsync(SlotRef slot, SaveReason reason, string displayName = null)
         {
+            if (disposed) return DisposedSave(slot);
             if (IsAutosave(reason) && IsBusy)                                         // §5.3 rule 1: the scheduler keeps it pending
                 return new SaveResult(false, SaveErrorKind.Blocked, SaveMessages.Blocked(SaveBlockReason.Transitioning), slot, 0, 0, 0);
             var ticket = new object();
@@ -334,24 +338,42 @@ namespace Game.Persistence.Services
                 RaiseCompleted(full, reason);
                 return full;
             }
+            CapturedSave captured = null;
             try
             {
-                while (queue.Count > 0 && queue[0] != ticket) await UnityEngine.Awaitable.NextFrameAsync();
-                var captured = CaptureNow(slot, reason, displayName);
+                while (!disposed && queue.Count > 0 && queue[0] != ticket) await UnityEngine.Awaitable.NextFrameAsync();
+                if (disposed) return DisposedSave(slot);
+                captured = CaptureNow(slot, reason, displayName);
                 SaveResult result;
                 if (captured.Failure.HasValue) result = captured.Failure.Value;
                 else
                 {
+                    lock (captureOwnership) waitingCaptures.Add(captured);
                     await FinishPendingThumbnailsAsync(captured);
+                    if (disposed) return DisposedSave(slot);
                     await UnityEngine.Awaitable.BackgroundThreadAsync();
-                    try { result = WriteCaptured(captured); }
+                    try
+                    {
+                        // The handoff is on the worker, so disposal also covers a queued continuation that never starts.
+                        bool ownsCapture;
+                        lock (captureOwnership) ownsCapture = waitingCaptures.Remove(captured);
+                        result = ownsCapture ? WriteCaptured(captured) : DisposedSave(slot);
+                    }
                     finally { await UnityEngine.Awaitable.MainThreadAsync(); }
                 }
-                FinishSave(captured, result);
+                if (!disposed) FinishSave(captured, result);
                 return result;
             }
-            finally { queue.Remove(ticket); }
+            finally
+            {
+                lock (captureOwnership)
+                    if (captured != null && waitingCaptures.Remove(captured)) captured.Release();
+                queue.Remove(ticket);
+            }
         }
+
+        static SaveResult DisposedSave(SlotRef slot)
+            => new SaveResult(false, SaveErrorKind.Blocked, SaveMessages.Blocked(SaveBlockReason.NoSession), slot, 0, 0, 0);
 
         /// <summary>§5.3 rules 2–3. False when the queue is full.</summary>
         bool Enqueue(object ticket, bool quit)
@@ -604,6 +626,11 @@ namespace Game.Persistence.Services
         {
             if (disposed) return;
             disposed = true;
+            lock (captureOwnership)
+            {
+                foreach (var captured in waitingCaptures) captured.Release();
+                waitingCaptures.Clear();
+            }
             if (subscribedToQuit) { UnityEngine.Application.wantsToQuit -= HandleWantsToQuit; subscribedToQuit = false; }
             OperationCompleted = null;
             participants.Clear();
@@ -693,7 +720,7 @@ namespace Game.Persistence.Services
         // ADR-0034: no pending producer is shared with the background writer after this boundary.
         internal async UnityEngine.Awaitable FinishPendingThumbnailsAsync(CapturedSave captured)
         {
-            for (int frame = 0; frame < 2 && HasPending(); frame++) await UnityEngine.Awaitable.NextFrameAsync();
+            for (int frame = 0; frame < 2 && !disposed && HasPending(); frame++) await UnityEngine.Awaitable.NextFrameAsync();
             if (captured.SlotThumbnail != null && (captured.SlotThumbnail.Pending || captured.SlotThumbnail.Rgba32 == null))
             { captured.SlotThumbnail = null; captured.Meta.Thumbnail = null; }
             for (int i = captured.ChangedThumbnails.Count - 1; i >= 0; i--)
@@ -877,7 +904,7 @@ namespace Game.Persistence.Services
         /// <summary>§5.9 quit: true approves the quit now; false starts a quit save, after which the routine quits itself.</summary>
         internal bool HandleWantsToQuit()
         {
-            if (quitApproved) return true;
+            if (disposed || quitApproved) return true;
             if (!HasActiveSessionContext || !CanSave(out var reason) || activeProfile.Value == null)
             {
                 CanSave(out reason);
@@ -895,10 +922,12 @@ namespace Game.Persistence.Services
             try
             {
                 var save = SaveAsync(NextAutosaveSlot(activeProfile), SaveReason.Quit).GetAwaiter();   // Quit jumps the queue (§5.3)
-                while (!save.IsCompleted && deadline.Elapsed.TotalSeconds < config.QuitSaveTimeoutSeconds) await UnityEngine.Awaitable.NextFrameAsync();
+                while (!disposed && !save.IsCompleted && deadline.Elapsed.TotalSeconds < config.QuitSaveTimeoutSeconds) await UnityEngine.Awaitable.NextFrameAsync();
+                if (disposed) return;
                 if (!save.IsCompleted) GameLog.Warn("Save", $"Quit save did not finish within {config.QuitSaveTimeoutSeconds} s; quitting anyway (the previous save is intact)");
             }
             catch (Exception e) { GameLog.Exception("Save", e, "quit save"); }
+            if (disposed) return;
             quitApproved = true;
             QuitAction?.Invoke();
         }

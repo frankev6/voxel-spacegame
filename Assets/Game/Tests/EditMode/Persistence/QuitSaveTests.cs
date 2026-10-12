@@ -88,5 +88,74 @@ namespace Game.Tests.EditMode.Persistence
             Assert.IsTrue(service.IsBusy, "the hanging save is still running");
             while (service.IsBusy && sw.Elapsed.TotalSeconds < 10) yield return null;   // let it finish before cleanup
         }
+
+        [UnityTest]
+        public IEnumerator DisposeDuringThumbnailWait_ReleasesImmediately()
+        {
+            participant.WithDeferred = true;
+            context.SlotThumbnail = new ThumbnailRequest { Key = "slot", Pending = true };
+            Assert.IsFalse(service.HandleWantsToQuit());
+            Assert.AreEqual(1, participant.Blocks.Count);
+            var block = participant.Blocks[0];
+            Assert.AreEqual(0, block.Disposes);
+            service.Dispose();
+            Assert.AreEqual(1, block.Disposes, "release cannot depend on another frame");
+            Assert.AreEqual(0, block.Encodes);
+            double deadline = UnityEngine.Time.realtimeSinceStartupAsDouble + 5;
+            while (service.IsBusy && UnityEngine.Time.realtimeSinceStartupAsDouble < deadline) yield return null;
+            Assert.IsFalse(service.IsBusy);
+            Assert.AreEqual(1, block.Disposes);
+            Assert.AreEqual(0, block.Encodes);
+            Assert.AreEqual(0, quits, "disposed quit routine cannot request application exit later");
+            Assert.IsFalse(File.Exists(AutoMeta));
+            Assert.IsTrue(service.HandleWantsToQuit());
+        }
+
+        sealed class GatedBlock : ISaveParticipant, ISaveDeferredBlock
+        {
+            public string Key => "TSTA";
+            public int Version => 1;
+            internal readonly System.Threading.ManualResetEventSlim Entered = new System.Threading.ManualResetEventSlim();
+            internal readonly System.Threading.ManualResetEventSlim Resume = new System.Threading.ManualResetEventSlim();
+            internal int Disposes;
+            public void Capture(SaveWriter writer) => writer.WriteDeferred(this);
+            public void Restore(SaveReader reader, int version) => throw new NotSupportedException();
+            public byte[] Encode()
+            {
+                Entered.Set();
+                if (!Resume.Wait(TimeSpan.FromSeconds(10))) throw new TimeoutException("test encoder was not released");
+                return new byte[] { 1, 2, 3 };
+            }
+            public void Dispose() => System.Threading.Interlocked.Increment(ref Disposes);
+        }
+
+        [UnityTest]
+        public IEnumerator DisposeDuringEncoding_WorkerOwnsSnapshot()
+        {
+            service.Dispose();
+            service = new SaveService(paths, null, null, new SaveServiceConfig(), TestRegistry);
+            service.AttachContext(context);
+            var block = new GatedBlock();
+            service.Register(block);
+            int completed = 0;
+            service.OperationCompleted += _ => completed++;
+            var pending = service.SaveAsync(new SlotRef(profile, new SlotId("manual_001")), SaveReason.Manual).GetAwaiter();
+            double deadline = UnityEngine.Time.realtimeSinceStartupAsDouble + 5;
+            try
+            {
+                while (!block.Entered.IsSet && UnityEngine.Time.realtimeSinceStartupAsDouble < deadline) yield return null;
+                Assert.IsTrue(block.Entered.IsSet, "worker reached encoding");
+                service.Dispose();
+                Assert.AreEqual(0, block.Disposes, "worker still owns its live encoding input");
+            }
+            finally { block.Resume.Set(); }
+            deadline = UnityEngine.Time.realtimeSinceStartupAsDouble + 5;
+            while (!pending.IsCompleted && UnityEngine.Time.realtimeSinceStartupAsDouble < deadline) yield return null;
+            Assert.IsTrue(pending.IsCompleted);
+            Assert.IsTrue(pending.GetResult().Success, "already owned write finishes atomically");
+            Assert.AreEqual(1, block.Disposes);
+            Assert.AreEqual(0, completed, "disposed service does not publish completion");
+            block.Entered.Dispose(); block.Resume.Dispose();
+        }
     }
 }
