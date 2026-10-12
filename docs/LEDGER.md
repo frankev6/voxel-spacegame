@@ -14,8 +14,8 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 13 | 0 | 1 | 0 | 94 | 0 | 108 | 8 |
-| M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 8 |
+| M1 | 12 | 0 | 1 | 0 | 95 | 0 | 108 | 7 |
+| M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 9 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -202,7 +202,7 @@
 | CAM-012 | Keep the imported player ship framed during fast close-zoom flight | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-005, FND-001 | yes | done | astra (gpt-6) | 2026-10-12 | 42287c3 | Bounds-aware focus keeps fast Fighter framed; live 53.39 m/s capture; Q154 |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
-| AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Pooled managed playback, UI cooldowns and stinger ducking |
+| AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | done | astra (gpt-6) | 2026-10-12 | b8521e9 | UI/cue playback and ducking; four tests pass, 0 B over 1000 UI calls |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | todo |  |  |  |  |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | no | todo |  |  |  |  |
 | DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0b4269c | Real launch/probes, isolated profile, live edit-mode launch 1.370 s; Q144–146 |
@@ -288,7 +288,7 @@
 | VFX-010 | Chunk-body dissolve hook | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, DMG-001 | no | todo |  |  |  |  |
 | VFX-011 | Quality levels and the settings hook | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | no | todo |  |  |  |  |
 | VFX-012 | Regression and budget tests (02-C29, GC, upload) | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-005, VFX-006, VFX-007 | no | todo |  |  |  |  |
-| AUD-006 | SfxEvent drain: coalescing, cooldown and voice allocation | [SPEC-64](specs/SPEC-64-audio.md) | M2 | frontier | AUD-005, TST-001 | no | todo |  |  |  |  |
+| AUD-006 | SfxEvent drain: coalescing, cooldown and voice allocation | [SPEC-64](specs/SPEC-64-audio.md) | M2 | frontier | AUD-005, TST-001 | yes | todo |  |  |  |  |
 | AUD-007 | Cue content, legacy import and the CombatAudioCues singleton | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006 | no | todo |  |  |  |  |
 | AUD-008 | Music director, crossfades and scene contexts | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006, FND-001 | no | todo |  |  |  |  |
 | AUD-009 | Loop voices: player engine and beams | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006, FLT-001, WPN-001 | no | todo |  |  |  |  |
@@ -844,6 +844,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — AUD-005 done — astra (gpt-6)
+
+- **Changed:** UI cues use eight existing voices round-robin, cached cue lookup, shared per-cue cooldowns and nonrepeating clip selection. PlayCue and the 2D PlayCueAt path route through existing pools and buses. Stingers replace the prior one-shot and duck both music voices from retained base gains, without multiplying settings/source attenuation repeatedly. Q166 / SPEC-64 Q15 records the staged allocator/director integration; spatial allocation remains AUD-006 and music direction AUD-008.
+- **Validation:** all four required PlayMode tests pass, including the ninth UI start stealing voice 0, shared enum/id cooldown, 2D cue routing, −8 dB (**0.398107**) duck factor after **0.2 s** supplied update time and restored base volumes after the **1 s** release. **0 B managed allocations over 1,000 warmed PlayUi calls**, also passed in the separate Performance-category run. Perf wrapper has no matching EditMode test or PerfRun JSON for this allocation assertion; its passing PlayMode result is retained. No optimization passes.
+- **Full suites:** compile zero C# warnings; EditMode **749 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4199 ms** vs 3, MeshBuild128 **1.0917 ms** vs 0.5); headless PlayMode **99 passed, 16 GPU skips**. Evidence `Logs/playtest/aud005/`; docs clean.
+- **Boundary / next:** clips in tests are in-memory silent test data, not production assets. Null-config boot remains silent until AUD-007 registers cue content; no audible gameplay claim. No owner decision or new art. DEV-015 console next, then remaining M1 integration/review; performance gaps remain deferred.
 
 ### 2026-10-12 — REN-014 done — astra (gpt-6)
 
