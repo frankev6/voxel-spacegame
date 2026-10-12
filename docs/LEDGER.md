@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 2 | 1 | 1 | 0 | 104 | 0 | 108 | 0 |
+| M1 | 2 | 0 | 1 | 0 | 105 | 0 | 108 | 1 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -204,13 +204,13 @@
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | done | astra (gpt-6) | 2026-10-12 | bd35dac | Four scenes listener-free; same listener across real flow; mutation proven |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | done | astra (gpt-6) | 2026-10-12 | b8521e9 | UI/cue playback and ducking; four tests pass, 0 B over 1000 UI calls |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | done | astra (gpt-6) | 2026-10-12 | 8879cfa | 19 clips: 2 Blocked, 17 Unverified; release guard and four tests |
-| DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Automatic smoke/regression cases through production boot and scenario runner |
+| DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | yes | done | astra (gpt-6) | 2026-10-12 | 8f8adc3 | Automatic file cases; live Boot smoke passes, added active case discovered, future-command draft ignored (Q176) |
 | DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0b4269c | Real launch/probes, isolated profile, live edit-mode launch 1.370 s; Q144–146 |
 | DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | blocked | astra (gpt-6) | 2026-10-12 |  | Needs implemented FND-012 and SPEC-30/31 coordinates; contract-only Ready is premature (Q155) |
 | DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | no | todo |  |  |  |  |
 | DEV-015 | In-game dev console | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-003, UI-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 8cf2df1 | F1 console; history/completion, async results, 0 B closed; ADR-0049 |
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | yes | done | astra (gpt-6) | 2026-10-12 | f1f6cd2 | Console/CLI replay; real seed-7 Fighter 300 ticks, 0 m error; live 1790-tick recording and screenshot; Q175 |
-| DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | no | todo |  |  |  |  |
+| DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | yes | todo |  |  |  |  |
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 9349e78 | Sparse text recorder/replay; five required tests; even-tick 30/60/144 commands match |
 | TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | done | astra (gpt-6) | 2026-10-12 | 1392d35 | Real Boot/flow fixture; four tests; temp saves/settings and unchanged real profile timestamps |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-12 | a56c266 | Full pipeline: 15-frame readiness, idle 0.224481 ms; total memory performance deferred (Q174); zero tuning |
@@ -750,6 +750,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 175 | 2026-10-12 | SPEC-70 DEV-016 | Absolute recording ticks and absent universe position prevent literal M1 replay acceptance | Shift the recording clock; compare real local flight position | Tech lead | Resolved SPEC-70 Q22: existing cmdrec text in `.pcr`, bounded stems, session-bound playback. Test real seed-7 Fighter input/physics for 300 exact ticks; extend local-position comparison to canonical UniversePosition when SPEC-30/31 exists. No fabricated coordinates or alternate spawner. |
 
+| 176 | 2026-10-12 | SPEC-70 DEV-007 | Coroutine parameterization and unimplemented draft vocabulary | Native UnityTest ValueSource; header-only draft inspection | Tech lead | Resolved SPEC-70 Q23: one sorted case per smoke/regression file, drafts ignored before resolving steps, active cases use strict parser/real runner and the specified frame bound. |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
@@ -858,6 +860,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DEV-007 done — astra (gpt-6)
+
+- **Changed:** ScenarioFileTests discovers sorted smoke/regression file stems as native UnityTest ValueSource cases, inherits the real GameFlowFixture, parses active scripts against the actual host and runs ScenarioRunner to completion. It prints/asserts the JSON artifact and imposes the requested timeout × 60 frame bound alongside the runner’s real-time limit. Draft headers are parsed before their future vocabulary is resolved; production parsing remains strict. SPEC-70 Q23 / ledger Q176; implementation `8f8adc3`.
+- **Acceptance evidence:** adding two temporary files without changing code yields **2 passed, 1 ignored**: the new active file and canonical smoke_boot pass; the draft with unknown future command/probe is ignored with reason `draft`. The intentionally failing negative-tag fixture stays excluded. Temporary inputs are copied to Logs then removed; rerunning canonical files gives **1 passed**, with a real Boot/MainMenu and one listener. Result JSON paths are in `Logs/playtest/dev007/discovery.xml` and `canonical.xml`.
+- **Checks:** compile zero C# warnings; full EditMode **765 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4491 ms** vs 3; MeshBuild128 **1.0483 ms** vs 0.5). No runtime/boot/flow code changed; targeted PlayMode covers the new file cases, and the latest full PlayMode remains DEV-016’s **105 passed, 3 advisory timing misses, 23 GPU skips**. Docs clean. Zero tuning; no new art or owner decision.
+- **Next:** DEV-019 six draft regressions, then built M1 system review and M2 combat. Preserve DEV-009/012’s documented future-system dependencies and the existing shutdown-allocation review item.
 
 ### 2026-10-12 — DEV-016 done — astra (gpt-6)
 
