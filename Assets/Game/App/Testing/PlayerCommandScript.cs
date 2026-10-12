@@ -52,6 +52,16 @@ namespace Game.App.Testing
             return tick < StartTick || high < 0 ? default : changes[high].Command;
         }
         internal void Begin(uint tick) { fixedStart = true; StartTick = EndTick = tick; }
+        // DEV-016: a new session can finish spawning at a different tick. Preserve durations and sparse changes.
+        internal PlayerCommandScript AtStart(uint tick)
+        {
+            var shifted = new PlayerCommandScript { seed = seed, content = content };
+            shifted.Begin(tick);
+            uint end = checked(tick + (EndTick - StartTick));
+            foreach (var change in changes) shifted.Set(checked(tick + (change.Tick - StartTick)), change.Command);
+            shifted.Finish(end);
+            return shifted;
+        }
         internal void Finish(uint tick)
         {
             EndTick = Math.Max(StartTick, tick);

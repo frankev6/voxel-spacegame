@@ -576,7 +576,7 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Do:** Commands `record start|stop|save name=` (files in `TestData/Replays/<name>.pcr`), `replay name=` (Pending until the script ends); CLI `gh_record`, `gh_replay`.
 - **Files:** `Assets/Game/App/DevRuntime/Commands/{RecordDevCommand,ReplayDevCommand}.cs`, `Assets/Game/DevTools/Editor/Commands/ReplayCliCommands.cs`
 - **Acceptance criteria:**
-  - [ ] Record 300 ticks of flying after `newgame seed=7`, replay after a fresh `newgame seed=7`: player `UniversePosition` after 300 ticks equal within 1e-4 m.
+  - [ ] Record 300 ticks of flying after `newgame seed=7`, replay after a fresh `newgame seed=7`: player local position after exactly 300 ticks equal within 1e-4 m in M1 (Q22). Extend the same check to canonical `UniversePosition` when SPEC-30/31 implements it.
 - **Tests:** `ReplayCommandTests.RecordReplay_SamePosition` (PlayMode).
 
 ### DEV-017 — inv, give and facts commands
@@ -653,6 +653,8 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 | 20 | DEV-009 contract dependencies are ready, but its required ShipSpawnService and universe coordinates are absent | Block the complete command task until the canonical services exist; continue ready prerequisites | Tech lead | Resolved dependency audit: DEV-009 needs implemented FND-012 plus FrameOrigin/UniversePosition and current-system state from SPEC-30/31. Do not replace ShipSpawnService with dev-owned spawn logic, silently ignore AI/allegiance, or invent zero universe coordinates. Keep all original command scope and acceptance criteria. Ledger status is blocked even if contract-only Ready is yes; revisit after the canonical services land. |
 
 | 21 | Console requires code-built UI while UIRoot requires assets, and teleport is still blocked in DEV-009 | Opt-in programmatic view; complete only registered commands | Tech lead | Resolved ADR-0049 / DEV-015: canonical base is UIScreen. Host owns toggle/subscription/pending completion; navigator owns context. A test-only teleport entry verifies the specified completion example without advertising an unavailable production command. |
+
+| 22 | Replay files use a different suffix, absolute script ticks and a position type not implemented in M1 | Preserve SPEC-71 text, shift only the tick origin, compare existing local position | Tech lead | Resolved DEV-016: `.pcr` files contain the existing `cmdrec 1` format; file stems are bounded and cannot escape TestData/Replays. Playback shifts sparse ticks to the current clock without changing their spacing, stays Pending until the exclusive end, and cancels on session change/timeout. M1 acceptance runs the actual boot, seed-7 imported Fighter, input sampler and physics for exactly 300 ticks and compares LocalTransform position; canonical universe position remains a SPEC-30/31 follow-up, never synthesized. The deterministic acceptance uses one fixed tick per input frame; this is not a guarantee for arbitrary catch-up/frame schedules (SPEC-71 Q8). |
 
 ## 11. References
 

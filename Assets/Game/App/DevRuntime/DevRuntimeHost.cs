@@ -46,6 +46,7 @@ namespace Game.App.DevRuntime
         public DevUiQuery Ui { get; private set; }
         public DevEventCounter Events { get; private set; }
         internal Game.App.DevRuntime.Console.DevConsole Console { get; private set; }
+        internal Commands.FlightReplaySession Replay { get; private set; }
         public static DevRuntimeHost Create(Transform parent)
         {
             var root = new GameObject("DevRuntimeHost");
@@ -58,6 +59,7 @@ namespace Game.App.DevRuntime
                 host.Input = new DevInputInjector();
                 host.Ui = new DevUiQuery();
                 host.Context = new DevContext(host);
+                host.Replay = new Commands.FlightReplaySession();
                 host.Commands = DevCommandRegistry.CreateDefault();
                 host.Probes = Scenarios.ScenarioProbeRegistry.CreateDefault();
                 return host;
@@ -116,6 +118,7 @@ namespace Game.App.DevRuntime
             foreach (var scenario in scenarios) scenario.Abort("play mode exited");
             scenarios.Clear();
             Console?.Dispose();
+            Replay?.Dispose();
             Context?.Dispose();
             Input?.Dispose();
             Events?.Dispose();
