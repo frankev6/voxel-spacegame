@@ -491,7 +491,7 @@ Timing tests run with safety checks off (SPEC-71 perf fixture). Functional tests
 - **Do:** EditMode test that opens each scene of the build list (`Boot`, `MainMenu`, `World`, `BlueprintLab`) with `EditorSceneManager.OpenScene(..., Additive)` and asserts it contains no `AudioListener`. PlayMode test: boot → MainMenu → World → BlueprintLab → MainMenu through `SceneFlow`; after each transition exactly one enabled `AudioListener` exists and no log line contains "There are no audio listeners".
 - **Files:** `Assets/Game/Tests/EditMode/Presentation/Audio/AudioListenerSceneTests.cs`, `Assets/Game/Tests/PlayMode/Presentation/Audio/AudioListenerFlowTests.cs`
 - **Acceptance criteria:**
-  - [ ] Both tests pass; adding an `AudioListener` to any scene makes the EditMode test fail with the scene name.
+  - [x] Both tests pass; adding an `AudioListener` to any scene makes the EditMode test fail with the scene name.
 - **Tests:** `AudioListenerSceneTests.Scenes_ContainNoAudioListener`, `AudioListenerFlowTests.SceneTransitions_ExactlyOneListener_NoWarnings`.
 
 ### AUD-005 — UI sounds, PlayCue and stingers
