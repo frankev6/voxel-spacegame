@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 23 | 0 | 0 | 0 | 83 | 0 | 106 | 15 |
+| M1 | 22 | 0 | 1 | 0 | 83 | 0 | 106 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -204,7 +204,7 @@
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | todo |  |  |  |  |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | no | todo |  |  |  |  |
 | DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0b4269c | Real launch/probes, isolated profile, live edit-mode launch 1.370 s; Q144–146 |
-| DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |  |
+| DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | blocked | astra (gpt-6) | 2026-10-12 |  | Needs implemented FND-012 and SPEC-30/31 coordinates; contract-only Ready is premature (Q155) |
 | DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | no | todo |  |  |  |  |
 | DEV-015 | In-game dev console | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-003, UI-001, INP-001 | yes | todo |  |  |  |  |
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | no | todo |  |  |  |  |
@@ -722,6 +722,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 152 | 2026-10-12 | SPEC-60 UI-004 / HUD-002 | M3 scene roots are absent during navigator handover | Temporary roots and App navigation adapter | Tech lead | Resolved SPEC-60 Q16 / ADR-0047: remove direct input writer, retain flight/pause via navigator; HUD-002 replaces adapter/views. |
 | 153 | 2026-10-12 | SPEC-60 UI-005 | Screen.height is Editor-window sized inside ECS input sampling | Flip Y in the actual panel space | Tech lead | Resolved SPEC-60 Q17: live HUD click leaked into fire; use panel height after ScreenToPanel, and test against independent viewport dimensions. |
 | 154 | 2026-10-12 | SPEC-62 CAM-012 | Distance-only look-ahead does not keep the hull framed | Clip output focus using solid bounds and camera frustum | Tech lead | Resolved SPEC-62 Q15: preserve filter state and requested zoom/orbit; center deliberate close inspection; internal bounds handoff, no public contract change. |
+| 155 | 2026-10-12 | SPEC-70 DEV-009 | Contract-only Ready omits absent ship-spawn and universe services | Keep full scope blocked until canonical prerequisites exist | Tech lead | Resolved SPEC-70 Q20: FND-012 plus SPEC-30/31 coordinates/current-system state required; no alternate dev spawner or fabricated metadata. Continue WPN-001/AI-001 and other ready work. |
 
 
 
@@ -830,6 +831,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DEV-009 dependency audit — astra (gpt-6)
+
+- The task's contract dependencies are done, but its mandated `ShipSpawnService` (FND-012, M2), `Allegiance`/AI contracts and `FrameOrigin`/`UniversePosition`/current-star-system services do not exist. No runtime implementation was made and no acceptance criterion is claimed.
+- Resolved Q155 / SPEC-70 Q20: keep the complete task **blocked** on those canonical implementations, even though contract-only Ready remains yes. Do not bypass the spawn owner, ignore requested AI/allegiance, fabricate universe positions, or mark a local-only subset done. This does not block the active goal: WPN-001 is ready and opens AI-001, both prerequisites of FND-012; other M1 tasks are ready too.
+- Next: implement WPN-001, then continue the remaining M1 work. Revisit DEV-009 when the canonical spawner and coordinate services are available. Docs consistency passes; no Unity code changed.
 
 ### 2026-10-12 — CAM-012 done — astra (gpt-6)
 

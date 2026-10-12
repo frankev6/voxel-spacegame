@@ -43,7 +43,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 **Owner priority:** build playable, integrated slices; demonstrate them in the running game with screenshots. Performance targets are advisory, with at most two initial optimization passes per system across workers/handoffs. The first imported-ship rendering/flight/collision/save-load checkpoint has now been demonstrated.
 
-1. **DEV-009 next:** implement the ready spawn, teleport and grid/snapshot commands so multi-ship collision scenarios can be launched and inspected repeatably. Use existing imported blueprints; no new hull designs or assets. Camera framing at fast close zoom is now corrected and demonstrated.
+1. **WPN-001 next:** implement the ready weapon contracts, opening AI-001 and moving toward the canonical ship spawner/combat. DEV-009 was advertised ready but is now blocked: it needs implemented FND-012 and SPEC-30/31 coordinates/current-system state (Q155). Its full scope is preserved; no alternate dev spawner or fabricated universe metadata. Revisit when those services exist. Camera framing is corrected and demonstrated.
 2. **Continue ready M1 integration:** INP-004 held-key regression, UI-006 binding and UI-007 controls, rendering LOD/props and the remaining system review. UI-005 focus/pointer isolation is now complete. Preserve real flight/Escape behavior. Full HUD screens remain M3; HUD-002 must replace the temporary ADR-0047 adapter/views. ART-014 owns applying NOCTURNE tokens. Defer numeric misses.
 3. **Art track:** finish ART-007's validator when convenient, preserving owner-only art gates. No AI assets or unapproved new 3D hulls.
 
