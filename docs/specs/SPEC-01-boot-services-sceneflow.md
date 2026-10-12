@@ -881,12 +881,12 @@ If no save exists, "Load last save" is disabled.
 - **Tier:** frontier — F5: live integration of renderer, controls, physics, camera and save/load
 - **Depends on:** `FND-010`, `REN-001`, `INP-001`, `DEV-001`
 - **Do:** After the REN-011 and INP-005 implementations are done (before DEV-008, whose ready predicate needs Flight context), deliver the owner's 2026-10-12 playable-slice priority: use the existing imported Fighter as the temporary start blueprint (replacing Q7/Q19's four-cell ship_base default); apply DESIGN-GUIDE §4.1 lighting values to World; connect scene/pause input contexts while the future UI navigator is unavailable. Document the temporary context owner with an accepted ADR before changing that single-writer contract, and explicitly hand ownership to UI-004 when it lands. Exercise boot → imported player ship → real input → collision → save/load with the production renderer and camera, capture screenshots of the running game, and record any remaining limitations honestly. No new hulls or AI art.
-- **Files:** `Assets/Game/Scenes/World.unity`; `Assets/Game/Content/Config/config_game.asset`; `Assets/Game/App/Boot/{GameComposition,SceneInputContextBridge}.cs`; `Assets/Game/Tests/PlayMode/App/PlayableShipTests.cs`; `docs/HANDOFF.md`; `docs/LEDGER.md`
+- **Files:** `Assets/Game/Scenes/World.unity`; `Assets/Game/Content/Config/config_game.asset`; `Assets/Game/App/Boot/{GameComposition,SceneInputContextBridgeSystem,WorldLightingRig}.cs`; `Assets/Game/App/Flow/SceneFlow.cs` (ADR-0045 paused physics drain); `Assets/Game/Tests/PlayMode/App/PlayableShipTests.cs`; `docs/HANDOFF.md`; `docs/LEDGER.md`
 - **Acceptance criteria:**
-  - [ ] Imported ship hull and functional meshes visibly render in the running World with the production camera and documented lighting.
-  - [ ] W/S thrust, A/D turn, Q/E strafe, braking and camera orbit/zoom act through InputService; menus/loading/pause neutralize flight input.
-  - [ ] A real collider interaction is observed; save/load restores the imported ship's voxel data and usable camera/controls. Record pose/velocity persistence limits until their owning world-state spec is implemented.
-  - [ ] Screenshots (or a short recording) and before/after input evidence are supplied to the owner; no renderer test image is presented as gameplay.
+  - [x] Imported ship hull and functional meshes visibly render in the running World with the production camera and documented lighting.
+  - [x] W/S thrust, A/D turn, Q/E strafe, braking and camera orbit/zoom act through InputService; menus/loading/pause neutralize flight input.
+  - [x] A real collider interaction is observed; save/load restores the imported ship's voxel data and usable camera/controls. Record pose/velocity persistence limits until their owning world-state spec is implemented.
+  - [x] Screenshots (or a short recording) and before/after input evidence are supplied to the owner; no renderer test image is presented as gameplay.
 - **Tests:** `PlayableShipTests.Controls_MoveImportedShip`, `.SceneAndPause_NeutralizeFlight`, `.SaveLoad_RestoresImportedShip` (PlayMode); live GPU screenshots and collision observation supplement these functional tests.
 
 ## 10. Open questions
@@ -921,6 +921,10 @@ If no save exists, "Load last save" is disabled.
 | 22 | Missing/damaged SESS resets the allocation counter below ids surviving in FLET | Advance the counter past valid restored fleet ids before allocating any fallback | Tech lead | Resolved FND-010: the composition callback reserves through the highest valid FLET id, including a dropped record, while preserving any higher SESS counter. Repair clears outstanding grants and reports FND-W002 during participant restore. Missing, malformed and stale-low SESS cases are tested; no file-format or allocator-interface change. |
 
 | 23 | Sandbox entry resets the session before old World writeback, and its optional player/session defaults are unspecified | Reset between scenes under the normal operation reservation | Tech lead | Resolved FND-016: save/teardown precede sandbox reset; creative session, configured start fleet, zero times and seed 0 mapped to 1; campaign initializers do not run. IsSandbox is runtime state for GAL-008 to clear rather than generate the galaxy. SpawnPlayer=false suppresses only the live grid; new game/load/end reset that flag. Release builds return NotAllowed; DEV-008 owns harness dispatch. |
+
+| 24 | The first playable slice needs input before UI-004 and DEV-008 itself waits for Flight | Temporary sole scene context owner; execute FND-017 first | Tech lead | Resolved ADR-0044: current scene/pause sampled before player input; UI-004 removes fallback. Existing Fighter is the temporary starter; approved lights track camera yaw. FLET restores ship data, not pose/velocity until world-location persistence. |
+
+| 25 | Paused teardown leaves package-owned temporal-coherence cleanup entities and a stale physics world | Dispatch the existing physics initialization and end-fixed ECB once at zero delta after destruction | Tech lead | Resolved ADR-0045: no simulation tick, unpause, manual component removal or broadphase mutation. Production-world/live restart exposed this during FND-017. |
 
 ## 11. References
 

@@ -42,7 +42,7 @@ This spec builds the one UI stack of the game: a single `UIDocument` with fixed 
 1. **One `UIDocument`, one `PanelSettings`, one theme.** Owned by `UIRoot`, living on the `GameRoot` prefab (DontDestroyOnLoad). Reason: ADR-0005; no sorting-order integers.
 2. **Six layers, fixed order** under `#ui-root`: `layer-world`, `layer-hud`, `layer-screens`, `layer-modals`, `layer-toasts`, `layer-tooltip` (bottom to top). Toasts are always above screens and modals. Reason: 06-E2 (toasts hidden behind merchant).
 3. **`PanelSettings`:** `ScaleWithScreenSize`, reference 1920×1080, `MatchWidthOrHeight`, match 0.5, `scale` driven by the UI-scale setting (0.8–1.5). Reason: R7/E7 (1200×800 width-match compressed layouts).
-4. **`UINavigator` is the single owner of navigation, UI pause tokens and the input context.** No other code calls `InputService.SetContext` (architecture §8). Screens never show/hide themselves.
+4. **`UINavigator` is the single owner of navigation, UI pause tokens and the input context.** No other code calls `InputService.SetContext` (architecture §8). Until UI-004, ADR-0044 gives sole ownership to SceneInputContextBridgeSystem; UI-004 must unbind/remove it before enabling navigator ownership. Screens never show/hide themselves.
 5. **Root screens.** Each scene has exactly one root screen at the bottom of the stack (`MainMenuView`, `FlightHudView`, `ShipEditorView`, SPEC-61). Only `SetRoot` installs a root; `Back()` never pops a root. Reason: removes the "base context" special case and B7/R13 (editor HUD left in the galaxy).
 6. **Esc is `Back()`, always**, via the Global map action `Back`. Screens never handle `NavigationCancelEvent` or Esc key events themselves.
 7. **Pause is derived, never set.** The navigator holds at most **one** `PauseToken` named `"UINavigator"` while any screen in the stack has `PausesSimulation == true`. Reason: 06-B4 (boolean pause).
@@ -775,7 +775,7 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 - **Milestone:** M1
 - **Tier:** frontier — F1/F5: single owner of navigation, pause and input context across all screens
 - **Depends on:** `UI-003`
-- **Do:** Implement `UINavigator` per §5.2 (build, Push, Pop, Back, SetRoot, Toggle, CloseAllAboveRoot, Sync, deferred queue, covering, HUD hiding) with `for` loops only.
+- **Do:** Remove/unbind the ADR-0044 SceneInputContextBridgeSystem fallback and its Escape pause token before this navigator takes input ownership. Implement `UINavigator` per §5.2 (build, Push, Pop, Back, SetRoot, Toggle, CloseAllAboveRoot, Sync, deferred queue, covering, HUD hiding) with `for` loops only.
 - **Files:** `Assets/Game/UI/Services/UINavigator.cs`
 - **Acceptance criteria:**
   - [ ] Every row of §7 that concerns the navigator holds.

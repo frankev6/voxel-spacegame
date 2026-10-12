@@ -134,6 +134,12 @@ How to use this file: before you start a task, read the sections whose tags matc
 
 ---
 
+### T2.15 Paused scene teardown and Unity Physics cleanup
+
+`PhysicsTemporalCoherenceInfo` is package-owned cleanup data. Its removal runs in PhysicsBuildWorldGroup with playback at EndFixedStepSimulation. Pausing before destroying a live World prevents that fixed step: cleanup entities survive, and the collision world retains old bodies while collider resources retire. Isolated spawn fixtures that never tick the full physics pipeline miss this.
+
+SceneFlow dispatches the existing PhysicsInitializeGroup and end-fixed ECB once at zero delta after destroying non-boot entities, completing jobs around playback (ADR-0045). It does not unpause, simulate, advance SimClock, manually remove coherence data, or edit the broadphase. Production-world controls and save/load tests must include scene exit after actual physics ticks.
+
 ## 3. Rendering `[Voxel/REN, Presentation, Art]`
 
 ### T3.1 One `RenderMeshArray` per brick

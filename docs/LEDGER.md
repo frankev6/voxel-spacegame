@@ -708,6 +708,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 139 | 2026-10-12 | SPEC-11 REN-010 | EditMode runtime fixture requires AABB assembly reference | Direct test-only Unity.Mathematics.Extensions reference | Tech lead | Accepted ADR-0043 / SPEC-11 Q30, same installed package; runtime boundaries unchanged. |
 | 140 | 2026-10-12 | SPEC-11 REN-011 | Cleanup/query timing and runtime palette material ownership | Exact deletion capture before drawing; shared runtime material copies; explicit camera bridge | Tech lead | Resolved SPEC-11 Q31 within ADR-0032; no per-brick materials or meshes. |
 | 141 | 2026-10-12 | SPEC-03 INP-005 | UI gate and origin system are future work; physics singleton read does not wait | Null gate allows pointer until UI-003; GAL-009 precedes sampling; explicit query dependency completion | Tech lead | Resolved SPEC-03 Q8; Flight-disabled/unbound remains neutral, scene/pause context hookup belongs to FND-017. |
+| 142 | 2026-10-12 | SPEC-01 FND-017 / SPEC-03 / SPEC-60 | Flight context waits for unfinished UI; DEV-008 waits for Flight | Temporary sole scene/pause bridge before sampling; UI-004 removes it | Tech lead | Resolved SPEC-01 Q24 / accepted ADR-0044. Existing Fighter starter and approved camera-relative lighting; FLET does not yet persist pose/velocity. |
+| 143 | 2026-10-12 | SPEC-01 FND-017 | Real World restart leaves PhysicsTemporalCoherenceInfo after paused teardown | Drain existing physics initialization and end-fixed ECB at zero delta | Tech lead | Resolved SPEC-01 Q25 / accepted ADR-0045; package retains ownership; no gameplay tick. |
 
 
 

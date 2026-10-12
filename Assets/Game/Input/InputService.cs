@@ -37,7 +37,7 @@ namespace Game.Input
         public InputContext CurrentContext { get; private set; }
 
         /// <summary>Enables exactly the maps of SPEC-03 decision 2 (Global always) and publishes InputContextChanged once per change.
-        /// Only UINavigator (via SPEC-60's InputServiceBridge) calls this.</summary>
+        /// Sole production caller follows ADR-0044: temporary scene bridge, then UINavigator at UI-004.</summary>
         public void SetContext(InputContext context)
         {
             if (context == CurrentContext) return;

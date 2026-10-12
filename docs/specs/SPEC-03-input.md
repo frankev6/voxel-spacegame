@@ -41,7 +41,7 @@ This avoids the old prototype's polling of `Keyboard.current` from many scripts,
 - `EditorInputSampler`, which builds the `EditorInputFrame` defined by SPEC-51 from the Editor map.
 
 **Out of scope (and who owns it instead):**
-- Deciding which context is active: `UINavigator` (SPEC-60), the only caller of `SetContext`.
+- Deciding which context is active: `UINavigator` (SPEC-60), the only caller of `SetContext` after UI-004. Before then, the sole owner is SceneInputContextBridgeSystem (ADR-0044).
 - `PlayerCommand`/`ShipCommand` type definitions and their consumption: SPEC-20.
 - Camera behaviour: SPEC-62.
 - The settings screen: SPEC-61.
@@ -176,7 +176,7 @@ public sealed class InputService : System.IDisposable
     public InputService(Game.Core.Settings.ControlSettingsData controls);   // creates Controls, applies overrides, enables Global
     public Controls Controls { get; }                                        // generated class; read actions from here
     public Game.Core.InputContext CurrentContext { get; }
-    public void SetContext(Game.Core.InputContext context);                  // only UINavigator (via SPEC-60's InputServiceBridge) calls this
+    public void SetContext(Game.Core.InputContext context);                  // ADR-0044 temporary scene bridge; UI-004 transfers sole ownership to UINavigator
     public string GetBindingDisplay(string actionPath);                      // "Flight/Interact" → "F"; unknown → "?" + WarnOnce
     public event System.Action BindingsChanged;                              // after rebind, reset or ApplyBindingOverrides
     public bool IsRebinding { get; }
@@ -350,7 +350,7 @@ When the Editor map is disabled, set `frame = default`.
 
 | API | Preconditions | Postconditions / errors |
 |---|---|---|
-| `InputService.SetContext` | Main thread; caller is `InputServiceBridge` | Exactly the maps of Decision 2 enabled; `InputContextChanged` published once per actual change |
+| `InputService.SetContext` | Main thread; sole caller follows ADR-0044, then `InputServiceBridge` | Exactly the maps of Decision 2 enabled; `InputContextChanged` published once per actual change |
 | `GetBindingDisplay(path)` | — | Display string; unknown path → `"?"` and `WarnOnce` |
 | `StartRebind` | Not already rebinding (else cancels the previous) | `done` called exactly once |
 | `ApplyBindingOverrides(json)` | — | Never throws; invalid JSON → defaults + warning |

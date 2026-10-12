@@ -411,7 +411,7 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | Facts | `FactStore` (via effects only) | Read via conditions |
 | Inventory, wallet | `InventoryModel` / `Wallet` methods called by commit/merchant/loot code | Read through view models |
 | Pause state | `PauseService` (tokens from `UINavigator` and others) | Read |
-| Active input context | `InputService` (set by `UINavigator`) | Read |
+| Active input context | `InputService` (temporarily `SceneInputContextBridgeSystem`, then `UINavigator` at UI-004; ADR-0044) | Read |
 | `Dormant` enable bit on grids | `GridLodSystem` | Read (expensive systems skip dormant grids) |
 | `PersistentId` allocation | `GameSession.AllocatePersistentId()` (the counter is saved) | Read; `GridSpawnSystem` copies it from the request onto the grid root |
 | Scenes | `SceneFlow` | — |

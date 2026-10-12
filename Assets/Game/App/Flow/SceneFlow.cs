@@ -9,6 +9,7 @@ using Game.Data.Definitions;
 using Game.Persistence.Services;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Physics.Systems;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -284,6 +285,20 @@ namespace Game.App.Flow
             if (doomed.Length > 0) em.DestroyEntity(doomed.AsArray());
             int n = doomed.Length;
             doomed.Dispose();
+            // ADR-0045: pause prevents fixed-step cleanup. Let Physics own invalidation and the empty broadphase rebuild.
+            var physics = world.GetExistingSystemManaged<PhysicsInitializeGroup>();
+            if (physics != null)
+            {
+                world.PushTime(new Unity.Core.TimeData(world.Time.ElapsedTime, 0));
+                try
+                {
+                    physics.Update();
+                    em.CompleteAllTrackedJobs();
+                    world.GetExistingSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>()?.Update();
+                    em.CompleteAllTrackedJobs();
+                }
+                finally { world.PopTime(); }
+            }
             return n;
         }
 

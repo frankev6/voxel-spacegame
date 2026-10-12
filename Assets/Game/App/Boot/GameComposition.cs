@@ -141,6 +141,7 @@ namespace Game.App.Boot
 
             // 9.1 Flight input. UI-003 rebinds the gate when UIRoot exists; FND-017 supplies the pre-UI scene context bridge.
             world.GetExistingSystemManaged<PlayerInputSampleSystem>().Bind(Input, null);
+            world.GetExistingSystemManaged<SceneInputContextBridgeSystem>().Bind(Flow, Pause, Input);
 
             // 11. Camera (CAM-004/005), with context-gated input.
             Camera = Push(new CameraRigService(config.CameraConfig, root.Find("CameraRoot") ?? root, new InputCameraInput(Input)));
@@ -217,7 +218,11 @@ namespace Game.App.Boot
             // Borrowed fleet structures must be unpinned before their owners dispose them.
             if (Registry != null) Registry.CancelSpawnReads();
             if (Camera != null) Audio?.ClearListenerTarget(Camera.ListenerPivot);
-            if (world != null && world.IsCreated) world.GetExistingSystemManaged<PlayerInputSampleSystem>()?.Unbind();
+            if (world != null && world.IsCreated)
+            {
+                world.GetExistingSystemManaged<SceneInputContextBridgeSystem>()?.Unbind();
+                world.GetExistingSystemManaged<PlayerInputSampleSystem>()?.Unbind();
+            }
             LastDisposeLog.Clear();
             for (int i = DisposeStack.Count - 1; i >= 0; i--)
             {
