@@ -889,6 +889,19 @@ If no save exists, "Load last save" is disabled.
   - [x] Screenshots (or a short recording) and before/after input evidence are supplied to the owner; no renderer test image is presented as gameplay.
 - **Tests:** `PlayableShipTests.Controls_MoveImportedShip`, `.SceneAndPause_NeutralizeFlight`, `.SaveLoad_RestoresImportedShip` (PlayMode); live GPU screenshots and collision observation supplement these functional tests.
 
+### FND-018 — Nocturne flight environment and movement reference
+- **Milestone:** M1
+- **Tier:** frontier — F5: owner-directed live presentation integration
+- **Depends on:** `FND-017`
+- **Do:** Deliver Frank's requested Nocturne background, large placeholder storm planet and sparse nearby particle debris. Reuse the own-work procedural look-book sky/planet source and DESIGN-GUIDE §4, preserving the look book. Bake a full-sphere distant environment; use scene-owned presentation-only world-space particles for near parallax. Keep particles stationary until recycled outside the useful viewing region, fade recycling, and do not create physics/gameplay debris or a second simulation writer. Restore camera settings and destroy owned resources on scene exit. This staged placeholder is replaced by SPEC-31 celestial streaming; it makes no claim to planet travel or persistence.
+- **Files:** `ArtSource/LookDev/export_nocturne_world.py`; `Assets/Game/Content/Environment/Nocturne/`; `Assets/Game/Presentation/Environment/NocturneFlightEnvironment.cs`; `Assets/Game/Presentation/Shaders/SpatialDebris.shader`; `Assets/Game/Scenes/World.unity`; `Assets/Game/Tests/PlayMode/App/NocturneEnvironmentTests.cs`
+- **Acceptance criteria:**
+  - [ ] Actual World renders Nocturne smoke/filaments/stars and a large VESPER-9 placeholder from the existing procedural source, with the imported ship readable.
+  - [ ] Real thrust produces nearby debris parallax; stationary flight does not produce fake drift. Camera orbit remains usable.
+  - [ ] World exit/re-entry removes/recreates the presentation and restores camera state without leaked objects or errors.
+  - [ ] Inspected screenshots and real-input evidence are supplied to Frank.
+- **Tests:** `NocturneEnvironmentTests.WorldEnvironment_EntersMovesAndCleansUp` (PlayMode); actual GPU screenshots before/after real W input. Compile and full EditMode/PlayMode suites. Performance advisory; no initial tuning required.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
@@ -925,6 +938,8 @@ If no save exists, "Load last save" is disabled.
 | 24 | The first playable slice needs input before UI-004 and DEV-008 itself waits for Flight | Temporary sole scene context owner; execute FND-017 first | Tech lead | Resolved ADR-0044: current scene/pause sampled before player input; UI-004 removes fallback. Existing Fighter is the temporary starter; approved lights track camera yaw. FLET restores ship data, not pose/velocity until world-location persistence. |
 
 | 25 | Paused teardown leaves package-owned temporal-coherence cleanup entities and a stale physics world | Dispatch the existing physics initialization and end-fixed ECB once at zero delta after destruction | Tech lead | Resolved ADR-0045: no simulation tick, unpause, manual component removal or broadphase mutation. Production-world/live restart exposed this during FND-017. |
+
+| 26 | Owner needs spatial cues before SPEC-31 celestial streaming exists | Scene-owned distant placeholder and local cosmetic particles | Tech lead | Resolved FND-018: bake the existing Nocturne procedural sky and storm planet into a panoramic distant backdrop. This is intentionally non-travelable, with no celestial identity or save data. Nearby world-space particles supply translational parallax; SYS-011 replaces the distant placeholder when canonical celestial visuals exist. |
 
 ## 11. References
 
