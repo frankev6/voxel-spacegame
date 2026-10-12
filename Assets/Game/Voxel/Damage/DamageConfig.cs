@@ -116,6 +116,59 @@ namespace Game.Voxel.Damage
             int armor = armorClass < table.ArmorClassCount ? armorClass : 0;
             return table.ArmorMultipliers[table.Types[index].ArmorOffset + armor];
         }  // Table lookup (decision 19); unknown type → 1.0, armour class out of range → class 0
-        public static DamageConfig FromDefinition(Game.Data.Definitions.DamageConfigDefinition def) { throw new System.NotImplementedException("DMG-003"); } // cue hashes via ContentId.Hash
+        public static DamageConfig FromDefinition(Game.Data.Definitions.DamageConfigDefinition def)
+        {
+            if (def == null) throw new System.ArgumentNullException(nameof(def));
+            return new DamageConfig
+            {
+                EntryBacktrackCells = def.EntryBacktrackCells,
+                MaxDdaCells = def.MaxDdaCells,
+                MaxBlastRadiusCells = def.MaxBlastRadiusCells,
+                MaxOcclusionRadiusCells = def.MaxOcclusionRadiusCells,
+                OcclusionFactor = def.OcclusionFactor,
+                InstanceDestroyCellFraction = def.InstanceDestroyCellFraction,
+                KickDetach = def.KickDetach,
+                KickDissolve = def.KickDissolve,
+                KickRandomFraction = def.KickRandomFraction,
+                MinRamEnergyJ = def.MinRamEnergyJ,
+                RamHpPerJoule = def.RamHpPerJoule,
+                RamRestitutionCorrection = def.RamRestitutionCorrection,
+                RamRadiusBaseCells = def.RamRadiusBaseCells,
+                RamRadiusCellsPerSqrtMJ = def.RamRadiusCellsPerSqrtMJ,
+                RamRadiusMaxCells = def.RamRadiusMaxCells,
+                RamPairCooldownTicks = def.RamPairCooldownTicks,
+                MaxRestoreCellsPerTick = def.MaxRestoreCellsPerTick,
+                IntegrityNodeBudgetPerGrid = def.IntegrityNodeBudgetPerGrid,
+                MaxIntegrityGridsPerTick = def.MaxIntegrityGridsPerTick,
+                MaxSeedsPerGrid = def.MaxSeedsPerGrid,
+                IntegrityForceAfterDeferrals = def.IntegrityForceAfterDeferrals,
+                BrickWarmupPerTick = def.BrickWarmupPerTick,
+                ParticleMaxCells = def.ParticleMaxCells,
+                ChunkMaxCells = def.ChunkMaxCells,
+                ChunkMaxExtentCells = def.ChunkMaxExtentCells,
+                MaxLiveChunks = def.MaxLiveChunks,
+                SplitCellBudgetPerTick = def.SplitCellBudgetPerTick,
+                MaxNewHulksPerTick = def.MaxNewHulksPerTick,
+                MaxNewChunksPerTick = def.MaxNewChunksPerTick,
+                SplitGraceTicks = def.SplitGraceTicks,
+                MaxDebrisParticlesPerTick = def.MaxDebrisParticlesPerTick,
+                ChunkMaxBoxes = def.ChunkMaxBoxes,
+                ChunkLifetimeMinSeconds = def.ChunkLifetimeMinSeconds,
+                ChunkLifetimeMaxSeconds = def.ChunkLifetimeMaxSeconds,
+                ChunkDissolveSeconds = def.ChunkDissolveSeconds,
+                HulkSeparationSpeed = def.HulkSeparationSpeed,
+                ChunkSeparationSpeed = def.ChunkSeparationSpeed,
+                ChunkTumbleMin = def.ChunkTumbleMin,
+                ChunkTumbleMax = def.ChunkTumbleMax,
+                CoreBreachRadiusCells = def.CoreBreachRadiusCells,
+                CoreBreachDamage = def.CoreBreachDamage,
+                DissolveParticlesPerTick = def.DissolveParticlesPerTick,
+                DissolveParticleCap = def.DissolveParticleCap,
+                CueRamImpact = def.RamImpactCue != null ? def.RamImpactCue.Id.Hash : default,
+                CueCellBreak = def.CellBreakCue != null ? def.CellBreakCue.Id.Hash : default,
+                CueSplit = def.SplitCue != null ? def.SplitCue.Id.Hash : default,
+                CueCoreLost = def.CoreLostCue != null ? def.CoreLostCue.Id.Hash : default
+            };
+        }
     }
 }

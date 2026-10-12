@@ -34,7 +34,7 @@ namespace Game.Data.Services
             live.Sort((a, b) => string.CompareOrdinal(a.IdString, b.IdString));
             foreach (var d in live)                                                                     // step 3: runtime validation pass
             {
-                var context = new ContentValidationContext("content:" + d.IdString, false, x => catalog.TryGet(x.Id, out var y) && ReferenceEquals(x, y));
+                var context = new ContentValidationContext("content:" + d.IdString, false, x => catalog.TryGet(x.Id, out var y) && ReferenceEquals(x, y), catalog);
                 d.Validate(report.For("content:" + d.IdString), context);
             }
             if (report.HasErrors)                                                                       // step 4

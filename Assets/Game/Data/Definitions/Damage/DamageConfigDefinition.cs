@@ -99,5 +99,55 @@ namespace Game.Data.Definitions
         public AudioCueDefinition CellBreakCue => cellBreakCue;
         public AudioCueDefinition SplitCue => splitCue;
         public AudioCueDefinition CoreLostCue => coreLostCue;
+        public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
+        {
+            base.Validate(scope, context);
+            if (float.IsNaN(entryBacktrackCells) || float.IsInfinity(entryBacktrackCells) || entryBacktrackCells < 0) scope.Error("DMG-E005", nameof(entryBacktrackCells), "Must be finite and nonnegative.");
+            if (maxDdaCells < 1) scope.Error("DMG-E005", nameof(maxDdaCells), "Budget must be at least 1.");
+            if (float.IsNaN(maxBlastRadiusCells) || float.IsInfinity(maxBlastRadiusCells) || maxBlastRadiusCells < 0) scope.Error("DMG-E005", nameof(maxBlastRadiusCells), "Must be finite and nonnegative.");
+            if (float.IsNaN(maxOcclusionRadiusCells) || float.IsInfinity(maxOcclusionRadiusCells) || maxOcclusionRadiusCells < 0) scope.Error("DMG-E005", nameof(maxOcclusionRadiusCells), "Must be finite and nonnegative.");
+            if (float.IsNaN(occlusionFactor) || float.IsInfinity(occlusionFactor) || occlusionFactor < 0) scope.Error("DMG-E005", nameof(occlusionFactor), "Must be finite and nonnegative.");
+            if (float.IsNaN(instanceDestroyCellFraction) || float.IsInfinity(instanceDestroyCellFraction) || instanceDestroyCellFraction < 0) scope.Error("DMG-E005", nameof(instanceDestroyCellFraction), "Must be finite and nonnegative.");
+            if (float.IsNaN(kickDetach) || float.IsInfinity(kickDetach) || kickDetach < 0) scope.Error("DMG-E005", nameof(kickDetach), "Must be finite and nonnegative.");
+            if (float.IsNaN(kickDissolve) || float.IsInfinity(kickDissolve) || kickDissolve < 0) scope.Error("DMG-E005", nameof(kickDissolve), "Must be finite and nonnegative.");
+            if (float.IsNaN(kickRandomFraction) || float.IsInfinity(kickRandomFraction) || kickRandomFraction < 0) scope.Error("DMG-E005", nameof(kickRandomFraction), "Must be finite and nonnegative.");
+            if (float.IsNaN(minRamEnergyJ) || float.IsInfinity(minRamEnergyJ) || minRamEnergyJ < 0) scope.Error("DMG-E005", nameof(minRamEnergyJ), "Must be finite and nonnegative.");
+            if (float.IsNaN(ramHpPerJoule) || float.IsInfinity(ramHpPerJoule) || ramHpPerJoule < 0) scope.Error("DMG-E005", nameof(ramHpPerJoule), "Must be finite and nonnegative.");
+            if (float.IsNaN(ramRestitutionCorrection) || float.IsInfinity(ramRestitutionCorrection) || ramRestitutionCorrection < 0) scope.Error("DMG-E005", nameof(ramRestitutionCorrection), "Must be finite and nonnegative.");
+            if (float.IsNaN(ramRadiusBaseCells) || float.IsInfinity(ramRadiusBaseCells) || ramRadiusBaseCells < 0) scope.Error("DMG-E005", nameof(ramRadiusBaseCells), "Must be finite and nonnegative.");
+            if (float.IsNaN(ramRadiusCellsPerSqrtMJ) || float.IsInfinity(ramRadiusCellsPerSqrtMJ) || ramRadiusCellsPerSqrtMJ < 0) scope.Error("DMG-E005", nameof(ramRadiusCellsPerSqrtMJ), "Must be finite and nonnegative.");
+            if (float.IsNaN(ramRadiusMaxCells) || float.IsInfinity(ramRadiusMaxCells) || ramRadiusMaxCells < 0) scope.Error("DMG-E005", nameof(ramRadiusMaxCells), "Must be finite and nonnegative.");
+            if (ramPairCooldownTicks < 1) scope.Error("DMG-E005", nameof(ramPairCooldownTicks), "Budget must be at least 1.");
+            if (maxRestoreCellsPerTick < 1) scope.Error("DMG-E005", nameof(maxRestoreCellsPerTick), "Budget must be at least 1.");
+            if (integrityNodeBudgetPerGrid < 1) scope.Error("DMG-E005", nameof(integrityNodeBudgetPerGrid), "Budget must be at least 1.");
+            if (maxIntegrityGridsPerTick < 1) scope.Error("DMG-E005", nameof(maxIntegrityGridsPerTick), "Budget must be at least 1.");
+            if (maxSeedsPerGrid < 1) scope.Error("DMG-E005", nameof(maxSeedsPerGrid), "Budget must be at least 1.");
+            if (integrityForceAfterDeferrals < 1) scope.Error("DMG-E005", nameof(integrityForceAfterDeferrals), "Budget must be at least 1.");
+            if (brickWarmupPerTick < 1) scope.Error("DMG-E005", nameof(brickWarmupPerTick), "Budget must be at least 1.");
+            if (particleMaxCells < 1) scope.Error("DMG-E005", nameof(particleMaxCells), "Budget must be at least 1.");
+            if (chunkMaxCells < 1) scope.Error("DMG-E005", nameof(chunkMaxCells), "Budget must be at least 1.");
+            if (chunkMaxExtentCells < 1) scope.Error("DMG-E005", nameof(chunkMaxExtentCells), "Budget must be at least 1.");
+            if (maxLiveChunks < 1) scope.Error("DMG-E005", nameof(maxLiveChunks), "Budget must be at least 1.");
+            if (splitCellBudgetPerTick < 1) scope.Error("DMG-E005", nameof(splitCellBudgetPerTick), "Budget must be at least 1.");
+            if (maxNewHulksPerTick < 1) scope.Error("DMG-E005", nameof(maxNewHulksPerTick), "Budget must be at least 1.");
+            if (maxNewChunksPerTick < 1) scope.Error("DMG-E005", nameof(maxNewChunksPerTick), "Budget must be at least 1.");
+            if (splitGraceTicks < 1) scope.Error("DMG-E005", nameof(splitGraceTicks), "Budget must be at least 1.");
+            if (maxDebrisParticlesPerTick < 1) scope.Error("DMG-E005", nameof(maxDebrisParticlesPerTick), "Budget must be at least 1.");
+            if (chunkMaxBoxes < 1) scope.Error("DMG-E005", nameof(chunkMaxBoxes), "Budget must be at least 1.");
+            if (float.IsNaN(chunkLifetimeMinSeconds) || float.IsInfinity(chunkLifetimeMinSeconds) || chunkLifetimeMinSeconds < 0) scope.Error("DMG-E005", nameof(chunkLifetimeMinSeconds), "Must be finite and nonnegative.");
+            if (float.IsNaN(chunkLifetimeMaxSeconds) || float.IsInfinity(chunkLifetimeMaxSeconds) || chunkLifetimeMaxSeconds < 0) scope.Error("DMG-E005", nameof(chunkLifetimeMaxSeconds), "Must be finite and nonnegative.");
+            if (float.IsNaN(chunkDissolveSeconds) || float.IsInfinity(chunkDissolveSeconds) || chunkDissolveSeconds < 0) scope.Error("DMG-E005", nameof(chunkDissolveSeconds), "Must be finite and nonnegative.");
+            if (float.IsNaN(hulkSeparationSpeed) || float.IsInfinity(hulkSeparationSpeed) || hulkSeparationSpeed < 0) scope.Error("DMG-E005", nameof(hulkSeparationSpeed), "Must be finite and nonnegative.");
+            if (float.IsNaN(chunkSeparationSpeed) || float.IsInfinity(chunkSeparationSpeed) || chunkSeparationSpeed < 0) scope.Error("DMG-E005", nameof(chunkSeparationSpeed), "Must be finite and nonnegative.");
+            if (float.IsNaN(chunkTumbleMin) || float.IsInfinity(chunkTumbleMin) || chunkTumbleMin < 0) scope.Error("DMG-E005", nameof(chunkTumbleMin), "Must be finite and nonnegative.");
+            if (float.IsNaN(chunkTumbleMax) || float.IsInfinity(chunkTumbleMax) || chunkTumbleMax < 0) scope.Error("DMG-E005", nameof(chunkTumbleMax), "Must be finite and nonnegative.");
+            if (float.IsNaN(coreBreachRadiusCells) || float.IsInfinity(coreBreachRadiusCells) || coreBreachRadiusCells < 0) scope.Error("DMG-E005", nameof(coreBreachRadiusCells), "Must be finite and nonnegative.");
+            if (float.IsNaN(coreBreachDamage) || float.IsInfinity(coreBreachDamage) || coreBreachDamage < 0) scope.Error("DMG-E005", nameof(coreBreachDamage), "Must be finite and nonnegative.");
+            if (dissolveParticlesPerTick < 1) scope.Error("DMG-E005", nameof(dissolveParticlesPerTick), "Budget must be at least 1.");
+            if (dissolveParticleCap < 1) scope.Error("DMG-E005", nameof(dissolveParticleCap), "Budget must be at least 1.");
+            if (particleMaxCells >= chunkMaxCells) scope.Error("DMG-E005", nameof(particleMaxCells), "Must be smaller than chunkMaxCells.");
+            if (chunkLifetimeMinSeconds > chunkLifetimeMaxSeconds) scope.Error("DMG-E006", nameof(chunkLifetimeMinSeconds), "Must not exceed chunkLifetimeMaxSeconds.");
+            if (chunkTumbleMin > chunkTumbleMax) scope.Error("DMG-E006", nameof(chunkTumbleMin), "Must not exceed chunkTumbleMax.");
+        }
     }
 }

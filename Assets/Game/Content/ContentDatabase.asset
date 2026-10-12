@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: ContentDatabase
   m_EditorClassIdentifier: Game.Data::Game.Data.ContentDatabase
   definitions:
+  - {fileID: 11400000, guid: 722d58156a944931ac0cccbcb30eb550, type: 2}
+  - {fileID: 11400000, guid: c346262ebd5f42938405227a7a4e3c2f, type: 2}
+  - {fileID: 11400000, guid: 87f43591dcea4c56bb873810e81c5d43, type: 2}
+  - {fileID: 11400000, guid: e4d427505be846bf814700ff3cb2ffea, type: 2}
   - {fileID: 11400000, guid: 05634708927ac440380b36ac66818c07, type: 2}
   - {fileID: 11400000, guid: e359aa29e6b064108934b2dac57ec713, type: 2}
   - {fileID: 11400000, guid: c923ad8eb5a8c4a4688b67138840b24f, type: 2}
@@ -30,12 +34,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9657aee227bbb4bafaf11b900f2e5a68, type: 2}
   - {fileID: 11400000, guid: 159812ac20bd3420fa2bbbecc566e6c1, type: 2}
   - {fileID: 11400000, guid: cd36367c9f3b348ac98cb9f0288f95c7, type: 2}
+  - {fileID: 11400000, guid: f5d747a2867d4df699d4c97067ff3488, type: 2}
   - {fileID: 11400000, guid: b6574380846604e40b1f01b296aa3c43, type: 2}
   - {fileID: 11400000, guid: ecf6eb1811fff49d191c7b3015eea9c2, type: 2}
   - {fileID: 11400000, guid: c449eca9af05c46b0b88f54f6db64c4d, type: 2}
   - {fileID: 11400000, guid: eb711689af64444c39d00e3f4ce55697, type: 2}
   - {fileID: 11400000, guid: 71d9bfa1093054938b83cbc84733176b, type: 2}
   - {fileID: 11400000, guid: 8437758833db54c1a9e7b9e751237e8a, type: 2}
+  - {fileID: 11400000, guid: 2ab17936d9b74b9e824acc247707606b, type: 2}
+  - {fileID: 11400000, guid: 679da31ba3264b93a9bb760ce2dacb65, type: 2}
+  - {fileID: 11400000, guid: 2d5758f4a8f24f70bc8e6c376377c672, type: 2}
+  - {fileID: 11400000, guid: 1989f1159553428d975d4b261e991c61, type: 2}
   - {fileID: 11400000, guid: 15d5131dd86ea410aac1364290273760, type: 2}
   - {fileID: 11400000, guid: 98f4ea94dbad1429b9e28c70ecec9e60, type: 2}
   - {fileID: 11400000, guid: 9a676ec26ab964f97857b241826efdce, type: 2}

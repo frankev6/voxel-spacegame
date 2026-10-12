@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.Voxel.Rendering;
+using Game.Voxel.Damage;
 using UnityEngine;
 using Game.Data.Components;
 using Game.Core;
@@ -36,7 +37,17 @@ namespace Game.App.Boot
                 var physics = catalog.Get<PhysicsVoxelConfigDefinition>(new ContentId("config_physics"));
                 Create(em, PhysicsVoxelConfigFactory.Create(physics), created);
                 Create(em, PhysicsVoxelConfigFactory.CreatePhysicsStep(physics), created);
-                // TODO(DMG-003): DamageConfig. TODO(PWR-003): PowerTuning.
+                var damage = DamageConfig.FromDefinition(catalog.Get<DamageConfigDefinition>(new ContentId("config_damage")));
+                lifetime.DamageTable = DamageContent.BuildTable(catalog);
+                damage.Table = lifetime.DamageTable;
+                using (var query = em.CreateEntityQuery(ComponentType.ReadOnly<DamageConfig>()))
+                {
+                    // The damage stream owner creates its fallback in OnCreate, before boot content exists.
+                    lifetime.DamageEntity = query.IsEmpty ? Create(em, damage, created) : query.GetSingletonEntity();
+                    em.SetComponentData(lifetime.DamageEntity, damage);
+                    if (!created.Contains(lifetime.DamageEntity)) created.Add(lifetime.DamageEntity);
+                }
+                // TODO(PWR-003): PowerTuning.
                 Create(em, FlightConfigFactory.Create(catalog.Get<FlightConfigDefinition>(new ContentId("config_flight"))), created);
                 // Later rows (ENC-001, WPN, AI, ABL, SYS, ECO-007) are added by their tasks (SPEC-01 §5.3).
 
@@ -53,15 +64,20 @@ namespace Game.App.Boot
         {
             readonly World world;
             VoxelRenderConfig config;
-            internal Entity ConfigEntity;
+            internal Entity ConfigEntity, DamageEntity;
+            internal BlobAssetReference<DamageTableBlob> DamageTable;
             public RenderConfigLifetime(World world, VoxelRenderConfig config) { this.world = world; this.config = config; }
             public void Dispose()
             {
-                if (world.IsCreated && ConfigEntity != Entity.Null && world.EntityManager.Exists(ConfigEntity))
+                if (world.IsCreated)
                 {
                     world.EntityManager.CompleteAllTrackedJobs();
-                    world.EntityManager.DestroyEntity(ConfigEntity);
+                    if (ConfigEntity != Entity.Null && world.EntityManager.Exists(ConfigEntity)) world.EntityManager.DestroyEntity(ConfigEntity);
+                    if (DamageEntity != Entity.Null && world.EntityManager.Exists(DamageEntity))
+                        world.EntityManager.SetComponentData(DamageEntity, DamageConfig.Default);
                 }
+                if (DamageTable.IsCreated) DamageTable.Dispose();
+                DamageTable = default; DamageEntity = Entity.Null;
                 VoxelRenderConfigFactory.Destroy(ref config);
                 ConfigEntity = Entity.Null;
             }

@@ -37,7 +37,7 @@ namespace Game.Editor.Content
             foreach (var d in defs.Where(d => d != null).OrderBy(d => d.IdString, StringComparer.Ordinal))
             {
                 string path = AssetDatabase.GetAssetPath(d);
-                d.Validate(report.For(path), new ContentValidationContext(path, true, inDatabase.Contains));
+                d.Validate(report.For(path), new ContentValidationContext(path, true, inDatabase.Contains, catalog));
                 string file = Path.GetFileNameWithoutExtension(path);                                             // step 4: W012
                 if (!string.IsNullOrEmpty(d.IdString) && !string.IsNullOrEmpty(file) && file != d.IdString)
                     report.Warning("DATA-W012", path, "id", $"File name '{file}' differs from the ID '{d.IdString}'.");
