@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 39 | 0 | 0 | 0 | 65 | 0 | 104 | 15 |
+| M1 | 38 | 0 | 0 | 0 | 66 | 0 | 104 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 5 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -192,8 +192,8 @@
 | UI-007 | Base controls: buttons, panel, list, inputs, key hint, markers, HUD plates | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-002, UI-006 | no | todo |  |  |  |  |
 | CAM-001 | Public contract types | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CORE-001 | yes | done | astra (gpt-6) | 2026-10-11 | f078fc9 | Exact contracts, unmanaged view, two required tests; deferred Fx members Q126 |
 | CAM-002 | ADR: custom camera rig instead of Cinemachine | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | — | yes | done | astra (gpt-6) | 2026-10-11 | a0df398 | ADR-0038 Proposed, all five reasons; no package or runtime change |
-| CAM-003 | Camera math helpers | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Half-life damping, shortest-arc yaw and orbit helpers |
-| CAM-004 | Rig service, camera prefab, Menu/Hold modes and the sync system shell | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-003, FND-001 | no | todo |  |  |  |  |
+| CAM-003 | Camera math helpers | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0e4a19d | Five specified tests; 30/60/144 FPS damping agrees within 1e-4 |
+| CAM-004 | Rig service, camera prefab, Menu/Hold modes and the sync system shell | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-003, FND-001 | yes | todo |  |  |  |  |
 | CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-004, FLT-001, VOX-001, INP-001 | no | todo |  |  |  |  |
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | no | todo |  |  |  |  |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
@@ -798,6 +798,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-11 — CAM-003 camera math (astra, gpt-6)
+
+- Implemented scalar/vector half-life damping, shortest-arc angle damping in (−180, 180], world-yaw/local-pitch orbit rotation, focus-relative position, length clamp and +Z heading. Pure math; no state, allocation or scene updates.
+- All five required tests pass: one half-life reaches the midpoint, 30/60/144 steps agree with the one-second solution within **1e-4**, 170°→−170° crosses 180°, positive pitch looks downward at any tested yaw, and identity heading is zero.
+- Validation: compile **zero C# warnings**, EditMode **675 passed + 1 explicit skipped**, PlayMode **61 passed**, docs **505 tasks / zero errors**. No new performance gate; existing perf baseline remains **44/44**. Implementation: `0e4a19d`.
+- Next: CAM-004 rig/prefab/sync and composition binding. Reconcile SPEC-62's camera-prefab listener wording with SPEC-64's already implemented sole listener under AudioRoot before integrating; do not create a duplicate listener.
 
 ### 2026-10-11 — CAM-002 custom camera decision record (astra, gpt-6)
 
