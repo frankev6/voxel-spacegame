@@ -17,6 +17,7 @@ namespace Game.Presentation.Systems
 {
     /// <summary>Managed camera bridge and sole MainCameraState writer (SPEC-62 §5.1).</summary>
     [UpdateInGroup(typeof(PresentationBridgeGroup))]
+    [UpdateBefore(typeof(BrickPoolRenderSystem))]
     // TODO(AUD-006): UpdateAfter AudioEventDrainSystem when that system exists.
     // TODO(HUD-002): UpdateBefore HudSyncSystem when that system exists.
     public partial class CameraTargetSyncSystem : SystemBase
@@ -25,7 +26,7 @@ namespace Game.Presentation.Systems
         // TODO(CAM-006): Origin marker with origin warp.
         // TODO(CAM-007): Occlusion marker with the physics ray.
         // TODO(CAM-008): Shake marker with typed FX input.
-        EntityQuery players, viewers;
+        EntityQuery players, viewers, renderCameras;
         Entity viewEntity, lastTarget;
         float3 lastTargetPos;
         CameraRigService rig;
@@ -35,6 +36,7 @@ namespace Game.Presentation.Systems
             viewEntity = EntityManager.CreateSingleton<MainCameraState>();
             players = GetEntityQuery(ComponentType.ReadOnly<PlayerShip>(), ComponentType.ReadOnly<LocalToWorld>());
             viewers = GetEntityQuery(ComponentType.ReadWrite<VoxelViewer>());
+            renderCameras = GetEntityQuery(ComponentType.ReadWrite<VoxelRenderCamera>());
             RequireForUpdate<MainCameraState>();
         }
         public void Bind(CameraRigService rig, IFxFrameReader fx)
@@ -79,6 +81,7 @@ namespace Game.Presentation.Systems
             }
             rig.Tick(dt);
             var camera = rig.Camera;
+            if (!renderCameras.IsEmptyIgnoreFilter) renderCameras.SetSingleton(new VoxelRenderCamera { Value = camera });
             EntityManager.SetComponentData(viewEntity, new MainCameraState
             {
                 Position = camera.transform.position, Rotation = camera.transform.rotation,

@@ -30,6 +30,7 @@ namespace Game.Voxel.Grid
             em.AddComponentData(e, BrickMeshBatch.Create());
             em.AddComponentData(e, VoxelRenderRuntime.Create());
             em.AddComponentData(e, new VoxelViewer());
+            em.AddComponentData(e, new VoxelRenderCamera());
             em.AddComponentData(e, ColliderDirtyQueue.Create());
             em.AddComponentData(e, ColliderBuildCache.Create());
             em.AddComponentData(e, ColliderBatchQueue.Create());

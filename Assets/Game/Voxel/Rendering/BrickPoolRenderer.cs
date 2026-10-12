@@ -92,6 +92,7 @@ namespace Game.Voxel.Rendering
                 throw new InvalidOperationException("Stale or invalid brick pool handle.");
             return handle.Slot;
         }
+        internal AABB GetBounds(BrickPoolHandle handle) => items[Validate(handle)].Bounds;
         public void GetRanges(BrickPoolHandle handle, out PoolRange vertexRange, out PoolRange indexRange)
         { var item = items[Validate(handle)]; vertexRange = item.Vertices; indexRange = item.Indices; }
         public void SetTransform(BrickPoolHandle handle, float4x4 matrix) => worldMatrices[Validate(handle)] = matrix;

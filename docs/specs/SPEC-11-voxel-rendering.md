@@ -221,9 +221,9 @@ public struct VoxelViewer : IComponentData                          // singleton
 { public float3 CameraPosition; public float3 AnchorPosition; /* player ship */ public byte Valid; }
 ```
 
-`VoxelRenderManagedState : ScriptableObject` (public type for the public `VoxelRenderRuntime.Managed` field; its fields are internal; runtime instance, `HideFlags.DontSave`): `List<Mesh> ApplyList`, `Mesh Scratch`, `Mesh.MeshDataArray PendingData`, `bool HasPendingData`, `MaterialPropertyBlock[] PropBlocks`, `GraphicsBuffer[] PropInstanceBuffers`, `GraphicsBuffer GridMatrices`, `List<int> PropCounts`. Destroyed by `BrickMeshApplySystem.OnDestroy`.
+`VoxelRenderManagedState : ScriptableObject` owns the `BrickPoolRenderer`, one runtime copy of each shared brick/prop material, and the functional placeholder mesh, plus future prop buffers. Old MeshData scratch/apply lists are removed (ADR-0032). All are released by `BrickMeshApplySystem.OnDestroy`. `VoxelRenderCamera : IComponentData` contains the explicit `UnityObjectRef<Camera>` published by CameraTargetSyncSystem; VoxelSingletons creates it before the boot snapshot.
 
-`BrickRenderStats` (static): `BrickRenderTotals Gather(EntityManager em)` → `{ long GpuBytes; long CpuCopyBytes; int Meshes; long Vertices; long Indices; }` with `GpuBytes = Σ (VertexCount × 8 + IndexCount × (VertexCount <= 65536 ? 2 : 4))` and `CpuCopyBytes = ReleaseCpuMeshCopies ? 0 : GpuBytes`.
+`BrickRenderStats.Gather(em)` returns allocated pool GPU bytes including staging and retired buffers, zero retained CPU geometry-copy bytes, and live applied brick/vertex/index totals (ADR-0032). Allocator/slot bookkeeping and in-flight build output remain separately measurable native storage for TST-004.
 
 ### 4.3 Definitions (`Assets/Game/Data/Definitions/Voxel/`, namespace `Game.Data.Definitions`)
 
@@ -548,12 +548,12 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Tier:** frontier — F2/F4: mesh lifetime, registration, deferred disposal, apply budget
 - **Depends on:** `REN-010`, `SPEC-10`
 - **Do:** Implement `BrickMeshApplySystem` (§5.5) with `ApplyResultsJob`, registration, managed state; `BrickRenderCleanupSystem` (§5.6); `BrickRenderStats.Gather`.
-- **Files:** `Assets/Game/Voxel/Rendering/{BrickMeshApplySystem,ApplyResultsJob,BrickRenderCleanupSystem,VoxelRenderManagedState,BrickRenderStats}.cs`; `Assets/Game/Tests/PlayMode/Voxel/BrickMeshApplyTests.cs`
+- **Files:** `Assets/Game/Voxel/Rendering/{BrickMeshApplySystem,ApplyResultsJob,BrickRenderCleanupSystem,VoxelRenderManagedState,BrickRenderStats,BrickPoolRenderSystem,VoxelRenderCamera}.cs`; `Assets/Game/Voxel/Grid/VoxelSingletons.cs`; `Assets/Game/Presentation/Systems/CameraTargetSyncSystem.cs`; `Assets/Game/Tests/PlayMode/Voxel/BrickMeshApplyTests.cs`
 - **Acceptance criteria:**
-  - [ ] Each brick retains one generational pool handle across 20 rebuilds; geometry ranges may relocate only when capacity is insufficient (ADR-0032).
-  - [ ] A destroyed brick stops drawing immediately; its pool ranges/slot are reusable only after 3 frames; cleanup-only entity count returns to 0.
-  - [ ] Empty results disable pool drawing; pool local bounds equal completed mesh bounds.
-  - [ ] Apply of 128 bricks ≤ 2.5 ms main thread; 0 GC per frame after warm-up excluding first-build pool growth.
+  - [x] Each brick retains one generational pool handle across 20 rebuilds; geometry ranges may relocate only when capacity is insufficient (ADR-0032).
+  - [x] A destroyed brick stops drawing immediately; its pool ranges/slot are reusable only after 3 frames; cleanup-only entity count returns to 0.
+  - [x] Empty results disable pool drawing; pool local bounds equal completed mesh bounds.
+  - [x] Apply of 128 bricks ≤ 2.5 ms main thread; 0 GC per frame after warm-up excluding first-build pool growth.
 - **Tests:** `BrickMeshApplyTests.RegisterOnce_RewriteInPlace`, `.DestroyedBrick_MeshRetired`, `.EmptyMesh_Hidden`, `.Bounds_Updated`, `.ApplyBudget128`, `.NoGcSteadyState`.
 
 ### REN-012 — GridLodSystem, Dormant and LOD switching
@@ -647,6 +647,8 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 29 | Boot factory signature omits prop meshes/lifetime; old palette text conflicts with approved art | Boot supplies ContentService.PropMeshes and owns disposal; copy the approved REN-008 palette | Tech lead | Resolved 2026-10-12: internal BootSingletons.CreateAll returns a disposable RenderConfigLifetime retained by GameComposition (and test fixtures), destroys its singleton and factory allocations on shutdown/failure. Shared source materials remain assets. The config references BrickLitIndirect and the explicit pool-copy compute shader. Palette follows DESIGN-GUIDE / ADR-0040, preserving the existing Q4/Q30 default rather than reintroducing legacy colors. |
 
 | 30 | EditMode mesh tests cannot instantiate VoxelRenderRuntime without the AABB assembly | Direct test-only Unity.Mathematics.Extensions reference | Tech lead | Accepted ADR-0043; installed package, no runtime dependency or contract change. |
+
+| 31 | Pooled cleanup must precede submission; query capture is deprecated; palette references must not mutate source assets | Retire before PresentationBridgeGroup, capture exact deleted entities, one runtime copy per shared material | Tech lead | Resolved 2026-10-12: cleanup uses OrderFirst plus UpdateBefore(PresentationBridgeGroup), releases handles immediately and records one bulk removal over the exact captured entities (not a later query that could include unretired deletions). Apply owns shared material copies and the pool; camera owner publishes VoxelRenderCamera before BrickPoolRenderSystem submits. All are the accepted ADR-0032 integration, with no per-brick materials or meshes. |
 
 ## 11. References
 
