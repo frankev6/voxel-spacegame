@@ -697,6 +697,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 131 | 2026-10-11 | SPEC-62 CAM-011 | M1 camera gate mentions M3 raycast/origin paths | Enforce no-occlusion 0.05 ms and zero GC now | Tech lead | Resolved SPEC-62 Q14; CAM-007 owns real-raycast timing ≤0.15 ms, CAM-006 owns origin accuracy; no stub timing accepted |
 | 132 | 2026-10-11 | SPEC-11 REN-003 | Fallback needs missing shared surface shader; apply/cleanup systems are future work | REN-008 first; future REN-010/011 consume pooled contract | Tech lead | Resolved SPEC-11 Q23; added shader dependency and returned REN-003 to todo; no contract or gate success asserted |
 | 133 | 2026-10-11 | SPEC-11 REN-008 | Old shader property/channel contract conflicts with approved design; legacy texture forbidden | Canonical art contract, procedural inputs | Tech lead | Accepted ADR-0040 / SPEC-11 Q24; preserve packed vertex and defer missing presentation writers to their features; no new art direction |
+| 134 | 2026-10-11 | SPEC-11 REN-003 | Fallback allocation, memory growth and integration contracts were unspecified | Exact packed ranges, generational slots, GPU copy, explicit camera and future pooled apply/cleanup | Tech lead | Accepted ADR-0032 / SPEC-11 Q25; same 36 MB and timing gates; performance remains to be measured |
 
 
 

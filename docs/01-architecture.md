@@ -222,7 +222,7 @@ SimulationSystemGroup
 
 PresentationSystemGroup
 ├─ PresentationBridgeGroup               (custom)
-│  ├─ BrickMeshApplySystem               REN  main thread; swaps MaterialMeshInfo
+│  ├─ BrickMeshApplySystem               REN  main thread; uploads pooled brick ranges (ADR-0032)
 │  ├─ FxUploadSystem                     VFX  FxEvents → VFX Graph event buffers
 │  ├─ AudioEventDrainSystem              AUD  SfxEvents → voice-capped playback
 │  ├─ CameraTargetSyncSystem             CAM
@@ -387,7 +387,7 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | Cell contents and `Cell.Hp` | `DamageResolveSystem` at runtime (damage events and the `CellRestoreRequest` channel, ADR-0016); `EditSession.Commit` in the editor | Read only; other features post `CellRestoreRequest`s |
 | `BlockInstance.FunctionHp` | `DamageResolveSystem` | Read |
 | `VoxelGrid.Revision`, `BrickDirty` | `DamageResolveSystem`, `SplitSystem`, `GridSpawnSystem` | Read |
-| Brick render mesh (`MaterialMeshInfo`) | `BrickMeshApplySystem` | — |
+| Brick render content (`BrickRenderState`, pooled ranges) | `BrickMeshApplySystem` | — |
 | Grid `PhysicsCollider` | `ColliderSwapSystem` | — |
 | `PhysicsMass` | `GridMassUpdateSystem` | — |
 | `VoxelGrid.Kind` | `GridSpawnSystem` (initial), `ShipDeathSystem` (Ship → Hulk) | Read |
@@ -479,11 +479,11 @@ The game must hold 1M-cell stations, 30-ship battles and 50,000 debris particles
 
 1. **Incremental, never global.** Every piece of derived per-grid data is updated for **dirty pieces only**: meshes, colliders, mass, stats, integrity, LOD. Any pass that touches every cell of a grid needs a spec decision that names it and a budget in 06. Removing one cell must cost O(brick) for rebuilds plus O(bricks of that grid) at most for re-assembly, never O(cells of the grid).
 2. **Time-sliced with explicit budgets.** Unbounded work, such as remeshing after a big explosion, spawning a 1M-cell grid or streaming a star system, is queued and processed under a per-frame budget measured in microseconds or items, in a stated priority order. Examples of priority: colliders of grids near the player before meshes of far grids; visible before hidden. No frame may exceed the 8 ms voxel spike budget.
-3. **Rendering through registered IDs.**
-   - Every brick mesh is a `Mesh` registered **once** with `EntitiesGraphicsSystem.RegisterMesh`, referenced by `BatchMeshID` in `MaterialMeshInfo`, and rewritten **in place** (`Mesh.ApplyAndDisposeWritableMeshData`, explicit bounds, then update `RenderBounds`). It is unregistered and destroyed through `DeferredDisposalSystem`.
-   - Materials are shared, one per material layer, registered once.
-   - Per-instance variation comes from material-property components or the palette, never from material instances.
-   - **Never** give entities their own `RenderMeshArray`.
+3. **Shared pooled brick rendering (ADR-0032).**
+   - Bricks own generational handles and packed ranges in one shared GPU vertex/index pool per material. They have no individual Mesh, MaterialMeshInfo or RenderMeshArray. Completed snapshot meshes upload in bounded batches; no retained CPU geometry copy. Deleted/replaced ranges and grown buffers retire after at least three frames.
+   - Functional entities keep meshes/materials registered once with Entities Graphics; registered meshes retire through DeferredDisposalSystem. One shared brick material covers all texture-array layers, and one shared prop material covers functional/prop meshes.
+   - Per-instance variation comes from material-property data or the palette, never material instances. Neither pool pages nor shared components are allocated per individual brick.
+   - Explicit camera input, Burst frustum/shadow culling and change-driven matrix upload preserve module direction and the existing memory/timing gates.
 4. **Shared components only at low cardinality.** Allowed: `StarSystemMember` (≤ 2 values) and the components Entities Graphics adds itself. A shared component whose value is unique per grid, per brick or per ship splits chunks down to one entity each and is forbidden.
 5. **Large buffers live outside chunks.** Any dynamic buffer that is typically larger than 128 bytes is declared `[InternalBufferCapacity(0)]`.
 6. **Batch structural changes.**

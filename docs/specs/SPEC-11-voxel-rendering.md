@@ -13,7 +13,7 @@
 
 ## 1. Purpose
 
-This spec turns voxel bricks into pixels at a cost proportional to the number of *changed* bricks, not cells. Each non-empty brick owns one packed 8-byte-vertex culled-face mesh built by a Burst job from an 18³ snapshot, registered once with Entities Graphics and rewritten in place when the brick changes. It defines the mesher (face culling across brick borders, ambient occlusion, vertex welding), the per-frame build/apply budgets and priorities, the brick shader contract the art team fills after SPEC-80, LOD1 and LOD2, the `Dormant` tag, prop block instancing, the shadow policy, and the fallback renderer if Entities Graphics cannot carry thousands of runtime meshes. The old prototype drew every voxel as an entity with 12 triangles including hidden faces (~66 triangles per voxel, O(voxels) per frame; R24, 01 §5.1).
+This spec turns voxel bricks into pixels at a cost proportional to the number of *changed* bricks, not cells. Each non-empty brick owns packed ranges in a shared GPU pool, built by a Burst job from an 18³ snapshot and rewritten when the brick changes (accepted ADR-0032 after REN-002 no-go). It defines the mesher (face culling across brick borders, ambient occlusion, vertex welding), the per-frame build/apply budgets and priorities, the brick shader contract the art team fills after SPEC-80, LOD1 and LOD2, the `Dormant` tag, prop block instancing, the shadow policy, and the fallback renderer if Entities Graphics cannot carry thousands of runtime meshes. The old prototype drew every voxel as an entity with 12 triangles including hidden faces (~66 triangles per voxel, O(voxels) per frame; R24, 01 §5.1).
 
 ## 2. Scope
 
@@ -34,9 +34,9 @@ This spec turns voxel bricks into pixels at a cost proportional to the number of
 
 ## 3. Decisions (binding)
 
-1. **One mesh per brick, registered once.** A brick's `Mesh` is created and registered with `EntitiesGraphicsSystem.RegisterMesh` on its first build, referenced by `BatchMeshID` in `MaterialMeshInfo`, rewritten in place with `Mesh.ApplyAndDisposeWritableMeshData` on every rebuild, and unregistered and destroyed through `DeferredDisposalSystem` when the brick dies (architecture §11.3). No per-entity `RenderMeshArray`.
-2. **One shared registered material for all bricks** (`BrickMaterial`), one for props (`PropMaterial`). `BlockDef.MaterialLayer` (0..63) is a `Texture2DArray` slice, not a separate material, so one draw-command family covers every block look. Per-cell variation comes from vertex data (layer, palette colour, damage), never from material instances.
-3. **Packed vertex: 8 bytes** — `Position` UNorm8×4 `(x, y, z, 0)` with x,y,z = half-cell coordinates 0..32 inside the brick (ADR-0027), and `TexCoord0` UNorm8×4 `(normalIndex, layer, colour, aoDamageFlags)`. Shaders recover integers with `round(v * 255)` and multiply positions by 0.5 to obtain cell units. Mesher indices are uint; GPU indices use UInt16 when vertex count ≤ 65,536 and UInt32 otherwise (ADR-0030). A legal painted long-slope tiling needs at least 73,728 vertices; the isolated cube checkerboard still uses 49,152. Meshes are in cell units; the brick entity's `LocalTransform.Scale = CellSize`.
+1. **Pooled brick geometry (ADR-0032).** One generational pool handle per applied brick, exact packed ranges within shared pages, no individual Mesh/MaterialMeshInfo. Replacement/deletion retires ranges for three frames; functional entities retain registered meshes.
+2. **One shared material for all bricks**, one for props. Layers 0..63 select texture-array slices, not materials. No material instances per entity.
+3. **Packed vertex: eight bytes**, half-cell position and four attribute bytes unchanged (ADR-0027). Pool indices are uint (ADR-0032); mesher uint output and all five shapes remain exact (ADR-0030). Brick transforms include CellSize. Pooled geometry has no retained CPU copy.
 4. **Jobs that may outlive the frame read only snapshots.** `BrickMeshBuildSystem` copies each brick plus a 1-cell border from its 26 neighbours into an 18³ `uint` snapshot (23,328 B) owned by the system, then schedules the mesher on the snapshot. Results are applied only after `JobHandle.IsCompleted` (architecture §5.1).
 5. **Culled faces, not greedy, at LOD0.** A face is emitted iff the neighbour cell (inside or outside the brick) does not cover it fully. Greedy merging is used only at LOD1/LOD2 because it fights per-cell colour, AO and damage. Coplanar vertices with identical attributes are welded inside each axis slice.
 6. **Budgeted, prioritised rebuilds.** At most one mesh batch is in flight; a batch holds 16..128 bricks sized so the main-thread apply stays under 2.0 ms. Priority order: `Damage` > `Neighbour` > `Spawn` > `Lod`, FIFO within a priority (SPEC-10 enqueues; this spec dequeues).
@@ -125,6 +125,7 @@ public struct VoxelRenderConfig : IComponentData            // singleton, create
 {
     public UnityObjectRef<Material> BrickMaterial;           // BrickLit material
     public UnityObjectRef<Material> PropMaterial;            // PropInstanced material
+    public UnityObjectRef<ComputeShader> BrickPoolCopy;      // explicit GPU growth copy (ADR-0032)
     public UnityObjectRef<Texture2D> Palette;                // 256×1 RGBA32, point-filtered, built from VoxelPaletteDefinition
     public NativeArray<UnityObjectRef<Mesh>> PropMeshes;     // ContentService.PropMeshes, index = BlockDef.PropMeshIndex
     public int MeshBatchMin;          // 16
@@ -197,8 +198,8 @@ public struct BrickMeshBatch : IComponentData                // singleton
 
 public struct BrickRenderState : ICleanupComponentData       // on every brick (added by SPEC-10 after Instantiate)
 {
-    public UnityObjectRef<Mesh> Mesh;    // default until the first build
-    public BatchMeshID MeshId;           // Null until registered
+    public BrickPoolHandle Handle;     // Slot 0 until first apply; generation rejects stale references
+    public PoolRange Vertices, Indices; // exact reserved ranges in the shared pools
     public int VertexCount, IndexCount;  // of the current content
     public byte ShownLod;                // 0 or 1; 255 = nothing applied yet
     public byte HasMesh;                 // 1 after the first apply
@@ -229,6 +230,7 @@ public sealed class VoxelRenderConfigDefinition : ContentDefinition   // single 
 {
     [SerializeField] private Material brickMaterial;       // BrickLit shader; placeholder until SPEC-81
     [SerializeField] private Material propMaterial;        // PropInstanced shader
+    [SerializeField] private ComputeShader brickPoolCopy;   // explicit GPU buffer-growth copy
     [SerializeField] private VoxelPaletteDefinition palette;
     [SerializeField, Range(16, 128)] private int meshBatchMin = 16;
     [SerializeField, Range(16, 256)] private int meshBatchMax = 128;
@@ -355,14 +357,17 @@ Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `Hollow
 
 - **Group:** `WorldGroup`, `[UpdateAfter(typeof(GridLodSystem))]`. For grids whose bounding-sphere distance to the camera exceeds `Lod2Distance` (hysteresis 10%): a proxy entity (child of the root, created by `GridSpawnSystem` at spawn with `MaterialMeshInfo` disabled) gets a mesh built from 4×-downsampled brick masks (4³ super-cells per brick, solid if ≥ 32 of 64 cells, greedy merge over the whole grid, AO 3, layer and colour of the grid's most common palette entry); the proxy's `MaterialMeshInfo` is enabled and every brick's is disabled (job). Proxy rebuild when `VoxelGrid.Revision` changed and the grid is at LOD2, at most 1 proxy rebuild per frame, job on a mask snapshot. Proxy `RenderFilterSettings` has `ShadowCastingMode.Off` (a second shared value; cardinality 2).
 
-### 5.10 Fallback renderer (only if REN-002 is no-go; needs an ADR)
+### 5.10 Pooled renderer (REN-002 no-go; accepted ADR-0032)
 
-`BrickPoolRenderer` replaces registered meshes:
-1. One vertex pool (`GraphicsBuffer`, `Target.Raw`, 8-byte vertices) and one index pool (`Target.Index`, 32-bit) per material, paged in 4,096-vertex / 6,144-index pages with a native free-list allocator; `BrickRenderState` stores page runs instead of `Mesh/MeshId`.
-2. The mesher writes into `NativeArray`s instead of `MeshDataArray`; apply uploads with `GraphicsBuffer.SetData(array, 0, dstStart, count)` (no CPU copy is kept).
-3. Per frame, a Burst culling job tests each brick's world AABB against the camera frustum (6 planes) and adds every brick within the shadow distance for shadow casting; it writes one `GraphicsBuffer.IndirectDrawIndexedArgs` per visible brick (`indexCountPerInstance`, `instanceCount = 1`, `startIndex`, `baseVertexIndex`, `startInstance = brick slot`) and a per-brick `float4x4` buffer updated only for bricks whose `LocalToWorld` changed.
-4. One `Graphics.RenderPrimitivesIndexedIndirect(rp, MeshTopology.Triangles, indexPool, args, commandCount)` per material with shadows on; shader `BrickLitIndirect.shader` uses `UnityIndirect.cginc` (`InitIndirectDrawArgs`, `GetIndirectInstanceID`) and vertex pulling from the raw pool by `SV_VertexID`; it includes the same `BrickVertexDecode.hlsl` and `BrickSurface.hlsl`.
-5. Entities Graphics still draws functional entities; bricks lose `MaterialMeshInfo`.
+`BrickPoolRenderer` owns one shared raw vertex and uint index pool per material. `PageAllocator` best-fit allocates exact element ranges and coalesces frees; page sizes 4,096 vertices / 6,144 indices are capacity granularity only. Defaults reserve 160/512 pages and 1,024 slots; optional smaller test capacities exercise growth. Grow ≥1.5× rounded to pages, copy with configured `BrickPoolCopy.compute`, and retain old buffers three frames. Rewrites reuse fitting ranges; replacements, empty results and deletion retire ranges three frames before reuse. Slot zero is invalid; generations reject stale handles.
+
+The explicit API is `BrickPoolRenderer(Material, ComputeShader, vertexCapacity, indexCapacity, slotCapacity)`, `Upload(handle, NativeArray<PackedBrickVertex>, NativeArray<uint>, AABB, float4x4) → handle`, `Release(handle)`, `SetTransform(handle, matrix)`, `SetVisible(handle, bool)`, `Reserve(vertices, indices, slots)`, `AdvanceFrame(uint)`, `Render(Camera, shadowDistance)`, `Dispose()`. Native transform views/updates support Burst callers without per-entity managed loops. Range/count and memory accessors expose actual reservations and retired resources for integration/statistics. Invalid/stale handles throw; the default handle allocates on Upload, and Release(default) does nothing. Empty uploads remain valid applied slots with no draw.
+
+`BrickCullJob` runs in Burst over slot records: transform local AABB, test all six frustum planes, include off-frustum bounds within shadow distance, write one indexed argument per selected brick (`startInstance = slot`, `baseVertexIndex = vertex range start`). It also tracks changed matrix upload bounds and combined world draw bounds. Reused native arrays/lists avoid per-frame GC. The adapter uploads arguments/changed matrices and issues one `Graphics.RenderPrimitivesIndexedIndirect` call per material. Shader `BrickLitIndirect.shader` uses `UnityIndirect.cginc`, raw vertex pulling, shared decode/surface and the same forward/shadow/depth/depth-normal passes as BrickLit. Camera is passed explicitly; no runtime asset path or object search.
+
+No CPU geometry copies persist after upload. Accounting includes allocated GPU capacity plus retired buffers, native allocator/slot/matrix/argument/retirement storage and later integration's in-flight outputs. The reference memory gate stays 36 MB; REN-003 reports its measured pool addition against the corrected 10,998,784 B non-render baseline, and TST-004 verifies the integrated renderer/ECS/batch peak.
+
+**REN-010/011 integration overrides the earlier registered-mesh recipes in §4.2/5.4–5.6:** REN-010 uses a native array of owned unsafe vertex/index result lists (one distinct pair per work item); no MeshDataArray. Snapshot/Burst/batch timing and access rules stay unchanged. Complete and dispose every result on shutdown; REN-011 discards dead-brick outputs and uploads live ones, then releases result geometry. Apply records the handle/ranges/counts/LOD/props, sets pool visibility instead of MaterialMeshInfo, and updates the same EMA. `VoxelRenderManagedState` owns the pool; scratch Mesh, ApplyList and PendingData disappear when their replacing systems land. Cleanup transfers destroyed handles to pool retirement before removing BrickRenderState, even outside gameplay. REN-011 registers only functional meshes/materials and sets readiness once the pool/shape/orientation/prop inputs exist. Its explicit camera bridge runs after CameraTargetSyncSystem, through a Voxel-owned reference published by that camera owner. REN-012/015 use pool visibility for bricks. Functional Entities Graphics and existing mesh retirement remain unchanged. Pool geometry ignores ReleaseCpuMeshCopies (always no copy).
 
 ## 6. Public API
 
@@ -379,9 +384,9 @@ Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `Hollow
 
 | Situation | Required behaviour |
 |---|---|
-| Brick destroyed while its build is in flight | Its data is applied to the scratch mesh; nothing else happens; cleanup retires its mesh if it had one |
+| Brick destroyed while its build is in flight | Its native output is disposed without upload; cleanup retires its pool handle if applied (ADR-0032) |
 | Brick re-dirtied while in flight | It was removed from `Pending` at dequeue, so it is queued again and rebuilt after this batch |
-| Mesh result with 0 vertices (fully enclosed brick) | Mesh keeps its registration; `MaterialMeshInfo` disabled |
+| Mesh result with 0 vertices (fully enclosed brick) | Applied slot persists; geometry retires and drawing is disabled (ADR-0032) |
 | Neighbour brick missing (grid edge or not yet spawned) | Treated as air: border faces are emitted; when it spawns, SPEC-10 enqueues it, and its first build marks nothing — the edge brick keeps faces until it is next rebuilt. `GridSpawnSystem` enqueues spawned bricks in brick-record order, so most neighbours exist before their meshes build; remaining hidden-face overdraw is accepted |
 | Diagonal-neighbour change (edge/corner of a brick) | AO of the diagonal brick is not rebuilt until it is next dirtied (accepted cosmetic error) |
 | Wedge faces next to wedge faces | Partial faces are culled only by full neighbour faces; coincident back-to-back triangles are emitted (back-face culled) |
@@ -443,7 +448,7 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Tier:** frontier — F2/F4: GPU buffer pools, indirect drawing, budgets
 - **Depends on:** `REN-002`, `REN-008`
 - **Do:** If REN-002 records **go**, set `dropped` with the measurement reference. If **no-go**, after the ADR is accepted implement §5.10 against REN-008’s shared surface shader, and specify the pooled apply/cleanup integration for REN-010/011 (those systems do not exist yet, Q23); update §3 decisions 1–3 in the same commit. REN-011 implements the pooled callers.
-- **Files:** `Assets/Game/Voxel/Rendering/{BrickPoolRenderer,PageAllocator,BrickCullJob}.cs`; `Assets/Game/Voxel/Rendering/Shaders/BrickLitIndirect.shader`; `Assets/Game/Tests/PlayMode/Voxel/BrickPoolRendererTests.cs`
+- **Files:** `Assets/Game/Voxel/Rendering/{BrickPoolRenderer,PageAllocator,BrickCullJob,BrickPoolHandle,PoolRange}.cs`; `Assets/Game/Voxel/Rendering/Shaders/{BrickLitIndirect.shader,BrickPoolCopy.compute}`; `Assets/Game/Tests/PlayMode/Voxel/BrickPoolRendererTests.cs`
 - **Acceptance criteria:**
   - [ ] All REN tests pass on the fallback; REN-002 (a)–(c) targets met.
 - **Tests:** `BrickPoolRendererTests.PageAllocator_NoOverlap_Fuzz`, `.Render_MatchesReferenceScreenshot`, `.Idle2500_UnderBudget`.
@@ -540,10 +545,10 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Do:** Implement `BrickMeshApplySystem` (§5.5) with `ApplyResultsJob`, registration, managed state; `BrickRenderCleanupSystem` (§5.6); `BrickRenderStats.Gather`.
 - **Files:** `Assets/Game/Voxel/Rendering/{BrickMeshApplySystem,ApplyResultsJob,BrickRenderCleanupSystem,VoxelRenderManagedState,BrickRenderStats}.cs`; `Assets/Game/Tests/PlayMode/Voxel/BrickMeshApplyTests.cs`
 - **Acceptance criteria:**
-  - [ ] Each brick registers exactly one mesh in its lifetime (registration counter) across 20 rebuilds; `MaterialMeshInfo.MeshID` never changes for a living brick.
-  - [ ] A destroyed brick's mesh is unregistered and destroyed 3 frames later; entity count of cleanup-only entities returns to 0.
-  - [ ] Empty results disable `MaterialMeshInfo`; `RenderBounds` equals the mesh bounds.
-  - [ ] Apply of 128 bricks ≤ 2.5 ms main thread; 0 GC per frame after warm-up excluding first-build `new Mesh`.
+  - [ ] Each brick retains one generational pool handle across 20 rebuilds; geometry ranges may relocate only when capacity is insufficient (ADR-0032).
+  - [ ] A destroyed brick stops drawing immediately; its pool ranges/slot are reusable only after 3 frames; cleanup-only entity count returns to 0.
+  - [ ] Empty results disable pool drawing; pool local bounds equal completed mesh bounds.
+  - [ ] Apply of 128 bricks ≤ 2.5 ms main thread; 0 GC per frame after warm-up excluding first-build pool growth.
 - **Tests:** `BrickMeshApplyTests.RegisterOnce_RewriteInPlace`, `.DestroyedBrick_MeshRetired`, `.EmptyMesh_Hidden`, `.Bounds_Updated`, `.ApplyBudget128`, `.NoGcSteadyState`.
 
 ### REN-012 — GridLodSystem, Dormant and LOD switching
@@ -627,6 +632,8 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 22 | Can dynamic meshes release CPU copies after each apply? | Keep copies for mutable registered meshes | Tech lead | Resolved by REN-002 on Metal: UploadMeshData(true) prevents subsequent writable-mesh apply and shows no drop in the runtime-memory counter; releaseCpuMeshCopies defaults to false. |
 | 23 | Fallback task precedes its shared surface shader and asks to switch apply/cleanup systems that do not exist yet | Finish REN-008’s shared shader first, then build the standalone pool and specify future integration | Tech lead | Resolved 2026-10-11: REN-003 now depends on REN-008 and returns to todo until it is done. REN-010/011 will consume the accepted pooled contract instead of building a disposable registered-mesh implementation. No fallback implementation or performance success is claimed yet; ADR-0032 remains proposed. |
 | 24 | SPEC-11 shader properties conflict with the approved art contract and request a legacy bitmap | Use canonical DESIGN-SYSTEM properties and procedural placeholder inputs | Tech lead | Resolved ADR-0040: shared surface, unchanged packed geometry, no exposure/scorch alias, canonical paint/mask/damage and prop semantics; no third-party bitmap or new visual direction. |
+
+| 25 | How does the fallback preserve memory, explicit camera input and future apply/cleanup ownership? | Exact packed ranges, GPU growth copy and explicit owned pool; future systems consume pooled output | Tech lead | Resolved ADR-0032: page granularity only for capacity; generational slots and three-frame retirement; full allocated/retired accounting; REN-010/011 integration specified without placeholder systems. |
 
 ## 11. References
 
