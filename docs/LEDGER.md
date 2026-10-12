@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 19 | 1 | 1 | 0 | 85 | 0 | 106 | 12 |
+| M1 | 19 | 0 | 1 | 0 | 86 | 0 | 106 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 8 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -111,7 +111,7 @@
 | FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-11 | 745e10a | Fleet/FLET ownership, player spawn/writeback, report warnings and recovered-id reservation |
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | yes | done | astra (gpt-6) | 2026-10-11 | 4efcb47 | Serialized creative sandbox, optional player; normal campaign resets flags |
 | FND-017 | Imported ship flight checkpoint | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-010, REN-001, INP-001, DEV-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0e253e1 | Imported Fighter renders, flies, collides and saves/loads; real screenshots; ADR-0044/0045 |
-| INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Held-key pause/resume through production input bridge |
+| INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | 5fcd282 | Real bridge/nav/sampler: held W neutral on pause, resumes without phantom edges |
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 66702c3 | Real input mapping, latched edges, collider/plane aim; ten required tests pass |
 | INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | yes | todo |  |  |  |  |
 | INP-007 | Frame-rate independence test | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-005, SPEC-20 | yes | todo |  |  |  |  |
@@ -833,6 +833,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — INP-004 done — astra (gpt-6)
+
+- **Implementation 5fcd282:** the specified `ContextIntegrationTests.HeldKey_AcrossPause` uses the real InputService, InputServiceBridge, UINavigator, PauseService and PlayerInputSampleSystem in an isolated ECS world. A genuine Interact press seeds a nonzero counter; W stays held across opening a pausing screen and closing it through injected Escape / Global.Back.
+- **Verified behavior:** pause disables Flight and produces **Thrust 0 in the same frame**, with timeScale 0 and unchanged edge counters. Closing restores Flight; the next Input System initial-state check restores **Thrust 1** without a new W press. All ten edge counters retain their values through pause, close and the following frame. No production fix was needed. Test devices, action ownership, native world and manual-update setting are cleaned up.
+- **Validation:** focused PlayMode **1/1 passed**; compile **zero C# warnings**; full EditMode **734 pass, 1 advisory timing miss, 1 explicit skip** (MeshBuild128 **0.8795 ms** vs 0.5, performance deferred); full headless PlayMode **86 pass, 12 GPU-only skips**. Docs **507 tasks / zero errors**. Zero optimization passes. Evidence `Logs/playtest/inp004/`; pre-run QualitySettings restored.
+- **Next:** UI-006 binding/converters, then UI-007 usable controls and remaining M1 tasks. AI-001 and WPN-001 are merged, but combat behavior remains M2. DEV-009 still needs the implemented canonical spawner and world-coordinate services. No new visual result or owner decision; the Fighter flight screenshot remains current. HANDOFF updated.
 
 ### 2026-10-12 — AI-001 done — astra (gpt-6)
 
