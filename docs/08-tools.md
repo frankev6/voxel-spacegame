@@ -59,6 +59,7 @@ These work with no Editor open (verified 2026-10-10):
 - **Rendering or real shader compilation needs the GPU:**
   - Run `-batchmode` **without** `-nographics`. Metal works headless. For renderer performance, also pass `-force-gfx-mt`: batch PlayMode otherwise selected SingleThreaded despite the project setting (REN-002). Log `SystemInfo.renderingThreadingMode` to verify.
   - Set `ShaderUtil.allowAsyncCompilation = false`.
+  - PlayMode test coroutines can resume after rendering. Submit per-frame `Graphics.RenderMeshPrimitives` work from `RenderPipelineManager.beginCameraRendering` before the test camera is culled; a draw issued only immediately before `yield return null` can miss every captured frame (REN-008). Unsubscribe in `finally`.
   - Throw away the first `camera.Render()` after `NewScene`, because it draws only the clear colour.
   - Back up `ProjectSettings/QualitySettings.asset` before the run and restore that backup with `cp` afterward; GPU runs may re-save its version. Do not restore from Git over uncommitted settings. Back up/restore PlayerSettings too if enabling `enableFrameTimingStats` for measurement.
   - In this Metal Editor, `Render Thread` is absent and the `CPU Render Thread Frame Time` counter reports zero even with multithreaded rendering. `RenderLoop` provides active render work, not full thread frame time. FrameTiming GPU results arrive sparsely: collect 300 unique positive timestamps for a 300-sample GPU report; never treat absent/zero timings as a passed gate.

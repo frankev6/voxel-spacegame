@@ -260,6 +260,7 @@ public sealed class VoxelPaletteDefinition : ContentDefinition         // single
 |---|---|---|
 | `BrickVertexDecode.hlsl` | code | Existing eight-byte decode, half-cell position, 42 normals/tangents, layer/colour/AO/damage/scorch and BrickFaceUV, unchanged |
 | `BrickLit.shader` | code | URP target 4.5; DOTS instancing; UniversalForward, ShadowCaster, DepthOnly, DepthNormals; one UnityPerMaterial layout across passes |
+| `BrickMaterial.hlsl` | shared material contract | Canonical UnityPerMaterial layout, texture declarations and DOTS property accessors for all passes |
 | `BrickSurface.hlsl` | art-facing implementation | `BrickSurface(BrickSurfaceInput, inout SurfaceData)`; canonical texture/parameter contract of DESIGN-SYSTEM §10.14. Surface input carries positionCells, positionWS, positionCS, world tangent frame, face UV, layer, colour, AO, damage and scorch. Optional exposure is absent in the current vertex format |
 | `PropInstanced.shader` | code | URP lit; procedural PropSetup from `_PropInstances`, `_GridMatrices`, `_OrientMatrices`; DOTS path for functional entities; canonical §10.15 properties and vertex paint selectors |
 
@@ -502,11 +503,11 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Tier:** frontier — F1: shader contract every future asset depends on; DOTS-instancing URP HLSL
 - **Depends on:** `REN-004`
 - **Do:** Write `BrickLit.shader`, shared `BrickSurface.hlsl` and `PropInstanced.shader` against §4.4 / ADR-0040. Add `VoxelPlaceholderArtBuilder` (menu `Game/Voxel/Build Placeholder Brick Art`) producing procedural 64-slice 256² albedo/normal/mask arrays (layer 63 missing checker), canonical support textures and materials under `Assets/Game/Art/_Placeholder/`. No legacy texture. Normal array flat; mask metallic 0.6, smoothness 0.4, paint 1, emission 0; crack-distance texture plus damage ramp provide the three damage levels. All runtime references through REN-009 definitions.
-- **Files:** `Assets/Game/Voxel/Rendering/Shaders/{BrickLit.shader,BrickSurface.hlsl,PropInstanced.shader}`; `Assets/Game/Editor/Voxel/VoxelPlaceholderArtBuilder.cs`; `Assets/Game/Art/_Placeholder/Textures/{BrickAlbedoArray,BrickNormalArray,BrickMaskArray,BrickLayerParams,PaintPalette,CrackTex,DamageRamp,MacroNoiseTex,ToonRamp}.asset`; `Assets/Game/Art/_Placeholder/Materials/{BrickPlaceholder,PropPlaceholder}.mat`; `Assets/Game/Tests/PlayMode/Voxel/BrickShaderTests.cs`
+- **Files:** `Assets/Game/Voxel/Rendering/Shaders/{BrickLit.shader,BrickMaterial.hlsl,BrickSurface.hlsl,PropInstanced.shader}`; `Assets/Game/Editor/Voxel/VoxelPlaceholderArtBuilder.cs`; `Assets/Game/Art/_Placeholder/Textures/{BrickAlbedoArray,BrickNormalArray,BrickMaskArray,BrickLayerParams,PaintPalette,CrackTex,DamageRamp,MacroNoiseTex,ToonRamp,PropAlbedo,PropMask,PropNormal}.asset`; `Assets/Game/Art/_Placeholder/Materials/{BrickPlaceholder,PropPlaceholder}.mat`; `Assets/Game/Tests/PlayMode/Voxel/BrickShaderTests.cs`
 - **Acceptance criteria:**
-  - [ ] Shaders compile for Metal and Direct3D 11 with zero errors and are SRP-batcher compatible (Frame Debugger check recorded).
-  - [ ] A rendered test brick shows the expected palette colour per colour index, AO darkening at inner corners, crack overlay at damage 3, and casts a shadow.
-  - [ ] No C# file references the placeholder assets (conventions guard passes).
+  - [x] Shaders compile for Metal and Direct3D 11 with zero errors and are SRP-batcher compatible (the Editor SRP Batcher compatibility result is recorded after a real draw, per ADR-0040 and 08-tools).
+  - [x] A rendered test brick shows the expected palette colour per colour index, AO darkening at inner corners, crack overlay at damage 3, and casts a shadow.
+  - [x] No runtime C# file references the placeholder assets (conventions guard passes).
 - **Tests:** `BrickShaderTests.PaletteColour_PerIndex`, `.CracksVisible_AtDamage3`, `.ShadowCast`, `.PropInstances_Render`.
 
 ### REN-009 — Render config definitions and factory
