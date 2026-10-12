@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 43 | 0 | 0 | 0 | 61 | 0 | 104 | 16 |
+| M1 | 42 | 0 | 0 | 0 | 62 | 0 | 104 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 4 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -180,7 +180,7 @@
 | FLT-008 | PlanarConstraintSystem | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-001, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-11 | 0be9bf9 | Vertical impulse constraint; real integration; three required tests |
 | FLT-009 | Flight behaviour scenarios | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | standard | FLT-005, FLT-007, FLT-008, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 4b4054d | Five physical scenarios; torque, ram, lost thruster, turn and frame-independent edges |
 | FLT-010 | Flight tuning against legacy blueprints | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-009, SPEC-72 | yes | todo |  |  |  |  |
-| FLT-011 | Flight performance and determinism | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-007, FLT-008, TST-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Whole-flight performance and exact per-tick determinism |
+| FLT-011 | Flight performance and determinism | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M1 | frontier | FLT-007, FLT-008, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0278edb | Six flight cost/GC gates pass; 600 ticks × 3 ships identical across 8 runs |
 | WPN-001 | Public contract types | [SPEC-21](specs/SPEC-21-weapons.md) | M1 | standard | CORE-001, DATA-001, VOX-001, DMG-001, FLT-001 | yes | todo |  |  |  |  |
 | AI-001 | Public contract types | [SPEC-23](specs/SPEC-23-ai.md) | M1 | standard | CORE-001, DATA-001, VOX-001, WPN-001 | no | todo |  |  |  |  |
 | UI-001 | Public contract types | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | CORE-001, INP-001 | yes | todo |  |  |  |  |
@@ -742,6 +742,13 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 PHY-002 exact body-pair schedule (Physics 6.6.0): `state.Dependency = job.Schedule(SystemAPI.GetSingletonRW<SimulationSingleton>().ValueRW, ref SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld, state.Dependency);` with `Execute(ref ModifiableBodyPair pair)` and `pair.Disable()`. The §5.12 group names and signature work unchanged. Local reproduction/evidence: `Logs/tools/phy002-PhysicsCapabilitiesSpike.cs`, `phy002-report.txt`, `phy002-results.xml`, `phy002-headless.log`. The disposable source is removed from Assets as specified.
 
 ## Log
+
+### 2026-10-11 — FLT-011 flight cost and determinism gates (astra, gpt-6)
+
+- Three required performance tests add six passing gates: 50 Ship20k-sized roots × 20 thrusters, main-thread scheduling, player command application, 100-body plane work, 200-instance cache rebuild and zero managed allocation. Final medians: **0.08983 ms** propulsion workers, **0.001041 ms** propulsion main, **0.000666 ms** player apply, **0.003166 ms** plane workers, **1.162 µs** rebuild per ship, **0 B** managed allocation. Full measurements and scopes are above.
+- The required determinism test compares every transform/velocity field by bits for 600 ticks × 3 ships. All **eight runs** (1, 2, 0/1, 6 ticks/frame × 1/17 workers) match; the scripted sequence includes thrust, turning, boost, braking and coast. No simulation implementation changes were needed.
+- Initial worker marker names were absent: discovered exact **Burst Jobs** handles, required positive samples, and documented IJobEntity naming in 08-tools. Reference settings are scoped once around the performance fixture, then restored. A test-only nonzero-yaw assertion now checks the whole script rather than a neutral-command tick.
+- Validation: compile **zero C# warnings**; EditMode **668 passed + 1 explicit skipped**, PlayMode **60 passed**; all **44/44** performance gates pass; docs **505 tasks / zero errors**. Implementation: `0278edb`. Next: FLT-010 legacy tuning evidence, then remaining M1 renderer/camera/UI work.
 
 ### 2026-10-11 — FLT-009 combined flight scenarios (astra, gpt-6)
 
