@@ -1,0 +1,64 @@
+scenario r15_editor_no_dupe
+desc "Discarding ten hull removals cannot duplicate inventory"
+status draft
+tags regression R15
+timeout 180
+# Activation prerequisite: bind the Ark leave option and verify viewport clicks on the owning editor task.
+# Provisional 1280x720 viewport coordinates; these drafts have not been executed.
+newgame seed=19019
+wait player.ready timeout=60
+let n = inv("block_hull")
+interact body=ark_station
+wait context == "Dialog" timeout=5
+key keys=Escape
+wait ui.visible("Edit Ship") timeout=5
+click target=dock-edit-ship
+wait context == "Editor" timeout=5
+click target=editor-tool-remove
+# Ten distinct hull cells must be verified before activation; no mirrored removal.
+mouse x=600 y=320 button=left down=true
+wait frames=1
+mouse button=left down=false
+wait frames=1
+mouse x=615 y=320 button=left down=true
+wait frames=1
+mouse button=left down=false
+wait frames=1
+mouse x=630 y=320 button=left down=true
+wait frames=1
+mouse button=left down=false
+wait frames=1
+mouse x=645 y=320 button=left down=true
+wait frames=1
+mouse button=left down=false
+wait frames=1
+mouse x=660 y=320 button=left down=true
+wait frames=1
+mouse button=left down=false
+wait frames=1
+mouse x=600 y=335 button=left down=true
+wait frames=1
+mouse button=left down=false
+wait frames=1
+mouse x=615 y=335 button=left down=true
+wait frames=1
+mouse button=left down=false
+wait frames=1
+mouse x=630 y=335 button=left down=true
+wait frames=1
+mouse button=left down=false
+wait frames=1
+mouse x=645 y=335 button=left down=true
+wait frames=1
+mouse button=left down=false
+wait frames=1
+mouse x=660 y=335 button=left down=true
+wait frames=1
+mouse button=left down=false
+wait frames=1
+click target=editor-leave
+wait ui.visible("Discard") timeout=5
+assert ui.visible("refunds 10") "ten removed blocks in pending BOM"
+click target=confirm-discard
+wait player.ready timeout=30
+assert inv("block_hull") == $n "cancel gives no free blocks"

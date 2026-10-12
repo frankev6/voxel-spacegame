@@ -751,6 +751,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 175 | 2026-10-12 | SPEC-70 DEV-016 | Absolute recording ticks and absent universe position prevent literal M1 replay acceptance | Shift the recording clock; compare real local flight position | Tech lead | Resolved SPEC-70 Q22: existing cmdrec text in `.pcr`, bounded stems, session-bound playback. Test real seed-7 Fighter input/physics for 300 exact ticks; extend local-position comparison to canonical UniversePosition when SPEC-30/31 exists. No fabricated coordinates or alternate spawner. |
 
 | 176 | 2026-10-12 | SPEC-70 DEV-007 | Coroutine parameterization and unimplemented draft vocabulary | Native UnityTest ValueSource; header-only draft inspection | Tech lead | Resolved SPEC-70 Q23: one sorted case per smoke/regression file, drafts ignored before resolving steps, active cases use strict parser/real runner and the specified frame bound. |
+| 177 | 2026-10-12 | SPEC-70 DEV-019 | Future editor input cannot yet be exercised | Keep explicit draft activation prerequisites | Tech lead | Resolved SPEC-70 Q24: provisional viewport clicks, refund text, changed paint colour and Ark leave option must be bound by owning systems before activation. Parse-only fixtures expose only declared future vocabulary; no production stubs. R30 verifies return target identity and both entry rings. |
 
 ## Measurements
 

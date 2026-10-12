@@ -1,0 +1,12 @@
+scenario r25_r26_ship_death_no_ecb_errors
+desc "Crowded hostile frigates produce hulks without deferred entity errors"
+status draft
+tags regression R25 R26
+timeout 180
+sandbox seed=19019
+wait player.ready timeout=30
+spawn blueprint=ship_frigate count=30 spacing=5 team=2 ai=true
+wait ticks=1200
+assert logs.exceptions == 0 "no exceptions"
+assert !logs.contains("EntityCommandBuffer") "no deferred entity errors"
+assert grids.count("Hulk") > 0 "death produces hulks"

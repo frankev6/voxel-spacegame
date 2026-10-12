@@ -1,0 +1,32 @@
+scenario r16_r19_editor_round_trip
+desc "Paint-only commit preserves position and bricks and interaction still works"
+status draft
+tags regression R16 R19
+timeout 180
+# Activation prerequisite: bind the Ark leave option and verify viewport clicks on the owning editor task.
+# Provisional 1280x720 viewport coordinates; these drafts have not been executed.
+newgame seed=19019
+wait player.ready timeout=60
+interact body=ark_station
+wait context == "Dialog" timeout=5
+let x = player.upos.x
+let z = player.upos.z
+let bricks = ecs.count("Brick")
+key keys=Escape
+wait ui.visible("Edit Ship") timeout=5
+click target=dock-edit-ship
+wait context == "Editor" timeout=5
+# Bind a hull cell whose colour differs from swatch 1; paint leaves topology unchanged.
+click target=editor-tool-paint
+click target=editor-color-1
+mouse x=640 y=360 button=left down=true
+wait frames=1
+mouse button=left down=false
+click target=editor-leave
+wait ui.visible("Commit") timeout=5
+click target=confirm-commit
+wait player.ready timeout=30
+assert distance(player.upos.x, player.upos.z, $x, $z) < 1 "position preserved"
+assert ecs.count("Brick") == $bricks "paint-only committed ship has the same bricks"
+interact body=ark_station
+wait context == "Dialog" timeout=5

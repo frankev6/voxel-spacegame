@@ -658,6 +658,8 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 
 | 23 | File cases are coroutines and draft steps reference future vocabulary | Use UnityTest parameter sources and inspect draft headers before full parsing | Tech lead | Resolved DEV-007: installed UnityTest adapts ValueSource cases for IEnumerator methods. Discover sorted smoke/regression file stems through a ValueSource, parse headers with the canonical parser, ignore draft cases before resolving future steps, and run active files against the real host. Keep the requested timeout × 60 frame bound plus the runner’s existing real-time timeout and print its JSON path. Production parsing remains strict. |
 
+| 24 | Draft editor input cannot be verified before the editor exists | Explicit provisional clicks and activation prerequisites | Tech lead | Resolved DEV-019: keep all six scenarios draft. Editor fixtures use provisional 1280×720 clicks; owning tasks must bind ten distinct hull cells, verify the pending refund text, a paint colour change and the Ark leave option before activation. Paint-only commit preserves topology. R30 visits Drift then returns to the exact captured Ark system ID, checking both arrival rings against TRV-011’s tighter 200 m limit. Future vocabulary uses explicit parse-only fixtures as in Q15; no production stubs. |
+
 ## 11. References
 
 - `docs/reference/audit-2026-10/00-synthesis.md` §6m (harness, lessons, plan); `LEDGER.md` TOOLING v1–v5, R10, R15, R16, R18 (modal blocks CLI), R19, R25, R26, R28, R30.

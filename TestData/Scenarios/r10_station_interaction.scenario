@@ -1,0 +1,10 @@
+scenario r10_station_interaction
+desc "Hub station remains in range and opens dialog"
+status draft
+tags regression R10
+timeout 180
+newgame seed=19019
+wait player.ready timeout=60
+interact body=ark_station
+assert interaction.inrange "station is in interaction range"
+wait context == "Dialog" timeout=5

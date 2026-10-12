@@ -1,0 +1,26 @@
+scenario r28_pause_load
+desc "Loading from the pause menu restores the saved position and keeps the star system (ledger R28)"
+status draft
+tags regression R28
+timeout 180
+newgame seed=28028
+wait player.ready timeout=60
+teleport sx=250 sz=-300
+wait ticks=30
+let sx = player.upos.x
+let sz = player.upos.z
+let sys = star_system
+save slot=r28
+teleport sx=600 sz=600
+wait ticks=30
+key keys=Escape
+wait ui.visible("Load") timeout=5
+click target="Load"
+wait ui.visible("r28") timeout=5
+click target="r28"
+wait events.count("GameLoaded") == 1 timeout=30
+wait player.ready timeout=30
+wait ticks=60
+assert abs(player.upos.x - $sx) < 1 && abs(player.upos.z - $sz) < 1 "player is where it was saved"
+assert star_system == $sys "same star system"
+assert ecs.count("Brick") > 0 "voxels present"

@@ -1,0 +1,18 @@
+scenario r30_lane_jump_entry
+desc "Adjacent lane round trip enters inside each lane ring"
+status draft
+tags regression R30
+timeout 180
+newgame seed=19019
+wait player.ready timeout=60
+let home = star_system
+jump to=starsys_drift
+wait travel.phase == "Idle" && star_system != $home timeout=30
+assert travel.arrival_gap >= 0 && travel.arrival_gap <= 200 "arrives at Drift lane entry"
+assert travel.inside_ring "inside destination ring"
+# The return leg verifies the exact target ID captured from the authored starting system.
+jump to=starsys_ark_start
+wait travel.phase == "Idle" && star_system == $home timeout=30
+assert travel.arrival_gap >= 0 && travel.arrival_gap <= 200 "arrives at Ark lane entry"
+assert travel.inside_ring "inside home ring"
+assert logs.exceptions == 0 "no travel exceptions"
