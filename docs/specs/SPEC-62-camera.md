@@ -376,9 +376,9 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Do:** Create `static class CameraMath` with `Damp(float, float, float halfLife, float dt)`, `Damp(float3, float3, float, float)`, `DampAngle(float deg, float targetDeg, float halfLife, float dt)` (shortest arc, result in (−180, 180]), `OrbitRotation(float pitchDeg, float yawDeg)`, `OrbitPosition(float3 focus, quaternion r, float distance)`, `ClampLength(float3 v, float max)`, `HeadingYawDeg(quaternion rot)`.
 - **Files:** `Assets/Game/Presentation/Services/CameraMath.cs`
 - **Acceptance criteria:**
-  - [ ] `Damp` with halfLife h after time h moves exactly half way.
-  - [ ] Damping a constant target over 1 s gives the same result (±1e-4) with 30, 60 or 144 equal steps.
-  - [ ] `DampAngle(170, -170, …)` moves through 180°, not through 0°.
+  - [x] `Damp` with halfLife h after time h moves exactly half way.
+  - [x] Damping a constant target over 1 s gives the same result (±1e-4) with 30, 60 or 144 equal steps.
+  - [x] `DampAngle(170, -170, …)` moves through 180°, not through 0°.
 - **Tests:** `Assets/Game/Tests/EditMode/Presentation/CameraMathTests.cs`: `Damp_OneHalfLife_HalfWay`, `Damp_FrameRateIndependent_30_60_144`, `DampAngle_ShortestArc`, `OrbitRotation_PositivePitch_LooksDown`, `HeadingYaw_PlusZ_IsZero`.
 
 ### CAM-004 — Rig service, camera prefab, Menu/Hold modes and the sync system shell
