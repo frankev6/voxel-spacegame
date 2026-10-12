@@ -705,7 +705,7 @@ Quit. **`SaveService` owns the quit hook itself:** its constructor subscribes `A
 1. If `quitApproved` → return true.
 2. If no session or `!CanSave(out r)` → `GameLog.Info("Save", "Quit without saving: " + r)`; return true. (The pause-menu Quit button, SPEC-61, warns the player when `CanSave` is false.)
 3. Start `QuitSave()`: await the running operation, then `SaveAsync(NextAutosaveSlot, Quit)`, racing a real-time timeout of `QuitSaveTimeoutSeconds`; then `quitApproved = true; Application.Quit()`. Return false.
-`wantsToQuit` is not raised when leaving Play Mode in the Editor; tests call `HandleWantsToQuit` directly.
+Unity 6.6 also raises `wantsToQuit` when leaving Play Mode in the observed CLI path. That path does not guarantee another thumbnail frame: Dispose releases captures not yet owned by the worker (PERS-019). Tests also call `HandleWantsToQuit` directly.
 
 ### 5.10 Fixture harness
 
@@ -1020,6 +1020,18 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
   - [ ] Empty/null profiles never abort listing other profiles and emit one warning each.
   - [ ] Empty/null META keeps the load successful, produces one PERS-W013 and does not affect participant restoration.
 - **Tests:** `ProfileAndSlotTests.NullProfile_IsSkipped`; `LoadPipelineTests.NullMeta_IsReportedWithoutRejectingLoad`.
+
+### PERS-019 — Release saves awaiting thumbnail frames during teardown
+- **Milestone:** M1
+- **Tier:** frontier — deferred native snapshot ownership across main-thread teardown and background handoff
+- **Depends on:** `PERS-005`, `PERS-008`, `PERS-009`
+- **Do:** Track captured saves until the worker takes ownership. Disposal synchronously releases waiting snapshots even if no further frame arrives; ownership transfer must not race disposal or free an encoding worker's data. Suppress post-disposal save completion/quit callbacks and reject new/queued captures after disposal.
+- **Files:** `Assets/Game/Persistence/Services/SaveService.cs`; `Assets/Game/Tests/EditMode/Persistence/QuitSaveTests.cs`
+- **Acceptance criteria:**
+  - [ ] Disposing while a thumbnail is pending releases deferred blocks immediately without needing another frame; resumed operations do not encode or commit the disposed capture.
+  - [ ] Disposal during worker encoding leaves that snapshot owned by the worker until its normal release; no duplicate free or completion callback.
+  - [ ] A tracked real Fighter Play/stop/Editor-exit no longer reports the four FleetSaveParticipant snapshot allocations.
+- **Tests:** `QuitSaveTests.DisposeDuringThumbnailWait_ReleasesImmediately`, `.DisposeDuringEncoding_WorkerOwnsSnapshot` plus the existing quit suite and live Editor reproduction.
 
 ## 10. Open questions
 
