@@ -28,7 +28,7 @@ The camera shows the planar game from above and behind the player ship so the fl
 
 **Out of scope (and who owns it instead):**
 - Mouse-aim ray to `ShipCommand.AimWorld` → SPEC-03 (reads `MainCameraState`).
-- Audio listener placement → SPEC-64 (default: on the camera prefab, §10 Q6).
+- Audio listener placement → SPEC-64 (AudioRoot owns the listener; the rig supplies a pivot, ADR-0039).
 - Map rendering, markers and selection → SPEC-61.
 - Cinematic sequences → not in v1.
 - Post-processing volumes → SPEC-80/81.
@@ -286,6 +286,7 @@ namespace Game.Presentation.Services
         /// Instantiates config.CameraPrefab under `parent` (GameRoot transform). Throws when the prefab has no Camera.
         public CameraRigService(Game.Presentation.Data.CameraConfig config, UnityEngine.Transform parent, ICameraInput input);
         public UnityEngine.Camera Camera { get; }
+        public UnityEngine.Transform ListenerPivot { get; }        // ADR-0039: AudioService follows this; rig owns its lifetime
         public Game.Presentation.Data.CameraMode Mode { get; }
         public Unity.Mathematics.float3 Focus { get; }
         public float CurrentDistance { get; }
@@ -385,13 +386,13 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Milestone:** M1
 - **Tier:** frontier — F1/F5: the single app camera and its frame-ordering in the presentation pipeline
 - **Depends on:** `CAM-003`, `FND-001`
-- **Do:** Create `MainCamera.prefab` (Camera with FOV/clips from config, `UniversalAdditionalCameraData`, `AudioListener` per §10 Q6). Implement `CameraRigService` constructor, `Dispose`, `SetMode`, blends, Menu and Hold modes, `Tick` steps 1–3 and 5 (shake added by CAM-008), `ApplySettings`, `ScreenPointToRay`. Implement `CameraTargetSyncSystem` with `OnCreate` (singleton, `RequireForUpdate<MainCameraState>`), `Bind`, steps 1, 3–5, 8, 9 of §5.1. Add `ProfilerMarker`s of §8. Add a guard test that content scenes contain no `Camera`.
-- **Files:** `Assets/Game/Presentation/Data/{MainCamera.prefab,CameraConfig.asset}`, `Assets/Game/Presentation/Services/CameraRigService.cs`, `Assets/Game/Presentation/Systems/CameraTargetSyncSystem.cs`
+- **Do:** Create `MainCamera.prefab` (Camera with FOV/clips from config, `UniversalAdditionalCameraData`, no `AudioListener` (ADR-0039)). Implement `CameraRigService` constructor, `Dispose`, `SetMode`, blends, Menu and Hold modes, `Tick` steps 1–3 and 5 (shake added by CAM-008), `ApplySettings`, `ScreenPointToRay`. Implement `CameraTargetSyncSystem` with `OnCreate` (singleton, `RequireForUpdate<MainCameraState>`), `Bind`, steps 1, 3–5, 8, 9 of §5.1. Add `ProfilerMarker`s of §8. Add a guard test that content scenes contain no `Camera`. Wire SPEC-01 step 11 (serialized config, scene modes, settings, listener target and optional thumbnails); update the existing composition-order expectation. Input/FX staging follows Q11.
+- **Files:** `Assets/Game/Presentation/Data/{MainCamera.prefab,CameraConfig.asset}`, `Assets/Game/Presentation/Services/CameraRigService.cs`, `Assets/Game/Presentation/Systems/CameraTargetSyncSystem.cs`; SPEC-01 composition/config/settings and GameRoot prefab; existing `CompositionTests`.
 - **Acceptance criteria:**
-  - [ ] Constructing the rig creates exactly one `Camera` under the parent; `Dispose` destroys it.
-  - [ ] Menu mode drifts 2°/s; reduce motion stops the drift.
-  - [ ] Unbound system does nothing; bound system writes `MainCameraState` every frame in a scene without gameplay.
-  - [ ] `MainMenu`, `World`, `BlueprintLab` scenes contain no `Camera` component (06-E11).
+  - [x] Constructing the rig creates exactly one `Camera` under the parent; `Dispose` destroys it.
+  - [x] Menu mode drifts 2°/s; reduce motion stops the drift.
+  - [x] Unbound system does nothing; bound system writes `MainCameraState` every frame in a scene without gameplay.
+  - [x] `MainMenu`, `World`, `BlueprintLab` scenes contain no `Camera` component (06-E11).
 - **Tests:** `Assets/Game/Tests/EditMode/Presentation/CameraRigServiceTests.cs`: `Construct_CreatesOneCamera`, `Dispose_DestroysCamera`, `MinPitchBelow20_Throws`, `SetMode_Blend_ReachesTargetAfterBlendSeconds`, `SetMode_ReduceMotion_Cuts`, `Menu_Drift_TwoDegreesPerSecond`. `Assets/Game/Tests/EditMode/Presentation/CameraTargetSyncSystemTests.cs` (`EcsTestWorld`): `Unbound_NoWrite`, `Bound_WritesMainCameraStateEveryFrame`, `NoPlayerShip_ClearsTarget`. `Assets/Game/Tests/EditMode/Presentation/ContentScenesTests.cs`: `ContentScenes_HaveNoCamera`.
 
 ### CAM-005 — Flight follow mode and camera input
@@ -489,14 +490,18 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 | 3 | SPEC-12: name of the camera query filter in `PhysicsLayers` | `PhysicsLayers.CameraOcclusionQuery` — hits grids (ships, stations, asteroids, hulks), not debris, chunk bodies or sensors | Tech lead (SPEC-12) |  |
 | 4 | SPEC-63: how the camera reads the frame's `FxEvent`s | SPEC-63 keeps the frame's events readable as a `NativeArray<FxEvent>.ReadOnly` until the end of `PresentationBridgeGroup`; `FxFrameReader` exposes it; `CameraTargetSyncSystem` runs after `FxUploadSystem` | Tech lead (SPEC-63) |  |
 | 5 | Which `FxKind`s shake, and how much | Explosion: 0.5 / 300 m; ship destroyed: 1.0 / 600 m; ram impact: 0.4 / 200 m; projectile hit: 0.05 / 80 m (rows only for kinds that exist in SPEC-63's enum) | Owner |  |
-| 6 | SPEC-64: where the `AudioListener` lives | On `MainCamera.prefab` | Tech lead (SPEC-64) |  |
+| 6 | SPEC-64: where the `AudioListener` lives | AudioRoot, with camera-owned target pivot | Tech lead (SPEC-64) | Resolved CAM-004 / ADR-0039: retain SPEC-64 ownership; no listener on camera prefab. |
 | 7 | SPEC-20: ship forward axis and graphical smoothing on the player ship | Forward = grid +Z, up = +Y; the player ship has `PhysicsGraphicalSmoothing` | Tech lead (SPEC-20) |  |
 | 8 | Should the flight yaw default to following the ship heading or stay north-up? | `FollowHeading` (controls are ship-relative); `Free` available in settings | Owner |  |
 
 | 9 | Deferring the whole IFxFrameReader interface to CAM-008 prevents CAM-004 Bind from compiling (CAM-008 depends on CAM-005) | Add an empty binding interface now; defer only its FxEvent property | Tech lead | Resolved CAM-001: retain the §6 interface name with a CAM-008 TODO for Current, and defer ShakeRule.Kind as instructed. No FxKind/FxEvent substitute is invented; VFX-001 owns those contracts. |
 
+| 10 | Camera-prefab listener contradicts SPEC-64’s existing single-listener service | Keep AudioService ownership; expose and bind a rig-owned ListenerPivot | Tech lead | Resolved CAM-004 / ADR-0039; app binds/clears the existing target API, and the rig disposes its pivot. |
+| 11 | CAM-004 composition precedes camera input, Fx events, persisted yaw mode and ordering peers | Wire available contracts; explicitly defer missing adapters and peer attributes | Tech lead | Resolved CAM-004 / ADR-0039: null input/FX until CAM-005/CAM-008, FollowHeading default, sensitivity clamped to 0.1–3. AudioEventDrainSystem/HudSyncSystem ordering attributes are added when those types exist. Write the existing optional VoxelViewer for SPEC-11; no lazy singleton creation. Lab uses Hold until CAM-009. |
+
 ## 11. References
 
+- [ADR-0039 — Camera/listener binding](../decisions/ADR-0039-camera-listener-binding.md).
 - [ADR-0038 — Custom camera rig instead of Cinemachine](../decisions/ADR-0038-camera-rig.md) (CAM-002 decision record).
 
 - Audit `03-galaxy-world.md` §5.11 (camera), B9c, B26, S5; `LEDGER.md` R7 (pitch overwritten to 0 → edge-on plane); `06-ui-shipeditor.md` E11, §5.3.2 (editor orbit camera).

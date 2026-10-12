@@ -339,7 +339,7 @@ Every row is one step. A step's object is pushed onto `DisposeStack` when it is 
 | 9.1 | `world.GetExistingSystemManaged<PlayerInputSampleSystem>().Bind(input, ui)` (SPEC-03 INP-005; `ui` is the `IWorldPointerGate` of step 9); on dispose `Unbind()` | — | INP-005 |
 | 10 | `composition = new UiComposition(ui, ...)`; `flow.SetRootScreens(composition)` | `UiComposition` | HUD-002 |
 | 10.1 | `launcher = new MerchantLauncher(economy, merchants, factions, territory, encounters, loader, ui.Navigator)` (needs the navigator of step 9) | `MerchantLauncher` | ECO-008 |
-| 11 | `camera = new CameraRigService(config.CameraConfig, transform, new CameraInputAdapter(input))`; `world.GetExistingSystemManaged<CameraTargetSyncSystem>()` bind (SPEC-62 §5) | `CameraRigService` | CAM (service task) |
+| 11 | `camera = new CameraRigService(config.CameraConfig, transform, new InputCameraInput(input))`; `world.GetExistingSystemManaged<CameraTargetSyncSystem>()` bind (SPEC-62 §5); listener pivot, scene modes and optional thumbnail binding per ADR-0039; null input/FX staging until CAM-005/CAM-008 | `CameraRigService` | CAM (service task) |
 | 12 | `fx = FxRig.Create(transform, vfxConfig, content.Catalog.All<FxDefinition>(), cellPalette, (VfxQuality)settings.Current.Video.VfxQuality)` (the setting is a `byte`, SPEC-02; the enum is SPEC-63's); `fx.BindTo(world)` | `FxRig` | VFX (rig task) |
 | 13 | SPEC-41 `DialogPresenter` (after `UIRoot`) | per SPEC-41 | DLG presenter task |
 | 14 | `SettingsApplier.ApplyAll(settings.Current)` (§5.6): pushes every section to its consumer once | — | FND-004 |

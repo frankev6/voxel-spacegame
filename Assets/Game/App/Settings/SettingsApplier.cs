@@ -34,8 +34,15 @@ namespace Game.App.Settings
                 input.MouseSensitivity = s.Controls.MouseSensitivity;
                 input.InvertCameraY = s.Controls.InvertCameraY;
                 input.CameraZoomSensitivity = s.Controls.CameraZoomSensitivity;
-                // CAM service task: camera.ApplySettings(s.Controls)
             }
+            if ((sections & (SettingsSection.Controls | SettingsSection.Accessibility)) != 0
+                && Game.Core.Services.TryGet<Game.Presentation.Services.CameraRigService>(out var camera))
+                camera.ApplySettings(new Game.Presentation.Data.CameraSettings
+                {
+                    MouseSensitivity = s.Controls.MouseSensitivity, InvertOrbitY = s.Controls.InvertCameraY,
+                    YawMode = Game.Presentation.Data.CameraYawMode.FollowHeading,
+                    ShakeScale = s.Accessibility.ScreenShakeScale, ReduceMotion = s.Accessibility.ReduceMotion
+                });
             // Gameplay: PERS-009 sets save.Autosave's interval from s.Gameplay.AutosaveIntervalMinutes.
             // Accessibility: SPEC-60 ui.ApplyAccessibility (text-scale index per SPEC-02 Q9) and SPEC-62 camera shake scale.
         }

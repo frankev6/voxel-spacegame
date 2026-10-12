@@ -1,6 +1,6 @@
 # ADR-0038 — Custom camera rig instead of Cinemachine
 
-**Status:** Proposed — 2026-10-11, Tech lead (astra, gpt-6)
+**Status:** Accepted — 2026-10-11, Tech lead (astra, gpt-6), for CAM-004 under Frank’s autonomous technical-decision instruction
 
 ## Context
 The old-prototype audit, `docs/reference/audit-2026-10/03-galaxy-world.md` §5.11, recommended adopting Cinemachine for flight, tactical and editor views. ADR-0011 deliberately deferred the package until SPEC-62 selected a camera design. V2 now has ECS ships, Unity Physics colliders and context-owned input; SPEC-62 §3 decision 1 selects a small custom rig suited to those boundaries. CAM-002 records that choice before the rig implementation; no package is added by this ADR.
@@ -19,7 +19,7 @@ Implement `CameraRigService` and `CameraTargetSyncSystem` as specified by SPEC-6
 ## Consequences
 Camera behavior stays compatible with Unity Physics, ECS interpolation and input contexts. Tests can supply camera input and target poses without proxy GameObjects or package-specific authoring state. The implementation must maintain its own follow/orbit math, blending, occlusion, shake and regression tests; camera cost remains subject to SPEC-62 §8.
 
-There are no Cinemachine authoring tools or cinematic-sequence workflow. Cinematic sequences remain outside v1. If cutscenes become part of the approved scope, revisit the camera integration through a new ADR rather than adding a second camera owner or installing a package implicitly. Content scenes continue to contain no cameras, and listener ownership stays with the camera prefab as specified by SPEC-64.
+There are no Cinemachine authoring tools or cinematic-sequence workflow. Cinematic sequences remain outside v1. If cutscenes become part of the approved scope, revisit the camera integration through a new ADR rather than adding a second camera owner or installing a package implicitly. Content scenes continue to contain no cameras, and listener ownership stays with AudioService, bound through the rig’s pivot (ADR-0039 / SPEC-64).
 
 ## Alternatives considered
 - **Cinemachine 3 with proxy transforms and manual axis input.** Provides mature authoring and blending tools, but still needs ECS proxies, custom Unity Physics occlusion and a context-aware input adapter. That integration is disproportionate to the present scope.

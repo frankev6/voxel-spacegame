@@ -8,6 +8,8 @@ using Game.App.Settings;
 using Game.Core;
 using Game.Core.Audio;
 using Game.Presentation.Audio;
+using Game.Presentation.Services;
+using Game.Presentation.Systems;
 using Game.Core.Settings;
 using Game.Data.Definitions;
 using Game.Data.Services;
@@ -43,6 +45,7 @@ namespace Game.App.Boot
         internal VoxelStructureRegistry Registry { get; private set; }
         internal InputService Input { get; private set; }
         internal AudioService Audio { get; private set; }
+        internal CameraRigService Camera { get; private set; }
         internal PauseService Pause { get; private set; }
         internal SaveService Save { get; private set; }
         internal GameConfigDefinition GameConfig { get; private set; }
@@ -131,9 +134,18 @@ namespace Game.App.Boot
             Step("8 session");
             Session.BindFleet(Blueprints, Registry, Content.Catalog); Save.Register(Session.FleetParticipant);
             Register(Session.Fleet);
-            // TODO(CAM-004): Session.SetThumbnailCamera(camera.Camera) after constructing the rig in step 11.
+
             // 8.1–13: galaxy, travel, spawner, factions, map, economy, narrative, UI, camera, FX and dialog are added by their tasks, in the
             //    rows of SPEC-01 §5.2 (GAL-008, TRV-006, FND-012, ENC-007, GAL-011, ECO-008, UI-003, …).
+
+            // 11. Camera (CAM-004); CAM-005 supplies InputCameraInput.
+            Camera = Push(new CameraRigService(config.CameraConfig, root.Find("CameraRoot") ?? root, null));
+            Register(Camera);
+            world.GetExistingSystemManaged<CameraTargetSyncSystem>().Bind(Camera, null); // CAM-008 supplies the FX reader.
+            Audio.SetListenerTarget(Camera.ListenerPivot);
+            Session.SetThumbnailCamera(Camera.Camera);
+            Flow.RegisterReady(new CameraSceneHook(Camera));
+            Step("11 camera");
 
             // 14. Settings applier (FND-004): follows SettingsChanged, then pushes every section once (SPEC-01 open question 7).
             Push(new SettingsApplier(Settings));
@@ -164,6 +176,21 @@ namespace Game.App.Boot
             return service;
         }
 
+        sealed class CameraSceneHook : ISceneReady
+        {
+            readonly CameraRigService rig;
+            public CameraSceneHook(CameraRigService rig) { this.rig = rig; }
+            public int SceneReadyOrder => SceneHookOrder.Camera;
+            public void OnSceneReady(in SceneReadyContext context)
+            {
+                rig.SetMode(context.Scene == GameScene.MainMenu ? Game.Presentation.Data.CameraMode.Menu
+                    : context.Scene == GameScene.World ? Game.Presentation.Data.CameraMode.Flight
+                    : Game.Presentation.Data.CameraMode.Hold, cut: true);
+                // TODO(CAM-009): BlueprintLab enters editor orbit with its structure bounds.
+            }
+            public bool IsSceneReadyComplete(in SceneReadyContext context) => true;
+        }
+
         sealed class RegistryLifetime : IDisposable
         {
             readonly VoxelStructureRegistry registry;
@@ -185,6 +212,7 @@ namespace Game.App.Boot
             catch (Exception e) { GameLog.Exception(LogCategories.Boot, e, "GameComposition.Dispose jobs"); }
             // Borrowed fleet structures must be unpinned before their owners dispose them.
             if (Registry != null) Registry.CancelSpawnReads();
+            if (Camera != null) Audio?.ClearListenerTarget(Camera.ListenerPivot);
             LastDisposeLog.Clear();
             for (int i = DisposeStack.Count - 1; i >= 0; i--)
             {
@@ -193,7 +221,7 @@ namespace Game.App.Boot
                 catch (Exception e) { GameLog.Exception(LogCategories.Boot, e, "GameComposition.Dispose " + DisposeStack[i].GetType().Name); }
             }
             DisposeStack.Clear();
-            Settings = null; Content = null; Blueprints = null; Registry = null; Input = null; Audio = null; Pause = null; Save = null; GameConfig = null; Flow = null;
+            Settings = null; Content = null; Blueprints = null; Registry = null; Input = null; Audio = null; Camera = null; Pause = null; Save = null; GameConfig = null; Flow = null;
             Game.Core.Services.Reset();
         }
     }

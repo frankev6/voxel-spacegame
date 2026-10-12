@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6d8dad4b585d49afb0d49667c82e65c, type: 3}
+  m_Name: CameraConfig
+  m_EditorClassIdentifier: Game.Presentation::Game.Presentation.Data.CameraConfig
+  CameraPrefab: {fileID: 586258118316653058, guid: b354bc6c2afd64ceb9b1bc9604def9c9, type: 3}
+  VerticalFovDeg: 40
+  NearClip: 0.3
+  FarClip: 50000
+  DefaultPitchDeg: 55
+  MinPitchDeg: 35
+  MaxPitchDeg: 80
+  DefaultDistance: 150
+  MinDistance: 25
+  MaxDistance: 400
+  ZoomStepFactor: 0.88
+  OrbitDegPerPixel: 0.25
+  FocusHalfLife: 0.06
+  YawHalfLife: 0.12
+  PitchHalfLife: 0.08
+  ZoomHalfLife: 0.12
+  LookAheadSeconds: 0.4
+  LookAheadMaxFraction: 0.35
+  LookAheadHalfLife: 0.35
+  TeleportCutDistance: 250
+  OcclusionMargin: 1
+  OcclusionMinDistance: 5
+  OcclusionReleaseHalfLife: 0.3
+  EditorMinPitchDeg: -89
+  EditorMaxPitchDeg: 89
+  EditorMinDistance: 2
+  EditorDistanceRadiusFactor: 2.5
+  EditorDistancePad: 5
+  EditorMaxDistanceRadiusFactor: 6
+  EditorMaxDistancePad: 100
+  EditorPanPerPixelPerMeter: 0.0015
+  EditorHalfLife: 0.05
+  EditorFocusPadding: 1.2
+  EditorPivotBoundsPad: 50
+  BlendSeconds: 0.5
+  MenuPosition: {x: 0, y: 60, z: -120}
+  MenuLookAt: {x: 0, y: 0, z: 0}
+  MenuDriftDegPerSecond: 2
+  TraumaDecayPerSecond: 1.4
+  ShakeFrequencyHz: 22
+  ShakeMaxOffsetFraction: 0.01
+  ShakeMaxAngleDeg: 2
+  ShakeRules: []
