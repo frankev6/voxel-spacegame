@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 14 | 0 | 1 | 0 | 93 | 0 | 108 | 9 |
+| M1 | 13 | 0 | 1 | 0 | 94 | 0 | 108 | 8 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 8 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -150,7 +150,7 @@
 | REN-011 | BrickMeshApplySystem, cleanup and statistics | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-010, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-12 | 18a0e45 | Pooled apply/cleanup, shared registration, camera transforms; six GPU checks pass |
 | REN-012 | GridLodSystem, Dormant and LOD switching | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011 | yes | done | astra (gpt-6) | 2026-10-12 | 6b2f87e | Hysteresis, conditional versions, async apply recovery; live Fighter LOD1 → LOD0 |
 | REN-013 | Rendering gate suite | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-012, REN-008 | yes | todo |  |  |  |  |
-| REN-014 | Prop block instancing | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011, REN-008 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Change-driven prop rendering and moving-grid matrices |
+| REN-014 | Prop block instancing | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011, REN-008 | yes | done | astra (gpt-6) | 2026-10-12 | 37097fa | Applied prop cells, moving bounds, four GPU tests; 10k props 0.01465 ms |
 | PHY-001 | Public contract types | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 1f27ec6 | Physics contracts, exact filters, native/blob ownership; 4 required tests |
 | PHY-002 | SPIKE: Unity Physics capabilities for nested voxel compounds | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | dd85d8c | Nested GO; all ten checks recorded |
 | PHY-003 | Physics config definition, factory and PhysicsStep | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | PHY-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | e14cc32 | Default asset / E001-E002 / factories / both boot rows integrated |
@@ -843,6 +843,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — REN-014 done — astra (gpt-6)
+
+- **Changed:** PropRenderSystem gathers applied prop lists into flat mesh-sorted storage on change, uploads instance buffers only when needed, and draws once per mesh. GridMatrixJob updates ship transforms and conservative bounds every frame. Q165 / SPEC-11 Q34 fixes stale gather-only bounds. GPU resources share the existing world-owned managed state and dispose safely regardless of system teardown order.
+- **Validation:** all four required GPU tests pass. Actual voxel cells pass through BrickSnapshotJob → BrickMeshJob → BrickMeshApplySystem → PropRenderSystem; clearing the cells removes the rendered prop. Pixel-area and moved-camera checks show the full test quad before/after moving 100 m; three world disposal cycles release buffers without leak warnings. No production test assets or art were created. Images/results: `Logs/playtest/ren014/`.
+- **Measured:** 10,000 props on 20 moving grids: **0.01465 ms median / 0.0191 ms p95** steady update; rebuild **0.2838 ms median / 0.3015 ms p95**, against advisory 0.3 / 1 ms. **Zero optimization passes.** The required `tools/test.sh perf PropRenderTests` headless invocation has no EditMode match and skips its GPU PlayMode test; the actual measurement is from the separate passing GPU run, not that headless command.
+- **Full suites:** compile zero C# warnings; EditMode **749 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.6408 ms** vs 3; MeshBuild128 **1.0536 ms** vs 0.5); headless PlayMode **95 passed, 16 GPU skips**. After the final test-only change to exercise actual cells, all four GPU tests pass again. No renderer tuning or new owner decision. Docs clean.
+- **Next:** AUD-005 playback/cooldowns/stinger ducking, then remaining M1 integration and system review. Audio cue content remains AUD-007, so do not claim audible gameplay yet. HANDOFF updated; approved Nocturne appearance retained.
 
 ### 2026-10-12 — FND-019 done — astra (gpt-6)
 
