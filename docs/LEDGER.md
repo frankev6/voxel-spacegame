@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 29 | 1 | 0 | 0 | 75 | 0 | 105 | 11 |
+| M1 | 29 | 0 | 0 | 0 | 76 | 0 | 105 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 7 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -110,7 +110,7 @@
 | FND-009 | GameSession: new game, end, IGameFlow, ISaveContext, SESS | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-006, FND-008, PERS-001 | yes | done | astra (gpt-6) | 2026-10-11 | 8a8bd6f | Session flow/SESS; ordered save preparation; bounded thumbnail readback (ADR-0034) |
 | FND-010 | Fleet model, FLET and the player ship | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-009, VOX-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-11 | 745e10a | Fleet/FLET ownership, player spawn/writeback, report warnings and recovered-id reservation |
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | yes | done | astra (gpt-6) | 2026-10-11 | 4efcb47 | Serialized creative sandbox, optional player; normal campaign resets flags |
-| FND-017 | Imported ship flight checkpoint | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-010, REN-001, INP-001, DEV-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Owner priority; REN-011/INP-005 ready; context hookup precedes DEV-008 ready predicate |
+| FND-017 | Imported ship flight checkpoint | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-010, REN-001, INP-001, DEV-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0e253e1 | Imported Fighter renders, flies, collides and saves/loads; real screenshots; ADR-0044/0045 |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | no | todo |  |  |  |  |
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 66702c3 | Real input mapping, latched edges, collider/plane aim; ten required tests pass |
 | INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | yes | todo |  |  |  |  |
@@ -198,7 +198,7 @@
 | CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-004, FLT-001, VOX-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-11 | f19e2a5 | Flight follow, input, cuts; exact moving-target damping (Q129–130) |
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 111f9fd | CPU 0.002833 ms; 0 B/update; 10 s circle pitch/GC pass (Q131) |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
-| AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | no | todo |  |  |  |  |
+| AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | todo |  |  |  |  |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | todo |  |  |  |  |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | no | todo |  |  |  |  |
@@ -209,7 +209,7 @@
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | no | todo |  |  |  |  |
 | DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | no | todo |  |  |  |  |
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | todo |  |  |  |  |
-| TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | no | todo |  |  |  |  |
+| TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | todo |  |  |  |  |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | no | todo |  |  |  |  |
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | no | todo |  |  |  |  |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
@@ -818,6 +818,15 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — FND-017 done — astra (gpt-6)
+
+- **First actual playable checkpoint delivered.** Existing imported Fighter (**1,005 cells**) replaces the four-cell starter. Production pooled hulls and functional meshes render under the approved camera-relative key/fill/rim/ambient lighting. Real Input System W/S, A/D, Q/E, Shift/X and mouse orbit/zoom reach the existing flight/physics/camera systems. Escape pauses/resumes. Implementation **0e253e1**, no new ship designs or AI art.
+- **Running-game evidence:** `Logs/playtest/fighter-after-save-load.png` (loaded ship, flown again, camera orbit) and `Logs/playtest/fighter-contact.png` (two imported ships in physical contact). Scripts and raw observations are under `Logs/playtest/flight-checkpoint/`; screenshots were shown to Frank. Two-second W input produced **14.523 m/s**; the deterministic collision run reached **16.93755 m/s** and rebounded at **−1.803858 m/s**, at z **19.72989 m** against a static imported Fighter at z 35. Commands used real input and GridSpawnApi, not direct velocity writes.
+- **Live save/load:** isolated harness profile p003/manual_017, **1,743 B** save, player id **1**, blueprint ship_fighter, **1,005 cells**, voxel hash **58AE4237CE09B3B7** before/after. The loaded ship moved **2.010558 m** under real W input. Load reported **0 errors / 0 warnings**; the final live run had **zero errors**. FLET v1 does not preserve pose/velocity: it currently respawns at origin/zero (Q142). No HUD, galaxy backdrop or final functional-block presentation yet.
+- **Integrated defects/decisions:** Q142 / accepted ADR-0044 assigns temporary sole input-context ownership to the App scene/pause bridge before sampling; **UI-004 must remove/unbind it** before taking ownership. Q143 / accepted ADR-0045 fixes the actual live restart error: paused fixed-step cleanup left PhysicsTemporalCoherenceInfo entities. Teardown now drains the existing package physics initialization and end-fixed ECB at zero delta, without simulating or manually removing coherence data. Trap T2.15 added. DEV-008 follows this checkpoint because its ready predicate needs Flight.
+- **Validation:** compile **zero C# warnings**; all **3 GPU production-world integration tests pass** (`Logs/test-results/fnd017-gpu.xml`); full EditMode **709 pass, 1 advisory failure, 1 explicit skipped** (unchanged MeshBuild128 **0.8767 ms** vs 0.5 ms); full headless PlayMode **68 passed + 12 GPU-only skipped**. Docs **506 tasks / zero errors**. No optimization passes; the existing timing gap remains deferred. Temporary scene-authoring script removed; incidental Unity settings restored from backups.
+- **Next:** DEV-008 new-game/sandbox entry and repeatable launch, then ready M1 UI/navigation/flight HUD and remaining systems. Owner review items are the provisional starter/art/tuning and the explicitly documented temporary context/persistence choices; none blocks gameplay progress. HANDOFF §2–3 updated.
 
 ### 2026-10-12 — INP-005 done — astra (gpt-6)
 
