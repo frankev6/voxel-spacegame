@@ -1,6 +1,12 @@
 # 06 — Performance budgets
 
-**Status: BINDING.** These numbers are gates. A task that makes a gate fail is not done. If a budget proves impossible, raise it in the ledger *Open questions* with measurements; do not silently relax it.
+**Status: ADVISORY performance targets; binding workflow policy.** These numbers are suggestions for later tuning, not blockers to finishing functional work or moving to the next phase/milestone. [ADR-0042](decisions/ADR-0042-advisory-performance-targets.md) (owner, 2026-10-12) supersedes older “gate” and “must pass” wording across all specs, acceptance criteria, ADRs and roadmap entries.
+
+## Initial optimization limit
+
+Build and connect the systems first, then exercise the game. Use **at most two initial optimization passes per system/feature**, total across tasks, workers and handoffs. One pass is one bounded change based on profiling evidence, followed by measurement and a keep/revert decision; zero passes are required without a demonstrated problem. Time spent troubleshooting a benchmark or profiler solely to chase a number counts toward the same allowance. After two passes, record results (or unavailable data), the pass count and deferred concerns in the ledger, and move on. Do not reset the allowance by changing workers/tools or subdividing the task.
+
+Keep budgets and honest failure reports for comparison; do not change assertions just to claim a pass. Further optimization needs a demonstrated bottleneck from integrated gameplay or an explicit owner request. Functional correctness, determinism, safety, leaks and actual failures such as out-of-memory remain required fixes, even where listed beside performance targets below. Numeric memory/GC targets are advisory; ownership and lifetime correctness are not.
 
 ## Reference machine and settings
 

@@ -2,6 +2,8 @@
 
 **Status:** Accepted (owner, 2026-10-11)
 
+**Performance follow-up:** [ADR-0042](ADR-0042-advisory-performance-targets.md) makes numeric performance targets advisory. System reviews still check the integrated game and record measurements; missed performance numbers do not block completion or later milestones.
+
 ## Context
 04-workflow §7 required every `frontier` task to get an independent review by a second frontier-class session before it could be `done`, and dependents start only on `done`. With one worker and no subagents, every frontier task stopped the work behind it. Almost all of M0 is frontier-tier, so the build stalled one task at a time.
 

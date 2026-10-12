@@ -1,6 +1,6 @@
 # 05 — Testing, verification and the feedback loop
 
-**Status: BINDING.** A task is not done until the checks below pass on your machine.
+**Status: BINDING.** Functional correctness and safety checks must pass. Performance targets are advisory under [ADR-0042](decisions/ADR-0042-advisory-performance-targets.md); performance-only failures do not block completion or later phases.
 
 ## 1. The commands
 
@@ -47,11 +47,11 @@ The Editor can stay open while you work; the scripts talk to it through the Unit
 
 ## 4. Definition of Done (every task)
 
-- [ ] Every acceptance criterion in the task is met and checked.
-- [ ] Tests listed in the task exist and pass; existing tests still pass (`tools/test.sh editmode`).
+- [ ] Every functional acceptance criterion in the task is met and checked. Numeric performance criteria are advisory (ADR-0042), including older spec wording that calls them gates.
+- [ ] Tests listed in the task exist; functional, correctness and safety assertions pass, including existing regression tests (`tools/test.sh editmode`). Record performance-only assertion failures separately; they do not prevent completion. A mixed test must still establish its functional assertions; a failed timing assertion is not evidence those ran.
 - [ ] `tools/compile.sh` shows zero errors and zero new warnings in `Game.*` assemblies.
 - [ ] No rule in [02-conventions.md](02-conventions.md) is broken (self-review checklist in [04-workflow.md](04-workflow.md)).
-- [ ] Perf gates touched by the task are measured and recorded in the ledger log.
+- [ ] Record relevant performance results, missed targets or unavailable measurements, and the initial optimization pass count in the ledger. At most two passes per system/feature across workers and handoffs; measurement troubleshooting for a number uses the same allowance. Do not fabricate a passing result, relax test thresholds or repeat runs just to obtain green. Defer further tuning and continue integration/live gameplay.
 - [ ] Docs updated if behaviour or a contract changed (spec *Status*, glossary, architecture only via ADR).
 - [ ] `docs/LEDGER.md` row set to `done` with the commit hash, and a log entry written.
 

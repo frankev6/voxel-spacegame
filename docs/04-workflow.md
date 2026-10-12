@@ -20,6 +20,7 @@
   3. Otherwise, choose the simplest option that keeps every binding rule, write it as a new row in the spec's *Open questions* with your choice as the default, and add an entry to the ledger *Open questions* section. Keep going.
 - **Contradiction rule.** If two documents disagree, architecture beats spec, and an ADR beats architecture. Log the conflict in the ledger; don't pick a third way.
 - **Contract changes.** If you need to change a type listed in architecture §6 or another module's public API, stop and write an ADR draft (`docs/decisions/ADR-NNNN-*.md`, status *Proposed*). Work on something else until it's accepted.
+- **Performance policy ([ADR-0042](decisions/ADR-0042-advisory-performance-targets.md)).** Spec performance numbers are advisory, even when older text calls them gates. Use at most two initial optimization passes per system/feature in total across workers and handoffs: one targeted change plus measurement and a keep/revert decision per pass. Profiling/tool troubleshooting solely for a target counts too. Do not spend either pass without a measured problem and a hypothesis; no tuning is required just because a number exists. After two passes, record the result and remaining concern, then continue integration and live gameplay. Further tuning belongs to a separate effort justified by an integrated bottleneck or an explicit owner request.
 - Keep the Editor-driven loop fast: `tools/compile.sh` after edits, `tools/test.sh editmode <filter>` for your tests.
 
 ## 3. Finishing
@@ -35,7 +36,7 @@
    - [ ] Every `TODO` has a task ID.
    - [ ] Tests named and placed per conventions §7.
    - [ ] The review checklist at the end of [07-implementation-traps.md](07-implementation-traps.md) passes for every section that applies.
-3. Update [LEDGER.md](LEDGER.md): status `done`, commit hash, and one entry in the *Log* (what changed, measurements, follow-ups).
+3. Update [LEDGER.md](LEDGER.md): status `done`, commit hash, and one entry in the *Log* (what changed, measurements, follow-ups). Once functional requirements pass, missed performance targets do not prevent `done`; put `performance deferred` in Notes and record targets/results (or unavailable measurements), initial pass count and follow-up. Do not add deferred tuning as a dependency of working features.
 4. Commit `<TASK-ID>: <summary>` on `task/<TASK-ID>-<slug>`, then merge to `main` (rebase first). One task per merge.
 
 ## 4. Statuses
@@ -104,7 +105,7 @@ Contract tasks (`-001`) are `standard` when the spec's §4 gives the exact code,
    - changing a contract type;
    - changing a binary format;
    - changing system ordering;
-   - meeting a perf budget the spec's algorithm doesn't reach.
+   - a separately justified optimization that requires changing a binding architecture/algorithm contract. A missed advisory performance number alone is not an escalation or blocker (ADR-0042).
 4. **What the system review checks for frontier work (§8):**
    - conformance to the spec's Decisions and Data model;
    - job safety, with tests run with Burst safety checks and leak detection on (`NativeLeakDetection.Mode = EnabledWithStackTrace`);
@@ -120,6 +121,6 @@ The first buildout goes wide: tasks are `done` at their Definition of Done and d
 
 - **When:** when a milestone's systems are built, and always before its exit gate (ROADMAP). The owner may also ask for a review of any part at any time.
 - **Who:** a frontier-class session that did not write the code under review.
-- **What:** the §7.2 rule 4 checklist for every frontier task in scope, the cross-module flows and their ordering, integration and scenario tests, and the milestone's perf gates.
+- **What:** the §7.2 rule 4 checklist for every frontier task in scope, the cross-module flows and their ordering, integration and scenario tests, and the milestone's advisory performance results. Missing numeric targets creates follow-up work, not a progression blocker (ADR-0042).
 - **Output:** findings become new tasks in the owning specs (`tools/ledger-sync.py`) or ledger log entries. The ledger log records `system-review: name (model)` with the scope and the findings; a milestone gate passes only after that entry.
 

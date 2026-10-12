@@ -30,7 +30,8 @@ This file is the entry point. It is short on purpose; the binding details are in
 - **Art follows [DESIGN-GUIDE.md](docs/design/DESIGN-GUIDE.md)** (approved 2026-10-11). Never reference `Assets/Game/Art/_Placeholder/` from code; use definitions and theme tokens. No copyrighted or third-party images (no Starsector art); fonts are SIL OFL 1.1 only; AI-generated assets only with the owner's approval of each asset.
 - **Git stays local.** Commit locally; never push or touch a remote until the owner says so (Git LFS first, ADR-0008).
 - **No old code.** The old prototype is a reference for feel and content only. Content arrives through `Import/Legacy/` and the converters in SPEC-72.
-- **Done means done**: acceptance criteria checked, tests written and passing, `tools/compile.sh` clean, ledger updated with the commit hash and a log entry.
+- **Build systems before tuning** ([ADR-0042](docs/decisions/ADR-0042-advisory-performance-targets.md)): performance numbers in specs are suggestions, never blockers for task completion or later phases. At most **two initial optimization passes per system/feature**, carried across workers and handoffs; benchmark troubleshooting counts too. Record misses or unavailable measurements and move on to integration and live gameplay. Revisit tuning only for a demonstrated integrated bottleneck or an explicit owner request.
+- **Done means functional work is done**: functional acceptance criteria checked, correctness/safety tests passing, `tools/compile.sh` clean, ledger updated with the commit hash and a log entry. Report performance-only failures honestly as deferred; they do not keep the task open ([05-testing §4](docs/05-testing.md)).
 
 ## 3. Commands
 
@@ -38,7 +39,7 @@ This file is the entry point. It is short on purpose; the binding details are in
 tools/compile.sh                      # compile (uses the open Editor via the Unity CLI, or batch mode)
 tools/test.sh editmode [filter]       # EditMode tests
 tools/test.sh playmode [filter]       # PlayMode tests
-tools/test.sh perf [filter]           # performance gates
+tools/test.sh perf [filter]           # advisory performance measurements
 tools/check-docs.py                   # spec/ledger consistency
 tools/ledger-sync.py                  # add ledger rows for new spec tasks
 tools/playtest/g.sh snapshot          # live game state from the running Editor (see tools/playtest/README.md)

@@ -11,6 +11,8 @@
 
 > Read [01-architecture.md](../01-architecture.md) (§5.1, §11), [02-conventions.md](../02-conventions.md), [03-glossary.md](../03-glossary.md), [07-implementation-traps.md](../07-implementation-traps.md) §3 and [SPEC-10](SPEC-10-voxel-data-model.md) before this spec. This spec may not contradict them.
 
+> **Owner policy, 2026-10-12 ([ADR-0042](../decisions/ADR-0042-advisory-performance-targets.md)):** numeric performance criteria throughout this spec are advisory, including historical go/no-go results and timing investigations. Misses or unavailable measurements do not block functional completion, renderer integration or later phases. At most two initial optimization/benchmark-troubleshooting passes per system across workers and handoffs; REN-003 has already exhausted that allowance.
+
 ## 1. Purpose
 
 This spec turns voxel bricks into pixels at a cost proportional to the number of *changed* bricks, not cells. Each non-empty brick owns packed ranges in a shared GPU pool, built by a Burst job from an 18³ snapshot and rewritten when the brick changes (accepted ADR-0032 after REN-002 no-go). It defines the mesher (face culling across brick borders, ambient occlusion, vertex welding), the per-frame build/apply budgets and priorities, the brick shader contract the art team fills after SPEC-80, LOD1 and LOD2, the `Dormant` tag, prop block instancing, the shadow policy, and the fallback renderer if Entities Graphics cannot carry thousands of runtime meshes. The old prototype drew every voxel as an entity with 12 triangles including hidden faces (~66 triangles per voxel, O(voxels) per frame; R24, 01 §5.1).

@@ -6,6 +6,8 @@
 
 Task status lives in [LEDGER.md](LEDGER.md). Task definitions live in the specs.
 
+**Performance never blocks the next phase ([ADR-0042](decisions/ADR-0042-advisory-performance-targets.md), owner 2026-10-12).** Numbers in exit gates below and all specs are advisory suggestions. Complete the functional scope and system review, record performance gaps, and continue in roadmap order. At most two initial optimization passes per system/feature across workers and handoffs; then prioritize connected systems and live gameplay. Correctness, safety and explicit owner/art gates still apply.
+
 **Every milestone's exit gate also needs its system review** ([04-workflow §8](04-workflow.md), [ADR-0019](decisions/ADR-0019-system-reviews-instead-of-per-task-reviews.md)): tasks are `done` at their Definition of Done, and the milestone's systems are reviewed in depth together before the gate passes.
 
 ```mermaid
@@ -52,7 +54,7 @@ flowchart LR
 | SPEC-62 Camera | Third-person follow rig |
 | SPEC-60 UI framework | `UIRoot`, `UINavigator`, pause/input contexts (needed for menus) |
 
-**Exit gates:** voxel gates in [06-performance-budgets.md](06-performance-budgets.md) pass (1M-cell station idle ≤ 2 ms; spawn without hitches); a ship with off-centre thrusters turns because of torque; ramming pushes ships physically.
+**Exit gates:** ships/station render and collide; the player can fly; a ship with off-centre thrusters turns because of torque; ramming pushes ships physically. Record advisory voxel performance results against [06](06-performance-budgets.md), including idle/spawn targets; missed numbers do not block M2.
 
 ## M2 — Combat and destruction
 
@@ -68,7 +70,7 @@ flowchart LR
 | SPEC-63 VFX | Debris particles, hits, explosions, beams |
 | SPEC-64 Audio | Event drain, voice caps, mixer |
 
-**Exit gates:** combat gates pass; determinism test passes at 30/60/144 FPS; 10-minute soak with zero errors and zero leaks.
+**Exit gates:** combat/destruction systems work together; determinism test passes at 30/60/144 FPS; 10-minute soak with zero errors and zero leaks. Record combat performance results and defer missed numeric targets; they do not block M3.
 
 ## M3 — Vertical slice
 

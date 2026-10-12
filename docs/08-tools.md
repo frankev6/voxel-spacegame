@@ -57,6 +57,7 @@ These work with no Editor open (verified 2026-10-10):
   - `tools/test.sh editmode DevReleaseStripTests` performs the real release compilation and checks Game.App.dll for dev namespaces and the output for DevTools assemblies (DEV-020). A missing-guard mutation must make the test fail; back up and restore the source with `cp`.
   - "Function pointer types are not supported by the SerializationWeaver" lines about `Unity.Entities.dll` are noise.
 - **Rendering or real shader compilation needs the GPU:**
+  - **ADR-0042 policy:** the numeric timing targets below are advisory. A failed/unavailable benchmark is not a progression blocker; at most two initial tuning/measurement-troubleshooting passes per system, then record the limitation and move on.
   - Run `-batchmode` **without** `-nographics`. Metal works headless. For renderer performance, also pass `-force-gfx-mt`: batch PlayMode otherwise selected SingleThreaded despite the project setting (REN-002). Log `SystemInfo.renderingThreadingMode` to verify.
   - Set `ShaderUtil.allowAsyncCompilation = false`.
   - PlayMode test coroutines can resume after rendering. Submit per-frame `Graphics.RenderMeshPrimitives` work from `RenderPipelineManager.beginCameraRendering` before the test camera is culled; a draw issued only immediately before `yield return null` can miss every captured frame (REN-008). Unsubscribe in `finally`.

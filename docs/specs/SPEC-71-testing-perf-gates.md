@@ -11,6 +11,8 @@
 
 > Read [05-testing.md](../05-testing.md), [06-performance-budgets.md](../06-performance-budgets.md) and [07-implementation-traps.md](../07-implementation-traps.md) before this spec. This spec may not contradict them.
 
+> **Owner policy, 2026-10-12 ([ADR-0042](../decisions/ADR-0042-advisory-performance-targets.md)):** every numeric performance target here and in dependent specs is advisory. Performance-only FAIL/inconclusive/unavailable results are recorded, not progression blockers. Keep correctness/determinism/leak checks mandatory. At most two initial optimization passes per system/feature across workers and handoffs, including benchmark troubleshooting; then move on to integrated gameplay. Existing assertion/reporting APIs may keep reporting failure honestly; that does not make a performance-only miss a workflow gate.
+
 ## 1. Purpose
 
 Every other spec says "test with `EcsTestWorld`", "measure with the perf harness", "prove determinism at 30, 60 and 144 FPS". This spec builds those tools and owns the game-wide gates that no single module can own.

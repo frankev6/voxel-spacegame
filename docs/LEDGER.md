@@ -811,6 +811,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-12 — Owner policy: build systems before performance tuning
+
+- Frank, verbatim: “can you reword handoff or docs to say the spec performance goals are just suggestions but not blockers to move on to the next phases. no worker should spend more than 2 passes initially in optimizing blindly just for spec numbers.”
+- Accepted **ADR-0042**: performance numbers across specs/roadmap/tests are advisory, never blockers for functional task completion, dependents or later phases. Maximum **two initial optimization passes per system/feature**, shared across workers/tasks/handoffs; benchmark troubleshooting counts. Record gaps or unavailable measurements and move on. Later tuning needs an integrated gameplay bottleneck or explicit owner direction.
+- Correctness, safety, leaks, determinism, functional integration and explicit owner/art approvals still apply. Keep numeric failure reports truthful; no test thresholds or runtime code changed for this policy. Existing implementation/test status remains unchanged. REN-003 has exhausted its initial tuning allowance; prioritize renderer/input integration and a live gameplay check.
+
 ### 2026-10-11 — REN-008 done — astra (gpt-6)
 
 - Implemented `BrickLit`, shared `BrickSurface`/material layout and `PropInstanced` with forward, shadow, depth and depth-normal passes. ADR-0040 / Q133 uses the approved art contract, retains the eight-byte vertex and keeps exposure distinct from scorch. No legacy bitmap, AI-generated asset or new ship geometry.
