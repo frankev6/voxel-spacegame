@@ -53,8 +53,8 @@ namespace Game.Tests.PlayMode.Simulation.Flight
             public VoxelContent Content => new VoxelContent { Blocks = content.BlockDefs, Orientations = content.Orientations };
             public ushort Hull => Index("block_hull");
             public ushort Thruster => Index("block_thruster_small");
-            ushort Index(string id) => content.Catalog.GetBlockIndex(content.Catalog.Get<BlockDefinition>(new ContentId(id)));
-            public Fixture()
+            public ushort Index(string id) => content.Catalog.GetBlockIndex(content.Catalog.Get<BlockDefinition>(new ContentId(id)));
+            public Fixture(params Type[] extra)
             {
                 content = new ContentService(Resources.Load<GameRoot>("GameRoot").Config.ContentDatabase);
                 library = new BlueprintLibrary(content.Catalog, Content);
@@ -67,6 +67,7 @@ namespace Game.Tests.PlayMode.Simulation.Flight
                     typeof(ThrusterInitSystem), typeof(PlayerCommandApplySystem), typeof(PropulsionSystem), typeof(PlanarConstraintSystem),
                     typeof(SimClockAdvanceSystem), typeof(EdgeCountSystem)
                 };
+                systems.AddRange(extra);
                 foreach (var type in DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.Default))
                     if (type.Namespace != null && (type.Namespace.StartsWith("Unity.Physics") || type.Namespace == "Unity.Transforms")) systems.Add(type);
                 Test = EcsTestWorld.Create(systems.ToArray()); Test.AddGameplayActive(); Test.AddSimClock(); content.CreateSingletons(Em);
@@ -101,7 +102,12 @@ namespace Game.Tests.PlayMode.Simulation.Flight
                     float3 point = GridSpaceMath.InstanceCenter(ref def, ref content.Orientations.Value, instance.Orient, instance.Origin, 1);
                     cellSize = 3 / (point.x - (float)(mass.FirstMoment.x / mass.Mass));
                 }
-                var source = Build(aftThrusters, cellSize); sources.Add(source);
+                var source = Build(aftThrusters, cellSize);
+                return SpawnSource(source, position, velocity, profile);
+            }
+            public Entity SpawnSource(VoxelStructure source, float3 position = default, float3 velocity = default, GridProfile profile = GridProfile.Dummy)
+            {
+                sources.Add(source);
                 return GridSpawnApi.RequestSpawn(Em, registry, registry.Register(source), new GridSpawnParams
                 {
                     Pose = new RigidTransform(quaternion.identity, position), Motion = GridMotion.Dynamic,

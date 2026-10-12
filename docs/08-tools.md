@@ -71,6 +71,7 @@ These work with no Editor open (verified 2026-10-10):
 - **CPU profiler recorders in headless tests (PHY-019):**
   - `new ProfilerRecorder(handle, ...)` needs `StartImmediately` (or `Start()`); `Default` only selects sum/wrap behavior. Assert both `Valid` and `IsRunning`.
   - With `-nographics`, even PlayMode `yield return null` can leave `Count = 0` and `LastValue = 0` while `CurrentValue` accumulates real samples. For a synchronous world update, use its before/after `CurrentValue` delta. Never accept zero/absent timing as a pass.
+  - `IJobEntity` worker markers use `<JobName> (Burst)` in the **Burst Jobs** category (FLT-011); they do not use the `<JobName>.Execute` Scripts marker of some other job types. Discover the actual handle after a warm-up, and require positive timing.
   - Inclusive ECS system names come from `EntityManager.EntityManagerDebug.GetSystemProfilerMarkerName`. Discover exact matching handles in both Scripts and Burst Jobs categories; only the active implementation emits samples. Sum whole-system markers without also adding their nested step markers.
 - **Native memory in tests:**
   - `UnsafeUtility.CheckForLeaks()` returns the tracked allocations still alive *and resets* the tracked set, writing its report with `Debug.Log`. Call it once after a warm-up as a baseline, then again at the end; skip `LogAssert.NoUnexpectedReceived` in that test.

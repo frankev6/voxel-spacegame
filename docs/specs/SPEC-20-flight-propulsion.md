@@ -623,7 +623,7 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Do:** Performance tests of §8 (50 `Ship20k`-sized ships, 20 thrusters each, all with changing commands); determinism test: 3 ships flying a scripted `ShipCommand` sequence for 600 ticks at frame patterns 1, 2, 0/1 and 6 ticks per frame and worker counts 1 and max → identical `LocalTransform` and `PhysicsVelocity` bits per tick.
 - **Files:** `Assets/Game/Tests/PlayMode/Simulation/Flight/{FlightPerfTests,FlightDeterminismTests}.cs`
 - **Acceptance criteria:**
-  - [ ] §8 budgets met (record numbers in the ledger *Measurements*); determinism records identical.
+  - [x] §8 budgets met (record numbers in the ledger *Measurements*); determinism records identical.
 - **Tests:** `FlightPerfTests.Propulsion50Ships_Under0_15ms`, `.Propulsion_MainThread`, `.ThrusterListRebuild`; `FlightDeterminismTests.ScriptedFlight_IdenticalAcrossFramePatterns`.
 
 ### FLT-012 — Power and stat integration (M2)
