@@ -14,9 +14,9 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 17 | 1 | 1 | 0 | 88 | 0 | 107 | 11 |
+| M1 | 17 | 0 | 1 | 0 | 89 | 0 | 107 | 11 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 8 |
-| M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
+| M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
@@ -191,7 +191,7 @@
 | UI-004 | UINavigator stack, pause token and input context | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-003 | yes | done | astra (gpt-6) | 2026-10-12 | 23b3cf5 | Navigator owns context/pause; live Resume/Escape restore Fighter controls; ADR-0047 |
 | UI-005 | Text entry context and world-pointer gate | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-004 | yes | done | astra (gpt-6) | 2026-10-12 | 4cdc9a9 | Text focus/Back and live flight pointer gating; viewport fix Q153; 7 required tests pass |
 | UI-006 | MVVM base, converters and number strings | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | 25da402 | Binding/converters; 6 EditMode + 3 PlayMode tests |
-| UI-007 | Base controls: buttons, panel, list, inputs, key hint, markers, HUD plates | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-002, UI-006 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Token-styled base controls and key binding hints |
+| UI-007 | Base controls: buttons, panel, list, inputs, key hint, markers, HUD plates | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-002, UI-006 | yes | done | astra (gpt-6) | 2026-10-12 | ce4b615 | Nine component sheets; gallery and KeyHint verified; contrast audit UI-012 |
 | CAM-001 | Public contract types | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CORE-001 | yes | done | astra (gpt-6) | 2026-10-11 | f078fc9 | Exact contracts, unmanaged view, two required tests; deferred Fx members Q126 |
 | CAM-002 | ADR: custom camera rig instead of Cinemachine | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | — | yes | done | astra (gpt-6) | 2026-10-11 | a0df398 | ADR-0038 Proposed, all five reasons; no package or runtime change |
 | CAM-003 | Camera math helpers | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0e4a19d | Five specified tests; 30/60/144 FPS damping agrees within 1e-4 |
@@ -438,7 +438,7 @@
 | EDT-022 | Editor host, input, presenter and leave prompt | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-011, EDT-015, EDT-019, EDT-021, SPEC-62, INP-001 | no | todo |  |  |  |  |
 | EDT-023 | Lab and ship-edit scene flow; R16/R19 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, SPEC-01, SPEC-31 | no | todo |  |  |  |  |
 | EDT-024 | Editor performance gates | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, TST-001 | no | todo |  |  |  |  |
-| UI-008 | Meter, Slot and TabBar controls | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-007 | no | todo |  |  |  |  |
+| UI-008 | Meter, Slot and TabBar controls | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-007 | yes | todo |  |  |  |  |
 | UI-009 | Tooltip service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | no | todo |  |  |  |  |
 | UI-010 | Notification service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | no | todo |  |  |  |  |
 | UI-011 | Confirm dialog and text prompt | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-005, UI-008 | no | todo |  |  |  |  |
@@ -837,6 +837,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — UI-007 done — astra (gpt-6)
+
+- **Implementation:** `ce4b615` adds nine token-only component sheets, all base control variants/states, KeyHint binding text and the actual UXML controls gallery. Game.tss imports the components; the existing pause button uses the shared styling. Q160 / SPEC-60 Q19 records empty binding display behavior. Final HUD and contrast audit remain their specified later tasks (UI-012 / HUD-002).
+- **Validation:** both required PlayMode tests pass; full PlayMode **92 passed, 0 failed, 12 GPU skips**. Compile zero C# warnings. Full EditMode **739 passed, 2 advisory timing misses, 1 explicit skip**: Write1MiB **4.2874 ms** vs 3; MeshBuild128 **1.1677 ms** vs 0.5. All functional checks and the theme token audit pass. Evidence `Logs/playtest/ui007/`. No tuning passes; timing gaps remain deferred.
+- **Next:** INP-006 camera/editor samplers, then remaining M1 integration. Preserve the approved Nocturne environment. No new owner decision or game screenshot in this controls-only task.
 
 ### 2026-10-12 — FND-018 done — astra (gpt-6)
 
