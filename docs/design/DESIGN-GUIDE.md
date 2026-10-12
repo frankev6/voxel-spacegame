@@ -8,7 +8,7 @@
 | **Visual reference** | [Look book](lookbook/index.html) and [ship silhouettes](lookbook/silhouettes.html), kept as they are (§10) |
 | **Technical appendix** | [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md) §4 and §10–§11 (§0.3) |
 | **Process spec** | [SPEC-80](../specs/SPEC-80-art-direction.md) |
-| **Last edited** | 2026-10-11 |
+| **Last edited** | 2026-10-12 |
 
 > Owner, 2026-10-11, verbatim: "to be honest im in love with the NOCTURNE version so we will use it as the main guide, however, we must keep the look book as it is, as a visual reference. and make a new Design system guideline to use as the source of truth. this is because i don't want to lose the drydock, or aliens, or the 2d ship ideas (which btw are not yet approved)"
 
@@ -164,7 +164,7 @@ The key light is pitched 40° above the flight plane. This overrides DESIGN-SYST
 
 ### 4.3 Sky
 
-- Near-black base `#020303`, with sparse stars (0.6 of the reference density).
+- Near-black base `#020303`. The in-game procedural sky uses the brighter nebulae and denser stars retained by the owner on 2026-10-12 (§13 decision 7); preserve FND-018's `_Brightness = 1` and its three star thresholds. The original look-book reference used sparse stars at 0.6 density.
 - Green smoke nebula (`#2A3A30` to `#4A3A22`) with a pale green glow.
 - On one side, a violet nebula (`#4A2468` to `#22285E`); on another, a low amber glow (`#8A3E1E`); thin filaments throughout. The owner's round-2 note asked for this variety: "the sky is no longer all green".
 - Dark dust lanes (`#070605`).
@@ -324,3 +324,4 @@ The look book and silhouette page are **frozen as visual reference**. New look-d
 | 5 | 2026-10-11 | **Design system approved: NOCTURNE, as this guide.** Owner, verbatim: "yes I approve" (answer to: does choosing NOCTURNE plus this guide count as the design-system approval). Production art (SPEC-81, A1) and the game milestones M0–M4 may start | Owner | Gate `ART-013`; ledger *Owner gates*; ROADMAP; SPEC-80 §12 |
 | 6 | 2026-10-11 | Slope kit: cube, slope, hip corner, long slope 1×2. Owner: "option 2 is better" | Owner | §5.1; ADR-0018 |
 | 4 | 2026-10-11 | Key light pitched 40° (overrides R4's 25° for NOCTURNE); hazard colours `#B23A2A` and `#0D0E0C`; function colours are the light colours of §3.3; NOCTURNE damage and VFX are physical (ember, scorch, smoke), not "light dying" | Lead worker (claude-opus-5-5), from the look-book renders the owner chose | §3.3, §4.1, §5.4, §9 |
+| 7 | 2026-10-12 | Owner keeps the brighter procedural nebulae and denser stars shown in `Logs/playtest/nocturne-procedural-sky.png`: “no don't reduce its good”. Preserve that FND-018 sky appearance; it supersedes the earlier sparse-density preference for this in-game sky. The planet remains separate physical geometry with atmosphere. | Owner | §4.3; FND-018 |

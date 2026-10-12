@@ -893,13 +893,13 @@ If no save exists, "Load last save" is disabled.
 - **Milestone:** M1
 - **Tier:** frontier — F5: owner-directed live presentation integration
 - **Depends on:** `FND-017`
-- **Do:** Deliver Frank's requested Nocturne background, large placeholder storm planet and sparse nearby particle debris. Reuse the own-work procedural look-book sky/planet source and DESIGN-GUIDE §4, preserving the look book. Bake a full-sphere distant environment; use scene-owned presentation-only world-space particles for near parallax. Keep particles stationary until recycled outside the useful viewing region, fade recycling, and do not create physics/gameplay debris or a second simulation writer. Restore camera settings and destroy owned resources on scene exit. This staged placeholder is replaced by SPEC-31 celestial streaming; it makes no claim to planet travel or persistence.
-- **Files:** `ArtSource/LookDev/export_nocturne_world.py`; `Assets/Game/Content/Environment/Nocturne/`; `Assets/Game/Presentation/Environment/NocturneFlightEnvironment.cs`; `Assets/Game/Presentation/Shaders/SpatialDebris.shader`; `Assets/Game/Scenes/World.unity`; `Assets/Game/Tests/PlayMode/App/NocturneEnvironmentTests.cs`
+- **Do:** Deliver Frank's requested Nocturne background, large placeholder storm planet and sparse nearby particle debris. Reuse the own-work procedural look-book sky/planet source and DESIGN-GUIDE §4, preserving the look book. Render a fully procedural, animated star/nebula sky: fixed hashed stars, slowly evolving smoke/filaments and dust lanes, Nocturne palette with lower-hemisphere features; no sky texture. VESPER-9 is a physical mesh sphere at a fixed finite world position, with a separately baked procedural surface and a separate atmosphere shell. Flying above/past it must change its apparent position/size. Use scene-owned presentation-only world-space particles for near parallax. Keep particles stationary until recycled outside the useful viewing region, fade recycling, and do not create physics/gameplay debris or a second simulation writer. Restore camera settings and destroy owned resources on scene exit. This staged sphere is replaced by SPEC-31 celestial streaming; it has no landing/collision or persistence.
+- **Files:** `ArtSource/LookDev/export_nocturne_world.py`; `Assets/Game/Content/Environment/Nocturne/`; `Assets/Game/Presentation/Environment/NocturneFlightEnvironment.cs`; `Assets/Game/Presentation/Shaders/{SpatialDebris,NocturneAtmosphere,NocturneSky}.shader`; `Assets/Game/Scenes/World.unity`; `Assets/Game/Tests/PlayMode/App/NocturneEnvironmentTests.cs`
 - **Acceptance criteria:**
-  - [ ] Actual World renders Nocturne smoke/filaments/stars and a large VESPER-9 placeholder from the existing procedural source, with the imported ship readable.
-  - [ ] Real thrust produces nearby debris parallax; stationary flight does not produce fake drift. Camera orbit remains usable.
-  - [ ] World exit/re-entry removes/recreates the presentation and restores camera state without leaked objects or errors.
-  - [ ] Inspected screenshots and real-input evidence are supplied to Frank.
+  - [x] Actual World renders animated procedural Nocturne smoke/filaments and fixed stars and a large VESPER-9 placeholder from the existing procedural source, with the imported ship readable.
+  - [x] Real thrust produces nearby debris parallax; stationary flight does not produce fake drift. Camera orbit remains usable.
+  - [x] World exit/re-entry removes/recreates the presentation and restores camera state without leaked objects or errors.
+  - [x] Inspected screenshots and real-input evidence are supplied to Frank.
 - **Tests:** `NocturneEnvironmentTests.WorldEnvironment_EntersMovesAndCleansUp` (PlayMode); actual GPU screenshots before/after real W input. Compile and full EditMode/PlayMode suites. Performance advisory; no initial tuning required.
 
 ## 10. Open questions
@@ -939,7 +939,7 @@ If no save exists, "Load last save" is disabled.
 
 | 25 | Paused teardown leaves package-owned temporal-coherence cleanup entities and a stale physics world | Dispatch the existing physics initialization and end-fixed ECB once at zero delta after destruction | Tech lead | Resolved ADR-0045: no simulation tick, unpause, manual component removal or broadphase mutation. Production-world/live restart exposed this during FND-017. |
 
-| 26 | Owner needs spatial cues before SPEC-31 celestial streaming exists | Scene-owned distant placeholder and local cosmetic particles | Tech lead | Resolved FND-018: bake the existing Nocturne procedural sky and storm planet into a panoramic distant backdrop. This is intentionally non-travelable, with no celestial identity or save data. Nearby world-space particles supply translational parallax; SYS-011 replaces the distant placeholder when canonical celestial visuals exist. |
+| 26 | Owner needs spatial cues before SPEC-31 celestial streaming exists | Scene-owned distant placeholder and local cosmetic particles | Tech lead | Resolved FND-018 after owner correction: sky contains only stars/nebulae and, after a second explicit owner request, is procedural and animated rather than a baked panorama. The planet is a physical 1,400 m radius sphere at (1400, -2000, 1700), with its own texture and 3% atmosphere shell; ships can pass above it. No celestial identity, landing/collision or save data yet. Cosmetic particles and the finite sphere both supply parallax; SYS-011 replaces the staged presentation. |
 
 ## 11. References
 
