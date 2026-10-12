@@ -1,0 +1,30 @@
+/* SPEC-60 UI-007. Shared control values always come from theme tokens. */
+.btn {
+    background-color: var(--color-surface-2);
+    color: var(--color-text);
+    border-color: var(--color-border);
+    border-width: var(--border-thin);
+    border-radius: var(--radius-s);
+    padding: var(--space-2) var(--space-4);
+    margin: var(--space-1);
+    -unity-font-definition: var(--font-body);
+    font-size: var(--text-m);
+    -unity-text-align: middle-center;
+    transition-property: background-color, color, border-color;
+    transition-duration: var(--duration-fast);
+}
+.btn__icon { width: var(--space-5); height: var(--space-5); margin-right: var(--space-2); }
+.btn__label { flex-grow: 1; -unity-text-align: middle-center; }
+.btn--primary { background-color: var(--color-accent); color: var(--color-bg); border-color: var(--color-accent); }
+.btn--secondary { background-color: var(--color-surface-2); color: var(--color-text); }
+.btn--ghost { background-color: initial; border-color: initial; color: var(--color-accent); }
+.btn--danger { background-color: var(--color-danger); color: var(--color-bg); border-color: var(--color-danger); }
+.btn--icon { width: var(--space-7); height: var(--space-7); padding: var(--space-2); }
+.btn--small { font-size: var(--text-s); padding: var(--space-1) var(--space-2); }
+.btn--wide { align-self: stretch; }
+.btn:hover { background-color: var(--color-surface-3); border-color: var(--color-accent); }
+.btn--primary:hover { background-color: var(--color-accent-strong); color: var(--color-bg); }
+.btn--danger:hover { background-color: var(--color-danger); border-color: var(--color-accent-strong); }
+.btn:active, .btn.is-active, .btn.is-selected { background-color: var(--color-accent-strong); color: var(--color-bg); border-color: var(--color-accent); }
+.btn:focus { border-color: var(--color-accent); border-width: var(--border-thick); }
+.btn:disabled, .btn.is-disabled { background-color: var(--color-surface-2); color: var(--color-text-muted); border-color: var(--color-border); }

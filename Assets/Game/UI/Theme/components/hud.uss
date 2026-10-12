@@ -1,0 +1,10 @@
+.hud-region { position: absolute; }
+.anchor-top-left { left: var(--space-5); top: var(--space-5); }
+.anchor-top-center { left: 50%; top: var(--space-5); translate: -50% 0; }
+.anchor-top-right { right: var(--space-5); top: var(--space-5); }
+.anchor-center { left: 50%; top: 50%; translate: -50% -50%; }
+.anchor-bottom-left { left: var(--space-5); bottom: var(--space-5); }
+.anchor-bottom-center { left: 50%; bottom: var(--space-5); translate: -50% 0; }
+.anchor-bottom-right { right: var(--space-5); bottom: var(--space-5); }
+.anchor-right-center { right: var(--space-5); top: 50%; translate: 0 -50%; }
+.hud-plate { background-color: var(--color-surface-1); border-color: var(--color-border); border-width: var(--border-thin); border-radius: var(--radius-s); padding: var(--space-2) var(--space-3); color: var(--color-text); }

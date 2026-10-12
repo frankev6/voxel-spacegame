@@ -1,0 +1,1 @@
+.key-hint { -unity-font-definition: var(--font-mono); font-size: var(--text-s); color: var(--color-text); background-color: var(--color-surface-2); border-color: var(--color-border); border-width: var(--border-thin); border-radius: var(--radius-s); padding: var(--space-1) var(--space-2); margin: var(--space-1); -unity-text-align: middle-center; }

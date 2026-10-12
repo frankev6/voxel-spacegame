@@ -1,0 +1,5 @@
+.slider { color: var(--color-text); margin: var(--space-2) var(--space-1); }
+.slider .unity-base-slider__tracker { height: var(--space-1); background-color: var(--color-surface-3); border-color: var(--color-border); border-width: var(--border-thin); }
+.slider .unity-base-slider__dragger { width: var(--space-4); height: var(--space-4); background-color: var(--color-accent); border-color: var(--color-bg); border-width: var(--border-thin); border-radius: var(--radius-s); }
+.slider:focus .unity-base-slider__dragger, .slider:hover .unity-base-slider__dragger { background-color: var(--color-accent-strong); }
+.slider:disabled .unity-base-slider__dragger { background-color: var(--color-text-muted); }

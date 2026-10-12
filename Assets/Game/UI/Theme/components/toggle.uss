@@ -1,0 +1,5 @@
+.toggle { color: var(--color-text); margin: var(--space-2) var(--space-1); }
+.toggle .unity-toggle__checkmark { width: var(--space-4); height: var(--space-4); background-color: var(--color-surface-2); border-color: var(--color-border); border-width: var(--border-thin); border-radius: var(--radius-s); -unity-background-image-tint-color: var(--color-accent); }
+.toggle:hover .unity-toggle__checkmark, .toggle:focus .unity-toggle__checkmark { border-color: var(--color-accent); }
+.toggle:disabled { color: var(--color-text-muted); }
+.toggle:disabled .unity-toggle__checkmark { -unity-background-image-tint-color: var(--color-text-muted); }

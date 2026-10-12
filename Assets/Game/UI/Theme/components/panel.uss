@@ -1,0 +1,15 @@
+.panel {
+    background-color: var(--color-surface-1);
+    color: var(--color-text);
+    border-color: var(--color-border);
+    border-width: var(--border-thin);
+    border-radius: var(--radius-m);
+}
+.panel__header { flex-direction: row; align-items: center; padding: var(--space-3) var(--space-4); border-bottom-width: var(--border-thin); border-bottom-color: var(--color-border); }
+.panel__title { flex-grow: 1; -unity-font-definition: var(--font-display); font-size: var(--text-l); }
+.panel__header-actions { flex-direction: row; align-items: center; }
+.panel__body { padding: var(--space-4); flex-grow: 1; }
+.panel__footer { flex-direction: row; justify-content: flex-end; padding: var(--space-3) var(--space-4); border-top-width: var(--border-thin); border-top-color: var(--color-border); }
+.panel--floating { align-self: flex-start; }
+.panel--hud { border-radius: var(--radius-s); }
+.panel--modal { border-color: var(--color-accent); }

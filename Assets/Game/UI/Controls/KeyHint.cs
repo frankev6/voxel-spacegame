@@ -1,11 +1,19 @@
+using System;
+using Game.UI.Data;
+using UnityEngine.UIElements;
+
 namespace Game.UI.Controls
 {
-    /// <summary>Implements SPEC-60 §4.5. Contract shell; implementation follows in the owning UI task.</summary>
-    [UnityEngine.UIElements.UxmlElement]
-    public partial class KeyHint : UnityEngine.UIElements.Label
+    /// <summary>SPEC-60 §4.5: binding text supplied by the input adapter, styled by the shared theme.</summary>
+    [UxmlElement]
+    public partial class KeyHint : Label
     {
-        [UnityEngine.UIElements.UxmlAttribute] public string ActionPath { get; set; }   // "Flight/Interact"
-        /// Resolver injected once by UIRoot; refreshed when SPEC-03 raises BindingsChanged.
-        public void Refresh(System.Func<string, string> bindingDisplay) => throw new System.NotImplementedException();
+        [UxmlAttribute] public string ActionPath { get; set; }
+        public KeyHint() => AddToClassList(UIStyleClasses.KeyHint);
+        public void Refresh(Func<string, string> bindingDisplay)
+        {
+            if (bindingDisplay == null) throw new ArgumentNullException(nameof(bindingDisplay));
+            text = string.IsNullOrEmpty(ActionPath) ? string.Empty : bindingDisplay(ActionPath) ?? string.Empty;
+        }
     }
 }

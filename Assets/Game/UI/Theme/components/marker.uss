@@ -1,0 +1,4 @@
+.marker { width: var(--space-3); height: var(--space-3); margin: var(--space-2); border-width: var(--border-thick); }
+.marker--ally { background-color: var(--color-ally); border-color: var(--color-ally); border-radius: 50%; }
+.marker--enemy { background-color: var(--color-enemy); border-color: var(--color-enemy); border-radius: 0; rotate: 45deg; }
+.marker--neutral { background-color: var(--color-neutral); border-color: var(--color-neutral); border-radius: 0; }

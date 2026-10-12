@@ -1,0 +1,75 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:game="Game.UI.Controls">
+  <ui:ScrollView name="gallery-scroll" class="grow">
+    <ui:VisualElement name="gallery-panel" class="panel panel--floating">
+      <ui:VisualElement class="panel__header">
+        <ui:Label name="gallery-title" text="CONTROL GALLERY" class="panel__title" />
+        <ui:VisualElement class="panel__header-actions">
+          <ui:Button name="gallery-header-action" text="HELP" class="btn btn--ghost btn--small" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement class="panel__body stack-m">
+        <ui:Label name="gallery-buttons-title" text="Buttons" class="text-l" />
+        <ui:VisualElement class="row">
+          <ui:Button name="gallery-primary" text="Primary" class="btn btn--primary" />
+          <ui:Button name="gallery-secondary" text="Secondary" class="btn btn--secondary" />
+          <ui:Button name="gallery-ghost" text="Ghost" class="btn btn--ghost" />
+          <ui:Button name="gallery-danger" text="Danger" class="btn btn--danger" />
+          <ui:Button name="gallery-icon" text="+" tooltip="Add" class="btn btn--icon" />
+          <ui:Button name="gallery-small" text="Small" class="btn btn--secondary btn--small" />
+        </ui:VisualElement>
+        <ui:VisualElement class="row">
+          <ui:Button name="gallery-disabled" text="Disabled" enabled="false" class="btn btn--primary is-disabled" />
+          <ui:Button name="gallery-selected" text="Selected" class="btn is-selected" />
+          <ui:Button name="gallery-active" text="Active" class="btn is-active" />
+          <ui:Button name="gallery-composite" class="btn btn--secondary row">
+            <ui:Label text="+" class="btn__icon" />
+            <ui:Label name="gallery-composite-label" text="Icon and label" class="btn__label" />
+          </ui:Button>
+        </ui:VisualElement>
+        <ui:Button name="gallery-wide" text="Wide action · hover, press or tab to focus" class="btn btn--secondary btn--wide" />
+        <ui:TextField name="gallery-input" label="Ship name" value="Fighter" class="text-field" />
+        <ui:TextField name="gallery-invalid-input" label="Invalid" value="Required" class="text-field is-invalid" />
+        <ui:TextField name="gallery-disabled-input" label="Read only" value="Locked" enabled="false" class="text-field" />
+        <ui:Slider name="gallery-slider" label="UI scale" low-value="0.8" high-value="1.5" value="1" class="slider" />
+        <ui:SliderInt name="gallery-slider-int" label="Volume" low-value="0" high-value="100" value="75" class="slider" />
+        <ui:Slider name="gallery-disabled-slider" label="Disabled slider" value="0.5" enabled="false" class="slider" />
+        <ui:VisualElement class="row">
+          <ui:Toggle name="gallery-toggle" label="Enabled" value="true" class="toggle" />
+          <ui:Toggle name="gallery-toggle-off" label="Off" value="false" class="toggle" />
+          <ui:Toggle name="gallery-disabled-toggle" label="Disabled" value="true" enabled="false" class="toggle" />
+          <game:KeyHint name="gallery-key-hint" action-path="Flight/Interact" text="E" class="key-hint" />
+        </ui:VisualElement>
+        <ui:VisualElement class="row">
+          <ui:VisualElement name="gallery-ally" class="marker marker--ally" /><ui:Label text="Ally" />
+          <ui:VisualElement name="gallery-enemy" class="marker marker--enemy" /><ui:Label text="Enemy" />
+          <ui:VisualElement name="gallery-neutral" class="marker marker--neutral" /><ui:Label text="Neutral" />
+        </ui:VisualElement>
+        <ui:VisualElement name="gallery-list" class="list list--compact">
+          <ui:VisualElement name="gallery-list-row-0" class="list__item"><ui:Label text="Hull" class="list__item-label" /><ui:Label text="100" class="list__item-value" /></ui:VisualElement>
+          <ui:VisualElement name="gallery-list-row-1" class="list__item is-selected"><ui:Label text="Selected" class="list__item-label" /><ui:Label text="72" class="list__item-value" /></ui:VisualElement>
+          <ui:VisualElement name="gallery-list-row-2" class="list__item is-disabled" enabled="false"><ui:Label text="Unavailable" class="list__item-label" /></ui:VisualElement>
+          <ui:Label name="gallery-list-empty" text="No additional items" class="list__empty" />
+        </ui:VisualElement>
+        <ui:VisualElement name="gallery-hud-panel" class="panel panel--hud">
+          <ui:Label text="HUD plate and anchors" class="panel__title" />
+          <ui:VisualElement class="panel__body">
+            <ui:Label text=" " /><ui:Label text=" " /><ui:Label text=" " /><ui:Label text=" " />
+            <ui:Label text=" " /><ui:Label text=" " /><ui:Label text=" " /><ui:Label text=" " />
+            <ui:Label name="gallery-top-left" text="TL" class="hud-region hud-plate anchor-top-left" />
+            <ui:Label name="gallery-top-center" text="TC" class="hud-region hud-plate anchor-top-center" />
+            <ui:Label name="gallery-top-right" text="TR" class="hud-region hud-plate anchor-top-right" />
+            <ui:Label name="gallery-center" text="C" class="hud-region hud-plate anchor-center" />
+            <ui:Label name="gallery-right-center" text="RC" class="hud-region hud-plate anchor-right-center" />
+            <ui:Label name="gallery-bottom-left" text="BL" class="hud-region hud-plate anchor-bottom-left" />
+            <ui:Label name="gallery-bottom-center" text="BC" class="hud-region hud-plate anchor-bottom-center" />
+            <ui:Label name="gallery-bottom-right" text="BR" class="hud-region hud-plate anchor-bottom-right" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="gallery-modal-panel" class="panel panel--modal">
+          <ui:Label text="Modal panel pattern" class="panel__title" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement class="panel__footer"><ui:Button name="gallery-confirm" text="Confirm" class="btn btn--primary" /></ui:VisualElement>
+    </ui:VisualElement>
+  </ui:ScrollView>
+</ui:UXML>
