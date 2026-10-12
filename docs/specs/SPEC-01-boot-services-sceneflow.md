@@ -876,6 +876,19 @@ If no save exists, "Load last save" is disabled.
   - [x] Sandbox with `SpawnPlayer = true`: the World is ready, the player ship is at the origin, and no `StarSystemMember` entities exist.
 - **Tests:** `SandboxTests.Sandbox_SpawnsPlayer`.
 
+### FND-017 — Imported ship flight checkpoint
+- **Milestone:** M1
+- **Tier:** frontier — F5: live integration of renderer, controls, physics, camera and save/load
+- **Depends on:** `FND-010`, `REN-001`, `INP-001`, `DEV-001`
+- **Do:** After the REN-011, INP-005 and DEV-008 implementations are done, deliver the owner's 2026-10-12 playable-slice priority: use the existing imported Fighter as the temporary start blueprint (replacing Q7/Q19's four-cell ship_base default); apply DESIGN-GUIDE §4.1 lighting values to World; connect scene/pause input contexts while the future UI navigator is unavailable. Document the temporary context owner with an accepted ADR before changing that single-writer contract, and explicitly hand ownership to UI-004 when it lands. Exercise boot → imported player ship → real input → collision → save/load with the production renderer and camera, capture screenshots of the running game, and record any remaining limitations honestly. No new hulls or AI art.
+- **Files:** `Assets/Game/Scenes/World.unity`; `Assets/Game/Content/Config/config_game.asset`; `Assets/Game/App/Boot/{GameComposition,SceneInputContextBridge}.cs`; `Assets/Game/Tests/PlayMode/App/PlayableShipTests.cs`; `docs/HANDOFF.md`; `docs/LEDGER.md`
+- **Acceptance criteria:**
+  - [ ] Imported ship hull and functional meshes visibly render in the running World with the production camera and documented lighting.
+  - [ ] W/S thrust, A/D turn, Q/E strafe, braking and camera orbit/zoom act through InputService; menus/loading/pause neutralize flight input.
+  - [ ] A real collider interaction is observed; save/load restores the imported ship's voxel data and usable camera/controls. Record pose/velocity persistence limits until their owning world-state spec is implemented.
+  - [ ] Screenshots (or a short recording) and before/after input evidence are supplied to the owner; no renderer test image is presented as gameplay.
+- **Tests:** `PlayableShipTests.Controls_MoveImportedShip`, `.SceneAndPause_NeutralizeFlight`, `.SaveLoad_RestoresImportedShip` (PlayMode); live GPU screenshots and collision observation supplement these functional tests.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
