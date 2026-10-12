@@ -61,7 +61,7 @@ namespace Game.UI.Services
                 RootElement.RegisterCallback<PointerOutEvent>(OnPointerOut);
                 RootElement.RegisterCallback<FocusInEvent>(OnFocusIn, TrickleDown.TrickleDown);
                 RootElement.RegisterCallback<FocusOutEvent>(OnFocusOut, TrickleDown.TrickleDown);
-                // TODO(UI-006): converter registration.
+                UIConverters.RegisterAll();
                 // TODO(UI-009): tooltip lifecycle. TODO(UI-010): notification lifecycle. TODO(UI-011): dialog registration.
                 // TODO(UI-013): ApplyAccessibility; until then use the specified construction defaults.
                 config.PanelSettings.scale = 1;

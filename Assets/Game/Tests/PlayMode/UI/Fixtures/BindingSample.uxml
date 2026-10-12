@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Label name="binding-hull" text="unbound">
+        <Bindings>
+            <ui:DataBinding property="text" data-source-path="Hull" binding-mode="ToTarget" source-to-ui-converters="int-to-text" />
+        </Bindings>
+    </ui:Label>
+</ui:UXML>
