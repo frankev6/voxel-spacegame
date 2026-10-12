@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 36 | 0 | 0 | 0 | 68 | 0 | 104 | 15 |
+| M1 | 35 | 0 | 0 | 0 | 69 | 0 | 104 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 7 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -195,7 +195,7 @@
 | CAM-003 | Camera math helpers | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0e4a19d | Five specified tests; 30/60/144 FPS damping agrees within 1e-4 |
 | CAM-004 | Rig service, camera prefab, Menu/Hold modes and the sync system shell | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-003, FND-001 | yes | done | astra (gpt-6) | 2026-10-11 | ece7b8b | Persistent rig, menu/hold, ECS view and boot bindings; ADR-0039 single listener; ten required tests |
 | CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-004, FLT-001, VOX-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-11 | f19e2a5 | Flight follow, input, cuts; exact moving-target damping (Q129–130) |
-| CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Inclusive camera CPU/GC and circle framing gates |
+| CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 111f9fd | CPU 0.002833 ms; 0 B/update; 10 s circle pitch/GC pass (Q131) |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | todo |  |  |  |  |
@@ -706,6 +706,7 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-11 | CAM-011 | Camera CPU / GC / circle (Apple M5 Pro, reference CPU settings, headless Editor) | Inclusive camera update median/p95 **0.002833 / 0.003000 ms** (≤0.05 ms); allocation median/p95/max **0/0/0 B** | 60 warm-up + 300 measured updates; includes ECS reads, InputCameraInput, rig, view state and VoxelViewer write. Circle: **185,964 frames / 10.009428 s / 80 m/s**, pitch **54.999989–55.000019°**, every measured update 0 B. Q131 defers actual-raycast 0.15 ms evidence to CAM-007; no missing path counted as passed |
 | 2026-10-11 | CAM-005 | Moving-target camera at 30/60/144 FPS | Final X **230.4243 / 230.4243 / 230.4243 m** (printed precision), 0.05 m agreement gate passes | Target 100 m/s for 2 s; default look-ahead and half-lives. Original endpoint update: 232.0124 / 231.2455 / 230.7731 m; 30–60 error 0.766891 m. Q130 integrates the exponential cascade without relaxing the test |
 | 2026-10-11 | FLT-011 | Propulsion worker / cache rebuild | 50 ships × 20 thrusters: median/p95 **0.08983 / 0.1081 ms** (budget 0.15 ms). 200-instance rebuild: **1.162 / 1.628 µs per ship** (budget 2 µs) | Apple M5 Pro, 17 workers, reference CPU settings, 60 warmup + 300 samples; actual Burst Jobs markers. Ship20k + 20 thrusters per root. Rebuild fixture adds 180 non-thruster functional instances and conservatively includes the whole zero-sweep propulsion job |
 | 2026-10-11 | FLT-011 | Flight scheduling / player / plane / GC | Median/p95: propulsion main **0.001041 / 0.003417 ms** (0.03); player command **0.000666 / 0.000834 ms** (0.01); plane worker, 100 bodies **0.003166 / 0.007417 ms** (0.02). Managed allocation **0 B every sample** | 60 warmup + 300 samples; GC measured around the three flight system updates and their job completion, excluding fixture mutations, scenes and unrelated physics work |
@@ -804,6 +805,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-11 — CAM-011 done — astra (gpt-6)
+
+- Added the three prescribed PlayMode camera tests. Timing uses the whole CameraTargetSyncSystem marker (including nested rig/input); GC measures only that update, excluding fixture mutation/assertions. The 80 m/s circle advances from the production bridge’s clamped unscaled dt for at least ten seconds, checking pitch and zero allocation each frame.
+- Q131 / SPEC-62 Q14 resolves future-path gates: enforce **0.05 ms without occlusion** now; CAM-007 owns a real-raycast fixture and **0.15 ms** timing, CAM-006 owns origin accuracy. Initial captured-clock assertion exposed that captureDeltaTime does not fix unscaledDeltaTime; documented in tools, corrected the scenario clock without changing runtime or loosening its checks.
+- Reference CPU median/p95 **0.002833 / 0.003000 ms**; GC median/p95/max **0/0/0 B**. Circle **185,964 frames / 10.009428 s**, pitch **54.999989–55.000019°**, no camera allocation. No graphics timing claimed.
+- Validation: compile **zero C# warnings**, full EditMode **693 passed + 1 explicit skipped**, full PlayMode **64 passed**, perf **47/47**, docs **505 tasks / zero errors**. Implementation: `111f9fd`. Next: renderer fallback contract and implementation, then remaining M1 renderer/input/UI work.
+
 
 ### 2026-10-11 — CAM-005 done — astra (gpt-6)
 
