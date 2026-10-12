@@ -694,6 +694,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 128 | 2026-10-11 | SPEC-62 CAM-004 | Camera boot wiring precedes input/FX adapters and ordering peers | Bind available services, explicitly defer adapters | Tech lead | Resolved SPEC-62 Q11 / ADR-0039: null input/FX staging; FollowHeading; sensitivity clamp; existing VoxelViewer writer; Lab Hold until CAM-009 |
 | 129 | 2026-10-11 | SPEC-62 CAM-005 | Input/rig specs apply orbit settings twice and duplicate adapter ownership | Raw pixels, one Input-namespace adapter, settings in rig | Tech lead | Resolved SPEC-62 Q12 / SPEC-03 Q7; CAM-005 Flight branch, INP-006 Editor branch/tests, zoom sensitivity once |
 | 130 | 2026-10-11 | SPEC-62 CAM-005 | Endpoint damping misses moving-target FPS tolerance by 0.767 m | Exact exponential cascade with linear target motion | Tech lead | Resolved SPEC-62 Q13; original 30/60/144 X: 232.0124/231.2455/230.7731 m. Test/tolerance unchanged; equal-rate and small-step limits; task tier frontier |
+| 131 | 2026-10-11 | SPEC-62 CAM-011 | M1 camera gate mentions M3 raycast/origin paths | Enforce no-occlusion 0.05 ms and zero GC now | Tech lead | Resolved SPEC-62 Q14; CAM-007 owns real-raycast timing ≤0.15 ms, CAM-006 owns origin accuracy; no stub timing accepted |
 
 
 

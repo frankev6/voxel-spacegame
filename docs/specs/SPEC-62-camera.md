@@ -344,6 +344,8 @@ Mode ownership: `Game.App` sets `Menu` when MainMenu is ready, `Flight` (cut) wh
 | GC | 0 B/frame | `CameraPerformanceTests.FlightFrame_ZeroGc` |
 | Origin rebase (06 world gate "no visible pop") | Camera-target offset error ≤ 1e-3 m across the rebase frame | `CameraOriginShiftTests` |
 
+M1 CAM-011 measures the actual no-occlusion path against **0.05 ms** and zero GC; CAM-007 extends the same timing test with a real raycast fixture against **0.15 ms**. Origin-rebase accuracy belongs to CAM-006. Inclusive system timing includes `CameraRigService.Tick`; do not double count nested markers (Q14).
+
 Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadTarget`, `CameraTargetSyncSystem.Shake`, `CameraTargetSyncSystem.Occlusion`, `CameraRigService.Tick`. Scale: the system touches one entity (the player ship) and at most 256 Fx events per frame; it never iterates other entities.
 
 ## 9. Tasks
@@ -424,13 +426,14 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Milestone:** M3
 - **Tier:** frontier — F2: main-thread physics query with an explicit dependency completion in the presentation group
 - **Depends on:** `CAM-005`, `PHY-001`
-- **Do:** Implement §5.1 step 7 and §5.3 step 7 with `IgnoreEntityClosestHitCollector : ICollector<RaycastHit>`.
+- **Do:** Implement §5.1 step 7 and §5.3 step 7 with `IgnoreEntityClosestHitCollector : ICollector<RaycastHit>`. Extend `CameraPerformanceTests.FlightFrame_Under0_15ms` with a real raycast fixture and measure the 0.15 ms gate (Q14).
 - **Files:** `Assets/Game/Presentation/Systems/CameraTargetSyncSystem.cs`, `Assets/Game/Presentation/Services/{CameraRigService,IgnoreEntityClosestHitCollector}.cs`
 - **Acceptance criteria:**
   - [ ] A box collider between focus and camera pulls the camera to hit distance − 1 m (min 5 m) in the same frame.
   - [ ] Removing the box restores the distance with half-life 0.3 s.
   - [ ] The player's own grid never causes a pull-in.
-- **Tests:** `Assets/Game/Tests/PlayMode/Presentation/CameraOcclusionTests.cs`: `BoxBetween_PullsIn`, `BoxRemoved_ReleasesSmoothly`, `OwnGrid_Ignored`, `NoPhysicsWorld_NoOcclusion`.
+  - [ ] Combined camera CPU cost with a real raycast is ≤0.15 ms median; recorded in the ledger (Q14).
+- **Tests:** `Assets/Game/Tests/PlayMode/Presentation/CameraOcclusionTests.cs`: `BoxBetween_PullsIn`, `BoxRemoved_ReleasesSmoothly`, `OwnGrid_Ignored`, `NoPhysicsWorld_NoOcclusion`; extend `CameraPerformanceTests.FlightFrame_Under0_15ms` with the raycast fixture (Q14).
 
 ### CAM-008 — Screen shake from FxEvents
 - **Milestone:** M2
@@ -477,8 +480,8 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Do:** Add PlayMode `Performance` tests for §8 and a scripted flight scenario test (player ship flying a circle at 80 m/s for 10 s) asserting zero GC and pitch range each frame.
 - **Files:** `Assets/Game/Tests/PlayMode/Presentation/CameraPerformanceTests.cs`
 - **Acceptance criteria:**
-  - [ ] Medians recorded in the ledger *Measurements* table.
-  - [ ] Both gates of §8 pass on the reference machine.
+  - [x] Medians recorded in the ledger *Measurements* table.
+  - [x] M1 no-occlusion CPU (≤0.05 ms) and zero-GC gates of §8 pass on the reference machine; CAM-007 owns raycast timing and CAM-006 owns origin accuracy (Q14).
 - **Tests:** `CameraPerformanceTests.FlightFrame_Under0_15ms`, `CameraPerformanceTests.FlightFrame_ZeroGc`, `CameraPerformanceTests.CircleFlight_PitchInRangeEveryFrame`.
 
 ## 10. Open questions
@@ -493,15 +496,12 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 | 6 | SPEC-64: where the `AudioListener` lives | AudioRoot, with camera-owned target pivot | Tech lead (SPEC-64) | Resolved CAM-004 / ADR-0039: retain SPEC-64 ownership; no listener on camera prefab. |
 | 7 | SPEC-20: ship forward axis and graphical smoothing on the player ship | Forward = grid +Z, up = +Y; the player ship has `PhysicsGraphicalSmoothing` | Tech lead (SPEC-20) |  |
 | 8 | Should the flight yaw default to following the ship heading or stay north-up? | `FollowHeading` (controls are ship-relative); `Free` available in settings | Owner |  |
-
 | 9 | Deferring the whole IFxFrameReader interface to CAM-008 prevents CAM-004 Bind from compiling (CAM-008 depends on CAM-005) | Add an empty binding interface now; defer only its FxEvent property | Tech lead | Resolved CAM-001: retain the §6 interface name with a CAM-008 TODO for Current, and defer ShakeRule.Kind as instructed. No FxKind/FxEvent substitute is invented; VFX-001 owns those contracts. |
-
 | 10 | Camera-prefab listener contradicts SPEC-64’s existing single-listener service | Keep AudioService ownership; expose and bind a rig-owned ListenerPivot | Tech lead | Resolved CAM-004 / ADR-0039; app binds/clears the existing target API, and the rig disposes its pivot. |
 | 11 | CAM-004 composition precedes camera input, Fx events, persisted yaw mode and ordering peers | Wire available contracts; explicitly defer missing adapters and peer attributes | Tech lead | Resolved CAM-004 / ADR-0039: null input/FX until CAM-005/CAM-008, FollowHeading default, sensitivity clamped to 0.1–3. AudioEventDrainSystem/HudSyncSystem ordering attributes are added when those types exist. Write the existing optional VoxelViewer for SPEC-11; no lazy singleton creation. Lab uses Hold until CAM-009. |
-
 | 12 | SPEC-03 applies orbit sensitivity/inversion in the adapter and SPEC-62 applies them again; adapter namespace/ownership also differs | Raw orbit pixels from the canonical SPEC-03 Input namespace; rig applies settings once | Tech lead | Resolved CAM-005: implement the Flight branch in Game.Presentation.Input.InputCameraInput; INP-006 extends Editor sampling and owns adapter tests. Zoom sensitivity remains in the adapter, once. CAM-009 consumes the Editor branch. ICameraInput already promises pixel deltas; no public signature changes. |
-
 | 13 | Endpoint-only focus damping violates the moving-target FPS acceptance | Integrate the same exponential cascade with linear target motion over each frame | Tech lead | Resolved CAM-005: initial 100 m/s, 2 s X positions were 232.0124 / 231.2455 / 230.7731 m at 30/60/144 FPS (30–60 error 0.766891 m vs 0.05 m). §5.3 now gives the closed-form integration, including equal-rate/small-step limits; required test and tolerance remain unchanged. Task raised to frontier for this numerical decision. |
+| 14 | M1 camera performance task references occlusion/origin paths implemented in M3 | Measure actual no-occlusion CPU/GC now; extend the same timing test in CAM-007 | Tech lead | Resolved CAM-011: enforce 0.05 ms without a raycast, not the looser 0.15 ms label. CAM-007 explicitly owns the real-raycast fixture and 0.15 ms evidence; CAM-006 owns origin accuracy. The ten-second circle advances from the same clamped unscaled dt as the production bridge; captureDeltaTime does not fix unscaledDeltaTime in this Editor (verified by the initial test failure). A real-time timeout bounds a stalled clock. Allocation measurement covers the inclusive bridge/rig update, excluding fixture mutation and assertions. |
 
 ## 11. References
 
