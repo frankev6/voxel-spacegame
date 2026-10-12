@@ -5,3 +5,4 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Game.Tests.PlayMode")]
 [assembly: InternalsVisibleTo("Game.Editor")]
 [assembly: InternalsVisibleTo("Game.DevTools.Editor")]
+[assembly: InternalsVisibleTo("Game.Tests.Common")] // SPEC-71 real-boot fixture lifecycle.

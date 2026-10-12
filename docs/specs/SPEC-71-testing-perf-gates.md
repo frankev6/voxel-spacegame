@@ -400,18 +400,20 @@ A frame can run past the target tick, so the runner holds the simulation through
 ### 5.6 `GameFlowFixture`
 
 **SetUp:**
-1. `GameRootTestHooks.Reset()`.
-2. `dir = Path.Combine("Temp/TestRuns", Guid)`; `SaveRoot = dir + "/saves"`; `SettingsPath = dir + "/settings.json"`; `SkipIntroScreens = true`.
-3. `SceneManager.LoadScene("Boot")`.
-4. `WaitUntil(Services.TryGet<SceneFlow>(out _) && state == MainMenu, 30 s)`.
+1. Set leak detection to `EnabledWithStackTrace`, keep unexpected error logs fatal, and capture the last 20 log lines for timeout diagnostics.
+2. Settle/quit an existing game session and destroy its root before replacing its world. Reset `GameRootTestHooks`.
+3. `dir = Path.GetFullPath(Path.Combine("Temp/TestRuns", Guid))`; create it and set `SaveRoot = dir + "/saves"`, `SettingsPath = dir + "/settings.json"`, `SkipIntroScreens = true`.
+4. Load `Boot`, then explicitly call the existing `Bootstrap.Boot` (RuntimeInitializeOnLoadMethod is not rerun by scene loads). The test-only Common assembly gets friend access to App for this existing lifecycle; no new runtime API or assembly reference.
+5. On a null graphics device only, disable `VoxelConfig.RequireRenderer` so headless correctness tests can reach player readiness. GPU runs retain production readiness.
+6. Wait for the production `SceneFlow` to settle in MainMenu (30 s), then create/activate a throwaway profile.
 
 **TearDown:**
-1. If in the World or Lab: `SceneFlow` quit to the menu, then wait.
-2. Destroy the `GameRoot` object; wait 2 frames; `GameRootTestHooks.Reset()`.
-3. Delete `dir` (ignore IO errors with a warning).
-4. `LogAssert.NoUnexpectedReceived()`.
+1. Wait for an active transition to settle. Quit an active session, or transition Lab/World to MainMenu.
+2. Destroy the `GameRoot` object; wait 2 frames; reset test hooks.
+3. Delete `dir` (IO/access errors warn), restore leak-detection mode and unsubscribe log capture. Idempotent cleanup lets a derived teardown inspect the result.
+4. `LogAssert.NoUnexpectedReceived()`; unexpected errors also fail through Unity's normal per-test check.
 
-`NewGame(seed)`: `SceneFlow.StartNewGameAsync(new NewGameOptions { GalaxySeed = seed, CommanderName = "Test" })`, then `WaitUntil(PlayerReady, 60 s)`.
+`NewGame(seed)` calls the canonical `IGameFlow.NewGameAsync(new NewGameArgs("Test", seed, false, ContentId.None))`, then waits for `PlayerReady` (60 s). M1's production new-game path uses the imported starter without galaxy streaming; SPEC-30/31 will extend that same flow. `EnterSandbox()` calls `SceneFlow.EnterSandboxAsync(new SandboxArgs(true, 42))` and waits for the same readiness. The intro hook already exists from FND-005; there is no splash yet to skip (HUD-003 owns it).
 
 ### 5.7 Gate suites
 
@@ -501,12 +503,12 @@ The game gates it owns are those listed in §5.7.
 - **Do:**
   1. Implement `GameRootTestHooks` and the `GameRoot.Awake` reads of it, with a ledger note to SPEC-01/05 (item 92): save root via `new SavePaths(root)`, settings path, intro skip.
   2. Implement `GameFlowFixture` (§5.6).
-- **Files:** `Assets/Game/App/Testing/GameRootTestHooks.cs`; `Assets/Game/App/GameRoot.cs` (hook reads); `Assets/Game/Tests/Common/Flow/GameFlowFixture.cs`; `Assets/Game/Tests/PlayMode/TestKit/GameFlowFixtureTests.cs`
+- **Files:** `Assets/Game/App/Testing/GameRootTestHooks.cs`; `Assets/Game/App/Boot/GameRoot.cs` (existing hook reads); `Assets/Game/App/AssemblyInfo.cs` (test-only friend access); `Assets/Game/Tests/Common/Flow/GameFlowFixture.cs`; `Assets/Game/Tests/PlayMode/TestKit/GameFlowFixtureTests.cs`
 - **Acceptance criteria:**
-  - [ ] Boot reaches the menu.
-  - [ ] `NewGame(42)` yields `PlayerReady` (M1: sandbox; the galaxy path once SPEC-30/31 exist).
-  - [ ] A save made in the test lands under the temp folder and nothing is written to the real profile (folder timestamps unchanged).
-  - [ ] Teardown deletes the folder.
+  - [x] Boot reaches the menu.
+  - [x] `NewGame(42)` yields `PlayerReady` (M1: sandbox; the galaxy path once SPEC-30/31 exist).
+  - [x] A save made in the test lands under the temp folder and nothing is written to the real profile (folder timestamps unchanged).
+  - [x] Teardown deletes the folder.
 - **Tests:** `GameFlowFixtureTests.Boot_ReachesMenu`, `.Sandbox_PlayerReady`, `.Saves_InTempRoot`, `.Teardown_Cleans`.
 
 ### TST-004 — Integrated voxel gate suite (moved from SPEC-10 VOX-018)
@@ -607,6 +609,7 @@ The game gates it owns are those listed in §5.7.
 | 7 | Applied settings disabled only domain reload; live wrappers used an obsolete CLI schema and ignored process failure | **Answer (resolved in TST-008):** apply and guard both reload flags (ADR-0020); use the installed Pipeline command schema and complete structured results, export XML, clear stale results and reject failed process/CLI execution even when XML reports passes. Iteration timings include CLI transport and script wall time with an idle open Editor. | Tech lead | — |
 
 | 8 | Replay/record managed systems and PlayerCommand override absent from architecture; endpoints/FrameIndex unspecified | Follow ADR-0051 | Tech lead | Resolved: explicit dev-only hooks, frame-stage/even-tick bounds, finite float round trips, transient FrameIndex and defined script endpoints. |
+| 9 | Fixture pseudo-API differs from implemented boot/session lifecycle | Use existing canonical services and test-only boot access | Tech lead | Resolved TST-003: explicit Bootstrap after Boot scene load, existing IGameFlow.NewGameAsync and SceneFlow sandbox; null-device renderer readiness bypass only, hooks already supplied by FND-005, splash deferred to HUD-003. |
 
 ## 11. References
 
