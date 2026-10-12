@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 10 |
+| M2 | 86 | 0 | 0 | 0 | 1 | 0 | 87 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -218,9 +218,9 @@
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
 | PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | todo |  |  |  |  |
-| DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Damage and explosion channels, per-tick owned data and consumer lifetime |
+| DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-12 | e3377fa | Four channels, owned phase memory, stable explosion drains; 5 tests; Q179–180 |
 | DMG-003 | Damage config asset and boot hookup | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-001 | yes | todo |  |  |  |  |
-| DMG-004 | Cell access, quantization and RemoveCell | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-002 | no | todo |  |  |  |  |
+| DMG-004 | Cell access, quantization and RemoveCell | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-002 | yes | todo |  |  |  |  |
 | DMG-005 | Point and blast damage | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | no | todo |  |  |  |  |
 | DMG-006 | DamageResolveSystem pipeline | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-005 | no | todo |  |  |  |  |
 | DMG-007 | ImpactEventSystem (rams and knockback) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, PHY-001 | no | todo |  |  |  |  |
@@ -754,6 +754,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 176 | 2026-10-12 | SPEC-70 DEV-007 | Coroutine parameterization and unimplemented draft vocabulary | Native UnityTest ValueSource; header-only draft inspection | Tech lead | Resolved SPEC-70 Q23: one sorted case per smoke/regression file, drafts ignored before resolving steps, active cases use strict parser/real runner and the specified frame bound. |
 | 177 | 2026-10-12 | SPEC-70 DEV-019 | Future editor input cannot yet be exercised | Keep explicit draft activation prerequisites | Tech lead | Resolved SPEC-70 Q24: provisional viewport clicks, refund text, changed paint colour and Ark leave option must be bound by owning systems before activation. Parse-only fixtures expose only declared future vocabulary; no production stubs. R30 verifies return target identity and both entry rings. |
 | 178 | 2026-10-12 | SPEC-05 PERS-019 | Four native Fleet snapshots leaked on Play exit while quit-save awaited thumbnails | Track ownership until worker claims the capture | Tech lead | Resolved SPEC-05 Q29: synchronous waiting-snapshot disposal, exclusive worker handoff, no post-disposal completion/quit callback. Tracked stacks in Logs/playtest/m1-review/tracked-editor.log identify all four allocations. |
+| 179 | 2026-10-12 | SPEC-13 DMG-002 | Tick stats reset races pending job writes; internal ownership details | Dependent reset job and explicit phase fences | Tech lead | Resolved SPEC-13 Q21: no fixed-step completion; stats reset depends on previous phase/readers, later writers chain it, and container copies preserve detach swaps. Main-thread stats reads complete publication outside fixed simulation. CellMask uses 64 inline ulongs. |
+| 180 | 2026-10-12 | SPEC-13 DMG-002 | Shared stale-stream warning fails inside Burst owner (BC1016) | Build identical warning from unmanaged characters | Tech lead | Resolved SPEC-13 Q22: preserve existing logging and lifetime behavior; eliminate managed-string conversion. Full suite verifies actual Burst compilation, which focused asynchronous tests missed. |
 
 ## Measurements
 
@@ -863,6 +865,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DMG-002 done — astra (gpt-6)
+
+- **Changed:** DamageStreamsSystem creates all four shared channels and persistent damage memory before the boot snapshot, publishes tick statistics through a dependent job, and swaps detach lists without redirecting pending jobs. Removed/restored readers and phase handles participate in teardown. Explosion drains gather and stably sort by source, producer, sequence and gather position; core-loss and retired-blob drains transfer pending results. Implementation `e3377fa`.
+- **Correctness decisions:** SPEC-13 Q21 / ledger Q179 orders the stats reset and records phase ownership, deferred views and the 64-ulong cell mask. The full suite exposed BC1016 in the shared SimEventChannel stale-warning string constructor; Q22 / Q180 preserves the exact warning using unmanaged character appends. No public API change, logging suppression or optimization pass.
+- **Checks:** five required tests pass with safety/leak checks, including 6,000 parallel events, stable explosion order at 1/8 workers, one-time stale warning and destruction with pending readers. Compile zero C# warnings. Full EditMode **773 passed, 2 advisory timing misses, 1 explicit skip**; full PlayMode **109 passed, 0 failed, 29 GPU/draft skips**. Write1MiB **3.8533 ms** vs 3 and MeshBuild128 **1.1164 ms** vs 0.5 remain performance deferred; zero tuning. Evidence: `Logs/playtest/dmg002/` (including the original Burst failure and corrected full results).
+- **Next:** DMG-003 config/table → DMG-004 cell write path → point/blast resolver and ramming. This task is event plumbing, not visible destruction or weapons. Preserve approved Nocturne visuals. No new owner decision.
 
 ### 2026-10-12 — Built M1 systems reviewed — system-review: astra (gpt-6)
 
