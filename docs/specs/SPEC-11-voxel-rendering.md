@@ -341,10 +341,11 @@ Gate: LOD1 triangles ≤ 25% of LOD0 for the same brick set (measured on `Hollow
 - **Group:** `WorldGroup`, last. Burst `ISystem`. Requires `GameplayActive`, `VoxelViewer`, `VoxelRenderConfig`.
 - **Writes:** `Dormant` enable bits (sole writer), `BrickLodDesired` (sole writer); enqueues `Lod` requests.
 - Per frame (markers `Grids`, `Bricks`, `Enqueue`):
-  1. `VoxelViewer.Valid == 0` → all grids non-dormant and all bricks LOD0 desired (only writes values that change); return.
-  2. `GridDormancyJob : IJobEntity` (`ScheduleParallel`) over roots: bounding sphere of the grid (centre = `LocalToWorld` of the `CellMin..CellMax` centre × CellSize, radius = half diagonal × CellSize); `d = max(0, |centre − AnchorPosition| − radius)`; currently dormant → stays dormant while `d > DormantDistance × (1 − LodHysteresis)`; currently active → becomes dormant when `d > DormantDistance`.
+  1. `VoxelViewer.Valid == 0` → all grids non-dormant and all bricks LOD0 desired (only writes values that change); still run step 4 so already-shown LOD1 meshes rebuild to LOD0 (Q32).
+  2. `GridDormancyJob : IJobEntity` (`ScheduleParallel`) over roots: bounding sphere of the grid (centre = `LocalToWorld` of `(CellMin + CellMax + 1) / 2 × CellSize`, radius = `length(CellMax + 1 − CellMin) / 2 × CellSize × root scale` (bounds are inclusive; Q33)); `d = max(0, |centre − AnchorPosition| − radius)`; currently dormant → stays dormant while `d > DormantDistance × (1 − LodHysteresis)`; currently active → becomes dormant when `d > DormantDistance`.
   3. `BrickLodJob : IJobEntity` (`ScheduleParallel`) over bricks with `BrickRenderState`: sphere centre = `math.transform(LocalToWorld.Value, 8)`, radius = `8√3 × scale` (scale = length of LTW column 0); `d = max(0, |centre − CameraPosition| − radius)`; current desired 0 → 1 when `d > Lod1Distance`; 1 → 0 when `d < Lod1Distance × (1 − LodHysteresis)`; grid dormant → 1. Write only on change.
-  4. `LodEnqueueJob : IJobChunk` (`Schedule`, change filter on `BrickLodDesired`): `HasMesh == 1` and `Desired != ShownLod` → `BrickMeshQueue.Enqueue(brick, grid, Lod)`. Job access per SPEC-12 §5.1: `q = SystemAPI.GetSingleton<BrickMeshQueue>()` (read-only), schedule on `q.Acquire(state.Dependency)`, then `q.Release(handle)`.
+  4. `LodEnqueueJob : IJobChunk` (`Schedule`, change filter on `BrickLodDesired` OR `BrickRenderState` (Q32)): `HasMesh == 1` and `Desired != ShownLod` → `BrickMeshQueue.Enqueue(brick, grid, Lod)`. Job access per SPEC-12 §5.1: `q = SystemAPI.GetSingleton<BrickMeshQueue>()` (read-only), schedule on `q.Acquire(state.Dependency)`, then `q.Release(handle)`.
+- Use read-only query access plus per-entity lookups for conditional writes: an unconditional RW query marks chunk versions even when values are unchanged. Parallel jobs write only their own entity.
 - Complexity O(bricks) per frame in parallel jobs (2,500 bricks ≈ 20 µs worker time); 0 main-thread loops.
 
 ### 5.8 `PropRenderSystem`
@@ -395,7 +396,8 @@ No CPU geometry copies persist after upload. Accounting includes allocated GPU c
 | Neighbour brick missing (grid edge or not yet spawned) | Treated as air: border faces are emitted; when it spawns, SPEC-10 enqueues it, and its first build marks nothing — the edge brick keeps faces until it is next rebuilt. `GridSpawnSystem` enqueues spawned bricks in brick-record order, so most neighbours exist before their meshes build; remaining hidden-face overdraw is accepted |
 | Diagonal-neighbour change (edge/corner of a brick) | AO of the diagonal brick is not rebuilt until it is next dirtied (accepted cosmetic error) |
 | Wedge faces next to wedge faces | Partial faces are culled only by full neighbour faces; coincident back-to-back triangles are emitted (back-face culled) |
-| `VoxelViewer.Valid == 0` (menus, first frame) | Everything LOD0, nothing dormant |
+| `VoxelViewer.Valid == 0` (menus, first frame) | Everything LOD0, nothing dormant; queue restoration of already-shown LOD1 |
+| Camera reverses LOD distance while an earlier mesh is in flight | Recheck after apply changes BrickRenderState; enqueue the current desired LOD if the arriving mesh disagrees (Q32) |
 | Batch not complete after 4 frames | `Complete()` in `BrickMeshApplySystem` (presentation; bounded) |
 | More than 512 props in one brick | Extra props not drawn; `GameLog.WarnOnce("Voxel", "prop overflow")` |
 | Palette index or block index out of range in a cell | Drawn with layer 63 colour 0; `GameLog.WarnOnce` |
@@ -563,10 +565,10 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Do:** Implement `GridLodSystem` (§5.7) with its three jobs.
 - **Files:** `Assets/Game/Voxel/Rendering/{GridLodSystem,GridDormancyJob,BrickLodJob,LodEnqueueJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/Rendering/GridLodSystemTests.cs`
 - **Acceptance criteria:**
-  - [ ] A brick crossing 400 m switches to LOD1; it switches back below 360 m and not between 360 and 400 m.
-  - [ ] A grid beyond 3,000 m from the anchor becomes dormant; returns below 2,700 m; its bricks never desire LOD0 while dormant.
-  - [ ] Only changed values are written (change version unchanged on idle frames).
-  - [ ] Main-thread cost ≤ 0.1 ms for 5,000 bricks.
+  - [x] A brick crossing 400 m switches to LOD1; it switches back below 360 m and not between 360 and 400 m.
+  - [x] A grid beyond 3,000 m from the anchor becomes dormant; returns below 2,700 m; its bricks never desire LOD0 while dormant.
+  - [x] Only changed values are written (change version unchanged on idle frames).
+  - [x] Main-thread cost ≤ 0.1 ms for 5,000 bricks.
 - **Tests:** `GridLodSystemTests.Lod_Hysteresis`, `.Dormant_Hysteresis`, `.Dormant_ForcesLod1`, `.Idle_NoWrites`, `.InvalidViewer_AllLod0`, `.MainThreadCost5000`.
 
 ### REN-013 — Rendering gate suite
@@ -649,6 +651,9 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 30 | EditMode mesh tests cannot instantiate VoxelRenderRuntime without the AABB assembly | Direct test-only Unity.Mathematics.Extensions reference | Tech lead | Accepted ADR-0043; installed package, no runtime dependency or contract change. |
 
 | 31 | Pooled cleanup must precede submission; query capture is deprecated; palette references must not mutate source assets | Retire before PresentationBridgeGroup, capture exact deleted entities, one runtime copy per shared material | Tech lead | Resolved 2026-10-12: cleanup uses OrderFirst plus UpdateBefore(PresentationBridgeGroup), releases handles immediately and records one bulk removal over the exact captured entities (not a later query that could include unretired deletions). Apply owns shared material copies and the pool; camera owner publishes VoxelRenderCamera before BrickPoolRenderSystem submits. All are the accepted ADR-0032 integration, with no per-brick materials or meshes. |
+
+| 32 | Invalid-viewer early return skips restoration, and desired-only change filtering misses an opposite-LOD mesh applied later | Always enqueue after desired updates; watch desired and applied render state | Tech lead | Resolved REN-012: invalid viewer clears dormancy/desires and still runs enqueue. Either desired or applied state changing triggers mismatch checks, so async apply cannot leave a stale LOD. Covered within the specified hysteresis and invalid-viewer tests. |
+| 33 | Grid bounds are inclusive cell indices, but the distance-sphere formula omits cell extent and root scale | Include CellMax + 1 and uniform root scale | Tech lead | Resolved REN-012: centre and half diagonal use the full occupied cell volume, then apply the root transform/scale. Brick LTW already includes CellSize, so its radius uses LTW scale exactly once. |
 
 ## 11. References
 

@@ -902,6 +902,18 @@ If no save exists, "Load last save" is disabled.
   - [x] Inspected screenshots and real-input evidence are supplied to Frank.
 - **Tests:** `NocturneEnvironmentTests.WorldEnvironment_EntersMovesAndCleansUp` (PlayMode); actual GPU screenshots before/after real W input. Compile and full EditMode/PlayMode suites. Performance advisory; no initial tuning required.
 
+### FND-019 — Preserve Nocturne sky across direct new-game restarts
+- **Milestone:** M1
+- **Tier:** frontier — F5: scene teardown and persistent-camera presentation lifetime
+- **Depends on:** `FND-018`, `FND-017`
+- **Do:** Fix the loss of the persistent camera's Skybox override after NewGame is called while already in World. Keep the approved procedural material, brightness and star density. Make teardown/rebinding safe across consecutive World instances and preserve exit cleanup. Reproduce the direct restart path through the real session, not only World → menu → World with a frame between transitions.
+- **Files:** `Assets/Game/Presentation/Environment/NocturneFlightEnvironment.cs`; `Assets/Game/Tests/PlayMode/App/NocturneEnvironmentTests.cs`
+- **Acceptance criteria:**
+  - [ ] Repeated direct NewGame calls retain an enabled camera Skybox using Game/NocturneSky after settling; only one environment and particle system remain.
+  - [ ] Leaving World restores the camera's prior clear/sky state with no leftover environment objects.
+  - [ ] Live fresh launch and direct restart preserve the approved appearance; zero runtime errors.
+- **Tests:** `NocturneEnvironmentTests.NewGameRestart_PreservesSky`; retain `WorldEnvironment_EntersMovesAndCleansUp`.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |

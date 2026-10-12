@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 15 | 0 | 1 | 0 | 91 | 0 | 107 | 9 |
+| M1 | 15 | 1 | 1 | 0 | 91 | 0 | 108 | 7 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 8 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -112,6 +112,7 @@
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | yes | done | astra (gpt-6) | 2026-10-11 | 4efcb47 | Serialized creative sandbox, optional player; normal campaign resets flags |
 | FND-017 | Imported ship flight checkpoint | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-010, REN-001, INP-001, DEV-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0e253e1 | Imported Fighter renders, flies, collides and saves/loads; real screenshots; ADR-0044/0045 |
 | FND-018 | Nocturne flight environment and movement reference | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-017 | yes | done | astra (gpt-6) | 2026-10-12 | c55d61f | Animated procedural sky; physical planet/atmosphere; flight-reference particles |
+| FND-019 | Preserve Nocturne sky across direct new-game restarts | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-018, FND-017 | yes | todo |  |  |  |  |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | 5fcd282 | Real bridge/nav/sampler: held W neutral on pause, resumes without phantom edges |
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 66702c3 | Real input mapping, latched edges, collider/plane aim; ten required tests pass |
 | INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | yes | done | astra (gpt-6) | 2026-10-12 | a90d5ec | Editor camera + 34 action mappings; four required tests pass; ADR-0048 |
@@ -200,7 +201,7 @@
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 111f9fd | CPU 0.002833 ms; 0 B/update; 10 s circle pitch/GC pass (Q131) |
 | CAM-012 | Keep the imported player ship framed during fast close-zoom flight | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-005, FND-001 | yes | done | astra (gpt-6) | 2026-10-12 | 42287c3 | Bounds-aware focus keeps fast Fighter framed; live 53.39 m/s capture; Q154 |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
-| AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
+| AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | no | todo |  |  |  |  |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | todo |  |  |  |  |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | todo |  |  |  |  |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | no | todo |  |  |  |  |
@@ -211,7 +212,7 @@
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | no | todo |  |  |  |  |
 | DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | no | todo |  |  |  |  |
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | todo |  |  |  |  |
-| TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | todo |  |  |  |  |
+| TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | no | todo |  |  |  |  |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | no | todo |  |  |  |  |
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
@@ -730,6 +731,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 159 | 2026-10-12 | SPEC-01 FND-018 | Spatial cues requested before celestial streaming | Procedural distant placeholder and stationary local particles | Tech lead | Resolved SPEC-01 Q26: owner explicitly corrected the initial bake. Planet must be a physical finite sphere with surface/atmosphere, separate from the nebula/star sky. A subsequent request requires that sky to be procedural and animated; no sky texture remains. Owner retained the first procedural rendering brightness/density: “no don't reduce its good” (DESIGN-GUIDE decision 7). SYS-011 replaces staged cosmetics; no celestial persistence. |
 | 160 | 2026-10-12 | SPEC-60 UI-007 | KeyHint unset-path/null resolver policy | Empty display until configured, reject missing resolver | Tech lead | Resolved SPEC-60 Q19; imports added through Game.tss. Contrast audit remains UI-012, as specified. |
 | 161 | 2026-10-12 | SPEC-03 INP-006 / SPEC-51 | Editor sampler violates module boundary and needs undeclared types | App host, stage canonical frame/actions | Tech lead | Resolved SPEC-03 Q9 / SPEC-51 Q22 by accepted ADR-0048; no assembly changes. EDT-024 composes the existing sampler. |
+| 162 | 2026-10-12 | SPEC-11 REN-012 | LOD restore skipped for invalid viewer or late async apply | Always enqueue; filter desired OR applied state | Tech lead | Resolved SPEC-11 Q32; no new public contract |
+| 163 | 2026-10-12 | SPEC-11 REN-012 | Inclusive grid bounds omit volume extent/scale in distance sphere | CellMax + 1; transform centre and scale radius | Tech lead | Resolved SPEC-11 Q33; exact occupied cell volume |
 
 
 
