@@ -564,9 +564,9 @@ Timing tests run with safety checks off (SPEC-71 perf fixture). Functional tests
 - **Do:** Create `AudioProvenanceTable`/`AudioProvenanceEntry`/`ProvenanceStatus` and `Assets/Game/Audio/AudioProvenance.asset` with one row per clip in `Assets/Game/Audio/` (19 clips today: 5 music, 14 SFX): `ComfyUI_00018_.mp3` and `upbeat.mp3` → `Blocked`, note "AI-generated-looking / unknown origin, awaiting owner (AUD-011)"; all others `Unverified`, source "carried over from the prototype". Implement `AudioReleaseBuildCheck : IPreprocessBuildWithReport` (§3.14).
 - **Files:** `Assets/Game/Editor/Audio/{AudioProvenanceTable,AudioProvenanceEntry,ProvenanceStatus,AudioReleaseBuildCheck}.cs`, `Assets/Game/Audio/AudioProvenance.asset`, `Assets/Game/Tests/EditMode/Presentation/Audio/AudioProvenanceTests.cs`
 - **Acceptance criteria:**
-  - [ ] Every `AudioClip` under `Assets/Game/Audio/` has exactly one row; adding a clip without a row fails the test.
-  - [ ] No `AudioCueDefinition` references a `Blocked` clip.
-  - [ ] The build check fails a non-development build listing every `Unverified` referenced clip and passes a development build.
+  - [x] Every `AudioClip` under `Assets/Game/Audio/` has exactly one row; adding a clip without a row fails the test.
+  - [x] No `AudioCueDefinition` references a `Blocked` clip.
+  - [x] The build check fails a non-development build listing every `Unverified` referenced clip and passes a development build.
 - **Tests:** `AudioProvenanceTests.EveryClip_HasOneRow`, `AudioProvenanceTests.NoCue_ReferencesBlocked`, `AudioProvenanceTests.ReleaseCheck_FailsOnUnverified`, `AudioProvenanceTests.ReleaseCheck_PassesDevelopmentBuild`.
 
 ### AUD-011 — GATE: Owner confirms licences of the carried-over audio

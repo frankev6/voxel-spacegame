@@ -1,0 +1,110 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1dc4e6e4fc04b7094a5578fa91497e7, type: 3}
+  m_Name: AudioProvenance
+  m_EditorClassIdentifier: Game.Editor::Game.Editor.Audio.AudioProvenanceTable
+  entries:
+  - clip: {fileID: 8300000, guid: 6018603c4e4093f4d9b64b192396f362, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: c76691d2db334db4493227c5c3efe8ac, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: 9223dd0675dbd5746935bcf0e383fd8d, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: a77649c4049e92d41a8e57c3f8478f66, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 2
+    note: AI-generated-looking / unknown origin, awaiting owner (AUD-011)
+  - clip: {fileID: 8300000, guid: 778c28874465c334aaef62e1bf52b56c, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 2
+    note: AI-generated-looking / unknown origin, awaiting owner (AUD-011)
+  - clip: {fileID: 8300000, guid: 04f0e5a8cbde6744bb2c524ca0fb832a, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: 0e821dd27320b2d4ab9589a0f85718ed, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: e8d03ea372f66014ca52886ce83c7691, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: 52234431db73df649b50a89875be863e, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: fd7e1cb2f44d86443b6215a01bea0e3f, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: 1a6b13551699a3b4da2058b6af1e495b, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: 24ef121871b080342a5a1735ea9be720, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: 564f13e1bd2d7d143ab887dd120f1760, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: f61a886e237ba8747bc32780fb5b8a0a, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: 2709695e6ba319b4a93f0cdf4ae3064c, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: 0e3b9742f3331f3478b7df0d7c0da8b1, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: fd2daab841acc5f45bdadfe794b3d157, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: a7e262ca1dcf3ed449f0098a3b8e00d0, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: fdc7f2ede5112fe46b8ab1e7165cdac2, type: 3}
+    source: carried over from the prototype
+    licence: unknown
+    status: 0
+    note: Awaiting owner licence confirmation (AUD-011)
