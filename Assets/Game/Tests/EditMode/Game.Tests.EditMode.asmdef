@@ -33,7 +33,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Unity.PerformanceTesting",
-        "Game.Editor"
+        "Game.Editor",
+        "Unity.Mathematics.Extensions"
     ],
     "includePlatforms": [
         "Editor"

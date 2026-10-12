@@ -704,6 +704,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 
 | 138 | 2026-10-12 | SPEC-11 REN-009 / SPEC-01 boot | Render configuration lacks explicit prop-mesh input/disposal and old palette text conflicts with approved look | Boot-owned disposable factory result; approved REN-008 NOCTURNE palette | Tech lead | Resolved SPEC-11 Q29: internal boot signature supplies PropMeshes and retains cleanup in the composition stack; shared source assets remain unchanged. |
+| 139 | 2026-10-12 | SPEC-11 REN-010 | EditMode runtime fixture requires AABB assembly reference | Direct test-only Unity.Mathematics.Extensions reference | Tech lead | Accepted ADR-0043 / SPEC-11 Q30, same installed package; runtime boundaries unchanged. |
 
 
 

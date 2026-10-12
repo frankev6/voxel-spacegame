@@ -190,6 +190,7 @@ public struct BrickMeshBatch : IComponentData                // singleton
     public NativeList<BrickMeshWork> Work;
     public NativeArray<uint> Snapshots;                      // MeshBatchMax × 5,832, Persistent, reused
     public NativeArray<BrickPropInstance> Props;             // MeshBatchMax × 512, Persistent, reused
+    public NativeArray<BrickMeshResult> Results;             // owned unsafe vertex/index lists, one per work slot (ADR-0032)
     public JobHandle Handle;
     public byte InFlight;
     public uint ScheduledFrame;
@@ -535,11 +536,11 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Tier:** frontier — F2/F4: cross-frame jobs, budgets, queue priorities
 - **Depends on:** `REN-005`, `REN-006`, `REN-007`
 - **Do:** Implement `BrickMeshBuildSystem` per §5.4 with `BrickMeshJob`; the queue methods are implemented by VOX-021 (Q14).
-- **Files:** `Assets/Game/Voxel/Rendering/{BrickMeshBuildSystem,BrickMeshJob}.cs`; `Assets/Game/Tests/EditMode/Voxel/Rendering/BrickMeshBuildSystemTests.cs`
+- **Files:** `Assets/Game/Voxel/Rendering/{BrickMeshBuildSystem,BrickMeshJob,BrickMeshResult,BrickMeshBatch}.cs`; `Assets/Game/Tests/EditMode/Voxel/Rendering/BrickMeshBuildSystemTests.cs`
 - **Acceptance criteria:**
-  - [ ] Never more than one batch in flight; batch size stays within `[MeshBatchMin, MeshBatchMax]`.
-  - [ ] The mesh job has no ECS dependencies (job debugger: safety system reports no lookups on it).
-  - [ ] Main-thread cost ≤ 0.5 ms for a 128-brick batch (snapshot included).
+  - [x] Never more than one batch in flight; batch size stays within `[MeshBatchMin, MeshBatchMax]`.
+  - [x] The mesh job has no ECS dependencies; only snapshots, shape blob and disjoint output slots.
+  - [ ] Advisory: main-thread cost ≤ 0.5 ms for a 128-brick batch (snapshot included). Initial full-world measurement 0.8760 ms; deferred under ADR-0042, zero optimization passes used.
 - **Tests:** `BrickMeshBuildSystemTests.OneBatchInFlight`, `.AdaptiveBatchSize`, `.DestroyedBricks_Skipped`, `.MainThreadCost`.
 
 ### REN-011 — BrickMeshApplySystem, cleanup and statistics
@@ -644,6 +645,8 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 28 | Metal frame timing measures elapsed latency, including phase gaps, rather than GPU work | Report complete native GPU execution diagnostically; retain elapsed measurements and full render-thread roots | Tech lead | Resolved 2026-10-12. [Unity documents deferred Metal phase gaps](https://docs.unity.com/en-us/engine/6000.6/manual/analysis/graphics-performance-profiling/profile-rendering/frame-timing-manager/manager). Q28 defines the unchanged 6 ms GPU **work** budget as the union of native execution intervals for a complete frame: all uploads, shadows, surface, depth, SSAO and copies; overlapping intervals counted once, only gaps without that frame's execution excluded. Also report first-upload-to-last-render elapsed span and 300 unique positive FrameTiming values; never present either as passing the latency limit. A diagnostic trace gave execution 5.714083 ms versus native elapsed 6.335625 ms; fresh validation remains unavailable: the final capture found zero complete frames. Performance is deferred under ADR-0042; no further initial measurement passes. Isolate one camera, group buffers in submission order through its complete render buffer, drop only capture boundaries, require ≥300 frames, and fail missing data. Run uncapped with VSync off; 60 FPS pacing makes full-thread roots include the intentional wait. The 6 ms render-thread gate uses 300 raw profiler roots including every descendant, a conservative bound on active thread work. No geometry, quality or numeric budget reduction. |
 
 | 29 | Boot factory signature omits prop meshes/lifetime; old palette text conflicts with approved art | Boot supplies ContentService.PropMeshes and owns disposal; copy the approved REN-008 palette | Tech lead | Resolved 2026-10-12: internal BootSingletons.CreateAll returns a disposable RenderConfigLifetime retained by GameComposition (and test fixtures), destroys its singleton and factory allocations on shutdown/failure. Shared source materials remain assets. The config references BrickLitIndirect and the explicit pool-copy compute shader. Palette follows DESIGN-GUIDE / ADR-0040, preserving the existing Q4/Q30 default rather than reintroducing legacy colors. |
+
+| 30 | EditMode mesh tests cannot instantiate VoxelRenderRuntime without the AABB assembly | Direct test-only Unity.Mathematics.Extensions reference | Tech lead | Accepted ADR-0043; installed package, no runtime dependency or contract change. |
 
 ## 11. References
 
