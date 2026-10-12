@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 38 | 0 | 0 | 0 | 66 | 0 | 104 | 15 |
+| M1 | 37 | 0 | 0 | 0 | 67 | 0 | 104 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 5 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -193,8 +193,8 @@
 | CAM-001 | Public contract types | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CORE-001 | yes | done | astra (gpt-6) | 2026-10-11 | f078fc9 | Exact contracts, unmanaged view, two required tests; deferred Fx members Q126 |
 | CAM-002 | ADR: custom camera rig instead of Cinemachine | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | — | yes | done | astra (gpt-6) | 2026-10-11 | a0df398 | ADR-0038 Proposed, all five reasons; no package or runtime change |
 | CAM-003 | Camera math helpers | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0e4a19d | Five specified tests; 30/60/144 FPS damping agrees within 1e-4 |
-| CAM-004 | Rig service, camera prefab, Menu/Hold modes and the sync system shell | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-003, FND-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Single app camera, menu/hold, ECS sync and composition binding |
-| CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-004, FLT-001, VOX-001, INP-001 | no | todo |  |  |  |  |
+| CAM-004 | Rig service, camera prefab, Menu/Hold modes and the sync system shell | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-003, FND-001 | yes | done | astra (gpt-6) | 2026-10-11 | ece7b8b | Persistent rig, menu/hold, ECS view and boot bindings; ADR-0039 single listener; ten required tests |
+| CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-004, FLT-001, VOX-001, INP-001 | yes | todo |  |  |  |  |
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | no | todo |  |  |  |  |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
@@ -800,6 +800,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-11 — CAM-004 persistent camera and composition (astra, gpt-6)
+
+- Implemented one app camera with configured FOV/clips, Menu drift, Hold, half-second blends/cuts, reduced-motion behavior, target storage and disposal. The presentation bridge creates MainCameraState in OnCreate, selects the interpolated player target, publishes camera state each frame and updates the existing optional VoxelViewer; no lazy singleton or fixed-step camera work.
+- Created the prefab/config through a temporary Editor script, verified one Camera and zero listeners, then removed the script. Serialized clear color follows DESIGN-GUIDE's existing #020303 sky base. Composition uses the CameraRoot staging child, binds settings, scene modes and optional thumbnails, and disposes in reverse. The existing boot/composition expectations remain green.
+- Accepted ADR-0038 for integration. Q127 / ADR-0039 resolves the conflicting listener instructions: AudioService remains sole owner; it follows a rig-owned ListenerPivot, cleared before disposal. Q128 documents null input/FX staging until CAM-005/CAM-008, FollowHeading default and future ordering peers; Lab uses Hold until CAM-009.
+- All ten required tests pass. An initial pivot assertion exposed **7.6 µm** of parent-transform conversion roundoff; it now uses **0.1 mm** tolerance while stored target data remains exact. `SystemBase` requires qualified UnityEngine.Time; the tool reference records that compile trap.
+- Validation: compile **zero C# warnings**, EditMode **685 passed + 1 explicit skipped**, PlayMode **61 passed**, perf **44/44**, docs **505 tasks / zero errors**. Enter-to-menu gate median/p95 **14.00 / 17.32 ms** (<1 s); camera-specific frame gates remain CAM-011. Implementation: `ece7b8b`. Next: CAM-005 flight follow and input.
 
 ### 2026-10-11 — CAM-003 camera math (astra, gpt-6)
 
