@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 12 | 0 | 1 | 0 | 95 | 0 | 108 | 7 |
+| M1 | 11 | 0 | 1 | 0 | 96 | 0 | 108 | 6 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 9 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -208,7 +208,7 @@
 | DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0b4269c | Real launch/probes, isolated profile, live edit-mode launch 1.370 s; Q144–146 |
 | DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | blocked | astra (gpt-6) | 2026-10-12 |  | Needs implemented FND-012 and SPEC-30/31 coordinates; contract-only Ready is premature (Q155) |
 | DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | no | todo |  |  |  |  |
-| DEV-015 | In-game dev console | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-003, UI-001, INP-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | F1 console over shared command registry and navigator |
+| DEV-015 | In-game dev console | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-003, UI-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 8cf2df1 | F1 console; history/completion, async results, 0 B closed; ADR-0049 |
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | no | todo |  |  |  |  |
 | DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | no | todo |  |  |  |  |
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | todo |  |  |  |  |
@@ -845,6 +845,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DEV-015 done — astra (gpt-6)
+
+- **Changed:** F1 opens a themed code-built console through the existing navigator, with TextEntry context, world-pointer blocking and no simulation pause. Shared registry commands, 200 output lines, 50-entry history, Tab completion and pending-operation completion are connected. ADR-0049 / Q167 adds an explicit UIScreen programmatic-root fallback while retaining configured UXML behavior. Development guards remain intact.
+- **Live game:** help appears, Up recalls help, newg completes to newgame; F1 closes and restores Flight. Real W input reached **14.64485 m/s** afterwards. Screenshot `Logs/playtest/fighter-dev-console.png`; evidence `Logs/playtest/dev015/`. No runtime errors. Live text-field keys need GameView KeyDown events rather than input-state injection; recipe recorded in 08-tools.
+- **Validation:** all three required tests pass, including a real asynchronous newgame command. **0 B over 10,000 closed updates**, also passing in the separate Performance-category run. Perf wrapper reports no EditMode match or PerfRun JSON, so its wrapper exit is not claimed as a passing benchmark. Zero optimization passes.
+- **Full suites:** compile zero C# warnings; EditMode **749 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4777 ms** vs 3, MeshBuild128 **1.0393 ms** vs 0.5); headless PlayMode **102 passed, 16 GPU skips**. Docs clean. The GPU Editor shutdown reports four persistent allocations, matching the prior FND-019 shutdown log; retain both for M1 system-review diagnosis, separate from the clear runtime checks.
+- **Next:** VFX-001 shared effect contracts, then remaining M1 integration and review. No new owner decision or art; preserve approved Nocturne environment. HANDOFF updated.
 
 ### 2026-10-12 — AUD-005 done — astra (gpt-6)
 
