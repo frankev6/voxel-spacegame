@@ -1,12 +1,33 @@
+using System;
+using Game.Core;
+using Game.Input;
+using UnityEngine.InputSystem;
+
 namespace Game.UI.Services
 {
-    /// <summary>Implements SPEC-60 §6. Contract shell; implementation follows in the owning UI task.</summary>
-    public sealed class InputServiceBridge : IInputContextTarget, System.IDisposable
+    /// <summary>Implements SPEC-60 §6: owns the Back subscription and forwards the existing input service API.</summary>
+    public sealed class InputServiceBridge : IInputContextTarget, IDisposable
     {
-        public InputServiceBridge(Game.Input.InputService input) => throw new System.NotImplementedException();
-        public void SetContext(Game.Core.InputContext context) => throw new System.NotImplementedException();                   // → input.SetContext(context)
-        public void BindBack(System.Action onBack) => throw new System.NotImplementedException();                               // subscribes Controls.Global.Back.performed
-        public string GetBindingDisplay(string actionPath) => throw new System.NotImplementedException();                      // → SPEC-03 display string, e.g. "E"
-        public void Dispose() => throw new System.NotImplementedException();                                                    // unsubscribes
+        readonly InputService input;
+        Action back;
+        bool subscribed, disposed;
+        public InputServiceBridge(InputService input) => this.input = input ?? throw new ArgumentNullException(nameof(input));
+        public void SetContext(InputContext context)
+        { if (disposed) throw new ObjectDisposedException(nameof(InputServiceBridge)); input.SetContext(context); }
+        public void BindBack(Action onBack)
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(InputServiceBridge));
+            if (subscribed) input.Controls.Global.Back.performed -= OnBack;
+            back = onBack; subscribed = onBack != null;
+            if (subscribed) input.Controls.Global.Back.performed += OnBack;
+        }
+        void OnBack(InputAction.CallbackContext _) => back?.Invoke();
+        public string GetBindingDisplay(string actionPath) => input.GetBindingDisplay(actionPath);
+        public void Dispose()
+        {
+            if (disposed) return;
+            if (subscribed) input.Controls.Global.Back.performed -= OnBack;
+            back = null; subscribed = false; disposed = true;
+        }
     }
 }

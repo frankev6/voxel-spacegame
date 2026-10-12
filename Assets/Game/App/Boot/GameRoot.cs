@@ -33,7 +33,7 @@ namespace Game.App.Boot
             var savePaths = SavePaths.CreateDefault();
             var settingsPaths = SettingsPaths.Default;
 #endif
-            // TODO(UI-003): GameRootTestHooks.SkipIntroScreens skips the MainMenu splash once the splash exists.
+            // TODO(HUD-003): GameRootTestHooks.SkipIntroScreens skips the MainMenu splash once the splash exists.
             Composition = GameComposition.Build(transform, config, savePaths, settingsPaths);
         }
 
@@ -49,7 +49,7 @@ namespace Game.App.Boot
             float dt = Time.unscaledDeltaTime;
             Composition?.Session?.Tick(dt);
             Composition?.Save?.Autosave.Update(dt);
-            // TODO(UI-003): uiRoot.Tick(dt).
+            Composition?.UI?.Tick(dt);
             Composition?.Settings?.Tick(dt);                      // debounced save
         }
 

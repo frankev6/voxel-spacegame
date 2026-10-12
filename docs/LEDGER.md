@@ -714,6 +714,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 145 | 2026-10-12 | SPEC-70 DEV-008 | Edit-mode launch needs a real runtime operation ID | Async boot then registry dispatch | Tech lead | Resolved SPEC-70 Q18: wait for settled MainMenu and host; set intro hook before owned boot, restore after dispatch. |
 | 146 | 2026-10-12 | SPEC-70 DEV-008 | Sandbox exit may autosave an active player profile | Require harness for active sessions | Tech lead | Resolved SPEC-70 Q19: select/create harness only without a session; reject active other profiles and busy flow/save before profile changes. |
 | 147 | 2026-10-12 | SPEC-60 UI-002 | Theme literal audit includes SPEC-80 direction token sources | Audit all UI-owned styles, exempt token inputs | Tech lead | Resolved SPEC-60 Q11: Directions/ is an authored token source alongside tokens.uss; component/screen styles stay covered. |
+| 148 | 2026-10-12 | SPEC-60 UI-003 | Root precedes navigator and later UI services | Stage registration/build and real root lifecycle only | Tech lead | Resolved SPEC-60 Q12: keep flight context and Escape fallback until UI-004; defer pointer/focus, converters and service ticks to their owning tasks. |
+| 149 | 2026-10-12 | SPEC-60 UI-003 | Input bridge requires package callback types | Reference existing Unity.InputSystem | Tech lead | Resolved SPEC-60 Q13 / accepted ADR-0046; no package or Game.* boundary change. |
+| 150 | 2026-10-12 | SPEC-60 UI-003 | UI/audio sound enum ordinals differ | Named mapping and configured cue overrides | Tech lead | Resolved SPEC-60 Q14: Confirm maps to audio Success, no enum cast; audio playback/content remains its own task. |
 
 
 

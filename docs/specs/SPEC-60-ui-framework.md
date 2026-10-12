@@ -762,7 +762,7 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 - **Tier:** frontier — F1: service lifecycle and the single UIDocument every screen builds on
 - **Depends on:** `UI-002`, `CORE-001`
 - **Do:** Implement `UIRoot` §5.1 steps 1–8 (dialog services and accessibility may be stubs until UI-011/UI-013: construct them, leave their bodies to those tasks), `Register`, `GetLayer`, `Tick` (calls notifications/tooltip tick when present), `HandleBackPressed`, `Dispose`, the sound hooks of §5.10, and `InputServiceBridge` (§6) over SPEC-03.
-- **Files:** `Assets/Game/UI/Services/UIRoot.cs`, `Assets/Game/UI/Services/InputServiceBridge.cs`
+- **Files:** `Assets/Game/UI/Services/UIRoot.cs`, `Assets/Game/UI/Services/InputServiceBridge.cs`, navigator registration/build support in `UINavigator.cs`, App composition/config/root and `AppUiSoundSink.cs`, GameRoot prefab (Q12–14)
 - **Harness integration:** register the owned `UIDocument` in `Services` alongside `UIRoot`, and unregister it on disposal; SPEC-70 Q14 uses it for dev UI query without scene searches.
 - **Acceptance criteria:**
   - [ ] Construction with a valid config yields `#ui-root` with six layers reachable via `GetLayer`.
@@ -909,6 +909,10 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 | 9 | `tokens.uss` comment says ally/enemy "differ in lightness", but current values have equal luminance (~0.33) | `AllegianceColorCheck` (CVD ΔE ≥ 20) is the gate instead of lightness; SPEC-80 fixes the comment | Owner (SPEC-80) |  |
 | 10 | Hover sound for every button may be noisy | Keep; SPEC-64 may map `UISound.Hover` to silence | Owner |  |
 | 11 | The no-literal style audit includes SPEC-80 direction token sources | Audit UI-owned styles; retain token-source exemptions | Tech lead | Resolved: exclude Directions/ alongside tokens.uss and accessibility.uss. Alternative direction sheets intentionally contain token values and are not imported by Game.tss. All component and screen styles remain audited. |
+
+| 12 | Root construction precedes navigator, bindings, focus and toast/tooltip implementations | Stage only the implemented lifecycle | Tech lead | Resolved in UI-003: construct the service shells, implement navigator registration/build/prewarm support, and wire the persistent document/root at boot. UI-004 supplies stack operations and binds Back after unbinding ADR-0044; UI-005 adds focus/pointer gates; UI-006 registers converters; UI-009/010 add service ticks; UI-011 registers dialog screens; UI-013 adds accessibility. Until then Tick is an explicit staged hook and defaults are scale 1 / normal text / no reduced motion. Do not invoke throwing future methods or claim those features implemented. |
+| 13 | InputServiceBridge needs the package assembly owning the action callback type | Reference installed Unity.InputSystem | Tech lead | Resolved by accepted ADR-0046; no package change, new Game.* edge or additional context writer. |
+| 14 | UI and audio sound enums have different ordinals and UI Confirm has no identical audio name | Explicit semantic mapping | Tech lead | Resolved: AppUiSoundSink uses a nonempty UIConfig.SoundCueIds override through PlayCue; otherwise maps Hover/Click/Open/Close/Error by name and Confirm to Success. Never cast the enum. Playback remains subject to the audio implementation/content tasks. |
 
 ## 11. References
 

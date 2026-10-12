@@ -167,4 +167,5 @@ MonoBehaviour:
   config:
     CameraConfig: {fileID: 11400000, guid: 5ec750bef694c42318cec195d1d1f651, type: 2}
     ContentDatabase: {fileID: 11400000, guid: c928f6f8b47334fc5ab64af15fce1619, type: 2}
+    UiConfig: {fileID: 11400000, guid: 220e428c5ea11433ca6c7aaf0d52df84, type: 2}
     UiDocument: {fileID: 6798467373338317858}
