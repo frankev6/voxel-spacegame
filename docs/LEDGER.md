@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 15 | 0 | 1 | 0 | 92 | 0 | 108 | 8 |
+| M1 | 14 | 0 | 1 | 0 | 93 | 0 | 108 | 9 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 8 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -112,7 +112,7 @@
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | yes | done | astra (gpt-6) | 2026-10-11 | 4efcb47 | Serialized creative sandbox, optional player; normal campaign resets flags |
 | FND-017 | Imported ship flight checkpoint | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-010, REN-001, INP-001, DEV-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0e253e1 | Imported Fighter renders, flies, collides and saves/loads; real screenshots; ADR-0044/0045 |
 | FND-018 | Nocturne flight environment and movement reference | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-017 | yes | done | astra (gpt-6) | 2026-10-12 | c55d61f | Animated procedural sky; physical planet/atmosphere; flight-reference particles |
-| FND-019 | Preserve Nocturne sky across direct new-game restarts | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-018, FND-017 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Reproduce and repair persistent-camera sky lifetime |
+| FND-019 | Preserve Nocturne sky across direct new-game restarts | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-018, FND-017 | yes | done | astra (gpt-6) | 2026-10-12 | 8f80083 | Deferred sky binding; three live direct restarts retain approved appearance |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | 5fcd282 | Real bridge/nav/sampler: held W neutral on pause, resumes without phantom edges |
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 66702c3 | Real input mapping, latched edges, collider/plane aim; ten required tests pass |
 | INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | yes | done | astra (gpt-6) | 2026-10-12 | a90d5ec | Editor camera + 34 action mappings; four required tests pass; ADR-0048 |
@@ -201,7 +201,7 @@
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 111f9fd | CPU 0.002833 ms; 0 B/update; 10 s circle pitch/GC pass (Q131) |
 | CAM-012 | Keep the imported player ship framed during fast close-zoom flight | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-005, FND-001 | yes | done | astra (gpt-6) | 2026-10-12 | 42287c3 | Bounds-aware focus keeps fast Fighter framed; live 53.39 m/s capture; Q154 |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
-| AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | no | todo |  |  |  |  |
+| AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | todo |  |  |  |  |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | todo |  |  |  |  |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | no | todo |  |  |  |  |
@@ -212,7 +212,7 @@
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | no | todo |  |  |  |  |
 | DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | no | todo |  |  |  |  |
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | todo |  |  |  |  |
-| TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | no | todo |  |  |  |  |
+| TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | todo |  |  |  |  |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | no | todo |  |  |  |  |
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
@@ -842,6 +842,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — FND-019 done — astra (gpt-6)
+
+- **Changed:** defer the scene environment's Start by one frame so a direct World reload cannot borrow the persistent camera's Skybox pending destruction. Existing ownership and exit cleanup remain intact. Q164 / SPEC-01 Q27 records the lifetime correction; no appearance change or new owner decision.
+- **Validation:** regression failed on restart 1 before the fix; both environment tests now pass. Compile has zero C# warnings. Full EditMode **749 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4134 ms** vs 3; MeshBuild128 **1.1039 ms** vs 0.5); full PlayMode **95 passed, 12 GPU skips**. No optimization passes; numeric misses deferred. Docs clean.
+- **Live:** three consecutive direct NewGame calls retain the same camera, enabled Game/NocturneSky, brightness **1**, animation speed **0.012**, one environment and **1,400 particles**; zero runtime errors. Inspected capture `Logs/playtest/fighter-restart-sky-fixed.png`; proof and test results `Logs/playtest/fnd019/`.
+- **Next:** REN-014 prop instancing, remaining ready M1 integration and system review. Preserve approved Nocturne brightness/star density and the physical planet. HANDOFF updated.
 
 ### 2026-10-12 — REN-012 done — astra (gpt-6)
 
