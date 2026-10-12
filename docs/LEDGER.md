@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 3 | 1 | 1 | 0 | 103 | 0 | 108 | 1 |
+| M1 | 3 | 0 | 1 | 0 | 104 | 0 | 108 | 1 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -209,7 +209,7 @@
 | DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | blocked | astra (gpt-6) | 2026-10-12 |  | Needs implemented FND-012 and SPEC-30/31 coordinates; contract-only Ready is premature (Q155) |
 | DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | no | todo |  |  |  |  |
 | DEV-015 | In-game dev console | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-003, UI-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 8cf2df1 | F1 console; history/completion, async results, 0 B closed; ADR-0049 |
-| DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Shared console/CLI commands and real Fighter flight replay |
+| DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | yes | done | astra (gpt-6) | 2026-10-12 | f1f6cd2 | Console/CLI replay; real seed-7 Fighter 300 ticks, 0 m error; live 1790-tick recording and screenshot; Q175 |
 | DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | no | todo |  |  |  |  |
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 9349e78 | Sparse text recorder/replay; five required tests; even-tick 30/60/144 commands match |
 | TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | done | astra (gpt-6) | 2026-10-12 | 1392d35 | Real Boot/flow fixture; four tests; temp saves/settings and unchanged real profile timestamps |
@@ -748,12 +748,15 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 174 | 2026-10-12 | SPEC-71 TST-004 | Whole-voxel memory inspection cannot establish complete native/engine overhead | Report owned capacity and leave total peak unavailable | Tech lead | Resolved SPEC-71 Q10: real integrated mesh/collider readiness and inclusive updating-system markers; separately inspect owned capacity through damage overlap after source eviction. Below-budget accounting is inconclusive for total memory. Advisory misses/unavailable total are deferred, zero tuning. |
 
+| 175 | 2026-10-12 | SPEC-70 DEV-016 | Absolute recording ticks and absent universe position prevent literal M1 replay acceptance | Shift the recording clock; compare real local flight position | Tech lead | Resolved SPEC-70 Q22: existing cmdrec text in `.pcr`, bounded stems, session-bound playback. Test real seed-7 Fighter input/physics for 300 exact ticks; extend local-position comparison to canonical UniversePosition when SPEC-30/31 exists. No fabricated coordinates or alternate spawner. |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-12 | DEV-016 | Real Fighter record/replay | **300 ticks**, recorded/replayed local position **(16.66402, 0, 43.55072) m**, **0 m error**; live CLI replay completes **1,790 ticks** | Production boot/newgame seed 7, input actions, imported ship and physics. Exact test controls the tick endpoint; live variable-frame capture is visual evidence. Full-suite advisory misses: Propulsion50Ships **0.1939 ms** vs 0.15, ThrusterRebuild **3.6237 µs** vs 2, Hit1MColliderJobs **0.6844 ms** vs 0.5; zero tuning |
 | 2026-10-12 | TST-004 | Full voxel pipeline (Apple M5 Pro, Metal, 1920×1080) | Idle **0.224481 / 0.600458 ms median/p95**; spawn **15 frames**, **5.571041 ms max**; accounted reference memory **36,180,776 B**, thin shell **131,349,912 B** | 60 warm-up + 300 samples, 17 workers; mesh and installed collider readiness. Four damage buckets for memory; source evicted. Total memory **inconclusive**, private scratch/engine overhead excluded (Q174); performance deferred, **0 tuning passes**. Evidence `Logs/playtest/tst004/gpu.xml` |
 | 2026-10-12 | REN-013 | Production renderer / screenshot (Apple M5 Pro, Metal, 1920×1080) | 1,008,128-cell / 872-brick station render share **0.117376 / 0.173208 ms median/p95**; 2,500-brick static **0.131499 ms**, moving **0.161125 ms**, delta **0.029626 ms** | Inclusive current renderer markers, 60 warm-up + 300 measured frames per state; real spawn/snapshot/build/apply. Ship20k **MAE 0**, **341,662 nonblack pixels**, ten applied bricks. All three GPU tests pass; zero tuning. Evidence Logs/playtest/ren013/ |
 | 2026-10-11 | CAM-011 | Camera CPU / GC / circle (Apple M5 Pro, reference CPU settings, headless Editor) | Inclusive camera update median/p95 **0.002833 / 0.003000 ms** (≤0.05 ms); allocation median/p95/max **0/0/0 B** | 60 warm-up + 300 measured updates; includes ECS reads, InputCameraInput, rig, view state and VoxelViewer write. Circle: **185,964 frames / 10.009428 s / 80 m/s**, pitch **54.999989–55.000019°**, every measured update 0 B. Q131 defers actual-raycast 0.15 ms evidence to CAM-007; no missing path counted as passed |
@@ -855,6 +858,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DEV-016 done — astra (gpt-6)
+
+- **Changed:** `record start/stop/save name=...` and `replay name=...` share the console/scenario registry and `gh_record` / `gh_replay` CLI adapters. The host owns the recorder and playback operation; session changes, host disposal and timeout stop playback. Files use bounded stems under TestData/Replays and SPEC-71's existing text format with `.pcr` suffix. Sparse tick origins shift to the fresh session's current clock; spacing and duration are preserved. Implementation `f1f6cd2`; SPEC-70 Q22 / ledger Q175 documents local-position acceptance until canonical universe coordinates exist, and the frame-scheduling limitation.
+- **Integrated acceptance:** the required test passes both focused and in the full suite. Real Boot → `newgame seed=7` → imported Fighter, real keyboard actions, input sampler and physics: record forward thrust, turning and strafing for **300 exact ticks**, save, start another seed-7 game and replay. Both end at **(16.66402, 0, 43.55072) m**, **0 m error** against 1e-4 m. The test drives the production world with one sampling update/fixed tick per step, restoring its player-loop/rate manager afterward; no alternate spawner or synthetic universe position. This does not claim arbitrary catch-up schedules reproduce the same endpoint.
+- **Live game:** actual CLI start/stop/save and fresh-game replay all work. Retained `TestData/Replays/fighter_flight_demo.pcr` contains **1,790 ticks** of boosted forward flight, right strafe and coasting; operation 3 reports **succeeded: replayed 1790 ticks**. During playback the ship was sampled at **27.43835 m/s**; runtime logs have **zero error kinds**, one camera/listener. Visually inspected screenshot `Logs/playtest/fighter-flight-replay.png` shows the real Fighter beside the separate planet and procedural sky. Live sample positions are at different times and are not an endpoint comparison. Evidence `Logs/playtest/dev016/live-evidence.json`, recording copy and live Editor log.
+- **Full checks:** compile zero C# warnings; EditMode **765 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4907 ms** vs 3; MeshBuild128 **1.0356 ms** vs 0.5). PlayMode **105 passed, 3 advisory timing misses, 23 GPU-only skips**: Propulsion50Ships **0.1939 ms** vs 0.15, ThrusterRebuild200Instances **3.6237 µs** vs 2, Hit1MColliderJobs **0.6844 ms** vs 0.5. No functional failures; no tuning or reruns to chase those numbers. Docs clean. The GPU Editor again reports the same **four Persistent allocations only at process shutdown**; retain the existing M1 system-review follow-up, not a zero-leak claim. Editor closed and QualitySettings restored from the pre-run backup.
+- **Next:** DEV-007 automatic scenario tests, DEV-019 draft regressions, then the built M1 system review and M2 combat. No owner decision or visual change; approved Nocturne brightness/density is preserved.
 
 ### 2026-10-12 — TST-004 done — astra (gpt-6)
 
