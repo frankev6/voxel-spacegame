@@ -71,6 +71,8 @@ Useful built-ins: `editor_play`, `editor_stop`, `open_scene`, `recompile`, `reco
 
 `scenario.sh <name or path> [timeout=600]` starts and polls a scenario once per second. It prints the outcome and JSON path; exits 0 (pass/draft), 1 (failed), 2 (error), or 3 (Editor unreachable). `scenarios.sh [tag=regression]` runs active files with that tag, in name order, and writes `Logs/playtest/scenarios/summary.json`. Use `tag=smoke` for the Boot smoke. The intentional `smoke_fail` CLI fixture is tagged `negative`, so it does not fail smoke/regression suites. Result filenames include a run ID to avoid overwriting concurrent runs in the same second.
 
+`tools/test.sh playmode ScenarioFileTests` discovers one case per `.scenario` file tagged `smoke` or `regression`, boots the real game, and prints the result JSON path. Drafts are ignored before resolving future commands/probes. Active files retain strict parsing and the file timeout, with a second test bound of `timeout × 60` frames.
+
 ## Flight recording
 
 With a ready player, run `g.sh record --action start`, fly with the normal controls, then `g.sh record --action stop` and `g.sh record --action save --name flight_demo`. After a fresh game with the same seed, use `g.sh replay --name flight_demo` and poll the returned ID with `g.sh op --id N`. Console equivalents are `record start`, `record stop`, `record save name=flight_demo` and `replay name=flight_demo`.

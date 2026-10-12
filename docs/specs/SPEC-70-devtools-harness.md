@@ -470,7 +470,7 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Milestone:** M1
 - **Tier:** standard — test wiring on top of DEV-006 and SPEC-71 fixtures
 - **Depends on:** `DEV-006`, `SPEC-71`
-- **Do:** `ScenarioFileTests : GameFlowFixture` (SPEC-71) with `[TestCaseSource]` listing every `TestData/Scenarios/*.scenario` tagged `regression` or `smoke`; `status draft` → `Assert.Ignore("draft")`; else run through `ScenarioRunner` with a frame-count timeout equal to `timeout × 60` and assert outcome `Passed`, printing the JSON path. Category `Scenario`.
+- **Do:** `ScenarioFileTests : GameFlowFixture` (SPEC-71) with UnityTest `[ValueSource]` (Q23) listing every `TestData/Scenarios/*.scenario` tagged `regression` or `smoke`; `status draft` → `Assert.Ignore("draft")`; else run through `ScenarioRunner` with a frame-count timeout equal to `timeout × 60` and assert outcome `Passed`, printing the JSON path. Category `Scenario`.
 - **Files:** `Assets/Game/Tests/PlayMode/DevTools/ScenarioFileTests.cs`
 - **Acceptance criteria:**
   - [ ] Adding a new active file adds a test case without code changes.
@@ -655,6 +655,8 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 | 21 | Console requires code-built UI while UIRoot requires assets, and teleport is still blocked in DEV-009 | Opt-in programmatic view; complete only registered commands | Tech lead | Resolved ADR-0049 / DEV-015: canonical base is UIScreen. Host owns toggle/subscription/pending completion; navigator owns context. A test-only teleport entry verifies the specified completion example without advertising an unavailable production command. |
 
 | 22 | Replay files use a different suffix, absolute script ticks and a position type not implemented in M1 | Preserve SPEC-71 text, shift only the tick origin, compare existing local position | Tech lead | Resolved DEV-016: `.pcr` files contain the existing `cmdrec 1` format; file stems are bounded and cannot escape TestData/Replays. Playback shifts sparse ticks to the current clock without changing their spacing, stays Pending until the exclusive end, and cancels on session change/timeout. M1 acceptance runs the actual boot, seed-7 imported Fighter, input sampler and physics for exactly 300 ticks and compares LocalTransform position; canonical universe position remains a SPEC-30/31 follow-up, never synthesized. The deterministic acceptance uses one fixed tick per input frame; this is not a guarantee for arbitrary catch-up/frame schedules (SPEC-71 Q8). |
+
+| 23 | File cases are coroutines and draft steps reference future vocabulary | Use UnityTest parameter sources and inspect draft headers before full parsing | Tech lead | Resolved DEV-007: installed UnityTest adapts ValueSource cases for IEnumerator methods. Discover sorted smoke/regression file stems through a ValueSource, parse headers with the canonical parser, ignore draft cases before resolving future steps, and run active files against the real host. Keep the requested timeout × 60 frame bound plus the runner’s existing real-time timeout and print its JSON path. Production parsing remains strict. |
 
 ## 11. References
 
