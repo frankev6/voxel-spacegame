@@ -561,11 +561,11 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Milestone:** M1
 - **Tier:** standard — UI Toolkit screen over the existing registry
 - **Depends on:** `DEV-003`, `UI-001`, `INP-001`
-- **Do:** `DevConsoleScreen : Screen` (SPEC-60) with `Context = TextEntry`, `PausesSimulation = false`, `BlocksWorldPointer = true`, built in C# using theme classes only (no UXML/USS asset, no inline styles): output list (last 200 lines, `ListView` with pooled items), input `TextField`, history (↑/↓, 50 entries), Tab completion of command names, Enter executes through the registry (Pending results print when the op ends). Toggled by `Global/DevConsole`.
-- **Files:** `Assets/Game/App/DevRuntime/Console/{DevConsole,DevConsoleScreen}.cs`
+- **Do:** `DevConsoleScreen : UIScreen` (SPEC-60, ADR-0049) with `Context = TextEntry`, `PausesSimulation = false`, `BlocksWorldPointer = true`, built in C# using theme classes only (no UXML/USS asset, no inline styles): output list (last 200 lines, `ListView` with pooled items), input `TextField`, history (↑/↓, 50 entries), Tab completion of command names, Enter executes through the registry (Pending results print when the op ends). Toggled by `Global/DevConsole`.
+- **Files:** `Assets/Game/App/DevRuntime/Console/{DevConsole,DevConsoleScreen}.cs`; `Assets/Game/App/DevRuntime/DevRuntimeHost.cs`; `Assets/Game/UI/Views/UIScreen.cs`; `Assets/Game/UI/Services/UIRoot.cs`; `Assets/Game/Tests/PlayMode/DevTools/DevConsoleTests.cs`
 - **Acceptance criteria:**
   - [ ] F1 (`Global/DevConsole`, SPEC-03) opens and closes the console; gameplay input is off while open.
-  - [ ] `help` output appears; ↑ recalls the last command; Tab completes `tel` to `teleport`.
+  - [ ] `help` output appears; ↑ recalls the last command; Tab completes registered command names (`tel` → `teleport` in the test registry; production `newg` → `newgame` until DEV-009 lands).
   - [ ] No allocation per frame while the console is closed.
 - **Tests:** `DevConsoleTests.Toggle_ChangesContext`, `DevConsoleTests.History_And_Completion`, `DevConsoleTests.Closed_NoGcAlloc` (PlayMode).
 
@@ -651,6 +651,8 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 | 18 | Edit-mode launch needs a runtime operation ID before the runtime host exists | Asynchronous boot dispatch | Tech lead | Resolved: Task-based CLI waits for host and settled MainMenu, then dispatches the registry command and returns its real operation ID. Intro hook applies before the boot started by this wrapper and is restored after dispatch. |
 | 19 | Sandbox scene exit may autosave an active player profile | Keep harness sessions isolated | Tech lead | Resolved: select/create harness only without a session; refuse sandbox from an active non-harness profile. Busy flow/save checks precede profile changes. |
 | 20 | DEV-009 contract dependencies are ready, but its required ShipSpawnService and universe coordinates are absent | Block the complete command task until the canonical services exist; continue ready prerequisites | Tech lead | Resolved dependency audit: DEV-009 needs implemented FND-012 plus FrameOrigin/UniversePosition and current-system state from SPEC-30/31. Do not replace ShipSpawnService with dev-owned spawn logic, silently ignore AI/allegiance, or invent zero universe coordinates. Keep all original command scope and acceptance criteria. Ledger status is blocked even if contract-only Ready is yes; revisit after the canonical services land. |
+
+| 21 | Console requires code-built UI while UIRoot requires assets, and teleport is still blocked in DEV-009 | Opt-in programmatic view; complete only registered commands | Tech lead | Resolved ADR-0049 / DEV-015: canonical base is UIScreen. Host owns toggle/subscription/pending completion; navigator owns context. A test-only teleport entry verifies the specified completion example without advertising an unavailable production command. |
 
 ## 11. References
 

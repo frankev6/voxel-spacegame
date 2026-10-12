@@ -256,6 +256,8 @@ namespace Game.UI.Views
 }
 ```
 
+Programmatic views (accepted [ADR-0049](../decisions/ADR-0049-programmatic-ui-views.md)): `UIScreen.CreateView() → VisualElement` is virtual and returns null by default. UIRoot prefers a configured ScreenAsset; only when none exists does it ask the screen for this explicit root. A null result retains the missing-screen error. Both paths receive the same name, theme/layer classes, build-once cache and navigation lifecycle. DEV-015 uses this for its asset-free development console.
+
 ### 4.4 View model base (`Assets/Game/UI/ViewModels/ViewModelBase.cs`)
 
 ```csharp
@@ -918,6 +920,8 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 | 18 | Number/clock helpers do not specify invalid inputs or durations beyond two minute digits | Explicit duration formatting and immutable private caches | Tech lead | **Resolved (2026-10-12):** Get2Digits accepts [0, 99] and throws outside it. Clock values floor whole seconds, map negative/nonfinite input to 00:00, cap finite seconds at int.MaxValue, and expand minutes beyond 99 using Get rather than wrap or truncate elapsed time. Private number tables are immutable after static construction, documented with StaticStateOk; registration uses Unity's group lookup, with no separate mutable flag. UI-006 fills UIRoot's existing registration hook; ViewModelBase already matches §4.4. |
 
 | 19 | KeyHint has an unset ActionPath during UXML construction and no null resolver policy | Empty text until a path is set; reject a missing resolver | Tech lead | Resolved UI-007: constructor adds the shared class; Refresh throws ArgumentNullException for a null resolver, displays empty text for an empty path or null result, and otherwise uses exactly the resolver text. The caller refreshes on binding changes. Component imports belong in Game.tss (§4.8); contrast auditing remains UI-012 as the task explicitly states. |
+
+| 20 | DEV-015 requires a programmatic screen but UIRoot only builds configured UXML | Explicit opt-in CreateView fallback | Tech lead | Resolved by accepted ADR-0049: default null preserves missing-view errors; both view sources use the same navigator, theme and lifetime. |
 
 ## 11. References
 

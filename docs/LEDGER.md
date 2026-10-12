@@ -736,6 +736,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 164 | 2026-10-12 | SPEC-01 FND-019 | Direct restart borrows a camera Skybox pending deferred destruction | Bind after one frame, preserving scene ownership | Tech lead | Resolved SPEC-01 Q27; failing direct-restart regression proves the lifetime race |
 | 165 | 2026-10-12 | SPEC-11 REN-014 | Gather-only prop draw bounds go stale as ships move | Recompute world union from per-grid local bounds with matrix uploads | Tech lead | Resolved SPEC-11 Q34; no public contract or art change |
 | 166 | 2026-10-12 | SPEC-64 AUD-005 | Managed 2D playback precedes SFX allocator/music director | Use existing pools and victim rules; preserve base music gains; defer spatial path | Tech lead | Resolved SPEC-64 Q15; AUD-006 centralizes allocation and AUD-008 supplies crossfade gains |
+| 167 | 2026-10-12 | SPEC-70 DEV-015 / SPEC-60 | Code-built console cannot use UXML-only root; teleport not implemented | Explicit CreateView fallback; registry-only completion | Tech lead | Accepted ADR-0049; SPEC-70 Q21 / SPEC-60 Q20 preserve canonical navigation and command scope |
 
 
 
