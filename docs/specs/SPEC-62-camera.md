@@ -160,7 +160,7 @@ CameraMode mode; CameraSettings settings; bool reduceMotion;
 bool hasTarget; float3 targetPos; quaternion targetRot; float3 targetVel; float targetRadius;
 // flight state
 float yawDeg, yawOffsetDeg, pitchDeg, pitchTargetDeg, distance, distanceTarget, occlusionDistance;
-float3 focus, lookAhead;
+float3 focus, lookAhead, previousFollowPosition;
 // editor state
 float3 pivot, pivotTarget; float edYaw, edYawTarget, edPitch, edPitchTarget, edDistance, edDistanceTarget;
 float3 boundsCenter; float boundsRadius; bool suppressZoom, suppressOrbit;
@@ -237,11 +237,11 @@ Per-frame algorithm:
 3. Recenter pressed: `yawOffsetDeg = 0; pitchTargetDeg = DefaultPitchDeg`.
 4. Ship heading: `f = mul(targetRot, float3(0,0,1))`; `shipYaw = degrees(atan2(f.x, f.z))` (ship forward is +Z, §10 Q7). `desiredYaw = (YawMode == FollowHeading ? shipYaw : 0) + yawOffsetDeg`.
 5. On cut: `yaw = desiredYaw; pitch = pitchTarget; distance = distanceTarget; lookAhead = 0; focus = targetPos;` skip step 6.
-6. `yaw = DampAngle(yaw, desiredYaw, YawHalfLife, dt)` (shortest arc); `pitch = Damp(pitch, pitchTarget, PitchHalfLife, dt)`; `distance = Damp(distance, distanceTarget, ZoomHalfLife, dt)`. `la = targetVel * LookAheadSeconds; la.y = 0; la = clampLength(la, LookAheadMaxFraction * distance)`; `lookAhead = Damp(lookAhead, la, LookAheadHalfLife, dt)`; `focus = Damp(focus, targetPos + lookAhead, FocusHalfLife, dt)`.
+6. `yaw = DampAngle(yaw, desiredYaw, YawHalfLife, dt)` (shortest arc); `pitch = Damp(pitch, pitchTarget, PitchHalfLife, dt)`; `distance = Damp(distance, distanceTarget, ZoomHalfLife, dt)`. `la = targetVel * LookAheadSeconds; la.y = 0; la = clampLength(la, LookAheadMaxFraction * distance)`; Integrate the look-ahead/focus cascade exactly for a linearly interpolated target position over the frame and a constant `la` goal (Q13): `kf=ln(2)/FocusHalfLife`, `kl=ln(2)/LookAheadHalfLife`, `A=exp(-kf*dt)`, `B=exp(-kl*dt)`. With old look-ahead `L`, `focus = lerp(targetPos+la, focus, A) + (targetPos-previousFollowPosition)*(A-(1-A)/(kf*dt)) + (L-la)*kf*(B-A)/(kf-kl)`; then `lookAhead = lerp(la,L,B)`. For equal rates the last coefficient is `kf*dt*A`; use its series near equality and the small-step series for the ramp coefficient to avoid cancellation. At dt=0 skip integration. Store `previousFollowPosition=targetPos` after each Flight pose, including cuts. This preserves exponential half-lives without endpoint-sampling bias.
 7. Occlusion: `effective = min(distance, occlusionDistance)`; when `occlusionDistance` is infinite or larger than the previous effective distance, the effective distance returns with `OcclusionReleaseHalfLife` (pull-in is immediate, release is smooth).
 8. `r = quaternion.Euler(radians(pitch), radians(yaw), 0)` (yaw about Y, then pitch about local X; positive pitch looks down); `p = focus - mul(r, float3(0,0,1)) * effective`.
 
-`Warp(delta)` adds `delta` to `focus`, `targetPos`, `pivot`, `pivotTarget`, `boundsCenter`, `blendFromPos` and the last output pose. Nothing else changes, so the camera-to-target offset is identical before and after the shift.
+`Warp(delta)` adds `delta` to `focus`, `targetPos`, `pivot`, `pivotTarget`, `boundsCenter`, `blendFromPos`, `previousFollowPosition` and the last output pose. Nothing else changes, so the camera-to-target offset is identical before and after the shift.
 
 ### 5.4 Editor orbit
 
@@ -397,15 +397,15 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 
 ### CAM-005 — Flight follow mode and camera input
 - **Milestone:** M1
-- **Tier:** standard — algorithm fully given in §5.3; regression tests defined
+- **Tier:** frontier — F3/F6: resolve and verify moving-target damping discretisation (Q13)
 - **Depends on:** `CAM-004`, `FLT-001`, `VOX-001`, `INP-001`
 - **Do:** Implement §5.3 steps 1–6 and 8 (occlusion = infinite until CAM-007), target cut rules (§5.1 step 5), and `InputCameraInput : ICameraInput` over SPEC-03 actions (§10 Q1).
-- **Files:** `Assets/Game/Presentation/Services/{CameraRigService,InputCameraInput}.cs`, `Assets/Game/Presentation/Systems/CameraTargetSyncSystem.cs`
+- **Files:** `Assets/Game/Presentation/Services/CameraRigService.cs`, `Assets/Game/Presentation/Input/InputCameraInput.cs`, `Assets/Game/Presentation/Systems/CameraTargetSyncSystem.cs`
 - **Acceptance criteria:**
-  - [ ] Default flight pose: pitch 55°, distance 150 m, behind the ship's heading.
-  - [ ] Under any orbit input the angle between camera forward and the XZ plane stays in [35°, 80°] (regression: plane never edge-on).
-  - [ ] Following a target moving at 100 m/s for 2 s gives the same final camera position (±0.05 m) at 30, 60 and 144 FPS.
-  - [ ] New player ship entity → cut (no swoop).
+  - [x] Default flight pose: pitch 55°, distance 150 m, behind the ship's heading.
+  - [x] Under any orbit input the angle between camera forward and the XZ plane stays in [35°, 80°] (regression: plane never edge-on).
+  - [x] Following a target moving at 100 m/s for 2 s gives the same final camera position (±0.05 m) at 30, 60 and 144 FPS.
+  - [x] New player ship entity → cut (no swoop).
 - **Tests:** `Assets/Game/Tests/EditMode/Presentation/FlightCameraModeTests.cs`: `Default_PitchIs55_NotEdgeOn`, `FuzzOrbitInput_1000Frames_PitchInRange` (fixed-seed `RngStreams`), `Zoom_ClampedToRange`, `Recenter_ResetsOffsetAndPitch`, `FollowHeading_YawTracksShip`, `FrameRateIndependence_30_60_144`, `LookAhead_ClampedToFractionOfDistance`. `CameraTargetSyncSystemTests`: `NewTargetEntity_Cuts`.
 
 ### CAM-006 — Origin warp and teleport cut
@@ -450,7 +450,7 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Tier:** standard — algorithm fully given in §5.4
 - **Depends on:** `CAM-005`
 - **Do:** Implement `EnterEditorOrbit`, `FocusOn`, `SnapView`, `SetEditorSuppression`, the editor branch of `Tick`, and the editor actions in `InputCameraInput`.
-- **Files:** `Assets/Game/Presentation/Services/{CameraRigService,InputCameraInput}.cs`
+- **Files:** `Assets/Game/Presentation/Services/CameraRigService.cs`, `Assets/Game/Presentation/Input/InputCameraInput.cs`
 - **Acceptance criteria:**
   - [ ] Entering with radius 10 → distance 30 m, yaw 45°, pitch 30°.
   - [ ] Pitch clamps at ±89°; pan keeps the pivot within bounds + 50 m.
@@ -498,6 +498,10 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 
 | 10 | Camera-prefab listener contradicts SPEC-64’s existing single-listener service | Keep AudioService ownership; expose and bind a rig-owned ListenerPivot | Tech lead | Resolved CAM-004 / ADR-0039; app binds/clears the existing target API, and the rig disposes its pivot. |
 | 11 | CAM-004 composition precedes camera input, Fx events, persisted yaw mode and ordering peers | Wire available contracts; explicitly defer missing adapters and peer attributes | Tech lead | Resolved CAM-004 / ADR-0039: null input/FX until CAM-005/CAM-008, FollowHeading default, sensitivity clamped to 0.1–3. AudioEventDrainSystem/HudSyncSystem ordering attributes are added when those types exist. Write the existing optional VoxelViewer for SPEC-11; no lazy singleton creation. Lab uses Hold until CAM-009. |
+
+| 12 | SPEC-03 applies orbit sensitivity/inversion in the adapter and SPEC-62 applies them again; adapter namespace/ownership also differs | Raw orbit pixels from the canonical SPEC-03 Input namespace; rig applies settings once | Tech lead | Resolved CAM-005: implement the Flight branch in Game.Presentation.Input.InputCameraInput; INP-006 extends Editor sampling and owns adapter tests. Zoom sensitivity remains in the adapter, once. CAM-009 consumes the Editor branch. ICameraInput already promises pixel deltas; no public signature changes. |
+
+| 13 | Endpoint-only focus damping violates the moving-target FPS acceptance | Integrate the same exponential cascade with linear target motion over each frame | Tech lead | Resolved CAM-005: initial 100 m/s, 2 s X positions were 232.0124 / 231.2455 / 230.7731 m at 30/60/144 FPS (30–60 error 0.766891 m vs 0.05 m). §5.3 now gives the closed-form integration, including equal-rate/small-step limits; required test and tolerance remain unchanged. Task raised to frontier for this numerical decision. |
 
 ## 11. References
 

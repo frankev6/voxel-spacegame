@@ -39,6 +39,25 @@ namespace Game.Tests.EditMode.Presentation
                 Assert.AreEqual(CameraMode.Menu, state.Mode);
             }
         }
+        [Test] public void NewTargetEntity_Cuts()
+        {
+            using var f = new Fixture(); using var w = EcsTestWorld.Create(typeof(CameraTargetSyncSystem));
+            var em = w.EntityManager; var old = em.CreateEntity(typeof(PlayerShip), typeof(LocalToWorld));
+            em.SetComponentData(old, new LocalToWorld { Value = float4x4.identity });
+            f.Rig.SetMode(CameraMode.Flight, true);
+            w.World.GetExistingSystemManaged<CameraTargetSyncSystem>().Bind(f.Rig, null); w.StepFrame(0);
+            em.DestroyEntity(old);
+            var next = em.CreateEntity(typeof(PlayerShip), typeof(LocalToWorld));
+            var pos = new float3(600, 0, 20); var rotation = quaternion.RotateY(math.radians(90));
+            em.SetComponentData(next, new LocalToWorld { Value = float4x4.TRS(pos, rotation, new float3(1)) });
+            w.StepFrame(0);
+            Assert.AreEqual(pos, f.Rig.Focus);
+            Assert.AreEqual(90, f.Rig.YawDeg, .001f);
+            var expected = Game.Presentation.Services.CameraMath.OrbitPosition(pos,
+                Game.Presentation.Services.CameraMath.OrbitRotation(55, 90), 150);
+            Assert.Less(math.distance(expected, f.Rig.Camera.transform.position), .001f);
+        }
+
         [Test] public void NoPlayerShip_ClearsTarget()
         {
             using var f = new Fixture(); using var w = EcsTestWorld.Create(typeof(CameraTargetSyncSystem));

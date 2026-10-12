@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 37 | 0 | 0 | 0 | 67 | 0 | 104 | 15 |
+| M1 | 36 | 1 | 0 | 0 | 67 | 0 | 104 | 14 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 5 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -194,7 +194,7 @@
 | CAM-002 | ADR: custom camera rig instead of Cinemachine | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | — | yes | done | astra (gpt-6) | 2026-10-11 | a0df398 | ADR-0038 Proposed, all five reasons; no package or runtime change |
 | CAM-003 | Camera math helpers | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-001 | yes | done | astra (gpt-6) | 2026-10-11 | 0e4a19d | Five specified tests; 30/60/144 FPS damping agrees within 1e-4 |
 | CAM-004 | Rig service, camera prefab, Menu/Hold modes and the sync system shell | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-003, FND-001 | yes | done | astra (gpt-6) | 2026-10-11 | ece7b8b | Persistent rig, menu/hold, ECS view and boot bindings; ADR-0039 single listener; ten required tests |
-| CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-004, FLT-001, VOX-001, INP-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Flight follow, orbit/zoom, target cuts and input adapter |
+| CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-004, FLT-001, VOX-001, INP-001 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Flight follow, orbit/zoom, target cuts and input adapter |
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | no | todo |  |  |  |  |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
@@ -692,6 +692,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 126 | 2026-10-11 | SPEC-62 CAM-001 | Deferring IFxFrameReader creates a CAM-004/CAM-008 dependency cycle | Empty interface now, typed event property at CAM-008 | Tech lead | Resolved SPEC-62 Q9; preserve Bind type without inventing VFX contracts |
 | 127 | 2026-10-11 | SPEC-62 CAM-004 | Camera prefab listener contradicts sole AudioRoot listener | Retain audio ownership, bind rig pivot | Tech lead | Resolved SPEC-62 Q10 / ADR-0039; new read-only ListenerPivot contract; no duplicate listener |
 | 128 | 2026-10-11 | SPEC-62 CAM-004 | Camera boot wiring precedes input/FX adapters and ordering peers | Bind available services, explicitly defer adapters | Tech lead | Resolved SPEC-62 Q11 / ADR-0039: null input/FX staging; FollowHeading; sensitivity clamp; existing VoxelViewer writer; Lab Hold until CAM-009 |
+| 129 | 2026-10-11 | SPEC-62 CAM-005 | Input/rig specs apply orbit settings twice and duplicate adapter ownership | Raw pixels, one Input-namespace adapter, settings in rig | Tech lead | Resolved SPEC-62 Q12 / SPEC-03 Q7; CAM-005 Flight branch, INP-006 Editor branch/tests, zoom sensitivity once |
+| 130 | 2026-10-11 | SPEC-62 CAM-005 | Endpoint damping misses moving-target FPS tolerance by 0.767 m | Exact exponential cascade with linear target motion | Tech lead | Resolved SPEC-62 Q13; original 30/60/144 X: 232.0124/231.2455/230.7731 m. Test/tolerance unchanged; equal-rate and small-step limits; task tier frontier |
 
 
 
@@ -703,6 +705,7 @@ Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-11 | CAM-005 | Moving-target camera at 30/60/144 FPS | Final X **230.4243 / 230.4243 / 230.4243 m** (printed precision), 0.05 m agreement gate passes | Target 100 m/s for 2 s; default look-ahead and half-lives. Original endpoint update: 232.0124 / 231.2455 / 230.7731 m; 30–60 error 0.766891 m. Q130 integrates the exponential cascade without relaxing the test |
 | 2026-10-11 | FLT-011 | Propulsion worker / cache rebuild | 50 ships × 20 thrusters: median/p95 **0.08983 / 0.1081 ms** (budget 0.15 ms). 200-instance rebuild: **1.162 / 1.628 µs per ship** (budget 2 µs) | Apple M5 Pro, 17 workers, reference CPU settings, 60 warmup + 300 samples; actual Burst Jobs markers. Ship20k + 20 thrusters per root. Rebuild fixture adds 180 non-thruster functional instances and conservatively includes the whole zero-sweep propulsion job |
 | 2026-10-11 | FLT-011 | Flight scheduling / player / plane / GC | Median/p95: propulsion main **0.001041 / 0.003417 ms** (0.03); player command **0.000666 / 0.000834 ms** (0.01); plane worker, 100 bodies **0.003166 / 0.007417 ms** (0.02). Managed allocation **0 B every sample** | 60 warmup + 300 samples; GC measured around the three flight system updates and their job completion, excluding fixture mutations, scenes and unrelated physics work |
 | 2026-10-11 | FLT-011 | Exact flight determinism | **8/8 runs identical**, 600 ticks × 3 ships = 1800 records/run | Frame patterns 1, 2, 0/1 and 6 ticks/frame × 1/17 workers; compare every LocalTransform and PhysicsVelocity field by bits, never struct padding. Scripts exercise thrust, turn, boost, brake and coast |

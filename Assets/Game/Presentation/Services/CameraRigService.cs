@@ -19,7 +19,8 @@ namespace Game.Presentation.Services
         CameraMode mode;
         CameraSettings settings = new CameraSettings { MouseSensitivity = 1, ShakeScale = 1 };
         bool blending, disposed;
-        float blendT, yawDeg;
+        float blendT, yawDeg, yawOffsetDeg, pitchDeg, pitchTargetDeg, distance, distanceTarget;
+        float3 lookAhead, previousFollowPosition;
         float3 blendFromPos, outPos;
         quaternion blendFromRot, outRot;
         internal CameraConfig Config => config;
@@ -50,6 +51,7 @@ namespace Game.Presentation.Services
                 listenerPivot = new GameObject("ListenerPivot").transform;
                 listenerPivot.SetParent(instance.transform, false);
                 mode = CameraMode.Menu; FocusState = config.MenuLookAt;
+                pitchDeg = pitchTargetDeg = config.DefaultPitchDeg; distance = distanceTarget = config.DefaultDistance;
                 MenuPose(out outPos, out outRot);
                 ApplyPose();
             }
@@ -60,7 +62,8 @@ namespace Game.Presentation.Services
         public Transform ListenerPivot => listenerPivot;
         public CameraMode Mode => mode;
         public float3 Focus => FocusState;
-        public float CurrentDistance => config.DefaultDistance; // TODO(CAM-005): damped flight distance.
+        public float CurrentDistance => distance;
+        internal float3 LookAhead => lookAhead;
         public float YawDeg => yawDeg;
 
         public void SetMode(CameraMode mode, bool cut)
@@ -69,7 +72,11 @@ namespace Game.Presentation.Services
             this.mode = mode;
             blending = !cut && !settings.ReduceMotion && config.BlendSeconds > 0;
             blendT = 0; blendFromPos = outPos; blendFromRot = outRot;
-            // TODO(CAM-005): entering Flight resets pitch/distance targets and yaw offset.
+            if (mode == CameraMode.Flight)
+            {
+                pitchTargetDeg = config.DefaultPitchDeg; distanceTarget = config.DefaultDistance; yawOffsetDeg = 0;
+                if (cut || settings.ReduceMotion) CutRequested = true;
+            }
             // TODO(CAM-009): clear editor input suppression on mode changes.
         }
 
@@ -87,12 +94,12 @@ namespace Game.Presentation.Services
             if (disposed) return;
             CutRequested |= cut || !HasTarget; HasTarget = true;
             TargetPosition = pos; TargetRotation = rot; TargetVelocity = vel; TargetRadius = radius;
-            if (CutRequested) FocusState = pos;
+            if (CutRequested) { FocusState = pos; blending = false; }
         }
         public void ClearTarget() { HasTarget = false; CutRequested = false; }
         public void Warp(float3 delta) => throw new NotImplementedException("CAM-006");
         public void AddImpulse(float3 worldPos, float strength, float radius) => throw new NotImplementedException("CAM-008");
-        public float3 DesiredFlightPosition() => throw new NotImplementedException("CAM-005");
+        public float3 DesiredFlightPosition() => CameraMath.OrbitPosition(FocusState, CameraMath.OrbitRotation(pitchDeg, yawDeg), distance);
         public void SetOcclusionDistance(float distance) => throw new NotImplementedException("CAM-007");
         public void EnterEditorOrbit(float3 center, float radius, bool cut) => throw new NotImplementedException("CAM-009");
         public void FocusOn(float3 center, float radius) => throw new NotImplementedException("CAM-009");
@@ -112,7 +119,8 @@ namespace Game.Presentation.Services
                 if (!settings.ReduceMotion) yawDeg += config.MenuDriftDegPerSecond * dt;
                 MenuPose(out p, out r);
             }
-            // Hold and targetless Flight retain the last output; CAM-005/CAM-009 supply their mode poses.
+            else if (mode == CameraMode.Flight && HasTarget) FlightPose(dt, out p, out r);
+            // Hold and targetless Flight retain the last output; CAM-009 supplies the editor pose.
             if (blending)
             {
                 blendT = math.min(1, blendT + dt / config.BlendSeconds);
@@ -123,6 +131,54 @@ namespace Game.Presentation.Services
             // TODO(CAM-008): additive shake after the logical mode/blend pose.
             outPos = p; outRot = r;
             ApplyPose();
+        }
+
+        void FlightPose(float dt, out float3 position, out quaternion rotation)
+        {
+            Vector2 orbit = input?.OrbitDelta ?? Vector2.zero;
+            float k = config.OrbitDegPerPixel * settings.MouseSensitivity;
+            yawOffsetDeg += orbit.x * k;
+            pitchTargetDeg = math.clamp(pitchTargetDeg - orbit.y * k * (settings.InvertOrbitY ? -1 : 1), config.MinPitchDeg, config.MaxPitchDeg);
+            distanceTarget = math.clamp(distanceTarget * math.pow(config.ZoomStepFactor, input?.ZoomSteps ?? 0), config.MinDistance, config.MaxDistance);
+            if (input?.RecenterPressed == true) { yawOffsetDeg = 0; pitchTargetDeg = config.DefaultPitchDeg; }
+            float desiredYaw = (settings.YawMode == CameraYawMode.FollowHeading ? CameraMath.HeadingYawDeg(TargetRotation) : 0) + yawOffsetDeg;
+            if (CutRequested)
+            {
+                yawDeg = desiredYaw; pitchDeg = pitchTargetDeg; distance = distanceTarget;
+                lookAhead = 0; FocusState = TargetPosition; CutRequested = false;
+            }
+            else
+            {
+                yawDeg = CameraMath.DampAngle(yawDeg, desiredYaw, config.YawHalfLife, dt);
+                pitchDeg = CameraMath.Damp(pitchDeg, pitchTargetDeg, config.PitchHalfLife, dt);
+                distance = CameraMath.Damp(distance, distanceTarget, config.ZoomHalfLife, dt);
+                float3 targetLookAhead = TargetVelocity * config.LookAheadSeconds; targetLookAhead.y = 0;
+                targetLookAhead = CameraMath.ClampLength(targetLookAhead, config.LookAheadMaxFraction * distance);
+                UpdateFollowFocus(targetLookAhead, dt);
+            }
+            previousFollowPosition = TargetPosition;
+            rotation = CameraMath.OrbitRotation(pitchDeg, yawDeg);
+            position = CameraMath.OrbitPosition(FocusState, rotation, distance);
+            // TODO(CAM-007): immediate occlusion pull-in and damped release.
+        }
+
+        void UpdateFollowFocus(float3 targetLookAhead, float dt)
+        {
+            if (dt <= 0) return;
+            // SPEC-62 Q13: exact exponential cascade for a linearly interpolated target
+            // and a constant look-ahead goal during this frame. Endpoint-only lerp adds FPS-dependent lag.
+            double kf = Math.Log(2) / config.FocusHalfLife, kl = Math.Log(2) / config.LookAheadHalfLife;
+            double x = kf * dt, z = (kf - kl) * dt;
+            double af = Math.Exp(-x), al = Math.Exp(-kl * dt);
+            double ramp = x < .001 ? -x * .5 + x * x / 3 - x * x * x / 8 : af - (1 - af) / x;
+            // The equal-half-life limit also avoids subtracting nearly equal exponentials.
+            double cascade = Math.Abs(z) < .001
+                ? af * kf * dt * (1 + z * .5 + z * z / 6 + z * z * z / 24)
+                : kf * (al - af) / (kf - kl);
+            FocusState = math.lerp(TargetPosition + targetLookAhead, FocusState, (float)af)
+                + (TargetPosition - previousFollowPosition) * (float)ramp
+                + (lookAhead - targetLookAhead) * (float)cascade;
+            lookAhead = math.lerp(targetLookAhead, lookAhead, (float)al);
         }
 
         void MenuPose(out float3 position, out quaternion rotation)

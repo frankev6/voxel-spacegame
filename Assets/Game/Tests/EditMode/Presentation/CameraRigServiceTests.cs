@@ -17,10 +17,10 @@ namespace Game.Tests.EditMode.Presentation
             internal readonly GameObject Prefab = new GameObject("Camera test prefab", typeof(Camera));
             internal readonly CameraConfig Config = ScriptableObject.CreateInstance<CameraConfig>();
             internal CameraRigService Rig;
-            internal Fixture(bool construct = true)
+            internal Fixture(bool construct = true, ICameraInput input = null)
             {
                 Config.CameraPrefab = Prefab;
-                if (construct) Rig = new CameraRigService(Config, Parent.transform, null);
+                if (construct) Rig = new CameraRigService(Config, Parent.transform, input);
             }
             public void Dispose()
             {

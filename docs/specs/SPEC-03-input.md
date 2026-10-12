@@ -328,10 +328,11 @@ The system allocates nothing per frame: action references are cached in `Bind`.
 
 Mode is read from `input.CurrentContext`:
 - **Flight:**
-  - `OrbitDelta = CameraOrbitHold.IsPressed() ? CameraLook.ReadValue<Vector2>() * MouseSensitivity * (InvertCameraY ? (1, −1) : (1, 1)) : 0`;
+  - `OrbitDelta = CameraOrbitHold.IsPressed() ? CameraLook.ReadValue<Vector2>() : 0`;
   - `ZoomSteps = CameraZoom.ReadValue<float>() * CameraZoomSensitivity`;
   - `RecenterPressed = CameraRecenter.WasPressedThisFrame()`;
   - pan and editor view keys read zero.
+- Orbit deltas are raw pixels; CameraRigService applies sensitivity/inversion exactly once (CAM-005, Q7).
 - **Editor:** the same rules, using the Editor map's `OrbitHold`/`Orbit`, `PanHold`/`Pan`, `Zoom` (only while Ctrl is not held), `Focus` and `View*`.
 - **Other contexts:** everything reads zero.
 
@@ -448,10 +449,10 @@ When the Editor map is disabled, set `frame = default`.
 - **Milestone:** M1
 - **Tier:** standard — §5.3 and §5.4 mapping tables
 - **Depends on:** `INP-002`, `CAM-001`
-- **Do:** Implement `InputCameraInput` (§5.3) and `EditorInputSampler` (§5.4; the `EditorActions` mapping table comes from SPEC-51 §4 once EDT-001 exists; until then the test uses its own enum copy).
+- **Do:** Extend CAM-005’s Flight `InputCameraInput` with its Editor branch (§5.3), test the shared adapter, and implement `EditorInputSampler` (§5.4; the `EditorActions` mapping table comes from SPEC-51 §4 once EDT-001 exists; until then the test uses its own enum copy).
 - **Files:** `Assets/Game/Presentation/Input/{InputCameraInput,EditorInputSampler}.cs`; `Assets/Game/Tests/EditMode/Input/SamplerTests.cs`
 - **Acceptance criteria:**
-  - [ ] Orbit delta is zero unless the hold is pressed; inversion flips Y.
+  - [ ] Orbit delta is zero unless the hold is pressed; the adapter/rig path applies Y inversion once.
   - [ ] In the Editor, Ctrl+scroll feeds `ToolWheel` and plain scroll feeds `Zoom`.
   - [ ] Ctrl+Z sets `Undo` and not `MirrorZ`.
 - **Tests:** `SamplerTests.Orbit_OnlyWhileHeld`, `.InvertY`, `.CtrlScroll_ToolWheel`, `.CtrlZ_UndoOnly`.
@@ -478,15 +479,18 @@ When the Editor map is disabled, set `frame = default`.
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | Flight controls: A/D turn and Q/E strafe, or mouse-facing ship? | A/D turn, Q/E strafe; mouse aims weapons only | Owner |
-| 2 | Interact on F (and Fleet screen on K) | Yes | Owner |
-| 3 | Fire groups beyond 3 | 3 groups in v1 (LMB, RMB, Space) | Owner |
-| 4 | The generated `Controls.Dispose()` calls `Object.Destroy(asset)`, which logs an error in edit mode, so EditMode tests that dispose an `InputService` fail on the unexpected log (found in INP-001) | `InputService.Dispose` disables the maps, then destroys `Controls.asset` with `Object.DestroyImmediate` when `!Application.isPlaying` and calls `Controls.Dispose()` otherwise | Tech lead |
-| 5 | No task sets `InputSystem.settings.shortcutKeysConsumeInput = true` in `ProjectSetup` (§4.2 Editor) | INP-002 adds it to `ProjectSetup.ApplyAll`/`Check` with a `ProjectSettingsGuardTests` case | Tech lead |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | Flight controls: A/D turn and Q/E strafe, or mouse-facing ship? | A/D turn, Q/E strafe; mouse aims weapons only | Owner |  |
+| 2 | Interact on F (and Fleet screen on K) | Yes | Owner |  |
+| 3 | Fire groups beyond 3 | 3 groups in v1 (LMB, RMB, Space) | Owner |  |
+| 4 | The generated `Controls.Dispose()` calls `Object.Destroy(asset)`, which logs an error in edit mode, so EditMode tests that dispose an `InputService` fail on the unexpected log (found in INP-001) | `InputService.Dispose` disables the maps, then destroys `Controls.asset` with `Object.DestroyImmediate` when `!Application.isPlaying` and calls `Controls.Dispose()` otherwise | Tech lead |  |
+| 5 | No task sets `InputSystem.settings.shortcutKeysConsumeInput = true` in `ProjectSetup` (§4.2 Editor) | INP-002 adds it to `ProjectSetup.ApplyAll`/`Check` with a `ProjectSettingsGuardTests` case | Tech lead |  |
 
-| 6 | Removing a conflicting override loses a previously successful custom binding, contrary to §7’s “old binding kept” | **Answer (resolved in INP-003):** capture and restore the prior binding overrides on conflict; defaults remain defaults when no override existed. Disable Global while rebinding so cancellation cannot fire Back. ADR-0021 permits the already-installed InputTestFixture assembly reference required by the task. | Tech lead |
+| 6 | Removing a conflicting override loses a previously successful custom binding, contrary to §7’s “old binding kept” | **Answer (resolved in INP-003):** capture and restore the prior binding overrides on conflict; defaults remain defaults when no override existed. Disable Global while rebinding so cancellation cannot fire Back. ADR-0021 permits the already-installed InputTestFixture assembly reference required by the task. | Tech lead |  |
+
+| 7 | Camera adapter and rig both apply sensitivity/inversion, and CAM-005/INP-006 duplicate adapter ownership | Raw pixel deltas; rig owns orbit settings; one adapter in Game.Presentation.Input | Tech lead | Resolved CAM-005 / SPEC-62 Q12: CAM-005 implements Flight and app binding; INP-006 adds Editor and the listed adapter tests (InvertY checks the adapter/rig path). Zoom sensitivity is applied once in the adapter. |
+
 
 ## 11. References
 
