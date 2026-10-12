@@ -698,6 +698,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 132 | 2026-10-11 | SPEC-11 REN-003 | Fallback needs missing shared surface shader; apply/cleanup systems are future work | REN-008 first; future REN-010/011 consume pooled contract | Tech lead | Resolved SPEC-11 Q23; added shader dependency and returned REN-003 to todo; no contract or gate success asserted |
 | 133 | 2026-10-11 | SPEC-11 REN-008 | Old shader property/channel contract conflicts with approved design; legacy texture forbidden | Canonical art contract, procedural inputs | Tech lead | Accepted ADR-0040 / SPEC-11 Q24; preserve packed vertex and defer missing presentation writers to their features; no new art direction |
 | 134 | 2026-10-11 | SPEC-11 REN-003 | Fallback allocation, memory growth and integration contracts were unspecified | Exact packed ranges, generational slots, GPU copy, explicit camera and future pooled apply/cleanup | Tech lead | Accepted ADR-0032 / SPEC-11 Q25; same 36 MB and timing gates; performance remains to be measured |
+| 135 | 2026-10-11 | SPEC-11 REN-003 | Metal indirect draw and growth-copy behaviour differ from the initial assumptions | Separate CPU upload staging, GPU-only pool writes and explicit per-slot vertex offsets | Tech lead | ADR-0032 / SPEC-11 Q26: GPU readback isolates lost old indices and omitted base vertex; repaired path under validation |
+| 136 | 2026-10-11 | SPEC-11 REN-003 | One indirect command per brick misses the Metal GPU gate | Coalesce selected index intervals; global GPU indices and per-vertex owners | Tech lead | Accepted ADR-0041 / SPEC-11 Q27; diagnostic GPU 22.000125 ms over 60 samples, final 300-sample gates unchanged |
 
 
 
