@@ -14,8 +14,8 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 10 | 1 | 1 | 0 | 96 | 0 | 108 | 5 |
-| M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 9 |
+| M1 | 10 | 0 | 1 | 0 | 97 | 0 | 108 | 5 |
+| M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -200,7 +200,7 @@
 | CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-004, FLT-001, VOX-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-11 | f19e2a5 | Flight follow, input, cuts; exact moving-target damping (Q129–130) |
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 111f9fd | CPU 0.002833 ms; 0 B/update; 10 s circle pitch/GC pass (Q131) |
 | CAM-012 | Keep the imported player ship framed during fast close-zoom flight | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-005, FND-001 | yes | done | astra (gpt-6) | 2026-10-12 | 42287c3 | Bounds-aware focus keeps fast Fighter framed; live 53.39 m/s capture; Q154 |
-| VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | frontier | CORE-001, DATA-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Shared VFX contracts, queue lifetime and validation |
+| VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | frontier | CORE-001, DATA-001 | yes | done | astra (gpt-6) | 2026-10-12 | bb25b99 | Guarded queue, shared kinds, GPU layouts and validation; ADR-0050 |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | done | astra (gpt-6) | 2026-10-12 | b8521e9 | UI/cue playback and ducking; four tests pass, 0 B over 1000 UI calls |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | todo |  |  |  |  |
@@ -277,7 +277,7 @@
 | ABL-004 | Effect systems | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-003, SPEC-22 | no | todo |  |  |  |  |
 | ABL-005 | Ability scenarios and frame-rate independence | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-004, SPEC-21 | no | todo |  |  |  |  |
 | CAM-008 | Screen shake from FxEvents | [SPEC-62](specs/SPEC-62-camera.md) | M2 | standard | CAM-005, SPEC-63 | no | todo |  |  |  |  |
-| VFX-002 | FxRig: slots, effects, buffers and binding | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-001, TST-001 | no | todo |  |  |  |  |
+| VFX-002 | FxRig: slots, effects, buffers and binding | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-001, TST-001 | yes | todo |  |  |  |  |
 | VFX-003 | FxUploadSystem: drain, batch, submit, stats | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002 | no | todo |  |  |  |  |
 | VFX-004 | Template graphs and content assets for hits, explosions, muzzle and shield sparks | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | no | todo |  |  |  |  |
 | VFX-005 | Voxel debris particles and the 50k GPU gate | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-004 | no | todo |  |  |  |  |
@@ -848,6 +848,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — VFX-001 done — astra (gpt-6)
+
+- **Changed:** shared effect kinds, event helpers/queue, chunk dissolve property, content definitions and validation, GPU instance layouts/counters, and the specified unbound FxRig contract stub. ADR-0050 / Q168–170 resolves the Data→Voxel enum cycle, owns native producer handles through GuardedHandles, and uses the canonical scoped validator. Registered FxEventQueue in the voxel test's documented module-singleton allowlist. No new assembly reference, asset, art or boot call to the throwing rig stub.
+- **Validation:** all **six required tests pass**. FxEvent **56 B**, GPU event **80 B**, tracer/beam/plume **48 B**, shield **224 B**. The lifetime check schedules two concurrent 128-event writers, waits through main-thread enqueue (**257 events**), then disposes the world with another writer pending: **zero leaked allocations**, queue and guard disposed. Required invalid content combinations report asset/field diagnostics.
+- **Full suites:** EditMode **755 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4139 ms** vs 3, MeshBuild128 **1.0436 ms** vs 0.5); PlayMode **102 passed, 16 GPU skips**. Final compile has zero C# warnings and all six focused tests pass again after completing the readonly quality-budget accessors. Evidence `Logs/playtest/vfx001/`; docs clean. No performance gate owned by this contract task, zero optimization passes.
+- **Next:** AUD-004 listener scene/flow regression, then remaining M1 checks and system review. FxRig resources/binding are VFX-002, draining VFX-003, actual effects later M2 tasks. AUD-006 must reconcile its existing SFX producer/drain guard ownership before asynchronous producers. No new owner decision; approved Nocturne environment preserved.
 
 ### 2026-10-12 — DEV-015 done — astra (gpt-6)
 
