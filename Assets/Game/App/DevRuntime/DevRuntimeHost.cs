@@ -45,6 +45,7 @@ namespace Game.App.DevRuntime
         public DevInputInjector Input { get; private set; }
         public DevUiQuery Ui { get; private set; }
         public DevEventCounter Events { get; private set; }
+        internal Game.App.DevRuntime.Console.DevConsole Console { get; private set; }
         public static DevRuntimeHost Create(Transform parent)
         {
             var root = new GameObject("DevRuntimeHost");
@@ -63,6 +64,9 @@ namespace Game.App.DevRuntime
             }
             catch { host.Dispose(); throw; }
         }
+        internal void BindConsole(Game.Input.InputService input, Game.UI.Services.UIRoot ui)
+        { Console = new Game.App.DevRuntime.Console.DevConsole(this, input, ui); }
+
         public Scenarios.ScenarioRunner RunScenario(Scenarios.ScenarioScript script, string path, int runId, string outputDirectory = null)
         {
             if (disposed) throw new ObjectDisposedException(nameof(DevRuntimeHost));
@@ -99,6 +103,7 @@ namespace Game.App.DevRuntime
             int scenarioCount = scenarios.Count;
             for (int i = 0; i < scenarioCount; i++) scenarios[i].Step();
             for (int i = scenarioCount - 1; i >= 0; i--) if (scenarios[i].Finished) scenarios.RemoveAt(i);
+            Console?.Update();
         }
         void LateUpdate() { /* DEV-012 adds overlay rendering. */ }
         void OnDestroy() { Cleanup(); }
@@ -110,6 +115,7 @@ namespace Game.App.DevRuntime
             running.Clear();
             foreach (var scenario in scenarios) scenario.Abort("play mode exited");
             scenarios.Clear();
+            Console?.Dispose();
             Context?.Dispose();
             Input?.Dispose();
             Events?.Dispose();

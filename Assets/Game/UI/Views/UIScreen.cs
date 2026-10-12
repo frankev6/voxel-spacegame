@@ -26,6 +26,9 @@ namespace Game.UI.Views
             catch { Navigator = null; Root = null; throw; }
         }
 
+        /// Explicit programmatic fallback when no ScreenAsset exists (ADR-0049); null preserves missing-view errors.
+        public virtual VisualElement CreateView() => null;
+
         /// Query named elements, set Root.dataSource, register callbacks. Called exactly once.
         protected abstract void OnBuild();
         public virtual void OnPush(object args) { }

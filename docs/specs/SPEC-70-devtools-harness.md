@@ -562,11 +562,11 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Tier:** standard — UI Toolkit screen over the existing registry
 - **Depends on:** `DEV-003`, `UI-001`, `INP-001`
 - **Do:** `DevConsoleScreen : UIScreen` (SPEC-60, ADR-0049) with `Context = TextEntry`, `PausesSimulation = false`, `BlocksWorldPointer = true`, built in C# using theme classes only (no UXML/USS asset, no inline styles): output list (last 200 lines, `ListView` with pooled items), input `TextField`, history (↑/↓, 50 entries), Tab completion of command names, Enter executes through the registry (Pending results print when the op ends). Toggled by `Global/DevConsole`.
-- **Files:** `Assets/Game/App/DevRuntime/Console/{DevConsole,DevConsoleScreen}.cs`; `Assets/Game/App/DevRuntime/DevRuntimeHost.cs`; `Assets/Game/UI/Views/UIScreen.cs`; `Assets/Game/UI/Services/UIRoot.cs`; `Assets/Game/Tests/PlayMode/DevTools/DevConsoleTests.cs`
+- **Files:** `Assets/Game/App/DevRuntime/Console/{DevConsole,DevConsoleScreen}.cs`; `Assets/Game/App/DevRuntime/DevRuntimeHost.cs`; `Assets/Game/App/Boot/GameComposition.cs`; `Assets/Game/UI/Views/UIScreen.cs`; `Assets/Game/UI/Services/UIRoot.cs`; `Assets/Game/Tests/PlayMode/App/DevConsoleTests.cs`
 - **Acceptance criteria:**
-  - [ ] F1 (`Global/DevConsole`, SPEC-03) opens and closes the console; gameplay input is off while open.
-  - [ ] `help` output appears; ↑ recalls the last command; Tab completes registered command names (`tel` → `teleport` in the test registry; production `newg` → `newgame` until DEV-009 lands).
-  - [ ] No allocation per frame while the console is closed.
+  - [x] F1 (`Global/DevConsole`, SPEC-03) opens and closes the console; gameplay input is off while open.
+  - [x] `help` output appears; ↑ recalls the last command; Tab completes registered command names (`tel` → `teleport` in the test registry; production `newg` → `newgame` until DEV-009 lands).
+  - [x] No allocation per frame while the console is closed.
 - **Tests:** `DevConsoleTests.Toggle_ChangesContext`, `DevConsoleTests.History_And_Completion`, `DevConsoleTests.Closed_NoGcAlloc` (PlayMode).
 
 ### DEV-016 — record and replay commands

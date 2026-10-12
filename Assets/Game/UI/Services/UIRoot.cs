@@ -98,8 +98,9 @@ namespace Game.UI.Services
             if (screen.IsBuilt) return;
             using (BuildMarker.Auto())
             {
-                if (!assets.TryGetValue(screen.Key, out var asset)) throw new InvalidOperationException("UIConfig missing screen '" + screen.Key + "'");
-                var tree = asset.Uxml.Instantiate(); tree.name = UINames.ScreenRoot(screen.Key); tree.pickingMode = PickingMode.Ignore;
+                VisualElement tree = assets.TryGetValue(screen.Key, out var asset) ? asset.Uxml.Instantiate() : screen.CreateView();
+                if (tree == null) throw new InvalidOperationException("UIConfig missing screen '" + screen.Key + "'");
+                tree.name = UINames.ScreenRoot(screen.Key); tree.pickingMode = PickingMode.Ignore;
                 tree.AddToClassList(UIStyleClasses.Screen); tree.AddToClassList(UIStyleClasses.IsHidden);
                 tree.AddToClassList(screen.Layer == UILayer.Hud ? UIStyleClasses.ScreenHud
                     : screen.Layer == UILayer.Screens ? UIStyleClasses.ScreenScreens : UIStyleClasses.ScreenModals);

@@ -173,7 +173,8 @@ namespace Game.App.Boot
             Step("15 snapshot");
 
             #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Register(Push(Game.App.DevRuntime.DevRuntimeHost.Create(root)));
+            var devHost = Push(Game.App.DevRuntime.DevRuntimeHost.Create(root));
+            devHost.BindConsole(Input, UI); Register(devHost);
             Step("16 dev runtime");
 #endif
         }

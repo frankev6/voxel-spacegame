@@ -10,7 +10,7 @@ DEV-015 requires a console built in C# with theme classes and no dev UXML/USS as
 
 - Add `public virtual VisualElement CreateView() => null` to UIScreen. A screen may explicitly provide a programmatic root; the default preserves the existing UXML-only contract.
 - UIRoot.BuildScreen first uses a registered ScreenAsset. When none exists, it calls CreateView and rejects null with the existing missing-screen error. It applies the same root name, theme classes, layer, build-once caching and lifecycle to either source.
-- DevConsoleScreen overrides CreateView and builds its controls with shared theme classes only. DevRuntimeHost owns the console, subscribes through it to Global/DevConsole, ticks pending command completions, and disposes it before UI teardown. UINavigator remains the only context/pause owner.
+- DevConsoleScreen overrides CreateView and builds its controls with shared theme classes only. GameComposition explicitly binds its host to the composed input/UI services. DevRuntimeHost owns the console, subscribes through it to Global/DevConsole, ticks pending command completions, and disposes it before UI teardown. UINavigator remains the only context/pause owner.
 - No new assembly references, dev assets, scene listeners or additional UIDocument. Dev console types stay inside the existing Editor/development compilation guards.
 
 ## Consequences

@@ -31,6 +31,8 @@ All scripts find the project root themselves, so you can run them from anywhere 
 | `tools/playtest/newgame.sh [seed=1] [ship]` | Enter Play from Boot if needed, launch a campaign in the harness profile, wait for player readiness, print a snapshot; optional start-scenario selection currently unsupported |
 | `tools/playtest/shot.sh`, `perf.sh`, `waitscene.sh`, `to.sh` | Screenshot, frame stats, wait for a scene, hard timeout (macOS has no `timeout`) |
 
+**UI text-field keys in the live Editor (DEV-015):** `g.sh key` injects Input System keyboard state, which drives action maps (F1, flight controls). It does not supply UI Toolkit text-field key events in this Editor. For Enter/history/Tab checks, focus the named TextField through `g.sh eval`, then send a `UnityEngine.Event` (`type = KeyDown`, appropriate `keyCode`) to the focused GameView with `EditorWindow.SendEvent`. Enter also uses `character = '\n'`. Read back the command result or field value; a successful keyboard injection alone does not prove text submission. Required PlayMode tests send `KeyDownEvent` to the field directly.
+
 **Where output goes:** `Logs/tools/` (script logs), `Logs/test-results/`, `Logs/perf/` (one JSON record per perf test), `Logs/playtest/`. Never write tool output to `Temp/` (Unity deletes it on exit) or `Assets/`.
 
 ## 3. Unity with no Editor open (headless)
