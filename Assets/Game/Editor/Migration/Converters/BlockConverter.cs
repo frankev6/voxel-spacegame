@@ -86,6 +86,8 @@ namespace Game.Editor.Migration.Converters
                             // Register before assigning: Unity cannot replace an ID after first serialization.
                             for (int i = 0; i < modules.Length; i++)
                             {
+                                if (modules[i] is WeaponMountModule mount && context.IdMap.TryMap(LegacyIdKind.Weapon, dto.RegistryKey, out string weaponId))
+                                    mount.Weapon = AssetDatabase.LoadAssetAtPath<WeaponDefinition>("Assets/Game/Content/Weapons/" + weaponId + ".asset");
                                 if (!UnityEngine.Serialization.ManagedReferenceUtility.SetManagedReferenceIdForObject(so.targetObject, modules[i], (long)modules[i].Id))
                                     throw new InvalidOperationException("Could not assign a stable module reference ID.");
                                 p.GetArrayElementAtIndex(i).managedReferenceValue = modules[i];

@@ -27,6 +27,7 @@ namespace Game.Voxel.PhysicsBody
                 .WithAll<BrickSlot>().WithDisabled<GridSpawning>().Build(ref state);
             rebuild = new EntityQueryBuilder(Allocator.Temp).WithAll<GridRebuilt, VoxelGrid, GridSource, GridMass, GridColliderState, LocalTransform>()
                 .WithAll<BrickSlot>().WithDisabled<GridSpawning>().Build(ref state);
+            job.Unadopted = state.GetComponentLookup<GridUnadoptedCollider>();
             job.Grids = state.GetComponentLookup<VoxelGrid>(true); job.Sources = state.GetComponentLookup<GridSource>(true);
             job.Masses = state.GetComponentLookup<GridMass>(true); job.Transforms = state.GetComponentLookup<LocalTransform>(true);
             job.Colliders = state.GetComponentLookup<PhysicsCollider>(true); job.Damping = state.GetComponentLookup<PhysicsDamping>(true);
@@ -42,7 +43,7 @@ namespace Game.Voxel.PhysicsBody
             // IsEmpty synchronizes enableable writers; the asynchronous gather must apply those filters instead (Q22).
             if (init.IsEmptyIgnoreFilter && rebuild.IsEmptyIgnoreFilter) return;
             using var marker = Init.Auto();
-            job.Grids.Update(ref state); job.Sources.Update(ref state); job.Masses.Update(ref state); job.Transforms.Update(ref state);
+            job.Unadopted.Update(ref state); job.Grids.Update(ref state); job.Sources.Update(ref state); job.Masses.Update(ref state); job.Transforms.Update(ref state);
             job.Colliders.Update(ref state); job.Damping.Update(ref state); job.Bricks.Update(ref state); job.Slots.Update(ref state);
             job.Inits.Update(ref state); job.Rebuilt.Update(ref state); job.Recompute.Update(ref state); job.States.Update(ref state);
             var queue = SystemAPI.GetSingleton<ColliderDirtyQueue>(); var cache = SystemAPI.GetSingleton<ColliderBuildCache>();

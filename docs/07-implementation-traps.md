@@ -110,6 +110,8 @@ How to use this file: before you start a task, read the sections whose tags matc
 
   Run tests with `NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace`.
 
+- **Cross-tick event streams (ADR-0056):** a later simulation tick can be more than four rendered frames away, especially while paused. Use explicitly disposed Persistent streams for SimEventChannel registrations; same-update reader metadata can remain TempJob. Never add a fixed-step Complete just to hide an allocator-lifetime mismatch.
+
 ### T2.11 Nested native containers and padding bytes
 - **Wrong:**
   - a `NativeArray<NativeStream.Reader>` (or any container of containers) passed to a job: every job rejects it, its own `Dispose(JobHandle)` included;

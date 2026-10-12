@@ -22,6 +22,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
         readonly VoxelStructureRegistry registry;
         readonly SystemHandle spawn;
         readonly List<VoxelStructure> sources = new List<VoxelStructure>();
+        readonly List<NativeStream> explosionStreams = new List<NativeStream>();
         public EntityManager EM => World.EntityManager;
         public TestGridFactory()
         {
@@ -71,6 +72,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
         public CellWriter Writer(Entity root)
         {
             ref var state = ref World.Unmanaged.ResolveSystemStateRef(spawn);
+            var stream = new NativeStream(1, Allocator.TempJob); explosionStreams.Add(stream);
             var w = new CellWriter
             {
                 Access = new GridCellAccess
@@ -80,6 +82,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
                     Dense = state.GetBufferLookup<BrickCells>(), Sparse = state.GetBufferLookup<BrickSparseCells>(), Masks = state.GetBufferLookup<BrickSolidMask>(),
                     Bricks = state.GetComponentLookup<Brick>(), Dirty = state.GetComponentLookup<BrickDirty>()
                 },
+                Explosions = stream.AsWriter(),
                 Config = DamageConfig.Default, Transform = LocalTransform.Identity,
                 Mass = new Unity.Physics.PhysicsMass { Transform = RigidTransform.identity }, Tick = 7,
                 Row = new DamageTypeRow { KickMin = 6, KickMax = 18 }
@@ -93,7 +96,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
         }
         public void Dispose()
         {
-            World.Dispose(); UnityEngine.Object.DestroyImmediate(registry);
+            World.Dispose(); foreach (var stream in explosionStreams) stream.Dispose(); UnityEngine.Object.DestroyImmediate(registry);
             foreach (var s in sources) s.Dispose(); library.Dispose(); Content.Dispose();
         }
     }

@@ -4,9 +4,9 @@ namespace Game.Data.Blocks
     [System.Serializable] public sealed class WeaponMountModule : BlockModule<WeaponMountParams>
     {
         public Unity.Mathematics.float3 MuzzleOffsetCells;
-        // DATA-010 (M2) adds: [SerializeField] WeaponDefinition weapon (+ getter); Bake then sets WeaponIndex = ctx.Catalog.IndexOf<WeaponDefinition>(weapon)
-        // (0 if null); ContributeStats adds weapon.SustainedDps and weapon.PowerDraw (SPEC-21 getters). Until then WeaponIndex = 0 (unarmed).
+        [UnityEngine.SerializeField] private Game.Data.Definitions.WeaponDefinition weapon;
+        public Game.Data.Definitions.WeaponDefinition Weapon { get => weapon; set => weapon = value; }
         public override BlockModuleId Id => BlockModuleId.WeaponMount;
-        protected override WeaponMountParams Bake(in BlockModuleBakeContext ctx) => new WeaponMountParams { WeaponIndex = 0, MuzzleOffsetCells = MuzzleOffsetCells };
+        protected override WeaponMountParams Bake(in BlockModuleBakeContext ctx) => new WeaponMountParams { WeaponIndex = weapon == null ? (ushort)0 : ctx.Catalog.IndexOf<Game.Data.Definitions.WeaponDefinition>(weapon), MuzzleOffsetCells = MuzzleOffsetCells };
     }
 }

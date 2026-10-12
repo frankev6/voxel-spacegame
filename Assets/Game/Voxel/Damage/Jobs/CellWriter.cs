@@ -64,7 +64,7 @@ namespace Game.Voxel.Damage.Jobs
                 var instance = Access.Instances[cell.InstanceIndex]; instance.FunctionHp -= effective;
                 Access.Instances[cell.InstanceIndex] = instance;
             }
-            // TODO(DMG-005): evaluate functional collapse and core loss after instance damage.
+            // Point/blast callers evaluate instance collapse after this write (FND-020).
         }
         public bool RemoveCell(int3 c, CellRemovedReason reason)
         {

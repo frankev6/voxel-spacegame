@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 85 | 0 | 0 | 0 | 4 | 0 | 89 | 11 |
+| M2 | 84 | 1 | 0 | 0 | 4 | 0 | 89 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -222,30 +222,30 @@
 | DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-12 | e3377fa | Four channels, owned phase memory, stable explosion drains; 5 tests; Q179–180 |
 | DMG-003 | Damage config asset and boot hookup | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-001 | yes | done | astra (gpt-6) | 2026-10-12 | c1d6af2 | Shipped config/4 damage types/4 armor classes, validation and boot-owned table; 3 tests; Q181 |
 | DMG-004 | Cell access, quantization and RemoveCell | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-002 | yes | done | astra (gpt-6) | 2026-10-12 | 8b20d15 | Cell writes, DDA, deterministic quantization and debris kinematics; 10 required tests pass |
-| DMG-005 | Point and blast damage | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | todo |  |  |  |  |
-| DMG-006 | DamageResolveSystem pipeline | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-005 | no | todo |  |  |  |  |
+| DMG-005 | Point and blast damage | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | todo |  |  |  | FND-020 implements initial point/blast/instance path; complete this task’s full required tests and criteria |
+| DMG-006 | DamageResolveSystem pipeline | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-005 | no | todo |  |  |  | FND-020 provides serial ordered resolver; parallel ranges/restoration and full spec coverage remain |
 | DMG-007 | ImpactEventSystem (rams and knockback) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, PHY-001 | no | todo |  |  |  |  |
 | DMG-008 | Brick connectivity summaries | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | todo |  |  |  |  |
-| DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | no | todo |  |  |  |  |
-| DMG-010 | SplitSystem: plan, particle tier, deferred detach and debris FX | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-009, VFX-001, AUD-001 | no | todo |  |  |  |  |
-| DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | no | todo |  |  |  |  |
-| DMG-012 | Hulk grids from splits | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-011, FND-001, SPEC-12 | no | todo |  |  |  |  |
-| DMG-013 | ShipDeathSystem, despawn dissolve and the destroy pass | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-012 | no | todo |  |  |  |  |
+| DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | no | todo |  |  |  | FND-020 uses changed-grid full flood; hybrid graph/budgets and complete coverage remain |
+| DMG-010 | SplitSystem: plan, particle tier, deferred detach and debris FX | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-009, VFX-001, AUD-001 | no | todo |  |  |  | FND-020 supplies physical-grid splitting and deferred detach; particle/chunk tiers and FX remain |
+| DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | no | todo |  |  |  | Chunk pool/collider/lifetime remains unimplemented; FND-020 temporarily represents every piece as a hulk grid |
+| DMG-012 | Hulk grids from splits | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-011, FND-001, SPEC-12 | no | todo |  |  |  | FND-020 includes initial hulk bodies, cell/instance copy and functional transfer; full spec tests/criteria remain |
+| DMG-013 | ShipDeathSystem, despawn dissolve and the destroy pass | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-012 | no | todo |  |  |  | FND-020 includes core-loss/instance cleanup; full death/despawn/presentation criteria remain |
 | DMG-014 | Determinism hash and frame-rate determinism tests | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-013, TST-001 | no | todo |  |  |  |  |
 | DMG-015 | Regression scenarios R25/R26 and soak | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014 | no | todo |  |  |  |  |
 | DMG-016 | Performance gates | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-014 | no | todo |  |  |  |  |
 | DMG-017 | Harness commands | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014, DEV-001 | no | todo |  |  |  |  |
 | FLT-012 | Power and stat integration (M2) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, PWR-001 | no | todo |  |  |  |  |
 | FLT-013 | Owner flight-control correction before the firing range | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, FLT-009, SPEC-03 | yes | done | astra (gpt-6) | 2026-10-12 | 1bc23e8 | Shift strafe, Ctrl boost, gentle coast, bounded assist; live Fighter verified; Q182 |
-| WPN-002 | Weapon content: definitions, blob, boot singletons | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, SPEC-04 | no | todo |  |  |  |  |
-| WPN-003 | CombatHitTest | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-001, SPEC-10, AI-001, PWR-001 | no | todo |  |  |  |  |
-| WPN-004 | WeaponInitSystem and mounts | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-002, SPEC-10, SPEC-20 | no | todo |  |  |  |  |
+| WPN-002 | Weapon content: definitions, blob, boot singletons | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, SPEC-04 | no | todo |  |  |  | FND-020 includes plasma assets/blob/boot; faction relations and full validation remain |
+| WPN-003 | CombatHitTest | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-001, SPEC-10, AI-001, PWR-001 | no | todo |  |  |  | FND-020 provides ordered grid broadphase + current-cell raycast; spatial hash/shields/full spec remain |
+| WPN-004 | WeaponInitSystem and mounts | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-002, SPEC-10, SPEC-20 | no | todo |  |  |  | FND-020 initializes installed mounts; finish full specification and tests |
 | WPN-005 | PlayerTargetingSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, AI-001, SPEC-20 | no | todo |  |  |  |  |
-| WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | no | todo |  |  |  |  |
-| WPN-007 | WeaponFireSystem and the projectile store append | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-006, PWR-001 | no | todo |  |  |  |  |
-| WPN-008 | ProjectileStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-003, WPN-007, PWR-001, SPEC-13 | no | todo |  |  |  |  |
+| WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | no | todo |  |  |  | FND-020 includes manual aim/arcs; targeting, lead/autofire and full tests remain |
+| WPN-007 | WeaponFireSystem and the projectile store append | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-006, PWR-001 | no | todo |  |  |  | FND-020 includes serial fire/store append; power integration and full criteria remain |
+| WPN-008 | ProjectileStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-003, WPN-007, PWR-001, SPEC-13 | no | todo |  |  |  | FND-020 includes projectile movement/hit/lifetime; full homing/shield/performance criteria remain |
 | WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | no | todo |  |  |  |  |
-| WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | no | todo |  |  |  |  |
+| WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | no | todo |  |  |  | FND-020 drains explosions into damage; shields/effects and full criteria remain |
 | WPN-011 | CombatGridSetup and turret visuals | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, PWR-001, ABL-001 | no | todo |  |  |  |  |
 | WPN-012 | Combat scenarios and determinism | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-009, WPN-010, WPN-011, SPEC-13, SPEC-22 | no | todo |  |  |  |  |
 | WPN-013 | Weapon performance gates | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, TST-001 | no | todo |  |  |  |  |
@@ -283,8 +283,8 @@
 | VFX-002 | FxRig: slots, effects, buffers and binding | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-001, TST-001 | yes | todo |  |  |  |  |
 | VFX-003 | FxUploadSystem: drain, batch, submit, stats | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002 | no | todo |  |  |  |  |
 | VFX-004 | Template graphs and content assets for hits, explosions, muzzle and shield sparks | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | no | todo |  |  |  |  |
-| VFX-005 | Voxel debris particles and the 50k GPU gate | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-004 | no | todo |  |  |  |  |
-| VFX-006 | Projectile tracers | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002, WPN-001, CORE-001 | no | todo |  |  |  |  |
+| VFX-005 | Voxel debris particles and the 50k GPU gate | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-004 | no | todo |  |  |  | Particle debris remains unimplemented; FND-020 uses physical-grid pieces |
+| VFX-006 | Projectile tracers | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002, WPN-001, CORE-001 | no | todo |  |  |  | FND-020 supplies a simple instanced projectile tracer; complete specified batching/styles/effects |
 | VFX-007 | Beams clipped at the hit point | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003, WPN-001 | no | todo |  |  |  |  |
 | VFX-008 | Thruster plumes | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, FLT-001 | no | todo |  |  |  |  |
 | VFX-009 | Shield shells and ripples | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, PWR-001, CORE-001 | no | todo |  |  |  |  |
@@ -761,7 +761,10 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 181 | 2026-10-12 | SPEC-13 DMG-003 | Catalog-wide validation and boot damage-table ownership | Internal validation catalog; replace fallback config and own blob at boot | Tech lead | Resolved SPEC-13 Q23: definitions determine contiguous table dimensions; E005/E006 cover config values/ranges. Boot disposal completes jobs, resets the surviving singleton and releases its table. Four authored types plus a test-only fifth value; no production enum or existing public API change. |
 | 182 | 2026-10-12 | SPEC-20 FLT-013 / SPEC-03 | Owner flight-control correction and shooting priority | ADR-0052; V2 implementation, physical directional thrust | Tech lead | Resolved SPEC-20 Q20: Shift strafes, Ctrl boosts, gentle thruster-limited coasting, capacity-bounded assist; prove actual Fighter controls. Stationary-target shooting is the next M2 checkpoint. Frank: “dont copy v1, PLEASE, just make your own version with our new architecture”. |
 | 183 | 2026-10-12 | SPEC-13 DMG-004 | Cell-writer outputs, dirty urgency and ray reference resolution | Existing collider priority; per-grid scratch; stratified samples | Tech lead | Resolved SPEC-13 Q24: no new dirty bit; collider scheduler already marks runtime damage urgent. Preserve same-bin HP dirty state. Reference sampling includes each positive-length cell interval; no dropped thin crossings. |
-| 184 | 2026-10-12 | SPEC-01 FND-020 / SPEC-13 / SPEC-21 / SPEC-63 | Owner requests bigger stationary target, firing and visible physical breakup now | ADR-0053 integrated production slice | Tech lead | Resolved SPEC-01 Q28: “Get that playable and show me it working.” Stage the existing systems with deterministic simple internals, real cells and physical hulk pieces; keep broader tasks open. Existing imported Vestari is longer than Fighter. No copied V1 code or new hull/art gate. |
+| 184 | 2026-10-12 | SPEC-01 FND-020 / SPEC-13 / SPEC-21 / SPEC-63 | Owner requests bigger stationary target, firing and visible physical breakup now | ADR-0053 integrated production slice | Tech lead | Resolved SPEC-01 Q28: “Get that playable and show me it working.” Stage the existing systems with deterministic simple internals, real cells and physical hulk pieces; keep broader tasks open. Frank superseded the imported target: “dont use vestari, make a test station we can shoot, that has various possible combination of blocks and structures so we can test everything like breaking off, etc”. Use existing blocks in a procedural station with single/redundant bridges, layered hull, pods and functional/reactor sections. Frank also directed: “spacebar should be shooting”; Space and left-click fire primary, G remains tertiary. No copied V1 code or new hull/art gate. |
+| 185 | 2026-10-12 | SPEC-10 / SPEC-13 | Split job cannot use GridPrototypes lookup because its native maps become nested containers | Separate plain GridSerialAllocator component, ADR-0054 | Tech lead | Resolved SPEC-10 Q41: both canonical root creators allocate from one ECS-tracked uint component. Brick prototype is passed by value; no unsafe bypass or fixed-step completion. |
+| 186 | 2026-10-12 | SPEC-12 Q27 / SPEC-13 Q25 | Immediate post-split restart can precede collider adoption and retain pending combat events | Cleanup ownership and stop-lifecycle drain, ADR-0055 | Tech lead | Resolved: unadopted provisional blobs retain a cleanup owner, adopted blobs remain cache-owned; stopping gameplay clears cross-session pending channels and detach state. |
+| 187 | 2026-10-12 | SPEC-02 Q16 | Event streams may await the next simulation tick beyond TempJob frame lifetime | Persistent stream allocation, ADR-0056 | Tech lead | Resolved: retain explicit channel disposal/fences; no event-order or API change and no fixed-step sync point. |
 
 ## Measurements
 
@@ -876,7 +879,7 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 - **Implemented:** `8b20d15` adds deterministic damage maths, half-open DDA, dense/sparse cached cell access and the shared cell writer. Removal updates masks/counts/revisions, touches face-neighbour meshes, clears empty brick slots and emits cells with inherited rigid motion and reason-specific kicks. HP-only changes preserve dirty flags within one visual bin. Ten required tests pass, including 500 seeded rays with 10,000 reference samples each and 10,000 sub-quantum HP samples. Instance collapse/resolver integration follows.
 - **Verification:** compile zero C# warnings; focused damage suite **22 passed**; full EditMode **785 passed, 3 advisory timing failures, 1 explicit skip**; full headless PlayMode **112 passed, 0 failed, 29 expected skips**. Evidence `Logs/playtest/dmg004/`. Timing misses: Write1MiB **3.4990 ms / 3**, MeshBuild128 **1.0913 ms / 0.5**, station encode **76.9774 ms / 60**. Performance deferred, **zero optimization passes**; no reruns to chase timing.
-- **Decisions:** Q183 resolves the stale Urgent dirty flag and thin-cell reference sampling. Q184 / ADR-0053 records Frank's new explicit checkpoint: “Get that playable and show me it working.” **FND-020 is next:** larger stationary Vestari target, real input/projectiles, holes and independently moving physical sections in one playable slice. Broader combat tasks remain open; simple staged internals retain V2 ownership and existing render/physics paths. No V1 code or new hull artwork.
+- **Decisions:** Q183 resolves the stale Urgent dirty flag and thin-cell reference sampling. Q184 / ADR-0053 records Frank's new explicit checkpoint: “Get that playable and show me it working.” **FND-020 is next:** larger stationary test-station target, real input/projectiles, holes and independently moving physical sections in one playable slice. Broader combat tasks remain open; simple staged internals retain V2 ownership and existing render/physics paths. No V1 code or new hull artwork.
 - **Workspace:** an existing `ProjectSettings/QualitySettings.asset` serialization change was present before this run and remains unstaged; it was not authored or reverted by this task. No remote Git operation.
 
 

@@ -103,8 +103,8 @@ namespace Game.Tests.EditMode.Input
         {
             gate.Allowed = false;
             InputSystem.QueueStateEvent(mouse, new MouseState { position = new Vector2(100, 100) }.WithButton(MouseButton.Left).WithButton(MouseButton.Right));
-            Frame(Key.Space); Assert.AreEqual(4, Command.FireGroups);
-            gate.Allowed = true; Frame(Key.Space); Assert.AreEqual(7, Command.FireGroups);
+            Frame(Key.Space); Assert.AreEqual(1, Command.FireGroups);
+            gate.Allowed = true; Frame(Key.Space, Key.G); Assert.AreEqual(7, Command.FireGroups);
         }
         [Test] public void Unbound_Neutral()
         {

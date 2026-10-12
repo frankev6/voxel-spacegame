@@ -75,13 +75,13 @@ namespace Game.Data.Streams
             Data->Tick = tick;
         }
 
-        /// <summary>Producer, main thread inside OnUpdate: registers a new NativeStream (Allocator.TempJob) with forEachCount indices.</summary>
+        /// <summary>Producer, main thread inside OnUpdate: registers a new NativeStream (Allocator.Persistent) with forEachCount indices.</summary>
         public NativeStream.Writer BeginWrite(ref SystemState state, ProducerKind producer, int forEachCount)
         {
             CheckCreated();
             if (forEachCount < 1) throw new System.ArgumentOutOfRangeException(nameof(forEachCount), forEachCount, "SimEventChannel.BeginWrite needs forEachCount >= 1");
             if (Data->OpenWrite != 0) throw new System.InvalidOperationException($"SimEventChannel {Data->Name}: BeginWrite called twice without EndWrite");
-            var stream = new NativeStream(forEachCount, Allocator.TempJob);
+            var stream = new NativeStream(forEachCount, Allocator.Persistent);
             Data->Pending.Add(new SimEventRegistration { Stream = stream, Producer = producer, ForEachCount = forEachCount, Tick = Data->Tick });
             Data->OpenWrite = 1;
             state.Dependency = JobHandle.CombineDependencies(state.Dependency, Data->LastConsumer);
@@ -153,7 +153,7 @@ namespace Game.Data.Streams
 
         void MoveInboxToFront()
         {
-            var stream = new NativeStream(1, Allocator.TempJob);
+            var stream = new NativeStream(1, Allocator.Persistent);
             var w = stream.AsWriter();
             w.BeginForEachIndex(0);
             for (int i = 0; i < Data->Inbox.Length; i++) w.Write(Data->Inbox[i]);

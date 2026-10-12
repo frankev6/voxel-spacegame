@@ -20,7 +20,7 @@ namespace Game.Voxel.Damage
     /// <summary>SPEC-13 section 5.1: world-lifetime damage memory and tick boundaries; Q21 schedules stats reset safely.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup), OrderFirst = true)]
     [UpdateBefore(typeof(GridMassUpdateSystem))]
-    public unsafe partial struct DamageStreamsSystem : ISystem
+    public unsafe partial struct DamageStreamsSystem : ISystem, ISystemStartStop
     {
         // DMG-007 adds ImpactEventSystem's explicit ordering after this owner when that type exists.
         DamageStreams owned;
@@ -38,6 +38,20 @@ namespace Game.Voxel.Damage
             state.EntityManager.CreateSingleton(owned);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<DamageStreams>(); state.RequireForUpdate<DamageConfig>();
             state.RequireForUpdate<BlockDefsRef>(); state.RequireForUpdate<BlockModulesRef>(); state.RequireForUpdate<OrientationTablesRef>(); state.RequireForUpdate<SimClock>();
+        }
+        [BurstCompile] public void OnStartRunning(ref SystemState state) { }
+        [BurstCompile] public void OnStopRunning(ref SystemState state)
+        {
+            owned.Data->AllJobs(state.Dependency).Complete();
+            owned.Damage.BeginRead(ref state); owned.Damage.EndRead(state.Dependency);
+            owned.Explosions.BeginRead(ref state); owned.Explosions.EndRead(state.Dependency);
+            owned.Impulses.BeginRead(ref state); owned.Impulses.EndRead(state.Dependency);
+            owned.Restores.BeginRead(ref state); owned.Restores.EndRead(state.Dependency);
+            var data = owned.Data;
+            data->PendingDetachCurrent.Clear(); data->PendingDetachNext.Clear(); data->CoreLost.Clear();
+            data->Removed.Clear(); data->RemovedGrids.Clear(); data->Restored.Clear(); data->RestoredGrids.Clear();
+            data->Islands.Clear(); data->IslandMasks.Clear(); data->DestroyList.Clear(); data->GridResults.Clear();
+            data->RamPairs.Clear(); data->Current = default; data->Last = default;
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {

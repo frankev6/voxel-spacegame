@@ -137,6 +137,10 @@ namespace Game.App.Boot
             Step("8 session");
             Session.BindFleet(Blueprints, Registry, Content.Catalog); Save.Register(Session.FleetParticipant);
             Register(Session.Fleet);
+            var rangeConfig = Content.Catalog.Get<FiringRangeConfigDefinition>(new ContentId("config_firing_range"));
+            var range = Push(new Game.App.Session.FiringRangeService(world, Content.Catalog, new VoxelContent { Blocks = Content.BlockDefs, Orientations = Content.Orientations }, Registry, Session, rangeConfig));
+            Register(range); Flow.RegisterExiting(range);
+            world.GetExistingSystemManaged<Game.Presentation.Vfx.ProjectileTracerBridgeSystem>().Bind(rangeConfig);
 
             // 8.1–13: galaxy, travel, spawner, factions, map, economy, narrative, UI, camera, FX and dialog are added by their tasks, in the
             //    rows of SPEC-01 §5.2 (GAL-008, TRV-006, FND-012, ENC-007, GAL-011, ECO-008, UI-003, …).

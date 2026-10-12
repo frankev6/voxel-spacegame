@@ -26,6 +26,7 @@ namespace Game.Voxel.PhysicsBody
         [ReadOnly] public ComponentLookup<PhysicsDamping> Damping;
         [ReadOnly] public ComponentLookup<Brick> Bricks;
         [ReadOnly] public BufferLookup<BrickSlot> Slots;
+        public ComponentLookup<GridUnadoptedCollider> Unadopted;
         public ComponentLookup<GridBodyInit> Inits;
         public ComponentLookup<GridRebuilt> Rebuilt;
         public ComponentLookup<GridMassRecompute> Recompute;
@@ -75,6 +76,7 @@ namespace Game.Voxel.PhysicsBody
                 var stats = Cache.Stats.Value; stats.InstalledBytes += ColliderPipeline.Bytes(blob) - ColliderPipeline.Bytes(record.Installed); Cache.Stats.Value = stats;
                 ColliderPipeline.Retire(ref Cache, record.Installed); record.Installed = blob;
             }
+            if (Unadopted.HasComponent(root)) Unadopted[root] = default;
             record.Motion = init.Motion; record.CellSize = grid.CellSize; record.IsEditorPreview = preview ? (byte)1 : (byte)0; Cache.Grids[index] = record;
             if (!hasBody)
             {

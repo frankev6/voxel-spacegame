@@ -86,6 +86,7 @@ namespace Game.Voxel.Grid
             }
             state.CompleteDependency();
             var prototypes = em.GetComponentData<GridPrototypes>(singletons);
+            var serials = em.GetComponentData<GridSerialAllocator>(singletons);
             using (PrototypesMarker.Auto()) PreparePrototypes(em, runtime, ref prototypes);
             var content = new VoxelContent { Blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value, Orientations = SystemAPI.GetSingleton<OrientationTablesRef>().Value };
             using (DespawnMarker.Auto()) Despawn(ref state, registry);
@@ -101,7 +102,8 @@ namespace Game.Voxel.Grid
                     Continue(ref state, registry, root, runtime, prototypes.Brick, ref queue, ref budget);
                 }
             }
-            using (ConvertMarker.Auto()) Convert(ref state, registry, content, runtime, ref prototypes, ref queue, ref budget);
+            using (ConvertMarker.Auto()) Convert(ref state, registry, content, runtime, ref prototypes, ref queue, ref budget, ref serials.Next);
+            em.SetComponentData(singletons, serials);
             em.SetComponentData(singletons, prototypes);
         }
 
@@ -154,7 +156,7 @@ namespace Game.Voxel.Grid
             => RenderMeshUtility.AddComponents(e, em, new RenderMeshDescription(ShadowCastingMode.On, receiveShadows: true), new MaterialMeshInfo(material, mesh));
 
         unsafe void Convert(ref SystemState state, VoxelStructureRegistry registry, VoxelContent content, VoxelRenderRuntime runtime,
-            ref GridPrototypes prototypes, ref BrickMeshQueue queue, ref int budget)
+            ref GridPrototypes prototypes, ref BrickMeshQueue queue, ref int budget, ref uint nextSerial)
         {
             var em = state.EntityManager;
             using var candidates = requests.ToEntityArray(Allocator.Temp); candidates.Sort(new EntityOrder());
@@ -209,7 +211,7 @@ namespace Game.Voxel.Grid
                 {
                     Entity = entity, Request = request, Token = token, Mass = source.GetMass(content),
                     Grid = new VoxelGrid { BrickMin = brickMin, BrickDims = dims, CellMin = cellMin, CellMax = cellMax,
-                        CellSize = source.Data.Header.Value.CellSize, Revision = 1, AnchorInstance = anchor, Kind = request.Kind, Serial = prototypes.NextSerial++ },
+                        CellSize = source.Data.Header.Value.CellSize, Revision = 1, AnchorInstance = anchor, Kind = request.Kind, Serial = nextSerial++ },
                     Bricks = (BrickRecord*)source.Data.Bricks.GetUnsafeReadOnlyPtr(), BrickLength = source.BrickCount,
                     Palette = (PaletteEntry*)source.Data.Palette.GetUnsafeReadOnlyPtr(), PaletteLength = source.Data.Palette.Length,
                     Instances = (BlockInstance*)source.Data.Instances.GetUnsafeReadOnlyPtr(), InstanceLength = source.Data.Instances.Length

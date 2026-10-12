@@ -10,6 +10,7 @@ using Game.Data.Definitions;
 using Game.Voxel.PhysicsBody;
 using Game.Voxel.Grid;
 using Game.Simulation.Flight;
+using Game.Simulation.Weapons;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -47,6 +48,9 @@ namespace Game.App.Boot
                     em.SetComponentData(lifetime.DamageEntity, damage);
                     if (!created.Contains(lifetime.DamageEntity)) created.Add(lifetime.DamageEntity);
                 }
+                WeaponContent.CreateSingletons(em, catalog, created);
+                using (var weapons = em.CreateEntityQuery(ComponentType.ReadOnly<WeaponDefsRef>()))
+                { lifetime.WeaponEntity = weapons.GetSingletonEntity(); lifetime.Weapons = weapons.GetSingleton<WeaponDefsRef>().Value; }
                 // TODO(PWR-003): PowerTuning.
                 Create(em, FlightConfigFactory.Create(catalog.Get<FlightConfigDefinition>(new ContentId("config_flight"))), created);
                 // Later rows (ENC-001, WPN, AI, ABL, SYS, ECO-007) are added by their tasks (SPEC-01 §5.3).
@@ -64,7 +68,8 @@ namespace Game.App.Boot
         {
             readonly World world;
             VoxelRenderConfig config;
-            internal Entity ConfigEntity, DamageEntity;
+            internal Entity ConfigEntity, DamageEntity, WeaponEntity;
+            internal BlobAssetReference<WeaponDefsBlob> Weapons;
             internal BlobAssetReference<DamageTableBlob> DamageTable;
             public RenderConfigLifetime(World world, VoxelRenderConfig config) { this.world = world; this.config = config; }
             public void Dispose()
@@ -76,6 +81,9 @@ namespace Game.App.Boot
                     if (DamageEntity != Entity.Null && world.EntityManager.Exists(DamageEntity))
                         world.EntityManager.SetComponentData(DamageEntity, DamageConfig.Default);
                 }
+                if (Weapons.IsCreated) Weapons.Dispose(); Weapons = default;
+                if (world.IsCreated && world.EntityManager.Exists(WeaponEntity)) world.EntityManager.DestroyEntity(WeaponEntity);
+                WeaponEntity = Entity.Null;
                 if (DamageTable.IsCreated) DamageTable.Dispose();
                 DamageTable = default; DamageEntity = Entity.Null;
                 VoxelRenderConfigFactory.Destroy(ref config);

@@ -36,12 +36,12 @@ namespace Game.Tests.EditMode.Input
         {
             var results = new List<RebindResult>(); int changes = 0; input.BindingsChanged += () => changes++;
             input.StartRebind("Flight/Interact", 0, results.Add); Assert.IsTrue(input.IsRebinding);
-            Match(keyboard.gKey);
+            Match(keyboard.uKey);
             Assert.IsFalse(input.IsRebinding); Assert.AreEqual(1, results.Count); Assert.AreEqual(RebindStatus.Completed, results[0].Status);
-            Assert.AreEqual("G", results[0].NewDisplay); Assert.AreEqual("G", input.GetBindingDisplay("Flight/Interact")); Assert.AreEqual(1, changes);
+            Assert.AreEqual("U", results[0].NewDisplay); Assert.AreEqual("U", input.GetBindingDisplay("Flight/Interact")); Assert.AreEqual(1, changes);
             string json = input.SaveBindingOverridesJson();
             using var restored = new InputService(new ControlSettingsData { BindingOverridesJson = json });
-            Assert.AreEqual("G", restored.GetBindingDisplay("Flight/Interact"));
+            Assert.AreEqual("U", restored.GetBindingDisplay("Flight/Interact"));
             restored.ResetBinding("Flight/Interact", 0); Assert.AreEqual("F", restored.GetBindingDisplay("Flight/Interact"));
             restored.ApplyBindingOverrides(json); restored.ResetAllBindings(); Assert.AreEqual("F", restored.GetBindingDisplay("Flight/Interact"));
         }
@@ -52,11 +52,11 @@ namespace Game.Tests.EditMode.Input
             Assert.AreEqual(RebindStatus.Conflict, results[0].Status); Assert.AreEqual("Flight/Thrust", results[0].ConflictActionPath);
             Assert.AreEqual("F", input.GetBindingDisplay("Flight/Interact")); Assert.AreEqual(0, changes);
             // A later rejected attempt also keeps an already customised binding (SPEC-03 Q6).
-            input.StartRebind("Flight/Interact", 0, results.Add); Match(keyboard.gKey);
+            input.StartRebind("Flight/Interact", 0, results.Add); Match(keyboard.uKey);
             input.StartRebind("Flight/Interact", 0, results.Add); Match(keyboard.wKey);
-            Assert.AreEqual(RebindStatus.Conflict, results[2].Status); Assert.AreEqual("G", input.GetBindingDisplay("Flight/Interact")); Assert.AreEqual(1, changes);
+            Assert.AreEqual(RebindStatus.Conflict, results[2].Status); Assert.AreEqual("U", input.GetBindingDisplay("Flight/Interact")); Assert.AreEqual(1, changes);
             input.StartRebind("Flight/Interact", 0, results.Add); Match(keyboard.f5Key);
-            Assert.AreEqual("Global/QuickSave", results[3].ConflictActionPath); Assert.AreEqual("G", input.GetBindingDisplay("Flight/Interact"));
+            Assert.AreEqual("Global/QuickSave", results[3].ConflictActionPath); Assert.AreEqual("U", input.GetBindingDisplay("Flight/Interact"));
         }
         [Test] public void Escape_Cancels()
         {
@@ -73,7 +73,7 @@ namespace Game.Tests.EditMode.Input
         }
         [Test] public void InvalidJson_Defaults()
         {
-            input.StartRebind("Flight/Interact", 0, _ => { }); Match(keyboard.gKey);
+            input.StartRebind("Flight/Interact", 0, _ => { }); Match(keyboard.uKey);
             LogAssert.Expect(LogType.Warning, new Regex("Binding overrides are invalid"));
             input.ApplyBindingOverrides("{ invalid json");
             Assert.AreEqual("F", input.GetBindingDisplay("Flight/Interact"));

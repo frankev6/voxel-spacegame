@@ -1179,3 +1179,5 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - Audit (background only): `docs/reference/audit-2026-10/01-voxel-core.md` §5.3 (full-ship compound rebuilds), `02-combat-destruction.md` C11 (debris ignores ship motion), `00-synthesis.md` §6.
 - Unity Physics 1.x: `CompoundCollider.Create` (children are copied into the compound), `BoxCollider.Create`, `ColliderKey`, `PhysicsMass` (`Transform`, `InverseInertia`, `AngularExpansionFactor`), `PhysicsVelocity.Angular` in inertia space, `IBodyPairsJob`, `ModifiableBodyPair`, `PhysicsSimulationGroup` sub-groups, `PhysicsStep`, `CollisionResponsePolicy`, `PhysicsGraphicalSmoothing`.
 - Jacobi eigenvalue algorithm (cyclic), e.g. Golub & Van Loan, *Matrix Computations*, §8.5.
+
+| 27 | Scene exit immediately after a split precedes collider cache adoption | Temporary cleanup ownership until adoption | Tech lead | Resolved FND-020 / ADR-0055: GridUnadoptedCollider owns the provisional blob until GridBodyInitJob clears it after adoption. Cleanup retires dead unadopted blobs through DeferredDisposal; shutdown releases remaining unadopted blobs. |

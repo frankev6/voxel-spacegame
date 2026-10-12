@@ -512,8 +512,19 @@
                 },
                 {
                     "name": "",
-                    "id": "fc2ff892-c1e2-574d-afc0-09d680bae6d0",
+                    "id": "526f8ece-adb1-46c3-b391-f967176f31a9",
                     "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "FirePrimary",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fc2ff892-c1e2-574d-afc0-09d680bae6d0",
+                    "path": "<Keyboard>/g",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",

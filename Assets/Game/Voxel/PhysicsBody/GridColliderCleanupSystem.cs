@@ -46,14 +46,30 @@ namespace Game.Voxel.PhysicsBody
                 for (int i = cache.C.Grids.Length - 1; i >= 0; i--)
                     if (!active || !entities.Exists(cache.C.Grids[i].Root)) ColliderPipeline.RemoveRecord(ref cache.C, i, batch.B);
             if (!active) { queue.CompleteAccess(); queue.Requests.Clear(); }
+            // Stamp both retirement paths from this tick, not the prior presentation frame (Q21).
+            if (SystemAPI.TryGetSingleton<SimClock>(out var clock)) deferred.Tick = clock.Tick;
+            foreach (var (pending, entity) in SystemAPI.Query<RefRW<GridUnadoptedCollider>>().WithNone<VoxelGrid>().WithEntityAccess())
+            {
+                var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
+                if (pending.ValueRO.Value.IsCreated) DeferredDisposal.RetireBlob(ref deferred, pending.ValueRO.Value);
+                pending.ValueRW.Value = default; ecb.RemoveComponent<GridUnadoptedCollider>(entity);
+            }
             using (Retire.Auto())
             {
-                // The queue mirrors the previous presentation tick until DeferredDisposalSystem runs later this frame.
-                // Stamp this local view from the current clock so catch-up ticks cannot shorten the physics lifetime (Q21).
-                if (SystemAPI.TryGetSingleton<SimClock>(out var clock)) deferred.Tick = clock.Tick;
                 for (int i = 0; i < cache.C.Retired.Length; i++) DeferredDisposal.RetireBlob(ref deferred, cache.C.Retired[i]);
                 ColliderPipeline.ClearTransferredRetired(ref cache.C);
             }
         }
+        [BurstCompile] public void OnDestroy(ref SystemState state)
+        {
+            state.CompleteDependency();
+            foreach (var pending in SystemAPI.Query<RefRW<GridUnadoptedCollider>>())
+            {
+                var blob = pending.ValueRO.Value;
+                if (blob.IsCreated) blob.Dispose();
+                pending.ValueRW.Value = default;
+            }
+        }
+
     }
 }

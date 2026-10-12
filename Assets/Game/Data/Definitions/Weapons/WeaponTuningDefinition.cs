@@ -22,8 +22,13 @@ namespace Game.Data.Definitions
         public float UnderCursorRadius => underCursorRadius;
         public int MaxCandidates => maxCandidates;
 
-        // TODO(WPN-002): WPN-E007 validation.
         public override void Validate(ValidationScope scope, ContentValidationContext context)
-            => throw new System.NotImplementedException();
+
+        {
+            if (maxProjectiles < 1 || maxCandidates < 1 || !float.IsFinite(fixedConvergenceDeg) || fixedConvergenceDeg < 0 || fixedConvergenceDeg > 30 ||
+                !float.IsFinite(explosionImpulsePerDamage) || explosionImpulsePerDamage < 0 || !float.IsFinite(maxTargetRange) || maxTargetRange <= 0 ||
+                !float.IsFinite(underCursorRadius) || underCursorRadius <= 0)
+                scope.Error("WPN-E007", "tuning", "Weapon tuning limits must be positive and finite.");
+        }
     }
 }

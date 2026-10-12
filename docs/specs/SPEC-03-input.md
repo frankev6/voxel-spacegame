@@ -109,9 +109,9 @@ Action names are PascalCase and unique within their map. The **action path** use
 | `StrafeModifier` | Button (held) | `<Keyboard>/shift` | Add Turn input to Strafe and set commanded Turn to zero (ADR-0052, FLT-013) |
 | `Boost` | Button (held) | `<Keyboard>/leftCtrl` | `ShipCommandFlags.Boost`; suppressed during StrafeModifier |
 | `Brake` | Button (held) | `<Keyboard>/x` | `ShipCommandFlags.Brake` |
-| `FirePrimary` | Button (held) | `<Mouse>/leftButton` | fire group bit 0 |
+| `FirePrimary` | Button (held) | `<Mouse>/leftButton`, `<Keyboard>/space` | fire group bit 0 |
 | `FireSecondary` | Button (held) | `<Mouse>/rightButton` | fire group bit 1 |
-| `FireTertiary` | Button (held) | `<Keyboard>/space` | fire group bit 2 |
+| `FireTertiary` | Button (held) | `<Keyboard>/g` | fire group bit 2 |
 | `Interact` | Button (press) | `<Keyboard>/f` | edge `Interact` |
 | `Ability1` … `Ability4` | Button (press) | `<Keyboard>/1` … `<Keyboard>/4` | edges `Ability1`…`Ability4` |
 | `TargetNext` | Button (press) | `<Keyboard>/tab` | edge `TargetNext` |
@@ -324,7 +324,7 @@ Position: `GameInitGroup`, after `OriginRebaseSystem`, before `GridSpawnSystem` 
    6. **Plane fallback:** `Planar.RayPlaneY(near, dir, 0f, out hit, out _)` → `AimWorld = hit`, `AimValid = 1`; on failure (a ray parallel to the plane or pointing away), keep the previous `AimWorld` and set `AimValid = 0`.
 
    Without a `MainCameraState`, `AimValid = 0`.
-8. **Fire groups:** bit 0 = `FirePrimary.IsPressed() && allowed`; bit 1 = `FireSecondary.IsPressed() && allowed`; bit 2 = `FireTertiary.IsPressed()`.
+8. **Fire groups:** bit 0 = `FirePrimary.IsPressed() && (allowed || keyboardBindingPressed)` (FND-020, ADR-0053: Space fires even when the pointer overlaps HUD; inactive Flight context still neutralizes it); bit 1 = `FireSecondary.IsPressed() && allowed`; bit 2 = `FireTertiary.IsPressed()`.
 9. **Edges:** for each edge action, if `WasPressedThisFrame()` then `counter = (byte)(counter + 1)`. For `TargetUnderCursor`, count only when `allowed`. A frame never counts more than 1 per action.
 10. `FrameIndex = (uint)UnityEngine.Time.frameCount`; write the singleton.
 

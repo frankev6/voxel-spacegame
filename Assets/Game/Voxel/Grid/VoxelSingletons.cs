@@ -15,10 +15,10 @@ namespace Game.Voxel.Grid
             Entity e = em.CreateEntity();
             em.AddComponentData(e, new GridPrototypes
             {
-                NextSerial = 1,
                 FunctionalByMask = new NativeHashMap<ulong, Entity>(32, Allocator.Persistent),
                 FunctionalByMaskNoRender = new NativeHashMap<ulong, Entity>(32, Allocator.Persistent)
             });
+            em.AddComponentData(e, new GridSerialAllocator { Next = 1 });
             em.AddComponentData(e, new DeferredDisposalQueue
             {
                 Blobs = new NativeList<RetiredBlob>(1024, Allocator.Persistent),

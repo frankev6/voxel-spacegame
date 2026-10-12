@@ -73,7 +73,7 @@ namespace Game.Presentation.Input
                     allowed = pointerGate == null || pointerGate.IsWorldPointerAllowed(pointer);
                     Aim(pointer, ref command);
                 }
-                command.FireGroups = (firePrimary.IsPressed() && allowed ? 1u : 0) | (fireSecondary.IsPressed() && allowed ? 2u : 0) | (fireTertiary.IsPressed() ? 4u : 0);
+                command.FireGroups = (firePrimary.IsPressed() && (allowed || KeyboardBindingPressed(firePrimary)) ? 1u : 0) | (fireSecondary.IsPressed() && allowed ? 2u : 0) | (fireTertiary.IsPressed() ? 4u : 0);
                 Count(interact, ref command.Edges.Interact); Count(ability1, ref command.Edges.Ability1);
                 Count(ability2, ref command.Edges.Ability2); Count(ability3, ref command.Edges.Ability3); Count(ability4, ref command.Edges.Ability4);
                 Count(targetNext, ref command.Edges.TargetNext); Count(targetClear, ref command.Edges.TargetClear);
@@ -81,6 +81,12 @@ namespace Game.Presentation.Input
                 Count(autofire, ref command.Edges.AutofireToggle); Count(cruise, ref command.Edges.Cruise);
             }
             EntityManager.SetComponentData(commandEntity, command);
+        }
+        static bool KeyboardBindingPressed(InputAction action)
+        {
+            foreach (var control in action.controls)
+                if (control.device is Keyboard && control is UnityEngine.InputSystem.Controls.ButtonControl button && button.isPressed) return true;
+            return false;
         }
         static void Count(InputAction action, ref byte counter)
         { if (action.WasPressedThisFrame()) counter = unchecked((byte)(counter + 1)); }

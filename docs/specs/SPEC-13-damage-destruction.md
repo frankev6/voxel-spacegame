@@ -1124,3 +1124,5 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - Audit (background only): `docs/reference/audit-2026-10/02-combat-destruction.md` §1.4, §2 (C01–C12, C21, C24, C28), §4.2, §5.2–§5.8, §5.13; `01-voxel-core.md` B1, B2, B5, B7, B12–B15, B17, §6.4–§6.5; `00-synthesis.md` §6e; `LEDGER.md` R20–R26.
 - Unity Physics: `ICollisionEventsJob`, `CollisionEvent.CalculateDetails` (`EstimatedImpulse`, `AverageContactPointPosition`), `PhysicsComponentExtensions.ApplyLinearImpulse`, `PhysicsMass.InertiaOrientation`, `BoxCollider.Create`, `CompoundCollider.Create`. Entities: `NativeStream`, `IJobParallelForDefer`, `EntityCommandBuffer.SetBuffer` on deferred entities.
 - J. Amanatides, A. Woo, "A Fast Voxel Traversal Algorithm for Ray Tracing" (1987).
+
+| 25 | A scene restart can retain prior-session explosions or delayed detach state | Drain pending channels and clear scratch lists when gameplay stops | Tech lead | Resolved FND-020 / ADR-0055: owner stop lifecycle completes dependent jobs, drains all four channels and clears pending detaches/events/stats while preserving channel pointer identity. Serial allocation uses SPEC-10 Q41 / ADR-0054. |

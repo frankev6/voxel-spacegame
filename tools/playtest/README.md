@@ -11,11 +11,25 @@ check takes seconds. Outputs go to `Logs/playtest/` (never `Temp/`, which Unity 
 | `rc.sh` | Recompile through the CLI, wait, print C# errors and Editor state (used by `tools/compile.sh`) |
 | `shot.sh <name>` | Game-view screenshot to `Logs/playtest/<name>.png` |
 | `perf.sh` | Frame timing, draw calls, triangles, memory + voxel entity counts |
+| `range.sh [seed=7]` | Restart the real game and spawn the modular destruction test station; Space or left mouse fires |
 | `newgame.sh [seed=1] [ship]` | Enter Play from Boot if needed, launch into the imported starter, poll readiness and print a snapshot; uses the isolated harness profile |
 | `waitscene.sh <Scene>` | Block until a scene is active |
 | `to.sh <secs> <cmd>` | Hard timeout wrapper (macOS has no `timeout`) |
 
 `newgame.sh` and `scenario.sh` are available. `toworld.sh` follows the travel integration. The optional ship argument is a start-scenario ID; leave it empty until start scenarios exist.
+
+## Destruction test station
+
+Run `tools/playtest/range.sh 7` with the Editor open. It starts a fresh game and places the test station ahead of the Fighter. In an existing World session, enter `range` in the dev console instead. Aim with the mouse and hold **Space** or left mouse to fire. W/S thrusts forward/reverse; A/D turns; Shift+A/D strafes; Ctrl boosts. Restart the range script to restore every cell and clear debris/projectiles.
+
+The cyan connections identify cuts to try:
+
+- Left: one thin bridge into a hollow pod carrying a thruster. Cut it to release the pod.
+- Right: two independent bridges into a cargo/reactor platform. One surviving bridge should keep it attached.
+- Centre: layered front/back walls, slopes, a long slope, cargo, reactor and core. Shoot through the front wall to reach interior/rear cells.
+- Rear: a wider bridge and two reactors for multi-cell damage and blast-chain checks.
+
+This is a procedural test fixture using existing blocks, not a finished station design. The first combat slice supports plasma projectiles and physical voxel pieces; beam weapons, shields, AI, final effects/audio, debris pooling and large-battle performance work remain later tasks.
 
 ## Harness commands (`Assets/Game/DevTools/Editor/GameTestHarness.cs`)
 
@@ -49,6 +63,7 @@ Runtime dev commands, reachable as `gh_<name>` and in the in-game console. Each 
 | `gh_record` (`--action`, `--name=""`) | `start`, `stop`, or `save`; save uses a file stem beneath TestData/Replays with a .pcr suffix |
 | `gh_replay` (`--name`) | Replay from the current simulation tick; returns an operation ID until playback ends |
 | `gh_help` (`--cmd=""`) | List runtime commands or show one usage; play mode required |
+| `range` (via `gh_dev --cmd range` or the console) | Spawn the test station in World. Left pod has one bridge; right pod has two; rear bay has paired reactors. New game resets all pieces and projectiles |
 | `gh_dev` (`--cmd`) | Execute any runtime command line |
 | `gh_op` (`--id`) | Poll `running/succeeded/failed` status without blocking |
 | `gh_until` (`--cond`) | Evaluate a typed scenario expression once; returns true/false |

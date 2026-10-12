@@ -75,8 +75,18 @@ namespace Game.Data.Definitions
         public FxDefinition HitFx => hitFx;
         public WeaponDeliveryData DeliveryData => deliveryData;
         /// §4.9 formula on the authored values (editor stats through SPEC-04 WeaponMountModule; WeaponContent.ComputeSustainedDps gives the same number).
-        public float SustainedDps => throw new System.NotImplementedException();
+        public float SustainedDps => (delivery == WeaponDelivery.Beam ? damage : (damage + explosionDamage * .5f) * pelletsPerRound * burstCount) * fireRate;
         public override void Validate(ValidationScope scope, ContentValidationContext context)
-            => throw new System.NotImplementedException(); // TODO(WPN-002): content validation and baking.   // WPN-E001..E006 (§7)
+
+        {
+            if (!(fireRate > 0) || float.IsInfinity(fireRate) || damage < 0 || !float.IsFinite(damage) || !float.IsFinite(explosionDamage) || explosionDamage < 0)
+                scope.Error("WPN-E001", nameof(fireRate), "Rate must be positive and damage finite and nonnegative.");
+            if (burstCount < 1 || burstCount > ushort.MaxValue || burstInterval < 0 || !float.IsFinite(burstInterval) || pelletsPerRound < 1 || pelletsPerRound > 32)
+                scope.Error("WPN-E002", nameof(burstCount), "Invalid burst or pellet count.");
+            if (delivery != WeaponDelivery.Beam && (!(projectileSpeed > 0) || !float.IsFinite(projectileSpeed) || !(lifetimeMin > 0) || lifetimeMax < lifetimeMin || !float.IsFinite(lifetimeMax)))
+                scope.Error("WPN-E003", nameof(projectileSpeed), "Projectiles need finite positive speed and ordered positive lifetimes.");
+            if (damageType == Game.Data.Combat.DamageType.Ram) scope.Error("WPN-E008", nameof(damageType), "Ram is not a weapon damage type.");
+            // TODO(WPN-002): complete validation for all delivery variants and cross-content references.
+        }
     }
 }

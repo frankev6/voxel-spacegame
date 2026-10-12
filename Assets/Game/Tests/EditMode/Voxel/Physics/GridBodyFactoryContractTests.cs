@@ -55,8 +55,8 @@ namespace Game.Tests.EditMode.Voxel.Physics
             bool adopted = false;
             try
             {
-                using var prototypesQuery = em.CreateEntityQuery(typeof(GridPrototypes));
-                var prototypes = prototypesQuery.GetSingleton<GridPrototypes>(); prototypes.NextSerial = 2; prototypesQuery.SetSingleton(prototypes);
+                using var serialsQuery = em.CreateEntityQuery(typeof(GridSerialAllocator));
+                serialsQuery.SetSingleton(new GridSerialAllocator { Next = 2 });
                 var ecb = f.Test.World.GetExistingSystemManaged<GameplayEndCommandBufferSystem>().CreateCommandBuffer();
                 Entity root = ecb.CreateEntity(); Entity brick = ecb.CreateEntity();
                 ecb.AddComponent(root, grid); ecb.AddComponent(root, LocalTransform.Identity); ecb.AddComponent(root, new LocalToWorld { Value = float4x4.identity });

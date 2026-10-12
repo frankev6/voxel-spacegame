@@ -57,3 +57,4 @@ MonoBehaviour:
           x: 0.5
           y: 0
           z: 1.5
+        weapon: {fileID: 11400000, guid: c2aaa45f068e4342a2bfc64520f39b4f, type: 2}
