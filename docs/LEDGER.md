@@ -707,6 +707,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 138 | 2026-10-12 | SPEC-11 REN-009 / SPEC-01 boot | Render configuration lacks explicit prop-mesh input/disposal and old palette text conflicts with approved look | Boot-owned disposable factory result; approved REN-008 NOCTURNE palette | Tech lead | Resolved SPEC-11 Q29: internal boot signature supplies PropMeshes and retains cleanup in the composition stack; shared source assets remain unchanged. |
 | 139 | 2026-10-12 | SPEC-11 REN-010 | EditMode runtime fixture requires AABB assembly reference | Direct test-only Unity.Mathematics.Extensions reference | Tech lead | Accepted ADR-0043 / SPEC-11 Q30, same installed package; runtime boundaries unchanged. |
 | 140 | 2026-10-12 | SPEC-11 REN-011 | Cleanup/query timing and runtime palette material ownership | Exact deletion capture before drawing; shared runtime material copies; explicit camera bridge | Tech lead | Resolved SPEC-11 Q31 within ADR-0032; no per-brick materials or meshes. |
+| 141 | 2026-10-12 | SPEC-03 INP-005 | UI gate and origin system are future work; physics singleton read does not wait | Null gate allows pointer until UI-003; GAL-009 precedes sampling; explicit query dependency completion | Tech lead | Resolved SPEC-03 Q8; Flight-disabled/unbound remains neutral, scene/pause context hookup belongs to FND-017. |
 
 
 

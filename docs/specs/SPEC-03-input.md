@@ -314,7 +314,7 @@ Position: `GameInitGroup`, after `OriginRebaseSystem`, before `GridSpawnSystem` 
    2. `inv = math.inverse(ViewProjection)`;
    3. `near = inv × (ndc, −1, 1)`, `far = inv × (ndc, 1, 1)`, both divided by w;
    4. `dir = normalize(far − near)`;
-   5. **Pick:** if `SystemAPI.TryGetSingleton<PhysicsWorldSingleton>(out var pw)` (a read: it completes only the jobs that write the physics world): `ignore` = the first entity of `playerQuery` (`WithAll<PlayerShip>().WithNone<Parent>()`), or `Entity.Null`. Cast `RaycastInput { Start = near, End = near + dir × 5000f, Filter = PhysicsLayers.PickingQuery }` with `new IgnoreBodyClosestHitCollector(ignore, 1f)` (§4.4). On a hit: `AimWorld = hit.Position`, `AimValid = 1`; go to step 8.
+   5. **Pick:** if a `PhysicsWorldSingleton` exists: explicitly complete its query dependencies before reading it (singleton access itself does not wait): `ignore` = the first entity of `playerQuery` (`WithAll<PlayerShip>().WithNone<Parent>()`), or `Entity.Null`. Cast `RaycastInput { Start = near, End = near + dir × 5000f, Filter = PhysicsLayers.PickingQuery }` with `new IgnoreBodyClosestHitCollector(ignore, 1f)` (§4.4). On a hit: `AimWorld = hit.Position`, `AimValid = 1`; go to step 8.
    6. **Plane fallback:** `Planar.RayPlaneY(near, dir, 0f, out hit, out _)` → `AimWorld = hit`, `AimValid = 1`; on failure (a ray parallel to the plane or pointing away), keep the previous `AimWorld` and set `AimValid = 0`.
 
    Without a `MainCameraState`, `AimValid = 0`.
@@ -434,15 +434,15 @@ When the Editor map is disabled, set `frame = default`.
 - **Tier:** frontier — F5/F1: the latching contract every frame rate depends on (architecture §5.1); determinism gate input
 - **Depends on:** `INP-002`, `FLT-001`, `CAM-001`, `PHY-001`
 - **Do:** Implement `PlayerInputSampleSystem` (§5.2) with `Bind`/`Unbind`, and `IgnoreBodyClosestHitCollector` (§4.4). Add the bind call at SPEC-01 §5.2 step 9.1: `world.GetExistingSystemManaged<PlayerInputSampleSystem>().Bind(input, ui)`.
-- **Files:** `Assets/Game/Presentation/Input/PlayerInputSampleSystem.cs`; `Assets/Game/App/Boot/GameComposition.cs` (one line); `Assets/Game/Tests/EditMode/Input/PlayerInputSampleSystemTests.cs`
+- **Files:** `Assets/Game/Presentation/Input/{PlayerInputSampleSystem,IgnoreBodyClosestHitCollector}.cs`; `Assets/Game/App/Boot/GameComposition.cs` (one line); `Assets/Game/Tests/EditMode/Input/PlayerInputSampleSystemTests.cs`
 - **Acceptance criteria:**
-  - [ ] With `InputTestFixture`: W → `Thrust.y == 1`; Q → `Thrust.x == −1`; D → `Turn == 1`.
-  - [ ] Pressing F once over 3 frames increments `Edges.Interact` by exactly 1.
-  - [ ] Aim with a known `MainCameraState` (top-down orthographic-equivalent matrices) maps the screen centre to the camera's ground point within 1e-3 m.
-  - [ ] The pointer over a blocking UI rectangle (fake gate) suppresses bits 0 and 1 but not bit 2.
-  - [ ] Pick: a static box collider (filter of a grid) 100 m in front of the camera under the cursor → `AimWorld` on its near face within 1e-3 m; the same box carrying `PlayerShip` is ignored and the plane point is used; no collider → plane point.
-  - [ ] Pressing J once increments `Edges.Cruise` by exactly 1.
-  - [ ] 0 B allocated per update.
+  - [x] With `InputTestFixture`: W → `Thrust.y == 1`; Q → `Thrust.x == −1`; D → `Turn == 1`.
+  - [x] Pressing F once over 3 frames increments `Edges.Interact` by exactly 1.
+  - [x] Aim with a known `MainCameraState` (top-down orthographic-equivalent matrices) maps the screen centre to the camera's ground point within 1e-3 m.
+  - [x] The pointer over a blocking UI rectangle (fake gate) suppresses bits 0 and 1 but not bit 2.
+  - [x] Pick: a static box collider (filter of a grid) 100 m in front of the camera under the cursor → `AimWorld` on its near face within 1e-3 m; the same box carrying `PlayerShip` is ignored and the plane point is used; no collider → plane point.
+  - [x] Pressing J once increments `Edges.Cruise` by exactly 1.
+  - [x] 0 B allocated per update.
 - **Tests:** `PlayerInputSampleSystemTests.Aim_PicksCollider`, `.Aim_IgnoresPlayer`, `.Aim_PlaneFallback`, `.Cruise_Counts`, `PlayerInputSampleSystemTests.Analog_Mapping`, `.Edge_CountsOnce`, `.Aim_ScreenCenter`, `.PointerBlocked_SuppressesMouseFire`, `.Unbound_Neutral`, `.NoAlloc`.
 
 ### INP-006 — Camera and editor samplers
@@ -472,7 +472,7 @@ When the Editor map is disabled, set `frame = default`.
 - **Tier:** standard — bindings only
 - **Depends on:** `INP-003`
 - **Do:** Add the `Gamepad` control scheme with bindings for Flight (left stick thrust/strafe, right stick aim direction mapped to `AimWorld` = ship position + 50 m × direction, triggers fire, shoulders boost/brake), Menu and Dialog. Update `GetBindingDisplay` to use the last used device's scheme.
-- **Files:** `Assets/Game/Input/Controls.inputactions`; `Assets/Game/Presentation/Input/PlayerInputSampleSystem.cs`; tests
+- **Files:** `Assets/Game/Input/Controls.inputactions`; `Assets/Game/Presentation/Input/{PlayerInputSampleSystem,IgnoreBodyClosestHitCollector}.cs`; tests
 - **Acceptance criteria:**
   - [ ] Every Flight action has a gamepad binding; the display switches on device change.
 - **Tests:** `GamepadTests.AllFlightActionsBound`, `.DisplaySwitchesWithDevice`.
@@ -491,6 +491,8 @@ When the Editor map is disabled, set `frame = default`.
 
 | 7 | Camera adapter and rig both apply sensitivity/inversion, and CAM-005/INP-006 duplicate adapter ownership | Raw pixel deltas; rig owns orbit settings; one adapter in Game.Presentation.Input | Tech lead | Resolved CAM-005 / SPEC-62 Q12: CAM-005 implements Flight and app binding; INP-006 adds Editor and the listed adapter tests (InvertY checks the adapter/rig path). Zoom sensitivity is applied once in the adapter. |
 
+
+| 8 | Player sampler precedes UI composition and origin rebasing; singleton reads do not implicitly wait | Bind with no pointer blocker until UIRoot exists, defer the absent ordering edge, explicitly complete physics readers | Tech lead | Resolved 2026-10-12: null pointer gate permits world pointer input while there is no UI; disabled Flight/unbound service stays neutral. UI-003 rebinds the actual gate; FND-017 owns temporary scene/pause contexts. GAL-009 must run before sampling when introduced. Physics query completion is explicit, preserving the stated read boundary without assuming singleton access waits. |
 
 ## 11. References
 
