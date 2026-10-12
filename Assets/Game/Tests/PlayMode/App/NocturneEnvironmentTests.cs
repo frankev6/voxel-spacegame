@@ -11,13 +11,37 @@ namespace Game.Tests.PlayMode.App
 {
     public sealed class NocturneEnvironmentTests : ProductionSessionFixture
     {
+        [UnityTest] public IEnumerator NewGameRestart_PreservesSky()
+        {
+            var clear = Game.Camera.Camera.clearFlags;
+            for (int restart = 0; restart < 3; restart++)
+            {
+                yield return Run(Game.Session.NewGameAsync(new NewGameArgs("Harness", 42, false, ContentId.None)));
+                yield return Until(() => Object.FindAnyObjectByType<NocturneFlightEnvironment>()?.GetComponentInChildren<ParticleSystem>() != null,
+                    "Environment initialized after direct restart");
+                // Let deferred destruction settle before accepting a component that is still queued for removal.
+                yield return null;
+                var skybox = Game.Camera.Camera.GetComponent<Skybox>();
+                Assert.IsNotNull(skybox, "Direct restart " + restart + " must retain the camera override");
+                Assert.IsTrue(skybox.enabled); Assert.AreEqual("Game/NocturneSky", skybox.material.shader.name);
+                Assert.AreEqual(1, Object.FindObjectsByType<NocturneFlightEnvironment>().Length);
+                var environment = Object.FindAnyObjectByType<NocturneFlightEnvironment>();
+                Assert.AreEqual(1, environment.GetComponentsInChildren<ParticleSystem>().Length);
+                Assert.AreEqual(1400, environment.GetComponentInChildren<ParticleSystem>().particleCount);
+            }
+            yield return Run(Game.Session.QuitToMainMenuAsync(false)); yield return null;
+            Assert.IsNull(Object.FindAnyObjectByType<NocturneFlightEnvironment>());
+            Assert.IsNull(Game.Camera.Camera.GetComponent<Skybox>());
+            Assert.AreEqual(clear, Game.Camera.Camera.clearFlags);
+        }
+
         [UnityTest] public IEnumerator WorldEnvironment_EntersMovesAndCleansUp()
         {
             var clear = Game.Camera.Camera.clearFlags;
             for (int entry = 0; entry < 2; entry++)
             {
                 yield return Run(Game.Session.NewGameAsync(new NewGameArgs("Harness", 42, false, ContentId.None)));
-                yield return Until(() => Object.FindAnyObjectByType<NocturneFlightEnvironment>() != null, "World environment exists");
+                yield return Until(() => Object.FindAnyObjectByType<NocturneFlightEnvironment>()?.GetComponentInChildren<ParticleSystem>() != null, "World environment initialized");
                 yield return null;
                 var environment = Object.FindAnyObjectByType<NocturneFlightEnvironment>();
                 var dust = environment.GetComponentInChildren<ParticleSystem>();

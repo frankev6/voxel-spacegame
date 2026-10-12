@@ -733,6 +733,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 161 | 2026-10-12 | SPEC-03 INP-006 / SPEC-51 | Editor sampler violates module boundary and needs undeclared types | App host, stage canonical frame/actions | Tech lead | Resolved SPEC-03 Q9 / SPEC-51 Q22 by accepted ADR-0048; no assembly changes. EDT-024 composes the existing sampler. |
 | 162 | 2026-10-12 | SPEC-11 REN-012 | LOD restore skipped for invalid viewer or late async apply | Always enqueue; filter desired OR applied state | Tech lead | Resolved SPEC-11 Q32; no new public contract |
 | 163 | 2026-10-12 | SPEC-11 REN-012 | Inclusive grid bounds omit volume extent/scale in distance sphere | CellMax + 1; transform centre and scale radius | Tech lead | Resolved SPEC-11 Q33; exact occupied cell volume |
+| 164 | 2026-10-12 | SPEC-01 FND-019 | Direct restart borrows a camera Skybox pending deferred destruction | Bind after one frame, preserving scene ownership | Tech lead | Resolved SPEC-01 Q27; failing direct-restart regression proves the lifetime race |
 
 
 

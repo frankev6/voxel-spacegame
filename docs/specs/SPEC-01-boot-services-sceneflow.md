@@ -909,9 +909,9 @@ If no save exists, "Load last save" is disabled.
 - **Do:** Fix the loss of the persistent camera's Skybox override after NewGame is called while already in World. Keep the approved procedural material, brightness and star density. Make teardown/rebinding safe across consecutive World instances and preserve exit cleanup. Reproduce the direct restart path through the real session, not only World → menu → World with a frame between transitions.
 - **Files:** `Assets/Game/Presentation/Environment/NocturneFlightEnvironment.cs`; `Assets/Game/Tests/PlayMode/App/NocturneEnvironmentTests.cs`
 - **Acceptance criteria:**
-  - [ ] Repeated direct NewGame calls retain an enabled camera Skybox using Game/NocturneSky after settling; only one environment and particle system remain.
-  - [ ] Leaving World restores the camera's prior clear/sky state with no leftover environment objects.
-  - [ ] Live fresh launch and direct restart preserve the approved appearance; zero runtime errors.
+  - [x] Repeated direct NewGame calls retain an enabled camera Skybox using Game/NocturneSky after settling; only one environment and particle system remain.
+  - [x] Leaving World restores the camera's prior clear/sky state with no leftover environment objects.
+  - [x] Live fresh launch and direct restart preserve the approved appearance; zero runtime errors.
 - **Tests:** `NocturneEnvironmentTests.NewGameRestart_PreservesSky`; retain `WorldEnvironment_EntersMovesAndCleansUp`.
 
 ## 10. Open questions
@@ -952,6 +952,8 @@ If no save exists, "Load last save" is disabled.
 | 25 | Paused teardown leaves package-owned temporal-coherence cleanup entities and a stale physics world | Dispatch the existing physics initialization and end-fixed ECB once at zero delta after destruction | Tech lead | Resolved ADR-0045: no simulation tick, unpause, manual component removal or broadphase mutation. Production-world/live restart exposed this during FND-017. |
 
 | 26 | Owner needs spatial cues before SPEC-31 celestial streaming exists | Scene-owned distant placeholder and local cosmetic particles | Tech lead | Resolved FND-018 after owner correction: sky contains only stars/nebulae and, after a second explicit owner request, is procedural and animated rather than a baked panorama. The planet is a physical 1,400 m radius sphere at (1400, -2000, 1700), with its own texture and 3% atmosphere shell; ships can pass above it. No celestial identity, landing/collision or save data yet. Cosmetic particles and the finite sphere both supply parallax; SYS-011 replaces the staged presentation. |
+
+| 27 | Direct World reload lets a new environment borrow the old scene’s Skybox while its Destroy is pending | Wait one frame before acquiring the persistent-camera override | Tech lead | Resolved FND-019: Start yields once, then captures/restores the prior camera state and creates the sky/debris. Destroy remains deferred and owned; no persistent extra component, per-frame repair, or material change. Regression failed on restart 1 before this fix. |
 
 ## 11. References
 

@@ -1,3 +1,4 @@
+using System.Collections;
 using Game.Presentation.Services;
 using Unity.Mathematics;
 using UnityEngine;
@@ -23,9 +24,12 @@ namespace Game.Presentation.Environment
         CameraClearFlags previousClear;
         ParticleSystem dust;
 
-        void Start()
+        IEnumerator Start()
         {
-            if (!Game.Core.Services.TryGet<CameraRigService>(out var rig)) return;
+            // A direct World reload can run Start before the prior environment's deferred Destroy(Skybox).
+            // Bind after that destruction boundary, so this scene never borrows a component queued for removal (FND-019).
+            yield return null;
+            if (!Game.Core.Services.TryGet<CameraRigService>(out var rig)) yield break;
             camera = rig.Camera;
             previousClear = camera.clearFlags;
             skybox = camera.GetComponent<Skybox>();
