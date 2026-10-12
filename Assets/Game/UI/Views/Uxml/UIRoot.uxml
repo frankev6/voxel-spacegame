@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="ui-root" class="ui-root" picking-mode="Ignore">
+        <ui:VisualElement name="layer-world" class="layer" picking-mode="Ignore" />
+        <ui:VisualElement name="layer-hud" class="layer" picking-mode="Ignore" />
+        <ui:VisualElement name="layer-screens" class="layer" picking-mode="Ignore" />
+        <ui:VisualElement name="layer-modals" class="layer" picking-mode="Ignore" />
+        <ui:VisualElement name="layer-toasts" class="layer" picking-mode="Ignore" />
+        <ui:VisualElement name="layer-tooltip" class="layer" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

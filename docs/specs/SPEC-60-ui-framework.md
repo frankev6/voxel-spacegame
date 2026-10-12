@@ -755,7 +755,7 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
   - [ ] Panel settings: ScaleWithScreenSize, 1920×1080, MatchWidthOrHeight, 0.5, theme `Game.tss`.
   - [ ] `UIRoot.uxml` has exactly six layers in `UILayer` order with `picking-mode="Ignore"`.
   - [ ] No literal colour, font or font size in any new USS file (only `var(--…)`).
-- **Tests:** `Assets/Game/Tests/EditMode/UI/ThemeFilesTests.cs`: `PanelSettings_MatchesDecision3`, `RootUxml_HasSixLayersInOrder`, `ThemeUss_NoLiteralColorsOrFonts` (regex over every `.uss` except `tokens.uss` and `accessibility.uss` rejects `#[0-9a-fA-F]{3,8}`, `rgb(`, `url(` and `font-size:` not followed by `var(`).
+- **Tests:** `Assets/Game/Tests/EditMode/UI/ThemeFilesTests.cs`: `PanelSettings_MatchesDecision3`, `RootUxml_HasSixLayersInOrder`, `ThemeUss_NoLiteralColorsOrFonts` (regex over every UI-owned `.uss` except `tokens.uss`, `accessibility.uss` and SPEC-80 direction token sources under `Directions/` (Q11) rejects `#[0-9a-fA-F]{3,8}`, `rgb(`, `url(` and `font-size:` not followed by `var(`).
 
 ### UI-003 — UIRoot construction, layers and sound hooks
 - **Milestone:** M1
@@ -896,18 +896,19 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | SPEC-03: exact API to set the context and the Back action | `InputService.SetContext(InputContext)`; `InputService.Controls.Global.Back` (Esc), `performed` event | Tech lead (SPEC-03) |
-| 2 | SPEC-03: binding display strings and change event | `string InputService.GetBindingDisplay(string actionPath)` ("Map/Action"), `event Action InputService.BindingsChanged` | Tech lead (SPEC-03) |
-| 3 | SPEC-03: may the Global map contain character keys? | No: Global holds only Esc and function keys, so `TextEntry` cannot trigger screen hotkeys | Tech lead (SPEC-03) |
-| 4 | SPEC-02: `PauseToken` release API | `PauseToken : IDisposable`; `Dispose()` releases; disposing twice is a no-op | Tech lead (SPEC-02) |
-| 5 | SPEC-01: who ticks `UIRoot` and when | `GameRoot.Update` calls `uiRoot.Tick(Time.unscaledDeltaTime)` every frame | Tech lead (SPEC-01) |
-| 6 | SPEC-01: who wires `InputServiceBridge.BindBack`, the sound sink and accessibility settings | `GameRoot` at step 9: `new InputServiceBridge(input)` → `new UIRoot(...)` → `bridge.BindBack(uiRoot.HandleBackPressed)`; App sound sink over SPEC-64; settings change → `ApplyAccessibility` | Tech lead (SPEC-01) |
-| 7 | Gamepad navigation (focus rings, D-pad) | Out of v1 UI scope until M4 gamepad work; screens still set `DefaultFocus` | Owner |
-| 8 | Fonts: `tokens.uss` points at `.otf/.ttf` files; does UI Toolkit accept them for `-unity-font-definition` on 6.6? | If not, UI-002 creates dynamic `FontAsset`s next to the theme (`Assets/Game/UI/Theme/Fonts/*_PH.asset`) and a SPEC-80/81 task re-points the tokens; this spec never edits token values | Tech lead (SPEC-80) |
-| 9 | `tokens.uss` comment says ally/enemy "differ in lightness", but current values have equal luminance (~0.33) | `AllegianceColorCheck` (CVD ΔE ≥ 20) is the gate instead of lightness; SPEC-80 fixes the comment | Owner (SPEC-80) |
-| 10 | Hover sound for every button may be noisy | Keep; SPEC-64 may map `UISound.Hover` to silence | Owner |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | SPEC-03: exact API to set the context and the Back action | `InputService.SetContext(InputContext)`; `InputService.Controls.Global.Back` (Esc), `performed` event | Tech lead (SPEC-03) |  |
+| 2 | SPEC-03: binding display strings and change event | `string InputService.GetBindingDisplay(string actionPath)` ("Map/Action"), `event Action InputService.BindingsChanged` | Tech lead (SPEC-03) |  |
+| 3 | SPEC-03: may the Global map contain character keys? | No: Global holds only Esc and function keys, so `TextEntry` cannot trigger screen hotkeys | Tech lead (SPEC-03) |  |
+| 4 | SPEC-02: `PauseToken` release API | `PauseToken : IDisposable`; `Dispose()` releases; disposing twice is a no-op | Tech lead (SPEC-02) |  |
+| 5 | SPEC-01: who ticks `UIRoot` and when | `GameRoot.Update` calls `uiRoot.Tick(Time.unscaledDeltaTime)` every frame | Tech lead (SPEC-01) |  |
+| 6 | SPEC-01: who wires `InputServiceBridge.BindBack`, the sound sink and accessibility settings | `GameRoot` at step 9: `new InputServiceBridge(input)` → `new UIRoot(...)` → `bridge.BindBack(uiRoot.HandleBackPressed)`; App sound sink over SPEC-64; settings change → `ApplyAccessibility` | Tech lead (SPEC-01) |  |
+| 7 | Gamepad navigation (focus rings, D-pad) | Out of v1 UI scope until M4 gamepad work; screens still set `DefaultFocus` | Owner |  |
+| 8 | Fonts: `tokens.uss` points at `.otf/.ttf` files; does UI Toolkit accept them for `-unity-font-definition` on 6.6? | If not, UI-002 creates dynamic `FontAsset`s next to the theme (`Assets/Game/UI/Theme/Fonts/*_PH.asset`) and a SPEC-80/81 task re-points the tokens; this spec never edits token values | Tech lead (SPEC-80) |  |
+| 9 | `tokens.uss` comment says ally/enemy "differ in lightness", but current values have equal luminance (~0.33) | `AllegianceColorCheck` (CVD ΔE ≥ 20) is the gate instead of lightness; SPEC-80 fixes the comment | Owner (SPEC-80) |  |
+| 10 | Hover sound for every button may be noisy | Keep; SPEC-64 may map `UISound.Hover` to silence | Owner |  |
+| 11 | The no-literal style audit includes SPEC-80 direction token sources | Audit UI-owned styles; retain token-source exemptions | Tech lead | Resolved: exclude Directions/ alongside tokens.uss and accessibility.uss. Alternative direction sheets intentionally contain token values and are not imported by Game.tss. All component and screen styles remain audited. |
 
 ## 11. References
 

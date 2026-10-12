@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6ec28913fd64c0f99de968f456f85bf, type: 3}
+  m_Name: UIConfig
+  m_EditorClassIdentifier: Game.UI::Game.UI.Data.UIConfig
+  PanelSettings: {fileID: 11400000, guid: 609a6ff8391a844909b399dab6b8097b, type: 2}
+  RootUxml: {fileID: 9197481963319205126, guid: 4c16474e26ee4ab28307b15aec7e53b0, type: 3}
+  ToastUxml: {fileID: 0}
+  TooltipUxml: {fileID: 0}
+  Screens: []
+  TooltipDelaySeconds: 0.35
+  MaxVisibleToasts: 4
+  MaxQueuedToasts: 32
+  ToastLifetimeSeconds: 4
+  ToastCoalesceWindowSeconds: 2.5
+  ToastPoolSize: 8
+  MinUiScale: 0.8
+  MaxUiScale: 1.5
+  SoundCueIds:
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 

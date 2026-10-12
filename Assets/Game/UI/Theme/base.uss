@@ -1,0 +1,16 @@
+/* SPEC-60 §4.8. The root stays transparent over the game; screens supply their own panels. */
+.ui-root {
+    position: absolute;
+    left: 0; top: 0; right: 0; bottom: 0;
+    background-color: initial;
+    -unity-font-definition: var(--font-body);
+    color: var(--color-text);
+    font-size: var(--text-m);
+}
+.layer, .screen {
+    position: absolute;
+    left: 0; top: 0; right: 0; bottom: 0;
+}
+.is-hidden, .is-covered { display: none; }
+/* Selection/disabled/empty/locked/ready/active/invalid states and screen layer modifiers
+   are semantic hooks; their visible treatment belongs to the owning component/screen sheets. */

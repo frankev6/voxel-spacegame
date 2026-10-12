@@ -713,6 +713,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 144 | 2026-10-12 | SPEC-70 DEV-008 | Start-scenario argument has no content or consumer | Explicitly reject nonempty selection | Tech lead | Resolved SPEC-70 Q17: empty uses the configured imported starter; no silent ignore or blueprint reinterpretation. |
 | 145 | 2026-10-12 | SPEC-70 DEV-008 | Edit-mode launch needs a real runtime operation ID | Async boot then registry dispatch | Tech lead | Resolved SPEC-70 Q18: wait for settled MainMenu and host; set intro hook before owned boot, restore after dispatch. |
 | 146 | 2026-10-12 | SPEC-70 DEV-008 | Sandbox exit may autosave an active player profile | Require harness for active sessions | Tech lead | Resolved SPEC-70 Q19: select/create harness only without a session; reject active other profiles and busy flow/save before profile changes. |
+| 147 | 2026-10-12 | SPEC-60 UI-002 | Theme literal audit includes SPEC-80 direction token sources | Audit all UI-owned styles, exempt token inputs | Tech lead | Resolved SPEC-60 Q11: Directions/ is an authored token source alongside tokens.uss; component/screen styles stay covered. |
 
 
 
