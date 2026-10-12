@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 17 | 0 | 1 | 0 | 89 | 0 | 107 | 11 |
+| M1 | 16 | 0 | 1 | 0 | 90 | 0 | 107 | 10 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 8 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 9 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -114,7 +114,7 @@
 | FND-018 | Nocturne flight environment and movement reference | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-017 | yes | done | astra (gpt-6) | 2026-10-12 | c55d61f | Animated procedural sky; physical planet/atmosphere; flight-reference particles |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | 5fcd282 | Real bridge/nav/sampler: held W neutral on pause, resumes without phantom edges |
 | INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 66702c3 | Real input mapping, latched edges, collider/plane aim; ten required tests pass |
-| INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Camera/editor input mapping |
+| INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | yes | done | astra (gpt-6) | 2026-10-12 | a90d5ec | Editor camera + 34 action mappings; four required tests pass; ADR-0048 |
 | INP-007 | Frame-rate independence test | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-005, SPEC-20 | yes | todo |  |  |  |  |
 | DATA-011 | v2 block additions (reactor, cargo) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | standard | DATA-009 | yes | done | astra (gpt-6) | 2026-10-11 | 7158bf8 | Reactor/cargo registered; specified modules and existing art references validated |
 | DATA-012 | Approved slope kit per-cell data and content | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | frontier | DATA-006, DATA-009 | yes | done | astra (gpt-6) | 2026-10-11 | 88b13a0 | Canonical per-cell shapes, approved-kit validation and two definitions; ADR-0028/Q90 |
@@ -838,6 +838,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — INP-006 done — astra (gpt-6)
+
+- **Implementation:** `a90d5ec` adds the camera Editor branch (held orbit/pan, Ctrl-gated zoom, focus/view edges) and App-host sampler for the canonical frame and all 34 action bits. Disabled Editor map clears the frame; pointer permission is sampled through the UI gate. Existing Flight behavior is preserved. The full Blueprint Lab host remains EDT-024.
+- **Resolved defect:** Q161 / SPEC-03 Q9 / SPEC-51 Q22, accepted ADR-0048 (`270bc4e`): the sampler lives in App/EditorHost as SPEC-51 already requires, avoiding a forbidden Presentation → ShipEditor reference. INP-006 declares the exact two input types early; EDT-001/024 reuse them. No assembly changes or substitute enum.
+- **Validation:** all four required tests pass with real Input System devices: held-only orbit, one sensitivity/inversion application through the camera rig, Ctrl-wheel separation, Ctrl-Z without MirrorZ. Full EditMode **743 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.5094 ms** vs 3; MeshBuild128 **1.0316 ms** vs 0.5). Full PlayMode **92 passed, 0 failed, 12 GPU skips**. Compile zero C# warnings; docs clean. Evidence `Logs/playtest/inp006/`. No performance tuning.
+- **Next:** INP-007 real input at 30/60/144 FPS, then remaining M1 rendering and integration. No change to the approved environment or new owner choice.
 
 ### 2026-10-12 — UI-007 done — astra (gpt-6)
 
