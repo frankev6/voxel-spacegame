@@ -38,6 +38,8 @@ This spec turns simulation facts into pictures: flying voxel cubes when cells br
 - The VFX quality option on the settings screen and where it is stored (SPEC-61 / SPEC-01).
 - Final art for graphs, shaders and textures (SPEC-80 / SPEC-81, after owner approval).
 
+> **Playable integration staging:** [ADR-0053](../decisions/ADR-0053-playable-firing-range-first.md) permits the bounded FND-020 firing/breakup slice before this spec is complete. It implements portions of the production path in place; tasks below remain open until their full acceptance criteria pass. Follow the ADR's explicit staging exceptions for this checkpoint.
+
 ## 3. Decisions (binding)
 
 1. **One unmanaged queue, drained once per frame.** All producers append `FxEvent`s to `FxEventQueue.Queue` (`NativeQueue<FxEvent>`, `Allocator.Persistent`) through `ParallelWriter`. The queue accumulates across the 0..N fixed ticks of a frame; `FxUploadSystem` empties it exactly once per frame. Reason: presentation runs once per frame while simulation runs 0..N ticks.

@@ -914,6 +914,20 @@ If no save exists, "Load last save" is disabled.
   - [x] Live fresh launch and direct restart preserve the approved appearance; zero runtime errors.
 - **Tests:** `NocturneEnvironmentTests.NewGameRestart_PreservesSky`; retain `WorldEnvironment_EntersMovesAndCleansUp`.
 
+### FND-020 — Playable stationary-target shooting and physical breakup
+- **Milestone:** M2
+- **Tier:** frontier — F1/F2/F5: production combat integration, cell ownership and split lifetime
+- **Depends on:** `FND-017`, `FND-018`, `FLT-001`, `DMG-001`, `WPN-001`, `VFX-001`
+- **Do:** Start only after FLT-013 and DMG-004 are done (the ledger supports cross-spec contract/whole-spec dependencies only). Deliver Frank's playable firing-range request under ADR-0053. Spawn the existing larger Vestari as a stationary target for the Fighter, use real fire-group input and installed mounts, visibly render projectile travel, resolve hits against current cells through DamageStreams, remove cells through DamageResolveSystem, find disconnected sections and create independent moving physical pieces through the canonical split path. Implement the bounded first portions of the production systems in their owning modules; broader DMG/WPN/VFX tasks remain todo until their complete criteria pass. Preserve Nocturne, no V1 code or new hulls. Record controls, restart path, screenshots and measured sustained-fire frame times.
+- **Files:** `Assets/Game/App/Boot/`, `Assets/Game/App/Session/`, `Assets/Game/Data/Definitions/Weapons/`, `Assets/Game/Data/Definitions/`, `Assets/Game/Data/Blocks/`, `Assets/Game/Content/Config/`, `Assets/Game/Content/Weapons/`, `Assets/Game/Simulation/Weapons/`, `Assets/Game/Voxel/Damage/`, `Assets/Game/Presentation/Weapons/`, `Assets/Game/Tests/PlayMode/App/FiringRangeTests.cs`, `tools/playtest/`, `docs/HANDOFF.md`
+- **Acceptance criteria:**
+  - [ ] A documented repeatable entry displays the Fighter and a stationary, larger, different imported hull with usable flight and camera controls.
+  - [ ] Real fire input emits visible moving shots from mounts; hits remove actual cells, expose holes and update rendered geometry/colliders. Shots pass through holes to solid cells behind them.
+  - [ ] Severing a section produces an independently moving, rendered physical piece that retains the correct cells and rigid motion; target remainder remains damageable.
+  - [ ] Scene exit/restart clears projectiles and range bodies with no stale stream/job/native allocation errors; pause neutralizes fire.
+  - [ ] Actual gameplay screenshots before/after firing and breakup are inspected and shown to Frank; sustained-fire frame measurements and limitations are recorded, with at most two initial tuning passes.
+- **Tests:** `FiringRangeTests.RealFire_DamagesStationaryTarget`, `.Shots_PassThroughHole`, `.SeveredSection_BecomesMovingBody`, `.Restart_ClearsCombatState` (PlayMode); compile and full EditMode/PlayMode suites; live input/capture and sustained-fire measurements.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
@@ -954,6 +968,8 @@ If no save exists, "Load last save" is disabled.
 | 26 | Owner needs spatial cues before SPEC-31 celestial streaming exists | Scene-owned distant placeholder and local cosmetic particles | Tech lead | Resolved FND-018 after owner correction: sky contains only stars/nebulae and, after a second explicit owner request, is procedural and animated rather than a baked panorama. The planet is a physical 1,400 m radius sphere at (1400, -2000, 1700), with its own texture and 3% atmosphere shell; ships can pass above it. No celestial identity, landing/collision or save data yet. Cosmetic particles and the finite sphere both supply parallax; SYS-011 replaces the staged presentation. |
 
 | 27 | Direct World reload lets a new environment borrow the old scene’s Skybox while its Destroy is pending | Wait one frame before acquiring the persistent-camera override | Tech lead | Resolved FND-019: Start yields once, then captures/restores the prior camera state and creates the sky/debris. Destroy remains deferred and owned; no persistent extra component, per-frame repair, or material change. Regression failed on restart 1 before this fix. |
+
+| 28 | Owner needs playable shooting and breakup before complete combat feature coverage | Bounded production-system slice, ADR-0053 | Tech lead | Resolved FND-020 sequencing: existing larger Vestari target, real input/projectiles, authoritative damage and physical split pieces. Ordered-grid broad phase, serial scheduled resolver, simple changed-grid connectivity and hulk representation may ship first under ADR-0053; broader owning tasks stay todo. No AI/shield/galaxy or finished-art prerequisite. Frank: “Get that playable and show me it working.” |
 
 ## 11. References
 

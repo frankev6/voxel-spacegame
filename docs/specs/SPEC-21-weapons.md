@@ -32,6 +32,8 @@ Weapons are functional blocks: each weapon block has an entity that aims (turret
 - Ability-driven damage: SPEC-24 (uses the same producer contracts).
 - Per-instance fire-group assignment in the editor: M4 (WPN-016); v1 uses each weapon's default groups.
 
+> **Playable integration staging:** [ADR-0053](../decisions/ADR-0053-playable-firing-range-first.md) permits the bounded FND-020 firing/breakup slice before this spec is complete. It implements portions of the production path in place; tasks below remain open until their full acceptance criteria pass. Follow the ADR's explicit staging exceptions for this checkpoint.
+
 ## 3. Decisions (binding)
 
 1. **Hits are tested against cells and analytic shields, never against physics colliders.** Broad phase: `SpatialHash.QuerySegment`/`QuerySphere` (SPEC-23) over proxies of every grid root and celestial body. Narrow phase: shield ellipsoid (`ShieldMath`, last tick's `ShieldState`), then `VoxelRaycast` through the grid's cells, then celestial spheres. Reason: SPEC-12 decision 4 (colliders lag and are conservative); exact cells (01-B2); determinism.
