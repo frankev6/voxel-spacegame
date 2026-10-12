@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 24 | 0 | 0 | 0 | 82 | 0 | 106 | 16 |
+| M1 | 23 | 0 | 0 | 0 | 83 | 0 | 106 | 15 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -197,7 +197,7 @@
 | CAM-004 | Rig service, camera prefab, Menu/Hold modes and the sync system shell | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-003, FND-001 | yes | done | astra (gpt-6) | 2026-10-11 | ece7b8b | Persistent rig, menu/hold, ECS view and boot bindings; ADR-0039 single listener; ten required tests |
 | CAM-005 | Flight follow mode and camera input | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-004, FLT-001, VOX-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-11 | f19e2a5 | Flight follow, input, cuts; exact moving-target damping (Q129–130) |
 | CAM-011 | Camera performance and framing tests | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CAM-005, TST-001 | yes | done | astra (gpt-6) | 2026-10-11 | 111f9fd | CPU 0.002833 ms; 0 B/update; 10 s circle pitch/GC pass (Q131) |
-| CAM-012 | Keep the imported player ship framed during fast close-zoom flight | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-005, FND-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |  |
+| CAM-012 | Keep the imported player ship framed during fast close-zoom flight | [SPEC-62](specs/SPEC-62-camera.md) | M1 | frontier | CAM-005, FND-001 | yes | done | astra (gpt-6) | 2026-10-12 | 42287c3 | Bounds-aware focus keeps fast Fighter framed; live 53.39 m/s capture; Q154 |
 | VFX-001 | Public contract types | [SPEC-63](specs/SPEC-63-vfx.md) | M1 | standard | CORE-001, DATA-001 | yes | todo |  |  |  |  |
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | todo |  |  |  |  |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | todo |  |  |  |  |
@@ -830,6 +830,15 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — CAM-012 done — astra (gpt-6)
+
+- **Implementation 42287c3:** the camera bridge supplies actual conservative solid bounds (CellMin/CellMax), not brick allocation extents. After the unchanged follow filter, the rig retains the largest desired focus displacement that keeps all eight bounds corners inside the camera frustum. If deliberate close inspection cannot fit the hull even when centered, the output centers it. Requested distance, pitch, yaw, input targets and damping state remain intact. Internal bounds handoff only; no new art or public contract.
+- **Resolved Q154 / SPEC-62 Q15:** analytic clipping of the output translation against the camera's six frustum planes; Focus/DesiredFlightPosition use the corrected focus. Cached world bounds must shift with the future CAM-006 origin warp, while the framing displacement stays unchanged. Frank can review the close-zoom follow feel; no owner gate was introduced.
+- **Actual GPU game:** isolated launch **1.365 s**; real W for 7.3 s reached **53.38865 m/s**. At the same ten-notch zoom and orbit as the prior clipped view, distance **41.77738 m**, yaw **24.99996°**, pitch **50.00005°**; projected solid bounds now lie within **x [0.3420966, 0.7831935], y [0, 0.6924891]**. The inspected capture `Logs/playtest/fighter-framing-corrected.png` shows the full Fighter and was shown to Frank. Before: `Logs/playtest/fighter-input-isolation.png`. Raw evidence under `Logs/playtest/cam012/`; **zero runtime errors**. Editor closed; incidental settings restored, including the headless importer version rewrite (original QualitySettings backup verified against the initial clean Git blob).
+- **Validation:** compile **zero C# warnings**; full EditMode **729 pass, 1 advisory timing miss, 1 explicit skip** (MeshBuild128 **0.8737 ms** vs 0.5). Full headless PlayMode **85 pass, 12 GPU-only skips**; both new framing tests run against the real imported 1,005-cell Fighter at 53 m/s, with turns/orbit changes at 16:9/4:3, plus deliberate close inspection preserving input. Existing camera regression/performance tests pass: inclusive bridge median/p95 **0.005208/0.005708 ms** and **0 B/update**. Docs **507 tasks / zero errors**. Zero optimization passes.
+- **Test cleanup correction:** the shared production fixture now settles the flow and quits an active test session before restoring its boot root. Previously restoring from World started an async quick-start that the next fixture destroyed, causing a disposed-World error before camera assertions. New tests also use the real scroll binding's 0.008333 scale and a 1 cm settling tolerance, rather than assuming exact 1/120 arithmetic. No assertions were removed.
+- **Next:** ready DEV-009 spawn/teleport/grid inspection commands for repeatable multi-ship collision scenarios, then remaining M1 integrations and system review. Keep performance deferred; retain owner-only art boundaries. HANDOFF updated.
 
 ### 2026-10-12 — UI-005 done — astra (gpt-6)
 
