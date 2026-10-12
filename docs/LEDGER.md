@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 31 | 0 | 0 | 0 | 74 | 0 | 105 | 12 |
+| M1 | 30 | 0 | 0 | 0 | 75 | 0 | 105 | 12 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 7 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -112,9 +112,9 @@
 | FND-016 | Sandbox entry | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | standard | FND-010 | yes | done | astra (gpt-6) | 2026-10-11 | 4efcb47 | Serialized creative sandbox, optional player; normal campaign resets flags |
 | FND-017 | Imported ship flight checkpoint | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M1 | frontier | FND-010, REN-001, INP-001, DEV-001 | yes | todo |  |  |  | Owner priority; execute after REN-011, INP-005 and DEV-008 implementations |
 | INP-004 | Context integration with SPEC-60 | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, UI-001 | no | todo |  |  |  |  |
-| INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |  |
+| INP-005 | PlayerInputSampleSystem | [SPEC-03](specs/SPEC-03-input.md) | M1 | frontier | INP-002, FLT-001, CAM-001, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 66702c3 | Real input mapping, latched edges, collider/plane aim; ten required tests pass |
 | INP-006 | Camera and editor samplers | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-002, CAM-001 | yes | todo |  |  |  |  |
-| INP-007 | Frame-rate independence test | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-005, SPEC-20 | no | todo |  |  |  |  |
+| INP-007 | Frame-rate independence test | [SPEC-03](specs/SPEC-03-input.md) | M1 | standard | INP-005, SPEC-20 | yes | todo |  |  |  |  |
 | DATA-011 | v2 block additions (reactor, cargo) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | standard | DATA-009 | yes | done | astra (gpt-6) | 2026-10-11 | 7158bf8 | Reactor/cargo registered; specified modules and existing art references validated |
 | DATA-012 | Approved slope kit per-cell data and content | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M1 | frontier | DATA-006, DATA-009 | yes | done | astra (gpt-6) | 2026-10-11 | 88b13a0 | Canonical per-cell shapes, approved-kit validation and two definitions; ADR-0028/Q90 |
 | VOX-002 | SPIKE: memory model for the reference and thin-shell stations | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 6393ecd | No-go: reference 38,828,288 B retained-copy peak; ADR-0023 proposed |
@@ -816,6 +816,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — INP-005 done — astra (gpt-6)
+
+- Bound real Flight actions to the pre-boot-snapshot PlayerCommand singleton: analog controls, boost/brake, gated fire, latched action counters and physics picking excluding the player with flight-plane fallback. Unbound/disabled input is neutral. Q141 records the temporary permissive pointer gate until UI-003 and explicit physics dependency completion. Implementation **66702c3**.
+- Validation: compile **zero C# warnings**; all **10** prescribed input tests pass including **0 B** warmed sampling; full EditMode **709 passed, 1 advisory timing failure, 1 explicit skipped** (known MeshBuild128 **0.8771 ms** vs 0.5 ms, unchanged/deferred); PlayMode **65 passed + 12 GPU-only skipped**; docs **506 tasks / zero errors**. No optimization passes.
+- Next is the actual flight checkpoint. DEV-008's ready predicate itself requires Flight context, so FND-017 will supply that integration before the convenience command; use the existing CLI and real IGameFlow entry in the meantime.
 
 ### 2026-10-12 — REN-011 done — astra (gpt-6)
 
