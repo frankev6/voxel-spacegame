@@ -575,12 +575,12 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Milestone:** M1
 - **Tier:** frontier — F4: owns the moving-ship transform gate
 - **Depends on:** `REN-012`, `REN-008`
-- **Do:** PlayMode performance tests (safety off, 1920×1080, 60-frame warm-up, 300 frames): `Lattice2500` grid moved every frame on a circle (transform gate); `HollowStation1M` idle in view (render share); a screenshot comparison of `Ship20k` against a stored reference image (tolerance: mean absolute error ≤ 2/255) to catch shader/mesher regressions.
+- **Do:** PlayMode performance tests (safety off, 1920×1080, 60-frame warm-up, 300 frames): `Lattice2500` grid moved every frame on a circle (transform gate); `HollowStation1M` idle in view (render share); a screenshot comparison of `Ship20k` against a stored reference image (tolerance: mean absolute error ≤ 2/255) to catch shader/mesher regressions. Use the actual spawn/snapshot/build/apply/render pipeline. Under ADR-0032, the moving delta includes TransformSystemGroup + EntitiesGraphicsSystem + BrickPoolRenderSystem; idle includes EntitiesGraphicsSystem and every REN system, using inclusive system markers without nested step double counting. The fixed-camera/light screenshot reference is captured from Unity, visually inspected and stored explicitly; normal tests never rewrite it (Q35).
 - **Files:** `Assets/Game/Tests/PlayMode/Voxel/{BrickRenderPerfTests,BrickRenderScreenshotTests}.cs`; `Assets/Game/Tests/PlayMode/Voxel/Reference/Ship20k.png`
 - **Acceptance criteria:**
-  - [ ] Moving 2,500 bricks: transform + Entities Graphics main-thread delta ≤ 0.5 ms median.
-  - [ ] Idle station render share ≤ 1.2 ms median.
-  - [ ] Screenshot matches the reference.
+  - [x] Moving 2,500 bricks: transform + Entities Graphics main-thread delta ≤ 0.5 ms median.
+  - [x] Idle station render share ≤ 1.2 ms median.
+  - [x] Screenshot matches the reference.
 - **Tests:** `BrickRenderPerfTests.MovingLattice2500_TransformUnder0_5ms`, `.IdleStation1M_RenderShare`; `BrickRenderScreenshotTests.Ship20k_MatchesReference`.
 
 ### REN-014 — Prop block instancing
@@ -656,6 +656,8 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 33 | Grid bounds are inclusive cell indices, but the distance-sphere formula omits cell extent and root scale | Include CellMax + 1 and uniform root scale | Tech lead | Resolved REN-012: centre and half diagonal use the full occupied cell volume, then apply the root transform/scale. Brick LTW already includes CellSize, so its radius uses LTW scale exactly once. |
 
 | 34 | Gather-only world bounds go stale when ships move without changing props | Cache local bounds at gather; update conservative union with grid matrices every frame | Tech lead | Resolved REN-014: flat mesh-sorted native instance storage avoids nested containers, shared managed GPU ownership is disposed idempotently by either system teardown, and bounds remain O(grids). The required pixel test moves the prop outside its original bounds. |
+
+| 35 | REN-013 still names only Entities Graphics after the pooled-renderer replacement; screenshot baseline absent | Measure the current production renderer and inspect the first Unity capture | Tech lead | Resolved REN-013: moving delta includes transforms, Entities Graphics and pooled submission; idle includes all REN systems and Entities Graphics. GPU fixture runs real spawn/mesh/apply at 1920×1080 with fixed camera/light; initial reference is manually stored from an inspected Unity-rendered candidate, never auto-updated by a passing test. No renderer tuning or budget changes. |
 
 ## 11. References
 
