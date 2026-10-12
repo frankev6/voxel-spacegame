@@ -69,6 +69,13 @@ namespace Game.Tests.PlayMode.App
         }
         [UnityTearDown] public IEnumerator TearDown()
         {
+            // Restore from a settled menu: otherwise Bootstrap in World starts a new async
+            // quick-start which the next fixture destroys while it still owns scene work.
+            if (GameRoot.Instance != null)
+            {
+                yield return Until(() => !Game.Flow.IsTransitioning, "Fixture transition settled", 30);
+                if (Game.Session.HasActiveSession) yield return Run(Game.Session.QuitToMainMenuAsync(false));
+            }
             if (GameRoot.Instance != null) { Object.Destroy(GameRoot.Instance.gameObject); yield return null; }
             GameRootTestHooks.Reset();
             Bootstrap.Boot(); yield return null;

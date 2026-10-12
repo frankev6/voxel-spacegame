@@ -67,15 +67,19 @@ namespace Game.Presentation.Systems
                     float3 pos = ltw.Position;
                     var rotation = new quaternion(math.orthonormalize(new float3x3(ltw.Value)));
                     float3 velocity = EntityManager.HasComponent<PhysicsVelocity>(target) ? EntityManager.GetComponentData<PhysicsVelocity>(target).Linear : float3.zero;
-                    float radius = 10;
-                    if (EntityManager.HasComponent<VoxelGrid>(target))
+                    float radius = 10; float3 boundsMin = 0, boundsMax = 0;
+                    bool hasBounds = EntityManager.HasComponent<VoxelGrid>(target);
+                    if (hasBounds)
                     {
                         var grid = EntityManager.GetComponentData<VoxelGrid>(target);
-                        radius = math.max(2, .5f * math.length((float3)grid.BrickDims * 16 * grid.CellSize));
+                        boundsMin = (float3)grid.CellMin * grid.CellSize;
+                        boundsMax = ((float3)grid.CellMax + 1) * grid.CellSize;
+                        radius = math.max(2, .5f * math.length(boundsMax - boundsMin));
                     }
                     // TODO(CAM-006): subtract the same-frame origin warp before measuring teleport distance.
                     bool cut = target != lastTarget || math.distance(pos, lastTargetPos) > rig.Config.TeleportCutDistance;
                     rig.SetTarget(pos, rotation, velocity, radius, cut);
+                    if (hasBounds) rig.SetTargetBounds(boundsMin, boundsMax, ltw.Value);
                     lastTarget = target; lastTargetPos = pos;
                 }
             }

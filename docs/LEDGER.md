@@ -721,6 +721,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 151 | 2026-10-12 | SPEC-60 UI-004 | Deferred Back/Pop, callback loops and failed push focus | Bounded FIFO, accepted queued Pop, successful focus only | Tech lead | Resolved SPEC-60 Q15 / ADR-0047; postconditions recomputed after partial failures. |
 | 152 | 2026-10-12 | SPEC-60 UI-004 / HUD-002 | M3 scene roots are absent during navigator handover | Temporary roots and App navigation adapter | Tech lead | Resolved SPEC-60 Q16 / ADR-0047: remove direct input writer, retain flight/pause via navigator; HUD-002 replaces adapter/views. |
 | 153 | 2026-10-12 | SPEC-60 UI-005 | Screen.height is Editor-window sized inside ECS input sampling | Flip Y in the actual panel space | Tech lead | Resolved SPEC-60 Q17: live HUD click leaked into fire; use panel height after ScreenToPanel, and test against independent viewport dimensions. |
+| 154 | 2026-10-12 | SPEC-62 CAM-012 | Distance-only look-ahead does not keep the hull framed | Clip output focus using solid bounds and camera frustum | Tech lead | Resolved SPEC-62 Q15: preserve filter state and requested zoom/orbit; center deliberate close inspection; internal bounds handoff, no public contract change. |
 
 
 
