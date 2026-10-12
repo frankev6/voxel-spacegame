@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 83 | 1 | 0 | 0 | 5 | 0 | 89 | 9 |
+| M2 | 83 | 0 | 0 | 0 | 6 | 0 | 89 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -222,8 +222,8 @@
 | DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-12 | e3377fa | Four channels, owned phase memory, stable explosion drains; 5 tests; Q179–180 |
 | DMG-003 | Damage config asset and boot hookup | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-001 | yes | done | astra (gpt-6) | 2026-10-12 | c1d6af2 | Shipped config/4 damage types/4 armor classes, validation and boot-owned table; 3 tests; Q181 |
 | DMG-004 | Cell access, quantization and RemoveCell | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-002 | yes | done | astra (gpt-6) | 2026-10-12 | 8b20d15 | Cell writes, DDA, deterministic quantization and debris kinematics; 10 required tests pass |
-| DMG-005 | Point and blast damage | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | partial in FND-020: point/blast/instance collapse and core-loss path / radius-clamp warning, full DMG-005 contract validation and ten required tests |
-| DMG-006 | DamageResolveSystem pipeline | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-005 | no | todo |  |  |  | partial in FND-020: serial ordered resolver, detach-first and grid stats / parallel ranges, restore pass, impulse integration and required tests |
+| DMG-005 | Point and blast damage | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | done | astra (gpt-6) | 2026-10-12 | 7dbd025 | Point/blast/instance rules complete; 10 required tests; full suites green; Q189 occlusion fixture correction; zero tuning passes |
+| DMG-006 | DamageResolveSystem pipeline | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-005 | yes | todo |  |  |  | partial in FND-020: serial ordered resolver, detach-first and grid stats / parallel ranges, restore pass, impulse integration and required tests |
 | DMG-007 | ImpactEventSystem (rams and knockback) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, PHY-001 | no | todo |  |  |  | partial in FND-020: pending impulse and ram data contracts from earlier work; range uses split initial velocity / impact consumer, ram aggregation, knockback, FX and required tests |
 | DMG-008 | Brick connectivity summaries | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | todo |  |  |  | partial in FND-020: bounded full-grid fallback connectivity / cached brick connectivity summaries, warm-up and required tests |
 | DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | no | todo |  |  |  | partial in FND-020: bounded full-grid flood and canonical masks / hybrid graph race, node budgets, forced deferrals and full required tests |
@@ -879,7 +879,7 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ### 2026-10-12 — DMG-005 point/blast and instance damage — astra (gpt-6)
 
-1. **Implemented:** completes the FND-020 point/blast/instance path with a once-per-resolver radius-clamp warning, one-cell penetration for sub-half-cell blasts, and reactor instigator fallback to the source grid when no shooter exists. The warning uses an owner-disposed native latch and Burst-safe logging; no managed hot-path state, extra sync point, new API or art change. Point DDA still carries overflow through air and armour; blast remains two-pass over pre-event HP.
+1. **Implemented:** `7dbd025` completes the FND-020 point/blast/instance path with a once-per-resolver radius-clamp warning, one-cell penetration for sub-half-cell blasts, and reactor instigator fallback to the source grid when no shooter exists. The warning uses an owner-disposed native latch and Burst-safe logging; no managed hot-path state, extra sync point, new API or art change. Point DDA still carries overflow through air and armour; blast remains two-pass over pre-event HP.
 2. **Required behavior:** all ten focused tests pass: 250 damage removes two 100-HP cells and leaves the third at 50 HP within one quantum; rays enter fresh holes; zero-direction hits stay in one cell; the 400-damage crater has 19 cells and all 48 cube symmetries; shielding reduces the stronger crater from **57 to 27** cells; 5/10 thruster cells trigger full collapse and queue its functional entity; function HP zero also collapses; reactor emits exactly one 400-damage, 4-cell-radius request; core loss clears the anchor and records the world centre. Repeated radius-clamped events warn once and stay inside the cap. Q189 / SPEC-13 Q27 explains why the independent occlusion comparison requires 1600 damage; no gameplay tuning or owner gate.
 3. **Validation:** focused **10 passed, 0 failed**; compile zero CS warnings. Full EditMode **800 passed, 0 failed, 1 skipped** (exit 0). Full PlayMode **116 passed, 0 failed, 29 skipped** (exit 0), including all four firing-range scenarios. Docs check has zero errors/warnings. Local-only Git; pre-existing QualitySettings change excluded. **spec-required: 10, extra: 0**. No new perf gate in this task; **zero optimization passes**. Evidence: `Logs/playtest/dmg005/`. DMG-006 retains the remaining resolver work; later WPN/DMG/VFX rows stay open.
 
