@@ -696,6 +696,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 130 | 2026-10-11 | SPEC-62 CAM-005 | Endpoint damping misses moving-target FPS tolerance by 0.767 m | Exact exponential cascade with linear target motion | Tech lead | Resolved SPEC-62 Q13; original 30/60/144 X: 232.0124/231.2455/230.7731 m. Test/tolerance unchanged; equal-rate and small-step limits; task tier frontier |
 | 131 | 2026-10-11 | SPEC-62 CAM-011 | M1 camera gate mentions M3 raycast/origin paths | Enforce no-occlusion 0.05 ms and zero GC now | Tech lead | Resolved SPEC-62 Q14; CAM-007 owns real-raycast timing ≤0.15 ms, CAM-006 owns origin accuracy; no stub timing accepted |
 | 132 | 2026-10-11 | SPEC-11 REN-003 | Fallback needs missing shared surface shader; apply/cleanup systems are future work | REN-008 first; future REN-010/011 consume pooled contract | Tech lead | Resolved SPEC-11 Q23; added shader dependency and returned REN-003 to todo; no contract or gate success asserted |
+| 133 | 2026-10-11 | SPEC-11 REN-008 | Old shader property/channel contract conflicts with approved design; legacy texture forbidden | Canonical art contract, procedural inputs | Tech lead | Accepted ADR-0040 / SPEC-11 Q24; preserve packed vertex and defer missing presentation writers to their features; no new art direction |
 
 
 
