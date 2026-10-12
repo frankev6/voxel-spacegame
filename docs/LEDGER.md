@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 34 | 0 | 0 | 0 | 70 | 0 | 104 | 14 |
+| M1 | 33 | 1 | 0 | 0 | 70 | 0 | 104 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 7 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -136,7 +136,7 @@
 | VOX-021 | Mesh rebuild priority queue | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M1 | frontier | REN-001 | yes | done | astra (gpt-6) | 2026-10-11 | bb07e09 | Guarded priority/FIFO mesh queue; stale promotion invalidation; 4 tests; Q75–76 |
 | REN-001 | Public contract types | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | standard | VOX-001, DATA-001 | yes | done | astra (gpt-6) | 2026-10-11 | 42dfd86 | Rendering contracts; queue/batch ownership; ADR-0018 layout; Q51–53 |
 | REN-002 | SPIKE: Entities Graphics with thousands of runtime brick meshes | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-11 | 66a5baf | No-go: movement delta 1.625 ms, GPU 6.435 ms; REN-003 activated, ADR-0032 proposed |
-| REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002, REN-008 | yes | todo |  | 2026-10-11 |  | Q132: shared shader prerequisite REN-008; ADR-0032 remains proposed |
+| REN-003 | Fallback renderer (only if REN-002 is no-go) | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-002, REN-008 | yes | in-progress | astra (gpt-6) | 2026-10-11 |  | Resume after REN-008; finalize ADR-0032 and measure pooled fallback |
 | REN-004 | Normals, packing and shape tables | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 6b076af | Five shapes × 24 rotations; exact half-cell packing; 42 normals; Q88–89 |
 | REN-005 | Snapshot gathering | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004, SPEC-10, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-11 | 93cd973 | 27-neighbour snapshots, per-cell slopes, bounded props and retained flags; ADR-0029/Q91 |
 | REN-006 | LOD0 mesher | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-004 | yes | done | astra (gpt-6) | 2026-10-11 | 1de74e0 | LOD0 culling/AO/welding; 36.3 µs median; large slope indices safe; ADR-0030/Q92 |
