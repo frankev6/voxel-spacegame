@@ -59,7 +59,7 @@ This spec turns simulation facts into pictures: flying voxel cubes when cells br
 
 ## 4. Data model
 
-### 4.1 Stream types (public contract, `Game.Voxel`, folder `Assets/Game/Voxel/PresentationStreams/`)
+### 4.1 Stream types (public contract; FxKind in `Game.Data.Definitions`, remaining types in `Game.Voxel.PresentationStreams`)
 
 ```csharp
 namespace Game.Data.Definitions
@@ -110,7 +110,7 @@ namespace Game.Voxel.PresentationStreams
         public ContentHash Fx;     // added by SPEC-63: hash of a specific FxDefinition; default (Value 0) = default for Kind
     }
 
-    /// Singleton. The queue is owned by FxEventQueueCreateSystem. Producers write through Queue.AsParallelWriter().
+    /// Singleton. FxEventQueueCreateSystem owns the queue and guard. Producers register atomic writes through Access.
     public struct FxEventQueue : IComponentData
     {
         public NativeQueue<FxEvent> Queue;
@@ -559,12 +559,12 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Tier:** frontier — native queue ownership and guarded producer access (ADR-0050), plus exact content/GPU layouts
 - **Depends on:** `CORE-001`, `DATA-001`
 - **Do:** Create the stream types, `FxEventQueueCreateSystem` and `FxEvents` exactly as in §4.1; `VfxQuality`, `FxMode`, `FxDefinition`, `FxQualityBudget`, `VfxConfigDefinition` exactly as in §4.2 with the `Validate` rules in their comments; `FxGpuEvent`, the four instance structs, `FxStats` as in §4.3; an empty `FxRig : MonoBehaviour` with the §6.1 signatures throwing `NotImplementedException`. Make sure `Game.Voxel.asmdef` references `Unity.Entities.Graphics` (allowed by architecture §3.1; `[MaterialProperty]` needs it).
-- **Files:** `Assets/Game/Voxel/PresentationStreams/{FxEventFlags,FxEvent,FxEventQueue,FxEventQueueCreateSystem,FxEvents,ChunkDissolve}.cs`; `Assets/Game/Data/Definitions/Vfx/{FxKind,VfxQuality,FxMode,FxDefinition,FxQualityBudget,VfxConfigDefinition}.cs`; `Assets/Game/Presentation/Vfx/Data/{FxGpuEvent,TracerInstance,BeamInstance,PlumeInstance,ShieldInstance,FxStats}.cs`; `Assets/Game/Presentation/Vfx/FxRig.cs`
+- **Files:** `Assets/Game/Voxel/PresentationStreams/{FxEventFlags,FxEvent,FxEventQueue,FxEventQueueCreateSystem,FxEvents,ChunkDissolve}.cs`; `Assets/Game/Data/Definitions/Vfx/{FxKind,VfxQuality,FxMode,FxDefinition,FxQualityBudget,VfxConfigDefinition}.cs`; `Assets/Game/Presentation/Vfx/Data/{FxGpuEvent,TracerInstance,BeamInstance,PlumeInstance,ShieldInstance,FxStats}.cs`; `Assets/Game/Presentation/Vfx/FxRig.cs`; `Assets/Game/Tests/EditMode/Vfx/{FxContractTests,FxEventQueueTests,FxEventsTests,FxDefinitionValidationTests}.cs`; `Assets/Game/Tests/EditMode/Voxel/VoxelContractTests.cs` (register the explicitly permitted module singleton, as its existing VFX-001 comment requires)
 - **Acceptance criteria:**
-  - [ ] `UnsafeUtility.SizeOf<FxEvent>() == 56`, `SizeOf<FxGpuEvent>() == 80`, `SizeOf<ShieldInstance>() == 224`, the other instance structs 48.
-  - [ ] A world containing `FxEventQueueCreateSystem` has exactly one `FxEventQueue` singleton; disposing the world leaks nothing.
-  - [ ] `FxDefinition.Validate` and `VfxConfigDefinition.Validate` report every error listed in their comments.
-  - [ ] `tools/compile.sh` clean; `AssemblyRulesTests` pass.
+  - [x] `UnsafeUtility.SizeOf<FxEvent>() == 56`, `SizeOf<FxGpuEvent>() == 80`, `SizeOf<ShieldInstance>() == 224`, the other instance structs 48.
+  - [x] A world containing `FxEventQueueCreateSystem` has exactly one `FxEventQueue` singleton; disposing the world leaks nothing.
+  - [x] `FxDefinition.Validate` and `VfxConfigDefinition.Validate` report every error listed in their comments.
+  - [x] `tools/compile.sh` clean; `AssemblyRulesTests` pass.
 - **Tests:** `FxContractTests.FxEvent_Size_Is56`, `FxContractTests.FxGpuEvent_Size_Is80`, `FxContractTests.InstanceStructs_HaveShaderSizes`, `FxEventQueueTests.World_CreatesSingleton_AndDisposesWithoutLeak` (EcsTestWorld, leak check on), `FxEventsTests.Helpers_FillFieldsPerTable` (one assertion per §5.6 row), `FxDefinitionValidationTests.InvalidCombinations_ReportErrors`.
 
 ### VFX-002 — FxRig: slots, effects, buffers and binding
@@ -739,7 +739,7 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 | 9 | SPEC-20: thruster visual fields (§6.5) | `ThrusterState { float Intensity }` written by `PropulsionSystem`; `ThrusterVisual { float3 NozzleLocal, ExhaustDirLocal; float NozzleRadius }` written once at spawn | Tech lead | — |
 | 10 | SPEC-22: shield state and ripple ring buffer (§6.5) | As in §6.5; ShieldSystem writes the oldest of 8 `ShieldRipple` slots on each hit | Tech lead | — |
 | 11 | SPEC-30: how do ECS-side presentation consumers receive `OriginShifted` in the frame it happens? | `OriginRebaseSystem` also keeps a singleton `OriginShifted : IComponentData { float3 Delta; uint Sequence; }`; each shift sets `Delta` (amount added to every root local position) and increments `Sequence`; at most one shift per frame | Tech lead | — |
-| 12 | SPEC-04: does `ContentDefinition` expose `public virtual void Validate(ValidationReport report)`? | Yes; `ValidationReport.Error(Object asset, string field, string message)` and `Warn(...)` | Tech lead | — |
+| 12 | SPEC-04: does `ContentDefinition` expose `public virtual void Validate(ValidationReport report)`? | Use the canonical SPEC-04 API | Tech lead | Resolved VFX-001 / Q18: Validate(ValidationScope, ContentValidationContext); diagnostics through the asset-bound scope. |
 | 13 | Is `UnityEngine.VFX.VisualEffectAsset` (engine module type) allowed in `Game.Data` although VFX Graph is listed for Presentation only (architecture §3.1)? | Yes: the type is in the engine's VFX module; `Game.Data` does not reference `Unity.VisualEffectGraph.Runtime` | Tech lead | — |
 | 14 | Should hits leave persistent scorch/burn marks on hulls? | No in v1 (cells are removed instead) | Owner | — |
 | 15 | Which specs own the managed event types `SessionReset` and `StarSystemEntered`? | `SessionReset`: SPEC-01 (`FND-001`); `StarSystemEntered`: SPEC-31 (`SYS-001`) | Tech lead | — |

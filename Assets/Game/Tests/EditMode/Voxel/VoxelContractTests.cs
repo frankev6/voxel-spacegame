@@ -19,7 +19,7 @@ namespace Game.Tests.EditMode.Voxel
         // Module singletons allowed to hold native containers (SPEC-10 decision 9). SPEC-11/12 queue and cache singletons and SPEC-63's
         // FxEventQueue are added here by REN-001/PHY-001/VFX-001; SPEC-64's SfxEventQueue lives in Game.Voxel too (AUD-001).
         static readonly HashSet<Type> ContainerSingletons = new HashSet<Type>
-        { typeof(DeferredDisposalQueue), typeof(GridPrototypes), typeof(Game.Voxel.PresentationStreams.SfxEventQueue),
+        { typeof(DeferredDisposalQueue), typeof(GridPrototypes), typeof(Game.Voxel.PresentationStreams.SfxEventQueue), typeof(Game.Voxel.PresentationStreams.FxEventQueue),
           typeof(VoxelRenderConfig), typeof(VoxelRenderRuntime), typeof(BrickMeshQueue), typeof(BrickMeshBatch), typeof(ColliderDirtyQueue), typeof(ColliderBuildCache), typeof(ColliderBatchQueue) };
 
         [Test]
