@@ -639,6 +639,19 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
   - [ ] A ship with no side-facing thrusters has `YawTorque == 0`, `GyroYawTorque > 0` and `TurnRateDeg > 0`; hulks are not updated; a thrust multiplier of 3 triples `ForwardAccel` without a functional recompute.
 - **Tests:** `PropulsionPowerTests.ThrustMultiplier_Applies`, `.MaxSpeedMultiplier_Applies`, `.Unpowered_DoesNotFire`, `.Demand_SameTick`; `PropulsionStatsTests.Spawn_Totals`, `.ThrusterDestroyed_Recomputes`, `.Gyro_TurnsWithoutSideThrusters`, `.Multiplier_CheapUpdate`.
 
+### FLT-013 — Owner flight-control correction before the firing range
+- **Milestone:** M2
+- **Tier:** frontier — integrated input, fixed-step propulsion and actual Fighter handling
+- **Depends on:** `FLT-007`, `FLT-009`, `INP-005`
+- **Do:** Implement Frank's 2026-10-12 request using V2 only: Shift redirects turn input into strafe, boost moves to Ctrl, forward coasting gently decelerates through available thrusters. Verify reverse and ship-local thrust after turning against the actual imported Fighter. Bound assist force requests by installed actuator capacity so impossible requests do not dominate allocation. Keep physical impulse ownership, mass, thruster direction/strength and off-centre torque; no copied V1 code or hull changes. Record the stationary-target shooting range as the next M2 integration priority.
+- **Files:** `Assets/Game/Input/Controls.inputactions`, `Assets/Game/Input/Controls.cs`; `Assets/Game/Presentation/Input/PlayerInputSampleSystem.cs`; `Assets/Game/Simulation/Flight/{FlightConfig,FlightConfigFactory,FlightMath,PropulsionJob}.cs`; `Assets/Game/Data/Definitions/Flight/FlightConfigDefinition.cs`; `Assets/Game/Content/Config/config_flight.asset`; existing input/flight tests; `Assets/Game/Tests/PlayMode/Simulation/Flight/FlightControlCorrectionTests.cs`; related specs, ADR, handoff and playtest controls reference.
+- **Acceptance criteria:**
+  - [ ] Shift+A/D strafes without a commanded turn; W/S remains forward/reverse; Q/E remains direct strafe; Ctrl boosts; mappings remain rebindable and menu-safe.
+  - [ ] Neutral forward motion decays gently, bounded by reverse thrusters; X brakes harder. No synthetic lateral engine or velocity overwrite.
+  - [ ] Real Fighter demonstrates reverse, both strafe directions and thrust along its rotated forward axis. Removing directional thrusters removes that capability. Report mass/force and measured motion rather than inflating all thrust values.
+  - [ ] Live flight verified and captured; existing flight/determinism checks and full suites remain functionally passing.
+- **Tests:** update `InputAssetTests`, `PlayerInputSampleSystemTests.Analog_Mapping`, `FlightMathTests.Targets_Coast`, existing propulsion coast expectations and config validation; add `FlightControlCorrectionTests.Fighter_DirectionalThrust`, `.Fighter_TurnAndStrafe`, `.Fighter_CoastAndBrake`.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
