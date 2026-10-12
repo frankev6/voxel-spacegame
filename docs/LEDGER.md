@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 82 | 0 | 0 | 0 | 7 | 0 | 89 | 10 |
-| M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
+| M2 | 81 | 0 | 0 | 0 | 8 | 0 | 89 | 9 |
+| M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 11 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
@@ -224,7 +224,7 @@
 | DMG-004 | Cell access, quantization and RemoveCell | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-002 | yes | done | astra (gpt-6) | 2026-10-12 | 8b20d15 | Cell writes, DDA, deterministic quantization and debris kinematics; 10 required tests pass |
 | DMG-005 | Point and blast damage | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | done | astra (gpt-6) | 2026-10-12 | 7dbd025 | Point/blast/instance rules complete; 10 required tests; full suites green; Q189 occlusion fixture correction; zero tuning passes |
 | DMG-006 | DamageResolveSystem pipeline | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-005 | yes | done | astra (gpt-6) | 2026-10-12 | 0018fd1 | Ordered gather/sort/plan, exclusive parallel grid resolution and canonical publication; seven tests; full suites green; Q190; repairs remain DMG-019 |
-| DMG-007 | ImpactEventSystem (rams and knockback) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, PHY-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | partial in FND-020: pending impulse and ram data contracts from earlier work; range uses split initial velocity / impact consumer, ram aggregation, knockback, FX and required tests |
+| DMG-007 | ImpactEventSystem (rams and knockback) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 01d5ff2 | Canonical ram pairs, energy/hardness split, cooldown, next-tick planar knockback; six required tests; ADR-0058 |
 | DMG-008 | Brick connectivity summaries | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | todo |  |  |  | partial in FND-020: bounded full-grid fallback connectivity / cached brick connectivity summaries, warm-up and required tests |
 | DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | no | todo |  |  |  | partial in FND-020: bounded full-grid flood and canonical masks / hybrid graph race, node budgets, forced deferrals and full required tests |
 | DMG-010 | SplitSystem: plan, particle tier, deferred detach and debris FX | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-009, VFX-001, AUD-001 | no | todo |  |  |  | partial in FND-020: physical splits and retained deferred seeds / particle/chunk tiers, debris FX/audio and required tests |
@@ -243,7 +243,7 @@
 | WPN-005 | PlayerTargetingSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, AI-001, SPEC-20 | no | todo |  |  |  |  |
 | WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | no | todo |  |  |  | partial in FND-020: manual aim and arcs / targeting, lead, autofire and required tests |
 | WPN-007 | WeaponFireSystem and the projectile store append | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-006, PWR-001 | no | todo |  |  |  | partial in FND-020: serial fire and projectile append / parallel stream flattening, power, beam delivery/pulses and full required tests |
-| WPN-008 | ProjectileStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-003, WPN-007, PWR-001, SPEC-13 | no | todo |  |  |  | partial in FND-020: movement, hull hits and lifetime / parallel stream/compaction pipeline, homing, shields and full required tests |
+| WPN-008 | ProjectileStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-003, WPN-007, PWR-001, SPEC-13 | no | todo |  |  |  | partial in FND-020: movement, hull hits and lifetime; DMG-007 orders stepping after impact / parallel stream/compaction pipeline, homing, shields and full required tests |
 | WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | no | todo |  |  |  |  |
 | WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | no | todo |  |  |  | partial in FND-020: explosion requests into damage / shields, effects and required tests |
 | WPN-011 | CombatGridSetup and turret visuals | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, PWR-001, ABL-001 | no | todo |  |  |  |  |
@@ -312,7 +312,7 @@
 | PERS-015 | Full-world round trip with all real participants | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-011, PERS-012, SPEC-01, SPEC-30, SPEC-31, SPEC-33, SPEC-40, SPEC-41, SPEC-42, SPEC-50 | no | todo |  |  |  |  |
 | VOX-020 | Incremental grid edits for the editor preview | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M3 | frontier | VOX-014 | yes | todo |  |  |  |  |
 | PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | yes | todo |  |  |  |  |
-| DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | no | todo |  |  |  | partial in DMG-002: channels/contracts and readback / impulse consumer and bounded heal/place passes with nine required tests |
+| DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | yes | todo |  |  |  | partial in DMG-002: channels/contracts and readback / impulse consumer and bounded heal/place passes with nine required tests |
 | AI-013 | Fleet data and formations | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-003 | no | todo |  |  |  |  |
 | AI-014 | FleetSystem and member thinking | [SPEC-23](specs/SPEC-23-ai.md) | M3 | frontier | AI-013, AI-007 | no | todo |  |  |  |  |
 | AI-015 | Fleet and swarm scenario and performance | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-014 | no | todo |  |  |  |  |
@@ -768,6 +768,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 188 | 2026-10-12 | SPEC-13 Q26 / architecture §11.1 | Bound the staged full-grid integrity pass | 16384 occupied cells; queued seeds and once-per-grid warning | Tech lead | Resolved ADR-0057: DamageConfig.MaxFullFloodCells guards before flood allocation; IntegritySizeDeferred counts skips. DMG-008/009 own the replacement. |
 | 189 | 2026-10-12 | SPEC-13 Q27 / DMG-005 | Blast occlusion test geometry and warning scope | Preserve 400-damage symmetry; use 1600 damage to reach shielded cells; warn once per resolver lifetime using native state | Tech lead | Resolved DMG-005; no owner gate |
 | 190 | 2026-10-12 | SPEC-13 Q28 / DMG-006 | Deferred range outputs, hasher dependency and repair scope | Per-range native streams; canonical serial explosion publication; bring forward CellStateHasher; repair pass remains DMG-019 | Tech lead | Resolved; no public API change, fixed-step completion or owner gate |
+| 191 | 2026-10-12 | SPEC-13 Q29 / SPEC-63 Q19 | Missing ram effect kind and opposite Unity collision normal convention | Append RamImpact = 13, 14-entry defaults; convert B-to-A normal at collection | Tech lead | Resolved ADR-0058; no new art, owner gate or enum renumbering |
 
 ## Measurements
 
@@ -877,6 +878,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DMG-007 collision damage and next-tick knockback — astra (gpt-6)
+
+1. **Implemented:** `01d5ff2` — ImpactEventSystem applies resolver-owned pending impulses once on the next tick, projects planar linear/angular impulses, collects real Unity Physics contacts, sorts and aggregates canonical pairs, splits ram energy by contact hardness, enforces six-tick cooldowns and prunes stale pairs. Ram damage suppresses duplicate physical impulses; FX/SFX events use the existing queues. ProjectileStepSystem now follows impact processing. General ImpulseRequest consumption remains explicitly TODO(DMG-019).
+2. **Evidence:** six required tests pass, including actual 20-ton physics collisions, resting contact, armour split, next-tick-only impulse application and planar projection. Head-on contact emits one event per side with approximately 3997.627 damage each and a 2 m radius; the next five contact ticks emit none. At 30/60/144 FPS, all runs emit exactly two events totalling **7995.25390625 damage**. Compile has zero C# warnings. Full EditMode **813 passed, 0 failed, 1 skipped**; full PlayMode **116 passed, 0 failed, 29 skipped**, both exit 0, including the four firing-range scenarios. Evidence: `Logs/playtest/dmg007/`. **spec-required: 6, extra: 0**; zero optimization passes.
+3. **Scope/decision:** Q191 / SPEC-13 Q29 / SPEC-63 Q19 and ADR-0058 add the missing RamImpact enum value 13 and extend defaults to 14 entries without renumbering existing values. Unity normals are converted from B-to-A at collection. Other-task files: `Simulation/Weapons/ProjectileStepSystem.cs` (WPN-008 ordering); `Data/Definitions/Vfx/{FxKind,VfxConfigDefinition}.cs` and existing VFX validation test (VFX-001 contract extension). Upload and visual content remain VFX-003/004; audio cues remain unconfigured. Controls, Nocturne, station and Space fire are preserved. No new owner gate; local Git only. No stray InitTestScene remained after the idle run; QualitySettings matches its pre-existing backup and is excluded. Next: DMG-008 brick connectivity, then DMG-009 hybrid integrity.
 
 ### 2026-10-12 — DMG-006 canonical per-grid damage pipeline — astra (gpt-6)
 
