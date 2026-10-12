@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 21 | 0 | 1 | 0 | 84 | 0 | 106 | 14 |
+| M1 | 20 | 1 | 1 | 0 | 84 | 0 | 106 | 13 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 6 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -724,6 +724,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 154 | 2026-10-12 | SPEC-62 CAM-012 | Distance-only look-ahead does not keep the hull framed | Clip output focus using solid bounds and camera frustum | Tech lead | Resolved SPEC-62 Q15: preserve filter state and requested zoom/orbit; center deliberate close inspection; internal bounds handoff, no public contract change. |
 | 155 | 2026-10-12 | SPEC-70 DEV-009 | Contract-only Ready omits absent ship-spawn and universe services | Keep full scope blocked until canonical prerequisites exist | Tech lead | Resolved SPEC-70 Q20: FND-012 plus SPEC-30/31 coordinates/current-system state required; no alternate dev spawner or fabricated metadata. Continue WPN-001/AI-001 and other ready work. |
 | 156 | 2026-10-12 | SPEC-21 WPN-001 | Contract staging cycle and stale task/type annotations | Canonical SpatialHash shell; include existing stats/shot types | Tech lead | Resolved SPEC-21 Q11: AI-001 fills its shell, VFX-001 fills FxDefinition; WeaponShot is 80 B by existing fields, ProjectileRow stays 64 B; no API or runtime behavior change. |
+| 157 | 2026-10-12 | SPEC-23 AI-001 | Missing ability reference and proxy layout/staging details | Canonical ability shell and explicit 64 B layout | Tech lead | Resolved SPEC-23 Q6: ABL-001 fills AbilityDefinition; include prescribed ability-rule types, read-only content lists and config validation signature; preserve proxy fields with trailing padding. |
 
 
 

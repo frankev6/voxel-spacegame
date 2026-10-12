@@ -60,6 +60,7 @@ namespace Game.Simulation.Spatial
     [System.Flags] public enum ProxyFlags : byte { None = 0, PlayerShip = 1, Dormant = 2, Shielded = 4, HasAi = 8 }
 
     /// <summary>One broad-phase object (64 bytes). Implements SPEC-23 §4.1.</summary>
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Size = 64)]
     public struct SpatialProxy
     {
         public Entity Entity;            // grid root or celestial body entity
@@ -154,7 +155,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField, UnityEngine.Range(0, 1.5f)] private float orbitStepRad = 0.35f;  // angle advanced around the target per think
         [UnityEngine.SerializeField] private bool avoidFriendlyFire = true;
         [UnityEngine.SerializeField] private AiAbilityRule[] abilityRules = System.Array.Empty<AiAbilityRule>();   // ≤ 8, checked in order (review X5)
-        // Public getters with the same names in PascalCase.
+        // Public getters with the same names in PascalCase; AbilityRules is IReadOnlyList<AiAbilityRule>.
         public override void Validate(ValidationScope scope, ContentValidationContext context);       // AI-E001..E003 (§7)
     }
 
@@ -168,6 +169,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField, UnityEngine.Min(0)] private float avoidanceMargin = 25;         // m added to radii for local avoidance
         [UnityEngine.SerializeField] private AiProfileDefinition defaultProfile;                     // used when AiSetup gets ContentId.None
         // Public getters.
+        public override void Validate(ValidationScope scope, ContentValidationContext context); // AI-E002, implemented by AI-003
     }
 }
 ```
@@ -275,6 +277,7 @@ namespace Game.Data.Definitions
     public sealed class FormationDefinition : ContentDefinition
     {
         [UnityEngine.SerializeField] private UnityEngine.Vector2[] slots;   // leader-local XZ offsets in metres (x right, y forward)
+        public System.Collections.Generic.IReadOnlyList<UnityEngine.Vector2> Slots => slots;
     }
 }
 ```
@@ -416,8 +419,8 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 - **Milestone:** M1
 - **Tier:** standard — transcribes the exact code of §4 (bodies throw `NotImplementedException`, except `CellKey`, `BeginRead`, `EndRead`, `CompleteAccess`, `Get`)
 - **Depends on:** `CORE-001`, `DATA-001`, `VOX-001`, `WPN-001`
-- **Do:** Create every type of §4.1–§4.4 in the folders of decision 10.
-- **Files:** `Assets/Game/Simulation/Spatial/{ProxyKind,ProxyFlags,SpatialProxy,SpatialBody,SpatialHashState,SpatialHash}.cs`; `Assets/Game/Simulation/Ai/{AiProfile,AiProfilesBlob,AiConfig,AiState,AiBrain,PlayerCombatStatus,AiSetup,AiContent,FleetMember}.cs`; `Assets/Game/Data/Definitions/Ai/{AiFacing,AiRole,AiProfileDefinition,AiConfigDefinition,FormationDefinition}.cs`
+- **Do:** Create every type of §4.1–§4.4 in the folders of decision 10. Fill the canonical SpatialHash shell staged by WPN-001. If AbilityDefinition is not present yet, stage only its ContentDefinition identity with TODO(ABL-001); ABL-001 fills it (§10 Q6).
+- **Files:** `Assets/Game/Simulation/Spatial/{ProxyKind,ProxyFlags,SpatialProxy,SpatialBody,SpatialHashState,SpatialHash}.cs`; `Assets/Game/Simulation/Ai/{AiProfile,AiAbilityRuleDef,AiProfilesBlob,AiConfig,AiState,AiBrain,PlayerCombatStatus,AiSetup,AiContent,FleetMember}.cs`; `Assets/Game/Data/Definitions/Ai/{AiFacing,AiRole,AiAbilityTrigger,AiAbilityRule,AiProfileDefinition,AiConfigDefinition,FormationDefinition}.cs`
 - **Acceptance criteria:**
   - [ ] Compiles; `SpatialProxy` is 64 bytes; components unmanaged.
 - **Tests:** `AiContractTests.SpatialProxy_Is64Bytes`, `.Components_AreUnmanaged`.
@@ -582,6 +585,7 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 | 3 | AI awareness of the player: always perfect inside `SensorRange` (no stealth) | Yes | Owner |
 | 4 | SPEC-02/SPEC-30: add the Core singleton `OriginShiftRecord { uint Sequence; float3 Delta; byte StarSystemChanged; }` (`Game.Core.Components`). `OriginRebaseSystem.OnCreate` creates it; its `DecideJob` writes the values of the latest rebase together with `FrameOrigin` (`Sequence = FrameOrigin.ShiftSequence`). Simulation owners of cached positions (AI anchors here, `ProjectileStore` in SPEC-21) react to it because Game.Simulation cannot read `FrameOrigin` | **Applied** in SPEC-02 §4.3, SPEC-30 §5.10 (2026-10-09). Add the record (last rebase only; consumers detect gaps by `Sequence`) | Tech lead |
 | 5 | Architecture §5 comment says "ShipProxy hash"; SPEC-70 reads `ShipProxy` positions | **Applied** in architecture §5, SPEC-70 §6.4 (2026-10-09). Rename to `SpatialProxy` in both | Tech lead |
+| 6 | AI-001's file list omits the ability-rule types and references an absent AbilityDefinition; SpatialProxy's listed fields naturally occupy 48 bytes despite the 64-byte acceptance contract | **Resolved (2026-10-12):** include the existing ability-rule types, and stage the canonical Game.Data.Definitions.AbilityDefinition identity with TODO(ABL-001), as WPN-001 stages FxDefinition. Honor the explicit 64-byte proxy contract with Sequential Size=64 (trailing padding; existing fields/offsets unchanged). This is contract transcription, not a performance optimization. Expose FormationDefinition.Slots and profile AbilityRules as read-only lists, and declare AiConfigDefinition's AI-E002 validation override for AI-003. | Tech lead |
 
 ## 11. References
 
