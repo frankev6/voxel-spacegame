@@ -23,56 +23,8 @@ using Object = UnityEngine.Object;
 namespace Game.Tests.PlayMode.App
 {
     /// <summary>FND-017: the production boot, imported Fighter, input, physics, camera and save path in one running World.</summary>
-    public sealed class PlayableShipTests
+    public sealed class PlayableShipTests : ProductionSessionFixture
     {
-        string directory;
-        GameComposition Game => GameRoot.Instance.Composition;
-        EntityManager EM => World.DefaultGameObjectInjectionWorld.EntityManager;
-        DevRuntimeHost Host => Services.Get<DevRuntimeHost>();
-        Entity Root { get { Assert.IsTrue(Game.Session.PlayerSpawner.TryGetRoot(out var root)); return root; } }
-        PlayerCommand Command { get { using var q = EM.CreateEntityQuery(typeof(PlayerCommand)); return q.GetSingleton<PlayerCommand>(); } }
-        float3 Position => EM.GetComponentData<LocalTransform>(Root).Position;
-        float Speed => math.length(EM.GetComponentData<PhysicsVelocity>(Root).Linear);
-        static IEnumerator Until(Func<bool> condition, string message, double seconds = 10)
-        {
-            double deadline = Time.realtimeSinceStartupAsDouble + seconds;
-            while (!condition() && Time.realtimeSinceStartupAsDouble < deadline) yield return null;
-            Assert.IsTrue(condition(), message);
-        }
-        internal static IEnumerator Run(Awaitable<FlowResult> operation)
-        {
-            var awaiter = operation.GetAwaiter();
-            yield return Until(() => awaiter.IsCompleted, "Flow did not complete", 30);
-            Assert.AreEqual(FlowResult.Ok, awaiter.GetResult());
-        }
-        [UnitySetUp] public IEnumerator SetUp()
-        {
-            if (GameRoot.Instance != null) { Object.Destroy(GameRoot.Instance.gameObject); yield return null; }
-            directory = Path.Combine(Application.temporaryCachePath, "PlayableShip_" + Guid.NewGuid().ToString("N"));
-            GameRootTestHooks.SaveRoot = Path.Combine(directory, "saves");
-            GameRootTestHooks.SettingsPath = Path.Combine(directory, "settings.json");
-            GameRootTestHooks.SkipIntroScreens = true;
-            Bootstrap.Boot();
-            // Only headless functional runs skip the GPU prerequisite. Live/GPU runs use the production renderer unchanged.
-            if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null)
-            {
-                using var q = EM.CreateEntityQuery(typeof(VoxelConfig)); var config = q.GetSingleton<VoxelConfig>();
-                config.RequireRenderer = 0; q.SetSingleton(config);
-            }
-            yield return null;
-            yield return Until(() => !Game.Flow.IsTransitioning, "Startup completed");
-            // Test Runner uses its own scene; Startup intentionally leaves non-game scenes alone (SPEC-01 Q9).
-            if (Game.Flow.CurrentScene != GameScene.MainMenu)
-                yield return Run(Game.Flow.TransitionAsync(GameScene.MainMenu, SceneEntryReason.Startup));
-            Game.Save.SetActiveProfile(Game.Save.CreateProfile("harness").Id);
-        }
-        [UnityTearDown] public IEnumerator TearDown()
-        {
-            if (GameRoot.Instance != null) { Object.Destroy(GameRoot.Instance.gameObject); yield return null; }
-            GameRootTestHooks.Reset();
-            Bootstrap.Boot(); yield return null;
-            if (directory != null && Directory.Exists(directory)) Directory.Delete(directory, true);
-        }
         IEnumerator StartShip()
         {
             yield return Run(Game.Session.NewGameAsync(new NewGameArgs("Harness", 42, false, ContentId.None)));

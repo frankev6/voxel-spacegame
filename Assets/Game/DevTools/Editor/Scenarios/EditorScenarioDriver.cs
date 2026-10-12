@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
+using Game.App.Testing;
+using Game.Core;
+using Game.Core.Flow;
 using Game.App.DevRuntime;
 using Game.App.DevRuntime.Scenarios;
 using UnityEditor;
@@ -20,6 +24,14 @@ namespace Game.DevTools.Editor.Scenarios
             internal double Requested;
         }
         static readonly Dictionary<int, Entry> runs = new Dictionary<int, Entry>();
+        sealed class CommandEntry
+        {
+            internal string Line;
+            internal double Requested;
+            internal bool RestoreIntro, PreviousIntro;
+            internal readonly TaskCompletionSource<DevCommandResult> Completion = new TaskCompletionSource<DevCommandResult>();
+        }
+        static readonly List<CommandEntry> commands = new List<CommandEntry>();
         const string NextIdKey = "Game.DevTools.ScenarioNextId";
         static EditorScenarioDriver()
         {
@@ -38,11 +50,7 @@ namespace Game.DevTools.Editor.Scenarios
                 var entry = new Entry { Script = script, Requested = EditorApplication.timeSinceStartup,
                     Run = new ScenarioRun { Name = script.Name, FilePath = path, RunId = id, Message = "waiting for dev runtime" } };
                 runs.Add(id, entry);
-                if (!EditorApplication.isPlayingOrWillChangePlaymode)
-                {
-                    EditorSceneManager.OpenScene("Assets/Game/Scenes/Boot.unity", OpenSceneMode.Single);
-                    EditorApplication.isPlaying = true;
-                }
+                EnterPlay();
                 return entry.Run;
             }
             catch (Exception e)
@@ -51,8 +59,47 @@ namespace Game.DevTools.Editor.Scenarios
                 runs[id] = new Entry { Run = run }; return run;
             }
         }
+        static void EnterPlay()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+            EditorSceneManager.OpenScene("Assets/Game/Scenes/Boot.unity", OpenSceneMode.Single);
+            EditorApplication.isPlaying = true;
+        }
+        /// <summary>DEV-008: asynchronously enter Play, await the real boot, then return its runtime operation id.</summary>
+        internal static Task<DevCommandResult> StartCommand(string line, bool intro)
+        {
+            if (EditorApplication.isPlaying)
+                return Task.FromResult(Services.TryGet<DevRuntimeHost>(out var host) && host != null
+                    ? host.Commands.Execute(line, host.Context) : DevCommandResult.Fail("dev runtime not available"));
+            var entry = new CommandEntry { Line = line, Requested = EditorApplication.timeSinceStartup,
+                RestoreIntro = !EditorApplication.isPlayingOrWillChangePlaymode, PreviousIntro = GameRootTestHooks.SkipIntroScreens };
+            if (entry.RestoreIntro) GameRootTestHooks.SkipIntroScreens = !intro;
+            commands.Add(entry);
+            try { EnterPlay(); }
+            catch (Exception e) { FinishCommand(entry, DevCommandResult.Fail(e.Message)); }
+            return entry.Completion.Task;
+        }
+        static void FinishCommand(CommandEntry entry, DevCommandResult result)
+        {
+            commands.Remove(entry);
+            if (entry.RestoreIntro) GameRootTestHooks.SkipIntroScreens = entry.PreviousIntro;
+            entry.Completion.TrySetResult(result);
+        }
+        static void FailCommands(string message)
+        {
+            while (commands.Count > 0) FinishCommand(commands[commands.Count - 1], DevCommandResult.Fail(message));
+        }
         static void Update()
         {
+            for (int i = commands.Count - 1; i >= 0; i--)
+            {
+                var entry = commands[i];
+                if (EditorApplication.isPlaying && Services.TryGet<DevRuntimeHost>(out var host) && host != null
+                    && Services.TryGet<IGameFlow>(out var flow) && !flow.IsTransitioning && flow.CurrentScene == GameScene.MainMenu)
+                    FinishCommand(entry, host.Commands.Execute(entry.Line, host.Context));
+                else if (EditorApplication.timeSinceStartup - entry.Requested > 30)
+                    FinishCommand(entry, DevCommandResult.Fail("dev runtime not available after 30 s"));
+            }
             foreach (var entry in runs.Values)
             {
                 if (entry.Run.Outcome != ScenarioOutcome.Running || entry.Runner != null) continue;
@@ -72,10 +119,12 @@ namespace Game.DevTools.Editor.Scenarios
         static void OnPlayMode(PlayModeStateChange state)
         {
             if (state != PlayModeStateChange.ExitingPlayMode && state != PlayModeStateChange.EnteredEditMode) return;
+            FailCommands("play mode exited");
             foreach (var entry in runs.Values) if (entry.Run.Outcome == ScenarioOutcome.Running) Fail(entry, "play mode exited");
         }
         static void BeforeReload()
         {
+            FailCommands("scripts reloaded");
             foreach (var entry in runs.Values) if (entry.Run.Outcome == ScenarioOutcome.Running) Fail(entry, "scripts reloaded");
         }
         public static ScenarioRun Get(int id) => runs.TryGetValue(id, out var entry) ? entry.Run : null;

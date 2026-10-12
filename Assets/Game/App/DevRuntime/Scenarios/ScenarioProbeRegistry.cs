@@ -17,7 +17,7 @@ namespace Game.App.DevRuntime.Scenarios
         public bool TryGet(string name, out IScenarioProbe probe) => probes.TryGetValue(name, out probe);
         public static ScenarioProbeRegistry CreateDefault()
         {
-            var registry = new ScenarioProbeRegistry(); BuiltInScenarioProbes.Register(registry); return registry;
+            var registry = new ScenarioProbeRegistry(); BuiltInScenarioProbes.Register(registry); PlayerScenarioProbes.Register(registry); return registry;
         }
     }
 }

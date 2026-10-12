@@ -710,6 +710,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 141 | 2026-10-12 | SPEC-03 INP-005 | UI gate and origin system are future work; physics singleton read does not wait | Null gate allows pointer until UI-003; GAL-009 precedes sampling; explicit query dependency completion | Tech lead | Resolved SPEC-03 Q8; Flight-disabled/unbound remains neutral, scene/pause context hookup belongs to FND-017. |
 | 142 | 2026-10-12 | SPEC-01 FND-017 / SPEC-03 / SPEC-60 | Flight context waits for unfinished UI; DEV-008 waits for Flight | Temporary sole scene/pause bridge before sampling; UI-004 removes it | Tech lead | Resolved SPEC-01 Q24 / accepted ADR-0044. Existing Fighter starter and approved camera-relative lighting; FLET does not yet persist pose/velocity. |
 | 143 | 2026-10-12 | SPEC-01 FND-017 | Real World restart leaves PhysicsTemporalCoherenceInfo after paused teardown | Drain existing physics initialization and end-fixed ECB at zero delta | Tech lead | Resolved SPEC-01 Q25 / accepted ADR-0045; package retains ownership; no gameplay tick. |
+| 144 | 2026-10-12 | SPEC-70 DEV-008 | Start-scenario argument has no content or consumer | Explicitly reject nonempty selection | Tech lead | Resolved SPEC-70 Q17: empty uses the configured imported starter; no silent ignore or blueprint reinterpretation. |
+| 145 | 2026-10-12 | SPEC-70 DEV-008 | Edit-mode launch needs a real runtime operation ID | Async boot then registry dispatch | Tech lead | Resolved SPEC-70 Q18: wait for settled MainMenu and host; set intro hook before owned boot, restore after dispatch. |
+| 146 | 2026-10-12 | SPEC-70 DEV-008 | Sandbox exit may autosave an active player profile | Require harness for active sessions | Tech lead | Resolved SPEC-70 Q19: select/create harness only without a session; reject active other profiles and busy flow/save before profile changes. |
 
 
 

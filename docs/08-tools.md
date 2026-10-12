@@ -28,6 +28,7 @@ All scripts find the project root themselves, so you can run them from anywhere 
 | `tools/check-docs.py` | Spec and ledger consistency; run it after editing any doc |
 | `tools/ledger-sync.py` | Adds ledger rows for new spec tasks (never deletes) |
 | `tools/playtest/g.sh <cmd>` | Runs a command in the running Editor: snapshot, logs, UI clicks, keys, mouse, ECS reads. See [tools/playtest/README.md](../tools/playtest/README.md) |
+| `tools/playtest/newgame.sh [seed=1] [ship]` | Enter Play from Boot if needed, launch a campaign in the harness profile, wait for player readiness, print a snapshot; optional start-scenario selection currently unsupported |
 | `tools/playtest/shot.sh`, `perf.sh`, `waitscene.sh`, `to.sh` | Screenshot, frame stats, wait for a scene, hard timeout (macOS has no `timeout`) |
 
 **Where output goes:** `Logs/tools/` (script logs), `Logs/test-results/`, `Logs/perf/` (one JSON record per perf test), `Logs/playtest/`. Never write tool output to `Temp/` (Unity deletes it on exit) or `Assets/`.

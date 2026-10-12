@@ -11,10 +11,11 @@ check takes seconds. Outputs go to `Logs/playtest/` (never `Temp/`, which Unity 
 | `rc.sh` | Recompile through the CLI, wait, print C# errors and Editor state (used by `tools/compile.sh`) |
 | `shot.sh <name>` | Game-view screenshot to `Logs/playtest/<name>.png` |
 | `perf.sh` | Frame timing, draw calls, triangles, memory + voxel entity counts |
+| `newgame.sh [seed=1] [ship]` | Enter Play from Boot if needed, launch into the imported starter, poll readiness and print a snapshot; uses the isolated harness profile |
 | `waitscene.sh <Scene>` | Block until a scene is active |
 | `to.sh <secs> <cmd>` | Hard timeout wrapper (macOS has no `timeout`) |
 
-Game-flow scripts (`newgame.sh`, `toworld.sh`, `scenario.sh`) are added by SPEC-70 once the game exists.
+`newgame.sh` and `scenario.sh` are available. `toworld.sh` follows the travel integration. The optional ship argument is a start-scenario ID; leave it empty until start scenarios exist.
 
 ## Harness commands (`Assets/Game/DevTools/Editor/GameTestHarness.cs`)
 
@@ -43,6 +44,8 @@ Runtime dev commands, reachable as `gh_<name>` and in the in-game console. Each 
 
 | Command (args, defaults) | Purpose |
 |---|---|
+| `gh_newgame` (`--seed`, `--ship=""`, `--intro=false`, `--profile=harness`) | Start a campaign; enter Play from Boot if needed; returns a runtime operation ID |
+| `gh_sandbox` (`--player=true`, `--seed=1`) | Enter a sandbox in the harness profile; enter Play if needed |
 | `gh_help` (`--cmd=""`) | List runtime commands or show one usage; play mode required |
 | `gh_dev` (`--cmd`) | Execute any runtime command line |
 | `gh_op` (`--id`) | Poll `running/succeeded/failed` status without blocking |

@@ -242,7 +242,7 @@ Built-in probes (DEV-005 unless noted):
 | `ecs.count("Component")` | Entities with that component type name (disabled entities excluded) |
 | `audio.listeners` | Enabled `AudioListener` count (dev code may count through `AudioService`; never `Find*`) |
 | `abs(x)`, `min(a,b)`, `max(a,b)`, `distance(x1,z1,x2,z2)` | Math helpers |
-| `player.exists`, `player.ready` (DEV-009) | `PlayerShip` exists; ready = exists, `GameplayActive`, player grid has `PhysicsCollider`, context `Flight` |
+| `player.exists`, `player.ready` (DEV-008) | `PlayerShip` exists; ready = exists, `GameplayActive`, player grid has `PhysicsCollider`, context `Flight` |
 | `player.pos.x/y/z`, `player.upos.x/z`, `player.speed`, `player.id`, `player.cells` (DEV-009) | Local position; `UniversePosition`; speed m/s; `PersistentId.Value`; solid cell count |
 | `grid(id).exists`, `grid(id).cells`, `grid(id).kind`, `grids.count("Ship"\|"Station"\|"Asteroid"\|"Hulk")` (DEV-009) | By `PersistentId` |
 | `star_system` (DEV-018) | Current `StarSystemId.Value` (−1 when none) |
@@ -482,7 +482,7 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Tier:** standard — commands calling specified service APIs
 - **Depends on:** `DEV-006`, `FND-001`, `PERS-001`
 - **Do:** Commands `newgame`, `sandbox` and probes `player.exists`, `player.ready` (§6.2, §6.3); CLI wrappers `gh_newgame`, `gh_sandbox` (edit-mode handling through `EditorScenarioDriver`'s play-mode entry); `tools/playtest/newgame.sh`.
-- **Files:** `Assets/Game/App/DevRuntime/Commands/{NewGameDevCommand,SandboxDevCommand}.cs`, `Assets/Game/App/DevRuntime/Scenarios/PlayerScenarioProbes.cs`, `Assets/Game/DevTools/Editor/Commands/SessionCliCommands.cs`, `tools/playtest/newgame.sh`
+- **Files:** `Assets/Game/App/DevRuntime/Commands/{NewGameDevCommand,SandboxDevCommand,SessionDevOperation}.cs`, `Assets/Game/App/DevRuntime/Scenarios/PlayerScenarioProbes.cs`, `Assets/Game/DevTools/Editor/Commands/SessionCliCommands.cs`, `tools/playtest/newgame.sh`
 - **Acceptance criteria:**
   - [ ] From edit mode, `newgame.sh 42` reaches `player.ready` in ≤ 20 s and prints the snapshot.
   - [ ] Two runs with seed 42 report the same player `PersistentId` and spawn position.
@@ -624,28 +624,32 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 
 ## 10. Open questions
 
-| # | Question | Default if unanswered | Decider |
-|---|---|---|---|
-| 1 | SPEC-01: creating the host | `GameRoot`, last step of `Awake`, inside `#if UNITY_EDITOR \|\| DEVELOPMENT_BUILD`: `var dev = DevRuntimeHost.Create(transform); Services.Register(dev);` | Tech lead |
-| 2 | SPEC-01: new-game and sandbox entry points | **Answered:** `IGameFlow.NewGameAsync(new NewGameArgs(name, seed, creative, startScenario))` and `SceneFlow.EnterSandboxAsync(new SandboxArgs(spawnPlayer, seed))` (SPEC-01 §4.3, §5.4.4) | Tech lead |
-| 3 | SPEC-01: `ShipSpawnService.Spawn` signature | **Answered:** SPEC-01 §4.4 keeps exactly this overload | Tech lead |
-| 4 | SPEC-05: harness saves must not mix with player saves | **Answered:** the harness uses its own profile (`newgame profile=harness`); PlayMode tests set `GameRootTestHooks.SaveRoot`/`SettingsPath` to a temp folder (SPEC-01 §5.1, SPEC-71 TST-003) | Tech lead |
-| 5 | SPEC-03: action names for fire groups, interact and the console | **Answered:** `Flight/FirePrimary`/`FireSecondary`/`FireTertiary`, `Flight/Interact`, `Global/DevConsole` on F1 (the Global map holds only Esc and function keys) | Tech lead |
-| 6 | SPEC-31: body lookup and interaction state | **Answered:** `DevBodyQuery` (this spec, §6.4) over SPEC-31's public components; `InteractionTarget` as in SPEC-31 §4.3 | Tech lead |
-| 7 | SPEC-32: jump request API | **Answered:** `TravelService.RequestJump(StarSystemId, JumpSource.Dev) → JumpRequestResult` (SPEC-32 §4.4); `travel.*` probes from TRV-011 | Tech lead |
-| 8 | SPEC-40: fact access and condition compiler | **Answered:** slot API of `FactStore` and `LogicCompiler.TryCompileExpression` (§6.4) | Tech lead |
-| 9 | SPEC-50: dev grants | **Answered:** `InventoryModel.TryAdd(ContentId, int, out string reason)`, `Wallet.Add(long)` (SPEC-50 §4.3–§4.4) | Tech lead |
-| 10 | SPEC-62: gameplay camera access | `CameraRigService.Camera` (registered in `Services`) | Tech lead |
-| 11 | SPEC-60: theme classes for a code-built screen | Generic classes `panel`, `label`, `label--mono`, `text-field`, `list` exist in the theme | Tech lead |
-| 12 | Where do non-asset test inputs live? | `TestData/` at the project root (`Scenarios/`, `Replays/`, `Golden/`); see Proposed change in the report | Tech lead |
+| # | Question | Default if unanswered | Decider | Answer |
+|---|---|---|---|---|
+| 1 | SPEC-01: creating the host | `GameRoot`, last step of `Awake`, inside `#if UNITY_EDITOR \|\| DEVELOPMENT_BUILD`: `var dev = DevRuntimeHost.Create(transform); Services.Register(dev);` | Tech lead |  |
+| 2 | SPEC-01: new-game and sandbox entry points | **Answered:** `IGameFlow.NewGameAsync(new NewGameArgs(name, seed, creative, startScenario))` and `SceneFlow.EnterSandboxAsync(new SandboxArgs(spawnPlayer, seed))` (SPEC-01 §4.3, §5.4.4) | Tech lead |  |
+| 3 | SPEC-01: `ShipSpawnService.Spawn` signature | **Answered:** SPEC-01 §4.4 keeps exactly this overload | Tech lead |  |
+| 4 | SPEC-05: harness saves must not mix with player saves | **Answered:** the harness uses its own profile (`newgame profile=harness`); PlayMode tests set `GameRootTestHooks.SaveRoot`/`SettingsPath` to a temp folder (SPEC-01 §5.1, SPEC-71 TST-003) | Tech lead |  |
+| 5 | SPEC-03: action names for fire groups, interact and the console | **Answered:** `Flight/FirePrimary`/`FireSecondary`/`FireTertiary`, `Flight/Interact`, `Global/DevConsole` on F1 (the Global map holds only Esc and function keys) | Tech lead |  |
+| 6 | SPEC-31: body lookup and interaction state | **Answered:** `DevBodyQuery` (this spec, §6.4) over SPEC-31's public components; `InteractionTarget` as in SPEC-31 §4.3 | Tech lead |  |
+| 7 | SPEC-32: jump request API | **Answered:** `TravelService.RequestJump(StarSystemId, JumpSource.Dev) → JumpRequestResult` (SPEC-32 §4.4); `travel.*` probes from TRV-011 | Tech lead |  |
+| 8 | SPEC-40: fact access and condition compiler | **Answered:** slot API of `FactStore` and `LogicCompiler.TryCompileExpression` (§6.4) | Tech lead |  |
+| 9 | SPEC-50: dev grants | **Answered:** `InventoryModel.TryAdd(ContentId, int, out string reason)`, `Wallet.Add(long)` (SPEC-50 §4.3–§4.4) | Tech lead |  |
+| 10 | SPEC-62: gameplay camera access | `CameraRigService.Camera` (registered in `Services`) | Tech lead |  |
+| 11 | SPEC-60: theme classes for a code-built screen | Generic classes `panel`, `label`, `label--mono`, `text-field`, `list` exist in the theme | Tech lead |  |
+| 12 | Where do non-asset test inputs live? | `TestData/` at the project root (`Scenarios/`, `Replays/`, `Golden/`); see Proposed change in the report | Tech lead |  |
 
-| 13 | DEV-003 precedes seven managed-event payloads and the camera/player contracts. How is the M0 host staged? | **Answered:** subscribe to the three existing types (SessionReset, GameSaved, GameLoaded); reserve all ten counter names with zero until their owning payload tasks add typed subscriptions. CAM-004/DEV-009 wire camera/player lookups when available; return null/Entity.Null in M0. DEV-004 adds input/UI, DEV-005 expressions, DEV-006 runners. No speculative shared contracts or assembly changes. | Tech lead |
+| 13 | DEV-003 precedes seven managed-event payloads and the camera/player contracts. How is the M0 host staged? | **Answered:** subscribe to the three existing types (SessionReset, GameSaved, GameLoaded); reserve all ten counter names with zero until their owning payload tasks add typed subscriptions. CAM-004/DEV-009 wire camera/player lookups when available; return null/Entity.Null in M0. DEV-004 adds input/UI, DEV-005 expressions, DEV-006 runners. No speculative shared contracts or assembly changes. | Tech lead |  |
 
-| 14 | DEV-004 needs UIRoot before UI-003; how is its document obtained in M0? | **Answered:** DevUiQuery accepts an explicit root resolver for its real-panel tests; default resolver reads a registered UIDocument service. UI-003 registers its owned document at composition (alongside UIRoot) and unregisters it on disposal. With no UI in M0, commands report UI root unavailable. No scene search or placeholder UI. | Tech lead |
+| 14 | DEV-004 needs UIRoot before UI-003; how is its document obtained in M0? | **Answered:** DevUiQuery accepts an explicit root resolver for its real-panel tests; default resolver reads a registered UIDocument service. UI-003 registers its owned document at composition (alongside UIRoot) and unregisters it on disposal. With no UI in M0, commands report UI root unavailable. No scene search or placeholder UI. | Tech lead |  |
 
-| 15 | DEV-005 grammar conflicts with highest-precedence `!`, uppercase R28 tags, and missing future registrations in its example | **Answered:** follow the acceptance precedence (`!`/unary minus highest), allow uppercase in tags only, and test the exact R28 example with explicitly registered parse-only fixtures for future commands/probes. Production still rejects unregistered names. Omitted status is active; header timeout defaults to 300 s and wait timeout to 30 s. | Tech lead |
+| 15 | DEV-005 grammar conflicts with highest-precedence `!`, uppercase R28 tags, and missing future registrations in its example | **Answered:** follow the acceptance precedence (`!`/unary minus highest), allow uppercase in tags only, and test the exact R28 example with explicitly registered parse-only fixtures for future commands/probes. Production still rejects unregistered names. Omitted status is active; header timeout defaults to 300 s and wait timeout to 30 s. | Tech lead |  |
 
-| 16 | Same-second runs overwrite result files; how should the intentional failing smoke fit active suites? | **Answered:** append runId (and a collision suffix if needed) to result filenames. Tag smoke_fail as negative, not smoke/regression; direct invocation still exits 1. Parse/start failures also write JSON. Script polling timeout stops the run (error/exit 2); transport timeouts remain exit 3. | Tech lead |
+| 16 | Same-second runs overwrite result files; how should the intentional failing smoke fit active suites? | **Answered:** append runId (and a collision suffix if needed) to result filenames. Tag smoke_fail as negative, not smoke/regression; direct invocation still exits 1. Parse/start failures also write JSON. Script polling timeout stops the run (error/exit 2); transport timeouts remain exit 3. | Tech lead |  |
+
+| 17 | The ship argument names start scenarios, but no start-scenario content or consumer exists | Use configured starter | Tech lead | Resolved: reject nonempty ship explicitly; default uses GameConfig starter. Do not silently ignore selection or reinterpret it as a blueprint. |
+| 18 | Edit-mode launch needs a runtime operation ID before the runtime host exists | Asynchronous boot dispatch | Tech lead | Resolved: Task-based CLI waits for host and settled MainMenu, then dispatches the registry command and returns its real operation ID. Intro hook applies before the boot started by this wrapper and is restored after dispatch. |
+| 19 | Sandbox scene exit may autosave an active player profile | Keep harness sessions isolated | Tech lead | Resolved: select/create harness only without a session; refuse sandbox from an active non-harness profile. Busy flow/save checks precede profile changes. |
 
 ## 11. References
 

@@ -43,9 +43,18 @@ namespace Game.App.DevRuntime
         public long LogWarnings => Logs.Warnings - warnings;
         public long LogStartSequence => logSequence;
         public long EventCount(string name) => Events.Count(name) - (eventBaseline != null && eventBaseline.TryGetValue(name, out long count) ? count : 0);
-        // CAM-004 and DEV-009 wire the camera service/player query when their contracts land (SPEC-70 Q13).
+        // TODO(DEV-009): expose the existing camera service in the snapshot/aim integration.
         public Camera GameplayCamera => null;
-        public Entity PlayerShipRoot => Entity.Null;
+        public Entity PlayerShipRoot
+        {
+            get
+            {
+                if (World == null || !World.IsCreated) return Entity.Null;
+                var query = Query(TypeManager.GetTypeIndex<Game.Simulation.Commands.PlayerShip>());
+                return query.CalculateEntityCount() == 1 ? query.GetSingletonEntity() : Entity.Null;
+            }
+        }
+        internal bool HasGameplay => World != null && World.IsCreated && !Query(TypeManager.GetTypeIndex<GameplayActive>()).IsEmptyIgnoreFilter;
         internal bool ServicesReady => GameRoot.Instance != null && GameRoot.Instance.Composition != null;
         EntityQuery Query(TypeIndex type)
         {
