@@ -468,7 +468,7 @@ When the Editor map is disabled, set `frame = default`.
 - **Do:** PlayMode test: inject a scripted sequence of presses and holds at simulated 30, 60 and 144 FPS (`Time.captureDeltaTime`). Assert the same number of consumed `Interact` and `Ability1` edges, and the same total thrust-seconds (±1 tick), in the player ship's `ShipCommand` history recorded by a test system.
 - **Files:** `Assets/Game/Tests/PlayMode/Input/FrameRateIndependenceTests.cs`
 - **Acceptance criteria:**
-  - [ ] Edge counts are identical at all three rates; held-thrust tick counts differ by at most 1.
+  - [x] Edge counts are identical at all three rates; held-thrust tick counts differ by at most 1.
 - **Tests:** `FrameRateIndependenceTests.Edges_SameAt30_60_144`, `.Thrust_TickCountsMatch`.
 
 ### INP-008 — Gamepad scheme
