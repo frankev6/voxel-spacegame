@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | Draft |
 | **Area code** | INP (task IDs are `INP-001`, `INP-002`, …) |
-| **Module(s)** | `Game.Input` (folder `Assets/Game/Input/`: the actions asset, generated `Controls` class, `InputService`); `Game.Presentation` (folder `Assets/Game/Presentation/Input/`: `PlayerInputSampleSystem`, `InputCameraInput` helpers) |
+| **Module(s)** | `Game.Input` (folder `Assets/Game/Input/`: the actions asset, generated `Controls` class, `InputService`); `Game.Presentation` (folder `Assets/Game/Presentation/Input/`: `PlayerInputSampleSystem`, `InputCameraInput` helpers); `Game.App.EditorHost` (`EditorInputSampler`, ADR-0048) |
 | **Depends on specs** | SPEC-02 (`InputContext`, `InputContextChanged`, `IWorldPointerGate`, `ControlSettingsData`, `EventBus<T>`, `GameLog`), SPEC-20 (`PlayerCommand`, `ShipCommandFlags`, `PlayerEdgeCounters` types), SPEC-62 (`MainCameraState` for mouse aim) |
 | **Depended on by** | SPEC-01 (constructs `InputService`, binds `PlayerInputSampleSystem`), SPEC-60 (`SetContext`, `Global.Back`, binding display strings), SPEC-61 (rebinding, screen hotkeys), SPEC-62 (camera actions), SPEC-51 (Editor map), SPEC-41 (Dialog map), SPEC-20 (consumes `PlayerCommand`), SPEC-70 (action names for injected input) |
 | **Milestone** | M0 (INP-005…INP-007 in M1) |
@@ -456,9 +456,9 @@ When the Editor map is disabled, set `frame = default`.
 - **Do:** Extend CAM-005’s Flight `InputCameraInput` with its Editor branch (§5.3), test the shared adapter, and implement `Game.App.EditorHost.EditorInputSampler` (§5.4). Declare the exact `EditorActions` and `EditorInputFrame` types from SPEC-51 §4.2 now; EDT-001 reuses them (ADR-0048).
 - **Files:** `Assets/Game/Presentation/Input/InputCameraInput.cs`; `Assets/Game/App/EditorHost/EditorInputSampler.cs`; `Assets/Game/ShipEditor/Data/{EditorActions,EditorInputFrame}.cs`; `Assets/Game/Tests/EditMode/Input/SamplerTests.cs`
 - **Acceptance criteria:**
-  - [ ] Orbit delta is zero unless the hold is pressed; the adapter/rig path applies Y inversion once.
-  - [ ] In the Editor, Ctrl+scroll feeds `ToolWheel` and plain scroll feeds `Zoom`.
-  - [ ] Ctrl+Z sets `Undo` and not `MirrorZ`.
+  - [x] Orbit delta is zero unless the hold is pressed; the adapter/rig path applies Y inversion once.
+  - [x] In the Editor, Ctrl+scroll feeds `ToolWheel` and plain scroll feeds `Zoom`.
+  - [x] Ctrl+Z sets `Undo` and not `MirrorZ`.
 - **Tests:** `SamplerTests.Orbit_OnlyWhileHeld`, `.InvertY`, `.CtrlScroll_ToolWheel`, `.CtrlZ_UndoOnly`.
 
 ### INP-007 — Frame-rate independence test
