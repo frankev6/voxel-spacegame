@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 24 | 1 | 0 | 0 | 81 | 0 | 106 | 16 |
+| M1 | 24 | 0 | 0 | 0 | 82 | 0 | 106 | 16 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 5 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 2 |
@@ -188,7 +188,7 @@
 | UI-002 | Theme skeleton, panel settings and root UXML | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-001 | yes | done | astra (gpt-6) | 2026-10-12 | a494f84 | Panel/theme/config and six non-picking layers; three asset tests pass; Q147 |
 | UI-003 | UIRoot construction, layers and sound hooks | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-002, CORE-001 | yes | done | astra (gpt-6) | 2026-10-12 | fdade56 | Root/document boot lifecycle, prewarm, sound hooks; live flight preserved; Q148–150 |
 | UI-004 | UINavigator stack, pause token and input context | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-003 | yes | done | astra (gpt-6) | 2026-10-12 | 23b3cf5 | Navigator owns context/pause; live Resume/Escape restore Fighter controls; ADR-0047 |
-| UI-005 | Text entry context and world-pointer gate | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-004 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |  |
+| UI-005 | Text entry context and world-pointer gate | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-004 | yes | done | astra (gpt-6) | 2026-10-12 | 4cdc9a9 | Text focus/Back and live flight pointer gating; viewport fix Q153; 7 required tests pass |
 | UI-006 | MVVM base, converters and number strings | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | frontier | UI-001 | yes | todo |  |  |  |  |
 | UI-007 | Base controls: buttons, panel, list, inputs, key hint, markers, HUD plates | [SPEC-60](specs/SPEC-60-ui-framework.md) | M1 | standard | UI-002, UI-006 | no | todo |  |  |  |  |
 | CAM-001 | Public contract types | [SPEC-62](specs/SPEC-62-camera.md) | M1 | standard | CORE-001 | yes | done | astra (gpt-6) | 2026-10-11 | f078fc9 | Exact contracts, unmanaged view, two required tests; deferred Fx members Q126 |
@@ -829,6 +829,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — UI-005 done — astra (gpt-6)
+
+- **Implementation 4cdc9a9:** root focus callbacks derive TextEntry context; Back blurs typing before navigating. The world-pointer gate blocks pickable UI, blocking screens and the stack-change frame plus one. UIRoot implements/registers the existing Core gate and is bound to the production PlayerInputSampleSystem; disposal unregisters callbacks and the interface slot. Seven prescribed PlayMode tests exercise real runtime panels and focus.
+- **Live integration found and fixed Q153 / SPEC-60 Q17:** the first headless tests passed but real HUD clicks still set fire. An in-sampler probe proved `Screen.height` was **1427** (Editor window) while the game panel was **1080**; mouse (164,958) became y469 instead of y122. Convert to panel scale first, then flip against the actual panel height. Pointer tests now use the RenderTexture viewport independently of `Screen.height`, removing the shared mistaken assumption. CLI mouse state also differs from player-loop state, so final evidence was recorded by a temporary LateUpdate probe in the real game.
+- **Actual GPU game after correction:** isolated launch **2.035 s**; held left mouse over the HUD button gave **gate=false/fire=0**, over empty world **gate=true/fire=1**. W gave thrust (0,1); focusing a field produced **TextEntry/thrust=0/fire=0**. With pause open and the field focused, the first real Escape restored Menu without closing, the second restored Flight. Real W moved the ship again (final forward velocity **53.19214 m/s**); **zero runtime errors**. Temporary test UI/probes were removed with Play exit; Editor closed and incidental settings restored. Evidence: `Logs/playtest/ui005/`, especially `live-input.txt`; the `*-before-fix*` files document the defect, not the final result.
+- **Validation after the fix:** compile **zero C# warnings**; full EditMode **728 pass, 2 advisory timing failures, 1 explicit skip** (Write1MiB **3.4669 ms** vs 3; MeshBuild128 **1.0529 ms** vs 0.5). Full headless PlayMode **83 pass, 12 GPU-only skips**, including all seven new tests. Docs **507 tasks / zero errors**. **Zero optimization passes.**
+- **Next gameplay finding:** the inspected actual capture `Logs/playtest/fighter-input-isolation.png` clips the Fighter at the bottom during fast close-zoom flight. Added ready **CAM-012** to SPEC-62 for bounds-aware framing and real before/after evidence; take it next, before UI support work. INP-004 and UI-006/007 remain ready. HANDOFF updated. No owner art decision or new asset was introduced.
 
 ### 2026-10-12 — UI-004 done — astra (gpt-6)
 
