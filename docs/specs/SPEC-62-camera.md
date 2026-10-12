@@ -35,7 +35,7 @@ The camera shows the planar game from above and behind the player ship so the fl
 
 ## 3. Decisions (binding)
 
-1. **Custom rig, no Cinemachine package.** Reasons: (a) Cinemachine's de-occluder/decollider uses PhysX queries and this game has no PhysX colliders at runtime (ADR-0004); (b) Cinemachine targets `Transform`s, so every ECS target would need a synced proxy GameObject; (c) `CinemachineInputAxisController` reads input directly and would bypass `InputService` contexts (architecture §8); (d) the needs are small (follow, orbit, zoom, shake, warp) and pure-math testable; (e) adding a package needs an ADR (ADR-0011). Recorded by CAM-002.
+1. **Custom rig, no Cinemachine package.** Reasons: (a) Cinemachine's de-occluder/decollider uses PhysX queries and this game has no PhysX colliders at runtime (ADR-0004); (b) Cinemachine targets `Transform`s, so every ECS target would need a synced proxy GameObject; (c) `CinemachineInputAxisController` reads input directly and would bypass `InputService` contexts (architecture §8); (d) the needs are small (follow, orbit, zoom, shake, warp) and pure-math testable; (e) adding a package needs an ADR (ADR-0011). Recorded by CAM-002 in [ADR-0038](../decisions/ADR-0038-camera-rig.md).
 2. **One `Camera` for the whole app**, instantiated by `CameraRigService` from `CameraConfig.CameraPrefab` as a child of `GameRoot` (DontDestroyOnLoad). Content scenes (`MainMenu`, `World`, `BlueprintLab`) contain **no** `Camera` component. Reason: 06-E11 (uncleared back buffer) and one owner.
 3. **The flight plane never reads edge-on.** Flight pitch (angle between camera forward and the XZ plane) is clamped to **[35°, 80°]**, default **55°** (DESIGN-SYSTEM §4 reference camera). Config validation rejects `MinPitchDeg < 20`.
 4. **Distances are absolute metres**, default **150 m**, range **[25 m, 400 m]** (DESIGN-SYSTEM §4: 50 / 150 / 300 m reference), vertical FOV **40°**.
@@ -365,8 +365,8 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Do:** Write `docs/decisions/ADR-NNNN-camera-rig.md` (NNNN = next free number, status *Proposed*) using `ADR-0000-template.md`: context (03 §5.11 recommended Cinemachine 3; ADR-0011 deferred it), decision = §3 decision 1 with reasons (a)–(e), consequences (no authoring tools; cinematic sequences out of v1; revisit via a new ADR if cutscenes are added), alternatives (Cinemachine 3 with proxy transforms and manual axis input). Link it from this spec's §11 in the same commit.
 - **Files:** `docs/decisions/ADR-NNNN-camera-rig.md`, `docs/specs/SPEC-62-camera.md`
 - **Acceptance criteria:**
-  - [ ] ADR follows the template and lists all five reasons.
-  - [ ] `tools/check-docs.py` passes.
+  - [x] ADR follows the template and lists all five reasons.
+  - [x] `tools/check-docs.py` passes.
 - **Tests:** none (document); `tools/check-docs.py` run recorded in the ledger log.
 
 ### CAM-003 — Camera math helpers
@@ -496,6 +496,8 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 | 9 | Deferring the whole IFxFrameReader interface to CAM-008 prevents CAM-004 Bind from compiling (CAM-008 depends on CAM-005) | Add an empty binding interface now; defer only its FxEvent property | Tech lead | Resolved CAM-001: retain the §6 interface name with a CAM-008 TODO for Current, and defer ShakeRule.Kind as instructed. No FxKind/FxEvent substitute is invented; VFX-001 owns those contracts. |
 
 ## 11. References
+
+- [ADR-0038 — Custom camera rig instead of Cinemachine](../decisions/ADR-0038-camera-rig.md) (CAM-002 decision record).
 
 - Audit `03-galaxy-world.md` §5.11 (camera), B9c, B26, S5; `LEDGER.md` R7 (pitch overwritten to 0 → edge-on plane); `06-ui-shipeditor.md` E11, §5.3.2 (editor orbit camera).
 - `docs/design/DESIGN-SYSTEM.md` §4 (reference viewing conditions: 40° FOV, 55° pitch, 50/150/300 m).
