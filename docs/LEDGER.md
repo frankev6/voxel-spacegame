@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 6 | 0 | 1 | 0 | 101 | 0 | 108 | 1 |
+| M1 | 5 | 0 | 1 | 0 | 102 | 0 | 108 | 1 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -149,7 +149,7 @@
 | REN-010 | BrickMeshBuildSystem | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-005, REN-006, REN-007 | yes | done | astra (gpt-6) | 2026-10-12 | be4b370 | Snapshot-only Burst batches verified; performance deferred: 0.864 ms vs 0.5 ms, zero tuning passes |
 | REN-011 | BrickMeshApplySystem, cleanup and statistics | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-010, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-12 | 18a0e45 | Pooled apply/cleanup, shared registration, camera transforms; six GPU checks pass |
 | REN-012 | GridLodSystem, Dormant and LOD switching | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011 | yes | done | astra (gpt-6) | 2026-10-12 | 6b2f87e | Hysteresis, conditional versions, async apply recovery; live Fighter LOD1 → LOD0 |
-| REN-013 | Rendering gate suite | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-012, REN-008 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Integrated rendering regressions; measure advisory targets without renderer tuning |
+| REN-013 | Rendering gate suite | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-012, REN-008 | yes | done | astra (gpt-6) | 2026-10-12 | 1461748 | Three GPU tests pass; real pipeline, MAE 0; moving delta 0.029626 ms, idle 0.117376 ms; no tuning |
 | REN-014 | Prop block instancing | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M1 | frontier | REN-011, REN-008 | yes | done | astra (gpt-6) | 2026-10-12 | 37097fa | Applied prop cells, moving bounds, four GPU tests; 10k props 0.01465 ms |
 | PHY-001 | Public contract types | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | standard | CORE-001, DATA-001, VOX-001 | yes | done | astra (gpt-6) | 2026-10-11 | 1f27ec6 | Physics contracts, exact filters, native/blob ownership; 4 required tests |
 | PHY-002 | SPIKE: Unity Physics capabilities for nested voxel compounds | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M1 | frontier | PHY-001 | yes | done | astra (gpt-6) | 2026-10-11 | dd85d8c | Nested GO; all ten checks recorded |
@@ -213,7 +213,7 @@
 | DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | no | todo |  |  |  |  |
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 9349e78 | Sparse text recorder/replay; five required tests; even-tick 30/60/144 commands match |
 | TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | done | astra (gpt-6) | 2026-10-12 | 1392d35 | Real Boot/flow fixture; four tests; temp saves/settings and unchanged real profile timestamps |
-| TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | no | todo |  |  |  |  |
+| TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | yes | todo |  |  |  |  |
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
 | PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | todo |  |  |  |  |
@@ -852,6 +852,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — REN-013 done — astra (gpt-6)
+
+- **Changed:** three required rendering regressions use real GridSpawn → snapshots → Burst mesher → apply → pooled submission, with physics present, a 1920×1080 URP camera and production content. The fixture owns a separate world, restores cameras/lighting/pipeline and disposes its resources. SPEC-11 Q35 / ledger Q173 accounts for ADR-0032's pooled renderer in the original gate wording. The initial Unity-rendered Ship20k reference was visually inspected before storage; tests never replace it automatically. Its first setup check was corrected to wait until deferred spawning adds GridSpawning before querying the enable bit.
+- **GPU validation:** **3 passed**. Ship20k: **MAE 0**, **341,662 nonblack pixels**, all **10 bricks** applied. HollowStation1M: **1,008,128 cells / 872 bricks**, inclusive render share **0.117376 / 0.173208 ms median/p95**. Lattice2500: static **0.131499 ms**, moving **0.161125 ms**, delta **0.029626 ms**. Reference CPU settings, 17 workers, 60 warm-up + 300 measured frames per state. **Zero tuning passes**; existing renderer allowance remains exhausted.
+- **Full checks:** compile zero C# warnings; EditMode **765 passed, 2 advisory timing misses, 1 explicit skip** (Write1MiB **3.4633 ms** vs 3; MeshBuild128 **1.0460 ms** vs 0.5); headless PlayMode **107 passed, 19 GPU skips**. Required perf wrapper ran headlessly: no EditMode match, two GPU skips, no new records, so wrapper exits nonzero; the real GPU run above supplies both passing perf records. Evidence `Logs/playtest/ren013/`, plus the checked-in reference PNG. Docs clean.
+- **Next:** TST-004 combined voxel readiness/memory checks, then DEV-007/016/019 and M1 system review. No new owner decision, hull design or art change; approved Nocturne environment preserved.
 
 ### 2026-10-12 — AUD-010 done — astra (gpt-6)
 
