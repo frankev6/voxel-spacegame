@@ -303,7 +303,7 @@ Output: `MusicCommand { bool Change; MusicState Target; ContentHash Cue; float F
 ### 5.6 UI sounds, cues and stingers (main thread)
 - `PlayUi(sound)`: cue = `uiSounds[(int)sound]`; skip when `now − lastStart[cue] < cue.Cooldown`; play on the next `UiVoice` round-robin (stealing the oldest).
 - `PlayCue(id)`: resolve through `ContentDatabase`; 2D on a UI voice when `bus == Ui`, else on the SFX pool as a candidate with `PlayerSource` at the listener position.
-- `PlayCueAt(id, pos, vol)`: one candidate through `SfxVoiceAllocator` with `maxNew` 1.
+- `PlayCueAt(id, pos, vol)`: one candidate through `SfxVoiceAllocator` with `maxNew` 1. Until AUD-006, AUD-005 supports only explicitly 2D cues (Q15).
 - `PlayStinger(id)`: play on `Stinger` (replacing any playing stinger), start ducking.
 - Unknown `ContentId` → `GameLog.WarnOnce("Audio.UnknownCue." + id.Value, …)`, no sound.
 
@@ -499,12 +499,12 @@ Timing tests run with safety checks off (SPEC-71 perf fixture). Functional tests
 - **Tier:** standard — implements §5.6 exactly
 - **Depends on:** `AUD-003`
 - **Do:** Implement `PlayUi`, `PlayCue`, `PlayCueAt` (2D path only until AUD-006; spatial path then routes through the allocator), `PlayStinger` with ducking (§5.2 step 4 ducking part), cooldowns per cue for UI, round-robin UI voices.
-- **Files:** `Assets/Game/Presentation/Audio/AudioService.cs`, `Assets/Game/Presentation/Audio/UiVoicePool.cs`
+- **Files:** `Assets/Game/Presentation/Audio/AudioService.cs`, `Assets/Game/Presentation/Audio/UiVoicePool.cs`; `Assets/Game/Tests/PlayMode/Presentation/Audio/AudioUiTests.cs`
 - **Acceptance criteria:**
-  - [ ] `PlayUi(Hover)` twice within 0.05 s plays once; after 0.06 s plays again.
-  - [ ] Nine `PlayUi` calls in one frame use 8 voices and steal the oldest.
-  - [ ] A stinger lowers music voice volume to `10^(−8/20)` of normal within 0.2 s and restores it 1 s after the stinger ends.
-  - [ ] 0 B GC per `PlayUi` call after the first.
+  - [x] `PlayUi(Hover)` twice within 0.05 s plays once; after 0.06 s plays again.
+  - [x] Nine `PlayUi` calls in one frame use 8 voices and steal the oldest.
+  - [x] A stinger lowers music voice volume to `10^(−8/20)` of normal within 0.2 s and restores it 1 s after the stinger ends.
+  - [x] 0 B GC per `PlayUi` call after the first.
 - **Tests:** `AudioUiTests.Hover_RespectsCooldown`, `AudioUiTests.NinthVoice_StealsOldest`, `AudioUiTests.Stinger_DucksAndRestoresMusic`, `AudioUiTests.PlayUi_NoGcAlloc` (PlayMode).
 
 ### AUD-006 — SfxEvent drain: coalescing, cooldown and voice allocation
@@ -620,6 +620,8 @@ Timing tests run with safety checks off (SPEC-71 perf fixture). Functional tests
 | 12 | §4.3 lists the cue and config validation rules without codes | AUD-001 uses AUD-E001 clips empty or null, AUD-E002 minDistance ≥ maxDistance, AUD-E003 Ui cue with spatialBlend > 0; AUD-E010 mixer or group missing, AUD-E011 uiSounds not 11 or one missing, AUD-E012 music cue missing/not Music bus/not looping, AUD-E013 ambienceWorld not an Ambience loop, AUD-E014 combat cue missing, AUD-E015 combatEnterSignals < 1, AUD-E016 sceneMusic lacks a scene | Tech lead |
 | 13 | AUD-002 assumes manual Editor UI, but Frank requires CLI/headless jobs | **Answer (resolved in AUD-002):** use the installed Unity Editor mixer-authoring API through a temporary reflected Editor job, delete it after creation, and verify the saved mixer with AudioMixer.FindMatchingGroups/GetFloat. No runtime reflection or package/assembly change. This produces the specified asset without owner intervention. | Tech lead |
 | 14 | AUD-003 must compose audio in M0, but config_audio/cue content is AUD-007 in M2 | **Answer (resolved in AUD-003):** boot resolves config_audio when available and always constructs/registers the core service. A null config is a silent staging mode: one listener, all 60 pools, pause/follow/disposal, no mixer writes or playback. Missing groups in an existing config still error and fall back to Master. AUD-007 supplies the fully validated config and cues; no fake content or weakened content validation. | Tech lead |
+
+| 15 | AUD-005 needs managed 2D playback before AUD-006's SFX allocator and AUD-008's music director exist | Use existing pooled sources and the specified victim rules; keep spatial playback deferred, retain unducked music gains | Tech lead | Resolved AUD-005: per-cue cached definitions/clip history and UI cooldowns allocate only at construction. Non-UI 2D calls use the existing 40-source pool with §5.3 priority/audibility victim rules until AUD-006 centralizes allocation. PlayCueAt skips spatial cues until then. AUD-008 supplies base crossfade gains through internal SetMusicVoiceVolumes before ducking; source/mixer volumes never compound. Null config stays silent until AUD-007. |
 
 ## 11. References
 
