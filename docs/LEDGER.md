@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 5 | 0 | 1 | 0 | 102 | 0 | 108 | 1 |
+| M1 | 4 | 0 | 1 | 0 | 103 | 0 | 108 | 2 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -204,16 +204,16 @@
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | done | astra (gpt-6) | 2026-10-12 | bd35dac | Four scenes listener-free; same listener across real flow; mutation proven |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | done | astra (gpt-6) | 2026-10-12 | b8521e9 | UI/cue playback and ducking; four tests pass, 0 B over 1000 UI calls |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | done | astra (gpt-6) | 2026-10-12 | 8879cfa | 19 clips: 2 Blocked, 17 Unverified; release guard and four tests |
-| DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | no | todo |  |  |  |  |
+| DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | yes | todo |  |  |  |  |
 | DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0b4269c | Real launch/probes, isolated profile, live edit-mode launch 1.370 s; Q144–146 |
 | DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | blocked | astra (gpt-6) | 2026-10-12 |  | Needs implemented FND-012 and SPEC-30/31 coordinates; contract-only Ready is premature (Q155) |
 | DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | no | todo |  |  |  |  |
 | DEV-015 | In-game dev console | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-003, UI-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 8cf2df1 | F1 console; history/completion, async results, 0 B closed; ADR-0049 |
-| DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | no | todo |  |  |  |  |
+| DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | yes | todo |  |  |  |  |
 | DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | no | todo |  |  |  |  |
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 9349e78 | Sparse text recorder/replay; five required tests; even-tick 30/60/144 commands match |
 | TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | done | astra (gpt-6) | 2026-10-12 | 1392d35 | Real Boot/flow fixture; four tests; temp saves/settings and unchanged real profile timestamps |
-| TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Full voxel rendering/collision readiness and advisory resource measurements |
+| TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-12 | a56c266 | Full pipeline: 15-frame readiness, idle 0.224481 ms; total memory performance deferred (Q174); zero tuning |
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
 | PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | todo |  |  |  |  |
@@ -746,12 +746,15 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 
 
+| 174 | 2026-10-12 | SPEC-71 TST-004 | Whole-voxel memory inspection cannot establish complete native/engine overhead | Report owned capacity and leave total peak unavailable | Tech lead | Resolved SPEC-71 Q10: real integrated mesh/collider readiness and inclusive updating-system markers; separately inspect owned capacity through damage overlap after source eviction. Below-budget accounting is inconclusive for total memory. Advisory misses/unavailable total are deferred, zero tuning. |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
 
 | Date | Task | Gate | Result | Notes |
 |---|---|---|---|---|
+| 2026-10-12 | TST-004 | Full voxel pipeline (Apple M5 Pro, Metal, 1920×1080) | Idle **0.224481 / 0.600458 ms median/p95**; spawn **15 frames**, **5.571041 ms max**; accounted reference memory **36,180,776 B**, thin shell **131,349,912 B** | 60 warm-up + 300 samples, 17 workers; mesh and installed collider readiness. Four damage buckets for memory; source evicted. Total memory **inconclusive**, private scratch/engine overhead excluded (Q174); performance deferred, **0 tuning passes**. Evidence `Logs/playtest/tst004/gpu.xml` |
 | 2026-10-12 | REN-013 | Production renderer / screenshot (Apple M5 Pro, Metal, 1920×1080) | 1,008,128-cell / 872-brick station render share **0.117376 / 0.173208 ms median/p95**; 2,500-brick static **0.131499 ms**, moving **0.161125 ms**, delta **0.029626 ms** | Inclusive current renderer markers, 60 warm-up + 300 measured frames per state; real spawn/snapshot/build/apply. Ship20k **MAE 0**, **341,662 nonblack pixels**, ten applied bricks. All three GPU tests pass; zero tuning. Evidence Logs/playtest/ren013/ |
 | 2026-10-11 | CAM-011 | Camera CPU / GC / circle (Apple M5 Pro, reference CPU settings, headless Editor) | Inclusive camera update median/p95 **0.002833 / 0.003000 ms** (≤0.05 ms); allocation median/p95/max **0/0/0 B** | 60 warm-up + 300 measured updates; includes ECS reads, InputCameraInput, rig, view state and VoxelViewer write. Circle: **185,964 frames / 10.009428 s / 80 m/s**, pitch **54.999989–55.000019°**, every measured update 0 B. Q131 defers actual-raycast 0.15 ms evidence to CAM-007; no missing path counted as passed |
 | 2026-10-11 | CAM-005 | Moving-target camera at 30/60/144 FPS | Final X **230.4243 / 230.4243 / 230.4243 m** (printed precision), 0.05 m agreement gate passes | Target 100 m/s for 2 s; default look-ahead and half-lives. Original endpoint update: 232.0124 / 231.2455 / 230.7731 m; 30–60 error 0.766891 m. Q130 integrates the exponential cascade without relaxing the test |
@@ -852,6 +855,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — TST-004 done — astra (gpt-6)
+
+- **Changed:** four required integrated voxel tests use real spawn, snapshots, mesher, pooled rendering and physics with a 1920×1080 URP camera. Readiness requires every brick mesh plus a valid installed collider. Inclusive updating Game.Voxel system markers and Entities Graphics are measured without nested marker double counting. Memory accounting evicts the spawn source, inspects allocated capacities/unique collider blobs and exercises four damage buckets over 300 frames; independent jobs are completed before inspection, separately from timing. Implementation `a56c266`; SPEC-71 Q10 / ledger Q174 states the measurement limits.
+- **GPU evidence:** **6 passed, 1 inconclusive**, including all three REN-013 regressions. HollowStation1M: idle **0.224481 / 0.600458 ms median/p95**, spawn ready **frame 15**, worst voxel frame **5.571041 ms**. Accounted peak **36,180,776 B** (ECS chunks 671,744; buffer heap 7,321,824; mesh GPU 20,582,464; mesh native 267,780; mesh batch 3,491,864; queues 252,376; collider storage 989,668; blobs 2,603,056). Thin shell reports **131,349,912 B**. Reference CPU settings, 17 workers, 60 warm-up + 300 samples. **Total memory remains inconclusive**: private scratch/engine overhead is excluded; the JSON budget result applies only to the accounted capacities. GPU process exits 2 because of this explicit inconclusive result. **Performance deferred; zero tuning passes**, with no renderer changes.
+- **Full checks:** compile zero C# warnings; EditMode **765 passed, 2 existing advisory misses, 1 explicit skip** (Write1MiB **5.1419 ms** vs 3; MeshBuild128 **1.4718 ms** vs 0.5); PlayMode **107 passed, 23 GPU-only skips**. Required headless perf wrapper: no EditMode matches, four GPU skips, no fresh records; actual measurements are from the GPU run above. No native-leak/aged-TempJob diagnostics in these PlayMode/GPU logs. Evidence `Logs/playtest/tst004/`. Docs clean.
+- **Next:** DEV-016 live flight record/replay, then DEV-007/019, built M1 system review and M2 combat. No new owner decision or art change; preserve the approved Nocturne environment. The total-memory measurement gap does not block progression.
 
 ### 2026-10-12 — REN-013 done — astra (gpt-6)
 
