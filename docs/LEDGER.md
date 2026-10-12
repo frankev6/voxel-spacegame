@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 3 | 0 | 1 | 0 | 104 | 0 | 108 | 1 |
+| M1 | 2 | 1 | 1 | 0 | 104 | 0 | 108 | 0 |
 | M2 | 87 | 0 | 0 | 0 | 0 | 0 | 87 | 10 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
@@ -204,7 +204,7 @@
 | AUD-004 | Listener regression and scene validation (R5/R7) | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003, SPEC-01 | yes | done | astra (gpt-6) | 2026-10-12 | bd35dac | Four scenes listener-free; same listener across real flow; mutation proven |
 | AUD-005 | UI sounds, PlayCue and stingers | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-003 | yes | done | astra (gpt-6) | 2026-10-12 | b8521e9 | UI/cue playback and ducking; four tests pass, 0 B over 1000 UI calls |
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | done | astra (gpt-6) | 2026-10-12 | 8879cfa | 19 clips: 2 Blocked, 17 Unverified; release guard and four tests |
-| DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | yes | todo |  |  |  |  |
+| DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | Automatic smoke/regression cases through production boot and scenario runner |
 | DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0b4269c | Real launch/probes, isolated profile, live edit-mode launch 1.370 s; Q144–146 |
 | DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | blocked | astra (gpt-6) | 2026-10-12 |  | Needs implemented FND-012 and SPEC-30/31 coordinates; contract-only Ready is premature (Q155) |
 | DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | no | todo |  |  |  |  |
