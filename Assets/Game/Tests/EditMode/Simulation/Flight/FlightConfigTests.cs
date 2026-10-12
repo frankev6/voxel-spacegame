@@ -34,7 +34,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
             using var content = new ContentService(ContentDatabaseBuilder.Rebuild());
             using var world = EcsTestWorld.Create();
             content.CreateSingletons(world.EntityManager);
-            BootSingletons.CreateAll(world.EntityManager, content.Catalog);
+            using var bootConfigs = BootSingletons.CreateAll(world.EntityManager, content.Catalog, content.PropMeshes);
             Assert.AreEqual(expected, world.GetSingleton<FlightConfig>());
             using var configs = world.EntityManager.CreateEntityQuery(typeof(FlightConfig), typeof(BootSingleton));
             Assert.AreEqual(1, configs.CalculateEntityCount());

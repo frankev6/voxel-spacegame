@@ -35,7 +35,7 @@ namespace Game.Tests.EditMode.Voxel.Physics
             using var content = new ContentService(ContentDatabaseBuilder.Rebuild());
             using var world = EcsTestWorld.Create();
             content.CreateSingletons(world.EntityManager);
-            BootSingletons.CreateAll(world.EntityManager, content.Catalog);
+            using var bootConfigs = BootSingletons.CreateAll(world.EntityManager, content.Catalog, content.PropMeshes);
             var definition = content.Catalog.Get<PhysicsVoxelConfigDefinition>(new ContentId("config_physics"));
             var step = world.GetSingleton<PhysicsStep>();
             Assert.AreEqual(PhysicsVoxelConfigFactory.CreatePhysicsStep(definition), step);

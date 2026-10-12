@@ -703,6 +703,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 137 | 2026-10-12 | SPEC-11 REN-003 | Metal frame timings include idle phase gaps; recorder lacks full thread timing | Diagnostic native execution union for all frame buffers; retain elapsed latency and raw render-thread roots | Tech lead | SPEC-11 Q28 with Unity's documented Metal timing semantics; unchanged 6 ms work limits, ≥300 complete frames. Diagnostic execution 5.714083 ms / elapsed 6.335625 ms; fresh validation unavailable (zero complete frames). Deferred under ADR-0042; no performance pass claimed. Owner should review this explicit measurement interpretation. |
 
 
+| 138 | 2026-10-12 | SPEC-11 REN-009 / SPEC-01 boot | Render configuration lacks explicit prop-mesh input/disposal and old palette text conflicts with approved look | Boot-owned disposable factory result; approved REN-008 NOCTURNE palette | Tech lead | Resolved SPEC-11 Q29: internal boot signature supplies PropMeshes and retains cleanup in the composition stack; shared source assets remain unchanged. |
 
 
 

@@ -89,7 +89,7 @@ namespace Game.App.Boot
             if (config?.ContentDatabase == null) throw new InvalidOperationException("GameRootConfig.ContentDatabase is not set on the GameRoot prefab");
             Content = Push(new ContentService(config.ContentDatabase));
             Content.CreateSingletons(em);
-            BootSingletons.CreateAll(em, Content.Catalog);
+            Push(BootSingletons.CreateAll(em, Content.Catalog, Content.PropMeshes));
             Register(Content);
             Content.Catalog.TryGet(new ContentId("config_game"), out GameConfigDefinition gameConfig);
             GameConfig = gameConfig;                                       // FND-E003 guarantees exactly one in a validated database

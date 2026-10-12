@@ -1,4 +1,5 @@
 using UnityEngine;
+using Game.Data.Validation;
 
 namespace Game.Data.Definitions
 {
@@ -30,5 +31,15 @@ namespace Game.Data.Definitions
         public float LodHysteresis => lodHysteresis;
         public float DormantDistance => dormantDistance;
         public bool ReleaseCpuMeshCopies => releaseCpuMeshCopies;
+        public override void Validate(ValidationScope scope, ContentValidationContext context)
+        {
+            base.Validate(scope, context);
+            if (!brickMaterial) scope.Error("REN-E001", nameof(brickMaterial), "Brick material is required.");
+            if (!propMaterial) scope.Error("REN-E001", nameof(propMaterial), "Prop material is required.");
+            if (!palette) scope.Error("REN-E001", nameof(palette), "Paint palette is required.");
+            if (!brickPoolCopy) scope.Error("REN-E001", nameof(brickPoolCopy), "Pool copy compute shader is required.");
+            if (meshBatchMin < 16 || meshBatchMax > 256 || meshBatchMin > meshBatchMax)
+                scope.Error("REN-E003", nameof(meshBatchMin), "Mesh batch must satisfy 16 <= min <= max <= 256.");
+        }
     }
 }

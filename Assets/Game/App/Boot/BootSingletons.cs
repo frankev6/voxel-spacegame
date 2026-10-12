@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using Game.Voxel.Rendering;
+using UnityEngine;
 using Game.Data.Components;
 using Game.Core;
 using Game.Core.Components;
@@ -15,7 +18,7 @@ namespace Game.App.Boot
     /// ContentService.CreateSingletons made in step 2) carries BootSingleton. Implements SPEC-01 §4.5, §5.3.</summary>
     internal static class BootSingletons
     {
-        internal static void CreateAll(EntityManager em, Game.Data.Services.ContentCatalog catalog)
+        internal static IDisposable CreateAll(EntityManager em, Game.Data.Services.ContentCatalog catalog, IReadOnlyList<Mesh> propMeshes)
         {
             var created = new List<Entity>();
 
@@ -25,18 +28,43 @@ namespace Game.App.Boot
                 foreach (var e in entities) created.Add(e);
 
             Create(em, VoxelConfigFactory.Create(catalog.Get<VoxelConfigDefinition>(new ContentId("config_voxel"))), created);
-            // TODO(REN-009): VoxelRenderConfig.
-            var physics = catalog.Get<PhysicsVoxelConfigDefinition>(new ContentId("config_physics"));
-            Create(em, PhysicsVoxelConfigFactory.Create(physics), created);
-            Create(em, PhysicsVoxelConfigFactory.CreatePhysicsStep(physics), created);
-            // TODO(DMG-003): DamageConfig. TODO(PWR-003): PowerTuning.
-            Create(em, FlightConfigFactory.Create(catalog.Get<FlightConfigDefinition>(new ContentId("config_flight"))), created);
-            // Later rows (ENC-001, WPN, AI, ABL, SYS, ECO-007) are added by their tasks (SPEC-01 §5.3).
+            var renderConfig = VoxelRenderConfigFactory.Create(catalog.Get<VoxelRenderConfigDefinition>(new ContentId("config_voxel_render")), propMeshes);
+            var lifetime = new RenderConfigLifetime(em.World, renderConfig);
+            try
+            {
+                lifetime.ConfigEntity = Create(em, renderConfig, created);
+                var physics = catalog.Get<PhysicsVoxelConfigDefinition>(new ContentId("config_physics"));
+                Create(em, PhysicsVoxelConfigFactory.Create(physics), created);
+                Create(em, PhysicsVoxelConfigFactory.CreatePhysicsStep(physics), created);
+                // TODO(DMG-003): DamageConfig. TODO(PWR-003): PowerTuning.
+                Create(em, FlightConfigFactory.Create(catalog.Get<FlightConfigDefinition>(new ContentId("config_flight"))), created);
+                // Later rows (ENC-001, WPN, AI, ABL, SYS, ECO-007) are added by their tasks (SPEC-01 §5.3).
 
-            Create(em, default(PersistentIdAllocator), created);
+                Create(em, default(PersistentIdAllocator), created);
 
-            foreach (var e in created)
-                if (!em.HasComponent<BootSingleton>(e)) em.AddComponent<BootSingleton>(e);
+                foreach (var e in created)
+                    if (!em.HasComponent<BootSingleton>(e)) em.AddComponent<BootSingleton>(e);
+                return lifetime;
+            }
+            catch { lifetime.Dispose(); throw; }
+        }
+
+        sealed class RenderConfigLifetime : IDisposable
+        {
+            readonly World world;
+            VoxelRenderConfig config;
+            internal Entity ConfigEntity;
+            public RenderConfigLifetime(World world, VoxelRenderConfig config) { this.world = world; this.config = config; }
+            public void Dispose()
+            {
+                if (world.IsCreated && ConfigEntity != Entity.Null && world.EntityManager.Exists(ConfigEntity))
+                {
+                    world.EntityManager.CompleteAllTrackedJobs();
+                    world.EntityManager.DestroyEntity(ConfigEntity);
+                }
+                VoxelRenderConfigFactory.Destroy(ref config);
+                ConfigEntity = Entity.Null;
+            }
         }
 
         /// <summary>Writes a component-value singleton with the editor name "Cfg.&lt;Type&gt;" and records it (for factory rows).</summary>

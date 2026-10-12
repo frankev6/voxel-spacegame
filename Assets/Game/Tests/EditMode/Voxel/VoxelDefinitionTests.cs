@@ -74,7 +74,7 @@ namespace Game.Tests.EditMode.Voxel
             using var content = new ContentService(ContentDatabaseBuilder.Rebuild());
             using var world = EcsTestWorld.Create();
             content.CreateSingletons(world.EntityManager);
-            BootSingletons.CreateAll(world.EntityManager, content.Catalog);
+            using var bootConfigs = BootSingletons.CreateAll(world.EntityManager, content.Catalog, content.PropMeshes);
             var asset = content.Catalog.Get<VoxelConfigDefinition>(new ContentId("config_voxel"));
             Assert.AreEqual(1024, asset.SpawnBricksPerFrame); Assert.AreEqual(0.5f, asset.DefaultCellSize);
             Assert.AreEqual(VoxelConfigFactory.Create(asset), world.GetSingleton<VoxelConfig>());

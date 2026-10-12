@@ -57,7 +57,7 @@ namespace Game.Tests.PlayMode.Boot
             var composition = GameRoot.Instance.Composition;
             CollectionAssert.AreEqual(ExpectedSteps, composition.StepLog, "SPEC-01 §5.2 order");
             var built = composition.DisposeStack.Select(d => d.GetType().Name).ToList();
-            CollectionAssert.AreEqual(new[] { "SettingsService", "ContentService", "BlueprintLibrary", "RegistryLifetime", "InputService", "AudioService", "PauseService", "SaveService", "SceneFlow", "GameSession", "CameraRigService", "SettingsApplier", "DevRuntimeHost" }, built);
+            CollectionAssert.AreEqual(new[] { "SettingsService", "ContentService", "RenderConfigLifetime", "BlueprintLibrary", "RegistryLifetime", "InputService", "AudioService", "PauseService", "SaveService", "SceneFlow", "GameSession", "CameraRigService", "SettingsApplier", "DevRuntimeHost" }, built);
             yield return Shutdown();
             built.Reverse();
             CollectionAssert.AreEqual(built, GameComposition.LastDisposeLog, "disposed in reverse");
@@ -82,7 +82,7 @@ namespace Game.Tests.PlayMode.Boot
                 var e = Assert.Throws<InvalidOperationException>(() =>
                     GameComposition.Build(host.transform, config, new SavePaths(Path.Combine(tempRoot, "saves")), new SettingsPaths(Path.Combine(tempRoot, "settings.json"))));
                 StringAssert.Contains("5 pause", e.Message);
-                CollectionAssert.AreEqual(new[] { "PauseService", "AudioService", "InputService", "RegistryLifetime", "BlueprintLibrary", "ContentService", "SettingsService" }, GameComposition.LastDisposeLog,
+                CollectionAssert.AreEqual(new[] { "PauseService", "AudioService", "InputService", "RegistryLifetime", "BlueprintLibrary", "RenderConfigLifetime", "ContentService", "SettingsService" }, GameComposition.LastDisposeLog,
                     "everything built before the failure is disposed, newest first");
                 Assert.AreEqual(0, Game.Core.Services.Count);
             }

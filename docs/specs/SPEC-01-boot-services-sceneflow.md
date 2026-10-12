@@ -320,7 +320,7 @@ Every row is one step. A step's object is pushed onto `DisposeStack` when it is 
 | # | Step | Registered as | Added by |
 |---|---|---|---|
 | 1 | `settings = new SettingsService(new NewtonsoftSaveJsonCodec(), settingsPaths)` (§5.1); `settings.Load()` | `SettingsService`, `ISettingsService` | FND-004 |
-| 2 | `content = new ContentService(config.ContentDatabase)` (validates; throws `ContentValidationException` → boot fails loudly); `content.CreateSingletons(em)`; `BootSingletons.CreateAll(em, content.Catalog)` (§5.3); `blueprints = new BlueprintLibrary(...)`; `registry = VoxelStructureRegistry.CreateRuntime(blueprints)`; create `VoxelStructureRegistryRef` singleton | `ContentService`, `BlueprintLibrary`, `VoxelStructureRegistry` | FND-005, DATA-007, VOX (registry task) |
+| 2 | `content = new ContentService(config.ContentDatabase)` (validates; throws `ContentValidationException` → boot fails loudly); `content.CreateSingletons(em)`; `Push(BootSingletons.CreateAll(em, content.Catalog, content.PropMeshes))` (§5.3); `blueprints = new BlueprintLibrary(...)`; `registry = VoxelStructureRegistry.CreateRuntime(blueprints)`; create `VoxelStructureRegistryRef` singleton | `ContentService`, `BlueprintLibrary`, `VoxelStructureRegistry` | FND-005, DATA-007, VOX (registry task) |
 | 3 | `input = new InputService(settings.Current.Controls)` | `InputService` | INP (service task) |
 | 4 | `audio = new AudioService(audioConfig, config.ContentDatabase, SettingsMapping.ToVolumes(settings.Current.Audio), transform)`; `audio.BindTo(world)` (the world exists since step 2) | `AudioService`, `IAudioService` | AUD (service task) |
 | 5 | `pause = new PauseService()`; `audio.BindPause(pause)` | `PauseService`, `IPauseService` | FND-003 |
@@ -361,7 +361,7 @@ Creates ECS configuration singletons from content, once per boot, **in table ord
 |---|---|---|
 | `BlockDefsRef`, `OrientationTablesRef` | `ContentService.CreateSingletons` (step 2) | DATA-007 |
 | `VoxelConfig` | `VoxelConfigFactory.Create(catalog.Get<VoxelConfigDefinition>("config_voxel"))` | VOX config task |
-| `VoxelRenderConfig` | `VoxelRenderConfigFactory.Create(catalog)` | REN config task |
+| `VoxelRenderConfig` | `VoxelRenderConfigFactory.Create(catalog.Get<VoxelRenderConfigDefinition>("config_voxel_render"), content.PropMeshes)`; returned boot lifetime disposes it (SPEC-11 Q29) | REN config task |
 | `PhysicsVoxelConfig` | `PhysicsVoxelConfigFactory.Create(catalog.Get<PhysicsVoxelConfigDefinition>("config_physics"))` | PHY config task |
 | `PhysicsStep` | `PhysicsVoxelConfigFactory.CreatePhysicsStep(catalog.Get<PhysicsVoxelConfigDefinition>("config_physics"))` | PHY config task |
 | `DamageConfig` | `DamageConfig.FromDefinition(catalog.Get<DamageConfigDefinition>("config_damage"))` with `Table = DamageContent.BuildTable(catalog)` (SPEC-13 §4.7; disposed at shutdown with the other boot blobs) | DMG config task |

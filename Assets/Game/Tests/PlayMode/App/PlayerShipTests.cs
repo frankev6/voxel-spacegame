@@ -48,6 +48,7 @@ namespace Game.Tests.PlayMode.App
             public readonly EcsTestWorld World;
             public readonly ContentService Content;
             readonly BlueprintLibrary blueprints;
+            readonly IDisposable bootConfigs;
             readonly VoxelStructureRegistry registry;
             readonly PauseService pause = new PauseService();
             public readonly SaveService Save;
@@ -63,7 +64,7 @@ namespace Game.Tests.PlayMode.App
                 registry = VoxelStructureRegistry.CreateRuntime(blueprints);
                 World = EcsTestWorld.Create(typeof(GridSpawnSystem), typeof(GridSpawnBodyInitSystem), typeof(ThrusterInitSystem),
                     typeof(SimClockAdvanceSystem), typeof(GridColliderCleanupSystem), typeof(DeferredDisposalSystem));
-                Content.CreateSingletons(EM); BootSingletons.CreateAll(EM, Content.Catalog);
+                Content.CreateSingletons(EM); bootConfigs = BootSingletons.CreateAll(EM, Content.Catalog, Content.PropMeshes);
                 // Rendering has its own M1 integration task; this fixture tests physical/player readiness headlessly.
                 using (var q = EM.CreateEntityQuery(typeof(VoxelConfig)))
                 { var voxel = q.GetSingleton<VoxelConfig>(); voxel.RequireRenderer = 0; q.SetSingleton(voxel); }
@@ -92,7 +93,7 @@ namespace Game.Tests.PlayMode.App
             { Assert.IsTrue(Session.PlayerSpawner.TryGetRoot(out var root)); return root; }
             public void Dispose()
             {
-                Session.Dispose(); Flow.Dispose(); Save.Dispose(); World.Dispose();
+                Session.Dispose(); Flow.Dispose(); Save.Dispose(); bootConfigs.Dispose(); World.Dispose();
                 Object.DestroyImmediate(registry); blueprints.Dispose(); Content.Dispose(); pause.Dispose();
                 if (Directory.Exists(directory)) Directory.Delete(directory, true);
             }

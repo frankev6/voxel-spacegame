@@ -254,7 +254,7 @@ public sealed class VoxelPaletteDefinition : ContentDefinition         // single
 }
 ```
 
-`VoxelRenderConfigFactory.Create(VoxelRenderConfigDefinition def, IReadOnlyList<Mesh> propMeshes) → VoxelRenderConfig` builds the palette `Texture2D(256, 1, RGBA32, false) { filterMode = Point, wrapMode = Clamp }` and the `PropMeshes` array (`Allocator.Persistent`); `VoxelRenderConfigFactory.Destroy(ref VoxelRenderConfig c)` disposes the array and destroys the texture. Legacy paint colours 0..16 (`Import/Legacy/content/Items/Consumables/Paint/`) are entered in slots 0..16 of the placeholder palette.
+`VoxelRenderConfigFactory.Create(VoxelRenderConfigDefinition def, IReadOnlyList<Mesh> propMeshes) → VoxelRenderConfig` builds the palette `Texture2D(256, 1, RGBA32, false) { filterMode = Point, wrapMode = Clamp }` and the `PropMeshes` array (`Allocator.Persistent`); `VoxelRenderConfigFactory.Destroy(ref VoxelRenderConfig c)` disposes the array and destroys the texture. The placeholder palette uses the approved DESIGN-GUIDE / ADR-0040 NOCTURNE colors already authored by REN-008, including Q4/Q30 defaults; it does not restore superseded legacy colors. SPEC-01 boot passes ContentService.PropMeshes to this factory and retains a disposable config owner through shutdown.
 
 ### 4.4 Shader contract (`Assets/Game/Voxel/Rendering/Shaders/`)
 
@@ -523,11 +523,11 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - **Milestone:** M1
 - **Tier:** standard — definitions listed field by field
 - **Depends on:** `REN-001`, `REN-008`
-- **Do:** Implement `VoxelRenderConfigDefinition`, `VoxelPaletteDefinition` (legacy colours 0..16 in the placeholder asset), `VoxelRenderConfigFactory.Create/Destroy`. Create `config_voxel_render.asset` and `config_voxel_palette.asset` in `Assets/Game/Content/Config/`.
-- **Files:** `Assets/Game/Data/Definitions/Voxel/{VoxelRenderConfigDefinition,VoxelPaletteDefinition}.cs`; `Assets/Game/Voxel/Rendering/VoxelRenderConfigFactory.cs`; `Assets/Game/Content/Config/{config_voxel_render,config_voxel_palette}.asset`; `Assets/Game/Tests/EditMode/Voxel/Rendering/RenderConfigTests.cs`
+- **Do:** Implement `VoxelRenderConfigDefinition`, `VoxelPaletteDefinition` (approved NOCTURNE palette, Q29), `VoxelRenderConfigFactory.Create/Destroy`. Create `config_voxel_render.asset` and `config_voxel_palette.asset` in `Assets/Game/Content/Config/`.
+- **Files:** `Assets/Game/Data/Definitions/Voxel/{VoxelRenderConfigDefinition,VoxelPaletteDefinition}.cs`; `Assets/Game/Voxel/Rendering/VoxelRenderConfigFactory.cs`; `Assets/Game/Content/Config/{config_voxel_render,config_voxel_palette}.asset` and `BrickPool.mat`; `Assets/Game/App/Boot/{BootSingletons,GameComposition}.cs`; `Assets/Game/Tests/EditMode/Voxel/Rendering/RenderConfigTests.cs`
 - **Acceptance criteria:**
-  - [ ] Factory output matches the definition values; palette texture pixels equal the colours; `Destroy` leaks nothing.
-  - [ ] Validation: missing materials or palette → error; palette length ≠ 256 → error.
+  - [x] Factory output matches the definition values; palette texture pixels equal the colours; `Destroy` releases texture/native storage.
+  - [x] Validation: missing materials, pool-copy shader or palette → error; palette length ≠ 256 → error.
 - **Tests:** `RenderConfigTests.Factory_CopiesValues`, `.PaletteTexture_MatchesColours`, `.Validation_Errors`.
 
 ### REN-010 — BrickMeshBuildSystem
@@ -642,6 +642,8 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 | 26 | Metal growth/upload ordering loses earlier indices, and raw vertex IDs omit the nonzero command base | Separate CPU upload staging, GPU-only pool writes and explicit per-slot vertex-start metadata; indirect baseVertexIndex zero | Tech lead | Resolved contract in ADR-0032 after three-command pixel/readback evidence: initial old index ranges read back zero; all vertex ranges existed but a nonzero-base command selected the first range until explicitly offset. Copy readback was correct before upload, and a synchronous barrier made the test pass; command ordering alone did not. Staging repair remains subject to pixel/growth tests. |
 | 27 | Per-brick indirect commands miss Metal GPU/render-thread gates | Coalesce adjacent selected index intervals; GPU global indices and uint vertex owners | Tech lead | Accepted ADR-0041 after 60-sample diagnostic GPU 22.000125 ms; same geometry, culling and 300-sample acceptance gates. Final implementation and validation pending. |
 | 28 | Metal frame timing measures elapsed latency, including phase gaps, rather than GPU work | Report complete native GPU execution diagnostically; retain elapsed measurements and full render-thread roots | Tech lead | Resolved 2026-10-12. [Unity documents deferred Metal phase gaps](https://docs.unity.com/en-us/engine/6000.6/manual/analysis/graphics-performance-profiling/profile-rendering/frame-timing-manager/manager). Q28 defines the unchanged 6 ms GPU **work** budget as the union of native execution intervals for a complete frame: all uploads, shadows, surface, depth, SSAO and copies; overlapping intervals counted once, only gaps without that frame's execution excluded. Also report first-upload-to-last-render elapsed span and 300 unique positive FrameTiming values; never present either as passing the latency limit. A diagnostic trace gave execution 5.714083 ms versus native elapsed 6.335625 ms; fresh validation remains unavailable: the final capture found zero complete frames. Performance is deferred under ADR-0042; no further initial measurement passes. Isolate one camera, group buffers in submission order through its complete render buffer, drop only capture boundaries, require ≥300 frames, and fail missing data. Run uncapped with VSync off; 60 FPS pacing makes full-thread roots include the intentional wait. The 6 ms render-thread gate uses 300 raw profiler roots including every descendant, a conservative bound on active thread work. No geometry, quality or numeric budget reduction. |
+
+| 29 | Boot factory signature omits prop meshes/lifetime; old palette text conflicts with approved art | Boot supplies ContentService.PropMeshes and owns disposal; copy the approved REN-008 palette | Tech lead | Resolved 2026-10-12: internal BootSingletons.CreateAll returns a disposable RenderConfigLifetime retained by GameComposition (and test fixtures), destroys its singleton and factory allocations on shutdown/failure. Shared source materials remain assets. The config references BrickLitIndirect and the explicit pool-copy compute shader. Palette follows DESIGN-GUIDE / ADR-0040, preserving the existing Q4/Q30 default rather than reintroducing legacy colors. |
 
 ## 11. References
 
