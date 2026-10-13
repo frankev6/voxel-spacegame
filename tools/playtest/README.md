@@ -49,8 +49,14 @@ This is a procedural test fixture using existing blocks, not a finished station 
 | `invoke --type T --method M [--args a,b] [--path ""]` | Reflection call with primitive args (debugging only) |
 | `find --type T [--max 30]` | Scene objects with a component type, with positions |
 | `perf` | Main-thread ms (15-frame average), draws, triangles, GC alloc per frame, memory, entity totals |
+| `gh_dmg_hash` | One JSON line with the canonical ComputeWorldHash (hex string) and current tick; Play mode required |
+| `gh_dmg_stats` | One JSON line with published prior-tick DamageTickStats and cumulative GridDamageStats, sorted by persistent id; Play mode required |
+| `gh_dmg_hit --x <metres> --y <metres> --z <metres> --amount <positive> --radius <nonnegative>` | Queue one kinetic DamageEvent on the first ready damageable persistent grid whose root-local half-open bounds contain this local-frame world point; overlaps choose the lowest persistent id. Radius 0 targets one cell, positive radius uses the resolver's blast path. JSON reports queued, not applied |
+| `gh_dmg_kill_core --persistentId <unsigned decimal id>` | Queue lethal kinetic cell hits for every remaining cell of the grid's live core, including multi-cell cores; JSON reports the grid id and number queued. Resolver/death systems apply damage and the hulk transition on a later tick |
 
 Harness command names may omit the `gh_` prefix in `g.sh`. `HarnessCommandTests` checks that every `[CliCommand]` has a row here with all its arguments.
+
+The four damage commands return compact JSON for both success and failure. Persistent ids are decimal strings to preserve all 64 bits. Damage commands post through the existing main-thread channel inbox; they never edit cells, HP or hulk state directly. Requests remain queued while simulation is paused. `LastTickStats` describes the previously published tick, while per-grid counters are cumulative after outstanding jobs finish.
 
 ## Game commands (SPEC-70 §6.3)
 
