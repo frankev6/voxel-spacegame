@@ -914,11 +914,13 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 333 | SPEC-32 Q12: travel validation and geometry dependencies | Resolved: scoped field errors precede geometry checks; inclusive blueprint bounds and voxel shape radius use double arithmetic, shipped gates validated against real content. | Tech lead |
 | 335 | SPEC-30 Q33: start-location time source | Resolved: use canonical SimClock UniversalTime, zero before a clock exists; app sets/restores clock before placement. No duplicate saved time. | Tech lead |
 | 336 | SPEC-01 Q30/Q31: real spawner integration and duplicate fleet borrow | Resolved: install against actual galaxy service; internal registered-source path reuses the fleet-owned handle and never releases it. Service releases only its own registrations. Production session binding remains pending. | Tech lead |
+| 337 | SPEC-40 Q23: converted quest count | Resolved: eleven source quests merge three Whisper chapters into one chain, yielding nine total quests (eight standalone plus chain), plus three contracts. Preserve all source strings; no invented tenth quest. | Tech lead |
 | 338 | SPEC-42 Q9: quest-definition construction blocked by whole narrative spec | Resolved: explicit completed compiler/binder/catalog/import/validator prerequisites; actual boot exception requires real QST-002 implementation. Runtime narrative execution remains separate, all required validation cases retained. | Tech lead |
 | 339 | SPEC-30 Q34: GLXY restore bounds and ownership | Resolved: direct internal visit-count restore, remaining-byte count bounds, canonical sorted unique records, failed restore clears partial state; independently framed corrupt VOXS drops only that record with a warning. | Tech lead |
 | 340 | SPEC-30 Q35: live session composition before PLOC/loader | Resolved: actual galaxy/ticker/GLXY registered and owned; missing old chunks warn, start fallback waits for restored SimClock, stale deferred reset cannot dispose a newer campaign. Pose/docking and streaming remain SYS tasks. | Tech lead |
 | 341 | SPEC-31 Q13: world-loader dependencies include later and optional work | Resolved: explicit completed galaxy/origin, voxel and physics lifetime prerequisites for SYS-004; full T1 acceptance preserved, later streaming tiers and visuals remain separate. | Tech lead |
 | 342 | SPEC-32 Q13: arrival solver held by whole galaxy spec | Resolved: completed TRV-001, GAL-002 and GAL-008 are its actual prerequisites; retain five functional checks and advisory fixture, leave travel/streaming acceptance separate. | Tech lead |
+| 343 | SPEC-40 Q24: native conversion representation | Resolved: preserve dynamic encounter marker labels without fabricated pins; retain fixed contract format strings. Three once-only condition beats select the failed Whisper stage. Declare opening_cache_found for the specified rumor; its writer remains QST-009. | Tech lead |
 | 344 | SPEC-33 Q25: composition/placement sequencing | Resolved: completed ENC-002 and GAL-006/008 are direct prerequisites; fixed RNG/geometry/tests remain unchanged, director integration is ENC-007. | Tech lead |
 | 334 | SPEC-33 Q24: legacy first formation conflicts with final encounter table | Resolved: retain/report original formation and explicit replacement diagnostics; authored ENC-010 composition table governs final fleets, real assets required. | Tech lead |
 | 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
@@ -1046,6 +1048,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — NAR-016 / ECO-009 source integration — astra (gpt-6)
+
+- Integrated quest converter f26977f and economy assets c0f0c244 on task/NAR-016-integration. Source review retains chapter-specific failure beats and real typed content references. Questions337/343 mirror SPEC-40 Q23/24.
+- NAR-016: spec-required: 4, extra: 0; ECO-009: spec-required: 2, extra: 0. Checks and actual quest generation remain pending the compatible QST-002 compiler batch; no Unity run or acceptance claim. Production balance unchanged.
+- All three existing workers remain active: ENC-006222, TRV-005234, QST-002196. Previous turn verified these live worker handles and confirmed fast-fixture rules; this turn integrates delivered source.
 
 ### 2026-10-13 — SYS-004 required fixtures compile — astra (gpt-6)
 
