@@ -28,13 +28,16 @@ namespace Game.Tests.EditMode.Galaxy.Travel
             internal readonly VoxelConfigDefinition Voxel;
             internal readonly GalaxyGenerationDefinition Galaxy;
             internal readonly List<ContentDefinition> Definitions = new();
-            internal Fixture()
+            readonly bool fieldsOnly;
+            internal Fixture(bool fieldsOnly = false)
             {
+                this.fieldsOnly = fieldsOnly;
                 var fuel = AssetDatabase.LoadAssetAtPath<ItemDefinition>("Assets/Game/Content/Items/resource_fuel.asset");
                 var cue = AssetDatabase.LoadAssetAtPath<AudioCueDefinition>("Assets/Game/Content/Audio/cue_warp.asset");
                 Assert.IsNotNull(fuel); Assert.IsNotNull(cue);
                 Config = TestContentFactory.Create<TravelConfigDefinition>("config_travel", so =>
                 { TestContentFactory.Set(so, "fuelItem", fuel); TestContentFactory.Set(so, "departCue", cue); TestContentFactory.Set(so, "arriveCue", cue); });
+                if (fieldsOnly) return;
                 Blueprint = TestContentFactory.Create<ShipBlueprintDefinition>("ship_travel_test", so =>
                 { so.FindProperty("boundsMin").vector3IntValue = new Vector3Int(-10, -10, -10); so.FindProperty("boundsMax").vector3IntValue = new Vector3Int(9, 9, 9); });
                 Gate = TestContentFactory.Create<BodyTemplateDefinition>("body_travel_gate", so =>
@@ -54,6 +57,7 @@ namespace Game.Tests.EditMode.Galaxy.Travel
             }
             internal ValidationReport Validate()
             {
+                if (fieldsOnly) return TestContentFactory.Validate(Config);
                 var report = new ValidationReport("TRV-002 fixture"); var catalog = ContentCatalog.Build(Definitions, report);
                 foreach (var config in Definitions.OfType<TravelConfigDefinition>()) config.Validate(report.For("content:" + config.IdString), null);
                 new TravelContentValidator().Validate(catalog, report); return report;
@@ -79,7 +83,7 @@ namespace Game.Tests.EditMode.Galaxy.Travel
             if (code != null) Assert.AreEqual(code == "TRV-W001" ? ValidationSeverity.Warning : ValidationSeverity.Error, report.Entries[0].Severity);
         }
         static void BadConfig(string code, params (string field, object value)[] edits)
-        { foreach (var edit in edits) { var fixture = new Fixture(); Set(fixture.Config, edit.field, edit.value); Expect(fixture, code); } }
+        { foreach (var edit in edits) { var fixture = new Fixture(fieldsOnly: true); Set(fixture.Config, edit.field, edit.value); Expect(fixture, code); } }
         [Test] public void Defaults()
         {
             var fixture = new Fixture(); Expect(fixture);
@@ -115,20 +119,20 @@ namespace Game.Tests.EditMode.Galaxy.Travel
             ("revealDelayFrames", -1), ("revealDelayFrames", 11), ("laneRefreshTicks", 59));
         [Test] public void TRV_E002_Passes()
         {
-            var f = new Fixture(); Set(f.Config, "spoolTicks", 1); Set(f.Config, "arrivalTicks", 600); Set(f.Config, "coverMinSeconds", 0f);
+            var f = new Fixture(fieldsOnly: true); Set(f.Config, "spoolTicks", 1); Set(f.Config, "arrivalTicks", 600); Set(f.Config, "coverMinSeconds", 0f);
             Set(f.Config, "transitTimeoutSeconds", 5f); Set(f.Config, "revealDelayFrames", 0); Set(f.Config, "laneRefreshTicks", 60); Expect(f);
             Set(f.Config, "spoolTicks", 600); Set(f.Config, "arrivalTicks", 1); Set(f.Config, "coverMinSeconds", 5f); Set(f.Config, "revealDelayFrames", 10); Expect(f);
         }
         [Test] public void TRV_E003_Fails() => BadConfig("TRV-E003", ("fuelItem", null), ("fuelPerLy", -.1f), ("fuelPerLy", float.NaN),
             ("fuelPerLy", float.PositiveInfinity), ("fuelMinPerJump", -1), ("ancientGateFuel", -1));
         [Test] public void TRV_E003_Passes()
-        { var f = new Fixture(); Set(f.Config, "fuelPerLy", 0f); Set(f.Config, "fuelMinPerJump", 0); Set(f.Config, "ancientGateFuel", 0); Expect(f); }
+        { var f = new Fixture(fieldsOnly: true); Set(f.Config, "fuelPerLy", 0f); Set(f.Config, "fuelMinPerJump", 0); Set(f.Config, "ancientGateFuel", 0); Expect(f); }
         [Test] public void TRV_E004_Fails() => BadConfig("TRV-E004", ("arrivalStandoffM", 49f), ("arrivalStandoffM", 2001f), ("arrivalStandoffM", float.NaN),
             ("arrivalStepM", 9f), ("arrivalStepM", 501f), ("arrivalStepM", float.PositiveInfinity), ("arrivalMaxSteps", -1), ("arrivalMaxSteps", 65),
             ("playerClearanceM", -.1f), ("playerClearanceM", 151f), ("playerClearanceM", float.NaN));
         [Test] public void TRV_E004_Passes()
         {
-            var f = new Fixture(); Set(f.Config, "arrivalStandoffM", 50f); Set(f.Config, "playerClearanceM", 0f); Set(f.Config, "arrivalStepM", 10f); Set(f.Config, "arrivalMaxSteps", 0); Expect(f);
+            var f = new Fixture(fieldsOnly: true); Set(f.Config, "arrivalStandoffM", 50f); Set(f.Config, "playerClearanceM", 0f); Set(f.Config, "arrivalStepM", 10f); Set(f.Config, "arrivalMaxSteps", 0); Expect(f);
             Set(f.Config, "arrivalStandoffM", 2000f); Set(f.Config, "playerClearanceM", 2000f); Set(f.Config, "arrivalStepM", 500f); Set(f.Config, "arrivalMaxSteps", 64); Expect(f);
         }
         [Test] public void TRV_E005_Fails()
@@ -158,7 +162,7 @@ namespace Game.Tests.EditMode.Galaxy.Travel
         [Test] public void TRV_E008_Fails() => BadConfig("TRV-E008", ("departCue", null), ("arriveCue", null), ("warpFxScale", 0f), ("warpFxScale", float.PositiveInfinity),
             ("cruiseSpoolTicks", 0), ("cruiseMinDistanceM", 499f), ("cruiseMinDistanceM", float.NaN), ("cruiseStandoffM", 49f), ("escortRadiusM", -.1f));
         [Test] public void TRV_E008_Passes()
-        { var f = new Fixture(); Set(f.Config, "warpFxScale", .1f); Set(f.Config, "cruiseSpoolTicks", 1); Set(f.Config, "cruiseMinDistanceM", 500f); Set(f.Config, "cruiseStandoffM", 50f); Set(f.Config, "escortRadiusM", 0f); Expect(f); }
+        { var f = new Fixture(fieldsOnly: true); Set(f.Config, "warpFxScale", .1f); Set(f.Config, "cruiseSpoolTicks", 1); Set(f.Config, "cruiseMinDistanceM", 500f); Set(f.Config, "cruiseStandoffM", 50f); Set(f.Config, "escortRadiusM", 0f); Expect(f); }
         [Test] public void TRV_W001_Fails() { var f = new Fixture(); f.Lane(" "); Expect(f, "TRV-W001"); }
         [Test] public void TRV_W001_Passes()
         {
