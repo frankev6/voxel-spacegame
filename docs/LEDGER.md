@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 118 | 8 | 0 | 0 | 54 | 0 | 180 | 11 |
+| M3 | 116 | 9 | 0 | 0 | 55 | 0 | 180 | 10 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -322,8 +322,8 @@
 | GAL-001 | Public contract types | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | CORE-001, DATA-001, VOX-001, NAR-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 6d49a49 | Galaxy contracts, three required tests; full suites green |
 | GAL-002 | Orbit math | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b41aab2 | Double-precision Kepler position/velocity and period wrapping; full 968 EM /145 PM green |
 | GAL-003 | Definitions, properties and validator | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 29aa4c47 | All 24 diagnostics and four in-memory fixtures; clean compile, 48 required cases pass; production content GAL-012 remains |
-| GAL-004 | GalaxyDefBuilder and layout job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-003 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
-| GAL-005 | Lane graph and galaxy hash | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-004 | no | todo |  |  |  |  |
+| GAL-004 | GalaxyDefBuilder and layout job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-003 | yes | done | astra (gpt-6) | 2026-10-13 | 42ecb93f | Deterministic layout, packing, queries and disposal; five focused checks pass; GAL-005 lanes/hash remain |
+| GAL-005 | Lane graph and galaxy hash | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-004 | yes | todo |  |  |  |  |
 | GAL-006 | Star-system content job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-002, GAL-005 | no | todo |  |  |  |  |
 | GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | no | todo |  |  |  |  |
 | GAL-008 | GalaxyService, ticker and bridge system | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, FND-001 | no | todo |  |  |  |  |
@@ -1031,6 +1031,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — GAL-004 accepted — astra (gpt-6)
+
+- 42ecb93f completes managed content transfer, persistent arrays, scheduled deterministic layout, sorted ID index and exception cleanup, following87d13854/e78a7578 placement/packing/query work. GAL-005 lane graph, adjacency and hash remain explicitly marked TODO.
+- Initial compile exposed readonly using-array writes and a missing ValidationReport context; corrected before acceptance. Compile91964 clean, zero CS warnings; focused57816 five passed/zero failed/skipped, including bytewise repeatability at worker1/max and leak detection. Evidence `Logs/playtest/galaxy-layout/{compile.log,acceptance.xml}`. Test count: spec-required: 5, extra: 0. No broad suite or benchmark.
+- Workers active GAL-012191, ENC-010204, HUD-005168. Previous turn completed packing/query implementation (progress).
 
 ### 2026-10-13 — GAL-004 packing and ownership checkpoint — astra (gpt-6)
 

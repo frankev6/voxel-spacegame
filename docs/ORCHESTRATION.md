@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Layout accepted:**42ecb93f compile91964 clean, focused57816 five passed; evidence galaxy-layout/. No active Unity run. GAL-005 lanes/hash next lead task. Workers active GAL-012191/ENC-010204/HUD-005168. Previous turn implemented packing/queries (progress).
+
 - **Galaxy packing/query checkpoint:** GAL-004 now implements template/pool and authored moon-key packing, indexed system lookup, binary lane lookup, adjacency bounds and idempotent owned-memory disposal. Builder orchestration and five checks still pending; no Unity run yet. ADR-0074 allows HUD-005 test-only input clock control to avoid wall waits; worker notified. Live snapshots combat190/power203/presentation167. Previous turn implemented layout (progress).
 
 - **Layout implementation underway:** GAL-004 claimed c889b973; task/GAL-004-galaxy-layout adds ordered Burst placement with spatial grid, fixed RNG draws, structural IDs and weighted picks. Builder, queries/disposal and five required tests remain; uncompiled/unvalidated checkpoint, no acceptance claim. All workers live at snapshots combat189/power203/presentation166; assignments GAL-012/ENC-010/HUD-005. ADR-0073 resolves camera persistence and is dispatched. Previous goal turn accepted GAL-003 (progress).
