@@ -842,6 +842,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 250 | SPEC-31 Q11: fake spawner contract precedes real FND-012. | Tests document argument/membership forwarding only. FND-012 must add Allegiance, use real profiles/hooks, supplied StarSystemMember and ulong lookup/despawn forwarding, and register both service types. No runtime spawning completion claim. | Tech lead |
 | 251 | SPEC-23 Q13–15: origin dependency and formation blob/defaults. | AI anchor initialization waits for GAL-009. ADR-0065 stores one-based formations in the existing profiles blob lifetime; author ten slots at 40m spacing, reject nonfinite/empty/under-20m spacing with AI-E004. AI-014 owns steering. | Tech lead |
 | 252 | SPEC-50 Q7–9: staged economy dependencies and managed events. | Keep exact typed shells, defer MerchantLauncher constructor until ENC-001 types exist, preserve Core/Data module boundary and shared packages. ItemAcquired is managed-only; unfinished SalvageMarkSystem is not auto-created. ECO-002–008 own behavior and integration. | Tech lead |
+| 253 | SPEC-32 Q11: locked action presses must not replay after unlock. | Discard all nine ship counter backlogs while Actions is locked, preserve separately owned Cruise, and retain normal unlocked consumption. Movement lock writes Brake. TRV-007 required tests cover unlock behavior; travel lifecycle remains TRV-006. | Tech lead |
 
 ## Measurements
 
