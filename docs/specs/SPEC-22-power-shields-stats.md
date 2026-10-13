@@ -657,7 +657,7 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 - **Do:** Implement jobs A and B exactly as §5.3, including the two-pass split for ability costs and the hulk branch. Tests drive demand by setting `PowerRequest.Requesting` directly.
 - **Files:** `Assets/Game/Simulation/Power/{PowerAllocationSystem,PowerAllocateJob,PoweredApplyJob}.cs`
 - **Acceptance criteria:**
-  - [ ] Gen 40, cap 200, one weapon group held with draw 46 E/s: first brownout at tick 1,980 ± 1 (33 s); afterwards the lowest-priority, highest-index weapons stay off for ≥ 30 ticks at a time.
+  - [ ] Gen 40, cap 200, one weapon group held with draw 46 E/s: first brownout at tick 2,000 ± 1 (33⅓ s; Q15); afterwards the lowest-priority, highest-index weapons stay off for ≥ 30 ticks at a time.
   - [ ] Shield emitters keep `Granted` while weapons brown out.
   - [ ] An ability slot in `PendingPower` with cost 20 and `Stored ≥ 20` sets its bit in `AbilityGrantMask` with `AbilityGrantTick == Tick`; with `Stored = 10` and generation 0 the bit stays 0.
   - [ ] `Hulk` → `Stored = 0`, every `Powered` bit disabled the same tick.
@@ -751,3 +751,5 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 - Audit: `docs/reference/audit-2026-10/02-combat-destruction.md` C08 (parallel energy races), C14 (shields never exist), C22 (beam double drain), C33 (enable bit overloading), §5.10 (beams, shields, energy); `LEDGER.md` R21 (energy 200 → 1 in ~10 s).
 - `00-synthesis.md` §6f (power, shields).
 - Unity: `IJobChunk` with `DidChange`, `ArchetypeChunk.SetComponentEnabled`, `NativeStream`, Unity Physics `PhysicsMass`.
+
+| 15 | PWR-005 converts the rounded 33 s sustain label to 1,980 ticks, contradicting its exact energy inputs | Keep generation 40, capacity 200 and draw 46 unchanged. Exact sustain is 200 / (46 − 40) = 33⅓ s, so assert the first denial at 2,000 ± 1 ticks under the specified fixed-step allocator. No energy tuning or threshold relaxation; correct the arithmetic. | Tech lead |
