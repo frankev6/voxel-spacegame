@@ -44,6 +44,6 @@ MonoBehaviour:
   asteroidsPerSectorMax: 6
   asteroidRadiusMinM: 4
   asteroidRadiusMaxM: 18
-  asteroidBlock: {fileID: 0}
+  asteroidBlock: {fileID: 11400000, guid: dfcc75e2220ed476babe83e285ee98e6, type: 2}
   asteroidNoiseAmplitude: 0.25
   asteroidNoiseFrequency: 0.15
