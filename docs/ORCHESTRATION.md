@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | UI-011 | dispatched; MIG-009 c48030b delivered, pending content generation/validation | Ready standard work after batch integration |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DLG-001 | dispatched from main claim f85dcab; GAL-001 9c177ac delivered pending validation | Galaxy/dialog dependent standard work |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | UI-010 | delivered 0c60754; genuine dependency wait until compatible validation unlocks work | Ready presentation work after integration |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ART-014 | dispatched from main claim 010a9e2; UI-010 0c60754 delivered pending validation | Ready presentation work after integration |
 
 ## Operating rules
 
@@ -50,3 +50,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - Live hulk proof prepared at `Logs/playtest/dmg012/cut-port-bridge.cs.txt`: production projectiles resolve the player mount weapon index dynamically (new nine-weapon catalog changes indices), then cut the 3x station port bridge. Run only after current full suites finish; no live claim yet.
 
 - Batch3 full EditMode rerun passed **923/0/1**; session `67185` continues PlayMode, still live. GAL-001 delivered `9c177ac6b3bd4901b9b472e3288a63f6792a30a3` (3 required tests), UI-010 delivered `0c607547e328b9c5054c82930c2e0d46973d9210` (7 required tests). Both await integration/validation. GAL worker recycled to ready DLG-001 from main claim `f85dcab`; UI-010 worker is in a real dependency wait. UI-011 worker notified to use SPEC-60 Q28 onward because UI-010 used Q25–27. No source mutation during the active suites.
+
+- ART-014 scope review resolves the temporary presentation wait: its exact task mechanically applies already-approved Nocturne values and existing OFL fonts; it requires no new art decision or production. Claimed on main `010a9e2` and dispatched to the same presentation thread. Preserve live sky brightness/density and physical planet; audit references before removing only specified non-chosen assets. GAL-001 identity/event/stub review and UI-010 pool/coalescing/lifecycle/test review found no issue requiring a worker repair; shared UIRoot/config conflicts must retain all services on integration. PlayMode process/session `67185` remains active.
