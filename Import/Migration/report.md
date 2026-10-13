@@ -1,11 +1,13 @@
 # Legacy migration report
 
-Converters: Items (100), Blocks (110), Audio (200), Weapons (220), Ships (300)
+Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (220), Ships (300)
 
 ## Assets
 
 | Asset | Outcome |
 |---|---|
+|Assets/Game/Content/Abilities/ability_shield_toggle.asset|Unchanged|
+|Assets/Game/Content/Abilities/ability_speed_boost.asset|Unchanged|
 |Assets/Game/Content/Audio/cue_editor_place.asset|Unchanged|
 |Assets/Game/Content/Audio/cue_editor_remove.asset|Unchanged|
 |Assets/Game/Content/Audio/cue_explosion_large.asset|Unchanged|
@@ -126,9 +128,14 @@ Converters: Items (100), Blocks (110), Audio (200), Weapons (220), Ships (300)
 ## Entries
 
 ```text
+[I] MIG-I012 Assets/Game/Content/Blocks/block_shield_small.asset grantedAbilities: Kept existing link.
+[I] MIG-I012 Assets/Game/Content/Blocks/block_thruster_large.asset grantedAbilities: Kept existing link.
+[I] MIG-I012 Assets/Game/Content/Blocks/block_thruster_medium.asset grantedAbilities: Kept existing link.
+[I] MIG-I012 Assets/Game/Content/Blocks/block_thruster_small.asset grantedAbilities: Kept existing link.
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_medium.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_small.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_small_fixed.asset: Kept hand-edited asset.
+[I] MIG-I091 content/Abilities/ability_shield_toggle.json: Dropped: legacy Description (placeholder).
 [I] MIG-I091 content/Items/Blocks/Cores/block_core_cross.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Cores/block_core_small.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Hulls/block_hull.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate.
@@ -282,15 +289,15 @@ Converters: Items (100), Blocks (110), Audio (200), Weapons (220), Ships (300)
 [W] MIG-W041 content/Items/Ships/ship_striker.json voxels[9]: Rotation snapped to a cube rotation.
 [I] MIG-I091 content/Items/Ships/ship_vestari.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
 [I] MIG-I090 content/Items/Ships/ship_vestari.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
-0 errors, 67 warnings, 89 infos
+0 errors, 67 warnings, 94 infos
 ```
 
 ## Summary
 
-0 errors, 67 warnings, 89 infos
+0 errors, 67 warnings, 94 infos
 
 Created: 0
 Updated: 0
-Unchanged: 95
+Unchanged: 97
 SkippedHandEdited: 3
 Failed: 0
