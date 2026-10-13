@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Galaxy lanes accepted:** GAL-00503a6cec6 connects systems, preserves authored gates, builds sorted adjacency and freezes version1 hash; six focused checks pass and compile clean. Per-system bodies/service remain next generation work. Settings delivery plus review fix await lead integration; world/encounter workers continue.
+
 - **Galaxy layout accepted:** GAL-00442ecb93f builds deterministic persistent system layout and authored body parameters; clean compile, five focused checks pass. Lane graph/hash are GAL-005 next; world gameplay service is not yet implemented. Three workers continue real world/encounter content and settings.
 
 - **World generation underway:** GAL-00329aa4c47 accepted with clean compile and48 focused checks; GAL-004 lead layout checkpoint is unvalidated, builder/lifetime/tests remain. Workers now author actual GAL-012 world content, ENC-010 encounters and HUD-005 settings. ADR-0073 supplies missing persistent camera orientation contract. No broad suite or benchmark.
