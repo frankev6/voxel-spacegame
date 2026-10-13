@@ -975,6 +975,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Firing/destruction integration and fixture repairs — astra (gpt-6)
+
+- WPN-007, DMG-015/017 and ENC-002 integrated for validation. Compile clean, full EditMode **1153/0/1**; PlayMode **150/3/53**, with all three new destruction tests stopping on expected setup logs before gameplay. Evidence `Logs/playtest/firing-destruction/`. No task marked done yet.
+- Repairs 067e75e4 / 8f76c8ce explicitly expect observed fixture setup messages and baseline-only leak diagnostics; final disposal still requires zero leaks, with all errors/exceptions unexpected. Focused R26 passed; R25 baseline repair pending session 24180. Full soak remains unverified, not skipped or shortened.
+- Counts: WPN-007 spec-required: 8, extra: 0; DMG-015 spec-required: 3, extra: 0; DMG-017 spec-required: 2, extra: 0; ENC-002 spec-required: 31, extra: 0. Zero tuning passes. ENC config and ARK prerequisite generation validated with zero errors/warnings; canonical ARK ownership remains ENC-010. Same three workers reused for AUD-007/008/009. Live firing and damage-command evidence follows green validation.
+
 ### 2026-10-13 — Spatial audio and turret presentation green — astra (gpt-6)
 
 - AUD-006 and WPN-011 closed: compile clean, zero CS warnings; full **1112/0/1 EditMode and 150/0/53 PlayMode**, session 95012 exit 0. Focused **15/0/0 EditMode, 10/0/0 PlayMode**. Evidence `Logs/playtest/audio-combat/`. Warmed 500-event processing measured **0 B managed allocation**. No tuning pass.
