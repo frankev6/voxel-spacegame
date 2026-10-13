@@ -64,4 +64,6 @@ MonoBehaviour:
   defaultAncientGate: {fileID: 11400000, guid: 275e5b18f32de407c8a77456a1aed8d1, type: 2}
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }

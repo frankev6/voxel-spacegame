@@ -176,7 +176,7 @@ for key, gate in [('starsys_drift',False),('starsys_whisper',True)]:
     fields += '    lockedMessage: '+('The gate is dormant.' if gate else '')+'\n'
     for end in ['A','B']: fields += '    gateTemplate'+end+': '+(body_ref('body_gate_dormant') if gate else '{fileID: 0}')+'\n'
     fields += '    hiddenUntilKnown: 0\n'
-fields += '  defaultHyperlaneGate: '+body_ref('body_jump_point')+'\n  defaultAncientGate: '+body_ref('body_gate_active')+'\n  references:\n    version: 2\n    RefIds: []\n'
+fields += '  defaultHyperlaneGate: '+body_ref('body_jump_point')+'\n  defaultAncientGate: '+body_ref('body_gate_active')+'\n  references:\n    version: 2\n    RefIds:\n    - rid: -2\n      type: {class: , ns: , asm: }\n'
 asset('Assets/Game/Content/Galaxy/galaxy_main.asset','GalaxyGenerationDefinition',fields)
 print('Authored 3 real star systems, 2 lanes, galaxy_main, 1 template and 2 approved-art visual definitions; completed 20 canonical body stubs.')
 print('Gate compile intentionally pending TRV-003; blocked gate is serialized fail-closed. Run lead import/validation recipe before gameplay.')
