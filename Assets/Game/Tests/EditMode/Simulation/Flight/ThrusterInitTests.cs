@@ -81,6 +81,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
         [Test]
         public void Registered_ComponentsPresent()
         {
+            var modules = world.GetSingleton<BlockModulesRef>().Value;
             for (GridProfile profile = GridProfile.None; profile <= GridProfile.Dummy; profile++)
             {
                 var root = Spawn(profile); Frame();
@@ -103,7 +104,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
                     Assert.AreEqual(1, requests.Length);
                     Assert.AreEqual(BlockModuleId.Thruster, requests[0].Module);
                     Assert.AreEqual(PowerTuning.Defaults.PriorityThruster, requests[0].Priority);
-                    Assert.IsTrue(world.GetSingleton<BlockModulesRef>().Value.Value.TryGet(BlockModuleId.Thruster, instance.Block, out ThrusterParams row));
+                    Assert.IsTrue(modules.Value.TryGet(BlockModuleId.Thruster, instance.Block, out ThrusterParams row));
                     Assert.AreEqual(row.PowerDraw, requests[0].Draw);
                     Assert.Greater(EM.GetComponentData<ThrusterVisual>(instance.Functional).NozzleRadius, 0);
                 }
