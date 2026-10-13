@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Lead narrative implementation:** NAR-002 claimed38d4c17b; existing isolated lead checkout now `task/NAR-002-logic-parser`. Lexer/token/location/first-error types implemented (expression operators, command words, escaped strings, CRLF tracking). Parser/AST and seven required tests remain, no compilation claim. Primary main unchanged runtime; Editor17922 open/stopped. Worker snapshots AI-010126, AI-015145, SYS-003154 active. Prior turn closed merchants and recycled worker (progress).
+
 - **Merchant closeout:** focused91104 exited0,8/0/0 in0.48s; compile49620 clean. ECO-005 closedf4cae431, evidence `merchants/`. FF main then claim/recycle power SYS-003. AI-010 active125, AI-015 active145. Editor17922 open/stopped; no active validation. Previous turn repaired pricing and verified all eight checks (progress).
 
 - **Merchant rounding repair:** compile22093 clean; focused51576 returned7/1/0, only Prices_Relation (45 expected,44 actual). Failure archived `merchants/acceptance-first.xml`. f4cae431 floors sales with MathF in authored float domain before widening (avoids double promotion at floor); unchanged assertions. Recompile49620 clean; eight-check focused rerun91104 active. No full suite/tuning. Previous turn closed combat and recycled worker (progress).
