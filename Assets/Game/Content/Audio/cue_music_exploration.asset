@@ -21,14 +21,14 @@ MonoBehaviour:
   volumeRandom: 0.1
   pitch: 1
   pitchRandom: 0.05
-  maxVoices: 4
-  priority: 128
-  spatialBlend: 1
+  maxVoices: 1
+  priority: 0
+  spatialBlend: 0
   minDistance: 30
   maxDistance: 600
-  cooldown: 0.05
-  loop: 0
-  coalesce: 2
+  cooldown: 0
+  loop: 1
+  coalesce: 0
   coalesceCellSize: 16
   coalesceGain: 0.25
   combatSignal: 0

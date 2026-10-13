@@ -16,19 +16,19 @@ MonoBehaviour:
   formerIds: []
   clips:
   - {fileID: 8300000, guid: fd2daab841acc5f45bdadfe794b3d157, type: 3}
-  bus: 0
+  bus: 1
   volume: 0.5
   volumeRandom: 0.1
   pitch: 1
   pitchRandom: 0.05
-  maxVoices: 4
-  priority: 128
-  spatialBlend: 1
+  maxVoices: 2
+  priority: 64
+  spatialBlend: 0
   minDistance: 30
   maxDistance: 600
-  cooldown: 0.05
+  cooldown: 0.1
   loop: 0
-  coalesce: 2
+  coalesce: 1
   coalesceCellSize: 16
   coalesceGain: 0.25
   combatSignal: 0

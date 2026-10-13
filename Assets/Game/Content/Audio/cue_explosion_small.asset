@@ -21,8 +21,8 @@ MonoBehaviour:
   volumeRandom: 0.1
   pitch: 1
   pitchRandom: 0.05
-  maxVoices: 4
-  priority: 128
+  maxVoices: 6
+  priority: 100
   spatialBlend: 1
   minDistance: 30
   maxDistance: 600
@@ -31,4 +31,4 @@ MonoBehaviour:
   coalesce: 2
   coalesceCellSize: 16
   coalesceGain: 0.25
-  combatSignal: 0
+  combatSignal: 1

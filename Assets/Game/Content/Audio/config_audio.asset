@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04af82600a2e84083b4e42571fb24f5d, type: 3}
+  m_Name: config_audio
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.AudioConfigDefinition
+  id: config_audio
+  formerIds: []
+  mixer: {fileID: 24100000, guid: db23e3a2ac6854e0eb4c35de422973fe, type: 2}
+  sfxGroup: {fileID: 8077687013934886050, guid: db23e3a2ac6854e0eb4c35de422973fe, type: 2}
+  uiGroup: {fileID: 1841896386727727997, guid: db23e3a2ac6854e0eb4c35de422973fe, type: 2}
+  musicGroup: {fileID: -2456558659089997946, guid: db23e3a2ac6854e0eb4c35de422973fe, type: 2}
+  ambienceGroup: {fileID: 1169625510628749998, guid: db23e3a2ac6854e0eb4c35de422973fe, type: 2}
+  uiSounds:
+  - {fileID: 11400000, guid: 4a5e0c2d71bb14824a72743786bc6786, type: 2}
+  - {fileID: 11400000, guid: 175ee0ec21cf740808e5163c813091a2, type: 2}
+  - {fileID: 11400000, guid: 8d668170eb44d4a3c84f341eedc94930, type: 2}
+  - {fileID: 11400000, guid: 6a42cbd3c58fa44c8a7bb683695bbb38, type: 2}
+  - {fileID: 11400000, guid: 6a42cbd3c58fa44c8a7bb683695bbb38, type: 2}
+  - {fileID: 11400000, guid: 8f292f932c1894ee08972b81658c31ae, type: 2}
+  - {fileID: 11400000, guid: 67882f03c1e6b41c7adcd65371399523, type: 2}
+  - {fileID: 11400000, guid: 028a1ee6611bc48ee9ca3d67f9db3979, type: 2}
+  - {fileID: 11400000, guid: a932f160562054b238d100d576dcd0d8, type: 2}
+  - {fileID: 11400000, guid: 67882f03c1e6b41c7adcd65371399523, type: 2}
+  - {fileID: 11400000, guid: 175ee0ec21cf740808e5163c813091a2, type: 2}
+  musicMenu: {fileID: 11400000, guid: 5efd89617a58a4d098df392a26823fa3, type: 2}
+  musicExploration: {fileID: 11400000, guid: 4d4a4a05bb1484598b0592f59a6a1209, type: 2}
+  musicCombat: {fileID: 11400000, guid: e015555cc33f24322b83296e0ad2fff4, type: 2}
+  musicEditor: {fileID: 11400000, guid: 312cb97979a3c44f8a45da522f6a3318, type: 2}
+  ambienceWorld: {fileID: 0}
+  impactKinetic: {fileID: 11400000, guid: 77e2fa6660554493b8a745b4079ab135, type: 2}
+  impactEnergy: {fileID: 11400000, guid: f2038c941ee2e4e5fb312f91e4c92d7e, type: 2}
+  impactExplosive: {fileID: 11400000, guid: aa2902ccd131041dab0c0802b1973612, type: 2}
+  impactRam: {fileID: 11400000, guid: f07b9bfb693334b30bb702a7e70ec929, type: 2}
+  explosionSmall: {fileID: 11400000, guid: 2833c60c3970548a092f1731b7c46983, type: 2}
+  explosionLarge: {fileID: 11400000, guid: 5b05d977ff1cc4b1e9052c2c139ec067, type: 2}
+  shieldHit: {fileID: 11400000, guid: f4c413beb24c34da99be7ca7246f62e7, type: 2}
+  cellBreak: {fileID: 11400000, guid: 0309d608654cf4267a4687a24651e17e, type: 2}
+  breakOff: {fileID: 11400000, guid: 1d5750f23ef2442efab42a6752f67c34, type: 2}
+  shipDeath: {fileID: 11400000, guid: 86c79a4e82481435784d6702c88bfa17, type: 2}
+  engineLoop: {fileID: 0}
+  beamLoop: {fileID: 0}
+  sceneMusic:
+  - sceneName: Boot
+    context: 0
+  - sceneName: MainMenu
+    context: 1
+  - sceneName: World
+    context: 2
+  - sceneName: BlueprintLab
+    context: 3
+  combatRadius: 500
+  combatWindowSeconds: 2
+  combatHoldSeconds: 8
+  combatEnterSignals: 3
+  fadeDefault: 2
+  fadeToCombat: 1
+  fadeFromCombat: 4
+  stingerDuckDb: -8
+  stingerAttack: 0.2
+  stingerRelease: 1
+  loopFadeSeconds: 0.1
+  beamLoopRadius: 300

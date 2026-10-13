@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-009 | dispatched from main 7c5b9d08; DMG-015 delivered 559db043 | loop voices |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AUD-008 | dispatched from main 7c5b9d08; DMG-017 delivered ee16f993 | music director |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AUD-007 | dispatched from main 7c5b9d08; ENC-002 delivered 9c5b969f | cue content/binding |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-001 | dispatched from main 8217719f; AUD-007 delivered 3cef9d81 | quest contracts |
 
 ## Operating rules
 
@@ -18,7 +18,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- **Now:** session 8009 exited 1: compile clean, full EditMode **1153/0/1**, PlayMode **150/3/53**. All three failures are DMG-015's initial unhandled content-load log, before gameplay; evidence `Logs/playtest/firing-destruction/playmode-first.xml`. Prepared repair integrated **067e75e4**. Focused session 66206 exited 1: R26 passes; R25 stops at the warm-up leak baseline diagnostic. Repair **8f76c8ce** expects only baseline-probe reports while retaining the final zero-leak assertion. Compile and both short scenarios rerun in **session 24180**; do not mutate primary runtime until terminal. The ten-minute soak will run in the subsequent full batch (first attempt failed during setup). Same workers active on AUD-007/008/009. No task closure yet; live range/harness proof remains.
+- **Now:** repaired destruction session **24180 exited 0**, compile clean; R25/R26 **2/0/0**. R25: 63 ships, 177 ram events, 63 original core-loss hulks; R26: twelve hostile ships released 60 shots before scripted core loss/duplicate despawns; both zero leaks. Evidence `firing-destruction/death-focused-final.xml`. AUD-007 delivered 3cef9d81 and integrated c4f0efa7; protected audio generation session 8112 exited 0: 20 legacy plus 10 new cues, validated config/catalog, second import byte/GUID-identical, no blocked clip references. Unverified clips remain development-only. Same presentation worker recycled to QST-001, claim main 8217719f; AUD-008/009 still active. Full regression including soak and live CLI/firing proof remain before closeout.
 
 - **Review while session 8009 runs:** Unity's NoUnexpectedReceived checks all logs, so the three new destruction fixtures encounter normal content-load and partial-system ordering diagnostics before their gameplay assertions. Prepared `task/DMG-015-log-expectations` in the isolated lead worktree: explicitly expect only the five observed message kinds; retain strict errors/exceptions/other warnings. Do not integrate until session 8009 is terminal; inspect final XML first. Primary runtime unchanged.
 

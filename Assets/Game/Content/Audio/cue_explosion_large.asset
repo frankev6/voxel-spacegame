@@ -22,13 +22,13 @@ MonoBehaviour:
   pitch: 1
   pitchRandom: 0.05
   maxVoices: 4
-  priority: 128
+  priority: 80
   spatialBlend: 1
   minDistance: 30
   maxDistance: 600
-  cooldown: 0.05
+  cooldown: 0.1
   loop: 0
   coalesce: 2
   coalesceCellSize: 16
   coalesceGain: 0.25
-  combatSignal: 0
+  combatSignal: 1
