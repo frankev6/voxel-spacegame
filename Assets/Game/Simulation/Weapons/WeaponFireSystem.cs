@@ -11,6 +11,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 
@@ -75,7 +76,7 @@ namespace Game.Simulation.Weapons
             job.Hulks.Update(ref state);
             job.Dormant.Update(ref state);
             job.Spawning.Update(ref state);
-            var stream = new NativeStream(query.CalculateChunkCountWithoutFiltering(), Allocator.TempJob);
+            var stream = new NativeStream(math.max(1, query.CalculateChunkCountWithoutFiltering()), Allocator.TempJob);
             job.Shots = stream.AsWriter(); job.Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value;
             job.Tick = SystemAPI.GetSingleton<SimClock>().Tick; job.Relations = SystemAPI.GetSingleton<FactionRelations>();
             var fx = SystemAPI.GetSingleton<FxEventQueue>(); var sfx = SystemAPI.GetSingleton<SfxEventQueue>();
