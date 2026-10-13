@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Audio acceptance authored:** isolated AUD-006 head **ec0ecb0** includes all 13 specified tests (12 EditMode, one PlayMode), with the required 500-event warmed allocation assertion in the start-limit case; extra: 0. Drain file now matches the spec Systems path. Central frame allocator and pooled spatial playback are implemented. Compilation/execution remain pending the primary Unity channel. Session 22999 remains live (Unity PID 9992); EditMode 1097/0/1, PlayMode XML not yet produced. Do not clean its InitTestScene or change primary runtime.
+
 - **Latest continuation:** session 22999 has completed EditMode **1097/0/1** and is still running PlayMode. All three exact worker threads inspected: MIG-013/EDT-001 dependency waits; WPN-011 delivered **0a9da66**, source reviewed, queued for next batch. Lead AUD-006 isolated **3717708** adds spatial pooled playback, binding and bounded event drain/coalescing/cooldown; required tests, producer dependency verification and Unity validation remain. No audio or WPN-011 runtime changes entered the active validation checkout. Previous turn answered the owner's goal/scheduling question; this continuation resumes implementation.
 
 
