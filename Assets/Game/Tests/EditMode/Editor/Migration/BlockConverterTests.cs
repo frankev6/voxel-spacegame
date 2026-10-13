@@ -92,7 +92,7 @@ weapon_missile_launcher_small|Functional|Cube|200|800|30|Weapon|2,1,2|0,0,3;1,0,
             if (b.TryGetModule<PowerSourceModule>(out var source)) Assert.AreEqual(40, source.Params.Generation);
             if (b.TryGetModule<PowerStorageModule>(out var storage)) Assert.AreEqual(b.BlockCategory == BlockCategory.Core ? 200 : 40, storage.Params.Storage);
             if (b.TryGetModule<ThrusterModule>(out var thruster)) { Assert.AreEqual(b.IdString == "block_thruster_small" ? 20000 : 40000, thruster.Params.ThrustNewtons); Assert.AreEqual(0, thruster.Params.PowerDraw); }
-            if (b.TryGetModule<ShieldEmitterModule>(out var shield)) { Assert.AreEqual(300, shield.Params.Capacity); Assert.AreEqual(15, shield.Params.RegenPerSecond); Assert.AreEqual(3, shield.Params.RechargeDelaySeconds); Assert.AreEqual(10, shield.Params.PowerDraw); }
+            if (b.TryGetModule<ShieldEmitterModule>(out var shield)) { Assert.AreEqual(3000, shield.Params.Capacity); Assert.AreEqual(120, shield.Params.RegenPerSecond); Assert.AreEqual(4, shield.Params.RechargeDelaySeconds); Assert.AreEqual(8, shield.Params.PowerDraw); }
             if (b.TryGetModule<WeaponMountModule>(out var weapon)) { var f = muzzle.Split(',').Select(x => float.Parse(x, System.Globalization.CultureInfo.InvariantCulture)).ToArray(); Assert.AreEqual(new float3(f[0], f[1], f[2]), weapon.MuzzleOffsetCells); }
         }
         [Test] public void Footprints_FromBlockSizeAndVoxelShape()

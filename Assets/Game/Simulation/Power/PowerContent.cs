@@ -2,6 +2,7 @@ using System;
 using Game.Data.Definitions;
 using Game.Data.Services;
 using Game.Data.Validation;
+using Game.Voxel.Grid;
 using Unity.Entities;
 
 namespace Game.Simulation.Power
@@ -37,6 +38,11 @@ namespace Game.Simulation.Power
                 ShieldRestartFraction = d.ShieldRestartFraction,
                 SustainWarningSeconds = d.SustainWarningSeconds,
             };
+            // PWR-008: the same advisory check used by the editor, without an Editor assembly dependency.
+            // This short-lived library owns and disposes its decoded structures; no second boot-session cache is retained.
+            using var blueprints = new BlueprintLibrary(catalog, default);
+            PowerBudgetValidation.Validate(catalog, blueprints, report);
+            if (report.WarningCount > 0) report.LogTo(Game.Core.LogCategories.Content);
         }
 
         public PowerTuning Tuning { get; }
