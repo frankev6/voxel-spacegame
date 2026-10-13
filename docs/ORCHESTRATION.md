@@ -18,7 +18,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- **Turret acceptance green:** combined compile11012 clean, focused live55810 exited0 with2/0/0 TurretAiTests; evidence `station-player-ai/turrets.xml`. FND-022 real-fire/new-player check25184 now active in Editor17922. No mutations or competing Unity until terminal. Next archive result, AiSetupTests.Anchor_FromPose, fresh live enemy without player mutation, closeout/recycle combat worker AI-015.
+- **Turret acceptance green:** combined compile11012 clean, focused live55810 exited0 with2/0/0 TurretAiTests; evidence `station-player-ai/turrets.xml`. FND-022 real-fire/new-player check25184 exited0 with1/0/0, archived player-fire.xml. AiSetupTests.Anchor_FromPose17259 now active in Editor17922. No mutations or competing Unity until terminal. Next archive result, AiSetupTests.Anchor_FromPose, fresh live enemy without player mutation, closeout/recycle combat worker AI-015.
 
 - **Turret delivery integrated:**4504c914 reviewed/cherry-picked aed6fcbd; spec merge preserves Q23/24/25, turret Q23 mirroredQ303. Combined FND-022/turret compile11012 active in open stopped Editor17922. Prior FND compile36848 passed clean. Next focused TurretAiTests and RealFire_DamagesStationaryTarget plus AiSetupTests.Anchor_FromPose; no broad run. Combat worker notified next AI-015 after closure, power/presentation remain active124/151. Previous turn integrated player fix and repaired namespace collision (progress).
 
