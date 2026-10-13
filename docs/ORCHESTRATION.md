@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Preview/ability compile repairs:** terminal14093 found CS1654 on readonly using NativeList target assignment; a2e9b77e uses a writable array view. Terminal94076 found two fixture struct-return/using assignment errors;89f71874 fixes History capacity assignment and changed-coordinate construction. Serialized compile/GridEditTests/AbilityScenarioTests retry56615 is active; primary runtime frozen until terminal. AI-007/008 workers verified active atcursors126/111. No acceptance claim yet.
+
 - **Workers recycled / next batch integrated:** AI-006 closed7e52f91d and claims811feca5 are on local main. Existing combat AI-007 activecursor125 and presentation AI-008 activecursor110; power ABL-005 delivered/validation wait. Primary `task/VOX-020-integrated-preview` integrates46c0a916/af32d7f4/2c878b9a/2a841f92 plusc65a62ec (ABL-005). Q294 mirrorsSPEC24Q9. Serialized compile and grouped GridEditTests/AbilityScenarioTests now active as session14093; no primary runtime mutations until terminal and no completion claim for either task. Original isolated branches preserved.
 
 - **AI-006 closed:** session91602 exited0 with compile clean,1207/0/1 EditMode,170/0/53 PlayMode; soak600.00s/36000ticks/zero leaks. Unity82054/compiler82067 are gone. Original QualitySettings restored/excluded, test debris cleaned after terminal. Next local FF main and claim/dispatch AI-007/008 to existing combat/presentation workers; lead integrates staged VOX-020/ABL-005 batch.
