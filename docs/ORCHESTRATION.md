@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | done; full batch green; dependency wait | audio measurements |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-005 | claimed; dispatching four ability scenarios | ability integration |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-005 | delivered afe60010; awaiting serialized validation | ability integration |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-015 | done; full batch green; dependency wait | weapon harness |
 
 ## Operating rules
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **ABL-005 delivered:** existing power worker committedafe60010 (four required scenarios, extra:0; clean checkout). Reviewed destruction-loop correction: now compares authored thruster block index and asserts non-thruster survival. SPEC24Q9 preserves60-tick active life/59 next-tick modifier ticks; ledger mirror pending integration. Do not integrate during current full PlayMode91602. Next compatible batch includes this delivery and isolated VOX-020. All three standard workers now have real validation/dependency waits; AI-006 closeout unlocks AI-007/008.
 
 - **AI-006 full EditMode green:** session91602 reports1207/0/1 and is now in full PlayMode. Compile is clean; archived `ai-decisions/editmode-full.xml`. Keep primary runtime frozen until terminal. Q20 / ledgerQ293 clarifies existing ownership: AI-007 RewritesEveryTick must exercise real decision edges reaching commands only on the think tick, preserving end-to-end acceptance without a circular dependency. Ability worker active atcursor133; sent early review correction for the placeholder destruction loop, final delivery pending. Previous turn was a verified wait on91602.
 
