@@ -1032,6 +1032,10 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Boot correction on main, settings checkpoint preserved — astra (gpt-6)
+
+- Applied canonical belt block correction6c89f0b0 to main independently of unfinished settings. Settings/pause navigation and session guards preserved on task/HUD-005-settings-integration dbe07d59; rebind repair/accepted checks and complete main-menu navigation remain. No active validation or repeated test run. Test count: existing spec-required acceptance pending, extra: 0.
+
 ### 2026-10-13 — GAL-005 accepted — astra (gpt-6)
 
 - 03a6cec6 integrates authored gate metadata (including endpoint override swaps), lane job, neighbour-sorted adjacency and canonical hash D69B969F976A94B9 for Small/version1. Connectivity passes Small/Large/Disconnected.
