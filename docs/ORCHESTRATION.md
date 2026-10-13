@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Batch closed:** session43506 exited0, compile clean,1179/0/1 EM and160/0/53 PM. Live348shots/345hits/175destroyedcells/0drops; firing demand=grant20 E/s then0 on release; no new diagnostics. WPN-008/018,QST-001,MIG-012 closed; range reset and Editor35039 live. Next claim/dispatch WPN-009 and015 to existing workers, lead010; AUD-013 staged7fcd2760+0da3c84a for next validation.
+
 - **Validation wait verified:** session43506 remains live in later physics PlayMode checks after the soak. At 10:50 local, Unity42910 was waiting while its Burst compiler42922 used ~915% CPU; log advanced to ColliderSpawnPerfTests. No final XML yet; this is active compilation, not a terminal/hung-run inference. Preserve primary runtime/test-owned InitTestScene. Isolated audio preparation now7fcd2760 +0da3c84a (ledgerQ282).
 
 - **AUD-013 delivered:** bbf32ef9, exactly four required tests/zero extras, no runtime/assets changes; reviewed and staged on isolated `task/AUD-013-measurement-integration` from primary2aac40cb. Three timing gates retain targets and missing-data failures in JSON; 300-frame GC gate uses worst frame. Spec64 Q27–29 await central mirror on integration. All three workers now have actual validation/dependency waits. Primary session43506 is confirmed live in PlayMode (Unity42910); do not integrate audio or mutate runtime until terminal. Live projectile/power readback prepared at `Logs/playtest/projectile-combat/live-readback.cs.txt`.

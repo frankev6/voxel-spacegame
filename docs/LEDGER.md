@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 27 | 0 | 0 | 0 | 64 | 0 | 91 | 5 |
-| M3 | 145 | 5 | 0 | 0 | 30 | 0 | 180 | 12 |
+| M2 | 24 | 1 | 0 | 0 | 66 | 0 | 91 | 6 |
+| M3 | 145 | 3 | 0 | 0 | 32 | 0 | 180 | 12 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -244,16 +244,16 @@
 | WPN-005 | PlayerTargetingSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, AI-001, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 2bbffb6 | Deterministic hostile target cycling, cursor targeting and input toggles; six required tests; full 1051 EM /146 PM passed. |
 | WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | yes | done | astra (gpt-6) | 2026-10-13 | fc32163 | Target velocity lead and occupied hull centre aiming; 5 required tests |
 | WPN-007 | WeaponFireSystem and the projectile store append | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-006, PWR-001 | yes | done | astra (gpt-6) | 2026-10-13 | c0f3b458 | Parallel ordered firing/store append; eight required checks and live Space fire pass; WPN-008/009 remaining scope retained |
-| WPN-008 | ProjectileStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-003, WPN-007, PWR-001, SPEC-13 | no | in-progress | astra (gpt-6) | 2026-10-13 |  | partial in FND-020: movement, hull hits and lifetime; DMG-007 orders stepping after impact / parallel stream/compaction pipeline, homing, shields and full required tests; partial in VFX-004: guarded hull-hit emission with normal, velocity and overrides / parallel pipeline, homing, shields and full required tests; Claimed after green combat batch; lead owns serialized Unity |
-| WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | no | todo |  |  |  | partial in WPN-007: pulse clock, muzzle/range endpoint and cancellation / first-hit casts, hull/shield damage streams and impact effects |
-| WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | no | todo |  |  |  | partial in FND-020: explosion requests into damage / shields, audio and required tests; partial in VFX-004: guarded explosion visual event / shields, audio and required tests |
+| WPN-008 | ProjectileStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-003, WPN-007, PWR-001, SPEC-13 | no | done | astra (gpt-6) | 2026-10-13 | 2e5247ca | Parallel homing/hull/shield/fuse streams and stable compaction; seven required tests, full suites and live 345 projectile hits pass |
+| WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | yes | todo |  |  |  | partial in WPN-007: pulse clock, muzzle/range endpoint and cancellation / first-hit casts, hull/shield damage streams and impact effects |
+| WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | yes | todo |  |  |  | partial in FND-020: explosion requests into damage / shields, audio and required tests; partial in VFX-004: guarded explosion visual event / shields, audio and required tests |
 | WPN-011 | CombatGridSetup and turret visuals | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, PWR-001, ABL-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | c5122fd | Combat composition and absolute turret poses with split refresh; 3 required tests |
 | WPN-012 | Combat scenarios and determinism | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-009, WPN-010, WPN-011, SPEC-13, SPEC-22 | no | todo |  |  |  |  |
 | WPN-013 | Weapon performance gates | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, TST-001 | no | todo |  |  |  |  |
 | WPN-014 | Weapon balance pass | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, SPEC-72 | no | todo |  |  |  |  |
-| WPN-015 | Harness hooks | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | no | todo |  |  |  |  |
+| WPN-015 | Harness hooks | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | yes | todo |  |  |  |  |
 | WPN-017 | ShipDestroyed payload and bridge | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, DMG-001, CORE-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | ec9a6f1 | Canonical destruction event bridge; 4 required tests; full batch 901 EM / 128 PM, zero failures |
-| WPN-018 | Weapon power demand and weapon stats | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, WPN-007, PWR-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | ; Claimed after green combat batch; lead owns serialized Unity |
+| WPN-018 | Weapon power demand and weapon stats | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, WPN-007, PWR-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b672f6f1 | Same-tick weapon demand and revision-cached stats; five required tests; live firing demand/grant20 E/s returns to zero on release |
 | PWR-001 | Public contract types | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | CORE-001, DATA-001, VOX-001, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | eeed571 | Canonical declarations; three required tests; Q202 deferred allocator ordering. Full batch green. |
 | PWR-002 | Shield maths | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 08c5f01 | Shield intersections, containment and overlap; 5 required tests; full batch 901 EM / 128 PM, zero failures |
 | PWR-003 | Tuning definition, baker and spawn helper | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3f8692f | Power tuning validation/bake and spawn registration; catalog e722af7; full 968 EM /145 PM green |
@@ -400,7 +400,7 @@
 | DLG-010 | Speakers and illustrations | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable combat worker; existing approved/own-work placeholders only; no art generation |
 | DLG-011 | Dialog PlayMode scenarios | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-007, DLG-009, QST-001 | no | todo |  |  |  |  |
 | DLG-012 | Harness commands for dialog | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, DEV-001 | no | todo |  |  |  |  |
-| QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Presentation worker; quest contracts only, lead owns Unity |
+| QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 95f80410 | Public quest/mystery contracts and required assembly test; behavior remains QST-002 onward |
 | QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, SPEC-40 | no | todo |  |  |  |  |
 | QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, SPEC-40 | no | todo |  |  |  |  |
 | QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, SPEC-40 | no | todo |  |  |  |  |
@@ -482,7 +482,7 @@
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | no | todo |  |  |  |  |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | todo |  |  |  |  |
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
-| MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Power worker; faction converter and protected generation recipe; lead owns Unity |
+| MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e9d50f3c | Three exact factions generated; duplicate skipped, player/AI ownership preserved; rerun byte/GUID/manifest stable |
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3d65849 | Protected ordered loot assets/catalog; rerun byte-identical; 1 required and 1 migration-safety test |
 | MIG-014 | Body template stubs | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-004, GAL-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Dispatched to reusable presentation worker; lead owns generation and Unity validation |
 | MIG-015 | Hand-off package | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-002, MIG-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 5241ee5 | Typed legacy handoff metadata; spec-required: 3, extra: 0 |
@@ -982,6 +982,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Projectile, power and faction batch verified — astra (gpt-6)
+
+- Closed WPN-008, WPN-018, QST-001 and MIG-012. Session43506 exited0: compile zero CS warnings, full EditMode **1179/0/1**, PlayMode **160/0/53**. Evidence `Logs/playtest/projectile-combat/`. Ten-minute destruction soak passed in600.32s, 36,000 ticks, 60 chunks/hulks/rams and zero native leaks. Required projectile job tests7/7 and grouped faction/quest/migration7/7 also pass.
+- Live Space fire: 348 fired, 345 hull hits, 3 expired, 0 dropped, 175 station cells destroyed. Player has14 mounts, 2,190 DPS,720m maximum range and36 E/s full weapon demand; held group requested/granted20 E/s, release returned both to0. Station is present in canonical spatial hash. Screenshots before/firing/damaged and readbacks retained; no new runtime errors/warnings. Range reset, interactive Editor35039 remains open.
+- MIG-012 generates three factions only, preserves player and earlier AI fields, and records the duplicate skip. Targeted rerun bytes/GUIDs/manifest stable; full migration idempotence remains green. QST-001 is contract scope only. Test counts: WPN-008 spec-required:7, extra:0; WPN-018 spec-required:5, extra:0; QST-001 spec-required:1, extra:0; MIG-012 spec-required:1, extra:1 (migration protection). Zero optimization passes; Q278–281 record resolved defaults.
+- Next: WPN-009 beams and WPN-015 harness to existing workers, lead WPN-010 explosions. AUD-013 reviewed/staged7fcd2760 +0da3c84a in isolated checkout; Unity pending. QualitySettings original delta preserved/excluded. No new owner gate or assets requiring art approval.
 
 ### 2026-10-13 — Firing, destruction and audio batch verified — astra (gpt-6)
 
