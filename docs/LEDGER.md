@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 80 | 0 | 0 | 0 | 9 | 0 | 89 | 9 |
+| M2 | 79 | 0 | 0 | 0 | 10 | 0 | 89 | 9 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 11 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -226,8 +226,8 @@
 | DMG-006 | DamageResolveSystem pipeline | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-005 | yes | done | astra (gpt-6) | 2026-10-12 | 0018fd1 | Ordered gather/sort/plan, exclusive parallel grid resolution and canonical publication; seven tests; full suites green; Q190; repairs remain DMG-019 |
 | DMG-007 | ImpactEventSystem (rams and knockback) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 01d5ff2 | Canonical ram pairs, energy/hardness split, cooldown, next-tick planar knockback; six required tests; ADR-0058 |
 | DMG-008 | Brick connectivity summaries | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | done | astra (gpt-6) | 2026-10-12 | 36e838d | Scanline brick flood, instance unions, touched checks and deterministic warm-up; 1000 reference masks; three required tests |
-| DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | partial in FND-020: bounded full-grid flood and canonical masks; DMG-008 caches brick summaries / hybrid graph race, node budgets, forced deferrals and full required tests |
-| DMG-010 | SplitSystem: plan, particle tier, deferred detach and debris FX | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-009, VFX-001, AUD-001 | no | todo |  |  |  | partial in FND-020: physical splits and retained deferred seeds / particle/chunk tiers, debris FX/audio and required tests |
+| DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | yes | done | astra (gpt-6) | 2026-10-12 | 1cf796e | Parallel hybrid race, canonical masks, retained seeds and forced retries; 300 reference structures; live Space cut detached 205 cells |
+| DMG-010 | SplitSystem: plan, particle tier, deferred detach and debris FX | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-009, VFX-001, AUD-001 | yes | todo |  |  |  | partial in FND-020: physical splits and retained deferred seeds / particle/chunk tiers, debris FX/audio and required tests |
 | DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | no | todo |  |  |  | partial in FND-020: all pieces temporarily use hulk grids / chunk pool, colliders, lifetime and required tests |
 | DMG-012 | Hulk grids from splits | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-011, FND-001, SPEC-12 | no | todo |  |  |  | partial in FND-020: hulk cells/instances, bodies and functional transfer / remaining lifecycle, integration and required tests |
 | DMG-013 | ShipDeathSystem, despawn dissolve and the destroy pass | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-012 | no | todo |  |  |  | partial in FND-020: initial core-loss and destroyed-instance cleanup / despawn dissolve, final death presentation and required tests |
@@ -770,6 +770,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 190 | 2026-10-12 | SPEC-13 Q28 / DMG-006 | Deferred range outputs, hasher dependency and repair scope | Per-range native streams; canonical serial explosion publication; bring forward CellStateHasher; repair pass remains DMG-019 | Tech lead | Resolved; no public API change, fixed-step completion or owner gate |
 | 191 | 2026-10-12 | SPEC-13 Q29 / SPEC-63 Q19 | Missing ram effect kind and opposite Unity collision normal convention | Append RamImpact = 13, 14-entry defaults; convert B-to-A normal at collection | Tech lead | Resolved ADR-0058; no new art, owner gate or enum renumbering |
 | 192 | 2026-10-12 | SPEC-13 Q30 | Deterministic brick warm-up remainder and staged integration | Earliest sorted candidates get remainder; touched bricks outside quota | Tech lead | Resolved DMG-008; summaries precede full-flood size guard; DMG-009 retains graph traversal scope |
+| 193 | 2026-10-12 | SPEC-13 Q31 | Capped seed prefix can miss the true anchor; staged cap retirement | Keep all seeds, defer overflow then force complete set; hybrid replaces full flood | Tech lead | Resolved DMG-009; canonical stream publication and internal node-count evidence; legacy cap fields preserved but inactive |
 
 ## Measurements
 
@@ -879,6 +880,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DMG-009 hybrid integrity and live station breakup — astra (gpt-6)
+
+1. **Implemented:** `1cf796e` — replaces the temporary full-grid flood with deterministic candidate/seed selection, parallel exclusive per-grid races, connected-brick/cell nodes, cross-brick face and instance links, a size-fair heap, union-find and O(1) FIFO concatenation. Touched summaries and warm-up run before traversal. Per-grid streams publish island masks in canonical grid/set/slot order. Node-budget work and seeds survive four deferrals; the fifth attempt is forced. The former occupied-cell cap is no longer used; its fields remain compatible. No managed gameplay allocations, fixed-step completion, public API/assembly change or new owner gate.
+2. **Correctness/evidence:** six required tests pass; **300** seeded structures (including **100 core grids**) produce **7,863 islands** matching an independent full-grid BFS. Smaller/larger bridge anchor rules, instance links across bricks, four 100-node deferrals and exact forced/unlimited island equivalence pass. A radius-3 crater removes **93 cells** from the **1M-cell** station and visits **78 nodes** (advisory target ≤2,000), with no islands. Focused suite including existing connectivity/review checks: **11 passed**. Compile zero C# warnings; full EditMode **822 passed, 0 failed, 1 skipped**; full PlayMode **116 passed, 0 failed, 29 skipped**, both exit 0. **spec-required: 6, extra: 0**; existing cap/summary fixtures updated for the replacement implementation. Zero optimization passes.
+3. **Live integration:** real seed-7 range, mouse aim and three seconds of **Space** fire severed the port bridge: **11 destroyed / 205 detached cells**. One physical pod retained its visible hull and moved at approximately **0.75 m/s**; no new runtime errors/warnings. Screenshots: `Logs/playtest/dmg009/station-before.png` and `station-after.png`; entity/velocity/log readback in `live.txt`. Full test/compile evidence is in that directory. The CLI launcher did not start an Editor process; after cancelling it, the installed Unity executable opened successfully. The live range remains open for inspection. Controls, Nocturne, procedural station and Space fire are preserved.
+4. **Resolved decisions:** Q193 / SPEC-13 Q31 records two correctness fixes: a seed prefix cannot prove the anchor, so overflow retains the complete set and uses the same defer/force policy; randomized case 142 exposed equal 16-cell components, so early stopping must prove size/tie precedence before retaining the survivor. A NativeStream writer-copy defect found by the focused checks was fixed before the full suites. Remaining split particle/chunk tiers, debris FX and later damage tasks stay open; next is DMG-010. QualitySettings matches its pre-existing backup and is excluded; no stray InitTestScene remains. Git stays local.
 
 ### 2026-10-12 — DMG-008 brick connectivity summaries — astra (gpt-6)
 
