@@ -17,6 +17,7 @@ namespace Game.UI.Services
         readonly UIDocument document;
         readonly IUISoundSink sound;
         readonly IFrameClock clock;
+        readonly float minUiScale, maxUiScale;
         readonly Dictionary<string, ScreenAsset> assets = new Dictionary<string, ScreenAsset>(StringComparer.Ordinal);
         readonly VisualElement[] layers = new VisualElement[6];
         Button lastHover;
@@ -40,6 +41,7 @@ namespace Game.UI.Services
                         throw new InvalidOperationException("UIConfig screen '" + asset.Key + "' requires a nonempty key and UXML");
                     if (!assets.TryAdd(asset.Key, asset)) throw new InvalidOperationException("UIConfig duplicate screen key '" + asset.Key + "'");
                 }
+                minUiScale = config.MinUiScale; maxUiScale = config.MaxUiScale;
                 ownsDocument = true;
                 document.panelSettings = config.PanelSettings;
                 document.visualTreeAsset = config.RootUxml;
@@ -62,8 +64,7 @@ namespace Game.UI.Services
                 RootElement.RegisterCallback<FocusInEvent>(OnFocusIn, TrickleDown.TrickleDown);
                 RootElement.RegisterCallback<FocusOutEvent>(OnFocusOut, TrickleDown.TrickleDown);
                 UIConverters.RegisterAll();
-                // TODO(UI-013): ApplyAccessibility; until then use the specified construction defaults.
-                config.PanelSettings.scale = 1;
+                ApplyAccessibility(new AccessibilityOptions { UiScale = 1, TextScale = TextScale.Percent100 });
             }
             catch (Exception e)
             {
@@ -136,7 +137,17 @@ namespace Game.UI.Services
         void OnFocusIn(FocusInEvent evt) => Navigator.SetTextEntry(IsTextEntry(evt.target as Focusable));
         void OnFocusOut(FocusOutEvent evt)
         { if (!IsTextEntry(evt.relatedTarget)) Navigator.SetTextEntry(false); }
-        public void ApplyAccessibility(in AccessibilityOptions options) => throw new NotImplementedException("UI-013");
+        /// <summary>SPEC-60 §5.11: panel scaling and token/motion classes apply to every current or future screen.</summary>
+        public void ApplyAccessibility(in AccessibilityOptions options)
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(UIRoot));
+            float scale = float.IsNaN(options.UiScale) ? 1 : options.UiScale;
+            document.panelSettings.scale = Mathf.Clamp(scale, minUiScale, maxUiScale);
+            RootElement.EnableInClassList(UIStyleClasses.TextScale115, options.TextScale == TextScale.Percent115);
+            RootElement.EnableInClassList(UIStyleClasses.TextScale130, options.TextScale == TextScale.Percent130);
+            RootElement.EnableInClassList(UIStyleClasses.ReduceMotion, options.ReduceMotion);
+            ReduceMotion = options.ReduceMotion;
+        }
         internal void PlaySound(UISound value) => sound.Play(value);
         void OnClick(ClickEvent evt)
         { if (evt.target is Button button && button.enabledInHierarchy) sound.Play(UISound.Click); }

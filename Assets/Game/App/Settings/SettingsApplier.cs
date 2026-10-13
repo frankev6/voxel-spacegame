@@ -43,8 +43,14 @@ namespace Game.App.Settings
                     YawMode = Game.Presentation.Data.CameraYawMode.FollowHeading,
                     ShakeScale = s.Accessibility.ScreenShakeScale, ReduceMotion = s.Accessibility.ReduceMotion
                 });
+            if ((sections & SettingsSection.Accessibility) != 0 && Game.Core.Services.TryGet<Game.UI.Services.UIRoot>(out var ui))
+                ui.ApplyAccessibility(new Game.UI.Data.AccessibilityOptions
+                {
+                    UiScale = s.Accessibility.UiScale,
+                    TextScale = (Game.UI.Data.TextScale)Math.Min((int)s.Accessibility.TextScaleIndex, 2),
+                    ReduceMotion = s.Accessibility.ReduceMotion
+                });
             // Gameplay: PERS-009 sets save.Autosave's interval from s.Gameplay.AutosaveIntervalMinutes.
-            // Accessibility: SPEC-60 ui.ApplyAccessibility (text-scale index per SPEC-02 Q9) and SPEC-62 camera shake scale.
         }
 
         static void ApplyVideo(VideoSettingsData v)

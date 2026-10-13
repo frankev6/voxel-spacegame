@@ -186,7 +186,7 @@ namespace Game.UI.Services
                         slot.Life -= dt;
                         if (slot.Life <= 0)
                         {
-                            slot.Exiting = true; slot.ExitLeft = (motion ? 0 : exitSeconds) + slot.Life;
+                            slot.Exiting = true; slot.ExitLeft = motion ? 0 : exitSeconds + slot.Life;
                             slot.Element.RemoveFromClassList(UIStyleClasses.ToastBump); slot.Bumping = false;
                             slot.Element.AddToClassList(UIStyleClasses.ToastExit);
                         }

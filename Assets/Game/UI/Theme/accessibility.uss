@@ -1,1 +1,23 @@
-/* SPEC-60 UI-013 supplies accessibility overrides here. */
+/* SPEC-60 UI-013. Rounded multiples of the approved tokens.uss type scale. */
+.ui-root.text-scale-115 {
+    --text-xs: 14px;
+    --text-s: 16px;
+    --text-m: 18px;
+    --text-l: 23px;
+    --text-xl: 30px;
+    --text-xxl: 39px;
+}
+.ui-root.text-scale-130 {
+    --text-xs: 16px;
+    --text-s: 18px;
+    --text-m: 21px;
+    --text-l: 26px;
+    --text-xl: 34px;
+    --text-xxl: 44px;
+}
+.ui-root.reduce-motion .toast,
+.ui-root.reduce-motion .tooltip,
+.ui-root.reduce-motion .btn,
+.ui-root.reduce-motion .modal__window {
+    transition-duration: 0s;
+}
