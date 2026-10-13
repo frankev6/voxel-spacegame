@@ -261,6 +261,8 @@ Per tick:
 
 `FocusOn(float3 center, float radius)`: `pivotTarget = center; edDistanceTarget = clamp(radius * EditorFocusPadding / sin(radians(VerticalFovDeg / 2)), EditorMinDistance, MaxEd)`. `SetEditorSuppression(bool zoom, bool orbit)` sets the flags; they reset to false on every `SetMode`.
 
+`FocusPressed` calls `FocusOn(boundsCenter, boundsRadius)` after the view keys; selection-specific framing is supplied through the public `FocusOn` API. `Focus`, `CurrentDistance` and `YawDeg` expose the editor pivot/distance/yaw while in EditorOrbit, leaving flight filter state separate. A reduced-motion mode entry copies the editor targets immediately, just as an explicit cut does (Q18).
+
 ### 5.5 Flow
 
 ```mermaid
@@ -522,6 +524,7 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 | 15 | Fast close-zoom flight pushes the imported Fighter out of frame despite fitting while stationary | Clip the output focus translation against the actual solid-bounds frustum | Tech lead | Resolved CAM-012: use CellMin/CellMax bounds, not brick capacity or a corner-centered radius. Keep damping state and zoom/orbit intact; retain as much desired focus displacement as all bounds permit. Center the hull when deliberate close zoom cannot fit it. Internal bounds handoff only; public camera and ECS contracts unchanged. |
 | 16 | The VFX uploader retains its drained list but has no camera view; generic shake-kind names differ from the actual enum | Borrow an internal read-only view of the completed drain, valid for the current rendered frame and consumed synchronously after FxUploadSystem; preserve existing allocation/disposal and queue ownership. Configure both ExplosionSmall/ExplosionLarge at 0.5 / 300 m, RamImpact at 0.4 / 200 m and both HitKinetic/HitEnergy at 0.05 / 80 m; omit ship-destroyed because no such FxKind exists | Tech lead | CAM-008 implements this default. Lead owns GameComposition binding under ADR-0062. |
 | 17 | CAM-010's universal 1e-9 round-trip criterion cannot hold through its binding float2 pixel API: at Center=0, UnitsPerPixel=1, ViewSize=(1024,768), p=(0.123456789,0), pixel rounding alone loses about 1.7e-5 map units | Preserve public signatures and exact formulas, compute in double until the final pixel cast, and keep the 1e-9 assertion on independently selected pixel-representable/conditioned points up to 1e12. General inverse error includes UnitsPerPixel times half a pixel float ULP plus double arithmetic error; no universal 1e-9 claim. Zoom anchoring similarly requires double map resolution finer than 0.01 pixel. Frame requires positive viewport area after padding and configured positive ordered zoom limits | Tech lead | CAM-010 records this limitation for lead review; no signature or assembly change. |
+| 18 | Focus key has no selection payload, and editor-mode public pose getters/reduced-motion entry need explicit semantics | Focus key frames the configured whole bounds; hosts frame selections through FocusOn. Pose getters expose editor state in EditorOrbit; reduced-motion entry snaps targets as an explicit cut does | Tech lead | CAM-009 uses these defaults and the already implemented INP-006 Editor input adapter; no public signatures or shared composition changes. |
 
 ## 11. References
 

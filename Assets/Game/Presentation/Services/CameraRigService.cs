@@ -24,6 +24,9 @@ namespace Game.Presentation.Services
         float3 boundsMin, boundsMax;
         float4x4 boundsTransform;
         bool hasBounds;
+        float3 pivot, pivotTarget, boundsCenter;
+        float boundsRadius, edYaw, edYawTarget, edPitch, edPitchTarget, edDistance, edDistanceTarget;
+        bool suppressZoom, suppressOrbit;
         float3 blendFromPos, outPos;
         quaternion blendFromRot, outRot;
         float3 unshakenPos;
@@ -69,10 +72,10 @@ namespace Game.Presentation.Services
         public Camera Camera => camera;
         public Transform ListenerPivot => listenerPivot;
         public CameraMode Mode => mode;
-        public float3 Focus => FocusState + framingOffset;
-        public float CurrentDistance => distance;
+        public float3 Focus => mode == CameraMode.EditorOrbit ? pivot : FocusState + framingOffset;
+        public float CurrentDistance => mode == CameraMode.EditorOrbit ? edDistance : distance;
         internal float3 LookAhead => lookAhead;
-        public float YawDeg => yawDeg;
+        public float YawDeg => mode == CameraMode.EditorOrbit ? edYaw : yawDeg;
 
         public void SetMode(CameraMode mode, bool cut)
         {
@@ -85,7 +88,7 @@ namespace Game.Presentation.Services
                 pitchTargetDeg = config.DefaultPitchDeg; distanceTarget = config.DefaultDistance; yawOffsetDeg = 0;
                 if (cut || settings.ReduceMotion) CutRequested = true;
             }
-            // TODO(CAM-009): clear editor input suppression on mode changes.
+            suppressZoom = suppressOrbit = false;
         }
 
         public void ApplySettings(in CameraSettings settings)
@@ -116,10 +119,43 @@ namespace Game.Presentation.Services
         }
         public float3 DesiredFlightPosition() => CameraMath.OrbitPosition(Focus, CameraMath.OrbitRotation(pitchDeg, yawDeg), distance);
         public void SetOcclusionDistance(float distance) => throw new NotImplementedException("CAM-007");
-        public void EnterEditorOrbit(float3 center, float radius, bool cut) => throw new NotImplementedException("CAM-009");
-        public void FocusOn(float3 center, float radius) => throw new NotImplementedException("CAM-009");
-        public void SnapView(EditorView view) => throw new NotImplementedException("CAM-009");
-        public void SetEditorSuppression(bool zoom, bool orbit) => throw new NotImplementedException("CAM-009");
+        public void EnterEditorOrbit(float3 center, float radius, bool cut)
+        {
+            if (disposed) return;
+            boundsCenter = center; boundsRadius = math.max(radius, 1);
+            pivotTarget = center; edYawTarget = 45; edPitchTarget = 30;
+            edDistanceTarget = math.clamp(radius * config.EditorDistanceRadiusFactor + config.EditorDistancePad, config.EditorMinDistance, MaxEditorDistance);
+            SetMode(CameraMode.EditorOrbit, cut);
+            if (cut || settings.ReduceMotion)
+            {
+                pivot = pivotTarget; edYaw = edYawTarget; edPitch = edPitchTarget; edDistance = edDistanceTarget;
+            }
+        }
+        public void FocusOn(float3 center, float radius)
+        {
+            if (disposed) return;
+            pivotTarget = center;
+            edDistanceTarget = math.clamp(radius * config.EditorFocusPadding / math.sin(math.radians(config.VerticalFovDeg * .5f)), config.EditorMinDistance, MaxEditorDistance);
+        }
+        public void SnapView(EditorView view)
+        {
+            if (disposed) return;
+            switch (view)
+            {
+                case EditorView.Iso: edYawTarget = 45; edPitchTarget = 30; break;
+                case EditorView.Top: edYawTarget = edYaw; edPitchTarget = 89; break;
+                case EditorView.Front: edYawTarget = 0; edPitchTarget = 0; break;
+                case EditorView.Side: edYawTarget = 90; edPitchTarget = 0; break;
+                default: throw new ArgumentOutOfRangeException(nameof(view));
+            }
+            edPitchTarget = math.clamp(edPitchTarget, config.EditorMinPitchDeg, config.EditorMaxPitchDeg);
+        }
+        public void SetEditorSuppression(bool zoom, bool orbit)
+        {
+            if (disposed) return;
+            suppressZoom = zoom; suppressOrbit = orbit;
+        }
+        float MaxEditorDistance => boundsRadius * config.EditorMaxDistanceRadiusFactor + config.EditorMaxDistancePad;
         public Ray ScreenPointToRay(Vector2 screenPosBottomLeft) => camera.ScreenPointToRay(screenPosBottomLeft);
 
         public void Tick(float dt)
@@ -136,8 +172,8 @@ namespace Game.Presentation.Services
                 MenuPose(out p, out r);
             }
             else if (mode == CameraMode.Flight && HasTarget) FlightPose(dt, out p, out r);
+            else if (mode == CameraMode.EditorOrbit) EditorPose(dt, out p, out r);
             // Hold/targetless Flight keep the logical pose so additive shake never accumulates into a drift.
-            // CAM-009 supplies the editor pose.
             if (blending)
             {
                 blendT = math.min(1, blendT + dt / config.BlendSeconds);
@@ -161,6 +197,36 @@ namespace Game.Presentation.Services
                 outRot = math.mul(r, quaternion.EulerXYZ(math.radians(angles)));
             }
             ApplyPose();
+        }
+
+        void EditorPose(float dt, out float3 position, out quaternion rotation)
+        {
+            Vector2 orbit = input?.OrbitDelta ?? Vector2.zero;
+            float k = config.OrbitDegPerPixel * settings.MouseSensitivity;
+            if (!suppressOrbit)
+            {
+                edYawTarget += orbit.x * k;
+                edPitchTarget = math.clamp(edPitchTarget - orbit.y * k * (settings.InvertOrbitY ? -1 : 1), config.EditorMinPitchDeg, config.EditorMaxPitchDeg);
+            }
+            var currentRotation = CameraMath.OrbitRotation(edPitch, edYaw);
+            Vector2 pan = input?.PanDelta ?? Vector2.zero;
+            float3 right = math.rotate(currentRotation, new float3(1, 0, 0)), up = math.rotate(currentRotation, new float3(0, 1, 0));
+            pivotTarget += (-right * pan.x - up * pan.y) * edDistance * config.EditorPanPerPixelPerMeter;
+            float extent = boundsRadius + config.EditorPivotBoundsPad;
+            pivotTarget = math.clamp(pivotTarget, boundsCenter - extent, boundsCenter + extent);
+            if (!suppressZoom)
+                edDistanceTarget = math.clamp(edDistanceTarget * math.pow(config.ZoomStepFactor, input?.ZoomSteps ?? 0), config.EditorMinDistance, MaxEditorDistance);
+            if (input?.ViewIsoPressed == true) SnapView(EditorView.Iso);
+            if (input?.ViewTopPressed == true) SnapView(EditorView.Top);
+            if (input?.ViewFrontPressed == true) SnapView(EditorView.Front);
+            if (input?.ViewSidePressed == true) SnapView(EditorView.Side);
+            if (input?.FocusPressed == true) FocusOn(boundsCenter, boundsRadius);
+            edYaw = CameraMath.DampAngle(edYaw, edYawTarget, config.EditorHalfLife, dt);
+            edPitch = CameraMath.Damp(edPitch, edPitchTarget, config.EditorHalfLife, dt);
+            edDistance = CameraMath.Damp(edDistance, edDistanceTarget, config.EditorHalfLife, dt);
+            pivot = CameraMath.Damp(pivot, pivotTarget, config.EditorHalfLife, dt);
+            rotation = CameraMath.OrbitRotation(edPitch, edYaw);
+            position = CameraMath.OrbitPosition(pivot, rotation, edDistance);
         }
 
         void FlightPose(float dt, out float3 position, out quaternion rotation)
