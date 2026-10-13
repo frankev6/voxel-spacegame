@@ -40,7 +40,8 @@ MonoBehaviour:
   blockCategory: 6
   modules:
   - rid: 6
-  grantedAbilities: []
+  grantedAbilities:
+  - {fileID: 11400000, guid: 0f2662c9f24714b169d9be03d4aa8be1, type: 2}
   references:
     version: 2
     RefIds:

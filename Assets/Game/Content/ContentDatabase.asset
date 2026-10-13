@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: ContentDatabase
   m_EditorClassIdentifier: Game.Data::Game.Data.ContentDatabase
   definitions:
+  - {fileID: 11400000, guid: 0f2662c9f24714b169d9be03d4aa8be1, type: 2}
+  - {fileID: 11400000, guid: 35ab7995a9ebc44388dc90283da496f5, type: 2}
   - {fileID: 11400000, guid: 722d58156a944931ac0cccbcb30eb550, type: 2}
   - {fileID: 11400000, guid: c346262ebd5f42938405227a7a4e3c2f, type: 2}
   - {fileID: 11400000, guid: 87f43591dcea4c56bb873810e81c5d43, type: 2}
