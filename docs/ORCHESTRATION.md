@@ -18,7 +18,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- **Now:** main **90f066a7** contains the validated AUD-006/WPN-011 batch. Primary `task/WPN-007-validation` integrates isolated firing work; compile + eight required EditMode cases run in **session 94537**. Do not mutate runtime before terminal. All three exact workers rechecked active (DMG-015, DMG-017, ENC-002); audio follow-ups await their deliveries.
+- **Now:** main **90f066a7** contains the validated AUD-006/WPN-011 batch. Primary `task/WPN-007-validation` integrates isolated firing work; compile + eight required EditMode cases run in **session 50618** (94537 exposed a missing OwnedBy namespace import, repaired by f74ea9ac). Do not mutate runtime before terminal. All three exact workers rechecked active (DMG-015, DMG-017, ENC-002); audio follow-ups await their deliveries.
 
 - **Latest closeout:** full audio/turret session 95012 exited 0: **1112/0/1 EditMode, 150/0/53 PlayMode**, compile clean. AUD-006/WPN-011 closed, evidence `audio-combat/*-final.xml`. Unity free; original QualitySettings delta preserved, inactive artifacts removed. Next primary batch WPN-007; isolated **085ab8ac** includes real pulse clock. Workers still DMG-015/017 and ENC-002; newly ready AUD-007/008/009 are next reuse candidates.
 
