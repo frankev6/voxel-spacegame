@@ -15,14 +15,22 @@ namespace Game.Data.Definitions
         public string TargetBodyTag => targetBodyTag;
         public Game.Data.Logic.CompiledCondition ResolvedWhen => resolvedWhen;
 
-        // TODO(QST-002): implement field validation and the specified logic usages.
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
             base.Validate(scope, context);
-            throw new System.NotImplementedException("QST-002");
+            QuestDefinitionValidation.Rumor(this, scope);
+            QuestDefinitionValidation.Reference(target, "target", scope, context);
+            QuestDefinitionValidation.Logic(resolvedWhen, scope, "resolvedWhen");
         }
         public void CompileLogic(Game.Data.Logic.Compiler.LogicCompiler compiler, Game.Data.Validation.ValidationScope scope)
-            => throw new System.NotImplementedException("QST-002");
-        public void BindLogic(Game.Data.Logic.LogicBinder binder) => throw new System.NotImplementedException("QST-002");
+        {
+            resolvedWhen ??= new();
+            QuestDefinitionValidation.Compile(compiler, resolvedWhen, Game.Data.Logic.LogicUsage.MarkerCondition, scope, "resolvedWhen");
+        }
+        public void BindLogic(Game.Data.Logic.LogicBinder binder)
+        {
+            if (binder == null) throw new System.ArgumentNullException(nameof(binder));
+            resolvedWhen?.Bind(binder);
+        }
     }
 }

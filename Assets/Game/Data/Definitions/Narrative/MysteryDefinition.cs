@@ -19,14 +19,22 @@ namespace Game.Data.Definitions
         public Game.Data.Logic.CompiledEffectList OnSolved => onSolved;
         public int Order => order;
 
-        // TODO(QST-002): implement field validation and the specified logic usages.
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
             base.Validate(scope, context);
-            throw new System.NotImplementedException("QST-002");
+            QuestDefinitionValidation.Mystery(this, scope);
+            QuestDefinitionValidation.Logic(onSolved, scope, "onSolved");
+            if (requires != null) for (int i = 0; i < requires.Count; i++) QuestDefinitionValidation.Reference(requires[i], "requires[" + i + "]", scope, context);
         }
         public void CompileLogic(Game.Data.Logic.Compiler.LogicCompiler compiler, Game.Data.Validation.ValidationScope scope)
-            => throw new System.NotImplementedException("QST-002");
-        public void BindLogic(Game.Data.Logic.LogicBinder binder) => throw new System.NotImplementedException("QST-002");
+        {
+            onSolved ??= new();
+            QuestDefinitionValidation.Compile(compiler, onSolved, Game.Data.Logic.LogicUsage.QuestEffect, scope, "onSolved");
+        }
+        public void BindLogic(Game.Data.Logic.LogicBinder binder)
+        {
+            if (binder == null) throw new System.ArgumentNullException(nameof(binder));
+            onSolved?.Bind(binder);
+        }
     }
 }
