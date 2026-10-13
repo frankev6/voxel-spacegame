@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | delivered bbf32ef9; staged in isolated lead checkout; validation wait | audio measurements |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | WPN-009 | dispatch after projectile closeout | beam hit/damage integration |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-015 | dispatch after projectile closeout | weapon harness |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | integrated 8a24a71f; four focused checks passed; full batch validation wait | audio measurements |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | WPN-009 | delivered eee18b830; reviewed/integrated dabc1fa4; validation wait | beam hit/damage integration |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-015 | delivered 5e223c83; reviewed/integrated dceee015; validation wait | weapon harness |
 
 ## Operating rules
 
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Combined regression:** session66775 exited0: compile clean, ExplosionTests4/4 and audio4/4. Audio warmed300-frame worst/total GC0B; timing misses remain advisory, zero tuning passes. Evidence `Logs/playtest/beam-explosion-audio/{explosions-final,audio-final}.xml`. Beam delivery eee18b830 reviewed/integrated dabc1fa4; harness dceee015 integrated. Serialized compile/full EditMode/full PlayMode session80229 now active. All three workers have verified delivered/validation waits; no primary runtime mutations until terminal. Prior goal-question turn supplied status only; this continuation advances integration/validation.
 
 - **Explosion fixture repaired:** diagnostics established real request/radius reaches job; invented source Entity90000 caused Unity HasComponent to throw before stream finalization. e3495d72 uses real created source/instigator entities and retains prerequisite assertion. Temporary production logging restored from cp backup after terminal12085; no diagnostic production changes remain. Serialized compile + four explosions + four audio checks session66775 active. WPN-015 staged063cbb09 still isolated; beams active. No primary mutation until terminal.
 
