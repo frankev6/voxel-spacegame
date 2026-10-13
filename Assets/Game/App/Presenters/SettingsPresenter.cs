@@ -49,7 +49,7 @@ namespace Game.App.Presenters
             if (!bound || disposed) return;
             Refresh(); if (!ui.Navigator.IsOpen<SettingsView>()) ui.Navigator.Push<SettingsView>();
         }
-        void StackChanged() { if (!ui.Navigator.IsOpen<SettingsView>()) CancelRebind(); else Refresh(); }
+        void StackChanged() { if (ui.Navigator.Top is SettingsView) Refresh(); else CancelRebind(); }
         void Changed(SettingsChanged _) => Refresh();
         void BuildOptions()
         {
@@ -113,7 +113,7 @@ namespace Game.App.Presenters
             model.TextScaleIndex = data.Accessibility.TextScaleIndex; model.ReduceMotion = data.Accessibility.ReduceMotion;
             RefreshBindings();
         }
-        public void SelectTab(int tab) { if (tab >= 0 && tab < 5 && tab != model.SelectedTab) { CancelRebind(); model.SelectedTab = tab; } }
+        public void SelectTab(int tab) { if (bound && !disposed && tab >= 0 && tab < 5 && tab != model.SelectedTab) { CancelRebind(); model.SelectedTab = tab; } }
         void Apply(GameSettings edited, SettingsSection section)
         {
             if (!bound || disposed) return;
@@ -183,7 +183,7 @@ namespace Game.App.Presenters
         }
         public void StartRebind(int row)
         {
-            if (!bound || disposed || !ui.Navigator.IsOpen<SettingsView>() || row < 0 || row >= bindings.Count) return;
+            if (!bound || disposed || ui.Navigator.Top is not SettingsView || row < 0 || row >= bindings.Count) return;
             CancelRebind(); model.ListeningRow = row; RefreshBindings();
             var target = bindings[row];
             input.StartRebind(model.Rebinds[row].ActionPath, target.index, result =>
@@ -199,7 +199,13 @@ namespace Game.App.Presenters
                 RefreshBindings();
             });
         }
-        public void CancelRebind() { input.CancelRebind(); model.ListeningRow = -1; RefreshBindings(); }
+        public void CancelRebind()
+        {
+            if (disposed) return;
+            // InputService is shared: only cancel the operation this presenter started.
+            if (model.ListeningRow >= 0) input.CancelRebind();
+            model.ListeningRow = -1; RefreshBindings();
+        }
         public void ResetBindings()
         {
             if (!bound || disposed) return;

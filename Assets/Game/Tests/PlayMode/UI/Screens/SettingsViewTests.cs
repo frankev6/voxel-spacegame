@@ -110,7 +110,21 @@ namespace Game.Tests.PlayMode.UI.Screens
             Press(keyboard.escapeKey); InputSystem.Update(); Release(keyboard.escapeKey);
             Assert.IsFalse(window.Input.IsRebinding); Assert.IsTrue(window.View.IsOpen); Assert.AreEqual(-1, window.Model.ListeningRow);
             Assert.AreEqual("F", window.Model.Rebinds[row].BindingText); Assert.AreEqual(InputContext.Menu, window.Input.CurrentContext);
+            window.Presenter.StartRebind(row); Assert.IsTrue(window.Input.IsRebinding);
+            window.UI.Confirm.Show(DialogTestContext.Confirm(), null);
+            Assert.IsFalse(window.Input.IsRebinding, "Covering settings cancels its listening operation.");
+            Assert.AreEqual(-1, window.Model.ListeningRow); Assert.IsTrue(window.Input.Controls.Global.enabled);
+            yield return null; PressAndRelease(keyboard.escapeKey);
+            Assert.IsFalse(window.UI.Confirm.IsOpen); Assert.IsTrue(window.View.IsOpen);
+            window.Presenter.StartRebind(row); Assert.IsTrue(window.Input.IsRebinding);
+            window.Presenter.Unbind(); Assert.IsFalse(window.Input.IsRebinding); Assert.AreEqual(-1, window.Model.ListeningRow);
+            var model = window.View.Root.dataSource;
+            window.Presenter.Bind(); Assert.AreSame(model, window.Model, "Session rebinding preserves the model identity.");
             yield return null; PressAndRelease(keyboard.escapeKey); Assert.IsFalse(window.View.IsOpen, "Back resumes normal navigation after cancellation.");
+            // An unrelated input operation remains owned by its caller while settings is closed.
+            window.Input.StartRebind("Flight/Interact", 0, _ => { });
+            window.Presenter.CancelRebind(); Assert.IsTrue(window.Input.IsRebinding);
+            window.Input.CancelRebind();
         }
         [UnityTest] public IEnumerator Rebind_Success_UpdatesRow()
         {
