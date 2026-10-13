@@ -20,6 +20,7 @@ namespace Game.Editor.Content
                 throw new System.InvalidOperationException("Expected exactly one power tuning definition in the rebuilt database.");
             if (report.HasErrors) throw new Game.Data.Validation.ContentValidationException(report);
             UnityEditor.AssetDatabase.SaveAssets();
+            UnityEditor.EditorApplication.Exit(0);
         }
     }
 }
