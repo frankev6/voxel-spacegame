@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Data.Combat;
@@ -7,6 +8,7 @@ using Game.Tests.Common;
 using Game.Voxel.Damage;
 using Game.Voxel.Grid;
 using Game.Voxel.Model;
+using Game.Voxel.PhysicsBody;
 using Game.Voxel.PresentationStreams;
 using NUnit.Framework;
 using Unity.Burst;
@@ -25,6 +27,7 @@ namespace Game.Tests.PlayMode.Combat
     {
         public Entity A, B, C, D;
         public uint Start;
+        public byte ChunkSpur;
     }
 
     // Scripted SPEC-21 producer: fixed-tick hits enter the real damage channel; no direct cell edits.
@@ -60,6 +63,7 @@ namespace Game.Tests.PlayMode.Combat
                 }
                 if (t == 120) Fire(Script.D, Script.A, new float3(5.75f,.25f,1.25f), 100000, 3000);
                 if (t == 300) Fire(Script.A, Script.D, new float3(1.25f,.75f,1.25f), 100000, 3001);
+                if (Script.ChunkSpur != 0 && t == 180) Fire(Script.D, Script.A, new float3(4.25f,.25f,2.75f), 100000, 3002);
                 Writer.EndForEachIndex();
             }
             void Fire(Entity source, Entity target, float3 point, float amount, uint sequence)
@@ -73,21 +77,25 @@ namespace Game.Tests.PlayMode.Combat
     [Category("Scenario")]
     public unsafe sealed class DamageDeterminismTests
     {
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             public readonly FlightFixture Flight;
             public readonly Entity[] Roots = new Entity[4];
             public EntityManager Em => Flight.Em;
-            public Fixture()
+            readonly bool chunkSpur;
+            public Fixture(bool chunkSpur = false)
             {
-                Flight = new FlightFixture(typeof(DamageStreamsSystem), typeof(ImpactEventSystem), typeof(DamageResolveSystem),
+                this.chunkSpur = chunkSpur;
+                var systems = new List<Type> { typeof(DamageStreamsSystem), typeof(ImpactEventSystem), typeof(DamageResolveSystem),
                     typeof(IntegritySystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(ChunkColliderCleanupSystem),
-                    typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(ExplosionSystem), typeof(SkirmishShotsSystem));
+                    typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(ExplosionSystem), typeof(SkirmishShotsSystem) };
+                if (chunkSpur) systems.Add(typeof(SplitGraceContactSystem));
+                Flight = new FlightFixture(systems.ToArray());
                 Em.CreateSingleton(new PersistentIdAllocator { Next = 1000, End = 2000 });
                 Em.CreateSingleton(new WeaponTuning { MaxCandidates = 32, ExplosionImpulsePerDamage = 2 });
                 for (int i = 0; i < 4; i++)
                 {
-                    Roots[i] = Flight.SpawnSource(Build(), new float3(i * 200,0,0));
+                    Roots[i] = Flight.SpawnSource(Build(Flight, chunkSpur && i == 0), new float3(i * 200,0,0));
                 }
                 Flight.Ready(Roots);
                 // Asynchronous spawn readiness can finish on different ticks. Begin each comparison
@@ -96,18 +104,23 @@ namespace Game.Tests.PlayMode.Combat
                 while (Flight.Test.TicksRun < 120) Flight.Tick();
                 for (int i = 0; i < 4; i++) Em.SetComponentData(Roots[i], new PersistentId { Value = (ulong)(100 + i) });
             }
-            VoxelStructure Build()
+            internal static VoxelStructure Build(FlightFixture flight, bool chunkSpur = false)
             {
                 var s = new VoxelStructure(.5f);
                 // Test-only connected hull: two lobes joined by one cell, core and real weapon block.
                 for (int x = 0; x <= 17; x++) for (int z = 0; z <= 4; z++)
-                    if (x != 11 || z == 2) Place(s, "block_hull", new int3(x,0,z));
-                Place(s, "block_core_small", new int3(2,1,2));
-                Place(s, "weapon_plasma_turret_small", new int3(14,1,2));
+                    if (x != 11 || z == 2) Place(flight, s, "block_hull", new int3(x,0,z));
+                Place(flight, s, "block_core_small", new int3(2,1,2));
+                Place(flight, s, "weapon_plasma_turret_small", new int3(14,1,2));
+                if (chunkSpur)
+                {
+                    Place(flight, s, "block_hull", new int3(8,0,5));
+                    for (int x = 7; x <= 9; x++) for (int z = 6; z <= 9; z++) Place(flight, s, "block_hull", new int3(x,0,z));
+                }
                 return s;
             }
-            void Place(VoxelStructure source, string id, int3 origin)
-                => Assert.AreEqual(PlaceResult.Ok, source.TryPlaceBlock(new BlockPlacement { Block = Flight.Index(id), Origin = origin }, Flight.Content), id);
+            static void Place(FlightFixture flight, VoxelStructure source, string id, int3 origin)
+                => Assert.AreEqual(PlaceResult.Ok, source.TryPlaceBlock(new BlockPlacement { Block = flight.Index(id), Origin = origin }, flight.Content), id);
             public void Begin()
             {
                 // Physical ram, after every collider is ready. Preparation does not consume scripted combat ticks.
@@ -115,7 +128,21 @@ namespace Game.Tests.PlayMode.Combat
                 Em.SetComponentData(Roots[1], new PhysicsVelocity { Linear = new float3(15,0,0) });
                 Em.SetComponentData(Roots[2], new PhysicsVelocity { Linear = new float3(-15,0,0) });
                 uint tick = Flight.Test.GetSingleton<SimClock>().Tick;
-                Em.CreateSingleton(new SkirmishScript { A = Roots[0], B = Roots[1], C = Roots[2], D = Roots[3], Start = tick });
+                Em.CreateSingleton(new SkirmishScript { A = Roots[0], B = Roots[1], C = Roots[2], D = Roots[3], Start = tick, ChunkSpur = (byte)(chunkSpur ? 1 : 0) });
+            }
+            // DMG-015 repeats the same fixture in one World; old grids leave through the production death path.
+            public void Respawn()
+            {
+                using (var query = Em.CreateEntityQuery(typeof(VoxelGrid)))
+                using (var grids = query.ToEntityArray(Allocator.Temp))
+                    foreach (var grid in grids) DamageScenarioProbe.Request(Em, grid, GridDissolveMode.Dissolve);
+                for (int i = 0; i < Roots.Length; i++)
+                    Roots[i] = Flight.SpawnSource(Build(Flight, chunkSpur && i == 0), new float3(i == 2 ? 220 : i * 200,0,0),
+                        new float3(i == 1 ? 15 : i == 2 ? -15 : 0,0,0));
+                // New roots pass through normal asynchronous readiness while every soak tick remains observed.
+                using var script = Em.CreateEntityQuery(typeof(SkirmishScript));
+                script.SetSingleton(new SkirmishScript { A = Roots[0], B = Roots[1], C = Roots[2], D = Roots[3],
+                    Start = Flight.Test.GetSingleton<SimClock>().Tick, ChunkSpur = (byte)(chunkSpur ? 1 : 0) });
             }
             public void Dispose() => Flight.Dispose();
         }
