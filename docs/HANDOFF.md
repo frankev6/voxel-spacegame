@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Atomic effects underway:** NAR-005 claimed046342be; task/NAR-005-atomic-effects ated98d97f implements reused summed-cost scratch. Effect routing/list execution and five cases remain; uncompiled/unaccepted. Also fixed failed Whisper chapter selection73e5744f using an authored fact because quest_stage returns -1 after failure (Q347). Content generation still waits for QST-002; no Unity operation. Workers ENC-006224/TRV-004237/QST-002199 active. Previous turn fixed imports and dispatched routes (progress).
+
 - **Arrival integrated / worker recycled:** main includes TRV-0056f940373 and converter rerun repair19dea5e0; these remain uncompiled/unaccepted pending QST-002 batch. TRV-004 claimed3ab2e8a3 and dispatched to the same economy worker; ENC-006 and QST-002 continue. No Unity operation. Next generate/recompile real content and run focused acceptance together. Previous turn integrated source (progress).
 
 - **Quest/economy source integrated:** branch task/NAR-016-integration contains f26977f/c0f0c244. Real quest generation, graph compilation and six focused checks remain pending the QST-002 compiler batch; no acceptance claim or active Unity operation. Workers ENC-006222/TRV-005234/QST-002196 are active. Questions337/343 reconciled. Previous turn verified live workers; this turn integrates source.

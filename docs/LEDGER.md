@@ -1052,6 +1052,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — NAR-016 failed chapter fix / NAR-005 cost aggregation — astra (gpt-6)
+
+- NAR-01673e5744f records the Whisper chapter in a saved authored fact; failure beats no longer query quest_stage after failure, when that public API returns -1. Existing QuestCounts expanded: spec-required: 4, extra: 0; still unrun pending QST-002 batch. Q347 records the decision.
+- NAR-005 claimed046342be; ed98d97f implements reused summed item/credit requirements with overflow rejection. Node execution, list preflight/application and five specified cases remain. Planned spec-required: 5, extra: 0; no compile/test claim.
+- ENC-006224, TRV-004237, QST-002199 verified active. No Unity operation. Previous turn import repair and route dispatch were progress.
+
 ### 2026-10-13 — NAR-016 rerun repair / TRV-005 integration — astra (gpt-6)
 
 - Arrival geometry delivery integrated6f940373, static review found no defects; spec-required: 5 functional plus 1 opt-in performance, extra: 0. Not yet compiled or accepted; measurement deferred. Q345 resolves zero-radius search.
