@@ -42,8 +42,8 @@ namespace Game.Voxel.Damage
             dissolve.Instances = state.GetBufferLookup<BlockInstance>(true);
             dissolve.Requests = state.GetComponentLookup<GridDissolveRequest>(true);
             dissolve.Progress = state.GetComponentLookup<GridDissolving>();
-            requests = state.GetEntityQuery(ComponentType.ReadOnly<GridDissolveRequest>());
-            dissolving = state.GetEntityQuery(ComponentType.ReadOnly<GridDissolving>(), ComponentType.ReadOnly<VoxelGrid>());
+            requests = new EntityQueryBuilder(Allocator.Temp).WithAll<GridDissolveRequest>().Build(ref state);
+            dissolving = new EntityQueryBuilder(Allocator.Temp).WithAll<GridDissolving, VoxelGrid>().Build(ref state);
             state.RequireForUpdate<FxEventQueue>(); state.RequireForUpdate<SfxEventQueue>(); state.RequireForUpdate<BlockDefsRef>();
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<DamageStreams>(); state.RequireForUpdate<DamageConfig>();
             state.RequireForUpdate<SimClock>(); state.RequireForUpdate<GameplayEndCommandBufferSystem.Singleton>();
