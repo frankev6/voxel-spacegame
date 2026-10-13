@@ -66,7 +66,7 @@ namespace Game.Simulation.Weapons
                 ref var weapon = ref Weapons.Value.Weapons[mount.WeaponIndex];
                 float rate = Multipliers.HasComponent(root) ? Multipliers[root].Get(StatId.FireRate) : 1;
                 state.CooldownTicks = weapon.TriggerIntervalTicks / math.max(.0001f, rate);
-                state.CooldownRemainingTicks -= 1;
+                if (state.CooldownRemainingTicks > 0) state.CooldownRemainingTicks -= 1;
                 if (state.RoundsLeftInBurst > 0) state.BurstRemainingTicks -= 1;
                 var command = Commands.HasComponent(root) ? Commands[root] : default;
                 Entity target = Targets.HasComponent(root) ? Targets[root].Value : Entity.Null;
@@ -92,7 +92,6 @@ namespace Game.Simulation.Weapons
                 {
                     state.ShotCounter++;
                     uint shotId = ((uint)functional.InstanceIndex & 0xFFFF) << 16 | (state.ShotCounter & 0xFFFF);
-                    var random = WeaponRandom.Create(Tick, Ids.HasComponent(root) ? Ids[root].Value : 0, shotId);
                     float3 forward = aim.FireDirLocal, side = math.normalizesafe(math.cross(mount.UpLocal, forward), new float3(1,0,0));
                     float3 up = math.cross(forward, side);
                     int pellets = weapon.Delivery == WeaponDelivery.Beam ? 1 : weapon.PelletsPerRound;
@@ -101,6 +100,7 @@ namespace Game.Simulation.Weapons
                         (weapon.ExplodeOnExpire != 0 ? ProjectileFlags.ExplodeOnExpire : 0);
                     for (int pellet = 0; pellet < pellets; pellet++)
                     {
+                        var random = WeaponRandom.Create(Tick, Ids.HasComponent(root) ? Ids[root].Value : 0, shotId + (uint)pellet);
                         float angle = weapon.SpreadRad * math.sqrt(random.NextFloat()), azimuth = random.NextFloat(0, 2 * math.PI);
                         float3 direction = forward * math.cos(angle) + (side * math.cos(azimuth) + up * math.sin(azimuth)) * math.sin(angle);
                         Shots.Write(new WeaponShot { Weapon = entity, Grid = root, Instigator = Owners.HasComponent(root) ? Owners[root].Owner : root,

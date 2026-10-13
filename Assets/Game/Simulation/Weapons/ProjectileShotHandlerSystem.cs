@@ -15,19 +15,20 @@ namespace Game.Simulation.Weapons
     public partial struct ProjectileShotHandlerSystem : ISystem
     {
         ComponentLookup<OriginShiftRecord> shifts;
+        ComponentLookup<PersistentId> ids;
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
-            shifts = state.GetComponentLookup<OriginShiftRecord>(true);
+            shifts = state.GetComponentLookup<OriginShiftRecord>(true); ids = state.GetComponentLookup<PersistentId>(true);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<WeaponShots>(); state.RequireForUpdate<ProjectileStore>();
             state.RequireForUpdate<WeaponDefsRef>(); state.RequireForUpdate<WeaponTuning>(); state.RequireForUpdate<SimClock>();
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             var shots = SystemAPI.GetSingleton<WeaponShots>(); var store = SystemAPI.GetSingleton<ProjectileStore>();
-            shifts.Update(ref state);
+            shifts.Update(ref state); ids.Update(ref state);
             SystemAPI.TryGetSingletonEntity<OriginShiftRecord>(out var shiftEntity);
             state.Dependency = new AppendJob { Shots = shots.Shots, Rows = store.Rows, Stats = store.Stats, Applied = store.AppliedShiftSequence,
-                Shifts = shifts, ShiftEntity = shiftEntity, Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value, Tick = SystemAPI.GetSingleton<SimClock>().Tick,
+                Shifts = shifts, Ids = ids, ShiftEntity = shiftEntity, Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value, Tick = SystemAPI.GetSingleton<SimClock>().Tick,
                 Capacity = SystemAPI.GetSingleton<WeaponTuning>().MaxProjectiles }.Schedule(store.Acquire(shots.Access.BeginRead(state.Dependency)));
             shots.Access.EndRead(state.Dependency); store.Release(state.Dependency);
         }
@@ -36,16 +37,22 @@ namespace Game.Simulation.Weapons
             [ReadOnly] public NativeList<WeaponShot> Shots;
             public NativeList<ProjectileRow> Rows; public NativeReference<ProjectileStoreStats> Stats; public NativeReference<uint> Applied;
             [ReadOnly] public ComponentLookup<OriginShiftRecord> Shifts;
+            [ReadOnly] public ComponentLookup<PersistentId> Ids;
             public Entity ShiftEntity; public BlobAssetReference<WeaponDefsBlob> Weapons; public uint Tick; public int Capacity;
             public void Execute()
             {
                 ProjectileStore.ApplyPendingShift(ref Rows, Shifts.HasComponent(ShiftEntity) ? Shifts[ShiftEntity] : default, ref Applied); var stats = Stats.Value;
                 foreach (var shot in Shots)
                 {
-                    if (shot.Delivery != WeaponDelivery.Projectile) continue; // WPN-008 adds guided missile delivery.
-                    if (Rows.Length >= Capacity) { stats.DroppedFull++; continue; }
+                    if (shot.Delivery != WeaponDelivery.Projectile && shot.Delivery != WeaponDelivery.Missile) continue;
+                    if (Rows.Length >= Capacity)
+                    {
+                        if (stats.DroppedFull == 0) { FixedString128Bytes warning = "Projectile store full; released shots are being dropped."; GameLog.Burst.Warn(warning); }
+                        stats.DroppedFull++; continue;
+                    }
                     ref var weapon = ref Weapons.Value.Weapons[shot.Def];
-                    var random = Unity.Mathematics.Random.CreateFromIndex((uint)StableHash.Combine(Tick, ((ulong)(uint)shot.Grid.Index << 32) | shot.ShotId));
+                    var random = WeaponRandom.Create(Tick, Ids.HasComponent(shot.Grid) ? Ids[shot.Grid].Value : 0, shot.ShotId);
+                    random.NextFloat(); random.NextFloat(); // The same pellet consumed two spread samples.
                     uint life = weapon.LifetimeMinTicks == weapon.LifetimeMaxTicks ? weapon.LifetimeMaxTicks : random.NextUInt(weapon.LifetimeMinTicks, weapon.LifetimeMaxTicks + 1);
                     Rows.Add(new ProjectileRow { Position = shot.MuzzleWorld, Velocity = shot.DirWorld * weapon.ProjectileSpeed + shot.ShooterVelocity,
                         Source = shot.Grid, Instigator = shot.Instigator, Target = shot.Target, ShotId = shot.ShotId, DeathTick = Tick + life,
