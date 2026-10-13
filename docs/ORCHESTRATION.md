@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | GAL-002 | dispatched from main c95d3f1; WPN-002 integrated 702c1a6, focused validation active | Ready standard work after batch integration |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | GAL-003 | dispatched from main 3a12c2c; GAL-002 integrated d5acbd2, focused validation active | Ready standard work after batch integration |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AI-003 | dispatched from main ffaf254; MIG-010 6ca1b17 integrated as d6ec9ad, awaiting ABL-002 and generation | M2 power/ability work |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | SYS-001 | dispatched from main 72a68d3; ABL-002 integrated 900e223 with boot hookup 9534014, validation pending | M2 ability content and grants |
 
@@ -90,3 +90,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - WPN-002 focused session 81966 completed exit 0: compile clean, all four required tests pass (`Logs/playtest/combat-content-batch/weapons.xml`). Full compatible EditMode + PlayMode suite launched on primary as session `73612`; poll that exact handle, do not mutate runtime source. AI-004 isolated commits `85fd0e3` / `5718d18` implement gather/sort/bucket and guarded singleton lifetime; five required tests and Unity verification still pending. No done claim for this builder.
 
 - Full session 73612 failed EditMode 952/6/1 (no PlayMode): two fixture DATA-E011 errors and four shared migration-gate duplicate-path setup failures. Repair `dcc00ef` uses transient JSON fixtures and preserves later-owned ability grants during full block conversion; keeps strict validation and idempotence. Q235–236 mirrored. Compile + affected grouped session `29046` active. AI-004 isolated required tests committed `876424e`; still unvalidated.
+
+- Repair session 29046 completed 16 passed/2 failed: migration and strict content checks fixed; plain JSON was not populated by EditorJsonUtility. `48ad51a` switches to JsonUtility; session 82645 completed 3/0/0. GAL-002 reviewed and integrated `d5acbd2`; same worker dispatched GAL-003 from main `3a12c2c`. AI-004 integrated `f721b4b`, `f99a02c`, `d45d6ba`, `c9491ee`. Compile + spatial-builder/orbit focused session `43399` active; do not mutate primary source. Q237 mirrors orbit decision. Full suites still need rerun; migration report is generated evidence awaiting final commit, QualitySettings remains excluded.

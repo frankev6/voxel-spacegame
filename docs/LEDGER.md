@@ -821,6 +821,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 234 | SPEC-21 Q14–15: stable weapon diagnostics and boot faction ownership. | Keep field-specific safety checks in existing WPN code categories, preserve authored nine weapons/config, reject duplicate weapon singletons before allocation, preserve an existing faction owner and clean only factory-owned native data/entities. Integrated with power and ability boot lifetimes. | Tech lead |
 | 235 | SPEC-24 Q5: test assets violate strict production-content location rules. | Keep hand-authored JSON fixtures in Tests and deserialize transient definitions; do not weaken DATA-E011 or add test definitions to production. | Tech lead |
 | 236 | SPEC-72 Q23: full block conversion erases later-owned ability grants. | Preserve existing catalog grants during block field rebuild; retain fill-only-empty semantics, unique-path snapshots and hard report/byte idempotence checks. Output inventory now includes two abilities. | Tech lead |
+| 237 | SPEC-30 Q19: analytic elliptic velocity and periapsis rotation sign. | Differentiate Kepler analytically, use Unity positive-Y rotation consistently for position/velocity, retain the specified phase convention, exactly six Newton iterations and double-precision period reduction. Fixed parents avoid division. | Tech lead |
 
 ## Measurements
 
