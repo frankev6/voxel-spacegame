@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fb780286d264775b802eef0c2b6691b, type: 3}
+  m_Name: fx_explosion_large_default
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.FxDefinition
+  id: fx_explosion_large_default
+  formerIds: []
+  kind: 5
+  mode: 1
+  graph: {fileID: 8926484042661614526, guid: a72beebd212ff4568bf728d5632418ab, type: 3}
+  mesh: {fileID: 0}
+  material: {fileID: 0}
+  defaultColor: {r: 1, g: 0.7019608, b: 0.2784314, a: 1}
+  scale: 1
+  particlesPerEvent: 1
+  maxEventsPerFrame: 4
+  poolSize: 4
+  maxLifetime: 2.5
+  cullDistance: 1500
+  lodDistance: 300
+  lodParticleFactor: 0.25
+  minQuality: 0

@@ -18,3 +18,4 @@ REN-008 entries below cover the new procedural runtime placeholders. They do not
 | `Assets/Game/Art/_Placeholder/Textures/ToonRamp.asset` | Procedural generator above; ADR-0040; approved DESIGN-GUIDE palette | Original project work | Codex GPT-6, for Frank | 2026-10-11 |
 | `Assets/Game/Art/_Placeholder/Materials/BrickPlaceholder.mat` | Generator above; references only the textures listed here | Original project work | Codex GPT-6, for Frank | 2026-10-11 |
 | `Assets/Game/Art/_Placeholder/Materials/PropPlaceholder.mat` | Generator above; references only the textures listed here | Original project work | Codex GPT-6, for Frank | 2026-10-11 |
+| `Assets/Game/Presentation/Vfx/Templates/fx_particle_soft.png` and five template graphs | Own procedural radial alpha texture (64×64), authored VFX graphs; generator evidence `Logs/playtest/vfx004/generate.cs`; DESIGN-GUIDE §9 colours | Original project work | Codex GPT-6, for Frank | 2026-10-12 |

@@ -8,6 +8,7 @@ using Game.App.Settings;
 using Game.Core;
 using Game.Core.Audio;
 using Game.Presentation.Audio;
+using Game.Presentation.Vfx;
 using Game.Presentation.Services;
 using Game.Presentation.Input;
 using Game.Presentation.Systems;
@@ -48,6 +49,7 @@ namespace Game.App.Boot
         internal InputService Input { get; private set; }
         internal AudioService Audio { get; private set; }
         internal CameraRigService Camera { get; private set; }
+        internal FxRig Fx { get; private set; }
         internal UIRoot UI { get; private set; }
         internal PauseService Pause { get; private set; }
         internal SaveService Save { get; private set; }
@@ -167,6 +169,18 @@ namespace Game.App.Boot
             Flow.RegisterReady(new CameraSceneHook(Camera));
             Step("11 camera");
 
+            // 12. Authored VFX. Null graphics runs retain the unbound drain instead of allocating GPU resources.
+            if (SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null)
+            {
+                var vfxConfig = Content.Catalog.Get<VfxConfigDefinition>(new ContentId("config_vfx"));
+                var paletteDefinition = Content.Catalog.Get<VoxelPaletteDefinition>(new ContentId("config_voxel_palette"));
+                var palette = new Color32[paletteDefinition.Colors.Count];
+                for (int i = 0; i < palette.Length; i++) palette[i] = paletteDefinition.Colors[i];
+                Fx = FxRig.Create(root, vfxConfig, Content.Catalog.All<FxDefinition>(), palette, (VfxQuality)Settings.Current.Video.VfxQuality);
+                Push(new FxLifetime(Fx)); Fx.BindTo(world); Register(Fx);
+            }
+            Step("12 fx");
+
             // 14. Settings applier (FND-004): follows SettingsChanged, then pushes every section once (SPEC-01 open question 7).
             Push(new SettingsApplier(Settings));
             SettingsApplier.ApplyAll(Settings.Current);
@@ -195,6 +209,13 @@ namespace Game.App.Boot
         {
             DisposeStack.Add(service);
             return service;
+        }
+
+        sealed class FxLifetime : IDisposable
+        {
+            readonly FxRig rig;
+            public FxLifetime(FxRig rig) { this.rig = rig; }
+            public void Dispose() { if (rig == null) return; rig.Dispose(); UnityEngine.Object.Destroy(rig.gameObject); }
         }
 
         sealed class CameraSceneHook : ISceneReady
@@ -247,7 +268,7 @@ namespace Game.App.Boot
                 catch (Exception e) { GameLog.Exception(LogCategories.Boot, e, "GameComposition.Dispose " + DisposeStack[i].GetType().Name); }
             }
             DisposeStack.Clear();
-            Settings = null; Content = null; Blueprints = null; Registry = null; Input = null; Audio = null; Camera = null; Pause = null; Save = null; GameConfig = null; Flow = null;
+            Settings = null; Content = null; Blueprints = null; Registry = null; Input = null; Audio = null; Camera = null; Fx = null; Pause = null; Save = null; GameConfig = null; Flow = null;
             Game.Core.Services.Reset();
         }
     }

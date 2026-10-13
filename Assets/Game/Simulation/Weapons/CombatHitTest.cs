@@ -36,7 +36,9 @@ namespace Game.Simulation.Weapons
                 if (!VoxelRaycast.Cast(ref query, start / size, delta / size, length / size, out var hit)) continue;
                 float fraction = hit.DistanceCells * size / length;
                 if (fraction > 1 || fraction > best.Fraction || (fraction == best.Fraction && grid.Index >= best.Grid.Index)) continue;
-                best = new CombatHit { Kind = HitKind.Hull, Grid = grid, Fraction = fraction, WorldPoint = math.lerp(p0, p1, fraction) };
+                float3 normal = -math.normalizesafe(delta, new float3(0, 1, 0));
+                if (hit.EnteredFace < 6) { normal = float3.zero; normal[hit.EnteredFace / 2] = (hit.EnteredFace & 1) == 0 ? 1 : -1; }
+                best = new CombatHit { Kind = HitKind.Hull, Grid = grid, Fraction = fraction, WorldPoint = math.lerp(p0, p1, fraction), WorldNormal = math.rotate(transform.Rotation, normal) };
             }
             return best;
         }

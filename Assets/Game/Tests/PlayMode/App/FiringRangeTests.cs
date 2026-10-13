@@ -63,6 +63,15 @@ namespace Game.Tests.PlayMode.App
             Host.Input.SetKeys("Space", 0, true);
             var store = Singleton<ProjectileStore>(); store.CompleteAccess(); Assert.Greater(store.Stats.Value.Fired, 0); Assert.Greater(store.Stats.Value.Hits, 0);
             Assert.Less(Cells(target), cells); Assert.AreEqual(pose.Position, EM.GetComponentData<LocalTransform>(target).Position);
+            if (SystemInfo.graphicsDeviceType != GraphicsDeviceType.Null)
+            {
+                yield return Until(() => Game.Fx.Stats.EventsDrained > 0, "Real firing reaches the session effect rig");
+                var muzzle = Game.Fx.transform.Find("Fx_fx_muzzle_default").GetComponent<UnityEngine.VFX.VisualEffect>();
+                var kinetic = Game.Fx.transform.Find("Fx_fx_hit_kinetic_default").GetComponent<UnityEngine.VFX.VisualEffect>();
+                var energy = Game.Fx.transform.Find("Fx_fx_hit_energy_default").GetComponent<UnityEngine.VFX.VisualEffect>();
+                yield return Until(() => muzzle.GetInt("FxEventCount") > 0 &&
+                    kinetic.GetInt("FxEventCount") + energy.GetInt("FxEventCount") > 0, "Real muzzle and hull-hit events reach their graphs");
+            }
             using (Game.Pause.Acquire("Firing range pause"))
             {
                 yield return Until(() => Game.Input.CurrentContext == InputContext.None, "Pause neutralizes fire");

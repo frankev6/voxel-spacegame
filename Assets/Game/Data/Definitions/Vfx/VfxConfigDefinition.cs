@@ -47,7 +47,14 @@ namespace Game.Data.Definitions
             if (defaults == null || defaults.Length != 14) scope.Error("VFX-E010", nameof(defaults), "Defaults must have 14 entries indexed by FxKind.");
             else for (int k = 1; k < defaults.Length; k++)
             {
-                if (defaults[k] == null) scope.Error("VFX-E011", $"defaults[{k}]", "A default is required for each effect kind.");
+                if (defaults[k] == null)
+                {
+                    // TODO(VFX-014): make staged families strict when their authored content exists.
+                    var kind = (FxKind)k;
+                    bool staged = kind == FxKind.Debris || kind == FxKind.Tracer || kind == FxKind.Beam || kind == FxKind.Thruster || kind == FxKind.ShieldShell || kind == FxKind.Warp;
+                    if (staged) scope.Warning("VFX-W011", $"defaults[{k}]", "Effect family is awaiting its content task.");
+                    else scope.Error("VFX-E011", $"defaults[{k}]", "A default is required for this effect kind.");
+                }
                 else if (defaults[k].Kind != (FxKind)k) scope.Error("VFX-E012", $"defaults[{k}]", "Default kind must match its array index.");
             }
             if (fallbackCellPalette == null || fallbackCellPalette.Length != 256)

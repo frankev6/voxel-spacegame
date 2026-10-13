@@ -7,6 +7,8 @@ using Game.Simulation.Commands;
 using Game.Voxel.Model;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Game.Voxel.PresentationStreams;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -42,7 +44,9 @@ namespace Game.Simulation.Weapons
             job.Commands.Update(ref state); job.Transforms.Update(ref state); job.Velocities.Update(ref state); job.Owners.Update(ref state); job.Players.Update(ref state);
             job.Entities = query.ToEntityListAsync(state.WorldUpdateAllocator, state.Dependency, out var gather);
             job.Shots = owned.Shots; job.Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value; job.Tick = SystemAPI.GetSingleton<SimClock>().Tick;
-            state.Dependency = job.Schedule(owned.Access.Acquire(JobHandle.CombineDependencies(state.Dependency, gather))); owned.Access.Release(state.Dependency);
+            var fx = SystemAPI.GetSingleton<FxEventQueue>(); job.Fx = fx.Queue.AsParallelWriter();
+            state.Dependency = job.Schedule(fx.Access.BeginRead(owned.Access.Acquire(JobHandle.CombineDependencies(state.Dependency, gather))));
+            owned.Access.Release(state.Dependency); fx.Access.EndRead(state.Dependency);
         }
         [BurstCompile] struct FireJob : IJob
         {
@@ -57,6 +61,7 @@ namespace Game.Simulation.Weapons
             [ReadOnly] public ComponentLookup<OwnedBy> Owners;
             [ReadOnly] public ComponentLookup<PlayerShip> Players;
             public NativeList<WeaponShot> Shots;
+            [NativeDisableContainerSafetyRestriction] public NativeQueue<FxEvent>.ParallelWriter Fx;
             public BlobAssetReference<WeaponDefsBlob> Weapons; public uint Tick;
             public void Execute()
             {
@@ -92,6 +97,15 @@ namespace Game.Simulation.Weapons
                                     (weapon.ExplodeOnExpire != 0 ? ProjectileFlags.ExplodeOnExpire : ProjectileFlags.None) });
                         }
                         state.ShotCounter += (uint)(weapon.PelletsPerRound - 1); state.RoundsLeftInBurst--; state.BurstRemainingTicks += weapon.BurstIntervalTicks; state.Firing = 1;
+                    }
+                    if (state.Firing != 0)
+                    {
+                        var transform = Transforms[root];
+                        float3 muzzle = mount.PivotLocal + math.rotate(quaternion.AxisAngle(mount.UpLocal, aim.Yaw), mount.MuzzleLocal - mount.PivotLocal);
+                        var effect = FxEvents.Muzzle(transform.TransformPoint(muzzle), math.rotate(transform.Rotation, aim.FireDirLocal),
+                            Velocities.HasComponent(root) ? Velocities[root].Linear : default, math.max(.01f, weapon.ProjectileRadius * 2), weapon.TracerColor, weapon.MuzzleFx);
+                        if (Players.HasComponent(root)) effect.Flags |= FxEventFlags.PlayerSource;
+                        Fx.Enqueue(effect);
                     }
                     States[entity] = state;
                 }

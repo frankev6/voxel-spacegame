@@ -5,6 +5,10 @@ using Game.Voxel.Damage;
 using Game.Voxel.Model;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Physics;
+using Game.Simulation.Commands;
+using Game.Voxel.PresentationStreams;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -12,7 +16,7 @@ using Unity.Transforms;
 
 namespace Game.Simulation.Weapons
 {
-    // TODO(WPN-010): shields, effects and full explosion tests.
+    // TODO(WPN-010): shields, audio and full explosion tests; visual event emission landed in VFX-004.
     /// <summary>SPEC-21 §5.8: drains same-tick projectile and prior-tick reactor/core explosions into hull damage.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup)), UpdateAfter(typeof(ProjectileStepSystem)), UpdateBefore(typeof(DamageResolveSystem))]
     public partial struct ExplosionSystem : ISystem
@@ -23,17 +27,21 @@ namespace Game.Simulation.Weapons
             grids = new EntityQueryBuilder(Allocator.Temp).WithAll<VoxelGrid, LocalTransform>().Build(ref state);
             job.Grids = state.GetComponentLookup<VoxelGrid>(true); job.Transforms = state.GetComponentLookup<LocalTransform>(true);
             job.Spawning = state.GetComponentLookup<GridSpawning>(true); job.Sources = state.GetComponentLookup<GridSource>(true);
+            job.Velocities = state.GetComponentLookup<PhysicsVelocity>(true); job.Players = state.GetComponentLookup<PlayerShip>(true);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<DamageStreams>(); state.RequireForUpdate<WeaponTuning>();
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             job.Grids.Update(ref state); job.Transforms.Update(ref state); job.Spawning.Update(ref state); job.Sources.Update(ref state);
+            job.Velocities.Update(ref state); job.Players.Update(ref state);
             var streams = SystemAPI.GetSingleton<DamageStreams>();
             job.Explosions = new NativeList<ExplosionRequest>(state.WorldUpdateAllocator); streams.ScheduleDrainExplosions(ref state, job.Explosions);
             job.Roots = grids.ToEntityListAsync(state.WorldUpdateAllocator, state.Dependency, out var gather);
             job.Damage = streams.Damage.BeginWrite(ref state, ProducerKind.Explosion, 1);
             job.Impulse = SystemAPI.GetSingleton<WeaponTuning>().ExplosionImpulsePerDamage;
-            state.Dependency = job.Schedule(JobHandle.CombineDependencies(state.Dependency, gather)); streams.Damage.EndWrite(state.Dependency);
+            var fx = SystemAPI.GetSingleton<FxEventQueue>(); job.Fx = fx.Queue.AsParallelWriter();
+            state.Dependency = job.Schedule(fx.Access.BeginRead(JobHandle.CombineDependencies(state.Dependency, gather)));
+            streams.Damage.EndWrite(state.Dependency); fx.Access.EndRead(state.Dependency);
         }
         [BurstCompile] struct ExplosionJob : IJob
         {
@@ -43,6 +51,9 @@ namespace Game.Simulation.Weapons
             [ReadOnly] public ComponentLookup<LocalTransform> Transforms;
             [ReadOnly] public ComponentLookup<GridSpawning> Spawning;
             [ReadOnly] public ComponentLookup<GridSource> Sources;
+            [ReadOnly] public ComponentLookup<PhysicsVelocity> Velocities;
+            [ReadOnly] public ComponentLookup<PlayerShip> Players;
+            [NativeDisableContainerSafetyRestriction] public NativeQueue<FxEvent>.ParallelWriter Fx;
             public NativeStream.Writer Damage; public float Impulse;
             public void Execute()
             {
@@ -50,6 +61,10 @@ namespace Game.Simulation.Weapons
                 foreach (var explosion in Explosions)
                 {
                     if (!(explosion.Radius > 0) || !math.isfinite(explosion.Radius) || !math.all(math.isfinite(explosion.WorldPos))) continue;
+                    var effect = FxEvents.Explosion(explosion.WorldPos, explosion.Radius,
+                        Velocities.HasComponent(explosion.Source) ? Velocities[explosion.Source].Linear : default);
+                    if (Players.HasComponent(explosion.Source)) effect.Flags |= FxEventFlags.PlayerSource;
+                    Fx.Enqueue(effect);
                     foreach (var root in Roots)
                     {
                         if ((Spawning.HasComponent(root) && Spawning.IsComponentEnabled(root)) ||

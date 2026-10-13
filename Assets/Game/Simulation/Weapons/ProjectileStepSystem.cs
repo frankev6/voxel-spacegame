@@ -6,6 +6,10 @@ using Game.Voxel.Damage;
 using Game.Voxel.Model;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Physics;
+using Game.Data.Definitions;
+using Game.Voxel.PresentationStreams;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -22,6 +26,7 @@ namespace Game.Simulation.Weapons
         {
             owned = ProjectileStore.Create(8192); state.EntityManager.CreateSingleton(owned);
             grids = new EntityQueryBuilder(Allocator.Temp).WithAll<VoxelGrid>().Build(ref state); job.HitTest = CombatHitTest.Create(ref state);
+            job.Velocities = state.GetComponentLookup<PhysicsVelocity>(true);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<WeaponDefsRef>(); state.RequireForUpdate<SimClock>(); state.RequireForUpdate<DamageStreams>();
         }
         [BurstCompile] public void OnDestroy(ref SystemState state) { state.CompleteDependency(); owned.Dispose(); }
@@ -29,7 +34,7 @@ namespace Game.Simulation.Weapons
         [BurstCompile] public void OnStopRunning(ref SystemState state) { owned.CompleteAccess(); owned.Rows.Clear(); owned.Stats.Value = default; }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
-            job.HitTest.Update(ref state);
+            job.HitTest.Update(ref state); job.Velocities.Update(ref state);
             job.Grids = grids.ToEntityListAsync(state.WorldUpdateAllocator, state.Dependency, out var gather);
             var streams = SystemAPI.GetSingleton<DamageStreams>();
             job.Damage = streams.Damage.BeginWrite(ref state, ProducerKind.Projectile, 1);
@@ -37,12 +42,15 @@ namespace Game.Simulation.Weapons
             job.Rows = owned.Rows; job.Stats = owned.Stats; job.Applied = owned.AppliedShiftSequence;
             job.Shift = SystemAPI.TryGetSingleton<OriginShiftRecord>(out var shift) ? shift : default;
             job.Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value; job.Tick = SystemAPI.GetSingleton<SimClock>().Tick;
-            state.Dependency = job.Schedule(owned.Acquire(JobHandle.CombineDependencies(state.Dependency, gather)));
+            var fx = SystemAPI.GetSingleton<FxEventQueue>(); job.Fx = fx.Queue.AsParallelWriter();
+            state.Dependency = job.Schedule(fx.Access.BeginRead(owned.Acquire(JobHandle.CombineDependencies(state.Dependency, gather)))); fx.Access.EndRead(state.Dependency);
             streams.Damage.EndWrite(state.Dependency); streams.Explosions.EndWrite(state.Dependency); owned.Release(state.Dependency);
         }
         [BurstCompile] struct StepJob : IJob
         {
             public CombatHitTest HitTest;
+            [ReadOnly] public ComponentLookup<PhysicsVelocity> Velocities;
+            [NativeDisableContainerSafetyRestriction] public NativeQueue<FxEvent>.ParallelWriter Fx;
             public NativeList<Entity> Grids;
             public NativeList<ProjectileRow> Rows;
             public NativeReference<ProjectileStoreStats> Stats;
@@ -68,6 +76,11 @@ namespace Game.Simulation.Weapons
                             LocalDir = math.rotate(math.inverse(transform.Rotation), direction), Amount = weapon.Damage * row.DamageMultiplier,
                             Penetration = weapon.PenetrationCells, Type = row.Type, Source = row.Source, Instigator = row.Instigator,
                             Producer = ProducerKind.Projectile, Sequence = row.ShotId, WorldImpulse = direction * weapon.ImpulsePerHit });
+                        var effect = FxEvents.Hit(row.Type == DamageType.Energy ? FxKind.HitEnergy : FxKind.HitKinetic,
+                            hit.WorldPoint, hit.WorldNormal, Velocities.HasComponent(hit.Grid) ? Velocities[hit.Grid].Linear : default,
+                            weapon.Damage * row.DamageMultiplier, weapon.HitFx);
+                        if ((row.Flags & ProjectileFlags.PlayerSource) != 0) effect.Flags |= FxEventFlags.PlayerSource;
+                        Fx.Enqueue(effect);
                         Explode(row, weapon, hit.WorldPoint); stats.Hits++; continue;
                     }
                     if (Tick >= row.DeathTick)

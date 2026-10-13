@@ -49,6 +49,8 @@ namespace Game.App.Settings
 
         static void ApplyVideo(VideoSettingsData v)
         {
+            if (Game.Core.Services.TryGet<Game.Presentation.Vfx.FxRig>(out var fx))
+                fx.SetQuality((Game.Data.Definitions.VfxQuality)v.VfxQuality);
             if (UnityEngine.Application.isBatchMode) return;   // headless runs and tests keep the project's screen and quality settings
             if (v.ResolutionWidth > 0 && v.ResolutionHeight > 0)
                 UnityEngine.Screen.SetResolution(v.ResolutionWidth, v.ResolutionHeight, v.FullScreenMode,
@@ -57,7 +59,6 @@ namespace Game.App.Settings
             if (v.QualityLevel >= 0) UnityEngine.QualitySettings.SetQualityLevel(Math.Min(v.QualityLevel, UnityEngine.QualitySettings.names.Length - 1));
             UnityEngine.QualitySettings.vSyncCount = v.VSync ? 1 : 0;
             UnityEngine.Application.targetFrameRate = v.TargetFrameRate;
-            // VFX rig task: fx.SetQuality((VfxQuality)v.VfxQuality)
         }
     }
 }

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fb780286d264775b802eef0c2b6691b, type: 3}
+  m_Name: fx_muzzle_default
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.FxDefinition
+  id: fx_muzzle_default
+  formerIds: []
+  kind: 8
+  mode: 0
+  graph: {fileID: 8926484042661614526, guid: a6270613fa58142d7abdf0ac43b5c8a6, type: 3}
+  mesh: {fileID: 0}
+  material: {fileID: 0}
+  defaultColor: {r: 1, g: 0.33333334, b: 0.1882353, a: 1}
+  scale: 1
+  particlesPerEvent: 4
+  maxEventsPerFrame: 2048
+  poolSize: 4
+  maxLifetime: 0.1
+  cullDistance: 1500
+  lodDistance: 300
+  lodParticleFactor: 0.25
+  minQuality: 0
