@@ -29,17 +29,14 @@ namespace Game.Galaxy.Streaming
         {
             Output.Clear();
             int ring = Sector / 4096, angular = Sector % 4096;
-            double inner = Belt.BeltInnerRadiusM + ring * (double)SectorSizeM;
-            double outer = math.min(Belt.BeltOuterRadiusM, inner + SectorSizeM);
-            double middle = (inner + outer) * .5;
-            int sectors = (int)math.ceil(2 * math.PI * middle / SectorSizeM);
+            BeltSectorGeometry.Ring(Belt, SectorSizeM, ring, out double inner, out double outer, out int sectors);
             var rng = RngStreams.For(Belt.Seed, RngPurpose.AsteroidShape, (ulong)Sector);
             int count = rng.NextInt(MinCount, MaxCount + 1);
             for (int k = 0; k < count; k++)
             {
                 // Square-root radius is uniform over the annular sector's area.
                 double radius = math.sqrt(math.lerp(inner * inner, outer * outer, rng.NextFloat()));
-                double angle = (angular + (double)rng.NextFloat()) * (2 * math.PI / sectors);
+                double angle = (angular + (double)rng.NextFloat()) * (BeltSectorGeometry.Tau / sectors);
                 float height = rng.NextFloat(-.25f, .25f) * (Belt.BeltOuterRadiusM - Belt.BeltInnerRadiusM) * .1f;
                 float sizeDraw = rng.NextFloat();
                 float size = math.lerp(MinRadiusM, MaxRadiusM, sizeDraw * sizeDraw);
