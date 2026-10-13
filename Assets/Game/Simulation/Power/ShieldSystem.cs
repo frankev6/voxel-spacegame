@@ -23,7 +23,7 @@ namespace Game.Simulation.Power
     /// <summary>SPEC-22 §5.5: world-owned shield hit channel, stable gather and exclusive per-root resolution.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup))]
     [UpdateAfter(typeof(ExplosionSystem)), UpdateBefore(typeof(DamageResolveSystem))]
-    public partial struct ShieldSystem : ISystem
+    public partial struct ShieldSystem : ISystem, ISystemStartStop
     {
         ShieldHitStreams owned;
         EntityQuery roots;
@@ -43,6 +43,13 @@ namespace Game.Simulation.Power
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<SimClock>(); state.RequireForUpdate<PowerTuning>();
             state.RequireForUpdate<BlockModulesRef>(); state.RequireForUpdate<DamageConfig>();
             state.RequireForUpdate<DamageStreams>(); state.RequireForUpdate<FxEventQueue>();
+        }
+        [BurstCompile] public void OnStartRunning(ref SystemState state) { }
+        [BurstCompile] public void OnStopRunning(ref SystemState state)
+        {
+            // Match the damage channel owner: pending hits cannot cross a gameplay stop/re-entry.
+            owned.Hits.BeginRead(ref state);
+            owned.Hits.EndRead(state.Dependency);
         }
         [BurstCompile] public void OnDestroy(ref SystemState state)
         { state.CompleteDependency(); owned.Hits.Dispose(); }
