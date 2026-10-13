@@ -149,15 +149,23 @@ namespace Game.Tests.EditMode.Voxel.Damage
                     for (uint tick = 1; tick <= hashes.Length; tick++)
                     {
                         f.Begin(tick);
-                        if (tick == 1) for (int n = 0; n < 8; n++)
+                        if (tick == 1) for (int n = 0; n < 16; n++)
                         {
-                            int i = reverse ? 7 - n : n;
-                            var request = Heal(roots[i / 2], 0, new int3(7, 0, 0));
+                            int i = reverse ? 15 - n : n; int grid = i / 4, operation = i % 4;
+                            var request = operation < 2 ? Heal(roots[grid], 0, new int3(7, 0, 0)) : Place(f, roots[grid], new int3(8, 0, 0));
+                            // Competing placement colours make the canonical winner observable
+                            // as well as exercising continuation across both restore modes.
+                            if (operation >= 2) request.Color = (byte)(operation + 5);
                             request.Sequence = (uint)i; f.Streams.Restores.PostFromMainThread(request);
                         }
                         f.Resolve(); hashes[tick - 1] = CellStateHasher.ComputeWorldHash(f.Grid.EM);
                     }
-                    foreach (var root in roots) for (int x = 0; x < 8; x++) Assert.AreEqual(255, f.Cell(root, x).Hp);
+                    foreach (var root in roots)
+                    {
+                        for (int x = 0; x <= 8; x++) Assert.AreEqual(255, f.Cell(root, x).Hp);
+                        var placed = f.Cell(root, 8);
+                        Assert.AreEqual(7, f.Grid.EM.GetBuffer<PaletteEntry>(root)[placed.PaletteIndex].Color);
+                    }
                     if (expected == null) expected = hashes; else CollectionAssert.AreEqual(expected, hashes, $"workers={workers}, reverse={reverse}");
                 }
             }
