@@ -153,7 +153,8 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             var beforeAim = new WeaponAim { Yaw = .2f, DesiredYaw = .1f, FireDirLocal = new float3(.4f, 0, .7f), HasAim = 1, Aligned = 1, InRange = 1, Reserved = 9 };
             EM.SetComponentData(weapon, beforeState); EM.SetComponentData(weapon, beforeBeam); EM.SetComponentData(weapon, beforeAim);
             // A hulk-split test double changes both the grid/index and block placement. No SplitSystem is needed to verify its boundary.
-            EM.GetBuffer<BlockInstance>(root)[functional.InstanceIndex] = default;
+            var rootInstances = EM.GetBuffer<BlockInstance>(root);
+            rootInstances[functional.InstanceIndex] = default;
             var hulk = EM.CreateEntity(typeof(VoxelGrid));
             EM.SetComponentData(hulk, new VoxelGrid { CellSize = .75f, Kind = GridKind.Hulk });
             EM.AddBuffer<BlockInstance>(hulk);
