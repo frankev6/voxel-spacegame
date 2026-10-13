@@ -931,7 +931,7 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 1. Full serialized session 21701 exited 0: **939 EditMode passed, 0 failed, 1 skipped; 135 PlayMode passed, 0 failed, 53 skipped**. Compile clean, focused 18/18 including actual Burst query safety. Evidence `Logs/playtest/ai002/{editmode-full,playmode-full,query-burst-integrated}.xml`.
 2. Closed AI-002 `470001e` (spec-required: 5, extra: 0), GAL-001 `6d49a49` (3, 0), DLG-001 `67e0ffd` (1, 0), UI-010 `6b3a919` (7, 0). ADR-0064 resolves job data versus owner handle bookkeeping without disabling safety. No optimization pass or new gameplay claim for interface stubs.
-3. Next isolated combat batch includes WPN-003, PWR-003, UI-011 and partial ART-014. WPN-003 review repairs `b5d0c5d` / `1b3876c` retain the specified DDA endpoint margin and run the same seven required cases through Burst jobs. Power catalog rebuild remains next. Unity has exited; original QualitySettings restored and excluded.
+3. Next isolated combat batch includes WPN-003, PWR-003, UI-011 and partial ART-014. WPN-003 review repairs `b5d0c5d` / `1b3876c` retain the specified DDA endpoint margin and run the same seven required cases through Burst jobs. Power catalog rebuild subsequently passed (session 79119), catalog committed `e722af7`, temporary script removed. Initial fixture conversion compile error fixed `ef6949e`; compile/grouped validation session 56625 now active. Original QualitySettings remains excluded.
 
 ### 2026-10-13 — WPN-003 next combat batch prepared — astra (gpt-6)
 
