@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Game.Core.Components;
+using Game.Data;
 using Game.Data.Blocks;
 using Game.Simulation.Abilities;
 using Game.Simulation.Power;
@@ -21,6 +22,7 @@ namespace Game.Tests.EditMode.Simulation.Power
         {
             world = EcsTestWorld.Create(typeof(PowerAllocationSystem));
             world.AddGameplayActive(); world.AddSimClock(); world.AddSingleton(PowerTuning.Defaults);
+            world.AddSingleton(default(BlockDefsRef)); world.AddSingleton(default(BlockModulesRef));
         }
         [TearDown] public void TearDown() => world?.Dispose();
         Entity Root(float stored = 200, float generation = 40)

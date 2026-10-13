@@ -1,5 +1,8 @@
 using Game.Core.Components;
 using Game.Core.Systems;
+using Game.Data;
+using Game.Data.Blocks;
+using Unity.Profiling;
 using Game.Simulation.Abilities;
 using Game.Voxel.Damage;
 using Game.Voxel.Model;
@@ -13,12 +16,15 @@ namespace Game.Simulation.Power
     [BurstCompile, UpdateInGroup(typeof(GameplayPrePhysicsGroup)), UpdateAfter(typeof(PowerDemandGroup))]
     public partial struct PowerAllocationSystem : ISystem
     {
+        static readonly ProfilerMarker AllocateMarker = new ProfilerMarker("PowerAllocationSystem.Allocate");
+        static readonly ProfilerMarker ApplyMarker = new ProfilerMarker("PowerAllocationSystem.Apply");
         PowerAllocateJob allocate;
         PoweredApplyJob apply;
         EntityQuery functionals;
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<SimClock>(); state.RequireForUpdate<PowerTuning>();
+            state.RequireForUpdate<BlockDefsRef>(); state.RequireForUpdate<BlockModulesRef>();
             allocate.Instances = state.GetBufferLookup<BlockInstance>(true); allocate.Requests = state.GetBufferLookup<PowerRequest>(true);
             allocate.Abilities = state.GetBufferLookup<AbilitySlot>(true); allocate.Inhibits = state.GetComponentLookup<Inhibited>(true);
             allocate.Hulks = state.GetComponentLookup<Hulk>(true); allocate.Spawning = state.GetComponentLookup<GridSpawning>(true);
@@ -36,8 +42,8 @@ namespace Game.Simulation.Power
             apply.Powers.Update(ref state); apply.Consumers.Update(ref state); apply.Functionals.Update(ref state);
             apply.Links.Update(ref state); apply.Powered.Update(ref state); apply.Entities.Update(ref state);
             apply.Tick = allocate.Tick; apply.Instances = allocate.Instances; apply.Requests = allocate.Requests; apply.Inhibits = allocate.Inhibits;
-            state.Dependency = allocate.ScheduleParallel(state.Dependency);
-            state.Dependency = apply.ScheduleParallel(functionals, state.Dependency);
+            using (AllocateMarker.Auto()) state.Dependency = allocate.ScheduleParallel(state.Dependency);
+            using (ApplyMarker.Auto()) state.Dependency = apply.ScheduleParallel(functionals, state.Dependency);
         }
     }
 }
