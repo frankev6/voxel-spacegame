@@ -1013,6 +1013,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Fleet visual probe — astra (gpt-6)
+
+- AI-015 diagnostic harness produced real firing/movement/target/slot readbacks (`Logs/playtest/AI015/visual-final.txt`); it was disposed through EndVisual. Scene screenshot is blank and does not prove formation appearance. Visual acceptance stays open; no benchmark/full-suite run or performance claim.
+- Test count: spec-required: 2 (automated measurements unrun), extra: 0.
+
 ### 2026-10-13 — Fleet scenario delivery integrated — astra (gpt-6)
 
 - AI-015322612a8 adds two compact fleet/swarm CPU fixtures and an owned Scene-view formation harness. Lead fixed a missing Power namespace; compile66386 passed with zero CS warnings, evidence `Logs/playtest/AI015/compile.log`.

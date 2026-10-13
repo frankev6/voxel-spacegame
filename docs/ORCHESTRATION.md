@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Fleet visual evidence limitation:** BeginVisual ran real AI/physics with firing/motion and transformed slot readbacks; saved `AI015/visual-readback.txt` and `visual-final.txt`. CLI Scene screenshot `formation.png` is blank, so visual acceptance is NOT proven. EndVisual completed and disposed the fixture. No benchmark run. Preserve AI-015 in-progress and integrate compiled checkpoint; next lead HUD-008 for actual combat HUD data. Worker snapshots159/171/143 active. Previous turn integrated/repaired fleet compile (progress).
+
 - **Fleet scenarios integrated for review:** branch task/AI-015-fleet-integration, delivery322612a8 plus missing Power namespace repair. Compile66386 clean (zero CS warnings); evidence `AI015/compile.log`. Two Performance fixtures deliberately not run; visual acceptance remains pending, AI-015 stays in-progress. Q27 mirrored310. Workers NAR-004158/ECO-004170/NAR-009142 active. No Unity validation active; Editor open/stopped. Previous turn claimed/recycled NAR-009 (progress).
 
 - **Fast validation / recycling:** worker snapshots NAR-004157 and ECO-004170 active; DEV-018141 delivered866cb01b, acceptance blocked on actual GAL-008/SYS-009/TRV-006/HUD-002/003. Presentation recycled to NAR-009. AI-015 review pending; no Unity tests launched this turn. Preserve incidental fixture acceleration and production balance.
