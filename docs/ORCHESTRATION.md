@@ -23,6 +23,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **UI audits accepted:**6a6c2ccb compile73024 clean;52224 eight passed0.35s,48136 existing tab case passed. Evidence ui-audits/. UI-012 closes; UI-013 is next ready standard assignment for the available power worker while NAR-020 review remains queued. No active validation. Previous turn supplied panels (progress).
+
 - **Audit batch authored:** UI-012 adds severity1 Machado matrices with linear-sRGB/D65 CIE76 minimum, verified against the authors' supplementary table; exactly eight required AuditTests now authored plus existing tab case. First compile84878 found a fixture Color32-to-StyleColor conversion; explicit Color cast fixes it, compile73024 pending. Functional checks next; no acceptance claim. Previous turn supplied shared panels (progress).
 
 - **Shared UI panel implemented:** UI-012 adds UITestPanel with production theme/settings clones and all five logical sizes, owned render-target disposal and one-frame layout contract. Existing nine-tab test now calls the canonical audit in addition to retained bounds/scroll assertions. No tests run yet; CVD utility/eight AuditTests remain. HUD-004 receives the concrete helper API to avoid duplicate setup. Previous turn implemented contrast (progress).

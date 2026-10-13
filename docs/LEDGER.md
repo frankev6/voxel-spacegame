@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 122 | 10 | 0 | 0 | 48 | 0 | 180 | 8 |
+| M3 | 122 | 9 | 0 | 0 | 49 | 0 | 180 | 9 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -449,8 +449,8 @@
 | UI-009 | Tooltip service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | c777fd7 | Pooled tooltips, scheduler and lifecycle; fixture repair a34c3c3; spec-required: 7, extra: 0 |
 | UI-010 | Notification service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 6b3a919 | Notification pooling/lifecycle, seven required tests; full suites green |
 | UI-011 | Confirm dialog and text prompt | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-005, UI-008 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 18a80bf | Queued confirm/text dialogs with navigation, focus and disposal lifecycle; full 968 EM /145 PM green |
-| UI-012 | Layout, contrast and allegiance-colour audits | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | frontier | UI-008 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead prerequisite for shared HUD layout acceptance; HUD-002 checkpoint remains open |
-| UI-013 | Accessibility options | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-010, UI-012 | no | todo |  |  |  |  |
+| UI-012 | Layout, contrast and allegiance-colour audits | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | frontier | UI-008 | yes | done | astra (gpt-6) | 2026-10-13 | 6a6c2ccb | Layout/contrast/CVD audits and shared panel; 8 audit cases + required existing tab case pass |
+| UI-013 | Accessibility options | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-010, UI-012 | yes | todo |  |  |  |  |
 | HUD-001 | Public contract types | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | UI-001, CORE-001, CAM-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | a983d88 | Screen/VM/snapshot contracts; static notification lifetime fix f847997; 3 required tests; full batch 901 EM / 128 PM, zero failures |
 | HUD-002 | UI composition, screen registration and root switching | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, UI-001, UI-002, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead composition/root/session infrastructure under ADR-0072; preserve existing playable menu/pause/flight |
 | HUD-003 | Main menu and new game | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: menu view and service-backed presenter with name prompt/continue/quit / composition hookup and layout acceptance remain |
@@ -1023,6 +1023,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — UI audits accepted — astra (gpt-6)
+
+- UI-0126a6c2ccb implements layout containment/overlap/text audits, resolved-background WCAG contrast and severity1 Machado/D65 CIE76 colour distance; shared production-themed panels cover all five logical sizes. Q30/31 mirrored320/321; no palette changes.
+- Compile73024 clean, zero CS warnings after fixture Color cast repair. Focused52224 eight passed in0.35s; required existing nine-tab regression48136 one passed, retaining scroll/bounds assertions. Evidence `Logs/playtest/ui-audits/`. No full suite or benchmark.
+- Test count: spec-required: 8 new + 1 existing integration case, extra: 0. Next UI-013 now ready; HUD-004 can use the canonical audits.
 
 ### 2026-10-13 — Legacy logic translation accepted — astra (gpt-6)
 
