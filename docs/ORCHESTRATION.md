@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | MIG-009 | implementing; INP-008 eecb3e0 reviewed, pending validation | Weapon content/links batch with DATA-010 |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | UI-011 | dispatched; MIG-009 c48030b delivered, pending content generation/validation | Ready standard work after batch integration |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | GAL-001 | dispatched; DATA-010 9b56175 reviewed, pending MIG-009 compatible validation | Galaxy contract-dependent standard work |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | UI-010 | dispatched; UI-009 76014c4 delivered, pending validation | Ready presentation work; audio content after AUD-006 |
 
@@ -41,3 +41,6 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - UI-009 delivered `76014c4691bb0f3f5f8962fe4f8a0853f6803438`: tooltip pooling/delay/cancellation/positioning and lifecycle, 7 required tests, 0 extra; SPEC-60 Q23–24 need central mirror. Lead inspected service; full integration review/validation pending. Same presentation worker dispatched UI-010 from main claim `654ee31`; keep shared UI lifecycle edits compatible.
 
 - UI-009 lead review fix `b8af3e35a18846fa974d4a7fede06d5827e1bf07` is on its inactive task branch: reset the fixture fill counter for each test and replace frame-count scheduler deadlines with 5-second real-time bounds. Seven required tests remain unchanged in count. Primary source remains untouched during active Unity validation; integrate both UI-009 commits together.
+
+- MIG-009 delivered `c48030b79dca12bf411d94a2777dcc0befd110ae`: converter plus three required tests, SPEC-72 Q20/Q21. Lead must generate remaining six weapons, catalog-register and validate strict DATA-010 links. Same worker claimed/dispatched UI-011 from main `b902672`; ten required dialog tests, SPEC-60 question numbers Q27+ reserved.
+- DMG-012 hulk recorder extracted to `Jobs/RecordHulkJob.cs`; seven required `HulkSplitTests` pass (session 2041 exit 0), compile clean. Canonical root/brick/functional LEG order, stale parent membership filtering, and once-only empty-ID-block warning completed. Evidence `Logs/playtest/dmg012/hulk-focused.xml`. Full compatible-batch regression and live hulk check remain before closeout.

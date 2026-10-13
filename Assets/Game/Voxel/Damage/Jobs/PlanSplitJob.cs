@@ -1,4 +1,7 @@
 using Game.Voxel.Grid;
+using Game.Core;
+using System.Threading;
+using UnityEngine;
 using Game.Core.Components;
 using Game.Voxel.Model;
 using Unity.Burst;
@@ -13,6 +16,11 @@ namespace Game.Voxel.Damage.Jobs
     internal enum SplitTier : byte { Particle, Chunk, Hulk }
     [BurstCompile] internal unsafe struct PlanSplitJob : IJob
     {
+        struct AllocatorWarningContext { }
+        static readonly SharedStatic<int> allocatorWarning = SharedStatic<int>.GetOrCreate<AllocatorWarningContext>();
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetWarnings() => allocatorWarning.Data = 0;
+
         [ReadOnly] public NativeList<IslandRecord> Islands;
         [ReadOnly] public NativeList<IslandMask> Masks;
         public GridCellReader Reader;
@@ -40,7 +48,15 @@ namespace Game.Voxel.Damage.Jobs
                 var tier = Tier(island, Config);
                 bool budget = accepted == 0 || (long)cells + island.CellCount <= Config.SplitCellBudgetPerTick;
                 bool available = tier == SplitTier.Particle || (tier == SplitTier.Chunk && Chunks.IsCreated && Config.MaxLiveChunks > 0 && chunks < Config.MaxNewChunksPerTick) || (tier == SplitTier.Hulk && HulkAvailable && hulks < Config.MaxNewHulksPerTick && allocator.Next < allocator.End);
-                if (!budget || !available) { Reseed(island, anchors); Data->Current.SplitsDeferred++; continue; }
+                if (!budget || !available)
+                {
+                    if (tier == SplitTier.Hulk && allocator.Next >= allocator.End && Interlocked.Exchange(ref allocatorWarning.Data, 1) == 0)
+                    {
+                        FixedString128Bytes warning = "Damage: hulk split deferred until PersistentId allocator block is replenished";
+                        GameLog.Burst.Warn(warning);
+                    }
+                    Reseed(island, anchors); Data->Current.SplitsDeferred++; continue;
+                }
                 accepted++; cells += island.CellCount;
                 if (tier == SplitTier.Hulk) { Bodies.Add(island); hulks++; allocator.Next++; }
                 else if (tier == SplitTier.Chunk) { Chunks.Add(island); chunks++; }
