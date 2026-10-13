@@ -258,7 +258,7 @@
 | PWR-002 | Shield maths | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 08c5f01 | Shield intersections, containment and overlap; 5 required tests; full batch 901 EM / 128 PM, zero failures |
 | PWR-003 | Tuning definition, baker and spawn helper | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3f8692f | Power tuning validation/bake and spawn registration; catalog e722af7; full 968 EM /145 PM green |
 | PWR-004 | Registration and `PowerInitSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-003, WPN-001, VOX-001, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-13 | cc561a2 | Registration, same-frame binding and energy initialization; 5 required tests; full batch green |
-| PWR-005 | `PowerAllocationSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-004, ABL-001 | yes | todo |  |  |  |  |
+| PWR-005 | `PowerAllocationSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-004, ABL-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead allocation and brownout runtime while flight integration validates |
 | PWR-006 | `ShipStatsAggregateSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-004, SPEC-12 | yes | todo |  |  |  |  |
 | PWR-007 | `ShieldSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-005, PWR-006, PWR-002, DMG-001, VFX-001, SPEC-02 | no | todo |  |  |  |  |
 | PWR-008 | Power budget validator and balance tests | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-006, SPEC-72, WPN-001 | no | todo |  |  |  |  |
