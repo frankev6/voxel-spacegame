@@ -8,7 +8,7 @@ namespace Game.Tests.EditMode.Galaxy
     /// <summary>GAL-002: SPEC-30 §5.5.5 and task acceptance criteria.</summary>
     public sealed class OrbitMathTests
     {
-        const double Tau = 2.0 * math.PI;
+        const double Tau = 2.0 * System.Math.PI;
 
         [Test]
         public void Circular_PeriodReturnsToStart()
@@ -105,7 +105,7 @@ namespace Game.Tests.EditMode.Galaxy
             var body = new BodySpec
             {
                 ParentOrbit = new OrbitElements { Mode = OrbitMode.Circular, RadiusM = 1e5, PeriodS = 3600 },
-                Orbit = new OrbitElements { Mode = OrbitMode.Circular, RadiusM = 1000, PeriodS = 600, PhaseRad = math.PI / 2 }
+                Orbit = new OrbitElements { Mode = OrbitMode.Circular, RadiusM = 1000, PeriodS = 600, PhaseRad = System.Math.PI / 2 }
             };
             AssertNear(new double3(1e5, 0, 1000), OrbitMath.Position(body, 0), 1e-6);
             AssertNear(new double3(-1000 * Tau / 600, 0, 1e5 * Tau / 3600), OrbitMath.Velocity(body, 0), 1e-6);
@@ -117,7 +117,7 @@ namespace Game.Tests.EditMode.Galaxy
                 AssertNear((OrbitMath.Position(body, t + h) - OrbitMath.Position(body, t - h)) / (2 * h), OrbitMath.Velocity(body, t), 1e-3);
             }
             // An anchored story spawn moves with its parent and keeps its fixed offset.
-            body.Orbit = new OrbitElements { Mode = OrbitMode.Fixed, RadiusM = 400, PhaseRad = math.PI };
+            body.Orbit = new OrbitElements { Mode = OrbitMode.Fixed, RadiusM = 400, PhaseRad = System.Math.PI };
             AssertNear(new double3(1e5 - 400, 0, 0), OrbitMath.Position(body, 0), 1e-6);
             AssertNear(OrbitMath.LocalVelocity(body.ParentOrbit, 900), OrbitMath.Velocity(body, 900), 1e-6);
             // A root's default parent contributes zero without a period or identity check.

@@ -6,7 +6,7 @@ namespace Game.Galaxy.Data
     /// <summary>Pure, Burst-compatible orbit evaluation in the XZ plane. Implements SPEC-30 §4.5 and §5.5.5.</summary>
     public static class OrbitMath
     {
-        const double Tau = 2.0 * math.PI;
+        const double Tau = 2.0 * System.Math.PI;
 
         public static double3 LocalPosition(in OrbitElements o, double t)
         {
