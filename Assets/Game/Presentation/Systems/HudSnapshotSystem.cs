@@ -43,6 +43,10 @@ namespace Game.Presentation.Systems
         ComponentLookup<Allegiance> allegianceLookup;
         ComponentLookup<HudSnapshot> snapshotLookup;
         BufferLookup<HudRadarBlip> radarLookup;
+        // Internal clock seam for SPEC-61 simulated-frame acceptance; production uses unscaled engine time.
+        internal bool UseTestClock;
+        internal double TestElapsed;
+        internal uint TestFrame;
         double lastRadar;
         uint radarVersion;
         FactionRelations neutralRelations;
@@ -50,7 +54,7 @@ namespace Game.Presentation.Systems
         public void OnCreate(ref SystemState state)
         {
             snapshot = state.EntityManager.CreateEntity(typeof(HudSnapshot));
-            state.EntityManager.AddBuffer<HudRadarBlip>(snapshot).Capacity = 64;
+            var radar = state.EntityManager.AddBuffer<HudRadarBlip>(snapshot); radar.Capacity = 64;
             state.RequireForUpdate<GameplayActive>();
             weapons = SystemAPI.QueryBuilder().WithAll<FunctionalBlock, WeaponState>().Build();
             grids = SystemAPI.QueryBuilder().WithAll<VoxelGrid, Allegiance, LocalToWorld>().WithNone<PlayerShip>().Build();
@@ -86,7 +90,7 @@ namespace Game.Presentation.Systems
                 return;
             }
             var value = new HudSnapshot { Flags = HudFlags.HasShip, TargetFaction = 255, RadarVersion = radarVersion,
-                FrameIndex = (uint)UnityEngine.Time.frameCount };
+                FrameIndex = UseTestClock ? TestFrame : (uint)UnityEngine.Time.frameCount };
             float3 position = 0;
             byte faction = 255;
             Entity target = Entity.Null;
@@ -111,7 +115,7 @@ namespace Game.Presentation.Systems
                     value.Flags |= HudFlags.Boosting;
                 if (SystemAPI.HasBuffer<AbilitySlot>(player))
                 {
-                    var slots = SystemAPI.GetBuffer<AbilitySlot>(player, true);
+                    var slots = SystemAPI.GetBuffer<AbilitySlot>(player);
                     for (int i = 0; i < math.min(4, slots.Length); i++)
                     {
                         var slot = slots[i];
@@ -151,7 +155,7 @@ namespace Game.Presentation.Systems
                 for (byte i = 0; i < 3; i++) groups[i] = new HudWeaponGroupState { Group = i, Ready01 = 1 };
                 state.Dependency = new HudWeaponGatherJob { Blocks = blockHandle, Weapons = weaponHandle, Player = player, Groups = groups }
                     .Schedule(weapons, state.Dependency);
-                double now = UnityEngine.Time.unscaledTimeAsDouble;
+                double now = UseTestClock ? TestElapsed : UnityEngine.Time.unscaledTimeAsDouble;
                 if (now - lastRadar >= .1)
                 {
                     using (RadarMarker.Auto())

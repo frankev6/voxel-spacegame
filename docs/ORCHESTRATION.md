@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **HUD focused acceptance green:** compile24417 clean after AddBuffer local/GetBuffer API fixes;24696 nine passed. Evidence `hud-snapshot/`. Internal instance clock seam exercises144 simulated frames without real waits. Power worker review174 active (its initial compile finding already repaired); ECO-004 delivered3d2cdd89 pending integration. No active validation. Previous turn wired snapshot (progress).
+
 - **HUD snapshot wired (unvalidated):** HUD-008 now creates its singleton/buffer in OnCreate, reads player/target/ability/interaction/system values, schedules weapon and bounded radar jobs, and publishes snapshots with dependencies retained. Required nine checks and compile remain; route-waypoint bridge remains explicit HUD-009 TODO. No test launched. Previous turn implemented gather jobs (progress).
 
 - **HUD-008 implementation:** claimed0d75698a; primary task/HUD-008-combat-snapshot now adds weapon-group gathering plus bounded nearest64 radar gathering/sorting jobs. Snapshot system, scheduling and nine required tests remain; no compile/test claim. Worker snapshots NAR-004160/ECO-004172/NAR-009144 active. Previous turn probed fleet visual limitation and claimed HUD (progress).
