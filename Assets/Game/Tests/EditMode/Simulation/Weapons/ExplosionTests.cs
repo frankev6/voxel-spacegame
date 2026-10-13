@@ -33,6 +33,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             public readonly FxEventQueue Fx = new FxEventQueue { Queue = new NativeQueue<FxEvent>(Allocator.Persistent), Access = GuardedHandles.Create() };
             public readonly SfxEventQueue Sfx = new SfxEventQueue { Queue = new NativeQueue<SfxEvent>(Allocator.Persistent), Access = GuardedHandles.Create() };
             readonly SystemHandle system, probe;
+            readonly Entity source, instigator;
             public List<DamageEvent> Damage;
             public List<ShieldHit> Hits;
             public EntityManager Em => Grids.EM;
@@ -43,6 +44,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 Em.CreateSingleton(new CombatAudioCues { ExplosionSmall = new ContentHash(1), ExplosionLarge = new ContentHash(2) });
                 probe = Grids.World.GetOrCreateSystem<HitTestProbeSystem>();
                 system = Grids.World.GetOrCreateSystem<ExplosionSystem>();
+                source = Em.CreateEntity(); instigator = Em.CreateEntity();
             }
             public Entity Grid(float3 center, bool shield = false)
             {
@@ -53,8 +55,8 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 Hash.Large.Add(Hash.Proxies.Length - 1); return root;
             }
             public ExplosionRequest Request(float3 pos, float radius = 4, uint sequence = 17) => new ExplosionRequest
-            { WorldPos = pos, Radius = radius, Amount = 100, Type = DamageType.Explosive, Source = new Entity { Index = 90000, Version = 1 },
-                Instigator = new Entity { Index = 90001, Version = 1 }, Sequence = sequence, Producer = ProducerKind.Projectile };
+            { WorldPos = pos, Radius = radius, Amount = 100, Type = DamageType.Explosive, Source = source,
+                Instigator = instigator, Sequence = sequence, Producer = ProducerKind.Projectile };
             public void Publish(ExplosionRequest request)
             {
                 ref var state = ref Grids.World.Unmanaged.ResolveSystemStateRef(probe);
@@ -64,6 +66,8 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             }
             public void Step()
             {
+                ref var runState = ref Grids.World.Unmanaged.ResolveSystemStateRef(system);
+                Assert.IsTrue(runState.ShouldRunSystem(), "Explosion prerequisites must be present.");
                 system.Update(Grids.World.Unmanaged);
                 Damage = Read(Streams.Damage); Hits = Read(Shields.Hits);
                 Fx.Access.CompleteAccess(); Sfx.Access.CompleteAccess();
