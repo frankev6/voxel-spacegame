@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | TRV-001 | dispatched from main 681df25; AST-003 b1e37cd delivered | WPN-004/005 after FLT-012 |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AI-005 | dispatched from main claim 733b849; AST-002 integrated, validation running | combat runtime as ready |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | SYS-002 | dispatched from main claim c50756b; MIG-014 delivered and held | SYS-003 after VOX-020 |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ECO-001 | claimed on main and dispatched; SYS-002 f27c54b delivered for boot/catalog review and validation | SYS-003 after VOX-020 |
 
 ## Operating rules
 
@@ -125,3 +125,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - MIG-014 `644622c` reviewed; worker is repairing its collision with existing SPEC-72 Q22/23 and updating the full migration asset-count expectation for the 20 new stubs, without relaxing idempotence. AST-002 is finalizing seven required tests, AST-003 auditing evidence. PWR-004 Q14 / ledger Q241 resolves arithmetic and ownership contradictions; five tests remain unchanged in count. Primary PlayMode `25256` remains live.
 
 - MIG-014 follow-up `fea6357` resolves Q24 numbering and changes only the existing full migration gate expected distinct assets 100→120, preserving its assertions. Do not integrate generated bodies before GAL-003 validation and requisite authored content are ready. Presentation worker now in a real dependency wait for AI-003/SYS-001 closeout; no duplicate/replacement worker. Verified current PlayMode Unity 69159 and active Burst compiler 69167 (~625% CPU), still session `25256`; preserve source. Legacy Fighter inventory independently confirms 14 thrusters and 14 weapons, supporting PWR-004 Q14 arithmetic.
+
+- SYS-002 delivered `f27c54b` (two required tests, no extra); boot patch and config generation recipe pending lead review/integration after session 2085. Same presentation worker recycled to ready ECO-001. TRV-001 and AI-005 continue.
