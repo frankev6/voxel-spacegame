@@ -322,7 +322,7 @@
 | GAL-001 | Public contract types | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | CORE-001, DATA-001, VOX-001, NAR-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 6d49a49 | Galaxy contracts, three required tests; full suites green |
 | GAL-002 | Orbit math | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b41aab2 | Double-precision Kepler position/velocity and period wrapping; full 968 EM /145 PM green |
 | GAL-003 | Definitions, properties and validator | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 29aa4c47 | All 24 diagnostics and four in-memory fixtures; clean compile, 48 required cases pass; production content GAL-012 remains |
-| GAL-004 | GalaxyDefBuilder and layout job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-003 | yes | todo |  |  |  |  |
+| GAL-004 | GalaxyDefBuilder and layout job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-003 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
 | GAL-005 | Lane graph and galaxy hash | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-004 | no | todo |  |  |  |  |
 | GAL-006 | Star-system content job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-002, GAL-005 | no | todo |  |  |  |  |
 | GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | no | todo |  |  |  |  |
