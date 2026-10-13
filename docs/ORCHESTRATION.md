@@ -7,9 +7,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-016 graph stability | Repair unchanged compilation replacing live serialized graphs; SYS-005 still waits | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | dependency wait | Belt cause repaired by lead37ed39f6; no remaining finding246 | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | SYS-005 | Claimed aac4a2f6; analytic body orbit implementation dispatched | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | boot logic diagnosis | Read-only actual NAR-E005 count-node validation investigation | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | Count-slot diagnosis complete211; lead repair verified by boot | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **T2 ownership work underway:** SYS-006 claimed32c7be10;2e2c1117 adds snapshot capture/ownership transfer helper, uncompiled and not yet wired. Next grid spawning, hysteresis, core-loss events and real scene registration before five focused checks. SYS-005 claim aac4a2f6 dispatched to economy worker; combat NAR-016 stability repair active233; presentation dependency wait (boot diagnosis complete211). No Unity active. FND-012 UnknownBlueprint and serialized-condition case await next focused batch. Previous turn boot fixes were progress.
 
 - **T1 loader accepted:** PlayMode83915 terminal2: all5 SYS-004 cases plus5 spawn cases pass; one FND-012 assertion rejected routine setup info, now repaired awaiting single-case retry. Q357 stages live loader installation with SYS-006 T2 so missing grids still block arrival. No Unity active. Next dispatch SYS-005 and implement T2; graph stability repair continues.
 

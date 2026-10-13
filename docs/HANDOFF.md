@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **T2 ownership work underway:** SYS-006 claimed32c7be10;2e2c1117 adds snapshot capture/ownership transfer helper, uncompiled and not yet wired. Next grid spawning, hysteresis, core-loss events and real scene registration before five focused checks. SYS-005 claim aac4a2f6 dispatched to economy worker; combat NAR-016 stability repair active233; presentation dependency wait (boot diagnosis complete211). No Unity active. FND-012 UnknownBlueprint and serialized-condition case await next focused batch. Previous turn boot fixes were progress.
+
 - **T1 loader accepted:** PlayMode83915 terminal2: all5 SYS-004 cases plus5 spawn cases pass; one FND-012 assertion rejected routine setup info, now repaired awaiting single-case retry. Q357 stages live loader installation with SYS-006 T2 so missing grids still block arrival. No Unity active. Next dispatch SYS-005 and implement T2; graph stability repair continues.
 
 - **Boot repairs compiled:**37ed39f6 accepts empty unused serialized argument text and uses1000 m belt sectors at2000 m width (Q355/356), without weakening validation. Compile65679 terminal0, zero CS warnings. Focused11-case PlayMode83915 is active; poll the same handle/log before further Unity. Existing condition case now serializes graphs, awaiting its next focused EditMode batch. Combat graph-stability repair active231; economy diagnosis complete246/dependency wait; presentation finishing count-slot review. Prior turn generated real content and identified defects (progress).

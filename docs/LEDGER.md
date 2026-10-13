@@ -1063,6 +1063,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-005 dispatched / SYS-006 ownership implementation — astra (gpt-6)
+
+- SYS-005 claimed aac4a2f6 and assigned to the existing economy worker; two direct-tick required cases, no worker Unity. Combat repairs NAR-016 graph persistence; presentation has a genuine ready-task dependency wait. Remaining standard-ready rows are advisory GAL-013 and owner-only AUD-011, neither used as busywork.
+- SYS-006 claimed32c7be10 with Q358 direct-runtime prerequisites.2e2c1117 adds main-thread damage snapshot transfer, preserving registry borrow and delta ownership, rejecting missing writable sources and skipping partial grids. Not wired/compiled yet; no acceptance claim. Spawning, hysteresis, hulk handling and actual scene composition remain. Planned spec-required: 5, extra: 0.
+- No active Unity. Next validation batches include the repaired single FND-012 case and existing serialized condition case; avoid rerunning accepted T1 cases without related changes.
+
 ### 2026-10-13 — SYS-004 T1 accepted; spawn log assertion repaired — astra (gpt-6)
 
 - Focused PlayMode83915 terminal2:10 passed/1 failed,11.054s test bodies. All five SYS-004 checks pass (spec-required: 5, extra: 0); T1 accepted37ed39f6. Q357 explicitly moves live loader registration to SYS-006 because actual T2 arrival readiness must remain enforced. No claim of loaded station grids or live streaming yet.
