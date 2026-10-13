@@ -1330,6 +1330,8 @@ Visibility:
 | 17 | §4.8's readonly frame context (and §5.12's readonly map entries referenced there) omit constructors, so callers cannot supply non-default values. | Add constructors assigning every stated readonly field, in declaration order, without changing fields or adding behavior. | Tech lead — resolved by GAL-001; central mirror pending. |
 | 18 | §4.8 omits `GalaxyService.GetStartLocation`, although §6 and SPEC-01's new-game flow require it. | Include the stated `PlayerLocation GetStartLocation()` contract, with a GAL-008 throwing stub; no start-position computation in GAL-001. | Tech lead — resolved by GAL-001 against the existing public API; central mirror pending. |
 
+| 19 | Elliptic velocity and the sign of periapsis rotation are implicit in §5.5.5. | GAL-002 default: differentiate Kepler’s equation analytically (`dE/dt = (2π/T)/(1−e cos E)`), then rotate both position and velocity with Unity’s positive-Y rotation (`x′ = cos ω·x + sin ω·z`, `z′ = −sin ω·x + cos ω·z`). Phase keeps the specified +X toward +Z convention. Use exactly six Newton steps and double-precision `t/T−floor(t/T)`; Fixed/default parent orbits bypass division and contribute zero velocity. Moving inputs retain the stated positive-period precondition and validated eccentricity range; no new validation or generation algorithms. | Tech lead — resolved by GAL-002 against §4.5/§5.5.5; central mirror pending. |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/03-galaxy-world.md` (03-B1, 03-B9a–d, 03-D3), `04` (04-B1, 04-B11), `LEDGER.md` R9.
