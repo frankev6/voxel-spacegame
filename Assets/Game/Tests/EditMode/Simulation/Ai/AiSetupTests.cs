@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Game.Core;
 using Game.Core.Components;
 using Game.Data.Blocks;
@@ -93,10 +94,15 @@ namespace Game.Tests.EditMode.Simulation.Ai
                 using (var query = em.CreateEntityQuery(ComponentType.ReadOnly<RootComponentRegistration>()))
                 {
                     var registrations = query.GetSingletonBuffer<RootComponentRegistration>(true);
-                    Assert.AreEqual(3, registrations.Length);
-                    for (int i = 0; i < registrations.Length; i++) Assert.AreEqual(ComponentType.ReadWrite<AiBrain>(), registrations[i].Type);
-                    CollectionAssert.AreEquivalent(new[] { GridProfile.NpcShip, GridProfile.Station, GridProfile.SmallCraft },
-                        new[] { registrations[0].Profile, registrations[1].Profile, registrations[2].Profile });
+                    Assert.AreEqual(4, registrations.Length);
+                    var brains = new List<GridProfile>(); int commands = 0;
+                    foreach (var row in registrations)
+                    {
+                        if (row.Type == ComponentType.ReadWrite<AiBrain>()) brains.Add(row.Profile);
+                        else { Assert.AreEqual(ComponentType.ReadWrite<ShipCommand>(), row.Type); Assert.AreEqual(GridProfile.Station, row.Profile); commands++; }
+                    }
+                    CollectionAssert.AreEquivalent(new[] { GridProfile.NpcShip, GridProfile.Station, GridProfile.SmallCraft }, brains);
+                    Assert.AreEqual(1, commands, "ADR-0071 registers only the Station command, not flight components.");
                 }
                 int handle = registry.Register(source);
                 var roots = new Entity[6];
@@ -109,6 +115,7 @@ namespace Game.Tests.EditMode.Simulation.Ai
                     });
                     roots[(int)profile] = root;
                     if (profile == GridProfile.NpcShip) em.AddComponentData(root, new AiBrain { ProfileIndex = 3 });
+                    if (profile == GridProfile.Station) em.AddComponentData(root, new ShipCommand { Edges = ShipCommandEdges.Ability1 });
                 }
                 spawn.Update(world.Unmanaged);
                 em.CompleteAllTrackedJobs();
@@ -116,7 +123,10 @@ namespace Game.Tests.EditMode.Simulation.Ai
                 {
                     bool expected = profile == GridProfile.NpcShip || profile == GridProfile.Station || profile == GridProfile.SmallCraft;
                     Assert.AreEqual(expected, em.HasComponent<AiBrain>(roots[(int)profile]), profile.ToString());
+                    Assert.AreEqual(profile == GridProfile.Station, em.HasComponent<ShipCommand>(roots[(int)profile]), profile.ToString());
                 }
+                Assert.AreEqual(ShipCommandEdges.Ability1, em.GetComponentData<ShipCommand>(roots[(int)GridProfile.Station]).Edges,
+                    "Profile conversion retains requester commands until steering rewrites the live tick.");
                 Assert.AreEqual(3, em.GetComponentData<AiBrain>(roots[(int)GridProfile.NpcShip]).ProfileIndex, "Conversion preserves requester values.");
                 Entity player = roots[(int)GridProfile.PlayerShip], craft = roots[(int)GridProfile.SmallCraft];
                 em.AddComponent<PlayerShip>(player);

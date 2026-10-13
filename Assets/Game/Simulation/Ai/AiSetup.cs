@@ -2,6 +2,7 @@ using System;
 using Game.Core;
 using Game.Data.Definitions;
 using Game.Data.Services;
+using Game.Simulation.Commands;
 using Game.Voxel.Model;
 using Unity.Entities;
 
@@ -10,12 +11,14 @@ namespace Game.Simulation.Ai
     /// <summary>Implements SPEC-23 §4.3: AiSetup.</summary>
     public static class AiSetup
     {
-        /// <summary>Appends the AI brain type once from AiAnchorShiftSystem.OnCreate (ADR-0015).</summary>
+        /// <summary>Appends AI brains and Station-only commands once from AiAnchorShiftSystem.OnCreate (ADR-0015/0071).</summary>
         public static void Register(DynamicBuffer<RootComponentRegistration> registrations)
         {
             var type = ComponentType.ReadWrite<AiBrain>();
             registrations.Add(new RootComponentRegistration { Profile = GridProfile.NpcShip, Type = type });
             registrations.Add(new RootComponentRegistration { Profile = GridProfile.Station, Type = type });
+            // Stations deliberately skip FlightSetup but still consume turret aim and one-tick ability commands.
+            registrations.Add(new RootComponentRegistration { Profile = GridProfile.Station, Type = ComponentType.ReadWrite<ShipCommand>() });
             registrations.Add(new RootComponentRegistration { Profile = GridProfile.SmallCraft, Type = type });
         }
 
