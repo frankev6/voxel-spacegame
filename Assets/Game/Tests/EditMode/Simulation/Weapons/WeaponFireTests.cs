@@ -36,10 +36,10 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             {
                 using var builder = new BlobBuilder(Allocator.Temp);
                 ref var blob = ref builder.ConstructRoot<WeaponDefsBlob>();
-                builder.Allocate(ref blob.Weapons, 2)[1] = weapon;
+                var rows = builder.Allocate(ref blob.Weapons, 2); rows[1] = weapon;
                 definitions = builder.CreateBlobAssetReference<WeaponDefsBlob>(Allocator.Persistent);
                 World = EcsTestWorld.Create(typeof(WeaponFireSystem), typeof(ProjectileShotHandlerSystem), typeof(BeamShotHandlerSystem),
-                    typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(FireCaptureSystem));
+                    typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(FireCaptureSystem), typeof(SimClockAdvanceSystem));
                 World.AddSingleton(new WeaponDefsRef { Value = definitions });
                 World.AddSingleton(new WeaponTuning { MaxProjectiles = capacity });
                 Store = ProjectileStore.Create(capacity); World.AddSingleton(Store);
