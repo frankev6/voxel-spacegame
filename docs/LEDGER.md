@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 59 | 1 | 0 | 0 | 31 | 0 | 91 | 6 |
-| M3 | 171 | 1 | 0 | 0 | 8 | 0 | 180 | 12 |
+| M2 | 58 | 2 | 0 | 0 | 31 | 0 | 91 | 5 |
+| M3 | 170 | 2 | 0 | 0 | 8 | 0 | 180 | 11 |
 | M4 | 13 | 1 | 0 | 0 | 0 | 0 | 14 | 2 |
 | A0 | 6 | 2 | 0 | 1 | 7 | 0 | 16 | 0 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
@@ -218,7 +218,7 @@
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
 | FND-020 | Playable stationary-target shooting and physical breakup | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-017, FND-018, FLT-001, DMG-001, WPN-001, VFX-001 | yes | done | astra (gpt-6) | 2026-10-12 | 53e61db | Playable station/Space fire; review fixes: bounded integrity, canonical masks, allocation attribution, stronger image checks; default suites green; perf advisory |
 | FND-021 | Automatic aligned test station in World | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-020, SPEC-63 | yes | done | astra (gpt-6) | 2026-10-13 | c3bb396 | Automatic World station at Y=-2 m; idempotent range request; direct World Play verified; spec-required: 1 (existing feature test extended), extra: 0 |
-| DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | yes | todo |  |  |  |  |
+| DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Assigned reusable worker; central Unity validation |
 | PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | 094f430 | Pair-specific grace; three required tests. Full EM 861/0/1, PM 121/0/53; compile clean. |
 | DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-12 | e3377fa | Four channels, owned phase memory, stable explosion drains; 5 tests; Q179–180 |
 | DMG-003 | Damage config asset and boot hookup | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-001 | yes | done | astra (gpt-6) | 2026-10-12 | c1d6af2 | Shipped config/4 damage types/4 armor classes, validation and boot-owned table; 3 tests; Q181 |
@@ -445,10 +445,10 @@
 | EDT-023 | Lab and ship-edit scene flow; R16/R19 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, SPEC-01, SPEC-31 | no | todo |  |  |  |  |
 | EDT-024 | Editor performance gates | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, TST-001 | no | todo |  |  |  |  |
 | UI-008 | Meter, Slot and TabBar controls | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-007 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 90c13ad | Meter, Slot and scrolling TabBar; 7 required tests; full batch 901 EM / 128 PM, zero failures |
-| UI-009 | Tooltip service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | yes | todo |  |  |  |  |
+| UI-009 | Tooltip service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Assigned reusable worker; central Unity validation |
 | UI-010 | Notification service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | yes | todo |  |  |  |  |
 | UI-011 | Confirm dialog and text prompt | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-005, UI-008 | yes | todo |  |  |  |  |
-| UI-012 | Layout, contrast and allegiance-colour audits | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | frontier | UI-008 | yes | todo |  |  |  | Include canonical UILayoutAudit invocation for UI-008 tab panel; actual bounds/scroll checks already staged (Q210) |
+| UI-012 | Layout, contrast and allegiance-colour audits | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | frontier | UI-008 | yes | todo |  |  |  |  |
 | UI-013 | Accessibility options | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-010, UI-012 | no | todo |  |  |  |  |
 | HUD-001 | Public contract types | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | UI-001, CORE-001, CAM-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | a983d88 | Screen/VM/snapshot contracts; static notification lifetime fix f847997; 3 required tests; full batch 901 EM / 128 PM, zero failures |
 | HUD-002 | UI composition, screen registration and root switching | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-60, FND-001 | no | todo |  |  |  |  |
@@ -940,6 +940,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 1. Physical chunk pool, exact mass/inherited velocity, greedy colliders, expiry and deferred disposal implemented; five required tests pass, including pool eviction safety repair. Palette-lit chunk rendering compiles but still needs live verification. Test count: spec-required: 5, extra: 0. Zero optimization passes.
 2. WPN-017, CAM-008, PHY-022, PWR-002, ABL-001, HUD-001 and UI-008 integrated; all remain in-progress pending combined validation. Lead fixed PHY-022 test NativeArray ownership alias after compile failure; subsequent compile passes. First full EditMode 886/1/1: static audit rejected 231 HUD cached notification fields; lead documented their readonly property-name-only lifetime (`f847997`) without changing audit coverage. Full EditMode rerun **887/0/1**; PlayMode running in session 56515. Results saved under Logs/playtest/orchestration-batch2/.
 3. Same three workers reassigned to NAR-001, CAM-010 and CAM-009. Q206–210 mirror worker spec decisions and retained EDT-001/UI-012 work. No owner gate. Exact dispatch and commit evidence in ORCHESTRATION.md.
+
+### 2026-10-13 — Validated worker batch integrated to main — astra (gpt-6)
+
+1. WPN-017, CAM-008, PHY-022, PWR-002, ABL-001, HUD-001, UI-008, CAM-009, CAM-010 and NAR-001 validated together on lead branch: compile clean; full EditMode 901/0/1 and PlayMode 128/0/53. Individual required counts respectively 4/7/1/5/1/3/7/6/6/2; extra: 0 for each. Evidence Logs/playtest/orchestration-batch2/. Physical chunks remain on the lead branch while live contact repair is verified.
+2. Main receives the completed worker implementations and readonly notification/NativeArray fixture repairs. Camera framing fixture explicitly disables shake to isolate the specified pre-shake framing contract. Next workers: DATA-010 and UI-009. Local integration only; no new owner gate or tuning pass.
 
 ### 2026-10-13 — PHY-014, PWR-001, MIG-011 batch complete — astra (gpt-6)
 
