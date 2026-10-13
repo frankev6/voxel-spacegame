@@ -361,7 +361,7 @@ namespace Game.Voxel.Grid
                     min = math.min(min, BrickMath.BrickOf(lo));
                     dims = math.max(grid.BrickMin + grid.BrickDims, BrickMath.BrickOf(hi) + 1) - min;
                 }
-                if ((long)dims.x * dims.y * dims.z > 262144 || source.CellSize != grid.CellSize)
+                if (math.any(dims <= 0) || math.any(dims > 262144) || (long)dims.x * dims.y * dims.z > 262144 || source.CellSize != grid.CellSize)
                 {
                     GameLog.WarnOnce("Voxel.PreviewEditBounds", "Voxel", "preview edit awaits valid bounds/cell size; request retained"); continue;
                 }
