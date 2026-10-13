@@ -369,7 +369,7 @@ Per-frame algorithm:
 3. If `Rig == null`: `stats.Bound = false`, add `drained.Length` to `EventsOverHardCap`, return.
 4. Reference point `refPos` = position of the first `PlayerShip` root `LocalToWorld`, else `float3.zero`.
 5. (VFX-013) Origin shift: see §5.8. Runs before step 6 so this frame's events use the new anchors.
-6. Run `FxBatchJob` (Burst `IJob`, `.Run()`) with: `drained`, `slots` (`NativeArray<FxSlot>`), `slotByHash` (`NativeHashMap<ulong,int>` keyed by `ContentHash.Value`, used for lookup only, never iterated), `defaultSlotByKind` (`NativeArray<int>`, length 13, −1 = none), `palette` (`NativeArray<uint>`, 256 linear-RGBA-packed entries), `anchorPos` (`NativeArray<float3>` per slot), budget (§4.2 for the current quality), `debrisBudget = max(0, min(DebrisSpawnPerFrame, DebrisLiveCap − DebrisLiveEstimate))`, `frameIndex` (uint). For each event `i`:
+6. Run `FxBatchJob` (Burst `IJob`, `.Run()`) with: `drained`, `slots` (`NativeArray<FxSlot>`), `slotByHash` (`NativeHashMap<ulong,int>` keyed by `ContentHash.Value`, used for lookup only, never iterated), `defaultSlotByKind` (`NativeArray<int>`, length 14, −1 = none), `palette` (`NativeArray<uint>`, 256 linear-RGBA-packed entries), `anchorPos` (`NativeArray<float3>` per slot), budget (§4.2 for the current quality), `debrisBudget = max(0, min(DebrisSpawnPerFrame, DebrisLiveCap − DebrisLiveEstimate))`, `frameIndex` (uint). For each event `i`:
    1. Slot: if `Fx.Value != 0` and `slotByHash` has it and that slot's `Kind == Kind`, use it; else `defaultSlotByKind[Kind]`. If −1: `Unresolved++`, skip.
    2. If the slot is `Instanced` (state kinds): `StateKindRejected++`, skip.
    3. If `slot.MinQuality > quality`: `QualitySkipped++`, skip.
@@ -378,7 +378,7 @@ Per-frame algorithm:
    6. Debris only: if `d2 > debrisFullDetailDistance²`: keep only when `i % 4 == 0` (else `Culled++`, skip) and `size *= 1.6`. Then if `debrisBudget == 0`: `BudgetDropped++`, skip; else `debrisBudget--`, `DebrisSpawned++`, `lifetimeScale = lerp(min, max, hash01(seed)) / max`.
    7. Other kinds: if `d2 > slot.LodDistanceSq`: `count = max(1, (int)ceil(count * slot.LodParticleFactor))`, `size *= 1.6`.
    8. If `slotCounts[slot] == slot.MaxEventsPerFrame`: `BudgetDropped++`, skip.
-   9. Colour: `Color == 0` → `slot.DefaultColorRgba8`; `PaletteColor` flag → `palette[Color & 0xFF]`; else `Color`. Convert sRGB RGBA8 to linear `float4`.
+   9. Colour: `Color == 0` → `slot.DefaultColorRgba8`; `PaletteColor` flag → `palette[Color & 0xFF]`; else `Color`. Unpack palette entries directly as linear `float4`; convert raw/default sRGB RGBA8 to linear once (Q20).
    10. Write `gpuEvents[slot.BufferOffset + slotCounts[slot]++] = { position = Pos − anchorPos[slot], size, direction = normalizesafe(Dir, (0,1,0)), lifetimeScale (1 for non-debris), velocity = Vel, seed = math.hash(new uint2((uint)i, frameIndex)), color, particleCount = (uint)count, kind = (uint)Kind }`.
 7. For every slot with `slotCounts[s] > 0`: `Rig.Submit(s, gpuEvents, slot.BufferOffset, slotCounts[s])` (§6.1). `BatchesSubmitted++` per batched slot; `PooledPlayed += n` per pooled slot.
 8. Debris live estimate: push `(ElapsedTime, DebrisSpawned)` into a 1,024-entry ring; `DebrisLiveEstimate = Σ count of entries with ElapsedTime − t < debrisLifetimeMax`.
@@ -577,10 +577,10 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Do:** Implement `FxRig.Create/BindTo/Unbind/SetQuality/Dispose/Stats` per §6.1: build `FxSlot`s (slot 0 invalid, slots 1..N in the given definition order), `slotByHash`, `defaultSlotByKind` (from `config.defaults`), palette (256 linear-packed entries from `cellPalette` or `config.fallbackCellPalette`); per batched slot one child `GameObject` "Fx_<id>" with `VisualEffect` (asset = graph) acting as its anchor and one `GraphicsBuffer` (`Structured`, count = `MaxEventsPerFrame`, stride 80); per pooled slot `poolSize` children; per instanced definition one `FxInstanceBatch<T>` sized by the High budget. Implement the graph contract check of §6.3. `BindTo` stores the rig in each system's `Rig` property and creates the `VfxRuntimeConfig` singleton (`float ChunkDissolveSeconds`) with `EntityManager.CreateSingleton` (main thread, bind time only). Implement `FxInstanceBatch<T>` (§4.3).
 - **Files:** `Assets/Game/Presentation/Vfx/FxRig.cs`, `Assets/Game/Presentation/Vfx/FxInstanceBatch.cs`, `Assets/Game/Presentation/Vfx/Data/FxSlot.cs`, `Assets/Game/Presentation/Vfx/Components/VfxRuntimeConfig.cs`
 - **Acceptance criteria:**
-  - [ ] `Create` with N definitions creates exactly (batched + Σ poolSize) child GameObjects and no more for the rest of the session.
-  - [ ] A definition whose graph lacks `FxEvents` logs one error naming the asset and is skipped; the rig still works for the others.
-  - [ ] `Dispose` releases every `GraphicsBuffer` (count of live buffers returns to the pre-Create value) and every native array (leak check passes).
-  - [ ] Total buffer bytes at High ≤ 12 MB with the content set of VFX-004.
+  - [x] `Create` with N definitions creates exactly (batched + Σ poolSize) child GameObjects and no more for the rest of the session.
+  - [x] A definition whose graph lacks `FxEvents` logs one error naming the asset and is skipped; the rig still works for the others.
+  - [x] `Dispose` releases every `GraphicsBuffer` (count of live buffers returns to the pre-Create value) and every native array (leak check passes).
+  - [ ] Total buffer bytes at High ≤ 12 MB with the content set of VFX-004. Advisory follow-up when that content exists; VFX-002 representative rig measures 950,272 bytes (Q20).
 - **Tests:** `FxRigTests.Create_BuildsOneChildPerBatchedAndPoolSlot`, `FxRigTests.Create_GraphMissingProperty_LogsErrorAndSkips`, `FxRigTests.Dispose_ReleasesAllBuffers`, `FxRigTests.Create_TotalBufferBytes_Under12MB`, `FxRigTests.SlotByHash_ResolvesEveryDefinition` (PlayMode, test definitions created in code).
 
 ### VFX-003 — FxUploadSystem: drain, batch, submit, stats
@@ -750,8 +750,8 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 | 16 | FxDefinition cannot reference FxKind in Voxel | Shared enum in Data | Tech lead | Resolved ADR-0050: Game.Data.Definitions.FxKind, unchanged byte values; remaining streams stay in Voxel. |
 | 17 | Queue producer handles are not owned by the specified queue contract | Embed GuardedHandles | Tech lead | Resolved ADR-0050: shared atomic enqueue registration, exclusive drain, complete and dispose guard with queue; VFX-001 raised to frontier. |
 | 18 | Validation signature and diagnostics differ from implemented SPEC-04 | Canonical scope/context validation | Tech lead | Resolved: use Validate(ValidationScope, ContentValidationContext). FxDefinition codes VFX-E001 None, E002 missing graph, E003 missing mesh/material, E004 mode/kind mismatch, E005 debris, E006 large/warp pooled. Config codes E010 defaults length, E011 missing default, E012 wrong kind, E013 palette length, E014 lifetime order, E015 damage-colour length. Strict defaults until VFX-004's documented staged relaxation. |
-
 | 19 | RamImpact requested by SPEC-13 is absent from FxKind | Append RamImpact = 13 and extend defaults to 14 entries | Tech lead | Resolved DMG-007 / ADR-0058: preserve values 0–12; producer supplies contact point, A-to-B normal and energy-based scale. VFX-003 still owns visual content; no asset or art direction is created here. |
+| 20 | Staged rig binding and palette colour space | Internal consumer binding hook; linear-packed palette is converted exactly once | Tech lead | Resolved VFX-002: existing/future VFX consumers implement an internal rig property hook; the session rig registry resets at SubsystemRegistration and Unbind/Dispose removes its binding. Bind creates the runtime singleton; no placeholder systems. Palette is packed linear at Create, so upload must not apply sRGB conversion again. Raw/default colours remain sRGB. Defaults length is 14 per ADR-0058. VFX-004 content-budget validation remains pending its actual content; representative buffers are measured now. |
 
 ## 11. References
 
