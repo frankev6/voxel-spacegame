@@ -82,6 +82,7 @@ namespace Game.Tests.EditMode.Galaxy
         }
         [Test] public void CorruptStructure_DropsRecord()
         {
+            LogAssert.Expect(LogType.Log, new Regex("Content: 3 definitions, 2 blocks"));
             using var f = new Fixture(); Fill(f.State, 1); var delta = f.State.GetOrCreateDelta(new StarSystemId(1));
             delta.SetStructure(50, 7, f.Structure()); delta.SetStructure(60, 8, f.Structure()); int encoded = 0;
             byte[] bytes = f.Capture(block => ++encoded == 1 ? new byte[] { 0, 1, 2 } : block.Encode());
