@@ -6,7 +6,7 @@ Checks:
 - task IDs are unique and use the spec's area code; task -001 exists ("Public contract types");
 - every task has Milestone (valid), Tier (valid), Depends on, Do, Files, Acceptance criteria, Tests;
 - frontier-tier tasks are owned only by frontier-class models (per-task reviews were replaced by system reviews, ADR-0019);
-- dependency tokens are valid: own task IDs, another spec's <CODE>-001, or SPEC-NN;
+- dependency tokens are valid: existing task IDs or SPEC-NN (ADR-0068);
 - no task depends on a task scheduled in a later milestone; no dependency cycles;
 - the ledger has exactly one row per spec task (run tools/ledger-sync.py to fix), valid statuses;
 - every spec listed in docs/01-architecture.md §10 exists.
@@ -63,8 +63,6 @@ def main():
                     errors.append(f"{where}: depends on unknown task {tok}")
                     continue
                 dep = idx[tok][0]
-                if dep.spec != t.spec and not tok.endswith("-001"):
-                    errors.append(f"{where}: cross-spec dependency {tok} must be {tok[:-3]}001 or {dep.spec}")
                 if MILESTONE_RANK.get(dep.milestone, 99) > MILESTONE_RANK.get(t.milestone, 99):
                     errors.append(f"{where} ({t.milestone}) depends on {tok} scheduled later ({dep.milestone})")
 

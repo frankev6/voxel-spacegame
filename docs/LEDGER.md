@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 21 | 4 | 0 | 0 | 66 | 0 | 91 | 3 |
+| M2 | 21 | 4 | 0 | 0 | 66 | 0 | 91 | 4 |
 | M3 | 145 | 3 | 0 | 0 | 32 | 0 | 180 | 12 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
@@ -248,7 +248,7 @@
 | WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | partial in WPN-007: pulse clock, muzzle/range endpoint and cancellation / first-hit casts, hull/shield damage streams and impact effects; Claimed after projectile batch green; lead owns Unity |
 | WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | partial in FND-020: explosion requests into damage / shields, audio and required tests; partial in VFX-004: guarded explosion visual event / shields, audio and required tests; Claimed after projectile batch green; lead owns Unity |
 | WPN-011 | CombatGridSetup and turret visuals | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, PWR-001, ABL-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | c5122fd | Combat composition and absolute turret poses with split refresh; 3 required tests |
-| WPN-012 | Combat scenarios and determinism | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-009, WPN-010, WPN-011, SPEC-13, SPEC-22 | no | todo |  |  |  |  |
+| WPN-012 | Combat scenarios and determinism | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-009, WPN-010, WPN-011, DMG-001, DMG-002, DMG-003, DMG-004, DMG-005, DMG-006, DMG-007, DMG-008, DMG-009, DMG-010, DMG-011, DMG-012, DMG-013, DMG-014, DMG-015, DMG-017, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | no | todo |  |  |  |  |
 | WPN-013 | Weapon performance gates | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, TST-001 | no | todo |  |  |  |  |
 | WPN-014 | Weapon balance pass | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, SPEC-72 | no | todo |  |  |  |  |
 | WPN-015 | Harness hooks | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | ; Claimed after projectile batch green; lead owns Unity |
@@ -268,7 +268,7 @@
 | AI-003 | AI content and boot singletons | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 21337c2 | Profiles/config, boot-owned singleton and catalog; 2 required tests; full batch green |
 | AI-004 | SpatialHashBuildSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-002, SPEC-10, PWR-001, DMG-001 | yes | done | astra (gpt-6) | 2026-10-13 | f99a02c | Guarded parallel proxy gathering, canonical sort/bucket and boot-safe hash lifetime; full 968 EM /145 PM green |
 | AI-005 | AI setup and anchor shift | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-003, SPEC-02 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b0fc87e | Brain registration and origin anchor shift; 4 required tests; live origin producer awaits GAL-009 |
-| AI-006 | AiDecisionSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-004, AI-005, SPEC-20, SPEC-21, ABL-001 | no | todo |  |  |  |  |
+| AI-006 | AiDecisionSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-004, AI-005, SPEC-20, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, ABL-001 | no | todo |  |  |  |  |
 | AI-007 | AiSteeringSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006 | no | todo |  |  |  |  |
 | AI-008 | PlayerCombatStatusSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006, DMG-001 | no | todo |  |  |  |  |
 | AI-009 | Station turret AI | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007 | no | todo |  |  |  |  |
@@ -277,7 +277,7 @@
 | AI-012 | AI and hash performance | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010, TST-001 | no | todo |  |  |  |  |
 | ABL-001 | Public contract types | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | CORE-001, DATA-001, PWR-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 1bc7515 | Canonical ability contracts; 48-byte slot; 1 required test; full batch 901 EM / 128 PM, zero failures |
 | ABL-002 | Ability content and boot singleton | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 900e223 | Ability definition bake and boot lifetime 9534014; fixture repair 48ad51a; full 968 EM /145 PM green |
-| ABL-003 | AbilitySystem | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | frontier | ABL-002, SPEC-20, SPEC-22 | no | todo |  |  |  |  |
+| ABL-003 | AbilitySystem | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | frontier | ABL-002, SPEC-20, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | yes | todo |  |  |  |  |
 | ABL-004 | Effect systems | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-003, SPEC-22 | no | todo |  |  |  |  |
 | ABL-005 | Ability scenarios and frame-rate independence | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-004, SPEC-21 | no | todo |  |  |  |  |
 | CAM-008 | Screen shake from FxEvents | [SPEC-62](specs/SPEC-62-camera.md) | M2 | standard | CAM-005, SPEC-63 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 9d59a62 | Impact shake and borrowed frame reader; Boot binding e265f13; 7 required tests; full batch 901 EM / 128 PM, zero failures |
@@ -872,6 +872,10 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 280 | SPEC-21 Q65–66: projectile batch scheduling and antiparallel homing | Use installed explicit-length batch API with rounded capacity and job-only live length, fixed 64-row stream lanes and per-lane counters reduced during stable compaction. Opposite homing directions use a deterministic perpendicular; absent targets continue straight. Implementation isolated; seven required tests and Unity pending. | Tech lead |
 | 281 | SPEC-21 Q64: weapon power init and cached stats | Separate unbound weapon consumer initialization from geometry inside WeaponInitSystem; preserve canonical binding, same-tick demand ownership and initial weapon count across revision rebuilds. Five required real-Fighter tests; integrated b672f6f1, Unity validation pending. | Tech lead |
 | 283 | SPEC-21 Q69: complete explosion queries and presentation defaults | Query sorted spatial proxies, fall back to a complete sorted proxy scan on bounded-output overflow, then shield-first narrow phase. Retain invalid-input rejection and emit one stationary FX/unit-volume SFX pair with player-source classification per valid blast. Four required channel/system tests authored, Unity pending. Q282 reserved by prepared AUD-013 integration. | Tech lead |
+| 282 | SPEC-64 Q27–29: representative audio measurement and unavailable timing | Exercise the authored combat cues and real drain/loop/service with disposable silent loop fixtures; retain inclusive component timing, unchanged advisory targets and false/null JSON for unavailable samples. Measure guarded enqueue through service update for 300 warmed frames; worst-frame allocation remains a hard zero-byte requirement. Four required tests, zero extras, no production/content changes or tuning passes; Unity pending. | Tech lead |
+| 284 | SPEC-21 Q68: weapon diagnostic rows and guarded stats | Preserve canonical BlockInstance order and copied immutable values, validate links and complete read dependencies; missing/ambiguous/uncreated store returns false/default. DEV-011 retains command registration. One required test, zero extras; integrated dceee015, full validation pending. | Tech lead |
+| 285 | SPEC-21 Q67: beam attribution and first-hit effects | Read current root multipliers/owner per pulse without changing BeamState; clip hull/shield/celestial first hits, let ShieldSystem own ripples, retain guarded chunk-exclusive streams and immediate cancellation. Three required tests plus existing firing-fixture prerequisite repair; integrated dabc1fa4, full validation pending. | Tech lead |
+| 286 | SPEC-21 Q70 / SPEC-23 Q16 / SPEC-24 Q6: advisory tasks incorrectly block gameplay via whole-spec dependencies | Preserve all expanded functional prerequisites explicitly; remove only DMG-016/PWR-009 performance tasks from combat/abilities and WPN-013/014 performance/feel tasks from AI prerequisites. All tasks retain scope and tests; no owner sign-off is waived. Implements ADR-0042 and Frank's build-first priority; accepted ADR-0068 permits explicit cross-spec tasks without weakening ID, milestone or cycle validation. | Tech lead |
 
 
 ## Measurements

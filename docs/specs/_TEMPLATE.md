@@ -58,6 +58,7 @@ Each task is small (0.5–3 days), independently reviewable, and ordered so that
 
 **Dependency tokens** allowed in *Depends on*:
 - a task ID from this spec (`VOX-004`);
+- another spec's explicit task ID when runtime behavior is required ([ADR-0068](../decisions/ADR-0068-explicit-functional-dependencies.md)); retain every real functional prerequisite, but do not gate gameplay on advisory measurements or owner feel sign-off;
 - another spec's **contract task** `<CODE>-001` — in every spec, task `-001` is *"Public contract types"*: it creates all public types of that spec (components, structs, enums, interfaces, definition classes) with no behaviour, so other modules can compile against them early;
 - a whole spec, `SPEC-NN`, meaning "every task of SPEC-NN whose milestone is the same as or earlier than this task's milestone".
 
