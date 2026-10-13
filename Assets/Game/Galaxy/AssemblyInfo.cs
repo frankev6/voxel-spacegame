@@ -7,3 +7,4 @@ using Unity.Entities;
 [assembly: InternalsVisibleTo("Game.Editor")]
 [assembly: InternalsVisibleTo("Game.DevTools.Editor")]
 [assembly: RegisterGenericComponentType(typeof(Game.Data.Components.ManagedEventQueue<Game.Core.Events.OriginShifted>))]
+[assembly: RegisterGenericComponentType(typeof(Game.Data.Components.ManagedEventQueue<Game.Core.Events.BodyInteracted>))]

@@ -74,7 +74,7 @@ namespace Game.Core.Events
 }
 ```
 
-`Game.Galaxy/AssemblyInfo.cs` registers `ManagedEventQueue<BodyInteracted>` (the only one enqueued from ECS) and `ManagedEventChannels.RegisterAll` gets `RegisterChannel<BodyInteracted>()`.
+`Game.Galaxy/AssemblyInfo.cs` registers `ManagedEventQueue<BodyInteracted>` (the only one enqueued from ECS) and `ManagedEventChannels.RegisterAll` gets `RegisterChannel<BodyInteracted>()`. `BodyDestroyed` remains managed-only; the existing bridge test exclusion list records that actual publisher (Q7).
 
 ### 4.2 Body components (`Game.Galaxy.Bodies`)
 
@@ -210,7 +210,7 @@ namespace Game.Galaxy.Services
 
     /// <summary>Owner of the loaded star system. Implements SPEC-31 §5.1–§5.8.</summary>
     /// ITravelLoader (SPEC-32 §4, Game.Galaxy.Travel) is added to the base list by SPEC-32 TRV-006 together with its two members below.
-    public sealed class StarSystemLoader : IGalaxyFrameTick, IGalaxyLiveDeltaSink, ITravelLoader, Game.Core.Flow.ISceneReady, Game.Core.Flow.ISceneExiting, System.IDisposable
+    public sealed class StarSystemLoader : IGalaxyFrameTick, IGalaxyLiveDeltaSink, /* ITravelLoader added by TRV-006 (Q6) */ Game.Core.Flow.ISceneReady, Game.Core.Flow.ISceneExiting, System.IDisposable
     {
         public StarSystemLoader(GalaxyService galaxy, Unity.Entities.World world, Game.Voxel.Grid.VoxelStructureRegistry registry,
                                 Game.Voxel.Grid.BlueprintLibrary blueprints, IPersistentIdAllocator ids, Game.Data.Services.ContentCatalog catalog);
@@ -459,8 +459,8 @@ sequenceDiagram
 - **Milestone:** M3
 - **Tier:** standard — transcribes the exact code of §4 (bodies throw `NotImplementedException`)
 - **Depends on:** `CORE-001`, `DATA-001`, `GAL-001`, `WPN-001`
-- **Do:** Create every type of §4 (including `BodyGridInitialCells` from §5.6 and `StreamingConfigDefinition`) in the folders of decision 13.
-- **Files:** `Assets/Game/Core/Events/{StarSystemEntryReason,StarSystemEntered,BodyInteracted,BodyDestroyed,DockStateChanged}.cs`; `Assets/Game/Galaxy/Bodies/{BodyTier,BodyFlags,StarSystemBody,BodyOrbit,BodyGridOwner,BodyGridInitialCells,CurrentStarSystemInfo,StreamingConfig}.cs`; `Assets/Game/Galaxy/Interaction/{Interactable,InteractionTarget,InteractionInputState}.cs`; `Assets/Game/Galaxy/Services/{IShipSpawner,PersistentIdValue,GalaxyShipSpawnArgs,LoaderState,StarSystemLoader,DockingService,PlayerLocationSaveParticipant}.cs`; `Assets/Game/Data/Definitions/World/StreamingConfigDefinition.cs`
+- **Do:** Create every type of §4 (including the internal §4.5 carriers, `BodyGridInitialCells`/`BodyGridEvent` from §5.6 and `StreamingConfigDefinition`) in the folders of decision 13.
+- **Files:** `Assets/Game/Core/Events/{StarSystemEntryReason,StarSystemEntered,BodyInteracted,BodyDestroyed,DockStateChanged}.cs`; `Assets/Game/Galaxy/Bodies/{BodyTier,BodyFlags,StarSystemBody,BodyOrbit,BodyGridOwner,BodyGridInitialCells,CurrentStarSystemInfo,StreamingConfig}.cs`; `Assets/Game/Galaxy/Interaction/{Interactable,InteractionTarget,InteractionInputState}.cs`; `Assets/Game/Galaxy/Services/{IShipSpawner,PersistentIdValue,GalaxyShipSpawnArgs,LoaderState,StarSystemLoader,DockingService,PlayerLocationSaveParticipant}.cs`; `Assets/Game/Data/Definitions/World/StreamingConfigDefinition.cs`; §4.5 streaming carriers, `BodyGridEvent`, the two required tests and the explicit §4.1 event bridge registration (Q7–8)
 - **Acceptance criteria:**
   - [ ] Compiles; components unmanaged; event payloads use only Core-visible types.
 - **Tests:** `StreamingContractTests.Components_AreUnmanaged`, `.Events_CoreOnly`.
@@ -612,6 +612,9 @@ sequenceDiagram
 | 3 | Persist damage of large bodies (> 65,536 cells) in M3? | No; GAL-016 brick diffs in M4 | Owner |
 | 4 | Asteroid damage persistence | Only "destroyed" is persisted | Owner |
 | 5 | Station allegiance before SPEC-33 exists | `Allegiance.None` (neutral, never targeted by `TargetNext`) | SPEC-33 |
+| 6 | The loader base list names ITravelLoader although its immediately preceding comment defers that interface to TRV-006 and the type does not yet exist | Follow the explicit staging comment: retain loader/arrival member shells, add the SPEC-32-owned interface when TRV-006 integrates it. Preserve the existing ADR-0060 StarSystemEntered/StarSystemEntryReason files and identities unchanged. No new travel interface or assembly reference. | Tech lead |
+| 7 | The existing bridge test assumes every new architecture event has an ECS queue, while §4.1/§5.6 specify BodyDestroyed is published by the managed loader | Register BodyInteracted in Galaxy's generic component metadata and the existing drain list; classify BodyDestroyed as managed-only in the existing test exclusion list. Keep all prior channels, payloads and test methods. | Tech lead |
+| 8 | SYS-001's file list omits §4.5 carriers/BodyGridEvent, definition getter shapes and the scene-exit hook order | Include all stated carriers/events with their exact fields; use trivial PascalCase getters over the specified serialized defaults, SceneExitOrder = SceneHookOrder.Galaxy, PLOC Key/Version = PLOC/1. Behaviour/validation/config asset remain in SYS-002/004/008/009/013 and travel integration in TRV-006. | Tech lead |
 
 ## 11. References
 
