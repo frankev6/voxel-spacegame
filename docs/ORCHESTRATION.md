@@ -60,3 +60,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - Main includes validated DMG-012/batch3 at `5388604`. Lead claimed AI-002 (`7b8cf39`) on `task/AI-002-spatial-queries`: hash queries and five required reference tests implemented, validation pending. DLG-001 delivered `d07fd9b8189ae8cfedb477b6ec0177639a4077c1`, one required test; same worker recycled to ready PWR-003. Q223–224 resolve read-only overflow telemetry and bounded traversal.
 
 - AI-002 `bb73f9b`: compile clean, all five required query tests pass (`Logs/playtest/ai002/query-focused.xml`). Integrated GAL-001 `6d49a49`, DLG-001 `67e0ffd`, UI-010 `6b3a919`; both UI service lifecycle/config/theme changes retained. Integrated compile clean. Focused grouped audit running before full regression; no done claim for this batch yet. Ledger Q225–227 mirror delivered resolutions. Editor stopped for validation.
+
+- Live grouped filter `A|B|...` was rejected with no matching tests (session 79708; no result accepted). Closed idle Editor normally (87955 exit 0) and started the same grouped filter headlessly, session `79989`. Poll that handle; do not launch another Unity operation.
