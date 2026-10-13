@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 134 | 7 | 0 | 0 | 39 | 0 | 180 | 6 |
+| M3 | 134 | 7 | 0 | 0 | 39 | 0 | 180 | 7 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -414,7 +414,7 @@
 | ECO-001 | Public contract types | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | CORE-001, DATA-001, NAR-001, VOX-001, DMG-001, SYS-001, FLT-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a81ff41 | Economy contracts and serialized tradeable defaults; 2 required tests. Runtime ECO-002 onward remains open. Full 1027 EM / 145 PM passed. |
 | ECO-002 | Definitions, config and validators | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | db5d72e | Strict economy validators/config and canonical scrap; 15 required tests; partial ECO-009 scrap only |
 | ECO-003 | InventoryModel and Wallet | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-001 | yes | done | astra (gpt-6) | 2026-10-13 | 80a8bd18 | Twelve functional inventory/wallet checks pass; advisory Apply40 unmeasured (ADR-0070) |
-| ECO-004 | Loot and EconomyService | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003, SPEC-40 | no | todo |  |  |  |  |
+| ECO-004 | Loot and EconomyService | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003, ECO-005, NAR-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Recycled power worker; actual prerequisites reconciledQ308 |
 | ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | f4cae431 | Merchant pricing, stock/restock and trading; eight required checks pass; sale rounding repaired |
 | ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | no | todo |  |  |  |  |
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, SPEC-13, SPEC-31, SPEC-12 | no | todo |  |  |  |  |
@@ -898,6 +898,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 305 | SPEC-40 Q13: parser precedence example and internal results | Resolved: follow the grammar with $-prefixed variables; internal location-bearing AST and first-error code/line/column diagnostics, translated by NAR-003. Command integers use the Int32 domain. | Tech lead |
 | 306 | SPEC-23 Q26: fast physical AI scenario fixtures | Resolved: frozen player dummy without Hulk, real physical frigate/pipeline; fixture-only arena and weapon changes, fixed ticks and early exit retain functional assertions. Production balance unchanged. | Tech lead |
 | 307 | SPEC-31 Q12: builder geometry, inputs and ownership | Resolved: injected baked content/catalog, caller-owned sources and loader-owned cache; centered cell sampling, shell subtraction, deterministic nearest-core footprint replacement, seeded simplex offset and bounded native staging. No new assets. | Tech lead |
+| 308 | SPEC-50 Q25: actual ECO-004 narrative dependency | Resolved under ADR-0068: require NAR-001 interface plus completed ECO-003/005 runtime; retain full loot/service scope and eight required tests. | Tech lead |
 
 
 ## Measurements
