@@ -39,7 +39,6 @@ namespace Game.Simulation.Weapons
                     var beam = Beams[shot.Weapon]; beam.Active = 1; beam.TicksLeft = (ushort)weapon.BeamPulseTicks;
                     beam.Width = weapon.BeamWidth; beam.Fx = weapon.HitFx; beam.HitSomething = 0;
                     Beams[shot.Weapon] = beam;
-                    // TODO(WPN-009): cast, resolve first hit and decrement this pulse in BeamStepSystem.
                 }
             }
         }

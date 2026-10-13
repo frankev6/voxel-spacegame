@@ -5,9 +5,11 @@ using Game.App.Systems;
 using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Data.Definitions;
+using Game.Data.Streams;
 using Game.Simulation;
 using Game.Simulation.Commands;
 using Game.Simulation.Power;
+using Game.Simulation.Spatial;
 using Game.Simulation.Weapons;
 using Game.Tests.Common;
 using Game.Voxel.Damage;
@@ -31,6 +33,9 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             public readonly ProjectileStore Store;
             readonly BlobAssetReference<WeaponDefsBlob> definitions;
             readonly FactionRelations relations;
+            readonly SpatialHash hash;
+            readonly SimEventChannel<DamageEvent> damage;
+            readonly SimEventChannel<ShieldHit> shieldHits;
             public EntityManager Em => World.EntityManager;
             public WeaponState State => Em.GetComponentData<WeaponState>(Mount);
             public Fixture(WeaponDef weapon, int capacity = 8192)
@@ -44,6 +49,9 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                     typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(FireCaptureSystem), typeof(SimClockAdvanceSystem));
                 World.AddSingleton(new WeaponDefsRef { Value = definitions });
                 World.AddSingleton(new WeaponTuning { MaxProjectiles = capacity });
+                hash = SpatialHash.Create(128); World.AddSingleton(hash);
+                damage = SimEventChannel<DamageEvent>.Create("fire_test_damage"); World.AddSingleton(new DamageStreams { Damage = damage });
+                shieldHits = SimEventChannel<ShieldHit>.Create("fire_test_shields"); World.AddSingleton(new ShieldHitStreams { Hits = shieldHits });
                 Store = ProjectileStore.Create(capacity); World.AddSingleton(Store);
                 relations = FactionRelations.CreateDefault(Allocator.Persistent); World.AddSingleton(relations);
                 World.AddGameplayActive(); World.AddSimClock();
@@ -61,8 +69,18 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 Em.SetComponentData(entity, new WeaponState { Group = 1 });
                 return entity;
             }
-            public void Step(int ticks = 1) { World.StepTicks(ticks); Em.CompleteAllTrackedJobs(); Store.CompleteAccess(); }
-            public void Dispose() { World.Dispose(); Store.Dispose(); definitions.Dispose(); relations.Dispose(); }
+            public void Step(int ticks = 1)
+            {
+                for (int i = 0; i < ticks; i++)
+                {
+                    World.StepTicks(1); Em.CompleteAllTrackedJobs(); Store.CompleteAccess();
+                    // This firing/lifetime fixture has an empty hash: consume its empty partitions each tick.
+                    ref var state = ref World.World.Unmanaged.ResolveSystemStateRef(World.World.GetExistingSystem<BeamStepSystem>());
+                    damage.BeginRead(ref state); damage.EndRead(state.Dependency);
+                    shieldHits.BeginRead(ref state); shieldHits.EndRead(state.Dependency);
+                }
+            }
+            public void Dispose() { World.Dispose(); Store.Dispose(); damage.Dispose(); shieldHits.Dispose(); hash.Dispose(); definitions.Dispose(); relations.Dispose(); }
         }
         static WeaponDef Definition() => new WeaponDef { Index = 1, Delivery = WeaponDelivery.Projectile,
             TriggerIntervalTicks = 24, BurstCount = 1, PelletsPerRound = 1, ProjectileSpeed = 100,
