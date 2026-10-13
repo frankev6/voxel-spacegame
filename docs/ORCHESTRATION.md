@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Procedural content job authored:** GAL006 now has fixed-draw procedural bodies, usage-limited pools, scheduled wrapper and overflow reporting; six checks/compile pending. Q332/SPEC30Q32 guards lane-index capacity. HUD005 repair a03ac074 delivered174, queued on preserved settings branch; TRV002 resumed. GAL012198/ENC010210 active. No Unity run. Previous turn authored content foundation (progress).
+
 - **Per-system generation underway:** GAL006 claimed3dc7cc6a, task/GAL-006-system-content authors body hashes/lookup/disposal plus authored/gate helpers. Procedural placement/job wrapper/six checks pending, unvalidated. Workers197/209/173 active; presentation explicitly switched to HUD005 repair after preserving TRV002. No active Unity run. Previous turn guarded pause intents (progress).
 
 - **Settings work preserved for repair:** task/HUD-005-settings-integration at dbe07d59 includes real pause routes and session callback guards, unvalidated delta. Belt boot correction alone is on main6c89f0b0 so unrelated gameplay is not held behind settings. Next integrate worker HUD005 repair and validate on that branch. Workers GAL012196/ENC010208/TRV002172 active; no Unity run. Previous turn authored pause routes (progress).

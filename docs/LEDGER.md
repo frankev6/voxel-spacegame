@@ -911,6 +911,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 318 | SPEC-40 Q19: legacy translation boundary and defaults | Resolved: retain source metadata for emission; decimal cumulative thresholds, source-ordered quest logs, canonical provisional journal labels and contextual item mappings. No runtime/asset emission in NAR-014. | Tech lead |
 | 319 | SPEC-61 Q23: save/load construction versus composition cycle | Resolved: explicit completed UI/save/flow prerequisites allow parallel source construction; shared production hookup and full functional/layout acceptance remain required. ADR-0072 amended. | Tech lead |
 | 320 | SPEC-60 Q30: layout audit scroll/measurement semantics | Resolved: exclude scroll content subtree but audit viewport; use intrinsic nowrap width, clear result list and check all containing panels. Functional acceptance pending. | Tech lead |
+| 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
 | 330 | SPEC-61 Q27: fast PlayMode rebind fixture | Resolved ADR-0074: existing InputSystem test framework reference permitted for PlayMode; direct clock advance with state restoration. | Tech lead |
 | 329 | SPEC-02 Q17 / SPEC-61 Q26: persisted camera orientation | Resolved ADR-0073: additive Controls byte with legacy default0, real app mapping and settings binding; implementation in HUD-005. | Tech lead |
 | 328 | SPEC-72 Q45: body-stub field ownership | Resolved: preserve non-owned authored fields and object name even on forced refresh; exact twenty-stub acceptance is independent of downstream GAL-012. | Tech lead |
@@ -1031,6 +1032,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — GAL-006 procedural job checkpoint — astra (gpt-6)
+
+- Procedural planet/moon/belt/station/POI generation and scheduled content wrapper authored: maximum-count draws, per-entry pool usage, bounded fixed placement, ring gates, sorted keys, truncation flag, generated hash and exception cleanup. Six required checks remain; no compile/test run yet. Test count: spec-required: 6 pending, extra: 0.
+- SPEC30Q32/ledger332 makes ushort lane overflow an explicit pre-schedule failure rather than corrupt identity or missing gates. HUD005 repair a03ac074 delivered; presentation resumes TRV002. Worker snapshots198/210/174 active. Previous turn implemented authored body/hash foundation (progress).
 
 ### 2026-10-13 — GAL-006 body foundation checkpoint — astra (gpt-6)
 
