@@ -412,7 +412,7 @@
 | QST-010 | Opening chapter playthrough | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-008, QST-009, QST-007, SPEC-70, SPEC-32, SPEC-50 | no | todo |  |  |  |  |
 | ECO-001 | Public contract types | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | CORE-001, DATA-001, NAR-001, VOX-001, DMG-001, SYS-001, FLT-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a81ff41 | Economy contracts and serialized tradeable defaults; 2 required tests. Runtime ECO-002 onward remains open. Full 1027 EM / 145 PM passed. |
 | ECO-002 | Definitions, config and validators | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | db5d72e | Strict economy validators/config and canonical scrap; 15 required tests; partial ECO-009 scrap only |
-| ECO-003 | InventoryModel and Wallet | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-001 | yes | todo |  |  |  |  |
+| ECO-003 | InventoryModel and Wallet | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Claimed for isolated implementation while combat validates; atomic cargo and wallet unlock merchant work |
 | ECO-004 | Loot and EconomyService | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003, SPEC-40 | no | todo |  |  |  |  |
 | ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | no | todo |  |  |  |  |
 | ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | no | todo |  |  |  |  |
