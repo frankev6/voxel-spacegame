@@ -39,6 +39,7 @@ namespace Game.Data.Definitions
         }
 
         // ---- SPEC-50 economy fields go below this line (ECO tasks). Do not edit the fields above. ----
-        // ECO-001 adds: [SerializeField] private bool tradeable = true; public bool Tradeable => tradeable && Category != ItemCategory.Quest;
+        [UnityEngine.SerializeField] private bool tradeable = true;
+        public bool Tradeable => tradeable && Category != ItemCategory.Quest;
     }
 }
