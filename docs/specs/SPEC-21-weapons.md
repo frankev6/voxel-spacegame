@@ -922,6 +922,8 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 
 | 61 | Fractional trigger carry and reconstructing a pellet RNG in a later delivery handler | Preserve negative sub-tick carry while actively firing; clamp idle/power/active-beam waiting to zero so no triggers bank. A zero initial cooldown fires immediately without subtracting an extra first tick. Seed each pellet with decision 8 using its own ShotId and shooter persistent id (zero for unidentified fixtures); consume two spread samples, then reconstruct that same seed and skip those two samples for lifetime. This makes variable lifetime independent of delivery batching and entity allocation. | Tech lead |
 
+| 62 | WPN-007 requires real pulse duration before WPN-009 supplies beam hit resolution | Bring forward BeamStepSystem pulse lifetime, muzzle/range endpoint and power/core-loss cancellation only. Its production post-physics update consumes the release tick and reaches zero after exactly BeamPulseTicks; WPN-007 tests that system, not a test countdown. WPN-009 remains todo with precise TODO markers for first-hit casts, damage/shield streams and impact effects. | Tech lead |
+
 ## 11. References
 
 - Audit (background only): `docs/reference/audit-2026-10/02-combat-destruction.md` C22 (double energy drain), R26 (beam through targets), 01-B2 (wrong-cell hits).

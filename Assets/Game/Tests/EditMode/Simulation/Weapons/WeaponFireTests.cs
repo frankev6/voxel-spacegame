@@ -39,7 +39,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 var rows = builder.Allocate(ref blob.Weapons, 4); rows[1] = weapon;
                 rows[2] = Definition(); var beam = Definition(); beam.Delivery = WeaponDelivery.Beam; rows[3] = beam;
                 definitions = builder.CreateBlobAssetReference<WeaponDefsBlob>(Allocator.Persistent);
-                World = EcsTestWorld.Create(typeof(WeaponFireSystem), typeof(ProjectileShotHandlerSystem), typeof(BeamShotHandlerSystem),
+                World = EcsTestWorld.Create(typeof(WeaponFireSystem), typeof(ProjectileShotHandlerSystem), typeof(BeamShotHandlerSystem), typeof(BeamStepSystem),
                     typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(FireCaptureSystem), typeof(SimClockAdvanceSystem));
                 World.AddSingleton(new WeaponDefsRef { Value = definitions });
                 World.AddSingleton(new WeaponTuning { MaxProjectiles = capacity });
@@ -93,18 +93,16 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             var weapon = Definition(); weapon.Delivery = WeaponDelivery.Beam; weapon.TriggerIntervalTicks = 1;
             using var f = new Fixture(weapon); f.Step();
             var pulse = f.Em.GetComponentData<BeamState>(f.Mount);
-            Assert.AreEqual(1, pulse.Active); Assert.AreEqual(9, pulse.TicksLeft); Assert.AreEqual(.2f, pulse.Width);
+            Assert.AreEqual(1, pulse.Active); Assert.AreEqual(8, pulse.TicksLeft, "The release tick consumes the first pulse step."); Assert.AreEqual(.2f, pulse.Width);
             Assert.AreEqual(0, f.Store.Rows.Length, "Projectile handler must ignore beam deliveries.");
-            // WPN-007 owns start/suppression. Stand in for WPN-009's post-physics consumption of the pulse.
-            int consumed = 0;
-            while (pulse.TicksLeft > 0)
+            for (int tick = 1; tick < 9; tick++)
             {
-                consumed++; pulse.TicksLeft--; pulse.Active = (byte)(pulse.TicksLeft > 0 ? 1 : 0);
-                f.Em.SetComponentData(f.Mount, pulse);
-                if (pulse.Active != 0) { f.Step(); Assert.AreEqual(1, f.State.ShotCounter, "Active pulse cannot retrigger."); }
+                f.Step(); pulse = f.Em.GetComponentData<BeamState>(f.Mount);
+                Assert.AreEqual(1, f.State.ShotCounter, "Active pulse cannot retrigger.");
+                Assert.AreEqual(8 - tick, pulse.TicksLeft);
+                Assert.AreEqual(tick < 8 ? 1 : 0, pulse.Active);
             }
-            Assert.AreEqual(weapon.BeamPulseTicks, consumed);
-            f.Step(); Assert.AreEqual(2, f.State.ShotCounter); Assert.AreEqual(9, f.Em.GetComponentData<BeamState>(f.Mount).TicksLeft);
+            f.Step(); Assert.AreEqual(2, f.State.ShotCounter); Assert.AreEqual(8, f.Em.GetComponentData<BeamState>(f.Mount).TicksLeft);
         }
         [Test] public void ShotIds_Unique()
         {
