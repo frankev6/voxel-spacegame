@@ -1,0 +1,13 @@
+/* SPEC-60 UI-008. Inventory/ability tile, with badges above its cooldown mask. */
+.slot { position: relative; width: var(--space-8); height: var(--space-8); flex-shrink: 0; margin: var(--space-1); background-color: var(--color-surface-2); border-color: var(--color-border); border-width: var(--border-thin); border-radius: var(--radius-s); }
+.slot__icon { position: absolute; left: var(--space-1); top: var(--space-1); right: var(--space-1); bottom: var(--space-1); -unity-background-scale-mode: scale-to-fit; }
+.slot__count { position: absolute; right: var(--space-1); bottom: var(--space-1); color: var(--color-text); background-color: var(--color-surface-2); font-size: var(--text-xs); -unity-font-definition: var(--font-mono); padding: 0 var(--space-1); }
+.slot__key { position: absolute; left: var(--space-1); top: var(--space-1); color: var(--color-text); background-color: var(--color-surface-2); font-size: var(--text-xs); -unity-font-definition: var(--font-mono); padding: 0 var(--space-1); }
+.slot__cooldown { position: absolute; left: 0; right: 0; bottom: 0; background-color: var(--color-bg); opacity: 0.75; }
+.slot:hover, .slot:focus { border-color: var(--color-accent); }
+.slot.is-selected { border-color: var(--color-accent-strong); border-width: var(--border-thick); }
+.slot.is-empty .slot__icon { opacity: 0; }
+.slot.is-disabled .slot__icon, .slot.is-locked .slot__icon { opacity: 0.4; }
+.slot.is-disabled { border-color: var(--color-border); }
+.slot.is-locked { border-color: var(--color-warning); }
+.slot.is-ready { background-color: var(--color-surface-3); }

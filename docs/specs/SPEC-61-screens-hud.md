@@ -700,6 +700,7 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 | 17 | Should Dialog pause the simulation? | Yes (`PausesSimulation = true`) | Owner |
 | 18 | Clue graph visualisation | M3 shows a grouped list; a graph view is a later task | Owner |
 | 19 | HUD panels for new ship systems (review X12): a hangar, tractor or cloak needs HUD state without editing `HudSyncSystem` | Add when the first such system is specified: an `IShipSystemPanel` registry in `Game.UI` (view model + UXML template + a Presentation-side sync callback registered at composition), drawn in a fixed HUD region in registration order | UI lead |
+| 20 | HUD-001's exact ShipEditorView constructor needs SPEC-51 types before EDT-001, which depends on HUD-001 | **Resolved (2026-10-13, Tech lead):** bring forward only the canonical `Game.UI.ViewModels.ShipEditorViewModel : ViewModelBase` and `Game.UI.Views.IShipEditorCommands` type identities in their SPEC-51 folders as empty shells. Precise `TODO(EDT-001)` notes retain all editor view-model properties, nested models and command members for EDT-001. ShipEditorView keeps the exact constructor signature; no editor behavior or alternative signatures. Existing provisional screens/adapter remain installed until HUD-002. | Tech lead |
 
 ## 11. References
 

@@ -1,0 +1,8 @@
+/* SPEC-60 UI-008. The viewport shrinks; the horizontal content never wraps or compresses labels. */
+.tab-bar { min-width: 0; max-width: 100%; flex-shrink: 1; align-self: stretch; background-color: var(--color-surface-1); }
+.tab-bar > .unity-scroll-view { min-width: 0; max-width: 100%; flex-shrink: 1; }
+.tab-bar .unity-scroll-view__content-viewport { min-width: 0; overflow: hidden; }
+.tab-bar .unity-scroll-view__content-container { flex-direction: row; flex-wrap: nowrap; }
+.tab-bar__tab { flex-shrink: 0; min-height: var(--space-6); padding: var(--space-2) var(--space-4); margin-right: var(--space-1); color: var(--color-text); background-color: var(--color-surface-2); border-color: var(--color-border); border-width: var(--border-thin); border-radius: var(--radius-s); font-size: var(--text-m); -unity-font-definition: var(--font-body); white-space: nowrap; -unity-text-align: middle-center; }
+.tab-bar__tab:hover, .tab-bar__tab:focus { border-color: var(--color-accent); }
+.tab-bar__tab.is-selected { border-color: var(--color-accent-strong); border-bottom-width: var(--border-thick); color: var(--color-accent-strong); background-color: var(--color-surface-3); }

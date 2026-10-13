@@ -13,3 +13,6 @@
 @import url("components/key-hint.uss");
 @import url("components/marker.uss");
 @import url("components/hud.uss");
+@import url("components/meter.uss");
+@import url("components/slot.uss");
+@import url("components/tab-bar.uss");

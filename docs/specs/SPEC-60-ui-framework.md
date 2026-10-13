@@ -354,6 +354,8 @@ namespace Game.UI.Controls
 }
 ```
 
+UI-008 control defaults (Q21): meters use neutral styling and a low threshold of 0.25; nonpositive maxima yield zero fill while number labels retain the supplied integers. Fractions clamp to [0,1], with nonfinite input mapped to zero. Per-frame numbers use the NumberStringCache range [−9999,9999]; its existing rare large-value fallback remains outside hot paths. Controls prefix child names with their own name on attachment, outside setter paths. Slots are ready only with an icon, zero cooldown and neither disabled nor locked. Tab bars use −1 for no selection, select the first tab on initial nonempty SetTabs, retain a still-valid selection on rebuild, and otherwise select the first tab (empty lists clear selection). Invalid indices or missing/mismatched/duplicate names are argument errors.
+
 `PanelFrame` is **not** a custom control. A panel is the class pattern in §4.6, written explicitly in UXML:
 
 ```xml
@@ -833,7 +835,7 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
   - [ ] `Meter.SetValue(50, 200)` → fill width 25 %, labels "50" and "200", `.meter--low` absent at threshold 0.25 (equal is not low).
   - [ ] Nine tabs with 12-character labels at logical 1280×720 stay inside the parent (R12).
   - [ ] Zero GC for 10,000 `SetValue` calls with changing values in [0, 9999].
-- **Tests:** `Assets/Game/Tests/PlayMode/UI/ControlsTests.cs`: `Meter_SetValue_FillAndLabels`, `Meter_Low_ClassBelowThreshold`, `Meter_SetValue_ZeroAlloc`, `Slot_CountOne_HidesBadge`, `Slot_Cooldown_OverlayHeight`, `TabBar_NineTabs_NoOverflowAt1280x720` (uses `UILayoutAudit`), `TabBar_SelectSame_NoEvent`.
+- **Tests:** `Assets/Game/Tests/PlayMode/UI/ControlsTests.cs`: `Meter_SetValue_FillAndLabels`, `Meter_Low_ClassBelowThreshold`, `Meter_SetValue_ZeroAlloc`, `Slot_CountOne_HidesBadge`, `Slot_Cooldown_OverlayHeight`, `TabBar_NineTabs_NoOverflowAt1280x720` (real panel bounds and scrolling now; UI-012 adds the canonical `UILayoutAudit` invocation, Q22), `TabBar_SelectSame_NoEvent`.
 
 ### UI-009 — Tooltip service
 - **Milestone:** M3
@@ -876,7 +878,7 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 - **Milestone:** M3
 - **Tier:** frontier — F1/F3: every screen's regression tests rely on it; a wrong audit silently passes broken layouts
 - **Depends on:** `UI-008`
-- **Do:** Implement `UILayoutAudit`, `ContrastAudit`, `AllegianceColorCheck` (§5.12) in `Game.UI` (so the harness can call them), and `UITestPanel` with the five logical sizes in the test assembly. Add gallery tests for UI-007/UI-008 controls.
+- **Do:** Implement `UILayoutAudit`, `ContrastAudit`, `AllegianceColorCheck` (§5.12) in `Game.UI` (so the harness can call them), and `UITestPanel` with the five logical sizes in the test assembly. Add gallery tests for UI-007/UI-008 controls, and invoke the canonical `UILayoutAudit` in the existing nine-tab test while retaining its viewport overflow assertions (Q22).
 - **Files:** `Assets/Game/UI/Services/{UILayoutAudit,ContrastAudit,AllegianceColorCheck}.cs`, `Assets/Game/Tests/PlayMode/UI/UITestPanel.cs`
 - **Acceptance criteria:**
   - [ ] A fixture with a button positioned outside its `.panel` reports `OutsidePanel`; two overlapping `.hud-region`s report `RegionOverlap`; an unwrapped 200-character label in a 100 px box reports `TextOverflow`.
@@ -922,6 +924,8 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 | 19 | KeyHint has an unset ActionPath during UXML construction and no null resolver policy | Empty text until a path is set; reject a missing resolver | Tech lead | Resolved UI-007: constructor adds the shared class; Refresh throws ArgumentNullException for a null resolver, displays empty text for an empty path or null result, and otherwise uses exactly the resolver text. The caller refreshes on binding changes. Component imports belong in Game.tss (§4.8); contrast auditing remains UI-012 as the task explicitly states. |
 
 | 20 | DEV-015 requires a programmatic screen but UIRoot only builds configured UXML | Explicit opt-in CreateView fallback | Tech lead | Resolved by accepted ADR-0049: default null preserves missing-view errors; both view sources use the same navigator, theme and lifetime. |
+| 21 | Control shells leave invalid fractions, maxima, child names, ready state and tab selection defaults unspecified | Preserve supplied number labels; use zero fill for nonpositive maxima, clamp fractions and map nonfinite input to zero. Name children on attachment; ready means an icon with zero cooldown and no disabled/locked state. Empty tabs use −1, nonempty initial tabs select 0 and rebuilds retain valid selection; invalid arguments fail loudly | Tech lead | UI-008 uses these defaults with the existing cached-number range; no per-frame name formatting or new public contract. |
+| 22 | UI-008's required tab test names UILayoutAudit, but frontier UI-012 owns that audit and depends on UI-008 | Validate actual 1280×720 panel bounds, clipping viewport, label widths and scrolling in UI-008; UI-012 adds its canonical audit invocation | Tech lead | Resolved by lead direction 2026-10-13: retain the real panel bounds check with TODO(UI-012), assign the full audit invocation to UI-012 and do not weaken viewport overflow assertions or implement the frontier audit in UI-008. |
 
 ## 11. References
 

@@ -1,0 +1,15 @@
+/* SPEC-60 UI-008. Thin resource bars; theme tokens own every visual value. */
+.meter { position: relative; flex-direction: row; align-items: center; min-height: var(--space-6); padding: var(--space-1) var(--space-2); background-color: var(--color-surface-1); color: var(--color-text); }
+.meter__fill { position: absolute; left: 0; bottom: 0; height: var(--space-1); background-color: var(--color-neutral); }
+.meter__caption { flex-grow: 1; font-size: var(--text-xs); -unity-font-definition: var(--font-display); }
+.meter__value { font-size: var(--text-s); -unity-font-definition: var(--font-mono); }
+.meter__max { margin-left: var(--space-2); font-size: var(--text-xs); -unity-font-definition: var(--font-mono); color: var(--color-text-muted); }
+.meter--hull .meter__fill { background-color: var(--color-hull); }
+.meter--hull .meter__value { color: var(--color-hull); }
+.meter--shield .meter__fill { background-color: var(--color-shield); }
+.meter--shield .meter__value { color: var(--color-shield); }
+.meter--energy .meter__fill { background-color: var(--color-energy); }
+.meter--energy .meter__value { color: var(--color-energy); }
+.meter--neutral .meter__fill { background-color: var(--color-neutral); }
+.meter--low .meter__fill { background-color: var(--color-danger); }
+.meter--low .meter__caption { -unity-font-style: bold; }

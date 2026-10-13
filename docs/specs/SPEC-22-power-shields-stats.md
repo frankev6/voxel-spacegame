@@ -327,6 +327,10 @@ Algorithms (all in grid space, `inv = 1 / radii`):
 - `SurfacePointToward`: `q = (p − center) * inv`; `center + (q / length(q)) * radii`.
 - `Normal`: `normalize((surfacePoint − center) * inv * inv)`.
 
+**Numerical contract (PWR-002, Q11):** inputs are finite grid-space floats, all radii positive, and sphere radius nonnegative. Evaluate offsets, squared lengths and normalization in double; scale all quadratic coefficients by the same positive factor before evaluating the discriminant so finite float inputs cannot overflow it. Keep the `A < 1e-12` threshold in the original normalized ellipsoid space. Misses write `t = 0`; a discriminant of zero counts as a tangent hit. A centre query, outside the documented ray/surface domains, has a deterministic +X extension: the surface point is `center + (radii.x,0,0)` and the normal is `(1,0,0)`. Results are cast to the public float types; a surface position beyond the representable float range may become infinity, but finite valid inputs never produce NaN. Double intermediates prevent overflow; they do not promise an exact intersection classification for geometry below double precision at extreme coordinate/radius ratios.
+
+**Reference march (PWR-002, Q12):** keep 10,000 seeded cases and 1,000 steps. Construct random crossings with normalized perpendicular offset at most 0.5 and endpoints 2–4 radii along opposite directions; construct misses with perpendicular offset 1.25–2, inside starts within 0.5 radii, and zero-length outside segments. These cases are selected before calling `ShieldMath`; no case is filtered by its output. The crossing interval is wider than a march step. Prescribed tangency, endpoint, inside/boundary-start and zero-length cases are checked directly because fixed samples cannot resolve every arbitrarily short crossing or tangent.
+
 ### 4.5 Tuning
 
 ```csharp
@@ -736,6 +740,8 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 | 8 | Should a ship's `InitialMass` survive save/load so `MassFraction` stays meaningful after loading a damaged ship | No for M3: after load `InitialMass` = loaded mass; revisit when SPEC-05 saves ship damage | SPEC-05 |
 | 9 | `ShipStats.MassFraction` as the AI/HUD hull-health measure | Yes (cheap, maintained incrementally by SPEC-12) | SPEC-23 / SPEC-61 |
 | 10 | PWR-001's `PowerDemandGroup.UpdateBefore(PowerAllocationSystem)` names the PWR-005 system before it exists | Defer the redundant group attribute until PWR-005; its already specified `UpdateAfter(PowerDemandGroup)` preserves the same ordering edge. Keep a PWR-005 TODO; do not introduce an allocator stub | Tech lead |
+| 11 | The exact float formulas can overflow or divide by zero despite §6's finite-input no-NaN guarantee | Use double offsets/normalization and a uniformly scaled quadratic; preserve the original 1e-12 threshold and tangent rule, write t=0 on misses and use a deterministic +X centre-query extension. Float output range and extreme-ratio precision limits are explicit in §4.4 | Tech lead |
+| 12 | A 1,000-step march can miss grazing crossings and tangencies | Select the 10,000 seeded random cases independently in the resolvable domains documented in §4.4; check prescribed boundary cases directly. Never filter by implementation outcome | Tech lead |
 
 ## 11. References
 
