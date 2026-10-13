@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5da82250bed548bf93572f7ed4903f21, type: 3}
+  m_Name: body_resource_cache
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.BodyTemplateDefinition
+  id: body_resource_cache
+  formerIds: []
+  displayName: Resource Cache
+  description: 
+  role: 8
+  radiusMinM: 6
+  radiusMaxM: 6
+  visual: {fileID: 11400000, guid: 3220d13f394f5aac9bd5e3e2ce2b611a, type: 2}
+  starClass: 2
+  hasCollider: 1
+  canHaveMoons: 0
+  interaction: 2
+  interactionDistanceM: 150
+  interactPrompt: Inspect
+  storyTag: resource_cache
+  structureSource: 2
+  blueprint: {fileID: 0}
+  shape:
+    kind: 2
+    sizeCells: {x: 12, y: 8, z: 12}
+    wallThicknessCells: 2
+    hullBlock: {fileID: 11400000, guid: dfcc75e2220ed476babe83e285ee98e6, type: 2}
+    coreBlock: {fileID: 11400000, guid: 740a6c99920824c919828525215fa6b2, type: 2}
+    colorIndex: 0
+  destructible: 1
+  t2LoadDistanceM: 6000
+  beltWidthM: 2000
+  sectorSizeM: 500
+  asteroidsPerSectorMin: 2
+  asteroidsPerSectorMax: 6
+  asteroidRadiusMinM: 4
+  asteroidRadiusMaxM: 18
+  asteroidBlock: {fileID: 0}
+  asteroidNoiseAmplitude: 0.25
+  asteroidNoiseFrequency: 0.15

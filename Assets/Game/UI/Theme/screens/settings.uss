@@ -1,0 +1,14 @@
+/* SPEC-61 HUD-005: geometry only; appearance uses the approved NOCTURNE theme. */
+.settings-screen { flex-grow: 1; align-items: center; justify-content: center; }
+.settings-panel { width: 960px; max-width: 90%; height: 720px; max-height: 90%; }
+.settings-body { min-height: 0; flex-shrink: 1; flex-basis: 0; }
+.settings-page { flex-grow: 1; }
+.settings-row { flex-direction: row; align-items: center; min-height: 56px; }
+.settings-label { flex-grow: 1; min-width: 0; white-space: normal; margin-right: var(--space-4); }
+.settings-control { width: 280px; flex-shrink: 0; }
+.settings-note { white-space: normal; margin-top: var(--space-2); }
+.settings-rebinds { height: 300px; min-height: 160px; flex-shrink: 0; margin-top: var(--space-4); }
+.settings-rebind-row { height: 64px; flex-direction: row; align-items: center; }
+.settings-rebind-action { flex-grow: 1; min-width: 0; white-space: normal; }
+.settings-rebind-binding { width: 180px; white-space: normal; margin-right: var(--space-4); }
+.settings-reset { align-self: flex-end; margin-top: var(--space-4); }

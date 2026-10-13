@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 120 | 8 | 0 | 0 | 52 | 0 | 180 | 7 |
+| M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
+| M3 | 112 | 9 | 0 | 0 | 59 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -215,7 +215,7 @@
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 9349e78 | Sparse text recorder/replay; five required tests; even-tick 30/60/144 commands match |
 | TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | done | astra (gpt-6) | 2026-10-12 | 1392d35 | Real Boot/flow fixture; four tests; temp saves/settings and unchanged real profile timestamps |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-12 | a56c266 | Full pipeline: 15-frame readiness, idle 0.224481 ms; total memory performance deferred (Q174); zero tuning |
-| FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  | Await actual galaxy services; SYS-010 partial contract mapping: add Allegiance, real profiles/hooks, supplied StarSystemMember, ulong lookup/despawn adapter and dual service registration; fake tests do not complete runtime |
+| FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Await actual galaxy services; SYS-010 partial contract mapping: add Allegiance, real profiles/hooks, supplied StarSystemMember, ulong lookup/despawn adapter and dual service registration; fake tests do not complete runtime |
 | FND-020 | Playable stationary-target shooting and physical breakup | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-017, FND-018, FLT-001, DMG-001, WPN-001, VFX-001 | yes | done | astra (gpt-6) | 2026-10-12 | 53e61db | Playable station/Space fire; review fixes: bounded integrity, canonical masks, allocation attribution, stronger image checks; default suites green; perf advisory |
 | FND-021 | Automatic aligned test station in World | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-020, SPEC-63 | yes | done | astra (gpt-6) | 2026-10-13 | c3bb396 | Automatic World station at Y=-2 m; idempotent range request; direct World Play verified; spec-required: 1 (existing feature test extended), extra: 0 |
 | FND-022 | Player allegiance in the current world spawn path | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-010, WPN-001 | yes | done | astra (gpt-6) | 2026-10-13 | ff6a2704 | Canonical player allegiance; real-fire check passes; fresh NPC destroyed168/detached15 cells |
@@ -321,16 +321,16 @@
 | AI-015 | Fleet and swarm scenario and performance | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-014 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Recycled combat worker; fleet/swarm scenarios; measurements opt-in advisory |
 | GAL-001 | Public contract types | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | CORE-001, DATA-001, VOX-001, NAR-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 6d49a49 | Galaxy contracts, three required tests; full suites green |
 | GAL-002 | Orbit math | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b41aab2 | Double-precision Kepler position/velocity and period wrapping; full 968 EM /145 PM green |
-| GAL-003 | Definitions, properties and validator | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable combat worker validates galaxy definitions while full combat batch completes |
-| GAL-004 | GalaxyDefBuilder and layout job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-003 | no | todo |  |  |  |  |
-| GAL-005 | Lane graph and galaxy hash | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-004 | no | todo |  |  |  |  |
-| GAL-006 | Star-system content job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-002, GAL-005 | no | todo |  |  |  |  |
-| GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | no | todo |  |  |  |  |
+| GAL-003 | Definitions, properties and validator | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 29aa4c47 | All 24 diagnostics and four in-memory fixtures; clean compile, 48 required cases pass; production content GAL-012 remains |
+| GAL-004 | GalaxyDefBuilder and layout job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-003 | yes | done | astra (gpt-6) | 2026-10-13 | 42ecb93f | Deterministic layout, packing, queries and disposal; five focused checks pass; GAL-005 lanes/hash remain |
+| GAL-005 | Lane graph and galaxy hash | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-004 | yes | done | astra (gpt-6) | 2026-10-13 | 03a6cec6 | Connected lane graph, gate metadata, sorted adjacency and version-one golden; six focused checks pass |
+| GAL-006 | Star-system content job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-002, GAL-005 | yes | done | astra (gpt-6) | 2026-10-13 | e421d5ee | Complete system content generation/hash/ownership; six focused checks pass in0.193s; Q332 capacity guard |
+| GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | yes | todo |  |  |  |  |
 | GAL-008 | GalaxyService, ticker and bridge system | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, FND-001 | no | todo |  |  |  |  |
 | GAL-009 | OriginRebaseSystem | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-001, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | 5bf0a47 | Asynchronous origin capture/rebase/placement and dependent consumers; full 1051 EM /146 PM passed; 5000-root p95 0.2959 ms. |
 | GAL-010 | GLXY save participant | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, PERS-001 | no | todo |  |  |  |  |
 | GAL-011 | Galaxy map model | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-008 | no | todo |  |  |  |  |
-| GAL-012 | M3 galaxy content | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-003, SPEC-72 | no | todo |  |  |  |  |
+| GAL-012 | M3 galaxy content | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-003, SPEC-72 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | 0834c0ea/fb2a61b9 real systems/body assets imported and zero scoped validation errors; three runtime smoke checks pending GAL-008 and lane/logic wiring |
 | GAL-013 | Performance gates | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-005, GAL-006, GAL-009, GAL-011, TST-001 | no | todo |  |  |  |  |
 | SYS-001 | Public contract types | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | CORE-001, DATA-001, GAL-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e738e71 | Streaming contracts and service shells; 2 required tests; full batch green |
 | SYS-002 | Streaming config and boot singleton | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 7244be6 | Config validation/factory, boot singleton and catalog asset; 2 required tests; full suites green |
@@ -347,7 +347,7 @@
 | SYS-013 | Jump integration hooks | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006, SYS-008 | no | todo |  |  |  |  |
 | SYS-014 | World gates: streaming performance and soak | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-007, SYS-013, TST-001 | no | todo |  |  |  |  |
 | TRV-001 | Public contract types | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, FLT-001, NAR-001, AUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a68c988 | Canonical travel contracts and staged watcher API; 2 required tests; runtime travel remains later tasks |
-| TRV-002 | Travel config definition and validator | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-04, SPEC-72 | no | todo |  |  |  |  |
+| TRV-002 | Travel config definition and validator | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-04, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 5a436d86 | 19 required checks pass; real shipped travel content zero errors, GAL-012 gates32m satisfy geometry |
 | TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, SPEC-30, SPEC-40 | no | todo |  |  |  |  |
 | TRV-004 | Route planner | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-30 | no | todo |  |  |  |  |
 | TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-30 | no | todo |  |  |  |  |
@@ -367,7 +367,7 @@
 | ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SPEC-31, SPEC-32, SPEC-23 | no | todo |  |  |  |  |
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | no | todo |  |  |  |  |
 | ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, SPEC-40 | no | todo |  |  |  |  |
-| ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | no | todo |  |  |  | partial in ENC-002: locked player faction prerequisite / remaining factions, encounters and canonical ARK ownership open |
+| ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | cdf292d6 | Ten canonical encounters, six factions, real ARK/Whisper ownership; generation/rerun zero errors, two required checks pass |
 | ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | no | todo |  |  |  |  |
 | ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-009, SPEC-70 | no | todo |  |  |  |  |
 | NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | e39b2d3 | Narrative contracts and precise future-task stubs; 2 required tests; full batch 901 EM / 128 PM, zero failures |
@@ -419,7 +419,7 @@
 | ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | yes | todo |  |  |  |  |
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, SPEC-13, SPEC-31, SPEC-12 | no | todo |  |  |  |  |
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
-| ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | no | todo |  |  |  | partial in ECO-002: canonical resource_scrap generation prepared / execution and remaining narrative, loot and merchant content pending |
+| ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | partial in ECO-002: canonical resource_scrap generation prepared / execution and remaining narrative, loot and merchant content pending |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
 | EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 9c627fd | Editor contracts/config; 4 required tests; runtime tools remain EDT-002 onward |
 | EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | todo |  |  |  |  |
@@ -454,9 +454,9 @@
 | HUD-001 | Public contract types | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | UI-001, CORE-001, CAM-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | a983d88 | Screen/VM/snapshot contracts; static notification lifetime fix f847997; 3 required tests; full batch 901 EM / 128 PM, zero failures |
 | HUD-002 | UI composition, screen registration and root switching | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, UI-001, UI-002, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead composition/root/session infrastructure under ADR-0072; preserve existing playable menu/pause/flight |
 | HUD-003 | Main menu and new game | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: menu view and service-backed presenter with name prompt/continue/quit / composition hookup and layout acceptance remain |
-| HUD-004 | Save and load slots | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, PERS-002, PERS-005, PERS-006, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Presentation worker: save/load UI; shared HUD-002 production hookup required |
-| HUD-005 | Settings screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
-| HUD-006 | Pause screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: authored pause view and service-backed presenter/save eligibility/confirmation / composition hookup, key hints and acceptance remain |
+| HUD-004 | Save and load slots | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, PERS-002, PERS-005, PERS-006, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | a8d00e7a/9e5db398: view + persistent composition; 5 required screen and4 boot checks pass; session-race review repaired b05b62f; visible menu routing pending |
+| HUD-005 | Settings screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, UI-012, UI-013, FND-004, INP-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Presentation worker next after bounded HUD-004 review; ADR-0072/Q327 construction split, lead owns actual navigation |
+| HUD-006 | Pause screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: authored pause view and service-backed presenter/save eligibility/confirmation / pause composition hookup authored / key hints and acceptance remain |
 | HUD-007 | Flight HUD view and layout | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: view-model binding and Esc-to-pause route / HUD layout, data integration and acceptance remain |
 | HUD-008 | HudSnapshotSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, PWR-001, WPN-001, ABL-001, SYS-001, GAL-001, FLT-001, VOX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 13c85bbd | Review repairs complete: duplicate players, frozen hulk meters and interactable-body radar; nine focused checks pass |
 | HUD-009 | HudSyncSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-008, HUD-007, TRV-001, ENC-001 | no | todo |  |  |  |  |
@@ -485,7 +485,7 @@
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
 | MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e9d50f3c | Three exact factions generated; duplicate skipped, player/AI ownership preserved; rerun byte/GUID/manifest stable |
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3d65849 | Protected ordered loot assets/catalog; rerun byte-identical; 1 required and 1 migration-safety test |
-| MIG-014 | Body template stubs | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-004, GAL-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Dispatched to reusable presentation worker; lead owns generation and Unity validation |
+| MIG-014 | Body template stubs | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-004, GAL-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | e01dcf3f | Twenty generated body stubs; protected writer cbc6029b; required test passes; byte/GUID-stable rerun; Q328 |
 | MIG-015 | Hand-off package | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-002, MIG-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 5241ee5 | Typed legacy handoff metadata; spec-required: 3, extra: 0 |
 | INP-008 | Gamepad scheme | [SPEC-03](specs/SPEC-03-input.md) | M4 | standard | INP-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 33e24c3 | Gamepad bindings/device labels/aim; hardware feel untested; spec-required: 2, extra: 0 |
 | REN-015 | LOD2 grid proxies | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M4 | frontier | REN-012 | yes | todo |  |  |  |  |
@@ -911,6 +911,17 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 318 | SPEC-40 Q19: legacy translation boundary and defaults | Resolved: retain source metadata for emission; decimal cumulative thresholds, source-ordered quest logs, canonical provisional journal labels and contextual item mappings. No runtime/asset emission in NAR-014. | Tech lead |
 | 319 | SPEC-61 Q23: save/load construction versus composition cycle | Resolved: explicit completed UI/save/flow prerequisites allow parallel source construction; shared production hookup and full functional/layout acceptance remain required. ADR-0072 amended. | Tech lead |
 | 320 | SPEC-60 Q30: layout audit scroll/measurement semantics | Resolved: exclude scroll content subtree but audit viewport; use intrinsic nowrap width, clear result list and check all containing panels. Functional acceptance pending. | Tech lead |
+| 333 | SPEC-32 Q12: travel validation and geometry dependencies | Resolved: scoped field errors precede geometry checks; inclusive blueprint bounds and voxel shape radius use double arithmetic, shipped gates validated against real content. | Tech lead |
+| 334 | SPEC-33 Q24: legacy first formation conflicts with final encounter table | Resolved: retain/report original formation and explicit replacement diagnostics; authored ENC-010 composition table governs final fleets, real assets required. | Tech lead |
+| 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
+
+| 331 | SPEC-61 Q28: settings binding and lifecycle | Resolved: real Apply/Flush persistence, binding-index rows, owned rebind cancellation on cover/unbind and persistent app composition. Visible menu/pause navigation still required for closure. | Tech lead |
+| 330 | SPEC-61 Q27: fast PlayMode rebind fixture | Resolved ADR-0074: existing InputSystem test framework reference permitted for PlayMode; direct clock advance with state restoration. | Tech lead |
+| 329 | SPEC-02 Q17 / SPEC-61 Q26: persisted camera orientation | Resolved ADR-0073: additive Controls byte with legacy default0, real app mapping and settings binding; implementation in HUD-005. | Tech lead |
+| 328 | SPEC-72 Q45: body-stub field ownership | Resolved: preserve non-owned authored fields and object name even on forced refresh; exact twenty-stub acceptance is independent of downstream GAL-012. | Tech lead |
+| 327 | SPEC-61 Q25: settings destination/composition cycle | Resolved via ADR-0072: construct against completed settings/input/UI services; real navigation/lifetime and five checks still required before closure. | Tech lead |
+| 326 | SPEC-61 Q24: named save API and presenter lifecycle | Resolved: SaveService.SaveAsync preserves names and owning safety checks; flow loads; persistent composition owns register/bind/tick/session rebind/dispose. Five screen checks and reachable production navigation remain required. | Tech lead |
+
 | 325 | SPEC-40 Q22: missing production beat placement assets | Resolved: strict no-write preflight until GAL-012/ENC-010 supply starsys_whisper and encounter_traveling_merchant; fixture references only in tests. NAR-015 stays open. | Tech lead |
 | 324 | SPEC-60 Q32: stale accessibility font-size example | Resolved: use approved 16px body token, 21px at130%; preserve theme and factor-based checks. | Tech lead |
 | 323 | SPEC-40 Q21 / SPEC-41 Q10: contradictory narrative rule provider order | Resolved: dialog10, quest20, mystery30 using numeric sorting; runtime system order unchanged. | Tech lead |
@@ -1027,6 +1038,116 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — TRV-002 and ENC-010 accepted; GAL-012 content integrated — astra (gpt-6)
+
+- TRV-00202695845/d14b6b59/5a436d86 implements defaults, field/database validation and real config. All19 required cases pass, including shipped content; GAL-012 gates use32m radii, containing29.12m shape extent. Test count: spec-required: 19, extra: 0. Q333 mirrors SPEC32Q12.
+- ENC-010a8d4d49c/cdf292d6 supplies fleet converter, ten canonical encounters, six factions and ARK/Whisper ownership. Generation and byte/GUID-preserving rerun report zero errors/warnings; both required migration checks pass. Initial recipe's EditorJsonUtility comparison falsely flagged fields; durable asset diff showed only intended ownership changes, recipe now compares saved fields excluding ownership. Test count: spec-required: 2, extra: 0. Q334 resolves first-formation/authored-table conflict with retained diagnostics.
+- GAL-0120834c0ea imports three real systems, two lanes and completed body templates with zero world/TRV validation errors. First focused batch20pass/1fail exposed missing null managed-reference metadata in galaxy_main; fb2a61b9 fixes asset and reproducer using Unity-authored null-reference format. No assertions suppressed. Three gameplay smoke checks remain pending GAL-008 and production lane/logic; task remains in-progress. Test count: spec-required: 3 pending, extra: 0.
+- Combined compile29092 clean, zero CS warnings; focused32137 exited0 with21passed/zero failed/skipped in2.6436067s. Evidence `Logs/playtest/m3-content-batch/{compile.log,first.xml,acceptance.xml}`, `enc010/{generation.txt,rerun.txt}`, `gal012-content/{validation.txt,readback.txt}`. Temporary Editor jobs removed. No active Unity process; unrelated QualitySettings excluded.
+- Existing workers: ECO-009216 and FND-012179 active; combat GAL-012 review complete203 and preparing NAR-016 while explicitly waiting for NAR-015 acceptance. Lead must complete preserved narrative generation and GAL-007/008; no extra review loops. Previous goal turn merged settings and recycled workers (progress).
+
+### 2026-10-13 — Settings checkpoint merged, workers recycled — astra (gpt-6)
+
+- Settings/pause compiled checkpoint and accepted five-case repair merged locally to main89816018; production root/menu acceptance remains open. ECO-009 claimedb1c96474 and FND-012 claimed3582c4c0, dispatched to existing power/presentation workers. Combat worker reviews delivered GAL-0128dc89fbc; no duplicate threads. Test count: spec-required: 5 accepted above, extra: 0; no additional Unity run.
+- Ledger sync and documentation checks clean. No active Unity operation; unrelated QualitySettings delta and orphan test-folder metadata remain excluded. Lead next integrates world/travel/encounter deliveries and implements GAL-007/008 needed for real campaign generation. Previous turn made settings acceptance and local integration progress.
+
+### 2026-10-13 — HUD-005 settings repair accepted, navigation checkpoint — astra (gpt-6)
+
+- 608141f integrates queued-input processing before direct fixture clock advancement. Compile95492 clean with zero CS warnings; focused headless19638 exited0, five passed/zero failed/skipped in1.3473552s test execution. Evidence `Logs/playtest/settings-screen/{compile-repaired.log,acceptance-repaired.xml}`. Test count: spec-required: 5, extra: 0. No broad suite or performance run.
+- Real pause routes and stale-session guards are compiled; screen tests pass. HUD-005 stays in-progress for full production navigation acceptance; HUD-002 root installation and HUD-006 acceptance remain separate. No live gameplay claim. Unity is closed, no active validation.
+- GAL-0128dc89fbc, ENC-010248f274c and TRV-0024fed054f/dd9f3fec/5de6da14 await content integration. ECO-009 claimed on main and dispatched to the same power worker. Previous turn reconciled settings branch and applied fast-fixture policy (progress).
+
+### 2026-10-13 — GAL-006 accepted — astra (gpt-6)
+
+- e421d5ee verifies6bc17a47/fcd27c85: authored/procedural bodies, fixed draw order, per-pool max counts, moon parents, separated stations/gates, deterministic hashes and100 regenerations. Compile6163 clean; fresh headless88933 six passed/zero failed/skipped in0.1929481s test execution. Test count: spec-required: 6, extra: 0. Evidence `Logs/playtest/system-content/{compile.log,acceptance.xml}`.
+- Live80985 stalled before results; process sample proved native SaveModifiedScenesIfUserWantsTo dialog, not generation work. CLI cancel80140/exit82018 could not reach blocked Editor; terminated test Editor17922 with TERM, confirmed exited and all handles terminal before headless run. Evidence editor-sample.txt/aborted-editor.json. Do not reuse this failed live run as passing evidence. No Editor remains open.
+- Worker HUD005 repair a03ac074 ready; TRV0024fed054f/dd9f3fec delivered175 and bounded review dispatched. GAL012199/ENC010211 active. Previous turn implemented procedural job (progress).
+
+### 2026-10-13 — GAL-006 procedural job checkpoint — astra (gpt-6)
+
+- Procedural planet/moon/belt/station/POI generation and scheduled content wrapper authored: maximum-count draws, per-entry pool usage, bounded fixed placement, ring gates, sorted keys, truncation flag, generated hash and exception cleanup. Six required checks remain; no compile/test run yet. Test count: spec-required: 6 pending, extra: 0.
+- SPEC30Q32/ledger332 makes ushort lane overflow an explicit pre-schedule failure rather than corrupt identity or missing gates. HUD005 repair a03ac074 delivered; presentation resumes TRV002. Worker snapshots198/210/174 active. Previous turn implemented authored body/hash foundation (progress).
+
+### 2026-10-13 — GAL-006 body foundation checkpoint — astra (gpt-6)
+
+- Claimed3dc7cc6a; implemented content binary lookup/disposal, explicit declaration-order body hash excluding mutable state, fixed five-draw body streams, authored orbit/parent/radius transfer, extent calculation and bounded arc-separated gate placement. Procedural counts/bodies, scheduled wrapper and six required checks remain; no compile/acceptance claim. Test count: spec-required: 6 pending, extra: 0.
+- Existing workers GAL012197/ENC010209/HUD005 repair173 active; repair worker preserved TRV002 before switching. Settings integration remains on dbe07d59; main belt repair6c89f0b0 is retained. Previous turn repaired pause session intents (progress).
+
+### 2026-10-13 — Boot correction on main, settings checkpoint preserved — astra (gpt-6)
+
+- Applied canonical belt block correction6c89f0b0 to main independently of unfinished settings. Settings/pause navigation and session guards preserved on task/HUD-005-settings-integration dbe07d59; rebind repair/accepted checks and complete main-menu navigation remain. No active validation or repeated test run. Test count: existing spec-required acceptance pending, extra: 0.
+
+### 2026-10-13 — HUD-002 pause session guard — astra (gpt-6)
+
+- Pause presenter now invalidates old confirmation callbacks when unbound during session reset and suppresses stale completion notifications while still consuming owned completions. Commands require a bound presenter. Changes remain pending combined settings/pause validation; no extra run. Test count: existing spec-required acceptance pending, extra: 0.
+- Worker snapshots GAL012196/ENC010208/TRV002172 live; HUD005 bounded repair still requested. Previous turn connected real pause destinations (progress).
+
+### 2026-10-13 — HUD-002 pause navigation integration — astra (gpt-6)
+
+- App composition now creates/binds the real PausePresenter/View with SaveSlots and Settings routes. Temporary flight/editor root Back opens PauseView; bridge no longer registers the obsolete resume-only modal. Menu setup reuses the same pause ownership. Full HUD/editor roots and main-menu destination remain open.
+- Changes authored, not yet compiled/live-verified; combine validation with pending HUD-005 rebind repair. No repeated test run. Test count: spec-required: existing HUD-002/005/006 acceptance pending, extra: 0. Previous turn integrated settings and fixed belt boot validation (progress).
+
+### 2026-10-13 — HUD-005 integration and boot repair — astra (gpt-6)
+
+- Integrated04cf34fd/9dfc8bc settings delivery/rebind-cover repair; composition owns register/bind/session rebind/dispose. Compile91761 clean after qualifying a test namespace ambiguity. Q331 mirrors SPEC61Q28. HUD-005 remains in-progress: real menu/pause routing and accepted checks remain.
+- Boot rejected MIG-014 belt stub under GAL-E016; supplied canonical block_hull in d289f13f, matching GAL-012 worker choice. No validator weakening. First stalled test cancelled (89902 terminal); second45272 rejected duplicated result identities. Raw summary3passed2failed in1.01s, rebind Escape line119 and completion line135; no accepted XML. Evidence settings-screen/aborted-boot.json and rebind-failures.json. Test count: spec-required: 5, extra: 0. Worker repairs bounded issues, then resumes TRV-002.
+- No active validation; font side effects backed up/restored, original QualitySettings excluded. Previous turn accepted GAL-005 and assigned TRV-002 (progress).
+
+### 2026-10-13 — GAL-005 accepted — astra (gpt-6)
+
+- 03a6cec6 integrates authored gate metadata (including endpoint override swaps), lane job, neighbour-sorted adjacency and canonical hash D69B969F976A94B9 for Small/version1. Connectivity passes Small/Large/Disconnected.
+- Compile91840 clean; focused11914 four lane checks and12009 two hash checks pass. Initial combined filter matched nothing; no run accepted. Initial lane check3/1 exposed a fixture counting post-extra bridge exceptions against the earlier extra-lane cap; dense connected fixture isolates that rule, separate disconnected connectivity retained. Evidence `Logs/playtest/galaxy-lanes/{compile.log,lanes-first.xml,lanes.xml,hash.xml}`. Test count: spec-required: 6, extra: 0. No broad suite or benchmark.
+- HUD-005 repair114e6713 queued; presentation prepares ready TRV-002. GAL-012193/ENC-010205 active. Previous turn implemented lane/hash algorithms (progress).
+
+### 2026-10-13 — GAL-005 lane job checkpoint — astra (gpt-6)
+
+- Authored spatial candidate gathering, deterministic Kruskal forest, seeded extra lanes, disconnected-component bridges and canonical pair sorting; union-find and explicit little-endian galaxy hash serializer. Builder hookup/gate metadata/adjacency and golden acceptance remain. No Unity run yet. Test count: spec-required: 6 pending, extra: 0.
+- HUD-005 delivered366615a9; same worker assigned bounded review while lead integrates generation. GAL-012/ENC-010 continue. Previous turn completed GAL-004 (progress).
+
+### 2026-10-13 — GAL-004 accepted — astra (gpt-6)
+
+- 42ecb93f completes managed content transfer, persistent arrays, scheduled deterministic layout, sorted ID index and exception cleanup, following87d13854/e78a7578 placement/packing/query work. GAL-005 lane graph, adjacency and hash remain explicitly marked TODO.
+- Initial compile exposed readonly using-array writes and a missing ValidationReport context; corrected before acceptance. Compile91964 clean, zero CS warnings; focused57816 five passed/zero failed/skipped, including bytewise repeatability at worker1/max and leak detection. Evidence `Logs/playtest/galaxy-layout/{compile.log,acceptance.xml}`. Test count: spec-required: 5, extra: 0. No broad suite or benchmark.
+- Workers active GAL-012191, ENC-010204, HUD-005168. Previous turn completed packing/query implementation (progress).
+
+### 2026-10-13 — GAL-004 packing and ownership checkpoint — astra (gpt-6)
+
+- Implemented definition parameter/pool packing in specified order, authored moon parent slots/subslots and sorted keys, GalaxyDef queries and native ownership disposal. Builder orchestration and five required checks remain; uncompiled checkpoint, no acceptance claim. Test count: spec-required: 5 pending, extra: 0.
+- ADR-0074/SPEC61Q27/ledger330 permits the existing Input System test framework in PlayMode to shorten the required real rebind test. Existing worker continues implementation; no new worker or Unity run. Previous turn implemented layout (progress).
+
+### 2026-10-13 — GAL-004 implementation checkpoint — astra (gpt-6)
+
+- Ordered Burst layout job and weighted pool selection authored: spatial rejection grid, fixed per-attempt/per-system draws, sorted structural IDs and skipped count. Builder and GalaxyDef lifetime/query integration remain. No compile/test run yet; validate once the compatible implementation is complete.
+- Test count: spec-required: 5 pending, extra: 0. Three existing workers continue GAL-012, ENC-010 and HUD-005; ADR-0073 resolves the real persisted camera-setting gap for HUD-005. Previous goal turn completed GAL-003 (progress).
+
+### 2026-10-13 — GAL-003 accepted — astra (gpt-6)
+
+- Reviewed 29aa4c47: local definition and catalog validation, all21 error/three warning codes and four valid in-memory fixtures. Fixed collision IDs avoid fixture search overhead.
+- Compile99024 clean, zero CS warnings; focused13010:48 passed, zero failed/skipped. Evidence `Logs/playtest/galaxy-validator/{compile.log,acceptance.xml}`. Test count: spec-required: 48, extra: 0. No broad run or performance gate.
+- GAL-004 layout and GAL-012 actual content now unlocked; existing TRV-003 compiler remains explicitly unfinished. ENC-010 assigned to existing power worker; HUD-005 continues. Previous goal turn completed MIG-014 (progress).
+
+### 2026-10-13 — MIG-014 accepted — astra (gpt-6)
+
+- Reviewed converter cbc6029b; generated twenty canonical stubs, catalog references and migration hashes in e01dcf3f. Generation/rerun: zero errors, zero warnings; byte and GUID stability verified. Temporary editor job removed.
+- Compile clean with zero CS warnings; focused BodyTemplateConverterTests: one passed, zero failed, 2.71s total reported test duration. Evidence `Logs/playtest/mig014/{compile.log,acceptance.xml,targeted-generation.txt,targeted-rerun.txt}`. No full suite, benchmark or soak. Test count: spec-required: 1, extra: 0.
+- Q328/SPEC-72 Q45 records field preservation. Production world resources remain GAL-012; unrelated QualitySettings excluded. Fast-fixture owner guidance remains in testing/handoff/worker dispatch.
+
+### 2026-10-13 — Save session race repaired — astra (gpt-6)
+
+- HUD-004b05b62f guards pending confirmations and completion UI by generation/profile; actual composition calls ResetSession while retaining the model. Old results are consumed without closing/erroring into a newer session.
+- Compile52462 clean, focused78374 five passed, including added race assertions within existing required cases. Evidence `Logs/playtest/save-slots/{compile-session-repair.log,session-repair.xml}`. Test count: spec-required: 5, extra: 0. No unrelated reruns; fonts restored. Visible menu routing remains HUD-002 integration work.
+
+### 2026-10-13 — Galaxy delivery hold corrected — astra (gpt-6)
+
+- Re-read GAL-003 and MIG-014 acceptance: production galaxy content is outside their closure criteria. Earlier whole-content hold is superseded by ADR-0070 scoped verification, without relaxing any validator. Existing workers reconcile deliveries; lead will verify validator fixtures and generate20 required stubs, then dispatch unlocked content work.
+- HUD-004 bounded review found stale-session completion UI behavior; repair pending before HUD-005 construction. No new tests or Unity runs in this coordination turn (spec-required: 0, extra: 0).
+
+### 2026-10-13 — Save screen integration verified — astra (gpt-6)
+
+- HUD-004a8d00e7a +9e5db398 supplies real slot operations/confirmations, virtualized screen and persistent composition lifetime. Compile35034 clean, focused60326 five required screen checks passed;56386 four existing boot ownership checks passed. Evidence `Logs/playtest/save-slots/{compile.log,acceptance.xml,boot.xml}`.
+- Test count: spec-required: 5 plus4 existing boot checks, extra: 0. No broad suite or benchmark; dynamic fonts backed up/restored.
+- HUD-004 stays in-progress: worker review161 active and reachable menu/pause routing depends on remaining HUD-002 bindings. No claim that visible navigation is complete.
 
 ### 2026-10-13 — Dialogue converter functional checks passed — astra (gpt-6)
 

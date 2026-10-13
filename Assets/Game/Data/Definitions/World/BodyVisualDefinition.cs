@@ -27,11 +27,12 @@ namespace Game.Data.Definitions
         public UnityEngine.Sprite MapIcon => mapIcon;
         public string MapColorToken => mapColorToken;
 
-        // TODO(GAL-003): validate the authored world fields and cross-content references.
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
             base.Validate(scope, context);
-            throw new System.NotImplementedException("GAL-003");
+            WorldDefinitionValidation.Require(scope, "GAL-E020", nameof(meshRadius), float.IsFinite(meshRadius) && meshRadius > 0, "Mesh radius must be finite and positive.");
+            WorldDefinitionValidation.Require(scope, "GAL-E020", nameof(mesh), mesh != null, "Body visual requires a mesh.");
+            WorldDefinitionValidation.Require(scope, "GAL-E020", nameof(material), material != null, "Body visual requires a shared material.");
         }
     }
 }

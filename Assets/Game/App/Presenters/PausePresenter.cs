@@ -20,6 +20,7 @@ namespace Game.App.Presenters
         readonly Action showSettings;
         Awaitable<FlowResult> pending;
         bool bound, disposed;
+        uint generation, operationGeneration;
         internal PausePresenter(UIRoot ui, PauseViewModel model, IGameFlow flow,
             Action<SaveSlotsMode> showSlots, Action showSettings)
         {
@@ -40,7 +41,7 @@ namespace Game.App.Presenters
         internal void Unbind()
         {
             if (!bound) return;
-            bound = false;
+            bound = false; generation++;
             ui.Navigator.StackChanged -= OnStackChanged;
         }
         void OnStackChanged() { if (ui.Navigator.Top is PauseView) Refresh(); }
@@ -59,7 +60,7 @@ namespace Game.App.Presenters
                 _ => "Saving is unavailable."
             };
         }
-        bool CanAct => !disposed && pending == null && !flow.IsTransitioning;
+        bool CanAct => bound && !disposed && pending == null && !flow.IsTransitioning;
         public void Resume() { if (CanAct) ui.Navigator.Pop(ui.Navigator.Get<PauseView>()); }
         public void Save()
         {
@@ -74,7 +75,11 @@ namespace Game.App.Presenters
             if (!CanAct) return;
             Confirm("Main menu", "Save and return to the main menu?", "Main menu", () =>
             {
-                if (CanAct) pending = flow.QuitToMainMenuAsync(saveFirst: true);
+                if (CanAct)
+                {
+                    operationGeneration = generation;
+                    pending = flow.QuitToMainMenuAsync(saveFirst: true);
+                }
             });
         }
         public void Quit()
@@ -83,6 +88,7 @@ namespace Game.App.Presenters
         }
         void Confirm(string title, string body, string accept, Action action)
         {
+            uint version = generation;
             ui.Confirm.Show(new ConfirmRequest
             {
                 Title = title, Body = body, CancelIndex = 1, DefaultFocusIndex = 1,
@@ -91,7 +97,7 @@ namespace Game.App.Presenters
                     new ConfirmOption { Label = accept, Enabled = true, Variant = ButtonVariant.Danger },
                     new ConfirmOption { Label = "Cancel", Enabled = true, Variant = ButtonVariant.Secondary }
                 }
-            }, choice => { if (!disposed && choice == 0) action(); });
+            }, choice => { if (bound && !disposed && version == generation && choice == 0) action(); });
         }
         internal void Tick()
         {
@@ -104,13 +110,14 @@ namespace Game.App.Presenters
             try
             {
                 var result = awaiter.GetResult();
-                if (result != FlowResult.Ok)
+                if (bound && operationGeneration == generation && result != FlowResult.Ok)
                     ui.Notifications.Post(new Notification { Kind = NotificationKind.Danger, Label = "Unable to return to the main menu: " + result });
             }
             catch (Exception error)
             {
                 GameLog.Exception(LogCategories.Flow, error, "Pause menu operation");
-                ui.Notifications.Post(new Notification { Kind = NotificationKind.Danger, Label = "Unable to return to the main menu." });
+                if (bound && operationGeneration == generation)
+                    ui.Notifications.Post(new Notification { Kind = NotificationKind.Danger, Label = "Unable to return to the main menu." });
             }
         }
         public void Dispose()
@@ -118,6 +125,6 @@ namespace Game.App.Presenters
             if (disposed) return;
             Unbind(); disposed = true; pending = null;
         }
-        // TODO(HUD-006): composition hookup, key hints and required acceptance.
+        // TODO(HUD-006): key hints and required acceptance.
     }
 }

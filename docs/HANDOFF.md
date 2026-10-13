@@ -31,7 +31,25 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **World/travel/encounter content integrated:** TRV-002 and ENC-010 accepted,21 focused checks pass2.64s and clean compile. Three authored systems/body templates validate; GAL-012 runtime acceptance awaits GAL-008/lane logic. ECO-009/FND-012 workers active; combat prepares NAR-016 with explicit dependency wait. No active Unity operation. Next lead: preserved NAR-015 real generation and GAL-007/008.
+
+- **Settings checks accepted:**608141f compile clean, five focused checks pass in1.35s; real pause routes compiled. Production menu/root integration remains open. No Unity process active. Next integrate delivered world/travel/encounter content; ECO-009 dispatched, FND-012 dependency review underway.
+
+- **System generation accepted:** GAL-006e421d5ee generates authored/procedural bodies and gates with deterministic hashes; six focused checks pass in0.193s, compile clean. Live Editor save-scene dialog required closing it; fresh headless run accepted, Editor currently closed. Next state/delta/service integration remains; settings repair and travel configuration deliveries are queued.
+
+- **Settings/pause integration pending acceptance:** settings04cf34fd/9dfc8bc and composition2b8df45a compile; two rebind failures need repair (raw runner results duplicated, no accepted XML). Real pause routes to save/load/settings are now authored, awaiting combined validation. Belt boot rejection repaired d289f13f using canonical block_hull. Full menu/HUD/editor roots remain incomplete; no new playable acceptance claim.
+
+- **Galaxy lanes accepted:** GAL-00503a6cec6 connects systems, preserves authored gates, builds sorted adjacency and freezes version1 hash; six focused checks pass and compile clean. Per-system bodies/service remain next generation work. Settings delivery plus review fix await lead integration; world/encounter workers continue.
+
+- **Galaxy layout accepted:** GAL-00442ecb93f builds deterministic persistent system layout and authored body parameters; clean compile, five focused checks pass. Lane graph/hash are GAL-005 next; world gameplay service is not yet implemented. Three workers continue real world/encounter content and settings.
+
+- **World generation underway:** GAL-00329aa4c47 accepted with clean compile and48 focused checks; GAL-004 lead layout checkpoint is unvalidated, builder/lifetime/tests remain. Workers now author actual GAL-012 world content, ENC-010 encounters and HUD-005 settings. ADR-0073 supplies missing persistent camera orientation contract. No broad suite or benchmark.
+
+- **Body migration accepted:** MIG-014 e01dcf3f supplies twenty canonical stubs with stable GUIDs/bytes; clean compile and one focused check passed (2.71s reported suite duration). GAL-003 a1d48092 is delivered for scoped review; HUD-005 continues. Real world authoring remains GAL-012. Fast test fixtures and focused batch checks remain mandatory.
+
 - **UI composition checkpoint:** compiled50fc418a/57ad0950 is on local main, still HUD-002 in-progress: persistent15 view models, loading/menu/pause views/presenters and root lifecycle exist; Boot continues using the playable M1 adapter until real destinations/editor are connected. No UI acceptance claim. Workers now build NAR-013 validator, NAR-020 watcher and HUD-004 save/load (claim93cfef3d); ADR-0072Q23 separates screen construction from shared final integration. Compile zero CS warnings; no broad tests.
+
+- **Galaxy sequencing correction:** GAL-003 validators and MIG-014 body stubs are being reconciled on current main by the existing workers. Close on their exact scoped acceptance; do not hold them behind production GAL-012 assets or unrelated TRV-003 narrative validation. The previous whole-content hold was overbroad. This unlocks the real star-system/encounter definitions needed by NAR-015. HUD-004 screen/boot checks pass but navigation remains; HUD-005 construction is now assigned under ADR-0072.
 
 - **Accessibility complete:** UI-013e3fa8660 applies saved UI/text scale and reduced motion to the real UI root. Clean compile, one EditMode and four PlayMode cases pass, including 130% gallery text and immediate toast exit. HUD-004 is active; NAR-015 asset writing remains lead work.
 

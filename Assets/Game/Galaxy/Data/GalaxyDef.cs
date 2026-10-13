@@ -8,7 +8,7 @@ namespace Game.Galaxy.Data
     {
         public ulong Seed { get; }
         public int GeneratorVersion { get; }
-        public ulong Hash { get; }                                       // GalaxyHash.Compute, §5.4
+        public ulong Hash { get; internal set; }                                       // GalaxyHash.Compute, §5.4
         public Unity.Collections.NativeArray<StarSystemDef> StarSystems; // sorted by Id.Value ascending
         public Unity.Collections.NativeArray<LaneDef> Lanes;             // sorted by (A.Value, B.Value)
         public Unity.Collections.NativeArray<int> Adjacency;             // lane indices; per star system sorted by neighbour Id.Value
@@ -25,15 +25,86 @@ namespace Game.Galaxy.Data
         public StarSystemId StartStarSystem { get; }
 
         public Unity.Collections.NativeArray<WeightedIndex> PoolEntries;
+        public int SkippedProceduralCount { get; internal set; }
 
-        public bool TryGetIndex(StarSystemId id, out int index) => throw new System.NotImplementedException("GAL-004");
-        public ref readonly StarSystemDef Get(StarSystemId id) => throw new System.NotImplementedException("GAL-004");          // KeyNotFoundException if absent
-        public int LaneCountOf(StarSystemId id) => throw new System.NotImplementedException("GAL-004");
-        public int LaneIndexOf(StarSystemId id, int adjacencySlot) => throw new System.NotImplementedException("GAL-004");      // 0 ≤ adjacencySlot < LaneCount
-        public static StarSystemId Neighbour(in LaneDef lane, StarSystemId self) => throw new System.NotImplementedException("GAL-004"); // the other end
-        public bool TryFindLane(StarSystemId a, StarSystemId b, out int laneIndex) => throw new System.NotImplementedException("GAL-004");
-        public ushort BodyTemplateIndexOf(BodyTemplateDefinition def) => throw new System.NotImplementedException("GAL-004");  // NoIndex if not in BodyTemplates
-        public void Dispose() => throw new System.NotImplementedException("GAL-004");                                           // safe to call twice
-        // TODO(GAL-004): implement the behavior specified by SPEC-30.
+        internal GalaxyDef(ulong seed, int version,
+            System.Collections.Generic.IReadOnlyList<StarSystemTemplateDefinition> templates,
+            System.Collections.Generic.IReadOnlyList<AuthoredStarSystemDefinition> authored,
+            System.Collections.Generic.IReadOnlyList<BodyTemplateDefinition> bodies, StarSystemId start)
+        {
+            Seed = seed; GeneratorVersion = version; Templates = templates; Authored = authored;
+            BodyTemplates = bodies; StartStarSystem = start;
+            LaneGates = new System.Collections.Generic.List<LaneGateSpec>();
+        }
+
+        public bool TryGetIndex(StarSystemId id, out int index)
+        {
+            index = -1;
+            return IndexById.IsCreated && IndexById.TryGetValue(id.Value, out index);
+        }
+
+        public unsafe ref readonly StarSystemDef Get(StarSystemId id)
+        {
+            if (!TryGetIndex(id, out int index)) throw new System.Collections.Generic.KeyNotFoundException(id.ToString());
+            return ref Unity.Collections.LowLevel.Unsafe.UnsafeUtility.ArrayElementAsRef<StarSystemDef>(
+                Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(StarSystems), index);
+        }
+
+        public int LaneCountOf(StarSystemId id) => Get(id).LaneCount;
+
+        public int LaneIndexOf(StarSystemId id, int adjacencySlot)
+        {
+            ref readonly var system = ref Get(id);
+            if ((uint)adjacencySlot >= system.LaneCount) throw new System.ArgumentOutOfRangeException(nameof(adjacencySlot));
+            return Adjacency[system.FirstAdjacency + adjacencySlot];
+        }
+
+        public static StarSystemId Neighbour(in LaneDef lane, StarSystemId self)
+        {
+            if (lane.A.Equals(self)) return lane.B;
+            if (lane.B.Equals(self)) return lane.A;
+            throw new System.ArgumentException("Star system is not an endpoint of this lane.", nameof(self));
+        }
+
+        public bool TryFindLane(StarSystemId a, StarSystemId b, out int laneIndex)
+        {
+            laneIndex = -1;
+            if (!Lanes.IsCreated) return false;
+            if (a.Value > b.Value) (a, b) = (b, a);
+            int low = 0, high = Lanes.Length - 1;
+            while (low <= high)
+            {
+                int middle = low + (high - low) / 2;
+                var lane = Lanes[middle];
+                int comparison = lane.A.Value.CompareTo(a.Value);
+                if (comparison == 0) comparison = lane.B.Value.CompareTo(b.Value);
+                if (comparison == 0) { laneIndex = middle; return true; }
+                if (comparison < 0) low = middle + 1;
+                else high = middle - 1;
+            }
+            return false;
+        }
+
+        public ushort BodyTemplateIndexOf(BodyTemplateDefinition def)
+        {
+            if (def == null || BodyTemplates == null) return GalaxyConstants.NoIndex;
+            for (int i = 0; i < BodyTemplates.Count; i++)
+                if (BodyTemplates[i] == def) return checked((ushort)i);
+            return GalaxyConstants.NoIndex;
+        }
+
+        public void Dispose()
+        {
+            if (StarSystems.IsCreated) StarSystems.Dispose();
+            if (Lanes.IsCreated) Lanes.Dispose();
+            if (Adjacency.IsCreated) Adjacency.Dispose();
+            if (IndexById.IsCreated) IndexById.Dispose();
+            if (BodyTemplateParams.IsCreated) BodyTemplateParams.Dispose();
+            if (AuthoredBodies.IsCreated) AuthoredBodies.Dispose();
+            if (AuthoredBodyRanges.IsCreated) AuthoredBodyRanges.Dispose();
+            if (TemplateParams.IsCreated) TemplateParams.Dispose();
+            if (AuthoredTemplateParams.IsCreated) AuthoredTemplateParams.Dispose();
+            if (PoolEntries.IsCreated) PoolEntries.Dispose();
+        }
     }
 }

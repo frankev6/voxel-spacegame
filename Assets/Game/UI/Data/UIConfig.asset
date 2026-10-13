@@ -41,6 +41,12 @@ MonoBehaviour:
   - Key: pause
     Uxml: {fileID: 9197481963319205126, guid: 605fc26a79d5494d92b2bb0b65d87c93, type: 3}
     Prewarm: 1
+  - Key: save-slots
+    Uxml: {fileID: 9197481963319205126, guid: af4b7aae04f142fa9fa404ec84e86d2c, type: 3}
+    Prewarm: 0
+  - Key: settings
+    Uxml: {fileID: 9197481963319205126, guid: 05e0379d119b49e88984f3a490738a97, type: 3}
+    Prewarm: 0
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32

@@ -1,0 +1,39 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:game="Game.UI.Controls">
+    <Style src="../../Theme/screens/settings.uss" />
+    <ui:VisualElement class="settings-screen" picking-mode="Ignore">
+        <ui:VisualElement name="settings-panel" class="panel settings-panel">
+            <ui:VisualElement class="panel__header" picking-mode="Ignore"><ui:Label text="Settings" class="panel__title text-display" picking-mode="Ignore" /></ui:VisualElement>
+            <game:TabBar name="settings-tabs" />
+            <ui:ScrollView name="settings-body" class="panel__body settings-body" mode="Vertical" horizontal-scroller-visibility="Hidden">
+                <ui:VisualElement name="settings-page-audio" class="settings-page" picking-mode="Ignore">
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Master volume" class="settings-label" picking-mode="Ignore" /><ui:Slider name="settings-master-volume" class="settings-control" low-value="0" high-value="1" /></ui:VisualElement>
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Music volume" class="settings-label" picking-mode="Ignore" /><ui:Slider name="settings-music-volume" class="settings-control" low-value="0" high-value="1" /></ui:VisualElement>
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Sound effects" class="settings-label" picking-mode="Ignore" /><ui:Slider name="settings-sfx-volume" class="settings-control" low-value="0" high-value="1" /></ui:VisualElement>
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="UI sounds" class="settings-label" picking-mode="Ignore" /><ui:Slider name="settings-ui-volume" class="settings-control" low-value="0" high-value="1" /></ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="settings-page-video" class="settings-page" picking-mode="Ignore">
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Resolution" class="settings-label" picking-mode="Ignore" /><ui:DropdownField name="settings-resolution" class="settings-control" /></ui:VisualElement>
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Display mode" class="settings-label" picking-mode="Ignore" /><ui:DropdownField name="settings-fullscreen-mode" class="settings-control" /></ui:VisualElement>
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="VSync" class="settings-label" picking-mode="Ignore" /><ui:Toggle name="settings-vsync" class="settings-control" /></ui:VisualElement>
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Quality" class="settings-label" picking-mode="Ignore" /><ui:DropdownField name="settings-quality" class="settings-control" /></ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="settings-page-controls" class="settings-page" picking-mode="Ignore">
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Mouse sensitivity" class="settings-label" picking-mode="Ignore" /><ui:Slider name="settings-mouse-sensitivity" class="settings-control" low-value="0.1" high-value="5" /></ui:VisualElement>
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Invert orbit Y" class="settings-label" picking-mode="Ignore" /><ui:Toggle name="settings-invert-orbit-y" class="settings-control" /></ui:VisualElement>
+                    <ui:ListView name="settings-rebinds" class="list settings-rebinds" item-template="project://database/Assets/Game/UI/Views/Uxml/RebindRow.uxml?fileID=9197481963319205126&amp;guid=ebc4508b13ab4dbeaf0ad9350d2bb907&amp;type=3#RebindRow" fixed-item-height="64" virtualization-method="FixedHeight" selection-type="None" />
+                    <ui:Button name="settings-reset-bindings" text="Reset bindings" class="btn btn--secondary settings-reset" />
+                </ui:VisualElement>
+                <ui:VisualElement name="settings-page-gameplay" class="settings-page" picking-mode="Ignore">
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Camera orientation" class="settings-label" picking-mode="Ignore" /><ui:DropdownField name="settings-camera-yaw-mode" class="settings-control" /></ui:VisualElement>
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Screen shake" class="settings-label" picking-mode="Ignore" /><ui:Slider name="settings-screen-shake" class="settings-control" low-value="0" high-value="1" /></ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="settings-page-accessibility" class="settings-page" picking-mode="Ignore">
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="UI scale" class="settings-label" picking-mode="Ignore" /><ui:Slider name="settings-ui-scale" class="settings-control" low-value="0.8" high-value="1.5" /></ui:VisualElement>
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Text size" class="settings-label" picking-mode="Ignore" /><ui:DropdownField name="settings-text-scale" class="settings-control" /></ui:VisualElement>
+                    <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Reduce motion" class="settings-label" picking-mode="Ignore" /><ui:Toggle name="settings-reduce-motion" class="settings-control" /></ui:VisualElement>
+                </ui:VisualElement>
+            </ui:ScrollView>
+            <ui:VisualElement class="panel__footer" picking-mode="Ignore"><ui:VisualElement class="spacer" picking-mode="Ignore" /><ui:Button name="settings-close" text="Close" class="btn btn--primary" /></ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

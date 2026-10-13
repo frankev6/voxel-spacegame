@@ -51,6 +51,6 @@ namespace Game.UI.Views
             save.SetEnabled(viewModel.CanSave);
             blocked.EnableInClassList(UIStyleClasses.IsHidden, viewModel.CanSave);
         }
-        // TODO(HUD-006): complete presenter integration, key hints and the required acceptance.
+        // TODO(HUD-006): finish key hints and the required pause-screen acceptance.
     }
 }

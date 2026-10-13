@@ -1338,6 +1338,8 @@ Visibility:
 
 | 31 | Decision 9 requires pre-rebase position sync, but §5.10 only specified a post-rebase sync, losing the latest physics movement when crossing the threshold. | Capture non-analytic root UniversePosition from old origin plus current local transform in a dependency-chained parallel job before gather/decide. Skip capture for a newer different-system request, preserving destination-authored positions; retain the post-placement sync. Extend the required Threshold_Rebases test with an actual pending +1 m transform write from x=2000, expecting x=0 after rebasing by 2001. No extra test or main-thread completion. | Tech lead |
 
+| 32 | BodySpec.LaneIndex is ushort while the galaxy cap can produce more lanes | Preserve the declared type; fail content generation explicitly with GalaxyGenerationException before scheduling if an adjacent index reaches NoIndex. Never wrap or silently omit a gate. Wider indices require a future accepted contract change if integrated content reaches the limit. | Tech lead |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/03-galaxy-world.md` (03-B1, 03-B9a–d, 03-D3), `04` (04-B1, 04-B11), `LEDGER.md` R9.

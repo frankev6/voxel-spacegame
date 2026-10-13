@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f1822b85be341fe897c9e703e03c4e4, type: 3}
+  m_Name: systpl_opening
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.StarSystemTemplateDefinition
+  id: systpl_opening
+  formerIds: []
+  namePrefix: Uncharted
+  starPool:
+  - template: {fileID: 11400000, guid: f95f5439aa3fc4499a2cfd37dbad44e3, type: 2}
+    weight: 1
+    maxCount: 0
+  planetPool:
+  - template: {fileID: 11400000, guid: 08de1e0ba973843aea4b3107a3efec0e, type: 2}
+    weight: 1
+    maxCount: 0
+  moonPool:
+  - template: {fileID: 11400000, guid: 0049e7960af624b9ba5cd4e7622080eb, type: 2}
+    weight: 1
+    maxCount: 0
+  beltPool:
+  - template: {fileID: 11400000, guid: 7731ce420011946478a5a881b94d0cb4, type: 2}
+    weight: 1
+    maxCount: 0
+  stationPool:
+  - template: {fileID: 11400000, guid: 9352b329ad44e488a8539dedf945b3e8, type: 2}
+    weight: 1
+    maxCount: 0
+  pointOfInterestPool:
+  - template: {fileID: 11400000, guid: 7170680600a9e45eb992aee800d8c176, type: 2}
+    weight: 1
+    maxCount: 0
+  minPlanets: 0
+  maxPlanets: 2
+  maxMoonsPerPlanet: 1
+  moonChance: 0.5
+  minBelts: 0
+  maxBelts: 1
+  minStations: 0
+  maxStations: 1
+  minPointsOfInterest: 0
+  maxPointsOfInterest: 2
+  firstOrbitRadiusM: 7000
+  orbitSpacingMinM: 4000
+  orbitSpacingMaxM: 5000
+  orbitPeriodAtReferenceS: 3600
+  orbitReferenceRadiusM: 4000
+  moonOrbitMinM: 1200
+  moonOrbitMaxM: 1800
+  moonPeriodAtReferenceS: 600
+  moonReferenceRadiusM: 1000
+  stationRadiusMinM: 3000
+  stationRadiusMaxM: 9000
+  pointOfInterestRadiusMinM: 6000
+  pointOfInterestRadiusMaxM: 12000
+  minBodySeparationM: 1500
+  laneRingMarginM: 3000
+  minLaneRingRadiusM: 22000
+  extentMarginM: 2000
+  dangerMin: 0
+  dangerMax: 3

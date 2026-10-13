@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7b739dae44940098571a23d3b55d6b3, type: 3}
+  m_Name: starsys_drift
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.AuthoredStarSystemDefinition
+  id: starsys_drift
+  formerIds: []
+  displayName: The Drift
+  positionLy: {x: 6, y: 2}
+  template: {fileID: 11400000, guid: 2fb4761bf13a5c60b3042bcec8abb617, type: 2}
+  star: {fileID: 11400000, guid: f95f5439aa3fc4499a2cfd37dbad44e3, type: 2}
+  bodies:
+  - key: drift_belt
+    role: 5
+    slot: 0
+    parentKey:
+    template: {fileID: 11400000, guid: 7731ce420011946478a5a881b94d0cb4, type: 2}
+    mode: 0
+    orbitRadiusM: 10000
+    phaseDegrees: 0
+    eccentricity: 0
+    periodOverrideS: 0
+    radiusOverrideM: 0
+    yawDegrees: 0
+    displayNameOverride:
+  - key: drift_derelict
+    role: 8
+    slot: 0
+    parentKey:
+    template: {fileID: 11400000, guid: 03331a31ca8824aad805b896121b259d, type: 2}
+    mode: 0
+    orbitRadiusM: 8000
+    phaseDegrees: 180
+    eccentricity: 0
+    periodOverrideS: 0
+    radiusOverrideM: 0
+    yawDegrees: 0
+    displayNameOverride:
+  - key: drift_cache
+    role: 8
+    slot: 1
+    parentKey:
+    template: {fileID: 11400000, guid: 7170680600a9e45eb992aee800d8c176, type: 2}
+    mode: 0
+    orbitRadiusM: 10500
+    phaseDegrees: 30
+    eccentricity: 0
+    periodOverrideS: 0
+    radiusOverrideM: 0
+    yawDegrees: 0
+    displayNameOverride:
+  - key: drift_lab
+    role: 4
+    slot: 0
+    parentKey:
+    template: {fileID: 11400000, guid: 12bd0e04c805a43afa8c3242350fbe0e, type: 2}
+    mode: 0
+    orbitRadiusM: 5000
+    phaseDegrees: 90
+    eccentricity: 0
+    periodOverrideS: 0
+    radiusOverrideM: 0
+    yawDegrees: 0
+    displayNameOverride:
+  hiddenUntilKnown: 0
+  isStory: 1
+  isHub: 0
+  noEncounters: 0
+  connectProcedurally: 0
+  danger: 2
+  startBodyKey:
+  startOffsetM: {x: 0, y: 0, z: -400}
+  startYawDegrees: 0

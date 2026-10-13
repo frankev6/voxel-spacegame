@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d14ae53bc9e84ed89242dc7426a2fd55, type: 3}
+  m_Name: galaxy_main
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.GalaxyGenerationDefinition
+  id: galaxy_main
+  formerIds: []
+  generatorVersion: 1
+  useFixedSeed: 1
+  fixedSeed: 1592590337
+  galaxyRadiusLy: 60
+  proceduralStarSystemCount: 0
+  minStarSystemSpacingLy: 3
+  placementAttemptsPerStarSystem: 30
+  laneCandidateNeighbours: 6
+  maxLaneDegree: 4
+  maxLaneLengthLy: 12
+  extraLaneChance: 0.35
+  templatePool:
+  - template: {fileID: 11400000, guid: 2fb4761bf13a5c60b3042bcec8abb617, type: 2}
+    weight: 1
+  authoredStarSystems:
+  - {fileID: 11400000, guid: a93d1205a81b5ca3be814bc3473818ac, type: 2}
+  - {fileID: 11400000, guid: ca6424efcc0c5f5d91bfe11e62ae695a, type: 2}
+  - {fileID: 11400000, guid: b2d65c9fab5453daa42671c1e5b3ebc6, type: 2}
+  startStarSystem: {fileID: 11400000, guid: a93d1205a81b5ca3be814bc3473818ac, type: 2}
+  authoredLanes:
+  - a: {fileID: 11400000, guid: a93d1205a81b5ca3be814bc3473818ac, type: 2}
+    b: {fileID: 11400000, guid: ca6424efcc0c5f5d91bfe11e62ae695a, type: 2}
+    kind: 0
+    condition:
+      source:
+      sourceHash: 0
+      compilerVersion: 0
+      hasErrors: 0
+      root: {rid: -2}
+    lockedMessage:
+    gateTemplateA: {fileID: 0}
+    gateTemplateB: {fileID: 0}
+    hiddenUntilKnown: 0
+  - a: {fileID: 11400000, guid: a93d1205a81b5ca3be814bc3473818ac, type: 2}
+    b: {fileID: 11400000, guid: b2d65c9fab5453daa42671c1e5b3ebc6, type: 2}
+    kind: 0
+    condition:
+      source: $gate_ark_start_active
+      sourceHash: 0
+      compilerVersion: 0
+      hasErrors: 1
+      root: {rid: -2}
+    lockedMessage: The gate is dormant.
+    gateTemplateA: {fileID: 11400000, guid: cd5e1310fa3a24d538a4512db9346a42, type: 2}
+    gateTemplateB: {fileID: 11400000, guid: cd5e1310fa3a24d538a4512db9346a42, type: 2}
+    hiddenUntilKnown: 0
+  defaultHyperlaneGate: {fileID: 11400000, guid: bf078567a38fa4526b9720c178cb7de8, type: 2}
+  defaultAncientGate: {fileID: 11400000, guid: 275e5b18f32de407c8a77456a1aed8d1, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }

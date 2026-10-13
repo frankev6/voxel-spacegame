@@ -6,10 +6,10 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-013 | accepted e81dc6d; dependency wait for NAR-015 to unlock NAR-016 | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | UI-013 | accepted e3fa8660; ready-standard dependency wait | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | GAL-012 | review complete203; content integrated, runtime acceptance pending; NAR-016 preparation/dependency wait | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-009 | claimed; ENC-010248f274c delivered, lead integration pending | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-004 | claimed93cfef3d; save/load UI dispatched under Q23 | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | FND-012 | claimed; TRV-002 delivery pending lead content integration | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -17,9 +17,53 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
-All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
+All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **World/travel/encounter content integrated:** TRV-002 and ENC-010 accepted,21 focused checks pass2.64s and clean compile. Three authored systems/body templates validate; GAL-012 runtime acceptance awaits GAL-008/lane logic. ECO-009/FND-012 workers active; combat prepares NAR-016 with explicit dependency wait. No active Unity operation. Next lead: preserved NAR-015 real generation and GAL-007/008.
+
+- **Settings checks accepted:**608141f compile clean, five focused checks pass in1.35s; real pause routes compiled. Production menu/root integration remains open. No Unity process active. Next integrate delivered world/travel/encounter content; ECO-009 dispatched, FND-012 dependency review underway.
+
+- **System content accepted:**e421d5ee compile6163 clean; headless88933 six passed0.193s. Live80985 blocked by native save-scene dialog (sample captured); Editor17922 terminated after CLI cancel/exit unable to proceed, all handles terminal. No Editor or Unity run active. HUD005 repair a03ac074 integration next, TRV0024fed054f/dd9f3fec review175; GAL012199/ENC010211 active. Previous turn authored procedural job (progress).
+
+- **Procedural content job authored:** GAL006 now has fixed-draw procedural bodies, usage-limited pools, scheduled wrapper and overflow reporting; six checks/compile pending. Q332/SPEC30Q32 guards lane-index capacity. HUD005 repair a03ac074 delivered174, queued on preserved settings branch; TRV002 resumed. GAL012198/ENC010210 active. No Unity run. Previous turn authored content foundation (progress).
+
+- **Per-system generation underway:** GAL006 claimed3dc7cc6a, task/GAL-006-system-content authors body hashes/lookup/disposal plus authored/gate helpers. Procedural placement/job wrapper/six checks pending, unvalidated. Workers197/209/173 active; presentation explicitly switched to HUD005 repair after preserving TRV002. No active Unity run. Previous turn guarded pause intents (progress).
+
+- **Settings work preserved for repair:** task/HUD-005-settings-integration at dbe07d59 includes real pause routes and session callback guards, unvalidated delta. Belt boot correction alone is on main6c89f0b0 so unrelated gameplay is not held behind settings. Next integrate worker HUD005 repair and validate on that branch. Workers GAL012196/ENC010208/TRV002172 active; no Unity run. Previous turn authored pause routes (progress).
+
+- **Pause stale-intent guard authored:** generation invalidates callbacks and old completion UI across session unbind/rebind, preserving pending completion consumption. Await HUD005 repair before combined validation; no active Unity run. Workers196/208/172 confirmed active. Previous turn connected pause destinations (progress).
+
+- **Real pause route authored:** app-owned PausePresenter/View opens SaveSlots/Settings; M1 root Back uses it while temporary flight/editor roots remain. No duplicate pause creation when menu installs. Uncompiled delta awaits combined settings repair acceptance; no active Unity run. Workers GAL012196/ENC010207/TRV002172 active; presentation has bounded HUD005 repair request. Previous turn integrated settings/fixed belt (progress).
+
+- **Settings integration needs repair:**04cf34fd/9dfc8bc installed in composition; compile91761 clean. Belt boot regression fixed d289f13f. Cancelled89902;45272 terminal with duplicate runner identities and raw3pass2rebind failures, not accepted. Worker repairs HUD005 then resumesTRV002; GAL012195/ENC010206 active. No active Unity run; fonts restored. Next fresh runner after repair; production navigation still pending. Previous turn accepted GAL005 (progress).
+
+- **Lanes accepted:**03a6cec6 compile91840 clean; four lane and two hash checks pass, evidence galaxy-lanes/. No active Unity run. HUD-005366615a9+114e6713 integration next; worker prepares TRV-002 pending main claim. GAL-012193/ENC-010205 active. Previous turn implemented lane/hash algorithms (progress).
+
+- **Lane implementation checkpoint:** GAL-005 claimed5562932d; task/GAL-005-galaxy-lanes authors spatial candidates/Kruskal/seeded extras/component bridges, union-find and explicit little-endian hash serialization. Builder lane/gate/adjacency hookup, six required checks and golden remain; uncompiled, no acceptance claim. HUD-005366615a9 delivered169 and bounded review dispatched; GAL-012192/ENC-010204 active. Previous turn accepted GAL-004 (progress).
+
+- **Layout accepted:**42ecb93f compile91964 clean, focused57816 five passed; evidence galaxy-layout/. No active Unity run. GAL-005 lanes/hash next lead task. Workers active GAL-012191/ENC-010204/HUD-005168. Previous turn implemented packing/queries (progress).
+
+- **Galaxy packing/query checkpoint:** GAL-004 now implements template/pool and authored moon-key packing, indexed system lookup, binary lane lookup, adjacency bounds and idempotent owned-memory disposal. Builder orchestration and five checks still pending; no Unity run yet. ADR-0074 allows HUD-005 test-only input clock control to avoid wall waits; worker notified. Live snapshots combat190/power203/presentation167. Previous turn implemented layout (progress).
+
+- **Layout implementation underway:** GAL-004 claimed c889b973; task/GAL-004-galaxy-layout adds ordered Burst placement with spatial grid, fixed RNG draws, structural IDs and weighted picks. Builder, queries/disposal and five required tests remain; uncompiled/unvalidated checkpoint, no acceptance claim. All workers live at snapshots combat189/power203/presentation166; assignments GAL-012/ENC-010/HUD-005. ADR-0073 resolves camera persistence and is dispatched. Previous goal turn accepted GAL-003 (progress).
+
+- **Galaxy validators accepted:**29aa4c47 compile99024 clean; focused13010 all48 passed, evidence galaxy-validator/. ENC-010 dispatched on acb4ba7f; HUD-005165 active. GAL-004/012 unlocked. No active Unity run. Previous goal turn closed MIG-014 (progress).
+
+- **Body migration accepted:** cbc6029b/e01dcf3f, twenty canonical stubs, generation and byte/GUID-stable rerun clean; compile80221 clean, focused62647 one passed (2.71s). Evidence mig014/. No active Unity run. GAL-003 delivered a1d48092 cursor188; settings continues. Recycle power into ready work after ledger sync.
+
+- **Save session repair accepted:** worker937fa75b integratedb05b62f; composition now calls ResetSession. Compile52462 clean, focused78374 five passed; evidence save-slots/session-repair.xml. No active validation, fonts restored. HUD-004 remains open only for reachable production navigation; HUD-005164 underway. GAL-003186/MIG-014201 active. Previous turn corrected overbroad galaxy hold (progress).
+
+- **Overbroad galaxy hold corrected:** reread GAL-003 exact acceptance (per-code failing/passing and four in-memory fixtures) and MIG-014 (20 named/role/tag stubs). Neither requires finished production GAL-012 assets. Under existing ADR-0070, scoped checks/generation can close these tasks while strict validators continue reporting unfinished downstream content. Workers185/199 instructed to deliver promptly for scoped acceptance. HUD review162 found a stale-session completion issue and is repairing it before HUD-005. Previous turn unlocked settings construction (progress).
+
+- **Settings construction unlocked:** ADR-0072/SPEC61Q25/ledger327 replace HUD-005 circular construction dependency with actual completed services. Keep full five-case and production navigation acceptance. HUD-004 tested checkpoint a59c0e12 remains open pending review/reachable roots; no new Unity run. GAL-003184/MIG-014198 active. Previous turn verified save screen (progress).
+
+- **Save screen checks green:**35034 clean compile;60326 five required cases and56386 four existing boot checks pass; evidence save-slots/. a8d00e7a/9e5db398 remain integration branch; HUD-004 open for worker review and visible menu/pause routing. No active validation; font changes restored. GAL-003183/MIG-014197 continue. Previous turn installed save presenter lifetime (progress).
+
+- **Save screen integration underway:** HUD-0042ae551ed integrated as a8d00e7a; UiComposition now registers/binds persistent SaveSlotsPresenter/View, ticks it and rebinds on SessionReset/disposes with app. Real visible menu/pause navigation still pending HUD-002, so no done claim. Five required checks unrun; worker review161 active. GAL-003183/MIG-014197 active. Q326 mirrors SPEC61Q24. Previous turn resumed missing content deliveries (progress).
+
+- **Existing work resumed:** missing narrative locations trace to GAL-003/MIG-014 code deliveries held for content generation. Combat resumes579394d against current main; power resumes644622c/fea6357; presentation delivered HUD-0042ae551ed159 and receives bounded review. Lead preserves NAR-0151e2b8a41 (six focused checks passed, generation pending actual content). Reconcile schema/content sequencing next; no fake references. Previous turn verified converter (progress).
 
 - **Converter functional checks pass:** compile17861 clean, focused65416 six passed, evidence legacy-narrative/. Real generated content still absent: actual starsys_whisper/encounter_traveling_merchant references missing, Q325; NAR-015 remains open. Next inspect real GAL-012/ENC-010 readiness rather than invent assets or idle workers. HUD-004158 active; two explicit standard dependency waits. Previous turn connected converter (progress).
 
@@ -319,7 +363,7 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - **Latest reviewed deliveries:** PWR-008 `ff548e3` integrated as `2edb150`; protected small-shield generation recipe and SPEC-04 values `fdba1fa` prepared, not executed. ECO-002 `2de0009` integrated as `6036b77`; worker is adding its omitted generation recipe to tools/jobs. Tests authored: PWR-008 3, ECO-002 15; extras 0. PWR worker recycled to EDT-001 on main `cad43d7`. After the ECO recipe arrives, presentation has a genuine dependency/validation wait: no other eligible standard main task remains, owner-only gates and false-ready runtime dependencies stay excluded.
 - **Next playable work:** after WPN-004/005 close, claim WPN-006 aiming/lead, then firing/projectile/shield producers and an enemy that fights back. No enemy-combat completion claim yet.
 - **Preservation:** restore pre-existing QualitySettings from `Logs/playtest/orchestration-batch2/QualitySettings.before.asset` only after validation terminates; exclude that delta from commits. Delete only inactive test-runner scenes and orphan test metas. No remotes.
-- **Real dependency waits:** FND-012/DEV-018 lack actual galaxy generation/current-system services, saved UniversePosition and travel lifecycle despite contract-level Ready. SYS-010 only validates contract forwarding. Hold GAL-003 `579394d` / MIG-014 `644622c` + `fea6357` for compatible galaxy-content generation. DLG-010 `38b2bb0` remains partial without approved sprites; SYS-003 awaits VOX-020.
+- **Real dependency waits:** FND-012/DEV-018 lack actual galaxy generation/current-system services, saved UniversePosition and travel lifecycle despite contract-level Ready. SYS-010 only validates contract forwarding. Historical hold of GAL-003 `579394d` / MIG-014 `644622c` + `fea6357` is superseded: exact scoped acceptance does not require production GAL-012 content (see current lead state). DLG-010 `38b2bb0` remains partial without approved sprites; SYS-003 awaits VOX-020.
 
 ## Validated and pending batches
 

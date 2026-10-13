@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7b739dae44940098571a23d3b55d6b3, type: 3}
+  m_Name: starsys_ark_start
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.AuthoredStarSystemDefinition
+  id: starsys_ark_start
+  formerIds: []
+  displayName: Ark Reach
+  positionLy: {x: 0, y: 0}
+  template: {fileID: 11400000, guid: 2fb4761bf13a5c60b3042bcec8abb617, type: 2}
+  star: {fileID: 11400000, guid: f95f5439aa3fc4499a2cfd37dbad44e3, type: 2}
+  bodies:
+  - key: ark_station
+    role: 4
+    slot: 0
+    parentKey:
+    template: {fileID: 11400000, guid: 3f3ed5de20d9143e38e3f155b2be9632, type: 2}
+    mode: 0
+    orbitRadiusM: 3000
+    phaseDegrees: 0
+    eccentricity: 0
+    periodOverrideS: 0
+    radiusOverrideM: 0
+    yawDegrees: 0
+    displayNameOverride:
+  - key: reach_i
+    role: 2
+    slot: 0
+    parentKey:
+    template: {fileID: 11400000, guid: 08de1e0ba973843aea4b3107a3efec0e, type: 2}
+    mode: 1
+    orbitRadiusM: 7000
+    phaseDegrees: 45
+    eccentricity: 0
+    periodOverrideS: 0
+    radiusOverrideM: 0
+    yawDegrees: 0
+    displayNameOverride:
+  - key: reach_ii
+    role: 2
+    slot: 1
+    parentKey:
+    template: {fileID: 11400000, guid: a4170fc1877184ceda1269c7662ebeb7, type: 2}
+    mode: 1
+    orbitRadiusM: 12000
+    phaseDegrees: 200
+    eccentricity: 0
+    periodOverrideS: 0
+    radiusOverrideM: 0
+    yawDegrees: 0
+    displayNameOverride:
+  - key: reach_ii_a
+    role: 3
+    slot: 0
+    parentKey: reach_ii
+    template: {fileID: 11400000, guid: 0049e7960af624b9ba5cd4e7622080eb, type: 2}
+    mode: 1
+    orbitRadiusM: 1400
+    phaseDegrees: 0
+    eccentricity: 0
+    periodOverrideS: 0
+    radiusOverrideM: 0
+    yawDegrees: 0
+    displayNameOverride:
+  - key: reach_belt
+    role: 5
+    slot: 0
+    parentKey:
+    template: {fileID: 11400000, guid: 7731ce420011946478a5a881b94d0cb4, type: 2}
+    mode: 0
+    orbitRadiusM: 18000
+    phaseDegrees: 0
+    eccentricity: 0
+    periodOverrideS: 0
+    radiusOverrideM: 0
+    yawDegrees: 0
+    displayNameOverride:
+  hiddenUntilKnown: 0
+  isStory: 1
+  isHub: 1
+  noEncounters: 0
+  connectProcedurally: 0
+  danger: 0
+  startBodyKey: ark_station
+  startOffsetM: {x: 0, y: 0, z: -400}
+  startYawDegrees: 0

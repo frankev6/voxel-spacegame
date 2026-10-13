@@ -72,11 +72,35 @@ namespace Game.Data.Definitions
         public int DangerMin => dangerMin;
         public int DangerMax => dangerMax;
 
-        // TODO(GAL-003): validate the authored world fields and cross-content references.
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
             base.Validate(scope, context);
-            throw new System.NotImplementedException("GAL-003");
+            WorldDefinitionValidation.Counts(scope, nameof(minPlanets), minPlanets, maxPlanets);
+            WorldDefinitionValidation.Counts(scope, nameof(minBelts), minBelts, maxBelts);
+            WorldDefinitionValidation.Counts(scope, nameof(minStations), minStations, maxStations);
+            WorldDefinitionValidation.Counts(scope, nameof(minPointsOfInterest), minPointsOfInterest, maxPointsOfInterest);
+            WorldDefinitionValidation.Counts(scope, nameof(maxMoonsPerPlanet), 0, maxMoonsPerPlanet);
+            WorldDefinitionValidation.Require(scope, "GAL-E012", nameof(dangerMin), dangerMin >= 0 && dangerMax >= dangerMin && dangerMax <= 3, "Danger must be ordered in 0..3.");
+            WorldDefinitionValidation.Require(scope, "GAL-E012", nameof(moonChance), float.IsFinite(moonChance) && moonChance >= 0 && moonChance <= 1, "Moon chance must be in 0..1.");
+            WorldDefinitionValidation.Pool(scope, nameof(starPool), starPool, BodyRole.Star, 1);
+            WorldDefinitionValidation.Pool(scope, nameof(planetPool), planetPool, BodyRole.Planet, minPlanets);
+            WorldDefinitionValidation.Pool(scope, nameof(moonPool), moonPool, BodyRole.Moon, 0);
+            WorldDefinitionValidation.Pool(scope, nameof(beltPool), beltPool, BodyRole.Belt, minBelts);
+            WorldDefinitionValidation.Pool(scope, nameof(stationPool), stationPool, BodyRole.Station, minStations);
+            WorldDefinitionValidation.Pool(scope, nameof(pointOfInterestPool), pointOfInterestPool, BodyRole.PointOfInterest, minPointsOfInterest);
+            WorldDefinitionValidation.Range(scope, nameof(orbitSpacingMinM), orbitSpacingMinM, orbitSpacingMaxM);
+            WorldDefinitionValidation.Range(scope, nameof(moonOrbitMinM), moonOrbitMinM, moonOrbitMaxM);
+            WorldDefinitionValidation.Range(scope, nameof(stationRadiusMinM), stationRadiusMinM, stationRadiusMaxM);
+            WorldDefinitionValidation.Range(scope, nameof(pointOfInterestRadiusMinM), pointOfInterestRadiusMinM, pointOfInterestRadiusMaxM);
+            WorldDefinitionValidation.Positive(scope, nameof(firstOrbitRadiusM), firstOrbitRadiusM);
+            WorldDefinitionValidation.Positive(scope, nameof(orbitPeriodAtReferenceS), orbitPeriodAtReferenceS);
+            WorldDefinitionValidation.Positive(scope, nameof(orbitReferenceRadiusM), orbitReferenceRadiusM);
+            WorldDefinitionValidation.Positive(scope, nameof(moonPeriodAtReferenceS), moonPeriodAtReferenceS);
+            WorldDefinitionValidation.Positive(scope, nameof(moonReferenceRadiusM), moonReferenceRadiusM);
+            WorldDefinitionValidation.Positive(scope, nameof(minBodySeparationM), minBodySeparationM);
+            WorldDefinitionValidation.Positive(scope, nameof(laneRingMarginM), laneRingMarginM);
+            WorldDefinitionValidation.Positive(scope, nameof(minLaneRingRadiusM), minLaneRingRadiusM);
+            WorldDefinitionValidation.Positive(scope, nameof(extentMarginM), extentMarginM);
         }
     }
 }

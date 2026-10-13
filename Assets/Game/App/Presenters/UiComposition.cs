@@ -16,6 +16,8 @@ namespace Game.App.Presenters
         readonly UIRoot ui;
         readonly SceneFlow flow;
         readonly LoadingPresenter loadingPresenter;
+        readonly SaveSlotsPresenter saveSlotsPresenter;
+        readonly SettingsPresenter settingsPresenter;
         MainMenuPresenter menuPresenter;
         PausePresenter pausePresenter;
         bool rootsBound, disposed;
@@ -43,12 +45,26 @@ namespace Game.App.Presenters
             Loading = new LoadingView(LoadingModel);
             ui.Register(Loading);
             loadingPresenter.Bind();
+            saveSlotsPresenter = new SaveSlotsPresenter(ui, SaveSlotsModel, Game.Core.Services.Get<SaveService>(), Game.Core.Services.Get<IGameFlow>());
+            ui.Register(new SaveSlotsView(SaveSlotsModel, saveSlotsPresenter));
+            saveSlotsPresenter.Bind();
+            settingsPresenter = new SettingsPresenter(ui, SettingsModel,
+                Game.Core.Services.Get<Game.App.Settings.SettingsService>(), Game.Core.Services.Get<Game.Input.InputService>());
+            ui.Register(new SettingsView(SettingsModel, settingsPresenter));
+            settingsPresenter.Bind();
+            pausePresenter = new PausePresenter(ui, PauseModel, Game.Core.Services.Get<IGameFlow>(), ShowSaveSlots, ShowSettings);
+            ui.Register(new PauseView(PauseModel, pausePresenter));
+            pausePresenter.Bind();
             EventBus<SessionReset>.Subscribe(OnSessionReset);
         }
         public UIScreen MainMenu => ui.Navigator.Get<MainMenuView>();
         public UIScreen FlightHud => ui.Navigator.Get<FlightHudView>();
         public UIScreen ShipEditor => ui.Navigator.Get<ShipEditorView>();
         public UIScreen Loading { get; }
+
+        internal void ShowSettings() => settingsPresenter.Show();
+
+        internal void ShowSaveSlots(SaveSlotsMode mode) => saveSlotsPresenter.Show(mode);
 
         // Installed only with real screen/launcher navigation, never placeholder command implementations.
         internal void BindMenuNavigation(Action<SaveSlotsMode> showSlots, Action openLab, Action showSettings)
@@ -60,13 +76,9 @@ namespace Game.App.Presenters
             var saves = Game.Core.Services.Get<SaveService>();
             var menu = new MainMenuPresenter(ui, MainMenuModel, session, saves,
                 () => showSlots(SaveSlotsMode.Load), openLab, showSettings);
-            var pause = new PausePresenter(ui, PauseModel, session, showSlots, showSettings);
             ui.Register(new MainMenuView(MainMenuModel, menu));
-            ui.Register(new PauseView(PauseModel, pause));
             menuPresenter = menu;
-            pausePresenter = pause;
             menu.Bind();
-            pause.Bind();
         }
         internal void BindSceneRoots(IHudRadarSource radar, Func<string, string> bindingDisplay, IShipEditorCommands editorCommands)
         {
@@ -89,6 +101,9 @@ namespace Game.App.Presenters
             pausePresenter?.Unbind();
             menuPresenter?.Bind();
             pausePresenter?.Bind();
+            saveSlotsPresenter.ResetSession();
+            settingsPresenter.Unbind();
+            settingsPresenter.Bind();
             loadingPresenter.Dispose();
             loadingPresenter.Bind();
             // TODO(HUD-009/010/011/012/013/014/015/016/017/018/019): rebind the owning feature presenters
@@ -100,6 +115,7 @@ namespace Game.App.Presenters
             menuPresenter?.Tick();
             pausePresenter?.Tick();
             loadingPresenter.Tick();
+            saveSlotsPresenter.Tick();
         }
         void CheckAlive() { if (disposed) throw new ObjectDisposedException(nameof(UiComposition)); }
         public void Dispose()
@@ -108,6 +124,8 @@ namespace Game.App.Presenters
             disposed = true;
             EventBus<SessionReset>.Unsubscribe(OnSessionReset);
             loadingPresenter.Dispose();
+            saveSlotsPresenter.Dispose();
+            settingsPresenter.Dispose();
             pausePresenter?.Dispose();
             menuPresenter?.Dispose();
             if (rootsBound) flow.SetRootScreens(null);

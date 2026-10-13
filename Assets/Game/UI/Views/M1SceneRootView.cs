@@ -16,7 +16,7 @@ namespace Game.UI.Views
         public override void OnPush(object args) => context = args is InputContext value ? value : InputContext.None;
         public override bool OnBack()
         {
-            if (context == InputContext.Flight || context == InputContext.Editor) Navigator.Push<M1PauseView>();
+            if (context == InputContext.Flight || context == InputContext.Editor) Navigator.Push<PauseView>();
             return true;
         }
     }

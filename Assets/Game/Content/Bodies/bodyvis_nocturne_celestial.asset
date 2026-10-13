@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32dfcf026021413681af9dfbee94953c, type: 3}
+  m_Name: bodyvis_nocturne_celestial
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.BodyVisualDefinition
+  id: bodyvis_nocturne_celestial
+  formerIds: []
+  mesh: {fileID: 4300000, guid: c7c595bf8551a48d0939e3ef952e8544, type: 2}
+  meshRadius: 1
+  material: {fileID: 2100000, guid: 31765c51cb3c044c382e0010a8a2e0a0, type: 2}
+  baseColor: {r: 1, g: 1, b: 1, a: 1}
+  emissionColor: {r: 0, g: 0, b: 0, a: 1}
+  castShadows: 0
+  hideWhenGridPresent: 1
+  mapIcon: {fileID: 0}
+  mapColorToken: --color-map-body

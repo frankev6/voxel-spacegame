@@ -31,6 +31,13 @@ namespace Game.Editor.Migration
             CheckPath(root + "/probe.asset");
         }
         public T CreateOrUpdate<T>(string area, string id, Action<SerializedObject> fill, out WriteOutcome outcome) where T : ContentDefinition
+            => CreateOrUpdate<T>(area, id, fill, false, out outcome);
+
+        // Partial migrations retain fields authored by later owners, including a forced identity refresh.
+        internal T CreateOrUpdateFields<T>(string area, string id, Action<SerializedObject> fill, out WriteOutcome outcome) where T : ContentDefinition
+            => CreateOrUpdate<T>(area, id, fill, true, out outcome);
+
+        T CreateOrUpdate<T>(string area, string id, Action<SerializedObject> fill, bool preserveExistingFields, out WriteOutcome outcome) where T : ContentDefinition
         {
             if (string.IsNullOrEmpty(id) || id.IndexOfAny(new[] { '/', '\\', ':' }) >= 0 || id == "." || id == "..") throw new ArgumentException("Invalid asset ID.", nameof(id));
             string path = root + "/" + area + "/" + id + ".asset";
@@ -49,7 +56,8 @@ namespace Game.Editor.Migration
             T tmp = ScriptableObject.CreateInstance<T>();
             try
             {
-                tmp.name = id;
+                if (preserveExistingFields && existing != null) EditorUtility.CopySerialized(existing, tmp);
+                tmp.name = preserveExistingFields && existing != null ? existing.name : id;
                 using (var so = new SerializedObject(tmp))
                 {
                     so.FindProperty("id").stringValue = id;
