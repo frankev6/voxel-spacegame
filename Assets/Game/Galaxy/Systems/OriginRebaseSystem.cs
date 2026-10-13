@@ -36,7 +36,10 @@ namespace Game.Galaxy.Systems
         ComponentLookup<PhysicsGraphicalInterpolationBuffer> interpolation;
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
-            origin = state.EntityManager.CreateEntity(typeof(FrameOrigin), typeof(OriginRebaseRequest), typeof(OriginShiftRecord));
+            origin = state.EntityManager.CreateEntity();
+            state.EntityManager.AddComponent<FrameOrigin>(origin);
+            state.EntityManager.AddComponent<OriginRebaseRequest>(origin);
+            state.EntityManager.AddComponent<OriginShiftRecord>(origin);
             state.EntityManager.SetComponentEnabled<OriginRebaseRequest>(origin, false);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<WorldSceneActive>(); state.RequireForUpdate<FrameOrigin>();
             state.RequireForUpdate<ManagedEventQueue<OriginShifted>>();
