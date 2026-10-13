@@ -64,7 +64,7 @@ namespace Game.Data.Logic.Compiler
                 string text = source.Substring(start, position - start);
                 bool integer = true; foreach (char ch in text) integer &= Digit(ch);
                 if (integer) return Token(LogicTokenKind.Int, text);
-                if ((!command || Letter(c)) && text.Length > 64) throw Error("Name exceeds 64 characters.");
+                if (!command && text.Length > 64) throw Error("Name exceeds 64 characters.");
                 if (text == "true") return Token(LogicTokenKind.True);
                 if (text == "false") return Token(LogicTokenKind.False);
                 if (command) return Token(LogicTokenKind.Word);
