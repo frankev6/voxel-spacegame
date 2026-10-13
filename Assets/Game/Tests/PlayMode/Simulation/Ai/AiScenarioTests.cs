@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Data.Blocks;
+using Game.Data.Combat;
 using Game.Simulation;
 using Game.Simulation.Ai;
 using Game.Simulation.Commands;
@@ -126,7 +127,8 @@ namespace Game.Tests.PlayMode.Simulation.Ai
                 if (returned && movedBack && distance < Fixture.Arrival * 2) break;
             }
             Assert.IsTrue(engaged); Assert.Greater(peak, 48, "The actor must chase beyond 1.5 times its test leash through real propulsion.");
-            Assert.IsTrue(returned); Assert.IsTrue(movedBack);
+            Assert.IsTrue(returned, $"The actor must enter Return after crossing its leash; peak={peak}, state={f.Brain(ship).State}.");
+            Assert.IsTrue(movedBack, $"The actor must physically reverse its chase; peak={peak}, final distance={math.distance(anchor, f.Em.GetComponentData<LocalTransform>(ship).Position)}.");
             Assert.Less(math.distance(anchor, f.Em.GetComponentData<LocalTransform>(ship).Position), Fixture.Arrival * 2,
                 "Return remains latched until the actor physically reaches the specified anchor-release radius.");
             Assert.AreEqual(anchor, f.Brain(ship).Anchor, "The chase must not move the spawn anchor.");
@@ -177,7 +179,7 @@ namespace Game.Tests.PlayMode.Simulation.Ai
                     {
                         ref var blob = ref builder.ConstructRoot<AiProfilesBlob>(); var rows = builder.Allocate(ref blob.Profiles, 1);
                         rows[0] = authored.Value.Profiles[0]; rows[0].AbilityRules = default; builder.Allocate(ref rows[0].AbilityRules, 0);
-                        // Keep steering laws and authored propulsion; shorten only the fixture's arena distances.
+                        // Keep steering laws; arena distances and the seeded thrust modifier bound fixture travel.
                         rows[0].PreferredRangeFraction = .1f; rows[0].LeashRadius = leash; rows[0].PatrolRadius = 0;
                         builder.Allocate(ref blob.Formations, 0); profiles = builder.CreateBlobAssetReference<AiProfilesBlob>(Allocator.Persistent);
                     }
@@ -211,6 +213,10 @@ namespace Game.Tests.PlayMode.Simulation.Ai
                 {
                     Assert.AreEqual(1, Brain(root).Initialized); Assert.Greater(Em.GetBuffer<Game.Simulation.Flight.FlightThruster>(root).Length, 0);
                     Assert.Greater(Em.GetComponentData<WeaponStats>(root).MaxWeaponRange, 0);
+                    // Seed fixture engine capacity through the same aggregate consumed by both steering and propulsion.
+                    // Do not replace velocities, thruster forces or acceleration stats to manufacture movement.
+                    Em.GetBuffer<ShipStatModifier>(root).Add(new ShipStatModifier {
+                        Stat = StatId.Thrust, Producer = ProducerKind.Test, Multiplier = 4, UntilTick = uint.MaxValue });
                 }
             }
             public void StartAi() => Em.CreateSingleton(config);
