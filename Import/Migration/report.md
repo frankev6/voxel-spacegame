@@ -1,11 +1,31 @@
 # Legacy migration report
 
-Converters: Items (100), Blocks (110), Ships (300)
+Converters: Items (100), Blocks (110), Audio (200), Ships (300)
 
 ## Assets
 
 | Asset | Outcome |
 |---|---|
+|Assets/Game/Content/Audio/cue_editor_place.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_editor_remove.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_explosion_large.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_explosion_small.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_impact_hull.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_music_combat.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_music_exploration.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_music_menu.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_music_station.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_ui_click.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_ui_fail.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_ui_hover.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_ui_slot_click.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_ui_slot_hover.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_ui_success.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_ui_view_close.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_ui_view_open.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_weapon_cannon_fire.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_weapon_laser_fire.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_weapon_plasma_fire.asset|Unchanged|
 |Assets/Game/Content/Blocks/block_capacitor_small.asset|Unchanged|
 |Assets/Game/Content/Blocks/block_core_cross.asset|Unchanged|
 |Assets/Game/Content/Blocks/block_core_small.asset|Unchanged|
@@ -250,6 +270,6 @@ Converters: Items (100), Blocks (110), Ships (300)
 
 Created: 0
 Updated: 0
-Unchanged: 69
+Unchanged: 89
 SkippedHandEdited: 0
 Failed: 0
