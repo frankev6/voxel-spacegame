@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | INP-008 | implementing; NAR-001 integrated e39b2d3, validation pending | Ready narrative/weapon work after batch closeout |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | MIG-009 | implementing; INP-008 eecb3e0 reviewed, pending validation | Weapon content/links batch with DATA-010 |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DATA-010 | implementing; MIG-015 delivered 25ac3f0, pending review | Ready power/ability content |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | UI-009 | implementing; AST-001 delivered 54c4fba, pending review | Ready presentation work; audio content after AUD-006 |
 
@@ -28,6 +28,10 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 - Batch 1: PHY-014/PWR-001/MIG-011, full 861/0/1 EditMode and 121/0/53 PlayMode. Evidence `Logs/playtest/orchestration-batch1/`.
 - Ten-task batch: WPN-017, CAM-008, PHY-022, PWR-002, ABL-001, HUD-001, UI-008, CAM-009, CAM-010, NAR-001 done. Compile clean; full 901/0/1 EditMode and 128/0/53 PlayMode. Evidence `Logs/playtest/orchestration-batch2/`. Independently integrated to main `0561e29` while chunk repair stayed on lead branch; DATA-010/UI-009 claimed `6d3c2cd` and dispatched.
-- MIG-015 delivery `25ac3f0a740f4391b5db73973ca9020a87d3c95b`: typed migration handoff, 3 required tests, SPEC-72 Q18. Await lead review, mirror and validation.
-- AST-001 delivery `54c4fba38a658d4990f07a99876edc467b0734a5`: art contracts and 1,019 planned manifest rows, 4 required tests, SPEC-81 Q15–20. Await lead review, mirrors and validation. No produced/licensed asset claim.
+- MIG-015 delivery `25ac3f0a740f4391b5db73973ca9020a87d3c95b`: typed migration handoff, 3 required tests, SPEC-72 Q18. Reviewed extraction and required tests; await integration, mirror and validation.
+- AST-001 delivery `54c4fba38a658d4990f07a99876edc467b0734a5`: art contracts and 1,019 planned manifest rows, 4 required tests, SPEC-81 Q15–20. Reviewed rules, planned-only manifest and provenance preservation; await integration, mirrors and validation. No produced/licensed asset claim.
 - INP-008 hit temporary provider capacity; same thread/model resumed successfully. Do not duplicate it.
+
+- INP-008 delivered `eecb3e05926e1a318b838e118a541a1e10a27730`, 2 required tests, SPEC-03 Q10/Q11. Lead reviewed aim and device-label flow; Unity validation/hardware ergonomics pending. Do not claim physical controller testing.
+- MIG-009 exact dependency resolved in SPEC-72 Q19 / ledger Q216: use permitted DATA-001 contract dependency (DATA-007 implementation is done) rather than all SPEC-04, because serialized weapon field/bake already exists and DATA-010 strict validation needs the six missing links. Initial DATA-007 dependency was rejected by docs checker and corrected on main `8b0016e`; merged into lead, check-docs passes. MIG-009 claimed/dispatched to same combat worker. Keep E047 strict; integrate migration content before DATA-010.
+- Repair full EditMode **901/0/1** passes; saved `Logs/playtest/dmg011/editmode-repair.xml`. PlayMode session 46677 remains running; source unchanged during validation.
