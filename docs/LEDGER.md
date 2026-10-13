@@ -896,6 +896,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 303 | SPEC-23 Q23 / ADR-0071: static station command composition | Resolved: AiSetup adds ShipCommand with Station AiBrain, no flight/propulsion components. Station tests exercise actual profile conversion, authored turret and power/aim/fire paths. | Tech lead |
 | 304 | SPEC-50 Q24: merchant session and numeric boundaries | Resolved: canonical stock index, finite game time, no backward-clock restock, closed sessions reject trades; nested merchant trades rejected, readonly refresh retained. Prices use specified rounding and bounded int values, quantity totals use long; finite stock overflow rejected before sale. Existing wallet/cargo sequence and refund preserved. | Tech lead |
 | 305 | SPEC-40 Q13: parser precedence example and internal results | Resolved: follow the grammar with $-prefixed variables; internal location-bearing AST and first-error code/line/column diagnostics, translated by NAR-003. Command integers use the Int32 domain. | Tech lead |
+| 306 | SPEC-23 Q26: fast physical AI scenario fixtures | Resolved: frozen player dummy without Hulk, real physical frigate/pipeline; fixture-only arena and weapon changes, fixed ticks and early exit retain functional assertions. Production balance unchanged. | Tech lead |
 
 
 ## Measurements
