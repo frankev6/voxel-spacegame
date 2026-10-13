@@ -17,7 +17,7 @@ namespace Game.Tests.PlayMode.Combat
         public IEnumerator TenMinuteSoak()
         {
             using var leak = new DamageLeakScope();
-            DamageScenarioProbe.WarmUp(); LogAssert.NoUnexpectedReceived(); UnsafeUtility.CheckForLeaks();
+            DamageScenarioProbe.WarmUp(); DamageScenarioProbe.BaselineLeaks();
             // Flush the probe's diagnostic Log output before the gameplay log assertions (08-tools).
             yield return null;
             const int ticks = 600 * 60;

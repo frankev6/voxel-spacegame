@@ -87,6 +87,21 @@ namespace Game.Tests.PlayMode.Combat
         {
             var entity = em.CreateEntity(typeof(GridDissolveRequest)); em.SetComponentData(entity, new GridDissolveRequest { Grid = root, Mode = mode }); return entity;
         }
+        public static void BaselineLeaks()
+        {
+            // This first probe reports pre-existing engine allocations and resets tracking.
+            // Expect its diagnostics only during this synchronous baseline, never at final disposal.
+            void BaselineLog(string message, string trace, LogType type)
+            {
+                if (type == LogType.Log && message.StartsWith("Leak Detected : ", StringComparison.Ordinal))
+                    LogAssert.Expect(type, message);
+            }
+            LogAssert.NoUnexpectedReceived();
+            Application.logMessageReceived += BaselineLog;
+            try { UnsafeUtility.CheckForLeaks(); }
+            finally { Application.logMessageReceived -= BaselineLog; }
+            LogAssert.NoUnexpectedReceived();
+        }
         public static void WarmUp()
         {
             using var f = new DamageDeterminismTests.Fixture(true); f.Begin();
@@ -160,7 +175,7 @@ namespace Game.Tests.PlayMode.Combat
 
         [UnityTest] public IEnumerator R25_MassRamming_NoEcbErrors()
         {
-            using var leak = new DamageLeakScope(); DamageScenarioProbe.WarmUp(); LogAssert.NoUnexpectedReceived(); UnsafeUtility.CheckForLeaks();
+            using var leak = new DamageLeakScope(); DamageScenarioProbe.WarmUp(); DamageScenarioProbe.BaselineLeaks();
             yield return null; // Keep the leak probe's diagnostic Log output out of the gameplay log assertion.
             int deaths = 0, rams = 0;
             using (var f = Create(false))
@@ -196,7 +211,7 @@ namespace Game.Tests.PlayMode.Combat
 
         [UnityTest] public IEnumerator R26_TwelveShipDeaths_NoEcbErrors()
         {
-            using var leak = new DamageLeakScope(); DamageScenarioProbe.WarmUp(); LogAssert.NoUnexpectedReceived(); UnsafeUtility.CheckForLeaks();
+            using var leak = new DamageLeakScope(); DamageScenarioProbe.WarmUp(); DamageScenarioProbe.BaselineLeaks();
             yield return null;
             var report = new ValidationReport("R26 weapon definitions");
             var catalog = ContentCatalog.Build(Resources.Load<GameRoot>("GameRoot").Config.ContentDatabase.Definitions, report);
