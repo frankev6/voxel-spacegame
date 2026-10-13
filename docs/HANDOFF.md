@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Combat HUD underway:** lead HUD-008 is implementing ECS snapshot/radar jobs; not yet wired or validated. Fleet AI-015 compiles, with actual firing/movement readbacks, but Scene-view capture was blank: visual acceptance remains open and benchmarks deferred. Workers continue NAR-004 condition evaluation, ECO-004 loot/economy, NAR-009 import compilation.
+
 - **Narrative compiler accepted:** NAR-003d3f59c1c, clean compile and6 focused checks; parser/type checking/binding/graph emission ready. NAR-004 condition evaluation and NAR-005 effect execution remain open, explicitly marked in code. Catalog NAR-006 is complete: four functional checks pass and its opt-in Build20k fixture is authored; measurement deferred.
 
 - **Structure builders accepted:** SYS-003971ae0b7; deterministic procedural shapes/asteroids, four focused checks and clean compile. Loader ownership/geometry defaults recorded in ledger307. Narrative compiler progresses in isolation; real travel/PLOC prerequisites still block complete DEV-018 acceptance.
