@@ -17,3 +17,5 @@ Continue the roadmap as playable integrated slices: physical breakup, complete c
 ## Tracking
 
 See `docs/ORCHESTRATION.md`. The prior app goal is blocked and cannot be replaced by the available tool while unfinished; do not falsely mark it achieved. Repository goal and scheduled continuation carry the owner instruction until the app goal can be updated.
+
+2026-10-13 update: Frank cleared the legacy goal. The revised native orchestration goal was successfully created and is active. The heartbeat is paused as a fallback to avoid redundant scheduled continuation.
