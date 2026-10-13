@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 130 | 8 | 0 | 0 | 42 | 0 | 180 | 7 |
+| M3 | 130 | 7 | 0 | 0 | 43 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -414,9 +414,9 @@
 | ECO-001 | Public contract types | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | CORE-001, DATA-001, NAR-001, VOX-001, DMG-001, SYS-001, FLT-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a81ff41 | Economy contracts and serialized tradeable defaults; 2 required tests. Runtime ECO-002 onward remains open. Full 1027 EM / 145 PM passed. |
 | ECO-002 | Definitions, config and validators | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | db5d72e | Strict economy validators/config and canonical scrap; 15 required tests; partial ECO-009 scrap only |
 | ECO-003 | InventoryModel and Wallet | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-001 | yes | done | astra (gpt-6) | 2026-10-13 | 80a8bd18 | Twelve functional inventory/wallet checks pass; advisory Apply40 unmeasured (ADR-0070) |
-| ECO-004 | Loot and EconomyService | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003, ECO-005, NAR-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Recycled power worker; actual prerequisites reconciledQ308 |
+| ECO-004 | Loot and EconomyService | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003, ECO-005, NAR-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9d457784 | Seeded loot and stable economy lifecycle facade; clean compile, eight required checks pass |
 | ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | f4cae431 | Merchant pricing, stock/restock and trading; eight required checks pass; sale rounding repaired |
-| ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | no | todo |  |  |  |  |
+| ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | yes | todo |  |  |  |  |
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, SPEC-13, SPEC-31, SPEC-12 | no | todo |  |  |  |  |
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | no | todo |  |  |  | partial in ECO-002: canonical resource_scrap generation prepared / execution and remaining narrative, loot and merchant content pending |
@@ -902,6 +902,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 309 | SPEC-40 Q14: runtime vocabulary invocation boundary | Resolved: SPEC-41 Invoke serves expression functions with evaluated values/resolved indices and retained canonical IDs; commands use compiled effect preflight/flow, never direct Invoke. | Tech lead |
 | 310 | SPEC-23 Q27: fleet/swarm fixture geometry and measurement scope | Resolved: compact authored-block CPU fixtures with real AI, physics and damage; single-brick craft, actual pose/slot visual harness, separate AI/fixed-tick measures and explicit unavailable/casualty records. Measurements opt-in; visual acceptance remains pending. | Tech lead |
 | 311 | SPEC-61 Q21: HUD byte counts and radar fixture semantics | Resolved: saturate count255, internal instance clock seam, disjoint radar categories; route waypoint resolution remains HUD-009. | Tech lead |
+| 312 | SPEC-50 Q26: loot buffer/draw order and economy lifecycle defaults | Resolved: clear reusable results, checked first-appearance merging, specified deterministic draws, validated indices/rows, stable models and direct event forwarding; no gameplay waits. | Tech lead |
 
 
 ## Measurements
@@ -1013,6 +1014,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Loot and economy facade accepted — astra (gpt-6)
+
+- ECO-0049d457784 implements deterministic independent/weighted loot, stable inventory/wallet/merchant lifecycle models and narrative event forwarding. Q26 mirrored312.
+- Compile41043 clean; LootRollerTests13217 four passed; EconomyServiceTests49651 four passed. Evidence `Logs/playtest/loot-economy/`. Broad namespace selection86522 was rejected before dispatch to prevent implicit benchmarks; no test failed and no benchmark ran.
+- Test count: spec-required: 8, extra: 0. Zero gameplay waits and zero tuning passes.
 
 ### 2026-10-13 — Combat HUD snapshot accepted — astra (gpt-6)
 

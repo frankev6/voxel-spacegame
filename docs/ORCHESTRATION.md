@@ -20,6 +20,10 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Loot/economy accepted:**9d457784 clean compile41043; exact classes13217/49651 each4 passed, evidence `loot-economy/`. Namespace selection86522 refused before dispatch (benchmark exclusion), no failure/rerun. Ready FF main; no active validation. Power worker HUD review ongoing; other workers implement NAR-004/NAR-009.
+
+- **HUD accepted / loot integrated:** HUD-00888a324e0 closed9f562214 and FF main. ECO-0043d2cdd89 reviewed/integrated9d457784; compile41043 clean, economy-only functional batch86522 active (default excludes benchmarks). SPEC50Q26 mirrored312. Power worker bounded HUD review174 continues; NAR-004161/NAR-009145 active. Previous turn passed nine HUD checks (progress).
+
 - **HUD focused acceptance green:** compile24417 clean after AddBuffer local/GetBuffer API fixes;24696 nine passed. Evidence `hud-snapshot/`. Internal instance clock seam exercises144 simulated frames without real waits. Power worker review174 active (its initial compile finding already repaired); ECO-004 delivered3d2cdd89 pending integration. No active validation. Previous turn wired snapshot (progress).
 
 - **HUD snapshot wired (unvalidated):** HUD-008 now creates its singleton/buffer in OnCreate, reads player/target/ability/interaction/system values, schedules weapon and bounded radar jobs, and publishes snapshots with dependencies retained. Required nine checks and compile remain; route-waypoint bridge remains explicit HUD-009 TODO. No test launched. Previous turn implemented gather jobs (progress).
