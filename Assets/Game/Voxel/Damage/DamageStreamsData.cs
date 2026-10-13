@@ -32,6 +32,7 @@ namespace Game.Voxel.Damage
         public NativeList<GridCoreLost> CoreLost;
         public NativeList<BlobAssetReference<Collider>> RetiredChunkBlobs;
         public DamageTickStats Current, Last;
+        public int IntegrityNodesVisited; // Last completed hybrid race batch; internal harness/test evidence.
         public NativeList<DamageGridRange> GridRanges;
         public NativeList<DamageEvent> SortedEvents;
         public NativeList<DamageGridResult> GridResults;

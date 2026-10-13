@@ -107,11 +107,11 @@ namespace Game.Tests.EditMode.Voxel.Damage
             var a = grids.Spawn(grids.Box(0, new int3(47, 0, 0))); var b = grids.Spawn(grids.Box(0, new int3(47, 0, 0)));
             grids.World.CreateSystem<DamageStreamsSystem>();
             using var configQuery = grids.EM.CreateEntityQuery(typeof(DamageConfig));
-            var config = configQuery.GetSingleton<DamageConfig>(); config.BrickWarmupPerTick = 3; config.MaxFullFloodCells = 1; configQuery.SetSingleton(config);
+            var config = configQuery.GetSingleton<DamageConfig>(); config.BrickWarmupPerTick = 3; config.IntegrityNodeBudgetPerGrid = 0; configQuery.SetSingleton(config);
             grids.EM.GetBuffer<IntegritySeed>(a).Add(new IntegritySeed()); grids.EM.GetBuffer<IntegritySeed>(b).Add(new IntegritySeed());
+            grids.EM.GetBuffer<IntegritySeed>(a).Add(new IntegritySeed { Cell = new int3(47,0,0) });
+            grids.EM.GetBuffer<IntegritySeed>(b).Add(new IntegritySeed { Cell = new int3(47,0,0) });
             var system = grids.World.CreateSystem<IntegritySystem>();
-            LogAssert.Expect(LogType.Warning, "[Damage] flood deferred; seeds kept. cap=1");
-            LogAssert.Expect(LogType.Warning, "[Damage] flood deferred; seeds kept. cap=1");
             system.Update(grids.World.Unmanaged); grids.EM.CompleteAllTrackedJobs();
             var slotsA = grids.EM.GetBuffer<BrickSlot>(a); var slotsB = grids.EM.GetBuffer<BrickSlot>(b);
             Assert.AreEqual(BrickConnectivity.Connected, grids.EM.GetComponentData<BrickIntegrity>(slotsA[0].Brick).State);

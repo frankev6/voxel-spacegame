@@ -25,26 +25,19 @@ namespace Game.Tests.EditMode.Voxel.Damage
             using var query = world.EntityManager.CreateEntityQuery(typeof(DamageStreams));
             var data = query.GetSingleton<DamageStreams>().Data; data->IntegrityHandle.Complete(); return data;
         }
-        [Test] public void OverCap_DefersDeterministicallyAndRetainsSeed()
+        [Test] public void FormerSizeCap_DoesNotBlockHybridTraversal()
         {
             using var f = new TestGridFactory();
-            var root = f.Spawn(f.Bridge()); f.World.CreateSystem<DamageStreamsSystem>();
+            var source = f.Bridge(); source.SetCell(0, default); var root = f.Spawn(source);
+            f.World.CreateSystem<DamageStreamsSystem>();
             using var configQuery = f.EM.CreateEntityQuery(typeof(DamageConfig));
             var config = DamageConfig.Default; config.MaxFullFloodCells = 1; configQuery.SetSingleton(config);
-            var seed = new int3(0); f.EM.GetBuffer<IntegritySeed>(root).Add(new IntegritySeed { Cell = seed });
-            var system = f.World.CreateSystem<IntegritySystem>();
-            LogAssert.Expect(LogType.Warning, "[Damage] flood deferred; seeds kept. cap=1");
-            for (int tick = 0; tick < 3; tick++)
-            {
-                var data = Run(f.World, system);
-                Assert.AreEqual(tick + 1, data->Current.IntegritySizeDeferred);
-                Assert.AreEqual(0, data->Islands.Length); Assert.AreEqual(0, data->IslandMasks.Length);
-                Assert.AreEqual(1, f.EM.GetBuffer<IntegritySeed>(root).Length);
-                Assert.AreEqual(seed, f.EM.GetBuffer<IntegritySeed>(root)[0].Cell);
-            }
-            // Work is queued, not discarded: lifting the cap consumes the same seed.
-            config.MaxFullFloodCells = DamageConfig.Default.MaxFullFloodCells; configQuery.SetSingleton(config);
-            Run(f.World, system); Assert.AreEqual(0, f.EM.GetBuffer<IntegritySeed>(root).Length);
+            f.EM.GetBuffer<IntegritySeed>(root).Add(new IntegritySeed { Cell = new int3(-1,0,0) });
+            f.EM.GetBuffer<IntegritySeed>(root).Add(new IntegritySeed { Cell = new int3(1,0,0) });
+            var data = Run(f.World, f.World.CreateSystem<IntegritySystem>());
+            Assert.AreEqual(0, data->Current.IntegritySizeDeferred);
+            Assert.AreEqual(1, data->Islands.Length); Assert.AreEqual(27, data->Islands[0].CellCount);
+            Assert.AreEqual(0, f.EM.GetBuffer<IntegritySeed>(root).Length);
         }
         [Test] public void StationBreakaway_MasksMatchPreviousSlotScan()
         {
@@ -64,7 +57,8 @@ namespace Game.Tests.EditMode.Voxel.Damage
                 var root = GridSpawnApi.RequestSpawn(em, registry, registry.Register(station), new GridSpawnParams
                     { PersistentId = 1, Pose = RigidTransform.identity, Flags = GridSpawnFlags.NoRender, Kind = GridKind.Station, Motion = GridMotion.Static });
                 spawn.Update(world.Unmanaged); em.CompleteAllTrackedJobs();
-                em.GetBuffer<IntegritySeed>(root).Add(new IntegritySeed { Cell = new int3(-13, 0, 0) });
+                em.GetBuffer<IntegritySeed>(root).Add(new IntegritySeed { Cell = new int3(-14, 0, 0) });
+                em.GetBuffer<IntegritySeed>(root).Add(new IntegritySeed { Cell = new int3(-12, 0, 0) });
                 var data = Run(world, world.CreateSystem<IntegritySystem>());
                 Assert.AreEqual(1, data->Islands.Length); Assert.AreEqual(0, data->Current.IntegritySizeDeferred);
                 var grid = em.GetComponentData<VoxelGrid>(root); var slots = em.GetBuffer<BrickSlot>(root);
