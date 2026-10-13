@@ -129,7 +129,7 @@ namespace Game.Tests.PlayMode.Combat
                 }
                 Assert.AreEqual(600u, f.Flight.Test.TicksRun - start);
                 var streams = f.Flight.Test.GetSingleton<DamageStreams>(); streams.Data->AllJobs(default).Complete();
-                Assert.Greater(streams.Data->RamPairs.Count(), 0, "The scenario must produce actual physics ram damage.");
+                Assert.Greater(streams.Data->RamPairs.Count, 0, "The scenario must produce actual physics ram damage.");
                 Assert.IsTrue(f.Em.HasComponent<Hulk>(f.Roots[3]), "The scripted core kill must pass through ShipDeathSystem.");
                 Assert.AreEqual(HulkCause.CoreLost, f.Em.GetComponentData<HulkInfo>(f.Roots[3]).Cause);
                 using var hulks = f.Em.CreateEntityQuery(typeof(HulkInfo));
