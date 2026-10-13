@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-009 | delivered 80ba1e65; real validation dependency wait | AUD-013 after AUD-008/009 done |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-012 | dispatched from main ac6ce962; AUD-008 delivered 5bf0008e | faction converter |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-012 | delivered 848b2932; real validation/dependency wait | next eligible standard task after batch closeout |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-001 | delivered 6a0f72a0; real dependency/validation wait | QST-002 after QST-001 and SPEC-40 |
 
 ## Operating rules
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **MIG-012 delivery:** `848b29324acf0e3810d2529f3acac4f60f53abe1`, clean worker branch. Exact three-faction converter and protected generation recipe; 1 required test + 1 migration safety extra, Unity/generation pending. Source review/integration next; preserve primary source during session73915. All three worker deliveries are now held in explicit dependency/validation waits; remaining Ready standard rows are assigned, owner-only or missing real prerequisites.
 
 - **Next-batch preparation:** QST-001 delivery `6a0f72a0` reviewed against SPEC-42 contract declarations and module boundaries; prepared as `7d12d0fb` in existing isolated lead checkout, branch `task/QST-001-contract-integration`. SPEC-42 Q7–8 mirrored there as ledger Q278. One required test, zero extras; Unity compile/test pending. Primary full session 73915 stays unchanged and live. Preserve this prepared branch when resuming frontier work; no working narrative runtime claim.
 
