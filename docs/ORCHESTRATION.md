@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AI-007 | claimed; dispatching steering | enemy flight |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-005 | delivered afe60010; awaiting serialized validation | ability integration |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AI-008 | claimed; dispatching combat status | combat integration |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AI-007 | active; steering and four required checks | enemy flight |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-005 | repairing two scenario failures after validation | ability integration |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AI-008 | active; combat status and three required checks | combat integration |
 
 ## Operating rules
 
@@ -18,7 +18,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- **Preview/ability compile repairs:** terminal14093 found CS1654 on readonly using NativeList target assignment; a2e9b77e uses a writable array view. Terminal94076 found two fixture struct-return/using assignment errors;89f71874 fixes History capacity assignment and changed-coordinate construction. Serialized compile/GridEditTests/AbilityScenarioTests retry56615 is active; primary runtime frozen until terminal. AI-007/008 workers verified active atcursors126/111. No acceptance claim yet.
+- **Preview acceptance / ability repair:** session56615 terminated exit1: compile clean, GridEditTests3/3 passed, AbilityScenarioTests2/4 passed. Failed boost physical speed settling (141.159866 versus120±2.4 after180ticks) and shield re-enable expected1/actual0; archived `preview-abilities/abilities-first-failed.xml`. Existing ability worker assigned evidence-based repair, preserving functional assertions; combat/presentation workers confirmed active atcursors127/112. Serialized advisory GridEditPerfTests session67932 now active; no primary runtime mutation until terminal. Full compatible regression remains pending; neither task closed. Previous owner-question turn was no implementation progress; this continuation dispatched repairs and started required measurement.
 
 - **Workers recycled / next batch integrated:** AI-006 closed7e52f91d and claims811feca5 are on local main. Existing combat AI-007 activecursor125 and presentation AI-008 activecursor110; power ABL-005 delivered/validation wait. Primary `task/VOX-020-integrated-preview` integrates46c0a916/af32d7f4/2c878b9a/2a841f92 plusc65a62ec (ABL-005). Q294 mirrorsSPEC24Q9. Serialized compile and grouped GridEditTests/AbilityScenarioTests now active as session14093; no primary runtime mutations until terminal and no completion claim for either task. Original isolated branches preserved.
 
