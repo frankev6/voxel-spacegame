@@ -9,7 +9,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | GAL-012 | claimed; author real M3 world content | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-009 | claimed; ENC-010248f274c delivered, lead integration pending | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | TRV-002 | claimed; HUD-005366615a9/114e6713 awaits lead integration | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | FND-012 | claimed; TRV-002 delivery pending lead content integration | HUD-003/006/007 once ready |
 
 ## Operating rules
 
