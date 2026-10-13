@@ -471,7 +471,7 @@ Common to all: `projectileRadius` 0.1 m (flak 0.2, missile 0.3); `fireConeDeg` 3
 | `WeaponStatsSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(ShipStatsAggregateSystem))]` | yes | `GameplayActive`, `WeaponDefsRef`, `BlockModulesRef` |
 | `PlayerTargetingSystem` | normal bucket in `ShipCommandGroup`, after the `OrderFirst` `PlayerCommandApplySystem` without a cross-bucket attribute (SPEC-02 decision 13, Q40) | yes | `GameplayActive`, `SpatialHash`, `FactionRelations`, `WeaponTuning`, `SimClock` |
 | `WeaponAimSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(PlanarConstraintSystem))]` | yes | `GameplayActive`, `WeaponDefsRef`, `WeaponTuning`, `SpatialHash` |
-| `WeaponFireSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(WeaponAimSystem))]`, `[UpdateBefore(typeof(AbilityActivationGroup))]` | yes | `GameplayActive`, `WeaponDefsRef`, `WeaponTuning`, `ProjectileStore`, `SimClock` |
+| `WeaponFireSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(WeaponAimSystem))]`, `[UpdateBefore(typeof(AbilityActivationGroup))]` | yes | `GameplayActive`, `WeaponDefsRef`, `WeaponTuning`, `SimClock` |
 | `ProjectileShotHandlerSystem`, `BeamShotHandlerSystem` | `GameplayPrePhysicsGroup`, `[UpdateAfter(typeof(WeaponFireSystem))]`, `[UpdateBefore(typeof(AbilityActivationGroup))]` (§5.5b) | yes | `GameplayActive`, `WeaponDefsRef`, `SimClock` (projectiles also `ProjectileStore`) |
 | `ProjectileStepSystem` | `GameplayPostPhysicsGroup`, `[UpdateAfter(typeof(ImpactEventSystem))]` | yes | `GameplayActive`, `DamageStreams`, `ShieldHitStreams`, `SpatialHash`, `WeaponDefsRef`, `SimClock` |
 | `BeamStepSystem` | `GameplayPostPhysicsGroup`, `[UpdateAfter(typeof(ProjectileStepSystem))]`, `[UpdateBefore(typeof(DamageResolveSystem))]` | yes | same |
@@ -923,6 +923,8 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 | 61 | Fractional trigger carry and reconstructing a pellet RNG in a later delivery handler | Preserve negative sub-tick carry while actively firing; clamp idle/power/active-beam waiting to zero so no triggers bank. A zero initial cooldown fires immediately without subtracting an extra first tick. Seed each pellet with decision 8 using its own ShotId and shooter persistent id (zero for unidentified fixtures); consume two spread samples, then reconstruct that same seed and skip those two samples for lifetime. This makes variable lifetime independent of delivery batching and entity allocation. | Tech lead |
 
 | 62 | WPN-007 requires real pulse duration before WPN-009 supplies beam hit resolution | Bring forward BeamStepSystem pulse lifetime, muzzle/range endpoint and power/core-loss cancellation only. Its production post-physics update consumes the release tick and reaches zero after exactly BeamPulseTicks; WPN-007 tests that system, not a test countdown. WPN-009 remains todo with precise TODO markers for first-hit casts, damage/shield streams and impact effects. | Tech lead |
+
+| 63 | Old timeline requires ProjectileStore on delivery-agnostic firing | Remove that prerequisite from WeaponFireSystem; only ProjectileShotHandlerSystem requires the store. Beam/custom shot production and regression scenarios may run without a projectile consumer. Keep all native shot-channel lifetime guards. | Tech lead |
 
 ## 11. References
 

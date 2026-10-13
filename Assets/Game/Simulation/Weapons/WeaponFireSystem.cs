@@ -49,7 +49,7 @@ namespace Game.Simulation.Weapons
             job.Dormant = state.GetComponentLookup<Dormant>(true);
             job.Spawning = state.GetComponentLookup<GridSpawning>(true);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<WeaponDefsRef>(); state.RequireForUpdate<SimClock>();
-            state.RequireForUpdate<WeaponTuning>(); state.RequireForUpdate<ProjectileStore>();
+            state.RequireForUpdate<WeaponTuning>();
             state.RequireForUpdate<FxEventQueue>(); state.RequireForUpdate<SfxEventQueue>(); state.RequireForUpdate<FactionRelations>();
         }
         [BurstCompile] public void OnDestroy(ref SystemState state) { state.CompleteDependency(); owned.Access.Dispose(); owned.Shots.Dispose(); }
