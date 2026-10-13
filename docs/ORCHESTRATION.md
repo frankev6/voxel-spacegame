@@ -18,7 +18,9 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- **MIG-012 delivery:** `848b29324acf0e3810d2529f3acac4f60f53abe1`, clean worker branch. Exact three-faction converter and protected generation recipe; 1 required test + 1 migration safety extra, Unity/generation pending. Source review/integration next; preserve primary source during session73915. All three worker deliveries are now held in explicit dependency/validation waits; remaining Ready standard rows are assigned, owner-only or missing real prerequisites.
+- **Validation progress:** session73915 reports full EditMode **1164/0/1**, compile clean with zero C# warnings; continues full PlayMode including the destruction soak. Exact session remains live. No batch closeout until terminal and live gameplay proof.
+
+- **MIG-012 delivery:** `848b29324acf0e3810d2529f3acac4f60f53abe1`, clean worker branch. Exact three-faction converter and protected generation recipe; 1 required test + 1 migration safety extra, Unity/generation pending. Reviewed strict mapping/protected writer and both tests; prepared `6b70ddd` on `task/MIG-012-faction-integration` in the existing isolated lead checkout, atop prepared QST-001. Q279 mirrors SPEC-72 Q42–44 there. Authored audio protection and faction count 105 both retained. Preserve primary source during session73915. All three worker deliveries are now held in explicit dependency/validation waits; remaining Ready standard rows are assigned, owner-only or missing real prerequisites.
 
 - **Next-batch preparation:** QST-001 delivery `6a0f72a0` reviewed against SPEC-42 contract declarations and module boundaries; prepared as `7d12d0fb` in existing isolated lead checkout, branch `task/QST-001-contract-integration`. SPEC-42 Q7–8 mirrored there as ledger Q278. One required test, zero extras; Unity compile/test pending. Primary full session 73915 stays unchanged and live. Preserve this prepared branch when resuming frontier work; no working narrative runtime claim.
 
