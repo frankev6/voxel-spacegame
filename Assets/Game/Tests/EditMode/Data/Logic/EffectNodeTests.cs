@@ -87,14 +87,14 @@ namespace Game.Tests.EditMode.Data.Logic
                 var report = new ValidationReport("effect fixture"); Facts = FactCatalog.Build(content, refs, report);
                 Assert.IsFalse(report.HasErrors, report.ToText()); compiler = new LogicCompiler(Facts, refs, new LogicFunctionRegistry());
                 Context = new RecordingContext(Facts) { CurrentStarSystemOwnerFactionIndex = Index(RefKind.Faction, "faction_sample"),
-                    DefaultScope = new LogicScope(LogicUsage.DialogEffect, 3, 0, 5, true, new LogicBodyHandle(42, 1, 2, 0, default)) };
+                    DefaultScope = new LogicScope(LogicUsage.DialogCommand, 3, 0, 5, true, new LogicBodyHandle(42, 1, 2, 0, default)) };
             }
             internal int Index(RefKind kind, string id)
             { Assert.IsTrue(refs.TryGet(kind, out var resolver)); Assert.IsTrue(resolver.TryResolve(id, out int value), id); return value; }
             internal IEffect Effect(string source)
             {
                 var report = new ValidationReport(source);
-                Assert.IsTrue(compiler.TryCompileCommand(source, new LogicCompileOptions(LogicUsage.DialogEffect, "test:effects", "command"), report, out var effect), report.ToText());
+                Assert.IsTrue(compiler.TryCompileCommand(source, new LogicCompileOptions(LogicUsage.DialogCommand, "test:effects", "command"), report, out var effect), report.ToText());
                 effect.Validate(report); effect.Bind(new LogicBinder(Facts, refs, report)); Assert.IsFalse(report.HasErrors, report.ToText()); return effect;
             }
             internal CompiledEffectList List(params string[] source)
