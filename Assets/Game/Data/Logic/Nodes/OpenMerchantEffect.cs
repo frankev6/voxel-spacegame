@@ -13,9 +13,18 @@ namespace Game.Data.Logic.Nodes
         public EffectFlow Flow => EffectFlow.Blocking;
         public void Validate(ValidationReport report) => arguments.Validate(report);
         public void Bind(LogicBinder binder) => arguments.Bind("open_merchant", binder);
-        // TODO(NAR-005): implement effect execution, preflight and summed requirements.
-        public void Apply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public bool CanApply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public void AddRequirements(EffectRequirements requirements) => throw new NotImplementedException("NAR-005");
+        public void Apply(ILogicContext context)
+        {
+            if (!arguments.CanRoute("open_merchant")) return;
+            var continuation = (context as ILogicEffectHost)?.BlockingCommandCompleted;
+            if (continuation == null)
+            {
+                Game.Core.GameLog.ErrorOnce("NAR.Effect.MerchantContinuation", "Narrative", "open_merchant requires a dialog continuation; effect skipped.");
+                return;
+            }
+            context.World.OpenMerchant(arguments.Indices[0], context.Scope, continuation);
+        }
+        public bool CanApply(ILogicContext context) => (context as ILogicEffectHost)?.BlockingCommandCompleted != null;
+        public void AddRequirements(EffectRequirements requirements) { }
     }
 }

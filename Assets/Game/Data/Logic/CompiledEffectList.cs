@@ -50,7 +50,7 @@ namespace Game.Data.Logic
         }
         static bool Rejected(ILogicContext ctx)
         {
-            // TODO(NAR-005): route EffectRejected through a Data-owned context trace hook.
+            if (ctx is ILogicEffectHost host) host.EffectRejected();
             return false;
         }
         public bool IsStale => compilerVersion != Compiler.LogicCompiler.Version ||

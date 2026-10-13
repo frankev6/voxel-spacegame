@@ -1463,6 +1463,8 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 
 | 26 | AddRequirements has no context although item/credit counts may be expressions; earlier effects can change those expressions | Resolved: cost nodes register their expressions in reusable EffectRequirements. IsSatisfied evaluates and freezes each cost before any Apply, checks summed costs, and prepared spending uses that exact amount. Scratch maintains independent reusable frames for nested lists, restored in finally. Ordinary direct Apply evaluates its current expression. Public interfaces remain unchanged. | Tech lead — ledger Q350 |
 
+| 27 | Data effects cannot access narrative tracing or the dialog merchant continuation through ILogicContext | Resolved by ADR-0075: optional ILogicEffectHost exposes rejection tracing and the current blocking continuation without changing ILogicContext or module references. OpenMerchant rejects a missing continuation. App/dialog production wiring remains NAR-011/DLG-006; tests supply a recording host. | Tech lead — ledger Q351 |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/05-narrative-quests.md` (B3, B8, B10, B13, B14, B17; §5.3–§5.5, §5.12–§5.13), `00-synthesis.md` §6h.
