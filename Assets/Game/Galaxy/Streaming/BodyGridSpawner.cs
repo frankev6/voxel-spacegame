@@ -106,6 +106,18 @@ namespace Game.Galaxy.Streaming
         }
         internal void Capture(Lease lease, StarSystemDelta delta)
         {
+            // Even an unfinished grid must not lose its writable source when it is unloaded.
+            // The spawn/despawn owner can finish writeback into this same delta-owned clone.
+            if (lease.OwnsSource && em.Exists(lease.Root) && em.HasComponent<BodyGridOwner>(lease.Root))
+            {
+                var owner = em.GetComponentData<BodyGridOwner>(lease.Root);
+                if (owner.PersistDamage != 0)
+                {
+                    uint revision = em.HasComponent<VoxelGrid>(lease.Root) ? em.GetComponentData<VoxelGrid>(lease.Root).Revision : 0;
+                    delta.SetStructure(owner.Body.LocalKey, revision, lease.Source);
+                    lease.OwnsSource = false;
+                }
+            }
             if (DamageCapture.Capture(em, lease.Root, registry, delta)) lease.OwnsSource = false;
         }
         internal bool Release(Lease lease)
