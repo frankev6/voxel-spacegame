@@ -1303,7 +1303,7 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 - **Milestone:** M3
 - **Tier:** frontier — F5: routes logic to economy, quests, galaxy, encounters, UI and saves
 - **Depends on:** `NAR-005`, `NAR-010`, `FND-001`, `ECO-001`, `QST-001`
-- **Do:** Implement `LogicContext` (scope stack depth 8) and `LogicWorldAdapter` per the §5.5 table, wiring every member whose owner API exists at implementation time and listing the rest in `UnwiredMembers`. Implement the boot sequence of §5.3 in a `NarrativeBootstrap.Build(...)` static method that SPEC-01's `GameRoot` calls (open question 6); register `ILogicContext`, `NarrativeService`, `FactStore` in `Services`. Implement `NarrativeTickBridgeSystem` (§5.3).
+- **Do:** Implement ADR-0075 `ILogicEffectHost` on the context, forwarding rejection traces and exposing the dialog-owned read/write continuation. Implement `LogicContext` (scope stack depth 8) and `LogicWorldAdapter` per the §5.5 table, wiring every member whose owner API exists at implementation time and listing the rest in `UnwiredMembers`. Implement the boot sequence of §5.3 in a `NarrativeBootstrap.Build(...)` static method that SPEC-01's `GameRoot` calls (open question 6); register `ILogicContext`, `NarrativeService`, `FactStore` in `Services`. Implement `NarrativeTickBridgeSystem` (§5.3).
 - **Files:** `Assets/Game/App/Services/{LogicContext,LogicWorldAdapter,NarrativeBootstrap}.cs`; `Assets/Game/Presentation/Systems/NarrativeTickBridgeSystem.cs`; `Assets/Game/Tests/EditMode/App/LogicContextTests.cs`
 - **Acceptance criteria:**
   - [ ] `PushScope` beyond depth 8 throws `InvalidOperationException`; `Scope` returns the innermost.

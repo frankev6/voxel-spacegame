@@ -642,7 +642,7 @@ sequenceDiagram
 - **Milestone:** M3
 - **Tier:** frontier — F5: ordering between runner, effects, presenter, beat service and terminal actions
 - **Depends on:** `DLG-001`, `SPEC-40`
-- **Do:** Implement `DialogService` (§5.3), `DialogMemory`, `DialogCommandTable`, deterministic `Roll` (§5.6) and `DialogSaveParticipant` (§4.10; register `DLGS` order 50). Build `FakeDialogRunner` (scripted runner for tests) under Tests.
+- **Do:** Install and restore the current blocking continuation through ADR-0075 `ILogicEffectHost.BlockingCommandCompleted`; the callback queues resume for Pump, never re-enters the runner. Implement `DialogService` (§5.3), `DialogMemory`, `DialogCommandTable`, deterministic `Roll` (§5.6) and `DialogSaveParticipant` (§4.10; register `DLGS` order 50). Build `FakeDialogRunner` (scripted runner for tests) under Tests.
 - **Files:** `Assets/Game/Narrative/Dialog/{DialogService,DialogMemory,DialogCommandTable,DialogSaveParticipant}.cs`; `Assets/Game/Tests/EditMode/Narrative/{DialogServiceTests,FakeDialogRunner,DialogServicePerfTests}.cs`
 - **Acceptance criteria:**
   - [ ] Lines are delivered one `Continue` per line from `Pump`, never re-entrantly; max 16 per pump.

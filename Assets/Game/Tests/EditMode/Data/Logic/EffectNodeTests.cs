@@ -157,6 +157,7 @@ namespace Game.Tests.EditMode.Data.Logic
         public RecordingContext(FactCatalog catalog)
         {
             this.catalog = catalog; Values = new int[catalog.Count];
+            BlockingCommandCompleted = Resume;
             for (int i = 0; i < Values.Length; i++) Values[i] = catalog.DefaultAt(i);
         }
         public void PushScope(in LogicScope scope) { if (depth == scopes.Length) throw new InvalidOperationException("Scope depth exceeds eight."); scopes[depth++] = scope; }
@@ -190,7 +191,7 @@ namespace Game.Tests.EditMode.Data.Logic
         public ulong LootSalt;
         public LogicScope LastScope;
         public Action LastContinuation;
-        public Action BlockingCommandCompleted => Resume;
+        public Action BlockingCommandCompleted { get; set; }
         void Resume() => Resumed++;
         public void EffectRejected() => Rejections++;
         public void GiveItems(int itemIndex, int count) { Items[itemIndex] = GetItemCount(itemIndex) + count; Calls.Add($"give_item:{itemIndex}:{count}"); }
