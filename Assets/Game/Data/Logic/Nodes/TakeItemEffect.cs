@@ -13,9 +13,31 @@ namespace Game.Data.Logic.Nodes
         public EffectFlow Flow => EffectFlow.Immediate;
         public void Validate(ValidationReport report) => arguments.Validate(report);
         public void Bind(LogicBinder binder) => arguments.Bind("take_item", binder);
-        // TODO(NAR-005): implement effect execution, preflight and summed requirements.
-        public void Apply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public bool CanApply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public void AddRequirements(EffectRequirements requirements) => throw new NotImplementedException("NAR-005");
+        public void Apply(ILogicContext context)
+        {
+            if (!arguments.CanRoute("take_item")) return;
+            Spend(context, arguments.Integers[1].Evaluate(context));
+        }
+        internal void ApplyPrepared(ILogicContext context, EffectRequirements requirements)
+        {
+            if (!arguments.CanRoute("take_item")) return;
+            Spend(context, requirements.PreparedCost(this));
+        }
+        void Spend(ILogicContext context, int amount)
+        {
+            if (amount < 1 || !context.Economy.TryTakeItems(arguments.Indices[0], amount))
+                Game.Core.GameLog.ErrorOnce("NAR.Effect.Unpaid.take_item", "Narrative", "take_item could not pay its cost; no resources taken.");
+        }
+        public bool CanApply(ILogicContext context)
+        {
+            if (arguments.Indices == null || arguments.Indices.Length == 0 || arguments.Indices[0] == 0) return true; // Unresolved references are logged no-ops at execution.
+            int amount = arguments.Integers[1].Evaluate(context);
+            return amount > 0 && context.Economy.GetItemCount(arguments.Indices[0]) >= amount;
+        }
+        public void AddRequirements(EffectRequirements requirements)
+        {
+            if (arguments.Indices == null || arguments.Indices.Length == 0 || arguments.Indices[0] == 0) return;
+            requirements.AddDeferredCost(this, arguments.Indices[0], arguments.Integers[1]);
+        }
     }
 }
