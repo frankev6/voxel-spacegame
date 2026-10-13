@@ -1326,6 +1326,9 @@ Visibility:
 | 4 | Galaxy size for M4 | `galaxyRadiusLy` 60, 200 star systems | Owner |
 | 5 | Condition shape for gated lanes | **Answered:** SPEC-40 `CompiledCondition` with the SPEC-40 text syntax (`$gate_ark_start_active`) | SPEC-40 |
 | 15 | Non-destructible bodies | `destructible = false` → SPEC-13 `DamageImmune` tag on the grid | SPEC-13 |
+| 16 | §4.6 spells the structure type `Game.Voxel.VoxelStructure`, but SPEC-10 decision 17 / §4.3 and the existing implementation place it in `Game.Voxel.Model`. | Use `Game.Voxel.Model.VoxelStructure` in `StructureDiffRecord.Structure` and `StarSystemDelta.SetStructure`; preserve the existing owning type. | Tech lead — resolved by GAL-001 transcription against the owning contract; central mirror pending. |
+| 17 | §4.8's readonly frame context (and §5.12's readonly map entries referenced there) omit constructors, so callers cannot supply non-default values. | Add constructors assigning every stated readonly field, in declaration order, without changing fields or adding behavior. | Tech lead — resolved by GAL-001; central mirror pending. |
+| 18 | §4.8 omits `GalaxyService.GetStartLocation`, although §6 and SPEC-01's new-game flow require it. | Include the stated `PlayerLocation GetStartLocation()` contract, with a GAL-008 throwing stub; no start-position computation in GAL-001. | Tech lead — resolved by GAL-001 against the existing public API; central mirror pending. |
 
 ## 11. References
 
