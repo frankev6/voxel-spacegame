@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 62 | 5 | 0 | 0 | 24 | 0 | 91 | 3 |
-| M3 | 178 | 0 | 0 | 0 | 2 | 0 | 180 | 11 |
+| M3 | 177 | 1 | 0 | 0 | 2 | 0 | 180 | 10 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
@@ -313,7 +313,7 @@
 | PERS-014 | Regression scenario 04-B1: load after a content change (end to end) | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | standard | PERS-010, SPEC-01, SPEC-50, SPEC-61, TST-001 | no | todo |  |  |  |  |
 | PERS-015 | Full-world round trip with all real participants | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-011, PERS-012, SPEC-01, SPEC-30, SPEC-31, SPEC-33, SPEC-40, SPEC-41, SPEC-42, SPEC-50 | no | todo |  |  |  |  |
 | VOX-020 | Incremental grid edits for the editor preview | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M3 | frontier | VOX-014 | yes | todo |  |  |  |  |
-| PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | yes | todo |  |  |  |  |
+| PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | yes | in-progress | power (gpt-6.1-sol) | 2026-10-13 |  | Independent ready task during PWR-001 central validation; ADR-0062. |
 | DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | yes | todo |  |  |  | partial in DMG-002: channels/contracts and readback / impulse consumer and bounded heal/place passes with nine required tests |
 | AI-013 | Fleet data and formations | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-003 | no | todo |  |  |  |  |
 | AI-014 | FleetSystem and member thinking | [SPEC-23](specs/SPEC-23-ai.md) | M3 | frontier | AI-013, AI-007 | no | todo |  |  |  |  |
