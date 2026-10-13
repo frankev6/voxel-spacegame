@@ -1453,6 +1453,8 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 
 | 21 | Rule provider numeric orders contradict the required dialog-before-quest sequence | **Resolved (2026-10-13):** SPEC-41 dialog Order10, SPEC-42 quest20/mystery30; retain numeric sorting and ordinal type-name tie breaks. This affects editor rules only. | Tech lead |
 
+| 22 | NAR-015 placement generation requires absent starsys_whisper and encounter_traveling_merchant assets despite its declared code dependencies being ready | **Resolved (2026-10-13):** fully implement and verify conversion with isolated typed fixture references, but production preflight must fail before output writes until GAL-012/ENC-010 supply the actual authored references. Do not generate fake definitions or serialize null locations. NAR-015 remains open until real content is generated and checked. | Tech lead |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/05-narrative-quests.md` (B3, B8, B10, B13, B14, B17; §5.3–§5.5, §5.12–§5.13), `00-synthesis.md` §6h.

@@ -384,7 +384,7 @@
 | NAR-012 | World-event bridge | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-011, SYS-001, ENC-001 | no | todo |  |  |  |  |
 | NAR-013 | Narrative validator framework and fact rules | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-009 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | e81dc6d | Scratch validator, V001–008 and CLI; reviewed repair, 7 focused checks pass; downstream owner stubs remain explicit diagnostics |
 | NAR-014 | Legacy converter: reading, mapping tables and logic translation | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, MIG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 2be62596 | Strict five-file loader and mapped logic; 5 focused checks pass; emission/assets remain NAR-015/016 |
-| NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead: deterministic dialogue emission and writing preservation |
+| NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Converter implemented; clean compile + 6 required checks pass; real generation awaits GAL-012/ENC-010 placement assets (Q325) |
 | NAR-016 | Legacy converter: quests, triggers, templates and flag assets | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-015 | no | todo |  |  |  |  |
 | NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | no | todo |  |  |  |  |
 | NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | no | todo |  |  |  |  |
@@ -911,6 +911,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 318 | SPEC-40 Q19: legacy translation boundary and defaults | Resolved: retain source metadata for emission; decimal cumulative thresholds, source-ordered quest logs, canonical provisional journal labels and contextual item mappings. No runtime/asset emission in NAR-014. | Tech lead |
 | 319 | SPEC-61 Q23: save/load construction versus composition cycle | Resolved: explicit completed UI/save/flow prerequisites allow parallel source construction; shared production hookup and full functional/layout acceptance remain required. ADR-0072 amended. | Tech lead |
 | 320 | SPEC-60 Q30: layout audit scroll/measurement semantics | Resolved: exclude scroll content subtree but audit viewport; use intrinsic nowrap width, clear result list and check all containing panels. Functional acceptance pending. | Tech lead |
+| 325 | SPEC-40 Q22: missing production beat placement assets | Resolved: strict no-write preflight until GAL-012/ENC-010 supply starsys_whisper and encounter_traveling_merchant; fixture references only in tests. NAR-015 stays open. | Tech lead |
 | 324 | SPEC-60 Q32: stale accessibility font-size example | Resolved: use approved 16px body token, 21px at130%; preserve theme and factor-based checks. | Tech lead |
 | 323 | SPEC-40 Q21 / SPEC-41 Q10: contradictory narrative rule provider order | Resolved: dialog10, quest20, mystery30 using numeric sorting; runtime system order unchanged. | Tech lead |
 | 322 | SPEC-40 Q20: narrative validator partial owner and analysis semantics | Resolved: declared defaults/comparison polarity, explicit debug exemption, scratch ownership and missing adapter manifest warnings; source-owner stubs remain diagnostics. Seven required cases pass. | Tech lead |
@@ -1026,6 +1027,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Dialogue converter functional checks passed — astra (gpt-6)
+
+- NAR-015 converter/emitter/manifest/beat writer implemented; six required checks cover actual34 encounters,93 pages,188 options, every emitted string, file-byte determinism under force, unique IDs, pool comments, terminal commands and nested returns.
+- Compile17861 clean, zero CS warnings; focused65416 six passed. Evidence `Logs/playtest/legacy-narrative/{compile.log,acceptance.xml}`. Test count: spec-required: 6, extra: 0. No broad suite or benchmark.
+- Production assets not generated: repository contains neither starsys_whisper nor encounter_traveling_merchant. SPEC-40 Q22 / ledger325 keeps typed-reference preflight strict and NAR-015 open pending actual GAL-012/ENC-010 content. Fixture-only definitions are deleted at teardown.
 
 ### 2026-10-13 — Accessibility accepted — astra (gpt-6)
 

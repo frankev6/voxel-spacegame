@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Converter functional checks pass:** compile17861 clean, focused65416 six passed, evidence legacy-narrative/. Real generated content still absent: actual starsys_whisper/encounter_traveling_merchant references missing, Q325; NAR-015 remains open. Next inspect real GAL-012/ENC-010 readiness rather than invent assets or idle workers. HUD-004158 active; two explicit standard dependency waits. Previous turn connected converter (progress).
+
 - **Converter connected:** NAR-015 prepares dialogue/manifest and typed placements entirely before writes, checks every existing output and asset type, then uses GUID-preserving asset writes and unchanged-text suppression; CLI/menu and --force handling authored. Six required cases, compile and real content generation remain. No test run. HUD-004157 active; two recorded dependency waits remain. Previous turn implemented beat/fact writer (progress).
 
 - **Beat/fact writer authored:** NAR-015 now maps all34 SPEC-42 placements explicitly, preserves typed star-system/hail references, nested Manual triggers, conditions/salience/repeat/debug and sorted legacy fact fields. Shared migration writer preserves existing GUIDs; converter-level preflight/force handling, asset generation and six acceptance cases still remain. No compile/test yet. Accepted main merged1485eee7; earlier emitter/manifest work preserved. Previous turn accepted accessibility (progress).
