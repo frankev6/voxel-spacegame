@@ -625,6 +625,8 @@ Timing tests run with safety checks off (SPEC-71 perf fixture). Functional tests
 
 | 15 | AUD-005 needs managed 2D playback before AUD-006's SFX allocator and AUD-008's music director exist | Use existing pooled sources and the specified victim rules; keep spatial playback deferred, retain unducked music gains | Tech lead | Resolved AUD-005: per-cue cached definitions/clip history and UI cooldowns allocate only at construction. Non-UI 2D calls use the existing 40-source pool with §5.3 priority/audibility victim rules until AUD-006 centralizes allocation. PlayCueAt skips spatial cues until then. AUD-008 supplies base crossfade gains through internal SetMusicVoiceVolumes before ducking; source/mixer volumes never compound. Null config stays silent until AUD-007. |
 
+| 16 | Native queue producer lifetime cannot rely on component reads alone (ledger Q169) | Resolved ADR-0067: embed GuardedHandles in SfxEventQueue; shared atomic producers publish BeginRead/EndRead handles, presentation/managed enqueue complete guarded access, and the creation system disposes both allocations after completion. Update ram, split and ship-death producers together. No event-layout or assembly changes. | Tech lead |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/LEDGER.md` R5/R7 (missing listener); `04-persistence-data.md` B12 (compounding volume), §6.7 (mixer groups, log-dB), §9 (entity per sound); `02-combat-destruction.md` C29 (audio events accumulating), §5.6 (one ram sound per pair per cooldown), §5.8 (aggregate SfxEvent per frame); `06-ui-shipeditor.md` D3/D4/D8 (UI sound bugs); `07-project-health.md` §5 (music should stream), §6 (unreachable mp3s).
