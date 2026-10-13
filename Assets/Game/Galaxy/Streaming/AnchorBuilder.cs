@@ -64,7 +64,8 @@ namespace Game.Galaxy.Streaming
                         }
                         if (interact) em.SetComponentData(entity, new Interactable { Kind = template.Interaction,
                             TemplateIndex = spec.TemplateIndex, DistanceM = template.InteractionDistanceM, Body = spec.Id });
-                        loaded.Add(spec.Id.LocalKey, new LoadedBody { Anchor = entity, StructureHandle = -1 });
+                        loaded.Add(spec.Id.LocalKey, new LoadedBody { Anchor = entity, StructureHandle = -1,
+                            WantsGrid = (byte)(template.StructureSource != StructureSource.None ? 1 : 0) });
                     }
                 }
                 em.AddSharedComponent(all.AsArray(), new StarSystemMember { Id = content.Id });
