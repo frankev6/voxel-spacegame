@@ -11,9 +11,12 @@ namespace Game.Data.Logic.Nodes
         [SerializeReference] private IIntExpr operand;
         public NegateExpr() { }
         internal NegateExpr(IIntExpr operand) { this.operand = operand; }
-        // TODO(NAR-004): evaluate logical negation or saturating integer negation.
-        public int Evaluate(ILogicContext context) => throw new NotImplementedException("NAR-004");
-        public void Validate(ValidationReport report) => operand?.Validate(report);
+        public int Evaluate(ILogicContext context) => operand != null ? LogicFunctionInfo.Saturate(-(long)operand.Evaluate(context)) : 0;
+        public void Validate(ValidationReport report)
+        {
+            if (operand == null) report.Error("NAR-E009", "", "", "Compiled node is missing an operand.");
+            else operand.Validate(report);
+        }
         public void Bind(LogicBinder binder) => operand?.Bind(binder);
         public void CollectDependencies(List<LogicDependency> into) => operand?.CollectDependencies(into);
     }

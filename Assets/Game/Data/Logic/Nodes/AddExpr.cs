@@ -11,9 +11,12 @@ namespace Game.Data.Logic.Nodes
         [SerializeReference] private IIntExpr left, right;
         public AddExpr() { }
         internal AddExpr(IIntExpr left, IIntExpr right) { this.left = left; this.right = right; }
-        // TODO(NAR-004): evaluate with short-circuit logic or saturating arithmetic.
-        public int Evaluate(ILogicContext context) => throw new NotImplementedException("NAR-004");
-        public void Validate(ValidationReport report) { left?.Validate(report); right?.Validate(report); }
+        public int Evaluate(ILogicContext context) => left != null && right != null ? LogicFunctionInfo.Saturate((long)left.Evaluate(context) + right.Evaluate(context)) : 0;
+        public void Validate(ValidationReport report)
+        {
+            if (left == null || right == null) report.Error("NAR-E009", "", "", "Compiled node is missing an operand.");
+            left?.Validate(report); right?.Validate(report);
+        }
         public void Bind(LogicBinder binder) { left?.Bind(binder); right?.Bind(binder); }
         public void CollectDependencies(List<LogicDependency> into) { left?.CollectDependencies(into); right?.CollectDependencies(into); }
     }

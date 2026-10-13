@@ -11,8 +11,7 @@ namespace Game.Data.Logic.Nodes
         [SerializeField] private bool value;
         public BoolLiteral() { }
         internal BoolLiteral(bool value) { this.value = value; }
-        // TODO(NAR-004): evaluate literal nodes.
-        public bool Evaluate(ILogicContext context) => throw new NotImplementedException("NAR-004");
+        public bool Evaluate(ILogicContext context) => value;
         public void Validate(ValidationReport report) { }
         public void Bind(LogicBinder binder) { }
         public void CollectDependencies(List<LogicDependency> into) { }

@@ -12,9 +12,9 @@ namespace Game.Data.Logic.Nodes
         [NonSerialized] private int slot = -1;
         public FactBoolRead() { }
         internal FactBoolRead(string name) { this.name = name; }
-        // TODO(NAR-004): evaluate the bound slot, failing closed when unbound.
-        public bool Evaluate(ILogicContext context) => throw new NotImplementedException("NAR-004");
-        public void Validate(ValidationReport report) { }
+        public bool Evaluate(ILogicContext context) => slot >= 0 && context.Facts.GetBySlot(slot) != 0;
+        public void Validate(ValidationReport report)
+        { if (string.IsNullOrEmpty(name)) report.Error("NAR-E006", "", "", "Compiled fact read has no name."); }
         public void Bind(LogicBinder binder) { slot = binder.BindFact(name); }
         public void CollectDependencies(List<LogicDependency> into)
         {

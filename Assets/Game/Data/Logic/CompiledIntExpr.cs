@@ -12,6 +12,7 @@ namespace Game.Data.Logic
         [UnityEngine.SerializeField] private int compilerVersion;
         [UnityEngine.SerializeField] private bool hasErrors;
         [UnityEngine.SerializeReference] private IIntExpr root;
+        [System.NonSerialized] private bool warned;
 
         public string Source => source;
         public bool HasErrors => hasErrors;
@@ -20,12 +21,17 @@ namespace Game.Data.Logic
         internal void SetCompiled(IIntExpr compiledRoot, bool failed)
         {
             hasErrors = failed;
+            warned = false;
             root = failed ? null : compiledRoot;
             sourceHash = Game.Core.StableHash.Hash64(source ?? "");
             compilerVersion = Compiler.LogicCompiler.Version;
         }
-        // TODO(NAR-004): evaluate the compiled integer root, with zero for empty source.
-        public int Evaluate(ILogicContext ctx) => throw new System.NotImplementedException("NAR-004");
+        public int Evaluate(ILogicContext ctx)
+        {
+            if (!hasErrors) return root != null ? root.Evaluate(ctx) : 0;
+            if (!warned) { warned = true; Game.Core.GameLog.WarnOnce("NAR.IntExpr." + sourceHash, "NAR", "Integer expression failed to compile; evaluates zero."); }
+            return 0;
+        }
         public void Validate(ValidationReport report)
         {
             if (IsStale) report.Error("NAR-E017", "", "", "Compiled logic is stale; recompile (Game/Narrative/Recompile All Logic).");

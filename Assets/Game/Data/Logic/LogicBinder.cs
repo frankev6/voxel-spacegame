@@ -56,6 +56,16 @@ namespace Game.Data.Logic
             return 0;
         }
 
+        /// <summary>Bind-time dependency expansion for relation(owner), whose current faction may change after binding.</summary>
+        internal int[] BindRelationDependencies()
+        {
+            if (!refs.TryGet(RefKind.Faction, out var resolver)) return Array.Empty<int>();
+            var indices = new System.Collections.Generic.List<int>(resolver.AllIds.Count);
+            foreach (string id in resolver.AllIds)
+                if (resolver.TryResolve(id, out int index) && index > 0 && !indices.Contains(index)) indices.Add(index);
+            indices.Sort(); return indices.ToArray();
+        }
+
         static string Suggestion(string value) => value == null ? "" : "; did you mean '" + value + "'?";
     }
 }

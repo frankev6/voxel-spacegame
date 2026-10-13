@@ -9,6 +9,7 @@ namespace Game.Data.Logic
         [UnityEngine.SerializeField] private int compilerVersion;         // LogicCompiler.Version at last compile
         [UnityEngine.SerializeField] private bool hasErrors;
         [UnityEngine.SerializeReference] private ICondition root;         // null when source is empty or hasErrors
+        [System.NonSerialized] private bool warned;
         public string Source => source;
         public bool HasErrors => hasErrors;
         public bool IsAlwaysTrue => !hasErrors && root == null;
@@ -17,12 +18,17 @@ namespace Game.Data.Logic
         internal void SetCompiled(ICondition compiledRoot, bool failed)
         {
             hasErrors = failed;
+            warned = false;
             root = failed ? null : compiledRoot;
             sourceHash = Game.Core.StableHash.Hash64(source ?? "");
             compilerVersion = Compiler.LogicCompiler.Version;
         }
-        // TODO(NAR-004): implement fail-closed condition evaluation over the compiled root.
-        public bool Evaluate(ILogicContext ctx) => throw new System.NotImplementedException("NAR-004");
+        public bool Evaluate(ILogicContext ctx)
+        {
+            if (!hasErrors) return root == null || root.Evaluate(ctx);
+            if (!warned) { warned = true; Game.Core.GameLog.WarnOnce("NAR.Condition." + sourceHash, "NAR", "Condition failed to compile; evaluates false."); }
+            return false;
+        }
         public void Validate(Game.Data.Validation.ValidationReport report)
         {
             if (IsStale) report.Error("NAR-E017", "", "", "Compiled logic is stale; recompile (Game/Narrative/Recompile All Logic).");

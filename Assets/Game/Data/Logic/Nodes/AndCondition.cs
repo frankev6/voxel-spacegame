@@ -11,9 +11,12 @@ namespace Game.Data.Logic.Nodes
         [SerializeReference] private ICondition left, right;
         public AndCondition() { }
         internal AndCondition(ICondition left, ICondition right) { this.left = left; this.right = right; }
-        // TODO(NAR-004): evaluate with short-circuit logic or saturating arithmetic.
-        public bool Evaluate(ILogicContext context) => throw new NotImplementedException("NAR-004");
-        public void Validate(ValidationReport report) { left?.Validate(report); right?.Validate(report); }
+        public bool Evaluate(ILogicContext context) => left != null && right != null && left.Evaluate(context) && right.Evaluate(context);
+        public void Validate(ValidationReport report)
+        {
+            if (left == null || right == null) report.Error("NAR-E009", "", "", "Compiled node is missing an operand.");
+            left?.Validate(report); right?.Validate(report);
+        }
         public void Bind(LogicBinder binder) { left?.Bind(binder); right?.Bind(binder); }
         public void CollectDependencies(List<LogicDependency> into) { left?.CollectDependencies(into); right?.CollectDependencies(into); }
     }

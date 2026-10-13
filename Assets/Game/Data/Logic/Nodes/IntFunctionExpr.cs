@@ -15,6 +15,8 @@ namespace Game.Data.Logic.Nodes
         [NonSerialized] private LogicFunctionInfo info;
         [NonSerialized] private int[] indices;
         [NonSerialized] private int[] factSlots;
+        [NonSerialized] private FunctionEvaluation evaluation;
+        [NonSerialized] private int[] ownerRelations = Array.Empty<int>();
         public IntFunctionExpr() { }
         internal IntFunctionExpr(LogicFunctionInfo info, ReadOnlySpan<object> arguments)
         {
@@ -28,19 +30,25 @@ namespace Game.Data.Logic.Nodes
                 textArgs[i] = arguments[i] as string;
             }
         }
-        // TODO(NAR-004): evaluate the bound vocabulary function without allocations.
-        public int Evaluate(ILogicContext context) => throw new NotImplementedException("NAR-004");
+        public int Evaluate(ILogicContext context) => evaluation != null ? evaluation.Evaluate(context).Int : 0;
         public void Validate(ValidationReport report)
         {
             if (!new LogicFunctionRegistry().TryGet(function, out var metadata) || metadata.IsEffect)
-                report.Error("NAR-E003", "", "", "Unknown function '" + function + "'.");
+            { report.Error("NAR-E003", "", "", "Unknown function '" + function + "'."); return; }
+            if (metadata.ReturnType != LogicType.Int)
+            { report.Error("NAR-E005", "", "", "Function return type does not match the compiled node."); return; }
+            if (!FunctionEvaluation.ValidateShape(metadata, intArgs, boolArgs, textArgs, report)) return;
             foreach (var arg in intArgs) arg?.Validate(report);
             foreach (var arg in boolArgs) arg?.Validate(report);
         }
         public void Bind(LogicBinder binder)
         {
+            evaluation = null; ownerRelations = Array.Empty<int>();
             if (!new LogicFunctionRegistry().TryGet(function, out info))
                 throw new InvalidOperationException("Unknown compiled function: " + function);
+            if (info.IsEffect || info.ReturnType != LogicType.Int || intArgs == null || boolArgs == null || textArgs == null ||
+                intArgs.Length != info.Params.Length || boolArgs.Length != info.Params.Length || textArgs.Length != info.Params.Length)
+                throw new InvalidOperationException("Invalid compiled function shape: " + function);
             indices = new int[info.Params.Length]; factSlots = new int[info.Params.Length];
             for (int i = 0; i < info.Params.Length; i++)
             {
@@ -49,11 +57,13 @@ namespace Game.Data.Logic.Nodes
                 var parameter = info.Params[i];
                 if (parameter.ArgKind == LogicArgKind.Fact) factSlots[i] = binder.BindFact(textArgs[i]);
                 if (parameter.ArgKind != LogicArgKind.Ref) continue;
-                if (parameter.RefKind == RefKind.Faction && textArgs[i] == "owner") indices[i] = 0;
+                if (parameter.RefKind == RefKind.Faction && textArgs[i] == "owner")
+                { indices[i] = -1; ownerRelations = binder.BindRelationDependencies(); }
                 else indices[i] = binder.BindRef(parameter.RefKind, textArgs[i]);
                 if (parameter.RefKind == RefKind.Clue || parameter.RefKind == RefKind.Beat || parameter.RefKind == RefKind.Mystery)
                     factSlots[i] = binder.BindFact(textArgs[i]);
             }
+            evaluation = new FunctionEvaluation(info, intArgs, boolArgs, textArgs, indices, factSlots);
         }
         public void CollectDependencies(List<LogicDependency> into)
         {
@@ -68,7 +78,14 @@ namespace Game.Data.Logic.Nodes
                 {
                     case RefKind.Item: Add(LogicDependencyKind.Item, indices[i]); break;
                     case RefKind.Quest: Add(LogicDependencyKind.Quest, indices[i]); break;
-                    case RefKind.Faction: Add(LogicDependencyKind.Relation, indices[i]); break;
+                    case RefKind.Faction:
+                        if (indices[i] == -1)
+                        {
+                            Add(LogicDependencyKind.Location, 0);
+                            foreach (int faction in ownerRelations) Add(LogicDependencyKind.Relation, faction);
+                        }
+                        else Add(LogicDependencyKind.Relation, indices[i]);
+                        break;
                 }
             }
             if (function == "credits") Add(LogicDependencyKind.Credits, 0);
