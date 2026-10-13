@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DLG-010 | dispatched from main 2a28cfc; GAL-003 delivered 579394d, strict missing content prerequisite | WPN-004/005 after FLT-012 |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AST-003 | dispatched from current main; DLG-010 partial 38b2bb0 lacks approved sprites; GAL-003 579394d awaits galaxy content | WPN-004/005 after FLT-012 |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AST-002 | dispatched from main 5764e72; AI-003 delivered 6787228, boot/catalog integration and validation pending | AI-005 after AI-003 closes |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | MIG-014 | dispatched from main 42aca7e; SYS-001 delivered 91c8610, awaiting next batch integration | Ready standard work after batch integration |
 
@@ -114,3 +114,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - Catalog rerun `9246` exited 0; temporary job/meta removed and five registered AI definitions committed `21337c2`. Started serialized compile + grouped AiContentTests/StreamingContractTests/ShipDeathTests as **session `17159`**; poll that handle, no primary source changes until terminal.
 
 - Grouped `17159` compiled clean, 6/1/0: Burst rejected managed params arrays in ShipDeathSystem.OnCreate. Repair `5dee38f` uses EntityQueryBuilder; serialized compile/grouped rerun **37988 active**. PWR-004 claimed main `bb9b1f4`; lead isolated checkout now `task/PWR-004-power-initialization`, registration helpers/system `f0c62a3` plus shield-request/rebind jobs implemented. Root initialization job, scheduling and five required tests remain; no Unity there.
+
+- Grouped rerun `37988` exited 0: compile clean, **7/0/0** AiContent/StreamingContract/ShipDeath tests, evidence `Logs/playtest/dmg013/acceptance-final.xml`. Full EditMode+PlayMode **session `25256` active**. PWR-004 isolated root initialization/scheduling implemented `f78a19f` after helpers `f0c62a3` / `847d8e6`; five required tests and validation still pending. DLG-010 partial delivery `38b2bb0` has exact content IDs but seven unavailable approved sprite references; do not close. Same worker recycled to AST-003 evidence audit without new approval requests or asset deletion.
