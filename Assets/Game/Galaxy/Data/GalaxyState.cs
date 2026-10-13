@@ -1,11 +1,15 @@
-using Game.Data.Definitions;
-using Unity.Mathematics;
+using System;
+using System.Collections.Generic;
 
 namespace Game.Galaxy.Data
 {
-    /// <summary>Everything the galaxy saves. Held by GameSession (SPEC-01); restored in place. Implements SPEC-30 §4.</summary>
-    public sealed class GalaxyState : System.IDisposable
+    /// <summary>Session-owned galaxy state; collections have deterministic save order (SPEC-30 §4.6).</summary>
+    public sealed class GalaxyState : IDisposable
     {
+        readonly List<uint> known = new(), visited = new();
+        readonly SortedDictionary<uint, StarSystemDelta> deltas = new();
+        StarSystemId routeDestination;
+        public GalaxyState() { Known = known.AsReadOnly(); Visited = visited.AsReadOnly(); }
         public ulong Seed;
         public int GeneratorVersion;
         public StarSystemId CurrentStarSystem;
@@ -13,20 +17,37 @@ namespace Game.Galaxy.Data
         public PlayerLocation PlayerLocation;
         public StarSystemId RouteDestination
         {
-            get => throw new System.NotImplementedException("GAL-007");
-            set => throw new System.NotImplementedException("GAL-007");
-        }    // written by SPEC-32; the setter increments Revision when the value changes
-        public uint Revision { get; }                         // +1 on every AddKnown/AddVisited that returns true, on a RouteDestination change
-                                                              // and on Clear (never reset; consumers compare stamps)
-        public System.Collections.Generic.IReadOnlyList<uint> Known { get; }    // sorted ascending
-        public System.Collections.Generic.IReadOnlyList<uint> Visited { get; }  // sorted ascending
-        public bool AddKnown(StarSystemId id) => throw new System.NotImplementedException("GAL-007"); public bool AddVisited(StarSystemId id) => throw new System.NotImplementedException("GAL-007");
-        public bool IsKnown(StarSystemId id) => throw new System.NotImplementedException("GAL-007"); public bool IsVisited(StarSystemId id) => throw new System.NotImplementedException("GAL-007");
-        public StarSystemDelta GetOrCreateDelta(StarSystemId id) => throw new System.NotImplementedException("GAL-007");
-        public bool TryGetDelta(StarSystemId id, out StarSystemDelta d) => throw new System.NotImplementedException("GAL-007");
-        public System.Collections.Generic.IEnumerable<StarSystemDelta> DeltasSorted() => throw new System.NotImplementedException("GAL-007");   // ascending StarSystemId, skips IsEmpty
-        public void Clear() => throw new System.NotImplementedException("GAL-007");                                  // disposes deltas, resets every field to default
-        public void Dispose() => throw new System.NotImplementedException("GAL-007");
-        // TODO(GAL-007): implement the behavior specified by SPEC-30.
+            get => routeDestination;
+            set { if (routeDestination.Equals(value)) return; routeDestination = value; Revision++; }
+        }
+        public uint Revision { get; private set; }
+        public IReadOnlyList<uint> Known { get; }
+        public IReadOnlyList<uint> Visited { get; }
+        public bool AddKnown(StarSystemId id) => Insert(known, id.Value);
+        public bool AddVisited(StarSystemId id) => Insert(visited, id.Value);
+        bool Insert(List<uint> list, uint id)
+        {
+            int index = list.BinarySearch(id); if (index >= 0) return false;
+            list.Insert(~index, id); Revision++; return true;
+        }
+        public bool IsKnown(StarSystemId id) => known.BinarySearch(id.Value) >= 0;
+        public bool IsVisited(StarSystemId id) => visited.BinarySearch(id.Value) >= 0;
+        public StarSystemDelta GetOrCreateDelta(StarSystemId id)
+        {
+            if (!deltas.TryGetValue(id.Value, out var delta))
+            { delta = new StarSystemDelta(id); deltas.Add(id.Value, delta); }
+            return delta;
+        }
+        public bool TryGetDelta(StarSystemId id, out StarSystemDelta delta) => deltas.TryGetValue(id.Value, out delta);
+        public IEnumerable<StarSystemDelta> DeltasSorted()
+        { foreach (var pair in deltas) if (!pair.Value.IsEmpty) yield return pair.Value; }
+        public void Clear()
+        {
+            foreach (var pair in deltas) pair.Value.Dispose();
+            deltas.Clear(); known.Clear(); visited.Clear();
+            Seed = 0; GeneratorVersion = 0; CurrentStarSystem = default;
+            HasPlayerLocation = false; PlayerLocation = default; routeDestination = default; Revision++;
+        }
+        public void Dispose() => Clear();
     }
 }

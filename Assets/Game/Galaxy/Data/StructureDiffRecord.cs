@@ -9,7 +9,6 @@ namespace Game.Galaxy.Data
         public ulong BodyKey;
         public uint Revision;                      // VoxelGrid.Revision when captured
         public Game.Voxel.Model.VoxelStructure Structure; // owned; full structure in M3 (brick diffs: GAL-016, M4)
-        public void Dispose() => throw new System.NotImplementedException("GAL-007");
-        // TODO(GAL-007): implement the behavior specified by SPEC-30.
+        public void Dispose() { Structure?.Dispose(); Structure = null; }
     }
 }
