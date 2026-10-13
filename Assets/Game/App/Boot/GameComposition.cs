@@ -146,7 +146,11 @@ namespace Game.App.Boot
             var campaignGalaxy = Push(new GalaxyService(Content.Catalog, Session.Galaxy, world, galaxyTicker));
             Register(campaignGalaxy); Session.BindGalaxy(campaignGalaxy);
             Save.Register(new GalaxySaveParticipant(Session.Galaxy, Content.Catalog));
-            // TODO(SYS-004/SYS-009): install loader and PLOC before claiming full world/pose restore.
+            var systemLoader = Push(new StarSystemLoader(campaignGalaxy, world, Registry, Blueprints, Session, Content.Catalog));
+            Register(systemLoader); galaxyTicker.Register(systemLoader);
+            Flow.RegisterReady(systemLoader); Flow.RegisterExiting(systemLoader);
+            Session.RegisterWriteback(new GalaxyFlushWriteback(systemLoader));
+            // TODO(SYS-009): register PLOC before claiming restored world pose/docking.
 
             Session.BindFleet(Blueprints, Registry, Content.Catalog); Save.Register(Session.FleetParticipant);
             Register(Session.Fleet);

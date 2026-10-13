@@ -76,6 +76,12 @@ namespace Game.Voxel.Grid
             spawnReads.Remove(token); read.Source.Unpin();
             if (!read.Blueprint.IsNone) blueprints.ReleaseUnpinnedLarge();
         }
+        /// <summary>Managed teardown: release only reads whose bound request no longer exists (ADR-0076).</summary>
+        public void ReconcileAbandonedReads(EntityManager em)
+        {
+            em.CompleteAllTrackedJobs();
+            ReconcileReads(em);
+        }
         internal void ReconcileReads(EntityManager em)
         {
             cancelled.Clear();

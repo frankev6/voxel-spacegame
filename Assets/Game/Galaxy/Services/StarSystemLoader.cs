@@ -168,6 +168,7 @@ namespace Game.Galaxy.Services
         }
         public void FlushStructures()
         {
+            if (!world.IsCreated || worldActive.IsEmptyIgnoreFilter) return;
             world.EntityManager.CompleteAllTrackedJobs();
             t2?.Flush(); foreach (var old in retiring) old.Flush();
         }
@@ -184,6 +185,7 @@ namespace Game.Galaxy.Services
                 try { em.DestroyEntity(members); } finally { members.ResetFilter(); }
                 em.DestroyEntity(chunks);
             }
+            registry.ReconcileAbandonedReads(em); DrainRetired();
             RetireColliders();
             if (Loaded.IsValid && galaxy.Galaxy != null) galaxy.ReleaseContent(Loaded);
             bodies.Clear(); Loaded = default; target = default; anchorsDirty = false; State = LoaderState.Idle;

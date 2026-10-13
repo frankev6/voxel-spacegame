@@ -630,6 +630,8 @@ sequenceDiagram
 
 | 16 | Scene readiness requires nearby T2 grids before the player is spawned, but §5.4 originally skipped all streaming without a player | Resolved: during initial entry, T2 measures from the actual requested arrival in star-system coordinates; once present, use the player position. Preserve grid-complete readiness, including persisted hulks. No fabricated player or always-ready fallback; T3 still waits for a player. | Tech lead — ledger Q359 |
 
+| 17 | Unload/failed request cleanup must release abandoned registry pins without cancelling other live spawns | Resolved by ADR-0076: registry reconciles only dead/mismatched bound reads after tracked jobs finish. Cleanup-only roots do not retain source ownership. Spawn failure destroys its request, reconciles pins and releases its clone/handle. | Tech lead — ledger Q360 |
+
 ## 11. References
 
 - Audit (background only): `docs/reference/audit-2026-10/03-galaxy-world.md` B1/D3 (R9), R10, R28; `00-synthesis.md` §5.

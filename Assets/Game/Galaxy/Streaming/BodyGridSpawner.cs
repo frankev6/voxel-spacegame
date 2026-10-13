@@ -65,6 +65,9 @@ namespace Game.Galaxy.Streaming
             else throw new InvalidOperationException("Voxel body has no structure source: " + template.IdString);
             bool persist = persisted || template.Destructible && source.SolidCellCount <= persistCellLimit;
             if (persist && !persisted) { source = source.Clone(); owns = true; }
+            Lease lease = null;
+            try
+            {
             bool armed = false;
             foreach (var instance in source.Data.Instances)
                 if (instance.Block != 0 && content.Blocks.Value.Blocks[instance.Block].HasModule(BlockModuleId.WeaponMount))
@@ -73,7 +76,8 @@ namespace Game.Galaxy.Streaming
             ulong id = ids.Allocate();
             double3 position = OrbitMath.Position(spec, time);
             bool borrowBlueprint = !persist && template.StructureSource == StructureSource.Blueprint;
-            var lease = new Lease { Source = source, Handle = borrowBlueprint ? -1 : registry.Register(source), OwnsSource = owns };
+            lease = new Lease { Source = source, Handle = -1, OwnsSource = owns };
+            if (!borrowBlueprint) lease.Handle = registry.Register(source);
             leases.Add(lease); // Keep ownership visible even if later component construction fails.
             var spawn = new GridSpawnParams
             {
@@ -103,6 +107,18 @@ namespace Game.Galaxy.Streaming
                 em.AddComponentData(lease.Root, new HulkInfo { Cause = HulkCause.CoreLost, OriginPersistentId = id, FormerKind = GridKind.Station });
             }
             return lease;
+            }
+            catch
+            {
+                if (lease != null)
+                {
+                    if (em.Exists(lease.Root)) em.DestroyEntity(lease.Root);
+                    registry.ReconcileAbandonedReads(em);
+                    registry.Release(lease.Handle); leases.Remove(lease);
+                }
+                if (owns && source.Data.IsCreated) source.Dispose();
+                throw;
+            }
         }
         internal void Capture(Lease lease, StarSystemDelta delta)
         {
@@ -123,7 +139,7 @@ namespace Game.Galaxy.Streaming
         internal bool Release(Lease lease)
         {
             // Despawn processing owns read-token cancellation. Never dispose a source while that job still reads it.
-            if (em.Exists(lease.Root)) return false;
+            if (em.Exists(lease.Root) && (em.HasComponent<VoxelGrid>(lease.Root) || em.HasComponent<GridSpawnRequest>(lease.Root))) return false;
             if (lease.Handle >= 0)
             {
                 if (lease.Source.IsPinned) return false;
