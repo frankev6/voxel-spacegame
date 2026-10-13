@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 50 | 5 | 0 | 0 | 36 | 0 | 91 | 6 |
-| M3 | 166 | 1 | 0 | 0 | 13 | 0 | 180 | 14 |
+| M2 | 49 | 6 | 0 | 0 | 36 | 0 | 91 | 5 |
+| M3 | 165 | 2 | 0 | 0 | 13 | 0 | 180 | 13 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 2 |
 | A0 | 6 | 1 | 0 | 1 | 8 | 0 | 16 | 2 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -816,6 +816,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 229 | SPEC-22 Q13: minimum-only authored power ranges permit non-finite values; legacy shield multipliers have a separate owner. | Require finite authored float tuning in its stated range; preserve legacy fields without rebaking SPEC-13-owned damage multipliers. PWR-003 delivery reviewed, Unity validation pending. | Tech lead |
 | 230 | SPEC-60 Q28–29: dialog mutation, deferred callbacks, queueing, invalid inputs and disposal need precise lifecycle rules. | Snapshot accepted requests, validate before mutation, deliver callbacks after navigator removal/context restoration, queue reentrant requests and dispose without user callbacks. Prompt validation and focus use existing services and real-time test deadlines. UI-011 integration preserves all existing UI services. | Tech lead |
 | 231 | SPEC-80 Q15–18: approved font/production look assets, full art validator and canonical ARK definition are absent. | Apply approved numeric Nocturne tokens and move existing OFL font bytes/GUIDs as explicit placeholders; retain reference-board sources outside Assets. Active selection metadata is partial, with unchanged live environment. ART-014 acceptance remains open for ART-007, AST producers and canonical faction content; no invented asset, licence or validator pass. | Tech lead |
+| 232 | SPEC-24 Q3–4: serialized ability validation and boot-owned blob lifetime. | Enforce finite/ranged scalars and known unique modifiers, positive rounded boost duration and representable timers. Boot creates the ability blob before snapshots and disposes after jobs complete; empty families retain a none-only entry. Runtime registration remains ABL-003. | Tech lead |
+| 233 | SPEC-72 Q22: ability inactive fields, icon source and protected grant target resolution. | Use configured migration sprites and exact SPEC-24 values, zero inactive fields, null optional cue/Fx, report replaced legacy values, resolve the four canonical targets and preserve authored assets/nonempty arrays through existing writer APIs. | Tech lead |
 
 ## Measurements
 
@@ -926,6 +928,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — ABL-002 / MIG-010 content integration — astra (gpt-6)
+
+1. Reviewed ABL-002 delivery `ff4488b`, integrated `900e223`; boot lifetime hookup `9534014` creates the ability singleton before snapshot and disposes its blob after tracked jobs. Spec-required: 3, extra: 0. Runtime ability activation/effects remain ABL-003/004; no playable boost/shield claim yet.
+2. Reviewed MIG-010 `6ca1b17`, integrated `d6ec9ad`; targeted production generation session 70436 exited 0, generated `8f264b3`: two ability definitions and four protected block grants, catalog and migration provenance. Spec-required: 1, extra: 0. Temporary job/meta removed. Compile plus grouped ability/migration/block-link regression session 55800 running.
+3. Previous combat batch focused session 56625 passed 11 EditMode / 11 PlayMode, zero failures. Full compatible regression remains pending. Q232–233 mirror ability/migration decisions. Recycled the same workers immediately to AI-003 and SYS-001; combat worker continues WPN-002. No new threads or Unity overlap.
 
 ### 2026-10-13 — AI-002 / GAL-001 / DLG-001 / UI-010 full batch green — astra (gpt-6)
 
