@@ -52,7 +52,7 @@ namespace Game.Tests.PlayMode.Presentation.Audio
             var database = Own(ScriptableObject.CreateInstance<ContentDatabase>());
             mixer = AssetDatabase.LoadAssetAtPath<AudioMixer>("Assets/Game/Audio/Mixer/GameMixer.mixer"); Assert.NotNull(mixer);
             var engine = Cue("cue_test_loop_engine", .6f, 1); var beam = Cue("cue_test_loop_beam", .8f, 1.4f);
-            database.EditorSetDefinitions(new ContentDefinition[] { engine, beam });
+            database.EditorSetDefinitions(new List<ContentDefinition> { engine, beam });
             using (var settings = new SerializedObject(config))
             {
                 settings.FindProperty("mixer").objectReferenceValue = mixer;
