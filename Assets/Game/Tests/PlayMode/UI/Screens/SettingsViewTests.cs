@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Game.App.Presenters;
 using Game.App.Settings;
+using SettingsService = Game.App.Settings.SettingsService;
 using Game.Core;
 using Game.Core.Events;
 using Game.Core.Settings;

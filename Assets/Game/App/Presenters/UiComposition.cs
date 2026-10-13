@@ -17,6 +17,7 @@ namespace Game.App.Presenters
         readonly SceneFlow flow;
         readonly LoadingPresenter loadingPresenter;
         readonly SaveSlotsPresenter saveSlotsPresenter;
+        readonly SettingsPresenter settingsPresenter;
         MainMenuPresenter menuPresenter;
         PausePresenter pausePresenter;
         bool rootsBound, disposed;
@@ -47,12 +48,18 @@ namespace Game.App.Presenters
             saveSlotsPresenter = new SaveSlotsPresenter(ui, SaveSlotsModel, Game.Core.Services.Get<SaveService>(), Game.Core.Services.Get<IGameFlow>());
             ui.Register(new SaveSlotsView(SaveSlotsModel, saveSlotsPresenter));
             saveSlotsPresenter.Bind();
+            settingsPresenter = new SettingsPresenter(ui, SettingsModel,
+                Game.Core.Services.Get<Game.App.Settings.SettingsService>(), Game.Core.Services.Get<Game.Input.InputService>());
+            ui.Register(new SettingsView(SettingsModel, settingsPresenter));
+            settingsPresenter.Bind();
             EventBus<SessionReset>.Subscribe(OnSessionReset);
         }
         public UIScreen MainMenu => ui.Navigator.Get<MainMenuView>();
         public UIScreen FlightHud => ui.Navigator.Get<FlightHudView>();
         public UIScreen ShipEditor => ui.Navigator.Get<ShipEditorView>();
         public UIScreen Loading { get; }
+
+        internal void ShowSettings() => settingsPresenter.Show();
 
         internal void ShowSaveSlots(SaveSlotsMode mode) => saveSlotsPresenter.Show(mode);
 
@@ -96,6 +103,8 @@ namespace Game.App.Presenters
             menuPresenter?.Bind();
             pausePresenter?.Bind();
             saveSlotsPresenter.ResetSession();
+            settingsPresenter.Unbind();
+            settingsPresenter.Bind();
             loadingPresenter.Dispose();
             loadingPresenter.Bind();
             // TODO(HUD-009/010/011/012/013/014/015/016/017/018/019): rebind the owning feature presenters
@@ -117,6 +126,7 @@ namespace Game.App.Presenters
             EventBus<SessionReset>.Unsubscribe(OnSessionReset);
             loadingPresenter.Dispose();
             saveSlotsPresenter.Dispose();
+            settingsPresenter.Dispose();
             pausePresenter?.Dispose();
             menuPresenter?.Dispose();
             if (rootsBound) flow.SetRootScreens(null);

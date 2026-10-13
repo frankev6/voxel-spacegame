@@ -911,6 +911,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 318 | SPEC-40 Q19: legacy translation boundary and defaults | Resolved: retain source metadata for emission; decimal cumulative thresholds, source-ordered quest logs, canonical provisional journal labels and contextual item mappings. No runtime/asset emission in NAR-014. | Tech lead |
 | 319 | SPEC-61 Q23: save/load construction versus composition cycle | Resolved: explicit completed UI/save/flow prerequisites allow parallel source construction; shared production hookup and full functional/layout acceptance remain required. ADR-0072 amended. | Tech lead |
 | 320 | SPEC-60 Q30: layout audit scroll/measurement semantics | Resolved: exclude scroll content subtree but audit viewport; use intrinsic nowrap width, clear result list and check all containing panels. Functional acceptance pending. | Tech lead |
+| 331 | SPEC-61 Q28: settings binding and lifecycle | Resolved: real Apply/Flush persistence, binding-index rows, owned rebind cancellation on cover/unbind and persistent app composition. Visible menu/pause navigation still required for closure. | Tech lead |
 | 330 | SPEC-61 Q27: fast PlayMode rebind fixture | Resolved ADR-0074: existing InputSystem test framework reference permitted for PlayMode; direct clock advance with state restoration. | Tech lead |
 | 329 | SPEC-02 Q17 / SPEC-61 Q26: persisted camera orientation | Resolved ADR-0073: additive Controls byte with legacy default0, real app mapping and settings binding; implementation in HUD-005. | Tech lead |
 | 328 | SPEC-72 Q45: body-stub field ownership | Resolved: preserve non-owned authored fields and object name even on forced refresh; exact twenty-stub acceptance is independent of downstream GAL-012. | Tech lead |
@@ -1031,6 +1032,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — HUD-005 integration and boot repair — astra (gpt-6)
+
+- Integrated04cf34fd/9dfc8bc settings delivery/rebind-cover repair; composition owns register/bind/session rebind/dispose. Compile91761 clean after qualifying a test namespace ambiguity. Q331 mirrors SPEC61Q28. HUD-005 remains in-progress: real menu/pause routing and accepted checks remain.
+- Boot rejected MIG-014 belt stub under GAL-E016; supplied canonical block_hull in d289f13f, matching GAL-012 worker choice. No validator weakening. First stalled test cancelled (89902 terminal); second45272 rejected duplicated result identities. Raw summary3passed2failed in1.01s, rebind Escape line119 and completion line135; no accepted XML. Evidence settings-screen/aborted-boot.json and rebind-failures.json. Test count: spec-required: 5, extra: 0. Worker repairs bounded issues, then resumes TRV-002.
+- No active validation; font side effects backed up/restored, original QualitySettings excluded. Previous turn accepted GAL-005 and assigned TRV-002 (progress).
 
 ### 2026-10-13 — GAL-005 accepted — astra (gpt-6)
 
