@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-016 | delivered44bace47; lead generation/validation pending, explicit dependency wait219 | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-006 | claimedb5364ab3; composition/placement dispatched; NAR-016 delivered44bace47 | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-005 | claimedadce6f4b; arrival geometry dispatched; ECO-009 delivered separately | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-002 | claimed ccef7c0d; implement definitions/validators to repair real boot | HUD-003/006/007 once ready |
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Loader fixtures compile / worker recycled:**2b278b11 adds five required direct-update SYS-004 cases; compile96149 clean, zero CS warnings (world-loader/compile.log). PlayMode execution waits for real QST-002 boot repair, not another known-failing run. No active Unity. ENC-006 claimedb5364ab3 and dispatched to combat worker; TRV-005 active232; QST-002 active195. NAR-01644bace47/ECO-0098d9ec70f remain delivered for lead integration. Previous turn map acceptance was progress.
 
 - **Map accepted / worker recycled:** GAL-011a229844 and app registration accepted, clean compile32938, four checks pass0.228s (galaxy-map/). Loader source now compiles but five SYS-004 cases and production integration remain. TRV-005 claimedadce6f4b and dispatched to same economy worker. NAR-01644bace47 delivered219, waiting for lead content integration/next eligible work; QST-002 active194 repairs boot and needs real graph recompile. No Unity operation. Previous turn loader lifecycle was progress.
 

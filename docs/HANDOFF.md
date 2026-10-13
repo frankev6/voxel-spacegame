@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Loader fixtures compile / worker recycled:**2b278b11 adds five required direct-update SYS-004 cases; compile96149 clean, zero CS warnings (world-loader/compile.log). PlayMode execution waits for real QST-002 boot repair, not another known-failing run. No active Unity. ENC-006 claimedb5364ab3 and dispatched to combat worker; TRV-005 active232; QST-002 active195. NAR-01644bace47/ECO-0098d9ec70f remain delivered for lead integration. Previous turn map acceptance was progress.
+
 - **Map accepted / worker recycled:** GAL-011a229844 and app registration accepted, clean compile32938, four checks pass0.228s (galaxy-map/). Loader source now compiles but five SYS-004 cases and production integration remain. TRV-005 claimedadce6f4b and dispatched to same economy worker. NAR-01644bace47 delivered219, waiting for lead content integration/next eligible work; QST-002 active194 repairs boot and needs real graph recompile. No Unity operation. Previous turn loader lifecycle was progress.
 
 - **Loader lifecycle authored:**85d75afe adds origin acknowledgement, T1 entry/visit event, owned queries/info/hook, delta refresh and filtered unload with deferred collider retirement. Five cases/compile remain. Arrival checks require actual nearby grids, so production installation waits for SYS-006; no fake readiness. Current branch task/SYS-004-world-loader; no Unity operation. Workers NAR-016218, GAL-011230, QST-002194 active. Previous turn anchor construction was progress.
