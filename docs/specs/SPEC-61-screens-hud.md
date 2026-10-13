@@ -444,8 +444,9 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 ### HUD-002 — UI composition, screen registration and root switching
 - **Milestone:** M3
 - **Tier:** frontier — F5: boot order, scene flow root switching, session rebind across App, UI and Presentation
-- **Depends on:** `HUD-001`, `SPEC-60`, `FND-001`
+- **Depends on:** `HUD-001`, `UI-001`, `UI-002`, `UI-003`, `UI-004`, `UI-005`, `UI-006`, `UI-007`, `UI-008`, `UI-009`, `UI-010`, `UI-011`, `FND-001`
 - **Do:** Remove/unbind ADR-0047's temporary SceneNavigationBridgeSystem and replace its M1 root/pause/blocker registrations before enabling full scene-root switching; the navigator remains the sole input owner.  Implement `UiComposition`: create all view models, views (registered on `UIRoot`), and presenters with their services (§5.4); register screen UXML entries in `UIConfig` (`Prewarm` true for `hud`, `pause`, `loading`, `confirm`, `text-prompt`); bind `HudSyncSystem` and the hotkey router; `SessionReset` handling. Provide the three root screens to `SceneFlow` (SPEC-01 calls `SetRoot`, §10 Q12).
+- **Sequencing:** [ADR-0072](../decisions/ADR-0072-hud-composition-sequencing.md): HUD-002 owns lifetime/registration/root/session infrastructure and preserves existing playable root behavior. Downstream screen/presenter/sync/hotkey tasks install their production bindings when implemented; their scope and acceptance are unchanged. Empty roots or fake service facades do not satisfy this task.
 - **Files:** `Assets/Game/App/Presenters/UiComposition.cs`, `Assets/Game/UI/Data/UIConfig.asset`
 - **Acceptance criteria:**
   - [ ] After boot into each scene exactly one root screen is in the stack and visible (R13).
@@ -703,6 +704,8 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 | 20 | HUD-001's exact ShipEditorView constructor needs SPEC-51 types before EDT-001, which depends on HUD-001 | **Resolved (2026-10-13, Tech lead):** bring forward only the canonical `Game.UI.ViewModels.ShipEditorViewModel : ViewModelBase` and `Game.UI.Views.IShipEditorCommands` type identities in their SPEC-51 folders as empty shells. Precise `TODO(EDT-001)` notes retain all editor view-model properties, nested models and command members for EDT-001. ShipEditorView keeps the exact constructor signature; no editor behavior or alternative signatures. Existing provisional screens/adapter remain installed until HUD-002. | Tech lead |
 
 | 21 | HUD-008 byte weapon counts, repeatable unscaled-clock acceptance and overlapping radar categories | Resolved: saturate the public byte weapon count at255 rather than wrapping; production radar uses unscaled engine time, with an internal per-system clock seam for the required144-FPS simulated acceptance. Radar queries are disjoint: grids take precedence, then bodies, then nongrid interactables not already in the body pass (including StarSystemBody anchors lacking SpatialBody). The future route-service bridge in HUD-009 supplies waypoint identity; HUD-008 does not fabricate a gate. | Tech lead |
+
+| 22 | HUD-002 waits for whole SPEC-60 and downstream systems that depend on HUD-002 | Resolved by ADR-0072: explicit completed UI foundations; composition/root/session infrastructure first while preserving current playable roots. Each downstream task owns its production hookup and full feature acceptance. UI audits/accessibility remain required, and actual travel gates remain. | Tech lead |
 
 ## 11. References
 

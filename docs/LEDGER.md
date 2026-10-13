@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 127 | 6 | 0 | 0 | 47 | 0 | 180 | 10 |
+| M3 | 127 | 6 | 0 | 0 | 47 | 0 | 180 | 11 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -452,7 +452,7 @@
 | UI-012 | Layout, contrast and allegiance-colour audits | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | frontier | UI-008 | yes | todo |  |  |  |  |
 | UI-013 | Accessibility options | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-010, UI-012 | no | todo |  |  |  |  |
 | HUD-001 | Public contract types | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | UI-001, CORE-001, CAM-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | a983d88 | Screen/VM/snapshot contracts; static notification lifetime fix f847997; 3 required tests; full batch 901 EM / 128 PM, zero failures |
-| HUD-002 | UI composition, screen registration and root switching | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-60, FND-001 | no | todo |  |  |  |  |
+| HUD-002 | UI composition, screen registration and root switching | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, UI-001, UI-002, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-001 | yes | todo |  |  |  |  |
 | HUD-003 | Main menu and new game | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
 | HUD-004 | Save and load slots | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, PERS-001 | no | todo |  |  |  |  |
 | HUD-005 | Settings screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
@@ -907,6 +907,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 314 | SPEC-40 Q16: FACT malformed payload atomicity | Resolved: validate the exact version1 ordered/unique payload fully before store mutation; reject malformed count/name/order/trailing data; version0 resets. | Tech lead |
 | 315 | SPEC-40 Q17: import compiler enumeration and diagnostics | Resolved: serialized wrapper stamps, coalesced current catalog, Play deferral and cached diagnostics; real owner CompileLogic methods retain their task scope. | Tech lead |
 | 316 | SPEC-40 Q18: bound condition dispatch and dynamic owner dependencies | Resolved: cache numeric dispatch/argument storage/generated slots at binding; owner relations expand to Location plus registered faction dependencies; preserve public Invoke and fail-closed errors. | Tech lead |
+| 317 | SPEC-61 Q22: circular HUD composition sequence | Resolved ADR-0072: explicit UI foundation dependencies, preserve playable roots, downstream feature owners install bindings; no fake services or removed acceptance. | Tech lead |
 
 
 ## Measurements
