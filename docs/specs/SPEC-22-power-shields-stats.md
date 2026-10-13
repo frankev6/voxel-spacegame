@@ -735,6 +735,7 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 | 7 | Should energy and shield HP be saved | No (Decision 12) | Owner |
 | 8 | Should a ship's `InitialMass` survive save/load so `MassFraction` stays meaningful after loading a damaged ship | No for M3: after load `InitialMass` = loaded mass; revisit when SPEC-05 saves ship damage | SPEC-05 |
 | 9 | `ShipStats.MassFraction` as the AI/HUD hull-health measure | Yes (cheap, maintained incrementally by SPEC-12) | SPEC-23 / SPEC-61 |
+| 10 | PWR-001's `PowerDemandGroup.UpdateBefore(PowerAllocationSystem)` names the PWR-005 system before it exists | Defer the redundant group attribute until PWR-005; its already specified `UpdateAfter(PowerDemandGroup)` preserves the same ordering edge. Keep a PWR-005 TODO; do not introduce an allocator stub | Tech lead |
 
 ## 11. References
 
