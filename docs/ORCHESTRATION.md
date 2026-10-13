@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AI-007 | delivered 2a92fd81; integrated 2a6444b2, validation wait | enemy flight |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-005 | repair 1fbe35fa integrated 0f12d55f; validation wait | ability integration |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AI-008 | active; combat status and three required checks | combat integration |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AI-008 | delivered 53d96351; integrated 0d64274b, validating | combat integration |
 
 ## Operating rules
 
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **All deliveries integrated / final acceptance:** session68001 exited0: steering/shield13/0/0 and ability scenarios4/0/0. Boost settles in220ticks within403tick physical bound; shield HP survives toggle and activates on the next grant. Evidence `preview-abilities/abilities-final.xml`. AI-00853d96351 reviewed/integrated0d64274b, preserving both independent SPEC23Q21/Q22 rows; Q22 mirroredQ298. Compile plus PlayerCombatStatusTests now session89452; no primary runtime mutations until terminal. All three workers have real validation waits; next eligible assignments after closure AI-009/010 and ABL-006. Full compatible regression remains required. Previous turn was concrete acceptance progress.
 
 - **Integrated steering / shield repair:** lead cad09f48 preserves charge across toggle-on before the next power grant, retaining real requesting-brownout loss; SPEC22Q43 mirrored Q295. Worker fixture repair1fbe35fa is reviewed/integrated0f12d55f (cursor142); SPEC24Q10 mirroredQ297. Combat delivery2a92fd81 integrated2a6444b2; four required steering tests pending Unity. SPEC23Q21 mirroredQ296, station command composition deferred explicitly to AI-009. Combat worker has a real validation wait; presentation AI-008 activecursor115. Compile75215 exited0 with zero CS warnings. Grouped steering/shield EditMode reports13/0/0 (archived `preview-abilities/steering-shield-acceptance.xml`); the same serialized session68001 continues into AbilityScenarioTests. Freeze primary runtime until terminal. Presentation worker remains activecursor117; integrate its committed delivery afterward, then status acceptance and full compatible regression. Prior turn made progress by archiving the passing preview measurement.
 
