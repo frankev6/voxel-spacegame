@@ -9,7 +9,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | dependency wait | NAR-016 accepted: focused tests and actual 225-file raw-byte stability pass; waiting ready narrative work | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-009 | Dispatched from claim5f510f02; world commands/probes, no Unity | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | SYS-007 review | Bounded pending-shape ownership/sector determinism review dispatched; no Unity | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | Review218 complete; Q9 encoding/midpoint findings fixed03bd54b9, pending-shape ownership sound | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Belt-sector selection authored:**5393c9cb adds bounded radial/angular bubble selection and sorted sector scheduling;03bd54b9 fixes review218 findings to match existing SPEC-31 Q9 (single ring supports8192 angles; partial-ring midpoint stays canonical). Pending-shape ownership review found no defect. Still uncompiled/unwired: next BeltStreamer job/spawn/retirement lifecycle and shared T2 budget, then four required cases. No Unity active. DEV-009 active255; combat/presentation genuine dependency waits. Previous turn implemented scheduled shape ownership (progress).
 
 - **Asynchronous asteroid shapes authored:** SYS-00717f68377 adds internal scheduled fill ownership and nonblocking TryTake; persistent buffers are joined/released on cancellation, while existing public Build stays synchronous. Sector descriptors33e464dc remain unwired. No compile/tests yet; finish belt lifecycle/shared budget and four cases before batch validation. No Unity active. DEV-009 active254; presentation assigned bounded source-lifetime/determinism review; combat dependency wait. Previous turn accepted T2 and authored sector generation (progress).
 

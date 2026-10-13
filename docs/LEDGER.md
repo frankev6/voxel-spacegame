@@ -1066,6 +1066,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-007 bounded sector geometry and review fixes — astra (gpt-6)
+
+-5393c9cb adds reusable sector geometry and bubble selection: radial bounds and angular span limit visited sectors; exact centre-distance filter; sorted IDs across the angle seam; unsupported IDs warn once and are skipped. Job and selector share ring geometry.
+- Presentation review218 found single-ring decoding and partial-ring midpoint mismatches against existing SPEC-31 Q9.03bd54b9 honors8192 angles for a single ring,4096 per ring for two rings, and the canonical full-width midpoint while clipping only sampled radial positions. No new decision or owner gate. The same review found no pending-shape lifetime defect.
+- Uncompiled/unaccepted, runtime streamer remains to implement. Next sector jobs, shape jobs, canonical spawns and retirement with shared T2 budget; then four required cases. Spec-required: 0 authored of4, extra: 0. No Unity runs this turn. DEV-009 active255; other workers genuine dependency waits. Previous turn scheduled shape implementation was progress.
+
 ### 2026-10-13 — SYS-007 scheduled shape ownership authored — astra (gpt-6)
 
 -17f68377 separates internal asteroid scheduling from source assembly: PendingShape holds a persistent cell buffer and JobHandle; TryTake returns without waiting while work is incomplete, transfers the assembled source once ready and disposes the buffer. Cancellation and schedule/assembly exceptions join before releasing storage. Existing public Build retains synchronous behavior using the same implementation; no public API/assembly contract changes.

@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Belt-sector selection authored:**5393c9cb adds bounded radial/angular bubble selection and sorted sector scheduling;03bd54b9 fixes review218 findings to match existing SPEC-31 Q9 (single ring supports8192 angles; partial-ring midpoint stays canonical). Pending-shape ownership review found no defect. Still uncompiled/unwired: next BeltStreamer job/spawn/retirement lifecycle and shared T2 budget, then four required cases. No Unity active. DEV-009 active255; combat/presentation genuine dependency waits. Previous turn implemented scheduled shape ownership (progress).
+
 - **Asynchronous asteroid shapes authored:** SYS-00717f68377 adds internal scheduled fill ownership and nonblocking TryTake; persistent buffers are joined/released on cancellation, while existing public Build stays synchronous. Sector descriptors33e464dc remain unwired. No compile/tests yet; finish belt lifecycle/shared budget and four cases before batch validation. No Unity active. DEV-009 active254; presentation assigned bounded source-lifetime/determinism review; combat dependency wait. Previous turn accepted T2 and authored sector generation (progress).
 
 - **T2 accepted; T3 implementation started:** SYS-006done from PlayMode6996 (5 pass) and compile3045 (zero CS warnings), merged locally. SYS-007claimed953c8d0c;33e464dc adds deterministic Burst sector descriptors, uncompiled and not yet wired. Next asynchronous asteroid shape generation, bounded sector lifecycle/shared T2 spawn budget and four required cases. No Unity active. DEV-009 worker active253; other two dependency waits. Previous turn completed converter acceptance and fixture repairs (progress).
