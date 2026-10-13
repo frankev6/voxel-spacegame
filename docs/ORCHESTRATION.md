@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Galaxy deltas accepted:**f90c0fd3 implements sorted saved changes, stable story-spawn IDs, owned structure snapshots and ordered application. Clean compile, six checks pass0.29s. GAL-008 is next to connect generation/cache/session lifecycle. All three workers active on NAR-016/ECO-009/FND-012; no active Unity run.
+
 - **Narrative conversion accepted:**5d85a419 generates34 dialogues/34beats/facts with145 byte-stable files and35 registered definitions; six required checks previously passed, current compile clean. NAR-016 unlocked for waiting worker; lead resumes GAL-007/008. No Unity operation active.
 
 - **World/travel/encounter content integrated:** TRV-002 and ENC-010 accepted,21 focused checks pass2.64s and clean compile. Three authored systems/body templates validate; GAL-012 runtime acceptance awaits GAL-008/lane logic. ECO-009/FND-012 workers active; combat prepares NAR-016 with explicit dependency wait. No active Unity operation. Next lead: preserved NAR-015 real generation and GAL-007/008.

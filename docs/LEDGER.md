@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 112 | 8 | 0 | 0 | 60 | 0 | 180 | 9 |
+| M3 | 110 | 9 | 0 | 0 | 61 | 0 | 180 | 9 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -325,10 +325,10 @@
 | GAL-004 | GalaxyDefBuilder and layout job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-003 | yes | done | astra (gpt-6) | 2026-10-13 | 42ecb93f | Deterministic layout, packing, queries and disposal; five focused checks pass; GAL-005 lanes/hash remain |
 | GAL-005 | Lane graph and galaxy hash | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-004 | yes | done | astra (gpt-6) | 2026-10-13 | 03a6cec6 | Connected lane graph, gate metadata, sorted adjacency and version-one golden; six focused checks pass |
 | GAL-006 | Star-system content job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-002, GAL-005 | yes | done | astra (gpt-6) | 2026-10-13 | e421d5ee | Complete system content generation/hash/ownership; six focused checks pass in0.193s; Q332 capacity guard |
-| GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
-| GAL-008 | GalaxyService, ticker and bridge system | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, FND-001 | no | todo |  |  |  |  |
+| GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | yes | done | astra (gpt-6) | 2026-10-13 | f90c0fd3 | Sorted unique deltas, stable append-only story slots, owned structure disposal, ordered applier and state revisions; six required checks pass |
+| GAL-008 | GalaxyService, ticker and bridge system | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, FND-001 | yes | todo |  |  |  |  |
 | GAL-009 | OriginRebaseSystem | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-001, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | 5bf0a47 | Asynchronous origin capture/rebase/placement and dependent consumers; full 1051 EM /146 PM passed; 5000-root p95 0.2959 ms. |
-| GAL-010 | GLXY save participant | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, PERS-001 | no | todo |  |  |  |  |
+| GAL-010 | GLXY save participant | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, PERS-001 | yes | todo |  |  |  |  |
 | GAL-011 | Galaxy map model | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-008 | no | todo |  |  |  |  |
 | GAL-012 | M3 galaxy content | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-003, SPEC-72 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | 0834c0ea/fb2a61b9 real systems/body assets imported and zero scoped validation errors; three runtime smoke checks pending GAL-008 and lane/logic wiring |
 | GAL-013 | Performance gates | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-005, GAL-006, GAL-009, GAL-011, TST-001 | no | todo |  |  |  |  |
@@ -1038,6 +1038,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — GAL-007 accepted — astra (gpt-6)
+
+- f90c0fd3 implements sorted/unique destroyed, interacted, replacement and owned-structure records; append-only story slots with tombstones and65535 capacity; deterministic galaxy state ordering/revision stamps. Structure replacement/disposal releases native ownership. Delta application resolves templates, preserves generated bodies/hash, appends fixed story bodies with stable IDs and parent orbits, then applies interacted/destroyed/structure flags.
+- Compile93167 clean, zero CS warnings. Focused22667 exited0: six passed, zero failed/skipped,0.2892336s actual execution; required100 insertion permutations included. Test count: spec-required: 6, extra: 0. Evidence `Logs/playtest/galaxy-deltas/{compile.log,acceptance.xml}`. No full suite/perf run. No Unity operation active; unrelated QualitySettings excluded.
+- Workers NAR-016207/ECO-009218/FND-012182 remain active. Lead next GAL-008 generation/cache/lifecycle and real campaign integration. Previous goal turn completed narrative conversion and recycled waiting worker (progress).
 
 ### 2026-10-13 — NAR-015 accepted with real content — astra (gpt-6)
 
