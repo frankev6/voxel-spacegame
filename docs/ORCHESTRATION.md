@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Current validation:** live Editor35039 exited0 through CLI. Primary `task/WPN-010-validation` integrates explosion32aeddbd/8b83b2c4/9dd952ff and audio8a24a71f/707e22bd; ledger conflict resolved retaining Q282 and283. Serialized compile + ExplosionTests + AudioPerfTests/AudioRegressionTests session48673 active. No primary runtime edits or concurrent Unity until terminal. Beam/harness workers remain active and join before full combined regression.
+
 - **Integration review:** isolated explosion8ad75afa adds real spatial builder/ShieldSystem owners to two existing destruction fixtures so new prerequisites cannot silently disable blasts; test count unchanged. Reviewed in-progress worker code and sent small repairs: Commands namespace for beam PlayerShip, separate public WeaponDebugRow file. Workers still active, audio staged; primary/live game unchanged.
 
 - **Explosion acceptance authored:** isolated dcd70313+c630c40c supplies full implementation and four required ExplosionTests against production system/channels (spec-required:4, extra:0). Shield routing, two grids, same/next-read producer timing, single presentation pair and impulse falloff covered; not yet compiled/run. Q283 mirrors SPEC21Q69, Q282 stays reserved for prepared audio. Both WPN-009/015 workers active; keep live Editor35039 unchanged until compatible batch ready.
