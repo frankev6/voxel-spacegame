@@ -21,10 +21,10 @@ namespace Game.Simulation.Commands
         {
             state.RequireForUpdate<GameplayActive>();
             state.RequireForUpdate<PlayerCommand>();
-            state.EntityManager.CreateSingleton(default(PlayerEdgeConsumed));
+            var edgeEntity = state.EntityManager.CreateSingleton(default(PlayerEdgeConsumed));
+            state.EntityManager.AddComponentData(edgeEntity, new PlayerControlLock { Flags = PlayerControlLockFlags.None });
             playerQuery = SystemAPI.QueryBuilder().WithAll<PlayerShip>().WithAllRW<ShipCommand>().WithNone<Hulk>().Build();
             anyPlayerQuery = SystemAPI.QueryBuilder().WithAll<PlayerShip>().Build();
-            // TODO(TRV-007): create the control-lock singleton here and apply its movement/action masks before scheduling.
         }
 
         [BurstCompile]
@@ -58,6 +58,25 @@ namespace Game.Simulation.Commands
                 AimValid = math.all(finiteAim) ? player.AimValid : (byte)0,
                 Flags = player.Flags, Edges = edges, FireGroups = player.FireGroups
             };
+            if (SystemAPI.TryGetSingleton(out PlayerControlLock controlLock))
+            {
+                if ((controlLock.Flags & PlayerControlLockFlags.Movement) != 0)
+                {
+                    command.Thrust = float2.zero;
+                    command.Turn = 0;
+                    command.Flags = ShipCommandFlags.Brake;
+                }
+                if ((controlLock.Flags & PlayerControlLockFlags.Actions) != 0)
+                {
+                    command.FireGroups = 0;
+                    command.Edges = ShipCommandEdges.None;
+                    // Drop the entire pending ship-action backlog, including multiple presses/counter wrap (SPEC-32 Q11).
+                    // Cruise remains the variable-rate travel consumer's counter (SPEC-20 Q13).
+                    byte cruise = consumed.Cruise;
+                    consumed = player.Edges;
+                    consumed.Cruise = cruise;
+                }
+            }
             state.Dependency = new PlayerCommandWriteJob { Command = command }.Schedule(playerQuery, state.Dependency);
         }
 
