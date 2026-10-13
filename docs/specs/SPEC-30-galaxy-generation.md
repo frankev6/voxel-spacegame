@@ -287,7 +287,7 @@ public sealed class BodyTemplateDefinition : ContentDefinition
     [SerializeField] private float t2LoadDistanceM = 6000f;                // SPEC-31 tier T2, measured to the bounding sphere
     // Belt only
     [SerializeField] private float beltWidthM = 2000f;
-    [SerializeField] private float sectorSizeM = 500f;
+    [SerializeField] private float sectorSizeM = 1000f;
     [SerializeField] private int asteroidsPerSectorMin = 2, asteroidsPerSectorMax = 6;   // max ≤ 8
     [SerializeField] private float asteroidRadiusMinM = 4f, asteroidRadiusMaxM = 18f;
     [SerializeField] private BlockDefinition asteroidBlock;
@@ -1345,6 +1345,8 @@ Visibility:
 | 34 | GLXY restore needs direct visit-count assignment and malformed-payload ownership cleanup | Use an internal RestoreVisitCount method rather than looping a serialized uint. Bound counts by remaining bytes, require canonical sorted unique lists, reject trailing data/unsupported versions, and clear partially restored state on failure so decoded structures cannot leak. Framed corrupt VOXS records alone are dropped with one warning. Construct participant with the actual GalaxyState and ContentCatalog for snapshot names/decoding. | Tech lead |
 
 | 35 | Session composition becomes live before SYS-004/SYS-009 streaming and player-location persistence | Register the actual ticker, session-owned state/service and GLXY participant now. New game sets the real start location; restore regenerates after Loaded, and missing GLXY uses the saved campaign seed with a warning. Missing PLOC warns and resolves the start pose only after World creates the restored SimClock. Do not claim saved pose/docking or streamed bodies before their tasks. Deferred session-clear handling checks the current zero seed so an old clear event cannot dispose a newer campaign. | Tech lead |
+
+| 36 | Default 2000 m belt width and 500 m sectors violate the fixed two-ring identity capacity | Resolved: retain the authored 2000 m belt width and use 1000 m sectors in the default and actual body_asteroid_belt asset. Two rings fit SPEC-31 Q9 without changing packed IDs or weakening SYS-E003. | Tech lead — ledger Q355 |
 
 ## 11. References
 

@@ -47,8 +47,8 @@ namespace Game.Data.Logic.Nodes
             return valid;
         }
         static bool ArgumentMatches(LogicArgKind kind, IIntExpr integer, ICondition boolean, string text)
-            => kind == LogicArgKind.Int ? integer != null && boolean == null && text == null
-                : kind == LogicArgKind.Bool ? boolean != null && integer == null && text == null
+            => kind == LogicArgKind.Int ? integer != null && boolean == null && string.IsNullOrEmpty(text)
+                : kind == LogicArgKind.Bool ? boolean != null && integer == null && string.IsNullOrEmpty(text)
                 : text != null && integer == null && boolean == null;
         internal LogicValue Evaluate(ILogicContext context)
         {

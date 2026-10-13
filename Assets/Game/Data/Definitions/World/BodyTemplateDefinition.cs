@@ -26,7 +26,7 @@ namespace Game.Data.Definitions
         [SerializeField] private float t2LoadDistanceM = 6000f;                // SPEC-31 tier T2, measured to the bounding sphere
         // Belt only
         [SerializeField] private float beltWidthM = 2000f;
-        [SerializeField] private float sectorSizeM = 500f;
+        [SerializeField] private float sectorSizeM = 1000f;
         [SerializeField] private int asteroidsPerSectorMin = 2, asteroidsPerSectorMax = 6;   // max ≤ 8
         [SerializeField] private float asteroidRadiusMinM = 4f, asteroidRadiusMaxM = 18f;
         [SerializeField] private BlockDefinition asteroidBlock;

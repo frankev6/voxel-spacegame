@@ -184,6 +184,8 @@ namespace Game.Tests.EditMode.Data.Logic
             {
                 var node = LogicTestEnvironment.Source(new CompiledCondition(), source); var report = new ValidationReport(source);
                 Assert.IsTrue(Compiler.Compile(node, new LogicCompileOptions(usage, "test:condition", "condition"), report), report.ToText());
+                // Exercise the serialized graph representation used by real content, not just fresh compiler objects.
+                node = JsonUtility.FromJson<CompiledCondition>(JsonUtility.ToJson(node));
                 node.Validate(report); node.Bind(new LogicBinder(Facts, Refs, report)); Assert.AreEqual(0, report.ErrorCount, report.ToText()); return node;
             }
             public CompiledIntExpr Integer(string source, LogicUsage usage = LogicUsage.BeatCondition)

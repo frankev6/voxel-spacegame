@@ -39,7 +39,7 @@ MonoBehaviour:
   destructible: 1
   t2LoadDistanceM: 6000
   beltWidthM: 2000
-  sectorSizeM: 500
+  sectorSizeM: 1000
   asteroidsPerSectorMin: 2
   asteroidsPerSectorMax: 6
   asteroidRadiusMinM: 4
