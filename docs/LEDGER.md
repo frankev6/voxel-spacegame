@@ -883,6 +883,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 291 | SPEC-23 Q18: AI rules can reference an uncatalogued ability | Reject with AI-E003 before blob allocation; preserve authored order and canonical ability-family indices, with independently allocated default-profile rules. | Tech lead |
 | 292 | SPEC-23 Q19: AI decision boundary contradictions | Use §7 missing-weapon range, latched Return arrival with flee/turret priority, margin-inclusive obstacle broadphase and stationary Hold/Idle. Query warning/counter is system-owned atomic telemetry with no decision influence. | Tech lead |
 | 293 | SPEC-23 Q20: AI-006 acceptance consumes downstream steering | Keep decision/production-tick proof in AI-006 and require real decision-to-command delivery plus intervening-tick suppression in AI-007 RewritesEveryTick. Existing test counts and full end-to-end scope preserved; removes circular acceptance dependency. | Tech lead |
+| 294 | SPEC-24 Q9: integrated ability duration/scenario evidence | Preserve60-tick Active lifetime and original expiry, yielding59 next-tick modifier ticks. Four authored-content scenarios verify actual increased/decreased speed, shields, real granting-thruster destruction and identical240-tick ability/status histories at30/60/144FPS. No runtime/tuning changes. | Tech lead |
 
 
 ## Measurements

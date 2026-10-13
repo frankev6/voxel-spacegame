@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Workers recycled / next batch integrated:** AI-006 closed7e52f91d and claims811feca5 are on local main. Existing combat AI-007 activecursor125 and presentation AI-008 activecursor110; power ABL-005 delivered/validation wait. Primary `task/VOX-020-integrated-preview` integrates46c0a916/af32d7f4/2c878b9a/2a841f92 plusc65a62ec (ABL-005). Q294 mirrorsSPEC24Q9. Serialized compile and grouped GridEditTests/AbilityScenarioTests now active as session14093; no primary runtime mutations until terminal and no completion claim for either task. Original isolated branches preserved.
+
 - **AI-006 closed:** session91602 exited0 with compile clean,1207/0/1 EditMode,170/0/53 PlayMode; soak600.00s/36000ticks/zero leaks. Unity82054/compiler82067 are gone. Original QualitySettings restored/excluded, test debris cleaned after terminal. Next local FF main and claim/dispatch AI-007/008 to existing combat/presentation workers; lead integrates staged VOX-020/ABL-005 batch.
 
 - **Next compatible batch staged without Unity:** existing lead checkout is now `task/VOX-020-ability-integration`, based on primary64eb9098, with VOX-0207cb20474/eb522e0f/4a3914fd/0bdffe92 and ABL-005e7be1baa. Original isolated branchfba40c66 preserved. Clean checkout and docs check pass; compile/tests still pending. Primary full PlayMode91602 remains live and unchanged. Worker2 final delivery verified atcursor136; all workers now have real validation/dependency waits. After current run closes, integrate these scoped commits and mirror SPEC24Q9, alongside newly unlocked AI-007/008 dispatch.
