@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | MIG-013 | claimed main ecb3b62 and dispatched; PWR-010 delivered | combat/migration work as ready |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-001 | claimed main cad43d7 and dispatched; PWR-008 delivered | editor contracts as ready |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ECO-002 | source delivered; completing tracked generation recipe | genuine validation/dependency wait afterward |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-011 | claimed main 2442bc0; finish ECO recipe then dispatch queued | combat composition |
 
 ## Operating rules
 
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Newest:** main `14ede65` closes origin/camera/mount/targeting; main `2442bc0` claims WPN-006 lead and WPN-011 presentation worker. Primary `task/PWR-007-combat-integration` now contains prepared PWR-007/008/010, ENC-001, ECO-002 and DMG-014. Compile session **41679** active; protected shield/economy generation and grouped/full validation still pending. Isolated lead workspace is `task/WPN-006-weapon-aim` from main; previous prepared branches preserved. Presentation worker was instructed to finish tracked ECO recipe then begin WPN-011, so its dependency wait is resolved.
 
 - **Unity:** session **36784 exited 0**: full **1051/0/1 EditMode, 146/0/53 PlayMode**. GAL-009/CAM-006/WPN-004/005 closed; Unity is free. QualitySettings restored and inactive runner artifacts removed. Interactive Editor is closed.
 - **Current batch:** GAL-009 origin, CAM-006 camera warps, WPN-004 mounts and WPN-005 targeting. All 24 required functional checks passed. Origin perf: 5000 roots, median 0.2661 ms / p95 0.2959 ms versus advisory 0.5 ms PASS; wrapper exit 1 was its empty EditMode filter, PlayMode passed 1/0/0. Initial full EditMode Burst failure repaired with generic component creation. Initial full PlayMode 145/1/53 found a true origin singleton-read race; `5bf0a47` moves projectile reads into dependent jobs and completes presentation reads. Compile clean and seven SceneFlow checks passed in terminal session 95528. Evidence `Logs/playtest/origin-combat/`. Final full regression is green; archived XMLs prove closeout.
