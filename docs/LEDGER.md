@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 14 | 3 | 0 | 0 | 74 | 0 | 91 | 5 |
-| M3 | 142 | 6 | 0 | 0 | 32 | 0 | 180 | 9 |
+| M2 | 14 | 0 | 0 | 0 | 77 | 0 | 91 | 7 |
+| M3 | 142 | 5 | 0 | 0 | 33 | 0 | 180 | 11 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -269,17 +269,17 @@
 | AI-004 | SpatialHashBuildSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-002, SPEC-10, PWR-001, DMG-001 | yes | done | astra (gpt-6) | 2026-10-13 | f99a02c | Guarded parallel proxy gathering, canonical sort/bucket and boot-safe hash lifetime; full 968 EM /145 PM green |
 | AI-005 | AI setup and anchor shift | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-003, SPEC-02 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b0fc87e | Brain registration and origin anchor shift; 4 required tests; live origin producer awaits GAL-009 |
 | AI-006 | AiDecisionSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-004, AI-005, SPEC-20, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, ABL-001 | yes | done | astra (gpt-6) | 2026-10-13 | 7c50bdaa | Decisions and nine required checks verified; full1207/170 green; Q291-293; steering edge delivery remains AI-007 |
-| AI-007 | AiSteeringSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Claimed after AI-006 full-green integration; existing combat worker; lead owns Unity |
-| AI-008 | PlayerCombatStatusSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006, DMG-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Claimed after AI-006 full-green integration; existing presentation worker; lead owns Unity |
-| AI-009 | Station turret AI | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007 | no | todo |  |  |  |  |
-| AI-010 | AI combat scenarios | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007, AI-008, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-008, PWR-010 | no | todo |  |  |  |  |
+| AI-007 | AiSteeringSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 2a6444b2 | Steering and ability edges; four required checks pass in13-check shield/steering batch; scoped closeout ADR-0070 |
+| AI-008 | PlayerCombatStatusSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006, DMG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 0d64274b | Combat status singleton; three required checks pass; scoped closeout ADR-0070 |
+| AI-009 | Station turret AI | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007 | yes | todo |  |  |  |  |
+| AI-010 | AI combat scenarios | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007, AI-008, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-008, PWR-010 | yes | todo |  |  |  |  |
 | AI-011 | AI determinism | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010 | no | todo |  |  |  |  |
 | AI-012 | AI and hash performance | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010, TST-001 | no | todo |  |  |  |  |
 | ABL-001 | Public contract types | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | CORE-001, DATA-001, PWR-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 1bc7515 | Canonical ability contracts; 48-byte slot; 1 required test; full batch 901 EM / 128 PM, zero failures |
 | ABL-002 | Ability content and boot singleton | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 900e223 | Ability definition bake and boot lifetime 9534014; fixture repair 48ad51a; full 968 EM /145 PM green |
 | ABL-003 | AbilitySystem | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | frontier | ABL-002, SPEC-20, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | yes | done | astra (gpt-6) | 2026-10-13 | e2b9bda3 | Slot sync, charges/duration, one-tick power handshake and guarded feedback; ADR-0069 empty resync; 9 required tests; effects remain ABL-004 |
 | ABL-004 | Effect systems | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-003, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | fe02469 | Shield toggle and guarded boost effects including empty resync; two required checks; full regression green |
-| ABL-005 | Ability scenarios and frame-rate independence | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-004, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Claimed after green combat/effects batch; lead owns serialized validation |
+| ABL-005 | Ability scenarios and frame-rate independence | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-004, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 0f12d55f | Four integrated ability scenarios pass; charge preservation cad09f48; scoped closeout ADR-0070 |
 | CAM-008 | Screen shake from FxEvents | [SPEC-62](specs/SPEC-62-camera.md) | M2 | standard | CAM-005, SPEC-63 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 9d59a62 | Impact shake and borrowed frame reader; Boot binding e265f13; 7 required tests; full batch 901 EM / 128 PM, zero failures |
 | VFX-002 | FxRig: slots, effects, buffers and binding | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-12 | f2b8118 | Session rig, graph validation, pooled/batched/instanced resources and binding; 5 GPU tests pass; final content budget advisory follow-up in VFX-004 |
 | VFX-003 | FxUploadSystem: drain, batch, submit, stats | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002 | yes | done | astra (gpt-6) | 2026-10-12 | f24d8c1 | Guarded drain even unbound, bounded batching/submission, lifetime accounting and stats; 12 required tests; visible content and boot binding next in VFX-004 |
@@ -312,11 +312,11 @@
 | PERS-013 | Regression scenario R28: load from the pause menu | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-009, PERS-010, SPEC-01, SPEC-20, SPEC-31, SPEC-61, TST-001 | no | todo |  |  |  |  |
 | PERS-014 | Regression scenario 04-B1: load after a content change (end to end) | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | standard | PERS-010, SPEC-01, SPEC-50, SPEC-61, TST-001 | no | todo |  |  |  |  |
 | PERS-015 | Full-world round trip with all real participants | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-011, PERS-012, SPEC-01, SPEC-30, SPEC-31, SPEC-33, SPEC-40, SPEC-41, SPEC-42, SPEC-50 | no | todo |  |  |  |  |
-| VOX-020 | Incremental grid edits for the editor preview | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M3 | frontier | VOX-014 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Isolated lead work during serialized combat regression; incremental editor preview edits |
+| VOX-020 | Incremental grid edits for the editor preview | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M3 | frontier | VOX-014 | yes | done | astra (gpt-6) | 2026-10-13 | a2e9b77e | Three functional checks pass; preview median0.2135ms against2ms; zero tuning; scoped closeout ADR-0070 |
 | PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | a606bfc | Restored-cell mass accumulator; ownership fixture repair; 1 required test; full batch 901 EM / 128 PM, zero failures |
 | DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Claimed in isolated lead checkout during AI/ability regression; impulse consumer and bounded restore passes, nine required tests |
 | AI-013 | Fleet data and formations | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | bf5e81f | Formation validation and boot-owned blob/catalog; 2 required tests. AI-014 steering remains open. Full 1027 EM / 145 PM passed. |
-| AI-014 | FleetSystem and member thinking | [SPEC-23](specs/SPEC-23-ai.md) | M3 | frontier | AI-013, AI-007 | no | todo |  |  |  |  |
+| AI-014 | FleetSystem and member thinking | [SPEC-23](specs/SPEC-23-ai.md) | M3 | frontier | AI-013, AI-007 | yes | todo |  |  |  |  |
 | AI-015 | Fleet and swarm scenario and performance | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-014 | no | todo |  |  |  |  |
 | GAL-001 | Public contract types | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | CORE-001, DATA-001, VOX-001, NAR-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 6d49a49 | Galaxy contracts, three required tests; full suites green |
 | GAL-002 | Orbit math | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b41aab2 | Double-precision Kepler position/velocity and period wrapping; full 968 EM /145 PM green |
@@ -333,7 +333,7 @@
 | GAL-013 | Performance gates | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-005, GAL-006, GAL-009, GAL-011, TST-001 | no | todo |  |  |  |  |
 | SYS-001 | Public contract types | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | CORE-001, DATA-001, GAL-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e738e71 | Streaming contracts and service shells; 2 required tests; full batch green |
 | SYS-002 | Streaming config and boot singleton | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 7244be6 | Config validation/factory, boot singleton and catalog asset; 2 required tests; full suites green |
-| SYS-003 | Structure builders | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-10 | no | todo |  |  |  |  |
+| SYS-003 | Structure builders | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-10 | yes | todo |  |  |  |  |
 | SYS-004 | Load and unload (T1) | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-002, SPEC-30, SPEC-10, SPEC-12 | no | todo |  |  |  |  |
 | SYS-005 | BodyOnRailsSystem | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004 | no | todo |  |  |  |  |
 | SYS-006 | T2 voxel bodies and damage persistence | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-003, SYS-004, SPEC-13, SPEC-21, SPEC-23 | no | todo |  |  |  |  |
@@ -1001,6 +1001,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Preview, abilities and AI steering/status closed — astra (gpt-6)
+
+- VOX-020 a2e9b77e, ABL-005 0f12d55f plus cad09f48, AI-007 2a6444b2 and AI-008 0d64274b accepted under ADR-0070. Compile clean (zero CS warnings). Archived focused evidence in `Logs/playtest/preview-abilities/`: grid-edits3/3, steering-shield13/13, abilities-final4/4, combat-status3/3. Existing full EditMode1217/0/1 provides additional evidence.
+- Full PlayMode173/2/53 is NOT green: two audio benchmark timeouts remain deferred infrastructure work; unrelated to these passing acceptance checks. No changed threshold or repeated run. Preview measurement median0.2135ms/p950.2266ms versus2ms. Zero tuning passes.
+- Test counts: VOX-020 spec-required:4, extra:0; ABL-005 spec-required:4, extra:0; AI-007 spec-required:4, extra:0; AI-008 spec-required:3, extra:0. Next existing workers AI-009/010; lead repair/inventory batch unlocks ECO-005. No live enemy demonstration claimed yet.
 
 ### 2026-10-13 — Owner correction: implementation before repeated validation — astra (gpt-6)
 
