@@ -5,7 +5,8 @@ Python 3 standard library only (SPEC-80 §4.6).
 
   check_tokens.py                       checks Assets/Game/UI/Theme/tokens.uss and every Directions/tokens-*.uss
   check_tokens.py --sheet PATH [...]    checks the given sheets only
-  check_tokens.py --verify-doc          also compares the sheets and the computed tables with DESIGN-SYSTEM.md
+  check_tokens.py --verify-doc          also compares the sheets and computed tables with the approved/documented column
+                                       (explicit migrated font fallbacks are reported pending AST-004, SPEC-80 Q15)
 
 Rules (DESIGN-SYSTEM):
 - every binding token of §10.1 is defined exactly once in each sheet's :root; direction sheets also define every §11 token;
@@ -29,6 +30,7 @@ import time
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DESIGN_SYSTEM = os.path.join(ROOT, "docs", "design", "DESIGN-SYSTEM.md")
 THEME = os.path.join(ROOT, "Assets", "Game", "UI", "Theme")
+REFERENCE_THEME = os.path.join(ROOT, "docs", "design", "board", "source-tokens")
 
 T1_TOKENS = ["--color-text", "--color-text-muted", "--color-accent", "--color-positive", "--color-warning",
              "--color-danger", "--color-info", "--color-ally", "--color-enemy"]
@@ -158,12 +160,39 @@ def parse_sheet(path):
 
 
 def column_of(path):
-    """DESIGN-SYSTEM column name for a sheet: tokens.uss → Placeholder, tokens-pulp-horizon.uss → PULP HORIZON."""
+    """Canonical sheet declares the ART-014 approved column; historical placeholder sheets keep their old column."""
     name = os.path.basename(path)
     if name == "tokens.uss":
-        return "Placeholder"
+        with open(path, encoding="utf-8") as sheet:
+            approved = re.search(r"Approved UI direction: (NOCTURNE|DRYDOCK|PULP HORIZON)\b", sheet.read())
+        return approved.group(1) if approved else "Placeholder"
     m = re.fullmatch(r"tokens-([a-z0-9-]+)\.uss", name)
     return m.group(1).replace("-", " ").upper() if m else None
+
+
+# ART-014 Q15: the specified look-test fonts do not exist. Only these byte/GUID-preserving
+# existing SDF fallbacks may temporarily differ from approved font filenames; AST-004 replaces them.
+FONT_FALLBACKS = {
+    "--font-display": ("OfficeCodePro-Bold_SDF.asset", "fa0897302a7104eb5840c5849601828b"),
+    "--font-body": ("OfficeCodePro-Regular_SDF.asset", "44ef3403971164328b280725314884c5"),
+    "--font-mono": ("OfficeCodePro-Regular_SDF.asset", "44ef3403971164328b280725314884c5"),
+    "--font-body-strong": ("OfficeCodePro-Bold_SDF.asset", "fa0897302a7104eb5840c5849601828b"),
+}
+
+
+def is_migrated_font_fallback(token, value):
+    fallback = FONT_FALLBACKS.get(token)
+    if fallback is None:
+        return False
+    filename, guid = fallback
+    relative = "Assets/Game/UI/Theme/Fonts/OfficeCodePro/" + filename
+    if value != f'url("project://database/{relative}")':
+        return False
+    path = os.path.join(ROOT, relative)
+    if not os.path.exists(path) or not os.path.exists(path + ".meta"):
+        return False
+    with open(path + ".meta", encoding="utf-8") as meta, open(path, encoding="utf-8") as asset:
+        return f"guid: {guid}" in meta.read() and "m_FamilyName: Office Code Pro" in asset.read()
 
 
 # ------------------------------------------------------------------ DESIGN-SYSTEM parsing
@@ -294,7 +323,7 @@ def check(paths, verify_doc):
         values, duplicates = parse_sheet(path)
         for name in duplicates:
             errors.append(f"{rel}: {name} is defined more than once")
-        required = binding + ([] if os.path.basename(path) == "tokens.uss" else proposed)
+        required = binding + ([] if column_of(path) == "Placeholder" else proposed)
         missing = [t for t in required if t not in values]
         for name in missing:
             errors.append(f"{rel}: missing token {name}")
@@ -330,7 +359,10 @@ def check(paths, verify_doc):
             else:
                 for name, want in expected.items():
                     if name in values and normalise(values[name]) != normalise(want):
-                        errors.append(f"{rel}: {name} is '{values[name]}', DESIGN-SYSTEM says '{want}'")
+                        if col == "NOCTURNE" and is_migrated_font_fallback(name, values[name]):
+                            print(f"INFO {rel}: {name} retains migrated OFL placeholder; approved '{want}' awaits AST-004 (SPEC-80 Q15)")
+                        else:
+                            errors.append(f"{rel}: {name} is '{values[name]}', DESIGN-SYSTEM says '{want}'")
 
     if verify_doc:
         doc_contrast, doc_de = doc_contrast_table(doc), doc_delta_e_table(doc)

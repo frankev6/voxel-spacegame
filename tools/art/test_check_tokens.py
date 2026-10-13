@@ -11,7 +11,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import check_tokens as ct  # noqa: E402
 
-DRYDOCK = os.path.join(ct.THEME, "Directions", "tokens-drydock.uss")
+DRYDOCK = os.path.join(ct.REFERENCE_THEME, "tokens-drydock.uss")
 
 
 def run_quiet(argv):

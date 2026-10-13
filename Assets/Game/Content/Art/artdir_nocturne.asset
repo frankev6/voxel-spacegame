@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf312bac64dea4d79bf8df73ef287a32, type: 3}
+  m_Name: artdir_nocturne
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ArtDirectionDefinition
+  id: artdir_nocturne
+  formerIds: []
+  displayName: NOCTURNE
+  isActive: 1
+  brickMaterial: {fileID: 0}
+  propMaterial: {fileID: 0}
+  skyMaterial: {fileID: 2100000, guid: d8f225dcfe7544e3c9a9d78a0d1d63da, type: 2}
+  fallbackFactionId: faction_ark
+  factionLooks: []

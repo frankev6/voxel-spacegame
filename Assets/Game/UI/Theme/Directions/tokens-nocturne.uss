@@ -1,6 +1,6 @@
-/* Implements SPEC-80 §4.4 (ART-002). NOCTURNE direction sheet: every binding token (DESIGN-SYSTEM §10.1) with the
-   NOCTURNE column of §8.1, plus every proposed token of §11. Review material until ART-013; fonts are look-test
-   fonts (ART-008). Generated from DESIGN-SYSTEM.md; check with tools/art/check_tokens.py --verify-doc. */
+/* SPEC-80 ART-014. Approved UI direction: NOCTURNE (DESIGN-GUIDE §8/§11).
+   Numeric tokens are the approved column. Office Code Pro is the migrated OFL compatibility placeholder,
+   not approved final typography; AST-004 supplies Michroma/Inter/JetBrains Mono. See Fonts/README.md and SPEC-80 Q15. */
 :root {
     /* colours */
     --color-bg: #05070D;
@@ -57,16 +57,16 @@
     --icon-l: 32px;
     --hud-margin: 32px;
     /* type */
-    --font-display: url("project://database/Assets/Game/Art/LookTest/Fonts/FNT_Michroma-Regular_SDF.asset");
-    --font-body: url("project://database/Assets/Game/Art/LookTest/Fonts/FNT_Inter-Regular_SDF.asset");
-    --font-mono: url("project://database/Assets/Game/Art/LookTest/Fonts/FNT_JetBrainsMono-Regular_SDF.asset");
+    --font-display: url("project://database/Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Bold_SDF.asset");
+    --font-body: url("project://database/Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Regular_SDF.asset");
+    --font-mono: url("project://database/Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Regular_SDF.asset");
     --text-xs: 12px;
     --text-s: 14px;
     --text-m: 16px;
     --text-l: 20px;
     --text-xl: 26px;
     --text-xxl: 34px;
-    --font-body-strong: url("project://database/Assets/Game/Art/LookTest/Fonts/FNT_Inter-SemiBold_SDF.asset");
+    --font-body-strong: url("project://database/Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Bold_SDF.asset");
     /* motion and opacity */
     --duration-fast: 120ms;
     --duration-normal: 250ms;

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Export the direction token sheets as CSS for the HTML design board (SPEC-80 ART-002, used by ART-005).
 
-Python 3 standard library only (SPEC-80 §4.6). Reads Assets/Game/UI/Theme/Directions/tokens-<direction>.uss and writes
+Python 3 standard library only (SPEC-80 §4.6). After ART-014 reads the frozen original sheets in
+docs/design/board/source-tokens/ (runtime Directions/ before that snapshot) and writes
 docs/design/board/tokens/<direction>.css. Colour, space, radius, border, text-size and duration tokens are copied as-is.
 Font tokens become Google Fonts families (table below) plus -weight and -stretch companions. Each file starts with the
 Google Fonts @import for its families (fonts.googleapis.com is one of the board's two allowed external hosts) and scopes
@@ -17,7 +18,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from check_tokens import THEME, ROOT, parse_sheet  # noqa: E402
+from check_tokens import THEME, ROOT, REFERENCE_THEME, parse_sheet  # noqa: E402
 
 OUT_DIR = os.path.join(ROOT, "docs", "design", "board", "tokens")
 COPIED = re.compile(r"^--(color|space|radius|border|text|duration)-")
@@ -89,7 +90,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--check", action="store_true", help="verify instead of writing")
     args = ap.parse_args(argv)
-    sheets = sorted(glob.glob(os.path.join(THEME, "Directions", "tokens-*.uss")))
+    sheets = sorted(glob.glob(os.path.join(REFERENCE_THEME, "tokens-*.uss")))
+    if not sheets:  # ART-002 before the ART-014 reference snapshot
+        sheets = sorted(glob.glob(os.path.join(THEME, "Directions", "tokens-*.uss")))
     if not sheets:
         raise SystemExit("export_board_tokens: no direction sheets found")
     stale = []

@@ -1,21 +1,78 @@
-/* Implements SPEC-80 §4.4. Binding token names (DESIGN-SYSTEM §10.1). Values: placeholder until ART-014. */
+/* SPEC-80 ART-014. Approved UI direction: NOCTURNE (DESIGN-GUIDE §8/§11).
+   Numeric tokens are the approved column. Office Code Pro is the migrated OFL compatibility placeholder,
+   not approved final typography; AST-004 supplies Michroma/Inter/JetBrains Mono. See Fonts/README.md and SPEC-80 Q15. */
 :root {
-    --color-bg: #111214;          --color-surface-1: #1A1B1E;   --color-surface-2: #232428;   --color-surface-3: #2D2F33;
-    --color-border: #4A4D52;      --color-text: #EDEDED;        --color-text-muted: #A6A6A6;
-    --color-accent: #7AA7D9;      --color-accent-strong: #B3CDEB;
-    --color-positive: #8CCB6A;    --color-warning: #E3BE5A;     --color-danger: #F06A7E;      --color-info: #6CB8F0;
-    --color-ally: #5C9BFF;        --color-enemy: #FF7A4D;       --color-neutral: #C8C8C8;
-    --color-shield: #5CC8FF;      --color-hull: #E0E0E0;        --color-energy: #EFD25A;
-    --color-faction-ark: #7AA7D9; --color-faction-raiders: #E5533D; --color-faction-xeno: #9B6CF0; --color-faction-vestari: #4FC3A1;
-    --color-faction-tlaxcala: #E3A04F; --color-faction-khuchad-clan: #C9C25A; --color-faction-neutral: #C8C8C8;   /* SPEC-33 mapColorToken */
-    --color-travel-cover: #F4F6FA;                                /* SPEC-32 §5.8 jump cover (direction A white-out) */
-    --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
-    --radius-s: 2px; --radius-m: 4px; --radius-l: 8px;
-    --border-thin: 1px; --border-thick: 2px;
-    --font-display: url("project://database/Assets/Game/Art/_Placeholder/Fonts/OfficeCodePro-Bold_SDF.asset");
-    --font-body: url("project://database/Assets/Game/Art/_Placeholder/Fonts/OfficeCodePro-Regular_SDF.asset");
-    --font-mono: url("project://database/Assets/Game/Art/_Placeholder/Fonts/OfficeCodePro-Regular_SDF.asset");
-    --text-xs: 12px; --text-s: 14px; --text-m: 16px; --text-l: 20px; --text-xl: 28px; --text-xxl: 40px;
-    --duration-fast: 100ms; --duration-normal: 200ms; --duration-slow: 400ms;
-    --duration-travel-fade: 0.5s;                                 /* SPEC-32 §5.8 timing contract: never changed by art */
+    /* colours */
+    --color-bg: #05070D;
+    --color-surface-1: #0A0F1A;
+    --color-surface-2: #101826;
+    --color-surface-3: #172233;
+    --color-border: #2A3B55;
+    --color-text: #DCE8F5;
+    --color-text-muted: #8FA6C2;
+    --color-accent: #39D5FF;
+    --color-accent-strong: #A6EEFF;
+    --color-positive: #3DD6A3;
+    --color-warning: #FFC247;
+    --color-danger: #FF5C7A;
+    --color-info: #8FB0FF;
+    --color-ally: #5B8CFF;
+    --color-enemy: #FF7A45;
+    --color-neutral: #B9C3D1;
+    --color-shield: #3FD8FF;
+    --color-hull: #EDE6DA;
+    --color-energy: #FFB84D;
+    --color-border-strong: #56769F;
+    --color-text-on-accent: #05070D;
+    --color-overlay: rgba(2, 4, 10, 0.70);
+    --color-objective: #FFE08A;
+    --color-clue: #E0C3FF;
+    /* factions (functional: SPEC-33/61) */
+    --color-faction-ark: #7FB2FF;
+    --color-faction-raiders: #FF5A66;
+    --color-faction-xeno: #B48CFF;
+    --color-faction-vestari: #5CE0C0;
+    --color-faction-tlaxcala: #FFB866;
+    --color-faction-khuchad-clan: #E6E07A;
+    --color-faction-neutral: #A9B4C8;
+    /* travel (functional: SPEC-32 §5.8) */
+    --color-travel-cover: #000000;
+    --duration-travel-fade: 0.5s;
+    /* space, shape, icons, HUD */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
+    --radius-s: 0px;
+    --radius-m: 0px;
+    --radius-l: 2px;
+    --border-thin: 1px;
+    --border-thick: 2px;
+    --icon-s: 16px;
+    --icon-m: 24px;
+    --icon-l: 32px;
+    --hud-margin: 32px;
+    /* type */
+    --font-display: url("project://database/Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Bold_SDF.asset");
+    --font-body: url("project://database/Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Regular_SDF.asset");
+    --font-mono: url("project://database/Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Regular_SDF.asset");
+    --text-xs: 12px;
+    --text-s: 14px;
+    --text-m: 16px;
+    --text-l: 20px;
+    --text-xl: 26px;
+    --text-xxl: 34px;
+    --font-body-strong: url("project://database/Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Bold_SDF.asset");
+    /* motion and opacity */
+    --duration-fast: 120ms;
+    --duration-normal: 250ms;
+    --duration-slow: 500ms;
+    --easing-in: ease-in-out-sine;
+    --easing-out: ease-in-out-sine;
+    --opacity-disabled: 0.4;
+    --opacity-hud-panel: 0.80;
 }
