@@ -64,6 +64,8 @@ wpn_missile_launcher_small|0|1|3|200|0|0.3|6|0.05|1|2|180|0.3|5|5|90|0|0.5|0.3|0
             }
             AssetDatabase.SaveAssets();
             var definitions = blocks.Values.Cast<ContentDefinition>().ToList();
+            definitions.Add(AssetDatabase.LoadAssetAtPath<BlockDefinition>("Assets/Game/Content/Blocks/block_missing.asset"));
+            definitions.Add(AssetDatabase.LoadAssetAtPath<ItemDefinition>("Assets/Game/Content/Items/item_missing.asset"));
             foreach (string cueId in new[] { "cue_weapon_plasma_fire", "cue_weapon_laser_fire" })
             {
                 var cue = AssetDatabase.LoadAssetAtPath<AudioCueDefinition>("Assets/Game/Content/Audio/" + cueId + ".asset"); Assert.NotNull(cue, cueId); definitions.Add(cue);
@@ -198,7 +200,7 @@ wpn_missile_launcher_small|0|1|3|200|0|0.3|6|0.05|1|2|180|0.3|5|5|90|0|0.5|0.3|0
             Assert.AreEqual(6, context.Writer.Outcomes.Count(o => o.Outcome == WriteOutcome.Created));
             Assert.AreEqual(3, context.Writer.Outcomes.Count(o => o.Outcome == WriteOutcome.SkippedHandEdited));
             var registered = blocks.Values.Cast<ContentDefinition>().Concat(Rows.Split('\n').Select(row => Weapon(row.Split('|')[0])))
-                .Concat(catalog.All<AudioCueDefinition>()).ToArray();
+                .Concat(catalog.All<AudioCueDefinition>()).Concat(new ContentDefinition[] { catalog.MissingBlock, catalog.MissingItem }).ToArray();
             var registrationReport = new ValidationReport("Catalog");
             var validationCatalog = ContentCatalog.Build(registered, registrationReport);
             Assert.IsFalse(registrationReport.HasErrors, registrationReport.ToText());

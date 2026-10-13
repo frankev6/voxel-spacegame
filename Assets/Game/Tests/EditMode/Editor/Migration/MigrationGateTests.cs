@@ -46,13 +46,17 @@ namespace Game.Tests.EditMode.Editor.Migration
         {
             Assert.AreEqual(0, first.ErrorCount, first.ToText()); Assert.AreEqual(0, second.ErrorCount, second.ToText());
             var report = ContentValidatorRunner.Validate(ContentDatabaseBuilder.Rebuild()); Assert.AreEqual(0, report.ErrorCount, report.ToText());
-            Assert.AreEqual(89, AssetRows(secondReport).Count()); // 35 items, 21 blocks, 13 ships, 20 audio cues.
+            Assert.AreEqual(98, AssetRows(secondReport).Count()); // 35 items, 21 blocks, 13 ships, 20 audio cues, 9 weapons.
         }
         [Test] public void SecondRun_IsIdempotent()
         {
             foreach (var row in AssetRows(secondReport))
             {
-                Assert.AreEqual("Unchanged", row.Outcome, row.Path); CollectionAssert.AreEqual(assets[row.Path], File.ReadAllBytes(row.Path), row.Path);
+                bool protectedPlasma = row.Path == "Assets/Game/Content/Weapons/wpn_plasma_turret_medium.asset"
+                    || row.Path == "Assets/Game/Content/Weapons/wpn_plasma_turret_small.asset"
+                    || row.Path == "Assets/Game/Content/Weapons/wpn_plasma_turret_small_fixed.asset";
+                Assert.AreEqual(protectedPlasma ? "SkippedHandEdited" : "Unchanged", row.Outcome, row.Path);
+                CollectionAssert.AreEqual(assets[row.Path], File.ReadAllBytes(row.Path), row.Path);
             }
             Assert.AreEqual(firstReport, secondReport); CollectionAssert.AreEqual(firstManifest, secondManifest);
         }
