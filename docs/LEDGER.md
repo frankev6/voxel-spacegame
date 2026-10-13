@@ -245,7 +245,7 @@
 | WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | yes | done | astra (gpt-6) | 2026-10-13 | fc32163 | Target velocity lead and occupied hull centre aiming; 5 required tests |
 | WPN-007 | WeaponFireSystem and the projectile store append | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-006, PWR-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead next combat firing pipeline after audio batch launch |
 | WPN-008 | ProjectileStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-003, WPN-007, PWR-001, SPEC-13 | no | todo |  |  |  | partial in FND-020: movement, hull hits and lifetime; DMG-007 orders stepping after impact / parallel stream/compaction pipeline, homing, shields and full required tests; partial in VFX-004: guarded hull-hit emission with normal, velocity and overrides / parallel pipeline, homing, shields and full required tests |
-| WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | no | todo |  |  |  |  |
+| WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | no | todo |  |  |  | partial in WPN-007: pulse clock, muzzle/range endpoint and cancellation / first-hit casts, hull/shield damage streams and impact effects |
 | WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | no | todo |  |  |  | partial in FND-020: explosion requests into damage / shields, audio and required tests; partial in VFX-004: guarded explosion visual event / shields, audio and required tests |
 | WPN-011 | CombatGridSetup and turret visuals | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, PWR-001, ABL-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  |  |
 | WPN-012 | Combat scenarios and determinism | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-009, WPN-010, WPN-011, SPEC-13, SPEC-22 | no | todo |  |  |  |  |
@@ -858,6 +858,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 266 | SPEC-21 Q50: turret rest pose and split refresh | Reconstruct absolute pose from current block origin/orientation/cell size; OR change-filter aim and mount so split reparenting redraws unchanged yaw. Fixed weapons remain unchanged. | Tech lead |
 | 267 | SPEC-64 Q16 / ledger Q169: native audio queue lifetime | ADR-0067 applies existing GuardedHandles to SFX producers, exclusive drain and disposal; ram, split and death producers updated together. Required drain tests use jobs attached only to the queue guard. | Tech lead |
 | 268 | SPEC-21 Q61: fractional timing and pellet RNG reconstruction | Carry negative fractional trigger remainder only while firing; zero initial cooldown fires immediately. Seed each pellet by its own ShotId and persistent shooter identity, then skip its two spread samples when reconstructing lifetime randomness. | Tech lead |
+| 269 | SPEC-21 Q62: firing acceptance requires a real beam pulse lifetime | Bring forward production BeamStepSystem clock/muzzle/range endpoint and cancellation into WPN-007; required duration test uses real fixed-step updates. WPN-009 still owns first-hit clipping, damage/shield streams and impact effects. | Tech lead |
 
 ## Measurements
 
