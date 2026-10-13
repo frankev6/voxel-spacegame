@@ -36,7 +36,7 @@ namespace Game.Tests.EditMode.Galaxy
         FrameOrigin Frame => Em.GetComponentData<FrameOrigin>(origin);
         [SetUp] public void SetUp()
         {
-            world = EcsTestWorld.Create(typeof(PendingRebaseWriteSystem), typeof(OriginRebaseSystem));
+            world = EcsTestWorld.Create(typeof(SimClockAdvanceSystem), typeof(PendingRebaseWriteSystem), typeof(OriginRebaseSystem));
             world.AddGameplayActive(); world.AddWorldSceneActive(); world.AddSimClock();
             events = new NativeQueue<ManagedEventEnvelope<OriginShifted>>(Allocator.Persistent);
             world.AddSingleton(new ManagedEventQueue<OriginShifted> { Queue = events });
