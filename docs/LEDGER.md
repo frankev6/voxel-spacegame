@@ -908,6 +908,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — DMG-011 live contact handoff defect found — astra (gpt-6)
+
+1. Live seed-7 production range: repeated controlled production projectiles cut a **264-cell** wall island. Chunk renderer is visible and initial separation velocity is approximately **(-0.95, 0, -1.14) m/s**. Screenshots `Logs/playtest/dmg011/chunk-early.png`, `chunk-moving.png`; commands/readbacks `live-cut.txt`. This is controlled projectile injection, not claimed keyboard input evidence.
+2. **DMG-011 remains in-progress:** at age 59 ticks, velocity is (-0.942, 0, -1.130); after the 60-tick parent contact grace expires, age 73 velocity is **(-5.71, 100.72, -16.78) m/s**. Parent collider was already Ready and installed at tick 124 before grace ended at tick 162. Timeline `contact-handoff.txt` isolates the kick to contact reactivation; initial tumble likely rotated the piece into surviving parent geometry during suppression. Investigate and fix collision handoff; do not hide it with a velocity clamp or mark the feature done from isolated tests. This is correctness work, not a tuning pass.
+3. Full compile and suites remain green at the tested revision: **901 EditMode / 128 PlayMode passed**, zero failures. Ten worker tasks closed in preceding entry. Editor currently running the damaged range. Preserve it until the contact fix needs recompilation/validation; QualitySettings serialization delta remains excluded.
+
 ### 2026-10-13 — Ten-task worker batch validated — astra (gpt-6)
 
 1. Full compile: zero C# warnings. Full EditMode **901 passed / 0 failed / 1 skipped**; PlayMode **128 passed / 0 failed / 53 skipped**, both exit 0. Evidence `Logs/playtest/orchestration-batch2/` includes XML and required-test inventory. Framing fixture's unshaken setting resolves the earlier impact-shake interaction without weakening viewport limits or production shake.
