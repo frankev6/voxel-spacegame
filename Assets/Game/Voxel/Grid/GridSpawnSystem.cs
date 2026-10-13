@@ -434,7 +434,8 @@ namespace Game.Voxel.Grid
                         slots = em.GetBuffer<BrickSlot>(root); var linked = em.GetBuffer<LinkedEntityGroup>(root);
                         for (int i = 0; i < created.Length; i++)
                         { slots[BrickMath.SlotIndex(newCoords[i], min, dims)] = new BrickSlot { Brick = created[i] }; linked.Add(new LinkedEntityGroup { Value = created[i] }); }
-                        int n = 0; for (int i = 0; i < targets.Length; i++) if (targets[i] == Entity.Null) targets[i] = created[n++];
+                        var targetArray = targets.AsArray();
+                        int n = 0; for (int i = 0; i < targetArray.Length; i++) if (targetArray[i] == Entity.Null) targetArray[i] = created[n++];
                     }
                     if (targets.Length > 0)
                     {
