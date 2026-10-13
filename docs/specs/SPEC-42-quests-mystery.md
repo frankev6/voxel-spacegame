@@ -806,7 +806,7 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 ### QST-002 — Definitions, logic compile/bind and validator rules
 - **Milestone:** M3
 - **Tier:** standard — fields, usages and rule table given in §4.2–§4.7
-- **Depends on:** `QST-001`, `SPEC-40`
+- **Depends on:** `QST-001`, `NAR-003`, `NAR-004`, `NAR-006`, `NAR-009`, `NAR-013`
 - **Do:**
   1. Implement the properties and `ILogicSourceOwner` on the five definitions, with the usages in the comments of §4.2–§4.4. Field paths are `stages[i].objectives[j].doneWhen` and so on.
   2. Implement `QuestValidatorRules` (V004–V006, V009, V011) and `MysteryValidatorRules` (V007, V008), plus the beat rules (V001–V003, V010, V012), in one provider class per file.
@@ -964,6 +964,8 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 | 6 | Requested changes to other specs | `_INTEGRATION-TODO.md` items 64, 65, 86–90 | Tech lead |
 | 7 | QST-001's throw-only staging instruction omits inherited interface members and conflicts with the literal value constructors, metadata and property rule | Transcribe the 25 public types and internal QuestInstance. Preserve explicit enum values, readonly view constructors, initialized DTOs, Repeatable and immutable Order/QUST/version metadata; authored definition getters expose fields with read-only lists. Complete INarrativeSystem, ILogicNarrative, ISaveParticipant and the four declared ILogicSourceOwner signatures; operational bodies/event accessors throw their owning QST-002…007 IDs. ClueDefinition has no logic fields/owner interface per its §4.4 declaration and SPEC-40 §4.5; RumorDefinition adds the owner. Validator providers remain QST-002. No service composition, save registration, runtime behavior or content in QST-001. | Tech lead |
 | 8 | The required quest resolver lines arrive while RefResolverRegistry and CatalogRefResolver are still NAR-006 shells | Stage the four typed registrations in CreateDefault: QuestDefinition/Quest, ClueDefinition/Clue (including rumors), StoryBeatDefinition/Beat, MysteryDefinition/Mystery. The existing generic resolver constructor, Register/TryGet and final CreateDefault path retain explicit NAR-006 throws. NAR-006 owns completing all families and returning the working registry; no partial runtime resolver or new API is claimed. | Tech lead |
+
+| 9 | Whole SPEC-40 dependency prevents implementing quest definitions even though imported beats already require their validators at boot | QST-002 depends on completed contracts, compiler/binder, condition nodes, reference/fact catalog, import pipeline and validator framework: QST-001 and NAR-003/004/006/009/013. Runtime effect execution, narrative scheduling and campaign playthrough remain their own tasks; no bypass of local validation, fake bindings or reduced acceptance. | Tech lead |
 
 ## 11. References
 

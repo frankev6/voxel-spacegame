@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 109 | 10 | 0 | 0 | 61 | 0 | 180 | 8 |
+| M3 | 109 | 10 | 0 | 0 | 61 | 0 | 180 | 9 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -402,7 +402,7 @@
 | DLG-011 | Dialog PlayMode scenarios | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-007, DLG-009, QST-001 | no | todo |  |  |  |  |
 | DLG-012 | Harness commands for dialog | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, DEV-001 | no | todo |  |  |  |  |
 | QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 95f80410 | Public quest/mystery contracts and required assembly test; behavior remains QST-002 onward |
-| QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, SPEC-40 | no | todo |  |  |  |  |
+| QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, NAR-003, NAR-004, NAR-006, NAR-009, NAR-013 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Claimed for real definition/validator boot repair; SPEC42Q9 explicit completed prerequisites. |
 | QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, SPEC-40 | no | todo |  |  |  |  |
 | QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, SPEC-40 | no | todo |  |  |  |  |
 | QST-005 | BeatService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, SPEC-41 | no | todo |  |  |  |  |
@@ -914,6 +914,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 333 | SPEC-32 Q12: travel validation and geometry dependencies | Resolved: scoped field errors precede geometry checks; inclusive blueprint bounds and voxel shape radius use double arithmetic, shipped gates validated against real content. | Tech lead |
 | 335 | SPEC-30 Q33: start-location time source | Resolved: use canonical SimClock UniversalTime, zero before a clock exists; app sets/restores clock before placement. No duplicate saved time. | Tech lead |
 | 336 | SPEC-01 Q30/Q31: real spawner integration and duplicate fleet borrow | Resolved: install against actual galaxy service; internal registered-source path reuses the fleet-owned handle and never releases it. Service releases only its own registrations. Production session binding remains pending. | Tech lead |
+| 338 | SPEC-42 Q9: quest-definition construction blocked by whole narrative spec | Resolved: explicit completed compiler/binder/catalog/import/validator prerequisites; actual boot exception requires real QST-002 implementation. Runtime narrative execution remains separate, all required validation cases retained. | Tech lead |
 | 334 | SPEC-33 Q24: legacy first formation conflicts with final encounter table | Resolved: retain/report original formation and explicit replacement diagnostics; authored ENC-010 composition table governs final fleets, real assets required. | Tech lead |
 | 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
 
