@@ -46,7 +46,7 @@ namespace Game.Tests.EditMode.Editor.Migration
         {
             Assert.AreEqual(0, first.ErrorCount, first.ToText()); Assert.AreEqual(0, second.ErrorCount, second.ToText());
             var report = ContentValidatorRunner.Validate(ContentDatabaseBuilder.Rebuild()); Assert.AreEqual(0, report.ErrorCount, report.ToText());
-            Assert.AreEqual(69, AssetRows(secondReport).Count());
+            Assert.AreEqual(89, AssetRows(secondReport).Count()); // 35 items, 21 blocks, 13 ships, 20 audio cues.
         }
         [Test] public void SecondRun_IsIdempotent()
         {

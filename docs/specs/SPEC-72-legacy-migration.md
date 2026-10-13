@@ -325,7 +325,7 @@ Prismatic mirrors get no `WeaponDefinition` (they migrate as `Prop` blocks witho
 
 Ability grants (written by MIG-010 into `BlockDefinition.grantedAbilities`, SPEC-04 DATA-010): `block_thruster_small`, `block_thruster_medium`, `block_thruster_large` → `[ability_speed_boost]`; `block_shield_small` → `[ability_shield_toggle]`. Ship-level `AbilityIds` are dropped (abilities come from blocks).
 
-**`AudioCueDefinition` (SPEC-64, area `Audio`):** one per Sounds/Music entry. Meanings: clip ← legacy `Clip` path with `Assets/Game/SFX/Music/<file>` → `Assets/Game/Audio/Music/<file>` and `Assets/Game/SFX/<file>` → `Assets/Game/Audio/Sfx/<file>` (all 13 distinct files exist there); volume ← `Volume`; category ← music for `music_*`, sfx otherwise. A missing clip file is `MIG-E060`.
+**`AudioCueDefinition` (SPEC-64, area `Audio`):** one per Sounds/Music entry. Meanings: clip ← legacy `Clip` path with `Assets/Game/SFX/Music/<file>` → `Assets/Game/Audio/Music/<file>` and `Assets/Game/SFX/<file>` → `Assets/Game/Audio/Sfx/<file>` (all 12 distinct referenced files exist there); volume ← `Volume`; category ← music for `cue_music_*`, sfx otherwise. A missing clip file is `MIG-E060`. SPEC-64 §3.14 applies before writing: require exactly one provenance row, allow `Unverified` for development or `Confirmed`, and reject `Blocked`/missing/duplicate provenance with `MIG-E061`. MIG-011 imports only these legacy meanings; AUD-007 owns SPEC-64 §6.4 playback tuning, additional cues and config wiring.
 
 **`FactionDefinition` (SPEC-33 §4.1, area `Factions`):** display name ← `displayName`; description ← `description`; `liveryColor` ← `color` RGBA; `shipNamePrefix` ← `shipNamePrefix`; `mapColorToken` = `--color-faction-<id without the faction_ prefix, underscores as hyphens>` (`--color-faction-khuchad-clan`, `--color-faction-tlaxcala`, `--color-faction-vestari`; SPEC-80 tokens); `isPlayerFaction` = false; doctrine ← list of (ship blueprint reference by mapped `shipKey`, weight); `basePlayerRelation` ← `basePlayerRelation`. Values: `faction_khuchad_clan` (Khuchad Clan, prefix KC, doctrine `ship_fighter` 0.5 + `ship_shuttle` 1, relation 0); `faction_tlaxcala` (Tlaxcala, TXS, no doctrine, −20); `faction_vestari` (Vestari, VSS, no doctrine, 0). `logo`, `crest` are null in the export (dropped).
 
@@ -549,6 +549,7 @@ Deterministic (no timestamps, ordinal sorting, LF line endings):
 | MIG-W052 / W053 | Warning | Ship without core / with several cores |
 | MIG-E054 | Error | VOXS verification mismatch |
 | MIG-E060 | Error | Audio clip file missing |
+| MIG-E061 | Error | Audio clip blocked or provenance missing, duplicated or invalid; cue skipped |
 | MIG-W070 | Warning | Loot entry dropped (target cannot hold ships) |
 | MIG-W080 | Warning | Body role not available in SPEC-30 |
 | MIG-W090 | Warning | Target property path not found |
@@ -581,6 +582,7 @@ Deterministic (no timestamps, ordinal sorting, LF line endings):
 | Empty `blockKey` | `MIG-W050`, skipped |
 | Numeric item ID in narrative DSL | `TryMapItemToken` maps `500`, `717185106`; any other number fails (receiver reports) |
 | Clip path with a different folder | Mapped by the two path rules; missing file → `MIG-E060` |
+| Audio clip `Blocked`, or without exactly one valid provenance row | `MIG-E061`, cue skipped; other entries continue. `Unverified` clips remain development-only under SPEC-64's release-build check |
 | Converter throws | `MIG-E099`; later converters still run; database rebuilt |
 | Run during Play Mode | Menu items disabled (`validate` functions return `!EditorApplication.isPlayingOrWillChangePlaymode`) |
 | `Import/Migration/` missing | Created |
