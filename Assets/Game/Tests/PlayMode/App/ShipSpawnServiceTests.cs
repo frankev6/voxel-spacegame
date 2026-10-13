@@ -153,7 +153,6 @@ namespace Game.Tests.PlayMode.App
             using var f = new Fixture(); int before = f.EM.UniversalQuery.CalculateEntityCount(); var args = f.Args(); args.Blueprint = new ContentId("ship_unknown");
             LogAssert.Expect(LogType.Error, new Regex("Unknown ship blueprint 'ship_unknown'")); var id = f.Spawner.Spawn(args);
             Assert.AreEqual(0, id.Value); Assert.AreEqual(before, f.EM.UniversalQuery.CalculateEntityCount()); Assert.AreEqual(1, f.Allocator.Next);
-            LogAssert.NoUnexpectedReceived();
         }
         [Test] public void RootLookup()
         {

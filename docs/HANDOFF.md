@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **T1 loader accepted:** PlayMode83915 terminal2: all5 SYS-004 cases plus5 spawn cases pass; one FND-012 assertion rejected routine setup info, now repaired awaiting single-case retry. Q357 stages live loader installation with SYS-006 T2 so missing grids still block arrival. No Unity active. Next dispatch SYS-005 and implement T2; graph stability repair continues.
+
 - **Boot repairs compiled:**37ed39f6 accepts empty unused serialized argument text and uses1000 m belt sectors at2000 m width (Q355/356), without weakening validation. Compile65679 terminal0, zero CS warnings. Focused11-case PlayMode83915 is active; poll the same handle/log before further Unity. Existing condition case now serializes graphs, awaiting its next focused EditMode batch. Combat graph-stability repair active231; economy diagnosis complete246/dependency wait; presentation finishing count-slot review. Prior turn generated real content and identified defects (progress).
 
 - **Real content compiled; boot defects identified:** NAR-016 generation66682 compiled actual content with0 errors, but raw-byte rerun failed on replacement graph IDs (worker combat repairing). Focused PlayMode7147 stopped143 immediately after8 actual boot validation errors: item-count node validation and belt bounds. Presentation/economy investigating those separately, no Unity or edits. No active Unity; next fix verified causes, rerun generation and only blocked11 cases. Previous turn accepted lane/effect batch (progress).

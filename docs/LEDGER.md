@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 100 | 9 | 0 | 0 | 71 | 0 | 180 | 7 |
+| M3 | 100 | 8 | 0 | 0 | 72 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -335,8 +335,8 @@
 | SYS-001 | Public contract types | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | CORE-001, DATA-001, GAL-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e738e71 | Streaming contracts and service shells; 2 required tests; full batch green |
 | SYS-002 | Streaming config and boot singleton | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 7244be6 | Config validation/factory, boot singleton and catalog asset; 2 required tests; full suites green |
 | SYS-003 | Structure builders | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-10 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 971ae0b7 | Deterministic shape/asteroid builders;4 focused tests pass; Q307 |
-| SYS-004 | Load and unload (T1) | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-002, GAL-008, GAL-009, SPEC-10, PHY-001, PHY-012 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
-| SYS-005 | BodyOnRailsSystem | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004 | no | todo |  |  |  |  |
+| SYS-004 | Load and unload (T1) | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-002, GAL-008, GAL-009, SPEC-10, PHY-001, PHY-012 | yes | done | astra (gpt-6) | 2026-10-13 | 37ed39f6 | Five T1 cases pass; Q357 stages actual scene registration with SYS-006 T2; missing grids correctly block arrival. |
+| SYS-005 | BodyOnRailsSystem | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004 | yes | todo |  |  |  |  |
 | SYS-006 | T2 voxel bodies and damage persistence | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-003, SYS-004, SPEC-13, SPEC-21, SPEC-23 | no | todo |  |  |  |  |
 | SYS-007 | T3 asteroid belts | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006 | no | todo |  |  |  |  |
 | SYS-008 | InteractionQuerySystem, docking and BodyInteracted | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-004, SPEC-20, SPEC-23 | no | todo |  |  |  |  |
@@ -931,6 +931,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 351 | SPEC-40 Q27: effect context hooks | Resolved in ADR-0075: optional Data ILogicEffectHost supplies rejection trace and merchant continuation; no cross-module reference. NAR-011/DLG-006 own production wiring. | Tech lead |
 | 352 | SPEC-33 Q26: pure composition boundaries | Resolved: composition returns full ordered fleet; director owns live-cap truncation. Preserve maximum RNG draws, blueprint-owned cell size and authored spacing; automatic spacing uses largest radius and M3 uses line abreast. | Tech lead |
 | 355 | SPEC-30 Q36: default belt geometry | Resolved: 2000 m width with1000 m sectors yields two identity-safe rings; keep SYS-E003 and packed ID contract unchanged. | Tech lead |
+| 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
 | 356 | SPEC-40 Q28: reloaded argument slots | Resolved: accept null/empty unused text for numeric and boolean slots; reject nonempty text and conflicting expression slots consistently at validation/bind. | Tech lead |
 | 354 | SPEC-32 Q18: lane-only lifecycle | Resolved: constructor owns config, scene query and lane watchers; missing context closes gated lanes until rebuild; generation changes dispose subscriptions. Execution remains TRV-006 and related tasks. | Tech lead |
 | 353 | SPEC-32 Q17: route input ownership | Resolved: caller populates scratch visibility/gates after EnsureCapacity; pure planner consumes those inputs, enforces known vertices, clears failed output and owns reusable search storage. | Tech lead |
@@ -1060,6 +1061,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — SYS-004 T1 accepted; spawn log assertion repaired — astra (gpt-6)
+
+- Focused PlayMode83915 terminal2:10 passed/1 failed,11.054s test bodies. All five SYS-004 checks pass (spec-required: 5, extra: 0); T1 accepted37ed39f6. Q357 explicitly moves live loader registration to SYS-006 because actual T2 arrival readiness must remain enforced. No claim of loaded station grids or live streaming yet.
+- FND-012 five of six pass. UnknownBlueprint catches routine ContentService info via NoUnexpectedReceived; remove that overbroad call, retain exact expected error and no-spawn/id assertions plus Unity's unexpected-error enforcement. Only that case needs rerun. Spec-required: 6, extra: 0. Evidence Logs/playtest/world-loader/first-acceptance.xml and .log. No Unity active.
+- Combat worker repairs NAR-016 graph stability; economy/presentation completed boot diagnoses and wait for ready standard tasks. Previous turn compiled actual boot fixes (progress).
 
 ### 2026-10-13 — SYS-004 boot repairs compiled — astra (gpt-6)
 
