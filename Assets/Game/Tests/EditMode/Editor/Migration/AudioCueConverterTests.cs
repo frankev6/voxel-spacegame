@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using Game.Data.Definitions;
@@ -99,10 +100,30 @@ namespace Game.Tests.EditMode.Editor.Migration
             }
         }
 
+        // Load a disposable source fixture rather than requiring Newtonsoft in the test assembly.
+        void ReplaceFirstClip(string replacement)
+        {
+            var file = index.OfType("AudioLibrary").Single();
+            var report = new ValidationReport("MIG");
+            string original = LegacyJson.Read<LegacyAudioLibraryDto>(file, report).Sounds[0].Clip.Path;
+            string text = File.ReadAllText(Path.Combine("Import/Legacy", file.RelativePath));
+            int offset = text.IndexOf(original, StringComparison.Ordinal);
+            Assert.GreaterOrEqual(offset, 0);
+            string temporaryRoot = Path.Combine(Path.GetTempPath(), "AudioMigration_" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                string target = Path.Combine(temporaryRoot, file.RelativePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(target));
+                File.WriteAllText(target, text.Substring(0, offset) + replacement + text.Substring(offset + original.Length));
+                index = LegacyContentIndex.Load(temporaryRoot, report);
+                Assert.IsFalse(report.HasErrors, report.ToText());
+            }
+            finally { if (Directory.Exists(temporaryRoot)) Directory.Delete(temporaryRoot, true); }
+        }
+
         [Test] public void MissingClip_IsE060AndOtherEntriesContinue()
         {
-            var json = index.OfType("AudioLibrary").Single().Json;
-            json["Sounds"][0]["Clip"]["$ref"] = "Assets/Game/SFX/missing-migration-clip.wav";
+            ReplaceFirstClip("Assets/Game/SFX/missing-migration-clip.wav");
             var context = Convert();
             Assert.AreEqual(19, context.Writer.Outcomes.Count);
             var error = context.Report.Entries.Single(e => e.Severity == ValidationSeverity.Error);
@@ -118,8 +139,7 @@ namespace Game.Tests.EditMode.Editor.Migration
             Assert.NotNull(table);
             var blocked = table.entries.First(e => e.status == ProvenanceStatus.Blocked);
             string blockedPath = AssetDatabase.GetAssetPath(blocked.clip);
-            var json = index.OfType("AudioLibrary").Single().Json;
-            json["Sounds"][0]["Clip"]["$ref"] = blockedPath.Replace("Assets/Game/Audio/Music/", "Assets/Game/SFX/Music/").Replace("Assets/Game/Audio/Sfx/", "Assets/Game/SFX/");
+            ReplaceFirstClip(blockedPath.Replace("Assets/Game/Audio/Music/", "Assets/Game/SFX/Music/").Replace("Assets/Game/Audio/Sfx/", "Assets/Game/SFX/"));
             var context = Convert();
             Assert.AreEqual(19, context.Writer.Outcomes.Count);
             var error = context.Report.Entries.Single(e => e.Severity == ValidationSeverity.Error);

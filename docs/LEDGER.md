@@ -782,6 +782,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 200 | 2026-10-13 | SPEC-63 Q25 / VFX-015 | GPU validation found overwritten fixed-step event batches, suppressed pooled starts and a beam producer dependency | Per-frame graph simulation, Reinit/custom-event restart and targeted writer completion | Tech lead | Resolved ADR-0060; 50k actual debris and live warp verified; correctness fixes, no optimization pass |
 
 | 201 | 2026-10-13 | SPEC-01 Q29 / FND-021 | Owner wants automatic World test station with hull crossing the firing plane | Production offset Y=-2 m and reversible AutoSpawnInWorld setting | Tech lead | Resolved ADR-0061; one scene-owned station after player readiness; range command idempotent |
+| 202 | 2026-10-13 | SPEC-22 Q10 / PWR-001 | PowerDemandGroup references allocator before PWR-005 exists | Defer redundant UpdateBefore attribute; retain PWR-005 TODO and reciprocal ordering requirement | Tech lead | Resolved; no allocator stub or changed runtime ordering |
 
 ## Measurements
 
@@ -892,6 +893,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — First worker batch integrated, validation pending — astra (gpt-6)
+
+1. Reviewed and integrated PHY-014 `094f430`, PWR-001 `eeed571`, MIG-011 `ca37e33`. Status remains in-progress until central checks and audio assets complete. Tests authored: PHY-014 spec-required: 3, extra: 0; PWR-001 spec-required: 3, extra: 0; MIG-011 spec-required: 1, extra: 3 (migration safety).
+2. Lead repaired audio test fixtures to load disposable source files instead of requiring Newtonsoft in the test assembly; compile passes. No assembly-boundary change or optimization pass. Q202 records deferred allocator ordering.
+3. Reused combat/content threads for WPN-017/CAM-008. Power worker prepares PWR-002 read-only while its prerequisite is validated. Full-suite and generated-content evidence will follow under Logs/playtest/orchestration-batch1/.
 
 ### 2026-10-13 — Three-worker orchestration started — astra (gpt-6)
 

@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | PHY-014 | implementing | WPN-017, then ready weapon/harness tasks |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | PWR-001 | implementing | PWR-002, ABL-001 after integration |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | MIG-011 | implementing | CAM-008, audio content after AUD-006 |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | WPN-017 | implementing; PHY-014 integrated, validation pending | WPN-017, then ready weapon/harness tasks |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | PWR-001 | integrated, validation pending; preparing PWR-002 read-only | PWR-002, ABL-001 after integration |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | CAM-008 | implementing; MIG-011 integrated, assets/validation pending | CAM-008, audio content after AUD-006 |
 
 ## Dispatch procedure
 
@@ -17,3 +17,5 @@ Read exact thread status; do not create replacement threads merely because a wor
 Heartbeat: `spaceship-implementation-coordinator`, ACTIVE every five minutes, targeting this coordinator thread. The legacy native goal remains blocked because create_goal rejects replacement and update_goal cannot edit/resume it. This is an app-tool limitation, not a project blocker.
 
 Current lead priority: integrate PHY-014, then claim DMG-011 and DMG-012. Preserve Frank's running World until validation requires stopping it. Existing QualitySettings serialization delta is unrelated and must stay excluded.
+
+Batch 1: PHY-014 `094f430`, PWR-001 `eeed571`, MIG-011 `ca37e33` integrated. Lead fixed audio test fixture assembly dependency; compile passes. Generating audio assets before full suites. Evidence: `Logs/playtest/orchestration-batch1/`. Editor was already closed at validation start.
