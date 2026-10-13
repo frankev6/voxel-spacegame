@@ -42,6 +42,7 @@ namespace Game.Tests.PlayMode.Galaxy
             readonly BlueprintLibrary blueprints;
             readonly NativeQueue<ManagedEventEnvelope<OriginShifted>> shifts;
             readonly Entity clock, retirement;
+            readonly bool ownsRetirement;
             readonly SystemHandle origin, deferred;
             internal readonly SystemHandle Spawn, Watch;
             internal readonly ContentService VoxelContent;
@@ -62,6 +63,7 @@ namespace Game.Tests.PlayMode.Galaxy
                     var original = definitions.OfType<Game.Data.Definitions.BodyTemplateDefinition>().Single(x => x.IdString == "body_station_ark");
                     testTemplate = Object.Instantiate(original);
                     using var so = new SerializedObject(testTemplate);
+                    so.FindProperty("shape.kind").intValue = (int)Game.Data.Definitions.ShapeKind.Box;
                     so.FindProperty("shape.sizeCells").vector3IntValue = new UnityEngine.Vector3Int(4, 1, 1);
                     so.FindProperty("shape.wallThicknessCells").intValue = 0;
                     so.FindProperty("shape.coreBlock").objectReferenceValue = null;
@@ -98,8 +100,12 @@ namespace Game.Tests.PlayMode.Galaxy
                 Em.CreateEntity(typeof(GameplayActive), typeof(WorldSceneActive)); clock = Em.CreateEntity(typeof(SimClock));
                 shifts = new NativeQueue<ManagedEventEnvelope<OriginShifted>>(Allocator.Persistent);
                 Em.CreateSingleton(new ManagedEventQueue<OriginShifted> { Queue = shifts });
-                retirement = Em.CreateEntity(typeof(DeferredDisposalQueue));
-                Em.SetComponentData(retirement, new DeferredDisposalQueue { Blobs = new NativeList<RetiredBlob>(Allocator.Persistent), Meshes = new NativeList<RetiredMesh>(Allocator.Persistent) });
+                ownsRetirement = !streaming;
+                if (ownsRetirement)
+                {
+                    retirement = Em.CreateEntity(typeof(DeferredDisposalQueue));
+                    Em.SetComponentData(retirement, new DeferredDisposalQueue { Blobs = new NativeList<RetiredBlob>(Allocator.Persistent), Meshes = new NativeList<RetiredMesh>(Allocator.Persistent) });
+                }
                 origin = World.CreateSystem<OriginRebaseSystem>(); deferred = World.CreateSystem<DeferredDisposalSystem>();
                 Galaxy = new GalaxyService(catalog, State, World, new GalaxyFrameTicker()); Galaxy.NewGame(42);
                 State.PlayerLocation = Galaxy.GetStartLocation(); State.HasPlayerLocation = true;
@@ -112,6 +118,8 @@ namespace Game.Tests.PlayMode.Galaxy
                     Em.CreateSingleton(new VoxelConfig { SpawnBricksPerFrame = 8, DefaultCellSize = .5f, RequireRenderer = 0 });
                     Em.CreateSingleton(new StreamingConfig { T2UnloadFactor = 1.25f, MaxGridSpawnsPerFrame = 1, PersistDamageMaxCells = persistLimit });
                     Spawn = World.CreateSystem<GridSpawnSystem>(); Watch = World.CreateSystem<BodyGridWatchSystem>();
+                    using var retirementQuery = Em.CreateEntityQuery(typeof(DeferredDisposalQueue));
+                    retirement = retirementQuery.GetSingletonEntity();
                     var content = Galaxy.GetContent(State.CurrentStarSystem);
                     foreach (var candidate in content.Bodies)
                         if (Galaxy.GetBodyTemplate(candidate.TemplateIndex).IdString == "body_station_ark") { Station = candidate; break; }
@@ -157,9 +165,13 @@ namespace Game.Tests.PlayMode.Galaxy
             {
                 Em.CompleteAllTrackedJobs(); Loader.Dispose(); Galaxy.Dispose(); State.Dispose();
                 Registry.Dispose(); Object.DestroyImmediate(Registry); blueprints.Dispose();
-                var queue = Em.GetComponentData<DeferredDisposalQueue>(retirement);
-                foreach (var record in queue.Blobs) { var blob = record.Blob; if (blob.IsCreated) blob.Dispose(); }
-                queue.Blobs.Dispose(); queue.Meshes.Dispose(); World.Dispose(); shifts.Dispose(); VoxelContent?.Dispose(); if (testTemplate != null) Object.DestroyImmediate(testTemplate);
+                if (ownsRetirement)
+                {
+                    var queue = Em.GetComponentData<DeferredDisposalQueue>(retirement);
+                    foreach (var record in queue.Blobs) { var blob = record.Blob; if (blob.IsCreated) blob.Dispose(); }
+                    queue.Blobs.Dispose(); queue.Meshes.Dispose();
+                }
+                World.Dispose(); shifts.Dispose(); VoxelContent?.Dispose(); if (testTemplate != null) Object.DestroyImmediate(testTemplate);
                 foreach (var system in testSystems) Object.DestroyImmediate(system);
                 if (testGeneration != null) Object.DestroyImmediate(testGeneration);
             }
