@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **WPN-010 implementation:** isolated `task/WPN-010-explosions` now has spatial sphere queries, shield-first events, canonical overflow fallback, one FX/SFX pair and guarded request disposal. SPEC21Q69 resolves overflow/defaults; four required tests and Unity pending. Primary main685f4386 and live Editor35039 remain unchanged. WPN-009 and015 confirmed active in existing power/presentation threads; audio remains reviewed validation wait. Preserve isolated audio branch0da3c84a for next batch.
+
 - **Batch closed:** session43506 exited0, compile clean,1179/0/1 EM and160/0/53 PM. Live348shots/345hits/175destroyedcells/0drops; firing demand=grant20 E/s then0 on release; no new diagnostics. WPN-008/018,QST-001,MIG-012 closed; range reset and Editor35039 live. Next claim/dispatch WPN-009 and015 to existing workers, lead010; AUD-013 staged7fcd2760+0da3c84a for next validation.
 
 - **Validation wait verified:** session43506 remains live in later physics PlayMode checks after the soak. At 10:50 local, Unity42910 was waiting while its Burst compiler42922 used ~915% CPU; log advanced to ColliderSpawnPerfTests. No final XML yet; this is active compilation, not a terminal/hung-run inference. Preserve primary runtime/test-owned InitTestScene. Isolated audio preparation now7fcd2760 +0da3c84a (ledgerQ282).
