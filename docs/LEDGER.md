@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 107 | 11 | 0 | 0 | 62 | 0 | 180 | 7 |
+| M3 | 107 | 10 | 0 | 0 | 63 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -326,10 +326,10 @@
 | GAL-005 | Lane graph and galaxy hash | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-004 | yes | done | astra (gpt-6) | 2026-10-13 | 03a6cec6 | Connected lane graph, gate metadata, sorted adjacency and version-one golden; six focused checks pass |
 | GAL-006 | Star-system content job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-002, GAL-005 | yes | done | astra (gpt-6) | 2026-10-13 | e421d5ee | Complete system content generation/hash/ownership; six focused checks pass in0.193s; Q332 capacity guard |
 | GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | yes | done | astra (gpt-6) | 2026-10-13 | f90c0fd3 | Sorted unique deltas, stable append-only story slots, owned structure disposal, ordered applier and state revisions; six required checks pass |
-| GAL-008 | GalaxyService, ticker and bridge system | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, FND-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
+| GAL-008 | GalaxyService, ticker and bridge system | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, FND-001 | yes | done | astra (gpt-6) | 2026-10-13 | cc7c0a1e | Service/cache/commands/ticker and real session/GLXY binding; six required cases pass, lifecycle extension passes. Live boot still QST-002; PLOC/streaming remain SYS tasks. |
 | GAL-009 | OriginRebaseSystem | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-001, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | 5bf0a47 | Asynchronous origin capture/rebase/placement and dependent consumers; full 1051 EM /146 PM passed; 5000-root p95 0.2959 ms. |
 | GAL-010 | GLXY save participant | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | 54ebbf3d | GLXY capture/restore and immutable v1 fixture d481a047; compile clean, four required checks passed across focused run and repaired-log case. App registration remains session integration. |
-| GAL-011 | Galaxy map model | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-008 | no | todo |  |  |  |  |
+| GAL-011 | Galaxy map model | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-008 | yes | todo |  |  |  |  |
 | GAL-012 | M3 galaxy content | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-003, SPEC-72 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | 0834c0ea/fb2a61b9 real systems/body assets imported and zero scoped validation errors; three runtime smoke checks pending GAL-008 and lane/logic wiring |
 | GAL-013 | Performance gates | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-005, GAL-006, GAL-009, GAL-011, TST-001 | no | todo |  |  |  |  |
 | SYS-001 | Public contract types | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | CORE-001, DATA-001, GAL-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e738e71 | Streaming contracts and service shells; 2 required tests; full batch green |
@@ -1043,6 +1043,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — GAL-008 accepted and session wired — astra (gpt-6)
+
+- cc7c0a1e registers real ticker/galaxy/GLXY against session-owned state; new game/restore/metadata/disposal connected. Missing old GLXY/PLOC warns, and fallback pose waits for World SimClock. Deferred reset guard prevents an older clear event from disposing a newer campaign (Q340).
+- Compile81805 clean; six required checks previously passed24199, changed Restore_SameHash rerun10741 passed with sandbox/stale-reset coverage. Zero C# warnings in compile/test logs. Tests: spec-required: 6, extra: 0. Evidence Logs/playtest/galaxy-service/{acceptance.xml,session-lifecycle.xml,session-compile.log}. No repeated full suites.
+- Scope boundary: actual boot remains blocked by QST-002 validator; FND-012 live acceptance still open. Saved pose/docking and world-body streaming remain SYS-009/004, explicitly not completed here. GAL-011 now unlocked. Previous turn accepted GLXY (progress).
 
 ### 2026-10-13 — GAL-010 accepted — astra (gpt-6)
 
