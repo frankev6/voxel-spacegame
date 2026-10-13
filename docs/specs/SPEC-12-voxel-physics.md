@@ -723,6 +723,8 @@ Non-finite results (should not happen) leave `v` unchanged and log `GameLog.Burs
 
 ### 5.12 `SplitGraceContactSystem` (M2)
 
+**Chunk exception (ADR-0063):** pooled chunk entities carry internal `ChunkContactState`. After the minimum grace interval, keep their named parent pair suppressed until exact collider clearance, then arm permanently for that incarnation; slot reuse resets the latch. Ordinary grid/stow grace remains tick-based.
+
 ```csharp
 [UpdateInGroup(typeof(PhysicsSimulationGroup))]
 [UpdateAfter(typeof(PhysicsCreateBodyPairsGroup))]
