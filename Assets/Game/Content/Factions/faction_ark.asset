@@ -25,6 +25,7 @@ MonoBehaviour:
   stances: []
   doctrine: []
   defaultAiProfile: {fileID: 0}
-  ownedStarSystems: []
+  ownedStarSystems:
+  - {fileID: 11400000, guid: a93d1205a81b5ca3be814bc3473818ac, type: 2}
   territorySeeds: 0
   territoryRadiusHops: 2

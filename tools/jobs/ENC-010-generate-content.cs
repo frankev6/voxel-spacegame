@@ -15,7 +15,7 @@ using Game.Data.Services;
 using Game.Data.Validation;
 using Game.Editor.Content;
 using Game.Editor.Migration.Encounters;
-using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 using UnityEditor;
 
 namespace Game.Editor.Migration
@@ -91,7 +91,7 @@ namespace Game.Editor.Migration
                     }
                 }
             foreach (var prior in ownershipBefore)
-                if (!JToken.DeepEquals(prior.Value, OwnershipOtherFields(catalog.Get<FactionDefinition>(new ContentId(prior.Key)))))
+                if (prior.Value != OwnershipOtherFields(catalog.Get<FactionDefinition>(new ContentId(prior.Key))))
                     report.Error("MIG-E099", prior.Key, "", "Ownership update changed unrelated faction fields.");
             string arkPath = PathOf("faction_ark"); var priorArk = before[arkPath];
             if (manifest.TryGetHash(arkPath, out _) != priorArk.HasHash)
@@ -118,8 +118,12 @@ namespace Game.Editor.Migration
         public static void RunCli()
         { try { Run(); EditorApplication.Exit(0); } catch (Exception e) { UnityEngine.Debug.LogException(e); EditorApplication.Exit(1); } }
         static string PathOf(string id) => ContentDatabaseBuilder.ContentRoot + (id.StartsWith("faction_", StringComparison.Ordinal) ? "/Factions/" : "/Encounters/") + id + ".asset";
-        static JObject OwnershipOtherFields(FactionDefinition definition)
-        { var value = JObject.Parse(EditorJsonUtility.ToJson(definition)); value.Remove("ownedStarSystems"); return value; }
+        static string OwnershipOtherFields(FactionDefinition definition)
+        {
+            // Compare durable serialized fields, not EditorJsonUtility's transient object identities.
+            string serialized = File.ReadAllText(AssetDatabase.GetAssetPath(definition));
+            return Regex.Replace(serialized, @"(?m)^  ownedStarSystems:[^\r\n]*\r?\n(?:  -[^\r\n]*\r?\n)*", "");
+        }
         static void VerifyUntouched(Dictionary<string, byte[]> sources, Dictionary<string, byte[]> content, HashSet<string> touched, ValidationReport report)
         {
             foreach (var pair in sources) if (!pair.Value.SequenceEqual(File.ReadAllBytes(pair.Key))) report.Error("MIG-E099", pair.Key, "", "Read-only export changed.");
