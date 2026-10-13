@@ -1461,6 +1461,8 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 
 | 25 | Failed quest stage cannot select a converted Whisper chapter: GetQuestStage is -1 unless Active | Resolved: declare saved Int whisper_chain_chapter; write 0 on chain acceptance and 1/2 through each previous stage completion before entering the next chapter. Failure beats read quest_failed plus this authored fact, preserving the public quest_stage contract and chapter-specific failure actions. Extend the existing QuestCounts case; no additional test case. | Tech lead — ledger Q347 |
 
+| 26 | AddRequirements has no context although item/credit counts may be expressions; earlier effects can change those expressions | Resolved: cost nodes register their expressions in reusable EffectRequirements. IsSatisfied evaluates and freezes each cost before any Apply, checks summed costs, and prepared spending uses that exact amount. Scratch maintains independent reusable frames for nested lists, restored in finally. Ordinary direct Apply evaluates its current expression. Public interfaces remain unchanged. | Tech lead — ledger Q350 |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/05-narrative-quests.md` (B3, B8, B10, B13, B14, B17; §5.3–§5.5, §5.12–§5.13), `00-synthesis.md` §6h.

@@ -927,6 +927,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 347 | SPEC-40 Q25: failed-stage selection | Resolved: quest_stage is -1 unless Active. Record whisper_chain_chapter at acceptance and stage transitions; failure beats read that saved authored fact, preserving chapter-specific actions without changing the query contract. | Tech lead |
 | 348 | SPEC-42 Q10: definition/provider boundaries | Resolved: local definitions validate structure, references and graph freshness; editor providers implement all twelve rules with actual tag/node/command data. Compile and bind every owned field; preserve dialog-owner failures. Empty failWhen/resolvedWhen remain guarded by runtime services. | Tech lead |
 | 349 | SPEC-32 Q16: lane access sequencing | Resolved: use completed TRV-002, GAL-008, NAR-003/004/006/020. Own lane-state construction/disposal while retaining TRV-006 execution stubs; full specified context absence/rebuild and watcher behavior remains required. | Tech lead |
+| 350 | SPEC-40 Q26: dynamic spending preflight | Resolved: defer expression evaluation into EffectRequirements.IsSatisfied, freeze amounts for execution and isolate reusable nested scratch frames. No public API change; direct single-effect execution evaluates the current expression. | Tech lead |
 | 334 | SPEC-33 Q24: legacy first formation conflicts with final encounter table | Resolved: retain/report original formation and explicit replacement diagnostics; authored ENC-010 composition table governs final fleets, real assets required. | Tech lead |
 | 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
 
@@ -1053,6 +1054,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — NAR-005 spending and list preflight authored — astra (gpt-6)
+
+- f88796f7 routes six remaining numeric reward/world actions. 82b85021 snapshots dynamic item/credit costs and isolates nested scratch frames. 0bf6d947 checks every effect and total cost before applying the list and uses captured spending amounts. Q350 records the API interpretation.
+- Merchant continuation, EffectRejected tracing and the five required cases remain (spec-required: 5, extra: 0). Source uncompiled/unaccepted; no Unity run. Previous turn added fact/loot/body effects (progress).
 
 ### 2026-10-13 — NAR-005 guarded facts and deterministic rewards — astra (gpt-6)
 
