@@ -1065,6 +1065,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-006 fast fixture reference repair — astra (gpt-6)
+
+- Owner reiterated minimal test waiting: incidental fixture health, damage, cadence and distances may be accelerated. Keep direct updates/small fixtures, batch relevant checks, preserve functional assertions and production balance (ADR-0070). Existing standing rules already capture this correction.
+- PlayMode86452 terminal failure (Unity exit2):6 passed/5 failed,0.199s reported test execution; this excludes Unity startup/shutdown and is not total validation wall time. Five T2 cases failed during shared construction because authored bodies referenced the original station while the catalog contained its clone. Repair clones the affected authored systems and redirects their body references; no production asset changed. Repair remains unvalidated, to join the next compatible batch rather than another immediate standalone run.
+- Evidence: Logs/playtest/t2-streaming/first-acceptance.xml and .log. Five T1 cases plus FND-012 UnknownBlueprint passed. No active Unity process. Test count unchanged: spec-required: 5, extra: 0. Three worker states inspected and unchanged; genuine integration/dependency waits recorded in ORCHESTRATION.
+
 ### 2026-10-13 — SYS-006 focused acceptance authored and compiled — astra (gpt-6)
 
 - 313c8792 adds five required T2StreamingTests using a four-cell station and direct loader/grid updates: hysteresis, small-station damage including GLXY save roundtrip, reset above a fixture-only two-cell cap, hulk restoration, twenty load/unload cycles. Reuses the T1 fixture with optional streaming configuration. Spec-required: 5, extra: 0; no wall-clock combat or large performance fixture.

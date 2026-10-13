@@ -47,6 +47,7 @@ namespace Game.Tests.PlayMode.Galaxy
             internal readonly ContentService VoxelContent;
             internal readonly ContentCatalog Catalog;
             readonly Game.Data.Definitions.BodyTemplateDefinition testTemplate;
+            readonly System.Collections.Generic.List<Game.Data.Definitions.AuthoredStarSystemDefinition> testSystems = new();
             internal BodySpec Station;
             internal Entity Player;
             internal static SceneReadyContext Entry => new(GameScene.World, SceneEntryReason.NewGame, default);
@@ -66,6 +67,16 @@ namespace Game.Tests.PlayMode.Galaxy
                     so.FindProperty("t2LoadDistanceM").floatValue = 10;
                     so.ApplyModifiedPropertiesWithoutUndo();
                     definitions[definitions.IndexOf(original)] = testTemplate;
+                    // Authored bodies must reference the same fixture template used by the catalog.
+                    foreach (var system in definitions.OfType<Game.Data.Definitions.AuthoredStarSystemDefinition>().ToArray())
+                    {
+                        if (!system.Bodies.Any(body => body.template == original)) continue;
+                        var copy = Object.Instantiate(system);
+                        testSystems.Add(copy);
+                        foreach (var body in copy.Bodies)
+                            if (body.template == original) body.template = testTemplate;
+                        definitions[definitions.IndexOf(system)] = copy;
+                    }
                 }
                 var catalog = ContentCatalog.Build(definitions, report); Assert.IsFalse(report.HasErrors, report.ToText());
                 Catalog = catalog;
@@ -133,6 +144,7 @@ namespace Game.Tests.PlayMode.Galaxy
                 var queue = Em.GetComponentData<DeferredDisposalQueue>(retirement);
                 foreach (var record in queue.Blobs) { var blob = record.Blob; if (blob.IsCreated) blob.Dispose(); }
                 queue.Blobs.Dispose(); queue.Meshes.Dispose(); World.Dispose(); shifts.Dispose(); VoxelContent?.Dispose(); if (testTemplate != null) Object.DestroyImmediate(testTemplate);
+                foreach (var system in testSystems) Object.DestroyImmediate(system);
             }
         }
         [Test] public void Load_CreatesAnchors()

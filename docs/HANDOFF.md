@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Focused run reconciled:** PlayMode86452 ended with6 passed/5 failed; all5 failures share a fixture reference mismatch before streaming executes. Authored-system fixture clones now point to the four-cell template clone; repair awaits the next compatible validation batch. Evidence: Logs/playtest/t2-streaming/first-acceptance.xml and .log. No Unity process remains. Existing T1 five cases and FND-012 UnknownBlueprint passed. Workers unchanged in genuine integration/dependency waits; pending orbit/compiler/condition checks and actual converter stability remain.
+
 - **T2 fixtures compiled / focused run active:**313c8792 adds exactly5 streaming cases using4-cell station/direct updates (small-damage save roundtrip, reset above fixture cap, hulk, hysteresis,20cycles). Compile81788 terminal0, zero CS warnings after converter fixesd83a8f57. PlayMode86452 currently active:5 T2+5 affected T1+1 FND-012 case; poll same handle before further Unity. Pending focused EditMode orbit/compiler/condition checks and actual converter stability remain. All workers integration/dependency wait. Previous turn live composition was progress.
 
 - **Live composition and cleanup authored:**8343f72c installs actual loader/ticker/scene hooks and GalaxyFlushWriteback. ADR-0076/Q360 adds targeted abandoned-read reconciliation; exception paths release requests/handles/clones; cleanup-only entities may outlive source storage. Uncompiled/unaccepted. Next author5 small T2 fixtures, compile once and run focused pending checks/content stability. No Unity active; all workers delivered, presentation review214 addressed. Previous turn loader wiring was progress.
