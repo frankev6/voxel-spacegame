@@ -30,6 +30,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Merchants accepted:** ECO-005f4cae431, clean compile and8 focused tests (0.48s). Buying/selling, stock/restock and prices implemented; integer-boundary sale rounding repaired. UI/persistence remain later tasks. Existing power worker next SYS-003 structure builders; AI-010/015 continue.
+
 - **Normal enemy combat now works:** FND-022/AI-009 accepted with clean compile and4 focused checks. Fresh player automatically has allegiance; real NPC fire destroyed168/detached15 cells without player mutation or injected damage. Station turret scenarios target/fire while remaining static. Evidence `Logs/playtest/station-player-ai/`. Merchants staged for acceptance; AI-010 active; next combat assignment AI-015.
 
 - **Live enemy damage verified:** existing Fighter NPC4099 targeted and shot the player through real AI/weapons/damage, destroying116 cells and detaching28; source attribution524514:7, zero logged errors. Evidence `Logs/playtest/enemy-live/`. This required manually supplying missing player allegiance; FND-022 permanent request-side fix and one existing test extension are prepared in the isolated lead checkout, not yet validated. Live Editor17922 remains running.

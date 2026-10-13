@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 1 | 0 | 0 | 79 | 0 | 92 | 5 |
-| M3 | 140 | 4 | 0 | 0 | 36 | 0 | 180 | 11 |
+| M3 | 139 | 4 | 0 | 0 | 37 | 0 | 180 | 10 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -415,7 +415,7 @@
 | ECO-002 | Definitions, config and validators | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | db5d72e | Strict economy validators/config and canonical scrap; 15 required tests; partial ECO-009 scrap only |
 | ECO-003 | InventoryModel and Wallet | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-001 | yes | done | astra (gpt-6) | 2026-10-13 | 80a8bd18 | Twelve functional inventory/wallet checks pass; advisory Apply40 unmeasured (ADR-0070) |
 | ECO-004 | Loot and EconomyService | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003, SPEC-40 | no | todo |  |  |  |  |
-| ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Existing power worker; merchants after ECO-003 focused acceptance |
+| ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | f4cae431 | Merchant pricing, stock/restock and trading; eight required checks pass; sale rounding repaired |
 | ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | no | todo |  |  |  |  |
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, SPEC-13, SPEC-31, SPEC-12 | no | todo |  |  |  |  |
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
@@ -1006,6 +1006,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Merchants verified — astra (gpt-6)
+
+- ECO-005 delivery6cd04fb0 integrated58637745 implements pricing, persistent per-merchant stock, game-time restocking, sessions, buying/selling and buyback. Q24 mirroredQ304. Lead repaired sale-floor promotion with MathF at f4cae431 after required Prices_Relation caught45 becoming44; assertions unchanged.
+- Compile49620 clean, zero CS warnings; focused91104 exited0 with8/0/0,0.48s test duration. Evidence `Logs/playtest/merchants/{compile-final.log,acceptance-final.xml}`; first7/1 failure retained. No full-suite rerun. Test count: spec-required:8, extra:0; zero optimization passes. UI/persistence wiring remain their owning tasks.
+- Recycle existing power worker to ready SYS-003 structure builders; AI-010/015 workers remain active. No new assets or owner gates.
 
 ### 2026-10-13 — Static turrets and normal player combat verified — astra (gpt-6)
 
