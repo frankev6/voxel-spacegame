@@ -16,8 +16,8 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 107 | 12 | 0 | 0 | 61 | 0 | 180 | 7 |
-| M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
+| M3 | 107 | 11 | 0 | 0 | 62 | 0 | 180 | 7 |
+| M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -328,7 +328,7 @@
 | GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | yes | done | astra (gpt-6) | 2026-10-13 | f90c0fd3 | Sorted unique deltas, stable append-only story slots, owned structure disposal, ordered applier and state revisions; six required checks pass |
 | GAL-008 | GalaxyService, ticker and bridge system | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, FND-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
 | GAL-009 | OriginRebaseSystem | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-001, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | 5bf0a47 | Asynchronous origin capture/rebase/placement and dependent consumers; full 1051 EM /146 PM passed; 5000-root p95 0.2959 ms. |
-| GAL-010 | GLXY save participant | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, PERS-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
+| GAL-010 | GLXY save participant | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | 54ebbf3d | GLXY capture/restore and immutable v1 fixture d481a047; compile clean, four required checks passed across focused run and repaired-log case. App registration remains session integration. |
 | GAL-011 | Galaxy map model | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-008 | no | todo |  |  |  |  |
 | GAL-012 | M3 galaxy content | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-003, SPEC-72 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | 0834c0ea/fb2a61b9 real systems/body assets imported and zero scoped validation errors; three runtime smoke checks pending GAL-008 and lane/logic wiring |
 | GAL-013 | Performance gates | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-005, GAL-006, GAL-009, GAL-011, TST-001 | no | todo |  |  |  |  |
@@ -492,7 +492,7 @@
 | PHY-021 | Region compounds for very large grids (only if PHY-019 shows assembly over budget) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M4 | frontier | PHY-019 | yes | todo |  |  |  |  |
 | DMG-018 | M4: per-brick component labels for >1M-cell stations | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | frontier | DMG-016 | no | todo |  |  |  |  |
 | WPN-016 | Per-instance fire groups (M4) | [SPEC-21](specs/SPEC-21-weapons.md) | M4 | frontier | WPN-011 | yes | todo |  |  |  |  |
-| GAL-014 | Brick-level structure diffs | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M4 | frontier | GAL-010 | no | todo |  |  |  |  |
+| GAL-014 | Brick-level structure diffs | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M4 | frontier | GAL-010 | yes | todo |  |  |  |  |
 | TRV-013 | Supercruise (in-system hop) | [SPEC-32](specs/SPEC-32-travel.md) | M4 | frontier | TRV-012, SPEC-23, SPEC-61 | no | todo |  |  |  |  |
 | TRV-014 | Escort transfer hooks | [SPEC-32](specs/SPEC-32-travel.md) | M4 | standard | TRV-012, AI-001, FND-001 | no | todo |  |  |  |  |
 | ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011, AI-001 | no | todo |  |  |  |  |
@@ -1042,6 +1042,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — GAL-010 accepted — astra (gpt-6)
+
+- Implementation54ebbf3d, tests4b8ccb10, fixture/log-expectation repaird481a047. Compile62711 clean, zero C# warnings. Fixture authoring55215 exit0 via SaveFixtureHarness.WriteFixture; committed immutable GLXY v1 container. Registry already has GLXY/order80.
+- Focused56129: three pass and one strict-log failure from ordinary Content setup info (0.195s). Corrected the expected setup log; only changed case rerun61570 passed0.182s/exit0. All four required outcomes now covered; no unchanged reruns. Evidence Logs/playtest/galaxy-save/{compile.log,first.xml,corrupt-repaired.xml,fixture.log}. Tests: spec-required: 4, extra: 0.
+- Production galaxy/session/PLOC wiring remains open; this closes the GLXY participant, not a claim that campaign save/load integration is complete. Previous turn authored persistence (progress).
 
 ### 2026-10-13 — GAL-010 persistence authored — astra (gpt-6)
 
