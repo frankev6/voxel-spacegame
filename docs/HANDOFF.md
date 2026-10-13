@@ -14,6 +14,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 | Commit locally only; never push | No `git push` and no remote operations. Merging to local `main` is fine |
 | Use the Unity CLI where possible | `tools/*.sh` and the CLI over manual Editor work ([08-tools.md](08-tools.md)) |
 | Keep the ledger current; record owner decisions verbatim | Quote Frank's words in the ledger log and in the *Answer* column of open questions |
+| Fast validation, owner correction 2026-10-13 | Focused functional acceptance per compatible batch; broad regression at gameplay checkpoints; benchmarks/soaks opt-in. No repeated three-minute test loops or worker queues behind unrelated tests. ADR-0070 supersedes older full-suite requirements below |
 | Three reusable separate worker threads authorized 2026-10-13 | GPT-6.1-Sol high, isolated worktrees; lead reviews, fixes and integrates; no subagents. See ADR-0062 and ORCHESTRATION.md |
 | Performance targets are advisory (ADR-0042, owner 2026-10-12) | Build and connect systems, then run the game. Spec numbers never block completion or later phases. At most two initial optimization passes per system/feature across all workers and handoffs; record the remaining gap and move on. See [performance policy](decisions/ADR-0042-advisory-performance-targets.md) |
 | Go wide, review systems later (ADR-0019) | No per-task review gate: tasks are `done` at their Definition of Done; an in-depth system review runs per milestone, before its gate (04-workflow §8) |
@@ -28,6 +29,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 - **Look-book ships are concepts, not final designs**, and the 2D ship lines are not approved yet.
 
 ## 2. Where things stand (2026-10-13)
+
+- **Validation workflow corrected (ADR-0070):** previous full run passed1217 EditMode and173 PlayMode cases but failed two audio benchmark timeouts. An unchanged audio rerun finished2 passed/1 failed in225.83s; no further rerun. Functional preview/ability/steering/status checks already pass. Close these tasks using that scoped evidence, then recycle combat/presentation into AI-009/010. Integrate prepared DMG-019/ECO-003 and use focused acceptance to unlock ECO-005. Older full-suite waits below are superseded; no claim that the full suite is green.
 
 - **Parallel foundation during validation:** ECO-003 is claimed on local main25e8d27a. Lead checkout `task/ECO-003-inventory-wallet` at43809e32 has wallet implementation/two required tests, not yet compiled; inventory remains. DMG-019 repair/impulse implementation and nine required tests are preserved at4b990546 on `task/DMG-019-restore-channels`, awaiting serialized validation after the current combat batch. This independent work unlocks ECO-005 for the third worker.
 

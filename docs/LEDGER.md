@@ -1002,6 +1002,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Owner correction: implementation before repeated validation — astra (gpt-6)
+
+- Frank: “man you cannot have 3 minute long tests, these are WAYYY too long man”. ADR-0070 replaces per-task full-suite waits with grouped compile and focused functional acceptance, broad regression at gameplay checkpoints, explicit-only performance/soak runs. Preserve hard functional assertions and original benchmark targets/records.
+- Default test commands previously included Performance and the600-second destruction soak. They now exclude Performance/LongRunning; `tools/test.sh soak` explicitly selects long scenarios. Live API selections are inventory-checked and refused before dispatch when exclusions cannot be represented; no expensive implicit fallback.
+- Prior full evidence:1217/0/1 EditMode,173/2/53 PlayMode, two audio timeout failures. Unchanged focused audio rerun terminated2/1 in225.83s before cancellation; no further retry or full-green claim. Existing functional batch acceptance remains usable for closure/dispatch. QualitySettings restored by cp and excluded; orphan meta removed after terminal.
+- Test count: spec-required:0, extra:0 (workflow correction; existing assertions unchanged). Validation: shell/Python syntax and synthetic filter inventory checks; docs consistency. No Unity suite launched for this policy edit.
+
 ### 2026-10-13 — AI-006 enemy decisions verified — astra (gpt-6)
 
 - Closed AI-006 (runtime7c50bdaa, content e2f96ddf, tests4fda59f2) after session91602 exited0: compile zero warning CS, full EditMode **1207 passed/0 failed/1 skipped**, PlayMode **170 passed/0 failed/53 skipped**. Evidence `Logs/playtest/ai-decisions/{acceptance.xml,compile-full.log,editmode-full.xml,playmode-full.xml,playmode-full.log}`. Soak600.00s/36000ticks,60 chunks/hulks/rams,36 dissolved/24 silent,peak2/64,zero native leaks.

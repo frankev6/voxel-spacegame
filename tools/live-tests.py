@@ -24,7 +24,11 @@ def select_tests(listing, mode, name_filter, category):
             continue
         if name_filter and name_filter.casefold() not in test['FullName'].casefold():
             continue
-        if category and category.casefold() not in [c.casefold() for c in test.get('Categories', [])]:
+        categories = {c.casefold() for c in test.get('Categories', [])}
+        terms = [c.casefold() for c in category.split(';') if c]
+        included = [c for c in terms if not c.startswith('!')]
+        excluded = [c[1:] for c in terms if c.startswith('!')]
+        if (included and not categories.intersection(included)) or categories.intersection(excluded):
             continue
         selected.append(test['FullName'])
     if not selected:
@@ -66,16 +70,25 @@ def run(root, mode, name_filter, category, output):
             raise RuntimeError(str(result))
         return result
 
-    if category and name_filter:
+    exclusions = category.startswith('!')
+    if category and name_filter and not exclusions:
         raise RuntimeError('The installed live test API supports one filter. Close the Editor for a combined name/category run.')
     status = call('test_status')
     if isinstance(status, dict) and status.get('status') == 'running':
         raise RuntimeError('Unity already has an active test request. No replacement request dispatched.')
-    expected = select_tests(call('list_tests', '--mode', mode.lower()), mode, name_filter, category)
+    listing = call('list_tests', '--mode', mode.lower())
+    expected = select_tests(listing, mode, name_filter, category)
+    dispatch_category = category
+    if exclusions:
+        # Pipeline only supports literal name/category filters, not exclusion expressions.
+        # A focused ordinary selection is safe only when its inventory is identical.
+        if expected != select_tests(listing, mode, name_filter, ''):
+            raise RuntimeError('Live API cannot exclude benchmarks/soaks from this selection. Use a focused functional name filter, or run headlessly. No tests dispatched.')
+        dispatch_category = ''
     request = dict(mode=mode, nameFilter=name_filter, category=category, inventory=sorted(expected.elements()))
     pathlib.Path(output).unlink(missing_ok=True)
-    receipt = call('run_tests', '--mode', mode.lower(), '--filter', category or name_filter,
-                   '--filter_type', 'category' if category else 'testName', '--async_tests', 'true')
+    receipt = call('run_tests', '--mode', mode.lower(), '--filter', dispatch_category or name_filter,
+                   '--filter_type', 'category' if dispatch_category else 'testName', '--async_tests', 'true')
     log.write_text(json.dumps(dict(request=request, receipt=receipt), indent=2) + '\n')
     if receipt.get('Mode', '').casefold() != mode.casefold():
         raise RuntimeError('Test dispatch receipt mode does not match request.')

@@ -10,7 +10,7 @@ using UnityEngine.TestTools;
 namespace Game.Tests.PlayMode.Combat
 {
     /// <summary>DMG-015: ten elapsed minutes and 36,000 fixed ticks of the DMG-014 skirmish, with seeded despawns.</summary>
-    [Category("Scenario")]
+    [Category("Scenario"), Category("LongRunning")]
     public sealed class DamageSoakTests
     {
         [UnityTest, Timeout(900000)]

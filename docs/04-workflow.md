@@ -25,7 +25,7 @@
 
 ## 3. Finishing
 
-1. Run the full Definition of Done in [05-testing.md §4](05-testing.md#4-definition-of-done-every-task).
+1. Apply ADR-0070: validate changed behavior in a compatible batch; do not run full suites per task or hold workers behind unrelated benchmarks. Run the scoped Definition of Done in [05-testing.md §4](05-testing.md#4-definition-of-done-every-task).
 2. Self-review against this checklist:
    - [ ] No managed `IComponentData`, no `SystemBase` outside allowed modules, every system has `[UpdateInGroup]` and `RequireForUpdate`.
    - [ ] No new assembly reference outside the architecture §3 table.

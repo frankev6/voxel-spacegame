@@ -4,14 +4,18 @@
 
 ## 1. The commands
 
+Owner correction (2026-10-13): compile once per compatible batch and run focused functional checks for changed behavior. Do not require a full suite per task, commit or worker delivery. Passing relevant acceptance checks unlock task closeout and dependent work; unrelated benchmark/soak failures remain recorded follow-ups. Broad functional regression belongs at meaningful integrated gameplay checkpoints or milestone review. Performance and long soak tests are opt-in only. A routine test approaching three minutes is a workflow defect: stop repeated diagnosis, record it and isolate/shorten its fixture; never increase timeouts or weaken functional assertions to obtain green. Preserve spec-required coverage, add no speculative tests, and prioritize implementation and live gameplay. See [ADR-0070](decisions/ADR-0070-focused-validation.md).
+
+
 All scripts live in `tools/`, find the project root themselves, and put the Unity CLI (`~/.unity/bin/unity`) on `PATH`.
 
 | Command | What it does | When |
 |---|---|---|
-| `tools/compile.sh` | If the Editor is open: recompile through the CLI and print errors. Otherwise: headless batch compile. Exit code ≠ 0 on any compile error | After every code change |
-| `tools/test.sh editmode [filter]` | Runs EditMode tests (optionally filtered by name), prints a summary, writes `Logs/test-results/*.xml` | Before every commit |
-| `tools/test.sh playmode [filter]` | Runs PlayMode tests | Before merging anything touching scenes, flow or ECS world setup |
-| `tools/test.sh perf [filter]` | Runs `Performance` category tests and prints medians vs budgets | Tasks with a perf gate |
+| `tools/compile.sh` | If the Editor is open: recompile through the CLI and print errors. Otherwise: headless batch compile. Exit code ≠ 0 on any compile error | Once per compatible implementation batch |
+| `tools/test.sh editmode [filter]` | Runs functional EditMode tests (optionally filtered by name), excluding Performance/LongRunning, prints a summary, writes `Logs/test-results/*.xml` | Focused changed behavior; broad runs at integration checkpoints |
+| `tools/test.sh playmode [filter]` | Runs functional PlayMode tests, excluding Performance/LongRunning | Focused runtime acceptance; broad runs at integration checkpoints |
+| `tools/test.sh perf [filter]` | Runs `Performance` category tests and prints medians vs budgets | Explicit measurement only; never routine closeout |
+| `tools/test.sh soak [filter]` | Runs long-duration scenarios explicitly | Deliberate soak checkpoint only |
 | `tools/check-docs.py` | Validates specs and ledger: unique task IDs, valid dependencies, every ledger row has a spec task, spec headers complete | After editing any doc |
 | `tools/ledger-sync.py` | Adds ledger rows for new spec tasks (never deletes) | After adding tasks to a spec |
 | `tools/playtest/*.sh` | Drive a running Editor: snapshot, logs, keys, mouse, screenshots, perf (see `tools/playtest/README.md`) | Manual and scenario checks |
@@ -50,7 +54,7 @@ Owner direction (2026-10-12): write the tests listed by each task spec; add extr
 ## 4. Definition of Done (every task)
 
 - [ ] Every functional acceptance criterion in the task is met and checked. Numeric performance criteria are advisory (ADR-0042), including older spec wording that calls them gates.
-- [ ] Tests listed in the task exist; functional, correctness and safety assertions pass, including existing regression tests (`tools/test.sh editmode`). Default EditMode and PlayMode suites must be green-or-real-failure. Performance-only timing, footprint and readiness checks warn with measured values and unchanged targets, while mixed tests retain hard functional assertions. Keep PerfRun JSON records and explicit perf summary FAIL rows unchanged.
+- [ ] Tests listed in the task exist; functional, correctness and safety assertions pass, including relevant existing regression checks selected for the changed behavior. Full suites are checkpoint validation, not a per-task closeout requirement (ADR-0070). Default EditMode and PlayMode suites must be green-or-real-failure. Performance-only timing, footprint and readiness checks warn with measured values and unchanged targets, while mixed tests retain hard functional assertions. Keep PerfRun JSON records and explicit perf summary FAIL rows unchanged.
 - [ ] `tools/compile.sh` shows zero errors and zero new warnings in `Game.*` assemblies.
 - [ ] No rule in [02-conventions.md](02-conventions.md) is broken (self-review checklist in [04-workflow.md](04-workflow.md)).
 - [ ] Record relevant performance results, missed targets or unavailable measurements, and the initial optimization pass count in the ledger. At most two passes per system/feature across workers and handoffs; measurement troubleshooting for a number uses the same allowance. Do not fabricate a passing result, relax test thresholds or repeat runs just to obtain green. Defer further tuning and continue integration/live gameplay.
