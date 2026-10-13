@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Import compiler accepted:**36adef2b compile20292 clean,50859 three passed; evidence `logic-import/`, Q17→315. NAR-0048243b1a4 delivered166, review/integration pending (draft Q15 must become18). Same combat thread on bounded FACT correctness review; presentation on HUD/spawn readiness audit; NAR-014 remains implementing. No Unity validation active. Previous turn implemented FACT (progress).
+
 - **FACT accepted / import pipeline next:**6a0c3c47 compile60074 clean, batch71608 five exact functional cases passed; benchmark unrun. NAR-00920f487c0 source review complete, next integration; its Q15 must become17 (lead15/16 already used). No active validation. Previous turn implemented FACT (progress).
 
 - **FACT participant implemented:** NAR-008 claimed033f2cac; staged version1 payload writer and fully parsed/validated restore before mutation, defaults for version0, unchanged FACT registry order20. Five functional checks plus one opt-in measurement authored; compile60074 following namespace repair, acceptance still pending. NAR-009 delivered20f487c0 (Q15 collision to renumber); same worker auditing actual HUD/spawn dependencies, no new ready standard implementation. NAR-004165/NAR-014179 active. Previous turn closed FactStore (progress).
