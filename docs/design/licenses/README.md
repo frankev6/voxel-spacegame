@@ -8,4 +8,4 @@ Use readable ASCII filenames without spaces, grouped by source/family when one l
 
 Fonts require SIL OFL 1.1 text shipped beside the font. CC-BY 4.0 needs attribution in credits as well as its proof; NC, ND, SA and personal-use-only sources do not qualify under the binding design guide. AI assets require the owner's explicit approval for that exact asset and evidence of permitted commercial use. Do not generate or import them as part of AST-001.
 
-TODO(AST-003): audit carried-over assets and populate actual proofs/statuses. No source downloads, receipts, licence confirmations or new proofs were obtained by AST-001.
+AST-003 records the repository-only inventory in [placeholder-audit-2026-10-13.md](placeholder-audit-2026-10-13.md) and its exact-path/hash/GUID CSV. [office-code-pro-ofl-1.1.txt](office-code-pro-ofl-1.1.txt) is the actual bundled font licence, preserved byte-for-byte. The audit record/CSV are evidence inventories, not licence permissions. No new receipt, owner confirmation, source download or AI approval was obtained; unresolved rows remain placeholder-only and excluded rows remove.
