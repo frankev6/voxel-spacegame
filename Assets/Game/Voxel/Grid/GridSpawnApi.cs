@@ -72,6 +72,23 @@ namespace Game.Voxel.Grid
             catch { registry.EndRead(token); throw; }
         }
         public static void RequestDespawn(EntityManager em, Entity root) { em.SetComponentEnabled<GridDespawnRequest>(root, true); }          // enables GridDespawnRequest
-        public static void RequestEdit(EntityManager em, Entity root, NativeArray<int3> changedBrickCoords) { throw new System.NotImplementedException("VOX-020"); }   // M3
+        /// <summary>Queues changed coordinates on a live registered editor preview; repeated calls coalesce in the spawn owner.</summary>
+        public static void RequestEdit(EntityManager em, Entity root, NativeArray<int3> changedBrickCoords)
+        {
+            if (!em.Exists(root) || !em.HasComponent<VoxelGrid>(root) || !em.HasComponent<GridSource>(root)
+                || !em.HasComponent<GridEditRequest>(root) || !em.HasBuffer<GridEditedBrick>(root))
+                throw new ArgumentException("Edit requires a live preview grid", nameof(root));
+            var source = em.GetComponentData<GridSource>(root);
+            if ((source.Flags & GridSpawnFlags.EditorPreview) == 0 || source.StructureHandle < 0 || !source.Blueprint.IsNone)
+                throw new ArgumentException("Edit requires a registered EditorPreview source", nameof(root));
+            if (em.IsComponentEnabled<GridSpawning>(root) || em.HasComponent<GridRebuildRequest>(root)
+                || em.IsComponentEnabled<GridDespawnRequest>(root))
+                throw new InvalidOperationException("Wait for preview spawn, rebuild or despawn before editing");
+            if (!changedBrickCoords.IsCreated) throw new ArgumentException("Changed coordinates must be allocated", nameof(changedBrickCoords));
+            if (changedBrickCoords.Length == 0) return;
+            var changed = em.GetBuffer<GridEditedBrick>(root);
+            foreach (var coord in changedBrickCoords) changed.Add(new GridEditedBrick { Coord = coord });
+            em.SetComponentEnabled<GridEditRequest>(root, true);
+        }
     }
 }
