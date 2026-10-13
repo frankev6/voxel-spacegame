@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AI-007 | delivered 2a92fd81; integrated 2a6444b2, validation wait | enemy flight |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-005 | repair 1fbe35fa integrated 0f12d55f; validation wait | ability integration |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AI-008 | delivered 53d96351; integrated 0d64274b, validating | combat integration |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AI-009 | assigned from main c1b9a0e2; station turret integration | AI follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-005 preparation | ABL-005 closed; actual ECO-003 dependency wait; read-only preparation authorized | merchants after inventory acceptance |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AI-010 | assigned from main c1b9a0e2; four combat scenarios | AI follow-ups |
 
 ## Operating rules
 
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Implementation resumed:** closeout3b1e944b on main accepts VOX-020/ABL-005/AI-007/008 using verified focused evidence under ADR-0070. Claimc1b9a0e2 and follow-ups dispatch AI-009/010 to existing combat/presentation threads; power reads ECO-005 while its real inventory dependency finishes. Primary now `task/DMG-019-focused-integration` at2e364ad5: all prepared repair/impulse and inventory/wallet commits integrated, one compile started; focused acceptance next. No full-suite rerun. Previous goal turn made progress by committing the validation policy.
 
 - **Owner workflow correction (ADR-0070), supersedes validation waits below:** default commands now exclude Performance/LongRunning; focused acceptance unlocks closure and dispatch. Audio rerun41147 already terminated2 passed/1 failed in225.83s before cancellation; no restart. No Unity process remains. Existing preview/ability/AI focused checks pass; close those rows with scoped evidence, then dispatch AI-009/010. Prepared DMG-019/ECO-003 needs one compile/focused acceptance batch, then ECO-005. Broad regression is a gameplay checkpoint, never a repeated per-task gate.
 
