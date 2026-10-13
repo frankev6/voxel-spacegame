@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Compiler checks green, scope still open:** primary7894ffe2 compiles clean58481; six required checks pass12910, evidence `narrative-compiler/`. LogicFunctionInfo.Invoke remains unimplemented and must be finished before NAR-003 closes. Nodes deliberately retain NAR-004/005 runtime TODOs. Power audit found ECO-004 needs NAR-001 interface, not entire narrative runtime; reconciling explicit prerequisites under ADR-0068. Previous turn accepted structures (progress).
+
 - **Structure builders accepted:**971ae0b7, compile37644 clean, focused41108 four passed; Q12→307, evidence `structure-builders/`. Power worker auditing eligible standard successors, no invented assignment. Lead isolated NAR-003ba63cfa6 constructs effect graphs; execution remains TODO(NAR-005) and ledger partial note. Compiler acceptance/runtime invocation still pending. No active Unity validation. Previous turn wired compiler APIs (progress).
 
 - **Compiler entry points wired:** isolated NAR-003f51018bb parses/checks/emits condition/int wrappers and command lists, stamps hashes/version and reports first parser diagnostics. Effect factories still unfinished, so valid command compilation is not yet accepted. No tests/compile this turn. DEV-018 worker found real TRV-006/GAL-008/SYS-009 gaps; instructed to finish useful service-backed plumbing then report exact dependency wait, never fake position/travel. Ledger notes updated. Workers AI-015152/SYS-003164/DEV-018136 active. Previous turn emitted condition graphs (progress).
