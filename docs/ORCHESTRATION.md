@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | done; full batch green; dependency wait | audio measurements |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-004 | active; effects and two required tests written; awaiting delivery | ABL-005 after WPN-012 |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-004 | delivered d83c30e7; integrated fe02469; validation wait | ABL-005 after WPN-012 |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-015 | done; full batch green; dependency wait | weapon harness |
 
 ## Operating rules
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Ability effects integrated:** worker d83c30e7 is reviewed/integrated fe02469; SPEC24Q8 mirrored Q288 in6f0c1b20. Shield toggle and boost request writers plus exactly two required tests (extra:0). Compile clean; serialized effect acceptance session78650 is active, followed by combined full regression if green. Do not mutate primary runtime until terminal. All three workers now have real validation/dependency waits; next power assignment ABL-005 after batch closeout.
 
 - **Combat acceptance green:** session25162 exited0; compile clean and all six WPN-012 required scenarios passed (spec-required:6, extra:0). Evidence `Logs/playtest/combat-scenarios/acceptance.xml` and `compile-acceptance.log`. Across30/60/144FPS and1/17workers, the600-tick skirmish produces cell hashFF97DBC590F12EDA with66 fired/37 hits/4 live/0 dropped and identical full projectile stats. ABL-004 remains actively finishing its delivery (exact worker cursor122); lead reviewed both effects and its two tests without an actionable finding so far. No active Unity. Next integrate the committed delivery, validate the two effect checks, then run one compatible full regression before closeout. Other workers remain verified dependency waits.
 
