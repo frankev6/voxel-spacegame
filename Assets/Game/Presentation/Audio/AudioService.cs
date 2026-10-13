@@ -22,6 +22,10 @@ namespace Game.Presentation.Audio
         readonly AudioConfigDefinition config;
         readonly AudioSource[] sfxVoices = new AudioSource[40];
         readonly VoiceInfo[] voiceInfo = new VoiceInfo[40];
+        readonly AudioSource[] loopVoices = new AudioSource[8];
+        readonly int[] loopSlots = new int[8];
+        readonly float[] loopVolumes = new float[8], loopTargets = new float[8];
+        readonly bool[] loopActive = new bool[8];
         NativeHashMap<ulong, int> cueSlotByHash;
         NativeArray<SfxCueInfo> cueInfo;
         AudioCueDefinition[] cues;
@@ -44,9 +48,14 @@ namespace Game.Presentation.Audio
         IPauseService pause;
         World boundWorld;
         AudioEventDrainSystem drainSystem;
+        AudioLoopBridgeSystem loopSystem;
         internal NativeHashMap<ulong, int> CueSlots => cueSlotByHash;
         internal NativeArray<SfxCueInfo> CueInfo => cueInfo;
         internal float CombatRadius => config != null ? config.CombatRadius : 0;
+        internal bool EngineLoopAvailable => LoopSlot(0) != 0;
+        internal bool BeamLoopAvailable => LoopSlot(1) != 0;
+        internal float BeamLoopRadius => config != null ? config.BeamLoopRadius : 0;
+        internal float BeamLoopPitch => config != null && config.BeamLoop != null ? config.BeamLoop.Pitch : 1;
         AudioVolumes pendingVolumes;
         bool volumesPending, disposed;
         internal MusicContext SceneContext { get; private set; }
@@ -76,7 +85,8 @@ namespace Game.Presentation.Audio
                 musicA = Voice("MusicA", music, 0, true, false); musicB = Voice("MusicB", music, 0, true, false);
                 stinger = Voice("Stinger", music, 0, true, false);
                 Voice("Ambience", ambience, 0, false, true);
-                for (int i = 0; i < 8; i++) Voice("LoopVoice_" + i, sfx, 1, false, true);
+                for (int i = 0; i < loopVoices.Length; i++)
+                { loopVoices[i] = Voice("LoopVoice_" + i, sfx, 1, false, true); loopVoices[i].volume = 0; }
                 int count = 0;
                 if (content != null) foreach (var def in content.Definitions) if (def is AudioCueDefinition) count++;
                 cueSlotByHash = new NativeHashMap<ulong, int>(Math.Max(1, count), Allocator.Persistent);
@@ -130,6 +140,7 @@ namespace Game.Presentation.Audio
                 if (boundWorld != null) Unbind(boundWorld);
                 boundWorld = world; drainSystem = world.GetOrCreateSystemManaged<AudioEventDrainSystem>();
                 drainSystem.Bind(this); stats.Bound = true;
+                loopSystem = world.GetOrCreateSystemManaged<AudioLoopBridgeSystem>(); loopSystem.Bind(this);
             }
             // Boot-owned singleton survives scene teardown; rebind updates it without adding another entity.
             var cues = new CombatAudioCues {
@@ -150,6 +161,8 @@ namespace Game.Presentation.Audio
         {
             if (!ReferenceEquals(boundWorld, world)) return;
             if (boundWorld != null && boundWorld.IsCreated && drainSystem != null) drainSystem.Bind(null);
+            if (boundWorld != null && boundWorld.IsCreated && loopSystem != null) loopSystem.Bind(null);
+            StopLoopVoices(); loopSystem = null;
             boundWorld = null; drainSystem = null; stats.Bound = false;
         }
         public void SetListenerTarget(Transform pivot) { if (!disposed) listenerTarget = pivot; }
@@ -178,6 +191,7 @@ namespace Game.Presentation.Audio
             AudioListener.pause = pause != null && pause.IsPaused;
             UpdateMusic(dt);
             UpdateDucking(dt);
+            UpdateLoopVoices(dt);
             for (int i = 0; i < voiceInfo.Length; i++) if (voiceInfo[i].Active && !sfxVoices[i].isPlaying) voiceInfo[i].Active = false;
         }
         void OnSceneChanged(Scene previous, Scene next)
@@ -342,6 +356,68 @@ namespace Game.Presentation.Audio
         internal int ActiveSfxCount
         {
             get { int count = 0; for (int i = 0; i < voiceInfo.Length; i++) if (voiceInfo[i].Active) count++; return count; }
+        }
+        // AUD-009: normalized loop envelopes; mixer settings stay on the mixer and cue gain is applied once.
+        int LoopSlot(int index)
+        {
+            if (disposed || config == null || !cueSlotByHash.IsCreated) return 0;
+            var cue = index == 0 ? config.EngineLoop : config.BeamLoop;
+            return cue != null && cueSlotByHash.TryGetValue(cue.Id.Hash.Value, out int slot) && cues[slot].Clips.Count > 0 ? slot : 0;
+        }
+        internal void SetLoopTarget(int index, float volume, float pitch, float3 position)
+        {
+            if (disposed || (uint)index >= 7) return; // Voice 7 is spare.
+            int slot = LoopSlot(index);
+            if (slot == 0 || !math.all(math.isfinite(position))) { StopLoopVoice(index); return; }
+            volume = math.isfinite(volume) ? math.saturate(volume) : 0;
+            if (loopSlots[index] != slot) StopLoopVoice(index);
+            var source = loopVoices[index]; source.transform.position = position;
+            source.pitch = math.isfinite(pitch) ? math.clamp(pitch, .1f, 3) : 1;
+            loopSlots[index] = slot; loopTargets[index] = volume;
+            if (!loopActive[index] && volume > 0)
+            {
+                var cue = cues[slot];
+                var random = new Unity.Mathematics.Random(unchecked((uint)Time.frameCount * 7919u + (uint)index + 1u) | 1u);
+                int count = cue.Clips.Count, previous = lastClip[slot];
+                int clip = random.NextInt(count > 1 && previous >= 0 ? count - 1 : count);
+                if (count > 1 && previous >= 0 && clip >= previous) clip++;
+                lastClip[slot] = clip; source.clip = cue.Clips[clip]; source.volume = 0;
+                source.spatialBlend = 1; // Keep the construction-time Sfx routing, including its specified Master fallback.
+                source.minDistance = cue.MinDistance; source.maxDistance = cue.MaxDistance; source.priority = cue.Priority;
+                source.ignoreListenerPause = false; source.loop = true; source.Play(); loopActive[index] = true;
+            }
+            stats.ActiveLoopVoices = ActiveLoopCount;
+        }
+        internal void FadeOutLoopVoice(int index)
+        {
+            if (disposed || (uint)index >= 7) return;
+            if (LoopSlot(index) == 0) StopLoopVoice(index);
+            else { loopTargets[index] = 0; if (index == 0) loopVoices[index].pitch = .8f; }
+        }
+        internal void StopLoopVoice(int index)
+        {
+            if ((uint)index >= loopVoices.Length) return;
+            if (loopVoices[index] != null) { loopVoices[index].Stop(); loopVoices[index].clip = null; loopVoices[index].volume = 0; }
+            loopSlots[index] = 0; loopVolumes[index] = loopTargets[index] = 0; loopActive[index] = false;
+            stats.ActiveLoopVoices = ActiveLoopCount;
+        }
+        internal void StopLoopVoices()
+        { for (int i = 0; i < loopVoices.Length; i++) StopLoopVoice(i); }
+        internal int ActiveLoopCount
+        { get { int count = 0; for (int i = 0; i < loopActive.Length; i++) if (loopActive[i]) count++; return count; } }
+        void UpdateLoopVoices(float dt)
+        {
+            float fade = config != null ? config.LoopFadeSeconds : 0;
+            float step = !math.isfinite(fade) || fade <= 0 ? 1 : (math.isfinite(dt) ? math.max(0, dt) / fade : 0);
+            for (int i = 0; i < loopVoices.Length; i++)
+            {
+                if (!loopActive[i]) continue;
+                if (LoopSlot(i) == 0) { StopLoopVoice(i); continue; }
+                loopVolumes[i] = Mathf.MoveTowards(loopVolumes[i], loopTargets[i], step);
+                loopVoices[i].volume = math.saturate(cues[loopSlots[i]].Volume * loopVolumes[i]);
+                if (loopTargets[i] == 0 && loopVolumes[i] == 0) StopLoopVoice(i);
+            }
+            stats.ActiveLoopVoices = ActiveLoopCount;
         }
         void StartOneShot(AudioSource source, int slot, float volume, AudioMixerGroup bus, bool ignorePause, float spatial = 0, int order = -1)
         {
