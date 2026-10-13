@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Full regression progress:** session43506 compile clean and full EditMode1179/0/1 completed; PlayMode continues on the same live handle. Evidence `Logs/playtest/projectile-combat/editmode-full.xml` and `compile-full.log`. No primary runtime mutation or second Unity. Audio worker fixed reviewed missing import and is finishing four required measurements; power/presentation remain genuine dependency waits.
+
 - **Grouped validation complete:** session94395 exited0, compile clean, faction/quest/migration7/7 (`Logs/playtest/projectile-combat/faction-quest.xml`). WPN-018 delivery753e2de5 reviewed and integrated b672f6f1, five required tests/zero extras. Combined compile/full EditMode/PlayMode session43506 now running; preserve primary runtime until terminal. AUD-013 remains active, other two workers have real dependency/validation waits; WPN-009/015 follow WPN-008 closeout. No eligible unassigned standard work bypasses actual galaxy/art prerequisites.
 
 - **Current validation:** faction generation93145 exited0; exact three outputs, duplicate skipped, player preserved, byte/GUID/manifest-stable rerun. Content0errors/11existing economy-power warnings. Generated assets committed e9d50f3c; temporary job/meta removed. Compile + grouped FactionConverterTests/QuestContractTests/MigrationGateTests now session94395; no primary mutation or concurrent Unity until terminal. Worker WPN-018 has implementation and five required tests in progress; AUD-013 active; presentation dependency wait remains.
