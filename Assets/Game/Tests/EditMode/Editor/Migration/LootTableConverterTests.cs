@@ -8,7 +8,7 @@ using Game.Data.Services;
 using Game.Data.Validation;
 using Game.Editor.Migration;
 using Game.Editor.Migration.Converters;
-using Newtonsoft.Json.Linq;
+using Game.Editor.Migration.Dto;
 using NUnit.Framework;
 using UnityEditor;
 
@@ -145,36 +145,71 @@ paint_08_cyan,1,1,100");
             var converter = new LootTableConverter(); var initial = Context(); converter.Convert(initial);
             Assert.IsFalse(initial.Report.HasErrors, initial.Report.ToText());
             byte[] original = File.ReadAllBytes(PathOf("loot_base")); Assert.IsTrue(manifest.TryGetHash(PathOf("loot_base"), out ulong hash));
-            var changes = new (string Code, Action<LegacyMigrationContext, JObject> Mutate)[]
+            var source = initial.Index.OfType("LootTable").Single(f => f.Name == "BaseLootTable");
+            var dto = LegacyJson.Read<LegacyLootTableDto>(source, initial.Report); Assert.NotNull(dto);
+            Assert.IsTrue(initial.Index.TryResolve(dto.LootItems[8].Item, out var research));
+            string temporary = Path.Combine(Path.GetTempPath(), "LootMigration_" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(temporary);
+            try
             {
-                ("MIG-E004", (_, json) => json["lootItems"][0]["item"]["$ref"] = "Assets/unknown.asset"),
-                ("MIG-E072", (_, json) => json["lootItems"][0]["minAmount"] = 0),
-                ("MIG-E072", (_, json) => json["lootItems"][0]["maxAmount"] = 10001),
-                ("MIG-E072", (_, json) => json["lootItems"][0]["dropChance"] = 101),
-                ("MIG-E002", (_, json) => json["lootItems"][0]["unrecognized"] = 1),
-                ("MIG-E003", (_, json) => json["$name"] = "UnmappedLootTable"),
-                ("MIG-E003", (c, json) => { Assert.IsTrue(c.Index.TryGetByAssetPath((string)json["lootItems"][8]["item"]["$ref"], out var item)); item.Json["RegistryKey"] = "unknown_research_item"; }),
-                ("MIG-E004", (c, _) => { var report = new ValidationReport("Incomplete prerequisite catalog"); c.Catalog = ContentCatalog.Build(catalog.All<ItemDefinition>().Where(d => d.IdString != "item_research_blueprint").Cast<ContentDefinition>().ToArray(), report); Assert.IsFalse(report.HasErrors, report.ToText()); })
-            };
-            foreach (var change in changes)
-            {
-                var context = Context(); var source = context.Index.OfType("LootTable").Single(f => f.Name == "BaseLootTable");
-                change.Mutate(context, source.Json); converter.Convert(context);
-                Assert.IsTrue(context.Report.HasErrors, change.Code); Assert.IsTrue(context.Report.Entries.Any(e => e.Code == change.Code), context.Report.ToText());
-                Assert.AreEqual(1, context.Writer.Outcomes.Count); Assert.AreEqual(PathOf("loot_creative"), context.Writer.Outcomes[0].AssetPath, "The other table still runs.");
-                CollectionAssert.AreEqual(original, File.ReadAllBytes(PathOf("loot_base"))); Assert.IsTrue(manifest.TryGetHash(PathOf("loot_base"), out ulong retained)); Assert.AreEqual(hash, retained);
+                string lootPath = Path.Combine(temporary, source.RelativePath), researchPath = Path.Combine(temporary, research.RelativePath);
+                // Like LegacyJsonTests, mutate disposable text copies: the test assembly has no Newtonsoft reference.
+                var changes = new (string Code, Action Mutate)[]
+                {
+                    ("MIG-E004", () => ReplaceFirst(lootPath, "\"$ref\":\"" + dto.LootItems[0].Item.Path + "\"", "\"$ref\":\"Assets/unknown.asset\"")),
+                    ("MIG-E072", () => ReplaceFirst(lootPath, "\"minAmount\":1", "\"minAmount\":0")),
+                    ("MIG-E072", () => ReplaceFirst(lootPath, "\"maxAmount\":1", "\"maxAmount\":10001")),
+                    ("MIG-E072", () => ReplaceFirst(lootPath, "\"dropChance\":100", "\"dropChance\":101")),
+                    ("MIG-E002", () => ReplaceFirst(lootPath, "\"minAmount\":1", "\"unrecognized\":1,\"minAmount\":1")),
+                    ("MIG-E003", () => ReplaceFirst(lootPath, "\"$name\":\"BaseLootTable\"", "\"$name\":\"UnmappedLootTable\"")),
+                    ("MIG-E003", () => ReplaceFirst(researchPath, "\"RegistryKey\":\"item_research_blueprint\"", "\"RegistryKey\":\"unknown_research_item\""))
+                };
+                foreach (var change in changes)
+                {
+                    CopyInputs(temporary); change.Mutate();
+                    var context = Context(legacyRoot: temporary); converter.Convert(context);
+                    AssertSkipped(context, change.Code, original, hash);
+                }
+                CopyInputs(temporary);
+                var incomplete = Context(legacyRoot: temporary); var report = new ValidationReport("Incomplete prerequisite catalog");
+                incomplete.Catalog = ContentCatalog.Build(catalog.All<ItemDefinition>().Where(d => d.IdString != "item_research_blueprint").Cast<ContentDefinition>().ToArray(), report);
+                Assert.IsFalse(report.HasErrors, report.ToText()); converter.Convert(incomplete); AssertSkipped(incomplete, "MIG-E004", original, hash);
+
+                // References use the indexed $path and the target DTO's RegistryKey, never ref name/type hints.
+                ReplaceFirst(lootPath, "\"name\":\"" + dto.LootItems[0].Item.Name + "\"", "\"name\":\"ship_fighter\"");
+                ReplaceFirst(lootPath, "\"type\":\"" + dto.LootItems[0].Item.Type + "\"", "\"type\":\"ShipItem\"");
+                var hints = Context(legacyRoot: temporary); converter.Convert(hints);
+                Assert.IsFalse(hints.Report.HasErrors, hints.Report.ToText()); Assert.AreEqual(2, hints.Writer.Outcomes.Count);
+                Assert.IsTrue(hints.Writer.Outcomes.All(o => o.Outcome == WriteOutcome.Unchanged));
             }
-            // References use the indexed $path and the target DTO's RegistryKey, never ref name/type hints.
-            var hints = Context(); var row = hints.Index.OfType("LootTable").First().Json["lootItems"][0]["item"];
-            row["name"] = "ship_fighter"; row["type"] = "ShipItem"; converter.Convert(hints);
-            Assert.IsFalse(hints.Report.HasErrors, hints.Report.ToText()); Assert.AreEqual(2, hints.Writer.Outcomes.Count);
-            Assert.IsTrue(hints.Writer.Outcomes.All(o => o.Outcome == WriteOutcome.Unchanged));
+            finally { Directory.Delete(temporary, true); }
             foreach (var pair in inputs) CollectionAssert.AreEqual(pair.Value, File.ReadAllBytes(pair.Key));
         }
 
-        LegacyMigrationContext Context(bool force = false)
+        void AssertSkipped(LegacyMigrationContext context, string code, byte[] original, ulong hash)
         {
-            var report = new ValidationReport("MIG-013"); string legacyRoot = Path.GetFullPath("Import/Legacy");
+            Assert.IsTrue(context.Report.HasErrors, code); Assert.IsTrue(context.Report.Entries.Any(e => e.Code == code), context.Report.ToText());
+            Assert.AreEqual(1, context.Writer.Outcomes.Count); Assert.AreEqual(PathOf("loot_creative"), context.Writer.Outcomes[0].AssetPath, "The other table still runs.");
+            CollectionAssert.AreEqual(original, File.ReadAllBytes(PathOf("loot_base"))); Assert.IsTrue(manifest.TryGetHash(PathOf("loot_base"), out ulong retained)); Assert.AreEqual(hash, retained);
+        }
+        void CopyInputs(string root)
+        {
+            string sourceRoot = Path.GetFullPath("Import/Legacy");
+            foreach (var pair in inputs)
+            {
+                string path = Path.Combine(root, Path.GetRelativePath(sourceRoot, Path.GetFullPath(pair.Key)));
+                Directory.CreateDirectory(Path.GetDirectoryName(path)); File.WriteAllBytes(path, pair.Value);
+            }
+        }
+        static void ReplaceFirst(string path, string before, string after)
+        {
+            string text = File.ReadAllText(path); int at = text.IndexOf(before, StringComparison.Ordinal);
+            Assert.GreaterOrEqual(at, 0, "Expected mutation token in " + path + ": " + before);
+            File.WriteAllText(path, text.Substring(0, at) + after + text.Substring(at + before.Length));
+        }
+        LegacyMigrationContext Context(bool force = false, string legacyRoot = null)
+        {
+            var report = new ValidationReport("MIG-013"); legacyRoot ??= Path.GetFullPath("Import/Legacy");
             var index = LegacyContentIndex.Load(legacyRoot, report); Assert.IsFalse(report.HasErrors, report.ToText());
             return new LegacyMigrationContext(index, LegacyIdMap.Default, new LegacyAssetWriter(Root, manifest, force, report), report, force, legacyRoot) { Catalog = catalog };
         }
