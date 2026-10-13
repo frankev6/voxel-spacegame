@@ -899,6 +899,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 306 | SPEC-23 Q26: fast physical AI scenario fixtures | Resolved: frozen player dummy without Hulk, real physical frigate/pipeline; fixture-only arena and weapon changes, fixed ticks and early exit retain functional assertions. Production balance unchanged. | Tech lead |
 | 307 | SPEC-31 Q12: builder geometry, inputs and ownership | Resolved: injected baked content/catalog, caller-owned sources and loader-owned cache; centered cell sampling, shell subtraction, deterministic nearest-core footprint replacement, seeded simplex offset and bounded native staging. No new assets. | Tech lead |
 | 308 | SPEC-50 Q25: actual ECO-004 narrative dependency | Resolved under ADR-0068: require NAR-001 interface plus completed ECO-003/005 runtime; retain full loot/service scope and eight required tests. | Tech lead |
+| 309 | SPEC-40 Q14: runtime vocabulary invocation boundary | Resolved: SPEC-41 Invoke serves expression functions with evaluated values/resolved indices and retained canonical IDs; commands use compiled effect preflight/flow, never direct Invoke. | Tech lead |
 
 
 ## Measurements

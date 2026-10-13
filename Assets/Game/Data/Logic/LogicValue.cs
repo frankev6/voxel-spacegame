@@ -6,5 +6,7 @@ namespace Game.Data.Logic
         public readonly LogicType Type;
         public readonly int Int;
         public readonly string Text;
+        public LogicValue(LogicType type, int value, string text = null)
+        { Type = type; Int = value; Text = text; }
     }
 }

@@ -1438,6 +1438,8 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 
 | 13 | NAR-002 precedence example uses bare names, while §4.6 requires variables; internal parser result and failure representation are unspecified | **Resolved (2026-10-13):** follow §4.6: use `not $a and $b or $c` for precedence acceptance. Parser returns internal location-bearing AST nodes and throws the first internal diagnostic with code/line/column; NAR-003 translates it into validation reports. Command signed integers use the Int32 domain, including -2147483648. | Tech lead |
 
+| 14 | Runtime Invoke argument representation and command routing are unspecified | **Resolved:** SPEC-41 §5.4 uses Invoke for expression functions only. LogicValue.Int carries evaluated integers/booleans or resolved ref indices/fact slots; Text retains canonical ref IDs and text (including owner). Invoke checks usage/arity and dispatches through ILogicContext; effect entries reject Invoke so command preflight, atomicity and flow cannot be bypassed. Commands use CreateNode and compiled effect handling. | Tech lead |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/05-narrative-quests.md` (B3, B8, B10, B13, B14, B17; §5.3–§5.5, §5.12–§5.13), `00-synthesis.md` §6h.
