@@ -16,6 +16,9 @@ namespace Game.Narrative
         readonly Dictionary<string, int> orphans = new Dictionary<string, int>(StringComparer.Ordinal);
         public FactCatalog Catalog { get; }
         public LogicTraceLog Trace { get; }
+        ILogicWorld traceWorld;
+        // NAR-010 binds the canonical world facade at composition; no ECS dependency belongs in FactStore.
+        internal void BindTraceWorld(ILogicWorld world) => traceWorld = world;
         public int NonDefaultCount => nonDefaultCount;
         public FactStore(FactCatalog catalog, int changeCapacity = 256)
         {
@@ -57,7 +60,7 @@ namespace Game.Narrative
             EventBus<FactChanged>.Publish(new FactChanged(Catalog.IdAt(slot), slot, old, value, source));
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Trace.Add(new LogicTraceEntry { Frame = UnityEngine.Time.frameCount, Kind = LogicTraceKind.FactWrite,
-                Source = source, Subject = slot, OldValue = old, NewValue = value });
+                UniversalTime = traceWorld?.UniversalTime ?? 0, Source = source, Subject = slot, OldValue = old, NewValue = value });
 #endif
         }
         public void AddBySlot(int slot, int delta, FactWriteSource source)

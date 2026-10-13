@@ -4,6 +4,7 @@ namespace Game.Narrative
     public sealed class NarrativeService
     {
         // TODO(NAR-010): implement this runtime service; the contract shell owns no runtime state.
+        // TODO(NAR-010): constructor binds facts.BindTraceWorld(context.World) for canonical trace time.
 
         public const int MaxPassesPerTick = 8;
         public NarrativeService(FactStore facts, Game.Data.Logic.ILogicContext context) => throw new System.NotImplementedException("NAR-010");

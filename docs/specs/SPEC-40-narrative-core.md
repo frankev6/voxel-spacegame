@@ -1440,6 +1440,8 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 
 | 14 | Runtime Invoke argument representation and command routing are unspecified | **Resolved:** SPEC-41 §5.4 uses Invoke for expression functions only. LogicValue.Int carries evaluated integers/booleans or resolved ref indices/fact slots; Text retains canonical ref IDs and text (including owner). Invoke checks usage/arity and dispatches through ILogicContext; effect entries reject Invoke so command preflight, atomicity and flow cannot be bypassed. Commands use CreateNode and compiled effect handling. | Tech lead |
 
+| 15 | FactStore trace clock and bounded-copy semantics lack a composition hook | Resolved: keep the public constructor unchanged; an internal BindTraceWorld hook accepts ILogicWorld from NarrativeService composition (NAR-010), giving the canonical UniversalTime without ECS dependencies. Before binding, time is0 per the world-facade fallback; ContextId remains0 for unscoped raw writes. CopyTo returns retained entries oldest-first up to buffer length; the debugger reverses its full512-entry copy for newest-first display. NonDefaultCount counts known slots, including Session; orphans are preserved separately. | Tech lead |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/05-narrative-quests.md` (B3, B8, B10, B13, B14, B17; §5.3–§5.5, §5.12–§5.13), `00-synthesis.md` §6h.
