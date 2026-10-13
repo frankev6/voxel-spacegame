@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace Game.Presentation.Audio
 {
-    /// <summary>SPEC-64 §5.2/§6.1: lifetime, listener, fixed voice pools, mixer settings and pause. Managed one-shots and stinger ducking; spatial allocation and music direction follow in AUD-006/008.</summary>
+    /// <summary>SPEC-64 §5.2/§6.1: lifetime, listener, fixed voice pools, mixer settings and pause. Pooled spatial/managed one-shots and stinger ducking; music direction follows in AUD-008.</summary>
     public sealed class AudioService : IAudioService, IDisposable
     {
         readonly AudioStats stats = new AudioStats();

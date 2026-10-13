@@ -71,15 +71,7 @@ namespace Game.Presentation.Audio
                 GameLog.WarnOnce("Audio.UnknownHash." + unknown[i], "Audio", "Unknown audio cue hash: " + unknown[i]);
             Service.RefreshSfxVoices();
             using (AllocateMarker.Auto())
-            {
-                int started = 0;
-                for (int i = 0; i < candidates.Length && started < 16; i++)
-                {
-                    var candidate = candidates[i];
-                    if (!Service.TryStartSfx(candidate, now)) continue;
-                    lastStart[candidate.GroupKey] = now; started++;
-                }
-            }
+                SfxVoiceAllocator.Allocate(candidates.AsArray(), Service, lastStart, now, 16);
             stats.Unresolved = counters[(int)SfxCounter.Unresolved]; stats.Silent = counters[(int)SfxCounter.Silent];
             stats.Culled = counters[(int)SfxCounter.Culled]; stats.Groups = counters[(int)SfxCounter.Groups];
             stats.CooldownDropped = counters[(int)SfxCounter.CooldownDropped]; stats.CombatSignals = counters[(int)SfxCounter.CombatSignals];

@@ -59,7 +59,7 @@ namespace Game.Tests.PlayMode.Presentation.Audio
                 edit.FindProperty("pitchRandom").floatValue = 0;
                 edit.FindProperty("coalesce").intValue = (int)CoalesceMode.None;
                 edit.FindProperty("cooldown").floatValue = 0;
-                edit.FindProperty("maxVoices").intValue = 40;
+                edit.FindProperty("maxVoices").intValue = 32;
                 var clips = edit.FindProperty("clips"); clips.arraySize = 2;
                 for (int i = 0; i < 2; i++) clips.GetArrayElementAtIndex(i).objectReferenceValue = Own(AudioClip.Create("SFX limit " + i, 48000, 1, 48000, false));
                 edit.ApplyModifiedPropertiesWithoutUndo();
