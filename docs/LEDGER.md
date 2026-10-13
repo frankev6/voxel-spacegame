@@ -827,6 +827,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 240 | SPEC-13 Q35: dissolve budget stops inside a brick. | Pack slot/local index into existing NextSlot; resume after the last sampled exposed cell without repeating debris or changing component layout. Start progress in request tick; duplicate requests retain progress. Required tests and Unity validation remain pending. | Tech lead |
 | 241 | SPEC-22 Q14: PWR-004 acceptance count and writer contradictions. | 14 weapons + 14 thrusters + one shield is 29 consumers; only consumer functionals carry PowerLink. PWR-004 verifies multi-module binding; Powered enable bits remain PWR-005, the specified sole writer. No extra test methods or tuning changes. | Tech lead |
 
+| 242 | SPEC-81 Q21–24: production import scope, advisory art budgets and validator mechanics. | Canonical production imports only; preserve retained placeholders, A1 warnings/A2 errors for licence/reference findings. Triangle/memory targets stay advisory. CLI exits explicitly; read-only scene scan, native generated texture formats and scoped texture memory accounting. | Tech lead |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
