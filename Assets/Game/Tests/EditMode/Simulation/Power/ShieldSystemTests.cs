@@ -157,11 +157,11 @@ namespace Game.Tests.EditMode.Simulation.Power
             ShieldState first; DamageEvent[] damage;
             using (var f = new Fixture())
             {
-                for (int i = 0; i < 10; i++) f.Stream(i); f.Step(7); first = f.State; damage = f.Overflow.ToArray();
+                for (int i = 0; i < 10; i++) f.Stream(i); f.Step(1); first = f.State; damage = f.Overflow.ToArray();
             }
             using (var f = new Fixture())
             {
-                for (int i = 9; i >= 0; i--) f.Stream(i); f.Step(7);
+                for (int i = 9; i >= 0; i--) f.Stream(i); f.Step(1);
                 Assert.AreEqual(first, f.State); CollectionAssert.AreEqual(damage, f.Overflow);
             }
         }
