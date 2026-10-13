@@ -894,6 +894,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 301 | SPEC-23 Q24: fleet leader replacement representation | Resolved: promoted root retains FleetMember with null Leader and thinks as a lone leader; followers retain slots/formations. Lowest slot then PersistentId/entity index breaks ties. Incomplete/hulk roots excluded. Invalid slot leaves prior goal. | Tech lead |
 | 302 | SPEC-23 Q25: fleet arrival envelope | Resolved: member arrival/braking radius=min(configured radius,5m), preserving lone-ship radius and real thruster control; required formation envelope is15m. | Tech lead |
 | 303 | SPEC-23 Q23 / ADR-0071: static station command composition | Resolved: AiSetup adds ShipCommand with Station AiBrain, no flight/propulsion components. Station tests exercise actual profile conversion, authored turret and power/aim/fire paths. | Tech lead |
+| 304 | SPEC-50 Q24: merchant session and numeric boundaries | Resolved: canonical stock index, finite game time, no backward-clock restock, closed sessions reject trades; nested merchant trades rejected, readonly refresh retained. Prices use specified rounding and bounded int values, quantity totals use long; finite stock overflow rejected before sale. Existing wallet/cargo sequence and refund preserved. | Tech lead |
 
 
 ## Measurements
