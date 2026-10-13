@@ -29,7 +29,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
-- **Current validation:** GAL-009/CAM-006/WPN-004/005 full EditMode 1051/0/1; PlayMode 145/1/53 exposed an asynchronous origin-read race. Fix `5bf0a47` compiles clean and all seven scene-flow tests pass. Full rerun **36784** active; do not claim full green yet. PWR-007 shields and ENC-001 contracts are prepared in the isolated lead checkout; workers continue PWR-010, PWR-008 and ECO-002. Exact handles/branches: ORCHESTRATION. Gameplay priority remains complete combat and an enemy that fights back.
+- **Latest full validation:** GAL-009/CAM-006/WPN-004/005 are complete: compile clean, **1051/0/1 EditMode and 146/0/53 PlayMode**, session 36784 exit 0. Origin reader race repaired in `5bf0a47`. Evidence `Logs/playtest/origin-combat/`. Next is WPN-006 aiming/lead; shields/status/power/economy and DMG-014 are prepared but unvalidated. Exact branches and workers: ORCHESTRATION.
 
 - **Orchestration:** Power allocation/aggregate stats (PWR-005/006), SYS-010 contracts, AI-013 formations, ECO-001 contracts and TRV-007 locks closed with clean compile and full **1027 EditMode / 145 PlayMode passed**, zero failures. Physical hulk breakup remains demonstrated; full combat/enemy behavior is still next. GAL-009 origin jobs, WPN-004/005 mounts/targeting and CAM-006 camera warp are prepared in an isolated compatible batch, pending Unity. Reuse the same three workers as standard dependencies unlock. Goal active; Editor closed. Exact dispatch/evidence: [ORCHESTRATION.md](ORCHESTRATION.md).
 

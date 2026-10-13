@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 36 | 6 | 0 | 0 | 49 | 0 | 91 | 2 |
-| M3 | 149 | 9 | 0 | 0 | 22 | 0 | 180 | 10 |
+| M2 | 36 | 4 | 0 | 0 | 51 | 0 | 91 | 4 |
+| M3 | 149 | 7 | 0 | 0 | 24 | 0 | 180 | 10 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 2 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -240,14 +240,14 @@
 | FLT-013 | Owner flight-control correction before the firing range | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, FLT-009, SPEC-03 | yes | done | astra (gpt-6) | 2026-10-12 | 1bc23e8 | Shift strafe, Ctrl boost, gentle coast, bounded assist; live Fighter verified; Q182 |
 | WPN-002 | Weapon content: definitions, blob, boot singletons | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 702c1a6 | Weapon definitions, blob and boot-owned singleton lifetime; full 968 EM /145 PM green |
 | WPN-003 | CombatHitTest | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-001, SPEC-10, AI-001, PWR-001 | yes | done | astra (gpt-6) | 2026-10-13 | acdebc2 | Burst nearest-hit queries for hulls, shields and celestial bodies; repairs f376412/528ae87; full 968 EM /145 PM green |
-| WPN-004 | WeaponInitSystem and mounts | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-002, SPEC-10, SPEC-20 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable worker implementation; lead owns serialized Unity validation |
-| WPN-005 | PlayerTargetingSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, AI-001, SPEC-20 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable worker implementation; lead owns serialized Unity validation |
-| WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | no | todo |  |  |  | partial in FND-020: manual aim and arcs / targeting, lead, autofire and required tests |
+| WPN-004 | WeaponInitSystem and mounts | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-002, SPEC-10, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | abffb45 | Canonical mount geometry and preserved reparent firing state; three required tests; full 1051 EM /146 PM passed. |
+| WPN-005 | PlayerTargetingSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, AI-001, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 2bbffb6 | Deterministic hostile target cycling, cursor targeting and input toggles; six required tests; full 1051 EM /146 PM passed. |
+| WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | yes | todo |  |  |  | partial in FND-020: manual aim and arcs / targeting, lead, autofire and required tests |
 | WPN-007 | WeaponFireSystem and the projectile store append | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-006, PWR-001 | no | todo |  |  |  | partial in FND-020: serial fire and projectile append / parallel stream flattening, power, beam delivery/pulses and full required tests; partial in VFX-004: guarded muzzle emission with overrides / parallel stream flattening, power, beams and full required tests |
 | WPN-008 | ProjectileStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-003, WPN-007, PWR-001, SPEC-13 | no | todo |  |  |  | partial in FND-020: movement, hull hits and lifetime; DMG-007 orders stepping after impact / parallel stream/compaction pipeline, homing, shields and full required tests; partial in VFX-004: guarded hull-hit emission with normal, velocity and overrides / parallel pipeline, homing, shields and full required tests |
 | WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | no | todo |  |  |  |  |
 | WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | no | todo |  |  |  | partial in FND-020: explosion requests into damage / shields, audio and required tests; partial in VFX-004: guarded explosion visual event / shields, audio and required tests |
-| WPN-011 | CombatGridSetup and turret visuals | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, PWR-001, ABL-001 | no | todo |  |  |  |  |
+| WPN-011 | CombatGridSetup and turret visuals | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, PWR-001, ABL-001 | yes | todo |  |  |  |  |
 | WPN-012 | Combat scenarios and determinism | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-009, WPN-010, WPN-011, SPEC-13, SPEC-22 | no | todo |  |  |  |  |
 | WPN-013 | Weapon performance gates | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, TST-001 | no | todo |  |  |  |  |
 | WPN-014 | Weapon balance pass | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, SPEC-72 | no | todo |  |  |  |  |
@@ -326,7 +326,7 @@
 | GAL-006 | Star-system content job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-002, GAL-005 | no | todo |  |  |  |  |
 | GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | no | todo |  |  |  |  |
 | GAL-008 | GalaxyService, ticker and bridge system | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, FND-001 | no | todo |  |  |  |  |
-| GAL-009 | OriginRebaseSystem | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-001, SPEC-02 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead floating-origin producer and placement; unlock live AI anchors |
+| GAL-009 | OriginRebaseSystem | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-001, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | 5bf0a47 | Asynchronous origin capture/rebase/placement and dependent consumers; full 1051 EM /146 PM passed; 5000-root p95 0.2959 ms. |
 | GAL-010 | GLXY save participant | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, PERS-001 | no | todo |  |  |  |  |
 | GAL-011 | Galaxy map model | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-008 | no | todo |  |  |  |  |
 | GAL-012 | M3 galaxy content | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-003, SPEC-72 | no | todo |  |  |  |  |
@@ -470,7 +470,7 @@
 | HUD-018 | Ship editor host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, EDT-001 | no | todo |  |  |  |  |
 | HUD-019 | Loading and dock screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-010, SYS-001, ECO-001, EDT-001 | no | todo |  |  |  |  |
 | HUD-020 | Full-screen layout regression suite | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-003, HUD-004, HUD-005, HUD-006, HUD-007, HUD-011, HUD-012, HUD-013, HUD-014, HUD-016, HUD-017, HUD-018, HUD-019 | no | todo |  |  |  |  |
-| CAM-006 | Origin warp and teleport cut | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, GAL-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead camera origin-warp integration alongside GAL-009; isolated while Unity validates prior batch |
+| CAM-006 | Origin warp and teleport cut | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, GAL-001 | yes | done | astra (gpt-6) | 2026-10-13 | 710a668 | Origin warp preserves framing and residual teleport cuts; five required tests; full 1051 EM /146 PM passed. |
 | CAM-007 | Occlusion pull-in | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, PHY-001 | yes | todo |  |  |  |  |
 | CAM-009 | Editor orbit mode | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-005 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 21e43a1 | Editor orbit, bounded pan/zoom, snap/focus and suppression; 6 required tests; full batch 901 EM / 128 PM, zero failures |
 | CAM-010 | Map view transform | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 014ed0b | Map transforms, zoom anchoring, framing and clamps; 6 required tests; full batch 901 EM / 128 PM, zero failures |
@@ -961,6 +961,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Origin, camera and targeting full regression green — astra (gpt-6)
+
+- GAL-009, CAM-006, WPN-004 and WPN-005 closed after compile clean and full **1051/0/1 EditMode, 146/0/53 PlayMode**, session 36784 exit 0. Evidence `Logs/playtest/origin-combat/{editmode-final.xml,playmode-final.xml,compile-race-repair.log}`. Origin race repair `5bf0a47` keeps simulation readers asynchronous and presentation reads synchronized.
+- Origin advisory measurement: 5000 roots median **0.2661 ms**, p95 **0.2959 ms** against 0.5 ms target. Perf PlayMode passed; wrapper exit 1 came from its empty EditMode filter, not a failed record. Zero optimization passes.
+- Tests: GAL-009 spec-required: 11 (10 functional + 1 perf), extra: 0; CAM-006 spec-required: 5, extra: 0; WPN-004 spec-required: 3, extra: 0; WPN-005 spec-required: 6, extra: 0. Preserved QualitySettings restored; inactive runner artifacts removed. No enemy-combat demonstration claimed yet.
+- Next: WPN-006 aiming/lead; shield/status/power-balance/encounter/economy batch plus three DMG-014 scenarios prepared for serialized validation.
 
 ### 2026-10-13 — Origin integration race repaired; shield batch prepared — astra (gpt-6)
 
