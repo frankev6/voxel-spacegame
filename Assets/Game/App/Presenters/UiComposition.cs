@@ -52,6 +52,9 @@ namespace Game.App.Presenters
                 Game.Core.Services.Get<Game.App.Settings.SettingsService>(), Game.Core.Services.Get<Game.Input.InputService>());
             ui.Register(new SettingsView(SettingsModel, settingsPresenter));
             settingsPresenter.Bind();
+            pausePresenter = new PausePresenter(ui, PauseModel, Game.Core.Services.Get<IGameFlow>(), ShowSaveSlots, ShowSettings);
+            ui.Register(new PauseView(PauseModel, pausePresenter));
+            pausePresenter.Bind();
             EventBus<SessionReset>.Subscribe(OnSessionReset);
         }
         public UIScreen MainMenu => ui.Navigator.Get<MainMenuView>();
@@ -73,13 +76,9 @@ namespace Game.App.Presenters
             var saves = Game.Core.Services.Get<SaveService>();
             var menu = new MainMenuPresenter(ui, MainMenuModel, session, saves,
                 () => showSlots(SaveSlotsMode.Load), openLab, showSettings);
-            var pause = new PausePresenter(ui, PauseModel, session, showSlots, showSettings);
             ui.Register(new MainMenuView(MainMenuModel, menu));
-            ui.Register(new PauseView(PauseModel, pause));
             menuPresenter = menu;
-            pausePresenter = pause;
             menu.Bind();
-            pause.Bind();
         }
         internal void BindSceneRoots(IHudRadarSource radar, Func<string, string> bindingDisplay, IShipEditorCommands editorCommands)
         {

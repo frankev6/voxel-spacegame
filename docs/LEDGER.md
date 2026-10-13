@@ -456,7 +456,7 @@
 | HUD-003 | Main menu and new game | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: menu view and service-backed presenter with name prompt/continue/quit / composition hookup and layout acceptance remain |
 | HUD-004 | Save and load slots | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, PERS-002, PERS-005, PERS-006, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | a8d00e7a/9e5db398: view + persistent composition; 5 required screen and4 boot checks pass; session-race review repaired b05b62f; visible menu routing pending |
 | HUD-005 | Settings screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, UI-012, UI-013, FND-004, INP-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Presentation worker next after bounded HUD-004 review; ADR-0072/Q327 construction split, lead owns actual navigation |
-| HUD-006 | Pause screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: authored pause view and service-backed presenter/save eligibility/confirmation / composition hookup, key hints and acceptance remain |
+| HUD-006 | Pause screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: authored pause view and service-backed presenter/save eligibility/confirmation / pause composition hookup authored / key hints and acceptance remain |
 | HUD-007 | Flight HUD view and layout | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: view-model binding and Esc-to-pause route / HUD layout, data integration and acceptance remain |
 | HUD-008 | HudSnapshotSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, PWR-001, WPN-001, ABL-001, SYS-001, GAL-001, FLT-001, VOX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 13c85bbd | Review repairs complete: duplicate players, frozen hulk meters and interactable-body radar; nine focused checks pass |
 | HUD-009 | HudSyncSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-008, HUD-007, TRV-001, ENC-001 | no | todo |  |  |  |  |
@@ -1032,6 +1032,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — HUD-002 pause navigation integration — astra (gpt-6)
+
+- App composition now creates/binds the real PausePresenter/View with SaveSlots and Settings routes. Temporary flight/editor root Back opens PauseView; bridge no longer registers the obsolete resume-only modal. Menu setup reuses the same pause ownership. Full HUD/editor roots and main-menu destination remain open.
+- Changes authored, not yet compiled/live-verified; combine validation with pending HUD-005 rebind repair. No repeated test run. Test count: spec-required: existing HUD-002/005/006 acceptance pending, extra: 0. Previous turn integrated settings and fixed belt boot validation (progress).
 
 ### 2026-10-13 — HUD-005 integration and boot repair — astra (gpt-6)
 

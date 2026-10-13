@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Settings/pause integration pending acceptance:** settings04cf34fd/9dfc8bc and composition2b8df45a compile; two rebind failures need repair (raw runner results duplicated, no accepted XML). Real pause routes to save/load/settings are now authored, awaiting combined validation. Belt boot rejection repaired d289f13f using canonical block_hull. Full menu/HUD/editor roots remain incomplete; no new playable acceptance claim.
+
 - **Galaxy lanes accepted:** GAL-00503a6cec6 connects systems, preserves authored gates, builds sorted adjacency and freezes version1 hash; six focused checks pass and compile clean. Per-system bodies/service remain next generation work. Settings delivery plus review fix await lead integration; world/encounter workers continue.
 
 - **Galaxy layout accepted:** GAL-00442ecb93f builds deterministic persistent system layout and authored body parameters; clean compile, five focused checks pass. Lane graph/hash are GAL-005 next; world gameplay service is not yet implemented. Three workers continue real world/encounter content and settings.

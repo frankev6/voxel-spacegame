@@ -26,7 +26,7 @@ namespace Game.App.Boot
         {
             this.flow = flow; this.pause = pause; navigator = ui.Navigator;
             sceneRoot = new M1SceneRootView(); blocker = new M1InputBlockView();
-            ui.Register(sceneRoot); ui.Register(new M1PauseView()); ui.Register(blocker);
+            ui.Register(sceneRoot); ui.Register(blocker);
             sceneContext = InputContext.None; navigator.SetRoot(sceneRoot, sceneContext);
         }
         internal void Unbind() { navigator = null; flow = null; pause = null; sceneRoot = null; blocker = null; }
