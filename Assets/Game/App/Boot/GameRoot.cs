@@ -49,6 +49,7 @@ namespace Game.App.Boot
             float dt = Time.unscaledDeltaTime;
             Composition?.Session?.Tick(dt);
             Composition?.Save?.Autosave.Update(dt);
+            Composition?.Screens?.Tick();
             Composition?.UI?.Tick(dt);
             Composition?.Settings?.Tick(dt);                      // debounced save
         }

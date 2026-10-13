@@ -24,7 +24,7 @@ namespace Game.Tests.PlayMode.Boot
     /// Each test that tears the boot down boots again in TearDown, so later tests see a normal game.</summary>
     public sealed class CompositionTests
     {
-        static readonly string[] ExpectedSteps = { "1 settings", "2 content", "3 input", "4 audio", "5 pause", "6 save", "7 flow", "8 session", "9 ui", "11 camera", "12 fx", "14 settings applier", "15 snapshot", "16 dev runtime" };
+        static readonly string[] ExpectedSteps = { "1 settings", "2 content", "3 input", "4 audio", "5 pause", "6 save", "7 flow", "8 session", "9 ui", "10 ui composition", "11 camera", "12 fx", "14 settings applier", "15 snapshot", "16 dev runtime" };
 
         string tempRoot;
 
@@ -57,7 +57,7 @@ namespace Game.Tests.PlayMode.Boot
             var composition = GameRoot.Instance.Composition;
             CollectionAssert.AreEqual(ExpectedSteps, composition.StepLog, "SPEC-01 §5.2 order");
             var built = composition.DisposeStack.Select(d => d.GetType().Name).ToList();
-            var expected = new List<string> { "SettingsService", "ContentService", "RenderConfigLifetime", "BlueprintLibrary", "RegistryLifetime", "InputService", "AudioService", "PauseService", "SaveService", "SceneFlow", "GameSession", "FiringRangeService", "InputServiceBridge", "UIRoot", "CameraRigService", "SettingsApplier", "DevRuntimeHost" };
+            var expected = new List<string> { "SettingsService", "ContentService", "RenderConfigLifetime", "BlueprintLibrary", "RegistryLifetime", "InputService", "AudioService", "PauseService", "SaveService", "SceneFlow", "GameSession", "FiringRangeService", "InputServiceBridge", "UIRoot", "UiComposition", "CameraRigService", "SettingsApplier", "DevRuntimeHost" };
             if (SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null) expected.Insert(expected.IndexOf("SettingsApplier"), "FxLifetime");
             CollectionAssert.AreEqual(expected, built);
             yield return Shutdown();

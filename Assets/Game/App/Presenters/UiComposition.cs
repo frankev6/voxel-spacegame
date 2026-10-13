@@ -112,7 +112,7 @@ namespace Game.App.Presenters
             menuPresenter?.Dispose();
             if (rootsBound) flow.SetRootScreens(null);
         }
-        // TODO(HUD-002): install in GameComposition only after real navigation/editor/HUD bindings preserve
-        // existing playable behavior; remove the M1 adapter, connect Tick, then run the four required checks.
+        // TODO(HUD-002): install real navigation/editor/HUD bindings before replacing the M1 adapter,
+        // then run the four required root/session acceptance checks.
     }
 }

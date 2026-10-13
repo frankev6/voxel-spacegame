@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.App.Flow;
+using Game.App.Presenters;
 using Game.App.Session;
 using Game.Core.Flow;
 using Game.App.Services;
@@ -51,6 +52,7 @@ namespace Game.App.Boot
         internal CameraRigService Camera { get; private set; }
         internal FxRig Fx { get; private set; }
         internal UIRoot UI { get; private set; }
+        internal UiComposition Screens { get; private set; }
         internal PauseService Pause { get; private set; }
         internal SaveService Save { get; private set; }
         internal GameConfigDefinition GameConfig { get; private set; }
@@ -155,6 +157,12 @@ namespace Game.App.Boot
             world.GetExistingSystemManaged<SceneNavigationBridgeSystem>().Bind(Flow, Pause, UI);
             inputBridge.BindBack(UI.HandleBackPressed);
             Step("9 ui");
+
+            // 10. App-lifetime UI models and implemented presenter bindings (HUD-002).
+            Screens = Push(new UiComposition(UI));
+            Register(Screens);
+            // TODO(HUD-002): install real destination/editor bindings and replace the M1 adapter before SetRootScreens.
+            Step("10 ui composition");
 
             // 9.1 Flight input uses the live UI pointer gate; ADR-0047 supplies scene roots through the navigator.
             world.GetExistingSystemManaged<PlayerInputSampleSystem>().Bind(Input, UI);
@@ -268,6 +276,7 @@ namespace Game.App.Boot
                 catch (Exception e) { GameLog.Exception(LogCategories.Boot, e, "GameComposition.Dispose " + DisposeStack[i].GetType().Name); }
             }
             DisposeStack.Clear();
+            Screens = null; UI = null; Session = null;
             Settings = null; Content = null; Blueprints = null; Registry = null; Input = null; Audio = null; Camera = null; Fx = null; Pause = null; Save = null; GameConfig = null; Flow = null;
             Game.Core.Services.Reset();
         }
