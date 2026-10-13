@@ -19,6 +19,8 @@ namespace Game.Tests.PlayMode.Presentation
         {
             yield return Run(Game.Session.NewGameAsync(new NewGameArgs("Harness", 42, false, ContentId.None)));
             yield return Until(() => Game.Input.CurrentContext == InputContext.Flight && Game.Camera.HasTarget, "Player camera ready");
+            // SPEC-62 applies impact shake after framing; this test measures the unshaken framing contract.
+            Game.Camera.ApplySettings(new Game.Presentation.Data.CameraSettings { MouseSensitivity = 1, ShakeScale = 0 });
             Assert.AreEqual("ship_fighter", Game.Session.Fleet.Flagship.SourceBlueprint.Value);
             Assert.AreEqual(1005, Game.Session.Fleet.Flagship.Structure.SolidCellCount);
             Host.Input.SetMouse(640, 360, "none", false, scroll, 0, 0);

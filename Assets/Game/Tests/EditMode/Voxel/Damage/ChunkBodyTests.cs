@@ -9,6 +9,7 @@ using Game.Voxel.PhysicsBody;
 using Game.Voxel.PresentationStreams;
 using NUnit.Framework;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -139,28 +140,48 @@ namespace Game.Tests.EditMode.Voxel.Damage
             Assert.AreEqual(80, f.Streams.Data->Current.ChunksCreated);
         }
 
+        static void CheckNoLeaks(Action exercise)
+        {
+            var previous = NativeLeakDetection.Mode;
+            NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace;
+            try
+            {
+                exercise(); // Warm up shared Unity/type resources before establishing the leak baseline.
+                UnsafeUtility.CheckForLeaks();
+                exercise();
+                Assert.AreEqual(0, UnsafeUtility.CheckForLeaks(), "Chunk lifetime/unload must release owned native allocations.");
+            }
+            finally { NativeLeakDetection.Mode = previous; }
+        }
+
         [Test] public void Lifetime_DisablesAndReleasesBlob()
         {
-            using var f = new Fixture(); f.AddIsland(); f.Run();
-            using var q = f.Chunks(); var entity = q.GetSingletonEntity(); var body = f.Em.GetComponentData<ChunkBody>(entity);
-            f.Tick = body.DissolveStartTick + 1; f.Run(); Assert.Less(f.Em.GetComponentData<LocalTransform>(entity).Scale, 1);
-            f.Tick = body.EndTick; f.Run(); Assert.IsTrue(f.Em.HasComponent<Disabled>(entity));
-            Assert.AreEqual(0, f.Em.GetComponentData<ChunkBody>(entity).Live);
-            Assert.IsFalse(f.Em.GetComponentData<PhysicsCollider>(entity).Value.IsCreated);
-            Assert.IsFalse(f.Em.GetComponentData<ChunkColliderBlob>(entity).Value.IsCreated);
-            f.Frame(); Assert.AreEqual(1, f.RetiredCount); f.Frame(); Assert.AreEqual(1, f.RetiredCount);
-            f.Frame(); Assert.AreEqual(0, f.RetiredCount);
+            CheckNoLeaks(() =>
+            {
+                using var f = new Fixture(); f.AddIsland(); f.Run();
+                using var q = f.Chunks(); var entity = q.GetSingletonEntity(); var body = f.Em.GetComponentData<ChunkBody>(entity);
+                f.Tick = body.DissolveStartTick + 1; f.Run(); Assert.Less(f.Em.GetComponentData<LocalTransform>(entity).Scale, 1);
+                f.Tick = body.EndTick; f.Run(); Assert.IsTrue(f.Em.HasComponent<Disabled>(entity));
+                Assert.AreEqual(0, f.Em.GetComponentData<ChunkBody>(entity).Live);
+                Assert.IsFalse(f.Em.GetComponentData<PhysicsCollider>(entity).Value.IsCreated);
+                Assert.IsFalse(f.Em.GetComponentData<ChunkColliderBlob>(entity).Value.IsCreated);
+                f.Frame(); Assert.AreEqual(1, f.RetiredCount); f.Frame(); Assert.AreEqual(1, f.RetiredCount);
+                f.Frame(); Assert.AreEqual(0, f.RetiredCount);
+            });
         }
 
         [Test] public void Unload_ReleasesBlobsWithoutGameplay()
         {
-            using var f = new Fixture(); f.AddIsland(); f.Run();
-            using var chunks = f.Chunks(true); f.Em.DestroyEntity(chunks);
-            using var active = f.Em.CreateEntityQuery(typeof(GameplayActive)); f.Em.DestroyEntity(active);
-            f.Frame(); Assert.AreEqual(1, f.RetiredCount);
-            using var owners = f.Em.CreateEntityQuery(typeof(ChunkColliderBlob)); Assert.IsTrue(owners.IsEmptyIgnoreFilter);
-            for (int i = 0; i < 4; i++) f.Frame();
-            Assert.AreEqual(0, f.RetiredCount);
+            CheckNoLeaks(() =>
+            {
+                using var f = new Fixture(); f.AddIsland(); f.Run();
+                using var chunks = f.Chunks(true); f.Em.DestroyEntity(chunks);
+                using var active = f.Em.CreateEntityQuery(typeof(GameplayActive)); f.Em.DestroyEntity(active);
+                f.Frame(); Assert.AreEqual(1, f.RetiredCount);
+                using var owners = f.Em.CreateEntityQuery(typeof(ChunkColliderBlob)); Assert.IsTrue(owners.IsEmptyIgnoreFilter);
+                for (int i = 0; i < 4; i++) f.Frame();
+                Assert.AreEqual(0, f.RetiredCount);
+            });
         }
     }
 }
