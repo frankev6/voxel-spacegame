@@ -1,0 +1,23 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="save-slot-row" class="list__item save-slot-row" picking-mode="Ignore">
+        <ui:VisualElement class="row" picking-mode="Ignore">
+            <ui:Label name="save-slot-title" class="save-slot-title text-m text-ellipsis" picking-mode="Ignore">
+                <Bindings><ui:DataBinding property="text" data-source-path="Title" binding-mode="ToTarget" /></Bindings>
+            </ui:Label>
+            <ui:Label name="save-slot-autosave" text="Autosave" class="text-s text-muted save-slot-tag" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement class="row" picking-mode="Ignore">
+            <ui:Label name="save-slot-location" class="grow text-s text-ellipsis" picking-mode="Ignore">
+                <Bindings><ui:DataBinding property="text" data-source-path="LocationText" binding-mode="ToTarget" /></Bindings>
+            </ui:Label>
+        </ui:VisualElement>
+        <ui:VisualElement class="row" picking-mode="Ignore">
+            <ui:Label name="save-slot-timestamp" class="grow text-xs text-muted text-mono" picking-mode="Ignore">
+                <Bindings><ui:DataBinding property="text" data-source-path="TimestampText" binding-mode="ToTarget" /></Bindings>
+            </ui:Label>
+            <ui:Label name="save-slot-playtime" class="text-xs text-muted text-mono" picking-mode="Ignore">
+                <Bindings><ui:DataBinding property="text" data-source-path="PlaytimeText" binding-mode="ToTarget" /></Bindings>
+            </ui:Label>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,22 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../../Theme/screens/save-slots.uss" />
+    <ui:VisualElement class="save-slots-screen" picking-mode="Ignore">
+        <ui:VisualElement name="save-slots-panel" class="panel save-slots-panel" picking-mode="Position">
+            <ui:VisualElement class="panel__header" picking-mode="Ignore">
+                <ui:Label name="save-slots-title" text="Load game" class="panel__title text-display" picking-mode="Ignore" />
+                <ui:Button name="save-slots-close" text="Close" class="btn btn--ghost" />
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__body save-slots-body" picking-mode="Ignore">
+                <ui:Label name="save-slots-empty" class="list__empty" picking-mode="Ignore" />
+                <ui:ListView name="save-slots-list" class="list save-slots-list" item-template="project://database/Assets/Game/UI/Views/Uxml/SaveSlotItem.uxml?fileID=9197481963319205126&amp;guid=030772c210e14e119e41765ffb2dcf27&amp;type=3#SaveSlotItem" fixed-item-height="88" virtualization-method="FixedHeight" selection-type="Single" show-border="false" show-add-remove-footer="false" />
+            </ui:VisualElement>
+            <ui:VisualElement name="save-slots-actions" class="panel__footer save-slots-actions" picking-mode="Ignore">
+                <ui:Button name="save-slots-delete" text="Delete" class="btn btn--danger" />
+                <ui:VisualElement class="spacer" picking-mode="Ignore" />
+                <ui:Button name="save-slots-new" text="New save" class="btn btn--secondary" />
+                <ui:Button name="save-slots-save" text="Overwrite" class="btn btn--primary" />
+                <ui:Button name="save-slots-load" text="Load" class="btn btn--primary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
