@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 113 | 10 | 0 | 0 | 57 | 0 | 180 | 9 |
+| M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
+| M3 | 112 | 11 | 0 | 0 | 57 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -1034,6 +1034,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Settings checkpoint merged, workers recycled — astra (gpt-6)
+
+- Settings/pause compiled checkpoint and accepted five-case repair merged locally to main89816018; production root/menu acceptance remains open. ECO-009 claimedb1c96474 and FND-012 claimed3582c4c0, dispatched to existing power/presentation workers. Combat worker reviews delivered GAL-0128dc89fbc; no duplicate threads. Test count: spec-required: 5 accepted above, extra: 0; no additional Unity run.
+- Ledger sync and documentation checks clean. No active Unity operation; unrelated QualitySettings delta and orphan test-folder metadata remain excluded. Lead next integrates world/travel/encounter deliveries and implements GAL-007/008 needed for real campaign generation. Previous turn made settings acceptance and local integration progress.
 
 ### 2026-10-13 — HUD-005 settings repair accepted, navigation checkpoint — astra (gpt-6)
 
