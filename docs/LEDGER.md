@@ -1063,6 +1063,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-006 transitions / NAR-016 repair integrated — astra (gpt-6)
+
+- 6f62e17c adds T2Streamer ordered body-distance checks, configured spawn cap, unload hysteresis and capture-before-despawn. Retired sources remain until roots/read pins are gone; the same body cannot reload before retirement. Writable clones transfer to delta even during partial spawn, preserving subsequent owner writeback (review edge identified by presentation worker).
+- NAR-016 c9671a1e integrated88b5a98: actual root cause was fresh-definition conversion discarding compiled wrappers plus territory actions rewritten in two passes. Preserve fields in place; compile copies and copy only changed wrappers. Existing deterministic/compiler cases strengthened, zero extra cases. Actual generation raw-byte rerun still required; no acceptance claim.
+- SYS-006 loader/core-loss/scene wiring and five required cases remain (spec-required: 5, extra: 0). Source batch uncompiled, no Unity active. Economy SYS-005 active248; presentation bounded lifetime review active213; combat delivery235 integration wait. Previous turn authored source spawning (progress).
+
 ### 2026-10-13 — SYS-006 body source/spawn ownership authored — astra (gpt-6)
 
 - 6ee18d76 adds BodyGridSpawner: cache procedural templates/seeds for loaded-system lifetime; borrow immutable blueprints through the canonical blueprint spawn path; register mutable clones for small destructible bodies and saved delta structures. Spawn static stations/hulks with body identity, interaction, faction, weapon-profile AI and immunity tags. Release waits for root destruction/read pins; transferred delta structures are never locally disposed.

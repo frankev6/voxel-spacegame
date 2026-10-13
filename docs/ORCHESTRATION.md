@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-016 graph stability | Repair unchanged compilation replacing live serialized graphs; SYS-005 still waits | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | integration wait | Graph-stability delivery c9671a1e integrated88b5a98; awaiting focused acceptance | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | SYS-005 | Claimed aac4a2f6; analytic body orbit implementation dispatched | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | source-lifetime review | Read-only review of lead SYS-006 spawn/capture helpers; no frontier implementation | HUD-003/006/007 once ready |
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **T2 transitions / converter repair integrated:**6f62e17c adds ordered bounded loads, hysteresis, capture-before-retire and delayed source release; unfinished writable sources transfer to delta before retirement. NAR-016 worker c9671a1e integrated88b5a98 (preserve compiler graphs during field writes/selective recompilation). All remain uncompiled/unaccepted pending loader/events/scene wiring and focused batch. No Unity active. SYS-005 worker active248; lifetime review active213; combat delivery235 awaits acceptance/next ready work. Previous turn spawn helper was progress.
 
 - **Body-grid spawn path authored:** SYS-0066ee18d76 adds procedural source caching, writable small-body clones, delta sources, blueprint borrows, stationary grid profiles, faction/interaction tags and hulk restoration. Ownership capture2e2c1117 remains unwired; hysteresis/events/scene composition/five cases still open. No compile or acceptance claim; no Unity active. Combat repairs converter stability, economy implements SYS-005, presentation assigned bounded read-only source-lifetime review. Previous turn authored capture (progress).
 
