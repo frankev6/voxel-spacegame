@@ -62,7 +62,7 @@ namespace Game.Editor.Migration.Narrative
             => Placements.TryGetValue(legacyId, out var value) ? value : throw new FormatException("Missing SPEC-42 placement: " + legacyId);
 
         internal static StoryBeatDefinition Write(LegacyAssetWriter writer, ConvertedEncounter encounter,
-            bool nested, Func<string, ContentDefinition> resolve)
+            bool nested, Func<string, ContentDefinition> resolve, IReadOnlyList<string> onStart = null)
         {
             var placement = GetPlacement(encounter.Source.Id);
             if (placement.BeatId != encounter.BeatId || encounter.Nodes.Count == 0)
@@ -75,7 +75,7 @@ namespace Game.Editor.Migration.Narrative
                     || placement.Trigger != BeatTrigger.Hail && !(location is AuthoredStarSystemDefinition))
                     throw new FormatException("Missing typed placement reference: " + placement.Where[0]);
             }
-            return writer.CreateOrUpdate<StoryBeatDefinition>("Beats", encounter.BeatId, so => {
+            return writer.CreateOrUpdateFields<StoryBeatDefinition>("Beats", encounter.BeatId, so => {
                 so.FindProperty("trigger").intValue = (int)(nested ? BeatTrigger.Manual : placement.Trigger);
                 so.FindProperty("where.starSystem").objectReferenceValue = location as AuthoredStarSystemDefinition;
                 so.FindProperty("where.hailEncounter").objectReferenceValue = location as EncounterDefinition;
@@ -86,11 +86,10 @@ namespace Game.Editor.Migration.Narrative
                 so.FindProperty("repeat").intValue = (int)placement.Repeat;
                 so.FindProperty("firstVisitOnly").boolValue = placement.FirstVisitOnly;
                 so.FindProperty("yarnNode").stringValue = encounter.Nodes[0].Title;
-                Strings(so.FindProperty("onStart.source"), Array.Empty<string>());
+                Strings(so.FindProperty("onStart.source"), onStart ?? Array.Empty<string>());
                 Strings(so.FindProperty("onComplete.source"), Array.Empty<string>());
                 so.FindProperty("debug").boolValue = encounter.BeatId.StartsWith("beat_debug_", StringComparison.Ordinal);
-                // TODO(NAR-016): territory trigger action lists extend onStart when trigger DTOs are converted.
-                // TODO(QST-002): compile/bind the authored wrappers through the real owner implementation.
+                // Imports compile the sources; unchanged writes retain the compiler-owned graphs.
             }, out _);
         }
         internal static FactCatalogDefinition WriteFacts(LegacyAssetWriter writer, IReadOnlyCollection<FactDeclaration> facts)

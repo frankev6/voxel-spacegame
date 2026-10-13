@@ -304,7 +304,7 @@ namespace Game.Editor.Migration.Narrative
         }
         static void WriteQuest(LegacyAssetWriter writer, Quest quest)
         {
-            writer.CreateOrUpdate<QuestDefinition>("Quests", quest.Id, so => {
+            writer.CreateOrUpdateFields<QuestDefinition>("Quests", quest.Id, so => {
                 so.FindProperty("title").stringValue = quest.Title; so.FindProperty("shortDescription").stringValue = quest.Short;
                 so.FindProperty("description").stringValue = quest.Description; so.FindProperty("kind").intValue = (int)quest.Kind; so.FindProperty("autoTrack").boolValue = quest.AutoTrack;
                 var stages = so.FindProperty("stages"); stages.arraySize = quest.Stages.Count;
@@ -332,7 +332,7 @@ namespace Game.Editor.Migration.Narrative
         }
         static void WriteBeat(LegacyAssetWriter writer, Beat beat)
         {
-            writer.CreateOrUpdate<StoryBeatDefinition>("Beats", beat.Id, so => {
+            writer.CreateOrUpdateFields<StoryBeatDefinition>("Beats", beat.Id, so => {
                 so.FindProperty("trigger").intValue = (int)beat.Trigger; so.FindProperty("firstVisitOnly").boolValue = beat.FirstVisit;
                 so.FindProperty("where.bodyTags").arraySize = beat.Tag.Length == 0 ? 0 : 1;
                 if (beat.Tag.Length != 0) so.FindProperty("where.bodyTags").GetArrayElementAtIndex(0).stringValue = beat.Tag;

@@ -49,6 +49,7 @@ namespace Game.Tests.EditMode.Editor.Narrative
         }
         [UnityTest] public IEnumerator EditedSource_Recompiles()
         {
+            long[] ids = ManagedIds(asset);
             using (var so = new SerializedObject(asset))
             { so.FindProperty("condition.source").stringValue = "false"; so.ApplyModifiedPropertiesWithoutUndo(); }
             AssetDatabase.SaveAssetIfDirty(asset);
@@ -60,16 +61,34 @@ namespace Game.Tests.EditMode.Editor.Narrative
             Assert.IsInstanceOf<BoolLiteral>(saved.FindProperty("condition.root").managedReferenceValue);
             Assert.IsFalse(saved.FindProperty("condition.root.value").boolValue, "Graph changed to the edited false literal.");
             Assert.IsFalse(EditorUtility.IsDirty(loaded), "Compilation saved the updated stamp and graph.");
+            long[] after = ManagedIds(loaded);
+            Assert.AreEqual(ids[1], after[1], "Current expression graph is retained beside the edited condition.");
+            Assert.AreEqual(ids[2], after[2], "Current effect graph is retained beside the edited condition.");
         }
         [UnityTest] public IEnumerator UnchangedSource_NotDirtied()
         {
-            byte[] before = File.ReadAllBytes(Path); string guid = AssetDatabase.AssetPathToGUID(Path);
+            byte[] before = File.ReadAllBytes(Path), meta = File.ReadAllBytes(Path + ".meta");
+            string guid = AssetDatabase.AssetPathToGUID(Path);
             Assert.IsFalse(EditorUtility.IsDirty(asset));
             AssetDatabase.ImportAsset(Path, ImportAssetOptions.ForceUpdate);
             yield return null;
             var loaded = AssetDatabase.LoadAssetAtPath<LogicCompileFixtureDefinition>(Path);
             Assert.IsFalse(EditorUtility.IsDirty(loaded)); Assert.IsFalse(loaded.Condition.IsStale);
             Assert.AreEqual(guid, AssetDatabase.AssetPathToGUID(Path)); CollectionAssert.AreEqual(before, File.ReadAllBytes(Path));
+            long[] ids = ManagedIds(loaded); object[] roots = ManagedRoots(loaded);
+            for (int pass = 0; pass < 2; pass++)
+            {
+                var report = LogicCompilePostprocessor.RecompileAll(ContentDatabaseBuilder.Rebuild(), Root);
+                Assert.AreEqual(0, report.ErrorCount, report.ToText());
+                Assert.IsFalse(EditorUtility.IsDirty(loaded));
+                CollectionAssert.AreEqual(ids, ManagedIds(loaded));
+                var after = ManagedRoots(loaded);
+                for (int i = 0; i < roots.Length; i++) Assert.AreSame(roots[i], after[i]);
+                // A later writer saves the live object, exposing graph replacement that a dirty-only check misses.
+                EditorUtility.SetDirty(loaded); AssetDatabase.SaveAssetIfDirty(loaded);
+                CollectionAssert.AreEqual(before, File.ReadAllBytes(Path));
+                CollectionAssert.AreEqual(meta, File.ReadAllBytes(Path + ".meta"));
+            }
         }
         [Test] public void RecompileAll_ClearsStale()
         {
@@ -93,6 +112,27 @@ namespace Game.Tests.EditMode.Editor.Narrative
             Assert.IsInstanceOf<GiveCreditsEffect>(effect.managedReferenceValue);
             Assert.AreEqual(2, effect.FindPropertyRelative("arguments.Integers").GetArrayElementAtIndex(0).FindPropertyRelative("value").intValue);
             Assert.IsFalse(EditorUtility.IsDirty(asset)); Assert.IsFalse(EditorUtility.IsDirty(encounter));
+            using (var edited = new SerializedObject(asset))
+            { edited.FindProperty("condition.source").stringValue = "1 +"; edited.ApplyModifiedPropertiesWithoutUndo(); }
+            var failed = LogicCompilePostprocessor.RecompileAll(ContentDatabaseBuilder.Rebuild(), Root);
+            Assert.Greater(failed.ErrorCount, 0); Assert.IsTrue(asset.Condition.HasErrors); Assert.IsFalse(asset.Condition.IsStale);
+            byte[] failedBytes = File.ReadAllBytes(Path);
+            var repeated = LogicCompilePostprocessor.RecompileAll(ContentDatabaseBuilder.Rebuild(), Root);
+            Assert.AreEqual(failed.ErrorCount, repeated.ErrorCount, "Current failed wrappers still return their diagnostics.");
+            CollectionAssert.AreEqual(failedBytes, File.ReadAllBytes(Path));
+        }
+
+        static long[] ManagedIds(LogicCompileFixtureDefinition owner)
+        {
+            using var so = new SerializedObject(owner);
+            return new[] { so.FindProperty("condition.root").managedReferenceId, so.FindProperty("progress.root").managedReferenceId,
+                so.FindProperty("effects.effects").GetArrayElementAtIndex(0).managedReferenceId };
+        }
+        static object[] ManagedRoots(LogicCompileFixtureDefinition owner)
+        {
+            using var so = new SerializedObject(owner);
+            return new[] { so.FindProperty("condition.root").managedReferenceValue, so.FindProperty("progress.root").managedReferenceValue,
+                so.FindProperty("effects.effects").GetArrayElementAtIndex(0).managedReferenceValue };
         }
     }
 }

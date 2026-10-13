@@ -96,7 +96,8 @@ namespace Game.Editor.Migration.Narrative
             plan.Quests?.CheckTypes(plan.Root);
             var writer = new LegacyAssetWriter(plan.Root, new MigrationManifest(), force, report);
             foreach (var encounter in plan.Encounters)
-                LegacyBeatWriter.Write(writer, encounter, plan.Nested.Contains(encounter.BeatId), id => plan.References[id]);
+                LegacyBeatWriter.Write(writer, encounter, plan.Nested.Contains(encounter.BeatId), id => plan.References[id],
+                    plan.Quests?.Beats.FirstOrDefault(beat => beat.Id == encounter.BeatId)?.OnStart);
             plan.Quests?.Write(writer, plan.Root, report);
             LegacyBeatWriter.WriteFacts(writer, plan.Facts);
             if (report.HasErrors) throw new InvalidDataException(report.ToText());

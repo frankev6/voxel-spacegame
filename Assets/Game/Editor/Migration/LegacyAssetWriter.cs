@@ -53,19 +53,22 @@ namespace Game.Editor.Migration
                 report.Info("MIG-I011", path, "", "Kept hand-edited asset.");
                 Record(path, outcome = WriteOutcome.SkippedHandEdited); return (T)existing;
             }
+            if (preserveExistingFields && existing != null)
+            {
+                byte[] before = File.ReadAllBytes(path);
+                // Stage only authored field edits, then apply once. Copying a whole temporary definition
+                // would replace compiler-owned managed graphs and their SerializeReference identities.
+                using (var so = new SerializedObject(existing)) Fill(so);
+                AssetDatabase.SaveAssetIfDirty(existing);
+                outcome = before.SequenceEqual(File.ReadAllBytes(path)) ? WriteOutcome.Unchanged : WriteOutcome.Updated;
+                manifest.SetHash(path, Hash(path)); Record(path, outcome);
+                return (T)existing;
+            }
             T tmp = ScriptableObject.CreateInstance<T>();
             try
             {
-                if (preserveExistingFields && existing != null) EditorUtility.CopySerialized(existing, tmp);
-                tmp.name = preserveExistingFields && existing != null ? existing.name : id;
-                using (var so = new SerializedObject(tmp))
-                {
-                    so.FindProperty("id").stringValue = id;
-                    string previousPath = fillingPath;
-                    try { fillingPath = path; fill?.Invoke(so); }
-                    finally { fillingPath = previousPath; }
-                    so.ApplyModifiedPropertiesWithoutUndo();
-                }
+                tmp.name = id;
+                using (var so = new SerializedObject(tmp)) Fill(so);
                 if (existing == null)
                 {
                     string directory = Path.GetDirectoryName(path);
@@ -85,6 +88,15 @@ namespace Game.Editor.Migration
                 return (T)existing;
             }
             finally { if (tmp != null) Object.DestroyImmediate(tmp); }
+
+            void Fill(SerializedObject so)
+            {
+                so.FindProperty("id").stringValue = id;
+                string previousPath = fillingPath;
+                try { fillingPath = path; fill?.Invoke(so); }
+                finally { fillingPath = previousPath; }
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
         }
         // SerializedObject is sealed: converter fills use this helper to skip unavailable target fields.
         internal void Set(SerializedObject so, string propertyPath, Action<SerializedProperty> fill)

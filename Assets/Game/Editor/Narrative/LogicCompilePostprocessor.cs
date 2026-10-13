@@ -93,17 +93,22 @@ namespace Game.Editor.Narrative
             {
                 if (!Eligible(path)) continue;
                 var asset = AssetDatabase.LoadMainAssetAtPath(path);
-                if (!(asset is ILogicSourceOwner owner)) continue;
+                if (!(asset is ILogicSourceOwner)) continue;
                 var before = Stamps(asset);
-                if (!before.Any(x => x.Stale)) continue;
+                if (before.Count == 0) continue;
                 compiler ??= BuildCompiler(database, report);
                 var local = new ValidationReport(path);
+                Object copy = null;
                 try
                 {
-                    owner.CompileLogic(compiler, local.For(path));
+                    // Owners compile every wrapper. Compile a copy so current wrappers retain their live
+                    // graph objects and SerializeReference IDs, even beside a changed field or on an error.
+                    copy = Object.Instantiate(asset);
+                    ((ILogicSourceOwner)copy).CompileLogic(compiler, local.For(path));
+                    bool changed = CopyChangedWrappers(asset, copy, before, Stamps(copy));
                     var after = Stamps(asset);
                     // Successful and failed compiles both stamp their source; only stamp changes may trigger reimport.
-                    if (!StoredEqual(before, after))
+                    if (changed)
                     { EditorUtility.SetDirty(asset); AssetDatabase.SaveAssetIfDirty(asset); }
                     foreach (var stamp in after.Where(x => x.Stale))
                         local.Error("NAR-E017", path, stamp.Path, "Compiled logic is stale; owner did not compile this field.");
@@ -114,6 +119,7 @@ namespace Game.Editor.Narrative
                     local.Error("NAR-E017", path, "", "Logic owner could not compile: " + e.GetType().Name + ": " + e.Message);
                     diagnostics[path] = (Signature(Stamps(asset)), local);
                 }
+                finally { if (copy != null) Object.DestroyImmediate(copy); }
                 report.Merge(local);
             }
             return report;
@@ -180,11 +186,21 @@ namespace Game.Editor.Narrative
             }
             return result;
         }
-        static bool StoredEqual(List<Stamp> a, List<Stamp> b)
+        static bool CopyChangedWrappers(Object asset, Object copy, List<Stamp> before, List<Stamp> compiled)
         {
-            if (a.Count != b.Count) return false;
-            for (int i = 0; i < a.Count; i++) if (a[i].Path != b[i].Path || a[i].SourceHash != b[i].SourceHash || a[i].Version != b[i].Version) return false;
-            return true;
+            using var target = new SerializedObject(asset);
+            using var source = new SerializedObject(copy);
+            bool changed = false;
+            foreach (var stamp in compiled)
+            {
+                int index = before.FindIndex(old => old.Path == stamp.Path);
+                if (index >= 0 && before[index].SourceHash == stamp.SourceHash && before[index].Version == stamp.Version) continue;
+                using var property = source.FindProperty(stamp.Path);
+                target.CopyFromSerializedProperty(property);
+                changed = true;
+            }
+            if (changed) target.ApplyModifiedPropertiesWithoutUndo();
+            return changed;
         }
         static ulong Signature(List<Stamp> stamps)
         {

@@ -4,9 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Game.Data;
 using Game.Data.Definitions;
 using Game.Data.Validation;
 using Game.Editor.Migration.Narrative;
+using Game.Editor.Content;
+using Game.Editor.Narrative;
 using NUnit.Framework;
 using UnityEditor;
 using static Game.Tests.EditMode.Data.TestContentFactory;
@@ -69,12 +72,30 @@ namespace Game.Tests.EditMode.Editor.Migration
             foreach (var pair in plan.References) AssetDatabase.CreateAsset(pair.Value, Root + "/References/" + pair.Key + ".asset");
             var report = new ValidationReport("write");
             LegacyNarrativeConverter.Write(plan, true, report);
+            Recompile(Root, report);
             var before = Directory.GetFiles(Root, "*", SearchOption.AllDirectories).ToDictionary(p => p, File.ReadAllBytes);
             Assert.Throws<IOException>(() => LegacyNarrativeConverter.Write(plan, false, report));
             LegacyNarrativeConverter.Write(plan, true, report);
+            Recompile(Root, report);
             CollectionAssert.AreEquivalent(before.Keys, Directory.GetFiles(Root, "*", SearchOption.AllDirectories));
             foreach (var pair in before) CollectionAssert.AreEqual(pair.Value, File.ReadAllBytes(pair.Key), pair.Key);
             Assert.AreEqual(0, report.ErrorCount, report.ToText());
+        }
+        internal static void Recompile(string root, ValidationReport report)
+        {
+            var generated = AssetDatabase.FindAssets("t:ContentDefinition", new[] { root }).Select(AssetDatabase.GUIDToAssetPath)
+                .Select(AssetDatabase.LoadAssetAtPath<ContentDefinition>).ToArray();
+            // Use real production dependencies, with generated definitions replacing their same-ID originals.
+            var database = UnityEngine.ScriptableObject.CreateInstance<ContentDatabase>();
+            try
+            {
+                database.EditorSetDefinitions(generated.Concat(ContentDatabaseBuilder.Rebuild().Definitions)
+                    .GroupBy(d => d.IdString, StringComparer.Ordinal).Select(group => group.First())
+                    .OrderBy(d => d.IdString, StringComparer.Ordinal).ToList());
+                report.Merge(LogicCompilePostprocessor.RecompileAll(database, root));
+                Assert.AreEqual(0, report.ErrorCount, report.ToText());
+            }
+            finally { UnityEngine.Object.DestroyImmediate(database); }
         }
         [Test] public void LineIds_Unique()
         {

@@ -60,7 +60,7 @@ namespace Game.Editor.Migration.Narrative
                 for (int i = 0; i < Mysteries.Length; i++)
                 {
                     var row = Mysteries[i]; int order = i;
-                    mysteries.Add(row.Id, writer.CreateOrUpdate<MysteryDefinition>("Clues", row.Id, so => {
+                    mysteries.Add(row.Id, writer.CreateOrUpdateFields<MysteryDefinition>("Clues", row.Id, so => {
                         so.FindProperty("title").stringValue = row.Title; so.FindProperty("solvedText").stringValue = row.Solved;
                         so.FindProperty("order").intValue = order; so.FindProperty("requires").arraySize = 0;
                     }, out _));
@@ -80,7 +80,7 @@ namespace Game.Editor.Migration.Narrative
                         }
                     }
                     clues.Add(row.Id, row.Id.StartsWith("rumor_", StringComparison.Ordinal)
-                        ? writer.CreateOrUpdate<RumorDefinition>("Clues", row.Id, Fill, out _)
+                        ? writer.CreateOrUpdateFields<RumorDefinition>("Clues", row.Id, Fill, out _)
                         : writer.CreateOrUpdate<ClueDefinition>("Clues", row.Id, Fill, out _));
                 }
                 foreach (var row in Mysteries)

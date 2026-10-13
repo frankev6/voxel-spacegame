@@ -45,6 +45,14 @@ namespace Game.Tests.EditMode.Editor.Migration
             Assert.AreEqual(2, plan.Manifest.Entries.Count(e => e.Dropped));
             foreach (var quest in plan.Quests.Quests)
                 Assert.AreEqual(quest.Logs.Count, quest.Logs.Select(l => l.Id).Distinct().Count(), quest.Id);
+            var report = new ValidationReport("NAR016 compiled round trip");
+            LegacyNarrativeConverter.Write(plan, true, report);
+            LegacyNarrativeConverterTests.Recompile(Root, report);
+            var before = Directory.GetFiles(Root, "*", SearchOption.AllDirectories).ToDictionary(path => path, File.ReadAllBytes);
+            LegacyNarrativeConverter.Write(plan, true, report);
+            LegacyNarrativeConverterTests.Recompile(Root, report);
+            CollectionAssert.AreEquivalent(before.Keys, Directory.GetFiles(Root, "*", SearchOption.AllDirectories));
+            foreach (var file in before) CollectionAssert.AreEqual(file.Value, File.ReadAllBytes(file.Key), file.Key);
         }
         [Test] public void Strings_InManifest()
         {
