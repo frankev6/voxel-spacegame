@@ -801,6 +801,12 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 215 | 2026-10-13 | SPEC-13 Q34 / ADR-0063 | Chunk contact reactivation converts overlap into a violent kick | Add per-pool-incarnation clearance latch; minimum grace preserved, recontact normal after clearance, other pairs unchanged | Tech lead | Implemented; 3 contact regressions and live 264-cell repeat pass, full-suite rerun pending |
 
 | 216 | 2026-10-13 | SPEC-72 Q19 / MIG-009 | Broad dependency waits for strict link validation that needs migrated weapons | Use permitted DATA-001 contract dependency; DATA-007 implementation already complete and original migration/weapon prerequisites; existing serialized weapon field/bake contract is sufficient | Tech lead | Resolved; preserve E047 and batch missing canonical content before strict validation |
+| 217 | 2026-10-13 | SPEC-72 Q18 | Typed migration handoff without narrative-copy ingestion | Resolve association labels from referenced metadata; preserve source order and report invalid references/float ranges | Tech lead | Resolved; delivered implementation integrated pending batch validation |
+| 218 | 2026-10-13 | SPEC-81 Q15–20 | Art contract and planned-manifest defaults | Use specified naming/provenance rules and planned rows only; no asset production or licence approval implied | Tech lead | Resolved; delivered implementation integrated pending batch validation |
+| 219 | 2026-10-13 | SPEC-03 Q10/Q11 | Gamepad aiming and device labels | Directional right-stick aim and last-active-device labels; physical controller ergonomics remain unverified | Tech lead | Resolved; delivered implementation integrated pending batch validation |
+| 220 | 2026-10-13 | SPEC-60 Q23/Q24 | Tooltip coordinate conversion and lifecycle | Convert via actual panel height; wire pooled tooltip lifecycle/config/theme and cancel stale providers | Tech lead | Resolved; delivered implementation integrated pending batch validation |
+| 221 | 2026-10-13 | SPEC-72 Q20 | Legacy missile damage conflicts with v2 tuning | Use SPEC-21 Explosive for canonical missile, validate all legacy enum identities | Tech lead | Resolved; delivered implementation integrated pending batch validation |
+| 222 | 2026-10-13 | SPEC-72 Q21 | Weapon migration defaults and protected links | Use canonical tuning/defaults and catalog IDs; preserve hand edits and existing links, fill only empty mapped links | Tech lead | Resolved; delivered implementation integrated pending batch validation |
 
 ## Measurements
 
@@ -911,6 +917,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DMG-012 and compatible worker batch integrated for validation — astra (gpt-6)
+
+1. Hulk recorder `29a8f74`: extracted same-tick creation, canonical root/brick/functional linked groups, stale parent member filtering, and once-only empty-ID-block warning. Seven required hulk tests pass; spec-required: 7, extra: 0. Compile clean. Full regression/live hulk proof pending; status remains in-progress.
+2. Integrated INP-008 `33e24c3` (spec-required: 2, extra: 0), MIG-015 `5241ee5` (3, 0), AST-001 `b175f2f` (4, 0), UI-009 `c777fd7` plus fixture repair `a34c3c3` (7, 0), MIG-009 `132a02a` (3, 0), DATA-010 `161c8d2` (3, 0). UI review fixed cross-test counter state and real-time scheduler deadlines without new tests. Q217–222 mirror the delivered spec decisions. No new art or physical-controller validation claim.
+3. Targeted non-forced weapon generation `8204e88` creates six missing definitions and fills nine canonical mounts. All content validates with zero errors/warnings; existing three plasma tunings retained and empty sound links filled. Temporary Editor job deleted; evidence `Logs/playtest/orchestration-batch3/weapon-generation.txt`. Full compile/EditMode/PlayMode session 13469 running. Workers continue UI-011, GAL-001 and UI-010; no duplicate threads, remote operations or tuning passes.
 
 ### 2026-10-13 — DMG-011 complete: physical chunk breakup — astra (gpt-6)
 
