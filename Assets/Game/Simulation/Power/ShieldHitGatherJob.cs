@@ -27,12 +27,13 @@ namespace Game.Simulation.Power
         }
         public void Execute()
         {
-            using var ordered = new NativeArray<Ordered>(Hits.Length, Allocator.Temp);
+            var ordered = new NativeArray<Ordered>(Hits.Length, Allocator.Temp);
             for (int i = 0; i < Hits.Length; i++) ordered[i] = new Ordered { Hit = Hits[i], GatherIndex = i };
             ordered.Sort();
             Ranges.Clear();
             if (Ranges.Capacity < Hits.Length) Ranges.Capacity = Hits.Length;
             for (int i = 0; i < Hits.Length; i++) Hits[i] = ordered[i].Hit;
+            ordered.Dispose();
             int start = 0;
             while (start < Hits.Length)
             {
