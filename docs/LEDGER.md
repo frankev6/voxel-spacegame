@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 1 | 0 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 6 |
-| M3 | 98 | 8 | 0 | 0 | 74 | 0 | 180 | 7 |
+| M3 | 98 | 7 | 0 | 0 | 75 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -337,8 +337,8 @@
 | SYS-003 | Structure builders | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-10 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 971ae0b7 | Deterministic shape/asteroid builders;4 focused tests pass; Q307 |
 | SYS-004 | Load and unload (T1) | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-002, GAL-008, GAL-009, SPEC-10, PHY-001, PHY-012 | yes | done | astra (gpt-6) | 2026-10-13 | 37ed39f6 | Five T1 cases pass; Q357 stages actual scene registration with SYS-006 T2; missing grids correctly block arrival. |
 | SYS-005 | BodyOnRailsSystem | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 370ffff | BodyOnRailsSystem integrated14a0989e; two required cases pass9669, preserves exact cross-FPS results and 1mm local tolerance. |
-| SYS-006 | T2 voxel bodies and damage persistence | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-003, SYS-004, DMG-014, WPN-012, AI-010 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
-| SYS-007 | T3 asteroid belts | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006 | no | todo |  |  |  |  |
+| SYS-006 | T2 voxel bodies and damage persistence | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-003, SYS-004, DMG-014, WPN-012, AI-010 | yes | done | astra (gpt-6) | 2026-10-13 | 8ec9a970 | Actual loader composed;5 required streaming/damage/hulk/lifecycle cases pass6996; compile3045 clean; Q357–361. |
+| SYS-007 | T3 asteroid belts | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006 | yes | todo |  |  |  |  |
 | SYS-008 | InteractionQuerySystem, docking and BodyInteracted | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-004, SPEC-20, SPEC-23 | no | todo |  |  |  |  |
 | SYS-009 | PLOC participant | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-008, PERS-001 | no | todo |  |  |  |  |
 | SYS-010 | IShipSpawner contract for Galaxy services | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, FND-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | adcf164 | Spawner contract forwarding only; 2 required tests. FND-012 runtime remains open. Full 1027 EM / 145 PM passed. |
@@ -1065,6 +1065,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — SYS-006 done: station streaming and damage persistence — astra (gpt-6)
+
+- Implementation8ec9a970 (runtime handoff aa540fd9, review repairs eff2a355, composition8343f72c): actual T2 loads/unloads with hysteresis; small-station damage survives unload/reload and GLXY save roundtrip; large stations reset; core loss remains a hulk and reloads persisted hulks; repeated cycles release registry handles and source pins. Live loader/ticker/scene hooks/writeback are composed. Orbiting grids follow their anchors and dead weapon mounts do not select armed AI.
+- Focused PlayMode6996 terminal0:5 passed/0 failed,0.194s test execution excluding Unity startup/shutdown. Compile3045 terminal0,zero CS warnings. Evidence Logs/playtest/t2-streaming/final-acceptance.{xml,log},final-compile.log. Spec-required: 5, extra: 0. Tiny four-cell fixture/direct ticks; no benchmark or broad suite.
+- Prior run failures and repairs remain recorded. Current proof is focused functional acceptance, not a new full-suite or visual gameplay claim. Next SYS-007 T3 asteroid streaming; DEV-009 worker active253. Combat/presentation wait for ready standard implementation, not perf busywork. Previous turn completed narrative generation and repaired the station handoff (progress).
 
 ### 2026-10-13 — NAR-016 done / T2 anchor handoff repaired — astra (gpt-6)
 
