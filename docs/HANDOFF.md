@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **AI combat scenarios accepted:** AI-010c45ab392; clean compile and4 focused checks cover physical orbit/hits, flee, ally obstruction and leash return. Fixture-only thrust resolved short-run travel; production balance untouched. Next presentation assignment DEV-018; lead narrative compiler continues.
+
 - **Narrative grammar accepted:** NAR-00267ce3485; clean compile and7 focused checks. Lexer/AST/parser ready for NAR-003 type checking and binding. Workers continue AI-010 fixture shortening, AI-015 fleet scenarios and SYS-003 structures.
 
 - **Merchants accepted:** ECO-005f4cae431, clean compile and8 focused tests (0.48s). Buying/selling, stock/restock and prices implemented; integer-boundary sale rounding repaired. UI/persistence remain later tasks. Existing power worker next SYS-003 structure builders; AI-010/015 continue.

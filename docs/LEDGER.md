@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 12 | 1 | 0 | 0 | 79 | 0 | 92 | 5 |
-| M3 | 137 | 5 | 0 | 0 | 38 | 0 | 180 | 9 |
+| M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
+| M3 | 135 | 7 | 0 | 0 | 38 | 0 | 180 | 7 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -273,9 +273,9 @@
 | AI-007 | AiSteeringSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 2a6444b2 | Steering and ability edges; four required checks pass in13-check shield/steering batch; scoped closeout ADR-0070 |
 | AI-008 | PlayerCombatStatusSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006, DMG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 0d64274b | Combat status singleton; three required checks pass; scoped closeout ADR-0070 |
 | AI-009 | Station turret AI | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | aed6fcbd | Two turret scenarios and existing setup check pass; static pose retained |
-| AI-010 | AI combat scenarios | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007, AI-008, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-008, PWR-010 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Claimed after focused AI acceptance; ADR-0070; lead owns Unity |
-| AI-011 | AI determinism | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010 | no | todo |  |  |  |  |
-| AI-012 | AI and hash performance | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010, TST-001 | no | todo |  |  |  |  |
+| AI-010 | AI combat scenarios | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007, AI-008, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-008, PWR-010 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c45ab392 | Four real combat scenarios pass; fixture-only thrust/cadence/damage; Q306 |
+| AI-011 | AI determinism | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010 | yes | todo |  |  |  |  |
+| AI-012 | AI and hash performance | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010, TST-001 | yes | todo |  |  |  |  |
 | ABL-001 | Public contract types | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | CORE-001, DATA-001, PWR-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 1bc7515 | Canonical ability contracts; 48-byte slot; 1 required test; full batch 901 EM / 128 PM, zero failures |
 | ABL-002 | Ability content and boot singleton | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 900e223 | Ability definition bake and boot lifetime 9534014; fixture repair 48ad51a; full 968 EM /145 PM green |
 | ABL-003 | AbilitySystem | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | frontier | ABL-002, SPEC-20, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | yes | done | astra (gpt-6) | 2026-10-13 | e2b9bda3 | Slot sync, charges/duration, one-tick power handshake and guarded feedback; ADR-0069 empty resync; 9 required tests; effects remain ABL-004 |
@@ -1008,6 +1008,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Physical AI combat scenarios accepted — astra (gpt-6)
+
+- AI-010c45ab392: real engage/orbit/hits, damaged retreat, ally fire blocking/resumption and leash return. First focused run1/3/0 exposed insufficient fixture thrust; test-only aggregate modifier fixes travel without increased bounds or weaker assertions. Production balance unchanged.
+- Clean compile11340, focused24943 four passed; evidence `Logs/playtest/ai-scenarios/acceptance-final.xml`. No broad suite or performance run. Spec question26 mirrored306.
+- Test count: spec-required: 4, extra: 0.
 
 ### 2026-10-13 — Narrative grammar accepted — astra (gpt-6)
 

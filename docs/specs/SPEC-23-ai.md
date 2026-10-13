@@ -535,7 +535,7 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 - **Do:** Scenarios: (1) one AI frigate vs a static player hulk-dummy: closes to preferred range, orbits, hits; (2) damaged AI below flee fraction runs away; (3) two allied AI ships do not shoot through each other; (4) leash: chasing beyond 1.5 × leash returns to the anchor.
 - **Files:** `Assets/Game/Tests/PlayMode/Simulation/Ai/AiScenarioTests.cs`
 - **Acceptance criteria:**
-  - [ ] As stated, over fixed tick counts.
+  - [x] As stated, over fixed tick counts.
 - **Tests:** `AiScenarioTests.Engage_OrbitsAndHits`, `.Flee_BelowThreshold`, `.Allies_NoFriendlyFire`, `.Leash_Returns`.
 
 ### AI-011 — AI determinism
