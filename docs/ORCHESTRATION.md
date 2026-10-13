@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | MIG-009 | implementing; INP-008 eecb3e0 reviewed, pending validation | Weapon content/links batch with DATA-010 |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | GAL-001 | dispatched; DATA-010 9b56175 reviewed, pending MIG-009 compatible validation | Galaxy contract-dependent standard work |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | UI-009 | implementing; AST-001 delivered 54c4fba, pending review | Ready presentation work; audio content after AUD-006 |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | UI-010 | dispatched; UI-009 76014c4 delivered, pending validation | Ready presentation work; audio content after AUD-006 |
 
 ## Operating rules
 
@@ -37,3 +37,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - Repair full EditMode **901/0/1** passes; saved `Logs/playtest/dmg011/editmode-repair.xml`. PlayMode session 46677 remains running; source unchanged during validation.
 
 - DATA-010 delivered `9b56175d254bd18df77898611583f7a8ff95eaaf`: strict E047, weapon stat contributions, authored-order ability bake/hash; 3 required tests, 0 extra. Lead reviewed source and tests; integrate with MIG-009 content. Same worker recycled to GAL-001, claimed on main `ba5be3b`, dispatched successfully. Combat MIG-009 and presentation UI-009 remain active.
+
+- UI-009 delivered `76014c4691bb0f3f5f8962fe4f8a0853f6803438`: tooltip pooling/delay/cancellation/positioning and lifecycle, 7 required tests, 0 extra; SPEC-60 Q23–24 need central mirror. Lead inspected service; full integration review/validation pending. Same presentation worker dispatched UI-010 from main claim `654ee31`; keep shared UI lifecycle edits compatible.
