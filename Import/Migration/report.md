@@ -1,6 +1,6 @@
 # Legacy migration report
 
-Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (220), Ships (300)
+Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (220), Ships (300), Loot (410)
 
 ## Assets
 
@@ -84,6 +84,8 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 |Assets/Game/Content/Items/resource_crew.asset|Unchanged|
 |Assets/Game/Content/Items/resource_fuel.asset|Unchanged|
 |Assets/Game/Content/Items/resource_palladium.asset|Unchanged|
+|Assets/Game/Content/Loot/loot_base.asset|Unchanged|
+|Assets/Game/Content/Loot/loot_creative.asset|Unchanged|
 |Assets/Game/Content/Ships/ship_base.asset|Unchanged|
 |Assets/Game/Content/Ships/ship_bastion.asset|Unchanged|
 |Assets/Game/Content/Ships/ship_beetle.asset|Unchanged|
@@ -132,6 +134,17 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [I] MIG-I012 Assets/Game/Content/Blocks/block_thruster_large.asset grantedAbilities: Kept existing link.
 [I] MIG-I012 Assets/Game/Content/Blocks/block_thruster_medium.asset grantedAbilities: Kept existing link.
 [I] MIG-I012 Assets/Game/Content/Blocks/block_thruster_small.asset grantedAbilities: Kept existing link.
+[W] ECO-W001 Assets/Game/Content/Items/item_strange_matter.asset tradeable: Quest item is marked tradeable; the flag is ignored and it cannot be traded.
+[W] ECO-W001 Assets/Game/Content/Items/item_strange_matter_container_empty.asset tradeable: Quest item is marked tradeable; the flag is ignored and it cannot be traded.
+[W] ECO-W001 Assets/Game/Content/Items/item_strange_matter_container_full.asset tradeable: Quest item is marked tradeable; the flag is ignored and it cannot be traded.
+[W] PWR-W002 Assets/Game/Content/Ships/ship_bastion.asset payload: ship_bastion: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_freighter.asset payload: ship_freighter: recharge infinite s > 10 s (rule R2)
+[W] PWR-W001 Assets/Game/Content/Ships/ship_icarus.asset payload: ship_icarus: sustain 0 s < 30 s (rule R1)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_icarus.asset payload: ship_icarus: recharge infinite s > 10 s (rule R2)
+[W] PWR-W001 Assets/Game/Content/Ships/ship_red_elite.asset payload: ship_red_elite: sustain 0 s < 30 s (rule R1)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_red_elite.asset payload: ship_red_elite: recharge infinite s > 10 s (rule R2)
+[W] PWR-W001 Assets/Game/Content/Ships/ship_striker.asset payload: ship_striker: sustain 0 s < 30 s (rule R1)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_striker.asset payload: ship_striker: recharge infinite s > 10 s (rule R2)
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_medium.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_small.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_small_fixed.asset: Kept hand-edited asset.
@@ -289,15 +302,21 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [W] MIG-W041 content/Items/Ships/ship_striker.json voxels[9]: Rotation snapped to a cube rotation.
 [I] MIG-I091 content/Items/Ships/ship_vestari.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
 [I] MIG-I090 content/Items/Ships/ship_vestari.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
-0 errors, 67 warnings, 94 infos
+[W] MIG-W070 content/Loot Tables/BaseLootTable.json lootItems[14].item: Ship loot entry dropped: SPEC-50 LootEntry holds only ItemDefinition: ship_beetle
+[W] MIG-W070 content/Loot Tables/BaseLootTable.json lootItems[15].item: Ship loot entry dropped: SPEC-50 LootEntry holds only ItemDefinition: ship_shuttle
+[W] MIG-W070 content/Loot Tables/BaseLootTable.json lootItems[16].item: Ship loot entry dropped: SPEC-50 LootEntry holds only ItemDefinition: ship_crescent
+[W] MIG-W070 content/Loot Tables/BaseLootTable.json lootItems[18].item: Ship loot entry dropped: SPEC-50 LootEntry holds only ItemDefinition: ship_fighter
+[W] MIG-W071 content/Loot Tables/CreativeModeLootTable.json lootItems[11].item: Null legacy loot item dropped; no replacement item is inferred.
+[I] MIG-I091 content/Loot Tables/StartShipsTable.json ships: Ship table intentionally not converted: StartShipsTable (5 legacy ship references). SPEC-01/50 own new-game loadouts.
+0 errors, 83 warnings, 95 infos
 ```
 
 ## Summary
 
-0 errors, 67 warnings, 94 infos
+0 errors, 83 warnings, 95 infos
 
 Created: 0
 Updated: 0
-Unchanged: 97
+Unchanged: 99
 SkippedHandEdited: 3
 Failed: 0

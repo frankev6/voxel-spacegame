@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 36 | 4 | 0 | 0 | 51 | 0 | 91 | 4 |
-| M3 | 149 | 7 | 0 | 0 | 24 | 0 | 180 | 10 |
+| M2 | 33 | 2 | 0 | 0 | 56 | 0 | 91 | 6 |
+| M3 | 149 | 3 | 0 | 0 | 28 | 0 | 180 | 15 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 2 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -232,18 +232,18 @@
 | DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-13 | e2cbd81 | Physical pool, exact mass/momentum, colliders, lifetime/rendering; ADR-0063 clearance; full 901 EM / 128 PM green; live 264-cell slab |
 | DMG-012 | Hulk grids from splits | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-011, FND-001, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-13 | 29a8f74 | Canonical hulk recorder/ownership/ID deferral; live 2296-cell section at 0.75 m/s, collider Ready; spec-required: 7, extra: 0 |
 | DMG-013 | ShipDeathSystem, despawn dissolve and the destroy pass | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-012 | yes | done | astra (gpt-6) | 2026-10-13 | 5dee38f | Core-loss hulk, capped dissolve and canonical deduplicated destroy; 3 required tests; full batch green |
-| DMG-014 | Determinism hash and frame-rate determinism tests | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-013, TST-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead isolated implementation while combat validation runs; canonical hasher already exists, three required integrated scenarios remain |
-| DMG-015 | Regression scenarios R25/R26 and soak | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014 | no | todo |  |  |  |  |
-| DMG-016 | Performance gates | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-014 | no | todo |  |  |  |  |
-| DMG-017 | Harness commands | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014, DEV-001 | no | todo |  |  |  |  |
+| DMG-014 | Determinism hash and frame-rate determinism tests | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-013, TST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 8fd7f66 | Six-way 600-tick hash 05E17322302FAC7F and quantum sensitivity; 3 required tests; ADR-0066 |
+| DMG-015 | Regression scenarios R25/R26 and soak | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014 | yes | todo |  |  |  |  |
+| DMG-016 | Performance gates | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-014 | yes | todo |  |  |  |  |
+| DMG-017 | Harness commands | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014, DEV-001 | yes | todo |  |  |  |  |
 | FLT-012 | Power and stat integration (M2) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, PWR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 8dba629 | Power demand, powered actuator gating, stat multipliers and propulsion caches; 8 required tests; full 1003 EM / 145 PM green |
 | FLT-013 | Owner flight-control correction before the firing range | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, FLT-009, SPEC-03 | yes | done | astra (gpt-6) | 2026-10-12 | 1bc23e8 | Shift strafe, Ctrl boost, gentle coast, bounded assist; live Fighter verified; Q182 |
 | WPN-002 | Weapon content: definitions, blob, boot singletons | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 702c1a6 | Weapon definitions, blob and boot-owned singleton lifetime; full 968 EM /145 PM green |
 | WPN-003 | CombatHitTest | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-001, SPEC-10, AI-001, PWR-001 | yes | done | astra (gpt-6) | 2026-10-13 | acdebc2 | Burst nearest-hit queries for hulls, shields and celestial bodies; repairs f376412/528ae87; full 968 EM /145 PM green |
 | WPN-004 | WeaponInitSystem and mounts | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-002, SPEC-10, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | abffb45 | Canonical mount geometry and preserved reparent firing state; three required tests; full 1051 EM /146 PM passed. |
 | WPN-005 | PlayerTargetingSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, AI-001, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 2bbffb6 | Deterministic hostile target cycling, cursor targeting and input toggles; six required tests; full 1051 EM /146 PM passed. |
-| WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | partial in FND-020: manual aim and arcs / targeting, lead, autofire and required tests |
-| WPN-007 | WeaponFireSystem and the projectile store append | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-006, PWR-001 | no | todo |  |  |  | partial in FND-020: serial fire and projectile append / parallel stream flattening, power, beam delivery/pulses and full required tests; partial in VFX-004: guarded muzzle emission with overrides / parallel stream flattening, power, beams and full required tests |
+| WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | yes | done | astra (gpt-6) | 2026-10-13 | fc32163 | Target velocity lead and occupied hull centre aiming; 5 required tests |
+| WPN-007 | WeaponFireSystem and the projectile store append | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-006, PWR-001 | yes | todo |  |  |  | partial in FND-020: serial fire and projectile append / parallel stream flattening, power, beam delivery/pulses and full required tests; partial in VFX-004: guarded muzzle emission with overrides / parallel stream flattening, power, beams and full required tests |
 | WPN-008 | ProjectileStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-003, WPN-007, PWR-001, SPEC-13 | no | todo |  |  |  | partial in FND-020: movement, hull hits and lifetime; DMG-007 orders stepping after impact / parallel stream/compaction pipeline, homing, shields and full required tests; partial in VFX-004: guarded hull-hit emission with normal, velocity and overrides / parallel pipeline, homing, shields and full required tests |
 | WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | no | todo |  |  |  |  |
 | WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | no | todo |  |  |  | partial in FND-020: explosion requests into damage / shields, audio and required tests; partial in VFX-004: guarded explosion visual event / shields, audio and required tests |
@@ -260,10 +260,10 @@
 | PWR-004 | Registration and `PowerInitSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-003, WPN-001, VOX-001, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-13 | cc561a2 | Registration, same-frame binding and energy initialization; 5 required tests; full batch green |
 | PWR-005 | `PowerAllocationSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-004, ABL-001 | yes | done | astra (gpt-6) | 2026-10-13 | 4745dae | Allocation, brownout, ability grants and Powered gating; 6 required tests. Full 1027 EM / 145 PM passed. |
 | PWR-006 | `ShipStatsAggregateSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-004, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-13 | 6338e23 | Stats/signature/mass revisions and wake recovery; 8 required tests. Full 1027 EM / 145 PM passed. |
-| PWR-007 | `ShieldSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-005, PWR-006, PWR-002, DMG-001, VFX-001, SPEC-02 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead shield runtime in isolated checkout while combat/origin validates |
-| PWR-008 | Power budget validator and balance tests | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-006, SPEC-72, WPN-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable power worker; lead owns Unity and central docs |
-| PWR-009 | Performance tests | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-005, PWR-006, PWR-007 | no | todo |  |  |  |  |
-| PWR-010 | `StatusSystem`: inhibits and stat modifiers (ADR-0016) | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001, PWR-005, SPEC-02 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable worker; lead owns central docs and serialized Unity validation |
+| PWR-007 | `ShieldSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-005, PWR-006, PWR-002, DMG-001, VFX-001, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | d06803c | Shield demand, ordered hit resolution, overflow and recharge; 9 required tests; full suite green |
+| PWR-008 | Power budget validator and balance tests | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-006, SPEC-72, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | f04a83a | Budget validator and canonical small-shield values; 3 required tests; advisory legacy balance warnings retained |
+| PWR-009 | Performance tests | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-005, PWR-006, PWR-007 | yes | todo |  |  |  |  |
+| PWR-010 | `StatusSystem`: inhibits and stat modifiers (ADR-0016) | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001, PWR-005, SPEC-02 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 999e25f | Ordered inhibits/modifiers with expiry and upsert; 6 required tests |
 | AI-002 | SpatialHash queries | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-001 | yes | done | astra (gpt-6) | 2026-10-13 | 470001e | Ordered spatial queries and Burst-safe read view; five required tests, full suites green |
 | AI-003 | AI content and boot singletons | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 21337c2 | Profiles/config, boot-owned singleton and catalog; 2 required tests; full batch green |
 | AI-004 | SpatialHashBuildSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-002, SPEC-10, PWR-001, DMG-001 | yes | done | astra (gpt-6) | 2026-10-13 | f99a02c | Guarded parallel proxy gathering, canonical sort/bucket and boot-safe hash lifetime; full 968 EM /145 PM green |
@@ -357,8 +357,8 @@
 | TRV-010 | Destination and route service | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-004, TRV-006 | no | todo |  |  |  |  |
 | TRV-011 | Narrative, dev probes and the R30 scenario | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-008, TRV-010, SPEC-40, SPEC-70 | no | todo |  |  |  |  |
 | TRV-012 | Jump integration, R30 regression and budget | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-009, TRV-011, TST-001 | no | todo |  |  |  |  |
-| ENC-001 | Public contract types | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, TRV-001, WPN-001, AI-001, NAR-001, ECO-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable worker; lead owns central docs and serialized Unity validation |
-| ENC-002 | Definitions, config and validators | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-001, SPEC-04 | no | todo |  |  |  |  |
+| ENC-001 | Public contract types | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, TRV-001, WPN-001, AI-001, NAR-001, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 101ff7b | Encounter contracts and faction event channel; 2 required tests; runtime ENC-002 onward remains |
+| ENC-002 | Definitions, config and validators | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-001, SPEC-04 | yes | todo |  |  |  |  |
 | ENC-003 | Faction singleton, index map and FactionStandingSystem | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-002, SPEC-21, SPEC-13, SPEC-23 | no | todo |  |  |  |  |
 | ENC-004 | FactionService and FACN | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-003, PERS-001, FND-001 | no | todo |  |  |  |  |
 | ENC-005 | TerritoryService (authored ownership) | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-30 | no | todo |  |  |  |  |
@@ -400,7 +400,7 @@
 | DLG-010 | Speakers and illustrations | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable combat worker; existing approved/own-work placeholders only; no art generation |
 | DLG-011 | Dialog PlayMode scenarios | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-007, DLG-009, QST-001 | no | todo |  |  |  |  |
 | DLG-012 | Harness commands for dialog | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, DEV-001 | no | todo |  |  |  |  |
-| QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | no | todo |  |  |  |  |
+| QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | todo |  |  |  |  |
 | QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, SPEC-40 | no | todo |  |  |  |  |
 | QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, SPEC-40 | no | todo |  |  |  |  |
 | QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, SPEC-40 | no | todo |  |  |  |  |
@@ -411,7 +411,7 @@
 | QST-009 | Opening chapter content | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, SPEC-30, SPEC-40 | no | todo |  |  |  |  |
 | QST-010 | Opening chapter playthrough | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-008, QST-009, QST-007, SPEC-70, SPEC-32, SPEC-50 | no | todo |  |  |  |  |
 | ECO-001 | Public contract types | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | CORE-001, DATA-001, NAR-001, VOX-001, DMG-001, SYS-001, FLT-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a81ff41 | Economy contracts and serialized tradeable defaults; 2 required tests. Runtime ECO-002 onward remains open. Full 1027 EM / 145 PM passed. |
-| ECO-002 | Definitions, config and validators | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-001, SPEC-04 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable worker; lead owns central docs and serialized Unity validation |
+| ECO-002 | Definitions, config and validators | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | db5d72e | Strict economy validators/config and canonical scrap; 15 required tests; partial ECO-009 scrap only |
 | ECO-003 | InventoryModel and Wallet | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-001 | yes | todo |  |  |  |  |
 | ECO-004 | Loot and EconomyService | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003, SPEC-40 | no | todo |  |  |  |  |
 | ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | no | todo |  |  |  |  |
@@ -420,10 +420,10 @@
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | no | todo |  |  |  | partial in ECO-002: canonical resource_scrap generation prepared / execution and remaining narrative, loot and merchant content pending |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
-| EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable power worker; extend canonical HUD-001 placeholders, lead owns central docs/Unity |
-| EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | no | todo |  |  |  |  |
+| EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 9c627fd | Editor contracts/config; 4 required tests; runtime tools remain EDT-002 onward |
+| EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | todo |  |  |  |  |
 | EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | no | todo |  |  |  |  |
-| EDT-004 | Edit history and diff commands | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001 | no | todo |  |  |  |  |
+| EDT-004 | Edit history and diff commands | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001 | yes | todo |  |  |  |  |
 | EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | no | todo |  |  |  |  |
 | EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | no | todo |  |  |  |  |
 | EDT-007 | Placement validator | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | no | todo |  |  |  |  |
@@ -482,8 +482,8 @@
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | no | todo |  |  |  |  |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | todo |  |  |  |  |
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
-| MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | no | todo |  |  |  |  |
-| MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable combat worker; lead owns central docs and serialized Unity |
+| MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | todo |  |  |  |  |
+| MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3d65849 | Protected ordered loot assets/catalog; rerun byte-identical; 1 required and 1 migration-safety test |
 | MIG-014 | Body template stubs | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-004, GAL-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Dispatched to reusable presentation worker; lead owns generation and Unity validation |
 | MIG-015 | Hand-off package | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-002, MIG-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 5241ee5 | Typed legacy handoff metadata; spec-required: 3, extra: 0 |
 | INP-008 | Gamepad scheme | [SPEC-03](specs/SPEC-03-input.md) | M4 | standard | INP-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 33e24c3 | Gamepad bindings/device labels/aim; hardware feel untested; spec-required: 2, extra: 0 |
@@ -965,6 +965,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Shield, aiming and supporting systems full regression green — astra (gpt-6)
+
+- Closed PWR-007/008/010, ENC-001, ECO-002, DMG-014, WPN-006, MIG-013 and EDT-001. Compile clean, zero CS warnings; full **1097/0/1 EditMode and 149/0/53 PlayMode**, session 22999 exit 0. Evidence `Logs/playtest/shield-combat/{editmode-final.xml,playmode-final.xml}`. The earlier sole CLI fixture failure was repaired with the complete authored config baseline (`6634507`), without weakening validators.
+- Shields resolve ordered hits and hull overflow; aiming uses moving occupied hull centres; six 600-tick destruction configurations produce **05E17322302FAC7F**. Status, power validation, economy/loot and encounter/editor contracts are integrated. Migration report: zero errors, 83 warnings (including advisory legacy power balance), 95 infos. No enemy-fights-back completion claim yet.
+- Test counts: PWR-007 spec-required: 9, extra: 0; PWR-008 spec-required: 3, extra: 0; PWR-010 spec-required: 6, extra: 0; ENC-001 spec-required: 2, extra: 0; ECO-002 spec-required: 15, extra: 0; DMG-014 spec-required: 3, extra: 0; WPN-006 spec-required: 5, extra: 0; MIG-013 spec-required: 1, extra: 1; EDT-001 spec-required: 4, extra: 0. Zero optimization passes. QualitySettings restored from backup; inactive runner artifacts removed.
+- Next: WPN-007 firing and subsequent projectile/beam producers; AUD-006 and WPN-011 are prepared in isolation for the next compatible batch. Recycle the same three standard workers against newly ready work.
 
 ### 2026-10-13 — Combat integration checks and identity repair — astra (gpt-6)
 
