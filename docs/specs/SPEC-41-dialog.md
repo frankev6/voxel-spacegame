@@ -399,7 +399,7 @@ Registry key `DLGS`, order 50 (SPEC-05 §4.8). Payload with SPEC-05 §4.10 primi
 4. Write `dialog_command_table.asset` (entries + `sourcesHash`); save only if content changed.
 5. Write `_Generated/facts.yarn` (Yarn path: `<<declare $name = 0>>` for Int, `= false` for Bool, every authored fact, ordinal) and `_Generated/logic.ysls.json` (every DialogCondition function and DialogCommand command from the SPEC-40 registry with parameter names/types, for the VS Code Yarn extension).
 
-### 5.2 Validator rules (`DialogValidatorRules : INarrativeRuleProvider`, Order 200)
+### 5.2 Validator rules (`DialogValidatorRules : INarrativeRuleProvider`, Order 10)
 
 | Code | Severity | Rule |
 |---|---|---|
@@ -746,6 +746,8 @@ sequenceDiagram
 | 7 | SPEC-60: element `ListView` item templates for dialog | Inline templates in `DialogView.uxml` | SPEC-60 |
 | 8 | SPEC-61 §4.2 already supplies real `DialogViewModel` / `DialogOptionViewModel` properties, while §4.9 describes the fuller SPEC-41 model. | Extend the existing types in place; retain SPEC-61 properties and `NotifyOptions()`, add every SPEC-41 member, and let `NotifyOptionsChanged()` use the same cached Options notification. The additional scalar properties have their own backing fields. | Tech lead — resolved by DLG-001 staging preservation; central mirror pending. |
 | 9 | §4.1 / DLG-001 lists `Views/IDialogCommands.cs`, but the existing canonical `Game.UI.Views.IDialogCommands` is in `Views/Commands/IDialogCommands.cs` with SPEC-61's `Choose(int)` signature. | Keep that file and its meta GUID, retain `Choose(int)` / `Continue()`, and add `ChooseByNumber(int)`, `ChooseOption(int)` and `Back()`. DLG-008's presenter must implement both the staged and canonical signatures; do not duplicate or move the interface. | Tech lead — resolved by DLG-001; central mirror pending. |
+
+| 10 | Dialog provider Order200 conflicts with SPEC-40 dialog-before-quest order and quest/mystery Order20/30 | **Resolved (2026-10-13):** dialog rule provider uses Order10, followed by quest20 and mystery30. Numeric provider sorting remains the sole ordering mechanism. Runtime narrative system ordering is unchanged. | Tech lead |
 
 ## 11. References
 

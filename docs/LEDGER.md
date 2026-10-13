@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 121 | 9 | 0 | 0 | 50 | 0 | 180 | 8 |
+| M3 | 120 | 9 | 0 | 0 | 51 | 0 | 180 | 7 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -382,7 +382,7 @@
 | NAR-010 | NarrativeService tick and dependency index | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007 | yes | todo |  |  |  |  |
 | NAR-011 | LogicContext and LogicWorldAdapter in Game.App | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-005, NAR-010, FND-001, ECO-001, QST-001 | no | todo |  |  |  |  |
 | NAR-012 | World-event bridge | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-011, SYS-001, ENC-001 | no | todo |  |  |  |  |
-| NAR-013 | Narrative validator framework and fact rules | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Existing combat worker: validator framework and fact rules |
+| NAR-013 | Narrative validator framework and fact rules | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-009 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | e81dc6d | Scratch validator, V001–008 and CLI; reviewed repair, 7 focused checks pass; downstream owner stubs remain explicit diagnostics |
 | NAR-014 | Legacy converter: reading, mapping tables and logic translation | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, MIG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 2be62596 | Strict five-file loader and mapped logic; 5 focused checks pass; emission/assets remain NAR-015/016 |
 | NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead: deterministic dialogue emission and writing preservation |
 | NAR-016 | Legacy converter: quests, triggers, templates and flag assets | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-015 | no | todo |  |  |  |  |
@@ -911,6 +911,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 318 | SPEC-40 Q19: legacy translation boundary and defaults | Resolved: retain source metadata for emission; decimal cumulative thresholds, source-ordered quest logs, canonical provisional journal labels and contextual item mappings. No runtime/asset emission in NAR-014. | Tech lead |
 | 319 | SPEC-61 Q23: save/load construction versus composition cycle | Resolved: explicit completed UI/save/flow prerequisites allow parallel source construction; shared production hookup and full functional/layout acceptance remain required. ADR-0072 amended. | Tech lead |
 | 320 | SPEC-60 Q30: layout audit scroll/measurement semantics | Resolved: exclude scroll content subtree but audit viewport; use intrinsic nowrap width, clear result list and check all containing panels. Functional acceptance pending. | Tech lead |
+| 323 | SPEC-40 Q21 / SPEC-41 Q10: contradictory narrative rule provider order | Resolved: dialog10, quest20, mystery30 using numeric sorting; runtime system order unchanged. | Tech lead |
 | 322 | SPEC-40 Q20: narrative validator partial owner and analysis semantics | Resolved: declared defaults/comparison polarity, explicit debug exemption, scratch ownership and missing adapter manifest warnings; source-owner stubs remain diagnostics. Seven required cases pass. | Tech lead |
 | 321 | SPEC-60 Q31: contrast audit theme/compositing | Resolved: require opaque resolved theme background, composite ancestors/self and transparent text, clear results and respect display/visibility. No guessed colours. | Tech lead |
 
@@ -1024,6 +1025,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Narrative validator accepted after review — astra (gpt-6)
+
+- NAR-013 `e81dc6d` repairs unsupported V001 writer errors for value-only reads/dynamic thresholds and exposes matching scratch owners to providers. Original source identity remains separate; assets are not modified.
+- Compile33600 clean, zero CS warnings; focused7179 seven passed. Evidence `Logs/playtest/narrative-validator/{compile-final.log,acceptance-final.xml}`. Test count: spec-required: 7, extra: 0. No broad suite or performance run.
+- SPEC-40 Q20 amended for conservative evidence, Q21/SPEC-41 Q10 mirrored323 resolve dialog10→quest20→mystery30. Remaining owner compiler stubs and adapter manifest stay with QST/DLG/TRV/NAR-011 tasks. UI-013 delivery1a668f8c awaits lead integration; NAR-015 continues.
 
 ### 2026-10-13 — Narrative validator integrated — astra (gpt-6)
 
