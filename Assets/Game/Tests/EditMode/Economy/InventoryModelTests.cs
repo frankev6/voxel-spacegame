@@ -37,7 +37,7 @@ namespace Game.Tests.EditMode.Economy
                     });
                     definitions.Add(Items[i]);
                 }
-                var report = new ValidationReport(); Catalog = ContentCatalog.Build(definitions, report);
+                var report = new ValidationReport("InventoryModelTests"); Catalog = ContentCatalog.Build(definitions, report);
                 Assert.AreEqual(0, report.ErrorCount); Inventory = new InventoryModel(Catalog);
             }
             public void Add(int item, int count) => Assert.IsTrue(Inventory.TryAdd(Items[item], count, AcquireSource.EditorRefund, out _));
