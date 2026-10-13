@@ -6,10 +6,10 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | SYS-005 preparation | ENC-0068bd541d5 delivered/reviewed; read-only preparation then waits for SYS-004 acceptance | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | dependency wait | TRV-004 accepted; waiting for ready standard functional work | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-016 graph stability | Repair unchanged compilation replacing live serialized graphs; SYS-005 still waits | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | boot belt diagnosis | Read-only actual SYS-E003 bounds investigation | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | TRV-003 review | delivered d4af6a3e, integrated with registry qualification fix; bounded review active | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | boot logic diagnosis | Read-only actual NAR-E005 count-node validation investigation | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Real content compiled; boot defects identified:** NAR-016 generation66682 compiled actual content with0 errors, but raw-byte rerun failed on replacement graph IDs (worker combat repairing). Focused PlayMode7147 stopped143 immediately after8 actual boot validation errors: item-count node validation and belt bounds. Presentation/economy investigating those separately, no Unity or edits. No active Unity; next fix verified causes, rerun generation and only blocked11 cases. Previous turn accepted lane/effect batch (progress).
 
 - **TRV-003 / NAR-005 accepted:** TRV-003c716202e fixes namespace qualification; compile71665 exits0 with zero CS warnings. Focused27074 terminal0:13 pass/0 fail in0.394s test execution. No active Unity. Includes8 lane and5 effect cases. Next actual content recompile/stability and world-loader integration. Presentation bounded review active207; combat/economy dependency waits.
 

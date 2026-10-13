@@ -33,7 +33,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496599
+          rid: 6548929066013557038
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -68,7 +68,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496600
+    - rid: 6548929066013557039
   onCompleted:
     source:
     - quest_log contract_bounty_probe legacy_2
@@ -76,7 +76,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496601
+    - rid: 6548929066013557040
   onFailed:
     source: []
     sourceHash: 3244421341483603138
@@ -93,15 +93,15 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496599
+    - rid: 6548929066013557038
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496602
+          rid: 6548929066013557041
         right:
-          rid: 6548929065634496603
-    - rid: 6548929065634496600
+          rid: 6548929066013557042
+    - rid: 6548929066013557039
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -114,7 +114,7 @@ MonoBehaviour:
           Text:
           - contract_bounty_probe
           - legacy_1
-    - rid: 6548929065634496601
+    - rid: 6548929066013557040
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -127,7 +127,7 @@ MonoBehaviour:
           Text:
           - contract_bounty_probe
           - legacy_2
-    - rid: 6548929065634496602
+    - rid: 6548929066013557041
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_accept
@@ -137,7 +137,7 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - defeated_encounter_xeno_probe_tutorial
-    - rid: 6548929065634496603
+    - rid: 6548929066013557042
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1

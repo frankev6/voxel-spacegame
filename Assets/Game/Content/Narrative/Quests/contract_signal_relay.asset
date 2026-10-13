@@ -33,7 +33,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496612
+          rid: 6548929066013557051
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -58,7 +58,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496613
+          rid: 6548929066013557052
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -93,7 +93,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496614
+    - rid: 6548929066013557053
   onCompleted:
     source:
     - quest_log contract_signal_relay legacy_2
@@ -101,7 +101,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496615
+    - rid: 6548929066013557054
   onFailed:
     source: []
     sourceHash: 3244421341483603138
@@ -118,23 +118,23 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496612
+    - rid: 6548929066013557051
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496616
+          rid: 6548929066013557055
         right:
-          rid: 6548929065634496617
-    - rid: 6548929065634496613
+          rid: 6548929066013557056
+    - rid: 6548929066013557052
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496618
+          rid: 6548929066013557057
         right:
-          rid: 6548929065634496619
-    - rid: 6548929065634496614
+          rid: 6548929066013557058
+    - rid: 6548929066013557053
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -147,7 +147,7 @@ MonoBehaviour:
           Text:
           - contract_signal_relay
           - legacy_1
-    - rid: 6548929065634496615
+    - rid: 6548929066013557054
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -160,7 +160,7 @@ MonoBehaviour:
           Text:
           - contract_signal_relay
           - legacy_2
-    - rid: 6548929065634496616
+    - rid: 6548929066013557055
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_accept
@@ -170,11 +170,11 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - sys_star_systems_entered
-    - rid: 6548929065634496617
+    - rid: 6548929066013557056
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496618
+    - rid: 6548929066013557057
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_accept
@@ -184,7 +184,7 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - sys_beats_completed
-    - rid: 6548929065634496619
+    - rid: 6548929066013557058
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1

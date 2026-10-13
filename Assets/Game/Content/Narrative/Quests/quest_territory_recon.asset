@@ -33,7 +33,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496687
+          rid: 6548929066013557126
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -58,7 +58,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496688
+          rid: 6548929066013557127
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -80,7 +80,7 @@ MonoBehaviour:
       compilerVersion: 1
       hasErrors: 0
       effects:
-      - rid: 6548929065634496689
+      - rid: 6548929066013557128
   failWhen:
     source: 
     sourceHash: 3244421341483603138
@@ -95,7 +95,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496690
+    - rid: 6548929066013557129
   onCompleted:
     source: []
     sourceHash: 3244421341483603138
@@ -109,7 +109,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496691
+    - rid: 6548929066013557130
   logEntries:
   - id: legacy_1
     text: Recon assignment accepted.
@@ -122,23 +122,23 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496687
+    - rid: 6548929066013557126
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496692
+          rid: 6548929066013557131
         right:
-          rid: 6548929065634496693
-    - rid: 6548929065634496688
+          rid: 6548929066013557132
+    - rid: 6548929066013557127
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496694
+          rid: 6548929066013557133
         right:
-          rid: 6548929065634496695
-    - rid: 6548929065634496689
+          rid: 6548929066013557134
+    - rid: 6548929066013557128
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -151,7 +151,7 @@ MonoBehaviour:
           Text:
           - quest_territory_recon
           - legacy_2
-    - rid: 6548929065634496690
+    - rid: 6548929066013557129
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -164,7 +164,7 @@ MonoBehaviour:
           Text:
           - quest_territory_recon
           - legacy_1
-    - rid: 6548929065634496691
+    - rid: 6548929066013557130
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -177,7 +177,7 @@ MonoBehaviour:
           Text:
           - quest_territory_recon
           - legacy_3
-    - rid: 6548929065634496692
+    - rid: 6548929066013557131
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_accept
@@ -187,11 +187,11 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - sys_beats_completed
-    - rid: 6548929065634496693
+    - rid: 6548929066013557132
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496694
+    - rid: 6548929066013557133
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_accept
@@ -201,7 +201,7 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - interacted_body_station_ark
-    - rid: 6548929065634496695
+    - rid: 6548929066013557134
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1

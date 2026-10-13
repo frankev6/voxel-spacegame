@@ -33,14 +33,14 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496604
+          rid: 6548929066013557043
       progress:
         source: item_count("resource_palladium")
         sourceHash: 1589212930537717302
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496605
+          rid: 6548929066013557044
       target: 2
       latch: 0
       optional: 0
@@ -58,7 +58,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496606
+          rid: 6548929066013557045
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -93,7 +93,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496607
+    - rid: 6548929066013557046
   onCompleted:
     source:
     - quest_log contract_material_sweep legacy_2
@@ -101,7 +101,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496608
+    - rid: 6548929066013557047
   onFailed:
     source: []
     sourceHash: 3244421341483603138
@@ -118,20 +118,20 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496604
+    - rid: 6548929066013557043
       type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: has_item
         intArgs:
         - rid: -2
-        - rid: 6548929065634496609
+        - rid: 6548929066013557048
         boolArgs:
         - rid: -2
         - rid: -2
         textArgs:
         - resource_palladium
         - 
-    - rid: 6548929065634496605
+    - rid: 6548929066013557044
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: item_count
@@ -141,15 +141,15 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - resource_palladium
-    - rid: 6548929065634496606
+    - rid: 6548929066013557045
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496610
+          rid: 6548929066013557049
         right:
-          rid: 6548929065634496611
-    - rid: 6548929065634496607
+          rid: 6548929066013557050
+    - rid: 6548929066013557046
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -162,7 +162,7 @@ MonoBehaviour:
           Text:
           - contract_material_sweep
           - legacy_1
-    - rid: 6548929065634496608
+    - rid: 6548929066013557047
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -175,11 +175,11 @@ MonoBehaviour:
           Text:
           - contract_material_sweep
           - legacy_2
-    - rid: 6548929065634496609
+    - rid: 6548929066013557048
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 2
-    - rid: 6548929065634496610
+    - rid: 6548929066013557049
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_accept
@@ -189,7 +189,7 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - sys_beats_completed
-    - rid: 6548929065634496611
+    - rid: 6548929066013557050
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1

@@ -26,7 +26,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     root:
-      rid: 6548929065634496549
+      rid: 6548929066013556988
   salience: 30
   weight: 1
   repeat: 2
@@ -41,9 +41,9 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496550
-    - rid: 6548929065634496551
-    - rid: 6548929065634496552
+    - rid: 6548929066013556989
+    - rid: 6548929066013556990
+    - rid: 6548929066013556991
   onComplete:
     source: []
     sourceHash: 3244421341483603138
@@ -56,27 +56,27 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496549
+    - rid: 6548929066013556988
       type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496553
+          rid: 6548929066013556992
         right:
-          rid: 6548929065634496554
-    - rid: 6548929065634496550
+          rid: 6548929066013556993
+    - rid: 6548929066013556989
       type: {class: TakeItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
           Integers:
           - rid: -2
-          - rid: 6548929065634496555
+          - rid: 6548929066013556994
           Booleans:
           - rid: -2
           - rid: -2
           Text:
           - resource_palladium
           - 
-    - rid: 6548929065634496551
+    - rid: 6548929066013556990
       type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -85,11 +85,11 @@ MonoBehaviour:
           - rid: -2
           Booleans:
           - rid: -2
-          - rid: 6548929065634496556
+          - rid: 6548929066013556995
           Text:
           - story_survey_complete
           - 
-    - rid: 6548929065634496552
+    - rid: 6548929066013556991
       type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -98,50 +98,50 @@ MonoBehaviour:
           - rid: -2
           Booleans:
           - rid: -2
-          - rid: 6548929065634496557
+          - rid: 6548929066013556996
           Text:
           - survey_local_materials_deliver_to_ark
           - 
-    - rid: 6548929065634496553
+    - rid: 6548929066013556992
       type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496558
+          rid: 6548929066013556997
         right:
-          rid: 6548929065634496559
-    - rid: 6548929065634496554
+          rid: 6548929066013556998
+    - rid: 6548929066013556993
       type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: has_item
         intArgs:
         - rid: -2
-        - rid: 6548929065634496560
+        - rid: 6548929066013556999
         boolArgs:
         - rid: -2
         - rid: -2
         textArgs:
         - resource_palladium
         - 
-    - rid: 6548929065634496555
+    - rid: 6548929066013556994
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 3
-    - rid: 6548929065634496556
+    - rid: 6548929066013556995
       type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496557
+    - rid: 6548929066013556996
       type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496558
+    - rid: 6548929066013556997
       type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496561
+          rid: 6548929066013557000
         right:
-          rid: 6548929065634496562
-    - rid: 6548929065634496559
+          rid: 6548929066013557001
+    - rid: 6548929066013556998
       type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: quest_active
@@ -151,11 +151,11 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - quest_survey_local_materials
-    - rid: 6548929065634496560
+    - rid: 6548929066013556999
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 3
-    - rid: 6548929065634496561
+    - rid: 6548929066013557000
       type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: quest_active
@@ -165,7 +165,7 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - quest_survey_local_materials
-    - rid: 6548929065634496562
+    - rid: 6548929066013557001
       type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: objective_done

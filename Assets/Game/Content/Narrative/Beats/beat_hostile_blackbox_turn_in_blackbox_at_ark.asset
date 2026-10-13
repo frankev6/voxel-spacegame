@@ -26,7 +26,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     root:
-      rid: 6548929065634496514
+      rid: 6548929066013556953
   salience: 30
   weight: 1
   repeat: 2
@@ -40,8 +40,8 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496515
-    - rid: 6548929065634496516
+    - rid: 6548929066013556954
+    - rid: 6548929066013556955
   onComplete:
     source: []
     sourceHash: 3244421341483603138
@@ -54,14 +54,14 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496514
+    - rid: 6548929066013556953
       type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496517
+          rid: 6548929066013556956
         right:
-          rid: 6548929065634496518
-    - rid: 6548929065634496515
+          rid: 6548929066013556957
+    - rid: 6548929066013556954
       type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -70,11 +70,11 @@ MonoBehaviour:
           - rid: -2
           Booleans:
           - rid: -2
-          - rid: 6548929065634496519
+          - rid: 6548929066013556958
           Text:
           - hostile_blackbox_turned_in
           - 
-    - rid: 6548929065634496516
+    - rid: 6548929066013556955
       type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -83,18 +83,18 @@ MonoBehaviour:
           - rid: -2
           Booleans:
           - rid: -2
-          - rid: 6548929065634496520
+          - rid: 6548929066013556959
           Text:
           - hostile_blackbox_submit_blackbox
           - 
-    - rid: 6548929065634496517
+    - rid: 6548929066013556956
       type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496521
+          rid: 6548929066013556960
         right:
-          rid: 6548929065634496522
-    - rid: 6548929065634496518
+          rid: 6548929066013556961
+    - rid: 6548929066013556957
       type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: quest_active
@@ -104,15 +104,15 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - quest_hostile_blackbox
-    - rid: 6548929065634496519
+    - rid: 6548929066013556958
       type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496520
+    - rid: 6548929066013556959
       type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496521
+    - rid: 6548929066013556960
       type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: quest_active
@@ -122,7 +122,7 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - quest_hostile_blackbox
-    - rid: 6548929065634496522
+    - rid: 6548929066013556961
       type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: objective_done

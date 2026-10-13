@@ -33,7 +33,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496627
+          rid: 6548929066013557066
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -58,7 +58,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496628
+          rid: 6548929066013557067
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -80,7 +80,7 @@ MonoBehaviour:
       compilerVersion: 1
       hasErrors: 0
       effects:
-      - rid: 6548929065634496629
+      - rid: 6548929066013557068
   failWhen:
     source: 
     sourceHash: 3244421341483603138
@@ -95,7 +95,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496630
+    - rid: 6548929066013557069
   onCompleted:
     source: []
     sourceHash: 3244421341483603138
@@ -109,7 +109,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496631
+    - rid: 6548929066013557070
   logEntries:
   - id: legacy_1
     text: Hostile contact recorded on border entry.
@@ -124,22 +124,22 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496627
+    - rid: 6548929066013557066
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496632
+          rid: 6548929066013557071
         right:
-          rid: 6548929065634496633
-    - rid: 6548929065634496628
+          rid: 6548929066013557072
+    - rid: 6548929066013557067
       type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496634
+          rid: 6548929066013557073
         right:
-          rid: 6548929065634496635
-    - rid: 6548929065634496629
+          rid: 6548929066013557074
+    - rid: 6548929066013557068
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -152,7 +152,7 @@ MonoBehaviour:
           Text:
           - quest_hostile_blackbox
           - legacy_3
-    - rid: 6548929065634496630
+    - rid: 6548929066013557069
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -165,7 +165,7 @@ MonoBehaviour:
           Text:
           - quest_hostile_blackbox
           - legacy_2
-    - rid: 6548929065634496631
+    - rid: 6548929066013557070
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -178,7 +178,7 @@ MonoBehaviour:
           Text:
           - quest_hostile_blackbox
           - legacy_4
-    - rid: 6548929065634496632
+    - rid: 6548929066013557071
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_accept
@@ -188,15 +188,15 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - sys_beats_completed
-    - rid: 6548929065634496633
+    - rid: 6548929066013557072
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496634
+    - rid: 6548929066013557073
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: hostile_blackbox_turned_in
-    - rid: 6548929065634496635
+    - rid: 6548929066013557074
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: hostile_blackbox_submit_blackbox

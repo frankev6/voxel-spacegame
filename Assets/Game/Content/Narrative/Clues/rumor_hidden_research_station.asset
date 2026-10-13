@@ -26,13 +26,13 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     root:
-      rid: 6548929065634496598
+      rid: 6548929066013557037
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496598
+    - rid: 6548929066013557037
       type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: quest_completed

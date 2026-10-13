@@ -25,7 +25,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     root:
-      rid: 6548929065634496532
+      rid: 6548929066013556971
   salience: 5
   weight: 1
   repeat: 0
@@ -47,19 +47,19 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 6548929065634496532
+    - rid: 6548929066013556971
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496533
+          rid: 6548929066013556972
         right:
-          rid: 6548929065634496534
-    - rid: 6548929065634496533
+          rid: 6548929066013556973
+    - rid: 6548929066013556972
       type: {class: FactIntRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: sys_star_systems_entered
-    - rid: 6548929065634496534
+    - rid: 6548929066013556973
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 4

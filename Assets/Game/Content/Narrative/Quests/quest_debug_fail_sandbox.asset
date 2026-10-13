@@ -33,7 +33,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496620
+          rid: 6548929066013557059
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -55,7 +55,7 @@ MonoBehaviour:
       compilerVersion: 1
       hasErrors: 0
       effects:
-      - rid: 6548929065634496621
+      - rid: 6548929066013557060
   failWhen:
     source: 
     sourceHash: 3244421341483603138
@@ -70,7 +70,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496622
+    - rid: 6548929066013557061
   onCompleted:
     source: []
     sourceHash: 3244421341483603138
@@ -85,8 +85,8 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496623
-    - rid: 6548929065634496624
+    - rid: 6548929066013557062
+    - rid: 6548929066013557063
   logEntries:
   - id: legacy_1
     text: Failure sandbox accepted.
@@ -99,15 +99,15 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496620
+    - rid: 6548929066013557059
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496625
+          rid: 6548929066013557064
         right:
-          rid: 6548929065634496626
-    - rid: 6548929065634496621
+          rid: 6548929066013557065
+    - rid: 6548929066013557060
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -120,7 +120,7 @@ MonoBehaviour:
           Text:
           - quest_debug_fail_sandbox
           - legacy_2
-    - rid: 6548929065634496622
+    - rid: 6548929066013557061
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -133,7 +133,7 @@ MonoBehaviour:
           Text:
           - quest_debug_fail_sandbox
           - legacy_1
-    - rid: 6548929065634496623
+    - rid: 6548929066013557062
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -146,7 +146,7 @@ MonoBehaviour:
           Text:
           - quest_debug_fail_sandbox
           - legacy_3
-    - rid: 6548929065634496624
+    - rid: 6548929066013557063
       type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -156,7 +156,7 @@ MonoBehaviour:
           - rid: -2
           Text:
           - contract_bounty_probe
-    - rid: 6548929065634496625
+    - rid: 6548929066013557064
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_accept
@@ -166,7 +166,7 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - sys_star_systems_entered
-    - rid: 6548929065634496626
+    - rid: 6548929066013557065
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1

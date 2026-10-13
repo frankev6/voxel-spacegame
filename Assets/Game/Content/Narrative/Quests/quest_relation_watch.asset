@@ -33,7 +33,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496636
+          rid: 6548929066013557075
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -58,7 +58,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496637
+          rid: 6548929066013557076
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -81,8 +81,8 @@ MonoBehaviour:
       compilerVersion: 1
       hasErrors: 0
       effects:
-      - rid: 6548929065634496638
-      - rid: 6548929065634496639
+      - rid: 6548929066013557077
+      - rid: 6548929066013557078
   failWhen:
     source: 
     sourceHash: 3244421341483603138
@@ -97,7 +97,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496640
+    - rid: 6548929066013557079
   onCompleted:
     source: []
     sourceHash: 3244421341483603138
@@ -111,7 +111,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496641
+    - rid: 6548929066013557080
   logEntries:
   - id: legacy_1
     text: Entered allied territory and received patrol assignment.
@@ -126,21 +126,21 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496636
+    - rid: 6548929066013557075
       type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496642
+          rid: 6548929066013557081
         right:
-          rid: 6548929065634496643
-    - rid: 6548929065634496637
+          rid: 6548929066013557082
+    - rid: 6548929066013557076
       type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496644
+          rid: 6548929066013557083
         right:
-          rid: 6548929065634496645
-    - rid: 6548929065634496638
+          rid: 6548929066013557084
+    - rid: 6548929066013557077
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -153,20 +153,20 @@ MonoBehaviour:
           Text:
           - quest_relation_watch
           - legacy_3
-    - rid: 6548929065634496639
+    - rid: 6548929066013557078
       type: {class: AdjustRelationEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
           Integers:
           - rid: -2
-          - rid: 6548929065634496646
+          - rid: 6548929066013557085
           Booleans:
           - rid: -2
           - rid: -2
           Text:
           - owner
           - 
-    - rid: 6548929065634496640
+    - rid: 6548929066013557079
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -179,7 +179,7 @@ MonoBehaviour:
           Text:
           - quest_relation_watch
           - legacy_2
-    - rid: 6548929065634496641
+    - rid: 6548929066013557080
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -192,31 +192,31 @@ MonoBehaviour:
           Text:
           - quest_relation_watch
           - legacy_4
-    - rid: 6548929065634496642
+    - rid: 6548929066013557081
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496647
+          rid: 6548929066013557086
         right:
-          rid: 6548929065634496648
-    - rid: 6548929065634496643
+          rid: 6548929066013557087
+    - rid: 6548929066013557082
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: relation_watch_territory_seen
-    - rid: 6548929065634496644
+    - rid: 6548929066013557083
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: relation_watch_report_submitted
-    - rid: 6548929065634496645
+    - rid: 6548929066013557084
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: relation_watch_submit_report
-    - rid: 6548929065634496646
+    - rid: 6548929066013557085
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 5
-    - rid: 6548929065634496647
+    - rid: 6548929066013557086
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_accept
@@ -226,7 +226,7 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - sys_territories_entered
-    - rid: 6548929065634496648
+    - rid: 6548929066013557087
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1

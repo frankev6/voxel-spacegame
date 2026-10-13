@@ -41,7 +41,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496696
+          rid: 6548929066013557135
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -68,12 +68,12 @@ MonoBehaviour:
       compilerVersion: 1
       hasErrors: 0
       effects:
-      - rid: 6548929065634496697
-      - rid: 6548929065634496698
-      - rid: 6548929065634496699
-      - rid: 6548929065634496700
-      - rid: 6548929065634496701
-      - rid: 6548929065634496702
+      - rid: 6548929066013557136
+      - rid: 6548929066013557137
+      - rid: 6548929066013557138
+      - rid: 6548929066013557139
+      - rid: 6548929066013557140
+      - rid: 6548929066013557141
   - id: intercept
     title: 'Story: Whisper Chain II'
     objectives:
@@ -87,7 +87,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496703
+          rid: 6548929066013557142
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -113,11 +113,11 @@ MonoBehaviour:
       compilerVersion: 1
       hasErrors: 0
       effects:
-      - rid: 6548929065634496704
-      - rid: 6548929065634496705
-      - rid: 6548929065634496706
-      - rid: 6548929065634496707
-      - rid: 6548929065634496708
+      - rid: 6548929066013557143
+      - rid: 6548929066013557144
+      - rid: 6548929066013557145
+      - rid: 6548929066013557146
+      - rid: 6548929066013557147
   - id: debrief
     title: 'Story: Whisper Chain III'
     objectives:
@@ -131,7 +131,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496709
+          rid: 6548929066013557148
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -156,7 +156,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496710
+          rid: 6548929066013557149
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -178,7 +178,7 @@ MonoBehaviour:
       compilerVersion: 1
       hasErrors: 0
       effects:
-      - rid: 6548929065634496711
+      - rid: 6548929066013557150
   failWhen:
     source: 
     sourceHash: 3244421341483603138
@@ -194,8 +194,8 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496712
-    - rid: 6548929065634496713
+    - rid: 6548929066013557151
+    - rid: 6548929066013557152
   onCompleted:
     source: []
     sourceHash: 3244421341483603138
@@ -232,15 +232,15 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496696
+    - rid: 6548929066013557135
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496714
+          rid: 6548929066013557153
         right:
-          rid: 6548929065634496715
-    - rid: 6548929065634496697
+          rid: 6548929066013557154
+    - rid: 6548929066013557136
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -253,14 +253,14 @@ MonoBehaviour:
           Text:
           - quest_whisper_chain
           - legacy_2
-    - rid: 6548929065634496698
+    - rid: 6548929066013557137
       type: {class: SpawnEncounterEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
           Integers:
           - rid: -2
           - rid: -2
-          - rid: 6548929065634496716
+          - rid: 6548929066013557155
           Booleans:
           - rid: -2
           - rid: -2
@@ -269,7 +269,7 @@ MonoBehaviour:
           - encounter_whisper_hunter
           - player
           - 
-    - rid: 6548929065634496699
+    - rid: 6548929066013557138
       type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -279,7 +279,7 @@ MonoBehaviour:
           - rid: -2
           Text:
           - quest_whisper_chain
-    - rid: 6548929065634496700
+    - rid: 6548929066013557139
       type: {class: TrackQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -289,20 +289,20 @@ MonoBehaviour:
           - rid: -2
           Text:
           - quest_whisper_chain
-    - rid: 6548929065634496701
+    - rid: 6548929066013557140
       type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
           Integers:
           - rid: -2
-          - rid: 6548929065634496717
+          - rid: 6548929066013557156
           Booleans:
           - rid: -2
           - rid: -2
           Text:
           - whisper_chain_chapter
           - 
-    - rid: 6548929065634496702
+    - rid: 6548929066013557141
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -315,15 +315,15 @@ MonoBehaviour:
           Text:
           - quest_whisper_chain
           - legacy_4
-    - rid: 6548929065634496703
+    - rid: 6548929066013557142
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496718
+          rid: 6548929066013557157
         right:
-          rid: 6548929065634496719
-    - rid: 6548929065634496704
+          rid: 6548929066013557158
+    - rid: 6548929066013557143
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -336,7 +336,7 @@ MonoBehaviour:
           Text:
           - quest_whisper_chain
           - legacy_5
-    - rid: 6548929065634496705
+    - rid: 6548929066013557144
       type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -346,7 +346,7 @@ MonoBehaviour:
           - rid: -2
           Text:
           - quest_whisper_chain
-    - rid: 6548929065634496706
+    - rid: 6548929066013557145
       type: {class: TrackQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -356,20 +356,20 @@ MonoBehaviour:
           - rid: -2
           Text:
           - quest_whisper_chain
-    - rid: 6548929065634496707
+    - rid: 6548929066013557146
       type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
           Integers:
           - rid: -2
-          - rid: 6548929065634496720
+          - rid: 6548929066013557159
           Booleans:
           - rid: -2
           - rid: -2
           Text:
           - whisper_chain_chapter
           - 
-    - rid: 6548929065634496708
+    - rid: 6548929066013557147
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -382,23 +382,23 @@ MonoBehaviour:
           Text:
           - quest_whisper_chain
           - legacy_7
-    - rid: 6548929065634496709
+    - rid: 6548929066013557148
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496721
+          rid: 6548929066013557160
         right:
-          rid: 6548929065634496722
-    - rid: 6548929065634496710
+          rid: 6548929066013557161
+    - rid: 6548929066013557149
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496723
+          rid: 6548929066013557162
         right:
-          rid: 6548929065634496724
-    - rid: 6548929065634496711
+          rid: 6548929066013557163
+    - rid: 6548929066013557150
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -411,20 +411,20 @@ MonoBehaviour:
           Text:
           - quest_whisper_chain
           - legacy_8
-    - rid: 6548929065634496712
+    - rid: 6548929066013557151
       type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
           Integers:
           - rid: -2
-          - rid: 6548929065634496725
+          - rid: 6548929066013557164
           Booleans:
           - rid: -2
           - rid: -2
           Text:
           - whisper_chain_chapter
           - 
-    - rid: 6548929065634496713
+    - rid: 6548929066013557152
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -437,7 +437,7 @@ MonoBehaviour:
           Text:
           - quest_whisper_chain
           - legacy_1
-    - rid: 6548929065634496714
+    - rid: 6548929066013557153
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_accept
@@ -447,19 +447,19 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - visited_starsys_whisper
-    - rid: 6548929065634496715
+    - rid: 6548929066013557154
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496716
+    - rid: 6548929066013557155
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496717
+    - rid: 6548929066013557156
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496718
+    - rid: 6548929066013557157
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_stage
@@ -469,15 +469,15 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - defeated_encounter_whisper_hunter
-    - rid: 6548929065634496719
+    - rid: 6548929066013557158
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496720
+    - rid: 6548929066013557159
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 2
-    - rid: 6548929065634496721
+    - rid: 6548929066013557160
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_stage
@@ -487,11 +487,11 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - visited_starsys_ark_start
-    - rid: 6548929065634496722
+    - rid: 6548929066013557161
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496723
+    - rid: 6548929066013557162
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_stage
@@ -501,11 +501,11 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - interacted_body_station_ark
-    - rid: 6548929065634496724
+    - rid: 6548929066013557163
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496725
+    - rid: 6548929066013557164
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 0

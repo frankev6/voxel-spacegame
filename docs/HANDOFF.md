@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Real content compiled; boot defects identified:** NAR-016 generation66682 compiled actual content with0 errors, but raw-byte rerun failed on replacement graph IDs (worker combat repairing). Focused PlayMode7147 stopped143 immediately after8 actual boot validation errors: item-count node validation and belt bounds. Presentation/economy investigating those separately, no Unity or edits. No active Unity; next fix verified causes, rerun generation and only blocked11 cases. Previous turn accepted lane/effect batch (progress).
+
 - **TRV-003 / NAR-005 accepted:** TRV-003c716202e fixes namespace qualification; compile71665 exits0 with zero CS warnings. Focused27074 terminal0:13 pass/0 fail in0.394s test execution. No active Unity. Includes8 lane and5 effect cases. Next actual content recompile/stability and world-loader integration. Presentation bounded review active207; combat/economy dependency waits.
 
 - **Lane source integrated / focused batch accepted:** ENC-006, TRV-004 and QST-002 done from clean compile and focused34715 exit0 (25 pass,0.514s test bodies). TRV-0037eef333 and NAR-005 continuation setter f758c1e3 await next compatible validation; actual content recompile/stability comes next. Presentation reviewing lane delivery; combat waits SYS-004, economy waits ready standard work. No Unity active. Details and evidence in ledger latest log.

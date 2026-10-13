@@ -26,7 +26,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     root:
-      rid: 6548929065634496512
+      rid: 6548929066013556951
   salience: 50
   weight: 1
   repeat: 2
@@ -48,12 +48,12 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 6548929065634496512
+    - rid: 6548929066013556951
       type: {class: NotCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         operand:
-          rid: 6548929065634496513
-    - rid: 6548929065634496513
+          rid: 6548929066013556952
+    - rid: 6548929066013556952
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: gate_ark_start_active

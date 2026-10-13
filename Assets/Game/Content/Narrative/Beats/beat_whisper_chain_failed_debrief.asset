@@ -25,7 +25,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     root:
-      rid: 6548929065634496579
+      rid: 6548929066013557018
   salience: 0
   weight: 1
   repeat: 0
@@ -38,7 +38,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496580
+    - rid: 6548929066013557019
   onComplete:
     source: []
     sourceHash: 3244421341483603138
@@ -51,14 +51,14 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496579
+    - rid: 6548929066013557018
       type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496581
+          rid: 6548929066013557020
         right:
-          rid: 6548929065634496582
-    - rid: 6548929065634496580
+          rid: 6548929066013557021
+    - rid: 6548929066013557019
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -71,7 +71,7 @@ MonoBehaviour:
           Text:
           - quest_whisper_chain
           - legacy_9
-    - rid: 6548929065634496581
+    - rid: 6548929066013557020
       type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: quest_failed
@@ -81,19 +81,19 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - quest_whisper_chain
-    - rid: 6548929065634496582
+    - rid: 6548929066013557021
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 0
         left:
-          rid: 6548929065634496583
+          rid: 6548929066013557022
         right:
-          rid: 6548929065634496584
-    - rid: 6548929065634496583
+          rid: 6548929066013557023
+    - rid: 6548929066013557022
       type: {class: FactIntRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: whisper_chain_chapter
-    - rid: 6548929065634496584
+    - rid: 6548929066013557023
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 2

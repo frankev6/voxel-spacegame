@@ -1059,6 +1059,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Real campaign compile and boot integration defects — astra (gpt-6)
+
+- NAR-016 actual generation66682: logic report0 errors/2 documented MIG-W092 warnings/1 info. Both generation passes compile, but strict byte comparison fails on beat_gate_dormant: live CompilePaths replaces compiled nodes even when source stamps match; later writes persist fresh SerializeReference IDs. NAR-016 remains open; combat worker assigned concrete repair. Evidence Logs/playtest/narrative-content-final/first-generation.log. Generated galaxy condition is now real/current; no normalized-byte workaround.
+- Focused PlayMode7147 (five SYS-004 + six FND-012 cases) fails during actual boot before test results. Eight validation errors: five NAR-E005 count-argument diagnostics across beats/objectives, three SYS-E003 authored belt dimension/identity bounds. Stopped exact Unity PID17925; process terminal143, no XML, no acceptance claim. Evidence Logs/playtest/world-loader/boot-failure.txt. Spec-required: 11, extra: 0; no new cases.
+- Economy investigates belt config/identity read-only; presentation investigates serialized count nodes/validator read-only. Lead owns fixes and serialized retry. All three existing chats reused, no duplicate workers. Temporary generation scripts/metas removed only after generation terminal1. No active Unity; unrelated QualitySettings/orphan metadata remain excluded. Previous turn accepted five task results (progress).
+
 ### 2026-10-13 — TRV-003 / NAR-005 accepted — astra (gpt-6)
 
 - Integrated lane delivery7eef333; fixed two namespace-shadowed Services.TryGet references in c716202e. Compile71665 terminal0, zero CS warnings. Focused27074 terminal0:13 pass,0 fail,0.394s test execution; startup/shutdown additional. Evidence Logs/playtest/lane-access/.

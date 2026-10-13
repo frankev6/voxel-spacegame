@@ -25,7 +25,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     root:
-      rid: 6548929065634496563
+      rid: 6548929066013557002
   salience: 20
   weight: 1
   repeat: 2
@@ -40,9 +40,9 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496564
-    - rid: 6548929065634496565
-    - rid: 6548929065634496566
+    - rid: 6548929066013557003
+    - rid: 6548929066013557004
+    - rid: 6548929066013557005
   onComplete:
     source: []
     sourceHash: 3244421341483603138
@@ -55,14 +55,14 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496563
+    - rid: 6548929066013557002
       type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496567
+          rid: 6548929066013557006
         right:
-          rid: 6548929065634496568
-    - rid: 6548929065634496564
+          rid: 6548929066013557007
+    - rid: 6548929066013557003
       type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -72,7 +72,7 @@ MonoBehaviour:
           - rid: -2
           Text:
           - quest_relation_watch
-    - rid: 6548929065634496565
+    - rid: 6548929066013557004
       type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -81,11 +81,11 @@ MonoBehaviour:
           - rid: -2
           Booleans:
           - rid: -2
-          - rid: 6548929065634496569
+          - rid: 6548929066013557008
           Text:
           - relation_watch_territory_seen
           - 
-    - rid: 6548929065634496566
+    - rid: 6548929066013557005
       type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -95,26 +95,26 @@ MonoBehaviour:
           - rid: -2
           Text:
           - contract_signal_relay
-    - rid: 6548929065634496567
+    - rid: 6548929066013557006
       type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: star_system_owned
         intArgs: []
         boolArgs: []
         textArgs: []
-    - rid: 6548929065634496568
+    - rid: 6548929066013557007
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496570
+          rid: 6548929066013557009
         right:
-          rid: 6548929065634496571
-    - rid: 6548929065634496569
+          rid: 6548929066013557010
+    - rid: 6548929066013557008
       type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
-    - rid: 6548929065634496570
+    - rid: 6548929066013557009
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: relation
@@ -124,7 +124,7 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - owner
-    - rid: 6548929065634496571
+    - rid: 6548929066013557010
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 0

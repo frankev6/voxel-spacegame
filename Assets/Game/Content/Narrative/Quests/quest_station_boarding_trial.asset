@@ -33,7 +33,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496655
+          rid: 6548929066013557094
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -58,7 +58,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496656
+          rid: 6548929066013557095
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -81,8 +81,8 @@ MonoBehaviour:
       compilerVersion: 1
       hasErrors: 0
       effects:
-      - rid: 6548929065634496657
-      - rid: 6548929065634496658
+      - rid: 6548929066013557096
+      - rid: 6548929066013557097
   failWhen:
     source: 
     sourceHash: 3244421341483603138
@@ -97,7 +97,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496659
+    - rid: 6548929066013557098
   onCompleted:
     source: []
     sourceHash: 3244421341483603138
@@ -111,7 +111,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496660
+    - rid: 6548929066013557099
   logEntries:
   - id: legacy_1
     text: Bar contact debrief complete.
@@ -126,21 +126,21 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496655
+    - rid: 6548929066013557094
       type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496661
+          rid: 6548929066013557100
         right:
-          rid: 6548929065634496662
-    - rid: 6548929065634496656
+          rid: 6548929066013557101
+    - rid: 6548929066013557095
       type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496663
+          rid: 6548929066013557102
         right:
-          rid: 6548929065634496664
-    - rid: 6548929065634496657
+          rid: 6548929066013557103
+    - rid: 6548929066013557096
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -153,7 +153,7 @@ MonoBehaviour:
           Text:
           - quest_station_boarding_trial
           - legacy_3
-    - rid: 6548929065634496658
+    - rid: 6548929066013557097
       type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -163,7 +163,7 @@ MonoBehaviour:
           - rid: -2
           Text:
           - quest_station_data_delivery
-    - rid: 6548929065634496659
+    - rid: 6548929066013557098
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -176,7 +176,7 @@ MonoBehaviour:
           Text:
           - quest_station_boarding_trial
           - legacy_2
-    - rid: 6548929065634496660
+    - rid: 6548929066013557099
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -189,27 +189,27 @@ MonoBehaviour:
           Text:
           - quest_station_boarding_trial
           - legacy_4
-    - rid: 6548929065634496661
+    - rid: 6548929066013557100
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496665
+          rid: 6548929066013557104
         right:
-          rid: 6548929065634496666
-    - rid: 6548929065634496662
+          rid: 6548929066013557105
+    - rid: 6548929066013557101
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: station_boarding_trial_meet_shady_contact
-    - rid: 6548929065634496663
+    - rid: 6548929066013557102
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: station_boarding_trial_decode_tip
-    - rid: 6548929065634496664
+    - rid: 6548929066013557103
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: station_boarding_trial_decode_tip
-    - rid: 6548929065634496665
+    - rid: 6548929066013557104
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_accept
@@ -219,7 +219,7 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - beat_shady_man
-    - rid: 6548929065634496666
+    - rid: 6548929066013557105
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1

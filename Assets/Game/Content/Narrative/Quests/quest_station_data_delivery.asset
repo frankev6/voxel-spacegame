@@ -33,14 +33,14 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496667
+          rid: 6548929066013557106
       progress:
         source: item_count("resource_palladium")
         sourceHash: 1589212930537717302
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496668
+          rid: 6548929066013557107
       target: 2
       latch: 0
       optional: 0
@@ -58,7 +58,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496669
+          rid: 6548929066013557108
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -80,7 +80,7 @@ MonoBehaviour:
       compilerVersion: 1
       hasErrors: 0
       effects:
-      - rid: 6548929065634496670
+      - rid: 6548929066013557109
   failWhen:
     source: 
     sourceHash: 3244421341483603138
@@ -95,7 +95,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496671
+    - rid: 6548929066013557110
   onCompleted:
     source: []
     sourceHash: 3244421341483603138
@@ -109,7 +109,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496672
+    - rid: 6548929066013557111
   logEntries:
   - id: legacy_1
     text: Collect 2 survey fragments and submit them at ARK.
@@ -122,20 +122,20 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496667
+    - rid: 6548929066013557106
       type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: has_item
         intArgs:
         - rid: -2
-        - rid: 6548929065634496673
+        - rid: 6548929066013557112
         boolArgs:
         - rid: -2
         - rid: -2
         textArgs:
         - resource_palladium
         - 
-    - rid: 6548929065634496668
+    - rid: 6548929066013557107
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: item_count
@@ -145,14 +145,14 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - resource_palladium
-    - rid: 6548929065634496669
+    - rid: 6548929066013557108
       type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         left:
-          rid: 6548929065634496674
+          rid: 6548929066013557113
         right:
-          rid: 6548929065634496675
-    - rid: 6548929065634496670
+          rid: 6548929066013557114
+    - rid: 6548929066013557109
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -165,7 +165,7 @@ MonoBehaviour:
           Text:
           - quest_station_data_delivery
           - legacy_2
-    - rid: 6548929065634496671
+    - rid: 6548929066013557110
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -178,7 +178,7 @@ MonoBehaviour:
           Text:
           - quest_station_data_delivery
           - legacy_1
-    - rid: 6548929065634496672
+    - rid: 6548929066013557111
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -191,15 +191,15 @@ MonoBehaviour:
           Text:
           - quest_station_data_delivery
           - legacy_3
-    - rid: 6548929065634496673
+    - rid: 6548929066013557112
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 2
-    - rid: 6548929065634496674
+    - rid: 6548929066013557113
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: station_data_delivery_submitted
-    - rid: 6548929065634496675
+    - rid: 6548929066013557114
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: station_data_delivery_submit_fragments

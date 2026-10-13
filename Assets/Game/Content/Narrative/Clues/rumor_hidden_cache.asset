@@ -26,11 +26,11 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     root:
-      rid: 6548929065634496597
+      rid: 6548929066013557036
   references:
     version: 2
     RefIds:
-    - rid: 6548929065634496597
+    - rid: 6548929066013557036
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         name: opening_cache_found

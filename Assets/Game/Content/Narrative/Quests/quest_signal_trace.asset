@@ -33,7 +33,7 @@ MonoBehaviour:
         compilerVersion: 1
         hasErrors: 0
         root:
-          rid: 6548929065634496649
+          rid: 6548929066013557088
       progress:
         source: 
         sourceHash: 3244421341483603138
@@ -55,7 +55,7 @@ MonoBehaviour:
       compilerVersion: 1
       hasErrors: 0
       effects:
-      - rid: 6548929065634496650
+      - rid: 6548929066013557089
   failWhen:
     source: 
     sourceHash: 3244421341483603138
@@ -70,7 +70,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496651
+    - rid: 6548929066013557090
   onCompleted:
     source: []
     sourceHash: 3244421341483603138
@@ -84,7 +84,7 @@ MonoBehaviour:
     compilerVersion: 1
     hasErrors: 0
     effects:
-    - rid: 6548929065634496652
+    - rid: 6548929066013557091
   logEntries:
   - id: legacy_1
     text: Signal Trace contract accepted.
@@ -97,15 +97,15 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929065634496649
+    - rid: 6548929066013557088
       type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         op: 5
         left:
-          rid: 6548929065634496653
+          rid: 6548929066013557092
         right:
-          rid: 6548929065634496654
-    - rid: 6548929065634496650
+          rid: 6548929066013557093
+    - rid: 6548929066013557089
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -118,7 +118,7 @@ MonoBehaviour:
           Text:
           - quest_signal_trace
           - legacy_2
-    - rid: 6548929065634496651
+    - rid: 6548929066013557090
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -131,7 +131,7 @@ MonoBehaviour:
           Text:
           - quest_signal_trace
           - legacy_1
-    - rid: 6548929065634496652
+    - rid: 6548929066013557091
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         arguments:
@@ -144,7 +144,7 @@ MonoBehaviour:
           Text:
           - quest_signal_trace
           - legacy_3
-    - rid: 6548929065634496653
+    - rid: 6548929066013557092
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         function: since_accept
@@ -154,7 +154,7 @@ MonoBehaviour:
         - rid: -2
         textArgs:
         - beat_mystery_signal
-    - rid: 6548929065634496654
+    - rid: 6548929066013557093
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
