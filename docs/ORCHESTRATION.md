@@ -18,10 +18,11 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- Primary `task/WPN-003-combat-integration`: full session `46507` passed EditMode **968/0/1** and is still running PlayMode. No primary runtime mutation or parallel Unity; preserve its temporary scene and QualitySettings until terminal.
-- Next batch prepared in `/Users/frank/.codex/worktrees/combat-hit-detection/spaceship-game-v2`: AI-003 `21bed70`, SYS-001 `ff14d2f`, AI boot lifetime `9132fdc`. Catalog regeneration and Unity validation pending.
-- That isolated checkout is now `task/DMG-013-ship-death`, claimed on main `463660a`. First scoped implementation `7878fa4` extracts ShipDeathJob and suppresses duplicate child destruction when its root's LEG owns it. Dissolve requests/progress, core-loss SFX and three required tests remain; not validated or done. Preserve the preceding AI/SYS commits for next-batch integration.
-- Three workers: GAL-003, AST-002, MIG-014. Editor closed; goal active, fallback heartbeat paused.
+- Main `1074075` contains the closed combat-content batch: **968/0/1 EditMode, 145/0/53 PlayMode**, both exit 0, compile clean. Evidence `Logs/playtest/combat-content-batch/`.
+- Primary `task/DMG-013-death-integration` now includes AI-003 `e1de8d9`, SYS-001 `e738e71`, AI boot lifetime `90a180a`, DMG-013 `96d32ca` / `3670bd7` / `5def348` / three required tests `77d9760`. Nothing in this new batch is validated yet.
+- AI catalog job `1127` failed compile; missing BlockDefsRef import and mutable scratch-set variable fixed `66b2fbe`. Rerun **session `9246` active**, temporary `Assets/Game/Editor/AiContentCatalogJob.cs`/meta must be removed after terminal; then commit generated catalog and run compile + grouped AiContent/StreamingContract/ShipDeath tests. Do not run a second Unity process.
+- Three assignments: DLG-010, AST-002, MIG-014. GAL-003 delivered `579394d`, not integrated because strict E001 requires actual galaxy content. Combat WPN-004/005 await SPEC-20; lead next runtime chain after DMG-013 is PWR-004 → FLT-012.
+- Lead isolated checkout remains `/Users/frank/.codex/worktrees/combat-hit-detection/spaceship-game-v2`, branch `task/DMG-013-ship-death`, old head `f52c097`; do not reapply its already integrated commits. Editor closed; goal active and heartbeat paused.
 
 ## Validated and pending batches
 
