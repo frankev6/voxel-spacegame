@@ -1115,6 +1115,8 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 
 | 25 | Pure encounter composition/placement waits for whole SPEC-30 including later map/performance/M4 work | Use completed ENC-002 definitions and GAL-006/008 generated content and service queries. Preserve specified RNG streams, obstruction geometry and all required tests; director, spawning and live encounter acceptance remain ENC-007. | Tech lead |
 
+| 26 | ENC-006 acceptance abbreviates pure API boundaries: no live cap inputs, a retained default cell-size parameter, maximum draws and an automatic-spacing minimum | **ENC-006 default:** follow §5.5/5.6 literally. Compose clears and returns the full ordered fleet; ENC-007 truncates by its actual available cap. CapTruncates checks that the composed prefix can be truncated by the caller, without claiming director coverage. Explicit entries consume one count draw each; doctrine consumes its count draw plus doctrineMaxShips weight draws, including unused slots. Blueprint radii use the blueprint cell size, not defaultCellSize. Positive authored spacing is honored; the radius-based minimum applies to automatic spacing. M3 poses are line abreast; formation slots remain ENC-013. | Tech lead — implementation clarification; central mirror pending. |
+
 ## 11. References
 
 - Audit (background only): `docs/reference/audit-2026-10/05-narrative-quests.md` (encounters unreachable, flags), `03-galaxy-world.md` (NPC fleets), `00-synthesis.md` §5.
