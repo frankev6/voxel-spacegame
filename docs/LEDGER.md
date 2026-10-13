@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 39 | 3 | 0 | 0 | 49 | 0 | 91 | 5 |
+| M2 | 37 | 5 | 0 | 0 | 49 | 0 | 91 | 3 |
 | M3 | 151 | 7 | 0 | 0 | 22 | 0 | 180 | 12 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 2 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
@@ -847,6 +847,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 255 | SPEC-21 Q30: mount initialization versus reparent state. | Refresh changed functional geometry with stale-link guards; initialize firing/beam defaults only once. WPN-018 still owns power-consumer hookup. Three required tests cover real Fighter, orientations and reparent state. | Tech lead |
 | 256 | SPEC-21 Q40–41 / SPEC-23 Q12: targeting ordering and selection defaults. | Normal ShipCommandGroup follows OrderFirst input; AI anchors explicitly follow targeting. Use rounded centimetre distance then entity index, nonnegative sphere-surface cursor distance, documented edge order and complete proxy scan on result overflow. No targeting truncation or tuning. | Tech lead |
 | 257 | SPEC-22 Q20–22: shield hit arithmetic, corner containment and manual toggle retention. | Eighth 300 Energy hit exactly exhausts 3000 HP, so ninth/tenth overflow 300 raw each. Uniformly expand padded ellipsoid by max(1,length(half/radii)) to contain corners. Manual off retains alive-emitter capacity/charge without regen or draw and marks below-quarter charge collapsed; requested-on brownout still loses ungranted capacity. | Tech lead |
+| 258 | SPEC-33 Q20: encounter contract staging and interface completeness. | Preserve exact public contracts plus internal instance/pending DTOs, immutable views and lifecycle metadata. Runtime operations remain explicit task-named shells; only faction event registration/drain wiring is active. ENC-002–014 own behavior and boot integration. | Tech lead |
 
 ## Measurements
 
@@ -957,6 +958,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Origin integration race repaired; shield batch prepared — astra (gpt-6)
+
+- Full origin/mount/targeting/camera batch: EditMode **1051/0/1**, PlayMode **145/1/53**. The one failure exposed projectile singleton reads racing asynchronous origin writes. `5bf0a47` moves simulation reads into dependent jobs and completes narrow presentation reads. Compile clean and seven scene-flow tests pass; full rerun session **36784** is active. Do not mark the batch done yet. Evidence `Logs/playtest/origin-combat/{playmode-initial.xml,scene-flow-repair.xml,compile-race-repair.log}`.
+- PWR-007 prepared on isolated branch, including gameplay-stop hit cleanup; ENC-001 delivery `23b336f` integrated there as `101ff7b`. Validation pending. PWR-007 spec-required: 9, extra: 0; ENC-001 spec-required: 2, extra: 0. No additional regression tests or tuning passes.
+- Same three workers remain in use: PWR-010 status effects, PWR-008 power balance (recycled after ENC-001 delivery), ECO-002 content. Next playable combat work remains aiming, firing and projectile/shield producers before an enemy-fights-back demonstration.
 
 ### 2026-10-13 — Power and control batch full regression green — astra (gpt-6)
 
