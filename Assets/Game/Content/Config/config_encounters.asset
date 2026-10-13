@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 575b06ee0c394c5c97b8e9a320963637, type: 3}
+  m_Name: config_encounters
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.EncounterConfigDefinition
+  id: config_encounters
+  formerIds: []
+  firstRollDelaySeconds: 90
+  rollIntervalSeconds: 120
+  dangerSpawnChance:
+  - 0
+  - 0.25
+  - 0.45
+  - 0.65
+  maxActiveDirectorInstances: 2
+  minPlayerDistanceM: 800
+  combatMinDistanceM: 300
+  arrivalGraceSeconds: 10
+  arrivalGraceDistanceM: 2000
+  placementTries: 12
+  placementStepDegrees: 30
+  bodyClearanceM: 150
+  despawnDistanceM: 6000
+  despawnDelaySeconds: 30
+  maxInstances: 16
+  maxShipsAlive: 40
+  hostileAtOrBelow: -25
+  friendlyAtOrAbove: 50
+  provokePenalty: 10
+  provokeIntervalTicks: 60
+  hailDistanceM: 300

@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 30 | 3 | 0 | 0 | 58 | 0 | 91 | 6 |
+| M2 | 27 | 6 | 0 | 0 | 58 | 0 | 91 | 3 |
 | M3 | 148 | 4 | 0 | 0 | 28 | 0 | 180 | 15 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
@@ -366,7 +366,7 @@
 | ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SPEC-31, SPEC-32, SPEC-23 | no | todo |  |  |  |  |
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | no | todo |  |  |  |  |
 | ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, SPEC-40 | no | todo |  |  |  |  |
-| ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | no | todo |  |  |  |  |
+| ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | no | todo |  |  |  | partial in ENC-002: locked player faction prerequisite / remaining factions, encounters and canonical ARK ownership open |
 | ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | no | todo |  |  |  |  |
 | ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-009, SPEC-70 | no | todo |  |  |  |  |
 | NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | e39b2d3 | Narrative contracts and precise future-task stubs; 2 required tests; full batch 901 EM / 128 PM, zero failures |
@@ -860,6 +860,10 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 268 | SPEC-21 Q61: fractional timing and pellet RNG reconstruction | Carry negative fractional trigger remainder only while firing; zero initial cooldown fires immediately. Seed each pellet by its own ShotId and persistent shooter identity, then skip its two spread samples when reconstructing lifetime randomness. | Tech lead |
 | 269 | SPEC-21 Q62: firing acceptance requires a real beam pulse lifetime | Bring forward production BeamStepSystem clock/muzzle/range endpoint and cancellation into WPN-007; required duration test uses real fixed-step updates. WPN-009 still owns first-hit clipping, damage/shield streams and impact effects. | Tech lead |
 | 270 | SPEC-21 Q63: stale projectile prerequisite on shared firing | Require ProjectileStore only in the projectile delivery handler; firing remains delivery-agnostic, including beam/custom-only worlds and damage regression fixtures. | Tech lead |
+| 271 | SPEC-33 Q21–23: encounter validation and required initial content | Bring forward only locked faction_ark and config_encounters, preserving assets/GUIDs. Canonical ARK ownership remains ENC-010 until the authored system exists. Enforce finite values, counts, stance/territory consistency and civilian fallback; use canonical logic compiler interfaces without claiming NAR-003 implementation. | Tech lead |
+| 272 | SPEC-13 Q40–42: damage harness dispatch and diagnostics | Commands post to the canonical main-thread damage inbox for next-tick resolution. Select deterministic ready grids in half-open local bounds; kill-core posts lethal hits for each remaining footprint cell. Compact JSON reports queued work, hashes and stats without directly writing damage-owned state. | Tech lead |
+| 273 | SPEC-13 Q37: regression and soak exposure | R25 uses real ram contacts on 63 overlapping 400-cell hulls; R26 verifies twelve actual firing sources before scripted simultaneous core losses and duplicate despawns. Soak repeats the skirmish for 36,000 fixed ticks and at least 600 elapsed seconds, seeds despawns, exercises a nonempty chunk pool and isolates the native leak probe. | Tech lead |
+
 
 ## Measurements
 

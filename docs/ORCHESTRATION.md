@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DMG-015 | dispatched from main 212b60a | damage regressions/soak |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DMG-017 | dispatched from main 212b60a | damage harness |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ENC-002 | dispatched from main 212b60a | encounter/faction content |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-009 | dispatched from main 7c5b9d08; DMG-015 delivered 559db043 | loop voices |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AUD-008 | dispatched from main 7c5b9d08; DMG-017 delivered ee16f993 | music director |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AUD-007 | dispatched from main 7c5b9d08; ENC-002 delivered 9c5b969f | cue content/binding |
 
 ## Operating rules
 
@@ -18,7 +18,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- **Now:** main **90f066a7** contains the validated AUD-006/WPN-011 batch. Primary `task/WPN-007-validation` integrates isolated firing work; compile + eight required EditMode cases run in **session 50618** (94537 exposed a missing OwnedBy namespace import, repaired by f74ea9ac). Do not mutate runtime before terminal. All three exact workers rechecked active (DMG-015, DMG-017, ENC-002); audio follow-ups await their deliveries.
+- **Now:** WPN-007 focused session 11640 exited 0: compile clean, eight required tests passed. Review c0f3b458 removes the projectile-store prerequisite from shared firing. DMG-015/017 and ENC-002 delivered and integrated on primary `task/WPN-007-validation`; three workers recycled to AUD-009/008/007 respectively from main 7c5b9d08. Lead runs ENC-002 protected generation, then compatible validation including the ten-minute soak once. No done claim before full regression and live harness acceptance.
 
 - **Latest closeout:** full audio/turret session 95012 exited 0: **1112/0/1 EditMode, 150/0/53 PlayMode**, compile clean. AUD-006/WPN-011 closed, evidence `audio-combat/*-final.xml`. Unity free; original QualitySettings delta preserved, inactive artifacts removed. Next primary batch WPN-007; isolated **085ab8ac** includes real pulse clock. Workers still DMG-015/017 and ENC-002; newly ready AUD-007/008/009 are next reuse candidates.
 
