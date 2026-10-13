@@ -16,15 +16,19 @@ namespace Game.Editor.Narrative
     {
         public sealed class CompiledGraph
         {
+            /// <summary>Disposable compiled owner, valid for the duration of this validation pass.</summary>
             public ContentDefinition Owner { get; }
+            /// <summary>Original definition for source identity; validation never binds or compiles it.</summary>
+            public ContentDefinition SourceOwner { get; }
             public string AssetPath { get; }
             public string Field { get; }
             public bool Debug { get; }
             public object Wrapper { get; }
             public object Root { get; }
-            internal CompiledGraph(ContentDefinition owner, string path, string field, object wrapper, bool debug)
+            internal CompiledGraph(ContentDefinition owner, string path, string field, object wrapper, bool debug, ContentDefinition sourceOwner = null)
             {
                 Owner = owner; AssetPath = path; Field = field; Wrapper = wrapper; Debug = debug;
+                SourceOwner = sourceOwner != null ? sourceOwner : owner;
                 Root = Value(wrapper, wrapper is CompiledEffectList ? "effects" : "root");
             }
         }
@@ -44,11 +48,11 @@ namespace Game.Editor.Narrative
             UnwiredMembers = unwired; Usage = new FactUsageAnalyzer(facts, refs);
         }
 
-        internal void AddGraph(ContentDefinition owner, string assetPath, string field, object wrapper, bool debug = false)
+        internal void AddGraph(ContentDefinition owner, string assetPath, string field, object wrapper, bool debug = false, ContentDefinition sourceOwner = null)
         {
             if (!(wrapper is CompiledCondition || wrapper is CompiledIntExpr || wrapper is CompiledEffectList))
                 throw new ArgumentException("Expected a compiled logic wrapper.", nameof(wrapper));
-            var graph = new CompiledGraph(owner, assetPath ?? "", field ?? "", wrapper, debug);
+            var graph = new CompiledGraph(owner, assetPath ?? "", field ?? "", wrapper, debug, sourceOwner);
             graphs.Add(graph); Usage.Analyze(graph);
         }
 

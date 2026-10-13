@@ -81,7 +81,7 @@ namespace Game.Editor.Narrative
                         }
                         catch (Exception exception) { local.Error("NAR-E017", "", "", "Compiled root could not validate: " + exception.GetType().Name + ": " + exception.Message); }
                         Copy(local, report, path, field.Field);
-                        context.AddGraph(definition, path, field.Field, field.Wrapper, debug);
+                        context.AddGraph(copy, path, field.Field, field.Wrapper, debug, definition);
                     }
                     if (copy is DialogProgramDefinition program) context.Usage.AnalyzeAssignments(program);
                 }

@@ -74,8 +74,7 @@ namespace Game.Editor.Narrative
                 }
             }
             if (graph.Wrapper is CompiledCondition) Require(graph.Root, true, graph);
-            else if (graph.Wrapper is CompiledIntExpr) NeedReads(graph.Root, graph);
-            else foreach (object node in Nodes(graph.Root).Where(n => n is FactBoolRead || n is FactIntRead)) NeedReads(node, graph);
+            // A value/progress read does not require a change from its declared default (V001).
 
             void Read(string name) { int slot = facts.SlotOf(name); if (slot >= 0) slots[slot].Reads++; }
         }
@@ -113,41 +112,44 @@ namespace Game.Editor.Narrative
                     Require(left is BoolLiteral ? right : left, required, graph); return;
                 }
             }
-            int? value = DefaultValue(node);
-            if (!value.HasValue || (value.Value != 0) != truth) NeedReads(node, graph);
+            RequireNonDefaultReads(node, truth, graph);
         }
-        void NeedReads(object root, CompiledGraph graph)
+        void RequireNonDefaultReads(object predicate, bool truth, CompiledGraph graph)
         {
             if (graph.Debug) return;
-            foreach (object node in Nodes(root))
+            foreach (object node in Nodes(predicate))
             {
                 string name = node is FactBoolRead || node is FactIntRead ? Value(node, "name") as string : null;
                 if (node is IntFunctionExpr && (Value(node, "function") as string == "since_accept" || Value(node, "function") as string == "since_stage"))
                     name = (Value(node, "textArgs") as string[])?.FirstOrDefault();
                 int slot = facts.SlotOf(name);
                 if (slot < 0) continue;
+                // Hold only this fact at its default. Another fact or a service can change independently,
+                // so an unknown result is not evidence that this particular fact needs a writer.
+                int? result = DefaultValue(predicate, slot);
+                if (!result.HasValue || (result.Value != 0) == truth) continue;
                 slots[slot].NeedsNonDefault = true;
                 slots[slot].ReadAssetPath ??= graph.AssetPath; slots[slot].ReadField ??= graph.Field;
             }
         }
-        int? DefaultValue(object node)
+        int? DefaultValue(object node, int factSlot)
         {
             if (node == null) return null;
             if (node is IntLiteral) return (int)Value(node, "value");
             if (node is BoolLiteral) return (bool)Value(node, "value") ? 1 : 0;
             if (node is FactIntRead || node is FactBoolRead)
-            { int slot = facts.SlotOf(Value(node, "name") as string); return slot >= 0 ? facts.DefaultAt(slot) : (int?)null; }
+            { int slot = facts.SlotOf(Value(node, "name") as string); return slot == factSlot ? facts.DefaultAt(slot) : (int?)null; }
             if (node is IntFunctionExpr)
             {
                 string name = Value(node, "function") as string;
-                if (name == "since_accept" || name == "since_stage") return 0;
+                if ((name == "since_accept" || name == "since_stage") && facts.SlotOf((Value(node, "textArgs") as string[])?.FirstOrDefault()) == factSlot) return 0;
                 return null;
             }
             if (node is NotCondition)
-            { int? inner = DefaultValue(Value(node, "operand")); return inner.HasValue ? inner == 0 ? 1 : 0 : (int?)null; }
+            { int? inner = DefaultValue(Value(node, "operand"), factSlot); return inner.HasValue ? inner == 0 ? 1 : 0 : (int?)null; }
             if (node is NegateExpr)
-            { int? inner = DefaultValue(Value(node, "operand")); return inner.HasValue ? Saturate(-(long)inner.Value) : (int?)null; }
-            int? a = DefaultValue(Value(node, "left")), b = DefaultValue(Value(node, "right"));
+            { int? inner = DefaultValue(Value(node, "operand"), factSlot); return inner.HasValue ? Saturate(-(long)inner.Value) : (int?)null; }
+            int? a = DefaultValue(Value(node, "left"), factSlot), b = DefaultValue(Value(node, "right"), factSlot);
             if (!a.HasValue || !b.HasValue) return null;
             if (node is AddExpr) return Saturate((long)a.Value + b.Value);
             if (node is SubtractExpr) return Saturate((long)a.Value - b.Value);

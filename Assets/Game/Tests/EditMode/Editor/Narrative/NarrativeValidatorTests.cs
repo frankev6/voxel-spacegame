@@ -41,7 +41,11 @@ namespace Game.Tests.EditMode.Editor.Narrative
             var integer = new Fixture(new FactDeclaration { Name = "story_count", Kind = FactKind.Int, Default = 5 });
             integer.Source("$story_count >= 5"); Has(integer.Validate(), "NAR-V001", false);
             integer.Source("$story_count < 5"); Has(integer.Validate(), "NAR-V001", true);
-            integer.Source("true", progress: "since_accept(\"story_count\")"); Has(integer.Validate(), "NAR-V001", true);
+            integer.Source("true", progress: "since_accept(\"story_count\")"); Has(integer.Validate(), "NAR-V001", false);
+            integer.Source("$story_count >= credits()"); Has(integer.Validate(), "NAR-V001", false);
+            var independent = new Fixture(new FactDeclaration { Name = "story_count", Kind = FactKind.Int, Default = 5 },
+                new FactDeclaration { Name = "story_other", Kind = FactKind.Int, Default = 5, Flags = FactFlags.WrittenByCode, Note = "Independent code writer." });
+            independent.Source("$story_count != $story_other"); Has(independent.Validate(), "NAR-V001", false);
         }
 
         [Test] public void V002_WrittenNeverRead()
@@ -151,6 +155,12 @@ namespace Game.Tests.EditMode.Editor.Narrative
             public void Run(NarrativeValidationContext context, ValidationReport report)
             {
                 Assert.IsNotNull(context.Compiler); Assert.IsNotNull(context.Refs); Assert.Greater(context.Graphs.Count, 0);
+                foreach (var graph in context.Graphs)
+                {
+                    Assert.AreNotSame(graph.SourceOwner, graph.Owner, "Providers receive scratch owners matching their compiled wrappers.");
+                    Assert.IsEmpty(AssetDatabase.GetAssetPath(graph.Owner));
+                    if (graph.Field == "condition") Assert.AreSame(((NarrativeValidatorFixtureDefinition)graph.Owner).Condition, graph.Wrapper);
+                }
                 Assert.Greater(context.Usage.WorldUses.Count, 0); calls.Add(Order);
             }
         }
