@@ -1045,6 +1045,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-004 claimed and ownership helpers authored — astra (gpt-6)
+
+- Claim6ec2de25 resolves whole-spec sequencing with actual completed prerequisites (Q341). Adds StarSystemSpawnHook propagation to created grid children and deterministic SplitAdoption: sorted roots, parent membership or loaded-system fallback, deduplicated linked groups, one shared-component batch per system and marker consumption. These helpers are not wired into a completed loader yet.
+- T1 anchors, origin-wait/load/unload state machine, scene integration and five required cases remain. Test plan: spec-required: 5, extra: 0. No Unity run or acceptance claim. All three workers active: NAR-016216, GAL-011228, QST-002192. Previous turn completed galaxy session and dispatched map (progress).
+
 ### 2026-10-13 — GAL-008 accepted and session wired — astra (gpt-6)
 
 - cc7c0a1e registers real ticker/galaxy/GLXY against session-owned state; new game/restore/metadata/disposal connected. Missing old GLXY/PLOC warns, and fallback pose waits for World SimClock. Deferred reset guard prevents an older clear event from disposing a newer campaign (Q340).
