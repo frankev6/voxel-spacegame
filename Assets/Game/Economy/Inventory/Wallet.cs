@@ -1,13 +1,33 @@
+using System;
+
 namespace Game.Economy
 {
-    /// <summary>SPEC-50 contract shell; ECO-003 owns behavior.</summary>
+    /// <summary>SPEC-50 §4.3: bounded credits with saturating grants and atomic spending.</summary>
     public sealed class Wallet
     {
-        public long Credits => throw new System.NotImplementedException("ECO-003");
-        public void Add(long amount) => throw new System.NotImplementedException("ECO-003");                  // amount ≥ 0; saturates at MaxCredits; negative → ArgumentOutOfRange
-        public bool TrySpend(long amount) => throw new System.NotImplementedException("ECO-003");             // amount ≥ 0; false and no change when Credits < amount
-        public void Set(long credits) => throw new System.NotImplementedException("ECO-003");                 // restore and new game only; clamps to [0, MaxCredits]
         public const long MaxCredits = 1_000_000_000_000L;
-        public event System.Action Changed { add => throw new System.NotImplementedException("ECO-003"); remove => throw new System.NotImplementedException("ECO-003"); }
+        public long Credits { get; private set; }
+        public event Action Changed;
+
+        public void Add(long amount)
+        {
+            if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
+            // Compare before adding so even long.MaxValue cannot overflow.
+            Set(amount >= MaxCredits - Credits ? MaxCredits : Credits + amount);
+        }
+
+        public bool TrySpend(long amount)
+        {
+            if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
+            if (amount > Credits) return false;
+            Set(Credits - amount); return true;
+        }
+
+        public void Set(long credits)
+        {
+            long next = Math.Clamp(credits, 0, MaxCredits);
+            if (next == Credits) return;
+            Credits = next; Changed?.Invoke();
+        }
     }
 }
