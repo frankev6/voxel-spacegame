@@ -16,6 +16,7 @@ namespace Game.Simulation.Power
             PowerGridSetup.Register(SystemAPI.GetSingletonBuffer<RootComponentRegistration>());
             var registrations = SystemAPI.GetSingletonBuffer<FunctionalComponentRegistration>();
             PowerRegistration.RegisterConsumer(registrations, BlockModuleId.ShieldEmitter);
+            // ADR-0016: all functional modules can receive status requests, including non-consumers.
             registrations.Add(new FunctionalComponentRegistration { Module = BlockModuleId.None, Type = ComponentType.ReadWrite<Inhibited>() });
             state.Enabled = false;
         }
