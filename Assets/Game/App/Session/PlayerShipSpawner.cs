@@ -29,15 +29,34 @@ namespace Game.App.Session
             int handle = record.Register(registry);
             try
             {
-                // TODO(FND-012): route this request through ShipSpawnService, reusing this record's single registered handle.
-                // TODO(GAL-008): bind the canonical player location once GalaxyState/streaming exist.
-                root = GridSpawnApi.RequestSpawn(world.EntityManager, registry, handle, new GridSpawnParams
+                if (Services.TryGet<Game.App.Spawning.ShipSpawnService>(out var spawner))
                 {
-                    PersistentId = record.PersistentId, Pose = RigidTransform.identity, Kind = GridKind.Ship,
-                    Motion = GridMotion.Dynamic, Flags = GridSpawnFlags.WriteBack, Profile = GridProfile.PlayerShip
-                });
-                // Requester data is available now; unified galaxy spawning remains FND-012/GAL-008.
-                world.EntityManager.AddComponentData(root, Game.Simulation.Allegiance.Player);
+                    float3 position = float3.zero; quaternion rotation = quaternion.identity;
+                    if (!session.IsSandbox && Services.TryGet<Game.Galaxy.Services.GalaxyService>(out var galaxy) && galaxy.State.HasPlayerLocation)
+                    {
+                        using var origins = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Game.Galaxy.Components.FrameOrigin>());
+                        if (origins.IsEmptyIgnoreFilter) throw new InvalidOperationException("Player placement requires FrameOrigin.");
+                        var location = galaxy.State.PlayerLocation;
+                        position = MathD.ToLocal(location.PositionM, origins.GetSingleton<Game.Galaxy.Components.FrameOrigin>().OriginInStarSystem);
+                        rotation = Planar.YawRotation(location.YawRad);
+                    }
+                    var id = spawner.SpawnRegistered(new Game.App.Spawning.ShipSpawnArgs
+                    {
+                        Structure = record.Structure, PersistentId = record.PersistentId, Position = position,
+                        Rotation = rotation, IsPlayer = true, Allegiance = Game.Simulation.Allegiance.Player
+                    }, handle);
+                    if (!spawner.TryGetRoot(id, out root)) throw new InvalidOperationException("Player spawn request was rejected");
+                }
+                else
+                {
+                    // Retain the standalone M1 path until the real galaxy composition is installed.
+                    root = GridSpawnApi.RequestSpawn(world.EntityManager, registry, handle, new GridSpawnParams
+                    {
+                        PersistentId = record.PersistentId, Pose = RigidTransform.identity, Kind = GridKind.Ship,
+                        Motion = GridMotion.Dynamic, Flags = GridSpawnFlags.WriteBack, Profile = GridProfile.PlayerShip
+                    });
+                    world.EntityManager.AddComponentData(root, Game.Simulation.Allegiance.Player);
+                }
             }
             catch { Release(); throw; }
         }

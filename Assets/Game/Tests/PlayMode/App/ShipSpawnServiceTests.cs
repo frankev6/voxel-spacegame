@@ -128,12 +128,16 @@ namespace Game.Tests.PlayMode.App
         [Test] public void Player_NoMember()
         {
             using var f = new Fixture(); var args = f.Args(player: true); args.Structure = f.Source; args.PersistentId = 79;
-            var id = f.Spawner.Spawn(args); Assert.AreEqual(79, id.Value); Assert.AreEqual(1, f.Allocator.Next);
+            int handle = f.Registry.Register(f.Source);
+            var id = f.Spawner.SpawnRegistered(args, handle); Assert.AreEqual(79, id.Value); Assert.AreEqual(1, f.Allocator.Next);
             Assert.IsTrue(f.Spawner.TryGetRoot(id, out var request)); var pending = f.EM.GetComponentData<GridSpawnRequest>(request);
             Assert.AreEqual(GridProfile.PlayerShip, pending.Profile); Assert.AreEqual(GridSpawnFlags.WriteBack, pending.Flags);
             var root = f.Convert(id); Assert.IsFalse(f.EM.HasComponent<StarSystemMember>(root)); Assert.IsTrue(f.EM.HasComponent<PlayerShip>(root));
             Assert.AreEqual(Allegiance.Player, f.EM.GetComponentData<Allegiance>(root)); FlyingProfile(f.EM, root);
-            Assert.AreSame(f.Source, f.Registry.Get(f.EM.GetComponentData<GridSource>(root).StructureHandle));
+            Assert.AreEqual(handle, f.EM.GetComponentData<GridSource>(root).StructureHandle);
+            Assert.AreSame(f.Source, f.Registry.Get(handle));
+            f.Spawner.Dispose(); Assert.AreSame(f.Source, f.Registry.Get(handle), "Fleet owns the existing borrow.");
+            f.Registry.Release(handle);
         }
         [Test] public void YawOnly()
         {

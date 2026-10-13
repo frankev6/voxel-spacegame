@@ -913,6 +913,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 320 | SPEC-60 Q30: layout audit scroll/measurement semantics | Resolved: exclude scroll content subtree but audit viewport; use intrinsic nowrap width, clear result list and check all containing panels. Functional acceptance pending. | Tech lead |
 | 333 | SPEC-32 Q12: travel validation and geometry dependencies | Resolved: scoped field errors precede geometry checks; inclusive blueprint bounds and voxel shape radius use double arithmetic, shipped gates validated against real content. | Tech lead |
 | 335 | SPEC-30 Q33: start-location time source | Resolved: use canonical SimClock UniversalTime, zero before a clock exists; app sets/restores clock before placement. No duplicate saved time. | Tech lead |
+| 336 | SPEC-01 Q30/Q31: real spawner integration and duplicate fleet borrow | Resolved: install against actual galaxy service; internal registered-source path reuses the fleet-owned handle and never releases it. Service releases only its own registrations. Production session binding remains pending. | Tech lead |
 | 334 | SPEC-33 Q24: legacy first formation conflicts with final encounter table | Resolved: retain/report original formation and explicit replacement diagnostics; authored ENC-010 composition table governs final fleets, real assets required. | Tech lead |
 | 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
 
@@ -1039,6 +1040,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — FND-012 fleet handoff authored — astra (gpt-6)
+
+- Player spawning now routes through the real service when composed, reusing the fleet-owned registration. Registered-source validation rejects mismatched handles; service disposal and failed requests leave externally owned borrows intact. Player pose reads canonical location relative to FrameOrigin; fleet writeback captures galaxy location. Standalone M1 fallback remains until actual production composition is installed.
+- Tests: spec-required: 6, extra: 0; extended existing Player_NoMember for same-handle ownership, not an extra test. No Unity run yet; validate with completed galaxy/session batch. Q336 resolves SPEC-01 duplicate registration. Previous turn integrated FND-012 source (progress).
 
 ### 2026-10-13 — FND-012 source integrated into galaxy batch — astra (gpt-6)
 

@@ -43,7 +43,14 @@ namespace Game.App.Spawning
         public PersistentId Spawn(in ShipSpawnArgs args) => SpawnCore(args, galaxy.State.CurrentStarSystem);
         public PersistentId Spawn(ContentId blueprint, float3 position, quaternion rotation, Allegiance allegiance, bool withAi)
             => Spawn(new ShipSpawnArgs { Blueprint = blueprint, Position = position, Rotation = rotation, Allegiance = allegiance, WithAi = withAi });
-        PersistentId SpawnCore(in ShipSpawnArgs args, StarSystemId starSystem)
+        // Fleet records retain ownership of their existing registry borrow through scene exit.
+        internal PersistentId SpawnRegistered(in ShipSpawnArgs args, int handle)
+        {
+            if (handle < 0 || args.Structure == null || !ReferenceEquals(registry.Get(handle), args.Structure))
+                throw new ArgumentException("The registered handle must refer to the supplied structure.", nameof(handle));
+            return SpawnCore(args, galaxy.State.CurrentStarSystem, handle);
+        }
+        PersistentId SpawnCore(in ShipSpawnArgs args, StarSystemId starSystem, int registeredHandle = -1)
         {
             if (disposed) throw new ObjectDisposedException(nameof(ShipSpawnService));
             if (!world.IsCreated || gameplay.IsEmptyIgnoreFilter) throw new InvalidOperationException("Ship spawning requires GameplayActive in a live World.");
@@ -67,20 +74,20 @@ namespace Game.App.Spawning
             {
                 if (args.Structure != null)
                 {
-                    handle = registry.Register(args.Structure);
+                    handle = registeredHandle >= 0 ? registeredHandle : registry.Register(args.Structure);
                     root = GridSpawnApi.RequestSpawn(em, registry, handle, p);
                 }
                 else root = GridSpawnApi.RequestSpawnBlueprint(em, blueprint.Id.Hash, p);
                 em.AddComponentData(root, args.Allegiance);
                 if (!args.IsPlayer) em.AddSharedComponent(root, new StarSystemMember { Id = starSystem });
                 if (args.WithAi) em.AddComponentData(root, new AiBrain { ProfileIndex = AiSetup.ProfileIndexOf(catalog, args.AiProfile) });
-                roots.Add(value, root); if (handle >= 0) handles.Add(value, handle);
+                roots.Add(value, root); if (handle >= 0 && registeredHandle < 0) handles.Add(value, handle);
                 return new PersistentId(value);
             }
             catch
             {
                 if (root != Entity.Null && em.Exists(root)) em.DestroyEntity(root);
-                if (handle >= 0) registry.Release(handle);
+                if (handle >= 0 && registeredHandle < 0) registry.Release(handle);
                 // The grid owner reconciles a cancelled request's read lease on its next update.
                 throw;
             }

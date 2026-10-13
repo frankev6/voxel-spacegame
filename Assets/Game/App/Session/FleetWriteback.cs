@@ -22,7 +22,7 @@ namespace Game.App.Session
             if (!em.HasComponent<VoxelGrid>(root) || em.IsComponentEnabled<GridSpawning>(root))
                 throw new System.InvalidOperationException("The player spawn has not finished");
             GridStructureSync.WriteBack(em, root, registry);
-            // TODO(GAL-008): capture the canonical galaxy player location after structure writeback.
+            if (Game.Core.Services.TryGet<Game.Galaxy.Services.GalaxyService>(out var galaxy)) galaxy.CapturePlayerLocation();
         }
     }
 }
