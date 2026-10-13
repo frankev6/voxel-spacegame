@@ -1,0 +1,17 @@
+title: territory_hostile_entry_start
+tags: territory hostile
+---
+<<play_sfx cue_ui_fail>>
+Hostile sensor pings flood your tactical feed as you cross the border. Someone is tracking your vector from the dark side of the system. #line:territory_hostile_entry_start_00
+<<if quest_active("quest_hostile_blackbox")>>
+    -> Mark Contact in Intel #line:territory_hostile_entry_start_01 #quest
+        <<quest_log quest_hostile_blackbox legacy_1>>
+        <<stop>>
+<<endif>>
+-> Request Reinforcement Contract #line:territory_hostile_entry_start_02 #quest
+    <<start_quest contract_bounty_probe>>
+    <<stop>>
+-> Run Silent #line:territory_hostile_entry_start_03 #leave
+    <<stop>>
+===
+

@@ -1,0 +1,14 @@
+title: survey_system_start
+tags: story tutorial mission
+---
+We must repair the hull breach left by the xeno probes. We'll need raw materials to do so. Survey the local system for any useful materials and come back once you're done. #line:survey_system_start_00 #portrait:speaker_nora
+-> Hand over the raw materials <<if (has_item("resource_palladium", 3)) and (has_item("resource_palladium", 3))>> #line:survey_system_start_01
+    <<take_item resource_palladium 3>>
+    <<set_fact story_survey_complete true>>
+    <<give_item item_strange_matter_container_full 1>>
+    <<stop>>
+-> Leave #line:survey_system_start_02 #leave
+    <<abort_beat>>
+    <<stop>>
+===
+

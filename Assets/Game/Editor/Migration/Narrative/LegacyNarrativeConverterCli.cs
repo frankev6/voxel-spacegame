@@ -32,7 +32,12 @@ namespace Game.Editor.Migration.Narrative
                 {
                     var plan = LegacyNarrativeConverter.Prepare(sources, LegacyNarrativeConverter.DefaultRoot,
                         LegacyNarrativeConverter.DefaultManifest, LegacyNarrativeConverter.Resolve, report);
-                    if (plan != null && !report.HasErrors) LegacyNarrativeConverter.Write(plan, force, report);
+                    if (plan != null && !report.HasErrors)
+                    {
+                        LegacyNarrativeConverter.Write(plan, force, report);
+                        // Batch exit cannot rely on the import postprocessor's deferred callback.
+                        if (!report.HasErrors) Game.Editor.Content.ContentDatabaseBuilder.Rebuild();
+                    }
                 }
             }
             catch (Exception exception) { report.Error("MIG-E020", "LegacyNarrative", "", exception.GetType().Name + ": " + exception.Message); }

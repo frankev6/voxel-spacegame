@@ -1,0 +1,114 @@
+title: mystery_signal_start
+tags: 
+---
+<<play_sfx cue_ui_click>>
+Your comms array picks up an encrypted signal. It's repeating coordinates nearby. #line:mystery_signal_start_00
+<<if quest_not_started("quest_signal_trace")>>
+    -> Flag as Signal Trace Contract #line:mystery_signal_start_01 #quest
+        <<start_quest quest_signal_trace>>
+        <<jump mystery_signal_signal_source>>
+<<endif>>
+-> Investigate #line:mystery_signal_start_02
+    <<reveal_clue rumor_hidden_research_station>>
+    <<jump mystery_signal_signal_source>>
+<<if quest_active("quest_signal_trace")>>
+    -> Submit Signal Telemetry (Debug Complete) #line:mystery_signal_start_03 #quest
+        <<complete_quest quest_signal_trace>>
+        <<stop>>
+<<endif>>
+-> Ignore Signal #line:mystery_signal_start_04 #leave
+    <<stop>>
+===
+
+title: mystery_signal_signal_source
+tags: 
+---
+<<play_sfx cue_ui_click>>
+Following the signal leads to a hidden research station. It appears abandoned... or is it? #line:mystery_signal_signal_source_00
+-> Board the Station #line:mystery_signal_signal_source_01
+    <<detour mystery_signal_station_interior>>
+    <<jump mystery_signal_signal_source>>
+-> Scan From Distance #line:mystery_signal_signal_source_02
+    <<if roll(100) <= 60>>
+    <<jump mystery_signal_scan_good>>
+    <<else>>
+    <<jump mystery_signal_scan_bad>>
+    <<endif>>
+-> Leave #line:mystery_signal_signal_source_03 #leave
+    <<stop>>
+===
+
+title: mystery_signal_station_interior
+tags: 
+---
+The station interior is dark. Emergency lights flash red. You hear strange sounds echoing through the halls. #line:mystery_signal_station_interior_00
+-> Search Lab #line:mystery_signal_station_interior_01
+    <<give_item resource_palladium 2>>
+    <<return>>
+-> Search Armory #line:mystery_signal_station_interior_02
+    <<give_credits 250>>
+    <<return>>
+-> Go Deeper #line:mystery_signal_station_interior_03
+    <<jump mystery_signal_station_deep>>
+-> Back to Ship #line:mystery_signal_station_interior_04 #leave
+    <<return>>
+===
+
+title: mystery_signal_station_deep
+tags: 
+---
+<<play_sfx cue_ui_click>>
+Deep inside you find an AI terminal still operational. It offers you a choice. #line:mystery_signal_station_deep_00
+-> Download Data #line:mystery_signal_station_deep_01
+    <<give_item item_ai_core_data 1>>
+    <<add_fact research_points 25>>
+    <<stop>>
+-> Destroy the Terminal #line:mystery_signal_station_deep_02
+    <<damage_ship 5>>
+    <<stop>>
+===
+
+title: mystery_signal_scan_good
+tags: 
+---
+<<play_sfx cue_ui_success>>
+Long-range scans reveal the station contains valuable research data. #line:mystery_signal_scan_good_00
+-> Board Now #line:mystery_signal_scan_good_01
+    <<detour mystery_signal_station_interior>>
+    <<jump mystery_signal_scan_good>>
+-> Leave With Scan Data #line:mystery_signal_scan_good_02
+    <<add_fact research_points 10>>
+    <<stop>>
+===
+
+title: mystery_signal_scan_bad
+tags: 
+---
+<<play_sfx cue_ui_fail>>
+Your scan triggers an automated defense system! Turrets target your ship! #line:mystery_signal_scan_bad_00
+-> Evade! #line:mystery_signal_scan_bad_01
+    <<if roll(100) <= 70>>
+    <<jump mystery_signal_evade_success>>
+    <<else>>
+    <<jump mystery_signal_evade_fail>>
+    <<endif>>
+===
+
+title: mystery_signal_evade_success
+tags: 
+---
+You dodge the turret fire and escape unscathed. #line:mystery_signal_evade_success_00
+-> Continue #line:mystery_signal_evade_success_01
+    <<stop>>
+===
+
+title: mystery_signal_evade_fail
+tags: 
+---
+<<play_sfx cue_ui_fail>>
+A turret blast grazes your hull before you can escape. #line:mystery_signal_evade_fail_00
+-> Damage Report #line:mystery_signal_evade_fail_01
+    <<damage_ship 15>>
+    <<stop>>
+===
+

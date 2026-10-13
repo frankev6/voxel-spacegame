@@ -1,0 +1,47 @@
+title: singing_storm_start
+tags: gas_giant
+---
+Your sensors pick up a rhythmic signal coming from inside the gas giant's crushing atmosphere. It's not random static; it's a distress beacon using an outdated Ark encryption code. The source is deep—approaching hull-crush depth. #line:singing_storm_start_00
+-> Dive and Retrieve <<if has_item("resource_fuel", 2)>> #line:singing_storm_start_01
+    <<take_item resource_fuel 2>>
+    <<if roll(100) <= 60>>
+    <<jump singing_storm_success_dive>>
+    <<else>>
+    <<jump singing_storm_fail_dive>>
+    <<endif>>
+-> Deploy Drone #line:singing_storm_start_02
+    <<jump singing_storm_drone_success>>
+-> Ignore #line:singing_storm_start_03 #leave
+    <<stop>>
+===
+
+title: singing_storm_success_dive
+tags: 
+---
+The pressure screams against your hull, but you snag the object. It's a 'Black Box' from Ark Mission 12. The audio log is terrifying\: 'The clouds... they aren't clouds. They are billions of microscopic machines eating the ship.' #line:singing_storm_success_dive_00
+-> Continue #line:singing_storm_success_dive_01
+    <<give_item item_ancient_data_log 1>>
+    <<damage_ship 5>>
+    <<reveal_clue clue_ark_mission_12>>
+    <<stop>>
+===
+
+title: singing_storm_drone_success
+tags: 
+---
+The pressure screams against your hull, but you snag the object. It's a 'Black Box' from Ark Mission 12. The audio log is terrifying\: 'The clouds... they aren't clouds. They are billions of microscopic machines eating the ship.' #line:singing_storm_drone_success_00
+-> Continue #line:singing_storm_drone_success_01
+    <<give_item item_ancient_data_log 1>>
+    <<reveal_clue clue_ark_mission_12>>
+    <<stop>>
+===
+
+title: singing_storm_fail_dive
+tags: 
+---
+Turbulence slams your ship against a pocket of metallic hydrogen. You are forced to emergency ascend before the hull buckles. You lost the signal. #line:singing_storm_fail_dive_00
+-> Continue #line:singing_storm_fail_dive_01
+    <<damage_ship 20>>
+    <<stop>>
+===
+

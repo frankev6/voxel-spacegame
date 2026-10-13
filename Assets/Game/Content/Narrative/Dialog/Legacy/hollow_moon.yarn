@@ -1,0 +1,23 @@
+title: hollow_moon_start
+tags: moon
+---
+Scanning reveals this moon is hollow. It's a shell built around a massive, dormant engine. It looks like the Vanguard tried to turn this moon into a ship. #line:hollow_moon_start_00
+-> Enter Core #line:hollow_moon_start_01
+    <<jump hollow_moon_engine_choice>>
+-> Mine Shell #line:hollow_moon_start_02
+    <<give_credits 400>>
+    <<stop>>
+===
+
+title: hollow_moon_engine_choice
+tags: 
+---
+The engine is intact but requires a Strange Matter spark to start. If you start it, the moon might leave orbit... or explode. #line:hollow_moon_engine_choice_00
+-> Ignite Engine #line:hollow_moon_engine_choice_01
+    <<reveal_clue rumor_hidden_planet>>
+    <<stop>>
+-> Strip Engine for Parts #line:hollow_moon_engine_choice_02
+    <<give_item item_vanguard_thruster 1>>
+    <<stop>>
+===
+

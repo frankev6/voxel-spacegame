@@ -1,0 +1,25 @@
+title: sensor_ghost_start
+tags: nebula
+---
+Your sensors go wild. You see a massive fleet surrounding you—hundreds of Ark ships. But your visual scanners show nothing. The nebula is psycho-reactive; it's projecting your crew's hopes onto the radar. #line:sensor_ghost_start_00
+-> Calibrate Sensors #line:sensor_ghost_start_01
+    <<add_fact research_points 100>>
+    <<stop>>
+-> Hail Them #line:sensor_ghost_start_02
+    <<jump sensor_ghost_sanity_break>>
+-> Harvest Gas #line:sensor_ghost_start_03
+    <<give_item item_psycho_gas 1>>
+    <<give_credits 250>>
+    <<stop>>
+===
+
+title: sensor_ghost_sanity_break
+tags: 
+---
+You hail the ghosts. The static screams back with the voices of your dead relatives. The crew panics. #line:sensor_ghost_sanity_break_00
+-> Continue <<if has_item("resource_crew", 1)>> #line:sensor_ghost_sanity_break_01
+    <<set_fact trait_shaken true>>
+    <<take_item resource_crew 1>>
+    <<stop>>
+===
+

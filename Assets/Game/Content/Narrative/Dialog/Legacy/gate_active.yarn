@@ -1,0 +1,11 @@
+title: gate_active_start
+tags: story navigation gate
+---
+The gate hums with awakened energy. Do you want to engage the warpgate and exit this solar system? #line:gate_active_start_00
+-> Use warpgate #line:gate_active_start_01
+    <<request_lane_jump starsys_whisper>>
+-> Leave #line:gate_active_start_02 #leave
+    <<abort_beat>>
+    <<stop>>
+===
+

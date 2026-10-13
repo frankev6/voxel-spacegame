@@ -1,0 +1,24 @@
+title: overgrown_forge_start
+tags: terrestrial_jungle
+---
+Massive Vanguard fabricators are rusting here, wrapped in thick, purple vines. The plants seem to be feeding on the residual energy of the machines. The factory is still trying to print something. #line:overgrown_forge_start_00
+-> Cut Vines #line:overgrown_forge_start_01
+    <<jump overgrown_forge_machine_active>>
+-> Harvest Plants #line:overgrown_forge_start_02
+    <<give_item resource_fuel 3>>
+    <<stop>>
+-> Scan Schematic #line:overgrown_forge_start_03
+    <<give_item item_blueprint_vanguard_plating 1>>
+    <<reveal_clue clue_vanguard_forge>>
+    <<stop>>
+===
+
+title: overgrown_forge_machine_active
+tags: 
+---
+The machine roars to life. It finishes its job\: A single, perfect 'Terraforming Seed.' But the noise attracts the local fauna. #line:overgrown_forge_machine_active_00
+-> Brace for Impact #line:overgrown_forge_machine_active_01
+    <<give_item item_terraforming_seed 1>>
+    <<start_combat encounter_jungle_beasts>>
+===
+

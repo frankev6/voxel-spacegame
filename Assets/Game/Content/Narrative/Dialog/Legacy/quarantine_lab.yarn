@@ -1,0 +1,33 @@
+title: quarantine_lab_start
+tags: station
+---
+This station was a medical research facility. The air is thick with yellow spores. Bodies in hazmat suits line the halls. They were researching a 'Cure' for the Silence's erasure effect. #line:quarantine_lab_start_00
+-> Search Lab #line:quarantine_lab_start_01
+    <<jump quarantine_lab_vial_found>>
+-> Purge Station <<if has_item("resource_fuel", 5)>> #line:quarantine_lab_start_02
+    <<take_item resource_fuel 5>>
+    <<add_fact rep_ark 1>>
+    <<stop>>
+-> Download Data #line:quarantine_lab_start_03
+    <<jump quarantine_lab_virus_contract>>
+===
+
+title: quarantine_lab_vial_found
+tags: 
+---
+You find a single vial of 'Reality Anchor.' It prevents one instance of death/erasure. #line:quarantine_lab_vial_found_00
+-> Take Vial #line:quarantine_lab_vial_found_01
+    <<give_item item_reality_anchor 1>>
+    <<stop>>
+===
+
+title: quarantine_lab_virus_contract
+tags: 
+---
+You download the research notes, but the spores have contaminated your ship's air supply. Your crew begins showing symptoms. #line:quarantine_lab_virus_contract_00
+-> Continue <<if has_item("resource_crew", 1)>> #line:quarantine_lab_virus_contract_01
+    <<give_item item_research_data 1>>
+    <<take_item resource_crew 1>>
+    <<stop>>
+===
+

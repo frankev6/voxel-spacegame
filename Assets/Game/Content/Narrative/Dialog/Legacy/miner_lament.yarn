@@ -1,0 +1,25 @@
+title: miner_lament_start
+tags: asteroid
+---
+A mining rig is silent. The drill is stuck deep in the rock. The logs say\: 'We hit a vein of something black. It's not ore. It's bleeding.' #line:miner_lament_start_00
+-> Retract Drill #line:miner_lament_start_01
+    <<jump miner_lament_oil_spill>>
+-> Loot Rig #line:miner_lament_start_02
+    <<give_item item_mining_beam_mk2 1>>
+    <<stop>>
+-> Destroy Asteroid <<if has_item("resource_fuel", 2)>> #line:miner_lament_start_03
+    <<take_item resource_fuel 2>>
+    <<add_fact rep_vanguard_ghosts 1>>
+    <<stop>>
+===
+
+title: miner_lament_oil_spill
+tags: 
+---
+You retract the drill. A geyser of raw, liquid Silence erupts. It damages your hull, but crystalizes into Dark Matter. #line:miner_lament_oil_spill_00
+-> Continue #line:miner_lament_oil_spill_01
+    <<damage_ship 15>>
+    <<give_credits 300>>
+    <<stop>>
+===
+

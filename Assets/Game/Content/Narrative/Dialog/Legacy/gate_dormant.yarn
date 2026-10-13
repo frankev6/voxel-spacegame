@@ -1,0 +1,14 @@
+title: gate_dormant_start
+tags: story tutorial mission
+---
+You see a circular gate large enough for a planet to fit through. Whatever technology was necessary to build this monolith, is far from any we currently possess. While we can't understand how they were built, our survey data says the gate reacts to awoken strangelets. Perhaps we can re-activate it. #line:gate_dormant_start_00
+-> Re-activate Gate <<if (has_item("item_strange_matter_container_full", 1)) and (has_item("item_strange_matter_container_full", 1))>> #line:gate_dormant_start_01
+    <<take_item item_strange_matter_container_full 1>>
+    <<set_fact gate_ark_start_active true>>
+    <<set_fact gate_ark_start_active true>>
+    <<stop>>
+-> Leave #line:gate_dormant_start_02 #leave
+    <<abort_beat>>
+    <<stop>>
+===
+

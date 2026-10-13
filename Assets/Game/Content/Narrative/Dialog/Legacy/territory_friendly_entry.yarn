@@ -1,0 +1,17 @@
+title: territory_friendly_entry_start
+tags: territory friendly
+---
+<<play_sfx cue_ui_view_open>>
+Friendly patrol signatures lock onto your ship and then stand down after an encrypted handshake. Local command uplinks fresh intel channels. #line:territory_friendly_entry_start_00
+<<if quest_active("quest_relation_watch")>>
+    -> Acknowledge Patrol Assignment #line:territory_friendly_entry_start_01 #quest
+        <<quest_log quest_relation_watch legacy_1>>
+        <<stop>>
+<<endif>>
+-> Request Local Contract #line:territory_friendly_entry_start_02 #quest
+    <<start_quest contract_signal_relay>>
+    <<stop>>
+-> Continue Patrol #line:territory_friendly_entry_start_03 #leave
+    <<stop>>
+===
+

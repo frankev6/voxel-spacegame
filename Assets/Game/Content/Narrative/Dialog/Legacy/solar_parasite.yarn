@@ -1,0 +1,23 @@
+title: solar_parasite_start
+tags: star
+---
+Orbiting close to the star is a creature... or a ship... that looks like a tick. It has extended a siphon into the star and is sucking plasma. It hasn't noticed you. #line:solar_parasite_start_00
+-> Kill It #line:solar_parasite_start_01
+    <<start_combat encounter_solar_parasite>>
+-> Siphon the Parasite #line:solar_parasite_start_02
+    <<jump solar_parasite_parasite_flee>>
+-> Study #line:solar_parasite_start_03
+    <<add_fact research_points 50>>
+    <<stop>>
+===
+
+title: solar_parasite_parasite_flee
+tags: 
+---
+You fill your tanks with super-charged plasma. The parasite detaches and flees into deep space, terrified of you. #line:solar_parasite_parasite_flee_00
+-> Continue #line:solar_parasite_parasite_flee_01
+    <<give_item resource_fuel 10>>
+    <<set_fact trait_solar_charged_engines true>>
+    <<stop>>
+===
+

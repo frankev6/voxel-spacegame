@@ -1,0 +1,31 @@
+title: time_echo_start
+tags: deep_space
+---
+Your radar pings a ship. It has your transponder code. It has your hull configuration. It is your ship, drifting heavily damaged. A hail comes through—it's your voice, but older and terrified. 'Don't go to the next sector. The Weaver is there.' #line:time_echo_start_00
+-> Demand Data #line:time_echo_start_01
+    <<jump time_echo_ship_fade>>
+-> Salvage Self #line:time_echo_start_02
+    <<jump time_echo_paradox_damage>>
+-> Attack #line:time_echo_start_03
+    <<start_combat encounter_doppelganger>>
+===
+
+title: time_echo_ship_fade
+tags: 
+---
+The future ship transmits its map data before flickering out of existence like a dying star. The coordinates reveal two sectors ahead. #line:time_echo_ship_fade_00
+-> Continue #line:time_echo_ship_fade_01
+    <<reveal_clue rumor_two_sectors_ahead>>
+    <<stop>>
+===
+
+title: time_echo_paradox_damage
+tags: 
+---
+As you strip parts from your future ship, reality snaps. The paradox causes internal damage to your current ship, but you get the repairs. #line:time_echo_paradox_damage_00
+-> Continue <<if has_item("resource_crew", 1)>> #line:time_echo_paradox_damage_01
+    <<repair_ship 50>>
+    <<take_item resource_crew 1>>
+    <<stop>>
+===
+

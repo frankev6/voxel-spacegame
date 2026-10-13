@@ -1,0 +1,35 @@
+title: distress_trap_start
+tags: trap
+---
+A distress beacon pulsates from a debris field. It claims to be a civilian transport out of fuel. #line:distress_trap_start_00 #illustration:illustration_beacon
+-> Approach to assist #line:distress_trap_start_01
+    <<if roll(100) <= 70>>
+    <<jump distress_trap_trap_spring>>
+    <<else>>
+    <<jump distress_trap_real_survivors>>
+    <<endif>>
+-> Ignore #line:distress_trap_start_02 #leave
+    <<stop>>
+===
+
+title: distress_trap_trap_spring
+tags: 
+---
+As you power down weapons to transfer fuel, pirate signatures flare to life all around you! It's a trap! #line:distress_trap_trap_spring_00
+-> Battle Stations! #line:distress_trap_trap_spring_01
+    <<start_combat encounter_raiders>>
+===
+
+title: distress_trap_real_survivors
+tags: 
+---
+<<play_sfx cue_ui_success>>
+You find a small pod with a grateful survivor. They offer a Blueprint in exchange for the fuel. #line:distress_trap_real_survivors_00
+-> Trade Fuel for Blueprint <<if has_item("resource_fuel", 2)>> #line:distress_trap_real_survivors_01
+    <<take_item resource_fuel 2>>
+    <<give_item item_research_blueprint 1>>
+    <<stop>>
+-> Leave them #line:distress_trap_real_survivors_02 #leave
+    <<stop>>
+===
+

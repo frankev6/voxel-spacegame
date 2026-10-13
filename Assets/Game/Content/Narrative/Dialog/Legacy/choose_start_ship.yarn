@@ -1,0 +1,21 @@
+title: choose_start_ship_start
+tags: story tutorial intro
+---
+The ARK bay systems come online. Choose your starting ship chassis. #line:choose_start_ship_start_00 #portrait:speaker_nora
+-> Take Fighter #line:choose_start_ship_start_01
+    <<give_ship ship_fighter>>
+    <<spawn_encounter encounter_xeno_probe_tutorial ark_station 1>>
+    <<set_fact intro_ship_chosen true>>
+    <<stop>>
+-> Take Frigate #line:choose_start_ship_start_02
+    <<give_ship ship_frigate>>
+    <<spawn_encounter encounter_xeno_probe_tutorial ark_station 1>>
+    <<set_fact intro_ship_chosen true>>
+    <<stop>>
+-> Take Vestari #line:choose_start_ship_start_03
+    <<give_ship ship_vestari>>
+    <<spawn_encounter encounter_xeno_probe_tutorial ark_station 1>>
+    <<set_fact intro_ship_chosen true>>
+    <<stop>>
+===
+

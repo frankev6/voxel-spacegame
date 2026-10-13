@@ -1,0 +1,16 @@
+title: fuel_station_start
+tags: 
+---
+An automated refueling depot orbits a gas giant. The docking fees are reasonable. #line:fuel_station_start_00
+-> Refuel (50 Scrap) <<if (credits() >= 50) and (credits() >= 50)>> #line:fuel_station_start_01
+    <<take_credits 50>>
+    <<give_item resource_fuel 3>>
+    <<stop>>
+-> Quick Top-Off (20 Scrap) <<if (credits() >= 20) and (credits() >= 20)>> #line:fuel_station_start_02
+    <<take_credits 20>>
+    <<give_item resource_fuel 1>>
+    <<stop>>
+-> Leave #line:fuel_station_start_03 #leave
+    <<stop>>
+===
+

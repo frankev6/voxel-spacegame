@@ -1,0 +1,54 @@
+title: shady_man_start
+tags: bar
+---
+A scarred man in a dark corner beckons you over. 'I have information... for a price.' #line:shady_man_start_00 #portrait:speaker_shady_man
+-> Pay for Info (100 Scrap) <<if (credits() >= 100) and (credits() >= 100)>> #line:shady_man_start_01
+    <<set_fact station_boarding_trial_meet_shady_contact true>>
+    <<take_credits 100>>
+    <<jump shady_man_info_revealed>>
+<<if quest_active("quest_station_boarding_trial")>>
+    -> Debrief Contact for Boarding Trial #line:shady_man_start_02 #quest
+        <<set_fact station_boarding_trial_decode_tip true>>
+        <<set_fact station_boarding_trial_meet_shady_contact true>>
+        <<set_fact station_boarding_trial_decode_tip true>>
+        <<jump shady_man_info_revealed>>
+<<endif>>
+-> Threaten Him #line:shady_man_start_03
+    <<set_fact station_boarding_trial_meet_shady_contact true>>
+    <<if roll(100) <= 50>>
+    <<jump shady_man_info_revealed>>
+    <<else>>
+    <<jump shady_man_bar_fight>>
+    <<endif>>
+-> Walk Away #line:shady_man_start_04 #leave
+    <<set_fact station_boarding_trial_meet_shady_contact true>>
+    <<complete_beat beat_shady_man>>
+    <<return>>
+===
+
+title: shady_man_info_revealed
+tags: 
+---
+<<play_sfx cue_ui_success>>
+'There's a hidden cache in the asteroid belt. Coordinates transmitted.' #line:shady_man_info_revealed_00
+-> Thanks #line:shady_man_info_revealed_01
+    <<reveal_clue rumor_hidden_cache>>
+    <<complete_beat beat_shady_man>>
+    <<return>>
+<<if quest_active("quest_station_boarding_trial")>>
+    -> Log Debrief to Boarding Trial #line:shady_man_info_revealed_02 #quest
+        <<quest_log quest_station_boarding_trial legacy_1>>
+        <<complete_beat beat_shady_man>>
+        <<return>>
+<<endif>>
+===
+
+title: shady_man_bar_fight
+tags: 
+---
+He pulls a knife! Security intervenes before it escalates. #line:shady_man_bar_fight_00
+-> Leave Quickly #line:shady_man_bar_fight_01 #leave
+    <<complete_beat beat_shady_man>>
+    <<return>>
+===
+

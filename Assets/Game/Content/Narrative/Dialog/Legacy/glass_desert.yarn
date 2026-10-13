@@ -1,0 +1,39 @@
+title: glass_desert_start
+tags: barren_world
+---
+This planet has no atmosphere. The surface is entirely fused glass. It wasn't formed naturally; scanning indicates the planet was 'glassed' by a weapon of impossible heat roughly 1,000 years ago. In the center of a crater, a single Vanguard spire stands untouched. #line:glass_desert_start_00
+-> Excavate Spire #line:glass_desert_start_01
+    <<jump glass_desert_spire_open>>
+-> Reflect Sunlight #line:glass_desert_start_02
+    <<jump glass_desert_reflection_event>>
+-> Harvest Glass #line:glass_desert_start_03
+    <<jump glass_desert_silence_trap>>
+===
+
+title: glass_desert_spire_open
+tags: 
+---
+You breach the outer shell. Inside is a perfectly preserved Vanguard terminal. It offers a single weapon schematic—a 'Glass-Cannon' beam. #line:glass_desert_spire_open_00
+-> Continue #line:glass_desert_spire_open_01
+    <<give_item item_blueprint_glass_beam 1>>
+    <<reveal_clue clue_vanguard_spire>>
+    <<stop>>
+===
+
+title: glass_desert_reflection_event
+tags: 
+---
+You align your solar panels to catch the brilliant reflection off the glass surface. Your energy banks surge with power. #line:glass_desert_reflection_event_00
+-> Continue #line:glass_desert_reflection_event_01
+    <<give_item resource_fuel 5>>
+    <<stop>>
+===
+
+title: glass_desert_silence_trap
+tags: 
+---
+As you harvest the glass, the ground shatters. Sub-surface 'Glass Worms' (Silence constructs) erupt. They were dormant until you disturbed the seal. #line:glass_desert_silence_trap_00
+-> Battle Stations! #line:glass_desert_silence_trap_01
+    <<start_combat encounter_glass_worms>>
+===
+

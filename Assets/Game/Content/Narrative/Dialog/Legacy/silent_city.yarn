@@ -1,0 +1,43 @@
+title: silent_city_start
+tags: terrestrial
+---
+You land in a sprawling metropolis. The buildings are pristine chrome and white stone. Vehicles are parked in the streets. Food is on the tables in cafes. But there are no people. No bodies. No signs of struggle. They just... vanished. #line:silent_city_start_00
+-> Loot Homes #line:silent_city_start_01
+    <<if roll(100) <= 50>>
+    <<jump silent_city_food_find>>
+    <<else>>
+    <<jump silent_city_trap_echo>>
+    <<endif>>
+-> Access Network #line:silent_city_start_02
+    <<jump silent_city_network_truth>>
+-> Leave #line:silent_city_start_03 #leave
+    <<stop>>
+===
+
+title: silent_city_food_find
+tags: 
+---
+You scavenge the abandoned homes and find preserved supplies still in their packaging. #line:silent_city_food_find_00
+-> Take Supplies #line:silent_city_food_find_01
+    <<give_credits 300>>
+    <<stop>>
+===
+
+title: silent_city_network_truth
+tags: 
+---
+The logs show the city didn't die. They 'Uploaded.' The entire population transferred their consciousness into a satellite array to escape the Silence. The array is orbiting the planet now. #line:silent_city_network_truth_00
+-> Continue #line:silent_city_network_truth_01
+    <<reveal_clue rumor_satellite_array>>
+    <<stop>>
+===
+
+title: silent_city_trap_echo
+tags: 
+---
+You enter a house. A holographic 'Echo' of a family eating dinner triggers. It loops the moment of their disappearance—a flash of black light. Your crew member watching it collapses, their mind partially erased. #line:silent_city_trap_echo_00
+-> Continue <<if has_item("resource_crew", 1)>> #line:silent_city_trap_echo_01
+    <<take_item resource_crew 1>>
+    <<stop>>
+===
+

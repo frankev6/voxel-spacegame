@@ -1,0 +1,48 @@
+title: derelict_salvage_start
+tags: salvage
+---
+A drifting cruiser, split in half by some massive impact, floats nearby. Sensors detect lingering radiation and valuable scrap. #line:derelict_salvage_start_00 #illustration:illustration_wreckage
+-> Salvage Scrap #line:derelict_salvage_start_01
+    <<give_loot loot_base 3>>
+    <<jump derelict_salvage_salvage_success>>
+-> Scan for Modules #line:derelict_salvage_start_02
+    <<if roll(100) <= 40>>
+    <<jump derelict_salvage_module_found>>
+    <<else>>
+    <<jump derelict_salvage_nothing_found>>
+    <<endif>>
+-> Leave #line:derelict_salvage_start_03 #leave
+    <<stop>>
+===
+
+title: derelict_salvage_salvage_success
+tags: 
+---
+You extract useful materials, but the unstable reactor leaks radiation, slightly damaging your hull. #line:derelict_salvage_salvage_success_00
+-> Continue #line:derelict_salvage_salvage_success_01
+    <<damage_ship 10>>
+    <<remove_body>>
+    <<stop>>
+===
+
+title: derelict_salvage_module_found
+tags: 
+---
+<<play_sfx cue_ui_success>>
+Deep in the wreckage, you find an intact Weapon Module! #line:derelict_salvage_module_found_00
+-> Take Module #line:derelict_salvage_module_found_01
+    <<give_loot loot_salvage_module 1>>
+    <<remove_body>>
+    <<stop>>
+===
+
+title: derelict_salvage_nothing_found
+tags: 
+---
+<<play_sfx cue_ui_fail>>
+The wreckage is picked clean. Nothing of value remains. #line:derelict_salvage_nothing_found_00
+-> Leave #line:derelict_salvage_nothing_found_01 #leave
+    <<remove_body>>
+    <<stop>>
+===
+

@@ -1,0 +1,21 @@
+title: crew_stranded_start
+tags: 
+---
+<<play_sfx cue_ui_click>>
+A distress pod from a destroyed vessel floats nearby. Life signs detected inside. #line:crew_stranded_start_00
+-> Rescue Survivor #line:crew_stranded_start_01
+    <<give_item resource_crew 1>>
+    <<jump crew_stranded_rescued>>
+-> Ignore #line:crew_stranded_start_02 #leave
+    <<stop>>
+===
+
+title: crew_stranded_rescued
+tags: 
+---
+<<play_sfx cue_ui_success>>
+A grateful engineer joins your crew. 'I won't forget this. Let me repay you with my skills.' #line:crew_stranded_rescued_00
+-> Welcome Aboard #line:crew_stranded_rescued_01
+    <<stop>>
+===
+

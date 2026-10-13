@@ -1,0 +1,28 @@
+title: debug_conditional_options_start
+tags: 
+---
+You encounter a locked container. Your options depend on your abilities and inventory. #line:debug_conditional_options_start_00
+-> Force it Open (Costs Hull) #line:debug_conditional_options_start_01
+    <<damage_ship 10>>
+    <<jump debug_conditional_options_opened>>
+-> Use Keycard <<if (has_item("resource_palladium", 1)) and (has_item("resource_palladium", 1))>> #line:debug_conditional_options_start_02
+    <<take_item resource_palladium 1>>
+    <<jump debug_conditional_options_opened>>
+<<if $has_hacking>>
+    -> Hack (Requires Skill) #line:debug_conditional_options_start_03
+        <<jump debug_conditional_options_opened>>
+<<endif>>
+-> Leave #line:debug_conditional_options_start_04 #leave
+    <<stop>>
+===
+
+title: debug_conditional_options_opened
+tags: 
+---
+<<play_sfx cue_ui_success>>
+The container opens, revealing valuable cargo! #line:debug_conditional_options_opened_00
+-> Take the Loot #line:debug_conditional_options_opened_01
+    <<give_item resource_palladium 3>>
+    <<stop>>
+===
+

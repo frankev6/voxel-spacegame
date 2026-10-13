@@ -1,0 +1,45 @@
+title: empty_cargo_start
+tags: 
+---
+You find a small cargo pod floating in space. It seems intact. #line:empty_cargo_start_00
+-> Open It #line:empty_cargo_start_01
+    <<if roll(100) <= 50>>
+    <<jump empty_cargo_cargo_good>>
+    <<elseif roll(100) <= 80>>
+    <<jump empty_cargo_cargo_trap>>
+    <<else>>
+    <<jump empty_cargo_cargo_empty>>
+    <<endif>>
+===
+
+title: empty_cargo_cargo_good
+tags: 
+---
+<<play_sfx cue_ui_success>>
+The pod contains valuable supplies! #line:empty_cargo_cargo_good_00
+-> Take It #line:empty_cargo_cargo_good_01
+    <<give_credits 150>>
+    <<remove_body>>
+    <<stop>>
+===
+
+title: empty_cargo_cargo_trap
+tags: 
+---
+<<play_sfx cue_ui_fail>>
+The pod was rigged! It explodes near your hull! #line:empty_cargo_cargo_trap_00
+-> Damage Report #line:empty_cargo_cargo_trap_01
+    <<damage_ship 10>>
+    <<remove_body>>
+    <<stop>>
+===
+
+title: empty_cargo_cargo_empty
+tags: 
+---
+The pod is empty. Someone got here first. #line:empty_cargo_cargo_empty_00
+-> Continue #line:empty_cargo_cargo_empty_01
+    <<remove_body>>
+    <<stop>>
+===
+

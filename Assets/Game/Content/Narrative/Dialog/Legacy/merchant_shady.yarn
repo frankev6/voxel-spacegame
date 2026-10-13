@@ -1,0 +1,21 @@
+title: merchant_shady_start
+tags: trade
+---
+A sleek, unmarked vessel hails you. 'Interested in some... undocumented upgrades? No questions asked.' #line:merchant_shady_start_00 #illustration:illustration_merchant
+-> Trade #line:merchant_shady_start_01
+    <<open_merchant merchant_shady_trader>>
+    <<jump merchant_shady_trade_done>>
+-> Attack #line:merchant_shady_start_02
+    <<start_combat encounter_raiders>>
+-> Leave #line:merchant_shady_start_03 #leave
+    <<stop>>
+===
+
+title: merchant_shady_trade_done
+tags: 
+---
+'Pleasure doing business.' The ship engages its cloak and vanishes. #line:merchant_shady_trade_done_00
+-> Continue #line:merchant_shady_trade_done_01
+    <<stop>>
+===
+

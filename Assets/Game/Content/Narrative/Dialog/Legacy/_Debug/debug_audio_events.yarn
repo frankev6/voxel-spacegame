@@ -1,0 +1,23 @@
+title: debug_audio_events_start
+tags: 
+---
+<<play_sfx cue_ui_view_open>>
+This encounter demonstrates audio feedback on pages and actions. #line:debug_audio_events_start_00
+-> Play Success Sound #line:debug_audio_events_start_01
+    <<play_sfx cue_ui_success>>
+    <<jump debug_audio_events_audio_played>>
+-> Play Fail Sound #line:debug_audio_events_start_02
+    <<play_sfx cue_ui_fail>>
+    <<jump debug_audio_events_audio_played>>
+-> Silent Option #line:debug_audio_events_start_03
+    <<stop>>
+===
+
+title: debug_audio_events_audio_played
+tags: 
+---
+You should have heard a sound effect! #line:debug_audio_events_audio_played_00
+-> End Demo #line:debug_audio_events_audio_played_01
+    <<stop>>
+===
+

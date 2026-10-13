@@ -1,0 +1,29 @@
+title: horizon_message_start
+tags: black_hole
+---
+A buoy floats dangerously close to the event horizon. It's transmitting a text file. It's a message from You. Timestamped\: 3 cycles ago. #line:horizon_message_start_00
+-> Retrieve Buoy #line:horizon_message_start_01
+    <<jump horizon_message_message_read>>
+-> Remote Download #line:horizon_message_start_02
+    <<jump horizon_message_corrupt_data>>
+===
+
+title: horizon_message_message_read
+tags: 
+---
+The message is clear\: 'The Silence tracks movement. Stop moving. Play dead. That is how I survived the last wipe.' It includes a software patch for your stealth systems. #line:horizon_message_message_read_00
+-> Install Patch #line:horizon_message_message_read_01
+    <<give_item item_stealth_patch 1>>
+    <<reveal_clue clue_message_from_self>>
+    <<stop>>
+===
+
+title: horizon_message_corrupt_data
+tags: 
+---
+The gravity distortion corrupted the file. You only get fragments\: '...movement... dead... wipe...' It's useless. #line:horizon_message_corrupt_data_00
+-> Continue #line:horizon_message_corrupt_data_01
+    <<reveal_clue clue_fragmented_warning>>
+    <<stop>>
+===
+

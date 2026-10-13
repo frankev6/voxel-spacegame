@@ -1,0 +1,33 @@
+title: cryo_vault_start
+tags: ice_giant
+---
+Buried in the ice ring is a vault marked with the symbol of the 'First Ark'—a mission launched 500 years ago that was presumed lost. The airlock is frozen shut. #line:cryo_vault_start_00
+-> Melt Seal <<if has_item("resource_fuel", 3)>> #line:cryo_vault_start_01
+    <<take_item resource_fuel 3>>
+    <<jump cryo_vault_vault_enter>>
+-> Use Explosives #line:cryo_vault_start_02
+    <<jump cryo_vault_vault_damaged>>
+===
+
+title: cryo_vault_vault_enter
+tags: 
+---
+Inside are thousands of genetic samples—embryos of Earth's extinct animals. A custodian AI wakes up. 'Are you the Gardeners? Is it safe to plant yet?' #line:cryo_vault_vault_enter_00
+-> Lie\: 'Yes, it is safe.' #line:cryo_vault_vault_enter_01
+    <<give_item item_seed_bank 1>>
+    <<stop>>
+-> Truth\: 'No, the galaxy is dying.' #line:cryo_vault_vault_enter_02
+    <<give_item item_genetic_stimulants 1>>
+    <<stop>>
+===
+
+title: cryo_vault_vault_damaged
+tags: 
+---
+The explosion compromises some of the samples, but you gain access. Inside are genetic samples and a custodian AI that powers down from the shock. #line:cryo_vault_vault_damaged_00
+-> Salvage What You Can #line:cryo_vault_vault_damaged_01
+    <<give_item item_genetic_stimulants 1>>
+    <<damage_ship 5>>
+    <<stop>>
+===
+

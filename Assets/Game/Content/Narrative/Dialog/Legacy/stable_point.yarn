@@ -1,0 +1,10 @@
+title: stable_point_start
+tags: portal
+---
+A fluctuation in the subspace field indicates a stable jump point. However, activating it will require a massive energy discharge from a Warp Core. #line:stable_point_start_00 #illustration:illustration_portal
+-> Activate Warp Drive <<if has_item("item_strange_matter_container_full", 1)>> #line:stable_point_start_01
+    <<start_combat encounter_extraction_guardians>>
+-> Leave #line:stable_point_start_02 #leave
+    <<stop>>
+===
+

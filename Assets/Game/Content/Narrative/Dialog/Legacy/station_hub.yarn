@@ -1,0 +1,144 @@
+title: station_hub_hub
+tags: hub station
+---
+<<play_sfx cue_ui_view_open>>
+Welcome to Nexus Station! The bustling marketplace offers many opportunities. #line:station_hub_hub_00 #illustration:illustration_station
+-> Visit Marketplace #line:station_hub_hub_01
+    <<detour station_hub_market_menu>>
+    <<jump station_hub_hub>>
+-> Station Bar #line:station_hub_hub_02
+    <<detour station_hub_bar_menu>>
+    <<jump station_hub_hub>>
+-> Research Lab #line:station_hub_hub_03
+    <<detour station_hub_lab_menu>>
+    <<jump station_hub_hub>>
+-> Mission Control #line:station_hub_hub_04
+    <<detour station_hub_mission_control>>
+    <<jump station_hub_hub>>
+-> Repair All Ships #line:station_hub_hub_05
+    <<repair_ship 100>>
+    <<jump station_hub_hub>>
+-> Visit Hangar Bay #line:station_hub_hub_06
+    <<open_ship_editor>>
+-> Undock #line:station_hub_hub_07 #leave
+    <<stop>>
+===
+
+title: station_hub_market_menu
+tags: 
+---
+The marketplace is filled with vendors hawking exotic wares. #line:station_hub_market_menu_00
+-> Trade Goods #line:station_hub_market_menu_01
+    <<open_merchant merchant_station_market>>
+    <<jump station_hub_market_menu>>
+-> View Bounties #line:station_hub_market_menu_02
+    <<detour station_hub_bounties>>
+    <<jump station_hub_market_menu>>
+-> Back #line:station_hub_market_menu_03 #leave
+    <<return>>
+===
+
+title: station_hub_bounties
+tags: 
+---
+The bounty board lists several active contracts. #line:station_hub_bounties_00
+-> Accept Pirate Hunt #line:station_hub_bounties_01
+    <<set_fact pirate_bounty_accepted true>>
+    <<return>>
+<<if quest_not_started("quest_hostile_blackbox")>>
+    -> Accept Hostile Blackbox Contract #line:station_hub_bounties_02 #quest
+        <<start_quest quest_hostile_blackbox>>
+        <<return>>
+<<endif>>
+-> Generate Bounty Template Mission #line:station_hub_bounties_03 #quest
+    <<start_quest contract_bounty_probe>>
+    <<return>>
+-> Back #line:station_hub_bounties_04 #leave
+    <<return>>
+===
+
+title: station_hub_mission_control
+tags: mission quest intel
+---
+Mission Control tracks contracts, trigger listeners, and experimental quest chains. #line:station_hub_mission_control_00
+<<if quest_not_started("quest_survey_local_materials")>>
+    -> Accept Material Turn-In Test #line:station_hub_mission_control_01 #quest
+        <<start_quest quest_survey_local_materials>>
+        <<return>>
+<<endif>>
+<<if quest_not_started("quest_station_data_delivery")>>
+    -> Accept Station Data Delivery Test #line:station_hub_mission_control_02 #quest
+        <<start_quest quest_station_data_delivery>>
+        <<return>>
+<<endif>>
+<<if quest_not_started("quest_station_boarding_trial")>>
+    -> Accept Boarding Trial Test #line:station_hub_mission_control_03 #quest
+        <<start_quest quest_station_boarding_trial>>
+        <<return>>
+<<endif>>
+<<if quest_not_started("quest_whisper_chain")>>
+    -> Start Whisper Chain Storyline #line:station_hub_mission_control_04 #quest
+        <<start_quest quest_whisper_chain>>
+        <<return>>
+<<endif>>
+<<if quest_not_started("quest_debug_fail_sandbox")>>
+    -> Accept Fail-State Sandbox #line:station_hub_mission_control_05 #quest
+        <<start_quest quest_debug_fail_sandbox>>
+        <<return>>
+<<endif>>
+-> Generate Signal Relay Template Mission #line:station_hub_mission_control_06 #quest
+    <<start_quest contract_signal_relay>>
+    <<return>>
+-> Generate Material Sweep Template Mission #line:station_hub_mission_control_07 #quest
+    <<start_quest contract_material_sweep>>
+    <<return>>
+<<if quest_active("quest_debug_fail_sandbox")>>
+    -> Force Fail Sandbox Quest #line:station_hub_mission_control_08 #quest
+        <<fail_quest quest_debug_fail_sandbox>>
+        <<return>>
+<<endif>>
+<<if quest_active("quest_debug_fail_sandbox")>>
+    -> Complete Sandbox Quest #line:station_hub_mission_control_09 #quest
+        <<complete_quest quest_debug_fail_sandbox>>
+        <<return>>
+<<endif>>
+-> Back #line:station_hub_mission_control_10 #leave
+    <<return>>
+===
+
+title: station_hub_bar_menu
+tags: 
+---
+The station bar is dimly lit and filled with suspicious characters. #line:station_hub_bar_menu_00
+-> Talk to Shady Figure <<if visited_count("shady_man_start") == 0>> #line:station_hub_bar_menu_01
+    <<detour shady_man_start>>
+    <<jump station_hub_bar_menu>>
+// LEGACY-UNAVAILABLE PLAY_FROM_POOL(bar_encounters): -> Random Encounter #line:station_hub_bar_menu_02
+-> Back #line:station_hub_bar_menu_03 #leave
+    <<return>>
+===
+
+title: station_hub_lab_menu
+tags: 
+---
+The research lab hums with advanced equipment. #line:station_hub_lab_menu_00
+-> Upgrade Shields <<if (credits() >= 500) and (credits() >= 500)>> #line:station_hub_lab_menu_01
+    <<take_credits 500>>
+    <<return>>
+-> View Research #line:station_hub_lab_menu_02
+    <<jump station_hub_research_view>>
+-> Back #line:station_hub_lab_menu_03 #leave
+    <<return>>
+===
+
+title: station_hub_research_view
+tags: lab
+---
+Current research projects are displayed on the screen. #line:station_hub_research_view_00
+-> Contribute Research Points #line:station_hub_research_view_01
+    <<add_fact research_points 10>>
+    <<return>>
+-> Back #line:station_hub_research_view_02 #leave
+    <<return>>
+===
+

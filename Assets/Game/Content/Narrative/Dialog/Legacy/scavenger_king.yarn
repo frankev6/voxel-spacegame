@@ -1,0 +1,22 @@
+title: scavenger_king_start
+tags: station_pirate
+---
+This isn't a station; it's a hundred dead ships welded together. The 'King' hails you. He sits on a throne made of Vanguard plating. 'You want to pass? Pay the toll, or become a brick in my wall.' #line:scavenger_king_start_00
+-> Pay Toll <<if (credits() >= 50) and (credits() >= 50)>> #line:scavenger_king_start_01
+    <<take_credits 50>>
+    <<stop>>
+-> Challenge #line:scavenger_king_start_02
+    <<start_combat encounter_scavenger_king>>
+-> Trade Info #line:scavenger_king_start_03
+    <<jump scavenger_king_king_impressed>>
+===
+
+title: scavenger_king_king_impressed
+tags: 
+---
+The King laughs. 'A hunter! I like hunters.' He lets you pass and gives you a weapon from his vault. #line:scavenger_king_king_impressed_00
+-> Accept Gift #line:scavenger_king_king_impressed_01
+    <<give_item item_scrap_cannon 1>>
+    <<stop>>
+===
+

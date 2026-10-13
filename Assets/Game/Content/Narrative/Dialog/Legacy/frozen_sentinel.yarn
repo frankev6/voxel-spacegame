@@ -1,0 +1,37 @@
+title: frozen_sentinel_start
+tags: derelict
+---
+A Vanguard warship drifts here, dead in the water. It's covered in ice, but your thermal scans show a faint heat signature in the core. It's not a reactor; it's a biological life sign. #line:frozen_sentinel_start_00
+-> Board\: Bridge #line:frozen_sentinel_start_01
+    <<jump frozen_sentinel_bridge_log>>
+-> Board\: Core #line:frozen_sentinel_start_02
+    <<jump frozen_sentinel_core_stasis>>
+-> Salvage Exterior #line:frozen_sentinel_start_03
+    <<give_credits 200>>
+    <<remove_body>>
+    <<stop>>
+===
+
+title: frozen_sentinel_bridge_log
+tags: 
+---
+The bridge logs reveal this ship was on a reconnaissance mission mapping Silence incursion zones. The star charts are invaluable. #line:frozen_sentinel_bridge_log_00
+-> Download Charts #line:frozen_sentinel_bridge_log_01
+    <<reveal_clue rumor_silence_incursions>>
+    <<add_fact research_points 25>>
+    <<remove_body>>
+    <<stop>>
+===
+
+title: frozen_sentinel_core_stasis
+tags: 
+---
+You find a stasis pod. Inside is a human... from your Ark. But he's aged 100 years. He wakes up screaming\: 'Don't let me go back! I've seen the loop!' then turns to dust as the pod opens. #line:frozen_sentinel_core_stasis_00
+-> Continue #line:frozen_sentinel_core_stasis_01
+    <<set_fact trait_existential_dread true>>
+    <<reveal_clue clue_seen_the_loop>>
+    <<give_credits 500>>
+    <<remove_body>>
+    <<stop>>
+===
+

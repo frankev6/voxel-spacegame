@@ -1,0 +1,26 @@
+title: mutiny_end_start
+tags: derelict
+---
+This Ark ship didn't die to aliens. The blast marks are from inside. You find the mess hall barricaded. Inside are the skeletons of the crew... and one skeleton sitting on a pile of food cans, holding a pistol. #line:mutiny_end_start_00
+-> Take Supplies #line:mutiny_end_start_01
+    <<give_item resource_fuel 3>>
+    <<remove_body>>
+    <<stop>>
+-> Investigate Logs #line:mutiny_end_start_02
+    <<jump mutiny_end_log_reveal>>
+-> Burial #line:mutiny_end_start_03
+    <<set_fact morale_boost true>>
+    <<remove_body>>
+    <<stop>>
+===
+
+title: mutiny_end_log_reveal
+tags: 
+---
+The logs reveal the Captain tried to turn back to the Ark. The crew mutinied to keep going forward. 'There is nothing back there,' the final log reads. 'Only the Silence.' #line:mutiny_end_log_reveal_00
+-> Continue #line:mutiny_end_log_reveal_01
+    <<reveal_clue clue_ark_mutiny>>
+    <<remove_body>>
+    <<stop>>
+===
+

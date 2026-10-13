@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a3822ffc4e44f6fb324395cd93265ec, type: 3}
+  m_Name: beat_gate_dormant
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.StoryBeatDefinition
+  id: beat_gate_dormant
+  formerIds: []
+  trigger: 0
+  where:
+    starSystem: {fileID: 0}
+    bodyTags:
+    - gate_dormant
+    hailEncounter: {fileID: 0}
+  condition:
+    source: not $gate_ark_start_active
+    sourceHash: 0
+    compilerVersion: 0
+    hasErrors: 0
+    root:
+      rid: -2
+  salience: 50
+  weight: 1
+  repeat: 2
+  firstVisitOnly: 0
+  yarnNode: gate_dormant_start
+  onStart:
+    source: []
+    sourceHash: 0
+    compilerVersion: 0
+    hasErrors: 0
+    effects: []
+  onComplete:
+    source: []
+    sourceHash: 0
+    compilerVersion: 0
+    hasErrors: 0
+    effects: []
+  debug: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }

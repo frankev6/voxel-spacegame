@@ -1,0 +1,207 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 158350817d4346c88633e4c8b95ed779, type: 3}
+  m_Name: facts_legacy
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.FactCatalogDefinition
+  id: facts_legacy
+  formerIds: []
+  facts:
+  - Name: debug_menus
+    Kind: 1
+    Scope: 1
+    Flags: 9
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: debug_menus'
+    JournalText: 
+  - Name: gate_ark_start_active
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: gate_ark_start_active'
+    JournalText: 
+  - Name: has_hacking
+    Kind: 1
+    Scope: 0
+    Flags: 9
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: has_hacking'
+    JournalText: 
+  - Name: hostile_blackbox_turned_in
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: hostile_blackbox_turned_in'
+    JournalText: 
+  - Name: intro_awake
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: intro_awake'
+    JournalText: 
+  - Name: intro_ship_chosen
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: intro_ship_chosen'
+    JournalText: 
+  - Name: morale_boost
+    Kind: 1
+    Scope: 0
+    Flags: 4
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: morale_boost'
+    JournalText: morale_boost
+  - Name: pirate_bounty_accepted
+    Kind: 1
+    Scope: 0
+    Flags: 4
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: pirate_bounty_accepted'
+    JournalText: pirate_bounty_accepted
+  - Name: relation_watch_report_submitted
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: relation_watch_report_submitted'
+    JournalText: 
+  - Name: rep_ark
+    Kind: 0
+    Scope: 0
+    Flags: 4
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: rep_ark'
+    JournalText: rep_ark
+  - Name: rep_vanguard_ghosts
+    Kind: 0
+    Scope: 0
+    Flags: 4
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: rep_vanguard_ghosts'
+    JournalText: rep_vanguard_ghosts
+  - Name: research_points
+    Kind: 0
+    Scope: 0
+    Flags: 4
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: research_points'
+    JournalText: research_points
+  - Name: station_boarding_trial_decode_tip
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: station_boarding_trial_decode_tip'
+    JournalText: 
+  - Name: station_boarding_trial_meet_shady_contact
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: station_boarding_trial_meet_shady_contact'
+    JournalText: 
+  - Name: station_data_delivery_submitted
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: station_data_delivery_submitted'
+    JournalText: 
+  - Name: story_survey_complete
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: story_survey_complete'
+    JournalText: 
+  - Name: trait_existential_dread
+    Kind: 1
+    Scope: 0
+    Flags: 4
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: trait_existential_dread'
+    JournalText: trait_existential_dread
+  - Name: trait_shaken
+    Kind: 1
+    Scope: 0
+    Flags: 4
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: trait_shaken'
+    JournalText: trait_shaken
+  - Name: trait_solar_charged_engines
+    Kind: 1
+    Scope: 0
+    Flags: 4
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: trait_solar_charged_engines'
+    JournalText: trait_solar_charged_engines
