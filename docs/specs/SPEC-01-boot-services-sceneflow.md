@@ -939,6 +939,17 @@ If no save exists, "Load last save" is disabled.
   - [x] The range command does not duplicate that station; actual Space fire still damages it.
 - **Tests:** Extend `FiringRangeTests.RealFire_DamagesStationaryTarget` to verify automatic target, lowered position and idempotent range request; use existing restart coverage.
 
+### FND-022 — Player allegiance in the current world spawn path
+- **Milestone:** M2
+- **Tier:** frontier — production spawn/combat integration repair
+- **Depends on:** `FND-010`, `WPN-001`
+- **Do:** Supply `Allegiance.Player` on the normal player grid request before conversion. Preserve profile, writeback, identity and registry lifecycle; FND-012/GAL-008 still own unified spawning and galaxy location.
+- **Files:** `Assets/Game/App/Session/PlayerShipSpawner.cs`, `Assets/Game/Tests/PlayMode/App/FiringRangeTests.cs`
+- **Acceptance criteria:**
+  - [ ] Real new-game player has canonical player allegiance without harness mutation and is eligible for hostile AI targeting.
+  - [ ] Existing player controls, source/writeback and station behavior are preserved.
+- **Tests:** Extend `FiringRangeTests.RealFire_DamagesStationaryTarget` to assert `Allegiance.Player` on the normally spawned player; live hostile NPC damage readback confirms integration.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
