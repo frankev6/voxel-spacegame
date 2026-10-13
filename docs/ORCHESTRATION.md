@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Loader lifecycle authored:**85d75afe adds origin acknowledgement, T1 entry/visit event, owned queries/info/hook, delta refresh and filtered unload with deferred collider retirement. Five cases/compile remain. Arrival checks require actual nearby grids, so production installation waits for SYS-006; no fake readiness. Current branch task/SYS-004-world-loader; no Unity operation. Workers NAR-016218, GAL-011230, QST-002194 active. Previous turn anchor construction was progress.
+
 - **Body anchors authored:**84fd44e9 adds archetype-grouped T1 anchors, Burst position/body/orbit fill and per-radius collider cache. Helpers still await loader state-machine wiring; no compile or acceptance claim. Next implement origin acknowledgement, content load, entry events, teardown/retirement and five required cases. SYS-012 visual child TODO retained. No Unity operation. NAR-016217, GAL-011229, QST-002193 all active; QST delivery requires real content recompile after integration. Previous turn ownership helpers were progress.
 
 - **World loading underway:** SYS-004 claimed6ec2de25, branch task/SYS-004-world-loader at5a214830 adds grid-child membership and deterministic split adoption helpers. Anchor creation, origin wait/load/unload, scene wiring and five required checks remain; uncompiled/unaccepted, no Unity run. All workers active (NAR-016216, GAL-011228, QST-002192). Previous turn galaxy-session completion was progress.
