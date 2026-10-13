@@ -16,6 +16,7 @@ namespace Game.App.Presenters
         readonly UIRoot ui;
         readonly SceneFlow flow;
         readonly LoadingPresenter loadingPresenter;
+        readonly SaveSlotsPresenter saveSlotsPresenter;
         MainMenuPresenter menuPresenter;
         PausePresenter pausePresenter;
         bool rootsBound, disposed;
@@ -43,12 +44,17 @@ namespace Game.App.Presenters
             Loading = new LoadingView(LoadingModel);
             ui.Register(Loading);
             loadingPresenter.Bind();
+            saveSlotsPresenter = new SaveSlotsPresenter(ui, SaveSlotsModel, Game.Core.Services.Get<SaveService>(), Game.Core.Services.Get<IGameFlow>());
+            ui.Register(new SaveSlotsView(SaveSlotsModel, saveSlotsPresenter));
+            saveSlotsPresenter.Bind();
             EventBus<SessionReset>.Subscribe(OnSessionReset);
         }
         public UIScreen MainMenu => ui.Navigator.Get<MainMenuView>();
         public UIScreen FlightHud => ui.Navigator.Get<FlightHudView>();
         public UIScreen ShipEditor => ui.Navigator.Get<ShipEditorView>();
         public UIScreen Loading { get; }
+
+        internal void ShowSaveSlots(SaveSlotsMode mode) => saveSlotsPresenter.Show(mode);
 
         // Installed only with real screen/launcher navigation, never placeholder command implementations.
         internal void BindMenuNavigation(Action<SaveSlotsMode> showSlots, Action openLab, Action showSettings)
@@ -87,8 +93,10 @@ namespace Game.App.Presenters
             // Never replace view models: views and bindings retain these exact objects across sessions.
             menuPresenter?.Unbind();
             pausePresenter?.Unbind();
+            saveSlotsPresenter.Unbind();
             menuPresenter?.Bind();
             pausePresenter?.Bind();
+            saveSlotsPresenter.Bind();
             loadingPresenter.Dispose();
             loadingPresenter.Bind();
             // TODO(HUD-009/010/011/012/013/014/015/016/017/018/019): rebind the owning feature presenters
@@ -100,6 +108,7 @@ namespace Game.App.Presenters
             menuPresenter?.Tick();
             pausePresenter?.Tick();
             loadingPresenter.Tick();
+            saveSlotsPresenter.Tick();
         }
         void CheckAlive() { if (disposed) throw new ObjectDisposedException(nameof(UiComposition)); }
         public void Dispose()
@@ -108,6 +117,7 @@ namespace Game.App.Presenters
             disposed = true;
             EventBus<SessionReset>.Unsubscribe(OnSessionReset);
             loadingPresenter.Dispose();
+            saveSlotsPresenter.Dispose();
             pausePresenter?.Dispose();
             menuPresenter?.Dispose();
             if (rootsBound) flow.SetRootScreens(null);

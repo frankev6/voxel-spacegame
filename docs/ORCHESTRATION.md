@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Save screen integration underway:** HUD-0042ae551ed integrated as a8d00e7a; UiComposition now registers/binds persistent SaveSlotsPresenter/View, ticks it and rebinds on SessionReset/disposes with app. Real visible menu/pause navigation still pending HUD-002, so no done claim. Five required checks unrun; worker review161 active. GAL-003183/MIG-014197 active. Q326 mirrors SPEC61Q24. Previous turn resumed missing content deliveries (progress).
+
 - **Existing work resumed:** missing narrative locations trace to GAL-003/MIG-014 code deliveries held for content generation. Combat resumes579394d against current main; power resumes644622c/fea6357; presentation delivered HUD-0042ae551ed159 and receives bounded review. Lead preserves NAR-0151e2b8a41 (six focused checks passed, generation pending actual content). Reconcile schema/content sequencing next; no fake references. Previous turn verified converter (progress).
 
 - **Accessibility accepted:**63b7f4ef/e3fa8660, compile76886 clean;79288 one EditMode +10047 four PlayMode passed. Fonts restored from backups; no active validation. Both combat and power now have explicit ready-standard dependency waits; HUD-004156 active. Lead NAR-015 preserved4e7533c0; continue asset writing to unlock NAR-016. Previous turn closed validator (progress).
