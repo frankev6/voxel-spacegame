@@ -95,14 +95,28 @@ namespace Game.Tests.EditMode.Simulation.Power
                 for (int i = 0; i < cells.Length; i++)
                 {
                     var cell = cells[i].Value;
-                    if (cell.IsAir || cell.IsInstance) continue;
+                    if (!Structural(cell)) continue;
                     cell.Hp = 128; cells[i] = new BrickCells { Value = cell }; changed = true; break;
+                }
+                if (changed) break;
+                if (!Em.HasBuffer<BrickSparseCells>(slot.Brick)) continue;
+                var sparse = Em.GetBuffer<BrickSparseCells>(slot.Brick);
+                for (int i = 0; i < sparse.Length; i++)
+                {
+                    var entry = sparse[i]; if (!Structural(entry.Value)) continue;
+                    entry.Value.Hp = 128; sparse[i] = entry; changed = true; break;
                 }
                 if (changed) break;
             }
             Assert.IsTrue(changed, "Fixture must damage a real structural hull cell.");
             var grid = Em.GetComponentData<VoxelGrid>(root); grid.Revision++; Em.SetComponentData(root, grid);
             Frame(); Assert.AreEqual(before.FunctionalRevision, Stats.FunctionalRevision); Assert.AreEqual(before.FunctionalSignature, Stats.FunctionalSignature);
+        }
+        bool Structural(Cell cell)
+        {
+            if (cell.IsAir) return false;
+            ushort block = cell.IsInstance ? Em.GetBuffer<BlockInstance>(root)[cell.InstanceIndex].Block : Em.GetBuffer<PaletteEntry>(root)[cell.PaletteIndex].Block;
+            return block != 0 && content.BlockDefs.Value.Blocks[block].Kind == BlockKind.Structural;
         }
         [Test] public void MassChange_CheapUpdateOnly()
         {
