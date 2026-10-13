@@ -67,7 +67,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                         else
                         {
                             var grid = Em.GetComponentData<VoxelGrid>(e);
-                            float3 lo = grid.CellMin * grid.CellSize, hi = (grid.CellMax + 1) * grid.CellSize;
+                            float3 lo = (float3)grid.CellMin * grid.CellSize, hi = (float3)(grid.CellMax + 1) * grid.CellSize;
                             center = pose.TransformPoint((lo + hi) * .5f); radius = math.distance(lo,hi) * .5f; kind = ProxyKind.Ship;
                         }
                         float hullRadius = radius;
