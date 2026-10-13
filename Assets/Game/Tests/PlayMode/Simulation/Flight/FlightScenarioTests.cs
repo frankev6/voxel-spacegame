@@ -52,6 +52,7 @@ namespace Game.Tests.PlayMode.Simulation.Flight
             public readonly Entity ConfigEntity, InputEntity;
             public EntityManager Em => Test.EntityManager;
             public VoxelContent Content => new VoxelContent { Blocks = content.BlockDefs, Orientations = content.Orientations };
+            public ContentCatalog Catalog => content.Catalog;
             public ushort Hull => Index("block_hull");
             public ushort Thruster => Index("block_thruster_small");
             public ushort Index(string id) => content.Catalog.GetBlockIndex(content.Catalog.Get<BlockDefinition>(new ContentId(id)));
