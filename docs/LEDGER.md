@@ -1032,6 +1032,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — GAL-004 packing and ownership checkpoint — astra (gpt-6)
+
+- Implemented definition parameter/pool packing in specified order, authored moon parent slots/subslots and sorted keys, GalaxyDef queries and native ownership disposal. Builder orchestration and five required checks remain; uncompiled checkpoint, no acceptance claim. Test count: spec-required: 5 pending, extra: 0.
+- ADR-0074/SPEC61Q27/ledger330 permits the existing Input System test framework in PlayMode to shorten the required real rebind test. Existing worker continues implementation; no new worker or Unity run. Previous turn implemented layout (progress).
+
 ### 2026-10-13 — GAL-004 implementation checkpoint — astra (gpt-6)
 
 - Ordered Burst layout job and weighted pool selection authored: spatial rejection grid, fixed per-attempt/per-system draws, sorted structural IDs and skipped count. Builder and GalaxyDef lifetime/query integration remain. No compile/test run yet; validate once the compatible implementation is complete.
