@@ -7,6 +7,7 @@ using Game.Data.Validation;
 using Game.Simulation.Commands;
 using Game.Simulation.Common;
 using Game.Simulation.Flight;
+using Game.Simulation.Power;
 using Game.Tests.Common;
 using Game.Tests.EditMode.Data;
 using Game.Tests.EditMode.Voxel;
@@ -59,6 +60,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
             content.Service.CreateSingletons(EM);
             world.AddSingleton(new VoxelStructureRegistryRef { Value = registry });
             world.AddSingleton(new VoxelConfig { SpawnBricksPerFrame = 1024, DefaultCellSize = .5f });
+            world.AddSingleton(PowerTuning.Defaults);
             world.AddGameplayActive();
         }
 

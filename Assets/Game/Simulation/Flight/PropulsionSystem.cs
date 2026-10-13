@@ -13,6 +13,7 @@ namespace Game.Simulation.Flight
     /// <summary>Schedules physical thrust and one-time hulk shutdown. Implements SPEC-20 §5.3.</summary>
     [BurstCompile]
     [UpdateInGroup(typeof(GameplayPrePhysicsGroup))]
+    [UpdateAfter(typeof(PropulsionStatsSystem))]
     public partial struct PropulsionSystem : ISystem
     {
         static readonly ProfilerMarker ScheduleMarker = new ProfilerMarker(ProfilerCategory.Scripts, "PropulsionSystem.Schedule");
