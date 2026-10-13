@@ -550,6 +550,7 @@ Deterministic (no timestamps, ordinal sorting, LF line endings):
 | MIG-E054 | Error | VOXS verification mismatch |
 | MIG-E060 | Error | Audio clip file missing |
 | MIG-E061 | Error | Audio clip blocked or provenance missing, duplicated or invalid; cue skipped |
+| MIG-E062 | Error | Required mapped block, its sole WeaponMountModule, or non-None fire cue unavailable; weapon skipped before writing |
 | MIG-W070 | Warning | Loot entry dropped (target cannot hold ships) |
 | MIG-W080 | Warning | Body role not available in SPEC-30 |
 | MIG-W090 | Warning | Target property path not found |
@@ -802,6 +803,9 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 | 18 | MIG-015 needs legacy narrative association labels, but NarrativeEncounter intentionally has no DTO and its importer copies are forbidden as narrative sources; override-only links have no pool weight | **Answer (resolved in MIG-015):** strictly deserialize the owning body/fleet DTO and resolve its reference by $path, using only the referenced index metadata name as the legacy association label. Never deserialize narrative-copy content; receivers still read narrative/*.json. Carry EncounterIdOverride on pool links; add a weight-1 override-only link if its label is not already in the pool. Keep source order, report unresolved refs/mappings and unrepresentable float values, and do not require future body/encounter assets to exist. | Tech lead |
 
 | 19 | MIG-009 depends on all SPEC-04 tasks, but DATA-010 strict link validation needs the missing migrated weapons first | **Answer (resolved, Tech lead):** depend on the permitted cross-spec contract DATA-001 (DATA-007 implementation is already done) plus MIG-006/MIG-011/WPN-001. WeaponMountModule.weapon, its bake lookup and WeaponDefinition already exist from FND-020, so migration needs no remaining DATA-010 behavior. Supply canonical mapped assets/links before integrating strict E047; never waive missing links or invent weapon definitions. | Tech lead |
+
+| 20 | SPEC-72 maps legacy missile Kinetic damage to Kinetic, but SPEC-21 §4.9 explicitly specifies Explosive | **Default implemented in MIG-009:** SPEC-21's v2 classification wins for `wpn_missile_launcher_small` (Explosive), as its revised blast damage requires. All legacy damage names are still validated and the ordinary Kinetic/Energy/HighExplosive mapping remains exact; delivery, visual and sound follow the export. Unknown enums fail with MIG-E021, never a replacement guess. | Tech lead |
+| 21 | Unused weapon values, prerequisite lookup, and pre-existing tuned weapons are not fully specified | **Default implemented in MIG-009:** write zero for beam speed/lifetimes and non-beam beamRange; keep common beamPulseSeconds 0.5, beamWidth 0.3, projectileRadius 0.1 unless §4.9 overrides, and the definition's default white tracer for new assets. Use the runner's catalog to resolve mapped block/cue IDs (no target-path guessing); require one mount and each non-None cue before writing, otherwise MIG-E062. Resolve ProjectileData by exact export path/type; missing/wrong-type refs are MIG-E004. The protected writer preserves tuned weapon bytes and existing mount/sound links, including the three plasma links; it may fill an empty fireCue on a protected weapon without adopting its tuning into the manifest. Link the actual mount array index. Report replaced numeric legacy tuning as MIG-I091. | Tech lead |
 
 ## 11. References
 
