@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 130 | 7 | 0 | 0 | 43 | 0 | 180 | 8 |
+| M3 | 128 | 9 | 0 | 0 | 43 | 0 | 180 | 6 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -458,7 +458,7 @@
 | HUD-005 | Settings screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
 | HUD-006 | Pause screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
 | HUD-007 | Flight HUD view and layout | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
-| HUD-008 | HudSnapshotSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, PWR-001, WPN-001, ABL-001, SYS-001, GAL-001, FLT-001, VOX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 88a324e0 | Snapshot and nearest64 radar; clean compile and nine focused checks pass; visible HUD binding remains HUD-009 |
+| HUD-008 | HudSnapshotSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, PWR-001, WPN-001, ABL-001, SYS-001, GAL-001, FLT-001, VOX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 13c85bbd | Review repairs complete: duplicate players, frozen hulk meters and interactable-body radar; nine focused checks pass |
 | HUD-009 | HudSyncSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-008, HUD-007, TRV-001, ENC-001 | no | todo |  |  |  |  |
 | HUD-010 | HUD presenters and screen hotkeys | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-009, QST-001, ECO-001, INP-001, TRV-001, NAR-001 | no | todo |  |  |  |  |
 | HUD-011 | Inventory screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-50 | no | todo |  |  |  |  |
@@ -1014,6 +1014,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — HUD review repairs accepted — astra (gpt-6)
+
+- HUD-00813c85bbd handles duplicate PlayerShip roots without singleton exceptions, freezes last live hull/shield/energy meters for the same hulk player, and includes interactable body anchors lacking SpatialBody in the disjoint point pass.
+- Extended the existing NoPlayer, Hulk and BeyondRange cases. Compile45635 clean; focused2563 nine passed, evidence `Logs/playtest/hud-snapshot/*-reviewed.*`. No broader suite/benchmark.
+- Test count: spec-required: 9, extra: 0.
 
 ### 2026-10-13 — Loot and economy facade accepted — astra (gpt-6)
 

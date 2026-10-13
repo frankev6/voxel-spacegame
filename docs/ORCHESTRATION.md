@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 | claimed920f5f71 after AI-015 delivery; condition evaluation | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-014 | claimedc76e4a29; legacy logic conversion after ECO acceptance/HUD review | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-014 | claimedc76e4a29; legacy translation after ECO acceptance and HUD review | narrative follow-ups |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-009 | claimed on main; import-time compile pipeline; DEV-018 delivered with real dependency wait | eligible standard work |
 
 ## Operating rules
@@ -19,6 +19,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **HUD review repairs accepted:**13c85bbd fixes duplicates, hulk meters and optional-body radar; compile45635 clean,2563 nine passed. No active Unity validation. Lead FactStore work preserved on task/NAR-007-fact-store64421ac4, unvalidated; return there next. Workers NAR-004163/NAR-014177/NAR-009147 active. Previous turn implemented facts and recycled worker (progress).
 
 - **Review follow-ups / worker recycled:** HUD review176 found duplicate-player exception, hulk meter freeze gap and interactable body without SpatialBody radar omission; lead repair required, keep findings open despite nine green checks. Power worker recycled to NAR-014 claimc76e4a29. FactStore88312cd6 implemented but unvalidated.
 
