@@ -822,6 +822,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 235 | SPEC-24 Q5: test assets violate strict production-content location rules. | Keep hand-authored JSON fixtures in Tests and deserialize transient definitions; do not weaken DATA-E011 or add test definitions to production. | Tech lead |
 | 236 | SPEC-72 Q23: full block conversion erases later-owned ability grants. | Preserve existing catalog grants during block field rebuild; retain fill-only-empty semantics, unique-path snapshots and hard report/byte idempotence checks. Output inventory now includes two abilities. | Tech lead |
 | 237 | SPEC-30 Q19: analytic elliptic velocity and periapsis rotation sign. | Differentiate Kepler analytically, use Unity positive-Y rotation consistently for position/velocity, retain the specified phase convention, exactly six Newton iterations and double-precision period reduction. Fixed parents avoid division. | Tech lead |
+| 238 | SPEC-23 Q10–11: AI content boundary and validation. | Bake scalar/default profiles with independent empty rule arrays; AI-006 owns runtime ability-rule baking and consumption. Validate finite scalar ranges/enums, rule fields and catalog membership before allocation. Boot owns the new profile blob through job-complete shutdown. | Tech lead |
+| 239 | SPEC-31 Q6–8: streaming contract staging and event ownership. | Preserve existing entry events; TRV-006 adds its future interface, managed loader publishes BodyDestroyed, and only BodyInteracted gets the ECS bridge. Include all specified carriers with exact defaults; behavior remains in later SYS tasks. | Tech lead |
 
 ## Measurements
 
