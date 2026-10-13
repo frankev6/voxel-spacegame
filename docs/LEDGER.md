@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 79 | 0 | 0 | 0 | 10 | 0 | 89 | 9 |
+| M2 | 78 | 0 | 0 | 0 | 11 | 0 | 89 | 8 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 11 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -227,8 +227,8 @@
 | DMG-007 | ImpactEventSystem (rams and knockback) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 01d5ff2 | Canonical ram pairs, energy/hardness split, cooldown, next-tick planar knockback; six required tests; ADR-0058 |
 | DMG-008 | Brick connectivity summaries | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | done | astra (gpt-6) | 2026-10-12 | 36e838d | Scanline brick flood, instance unions, touched checks and deterministic warm-up; 1000 reference masks; three required tests |
 | DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | yes | done | astra (gpt-6) | 2026-10-12 | 1cf796e | Parallel hybrid race, canonical masks, retained seeds and forced retries; 300 reference structures; live Space cut detached 205 cells |
-| DMG-010 | SplitSystem: plan, particle tier, deferred detach and debris FX | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-009, VFX-001, AUD-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | partial in FND-020: physical splits and retained deferred seeds / particle/chunk tiers, debris FX/audio and required tests |
-| DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | no | todo |  |  |  | partial in FND-020: all pieces temporarily use hulk grids / chunk pool, colliders, lifetime and required tests |
+| DMG-010 | SplitSystem: plan, particle tier, deferred detach and debris FX | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-009, VFX-001, AUD-001 | yes | done | astra (gpt-6) | 2026-10-12 | e3045a8 | Canonical tier/budget planning, next-tick particles, complete deferred reseeding, debris/SFX events; four required tests; existing hulk path retained |
+| DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | no | todo |  |  |  | partial in FND-020: hulk-body scaffolding; DMG-010 classifies and defers chunks / chunk pool, colliders, lifetime and required tests |
 | DMG-012 | Hulk grids from splits | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-011, FND-001, SPEC-12 | no | todo |  |  |  | partial in FND-020: hulk cells/instances, bodies and functional transfer / remaining lifecycle, integration and required tests |
 | DMG-013 | ShipDeathSystem, despawn dissolve and the destroy pass | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-012 | no | todo |  |  |  | partial in FND-020: initial core-loss and destroyed-instance cleanup / despawn dissolve, final death presentation and required tests |
 | DMG-014 | Determinism hash and frame-rate determinism tests | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-013, TST-001 | no | todo |  |  |  | partial in DMG-006: CellStateHasher / integrated 600-tick frame-rate and worker-count scenarios |
@@ -281,7 +281,7 @@
 | ABL-005 | Ability scenarios and frame-rate independence | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-004, SPEC-21 | no | todo |  |  |  |  |
 | CAM-008 | Screen shake from FxEvents | [SPEC-62](specs/SPEC-62-camera.md) | M2 | standard | CAM-005, SPEC-63 | no | todo |  |  |  |  |
 | VFX-002 | FxRig: slots, effects, buffers and binding | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-001, TST-001 | yes | todo |  |  |  |  |
-| VFX-003 | FxUploadSystem: drain, batch, submit, stats | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002 | no | todo |  |  |  |  |
+| VFX-003 | FxUploadSystem: drain, batch, submit, stats | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002 | no | todo |  |  |  | DMG-007/010 produce impact/debris events; drain/upload still absent. Prioritize after VFX-002 to consume queues, including while unbound |
 | VFX-004 | Template graphs and content assets for hits, explosions, muzzle and shield sparks | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | no | todo |  |  |  |  |
 | VFX-005 | Voxel debris particles and the 50k GPU gate | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-004 | no | todo |  |  |  | partial in FND-020: physical-grid pieces as temporary substitute / debris particle implementation and required tests |
 | VFX-006 | Projectile tracers | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002, WPN-001, CORE-001 | no | todo |  |  |  | partial in FND-020: simple instanced projectile tracer / final batching, styles, effects and required tests |
@@ -771,6 +771,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 191 | 2026-10-12 | SPEC-13 Q29 / SPEC-63 Q19 | Missing ram effect kind and opposite Unity collision normal convention | Append RamImpact = 13, 14-entry defaults; convert B-to-A normal at collection | Tech lead | Resolved ADR-0058; no new art, owner gate or enum renumbering |
 | 192 | 2026-10-12 | SPEC-13 Q30 | Deterministic brick warm-up remainder and staged integration | Earliest sorted candidates get remainder; touched bricks outside quota | Tech lead | Resolved DMG-008; summaries precede full-flood size guard; DMG-009 retains graph traversal scope |
 | 193 | 2026-10-12 | SPEC-13 Q31 | Capped seed prefix can miss the true anchor; staged cap retirement | Keep all seeds, defer overflow then force complete set; hybrid replaces full flood | Tech lead | Resolved DMG-009; canonical stream publication and internal node-count evidence; legacy cap fields preserved but inactive |
+| 194 | 2026-10-12 | SPEC-13 Q32 | Deferred disconnected island reseeding and staged split presentation | Retain island plus anchor representatives; preserve hulk path; canonical Debris kind | Tech lead | Resolved DMG-010; chunks wait for DMG-011, visible FX stays VFX-003/004; no new owner gate |
 
 ## Measurements
 
@@ -880,6 +881,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DMG-010 split planning and debris events — astra (gpt-6)
+
+1. **Implemented:** `e3045a8` — PlanSplitJob selects particle/chunk/hulk tiers, applies the shared cell budget and available hulk IDs/cap, and writes every accepted detach mask in canonical order. Particle cells leave the parent on the following resolver tick. Existing FND-020 hulk creation remains available for the playable station; chunk plans retain their seeds until DMG-011. EmitDebrisJob emits world position, parent motion plus kick, palette/material metadata and cube-root-scaled strided debris, plus one configured cell-break cue per grid with destroyed cells. This is event production, not completed visual/audio content.
+2. **Required evidence:** all four tests pass. A five-cell island remains intact on the planning tick and emits five debris events when detached next tick, inheriting parent velocity `(7,0,2)`. Boundaries 8/9/500/501, functional blocks and 17-cell extents select the specified tiers. **5,000** removed cells emit **1,667** events (stride 3, size × cube-root(3)), plus one break cue. Two five-cell islands under a five-cell budget detach over two ticks in identical order with **1 and 17 workers**, preserving the twenty-cell anchor. **spec-required: 4, extra: 0**; zero optimization passes.
+3. **Validation:** compile zero C# warnings; full EditMode **826 passed, 0 failed, 1 skipped**; full PlayMode **116 passed, 0 failed, 29 skipped**, both exit 0, including the production station shooting/pod scenarios. Docs check clean. Evidence: `Logs/playtest/dmg010/`. The prior live station demonstration remains DMG-009 evidence; no new visible-debris claim or screenshot this task. QualitySettings matches its pre-existing backup and is excluded; no stray InitTestScene remains after the runner stopped. Git stays local.
+4. **Resolved question/next:** Q194 / SPEC-13 Q32 replaces impossible outside-island neighbour reseeding with occupied island and anchor representatives; it also preserves existing hulk recording and aligns the older CellDebris name to SPEC-63's Debris + PaletteColor contract. No owner gate or new art. VFX-002/003 are next priorities: the FX consumer is still absent, so producer events currently accumulate until world disposal; the specified upload path must drain even while unbound. Continue to visual content and DMG-011/012 chunks/hulk completion after that integration. Controls, Nocturne, procedural station and Space fire are unchanged.
 
 ### 2026-10-12 — DMG-009 hybrid integrity and live station breakup — astra (gpt-6)
 
