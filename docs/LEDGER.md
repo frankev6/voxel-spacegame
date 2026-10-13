@@ -809,6 +809,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 222 | 2026-10-13 | SPEC-72 Q21 | Weapon migration defaults and protected links | Use canonical tuning/defaults and catalog IDs; preserve hand edits and existing links, fill only empty mapped links | Tech lead | Resolved; delivered implementation integrated pending batch validation |
 | 223 | SPEC-23 Q7: absent overflow counter conflicts with read-only parallel queries and scratch capacity. | Resolved: actual FixedList capacity with complete linear fallback; defer telemetry to a future owning-writer contract, no State writes. | Tech lead |
 | 224 | SPEC-23 Q8: enormous query bounds overflow or enumerate unbounded cells. | Resolved: complete linear fallback above 4096 cells or unrepresentable coordinates; same ordered matches and totals. | Tech lead |
+| 225 | SPEC-30 Q16–18: stale VoxelStructure namespace, omitted readonly constructors and GetStartLocation signature. | Resolved: use existing Game.Voxel.Model owner, declaration-order constructors and required GAL-008 method stub; no functional galaxy claim. | Tech lead |
+| 226 | SPEC-41 Q8–9: dialog contracts overlap existing SPEC-61 view models/interface. | Resolved: extend in place, retain existing members/GUIDs and notification caches; presenter later implements both compatible command signatures. | Tech lead |
+| 227 | SPEC-60 Q25–27: notification queue/timestamp, animation timing and root integration gaps. | Resolved: bounded FIFO/coalescing wrapper, first payload and saturating amounts, token durations and unscaled lifetime; preserve both tooltip and notification lifecycle integrations. | Tech lead |
 
 ## Measurements
 
@@ -919,6 +922,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — AI-002 implementation and next compatible batch — astra (gpt-6)
+
+1. `bb73f9b` implements persistent spatial containers, complete ordered segment/sphere queries, bounded scratch fallback and entity binary search. Five required tests pass, including independent brute-force comparisons for 10,000 proxies plus ten large bodies and 10,000 queries per shape; spec-required: 5, extra: 0. Compile zero CS warnings. Q223–224 preserve read-only queries and bound cell traversal without truncating totals. No tuning passes.
+2. Integrated GAL-001 `6d49a49` (spec-required: 3, extra: 0), DLG-001 `67e0ffd` (1, 0), UI-010 `6b3a919` (7, 0); retained both UI services through root/config/theme conflicts. Q225–227 mirror spec resolutions. Integrated compile passes; focused audit and full regression remain before closeout. Galaxy/dialog operations remain explicit owning-task stubs.
+3. DLG worker recycled to ready M2 PWR-003. UI-011 and ART-014 remain active. ART-014 has an actual unfinished ART-007 validator dependency to report, not bypass; approved mechanical work proceeds. Interactive Editor is stopped for validation, live breakup evidence preserved.
 
 ### 2026-10-13 — DMG-012 complete: large functional station section separates — astra (gpt-6)
 
