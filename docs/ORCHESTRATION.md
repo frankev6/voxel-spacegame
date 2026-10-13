@@ -18,7 +18,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- **Now:** WPN-007 focused session 11640 exited 0: compile clean, eight required tests passed. Review c0f3b458 removes the projectile-store prerequisite from shared firing. DMG-015/017 and ENC-002 delivered and integrated on primary `task/WPN-007-validation`; three workers recycled to AUD-009/008/007 respectively from main 7c5b9d08. Lead runs ENC-002 protected generation, then compatible validation including the ten-minute soak once. No done claim before full regression and live harness acceptance.
+- **Now:** WPN-007 focused session 11640 exited 0: compile clean, eight required tests passed. Review c0f3b458 removes the projectile-store prerequisite from shared firing. DMG-015/017 and ENC-002 delivered and integrated on primary `task/WPN-007-validation`; three workers recycled to AUD-009/008/007 respectively from main 7c5b9d08. ENC-002 protected generation exited 0 with zero validation errors/warnings; config and ARK prerequisite committed 40501eb0. Full compile/EditMode/PlayMode session **8009 is active**, including the ten-minute soak once. Do not mutate primary runtime or start another Unity operation until terminal. No done claim before full regression and live harness acceptance.
 
 - **Latest closeout:** full audio/turret session 95012 exited 0: **1112/0/1 EditMode, 150/0/53 PlayMode**, compile clean. AUD-006/WPN-011 closed, evidence `audio-combat/*-final.xml`. Unity free; original QualitySettings delta preserved, inactive artifacts removed. Next primary batch WPN-007; isolated **085ab8ac** includes real pulse clock. Workers still DMG-015/017 and ENC-002; newly ready AUD-007/008/009 are next reuse candidates.
 
