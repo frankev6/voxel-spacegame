@@ -25,7 +25,7 @@ namespace Game.Voxel.Damage.Jobs
         public NativeStream.Writer Removed, Touched, DestroyList, Explosions;
         public void Execute(int index)
         {
-            var range = Ranges[index]; var root = range.Grid; Explosions.BeginForEachIndex(index);
+            var range = Ranges[index]; var root = range.Grid;
             var writer = new CellWriter
             {
                 RandomIdentity = Access.Ids.HasComponent(root) && Access.Ids[root].Value != 0 ? Access.Ids[root].Value : (ulong)(uint)root.Index,
@@ -34,6 +34,8 @@ namespace Game.Voxel.Damage.Jobs
                 Mass = Access.Masses.HasComponent(root) ? Access.Masses[root] : new PhysicsMass { Transform = RigidTransform.identity },
                 Stats = Access.Stats[root], Modules = Modules, Orientations = Orientations, Explosions = Explosions
             };
+            // NativeStream checks the writer address after Begin; keep the opened writer in its final CellWriter field.
+            writer.Explosions.BeginForEachIndex(index);
             writer.Allocate(Allocator.Temp);
             for (int p = range.DetachStart; p < range.DetachStart + range.DetachCount; p++)
             {
@@ -95,7 +97,7 @@ namespace Game.Voxel.Damage.Jobs
             Removed.BeginForEachIndex(index); foreach (var cell in writer.Removed) Removed.Write(cell); Removed.EndForEachIndex();
             Touched.BeginForEachIndex(index); foreach (var brick in writer.Touched) Touched.Write(brick); Touched.EndForEachIndex();
             DestroyList.BeginForEachIndex(index); foreach (var entity in writer.DestroyList) DestroyList.Write(entity); DestroyList.EndForEachIndex();
-            Explosions = writer.Explosions; Explosions.EndForEachIndex();
+            writer.Explosions.EndForEachIndex();
             writer.Dispose();
         }
         static int3 SlotCoord(int index, VoxelGrid grid) => grid.BrickMin + new int3(index % grid.BrickDims.x,

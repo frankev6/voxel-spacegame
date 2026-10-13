@@ -63,6 +63,23 @@ namespace Game.Tests.EditMode.Voxel.Damage
                 Assert.AreEqual(new float3(1.25f,.25f,.25f), e.WorldPos);
             }
             finally { w.Dispose(); }
+
+            // The production resolver used to copy an already-open NativeStream.Writer into CellWriter.
+            // Exercise that scheduled path as part of the existing required reactor test.
+            var owner = f.World.GetOrCreateSystem<DamageStreamsSystem>();
+            var resolver = f.World.GetOrCreateSystem<DamageResolveSystem>();
+            f.EM.CreateSingleton(new Game.Core.Components.SimClock { Tick = 1 });
+            var scheduledRoot = f.Spawn(s);
+            using var query = f.EM.CreateEntityQuery(typeof(DamageStreams)); var streams = query.GetSingleton<DamageStreams>();
+            owner.Update(f.World.Unmanaged);
+            streams.Damage.PostFromMainThread(new DamageEvent { Grid = scheduledRoot, LocalPoint = new float3(1.25f,.25f,.25f),
+                Amount = 10000, Producer = ProducerKind.Projectile });
+            resolver.Update(f.World.Unmanaged); f.EM.CompleteAllTrackedJobs();
+            ref var state = ref f.World.Unmanaged.ResolveSystemStateRef(resolver);
+            using var requests = new NativeList<ExplosionRequest>(Allocator.TempJob);
+            streams.ScheduleDrainExplosions(ref state, requests).Complete();
+            Assert.AreEqual(1, requests.Length); Assert.AreEqual(scheduledRoot, requests[0].Source);
+            Assert.AreEqual(400, requests[0].Amount); Assert.AreEqual(2, requests[0].Radius);
         }
         [Test] public void CoreDestroyed_SetsCoreLost()
         {
