@@ -985,11 +985,11 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 - **Do:** Implement §5.5 steps 3–4 and 6: island kinematics, pool slots and eviction, greedy box collider (`ChunkMaxBoxes` cap, `PhysicsLayers.ChunkBody`/`ChunkMaterial`), ECB recording, lifetime shrink and disable, continuous `ChunkDissolve` presentation state (Q33); the `RetiredChunkBlobs` list with `DrainRetiredChunkBlobs`, and `ChunkColliderCleanupSystem` (§5.9).
 - **Files:** `Assets/Game/Voxel/Damage/Jobs/{IslandKinematics,ChunkBoxBuilder,RecordChunkJob,ChunkLifetimeJob}.cs`, `Assets/Game/Voxel/Damage/Systems/ChunkColliderCleanupSystem.cs`, `Assets/Game/Voxel/Rendering/{ChunkRenderSystem,ChunkRenderResources}.cs`, `Assets/Game/Tests/EditMode/Voxel/Damage/ChunkBodyTests.cs`
 - **Acceptance criteria:**
-  - [ ] A 100-cell island becomes one enabled chunk at the end of the detection tick with `PhysicsVelocity.Linear` within 0.01 m/s of `v + ω×r + separation` and mass equal to the summed `CellMass`.
-  - [ ] Greedy boxes cover exactly the island's cells (volume equality) for 200 seeded islands, or fall back to one AABB box above 32 boxes.
-  - [ ] 80 chunk-tier islands over several ticks never produce more than 64 live chunks; evicted chunks emit particles.
-  - [ ] A chunk disables itself at `EndTick`; its old collider blob is released through `DeferredDisposalSystem` no earlier than 3 frames later; leak detection reports nothing.
-  - [ ] Destroying all `ChunkBody` entities (unload) with no `GameplayActive` singleton: every blob is retired and disposed within 5 frames; no leak.
+  - [x] A 100-cell island becomes one enabled chunk at the end of the detection tick with `PhysicsVelocity.Linear` within 0.01 m/s of `v + ω×r + separation` and mass equal to the summed `CellMass`.
+  - [x] Greedy boxes cover exactly the island's cells (volume equality) for 200 seeded islands, or fall back to one AABB box above 32 boxes.
+  - [x] 80 chunk-tier islands over several ticks never produce more than 64 live chunks; evicted chunks emit particles.
+  - [x] A chunk disables itself at `EndTick`; its old collider blob is released through `DeferredDisposalSystem` no earlier than 3 frames later; leak detection reports nothing.
+  - [x] Destroying all `ChunkBody` entities (unload) with no `GameplayActive` singleton: every blob is retired and disposed within 5 frames; no leak.
 - **Tests:** `ChunkBodyTests.Unload_ReleasesBlobsWithoutGameplay`, `ChunkBodyTests.Chunk_InheritsMomentum`, `.GreedyBoxes_VolumeEqualsCells`, `.Pool_CapsAt64_AndEvicts`, `.Lifetime_DisablesAndReleasesBlob`.
 
 ### DMG-012 — Hulk grids from splits

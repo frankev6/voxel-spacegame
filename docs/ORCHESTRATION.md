@@ -18,11 +18,11 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- Branch `task/DMG-011-chunk-bodies`, latest repair `e2cbd81`, merged main at `00ea50b`.
-- Physical chunks: pool, exact mass/momentum, greedy colliders, retirement and palette-lit rendering implemented. Five required tests including explicit leak checks pass.
-- Live 264-cell wall cut exposed a ~102 m/s kick after 60-tick parent grace. ADR-0063 adds per-incarnation contact arming only after geometric clearance. All three existing SplitGraceTests pass with overlap/clearance/recontact coverage. Live repeat stays near 1.5 m/s then damps. Evidence `Logs/playtest/dmg011/contact-handoff-fixed.txt`, `chunk-fixed-moving.png`.
-- **Full validation now running: exec session 46677**, compile then EditMode then PlayMode. Editor session 39677 exited normally. Do not restart a live process or run concurrent Unity. Preserve original QualitySettings delta; backup `Logs/playtest/orchestration-batch2/QualitySettings.before.asset`.
-- After green full suites: close DMG-011 and merge locally, then claim DMG-012 hulk completion. Review next worker deliveries in a compatible batch. Preserve live play where practical; no new owner gates.
+- DMG-011 complete on `task/DMG-011-chunk-bodies`; final runtime repair `e2cbd81`. Local main integration follows closeout.
+- Physical chunks: pool, exact mass/momentum, greedy colliders, retirement and palette-lit rendering verified. Five required tests including native leak checks pass. ADR-0063 clearance contact repair passes existing three contact tests and live 264-cell slab separation proof.
+- Full validation session 46677 completed exit 0: compile zero CS warnings, EditMode **901/0/1**, PlayMode **128/0/53**. Evidence `Logs/playtest/dmg011/{editmode-repair,playmode-repair}.xml`, `contact-handoff-fixed.txt`, `chunk-fixed-moving.png`.
+- No Unity process active; runner cleaned test scene. Original QualitySettings delta restored from `Logs/playtest/orchestration-batch2/QualitySettings.before.asset` and remains excluded.
+- Next lead claim DMG-012 hulk completion after merging DMG-011; next compatible worker batch includes MIG-009 content before strict DATA-010, plus pending deliveries below.
 
 ## Validated and pending batches
 
@@ -34,7 +34,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 - INP-008 delivered `eecb3e05926e1a318b838e118a541a1e10a27730`, 2 required tests, SPEC-03 Q10/Q11. Lead reviewed aim and device-label flow; Unity validation/hardware ergonomics pending. Do not claim physical controller testing.
 - MIG-009 exact dependency resolved in SPEC-72 Q19 / ledger Q216: use permitted DATA-001 contract dependency (DATA-007 implementation is done) rather than all SPEC-04, because serialized weapon field/bake already exists and DATA-010 strict validation needs the six missing links. Initial DATA-007 dependency was rejected by docs checker and corrected on main `8b0016e`; merged into lead, check-docs passes. MIG-009 claimed/dispatched to same combat worker. Keep E047 strict; integrate migration content before DATA-010.
-- Repair full EditMode **901/0/1** passes; saved `Logs/playtest/dmg011/editmode-repair.xml`. PlayMode session 46677 remains running; source unchanged during validation.
+- Repair full validation completed green; see current lead state above.
 
 - DATA-010 delivered `9b56175d254bd18df77898611583f7a8ff95eaaf`: strict E047, weapon stat contributions, authored-order ability bake/hash; 3 required tests, 0 extra. Lead reviewed source and tests; integrate with MIG-009 content. Same worker recycled to GAL-001, claimed on main `ba5be3b`, dispatched successfully. Combat MIG-009 and presentation UI-009 remain active.
 

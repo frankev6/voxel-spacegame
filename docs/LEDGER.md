@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 57 | 3 | 0 | 0 | 31 | 0 | 91 | 5 |
+| M2 | 57 | 2 | 0 | 0 | 32 | 0 | 91 | 6 |
 | M3 | 168 | 4 | 0 | 0 | 8 | 0 | 180 | 9 |
 | M4 | 13 | 1 | 0 | 0 | 0 | 0 | 14 | 2 |
 | A0 | 6 | 2 | 0 | 1 | 7 | 0 | 16 | 0 |
@@ -229,8 +229,8 @@
 | DMG-008 | Brick connectivity summaries | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | done | astra (gpt-6) | 2026-10-12 | 36e838d | Scanline brick flood, instance unions, touched checks and deterministic warm-up; 1000 reference masks; three required tests |
 | DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | yes | done | astra (gpt-6) | 2026-10-12 | 1cf796e | Parallel hybrid race, canonical masks, retained seeds and forced retries; 300 reference structures; live Space cut detached 205 cells |
 | DMG-010 | SplitSystem: plan, particle tier, deferred detach and debris FX | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-009, VFX-001, AUD-001 | yes | done | astra (gpt-6) | 2026-10-12 | e3045a8 | Canonical tier/budget planning, next-tick particles, complete deferred reseeding, debris/SFX events; four required tests; existing hulk path retained |
-| DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | partial in FND-020: hulk-body scaffolding; DMG-010 classifies and defers chunks / chunk pool, colliders, lifetime and required tests |
-| DMG-012 | Hulk grids from splits | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-011, FND-001, SPEC-12 | no | todo |  |  |  | partial in FND-020: hulk cells/instances, bodies and functional transfer / remaining lifecycle, integration and required tests |
+| DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-13 | e2cbd81 | Physical pool, exact mass/momentum, colliders, lifetime/rendering; ADR-0063 clearance; full 901 EM / 128 PM green; live 264-cell slab |
+| DMG-012 | Hulk grids from splits | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-011, FND-001, SPEC-12 | yes | todo |  |  |  | partial in FND-020: hulk cells/instances, bodies and functional transfer / remaining lifecycle, integration and required tests |
 | DMG-013 | ShipDeathSystem, despawn dissolve and the destroy pass | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-012 | no | todo |  |  |  | partial in FND-020: initial core-loss and destroyed-instance cleanup / despawn dissolve, final death presentation and required tests |
 | DMG-014 | Determinism hash and frame-rate determinism tests | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-013, TST-001 | no | todo |  |  |  | partial in DMG-006: CellStateHasher / integrated 600-tick frame-rate and worker-count scenarios |
 | DMG-015 | Regression scenarios R25/R26 and soak | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014 | no | todo |  |  |  |  |
@@ -911,6 +911,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DMG-011 complete: physical chunk breakup — astra (gpt-6)
+
+1. Implemented deterministic 64-slot pool/eviction, exact cell mass and inherited motion, bounded greedy colliders, lifetime/dissolve rendering and deferred collider cleanup. Final contact repair `e2cbd81` (ADR-0063) prevents post-grace penetration impulses until parent clearance. All five acceptance criteria checked; spec-required: 5, extra: 0. Existing three PHY-014 tests include the required clearance/recontact regression, no new test count.
+2. Compile clean with zero warning CS; full EditMode **901 passed / 0 failed / 1 skipped**, PlayMode **128 passed / 0 failed / 53 skipped**, both exit 0. Evidence `Logs/playtest/dmg011/editmode-repair.xml`, `playmode-repair.xml`. Live 264-cell slab visibly separates/tumbles at approximately 1.5 m/s and damps without the former approximately 102 m/s kick (`chunk-fixed-moving.png`, `contact-handoff-fixed.txt`). Zero optimization passes; this was functional physics repair.
+3. Unity validation completed normally; test scene removed by runner, original QualitySettings delta restored with backup and excluded. Next lead task DMG-012 hulk creation/lifecycle. Three existing workers continue MIG-009, GAL-001 and UI-010. DATA-010/UI-009 delivered pending compatible batch; UI-009 fixture review repair `b8af3e3` must accompany its implementation.
 
 ### 2026-10-13 — DMG-011 live contact repair verified — astra (gpt-6)
 
