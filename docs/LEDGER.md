@@ -1007,6 +1007,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Owner correction: shorten test fixtures — astra (gpt-6)
+
+- Frank: "make sure your testing time takes as little as possible, like if blocks have to be weaker, or weapons do more damage, or they shoot faster etc. make sure youre not spending a bunch of time waiting on tests pleaseee"
+- Persisted fixture-only acceleration guidance in testing, handoff and orchestration docs; sent it to all three existing worker threads. Preserve functional assertions, required scenarios and production balance. Batch checks after implementation; bounded fixed ticks replace real-time combat waits.
+- Documentation-only change; spec-required: 0, extra: 0. No Unity run required.
+
 ### 2026-10-13 — Merchants verified — astra (gpt-6)
 
 - ECO-005 delivery6cd04fb0 integrated58637745 implements pricing, persistent per-merchant stock, game-time restocking, sessions, buying/selling and buyback. Q24 mirroredQ304. Lead repaired sale-floor promotion with MathF at f4cae431 after required Prices_Relation caught45 becoming44; assertions unchanged.

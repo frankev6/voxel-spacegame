@@ -16,6 +16,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
+All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
+
 ## Current lead state
 
 - **Lead narrative implementation:** NAR-002 claimed38d4c17b; existing isolated lead checkout now `task/NAR-002-logic-parser`. Lexer/token/location/first-error types implemented (expression operators, command words, escaped strings, CRLF tracking). Parser/AST and seven required tests remain, no compilation claim. Primary main unchanged runtime; Editor17922 open/stopped. Worker snapshots AI-010126, AI-015145, SYS-003154 active. Prior turn closed merchants and recycled worker (progress).

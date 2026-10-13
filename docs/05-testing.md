@@ -7,6 +7,8 @@
 Owner correction (2026-10-13): compile once per compatible batch and run focused functional checks for changed behavior. Do not require a full suite per task, commit or worker delivery. Passing relevant acceptance checks unlock task closeout and dependent work; unrelated benchmark/soak failures remain recorded follow-ups. Broad functional regression belongs at meaningful integrated gameplay checkpoints or milestone review. Performance and long soak tests are opt-in only. A routine test approaching three minutes is a workflow defect: stop repeated diagnosis, record it and isolate/shorten its fixture; never increase timeouts or weaken functional assertions to obtain green. Preserve spec-required coverage, add no speculative tests, and prioritize implementation and live gameplay. See [ADR-0070](decisions/ADR-0070-focused-validation.md).
 
 
+Fixture speed (owner correction, 2026-10-13): minimize waiting by using weaker test targets, higher test weapon damage or firing rates, and shorter distances whenever those values are not the behavior being verified. Step bounded fixed simulation ticks directly instead of waiting for wall-clock combat. Stop once the required outcome is observed. Preserve functional assertions and required scenarios; do not change production balance merely to accelerate tests. Implement compatible changes together, then run their focused checks once. Record unusually slow fixtures for shortening rather than repeatedly rerunning them.
+
 All scripts live in `tools/`, find the project root themselves, and put the Unity CLI (`~/.unity/bin/unity`) on `PATH`.
 
 | Command | What it does | When |
