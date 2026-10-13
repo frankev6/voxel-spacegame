@@ -1,6 +1,7 @@
 // Lead-only: copy temporarily to Assets/Game/Editor/StreamingConfigSetup.cs, run Game.Editor.StreamingConfigSetup.Run,
 // then remove the temporary source/meta. Uses the one-off Editor-job workflow in docs/08-tools.md §2.
 using System;
+using Game.Core;
 using Game.Data.Definitions;
 using Game.Data.Services;
 using Game.Data.Validation;
@@ -39,11 +40,11 @@ namespace Game.Editor
                 var report = new ValidationReport("SYS-002");
                 var catalog = ContentCatalog.Build(database.Definitions, report);
                 definition.Validate(report.For(path), new ContentValidationContext(path, true, _ => true, catalog));
-                Debug.Log(report.ToText());
+                GameLog.Info("Content", report.ToText());
                 if (report.HasErrors) throw new InvalidOperationException(report.ToText());
                 EditorApplication.Exit(0);
             }
-            catch (Exception e) { Debug.LogException(e); EditorApplication.Exit(1); }
+            catch (Exception e) { GameLog.Error("Content", e.ToString()); EditorApplication.Exit(1); }
         }
     }
 }
