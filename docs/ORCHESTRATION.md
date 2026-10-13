@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **AI-006 decision runtime compiled:** AiDecisionSystem/AiThinkJob now implement staggered parallel thinking, target scoring/validity, states/goals, avoidance, friendly-fire suppression and ability edges. Query truncation warning/count uses atomic system-owned native telemetry; SPEC23Q19 / ledgerQ292 records resolved boundary contradictions. Initial compile34803 found a missing Commands import; corrected, compile13779 exited0 with zero warning CS. Nine required decision tests and integrated validation still pending; no gameplay claim. ABL-005 worker remains active (verified cursor130); other workers retain actual AI-006 waits. Previous goal turn made progress via e2f96ddf rule baking.
+
 - **AI-006 rule bake implemented:** AiContent now bakes authored ability indices/triggers/thresholds, including independent default-profile arrays, and rejects uncatalogued references before allocation (SPEC23Q18 / ledgerQ291). Existing two content checks extended, no additional tests. Decision job and nine required checks remain; compilation deferred to the compatible batch. Exact three workers rechecked: power ABL-005 active (cursor130), combat/presentation remain genuine AI-006 dependency waits (cursors123/109). Prior turn answered the owner scheduling question; no implementation progress claimed for that turn.
 
 - **Next slice claimed:** AI-006 lead and ABL-005 existing power worker, after main8b3623f6 full-green closeout. Lead uses primary `task/AI-006-enemy-decisions`; worker starts from current main in its existing checkout. Other workers wait for AI-006 to unlock AI-007/008. Isolated VOX-020 remains on its own branchfba40c66; no Unity active.
