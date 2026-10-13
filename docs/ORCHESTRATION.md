@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-009 | dispatched from main 7c5b9d08; DMG-015 delivered 559db043 | loop voices |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AUD-008 | dispatched from main 7c5b9d08; DMG-017 delivered ee16f993 | music director |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-012 | dispatched from main ac6ce962; AUD-008 delivered 5bf0008e | faction converter |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-001 | dispatched from main 8217719f; AUD-007 delivered 3cef9d81 | quest contracts |
 
 ## Operating rules
@@ -18,7 +18,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- **Now:** repaired destruction session **24180 exited 0**, compile clean; R25/R26 **2/0/0**. R25: 63 ships, 177 ram events, 63 original core-loss hulks; R26: twelve hostile ships released 60 shots before scripted core loss/duplicate despawns; both zero leaks. Evidence `firing-destruction/death-focused-final.xml`. AUD-007 delivered 3cef9d81 and integrated c4f0efa7; protected audio generation session 8112 exited 0: 20 legacy plus 10 new cues, validated config/catalog, second import byte/GUID-identical, no blocked clip references. Unverified clips remain development-only. Same presentation worker recycled to QST-001, claim main 8217719f; AUD-008/009 still active. Audio compile and five required EditMode cases run in **session 78232**; poll this handle before any primary edits. Full regression including soak and live CLI/firing proof remain before closeout.
+- **Now:** AUD-007 generation and acceptance session 78232 exited 0: compile clean, **5/0/0** required EditMode tests. AUD-008 delivered and integrated **65c6ed89**, preserving cue binding and deduplicating Hash helper. Music compile + six EditMode/one PlayMode acceptance checks running in **session 92934**; do not mutate primary runtime until terminal. Lead claimed AUD-012 on main f572f201 and prepared isolated `task/AUD-012-origin-lifecycle` in existing lead checkout (no code yet). Same workers: AUD-009 loops active; music worker reused for MIG-012 from main ac6ce962; presentation on QST-001. R25/R26 both green, full soak/regression and live proof still required before closeout.
 
 - **Review while session 8009 runs:** Unity's NoUnexpectedReceived checks all logs, so the three new destruction fixtures encounter normal content-load and partial-system ordering diagnostics before their gameplay assertions. Prepared `task/DMG-015-log-expectations` in the isolated lead worktree: explicitly expect only the five observed message kinds; retain strict errors/exceptions/other warnings. Do not integrate until session 8009 is terminal; inspect final XML first. Primary runtime unchanged.
 
