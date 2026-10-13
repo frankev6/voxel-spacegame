@@ -1024,6 +1024,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — UI boot ownership integrated — astra (gpt-6)
+
+- HUD-002 `5433d3b1`: app owns persistent screen composition, ticks implemented presenters, and disposes before UIRoot. Existing visible scene adapter remains until real destination/editor bindings are installed; HUD-002 stays in-progress.
+- Compile51858 clean, zero CS warnings; focused59148 four existing CompositionTests passed. Evidence `Logs/playtest/ui-composition/boot.xml`. Test count: spec-required: 4 existing boot checks, extra: 0; four HUD-002 acceptance cases remain pending. No full suite or benchmark run.
+- NAR-013 delivery20b74933 queued for lead review; same three workers retained.
+
 ### 2026-10-13 — Logic watcher accepted — astra (gpt-6)
 
 - NAR-020b4344a9 implements conditional fact/item/credit subscriptions, sorted/deduplicated dependency keys, flip-only callbacks and idempotent disposal. Initial evaluation emits no callback; disposed Refresh retains the last value. Owners explicitly refresh dependency kinds without supported events, as SPEC-40 §6 requires.

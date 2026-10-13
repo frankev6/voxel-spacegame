@@ -6,11 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-013 | claimedb39fb6d7; validator implementation dispatched | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-013 | delivered20b74933; bounded correctness review active, lead integration pending | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | UI-013 | accessibility active188; NAR-020 acceptedb4344a9 | narrative follow-ups |
 
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 accepted | FACT review169 and NAR-014 review170 clear; genuine ready-standard dependency wait | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | UI-013 | accessibility active188; NAR-020 acceptedb4344a9 | narrative follow-ups |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-004 | claimed93cfef3d; save/load UI dispatched under Q23 | HUD-003/006/007 once ready |
 
 ## Operating rules
@@ -22,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Boot composition verified:** HUD-0025433d3b1 installs app-owned models/loading presenter and Tick/disposal; compile51858 clean, focused59148 four existing boot checks pass. Evidence ui-composition/boot.xml. Actual destination/root bindings and four HUD acceptance cases remain; task stays in-progress. NAR-01320b74933 delivered and worker doing bounded review; UI-013190/HUD-004153 active. No active validation. Previous acknowledgment turn was no progress; this turn changes and verifies startup integration.
 
 - **Watcher accepted:**b4344a9 clean compile86065, focused95813 four passed0.17s; evidence logic-watcher/. No active validation. All three current worker snapshots active: NAR-013175, UI-013188, HUD-004152. UI-generated font assets backed up/restored, unrelated QualitySettings excluded. Lead returns to HUD composition after review/integration; previous turn closed UI audits/recycled worker (progress).
 
