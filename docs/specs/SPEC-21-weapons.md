@@ -415,7 +415,7 @@ public readonly struct ShipDestroyed
     public readonly uint Tick;                        // SimClock.Tick of the core loss
     public readonly byte IsPlayer;                    // 1 when the grid had PlayerShip
     public readonly byte Faction;                     // Allegiance.Faction (255 = none / no Allegiance)
-    public readonly byte Kind;                        // (byte)HulkInfo.Kind: the GridKind before death (Ship = 0, Station = 1, Asteroid = 2)
+    public readonly byte Kind;                        // (byte)HulkInfo.FormerKind: the GridKind before death (Ship = 0, Station = 1, Asteroid = 2)
     public readonly ulong KillerPersistentId;         // PersistentId of GridDamageStats.LastDamageInstigator (0 = none, transient or unknown; review X6)
     public readonly byte KillerIsPlayer;              // 1 when that instigator was the player ship (so the player's craft credit the player)
     public ShipDestroyed(ulong persistentId, Game.Core.ContentHash blueprint, Game.Core.ContentHash encounter, uint encounterInstance,
@@ -423,9 +423,9 @@ public readonly struct ShipDestroyed
 }
 ```
 
-`ShipDestroyedBridgeSystem` (`Assets/Game/Simulation/Weapons/ShipDestroyedBridgeSystem.cs`, `ISystem`, main thread, not Burst-compiled): `PresentationBridgeGroup`, `[UpdateBefore(typeof(ManagedEventDrainSystem))]`; requires `DamageStreams` only (not `GameplayActive`: a core loss in the last tick before a scene exit is still reported). Per frame:
+`ShipDestroyedBridgeSystem` (`Assets/Game/Simulation/Weapons/ShipDestroyedBridgeSystem.cs`, `ISystem`, main thread, not Burst-compiled): normal order in `PresentationBridgeGroup`, before the existing `OrderLast` `ManagedEventDrainSystem` (SPEC-02 §5.6; no upward assembly reference or cross-bucket ordering attribute, Q13); requires `DamageStreams` only (not `GameplayActive`: a core loss in the last tick before a scene exit is still reported). Per frame:
 1. `streams.DrainCoreLost(pending)` (`pending`: persistent `NativeList<GridCoreLost>`, cleared each frame). Empty → return.
-2. `em.CompleteDependencyBeforeRO` for `PlayerShip`, `Allegiance`, `GridSource`, `HulkInfo` and (from M3) `EncounterTag`; then for each event in list order: if `em.Exists(Grid)`: `IsPlayer = HasComponent<PlayerShip>`, `Faction = Allegiance.Faction` (255 if absent), `Blueprint = GridSource.Blueprint`, `Kind = (byte)HulkInfo.Kind` (0 if absent), `Encounter`/`EncounterInstance` from `EncounterTag` when present; `k = GridDamageStats.LastDamageInstigator`: `KillerPersistentId = PersistentId[k]` and `KillerIsPlayer = HasComponent<PlayerShip>(k)` when `k` exists (else 0/0); if the grid no longer exists, those fields are 0/255.
+2. `em.CompleteDependencyBeforeRO` for `PlayerShip`, `Allegiance`, `GridSource`, `HulkInfo`, `GridDamageStats`, `PersistentId` and (from M3) `EncounterTag`; then for each event in list order: if `em.Exists(Grid)`: `IsPlayer = HasComponent<PlayerShip>`, `Faction = Allegiance.Faction` (255 if absent), `Blueprint = GridSource.Blueprint`, `Kind = (byte)HulkInfo.FormerKind` (0 if absent), `Encounter`/`EncounterInstance` from `EncounterTag` when present; `k = GridDamageStats.LastDamageInstigator`: `KillerPersistentId = PersistentId[k]` and `KillerIsPlayer = HasComponent<PlayerShip>(k)` when `k` exists (else 0/0); if the grid no longer exists, those fields are 0/255.
 3. `em.CompleteDependencyBeforeRO<ManagedEventQueue<ShipDestroyed>>()`; enqueue `ManagedEventEnvelope<ShipDestroyed> { Tick = e.Tick, SortKey = e.PersistentId, Payload }` (main-thread producer, SPEC-02 §5.6). `ManagedEventDrainSystem` publishes it the same frame.
 
 `Game.Simulation/AssemblyInfo.cs` registers `ManagedEventQueue<ShipDestroyed>`; `ManagedEventChannels.RegisterAll` gets `system.RegisterChannel<ShipDestroyed>();`. Consumers: SPEC-01 `DefeatWatcher` (`IsPlayer == 1`), SPEC-40 narrative bridge, SPEC-33 director (`EncounterDefeated`), SPEC-63/64 nothing (they react to `CellRemoved`/FX).
@@ -477,7 +477,7 @@ Common to all: `projectileRadius` 0.1 m (flak 0.2, missile 0.3); `fireConeDeg` 3
 | `BeamStepSystem` | `GameplayPostPhysicsGroup`, `[UpdateAfter(typeof(ProjectileStepSystem))]`, `[UpdateBefore(typeof(DamageResolveSystem))]` | yes | same |
 | `ExplosionSystem` | `GameplayPostPhysicsGroup`, `[UpdateAfter(typeof(BeamStepSystem))]`, `[UpdateBefore(typeof(DamageResolveSystem))]` | yes | `GameplayActive`, `DamageStreams`, `ShieldHitStreams`, `SpatialHash`, `WeaponTuning` |
 | `WeaponVisualSyncSystem` | `WorldGroup` (variable rate, before transforms) | yes | `GameplayActive` |
-| `ShipDestroyedBridgeSystem` | `PresentationBridgeGroup`, `[UpdateBefore(typeof(ManagedEventDrainSystem))]` | no (main thread) | `DamageStreams` (§4.6b) |
+| `ShipDestroyedBridgeSystem` | normal order in `PresentationBridgeGroup`, before its `OrderLast` managed event drain (Q13) | no (main thread) | `DamageStreams` (§4.6b) |
 
 SPEC-22's `ShieldSystem` declares `[UpdateAfter(typeof(ExplosionSystem))]`. `ProjectileStepSystem.OnCreate` creates the `ProjectileStore` singleton (capacity `WeaponTuning.MaxProjectiles` if present, else 8,192); `OnDestroy` completes and disposes it. It implements `ISystemStartStop`: `OnStartRunning` and `OnStopRunning` clear the store (`CompleteAccess`, `Rows.Clear()`), so no projectile survives a scene change.
 
@@ -906,6 +906,8 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 | 11 | WPN-001 references SpatialHash before AI-001 (which depends on WPN-001), and the task file list predates WeaponStats / delivery shots | **Resolved (2026-10-12):** include WeaponStats, WeaponShot, WeaponShots and WeaponDeliveryData from the existing data model; stage only the canonical Game.Simulation.Spatial.SpatialHash type identity with TODO(AI-001), so the exact CombatHitTest signature compiles without inventing another API. AI-001 fills that shell. FxDefinition uses the task's prescribed TODO(VFX-001) shell. ShipDestroyed remains WPN-017. WeaponShot's existing fields occupy 80 bytes, not its stale 64-byte comment; ProjectileRow remains 64 bytes. No fields, namespaces or runtime algorithms changed. | Tech lead |
 
 | 12 | Contact normal and missing staged weapon FX producers | **Resolved (2026-10-12), ADR-0059:** append WorldNormal to CombatHit, transform the entered voxel face to world space (inside-cell fallback opposite ray); VFX-004 brings guarded muzzle, hull-hit and explosion queue emission forward. Remaining WPN-003/007/008/010 criteria stay open; cell normals do not claim slope-accurate collision. | Tech lead |
+
+| 13 | §4.6b names an upward presentation reference for ordering and the nonexistent `HulkInfo.Kind` field | WPN-017 default: use normal group order before the drain's existing `OrderLast` bucket (architecture §3, SPEC-02 decision 13), read canonical `HulkInfo.FormerKind` (SPEC-13 §4.2), and complete the `GridDamageStats`/`PersistentId` dependencies before attribution reads. No assembly, contract or effective ordering changes. | Tech lead |
 
 ## 11. References
 
