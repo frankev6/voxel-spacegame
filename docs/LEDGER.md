@@ -857,6 +857,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 265 | SPEC-13 Q36: fresh Worlds allocate different entity indices for equivalent persistent ships. | ADR-0066 seeds authoritative cell quantization and CellWriter kicks from nonzero persistent identity; unidentified transient grids retain the entity-index fallback. Keep strict determinism checks and existing public helper compatibility. | Tech lead |
 | 266 | SPEC-21 Q50: turret rest pose and split refresh | Reconstruct absolute pose from current block origin/orientation/cell size; OR change-filter aim and mount so split reparenting redraws unchanged yaw. Fixed weapons remain unchanged. | Tech lead |
 | 267 | SPEC-64 Q16 / ledger Q169: native audio queue lifetime | ADR-0067 applies existing GuardedHandles to SFX producers, exclusive drain and disposal; ram, split and death producers updated together. Required drain tests use jobs attached only to the queue guard. | Tech lead |
+| 268 | SPEC-21 Q61: fractional timing and pellet RNG reconstruction | Carry negative fractional trigger remainder only while firing; zero initial cooldown fires immediately. Seed each pellet by its own ShotId and persistent shooter identity, then skip its two spread samples when reconstructing lifetime randomness. | Tech lead |
 
 ## Measurements
 
