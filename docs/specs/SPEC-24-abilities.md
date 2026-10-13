@@ -229,7 +229,7 @@ StatBoost slots are never `Blocked` (the system writes 0). `StatusSystem` (SPEC-
 | Ship becomes a hulk | Every slot `Unavailable`; modifiers cleared |
 | No `ShipStats` | Sync once at the first update |
 | No `ShipPower` (non-combat test world) | Costs are treated as granted |
-| Content | ABL-E001 StatBoost without modifiers or with > 4; ABL-E002 StatBoost `durationSeconds ≤ 0`; ABL-E003 `maxCharges > 1` with `chargeRechargeSeconds ≤ 0`; ABL-E005 ShieldToggle with `durationSeconds > 0` (toggles own `Active` through their effect system) (ABL-E004 is retired: it was the mirror-enum check) |
+| Content | ABL-E001 StatBoost without modifiers or with > 4; ABL-E002 StatBoost `durationSeconds ≤ 0`; ABL-E003 `maxCharges > 1` with `chargeRechargeSeconds ≤ 0`; ABL-E005 ShieldToggle with `durationSeconds > 0` (toggles own `Active` through their effect system) (ABL-E004 is retired: it was the mirror-enum check); ABL-E006 invalid kind or nonfinite/out-of-range scalar values (Q3) |
 
 ## 8. Performance budget
 
@@ -257,8 +257,8 @@ Scale notes: per ship per tick O(slots ≤ 8); the instance walk happens only on
 - **Milestone:** M2
 - **Tier:** standard — fields, values and validation are listed
 - **Depends on:** `ABL-001`, `SPEC-04`
-- **Do:** Getters and validation; `AbilityContent.CreateSingletons` (blob, entry 0 = none); `AbilityGridSetup.RootTypes`/`Register` (called from `AbilitySystem.OnCreate`, ADR-0015). Ledger note to SPEC-01 for the BootSingletons row. The two assets are written by SPEC-72 MIG-010; create hand-made test assets in the test folder.
-- **Files:** `Assets/Game/Data/Definitions/Abilities/AbilityDefinition.cs`, `Assets/Game/Simulation/Abilities/{AbilityContent,AbilityGridSetup}.cs`, `Assets/Game/Tests/EditMode/Simulation/Abilities/AbilityContentTests.cs`
+- **Do:** Getters and validation (including defensive Q3); `AbilityContent.CreateSingletons` (blob, entry 0 = none; boot integration/lifetime handoff Q4); `AbilityGridSetup.RootTypes`/`Register` (called from `AbilitySystem.OnCreate`, ADR-0015). Ledger note to SPEC-01 for the BootSingletons row. The two assets are written by SPEC-72 MIG-010; create hand-made test assets in the test folder. Abilities follow ContentCatalog’s 1-based ordinal family indices; fractional cooldown/recharge ticks are retained, duration uses SimTime.SecondsToTicks. Validate before native allocation; cue/fx references must belong to the catalog (DATA-E010).
+- **Files:** `Assets/Game/Data/Definitions/Abilities/AbilityDefinition.cs`, `Assets/Game/Simulation/Abilities/{AbilityContent,AbilityGridSetup}.cs`, `Assets/Game/Tests/EditMode/Simulation/Abilities/{AbilityContentTests.cs,Fixtures/ability_*.asset}`
 - **Acceptance criteria:**
   - [ ] Blob entries equal the §4.1 table (seconds → ticks); validation codes reported.
 - **Tests:** `AbilityContentTests.Blob_MatchesTable`, `.Validation_Codes`, `.GridSetup_AddsComponents`.
@@ -303,6 +303,8 @@ Scale notes: per ship per tick O(slots ≤ 8); the instance walk happens only on
 |---|---|---|---|
 | 1 | Should several granting blocks strengthen an ability (e.g. more thrusters → stronger boost)? | No: one slot, fixed strength | Owner |
 | 2 | Should the player be able to reorder the ability bar? | No in v1 (block order decides) | Owner |
+| 3 | Inspector ranges do not validate serialized floats/enums; duplicate boost stats or a positive duration rounding to zero would break the effect/request semantics | Reject invalid/duplicate stats and multipliers below 0.01 as ABL-E001; require a boost duration rounding to at least one tick as E002; enforce 1..9 charges and multi-charge recharge as E003; E006 covers unknown kinds/nonfinite or negative scalars, invalid threshold and float-tick overflow | Tech lead |
+| 4 | Boot row/lifetime are not wired yet and MIG-010's production definitions are absent; the factory has no owned teardown API | Lead adds AbilityContent.CreateSingletons before the boot snapshot, after the AI row when present and before streaming/economy/allocator, retains its persistent blob in the boot lifetime and disposes after jobs complete/entity destruction. An empty ability family publishes one none entry; never invent production definitions or require their IDs. ABL-003 calls AbilityGridSetup.Register once from AbilitySystem.OnCreate after GridSpawnSystem. | Tech lead |
 
 ## 11. References
 
