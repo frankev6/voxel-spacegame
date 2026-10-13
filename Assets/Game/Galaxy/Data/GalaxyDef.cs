@@ -8,7 +8,7 @@ namespace Game.Galaxy.Data
     {
         public ulong Seed { get; }
         public int GeneratorVersion { get; }
-        public ulong Hash { get; }                                       // GalaxyHash.Compute, §5.4
+        public ulong Hash { get; internal set; }                                       // GalaxyHash.Compute, §5.4
         public Unity.Collections.NativeArray<StarSystemDef> StarSystems; // sorted by Id.Value ascending
         public Unity.Collections.NativeArray<LaneDef> Lanes;             // sorted by (A.Value, B.Value)
         public Unity.Collections.NativeArray<int> Adjacency;             // lane indices; per star system sorted by neighbour Id.Value
@@ -25,6 +25,17 @@ namespace Game.Galaxy.Data
         public StarSystemId StartStarSystem { get; }
 
         public Unity.Collections.NativeArray<WeightedIndex> PoolEntries;
+        public int SkippedProceduralCount { get; internal set; }
+
+        internal GalaxyDef(ulong seed, int version,
+            System.Collections.Generic.IReadOnlyList<StarSystemTemplateDefinition> templates,
+            System.Collections.Generic.IReadOnlyList<AuthoredStarSystemDefinition> authored,
+            System.Collections.Generic.IReadOnlyList<BodyTemplateDefinition> bodies, StarSystemId start)
+        {
+            Seed = seed; GeneratorVersion = version; Templates = templates; Authored = authored;
+            BodyTemplates = bodies; StartStarSystem = start;
+            LaneGates = new System.Collections.Generic.List<LaneGateSpec>();
+        }
 
         public bool TryGetIndex(StarSystemId id, out int index)
         {
@@ -95,6 +106,5 @@ namespace Game.Galaxy.Data
             if (AuthoredTemplateParams.IsCreated) AuthoredTemplateParams.Dispose();
             if (PoolEntries.IsCreated) PoolEntries.Dispose();
         }
-        // TODO(GAL-004): builder initializes owned arrays and managed definition lists.
     }
 }
