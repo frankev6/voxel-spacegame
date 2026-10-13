@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 115 | 9 | 0 | 0 | 56 | 0 | 180 | 10 |
+| M3 | 113 | 10 | 0 | 0 | 57 | 0 | 180 | 9 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -324,8 +324,8 @@
 | GAL-003 | Definitions, properties and validator | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 29aa4c47 | All 24 diagnostics and four in-memory fixtures; clean compile, 48 required cases pass; production content GAL-012 remains |
 | GAL-004 | GalaxyDefBuilder and layout job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-003 | yes | done | astra (gpt-6) | 2026-10-13 | 42ecb93f | Deterministic layout, packing, queries and disposal; five focused checks pass; GAL-005 lanes/hash remain |
 | GAL-005 | Lane graph and galaxy hash | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-004 | yes | done | astra (gpt-6) | 2026-10-13 | 03a6cec6 | Connected lane graph, gate metadata, sorted adjacency and version-one golden; six focused checks pass |
-| GAL-006 | Star-system content job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-002, GAL-005 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
-| GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | no | todo |  |  |  |  |
+| GAL-006 | Star-system content job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-002, GAL-005 | yes | done | astra (gpt-6) | 2026-10-13 | e421d5ee | Complete system content generation/hash/ownership; six focused checks pass in0.193s; Q332 capacity guard |
+| GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | yes | todo |  |  |  |  |
 | GAL-008 | GalaxyService, ticker and bridge system | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, FND-001 | no | todo |  |  |  |  |
 | GAL-009 | OriginRebaseSystem | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-001, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | 5bf0a47 | Asynchronous origin capture/rebase/placement and dependent consumers; full 1051 EM /146 PM passed; 5000-root p95 0.2959 ms. |
 | GAL-010 | GLXY save participant | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, PERS-001 | no | todo |  |  |  |  |
@@ -1032,6 +1032,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — GAL-006 accepted — astra (gpt-6)
+
+- e421d5ee verifies6bc17a47/fcd27c85: authored/procedural bodies, fixed draw order, per-pool max counts, moon parents, separated stations/gates, deterministic hashes and100 regenerations. Compile6163 clean; fresh headless88933 six passed/zero failed/skipped in0.1929481s test execution. Test count: spec-required: 6, extra: 0. Evidence `Logs/playtest/system-content/{compile.log,acceptance.xml}`.
+- Live80985 stalled before results; process sample proved native SaveModifiedScenesIfUserWantsTo dialog, not generation work. CLI cancel80140/exit82018 could not reach blocked Editor; terminated test Editor17922 with TERM, confirmed exited and all handles terminal before headless run. Evidence editor-sample.txt/aborted-editor.json. Do not reuse this failed live run as passing evidence. No Editor remains open.
+- Worker HUD005 repair a03ac074 ready; TRV0024fed054f/dd9f3fec delivered175 and bounded review dispatched. GAL012199/ENC010211 active. Previous turn implemented procedural job (progress).
 
 ### 2026-10-13 — GAL-006 procedural job checkpoint — astra (gpt-6)
 
