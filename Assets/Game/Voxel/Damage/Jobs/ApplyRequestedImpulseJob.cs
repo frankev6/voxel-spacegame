@@ -28,7 +28,7 @@ namespace Game.Voxel.Damage.Jobs
             public int Compare(Entry a, Entry b)
             {
                 int c = a.Request.Body.Index.CompareTo(b.Request.Body.Index); if (c != 0) return c;
-                c = a.Request.Producer.CompareTo(b.Request.Producer); if (c != 0) return c;
+                c = ((byte)a.Request.Producer).CompareTo((byte)b.Request.Producer); if (c != 0) return c;
                 c = a.Request.Sequence.CompareTo(b.Request.Sequence); return c != 0 ? c : a.Order.CompareTo(b.Order);
             }
         }
