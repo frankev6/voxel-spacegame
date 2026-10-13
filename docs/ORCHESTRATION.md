@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **FactStore underway:** lead NAR-007 claimed7b5817be on main; task/NAR-007-fact-store implements dense values, Bool/range coercion, saturating additions, deferred changes, deduped drains, saved/session scopes, orphan retention and live-name precedence, plus bounded developer trace. Tests/compile and edge review remain; no acceptance claim. Workers NAR-004162/NAR-009146 active; power HUD review175 active, ECO-004 accepted. Previous turn accepted/merged loot (progress).
+
 - **Loot/economy accepted:**9d457784 clean compile41043; exact classes13217/49651 each4 passed, evidence `loot-economy/`. Namespace selection86522 refused before dispatch (benchmark exclusion), no failure/rerun. Ready FF main; no active validation. Power worker HUD review ongoing; other workers implement NAR-004/NAR-009.
 
 - **HUD accepted / loot integrated:** HUD-00888a324e0 closed9f562214 and FF main. ECO-0043d2cdd89 reviewed/integrated9d457784; compile41043 clean, economy-only functional batch86522 active (default excludes benchmarks). SPEC50Q26 mirrored312. Power worker bounded HUD review174 continues; NAR-004161/NAR-009145 active. Previous turn passed nine HUD checks (progress).
