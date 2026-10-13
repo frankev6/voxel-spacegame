@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Live composition and cleanup authored:**8343f72c installs actual loader/ticker/scene hooks and GalaxyFlushWriteback. ADR-0076/Q360 adds targeted abandoned-read reconciliation; exception paths release requests/handles/clones; cleanup-only entities may outlive source storage. Uncompiled/unaccepted. Next author5 small T2 fixtures, compile once and run focused pending checks/content stability. No Unity active; all workers delivered, presentation review214 addressed. Previous turn loader wiring was progress.
+
 - **Loader/event wiring authored:**3c776282 adds Burst body-event queue;55d6173e wires T2 creation/ticks/capture/retirement and destruction into loader, preserves hulk anchors and Q359 arrival-first loading. SYS-005 worker2559ea7 integrated14a0989e. Source uncompiled/unaccepted; finish shutdown retirement (cleanup entities/pins), App registration and5 T2 cases before batch validation. No Unity active. Combat/economy delivered, presentation lifetime review active213. Previous turn transitions were progress.
 
 - **T2 transitions / converter repair integrated:**6f62e17c adds ordered bounded loads, hysteresis, capture-before-retire and delayed source release; unfinished writable sources transfer to delta before retirement. NAR-016 worker c9671a1e integrated88b5a98 (preserve compiler graphs during field writes/selective recompilation). All remain uncompiled/unaccepted pending loader/events/scene wiring and focused batch. No Unity active. SYS-005 worker active248; lifetime review active213; combat delivery235 awaits acceptance/next ready work. Previous turn spawn helper was progress.

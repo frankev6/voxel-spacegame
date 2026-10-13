@@ -9,7 +9,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | integration wait | Graph-stability delivery c9671a1e integrated88b5a98; awaiting focused acceptance | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | integration wait | SYS-0052559ea7 delivered249, integrated14a0989e; two cases pending | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | source-lifetime review | Read-only review of lead SYS-006 spawn/capture helpers; no frontier implementation | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | Lifetime review214 complete; partial-spawn and exception findings repaired by lead | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Live composition and cleanup authored:**8343f72c installs actual loader/ticker/scene hooks and GalaxyFlushWriteback. ADR-0076/Q360 adds targeted abandoned-read reconciliation; exception paths release requests/handles/clones; cleanup-only entities may outlive source storage. Uncompiled/unaccepted. Next author5 small T2 fixtures, compile once and run focused pending checks/content stability. No Unity active; all workers delivered, presentation review214 addressed. Previous turn loader wiring was progress.
 
 - **Loader/event wiring authored:**3c776282 adds Burst body-event queue;55d6173e wires T2 creation/ticks/capture/retirement and destruction into loader, preserves hulk anchors and Q359 arrival-first loading. SYS-005 worker2559ea7 integrated14a0989e. Source uncompiled/unaccepted; finish shutdown retirement (cleanup entities/pins), App registration and5 T2 cases before batch validation. No Unity active. Combat/economy delivered, presentation lifetime review active213. Previous turn transitions were progress.
 

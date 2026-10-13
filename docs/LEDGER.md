@@ -1065,6 +1065,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-006 live composition / cleanup boundary — astra (gpt-6)
+
+- 8343f72c registers actual StarSystemLoader with frame ticker, scene-ready/exit hooks and the specified GalaxyFlushWriteback(order90). No unconditional readiness fallback. Pending PLOC remains explicitly SYS-009.
+- ADR-0076/Q360 exposes registry-owned abandoned-read reconciliation after tracked jobs complete; only dead/mismatched tokens are released. Loader unload invokes it after owned entities are destroyed. Cleanup-only roots no longer hold voxel sources. Body spawn exception cleanup destroys its request and releases its own handle/clone; presentation review214's P2 addressed.
+- Source uncompiled/unaccepted; next author five minimal direct-tick T2 fixtures and validate the compatible batch, including converter stability and pending single FND-012/condition checks. Planned spec-required: 5, extra: 0. No Unity active; workers delivered with genuine integration/dependency waits. Previous turn wired loader/events (progress).
+
 ### 2026-10-13 — SYS-006 loader wiring / SYS-005 integration — astra (gpt-6)
 
 - 3c776282 authors BodyGridWatchSystem with an OnCreate-owned persistent queue and Burst single-job core-loss/depletion reporting.55d6173e wires loader T2 ticks, capture, retired sources and body events; existing station grids remain physical hulks when destruction is marked. Destroyed voxel bodies retain anchors for persisted hulk restoration. Q359 resolves pre-player scene readiness using actual arrival position.
