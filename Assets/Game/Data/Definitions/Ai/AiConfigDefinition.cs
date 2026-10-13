@@ -18,8 +18,25 @@ namespace Game.Data.Definitions
         public float ArrivalRadius => arrivalRadius;
         public float AvoidanceMargin => avoidanceMargin;
         public AiProfileDefinition DefaultProfile => defaultProfile;
-        // TODO(AI-003): AI-E002 validation.
         public override void Validate(ValidationScope scope, ContentValidationContext context)
-            => throw new System.NotImplementedException();
+        {
+            base.Validate(scope, context);
+            Minimum(scope, nameof(hashCellSize), hashCellSize, 32f);
+            if (dormantThinkMultiplier < 1 || dormantThinkMultiplier > 20)
+                scope.Error("AI-E002", nameof(dormantThinkMultiplier), "Dormant think multiplier must be within [1, 20].");
+            Minimum(scope, nameof(combatBubbleRadius), combatBubbleRadius, 0f);
+            Minimum(scope, nameof(arrivalRadius), arrivalRadius, 1f);
+            Minimum(scope, nameof(avoidanceMargin), avoidanceMargin, 0f);
+            if (defaultProfile == null)
+                scope.Error("AI-E002", nameof(defaultProfile), "An AI config needs a default profile.");
+            else if (context?.Catalog != null && context.Catalog.IndexOf(defaultProfile) == 0)
+                scope.Error("AI-E002", nameof(defaultProfile), "The default AI profile must be in the content catalog.");
+        }
+
+        static void Minimum(ValidationScope scope, string field, float value, float minimum)
+        {
+            if (!float.IsFinite(value) || value < minimum)
+                scope.Error("AI-E002", field, $"{field} must be finite and at least {minimum}.");
+        }
     }
 }
