@@ -77,6 +77,8 @@
   "Assets/Game/Content/Items/resource_crew.asset": "e8666e242117f66b",
   "Assets/Game/Content/Items/resource_fuel.asset": "61d6e08e34778c7d",
   "Assets/Game/Content/Items/resource_palladium.asset": "cb8f43d321dd5055",
+  "Assets/Game/Content/Loot/loot_base.asset": "bb761e2dd9da797e",
+  "Assets/Game/Content/Loot/loot_creative.asset": "cc4be32f1f894b0d",
   "Assets/Game/Content/Ships/ship_base.asset": "67d8fa23a3bfc3ac",
   "Assets/Game/Content/Ships/ship_bastion.asset": "e165906d311def8a",
   "Assets/Game/Content/Ships/ship_beetle.asset": "c048d4705fc2ca84",

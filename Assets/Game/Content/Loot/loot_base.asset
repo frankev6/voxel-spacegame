@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f32f1d9899aa4f82bbd1702985370dbb, type: 3}
+  m_Name: loot_base
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.LootTableDefinition
+  id: loot_base
+  formerIds: []
+  entries:
+  - item: {fileID: 11400000, guid: 740a6c99920824c919828525215fa6b2, type: 2}
+    min: 1
+    max: 1
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: 337cf979332464341a61bf1b96b7f146, type: 2}
+    min: 1
+    max: 1
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: 747c899217dc244fe8b10cef3c51e294, type: 2}
+    min: 1
+    max: 1
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: 159812ac20bd3420fa2bbbecc566e6c1, type: 2}
+    min: 5
+    max: 10
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: dfcc75e2220ed476babe83e285ee98e6, type: 2}
+    min: 5
+    max: 10
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: 21d93224948934a8094c44cf92225179, type: 2}
+    min: 5
+    max: 10
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: 4e4b5ecd21b5f473d81f7bc3325df389, type: 2}
+    min: 5
+    max: 10
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: fb7feb9978ed1433f948d720121373c2, type: 2}
+    min: 5
+    max: 5
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: 9a676ec26ab964f97857b241826efdce, type: 2}
+    min: 2
+    max: 4
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: 691e9fca5c4c4459086ee9a30a0846b4, type: 2}
+    min: 27
+    max: 30
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: 12fa32ccd073c4913bdd2e70154aa61c, type: 2}
+    min: 5
+    max: 5
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: 863c5916c5e6c4806ad23751a5746537, type: 2}
+    min: 5
+    max: 5
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: 05634708927ac440380b36ac66818c07, type: 2}
+    min: 5
+    max: 5
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: 8a1171974fa0a46fd85542484dcd39fa, type: 2}
+    min: 1
+    max: 1
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: c923ad8eb5a8c4a4688b67138840b24f, type: 2}
+    min: 1
+    max: 1
+    chancePercent: 100
+  defaultPicks: 0
