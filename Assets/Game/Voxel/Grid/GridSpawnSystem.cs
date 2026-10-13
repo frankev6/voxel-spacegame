@@ -25,7 +25,7 @@ namespace Game.Voxel.Grid
     public partial struct GridSpawnSystem : ISystem
     {
         Entity singletons;
-        EntityQuery requests, spawning, registryQuery, despawns, rebuilds;
+        EntityQuery requests, spawning, registryQuery, despawns, rebuilds, edits;
         EntityArchetype brickBase;
         int rendererWait;
         byte brickRendered;
@@ -56,6 +56,7 @@ namespace Game.Voxel.Grid
                 Options = EntityQueryOptions.IncludeDisabledEntities
             });
             rebuilds = state.GetEntityQuery(ComponentType.ReadOnly<GridRebuildRequest>(), ComponentType.ReadOnly<VoxelGrid>());
+            edits = state.GetEntityQuery(ComponentType.ReadOnly<GridEditRequest>(), ComponentType.ReadOnly<VoxelGrid>());
             registryQuery = state.GetEntityQuery(ComponentType.ReadOnly<VoxelStructureRegistryRef>());
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<VoxelConfig>();
             state.RequireForUpdate<BlockDefsRef>(); state.RequireForUpdate<OrientationTablesRef>(); state.RequireForUpdate(registryQuery);
@@ -103,6 +104,7 @@ namespace Game.Voxel.Grid
                 }
             }
             using (ConvertMarker.Auto()) Convert(ref state, registry, content, runtime, ref prototypes, ref queue, ref budget, ref serials.Next);
+            Edit(ref state, registry, content, runtime, ref prototypes, ref queue);
             em.SetComponentData(singletons, serials);
             em.SetComponentData(singletons, prototypes);
         }
@@ -330,6 +332,147 @@ namespace Game.Voxel.Grid
             em.RemoveComponent<GridRebuildRequest>(roots); em.RemoveComponent<RebuildReadToken>(roots);
         }
 
+        // Editor-only initialization boundary; source storage is pinned only while the synchronous copy runs.
+        unsafe void Edit(ref SystemState state, VoxelStructureRegistry registry, VoxelContent content, VoxelRenderRuntime runtime,
+            ref GridPrototypes prototypes, ref BrickMeshQueue meshes)
+        {
+            var em = state.EntityManager;
+            using var roots = edits.ToEntityArray(Allocator.Temp);
+            if (roots.Length == 0) return;
+            em.CompleteAllTrackedJobs();
+            roots.Sort(new SerialOrder { Grids = state.GetComponentLookup<VoxelGrid>(true) });
+            var colliders = em.GetComponentData<ColliderDirtyQueue>(singletons); colliders.CompleteAccess();
+            foreach (var root in roots)
+            {
+                if (em.IsComponentEnabled<GridSpawning>(root)) continue;
+                var origin = em.GetComponentData<GridSource>(root);
+                var source = origin.StructureHandle < 0 ? null : registry.Get(origin.StructureHandle);
+                if ((origin.Flags & GridSpawnFlags.EditorPreview) == 0 || source == null || !source.Data.IsCreated)
+                {
+                    GameLog.WarnOnce("Voxel.InvalidPreviewEdit", "Voxel", "edit requires a live registered preview source");
+                    em.GetBuffer<GridEditedBrick>(root).Clear(); em.SetComponentEnabled<GridEditRequest>(root, false); continue;
+                }
+                if (source.IsPinned) continue;
+                var grid = em.GetComponentData<VoxelGrid>(root);
+                source.TryGetCellBounds(out var lo, out var hi);
+                int3 min = grid.BrickMin, dims = grid.BrickDims;
+                if (source.BrickCount > 0)
+                {
+                    min = math.min(min, BrickMath.BrickOf(lo));
+                    dims = math.max(grid.BrickMin + grid.BrickDims, BrickMath.BrickOf(hi) + 1) - min;
+                }
+                if ((long)dims.x * dims.y * dims.z > 262144 || source.CellSize != grid.CellSize)
+                {
+                    GameLog.WarnOnce("Voxel.PreviewEditBounds", "Voxel", "preview edit awaits valid bounds/cell size; request retained"); continue;
+                }
+                source.Pin();
+                try
+                {
+                    using var coords = new NativeList<int3>(Allocator.Temp);
+                    foreach (var row in em.GetBuffer<GridEditedBrick>(root)) coords.Add(row.Coord);
+                    coords.Sort(new EditCoordOrder());
+                    for (int i = coords.Length - 1; i > 0; i--) if (math.all(coords[i] == coords[i - 1])) coords.RemoveAt(i);
+                    var slots = em.GetBuffer<BrickSlot>(root);
+                    if (math.any(min != grid.BrickMin) || math.any(dims != grid.BrickDims))
+                    {
+                        using var old = slots.ToNativeArray(Allocator.Temp);
+                        slots.ResizeUninitialized(dims.x * dims.y * dims.z);
+                        UnsafeUtility.MemClear(slots.GetUnsafePtr(), slots.Length * UnsafeUtility.SizeOf<BrickSlot>());
+                        for (int i = 0; i < old.Length; i++)
+                        {
+                            int3 c = grid.BrickMin + new int3(i % grid.BrickDims.x, i / grid.BrickDims.x % grid.BrickDims.y,
+                                i / (grid.BrickDims.x * grid.BrickDims.y));
+                            slots[BrickMath.SlotIndex(c, min, dims)] = old[i];
+                        }
+                    }
+                    grid.BrickMin = min; grid.BrickDims = dims; grid.CellMin = lo; grid.CellMax = hi; grid.Revision++;
+                    var palette = em.GetBuffer<PaletteEntry>(root);
+                    if (palette.Length != source.Data.Palette.Length || UnsafeUtility.MemCmp(palette.GetUnsafeReadOnlyPtr(),
+                        source.Data.Palette.GetUnsafeReadOnlyPtr(), palette.Length * UnsafeUtility.SizeOf<PaletteEntry>()) != 0)
+                    { palette.ResizeUninitialized(source.Data.Palette.Length); palette.CopyFrom(source.Data.Palette.AsArray()); }
+                    using var removed = new NativeList<Entity>(Allocator.Temp);
+                    var instances = em.GetBuffer<BlockInstance>(root);
+                    using var prior = instances.ToNativeArray(Allocator.Temp);
+                    instances.ResizeUninitialized(source.Data.Instances.Length); grid.AnchorInstance = -1;
+                    for (int i = 0; i < instances.Length; i++)
+                    {
+                        var next = source.Data.Instances[i]; next.Functional = Entity.Null;
+                        bool alive = next.Block != 0 && next.CellsAlive > 0 && (next.Flags & BlockInstanceFlags.Destroyed) == 0;
+                        if (i < prior.Length)
+                        {
+                            var previous = prior[i]; var comparable = previous; comparable.Functional = Entity.Null;
+                            if (alive && UnsafeUtility.MemCmp(&comparable, &next, UnsafeUtility.SizeOf<BlockInstance>()) == 0)
+                                next.Functional = previous.Functional;
+                            else if (em.Exists(previous.Functional)) removed.Add(previous.Functional);
+                        }
+                        instances[i] = next;
+                        if (grid.AnchorInstance < 0 && alive && content.Blocks.Value.Blocks[next.Block].IsCore) grid.AnchorInstance = i;
+                    }
+                    for (int i = instances.Length; i < prior.Length; i++) if (em.Exists(prior[i].Functional)) removed.Add(prior[i].Functional);
+                    em.SetComponentData(root, grid);
+                    using var records = new NativeList<BrickRecord>(Allocator.TempJob);
+                    using var masks = new NativeList<BrickMaskBits>(Allocator.TempJob);
+                    using var targets = new NativeList<Entity>(Allocator.TempJob);
+                    using var newCoords = new NativeList<int3>(Allocator.Temp);
+                    foreach (var coord in coords)
+                    {
+                        int slot = BrickMath.SlotIndex(coord, min, dims); if (slot < 0) continue;
+                        Entity entity = slots[slot].Brick;
+                        if (source.Data.BrickIndex.TryGetValue(coord, out int index))
+                        {
+                            records.Add(source.Data.Bricks[index]); masks.Add(source.Data.Masks[index]); targets.Add(entity);
+                            if (entity == Entity.Null) newCoords.Add(coord);
+                        }
+                        else if (entity != Entity.Null) { removed.Add(entity); slots[slot] = default; }
+                    }
+                    bool render = runtime.IsReady != 0 && (origin.Flags & GridSpawnFlags.NoRender) == 0;
+                    using var created = new NativeArray<Entity>(newCoords.Length, Allocator.TempJob);
+                    if (created.Length > 0)
+                    {
+                        if (render) { em.Instantiate(prototypes.Brick, created); em.AddComponent<BrickRenderState>(created); }
+                        else { em.CreateEntity(brickBase, created); em.RemoveComponent<Prefab>(created); }
+                        slots = em.GetBuffer<BrickSlot>(root); var linked = em.GetBuffer<LinkedEntityGroup>(root);
+                        for (int i = 0; i < created.Length; i++)
+                        { slots[BrickMath.SlotIndex(newCoords[i], min, dims)] = new BrickSlot { Brick = created[i] }; linked.Add(new LinkedEntityGroup { Value = created[i] }); }
+                        int n = 0; for (int i = 0; i < targets.Length; i++) if (targets[i] == Entity.Null) targets[i] = created[n++];
+                    }
+                    if (targets.Length > 0)
+                    {
+                        new BrickFillJob { Entities = targets.AsArray(), Records = records.AsArray(), Pages = source.Data.CellPages.AsArray(),
+                            SparsePages = source.Data.SparsePages.AsArray(), Masks = masks.AsArray(), Root = root, CellSize = grid.CellSize,
+                            Bricks = state.GetComponentLookup<Brick>(), Cells = state.GetBufferLookup<BrickCells>(), Sparse = state.GetBufferLookup<BrickSparseCells>(),
+                            SolidMasks = state.GetBufferLookup<BrickSolidMask>(), Transforms = state.GetComponentLookup<LocalTransform>(),
+                            Parents = state.GetComponentLookup<Parent>(), Dirty = state.GetComponentLookup<BrickDirty>() }.Schedule(targets.Length, 8).Complete();
+                        foreach (var entity in targets) { var brick = em.GetComponentData<Brick>(entity); brick.ChangedRevision = grid.Revision; em.SetComponentData(entity, brick); }
+                    }
+                    if (created.Length > 0) foreach (var hook in registry.SpawnHooks) hook.OnEntitiesCreated(em, root, created);
+                    if (removed.Length > 0) em.DestroyEntity(removed.AsArray());
+                    CreateFunctional(ref state, registry, source, root, content, runtime, ref prototypes);
+                    slots = em.GetBuffer<BrickSlot>(root);
+                    foreach (var coord in coords)
+                    {
+                        int slot = BrickMath.SlotIndex(coord, min, dims); Entity entity = slot < 0 ? Entity.Null : slots[slot].Brick;
+                        colliders.Enqueue(grid.Serial, root, entity, coord, ColliderPriority.Damage);
+                        if (!render) continue;
+                        meshes.Enqueue(entity, root, MeshPriority.Damage);
+                        for (int face = 0; face < 6; face++)
+                        {
+                            int neighbour = BrickMath.SlotIndex(coord + BrickMath.FaceDirection((BlockFace)face), min, dims);
+                            if (neighbour >= 0) meshes.Enqueue(slots[neighbour].Brick, root, MeshPriority.Damage);
+                        }
+                    }
+                    em.SetComponentEnabled<GridMassRecompute>(root, true);
+                    em.GetBuffer<GridEditedBrick>(root).Clear(); em.SetComponentEnabled<GridEditRequest>(root, false);
+                }
+                finally { source.Unpin(); }
+            }
+        }
+        struct EditCoordOrder : IComparer<int3>
+        {
+            public int Compare(int3 a, int3 b)
+            { int z = a.z.CompareTo(b.z); if (z != 0) return z; int y = a.y.CompareTo(b.y); return y != 0 ? y : a.x.CompareTo(b.x); }
+        }
+
         static void AddTypes(EntityManager em, NativeArray<Entity> entities, List<ComponentType> types)
         {
             for (int start = 0; start < types.Count; start += 15)
@@ -391,7 +534,8 @@ namespace Game.Voxel.Grid
             for (int i = 0; i < source.Data.Instances.Length; i++)
             {
                 var instance = source.Data.Instances[i];
-                if (instance.Block == 0 || instance.CellsAlive == 0) continue;
+                if (instance.Block == 0 || instance.CellsAlive == 0 || (instance.Flags & BlockInstanceFlags.Destroyed) != 0) continue;
+                if (em.Exists(em.GetBuffer<BlockInstance>(root)[i].Functional)) continue;
                 ref var def = ref content.Blocks.Value.Blocks[instance.Block]; if (def.Kind != BlockKind.Functional) continue;
                 if (!groups.TryGetValue(def.ModuleMask, out var indices)) groups.Add(def.ModuleMask, indices = new List<int>());
                 indices.Add(i);
