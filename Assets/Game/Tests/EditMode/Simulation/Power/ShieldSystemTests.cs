@@ -158,11 +158,20 @@ namespace Game.Tests.EditMode.Simulation.Power
             using (var f = new Fixture())
             {
                 for (int i = 0; i < 10; i++) f.Stream(i); f.Step(1); first = f.State; damage = f.Overflow.ToArray();
+                foreach (var hit in damage)
+                { Assert.AreEqual(f.Root, hit.Grid); Assert.AreEqual(f.Emitter, hit.Instigator); }
             }
             using (var f = new Fixture())
             {
                 for (int i = 9; i >= 0; i--) f.Stream(i); f.Step(1);
-                Assert.AreEqual(first, f.State); CollectionAssert.AreEqual(damage, f.Overflow);
+                Assert.AreEqual(first, f.State);
+                Assert.AreEqual(damage.Length, f.Overflow.Count);
+                for (int i = 0; i < damage.Length; i++)
+                {
+                    // Entity versions belong to their world; compare the same logical root/emitter roles.
+                    var expected = damage[i]; expected.Grid = f.Root; expected.Instigator = f.Emitter;
+                    Assert.AreEqual(expected, f.Overflow[i], $"Overflow {i}");
+                }
             }
         }
         [Test] public void Hulk_AllOverflow()
