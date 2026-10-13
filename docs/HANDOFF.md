@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Current boot defect and repair:** galaxy-service source and fleet handoff merged locally, compile clean and six service checks pass0.24s. Focused spawner PlayMode hit StoryBeatDefinition.Validate QST-002 at automatic boot; stopped terminal143, no accepted result. Presentation worker now implements claimed QST-002 ccef7c0d with real validators. NAR-016 continues; economy worker prepares GAL-011. Galaxy session/save integration remains open. Evidence Logs/playtest/galaxy-service/.
+
 - **Fleet handoff authored:** bc25501c reuses the fleet-owned handle in canonical spawning, captures location during writeback and extends the existing player-profile fixture. Production session/galaxy composition is still pending; all current GAL-008/FND-012 changes remain uncompiled/unaccepted. Next connect session state/lifecycle and resolve actual GLXY/PLOC/loader staging without fabricated save support, then focused batch validation. No Unity operation. Workers: NAR-016 active211, ECO-009 dependency wait225, FND-012 integration wait188. Previous turn source integration was progress.
 
 - **Galaxy/spawner integration underway:** GAL-008 queries, live patches and six checks are authored; FND-012 source integrated as c7ac4bc9. Still uncompiled and unaccepted: finish session lifecycle and single-borrow fleet handoff, then focused batch validation. NAR-016 active; ECO-009/FND-012 delivered and waiting on lead integration. No Unity run.
