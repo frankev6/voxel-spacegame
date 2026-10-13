@@ -14,7 +14,7 @@ namespace Game.Presentation.Vfx
     internal interface IFxRigConsumer { FxRig Rig { get; set; } }
 
     /// <summary>SPEC-63 §6.1: session resource owner; all objects and buffers are allocated at Create.</summary>
-    public sealed class FxRig : MonoBehaviour
+    public sealed class FxRig : MonoBehaviour, IFxUploadTarget
     {
         static readonly Dictionary<World, FxRig> Bindings = new Dictionary<World, FxRig>();
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -23,6 +23,14 @@ namespace Game.Presentation.Vfx
         static readonly int EventsId = Shader.PropertyToID("FxEvents");
         static readonly int CountId = Shader.PropertyToID("FxEventCount");
         static readonly int ParticlesId = Shader.PropertyToID("ParticlesPerEvent");
+        static readonly int BatchEventId = Shader.PropertyToID("OnFxBatch");
+        static readonly int PlayEventId = Shader.PropertyToID("OnFxPlay");
+        static readonly int SpawnCountId = Shader.PropertyToID("spawnCount");
+        static readonly int DirectionId = Shader.PropertyToID("direction");
+        static readonly int VelocityId = Shader.PropertyToID("velocity");
+        static readonly int ColorId = Shader.PropertyToID("color");
+        static readonly int AlphaId = Shader.PropertyToID("alpha");
+        static readonly int SizeId = Shader.PropertyToID("size");
         static readonly int LifetimeId = Shader.PropertyToID("DebrisLifetimeMax");
         internal NativeArray<FxSlot> Slots;
         internal NativeHashMap<ulong, int> SlotByHash;
@@ -31,6 +39,10 @@ namespace Game.Presentation.Vfx
         internal NativeArray<float3> AnchorPositions;
         internal NativeList<Game.Voxel.PresentationStreams.FxEvent> PendingImpacts;
         internal VfxConfigDefinition Config { get; private set; }
+        FxUploadData IFxUploadTarget.UploadData => new FxUploadData { Slots = Slots, Hashes = SlotByHash, Defaults = DefaultSlotByKind,
+            Palette = Palette, Anchors = AnchorPositions, Quality = Quality, Budget = Budget,
+            DebrisFullDetailDistance = Config.DebrisFullDetailDistance, DebrisLifetimeMin = Config.DebrisLifetimeMin, DebrisLifetimeMax = Config.DebrisLifetimeMax };
+        NativeList<Game.Voxel.PresentationStreams.FxEvent> IFxUploadTarget.PendingImpacts => PendingImpacts;
         internal FxQualityBudget Budget => Config.Budget(Quality);
         internal FxInstanceBatch<TracerInstance> Tracers { get; private set; }
         internal FxInstanceBatch<BeamInstance> Beams { get; private set; }
@@ -58,6 +70,7 @@ namespace Game.Presentation.Vfx
             public IFxInstanceBatch Instances;
             public VFXEventAttribute[] Attributes;
             public double[] EndTimes;
+            public int Next;
             public void Dispose()
             {
                 Buffer?.Dispose(); Buffer = null; Instances?.Dispose(); Instances = null;
@@ -190,7 +203,34 @@ namespace Game.Presentation.Vfx
         }
         public void Submit(int slot, NativeArray<FxGpuEvent> events, int start, int count)
         {
-            // TODO(VFX-003): batched and pooled submission, including bounded pool reuse and event attributes.
+            if (disposed || count == 0) return;
+            if (slot <= 0 || slot >= Slots.Length || start < 0 || count < 0 || count > events.Length - start)
+                throw new ArgumentOutOfRangeException(nameof(slot));
+            var r = resources[slot]; var definition = Slots[slot];
+            if (r?.Effects == null) return;
+            if (definition.Mode == FxMode.Batched)
+            {
+                if (count > definition.MaxEventsPerFrame) throw new ArgumentOutOfRangeException(nameof(count));
+                r.Buffer.SetData(events, start, 0, count);
+                var effect = r.Effects[0]; effect.SetInt(CountId, count); effect.SetInt(ParticlesId, definition.ParticlesPerEvent);
+                effect.SetFloat(QualityId, Budget.ParticleFactor);
+                var attribute = r.Attributes[0]; attribute.SetFloat(SpawnCountId, count * definition.ParticlesPerEvent);
+                effect.SendEvent(BatchEventId, attribute); stats.BatchesSubmitted++;
+            }
+            else
+            {
+                int accepted = Math.Min(count, r.Effects.Length); stats.BudgetDropped += count - accepted;
+                for (int i = 0; i < accepted; i++)
+                {
+                    int index = r.Next; r.Next = (r.Next + 1) % r.Effects.Length;
+                    var e = events[start + i]; var effect = r.Effects[index]; var attribute = r.Attributes[index];
+                    // Reuse steals the oldest instance rather than adding another live effect to that pool slot.
+                    effect.Reinit(); effect.Stop(); effect.transform.position = e.position + (Vector3)AnchorPositions[slot];
+                    attribute.SetVector3(DirectionId, e.direction); attribute.SetVector3(VelocityId, e.velocity);
+                    attribute.SetVector3(ColorId, new Vector3(e.color.x, e.color.y, e.color.z)); attribute.SetFloat(AlphaId, e.color.w);
+                    attribute.SetFloat(SizeId, e.size); effect.SendEvent(PlayEventId, attribute); stats.PooledPlayed++;
+                }
+            }
         }
         public void ShiftAnchors(float3 delta)
         {

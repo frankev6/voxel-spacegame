@@ -375,13 +375,13 @@ Per-frame algorithm:
    3. If `slot.MinQuality > quality`: `QualitySkipped++`, skip.
    4. `d2 = lengthsq(Pos − refPos)`. If `(Flags & PlayerSource) == 0` and `d2 > slot.CullDistanceSq`: `Culled++`, skip.
    5. `size = (Scale > 0 ? Scale : 1) * slot.Scale`; `count = max(1, (int)round(slot.ParticlesPerEvent * budget.ParticleFactor))`.
-   6. Debris only: if `d2 > debrisFullDetailDistance²`: keep only when `i % 4 == 0` (else `Culled++`, skip) and `size *= 1.6`. Then if `debrisBudget == 0`: `BudgetDropped++`, skip; else `debrisBudget--`, `DebrisSpawned++`, `lifetimeScale = lerp(min, max, hash01(seed)) / max`.
+   6. Debris only: if `d2 > debrisFullDetailDistance²`: keep only when `i % 4 == 0` (else `Culled++`, skip) and `size *= 1.6`. Then if `debrisBudget == 0`: `BudgetDropped++`, skip. Reserve the debris budget and increment `DebrisSpawned` only after the slot-cap check succeeds; `lifetimeScale = lerp(min, max, hash01(seed)) / max` (Q21).
    7. Other kinds: if `d2 > slot.LodDistanceSq`: `count = max(1, (int)ceil(count * slot.LodParticleFactor))`, `size *= 1.6`.
    8. If `slotCounts[slot] == slot.MaxEventsPerFrame`: `BudgetDropped++`, skip.
-   9. Colour: `Color == 0` → `slot.DefaultColorRgba8`; `PaletteColor` flag → `palette[Color & 0xFF]`; else `Color`. Unpack palette entries directly as linear `float4`; convert raw/default sRGB RGBA8 to linear once (Q20).
+   9. Colour: `PaletteColor` flag → `palette[Color & 0xFF]` (including index 0); otherwise `Color == 0` → `slot.DefaultColorRgba8`; else `Color`. Unpack palette entries directly as linear `float4`; convert raw/default sRGB RGBA8 to linear once (Q20).
    10. Write `gpuEvents[slot.BufferOffset + slotCounts[slot]++] = { position = Pos − anchorPos[slot], size, direction = normalizesafe(Dir, (0,1,0)), lifetimeScale (1 for non-debris), velocity = Vel, seed = math.hash(new uint2((uint)i, frameIndex)), color, particleCount = (uint)count, kind = (uint)Kind }`.
 7. For every slot with `slotCounts[s] > 0`: `Rig.Submit(s, gpuEvents, slot.BufferOffset, slotCounts[s])` (§6.1). `BatchesSubmitted++` per batched slot; `PooledPlayed += n` per pooled slot.
-8. Debris live estimate: push `(ElapsedTime, DebrisSpawned)` into a 1,024-entry ring; `DebrisLiveEstimate = Σ count of entries with ElapsedTime − t < debrisLifetimeMax`.
+8. Debris live estimate: push `(ElapsedTime, DebrisSpawned)` into a 1,024-entry ring; `DebrisLiveEstimate = Σ count of entries with ElapsedTime − t < debrisLifetimeMax`. Push only non-empty submissions. If wrapping would overwrite an unexpired entry, merge its count into the new bucket and extend its expiry: conservative overestimation is permitted; undercounting live particles is not (Q21).
 9. Copy `counters` into `Rig.Stats`; zero `slotCounts` and `counters`.
 
 ### 5.3 `ProjectileTracerBridgeSystem` (managed `SystemBase`)
@@ -590,12 +590,12 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Do:** Implement `FxUploadSystem` exactly per §5.2 steps 1–9 (step 5 left as a call to an empty `ApplyOriginShift()` filled by VFX-013), `FxDrainJob`, `FxBatchJob`, the debris ring, and `FxRig.Submit` for batched slots (`SetData(events, start, 0, count)`, `SetInt("FxEventCount")`, `SetInt("ParticlesPerEvent")`, `SetFloat("QualityFactor")`, `SendEvent("OnFxBatch", attr)` with `spawnCount`) and pooled slots (§5.9). Cache property IDs with `Shader.PropertyToID` once. Merge `Rig.PendingImpacts` (a `NativeList<FxEvent>`, Persistent, capacity 1,024) after the dequeue in step 2.
 - **Files:** `Assets/Game/Presentation/Vfx/Systems/FxUploadSystem.cs`, `Assets/Game/Presentation/Vfx/Jobs/FxDrainJob.cs`, `Assets/Game/Presentation/Vfx/Jobs/FxBatchJob.cs`, `Assets/Game/Presentation/Vfx/FxRig.cs`
 - **Acceptance criteria:**
-  - [ ] After the update the queue is empty, whatever was enqueued (including 100,000 events: 65,536 processed, 34,464 counted in `EventsOverHardCap`).
-  - [ ] Unbound: queue drained, nothing submitted, no exception.
-  - [ ] Per-slot counts never exceed `MaxEventsPerFrame`; debris never exceeds `min(DebrisSpawnPerFrame, DebrisLiveCap − estimate)`.
-  - [ ] Culling, LOD, palette resolution and colour default follow §5.2 step 6 exactly.
-  - [ ] 0 B GC per frame after the first frame.
-  - [ ] Markers `FxUploadSystem.Drain`, `.Batch`, `.Submit` exist and report non-zero samples through `ProfilerRecorder` while events flow.
+  - [x] After the update the queue is empty, whatever was enqueued (including 100,000 events: 65,536 processed, 34,464 counted in `EventsOverHardCap`).
+  - [x] Unbound: queue drained, nothing submitted, no exception.
+  - [x] Per-slot counts never exceed `MaxEventsPerFrame`; debris never exceeds `min(DebrisSpawnPerFrame, DebrisLiveCap − estimate)`.
+  - [x] Culling, LOD, palette resolution and colour default follow §5.2 step 6 exactly.
+  - [x] 0 B GC per frame after the first frame.
+  - [x] Markers `FxUploadSystem.Drain`, `.Batch`, `.Submit` exist and report non-zero samples through `ProfilerRecorder` while events flow.
 - **Tests:** `FxBatchJobTests` (EditMode, job run directly): `UnknownHash_FallsBackToKindDefault`, `StateKind_IsRejected`, `BeyondCullDistance_IsCulled`, `PlayerSource_IsNeverCulled`, `FarDebris_KeepsOneInFour_AndScales`, `DebrisBudget_StopsAtCap`, `SlotCap_DropsOverflow`, `PaletteFlag_ResolvesPaletteIndex`, `NaNPosition_IsSkipped`; `FxUploadSystemTests` (EcsTestWorld + fake rig): `Unbound_DrainsAndDiscards`, `HardCap_ClearsRemainder`, `MultipleTicksPerFrame_AllEventsSubmittedOnce`.
 
 ### VFX-004 — Template graphs and content assets for hits, explosions, muzzle and shield sparks
@@ -752,6 +752,7 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 | 18 | Validation signature and diagnostics differ from implemented SPEC-04 | Canonical scope/context validation | Tech lead | Resolved: use Validate(ValidationScope, ContentValidationContext). FxDefinition codes VFX-E001 None, E002 missing graph, E003 missing mesh/material, E004 mode/kind mismatch, E005 debris, E006 large/warp pooled. Config codes E010 defaults length, E011 missing default, E012 wrong kind, E013 palette length, E014 lifetime order, E015 damage-colour length. Strict defaults until VFX-004's documented staged relaxation. |
 | 19 | RamImpact requested by SPEC-13 is absent from FxKind | Append RamImpact = 13 and extend defaults to 14 entries | Tech lead | Resolved DMG-007 / ADR-0058: preserve values 0–12; producer supplies contact point, A-to-B normal and energy-based scale. VFX-003 still owns visual content; no asset or art direction is created here. |
 | 20 | Staged rig binding and palette colour space | Internal consumer binding hook; linear-packed palette is converted exactly once | Tech lead | Resolved VFX-002: existing/future VFX consumers implement an internal rig property hook; the session rig registry resets at SubsystemRegistration and Unbind/Dispose removes its binding. Bind creates the runtime singleton; no placeholder systems. Palette is packed linear at Create, so upload must not apply sRGB conversion again. Raw/default colours remain sRGB. Defaults length is 14 per ADR-0058. VFX-004 content-budget validation remains pending its actual content; representative buffers are measured now. |
+| 21 | Upload accounting, palette index zero, and fake-rig seam | Count accepted debris only; preserve live estimates on ring wrap; palette flag takes precedence | Tech lead | Resolved VFX-003: slot overflow does not spend debris budget or inflate live estimates; merge unexpired overwritten ring buckets conservatively. PaletteColor index 0 is valid. Internal IFxUploadTarget exposes the same rig data/submission to the specified fake-rig tests without requiring GPU assets. The combined queue plus pending-impact input obeys the 65,536 cap. Unresolved warnings retain at most 65,536 unique hashes per world (architecture §11.1); later unresolved events are still fully counted. No public producer contract change. |
 
 ## 11. References
 
