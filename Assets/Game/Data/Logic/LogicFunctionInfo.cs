@@ -12,7 +12,14 @@ namespace Game.Data.Logic
         public int Milestone;
 
         // TODO(NAR-003): construct the selected ICondition/IIntExpr/IEffect while retaining bound nodes, refs and literals.
-        public object CreateNode(System.ReadOnlySpan<object> boundArgs) => throw new System.NotImplementedException("NAR-003");
+        public object CreateNode(System.ReadOnlySpan<object> boundArgs)
+        {
+            if (boundArgs.Length != Params.Length) throw new System.ArgumentException("Supply all parameters, including defaults.", nameof(boundArgs));
+            if (IsEffect) throw new System.NotImplementedException("NAR-003 effect construction");
+            return ReturnType == LogicType.Bool
+                ? (object)new Nodes.BoolFunctionCondition(this, boundArgs)
+                : new Nodes.IntFunctionExpr(this, boundArgs);
+        }
         // TODO(NAR-003): invoke the vocabulary entry with runtime values (Yarn boundary).
         public LogicValue Invoke(ILogicContext context, System.ReadOnlySpan<LogicValue> args) => throw new System.NotImplementedException("NAR-003");
     }
