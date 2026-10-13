@@ -35,6 +35,9 @@ namespace Game.Simulation.Ai
         [ReadOnly] public ComponentLookup<ShieldState> Shields;
         [ReadOnly] public ComponentLookup<ShieldControl> ShieldControls;
         [ReadOnly] public BufferLookup<AbilitySlot> Abilities;
+        [ReadOnly] public ComponentLookup<FleetMember> Members;
+        [ReadOnly] internal NativeHashMap<Entity, FleetLeaderDecision> Leaders;
+        public byte MemberPass;
         // Only atomic telemetry writes cross roots. Neither counter nor warning order affects decisions.
         [NativeDisableParallelForRestriction] public NativeArray<int> Overflow;
         public AiConfig Config;
@@ -44,6 +47,10 @@ namespace Game.Simulation.Ai
             in Allegiance allegiance, in LocalTransform pose, in PersistentId persistentId)
         {
             if (Spawning.HasComponent(entity) && Spawning.IsComponentEnabled(entity)) return;
+            Entity leader = Members.HasComponent(entity) ? Members[entity].Leader : Entity.Null;
+            bool following = leader != Entity.Null && leader != entity && Entities.Exists(leader)
+                && !Hulks.HasComponent(leader) && !(Spawning.HasComponent(leader) && Spawning.IsComponentEnabled(leader));
+            if (following != (MemberPass != 0)) return;
             ref var profiles = ref Config.Profiles.Value.Profiles;
             ref var profile = ref profiles[brain.ProfileIndex < profiles.Length ? brain.ProfileIndex : 0];
             int interval = profile.ThinkIntervalTicks;
@@ -63,6 +70,21 @@ namespace Game.Simulation.Ai
             float hull = ShipStats.HasComponent(entity) ? ShipStats[entity].MassFraction : 1;
             float weaponRange = WeaponStats.HasComponent(entity) ? WeaponStats[entity].MaxWeaponRange : profile.SensorRange * .5f;
             AiRole role = profile.Role == AiRole.Combat && weaponRange == 0 ? AiRole.Civilian : profile.Role;
+            if (following && Leaders.TryGetValue(leader, out var leaderDecision))
+            {
+                target = leaderDecision.Target;
+                if (target.Value != Entity.Null && (!Entities.Exists(target.Value) || Hulks.HasComponent(target.Value))) target.Value = Entity.Null;
+                brain.TargetSinceTick = target.SinceTick;
+                brain.State = leaderDecision.State;
+                SetAbilities(ref brain, ref profile, entity, hull, target.Value != Entity.Null);
+                int targetIndex = Hash.FindIndex(target.Value);
+                brain.FireBlocked = (byte)(profile.AvoidFriendlyFire != 0 && targetIndex >= 0
+                    && FriendlyFire(entity, target.Value, allegiance, pose.Position, Hash.Get(targetIndex).Center) ? 1 : 0);
+                control = new WeaponControl { Autofire = (byte)(brain.State == AiState.Engage
+                    && targetIndex >= 0 && brain.FireBlocked == 0 ? 1 : 0), AimMode = WeaponAimMode.TargetLead };
+                return;
+            }
+            CountSphereQuery();
             var candidates = new FixedList512Bytes<int>();
             CheckOverflow(Hash.QuerySphere(center, profile.SensorRange, ref candidates), candidates.Length);
             int nearest = -1, selected = -1;
@@ -81,7 +103,6 @@ namespace Game.Simulation.Ai
                     - (index == current ? profile.Stickiness : 0);
                 if (role != AiRole.Civilian && score < bestScore) { selected = index; bestScore = score; }
             }
-            // TODO(AI-014): fleet members inherit their live leader's target and formation goal.
             float anchorDistance = math.distance(Planar.FlattenY(pose.Position), Planar.FlattenY(brain.Anchor));
             bool returning = brain.PreviousState == AiState.Return && anchorDistance >= Config.ArrivalRadius * 2;
             if (role == AiRole.Turret) brain.State = AiState.Hold;
@@ -230,6 +251,12 @@ namespace Game.Simulation.Ai
                     if (slots[k].AbilityIndex == rule.AbilityIndex && slots[k].State == AbilitySlotState.Ready && slots[k].Blocked == 0)
                     { brain.AbilityEdges |= (byte)(1 << k); break; }
             }
+        }
+
+        unsafe void CountSphereQuery()
+        {
+            int* counters = (int*)Overflow.GetUnsafePtr();
+            Interlocked.Increment(ref counters[2]);
         }
 
         unsafe void CheckOverflow(int total, int retained)

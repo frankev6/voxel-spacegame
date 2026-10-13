@@ -10,6 +10,7 @@ using Game.Voxel.Rendering;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs;
 
 namespace Game.Simulation.Ai
 {
@@ -29,6 +30,9 @@ namespace Game.Simulation.Ai
         ComponentLookup<ShieldControl> shieldControls;
         BufferLookup<AbilitySlot> abilities;
         NativeArray<int> overflow;
+        ComponentLookup<FleetMember> members;
+        NativeHashMap<Entity, FleetLeaderDecision> leaders;
+        internal int SphereQueryCount => overflow[2];
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -47,7 +51,9 @@ namespace Game.Simulation.Ai
             shields = state.GetComponentLookup<ShieldState>(true);
             shieldControls = state.GetComponentLookup<ShieldControl>(true);
             abilities = state.GetBufferLookup<AbilitySlot>(true);
-            overflow = new NativeArray<int>(2, Allocator.Persistent);
+            overflow = new NativeArray<int>(3, Allocator.Persistent);
+            members = state.GetComponentLookup<FleetMember>(true);
+            leaders = new NativeHashMap<Entity, FleetLeaderDecision>(128, Allocator.Persistent);
         }
 
         [BurstCompile]
@@ -55,6 +61,7 @@ namespace Game.Simulation.Ai
         {
             state.Dependency.Complete();
             if (overflow.IsCreated) overflow.Dispose();
+            if (leaders.IsCreated) leaders.Dispose();
         }
 
         [BurstCompile]
@@ -63,15 +70,22 @@ namespace Game.Simulation.Ai
             entities.Update(ref state); hulks.Update(ref state); spawning.Update(ref state);
             dormant.Update(ref state); shipStats.Update(ref state); weaponStats.Update(ref state);
             shields.Update(ref state); shieldControls.Update(ref state); abilities.Update(ref state);
+            members.Update(ref state);
             var hash = SystemAPI.GetSingleton<SpatialHash>();
-            var handle = new AiThinkJob
+            var think = new AiThinkJob
             {
                 Hash = hash.AsReadOnly(), Config = SystemAPI.GetSingleton<AiConfig>(),
                 Relations = SystemAPI.GetSingleton<FactionRelations>(), Tick = SystemAPI.GetSingleton<SimClock>().Tick,
                 Entities = entities, Hulks = hulks, Spawning = spawning, Dormant = dormant,
                 ShipStats = shipStats, WeaponStats = weaponStats, Shields = shields,
                 ShieldControls = shieldControls, Abilities = abilities, Overflow = overflow,
-            }.ScheduleParallel(hash.BeginRead(state.Dependency));
+                Members = members, Leaders = leaders, MemberPass = 0,
+            };
+            var handle = think.ScheduleParallel(hash.BeginRead(state.Dependency));
+            handle = new ClearFleetLeaders { Leaders = leaders }.Schedule(handle);
+            handle = new CaptureFleetLeaders { Leaders = leaders }.Schedule(handle);
+            think.MemberPass = 1;
+            handle = think.ScheduleParallel(handle);
             hash.EndRead(handle);
             state.Dependency = handle;
         }

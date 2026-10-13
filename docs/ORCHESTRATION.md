@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Fleet decisions implemented:** AI-014 now schedules leaders/lone ships, a target/state snapshot, then members. Members retain abilities and friendly-fire segment checks while skipping sphere target search/avoidance. Null-Leader promoted roots think normally. Exactly three required fleet tests and compile remain next; no validation claim. Avoid overlapping AiThinkJob changes with AI-010 worker (notified).
+
 - **Lead AI-014 started:** claimfad43647 on main; primary `task/AI-014-fleet-coordination` implements scheduled FleetSystem goals and deterministic leader replacement. SPEC23Q24 mirroredQ301 (Q23 reserved by turret worker). Member decision shortcut and exactly three required checks remain; no compile/acceptance claim. Existing workers last verified active at combat137, presentation121, power145. Previous turn closed repair/inventory and dispatched merchants (progress).
 
 - **Repair/inventory accepted:** compile12640 exited0, focused14102 exited0 with21/0/0; evidence `repair-inventory/`. DMG-019 and ECO-003 closed with no full-suite rerun. Advisory inventory measurement deferred, zero tuning. Next FF main, claim/dispatch ECO-005 to the existing power thread; AI-009/010 continue. Previous goal turn integrated code and recycled workers (progress).
