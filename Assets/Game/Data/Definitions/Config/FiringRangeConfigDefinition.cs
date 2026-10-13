@@ -10,6 +10,7 @@ namespace Game.Data.Definitions
         [SerializeField] BlockDefinition hull, slope, longSlope, core, reactor, cargo, thruster;
         [SerializeField] byte hullColor = 15, bridgeColor = 13, moduleColor = 10;
         [SerializeField] float targetCellSize = 1;
+        [SerializeField, Min(1)] int stationScale = 1;
         [SerializeField] Vector3 targetOffset = new Vector3(0, 0, 45);
         [SerializeField] float targetYaw;
         [SerializeField] Material tracerMaterial;
@@ -25,6 +26,7 @@ namespace Game.Data.Definitions
         public byte BridgeColor => bridgeColor;
         public byte ModuleColor => moduleColor;
         public float TargetCellSize => targetCellSize;
+        public int StationScale => stationScale;
         public Vector3 TargetOffset => targetOffset;
         public float TargetYaw => targetYaw;
         public Material TracerMaterial => tracerMaterial;
@@ -32,7 +34,7 @@ namespace Game.Data.Definitions
         public float TracerWidth => tracerWidth;
         public override void Validate(ValidationScope scope, ContentValidationContext context)
         {
-            if (hull == null || slope == null || longSlope == null || core == null || reactor == null || cargo == null || thruster == null || !(targetCellSize > 0) || !float.IsFinite(targetCellSize) || tracerMaterial == null || !(tracerLength > 0) || !(tracerWidth > 0))
+            if (stationScale < 1 || stationScale > 8 || hull == null || slope == null || longSlope == null || core == null || reactor == null || cargo == null || thruster == null || !(targetCellSize > 0) || !float.IsFinite(targetCellSize) || tracerMaterial == null || !(tracerLength > 0) || !(tracerWidth > 0))
                 scope.Error("FND-E020", "range", "Station block definitions, positive sizes and tracer material are required.");
         }
     }

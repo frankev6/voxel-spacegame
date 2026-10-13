@@ -1,4 +1,5 @@
 using Game.Core;
+using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Data.Definitions;
 using Game.Simulation.Commands;
@@ -44,7 +45,8 @@ namespace Game.Presentation.Vfx
         NativeArray<double> liveTimes;
         IFxUploadTarget target;
         int ringNext;
-        uint frame;
+        uint frame, lastShiftSequence, clearRevision;
+        bool hasShiftSequence;
         bool hardCapWarned, stateWarned;
         readonly FxStats unboundStats = new FxStats();
         public FxRig Rig { get => target as FxRig; set => Bind(value); }
@@ -62,7 +64,7 @@ namespace Game.Presentation.Vfx
         {
             if (ReferenceEquals(target, value)) return;
             if (gpu.IsCreated) gpu.Dispose(); if (counts.IsCreated) counts.Dispose();
-            target = value; ringNext = 0;
+            target = value; ringNext = 0; hasShiftSequence = false; clearRevision = (value as FxRig)?.ClearRevision ?? 0;
             for (int i = 0; i < liveCounts.Length; i++) liveCounts[i] = 0;
             if (value == null) return;
             var slots = value.UploadData.Slots; int capacity = 0;
@@ -93,13 +95,19 @@ namespace Game.Presentation.Vfx
             stats.Bound = true;
             var data = target.UploadData;
             double now = SystemAPI.Time.ElapsedTime;
+            if (Rig != null)
+            {
+                Rig.Now = now; ApplyOriginShift();
+                if (Rig.ClearRevision != clearRevision)
+                { clearRevision = Rig.ClearRevision; for (int i = 0; i < liveCounts.Length; i++) liveCounts[i] = 0; ringNext = 0; }
+                Rig.ResetIdleAnchors(now);
+            }
             int live = 0;
             for (int i = 0; i < liveCounts.Length; i++)
             { if (now - liveTimes[i] >= data.DebrisLifetimeMax || now < liveTimes[i]) liveCounts[i] = 0; live += liveCounts[i]; }
             float3 reference = float3.zero;
             foreach (var transform in SystemAPI.Query<RefRO<LocalToWorld>>().WithAll<PlayerShip>().WithNone<Parent>())
             { reference = transform.ValueRO.Position; break; }
-            ApplyOriginShift();
             for (int i = 0; i < counts.Length; i++) counts[i] = 0;
             using (BatchMarker.Auto()) new FxBatchJob { Events = drained.AsArray(), Slots = data.Slots, SlotByHash = data.Hashes,
                 Defaults = data.Defaults, Palette = data.Palette, Anchors = data.Anchors, Output = gpu, Counts = counts, Counters = counters,
@@ -116,11 +124,21 @@ namespace Game.Presentation.Vfx
             if (stats.DebrisSpawned > 0)
             { liveCounts[ringNext] += stats.DebrisSpawned; liveTimes[ringNext] = now; ringNext = (ringNext + 1) % liveCounts.Length; }
             stats.DebrisLiveEstimate = live + stats.DebrisSpawned;
+            if (SystemAPI.HasSingleton<ChunkDissolveStats>())
+            { EntityManager.CompleteDependencyBeforeRO<ChunkDissolveStats>(); stats.DissolvingChunks = SystemAPI.GetSingleton<ChunkDissolveStats>().Count.Value; }
             if (stats.StateKindRejected > 0 && !stateWarned) { stateWarned = true; GameLog.WarnOnce("Vfx.StateKind", "Vfx", "State effect kinds cannot be submitted as events."); }
             for (int i = 0; i < unresolved.Length; i++) if (warned.Count < 65536 && warned.Add(unresolved[i]))
                 GameLog.WarnOnce("Vfx.Unresolved." + unresolved[i], "Vfx", "No effect slot or default resolves hash " + unresolved[i]);
         }
-        void ApplyOriginShift() { /* TODO(VFX-013): consume origin shifts before batching, and reset anchors/live estimates on clears. */ }
+        void ApplyOriginShift()
+        {
+            if (Rig == null || !SystemAPI.TryGetSingleton<OriginShiftRecord>(out var shift)) return;
+            if (!hasShiftSequence) { hasShiftSequence = true; lastShiftSequence = shift.Sequence; return; }
+            if (shift.Sequence == lastShiftSequence) return;
+            bool discontinuity = shift.StarSystemChanged != 0 || shift.Sequence - lastShiftSequence != 1 || math.lengthsq(shift.Delta) > 20000f * 20000f;
+            lastShiftSequence = shift.Sequence;
+            if (discontinuity) Rig.ClearAll(true); else Rig.ShiftAnchors(shift.Delta);
+        }
         static void Reset(FxStats s)
         {
             s.EventsDrained = s.EventsOverHardCap = s.Unresolved = s.StateKindRejected = s.QualitySkipped = s.Culled = s.BudgetDropped = 0;

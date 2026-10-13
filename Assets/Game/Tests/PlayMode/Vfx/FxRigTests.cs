@@ -110,6 +110,14 @@ namespace Game.Tests.PlayMode.Vfx
         }
         [UnityTest] public IEnumerator Dispose_ReleasesAllBuffers()
         {
+            // The global leak probe must not count the unrelated Entities Graphics frame allocator.
+            var presentation = World.DefaultGameObjectInjectionWorld?.GetExistingSystemManaged<PresentationSystemGroup>();
+            bool presentationEnabled = presentation != null && presentation.Enabled;
+            if (presentation != null) presentation.Enabled = false;
+            var previousLeakMode = Unity.Collections.NativeLeakDetection.Mode;
+            Unity.Collections.NativeLeakDetection.Mode = Unity.Collections.NativeLeakDetectionMode.EnabledWithStackTrace;
+            try
+            {
             Create(); rig.Dispose(); Object.Destroy(rig.gameObject); yield return null;
             UnsafeUtility.CheckForLeaks();
             Create(); Assert.AreEqual(2, rig.LiveBufferCount);
@@ -119,6 +127,8 @@ namespace Game.Tests.PlayMode.Vfx
             Assert.IsFalse(tracerBuffer.IsValid()); Assert.IsFalse(batchedBuffer.IsValid());
             Assert.AreEqual(0, rig.LiveBufferCount); Assert.IsFalse(rig.Slots.IsCreated); Assert.IsFalse(rig.Palette.IsCreated);
             Assert.AreEqual(0, UnsafeUtility.CheckForLeaks());
+            }
+            finally { Unity.Collections.NativeLeakDetection.Mode = previousLeakMode; if (presentation != null) presentation.Enabled = presentationEnabled; }
         }
         [Test] public void Create_TotalBufferBytes_Under12MB()
         {

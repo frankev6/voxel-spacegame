@@ -31,6 +31,7 @@ namespace Game.Presentation.Vfx
             }
             catch { Dispose(); throw; }
         }
+        internal void SetFloat(int id, float value) => properties.SetFloat(id, value);
         internal void Begin() => Count = 0;
         internal void Draw()
         {

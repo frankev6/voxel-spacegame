@@ -24,9 +24,9 @@ namespace Game.Tests.PlayMode.App
         {
             if (InputSystem.GetDevice<Keyboard>() == null) testKeyboard = InputSystem.AddDevice<Keyboard>();
             host = DevRuntimeHost.Create(null);
-            var keyboard = InputSystem.GetDevice<Keyboard>();
             Assert.AreEqual(DevResultKind.Ok, host.Commands.Execute("key keys=W hold=0.2", host.Context).Kind);
             InputSystem.Update();
+            var keyboard = Keyboard.current; // The injected device can be owned when the native keyboard is disabled.
             Assert.IsTrue(keyboard.wKey.isPressed);
             double start = Time.unscaledTimeAsDouble, last = start, frame = 0;
             double limit = Time.realtimeSinceStartupAsDouble + 5;

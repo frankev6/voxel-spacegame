@@ -12,8 +12,8 @@ VisualEffectResource:
     m_RendererSettings:
       motionVectorGenerationMode: 0
       shadowCastingMode: 0
-    m_CullingFlags: 3
-    m_UpdateMode: 0
+    m_CullingFlags: 0
+    m_UpdateMode: 1
     m_PreWarmDeltaTime: 0.05
     m_PreWarmStepCount: 0
     m_InitialEventName: OnPlay

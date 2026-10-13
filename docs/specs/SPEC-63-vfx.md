@@ -5,7 +5,7 @@
 | **Status** | Draft |
 | **Area code** | VFX (task IDs are `VFX-001`, `VFX-002`, …) |
 | **Module(s)** | `Game.Presentation` (folder `Assets/Game/Presentation/Vfx/`); shared stream types in `Game.Voxel` (folder `Assets/Game/Voxel/PresentationStreams/`); definitions in `Game.Data` (folder `Assets/Game/Data/Definitions/Vfx/`) |
-| **Depends on specs** | SPEC-01 (GameRoot creates and binds `FxRig`), SPEC-02 (`ContentHash`, `SimClock`, `EventBus<T>`, custom system groups in `Game.Core`), SPEC-04 (`ContentDefinition`, `ContentDatabase`, `ValidationReport`), SPEC-13 (debris `FxEvent`s, `ChunkBody`), SPEC-20 (thruster state), SPEC-21 (projectiles, beams, hit/muzzle/explosion `FxEvent`s), SPEC-22 (`ShieldState`, ripple buffer), SPEC-30 (`OriginShifted`), SPEC-32 (warp events), SPEC-71 (test and perf harness) |
+| **Depends on specs** | SPEC-01 (GameRoot creates and binds `FxRig`), SPEC-02 (`ContentHash`, `SimClock`, `EventBus<T>`, custom system groups in `Game.Core`), SPEC-04 (`ContentDefinition`, `ContentDatabase`, `ValidationReport`), SPEC-13 (debris `FxEvent`s, `ChunkBody`), SPEC-20 (thruster state), SPEC-21 (projectiles, beams, hit/muzzle/explosion `FxEvent`s), SPEC-22 (`ShieldState`, ripple buffer), SPEC-30 (`OriginShiftRecord` mirror), SPEC-32 (warp events), SPEC-71 (test and perf harness) |
 | **Depended on by** | SPEC-13, SPEC-20, SPEC-21, SPEC-22, SPEC-32 (emit `FxEvent`); SPEC-01 (creates the rig); SPEC-61 (VFX quality setting UI); SPEC-70 (`FxStats` in `gh_perf`); SPEC-81 (swaps template graphs and shaders through `FxDefinition` assets) |
 | **Milestone** | M2 (contract types M1; origin shift and warp M3) |
 
@@ -51,7 +51,7 @@ This spec turns simulation facts into pictures: flying voxel cubes when cells br
 7. **Hard caps everywhere.** At most 65,536 events are drained per frame (the rest are cleared and counted). Each `FxDefinition` has `maxEventsPerFrame`; debris has a live-particle cap per quality level. Overflow is dropped and counted in `FxStats`, never queued for later.
 8. **Debris is one cube particle per removed or detached cell** (glossary: debris particle). Colour comes from the cell palette, velocity from the producer (`v + ω×r + kick`), lifetime 3–6 s, size shrinks to 0 over the last 25% of life. No collision, no CPU simulation. Reason: synthesis §6n (VFX Graph for cosmetic debris).
 9. **Particles simulate in local space of a per-family anchor `Transform`.** On a floating-origin shift the anchor moves by the shift delta; live particles move with it at zero GPU cost. New events are written relative to the anchor. An anchor resets to the origin whenever its family has no live particles.
-10. **VFX reacts to `OriginShifted` in the same frame** (architecture §6.5, 07-implementation-traps T5.1), read on the ECS side (open question 11 gives the delivery), never through the deferred `EventBus`. Reason: `OriginRebaseSystem` runs in `InitializationSystemGroup`, so presentation sees the shift in the frame it happens and no particle visibly jumps. A delta longer than 20,000 m is a discontinuity (jump): clear instead of shift.
+10. **VFX reacts to the `OriginShiftRecord` mirror in the same frame** (architecture §6.5, 07-implementation-traps T5.1, ADR-0060), read on the ECS side, never through the deferred `OriginShifted` event. Reason: `OriginRebaseSystem` runs in `InitializationSystemGroup`, so presentation sees the shift in the frame it happens and no particle visibly jumps. A delta longer than 20,000 m is a discontinuity (jump): clear instead of shift.
 11. **Quality scales budgets, never correctness.** `VfxQuality` (Low/Medium/High) changes caps and particle counts only. Default `High`; the 06 gates are measured at `High`.
 12. **No ordering sort of events.** FX never feeds back into simulation, so drain order may vary between runs; tests assert counts and caps, not order. Decimation is by index stride, which is cheap and stable for a given drain order.
 13. **Distance culling and LOD use the player ship** (`PlayerShip` root `LocalToWorld.Position`), or `float3.zero` when there is no player ship. Reason: the camera is a third-person rig around the player; this needs no camera reference in ECS.
@@ -360,7 +360,7 @@ All VFX systems are in `PresentationBridgeGroup`. Ordering: `FxUploadSystem` fir
 
 ### 5.2 `FxUploadSystem` (managed `SystemBase`, listed in architecture §5)
 - **Group:** `PresentationBridgeGroup`. `RequireForUpdate<FxEventQueue>()` only (not `GameplayActive`, so leftovers are drained after leaving the World scene).
-- **Reads:** `FxEventQueue` (and empties it), `PlayerShip` + `LocalToWorld`, `OriginShifted` (from VFX-013), `SystemAPI.Time.ElapsedTime`. **Writes:** nothing in ECS; GPU buffers through `FxRig`.
+- **Reads:** `FxEventQueue` (and empties it), `PlayerShip` + `LocalToWorld`, `OriginShiftRecord` (from VFX-013), `SystemAPI.Time.ElapsedTime`. **Writes:** nothing in ECS; GPU buffers through `FxRig`.
 - **Owned memory:** `NativeList<FxEvent> drained` (Persistent, initial capacity 32,768), `NativeArray<FxGpuEvent> gpuEvents` (Persistent, length = Σ slot `MaxEventsPerFrame`, allocated in `Bind`), `NativeArray<int> slotCounts`, `NativeArray<int> counters` (one per `FxStats` counter); disposed in `OnDestroy` and on re-`Bind`.
 
 Per-frame algorithm:
@@ -387,7 +387,7 @@ Per-frame algorithm:
 ### 5.3 `ProjectileTracerBridgeSystem` (managed `SystemBase`)
 `PresentationBridgeGroup`, after `FxUploadSystem`. `RequireForUpdate<GameplayActive>()`, `RequireForUpdate<ProjectileStore>()`. Projectiles are rows of SPEC-21's `ProjectileStore` (§4.6 there), not entities.
 1. If `Rig == null` return. `batch = Rig.Tracers`; `batch.Begin()`.
-2. `alpha = clamp(ElapsedTime − MostRecentFixedTime.ElapsedTime, 0, 1/60)` when the `Unity.Physics.GraphicsIntegration.MostRecentFixedTime` singleton exists, else 0.
+2. `alpha = clamp(ElapsedTime − MostRecentFixedTime.ElapsedTime, 0, 1/60)` when the `Unity.Physics.GraphicsIntegration.MostRecentFixedTime` singleton buffer contains physics-world index 0, else 0.
 3. `store = SystemAPI.GetSingleton<ProjectileStore>(); store.CompleteAccess();` (main thread outside the fixed step: SPEC-12 §5.1 pattern; it completes only the last projectile jobs, which finished long before presentation). `n = min(store.Rows.Length, cap)` with `cap = budget.MaxTracers`.
 4. **Pending origin shift** (rows are shifted lazily by SPEC-21 at the next tick): `rec = SystemAPI.GetSingleton<OriginShiftRecord>()` (SPEC-02); `applied = store.AppliedShiftSequence.Value`.
    - `applied == rec.Sequence` → `correction = 0`;
@@ -432,11 +432,11 @@ Shields — query `ShieldState` + `LocalToWorld` + buffer `ShieldRipple` (SPEC-2
 | Beam, Thruster, Tracer, ShieldShell | never sent as events | — | — | — | — | — | — |
 
 ### 5.7 `ChunkDissolveSyncSystem` (Burst `ISystem`)
-`PresentationBridgeGroup`, after `FxUploadSystem`. `RequireForUpdate<GameplayActive>()`. `IJobEntity` over `ChunkBody` (SPEC-13) + `RefRW<ChunkDissolve>`: `Value = saturate(1 − TimeLeft / chunkDissolveSeconds)` (config value baked into a `VfxRuntimeConfig` singleton by `FxRig.BindTo`). Only writer of `ChunkDissolve.Value`. Counts entities with `Value > 0` into `Stats.DissolvingChunks` (read back by `FxUploadSystem` next frame through a `NativeReference<int>`).
+`PresentationBridgeGroup`, after `FxUploadSystem`. `RequireForUpdate<GameplayActive>()`. `IJobEntity` over `ChunkBody` (SPEC-13) + `RefRW<ChunkDissolve>`: `TimeLeft = max(0, (EndTick − SimClock.Tick) / 60f)` (guard unsigned subtraction); `Value = saturate(1 − TimeLeft / chunkDissolveSeconds)` for live bodies (ADR-0060) (config value baked into a `VfxRuntimeConfig` singleton by `FxRig.BindTo`). Only writer of `ChunkDissolve.Value`. Counts entities with `Value > 0` into `Stats.DissolvingChunks` (read back by `FxUploadSystem` next frame through a `NativeReference<int>`).
 
 ### 5.8 Origin shift and clears (VFX-013)
-1. `FxUploadSystem` keeps `uint lastShiftSequence` (initialised from the singleton when first seen). Each frame, if the `OriginShifted` singleton (open question 11) exists and its `Sequence != lastShiftSequence`: `delta = OriginShifted.Delta` (the amount `OriginRebaseSystem` added to every root local position this frame); store `Sequence`. Otherwise `delta = 0`.
-2. If `delta == 0`: nothing. If `length(delta) > 20000`: `Rig.ClearAll(exceptWarp: true)`. Else `Rig.ShiftAnchors(delta)`: every batched family anchor `Transform.position += delta`, every active pooled instance `Transform.position += delta`.
+1. `FxUploadSystem` keeps `uint lastShiftSequence` (initialised from the singleton when first seen). Each frame, if the `OriginShiftRecord` singleton (ADR-0060) exists and its `Sequence != lastShiftSequence`: `delta = OriginShiftRecord.Delta` (the amount `OriginRebaseSystem` added to every root local position this frame); store `Sequence`. Otherwise `delta = 0`.
+2. If `delta == 0`: nothing. If a star-system change or missed sequence is recorded, or `length(delta) > 20000`: `Rig.ClearAll(exceptWarp: true)`. Else `Rig.ShiftAnchors(delta)`: every batched family anchor `Transform.position += delta`, every active pooled instance `Transform.position += delta`.
 3. `FxRig` subscribes (in `OnEnable`, unsubscribes in `OnDisable`) to `EventBus<StarSystemEntered>` → `ClearAll(exceptWarp: true)` and `EventBus<SessionReset>` → `ClearAll(exceptWarp: false)`. `ClearAll` calls `VisualEffect.Reinit()` on every batched effect, stops every pooled instance, resets every anchor to `Vector3.zero` and empties the debris ring.
 4. Anchor reset: in step 7 of §5.2, a batched family whose last submit is older than its `MaxLifetime` (debris: `debrisLifetimeMax`) resets its anchor to `Vector3.zero`.
 
@@ -513,8 +513,8 @@ Each shader declares `StructuredBuffer<T> _Instances;` with `T` exactly as in §
 | SPEC-21 | `BeamState` on the beam weapon's functional entity (+ `FunctionalBlock`) | `float3 MuzzleLocal` (grid space), `float3 EndWorld` (clipped), `float Width`, `byte Active`, `byte HitSomething`, `ContentHash Fx` |
 | SPEC-20 | `ThrusterState` + `ThrusterVisual` on thruster functional entities | `float Intensity` (0..1); `float3 NozzleLocal`, `float3 ExhaustDirLocal`, `float NozzleRadius` (grid space) |
 | SPEC-22 | `ShieldState` on the grid root; buffer `ShieldRipple` (capacity 8) | `float3 Center, Radii; float Hp, MaxHp; byte Active`; `float3 LocalPoint; uint StartTick; float Strength` |
-| SPEC-13 | `ChunkBody` on chunk-body entities | `float TimeLeft` |
-| SPEC-30 | `OriginShifted` (binding event `{ float3 Delta }`), ECS-side delivery per open question 11 | `float3 Delta`, `uint Sequence` |
+| SPEC-13 / SPEC-02 | `ChunkBody` on chunk-body entities; `SimClock` | `uint EndTick`, `byte Live`; remaining seconds derived from `SimClock.Tick` |
+| SPEC-30 / Core | `OriginShiftRecord` ECS mirror (ADR-0060) | `float3 Delta`, `uint Sequence`, `byte StarSystemChanged` |
 
 ## 7. Edge cases and failure behaviour
 
@@ -580,7 +580,7 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
   - [x] `Create` with N definitions creates exactly (batched + Σ poolSize) child GameObjects and no more for the rest of the session.
   - [x] A definition whose graph lacks `FxEvents` logs one error naming the asset and is skipped; the rig still works for the others.
   - [x] `Dispose` releases every `GraphicsBuffer` (count of live buffers returns to the pre-Create value) and every native array (leak check passes).
-  - [ ] Total buffer bytes at High ≤ 12 MB with the content set of VFX-004. Advisory follow-up when that content exists; VFX-002 representative rig measures 950,272 bytes (Q20).
+  - [ ] Total buffer bytes at High ≤ 12 MB with the content set of VFX-004. VFX-015 production owned GraphicsBuffers measure 3,172,864 bytes; full GPU/native accounting remains inconclusive and advisory. VFX-002 representative rig measured 950,272 bytes (Q20).
 - **Tests:** `FxRigTests.Create_BuildsOneChildPerBatchedAndPoolSlot`, `FxRigTests.Create_GraphMissingProperty_LogsErrorAndSkips`, `FxRigTests.Dispose_ReleasesAllBuffers`, `FxRigTests.Create_TotalBufferBytes_Under12MB`, `FxRigTests.SlotByHash_ResolvesEveryDefinition` (PlayMode, test definitions created in code).
 
 ### VFX-003 — FxUploadSystem: drain, batch, submit, stats
@@ -615,25 +615,25 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Tier:** frontier — F4: owns the 06 debris gate
 - **Depends on:** `VFX-004`
 - **Do:** Author `FxDebrisTemplate.vfx` per §6.3 (capacity 65,536, Output Particle Mesh cube, Lit, no shadows, scale-to-zero over the last 25% of life, exposed `float DebrisLifetimeMax` set by the rig from config). Create `fx_debris_default.asset` (Batched, particlesPerEvent 1, maxEventsPerFrame 20,000, maxLifetime 6, cullDistance 2000, minQuality Low) and fill `defaults[Debris]`. Implement the debris-specific parts of `FxBatchJob` if VFX-003 stubbed them. Write the GPU benchmark (§8): PlayMode, SPEC-71 perf fixture, test config with `debrisLifetimeMin = debrisLifetimeMax = 20` so 50,000 particles stay alive; spawn 20,000 + 20,000 + 10,000 debris events over three frames at positions from `Random(63001)` inside a sphere of radius 50 m at the origin, velocities ≤ 2 m/s; measure 300 frames with and 300 without the rig bound.
-- **Files:** `Assets/Game/Presentation/Vfx/Templates/FxDebrisTemplate.vfx`, `Assets/Game/Content/Vfx/fx_debris_default.asset`, `Assets/Game/Content/Vfx/config_vfx.asset`, `Assets/Game/Tests/PlayMode/Presentation/Vfx/DebrisGpuBenchmarkTests.cs`, `Assets/Game/Tests/PlayMode/Presentation/Vfx/DebrisPlayModeTests.cs`
+- **Files:** `Assets/Game/Presentation/Vfx/Templates/FxDebrisTemplate.vfx`, `Assets/Game/Content/Vfx/fx_debris_default.asset`, `Assets/Game/Content/Vfx/config_vfx.asset`, `Assets/Game/Tests/PlayMode/Vfx/DebrisGpuBenchmarkTests.cs`, `Assets/Game/Tests/PlayMode/Vfx/DebrisPlayModeTests.cs`
 - **Acceptance criteria:**
-  - [ ] Each debris particle uses its event colour and velocity (readback test: one event with colour (255,0,0) and velocity (10,0,0) → particle moves +X and renders red in a 64×64 capture).
-  - [ ] Live estimate never exceeds 50,000 at High, 25,000 at Medium, 10,000 at Low over a 600-frame stress run at 20,000 events/frame.
-  - [ ] GPU delta median ≤ 1.0 ms at 1920×1080 on the reference machine; result written to `Logs/perf/latest.json` with gate id `G-CMB-DEBRIS-50K` and logged in the ledger *Measurements*.
+  - [x] Each debris particle uses its event colour and velocity (readback test: one event with colour (255,0,0) and velocity (10,0,0) → particle moves +X and renders red in a 64×64 capture).
+  - [x] Live estimate never exceeds 50,000 at High, 25,000 at Medium, 10,000 at Low over a 600-frame stress run at 20,000 events/frame.
+  - [ ] Advisory target: GPU delta median ≤ 1.0 ms at 1920×1080. Actual 50,000-particle population verified; this Metal Editor did not provide 300 positive unique GPU timing samples. The `G-CMB-DEBRIS-50K` perf record remains explicitly unavailable/FAIL and is recorded in ledger *Measurements*; not a completion blocker (ADR-0042).
 - **Tests:** `DebrisPlayModeTests.Debris_ColourAndVelocityFromEvent`, `DebrisPlayModeTests.Stress_LiveEstimateRespectsCapPerQuality`, `DebrisGpuBenchmarkTests.Debris50k_GpuDelta_UnderBudget` (`[Category("Performance")]`).
 
 ### VFX-006 — Projectile tracers
 - **Milestone:** M2
-- **Tier:** frontier — F2: parallel `IJobChunk` writes into a shared array by base entity index
+- **Tier:** frontier — F2: parallel `IJobParallelFor` writes into a shared array by projectile-row index
 - **Depends on:** `VFX-002`, `WPN-001`, `CORE-001`
 - **Do:** Implement `ProjectileTracerBridgeSystem` per §5.3, `TracerGatherJob`, `FxTracer.shader` per §6.4, `fx_tracer_default.asset` (Instanced, built-in Quad, material with `FxTracer.shader`), fill `defaults[Tracer]`.
-- **Files:** `Assets/Game/Presentation/Vfx/Systems/ProjectileTracerBridgeSystem.cs`, `Assets/Game/Presentation/Vfx/Jobs/TracerGatherJob.cs`, `Assets/Game/Presentation/Vfx/Shaders/FxTracer.shader`, `Assets/Game/Presentation/Vfx/Shaders/FxTracer.mat`, `Assets/Game/Content/Vfx/fx_tracer_default.asset`, `Assets/Game/Tests/PlayMode/Presentation/Vfx/TracerPerfTests.cs`
+- **Files:** `Assets/Game/Presentation/Vfx/ProjectileTracerBridgeSystem.cs`, `Assets/Game/Presentation/Vfx/Jobs/TracerGatherJob.cs`, `Assets/Game/Presentation/Vfx/Shaders/FxTracer.shader`, `Assets/Game/Content/Vfx/fx_tracer_default.mat`, `Assets/Game/Content/Vfx/fx_tracer_default.asset`, `Assets/Game/Tests/PlayMode/Vfx/TracerPerfTests.cs`
 - **Acceptance criteria:**
-  - [ ] Rows flagged `Dead` are never drawn.
-  - [ ] With 8,192 rows at Low (`MaxTracers` 4,096), exactly 4,096 instances are drawn and no index is written twice (test fills a sentinel and checks every slot once).
-  - [ ] A rebase of `d` recorded in `OriginShiftRecord` but not yet applied to the rows draws every tracer at `Position + d`; a star-system change draws none until the rows are cleared.
-  - [ ] Tracer length and colour follow §5.3 step 4.
-  - [ ] 5,000 tracers: ≤ 0.3 ms main thread median (`Tracers5k_Smoke`), measured from the `ProjectileTracerBridgeSystem.Gather` and `.Draw` markers.
+  - [x] Rows flagged `Dead` are never drawn.
+  - [x] With 8,192 rows at Low (`MaxTracers` 4,096), exactly 4,096 instances are drawn and no index is written twice (test fills a sentinel and checks every slot once).
+  - [x] A rebase of `d` recorded in `OriginShiftRecord` but not yet applied to the rows draws every tracer at `Position + d`; a star-system change draws none until the rows are cleared.
+  - [x] Tracer length and colour follow §5.3 step 4.
+  - [x] 5,000 tracers: ≤ 0.3 ms main thread median (`Tracers5k_Smoke`), measured from the `ProjectileTracerBridgeSystem.Gather` and `.Draw` markers.
 - **Tests:** `TracerGatherJobTests.DeadRows_Skipped`, `TracerGatherJobTests.OverCap_WritesEachIndexOnce`, `TracerGatherJobTests.PendingShift_Corrected`, `.StarSystemChange_DrawsNothing`, `TracerGatherJobTests.LengthAndColour_FollowSpec`, `TracerPerfTests.Tracers5k_Smoke` (`[Category("Performance")]`).
 
 ### VFX-007 — Beams clipped at the hit point
@@ -641,35 +641,35 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Tier:** standard — gather and draw through `FxInstanceBatch` with the exact steps of §5.4
 - **Depends on:** `VFX-003`, `WPN-001`
 - **Do:** Implement `BeamRenderBridgeSystem` per §5.4 including throttled impact sparks via `PendingImpacts`, `FxBeam.shader` per §6.4, `fx_beam_default.asset`, fill `defaults[Beam]`.
-- **Files:** `Assets/Game/Presentation/Vfx/Systems/BeamRenderBridgeSystem.cs`, `Assets/Game/Presentation/Vfx/Shaders/FxBeam.shader`, `Assets/Game/Presentation/Vfx/Shaders/FxBeam.mat`, `Assets/Game/Content/Vfx/fx_beam_default.asset`
+- **Files:** `Assets/Game/Presentation/Vfx/Systems/BeamRenderBridgeSystem.cs`, `Assets/Game/Presentation/Vfx/Shaders/FxBeam.shader`, `Assets/Game/Content/Vfx/fx_beam_default.mat`, `Assets/Game/Content/Vfx/fx_beam_default.asset`
 - **Acceptance criteria:**
-  - [ ] A beam's drawn end equals `BeamState.EndWorld` (never full range through the target, ledger R26).
-  - [ ] A beam whose grid lost `LocalToWorld` is not drawn.
-  - [ ] Impact sparks: exactly one `HitEnergy` event every 6 frames per hitting beam.
+  - [x] A beam's drawn end equals `BeamState.EndWorld` (never full range through the target, ledger R26).
+  - [x] A beam whose grid lost `LocalToWorld` is not drawn.
+  - [x] Impact sparks: exactly one `HitEnergy` event every 6 frames per hitting beam.
 - **Tests:** `BeamRenderTests.End_IsClippedHitPoint`, `BeamRenderTests.DestroyedGrid_NotDrawn`, `BeamRenderTests.ImpactSparks_EverySixthFrame` (EcsTestWorld + fake rig).
 
 ### VFX-008 — Thruster plumes
 - **Milestone:** M2
 - **Tier:** standard — gather and draw with the exact steps of §5.5
 - **Depends on:** `VFX-002`, `FLT-001`
-- **Do:** Implement `ThrusterPlumeBridgeSystem` per §5.5, `FxPlume.shader`, `fx_thruster_default.asset` (default colour (0.5, 0.8, 1, 1)), fill `defaults[Thruster]`.
-- **Files:** `Assets/Game/Presentation/Vfx/Systems/ThrusterPlumeBridgeSystem.cs`, `Assets/Game/Presentation/Vfx/Shaders/FxPlume.shader`, `Assets/Game/Presentation/Vfx/Shaders/FxPlume.mat`, `Assets/Game/Content/Vfx/fx_thruster_default.asset`
+- **Do:** Implement `ThrusterPlumeBridgeSystem` per §5.5, `FxPlume.shader`, `fx_thruster_default.asset` (white-blue colour per DESIGN-GUIDE §9), fill `defaults[Thruster]`.
+- **Files:** `Assets/Game/Presentation/Vfx/Systems/ThrusterPlumeBridgeSystem.cs`, `Assets/Game/Presentation/Vfx/Shaders/FxPlume.shader`, `Assets/Game/Content/Vfx/fx_thruster_default.mat`, `Assets/Game/Content/Vfx/fx_thruster_default.asset`
 - **Acceptance criteria:**
-  - [ ] Intensity 0 → no instance; intensity 1 → length `6 × NozzleRadius / 0.75` m.
-  - [ ] Plume direction follows grid rotation (rotate grid 90° about Y → plume direction rotates 90°).
-  - [ ] Hulk grids draw no plume.
+  - [x] Intensity 0 → no instance; intensity 1 → length `6 × NozzleRadius / 0.75` m.
+  - [x] Plume direction follows grid rotation (rotate grid 90° about Y → plume direction rotates 90°).
+  - [x] Hulk grids draw no plume.
 - **Tests:** `PlumeRenderTests.IntensityZero_NoInstance`, `PlumeRenderTests.LengthScalesWithIntensity`, `PlumeRenderTests.FollowsGridRotation`, `PlumeRenderTests.Hulk_NoPlume`.
 
 ### VFX-009 — Shield shells and ripples
 - **Milestone:** M2
 - **Tier:** standard — gather and draw with the exact steps of §5.5
 - **Depends on:** `VFX-002`, `PWR-001`, `CORE-001`
-- **Do:** Implement `ShieldRenderBridgeSystem` per §5.5, `FxShieldShell.shader` (rim + up to 8 expanding rings over `shieldRippleSeconds`, flash on the youngest hit), `fx_shield_shell_default.asset` (built-in Sphere, default colour (0.2, 0.6, 1, 0.35)), fill `defaults[ShieldShell]`.
-- **Files:** `Assets/Game/Presentation/Vfx/Systems/ShieldRenderBridgeSystem.cs`, `Assets/Game/Presentation/Vfx/Shaders/FxShieldShell.shader`, `Assets/Game/Presentation/Vfx/Shaders/FxShieldShell.mat`, `Assets/Game/Content/Vfx/fx_shield_shell_default.asset`
+- **Do:** Implement `ShieldRenderBridgeSystem` per §5.5, `FxShieldShell.shader` (rim + up to 8 expanding rings over `shieldRippleSeconds`, flash on the youngest hit), `fx_shield_shell_default.asset` (built-in Sphere, pale jade colour per DESIGN-GUIDE §9), fill `defaults[ShieldShell]`.
+- **Files:** `Assets/Game/Presentation/Vfx/Systems/ShieldRenderBridgeSystem.cs`, `Assets/Game/Presentation/Vfx/Shaders/FxShieldShell.shader`, `Assets/Game/Content/Vfx/fx_shield_shell_default.mat`, `Assets/Game/Content/Vfx/fx_shield_shell_default.asset`
 - **Acceptance criteria:**
-  - [ ] Inactive or `MaxHp <= 0` shields are not drawn.
-  - [ ] Ripple `w` equals age in seconds for ripples younger than 0.6 s and −1 otherwise.
-  - [ ] `EllipsoidToWorld` maps the unit sphere onto the ellipsoid (point (1,0,0) → `Center + (Radii.x,0,0)` in grid space).
+  - [x] Inactive or `MaxHp <= 0` shields are not drawn.
+  - [x] Ripple `w` equals age in seconds for ripples younger than 0.6 s and −1 otherwise.
+  - [x] `EllipsoidToWorld` maps the unit sphere onto the ellipsoid (point (1,0,0) → `Center + (Radii.x,0,0)` in grid space).
 - **Tests:** `ShieldRenderTests.Inactive_NotDrawn`, `ShieldRenderTests.RippleAges_PerSpec`, `ShieldRenderTests.EllipsoidMatrix_MapsUnitSphere`.
 
 ### VFX-010 — Chunk-body dissolve hook
@@ -679,8 +679,8 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Do:** Implement `ChunkDissolveSyncSystem` per §5.7 reading `VfxRuntimeConfig`.
 - **Files:** `Assets/Game/Presentation/Vfx/Systems/ChunkDissolveSyncSystem.cs`
 - **Acceptance criteria:**
-  - [ ] `TimeLeft = 3` → `Value = 0`; `TimeLeft = 1` → `0.5`; `TimeLeft = 0` → `1` (with `chunkDissolveSeconds = 2`).
-  - [ ] No other system writes `ChunkDissolve`.
+  - [x] `TimeLeft = 3` → `Value = 0`; `TimeLeft = 1` → `0.5`; `TimeLeft = 0` → `1` (with `chunkDissolveSeconds = 2`).
+  - [x] No other system writes `ChunkDissolve`.
 - **Tests:** `ChunkDissolveTests.Value_FollowsTimeLeft` (EcsTestWorld).
 
 ### VFX-011 — Quality levels and the settings hook
@@ -690,8 +690,8 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Do:** `FxRig.SetQuality` switches the active `FxQualityBudget`, sets `QualityFactor` on every effect, and is read by every VFX system at the start of its next update. Document for SPEC-01/SPEC-61 that the settings code calls `rig.SetQuality(q)` on change (open question 2).
 - **Files:** `Assets/Game/Presentation/Vfx/FxRig.cs`
 - **Acceptance criteria:**
-  - [ ] Each quality level enforces its row of §4.2 (debris cap, spawn per frame, particle factor, max tracers/beams/plumes/shields).
-  - [ ] Switching quality allocates no new buffers.
+  - [x] Each quality level enforces its row of §4.2 (debris cap, spawn per frame, particle factor, max tracers/beams/plumes/shields).
+  - [x] Switching quality allocates no new buffers.
 - **Tests:** `FxQualityTests.EachLevel_EnforcesBudgetRow`, `FxQualityTests.Switch_NoReallocation`.
 
 ### VFX-012 — Regression and budget tests (02-C29, GC, upload)
@@ -699,9 +699,9 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Tier:** standard — tests of behaviour already specified in §3 and §8
 - **Depends on:** `VFX-005`, `VFX-006`, `VFX-007`
 - **Do:** PlayMode tests: 10,000 hit events over 100 frames → child GameObject and `VisualEffect` counts under the rig unchanged and `GC Allocated In Frame` = 0 after frame 2; upload throughput at 5,000 mixed events and 20,000 debris events (§8 budgets).
-- **Files:** `Assets/Game/Tests/PlayMode/Presentation/Vfx/FxRegressionTests.cs`, `Assets/Game/Tests/PlayMode/Presentation/Vfx/FxUploadPerfTests.cs`
+- **Files:** `Assets/Game/Tests/PlayMode/Vfx/FxRegressionTests.cs`, `Assets/Game/Tests/PlayMode/Vfx/FxUploadPerfTests.cs`
 - **Acceptance criteria:**
-  - [ ] All tests pass on the reference machine; perf rows written to `Logs/perf/latest.json`.
+  - [x] All functional tests pass on the reference machine; perf rows written to `Logs/perf/`. Timing targets remain unchanged and misses remain FAIL rows, advisory under ADR-0042.
 - **Tests:** `FxRegressionTests.Hits10k_NoNewGameObjects`, `FxRegressionTests.Hits10k_NoGcAlloc`, `FxUploadPerfTests.Upload5k_MainThread_Smoke`, `FxUploadPerfTests.Upload20kDebris_MainThread`.
 
 ### VFX-013 — Floating-origin shift and clears
@@ -711,9 +711,9 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Do:** Implement §5.8 steps 1–4 (`ApplyOriginShift`, `FxRig.ShiftAnchors`, `FxRig.ClearAll`, `EventBus` subscriptions, anchor reset).
 - **Files:** `Assets/Game/Presentation/Vfx/Systems/FxUploadSystem.cs`, `Assets/Game/Presentation/Vfx/FxRig.cs`
 - **Acceptance criteria:**
-  - [ ] PlayMode: spawn 1,000 debris at local (1990, 0, 0) moving 0 m/s; write the `OriginShifted` singleton with `Delta = (−2000, 0, 0)` and a new `Sequence` (simulating a rebase; root transforms shifted by −2000); in the same frame every particle's world position is within 0.01 m of (−10, 0, 0) (GPU readback of 16 sample particles through a test graph that writes positions to a buffer).
-  - [ ] `|delta| > 20,000` clears all effects except warp; `StarSystemEntered` clears all except warp; `SessionReset` clears all.
-  - [ ] An anchor with no live particles for `MaxLifetime` returns to (0,0,0).
+  - [x] PlayMode: spawn 1,000 debris at local (1990, 0, 0) moving 0 m/s; write the `OriginShiftRecord` singleton with `Delta = (−2000, 0, 0)` and a new `Sequence` (simulating a rebase; root transforms shifted by −2000); in the same frame every particle's world position is within 0.01 m of (−10, 0, 0) (production-graph rendered invariance, unchanged live count and 16 submitted GPU-position readbacks; Q24).
+  - [x] `|delta| > 20,000` clears all effects except warp; `StarSystemEntered` clears all except warp; `SessionReset` clears all.
+  - [x] An anchor with no live particles for `MaxLifetime` returns to (0,0,0).
 - **Tests:** `FxOriginShiftTests.Rebase_ParticlesKeepWorldPositionSameFrame`, `FxOriginShiftTests.HugeDelta_ClearsExceptWarp`, `FxOriginShiftTests.StarSystemEntered_ClearsExceptWarp`, `FxOriginShiftTests.SessionReset_ClearsAll`, `FxOriginShiftTests.IdleAnchor_ResetsToOrigin`.
 
 ### VFX-014 — Warp effect and strict config validation
@@ -723,8 +723,8 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Do:** Author `FxWarpTemplate.vfx` (pooled: streak tunnel along `direction`, 2.5 s, 600 particles), `fx_warp_default.asset` (Pooled, poolSize 2), fill `defaults[Warp]`; change `VfxConfigDefinition.Validate` so a null default for any kind 1..12 is an error.
 - **Files:** `Assets/Game/Presentation/Vfx/Templates/FxWarpTemplate.vfx`, `Assets/Game/Content/Vfx/fx_warp_default.asset`, `Assets/Game/Content/Vfx/config_vfx.asset`, `Assets/Game/Data/Definitions/Vfx/VfxConfigDefinition.cs`
 - **Acceptance criteria:**
-  - [ ] A `Warp` event plays one pooled instance at the event position; a third concurrent warp steals the oldest instance.
-  - [ ] `config_vfx.asset` passes the strict rule.
+  - [x] A `Warp` event plays one pooled instance at the event position; a third concurrent warp steals the oldest instance.
+  - [x] `config_vfx.asset` passes the strict rule.
 - **Tests:** `WarpFxTests.WarpEvent_PlaysPooledInstance`, `WarpFxTests.ThirdWarp_StealsOldest`, `FxContentTests.VfxConfig_AllDefaultsPresent`.
 
 ### VFX-015 — Owner-requested complete effects batch and larger range
@@ -734,9 +734,9 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 - **Do:** Complete VFX-005 through VFX-014 together, bringing forward only their missing specified input contracts; triple the test station geometry at unchanged cell size. Owner 2026-10-12 explicitly requests one implementation batch and testing only at the end; this overrides per-task validation/branch sequencing for this batch.
 - **Files:** VFX-005…014 file lists; `Assets/Game/App/Session/FiringRangeService.cs`; specified shield and star-system entry contracts.
 - **Acceptance criteria:**
-  - [ ] All remaining VFX functional criteria implemented and validated in one final validation phase.
-  - [ ] Station geometry is three times larger on each axis, using normal cells and working real shooting/destruction.
-  - [ ] Missing gameplay producers remain explicitly tracked under their owning tasks; no claim of implemented travel, shields or galaxy streaming.
+  - [x] All remaining VFX functional criteria implemented and validated in one final validation phase.
+  - [x] Station geometry is three times larger on each axis, using normal cells and working real shooting/destruction.
+  - [x] Missing gameplay producers remain explicitly tracked under their owning tasks; no claim of implemented travel, shields or galaxy streaming.
 - **Tests:** VFX-005…014 required tests plus `FiringRangeTests.RealFire_DamagesStationaryTarget` extended for station dimensions (one existing functional feature test).
 
 ## 10. Open questions
@@ -746,14 +746,14 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 | 1 | SPEC-01: does `GameRoot` create the rig? | Yes: after `UIRoot`, `GameRoot` calls `FxRig.Create(transform, config, allFxDefinitions, cellPalette, settings.VfxQuality)` then `rig.BindTo(World.DefaultGameObjectInjectionWorld)`; on shutdown `rig.Unbind(world)` and `rig.Dispose()` | Tech lead | — |
 | 2 | SPEC-01/SPEC-61: where is the VFX quality stored and how is a change applied? | `SettingsService` stores `VfxQuality` (default `High`); the settings apply code calls `rig.SetQuality(q)` | Tech lead | — |
 | 3 | SPEC-13: confirm debris emission (one `FxEvents.Debris` per removed cell and per tier-1 island cell; 64 sampled cells when a chunk body dissolves) and that `FxUploadSystem` never reads `CellRemoved` | Yes as stated | Tech lead | — |
-| 4 | SPEC-13: name and fields of the chunk-body lifetime component | `ChunkBody { float TimeLeft; float Lifetime; }`; SPEC-13 adds `ChunkDissolve` at chunk creation | Tech lead | — |
+| 4 | SPEC-13: name and fields of the chunk-body lifetime component | Use canonical `ChunkBody.EndTick` and `Live`; derive seconds from `SimClock.Tick` | Tech lead | Resolved ADR-0060 / Q23; no obsolete TimeLeft component field is added. SPEC-13 adds ChunkDissolve at creation. |
 | 5 | SPEC-11: does the voxel/chunk shader expose a per-instance `_DissolveAmount` (DOTS instanced)? | Yes, 0 = solid, 1 = gone (alpha-clip dissolve with noise) | Tech lead | — |
 | 6 | SPEC-11/SPEC-04: where is the 256-entry cell colour palette? | A `Color32[256]` on a SPEC-11 definition; `GameRoot` passes it to `FxRig.Create`; else `config_vfx.fallbackCellPalette` (grey ramp) | Tech lead | — |
 | 7 | SPEC-21: projectile, beam and weapon visual fields (§6.5) | As in §6.5; projectile entities carry no Entities Graphics render components (this spec draws them); missiles are drawn as tracers in M2 | Tech lead | — |
 | 8 | SPEC-21: per-weapon FX overrides | `WeaponDefinition` gets optional `FxDefinition hitFx, muzzleFx`; their `Id.Hash` (`ContentHash`) is baked into the weapon blob and written to `FxEvent.Fx` | Tech lead | — |
 | 9 | SPEC-20: thruster visual fields (§6.5) | `ThrusterState { float Intensity }` written by `PropulsionSystem`; `ThrusterVisual { float3 NozzleLocal, ExhaustDirLocal; float NozzleRadius }` written once at spawn | Tech lead | — |
 | 10 | SPEC-22: shield state and ripple ring buffer (§6.5) | As in §6.5; ShieldSystem writes the oldest of 8 `ShieldRipple` slots on each hit | Tech lead | — |
-| 11 | SPEC-30: how do ECS-side presentation consumers receive `OriginShifted` in the frame it happens? | `OriginRebaseSystem` also keeps a singleton `OriginShifted : IComponentData { float3 Delta; uint Sequence; }`; each shift sets `Delta` (amount added to every root local position) and increments `Sequence`; at most one shift per frame | Tech lead | — |
+| 11 | SPEC-30: same-frame origin-shift delivery | Use the existing Core `OriginShiftRecord` singleton mirror | Tech lead | Resolved ADR-0060 / Q23: Delta, Sequence and StarSystemChanged are read synchronously; the managed OriginShifted event remains separate. |
 | 12 | SPEC-04: does `ContentDefinition` expose `public virtual void Validate(ValidationReport report)`? | Use the canonical SPEC-04 API | Tech lead | Resolved VFX-001 / Q18: Validate(ValidationScope, ContentValidationContext); diagnostics through the asset-bound scope. |
 | 13 | Is `UnityEngine.VFX.VisualEffectAsset` (engine module type) allowed in `Game.Data` although VFX Graph is listed for Presentation only (architecture §3.1)? | Yes: the type is in the engine's VFX module; `Game.Data` does not reference `Unity.VisualEffectGraph.Runtime` | Tech lead | — |
 | 14 | Should hits leave persistent scorch/burn marks on hulls? | No in v1 (cells are removed instead) | Owner | — |
@@ -769,6 +769,8 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 | 22 | Eight hit particles plus a flash, staged boot defaults and real weapon integration | Follow the specified eight spawn requests; render one additional flash output | Tech lead | Resolved VFX-004 / ADR-0059: every eighth hit particle also draws a 55 ms impact flash, giving eight sparks plus one flash without a ninth spawn. Add RamImpact content per ADR-0058. Bind the rig before the boot snapshot; Null graphics skips GPU allocation. Missing future defaults remain warnings until VFX-014. Guarded weapon producers now emit muzzle, hull-hit and explosion events; full weapon tasks remain open. Own procedural radial texture uses the approved design palette. |
 
 | 23 | Bulk completion before missing gameplay producers and stale origin/chunk inputs | Canonical contracts, OriginShiftRecord and EndTick | Tech lead | Resolved ADR-0060 / VFX-015: owner-authorized single implementation batch followed by final validation. Bring shield/entry payloads forward, use same-frame OriginShiftRecord and derive chunk lifetime from EndTick. Triple station geometry at unchanged cell size. |
+| 24 | Validation against the real graph and installed Unity contracts | Keep production rendering under test and preserve unavailable timing evidence | Tech lead | Resolved ADR-0060: origin clear/rebase uses rendered image invariance plus 16 submitted GPU-position readbacks and preserved live count; no claim of direct simulated-particle-buffer access. Use the Unity Physics singleton buffer at world index 0, boot-register the star-system channel, retain existing repository file locations, and apply the approved jade/white-blue palette. |
+| 25 | Per-frame event buffers, pooled restart and state-reader dependencies | Consume each frame before the shared buffer changes; complete producer writes before gather | Tech lead | Resolved ADR-0060: DeltaTime graphs with simulation continuing offscreen preserve batched counts and lifetime accounting; restart pooled graphs with Reinit/custom event, without a competing Stop. Bridges complete the component writers they read. Verified 50k GPU population and live warp; no tuning pass. |
 
 ## 11. References
 

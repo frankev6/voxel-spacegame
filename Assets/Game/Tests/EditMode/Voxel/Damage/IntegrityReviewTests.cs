@@ -45,7 +45,8 @@ namespace Game.Tests.EditMode.Voxel.Damage
             var voxels = new VoxelContent { Blocks = content.BlockDefs, Orientations = content.Orientations };
             var config = AssetDatabase.LoadAssetAtPath<FiringRangeConfigDefinition>("Assets/Game/Content/Config/config_firing_range.asset");
             using var station = FiringRangeService.BuildStation(config, content.Catalog, voxels);
-            station.SetCell(new int3(-13, 0, 0), default);
+            int cut = -13 * config.StationScale;
+            for (int y = 0; y < config.StationScale; y++) for (int z = 0; z < config.StationScale; z++) station.SetCell(new int3(cut, y, z), default);
             using var library = new BlueprintLibrary(content.Catalog, voxels);
             var registry = VoxelStructureRegistry.CreateRuntime(library);
             try
@@ -57,13 +58,13 @@ namespace Game.Tests.EditMode.Voxel.Damage
                 var root = GridSpawnApi.RequestSpawn(em, registry, registry.Register(station), new GridSpawnParams
                     { PersistentId = 1, Pose = RigidTransform.identity, Flags = GridSpawnFlags.NoRender, Kind = GridKind.Station, Motion = GridMotion.Static });
                 spawn.Update(world.Unmanaged); em.CompleteAllTrackedJobs();
-                em.GetBuffer<IntegritySeed>(root).Add(new IntegritySeed { Cell = new int3(-14, 0, 0) });
-                em.GetBuffer<IntegritySeed>(root).Add(new IntegritySeed { Cell = new int3(-12, 0, 0) });
+                em.GetBuffer<IntegritySeed>(root).Add(new IntegritySeed { Cell = new int3(cut - 1, 0, 0) });
+                em.GetBuffer<IntegritySeed>(root).Add(new IntegritySeed { Cell = new int3(cut + 1, 0, 0) });
                 var data = Run(world, world.CreateSystem<IntegritySystem>());
                 Assert.AreEqual(1, data->Islands.Length); Assert.AreEqual(0, data->Current.IntegritySizeDeferred);
                 var grid = em.GetComponentData<VoxelGrid>(root); var slots = em.GetBuffer<BrickSlot>(root);
                 var cells = new List<int3>(); station.TryGetCellBounds(out var min, out var max);
-                for (int z = min.z; z <= max.z; z++) for (int y = min.y; y <= max.y; y++) for (int x = min.x; x < -13; x++)
+                for (int z = min.z; z <= max.z; z++) for (int y = min.y; y <= max.y; y++) for (int x = min.x; x < cut; x++)
                 { var p = new int3(x,y,z); if (!station.GetCell(p).IsAir) cells.Add(p); }
                 int emitted = 0;
                 // Previous component × slot × node output, for the known single-bridge port component.

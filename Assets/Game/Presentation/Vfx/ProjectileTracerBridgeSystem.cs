@@ -1,49 +1,37 @@
+using Game.Core.Components;
 using Game.Core.Systems;
-using Game.Data.Definitions;
 using Game.Simulation.Weapons;
 using Unity.Entities;
-using UnityEngine;
-using UnityEngine.Rendering;
-
+using Unity.Jobs;
+using Unity.Mathematics;
+using Unity.Physics.GraphicsIntegration;
+using Unity.Profiling;
 namespace Game.Presentation.Vfx
 {
-    // TODO(VFX-006): final tracer batching/style variants and required tests. TODO(VFX-005): separate debris particle path remains unimplemented.
-    /// <summary>FND-020 live projectile visualization, reading the canonical store. VFX-006 adds full tracer batching/style variants.</summary>
-    [UpdateInGroup(typeof(PresentationBridgeGroup))]
-    public partial class ProjectileTracerBridgeSystem : SystemBase
+    /// <summary>SPEC-63 §5.3: guarded projectile gather and one session-owned instanced draw.</summary>
+    [UpdateInGroup(typeof(PresentationBridgeGroup)), UpdateAfter(typeof(FxUploadSystem))]
+    public partial class ProjectileTracerBridgeSystem : SystemBase, IFxRigConsumer
     {
-        FiringRangeConfigDefinition config; Mesh mesh;
-        readonly Matrix4x4[] matrices = new Matrix4x4[1023];
-        public void Bind(FiringRangeConfigDefinition definition) { config = definition; }
-        protected override void OnCreate()
-        {
-            RequireForUpdate<ProjectileStore>();
-            mesh = new Mesh { name = "Projectile tracer prism" };
-            mesh.vertices = new[] { new Vector3(-.5f,-.5f,-.5f), new Vector3(.5f,-.5f,-.5f), new Vector3(.5f,.5f,-.5f), new Vector3(-.5f,.5f,-.5f),
-                new Vector3(-.5f,-.5f,.5f), new Vector3(.5f,-.5f,.5f), new Vector3(.5f,.5f,.5f), new Vector3(-.5f,.5f,.5f) };
-            mesh.triangles = new[] { 0,2,1,0,3,2,4,5,6,4,6,7,0,1,5,0,5,4,2,3,7,2,7,6,0,4,7,0,7,3,1,2,6,1,6,5 };
-            mesh.RecalculateBounds(); mesh.UploadMeshData(true);
-        }
+        static readonly ProfilerMarker Gather = new ProfilerMarker(ProfilerCategory.Scripts, "ProjectileTracerBridgeSystem.Gather");
+        static readonly ProfilerMarker Draw = new ProfilerMarker(ProfilerCategory.Scripts, "ProjectileTracerBridgeSystem.Draw");
+        public FxRig Rig { get; set; }
+        protected override void OnCreate() { RequireForUpdate<GameplayActive>(); RequireForUpdate<ProjectileStore>(); }
         protected override void OnUpdate()
         {
-            if (config == null || config.TracerMaterial == null || SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null) return;
+            var batch = Rig?.Tracers; if (batch == null) return; batch.Begin();
             var store = SystemAPI.GetSingleton<ProjectileStore>(); store.CompleteAccess();
-            int count = 0; Bounds bounds = default;
-            for (int i = 0; i < store.Rows.Length; i++)
-            {
-                var row = store.Rows[i]; Vector3 direction = ((Vector3)row.Velocity).normalized;
-                Vector3 position = (Vector3)row.Position - direction * (config.TracerLength * .5f);
-                matrices[count++] = Matrix4x4.TRS(position, Quaternion.LookRotation(direction), new Vector3(config.TracerWidth, config.TracerWidth, config.TracerLength));
-                if (count == 1) bounds = new Bounds(position, Vector3.one * config.TracerLength); else bounds.Encapsulate(new Bounds(position, Vector3.one * config.TracerLength));
-                if (count == matrices.Length) { Draw(count, bounds); count = 0; }
-            }
-            if (count > 0) Draw(count, bounds);
+            var record = SystemAPI.TryGetSingleton<OriginShiftRecord>(out var r) ? r : default;
+            if (!TracerGatherJob.PendingShift(record, store.AppliedShiftSequence.Value, out var correction)) return;
+            float alpha = 0;
+            if (SystemAPI.TryGetSingletonBuffer<MostRecentFixedTime>(out var times, true) && times.Length > 0)
+                alpha = (float)math.clamp(SystemAPI.Time.ElapsedTime - times[0].ElapsedTime, 0, 1.0 / 60);
+
+            var config = Rig.Config; var colors = config.TracerColorByDamageType; int count = math.min(store.Rows.Length, Rig.Budget.MaxTracers);
+            using (Gather.Auto()) new TracerGatherJob { Rows = store.Rows.AsArray(), Output = batch.Data, Correction = correction, Alpha = alpha,
+                LengthSeconds = config.TracerLengthSeconds, MinLength = config.TracerMinLength, MaxLength = config.TracerMaxLength, Width = config.TracerWidth,
+                Color0 = (UnityEngine.Vector4)colors[0].linear, Color1 = (UnityEngine.Vector4)colors[1].linear,
+                Color2 = (UnityEngine.Vector4)colors[2].linear, Color3 = (UnityEngine.Vector4)colors[3].linear }.Schedule(count, 256).Complete();
+            batch.Count = count; using (Draw.Auto()) batch.Draw(); Rig.Stats.TracersDrawn = count;
         }
-        void Draw(int count, Bounds bounds)
-        {
-            var parameters = new RenderParams(config.TracerMaterial) { worldBounds = bounds, shadowCastingMode = ShadowCastingMode.Off, receiveShadows = false };
-            Graphics.RenderMeshInstanced(parameters, mesh, 0, matrices, count);
-        }
-        protected override void OnDestroy() { if (mesh != null) Object.DestroyImmediate(mesh); mesh = null; config = null; }
     }
 }

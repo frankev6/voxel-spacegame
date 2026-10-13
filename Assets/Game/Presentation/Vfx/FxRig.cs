@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.Core;
+using Game.Core.Events;
 using Game.Data.Definitions;
 using Unity.Collections;
 using Unity.Entities;
@@ -52,6 +53,15 @@ namespace Game.Presentation.Vfx
         SlotResources[] resources;
         World boundWorld;
         bool disposed;
+        internal uint ClearRevision { get; private set; }
+        internal double Now { get; set; }
+        void OnEnable() { EventBus<SessionReset>.Subscribe(OnSessionReset); EventBus<StarSystemEntered>.Subscribe(OnStarSystemEntered); }
+        void OnDisable() { EventBus<SessionReset>.Unsubscribe(OnSessionReset); EventBus<StarSystemEntered>.Unsubscribe(OnStarSystemEntered); }
+        void OnSessionReset(SessionReset _) => ClearAll(false);
+        void OnStarSystemEntered(StarSystemEntered _) => ClearAll(true);
+        internal float4 DefaultColor(FxKind kind)
+        { int slot = DefaultSlotByKind[(int)kind]; return slot < 0 ? float4.zero : FxStateMath.Linear(Slots[slot].DefaultColorRgba8); }
+
         public VfxQuality Quality { get; private set; }
         public FxStats Stats { get { stats.Bound = boundWorld != null && boundWorld.IsCreated; return stats; } }
         internal long TotalBufferBytes
@@ -71,6 +81,7 @@ namespace Game.Presentation.Vfx
             public VFXEventAttribute[] Attributes;
             public double[] EndTimes;
             public int Next;
+            public double LastSubmit = double.NegativeInfinity;
             public void Dispose()
             {
                 Buffer?.Dispose(); Buffer = null; Instances?.Dispose(); Instances = null;
@@ -130,7 +141,7 @@ namespace Game.Presentation.Vfx
                     {
                         var child = new GameObject("Fx_" + def.Id.Value + (count > 1 ? "_" + n : "")); child.transform.SetParent(transform, false);
                         var effect = child.AddComponent<VisualEffect>(); r.Effects[n] = effect; effect.visualEffectAsset = def.Graph;
-                        effect.playRate = 1; effect.Stop();
+                        effect.playRate = 1;
                         string missing = MissingProperty(effect, def.Mode);
                         if (missing != null) { Reject(def, missing); valid = false; break; }
                         effect.SetFloat(QualityId, config.Budget(quality).ParticleFactor);
@@ -158,6 +169,7 @@ namespace Game.Presentation.Vfx
             }
             Tracers = DefaultInstances<TracerInstance>(FxKind.Tracer); Beams = DefaultInstances<BeamInstance>(FxKind.Beam);
             Plumes = DefaultInstances<PlumeInstance>(FxKind.Thruster); Shields = DefaultInstances<ShieldInstance>(FxKind.ShieldShell);
+            Shields?.SetFloat(Shader.PropertyToID("_RippleSeconds"), config.ShieldRippleSeconds);
         }
         FxInstanceBatch<T> DefaultInstances<T>(FxKind kind) where T : unmanaged
         { int slot = DefaultSlotByKind[(int)kind]; return slot < 0 ? null : resources[slot].Instances as FxInstanceBatch<T>; }
@@ -198,7 +210,18 @@ namespace Game.Presentation.Vfx
         }
         public void SetQuality(VfxQuality q)
         {
+            bool reduced = Config != null && Config.Budget(q).DebrisLiveCap < Config.Budget(Quality).DebrisLiveCap;
             Quality = q; if (disposed || resources == null) return;
+            if (reduced)
+            {
+                for (int i = 1; i < resources.Length; i++) if (Slots[i].Kind == FxKind.Debris)
+                {
+                    var r = resources[i]; if (r?.Effects == null) continue;
+                    foreach (var effect in r.Effects) { effect.Reinit(); }
+                    r.LastSubmit = double.NegativeInfinity;
+                }
+                ClearRevision++; stats.DebrisLiveEstimate = 0;
+            }
             foreach (var r in resources) if (r?.Effects != null) foreach (var effect in r.Effects) if (effect != null) effect.SetFloat(QualityId, Config.Budget(q).ParticleFactor);
         }
         public void Submit(int slot, NativeArray<FxGpuEvent> events, int start, int count)
@@ -208,6 +231,7 @@ namespace Game.Presentation.Vfx
                 throw new ArgumentOutOfRangeException(nameof(slot));
             var r = resources[slot]; var definition = Slots[slot];
             if (r?.Effects == null) return;
+            r.LastSubmit = Now;
             if (definition.Mode == FxMode.Batched)
             {
                 if (count > definition.MaxEventsPerFrame) throw new ArgumentOutOfRangeException(nameof(count));
@@ -225,16 +249,23 @@ namespace Game.Presentation.Vfx
                     int index = r.Next; r.Next = (r.Next + 1) % r.Effects.Length;
                     var e = events[start + i]; var effect = r.Effects[index]; var attribute = r.Attributes[index];
                     // Reuse steals the oldest instance rather than adding another live effect to that pool slot.
-                    effect.Reinit(); effect.Stop(); effect.transform.position = e.position + (Vector3)AnchorPositions[slot];
+                    effect.Reinit(); effect.transform.position = e.position + (Vector3)AnchorPositions[slot];
                     attribute.SetVector3(DirectionId, e.direction); attribute.SetVector3(VelocityId, e.velocity);
                     attribute.SetVector3(ColorId, new Vector3(e.color.x, e.color.y, e.color.z)); attribute.SetFloat(AlphaId, e.color.w);
-                    attribute.SetFloat(SizeId, e.size); effect.SendEvent(PlayEventId, attribute); stats.PooledPlayed++;
+                    attribute.SetFloat(SizeId, e.size); effect.SendEvent(PlayEventId, attribute); r.EndTimes[index] = Now + definition.MaxLifetime; stats.PooledPlayed++;
                 }
             }
         }
         public void ShiftAnchors(float3 delta)
         {
-            // TODO(VFX-013): origin-shift adjustment and particle anchor lifetime reset.
+            if (disposed || resources == null || !math.all(math.isfinite(delta))) return;
+            for (int i = 1; i < resources.Length; i++)
+            {
+                var r = resources[i]; if (r?.Effects == null) continue;
+                if (Slots[i].Mode == FxMode.Batched)
+                { AnchorPositions[i] += delta; r.Effects[0].transform.position = AnchorPositions[i]; }
+                else for (int n = 0; n < r.Effects.Length; n++) if (r.EndTimes[n] > Now) r.Effects[n].transform.position += (Vector3)delta;
+            }
         }
         public void ClearAll(bool exceptWarp)
         {
@@ -242,13 +273,29 @@ namespace Game.Presentation.Vfx
             for (int i = 1; i < resources.Length; i++)
             {
                 if (exceptWarp && Slots[i].Kind == FxKind.Warp) continue;
-                var r = resources[i]; if (r?.Effects != null) foreach (var effect in r.Effects) if (effect != null) { effect.Reinit(); effect.Stop(); }
+                var r = resources[i]; if (r == null) continue;
+                if (r.Effects != null) foreach (var effect in r.Effects) if (effect != null) { effect.Reinit(); effect.transform.position = Vector3.zero; }
+                if (r.EndTimes != null) Array.Clear(r.EndTimes, 0, r.EndTimes.Length);
+                r.LastSubmit = double.NegativeInfinity; r.Next = 0; AnchorPositions[i] = float3.zero;
             }
-            if (PendingImpacts.IsCreated) PendingImpacts.Clear();
+            Tracers?.Begin(); Beams?.Begin(); Plumes?.Begin(); Shields?.Begin();
+            if (PendingImpacts.IsCreated) PendingImpacts.Clear(); ClearRevision++;
+            stats.DebrisLiveEstimate = stats.DebrisSpawned = 0;
+        }
+        internal void ResetIdleAnchors(double now)
+        {
+            if (disposed || resources == null) return;
+            for (int i = 1; i < resources.Length; i++)
+            {
+                var r = resources[i]; if (r?.Effects == null || Slots[i].Mode != FxMode.Batched) continue;
+                double life = Slots[i].Kind == FxKind.Debris ? Config.DebrisLifetimeMax : Slots[i].MaxLifetime;
+                if (now - r.LastSubmit < life) continue;
+                AnchorPositions[i] = float3.zero; r.Effects[0].transform.position = Vector3.zero;
+            }
         }
         public void Dispose()
         {
-            if (disposed) return; disposed = true; Unbind(boundWorld);
+            if (disposed) return; disposed = true; OnDisable(); Unbind(boundWorld);
             if (resources != null) foreach (var r in resources) r?.Dispose(); resources = null;
             if (Slots.IsCreated) Slots.Dispose(); if (SlotByHash.IsCreated) SlotByHash.Dispose(); if (DefaultSlotByKind.IsCreated) DefaultSlotByKind.Dispose();
             if (Palette.IsCreated) Palette.Dispose(); if (AnchorPositions.IsCreated) AnchorPositions.Dispose(); if (PendingImpacts.IsCreated) PendingImpacts.Dispose();

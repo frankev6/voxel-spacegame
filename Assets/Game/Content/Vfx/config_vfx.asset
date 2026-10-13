@@ -16,18 +16,18 @@ MonoBehaviour:
   formerIds: []
   defaults:
   - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 9d8dd27762979494699fc7e97eefb996, type: 2}
   - {fileID: 11400000, guid: 9874b7ca11b3e4b349dda2d0bc34bd54, type: 2}
   - {fileID: 11400000, guid: 7d6b80ede71a645229f64864c3e2ad65, type: 2}
   - {fileID: 11400000, guid: d512715c7546841fda418c01ef17cfe6, type: 2}
   - {fileID: 11400000, guid: a0ebb311b1e98468aa640069243cda8f, type: 2}
   - {fileID: 11400000, guid: 7644551d661e1470c9109fd5e33d6822, type: 2}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 6604676dfe4d44eb5b3a17385c31681d, type: 2}
   - {fileID: 11400000, guid: a6096911b1b4848748573e80008b6bf4, type: 2}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 6f0d16485a70d437e8fa7c781cc8e594, type: 2}
+  - {fileID: 11400000, guid: 2ef6c572aac164966b08da9dee628d16, type: 2}
+  - {fileID: 11400000, guid: d4010b26c57984352a8f1617df529b99, type: 2}
+  - {fileID: 11400000, guid: 20526564443ad4ac7b30545a2a2d6c63, type: 2}
   - {fileID: 11400000, guid: b80d169786a074c63824a8dda2028004, type: 2}
   low:
     DebrisLiveCap: 10000

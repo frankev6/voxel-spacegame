@@ -25,6 +25,7 @@ MonoBehaviour:
   bridgeColor: 13
   moduleColor: 10
   targetCellSize: 1
+  stationScale: 3
   targetOffset: {x: 0, y: 0, z: 45}
   targetYaw: 0
   tracerMaterial: {fileID: 2100000, guid: 5f9e0d702d3b49b4920f4f6470f5c494, type: 2}

@@ -37,7 +37,7 @@ namespace Game.Tests.PlayMode.App
         }
         void AimAt(float3 local)
         {
-            float3 world = EM.GetComponentData<LocalTransform>(target).TransformPoint(local);
+            float3 world = EM.GetComponentData<LocalTransform>(target).TransformPoint(local * 3);
             Vector3 point = Game.Camera.Camera.WorldToScreenPoint(world);
             Host.Input.SetMouse(point.x, point.y, "none", false, 0, 0, 0);
         }
@@ -58,8 +58,23 @@ namespace Game.Tests.PlayMode.App
         [UnityTest] public IEnumerator RealFire_DamagesStationaryTarget()
         {
             yield return StartRange(); var pose = EM.GetComponentData<LocalTransform>(target); int cells = Cells(target);
-            AimAt(new float3(0, 2, -5.9f)); Host.Input.SetKeys("Space", 0, false);
-            yield return Until(() => EM.GetComponentData<GridDamageStats>(target).CellsDestroyed > 0, "Space must fire real installed guns and destroy target cells", 12);
+            var bounds = EM.GetComponentData<VoxelGrid>(target);
+            Assert.GreaterOrEqual(bounds.BrickDims.x * BrickMath.Size, 153, "Production station spans three times its original 51-cell width");
+            Assert.Greater(cells, 10000, "Geometry is enlarged at unchanged voxel resolution");
+            AimAt(new float3(0, .5f, 2)); Host.Input.SetKeys("Space", 0, true);
+            // Let the injected devices and aim reach the real sampler before pressing the button.
+            yield return Until(() => EM.GetComponentData<Game.Simulation.Commands.ShipCommand>(Root).AimWorld.z > pose.Position.z, "Injected aim reached the flight sampler");
+            Host.Input.SetKeys("Space", 0, false);
+            double deadline = Time.realtimeSinceStartupAsDouble + 12;
+            while (EM.GetComponentData<GridDamageStats>(target).CellsDestroyed == 0 && Time.realtimeSinceStartupAsDouble < deadline)
+            { yield return null; }
+            var diagnostic = Singleton<ProjectileStore>(); diagnostic.CompleteAccess();
+            var command = EM.GetComponentData<Game.Simulation.Commands.ShipCommand>(Root);
+            TestContext.WriteLine($"Range fire: fired={diagnostic.Stats.Value.Fired}, hits={diagnostic.Stats.Value.Hits}, command={command.AimWorld}, valid={command.AimValid}, fire={command.FireGroups}, camera={Game.Camera.Camera.pixelRect}, target={pose.Position}");
+            for (int i = 0; i < math.min(4,diagnostic.Rows.Length); i++) TestContext.WriteLine($"Shot {diagnostic.Rows[i].Position} velocity {diagnostic.Rows[i].Velocity}");
+            TestContext.WriteLine($"Input: context={Game.Input.CurrentContext}, pressed={Game.Input.Controls.Flight.FirePrimary.IsPressed()}, enabled={Game.Input.Controls.Flight.FirePrimary.enabled}, keyboard={UnityEngine.InputSystem.Keyboard.current?.spaceKey.isPressed}");
+            foreach (var device in UnityEngine.InputSystem.InputSystem.devices) TestContext.WriteLine($"Device {device.name} enabled={device.enabled}");
+            Assert.Greater(EM.GetComponentData<GridDamageStats>(target).CellsDestroyed,0,"Space must destroy target cells");
             Host.Input.SetKeys("Space", 0, true);
             var store = Singleton<ProjectileStore>(); store.CompleteAccess(); Assert.Greater(store.Stats.Value.Fired, 0); Assert.Greater(store.Stats.Value.Hits, 0);
             Assert.Less(Cells(target), cells); Assert.AreEqual(pose.Position, EM.GetComponentData<LocalTransform>(target).Position);
@@ -87,15 +102,19 @@ namespace Game.Tests.PlayMode.App
             // A controlled projectile isolates hit testing from weapon spread; all movement/hits/damage still use production systems.
             var store = Singleton<ProjectileStore>(); store.CompleteAccess();
             var weapon = Singleton<WeaponDefsRef>().Value.Value.Weapons[1];
-            float3 start = EM.GetComponentData<LocalTransform>(target).TransformPoint(localStart);
+            float3 start = EM.GetComponentData<LocalTransform>(target).TransformPoint(localStart * 3);
             store.Rows.Add(new ProjectileRow { Position = start, Velocity = new float3(0, 0, 400), Source = Root, Instigator = Root,
                 ShotId = id, Weapon = 1, Type = weapon.Type, DamageMultiplier = 1, DeathTick = Singleton<SimClock>().Tick + 120 });
         }
         [UnityTest] public IEnumerator Shots_PassThroughHole()
         {
-            yield return StartRange(); Assert.IsFalse(CellAt(target, new int3(-13, 0, 0)).IsAir);
-            ShootAlongBridge(699); ShootAlongBridge(700);
-            yield return Until(() => CellAt(target, new int3(-13, 0, 0)).IsAir, "First projectile opens a hole", 5);
+            yield return StartRange(); Assert.IsFalse(CellAt(target, new int3(-38, 1, 0)).IsAir);
+            for (int z = 0; z < 3; z++)
+            {
+                ShootAlongBridge((uint)(680 + z * 2)); ShootAlongBridge((uint)(681 + z * 2));
+                int depth = z; yield return Until(() => CellAt(target,new int3(-38,1,depth)).IsAir,"Open enlarged bridge tunnel layer",5);
+            }
+            yield return Until(() => CellAt(target, new int3(-38, 1, 0)).IsAir, "First projectile opens a hole", 5);
             var store = Singleton<ProjectileStore>(); store.CompleteAccess(); int hits = store.Stats.Value.Hits;
             ShootAlongBridge(701);
             bool passed = false;
@@ -107,9 +126,9 @@ namespace Game.Tests.PlayMode.App
             }, "Second projectile passes through the removed cell instead of hitting the old collider", 5);
             store.CompleteAccess(); Assert.AreEqual(hits, store.Stats.Value.Hits);
             // Open both front-wall layers, then prove the next shot reaches the solid rear wall.
-            var frontA = new int3(0, 2, -6); var frontB = new int3(0, 2, -5); var rear = new int3(0, 2, 5);
+            var frontA = new int3(1, 7, -18); var frontB = new int3(1, 7, -13); var rear = new int3(1, 7, 15);
             byte rearHp = CellAt(target, rear).Hp;
-            for (uint id = 710; id < 718 && (!CellAt(target, frontA).IsAir || !CellAt(target, frontB).IsAir); id++)
+            for (uint id = 710; id < 734 && (!CellAt(target, frontA).IsAir || !CellAt(target, frontB).IsAir); id++)
             {
                 store.CompleteAccess(); int before = store.Stats.Value.Hits;
                 ShootFrom(id, new float3(.5f, 2.5f, -12));
@@ -117,13 +136,20 @@ namespace Game.Tests.PlayMode.App
                 yield return new WaitForSecondsRealtime(.04f);
             }
             Assert.IsTrue(CellAt(target, frontA).IsAir && CellAt(target, frontB).IsAir);
-            ShootFrom(720, new float3(.5f, 2.5f, -12));
+            ShootFrom(740, new float3(.5f, 2.5f, -12));
             yield return Until(() => CellAt(target, rear).IsAir || CellAt(target, rear).Hp < rearHp,
                 "Projectile passes through the front hole and damages solid cells behind it", 5);
         }
         [UnityTest] public IEnumerator SeveredSection_BecomesMovingBody()
         {
-            yield return StartRange(); AimAt(new float3(-11.5f, .5f, .5f)); Host.Input.SetKeys("Space", 0, false);
+            yield return StartRange();
+            // Clear the enlarged bridge cross-section using controlled real projectile rows.
+            for (int z = 0; z < 3; z++) for (int y = 0; y < 3; y++)
+            {
+                ShootFrom((uint)(900+z*6+y*2),new float3(-11.5f,(y+.5f)/3,-12));
+                ShootFrom((uint)(901+z*6+y*2),new float3(-11.5f,(y+.5f)/3,-12));
+                int height = y, depth = z; yield return Until(() => CellAt(target,new int3(-35,height,depth)).IsAir,"Cut enlarged bridge cross-section",5);
+            }
             Entity piece = Entity.Null;
             yield return Until(() =>
             {

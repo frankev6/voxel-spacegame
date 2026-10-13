@@ -97,12 +97,6 @@ Converters: Items (100), Blocks (110), Ships (300)
 ## Entries
 
 ```text
-[W] VFX-W011 Assets/Game/Content/Vfx/config_vfx.asset defaults[10]: Effect family is awaiting its content task.
-[W] VFX-W011 Assets/Game/Content/Vfx/config_vfx.asset defaults[11]: Effect family is awaiting its content task.
-[W] VFX-W011 Assets/Game/Content/Vfx/config_vfx.asset defaults[12]: Effect family is awaiting its content task.
-[W] VFX-W011 Assets/Game/Content/Vfx/config_vfx.asset defaults[1]: Effect family is awaiting its content task.
-[W] VFX-W011 Assets/Game/Content/Vfx/config_vfx.asset defaults[7]: Effect family is awaiting its content task.
-[W] VFX-W011 Assets/Game/Content/Vfx/config_vfx.asset defaults[9]: Effect family is awaiting its content task.
 [I] MIG-I091 content/Items/Blocks/Cores/block_core_cross.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Cores/block_core_small.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Hulls/block_hull.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate.
@@ -247,12 +241,12 @@ Converters: Items (100), Blocks (110), Ships (300)
 [W] MIG-W041 content/Items/Ships/ship_striker.json voxels[9]: Rotation snapped to a cube rotation.
 [I] MIG-I091 content/Items/Ships/ship_vestari.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
 [I] MIG-I090 content/Items/Ships/ship_vestari.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
-0 errors, 73 warnings, 77 infos
+0 errors, 67 warnings, 77 infos
 ```
 
 ## Summary
 
-0 errors, 73 warnings, 77 infos
+0 errors, 67 warnings, 77 infos
 
 Created: 0
 Updated: 0

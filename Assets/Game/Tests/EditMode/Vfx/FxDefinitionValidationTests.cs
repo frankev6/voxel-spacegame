@@ -46,8 +46,8 @@ namespace Game.Tests.EditMode.Vfx
             finally { Object.DestroyImmediate(material); }
 
             var config = Create<VfxConfigDefinition>("config_vfx");
-            Assert.AreEqual(7, Validate(config).Entries.Count(e => e.Code == "VFX-E011"));
-            Assert.AreEqual(6, Validate(config).Entries.Count(e => e.Code == "VFX-W011"));
+            Assert.AreEqual(13, Validate(config).Entries.Count(e => e.Code == "VFX-E011"));
+            Assert.AreEqual(0, Validate(config).Entries.Count(e => e.Code == "VFX-W011"));
             Edit(config, so => so.FindProperty("defaults").arraySize = 12);
             Has(Validate(config), "VFX-E010", "defaults");
             var definitions = Enumerable.Range(1, 13).Select(k => Fx((FxKind)k, FxMode.Batched)).ToArray();

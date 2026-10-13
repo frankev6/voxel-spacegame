@@ -23,20 +23,22 @@ namespace Game.Tests.PlayMode.Vfx
         [Test] public void AllDefinitions_PassValidate()
         {
             var report = new ValidationReport("VFX authored content"); var definitions = Definitions();
-            Assert.GreaterOrEqual(definitions.Length, 7);
+            Assert.GreaterOrEqual(definitions.Length, 13);
             foreach (var definition in definitions) definition.Validate(report.For(definition.IdString), null);
             Config().Validate(report.For("config_vfx"), null);
             Assert.AreEqual(0, report.ErrorCount, report.ToText());
-            Assert.AreEqual(6, report.WarningCount, "Only the six explicitly staged families may be missing.");
+            Assert.AreEqual(0, report.WarningCount, report.ToText());
         }
+        [Test] public void VfxConfig_AllDefaultsPresent()
+        { var config = Config(); for (int i = 1; i <= 13; i++) { Assert.IsNotNull(config.Defaults[i]); Assert.AreEqual((FxKind)i, config.Defaults[i].Kind); } }
         [UnityTest] public IEnumerator Rig_CreatesWithoutContractErrors()
         {
             if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null) Assert.Ignore("Requires VFX graphics device.");
             var rig = FxRig.Create(null, Config(), Definitions(), null, VfxQuality.High);
             try
             {
-                Assert.AreEqual(10, rig.GetComponentsInChildren<VisualEffect>().Length);
-                Assert.AreEqual(7, rig.SlotByHash.Count);
+                Assert.AreEqual(13, rig.GetComponentsInChildren<VisualEffect>().Length);
+                Assert.AreEqual(13, rig.SlotByHash.Count);
                 yield return null; LogAssert.NoUnexpectedReceived();
                 TestContext.WriteLine($"Authored rig GraphicsBuffers: {rig.TotalBufferBytes} bytes; upload/native memory is additional.");
             }

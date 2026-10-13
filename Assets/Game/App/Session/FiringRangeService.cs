@@ -40,6 +40,7 @@ namespace Game.App.Session
         public static VoxelStructure BuildStation(FiringRangeConfigDefinition config, ContentCatalog catalog, VoxelContent content)
         {
             var station = new VoxelStructure(config.TargetCellSize);
+            int scale = config.StationScale;
             try
             {
                 ushort hull = catalog.IndexOf<BlockDefinition>(config.Hull);
@@ -47,6 +48,7 @@ namespace Game.App.Session
                 ushort bridge = station.FindOrAddPalette(new PaletteEntry { Block = hull, Color = config.BridgeColor });
                 void Box(int3 min, int3 max, ushort palette, bool shell = false)
                 {
+                    min *= scale; max = (max + 1) * scale - 1;
                     for (int z = min.z; z <= max.z; z++) for (int y = min.y; y <= max.y; y++) for (int x = min.x; x <= max.x; x++)
                     {
                         int3 c = new int3(x, y, z);
@@ -55,7 +57,7 @@ namespace Game.App.Session
                 }
                 void Place(BlockDefinition block, int3 origin, byte orient = 0)
                 {
-                    var result = station.TryPlaceBlock(new BlockPlacement { Block = catalog.IndexOf<BlockDefinition>(block), Origin = origin,
+                    var result = station.TryPlaceBlock(new BlockPlacement { Block = catalog.IndexOf<BlockDefinition>(block), Origin = origin * scale,
                         Orient = orient, Color = config.ModuleColor }, content);
                     if (result != PlaceResult.Ok) throw new InvalidOperationException("Station placement " + block.IdString + ": " + result);
                 }

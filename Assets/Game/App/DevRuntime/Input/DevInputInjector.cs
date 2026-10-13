@@ -22,8 +22,13 @@ namespace Game.App.DevRuntime.Input
         public Mouse MouseDevice => mouse;
         Keyboard KeyboardDevice()
         {
-            if (keyboard != null && keyboard.added) return keyboard;
-            keyboard = InputSystem.GetDevice<Keyboard>();
+            if (keyboard != null && keyboard.added && keyboard.enabled) return keyboard;
+            if (ownsKeyboard && keyboard != null && keyboard.added)
+            { InputSystem.EnableDevice(keyboard); return keyboard; }
+            keyboard = null; ownsKeyboard = false;
+            foreach (var device in InputSystem.devices)
+                if (device is Keyboard candidate && candidate.enabled) { keyboard = candidate; break; }
+            // Batch/unfocused Editors can retain a disabled native keyboard. Events sent to it are discarded.
             if (keyboard == null) { keyboard = InputSystem.AddDevice<Keyboard>("AgentKeyboard"); ownsKeyboard = true; }
             return keyboard;
         }
