@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AI-015 | claimed after turret/fleet closure; assigned fleet/swarm scenarios | eligible standard work |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | SYS-003 | accepted971ae0b7; evaluating real next standard prerequisites | dependency audit |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-004 | claimed6c4a3b4b; loot and economy service | economy follow-ups |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-018 | claimed31d24070 after AI-010 acceptance; save/load/jump harness | eligible standard work |
 
 ## Operating rules
@@ -19,6 +19,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Power worker recycled:** ECO-004 claim6c4a3b4b and dispatch complete; explicit actual dependencies recordedSPEC50Q25/ledger308. Compiler scoped checks merged55ca3f70; NAR-003 stays open for Invoke, NAR-006 for Build20k fixture. AI-015153/DEV-018137 continue. No active Unity validation.
 
 - **Compiler checks green, scope still open:** primary7894ffe2 compiles clean58481; six required checks pass12910, evidence `narrative-compiler/`. LogicFunctionInfo.Invoke remains unimplemented and must be finished before NAR-003 closes. Nodes deliberately retain NAR-004/005 runtime TODOs. Power audit found ECO-004 needs NAR-001 interface, not entire narrative runtime; reconciling explicit prerequisites under ADR-0068. Previous turn accepted structures (progress).
 
