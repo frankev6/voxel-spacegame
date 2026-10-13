@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98a8eafe074d41d6af9d293401ec9d0a, type: 3}
+  m_Name: faction_vestari
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.FactionDefinition
+  id: faction_vestari
+  formerIds: []
+  displayName: Vestari
+  description: Technologically advanced, dogmatic, democratic civilization. Xenophobic. Peaceful as long as no foreigners enter their space. They believe to be direct Aksharan descendants. They think all other forms of life are lesser. High Tech ships. Normally smaller fleets. Their gestation period is a century so there are few of them in comparison to other factions.
+  isPlayerFaction: 0
+  shipNamePrefix: VSS
+  mapColorToken: --color-faction-vestari
+  liveryColor: {r: 0, g: 1, b: 1, a: 1}
+  basePlayerRelation: 0
+  relationLocked: 0
+  stances: []
+  doctrine: []
+  defaultAiProfile: {fileID: 0}
+  ownedStarSystems: []
+  territorySeeds: 0
+  territoryRadiusHops: 2
