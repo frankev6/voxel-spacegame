@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Compiler entry points wired:** isolated NAR-003f51018bb parses/checks/emits condition/int wrappers and command lists, stamps hashes/version and reports first parser diagnostics. Effect factories still unfinished, so valid command compilation is not yet accepted. No tests/compile this turn. DEV-018 worker found real TRV-006/GAL-008/SYS-009 gaps; instructed to finish useful service-backed plumbing then report exact dependency wait, never fake position/travel. Ledger notes updated. Workers AI-015152/SYS-003164/DEV-018136 active. Previous turn emitted condition graphs (progress).
+
 - **Narrative graph emission:** isolated NAR-003e2527030/dc961079 constructs vocabulary condition graphs, binds references/facts and collects dependencies; emits typed primitive/operator/call ASTs with default parameters. Effect factories, compiler entry points, runtime evaluation and six acceptance checks remain. No compilation claim. Workers AI-015152/SYS-003163/DEV-018135 active. Primary main unchanged runtime; no Unity run. Previous turn closed combat/recycled presentation worker (progress).
 
 - **Combat scenarios closed / worker recycled:** AI-010c45ab392 accepted (clean compile11340;24943 four passed in1.01s), closeout6c9d6fb8 FF main. DEV-018 claimed31d24070 and assigned to exact presentation thread. Lead isolated NAR-0036f1f72a3 adds typed comparison nodes; emission/factories/tests remain. Editor17922 open/stopped, no active validation. AI-015151/SYS-003163 continue. Previous turn implemented compiler diagnostics/nodes (progress).
