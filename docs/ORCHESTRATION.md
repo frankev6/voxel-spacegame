@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 accepted | FACT correctness review active; awaiting next real standard dependency | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-013 | claimedb39fb6d7; validator implementation dispatched | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-014 | claimedc76e4a29; legacy translation after ECO acceptance and HUD review | narrative follow-ups |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-009 accepted | readiness audit149 delivered; genuine wait for lead HUD composition/UI audit prerequisites | HUD-003/006/007 once ready |
 
@@ -19,6 +19,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Workers recycled:** corrected readiness inspection identifies NAR-013 and NAR-020 as genuinely ready after accepted NAR-009/004. Claimedb39fb6d7/595c0e29 and dispatched to existing combat/power threads. Presentation still waits for HUD prerequisites. Lead UI work remains task/HUD-002-ui-composition d96b3e04, no active validation. Prior all-worker dependency-wait assessment was incomplete; no owner blocker. Previous turn implemented menu commands (progress).
 
 - **Legacy logic accepted:**2be62596 clean compiles89361/43204; five focused checks11720 pass after exact salvage removal expectation repair. NAR-014 closes; NAR-015 frontier emission unlocked. All three workers currently have real standard-task dependency waits. Lead returns to HUD-002 preserved e7bcf344; composition/session/presenters remain. No Unity validation active. Previous turn staged UI views (progress).
 
