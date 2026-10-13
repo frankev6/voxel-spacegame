@@ -884,6 +884,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 292 | SPEC-23 Q19: AI decision boundary contradictions | Use §7 missing-weapon range, latched Return arrival with flee/turret priority, margin-inclusive obstacle broadphase and stationary Hold/Idle. Query warning/counter is system-owned atomic telemetry with no decision influence. | Tech lead |
 | 293 | SPEC-23 Q20: AI-006 acceptance consumes downstream steering | Keep decision/production-tick proof in AI-006 and require real decision-to-command delivery plus intervening-tick suppression in AI-007 RewritesEveryTick. Existing test counts and full end-to-end scope preserved; removes circular acceptance dependency. | Tech lead |
 | 294 | SPEC-24 Q9: integrated ability duration/scenario evidence | Preserve60-tick Active lifetime and original expiry, yielding59 next-tick modifier ticks. Four authored-content scenarios verify actual increased/decreased speed, shields, real granting-thruster destruction and identical240-tick ability/status histories at30/60/144FPS. No runtime/tuning changes. | Tech lead |
+| 295 | SPEC-22 Q43: shield toggle-on races the earlier power demand phase | Preserve capacity/HP while the allocation consumer is not yet Requesting; physical activation waits for an actual next-tick grant. Real requesting brownouts still remove capacity. ABL-005 integrated toggle scenario covers the transition; no new test or owner gate. | Tech lead |
 
 
 ## Measurements

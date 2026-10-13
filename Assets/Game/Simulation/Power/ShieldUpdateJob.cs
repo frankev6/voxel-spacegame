@@ -62,6 +62,7 @@ namespace Game.Simulation.Power
                 }
                 bool requested = Controls.HasComponent(root) && Controls[root].RequestedOn == 1;
                 float cap = 0, regen = 0, delay = float.PositiveInfinity;
+                bool hasGrant = false;
                 if (Instances.HasBuffer(root))
                 {
                     var instances = Instances[root]; var cs = consumers[i];
@@ -73,8 +74,11 @@ namespace Game.Simulation.Power
                         if (!Modules.Value.TryGet(BlockModuleId.ShieldEmitter, instances[consumer.InstanceIndex].Block, out ShieldEmitterParams row)) continue;
                         delay = math.min(delay, row.RechargeDelaySeconds);
                         bool granted = (consumer.Flags & PowerConsumerFlags.Granted) != 0;
-                        // A manual toggle retains the charge (§7); a requesting but unpowered emitter loses capacity.
-                        if (granted || !requested) cap += row.Capacity;
+                        // Demand precedes ability activation: a newly enabled emitter has not requested power yet.
+                        // Preserve charge during that transition, but never activate without a real grant.
+                        bool demandRequested = (consumer.Flags & PowerConsumerFlags.Requesting) != 0;
+                        hasGrant |= granted;
+                        if (granted || !requested || !demandRequested) cap += row.Capacity;
                         if (granted && requested) regen += row.RegenPerSecond;
                     }
                 }
@@ -94,7 +98,7 @@ namespace Game.Simulation.Power
                 if ((shield.Flags & ShieldFlags.FillOnNextUpdate) != 0)
                 { shield.Hp = cap; shield.Flags &= ~(ShieldFlags.FillOnNextUpdate | ShieldFlags.Collapsed); }
                 if (!requested && shield.Hp < cap * Tuning.ShieldRestartFraction) shield.Flags |= ShieldFlags.Collapsed;
-                SetActive(ref shield, requested);
+                SetActive(ref shield, requested && hasGrant);
                 var ring = ripples[i];
                 if (ring.Length != 8)
                 {
@@ -126,7 +130,7 @@ namespace Game.Simulation.Power
                 }
                 if ((shield.Active == 1 || (shield.Flags & ShieldFlags.Collapsed) != 0) && requested && Tick >= shield.RegenResumeTick)
                     shield.Hp = math.min(shield.MaxHp, shield.Hp + shield.RegenPerSecond * SimTime.FixedTimestep);
-                SetActive(ref shield, requested); shields[i] = shield;
+                SetActive(ref shield, requested && hasGrant); shields[i] = shield;
             }
             Damage.EndForEachIndex();
         }
