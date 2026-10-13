@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | PWR-010 | claimed main c4ea821 and dispatched | combat/status work as ready |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ENC-001 | claimed main c4ea821 and dispatched | encounter runtime as ready |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | PWR-008 | claimed main 190328f and dispatched; ENC-001 delivered | power/content work as ready |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ECO-002 | claimed main c4ea821 and dispatched | economy content as ready |
 
 ## Operating rules
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- ENC-001 delivered `23b336f`, reviewed contract/event/test staging and integrated into isolated shield batch as `101ff7b`; spec-required: 2, extra: 0, Unity validation pending. Same worker immediately recycled to PWR-008 from main claim `190328f`. Combat PWR-010 and presentation ECO-002 remain actively implementing. Session 64514 re-polled live; primary runtime untouched.
 
 - **Current:** main `fab92fc` closes PWR-005/006, SYS-010, AI-013, ECO-001 and TRV-007 with compile clean, full **1027/0/1 EditMode, 145/0/53 PlayMode**, session 57187 exit 0. Evidence `Logs/playtest/power-batch/`. Main `c4ea821` claims the three current worker tasks. Prior validation process is terminal; backup QualitySettings restored and test artifacts removed.
 - Primary is now `task/GAL-009-combat-validation`, integrating CAM-006 `710a668`, GAL-009 through `c898e34`, WPN-004 `abffb45` and WPN-005 `2bbffb6`. Compile plus 24 required functional tests started as session **81531** exited 1 with CS1612 in WPN-004 test buffer assignment; fixed by retaining the buffer local before writing. Rerun **1487** exited 1: compile clean, focused **14 passed / 10 failed**, all failures are the GAL-009 fixture missing SimClockAdvanceSystem while calling StepFrame. Added the required clock system; repaired validation pending. WPN-004/005 and CAM-006 required tests all pass. Origin advisory perf follows. Keep one Unity process and primary sources stable while running.
