@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | WPN-004 | delivered abffb45; reviewed and prepared with GAL-009; real dependency wait for power batch closure | combat runtime as ready |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | WPN-005 | delivered 2bbffb6; reviewed and prepared with GAL-009; waiting for validated standard dependencies | combat runtime as ready |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | TRV-007 | delivered 4f44ffa, integrated 75ba22b; waiting for ECO-001 validation | ECO-002 after batch closure |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | PWR-010 | claimed main c4ea821 and dispatched | combat/status work as ready |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ENC-001 | claimed main c4ea821 and dispatched | encounter runtime as ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ECO-002 | claimed main c4ea821 and dispatched | economy content as ready |
 
 ## Operating rules
 
@@ -17,6 +17,9 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Current:** main `fab92fc` closes PWR-005/006, SYS-010, AI-013, ECO-001 and TRV-007 with compile clean, full **1027/0/1 EditMode, 145/0/53 PlayMode**, session 57187 exit 0. Evidence `Logs/playtest/power-batch/`. Main `c4ea821` claims the three current worker tasks. Prior validation process is terminal; backup QualitySettings restored and test artifacts removed.
+- Primary is now `task/GAL-009-combat-validation`, integrating CAM-006 `710a668`, GAL-009 through `c898e34`, WPN-004 `abffb45` and WPN-005 `2bbffb6`. Compile plus 24 required functional tests started; pending result, no done claim. Origin advisory perf follows. Keep one Unity process and primary sources stable while running.
 
 - Main `58cf3ea` closes FLT-012/SYS-002/AI-005/TRV-001: clean compile, focused 26/0/0, full **1003/0/1 EditMode, 145/0/53 PlayMode**, session 87840 exit 0. Evidence `Logs/playtest/flt012/`. Main claim `04a0c30` starts WPN-004, WPN-005, TRV-007 on the three existing workers.
 - Primary `task/PWR-006-power-integration` includes prepared PWR-005/PWR-006, SYS-010, AI-013 and ECO-001 from isolated head `d96f714`; source conflicts resolved and allocation→aggregate→propulsion ordering installed. Formation catalog generation session 15988 exited 0; catalog committed `bf5e81f`, temporary job/meta removed. Session 24553 completed compile clean and **27 passed / 1 failed**: only HullDamageOnly fixture assumed dense/palette storage. Repair `6338e23` handles real sparse/instance-backed structural hull cells without changing assertions. Initial evidence `Logs/playtest/power-batch/initial-focused.xml`. Rerun 7567 exited 0: clean compile and **28/0/0** (`Logs/playtest/power-batch/focused-final.xml`, `compile.log`). Full session 99560 stopped in EditMode **1021/2/1** (no PlayMode): malformed ECO constructor TODO and first-run serialization of the new tradeable default made migration reports differ. Repair `a81ff41` corrects TODO and commits exactly tradeable:1 additions on 56 verified assets plus owned manifest hashes; strict tests unchanged. Evidence `Logs/playtest/power-batch/full-editmode-initial.xml`. Repair session 38254 exited 0: compile clean, **5/0/0**, evidence `Logs/playtest/power-batch/migration-repair.xml`. TRV-007 delivery reviewed/integrated `75ba22b`; Session 42046 exited 0: compile clean and **4/0/0** control-lock tests (`Logs/playtest/power-batch/control-locks.xml`). **Full compatible regression session 57187: EditMode 1027/0/1 passed (archived editmode-final.xml); PlayMode active**; no second Unity or source mutation while active.
