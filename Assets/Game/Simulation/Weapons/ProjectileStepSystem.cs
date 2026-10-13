@@ -2,103 +2,79 @@ using Game.Core;
 using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Data.Combat;
+using Game.Simulation.Power;
+using Game.Simulation.Spatial;
 using Game.Voxel.Damage;
-using Game.Voxel.Model;
+using Game.Voxel.PresentationStreams;
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.Physics;
-using Game.Data.Definitions;
-using Game.Voxel.PresentationStreams;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Physics;
 
 namespace Game.Simulation.Weapons
 {
-    // TODO(WPN-008): parallel stream/compaction pipeline, homing, shield hits and full projectile contract tests.
-    /// <summary>SPEC-21 §5.6 projectiles and lifetime. ADR-0053 uses an ordered grid broad phase for the initial range.</summary>
-    [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup)), UpdateAfter(typeof(ImpactEventSystem)), UpdateBefore(typeof(DamageResolveSystem))]
+    /// <summary>SPEC-21 §5.6: guarded origin shift, parallel hit streams and stable compaction.</summary>
+    [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup))]
+    [UpdateAfter(typeof(ImpactEventSystem)), UpdateAfter(typeof(SpatialHashBuildSystem)), UpdateBefore(typeof(ExplosionSystem))]
     public partial struct ProjectileStepSystem : ISystem, ISystemStartStop
     {
-        ProjectileStore owned; EntityQuery grids; StepJob job;
+        ProjectileStore owned;
+        ProjectileStepJob job;
+        ComponentLookup<OriginShiftRecord> shifts;
+        NativeArray<int2> batchCounts;
+        int scheduledRows;
+
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
-            owned = ProjectileStore.Create(SystemAPI.TryGetSingleton<WeaponTuning>(out var tuning) ? tuning.MaxProjectiles : 8192); state.EntityManager.CreateSingleton(owned);
-            grids = new EntityQueryBuilder(Allocator.Temp).WithAll<VoxelGrid>().Build(ref state); job.HitTest = CombatHitTest.Create(ref state);
+            int capacity = math.max(1, SystemAPI.TryGetSingleton<WeaponTuning>(out var tuning) ? tuning.MaxProjectiles : 8192);
+            owned = ProjectileStore.Create(capacity); state.EntityManager.CreateSingleton(owned);
+            scheduledRows = ((capacity + 63) / 64) * 64;
+            batchCounts = new NativeArray<int2>(scheduledRows / 64, Allocator.Persistent);
+            job.HitTest = CombatHitTest.Create(ref state);
             job.Velocities = state.GetComponentLookup<PhysicsVelocity>(true);
-            job.Shifts = state.GetComponentLookup<OriginShiftRecord>(true);
-            state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<WeaponDefsRef>(); state.RequireForUpdate<SimClock>(); state.RequireForUpdate<DamageStreams>();
+            shifts = state.GetComponentLookup<OriginShiftRecord>(true);
+            state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<WeaponDefsRef>();
+            state.RequireForUpdate<SimClock>(); state.RequireForUpdate<DamageStreams>();
+            state.RequireForUpdate<ShieldHitStreams>(); state.RequireForUpdate<SpatialHash>();
+            state.RequireForUpdate<FxEventQueue>(); state.RequireForUpdate<SfxEventQueue>();
         }
-        [BurstCompile] public void OnDestroy(ref SystemState state) { state.CompleteDependency(); owned.Dispose(); }
-        [BurstCompile] public void OnStartRunning(ref SystemState state) { owned.CompleteAccess(); owned.Rows.Clear(); owned.Stats.Value = default; owned.AppliedShiftSequence.Value = 0; }
-        [BurstCompile] public void OnStopRunning(ref SystemState state) { owned.CompleteAccess(); owned.Rows.Clear(); owned.Stats.Value = default; }
+        [BurstCompile] public void OnDestroy(ref SystemState state)
+        { state.CompleteDependency(); owned.Dispose(); batchCounts.Dispose(); }
+        [BurstCompile] public void OnStartRunning(ref SystemState state)
+        { owned.CompleteAccess(); owned.Rows.Clear(); owned.Stats.Value = default; owned.AppliedShiftSequence.Value = 0; }
+        [BurstCompile] public void OnStopRunning(ref SystemState state)
+        { owned.CompleteAccess(); owned.Rows.Clear(); owned.Stats.Value = default; }
+
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
-            job.HitTest.Update(ref state); job.Velocities.Update(ref state); job.Shifts.Update(ref state);
-            job.Grids = grids.ToEntityListAsync(state.WorldUpdateAllocator, state.Dependency, out var gather);
+            job.HitTest.Update(ref state); job.Velocities.Update(ref state); shifts.Update(ref state);
             var streams = SystemAPI.GetSingleton<DamageStreams>();
-            job.Damage = streams.Damage.BeginWrite(ref state, ProducerKind.Projectile, 1);
-            job.Explosions = streams.Explosions.BeginWrite(ref state, ProducerKind.Projectile, 1);
-            job.Rows = owned.Rows; job.Stats = owned.Stats; job.Applied = owned.AppliedShiftSequence;
-            SystemAPI.TryGetSingletonEntity<OriginShiftRecord>(out job.ShiftEntity);
-            job.Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value; job.Tick = SystemAPI.GetSingleton<SimClock>().Tick;
-            var fx = SystemAPI.GetSingleton<FxEventQueue>(); job.Fx = fx.Queue.AsParallelWriter();
-            state.Dependency = job.Schedule(fx.Access.BeginRead(owned.Acquire(JobHandle.CombineDependencies(state.Dependency, gather)))); fx.Access.EndRead(state.Dependency);
-            streams.Damage.EndWrite(state.Dependency); streams.Explosions.EndWrite(state.Dependency); owned.Release(state.Dependency);
-        }
-        [BurstCompile] struct StepJob : IJob
-        {
-            public CombatHitTest HitTest;
-            [ReadOnly] public ComponentLookup<PhysicsVelocity> Velocities;
-            [NativeDisableContainerSafetyRestriction] public NativeQueue<FxEvent>.ParallelWriter Fx;
-            public NativeList<Entity> Grids;
-            public NativeList<ProjectileRow> Rows;
-            public NativeReference<ProjectileStoreStats> Stats;
-            public NativeReference<uint> Applied;
-            [ReadOnly] public ComponentLookup<OriginShiftRecord> Shifts;
-            public Entity ShiftEntity;
-            public BlobAssetReference<WeaponDefsBlob> Weapons;
-            public NativeStream.Writer Damage, Explosions;
-            public uint Tick;
-            public void Execute()
-            {
-                ProjectileStore.ApplyPendingShift(ref Rows, Shifts.HasComponent(ShiftEntity) ? Shifts[ShiftEntity] : default, ref Applied);
-                var stats = Stats.Value; int live = 0; Damage.BeginForEachIndex(0); Explosions.BeginForEachIndex(0);
-                Grids.Sort(new EntityOrder());
-                for (int i = 0; i < Rows.Length; i++)
-                {
-                    var row = Rows[i]; ref var weapon = ref Weapons.Value.Weapons[row.Weapon];
-                    float3 end = row.Position + row.Velocity * SimTime.FixedTimestep;
-                    var hit = HitTest.Segment(row.Position, end, row.Source, Grids);
-                    if (hit.Kind == HitKind.Hull)
-                    {
-                        float3 direction = math.normalizesafe(row.Velocity); var transform = HitTest.Transforms[hit.Grid];
-                        if (weapon.Damage > 0) Damage.Write(new DamageEvent { Grid = hit.Grid, LocalPoint = transform.InverseTransformPoint(hit.WorldPoint),
-                            LocalDir = math.rotate(math.inverse(transform.Rotation), direction), Amount = weapon.Damage * row.DamageMultiplier,
-                            Penetration = weapon.PenetrationCells, Type = row.Type, Source = row.Source, Instigator = row.Instigator,
-                            Producer = ProducerKind.Projectile, Sequence = row.ShotId, WorldImpulse = direction * weapon.ImpulsePerHit });
-                        var effect = FxEvents.Hit(row.Type == DamageType.Energy ? FxKind.HitEnergy : FxKind.HitKinetic,
-                            hit.WorldPoint, hit.WorldNormal, Velocities.HasComponent(hit.Grid) ? Velocities[hit.Grid].Linear : default,
-                            weapon.Damage * row.DamageMultiplier, weapon.HitFx);
-                        if ((row.Flags & ProjectileFlags.PlayerSource) != 0) effect.Flags |= FxEventFlags.PlayerSource;
-                        Fx.Enqueue(effect);
-                        Explode(row, weapon, hit.WorldPoint); stats.Hits++; continue;
-                    }
-                    if (Tick >= row.DeathTick)
-                    { if ((row.Flags & ProjectileFlags.ExplodeOnExpire) != 0) Explode(row, weapon, end); stats.Expired++; continue; }
-                    row.Position = end; Rows[live++] = row;
-                }
-                Rows.ResizeUninitialized(live); stats.Live = live; stats.PeakLive = math.max(stats.PeakLive, live); Stats.Value = stats;
-                Damage.EndForEachIndex(); Explosions.EndForEachIndex();
-            }
-            void Explode(in ProjectileRow row, in WeaponDef weapon, float3 point)
-            {
-                if (weapon.ExplosionRadius <= 0 || weapon.ExplosionDamage <= 0) return;
-                Explosions.Write(new ExplosionRequest { WorldPos = point, Radius = weapon.ExplosionRadius, Amount = weapon.ExplosionDamage * row.DamageMultiplier,
-                    Type = DamageType.Explosive, Source = row.Source, Instigator = row.Instigator, Producer = ProducerKind.Projectile, Sequence = row.ShotId });
-            }
-            struct EntityOrder : System.Collections.Generic.IComparer<Entity> { public int Compare(Entity a, Entity b) => a.Index.CompareTo(b.Index); }
+            var shields = SystemAPI.GetSingleton<ShieldHitStreams>();
+            var hash = SystemAPI.GetSingleton<SpatialHash>();
+            var fx = SystemAPI.GetSingleton<FxEventQueue>();
+            var sfx = SystemAPI.GetSingleton<SfxEventQueue>();
+            job.Damage = streams.Damage.BeginWrite(ref state, ProducerKind.Projectile, batchCounts.Length);
+            job.Explosions = streams.Explosions.BeginWrite(ref state, ProducerKind.Projectile, batchCounts.Length);
+            job.Shields = shields.Hits.BeginWrite(ref state, ProducerKind.Projectile, batchCounts.Length);
+            SystemAPI.TryGetSingletonEntity<OriginShiftRecord>(out var shiftEntity);
+            var shift = new ProjectileShiftJob { Rows = owned.Rows, Applied = owned.AppliedShiftSequence,
+                Shifts = shifts, ShiftEntity = shiftEntity };
+            var shifted = shift.Schedule(owned.Acquire(state.Dependency));
+            job.Rows = owned.Rows; job.BatchCounts = batchCounts; job.Hash = hash.AsReadOnly();
+            job.Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value;
+            job.Tick = SystemAPI.GetSingleton<SimClock>().Tick;
+            job.MaxCandidates = SystemAPI.TryGetSingleton<WeaponTuning>(out var tuning) ? tuning.MaxCandidates : 32;
+            SystemAPI.TryGetSingleton(out job.Cues);
+            job.Fx = fx.Queue.AsParallelWriter(); job.Sfx = sfx.Queue.AsParallelWriter();
+            var reads = sfx.Access.BeginRead(fx.Access.BeginRead(hash.BeginRead(shifted)));
+            // The installed batch API accepts explicit lengths only. Empty upper-bound lanes still publish empty streams.
+            var stepped = job.ScheduleBatch(scheduledRows, 64, reads);
+            hash.EndRead(stepped); fx.Access.EndRead(stepped); sfx.Access.EndRead(stepped);
+            streams.Damage.EndWrite(stepped); streams.Explosions.EndWrite(stepped); shields.Hits.EndWrite(stepped);
+            state.Dependency = new ProjectileCompactJob { Rows = owned.Rows, Stats = owned.Stats, BatchCounts = batchCounts }.Schedule(stepped);
+            owned.Release(state.Dependency);
         }
     }
 }
