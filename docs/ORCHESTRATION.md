@@ -6,8 +6,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | TRV-001 | dispatched from main 681df25; AST-003 b1e37cd delivered | WPN-004/005 after FLT-012 |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AI-005 | dispatched from main claim 733b849; AST-002 integrated, validation running | combat runtime as ready |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | SYS-010 | claimed main aae29c1 and dispatched; TRV-001 1c5e2d2 delivered | WPN-004/005 after FLT-012 |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AI-013 | claimed main bc3dca7 and dispatched; AI-005 8215e97 delivered | combat runtime as ready |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ECO-001 | claimed on main and dispatched; SYS-002 f27c54b delivered for boot/catalog review and validation | SYS-003 after VOX-020 |
 
 ## Operating rules
@@ -18,7 +18,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- Main contains the closed combat-content batch at `1074075`: **968/0/1 EditMode, 145/0/53 PlayMode**, both exit 0, compile clean. Later main commits are task claims, most recently AST-003 `6851656`.
+- Main contains the closed AI-003/SYS-001/DMG-013 batch at `64bb9c7`, with **975/0/1 EditMode, 145/0/53 PlayMode** and clean compile. Later main commits are claims, most recently SYS-010 `aae29c1`.
 - AI-003/SYS-001/DMG-013 batch closed: compile clean, grouped **7/0/0**, full session **25256 exit 0**, EditMode **975/0/1**, PlayMode **145/0/53**. Evidence `Logs/playtest/dmg013/`. That run is terminal; temporary test scene removed by runner and QualitySettings restored from preserved backup.
 - Lead isolated checkout `/Users/frank/.codex/worktrees/combat-hit-detection/spaceship-game-v2` now uses `task/FLT-012-power-stats`, claimed on main `51c7b16`. Commit `d3618f1` adds current-tick/coast thruster power demand and stat-scaled, Powered-gated thrust. Registration/request init and revision-cached propulsion stats now implemented in d6f5e21; eight required tests in 10c9b02, fixture review 2386ef9. No Unity validation yet. PWR-006 still owns aggregate producer and the deferred ordering edge; explicit TODO retained. No Unity runs in this checkout.
 - Primary `task/PWR-004-power-integration`: PWR-004 + AST-002 + AST-003. Focused session 40345 exited 0, **12/0/0**, compile clean (`Logs/playtest/pwr004/acceptance-final.xml`, `compile.log`). A1 CLI session 10752 exit 0, no errors; A2 session 25133 expected exit 1 with 135 E006, 94 E007, 10 retained-font E001 and one absent-material E005. Q243–244 record actual import repair and staged A1 requirements; desktop compression targets unchanged. AST-003 integrated `0550393`, 150/150 inventory rows covered, 17 Unverified/two Blocked audio statuses preserved.
@@ -129,3 +129,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - SYS-002 delivered `f27c54b` (two required tests, no extra); boot patch and config generation recipe pending lead review/integration after session 2085. Same presentation worker recycled to ready ECO-001. TRV-001 and AI-005 continue.
 
 - Reviewed SYS-002 sector geometry/factory/required tests and staged integration in isolated flight checkout: `3441bda` plus boot and generation recipe `acb881e`. Flight real-spawn request assertions `de187eb`/`bbeece4`; existing fixture method count unchanged. Q245–246 mirror streaming/flight decisions. Primary session 2085 still live; latest process check Unity 75148 with active Burst compiler 75158, no runtime mutation.
+
+- AI-005 `8215e97` and TRV-001 `1c5e2d2` reviewed and prepared in isolated next batch as `987b8b4` / `12dc231`. Four/two required tests respectively, Unity pending. AI anchors require GAL-009 OriginShiftRecord before live behavior; travel remains exact contract shells. Same workers recycled to AI-013 and SYS-010. Lead logging repair `1123966` uses GameLog for art CLI/config recipe without changing findings.
