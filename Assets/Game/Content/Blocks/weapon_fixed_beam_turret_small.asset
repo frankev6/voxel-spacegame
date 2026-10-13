@@ -43,6 +43,7 @@ MonoBehaviour:
   blockCategory: 5
   modules:
   - rid: 5
+  grantedAbilities: []
   references:
     version: 2
     RefIds:
@@ -53,4 +54,4 @@ MonoBehaviour:
           x: 0
           y: 0
           z: 1.5
-        weapon: {fileID: 0}
+        weapon: {fileID: 11400000, guid: 27360fa141a34451da0722c2870392c6, type: 2}

@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2391fa89db9241018145925faab91112, type: 3}
   m_Name: wpn_plasma_turret_medium
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   id: wpn_plasma_turret_medium
   formerIds: []
   displayName: Plasma Turret Medium
@@ -44,6 +44,13 @@ MonoBehaviour:
   defaultFireGroups: 1
   visual: 0
   tracerColor: {r: 1, g: 0.68, b: 0.28, a: 1}
-  fireCue: {fileID: 0}
+  fireCue: {fileID: 11400000, guid: 284a5183071d5443bb21f9a5eec78c66, type: 2}
   muzzleFx: {fileID: 0}
   hitFx: {fileID: 0}
+  deliveryData:
+    rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }

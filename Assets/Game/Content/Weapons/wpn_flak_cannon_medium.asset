@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2391fa89db9241018145925faab91112, type: 3}
+  m_Name: wpn_flak_cannon_medium
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.WeaponDefinition
+  id: wpn_flak_cannon_medium
+  formerIds: []
+  displayName: Flak Cannon
+  delivery: 0
+  damageType: 2
+  damage: 0
+  penetrationCells: 1
+  explosionRadius: 2.5
+  explosionDamage: 60
+  explodeOnExpire: 1
+  impulsePerHit: 0
+  fireRate: 1
+  burstCount: 1
+  burstInterval: 0
+  pelletsPerRound: 8
+  spreadDeg: 6
+  projectileSpeed: 300
+  projectileRadius: 0.2
+  lifetimeMin: 0.5
+  lifetimeMax: 1.5
+  homingTurnRateDeg: 0
+  beamRange: 0
+  beamPulseSeconds: 0.5
+  beamWidth: 0.3
+  traverseHalfArcDeg: 0
+  traverseRateDeg: 0
+  maxElevationDeg: 20
+  fireConeDeg: 3
+  powerDraw: 5
+  defaultFireGroups: 4
+  visual: 2
+  tracerColor: {r: 1, g: 1, b: 1, a: 1}
+  fireCue: {fileID: 0}
+  muzzleFx: {fileID: 0}
+  hitFx: {fileID: 0}
+  deliveryData:
+    rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
