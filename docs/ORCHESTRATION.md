@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | GAL-003 | dispatched from main 3a12c2c; GAL-002 integrated d5acbd2, focused validation active | Ready standard work after batch integration |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DLG-010 | dispatched from main 2a28cfc; GAL-003 delivered 579394d, strict missing content prerequisite | WPN-004/005 after FLT-012 |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AST-002 | dispatched from main 5764e72; AI-003 delivered 6787228, boot/catalog integration and validation pending | AI-005 after AI-003 closes |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | MIG-014 | dispatched from main 42aca7e; SYS-001 delivered 91c8610, awaiting next batch integration | Ready standard work after batch integration |
 
@@ -107,3 +107,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - DMG-013 isolated implementation `0dc1a39` adds request ordering, same-tick initial progress, bounded exposed-cell dissolve, physical-grid preservation and core-loss SFX; follow-up replaces obsolete async arrays with supported entity lists. Three required ShipDeathTests and Unity validation remain. Q35 in SPEC-13 resolves packed slot/local resume cursor without changing component layout; central mirror Q240. Primary session `46507` remains live.
 
 - Full combat-content batch `46507` completed exit 0: **968/0/1 EditMode, 145/0/53 PlayMode**, compile clean. Eight tasks closed, evidence `combat-content-batch/*-final.xml`. QualitySettings restored/excluded and runner removed temporary scene. DMG-013 isolated tests `f52c097` are authored, not run; AI-003/SYS-001/DMG-013 remain next batch. GAL-003 delivered `579394d`, strict missing galaxy content must be supplied before integration.
+
+- Main `1074075` closes the eight-task green batch. Combat worker recycled to DLG-010 from main `2a28cfc`; WPN-004/005 have a real SPEC-20 dependency wait (lead must complete PWR-004 then FLT-012). Primary now `task/DMG-013-death-integration`, prepared AI-003/SYS-001/DMG-013 commits integrated. AI catalog job session `1127` is active; temporary `Assets/Game/Editor/AiContentCatalogJob.cs` must be removed after terminal. Then compile and grouped AiContent/StreamingContract/ShipDeath tests, followed by compatible full suites.
