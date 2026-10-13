@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.UI::Game.UI.Data.UIConfig
   PanelSettings: {fileID: 11400000, guid: 609a6ff8391a844909b399dab6b8097b, type: 2}
   RootUxml: {fileID: 9197481963319205126, guid: 4c16474e26ee4ab28307b15aec7e53b0, type: 3}
-  ToastUxml: {fileID: 0}
   TooltipUxml: {fileID: 9197481963319205126, guid: a82553d80906415e88957b36ea61a0bd, type: 3}
+  ToastUxml: {fileID: 9197481963319205126, guid: 8f33b9e582b34b4e9bee00937a9a7e25, type: 3}
   Screens:
   - Key: m1-scene-root
     Uxml: {fileID: 9197481963319205126, guid: 002c65be05254b1a83e2b75d5a535e8f, type: 3}

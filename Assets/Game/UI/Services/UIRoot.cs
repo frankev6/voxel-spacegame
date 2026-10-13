@@ -54,7 +54,7 @@ namespace Game.UI.Services
                     if (layers[i].name != name) throw new InvalidOperationException("UIRoot missing or out-of-order layer '" + name + "'");
                 }
                 Navigator = new UINavigator(this, pause, contextTarget, clock);
-                Tooltips = new TooltipService(this, config); Notifications = new NotificationService();
+                Tooltips = new TooltipService(this, config); Notifications = new NotificationService(this, config, clock);
                 Confirm = new ConfirmDialog(); Prompt = new TextPrompt();
                 RootElement.RegisterCallback<ClickEvent>(OnClick);
                 RootElement.RegisterCallback<PointerOverEvent>(OnPointerOver);
@@ -62,7 +62,7 @@ namespace Game.UI.Services
                 RootElement.RegisterCallback<FocusInEvent>(OnFocusIn, TrickleDown.TrickleDown);
                 RootElement.RegisterCallback<FocusOutEvent>(OnFocusOut, TrickleDown.TrickleDown);
                 UIConverters.RegisterAll();
-                // TODO(UI-010): notification lifecycle. TODO(UI-011): dialog registration.
+                // TODO(UI-011): dialog registration.
                 // TODO(UI-013): ApplyAccessibility; until then use the specified construction defaults.
                 config.PanelSettings.scale = 1;
             }
@@ -115,7 +115,7 @@ namespace Game.UI.Services
             using (TickMarker.Auto())
             {
                 Tooltips.Tick();
-                // TODO(UI-010): notification tick when implemented.
+                Notifications.Tick(unscaledDeltaTime, ReduceMotion);
             }
         }
         public void HandleBackPressed() => Navigator.Back();
@@ -160,6 +160,7 @@ namespace Game.UI.Services
             RootElement?.UnregisterCallback<PointerOverEvent>(OnPointerOver);
             RootElement?.UnregisterCallback<PointerOutEvent>(OnPointerOut);
             Tooltips?.Dispose();
+            Notifications?.Dispose();
             Navigator?.DisposeOwnedScreens();
             lastHover = null;
             Game.Core.Services.Unregister(this);

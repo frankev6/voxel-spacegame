@@ -1,0 +1,34 @@
+/* SPEC-60 §5.8. Column starts below the SPEC-61 radar; newest visible toast is last. */
+.toast-column {
+    position: absolute;
+    right: var(--space-5);
+    top: 296px;
+    width: 360px;
+    flex-direction: column;
+}
+.toast {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--space-3);
+    margin-bottom: var(--space-2);
+    background-color: var(--color-surface-1);
+    color: var(--color-text);
+    border-color: var(--color-border);
+    border-width: var(--border-thin);
+    border-radius: var(--radius-s);
+    opacity: 1;
+    translate: 0 0;
+    transition-property: opacity, translate;
+    transition-duration: var(--duration-normal);
+    transition-timing-function: ease-in-out-sine;
+}
+.toast__icon { margin-right: var(--space-3); font-size: var(--text-l); }
+.toast__text { flex-grow: 1; flex-shrink: 1; white-space: normal; font-size: var(--text-s); }
+.toast--info .toast__icon { color: var(--color-info); }
+.toast--positive .toast__icon { color: var(--color-positive); }
+.toast--warning .toast__icon { color: var(--color-warning); }
+.toast--danger .toast__icon { color: var(--color-danger); }
+.toast--enter { opacity: 0; translate: 0 var(--space-3); }
+.toast--exit { opacity: 0; translate: var(--space-3) 0; }
+.toast--bump { translate: 0 var(--space-1); transition-duration: var(--duration-fast); }
+.ui-root.reduce-motion .toast { transition-duration: 0s; }
