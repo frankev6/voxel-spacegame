@@ -3,6 +3,7 @@ using Game.Core.Systems;
 using Game.Data.Combat;
 using Game.Data.Streams;
 using Game.Voxel.Grid;
+using Game.Voxel.PresentationStreams;
 using Game.Voxel.Model;
 using Game.Voxel.PhysicsBody;
 using Unity.Burst;
@@ -23,6 +24,8 @@ namespace Game.Voxel.Damage.Jobs
         public BufferLookup<LinkedEntityGroup> Groups;
         [ReadOnly] public EntityStorageInfoLookup Storage;
         [ReadOnly] public NativeList<Entity> Destroy;
+        [ReadOnly] public NativeList<Entity> Despawns;
+        public NativeQueue<SfxEvent>.ParallelWriter Sfx;
         [ReadOnly] public NativeList<DamageGridResult> Results;
         public NativeList<GridCoreLost> CoreLost;
         public NativeStream.Writer Explosions;
@@ -35,15 +38,19 @@ namespace Game.Voxel.Damage.Jobs
             {
                 Entity root = result.Grid;
                 if (result.CoreLost == 0 || Hulks.HasComponent(root) || !Grids.HasComponent(root)) continue;
-                var grid = Grids[root]; var id = Ids[root].Value;
+                var grid = Grids[root];
+                if (grid.Kind == GridKind.Hulk) continue;
+                var id = Ids[root].Value;
                 Ecb.AddComponent<Hulk>(root); Ecb.AddComponent(root, new HulkInfo { Cause = HulkCause.CoreLost, Tick = Tick, OriginPersistentId = id, FormerKind = grid.Kind });
                 grid.Kind = GridKind.Hulk; Grids[root] = grid;
                 CoreLost.Add(new GridCoreLost { Grid = root, PersistentId = id, Tick = Tick, WorldPos = result.CoreWorldPos });
                 Explosions.Write(new ExplosionRequest { WorldPos = result.CoreWorldPos, Radius = Config.CoreBreachRadiusCells * grid.CellSize,
                     Amount = Config.CoreBreachDamage, Type = DamageType.Explosive, Source = root, Producer = ProducerKind.Explosion });
+                if (Config.CueCoreLost.Value != 0)
+                    Sfx.Enqueue(new SfxEvent { Cue = Config.CueCoreLost, Pos = result.CoreWorldPos, Volume = 1 });
             }
             Explosions.EndForEachIndex();
-            using var ordered = new NativeList<Entity>(Allocator.Temp); ordered.AddRange(Destroy.AsArray()); ordered.Sort(new RootOrder());
+            using var ordered = new NativeList<Entity>(Allocator.Temp); ordered.AddRange(Destroy.AsArray()); ordered.AddRange(Despawns.AsArray()); ordered.Sort(new RootOrder());
             // Root destruction recursively owns its current LEG. Suppress separate child commands
             // before editing surviving groups; duplicate root requests and stale members are harmless.
             using var covered = new NativeParallelHashSet<Entity>(math.max(1, ordered.Length), Allocator.Temp);
