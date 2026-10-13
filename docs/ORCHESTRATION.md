@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 | claimed920f5f71 after AI-015 delivery; condition evaluation | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-014 | claimedc76e4a29; legacy translation after ECO acceptance and HUD review | narrative follow-ups |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-009 | claimed on main; import-time compile pipeline; DEV-018 delivered with real dependency wait | eligible standard work |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-009 delivered | 20f487c0 pending integration; bounded HUD-002/FND-012 readiness audit active | awaiting actual ready standard work |
 
 ## Operating rules
 
@@ -19,6 +19,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **FACT participant implemented:** NAR-008 claimed033f2cac; staged version1 payload writer and fully parsed/validated restore before mutation, defaults for version0, unchanged FACT registry order20. Five functional checks plus one opt-in measurement authored; compile60074 following namespace repair, acceptance still pending. NAR-009 delivered20f487c0 (Q15 collision to renumber); same worker auditing actual HUD/spawn dependencies, no new ready standard implementation. NAR-004165/NAR-014179 active. Previous turn closed FactStore (progress).
 
 - **FactStore accepted:**18906e47; seven functional checks68749, final compile57658 clean, two performance fixtures deliberately unrun. Trace world binding belongs to NAR-010; Q15→313. Ready FF main and next frontier narrative service/save participant. Workers NAR-004164/NAR-014178/NAR-009147 active. No active Unity validation. Previous turn verified facts/authored perf fixtures (progress).
 

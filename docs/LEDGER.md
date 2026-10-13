@@ -904,6 +904,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 311 | SPEC-61 Q21: HUD byte counts and radar fixture semantics | Resolved: saturate count255, internal instance clock seam, disjoint radar categories; route waypoint resolution remains HUD-009. | Tech lead |
 | 312 | SPEC-50 Q26: loot buffer/draw order and economy lifecycle defaults | Resolved: clear reusable results, checked first-appearance merging, specified deterministic draws, validated indices/rows, stable models and direct event forwarding; no gameplay waits. | Tech lead |
 | 313 | SPEC-40 Q15: FactStore trace composition and count/copy semantics | Resolved: internal world-facade binding, zero time before binding, chronological bounded trace copy; known-slot NonDefaultCount, separate orphan retention. NAR-010 composition TODO retained. | Tech lead |
+| 314 | SPEC-40 Q16: FACT malformed payload atomicity | Resolved: validate the exact version1 ordered/unique payload fully before store mutation; reject malformed count/name/order/trailing data; version0 resets. | Tech lead |
 
 
 ## Measurements

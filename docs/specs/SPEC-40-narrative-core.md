@@ -1442,6 +1442,8 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 
 | 15 | FactStore trace clock and bounded-copy semantics lack a composition hook | Resolved: keep the public constructor unchanged; an internal BindTraceWorld hook accepts ILogicWorld from NarrativeService composition (NAR-010), giving the canonical UniversalTime without ECS dependencies. Before binding, time is0 per the world-facade fallback; ContextId remains0 for unscoped raw writes. CopyTo returns retained entries oldest-first up to buffer length; the debugger reverses its full512-entry copy for newest-first display. NonDefaultCount counts known slots, including Session; orphans are preserved separately. | Tech lead |
 
+| 16 | FACT malformed-input validation and mutation timing | Resolved: reject negative/impossible counts, invalid names, nonunique/nonordinal names, unsupported versions, truncation and trailing bytes with SaveFormatException. Parse into a temporary snapshot before Restore so malformed payloads leave the live store unchanged. Version0 resets defaults without reading. Registry FACT order20 is retained. | Tech lead |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/05-narrative-quests.md` (B3, B8, B10, B13, B14, B17; §5.3–§5.5, §5.12–§5.13), `00-synthesis.md` §6h.
