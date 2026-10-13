@@ -7,6 +7,9 @@ using Game.Tests.EditMode.Voxel.Damage;
 using Game.Voxel.Model;
 using NUnit.Framework;
 using Unity.Entities;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
@@ -20,6 +23,16 @@ namespace Game.Tests.EditMode.Simulation.Weapons
     /// <summary>WPN-003: production spawned cells, current poses and analytic shields, through the query-data API.</summary>
     public sealed class CombatHitTestTests
     {
+        [BurstCompile(CompileSynchronously = true)]
+        struct HitJob : IJob
+        {
+            [ReadOnly] public SpatialHashQueryData Hash;
+            public CombatHitTest Query;
+            public float3 Start, End;
+            public Entity Ignore;
+            public NativeArray<CombatHit> Result;
+            public void Execute() => Result[0] = Query.Segment(Start, End, 0, Ignore, Hash, 127);
+        }
         sealed class Fixture : IDisposable
         {
             public readonly TestGridFactory Grids = new TestGridFactory();
@@ -82,7 +95,11 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                     }
                     ref var state=ref Grids.World.Unmanaged.ResolveSystemStateRef(probe);
                     var hitTest=CombatHitTest.Create(ref state); hitTest.Update(ref state);
-                    return hitTest.Segment(a,b,0,ignore,hash.AsReadOnly(),127);
+                    using var result = new NativeArray<CombatHit>(1, Allocator.TempJob);
+                    var handle = new HitJob { Hash = hash.AsReadOnly(), Query = hitTest,
+                        Start = a, End = b, Ignore = ignore, Result = result }.Schedule(hash.BeginRead(default));
+                    hash.EndRead(handle); hash.CompleteAccess();
+                    return result[0];
                 }
                 finally { hash.Dispose(); }
             }
