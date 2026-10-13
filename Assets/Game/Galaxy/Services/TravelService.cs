@@ -98,7 +98,7 @@ namespace Game.Galaxy.Services
             get
             {
                 if (fuelIndex == 0) return -1;
-                Services.TryGet<ILogicContext>(out var context);
+                Game.Core.Services.TryGet<ILogicContext>(out var context);
                 int held = context?.Economy?.GetItemCount(fuelIndex) ?? -1;
                 if (held < 0) GameLog.WarnOnce("TRV.Fuel.NoEconomy", LogCategories.Travel, "Travel economy is unavailable; fuel costs are not enforced.");
                 return held;
@@ -109,7 +109,7 @@ namespace Game.Galaxy.Services
             if (disposed) return;
             var g = galaxy.Galaxy;
             if (g == null) { if (lanes.BuiltForGeneration != -1) lanes.Dispose(); return; }
-            Services.TryGet<ILogicContext>(out var context);
+            Game.Core.Services.TryGet<ILogicContext>(out var context);
             if (lanes.BuiltForGeneration == galaxy.GenerationCount && !(lanes.PendingContext && context != null)) return;
             lanes.Dispose(); int count = g.LaneGates.Count;
             lanes.GateOpen = new bool[count]; lanes.Watchers = new LogicWatcher[count];
