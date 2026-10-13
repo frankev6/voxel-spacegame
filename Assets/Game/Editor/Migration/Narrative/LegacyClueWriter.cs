@@ -76,8 +76,7 @@ namespace Game.Editor.Migration.Narrative
                         {
                             so.FindProperty("target").objectReferenceValue = row.Target.Length == 0 ? null : Targets[row.Target];
                             so.FindProperty("targetBodyTag").stringValue = row.Tag;
-                            so.FindProperty("resolvedWhen.source").stringValue = row.Condition;
-                            so.FindProperty("resolvedWhen.hasErrors").boolValue = row.Condition.Length != 0;
+                            LegacyQuestConverter.Pending(so.FindProperty("resolvedWhen"), row.Condition);
                         }
                     }
                     clues.Add(row.Id, row.Id.StartsWith("rumor_", StringComparison.Ordinal)

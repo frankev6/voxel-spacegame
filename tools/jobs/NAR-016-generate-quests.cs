@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using Game.Data.Validation;
 using Game.Editor.Content;
+using Game.Editor.Narrative;
 using UnityEditor;
 
 namespace Game.Editor.Migration.Narrative
@@ -21,7 +22,8 @@ namespace Game.Editor.Migration.Narrative
                 LegacyNarrativeConverter.DefaultManifest, LegacyNarrativeConverter.Resolve, report, includeQuests: true);
             if (plan == null || report.HasErrors) throw new InvalidDataException(report.ToText());
             LegacyNarrativeConverter.Write(plan, true, report);
-            ContentDatabaseBuilder.Rebuild();
+            var database = ContentDatabaseBuilder.Rebuild();
+            report.Merge(LogicCompilePostprocessor.RecompileAll(database));
             Directory.CreateDirectory("Logs/migration"); File.WriteAllText("Logs/migration/nar016.txt", report.ToText(int.MaxValue));
             if (report.HasErrors) throw new InvalidDataException(report.ToText());
             Console.WriteLine(report.ToText(int.MaxValue));

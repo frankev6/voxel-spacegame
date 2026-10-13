@@ -291,8 +291,14 @@ namespace Game.Editor.Migration.Narrative
         }
         internal static void Strings(SerializedProperty array, IEnumerable<string> values)
         { var rows = values.ToArray(); array.arraySize = rows.Length; for (int i = 0; i < rows.Length; i++) array.GetArrayElementAtIndex(i).stringValue = rows[i]; }
-        static void Pending(SerializedProperty wrapper, string source)
-        { wrapper.FindPropertyRelative("source").stringValue = source; wrapper.FindPropertyRelative("hasErrors").boolValue = !string.IsNullOrWhiteSpace(source); }
+        internal static void Pending(SerializedProperty wrapper, string source)
+        {
+            var field = wrapper.FindPropertyRelative("source");
+            if (field.stringValue == source) return; // Preserve a valid compiled graph on an unchanged import.
+            field.stringValue = source;
+            wrapper.FindPropertyRelative("compilerVersion").intValue = 0;
+            wrapper.FindPropertyRelative("hasErrors").boolValue = !string.IsNullOrWhiteSpace(source);
+        }
         static void WriteQuest(LegacyAssetWriter writer, Quest quest)
         {
             writer.CreateOrUpdate<QuestDefinition>("Quests", quest.Id, so => {
@@ -334,7 +340,14 @@ namespace Game.Editor.Migration.Narrative
         }
         static void Effects(SerializedProperty wrapper, IEnumerable<string> values)
         {
-            var rows = values.ToArray(); Strings(wrapper.FindPropertyRelative("source"), rows);
+            var rows = values.ToArray();
+            var source = wrapper.FindPropertyRelative("source");
+            bool unchanged = source.arraySize == rows.Length;
+            for (int i = 0; unchanged && i < rows.Length; i++)
+                unchanged = source.GetArrayElementAtIndex(i).stringValue == rows[i];
+            if (unchanged) return;
+            Strings(source, rows);
+            wrapper.FindPropertyRelative("compilerVersion").intValue = 0;
             wrapper.FindPropertyRelative("hasErrors").boolValue = rows.Length != 0;
         }
     }
