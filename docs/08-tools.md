@@ -13,6 +13,8 @@
 
 Prefer the Unity CLI and the `tools/` scripts over opening the Editor by hand.
 
+**Compile log selection:** `tools/playtest/rc.sh` resolves the open Editor's `Application.consoleLogPath` before triggering compilation. An Editor launched with `-logFile` does not write to `Logs/Editor.log`; inspecting that stale default can falsely report success and leave test discovery using an older assembly. Missing active-log resolution fails closed. Verified with a temporary `#error` (exit1), restored by `cp`, followed by clean compile (exit0).
+
 ## 2. Everyday scripts
 
 All scripts find the project root themselves, so you can run them from anywhere in the repository.
