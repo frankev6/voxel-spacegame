@@ -995,6 +995,8 @@ If no save exists, "Load last save" is disabled.
 
 | 29 | Owner requests the lowered test target on every World entry during testing | Config-controlled scene-ready range, Y=-2 m | Tech lead | Resolved FND-021 / ADR-0061: production AutoSpawnInWorld enabled, after player readiness; repeated range requests reuse the target and World exit resets it. No player means no station. |
 
+| 30 | FND-012 can construct against canonical galaxy contracts before GAL-008 installs the live service; fleet spawning already owns a registry borrow | Implement the real service, requester state, profiles, hook-backed root map, adapter and six direct-conversion tests now. Row 8.3 constructs/registers ShipSpawnService and IShipSpawner once the actual GalaxyService is installed at row 8.1; no substitute galaxy service or fabricated NPC membership. Reject NPC requests lacking a valid current/supplied system. Existing PlayerShipSpawner and its single fleet handle remain unchanged until the lead coordinates the service handoff and GAL-008 location binding; do not claim unified production routing complete before those are integrated. Registered structure sources remain caller-owned: service releases its borrow after dead-root lookup or disposal, never disposes the source; canonical Despawn acts on converted grids only. IDisposable removes the hook and owned query/maps. Test fixtures use one-cell encoded VOXS, real source assets and setup APIs, and one direct conversion update, with only the required despawn update added where needed. | Tech lead — FND-012 implementation default; central mirror pending |
+
 ## 11. References
 
 - Architecture §4 (scenes, services, ECS world), §7.3, §8; conventions §3; traps T6.1.

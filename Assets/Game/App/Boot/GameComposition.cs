@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Game.App.Flow;
 using Game.App.Presenters;
 using Game.App.Session;
+using Game.App.Spawning;
+using Game.Galaxy.Services;
 using Game.Core.Flow;
 using Game.App.Services;
 using Game.App.Settings;
@@ -58,6 +60,7 @@ namespace Game.App.Boot
         internal GameConfigDefinition GameConfig { get; private set; }
         internal SceneFlow Flow { get; private set; }
         internal GameSession Session { get; private set; }
+        internal ShipSpawnService Spawner { get; private set; }
 
         GameComposition() { }
 
@@ -145,8 +148,14 @@ namespace Game.App.Boot
             var range = Push(new Game.App.Session.FiringRangeService(world, Content.Catalog, new VoxelContent { Blocks = Content.BlockDefs, Orientations = Content.Orientations }, Registry, Session, rangeConfig));
             Register(range); Flow.RegisterReady(range); Flow.RegisterExiting(range);
 
-            // 8.1–13: galaxy, travel, spawner, factions, map, economy, narrative, UI, camera, FX and dialog are added by their tasks, in the
-            //    rows of SPEC-01 §5.2 (GAL-008, TRV-006, FND-012, ENC-007, GAL-011, ECO-008, UI-003, …).
+            // GAL-008 installs and registers its real GalaxyService at row 8.1 before this point.
+            // 8.3 FND-012: install both canonical surfaces only after that production dependency exists.
+            if (Services.TryGet<GalaxyService>(out var galaxy))
+            {
+                Spawner = Push(new ShipSpawnService(world, Registry, Content.Catalog, Session, galaxy));
+                Register(Spawner); Register<IShipSpawner>(Spawner);
+            }
+            // Remaining galaxy/travel/faction/map/economy/narrative bindings follow SPEC-01 §5.2.
 
             // 9. Persistent UI document and root (UI-003). Navigation owns pause/context (UI-004).
             var inputBridge = Push(new InputServiceBridge(Input)); Register(inputBridge);
