@@ -41,9 +41,12 @@ namespace Game.Simulation.Power
             {
                 var entity = entities[i];
                 if (Spawning.HasComponent(entity) && Spawning.IsComponentEnabled(entity) || Dormancy.HasComponent(entity) && Dormancy.IsComponentEnabled(entity)) continue;
+                // Enable writes update the component change version; recheck changes skipped while asleep/spawning.
+                bool resumed = Dormancy.HasComponent(entity) && Dormancy.DidChange(entity, LastSystemVersion) ||
+                    Spawning.HasComponent(entity) && Spawning.DidChange(entity, LastSystemVersion);
                 var value = stats[i]; bool full = (value.Flags & ShipStatsFlags.Initialized) == 0;
                 ulong signature = value.FunctionalSignature; int count = value.AliveFunctionalCount;
-                if (full || instChanged)
+                if (full || instChanged || resumed)
                 {
                     count = 0; ulong hash = 0x9E3779B97F4A7C15;
                     var blocks = instances[i];
@@ -63,7 +66,7 @@ namespace Game.Simulation.Power
                     value.BoundsCenter = (value.BoundsMin + value.BoundsMax) * .5f; value.BoundingRadius = math.length(value.BoundsMax - value.BoundsCenter);
                     value.FunctionalRevision++; value.Flags |= ShipStatsFlags.Initialized;
                 }
-                if (full || massChanged || !hasMass && (value.Flags & ShipStatsFlags.HasMass) != 0)
+                if (full || massChanged || resumed || !hasMass && (value.Flags & ShipStatsFlags.HasMass) != 0)
                 {
                     value.Mass = hasMass && masses[i].InverseMass > 0 ? 1 / masses[i].InverseMass : 0;
                     value.Flags &= ~ShipStatsFlags.HasMass;
@@ -75,7 +78,7 @@ namespace Game.Simulation.Power
                     }
                     else value.MassFraction = 1;
                 }
-                if (full || modChanged)
+                if (full || modChanged || resumed)
                 {
                     var result = new ShipStatMultipliers();
                     for (int stat = 0; stat <= (int)StatId.TurnRate; stat++) result.Values.Add(1);

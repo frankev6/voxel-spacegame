@@ -746,6 +746,8 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 
 | 14 | PWR-004 lists 28 base consumers but 15 after adding a shield, requires links on non-consumers despite §5.1, and includes PWR-005-owned Powered writes | Use 29 after the one-shield rebuild, bind only consuming functional entities, and verify two module bindings in the existing spawn test. Powered enable bits remain solely PWR-005 behavior; registration/init never writes them. Keep the five required test methods and exact initial energy values. | Tech lead |
 
+| 16 | PWR-006 global LastSystemVersion advances while dormant/spawning roots are skipped, so their changes can be missed on wake | When Dormant or GridSpawning changes to disabled, compare the functional signature again and refresh mass/modifiers even if their ordinary change filters are now cold. Enable writes update Unity component change versions. Keep the revision unchanged when the signature still matches; no writes while dormant, no extra test beyond Dormant_Skipped. | Tech lead |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/02-combat-destruction.md` C08 (parallel energy races), C14 (shields never exist), C22 (beam double drain), C33 (enable bit overloading), §5.10 (beams, shields, energy); `LEDGER.md` R21 (energy 200 → 1 in ~10 s).
