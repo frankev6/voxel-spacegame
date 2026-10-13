@@ -484,7 +484,7 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 ### AI-006 — AiDecisionSystem
 - **Milestone:** M2
 - **Tier:** frontier — F3/F5: staggered deterministic decisions over the hash, writes three components other systems consume
-- **Depends on:** `AI-004`, `AI-005`, `SPEC-20`, `SPEC-21`, `ABL-001`
+- **Depends on:** `AI-004`, `AI-005`, `SPEC-20`, `WPN-001`, `WPN-002`, `WPN-003`, `WPN-004`, `WPN-005`, `WPN-006`, `WPN-007`, `WPN-008`, `WPN-009`, `WPN-010`, `WPN-011`, `WPN-012`, `WPN-015`, `WPN-017`, `WPN-018`, `ABL-001`
 - **Do:** Implement §5.4 (including step 8, ability rules) and the `abilityRules` bake in `AiContent`.
 - **Files:** `Assets/Game/Simulation/Ai/{AiDecisionSystem,AiThinkJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Ai/AiDecisionTests.cs`
 - **Acceptance criteria:**
@@ -610,6 +610,8 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 | 13 | The canonical OriginShiftRecord creator/writer (GAL-009 OriginRebaseSystem) is absent, although AI-005's declared dependencies are ready. | Implement and test §5.3 exactly with the canonical record in the test worlds. Production updates retain RequireForUpdate<OriginShiftRecord> and wait for GAL-009 to create it; no AI-owned singleton or origin producer is introduced. First-init retains ProfileIndex and snapshots the current sequence; unsigned sequence wrap is adjacent, gaps reset cached points, and existing brains retain their other decision fields on a system change. This remains an explicit live integration dependency for the lead. | Tech lead — AI-005 default; central mirror pending. |
 | 14 | AI-013 requests a formations array in AiConfig without specifying its blob shape or disposal. | **Resolved by accepted [ADR-0065](../decisions/ADR-0065-formation-blob-storage.md):** extend the existing boot-owned AiProfilesBlob with BlobArray<FormationDef> Formations; each row has ContentHash IdHash and BlobArray<float2> Slots. Use one-based FormationDefinition catalog indices, reserve an empty row 0, retain authored slot order and X/right, Y/forward metre coordinates. Access by ref through AiConfig.Profiles.Value.Formations. The sole existing Profiles disposal path owns the array; AI-014 owns steering. | Tech lead — accepted centrally 2026-10-13; mirror pending. |
 | 15 | AI-013 does not name a validation code, finite-coordinate policy or exact default formation offsets. | **AI-013 default:** AI-E004 reports empty arrays, non-finite offsets and every pair closer than 20 m (exactly 20 m is valid). Author ten follower slots per formation using SPEC-33 ENC-013's 40 m pattern: line alternates ±40, ±80, … ±200 m at forward 0; wedge uses those paired X values at forward −40, −80, … −200 m; column is X 0, forward −40 through −400 m. The leader is not a follower slot. No byte-slot cap or steering behavior is added. | Tech lead — default recorded for central mirror. |
+
+| 16 | AI-006 broad spec dependencies include advisory performance or owner feel work | Replace the broad dependency with its explicit same-milestone functional prerequisites, excluding only WPN-013, WPN-014. Those tasks retain their full scope and tests but do not block this implementation. No runtime contract or functional prerequisite is removed; owner feel sign-off remains pending in its own task. Follows ADR-0042 and the owner instruction to build systems before tuning. | Tech lead |
 
 ## 11. References
 
