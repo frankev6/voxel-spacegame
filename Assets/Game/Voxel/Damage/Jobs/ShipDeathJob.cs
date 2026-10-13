@@ -53,7 +53,7 @@ namespace Game.Voxel.Damage.Jobs
             using var ordered = new NativeList<Entity>(Allocator.Temp); ordered.AddRange(Destroy.AsArray()); ordered.AddRange(Despawns.AsArray()); ordered.Sort(new RootOrder());
             // Root destruction recursively owns its current LEG. Suppress separate child commands
             // before editing surviving groups; duplicate root requests and stale members are harmless.
-            using var covered = new NativeParallelHashSet<Entity>(math.max(1, ordered.Length), Allocator.Temp);
+            var covered = new NativeParallelHashSet<Entity>(math.max(1, ordered.Length), Allocator.Temp);
             foreach (var root in ordered)
             {
                 if (!Storage.Exists(root) || !Grids.HasComponent(root) || !Groups.HasBuffer(root)) continue;
@@ -77,6 +77,7 @@ namespace Game.Voxel.Damage.Jobs
             }
             for (int i = 0; i < ordered.Length; i++)
                 if ((i == 0 || ordered[i] != ordered[i - 1]) && Storage.Exists(ordered[i]) && !covered.Contains(ordered[i])) Ecb.DestroyEntity(ordered[i]);
+            covered.Dispose();
         }
         struct RootOrder : System.Collections.Generic.IComparer<Entity>
         { public int Compare(Entity a, Entity b) { int c = a.Index.CompareTo(b.Index); return c == 0 ? a.Version.CompareTo(b.Version) : c; } }

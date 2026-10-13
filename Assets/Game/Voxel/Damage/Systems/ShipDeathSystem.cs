@@ -1,5 +1,6 @@
 using Game.Core.Components;
 using Game.Data.Blocks;
+using Game.Data.Components;
 using Game.Voxel.PresentationStreams;
 using Unity.Transforms;
 using Unity.Physics;
