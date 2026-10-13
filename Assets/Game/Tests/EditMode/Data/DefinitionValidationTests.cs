@@ -168,7 +168,7 @@ namespace Game.Tests.EditMode.Data
                 new ShieldEmitterModule { Params = new ShieldEmitterParams { Capacity = 10, RegenPerSecond = 0, RechargeDelaySeconds = 0, PowerDraw = 0 } },
                 new CargoModule { Params = new CargoParams { Capacity = 10 } },
                 new ExplosiveModule { Params = new ExplosiveParams { BlastRadiusCells = 2, BlastDamage = 50 } },
-                new WeaponMountModule(),
+                new WeaponMountModule { Weapon = Create<WeaponDefinition>("wpn_test") },
             };
             AssertClean(Block("block_every_module", BlockKind.Functional, modules: valid), "every module in range");
 

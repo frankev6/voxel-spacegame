@@ -71,7 +71,9 @@ namespace Game.Data.Blocks
                 d.Shape = shapeArray[0];
                 var clearArray = builder.Allocate(ref d.Clearance, clearance.Count);
                 for (int c = 0; c < clearance.Count; c++) clearArray[c] = clearance[c];
-                builder.Allocate(ref d.AbilityIndices, 0);   // DATA-010 fills them
+                var abilityArray = builder.Allocate(ref d.AbilityIndices, b.GrantedAbilities.Count);
+                for (int a = 0; a < abilityArray.Length; a++)
+                    abilityArray[a] = catalog.IndexOf<AbilityDefinition>(b.GrantedAbilities[a]);
                 int3 min = cells.Count > 0 ? cells[0] : int3.zero, max = min;
                 foreach (var c in cells) { min = math.min(min, c); max = math.max(max, c); }
                 d.BoundsMin = min; d.BoundsMax = max;
@@ -88,7 +90,8 @@ namespace Game.Data.Blocks
                 canonical.Write((ushort)cells.Count); foreach (var c in cells) { canonical.Write(c.x); canonical.Write(c.y); canonical.Write(c.z); }
                 for (int c = 0; c < cells.Count; c++) canonical.Write((byte)shapeArray[c]);
                 canonical.Write((ushort)clearance.Count); foreach (var c in clearance) { canonical.Write(c.x); canonical.Write(c.y); canonical.Write(c.z); }
-                canonical.Write((ushort)0);   // AbilityIndices.Length
+                canonical.Write(checked((ushort)abilityArray.Length));
+                for (int a = 0; a < abilityArray.Length; a++) canonical.Write(abilityArray[a]);
                 canonical.Write(d.ModuleMask); canonical.Write((byte)d.Category);
             }
             root.MissingBlockIndex = catalog.GetBlockIndex(catalog.MissingBlock);

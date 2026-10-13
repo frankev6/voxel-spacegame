@@ -8,5 +8,18 @@ namespace Game.Data.Blocks
         public Game.Data.Definitions.WeaponDefinition Weapon { get => weapon; set => weapon = value; }
         public override BlockModuleId Id => BlockModuleId.WeaponMount;
         protected override WeaponMountParams Bake(in BlockModuleBakeContext ctx) => new WeaponMountParams { WeaponIndex = weapon == null ? (ushort)0 : ctx.Catalog.IndexOf<Game.Data.Definitions.WeaponDefinition>(weapon), MuzzleOffsetCells = MuzzleOffsetCells };
+
+        public override void Validate(Game.Data.Definitions.BlockDefinition owner, Game.Data.Validation.ValidationReport report)
+        {
+            if (weapon == null)
+                report.Error("DATA-E047", "", nameof(weapon), "A weapon mount needs a weapon definition.");
+        }
+
+        public override void ContributeStats(ref BlockStatContribution stats, byte orient)
+        {
+            if (weapon == null) return;
+            stats.SustainedDps += weapon.SustainedDps;
+            stats.PowerDraw += weapon.PowerDraw;
+        }
     }
 }

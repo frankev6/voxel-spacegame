@@ -29,7 +29,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField] private Game.Data.Blocks.BlockCategory blockCategory;    // display only (§4.6); rules in §6.4
         [UnityEngine.SerializeReference] private Game.Data.Blocks.BlockModule[] modules = System.Array.Empty<Game.Data.Blocks.BlockModule>(); // §4.6; empty unless Functional
 
-        // DATA-010 (M2) adds: [SerializeField] AbilityDefinition[] grantedAbilities; (the weapon link lives in WeaponMountModule)
+        [UnityEngine.SerializeField] private AbilityDefinition[] grantedAbilities = System.Array.Empty<AbilityDefinition>();
 
         public Game.Data.Blocks.BlockKind Kind => kind;
         public Game.Data.Blocks.BlockShape Shape => shape;
@@ -45,6 +45,7 @@ namespace Game.Data.Definitions
         public UnityEngine.Mesh PropMesh => propMesh;
         public Game.Data.Blocks.BlockCategory BlockCategory => blockCategory;
         public System.Collections.Generic.IReadOnlyList<Game.Data.Blocks.BlockModule> Modules => modules;
+        public System.Collections.Generic.IReadOnlyList<AbilityDefinition> GrantedAbilities => grantedAbilities ?? System.Array.Empty<AbilityDefinition>();
         /// <summary>First module of type T, else false.</summary>
         public bool TryGetModule<T>(out T module) where T : Game.Data.Blocks.BlockModule
         {
@@ -55,7 +56,7 @@ namespace Game.Data.Definitions
         }
         public bool RequiresInstance => kind == Game.Data.Blocks.BlockKind.Functional || cells.Length > 1;
 
-        /// <summary>DATA-E020…E024 (item rules), then DATA-E030…E045 and E048…E052 (SPEC-04 §5.8). Module params report DATA-E041 through
+        /// <summary>DATA-E020…E024 (item rules), then DATA-E030…E045 and E047…E052 (SPEC-04 §5.8). Module params report DATA-E041 through
         /// BlockModule.Validate; their fields are prefixed with "modules[i].".</summary>
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
