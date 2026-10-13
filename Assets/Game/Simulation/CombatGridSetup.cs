@@ -1,12 +1,12 @@
-using System;
 using Unity.Entities;
 
 namespace Game.Simulation
 {
-    /// <summary>Implements SPEC-21 weapon contract: CombatGridSetup.</summary>
+    /// <summary>SPEC-21 WPN-011 / ADR-0015: zeroed combat composition; requesters own Allegiance values.</summary>
     public static class CombatGridSetup
     {
-        public static ComponentTypeSet RootTypes => new ComponentTypeSet(ComponentType.ReadWrite<Weapons.WeaponControl>(), ComponentType.ReadWrite<Weapons.ShipTarget>(), ComponentType.ReadWrite<Weapons.WeaponStats>());
+        public static ComponentTypeSet RootTypes => new ComponentTypeSet(
+            ComponentType.ReadWrite<Weapons.WeaponControl>(), ComponentType.ReadWrite<Weapons.ShipTarget>(), ComponentType.ReadWrite<Weapons.WeaponStats>());
         /// Appends RootTypes for every combat profile (PlayerShip, NpcShip, Station, SmallCraft, Dummy). Called by WeaponInitSystem.OnCreate.
         public static void Register(DynamicBuffer<Game.Voxel.Model.RootComponentRegistration> registrations)
         {
