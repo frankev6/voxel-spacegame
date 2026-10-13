@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 119 | 8 | 0 | 0 | 53 | 0 | 180 | 10 |
+| M3 | 118 | 8 | 0 | 0 | 54 | 0 | 180 | 11 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -321,8 +321,8 @@
 | AI-015 | Fleet and swarm scenario and performance | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-014 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Recycled combat worker; fleet/swarm scenarios; measurements opt-in advisory |
 | GAL-001 | Public contract types | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | CORE-001, DATA-001, VOX-001, NAR-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 6d49a49 | Galaxy contracts, three required tests; full suites green |
 | GAL-002 | Orbit math | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b41aab2 | Double-precision Kepler position/velocity and period wrapping; full 968 EM /145 PM green |
-| GAL-003 | Definitions, properties and validator | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Resumed on current main: reconcile preserved implementation and exact acceptance, lead owns content generation/Unity |
-| GAL-004 | GalaxyDefBuilder and layout job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-003 | no | todo |  |  |  |  |
+| GAL-003 | Definitions, properties and validator | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 29aa4c47 | All 24 diagnostics and four in-memory fixtures; clean compile, 48 required cases pass; production content GAL-012 remains |
+| GAL-004 | GalaxyDefBuilder and layout job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-003 | yes | todo |  |  |  |  |
 | GAL-005 | Lane graph and galaxy hash | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-004 | no | todo |  |  |  |  |
 | GAL-006 | Star-system content job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-002, GAL-005 | no | todo |  |  |  |  |
 | GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | no | todo |  |  |  |  |
@@ -330,7 +330,7 @@
 | GAL-009 | OriginRebaseSystem | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-001, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | 5bf0a47 | Asynchronous origin capture/rebase/placement and dependent consumers; full 1051 EM /146 PM passed; 5000-root p95 0.2959 ms. |
 | GAL-010 | GLXY save participant | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, PERS-001 | no | todo |  |  |  |  |
 | GAL-011 | Galaxy map model | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-008 | no | todo |  |  |  |  |
-| GAL-012 | M3 galaxy content | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-003, SPEC-72 | no | todo |  |  |  |  |
+| GAL-012 | M3 galaxy content | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-003, SPEC-72 | yes | todo |  |  |  |  |
 | GAL-013 | Performance gates | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-005, GAL-006, GAL-009, GAL-011, TST-001 | no | todo |  |  |  |  |
 | SYS-001 | Public contract types | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | CORE-001, DATA-001, GAL-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e738e71 | Streaming contracts and service shells; 2 required tests; full batch green |
 | SYS-002 | Streaming config and boot singleton | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 7244be6 | Config validation/factory, boot singleton and catalog asset; 2 required tests; full suites green |
@@ -1029,6 +1029,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — GAL-003 accepted — astra (gpt-6)
+
+- Reviewed 29aa4c47: local definition and catalog validation, all21 error/three warning codes and four valid in-memory fixtures. Fixed collision IDs avoid fixture search overhead.
+- Compile99024 clean, zero CS warnings; focused13010:48 passed, zero failed/skipped. Evidence `Logs/playtest/galaxy-validator/{compile.log,acceptance.xml}`. Test count: spec-required: 48, extra: 0. No broad run or performance gate.
+- GAL-004 layout and GAL-012 actual content now unlocked; existing TRV-003 compiler remains explicitly unfinished. ENC-010 assigned to existing power worker; HUD-005 continues. Previous goal turn completed MIG-014 (progress).
 
 ### 2026-10-13 — MIG-014 accepted — astra (gpt-6)
 
