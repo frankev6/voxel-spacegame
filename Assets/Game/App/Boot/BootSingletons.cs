@@ -12,6 +12,7 @@ using Game.Voxel.Grid;
 using Game.Simulation.Flight;
 using Game.Simulation.Weapons;
 using Game.Simulation.Power;
+using Game.Simulation.Abilities;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -55,8 +56,14 @@ namespace Game.App.Boot
                 new PowerContent(catalog).CreateSingletons(em);
                 using (var power = em.CreateEntityQuery(ComponentType.ReadOnly<PowerTuning>()))
                     created.Add(power.GetSingletonEntity());
+                AbilityContent.CreateSingletons(em, catalog, created);
+                using (var abilities = em.CreateEntityQuery(ComponentType.ReadOnly<AbilityDefsRef>()))
+                {
+                    lifetime.AbilityEntity = abilities.GetSingletonEntity();
+                    lifetime.Abilities = abilities.GetSingleton<AbilityDefsRef>().Value;
+                }
                 Create(em, FlightConfigFactory.Create(catalog.Get<FlightConfigDefinition>(new ContentId("config_flight"))), created);
-                // Later rows (ENC-001, WPN, AI, ABL, SYS, ECO-007) are added by their tasks (SPEC-01 §5.3).
+                // Later rows (ENC-001, WPN, AI, SYS, ECO-007) are added by their tasks (SPEC-01 §5.3).
 
                 Create(em, default(PersistentIdAllocator), created);
 
@@ -71,7 +78,8 @@ namespace Game.App.Boot
         {
             readonly World world;
             VoxelRenderConfig config;
-            internal Entity ConfigEntity, DamageEntity, WeaponEntity;
+            internal Entity ConfigEntity, DamageEntity, WeaponEntity, AbilityEntity;
+            internal BlobAssetReference<AbilityDefsBlob> Abilities;
             internal BlobAssetReference<WeaponDefsBlob> Weapons;
             internal BlobAssetReference<DamageTableBlob> DamageTable;
             public RenderConfigLifetime(World world, VoxelRenderConfig config) { this.world = world; this.config = config; }
@@ -84,6 +92,9 @@ namespace Game.App.Boot
                     if (DamageEntity != Entity.Null && world.EntityManager.Exists(DamageEntity))
                         world.EntityManager.SetComponentData(DamageEntity, DamageConfig.Default);
                 }
+                if (Abilities.IsCreated) Abilities.Dispose(); Abilities = default;
+                if (world.IsCreated && world.EntityManager.Exists(AbilityEntity)) world.EntityManager.DestroyEntity(AbilityEntity);
+                AbilityEntity = Entity.Null;
                 if (Weapons.IsCreated) Weapons.Dispose(); Weapons = default;
                 if (world.IsCreated && world.EntityManager.Exists(WeaponEntity)) world.EntityManager.DestroyEntity(WeaponEntity);
                 WeaponEntity = Entity.Null;
