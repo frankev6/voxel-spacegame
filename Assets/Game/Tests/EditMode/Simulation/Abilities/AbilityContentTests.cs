@@ -34,7 +34,7 @@ namespace Game.Tests.EditMode.Simulation.Abilities
         AbilityDefinition Load(string id)
         {
             var clone = ScriptableObject.CreateInstance<AbilityDefinition>(); owned.Add(clone);
-            EditorJsonUtility.FromJsonOverwrite(System.IO.File.ReadAllText(Fixtures + id + ".json"), clone);
+            JsonUtility.FromJsonOverwrite(System.IO.File.ReadAllText(Fixtures + id + ".json"), clone);
             return clone;
         }
         static void Set(AbilityDefinition definition, string field, object value)
