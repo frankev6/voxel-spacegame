@@ -1,4 +1,6 @@
 using Game.Core;
+using Game.Data.Combat;
+using Game.Simulation.Power;
 using Game.Data.Blocks;
 using Game.Simulation.Commands;
 using Game.Simulation.Common;
@@ -26,6 +28,8 @@ namespace Game.Simulation.Flight
         [ReadOnly] public BlobAssetReference<OrientationTablesBlob> Orientations;
         [ReadOnly] public EntityStorageInfoLookup Entities;
         [ReadOnly] public ComponentLookup<GridSpawning> Spawning;
+        [ReadOnly] public ComponentLookup<Powered> Powered;
+        [ReadOnly] public ComponentLookup<ShipStatMultipliers> Multipliers;
         // Each thruster entity belongs to exactly one ship root and is written only by that root's execute (SPEC-20 §5.3).
         [NativeDisableParallelForRestriction] public ComponentLookup<ThrusterState> Thrusters;
 
@@ -44,10 +48,12 @@ namespace Game.Simulation.Flight
             quaternion inertiaRotation = math.mul(rotation, mass.InertiaOrientation);
             float2 local = FlightMath.ToLocalPlanar(velocity.Linear, rotation);
             float yaw = math.rotate(inertiaRotation, velocity.Angular).y;
-            // TODO(FLT-012): read power and stat multipliers; M1 uses powered thrusters and unit multipliers.
+            var multipliers = Multipliers.HasComponent(entity) ? Multipliers[entity] : default;
+            float thrustMultiplier = multipliers.Get(StatId.Thrust);
+            float turnMultiplier = multipliers.Get(StatId.TurnRate);
             bool boost = (command.Flags & ShipCommandFlags.Boost) != 0 && (command.Flags & ShipCommandFlags.Brake) == 0;
-            FlightMath.SpeedCaps(Config, 1, boost, out float forward, out float reverse, out float strafe);
-            float yawCap = FlightMath.YawRateCap(Config, 1);
+            FlightMath.SpeedCaps(Config, multipliers.Get(StatId.MaxSpeed), boost, out float forward, out float reverse, out float strafe);
+            float yawCap = FlightMath.YawRateCap(Config, turnMultiplier);
             FlightMath.Targets(Config, command.Thrust, command.Turn, command.Flags, local, forward, reverse, strafe,
                 yawCap, out float2 target, out float targetYaw);
             var problem = new ThrustProblem
@@ -62,15 +68,17 @@ namespace Game.Simulation.Flight
             for (int k = 0; k < thrusters.Length; k++)
             {
                 var thruster = thrusters[k];
-                float max = Entities.Exists(thruster.Thruster) ? (boost ? Config.BoostThrottle : 1) : 0;
+                bool usable = Entities.Exists(thruster.Thruster) &&
+                    (!Powered.HasComponent(thruster.Thruster) || Powered.IsComponentEnabled(thruster.Thruster));
+                float max = usable ? (boost ? Config.BoostThrottle : 1) : 0;
                 actuators[k] = new ThrustActuator
                 {
-                    Column = thruster.MaxForce * new float3(thruster.ForceDirLocal.x, thruster.ForceDirLocal.z,
+                    Column = thruster.MaxForce * thrustMultiplier * new float3(thruster.ForceDirLocal.x, thruster.ForceDirLocal.z,
                         math.cross(thruster.PositionLocal - mass.CenterOfMass, thruster.ForceDirLocal).y), Max = max
                 };
                 throttles[k] = math.clamp(thruster.Throttle, 0, max);
             }
-            float gyroTorque = FlightMath.GyroYawTorque(Config, mass.InverseInertia.y);
+            float gyroTorque = FlightMath.GyroYawTorque(Config, mass.InverseInertia.y) * turnMultiplier;
             int gyroIndex = thrusters.Length;
             actuators[gyroIndex] = new ThrustActuator { Column = new float3(0, 0, gyroTorque), Min = -1, Max = 1 };
             throttles[gyroIndex] = flight.Gyro;
@@ -92,7 +100,7 @@ namespace Game.Simulation.Flight
                 float throttle = throttles[k] < Config.ThrottleEpsilon ? 0 : throttles[k];
                 if (throttle > 0)
                 {
-                    float3 force = math.rotate(rotation, thruster.ForceDirLocal) * (thruster.MaxForce * throttle);
+                    float3 force = math.rotate(rotation, thruster.ForceDirLocal) * (thruster.MaxForce * thrustMultiplier * throttle);
                     velocity.ApplyImpulse(mass, transform.Position, rotation, force * dt, transform.TransformPoint(thruster.PositionLocal));
                     firing = true;
                 }
