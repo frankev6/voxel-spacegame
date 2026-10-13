@@ -643,10 +643,10 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 - **Do:** Implement `PowerRegistration` (§4.1), `PowerRegistrationSystem` (§5.1, also calling `PowerGridSetup.Register`) and `PowerInitSystem` (§5.2) with its three jobs, including the first-init values of step 2.5. Tests use a test-only `TestConsumerInitSystem` (GameInitGroup, before `PowerInitSystem`) that fills `Thruster` and `WeaponMount` elements from their rows, so this task does not wait for SPEC-20/21.
 - **Files:** `Assets/Game/Simulation/Power/{PowerRegistration,PowerRegistrationSystem,PowerInitSystem,ShieldEmitterRequestInitJob,PowerRebindDetectJob,PowerInitJob}.cs`; `Assets/Game/Tests/EditMode/Simulation/Power/TestConsumerInitSystem.cs`
 - **Acceptance criteria:**
-  - [ ] Spawning `ship_fighter` (EcsTestWorld + `GridSpawnSystem`) yields 14 weapon, 14 thruster and 0 shield consumers sorted by (priority desc, instance asc); every functional entity has `PowerLink.Bound == 1`; `Stored == Capacity == 200`, `Generation == 40`.
-  - [ ] A `GridRebuildRequest` with a structure that adds one shield emitter re-initialises the grid in the same frame (15 consumers, shield first).
+  - [ ] Spawning `ship_fighter` (EcsTestWorld + `GridSpawnSystem`) yields 14 weapon, 14 thruster and 0 shield consumers sorted by (priority desc, instance asc); every consuming functional entity has `PowerLink.Bound == 1`; `Stored == Capacity == 200`, `Generation == 40`.
+  - [ ] A `GridRebuildRequest` with a structure that adds one shield emitter re-initialises the grid in the same frame (29 consumers: 14 weapons + 14 thrusters + 1 shield, shield first; Q14).
   - [ ] Grids without `ShipPower` are ignored; non-consumer functional entities have no `PowerRequest` and `ConsumerCount == 0`; every bound element's `ConsumerIndex` points at a consumer with the same `Functional` and `Module`.
-  - [ ] A test block with two consuming modules yields two consumers on one entity; `Powered` is enabled only while both are not browned out.
+  - [ ] A functional entity with two consuming modules yields two bound consumers on that entity. The `Powered` all-modules-not-browned-out behavior is implemented and verified by PWR-005, its sole writer (§5.3; Q14).
   - [ ] No structural change outside `OnCreate`; leak detection clean.
 - **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/PowerInitSystemTests.cs`: `Spawn_BuildsSortedConsumers`, `Spawn_SetsFullStorage`, `Rebuild_Reinitialises`, `NoShipPower_Ignored`, `NonConsumer_IndexMinusOne`.
 
@@ -743,6 +743,8 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 | 11 | The exact float formulas can overflow or divide by zero despite §6's finite-input no-NaN guarantee | Use double offsets/normalization and a uniformly scaled quadratic; preserve the original 1e-12 threshold and tangent rule, write t=0 on misses and use a deterministic +X centre-query extension. Float output range and extreme-ratio precision limits are explicit in §4.4 | Tech lead |
 | 12 | A 1,000-step march can miss grazing crossings and tangencies | Select the 10,000 seeded random cases independently in the resolvable domains documented in §4.4; check prescribed boundary cases directly. Never filter by implementation outcome | Tech lead |
 | 13 | Minimum-only float attributes do not exclude infinity, and `shieldMult*` fields remain on the authoring definition after their runtime ownership moved to SPEC-13. | Require finite values for the five float tunables carrying Min/Range attributes, in addition to their stated ranges; byte priorities fit their storage range inherently. Preserve legacy `shieldMult*` fields/getters without inventing ranges or baking them into PowerTuning; DamageTableBlob remains the multiplier source. | Tech lead — resolved by PWR-003; central mirror pending. |
+
+| 14 | PWR-004 lists 28 base consumers but 15 after adding a shield, requires links on non-consumers despite §5.1, and includes PWR-005-owned Powered writes | Use 29 after the one-shield rebuild, bind only consuming functional entities, and verify two module bindings in the existing spawn test. Powered enable bits remain solely PWR-005 behavior; registration/init never writes them. Keep the five required test methods and exact initial energy values. | Tech lead |
 
 ## 11. References
 
