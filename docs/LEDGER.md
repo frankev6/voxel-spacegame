@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 99 | 9 | 0 | 0 | 72 | 0 | 180 | 8 |
+| M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 6 |
+| M3 | 98 | 10 | 0 | 0 | 72 | 0 | 180 | 7 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -215,7 +215,7 @@
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 9349e78 | Sparse text recorder/replay; five required tests; even-tick 30/60/144 commands match |
 | TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | done | astra (gpt-6) | 2026-10-12 | 1392d35 | Real Boot/flow fixture; four tests; temp saves/settings and unchanged real profile timestamps |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-12 | a56c266 | Full pipeline: 15-frame readiness, idle 0.224481 ms; total memory performance deferred (Q174); zero tuning |
-| FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | c7ac4bc9 integrates worker d440434e: actual profiles/hooks, allegiance, membership, root lookup/despawn and adapter; six required fixtures authored, unrun. Production galaxy registration and single-borrow player handoff still pending; not accepted. |
+| FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | bc25501c | Canonical spawn service installed in composition with real galaxy and single fleet borrow; all six required cases pass across focused runs83915/86452. |
 | FND-020 | Playable stationary-target shooting and physical breakup | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-017, FND-018, FLT-001, DMG-001, WPN-001, VFX-001 | yes | done | astra (gpt-6) | 2026-10-12 | 53e61db | Playable station/Space fire; review fixes: bounded integrity, canonical masks, allocation attribution, stronger image checks; default suites green; perf advisory |
 | FND-021 | Automatic aligned test station in World | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-020, SPEC-63 | yes | done | astra (gpt-6) | 2026-10-13 | c3bb396 | Automatic World station at Y=-2 m; idempotent range request; direct World Play verified; spec-required: 1 (existing feature test extended), extra: 0 |
 | FND-022 | Player allegiance in the current world spawn path | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-010, WPN-001 | yes | done | astra (gpt-6) | 2026-10-13 | ff6a2704 | Canonical player allegiance; real-fire check passes; fresh NPC destroyed168/detached15 cells |
@@ -1064,6 +1064,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — FND-012 accepted / streaming-content batch follow-up — astra (gpt-6)
+
+- FND-012 accepted: c7ac4bc9 service plus bc25501c single-borrow player integration; GameComposition registers actual ShipSpawnService and IShipSpawner against the real galaxy. Five required cases pass in Logs/playtest/world-loader/first-acceptance.xml; repaired UnknownBlueprint passes in Logs/playtest/t2-streaming/first-acceptance.xml. Compile81788 clean. Spec-required: 6, extra: 0. No claim of full-suite green.
+- Focused EditMode13914 terminal failure (Unity exit2),4 passed/7 failed,17.873s test execution excluding startup/shutdown. Compiler copy-back leaves wrappers stale; combat worker repairs delivery. Orbit managed-oracle equality differs below printed precision; economy worker diagnoses/fixes while retaining frame-rate assertions. Evidence Logs/playtest/streaming-content-batch/first-editmode.*.
+- PlayMode92285 terminal failure (Unity exit2),five setup failures: galaxy generation owns direct authored-system references, so replacing catalog entries alone did not redirect them. Fixture now clones the generation definition and remaps its authored references too; source repair pending validation, no production asset changes. Evidence Logs/playtest/t2-streaming/second-acceptance.*. No active Unity. Presentation worker reviews gameplay semantics; next batch after repairs, no repeated unchanged runs. SYS-006 test count remains spec-required: 5, extra: 0.
 
 ### 2026-10-13 — SYS-006 fast fixture reference repair — astra (gpt-6)
 

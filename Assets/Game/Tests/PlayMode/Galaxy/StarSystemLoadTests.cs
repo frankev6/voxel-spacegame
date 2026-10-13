@@ -47,6 +47,7 @@ namespace Game.Tests.PlayMode.Galaxy
             internal readonly ContentService VoxelContent;
             internal readonly ContentCatalog Catalog;
             readonly Game.Data.Definitions.BodyTemplateDefinition testTemplate;
+            readonly Game.Data.Definitions.GalaxyGenerationDefinition testGeneration;
             readonly System.Collections.Generic.List<Game.Data.Definitions.AuthoredStarSystemDefinition> testSystems = new();
             internal BodySpec Station;
             internal Entity Player;
@@ -77,6 +78,19 @@ namespace Game.Tests.PlayMode.Galaxy
                             if (body.template == original) body.template = testTemplate;
                         definitions[definitions.IndexOf(system)] = copy;
                     }
+                    var generation = definitions.OfType<Game.Data.Definitions.GalaxyGenerationDefinition>().Single();
+                    testGeneration = Object.Instantiate(generation);
+                    using var generationFields = new SerializedObject(testGeneration);
+                    var field = generationFields.GetIterator();
+                    while (field.Next(true))
+                        if (field.propertyType == SerializedPropertyType.ObjectReference &&
+                            field.objectReferenceValue is Game.Data.Definitions.AuthoredStarSystemDefinition referenced)
+                        {
+                            var replacement = testSystems.FirstOrDefault(x => x.IdString == referenced.IdString);
+                            if (replacement != null) field.objectReferenceValue = replacement;
+                        }
+                    generationFields.ApplyModifiedPropertiesWithoutUndo();
+                    definitions[definitions.IndexOf(generation)] = testGeneration;
                 }
                 var catalog = ContentCatalog.Build(definitions, report); Assert.IsFalse(report.HasErrors, report.ToText());
                 Catalog = catalog;
@@ -145,6 +159,7 @@ namespace Game.Tests.PlayMode.Galaxy
                 foreach (var record in queue.Blobs) { var blob = record.Blob; if (blob.IsCreated) blob.Dispose(); }
                 queue.Blobs.Dispose(); queue.Meshes.Dispose(); World.Dispose(); shifts.Dispose(); VoxelContent?.Dispose(); if (testTemplate != null) Object.DestroyImmediate(testTemplate);
                 foreach (var system in testSystems) Object.DestroyImmediate(system);
+                if (testGeneration != null) Object.DestroyImmediate(testGeneration);
             }
         }
         [Test] public void Load_CreatesAnchors()
