@@ -1436,6 +1436,8 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 | 11 | Owner: legacy `CHANGE_RESEARCH` has no system in v2 | Converted to the journal fact `research_points` | Owner |
 | 12 | §4.7 names the node factory without declaring its argument and return types | **Resolved (2026-10-13, Tech lead):** stage `object CreateNode(ReadOnlySpan<object> boundArgs)` and `LogicValue Invoke(ILogicContext context, ReadOnlySpan<LogicValue> args)` as `TODO(NAR-003)` throwing stubs. Node construction retains bound expressions, references and literals; runtime invocation uses values. The returned node implements the registry-selected `ICondition`/`IIntExpr`/`IEffect`. These complete missing signatures, without changing an existing API. | Tech lead |
 
+| 13 | NAR-002 precedence example uses bare names, while §4.6 requires variables; internal parser result and failure representation are unspecified | **Resolved (2026-10-13):** follow §4.6: use `not $a and $b or $c` for precedence acceptance. Parser returns internal location-bearing AST nodes and throws the first internal diagnostic with code/line/column; NAR-003 translates it into validation reports. Command signed integers use the Int32 domain, including -2147483648. | Tech lead |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/05-narrative-quests.md` (B3, B8, B10, B13, B14, B17; §5.3–§5.5, §5.12–§5.13), `00-synthesis.md` §6h.
