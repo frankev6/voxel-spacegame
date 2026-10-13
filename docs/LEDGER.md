@@ -988,6 +988,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — WPN-010 live reactor repair and beam proof — astra (gpt-6)
+
+- Pre-repair batch: compile zero CS warnings; full EditMode **1187/0/1**, PlayMode **164/0/53**, session80229 exit0. Soak36000 ticks/600.34s,60 chunks/hulks/rams,0 native leaks. Evidence `Logs/playtest/beam-explosion-audio/`.
+- Normal secondary input fires the Fighter's four existing beams: all clipped at the station, lengths26.4–33.7m versus450m range;22 cells destroyed. Screenshot `beams-firing.png`. Controls/assets unchanged.
+- Live dev blast exposed an already-open NativeStream.Writer copied into CellWriter by ResolveGridJob. **d8e7855f** opens/closes the writer in its final field; existing required Reactor_WritesExplosionRequest now exercises production resolver scheduling. Focused InstanceDamageTests4/4, compile clean. Test count for this repair: spec-required:1 extended, extra:0.
+- Repeated live blast queuedtick840; reactor explosion attributed to station on tick841,18 cells/1 instance destroyed,0 new errors/warnings. `reactor-command-fixed.json`, `reactor-after-fixed.json`, `live-fixed.txt`. Initial failure preserved in `reactor-before-fix.txt`. Runtime fix still needs combined full regression; WPN/AUD batch remains in-progress. Zero tuning passes. Isolated ABL-003 lifecycle/nine tests join the next validation batch.
+
 ### 2026-10-13 — Projectile, power and faction batch verified — astra (gpt-6)
 
 - Closed WPN-008, WPN-018, QST-001 and MIG-012. Session43506 exited0: compile zero CS warnings, full EditMode **1179/0/1**, PlayMode **160/0/53**. Evidence `Logs/playtest/projectile-combat/`. Ten-minute destruction soak passed in600.32s, 36,000 ticks, 60 chunks/hulks/rams and zero native leaks. Required projectile job tests7/7 and grouped faction/quest/migration7/7 also pass.
