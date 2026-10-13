@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **World/travel/encounter content integrated:** TRV-002 and ENC-010 accepted,21 focused checks pass2.64s and clean compile. Three authored systems/body templates validate; GAL-012 runtime acceptance awaits GAL-008/lane logic. ECO-009/FND-012 workers active; combat prepares NAR-016 with explicit dependency wait. No active Unity operation. Next lead: preserved NAR-015 real generation and GAL-007/008.
+
 - **Settings checks accepted:**608141f compile clean, five focused checks pass in1.35s; real pause routes compiled. Production menu/root integration remains open. No Unity process active. Next integrate delivered world/travel/encounter content; ECO-009 dispatched, FND-012 dependency review underway.
 
 - **System generation accepted:** GAL-006e421d5ee generates authored/procedural bodies and gates with deterministic hashes; six focused checks pass in0.193s, compile clean. Live Editor save-scene dialog required closing it; fresh headless run accepted, Editor currently closed. Next state/delta/service integration remains; settings repair and travel configuration deliveries are queued.
