@@ -23,6 +23,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Contrast audit implemented:** UI-012 now evaluates resolved text over ancestor/self backgrounds with WCAG luminance and specified size/weight thresholds; missing theme fails explicitly. SPEC60Q31 mirrored321. CVD utility, UITestPanel and eight required checks remain; no Unity run/acceptance claim. Previous turn implemented geometry (progress).
+
 - **UI audit prerequisite underway:** UI-012 claimedf179de70; lead task/UI-012-layout-audits implements geometry traversal, viewport/panel containment, HUD overlap and intrinsic text-overflow checks. SPEC60Q30 mirrored320 explains scroll-content exclusion/nowrap measurement. Contrast/CVD utilities, real-panel fixtures and required checks remain; no compile/acceptance claim. HUD-002 stays in-progress on its compiled main checkpoint while destination screens develop. No Unity validation this turn. Previous turn unlocked/dispatched HUD-004 (progress).
 
 - **Third worker recycled / UI checkpoint on main:**57ad0950 amends ADR-0072 with SPEC61Q23/ledger319: HUD-004 construction uses completed services, shared production hookup/layout acceptance remain mandatory. Claimed93cfef3d, dispatched existing presentation worker. NAR-013/020 continue. Compiled HUD-002 checkpoint is merged locally but in-progress and not boot-installed; real editor/secondary-screen bindings remain. No Unity runs this turn. Previous turn implemented/compiled persistent composition (progress).

@@ -940,6 +940,8 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 
 | 30 | Layout audit scroll-content exclusion and nowrap measurement | Resolved: skip the ScrollView content container itself as well as its descendants, retaining viewport/chrome checks; its intentional oversized bounds must not fail scrolling controls. Measure nowrap text with Undefined width to recover intrinsic width; AtMost would clamp and hide the required overflow fixture. Results are cleared per Run. Wrapping text retains AtMost width and Undefined height; named panel descendants are checked against every containing panel. | Tech lead | UI-012 implementation default; acceptance pending |
 
+| 31 | Contrast audit missing theme and transparent text/background treatment | Resolved: require the actual resolved opaque --color-bg token; missing theme is an error instead of a guessed colour. Composite ancestors outermost first and the text element's own background, then alpha-composite foreground before WCAG luminance calculation. Skip display:none/zero-opacity subtrees; visibility:hidden skips that text but permits explicitly visible children. Clear results on each Run. Uses the updated WCAG sRGB 0.04045 breakpoint. | Tech lead | UI-012 implementation default; acceptance pending |
+
 ## 11. References
 
 - Audit `06-ui-shipeditor.md` §1.2–1.3 (old navigation), §2 B1–B12 and D/E bugs, §5.2 (target UI architecture); `04-persistence-data.md` B16–B18; `LEDGER.md` R4, R7, R11, R12, R13, R17, R31; screenshots `02-newgame.png`, `04-after-intro.png`, `07-ark-dialog.png`, `09-trade.png`, `22-inventory.png`, `23-fleet.png`.
