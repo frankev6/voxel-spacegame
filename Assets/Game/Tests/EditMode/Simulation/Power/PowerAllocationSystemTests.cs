@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Game.Core.Components;
-using Game.Data;
+using Game.Data.Components;
 using Game.Data.Blocks;
 using Game.Simulation.Abilities;
 using Game.Simulation.Power;

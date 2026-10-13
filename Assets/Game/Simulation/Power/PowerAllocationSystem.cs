@@ -1,6 +1,6 @@
 using Game.Core.Components;
 using Game.Core.Systems;
-using Game.Data;
+using Game.Data.Components;
 using Game.Data.Blocks;
 using Unity.Profiling;
 using Game.Simulation.Abilities;
