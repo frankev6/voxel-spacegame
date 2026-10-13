@@ -928,6 +928,17 @@ If no save exists, "Load last save" is disabled.
   - [x] Actual gameplay screenshots before/after firing and breakup are inspected and shown to Frank; sustained-fire frame measurements and limitations are recorded, with at most two initial tuning passes.
 - **Tests:** `FiringRangeTests.RealFire_DamagesStationaryTarget`, `.Shots_PassThroughHole`, `.SeveredSection_BecomesMovingBody`, `.Restart_ClearsCombatState` (PlayMode); compile and full EditMode/PlayMode suites; live input/capture and sustained-fire measurements. External-review requirements: `IntegrityReviewTests.OverCap_DefersDeterministicallyAndRetainsSeed`, `.StationBreakaway_MasksMatchPreviousSlotScan` (EditMode); strengthen the existing ship image regression with foreground/regional checks, profile sustained-fire allocation call stacks, and preserve green default suites with warning-only timing targets.
 
+### FND-021 — Automatic aligned test station in World
+- **Milestone:** M2
+- **Tier:** standard — owner-requested range placement and scene-ready hook
+- **Depends on:** `FND-020`, `VFX-015`
+- **Do:** Lower the production test station by 2 m so its three-cell floor crosses the firing plane. Enable automatic spawning on World entry after the player spawn completes, using the existing range service and a reversible content setting. Repeated range requests return the existing target; scene exit releases the source normally.
+- **Files:** `Assets/Game/App/Session/FiringRangeService.cs`, `Assets/Game/App/Boot/GameComposition.cs`, `Assets/Game/Data/Definitions/Config/FiringRangeConfigDefinition.cs`, `Assets/Game/Content/Config/config_firing_range.asset`, `Assets/Game/Tests/PlayMode/App/FiringRangeTests.cs`
+- **Acceptance criteria:**
+  - [ ] World entry with a player automatically produces one lowered test station, including direct World Play and new-game restarts.
+  - [ ] The range command does not duplicate that station; actual Space fire still damages it.
+- **Tests:** Extend `FiringRangeTests.RealFire_DamagesStationaryTarget` to verify automatic target, lowered position and idempotent range request; use existing restart coverage.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
