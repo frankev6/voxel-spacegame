@@ -4,6 +4,7 @@ using Game.Core.Events;
 using Game.Core.Systems;
 using Game.Data.Components;
 using Game.Galaxy.Components;
+using Game.Galaxy.Data;
 using Game.Simulation.Commands;
 using Unity.Burst;
 using Unity.Collections;
@@ -51,6 +52,8 @@ namespace Game.Galaxy.Systems
         {
             origins.Update(ref state); requests.Update(ref state); records.Update(ref state);
             positions.Update(ref state); readPositions.Update(ref state); interpolation.Update(ref state);
+            // Capture the preceding physics step before a same-system rebase can overwrite its pose.
+            state.Dependency = new CapturePositionJob { Origin = origin, Origins = origins, Requests = requests }.ScheduleParallel(state.Dependency);
             var decision = new NativeReference<RebaseDecision>(state.WorldUpdateAllocator);
             var players = playerQuery.ToComponentDataListAsync<LocalTransform>(state.WorldUpdateAllocator, state.Dependency, out var gather);
             var queue = SystemAPI.GetSingleton<ManagedEventQueue<OriginShifted>>().Queue.AsParallelWriter();
@@ -70,6 +73,20 @@ namespace Game.Galaxy.Systems
             public float3 Delta;
             public byte Rebase, Changed, PlacePlayer;
             public PlayerPlacement Placement;
+        }
+        [BurstCompile, WithNone(typeof(Parent), typeof(UniversePositionIsAnalytic))] partial struct CapturePositionJob : IJobEntity
+        {
+            public Entity Origin;
+            [ReadOnly] public ComponentLookup<FrameOrigin> Origins;
+            [ReadOnly] public ComponentLookup<OriginRebaseRequest> Requests;
+            void Execute(ref UniversePosition position, in LocalTransform transform)
+            {
+                var frame = Origins[Origin]; var request = Requests[Origin];
+                // On star-system entry, newly authored universe positions already belong to the destination.
+                if (Requests.IsComponentEnabled(Origin) && request.Serial > frame.AppliedRequestSerial &&
+                    !request.StarSystem.Equals(frame.StarSystem)) return;
+                position.Value = frame.OriginInStarSystem + (double3)transform.Position;
+            }
         }
         [BurstCompile] struct DecideJob : IJob
         {
@@ -93,7 +110,7 @@ namespace Game.Galaxy.Systems
                     frame.StarSystem = request.StarSystem; frame.AppliedRequestSerial = request.Serial;
                     Requests.SetComponentEnabled(Origin, false);
                 }
-                else if (Players.Length > 0 && math.lengthsq(Players[0].Position) > 2000f * 2000f)
+                else if (Players.Length > 0 && math.lengthsq(Players[0].Position) > GalaxyConstants.OriginRebaseThresholdM * GalaxyConstants.OriginRebaseThresholdM)
                 {
                     result.Rebase = 1; result.NewOrigin += (double3)Players[0].Position;
                     result.Delta = (float3)(frame.OriginInStarSystem - result.NewOrigin);

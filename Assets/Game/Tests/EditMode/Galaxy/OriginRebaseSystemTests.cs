@@ -58,7 +58,7 @@ namespace Game.Tests.EditMode.Galaxy
         void Step() { world.StepFrame(EcsTestWorld.TickSeconds); Em.CompleteAllTrackedJobs(); }
         [Test] public void Threshold_Rebases()
         {
-            var player = Root(new float3(2001, 0, 0), true, true);
+            var player = Root(new float3(2000, 0, 0), true, true);
             Em.AddComponent<PendingRebaseWrite>(player);
             Assert.DoesNotThrow(Step, "Origin gather must depend on the pending transform writer without main-thread synchronization.");
             Assert.AreEqual(float3.zero, Em.GetComponentData<LocalTransform>(player).Position);
@@ -153,6 +153,6 @@ namespace Game.Tests.EditMode.Galaxy
     {
         public void OnUpdate(ref SystemState state) => state.Dependency = new WriteJob().ScheduleParallel(state.Dependency);
         [BurstCompile, WithAll(typeof(PendingRebaseWrite))] partial struct WriteJob : IJobEntity
-        { void Execute(ref LocalTransform transform) { transform.Position += new float3(0, 0, 0); } }
+        { void Execute(ref LocalTransform transform) { transform.Position += new float3(1, 0, 0); } }
     }
 }
