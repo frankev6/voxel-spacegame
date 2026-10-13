@@ -37,7 +37,7 @@ namespace Game.Editor.Migration.Converters
             Add("block_capacitor_small", BlockKind.Functional, 100, 35, BlockCategory.Power, Box(2, 2, 1), null,
                 "shipVoxels/capacitor_2x1_base_1x1_hull.002", () => new BlockModule[] { new PowerStorageModule { Params = new PowerStorageParams { Storage = 40 } } });
             Add("block_shield_small", BlockKind.Functional, 100, 40, BlockCategory.Shield, Box(1, 1, 1), null,
-                "hulls/base_1x1_hull_base_1x1_hull", () => new BlockModule[] { new ShieldEmitterModule { Params = new ShieldEmitterParams { Capacity = 300, RegenPerSecond = 15, RechargeDelaySeconds = 3, PowerDraw = 10 } } });
+                "hulls/base_1x1_hull_base_1x1_hull", () => new BlockModule[] { new ShieldEmitterModule { Params = new ShieldEmitterParams { Capacity = 3000, RegenPerSecond = 120, RechargeDelaySeconds = 4, PowerDraw = 8 } } });
             Add("block_thruster_small", BlockKind.Functional, 100, 30, BlockCategory.Propulsion, Box(1, 1, 2), Exhaust(1, 2, 4),
                 "shipVoxels/thruster1x2_Cube.004", () => Thruster(20000), true);
             Add("block_thruster_medium", BlockKind.Functional, 100, 30, BlockCategory.Propulsion,

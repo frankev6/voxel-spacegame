@@ -1,6 +1,8 @@
+using Game.Data.Validation;
+
 namespace Game.Data.Definitions
 {
-    /// <summary>SPEC-50 §4.1 contract; ECO-002 owns content validation.</summary>
+    /// <summary>SPEC-50 §4.1: exact authored defaults and ECO-E005 field validation.</summary>
     [ContentIdPrefix("config_")]
     public sealed class EconomyConfigDefinition : ContentDefinition
     {
@@ -35,7 +37,20 @@ namespace Game.Data.Definitions
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
             base.Validate(scope, context);
-            throw new System.NotImplementedException("ECO-002");
+            if (baseCargoSlots < 1 || baseCargoSlots > 200) scope.Error("ECO-E005", nameof(baseCargoSlots), "Base cargo slots must be within [1, 200].");
+            EconomyDefinitionValidation.FloatRange(scope, "ECO-E005", nameof(unitsPerSlot), unitsPerSlot, 0f, float.MaxValue, true);
+            if (startCredits < 0) scope.Error("ECO-E005", nameof(startCredits), "Starting credits must be nonnegative.");
+            EconomyDefinitionValidation.LootEntries(startItems, scope, nameof(startItems), "ECO-E005");
+            EconomyDefinitionValidation.FloatRange(scope, "ECO-E005", nameof(relationPriceSlope), relationPriceSlope, 0f, float.MaxValue);
+            EconomyDefinitionValidation.FloatRange(scope, "ECO-E005", nameof(salvageFunctionalChance), salvageFunctionalChance, 0f, 1f);
+            EconomyDefinitionValidation.FloatRange(scope, "ECO-E005", nameof(salvageStructuralChance), salvageStructuralChance, 0f, 1f);
+            EconomyDefinitionValidation.FloatRange(scope, "ECO-E005", nameof(scrapPerCell), scrapPerCell, 0f, float.MaxValue);
+            EconomyDefinitionValidation.Positive(scope, nameof(salvageMaxStructuralItems), salvageMaxStructuralItems);
+            EconomyDefinitionValidation.Positive(scope, nameof(salvageMaxScrap), salvageMaxScrap);
+            EconomyDefinitionValidation.Positive(scope, nameof(maxSalvageCells), maxSalvageCells);
+            EconomyDefinitionValidation.FloatRange(scope, "ECO-E005", nameof(salvageDistanceM), salvageDistanceM, 0f, float.MaxValue, true);
+            if (scrapItem == null) scope.Error("ECO-E005", nameof(scrapItem), "Scrap item is not set; canonical resource_scrap is authored by ECO-009.");
+            if (salvageCue == null) scope.Error("ECO-E005", nameof(salvageCue), "Salvage cue is not set.");
         }
     }
 }

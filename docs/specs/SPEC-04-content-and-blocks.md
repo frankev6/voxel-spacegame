@@ -692,7 +692,7 @@ SPEC-72 writes exactly these values (MIG-006). Footprints and clearance are bloc
 | `block_core_small` | Functional | Cube | 1 | — | All | All | 300 | 300 | 60 | Core: Core (MaxCells 4000, MaxExtent 100), PowerSource (gen 40), PowerStorage (200) | shipVoxels : `hull_1x1_Cube.008` |
 | `block_core_cross` | Functional | Cube | 7: (0,0,0),(0,1,0),(0,2,0),(1,1,0),(−1,1,0),(0,1,1),(0,1,−1) | — | All | All | 500 | 3500 | 60 | Core: Core (MaxCells 8000, MaxExtent 150), PowerSource (gen 40), PowerStorage (200) | hulls : `cross_3x3_hull_cross_3x3_hull` |
 | `block_capacitor_small` | Functional | Cube | box 2×2×1 | — | All | All | 100 | 400 | 35 | Power: PowerStorage (40) | shipVoxels : `capacitor_2x1_base_1x1_hull.002` |
-| `block_shield_small` | Functional | Cube | 1 | — | All | All | 100 | 100 | 40 | Shield: ShieldEmitter (capacity 300, regen 15, delay 3, draw 10) | hulls : `base_1x1_hull_base_1x1_hull` |
+| `block_shield_small` | Functional | Cube | 1 | — | All | All | 100 | 100 | 40 | Shield: ShieldEmitter (capacity 3000, regen 120, delay 4, draw 8) | hulls : `base_1x1_hull_base_1x1_hull` |
 | `block_thruster_small` | Functional | Cube | box 1×1×2 | (0,0,2),(0,0,3),(0,0,4) | HF | −PosZ | 100 | 200 | 30 | Propulsion: Thruster (20000 N, draw 0) | shipVoxels : `thruster1x2_Cube.004` |
 | `block_thruster_medium` | Functional | Cube | 10: (0,0,0),(1,0,0),(2,0,0),(1,1,0),(1,−1,0) and the same at z=1 | — | HF | −PosZ | 100 | 1000 | 30 | Propulsion: Thruster (40000 N, draw 0) | shipVoxels : `thruster3x3x2.001_Cube.007` |
 | `block_thruster_large` | Functional | Cube | box 2×1×2 | (0..1,0,2..4) (6 cells) | HF | −PosZ | 100 | 400 | 30 | Propulsion: Thruster (40000 N, draw 0) | hulls : `base_2x2_thruster_base_2x2_thruster` |

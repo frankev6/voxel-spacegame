@@ -33,6 +33,7 @@ namespace Game.Simulation.Power
         {
             Entity root = functional.Grid;
             if (!Powers.HasComponent(root)) return true;
+            if (Inhibits.HasComponent(entity) && Tick < Inhibits[entity].UntilTick) return false;
             var power = Powers[root];
             if ((power.Flags & ShipPowerFlags.Dead) != 0 || (power.Flags & ShipPowerFlags.Initialized) == 0) return false;
             if (link.ConsumerCount == 0)
@@ -41,8 +42,7 @@ namespace Game.Simulation.Power
                 var instances = Instances[root];
                 if ((uint)functional.InstanceIndex >= (uint)instances.Length) return false;
                 var instance = instances[functional.InstanceIndex];
-                return instance.Block != 0 && (instance.Flags & BlockInstanceFlags.Destroyed) == 0 &&
-                    (!Inhibits.HasComponent(entity) || Tick >= Inhibits[entity].UntilTick);
+                return instance.Block != 0 && (instance.Flags & BlockInstanceFlags.Destroyed) == 0;
             }
             if (!Requests.HasBuffer(entity) || !Consumers.HasBuffer(root)) return false;
             var requests = Requests[entity]; var consumers = Consumers[root];

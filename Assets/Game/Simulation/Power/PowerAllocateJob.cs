@@ -60,6 +60,7 @@ namespace Game.Simulation.Power
             var instances = Instances[root];
             if ((uint)consumer.InstanceIndex >= (uint)instances.Length) return false;
             var instance = instances[consumer.InstanceIndex];
+            // StatusSystem owns the deadline; an active inhibit removes this consumer from both demand and grants.
             return instance.Block != 0 && (instance.Flags & BlockInstanceFlags.Destroyed) == 0 &&
                 (!Inhibits.HasComponent(consumer.Functional) || Tick >= Inhibits[consumer.Functional].UntilTick);
         }
