@@ -13,9 +13,14 @@ namespace Game.Data.Logic.Nodes
         public EffectFlow Flow => EffectFlow.Immediate;
         public void Validate(ValidationReport report) => arguments.Validate(report);
         public void Bind(LogicBinder binder) => arguments.Bind("remove_body", binder);
-        // TODO(NAR-005): implement effect execution, preflight and summed requirements.
-        public void Apply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public bool CanApply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public void AddRequirements(EffectRequirements requirements) => throw new NotImplementedException("NAR-005");
+        public void Apply(ILogicContext context)
+        {
+            if (!CanApply(context))
+            { Game.Core.GameLog.ErrorOnce("NAR.Effect.BodyScope.remove_body", "Narrative", "remove_body requires a body scope; effect skipped."); return; }
+            if (!arguments.CanRoute("remove_body")) return;
+            context.World.RemoveBody(context.Scope);
+        }
+        public bool CanApply(ILogicContext context) => context.Scope.HasBody;
+        public void AddRequirements(EffectRequirements requirements) { }
     }
 }

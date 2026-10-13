@@ -8,14 +8,24 @@ namespace Game.Data.Logic.Nodes
     public sealed class GiveLootEffect : IEffect
     {
         [SerializeField] private EffectArguments arguments = new EffectArguments();
+        [NonSerialized] int sysBeatsCompletedSlot = -1;
         public GiveLootEffect() { }
         internal GiveLootEffect(ReadOnlySpan<object> arguments) { this.arguments = new EffectArguments(arguments); }
         public EffectFlow Flow => EffectFlow.Immediate;
         public void Validate(ValidationReport report) => arguments.Validate(report);
-        public void Bind(LogicBinder binder) => arguments.Bind("give_loot", binder);
-        // TODO(NAR-005): implement effect execution, preflight and summed requirements.
-        public void Apply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public bool CanApply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public void AddRequirements(EffectRequirements requirements) => throw new NotImplementedException("NAR-005");
+        public void Bind(LogicBinder binder)
+        {
+            arguments.Bind("give_loot", binder);
+            sysBeatsCompletedSlot = binder.BindFact("sys_beats_completed");
+        }
+        public void Apply(ILogicContext context)
+        {
+            if (!arguments.CanRoute("give_loot") || sysBeatsCompletedSlot < 0) return;
+            ulong scope = ((ulong)(uint)context.Scope.BeatIndex << 32) | (uint)context.Scope.QuestIndex;
+            ulong salt = Game.Core.StableHash.Combine(scope, (ulong)(uint)context.Facts.GetBySlot(sysBeatsCompletedSlot));
+            context.Economy.GiveLoot(arguments.Indices[0], arguments.Integers[1].Evaluate(context), salt);
+        }
+        public bool CanApply(ILogicContext context) => true;
+        public void AddRequirements(EffectRequirements requirements) { }
     }
 }
