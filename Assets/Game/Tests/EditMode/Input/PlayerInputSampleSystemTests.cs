@@ -85,9 +85,9 @@ namespace Game.Tests.EditMode.Input
             Frame(Key.E, Key.D, Key.LeftShift); Assert.AreEqual(new float2(1, 0), Command.Thrust); Assert.AreEqual(0, Command.Turn);
             Frame(Key.D); Assert.AreEqual(float2.zero, Command.Thrust); Assert.AreEqual(1, Command.Turn);
             // Existing user overrides remain valid, but Shift strafe never accidentally boosts.
-            input.Controls.Flight.Boost.ApplyBindingOverride("<Keyboard>/leftShift");
+            input.Controls.Flight.Boost.ApplyBindingOverride(0, "<Keyboard>/leftShift");
             Frame(Key.LeftShift, Key.D); Assert.AreEqual(ShipCommandFlags.None, Command.Flags); Assert.AreEqual(0, Command.Turn);
-            input.Controls.Flight.Get().FindAction("StrafeModifier").ApplyBindingOverride("<Keyboard>/leftAlt");
+            input.Controls.Flight.Get().FindAction("StrafeModifier").ApplyBindingOverride(0, "<Keyboard>/leftAlt");
             Frame(Key.LeftAlt, Key.A); Assert.AreEqual(new float2(-1, 0), Command.Thrust); Assert.AreEqual(0, Command.Turn);
             input.SetContext(InputContext.Menu); Frame(Key.W); Assert.AreEqual(float2.zero, Command.Thrust); Assert.AreEqual(0, Command.Turn);
         }

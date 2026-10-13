@@ -57,7 +57,7 @@ namespace Game.Tests.EditMode.Input
         string PadDisplay(InputAction action)
         {
             for (int i = 0; i < action.bindings.Count; i++)
-                if (!action.bindings[i].isPartOfComposite && action.bindings[i].groups.Split(InputBinding.Separator).Contains("Gamepad"))
+                if (!action.bindings[i].isPartOfComposite && (action.bindings[i].groups ?? "").Split(InputBinding.Separator).Contains("Gamepad"))
                     return action.GetBindingDisplayString(i, InputBinding.DisplayStringOptions.DontIncludeInteractions);
             Assert.Fail(action.name + " has no Gamepad binding"); return null;
         }
@@ -69,7 +69,7 @@ namespace Game.Tests.EditMode.Input
             foreach (var map in new[] { input.Controls.Flight.Get(), input.Controls.Menu.Get(), input.Controls.Dialog.Get() })
                 foreach (var action in map.actions)
                 {
-                    Assert.IsTrue(action.bindings.Any(b => !b.isComposite && b.groups.Split(InputBinding.Separator).Contains("Gamepad")), map.name + "/" + action.name);
+                    Assert.IsTrue(action.bindings.Any(b => !b.isComposite && (b.groups ?? "").Split(InputBinding.Separator).Contains("Gamepad")), map.name + "/" + action.name);
                     Assert.IsTrue(action.controls.Any(c => c.device == pad), map.name + "/" + action.name + " must resolve to the device");
                     Assert.IsNotEmpty(PadDisplay(action));
                 }
