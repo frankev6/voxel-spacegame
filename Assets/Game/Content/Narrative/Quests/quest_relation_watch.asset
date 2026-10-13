@@ -1,0 +1,232 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78d862c52844416aa80f51a945d09ec8, type: 3}
+  m_Name: quest_relation_watch
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.QuestDefinition
+  id: quest_relation_watch
+  formerIds: []
+  title: Territory Relations Watch
+  shortDescription: Record a faction-border entry and submit a report at ARK.
+  description: Command wants real-time telemetry from faction borders. Confirm entry, then file a structured report at ARK operations.
+  kind: 1
+  autoTrack: 1
+  stages:
+  - id: main
+    title: Territory Relations Watch
+    objectives:
+    - id: territory_seen
+      text: 'Cross a Faction Border
+
+        Enter a faction-controlled territory.'
+      doneWhen:
+        source: (since_accept("sys_territories_entered") >= 1) or $relation_watch_territory_seen
+        sourceHash: 16982198319404261361
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: 6548929065634496636
+      progress:
+        source: 
+        sourceHash: 3244421341483603138
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: -2
+      target: 0
+      latch: 1
+      optional: 0
+      marker:
+        starSystem: {fileID: 11400000, guid: a93d1205a81b5ca3be814bc3473818ac, type: 2}
+        bodyTag: ark_station
+        label: Report to ARK
+    - id: submit_report
+      text: 'Submit Territory Report
+
+        Submit your report at ARK station.'
+      doneWhen:
+        source: ($relation_watch_report_submitted) or $relation_watch_submit_report
+        sourceHash: 5947775899408626691
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: 6548929065634496637
+      progress:
+        source: 
+        sourceHash: 3244421341483603138
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: -2
+      target: 0
+      latch: 1
+      optional: 0
+      marker:
+        starSystem: {fileID: 0}
+        bodyTag: 
+        label: 
+    onComplete:
+      source:
+      - quest_log quest_relation_watch legacy_3
+      - adjust_relation owner 5
+      sourceHash: 1044304102743106163
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929065634496638
+      - rid: 6548929065634496639
+  failWhen:
+    source: 
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: -2
+  onAccepted:
+    source:
+    - quest_log quest_relation_watch legacy_2
+    sourceHash: 6850433745983851809
+    compilerVersion: 1
+    hasErrors: 0
+    effects:
+    - rid: 6548929065634496640
+  onCompleted:
+    source: []
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
+    hasErrors: 0
+    effects: []
+  onFailed:
+    source:
+    - quest_log quest_relation_watch legacy_4
+    sourceHash: 7348977240752763142
+    compilerVersion: 1
+    hasErrors: 0
+    effects:
+    - rid: 6548929065634496641
+  logEntries:
+  - id: legacy_1
+    text: Entered allied territory and received patrol assignment.
+  - id: legacy_2
+    text: Territory entry confirmed. Submit the report at ARK.
+  - id: legacy_3
+    text: Territory report filed and validated.
+  - id: legacy_4
+    text: Territory report workflow failed.
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6548929065634496636
+      type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 6548929065634496642
+        right:
+          rid: 6548929065634496643
+    - rid: 6548929065634496637
+      type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 6548929065634496644
+        right:
+          rid: 6548929065634496645
+    - rid: 6548929065634496638
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_relation_watch
+          - legacy_3
+    - rid: 6548929065634496639
+      type: {class: AdjustRelationEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929065634496646
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - owner
+          - 
+    - rid: 6548929065634496640
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_relation_watch
+          - legacy_2
+    - rid: 6548929065634496641
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_relation_watch
+          - legacy_4
+    - rid: 6548929065634496642
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 6548929065634496647
+        right:
+          rid: 6548929065634496648
+    - rid: 6548929065634496643
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: relation_watch_territory_seen
+    - rid: 6548929065634496644
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: relation_watch_report_submitted
+    - rid: 6548929065634496645
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: relation_watch_submit_report
+    - rid: 6548929065634496646
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 5
+    - rid: 6548929065634496647
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: since_accept
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - sys_territories_entered
+    - rid: 6548929065634496648
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1

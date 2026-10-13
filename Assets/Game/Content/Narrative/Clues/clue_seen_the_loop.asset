@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d07ab84a062445b79a70b6579a383198, type: 3}
+  m_Name: clue_seen_the_loop
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ClueDefinition
+  id: clue_seen_the_loop
+  formerIds: []
+  title: Seen the Loop
+  body: The sentinel showed you a ship being frozen in place. It was yours.
+  mystery: {fileID: 11400000, guid: de61eeaf41ecc47eb975f35d8b485c64, type: 2}
+  links: []

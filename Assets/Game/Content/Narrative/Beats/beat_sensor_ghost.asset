@@ -21,11 +21,11 @@ MonoBehaviour:
     hailEncounter: {fileID: 0}
   condition:
     source: $sys_star_systems_entered >= 4
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 6014784686856252323
+    compilerVersion: 1
     hasErrors: 0
     root:
-      rid: -2
+      rid: 6548929065634496532
   salience: 5
   weight: 1
   repeat: 0
@@ -33,19 +33,33 @@ MonoBehaviour:
   yarnNode: sensor_ghost_start
   onStart:
     source: []
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
     hasErrors: 0
     effects: []
   onComplete:
     source: []
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
     hasErrors: 0
     effects: []
   debug: 0
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 6548929065634496532
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 6548929065634496533
+        right:
+          rid: 6548929065634496534
+    - rid: 6548929065634496533
+      type: {class: FactIntRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: sys_star_systems_entered
+    - rid: 6548929065634496534
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 4

@@ -17,11 +17,11 @@ namespace Game.Data.Definitions
         public MysteryDefinition Mystery => mystery;
         public System.Collections.Generic.IReadOnlyList<ClueDefinition> Links => links;
 
-        // TODO(QST-002): implement field validation and the specified logic usages.
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
             base.Validate(scope, context);
-            throw new System.NotImplementedException("QST-002");
+            QuestDefinitionValidation.Reference(mystery, "mystery", scope, context);
+            if (links != null) for (int i = 0; i < links.Count; i++) QuestDefinitionValidation.Reference(links[i], "links[" + i + "]", scope, context);
         }
     }
 }

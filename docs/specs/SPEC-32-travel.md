@@ -899,7 +899,7 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 ### TRV-003 — Lane access: gated lanes, fuel, revision
 - **Milestone:** M3
 - **Tier:** standard — algorithm and condition wiring given step by step in §5.1
-- **Depends on:** `TRV-002`, `SPEC-30`, `SPEC-40`
+- **Depends on:** `TRV-002`, `GAL-008`, `NAR-003`, `NAR-004`, `NAR-006`, `NAR-020`
 - **Do:**
   1. Implement `FuelMath.Cost` and `LaneAccessTable`.
   2. Implement the `ILaneAccess` members, `Revision` and `EnsureLaneState` of `TravelService` (§5.1). The other members stay as stubs until TRV-006.
@@ -1123,6 +1123,8 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 | 14 | Degenerate pure-solver inputs do not specify cruise direction when source equals target, facing at the search centre, or angular search at radius zero | Use +X for a zero-length planar direction, including the cruise direction and coincident facing. A zero-radius search ring contains only the unadjusted point: skip angular steps and retain its obstruction result. Normal validated gameplay geometry follows §5.4/5.10 unchanged. | Tech lead — resolved; ledger Q345 |
 
 | 15 | Route planner waits for whole SPEC-30 including optional performance and later M4 work | Resolved: completed TRV-001 contracts, GAL-005 indexed lane graph and GAL-007 known/visited state are the direct prerequisites for the pure routing job. All specified geometry, tie-breaks, visibility/lock checks and scratch ownership remain required. TravelService lane-state population remains TRV-003/006. | Tech lead — ledger Q346 |
+
+| 16 | Lane access waits for whole galaxy/narrative milestones while galaxy_main compilation already requires TRV-003 | Resolved: completed TRV-002, GAL-008 and NAR-003/004/006/020 provide config, live generation, compiler/binder and watchers. Implement the existing TravelService constructor/config and disposal only as needed to own lane state; retain explicit TRV-006 stubs for travel execution. Full lane-access acceptance remains; missing runtime ILogicContext follows the specified closed-and-rebuild behavior. | Tech lead — ledger Q349 |
 
 ## 11. References
 

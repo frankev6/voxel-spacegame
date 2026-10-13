@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 103 | 13 | 0 | 0 | 64 | 0 | 180 | 9 |
+| M3 | 101 | 13 | 0 | 0 | 66 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -348,9 +348,9 @@
 | SYS-014 | World gates: streaming performance and soak | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-007, SYS-013, TST-001 | no | todo |  |  |  |  |
 | TRV-001 | Public contract types | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, FLT-001, NAR-001, AUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a68c988 | Canonical travel contracts and staged watcher API; 2 required tests; runtime travel remains later tasks |
 | TRV-002 | Travel config definition and validator | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-04, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 5a436d86 | 19 required checks pass; real shipped travel content zero errors, GAL-012 gates32m satisfy geometry |
-| TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, SPEC-30, SPEC-40 | no | todo |  |  |  |  |
+| TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, GAL-008, NAR-003, NAR-004, NAR-006, NAR-020 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  |  |
 | TRV-004 | Route planner | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-005, GAL-007 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  |  |
-| TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-002, GAL-008 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  |  |
+| TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-002, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 6f940373 | Analytic jump/cruise arrival; five required functional checks pass; Perf_512Bodies authored, measurement deferred |
 | TRV-006 | TravelService jump timeline | [SPEC-32](specs/SPEC-32-travel.md) | M3 | frontier | TRV-003, TRV-005, TRV-007, SPEC-31, SPEC-30, FND-001 | no | todo |  |  |  |  |
 | TRV-007 | PlayerControlLock consumption | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 75ba22b | Movement/action lock consumption without press replay; 4 required tests. TRV-006 owns lifecycle. Full 1027 EM / 145 PM passed. |
 | TRV-008 | Gate interaction, gate info and notices | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006 | no | todo |  |  |  |  |
@@ -419,7 +419,7 @@
 | ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | yes | todo |  |  |  |  |
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, SPEC-13, SPEC-31, SPEC-12 | no | todo |  |  |  |  |
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
-| ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | partial in ECO-002: canonical resource_scrap generation prepared / execution and remaining narrative, loot and merchant content pending |
+| ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c0f0c244 | 17 assets plus existing Scrap; real catalog/readback zero errors; two required checks pass; three existing quest-item warnings retained |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
 | EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 9c627fd | Editor contracts/config; 4 required tests; runtime tools remain EDT-002 onward |
 | EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | todo |  |  |  |  |
@@ -925,6 +925,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 345 | SPEC-32 Q14: degenerate arrival geometry | Resolved: zero planar direction uses +X. Zero-radius search retains the initial point and obstruction result without angular division; normal validated geometry is unchanged. | Tech lead |
 | 346 | SPEC-32 Q15: route planner sequencing | Resolved: completed TRV-001, GAL-005 and GAL-007 directly supply routing contracts, indexed graph and visibility state. Keep full pure-job acceptance; TravelService wiring remains TRV-003/006. | Tech lead |
 | 347 | SPEC-40 Q25: failed-stage selection | Resolved: quest_stage is -1 unless Active. Record whisper_chain_chapter at acceptance and stage transitions; failure beats read that saved authored fact, preserving chapter-specific actions without changing the query contract. | Tech lead |
+| 348 | SPEC-42 Q10: definition/provider boundaries | Resolved: local definitions validate structure, references and graph freshness; editor providers implement all twelve rules with actual tag/node/command data. Compile and bind every owned field; preserve dialog-owner failures. Empty failWhen/resolvedWhen remain guarded by runtime services. | Tech lead |
+| 349 | SPEC-32 Q16: lane access sequencing | Resolved: use completed TRV-002, GAL-008, NAR-003/004/006/020. Own lane-state construction/disposal while retaining TRV-006 execution stubs; full specified context absence/rebuild and watcher behavior remains required. | Tech lead |
 | 334 | SPEC-33 Q24: legacy first formation conflicts with final encounter table | Resolved: retain/report original formation and explicit replacement diagnostics; authored ENC-010 composition table governs final fleets, real assets required. | Tech lead |
 | 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
 
@@ -1051,6 +1053,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — ECO-009 / TRV-005 done; quest content generated — astra (gpt-6)
+
+- Clean compile62184, zero CS warnings. Generation1415 terminal exit1: economy readback passes with zero errors/three existing tradeability warnings; narrative assets generatedbd158825, but whole-content compilation reports TRV-003 galaxy_main owner stub. Evidence Logs/playtest/narrative-content-batch/ and Logs/playtest/eco009/.
+- Focused EditMode49682 terminal exit1: 36 passed, one QST Usage_Enforced assertion failed (indexed diagnostic matcher; production correctly rejects dialog-only complete_beat). Reported test execution11.498s; startup/shutdown add wall time. Worker repairs the existing matcher; only changed case needs rerun.
+- ECO-009c0f0c244 done: spec-required: 2, extra: 0. TRV-0056f940373 done: spec-required: 5 functional + 1 opt-in perf authored/unrun, extra: 0. NAR-016 four cases pass, remains open for final compiler/stability evidence. QST-00224 of25 pass plus existing stale-owner check; remains open.
+- Q348 records definition rules; Q349 unlocks actual lane-access implementation. Temporary generation scripts removed after terminal exit. No active Unity. NAR-005 checkpoint preserveda381d1dd on its branch; previous turn cost aggregation was progress.
 
 ### 2026-10-13 — NAR-016 failed chapter fix / NAR-005 cost aggregation — astra (gpt-6)
 

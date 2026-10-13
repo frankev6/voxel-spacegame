@@ -1,0 +1,9 @@
+title: hostile_blackbox_turn_in_blackbox_at_ark_start
+tags: 
+---
+Turn in hostile telemetry blackbox #line:hostile_blackbox_turn_in_blackbox_at_ark_start_00
+-> Leave #leave #line:hostile_blackbox_turn_in_blackbox_at_ark_start_leave
+    <<abort_beat>>
+    <<stop>>
+===
+

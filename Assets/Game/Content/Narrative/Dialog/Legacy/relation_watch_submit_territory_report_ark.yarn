@@ -1,0 +1,9 @@
+title: relation_watch_submit_territory_report_ark_start
+tags: 
+---
+Submit territory intel report #line:relation_watch_submit_territory_report_ark_start_00
+-> Leave #leave #line:relation_watch_submit_territory_report_ark_start_leave
+    <<abort_beat>>
+    <<stop>>
+===
+

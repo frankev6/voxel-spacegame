@@ -93,9 +93,9 @@ namespace Game.Tests.EditMode.Editor.Narrative
             using (var serialized = new SerializedObject(fixture.Owner))
             { serialized.FindProperty("progress.compilerVersion").intValue = -1; serialized.ApplyModifiedPropertiesWithoutUndo(); }
             report = fixture.Validate(); Assert.IsTrue(report.Entries.Any(e => e.Code == "NAR-V007" && e.Field == "progress"));
-            // Current dependent owners are shells: their throwing compile must remain a real diagnostic.
-            fixture.Definitions.Add(Create<QuestDefinition>("quest_unimplemented"));
-            report = fixture.Validate(); Assert.IsTrue(report.Entries.Any(e => e.Code == "NAR-V007" && e.Message.Contains("QST-002")), report.ToText());
+            // Preserve failed-owner coverage when QST-002 replaces the formerly throwing quest shell.
+            fixture.Definitions.Add(Create<NarrativeValidatorFixtureDefinition>("narfixture_failure", so => Set(so, "failCompile", true)));
+            report = fixture.Validate(); Assert.IsTrue(report.Entries.Any(e => e.Code == "NAR-V007" && e.Message.Contains("Fixture compile failure")), report.ToText());
         }
 
         [Test] public void V008_BoolComparedToInt()

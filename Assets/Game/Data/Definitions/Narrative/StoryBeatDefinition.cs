@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game.Data.Definitions
 {
-    /// <summary>SPEC-42 §4.2 story beat data; validation and logic follow in QST-002.</summary>
+    /// <summary>SPEC-42 §4.2 story beat data; field validation and compiled logic (SPEC-42).</summary>
     [ContentIdPrefix("beat_")]
     [UnityEngine.CreateAssetMenu(menuName = "Game/Narrative/Story Beat", fileName = "beat_new")]
     public sealed class StoryBeatDefinition : ContentDefinition, Game.Data.Logic.ILogicSourceOwner
@@ -31,14 +31,27 @@ namespace Game.Data.Definitions
         public Game.Data.Logic.CompiledEffectList OnComplete => onComplete;
         public bool Debug => debug;
 
-        // TODO(QST-002): implement field validation and the specified logic usages.
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
             base.Validate(scope, context);
-            throw new System.NotImplementedException("QST-002");
+            if (debug && context != null && !context.IsEditorPass && !UnityEngine.Debug.isDebugBuild) return;
+            QuestDefinitionValidation.Beat(this, scope);
+            QuestDefinitionValidation.Logic(condition, scope, "condition");
+            QuestDefinitionValidation.Logic(onStart, scope, "onStart"); QuestDefinitionValidation.Logic(onComplete, scope, "onComplete");
+            QuestDefinitionValidation.Reference(where?.starSystem, "where.starSystem", scope, context);
+            QuestDefinitionValidation.Reference(where?.hailEncounter, "where.hailEncounter", scope, context);
         }
         public void CompileLogic(Game.Data.Logic.Compiler.LogicCompiler compiler, Game.Data.Validation.ValidationScope scope)
-            => throw new System.NotImplementedException("QST-002");
-        public void BindLogic(Game.Data.Logic.LogicBinder binder) => throw new System.NotImplementedException("QST-002");
+        {
+            condition ??= new(); onStart ??= new(); onComplete ??= new();
+            QuestDefinitionValidation.Compile(compiler, condition, Game.Data.Logic.LogicUsage.BeatCondition, scope, "condition");
+            QuestDefinitionValidation.Compile(compiler, onStart, Game.Data.Logic.LogicUsage.BeatEffect, scope, "onStart");
+            QuestDefinitionValidation.Compile(compiler, onComplete, Game.Data.Logic.LogicUsage.BeatEffect, scope, "onComplete");
+        }
+        public void BindLogic(Game.Data.Logic.LogicBinder binder)
+        {
+            if (binder == null) throw new System.ArgumentNullException(nameof(binder));
+            condition?.Bind(binder); onStart?.Bind(binder); onComplete?.Bind(binder);
+        }
     }
 }

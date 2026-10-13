@@ -14,12 +14,14 @@ namespace Game.Tests.EditMode.Editor.Narrative
         [SerializeField] private CompiledIntExpr progress = new();
         [SerializeField] private CompiledEffectList effects = new();
         [SerializeField] private bool debug;
+        [SerializeField] private bool failCompile;
         public CompiledCondition Condition => condition;
         public CompiledIntExpr Progress => progress;
         public CompiledEffectList Effects => effects;
         public bool Debug => debug;
         public void CompileLogic(LogicCompiler compiler, ValidationScope scope)
         {
+            if (failCompile) throw new System.InvalidOperationException("Fixture compile failure");
             var report = new ValidationReport(scope.AssetPath);
             compiler.Compile(condition, new LogicCompileOptions(LogicUsage.DialogCondition, scope.AssetPath, "condition"), report);
             compiler.Compile(progress, new LogicCompileOptions(LogicUsage.QuestObjective, scope.AssetPath, "progress"), report);

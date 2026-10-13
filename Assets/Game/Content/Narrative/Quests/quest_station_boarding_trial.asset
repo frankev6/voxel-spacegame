@@ -1,0 +1,225 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78d862c52844416aa80f51a945d09ec8, type: 3}
+  m_Name: quest_station_boarding_trial
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.QuestDefinition
+  id: quest_station_boarding_trial
+  formerIds: []
+  title: Station Boarding Trial
+  shortDescription: Debrief the shady contact and validate their intel.
+  description: Mission Control flagged a bar contact as a reliability test. Debrief the contact and extract a verifiable intel marker.
+  kind: 1
+  autoTrack: 1
+  stages:
+  - id: main
+    title: Station Boarding Trial
+    objectives:
+    - id: meet_shady_contact
+      text: 'Meet the Shady Contact
+
+        Complete the shady contact encounter at the station bar.'
+      doneWhen:
+        source: (since_accept("beat_shady_man") >= 1) or $station_boarding_trial_meet_shady_contact
+        sourceHash: 2221621461430096488
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: 6548929065634496655
+      progress:
+        source: 
+        sourceHash: 3244421341483603138
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: -2
+      target: 0
+      latch: 1
+      optional: 0
+      marker:
+        starSystem: {fileID: 11400000, guid: a93d1205a81b5ca3be814bc3473818ac, type: 2}
+        bodyTag: ark_station
+        label: Debrief with Mission Control
+    - id: decode_tip
+      text: 'Decode the Intel Tip
+
+        Extract a confirmed intel marker from the contact.'
+      doneWhen:
+        source: ($station_boarding_trial_decode_tip) or $station_boarding_trial_decode_tip
+        sourceHash: 9010286877993835421
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: 6548929065634496656
+      progress:
+        source: 
+        sourceHash: 3244421341483603138
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: -2
+      target: 0
+      latch: 1
+      optional: 0
+      marker:
+        starSystem: {fileID: 0}
+        bodyTag: 
+        label: 
+    onComplete:
+      source:
+      - quest_log quest_station_boarding_trial legacy_3
+      - start_quest quest_station_data_delivery
+      sourceHash: 11568393178089301645
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929065634496657
+      - rid: 6548929065634496658
+  failWhen:
+    source: 
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: -2
+  onAccepted:
+    source:
+    - quest_log quest_station_boarding_trial legacy_2
+    sourceHash: 6634006364961493724
+    compilerVersion: 1
+    hasErrors: 0
+    effects:
+    - rid: 6548929065634496659
+  onCompleted:
+    source: []
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
+    hasErrors: 0
+    effects: []
+  onFailed:
+    source:
+    - quest_log quest_station_boarding_trial legacy_4
+    sourceHash: 1180540827377509100
+    compilerVersion: 1
+    hasErrors: 0
+    effects:
+    - rid: 6548929065634496660
+  logEntries:
+  - id: legacy_1
+    text: Bar contact debrief complete.
+  - id: legacy_2
+    text: Visit the station bar and debrief the contact.
+  - id: legacy_3
+    text: Boarding trial passed. Mission Control unlocked the next delivery test.
+  - id: legacy_4
+    text: Boarding trial failed.
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6548929065634496655
+      type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 6548929065634496661
+        right:
+          rid: 6548929065634496662
+    - rid: 6548929065634496656
+      type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 6548929065634496663
+        right:
+          rid: 6548929065634496664
+    - rid: 6548929065634496657
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_station_boarding_trial
+          - legacy_3
+    - rid: 6548929065634496658
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_station_data_delivery
+    - rid: 6548929065634496659
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_station_boarding_trial
+          - legacy_2
+    - rid: 6548929065634496660
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_station_boarding_trial
+          - legacy_4
+    - rid: 6548929065634496661
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 6548929065634496665
+        right:
+          rid: 6548929065634496666
+    - rid: 6548929065634496662
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: station_boarding_trial_meet_shady_contact
+    - rid: 6548929065634496663
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: station_boarding_trial_decode_tip
+    - rid: 6548929065634496664
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: station_boarding_trial_decode_tip
+    - rid: 6548929065634496665
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: since_accept
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - beat_shady_man
+    - rid: 6548929065634496666
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1

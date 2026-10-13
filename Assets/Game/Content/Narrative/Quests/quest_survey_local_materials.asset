@@ -1,0 +1,224 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78d862c52844416aa80f51a945d09ec8, type: 3}
+  m_Name: quest_survey_local_materials
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.QuestDefinition
+  id: quest_survey_local_materials
+  formerIds: []
+  title: Survey Local Materials
+  shortDescription: Collect 3 raw materials and return to ARK.
+  description: NORA requested raw materials for emergency hull repairs. Gather at least three units of raw materials and deliver them at ARK station.
+  kind: 1
+  autoTrack: 1
+  stages:
+  - id: main
+    title: Survey Local Materials
+    objectives:
+    - id: collect_raw_materials
+      text: 'Collect Raw Materials
+
+        Gather 3 units of raw materials.'
+      doneWhen:
+        source: has_item("resource_palladium", 3)
+        sourceHash: 10988607801768678526
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: 6548929065634496676
+      progress:
+        source: item_count("resource_palladium")
+        sourceHash: 1589212930537717302
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: 6548929065634496677
+      target: 3
+      latch: 0
+      optional: 0
+      marker:
+        starSystem: {fileID: 11400000, guid: a93d1205a81b5ca3be814bc3473818ac, type: 2}
+        bodyTag: ark_station
+        label: Return to ARK
+    - id: deliver_to_ark
+      text: 'Deliver Materials
+
+        Turn in the materials at ARK station.'
+      doneWhen:
+        source: ($story_survey_complete) or $survey_local_materials_deliver_to_ark
+        sourceHash: 1117833201008944324
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: 6548929065634496678
+      progress:
+        source: 
+        sourceHash: 3244421341483603138
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: -2
+      target: 0
+      latch: 1
+      optional: 0
+      marker:
+        starSystem: {fileID: 0}
+        bodyTag: 
+        label: 
+    onComplete:
+      source:
+      - quest_log quest_survey_local_materials legacy_2
+      - set_fact story_survey_complete true
+      sourceHash: 11975296782705472331
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929065634496679
+      - rid: 6548929065634496680
+  failWhen:
+    source: 
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: -2
+  onAccepted:
+    source:
+    - quest_log quest_survey_local_materials legacy_1
+    sourceHash: 842435365655584944
+    compilerVersion: 1
+    hasErrors: 0
+    effects:
+    - rid: 6548929065634496681
+  onCompleted:
+    source: []
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
+    hasErrors: 0
+    effects: []
+  onFailed:
+    source:
+    - quest_log quest_survey_local_materials legacy_3
+    sourceHash: 8941403584096344067
+    compilerVersion: 1
+    hasErrors: 0
+    effects:
+    - rid: 6548929065634496682
+  logEntries:
+  - id: legacy_1
+    text: Collect 3 raw materials and return to ARK station.
+  - id: legacy_2
+    text: Materials delivered. Hull repair prep started.
+  - id: legacy_3
+    text: Mission failed before materials were delivered.
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6548929065634496676
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 6548929065634496683
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_palladium
+        - 
+    - rid: 6548929065634496677
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: item_count
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - resource_palladium
+    - rid: 6548929065634496678
+      type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 6548929065634496684
+        right:
+          rid: 6548929065634496685
+    - rid: 6548929065634496679
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_survey_local_materials
+          - legacy_2
+    - rid: 6548929065634496680
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929065634496686
+          Text:
+          - story_survey_complete
+          - 
+    - rid: 6548929065634496681
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_survey_local_materials
+          - legacy_1
+    - rid: 6548929065634496682
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_survey_local_materials
+          - legacy_3
+    - rid: 6548929065634496683
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 3
+    - rid: 6548929065634496684
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: story_survey_complete
+    - rid: 6548929065634496685
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: survey_local_materials_deliver_to_ark
+    - rid: 6548929065634496686
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1

@@ -6,10 +6,10 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-006 | claimedb5364ab3; composition/placement dispatched; NAR-016 delivered44bace47 | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | SYS-005 preparation | ENC-0068bd541d5 delivered/reviewed; read-only preparation then waits for SYS-004 acceptance | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-004 | claimed3ab2e8a3; route planner dispatched; TRV-005/ECO-009 source-integrated pending validation | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-002 | claimed ccef7c0d; implement definitions/validators to repair real boot | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | TRV-003 | claimed949c0afc; finish QST matcher repair then implement lane access | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Content batch validated / lane work dispatched:** QST-0020e064777 compiles clean; generationbd158825 created12 quests/contracts,41 beats,16 clue-family assets. Whole-content compile fails only TRV-003 lane-owner stub. Focused49682 terminal:36 pass/1 QST diagnostic-path matcher failure,11.498s test bodies. ECO-009/TRV-005 done; QST matcher repair and NAR-016 compiler/stability remain. TRV-003 claimed949c0afc and dispatched; TRV-004 active; ENC-0068bd541d5 delivered/reviewed, combat preparing SYS-005 then dependency wait. No Unity operation. NAR-005 preserveda381d1dd. Previous turn authored summed costs (progress).
 
 - **Atomic effects underway:** NAR-005 claimed046342be; task/NAR-005-atomic-effects ated98d97f implements reused summed-cost scratch. Effect routing/list execution and five cases remain; uncompiled/unaccepted. Also fixed failed Whisper chapter selection73e5744f using an authored fact because quest_stage returns -1 after failure (Q347). Content generation still waits for QST-002; no Unity operation. Workers ENC-006224/TRV-004237/QST-002199 active. Previous turn fixed imports and dispatched routes (progress).
 
