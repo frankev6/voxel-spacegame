@@ -7,8 +7,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-001 | implementing; HUD-001 integrated a983d88, validation pending | Ready narrative/weapon contracts after batch closeout |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | CAM-010 | implementing; PHY-022, PWR-002 and ABL-001 integrated, validation pending | Ready power/ability work after batch closeout |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | CAM-009 | implementing; CAM-008 and UI-008 integrated, validation pending | Ready presentation work; audio content after AUD-006 |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-015 | implementing; CAM-010 delivered fcdb195, pending integration | Ready power/ability work after batch closeout |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AST-001 | implementing contracts/planned manifest only; CAM-009 delivered 7716d3d, pending integration | Ready presentation work; audio content after AUD-006 |
 
 ## Dispatch procedure
 
@@ -23,3 +23,5 @@ Batch 1 complete: PHY-014 `094f430`, PWR-001 `eeed571`, MIG-011 `ca37e33` plus g
 Batch 2 integrated on main and merged into lead branch: WPN-017 `ec9a6f1`, CAM-008 `9d59a62` with Boot reader binding `e265f13`, PHY-022 `a606bfc`, PWR-002 `08c5f01`, ABL-001 `1bc7515`, HUD-001 `a983d88`, UI-008 `90c13ad`. Status remains in-progress until validation. Compile found a readonly using-variable write in the PHY-022 test; lead fixed ownership alias and combined compile passes. First full EditMode: 886/1/1; only static-state audit failed on 231 readonly cached HUD property-name notifications. Lead annotated their session-independent lifetime in `f847997`; compile is clean and full EditMode rerun is **887/0/1**. Full PlayMode is running in session 56515; no concurrent Unity work.
 
 Lead branch `task/DMG-011-chunk-bodies`: physical pool, exact mass/velocity, greedy colliders, lifetime and deferred retirement implemented. Five required tests pass (5/0/0), evidence `Logs/playtest/dmg011/chunk-tests.xml`; they caught and fixed pool eviction native-container write safety. Chunk renderer `186f663` reuses palette-lit cube instancing with per-slot buffers and COM-aligned transforms. Compile passes; GPU/live rendering still unverified. No completion claim yet. Zero tuning passes.
+
+During PlayMode validation, lead claimed MIG-015 (`7e14f5f`) and AST-001 (`844f375`) on main through the respective idle clean worker checkouts, then switched each to its new task branch and dispatched it. Primary checkout and Unity-tested code were not changed. Merge these main claims into the lead branch once Unity exits. CAM-010/CAM-009 deliveries await integration; NAR-001 remains active with lead-resolved factory signatures.
