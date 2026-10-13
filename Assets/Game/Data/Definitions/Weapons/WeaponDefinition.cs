@@ -77,16 +77,61 @@ namespace Game.Data.Definitions
         /// §4.9 formula on the authored values (editor stats through SPEC-04 WeaponMountModule; WeaponContent.ComputeSustainedDps gives the same number).
         public float SustainedDps => (delivery == WeaponDelivery.Beam ? damage : (damage + explosionDamage * .5f) * pelletsPerRound * burstCount) * fireRate;
         public override void Validate(ValidationScope scope, ContentValidationContext context)
-
         {
-            if (!(fireRate > 0) || float.IsInfinity(fireRate) || damage < 0 || !float.IsFinite(damage) || !float.IsFinite(explosionDamage) || explosionDamage < 0)
-                scope.Error("WPN-E001", nameof(fireRate), "Rate must be positive and damage finite and nonnegative.");
-            if (burstCount < 1 || burstCount > ushort.MaxValue || burstInterval < 0 || !float.IsFinite(burstInterval) || pelletsPerRound < 1 || pelletsPerRound > 32)
-                scope.Error("WPN-E002", nameof(burstCount), "Invalid burst or pellet count.");
-            if (delivery != WeaponDelivery.Beam && (!(projectileSpeed > 0) || !float.IsFinite(projectileSpeed) || !(lifetimeMin > 0) || lifetimeMax < lifetimeMin || !float.IsFinite(lifetimeMax)))
-                scope.Error("WPN-E003", nameof(projectileSpeed), "Projectiles need finite positive speed and ordered positive lifetimes.");
-            if (damageType == Game.Data.Combat.DamageType.Ram) scope.Error("WPN-E008", nameof(damageType), "Ram is not a weapon damage type.");
-            // TODO(WPN-002): complete validation for all delivery variants and cross-content references.
+            base.Validate(scope, context);
+            Check(scope, "WPN-E001", nameof(fireRate), fireRate > 0 && float.IsFinite(fireRate) && float.IsFinite(Game.Core.SimTime.TicksPerSecond / fireRate), "Fire rate must produce a finite positive tick interval.");
+            Check(scope, "WPN-E001", nameof(burstCount), burstCount >= 1 && burstCount <= ushort.MaxValue, "Burst count must fit the round counter.");
+            Check(scope, "WPN-E001", nameof(burstInterval), Nonnegative(burstInterval) && float.IsFinite(burstInterval * Game.Core.SimTime.TicksPerSecond), "Burst interval must be finite and nonnegative in seconds and ticks.");
+            Check(scope, "WPN-E001", nameof(pelletsPerRound), pelletsPerRound >= 1 && pelletsPerRound <= 32, "Pellet count must be in 1..32.");
+            Check(scope, "WPN-E001", nameof(spreadDeg), InRange(spreadDeg, 0, 45), "Spread must be in 0..45 degrees.");
+            Check(scope, "WPN-E001", nameof(traverseHalfArcDeg), InRange(traverseHalfArcDeg, 0, 180), "Traverse half-arc must be in 0..180 degrees.");
+            Check(scope, "WPN-E001", nameof(traverseRateDeg), Nonnegative(traverseRateDeg), "Traverse rate must be finite and nonnegative.");
+            Check(scope, "WPN-E001", nameof(maxElevationDeg), InRange(maxElevationDeg, 0, 60), "Elevation must be in 0..60 degrees.");
+            Check(scope, "WPN-E001", nameof(fireConeDeg), InRange(fireConeDeg, 0, 30), "Fire cone must be in 0..30 degrees.");
+            Check(scope, "WPN-E001", nameof(powerDraw), Nonnegative(powerDraw), "Power draw must be finite and nonnegative.");
+            Check(scope, "WPN-E001", nameof(defaultFireGroups), ((byte)defaultFireGroups & ~7) == 0, "Only the three authored fire-group bits are supported.");
+
+            bool projectile = delivery == WeaponDelivery.Projectile || delivery == WeaponDelivery.Missile;
+            Check(scope, "WPN-E002", nameof(projectileSpeed), Nonnegative(projectileSpeed) && (!projectile || projectileSpeed > 0), "Projectile/missile speed must be finite and positive; unused speed must be nonnegative.");
+            Check(scope, "WPN-E002", nameof(projectileRadius), Nonnegative(projectileRadius), "Projectile radius must be finite and nonnegative.");
+            Check(scope, "WPN-E002", nameof(homingTurnRateDeg), Nonnegative(homingTurnRateDeg), "Homing turn rate must be finite and nonnegative.");
+            Check(scope, "WPN-E002", nameof(visual), System.Enum.IsDefined(typeof(ProjectileVisual), visual), "Unknown projectile visual.");
+            if (delivery == WeaponDelivery.Beam)
+            {
+                Check(scope, "WPN-E003", nameof(beamRange), beamRange > 0 && float.IsFinite(beamRange), "Beam range must be finite and positive.");
+                Check(scope, "WPN-E003", nameof(beamPulseSeconds), beamPulseSeconds >= Game.Core.SimTime.FixedTimestep && float.IsFinite(beamPulseSeconds), "A beam pulse must last at least one fixed tick.");
+            }
+            else
+            {
+                Check(scope, "WPN-E003", nameof(beamRange), Nonnegative(beamRange), "Unused beam range must be finite and nonnegative.");
+                Check(scope, "WPN-E003", nameof(beamPulseSeconds), Nonnegative(beamPulseSeconds), "Unused beam pulse must be finite and nonnegative.");
+            }
+            Check(scope, "WPN-E003", nameof(beamWidth), Nonnegative(beamWidth), "Beam width must be finite and nonnegative.");
+            if (deliveryData != null)
+                Check(scope, "WPN-E003", nameof(deliveryData), deliveryData.Delivery == delivery, "Delivery data must match its weapon's delivery discriminator.");
+            // New delivery handlers may use shared fields without a data subclass (SPEC-21 §4.6c).
+            Check(scope, "WPN-E004", nameof(explosionRadius), InRange(explosionRadius, 0, 6), "Explosion radius must be finite and in 0..6 metres.");
+            Check(scope, "WPN-E005", nameof(lifetimeMin), Nonnegative(lifetimeMin) && (!projectile || lifetimeMin > 0), "Projectile/missile minimum life must be positive; unused life must be nonnegative.");
+            Check(scope, "WPN-E005", nameof(lifetimeMax), Nonnegative(lifetimeMax) && lifetimeMax >= lifetimeMin, "Maximum life must be finite and no shorter than minimum life.");
+            Check(scope, "WPN-E006", nameof(damage), Nonnegative(damage), "Hit damage must be finite and nonnegative.");
+            Check(scope, "WPN-E006", nameof(explosionDamage), Nonnegative(explosionDamage), "Blast damage must be finite and nonnegative.");
+            Check(scope, "WPN-E006", nameof(damage), damage > 0 || explosionDamage > 0, "A weapon must deal hit or blast damage.");
+            Check(scope, "WPN-E006", nameof(penetrationCells), penetrationCells >= 1 && float.IsFinite(penetrationCells), "Penetration must be finite and at least one cell.");
+            Check(scope, "WPN-E006", nameof(impulsePerHit), Nonnegative(impulsePerHit), "Hit impulse must be finite and nonnegative.");
+            Check(scope, "WPN-E008", nameof(damageType), System.Enum.IsDefined(typeof(Game.Data.Combat.DamageType), damageType) && damageType != Game.Data.Combat.DamageType.Ram, "Weapons require a supported non-Ram damage type.");
+            ValidateReference(scope, context, nameof(fireCue), fireCue);
+            ValidateReference(scope, context, nameof(muzzleFx), muzzleFx);
+            ValidateReference(scope, context, nameof(hitFx), hitFx);
+        }
+        static bool Nonnegative(float value) => float.IsFinite(value) && value >= 0;
+        static bool InRange(float value, float min, float max) => float.IsFinite(value) && value >= min && value <= max;
+        static void Check(ValidationScope scope, string code, string field, bool valid, string message)
+        { if (!valid) scope.Error(code, field, message); }
+        static void ValidateReference(ValidationScope scope, ContentValidationContext context, string field, ContentDefinition reference)
+        {
+            // Editor reference walking reports DATA-E010 already; runtime validation needs the same registration check.
+            if (context != null && !context.IsEditorPass && reference != null && !context.IsInDatabase(reference))
+                scope.Error("DATA-E010", field, "Referenced definition is not in the content database.");
         }
     }
 }

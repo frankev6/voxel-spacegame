@@ -23,12 +23,16 @@ namespace Game.Data.Definitions
         public int MaxCandidates => maxCandidates;
 
         public override void Validate(ValidationScope scope, ContentValidationContext context)
-
         {
-            if (maxProjectiles < 1 || maxCandidates < 1 || !float.IsFinite(fixedConvergenceDeg) || fixedConvergenceDeg < 0 || fixedConvergenceDeg > 30 ||
-                !float.IsFinite(explosionImpulsePerDamage) || explosionImpulsePerDamage < 0 || !float.IsFinite(maxTargetRange) || maxTargetRange <= 0 ||
-                !float.IsFinite(underCursorRadius) || underCursorRadius <= 0)
-                scope.Error("WPN-E007", "tuning", "Weapon tuning limits must be positive and finite.");
+            base.Validate(scope, context);
+            Check(scope, nameof(maxProjectiles), maxProjectiles >= 256, "Projectile capacity must be at least 256.");
+            Check(scope, nameof(maxCandidates), maxCandidates >= 4, "Candidate capacity must be at least four.");
+            Check(scope, nameof(fixedConvergenceDeg), float.IsFinite(fixedConvergenceDeg) && fixedConvergenceDeg >= 0 && fixedConvergenceDeg <= 30, "Fixed convergence must be in 0..30 degrees.");
+            Check(scope, nameof(explosionImpulsePerDamage), float.IsFinite(explosionImpulsePerDamage) && explosionImpulsePerDamage >= 0, "Explosion impulse must be finite and nonnegative.");
+            Check(scope, nameof(maxTargetRange), float.IsFinite(maxTargetRange) && maxTargetRange > 0, "Target range must be finite and positive.");
+            Check(scope, nameof(underCursorRadius), float.IsFinite(underCursorRadius) && underCursorRadius > 0, "Cursor radius must be finite and positive.");
         }
+        static void Check(ValidationScope scope, string field, bool valid, string message)
+        { if (!valid) scope.Error("WPN-E007", field, message); }
     }
 }

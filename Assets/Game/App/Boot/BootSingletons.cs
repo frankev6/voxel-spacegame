@@ -9,6 +9,7 @@ using Game.Core.Components;
 using Game.Data.Definitions;
 using Game.Voxel.PhysicsBody;
 using Game.Voxel.Grid;
+using Game.Simulation;
 using Game.Simulation.Flight;
 using Game.Simulation.Weapons;
 using Game.Simulation.Power;
@@ -50,9 +51,17 @@ namespace Game.App.Boot
                     em.SetComponentData(lifetime.DamageEntity, damage);
                     if (!created.Contains(lifetime.DamageEntity)) created.Add(lifetime.DamageEntity);
                 }
+                int firstWeaponEntity = created.Count;
                 WeaponContent.CreateSingletons(em, catalog, created);
                 using (var weapons = em.CreateEntityQuery(ComponentType.ReadOnly<WeaponDefsRef>()))
                 { lifetime.WeaponEntity = weapons.GetSingletonEntity(); lifetime.Weapons = weapons.GetSingleton<WeaponDefsRef>().Value; }
+                // Track only this factory's newly created matrix; an existing faction owner keeps its lifetime.
+                for (int i = firstWeaponEntity; i < created.Count; i++)
+                {
+                    if (em.HasComponent<WeaponTuning>(created[i])) lifetime.WeaponTuningEntity = created[i];
+                    if (em.HasComponent<FactionRelations>(created[i]))
+                    { lifetime.FactionEntity = created[i]; lifetime.Factions = em.GetComponentData<FactionRelations>(created[i]); }
+                }
                 new PowerContent(catalog).CreateSingletons(em);
                 using (var power = em.CreateEntityQuery(ComponentType.ReadOnly<PowerTuning>()))
                     created.Add(power.GetSingletonEntity());
@@ -78,7 +87,8 @@ namespace Game.App.Boot
         {
             readonly World world;
             VoxelRenderConfig config;
-            internal Entity ConfigEntity, DamageEntity, WeaponEntity, AbilityEntity;
+            internal Entity ConfigEntity, DamageEntity, WeaponEntity, WeaponTuningEntity, FactionEntity, AbilityEntity;
+            internal FactionRelations Factions;
             internal BlobAssetReference<AbilityDefsBlob> Abilities;
             internal BlobAssetReference<WeaponDefsBlob> Weapons;
             internal BlobAssetReference<DamageTableBlob> DamageTable;
@@ -95,9 +105,20 @@ namespace Game.App.Boot
                 if (Abilities.IsCreated) Abilities.Dispose(); Abilities = default;
                 if (world.IsCreated && world.EntityManager.Exists(AbilityEntity)) world.EntityManager.DestroyEntity(AbilityEntity);
                 AbilityEntity = Entity.Null;
+                if (world.IsCreated)
+                {
+                    var em = world.EntityManager;
+                    if (WeaponEntity != Entity.Null && em.Exists(WeaponEntity)) em.DestroyEntity(WeaponEntity);
+                    if (WeaponTuningEntity != Entity.Null && em.Exists(WeaponTuningEntity)) em.DestroyEntity(WeaponTuningEntity);
+                    if (FactionEntity != Entity.Null && em.Exists(FactionEntity))
+                    {
+                        if (em.HasComponent<FactionRelations>(FactionEntity)) Factions = em.GetComponentData<FactionRelations>(FactionEntity);
+                        em.DestroyEntity(FactionEntity);
+                    }
+                }
                 if (Weapons.IsCreated) Weapons.Dispose(); Weapons = default;
-                if (world.IsCreated && world.EntityManager.Exists(WeaponEntity)) world.EntityManager.DestroyEntity(WeaponEntity);
-                WeaponEntity = Entity.Null;
+                Factions.Dispose();
+                WeaponEntity = WeaponTuningEntity = FactionEntity = Entity.Null;
                 if (DamageTable.IsCreated) DamageTable.Dispose();
                 DamageTable = default; DamageEntity = Entity.Null;
                 VoxelRenderConfigFactory.Destroy(ref config);

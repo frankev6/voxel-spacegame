@@ -13,19 +13,57 @@ namespace Game.Simulation.Weapons
     {
         public static void CreateSingletons(EntityManager em, ContentCatalog catalog, System.Collections.Generic.List<Entity> created)
         {
-            created.Add(em.CreateSingleton(new WeaponDefsRef { Value = BuildBlob(catalog) }));
+            if (catalog == null) throw new ArgumentNullException(nameof(catalog));
+            if (created == null) throw new ArgumentNullException(nameof(created));
+            using var definitionsQuery = em.CreateEntityQuery(ComponentType.ReadOnly<WeaponDefsRef>());
+            using var tuningQuery = em.CreateEntityQuery(ComponentType.ReadOnly<WeaponTuning>());
+            using var factionsQuery = em.CreateEntityQuery(ComponentType.ReadOnly<FactionRelations>());
+            if (!definitionsQuery.IsEmptyIgnoreFilter || !tuningQuery.IsEmptyIgnoreFilter)
+                throw new InvalidOperationException("Weapon content is already initialized in this world.");
+            if (factionsQuery.CalculateEntityCount() > 1) throw new InvalidOperationException("FactionRelations must be a singleton.");
+            // Resolve and validate config before taking ownership of native memory.
             var definition = catalog.Get<WeaponTuningDefinition>(new ContentId("config_weapons"));
-            created.Add(em.CreateSingleton(new WeaponTuning { MaxProjectiles = definition.MaxProjectiles,
+            var report = new Game.Data.Validation.ValidationReport("Weapon boot");
+            definition.Validate(report.For("content:config_weapons"), null);
+            if (report.HasErrors) throw new Game.Data.Validation.ContentValidationException(report);
+            var tuning = new WeaponTuning { MaxProjectiles = definition.MaxProjectiles,
                 FixedConvergenceRad = math.radians(definition.FixedConvergenceDeg), ExplosionImpulsePerDamage = definition.ExplosionImpulsePerDamage,
-                MaxTargetRange = definition.MaxTargetRange, UnderCursorRadius = definition.UnderCursorRadius, MaxCandidates = definition.MaxCandidates }));
-            // TODO(WPN-002): faction relations are required when targeting/autofire is enabled.
+                MaxTargetRange = definition.MaxTargetRange, UnderCursorRadius = definition.UnderCursorRadius, MaxCandidates = definition.MaxCandidates };
+            BlobAssetReference<WeaponDefsBlob> blob = default;
+            FactionRelations factions = default;
+            Entity definitionsEntity = Entity.Null, tuningEntity = Entity.Null, factionsEntity = Entity.Null;
+            int firstCreated = created.Count;
+            try
+            {
+                blob = BuildBlob(catalog);
+                if (factionsQuery.IsEmptyIgnoreFilter) factions = FactionRelations.CreateDefault(Allocator.Persistent);
+                definitionsEntity = em.CreateSingleton(new WeaponDefsRef { Value = blob });
+                tuningEntity = em.CreateSingleton(tuning);
+                if (factions.Stance.IsCreated) factionsEntity = em.CreateSingleton(factions);
+#if UNITY_EDITOR
+                em.SetName(definitionsEntity, "Cfg.WeaponDefsRef"); em.SetName(tuningEntity, "Cfg.WeaponTuning");
+                if (factionsEntity != Entity.Null) em.SetName(factionsEntity, "Cfg.FactionRelations");
+#endif
+                created.Add(definitionsEntity); created.Add(tuningEntity);
+                if (factionsEntity != Entity.Null) created.Add(factionsEntity);
+            }
+            catch
+            {
+                if (factionsEntity != Entity.Null && em.Exists(factionsEntity)) em.DestroyEntity(factionsEntity);
+                if (tuningEntity != Entity.Null && em.Exists(tuningEntity)) em.DestroyEntity(tuningEntity);
+                if (definitionsEntity != Entity.Null && em.Exists(definitionsEntity)) em.DestroyEntity(definitionsEntity);
+                if (created.Count > firstCreated) created.RemoveRange(firstCreated, created.Count - firstCreated);
+                factions.Dispose(); if (blob.IsCreated) blob.Dispose(); throw;
+            }
         }
         public static BlobAssetReference<WeaponDefsBlob> BuildBlob(ContentCatalog catalog)
         {
+            if (catalog == null) throw new ArgumentNullException(nameof(catalog));
             var definitions = catalog.All<WeaponDefinition>();
             using var builder = new BlobBuilder(Allocator.Temp);
             ref var root = ref builder.ConstructRoot<WeaponDefsBlob>();
             var weapons = builder.Allocate(ref root.Weapons, definitions.Count + 1);
+            weapons[0] = default;
             for (int i = 0; i < definitions.Count; i++)
             {
                 var d = definitions[i]; UnityEngine.Color32 color = d.TracerColor;
@@ -33,7 +71,7 @@ namespace Game.Simulation.Weapons
                 {
                     Index = (ushort)(i + 1), Type = d.DamageType, IsFixed = (byte)(d.TraverseHalfArcDeg == 0 ? 1 : 0),
                     DefaultFireGroups = (byte)d.DefaultFireGroups, ExplodeOnExpire = (byte)(d.ExplodeOnExpire ? 1 : 0),
-                    TriggerIntervalTicks = 60f / d.FireRate, BurstIntervalTicks = d.BurstInterval * 60f,
+                    TriggerIntervalTicks = Game.Core.SimTime.TicksPerSecond / d.FireRate, BurstIntervalTicks = d.BurstInterval * Game.Core.SimTime.TicksPerSecond,
                     LifetimeMinTicks = math.max(1u, SimTime.SecondsToTicks(d.LifetimeMin)), LifetimeMaxTicks = math.max(1u, SimTime.SecondsToTicks(d.LifetimeMax)),
                     BeamPulseTicks = math.max(1u, SimTime.SecondsToTicks(d.BeamPulseSeconds)),
                     FireCue = d.FireCue != null ? d.FireCue.Id.Hash : default, MuzzleFx = d.MuzzleFx != null ? d.MuzzleFx.Id.Hash : default,
@@ -65,7 +103,12 @@ namespace Game.Simulation.Weapons
             }
             return builder.CreateBlobAssetReference<WeaponDefsBlob>(Allocator.Persistent);
         }
-        public static float ComputeSustainedDps(in WeaponDef w) => (w.Delivery == WeaponDelivery.Beam ? w.Damage :
-            (w.Damage + w.ExplosionDamage * .5f) * w.PelletsPerRound * w.BurstCount) * (60f / w.TriggerIntervalTicks);
+        public static float ComputeSustainedDps(in WeaponDef w)
+        {
+            // Index zero is the all-zero "none" row, including its timing fields.
+            if (!(w.TriggerIntervalTicks > 0) || !math.isfinite(w.TriggerIntervalTicks)) return 0;
+            return (w.Delivery == WeaponDelivery.Beam ? w.Damage :
+                (w.Damage + w.ExplosionDamage * .5f) * w.PelletsPerRound * w.BurstCount) * (SimTime.TicksPerSecond / w.TriggerIntervalTicks);
+        }
     }
 }
