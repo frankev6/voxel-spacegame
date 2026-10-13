@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | dispatched from main2485250e | audio measurements |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | delivered bbf32ef9; staged in isolated lead checkout; validation wait | audio measurements |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | WPN-018 | delivered 753e2de5, integrated b672f6f1; real validation wait | weapon demand/stats |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-001 | delivered 6a0f72a0; real dependency/validation wait | QST-002 after QST-001 and SPEC-40 |
 
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **AUD-013 delivered:** bbf32ef9, exactly four required tests/zero extras, no runtime/assets changes; reviewed and staged on isolated `task/AUD-013-measurement-integration` from primary2aac40cb. Three timing gates retain targets and missing-data failures in JSON; 300-frame GC gate uses worst frame. Spec64 Q27–29 await central mirror on integration. All three workers now have actual validation/dependency waits. Primary session43506 is confirmed live in PlayMode (Unity42910); do not integrate audio or mutate runtime until terminal. Live projectile/power readback prepared at `Logs/playtest/projectile-combat/live-readback.cs.txt`.
 
 - **Full regression progress:** session43506 compile clean and full EditMode1179/0/1 completed; PlayMode continues on the same live handle. Evidence `Logs/playtest/projectile-combat/editmode-full.xml` and `compile-full.log`. No primary runtime mutation or second Unity. Audio worker fixed reviewed missing import and is finishing four required measurements; power/presentation remain genuine dependency waits.
 
