@@ -6,8 +6,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | UI-011 | dispatched; MIG-009 c48030b delivered, pending content generation/validation | Ready standard work after batch integration |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DLG-001 | dispatched from main claim f85dcab; GAL-001 9c177ac delivered pending validation | Galaxy/dialog dependent standard work |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | UI-011 | UI-011 active; MIG-009 validated and merged | Ready standard work after batch integration |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | PWR-003 | dispatched from main 7b8cf39; DLG-001 d07fd9b and GAL-001 9c177ac pending validation | M2 power/ability work |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ART-014 | dispatched from main claim 010a9e2; UI-010 0c60754 delivered pending validation | Ready presentation work after integration |
 
 ## Operating rules
@@ -56,3 +56,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - Session `67185` completed **exit 0**, full EditMode **923/0/1**, PlayMode **135/0/53**. Evidence archived in batch3 `*-final.xml`; six worker tasks closed, DMG-012 awaits live proof. Original QualitySettings restored from backup; runner removed test scene. Fresh interactive Editor session `87955` launched, waiting for Pipeline startup before range.
 
 - DMG-012 closed: live controlled production projectiles detach 2296-cell port section, functional ownership correct, collider Ready, velocity ~0.75 m/s, zero runtime errors. Screenshot `Logs/playtest/dmg012/station-hulk-separated.png`; readback `live-proof.txt`. Full validated batch ready for local main FF. Interactive Editor `87955` remains running range.
+
+- Main includes validated DMG-012/batch3 at `5388604`. Lead claimed AI-002 (`7b8cf39`) on `task/AI-002-spatial-queries`: hash queries and five required reference tests implemented, validation pending. DLG-001 delivered `d07fd9b8189ae8cfedb477b6ec0177639a4077c1`, one required test; same worker recycled to ready PWR-003. Q223–224 resolve read-only overflow telemetry and bounded traversal.

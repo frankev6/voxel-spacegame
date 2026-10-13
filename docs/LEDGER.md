@@ -807,6 +807,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 220 | 2026-10-13 | SPEC-60 Q23/Q24 | Tooltip coordinate conversion and lifecycle | Convert via actual panel height; wire pooled tooltip lifecycle/config/theme and cancel stale providers | Tech lead | Resolved; delivered implementation integrated pending batch validation |
 | 221 | 2026-10-13 | SPEC-72 Q20 | Legacy missile damage conflicts with v2 tuning | Use SPEC-21 Explosive for canonical missile, validate all legacy enum identities | Tech lead | Resolved; delivered implementation integrated pending batch validation |
 | 222 | 2026-10-13 | SPEC-72 Q21 | Weapon migration defaults and protected links | Use canonical tuning/defaults and catalog IDs; preserve hand edits and existing links, fill only empty mapped links | Tech lead | Resolved; delivered implementation integrated pending batch validation |
+| 223 | SPEC-23 Q7: absent overflow counter conflicts with read-only parallel queries and scratch capacity. | Resolved: actual FixedList capacity with complete linear fallback; defer telemetry to a future owning-writer contract, no State writes. | Tech lead |
+| 224 | SPEC-23 Q8: enormous query bounds overflow or enumerate unbounded cells. | Resolved: complete linear fallback above 4096 cells or unrepresentable coordinates; same ordered matches and totals. | Tech lead |
 
 ## Measurements
 
