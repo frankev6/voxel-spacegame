@@ -94,7 +94,7 @@ namespace Game.Galaxy.Services
                 var template = galaxy.GetBodyTemplate(spec.TemplateIndex);
                 if (template.StructureSource == StructureSource.None) continue;
                 double radius = spec.RadiusM + template.T2LoadDistanceM;
-                if (math.distancesq(positionM, OrbitMath.Position(spec, time)) > radius * radius) continue;
+                if (math.distancesq(positionM, OrbitMath.Position(spec, time)) >= radius * radius) continue;
                 if (!bodies.TryGetValue(spec.Id.LocalKey, out var body) || !em.Exists(body.Grid) ||
                     !em.HasComponent<GridSpawning>(body.Grid) || em.IsComponentEnabled<GridSpawning>(body.Grid)) return false;
             }

@@ -48,6 +48,10 @@ namespace Game.Tests.PlayMode.Galaxy
             RemoveCell(f); f.Stream(100);
             Assert.IsFalse(f.State.GetOrCreateDelta(f.Station.Id.System).TryGetStructure(f.Station.Id.LocalKey, out _));
             f.Stream(0); Assert.AreEqual(4, CountCells(f));
+            f.Em.AddComponent<Hulk>(f.Grid());
+            f.Watch.Update(f.World.Unmanaged); f.Em.CompleteAllTrackedJobs(); f.Tick();
+            f.Stream(100); Assert.AreEqual(Entity.Null, f.Grid(), "Nonpersistent destroyed hulks still unload.");
+            f.Stream(0); Assert.AreEqual(Entity.Null, f.Grid(), "Destroyed bodies without snapshots do not respawn.");
         }
         [Test] public void CoreLost_HulkPersists()
         {

@@ -36,7 +36,6 @@ namespace Game.Galaxy.Streaming
                 if (!bodies.TryGetValue(key, out var body) || body.WantsGrid == 0 || !em.Exists(body.Anchor)) continue;
                 var template = galaxy.GetBodyTemplate(spec.TemplateIndex);
                 bool destroyed = (spec.State & BodyStateFlags.Destroyed) != 0;
-                if (destroyed && !delta.TryGetStructure(key, out _)) continue;
                 double distance = math.max(0, math.distance(positionM, OrbitMath.Position(spec, time)) - spec.RadiusM);
                 if (active.TryGetValue(key, out var lease))
                 {
@@ -49,6 +48,7 @@ namespace Game.Galaxy.Streaming
                     }
                     continue;
                 }
+                if (destroyed && !delta.TryGetStructure(key, out _)) continue;
                 if (retiring.Contains(key) || distance >= template.T2LoadDistanceM || spawned >= config.MaxGridSpawnsPerFrame) continue;
                 lease = spawner.Spawn(spec, template, body.Anchor, delta, origin, time, checked((uint)config.PersistDamageMaxCells));
                 active.Add(key, lease); spawned++;

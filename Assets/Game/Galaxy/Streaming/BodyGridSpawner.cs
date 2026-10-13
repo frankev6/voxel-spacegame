@@ -70,7 +70,8 @@ namespace Game.Galaxy.Streaming
             {
             bool armed = false;
             foreach (var instance in source.Data.Instances)
-                if (instance.Block != 0 && content.Blocks.Value.Blocks[instance.Block].HasModule(BlockModuleId.WeaponMount))
+                if (instance.Block != 0 && instance.CellsAlive > 0 && (instance.Flags & BlockInstanceFlags.Destroyed) == 0 &&
+                    content.Blocks.Value.Blocks[instance.Block].HasModule(BlockModuleId.WeaponMount))
                 { armed = true; break; }
             bool hulk = persisted && (spec.State & BodyStateFlags.Destroyed) != 0;
             ulong id = ids.Allocate();
@@ -91,6 +92,11 @@ namespace Game.Galaxy.Streaming
                 : GridSpawnApi.RequestSpawn(em, registry, lease.Handle, spawn);
             em.AddSharedComponent(lease.Root, new StarSystemMember { Id = spec.Id.System });
             em.AddComponentData(lease.Root, new UniversePosition { Value = position });
+            if (spec.Orbit.Mode != OrbitMode.Fixed || spec.ParentOrbit.Mode != OrbitMode.Fixed)
+            {
+                em.AddComponentData(lease.Root, new BodyOrbit { Orbit = spec.Orbit, ParentOrbit = spec.ParentOrbit });
+                em.AddComponent<UniversePositionIsAnalytic>(lease.Root);
+            }
             em.AddComponentData(lease.Root, new BodyGridOwner { Body = spec.Id, Anchor = anchor, PersistDamage = (byte)(persist ? 1 : 0) });
             em.AddComponentData(lease.Root, new BodyGridInitialCells { Cells = checked((uint)source.SolidCellCount) });
             if (template.Interaction != InteractionKind.None)

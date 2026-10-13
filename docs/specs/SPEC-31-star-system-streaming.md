@@ -387,7 +387,7 @@ Managed handler (in `StarSystemLoader`, subscribed to `EventBus<BodyInteracted>`
 
 ### 5.13 `BodyOnRailsSystem`
 
-`IJobEntity` (`ScheduleParallel`) over anchors with `BodyOrbit`, `UniversePosition`, `LocalTransform`, `UniversePositionIsAnalytic`: `UniversePosition = OrbitMath.Position(orbit, parentOrbit, SimClock.UniversalTime)`; `LocalTransform.Position = (float3)(UniversePosition − FrameOrigin.OriginInStarSystem)`. Rotation unchanged. Only writer of these values for analytic roots besides `OriginRebaseSystem`'s rebase (SPEC-30 decision 9 keeps sync off for analytic roots).
+`IJobEntity` (`ScheduleParallel`) over analytic anchors and their T2 grid roots with `BodyOrbit`, `UniversePosition`, `LocalTransform`, `UniversePositionIsAnalytic`: `UniversePosition = OrbitMath.Position(orbit, parentOrbit, SimClock.UniversalTime)`; `LocalTransform.Position = (float3)(UniversePosition − FrameOrigin.OriginInStarSystem)`. Rotation unchanged. Only writer of these values for analytic roots besides `OriginRebaseSystem`'s rebase (SPEC-30 decision 9 keeps sync off for analytic roots).
 
 ### 5.14 Jump (`BeginStarSystemChange`)
 
@@ -631,6 +631,7 @@ sequenceDiagram
 | 16 | Scene readiness requires nearby T2 grids before the player is spawned, but §5.4 originally skipped all streaming without a player | Resolved: during initial entry, T2 measures from the actual requested arrival in star-system coordinates; once present, use the player position. Preserve grid-complete readiness, including persisted hulks. No fabricated player or always-ready fallback; T3 still waits for a player. | Tech lead — ledger Q359 |
 
 | 17 | Unload/failed request cleanup must release abandoned registry pins without cancelling other live spawns | Resolved by ADR-0076: registry reconciles only dead/mismatched bound reads after tracked jobs finish. Cleanup-only roots do not retain source ownership. Spawn failure destroys its request, reconciles pins and releases its clone/handle. | Tech lead — ledger Q360 |
+| 18 | Orbiting T2 grids lacked the analytic movement owned by their anchors | Resolved: orbiting T2 roots carry BodyOrbit and UniversePositionIsAnalytic with the same orbit data as their anchors. BodyOnRailsSystem remains the sole analytic position writer; fixed bodies stay unchanged. This keeps physical geometry, streaming distance and interaction position together. | Tech lead — ledger Q361 |
 
 ## 11. References
 
