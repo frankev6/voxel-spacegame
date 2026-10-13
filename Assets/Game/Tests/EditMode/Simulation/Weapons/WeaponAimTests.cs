@@ -83,6 +83,9 @@ namespace Game.Tests.EditMode.Simulation.Weapons
         {
             using var f = new Fixture();
             float3 shooter = new float3(7, 0, 4), target = new float3(20, 0, 3), center = new float3(0, 0, 100);
+            var rotation = quaternion.RotateY(math.radians(30));
+            f.Em.AddComponentData(f.Target, new VoxelGrid { CellMin = 0, CellMax = new int3(19, 3, 7), CellSize = .5f });
+            f.Em.SetComponentData(f.Target, LocalTransform.FromPositionRotation(center - math.rotate(rotation, new float3(5, 1, 2)), rotation));
             f.Em.SetComponentData(f.Root, new PhysicsVelocity { Linear = shooter });
             f.Em.SetComponentData(f.Target, new PhysicsVelocity { Linear = target });
             f.Em.SetComponentData(f.Root, new ShipTarget { Value = f.Target });

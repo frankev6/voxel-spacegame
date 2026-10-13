@@ -16,6 +16,7 @@ namespace Game.Simulation.Weapons
     /// <summary>SPEC-21 §5.4 parallel manual and target-lead mount aiming.</summary>
         [BurstCompile] internal partial struct WeaponAimJob : IJobEntity
         {
+            [ReadOnly] public ComponentLookup<VoxelGrid> Grids;
             [ReadOnly] public ComponentLookup<LocalTransform> Transforms;
             [ReadOnly] public ComponentLookup<ShipCommand> Commands;
             [ReadOnly] public ComponentLookup<Hulk> Hulks;
@@ -37,7 +38,15 @@ namespace Game.Simulation.Weapons
                 Entity target = Targets.HasComponent(root) ? Targets[root].Value : Entity.Null;
                 if (Controls.HasComponent(root) && Controls[root].AimMode == WeaponAimMode.TargetLead && Transforms.HasComponent(target))
                 {
-                    point = Transforms[target].Position;
+                    var targetPose = Transforms[target];
+                    point = targetPose.Position;
+                    if (Grids.HasComponent(target))
+                    {
+                        var grid = Grids[target];
+                        // Match SpatialProxy's occupied-bounds center, not the blueprint's arbitrary origin.
+                        float3 center = ((float3)grid.CellMin + (float3)(grid.CellMax + 1)) * (.5f * grid.CellSize);
+                        point = targetPose.TransformPoint(center);
+                    }
                     if (weapon.Delivery == Game.Data.Definitions.WeaponDelivery.Projectile)
                         point = LeadMath.Point(muzzleWorld, Velocities.HasComponent(root) ? Velocities[root].Linear : float3.zero,
                             point, Velocities.HasComponent(target) ? Velocities[target].Linear : float3.zero,
