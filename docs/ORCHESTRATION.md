@@ -6,8 +6,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 accepted | FACT review169 delivered: no actionable defects; genuine wait for next ready standard dependency | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-014 | claimedc76e4a29; legacy translation after ECO acceptance and HUD review | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 accepted | FACT review169 clear; bounded NAR-014 delivery correctness review assigned | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-014 | delivered6562d5fd at182; lead integration/validation pending | narrative follow-ups |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-009 accepted | readiness audit149 delivered; genuine wait for lead HUD composition/UI audit prerequisites | HUD-003/006/007 once ready |
 
 ## Operating rules
@@ -19,6 +19,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Loading UI staged:** HUD-002 adds the actual loading meter/UXML/theme, prewarm config and event-aware SceneFlow presenter. Production composition polling/installation remains next; no acceptance claim or Unity run. HUD-019 partial scope is explicit in its ledger row. NAR-014 delivered6562d5fd182 (five checks authored, unrun); combat worker assigned bounded review. Power waits for delivery integration and presentation for real HUD prerequisites. Previous turn implemented root switching (progress).
 
 - **HUD root flow implemented, not yet installed:** SceneFlow now accepts the declared root set, selects loading/scene roots through the registered navigator, and restores the menu root during recovery. Existing adapter remains until composition preserves its behavior. HUD-002 remains in-progress; composition, session binding and four focused acceptance checks remain. No Unity tests launched. FACT review169 found no actionable defects; combat/presentation have real ready-standard dependency waits, NAR-014181 remains active. Previous acknowledgment turn was no progress; this turn changes runtime infrastructure.
 

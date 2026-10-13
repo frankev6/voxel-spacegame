@@ -32,6 +32,9 @@ MonoBehaviour:
   - Key: text-prompt
     Uxml: {fileID: 9197481963319205126, guid: c4319cf380724e0da50c6e29bf5a9dbb, type: 3}
     Prewarm: 0
+  - Key: loading
+    Uxml: {fileID: 9197481963319205126, guid: e1c2117e80634546a8450effb5ee4900, type: 3}
+    Prewarm: 1
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32

@@ -1,0 +1,3 @@
+/* SPEC-61: centred 480px progress region; colours and spacing use the theme. */
+.loading-screen { background-color: var(--color-bg); }
+.loading-progress { width: 480px; max-width: 90%; margin-top: var(--space-4); }

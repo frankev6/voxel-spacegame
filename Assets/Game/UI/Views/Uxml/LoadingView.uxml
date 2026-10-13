@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:game="Game.UI.Controls">
+    <Style src="../../Theme/screens/loading.uss" />
+    <ui:VisualElement class="loading-screen grow center" picking-mode="Position">
+        <ui:Label name="loading-status" class="text-display text-xl" picking-mode="Ignore">
+            <Bindings><ui:DataBinding property="text" data-source-path="StatusText" binding-mode="ToTarget" /></Bindings>
+        </ui:Label>
+        <game:Meter name="loading-progress" class="loading-progress" variant="neutral" show-numbers="false" />
+    </ui:VisualElement>
+</ui:UXML>
