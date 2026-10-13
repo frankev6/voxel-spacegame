@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Compiler graph staging:** isolated NAR-003852f9299 adds fact/ref suggestions, saturated constant-expression range checks and dependency equality; f6194df4 adds serialized primitive nodes with binding/dependency traversal. Evaluation explicitly remains TODO(NAR-004), now reflected in ledger Notes; function/effect nodes and emission still pending. No compilation claim or test run. Primary remains AI-010 integration branch; workers150/162/133 active, fixture repair uses aggregate thrust modifier without increasing bounds. Previous turn implemented type checker (progress).
+
 - **Narrative type checker implemented:** isolated NAR-003 branch31f7e122 now includes catalog prerequisites and post-order operator/call/argument/usage checks, fact/ref resolution, write restrictions, literal ranges and ten-error field cap. Compiler emission/factories and six required tests remain; code uncompiled. Review must finish suggestions and literal-expression range handling before acceptance. Primary AI-010 remainsb23ac6cc with no active validation. Workers AI-015149/SYS-003161/AI-010132 active; presentation diagnoses physical-motion failures. Previous turn ran catalog checks and integrated combat scenarios (progress).
 
 - **AI-010 focused findings:**80177 terminated1/3/0; friendly-fire passes, engage nearest106.5236 vs100, flee104.4045 vs105.7555, leash return/movedBack assertion false. Archived `ai-scenarios/acceptance-first.xml`. Presentation worker assigned concrete diagnosis/fixture repair without longer bounds or weaker assertions; no unchanged rerun. Editor open/stopped, validation terminal. Lead can continue isolated narrative work.
