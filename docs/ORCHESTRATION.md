@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Lane source integrated / focused batch accepted:** ENC-006, TRV-004 and QST-002 done from clean compile and focused34715 exit0 (25 pass,0.514s test bodies). TRV-0037eef333 and NAR-005 continuation setter f758c1e3 await next compatible validation; actual content recompile/stability comes next. Presentation reviewing lane delivery; combat waits SYS-004, economy waits ready standard work. No Unity active. Details and evidence in ledger latest log.
+
 - **Spending/list preflight authored:** NAR-005f88796f7/82b85021/0bf6d947 adds numeric routes, frozen expression costs, nested scratch and whole-list checks before Apply. Q350 records unchanged-public-API interpretation. Merchant continuation, rejection tracing and five cases remain; uncompiled/unaccepted, no Unity operation. TRV-004 review and TRV-003 continue; SYS-005 waits for SYS-004 acceptance. Previous turn added guarded facts/rewards (progress).
 
 - **Fact/loot/body effects authored:** NAR-0051261ffbb implements guarded Set/Add facts with service-only reserved access, deterministic loot salt, and body-scope checks. Nine effect nodes plus atomic lists/five cases remain; uncompiled/unaccepted. TRV-004ffc1a1bc delivered, bounded review requested (its Q16 must become Q17; lead Q16 already owns lane sequencing). TRV-003 active; combat SYS-005 preparation done229, actual wait on SYS-004 acceptance. No Unity operation. Previous turn added15 routes (progress).

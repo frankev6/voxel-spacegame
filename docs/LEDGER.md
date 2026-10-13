@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 101 | 13 | 0 | 0 | 66 | 0 | 180 | 8 |
+| M3 | 100 | 11 | 0 | 0 | 69 | 0 | 180 | 7 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -349,7 +349,7 @@
 | TRV-001 | Public contract types | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, FLT-001, NAR-001, AUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a68c988 | Canonical travel contracts and staged watcher API; 2 required tests; runtime travel remains later tasks |
 | TRV-002 | Travel config definition and validator | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-04, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 5a436d86 | 19 required checks pass; real shipped travel content zero errors, GAL-012 gates32m satisfy geometry |
 | TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, GAL-008, NAR-003, NAR-004, NAR-006, NAR-020 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  |  |
-| TRV-004 | Route planner | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-005, GAL-007 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  |  |
+| TRV-004 | Route planner | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-005, GAL-007 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c39d6148 | Deterministic Burst route search and reusable caller-populated scratch; 5 functional cases pass; advisory perf unrun. |
 | TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-002, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 6f940373 | Analytic jump/cruise arrival; five required functional checks pass; Perf_512Bodies authored, measurement deferred |
 | TRV-006 | TravelService jump timeline | [SPEC-32](specs/SPEC-32-travel.md) | M3 | frontier | TRV-003, TRV-005, TRV-007, SPEC-31, SPEC-30, FND-001 | no | todo |  |  |  |  |
 | TRV-007 | PlayerControlLock consumption | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 75ba22b | Movement/action lock consumption without press replay; 4 required tests. TRV-006 owns lifecycle. Full 1027 EM / 145 PM passed. |
@@ -363,7 +363,7 @@
 | ENC-003 | Faction singleton, index map and FactionStandingSystem | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-002, SPEC-21, SPEC-13, SPEC-23 | no | todo |  |  |  |  |
 | ENC-004 | FactionService and FACN | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-003, PERS-001, FND-001 | no | todo |  |  |  |  |
 | ENC-005 | TerritoryService (authored ownership) | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-30 | no | todo |  |  |  |  |
-| ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, GAL-006, GAL-008 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  |  |
+| ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, GAL-006, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 21d0996b | Full ordered seeded composition, clearance placement and line-abreast formation; 9 required cases pass. Director cap remains ENC-007. |
 | ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SPEC-31, SPEC-32, SPEC-23 | no | todo |  |  |  |  |
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | no | todo |  |  |  |  |
 | ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, SPEC-40 | no | todo |  |  |  |  |
@@ -402,7 +402,7 @@
 | DLG-011 | Dialog PlayMode scenarios | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-007, DLG-009, QST-001 | no | todo |  |  |  |  |
 | DLG-012 | Harness commands for dialog | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, DEV-001 | no | todo |  |  |  |  |
 | QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 95f80410 | Public quest/mystery contracts and required assembly test; behavior remains QST-002 onward |
-| QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, NAR-003, NAR-004, NAR-006, NAR-009, NAR-013 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Claimed for real definition/validator boot repair; SPEC42Q9 explicit completed prerequisites. |
+| QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, NAR-003, NAR-004, NAR-006, NAR-009, NAR-013 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9ca0b84 | Real definitions, compile/bind and validation; 24 prior cases plus repaired Usage_Enforced pass; generated content compiled except separate TRV-003 owner stub. |
 | QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, SPEC-40 | no | todo |  |  |  |  |
 | QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, SPEC-40 | no | todo |  |  |  |  |
 | QST-005 | BeatService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, SPEC-41 | no | todo |  |  |  |  |
@@ -930,6 +930,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 350 | SPEC-40 Q26: dynamic spending preflight | Resolved: defer expression evaluation into EffectRequirements.IsSatisfied, freeze amounts for execution and isolate reusable nested scratch frames. No public API change; direct single-effect execution evaluates the current expression. | Tech lead |
 | 351 | SPEC-40 Q27: effect context hooks | Resolved in ADR-0075: optional Data ILogicEffectHost supplies rejection trace and merchant continuation; no cross-module reference. NAR-011/DLG-006 own production wiring. | Tech lead |
 | 352 | SPEC-33 Q26: pure composition boundaries | Resolved: composition returns full ordered fleet; director owns live-cap truncation. Preserve maximum RNG draws, blueprint-owned cell size and authored spacing; automatic spacing uses largest radius and M3 uses line abreast. | Tech lead |
+| 354 | SPEC-32 Q18: lane-only lifecycle | Resolved: constructor owns config, scene query and lane watchers; missing context closes gated lanes until rebuild; generation changes dispose subscriptions. Execution remains TRV-006 and related tasks. | Tech lead |
 | 353 | SPEC-32 Q17: route input ownership | Resolved: caller populates scratch visibility/gates after EnsureCapacity; pure planner consumes those inputs, enforces known vertices, clears failed output and owns reusable search storage. | Tech lead |
 | 334 | SPEC-33 Q24: legacy first formation conflicts with final encounter table | Resolved: retain/report original formation and explicit replacement diagnostics; authored ENC-010 composition table governs final fleets, real assets required. | Tech lead |
 | 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
@@ -1057,6 +1058,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Route/composition/quest batch accepted; lane source integrated — astra (gpt-6)
+
+- Compile52054 clean, zero CS warnings. Focused34715 finished with Unity exit0; 25 passed,0 failed,0.514s test execution (startup/shutdown additional). Preserved XML/log in Logs/playtest/effects-encounter-route/. Five BlockPlacement cases matched the broad PlacementTests filter incidentally; use fully qualified filters next time.
+- ENC-00621d0996b done (spec-required: 9, extra: 0); TRV-004c39d6148 done (spec-required: 5 functional + 1 advisory perf unrun, extra: 0); QST-0029ca0b84 done (spec-required: 25, extra: 0), using24 previous passes plus the corrected indexed diagnostic-path case in this batch.
+- NAR-005 five required cases pass (spec-required: 5, extra: 0); f758c1e3 subsequently makes the ADR-0075 continuation writable and records production NAR-011/DLG-006 wiring. That small change awaits the next compatible compile/check; task remains in progress.
+- TRV-0037eef333 integrated, uncompiled/unaccepted (spec-required: 8, extra: 0). Q354 mirrors lane lifecycle. Next compile this batch, recompile actual galaxy content and check converter stability, then resume actual world-loader/gameplay checks. Worker presentation performs one bounded review; combat and economy have genuine dependency waits. No active Unity process.
+- Previous turn only reiterated existing testing policy (no progress); this turn accepts completed evidence and integrates new source. Unrelated QualitySettings/orphan metadata excluded.
 
 ### 2026-10-13 — NAR-005 spending and list preflight authored — astra (gpt-6)
 
