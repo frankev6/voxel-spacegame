@@ -11,6 +11,7 @@ using Game.Voxel.PhysicsBody;
 using Game.Voxel.Grid;
 using Game.Simulation.Flight;
 using Game.Simulation.Weapons;
+using Game.Simulation.Power;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -51,7 +52,9 @@ namespace Game.App.Boot
                 WeaponContent.CreateSingletons(em, catalog, created);
                 using (var weapons = em.CreateEntityQuery(ComponentType.ReadOnly<WeaponDefsRef>()))
                 { lifetime.WeaponEntity = weapons.GetSingletonEntity(); lifetime.Weapons = weapons.GetSingleton<WeaponDefsRef>().Value; }
-                // TODO(PWR-003): PowerTuning.
+                new PowerContent(catalog).CreateSingletons(em);
+                using (var power = em.CreateEntityQuery(ComponentType.ReadOnly<PowerTuning>()))
+                    created.Add(power.GetSingletonEntity());
                 Create(em, FlightConfigFactory.Create(catalog.Get<FlightConfigDefinition>(new ContentId("config_flight"))), created);
                 // Later rows (ENC-001, WPN, AI, ABL, SYS, ECO-007) are added by their tasks (SPEC-01 §5.3).
 

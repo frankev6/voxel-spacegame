@@ -31,5 +31,25 @@ namespace Game.Data.Definitions
         public float ShieldMultExplosive => shieldMultExplosive;
         public float ShieldMultRam => shieldMultRam;
         public float SustainWarningSeconds => sustainWarningSeconds;
+
+        /// <summary>Validates the authored ranges before baking (SPEC-22 PWR-003). Legacy shield multipliers are owned by DamageTableBlob.</summary>
+        public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
+        {
+            base.Validate(scope, context);
+            if (brownoutHoldTicks < 1)
+                scope.Error("PWR-E002", nameof(brownoutHoldTicks), "Brownout hold ticks must be at least 1.");
+            Minimum(scope, nameof(shieldPaddingScale), shieldPaddingScale, 1f);
+            Minimum(scope, nameof(shieldPaddingMetres), shieldPaddingMetres, 0f);
+            Minimum(scope, nameof(shieldMinRadiusMetres), shieldMinRadiusMetres, 0.5f);
+            if (!float.IsFinite(shieldRestartFraction) || shieldRestartFraction < 0f || shieldRestartFraction > 1f)
+                scope.Error("PWR-E002", nameof(shieldRestartFraction), "Shield restart fraction must be finite and within [0, 1].");
+            Minimum(scope, nameof(sustainWarningSeconds), sustainWarningSeconds, 1f);
+        }
+
+        static void Minimum(Game.Data.Validation.ValidationScope scope, string field, float value, float minimum)
+        {
+            if (!float.IsFinite(value) || value < minimum)
+                scope.Error("PWR-E002", field, $"{field} must be finite and at least {minimum}.");
+        }
     }
 }
