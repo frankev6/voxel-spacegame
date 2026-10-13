@@ -1183,11 +1183,11 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 - **Do:** Implement `LogicLexer`, `LogicToken`, `LogicTokenKind`, `LogicParser` and the `LogicAst*` classes per §4.6 and §5.1 steps 2–3: line/column tracking, string escapes `\"` and `\\`, depth limit 64, first-error stop with `NAR-E001/E002/E013`. Separate entry points `ParseExpression(string)` and `ParseCommand(string)`.
 - **Files:** `Assets/Game/Data/Logic/Compiler/{LogicLexer,LogicToken,LogicTokenKind,LogicParser,LogicAst,LogicAstLiteral,LogicAstVariable,LogicAstUnary,LogicAstBinary,LogicAstCall,LogicAstCommand,LogicDiagnostics}.cs`; `Assets/Game/Tests/EditMode/Data/Logic/LogicParserTests.cs`
 - **Acceptance criteria:**
-  - [ ] Precedence: `not a and b or c` parses as `((not a) and b) or c`; `1 + 2 >= 3` as `(1+2) >= 3`.
-  - [ ] `||`, `&&`, `!` are accepted as synonyms.
-  - [ ] Every §4.6 example parses; `has_item("x" 3)` fails with `NAR-E001` at the correct line:column.
-  - [ ] `notify "say \"hi\""` yields the text `say "hi"`.
-  - [ ] An expression nested 65 deep fails cleanly (no stack overflow).
+  - [x] Precedence: `not $a and $b or $c` parses as `((not $a) and $b) or $c`; `1 + 2 >= 3` as `(1+2) >= 3`.
+  - [x] `||`, `&&`, `!` are accepted as synonyms.
+  - [x] Every §4.6 example parses; `has_item("x" 3)` fails with `NAR-E001` at the correct line:column.
+  - [x] `notify "say \"hi\""` yields the text `say "hi"`.
+  - [x] An expression nested 65 deep fails cleanly (no stack overflow).
 - **Tests:** `LogicParserTests.Precedence_MatchesGrammar`, `.Synonyms_Accepted`, `.Examples_Parse`, `.SyntaxError_ReportsLineColumn`, `.StringEscapes`, `.DepthLimit_Enforced`, `.Command_ParsesArgsAndSignedInts`.
 
 ### NAR-003 — Type checker, registry, compiler and binder

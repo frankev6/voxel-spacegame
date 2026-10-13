@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 1 | 0 | 0 | 79 | 0 | 92 | 5 |
-| M3 | 139 | 4 | 0 | 0 | 37 | 0 | 180 | 10 |
+| M3 | 137 | 5 | 0 | 0 | 38 | 0 | 180 | 9 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -371,8 +371,8 @@
 | ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | no | todo |  |  |  |  |
 | ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-009, SPEC-70 | no | todo |  |  |  |  |
 | NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | e39b2d3 | Narrative contracts and precise future-task stubs; 2 required tests; full batch 901 EM / 128 PM, zero failures |
-| NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead narrative lexer/parser while workers complete combat and structures |
-| NAR-003 | Type checker, registry, compiler and binder | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-002 | no | todo |  |  |  |  |
+| NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 67ce3485 | Located lexer/AST/parser; seven focused checks pass; Q305 resolves grammar example |
+| NAR-003 | Type checker, registry, compiler and binder | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-002 | yes | todo |  |  |  |  |
 | NAR-004 | Condition and expression nodes | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003 | no | todo |  |  |  |  |
 | NAR-005 | Effect nodes and atomic effect lists | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-004 | no | todo |  |  |  |  |
 | NAR-006 | Fact catalog and reference resolvers | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | todo |  |  |  |  |
@@ -895,6 +895,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 302 | SPEC-23 Q25: fleet arrival envelope | Resolved: member arrival/braking radius=min(configured radius,5m), preserving lone-ship radius and real thruster control; required formation envelope is15m. | Tech lead |
 | 303 | SPEC-23 Q23 / ADR-0071: static station command composition | Resolved: AiSetup adds ShipCommand with Station AiBrain, no flight/propulsion components. Station tests exercise actual profile conversion, authored turret and power/aim/fire paths. | Tech lead |
 | 304 | SPEC-50 Q24: merchant session and numeric boundaries | Resolved: canonical stock index, finite game time, no backward-clock restock, closed sessions reject trades; nested merchant trades rejected, readonly refresh retained. Prices use specified rounding and bounded int values, quantity totals use long; finite stock overflow rejected before sale. Existing wallet/cargo sequence and refund preserved. | Tech lead |
+| 305 | SPEC-40 Q13: parser precedence example and internal results | Resolved: follow the grammar with $-prefixed variables; internal location-bearing AST and first-error code/line/column diagnostics, translated by NAR-003. Command integers use the Int32 domain. | Tech lead |
 
 
 ## Measurements
@@ -1006,6 +1007,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Narrative grammar accepted — astra (gpt-6)
+
+- NAR-002 implemented67ce3485: located expression/command tokens and AST, grammar precedence/synonyms, escaped strings, bounded nesting and first-error diagnostics. Q305 mirrors SPEC-40 Q13; type checking/binding remains NAR-003.
+- Compile clean (zero warning CS); focused LogicParserTests7/0/0. Evidence `Logs/playtest/narrative-parser/`. No broad suite or performance run.
+- Test count: spec-required: 7, extra: 0.
 
 ### 2026-10-13 — Owner correction: shorten test fixtures — astra (gpt-6)
 

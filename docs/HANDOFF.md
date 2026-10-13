@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Narrative grammar accepted:** NAR-00267ce3485; clean compile and7 focused checks. Lexer/AST/parser ready for NAR-003 type checking and binding. Workers continue AI-010 fixture shortening, AI-015 fleet scenarios and SYS-003 structures.
+
 - **Merchants accepted:** ECO-005f4cae431, clean compile and8 focused tests (0.48s). Buying/selling, stock/restock and prices implemented; integer-boundary sale rounding repaired. UI/persistence remain later tasks. Existing power worker next SYS-003 structure builders; AI-010/015 continue.
 
 - **Normal enemy combat now works:** FND-022/AI-009 accepted with clean compile and4 focused checks. Fresh player automatically has allegiance; real NPC fire destroyed168/detached15 cells without player mutation or injected damage. Station turret scenarios target/fire while remaining static. Evidence `Logs/playtest/station-player-ai/`. Merchants staged for acceptance; AI-010 active; next combat assignment AI-015.

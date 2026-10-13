@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **NAR-002 accepted:** primary integration67ce3485, compile93926 clean, focused21386 seven passed. Evidence `narrative-parser/`; ready to FF main and claim NAR-003. AI-010aa12b616 reviewed but worker actively shortening fixtures; wait for final delivery before integration. AI-015147/SYS-003156 active. Editor17922 open/stopped; no active validation. Previous turn implemented parser (progress).
+
 - **Fast fixtures persisted / parser implemented:** owner correction committed23799d99 and delivered to all three exact workers. Lead isolated NAR-002 e6e9ee02 adds AST and expression/command parsing with bounded nesting and first-error diagnostics; seven required tests and compilation remain. No Unity run this turn. Primary runtime unchanged; last worker snapshots AI-015146, SYS-003155, AI-010128 active. Prior acknowledgment alone was no progress; this turn changes authoritative docs/code.
 
 - **Lead narrative implementation:** NAR-002 claimed38d4c17b; existing isolated lead checkout now `task/NAR-002-logic-parser`. Lexer/token/location/first-error types implemented (expression operators, command words, escaped strings, CRLF tracking). Parser/AST and seven required tests remain, no compilation claim. Primary main unchanged runtime; Editor17922 open/stopped. Worker snapshots AI-010126, AI-015145, SYS-003154 active. Prior turn closed merchants and recycled worker (progress).
