@@ -15,10 +15,10 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 46 | 1 | 0 | 0 | 44 | 0 | 91 | 5 |
-| M3 | 161 | 3 | 0 | 0 | 16 | 0 | 180 | 15 |
+| M2 | 44 | 2 | 0 | 0 | 45 | 0 | 91 | 5 |
+| M3 | 156 | 8 | 0 | 0 | 16 | 0 | 180 | 10 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 2 |
-| A0 | 4 | 3 | 0 | 1 | 8 | 0 | 16 | 0 |
+| A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 <!-- summary:end -->
@@ -257,9 +257,9 @@
 | PWR-001 | Public contract types | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | CORE-001, DATA-001, VOX-001, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | eeed571 | Canonical declarations; three required tests; Q202 deferred allocator ordering. Full batch green. |
 | PWR-002 | Shield maths | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 08c5f01 | Shield intersections, containment and overlap; 5 required tests; full batch 901 EM / 128 PM, zero failures |
 | PWR-003 | Tuning definition, baker and spawn helper | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3f8692f | Power tuning validation/bake and spawn registration; catalog e722af7; full 968 EM /145 PM green |
-| PWR-004 | Registration and `PowerInitSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-003, WPN-001, VOX-001, SPEC-10 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead isolated implementation; unlocks FLT-012 and full combat runtime |
-| PWR-005 | `PowerAllocationSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-004, ABL-001 | no | todo |  |  |  |  |
-| PWR-006 | `ShipStatsAggregateSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-004, SPEC-12 | no | todo |  |  |  |  |
+| PWR-004 | Registration and `PowerInitSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-003, WPN-001, VOX-001, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-13 | cc561a2 | Registration, same-frame binding and energy initialization; 5 required tests; full batch green |
+| PWR-005 | `PowerAllocationSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-004, ABL-001 | yes | todo |  |  |  |  |
+| PWR-006 | `ShipStatsAggregateSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-004, SPEC-12 | yes | todo |  |  |  |  |
 | PWR-007 | `ShieldSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-005, PWR-006, PWR-002, DMG-001, VFX-001, SPEC-02 | no | todo |  |  |  |  |
 | PWR-008 | Power budget validator and balance tests | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-006, SPEC-72, WPN-001 | no | todo |  |  |  |  |
 | PWR-009 | Performance tests | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-005, PWR-006, PWR-007 | no | todo |  |  |  |  |
@@ -514,8 +514,8 @@
 | ART-012 | Finalize the design system for approval | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | ART-011 | no | done | claude (claude-opus-5-5) | 2026-10-11 | d60cdf7 | Replaced by DESIGN-GUIDE.md (d60cdf7); golden captures wait for the in-engine look test. Done under ADR-0019 (no per-task review) |
 | ART-013 | GATE: Owner approves design system | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-012 | yes | done | frank (human) | 2026-10-11 | 6a64d71 | Approved 2026-10-11: NOCTURNE as DESIGN-GUIDE.md. Owner: "yes I approve" |
 | AST-001 | Public contract types: asset manifest, naming rules and licence register | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | ART-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b175f2f | Art contracts and 1019 planned manifest rows; no produced asset claim; spec-required: 4, extra: 0 |
-| AST-002 | Art import rules and asset validator | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | AST-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable power worker; AI-005 awaits AI-003 validation; no asset production |
-| AST-003 | Licence audit of carried-over placeholders | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | AST-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Combat worker audits existing evidence; unknown licences stay placeholder-only; no owner wait |
+| AST-002 | Art import rules and asset validator | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | AST-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 12bc648 | Production importer/validator, A1 zero errors and expected A2 failures; 7 required tests; full batch green |
+| AST-003 | Licence audit of carried-over placeholders | [SPEC-81](specs/SPEC-81-asset-production.md) | A0 | standard | AST-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 0550393 | 150/150 required files inventoried; retained OFL proof; no asset deletion or invented approvals |
 | ART-014 | Apply the approved direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A1 | standard | ART-013 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Presentation worker; mechanically apply approved Nocturne tokens/assets; preserve owner brightness; lead validation |
 | AST-004 | Fonts and type ramp | [SPEC-81](specs/SPEC-81-asset-production.md) | A1 | standard | SPEC-80, AST-002 | no | todo |  |  |  |  |
 | AST-005 | Brick layers: hull and internals (layers 0–19) | [SPEC-81](specs/SPEC-81-asset-production.md) | A1 | standard | SPEC-80, SPEC-11, AST-002 | no | todo |  |  |  |  |
@@ -948,6 +948,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — PWR-004 / AST-002 / AST-003 full batch green — astra (gpt-6)
+
+- Full session 2085 exited 0: **987/0/1 EditMode, 145/0/53 PlayMode**. Compile clean; focused acceptance 12/0/0. Evidence `Logs/playtest/pwr004/{acceptance-final,editmode-final,playmode-final}.xml`, `compile.log`; CLI evidence `Logs/tools/ast002-a1.log`, `ast002-a2.log` (expected 0/1 exits).
+- PWR-004 registration, sorted consumer binding, rebind detection and initial energy complete. Tests: spec-required: 5, extra: 0. Allocation/stat aggregation still PWR-005/006.
+- AST-002 importer/validator complete with explicit A1/A2 staging Q243–244, unchanged desktop compression and advisory budgets. Tests: spec-required: 7, extra: 0. A2 still truthfully fails retained placeholders/unverified licences and unfinished font/material production; no assets generated to bypass those tasks.
+- AST-003 inventory complete, 150/150 files covered; licence verification remains limited to actual proof. Tests: spec-required: 0 new tests (inventory/validator audit), extra: 0. Zero optimization passes for the batch. Restored preserved QualitySettings; runner removed test scene, orphan test-folder metadata removed only after terminal.
+- Next prepared batch includes FLT-012's eight required checks, SYS-002 boot/config generation, AI-005 and TRV-001. Native goal remains active; all three reusable workers assigned. ADR-0065 accepts immutable formation storage without changing the existing boot lifetime.
 
 ### 2026-10-13 — Power acceptance green; flight integration started — astra (gpt-6)
 
