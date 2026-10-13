@@ -484,7 +484,7 @@
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
 | MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | no | todo |  |  |  |  |
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | no | todo |  |  |  |  |
-| MIG-014 | Body template stubs | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-004, GAL-001 | yes | todo |  |  |  |  |
+| MIG-014 | Body template stubs | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-004, GAL-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Dispatched to reusable presentation worker; lead owns generation and Unity validation |
 | MIG-015 | Hand-off package | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-002, MIG-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 5241ee5 | Typed legacy handoff metadata; spec-required: 3, extra: 0 |
 | INP-008 | Gamepad scheme | [SPEC-03](specs/SPEC-03-input.md) | M4 | standard | INP-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 33e24c3 | Gamepad bindings/device labels/aim; hardware feel untested; spec-required: 2, extra: 0 |
 | REN-015 | LOD2 grid proxies | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M4 | frontier | REN-012 | yes | todo |  |  |  |  |
