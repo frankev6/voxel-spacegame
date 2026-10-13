@@ -1,0 +1,14 @@
+{
+  "id": "ability_shield_toggle",
+  "formerIds": [],
+  "displayName": "ability_shield_toggle",
+  "description": "SPEC-24 table fixture",
+  "kind": 0,
+  "energyCost": 0,
+  "cooldownSeconds": 1,
+  "maxCharges": 1,
+  "chargeRechargeSeconds": 0,
+  "durationSeconds": 0,
+  "statModifiers": [],
+  "shieldEnableThreshold": 0.3
+}

@@ -1,0 +1,23 @@
+{
+  "id": "ability_speed_boost",
+  "formerIds": [],
+  "displayName": "ability_speed_boost",
+  "description": "SPEC-24 table fixture",
+  "kind": 1,
+  "energyCost": 15,
+  "cooldownSeconds": 0.5,
+  "maxCharges": 2,
+  "chargeRechargeSeconds": 3,
+  "durationSeconds": 1,
+  "statModifiers": [
+    {
+      "Stat": 1,
+      "Multiplier": 1.8
+    },
+    {
+      "Stat": 0,
+      "Multiplier": 2
+    }
+  ],
+  "shieldEnableThreshold": 0
+}

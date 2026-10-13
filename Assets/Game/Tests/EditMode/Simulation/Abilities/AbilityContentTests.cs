@@ -33,8 +33,9 @@ namespace Game.Tests.EditMode.Simulation.Abilities
         }
         AbilityDefinition Load(string id)
         {
-            var asset = AssetDatabase.LoadAssetAtPath<AbilityDefinition>(Fixtures + id + ".asset");
-            Assert.IsNotNull(asset, id); var clone = Object.Instantiate(asset); owned.Add(clone); return clone;
+            var clone = ScriptableObject.CreateInstance<AbilityDefinition>(); owned.Add(clone);
+            EditorJsonUtility.FromJsonOverwrite(System.IO.File.ReadAllText(Fixtures + id + ".json"), clone);
+            return clone;
         }
         static void Set(AbilityDefinition definition, string field, object value)
             => typeof(AbilityDefinition).GetField(field, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(definition, value);

@@ -59,6 +59,14 @@ namespace Game.Editor.Migration.Converters
                     context.Writer.CreateOrUpdate<BlockDefinition>("Blocks", id, so =>
                     {
                         var writer = context.Writer;
+                        // Later converters own ability links; rebuilding block fields must not erase them.
+                        if (context.Catalog != null && context.Catalog.TryGet<BlockDefinition>(new Game.Core.ContentId(id), out var previous))
+                            writer.Set(so, "grantedAbilities", p =>
+                            {
+                                p.arraySize = previous.GrantedAbilities.Count;
+                                for (int n = 0; n < p.arraySize; n++)
+                                    p.GetArrayElementAtIndex(n).objectReferenceValue = previous.GrantedAbilities[n];
+                            });
                         writer.Set(so, "displayName", p => p.stringValue = dto.ItemName);
                         writer.Set(so, "description", p => p.stringValue = dto.Description);
                         writer.Set(so, "category", p => p.intValue = (int)ItemCategory.Block);

@@ -32,7 +32,7 @@ namespace Game.Tests.EditMode.Editor.Migration
         {
             var clock = Stopwatch.StartNew(); first = LegacyMigrationRunner.RunAll(false); fullTimes[0] = clock.Elapsed.TotalMilliseconds;
             firstReport = File.ReadAllText("Import/Migration/report.md"); firstManifest = File.ReadAllBytes("Import/Migration/manifest.json");
-            assets = AssetRows(firstReport).ToDictionary(r => r.Path, r => File.ReadAllBytes(r.Path));
+            assets = AssetRows(firstReport).Select(r => r.Path).Distinct().ToDictionary(path => path, File.ReadAllBytes);
             clock.Restart(); second = LegacyMigrationRunner.RunAll(false); fullTimes[1] = clock.Elapsed.TotalMilliseconds;
             secondReport = File.ReadAllText("Import/Migration/report.md"); secondManifest = File.ReadAllBytes("Import/Migration/manifest.json");
         }
@@ -46,7 +46,7 @@ namespace Game.Tests.EditMode.Editor.Migration
         {
             Assert.AreEqual(0, first.ErrorCount, first.ToText()); Assert.AreEqual(0, second.ErrorCount, second.ToText());
             var report = ContentValidatorRunner.Validate(ContentDatabaseBuilder.Rebuild()); Assert.AreEqual(0, report.ErrorCount, report.ToText());
-            Assert.AreEqual(98, AssetRows(secondReport).Count()); // 35 items, 21 blocks, 13 ships, 20 audio cues, 9 weapons.
+            Assert.AreEqual(100, AssetRows(secondReport).Select(r => r.Path).Distinct().Count()); // 35 items, 21 blocks, 13 ships, 20 audio cues, 9 weapons, 2 abilities.
         }
         [Test] public void SecondRun_IsIdempotent()
         {
