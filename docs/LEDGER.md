@@ -924,6 +924,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — WPN-003 next combat batch prepared — astra (gpt-6)
+
+1. Isolated implementation `6772372` and required tests `b13fd8b`: canonical spatial candidates, active ellipsoid shields, exact hull cells, celestial sphere hits and deterministic nearest-hit ties. Spec-required: 7, extra: 0; Unity validation pending, not marked done. Current primary full suite has 939 EditMode passes; PlayMode session 21701 remains live.
+2. Reviewed/integrated PWR-003 `03eff52` (spec-required: 4, extra: 0) and UI-011 `bce99a3` (spec-required: 10, extra: 0) in the isolated combat checkout. Resolved root/theme conflicts preserving all tooltip, notification and modal lifetimes. Power content catalog rebuild and Unity verification remain pending.
+3. ART-014 amended delivery `3adb761` integrated there as `8d3e706`: approved numeric tokens, GUID-preserving existing OFL font move, reference-board sources outside runtime Assets. Full art acceptance remains open for ART-007 validator, canonical ARK content and approved production look/font producers; no fabricated asset or owner gate. Existing checker tests reused, no new tests. Spec decisions await central mirror with primary integration.
+4. All three exact reusable threads are active on WPN-002, MIG-010 and ABL-002; dispatch board and handoff corrected. No primary runtime edits during validation, no new Unity instance or remote operation.
+
 ### 2026-10-13 — AI-002 implementation and next compatible batch — astra (gpt-6)
 
 1. `bb73f9b` implements persistent spatial containers, complete ordered segment/sphere queries, bounded scratch fallback and entity binary search. Five required tests pass, including independent brute-force comparisons for 10,000 proxies plus ten large bodies and 10,000 queries per shape; spec-required: 5, extra: 0. Compile zero CS warnings. Q223–224 preserve read-only queries and bound cell traversal without truncating totals. No tuning passes.
