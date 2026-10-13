@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **FACT accepted / import pipeline next:**6a0c3c47 compile60074 clean, batch71608 five exact functional cases passed; benchmark unrun. NAR-00920f487c0 source review complete, next integration; its Q15 must become17 (lead15/16 already used). No active validation. Previous turn implemented FACT (progress).
+
 - **FACT participant implemented:** NAR-008 claimed033f2cac; staged version1 payload writer and fully parsed/validated restore before mutation, defaults for version0, unchanged FACT registry order20. Five functional checks plus one opt-in measurement authored; compile60074 following namespace repair, acceptance still pending. NAR-009 delivered20f487c0 (Q15 collision to renumber); same worker auditing actual HUD/spawn dependencies, no new ready standard implementation. NAR-004165/NAR-014179 active. Previous turn closed FactStore (progress).
 
 - **FactStore accepted:**18906e47; seven functional checks68749, final compile57658 clean, two performance fixtures deliberately unrun. Trace world binding belongs to NAR-010; Q15→313. Ready FF main and next frontier narrative service/save participant. Workers NAR-004164/NAR-014178/NAR-009147 active. No active Unity validation. Previous turn verified facts/authored perf fixtures (progress).
