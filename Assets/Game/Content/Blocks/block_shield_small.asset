@@ -50,7 +50,7 @@ MonoBehaviour:
       type: {class: ShieldEmitterModule, ns: Game.Data.Blocks, asm: Game.Data}
       data:
         Params:
-          Capacity: 300
-          RegenPerSecond: 15
-          RechargeDelaySeconds: 3
-          PowerDraw: 10
+          Capacity: 3000
+          RegenPerSecond: 120
+          RechargeDelaySeconds: 4
+          PowerDraw: 8
