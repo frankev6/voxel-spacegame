@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 13 | 2 | 0 | 0 | 77 | 0 | 92 | 6 |
+| M2 | 12 | 1 | 0 | 0 | 79 | 0 | 92 | 5 |
 | M3 | 140 | 4 | 0 | 0 | 36 | 0 | 180 | 11 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
@@ -218,7 +218,7 @@
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  | Await actual galaxy services; SYS-010 partial contract mapping: add Allegiance, real profiles/hooks, supplied StarSystemMember, ulong lookup/despawn adapter and dual service registration; fake tests do not complete runtime |
 | FND-020 | Playable stationary-target shooting and physical breakup | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-017, FND-018, FLT-001, DMG-001, WPN-001, VFX-001 | yes | done | astra (gpt-6) | 2026-10-12 | 53e61db | Playable station/Space fire; review fixes: bounded integrity, canonical masks, allocation attribution, stronger image checks; default suites green; perf advisory |
 | FND-021 | Automatic aligned test station in World | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-020, SPEC-63 | yes | done | astra (gpt-6) | 2026-10-13 | c3bb396 | Automatic World station at Y=-2 m; idempotent range request; direct World Play verified; spec-required: 1 (existing feature test extended), extra: 0 |
-| FND-022 | Player allegiance in the current world spawn path | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-010, WPN-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Live enemy ignored player until canonical allegiance supplied; preserve running game using isolated checkout |
+| FND-022 | Player allegiance in the current world spawn path | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-010, WPN-001 | yes | done | astra (gpt-6) | 2026-10-13 | ff6a2704 | Canonical player allegiance; real-fire check passes; fresh NPC destroyed168/detached15 cells |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 161c8d2 | Strict weapon links, stats and ordered ability bake/hash; spec-required: 3, extra: 0 |
 | PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | 094f430 | Pair-specific grace; three required tests. Full EM 861/0/1, PM 121/0/53; compile clean. |
 | DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-12 | e3377fa | Four channels, owned phase memory, stable explosion drains; 5 tests; Q179–180 |
@@ -272,7 +272,7 @@
 | AI-006 | AiDecisionSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-004, AI-005, SPEC-20, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, ABL-001 | yes | done | astra (gpt-6) | 2026-10-13 | 7c50bdaa | Decisions and nine required checks verified; full1207/170 green; Q291-293; steering edge delivery remains AI-007 |
 | AI-007 | AiSteeringSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 2a6444b2 | Steering and ability edges; four required checks pass in13-check shield/steering batch; scoped closeout ADR-0070 |
 | AI-008 | PlayerCombatStatusSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006, DMG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 0d64274b | Combat status singleton; three required checks pass; scoped closeout ADR-0070 |
-| AI-009 | Station turret AI | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Claimed after focused AI acceptance; ADR-0070; lead owns Unity |
+| AI-009 | Station turret AI | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | aed6fcbd | Two turret scenarios and existing setup check pass; static pose retained |
 | AI-010 | AI combat scenarios | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007, AI-008, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-008, PWR-010 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Claimed after focused AI acceptance; ADR-0070; lead owns Unity |
 | AI-011 | AI determinism | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010 | no | todo |  |  |  |  |
 | AI-012 | AI and hash performance | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010, TST-001 | no | todo |  |  |  |  |
@@ -1005,6 +1005,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Static turrets and normal player combat verified — astra (gpt-6)
+
+- AI-009 aed6fcbd supplies Station ShipCommand through AiSetup without flight components (ADR-0071/Q303); both required production turret scenarios pass. FND-02292371889/ff6a2704 supplies Allegiance.Player on the normal player request; existing real Space-fire scenario verifies it and station damage. Existing AiSetup anchor/profile check also passes. Combined compile clean; focused results2/0/0 turret,1/0/0 player-fire,1/0/0 setup. Evidence `Logs/playtest/station-player-ai/`.
+- Fresh normal new-game player, no allegiance mutation: existing Fighter NPC4099 spawned through production NpcShip pipeline engaged and dealt19035.20 damage, destroying168 player cells and detaching15 by tick1130. Source/instigator524514:7; fresh-damage.txt and fresh-allegiance.txt prove source and composition. No injected damage/new art; no full regression rerun or tuning.
+- Test counts: AI-009 spec-required:2, extra:0 (existing setup check also extended); FND-022 spec-required:1, extra:0 (existing scenario extended). Merchant6cd04fb0 reviewed/staged23ef50c9 in isolated checkout, acceptance pending. Next recycle combat to AI-015; AI-010 remains active.
 
 ### 2026-10-13 — Live enemy integration finding — astra (gpt-6)
 

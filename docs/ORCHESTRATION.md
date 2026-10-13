@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Combat batch closed:** AI-009/FND-022 accepted, compile clean and four focused checks pass. Fresh live NPC fire168 destroyed/15 detached, no player allegiance mutation; `station-player-ai/`. Existing lead isolated tree `task/ECO-005-reviewed-integration` at23ef50c9 stages merchant6cd04fb0, still uncompiled. Power delivery verified152; presentation AI-010 remains active. Next FF main, claim/recycle combat AI-015; preserve live Editor17922 until merchant/scenario batch validation.
+
 - **Turret acceptance green:** combined compile11012 clean, focused live55810 exited0 with2/0/0 TurretAiTests; evidence `station-player-ai/turrets.xml`. FND-022 real-fire/new-player check25184 exited0 with1/0/0, archived player-fire.xml. AiSetupTests.Anchor_FromPose17259 now active in Editor17922. No mutations or competing Unity until terminal. Next archive result, AiSetupTests.Anchor_FromPose, fresh live enemy without player mutation, closeout/recycle combat worker AI-015.
 
 - **Turret delivery integrated:**4504c914 reviewed/cherry-picked aed6fcbd; spec merge preserves Q23/24/25, turret Q23 mirroredQ303. Combined FND-022/turret compile11012 active in open stopped Editor17922. Prior FND compile36848 passed clean. Next focused TurretAiTests and RealFire_DamagesStationaryTarget plus AiSetupTests.Anchor_FromPose; no broad run. Combat worker notified next AI-015 after closure, power/presentation remain active124/151. Previous turn integrated player fix and repaired namespace collision (progress).
