@@ -9,7 +9,7 @@
 | **Depended on by** | Every spec that shows art or plays audio (they switch from placeholders at A2) |
 | **Milestone** | A0 (`AST-001` … `AST-003`, no assets produced), A1 (`AST-004` … `AST-032`), A2 (`AST-033` … `AST-035`) |
 
-> Read [01-architecture.md](../01-architecture.md), [02-conventions.md](../02-conventions.md) and [03-glossary.md](../03-glossary.md) before this spec. This spec may not contradict them. Every value in this spec's tasks comes from the **approved** [DESIGN-SYSTEM.md](../design/DESIGN-SYSTEM.md); "the approved direction" means the direction recorded in its §1.3 and §12. Where this spec says `§x.n`, read the approved direction's section (5, 6 or 7).
+> Read [01-architecture.md](../01-architecture.md), [02-conventions.md](../02-conventions.md) and [03-glossary.md](../03-glossary.md) before this spec. This spec may not contradict them. [DESIGN-GUIDE.md](../design/DESIGN-GUIDE.md) is the approved source of design values; its adopted DESIGN-SYSTEM §4 and §10–§11 supply the shared technical rules. Direction sections of DESIGN-SYSTEM are reference only unless the guide adopts them (Q16).
 
 ## 1. Purpose
 
@@ -37,7 +37,7 @@ Produce every art and audio asset of the game in the approved design system, the
 ## 3. Decisions (binding)
 
 1. **Every A1 and A2 task depends on `SPEC-80`**, which includes the gate `ART-013` and `ART-014`. Reason: ADR-0009.
-2. **The approved DESIGN-SYSTEM.md is the only source of values.** A hex, size, font or timing not found there needs a §12 decision row before it is used. Reason: coherence.
+2. **The approved DESIGN-GUIDE.md and its adopted technical appendix are the source of values.** A new design value needs an owner/guide decision before use; the old direction proposals do not override the guide. Reason: coherence; SPEC-80 §3.2 and DESIGN-GUIDE §0.3 (Q16).
 3. **World art uses exactly two materials: `M_Brick.mat` and `M_Prop_Trim.mat`** (plus art-owned materials for sky, bodies, VFX and overlays). No material is created per block, grid, faction or damage state (architecture §11.3, DESIGN-SYSTEM §10.14.1). Reason: SRP Batcher and Entities Graphics at 1M cells.
 4. **Art tasks never change gameplay data.** Cosmetic structural blocks copy `block_hull`'s gameplay values exactly; meshes fit the SPEC-04 footprint, never the other way round (conventions §5). Reason: placeholder policy.
 5. **Block, ship and paint icons are rendered by `BlockIconRenderer` (`AST-026`), never drawn.** Reason: consistency and cost.
@@ -138,13 +138,15 @@ Header line exactly: `asset_id,kind,path,content_ids,budget,task,source,licence,
 | `licence` | Licence name or `-` |
 | `status` | `planned`, `in-progress`, `review`, `done`, `dropped` |
 
+AST-001 inventories planned imported outputs and edits, not produced assets. Paths are unique; shared outputs use their earliest producing task. Filename stems can repeat across types/folders. `definition` also covers authored Unity text definitions (theme sheets, UXML, scene composition and accompanying font licence text), without adding a new kind. Editable masters, tool code, receipts and review captures are recorded by their producing task/source documentation rather than counted as runtime art. Planned source/licence fields describe intended routes only (Q17).
+
 ### 4.3 `docs/design/LICENSES.md` (public contract)
 
 One table, columns exactly: `| Path | Kind | Source | Licence | Author | Date | Proof | Status |`. *Source* is a URL or `own work`; *Proof* is a file in `docs/design/licenses/` (licence text, receipt, written permission) or `-` for own work; *Status* is `verified`, `placeholder-only` or `remove`.
 
 ### 4.4 Definitions used (owned elsewhere)
 
-`BlockDefinition` (`materialLayer`, `propMesh`), `ItemDefinition.icon` (SPEC-04); `ArtDirectionDefinition`, `BrickMaterialDefinition`, `BlockVisualDefinition` (SPEC-80 §4); `FxDefinition` (SPEC-63); `BodyVisualDefinition` (SPEC-31); `AudioCueDefinition` (SPEC-64, prefixes `sfx_`, `music_`); `ShipBlueprintDefinition` (SPEC-10). This spec creates **instances** of them under `Assets/Game/Content/<Area>/` and never edits their classes.
+`BlockDefinition` (`materialLayer`, `propMesh`), `ItemDefinition.icon` (SPEC-04); `ArtDirectionDefinition`, `BrickMaterialDefinition`, `BlockVisualDefinition` (SPEC-80 §4); `FxDefinition` (SPEC-63, area `Vfx`, prefix `fx_`); `BodyVisualDefinition` (SPEC-30, rendered by SPEC-31, prefix `bodyvis_`); `AudioCueDefinition` (SPEC-64, prefix `cue_` for all buses); `ShipBlueprintDefinition` (SPEC-10). This spec creates **instances** of them under `Assets/Game/Content/<Area>/` and never edits their classes (Q16).
 
 ## 5. Systems, services and flow
 
@@ -243,7 +245,7 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Acceptance criteria:**
   - [ ] The manifest has rows for every asset listed in this spec's tasks (at least 400 rows), all `planned`.
   - [ ] `tools/compile.sh` passes.
-- **Tests:** `ArtAssetRulesTests.Patterns_AcceptDesignSystemExamples` (every example of DESIGN-SYSTEM §10.7 matches its pattern), `.Patterns_RejectSpacesAndWrongCase`, `.Lod0Budget_MatchesTable` (1→150, 4→600, 18→1500, 64→3000, 65→5000), `.Lod1Budget_IsAtMostQuarterOfLod0`.
+- **Tests:** `ArtAssetRulesTests.Patterns_AcceptDesignSystemExamples` (every example of DESIGN-SYSTEM §10.7 matches its pattern; definition/source examples use canonical ContentIdRules), `.Patterns_RejectSpacesAndWrongCase`, `.Lod0Budget_MatchesTable` (1→150, 4→600, 18→1500, 64→3000, 65→5000), `.Lod1Budget_IsAtMostQuarterOfLod0` (explicit one-cell 40-triangle exception; all larger footprints ≤25%, Q15).
 
 ### AST-002 — Art import rules and asset validator
 - **Milestone:** A0
@@ -271,8 +273,8 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Milestone:** A1
 - **Tier:** standard — fonts and sizes are fixed by the approved direction
 - **Depends on:** `SPEC-80`, `AST-002`
-- **Do:** For the approved direction's display, body, body-strong and mono fonts (DESIGN-SYSTEM §8.1, §11): download from the font's official repository, create static instances where the source is variable (fontTools `instancer`; Archivo: `wdth=125, wght=800`), name per §10.7, place `OFL.txt` next to them, create FontAssets per §10.9. Point `tokens.uss` font tokens (and `--font-body-strong` if accepted) at them. Create `Assets/Game/UI/Theme/Components/typography.uss` with classes `.text-xs` … `.text-xxl`, `.text-display`, `.text-body`, `.text-mono` using only tokens, and a specimen `Assets/Game/UI/Theme/Gallery/TypeSpecimen.uxml` showing every character of the §10.9 set at every size. Remove the placeholder font references from `tokens.uss`.
-- **Files:** `Assets/Game/UI/Theme/Fonts/*`; `Assets/Game/UI/Theme/tokens.uss`; `Assets/Game/UI/Theme/Components/typography.uss`; `Assets/Game/UI/Theme/Gallery/TypeSpecimen.uxml`; `docs/design/LICENSES.md`
+- **Do:** For the approved direction's display, body, body-strong and mono fonts (DESIGN-SYSTEM §8.1, §11): download from the font's official repository, create static instances where the source is variable (fontTools `instancer`; Archivo: `wdth=125, wght=800`), name per §10.7, place `OFL.txt` next to them, create FontAssets per §10.9. Point `tokens.uss` font tokens (and `--font-body-strong` if accepted) at them. Restyle the existing `Assets/Game/UI/Theme/utilities.uss` with SPEC-60 §4.6’s typography classes (`.text-xs` … `.text-xxl`, `.text-display`, `.text-mono`) using only tokens; body typography remains on `.ui-root`, and a specimen `Assets/Game/UI/Theme/Gallery/TypeSpecimen.uxml` showing every character of the §10.9 set at every size. Remove the placeholder font references from `tokens.uss`.
+- **Files:** `Assets/Game/UI/Theme/Fonts/*`; `Assets/Game/UI/Theme/tokens.uss`; `Assets/Game/UI/Theme/utilities.uss`; `Assets/Game/UI/Theme/Gallery/TypeSpecimen.uxml`; `docs/design/LICENSES.md`
 - **Acceptance criteria:**
   - [ ] The specimen shows no missing-glyph boxes (screenshot in the ledger log).
   - [ ] Each FontAsset atlas is 1024 × 1024 or smaller and each font asset file ≤ 4 MB.
@@ -432,7 +434,7 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Tier:** frontier — owns the 06 debris GPU budget
 - **Depends on:** `AST-007`, `SPEC-63`
 - **Do:** VFX Graphs per the approved §x.7 and §10.17, fed by SPEC-63's event buffers: `VFX_Debris_Cells` (cube particles, colour from `_PaintPalette` by `CellRemoved.Color`, hot start, spin, life 3–6 s, scale-out), `VFX_Explosion_Small`, `VFX_Explosion_Large`, `VFX_Explosion_Reactor`, `VFX_Hit_Kinetic`, `VFX_Hit_Energy`, `VFX_Hulk_Sparks`, `VFX_Ember_Edges`; chunk-body dissolve through `_Dissolve01` (DESIGN-SYSTEM §10.14.4). `FxDefinition` assets for each.
-- **Files:** `Assets/Game/Art/VFX/Destruction/*`; `Assets/Game/Content/Fx/*`
+- **Files:** `Assets/Game/Art/VFX/Destruction/*`; `Assets/Game/Content/Vfx/*`
 - **Acceptance criteria:**
   - [ ] 50,000 live debris particles ≤ 1 ms GPU on the reference machine (06 gate); ≤ 20,000 spawns per frame.
   - [ ] Timings equal §10.17 within one frame at 60 FPS (capture analysis).
@@ -443,7 +445,7 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Tier:** standard — production within SPEC-63's system and listed budgets
 - **Depends on:** `AST-018`, `SPEC-21`
 - **Do:** Muzzle flashes for the six weapon families; projectile visuals for `projectile_bullet`, `projectile_energybullet`, `projectile_flak_shell` (+ burst), `projectile_missile` (exhaust + trail), beam visuals for `projectile_beam` (core + halo + impact glow); impacts for the four damage types; all per the approved §x.7 with damage-type colours from `artdir_<dir>`.
-- **Files:** `Assets/Game/Art/VFX/Weapons/*`; `Assets/Game/Content/Fx/*`
+- **Files:** `Assets/Game/Art/VFX/Weapons/*`; `Assets/Game/Content/Vfx/*`
 - **Acceptance criteria:**
   - [ ] 5,000 live projectiles render in ≤ 1 ms GPU.
   - [ ] Each damage type's impact is identified correctly by a second reviewer from a 150 m capture.
@@ -454,7 +456,7 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Tier:** standard — production within SPEC-63's system
 - **Depends on:** `AST-018`, `SPEC-32`
 - **Do:** Thruster plumes (small, medium, large; throttle-driven), shield shader `SH_Shield.shadergraph` (ellipsoid, ring buffer of 8 hit ripples per ship, collapse, raise), lane jump transition (look of SPEC-32's `travel-cover` per direction — white-out, black-out or sky-key wipe — through `--color-travel-cover` and `screens/travel.uss`; the timing is SPEC-32 §5.8's contract: opaque from commit until the arrival area is ready, transparent `--duration-travel-fade` (0.5 s) later; spool and arrival Fx on `FxKind.Warp`), supercruise streaks, interact beacon, ability effects for `ability_speed_boost` and `ability_shield_toggle`, motion dust (3 parallax layers).
-- **Files:** `Assets/Game/Art/VFX/Systems/*`; `Assets/Game/Art/Shaders/SH_Shield.shadergraph`; `Assets/Game/Content/Fx/*`
+- **Files:** `Assets/Game/Art/VFX/Systems/*`; `Assets/Game/Art/Shaders/SH_Shield.shadergraph`; `Assets/Game/Content/Vfx/*`
 - **Acceptance criteria:**
   - [ ] The jump cover follows SPEC-32 §5.8 exactly (fully opaque while `CoverRequested`, fully transparent 0.5 s after) and hides the whole star-system load (06 world gate); art changes only its look.
   - [ ] Shield ripple duration 0.4 s; 8 simultaneous ripples render without artefacts.
@@ -475,8 +477,8 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Milestone:** A1
 - **Tier:** standard — styles from approved tokens
 - **Depends on:** `AST-004`, `SPEC-60`
-- **Do:** `Assets/Game/UI/Theme/theme.tss` importing `tokens.uss`, `Components/typography.uss` and one USS per component with exactly these classes: `.btn`, `.btn--primary`, `.btn--danger`, `.btn--ghost`, `.panel`, `.panel__header`, `.tab`, `.tab--selected`, `.slot`, `.slot--empty`, `.slot--selected`, `.tooltip`, `.toast`, `.toast--positive`, `.toast--warning`, `.toast--danger`, `.toast--info`, `.bar`, `.bar__fill`, `.bar--hull`, `.bar--shield`, `.bar--energy`, `.list-row`, `.dialog-choice`, `.field`, `.toggle`, `.slider`, `.dropdown`, `.scrollbar`, `.modal`, `.keyhint`; hover/pressed/disabled/focus states per the approved §x.8; 9-slice sprites or shadow templates where §x.8 requires them. A component gallery `Gallery/ComponentGallery.uxml` shows every class in every state.
-- **Files:** `Assets/Game/UI/Theme/{theme.tss,Components/*.uss,Sprites/UI_*.png,Gallery/ComponentGallery.uxml}`
+- **Do:** Restyle the canonical `Assets/Game/UI/Theme/Game.tss`, `utilities.uss` and lowercase `components/*.uss`, preserving SPEC-60 §4.6's class catalogue and §4.8's imports. Do not introduce a parallel theme, legacy `.bar`/`.tab`/`.keyhint` names or new shared classes. Apply the approved guide's hover/pressed/disabled/focus look; 9-slice sprites or shadow templates only where it requires them. A component gallery `Gallery/ComponentGallery.uxml` shows every class in every state (Q16).
+- **Files:** `Assets/Game/UI/Theme/{Game.tss,utilities.uss,components/*.uss,Sprites/UI_*.png,Gallery/ComponentGallery.uxml}`
 - **Acceptance criteria:**
   - [ ] No literal colour, size, font or duration in any component USS (grep test).
   - [ ] Rules T1–T4 pass on a gallery capture; sizes equal DESIGN-SYSTEM §10.4.1.
@@ -487,8 +489,8 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Milestone:** A1
 - **Tier:** standard — styles and vector symbols from approved rules
 - **Depends on:** `AST-022`, `SPEC-61`
-- **Do:** Vector symbols (SVG → `VectorImage`): reticles (default, arc-limited, locked), markers ally (circle), enemy (diamond), neutral (square), objective, clue/rumor, interact, dock, gate, waypoint; radar blips in the same shapes; damage-direction indicator; target-frame brackets. `Components/hud.uss` with the zone layout of DESIGN-SYSTEM §10.4.2 and the approved direction's variant (§x.8); `HudZones.uxml` template.
-- **Files:** `Assets/Game/UI/Theme/Glyphs/GLY_{reticle_*,marker_*,blip_*}.svg`; `Assets/Game/UI/Theme/Components/hud.uss`; `Assets/Game/UI/Theme/Gallery/HudZones.uxml`
+- **Do:** Vector symbols (SVG → `VectorImage`): reticles (default, arc-limited, locked), markers ally (circle), enemy (diamond), neutral (square), objective, clue/rumor, interact, dock, gate, waypoint; radar blips in the same shapes; damage-direction indicator; target-frame brackets. `components/hud.uss` with the zone layout of DESIGN-SYSTEM §10.4.2 and the approved direction's variant (§x.8); `HudZones.uxml` template.
+- **Files:** `Assets/Game/UI/Theme/Glyphs/GLY_{reticle_*,marker_*,blip_*}.svg`; `Assets/Game/UI/Theme/components/hud.uss`; `Assets/Game/UI/Theme/Gallery/HudZones.uxml`
 - **Acceptance criteria:**
   - [ ] Zones within ±2 px of §10.4.2; HUD coverage ≤ 15 % in flight (capture analysis as in `ART-010`).
   - [ ] Marker colours pass rule C4; shapes follow rule C1.
@@ -551,7 +553,7 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Tier:** standard — fixed list in the approved style
 - **Depends on:** `AST-022`, `AST-014`, `AST-015`
 - **Do:** NORA avatar animated in UI Toolkit per the approved §x.8 (vector frames or USS transitions only); comms portraits 256 px as silhouettes in faction colours (8 factions) and for `officer_august`, `officer_gunner_vax`; MainMenu backdrop composition in `Assets/Game/Scenes/MainMenu.unity` (one hero ship, a hulk, a station silhouette, sky; no managers); a text wordmark in the display font (open question 7); app icon 1024 px with platform sizes set in PlayerSettings.
-- **Files:** `Assets/Game/UI/Theme/Sprites/UI_Portrait_*.png`; `Assets/Game/UI/Theme/Components/nora.uss`; `Assets/Game/Scenes/MainMenu.unity`; `Assets/Game/UI/Theme/Sprites/UI_Wordmark_Main.png`; `Assets/Game/Art/AppIcon/T_AppIcon_1024.png`
+- **Files:** `Assets/Game/UI/Theme/Sprites/UI_Portrait_*.png`; `Assets/Game/UI/Theme/screens/nora.uss`; `Assets/Game/Scenes/MainMenu.unity`; `Assets/Game/UI/Theme/Sprites/UI_Wordmark_Main.png`; `Assets/Game/Art/AppIcon/T_AppIcon_1024.png`
 - **Acceptance criteria:**
   - [ ] MainMenu backdrop passes L1–L4 in a capture; app icon readable at 32 px (reviewer).
 - **Tests:** `MainMenuSceneTests.Backdrop_LoadsWithoutErrors` (PlayMode).
@@ -561,7 +563,7 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Tier:** standard — fixed cue list and loudness rules
 - **Depends on:** `SPEC-80`, `AST-003`, `SPEC-64`
 - **Do:** Source or make, per the approved §x.9 and §10.18–§10.19, the cues `cue_ui_click`, `cue_ui_hover`, `cue_ui_open`, `cue_ui_close`, `cue_ui_tab`, `cue_ui_confirm`, `cue_ui_cancel`, `cue_ui_error`, `cue_ui_success`, `cue_ui_notify`, `cue_ui_slot_pick`, `cue_ui_slot_drop`, `cue_ui_type`, `cue_editor_place`, `cue_editor_remove`, `cue_editor_rotate`, `cue_editor_paint`, `cue_editor_invalid`, `cue_editor_commit`, `cue_editor_undo`, `cue_editor_redo`, `cue_editor_symmetry`, with 2–3 variations for `click`, `hover`, `place`, `remove`; `AudioCueDefinition` assets; licence rows.
-- **Files:** `Assets/Game/Audio/Sfx/SFX_Ui_*`, `SFX_Editor_*`; `Assets/Game/Content/Audio/sfx_*.asset`; `docs/design/LICENSES.md`
+- **Files:** `Assets/Game/Audio/Sfx/SFX_Ui_*`, `SFX_Editor_*`; `Assets/Game/Content/Audio/cue_*.asset`; `docs/design/LICENSES.md`
 - **Acceptance criteria:**
   - [ ] Short-term loudness ≤ −20 LUFS, peaks ≤ −1 dBTP (measurement report in the log); every file `verified`.
 - **Tests:** `AudioCueTests.UiAndEditorCues_AllExist`.
@@ -571,7 +573,7 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Tier:** standard — fixed cue list and loudness rules
 - **Depends on:** `AST-030`, `SPEC-21`
 - **Do:** Cues with 2–4 variations each: weapon fire per family (`plasma`, `beam_start`, `beam_loop`, `beam_end`, `railgun`, `lance`, `flak`, `missile_launch`), projectile flyby (2), impacts per damage type on hull and on shield (8), cell break (small, medium, large), chunk tear, hulk groan, explosions (small, large, reactor), debris rattle, thruster loops (small, medium, large) and boost, shield hit, shield down, shield up, power up, power down, core lost alarm, hull critical alarm, docking clamp, lane jump spool, lane jump whoosh, lane jump arrival, supercruise loop, scan ping.
-- **Files:** `Assets/Game/Audio/Sfx/SFX_*`; `Assets/Game/Content/Audio/sfx_*.asset`; `docs/design/LICENSES.md`
+- **Files:** `Assets/Game/Audio/Sfx/SFX_*`; `Assets/Game/Content/Audio/cue_*.asset`; `docs/design/LICENSES.md`
 - **Acceptance criteria:**
   - [ ] Peaks ≤ −1 dBTP; loops seamless; 3D cues mono; every file `verified`.
 - **Tests:** `AudioCueTests.CombatCues_AllExist`, `.LoopingCues_AreMarkedLooping`.
@@ -580,7 +582,7 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Milestone:** A1
 - **Tier:** standard — fixed track list and loudness rules
 - **Depends on:** `AST-030`
-- **Do:** Per the approved §x.9: main-menu theme; 3 exploration tracks (2–4 min, loopable); 2 combat tracks as stems (base + intensity layer); 6 mystery stingers (clue found, gate activates, Silence presence, message from yourself, Vanguard, the Whisper); a Silence theme; a wake-up / cryo intro cue; station ambience (hub, derelict); space ambience per star temperature (hot, sun-like, red dwarf). `AudioCueDefinition` assets with prefix `music_` (music) and `sfx_` (ambience). Sourcing per open question 8.
+- **Do:** Per the approved guide's audio section: main-menu theme; 3 exploration tracks (2–4 min, loopable); 2 combat tracks as stems (base + intensity layer); 6 mystery stingers (clue found, gate activates, Silence presence, message from yourself, Vanguard, the Whisper); a Silence theme; a wake-up / cryo intro cue; station ambience (hub, derelict); space ambience per star temperature (hot, sun-like, red dwarf). `AudioCueDefinition` assets retain prefix `cue_` on every bus (Q16). Sourcing per open question 8.
 - **Files:** `Assets/Game/Audio/Music/MUS_*.ogg`; `Assets/Game/Audio/Ambience/AMB_*.ogg`; `Assets/Game/Content/Audio/*.asset`; `docs/design/LICENSES.md`
 - **Acceptance criteria:**
   - [ ] Music −16 LUFS ±1 integrated, ambience −24 LUFS ±1; all streamed; resident audio memory ≤ 64 MB in heavy combat.
@@ -640,6 +642,12 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 | 12 | Officer portrait style | Silhouettes in faction colours, no painted faces | Owner |
 | 13 | Architecture §10 lists SPEC-81 under area code ART; this spec uses AST to keep task IDs unique | AST (architecture §10 row to be updated) | Tech lead |
 | 14 | Black hole look without the URP opaque texture | Shader-only lensing rim; no scene-colour sampling | Tech lead |
+| 15 | The one-cell LOD1 row is 40 triangles, exceeding 25% of the 150-triangle LOD0 row | **Resolved AST-001:** preserve the exact §4.1 lookup and shared table. The four required tests record one cell as the explicit 40-triangle exception, and assert ≤25% for every larger footprint; no target was lowered or represented as a measured pass | Tech lead |
+| 16 | This draft predates the approved guide and canonical UI/audio/content paths | **Resolved AST-001:** DESIGN-GUIDE wins; retain SPEC-60 Game.tss/lowercase components and its catalogue, SPEC-63 Content/Vfx and instanced state effects, SPEC-30 bodyvis_ ownership and SPEC-64 cue_ prefixes. Preserve canonical existing cue IDs; AST-030 resolves new aliases before authoring. No runtime types, assets or theme values change in AST-001 | Tech lead |
+| 17 | Wildcard tasks and source ranges do not give a finite manifest or kinds for UI/scene text assets | **Resolved AST-001:** one planned row per imported output/edit, shared paths deduplicated under the earliest producer; definition includes authored Unity text definitions. Use the minimum stated variation counts, two combat stem pairs and whole-block moving-part budget reservations. Sources/code/proofs/captures stay with their tasks. Planning never certifies production, licences, visual choices or purchases | Tech lead |
+| 18 | The existing provenance register has a different header and grouped paths without verification statuses | **Resolved AST-001:** retain its creation/authorship evidence in the exact eight-column table, split the previously documented five VFX graphs into exact paths and keep all retained rows placeholder-only pending AST-003. Creation dates are not owner licence-confirmation dates; no new verified row or proof is invented | Tech lead |
+| 19 | The icon count predates the approved hip/long-slope blocks and omits the missing block/officers; station blueprints are future-dependent | **Resolved AST-001:** enumerate current canonical block/item/paint/ship IDs plus the named cosmetic/prop/ability kit, including slopes, block_missing and both officers. Use ICO_<content_id> without doubling ship_. TODO(AST-014): extend station rows when authored station blueprints exist; do not invent one for the procedural range | Tech lead |
+| 20 | Future art tasks name legacy dissolve fields, event graphs for state effects and generated texture files not covered by the PNG pattern | **Resolved AST-001:** inventory state-driven beam/tracer/plume/shield materials/shaders and retain SPEC-63's ownership; TODO(AST-018): use canonical _DissolveAmount and resolve hulk/ember producer kinds. TODO(AST-002): generated Texture2D .asset LUTs need explicit validator handling; layerParams remains RGBAHalf, not a lossy PNG. Exact ArtAssetRules code remains unchanged | Tech lead |
 
 ## 11. References
 
