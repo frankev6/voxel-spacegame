@@ -893,6 +893,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Three-worker orchestration started — astra (gpt-6)
+
+1. Frank authorizes three separate reusable GPT-6.1-Sol high threads and asks the lead to review/fix small issues while continuing implementation. ADR-0062 records the revised goal, standard/frontier split, isolated worktrees, central ledger ownership and batched lead-owned Unity validation. No subagents, remote Git or new owner gate.
+2. Claimed and dispatched PHY-014 to Combat support, PWR-001 to Power and abilities, MIG-011 to Presentation and content. All three exact threads are verified active; IDs/worktrees and follow-up queues are in ORCHESTRATION.md. The lead prepares DMG-011/012 while the prerequisite split grace is implemented. Task results remain in-progress until integration validation; no tests claimed for this administrative setup.
+3. Enabled the five-minute heartbeat `spaceship-implementation-coordinator` to reconcile the same threads and continue work when the executor is available. The native goal replacement tool rejected the request because the prior blocked goal is unfinished; its objective/status cannot be edited/resumed by the available tool. The owner-approved revised objective is durably recorded, and implementation continues without falsely marking the old goal achieved.
+
 ### 2026-10-13 — FND-021 lowered automatic World test station — astra (gpt-6)
 
 1. **Implemented:** `c3bb396` lowers the production station **2 m**, to `(0,-2,45)`, so its three-cell floor straddles the firing plane. `AutoSpawnInWorld` is enabled for the current testing phase. The existing range service joins scene readiness immediately after the player, uses the normal spawn pipeline, and reuses its target on repeated range requests. Scene exit still releases the source; the next World entry gets a fresh station. ADR-0061 / Q201 records this reversible owner-requested setup.
