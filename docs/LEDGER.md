@@ -908,6 +908,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 315 | SPEC-40 Q17: import compiler enumeration and diagnostics | Resolved: serialized wrapper stamps, coalesced current catalog, Play deferral and cached diagnostics; real owner CompileLogic methods retain their task scope. | Tech lead |
 | 316 | SPEC-40 Q18: bound condition dispatch and dynamic owner dependencies | Resolved: cache numeric dispatch/argument storage/generated slots at binding; owner relations expand to Location plus registered faction dependencies; preserve public Invoke and fail-closed errors. | Tech lead |
 | 317 | SPEC-61 Q22: circular HUD composition sequence | Resolved ADR-0072: explicit UI foundation dependencies, preserve playable roots, downstream feature owners install bindings; no fake services or removed acceptance. | Tech lead |
+| 318 | SPEC-40 Q19: legacy translation boundary and defaults | Resolved: retain source metadata for emission; decimal cumulative thresholds, source-ordered quest logs, canonical provisional journal labels and contextual item mappings. No runtime/asset emission in NAR-014. | Tech lead |
 
 
 ## Measurements
