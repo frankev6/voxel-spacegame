@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 77 | 0 | 0 | 0 | 12 | 0 | 89 | 11 |
+| M2 | 76 | 0 | 0 | 0 | 13 | 0 | 89 | 13 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 11 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -281,15 +281,15 @@
 | ABL-005 | Ability scenarios and frame-rate independence | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-004, SPEC-21 | no | todo |  |  |  |  |
 | CAM-008 | Screen shake from FxEvents | [SPEC-62](specs/SPEC-62-camera.md) | M2 | standard | CAM-005, SPEC-63 | no | todo |  |  |  |  |
 | VFX-002 | FxRig: slots, effects, buffers and binding | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-12 | f2b8118 | Session rig, graph validation, pooled/batched/instanced resources and binding; 5 GPU tests pass; final content budget advisory follow-up in VFX-004 |
-| VFX-003 | FxUploadSystem: drain, batch, submit, stats | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | DMG-007/010 produce impact/debris events; drain/upload still absent. Prioritize after VFX-002 to consume queues, including while unbound |
-| VFX-004 | Template graphs and content assets for hits, explosions, muzzle and shield sparks | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | no | todo |  |  |  | Measure actual content-set rig buffer bytes against advisory 12 MB target (VFX-002 Q195); representative rig is 950272 bytes |
+| VFX-003 | FxUploadSystem: drain, batch, submit, stats | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002 | yes | done | astra (gpt-6) | 2026-10-12 | f24d8c1 | Guarded drain even unbound, bounded batching/submission, lifetime accounting and stats; 12 required tests; visible content and boot binding next in VFX-004 |
+| VFX-004 | Template graphs and content assets for hits, explosions, muzzle and shield sparks | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | yes | todo |  |  |  | Bind the authored rig in GameComposition before SnapshotBootEntities (SPEC-01 step 12); measure total GPU/native content-set memory against advisory 12 MB (Q195). Representative rig GPU buffers are 950272 bytes |
 | VFX-005 | Voxel debris particles and the 50k GPU gate | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-004 | no | todo |  |  |  | partial in FND-020: physical-grid pieces as temporary substitute / debris particle implementation and required tests |
 | VFX-006 | Projectile tracers | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002, WPN-001, CORE-001 | yes | todo |  |  |  | partial in FND-020: simple instanced projectile tracer / final batching, styles, effects and required tests |
-| VFX-007 | Beams clipped at the hit point | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003, WPN-001 | no | todo |  |  |  |  |
+| VFX-007 | Beams clipped at the hit point | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003, WPN-001 | yes | todo |  |  |  |  |
 | VFX-008 | Thruster plumes | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, FLT-001 | yes | todo |  |  |  |  |
 | VFX-009 | Shield shells and ripples | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, PWR-001, CORE-001 | no | todo |  |  |  |  |
 | VFX-010 | Chunk-body dissolve hook | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, DMG-001 | yes | todo |  |  |  |  |
-| VFX-011 | Quality levels and the settings hook | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | no | todo |  |  |  |  |
+| VFX-011 | Quality levels and the settings hook | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | yes | todo |  |  |  |  |
 | VFX-012 | Regression and budget tests (02-C29, GC, upload) | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-005, VFX-006, VFX-007 | no | todo |  |  |  |  |
 | AUD-006 | SfxEvent drain: coalescing, cooldown and voice allocation | [SPEC-64](specs/SPEC-64-audio.md) | M2 | frontier | AUD-005, TST-001 | yes | todo |  |  |  |  |
 | AUD-007 | Cue content, legacy import and the CombatAudioCues singleton | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006 | no | todo |  |  |  |  |
@@ -773,6 +773,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 193 | 2026-10-12 | SPEC-13 Q31 | Capped seed prefix can miss the true anchor; staged cap retirement | Keep all seeds, defer overflow then force complete set; hybrid replaces full flood | Tech lead | Resolved DMG-009; canonical stream publication and internal node-count evidence; legacy cap fields preserved but inactive |
 | 194 | 2026-10-12 | SPEC-13 Q32 | Deferred disconnected island reseeding and staged split presentation | Retain island plus anchor representatives; preserve hulk path; canonical Debris kind | Tech lead | Resolved DMG-010; chunks wait for DMG-011, visible FX stays VFX-003/004; no new owner gate |
 | 195 | 2026-10-12 | SPEC-63 Q20 | Rig binding before consumer systems exist and palette double-conversion ambiguity | Internal consumer hook; session registry reset; linear palette unpacked without a second gamma conversion | Tech lead | Resolved VFX-002; actual VFX-004 content budget remains to measure when authored; no owner gate |
+| 196 | 2026-10-12 | SPEC-63 Q21 | Upload counting before slot acceptance, lifetime-ring overwrite, palette index zero | Count accepted submissions; conservatively merge live buckets; flag selects palette including zero | Tech lead | Resolved VFX-003; internal fake-rig seam and combined hard cap documented; no owner gate |
 
 ## Measurements
 
@@ -882,6 +883,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — VFX-003 guarded event drain and upload — astra (gpt-6)
+
+1. **Implemented:** `f24d8c1` — FxUploadSystem now automatically completes registered queue writers and drains every presentation frame, even unbound. FxDrainJob enforces the combined queue/pending-impact hard cap; FxBatchJob resolves slots, culls, applies quality/LOD, resolves palette/raw colours, caps per-slot/debris submissions and produces GPU-layout events. FxRig submits batched buffers and reuses pooled effects with cached IDs/attributes. Persistent counters and a conservative lifetime ring report actual accepted debris; origin-shift/session-clear completion retains TODO(VFX-013).
+2. **Required evidence:** all **12** focused tests pass. **100,000** inputs leave an empty queue, with **65,536** processed and **34,464** over cap. Three fixed ticks produce three events submitted once; queued pending impacts merge and clear. Far debris keeps one in four; player-source hits bypass distance culling; slot overflow does not inflate spawned/live counts; palette index zero works; NaN positions are skipped. All three profiler markers report positive samples. The warmed CPU consumer path with the specified fake rig allocates **0 managed bytes over 100 updates**. Real graph output and its integrated allocation capture belong to the authored-content check next. **spec-required: 12, extra: 0**; zero optimization passes.
+3. **Validation:** compile zero C# warnings; full EditMode **838 passed, 0 failed, 1 skipped**; full PlayMode **116 passed, 0 failed, 34 expected headless skips**, both exit 0. Docs checks pass. Evidence: `Logs/playtest/vfx003/`. Runner has stopped; no InitTestScene remains. QualitySettings matches its pre-existing backup and is excluded from commits. No remote operations or new owner gate.
+4. **Resolved/next:** Q196 / SPEC-63 Q21 records accepted-only debris accounting, conservative ring wrapping, palette-flag precedence, the internal fake-rig seam and bounded unresolved diagnostics. **VFX-004 next:** author the hit/explosion/muzzle/spark graphs and definitions, bind the rig in GameComposition before the boot snapshot, and show actual output; VFX-005 supplies debris particles. Measure the complete GPU/native memory set then (advisory), and retain controls, Nocturne, test station and Space fire. Event queues no longer accumulate while unbound; visible debris is still not claimed. Continue DMG-011/012 afterwards.
 
 ### 2026-10-12 — VFX-002 session effect resources — astra (gpt-6)
 
