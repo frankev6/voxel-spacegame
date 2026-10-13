@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **AI-010 focused findings:**80177 terminated1/3/0; friendly-fire passes, engage nearest106.5236 vs100, flee104.4045 vs105.7555, leash return/movedBack assertion false. Archived `ai-scenarios/acceptance-first.xml`. Presentation worker assigned concrete diagnosis/fixture repair without longer bounds or weaker assertions; no unchanged rerun. Editor open/stopped, validation terminal. Lead can continue isolated narrative work.
+
 - **AI-010 integrated:** primary `task/AI-010-scenario-integration` at93406a7d integrates439002e3/26c91af1, keeps existing Ai folder GUID, fixes missing Flight namespace and mirrors Q26→ledger306. Recompile81930 clean; four focused PlayMode scenarios active80177 in Editor17922. No concurrent runtime changes until terminal. Presentation notified; next candidate DEV-018 after acceptance/claim. NAR-006 functional code is on maind4560a44; advisory fixture remains open. Previous turn authored catalog acceptance and integrated it (progress).
 
 - **Catalog functional checks green:** integrated4f205524, compile26449 clean, focused15122 four passed. Evidence `fact-catalog/`. Required Build20k advisory fixture still to author, including actual binding once NAR-003 is integrated; NAR-006 remains in-progress. AI-010 final shorteningdf1cda4b reviewed; worker notified of imminent integration after catalog validation. Lead NAR-003 code preservedfeef0b40. Previous turn implemented catalog (progress).
