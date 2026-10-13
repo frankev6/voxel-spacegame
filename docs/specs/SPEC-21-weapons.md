@@ -926,6 +926,9 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 
 | 63 | Old timeline requires ProjectileStore on delivery-agnostic firing | Remove that prerequisite from WeaponFireSystem; only ProjectileShotHandlerSystem requires the store. Beam/custom shot production and regression scenarios may run without a projectile consumer. Keep all native shot-channel lifetime guards. | Tech lead |
 
+| 65 | Installed Collections IJobParallelForBatch has no deferred NativeList length overload | Schedule the rounded MaxProjectiles upper bound with 64-row batches and inspect Rows.Length only inside the dependent job after shift/append. Open every fixed stream lane, including empty lanes; each owns its row interval and one hit/expiry counter. Reduce counters during stable compaction. No main-thread completion or dynamic length read is introduced. | Tech lead |
+| 66 | Homing Rodrigues axis is undefined for exactly opposite directions | Preserve speed; choose a deterministic perpendicular from world up unless nearly parallel, then world right. Missing target/proxy continues straight; zero speed or coincident target leaves velocity unchanged. Required homing test covers these cases without adding tests. | Tech lead |
+
 ## 11. References
 
 - Audit (background only): `docs/reference/audit-2026-10/02-combat-destruction.md` C22 (double energy drain), R26 (beam through targets), 01-B2 (wrong-cell hits).
