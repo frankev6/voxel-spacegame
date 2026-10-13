@@ -17,7 +17,8 @@ namespace Game.Voxel.PresentationStreams
             using var q = em.CreateEntityQuery(ComponentType.ReadWrite<SfxEventQueue>());
             if (q.IsEmpty) return;
             em.CompleteDependencyBeforeRW<SfxEventQueue>();
-            q.GetSingleton<SfxEventQueue>().Queue.Enqueue(e);
+            var stream = q.GetSingleton<SfxEventQueue>();
+            stream.Access.CompleteAccess(); stream.Queue.Enqueue(e);
         }
     }
 }

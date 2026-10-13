@@ -1,6 +1,7 @@
 using System;
 using Game.Core;
 using Game.Core.Audio;
+using Game.Voxel.PresentationStreams;
 using Game.Data;
 using Game.Data.Definitions;
 using Unity.Entities;
@@ -12,7 +13,7 @@ using UnityEngine;
 
 namespace Game.Presentation.Audio
 {
-    /// <summary>SPEC-64 §5.2/§6.1: lifetime, listener, fixed voice pools, mixer settings and pause. Managed one-shots and stinger ducking; spatial allocation and music direction follow in AUD-006/008.</summary>
+    /// <summary>SPEC-64 §5.2/§6.1: lifetime, listener, fixed voice pools, mixer settings and pause. Pooled spatial/managed one-shots and stinger ducking; music direction follows in AUD-008.</summary>
     public sealed class AudioService : IAudioService, IDisposable
     {
         readonly AudioStats stats = new AudioStats();
@@ -32,6 +33,11 @@ namespace Game.Presentation.Audio
         AudioRoot root;
         Transform listener, listenerTarget;
         IPauseService pause;
+        World boundWorld;
+        AudioEventDrainSystem drainSystem;
+        internal NativeHashMap<ulong, int> CueSlots => cueSlotByHash;
+        internal NativeArray<SfxCueInfo> CueInfo => cueInfo;
+        internal float CombatRadius => config != null ? config.CombatRadius : 0;
         AudioVolumes pendingVolumes;
         bool volumesPending, disposed;
         internal MusicContext SceneContext { get; private set; }
@@ -102,8 +108,20 @@ namespace Game.Presentation.Audio
         }
         public void ApplyVolumes(in AudioVolumes v) { if (disposed) return; pendingVolumes = v; volumesPending = true; }
         public void BindPause(IPauseService value) { if (!disposed) pause = value; }
-        public void BindTo(World world) { }                      // AUD-006/007: system binding and CombatAudioCues
-        public void Unbind(World world) { }
+        public void BindTo(World world)
+        {
+            if (disposed || world == null || !world.IsCreated || ReferenceEquals(boundWorld, world)) return;
+            if (boundWorld != null) Unbind(boundWorld);
+            boundWorld = world; drainSystem = world.GetOrCreateSystemManaged<AudioEventDrainSystem>();
+            drainSystem.Bind(this); stats.Bound = true;
+            // TODO(AUD-007): populate boot-owned CombatAudioCues from authored configuration.
+        }
+        public void Unbind(World world)
+        {
+            if (!ReferenceEquals(boundWorld, world)) return;
+            if (boundWorld != null && boundWorld.IsCreated && drainSystem != null) drainSystem.Bind(null);
+            boundWorld = null; drainSystem = null; stats.Bound = false;
+        }
         public void SetListenerTarget(Transform pivot) { if (!disposed) listenerTarget = pivot; }
         public void ClearListenerTarget(Transform pivot) { if (listenerTarget == pivot) listenerTarget = null; }
         public float3 ListenerPosition => listener != null ? (float3)listener.position : float3.zero;
@@ -149,10 +167,14 @@ namespace Game.Presentation.Audio
         public void PlayCueAt(ContentId cue, float3 position, float volume)
         {
             if (!Resolve(cue, out int slot) || !math.isfinite(volume) || volume <= .001f || !math.all(math.isfinite(position))) return;
-            // AUD-006 owns spatial candidates and allocation. Until then, only explicitly 2D cues play here (Q15).
-            if (cues[slot].SpatialBlend > 0) return;
-            if (cues[slot].Bus == AudioBus.Ui) PlayUiSlot(slot, math.saturate(volume));
-            else PlayTwoDimensional(slot, math.saturate(volume));
+            var info = cueInfo[slot];
+            float distance = math.distance(position, ListenerPosition);
+            if (info.SpatialBlend > 0 && distance > info.MaxDistance) return;
+            var candidate = new SfxCandidate { Slot = slot, Pos = position, FinalVolume = math.saturate(volume), Count = 1 };
+            candidate.Audibility = candidate.FinalVolume * info.Volume *
+                (info.SpatialBlend > 0 ? math.saturate(info.MinDistance / math.max(distance, info.MinDistance)) : 1);
+            RefreshSfxVoices();
+            TryStartSfx(candidate, Time.unscaledTimeAsDouble, false);
         }
         public void PlayStinger(ContentId cue)
         {
@@ -175,40 +197,46 @@ namespace Game.Presentation.Audio
         }
         void PlayTwoDimensional(int slot, float volume)
         {
-            if (cues[slot].Clips.Count == 0) return;
-            // Temporary managed-cue entry to the existing SFX pool. Same victim rules as §5.3; AUD-006 centralizes these.
-            var cue = cues[slot]; float audibility = volume * cue.Volume;
-            int same = 0, oldest = -1, free = -1, victim = -1;
-            for (int i = 0; i < voiceInfo.Length; i++)
-            {
-                var info = voiceInfo[i];
-                if (info.Active && !sfxVoices[i].isPlaying) { info.Active = false; voiceInfo[i] = info; }
-                if (!info.Active) { if (free < 0) free = i; continue; }
-                if (info.Slot == slot) { same++; if (oldest < 0 || info.StartTime < voiceInfo[oldest].StartTime) oldest = i; }
-                if (victim < 0 || info.Priority > voiceInfo[victim].Priority ||
-                    (info.Priority == voiceInfo[victim].Priority && (info.Audibility < voiceInfo[victim].Audibility ||
-                    (info.Audibility == voiceInfo[victim].Audibility && info.StartTime < voiceInfo[victim].StartTime)))) victim = i;
-            }
-            int chosen;
-            if (same >= cue.MaxVoices) { if (audibility <= voiceInfo[oldest].Audibility) return; chosen = oldest; }
-            else if (free >= 0) chosen = free;
-            else
-            {
-                if (victim < 0 || (voiceInfo[victim].Priority <= cue.Priority &&
-                    (voiceInfo[victim].Priority != cue.Priority || voiceInfo[victim].Audibility >= audibility))) return;
-                chosen = victim;
-            }
-            var bus = cue.Bus == AudioBus.Music ? config.MusicGroup : cue.Bus == AudioBus.Ambience ? config.AmbienceGroup : config.SfxGroup;
-            var source = sfxVoices[chosen]; source.Stop(); source.transform.position = ListenerPosition;
-            StartOneShot(source, slot, volume, bus, cue.Bus == AudioBus.Music);
-            voiceInfo[chosen] = new VoiceInfo { Slot = slot, Priority = (byte)cue.Priority, Audibility = audibility,
-                StartTime = Time.unscaledTimeAsDouble, Active = true };
+            RefreshSfxVoices();
+            var candidate = new SfxCandidate { Slot = slot, Pos = ListenerPosition, FinalVolume = volume,
+                Audibility = volume * cueInfo[slot].Volume, Flags = SfxEventFlags.PlayerSource, Count = 1 };
+            TryStartSfx(candidate, Time.unscaledTimeAsDouble, true);
         }
-        void StartOneShot(AudioSource source, int slot, float volume, AudioMixerGroup bus, bool ignorePause)
+        internal void RefreshSfxVoices()
+        {
+            for (int i = 0; i < voiceInfo.Length; i++)
+                if (voiceInfo[i].Active && !sfxVoices[i].isPlaying) voiceInfo[i].Active = false;
+        }
+        internal bool TryStartSfx(in SfxCandidate candidate, double now, bool forceTwoDimensional = false)
+        {
+            if (disposed || config == null || candidate.Slot <= 0 || candidate.Slot >= cues.Length ||
+                cues[candidate.Slot].Clips.Count == 0) return false;
+            int chosen = SfxVoiceAllocator.Select(candidate, voiceInfo, cueInfo[candidate.Slot], out bool stolen);
+            if (chosen < 0) { stats.RejectedNoVoice++; return false; }
+            StartSfxVoice(chosen, candidate, now, forceTwoDimensional);
+            stats.Started++; if (stolen) stats.Stolen++;
+            return true;
+        }
+        internal void StartSfxVoice(int index, in SfxCandidate candidate, double now, bool forceTwoDimensional = false)
+        {
+            int slot = candidate.Slot; var cue = cues[slot]; var source = sfxVoices[index];
+            var bus = cue.Bus == AudioBus.Music ? config.MusicGroup : cue.Bus == AudioBus.Ambience ? config.AmbienceGroup :
+                cue.Bus == AudioBus.Ui ? config.UiGroup : config.SfxGroup;
+            source.Stop(); source.transform.position = candidate.Pos;
+            StartOneShot(source, slot, candidate.FinalVolume, bus, cue.Bus == AudioBus.Music || cue.Bus == AudioBus.Ui,
+                forceTwoDimensional ? 0 : cue.SpatialBlend, candidate.Order);
+            voiceInfo[index] = new VoiceInfo { Slot = slot, Priority = (byte)cue.Priority, Audibility = candidate.Audibility,
+                StartTime = now, Active = true };
+        }
+        internal int ActiveSfxCount
+        {
+            get { int count = 0; for (int i = 0; i < voiceInfo.Length; i++) if (voiceInfo[i].Active) count++; return count; }
+        }
+        void StartOneShot(AudioSource source, int slot, float volume, AudioMixerGroup bus, bool ignorePause, float spatial = 0, int order = -1)
         {
             var cue = cues[slot];
             if (randomFrame != Time.frameCount) { randomFrame = Time.frameCount; playOrder = 0; }
-            uint seed = unchecked((uint)(Time.frameCount * 7919 + playOrder++ + 1));
+            uint seed = unchecked((uint)(Time.frameCount * 7919 + (order >= 0 ? order : playOrder++) + 1));
             var random = new Unity.Mathematics.Random(seed == 0 ? 1u : seed);
             int count = cue.Clips.Count, previous = lastClip[slot];
             int clip = random.NextInt(count > 1 && previous >= 0 ? count - 1 : count);
@@ -216,7 +244,8 @@ namespace Game.Presentation.Audio
             lastClip[slot] = clip;
             source.clip = cue.Clips[clip]; source.volume = math.saturate(cue.Volume * volume * (1 + random.NextFloat(-1,1) * cue.VolumeRandom));
             source.pitch = cue.Pitch * (1 + random.NextFloat(-1,1) * cue.PitchRandom);
-            source.outputAudioMixerGroup = bus; source.spatialBlend = 0; source.loop = false; source.ignoreListenerPause = ignorePause;
+            source.outputAudioMixerGroup = bus; source.spatialBlend = spatial;
+            source.minDistance = cue.MinDistance; source.maxDistance = cue.MaxDistance; source.loop = false; source.ignoreListenerPause = ignorePause;
             source.priority = cue.Priority; source.Play();
         }
         void UpdateDucking(float dt)
@@ -240,7 +269,7 @@ namespace Game.Presentation.Audio
 
         public void Dispose()
         {
-            if (disposed) return; disposed = true;
+            if (disposed) return; Unbind(boundWorld); disposed = true;
             SceneManager.activeSceneChanged -= OnSceneChanged; AudioListener.pause = false;
             listenerTarget = null; pause = null;
             if (cueInfo.IsCreated) cueInfo.Dispose(); if (cueSlotByHash.IsCreated) cueSlotByHash.Dispose();

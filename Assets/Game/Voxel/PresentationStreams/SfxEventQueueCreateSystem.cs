@@ -1,3 +1,4 @@
+using Game.Data.Streams;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -11,12 +12,14 @@ namespace Game.Voxel.PresentationStreams
     public partial struct SfxEventQueueCreateSystem : ISystem
     {
         NativeQueue<SfxEvent> queue;
+        GuardedHandles access;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             queue = new NativeQueue<SfxEvent>(Allocator.Persistent);
-            state.EntityManager.CreateSingleton(new SfxEventQueue { Queue = queue }, "SfxEventQueue");
+            access = GuardedHandles.Create();
+            state.EntityManager.CreateSingleton(new SfxEventQueue { Queue = queue, Access = access }, "SfxEventQueue");
             state.Enabled = false; // never updates; exists to own the allocation
         }
 
@@ -27,7 +30,9 @@ namespace Game.Voxel.PresentationStreams
         public void OnDestroy(ref SystemState state)
         {
             state.EntityManager.CompleteAllTrackedJobs();
+            access.CompleteAccess();
             if (queue.IsCreated) queue.Dispose();
+            access.Dispose();
         }
     }
 }

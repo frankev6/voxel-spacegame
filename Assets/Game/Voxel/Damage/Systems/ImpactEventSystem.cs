@@ -56,9 +56,9 @@ namespace Game.Voxel.Damage
             emit.Blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value; emit.Tick = tick; emit.Data = data;
             emit.Damage = streams.Damage.BeginWrite(ref state, ProducerKind.Impact, 1);
             var fx = SystemAPI.GetSingleton<FxEventQueue>(); emit.Fx = fx.Queue.AsParallelWriter();
-            emit.Sfx = SystemAPI.GetSingletonRW<SfxEventQueue>().ValueRW.Queue.AsParallelWriter();
-            using (Emit.Auto()) state.Dependency = emit.Schedule(fx.Access.BeginRead(state.Dependency));
-            fx.Access.EndRead(state.Dependency); streams.Damage.EndWrite(state.Dependency); data->ImpactHandle = state.Dependency;
+            var sfx = SystemAPI.GetSingleton<SfxEventQueue>(); emit.Sfx = sfx.Queue.AsParallelWriter();
+            using (Emit.Auto()) state.Dependency = emit.Schedule(sfx.Access.BeginRead(fx.Access.BeginRead(state.Dependency)));
+            sfx.Access.EndRead(state.Dependency); fx.Access.EndRead(state.Dependency); streams.Damage.EndWrite(state.Dependency); data->ImpactHandle = state.Dependency;
         }
         [BurstCompile] struct ClearContactsJob : IJob
         { public NativeList<RamContact> Contacts; public void Execute() => Contacts.Clear(); }

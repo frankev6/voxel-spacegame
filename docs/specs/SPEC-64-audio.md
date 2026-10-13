@@ -266,7 +266,7 @@ Construction (`new AudioService(config, content, initialVolumes, parent)`), in t
 - **Owned memory (Persistent, disposed in `OnDestroy`):** `NativeList<SfxEvent> drained` (capacity 4,096), `NativeList<SfxCandidate> candidates` (capacity 4,096), `NativeHashMap<ulong,int> groupIndex` (capacity 4,096, lookup only), `NativeHashMap<ulong,double> lastStart` (capacity 1,024; entries older than 2 s removed each frame by a key list), `NativeArray<int> counters`.
 
 Per-frame algorithm:
-1. `ref var q = ref SystemAPI.GetSingletonRW<SfxEventQueue>().ValueRW; CompleteDependency();`
+1. `var q = SystemAPI.GetSingleton<SfxEventQueue>(); q.Access.CompleteAccess();` (ADR-0067: complete the actual native queue producers).
 2. `SfxDrainJob` (Burst, `.Run()`): clear `drained`; dequeue until empty or 4,096; remaining → `EventsOverHardCap`, `q.Queue.Clear()`.
 3. If `Service == null`: `Stats.Bound = false`; return.
 4. (AUD-012) Origin shift per §3.13 → `Service.ShiftSpatialVoices(delta)` or `Service.StopSfxAndLoops()`.
@@ -352,9 +352,11 @@ Pre: when present, `config` passed validation and `content` contains every cue. 
 
 ```csharp
 // In a producer's OnUpdate (fixed step). Tests add typeof(SfxEventQueueCreateSystem) to their EcsTestWorld.
-var sfx = SystemAPI.GetSingleton<SfxEventQueue>().Queue.AsParallelWriter();   // read-only; never GetSingletonRW in the fixed step
+var stream = SystemAPI.GetSingleton<SfxEventQueue>();
+var sfx = stream.Queue.AsParallelWriter();
+// Schedule with stream.Access.BeginRead(state.Dependency), then stream.Access.EndRead(the scheduled handle).
 // in the job struct: [NativeDisableContainerSafetyRestriction] public NativeQueue<SfxEvent>.ParallelWriter Sfx;
-// AudioEventDrainSystem (§5.3 step 1) takes the queue RW and CompleteDependency() completes every producer first.
+// AudioEventDrainSystem completes stream.Access before drain/clear. The creation system owns and disposes queue + guard (ADR-0067).
 SystemAPI.TryGetSingleton<CombatAudioCues>(out var cues);           // absent in tests: all hashes 0 → emit nothing
 // in the job: if (cues.ImpactKinetic.Value != 0) sfx.Enqueue(SfxEvents.At(cues.ImpactKinetic, point, vol));
 ```
@@ -622,6 +624,8 @@ Timing tests run with safety checks off (SPEC-71 perf fixture). Functional tests
 | 14 | AUD-003 must compose audio in M0, but config_audio/cue content is AUD-007 in M2 | **Answer (resolved in AUD-003):** boot resolves config_audio when available and always constructs/registers the core service. A null config is a silent staging mode: one listener, all 60 pools, pause/follow/disposal, no mixer writes or playback. Missing groups in an existing config still error and fall back to Master. AUD-007 supplies the fully validated config and cues; no fake content or weakened content validation. | Tech lead |
 
 | 15 | AUD-005 needs managed 2D playback before AUD-006's SFX allocator and AUD-008's music director exist | Use existing pooled sources and the specified victim rules; keep spatial playback deferred, retain unducked music gains | Tech lead | Resolved AUD-005: per-cue cached definitions/clip history and UI cooldowns allocate only at construction. Non-UI 2D calls use the existing 40-source pool with §5.3 priority/audibility victim rules until AUD-006 centralizes allocation. PlayCueAt skips spatial cues until then. AUD-008 supplies base crossfade gains through internal SetMusicVoiceVolumes before ducking; source/mixer volumes never compound. Null config stays silent until AUD-007. |
+
+| 16 | Native queue producer lifetime cannot rely on component reads alone (ledger Q169) | Resolved ADR-0067: embed GuardedHandles in SfxEventQueue; shared atomic producers publish BeginRead/EndRead handles, presentation/managed enqueue complete guarded access, and the creation system disposes both allocations after completion. Update ram, split and ship-death producers together. No event-layout or assembly changes. | Tech lead |
 
 ## 11. References
 

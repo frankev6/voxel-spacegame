@@ -34,7 +34,7 @@ namespace Game.Voxel.Damage.Jobs
         public NativeStream.Writer Damage;
         // Atomic enqueue only; FxEventQueue.Access guards shared writers against drain/disposal.
         [NativeDisableContainerSafetyRestriction] public NativeQueue<FxEvent>.ParallelWriter Fx;
-        public NativeQueue<SfxEvent>.ParallelWriter Sfx;
+        [Unity.Collections.LowLevel.Unsafe.NativeDisableContainerSafetyRestriction] public NativeQueue<SfxEvent>.ParallelWriter Sfx;
         [NativeDisableUnsafePtrRestriction] public DamageStreamsData* Data;
         public void Execute()
         {
