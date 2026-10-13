@@ -1065,6 +1065,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-006 focused acceptance authored and compiled — astra (gpt-6)
+
+- 313c8792 adds five required T2StreamingTests using a four-cell station and direct loader/grid updates: hysteresis, small-station damage including GLXY save roundtrip, reset above a fixture-only two-cell cap, hulk restoration, twenty load/unload cycles. Reuses the T1 fixture with optional streaming configuration. Spec-required: 5, extra: 0; no wall-clock combat or large performance fixture.
+- Compile51224 found two converter-delivery errors (IReadOnlyList versus string[] and missing LINQ import); d83a8f57 repairs them. Compile81788 terminal0, zero CS warnings; log Logs/playtest/t2-streaming/compile.log.
+- PlayMode86452 active, filter5 T2+5 affected T1+single repaired FND-012 case. No acceptance yet. Pending EditMode batch: ConditionNodeTests.EachFunction_TrueAndFalse, BodyOnRailsTests, LegacyQuestConverterTests, LegacyNarrativeConverterTests.Output_IsDeterministic, LogicCompilePostprocessorTests. Actual production generation raw-byte stability rerun still required. Workers remain delivery/integration waits. Previous turn composition/cleanup was progress.
+
 ### 2026-10-13 — SYS-006 live composition / cleanup boundary — astra (gpt-6)
 
 - 8343f72c registers actual StarSystemLoader with frame ticker, scene-ready/exit hooks and the specified GalaxyFlushWriteback(order90). No unconditional readiness fallback. Pending PLOC remains explicitly SYS-009.

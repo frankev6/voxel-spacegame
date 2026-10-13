@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **T2 fixtures compiled / focused run active:**313c8792 adds exactly5 streaming cases using4-cell station/direct updates (small-damage save roundtrip, reset above fixture cap, hulk, hysteresis,20cycles). Compile81788 terminal0, zero CS warnings after converter fixesd83a8f57. PlayMode86452 currently active:5 T2+5 affected T1+1 FND-012 case; poll same handle before further Unity. Pending focused EditMode orbit/compiler/condition checks and actual converter stability remain. All workers integration/dependency wait. Previous turn live composition was progress.
+
 - **Live composition and cleanup authored:**8343f72c installs actual loader/ticker/scene hooks and GalaxyFlushWriteback. ADR-0076/Q360 adds targeted abandoned-read reconciliation; exception paths release requests/handles/clones; cleanup-only entities may outlive source storage. Uncompiled/unaccepted. Next author5 small T2 fixtures, compile once and run focused pending checks/content stability. No Unity active; all workers delivered, presentation review214 addressed. Previous turn loader wiring was progress.
 
 - **Loader/event wiring authored:**3c776282 adds Burst body-event queue;55d6173e wires T2 creation/ticks/capture/retirement and destruction into loader, preserves hulk anchors and Q359 arrival-first loading. SYS-005 worker2559ea7 integrated14a0989e. Source uncompiled/unaccepted; finish shutdown retirement (cleanup entities/pins), App registration and5 T2 cases before batch validation. No Unity active. Combat/economy delivered, presentation lifetime review active213. Previous turn transitions were progress.
