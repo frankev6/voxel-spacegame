@@ -11,8 +11,10 @@ namespace Game.Editor.Migration.Narrative
         {
             public readonly string SourcePath, Text, OutputFile, Destination;
             public readonly bool Unavailable;
-            internal Entry(string sourcePath, string text, string outputFile, string destination, bool unavailable)
-            { SourcePath = sourcePath; Text = text; OutputFile = outputFile; Destination = destination; Unavailable = unavailable; }
+            public readonly bool Dropped;
+            public readonly bool Generated;
+            internal Entry(string sourcePath, string text, string outputFile, string destination, bool unavailable, bool dropped = false, bool generated = false)
+            { SourcePath = sourcePath; Text = text; OutputFile = outputFile; Destination = destination; Unavailable = unavailable; Dropped = dropped; Generated = generated; }
         }
         readonly List<Entry> entries = new();
         readonly HashSet<string> sources = new(StringComparer.Ordinal);
@@ -47,6 +49,18 @@ namespace Game.Editor.Migration.Narrative
             if (!sources.Add(sourcePath)) throw new FormatException("Duplicate preservation source: " + sourcePath);
             entries.Add(new Entry(sourcePath, text, outputFile, field, false));
         }
+        internal void AddDropped(string sourcePath, string trigger, string manifestPath, string reason)
+        {
+            Validate(sourcePath, trigger, manifestPath, reason);
+            if (!sources.Add(sourcePath)) throw new FormatException("Duplicate preservation source: " + sourcePath);
+            entries.Add(new Entry(sourcePath, trigger, manifestPath, reason, false, true));
+        }
+        internal void AddGenerated(string sourcePath, string text, string outputFile, string destination)
+        {
+            Validate(sourcePath, text, outputFile, destination);
+            if (!sources.Add(sourcePath)) throw new FormatException("Duplicate preservation source: " + sourcePath);
+            entries.Add(new Entry(sourcePath, text, outputFile, destination, false, generated: true));
+        }
         static void Validate(string source, string text, string file, string destination)
         {
             if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(file) || string.IsNullOrWhiteSpace(destination) || text == null)
@@ -64,7 +78,7 @@ namespace Game.Editor.Migration.Narrative
             foreach (var row in entries)
                 output.Append("| ").Append(Cell(row.SourcePath)).Append(" | ").Append(Cell(row.Text))
                     .Append(" | ").Append(Cell(row.OutputFile)).Append(" | ").Append(Cell(row.Destination))
-                    .Append(" | ").Append(row.Unavailable ? "LEGACY-UNAVAILABLE comment" : "Preserved").Append(" |\n");
+                    .Append(" | ").Append(row.Generated ? "Generated" : row.Dropped ? "Dropped trigger" : row.Unavailable ? "LEGACY-UNAVAILABLE comment" : "Preserved").Append(" |\n");
             return output.ToString();
         }
         static string Cell(string value)

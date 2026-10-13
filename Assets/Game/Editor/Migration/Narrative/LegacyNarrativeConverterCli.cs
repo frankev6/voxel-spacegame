@@ -31,7 +31,7 @@ namespace Game.Editor.Migration.Narrative
                 if (sources != null)
                 {
                     var plan = LegacyNarrativeConverter.Prepare(sources, LegacyNarrativeConverter.DefaultRoot,
-                        LegacyNarrativeConverter.DefaultManifest, LegacyNarrativeConverter.Resolve, report);
+                        LegacyNarrativeConverter.DefaultManifest, LegacyNarrativeConverter.Resolve, report, includeQuests: true);
                     if (plan != null && !report.HasErrors)
                     {
                         LegacyNarrativeConverter.Write(plan, force, report);

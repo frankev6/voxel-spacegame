@@ -22,12 +22,13 @@ namespace Game.Editor.Migration.Narrative
             internal readonly LegacyManifestWriter Manifest = new();
             internal readonly Dictionary<string, ContentDefinition> References = new(StringComparer.Ordinal);
             internal readonly string Root, ManifestPath;
+            internal LegacyQuestConverter.Plan Quests;
             internal Plan(List<ConvertedEncounter> encounters, IReadOnlyCollection<FactDeclaration> facts, string root, string manifestPath)
             { Encounters = encounters; Facts = facts; Root = root; ManifestPath = manifestPath; }
         }
 
         internal static Plan Prepare(LegacyNarrativeLoader.Sources sources, string root, string manifestPath,
-            Func<string, ContentDefinition> resolve, ValidationReport report)
+            Func<string, ContentDefinition> resolve, ValidationReport report, bool includeQuests = false)
         {
             root = root.Replace('\\', '/').TrimEnd('/');
             if (!root.StartsWith("Assets/", StringComparison.Ordinal) || Array.Exists(root.Split('/'), part => part == ".." || part == "." || part.Length == 0))
@@ -69,6 +70,7 @@ namespace Game.Editor.Migration.Narrative
                 plan.TextFiles.Add(path, emission.Text);
                 plan.Manifest.AddDialogue(path, emission);
             }
+            if (includeQuests) plan.Quests = LegacyQuestConverter.Prepare(sources, translator, plan, resolve, report);
             plan.TextFiles.Add(manifestPath, plan.Manifest.Render());
             return plan;
         }
@@ -81,6 +83,7 @@ namespace Game.Editor.Migration.Narrative
             if (plan == null) throw new ArgumentNullException(nameof(plan));
             var paths = new List<string>(plan.TextFiles.Keys) { plan.Root + "/Facts/facts_legacy.asset" };
             foreach (var encounter in plan.Encounters) paths.Add(plan.Root + "/Beats/" + encounter.BeatId + ".asset");
+            if (plan.Quests != null) paths.AddRange(plan.Quests.AssetPaths(plan.Root));
             foreach (string path in paths)
             {
                 if (Directory.Exists(path)) throw new IOException("Output path is a directory: " + path);
@@ -90,9 +93,11 @@ namespace Game.Editor.Migration.Narrative
             // Type conflicts must also fail before a first output is written.
             CheckType<FactCatalogDefinition>(plan.Root + "/Facts/facts_legacy.asset");
             foreach (var encounter in plan.Encounters) CheckType<StoryBeatDefinition>(plan.Root + "/Beats/" + encounter.BeatId + ".asset");
+            plan.Quests?.CheckTypes(plan.Root);
             var writer = new LegacyAssetWriter(plan.Root, new MigrationManifest(), force, report);
             foreach (var encounter in plan.Encounters)
                 LegacyBeatWriter.Write(writer, encounter, plan.Nested.Contains(encounter.BeatId), id => plan.References[id]);
+            plan.Quests?.Write(writer, plan.Root, report);
             LegacyBeatWriter.WriteFacts(writer, plan.Facts);
             if (report.HasErrors) throw new InvalidDataException(report.ToText());
             foreach (var pair in plan.TextFiles)
@@ -104,11 +109,11 @@ namespace Game.Editor.Migration.Narrative
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
-        static void CheckType<T>(string path) where T : ContentDefinition
+        internal static void CheckType<T>(string path) where T : ContentDefinition
         {
             if (!File.Exists(path)) return;
             var asset = AssetDatabase.LoadMainAssetAtPath(path);
-            if (!(asset is T)) throw new InvalidDataException("Existing output is not " + typeof(T).Name + ": " + path);
+            if (asset == null || asset.GetType() != typeof(T)) throw new InvalidDataException("Existing output is not " + typeof(T).Name + ": " + path);
         }
         internal static ContentDefinition Resolve(string id)
         {

@@ -17,6 +17,12 @@ namespace Game.Editor.Migration.Narrative
         readonly List<ConvertedEncounter.LogEntry> logs = new List<ConvertedEncounter.LogEntry>();
         public IReadOnlyCollection<FactDeclaration> Facts => facts.Values;
         public IReadOnlyList<ConvertedEncounter.LogEntry> Logs => logs;
+        internal void DeclareFact(FactDeclaration declaration)
+        {
+            if (facts.TryGetValue(declaration.Name, out var existing) && existing.Kind != declaration.Kind)
+                throw new FormatException("Conflicting converted fact kind: " + declaration.Name);
+            facts[declaration.Name] = declaration;
+        }
 
         public LegacyActionTranslator(LegacyNarrativeLoader.Sources sources)
         {
