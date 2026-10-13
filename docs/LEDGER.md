@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 14 | 3 | 0 | 0 | 74 | 0 | 91 | 5 |
-| M3 | 144 | 4 | 0 | 0 | 32 | 0 | 180 | 11 |
+| M3 | 143 | 5 | 0 | 0 | 32 | 0 | 180 | 10 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -314,7 +314,7 @@
 | PERS-015 | Full-world round trip with all real participants | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-011, PERS-012, SPEC-01, SPEC-30, SPEC-31, SPEC-33, SPEC-40, SPEC-41, SPEC-42, SPEC-50 | no | todo |  |  |  |  |
 | VOX-020 | Incremental grid edits for the editor preview | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M3 | frontier | VOX-014 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Isolated lead work during serialized combat regression; incremental editor preview edits |
 | PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | a606bfc | Restored-cell mass accumulator; ownership fixture repair; 1 required test; full batch 901 EM / 128 PM, zero failures |
-| DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | yes | todo |  |  |  | partial in DMG-002: channels/contracts and readback / impulse consumer and bounded heal/place passes with nine required tests |
+| DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Claimed in isolated lead checkout during AI/ability regression; impulse consumer and bounded restore passes, nine required tests |
 | AI-013 | Fleet data and formations | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | bf5e81f | Formation validation and boot-owned blob/catalog; 2 required tests. AI-014 steering remains open. Full 1027 EM / 145 PM passed. |
 | AI-014 | FleetSystem and member thinking | [SPEC-23](specs/SPEC-23-ai.md) | M3 | frontier | AI-013, AI-007 | no | todo |  |  |  |  |
 | AI-015 | Fleet and swarm scenario and performance | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-014 | no | todo |  |  |  |  |
