@@ -504,6 +504,7 @@ Expected results with the real export (asserted by MIG-016; "palette" excludes e
 | `ship_frigate` | 119 | 0 | 119 | 0 | 127 | 19 | 9 | 1 |
 | `ship_icarus` | 270 | 2 | 258 | 10 (6 thruster_medium, 4 hull) | 305 | 3 | 23 | 0 |
 | `ship_red_elite` | 789 | 0 | 787 | 2 (hull) | 819 | 2 | 22 | 0 |
+| 23 | Full-run BlockConverter rebuild clears grants owned by the later AbilityConverter, producing duplicate Updated rows and violating rerun idempotence | Preserve the catalog block's authored grant array while rebuilding block-owned fields. AbilityConverter still fills only empty arrays. Migration gate snapshots unique asset paths and expects 100 unique outputs after the two abilities; every reported outcome and all final bytes remain checked. | Tech lead |
 | `ship_shuttle` | 119 | 0 | 119 | 0 | 127 | 19 | 9 | 1 |
 | `ship_striker` | 50 | 0 | 44 | 6 (3 plasma_turret_small, 1 thruster_medium, 2 hull) | 74 | 2 | 14 | 0 |
 | `ship_vestari` | 946 | 0 | 946 | 0 | 972 | 36 | 21 | 1 |

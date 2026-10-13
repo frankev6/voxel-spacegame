@@ -819,6 +819,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 232 | SPEC-24 Q3–4: serialized ability validation and boot-owned blob lifetime. | Enforce finite/ranged scalars and known unique modifiers, positive rounded boost duration and representable timers. Boot creates the ability blob before snapshots and disposes after jobs complete; empty families retain a none-only entry. Runtime registration remains ABL-003. | Tech lead |
 | 233 | SPEC-72 Q22: ability inactive fields, icon source and protected grant target resolution. | Use configured migration sprites and exact SPEC-24 values, zero inactive fields, null optional cue/Fx, report replaced legacy values, resolve the four canonical targets and preserve authored assets/nonempty arrays through existing writer APIs. | Tech lead |
 | 234 | SPEC-21 Q14–15: stable weapon diagnostics and boot faction ownership. | Keep field-specific safety checks in existing WPN code categories, preserve authored nine weapons/config, reject duplicate weapon singletons before allocation, preserve an existing faction owner and clean only factory-owned native data/entities. Integrated with power and ability boot lifetimes. | Tech lead |
+| 235 | SPEC-24 Q5: test assets violate strict production-content location rules. | Keep hand-authored JSON fixtures in Tests and deserialize transient definitions; do not weaken DATA-E011 or add test definitions to production. | Tech lead |
+| 236 | SPEC-72 Q23: full block conversion erases later-owned ability grants. | Preserve existing catalog grants during block field rebuild; retain fill-only-empty semantics, unique-path snapshots and hard report/byte idempotence checks. Output inventory now includes two abilities. | Tech lead |
 
 ## Measurements
 
@@ -929,6 +931,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Combat batch integration repairs — astra (gpt-6)
+
+1. Full session 73612 exited with **952 EditMode passed / 6 failed / 1 skipped**; PlayMode did not start. Two failures were strict DATA-E011 against test ability assets; four shared the migration gate setup's duplicate block paths. No performance-only failure or production validation rule weakened.
+2. `dcc00ef` replaces test content assets with transient JSON fixtures and fixes the underlying full-run block converter clearing later-owned grants. Migration gate snapshots unique output paths, expects the two new abilities, and retains report/outcome/byte equality. Q235–236 resolve the spec conflict and ownership defect. Existing test counts unchanged; spec-required: 3 ability, 1 converter, 4 migration gate; extra: 0. Compile and affected grouped session 29046 active.
+3. AI-004 isolated implementation now includes five required builder tests (`876424e`), pending Unity compile/validation. Main stays on the combat-content integration branch; no second Unity process. Three workers remain active.
 
 ### 2026-10-13 — WPN-002 integrated; spatial builder started — astra (gpt-6)
 
