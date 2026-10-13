@@ -17,7 +17,7 @@
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 59 | 5 | 0 | 0 | 27 | 0 | 91 | 5 |
 | M3 | 171 | 7 | 0 | 0 | 2 | 0 | 180 | 4 |
-| M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
+| M4 | 13 | 1 | 0 | 0 | 0 | 0 | 14 | 2 |
 | A0 | 6 | 2 | 0 | 1 | 7 | 0 | 16 | 0 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -486,7 +486,7 @@
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | no | todo |  |  |  |  |
 | MIG-014 | Body template stubs | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-004, GAL-001 | no | todo |  |  |  |  |
 | MIG-015 | Hand-off package | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-002, MIG-003 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Worker power lane; typed handoff extraction; three required tests; lead-owned Unity validation |
-| INP-008 | Gamepad scheme | [SPEC-03](specs/SPEC-03-input.md) | M4 | standard | INP-003 | yes | todo |  |  |  |  |
+| INP-008 | Gamepad scheme | [SPEC-03](specs/SPEC-03-input.md) | M4 | standard | INP-003 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Combat worker lane; ready later-milestone input work while lead validates combat batch |
 | REN-015 | LOD2 grid proxies | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M4 | frontier | REN-012 | yes | todo |  |  |  |  |
 | PHY-021 | Region compounds for very large grids (only if PHY-019 shows assembly over budget) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M4 | frontier | PHY-019 | yes | todo |  |  |  |  |
 | DMG-018 | M4: per-brick component labels for >1M-cell stations | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | frontier | DMG-016 | no | todo |  |  |  |  |
