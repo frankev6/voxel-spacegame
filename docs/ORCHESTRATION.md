@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 accepted | FACT review169 and NAR-014 review170 clear; genuine ready-standard dependency wait | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-014 | delivered6562d5fd at182; lead integration/validation pending | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-014 | accepted2be62596; genuine ready-standard dependency wait | narrative follow-ups |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-009 accepted | readiness audit149 delivered; genuine wait for lead HUD composition/UI audit prerequisites | HUD-003/006/007 once ready |
 
 ## Operating rules
@@ -19,6 +19,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Legacy logic accepted:**2be62596 clean compiles89361/43204; five focused checks11720 pass after exact salvage removal expectation repair. NAR-014 closes; NAR-015 frontier emission unlocked. All three workers currently have real standard-task dependency waits. Lead returns to HUD-002 preserved e7bcf344; composition/session/presenters remain. No Unity validation active. Previous turn staged UI views (progress).
 
 - **Menu/pause views staged:** HUD-002 now has authored main-menu and pause UXML/styles, view-model visibility/save-block updates, command bindings, and specified root Back routing. Presenters/lifetime/session hookup remain unfinished; temporary adapter stays installed. Partial owning HUD rows updated. No Unity validation this turn; previous turn built loading UI (progress). NAR-014 review170 found no actionable defects; lead integration/validation remains queued.
 
