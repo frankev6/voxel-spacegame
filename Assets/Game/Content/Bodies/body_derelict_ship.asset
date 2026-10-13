@@ -17,18 +17,18 @@ MonoBehaviour:
   displayName: Derelict Ship
   description: 
   role: 8
-  radiusMinM: 100
-  radiusMaxM: 100
-  visual: {fileID: 0}
-  starClass: 0
+  radiusMinM: 20
+  radiusMaxM: 20
+  visual: {fileID: 11400000, guid: 3220d13f394f5aac9bd5e3e2ce2b611a, type: 2}
+  starClass: 2
   hasCollider: 1
   canHaveMoons: 0
-  interaction: 0
+  interaction: 5
   interactionDistanceM: 150
-  interactPrompt: 
+  interactPrompt: Salvage
   storyTag: derelict
-  structureSource: 0
-  blueprint: {fileID: 0}
+  structureSource: 1
+  blueprint: {fileID: 11400000, guid: 6861f1006d5e848e2bc8d0cf43c520bb, type: 2}
   shape:
     kind: 0
     sizeCells: {x: 0, y: 0, z: 0}

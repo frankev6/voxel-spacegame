@@ -17,26 +17,26 @@ MonoBehaviour:
   displayName: Active Gate
   description: 
   role: 7
-  radiusMinM: 100
-  radiusMaxM: 100
-  visual: {fileID: 0}
-  starClass: 0
+  radiusMinM: 32
+  radiusMaxM: 32
+  visual: {fileID: 11400000, guid: 3220d13f394f5aac9bd5e3e2ce2b611a, type: 2}
+  starClass: 2
   hasCollider: 1
   canHaveMoons: 0
-  interaction: 0
+  interaction: 3
   interactionDistanceM: 150
-  interactPrompt: 
+  interactPrompt: Jump
   storyTag: gate_active
-  structureSource: 0
+  structureSource: 2
   blueprint: {fileID: 0}
   shape:
     kind: 0
-    sizeCells: {x: 0, y: 0, z: 0}
-    wallThicknessCells: 0
-    hullBlock: {fileID: 0}
+    sizeCells: {x: 48, y: 8, z: 32}
+    wallThicknessCells: 2
+    hullBlock: {fileID: 11400000, guid: dfcc75e2220ed476babe83e285ee98e6, type: 2}
     coreBlock: {fileID: 0}
     colorIndex: 0
-  destructible: 1
+  destructible: 0
   t2LoadDistanceM: 6000
   beltWidthM: 2000
   sectorSizeM: 500

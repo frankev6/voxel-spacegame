@@ -17,12 +17,12 @@ MonoBehaviour:
   displayName: Terrestrial Planet
   description: 
   role: 2
-  radiusMinM: 100
-  radiusMaxM: 100
-  visual: {fileID: 0}
-  starClass: 0
+  radiusMinM: 650
+  radiusMaxM: 650
+  visual: {fileID: 11400000, guid: 4063e8031ddf5c2bbb7bb7c5ac00ff0b, type: 2}
+  starClass: 2
   hasCollider: 1
-  canHaveMoons: 0
+  canHaveMoons: 1
   interaction: 0
   interactionDistanceM: 150
   interactPrompt: 
@@ -36,7 +36,7 @@ MonoBehaviour:
     hullBlock: {fileID: 0}
     coreBlock: {fileID: 0}
     colorIndex: 0
-  destructible: 1
+  destructible: 0
   t2LoadDistanceM: 6000
   beltWidthM: 2000
   sectorSizeM: 500

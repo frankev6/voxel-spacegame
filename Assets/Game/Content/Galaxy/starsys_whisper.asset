@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7b739dae44940098571a23d3b55d6b3, type: 3}
+  m_Name: starsys_whisper
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.AuthoredStarSystemDefinition
+  id: starsys_whisper
+  formerIds: []
+  displayName: Whisper
+  positionLy: {x: -5, y: 4}
+  template: {fileID: 11400000, guid: 2fb4761bf13a5c60b3042bcec8abb617, type: 2}
+  star: {fileID: 11400000, guid: f95f5439aa3fc4499a2cfd37dbad44e3, type: 2}
+  bodies:
+  - key: whisper_i
+    role: 2
+    slot: 0
+    parentKey:
+    template: {fileID: 11400000, guid: c84f5391581764db29d3925897e08c2a, type: 2}
+    mode: 1
+    orbitRadiusM: 7000
+    phaseDegrees: 40
+    eccentricity: 0
+    periodOverrideS: 0
+    radiusOverrideM: 0
+    yawDegrees: 0
+    displayNameOverride:
+  - key: whisper_ii
+    role: 2
+    slot: 1
+    parentKey:
+    template: {fileID: 11400000, guid: 645a062845f094be5b0ab67150c986d1, type: 2}
+    mode: 1
+    orbitRadiusM: 12000
+    phaseDegrees: 210
+    eccentricity: 0
+    periodOverrideS: 0
+    radiusOverrideM: 0
+    yawDegrees: 0
+    displayNameOverride:
+  - key: whisper_outpost
+    role: 4
+    slot: 0
+    parentKey:
+    template: {fileID: 11400000, guid: 9352b329ad44e488a8539dedf945b3e8, type: 2}
+    mode: 0
+    orbitRadiusM: 4000
+    phaseDegrees: 0
+    eccentricity: 0
+    periodOverrideS: 0
+    radiusOverrideM: 0
+    yawDegrees: 0
+    displayNameOverride:
+  hiddenUntilKnown: 0
+  isStory: 1
+  isHub: 0
+  noEncounters: 0
+  connectProcedurally: 0
+  danger: 1
+  startBodyKey:
+  startOffsetM: {x: 0, y: 0, z: -400}
+  startYawDegrees: 0

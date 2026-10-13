@@ -17,11 +17,11 @@ MonoBehaviour:
   displayName: Asteroid Belt
   description: 
   role: 5
-  radiusMinM: 100
-  radiusMaxM: 100
+  radiusMinM: 1000
+  radiusMaxM: 1000
   visual: {fileID: 0}
-  starClass: 0
-  hasCollider: 1
+  starClass: 2
+  hasCollider: 0
   canHaveMoons: 0
   interaction: 0
   interactionDistanceM: 150

@@ -17,18 +17,18 @@ MonoBehaviour:
   displayName: Station
   description: 
   role: 4
-  radiusMinM: 100
-  radiusMaxM: 100
-  visual: {fileID: 0}
-  starClass: 0
+  radiusMinM: 40
+  radiusMaxM: 40
+  visual: {fileID: 11400000, guid: 3220d13f394f5aac9bd5e3e2ce2b611a, type: 2}
+  starClass: 2
   hasCollider: 1
   canHaveMoons: 0
-  interaction: 0
+  interaction: 1
   interactionDistanceM: 150
-  interactPrompt: 
+  interactPrompt: Dock
   storyTag: station
-  structureSource: 0
-  blueprint: {fileID: 0}
+  structureSource: 1
+  blueprint: {fileID: 11400000, guid: b43838c726f3748989db74a2b44d5ac8, type: 2}
   shape:
     kind: 0
     sizeCells: {x: 0, y: 0, z: 0}

@@ -17,24 +17,24 @@ MonoBehaviour:
   displayName: Resource Cache
   description: 
   role: 8
-  radiusMinM: 100
-  radiusMaxM: 100
-  visual: {fileID: 0}
-  starClass: 0
+  radiusMinM: 6
+  radiusMaxM: 6
+  visual: {fileID: 11400000, guid: 3220d13f394f5aac9bd5e3e2ce2b611a, type: 2}
+  starClass: 2
   hasCollider: 1
   canHaveMoons: 0
-  interaction: 0
+  interaction: 2
   interactionDistanceM: 150
-  interactPrompt: 
+  interactPrompt: Inspect
   storyTag: resource_cache
-  structureSource: 0
+  structureSource: 2
   blueprint: {fileID: 0}
   shape:
-    kind: 0
-    sizeCells: {x: 0, y: 0, z: 0}
-    wallThicknessCells: 0
-    hullBlock: {fileID: 0}
-    coreBlock: {fileID: 0}
+    kind: 2
+    sizeCells: {x: 12, y: 8, z: 12}
+    wallThicknessCells: 2
+    hullBlock: {fileID: 11400000, guid: dfcc75e2220ed476babe83e285ee98e6, type: 2}
+    coreBlock: {fileID: 11400000, guid: 740a6c99920824c919828525215fa6b2, type: 2}
     colorIndex: 0
   destructible: 1
   t2LoadDistanceM: 6000
