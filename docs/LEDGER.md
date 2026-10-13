@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 58 | 2 | 0 | 0 | 31 | 0 | 91 | 5 |
+| M2 | 57 | 3 | 0 | 0 | 31 | 0 | 91 | 5 |
 | M3 | 170 | 2 | 0 | 0 | 8 | 0 | 180 | 11 |
 | M4 | 13 | 1 | 0 | 0 | 0 | 0 | 14 | 2 |
 | A0 | 6 | 2 | 0 | 1 | 7 | 0 | 16 | 0 |
@@ -303,7 +303,7 @@
 | DEV-013 | Overlays: islands and spatial hash | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-012, AI-001 | no | todo |  |  |  |  |
 | TST-005 | Determinism runner and the combat determinism gate | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | frontier | TST-002, TST-003, SPEC-13, SPEC-20, SPEC-21, SPEC-22, SPEC-23 | no | todo |  |  |  |  |
 | TST-006 | Ten-minute combat soak | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | standard | TST-005, SPEC-70 | no | todo |  |  |  |  |
-| MIG-009 | Weapon converter and weapon links | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-006, MIG-011, WPN-001, SPEC-04 | no | todo |  |  |  |  |
+| MIG-009 | Weapon converter and weapon links | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-006, MIG-011, WPN-001, DATA-007 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Combat worker; supplies canonical links before strict DATA-010 integration; Q216 |
 | MIG-010 | Ability converter and ability grants | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-006, ABL-001, SPEC-04 | no | todo |  |  |  |  |
 | MIG-011 | Audio cue converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-004, AUD-001 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | ca37e33 | 20 generated cues; lead fixture fix ed77024; one required + three migration safety tests. Full batch green. |
 | FND-011 | Load flow end to end (R28) | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | frontier | FND-010, SPEC-30, SPEC-31 | no | todo |  |  |  |  |
@@ -785,6 +785,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 202 | 2026-10-13 | SPEC-22 Q10 / PWR-001 | PowerDemandGroup references allocator before PWR-005 exists | Defer redundant UpdateBefore attribute; retain PWR-005 TODO and reciprocal ordering requirement | Tech lead | Resolved; no allocator stub or changed runtime ordering |
 | 203 | 2026-10-13 | SPEC-21 Q13 / WPN-017 | Presentation ordering and stale HulkInfo field | Existing OrderLast drain orders bridge without upward reference; use FormerKind and complete attribution dependencies | Tech lead | Resolved; no assembly or effective ordering change |
 | 204 | 2026-10-13 | SPEC-62 Q16 / CAM-008 | Camera FX reader missing; generic effect names differ | Borrow current-frame completed uploader drain; map actual hit/explosion/ram kinds and bind at boot | Tech lead | Resolved; synchronous reader, no second queue consumer |
+
+| 216 | 2026-10-13 | SPEC-72 Q19 / MIG-009 | Broad dependency waits for strict link validation that needs migrated weapons | Narrow to completed DATA-007 and original migration/weapon prerequisites; existing serialized weapon field/bake contract is sufficient | Tech lead | Resolved; preserve E047 and batch missing canonical content before strict validation |
 
 ## Measurements
 
