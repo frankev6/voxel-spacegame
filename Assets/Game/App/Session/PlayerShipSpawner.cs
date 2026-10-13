@@ -36,6 +36,8 @@ namespace Game.App.Session
                     PersistentId = record.PersistentId, Pose = RigidTransform.identity, Kind = GridKind.Ship,
                     Motion = GridMotion.Dynamic, Flags = GridSpawnFlags.WriteBack, Profile = GridProfile.PlayerShip
                 });
+                // Requester data is available now; unified galaxy spawning remains FND-012/GAL-008.
+                world.EntityManager.AddComponentData(root, Game.Simulation.Allegiance.Player);
             }
             catch { Release(); throw; }
         }
