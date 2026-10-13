@@ -82,10 +82,26 @@ namespace Game.Data.Definitions
             WorldDefinitionValidation.Require(check, "GAL-E019", nameof(defaultAncientGate), defaultAncientGate != null && defaultAncientGate.Role == BodyRole.LaneGate, "Default ancient gate must be a LaneGate template.");
         }
 
-        // TODO(TRV-003): compile and bind authored lane conditions.
         public void CompileLogic(Game.Data.Logic.Compiler.LogicCompiler compiler, Game.Data.Validation.ValidationScope scope)
-            => throw new System.NotImplementedException("TRV-003");
+        {
+            if (compiler == null) throw new System.ArgumentNullException(nameof(compiler));
+            if (authoredLanes == null) return;
+            var report = new Game.Data.Validation.ValidationReport(scope.AssetPath);
+            for (int i = 0; i < authoredLanes.Count; i++)
+            {
+                var lane = authoredLanes[i]; if (lane == null) continue;
+                lane.condition ??= new Game.Data.Logic.CompiledCondition();
+                compiler.Compile(lane.condition, new Game.Data.Logic.Compiler.LogicCompileOptions(Game.Data.Logic.LogicUsage.LaneCondition, scope.AssetPath, "authoredLanes[" + i + "].condition"), report);
+            }
+            foreach (var entry in report.Entries)
+                if (entry.Severity == Game.Data.Validation.ValidationSeverity.Error) scope.Error(entry.Code, entry.Field, entry.Message);
+                else if (entry.Severity == Game.Data.Validation.ValidationSeverity.Warning) scope.Warning(entry.Code, entry.Field, entry.Message);
+                else scope.Info(entry.Code, entry.Field, entry.Message);
+        }
         public void BindLogic(Game.Data.Logic.LogicBinder binder)
-            => throw new System.NotImplementedException("TRV-003");
+        {
+            if (binder == null) throw new System.ArgumentNullException(nameof(binder));
+            if (authoredLanes != null) foreach (var lane in authoredLanes) lane?.condition?.Bind(binder);
+        }
     }
 }
