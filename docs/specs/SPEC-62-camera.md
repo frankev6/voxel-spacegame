@@ -171,6 +171,7 @@ bool blending; float blendT; float3 blendFromPos; quaternion blendFromRot;
 float trauma, shakeTime;
 // output
 float3 outPos; quaternion outRot;
+float3 unshakenPos; quaternion unshakenRot; // Hold/targetless Flight retain this logical pose, preventing accumulated shake offsets
 ```
 
 ### 4.3 Map view transform (`Assets/Game/UI/Data/MapViewTransform.cs`, *public contract*, namespace `Game.UI.Data`)
@@ -226,8 +227,10 @@ Per-frame algorithm:
    - **Flight:** §5.3. Without a target: Hold.
    - **EditorOrbit:** §5.4.
 3. **Blend:** if `blending`: `blendT += dt / BlendSeconds`; `w = smoothstep(0, 1, blendT)`; `p = lerp(blendFromPos, p, w)`; `r = slerp(blendFromRot, r, w)`; stop when `blendT ≥ 1`.
-4. **Shake:** `trauma = max(0, trauma - TraumaDecayPerSecond * dt)`; `s = trauma * trauma`; `shakeTime += dt`; `n(k) = noise.snoise(float2(shakeTime * ShakeFrequencyHz, k))`; `offset = float3(n(0), n(10), 0) * ShakeMaxOffsetFraction * currentDistance * s` in camera space; `rShake = Euler(radians(n(20) * ShakeMaxAngleDeg * s), radians(n(30) * ShakeMaxAngleDeg * s), radians(n(40) * ShakeMaxAngleDeg * 0.5 * s))`. Skip when `s == 0` or reduce motion.
+4. **Shake:** retain the unshaken mode/blend pose separately for Hold and targetless Flight; `trauma = max(0, trauma - TraumaDecayPerSecond * dt)`; `s = trauma * trauma * settings.ShakeScale`; `shakeTime += dt`; `n(k) = noise.snoise(float2(shakeTime * ShakeFrequencyHz, k))`; `offset = float3(n(0), n(10), 0) * ShakeMaxOffsetFraction * currentDistance * s` in camera space; `rShake = Euler(radians(n(20) * ShakeMaxAngleDeg * s), radians(n(30) * ShakeMaxAngleDeg * s), radians(n(40) * ShakeMaxAngleDeg * 0.5 * s))`. Skip when `s == 0` or reduce motion.
 5. `outPos = p + mul(r, offset)`, `outRot = mul(r, rShake)`; `cameraTransform.SetPositionAndRotation(outPos, outRot)`.
+
+`AddImpulse(worldPos, strength, radius)` adds `strength * saturate(1 - distance(worldPos, Focus) / radius)` to trauma, saturating the result to [0,1]. Nonpositive strength/radius or nonfinite inputs are ignored. Accessibility suppresses/scales only the output; trauma still decays with unscaled time.
 
 `SetMode(CameraMode m, bool cut)`: if `cut` or reduce motion → `blending = false`; else `blending = true, blendT = 0, blendFrom = last output pose`. Entering Flight resets `pitchTarget = DefaultPitch`, `distanceTarget = DefaultDistance`, `yawOffset = 0`.
 
@@ -517,6 +520,7 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 | 13 | Endpoint-only focus damping violates the moving-target FPS acceptance | Integrate the same exponential cascade with linear target motion over each frame | Tech lead | Resolved CAM-005: initial 100 m/s, 2 s X positions were 232.0124 / 231.2455 / 230.7731 m at 30/60/144 FPS (30–60 error 0.766891 m vs 0.05 m). §5.3 now gives the closed-form integration, including equal-rate/small-step limits; required test and tolerance remain unchanged. Task raised to frontier for this numerical decision. |
 | 14 | M1 camera performance task references occlusion/origin paths implemented in M3 | Measure actual no-occlusion CPU/GC now; extend the same timing test in CAM-007 | Tech lead | Resolved CAM-011: enforce 0.05 ms without a raycast, not the looser 0.15 ms label. CAM-007 explicitly owns the real-raycast fixture and 0.15 ms evidence; CAM-006 owns origin accuracy. The ten-second circle advances from the same clamped unscaled dt as the production bridge; captureDeltaTime does not fix unscaledDeltaTime in this Editor (verified by the initial test failure). A real-time timeout bounds a stalled clock. Allocation measurement covers the inclusive bridge/rig update, excluding fixture mutation and assertions. |
 | 15 | Fast close-zoom flight pushes the imported Fighter out of frame despite fitting while stationary | Clip the output focus translation against the actual solid-bounds frustum | Tech lead | Resolved CAM-012: use CellMin/CellMax bounds, not brick capacity or a corner-centered radius. Keep damping state and zoom/orbit intact; retain as much desired focus displacement as all bounds permit. Center the hull when deliberate close zoom cannot fit it. Internal bounds handoff only; public camera and ECS contracts unchanged. |
+| 16 | The VFX uploader retains its drained list but has no camera view; generic shake-kind names differ from the actual enum | Borrow an internal read-only view of the completed drain, valid for the current rendered frame and consumed synchronously after FxUploadSystem; preserve existing allocation/disposal and queue ownership. Configure both ExplosionSmall/ExplosionLarge at 0.5 / 300 m, RamImpact at 0.4 / 200 m and both HitKinetic/HitEnergy at 0.05 / 80 m; omit ship-destroyed because no such FxKind exists | Tech lead | CAM-008 implements this default. Lead owns GameComposition binding under ADR-0062. |
 
 ## 11. References
 

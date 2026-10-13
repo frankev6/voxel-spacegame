@@ -54,4 +54,19 @@ MonoBehaviour:
   ShakeFrequencyHz: 22
   ShakeMaxOffsetFraction: 0.01
   ShakeMaxAngleDeg: 2
-  ShakeRules: []
+  ShakeRules:
+  - Kind: 4
+    Strength: 0.5
+    RadiusMeters: 300
+  - Kind: 5
+    Strength: 0.5
+    RadiusMeters: 300
+  - Kind: 13
+    Strength: 0.4
+    RadiusMeters: 200
+  - Kind: 2
+    Strength: 0.05
+    RadiusMeters: 80
+  - Kind: 3
+    Strength: 0.05
+    RadiusMeters: 80

@@ -2,6 +2,7 @@ using Game.Core;
 using Game.Core.Systems;
 using Game.Presentation.Components;
 using Game.Presentation.Services;
+using Game.Presentation.Vfx;
 using Game.Simulation.Commands;
 using Game.Voxel.Model;
 using Game.Voxel.Rendering;
@@ -17,6 +18,7 @@ namespace Game.Presentation.Systems
 {
     /// <summary>Managed camera bridge and sole MainCameraState writer (SPEC-62 §5.1).</summary>
     [UpdateInGroup(typeof(PresentationBridgeGroup))]
+    [UpdateAfter(typeof(FxUploadSystem))]
     [UpdateBefore(typeof(BrickPoolRenderSystem))]
     // TODO(AUD-006): UpdateAfter AudioEventDrainSystem when that system exists.
     // TODO(HUD-002): UpdateBefore HudSyncSystem when that system exists.
@@ -25,11 +27,12 @@ namespace Game.Presentation.Systems
         static readonly ProfilerMarker TargetMarker = new ProfilerMarker(ProfilerCategory.Scripts, "CameraTargetSyncSystem.ReadTarget");
         // TODO(CAM-006): Origin marker with origin warp.
         // TODO(CAM-007): Occlusion marker with the physics ray.
-        // TODO(CAM-008): Shake marker with typed FX input.
+        static readonly ProfilerMarker ShakeMarker = new ProfilerMarker(ProfilerCategory.Scripts, "CameraTargetSyncSystem.Shake");
         EntityQuery players, viewers, renderCameras;
         Entity viewEntity, lastTarget;
         float3 lastTargetPos;
         CameraRigService rig;
+        IFxFrameReader fx;
 
         protected override void OnCreate()
         {
@@ -41,8 +44,7 @@ namespace Game.Presentation.Systems
         }
         public void Bind(CameraRigService rig, IFxFrameReader fx)
         {
-            this.rig = rig; lastTarget = Entity.Null;
-            // TODO(CAM-008): retain and consume fx.Current after its VFX contract lands.
+            this.rig = rig; this.fx = fx; lastTarget = Entity.Null;
         }
         protected override void OnUpdate()
         {
@@ -81,6 +83,25 @@ namespace Game.Presentation.Systems
                     rig.SetTarget(pos, rotation, velocity, radius, cut);
                     if (hasBounds) rig.SetTargetBounds(boundsMin, boundsMax, ltw.Value);
                     lastTarget = target; lastTargetPos = pos;
+                }
+            }
+            using (ShakeMarker.Auto())
+            {
+                if (rig.Mode == Data.CameraMode.Flight && fx != null && rig.Config.ShakeRules != null)
+                {
+                    var events = fx.Current;
+                    int count = math.min(256, events.Length);
+                    var rules = rig.Config.ShakeRules;
+                    for (int i = 0; i < count; i++)
+                    {
+                        var e = events[i];
+                        for (int j = 0; j < rules.Length; j++)
+                            if (rules[j].Kind == e.Kind)
+                            {
+                                rig.AddImpulse(e.Pos, rules[j].Strength * math.max(e.Scale, 0), rules[j].RadiusMeters);
+                                break;
+                            }
+                    }
                 }
             }
             rig.Tick(dt);

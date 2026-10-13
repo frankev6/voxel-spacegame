@@ -26,6 +26,9 @@ namespace Game.Presentation.Services
         bool hasBounds;
         float3 blendFromPos, outPos;
         quaternion blendFromRot, outRot;
+        float3 unshakenPos;
+        quaternion unshakenRot;
+        float trauma, shakeTime;
         internal CameraConfig Config => config;
         internal bool HasTarget { get; private set; }
         internal float3 TargetPosition { get; private set; }
@@ -34,6 +37,7 @@ namespace Game.Presentation.Services
         internal float TargetRadius { get; private set; }
         internal bool CutRequested { get; private set; }
         internal float3 FocusState { get; private set; }
+        internal float Trauma => trauma;
 
         public CameraRigService(CameraConfig config, Transform parent, ICameraInput input)
         {
@@ -56,6 +60,7 @@ namespace Game.Presentation.Services
                 mode = CameraMode.Menu; FocusState = config.MenuLookAt;
                 pitchDeg = pitchTargetDeg = config.DefaultPitchDeg; distance = distanceTarget = config.DefaultDistance;
                 MenuPose(out outPos, out outRot);
+                unshakenPos = outPos; unshakenRot = outRot;
                 ApplyPose();
             }
             catch { Dispose(); throw; }
@@ -103,7 +108,12 @@ namespace Game.Presentation.Services
         { boundsMin = min; boundsMax = max; boundsTransform = localToWorld; hasBounds = true; }
         public void ClearTarget() { HasTarget = false; CutRequested = false; }
         public void Warp(float3 delta) => throw new NotImplementedException("CAM-006");
-        public void AddImpulse(float3 worldPos, float strength, float radius) => throw new NotImplementedException("CAM-008");
+        public void AddImpulse(float3 worldPos, float strength, float radius)
+        {
+            if (disposed || !math.all(math.isfinite(worldPos)) || !math.isfinite(strength) || !math.isfinite(radius) || strength <= 0 || radius <= 0) return;
+            float falloff = math.saturate(1 - math.distance(worldPos, Focus) / radius);
+            trauma = math.saturate(trauma + strength * falloff);
+        }
         public float3 DesiredFlightPosition() => CameraMath.OrbitPosition(Focus, CameraMath.OrbitRotation(pitchDeg, yawDeg), distance);
         public void SetOcclusionDistance(float distance) => throw new NotImplementedException("CAM-007");
         public void EnterEditorOrbit(float3 center, float radius, bool cut) => throw new NotImplementedException("CAM-009");
@@ -118,7 +128,7 @@ namespace Game.Presentation.Services
             using var marker = TickMarker.Auto();
             dt = math.isfinite(dt) ? math.clamp(dt, 0, .1f) : 0;
             input?.Sample();
-            float3 p = outPos; quaternion r = outRot;
+            float3 p = unshakenPos; quaternion r = unshakenRot;
             if (mode == CameraMode.Menu)
             {
                 framingOffset = 0;
@@ -126,7 +136,8 @@ namespace Game.Presentation.Services
                 MenuPose(out p, out r);
             }
             else if (mode == CameraMode.Flight && HasTarget) FlightPose(dt, out p, out r);
-            // Hold and targetless Flight retain the last output; CAM-009 supplies the editor pose.
+            // Hold/targetless Flight keep the logical pose so additive shake never accumulates into a drift.
+            // CAM-009 supplies the editor pose.
             if (blending)
             {
                 blendT = math.min(1, blendT + dt / config.BlendSeconds);
@@ -134,8 +145,21 @@ namespace Game.Presentation.Services
                 p = math.lerp(blendFromPos, p, w); r = math.slerp(blendFromRot, r, w);
                 if (blendT >= 1) blending = false;
             }
-            // TODO(CAM-008): additive shake after the logical mode/blend pose.
+            unshakenPos = p; unshakenRot = r;
+            trauma = math.max(0, trauma - config.TraumaDecayPerSecond * dt);
+            shakeTime += dt;
+            float amount = trauma * trauma * settings.ShakeScale;
             outPos = p; outRot = r;
+            if (amount > 0 && !settings.ReduceMotion)
+            {
+                float t = shakeTime * config.ShakeFrequencyHz;
+                float3 offset = new float3(noise.snoise(new float2(t, 0)), noise.snoise(new float2(t, 10)), 0)
+                    * config.ShakeMaxOffsetFraction * CurrentDistance * amount;
+                float3 angles = new float3(noise.snoise(new float2(t, 20)), noise.snoise(new float2(t, 30)), noise.snoise(new float2(t, 40)) * .5f)
+                    * config.ShakeMaxAngleDeg * amount;
+                outPos += math.rotate(r, offset);
+                outRot = math.mul(r, quaternion.EulerXYZ(math.radians(angles)));
+            }
             ApplyPose();
         }
 

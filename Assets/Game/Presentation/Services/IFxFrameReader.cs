@@ -1,8 +1,11 @@
+using Game.Voxel.PresentationStreams;
+using Unity.Collections;
+
 namespace Game.Presentation.Services
 {
-    /// <summary>Frame-view binding shell for SPEC-62 §6; events arrive with CAM-008.</summary>
+    /// <summary>SPEC-62 §6: borrowed FX events, readable only in this frame's PresentationBridgeGroup.</summary>
     public interface IFxFrameReader
     {
-        // TODO(CAM-008): NativeArray<FxEvent>.ReadOnly Current after SPEC-63's contract exists.
+        NativeArray<FxEvent>.ReadOnly Current { get; }
     }
 }

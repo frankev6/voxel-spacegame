@@ -38,6 +38,7 @@ namespace Game.Presentation.Vfx
         static readonly ProfilerMarker BatchMarker = new ProfilerMarker(ProfilerCategory.Scripts, "FxUploadSystem.Batch");
         static readonly ProfilerMarker SubmitMarker = new ProfilerMarker(ProfilerCategory.Scripts, "FxUploadSystem.Submit");
         NativeList<FxEvent> drained;
+        int drainedFrame = -1;
         NativeList<ulong> unresolved;
         NativeHashSet<ulong> warned;
         NativeArray<FxGpuEvent> gpu;
@@ -51,6 +52,10 @@ namespace Game.Presentation.Vfx
         readonly FxStats unboundStats = new FxStats();
         public FxRig Rig { get => target as FxRig; set => Bind(value); }
         public FxStats Stats => target?.Stats ?? unboundStats;
+        // CAM-008: synchronous drain/batch jobs have finished before the camera reads this borrowed view.
+        // Never retain it or schedule jobs with it; the next upload clears/reuses the owning list.
+        internal NativeArray<FxEvent>.ReadOnly FrameEvents => drained.IsCreated && drainedFrame == UnityEngine.Time.frameCount
+            ? drained.AsArray().AsReadOnly() : default;
         protected override void OnCreate()
         {
             drained = new NativeList<FxEvent>(32768, Allocator.Persistent);
@@ -89,6 +94,7 @@ namespace Game.Presentation.Vfx
                 }
             }
             int over = counters[(int)FxCounter.EventsOverHardCap];
+            drainedFrame = UnityEngine.Time.frameCount;
             if (over > 0 && !hardCapWarned) { hardCapWarned = true; GameLog.WarnOnce("Vfx.HardCap", "Vfx", "FX events exceeded the 65536 frame cap; excess events discarded."); }
             var stats = Stats; stats.EventsDrained = drained.Length; stats.EventsOverHardCap = over;
             if (target == null) { stats.EventsOverHardCap += drained.Length; return; }
