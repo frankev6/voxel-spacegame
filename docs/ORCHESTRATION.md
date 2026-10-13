@@ -9,7 +9,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | GAL-012 | claimed; author real M3 world content | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ENC-010 | claimed; converter and canonical encounters from current main | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-005 | claimed; finish HUD-004 bounded review then settings from current main | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-005 | delivered366615a9; bounded review active, lead integration pending | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Lane implementation checkpoint:** GAL-005 claimed5562932d; task/GAL-005-galaxy-lanes authors spatial candidates/Kruskal/seeded extras/component bridges, union-find and explicit little-endian hash serialization. Builder lane/gate/adjacency hookup, six required checks and golden remain; uncompiled, no acceptance claim. HUD-005366615a9 delivered169 and bounded review dispatched; GAL-012192/ENC-010204 active. Previous turn accepted GAL-004 (progress).
 
 - **Layout accepted:**42ecb93f compile91964 clean, focused57816 five passed; evidence galaxy-layout/. No active Unity run. GAL-005 lanes/hash next lead task. Workers active GAL-012191/ENC-010204/HUD-005168. Previous turn implemented packing/queries (progress).
 

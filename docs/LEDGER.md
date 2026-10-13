@@ -1032,6 +1032,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — GAL-005 lane job checkpoint — astra (gpt-6)
+
+- Authored spatial candidate gathering, deterministic Kruskal forest, seeded extra lanes, disconnected-component bridges and canonical pair sorting; union-find and explicit little-endian galaxy hash serializer. Builder hookup/gate metadata/adjacency and golden acceptance remain. No Unity run yet. Test count: spec-required: 6 pending, extra: 0.
+- HUD-005 delivered366615a9; same worker assigned bounded review while lead integrates generation. GAL-012/ENC-010 continue. Previous turn completed GAL-004 (progress).
+
 ### 2026-10-13 — GAL-004 accepted — astra (gpt-6)
 
 - 42ecb93f completes managed content transfer, persistent arrays, scheduled deterministic layout, sorted ID index and exception cleanup, following87d13854/e78a7578 placement/packing/query work. GAL-005 lane graph, adjacency and hash remain explicitly marked TODO.
