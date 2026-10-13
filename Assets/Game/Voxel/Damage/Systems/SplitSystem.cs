@@ -3,6 +3,8 @@ using Game.Core.Systems;
 using Game.Data.Blocks;
 using Game.Data.Components;
 using Game.Voxel.Grid;
+using Game.Voxel.Damage.Jobs;
+using Game.Voxel.PresentationStreams;
 using Game.Voxel.Model;
 using Game.Voxel.PhysicsBody;
 using Game.Voxel.Rendering;
@@ -18,7 +20,7 @@ using Unity.Transforms;
 
 namespace Game.Voxel.Damage
 {
-    // TODO(DMG-010): particle tier and debris FX/audio. TODO(DMG-011): pooled chunk tier/lifetime. TODO(DMG-012): complete hulk lifecycle tests.
+    // TODO(DMG-011): pooled chunk tier/lifetime. TODO(DMG-012): complete hulk lifecycle tests.
     /// <summary>SPEC-13 §5.5 hulk creation. ADR-0053 initially represents every detached island as a physical grid.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup))]
     [UpdateAfter(typeof(IntegritySystem)), UpdateBefore(typeof(GridMassUpdateSystem)), UpdateBefore(typeof(BrickDirtyScheduleSystem))]
@@ -40,6 +42,7 @@ namespace Game.Voxel.Damage
             job.Instances = state.GetBufferLookup<BlockInstance>(true); job.Palettes = state.GetBufferLookup<PaletteEntry>(true);
             job.Groups = state.GetBufferLookup<LinkedEntityGroup>(true); job.Seeds = state.GetBufferLookup<IntegritySeed>();
             job.Allocators = state.GetComponentLookup<PersistentIdAllocator>(); job.Serials = state.GetComponentLookup<GridSerialAllocator>();
+            state.RequireForUpdate<FxEventQueue>(); state.RequireForUpdate<SfxEventQueue>();
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<DamageStreams>(); state.RequireForUpdate<DamageConfig>();
             state.RequireForUpdate<PhysicsVoxelConfig>(); state.RequireForUpdate<BlockDefsRef>(); state.RequireForUpdate<PersistentIdAllocator>();
             state.RequireForUpdate<GridPrototypes>(); state.RequireForUpdate<GridSerialAllocator>(); state.RequireForUpdate<SimClock>(); state.RequireForUpdate<GameplayEndCommandBufferSystem.Singleton>();
@@ -56,7 +59,18 @@ namespace Game.Voxel.Damage
             job.Blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value; job.Tick = SystemAPI.GetSingleton<SimClock>().Tick;
             job.AllocatorEntity = SystemAPI.GetSingletonEntity<PersistentIdAllocator>(); job.SerialEntity = SystemAPI.GetSingletonEntity<GridSerialAllocator>(); job.BrickPrototype = SystemAPI.GetSingleton<GridPrototypes>().Brick;
             job.Ecb = SystemAPI.GetSingleton<GameplayEndCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
-            state.Dependency = job.Schedule(JobHandle.CombineDependencies(state.Dependency, data->IntegrityHandle, data->DetachNextWritable));
+            var bodies = new NativeList<IslandRecord>(Allocator.TempJob);
+            var dependency = JobHandle.CombineDependencies(state.Dependency, data->IntegrityHandle, data->DetachNextWritable);
+            var fx = SystemAPI.GetSingleton<FxEventQueue>();
+            dependency = new EmitDebrisJob { Removed = data->Removed, Ranges = data->RemovedGrids, Grids = job.Reader.Grids, Blocks = job.Blocks,
+                Config = job.Config, Fx = fx.Queue.AsParallelWriter(), Sfx = SystemAPI.GetSingletonRW<SfxEventQueue>().ValueRW.Queue.AsParallelWriter(), Data = data
+            }.Schedule(fx.Access.BeginRead(dependency));
+            fx.Access.EndRead(dependency);
+            dependency = new PlanSplitJob { Islands = data->Islands, Masks = data->IslandMasks, Reader = job.Reader, Bricks = job.Bricks,
+                Seeds = job.Seeds, Allocators = job.Allocators, AllocatorEntity = job.AllocatorEntity, HulkAvailable = job.BrickPrototype != Entity.Null,
+                Config = job.Config, Bodies = bodies, Detach = data->PendingDetachNext, Data = data }.Schedule(dependency);
+            job.Islands = bodies;
+            state.Dependency = bodies.Dispose(job.Schedule(dependency));
             data->SplitHandle = state.Dependency;
         }
         [BurstCompile] struct SplitJob : IJob
@@ -91,17 +105,10 @@ namespace Game.Voxel.Damage
             {
                 var allocator = Allocators[AllocatorEntity]; var serials = Serials[SerialEntity];
                 using var moved = new NativeHashSet<Entity>(16, Allocator.Temp);
-                int count = 0, cells = 0;
                 foreach (var island in Islands)
                 {
-                    if (allocator.Next >= allocator.End || BrickPrototype == Entity.Null || count >= Config.MaxNewHulksPerTick ||
-                        (count > 0 && cells + island.CellCount > Config.SplitCellBudgetPerTick))
-                    {
-                        // A full changed-grid flood will retry this disconnected component on the next tick.
-                        Seeds[island.Grid].Add(new IntegritySeed { Cell = island.CellMin }); Stats->Current.SplitsDeferred++; continue;
-                    }
                     Create(island, allocator.Next++, BrickPrototype, serials.Next++, moved);
-                    count++; cells += island.CellCount; Stats->Current.HulksCreated++;
+                    Stats->Current.HulksCreated++;
                 }
                 // Rewrite each old LEG once, after all of its moved functionals have been collected.
                 Entity previous = Entity.Null;
@@ -187,7 +194,6 @@ namespace Game.Voxel.Damage
                     }
                     slots[BrickMath.SlotIndex(coord, grid.BrickMin, grid.BrickDims)] = new BrickSlot { Brick = brick };
                     group.Add(new LinkedEntityGroup { Value = brick }); baseline.Add(new GridSpawnBrick { Coord = coord });
-                    Detach.Add(new PendingDetach { Grid = parent, SlotIndex = mask.SlotIndex, Mask = mask.Mask, Reason = CellRemovedReason.DetachedBody, IslandOrdinal = island.Ordinal });
                 }
                 bool planar = Planar.HasComponent(parent);
                 var mass = GridMassMath.CreateDynamicMass(massData, grid.CellMin, grid.CellMax, grid.CellSize, planar);
