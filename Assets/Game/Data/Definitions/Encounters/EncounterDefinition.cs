@@ -1,4 +1,8 @@
 using UnityEngine;
+using System;
+using Game.Data.Validation;
+using Game.Data.Logic;
+using Game.Data.Logic.Compiler;
 
 namespace Game.Data.Definitions
 {
@@ -46,13 +50,67 @@ namespace Game.Data.Definitions
         public bool Hailable => hailable;
         public LootTableDefinition DefeatLoot => defeatLoot;
 
-        // TODO(ENC-002): implement the definition checks from SPEC-33 §4.1.
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
             base.Validate(scope, context);
-            throw new System.NotImplementedException("ENC-002");
+            if (faction == null) scope.Error("ENC-E010", nameof(faction), "Encounter faction is not set.");
+            bool doctrineRange = EncounterDefinitionValidation.ShipRange(scope, "doctrineMinShips/doctrineMaxShips", doctrineMinShips, doctrineMaxShips);
+            if (useFactionDoctrine)
+            {
+                if (faction != null && (faction.Doctrine == null || faction.Doctrine.Count == 0))
+                    scope.Error("ENC-E011", nameof(useFactionDoctrine), "Doctrine encounter requires a nonempty faction doctrine.");
+            }
+            else if (ships == null || ships.Count == 0) scope.Error("ENC-E011", nameof(ships), "Encounter must contain at least one ship entry.");
+            long total = 0;
+            if (ships != null)
+                for (int i = 0; i < ships.Count; i++)
+                {
+                    var entry = ships[i];
+                    if (!useFactionDoctrine && entry.blueprint == null) scope.Error("ENC-E011", "ships[" + i + "].blueprint", "Encounter blueprint is not set.");
+                    if (EncounterDefinitionValidation.ShipRange(scope, "ships[" + i + "]", entry.countMin, entry.countMax)) total += entry.countMax;
+                }
+            if (!useFactionDoctrine && total > 10) scope.Error("ENC-E012", nameof(ships), "Maximum total encounter ships exceeds 10.");
+            if (minDanger < 0 || minDanger > maxDanger || maxDanger > 3) scope.Error("ENC-E013", "minDanger/maxDanger", "Danger range must be within [0, 3].");
+            EncounterDefinitionValidation.Nonnegative(scope, "ENC-E013", nameof(directorWeight), directorWeight);
+            if (!float.IsFinite(spawnDistanceMinM) || !float.IsFinite(spawnDistanceMaxM) || spawnDistanceMinM < 100 || spawnDistanceMinM > spawnDistanceMaxM || spawnDistanceMaxM > 10000)
+                scope.Error("ENC-E014", "spawnDistanceMinM/spawnDistanceMaxM", "Spawn distances must satisfy 100 <= minimum <= maximum <= 10000 m.");
+            EncounterDefinitionValidation.Nonnegative(scope, "ENC-E014", nameof(shipSpacingM), shipSpacingM);
+            if (kind != EncounterKind.Merchant || faction == null) return;
+            var aiConfigs = context?.Catalog?.All<AiConfigDefinition>();
+            AiProfileDefinition fallback = aiConfigs != null && aiConfigs.Count == 1 ? aiConfigs[0].DefaultProfile : null;
+            if (useFactionDoctrine)
+            {
+                if (faction.Doctrine == null || !doctrineRange) return;
+                for (int i = 0; i < faction.Doctrine.Count; i++)
+                    Civilian(scope, "faction.doctrine[" + i + "].aiProfile", faction.Doctrine[i].aiProfile ?? faction.DefaultAiProfile ?? fallback);
+            }
+            else if (ships != null)
+                for (int i = 0; i < ships.Count; i++)
+                    Civilian(scope, "ships[" + i + "].aiProfile", ships[i].aiProfile ?? faction.DefaultAiProfile ?? fallback);
         }
-        public void CompileLogic(Game.Data.Logic.Compiler.LogicCompiler compiler, Game.Data.Validation.ValidationScope scope) => throw new System.NotImplementedException("ENC-002");
-        public void BindLogic(Game.Data.Logic.LogicBinder binder) => throw new System.NotImplementedException("ENC-002");
+        static void Civilian(ValidationScope scope, string field, AiProfileDefinition profile)
+        {
+            if (profile == null || profile.Role != AiRole.Civilian) scope.Error("ENC-E015", field, "Merchant's resolved AI profile must be Civilian.");
+        }
+        public void CompileLogic(LogicCompiler compiler, ValidationScope scope)
+        {
+            if (compiler == null) throw new ArgumentNullException(nameof(compiler));
+            condition ??= new CompiledCondition();
+            var report = new ValidationReport("Encounter condition");
+            compiler.Compile(condition, new LogicCompileOptions(LogicUsage.EncounterCondition, scope.AssetPath, "condition"), report);
+            foreach (var entry in report.Entries)
+                switch (entry.Severity)
+                {
+                    case ValidationSeverity.Error: scope.Error(entry.Code, entry.Field, entry.Message); break;
+                    case ValidationSeverity.Warning: scope.Warning(entry.Code, entry.Field, entry.Message); break;
+                    default: scope.Info(entry.Code, entry.Field, entry.Message); break;
+                }
+        }
+        public void BindLogic(LogicBinder binder)
+        {
+            if (binder == null) throw new ArgumentNullException(nameof(binder));
+            condition ??= new CompiledCondition();
+            condition.Bind(binder);
+        }
     }
 }

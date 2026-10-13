@@ -1,4 +1,5 @@
 using UnityEngine;
+using Game.Data.Validation;
 
 namespace Game.Data.Definitions
 {
@@ -48,11 +49,32 @@ namespace Game.Data.Definitions
         public int ProvokeIntervalTicks => provokeIntervalTicks;
         public float HailDistanceM => hailDistanceM;
 
-        // TODO(ENC-002): implement the definition checks from SPEC-33 §4.1.
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
             base.Validate(scope, context);
-            throw new System.NotImplementedException("ENC-002");
+            if (dangerSpawnChance == null || dangerSpawnChance.Length != 4) scope.Error("ENC-E020", nameof(dangerSpawnChance), "Danger spawn chance requires four entries.");
+            else for (int i = 0; i < dangerSpawnChance.Length; i++)
+                if (!float.IsFinite(dangerSpawnChance[i]) || dangerSpawnChance[i] < 0 || dangerSpawnChance[i] > 1)
+                    scope.Error("ENC-E020", "dangerSpawnChance[" + i + "]", "Danger spawn chance must be finite and within [0, 1].");
+            if (hostileAtOrBelow >= friendlyAtOrAbove) scope.Error("ENC-E020", "hostileAtOrBelow/friendlyAtOrAbove", "Hostile threshold must be below friendly threshold.");
+            EncounterDefinitionValidation.Positive(scope, nameof(firstRollDelaySeconds), firstRollDelaySeconds);
+            EncounterDefinitionValidation.Positive(scope, nameof(rollIntervalSeconds), rollIntervalSeconds);
+            EncounterDefinitionValidation.Positive(scope, nameof(maxActiveDirectorInstances), maxActiveDirectorInstances);
+            EncounterDefinitionValidation.Positive(scope, nameof(minPlayerDistanceM), minPlayerDistanceM);
+            EncounterDefinitionValidation.Positive(scope, nameof(combatMinDistanceM), combatMinDistanceM);
+            EncounterDefinitionValidation.Positive(scope, nameof(arrivalGraceSeconds), arrivalGraceSeconds);
+            EncounterDefinitionValidation.Positive(scope, nameof(arrivalGraceDistanceM), arrivalGraceDistanceM);
+            EncounterDefinitionValidation.Positive(scope, nameof(placementTries), placementTries);
+            EncounterDefinitionValidation.Positive(scope, nameof(placementStepDegrees), placementStepDegrees);
+            EncounterDefinitionValidation.Positive(scope, nameof(bodyClearanceM), bodyClearanceM);
+            EncounterDefinitionValidation.Positive(scope, nameof(despawnDistanceM), despawnDistanceM);
+            EncounterDefinitionValidation.Positive(scope, nameof(despawnDelaySeconds), despawnDelaySeconds);
+            EncounterDefinitionValidation.Positive(scope, nameof(maxInstances), maxInstances);
+            EncounterDefinitionValidation.Positive(scope, nameof(maxShipsAlive), maxShipsAlive);
+            if (maxShipsAlive > 60) scope.Error("ENC-E020", nameof(maxShipsAlive), "At most 60 encounter ships may be alive.");
+            EncounterDefinitionValidation.Positive(scope, nameof(provokePenalty), provokePenalty);
+            EncounterDefinitionValidation.Positive(scope, nameof(provokeIntervalTicks), provokeIntervalTicks);
+            EncounterDefinitionValidation.Positive(scope, nameof(hailDistanceM), hailDistanceM);
         }
     }
 }

@@ -1,8 +1,10 @@
 using UnityEngine;
+using System;
+using System.Collections.Generic;
 
 namespace Game.Data.Definitions
 {
-    /// <summary>SPEC-33 §4.1 contract; ENC-002 owns validation.</summary>
+    /// <summary>SPEC-33 §4.1 faction data and local validation; runtime relations are owned by ENC-003.</summary>
     [ContentIdPrefix("faction_")]
     [CreateAssetMenu(menuName = "Game/Content/Faction", fileName = "faction_new")]
     public sealed class FactionDefinition : ContentDefinition
@@ -37,11 +39,37 @@ namespace Game.Data.Definitions
         public int TerritorySeeds => territorySeeds;
         public int TerritoryRadiusHops => territoryRadiusHops;
 
-        // TODO(ENC-002): implement the definition checks from SPEC-33 §4.1.
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
             base.Validate(scope, context);
-            throw new System.NotImplementedException("ENC-002");
+            if (isPlayerFaction && !relationLocked) scope.Error("ENC-E001", nameof(relationLocked), "The player faction's relation must be locked.");
+            if (string.IsNullOrEmpty(mapColorToken) || !mapColorToken.StartsWith("--color-", StringComparison.Ordinal))
+                scope.Error("ENC-E006", nameof(mapColorToken), "Map color token must start with --color-.");
+            if (stances == null) scope.Error("ENC-E003", nameof(stances), "Stance list is null.");
+            else
+            {
+                var seen = new Dictionary<FactionDefinition, FactionStanceValue>();
+                for (int i = 0; i < stances.Count; i++)
+                {
+                    var entry = stances[i];
+                    string field = "stances[" + i + "]";
+                    if (isPlayerFaction || entry.other == null || entry.other == this || entry.other.IsPlayerFaction ||
+                        !Enum.IsDefined(typeof(FactionStanceValue), entry.stance))
+                    { scope.Error("ENC-E003", field, "Static stances require two distinct non-player factions and a valid stance."); continue; }
+                    if (seen.TryGetValue(entry.other, out var previous) && previous != entry.stance)
+                        scope.Error("ENC-E003", field, "The same faction pair has conflicting stances.");
+                    else seen[entry.other] = entry.stance;
+                }
+            }
+            if (doctrine == null) scope.Error("ENC-E004", nameof(doctrine), "Doctrine list is null.");
+            else
+                for (int i = 0; i < doctrine.Count; i++)
+                {
+                    var entry = doctrine[i];
+                    if (entry.blueprint == null) scope.Error("ENC-E004", "doctrine[" + i + "].blueprint", "Doctrine blueprint is not set.");
+                    if (!float.IsFinite(entry.weight) || entry.weight <= 0)
+                        scope.Error("ENC-E004", "doctrine[" + i + "].weight", "Doctrine weight must be finite and positive.");
+                }
         }
     }
 }
