@@ -702,6 +702,7 @@ public sealed class ControlSettingsData
 {
     public float MouseSensitivity = 1f;          // [0.1, 5]
     public bool InvertCameraY = false;
+    public byte CameraYawModeIndex = 0; // ADR-0073: 0 FollowHeading, 1 Free; invalid resets to 0
     public float CameraZoomSensitivity = 1f;     // [0.1, 5]
     public string BindingOverridesJson = "";     // InputActionAsset.SaveBindingOverridesAsJson(); null → ""
     public void CopyFrom(ControlSettingsData o); public void Clamp(); public bool ValueEquals(ControlSettingsData o);
@@ -1459,6 +1460,8 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
 | 15 | EndRead retained only the reader handle and discarded disposal jobs; abandoning an open read also freed streams without waiting for producers | Retain every cleanup handle and complete writers before open-read disposal | Tech lead | **Resolved in CORE-013:** LastConsumer includes prior cleanup, readers, stream disposals and metadata-array disposals; Dispose waits for all of them, including open-read cleanup. No public type/API or ordering change |
 
 | 16 | Event streams can await a later fixed tick or pause beyond four rendered frames | Persistent stream allocations with existing explicit disposal | Tech lead | Resolved FND-020 / ADR-0056: registered NativeStreams use Persistent; EndRead/stale cleanup/Dispose keep ownership and fences. Read-set metadata remains same-update TempJob. |
+
+| 17 | Settings UI exposes camera orientation but Core cannot reference Presentation | Persist byte CameraYawModeIndex (0 FollowHeading, 1 Free), copy/compare/clamp in Controls; missing JSON defaults to0. App maps to Presentation enum. ADR-0073. | Tech lead | Resolved HUD-005. |
 
 ## 11. References
 

@@ -715,6 +715,8 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 
 | 25 | Settings construction waits on composition that requires a settings destination | Resolved: construct HUD-005 against completed HUD-001, UI-011/012/013, FND-004 and INP-003; retain all five required cases and actual production registration/lifecycle/menu navigation before closure. Lead integrates persistent model/presenter in HUD-002. No no-op destination or early completion. | Tech lead |
 
+| 26 | Camera orientation lacks a saved settings field | Resolved via ADR-0073: bind to Controls.CameraYawModeIndex (0 FollowHeading, 1 Free); persist through real service and apply through SettingsApplier. Required HUD-005 checks cover the path. | Tech lead |
+
 ## 11. References
 
 - Audit `06-ui-shipeditor.md` §1.1 (17 views), §2 B/D/E bugs, §5.2; `LEDGER.md` R4, R7, R8, R11, R12, R13, R31; screenshots `02-newgame.png`, `04-after-intro.png`, `05-flying.png`, `07-ark-dialog.png`, `09-trade.png`, `10-hangar.png`, `22-inventory.png`, `23-fleet.png`.
