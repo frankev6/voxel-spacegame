@@ -13,9 +13,12 @@ namespace Game.Data.Logic.Nodes
         public EffectFlow Flow => EffectFlow.Immediate;
         public void Validate(ValidationReport report) => arguments.Validate(report);
         public void Bind(LogicBinder binder) => arguments.Bind("repair_ship", binder);
-        // TODO(NAR-005): implement effect execution, preflight and summed requirements.
-        public void Apply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public bool CanApply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public void AddRequirements(EffectRequirements requirements) => throw new NotImplementedException("NAR-005");
+        public void Apply(ILogicContext context)
+        {
+            if (!arguments.CanRoute("repair_ship")) return;
+            context.World.RepairPlayerShip(arguments.Integers[0].Evaluate(context));
+        }
+        public bool CanApply(ILogicContext context) => true;
+        public void AddRequirements(EffectRequirements requirements) { }
     }
 }

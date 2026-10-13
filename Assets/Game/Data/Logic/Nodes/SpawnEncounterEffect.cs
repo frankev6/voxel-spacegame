@@ -13,9 +13,12 @@ namespace Game.Data.Logic.Nodes
         public EffectFlow Flow => EffectFlow.Immediate;
         public void Validate(ValidationReport report) => arguments.Validate(report);
         public void Bind(LogicBinder binder) => arguments.Bind("spawn_encounter", binder);
-        // TODO(NAR-005): implement effect execution, preflight and summed requirements.
-        public void Apply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public bool CanApply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public void AddRequirements(EffectRequirements requirements) => throw new NotImplementedException("NAR-005");
+        public void Apply(ILogicContext context)
+        {
+            if (!arguments.CanRoute("spawn_encounter")) return;
+            context.World.SpawnEncounter(arguments.Indices[0], arguments.Text[1], arguments.Integers[2].Evaluate(context), context.Scope);
+        }
+        public bool CanApply(ILogicContext context) => true;
+        public void AddRequirements(EffectRequirements requirements) { }
     }
 }

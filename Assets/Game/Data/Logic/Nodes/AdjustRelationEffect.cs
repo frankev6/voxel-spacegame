@@ -13,9 +13,13 @@ namespace Game.Data.Logic.Nodes
         public EffectFlow Flow => EffectFlow.Immediate;
         public void Validate(ValidationReport report) => arguments.Validate(report);
         public void Bind(LogicBinder binder) => arguments.Bind("adjust_relation", binder);
-        // TODO(NAR-005): implement effect execution, preflight and summed requirements.
-        public void Apply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public bool CanApply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public void AddRequirements(EffectRequirements requirements) => throw new NotImplementedException("NAR-005");
+        public void Apply(ILogicContext context)
+        {
+            if (!arguments.CanRoute("adjust_relation")) return;
+            int faction = arguments.Text[0] == "owner" ? context.World.CurrentStarSystemOwnerFactionIndex : arguments.Indices[0];
+            context.World.AdjustRelation(faction, arguments.Integers[1].Evaluate(context));
+        }
+        public bool CanApply(ILogicContext context) => true;
+        public void AddRequirements(EffectRequirements requirements) { }
     }
 }

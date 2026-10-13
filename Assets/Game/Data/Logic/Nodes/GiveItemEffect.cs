@@ -13,9 +13,12 @@ namespace Game.Data.Logic.Nodes
         public EffectFlow Flow => EffectFlow.Immediate;
         public void Validate(ValidationReport report) => arguments.Validate(report);
         public void Bind(LogicBinder binder) => arguments.Bind("give_item", binder);
-        // TODO(NAR-005): implement effect execution, preflight and summed requirements.
-        public void Apply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public bool CanApply(ILogicContext context) => throw new NotImplementedException("NAR-005");
-        public void AddRequirements(EffectRequirements requirements) => throw new NotImplementedException("NAR-005");
+        public void Apply(ILogicContext context)
+        {
+            if (!arguments.CanRoute("give_item")) return;
+            context.Economy.GiveItems(arguments.Indices[0], arguments.Integers[1].Evaluate(context));
+        }
+        public bool CanApply(ILogicContext context) => true;
+        public void AddRequirements(EffectRequirements requirements) { }
     }
 }
