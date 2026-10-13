@@ -949,6 +949,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Flight integration regression and allocator preparation — astra (gpt-6)
+
+- FLT-012/SYS-002/AI-005/TRV-001: compile clean, focused 26 passed, full EditMode 1003 passed / 0 failed / 1 skipped. PlayMode session 87840 is still active; no closeout until terminal. Evidence: `Logs/playtest/flt012/`.
+- PWR-005 isolated implementation `41e8595`, tests `7b0dfdb`, review repairs through `4745dae`: allocation, enable-mask recovery, priority/ability split and hulk shutdown prepared. Tests: spec-required: 6, extra: 0; Unity validation pending. SPEC-22 Q15 records the exact 2000-tick sustain arithmetic; mirror its question on integration.
+- Reviewed SYS-010/AI-013/ECO-001 deliveries prepared in isolated checkout (`adcf164`, `82eb487`, `6ecc4e5`). Tests: spec-required: 2 each, extra: 0 each; validation/catalog generation pending. Three reusable workers are in a recorded dependency wait until validated standard work unlocks. No gameplay, economy or formation-steering completion claim; zero tuning passes.
+
+
 ### 2026-10-13 — PWR-004 / AST-002 / AST-003 full batch green — astra (gpt-6)
 
 - Full session 2085 exited 0: **987/0/1 EditMode, 145/0/53 PlayMode**. Compile clean; focused acceptance 12/0/0. Evidence `Logs/playtest/pwr004/{acceptance-final,editmode-final,playmode-final}.xml`, `compile.log`; CLI evidence `Logs/tools/ast002-a1.log`, `ast002-a2.log` (expected 0/1 exits).
