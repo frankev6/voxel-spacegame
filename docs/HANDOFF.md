@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **UI composition checkpoint:** compiled50fc418a/57ad0950 is on local main, still HUD-002 in-progress: persistent15 view models, loading/menu/pause views/presenters and root lifecycle exist; Boot continues using the playable M1 adapter until real destinations/editor are connected. No UI acceptance claim. Workers now build NAR-013 validator, NAR-020 watcher and HUD-004 save/load (claim93cfef3d); ADR-0072Q23 separates screen construction from shared final integration. Compile zero CS warnings; no broad tests.
+
 - **Latest:** NAR-0142be62596 translates the five legacy narrative exports; five focused checks pass after correcting a source-incomplete test expectation. Emission/preservation and asset writing remain NAR-015/016. HUD-002 is staged separately: scene roots and loading/menu/pause views exist, but persistent composition/presenters are not installed or accepted. Preserve the current playable adapter until replacement is complete. No broad suite or benchmark run.
 
 - **Fact store accepted:** NAR-00718906e47 preserves facts, aliases/orphans and Session semantics with deferred notifications; seven functional checks pass and final compile is clean. Save chunk NAR-008 and narrative evaluation service NAR-010 are next dependencies. Two advisory measurements remain unrun.

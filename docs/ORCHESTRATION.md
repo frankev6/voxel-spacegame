@@ -11,7 +11,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 accepted | FACT review169 and NAR-014 review170 clear; genuine ready-standard dependency wait | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-020 | claimed595c0e29; dependency watcher dispatched | narrative follow-ups |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-009 accepted | readiness audit149 delivered; genuine wait for lead HUD composition/UI audit prerequisites | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-004 | claimed93cfef3d; save/load UI dispatched under Q23 | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -22,6 +22,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Third worker recycled / UI checkpoint on main:**57ad0950 amends ADR-0072 with SPEC61Q23/ledger319: HUD-004 construction uses completed services, shared production hookup/layout acceptance remain mandatory. Claimed93cfef3d, dispatched existing presentation worker. NAR-013/020 continue. Compiled HUD-002 checkpoint is merged locally but in-progress and not boot-installed; real editor/secondary-screen bindings remain. No Unity runs this turn. Previous turn implemented/compiled persistent composition (progress).
 
 - **Composition lifetime implemented:** UiComposition now owns all15 screen view models, loading registration/presenter, real menu/pause registration hooks, root installation with required real dependencies, session rebind and disposal. Still not installed in Boot: editor host/launcher/controllers and secondary-screen navigation are unfinished, so existing adapter remains. Four acceptance checks pending. Compile6483 found App.Services namespace shadowing; qualified Core.Services in flow/composition, recompile87462 clean, zero CS warnings; staged evidence ui-composition/compile-staged.log. Workers NAR-013172/NAR-020185 active, presentation still waits. Previous turn implemented pause/recycled workers (progress).
 
