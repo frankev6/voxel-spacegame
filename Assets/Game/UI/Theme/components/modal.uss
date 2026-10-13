@@ -1,0 +1,9 @@
+/* SPEC-60 §5.9: token-styled modal panels; responsive region dimensions live in the screen sheet. */
+.modal { flex-grow: 1; align-items: center; justify-content: center; }
+.modal__scrim { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: var(--color-bg); opacity: 0.85; }
+.modal__window { padding: var(--space-6); border-color: var(--color-accent); transition-duration: var(--duration-normal); }
+.modal__title { font-size: var(--text-l); margin-bottom: var(--space-4); white-space: normal; flex-shrink: 0; }
+.modal__body { flex-shrink: 1; margin-bottom: var(--space-4); }
+.modal__body Label { white-space: normal; }
+.modal__body .is-invalid { color: var(--color-danger); }
+.modal__actions { flex-direction: row; justify-content: flex-end; flex-shrink: 0; }

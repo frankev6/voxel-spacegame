@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="modal" picking-mode="Position">
+        <ui:VisualElement name="text-prompt-scrim" class="modal__scrim" picking-mode="Position" />
+        <ui:VisualElement name="text-prompt-window" class="modal__window panel panel--modal dialog-services-window" picking-mode="Position">
+            <ui:Label name="text-prompt-title" class="modal__title text-display" picking-mode="Ignore">
+                <Bindings><ui:DataBinding property="text" data-source-path="Title" binding-mode="ToTarget" /></Bindings>
+            </ui:Label>
+            <ui:VisualElement class="modal__body stack-s" picking-mode="Ignore">
+                <ui:Label name="text-prompt-label" picking-mode="Ignore">
+                    <Bindings><ui:DataBinding property="text" data-source-path="Label" binding-mode="ToTarget" /></Bindings>
+                </ui:Label>
+                <ui:TextField name="text-prompt-field" class="text-field">
+                    <Bindings><ui:DataBinding property="value" data-source-path="Text" binding-mode="ToTarget" /></Bindings>
+                </ui:TextField>
+                <ui:VisualElement name="text-prompt-error-row" class="row" picking-mode="Ignore">
+                    <ui:Label name="text-prompt-error-glyph" text="✕" class="is-invalid" picking-mode="Ignore" />
+                    <ui:Label name="text-prompt-error" class="is-invalid" picking-mode="Ignore">
+                        <Bindings><ui:DataBinding property="text" data-source-path="Error" binding-mode="ToTarget" /></Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="text-prompt-actions" class="modal__actions" picking-mode="Ignore">
+                <ui:Button name="text-prompt-ok" class="btn btn--primary">
+                    <Bindings><ui:DataBinding property="text" data-source-path="OkLabel" binding-mode="ToTarget" /></Bindings>
+                </ui:Button>
+                <ui:Button name="text-prompt-cancel" class="btn btn--secondary">
+                    <Bindings><ui:DataBinding property="text" data-source-path="CancelLabel" binding-mode="ToTarget" /></Bindings>
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

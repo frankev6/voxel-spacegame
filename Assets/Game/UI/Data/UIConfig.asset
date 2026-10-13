@@ -26,6 +26,12 @@ MonoBehaviour:
   - Key: m1-input-blocker
     Uxml: {fileID: 9197481963319205126, guid: 002c65be05254b1a83e2b75d5a535e8f, type: 3}
     Prewarm: 0
+  - Key: confirm
+    Uxml: {fileID: 9197481963319205126, guid: cec6401b63f34beca55e94542f6ed3de, type: 3}
+    Prewarm: 0
+  - Key: text-prompt
+    Uxml: {fileID: 9197481963319205126, guid: c4319cf380724e0da50c6e29bf5a9dbb, type: 3}
+    Prewarm: 0
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32

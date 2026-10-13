@@ -55,14 +55,13 @@ namespace Game.UI.Services
                 }
                 Navigator = new UINavigator(this, pause, contextTarget, clock);
                 Tooltips = new TooltipService(this, config); Notifications = new NotificationService(this, config, clock);
-                Confirm = new ConfirmDialog(); Prompt = new TextPrompt();
+                Confirm = new ConfirmDialog(Navigator, Tooltips); Prompt = new TextPrompt(Navigator);
                 RootElement.RegisterCallback<ClickEvent>(OnClick);
                 RootElement.RegisterCallback<PointerOverEvent>(OnPointerOver);
                 RootElement.RegisterCallback<PointerOutEvent>(OnPointerOut);
                 RootElement.RegisterCallback<FocusInEvent>(OnFocusIn, TrickleDown.TrickleDown);
                 RootElement.RegisterCallback<FocusOutEvent>(OnFocusOut, TrickleDown.TrickleDown);
                 UIConverters.RegisterAll();
-                // TODO(UI-011): dialog registration.
                 // TODO(UI-013): ApplyAccessibility; until then use the specified construction defaults.
                 config.PanelSettings.scale = 1;
             }
@@ -159,6 +158,7 @@ namespace Game.UI.Services
             RootElement?.UnregisterCallback<ClickEvent>(OnClick);
             RootElement?.UnregisterCallback<PointerOverEvent>(OnPointerOver);
             RootElement?.UnregisterCallback<PointerOutEvent>(OnPointerOut);
+            Confirm?.Dispose(); Prompt?.Dispose();
             Tooltips?.Dispose();
             Notifications?.Dispose();
             Navigator?.DisposeOwnedScreens();

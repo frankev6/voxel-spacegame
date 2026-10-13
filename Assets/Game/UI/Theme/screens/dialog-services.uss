@@ -1,0 +1,2 @@
+/* SPEC-60 UI-011: screen region dimensions are permitted by decision 11. */
+.dialog-services-window { width: 640px; max-width: 90%; max-height: 90%; }
