@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 104 | 12 | 0 | 0 | 64 | 0 | 180 | 9 |
+| M3 | 103 | 13 | 0 | 0 | 64 | 0 | 180 | 9 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -349,7 +349,7 @@
 | TRV-001 | Public contract types | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, FLT-001, NAR-001, AUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a68c988 | Canonical travel contracts and staged watcher API; 2 required tests; runtime travel remains later tasks |
 | TRV-002 | Travel config definition and validator | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-04, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 5a436d86 | 19 required checks pass; real shipped travel content zero errors, GAL-012 gates32m satisfy geometry |
 | TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, SPEC-30, SPEC-40 | no | todo |  |  |  |  |
-| TRV-004 | Route planner | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-30 | no | todo |  |  |  |  |
+| TRV-004 | Route planner | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-005, GAL-007 | yes | todo |  |  |  |  |
 | TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-002, GAL-008 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  |  |
 | TRV-006 | TravelService jump timeline | [SPEC-32](specs/SPEC-32-travel.md) | M3 | frontier | TRV-003, TRV-005, TRV-007, SPEC-31, SPEC-30, FND-001 | no | todo |  |  |  |  |
 | TRV-007 | PlayerControlLock consumption | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 75ba22b | Movement/action lock consumption without press replay; 4 required tests. TRV-006 owns lifecycle. Full 1027 EM / 145 PM passed. |
@@ -922,6 +922,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 342 | SPEC-32 Q13: arrival solver held by whole galaxy spec | Resolved: completed TRV-001, GAL-002 and GAL-008 are its actual prerequisites; retain five functional checks and advisory fixture, leave travel/streaming acceptance separate. | Tech lead |
 | 343 | SPEC-40 Q24: native conversion representation | Resolved: preserve dynamic encounter marker labels without fabricated pins; retain fixed contract format strings. Three once-only condition beats select the failed Whisper stage. Declare opening_cache_found for the specified rumor; its writer remains QST-009. | Tech lead |
 | 344 | SPEC-33 Q25: composition/placement sequencing | Resolved: completed ENC-002 and GAL-006/008 are direct prerequisites; fixed RNG/geometry/tests remain unchanged, director integration is ENC-007. | Tech lead |
+| 345 | SPEC-32 Q14: degenerate arrival geometry | Resolved: zero planar direction uses +X. Zero-radius search retains the initial point and obstruction result without angular division; normal validated geometry is unchanged. | Tech lead |
+| 346 | SPEC-32 Q15: route planner sequencing | Resolved: completed TRV-001, GAL-005 and GAL-007 directly supply routing contracts, indexed graph and visibility state. Keep full pure-job acceptance; TravelService wiring remains TRV-003/006. | Tech lead |
 | 334 | SPEC-33 Q24: legacy first formation conflicts with final encounter table | Resolved: retain/report original formation and explicit replacement diagnostics; authored ENC-010 composition table governs final fleets, real assets required. | Tech lead |
 | 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
 
@@ -1048,6 +1050,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — NAR-016 rerun repair / TRV-005 integration — astra (gpt-6)
+
+- Arrival geometry delivery integrated6f940373, static review found no defects; spec-required: 5 functional plus 1 opt-in performance, extra: 0. Not yet compiled or accepted; measurement deferred. Q345 resolves zero-radius search.
+- Fixed unchanged quest/rumor/effect imports corrupting valid compiler flags in19dea5e0. Changed sources invalidate the compiler stamp; unchanged sources preserve compiled output. Generation now invokes the actual compiler after catalog rebuild. NAR-016 remains four required checks, zero extra; execution waits for QST-002 delivery.
+- TRV-004 direct completed dependencies reconciledQ346 for the next worker assignment. Previous turn integrated quest/economy source (progress). No Unity run.
 
 ### 2026-10-13 — NAR-016 / ECO-009 source integration — astra (gpt-6)
 
