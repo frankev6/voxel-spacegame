@@ -7,6 +7,8 @@ using Game.Core.Events;
 using Game.Core.Flow;
 using Game.Data.Definitions;
 using Game.Persistence.Services;
+using Game.UI.Services;
+using Game.UI.Views;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics.Systems;
@@ -33,6 +35,8 @@ namespace Game.App.Flow
         readonly List<ISceneExiting> exitingHooks = new List<ISceneExiting>();
         NativeHashSet<Entity> bootEntities;
         PauseToken pauseToken;
+        IRootScreenSet rootScreens;
+        UINavigator navigator;
         bool disposed;
 
         public GameScene CurrentScene { get; private set; }
@@ -76,7 +80,30 @@ namespace Game.App.Flow
         internal bool UnregisterReady(ISceneReady hook) => readyHooks.Remove(hook);
         internal bool UnregisterExiting(ISceneExiting hook) => exitingHooks.Remove(hook);
 
-        // TODO(HUD-002): public void SetRootScreens(Game.UI.Views.IRootScreenSet screens) — null-safe; root-screen calls are skipped until set.
+        /// <summary>Installs the app-lifetime roots after UI registration. Null detaches UI during disposal or headless flow.</summary>
+        public void SetRootScreens(IRootScreenSet screens)
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(SceneFlow));
+            var nextNavigator = screens == null ? null : Services.Get<UINavigator>();
+            rootScreens = screens;
+            navigator = nextNavigator;
+        }
+
+        void ShowSceneRoot(GameScene scene)
+        {
+            if (rootScreens == null) return;
+            switch (scene)
+            {
+                case GameScene.MainMenu: navigator.SetRoot(rootScreens.MainMenu); break;
+                case GameScene.World: navigator.SetRoot(rootScreens.FlightHud); break;
+                case GameScene.BlueprintLab: navigator.SetRoot(rootScreens.ShipEditor); break;
+            }
+        }
+
+        void ShowLoadingRoot()
+        {
+            if (rootScreens != null) navigator.SetRoot(rootScreens.Loading);
+        }
 
         /// <summary>§5.4.5: every entity that exists at the end of boot (config and system-owned singletons) survives teardown.</summary>
         public void SnapshotBootEntities()
@@ -138,10 +165,10 @@ namespace Game.App.Flow
             Progress = 0f;
             EventBus<SceneTransitionStarted>.Publish(new SceneTransitionStarted(CurrentScene, target, reason));
             pauseToken = pause.Acquire("SceneFlow");
-            // TODO(HUD-002): ui.Navigator.SetRoot(screens.Loading) when screens are set.
 
             try
             {
+                ShowLoadingRoot();
                 // 2. Exit the current scene.
                 if (CurrentScene == GameScene.World || CurrentScene == GameScene.BlueprintLab)
                 {
@@ -171,6 +198,7 @@ namespace Game.App.Flow
                 CreateSceneEntities(target);
                 CurrentScene = target;
                 await RunReadyHooksAsync(new SceneReadyContext(target, reason, lab));
+                ShowSceneRoot(target);
             }
             catch (Exception e)
             {
@@ -178,7 +206,6 @@ namespace Game.App.Flow
             }
 
             // 6.
-            // TODO(HUD-002): set the root screen (MainMenu → screens.MainMenu, World → FlightHud, BlueprintLab → ShipEditor).
             Finish(target, reason, true);
             if (target == GameScene.World && (reason == SceneEntryReason.NewGame || reason == SceneEntryReason.LoadGame)) save?.Autosave.NotifySaved();
             return FlowResult.Ok;
@@ -193,8 +220,10 @@ namespace Game.App.Flow
             EventBus<SceneTransitionStarted>.Publish(new SceneTransitionStarted(GameScene.None, scene, reason));
             try
             {
+                ShowLoadingRoot();
                 CurrentScene = scene;
                 await RunReadyHooksAsync(new SceneReadyContext(scene, reason, default));
+                ShowSceneRoot(scene);
             }
             catch (Exception e) { return await RecoverAsync(e); }
             Finish(scene, reason, true);
@@ -256,6 +285,9 @@ namespace Game.App.Flow
                 while (op != null && !op.isDone) await Awaitable.NextFrameAsync();
             }
             catch (Exception e) { GameLog.Exception(LogCategories.Flow, e, "SceneFlow recovery"); }
+            // A broken view must not retain the transition pause token or prevent the failed result.
+            try { ShowSceneRoot(GameScene.MainMenu); }
+            catch (Exception e) { GameLog.Exception(LogCategories.Flow, e, "SceneFlow recovery root"); }
             // TODO(UI-003): ui.Notifications.Show("Something went wrong while loading. Returned to the main menu.", Error).
             Finish(GameScene.MainMenu, SceneEntryReason.ErrorRecovery, false);
             return FlowResult.Failed;
@@ -333,6 +365,8 @@ namespace Game.App.Flow
         {
             if (disposed) return;
             disposed = true;
+            rootScreens = null;
+            navigator = null;
             pauseToken.Dispose();
             if (bootEntities.IsCreated) bootEntities.Dispose();
             readyHooks.Clear();
