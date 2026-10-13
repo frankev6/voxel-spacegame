@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | done; full batch green; dependency wait | audio measurements |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-004 | claimed; dispatching ability effect systems | ABL-005 after WPN-012 |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-004 | active; effects and two required tests written; awaiting delivery | ABL-005 after WPN-012 |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-015 | done; full batch green; dependency wait | weapon harness |
 
 ## Operating rules
@@ -18,7 +18,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- **Combat scenarios authored:** e7fa44af adds exactly six required WPN-012 tests (spec-required:6, extra:0): player plasma shot-line holes, shield absorption/overflow, one flak burst/two ships, homing versus sideways motion, beam occlusion,600-tick four-ship hashes plus all projectile stats across30/60/144FPS and1/max workers. Fixture uses authored blocks and production power/fire/hit/damage/split systems; exact-aim fixtures zero spread only in copied test blobs, skirmish retains authored spread. Initial fixture compile97799 passed; final compile + grouped PlayMode namespace now live25162. No runtime mutations until terminal. ABL-004 worker remains active (cursor121); do not claim scenario acceptance yet.
+- **Combat acceptance green:** session25162 exited0; compile clean and all six WPN-012 required scenarios passed (spec-required:6, extra:0). Evidence `Logs/playtest/combat-scenarios/acceptance.xml` and `compile-acceptance.log`. Across30/60/144FPS and1/17workers, the600-tick skirmish produces cell hashFF97DBC590F12EDA with66 fired/37 hits/4 live/0 dropped and identical full projectile stats. ABL-004 remains actively finishing its delivery (exact worker cursor122); lead reviewed both effects and its two tests without an actionable finding so far. No active Unity. Next integrate the committed delivery, validate the two effect checks, then run one compatible full regression before closeout. Other workers remain verified dependency waits.
 
 - **Combat fixture started:** primary `task/WPN-012-combat-scenarios` now has a shared fixture using authored weapon/power blocks, real spawn/physics/aim/fire/shot handlers/spatial hits/shields/damage/integrity/split/death systems. Flight fixture exposes its existing catalog for weapon blob construction. Six required scenarios still need authoring; no compile/test claim yet. Existing power thread is active on ABL-004, cursor1568951e-0a09-4df8-a2cc-d2e8689f237e:120. Other workers remain dependency waits. No active Unity. Preserve pre-existing QualitySettings delta.
 
