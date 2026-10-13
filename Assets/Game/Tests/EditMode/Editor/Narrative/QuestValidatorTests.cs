@@ -222,7 +222,7 @@ namespace Game.Tests.EditMode.Editor.Narrative
                     object old = NarrativeValidationContext.Value(field.Wrapper, "source");
                     if (field.Wrapper is CompiledEffectList list) Effects(list, "complete_beat beat_usage");
                     else Source(field.Wrapper, field.Wrapper is CompiledIntExpr ? "roll(6)" : "roll(6) == 1");
-                    var report = f.Validate(); Assert.IsTrue(report.Entries.Any(entry => entry.Code == "NAR-E008" && entry.AssetPath == "content:" + definition.IdString && (entry.Field == field.Field || entry.Field.StartsWith(field.Field + " (", StringComparison.Ordinal))), report.ToText());
+                    var report = f.Validate(); Assert.IsTrue(report.Entries.Any(entry => entry.Code == "NAR-E008" && entry.AssetPath == "content:" + definition.IdString && (entry.Field == field.Field || entry.Field.StartsWith(field.Field + " (", StringComparison.Ordinal) || entry.Field.StartsWith(field.Field + "[", StringComparison.Ordinal))), report.ToText());
                     SetField(field.Wrapper, "source", old);
                 }
         }
