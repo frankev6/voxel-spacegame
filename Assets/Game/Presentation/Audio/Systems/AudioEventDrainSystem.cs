@@ -75,7 +75,7 @@ namespace Game.Presentation.Audio
             stats.Culled = counters[(int)SfxCounter.Culled]; stats.Groups = counters[(int)SfxCounter.Groups];
             stats.CooldownDropped = counters[(int)SfxCounter.CooldownDropped]; stats.CombatSignals = counters[(int)SfxCounter.CombatSignals];
             stats.ActiveSfxVoices = Service.ActiveSfxCount;
-            // TODO(AUD-008): feed this frame's CombatSignals to the music director.
+            Service.ReportCombatSignals(stats.CombatSignals);
         }
         protected override void OnDestroy()
         {

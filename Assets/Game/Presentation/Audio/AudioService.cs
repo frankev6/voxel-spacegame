@@ -1,6 +1,7 @@
 using System;
 using Game.Core;
 using Game.Core.Audio;
+using Game.Core.Events;
 using Game.Voxel.PresentationStreams;
 using Game.Data;
 using Game.Data.Definitions;
@@ -10,10 +11,11 @@ using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using Unity.Mathematics;
 using UnityEngine;
+using Unity.Profiling;
 
 namespace Game.Presentation.Audio
 {
-    /// <summary>SPEC-64 §5.2/§6.1: lifetime, listener, fixed voice pools, mixer settings and pause. Pooled spatial/managed one-shots and stinger ducking; music direction follows in AUD-008.</summary>
+    /// <summary>SPEC-64 §5.2/§6.1: lifetime, listener, fixed voice pools, mixer settings, pause and music direction.</summary>
     public sealed class AudioService : IAudioService, IDisposable
     {
         readonly AudioStats stats = new AudioStats();
@@ -29,6 +31,13 @@ namespace Game.Presentation.Audio
         UiVoicePool uiPool;
         AudioSource musicA, musicB, stinger;
         float duck = 1, musicBaseA = 1, musicBaseB = 1;
+        static readonly ProfilerMarker UpdateMarker = new ProfilerMarker(ProfilerCategory.Scripts, "AudioService.Update");
+        MusicDirector musicDirector;
+        ContentHash musicOverride;
+        float overrideFade, clearOverrideFade;
+        bool overridePending, clearOverridePending, musicFading;
+        int combatSignals, musicIncoming = -1;
+        float musicFadeTime, musicFadeDuration, musicStartA, musicStartB, musicTarget;
         int randomFrame = -1, playOrder;
         AudioRoot root;
         Transform listener, listenerTarget;
@@ -86,8 +95,13 @@ namespace Game.Presentation.Audio
                     }
                 if (config != null) for (int i = 0; i < uiSlots.Length && i < config.UiSounds.Count; i++)
                     if (config.UiSounds[i] != null) cueSlotByHash.TryGetValue(config.UiSounds[i].Id.Hash.Value, out uiSlots[i]);
+                musicDirector = config != null ? new MusicDirector(Hash(config.MusicMenu), Hash(config.MusicExploration),
+                    Hash(config.MusicCombat), Hash(config.MusicEditor), config.CombatWindowSeconds, config.CombatEnterSignals,
+                    config.CombatHoldSeconds, config.FadeDefault, config.FadeToCombat, config.FadeFromCombat) :
+                    new MusicDirector(ContentHash.None, ContentHash.None, ContentHash.None, ContentHash.None);
                 ApplyVolumes(initialVolumes); OnSceneChanged(default, SceneManager.GetActiveScene());
                 SceneManager.activeSceneChanged += OnSceneChanged;
+                EventBus<SessionReset>.Subscribe(OnSessionReset);
             }
             catch { Dispose(); throw; }
         }
@@ -132,7 +146,6 @@ namespace Game.Presentation.Audio
             }
             else query.SetSingleton(cues);
         }
-        static ContentHash Hash(AudioCueDefinition cue) => cue != null ? cue.Id.Hash : default;
         public void Unbind(World world)
         {
             if (!ReferenceEquals(boundWorld, world)) return;
@@ -143,10 +156,12 @@ namespace Game.Presentation.Audio
         public void ClearListenerTarget(Transform pivot) { if (listenerTarget == pivot) listenerTarget = null; }
         public float3 ListenerPosition => listener != null ? (float3)listener.position : float3.zero;
         public AudioStats Stats => stats;
-        public MusicState MusicState => MusicState.Silent;       // AUD-008: music director
+        public MusicState MusicState => musicDirector != null ? musicDirector.State : MusicState.Silent;
         internal void Update(float dt)
         {
             if (disposed) return;
+            using var marker = UpdateMarker.Auto();
+            dt = float.IsFinite(dt) ? math.max(0, dt) : 0;
             if (volumesPending)
             {
                 var mixer = config != null ? config.Mixer : null;
@@ -161,13 +176,92 @@ namespace Game.Presentation.Audio
             if (listenerTarget != null) listener.SetPositionAndRotation(listenerTarget.position, listenerTarget.rotation);
             else listenerTarget = null;
             AudioListener.pause = pause != null && pause.IsPaused;
+            UpdateMusic(dt);
             UpdateDucking(dt);
             for (int i = 0; i < voiceInfo.Length; i++) if (voiceInfo[i].Active && !sfxVoices[i].isPlaying) voiceInfo[i].Active = false;
         }
         void OnSceneChanged(Scene previous, Scene next)
+            => SetSceneMusicContext(next.name);
+
+        internal void SetSceneMusicContext(string sceneName)
         {
+            if (disposed) return;
             SceneContext = MusicContext.Silent;
-            if (config != null) foreach (var entry in config.SceneMusic) if (entry.sceneName == next.name) { SceneContext = entry.context; break; }
+            if (config != null) foreach (var entry in config.SceneMusic) if (entry.sceneName == sceneName) { SceneContext = entry.context; break; }
+        }
+
+        static ContentHash Hash(AudioCueDefinition cue) => cue != null ? cue.Id.Hash : ContentHash.None;
+        internal void ReportCombatSignals(int count)
+        {
+            if (disposed || count <= 0) return;
+            combatSignals += math.min(count, int.MaxValue - combatSignals);
+        }
+        void UpdateMusic(float dt)
+        {
+            var previous = musicDirector.State;
+            var command = musicDirector.Update(SceneContext, combatSignals, !musicOverride.IsNone, musicOverride, overrideFade, dt);
+            combatSignals = 0;
+            bool replaceOverride = command.Target == MusicState.Override && overridePending;
+            if (command.Change || replaceOverride)
+            {
+                if (clearOverridePending && previous == MusicState.Override && command.Target != MusicState.Silent)
+                    command.Fade = clearOverrideFade;
+                ApplyMusicCommand(command);
+            }
+            if (command.Target == MusicState.Override) overridePending = false;
+            clearOverridePending = false;
+            AdvanceMusicFade(dt);
+            stats.Music = musicDirector.State;
+        }
+        void ApplyMusicCommand(in MusicCommand command)
+        {
+            musicStartA = musicA.clip != null ? musicBaseA : 0;
+            musicStartB = musicB.clip != null ? musicBaseB : 0;
+            musicFadeTime = 0; musicFadeDuration = command.Fade; musicIncoming = -1; musicTarget = 0;
+            if (!command.Cue.IsNone && cueSlotByHash.TryGetValue(command.Cue.Value, out int slot) && cues[slot].Clips.Count > 0)
+            {
+                // Two voices cannot retain three clips. Replace the quieter one, preserving both unducked gains (Q21).
+                musicIncoming = musicStartA <= musicStartB ? 0 : 1;
+                var incoming = musicIncoming == 0 ? musicA : musicB;
+                incoming.Stop(); StartOneShot(incoming, slot, 1, config.MusicGroup, true);
+                incoming.loop = cues[slot].Loop;
+                musicTarget = incoming.volume;
+            }
+            musicFading = musicFadeDuration > 0 && (musicIncoming >= 0 || musicStartA > 0 || musicStartB > 0);
+            SetMusicVoiceVolumes(musicStartA, musicStartB);
+            if (!musicFading) FinishMusicFade();
+        }
+        void AdvanceMusicFade(float dt)
+        {
+            if (!musicFading) return;
+            musicFadeTime = math.min(musicFadeDuration, musicFadeTime + dt);
+            float t = musicFadeTime / musicFadeDuration;
+            float cosine = math.cos(t * math.PI * .5f), sine = math.sin(t * math.PI * .5f);
+            float a = musicStartA * cosine, b = musicStartB * cosine;
+            // Squared-gain interpolation reduces to sin/cos from a steady track and remains continuous on interruption.
+            if (musicIncoming == 0) a = math.sqrt(a * a + musicTarget * musicTarget * sine * sine);
+            if (musicIncoming == 1) b = math.sqrt(b * b + musicTarget * musicTarget * sine * sine);
+            SetMusicVoiceVolumes(a, b);
+            if (musicFadeTime >= musicFadeDuration) FinishMusicFade();
+        }
+        void FinishMusicFade()
+        {
+            musicFading = false;
+            if (musicIncoming != 0) { musicA.Stop(); musicA.clip = null; }
+            if (musicIncoming != 1) { musicB.Stop(); musicB.clip = null; }
+            SetMusicVoiceVolumes(musicIncoming == 0 ? musicTarget : 0, musicIncoming == 1 ? musicTarget : 0);
+        }
+        void OnSessionReset(SessionReset reset)
+        {
+            if (disposed || musicDirector == null) return;
+            musicOverride = ContentHash.None; overridePending = clearOverridePending = false; combatSignals = 0;
+            musicFading = false; musicA.Stop(); musicB.Stop(); stinger.Stop(); musicA.clip = musicB.clip = null;
+            duck = 1; SetMusicVoiceVolumes(0, 0); musicDirector.Reset();
+            // Reset to the current mapped context immediately, with empty combat history and no scripted override.
+            var command = musicDirector.Update(SceneContext, 0, false, ContentHash.None, 0, 0);
+            if (command.Change) ApplyMusicCommand(command);
+            stats.Music = musicDirector.State;
+            // AUD-012 owns the complementary SFX/loop clear; AUD-008 resets music only.
         }
 
         public void PlayUi(UiSound sound)
@@ -281,13 +375,25 @@ namespace Game.Presentation.Audio
         internal void SetMusicVoiceVolumes(float a, float b)
         { musicBaseA = a; musicBaseB = b; musicA.volume = a * duck; musicB.volume = b * duck; }
 
-        public void SetMusicOverride(ContentId cue, float fadeSeconds) { }
-        public void ClearMusicOverride(float fadeSeconds) { }
+        public void SetMusicOverride(ContentId cue, float fadeSeconds)
+        {
+            if (disposed) return;
+            if (!float.IsFinite(fadeSeconds) || fadeSeconds < 0) throw new ArgumentOutOfRangeException(nameof(fadeSeconds));
+            if (!Resolve(cue, out int slot) || cues[slot].Clips.Count == 0) return;
+            musicOverride = cues[slot].Id.Hash; overrideFade = fadeSeconds; overridePending = true; clearOverridePending = false;
+        }
+        public void ClearMusicOverride(float fadeSeconds)
+        {
+            if (disposed) return;
+            if (!float.IsFinite(fadeSeconds) || fadeSeconds < 0) throw new ArgumentOutOfRangeException(nameof(fadeSeconds));
+            musicOverride = ContentHash.None; overridePending = false; clearOverridePending = true; clearOverrideFade = fadeSeconds;
+        }
 
         public void Dispose()
         {
             if (disposed) return; Unbind(boundWorld); disposed = true;
             SceneManager.activeSceneChanged -= OnSceneChanged; AudioListener.pause = false;
+            EventBus<SessionReset>.Unsubscribe(OnSessionReset);
             listenerTarget = null; pause = null;
             if (cueInfo.IsCreated) cueInfo.Dispose(); if (cueSlotByHash.IsCreated) cueSlotByHash.Dispose();
             if (root != null)
