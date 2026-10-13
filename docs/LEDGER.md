@@ -833,6 +833,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 244 | SPEC-81 Q26: current A1 acceptance versus later-owned production font/material assets. | Verified retained OfficeCodePro naming and unassigned ArtDirection prop material warn in A1, fail in A2. Preserve other functional errors, explicit AST-004/008 work and existing visuals. | Tech lead |
 
+| 245 | SPEC-31 Q9–10: streaming configuration validation and sector capacity. | Validate procedural worst-case/authored belt geometry against sparse sector encoding; reject invalid/nonfinite config limits with SYS-E004. Factory copies values and boot owns singleton. Lead reviewed SYS-002; content generation and Unity validation pending. | Tech lead |
+| 246 | SPEC-20 Q21: tuning dependency and absent aggregate ordering type. | Require PowerTuning for thruster init; separate module request initialization before power binding. Preserve PWR-006 aggregate ownership with an explicit ordering TODO; feature stats observe mass, stats and multiplier changes. | Tech lead |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
