@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | GAL-003 | dispatched from main 3a12c2c; GAL-002 integrated d5acbd2, focused validation active | Ready standard work after batch integration |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AI-003 | dispatched from main ffaf254; MIG-010 6ca1b17 integrated as d6ec9ad, awaiting ABL-002 and generation | M2 power/ability work |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AST-002 | dispatched from main 5764e72; AI-003 delivered 6787228, boot/catalog integration and validation pending | AI-005 after AI-003 closes |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | MIG-014 | dispatched from main 42aca7e; SYS-001 delivered 91c8610, awaiting next batch integration | Ready standard work after batch integration |
 
 ## Operating rules
@@ -98,3 +98,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - Orbit rerun 15882 completed exit 0: compile clean, 5/0/0 (`Logs/playtest/combat-content-batch/orbit-fixed.xml`). Started full EditMode + PlayMode rerun session `46507` on the repaired complete combat-content/spatial/orbit batch. Poll exact handle; no runtime mutations or second Unity while active.
 
 - Full session `46507` now reports EditMode **968/0/1**; PlayMode remains live. SYS-001 delivered `91c8610` (2 required tests, 0 extra), service shells and managed/ECS event ownership reviewed; await next batch integration. Same presentation worker recycled to MIG-014 from main claim `42aca7e`. AI-003 and GAL-003 remain active. Do not touch test-owned InitTestScene or primary runtime while PlayMode runs.
+
+- AI-003 delivered `6787228`: four profiles/config, scalar baker, 2 required tests/0 extra, verified ability GUIDs; catalog recipe and boot-owned blob lifetime integration remain lead work. AI-005 has a real dependency wait until AI-003 closes; same worker dispatched ready AST-002 from main `5764e72`, no art production. Current three assignments: GAL-003, AST-002, MIG-014.
