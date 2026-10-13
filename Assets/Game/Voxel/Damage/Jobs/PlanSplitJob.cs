@@ -23,6 +23,7 @@ namespace Game.Voxel.Damage.Jobs
         public bool HulkAvailable;
         public DamageConfig Config;
         public NativeList<IslandRecord> Bodies;
+        public NativeList<IslandRecord> Chunks;
         public NativeList<PendingDetach> Detach;
         [NativeDisableUnsafePtrRestriction] public DamageStreamsData* Data;
         public static SplitTier Tier(IslandRecord island, DamageConfig config)
@@ -33,16 +34,16 @@ namespace Game.Voxel.Damage.Jobs
         public void Execute()
         {
             using var anchors = new NativeHashMap<Entity, int3>(16, Allocator.Temp);
-            Bodies.Clear(); int accepted = 0, cells = 0, hulks = 0; var allocator = Allocators[AllocatorEntity];
+            Bodies.Clear(); int accepted = 0, cells = 0, hulks = 0, chunks = 0; var allocator = Allocators[AllocatorEntity];
             foreach (var island in Islands)
             {
                 var tier = Tier(island, Config);
                 bool budget = accepted == 0 || (long)cells + island.CellCount <= Config.SplitCellBudgetPerTick;
-                bool available = tier == SplitTier.Particle || (tier == SplitTier.Hulk && HulkAvailable && hulks < Config.MaxNewHulksPerTick && allocator.Next < allocator.End);
-                // TODO(DMG-011): record pooled Chunk plans. Existing FND-020 hulk recording remains available.
+                bool available = tier == SplitTier.Particle || (tier == SplitTier.Chunk && Chunks.IsCreated && Config.MaxLiveChunks > 0 && chunks < Config.MaxNewChunksPerTick) || (tier == SplitTier.Hulk && HulkAvailable && hulks < Config.MaxNewHulksPerTick && allocator.Next < allocator.End);
                 if (!budget || !available) { Reseed(island, anchors); Data->Current.SplitsDeferred++; continue; }
                 accepted++; cells += island.CellCount;
                 if (tier == SplitTier.Hulk) { Bodies.Add(island); hulks++; allocator.Next++; }
+                else if (tier == SplitTier.Chunk) { Chunks.Add(island); chunks++; }
                 else Data->Current.ParticleIslands++;
                 for (int m = island.MaskStart; m < island.MaskStart + island.MaskCount; m++)
                 { var mask = Masks[m]; Detach.Add(new PendingDetach { Grid = island.Grid, SlotIndex = mask.SlotIndex, Mask = mask.Mask, Reason = tier == SplitTier.Particle ? CellRemovedReason.DetachedParticle : CellRemovedReason.DetachedBody, IslandOrdinal = island.Ordinal }); }

@@ -130,7 +130,7 @@ namespace Game.Data.Definitions
             if (particleMaxCells < 1) scope.Error("DMG-E005", nameof(particleMaxCells), "Budget must be at least 1.");
             if (chunkMaxCells < 1) scope.Error("DMG-E005", nameof(chunkMaxCells), "Budget must be at least 1.");
             if (chunkMaxExtentCells < 1) scope.Error("DMG-E005", nameof(chunkMaxExtentCells), "Budget must be at least 1.");
-            if (maxLiveChunks < 1) scope.Error("DMG-E005", nameof(maxLiveChunks), "Budget must be at least 1.");
+            if (maxLiveChunks < 1 || maxLiveChunks > 256) scope.Error("DMG-E005", nameof(maxLiveChunks), "Chunk slots must be in 1..256 (byte slot identity).");
             if (splitCellBudgetPerTick < 1) scope.Error("DMG-E005", nameof(splitCellBudgetPerTick), "Budget must be at least 1.");
             if (maxNewHulksPerTick < 1) scope.Error("DMG-E005", nameof(maxNewHulksPerTick), "Budget must be at least 1.");
             if (maxNewChunksPerTick < 1) scope.Error("DMG-E005", nameof(maxNewChunksPerTick), "Budget must be at least 1.");

@@ -20,13 +20,16 @@ using Unity.Transforms;
 
 namespace Game.Voxel.Damage
 {
-    // TODO(DMG-011): pooled chunk tier/lifetime. TODO(DMG-012): complete hulk lifecycle tests.
+    // TODO(DMG-012): complete hulk lifecycle tests.
     /// <summary>SPEC-13 §5.5 hulk creation. ADR-0053 initially represents every detached island as a physical grid.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup))]
     [UpdateAfter(typeof(IntegritySystem)), UpdateBefore(typeof(GridMassUpdateSystem)), UpdateBefore(typeof(BrickDirtyScheduleSystem))]
     public unsafe partial struct SplitSystem : ISystem
     {
         SplitJob job;
+        EntityArchetype chunkType;
+        ComponentLookup<ChunkColliderBlob> chunkColliders;
+        BufferLookup<ChunkCell> chunkCells;
         public void OnCreate(ref SystemState state)
         {
             job.RootType = state.EntityManager.CreateArchetype(typeof(VoxelGrid), typeof(BrickSlot), typeof(PaletteEntry), typeof(BlockInstance),
@@ -34,6 +37,11 @@ namespace Game.Voxel.Damage
                 typeof(GridDespawnRequest), typeof(GridRebuilt), typeof(GridBodyInit), typeof(GridEditRequest), typeof(GridEditedBrick), typeof(GridSpawnBrick),
                 typeof(GridMass), typeof(GridMassRecompute), typeof(GridColliderState), typeof(Dormant), typeof(SpawnReadToken),
                 typeof(GridDamageStats), typeof(PendingImpulse), typeof(GridIntegrityState), typeof(IntegritySeed));
+            chunkType = state.EntityManager.CreateArchetype(typeof(LocalTransform), typeof(LocalToWorld), typeof(PhysicsVelocity),
+                typeof(PhysicsMass), typeof(PhysicsCollider), typeof(PhysicsDamping), typeof(PhysicsWorldIndex), typeof(PhysicsGraphicalSmoothing),
+                typeof(PhysicsGraphicalInterpolationBuffer), typeof(ChunkBody), typeof(ChunkCell), typeof(ChunkColliderBlob),
+                typeof(SplitGrace), typeof(SplitOrigin), typeof(ChunkDissolve), typeof(Disabled));
+            chunkColliders = state.GetComponentLookup<ChunkColliderBlob>(true); chunkCells = state.GetBufferLookup<ChunkCell>(true);
             job.Reader = GridCellReader.Create(ref state);
             job.Transforms = state.GetComponentLookup<LocalTransform>(true); job.Masses = state.GetComponentLookup<PhysicsMass>(true);
             job.Velocities = state.GetComponentLookup<PhysicsVelocity>(true); job.Damping = state.GetComponentLookup<PhysicsDamping>(true);
@@ -49,6 +57,7 @@ namespace Game.Voxel.Damage
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
+            chunkColliders.Update(ref state); chunkCells.Update(ref state);
             job.Reader.Update(ref state); job.Transforms.Update(ref state); job.Masses.Update(ref state); job.Velocities.Update(ref state);
             job.Damping.Update(ref state); job.Planar.Update(ref state); job.Ids.Update(ref state); job.Sources.Update(ref state); job.Bricks.Update(ref state);
             job.Instances.Update(ref state); job.Palettes.Update(ref state); job.Groups.Update(ref state); job.Seeds.Update(ref state);
@@ -60,17 +69,30 @@ namespace Game.Voxel.Damage
             job.AllocatorEntity = SystemAPI.GetSingletonEntity<PersistentIdAllocator>(); job.SerialEntity = SystemAPI.GetSingletonEntity<GridSerialAllocator>(); job.BrickPrototype = SystemAPI.GetSingleton<GridPrototypes>().Brick;
             job.Ecb = SystemAPI.GetSingleton<GameplayEndCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
             var bodies = new NativeList<IslandRecord>(Allocator.TempJob);
+            var chunks = new NativeList<IslandRecord>(Allocator.TempJob);
+            var slots = new NativeArray<Entity>(math.clamp(job.Config.MaxLiveChunks, 1, 256), Allocator.TempJob);
+            var chunkBodies = new NativeArray<ChunkBody>(slots.Length, Allocator.TempJob);
             var dependency = JobHandle.CombineDependencies(state.Dependency, data->IntegrityHandle, data->DetachNextWritable);
             var fx = SystemAPI.GetSingleton<FxEventQueue>();
             dependency = new EmitDebrisJob { Removed = data->Removed, Ranges = data->RemovedGrids, Grids = job.Reader.Grids, Blocks = job.Blocks,
                 Config = job.Config, Fx = fx.Queue.AsParallelWriter(), Sfx = SystemAPI.GetSingletonRW<SfxEventQueue>().ValueRW.Queue.AsParallelWriter(), Data = data
             }.Schedule(fx.Access.BeginRead(dependency));
-            fx.Access.EndRead(dependency);
+            dependency = new ChunkLifetimeJob { Tick = job.Tick, Ecb = job.Ecb, Retired = data->RetiredChunkBlobs,
+                Fx = fx.Queue.AsParallelWriter() }.Schedule(dependency);
+            dependency = new CollectChunkSlotsJob { Entities = slots, Bodies = chunkBodies }.Schedule(dependency);
             dependency = new PlanSplitJob { Islands = data->Islands, Masks = data->IslandMasks, Reader = job.Reader, Bricks = job.Bricks,
                 Seeds = job.Seeds, Allocators = job.Allocators, AllocatorEntity = job.AllocatorEntity, HulkAvailable = job.BrickPrototype != Entity.Null,
-                Config = job.Config, Bodies = bodies, Detach = data->PendingDetachNext, Data = data }.Schedule(dependency);
+                Config = job.Config, Bodies = bodies, Chunks = chunks, Detach = data->PendingDetachNext, Data = data }.Schedule(dependency);
             job.Islands = bodies;
-            state.Dependency = bodies.Dispose(job.Schedule(dependency));
+            dependency = new RecordChunkJob { Islands = chunks, Masks = data->IslandMasks, Reader = job.Reader, Bricks = job.Bricks,
+                Transforms = job.Transforms, Masses = job.Masses, Velocities = job.Velocities, Colliders = chunkColliders,
+                OldCells = chunkCells, Palettes = job.Palettes, Instances = job.Instances, Slots = slots, Bodies = chunkBodies,
+                Archetype = chunkType, Blocks = job.Blocks, Config = job.Config, Tick = job.Tick, Ecb = job.Ecb,
+                Fx = fx.Queue.AsParallelWriter(), Data = data }.Schedule(dependency);
+            dependency = job.Schedule(dependency);
+            fx.Access.EndRead(dependency);
+            dependency = bodies.Dispose(dependency); dependency = chunks.Dispose(dependency);
+            dependency = slots.Dispose(dependency); state.Dependency = chunkBodies.Dispose(dependency);
             data->SplitHandle = state.Dependency;
         }
         [BurstCompile] struct SplitJob : IJob

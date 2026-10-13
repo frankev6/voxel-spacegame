@@ -57,7 +57,8 @@ namespace Game.Voxel.Damage.Jobs
         {
             using var boxes = new NativeList<Box>(Allocator.Temp);
             Build(cells, maxBoxes, boxes);
-            using var children = new NativeArray<CompoundCollider.ColliderBlobInstance>(boxes.Length, Allocator.Temp);
+            using var childrenStorage = new NativeArray<CompoundCollider.ColliderBlobInstance>(boxes.Length, Allocator.Temp);
+            var children = childrenStorage;
             for (int i = 0; i < boxes.Length; i++)
             {
                 var box = boxes[i];

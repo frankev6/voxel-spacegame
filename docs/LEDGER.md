@@ -785,6 +785,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 202 | 2026-10-13 | SPEC-22 Q10 / PWR-001 | PowerDemandGroup references allocator before PWR-005 exists | Defer redundant UpdateBefore attribute; retain PWR-005 TODO and reciprocal ordering requirement | Tech lead | Resolved; no allocator stub or changed runtime ordering |
 | 203 | 2026-10-13 | SPEC-21 Q13 / WPN-017 | Presentation ordering and stale HulkInfo field | Existing OrderLast drain orders bridge without upward reference; use FormerKind and complete attribution dependencies | Tech lead | Resolved; no assembly or effective ordering change |
 | 204 | 2026-10-13 | SPEC-62 Q16 / CAM-008 | Camera FX reader missing; generic effect names differ | Borrow current-frame completed uploader drain; map actual hit/explosion/ram kinds and bind at boot | Tech lead | Resolved; synchronous reader, no second queue consumer |
+| 205 | 2026-10-13 | SPEC-13 Q33 / DMG-011 | Chunk geometry origin, byte slot capacity and obsolete dissolve event | Use exact COM-rebased boxes/cells, validate 1..256 slots, canonical continuous ChunkDissolve state, reconstruct real slot handles | Tech lead | Resolved; required lifecycle tests still pending |
 
 ## Measurements
 
