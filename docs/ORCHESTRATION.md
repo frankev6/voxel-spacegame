@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Projectile validation repair:** session53533 compiled clean; focused tests5/2/0. Multi-batch runs caught NativeStream lane index1 being checked against row range64–127. Repair2e5247ca uses NativeDisableParallelForRestriction on the three stream writers only; exclusive row/64 lane ownership and all container lifetime checks retained. Serialized compile + seven-test rerun session40752 active. Failed evidence `Logs/playtest/projectile-combat/acceptance-first.xml`. No primary mutations until terminal.
+
 - **Current Unity:** interactive Editor8032 exited 0 through CLI after stopping Play. Primary now `task/WPN-008-validation`, implementation/tests integrated9ae0bb32/37cd4243/12173090/d190b867. Serialized compile + seven ProjectileStepTests running in session53533. Do not mutate primary runtime or start another Unity until terminal. QST/MIG prepared branch preserved; AUD-013 and WPN-018 workers confirmed active.
 
 - **WPN-008 acceptance authored:** isolated `task/WPN-008-projectile-step` now includes all seven required ProjectileStepTests (spec-required: 7, extra: 0), scheduled production step/compaction with real spawned cells and shield geometry. Coverage: attribution/fields, shield-first and explosive surface events, fuse endpoint, moving-target turn rate, stable 137-row compaction, 193-event output comparison at 1/max job workers. No Unity run yet. Next review fixtures, stop live Editor only for integration/validation, combine compatible deliveries if ready.
