@@ -40,7 +40,11 @@ namespace Game.Data.Logic
         public int GeneratedSlot(FactFamily family, ulong sourceHash) =>
             generated.TryGetValue(family, out var familySlots) && familySlots.TryGetValue(sourceHash, out int slot) ? slot : -1;
 
-        public static FactCatalog Build(ContentCatalog content, RefResolverRegistry refs, ValidationReport report)
+        public static FactCatalog Build(ContentCatalog content, RefResolverRegistry refs, ValidationReport report) =>
+            Build(content, refs, report, null);
+
+        // Instance-scoped hash seam for the required collision fixture; production always uses FactId.Hash.
+        internal static FactCatalog Build(ContentCatalog content, RefResolverRegistry refs, ValidationReport report, Func<string, ulong> hashForTest)
         {
             if (content == null) throw new ArgumentNullException(nameof(content));
             if (refs == null) throw new ArgumentNullException(nameof(refs));
@@ -93,9 +97,10 @@ namespace Game.Data.Logic
             {
                 var row = ordered[i];
                 result.names.Add(row.Id.Name, i);
-                if (result.hashes.TryGetValue(row.Id.Hash, out int other))
+                ulong hash = hashForTest == null ? row.Id.Hash : hashForTest(row.Id.Name);
+                if (result.hashes.TryGetValue(hash, out int other))
                     report.Error("NAR-E014", row.Asset, "facts", "Facts '" + ordered[other].Id.Name + "' and '" + row.Id.Name + "' share a 64-bit hash.");
-                else result.hashes.Add(row.Id.Hash, i);
+                else result.hashes.Add(hash, i);
                 if (row.Family != FactFamily.Authored && row.Family != FactFamily.System)
                 {
                     if (!result.generated.TryGetValue(row.Family, out var slots))
