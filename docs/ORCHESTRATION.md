@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Legacy logic accepted:**2be62596 clean compiles89361/43204; five focused checks11720 pass after exact salvage removal expectation repair. NAR-014 closes; NAR-015 frontier emission unlocked. All three workers currently have real standard-task dependency waits. Lead returns to HUD-002 preserved e7bcf344; composition/session/presenters remain. No Unity validation active. Previous turn staged UI views (progress).
+
 - **HUD sequence resolved / claimed:** ADR-0072bf19a02c removes false whole-SPEC60 gating and explicitly places downstream hookups with their owners. Preserve real existing root behavior before replacing M1 adapter; no blank roots/fake services. HUD-002 claimed for lead; implementation next, UI-012 remains required for layout acceptance. No tests launched. Previous turn accepted conditions (progress).
 
 - **Conditions accepted / HUD dependency action:**66fad93a compile21158 clean,89147 five passed; Q18→316. Presentation audit149 confirms HUD-002 whole-SPEC60 dependency overbroad and downstream binding cycle; next lead resolve sequencing and implement composition, retain actual travel gates. UI-012 still owns layout acceptance. Presentation has genuine ready-standard dependency wait; combat FACT review167 active, NAR-014180 active. No validation active. Previous turn closed FACT/import pipeline (progress).

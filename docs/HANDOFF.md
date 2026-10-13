@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Latest:** NAR-0142be62596 translates the five legacy narrative exports; five focused checks pass after correcting a source-incomplete test expectation. Emission/preservation and asset writing remain NAR-015/016. HUD-002 is staged separately: scene roots and loading/menu/pause views exist, but persistent composition/presenters are not installed or accepted. Preserve the current playable adapter until replacement is complete. No broad suite or benchmark run.
+
 - **Fact store accepted:** NAR-00718906e47 preserves facts, aliases/orphans and Session semantics with deferred notifications; seven functional checks pass and final compile is clean. Save chunk NAR-008 and narrative evaluation service NAR-010 are next dependencies. Two advisory measurements remain unrun.
 
 - **HUD data and loot accepted:** HUD-00888a324e0 supplies combat snapshot/nearest64 radar (nine checks); ECO-0049d457784 supplies seeded loot and economy facade (eight checks). Both compile cleanly. Visible flight HUD still needs HUD-002/007/009; no claim of new onscreen UI.

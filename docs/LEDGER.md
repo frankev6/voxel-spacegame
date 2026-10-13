@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 127 | 6 | 0 | 0 | 47 | 0 | 180 | 11 |
+| M3 | 126 | 6 | 0 | 0 | 48 | 0 | 180 | 11 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -383,8 +383,8 @@
 | NAR-011 | LogicContext and LogicWorldAdapter in Game.App | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-005, NAR-010, FND-001, ECO-001, QST-001 | no | todo |  |  |  |  |
 | NAR-012 | World-event bridge | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-011, SYS-001, ENC-001 | no | todo |  |  |  |  |
 | NAR-013 | Narrative validator framework and fact rules | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-009 | yes | todo |  |  |  |  |
-| NAR-014 | Legacy converter: reading, mapping tables and logic translation | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, MIG-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Recycled power worker: legacy reading and logic translation |
-| NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | no | todo |  |  |  |  |
+| NAR-014 | Legacy converter: reading, mapping tables and logic translation | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, MIG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 2be62596 | Strict five-file loader and mapped logic; 5 focused checks pass; emission/assets remain NAR-015/016 |
+| NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | yes | todo |  |  |  |  |
 | NAR-016 | Legacy converter: quests, triggers, templates and flag assets | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-015 | no | todo |  |  |  |  |
 | NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | no | todo |  |  |  |  |
 | NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | no | todo |  |  |  |  |
@@ -1020,6 +1020,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Legacy logic translation accepted — astra (gpt-6)
+
+- NAR-0142be62596 integrates strict DTO loading, canonical/contextual ID maps and logic translation for all five exported narrative files. Retains source text/metadata for NAR-015/016; Q19 mirrored318. Worker review170 found no actionable defects.
+- Compile89361 clean; focused13108 first4/1 exposed an incomplete test expectation: Take Module also contains DESTROY_ENTITY. Required exact output now includes remove_body; production translation unchanged. Recompile43204 clean, focused11720 five passed. Evidence `Logs/playtest/legacy-logic/`. No simulation waits, benchmark or broad suite.
+- Test count: spec-required: 5, extra: 0. Next: NAR-015 emission/preservation; HUD composition remains in progress separately.
 
 ### 2026-10-13 — Condition evaluation accepted — astra (gpt-6)
 
