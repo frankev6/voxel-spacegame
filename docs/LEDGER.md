@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 68 | 0 | 0 | 0 | 23 | 0 | 91 | 9 |
+| M2 | 67 | 0 | 0 | 0 | 24 | 0 | 91 | 8 |
 | M3 | 178 | 0 | 0 | 0 | 2 | 0 | 180 | 11 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -217,7 +217,7 @@
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-12 | a56c266 | Full pipeline: 15-frame readiness, idle 0.224481 ms; total memory performance deferred (Q174); zero tuning |
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
 | FND-020 | Playable stationary-target shooting and physical breakup | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-017, FND-018, FLT-001, DMG-001, WPN-001, VFX-001 | yes | done | astra (gpt-6) | 2026-10-12 | 53e61db | Playable station/Space fire; review fixes: bounded integrity, canonical masks, allocation attribution, stronger image checks; default suites green; perf advisory |
-| FND-021 | Automatic aligned test station in World | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-020, VFX-015 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
+| FND-021 | Automatic aligned test station in World | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-020, SPEC-63 | yes | done | astra (gpt-6) | 2026-10-13 | c3bb396 | Automatic World station at Y=-2 m; idempotent range request; direct World Play verified; spec-required: 1 (existing feature test extended), extra: 0 |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
 | PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | todo |  |  |  |  |
 | DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-12 | e3377fa | Four channels, owned phase memory, stable explosion drains; 5 tests; Q179–180 |
@@ -781,6 +781,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 199 | 2026-10-13 | SPEC-63 Q24 / VFX-015 | Production graph validation, installed Unity buffer contract and approved effect palette | Rendered origin invariance plus submitted GPU readback; canonical buffer/channel wiring; design guide colours | Tech lead | Resolved ADR-0060; direct simulated-particle readback not claimed; unavailable timing remains visible |
 | 200 | 2026-10-13 | SPEC-63 Q25 / VFX-015 | GPU validation found overwritten fixed-step event batches, suppressed pooled starts and a beam producer dependency | Per-frame graph simulation, Reinit/custom-event restart and targeted writer completion | Tech lead | Resolved ADR-0060; 50k actual debris and live warp verified; correctness fixes, no optimization pass |
 
+| 201 | 2026-10-13 | SPEC-01 Q29 / FND-021 | Owner wants automatic World test station with hull crossing the firing plane | Production offset Y=-2 m and reversible AutoSpawnInWorld setting | Tech lead | Resolved ADR-0061; one scene-owned station after player readiness; range command idempotent |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
@@ -890,6 +892,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — FND-021 lowered automatic World test station — astra (gpt-6)
+
+1. **Implemented:** `c3bb396` lowers the production station **2 m**, to `(0,-2,45)`, so its three-cell floor straddles the firing plane. `AutoSpawnInWorld` is enabled for the current testing phase. The existing range service joins scene readiness immediately after the player, uses the normal spawn pipeline, and reuses its target on repeated range requests. Scene exit still releases the source; the next World entry gets a fresh station. ADR-0061 / Q201 records this reversible owner-requested setup.
+2. **Validation:** compile zero CS warnings; full EditMode **854 passed, 0 failed, 1 explicit skip**, full PlayMode **118 passed, 0 failed, 53 expected skips**, both exit 0. All **four real-GPU range tests pass**, covering actual Space damage, holes, physical detachment and reset. Extended the existing owner-feature test for automatic spawn, height and idempotence: **spec-required: 1, extra: 0**, no new cases. No performance work or new owner gate.
+3. **Live evidence/closeout:** opened `World.unity` directly and entered Play, without `newgame` or `range`. Verified exactly **two grids** (Fighter at origin and one static station at `(0,-2,45)`), both with colliders; no runtime errors, only the existing GridSpawnSystem lookup warning. Evidence `Logs/playtest/fnd021/` includes full-suite XMLs, GPU range XML, `direct-world.txt` and `world-auto-station.png`. Leave this World session open and unpaused for Frank. Controls, scale and Nocturne unchanged. Preserve/exclude the pre-existing QualitySettings serialization delta. Next remains PHY-014, then DMG-011/012.
 
 ### 2026-10-13 — VFX-015 complete effects batch and 3× firing station — astra (gpt-6)
 
