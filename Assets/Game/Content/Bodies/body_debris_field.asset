@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5da82250bed548bf93572f7ed4903f21, type: 3}
+  m_Name: body_debris_field
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.BodyTemplateDefinition
+  id: body_debris_field
+  formerIds: []
+  displayName: Debris Field
+  description: 
+  role: 8
+  radiusMinM: 100
+  radiusMaxM: 100
+  visual: {fileID: 0}
+  starClass: 0
+  hasCollider: 1
+  canHaveMoons: 0
+  interaction: 0
+  interactionDistanceM: 150
+  interactPrompt: 
+  storyTag: debris_field
+  structureSource: 0
+  blueprint: {fileID: 0}
+  shape:
+    kind: 0
+    sizeCells: {x: 0, y: 0, z: 0}
+    wallThicknessCells: 0
+    hullBlock: {fileID: 0}
+    coreBlock: {fileID: 0}
+    colorIndex: 0
+  destructible: 1
+  t2LoadDistanceM: 6000
+  beltWidthM: 2000
+  sectorSizeM: 500
+  asteroidsPerSectorMin: 2
+  asteroidsPerSectorMax: 6
+  asteroidRadiusMinM: 4
+  asteroidRadiusMaxM: 18
+  asteroidBlock: {fileID: 0}
+  asteroidNoiseAmplitude: 0.25
+  asteroidNoiseFrequency: 0.15
