@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | MIG-013 | repair 2816e5 integrated b861ac5; generation/validation pending, dependency wait | combat/migration work as ready |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-001 | EDT-001 delivered 6712061; integrated 9c627fd, dependency wait pending validation | editor contracts as ready |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-011 | delivered 0a9da66; reviewed, awaiting next validation batch | combat composition |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DMG-015 | dispatched from main 212b60a | damage regressions/soak |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DMG-017 | dispatched from main 212b60a | damage harness |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ENC-002 | dispatched from main 212b60a | encounter/faction content |
 
 ## Operating rules
 
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Newest:** session 22999 exited 0: **1097/0/1 EditMode, 149/0/53 PlayMode**. Nine tasks closed and merged main **5735557**. Main **212b60a** claims WPN-007 and three standard tasks; all follow-ups sent to the exact existing threads. Primary now `task/AUD-006-validation`, audio and WPN-011 merged; serialized compile plus grouped EditMode/PlayMode **session 70163 active** (7369 failed on inherited ECS Time name; 62af102 qualifies UnityEngine.Time). Poll that handle before primary mutation. Audio guard ADR-0067 / Q267 corrects native producer lifetime; Q266 mirrors turret pose. QualitySettings backup restored (pre-existing serialization delta still excluded), inactive artifacts deleted. WPN-007 is lead next isolated work in `task/WPN-007-fire-pipeline` (existing lead checkout). DMG-015 and ENC-002 confirmed running; DMG-017 hit temporary model capacity after initial reads and was resumed in the same thread/model. Recheck its next status.
 
 - **Audio acceptance authored:** isolated AUD-006 head **ec0ecb0** includes all 13 specified tests (12 EditMode, one PlayMode), with the required 500-event warmed allocation assertion in the start-limit case; extra: 0. Drain file now matches the spec Systems path. Central frame allocator and pooled spatial playback are implemented. Compilation/execution remain pending the primary Unity channel. Session 22999 remains live (Unity PID 9992); EditMode 1097/0/1, PlayMode XML not yet produced. Do not clean its InitTestScene or change primary runtime.
 

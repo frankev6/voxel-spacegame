@@ -855,6 +855,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 263 | SPEC-51 Q23–25: editor contract identities and provisional config bindings. | Reuse canonical voxel/economy/input/UI types, expose the constructor dependency EditorContext, and stage task-ID shells without runtime wiring. Numeric config defaults follow the spec, colors use approved Nocturne tokens, and material bindings remain for EDT-018/019. Four required contract tests; no new art. | Tech lead |
 | 264 | SPEC-21 Q60: target transform origin is not the occupied hull centre. | Aim at the same transformed occupied-bounds centre as SpatialProxy; non-grid targets retain position fallback. The existing analytic moving-target test now includes an offset rotated hull. | Tech lead |
 | 265 | SPEC-13 Q36: fresh Worlds allocate different entity indices for equivalent persistent ships. | ADR-0066 seeds authoritative cell quantization and CellWriter kicks from nonzero persistent identity; unidentified transient grids retain the entity-index fallback. Keep strict determinism checks and existing public helper compatibility. | Tech lead |
+| 266 | SPEC-21 Q50: turret rest pose and split refresh | Reconstruct absolute pose from current block origin/orientation/cell size; OR change-filter aim and mount so split reparenting redraws unchanged yaw. Fixed weapons remain unchanged. | Tech lead |
+| 267 | SPEC-64 Q16 / ledger Q169: native audio queue lifetime | ADR-0067 applies existing GuardedHandles to SFX producers, exclusive drain and disposal; ram, split and death producers updated together. Required drain tests use jobs attached only to the queue guard. | Tech lead |
 
 ## Measurements
 

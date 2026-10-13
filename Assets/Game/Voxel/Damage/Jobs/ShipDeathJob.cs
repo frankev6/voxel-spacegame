@@ -25,7 +25,7 @@ namespace Game.Voxel.Damage.Jobs
         [ReadOnly] public EntityStorageInfoLookup Storage;
         [ReadOnly] public NativeList<Entity> Destroy;
         [ReadOnly] public NativeList<Entity> Despawns;
-        public NativeQueue<SfxEvent>.ParallelWriter Sfx;
+        [Unity.Collections.LowLevel.Unsafe.NativeDisableContainerSafetyRestriction] public NativeQueue<SfxEvent>.ParallelWriter Sfx;
         [ReadOnly] public NativeList<DamageGridResult> Results;
         public NativeList<GridCoreLost> CoreLost;
         public NativeStream.Writer Explosions;
