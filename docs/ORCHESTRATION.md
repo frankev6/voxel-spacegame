@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Settings checks accepted:**608141f compile clean, five focused checks pass in1.35s; real pause routes compiled. Production menu/root integration remains open. No Unity process active. Next integrate delivered world/travel/encounter content; ECO-009 dispatched, FND-012 dependency review underway.
+
 - **System content accepted:**e421d5ee compile6163 clean; headless88933 six passed0.193s. Live80985 blocked by native save-scene dialog (sample captured); Editor17922 terminated after CLI cancel/exit unable to proceed, all handles terminal. No Editor or Unity run active. HUD005 repair a03ac074 integration next, TRV0024fed054f/dd9f3fec review175; GAL012199/ENC010211 active. Previous turn authored procedural job (progress).
 
 - **Procedural content job authored:** GAL006 now has fixed-draw procedural bodies, usage-limited pools, scheduled wrapper and overflow reporting; six checks/compile pending. Q332/SPEC30Q32 guards lane-index capacity. HUD005 repair a03ac074 delivered174, queued on preserved settings branch; TRV002 resumed. GAL012198/ENC010210 active. No Unity run. Previous turn authored content foundation (progress).

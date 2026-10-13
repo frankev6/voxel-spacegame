@@ -1035,6 +1035,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — HUD-005 settings repair accepted, navigation checkpoint — astra (gpt-6)
+
+- 608141f integrates queued-input processing before direct fixture clock advancement. Compile95492 clean with zero CS warnings; focused headless19638 exited0, five passed/zero failed/skipped in1.3473552s test execution. Evidence `Logs/playtest/settings-screen/{compile-repaired.log,acceptance-repaired.xml}`. Test count: spec-required: 5, extra: 0. No broad suite or performance run.
+- Real pause routes and stale-session guards are compiled; screen tests pass. HUD-005 stays in-progress for full production navigation acceptance; HUD-002 root installation and HUD-006 acceptance remain separate. No live gameplay claim. Unity is closed, no active validation.
+- GAL-0128dc89fbc, ENC-010248f274c and TRV-0024fed054f/dd9f3fec/5de6da14 await content integration. ECO-009 claimed on main and dispatched to the same power worker. Previous turn reconciled settings branch and applied fast-fixture policy (progress).
+
 ### 2026-10-13 — GAL-006 accepted — astra (gpt-6)
 
 - e421d5ee verifies6bc17a47/fcd27c85: authored/procedural bodies, fixed draw order, per-pool max counts, moon parents, separated stations/gates, deterministic hashes and100 regenerations. Compile6163 clean; fresh headless88933 six passed/zero failed/skipped in0.1929481s test execution. Test count: spec-required: 6, extra: 0. Evidence `Logs/playtest/system-content/{compile.log,acceptance.xml}`.

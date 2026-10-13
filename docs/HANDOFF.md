@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Settings checks accepted:**608141f compile clean, five focused checks pass in1.35s; real pause routes compiled. Production menu/root integration remains open. No Unity process active. Next integrate delivered world/travel/encounter content; ECO-009 dispatched, FND-012 dependency review underway.
+
 - **System generation accepted:** GAL-006e421d5ee generates authored/procedural bodies and gates with deterministic hashes; six focused checks pass in0.193s, compile clean. Live Editor save-scene dialog required closing it; fresh headless run accepted, Editor currently closed. Next state/delta/service integration remains; settings repair and travel configuration deliveries are queued.
 
 - **Settings/pause integration pending acceptance:** settings04cf34fd/9dfc8bc and composition2b8df45a compile; two rebind failures need repair (raw runner results duplicated, no accepted XML). Real pause routes to save/load/settings are now authored, awaiting combined validation. Belt boot rejection repaired d289f13f using canonical block_hull. Full menu/HUD/editor roots remain incomplete; no new playable acceptance claim.
