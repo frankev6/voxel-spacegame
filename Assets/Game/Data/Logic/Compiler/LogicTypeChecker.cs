@@ -111,7 +111,7 @@ namespace Game.Data.Logic.Compiler
                     else if (!refs.TryGet(parameter.RefKind, out var resolver))
                         report.Warning("NAR-W001", options.AssetPath, Field(argument), "No resolver for " + parameter.RefKind + "; '" + text + "' was not checked.");
                     else if (!(parameter.RefKind == RefKind.Faction && text == "owner") && !resolver.TryResolve(text, out _))
-                        Error(argument, "NAR-E007", "Unknown " + parameter.RefKind + " '" + text + "'.");
+                        Error(argument, "NAR-E007", "Unknown " + parameter.RefKind + " '" + text + "'" + Suggest(text, resolver.AllIds) + ".");
                 }
                 else if (parameter.ArgKind == LogicArgKind.Text || parameter.ArgKind == LogicArgKind.Tag)
                 {
@@ -129,7 +129,7 @@ namespace Game.Data.Logic.Compiler
                             Error(argument, "NAR-E019", "Bool fact assigned a non-bool value.");
                     }
                     else if (actual.HasValue && actual.Value != expected) Wrong(argument, i, name, expected.ToString());
-                    if (argument is LogicAstLiteral number && number.Value is int integer) CheckRange(argument, name, i, integer);
+                    if (ConstantInt(argument, out int integer)) CheckRange(argument, name, i, integer);
                 }
             }
             if (name == "complete_quest")
@@ -140,8 +140,37 @@ namespace Game.Data.Logic.Compiler
         int Fact(LogicAst node, string name)
         {
             int slot = facts.SlotOf(name);
-            if (slot < 0) Error(node, "NAR-E006", "Unknown fact '" + name + "'.");
+            if (slot < 0)
+            {
+                var names = new string[facts.Count];
+                for (int i = 0; i < names.Length; i++) names[i] = facts.IdAt(i).Name;
+                Error(node, "NAR-E006", "Unknown fact '" + name + "'" + Suggest(name, names) + ".");
+            }
             return slot;
+        }
+        static string Suggest(string name, IEnumerable<string> candidates)
+        {
+            string best = null; int distance = 3;
+            foreach (string candidate in candidates)
+            {
+                int d = LogicFunctionRegistry.Distance(name, candidate);
+                if (d < distance || d == distance && d <= 2 && string.CompareOrdinal(candidate, best) < 0)
+                { best = candidate; distance = d; }
+            }
+            return best == null ? "" : "; did you mean '" + best + "'?";
+        }
+        static bool ConstantInt(LogicAst node, out int value)
+        {
+            if (node is LogicAstLiteral literal && literal.Value is int integer) { value = integer; return true; }
+            if (node is LogicAstUnary unary && unary.Operator == LogicTokenKind.Minus && ConstantInt(unary.Operand, out int operand))
+            { value = operand == int.MinValue ? int.MaxValue : -operand; return true; }
+            if (node is LogicAstBinary binary && (binary.Operator == LogicTokenKind.Plus || binary.Operator == LogicTokenKind.Minus) &&
+                ConstantInt(binary.Left, out int left) && ConstantInt(binary.Right, out int right))
+            {
+                long sum = binary.Operator == LogicTokenKind.Plus ? (long)left + right : (long)left - right;
+                value = (int)Math.Max(int.MinValue, Math.Min(int.MaxValue, sum)); return true;
+            }
+            value = 0; return false;
         }
         void CheckRange(LogicAst node, string name, int argument, int value)
         {
