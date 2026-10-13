@@ -1,4 +1,6 @@
 using Game.Core;
+using Game.Core.Components;
+using Unity.Mathematics;
 using Game.Core.Systems;
 using Game.Voxel.PresentationStreams;
 using Unity.Collections;
@@ -24,6 +26,8 @@ namespace Game.Presentation.Audio
         NativeHashMap<ulong, double> lastStart;
         NativeArray<int> counters;
         readonly AudioStats unboundStats = new AudioStats();
+        uint lastShiftSequence;
+        bool hasShiftSequence;
         internal AudioService Service { get; private set; }
         public AudioStats Stats => Service?.Stats ?? unboundStats;
 
@@ -41,7 +45,7 @@ namespace Game.Presentation.Audio
         }
         internal void Bind(AudioService service)
         {
-            Service = service; lastStart.Clear();
+            Service = service; lastStart.Clear(); hasShiftSequence = false;
         }
         protected override void OnUpdate()
         {
@@ -55,7 +59,7 @@ namespace Game.Presentation.Audio
             using (DrainMarker.Auto()) new SfxDrainJob { Queue = queue.Queue, Drained = drained, Counters = counters }.Run();
             stats.EventsDrained = counters[(int)SfxCounter.Drained]; stats.EventsOverHardCap = counters[(int)SfxCounter.OverCap];
             if (Service == null) return;
-            // TODO(AUD-012): shift or stop spatial voices on origin and system changes.
+            ApplyOriginShift();
             double now = UnityEngine.Time.unscaledTimeAsDouble;
             expired.Clear();
             foreach (var pair in lastStart) if (now - pair.Value > 2) expired.Add(pair.Key);
@@ -76,6 +80,24 @@ namespace Game.Presentation.Audio
             stats.CooldownDropped = counters[(int)SfxCounter.CooldownDropped]; stats.CombatSignals = counters[(int)SfxCounter.CombatSignals];
             stats.ActiveSfxVoices = Service.ActiveSfxCount;
             Service.ReportCombatSignals(stats.CombatSignals);
+        }
+        void ApplyOriginShift()
+        {
+            EntityManager.CompleteDependencyBeforeRO<OriginShiftRecord>();
+            if (!SystemAPI.TryGetSingleton<OriginShiftRecord>(out var shift)) return;
+            if (!hasShiftSequence) { hasShiftSequence = true; lastShiftSequence = shift.Sequence; return; }
+            if (shift.Sequence == lastShiftSequence) return;
+            bool clear = shift.StarSystemChanged != 0 || unchecked(shift.Sequence - lastShiftSequence) != 1 ||
+                !math.all(math.isfinite(shift.Delta)) || math.lengthsq(shift.Delta) > 20000f * 20000f;
+            lastShiftSequence = shift.Sequence;
+            if (clear) Service.StopSfxAndLoops(); else Service.ShiftSpatialVoices(shift.Delta);
+        }
+        internal void ClearPending()
+        {
+            CompleteDependency();
+            if (SystemAPI.TryGetSingleton<SfxEventQueue>(out var queue))
+            { queue.Access.CompleteAccess(); queue.Queue.Clear(); }
+            drained.Clear(); candidates.Clear(); groups.Clear(); lastStart.Clear();
         }
         protected override void OnDestroy()
         {

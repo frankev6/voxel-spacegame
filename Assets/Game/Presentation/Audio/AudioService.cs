@@ -112,6 +112,7 @@ namespace Game.Presentation.Audio
                 ApplyVolumes(initialVolumes); OnSceneChanged(default, SceneManager.GetActiveScene());
                 SceneManager.activeSceneChanged += OnSceneChanged;
                 EventBus<SessionReset>.Subscribe(OnSessionReset);
+                EventBus<StarSystemEntered>.Subscribe(OnStarSystemEntered);
             }
             catch { Dispose(); throw; }
         }
@@ -268,6 +269,7 @@ namespace Game.Presentation.Audio
         void OnSessionReset(SessionReset reset)
         {
             if (disposed || musicDirector == null) return;
+            StopSfxAndLoops();
             musicOverride = ContentHash.None; overridePending = clearOverridePending = false; combatSignals = 0;
             musicFading = false; musicA.Stop(); musicB.Stop(); stinger.Stop(); musicA.clip = musicB.clip = null;
             duck = 1; SetMusicVoiceVolumes(0, 0); musicDirector.Reset();
@@ -275,7 +277,32 @@ namespace Game.Presentation.Audio
             var command = musicDirector.Update(SceneContext, 0, false, ContentHash.None, 0, 0);
             if (command.Change) ApplyMusicCommand(command);
             stats.Music = musicDirector.State;
-            // AUD-012 owns the complementary SFX/loop clear; AUD-008 resets music only.
+
+        }
+
+        void OnStarSystemEntered(StarSystemEntered value) => StopSfxAndLoops();
+        internal void StopSfxAndLoops()
+        {
+            if (disposed) return;
+            for (int i = 0; i < sfxVoices.Length; i++)
+            {
+                if (sfxVoices[i] != null) { sfxVoices[i].Stop(); sfxVoices[i].clip = null; }
+                voiceInfo[i] = default;
+            }
+            StopLoopVoices(); // AUD-009 owns envelopes and assignments; retain its pooled sources.
+            drainSystem?.ClearPending(); combatSignals = 0; stats.ActiveSfxVoices = 0;
+        }
+        internal void ShiftSpatialVoices(float3 delta)
+        {
+            if (disposed) return;
+            if (!math.all(math.isfinite(delta))) { StopSfxAndLoops(); return; }
+            Vector3 shift = delta;
+            for (int i = 0; i < sfxVoices.Length; i++)
+                if (voiceInfo[i].Active && sfxVoices[i].spatialBlend > 0) sfxVoices[i].transform.position += shift;
+            for (int i = 0; i < loopVoices.Length; i++)
+                if (loopVoices[i].clip != null && loopVoices[i].spatialBlend > 0) loopVoices[i].transform.position += shift;
+            // Keep same-frame culling in the new frame until LateUpdate copies the camera target.
+            if (listener != null) listener.position += shift;
         }
 
         public void PlayUi(UiSound sound)
@@ -470,6 +497,7 @@ namespace Game.Presentation.Audio
             if (disposed) return; Unbind(boundWorld); disposed = true;
             SceneManager.activeSceneChanged -= OnSceneChanged; AudioListener.pause = false;
             EventBus<SessionReset>.Unsubscribe(OnSessionReset);
+            EventBus<StarSystemEntered>.Unsubscribe(OnStarSystemEntered);
             listenerTarget = null; pause = null;
             if (cueInfo.IsCreated) cueInfo.Dispose(); if (cueSlotByHash.IsCreated) cueSlotByHash.Dispose();
             if (root != null)
