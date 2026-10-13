@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 37 | 5 | 0 | 0 | 49 | 0 | 91 | 3 |
-| M3 | 151 | 7 | 0 | 0 | 22 | 0 | 180 | 12 |
+| M2 | 36 | 6 | 0 | 0 | 49 | 0 | 91 | 2 |
+| M3 | 150 | 8 | 0 | 0 | 22 | 0 | 180 | 11 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 2 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -848,6 +848,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 256 | SPEC-21 Q40–41 / SPEC-23 Q12: targeting ordering and selection defaults. | Normal ShipCommandGroup follows OrderFirst input; AI anchors explicitly follow targeting. Use rounded centimetre distance then entity index, nonnegative sphere-surface cursor distance, documented edge order and complete proxy scan on result overflow. No targeting truncation or tuning. | Tech lead |
 | 257 | SPEC-22 Q20–22: shield hit arithmetic, corner containment and manual toggle retention. | Eighth 300 Energy hit exactly exhausts 3000 HP, so ninth/tenth overflow 300 raw each. Uniformly expand padded ellipsoid by max(1,length(half/radii)) to contain corners. Manual off retains alive-emitter capacity/charge without regen or draw and marks below-quarter charge collapsed; requested-on brownout still loses ungranted capacity. | Tech lead |
 | 258 | SPEC-33 Q20: encounter contract staging and interface completeness. | Preserve exact public contracts plus internal instance/pending DTOs, immutable views and lifecycle metadata. Runtime operations remain explicit task-named shells; only faction event registration/drain wiring is active. ENC-002–014 own behavior and boot integration. | Tech lead |
+| 259 | SPEC-22 Q30: modifier guard, expiry sentinel and stopped gameplay. | Reject nonfinite/nonpositive multipliers, retain uint.MaxValue as until-cancelled, expire before same-tick aggregate and discard pending status channels at gameplay stop. Six required tests; Unity validation pending. | Tech lead |
 
 ## Measurements
 
