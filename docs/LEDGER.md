@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 134 | 7 | 0 | 0 | 39 | 0 | 180 | 7 |
+| M3 | 133 | 7 | 0 | 0 | 40 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -372,8 +372,8 @@
 | ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-009, SPEC-70 | no | todo |  |  |  |  |
 | NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | e39b2d3 | Narrative contracts and precise future-task stubs; 2 required tests; full batch 901 EM / 128 PM, zero failures |
 | NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 67ce3485 | Located lexer/AST/parser; seven focused checks pass; Q305 resolves grammar example |
-| NAR-003 | Type checker, registry, compiler and binder | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-002 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Compiled7894ffe2; six focused checks pass; runtime vocabulary Invoke still pending, task not done |
-| NAR-004 | Condition and expression nodes | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003 | no | todo |  |  |  | partial in NAR-003: serializable primitive node shapes and binding/dependency traversal / evaluation, function dispatch and required tests missing |
+| NAR-003 | Type checker, registry, compiler and binder | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-002 | yes | done | astra (gpt-6) | 2026-10-13 | d3f59c1c | Compiler, registry, binder, graph emission and scoped Invoke; six focused checks pass; runtime nodes NAR-004/005 |
+| NAR-004 | Condition and expression nodes | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003 | yes | todo |  |  |  | partial in NAR-003: serializable primitive node shapes and binding/dependency traversal / evaluation, function dispatch and required tests missing |
 | NAR-005 | Effect nodes and atomic effect lists | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-004 | no | todo |  |  |  | partial in NAR-003: serialized effect shapes, flow flags and binding / execution, preflight, atomic requirements and required tests missing |
 | NAR-006 | Fact catalog and reference resolvers | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Implementation4f205524; clean compile and4 functional checks pass; advisory Build20k fixture still pending actual binder integration |
 | NAR-007 | FactStore | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-006 | no | todo |  |  |  |  |
@@ -383,7 +383,7 @@
 | NAR-011 | LogicContext and LogicWorldAdapter in Game.App | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-005, NAR-010, FND-001, ECO-001, QST-001 | no | todo |  |  |  |  |
 | NAR-012 | World-event bridge | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-011, SYS-001, ENC-001 | no | todo |  |  |  |  |
 | NAR-013 | Narrative validator framework and fact rules | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-009 | no | todo |  |  |  |  |
-| NAR-014 | Legacy converter: reading, mapping tables and logic translation | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, MIG-001 | no | todo |  |  |  |  |
+| NAR-014 | Legacy converter: reading, mapping tables and logic translation | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, MIG-001 | yes | todo |  |  |  |  |
 | NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | no | todo |  |  |  |  |
 | NAR-016 | Legacy converter: quests, triggers, templates and flag assets | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-015 | no | todo |  |  |  |  |
 | NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | no | todo |  |  |  |  |
@@ -1011,6 +1011,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Narrative compiler accepted — astra (gpt-6)
+
+- NAR-003d3f59c1c: vocabulary registry, post-order types/usage/ranges, all diagnostic-code fixtures, suggestions, binding/dependencies, serialized graph emission, source staleness and scoped expression Invoke. Q14→309 explains runtime value representation and preserves command preflight/flow.
+- Clean compile90657; focused78010 six passed. Evidence `Logs/playtest/narrative-compiler/`. No broad suite/performance run.
+- Cross-task files: `Assets/Game/Data/Logic/Nodes/*.cs` contain binding/serialization for NAR-004/005; Evaluate/Apply/CanApply/AddRequirements remain explicit TODOs, with matching ledger partial notes. No claim that narrative gameplay is integrated.
+- Test count: spec-required: 6, extra: 0.
 
 ### 2026-10-13 — Procedural structure builders accepted — astra (gpt-6)
 

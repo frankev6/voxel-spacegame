@@ -1197,11 +1197,11 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 - **Do:** Implement `LogicTypeChecker`, `LogicFunctionRegistry` (every row of §4.7 with params, usage, flow, ranges), `LogicCompiler` (§5.1 steps 4–7 for all three wrappers plus `TryCompileCommand` and `TryCompileExpression`), `LogicBinder`, the wrappers' `Bind`/`CollectDependencies`/`IsStale`, Levenshtein suggestions (distance ≤ 2), and all `NAR-E*` messages of §4.9.
 - **Files:** `Assets/Game/Data/Logic/Compiler/{LogicTypeChecker,LogicCompiler}.cs`; `Assets/Game/Data/Logic/{LogicFunctionRegistry,LogicFunctionInfo,LogicParamInfo,LogicValue,LogicBinder,CompiledCondition,CompiledIntExpr,CompiledEffectList}.cs`; `Assets/Game/Tests/EditMode/Data/Logic/{LogicCompilerTests,LogicTestEnvironment}.cs`
 - **Acceptance criteria:**
-  - [ ] Each `NAR-E001…E022` code has a fixture producing exactly that code.
-  - [ ] `since_accept` outside `QuestObjective`, `roll` outside dialog and `start_combat` outside `DialogCommand` produce `NAR-E008`.
-  - [ ] Recompiling unchanged source produces an equal `sourceHash` and `IsStale == false`; editing one character makes it stale.
-  - [ ] Binding resolves every fact to the slot given by `FactCatalog.SlotOf` and every ref to `IndexOf<T>`.
-  - [ ] `CollectDependencies` of `has_item("resource_fuel",2) and $intro_awake` returns exactly `{Item(fuel index), Fact(intro_awake slot)}`.
+  - [x] Each `NAR-E001…E022` code has a fixture producing exactly that code.
+  - [x] `since_accept` outside `QuestObjective`, `roll` outside dialog and `start_combat` outside `DialogCommand` produce `NAR-E008`.
+  - [x] Recompiling unchanged source produces an equal `sourceHash` and `IsStale == false`; editing one character makes it stale.
+  - [x] Binding resolves every fact to the slot given by `FactCatalog.SlotOf` and every ref to `IndexOf<T>`.
+  - [x] `CollectDependencies` of `has_item("resource_fuel",2) and $intro_awake` returns exactly `{Item(fuel index), Fact(intro_awake slot)}`.
 - **Tests:** `LogicCompilerTests.ErrorCodes_EachFixture`, `.UsageRestrictions`, `.Staleness_TracksSource`, `.Binding_ResolvesSlotsAndIndices`, `.Dependencies_Collected`, `.UnknownFunction_SuggestsNearest`.
 
 ### NAR-004 — Condition and expression nodes

@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **NAR-003 closed:**d3f59c1c scoped invocation complete; compile90657 clean, focused78010 six passed. Evidence `narrative-compiler/`; Q14→309. Ready to FF main, NAR-004 standard now unlocked for next available worker. NAR-006 still needs its advisory Build20k fixture authored (not a measurement gate). Workers AI-015154/ECO-004168/DEV-018138 active. No live validation. Previous turn passed compiler scope and recycled economy worker (progress).
+
 - **Power worker recycled:** ECO-004 claim6c4a3b4b and dispatch complete; explicit actual dependencies recordedSPEC50Q25/ledger308. Compiler scoped checks merged55ca3f70; NAR-003 stays open for Invoke, NAR-006 for Build20k fixture. AI-015153/DEV-018137 continue. No active Unity validation.
 
 - **Compiler checks green, scope still open:** primary7894ffe2 compiles clean58481; six required checks pass12910, evidence `narrative-compiler/`. LogicFunctionInfo.Invoke remains unimplemented and must be finished before NAR-003 closes. Nodes deliberately retain NAR-004/005 runtime TODOs. Power audit found ECO-004 needs NAR-001 interface, not entire narrative runtime; reconciling explicit prerequisites under ADR-0068. Previous turn accepted structures (progress).
