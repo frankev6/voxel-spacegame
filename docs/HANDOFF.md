@@ -14,7 +14,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 | Commit locally only; never push | No `git push` and no remote operations. Merging to local `main` is fine |
 | Use the Unity CLI where possible | `tools/*.sh` and the CLI over manual Editor work ([08-tools.md](08-tools.md)) |
 | Keep the ledger current; record owner decisions verbatim | Quote Frank's words in the ledger log and in the *Answer* column of open questions |
-| No subagents unless Frank allows them | Work in one session |
+| Three reusable separate worker threads authorized 2026-10-13 | GPT-6.1-Sol high, isolated worktrees; lead reviews, fixes and integrates; no subagents. See ADR-0062 and ORCHESTRATION.md |
 | Performance targets are advisory (ADR-0042, owner 2026-10-12) | Build and connect systems, then run the game. Spec numbers never block completion or later phases. At most two initial optimization passes per system/feature across all workers and handoffs; record the remaining gap and move on. See [performance policy](decisions/ADR-0042-advisory-performance-targets.md) |
 | Go wide, review systems later (ADR-0019) | No per-task review gate: tasks are `done` at their Definition of Done; an in-depth system review runs per milestone, before its gate (04-workflow §8) |
 | Give options, not a single proposal | Every decision for Frank comes as 2–4 options with trade-offs, recommended first |
@@ -60,6 +60,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 - **Milestones/owner boundaries:** M0 passed **71/71**; M1 built systems are reviewed, its gameplay exit checks pass, and **107/109 tasks are done**, with DEV-009/012 awaiting later world-location/current-system support. No new owner decision in the latest tasks. Existing review items remain Q6(b), Q6(c), Q7, Q30, Q48, Q57, DATA-012 tuning, ADR-0033, the provisional Fighter starter/legacy flight tuning and CAM-012 close-zoom feel. Use documented defaults. ART-004 remains in review for the 150 m glyph criterion; preserve unmerged `task/ART-007-brick-tools` and its unfinished validator. No new hulls or AI assets.
 
 ## 3. Next
+
+**Active orchestration:** follow [ORCHESTRATION.md](ORCHESTRATION.md) and [ADR-0062](decisions/ADR-0062-three-worker-orchestration.md). Reuse the three named worker threads; keep dispatch state durable. Lead owns Unity validation, integration, reviews and frontier implementation.
 
 **Owner priority:** build playable, integrated slices and demonstrate them in the running game. Performance targets are advisory, with at most two initial optimization passes per system across workers/handoffs. The imported-ship rendering/flight/collision/save-load checkpoint is demonstrated. Continue the main work; preserve the approved environment.
 
