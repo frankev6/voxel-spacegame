@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Content batch validated / lane work dispatched:** QST-0020e064777 compiles clean; generationbd158825 created12 quests/contracts,41 beats,16 clue-family assets. Whole-content compile fails only TRV-003 lane-owner stub. Focused49682 terminal:36 pass/1 QST diagnostic-path matcher failure,11.498s test bodies. ECO-009/TRV-005 done; QST matcher repair and NAR-016 compiler/stability remain. TRV-003 claimed949c0afc and dispatched; TRV-004 active; ENC-0068bd541d5 delivered/reviewed, combat preparing SYS-005 then dependency wait. No Unity operation. NAR-005 preserveda381d1dd. Previous turn authored summed costs (progress).
+
 - **Arrival integrated / worker recycled:** main includes TRV-0056f940373 and converter rerun repair19dea5e0; these remain uncompiled/unaccepted pending QST-002 batch. TRV-004 claimed3ab2e8a3 and dispatched to the same economy worker; ENC-006 and QST-002 continue. No Unity operation. Next generate/recompile real content and run focused acceptance together. Previous turn integrated source (progress).
 
 - **Quest/economy source integrated:** branch task/NAR-016-integration contains f26977f/c0f0c244. Real quest generation, graph compilation and six focused checks remain pending the QST-002 compiler batch; no acceptance claim or active Unity operation. Workers ENC-006222/TRV-005234/QST-002196 are active. Questions337/343 reconciled. Previous turn verified live workers; this turn integrates source.
