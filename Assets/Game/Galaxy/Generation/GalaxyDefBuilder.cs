@@ -90,7 +90,7 @@ namespace Game.Galaxy.Generation
                 galaxy.SkippedProceduralCount = skipped.Value;
                 galaxy.IndexById = new NativeHashMap<uint, int>(math.max(1, output.Length), Allocator.Persistent);
                 for (int i = 0; i < output.Length; i++) galaxy.IndexById.Add(output[i].Id.Value, i);
-                // TODO(GAL-005): generate lanes, adjacency, managed gate specs and galaxy hash.
+                GalaxyLaneBuilder.Build(galaxy, gen);
                 return galaxy;
             }
             catch { galaxy.Dispose(); throw; }
