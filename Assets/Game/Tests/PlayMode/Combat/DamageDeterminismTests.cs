@@ -90,6 +90,10 @@ namespace Game.Tests.PlayMode.Combat
                     Roots[i] = Flight.SpawnSource(Build(), new float3(i * 200,0,0));
                 }
                 Flight.Ready(Roots);
+                // Asynchronous spawn readiness can finish on different ticks. Begin each comparison
+                // at the same absolute clock so collider install buckets and lifetimes have identical inputs.
+                Assert.Less(Flight.Test.TicksRun, 120u);
+                while (Flight.Test.TicksRun < 120) Flight.Tick();
                 for (int i = 0; i < 4; i++) Em.SetComponentData(Roots[i], new PersistentId { Value = (ulong)(100 + i) });
             }
             VoxelStructure Build()
@@ -137,6 +141,10 @@ namespace Game.Tests.PlayMode.Combat
                 using var hulkInfos = hulks.ToComponentDataArray<HulkInfo>(Allocator.Temp);
                 foreach (var info in hulkInfos) split |= info.Cause == HulkCause.Split;
                 Assert.IsTrue(split, "The bridge cut must produce a physical split hulk containing its weapon.");
+                using (var grids = f.Em.CreateEntityQuery(typeof(VoxelGrid), typeof(PersistentId)))
+                using (var roots = grids.ToEntityArray(Allocator.Temp))
+                    foreach (var root in roots)
+                        TestContext.WriteLine($"DMG-014 grid: fps={fps}, workers={workers}, id={f.Em.GetComponentData<PersistentId>(root).Value}, hash={CellStateHasher.ComputeGridHash(f.Em, root):X16}");
                 ulong hash = CellStateHasher.ComputeWorldHash(f.Em);
                 TestContext.WriteLine($"DMG-014: fps={fps}, workers={workers}, ticks=600, hash={hash:X16}");
                 return hash;
