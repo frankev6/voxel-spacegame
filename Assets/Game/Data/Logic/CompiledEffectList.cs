@@ -12,8 +12,47 @@ namespace Game.Data.Logic
         public System.Collections.Generic.IReadOnlyList<string> Source => source;
         public bool HasErrors => hasErrors;
         public bool IsEmpty => effects.Length == 0;
-        public bool CanApplyAll(ILogicContext ctx, EffectRequirements scratch) => throw new System.NotImplementedException("NAR-005");   // §5.4 step 1–3
-        public bool ApplyAll(ILogicContext ctx, EffectRequirements scratch) => throw new System.NotImplementedException("NAR-005");      // §5.4; false = nothing applied
+        public bool CanApplyAll(ILogicContext ctx, EffectRequirements scratch)
+        {
+            scratch.Push();
+            try { return Preflight(ctx, scratch); }
+            finally { scratch.Pop(); }
+        }
+        public bool ApplyAll(ILogicContext ctx, EffectRequirements scratch)
+        {
+            scratch.Push();
+            try
+            {
+                if (!Preflight(ctx, scratch)) return false;
+                foreach (var effect in effects)
+                {
+                    if (effect is Nodes.TakeItemEffect item) item.ApplyPrepared(ctx, scratch);
+                    else if (effect is Nodes.TakeCreditsEffect credits) credits.ApplyPrepared(ctx, scratch);
+                    else effect.Apply(ctx);
+                }
+                return true;
+            }
+            finally { scratch.Pop(); }
+        }
+        bool Preflight(ILogicContext ctx, EffectRequirements scratch)
+        {
+            if (hasErrors)
+            {
+                Game.Core.GameLog.WarnOnce("NAR.Effects." + sourceHash, "Narrative", "Effect list failed to compile; no effects applied.");
+                return false;
+            }
+            foreach (var effect in effects)
+            {
+                effect.AddRequirements(scratch);
+                if (!effect.CanApply(ctx)) return Rejected(ctx);
+            }
+            return scratch.IsSatisfied(ctx) || Rejected(ctx);
+        }
+        static bool Rejected(ILogicContext ctx)
+        {
+            // TODO(NAR-005): route EffectRejected through a Data-owned context trace hook.
+            return false;
+        }
         public bool IsStale => compilerVersion != Compiler.LogicCompiler.Version ||
             sourceHash != Game.Core.StableHash.Hash64(string.Join("\n", source ?? System.Array.Empty<string>()));
         internal void SetCompiled(IEffect[] compiledEffects, bool failed)
@@ -23,7 +62,6 @@ namespace Game.Data.Logic
             sourceHash = Game.Core.StableHash.Hash64(string.Join("\n", source ?? System.Array.Empty<string>()));
             compilerVersion = Compiler.LogicCompiler.Version;
         }
-        // TODO(NAR-005): implement summed requirement checks and atomic effect application.
         public void Bind(LogicBinder binder)
         {
             foreach (var effect in effects) effect?.Bind(binder);
