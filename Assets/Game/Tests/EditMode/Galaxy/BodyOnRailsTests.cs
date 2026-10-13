@@ -40,7 +40,9 @@ namespace Game.Tests.EditMode.Galaxy
             var expected = OrbitMath.Position(new BodySpec { Orbit = orbit.Orbit, ParentOrbit = orbit.ParentOrbit }, time);
             var position = em.GetComponentData<UniversePosition>(entity).Value;
             var transform = em.GetComponentData<LocalTransform>(entity);
-            Assert.AreEqual(expected, position);
+            // The managed oracle and Burst's transcendental arithmetic can differ in their last bits.
+            // Ten nanometres is still far tighter than the specified 1 mm local-position tolerance.
+            Assert.That(math.distance(expected, position), Is.LessThanOrEqualTo(1e-8));
             Assert.That(math.distance((float3)(expected - origin), transform.Position), Is.LessThanOrEqualTo(.001f));
             Assert.AreEqual(Rotation, transform.Rotation); Assert.AreEqual(2, transform.Scale);
         }
