@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 36 | 6 | 0 | 0 | 49 | 0 | 91 | 2 |
-| M3 | 150 | 8 | 0 | 0 | 22 | 0 | 180 | 11 |
+| M3 | 149 | 9 | 0 | 0 | 22 | 0 | 180 | 10 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 2 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -418,7 +418,7 @@
 | ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | no | todo |  |  |  |  |
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, SPEC-13, SPEC-31, SPEC-12 | no | todo |  |  |  |  |
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
-| ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | no | todo |  |  |  |  |
+| ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | no | todo |  |  |  | partial in ECO-002: canonical resource_scrap generation prepared / execution and remaining narrative, loot and merchant content pending |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
 | EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable power worker; extend canonical HUD-001 placeholders, lead owns central docs/Unity |
 | EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | no | todo |  |  |  |  |
@@ -849,6 +849,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 257 | SPEC-22 Q20–22: shield hit arithmetic, corner containment and manual toggle retention. | Eighth 300 Energy hit exactly exhausts 3000 HP, so ninth/tenth overflow 300 raw each. Uniformly expand padded ellipsoid by max(1,length(half/radii)) to contain corners. Manual off retains alive-emitter capacity/charge without regen or draw and marks below-quarter charge collapsed; requested-on brownout still loses ungranted capacity. | Tech lead |
 | 258 | SPEC-33 Q20: encounter contract staging and interface completeness. | Preserve exact public contracts plus internal instance/pending DTOs, immutable views and lifecycle metadata. Runtime operations remain explicit task-named shells; only faction event registration/drain wiring is active. ENC-002–014 own behavior and boot integration. | Tech lead |
 | 259 | SPEC-22 Q30: modifier guard, expiry sentinel and stopped gameplay. | Reject nonfinite/nonpositive multipliers, retain uint.MaxValue as until-cancelled, expire before same-tick aggregate and discard pending status channels at gameplay stop. Six required tests; Unity validation pending. | Tech lead |
+| 260 | SPEC-22 Q40–42: power balance adapters and canonical small shield. | Internal shared measurement serves Editor and boot, disposing temporary blueprint ownership. Use exact fixed R1/R2 rules with infinite recharge without surplus. Protected generation applies 3000/120/4/8 shield values and preserves GUID/grants; sixth reference case adds one real shield to a Fighter clone. | Tech lead |
+| 261 | SPEC-50 Q20–22: economy config prerequisites and validation defaults. | Bring forward only canonical resource_scrap for ECO-002 config; preserve strict ECO-E005 and existing assets/GUIDs. Remaining ECO-009 content stays open. Validate exact local fields and database merchant ownership without changing defaults or getters. | Tech lead |
 
 ## Measurements
 
