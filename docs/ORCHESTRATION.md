@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | HUD-001 | implementing; WPN-017 delivered 5354eff, integration pending | WPN-017, then ready weapon/harness tasks |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | PHY-022 | implementing independent task while PWR-001 validates | PWR-002, ABL-001 after integration |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | PWR-002 | implementing; PHY-022 delivered 1a9e98a pending validation | PWR-002, ABL-001 after integration |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | UI-008 | implementing; CAM-008 delivered e67313b, integration pending | CAM-008, audio content after AUD-006 |
 
 ## Dispatch procedure
@@ -18,10 +18,6 @@ Heartbeat: `spaceship-implementation-coordinator`, PAUSED fallback (previously e
 
 Current lead priority: integrate PHY-014, then claim DMG-011 and DMG-012. Preserve Frank's running World until validation requires stopping it. Existing QualitySettings serialization delta is unrelated and must stay excluded.
 
-Batch 1: PHY-014 `094f430`, PWR-001 `eeed571`, MIG-011 `ca37e33` integrated. Lead fixed audio test fixture assembly dependency; compile passes. Generating audio assets before full suites. Evidence: `Logs/playtest/orchestration-batch1/`. Editor was already closed at validation start.
+Batch 1 complete: PHY-014 `094f430`, PWR-001 `eeed571`, MIG-011 `ca37e33` plus generated assets `8669cc7`. Compile zero CS warnings; EditMode 861/0/1; PlayMode 121/0/53. Session 92809 completed exit 0. Evidence `Logs/playtest/orchestration-batch1/`. Editor closed; QualitySettings original delta preserved.
 
-Validation in progress: combined `tools/test.sh editmode && tools/test.sh playmode`, exec session `92809`, started 2026-10-13 ~02:04 local. Do not launch another Unity or edit primary source until it finishes. Compile passed with zero warning CS; migration RunCli exited 0 and generated 20 cue assets/database/manifest/report (currently uncommitted, review and commit after tests). Preserve QualitySettings backup at `Logs/playtest/orchestration-batch1/QualitySettings.before.asset`. Next continuation: inspect process/results, archive XML, finish batch closeout if green; otherwise repair real failures, then dispatch PWR-002 and claim DMG-011.
-
-2026-10-13 02:04 check: EditMode passed 861/0/1; PlayMode still active in session 92809. Power worker completed PWR-002 preparation and is reassigned ready PHY-022 (mass restoration), because PWR-002 prerequisite validation is pending. No primary source mutations during tests.
-
-Next batch deliveries: WPN-017 `5354eff` (SPEC-21 Q13 needs ledger mirror); CAM-008 `e67313b` (lead must wire FxFrameReader into Boot, SPEC-62 Q16 needs ledger mirror). Keep pending until session 92809 ends; no source integration during active Unity. PHY-022 remains active.
+Batch 2: WPN-017 integrated `ec9a6f1`; CAM-008 integrated `9d59a62` with lead Boot reader binding. PHY-022 delivered `1a9e98a` for review/integration. HUD-001 and UI-008 workers active. PWR-002 now claimed/dispatched after validated PWR-001; DMG-011 claimed for lead implementation. No batch-2 validation started yet.

@@ -162,7 +162,8 @@ namespace Game.App.Boot
             // 11. Camera (CAM-004/005), with context-gated input.
             Camera = Push(new CameraRigService(config.CameraConfig, root.Find("CameraRoot") ?? root, new InputCameraInput(Input)));
             Register(Camera);
-            world.GetExistingSystemManaged<CameraTargetSyncSystem>().Bind(Camera, null); // CAM-008 supplies the FX reader.
+            world.GetExistingSystemManaged<CameraTargetSyncSystem>().Bind(Camera,
+                new FxFrameReader(world.GetExistingSystemManaged<FxUploadSystem>()));
             Audio.SetListenerTarget(Camera.ListenerPivot);
             Session.SetThumbnailCamera(Camera.Camera);
             Flow.RegisterReady(new CameraSceneHook(Camera));

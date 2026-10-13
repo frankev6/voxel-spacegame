@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 62 | 2 | 0 | 0 | 27 | 0 | 91 | 8 |
+| M2 | 60 | 4 | 0 | 0 | 27 | 0 | 91 | 6 |
 | M3 | 175 | 3 | 0 | 0 | 2 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -229,7 +229,7 @@
 | DMG-008 | Brick connectivity summaries | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | done | astra (gpt-6) | 2026-10-12 | 36e838d | Scanline brick flood, instance unions, touched checks and deterministic warm-up; 1000 reference masks; three required tests |
 | DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | yes | done | astra (gpt-6) | 2026-10-12 | 1cf796e | Parallel hybrid race, canonical masks, retained seeds and forced retries; 300 reference structures; live Space cut detached 205 cells |
 | DMG-010 | SplitSystem: plan, particle tier, deferred detach and debris FX | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-009, VFX-001, AUD-001 | yes | done | astra (gpt-6) | 2026-10-12 | e3045a8 | Canonical tier/budget planning, next-tick particles, complete deferred reseeding, debris/SFX events; four required tests; existing hulk path retained |
-| DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | yes | todo |  |  |  | partial in FND-020: hulk-body scaffolding; DMG-010 classifies and defers chunks / chunk pool, colliders, lifetime and required tests |
+| DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | partial in FND-020: hulk-body scaffolding; DMG-010 classifies and defers chunks / chunk pool, colliders, lifetime and required tests |
 | DMG-012 | Hulk grids from splits | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-011, FND-001, SPEC-12 | no | todo |  |  |  | partial in FND-020: hulk cells/instances, bodies and functional transfer / remaining lifecycle, integration and required tests |
 | DMG-013 | ShipDeathSystem, despawn dissolve and the destroy pass | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-012 | no | todo |  |  |  | partial in FND-020: initial core-loss and destroyed-instance cleanup / despawn dissolve, final death presentation and required tests |
 | DMG-014 | Determinism hash and frame-rate determinism tests | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-013, TST-001 | no | todo |  |  |  | partial in DMG-006: CellStateHasher / integrated 600-tick frame-rate and worker-count scenarios |
@@ -255,7 +255,7 @@
 | WPN-017 | ShipDestroyed payload and bridge | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, DMG-001, CORE-001 | yes | in-progress | combat (gpt-6.1-sol) | 2026-10-13 |  | Claimed centrally under ADR-0062; worker implementation, lead validation. |
 | WPN-018 | Weapon power demand and weapon stats | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, WPN-007, PWR-001 | no | todo |  |  |  |  |
 | PWR-001 | Public contract types | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | CORE-001, DATA-001, VOX-001, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | eeed571 | Canonical declarations; three required tests; Q202 deferred allocator ordering. Full batch green. |
-| PWR-002 | Shield maths | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001 | yes | todo |  |  |  |  |
+| PWR-002 | Shield maths | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001 | yes | in-progress | power (gpt-6.1-sol) | 2026-10-13 |  |  |
 | PWR-003 | Tuning definition, baker and spawn helper | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001, SPEC-04 | no | todo |  |  |  |  |
 | PWR-004 | Registration and `PowerInitSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-003, WPN-001, VOX-001, SPEC-10 | no | todo |  |  |  |  |
 | PWR-005 | `PowerAllocationSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-004, ABL-001 | no | todo |  |  |  |  |
@@ -783,6 +783,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 201 | 2026-10-13 | SPEC-01 Q29 / FND-021 | Owner wants automatic World test station with hull crossing the firing plane | Production offset Y=-2 m and reversible AutoSpawnInWorld setting | Tech lead | Resolved ADR-0061; one scene-owned station after player readiness; range command idempotent |
 | 202 | 2026-10-13 | SPEC-22 Q10 / PWR-001 | PowerDemandGroup references allocator before PWR-005 exists | Defer redundant UpdateBefore attribute; retain PWR-005 TODO and reciprocal ordering requirement | Tech lead | Resolved; no allocator stub or changed runtime ordering |
+| 203 | 2026-10-13 | SPEC-21 Q13 / WPN-017 | Presentation ordering and stale HulkInfo field | Existing OrderLast drain orders bridge without upward reference; use FormerKind and complete attribution dependencies | Tech lead | Resolved; no assembly or effective ordering change |
+| 204 | 2026-10-13 | SPEC-62 Q16 / CAM-008 | Camera FX reader missing; generic effect names differ | Borrow current-frame completed uploader drain; map actual hit/explosion/ram kinds and bind at boot | Tech lead | Resolved; synchronous reader, no second queue consumer |
 
 ## Measurements
 
