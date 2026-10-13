@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Fleet acceptance authored:**70eb3dc3 adds exactly three required FleetTests using shared real steering/physics fixture (spec-required:3, extra:0). Formation tracking, leader target with sphere-query count, destroyed/hulk promotion. Q25 mirroredQ302 resolves general40m arrival versus15m formation envelope with member-only5m arrival. Compile99129 active; focused fleet/decision/steering checks next. No acceptance claim. Previous turn implemented ordered member thinking (progress).
+
 - **Fleet decisions implemented:** AI-014 now schedules leaders/lone ships, a target/state snapshot, then members. Members retain abilities and friendly-fire segment checks while skipping sphere target search/avoidance. Null-Leader promoted roots think normally. Exactly three required fleet tests and compile remain next; no validation claim. Avoid overlapping AiThinkJob changes with AI-010 worker (notified).
 
 - **Lead AI-014 started:** claimfad43647 on main; primary `task/AI-014-fleet-coordination` implements scheduled FleetSystem goals and deterministic leader replacement. SPEC23Q24 mirroredQ301 (Q23 reserved by turret worker). Member decision shortcut and exactly three required checks remain; no compile/acceptance claim. Existing workers last verified active at combat137, presentation121, power145. Previous turn closed repair/inventory and dispatched merchants (progress).
