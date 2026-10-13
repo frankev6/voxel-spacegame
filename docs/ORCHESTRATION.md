@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **HUD snapshot wired (unvalidated):** HUD-008 now creates its singleton/buffer in OnCreate, reads player/target/ability/interaction/system values, schedules weapon and bounded radar jobs, and publishes snapshots with dependencies retained. Required nine checks and compile remain; route-waypoint bridge remains explicit HUD-009 TODO. No test launched. Previous turn implemented gather jobs (progress).
+
 - **HUD-008 implementation:** claimed0d75698a; primary task/HUD-008-combat-snapshot now adds weapon-group gathering plus bounded nearest64 radar gathering/sorting jobs. Snapshot system, scheduling and nine required tests remain; no compile/test claim. Worker snapshots NAR-004160/ECO-004172/NAR-009144 active. Previous turn probed fleet visual limitation and claimed HUD (progress).
 
 - **Fleet visual evidence limitation:** BeginVisual ran real AI/physics with firing/motion and transformed slot readbacks; saved `AI015/visual-readback.txt` and `visual-final.txt`. CLI Scene screenshot `formation.png` is blank, so visual acceptance is NOT proven. EndVisual completed and disposed the fixture. No benchmark run. Preserve AI-015 in-progress and integrate compiled checkpoint; next lead HUD-008 for actual combat HUD data. Worker snapshots159/171/143 active. Previous turn integrated/repaired fleet compile (progress).
