@@ -65,7 +65,6 @@ namespace Game.Voxel.PhysicsBody
             using (AddRestored.Auto())
                 if (SystemAPI.TryGetSingleton<DamageStreams>(out var restoredStreams))
                 {
-                    // TODO(DMG-019): the resolver restore pass must populate these canonical views; they are empty until then.
                     var view = restoredStreams.BeginRestoredRead(ref state);
                     add.Cells = view.Cells; add.Ranges = view.Grids; add.Blocks = blocks; add.Changed = changed;
                     state.Dependency = add.Schedule(state.Dependency); restoredStreams.EndRestoredRead(state.Dependency);
