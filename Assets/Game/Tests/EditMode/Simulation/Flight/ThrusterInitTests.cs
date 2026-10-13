@@ -103,7 +103,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
                     Assert.AreEqual(1, requests.Length);
                     Assert.AreEqual(BlockModuleId.Thruster, requests[0].Module);
                     Assert.AreEqual(PowerTuning.Defaults.PriorityThruster, requests[0].Priority);
-                    Assert.IsTrue(content.Service.BlockModules.Value.TryGet(BlockModuleId.Thruster, instance.Block, out ThrusterParams row));
+                    Assert.IsTrue(world.GetSingleton<BlockModulesRef>().Value.Value.TryGet(BlockModuleId.Thruster, instance.Block, out ThrusterParams row));
                     Assert.AreEqual(row.PowerDraw, requests[0].Draw);
                     Assert.Greater(EM.GetComponentData<ThrusterVisual>(instance.Functional).NozzleRadius, 0);
                 }
