@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Galaxy session integrated:** cc7c0a1e/ad0f5195 accepted GAL-008 and merged locally; actual ticker/state/service/GLXY registered, lifecycle check passes. GAL-011 claimed19bb5361 and dispatched to the existing economy worker. NAR-016 and QST-002 continue. No active Unity. Existing quest-validator boot defect still prevents live acceptance; PLOC/streaming remain explicit SYS work. Previous turn accepted persistence (progress).
+
 - **Galaxy persistence accepted:**54ebbf3d plus fixture d481a047; clean compile and four required cases pass across focused run/single log-expectation repair (under0.4s total test bodies). Evidence Logs/playtest/galaxy-save/. No Unity run active. Next resume GAL-008 session binding with actual GLXY, identify remaining PLOC/loader dependencies. NAR-016 active215; QST-002 active190; GAL-011 worker prepared and waiting227.
 
 - **Galaxy persistence authored:** GAL-010 claimed6a0f11b8; branch task/GAL-010-galaxy-save at54ebbf3d implements GLXY capture/restore, deferred structures and bounded failure cleanup. Four required tests and version1 fixture pending; uncompiled/unaccepted. No Unity run. NAR-016 active213, QST-002 active189, economy worker prepared GAL-011 and waits for service dependency227. Previous turn service validation/boot diagnosis was progress.

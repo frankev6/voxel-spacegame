@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-016 | claimed; NAR-015 accepted, implement quests/triggers/clues | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-009 | ECO delivered; preparing GAL-011, waiting on GAL-008 acceptance226 | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | GAL-011 | claimed19bb5361; dispatched galaxy map implementation; ECO-009 delivered separately | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-002 | claimed ccef7c0d; implement definitions/validators to repair real boot | HUD-003/006/007 once ready |
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Galaxy session integrated:** cc7c0a1e/ad0f5195 accepted GAL-008 and merged locally; actual ticker/state/service/GLXY registered, lifecycle check passes. GAL-011 claimed19bb5361 and dispatched to the existing economy worker. NAR-016 and QST-002 continue. No active Unity. Existing quest-validator boot defect still prevents live acceptance; PLOC/streaming remain explicit SYS work. Previous turn accepted persistence (progress).
 
 - **Galaxy persistence accepted:**54ebbf3d plus fixture d481a047; clean compile and four required cases pass across focused run/single log-expectation repair (under0.4s total test bodies). Evidence Logs/playtest/galaxy-save/. No Unity run active. Next resume GAL-008 session binding with actual GLXY, identify remaining PLOC/loader dependencies. NAR-016 active215; QST-002 active190; GAL-011 worker prepared and waiting227.
 
