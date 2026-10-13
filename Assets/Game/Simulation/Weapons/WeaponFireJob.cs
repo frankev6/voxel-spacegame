@@ -1,5 +1,6 @@
 using Game.Core;
 using Game.Core.Components;
+using Game.Data.Components;
 using Game.Data.Combat;
 using Game.Data.Definitions;
 using Game.Simulation.Commands;

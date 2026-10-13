@@ -1,4 +1,5 @@
 using Game.Core.Components;
+using Game.Data.Components;
 using Game.Core.Systems;
 using Game.Data.Streams;
 using Game.Simulation.Commands;
