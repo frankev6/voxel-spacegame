@@ -19,7 +19,8 @@ namespace Game.Economy
             Check(merchantBuyFactor, nameof(merchantBuyFactor)); Check(slope, nameof(slope));
             float factor = 1 + slope * Math.Clamp(relation, -50, 50);
             if (basePrice <= 0 || merchantBuyFactor == 0 || factor <= 0) return 0;
-            return Bound(Math.Floor(basePrice * merchantBuyFactor * factor), 0);
+            // Floor in the authored float domain before widening; double argument promotion can turn 45 into 44.999998.
+            return Bound(MathF.Floor(basePrice * merchantBuyFactor * factor), 0);
         }
         static int Bound(double price, int minimum) => double.IsNaN(price) || price >= int.MaxValue ? int.MaxValue : price <= minimum ? minimum : (int)price;
         static void Check(float value, string parameter)
