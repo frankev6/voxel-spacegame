@@ -16,7 +16,7 @@ namespace Game.Tests.PlayMode.UI
         VisualElement Tooltip => context.UI.GetLayer(UILayer.Tooltip).Q<VisualElement>("tooltip");
         [UnitySetUp] public IEnumerator SetUp()
         {
-            context = new UIInputTestContext(0); AddTarget(); yield return null;
+            fills = 0; context = new UIInputTestContext(0); AddTarget(); yield return null;
         }
         [UnityTearDown] public IEnumerator TearDown() { context.Dispose(); yield return null; }
         void AddTarget()
@@ -41,8 +41,9 @@ namespace Game.Tests.PlayMode.UI
         { using var evt = PointerMoveEvent.GetPooled(PointerEvent(position)); evt.target = target; target.SendEvent(evt); }
         IEnumerator AwaitVisible()
         {
-            for (int frame = 0; frame < 1000 && !context.UI.Tooltips.IsVisible; frame++) yield return null;
-            Assert.IsTrue(context.UI.Tooltips.IsVisible, "Tooltip scheduler did not complete within 1000 frames");
+            double deadline = Time.realtimeSinceStartupAsDouble + 5;
+            while (!context.UI.Tooltips.IsVisible && Time.realtimeSinceStartupAsDouble < deadline) yield return null;
+            Assert.IsTrue(context.UI.Tooltips.IsVisible, "Tooltip scheduler did not complete within 5 seconds");
             // Position is recomputed after the displayed tooltip receives its actual layout.
             yield return null; yield return null;
             Assert.Greater(Tooltip.worldBound.width, 0); Assert.Greater(Tooltip.worldBound.height, 0);
@@ -63,7 +64,8 @@ namespace Game.Tests.PlayMode.UI
             context.Dispose(); context = new UIInputTestContext(); AddTarget(); yield return null;
             double started = Time.realtimeSinceStartupAsDouble; Enter(new Vector2(400, 200));
             Assert.IsFalse(context.UI.Tooltips.IsVisible); Assert.AreEqual(0, fills);
-            for (int frame = 0; frame < 1000 && !context.UI.Tooltips.IsVisible; frame++) yield return null;
+            double deadline = Time.realtimeSinceStartupAsDouble + 5;
+            while (!context.UI.Tooltips.IsVisible && Time.realtimeSinceStartupAsDouble < deadline) yield return null;
             Assert.IsTrue(context.UI.Tooltips.IsVisible);
             Assert.GreaterOrEqual(Time.realtimeSinceStartupAsDouble - started, .325, "The default 350 ms hover delay must not be skipped (25 ms scheduler tolerance).");
             yield return null; yield return null;
