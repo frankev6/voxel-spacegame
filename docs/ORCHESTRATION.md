@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- Full session **64514 exited 1**: EditMode 1051/0/1, PlayMode **145/1/53**. SceneFlow pause test exposed an unsafe main-thread OriginShiftRecord read while DecideJob writes. Fix `5bf0a47` moves both projectile consumers to cached read-only lookups inside dependent jobs; presentation readers explicitly complete their narrow read dependencies. Compile + SceneFlow PlayMode repair session **95528** active. Evidence `origin-combat/playmode-initial.xml`; no full-green claim yet. Isolated shield review `f1a87af` clears pending hits on gameplay stop, `055cfd5` aligns spec algorithm with already-resolved Q21–22.
+
 - ENC-001 delivered `23b336f`, reviewed contract/event/test staging and integrated into isolated shield batch as `101ff7b`; spec-required: 2, extra: 0, Unity validation pending. Same worker immediately recycled to PWR-008 from main claim `190328f`. Combat PWR-010 and presentation ECO-002 remain actively implementing. Session 64514 re-polled live; primary runtime untouched.
 
 - **Current:** main `fab92fc` closes PWR-005/006, SYS-010, AI-013, ECO-001 and TRV-007 with compile clean, full **1027/0/1 EditMode, 145/0/53 PlayMode**, session 57187 exit 0. Evidence `Logs/playtest/power-batch/`. Main `c4ea821` claims the three current worker tasks. Prior validation process is terminal; backup QualitySettings restored and test artifacts removed.
