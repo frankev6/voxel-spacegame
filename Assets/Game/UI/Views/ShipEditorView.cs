@@ -24,6 +24,7 @@ namespace Game.UI.Views
         public override bool HidesHud => false;
         public override bool IsRoot => true;
         // TODO(HUD-018): wire this screen's authored elements and behavior.
-        protected override void OnBuild() { }
+        protected override void OnBuild() { Root.dataSource = viewModel; }
+        public override bool OnBack() => commands.OnBackPressed();
     }
 }

@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../../Theme/screens/pause.uss" />
+    <ui:VisualElement class="modal" picking-mode="Position">
+        <ui:VisualElement class="modal__scrim" />
+        <ui:VisualElement class="modal__window panel panel--modal pause-window stack-m">
+            <ui:Label text="Paused" class="modal__title text-display text-xl" />
+            <ui:Button name="pause-resume" text="Resume" class="btn btn--primary" />
+            <ui:Button name="pause-save" text="Save" class="btn btn--secondary" />
+            <ui:Label name="pause-save-blocked" class="text-muted text-xs">
+                <Bindings><ui:DataBinding property="text" data-source-path="SaveBlockedReason" binding-mode="ToTarget" /></Bindings>
+            </ui:Label>
+            <ui:Button name="pause-load" text="Load" class="btn btn--secondary" />
+            <ui:Button name="pause-settings" text="Settings" class="btn btn--secondary" />
+            <ui:Button name="pause-main-menu" text="Main menu" class="btn btn--secondary" />
+            <ui:Button name="pause-quit" text="Quit" class="btn btn--ghost" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

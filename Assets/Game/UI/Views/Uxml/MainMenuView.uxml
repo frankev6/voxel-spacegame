@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../../Theme/screens/main-menu.uss" />
+    <ui:VisualElement class="main-menu-screen grow" picking-mode="Position">
+        <ui:VisualElement class="main-menu-column stack-m">
+            <ui:Label text="Spaceship" class="text-display text-xxl" />
+            <ui:Button name="main-menu-continue" text="Continue" class="btn btn--primary btn--wide" />
+            <ui:Label name="main-menu-continue-subtitle" class="text-muted text-xs">
+                <Bindings><ui:DataBinding property="text" data-source-path="ContinueSubtitle" binding-mode="ToTarget" /></Bindings>
+            </ui:Label>
+            <ui:Button name="main-menu-new-game" text="New game" class="btn btn--secondary btn--wide" />
+            <ui:Button name="main-menu-load" text="Load game" class="btn btn--secondary btn--wide" />
+            <ui:Button name="main-menu-lab" text="Blueprint lab" class="btn btn--secondary btn--wide" />
+            <ui:Button name="main-menu-settings" text="Settings" class="btn btn--secondary btn--wide" />
+            <ui:Button name="main-menu-quit" text="Quit" class="btn btn--ghost btn--wide" />
+        </ui:VisualElement>
+        <ui:Label name="main-menu-version" class="main-menu-version text-muted text-xs">
+            <Bindings><ui:DataBinding property="text" data-source-path="VersionText" binding-mode="ToTarget" /></Bindings>
+        </ui:Label>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,2 @@
+/* SPEC-61 pause region. */
+.pause-window { width: 420px; max-width: 90%; max-height: 90%; }

@@ -35,6 +35,12 @@ MonoBehaviour:
   - Key: loading
     Uxml: {fileID: 9197481963319205126, guid: e1c2117e80634546a8450effb5ee4900, type: 3}
     Prewarm: 1
+  - Key: main-menu
+    Uxml: {fileID: 9197481963319205126, guid: be159fb47780490b85b28a2d000197ad, type: 3}
+    Prewarm: 0
+  - Key: pause
+    Uxml: {fileID: 9197481963319205126, guid: 605fc26a79d5494d92b2bb0b65d87c93, type: 3}
+    Prewarm: 1
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32
