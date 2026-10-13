@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **TRV-003 / NAR-005 accepted:** TRV-003c716202e fixes namespace qualification; compile71665 exits0 with zero CS warnings. Focused27074 terminal0:13 pass/0 fail in0.394s test execution. No active Unity. Includes8 lane and5 effect cases. Next actual content recompile/stability and world-loader integration. Presentation bounded review active207; combat/economy dependency waits.
+
 - **Lane source integrated / focused batch accepted:** ENC-006, TRV-004 and QST-002 done from clean compile and focused34715 exit0 (25 pass,0.514s test bodies). TRV-0037eef333 and NAR-005 continuation setter f758c1e3 await next compatible validation; actual content recompile/stability comes next. Presentation reviewing lane delivery; combat waits SYS-004, economy waits ready standard work. No Unity active. Details and evidence in ledger latest log.
 
 - **Spending/list preflight authored:** NAR-005f88796f7/82b85021/0bf6d947 adds numeric routes, frozen expression costs, nested scratch and whole-list checks before Apply. Q350 records unchanged-public-API interpretation. Merchant continuation, rejection tracing and five cases remain; uncompiled/unaccepted, no Unity operation. TRV-004 review and TRV-003 continue; SYS-005 waits for SYS-004 acceptance. Previous turn added guarded facts/rewards (progress).

@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 100 | 11 | 0 | 0 | 69 | 0 | 180 | 7 |
+| M3 | 100 | 9 | 0 | 0 | 71 | 0 | 180 | 7 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -348,7 +348,7 @@
 | SYS-014 | World gates: streaming performance and soak | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-007, SYS-013, TST-001 | no | todo |  |  |  |  |
 | TRV-001 | Public contract types | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, FLT-001, NAR-001, AUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a68c988 | Canonical travel contracts and staged watcher API; 2 required tests; runtime travel remains later tasks |
 | TRV-002 | Travel config definition and validator | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-04, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 5a436d86 | 19 required checks pass; real shipped travel content zero errors, GAL-012 gates32m satisfy geometry |
-| TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, GAL-008, NAR-003, NAR-004, NAR-006, NAR-020 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  |  |
+| TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, GAL-008, NAR-003, NAR-004, NAR-006, NAR-020 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c716202e | Lane watchers, fuel, revision and authored compile/bind; 8 required cases pass. Execution stays TRV-006. |
 | TRV-004 | Route planner | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-005, GAL-007 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c39d6148 | Deterministic Burst route search and reusable caller-populated scratch; 5 functional cases pass; advisory perf unrun. |
 | TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-002, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 6f940373 | Analytic jump/cruise arrival; five required functional checks pass; Perf_512Bodies authored, measurement deferred |
 | TRV-006 | TravelService jump timeline | [SPEC-32](specs/SPEC-32-travel.md) | M3 | frontier | TRV-003, TRV-005, TRV-007, SPEC-31, SPEC-30, FND-001 | no | todo |  |  |  |  |
@@ -374,7 +374,7 @@
 | NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 67ce3485 | Located lexer/AST/parser; seven focused checks pass; Q305 resolves grammar example |
 | NAR-003 | Type checker, registry, compiler and binder | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-002 | yes | done | astra (gpt-6) | 2026-10-13 | d3f59c1c | Compiler, registry, binder, graph emission and scoped Invoke; six focused checks pass; runtime nodes NAR-004/005 |
 | NAR-004 | Condition and expression nodes | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 66fad93a | Bound condition/expression evaluation; clean compile and five required checks pass; effects remain NAR-005 |
-| NAR-005 | Effect nodes and atomic effect lists | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-004 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | partial in NAR-003: serialized effect shapes, flow flags and binding / execution, preflight, atomic requirements and required tests missing |
+| NAR-005 | Effect nodes and atomic effect lists | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-004 | yes | done | astra (gpt-6) | 2026-10-13 | f758c1e3 | All effect routes, summed/frozen costs, flow, loot salt and optional host hooks; 5 required cases pass. App/dialog hooks remain NAR-011/DLG-006. |
 | NAR-006 | Fact catalog and reference resolvers | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 309a55c1 | Fact catalog/resolvers;4 functional checks pass, Build20k fixture authored and measurement deferred ADR-0070 |
 | NAR-007 | FactStore | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-006 | yes | done | astra (gpt-6) | 2026-10-13 | 18906e47 | Dense facts, deferred changes, orphan/alias restore and trace; seven functional checks pass, two advisory fixtures authored/unrun |
 | NAR-008 | FACT save participant | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | 6a0c3c47 | Atomic versioned FACT payload; five functional checks pass, Capture5k measurement authored/unrun |
@@ -1058,6 +1058,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — TRV-003 / NAR-005 accepted — astra (gpt-6)
+
+- Integrated lane delivery7eef333; fixed two namespace-shadowed Services.TryGet references in c716202e. Compile71665 terminal0, zero CS warnings. Focused27074 terminal0:13 pass,0 fail,0.394s test execution; startup/shutdown additional. Evidence Logs/playtest/lane-access/.
+- TRV-003 done: spec-required: 8, extra: 0. NAR-005f758c1e3 done: spec-required: 5, extra: 0. Tests were one compatible focused batch after source changes, no full/perf reruns.
+- Production narrative/dialog context wiring remains NAR-011/DLG-006. Travel execution remains TRV-006; actual content recompile/stability and world-loader integration next. No active Unity. Presentation bounded source review active207; remaining workers have genuine dependency waits.
 
 ### 2026-10-13 — Route/composition/quest batch accepted; lane source integrated — astra (gpt-6)
 
