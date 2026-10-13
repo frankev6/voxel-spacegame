@@ -51,8 +51,9 @@ namespace Game.Galaxy.Travel
                     if (!visible || (IgnoreLocks == 0 && lane.GateIndex != 0 && GateOpen[lane.GateIndex - 1] == 0)) continue;
                     double nd = Dist[u] + lane.LengthLy; int nh = Hops[u] + 1;
                     bool tied = math.abs(nd - Dist[v]) <= 1e-9;
-                    if (!(nd < Dist[v] - 1e-9 || (tied && (nh < Hops[v] ||
-                        (nh == Hops[v] && (PrevSystem[v] < 0 || system.Id.Value < Systems[PrevSystem[v]].Id.Value))))) continue;
+                    bool better = nd < Dist[v] - 1e-9 || tied && (nh < Hops[v] ||
+                        nh == Hops[v] && (PrevSystem[v] < 0 || system.Id.Value < Systems[PrevSystem[v]].Id.Value));
+                    if (!better) continue;
                     Dist[v] = nd; Hops[v] = nh; PrevLane[v] = laneIndex; PrevSystem[v] = u;
                     Push(new RouteHeapEntry { Dist = nd, Hops = nh, Id = Systems[v].Id.Value, Index = v });
                 }
