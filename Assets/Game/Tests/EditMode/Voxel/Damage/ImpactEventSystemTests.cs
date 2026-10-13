@@ -36,7 +36,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
     }
     public unsafe sealed class ImpactEventSystemTests
     {
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             public readonly EcsTestWorld Test;
             public readonly TestGridFactory Grids;

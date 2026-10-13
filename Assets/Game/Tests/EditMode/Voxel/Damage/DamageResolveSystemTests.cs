@@ -16,7 +16,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
 {
     public unsafe sealed class DamageResolveSystemTests
     {
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             public readonly TestGridFactory Grid = new TestGridFactory();
             public readonly SystemHandle Owner, Resolver;
