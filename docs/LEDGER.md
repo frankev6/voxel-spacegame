@@ -1040,6 +1040,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — GAL-008 queries and live changes checkpoint — astra (gpt-6)
+
+- 7b11b7fa implements authored system/body lookup (including parent-slot moon identities), names/location keys, SimClock-based start placement, player universe-position capture, and direct cached replacement/story/interaction/destruction patches with one sink notification per effective command. Shared story append logic avoids diverging regeneration/live behavior. Q335 mirrors SPEC30Q33 time-source resolution.
+- Six required service cases authored; production session/composition/player integration and compile/focused validation remain. Test count: spec-required: 6 pending, extra: 0. No Unity run on incomplete batch. FND-012d440434e delivered with six direct-update checks; bounded review requested before lead hookup. ECO-0098d9ec70f review223; NAR-016 active, exact source quest-count resolution approved for worker spec record. Previous goal turn authored lifecycle/prefetch (progress).
+
 ### 2026-10-13 — GAL-008 lifecycle and prefetch checkpoint — astra (gpt-6)
 
 - Claimed d6e6ffc1. Implemented persistent ownership for scheduled body outputs, completion/transfer/disposal, synchronous builder reuse, ordered frame ticker with exception isolation, and WorldGroup bridge. GalaxyService now owns startup/restore generation, cache/prefetch/release, generation counts, reveal/visit state and disposal before its job-input arrays are released.
