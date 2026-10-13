@@ -103,16 +103,30 @@ namespace Game.Tests.PlayMode.Combat
         public DamageLeakScope()
         {
             NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace; LogAssert.ignoreFailingMessages = false;
+            Application.logMessageReceived += ExpectKnownFixtureLog;
             var world = World.DefaultGameObjectInjectionWorld;
             if (world == null || !world.IsCreated) return;
             Pause(world.GetExistingSystemManaged<InitializationSystemGroup>());
             Pause(world.GetExistingSystemManaged<SimulationSystemGroup>());
             Pause(world.GetExistingSystemManaged<PresentationSystemGroup>());
         }
+        // Partial ECS fixtures intentionally omit unrelated ordering targets. Expect only these
+        // observed setup diagnostics; all errors, exceptions and other warnings remain unexpected.
+        static void ExpectKnownFixtureLog(string message, string stackTrace, LogType type)
+        {
+            bool expected = type == LogType.Log && message.StartsWith("[Content] Content: ", StringComparison.Ordinal);
+            if (type == LogType.Warning)
+                expected = message.StartsWith("Ignoring invalid [Unity.Entities.UpdateBeforeAttribute] attribute on Game.Simulation.Flight.ThrusterInitSystem targeting Game.Simulation.Power.PowerInitSystem.", StringComparison.Ordinal) ||
+                    message.StartsWith("Ignoring invalid [Unity.Entities.UpdateAfterAttribute] attribute on Game.Simulation.Flight.PropulsionSystem targeting Game.Simulation.Flight.PropulsionStatsSystem.", StringComparison.Ordinal) ||
+                    message.StartsWith("Ignoring invalid [Unity.Entities.UpdateAfterAttribute] attribute on Game.Simulation.Weapons.ExplosionSystem targeting Game.Simulation.Weapons.ProjectileStepSystem.", StringComparison.Ordinal) ||
+                    message.StartsWith("'Game.Voxel.Grid.GridSpawnSystem' creates a Lookup object", StringComparison.Ordinal);
+            if (expected) LogAssert.Expect(type, message);
+        }
         void Pause(ComponentSystemGroup group)
         { if (group != null) { groups.Add((group, group.Enabled)); group.Enabled = false; } }
         public void Dispose()
         {
+            Application.logMessageReceived -= ExpectKnownFixtureLog;
             NativeLeakDetection.Mode = leakMode; LogAssert.ignoreFailingMessages = ignoreLogs;
             foreach (var item in groups) if (item.Group.World != null && item.Group.World.IsCreated) item.Group.Enabled = item.Enabled;
         }
