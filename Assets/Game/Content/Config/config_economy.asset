@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c1104005dc74777a8c9eccfef5f2f5a, type: 3}
+  m_Name: config_economy
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.EconomyConfigDefinition
+  id: config_economy
+  formerIds: []
+  baseCargoSlots: 20
+  unitsPerSlot: 10
+  startCredits: 2000
+  startItems:
+  - item: {fileID: 11400000, guid: 691e9fca5c4c4459086ee9a30a0846b4, type: 2}
+    min: 50
+    max: 50
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: dfcc75e2220ed476babe83e285ee98e6, type: 2}
+    min: 40
+    max: 40
+    chancePercent: 100
+  - item: {fileID: 11400000, guid: 00d412694742541778dbaf188c993e5e, type: 2}
+    min: 20
+    max: 20
+    chancePercent: 100
+  relationPriceSlope: 0.002
+  salvageFunctionalChance: 0.5
+  salvageStructuralChance: 0.1
+  salvageMaxStructuralItems: 50
+  scrapItem: {fileID: 11400000, guid: 34e2397c8972c48bd806db5db0d81384, type: 2}
+  scrapPerCell: 0.02
+  salvageMaxScrap: 500
+  maxSalvageCells: 20000
+  salvageDistanceM: 120
+  salvageCue: {fileID: 11400000, guid: 67882f03c1e6b41c7adcd65371399523, type: 2}
