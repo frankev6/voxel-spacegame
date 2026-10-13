@@ -665,19 +665,19 @@ Position: after `ShieldSystem`/`ExplosionSystem`/`BeamStepSystem`; the only writ
 #### 5.3.5 Applying damage and HP quantization
 
 `ApplyCellDamage(c, eff)` (eff already multiplied, `0 < eff < hp`):
-1. `units = HpUnits(Hp, CellHp) − eff`; `dither = Dither01(Tick, Grid.Index, c, ordinal++)`.
+1. `units = HpUnits(Hp, CellHp) − eff`; `dither = Dither01(Tick, randomIdentity, c, ordinal++)`.
 2. `q = QuantizeHp(units, CellHp, dither)` = `(byte)clamp(floor(units · 255 / CellHp + dither), 0, 255)`.
 3. `q == 0` → `RemoveCell(c, Destroyed)`; else write `Hp = q` and mark the brick `Mesh` dirty only when `(oldHp >> 6) != (q >> 6)` (four damage-look steps for SPEC-11).
 4. Instance cell: `FunctionHp −= eff` (see §5.3.7); `GridDamageStats.DamageTaken += eff`.
 
-`Dither01` = `Random.CreateFromIndex((uint)StableHash.Combine(StableHash.Combine(tick, (ulong)gridIndex), StableHash.Combine((ulong)(uint)ordinal, packed(c)))).NextFloat()` where `packed(c) = ((ulong)(c.x & 0x1FFFFF) << 42) | ((ulong)(c.y & 0x1FFFFF) << 21) | (ulong)(c.z & 0x1FFFFF)`.
+The runtime internal 64-bit overload takes `randomIdentity` (ADR-0066); the public int helper retains its existing formula. `Dither01` = `Random.CreateFromIndex((uint)StableHash.Combine(StableHash.Combine(tick, (ulong)gridIndex), StableHash.Combine((ulong)(uint)ordinal, packed(c)))).NextFloat()` where `packed(c) = ((ulong)(c.x & 0x1FFFFF) << 42) | ((ulong)(c.y & 0x1FFFFF) << 21) | (ulong)(c.z & 0x1FFFFF)`.
 
 #### 5.3.6 `RemoveCell(c, reason)` — the only cell removal routine
 
 1. Read the cell's block, orientation, colour and instance index (§5.3.2). Write `Cell` default (air), clear the `BrickSolidMask` bit, `Brick.SolidCount −= 1`.
 2. Dirty: brick `Flags |= Mesh | Collider` (runtime collider changes already use urgent `ColliderPriority.Damage` through `BrickDirtyScheduleSystem`; Q24); record `(grid, slot, brick)` in `TouchedBricks` once per brick per tick (per-job `Temp` hash set). If the cell lies on a brick face (local coordinate 0 or 15) and the neighbour brick exists → neighbour `Flags |= Mesh` and record it touched.
 3. If `SolidCount == 0`: append the brick to `DestroyList`, set its `BrickSlot` entry to `Entity.Null` (the LEG entry stays; destroying a missing LEG member is skipped by Entities).
-4. Kinematics: `wp = t.TransformPoint((c + 0.5) · s)`; `WorldVel = VelocityAtPoint(v, m, t, wp)`; `Kick` per reason/type (all directions world space; `u` = random unit vector from `Random.CreateFromIndex(hash(Tick, Grid.Index, packed(c)))`; `k = KickRandomFraction`; `r01` from the same generator):
+4. Kinematics: `wp = t.TransformPoint((c + 0.5) · s)`; `WorldVel = VelocityAtPoint(v, m, t, wp)`; `Kick` per reason/type (all directions world space; `u` = random unit vector from `Random.CreateFromIndex(hash(Tick, randomIdentity, packed(c)))`; `k = KickRandomFraction`; `r01` from the same generator):
    | Case | Kick |
    |---|---|
    | Destroyed, point event | `normalize(−dWorld·(1−k) + u·k) · row.KickMin · (0.6 + 0.8·r01)` (`row` = the event type's `DamageTypeRow`; `dWorld` = event direction in world; zero → `u`) |
@@ -769,7 +769,7 @@ Position: after `SplitSystem`, before `GridMassUpdateSystem`. One `IJob` with on
 ### 5.8 Determinism
 
 - Inputs to every per-grid computation are ordered: sorted events (§3 decision 3), pending detaches in island/slot order, seeds in removal order, fixed neighbour order, heap ties by set id.
-- Randomness only through `Random.CreateFromIndex(StableHash...)` of `(Tick, Grid.Index, cell, ordinal)`; never thread or time based.
+- CellWriter randomness uses `Random.CreateFromIndex(StableHash...)` of `(Tick, randomIdentity, cell, ordinal)`, where randomIdentity is nonzero PersistentId.Value or an entity-index fallback for transient unidentified grids (ADR-0066); never thread or time based.
 - Budgets count items, never time.
 - `CellStateHasher.ComputeWorldHash`: grids ordered by `PersistentId.Value`; for each: `Combine(id, Kind, BrickMin, BrickDims)`; for each slot in order with a brick: `Combine(slot, Hash64(4,096 logical cells expanded in local-index order, regardless of dense/sparse storage))`; for each instance: `Combine(Block, asuint(FunctionHp))`. Chunk bodies contribute `Combine(liveCount, Σ CellCount)`.
 
@@ -1129,6 +1129,8 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
 | 34 | Tumbling chunk overlaps surviving parent geometry when contact grace expires, producing a large depenetration kick | Retain the minimum grace, then keep that pair suppressed until geometric clearance; latch contacts armed thereafter, reset on pool reuse. Internal state writer is SplitGraceContactSystem (ADR-0063) | Tech lead | Resolved implementation; live verification pending. |
 
 | 35 | A particle budget can stop inside a 4096-cell brick, but GridDissolving only names a NextSlot cursor | Interpret the existing int as packed slot/local index (slot shifted by 12 plus local index), preserving the component layout. Resume immediately after the last sampled exposed cell; only pause on an emitted sample, so each resumed stride starts at a boundary. Initial requests advance in the same tick; repeated dissolve requests do not reset progress. Silent requests win at final destruction. | Tech lead | Resolved DMG-013; required acceptance tests pending. |
+
+| 36 | Identical persistent ships receive different Entity.Index values in fresh Worlds, changing stochastic cell HP rounding | CellWriter uses nonzero PersistentId.Value for quantization and cell kick randomness, with entity-index fallback only for unidentified transient grids. Keep tick/cell/ordinal inputs and all hash assertions. ADR-0066 records the internal lookup and compatibility decision. | Tech lead | Resolved DMG-014; validation pending. |
 
 ## 11. References
 

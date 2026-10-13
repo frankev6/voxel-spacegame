@@ -22,6 +22,7 @@ namespace Game.Voxel.Damage.Jobs
         public PhysicsVelocity Velocity;
         public PhysicsMass Mass;
         public uint Tick;
+        public ulong RandomIdentity;
         public int Ordinal;
         public float3 IslandCentroidWorld;
         public GridDamageStats Stats;
@@ -53,7 +54,7 @@ namespace Game.Voxel.Damage.Jobs
             if (effective <= 0f || !Access.TryGetCell(c, out var cell, out var brick, out int local)) return;
             float remaining = DamageMath.HpUnits(cell.Hp, Access.CellHp(cell));
             if (effective >= remaining) { RemoveCell(c, CellRemovedReason.Destroyed); return; }
-            byte hp = DamageMath.QuantizeHp(remaining - effective, Access.CellHp(cell), DamageMath.Dither01(Tick, Access.Grid.Index, c, Ordinal++));
+            byte hp = DamageMath.QuantizeHp(remaining - effective, Access.CellHp(cell), DamageMath.Dither01(Tick, RandomIdentity, c, Ordinal++));
             if (hp == 0) { RemoveCell(c, CellRemovedReason.Destroyed); return; }
             bool sameBin = (cell.Hp >> 6) == (hp >> 6); cell.Hp = hp;
             Changed |= Access.Write(brick, local, cell, sameBin);
@@ -111,7 +112,7 @@ namespace Game.Voxel.Damage.Jobs
         float3 Kick(int3 cell, float3 world, CellRemovedReason reason)
         {
             if (reason == CellRemovedReason.DetachedBody || (Event.Flags & DamageEventFlags.NoKick) != 0) return 0;
-            var random = Random.CreateFromIndex((uint)StableHash.Combine(StableHash.Combine(Tick, (ulong)Access.Grid.Index), DamageMath.Packed(cell)));
+            var random = Random.CreateFromIndex((uint)StableHash.Combine(StableHash.Combine(Tick, RandomIdentity), DamageMath.Packed(cell)));
             float3 unit = random.NextFloat3Direction(); float r = random.NextFloat();
             float k = Config.KickRandomFraction;
             float3 com = Transform.TransformPoint(Mass.CenterOfMass);

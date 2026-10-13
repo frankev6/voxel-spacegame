@@ -144,7 +144,7 @@ namespace Game.Tests.PlayMode.Combat
                 using (var grids = f.Em.CreateEntityQuery(typeof(VoxelGrid), typeof(PersistentId)))
                 using (var roots = grids.ToEntityArray(Allocator.Temp))
                     foreach (var root in roots)
-                        TestContext.WriteLine($"DMG-014 grid: fps={fps}, workers={workers}, id={f.Em.GetComponentData<PersistentId>(root).Value}, hash={CellStateHasher.ComputeGridHash(f.Em, root):X16}");
+                        TestContext.WriteLine($"DMG-014 grid: fps={fps}, workers={workers}, id={f.Em.GetComponentData<PersistentId>(root).Value}, entity={root.Index}:{root.Version}, hash={CellStateHasher.ComputeGridHash(f.Em, root):X16}");
                 ulong hash = CellStateHasher.ComputeWorldHash(f.Em);
                 TestContext.WriteLine($"DMG-014: fps={fps}, workers={workers}, ticks=600, hash={hash:X16}");
                 return hash;

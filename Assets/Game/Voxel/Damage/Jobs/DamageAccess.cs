@@ -1,4 +1,5 @@
 using Game.Data.Blocks;
+using Game.Core.Components;
 using Game.Voxel.Model;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -22,6 +23,7 @@ namespace Game.Voxel.Damage.Jobs
         [NativeDisableParallelForRestriction] public BufferLookup<BrickSparseCells> Sparse;
         [NativeDisableParallelForRestriction] public BufferLookup<BrickSolidMask> Masks;
         [ReadOnly] public BufferLookup<PaletteEntry> Palettes;
+        [ReadOnly] public ComponentLookup<PersistentId> Ids;
         [ReadOnly] public ComponentLookup<LocalTransform> Transforms;
         [ReadOnly] public ComponentLookup<PhysicsMass> Masses;
         [ReadOnly] public ComponentLookup<PhysicsVelocity> Velocities;
@@ -29,7 +31,7 @@ namespace Game.Voxel.Damage.Jobs
         [ReadOnly] public ComponentLookup<GridSpawning> Spawning;
         public static DamageAccess Create(ref SystemState s) => new DamageAccess
         {
-            Grids = s.GetComponentLookup<VoxelGrid>(), Bricks = s.GetComponentLookup<Brick>(), Dirty = s.GetComponentLookup<BrickDirty>(),
+            Ids = s.GetComponentLookup<PersistentId>(true), Grids = s.GetComponentLookup<VoxelGrid>(), Bricks = s.GetComponentLookup<Brick>(), Dirty = s.GetComponentLookup<BrickDirty>(),
             Stats = s.GetComponentLookup<GridDamageStats>(), Impulses = s.GetComponentLookup<PendingImpulse>(),
             Slots = s.GetBufferLookup<BrickSlot>(), Instances = s.GetBufferLookup<BlockInstance>(), Dense = s.GetBufferLookup<BrickCells>(),
             Sparse = s.GetBufferLookup<BrickSparseCells>(), Masks = s.GetBufferLookup<BrickSolidMask>(), Palettes = s.GetBufferLookup<PaletteEntry>(true),
@@ -38,7 +40,7 @@ namespace Game.Voxel.Damage.Jobs
         };
         public void Update(ref SystemState s)
         {
-            Grids.Update(ref s); Bricks.Update(ref s); Dirty.Update(ref s); Stats.Update(ref s); Impulses.Update(ref s);
+            Ids.Update(ref s); Grids.Update(ref s); Bricks.Update(ref s); Dirty.Update(ref s); Stats.Update(ref s); Impulses.Update(ref s);
             Slots.Update(ref s); Instances.Update(ref s); Dense.Update(ref s); Sparse.Update(ref s); Masks.Update(ref s); Palettes.Update(ref s);
             Transforms.Update(ref s); Masses.Update(ref s); Velocities.Update(ref s); Immune.Update(ref s); Spawning.Update(ref s);
         }

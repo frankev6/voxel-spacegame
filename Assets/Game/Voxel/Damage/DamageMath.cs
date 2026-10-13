@@ -14,8 +14,10 @@ namespace Game.Voxel.Damage
             => (byte)math.clamp(math.floor(units * (255f / cellHp) + dither01), 0f, 255f);
         internal static ulong Packed(int3 c) => ((ulong)(c.x & 0x1FFFFF) << 42) | ((ulong)(c.y & 0x1FFFFF) << 21) | (uint)(c.z & 0x1FFFFF);
         public static float Dither01(uint tick, int gridIndex, int3 cell, int eventOrdinal)
+            => Dither01(tick, (ulong)gridIndex, cell, eventOrdinal);
+        internal static float Dither01(uint tick, ulong identity, int3 cell, int eventOrdinal)
         {
-            var random = Random.CreateFromIndex((uint)StableHash.Combine(StableHash.Combine(tick, (ulong)gridIndex),
+            var random = Random.CreateFromIndex((uint)StableHash.Combine(StableHash.Combine(tick, identity),
                 StableHash.Combine((uint)eventOrdinal, Packed(cell))));
             return random.NextFloat();
         }

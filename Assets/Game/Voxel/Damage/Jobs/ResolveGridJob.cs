@@ -28,6 +28,7 @@ namespace Game.Voxel.Damage.Jobs
             var range = Ranges[index]; var root = range.Grid; Explosions.BeginForEachIndex(index);
             var writer = new CellWriter
             {
+                RandomIdentity = Access.Ids.HasComponent(root) && Access.Ids[root].Value != 0 ? Access.Ids[root].Value : (ulong)(uint)root.Index,
                 Access = Access.Cells(root, Blocks), Config = Config, Tick = Tick, Transform = Access.Transforms[root],
                 Velocity = Access.Velocities.HasComponent(root) ? Access.Velocities[root] : default,
                 Mass = Access.Masses.HasComponent(root) ? Access.Masses[root] : new PhysicsMass { Transform = RigidTransform.identity },
