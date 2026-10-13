@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 131 | 8 | 0 | 0 | 41 | 0 | 180 | 8 |
+| M3 | 130 | 8 | 0 | 0 | 42 | 0 | 180 | 7 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -458,7 +458,7 @@
 | HUD-005 | Settings screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
 | HUD-006 | Pause screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
 | HUD-007 | Flight HUD view and layout | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
-| HUD-008 | HudSnapshotSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, PWR-001, WPN-001, ABL-001, SYS-001, GAL-001, FLT-001, VOX-001, TST-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead: real ECS combat snapshot and radar; batch focused checks after implementation |
+| HUD-008 | HudSnapshotSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, PWR-001, WPN-001, ABL-001, SYS-001, GAL-001, FLT-001, VOX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 88a324e0 | Snapshot and nearest64 radar; clean compile and nine focused checks pass; visible HUD binding remains HUD-009 |
 | HUD-009 | HudSyncSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-008, HUD-007, TRV-001, ENC-001 | no | todo |  |  |  |  |
 | HUD-010 | HUD presenters and screen hotkeys | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-009, QST-001, ECO-001, INP-001, TRV-001, NAR-001 | no | todo |  |  |  |  |
 | HUD-011 | Inventory screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-50 | no | todo |  |  |  |  |
@@ -901,6 +901,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 308 | SPEC-50 Q25: actual ECO-004 narrative dependency | Resolved under ADR-0068: require NAR-001 interface plus completed ECO-003/005 runtime; retain full loot/service scope and eight required tests. | Tech lead |
 | 309 | SPEC-40 Q14: runtime vocabulary invocation boundary | Resolved: SPEC-41 Invoke serves expression functions with evaluated values/resolved indices and retained canonical IDs; commands use compiled effect preflight/flow, never direct Invoke. | Tech lead |
 | 310 | SPEC-23 Q27: fleet/swarm fixture geometry and measurement scope | Resolved: compact authored-block CPU fixtures with real AI, physics and damage; single-brick craft, actual pose/slot visual harness, separate AI/fixed-tick measures and explicit unavailable/casualty records. Measurements opt-in; visual acceptance remains pending. | Tech lead |
+| 311 | SPEC-61 Q21: HUD byte counts and radar fixture semantics | Resolved: saturate count255, internal instance clock seam, disjoint radar categories; route waypoint resolution remains HUD-009. | Tech lead |
 
 
 ## Measurements
@@ -1012,6 +1013,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Combat HUD snapshot accepted — astra (gpt-6)
+
+- HUD-00888a324e0 implements singleton creation, ship/ability/target/interaction values, weapon group gather and bounded nearest64 radar jobs with distance/entity ordering. UI binding remains HUD-009; no visible HUD completion claim. Q21 mirrored311.
+- Compile24417 clean; focused24696 nine passed in0.55s. Evidence `Logs/playtest/hud-snapshot/`. No full suite or benchmark.
+- Test count: spec-required: 9, extra: 0.
 
 ### 2026-10-13 — Fleet visual probe — astra (gpt-6)
 
