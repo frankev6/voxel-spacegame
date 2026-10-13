@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | UI-011 | UI-011 active; MIG-009 validated and merged | Ready standard work after batch integration |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | PWR-003 | dispatched from main 7b8cf39; DLG-001 d07fd9b and GAL-001 9c177ac pending validation | M2 power/ability work |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ART-014 | dispatched from main claim 010a9e2; UI-010 0c60754 delivered pending validation | Ready presentation work after integration |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ABL-002 | dispatched from main claim 0795eb9; ART-014 partial delivery pending integration | M2 ability content and grants |
 
 ## Operating rules
 
@@ -66,3 +66,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - Grouped audit 79989 passed 18/0/0. Extending the required ordered-query test to schedule Burst found embedded GuardedHandles incorrectly entering the job. ADR-0064 / Q228 repairs this with SpatialHashQueryData and AsReadOnly, keeping all spatial-container safety checks. Repaired compile clean and grouped audit session 25268 passed **18/0/0**, including actual Burst query/EndRead/disposal (`Logs/playtest/ai002/query-burst-integrated.xml`). Full suites still pending; integrate UI-011 delivery if ready before launching compatible batch.
 
 - Started full EditMode + PlayMode regression session `21701` on AI-002/GAL-001/DLG-001/UI-010 batch after 18/18 focused audit and clean compile. Primary source must remain unchanged while active. UI-011 and ART-014 are finishing deliveries for the next batch; lead reviewed current dialog services and art changes, requested ART-014 question-table formatting repair. Keep partial art acceptance explicit.
+
+- ART-014 mechanical delivery reported `f7ae676fa4817d1e7e166be2097e4b9ceb77981a`; verify final amended branch head before integration. Full acceptance remains open for validator, ARK definition, production looks and approved typography. Same presentation worker dispatched ready ABL-002 from main `0795eb9`. Lead WPN-003 claimed main `85c018e`; isolated checkout creation pending operation `a8ba9621-ce48-440b-81fc-e621af00fdaf`, based on current query integration branch. No Unity there; primary session `21701` continues unchanged.
