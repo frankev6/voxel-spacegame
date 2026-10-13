@@ -930,7 +930,7 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 ### TRV-005 — Arrival solver
 - **Milestone:** M3
 - **Tier:** standard — closed-form geometry given in §5.4
-- **Depends on:** `TRV-001`, `SPEC-30`
+- **Depends on:** `TRV-001`, `GAL-002`, `GAL-008`
 - **Do:** Implement `ArrivalSolver.SolveJump` (§5.4) and `SolveCruise` (§5.10 geometry).
 - **Files:** `Assets/Game/Galaxy/Travel/ArrivalSolver.cs`; `Assets/Game/Tests/EditMode/Galaxy/Travel/ArrivalSolverTests.cs`
 - **Acceptance criteria:**
@@ -1118,6 +1118,8 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 | 11 | Consuming one press per ship counter per tick can leave a multi-press backlog that replays after Actions unlock, contrary to TRV-007's no-replay acceptance | While Actions is locked, discard all pending ship presses by copying the nine incoming ship counters after masking the command; preserve consumed.Cruise for its separate variable-rate owner. Keep ordinary one-per-tick consumption when unlocked or only Movement-locked, and preserve the existing absent/hulk player path. Movement assigns exactly Brake as TRV-007 requires (equivalent to SPEC-20 §5.1's mask for the current Boost/Brake enum). No changes to input sampling, lock ownership, flight physics, fire bindings or staged TravelService. | Tech lead |
 
 | 12 | TRV-002 validation order and geometry dependency defaults | Discover TravelContentValidator through the existing IContentDatabaseValidator TypeCache runner with Order 320. Require finite float inputs; evaluate dependent clearance/E006 geometry only after the relevant arrival inputs pass their local range checks, preserving primary diagnostics. E007 uses double intermediates for inclusive max+1 and norm arithmetic, cached blueprint bounds, and the catalog's single positive finite voxel default cell size for procedural shapes; missing/invalid required geometry inputs produce E007. StructureSource.None has no structure to measure and adds no source requirement beyond the specified rule. W001 follows SPEC-30's nonempty authored Source gate rule and CompiledCondition.IsAlwaysTrue. Shipped-content validation remains in Defaults against the real rebuilt database. GAL-012 owns gate asset corrections; lead rebuilds and validates after integration. | Tech lead — resolved; ledger Q333 |
+
+| 13 | Arrival geometry waits for whole SPEC-30 including later map/performance/M4 work | Use completed TRV-001 contracts and GAL-002 orbit math plus GAL-008 real galaxy/content queries. All five functional cases and the opt-in Perf_512Bodies fixture remain required; no performance measurement gate. Runtime travel/streaming acceptance stays in its owning tasks. | Tech lead |
 
 ## 11. References
 

@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 105 | 12 | 0 | 0 | 63 | 0 | 180 | 7 |
+| M3 | 105 | 11 | 0 | 0 | 64 | 0 | 180 | 9 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -329,9 +329,9 @@
 | GAL-008 | GalaxyService, ticker and bridge system | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, FND-001 | yes | done | astra (gpt-6) | 2026-10-13 | cc7c0a1e | Service/cache/commands/ticker and real session/GLXY binding; six required cases pass, lifecycle extension passes. Live boot still QST-002; PLOC/streaming remain SYS tasks. |
 | GAL-009 | OriginRebaseSystem | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-001, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | 5bf0a47 | Asynchronous origin capture/rebase/placement and dependent consumers; full 1051 EM /146 PM passed; 5000-root p95 0.2959 ms. |
 | GAL-010 | GLXY save participant | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | 54ebbf3d | GLXY capture/restore and immutable v1 fixture d481a047; compile clean, four required checks passed across focused run and repaired-log case. App registration remains session integration. |
-| GAL-011 | Galaxy map model | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-008 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  |  |
+| GAL-011 | Galaxy map model | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | a229844 | Visibility/revisions and real app registration; four required checks passed0.228s, clean compile. Travel/ownership defaults per spec until their services exist. |
 | GAL-012 | M3 galaxy content | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-003, SPEC-72 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | 0834c0ea/fb2a61b9 real systems/body assets imported and zero scoped validation errors; three runtime smoke checks pending GAL-008 and lane/logic wiring |
-| GAL-013 | Performance gates | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-005, GAL-006, GAL-009, GAL-011, TST-001 | no | todo |  |  |  |  |
+| GAL-013 | Performance gates | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-005, GAL-006, GAL-009, GAL-011, TST-001 | yes | todo |  |  |  |  |
 | SYS-001 | Public contract types | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | CORE-001, DATA-001, GAL-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e738e71 | Streaming contracts and service shells; 2 required tests; full batch green |
 | SYS-002 | Streaming config and boot singleton | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 7244be6 | Config validation/factory, boot singleton and catalog asset; 2 required tests; full suites green |
 | SYS-003 | Structure builders | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-10 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 971ae0b7 | Deterministic shape/asteroid builders;4 focused tests pass; Q307 |
@@ -350,7 +350,7 @@
 | TRV-002 | Travel config definition and validator | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-04, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 5a436d86 | 19 required checks pass; real shipped travel content zero errors, GAL-012 gates32m satisfy geometry |
 | TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, SPEC-30, SPEC-40 | no | todo |  |  |  |  |
 | TRV-004 | Route planner | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-30 | no | todo |  |  |  |  |
-| TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-30 | no | todo |  |  |  |  |
+| TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-002, GAL-008 | yes | todo |  |  |  |  |
 | TRV-006 | TravelService jump timeline | [SPEC-32](specs/SPEC-32-travel.md) | M3 | frontier | TRV-003, TRV-005, TRV-007, SPEC-31, SPEC-30, FND-001 | no | todo |  |  |  |  |
 | TRV-007 | PlayerControlLock consumption | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 75ba22b | Movement/action lock consumption without press replay; 4 required tests. TRV-006 owns lifecycle. Full 1027 EM / 145 PM passed. |
 | TRV-008 | Gate interaction, gate info and notices | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006 | no | todo |  |  |  |  |
@@ -918,6 +918,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 339 | SPEC-30 Q34: GLXY restore bounds and ownership | Resolved: direct internal visit-count restore, remaining-byte count bounds, canonical sorted unique records, failed restore clears partial state; independently framed corrupt VOXS drops only that record with a warning. | Tech lead |
 | 340 | SPEC-30 Q35: live session composition before PLOC/loader | Resolved: actual galaxy/ticker/GLXY registered and owned; missing old chunks warn, start fallback waits for restored SimClock, stale deferred reset cannot dispose a newer campaign. Pose/docking and streaming remain SYS tasks. | Tech lead |
 | 341 | SPEC-31 Q13: world-loader dependencies include later and optional work | Resolved: explicit completed galaxy/origin, voxel and physics lifetime prerequisites for SYS-004; full T1 acceptance preserved, later streaming tiers and visuals remain separate. | Tech lead |
+| 342 | SPEC-32 Q13: arrival solver held by whole galaxy spec | Resolved: completed TRV-001, GAL-002 and GAL-008 are its actual prerequisites; retain five functional checks and advisory fixture, leave travel/streaming acceptance separate. | Tech lead |
 | 334 | SPEC-33 Q24: legacy first formation conflicts with final encounter table | Resolved: retain/report original formation and explicit replacement diagnostics; authored ENC-010 composition table governs final fleets, real assets required. | Tech lead |
 | 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
 
@@ -1044,6 +1045,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — GAL-011 accepted in loader batch — astra (gpt-6)
+
+- Worker5b58dc6c integrateda229844; app registration5ccf8167 uses the specified nullable lane/ownership defaults, with explicit future binding TODO. Visibility, stable read-only lists and change-only revisions implemented. Compile32938 clean after correcting loader adoption NativeArray initialization; zero CS warnings. Focused65248: four passed0.2281895s. Evidence Logs/playtest/galaxy-map/{compile.log,acceptance.xml}. Tests: spec-required: 4, extra: 0.
+- SYS-004 compiles but five loader cases and safe scene installation remain; no loader acceptance claim. NAR-01644bace47 delivered219; integrate actual generation with QST-002 repair. TRV-005 direct completed dependencies reconciledQ342 for next worker. Previous turn loader lifecycle was progress.
 
 ### 2026-10-13 — SYS-004 loader lifecycle authored — astra (gpt-6)
 
