@@ -350,7 +350,7 @@
 | TRV-002 | Travel config definition and validator | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-04, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 5a436d86 | 19 required checks pass; real shipped travel content zero errors, GAL-012 gates32m satisfy geometry |
 | TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, SPEC-30, SPEC-40 | no | todo |  |  |  |  |
 | TRV-004 | Route planner | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-30 | no | todo |  |  |  |  |
-| TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-002, GAL-008 | yes | todo |  |  |  |  |
+| TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-002, GAL-008 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  |  |
 | TRV-006 | TravelService jump timeline | [SPEC-32](specs/SPEC-32-travel.md) | M3 | frontier | TRV-003, TRV-005, TRV-007, SPEC-31, SPEC-30, FND-001 | no | todo |  |  |  |  |
 | TRV-007 | PlayerControlLock consumption | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 75ba22b | Movement/action lock consumption without press replay; 4 required tests. TRV-006 owns lifecycle. Full 1027 EM / 145 PM passed. |
 | TRV-008 | Gate interaction, gate info and notices | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006 | no | todo |  |  |  |  |
