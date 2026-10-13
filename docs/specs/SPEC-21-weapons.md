@@ -820,7 +820,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 - **Do:** PlayMode scenarios: (1) player plasma on a static hulk: holes appear exactly along the shot line; (2) shielded target absorbs, then overflows to hull; (3) flak burst damages two adjacent small ships; (4) homing missiles follow a strafing target; (5) beam does not pass through a target (R26); (6) 4-ship skirmish for 600 ticks at 30/60/144 simulated FPS and worker counts 1/max → identical `CellStateHasher` hash and `ProjectileStoreStats` (`DroppedFull == 0`).
 - **Files:** `Assets/Game/Tests/PlayMode/Simulation/Weapons/{CombatScenarioTests,CombatDeterminismTests}.cs`
 - **Acceptance criteria:**
-  - [ ] Each scenario as stated; the skirmish hash identical across all runs.
+  - [x] Each scenario as stated; the skirmish hash identical across all runs.
 - **Tests:** `CombatScenarioTests.Plasma_HolesAlongLine`, `.Shield_AbsorbThenOverflow`, `.Flak_TwoShips`, `.Missiles_Track`, `.Beam_StopsAtTarget`; `CombatDeterminismTests.Skirmish_IdenticalHash`.
 
 ### WPN-013 — Weapon performance gates

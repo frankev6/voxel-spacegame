@@ -285,7 +285,7 @@ Scale notes: per ship per tick O(slots ≤ 8); the instance walk happens only on
 - **Do:** Implement `ShieldToggleEffectSystem` (§5.2) and `StatBoostEffectSystem` (§5.3).
 - **Files:** `Assets/Game/Simulation/Abilities/{ShieldToggleEffectSystem,StatBoostEffectSystem}.cs`, `Assets/Game/Tests/EditMode/Simulation/Abilities/AbilityEffectTests.cs`
 - **Acceptance criteria:**
-  - [ ] A toggle flips `ShieldControl.RequestedOn` once; an active boost appears in `ShipStatModifier` (producer `Ability`, `SourceId` = slot) one tick after activation and disappears when it ends or its block is destroyed.
+  - [x] A toggle flips `ShieldControl.RequestedOn` once; an active boost appears in `ShipStatModifier` (producer `Ability`, `SourceId` = slot) one tick after activation and disappears when it ends or its block is destroyed.
 - **Tests:** `AbilityEffectTests.Toggle_FlipsOnce`, `.Boost_ModifiersAddedAndRemoved`.
 
 ### ABL-005 — Ability scenarios and frame-rate independence

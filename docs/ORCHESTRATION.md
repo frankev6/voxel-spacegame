@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | done; full batch green; dependency wait | audio measurements |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-004 | delivered d83c30e7; integrated fe02469; validation wait | ABL-005 after WPN-012 |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-004 | done; full batch green; next ABL-005 | ABL-005 after WPN-012 |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-015 | done; full batch green; dependency wait | weapon harness |
 
 ## Operating rules
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Combat/effects batch closed:** session21032 exited0: compile0C#warnings,1198/0/1 EditMode and170/0/53 PlayMode. Soak600s/36000ticks/zero native leaks. WPN-012 and ABL-004 done, archived `ability-effects/`. No active Unity; original QualitySettings preserved and test debris removed. Next FF main, claim AI-006 lead and ABL-005 existing power worker. Isolated VOX-020 headfba40c66 remains unvalidated, preserved for the next compatible batch.
 
 - **Parallel frontier progress:** VOX-020 claimed on main96838ceb and claim merged into primary without runtime changes. Existing lead checkout `/Users/frank/.codex/worktrees/combat-hit-detection/spaceship-game-v2` is now `task/VOX-020-preview-edits`, implementation f18f681f/ecfe5bfb: guarded edit API, incremental brick copies/bounds remap, functional reconciliation and affected mesh/collider queues. SPEC10Q42 mirrored Q289. a6f2e7ce adds exactly the three required functional tests plus one advisory measurement (spec-required:4, extra:0), covering1000 seeded edits, negative/positive bounds remapping, functional preservation/removal/reuse and100k-hull place/remove timing. All remain uncompiled/unrun; no Unity claim. Primary session21032 remains live in full PlayMode; EditMode1198/0/1 and compile0warnings archived `ability-effects/`. Preserve isolated changes until current validation ends; then close combat/ability batch and prioritize AI-006/ABL-005.
 
