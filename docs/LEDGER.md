@@ -420,7 +420,7 @@
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | no | todo |  |  |  |  |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
-| EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | no | todo |  |  |  |  |
+| EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | no | todo |  |  |  | partial in HUD-001: canonical empty editor VM/command identities / properties, nested models and command members remain |
 | EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | no | todo |  |  |  |  |
 | EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | no | todo |  |  |  |  |
 | EDT-004 | Edit history and diff commands | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001 | no | todo |  |  |  |  |
@@ -448,7 +448,7 @@
 | UI-009 | Tooltip service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | no | todo |  |  |  |  |
 | UI-010 | Notification service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | no | todo |  |  |  |  |
 | UI-011 | Confirm dialog and text prompt | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-005, UI-008 | no | todo |  |  |  |  |
-| UI-012 | Layout, contrast and allegiance-colour audits | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | frontier | UI-008 | no | todo |  |  |  |  |
+| UI-012 | Layout, contrast and allegiance-colour audits | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | frontier | UI-008 | no | todo |  |  |  | Include canonical UILayoutAudit invocation for UI-008 tab panel; actual bounds/scroll checks already staged (Q210) |
 | UI-013 | Accessibility options | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-010, UI-012 | no | todo |  |  |  |  |
 | HUD-001 | Public contract types | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | UI-001, CORE-001, CAM-001 | yes | in-progress | combat (gpt-6.1-sol) | 2026-10-13 |  | Ready independent M3 task while M2 batch validates; ADR-0062. |
 | HUD-002 | UI composition, screen registration and root switching | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-60, FND-001 | no | todo |  |  |  |  |
@@ -785,7 +785,13 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 202 | 2026-10-13 | SPEC-22 Q10 / PWR-001 | PowerDemandGroup references allocator before PWR-005 exists | Defer redundant UpdateBefore attribute; retain PWR-005 TODO and reciprocal ordering requirement | Tech lead | Resolved; no allocator stub or changed runtime ordering |
 | 203 | 2026-10-13 | SPEC-21 Q13 / WPN-017 | Presentation ordering and stale HulkInfo field | Existing OrderLast drain orders bridge without upward reference; use FormerKind and complete attribution dependencies | Tech lead | Resolved; no assembly or effective ordering change |
 | 204 | 2026-10-13 | SPEC-62 Q16 / CAM-008 | Camera FX reader missing; generic effect names differ | Borrow current-frame completed uploader drain; map actual hit/explosion/ram kinds and bind at boot | Tech lead | Resolved; synchronous reader, no second queue consumer |
-| 205 | 2026-10-13 | SPEC-13 Q33 / DMG-011 | Chunk geometry origin, byte slot capacity and obsolete dissolve event | Use exact COM-rebased boxes/cells, validate 1..256 slots, canonical continuous ChunkDissolve state, reconstruct real slot handles | Tech lead | Resolved; required lifecycle tests still pending |
+| 205 | 2026-10-13 | SPEC-13 Q33 / DMG-011 | Chunk geometry origin, byte slot capacity and obsolete dissolve event | Use exact COM-rebased boxes/cells, validate 1..256 slots, canonical continuous ChunkDissolve state, reconstruct real slot handles | Tech lead | Resolved; five required lifecycle tests pass; live rendering pending |
+
+| 206 | 2026-10-13 | SPEC-22 Q11 / PWR-002 | Finite float inputs can overflow intermediate ellipsoid math | Double offsets and normalized quadratic; retain tangent/epsilon rules, deterministic centre extension and explicit output precision limits | Tech lead | Resolved; validation pending |
+| 207 | 2026-10-13 | SPEC-22 Q12 / PWR-002 | Fixed-step march misses tangencies | Independently select resolvable random domains and check boundaries directly; never filter using implementation | Tech lead | Resolved; validation pending |
+| 208 | 2026-10-13 | SPEC-61 Q20 / HUD-001 | Editor constructor types precede dependent EDT-001 | Stage only canonical empty editor VM/command identities with precise EDT-001 TODOs | Tech lead | Resolved; remaining editor contracts stay open |
+| 209 | 2026-10-13 | SPEC-60 Q21 / UI-008 | Control defaults unspecified | Clamp invalid fractions, zero fill for invalid maxima, cached labels, named children and explicit tab defaults | Tech lead | Resolved; validation pending |
+| 210 | 2026-10-13 | SPEC-60 Q22 / UI-008 | Tab test depends on later frontier layout audit | Check actual panel bounds/clipping/scroll now; canonical audit invocation remains UI-012 | Tech lead | Resolved; no frontier implementation delegated |
 
 ## Measurements
 
@@ -896,6 +902,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DMG-011 / second batch integration in progress — astra (gpt-6)
+
+1. Physical chunk pool, exact mass/inherited velocity, greedy colliders, expiry and deferred disposal implemented; five required tests pass, including pool eviction safety repair. Palette-lit chunk rendering compiles but still needs live verification. Test count: spec-required: 5, extra: 0. Zero optimization passes.
+2. WPN-017, CAM-008, PHY-022, PWR-002, ABL-001, HUD-001 and UI-008 integrated; all remain in-progress pending combined validation. Lead fixed PHY-022 test NativeArray ownership alias after compile failure; subsequent compile passes. Full-suite results pending.
+3. Same three workers reassigned to NAR-001, CAM-010 and CAM-009. Q206–210 mirror worker spec decisions and retained EDT-001/UI-012 work. No owner gate. Exact dispatch and commit evidence in ORCHESTRATION.md.
 
 ### 2026-10-13 — PHY-014, PWR-001, MIG-011 batch complete — astra (gpt-6)
 

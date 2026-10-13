@@ -67,7 +67,8 @@ namespace Game.Tests.EditMode.Voxel.Physics
             world.AddGameplayActive(); world.AddSimClock();
             var em = world.EntityManager;
             content.Service.CreateSingletons(em);
-            using var restored = new NativeArray<CellRestored>(8, Allocator.TempJob);
+            using var restoredStorage = new NativeArray<CellRestored>(8, Allocator.TempJob);
+            var restored = restoredStorage;
             try
             {
                 var root = em.CreateEntity(typeof(VoxelGrid), typeof(GridMass), typeof(GridMassRecompute), typeof(GridSpawning),
