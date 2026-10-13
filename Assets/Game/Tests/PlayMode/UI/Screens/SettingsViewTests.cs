@@ -23,6 +23,7 @@ using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.TestTools;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
@@ -37,6 +38,11 @@ namespace Game.Tests.PlayMode.UI.Screens
         { base.Setup(); EventHub.Reset(); Services.Reset(); keyboard = InputSystem.AddDevice<Keyboard>(); }
         [TearDown] public override void TearDown()
         { try { EventHub.Reset(); Services.Reset(); } finally { base.TearDown(); } }
+        // In PlayMode UnityTests the fixture queues Set/Press/Release regardless of queueEventOnly.
+        // Process the event before advancing time or asserting callbacks; a frame yield is unnecessary.
+        void PressNow(ButtonControl button) { Press(button); InputSystem.Update(); }
+        void ReleaseNow(ButtonControl button) { Release(button); InputSystem.Update(); }
+        void TapNow(ButtonControl button) { PressNow(button); ReleaseNow(button); }
         sealed class Window : IDisposable
         {
             internal readonly UITestPanel Panel;
@@ -108,20 +114,20 @@ namespace Game.Tests.PlayMode.UI.Screens
             var list = window.View.Root.Q<ListView>("settings-rebinds"); list.ScrollToItem(row); yield return null;
             window.Click("settings-rebind-" + row); Assert.IsTrue(window.Input.IsRebinding);
             Assert.AreEqual("Press a key…", window.Model.Rebinds[row].BindingText);
-            Press(keyboard.escapeKey); InputSystem.Update(); Release(keyboard.escapeKey);
+            PressNow(keyboard.escapeKey); ReleaseNow(keyboard.escapeKey);
             Assert.IsFalse(window.Input.IsRebinding); Assert.IsTrue(window.View.IsOpen); Assert.AreEqual(-1, window.Model.ListeningRow);
             Assert.AreEqual("F", window.Model.Rebinds[row].BindingText); Assert.AreEqual(InputContext.Menu, window.Input.CurrentContext);
             window.Presenter.StartRebind(row); Assert.IsTrue(window.Input.IsRebinding);
             window.UI.Confirm.Show(DialogTestContext.Confirm(), null);
             Assert.IsFalse(window.Input.IsRebinding, "Covering settings cancels its listening operation.");
             Assert.AreEqual(-1, window.Model.ListeningRow); Assert.IsTrue(window.Input.Controls.Global.enabled);
-            yield return null; PressAndRelease(keyboard.escapeKey);
+            yield return null; TapNow(keyboard.escapeKey);
             Assert.IsFalse(window.UI.Confirm.IsOpen); Assert.IsTrue(window.View.IsOpen);
             window.Presenter.StartRebind(row); Assert.IsTrue(window.Input.IsRebinding);
             window.Presenter.Unbind(); Assert.IsFalse(window.Input.IsRebinding); Assert.AreEqual(-1, window.Model.ListeningRow);
             var model = window.View.Root.dataSource;
             window.Presenter.Bind(); Assert.AreSame(model, window.Model, "Session rebinding preserves the model identity.");
-            yield return null; PressAndRelease(keyboard.escapeKey); Assert.IsFalse(window.View.IsOpen, "Back resumes normal navigation after cancellation.");
+            yield return null; TapNow(keyboard.escapeKey); Assert.IsFalse(window.View.IsOpen, "Back resumes normal navigation after cancellation.");
             // An unrelated input operation remains owned by its caller while settings is closed.
             window.Input.StartRebind("Flight/Interact", 0, _ => { });
             window.Presenter.CancelRebind(); Assert.IsTrue(window.Input.IsRebinding);
@@ -131,7 +137,7 @@ namespace Game.Tests.PlayMode.UI.Screens
         {
             using var window = new Window(keyboard); window.Presenter.SelectTab(2); yield return null;
             int row = window.InteractRow; window.View.Root.Q<ListView>("settings-rebinds").ScrollToItem(row); yield return null;
-            window.Click("settings-rebind-" + row); Press(keyboard.uKey); currentTime += .2; InputSystem.Update(); Release(keyboard.uKey);
+            window.Click("settings-rebind-" + row); PressNow(keyboard.uKey); currentTime += .2; InputSystem.Update(); ReleaseNow(keyboard.uKey);
             Assert.IsFalse(window.Input.IsRebinding); Assert.AreEqual("U", window.Model.Rebinds[row].BindingText);
             yield return null;
             Assert.AreEqual("U", window.View.Root.Query<Label>("settings-rebind-binding").ToList().Single(label => label.parent.parent.userData is int index && index == row).text);
