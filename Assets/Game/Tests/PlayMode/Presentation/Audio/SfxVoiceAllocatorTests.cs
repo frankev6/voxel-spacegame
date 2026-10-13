@@ -64,7 +64,7 @@ namespace Game.Tests.PlayMode.Presentation.Audio
                 for (int i = 0; i < 2; i++) clips.GetArrayElementAtIndex(i).objectReferenceValue = Own(AudioClip.Create("SFX limit " + i, 48000, 1, 48000, false));
                 edit.ApplyModifiedPropertiesWithoutUndo();
             }
-            database.EditorSetDefinitions(new[] { cue });
+            database.EditorSetDefinitions(new List<ContentDefinition> { cue });
             service = new AudioService(config, database, AudioVolumes.Default, parent.transform);
             world = new World("SFX allocation"); world.CreateSystem<SfxEventQueueCreateSystem>();
             service.BindTo(world);
