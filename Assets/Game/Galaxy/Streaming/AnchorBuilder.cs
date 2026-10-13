@@ -24,8 +24,8 @@ namespace Game.Galaxy.Streaming
             var groups = new SortedDictionary<int, List<BodySpec>>();
             foreach (var spec in content.Bodies)
             {
-                if ((spec.State & BodyStateFlags.Destroyed) != 0) continue;
                 var template = galaxy.BodyTemplates[spec.TemplateIndex];
+                if ((spec.State & BodyStateFlags.Destroyed) != 0 && template.StructureSource == StructureSource.None) continue;
                 bool orbit = spec.Orbit.Mode != OrbitMode.Fixed || spec.ParentOrbit.Mode != OrbitMode.Fixed;
                 bool sphere = template.HasCollider && (template.Role == BodyRole.Star || template.Role == BodyRole.Planet || template.Role == BodyRole.Moon);
                 bool interact = template.Interaction != InteractionKind.None && template.StructureSource == StructureSource.None;

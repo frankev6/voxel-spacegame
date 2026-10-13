@@ -5,6 +5,9 @@ using Game.Core.Components;
 using Game.Core.Events;
 using Game.Core.Flow;
 using Game.Data.Definitions;
+using Game.Data.Components;
+using Game.Simulation.Commands;
+using Unity.Transforms;
 using Game.Data.Services;
 using Game.Galaxy.Bodies;
 using Game.Galaxy.Components;
@@ -29,6 +32,13 @@ namespace Game.Galaxy.Services
         readonly Dictionary<ulong, LoadedBody> bodies = new();
         readonly Dictionary<float, BlobAssetReference<Collider>> colliders = new();
         readonly EntityQuery members, chunks, splits, origins, info, worldActive, disposal;
+        readonly EntityQuery players, streaming, blockDefs, orientations, bodyEvents;
+        readonly BlueprintLibrary blueprints;
+        readonly IPersistentIdAllocator ids;
+        readonly ContentCatalog catalog;
+        readonly List<T2Streamer> retiring = new();
+        T2Streamer t2;
+        bool applyingDestruction;
         readonly Entity infoEntity;
         readonly bool ownsInfo;
         StarSystemId target;
@@ -44,7 +54,13 @@ namespace Game.Galaxy.Services
             this.registry = registry != null ? registry : throw new ArgumentNullException(nameof(registry));
             if (blueprints == null || ids == null || catalog == null) throw new ArgumentNullException("Loader dependencies");
             if (!world.IsCreated) throw new ArgumentException("World must be alive", nameof(world));
+            this.blueprints = blueprints; this.ids = ids; this.catalog = catalog;
             var em = world.EntityManager;
+            players = em.CreateEntityQuery(ComponentType.ReadOnly<PlayerShip>(), ComponentType.ReadOnly<LocalTransform>());
+            streaming = em.CreateEntityQuery(ComponentType.ReadOnly<StreamingConfig>());
+            blockDefs = em.CreateEntityQuery(ComponentType.ReadOnly<BlockDefsRef>());
+            orientations = em.CreateEntityQuery(ComponentType.ReadOnly<OrientationTablesRef>());
+            bodyEvents = em.CreateEntityQuery(ComponentType.ReadWrite<BodyGridEventQueue>());
             members = em.CreateEntityQuery(new EntityQueryDesc { All = new[] { ComponentType.ReadOnly<StarSystemMember>() }, Options = EntityQueryOptions.IncludeDisabledEntities });
             chunks = em.CreateEntityQuery(new EntityQueryDesc { All = new[] { ComponentType.ReadOnly<ChunkBody>() }, Options = EntityQueryOptions.IncludeDisabledEntities });
             splits = em.CreateEntityQuery(new EntityQueryDesc { All = new[] { ComponentType.ReadOnly<SplitOrigin>() }, Options = EntityQueryOptions.IncludeDisabledEntities });
@@ -74,7 +90,7 @@ namespace Game.Galaxy.Services
             double time = clocks.IsEmptyIgnoreFilter ? 0 : clocks.GetSingleton<SimClock>().UniversalTime;
             foreach (var spec in content.Bodies)
             {
-                if ((spec.State & BodyStateFlags.Destroyed) != 0) continue;
+                if ((spec.State & BodyStateFlags.Destroyed) != 0 && !galaxy.State.GetOrCreateDelta(Loaded).TryGetStructure(spec.Id.LocalKey, out _)) continue;
                 var template = galaxy.GetBodyTemplate(spec.TemplateIndex);
                 if (template.StructureSource == StructureSource.None) continue;
                 double radius = spec.RadiusM + template.T2LoadDistanceM;
@@ -107,7 +123,8 @@ namespace Game.Galaxy.Services
         }
         public void Tick(in GalaxyFrameContext ctx)
         {
-            CheckAlive(); if (worldActive.IsEmptyIgnoreFilter) return;
+            CheckAlive(); DrainRetired(); if (worldActive.IsEmptyIgnoreFilter) return;
+            DrainBodyEvents();
             if (State == LoaderState.Loading)
             {
                 if (origins.IsEmptyIgnoreFilter) return;
@@ -130,17 +147,18 @@ namespace Game.Galaxy.Services
             {
                 if (anchorsDirty) RefreshAnchors(ctx.UniversalTime);
                 SplitAdoption.Apply(world.EntityManager, splits, Loaded);
+                TickT2(ctx.UniversalTime);
             }
-            // TODO(SYS-006/SYS-007): T2 body grids and T3 asteroid streaming, including arrival readiness.
+            // TODO(SYS-007): T3 asteroid streaming.
         }
         public bool IsSceneReadyComplete(in SceneReadyContext context)
             => context.Scene != GameScene.World || IsArrivalReady;
         public void OnSceneExiting(in SceneExitContext context) { if (context.Scene == GameScene.World) Unload(); }
         public void OnBodyDeltaChanged(BodyId body)
-        { CheckAlive(); if (body.System.Equals(Loaded)) anchorsDirty = true; }
+        { CheckAlive(); if (!applyingDestruction && body.System.Equals(Loaded)) anchorsDirty = true; }
         void RefreshAnchors(double time)
         {
-            FlushStructures(); var em = world.EntityManager; em.CompleteAllTrackedJobs();
+            FlushStructures(); RetireT2(); var em = world.EntityManager; em.CompleteAllTrackedJobs();
             foreach (var body in bodies.Values) if (em.Exists(body.Anchor)) em.DestroyEntity(body.Anchor);
             bodies.Clear(); RetireColliders();
             AnchorBuilder.Create(world, galaxy.Galaxy, galaxy.GetContent(Loaded), time,
@@ -150,14 +168,14 @@ namespace Game.Galaxy.Services
         }
         public void FlushStructures()
         {
-            foreach (var body in bodies.Values)
-                if (body.Grid != Entity.Null) throw new NotImplementedException("SYS-006 structure writeback");
+            world.EntityManager.CompleteAllTrackedJobs();
+            t2?.Flush(); foreach (var old in retiring) old.Flush();
         }
         void Unload()
         {
             if (!world.IsCreated) return;
             State = LoaderState.Unloading; var em = world.EntityManager;
-            FlushStructures(); em.CompleteAllTrackedJobs();
+            FlushStructures(); RetireT2(); em.CompleteAllTrackedJobs();
             if (Loaded.IsValid)
             {
                 // Adopt last-frame pieces before destroying the system's members.
@@ -170,6 +188,53 @@ namespace Game.Galaxy.Services
             if (Loaded.IsValid && galaxy.Galaxy != null) galaxy.ReleaseContent(Loaded);
             bodies.Clear(); Loaded = default; target = default; anchorsDirty = false; State = LoaderState.Idle;
             if (em.Exists(infoEntity)) info.SetSingleton(default(CurrentStarSystemInfo));
+        }
+        void TickT2(double time)
+        {
+            if (retiring.Count != 0 || streaming.IsEmptyIgnoreFilter || blockDefs.IsEmptyIgnoreFilter || orientations.IsEmptyIgnoreFilter) return;
+            var em = world.EntityManager; em.CompleteAllTrackedJobs();
+            if (t2 == null)
+            {
+                var content = new VoxelContent { Blocks = blockDefs.GetSingleton<BlockDefsRef>().Value,
+                    Orientations = orientations.GetSingleton<OrientationTablesRef>().Value };
+                t2 = new T2Streamer(em, galaxy, new BodyGridSpawner(em, registry, blueprints, catalog, content, ids),
+                    galaxy.State.GetOrCreateDelta(Loaded), bodies);
+            }
+            // Initial entry has no player until scene-ready completes. Stream at the actual requested arrival first.
+            double3 origin = origins.GetSingleton<FrameOrigin>().OriginInStarSystem;
+            double3 position = players.IsEmptyIgnoreFilter ? arrival.PositionM : origin + (double3)players.GetSingleton<LocalTransform>().Position;
+            t2.Tick(galaxy.GetContent(Loaded), position, origin, time, streaming.GetSingleton<StreamingConfig>());
+        }
+        void DrainBodyEvents()
+        {
+            if (bodyEvents.IsEmptyIgnoreFilter) return;
+            var em = world.EntityManager; em.CompleteAllTrackedJobs();
+            var queue = bodyEvents.GetSingleton<BodyGridEventQueue>().Events;
+            while (queue.TryDequeue(out var change))
+            {
+                if (!change.Body.System.Equals(Loaded) || !bodies.TryGetValue(change.Body.LocalKey, out var body) ||
+                    body.Grid != change.Grid || !em.Exists(body.Anchor)) continue;
+                t2?.Flush();
+                bool changed;
+                applyingDestruction = true;
+                try { changed = galaxy.MarkBodyDestroyed(change.Body); }
+                finally { applyingDestruction = false; }
+                var anchor = em.GetComponentData<StarSystemBody>(body.Anchor);
+                anchor.Flags |= BodyFlags.Destroyed; em.SetComponentData(body.Anchor, anchor);
+                if (changed) EventBus<BodyDestroyed>.Publish(new BodyDestroyed(change.Body.System.Value, change.Body.LocalKey));
+                if (change.Kind == 1 && em.Exists(change.Grid) && em.HasComponent<GridDespawnRequest>(change.Grid))
+                    GridSpawnApi.RequestDespawn(em, change.Grid);
+            }
+        }
+        void RetireT2()
+        {
+            if (t2 == null) return;
+            t2.BeginRetirement(); retiring.Add(t2); t2 = null;
+        }
+        void DrainRetired()
+        {
+            for (int i = retiring.Count - 1; i >= 0; i--)
+                if (retiring[i].DrainRetired()) { retiring[i].Dispose(); retiring.RemoveAt(i); }
         }
         void RetireColliders()
         {
@@ -185,9 +250,12 @@ namespace Game.Galaxy.Services
         public void Dispose()
         {
             if (disposed) return;
-            Unload(); disposed = true; registry.RemoveSpawnHook(hook); galaxy.SetLiveDeltaSink(null);
+            Unload(); DrainRetired();
+            if (retiring.Count != 0) throw new InvalidOperationException("Loader disposal requires completed grid/read retirement.");
+            disposed = true; registry.RemoveSpawnHook(hook); galaxy.SetLiveDeltaSink(null);
             if (!world.IsCreated) return;
             if (ownsInfo && world.EntityManager.Exists(infoEntity)) world.EntityManager.DestroyEntity(infoEntity);
+            players.Dispose(); streaming.Dispose(); blockDefs.Dispose(); orientations.Dispose(); bodyEvents.Dispose();
             members.Dispose(); chunks.Dispose(); splits.Dispose(); origins.Dispose(); info.Dispose(); worldActive.Dispose(); disposal.Dispose();
         }
     }

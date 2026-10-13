@@ -32,7 +32,7 @@ namespace Game.Galaxy.Streaming
             var entity = Entities[index]; var spec = Specs[index];
             double3 position = OrbitMath.Position(spec, Time);
             var transform = LocalTransform.FromPositionRotation(MathD.ToLocal(position, Origin), Planar.YawRotation(spec.YawRad));
-            Bodies[entity] = new StarSystemBody { Id = spec.Id, TemplateIndex = spec.TemplateIndex, RadiusM = spec.RadiusM, Flags = Flags };
+            Bodies[entity] = new StarSystemBody { Id = spec.Id, TemplateIndex = spec.TemplateIndex, RadiusM = spec.RadiusM, Flags = Flags | ((spec.State & BodyStateFlags.Destroyed) != 0 ? BodyFlags.Destroyed : BodyFlags.None) };
             Positions[entity] = new UniversePosition { Value = position };
             Transforms[entity] = transform; Matrices[entity] = new LocalToWorld { Value = transform.ToMatrix() };
             if (Orbiting != 0) Orbits[entity] = new BodyOrbit { Orbit = spec.Orbit, ParentOrbit = spec.ParentOrbit };

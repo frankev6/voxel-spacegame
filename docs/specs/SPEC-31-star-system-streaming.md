@@ -320,7 +320,7 @@ Projectiles are cleared by SPEC-21 when the origin record reports a star-system 
 
 ### 5.4 T2: voxel bodies
 
-Per frame (marker `StarSystemLoader.T2`), with the player root position `p` (read with `EntityManager.GetComponentData<LocalTransform>`; allowed outside the fixed step, one sync per frame; no player → skip T2/T3):
+Per frame (marker `StarSystemLoader.T2`), with the player root position `p` (read with `EntityManager.GetComponentData<LocalTransform>`; allowed outside the fixed step, one sync per frame; no player → T2 uses the requested arrival while entry waits for readiness; T3 remains skipped (Q16)):
 1. For each `LoadedBody b` with `WantsGrid` (in body order): `d = max(0, |p − anchorPos| − RadiusM)`; load if `Grid == Null && !GridRequested && d < t2LoadDistanceM`; unload if `Grid != Null && d > t2LoadDistanceM × T2UnloadFactor`.
 2. Loads, at most `MaxGridSpawnsPerFrame` per frame in body order:
    1. Source: delta has a structure for this body → that structure (registered; `WriteBack` if `PersistDamage`); else template `structureSource`: `Blueprint` → `blueprints.TryGet`; `ProceduralShape` → `ProceduralShapeBuilder.Build(shape, seed)` (§5.8). If `destructible` and the source has ≤ `PersistDamageMaxCells` cells and it is not already owned → `clone = source.Clone()`, register it, `WriteBack`, `PersistDamage = 1`; else spawn from the blueprint hash / registered procedural structure without `WriteBack`.
@@ -627,6 +627,8 @@ sequenceDiagram
 | 14 | T1 task cannot install the scene-ready hook before T2 exists, while T2 depends on T1 | Resolved: accept SYS-004 after its five T1 lifecycle cases pass, preserving real IsAreaReady checks (false for missing nearby grids). SYS-006 owns live loader registration with actual T2 construction and arrival readiness. This avoids a circular task gate without pretending streamed stations exist or weakening readiness. | Tech lead — ledger Q357 |
 
 | 15 | T2 whole-spec dependencies include advisory gates, balance and M4 work | Resolved: completed SYS-003/004 and integrated DMG-014, WPN-012, AI-010 provide shape/grid ownership, destruction, weapon and AI runtime. Later tuning, scenarios and M4 extensions do not gate T2. Preserve all five functional cases and real scene composition. | Tech lead — ledger Q358 |
+
+| 16 | Scene readiness requires nearby T2 grids before the player is spawned, but §5.4 originally skipped all streaming without a player | Resolved: during initial entry, T2 measures from the actual requested arrival in star-system coordinates; once present, use the player position. Preserve grid-complete readiness, including persisted hulks. No fabricated player or always-ready fallback; T3 still waits for a player. | Tech lead — ledger Q359 |
 
 ## 11. References
 
