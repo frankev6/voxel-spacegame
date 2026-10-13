@@ -860,11 +860,11 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 - **Do:** Create `ShipDestroyed` (§4.6b) and `ShipDestroyedBridgeSystem`; register the queue and the channel (SPEC-02 §5.6 rule 3). Change SPEC-13's `DrainCoreLost` comment to name this system as its caller. The `EncounterTag` read is added by SPEC-33 ENC-007 (step 2 of its Do).
 - **Files:** `Assets/Game/Core/Events/ShipDestroyed.cs`; `Assets/Game/Simulation/Weapons/ShipDestroyedBridgeSystem.cs`; `Assets/Game/Simulation/AssemblyInfo.cs`; `Assets/Game/Presentation/Systems/ManagedEventChannels.cs` (one line); `Assets/Game/Tests/EditMode/Simulation/Weapons/ShipDestroyedBridgeTests.cs`
 - **Acceptance criteria:**
-  - [ ] A core loss on an AI ship with `Allegiance.Faction = 3` spawned from blueprint B publishes exactly one `ShipDestroyed { Blueprint = B, Faction = 3, IsPlayer = 0, Kind = 0 }` on the `EventBus` the same frame.
-  - [ ] A core loss on the player ship gives `IsPlayer = 1`.
-  - [ ] A ship killed by a craft with `OwnedBy { Owner = player root }` reports `KillerIsPlayer = 1` and the player's `KillerPersistentId` (review X6).
-  - [ ] Two core losses in one tick are published in ascending `PersistentId` order.
-  - [ ] A grid destroyed before the bridge runs still yields an event with its `PersistentId` and `Faction = 255`.
+  - [x] A core loss on an AI ship with `Allegiance.Faction = 3` spawned from blueprint B publishes exactly one `ShipDestroyed { Blueprint = B, Faction = 3, IsPlayer = 0, Kind = 0 }` on the `EventBus` the same frame.
+  - [x] A core loss on the player ship gives `IsPlayer = 1`.
+  - [x] A ship killed by a craft with `OwnedBy { Owner = player root }` reports `KillerIsPlayer = 1` and the player's `KillerPersistentId` (review X6).
+  - [x] Two core losses in one tick are published in ascending `PersistentId` order.
+  - [x] A grid destroyed before the bridge runs still yields an event with its `PersistentId` and `Faction = 255`.
 - **Tests:** `ShipDestroyedBridgeTests.AiShip_FieldsFilled`, `.Player_IsPlayer`, `.SameTick_SortedById`, `.DestroyedGrid_StillReported`.
 
 ### WPN-018 — Weapon power demand and weapon stats

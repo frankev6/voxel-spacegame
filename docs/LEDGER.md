@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 59 | 5 | 0 | 0 | 27 | 0 | 91 | 5 |
-| M3 | 171 | 7 | 0 | 0 | 2 | 0 | 180 | 4 |
+| M2 | 59 | 1 | 0 | 0 | 31 | 0 | 91 | 6 |
+| M3 | 171 | 1 | 0 | 0 | 8 | 0 | 180 | 12 |
 | M4 | 13 | 1 | 0 | 0 | 0 | 0 | 14 | 2 |
 | A0 | 6 | 2 | 0 | 1 | 7 | 0 | 16 | 0 |
 | A1 | 30 | 0 | 0 | 0 | 0 | 0 | 30 | 1 |
@@ -218,7 +218,7 @@
 | FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | todo |  |  |  |  |
 | FND-020 | Playable stationary-target shooting and physical breakup | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-017, FND-018, FLT-001, DMG-001, WPN-001, VFX-001 | yes | done | astra (gpt-6) | 2026-10-12 | 53e61db | Playable station/Space fire; review fixes: bounded integrity, canonical masks, allocation attribution, stronger image checks; default suites green; perf advisory |
 | FND-021 | Automatic aligned test station in World | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-020, SPEC-63 | yes | done | astra (gpt-6) | 2026-10-13 | c3bb396 | Automatic World station at Y=-2 m; idempotent range request; direct World Play verified; spec-required: 1 (existing feature test extended), extra: 0 |
-| DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
+| DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | yes | todo |  |  |  |  |
 | PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | 094f430 | Pair-specific grace; three required tests. Full EM 861/0/1, PM 121/0/53; compile clean. |
 | DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-12 | e3377fa | Four channels, owned phase memory, stable explosion drains; 5 tests; Q179–180 |
 | DMG-003 | Damage config asset and boot hookup | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-001 | yes | done | astra (gpt-6) | 2026-10-12 | c1d6af2 | Shipped config/4 damage types/4 armor classes, validation and boot-owned table; 3 tests; Q181 |
@@ -252,10 +252,10 @@
 | WPN-013 | Weapon performance gates | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, TST-001 | no | todo |  |  |  |  |
 | WPN-014 | Weapon balance pass | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, SPEC-72 | no | todo |  |  |  |  |
 | WPN-015 | Harness hooks | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | no | todo |  |  |  |  |
-| WPN-017 | ShipDestroyed payload and bridge | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, DMG-001, CORE-001 | yes | in-progress | combat (gpt-6.1-sol) | 2026-10-13 |  | Claimed centrally under ADR-0062; worker implementation, lead validation. |
+| WPN-017 | ShipDestroyed payload and bridge | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, DMG-001, CORE-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | ec9a6f1 | Canonical destruction event bridge; 4 required tests; full batch 901 EM / 128 PM, zero failures |
 | WPN-018 | Weapon power demand and weapon stats | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, WPN-007, PWR-001 | no | todo |  |  |  |  |
 | PWR-001 | Public contract types | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | CORE-001, DATA-001, VOX-001, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | eeed571 | Canonical declarations; three required tests; Q202 deferred allocator ordering. Full batch green. |
-| PWR-002 | Shield maths | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001 | yes | in-progress | power (gpt-6.1-sol) | 2026-10-13 |  |  |
+| PWR-002 | Shield maths | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 08c5f01 | Shield intersections, containment and overlap; 5 required tests; full batch 901 EM / 128 PM, zero failures |
 | PWR-003 | Tuning definition, baker and spawn helper | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001, SPEC-04 | no | todo |  |  |  |  |
 | PWR-004 | Registration and `PowerInitSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-003, WPN-001, VOX-001, SPEC-10 | no | todo |  |  |  |  |
 | PWR-005 | `PowerAllocationSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-004, ABL-001 | no | todo |  |  |  |  |
@@ -275,12 +275,12 @@
 | AI-010 | AI combat scenarios | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007, AI-008, SPEC-21, SPEC-22 | no | todo |  |  |  |  |
 | AI-011 | AI determinism | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010 | no | todo |  |  |  |  |
 | AI-012 | AI and hash performance | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010, TST-001 | no | todo |  |  |  |  |
-| ABL-001 | Public contract types | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | CORE-001, DATA-001, PWR-001 | yes | in-progress | power (gpt-6.1-sol) | 2026-10-13 |  | Ready parallel contracts; PWR-001 validated. |
+| ABL-001 | Public contract types | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | CORE-001, DATA-001, PWR-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 1bc7515 | Canonical ability contracts; 48-byte slot; 1 required test; full batch 901 EM / 128 PM, zero failures |
 | ABL-002 | Ability content and boot singleton | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-001, SPEC-04 | no | todo |  |  |  |  |
 | ABL-003 | AbilitySystem | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | frontier | ABL-002, SPEC-20, SPEC-22 | no | todo |  |  |  |  |
 | ABL-004 | Effect systems | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-003, SPEC-22 | no | todo |  |  |  |  |
 | ABL-005 | Ability scenarios and frame-rate independence | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-004, SPEC-21 | no | todo |  |  |  |  |
-| CAM-008 | Screen shake from FxEvents | [SPEC-62](specs/SPEC-62-camera.md) | M2 | standard | CAM-005, SPEC-63 | yes | in-progress | content (gpt-6.1-sol) | 2026-10-13 |  | Claimed centrally under ADR-0062; worker implementation, lead validation. |
+| CAM-008 | Screen shake from FxEvents | [SPEC-62](specs/SPEC-62-camera.md) | M2 | standard | CAM-005, SPEC-63 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 9d59a62 | Impact shake and borrowed frame reader; Boot binding e265f13; 7 required tests; full batch 901 EM / 128 PM, zero failures |
 | VFX-002 | FxRig: slots, effects, buffers and binding | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-12 | f2b8118 | Session rig, graph validation, pooled/batched/instanced resources and binding; 5 GPU tests pass; final content budget advisory follow-up in VFX-004 |
 | VFX-003 | FxUploadSystem: drain, batch, submit, stats | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002 | yes | done | astra (gpt-6) | 2026-10-12 | f24d8c1 | Guarded drain even unbound, bounded batching/submission, lifetime accounting and stats; 12 required tests; visible content and boot binding next in VFX-004 |
 | VFX-004 | Template graphs and content assets for hits, explosions, muzzle and shield sparks | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | yes | done | astra (gpt-6) | 2026-10-12 | 7327e4c | Authored hit/muzzle/explosion/shield-spark/ram content, boot binding and real firing hooks; 3 required GPU/content tests; complete GPU/native memory total remains advisory follow-up |
@@ -313,12 +313,12 @@
 | PERS-014 | Regression scenario 04-B1: load after a content change (end to end) | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | standard | PERS-010, SPEC-01, SPEC-50, SPEC-61, TST-001 | no | todo |  |  |  |  |
 | PERS-015 | Full-world round trip with all real participants | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-011, PERS-012, SPEC-01, SPEC-30, SPEC-31, SPEC-33, SPEC-40, SPEC-41, SPEC-42, SPEC-50 | no | todo |  |  |  |  |
 | VOX-020 | Incremental grid edits for the editor preview | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M3 | frontier | VOX-014 | yes | todo |  |  |  |  |
-| PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | yes | in-progress | power (gpt-6.1-sol) | 2026-10-13 |  | Independent ready task during PWR-001 central validation; ADR-0062. |
+| PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | a606bfc | Restored-cell mass accumulator; ownership fixture repair; 1 required test; full batch 901 EM / 128 PM, zero failures |
 | DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | yes | todo |  |  |  | partial in DMG-002: channels/contracts and readback / impulse consumer and bounded heal/place passes with nine required tests |
 | AI-013 | Fleet data and formations | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-003 | no | todo |  |  |  |  |
 | AI-014 | FleetSystem and member thinking | [SPEC-23](specs/SPEC-23-ai.md) | M3 | frontier | AI-013, AI-007 | no | todo |  |  |  |  |
 | AI-015 | Fleet and swarm scenario and performance | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-014 | no | todo |  |  |  |  |
-| GAL-001 | Public contract types | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | CORE-001, DATA-001, VOX-001, NAR-001 | no | todo |  |  |  |  |
+| GAL-001 | Public contract types | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | CORE-001, DATA-001, VOX-001, NAR-001 | yes | todo |  |  |  |  |
 | GAL-002 | Orbit math | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | no | todo |  |  |  |  |
 | GAL-003 | Definitions, properties and validator | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | no | todo |  |  |  |  |
 | GAL-004 | GalaxyDefBuilder and layout job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-003 | no | todo |  |  |  |  |
@@ -369,12 +369,12 @@
 | ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | no | todo |  |  |  |  |
 | ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | no | todo |  |  |  |  |
 | ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-009, SPEC-70 | no | todo |  |  |  |  |
-| NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | in-progress | combat (gpt-6.1-sol) | 2026-10-13 |  | Independent ready task while lead integrates validated batches. |
-| NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | no | todo |  |  |  |  |
+| NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | e39b2d3 | Narrative contracts and precise future-task stubs; 2 required tests; full batch 901 EM / 128 PM, zero failures |
+| NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | todo |  |  |  |  |
 | NAR-003 | Type checker, registry, compiler and binder | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-002 | no | todo |  |  |  |  |
 | NAR-004 | Condition and expression nodes | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003 | no | todo |  |  |  |  |
 | NAR-005 | Effect nodes and atomic effect lists | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-004 | no | todo |  |  |  |  |
-| NAR-006 | Fact catalog and reference resolvers | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | no | todo |  |  |  |  |
+| NAR-006 | Fact catalog and reference resolvers | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | todo |  |  |  |  |
 | NAR-007 | FactStore | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-006 | no | todo |  |  |  |  |
 | NAR-008 | FACT save participant | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007, PERS-001 | no | todo |  |  |  |  |
 | NAR-009 | Import-time compile pipeline | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, NAR-006 | no | todo |  |  |  |  |
@@ -388,7 +388,7 @@
 | NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | no | todo |  |  |  |  |
 | NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | no | todo |  |  |  |  |
 | NAR-020 | LogicWatcher | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-004 | no | todo |  |  |  |  |
-| DLG-001 | Public contract types | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | NAR-001, UI-001 | no | todo |  |  |  |  |
+| DLG-001 | Public contract types | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | NAR-001, UI-001 | yes | todo |  |  |  |  |
 | DLG-002 | Dialog script parser | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, SPEC-40 | no | todo |  |  |  |  |
 | DLG-003 | Dialog validator rules and generated files | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-002 | no | todo |  |  |  |  |
 | DLG-004 | Yarn Spinner 3 compatibility spike | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-002 | no | todo |  |  |  |  |
@@ -444,13 +444,13 @@
 | EDT-022 | Editor host, input, presenter and leave prompt | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-011, EDT-015, EDT-019, EDT-021, SPEC-62, INP-001 | no | todo |  |  |  |  |
 | EDT-023 | Lab and ship-edit scene flow; R16/R19 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, SPEC-01, SPEC-31 | no | todo |  |  |  |  |
 | EDT-024 | Editor performance gates | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, TST-001 | no | todo |  |  |  |  |
-| UI-008 | Meter, Slot and TabBar controls | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-007 | yes | in-progress | content (gpt-6.1-sol) | 2026-10-13 |  | Ready independent M3 task while M2 batch validates; ADR-0062. |
-| UI-009 | Tooltip service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | no | todo |  |  |  |  |
-| UI-010 | Notification service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | no | todo |  |  |  |  |
-| UI-011 | Confirm dialog and text prompt | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-005, UI-008 | no | todo |  |  |  |  |
-| UI-012 | Layout, contrast and allegiance-colour audits | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | frontier | UI-008 | no | todo |  |  |  |  |
+| UI-008 | Meter, Slot and TabBar controls | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-007 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 90c13ad | Meter, Slot and scrolling TabBar; 7 required tests; full batch 901 EM / 128 PM, zero failures |
+| UI-009 | Tooltip service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | yes | todo |  |  |  |  |
+| UI-010 | Notification service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | yes | todo |  |  |  |  |
+| UI-011 | Confirm dialog and text prompt | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-005, UI-008 | yes | todo |  |  |  |  |
+| UI-012 | Layout, contrast and allegiance-colour audits | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | frontier | UI-008 | yes | todo |  |  |  |  |
 | UI-013 | Accessibility options | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-010, UI-012 | no | todo |  |  |  |  |
-| HUD-001 | Public contract types | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | UI-001, CORE-001, CAM-001 | yes | in-progress | combat (gpt-6.1-sol) | 2026-10-13 |  | Ready independent M3 task while M2 batch validates; ADR-0062. |
+| HUD-001 | Public contract types | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | UI-001, CORE-001, CAM-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | a983d88 | Screen/VM/snapshot contracts; static notification lifetime fix f847997; 3 required tests; full batch 901 EM / 128 PM, zero failures |
 | HUD-002 | UI composition, screen registration and root switching | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-60, FND-001 | no | todo |  |  |  |  |
 | HUD-003 | Main menu and new game | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
 | HUD-004 | Save and load slots | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, PERS-001 | no | todo |  |  |  |  |
@@ -472,8 +472,8 @@
 | HUD-020 | Full-screen layout regression suite | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-003, HUD-004, HUD-005, HUD-006, HUD-007, HUD-011, HUD-012, HUD-013, HUD-014, HUD-016, HUD-017, HUD-018, HUD-019 | no | todo |  |  |  |  |
 | CAM-006 | Origin warp and teleport cut | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, GAL-001 | no | todo |  |  |  |  |
 | CAM-007 | Occlusion pull-in | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, PHY-001 | yes | todo |  |  |  |  |
-| CAM-009 | Editor orbit mode | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-005 | yes | in-progress | content (gpt-6.1-sol) | 2026-10-13 |  | Independent ready task while lead integrates validated batches. |
-| CAM-010 | Map view transform | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-001 | yes | in-progress | power (gpt-6.1-sol) | 2026-10-13 |  | Independent ready task while lead integrates validated batches. |
+| CAM-009 | Editor orbit mode | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-005 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 21e43a1 | Editor orbit, bounded pan/zoom, snap/focus and suppression; 6 required tests; full batch 901 EM / 128 PM, zero failures |
+| CAM-010 | Map view transform | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 014ed0b | Map transforms, zoom anchoring, framing and clamps; 6 required tests; full batch 901 EM / 128 PM, zero failures |
 | VFX-013 | Floating-origin shift and clears | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | frontier | VFX-003, GAL-001, SYS-001, FND-001 | no | done | astra (gpt-6) | 2026-10-13 | b575efe | Canonical rebase anchors, reset/system clears, idle reset; gameplay streaming remains open; spec-required: 5, extra: 0 |
 | VFX-014 | Warp effect and strict config validation | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | standard | VFX-004, TRV-001 | no | done | astra (gpt-6) | 2026-10-13 | b575efe | 600-particle pooled warp with oldest stealing, all 13 defaults strict; travel gameplay remains open; spec-required: 3, extra: 0 |
 | AUD-011 | GATE: Owner confirms licences of the carried-over audio | [SPEC-64](specs/SPEC-64-audio.md) | M3 | standard | AUD-010 | yes | todo |  |  |  |  |
@@ -895,6 +895,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Validated worker batch integrated to main — astra (gpt-6)
+
+1. WPN-017, CAM-008, PHY-022, PWR-002, ABL-001, HUD-001, UI-008, CAM-009, CAM-010 and NAR-001 validated together on lead branch: compile clean; full EditMode 901/0/1 and PlayMode 128/0/53. Individual required counts respectively 4/7/1/5/1/3/7/6/6/2; extra: 0 for each. Evidence Logs/playtest/orchestration-batch2/. Physical chunks remain on the lead branch while live contact repair is verified.
+2. Main receives the completed worker implementations and readonly notification/NativeArray fixture repairs. Camera framing fixture explicitly disables shake to isolate the specified pre-shake framing contract. Next workers: DATA-010 and UI-009. Local integration only; no new owner gate or tuning pass.
 
 ### 2026-10-13 — PHY-014, PWR-001, MIG-011 batch complete — astra (gpt-6)
 

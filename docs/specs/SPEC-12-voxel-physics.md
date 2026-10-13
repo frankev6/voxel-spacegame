@@ -1113,7 +1113,7 @@ Start from `PhysicsStep.Default`, then: `SimulationType = UnityPhysics`, `Gravit
 - **Do:** Implement §5.11 step 1b (`GridMassAddJob` over `BeginRestoredRead`). It goes live with SPEC-13 DMG-019; until then `BeginRestoredRead` returns empty arrays.
 - **Files:** `Assets/Game/Voxel/PhysicsBody/{GridMassUpdateSystem,GridMassAddJob}.cs`, `Assets/Game/Tests/EditMode/Voxel/PhysicsBody/GridMassRestoreTests.cs`
 - **Acceptance criteria:**
-  - [ ] Removing then restoring the same cells returns mass, centre of mass and tensor to their original values within 1e-9 relative.
+  - [x] Removing then restoring the same cells returns mass, centre of mass and tensor to their original values within 1e-9 relative.
 - **Tests:** `GridMassRestoreTests.RemoveThenRestore_RoundTrips`.
 
 ### PHY-023 — Urgent collider deadlines across catch-up frames

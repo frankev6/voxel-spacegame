@@ -618,10 +618,10 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 - **Do:** Implement `ShieldMath` exactly as §4.4 (Burst-compatible, `math` only).
 - **Files:** `Assets/Game/Simulation/Power/ShieldMath.cs`
 - **Acceptance criteria:**
-  - [ ] Segment from (−10,0,0) to (10,0,0) against a unit sphere at origin enters at `t = 0.45`.
-  - [ ] Segment starting inside never enters; zero-length segment never enters.
-  - [ ] Ellipsoid radii (4,1,2): `Contains((3.9,0,0))` true, `Contains((0,1.1,0))` false.
-  - [ ] 10,000 seeded random segments (`RngStreams.For(1, RngPurpose.Test, 0)`) agree with a brute-force 1,000-step march within 1e-3 in `t`.
+  - [x] Segment from (−10,0,0) to (10,0,0) against a unit sphere at origin enters at `t = 0.45`.
+  - [x] Segment starting inside never enters; zero-length segment never enters.
+  - [x] Ellipsoid radii (4,1,2): `Contains((3.9,0,0))` true, `Contains((0,1.1,0))` false.
+  - [x] 10,000 seeded random segments (`RngStreams.For(1, RngPurpose.Test, 0)`) agree with a brute-force 1,000-step march within 1e-3 in `t`.
 - **Tests:** `Assets/Game/Tests/EditMode/Simulation/Power/ShieldMathTests.cs`: `SegmentEnters_UnitSphere`, `SegmentEnters_FromInside_False`, `Contains_Ellipsoid`, `SphereOverlaps_Conservative`, `SegmentEnters_MatchesBruteForce`.
 
 ### PWR-003 — Tuning definition, baker and spawn helper

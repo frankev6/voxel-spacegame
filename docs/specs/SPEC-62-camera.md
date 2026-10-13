@@ -261,6 +261,8 @@ Per tick:
 
 `FocusOn(float3 center, float radius)`: `pivotTarget = center; edDistanceTarget = clamp(radius * EditorFocusPadding / sin(radians(VerticalFovDeg / 2)), EditorMinDistance, MaxEd)`. `SetEditorSuppression(bool zoom, bool orbit)` sets the flags; they reset to false on every `SetMode`.
 
+`FocusPressed` calls `FocusOn(boundsCenter, boundsRadius)` after the view keys; selection-specific framing is supplied through the public `FocusOn` API. `Focus`, `CurrentDistance` and `YawDeg` expose the editor pivot/distance/yaw while in EditorOrbit, leaving flight filter state separate. A reduced-motion mode entry copies the editor targets immediately, just as an explicit cut does (Q18).
+
 ### 5.5 Flow
 
 ```mermaid
@@ -447,10 +449,10 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Do:** Implement `AddImpulse`, shake in `Tick`, `FxFrameReader : IFxFrameReader` over SPEC-63 (§10 Q4), §5.1 step 6, and the default `ShakeRules` rows in `CameraConfig.asset` (§10 Q5).
 - **Files:** `Assets/Game/Presentation/Services/{CameraRigService,FxFrameReader}.cs`, `Assets/Game/Presentation/Systems/CameraTargetSyncSystem.cs`, `Assets/Game/Presentation/Data/{ShakeRule.cs,CameraConfig.asset}`
 - **Acceptance criteria:**
-  - [ ] An impulse of strength 1 at distance 0 gives trauma 1, which decays to 0 in 1/1.4 s.
-  - [ ] An impulse beyond its radius adds nothing.
-  - [ ] `ShakeScale = 0` or reduce motion → output pose identical to the unshaken pose.
-  - [ ] The logical `Focus` is never changed by shake.
+  - [x] An impulse of strength 1 at distance 0 gives trauma 1, which decays to 0 in 1/1.4 s.
+  - [x] An impulse beyond its radius adds nothing.
+  - [x] `ShakeScale = 0` or reduce motion → output pose identical to the unshaken pose.
+  - [x] The logical `Focus` is never changed by shake.
 - **Tests:** `Assets/Game/Tests/EditMode/Presentation/CameraShakeTests.cs`: `Impulse_AtZero_TraumaOne`, `Trauma_Decays`, `Impulse_BeyondRadius_Ignored`, `ShakeScaleZero_NoOffset`, `ReduceMotion_NoOffset`, `Shake_DoesNotMoveFocus`, `Over256Events_Capped`.
 
 ### CAM-009 — Editor orbit mode
@@ -460,10 +462,10 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Do:** Implement `EnterEditorOrbit`, `FocusOn`, `SnapView`, `SetEditorSuppression`, the editor branch of `Tick`, and the editor actions in `InputCameraInput`.
 - **Files:** `Assets/Game/Presentation/Services/CameraRigService.cs`, `Assets/Game/Presentation/Input/InputCameraInput.cs`
 - **Acceptance criteria:**
-  - [ ] Entering with radius 10 → distance 30 m, yaw 45°, pitch 30°.
-  - [ ] Pitch clamps at ±89°; pan keeps the pivot within bounds + 50 m.
-  - [ ] `SetEditorSuppression(zoom: true, …)` ignores scroll; `SetMode` clears suppression.
-  - [ ] `FocusOn` frames a sphere of the given radius inside the vertical FOV.
+  - [x] Entering with radius 10 → distance 30 m, yaw 45°, pitch 30°.
+  - [x] Pitch clamps at ±89°; pan keeps the pivot within bounds + 50 m.
+  - [x] `SetEditorSuppression(zoom: true, …)` ignores scroll; `SetMode` clears suppression.
+  - [x] `FocusOn` frames a sphere of the given radius inside the vertical FOV.
 - **Tests:** `Assets/Game/Tests/EditMode/Presentation/EditorOrbitCameraModeTests.cs`: `Enter_DefaultPose`, `Orbit_PitchClamped`, `Pan_PivotClamped`, `Zoom_Suppressed`, `SnapViews_Angles`, `FocusOn_SphereFitsFov`.
 
 ### CAM-010 — Map view transform
@@ -473,9 +475,9 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Do:** Implement `MapViewTransform` methods exactly as documented in §4.3 (double precision; zoom factor 0.85 per step; `Frame` uses the larger of the two axis fits).
 - **Files:** `Assets/Game/UI/Data/MapViewTransform.cs`
 - **Acceptance criteria:**
-  - [ ] `ViewToMap(MapToView(p)) == p` within 1e-9 relative for |p| ≤ 1e12.
-  - [ ] `ZoomAt(cursor, s)` keeps the map point under the cursor fixed (±0.01 px).
-  - [ ] Zoom clamps to `[MinUnitsPerPixel, MaxUnitsPerPixel]`.
+  - [x] `ViewToMap(MapToView(p)) == p` within 1e-9 relative for |p| ≤ 1e12.
+  - [x] `ZoomAt(cursor, s)` keeps the map point under the cursor fixed (±0.01 px).
+  - [x] Zoom clamps to `[MinUnitsPerPixel, MaxUnitsPerPixel]`.
 - **Tests:** `Assets/Game/Tests/EditMode/UI/MapViewTransformTests.cs`: `RoundTrip_Exact`, `ZoomAt_KeepsPointUnderCursor`, `Zoom_Clamped`, `Pan_MovesOppositeToDrag`, `Frame_FitsBoxWithPadding`, `ClampCenter_StaysInside`.
 
 ### CAM-011 — Camera performance and framing tests
@@ -521,6 +523,8 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 | 14 | M1 camera performance task references occlusion/origin paths implemented in M3 | Measure actual no-occlusion CPU/GC now; extend the same timing test in CAM-007 | Tech lead | Resolved CAM-011: enforce 0.05 ms without a raycast, not the looser 0.15 ms label. CAM-007 explicitly owns the real-raycast fixture and 0.15 ms evidence; CAM-006 owns origin accuracy. The ten-second circle advances from the same clamped unscaled dt as the production bridge; captureDeltaTime does not fix unscaledDeltaTime in this Editor (verified by the initial test failure). A real-time timeout bounds a stalled clock. Allocation measurement covers the inclusive bridge/rig update, excluding fixture mutation and assertions. |
 | 15 | Fast close-zoom flight pushes the imported Fighter out of frame despite fitting while stationary | Clip the output focus translation against the actual solid-bounds frustum | Tech lead | Resolved CAM-012: use CellMin/CellMax bounds, not brick capacity or a corner-centered radius. Keep damping state and zoom/orbit intact; retain as much desired focus displacement as all bounds permit. Center the hull when deliberate close zoom cannot fit it. Internal bounds handoff only; public camera and ECS contracts unchanged. |
 | 16 | The VFX uploader retains its drained list but has no camera view; generic shake-kind names differ from the actual enum | Borrow an internal read-only view of the completed drain, valid for the current rendered frame and consumed synchronously after FxUploadSystem; preserve existing allocation/disposal and queue ownership. Configure both ExplosionSmall/ExplosionLarge at 0.5 / 300 m, RamImpact at 0.4 / 200 m and both HitKinetic/HitEnergy at 0.05 / 80 m; omit ship-destroyed because no such FxKind exists | Tech lead | CAM-008 implements this default. Lead owns GameComposition binding under ADR-0062. |
+| 17 | CAM-010's universal 1e-9 round-trip criterion cannot hold through its binding float2 pixel API: at Center=0, UnitsPerPixel=1, ViewSize=(1024,768), p=(0.123456789,0), pixel rounding alone loses about 1.7e-5 map units | Preserve public signatures and exact formulas, compute in double until the final pixel cast, and keep the 1e-9 assertion on independently selected pixel-representable/conditioned points up to 1e12. General inverse error includes UnitsPerPixel times half a pixel float ULP plus double arithmetic error; no universal 1e-9 claim. Zoom anchoring similarly requires double map resolution finer than 0.01 pixel. Frame requires positive viewport area after padding and configured positive ordered zoom limits | Tech lead | CAM-010 records this limitation for lead review; no signature or assembly change. |
+| 18 | Focus key has no selection payload, and editor-mode public pose getters/reduced-motion entry need explicit semantics | Focus key frames the configured whole bounds; hosts frame selections through FocusOn. Pose getters expose editor state in EditorOrbit; reduced-motion entry snaps targets as an explicit cut does | Tech lead | CAM-009 uses these defaults and the already implemented INP-006 Editor input adapter; no public signatures or shared composition changes. |
 
 ## 11. References
 

@@ -547,7 +547,7 @@ Examples: `has_item("resource_palladium", 3) and not $gate_ark_start_active` · 
 
 ### 4.7 Function registry (the complete vocabulary)
 
-`LogicFunctionRegistry` (`Game.Data.Logic`) is an immutable table created once in a `static readonly` field (immutable, so no reset is needed). Each `LogicFunctionInfo` has: `Name`, `IsEffect`, `ReturnType` (conditions), `Params` (`LogicParamInfo{Name, ArgKind, RefKind, bool Optional, int DefaultInt}`), `AllowedUsage`, `Flow` (effects), `Milestone`, and two factories: `CreateNode(boundArgs)` and `Invoke(ILogicContext, ReadOnlySpan<LogicValue>)` (used by Yarn, SPEC-41 §5.4). `LogicValue` is `readonly struct { LogicType Type; int Int; string Text; }`.
+`LogicFunctionRegistry` (`Game.Data.Logic`) is an immutable table created once in a `static readonly` field (immutable, so no reset is needed). Each `LogicFunctionInfo` has: `Name`, `IsEffect`, `ReturnType` (conditions), `Params` (`LogicParamInfo{Name, ArgKind, RefKind, bool Optional, int DefaultInt}`), `AllowedUsage`, `Flow` (effects), `Milestone`, and two factories: `object CreateNode(ReadOnlySpan<object> boundArgs)` and `LogicValue Invoke(ILogicContext context, ReadOnlySpan<LogicValue> args)` (used by Yarn, SPEC-41 §5.4). `CreateNode` preserves bound `IIntExpr`/`ICondition` nodes, references and literals; it does not prematurely evaluate them into `LogicValue`. The returned node implements the registry-selected `ICondition`, `IIntExpr` or `IEffect`. `LogicValue` is `readonly struct { LogicType Type; int Int; string Text; }`. Both factory bodies remain `TODO(NAR-003)` throwing stubs in NAR-001 (Q12).
 
 **Conditions** (dependencies in brackets; `AC` = `AnyCondition`, `D` = `DialogCondition`, `Q` = `QuestObjective`):
 
@@ -1168,12 +1168,12 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 - **Milestone:** M3
 - **Tier:** standard — transcribes the exact code of §4.2–§4.5, §4.10, §4.12
 - **Depends on:** `CORE-001`, `DATA-001`
-- **Do:** Create every public type in §4.2, §4.3, §4.4 (13 ref structs from the template), §4.5, §4.10 and §4.12 with the exact names and members; method bodies `throw new System.NotImplementedException()` except trivial getters and `FactId`. Add `[ContentIdPrefix]` as written. Append `Narrative` to `RngPurpose` (SPEC-02 enum, append-only). Add `LogicFunctionRegistry`, `LogicFunctionInfo`, `LogicParamInfo`, `LogicArgKind { Int, Bool, Fact, Ref, Text, Tag }`, `LogicValue` as empty shells with the members named in §4.7.
+- **Do:** Create every public type in §4.2, §4.3, §4.4 (13 ref structs from the template), §4.5, §4.10 and §4.12 with the exact names and members; method bodies `throw new System.NotImplementedException()` except trivial getters and `FactId`. Add `[ContentIdPrefix]` as written. Confirm the existing `RngPurpose.Narrative = 12` (SPEC-02 enum, Q8), preserving every value; append only if absent. Add `LogicFunctionRegistry`, `LogicFunctionInfo`, `LogicParamInfo`, `LogicArgKind { Int, Bool, Fact, Ref, Text, Tag }`, `LogicValue` as empty shells with the members named in §4.7.
 - **Files:** `Assets/Game/Data/Logic/{FactId,FactKind,FactScope,FactFlags,FactFamily,FactWriteSource,FactChanged,FactCatalog,LogicType,LogicUsage,LogicDependencyKind,LogicDependency,QuestStatus,BaselineKind,EffectFlow,LogicBodyHandle,LogicScope,ICondition,IIntExpr,IEffect,ILogicContext,ILogicFacts,ILogicEconomy,ILogicNarrative,ILogicWorld,RefKind,IRefResolver,RefResolverRegistry,CatalogRefResolver,ItemRef,EntityRef,StarSystemRef,QuestRef,ClueRef,BeatRef,FactionRef,MysteryRef,LootTableRef,MerchantRef,EncounterRef,BlueprintRef,AudioCueRef,CompiledCondition,CompiledIntExpr,CompiledEffectList,EffectRequirements,ILogicSourceOwner,LogicBinder,LogicFunctionRegistry,LogicFunctionInfo,LogicParamInfo,LogicArgKind,LogicValue}.cs`; `Assets/Game/Data/Logic/Compiler/{LogicCompiler,LogicCompileOptions}.cs`; `Assets/Game/Data/Definitions/Narrative/{FactDeclaration,FactCatalogDefinition,NarrativeConfigDefinition}.cs`; `Assets/Game/Narrative/Services/{FactStore,NarrativeService,LogicTraceLog}.cs`; `Assets/Game/Narrative/Data/{FactEntry,FactSnapshot,LogicTraceEntry,LogicTraceKind}.cs`; `Assets/Game/Narrative/Services/INarrativeSystem.cs`; `Assets/Game/Core/…/RngPurpose.cs` (append only)
 - **Acceptance criteria:**
-  - [ ] `tools/compile.sh` passes with zero warnings in `Game.Data` and `Game.Narrative`.
-  - [ ] Every type exists with the stated namespace, file and member names; `Game.Data` references nothing new.
-  - [ ] `RngPurpose.Narrative` exists and no earlier value changed.
+  - [x] `tools/compile.sh` passes with zero warnings in `Game.Data` and `Game.Narrative`.
+  - [x] Every type exists with the stated namespace, file and member names; `Game.Data` references nothing new.
+  - [x] `RngPurpose.Narrative` exists and no earlier value changed.
 - **Tests:** `NarrativeContractTests.FactId_EqualityUsesHash`, `NarrativeContractTests.RefStructs_HaveKindConstants` (EditMode, `Tests/EditMode/Data/Logic/`).
 
 ### NAR-002 — Lexer and parser
@@ -1434,6 +1434,7 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 | 9 | SPEC-04: new ID prefixes `facts_`, `narrative_` (and SPEC-41/42/50 prefixes) | **Answered:** SPEC-04 §4.3 registry lists them; `StoryBeatDefinition` (`beat_`) is owned by SPEC-42 | SPEC-04 |
 | 10 | Owner: should `damage_ship` (legacy `CHANGE_HULL(−n)`) really damage voxels? | Yes, one `DamageEvent` of `n × 20` HP at a random surface cell; **Answered (2026-10-10, owner, ADR-0016):** `repair_ship` heals through SPEC-13's restore channel (`Heal`, fraction = percent); destroyed blocks still need the editor | Owner |
 | 11 | Owner: legacy `CHANGE_RESEARCH` has no system in v2 | Converted to the journal fact `research_points` | Owner |
+| 12 | §4.7 names the node factory without declaring its argument and return types | **Resolved (2026-10-13, Tech lead):** stage `object CreateNode(ReadOnlySpan<object> boundArgs)` and `LogicValue Invoke(ILogicContext context, ReadOnlySpan<LogicValue> args)` as `TODO(NAR-003)` throwing stubs. Node construction retains bound expressions, references and literals; runtime invocation uses values. The returned node implements the registry-selected `ICondition`/`IIntExpr`/`IEffect`. These complete missing signatures, without changing an existing API. | Tech lead |
 
 ## 11. References
 
