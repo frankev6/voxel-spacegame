@@ -266,7 +266,7 @@ Construction (`new AudioService(config, content, initialVolumes, parent)`), in t
 - **Owned memory (Persistent, disposed in `OnDestroy`):** `NativeList<SfxEvent> drained` (capacity 4,096), `NativeList<SfxCandidate> candidates` (capacity 4,096), `NativeHashMap<ulong,int> groupIndex` (capacity 4,096, lookup only), `NativeHashMap<ulong,double> lastStart` (capacity 1,024; entries older than 2 s removed each frame by a key list), `NativeArray<int> counters`.
 
 Per-frame algorithm:
-1. `ref var q = ref SystemAPI.GetSingletonRW<SfxEventQueue>().ValueRW; CompleteDependency();`
+1. `var q = SystemAPI.GetSingleton<SfxEventQueue>(); q.Access.CompleteAccess();` (ADR-0067: complete the actual native queue producers).
 2. `SfxDrainJob` (Burst, `.Run()`): clear `drained`; dequeue until empty or 4,096; remaining → `EventsOverHardCap`, `q.Queue.Clear()`.
 3. If `Service == null`: `Stats.Bound = false`; return.
 4. (AUD-012) Origin shift per §3.13 → `Service.ShiftSpatialVoices(delta)` or `Service.StopSfxAndLoops()`.
@@ -352,9 +352,11 @@ Pre: when present, `config` passed validation and `content` contains every cue. 
 
 ```csharp
 // In a producer's OnUpdate (fixed step). Tests add typeof(SfxEventQueueCreateSystem) to their EcsTestWorld.
-var sfx = SystemAPI.GetSingleton<SfxEventQueue>().Queue.AsParallelWriter();   // read-only; never GetSingletonRW in the fixed step
+var stream = SystemAPI.GetSingleton<SfxEventQueue>();
+var sfx = stream.Queue.AsParallelWriter();
+// Schedule with stream.Access.BeginRead(state.Dependency), then stream.Access.EndRead(the scheduled handle).
 // in the job struct: [NativeDisableContainerSafetyRestriction] public NativeQueue<SfxEvent>.ParallelWriter Sfx;
-// AudioEventDrainSystem (§5.3 step 1) takes the queue RW and CompleteDependency() completes every producer first.
+// AudioEventDrainSystem completes stream.Access before drain/clear. The creation system owns and disposes queue + guard (ADR-0067).
 SystemAPI.TryGetSingleton<CombatAudioCues>(out var cues);           // absent in tests: all hashes 0 → emit nothing
 // in the job: if (cues.ImpactKinetic.Value != 0) sfx.Enqueue(SfxEvents.At(cues.ImpactKinetic, point, vol));
 ```

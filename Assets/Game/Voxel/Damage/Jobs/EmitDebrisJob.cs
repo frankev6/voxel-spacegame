@@ -20,7 +20,7 @@ namespace Game.Voxel.Damage.Jobs
         public DamageConfig Config;
         // Atomic presentation writes; FxEventQueue.Access protects drain/disposal.
         [NativeDisableContainerSafetyRestriction] public NativeQueue<FxEvent>.ParallelWriter Fx;
-        public NativeQueue<SfxEvent>.ParallelWriter Sfx;
+        [Unity.Collections.LowLevel.Unsafe.NativeDisableContainerSafetyRestriction] public NativeQueue<SfxEvent>.ParallelWriter Sfx;
         [NativeDisableUnsafePtrRestriction] public DamageStreamsData* Data;
         static bool Debris(CellRemovedReason reason) => reason == CellRemovedReason.Destroyed || reason == CellRemovedReason.DetachedParticle || reason == CellRemovedReason.Dissolved;
         public void Execute()

@@ -60,7 +60,7 @@ namespace Game.Voxel.Damage
             job.Explosions = streams.Explosions.BeginWrite(ref state, ProducerKind.Explosion, 1);
             job.Ecb = SystemAPI.GetSingleton<GameplayEndCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
             var fx = SystemAPI.GetSingleton<FxEventQueue>();
-            job.Sfx = SystemAPI.GetSingletonRW<SfxEventQueue>().ValueRW.Queue.AsParallelWriter();
+            var sfx = SystemAPI.GetSingleton<SfxEventQueue>(); job.Sfx = sfx.Queue.AsParallelWriter();
             dissolve.RequestEntities = requests.ToEntityListAsync(Allocator.TempJob, out var requestHandle);
             dissolve.DissolvingEntities = dissolving.ToEntityListAsync(Allocator.TempJob, out var dissolveHandle);
             dissolve.Destroy = new NativeList<Entity>(Allocator.TempJob);
@@ -71,7 +71,8 @@ namespace Game.Voxel.Damage
             dependency = dissolve.Schedule(fx.Access.BeginRead(dependency));
             fx.Access.EndRead(dependency);
             job.Despawns = dissolve.Destroy;
-            dependency = job.Schedule(dependency);
+            dependency = job.Schedule(sfx.Access.BeginRead(dependency));
+            sfx.Access.EndRead(dependency);
             dependency = dissolve.RequestEntities.Dispose(dependency);
             dependency = dissolve.DissolvingEntities.Dispose(dependency);
             state.Dependency = dissolve.Destroy.Dispose(dependency);

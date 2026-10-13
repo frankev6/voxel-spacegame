@@ -45,10 +45,9 @@ namespace Game.Presentation.Audio
         }
         protected override void OnUpdate()
         {
-            // All producers take this singleton RW and publish their jobs in state.Dependency.
-            // Complete after acquiring RW: the native queue alias must not outlive any producer.
-            ref var queue = ref SystemAPI.GetSingletonRW<SfxEventQueue>().ValueRW;
-            CompleteDependency();
+            // ADR-0067: native queue aliases are guarded independently of ECS component dependencies.
+            var queue = SystemAPI.GetSingleton<SfxEventQueue>();
+            queue.Access.CompleteAccess();
             var stats = Stats;
             stats.Started = stats.Stolen = stats.RejectedNoVoice = stats.ActiveSfxVoices = 0;
             stats.Unresolved = stats.Silent = stats.Culled = stats.Groups = stats.CooldownDropped = stats.CombatSignals = 0;
