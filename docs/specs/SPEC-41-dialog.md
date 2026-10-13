@@ -744,6 +744,8 @@ sequenceDiagram
 | 5 | Owner: auto-advance vs click-per-line | Lines of a page appear together (auto-advance); the player only chooses options | Owner |
 | 6 | Owner: speaker name of the scarred man | "Scarred Man" (from "A scarred man in a dark corner") | Owner |
 | 7 | SPEC-60: element `ListView` item templates for dialog | Inline templates in `DialogView.uxml` | SPEC-60 |
+| 8 | SPEC-61 §4.2 already supplies real `DialogViewModel` / `DialogOptionViewModel` properties, while §4.9 describes the fuller SPEC-41 model. | Extend the existing types in place; retain SPEC-61 properties and `NotifyOptions()`, add every SPEC-41 member, and let `NotifyOptionsChanged()` use the same cached Options notification. The additional scalar properties have their own backing fields. | Tech lead — resolved by DLG-001 staging preservation; central mirror pending. |
+| 9 | §4.1 / DLG-001 lists `Views/IDialogCommands.cs`, but the existing canonical `Game.UI.Views.IDialogCommands` is in `Views/Commands/IDialogCommands.cs` with SPEC-61's `Choose(int)` signature. | Keep that file and its meta GUID, retain `Choose(int)` / `Continue()`, and add `ChooseByNumber(int)`, `ChooseOption(int)` and `Back()`. DLG-008's presenter must implement both the staged and canonical signatures; do not duplicate or move the interface. | Tech lead — resolved by DLG-001; central mirror pending. |
 
 ## 11. References
 

@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace Game.UI.ViewModels
 {
-    /// <summary>Bindable screen data; cached notifications and app-lifetime identity (SPEC-61 §4.2).</summary>
+    /// <summary>Dialog option data (SPEC-41 §4.9), preserving SPEC-61 §4.2's staged properties.</summary>
     public sealed class DialogOptionViewModel : ViewModelBase
     {
         [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
@@ -25,5 +25,23 @@ namespace Game.UI.ViewModels
         static readonly BindablePropertyChangedEventArgs DisabledReasonChanged = new BindablePropertyChangedEventArgs(nameof(DisabledReason));
         string disabledReason;
         [CreateProperty] public string DisabledReason { get => disabledReason; set => Set(ref disabledReason, value, DisabledReasonChanged); }
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs NumberLabelChanged = new BindablePropertyChangedEventArgs(nameof(NumberLabel));
+        string numberLabel;
+        [CreateProperty] public string NumberLabel { get => numberLabel; set => Set(ref numberLabel, value, NumberLabelChanged); }
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs IsAvailableChanged = new BindablePropertyChangedEventArgs(nameof(IsAvailable));
+        bool isAvailable;
+        [CreateProperty] public bool IsAvailable { get => isAvailable; set => Set(ref isAvailable, value, IsAvailableChanged); }
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs IsQuestChanged = new BindablePropertyChangedEventArgs(nameof(IsQuest));
+        bool isQuest;
+        [CreateProperty] public bool IsQuest { get => isQuest; set => Set(ref isQuest, value, IsQuestChanged); }
+
+        public int OptionId;
+        public byte Synthetic;
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 
 namespace Game.UI.ViewModels
 {
-    /// <summary>Bindable screen data; cached notifications and app-lifetime identity (SPEC-61 §4.2).</summary>
+    /// <summary>Dialog screen data (SPEC-41 §4.9), preserving SPEC-61 §4.2's staged properties.</summary>
     public sealed class DialogViewModel : ViewModelBase
     {
         [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
@@ -36,6 +36,27 @@ namespace Game.UI.ViewModels
         static readonly BindablePropertyChangedEventArgs OptionsChanged = new BindablePropertyChangedEventArgs(nameof(Options));
         [CreateProperty] public List<DialogOptionViewModel> Options { get; } = new List<DialogOptionViewModel>(9);
         public void NotifyOptions() => Notify(OptionsChanged);
+        public void NotifyOptionsChanged() => NotifyOptions();
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs LinesChanged = new BindablePropertyChangedEventArgs(nameof(Lines));
+        [CreateProperty] public List<DialogLineViewModel> Lines { get; } = new List<DialogLineViewModel>(32);
+        public void NotifyLinesChanged() => Notify(LinesChanged);
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs IllustrationChanged = new BindablePropertyChangedEventArgs(nameof(Illustration));
+        UnityEngine.Sprite illustration;
+        [CreateProperty] public UnityEngine.Sprite Illustration { get => illustration; set => Set(ref illustration, value, IllustrationChanged); }
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs HasIllustrationChanged = new BindablePropertyChangedEventArgs(nameof(HasIllustration));
+        bool hasIllustration;
+        [CreateProperty] public bool HasIllustration { get => hasIllustration; set => Set(ref hasIllustration, value, HasIllustrationChanged); }
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs ScrollToLineChanged = new BindablePropertyChangedEventArgs(nameof(ScrollToLine));
+        int scrollToLine;
+        [CreateProperty] public int ScrollToLine { get => scrollToLine; set => Set(ref scrollToLine, value, ScrollToLineChanged); }
 
         [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
         static readonly BindablePropertyChangedEventArgs CanContinueChanged = new BindablePropertyChangedEventArgs(nameof(CanContinue));
