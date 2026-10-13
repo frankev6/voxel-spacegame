@@ -30,6 +30,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Repair/inventory complete:** DMG-019 ordered impulses and bounded heal/place plus ECO-003 atomic inventory/wallet pass clean compile and21 focused checks, evidence `Logs/playtest/repair-inventory/`. Advisory Apply40 deferred. Existing power worker now moves to ECO-005 merchants; AI-009/010 remain active. No broad validation wait.
+
 - **Current:** preview/ability/AI batch closed3b1e944b and merged locally. Existing workers assigned AI-009 station turrets and AI-010 combat scenarios; power prepares merchants pending inventory acceptance. Lead integrated DMG-019/ECO-003 on `task/DMG-019-focused-integration` at2e364ad5, compiling once before focused checks. No full regression gate.
 
 - **Validation workflow corrected (ADR-0070):** previous full run passed1217 EditMode and173 PlayMode cases but failed two audio benchmark timeouts. An unchanged audio rerun finished2 passed/1 failed in225.83s; no further rerun. Functional preview/ability/steering/status checks already pass. Close these tasks using that scoped evidence, then recycle combat/presentation into AI-009/010. Integrate prepared DMG-019/ECO-003 and use focused acceptance to unlock ECO-005. Older full-suite waits below are superseded; no claim that the full suite is green.

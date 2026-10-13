@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 14 | 0 | 0 | 0 | 77 | 0 | 91 | 7 |
-| M3 | 142 | 5 | 0 | 0 | 33 | 0 | 180 | 11 |
+| M2 | 12 | 2 | 0 | 0 | 77 | 0 | 91 | 5 |
+| M3 | 142 | 3 | 0 | 0 | 35 | 0 | 180 | 12 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -314,7 +314,7 @@
 | PERS-015 | Full-world round trip with all real participants | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-011, PERS-012, SPEC-01, SPEC-30, SPEC-31, SPEC-33, SPEC-40, SPEC-41, SPEC-42, SPEC-50 | no | todo |  |  |  |  |
 | VOX-020 | Incremental grid edits for the editor preview | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M3 | frontier | VOX-014 | yes | done | astra (gpt-6) | 2026-10-13 | a2e9b77e | Three functional checks pass; preview median0.2135ms against2ms; zero tuning; scoped closeout ADR-0070 |
 | PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | a606bfc | Restored-cell mass accumulator; ownership fixture repair; 1 required test; full batch 901 EM / 128 PM, zero failures |
-| DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Claimed in isolated lead checkout during AI/ability regression; impulse consumer and bounded restore passes, nine required tests |
+| DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | 0b93d402 | Nine request-channel checks pass; ordered impulse and bounded heal/place |
 | AI-013 | Fleet data and formations | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | bf5e81f | Formation validation and boot-owned blob/catalog; 2 required tests. AI-014 steering remains open. Full 1027 EM / 145 PM passed. |
 | AI-014 | FleetSystem and member thinking | [SPEC-23](specs/SPEC-23-ai.md) | M3 | frontier | AI-013, AI-007 | yes | todo |  |  |  |  |
 | AI-015 | Fleet and swarm scenario and performance | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-014 | no | todo |  |  |  |  |
@@ -412,9 +412,9 @@
 | QST-010 | Opening chapter playthrough | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-008, QST-009, QST-007, SPEC-70, SPEC-32, SPEC-50 | no | todo |  |  |  |  |
 | ECO-001 | Public contract types | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | CORE-001, DATA-001, NAR-001, VOX-001, DMG-001, SYS-001, FLT-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a81ff41 | Economy contracts and serialized tradeable defaults; 2 required tests. Runtime ECO-002 onward remains open. Full 1027 EM / 145 PM passed. |
 | ECO-002 | Definitions, config and validators | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | db5d72e | Strict economy validators/config and canonical scrap; 15 required tests; partial ECO-009 scrap only |
-| ECO-003 | InventoryModel and Wallet | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Claimed for isolated implementation while combat validates; atomic cargo and wallet unlock merchant work |
+| ECO-003 | InventoryModel and Wallet | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-001 | yes | done | astra (gpt-6) | 2026-10-13 | 80a8bd18 | Twelve functional inventory/wallet checks pass; advisory Apply40 unmeasured (ADR-0070) |
 | ECO-004 | Loot and EconomyService | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003, SPEC-40 | no | todo |  |  |  |  |
-| ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | no | todo |  |  |  |  |
+| ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | yes | todo |  |  |  |  |
 | ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | no | todo |  |  |  |  |
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, SPEC-13, SPEC-31, SPEC-12 | no | todo |  |  |  |  |
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
@@ -1001,6 +1001,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Repair channels and inventory foundation verified — astra (gpt-6)
+
+- DMG-019 integrated through0b93d402: deterministic ordered body impulses, bounded heal/place continuation, per-request functional-heal deduplication and restored-cell publication. Nine required checks pass, including budget continuation and worker/order determinism. SPEC13Q43 mirroredQ299.
+- ECO-003 integrated through80a8bd18: bounded Wallet, atomic inventory transactions, overflow/jettison, counts, sorting/movement and notifications. Twelve functional checks pass including10000-operation invariant run. SPEC50Q23 mirroredQ300. Advisory Apply40 exists but is deliberately unmeasured under ADR-0070; zero tuning passes.
+- One combined compile clean, zero CS warnings; focused EditMode21 passed/0 failed/0 skipped. Evidence `Logs/playtest/repair-inventory/{compile.log,acceptance.xml,acceptance.log}`. Initial compile caught missing fixture ValidationReport context; fixed80a8bd18 before acceptance. No full-suite rerun. Original QualitySettings delta preserved/excluded, orphan metadata removed only after terminal.
+- Test counts: DMG-019 spec-required:9, extra:0; ECO-003 spec-required:13, extra:0 (12 functional executed, one optional performance measurement deferred). ECO-005 now unlocked for existing power worker; combat/presentation continue AI-009/010.
 
 ### 2026-10-13 — Preview, abilities and AI steering/status closed — astra (gpt-6)
 

@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Repair/inventory accepted:** compile12640 exited0, focused14102 exited0 with21/0/0; evidence `repair-inventory/`. DMG-019 and ECO-003 closed with no full-suite rerun. Advisory inventory measurement deferred, zero tuning. Next FF main, claim/dispatch ECO-005 to the existing power thread; AI-009/010 continue. Previous goal turn integrated code and recycled workers (progress).
+
 - **Compile repair:** first integrated compile55556 failed only missing ValidationReport context in the new inventory fixture. Fixed80a8bd18; serialized compile12640 active. Next focused EditMode filter `RequestChannelTests|InventoryModelTests|WalletTests` (headless regex), excluding benchmarks. No full or audio reruns; AI workers continue independently.
 
 - **Implementation resumed:** closeout3b1e944b on main accepts VOX-020/ABL-005/AI-007/008 using verified focused evidence under ADR-0070. Claimc1b9a0e2 and follow-ups dispatch AI-009/010 to existing combat/presentation threads; power reads ECO-005 while its real inventory dependency finishes. Primary now `task/DMG-019-focused-integration` at2e364ad5: all prepared repair/impulse and inventory/wallet commits integrated, one compile started; focused acceptance next. No full-suite rerun. Previous goal turn made progress by committing the validation policy.
