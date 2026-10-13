@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 133 | 7 | 0 | 0 | 40 | 0 | 180 | 8 |
+| M3 | 132 | 7 | 0 | 0 | 41 | 0 | 180 | 9 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -375,10 +375,10 @@
 | NAR-003 | Type checker, registry, compiler and binder | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-002 | yes | done | astra (gpt-6) | 2026-10-13 | d3f59c1c | Compiler, registry, binder, graph emission and scoped Invoke; six focused checks pass; runtime nodes NAR-004/005 |
 | NAR-004 | Condition and expression nodes | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | partial in NAR-003: serializable primitive node shapes and binding/dependency traversal / evaluation, function dispatch and required tests missing |
 | NAR-005 | Effect nodes and atomic effect lists | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-004 | no | todo |  |  |  | partial in NAR-003: serialized effect shapes, flow flags and binding / execution, preflight, atomic requirements and required tests missing |
-| NAR-006 | Fact catalog and reference resolvers | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Implementation4f205524; clean compile and4 functional checks pass; advisory Build20k fixture still pending actual binder integration |
-| NAR-007 | FactStore | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-006 | no | todo |  |  |  |  |
+| NAR-006 | Fact catalog and reference resolvers | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 309a55c1 | Fact catalog/resolvers;4 functional checks pass, Build20k fixture authored and measurement deferred ADR-0070 |
+| NAR-007 | FactStore | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-006 | yes | todo |  |  |  |  |
 | NAR-008 | FACT save participant | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007, PERS-001 | no | todo |  |  |  |  |
-| NAR-009 | Import-time compile pipeline | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, NAR-006 | no | todo |  |  |  |  |
+| NAR-009 | Import-time compile pipeline | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, NAR-006 | yes | todo |  |  |  |  |
 | NAR-010 | NarrativeService tick and dependency index | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007 | no | todo |  |  |  |  |
 | NAR-011 | LogicContext and LogicWorldAdapter in Game.App | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-005, NAR-010, FND-001, ECO-001, QST-001 | no | todo |  |  |  |  |
 | NAR-012 | World-event bridge | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-011, SYS-001, ENC-001 | no | todo |  |  |  |  |
@@ -1011,6 +1011,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Fact catalog closed — astra (gpt-6)
+
+- NAR-006309a55c1 completes authored/generated ordinal slots, aliases, source-hash lookup and canonical resolvers. Functional implementation4f205524 had four passing checks; no runtime changes since that evidence.
+- Added required opt-in Build20k fixture including actual binding of2,000 precompiled fields. Clean compile35729. Measurement deliberately not run under ADR-0070;30ms target unchanged, PerfRun record/warning retained. No tuning. Evidence `Logs/playtest/fact-catalog/`.
+- Test count: spec-required: 5 (4 functional executed,1 advisory measurement deferred), extra: 0.
 
 ### 2026-10-13 — Narrative compiler accepted — astra (gpt-6)
 

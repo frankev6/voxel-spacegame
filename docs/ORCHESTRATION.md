@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AI-015 | claimed after turret/fleet closure; assigned fleet/swarm scenarios | eligible standard work |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 | claimed920f5f71 after AI-015 delivery; condition evaluation | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-004 | claimed6c4a3b4b; loot and economy service | economy follow-ups |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-018 | claimed31d24070 after AI-010 acceptance; save/load/jump harness | eligible standard work |
 
@@ -19,6 +19,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Catalog closed / combat worker recycled:** NAR-006309a55c1 adds opt-in20k build+2k binding fixture, compile35729 clean; four prior functional checks remain valid, benchmark deliberately unrun. AI-015 delivered dab28594 (review/integration/visual acceptance pending; no measurement run). Worker recycled to NAR-004 claim920f5f71. ECO-004168/DEV-018139 active. Editor17922 open/stopped, no live validation. Previous turn closed compiler (progress).
 
 - **NAR-003 closed:**d3f59c1c scoped invocation complete; compile90657 clean, focused78010 six passed. Evidence `narrative-compiler/`; Q14→309. Ready to FF main, NAR-004 standard now unlocked for next available worker. NAR-006 still needs its advisory Build20k fixture authored (not a measurement gate). Workers AI-015154/ECO-004168/DEV-018138 active. No live validation. Previous turn passed compiler scope and recycled economy worker (progress).
 

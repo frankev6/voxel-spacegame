@@ -1237,12 +1237,12 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 - **Do:** Implement `RefResolverRegistry.CreateDefault`, `CatalogRefResolver<T>`, `ListRefResolver` and `FactCatalog.Build` exactly per §5.2 (declarations, generated families, `sys_` facts, ordinal slots, hash map, former names, validation codes), plus `SourceHashAt` and `GeneratedSlot` (one `Dictionary<ulong,int>` per family).
 - **Files:** `Assets/Game/Data/Logic/{FactCatalog,RefResolverRegistry,CatalogRefResolver,ListRefResolver}.cs`; `Assets/Game/Tests/EditMode/Data/Logic/{FactCatalogTests,FactCatalogPerfTests}.cs`
 - **Acceptance criteria:**
-  - [ ] Slots are identical for the same content regardless of asset order.
-  - [ ] A beat `beat_x` and an item `resource_fuel` yield facts `beat_x` and `acquired_resource_fuel`.
-  - [ ] `SlotOf(formerName)` returns the live slot.
-  - [ ] `GeneratedSlot(FactFamily.Acquired, itemHash)` returns the slot of `acquired_<item>`; unknown hash returns −1.
-  - [ ] Codes `NAR-E014/E015/E018/E020/E021/E022` produced by fixtures.
-  - [ ] Build of 20,000 facts ≤ 30 ms including binding of 2,000 fields.
+  - [x] Slots are identical for the same content regardless of asset order.
+  - [x] A beat `beat_x` and an item `resource_fuel` yield facts `beat_x` and `acquired_resource_fuel`.
+  - [x] `SlotOf(formerName)` returns the live slot.
+  - [x] `GeneratedSlot(FactFamily.Acquired, itemHash)` returns the slot of `acquired_<item>`; unknown hash returns −1.
+  - [x] Codes `NAR-E014/E015/E018/E020/E021/E022` produced by fixtures.
+  - [ ] Build of 20,000 facts ≤ 30 ms including binding of 2,000 fields. Advisory measurement deferred under ADR-0070; fixture authored.
 - **Tests:** `FactCatalogTests.Slots_AreOrdinalAndStable`, `.GeneratedFamilies_Present`, `.FormerNames_Resolve`, `.Validation_Codes`; `FactCatalogPerfTests.Build20k` (`[Category("Performance")]`).
 
 ### NAR-007 — FactStore
