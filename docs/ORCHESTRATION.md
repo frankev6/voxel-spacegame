@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Integration review:** isolated explosion8ad75afa adds real spatial builder/ShieldSystem owners to two existing destruction fixtures so new prerequisites cannot silently disable blasts; test count unchanged. Reviewed in-progress worker code and sent small repairs: Commands namespace for beam PlayerShip, separate public WeaponDebugRow file. Workers still active, audio staged; primary/live game unchanged.
+
 - **Explosion acceptance authored:** isolated dcd70313+c630c40c supplies full implementation and four required ExplosionTests against production system/channels (spec-required:4, extra:0). Shield routing, two grids, same/next-read producer timing, single presentation pair and impulse falloff covered; not yet compiled/run. Q283 mirrors SPEC21Q69, Q282 stays reserved for prepared audio. Both WPN-009/015 workers active; keep live Editor35039 unchanged until compatible batch ready.
 
 - **WPN-010 implementation:** isolated `task/WPN-010-explosions` now has spatial sphere queries, shield-first events, canonical overflow fallback, one FX/SFX pair and guarded request disposal. SPEC21Q69 resolves overflow/defaults; four required tests and Unity pending. Primary main685f4386 and live Editor35039 remain unchanged. WPN-009 and015 confirmed active in existing power/presentation threads; audio remains reviewed validation wait. Preserve isolated audio branch0da3c84a for next batch.
