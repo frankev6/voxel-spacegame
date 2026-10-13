@@ -56,7 +56,7 @@ namespace Game.Presentation.Audio
             stats.EventsDrained = counters[(int)SfxCounter.Drained]; stats.EventsOverHardCap = counters[(int)SfxCounter.OverCap];
             if (Service == null) return;
             // TODO(AUD-012): shift or stop spatial voices on origin and system changes.
-            double now = Time.unscaledTimeAsDouble;
+            double now = UnityEngine.Time.unscaledTimeAsDouble;
             expired.Clear();
             foreach (var pair in lastStart) if (now - pair.Value > 2) expired.Add(pair.Key);
             for (int i = 0; i < expired.Length; i++) lastStart.Remove(expired[i]);
