@@ -825,6 +825,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 238 | SPEC-23 Q10–11: AI content boundary and validation. | Bake scalar/default profiles with independent empty rule arrays; AI-006 owns runtime ability-rule baking and consumption. Validate finite scalar ranges/enums, rule fields and catalog membership before allocation. Boot owns the new profile blob through job-complete shutdown. | Tech lead |
 | 239 | SPEC-31 Q6–8: streaming contract staging and event ownership. | Preserve existing entry events; TRV-006 adds its future interface, managed loader publishes BodyDestroyed, and only BodyInteracted gets the ECS bridge. Include all specified carriers with exact defaults; behavior remains in later SYS tasks. | Tech lead |
 | 240 | SPEC-13 Q35: dissolve budget stops inside a brick. | Pack slot/local index into existing NextSlot; resume after the last sampled exposed cell without repeating debris or changing component layout. Start progress in request tick; duplicate requests retain progress. Required tests and Unity validation remain pending. | Tech lead |
+| 241 | SPEC-22 Q14: PWR-004 acceptance count and writer contradictions. | 14 weapons + 14 thrusters + one shield is 29 consumers; only consumer functionals carry PowerLink. PWR-004 verifies multi-module binding; Powered enable bits remain PWR-005, the specified sole writer. No extra test methods or tuning changes. | Tech lead |
 
 ## Measurements
 
