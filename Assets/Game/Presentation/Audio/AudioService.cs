@@ -110,12 +110,29 @@ namespace Game.Presentation.Audio
         public void BindPause(IPauseService value) { if (!disposed) pause = value; }
         public void BindTo(World world)
         {
-            if (disposed || world == null || !world.IsCreated || ReferenceEquals(boundWorld, world)) return;
-            if (boundWorld != null) Unbind(boundWorld);
-            boundWorld = world; drainSystem = world.GetOrCreateSystemManaged<AudioEventDrainSystem>();
-            drainSystem.Bind(this); stats.Bound = true;
-            // TODO(AUD-007): populate boot-owned CombatAudioCues from authored configuration.
+            if (disposed || world == null || !world.IsCreated) return;
+            if (!ReferenceEquals(boundWorld, world))
+            {
+                if (boundWorld != null) Unbind(boundWorld);
+                boundWorld = world; drainSystem = world.GetOrCreateSystemManaged<AudioEventDrainSystem>();
+                drainSystem.Bind(this); stats.Bound = true;
+            }
+            // Boot-owned singleton survives scene teardown; rebind updates it without adding another entity.
+            var cues = new CombatAudioCues {
+                ImpactKinetic = Hash(config != null ? config.ImpactKinetic : null), ImpactEnergy = Hash(config != null ? config.ImpactEnergy : null),
+                ImpactExplosive = Hash(config != null ? config.ImpactExplosive : null), ImpactRam = Hash(config != null ? config.ImpactRam : null),
+                ExplosionSmall = Hash(config != null ? config.ExplosionSmall : null), ExplosionLarge = Hash(config != null ? config.ExplosionLarge : null),
+                ShieldHit = Hash(config != null ? config.ShieldHit : null), CellBreak = Hash(config != null ? config.CellBreak : null),
+                BreakOff = Hash(config != null ? config.BreakOff : null), ShipDeath = Hash(config != null ? config.ShipDeath : null) };
+            var em = world.EntityManager;
+            using var query = em.CreateEntityQuery(ComponentType.ReadWrite<CombatAudioCues>());
+            if (query.IsEmpty)
+            {
+                var entity = em.CreateEntity(typeof(CombatAudioCues)); em.SetName(entity, "CombatAudioCues"); em.SetComponentData(entity, cues);
+            }
+            else query.SetSingleton(cues);
         }
+        static ContentHash Hash(AudioCueDefinition cue) => cue != null ? cue.Id.Hash : default;
         public void Unbind(World world)
         {
             if (!ReferenceEquals(boundWorld, world)) return;
