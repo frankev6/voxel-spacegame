@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | WPN-002 | dispatched from main 4f303b3; UI-011 73f3164 reviewed and integrated in isolated lead checkout, validation pending | Ready standard work after batch integration |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | GAL-002 | dispatched from main c95d3f1; WPN-002 integrated 702c1a6, focused validation active | Ready standard work after batch integration |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AI-003 | dispatched from main ffaf254; MIG-010 6ca1b17 integrated as d6ec9ad, awaiting ABL-002 and generation | M2 power/ability work |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | SYS-001 | dispatched from main 72a68d3; ABL-002 integrated 900e223 with boot hookup 9534014, validation pending | M2 ability content and grants |
 
@@ -84,3 +84,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - Session 55800 wrote **7/0/0** ability/migration/block-link results (`Logs/playtest/combat-content-batch/abilities-migration.xml`); compile clean. Handle still live during shutdown, confirmed Unity 50837 with active Burst compiler 50850; await terminal before any primary mutation or next Unity run. Reviewed pending WPN-002 factory cleanup/default faction ownership; no defect found, delivery still being finalized.
 
 - Session 55800 has now exited 0 (7 passed). Unity is free. WPN-002 worker notified that reviewed delivery can join the next full suite; await its scoped finalization rather than launching duplicate full suites. No owner blocker.
+
+- WPN-002 integrated `702c1a6`, all power/ability boot hooks retained; serialized compile + WeaponContentTests session `81966` active. Same combat worker dispatched GAL-002 from main `c95d3f1`. Lead isolated checkout now `task/AI-004-spatial-builder` from main claim `54353c3`, initial sort/bucket implementation `85fd0e3`; gathering/lifetime/tests still pending, no Unity there. Q234 mirrors weapon decisions.

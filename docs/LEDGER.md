@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 49 | 6 | 0 | 0 | 36 | 0 | 91 | 5 |
-| M3 | 165 | 2 | 0 | 0 | 13 | 0 | 180 | 13 |
+| M2 | 48 | 7 | 0 | 0 | 36 | 0 | 91 | 4 |
+| M3 | 164 | 3 | 0 | 0 | 13 | 0 | 180 | 12 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 2 |
 | A0 | 6 | 1 | 0 | 1 | 8 | 0 | 16 | 2 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -818,6 +818,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 231 | SPEC-80 Q15–18: approved font/production look assets, full art validator and canonical ARK definition are absent. | Apply approved numeric Nocturne tokens and move existing OFL font bytes/GUIDs as explicit placeholders; retain reference-board sources outside Assets. Active selection metadata is partial, with unchanged live environment. ART-014 acceptance remains open for ART-007, AST producers and canonical faction content; no invented asset, licence or validator pass. | Tech lead |
 | 232 | SPEC-24 Q3–4: serialized ability validation and boot-owned blob lifetime. | Enforce finite/ranged scalars and known unique modifiers, positive rounded boost duration and representable timers. Boot creates the ability blob before snapshots and disposes after jobs complete; empty families retain a none-only entry. Runtime registration remains ABL-003. | Tech lead |
 | 233 | SPEC-72 Q22: ability inactive fields, icon source and protected grant target resolution. | Use configured migration sprites and exact SPEC-24 values, zero inactive fields, null optional cue/Fx, report replaced legacy values, resolve the four canonical targets and preserve authored assets/nonempty arrays through existing writer APIs. | Tech lead |
+| 234 | SPEC-21 Q14–15: stable weapon diagnostics and boot faction ownership. | Keep field-specific safety checks in existing WPN code categories, preserve authored nine weapons/config, reject duplicate weapon singletons before allocation, preserve an existing faction owner and clean only factory-owned native data/entities. Integrated with power and ability boot lifetimes. | Tech lead |
 
 ## Measurements
 
@@ -928,6 +929,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — WPN-002 integrated; spatial builder started — astra (gpt-6)
+
+1. Reviewed WPN-002 `9501992`, integrated `702c1a6`, retaining power/ability creation and disposal through BootSingletons conflict. Nine weapon assets/config unchanged. Spec-required: 4, extra: 0; compile/grouped WeaponContentTests session 81966 active. Q234 mirrors validation/ownership defaults. Full compatible suites remain next.
+2. Claimed AI-004 on main `54353c3`; reused lead isolated checkout on `task/AI-004-spatial-builder`. Commit `85fd0e3` implements canonical proxy sort and bucket jobs; gathering, singleton/access lifetime and five required tests remain. No Unity in that checkout and no completion claim.
+3. Combat worker immediately recycled to ready GAL-002 on main `c95d3f1`; WPN-004 waits on WPN-002 validation. Other workers continue AI-003 and SYS-001. Goal remains playable full combat/enemy targeting; no tuning pass, art change or new gate.
 
 ### 2026-10-13 — ABL-002 / MIG-010 content integration — astra (gpt-6)
 
