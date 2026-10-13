@@ -31,7 +31,7 @@ namespace Game.Tests.PlayMode.Galaxy
     public sealed class StarSystemLoadTests
     {
         sealed class Ids : IPersistentIdAllocator { ulong next = 1; public ulong Allocate() => next++; }
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             internal readonly World World = new("SYS-004 direct loader");
             internal EntityManager Em => World.EntityManager;
@@ -43,12 +43,32 @@ namespace Game.Tests.PlayMode.Galaxy
             readonly NativeQueue<ManagedEventEnvelope<OriginShifted>> shifts;
             readonly Entity clock, retirement;
             readonly SystemHandle origin, deferred;
+            internal readonly SystemHandle Spawn, Watch;
+            internal readonly ContentService VoxelContent;
+            internal readonly ContentCatalog Catalog;
+            readonly Game.Data.Definitions.BodyTemplateDefinition testTemplate;
+            internal BodySpec Station;
+            internal Entity Player;
             internal static SceneReadyContext Entry => new(GameScene.World, SceneEntryReason.NewGame, default);
-            internal Fixture()
+            internal Fixture(bool streaming = false, int persistLimit = 64)
             {
                 var database = AssetDatabase.LoadAssetAtPath<ContentDatabase>("Assets/Game/Content/ContentDatabase.asset");
                 var report = new ValidationReport("Loader fixture");
-                var catalog = ContentCatalog.Build(database.Definitions, report); Assert.IsFalse(report.HasErrors, report.ToText());
+                var definitions = database.Definitions.ToList();
+                if (streaming)
+                {
+                    var original = definitions.OfType<Game.Data.Definitions.BodyTemplateDefinition>().Single(x => x.IdString == "body_station_ark");
+                    testTemplate = Object.Instantiate(original);
+                    using var so = new SerializedObject(testTemplate);
+                    so.FindProperty("shape.sizeCells").vector3IntValue = new UnityEngine.Vector3Int(4, 1, 1);
+                    so.FindProperty("shape.wallThicknessCells").intValue = 0;
+                    so.FindProperty("shape.coreBlock").objectReferenceValue = null;
+                    so.FindProperty("t2LoadDistanceM").floatValue = 10;
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                    definitions[definitions.IndexOf(original)] = testTemplate;
+                }
+                var catalog = ContentCatalog.Build(definitions, report); Assert.IsFalse(report.HasErrors, report.ToText());
+                Catalog = catalog;
                 blueprints = new BlueprintLibrary(catalog, default); Registry = VoxelStructureRegistry.CreateRuntime(blueprints);
                 Em.CreateEntity(typeof(GameplayActive), typeof(WorldSceneActive)); clock = Em.CreateEntity(typeof(SimClock));
                 shifts = new NativeQueue<ManagedEventEnvelope<OriginShifted>>(Allocator.Persistent);
@@ -58,6 +78,21 @@ namespace Game.Tests.PlayMode.Galaxy
                 origin = World.CreateSystem<OriginRebaseSystem>(); deferred = World.CreateSystem<DeferredDisposalSystem>();
                 Galaxy = new GalaxyService(catalog, State, World, new GalaxyFrameTicker()); Galaxy.NewGame(42);
                 State.PlayerLocation = Galaxy.GetStartLocation(); State.HasPlayerLocation = true;
+                if (streaming)
+                {
+                    VoxelContent = ContentService.CreateForTests(definitions); VoxelContent.CreateSingletons(Em);
+                    Em.CreateSingleton(new VoxelStructureRegistryRef { Value = Registry });
+                    Em.CreateSingleton(new VoxelConfig { SpawnBricksPerFrame = 8, DefaultCellSize = .5f, RequireRenderer = 0 });
+                    Em.CreateSingleton(new StreamingConfig { T2UnloadFactor = 1.25f, MaxGridSpawnsPerFrame = 1, PersistDamageMaxCells = persistLimit });
+                    Spawn = World.CreateSystem<GridSpawnSystem>(); Watch = World.CreateSystem<BodyGridWatchSystem>();
+                    var content = Galaxy.GetContent(State.CurrentStarSystem);
+                    foreach (var candidate in content.Bodies)
+                        if (Galaxy.GetBodyTemplate(candidate.TemplateIndex).IdString == "body_station_ark") { Station = candidate; break; }
+                    Assert.IsTrue(Station.Id.System.IsValid);
+                    Station.Orbit = default; Station.ParentOrbit = default; Station.RadiusM = 1;
+                    content.Bodies.Clear(); content.Bodies.Add(Station);
+                    State.PlayerLocation = new PlayerLocation { StarSystem = State.CurrentStarSystem, PositionM = double3.zero };
+                }
                 Loader = new StarSystemLoader(Galaxy, World, Registry, blueprints, new Ids(), catalog);
             }
             internal void Load()
@@ -67,6 +102,18 @@ namespace Game.Tests.PlayMode.Galaxy
                 Assert.AreEqual(LoaderState.Loading, Loader.State, "Must wait for the actual origin owner.");
                 origin.Update(World.Unmanaged); Em.CompleteAllTrackedJobs();
                 Loader.Tick(new GalaxyFrameContext(Em, 0, 0, 0, 1)); Assert.IsTrue(Loader.IsReady);
+            }
+            internal Entity Grid()
+            {
+                using var q = Em.CreateEntityQuery(typeof(BodyGridOwner), typeof(VoxelGrid));
+                return q.IsEmptyIgnoreFilter ? Entity.Null : q.GetSingletonEntity();
+            }
+            internal void Stream(double distance)
+            {
+                var position = new float3((float)distance, 0, 0);
+                if (Player == Entity.Null) { Player = Em.CreateEntity(typeof(PlayerShip), typeof(LocalTransform)); }
+                Em.SetComponentData(Player, LocalTransform.FromPosition(position));
+                Tick(); Spawn.Update(World.Unmanaged); Em.CompleteAllTrackedJobs(); Tick();
             }
             internal void Tick() => Loader.Tick(new GalaxyFrameContext(Em, 0, 0, 0, 2));
             internal void Unload()
@@ -85,7 +132,7 @@ namespace Game.Tests.PlayMode.Galaxy
                 Registry.Dispose(); Object.DestroyImmediate(Registry); blueprints.Dispose();
                 var queue = Em.GetComponentData<DeferredDisposalQueue>(retirement);
                 foreach (var record in queue.Blobs) { var blob = record.Blob; if (blob.IsCreated) blob.Dispose(); }
-                queue.Blobs.Dispose(); queue.Meshes.Dispose(); World.Dispose(); shifts.Dispose();
+                queue.Blobs.Dispose(); queue.Meshes.Dispose(); World.Dispose(); shifts.Dispose(); VoxelContent?.Dispose(); if (testTemplate != null) Object.DestroyImmediate(testTemplate);
             }
         }
         [Test] public void Load_CreatesAnchors()
