@@ -492,7 +492,7 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
   - [ ] Target choice prefers nearer hostiles, honours player bias and stickiness, never picks allies, neutrals, hulks or itself.
   - [ ] State transitions of §5.4 step 4 hold in table-driven tests; leash and return work.
   - [ ] Friendly-fire block suspends autofire while an ally crosses the line of fire.
-  - [ ] Ability rules: a fleeing ship with a Ready speed-boost slot sets that slot's edge on its think tick; a Blocked or cooling-down slot is never pressed; the edge reaches `ShipCommand.Edges` only on that tick.
+  - [ ] Ability rules: a fleeing ship with a Ready speed-boost slot sets that slot's edge on its think tick; a Blocked or cooling-down slot is never pressed; `AbilityEdgesTick` identifies the production tick. AI-007 owns and verifies delivery into `ShipCommand.Edges` on that tick only (Q20).
 - **Tests:** `AiDecisionTests.AbilityRules_Fleeing_Boosts`, `.AbilityRules_RespectsBlocked`, `AiDecisionTests.ThinkSchedule`, `.Target_Scoring`, `.Target_NeverAlly`, `.States_Table`, `.Leash_Return`, `.FriendlyFire_Blocks`, `.Avoidance_ShiftsGoal`.
 
 ### AI-007 — AiSteeringSystem
@@ -505,7 +505,7 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
   - [ ] Every AI ship's `ShipCommand` is rewritten every tick with `FireGroups = 0`, and `Edges` = the ability edges of this tick's think (0 on other ticks).
   - [ ] A ship given a goal 500 m away arrives within `ArrivalRadius` and stops (speed < 1 m/s) without overshooting by more than 20 m (with SPEC-20 propulsion in the test world).
   - [ ] Turrets never get thrust.
-- **Tests:** `AiSteeringTests.RewritesEveryTick`, `.ArrivesAndStops`, `.FacesHeading`, `.Turret_NoThrust`.
+- **Tests:** `AiSteeringTests.RewritesEveryTick` (including real AI-006 ability-edge delivery on the think tick and zero edges on intervening ticks), `.ArrivesAndStops`, `.FacesHeading`, `.Turret_NoThrust`.
 
 ### AI-008 — PlayerCombatStatusSystem
 - **Milestone:** M2
@@ -623,3 +623,5 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 | 18 | An authored rule can reference an ability asset outside the catalog, producing index zero during the AI-006 bake | Reject absent non-null ability references with AI-E003 before allocating the profiles blob. Bake rules in authored order with the canonical ability-family index, trigger and threshold; independently allocate the default profile's rules. Existing content parity/validation tests cover this completion of the AI-003 staging boundary. | Tech lead |
 
 | 19 | AI-006 state/range/avoidance prose has conflicting boundary instructions | Apply §7's half-sensor fallback when weapon stats are absent. Return remains latched until within twice ArrivalRadius, with turret and threatened-flee priority retained; clear its target while returning. Include AvoidanceMargin in the broadphase inflate so the specified hull clearance cannot be culled before the exact check. Idle/Hold do not acquire movement goals from avoidance. Warn once per decision-system lifetime and atomically count truncations in system-owned native telemetry; telemetry never affects simulation decisions. | Tech lead |
+
+| 20 | AI-006 acceptance asks for ShipCommand delivery implemented by its dependent AI-007 | AI-006 validates the ability decision and production tick; AI-007 RewritesEveryTick validates the production decision-to-command path and suppression on intervening ticks. Preserve the end-to-end requirement in AI-007 rather than blocking its prerequisite on absent downstream steering. No runtime contract, behavior, test count or milestone exit scope changes. | Tech lead |

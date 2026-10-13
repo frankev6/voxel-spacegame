@@ -882,6 +882,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 290 | SPEC-23 Q17: AI combat scenarios inherit advisory/owner dependencies | Apply ADR-0068 to AI-010: explicitly retain all M2 functional weapon/power tasks and AI-007/008; exclude only WPN-013/014 and PWR-009. Full combat WPN-012 remains required. No removed functional prerequisite, runtime change or new owner gate. | Tech lead |
 | 291 | SPEC-23 Q18: AI rules can reference an uncatalogued ability | Reject with AI-E003 before blob allocation; preserve authored order and canonical ability-family indices, with independently allocated default-profile rules. | Tech lead |
 | 292 | SPEC-23 Q19: AI decision boundary contradictions | Use §7 missing-weapon range, latched Return arrival with flee/turret priority, margin-inclusive obstacle broadphase and stationary Hold/Idle. Query warning/counter is system-owned atomic telemetry with no decision influence. | Tech lead |
+| 293 | SPEC-23 Q20: AI-006 acceptance consumes downstream steering | Keep decision/production-tick proof in AI-006 and require real decision-to-command delivery plus intervening-tick suppression in AI-007 RewritesEveryTick. Existing test counts and full end-to-end scope preserved; removes circular acceptance dependency. | Tech lead |
 
 
 ## Measurements
