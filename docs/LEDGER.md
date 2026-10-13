@@ -1004,6 +1004,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Live enemy integration finding — astra (gpt-6)
+
+- Real World range reopened, existing Fighter source spawned through NpcShip profile as id4099/faction1/ai_default. AI initially patrolled because the normal player lacked Allegiance. Adding faction0 to the player in the live fixture changed it to Engage. This is a diagnosed normal-spawn integration gap, not completed enemy combat acceptance; permanent player allegiance fix remains.
+- Evidence `Logs/playtest/enemy-live/` contains spawn script/readback, AI/weapon/damage snapshots and initial screenshot. Enemy was outside the initial screenshot. No new art, no injected damage, no hit proof yet. Editor17922 remains live. Test count: spec-required:0, extra:0 (live integration evidence only).
+
 ### 2026-10-13 — Fleet coordination verified — astra (gpt-6)
 
 - AI-014 b4fcfff5/0a23c0da/70eb3dc3 schedules formation goals and deterministic lowest-slot promotion, then feeds real steering. Leaders decide before a target/state snapshot; members skip sphere target search and avoidance while retaining abilities and friendly-fire protection. Q24/25 mirroredQ301/302 explain null-leader promotion and5m member arrival versus configured lone-ship radius.
