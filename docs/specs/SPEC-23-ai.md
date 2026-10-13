@@ -530,7 +530,7 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 ### AI-010 — AI combat scenarios
 - **Milestone:** M2
 - **Tier:** standard — PlayMode tests of specified behaviour
-- **Depends on:** `AI-007`, `AI-008`, `SPEC-21`, `SPEC-22`
+- **Depends on:** `AI-007`, `AI-008`, `WPN-001`, `WPN-002`, `WPN-003`, `WPN-004`, `WPN-005`, `WPN-006`, `WPN-007`, `WPN-008`, `WPN-009`, `WPN-010`, `WPN-011`, `WPN-012`, `WPN-015`, `WPN-017`, `WPN-018`, `PWR-001`, `PWR-002`, `PWR-003`, `PWR-004`, `PWR-005`, `PWR-006`, `PWR-007`, `PWR-008`, `PWR-010`
 - **Do:** Scenarios: (1) one AI frigate vs a static player hulk-dummy: closes to preferred range, orbits, hits; (2) damaged AI below flee fraction runs away; (3) two allied AI ships do not shoot through each other; (4) leash: chasing beyond 1.5 × leash returns to the anchor.
 - **Files:** `Assets/Game/Tests/PlayMode/Simulation/Ai/AiScenarioTests.cs`
 - **Acceptance criteria:**
@@ -617,3 +617,5 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 - Audit (background only): `docs/reference/audit-2026-10/02-combat-destruction.md` (AI and targeting notes).
 - Reynolds, "Steering Behaviors For Autonomous Characters" (1999) — arrival and local avoidance, background only.
 - SPEC-20 §6 AI writer contract; SPEC-21 §4.8 hash contract.
+
+| 17 | AI-010 still expands whole weapon/power specs, including advisory performance and owner feel work | Under ADR-0068, retain every same-milestone functional weapon/power prerequisite explicitly, excluding only WPN-013/014 and PWR-009. AI-007/008 and full combat WPN-012 remain required. Performance and balance tasks retain their full scope; no runtime contract or owner gate changes. | Tech lead |

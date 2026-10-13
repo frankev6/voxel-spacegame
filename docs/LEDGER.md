@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 18 | 2 | 0 | 0 | 71 | 0 | 91 | 3 |
-| M3 | 145 | 3 | 0 | 0 | 32 | 0 | 180 | 12 |
+| M3 | 144 | 4 | 0 | 0 | 32 | 0 | 180 | 11 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -272,7 +272,7 @@
 | AI-007 | AiSteeringSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006 | no | todo |  |  |  |  |
 | AI-008 | PlayerCombatStatusSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006, DMG-001 | no | todo |  |  |  |  |
 | AI-009 | Station turret AI | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007 | no | todo |  |  |  |  |
-| AI-010 | AI combat scenarios | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007, AI-008, SPEC-21, SPEC-22 | no | todo |  |  |  |  |
+| AI-010 | AI combat scenarios | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007, AI-008, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-008, PWR-010 | no | todo |  |  |  |  |
 | AI-011 | AI determinism | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010 | no | todo |  |  |  |  |
 | AI-012 | AI and hash performance | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010, TST-001 | no | todo |  |  |  |  |
 | ABL-001 | Public contract types | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | CORE-001, DATA-001, PWR-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 1bc7515 | Canonical ability contracts; 48-byte slot; 1 required test; full batch 901 EM / 128 PM, zero failures |
@@ -879,6 +879,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 287 | SPEC-24 Q7 / ADR-0069: empty ability resync and grant identity | Root Resynced/OverflowWarned replace padding without size growth; ABL-004 reconciles empty lists. Use pre-resync slot indices for grants and seed charge timer on spend. Nine required tests pending. | Tech lead |
 | 288 | SPEC-24 Q8: effect prerequisites and resync reconciliation | Both kind readers require AbilityDefsRef and skip spawning roots. Toggle once across available slots; unavailable slots stay inactive. Guarded boost requests cancel all old slot/stat keys before re-posting active survivors, including empty-list resync, preserving expiry and other producers. Exactly two required tests; Unity validation pending. | Tech lead |
 | 289 | SPEC-10 Q42: preview edits and source/functional lifetime | Ready registered EditorPreview only; coalesce changed coordinates, pin only while consuming, retain invalid-bounds/pinned work. Preserve root/untouched bricks and unchanged functional entities; replace changed functionals, queue affected meshes/colliders and mass recompute. Empty drafts retain table extent. Isolated VOX-020 implementation; tests/validation pending. | Tech lead |
+| 290 | SPEC-23 Q17: AI combat scenarios inherit advisory/owner dependencies | Apply ADR-0068 to AI-010: explicitly retain all M2 functional weapon/power tasks and AI-007/008; exclude only WPN-013/014 and PWR-009. Full combat WPN-012 remains required. No removed functional prerequisite, runtime change or new owner gate. | Tech lead |
 
 
 ## Measurements
