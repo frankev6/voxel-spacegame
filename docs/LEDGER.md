@@ -14,7 +14,7 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
+| M1 | 1 | 1 | 0 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 6 |
 | M3 | 98 | 9 | 0 | 0 | 73 | 0 | 180 | 7 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
@@ -207,7 +207,7 @@
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | done | astra (gpt-6) | 2026-10-12 | 8879cfa | 19 clips: 2 Blocked, 17 Unverified; release guard and four tests |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | yes | done | astra (gpt-6) | 2026-10-12 | 8f8adc3 | Automatic file cases; live Boot smoke passes, added active case discovered, future-command draft ignored (Q176) |
 | DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0b4269c | Real launch/probes, isolated profile, live edit-mode launch 1.370 s; Q144–146 |
-| DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | blocked | astra (gpt-6) | 2026-10-12 |  | Needs implemented FND-012 and SPEC-30/31 coordinates; contract-only Ready is premature (Q155) |
+| DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Q155 implementation prerequisites now exist: accepted FND-012, actual GalaxyService, FrameOrigin and T1 loader. Economy worker implements commands/probes; serialized validation by lead. |
 | DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | no | todo |  |  |  |  |
 | DEV-015 | In-game dev console | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-003, UI-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 8cf2df1 | F1 console; history/completion, async results, 0 B closed; ADR-0049 |
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | yes | done | astra (gpt-6) | 2026-10-12 | f1f6cd2 | Console/CLI replay; real seed-7 Fighter 300 ticks, 0 m error; live 1790-tick recording and screenshot; Q175 |
