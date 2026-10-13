@@ -17,11 +17,21 @@ namespace Game.Data.Logic
         public bool HasErrors => hasErrors;
         public bool IsStale => compilerVersion != Compiler.LogicCompiler.Version || sourceHash != Game.Core.StableHash.Hash64(source ?? "");
 
-        // TODO(NAR-003): implement wrapper validation, binding and dependency collection.
+        internal void SetCompiled(IIntExpr compiledRoot, bool failed)
+        {
+            hasErrors = failed;
+            root = failed ? null : compiledRoot;
+            sourceHash = Game.Core.StableHash.Hash64(source ?? "");
+            compilerVersion = Compiler.LogicCompiler.Version;
+        }
         // TODO(NAR-004): evaluate the compiled integer root, with zero for empty source.
         public int Evaluate(ILogicContext ctx) => throw new System.NotImplementedException("NAR-004");
-        public void Validate(ValidationReport report) => throw new System.NotImplementedException("NAR-003");
-        public void Bind(LogicBinder binder) => throw new System.NotImplementedException("NAR-003");
-        public void CollectDependencies(List<LogicDependency> into) => throw new System.NotImplementedException("NAR-003");
+        public void Validate(ValidationReport report)
+        {
+            if (IsStale) report.Error("NAR-E017", "", "", "Compiled logic is stale; recompile (Game/Narrative/Recompile All Logic).");
+            root?.Validate(report);
+        }
+        public void Bind(LogicBinder binder) => root?.Bind(binder);
+        public void CollectDependencies(List<LogicDependency> into) => root?.CollectDependencies(into);
     }
 }
