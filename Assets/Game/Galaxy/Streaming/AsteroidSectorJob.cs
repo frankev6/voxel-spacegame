@@ -28,7 +28,7 @@ namespace Game.Galaxy.Streaming
         public void Execute()
         {
             Output.Clear();
-            int ring = Sector / 4096, angular = Sector % 4096;
+            BeltSectorGeometry.Decode(Belt, SectorSizeM, Sector, out int ring, out int angular);
             BeltSectorGeometry.Ring(Belt, SectorSizeM, ring, out double inner, out double outer, out int sectors);
             var rng = RngStreams.For(Belt.Seed, RngPurpose.AsteroidShape, (ulong)Sector);
             int count = rng.NextInt(MinCount, MaxCount + 1);
