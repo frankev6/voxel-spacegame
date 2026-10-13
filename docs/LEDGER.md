@@ -1066,6 +1066,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-007 scheduled shape ownership authored — astra (gpt-6)
+
+-17f68377 separates internal asteroid scheduling from source assembly: PendingShape holds a persistent cell buffer and JobHandle; TryTake returns without waiting while work is incomplete, transfers the assembled source once ready and disposes the buffer. Cancellation and schedule/assembly exceptions join before releasing storage. Existing public Build retains synchronous behavior using the same implementation; no public API/assembly contract changes.
+- Still uncompiled/unaccepted, awaiting belt-sector selection/lifecycle, bounded jobs, shared T2/T3 spawn budget and four required functional cases in one compatible batch. Spec-required: 0 authored of4, extra: 0. No Unity active. DEV-009 active254; presentation dispatched bounded read-only ownership/determinism review; combat genuine dependency wait. Previous turn made T2 acceptance and T3 source progress.
+
 ### 2026-10-13 — SYS-007 sector generation authored — astra (gpt-6)
 
 - Claimed953c8d0c after SYS-006 acceptance/merge.33e464dc adds internal AsteroidSectorJob and descriptor: per-sector AsteroidShape stream, stable slot/subslot identity, uniform annular-area position, specified vertical scatter/radius bias/yaw/shape seed. Draws every candidate before destruction filtering, preserving surviving identities. Uncompiled/unaccepted; no runtime wiring yet.
