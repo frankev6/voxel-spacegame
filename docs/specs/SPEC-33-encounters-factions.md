@@ -1106,6 +1106,7 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 | 6 | Xeno as a faction | `faction_xeno` (hostile, locked) for the xeno story encounters | Narrative lead |
 | 7 | Encounter IDs for converted legacy fleets | SPEC-40 §4.13 IDs (`encounter_raiders`, …); SPEC-72 §4.4 suggestions are superseded (item 72) | Tech lead |
 | 8 | Requested changes to other specs | `_INTEGRATION-TODO.md` items 66 and 68–75 | Tech lead |
+| 20 | ENC-001's body-staging instruction and file list omit interface members, metadata/value semantics and the two internal §4.4 DTOs. | **ENC-001 default:** transcribe all 31 public types plus EncounterInstance/PendingEncounter. Definition getters expose authored data with read-only lists; literal enum values, payload/view constructors, EncounterAnchor.Player and constant lifecycle/save metadata retain their specified value semantics. Runtime service constructors/queries/operations, validation and logic compilation/binding throw NotImplementedException naming their owning ENC task. Complete ISaveParticipant, INewGameInitializer, IGalaxyFrameTick, ISceneExiting and ILogicSourceOwner signatures using existing canonical types. Register only the required faction event queue/channel; later producer, boot/service wiring, saves, composition and encounter behavior stay with ENC-002…014. No assets, new packages or alternate owners. | Tech lead — transcription/staging defaults; central mirror pending. |
 
 ## 11. References
 

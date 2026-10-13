@@ -9,3 +9,4 @@ using Unity.Entities;
 [assembly: InternalsVisibleTo("Game.Editor")]
 [assembly: InternalsVisibleTo("Game.DevTools.Editor")]
 [assembly: RegisterGenericComponentType(typeof(ManagedEventQueue<ShipDestroyed>))]
+[assembly: RegisterGenericComponentType(typeof(ManagedEventQueue<FactionRelationChanged>))]
