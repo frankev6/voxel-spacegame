@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Full regression complete:** session73915 exited 0: compile clean, **1164/0/1 EditMode, 160/0/53 PlayMode**. TenMinuteSoak passed in 600.33 s: 36,000 ticks, 60 chunks/hulks/rams, 36 dissolved + 24 silent despawns, peak 2/64 live chunks, zero native leaks. Evidence `Logs/playtest/combat-audio-final/`. Original QualitySettings restored/excluded and orphan test metas removed after terminal. Next live range, Space fire, four gh_dmg commands and audio source readback, then current-batch closeout. Prepared QST/MIG batch remains isolated.
+
 - **Validation progress:** session73915 reports full EditMode **1164/0/1**, compile clean with zero C# warnings; continues full PlayMode including the destruction soak. Exact session remains live. No batch closeout until terminal and live gameplay proof.
 
 - **MIG-012 delivery:** `848b29324acf0e3810d2529f3acac4f60f53abe1`, clean worker branch. Exact three-faction converter and protected generation recipe; 1 required test + 1 migration safety extra, Unity/generation pending. Reviewed strict mapping/protected writer and both tests; prepared `6b70ddd` on `task/MIG-012-faction-integration` in the existing isolated lead checkout, atop prepared QST-001. Q279 mirrors SPEC-72 Q42–44 there. Authored audio protection and faction count 105 both retained. Preserve primary source during session73915. All three worker deliveries are now held in explicit dependency/validation waits; remaining Ready standard rows are assigned, owner-only or missing real prerequisites.
