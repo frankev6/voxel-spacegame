@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Game.UI.Controls;
 using Game.UI.Data;
+using Game.UI.Services;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -183,7 +184,9 @@ namespace Game.Tests.PlayMode.UI
             Assert.Greater(scroll.scrollOffset.x, 0);
             AssertInside(last.worldBound, scroll.contentViewport.worldBound, "Last tab after scrolling");
             AssertInside(tabs.worldBound, parent.worldBound, "Tab strip after scrolling");
-            // TODO(UI-012): additionally invoke the canonical UILayoutAudit here once its frontier implementation exists (SPEC-60 Q22).
+            var issues = new List<LayoutIssue>();
+            UILayoutAudit.Run(parent, new Rect(0, 0, 1280, 720), issues);
+            Assert.IsEmpty(issues, "Canonical layout audit must agree with the retained scroll viewport checks.");
         }
 
         [Test] public void TabBar_SelectSame_NoEvent()

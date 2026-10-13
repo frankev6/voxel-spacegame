@@ -23,6 +23,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Shared UI panel implemented:** UI-012 adds UITestPanel with production theme/settings clones and all five logical sizes, owned render-target disposal and one-frame layout contract. Existing nine-tab test now calls the canonical audit in addition to retained bounds/scroll assertions. No tests run yet; CVD utility/eight AuditTests remain. HUD-004 receives the concrete helper API to avoid duplicate setup. Previous turn implemented contrast (progress).
+
 - **Contrast audit implemented:** UI-012 now evaluates resolved text over ancestor/self backgrounds with WCAG luminance and specified size/weight thresholds; missing theme fails explicitly. SPEC60Q31 mirrored321. NAR-020 delivered8290448c187 (four checks unrun); lead review pending. CVD utility, UITestPanel and eight required checks remain; no Unity run/acceptance claim. Previous turn implemented geometry (progress).
 
 - **UI audit prerequisite underway:** UI-012 claimedf179de70; lead task/UI-012-layout-audits implements geometry traversal, viewport/panel containment, HUD overlap and intrinsic text-overflow checks. SPEC60Q30 mirrored320 explains scroll-content exclusion/nowrap measurement. Contrast/CVD utilities, real-panel fixtures and required checks remain; no compile/acceptance claim. HUD-002 stays in-progress on its compiled main checkpoint while destination screens develop. No Unity validation this turn. Previous turn unlocked/dispatched HUD-004 (progress).
