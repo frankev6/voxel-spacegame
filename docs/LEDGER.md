@@ -989,6 +989,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — ABL-003 Burst validation repair — astra (gpt-6)
+
+- Full live regression1189/7/0 reproduced the documented post-Play environment failures; preserved XML/JSON and closed Editor78012 cleanly. Fresh headless60565 then1190/6/1 exposed BC1016 in AbilityJob.Resync: managed FixedString constructor. e2b9bda3 switches to the established Burst-supported literal conversion, keeping warning text and once-per-root behavior.
+- Evidence: `Logs/playtest/ability-lifecycle/editmode-live-failed.{xml,json}` and `editmode-burst-failed.{xml,log}`. Compile/full EditMode/PlayMode retry21253 is pending; no full-green or task-completion claim.
+- Tests: spec-required:9, extra:0 (existing ability acceptance); no new tests for this repair. Zero optimization passes. Follow-up: complete full regression, close compatible batch and dispatch ability effects/combat scenarios.
+
 ### 2026-10-13 — WPN-010 live reactor repair and beam proof — astra (gpt-6)
 
 - Pre-repair batch: compile zero CS warnings; full EditMode **1187/0/1**, PlayMode **164/0/53**, session80229 exit0. Soak36000 ticks/600.34s,60 chunks/hulks/rams,0 native leaks. Evidence `Logs/playtest/beam-explosion-audio/`.
