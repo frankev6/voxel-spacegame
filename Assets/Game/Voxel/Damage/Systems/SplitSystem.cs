@@ -39,7 +39,7 @@ namespace Game.Voxel.Damage
                 typeof(GridDamageStats), typeof(PendingImpulse), typeof(GridIntegrityState), typeof(IntegritySeed));
             chunkType = state.EntityManager.CreateArchetype(typeof(LocalTransform), typeof(LocalToWorld), typeof(PhysicsVelocity),
                 typeof(PhysicsMass), typeof(PhysicsCollider), typeof(PhysicsDamping), typeof(PhysicsWorldIndex), typeof(PhysicsGraphicalSmoothing),
-                typeof(PhysicsGraphicalInterpolationBuffer), typeof(ChunkBody), typeof(ChunkCell), typeof(ChunkColliderBlob),
+                typeof(PhysicsGraphicalInterpolationBuffer), typeof(ChunkBody), typeof(ChunkContactState), typeof(ChunkCell), typeof(ChunkColliderBlob),
                 typeof(SplitGrace), typeof(SplitOrigin), typeof(ChunkDissolve), typeof(Disabled));
             chunkColliders = state.GetComponentLookup<ChunkColliderBlob>(true); chunkCells = state.GetBufferLookup<ChunkCell>(true);
             job.Reader = GridCellReader.Create(ref state);

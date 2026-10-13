@@ -392,6 +392,7 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | `VoxelGrid.Revision`, `BrickDirty` | `DamageResolveSystem`, `SplitSystem`, `GridSpawnSystem` | Read |
 | Brick render content (`BrickRenderState`, pooled ranges) | `BrickMeshApplySystem` | — |
 | Grid `PhysicsCollider` | `ColliderSwapSystem` | — |
+| `ChunkContactState.Armed` | `SplitGraceContactSystem`; SplitSystem initializes/reset on pooled chunk creation/reuse (ADR-0063) | Read |
 | `PhysicsMass` | `GridMassUpdateSystem` | — |
 | `VoxelGrid.Kind` | `GridSpawnSystem` (initial), `ShipDeathSystem` (Ship → Hulk) | Read |
 | `PhysicsVelocity` | Unity Physics + `PropulsionSystem` (impulses only) + `ImpactEventSystem` (impulses only: collisions, damage knockback and the `ImpulseRequest` channel, ADR-0016; **every new mechanic that pushes bodies posts to that channel**) + `PlanarConstraintSystem` (vertical impulses only) + `GridMassUpdateSystem` (exact re-expression about the new centre of mass only) + `OriginRebaseSystem` (placement re-expression only: rotates the player's linear velocity by the placement yaw change). **Nobody else assigns velocity.** Creating `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` on a new body (`GridSpawnBodyInitSystem`, `GridBodyInitSystem`, `SplitSystem` through `GridBodyFactory`), and re-enabling a stowed grid with its pose and velocities (`GridStowApi.Unstow`, ADR-0015), is initialisation, not a write | Read |

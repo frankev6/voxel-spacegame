@@ -122,6 +122,7 @@ namespace Game.Voxel.Damage.Jobs
                 Ecb.SetComponent(entity, new PhysicsCollider { Value = blob }); Ecb.SetComponent(entity, new ChunkColliderBlob { Value = blob });
                 Ecb.SetComponent(entity, new PhysicsDamping { Linear = .02f, Angular = .05f });
                 Ecb.SetComponent(entity, new PhysicsGraphicalInterpolationBuffer { PreviousTransform = new RigidTransform(pose.Rotation, pose.Position), PreviousVelocity = motion.Velocity });
+                Ecb.SetComponent(entity, new ChunkContactState());
                 Ecb.SetComponent(entity, body); Ecb.SetComponent(entity, new SplitGrace { Other = island.Grid, UntilTick = Tick + (uint)Config.SplitGraceTicks });
                 Ecb.SetComponent(entity, new SplitOrigin { Parent = island.Grid });
                 Ecb.SetBuffer<ChunkCell>(entity).CopyFrom(cells.AsArray());

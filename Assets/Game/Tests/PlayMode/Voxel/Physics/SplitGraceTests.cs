@@ -42,6 +42,20 @@ namespace Game.Tests.PlayMode.Voxel.Physics
             Assert.Greater(math.distance(f.Position(parent), f.Position(piece)), before + .001f);
             Assert.Less(f.Velocity(parent).Linear.x, 0);
             Assert.Greater(f.Velocity(piece).Linear.x, 0);
+
+            // ADR-0063: pooled chunks additionally wait for geometric clearance after minimum grace.
+            Place(f.Em, parent, float3.zero); Place(f.Em, piece, new float3(OverlapOffset, 0, 0));
+            f.Em.SetComponentData(parent, default(Unity.Physics.PhysicsVelocity));
+            f.Em.SetComponentData(piece, default(Unity.Physics.PhysicsVelocity));
+            f.Em.AddComponentData(piece, new ChunkContactState());
+            f.Tick(4);
+            AssertStationary(f, parent, float3.zero);
+            AssertStationary(f, piece, new float3(OverlapOffset, 0, 0));
+            Assert.AreEqual(0, f.Em.GetComponentData<ChunkContactState>(piece).Armed);
+            Place(f.Em, piece, new float3(100, 0, 0)); f.Tick();
+            Assert.AreEqual(1, f.Em.GetComponentData<ChunkContactState>(piece).Armed);
+            Place(f.Em, piece, new float3(OverlapOffset, 0, 0)); f.Tick();
+            Assert.Greater(f.Velocity(piece).Linear.x, 0, "After clearance, a returning chunk collides normally.");
         }
 
         [Test]

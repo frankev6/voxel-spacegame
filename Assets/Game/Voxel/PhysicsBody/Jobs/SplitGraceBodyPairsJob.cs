@@ -11,6 +11,7 @@ namespace Game.Voxel.PhysicsBody
     internal struct SplitGraceBodyPairsJob : IBodyPairsJob
     {
         [ReadOnly] public ComponentLookup<SplitGrace> Grace;
+        [ReadOnly] public ComponentLookup<ChunkContactState> ChunkContacts;
         public uint Tick;
 
         public void Execute(ref ModifiableBodyPair pair)
@@ -19,6 +20,6 @@ namespace Game.Voxel.PhysicsBody
         }
 
         bool Suppressed(Entity body, Entity other) =>
-            Grace.HasComponent(body) && Grace[body].Other == other && Tick < Grace[body].UntilTick;
+            Grace.HasComponent(body) && Grace[body].Other == other && (Tick < Grace[body].UntilTick || (ChunkContacts.HasComponent(body) && ChunkContacts[body].Armed == 0));
     }
 }

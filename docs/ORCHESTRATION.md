@@ -7,8 +7,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | INP-008 | implementing; NAR-001 integrated e39b2d3, validation pending | Ready narrative/weapon work after batch closeout |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-015 | implementing; CAM-010 integrated 014ed0b, validation pending | Ready power/ability work after batch closeout |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AST-001 | implementing contracts/planned manifest only; CAM-009 integrated 21e43a1, validation pending | Ready presentation work; audio content after AUD-006 |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DATA-010 | implementing; MIG-015 delivered 25ac3f0, pending review | Ready power/ability content |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | UI-009 | implementing; AST-001 delivered 54c4fba, pending review | Ready presentation work; audio content after AUD-006 |
 
 ## Dispatch procedure
 
@@ -31,3 +31,5 @@ Latest validation supersedes earlier process state: session 56515 finished, Edit
 Expanded EditMode suite passed **901/0/1**, including both explicit chunk leak checks, all editor orbit/map transform tests and narrative contracts. Saved `Logs/playtest/orchestration-batch2/editmode.xml`; PlayMode remains running in session 77989. Do not restart while active.
 
 Current state supersedes earlier pending validation: full expanded batch finished **901/0/1 EditMode, 128/0/53 PlayMode**, both exit 0; ten worker tasks closed on lead branch (`e95cb69`), claims merged. Editor session 39677 is open and playing. DMG-011 live renderer works, but contact handoff is defective: 264-cell chunk goes from ~1.5 m/s separation to ~102 m/s immediately after 60-tick parent grace ends, despite parent collider already Ready. Evidence `Logs/playtest/dmg011/contact-handoff.txt`, early/moving screenshots. Next lead action is collision-handoff correctness fix, then validate and merge lead branch to main; do not close DMG-011 yet. Main still awaits this branch's validated closeouts. Workers INP-008/MIG-015/AST-001 remain active.
+
+Live contact repair (ADR-0063) now passes all three SplitGraceTests and the 264-cell repeat: ~1.5 m/s through grace expiry, damping afterwards; visible slab screenshot `Logs/playtest/dmg011/chunk-fixed-moving.png`. Full suites must rerun before closeout. Main independently integrated validated worker batch at 0561e29; main 6d3c2cd claims DATA-010/UI-009, both dispatched. INP-008 same thread recovered from transient provider capacity. MIG-015 25ac3f0 and AST-001 54c4fba await review/integration.

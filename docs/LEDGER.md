@@ -798,6 +798,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 213 | 2026-10-13 | SPEC-40 Q12 / NAR-001 | Missing registry factory signatures | CreateNode takes bound objects and returns selected node interface as object; Invoke consumes runtime LogicValue arguments; bodies remain NAR-003 stubs | Tech lead | Resolved; existing contracts unchanged |
 | 214 | 2026-10-13 | SPEC-62 §5.3 / CAM-008 integration | Framing test assumed no post-framing impact shake | Disable shake in framing fixture only, retaining strict viewport assertions and separate shake tests; production shake remains after framing as specified | Tech lead | Resolved; full PlayMode rerun pending |
 
+| 215 | 2026-10-13 | SPEC-13 Q34 / ADR-0063 | Chunk contact reactivation converts overlap into a violent kick | Add per-pool-incarnation clearance latch; minimum grace preserved, recontact normal after clearance, other pairs unchanged | Tech lead | Implemented; 3 contact regressions and live 264-cell repeat pass, full-suite rerun pending |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
@@ -907,6 +909,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DMG-011 live contact repair verified — astra (gpt-6)
+
+1. ADR-0063 adds internal per-incarnation chunk parent-contact arming. After the existing minimum grace, the pair remains suppressed until exact collider clearance; future impacts collide normally. SplitSystem initializes/reset state and SplitGraceContactSystem is its only subsequent writer. Ordinary grid grace and unrelated pairs are unchanged. No velocity clamp or physics tuning changes.
+2. Compile clean; all **3 SplitGraceTests pass**, including clearance/recontact assertions in the existing required test (spec-required: 3, extra: 0). Live repeat: 264 cells, age 59 velocity (-0.942,0,-1.130), age 73 (-0.938,0,-1.125), age 269 (-0.878,0,-1.054) m/s. No expiry kick; screenshot visibly shows detached tumbling wall slab. Evidence `Logs/playtest/dmg011/contact-handoff-fixed.txt`, `chunk-fixed-early.png`, `chunk-fixed-moving.png`, `contact-regression.xml`. Full regression rerun remains required before DMG-011 closeout.
+3. Worker batch closeouts also integrated independently into main (`0561e29`), allowing DATA-010 and UI-009 claims (`6d3c2cd`). Their existing workers are implementing; MIG-015 `25ac3f0` and AST-001 `54c4fba` await review/integration. INP-008 worker hit provider capacity; retried the same thread/model and it resumed without lost work or duplication.
 
 ### 2026-10-13 — DMG-011 live contact handoff defect found — astra (gpt-6)
 
