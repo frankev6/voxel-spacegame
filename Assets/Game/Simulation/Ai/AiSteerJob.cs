@@ -19,6 +19,7 @@ namespace Game.Simulation.Ai
     public partial struct AiSteerJob : IJobEntity
     {
         [ReadOnly] public ComponentLookup<FlightState> Flights;
+        [ReadOnly] public ComponentLookup<FleetMember> Members;
         [ReadOnly] public ComponentLookup<PropulsionStats> Propulsion;
         [ReadOnly] public ComponentLookup<ShipTarget> Targets;
         [ReadOnly] public ComponentLookup<LocalTransform> Transforms;
@@ -47,11 +48,13 @@ namespace Game.Simulation.Ai
             float3 to = Planar.FlattenY(brain.GoalPosition - pose.Position);
             float distance = math.length(to);
             float3 desired = float3.zero;
-            if (distance >= Config.ArrivalRadius)
+            float arrival = Members.HasComponent(entity) && Members[entity].Leader != Entity.Null
+                ? math.min(Config.ArrivalRadius, 5f) : Config.ArrivalRadius;
+            if (distance >= arrival)
             {
                 float braking = Propulsion.HasComponent(entity) ? math.max(.5f, .5f * Propulsion[entity].ForwardAccel) : 2;
                 float speed = math.min(brain.GoalSpeedFraction * flight.ForwardCap,
-                    math.sqrt(2 * braking * math.max(0, distance - Config.ArrivalRadius)));
+                    math.sqrt(2 * braking * math.max(0, distance - arrival)));
                 desired = math.normalizesafe(to) * speed;
             }
             float2 local = FlightMath.ToLocalPlanar(desired, pose.Rotation);

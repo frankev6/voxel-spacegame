@@ -173,7 +173,7 @@ namespace Game.Tests.EditMode.Simulation.Ai
             f.Tick(); Assert.AreEqual(default(ShipCommand), f.Command(turret), "Pending spawn commands are cleared without thrust.");
         }
 
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             public const float Arrival = 40;
             readonly EcsTestWorld world;
@@ -181,7 +181,7 @@ namespace Game.Tests.EditMode.Simulation.Ai
             readonly FactionRelations factions;
             readonly VoxelTestContent content;
             public EntityManager Em => world.EntityManager;
-            public Fixture(bool decisions = false, bool physics = false)
+            public Fixture(bool decisions = false, bool physics = false, bool fleet = false)
             {
                 using var builder = new BlobBuilder(Allocator.Temp);
                 ref var blob = ref builder.ConstructRoot<AiProfilesBlob>(); var rows = builder.Allocate(ref blob.Profiles, 2);
@@ -193,10 +193,18 @@ namespace Game.Tests.EditMode.Simulation.Ai
                     var rules = builder.Allocate(ref rows[i].AbilityRules, 4);
                     for (int k = 0; k < rules.Length; k++) rules[k] = new AiAbilityRuleDef { AbilityIndex = (ushort)(k + 1), Trigger = AiAbilityTrigger.Fleeing };
                 }
-                builder.Allocate(ref blob.Formations, 0); profiles = builder.CreateBlobAssetReference<AiProfilesBlob>(Allocator.Persistent);
+                var formations = builder.Allocate(ref blob.Formations, fleet ? 2 : 0);
+                if (fleet)
+                {
+                    builder.Allocate(ref formations[0].Slots, 0);
+                    var slots = builder.Allocate(ref formations[1].Slots, 3);
+                    slots[0] = new float2(-30, -40); slots[1] = new float2(30, -40); slots[2] = new float2(0, -80);
+                }
+                profiles = builder.CreateBlobAssetReference<AiProfilesBlob>(Allocator.Persistent);
                 try
                 {
                     var systems = new List<Type> { typeof(AiSteeringSystem) };
+                    if (fleet) systems.Add(typeof(FleetSystem));
                     if (decisions) { systems.Add(typeof(AiDecisionSystem)); systems.Add(typeof(SpatialHashBuildSystem)); }
                     if (physics)
                     {
@@ -257,6 +265,10 @@ namespace Game.Tests.EditMode.Simulation.Ai
                 return root;
             }
             public void Tick() => world.StepTicks(1);
+            public unsafe int SphereQueries
+            {
+                get { Em.CompleteAllTrackedJobs(); return world.World.Unmanaged.GetUnsafeSystemRef<AiDecisionSystem>(world.World.Unmanaged.GetExistingUnmanagedSystem<AiDecisionSystem>()).SphereQueryCount; }
+            }
             public ShipCommand Command(Entity root) => Em.GetComponentData<ShipCommand>(root);
             public AiBrain Brain(Entity root) => Em.GetComponentData<AiBrain>(root);
             public void Dispose()

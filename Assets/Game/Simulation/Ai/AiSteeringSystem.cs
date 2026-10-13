@@ -23,6 +23,7 @@ namespace Game.Simulation.Ai
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<AiConfig>();
             state.RequireForUpdate<FlightConfig>(); state.RequireForUpdate<SimClock>();
             job.Flights = state.GetComponentLookup<FlightState>(true);
+            job.Members = state.GetComponentLookup<FleetMember>(true);
             job.Propulsion = state.GetComponentLookup<PropulsionStats>(true);
             job.Targets = state.GetComponentLookup<ShipTarget>(true);
             job.Transforms = state.GetComponentLookup<LocalTransform>(true);
@@ -33,7 +34,7 @@ namespace Game.Simulation.Ai
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             using var marker = ScheduleMarker.Auto();
-            job.Flights.Update(ref state); job.Propulsion.Update(ref state); job.Targets.Update(ref state);
+            job.Members.Update(ref state); job.Flights.Update(ref state); job.Propulsion.Update(ref state); job.Targets.Update(ref state);
             job.Transforms.Update(ref state); job.Grids.Update(ref state); job.Hulks.Update(ref state); job.Spawning.Update(ref state);
             job.Config = SystemAPI.GetSingleton<AiConfig>(); job.Tick = SystemAPI.GetSingleton<SimClock>().Tick;
             state.Dependency = job.ScheduleParallel(state.Dependency);
