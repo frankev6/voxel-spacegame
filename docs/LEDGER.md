@@ -966,6 +966,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Combat integration checks and identity repair — astra (gpt-6)
+
+- Shield/status/budget/economy/encounter grouped checks pass **36/0/0**; aiming/loot/editor contracts pass **11/0/0**, compile clean. Evidence `Logs/playtest/shield-combat/`. Protected shield content `f04a83a`, economy config/scrap `db5d72e`, loot tables `3d65849` generated and registered; loot rerun bytes/GUIDs/manifest unchanged. No full-batch completion claim yet.
+- DMG-014's strict hash check exposed allocator-dependent fractional HP rounding: equivalent persistent ships had different Entity.Index values between Worlds. `8fd7f66` / ADR-0066 uses persistent identity in CellWriter; Q265 records it. Scenario clocks are aligned after asynchronous spawn. Q264 / `fc32163` corrects target-lead aiming to the occupied hull centre. Serial validation session 67167 is active.
+- Tests authored: PWR-007 spec-required: 9, extra: 0; PWR-008 spec-required: 3, extra: 0; PWR-010 spec-required: 6, extra: 0; ENC-001 spec-required: 2, extra: 0; ECO-002 spec-required: 15, extra: 0; DMG-014 spec-required: 3, extra: 0; WPN-006 spec-required: 5, extra: 0; MIG-013 spec-required: 1, extra: 1 (migration safety); EDT-001 spec-required: 4, extra: 0. No optimization pass. WPN-011 remains active; two workers have real dependency waits until this batch closes.
+
+
 ### 2026-10-13 — Origin, camera and targeting full regression green — astra (gpt-6)
 
 - GAL-009, CAM-006, WPN-004 and WPN-005 closed after compile clean and full **1051/0/1 EditMode, 146/0/53 PlayMode**, session 36784 exit 0. Evidence `Logs/playtest/origin-combat/{editmode-final.xml,playmode-final.xml,compile-race-repair.log}`. Origin race repair `5bf0a47` keeps simulation readers asynchronous and presentation reads synchronized.
