@@ -18,11 +18,9 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- DMG-011 completed and fast-forward merged into local main at `b87aec3`; final runtime repair `e2cbd81`. DMG-012 claimed on main `d40c19e`; lead now on `task/DMG-012-hulk-grids`.
-- Physical chunks: pool, exact mass/momentum, greedy colliders, retirement and palette-lit rendering verified. Five required tests including native leak checks pass. ADR-0063 clearance contact repair passes existing three contact tests and live 264-cell slab separation proof.
-- Full validation session 46677 completed exit 0: compile zero CS warnings, EditMode **901/0/1**, PlayMode **128/0/53**. Evidence `Logs/playtest/dmg011/{editmode-repair,playmode-repair}.xml`, `contact-handoff-fixed.txt`, `chunk-fixed-moving.png`.
-- No Unity process active; runner cleaned test scene. Original QualitySettings delta restored from `Logs/playtest/orchestration-batch2/QualitySettings.before.asset` and remains excluded.
-- Lead next: extract/complete staged hulk recorder and seven required lifecycle tests under DMG-012. Next compatible worker batch includes MIG-009 content before strict DATA-010, plus pending deliveries below.
+- AI-002/GAL-001/DLG-001/UI-010 full validation session 21701 exited 0: 939/0/1 EditMode, 135/0/53 PlayMode; compile clean. Closed in ledger; evidence in `Logs/playtest/ai002/`.
+- Lead next batch is prepared in `/Users/frank/.codex/worktrees/combat-hit-detection/spaceship-game-v2`: WPN-003 `6772372`, `b13fd8b`; PWR-003 `03eff52`; UI-011 `bce99a3`; partial ART-014 `8d3e706`; review repairs `c69d76b`, `b5d0c5d`, `1b3876c`. Move this sequence to primary after local main closeout, rebuild catalog and validate.
+- No Unity process active after suite completion; runner removed temporary scene. Original QualitySettings delta restored and excluded. Three workers actively implementing WPN-002, MIG-010, ABL-002.
 
 ## Validated and pending batches
 
