@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | MIG-009 | implementing; INP-008 eecb3e0 reviewed, pending validation | Weapon content/links batch with DATA-010 |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DATA-010 | implementing; MIG-015 delivered 25ac3f0, pending review | Ready power/ability content |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | GAL-001 | dispatched; DATA-010 9b56175 reviewed, pending MIG-009 compatible validation | Galaxy contract-dependent standard work |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | UI-009 | implementing; AST-001 delivered 54c4fba, pending review | Ready presentation work; audio content after AUD-006 |
 
 ## Operating rules
@@ -35,3 +35,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - INP-008 delivered `eecb3e05926e1a318b838e118a541a1e10a27730`, 2 required tests, SPEC-03 Q10/Q11. Lead reviewed aim and device-label flow; Unity validation/hardware ergonomics pending. Do not claim physical controller testing.
 - MIG-009 exact dependency resolved in SPEC-72 Q19 / ledger Q216: use permitted DATA-001 contract dependency (DATA-007 implementation is done) rather than all SPEC-04, because serialized weapon field/bake already exists and DATA-010 strict validation needs the six missing links. Initial DATA-007 dependency was rejected by docs checker and corrected on main `8b0016e`; merged into lead, check-docs passes. MIG-009 claimed/dispatched to same combat worker. Keep E047 strict; integrate migration content before DATA-010.
 - Repair full EditMode **901/0/1** passes; saved `Logs/playtest/dmg011/editmode-repair.xml`. PlayMode session 46677 remains running; source unchanged during validation.
+
+- DATA-010 delivered `9b56175d254bd18df77898611583f7a8ff95eaaf`: strict E047, weapon stat contributions, authored-order ability bake/hash; 3 required tests, 0 extra. Lead reviewed source and tests; integrate with MIG-009 content. Same worker recycled to GAL-001, claimed on main `ba5be3b`, dispatched successfully. Combat MIG-009 and presentation UI-009 remain active.
