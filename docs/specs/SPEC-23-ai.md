@@ -199,7 +199,11 @@ namespace Game.Simulation.Ai
         public BlobArray<AiAbilityRuleDef> AbilityRules;   // baked from abilityRules (ability → AbilityDefsBlob index)
     }
     public struct AiAbilityRuleDef { public ushort AbilityIndex; public Game.Data.Definitions.AiAbilityTrigger Trigger; public float Threshold; }
-    public struct AiProfilesBlob { public BlobArray<AiProfile> Profiles; }   // [0] = default profile copy; [i] = IndexOf<AiProfileDefinition>
+    public struct AiProfilesBlob
+    {
+        public BlobArray<AiProfile> Profiles;       // [0] = default profile copy; [i] = IndexOf<AiProfileDefinition>
+        public BlobArray<FormationDef> Formations; // ADR-0065: [0] empty; [i] = IndexOf<FormationDefinition>
+    }
 
     /// <summary>Boot singleton (SPEC-01 BootSingletons) from config_ai and all AiProfileDefinitions.</summary>
     public struct AiConfig : IComponentData
@@ -264,6 +268,13 @@ namespace Game.Simulation.Ai
 ```csharp
 namespace Game.Simulation.Ai
 {
+    /// <summary>Immutable formation row in AiProfilesBlob (ADR-0065). BootSingletons owns the existing Profiles blob.</summary>
+    public struct FormationDef
+    {
+        public Game.Core.ContentHash IdHash;
+        public Unity.Entities.BlobArray<Unity.Mathematics.float2> Slots; // authored leader-local metres: x right, y forward
+    }
+
     /// <summary>On group members (not on the leader): encounter fleets (SPEC-33) and carrier wings alike (ADR-0017). Writer: the spawner, FleetSystem on leader loss.</summary>
     public struct FleetMember : Unity.Entities.IComponentData
     {
@@ -279,6 +290,7 @@ namespace Game.Data.Definitions
     {
         [UnityEngine.SerializeField] private UnityEngine.Vector2[] slots;   // leader-local XZ offsets in metres (x right, y forward)
         public System.Collections.Generic.IReadOnlyList<UnityEngine.Vector2> Slots => slots;
+        public override void Validate(ValidationScope scope, ContentValidationContext context); // AI-E004 (AI-013, Q15)
     }
 }
 ```
@@ -397,7 +409,7 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 | Origin rebase | Anchors and goals shift by the record delta (§5.3); star-system change resets anchors |
 | Two AI ships each other's target, both fleeing | Allowed; flee goals are recomputed each think |
 | Load | AI restarts in `Idle` (decision 8) |
-| Content | AI-E001 `thinkIntervalTicks < 1`; AI-E002 `config_ai.defaultProfile` null; AI-E003 more than 8 `abilityRules` or a rule without `ability` |
+| Content | AI-E001 `thinkIntervalTicks < 1`; AI-E002 `config_ai.defaultProfile` null; AI-E003 more than 8 `abilityRules` or a rule without `ability`; AI-E004 empty/non-finite formation slots or a pair closer than 20 m (Q15) |
 
 ## 8. Performance budget
 
@@ -594,6 +606,8 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 | 9 | Passing the whole hash into a Burst job registers main-thread GuardedHandles as job inputs and breaks EndRead/disposal. | **Resolved:** ADR-0064 adds a non-owning SpatialHashQueryData view with only spatial containers; AsReadOnly for job fields, owner handles stay on main thread. Existing owner query APIs delegate without safety suppression. Required ordered-query test covers the real Burst access lifecycle. | Tech lead |
 | 10 | AI-003's blob parity criterion includes a rules field whose bake is explicitly assigned to AI-006. | AI-003 bakes every scalar and the default profile copy, with separately allocated empty AbilityRules arrays and an AI-006 TODO. Author/validate the specified ability rules now; AI-006 owns their runtime bake and consumption. | Tech lead — resolved by the coordinator's AI-003 boundary instruction; central mirror pending. |
 | 11 | §7 names only the three example validation failures, although the authored fields have additional numeric ranges and enum domains. | Use AI-E001 for all invalid profile scalar ranges/enums, AI-E002 for invalid config ranges/default or zero/multiple configs, and AI-E003 for invalid rule count/ability/trigger/threshold. Float tunables must be finite. Reject a default profile outside the catalog before allocating the blob. Preserve formation getters; formation behavior remains AI-013. | Tech lead — resolved by AI-003; central mirror pending. |
+| 14 | AI-013 requests a formations array in AiConfig without specifying its blob shape or disposal. | **Resolved by accepted [ADR-0065](../decisions/ADR-0065-formation-blob-storage.md):** extend the existing boot-owned AiProfilesBlob with BlobArray<FormationDef> Formations; each row has ContentHash IdHash and BlobArray<float2> Slots. Use one-based FormationDefinition catalog indices, reserve an empty row 0, retain authored slot order and X/right, Y/forward metre coordinates. Access by ref through AiConfig.Profiles.Value.Formations. The sole existing Profiles disposal path owns the array; AI-014 owns steering. | Tech lead — accepted centrally 2026-10-13; mirror pending. |
+| 15 | AI-013 does not name a validation code, finite-coordinate policy or exact default formation offsets. | **AI-013 default:** AI-E004 reports empty arrays, non-finite offsets and every pair closer than 20 m (exactly 20 m is valid). Author ten follower slots per formation using SPEC-33 ENC-013's 40 m pattern: line alternates ±40, ±80, … ±200 m at forward 0; wedge uses those paired X values at forward −40, −80, … −200 m; column is X 0, forward −40 through −400 m. The leader is not a follower slot. No byte-slot cap or steering behavior is added. | Tech lead — default recorded for central mirror. |
 
 ## 11. References
 
