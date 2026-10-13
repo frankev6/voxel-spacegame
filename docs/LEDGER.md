@@ -1039,6 +1039,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — GAL-008 lifecycle and prefetch checkpoint — astra (gpt-6)
+
+- Claimed d6e6ffc1. Implemented persistent ownership for scheduled body outputs, completion/transfer/disposal, synchronous builder reuse, ordered frame ticker with exception isolation, and WorldGroup bridge. GalaxyService now owns startup/restore generation, cache/prefetch/release, generation counts, reveal/visit state and disposal before its job-input arrays are released.
+- Queries/names, player start/capture, live delta patches, composition wiring and six required checks remain. No compile/test run on this incomplete batch; no acceptance claim. Test count: spec-required: 6 pending, extra: 0. Existing origin-reset behavior retained.
+- ECO-0098d9ec70f delivered220; bounded review requested, no other unassigned ready standard task except owner-only AUD-011. NAR-016207/FND-012184 active; FND worker owns narrow GameComposition row8.3 registration, lead will add real galaxy lifecycle when integrated. Previous goal turn accepted GAL-007 (progress).
+
 ### 2026-10-13 — GAL-007 accepted — astra (gpt-6)
 
 - f90c0fd3 implements sorted/unique destroyed, interacted, replacement and owned-structure records; append-only story slots with tombstones and65535 capacity; deterministic galaxy state ordering/revision stamps. Structure replacement/disposal releases native ownership. Delta application resolves templates, preserves generated bodies/hash, appends fixed story bodies with stable IDs and parent orbits, then applies interacted/destroyed/structure flags.

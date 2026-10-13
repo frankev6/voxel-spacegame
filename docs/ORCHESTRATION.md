@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-016 | claimed; NAR-015 accepted, implement quests/triggers/clues | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-009 | active218; ENC-010 accepted and merged | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-009 | delivered8d9ec70f220; bounded review then dependency wait for ready standard work | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | FND-012 | active181; TRV-002 accepted and merged | HUD-003/006/007 once ready |
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Galaxy service lifecycle authored:** GAL-008 owns persistent prefetch outputs, caches, new-game/restore generation and ordered ticker/bridge. Queries/live patches/composition/six checks remain; uncompiled batch, no Unity run. ECO-009 delivered8d9ec70f, bounded review requested; NAR-016/FND-012 active. Next finish service before combined validation.
 
 - **Galaxy deltas accepted:**f90c0fd3 implements sorted saved changes, stable story-spawn IDs, owned structure snapshots and ordered application. Clean compile, six checks pass0.29s. GAL-008 is next to connect generation/cache/session lifecycle. All three workers active on NAR-016/ECO-009/FND-012; no active Unity run.
 
