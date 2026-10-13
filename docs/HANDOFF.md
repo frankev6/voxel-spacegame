@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **World loading underway:** SYS-004 claimed6ec2de25, branch task/SYS-004-world-loader at5a214830 adds grid-child membership and deterministic split adoption helpers. Anchor creation, origin wait/load/unload, scene wiring and five required checks remain; uncompiled/unaccepted, no Unity run. All workers active (NAR-016216, GAL-011228, QST-002192). Previous turn galaxy-session completion was progress.
+
 - **Galaxy session integrated:** cc7c0a1e/ad0f5195 accepted GAL-008 and merged locally; actual ticker/state/service/GLXY registered, lifecycle check passes. GAL-011 claimed19bb5361 and dispatched to the existing economy worker. NAR-016 and QST-002 continue. No active Unity. Existing quest-validator boot defect still prevents live acceptance; PLOC/streaming remain explicit SYS work. Previous turn accepted persistence (progress).
 
 - **Galaxy persistence accepted:**54ebbf3d plus fixture d481a047; clean compile and four required cases pass across focused run/single log-expectation repair (under0.4s total test bodies). Evidence Logs/playtest/galaxy-save/. No Unity run active. Next resume GAL-008 session binding with actual GLXY, identify remaining PLOC/loader dependencies. NAR-016 active215; QST-002 active190; GAL-011 worker prepared and waiting227.
