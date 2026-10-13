@@ -61,8 +61,8 @@ namespace Game.Simulation.Weapons
                 }
                 else
                 {
-                    float target = math.clamp(aim.DesiredYaw, -weapon.TraverseHalfArcRad, weapon.TraverseHalfArcRad);
-                    aim.Yaw += math.clamp(target - aim.Yaw, -weapon.TraverseRateRad * SimTime.FixedTimestep, weapon.TraverseRateRad * SimTime.FixedTimestep);
+                    float targetYaw = math.clamp(aim.DesiredYaw, -weapon.TraverseHalfArcRad, weapon.TraverseHalfArcRad);
+                    aim.Yaw += math.clamp(targetYaw - aim.Yaw, -weapon.TraverseRateRad * SimTime.FixedTimestep, weapon.TraverseRateRad * SimTime.FixedTimestep);
                     aim.Aligned = (byte)(math.abs(aim.DesiredYaw - aim.Yaw) <= weapon.FireConeRad ? 1 : 0);
                 }
                 aim.FireDirLocal = math.rotate(quaternion.AxisAngle(mount.UpLocal, aim.Yaw), mount.ForwardLocal) * math.cos(elevation) + mount.UpLocal * math.sin(elevation);
