@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AST-003 | dispatched from current main; DLG-010 partial 38b2bb0 lacks approved sprites; GAL-003 579394d awaits galaxy content | WPN-004/005 after FLT-012 |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AST-002 | dispatched from main 5764e72; AI-003 delivered 6787228, boot/catalog integration and validation pending | AI-005 after AI-003 closes |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AST-002 delivered | c630e42 reviewed; Unity validation pending; real dependency wait for AI-003 full-suite closeout | AI-005 after AI-003 closes |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | MIG-014 delivered | 644622c + fea6357 reviewed; dependency wait for AI-003/SYS-001 full validation | AI-005 or SYS-002 once ready |
 
 ## Operating rules
@@ -18,11 +18,12 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- Main `1074075` contains the closed combat-content batch: **968/0/1 EditMode, 145/0/53 PlayMode**, both exit 0, compile clean. Evidence `Logs/playtest/combat-content-batch/`.
-- Primary `task/DMG-013-death-integration` now includes AI-003 `e1de8d9`, SYS-001 `e738e71`, AI boot lifetime `90a180a`, DMG-013 `96d32ca` / `3670bd7` / `5def348` / three required tests `77d9760`. Nothing in this new batch is validated yet.
-- AI catalog job `1127` failed compile; missing BlockDefsRef import and mutable scratch-set variable fixed `66b2fbe`. Rerun **session `9246` active**, temporary `Assets/Game/Editor/AiContentCatalogJob.cs`/meta must be removed after terminal; then commit generated catalog and run compile + grouped AiContent/StreamingContract/ShipDeath tests. Do not run a second Unity process.
-- Three assignments: DLG-010, AST-002, MIG-014. GAL-003 delivered `579394d`, not integrated because strict E001 requires actual galaxy content. Combat WPN-004/005 await SPEC-20; lead next runtime chain after DMG-013 is PWR-004 → FLT-012.
-- Lead isolated checkout remains `/Users/frank/.codex/worktrees/combat-hit-detection/spaceship-game-v2`, branch `task/DMG-013-ship-death`, old head `f52c097`; do not reapply its already integrated commits. Editor closed; goal active and heartbeat paused.
+- Main contains the closed combat-content batch at `1074075`: **968/0/1 EditMode, 145/0/53 PlayMode**, both exit 0, compile clean. Later main commits are task claims, most recently AST-003 `6851656`.
+- Primary `task/DMG-013-death-integration` contains AI-003, SYS-001 and DMG-013. AI catalog/lifetime and Burst query fixes are integrated. Compile clean; grouped acceptance **7/0/0** (`Logs/playtest/dmg013/acceptance-final.xml`). Full session **25256** passed **975/0/1 EditMode** and remains live in PlayMode. Last authoritative poll confirmed Unity 69159 and active Burst compiler 69167. Do not mutate primary runtime source or launch another Unity process until terminal.
+- Lead isolated checkout `/Users/frank/.codex/worktrees/combat-hit-detection/spaceship-game-v2`, branch `task/PWR-004-power-initialization`, contains registration, shield request initialization, rebind detection, root binding and five required tests through `6067fce`. Source review complete; compile and runtime checks pending. Next combat dependency is PWR-004 → FLT-012 → full weapon producers.
+- AST-002 delivery `c630e42` reviewed against its seven required checks; compile, focused tests and A1/A2 CLI validation pending. Combat worker remains active on AST-003. Power/presentation workers have genuine dependency waits for AI-003/SYS-001 full validation before AI-005/SYS-002 assignment.
+- Hold GAL-003 `579394d` and MIG-014 `644622c` + `fea6357` for a compatible galaxy-content batch; strict galaxy validation needs actual content. DLG-010 `38b2bb0` is partial without approved sprites. Do not weaken validation or mark these complete.
+- Editor closed; native revised goal active, fallback heartbeat paused. Exclude pre-existing QualitySettings delta and preserve the active runner's InitTestScene until validation ends.
 
 ## Validated and pending batches
 
