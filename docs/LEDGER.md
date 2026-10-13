@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 112 | 9 | 0 | 0 | 59 | 0 | 180 | 8 |
+| M3 | 112 | 8 | 0 | 0 | 60 | 0 | 180 | 9 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -384,8 +384,8 @@
 | NAR-012 | World-event bridge | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-011, SYS-001, ENC-001 | no | todo |  |  |  |  |
 | NAR-013 | Narrative validator framework and fact rules | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-009 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | e81dc6d | Scratch validator, V001–008 and CLI; reviewed repair, 7 focused checks pass; downstream owner stubs remain explicit diagnostics |
 | NAR-014 | Legacy converter: reading, mapping tables and logic translation | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, MIG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 2be62596 | Strict five-file loader and mapped logic; 5 focused checks pass; emission/assets remain NAR-015/016 |
-| NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Converter implemented; clean compile + 6 required checks pass; real generation awaits GAL-012/ENC-010 placement assets (Q325) |
-| NAR-016 | Legacy converter: quests, triggers, templates and flag assets | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-015 | no | todo |  |  |  |  |
+| NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 5d85a419 | 34 Yarn/34 beats/facts and manifest generated;145 files byte-stable,35 definitions registered; six required checks accepted, clean compile; Q325 |
+| NAR-016 | Legacy converter: quests, triggers, templates and flag assets | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-015 | yes | todo |  |  |  |  |
 | NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | no | todo |  |  |  |  |
 | NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | no | todo |  |  |  |  |
 | NAR-020 | LogicWatcher | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-004 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | b4344a9 | Sorted/deduplicated dependency watcher; 4 focused tests pass |
@@ -1038,6 +1038,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — NAR-015 accepted with real content — astra (gpt-6)
+
+- 5d85a419 completes preserved converter55b29176/ba1b7fe1 on current world/encounter content:34 Yarn files,34 beats, facts_legacy and preservation manifest cover93 pages/188 options. Actual generation94911 and forced regeneration10176 exited0;145 files including metadata and manifest remain byte-identical. CLI now synchronously rebuilds ContentDatabase before batch exit;56520 verified all35 generated definitions registered and content bytes unchanged.
+- Compile80481 clean, zero CS warnings. Reused six accepted converter cases from `Logs/playtest/legacy-narrative/acceptance.xml` (4.71s); no unchanged suite rerun. Production evidence `Logs/playtest/nar015-production/{first.txt,stability.txt,catalog.txt,compile.log}`. Test count: spec-required: 6, extra: 0. Q325/SPEC40Q22 retained from preserved branch.
+- This closes writing conversion, not playable dialogue/quests or lane logic. NAR-016 is now unblocked for existing combat worker; ECO-009218 and FND-012181 continue. No active Unity process; unrelated QualitySettings excluded. Previous goal turn integrated travel/encounter content (progress).
 
 ### 2026-10-13 — TRV-002 and ENC-010 accepted; GAL-012 content integrated — astra (gpt-6)
 
