@@ -824,6 +824,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 237 | SPEC-30 Q19: analytic elliptic velocity and periapsis rotation sign. | Differentiate Kepler analytically, use Unity positive-Y rotation consistently for position/velocity, retain the specified phase convention, exactly six Newton iterations and double-precision period reduction. Fixed parents avoid division. | Tech lead |
 | 238 | SPEC-23 Q10–11: AI content boundary and validation. | Bake scalar/default profiles with independent empty rule arrays; AI-006 owns runtime ability-rule baking and consumption. Validate finite scalar ranges/enums, rule fields and catalog membership before allocation. Boot owns the new profile blob through job-complete shutdown. | Tech lead |
 | 239 | SPEC-31 Q6–8: streaming contract staging and event ownership. | Preserve existing entry events; TRV-006 adds its future interface, managed loader publishes BodyDestroyed, and only BodyInteracted gets the ECS bridge. Include all specified carriers with exact defaults; behavior remains in later SYS tasks. | Tech lead |
+| 240 | SPEC-13 Q35: dissolve budget stops inside a brick. | Pack slot/local index into existing NextSlot; resume after the last sampled exposed cell without repeating debris or changing component layout. Start progress in request tick; duplicate requests retain progress. Required tests and Unity validation remain pending. | Tech lead |
 
 ## Measurements
 
