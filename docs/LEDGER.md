@@ -829,6 +829,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 242 | SPEC-81 Q21–24: production import scope, advisory art budgets and validator mechanics. | Canonical production imports only; preserve retained placeholders, A1 warnings/A2 errors for licence/reference findings. Triangle/memory targets stay advisory. CLI exits explicitly; read-only scene scan, native generated texture formats and scoped texture memory accounting. | Tech lead |
 
+| 243 | SPEC-81 Q25: Unity default sprite format rejects BC7. | Automatic compressed default format plus mandatory Standalone BC7/BC5 override; unchanged desktop target. Repair actual import errors, do not suppress logs or loosen tests. | Tech lead |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).

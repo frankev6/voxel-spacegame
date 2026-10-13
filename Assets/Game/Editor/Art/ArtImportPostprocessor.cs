@@ -131,12 +131,15 @@ namespace Game.Editor.Art
             foreach (string platform in new[] { "DefaultTexturePlatform", "Standalone" })
             {
                 var settings = platform == "DefaultTexturePlatform" ? importer.GetDefaultPlatformTextureSettings() : importer.GetPlatformTextureSettings(platform);
-                // An absent desktop override inherits the explicit default format.
-                if (platform == "DefaultTexturePlatform" || settings.overridden)
-                    Check(settings.format == format && settings.maxTextureSize == maxSize && settings.textureCompression == compression, platform);
+                // Unity rejects desktop-only BC formats as the default sprite format.
+                // Keep automatic selection there and enforce the requested format on desktop.
+                var platformFormat = platform == "DefaultTexturePlatform" && compression != TextureImporterCompression.Uncompressed
+                    ? TextureImporterFormat.Automatic : format;
+                Check((platform != "Standalone" || settings.overridden) && settings.format == platformFormat &&
+                    settings.maxTextureSize == maxSize && settings.textureCompression == compression, platform);
                 if (apply)
                 {
-                    settings.format = format;
+                    settings.format = platformFormat;
                     settings.maxTextureSize = maxSize;
                     settings.textureCompression = compression;
                     if (platform == "Standalone") settings.overridden = true;
