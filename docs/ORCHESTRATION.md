@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Explosion failure under investigation:** session48673 exited1 after compile clean and ExplosionTests0/4 (no damage/shield events); audio not started. Evidence `beam-explosion-audio/explosions-first.xml`. Required fixture now asserts prerequisites and logs proxy/event counts; diagnostic compile/rerun session43137 active, no primary mutations until terminal. WPN-015 delivered5e223c83 reviewed/staged063cbb09 in isolated `task/WPN-015-harness-integration`, preserving specQ68/69. Beam worker still active. No acceptance claim.
+
 - **Current validation:** live Editor35039 exited0 through CLI. Primary `task/WPN-010-validation` integrates explosion32aeddbd/8b83b2c4/9dd952ff and audio8a24a71f/707e22bd; ledger conflict resolved retaining Q282 and283. Serialized compile + ExplosionTests + AudioPerfTests/AudioRegressionTests session48673 active. No primary runtime edits or concurrent Unity until terminal. Beam/harness workers remain active and join before full combined regression.
 
 - **Integration review:** isolated explosion8ad75afa adds real spatial builder/ShieldSystem owners to two existing destruction fixtures so new prerequisites cannot silently disable blasts; test count unchanged. Reviewed in-progress worker code and sent small repairs: Commands namespace for beam PlayerShip, separate public WeaponDebugRow file. Workers still active, audio staged; primary/live game unchanged.
