@@ -59,7 +59,7 @@ namespace Game.Tests.PlayMode.App
         [UnityTest] public IEnumerator RealFire_DamagesStationaryTarget()
         {
             yield return StartRange(); var pose = EM.GetComponentData<LocalTransform>(target); int cells = Cells(target);
-            Assert.AreEqual(Game.Simulation.Allegiance.Player, EM.GetComponentData<Game.Simulation.Allegiance>(Root),
+            Assert.AreEqual(global::Game.Simulation.Allegiance.Player, EM.GetComponentData<global::Game.Simulation.Allegiance>(Root),
                 "Normal player spawning must supply faction identity before hostile AI targeting");
             Assert.AreEqual(target, Services.Get<FiringRangeService>().Spawn(Root), "Range command reuses the automatic target");
             Assert.AreEqual(-2f, pose.Position.y, "Station floor intersects the firing plane");
