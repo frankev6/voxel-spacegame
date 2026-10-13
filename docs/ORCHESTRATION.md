@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **FactStore accepted:**18906e47; seven functional checks68749, final compile57658 clean, two performance fixtures deliberately unrun. Trace world binding belongs to NAR-010; Q15→313. Ready FF main and next frontier narrative service/save participant. Workers NAR-004164/NAR-014178/NAR-009147 active. No active Unity validation. Previous turn verified facts/authored perf fixtures (progress).
+
 - **FactStore functional checks green:** compile89860 clean;68749 seven passed, evidence `fact-store/`. Two required opt-in performance fixtures authored, not run; final compile49015 pending at record time. Review trace metadata/default semantics before closing. No gameplay waits; previous turn repaired HUD (progress). Workers NAR-004164/NAR-014177/NAR-009147 active.
 
 - **HUD review repairs accepted:**13c85bbd fixes duplicates, hulk meters and optional-body radar; compile45635 clean,2563 nine passed. No active Unity validation. Lead FactStore work preserved on task/NAR-007-fact-store64421ac4, unvalidated; return there next. Workers NAR-004163/NAR-014177/NAR-009147 active. Previous turn implemented facts and recycled worker (progress).

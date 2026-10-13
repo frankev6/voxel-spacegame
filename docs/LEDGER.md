@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 128 | 9 | 0 | 0 | 43 | 0 | 180 | 6 |
+| M3 | 128 | 8 | 0 | 0 | 44 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -376,10 +376,10 @@
 | NAR-004 | Condition and expression nodes | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | partial in NAR-003: serializable primitive node shapes and binding/dependency traversal / evaluation, function dispatch and required tests missing |
 | NAR-005 | Effect nodes and atomic effect lists | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-004 | no | todo |  |  |  | partial in NAR-003: serialized effect shapes, flow flags and binding / execution, preflight, atomic requirements and required tests missing |
 | NAR-006 | Fact catalog and reference resolvers | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 309a55c1 | Fact catalog/resolvers;4 functional checks pass, Build20k fixture authored and measurement deferred ADR-0070 |
-| NAR-007 | FactStore | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-006 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead: dense narrative facts, deferred changes and save snapshots |
-| NAR-008 | FACT save participant | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007, PERS-001 | no | todo |  |  |  |  |
+| NAR-007 | FactStore | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-006 | yes | done | astra (gpt-6) | 2026-10-13 | 18906e47 | Dense facts, deferred changes, orphan/alias restore and trace; seven functional checks pass, two advisory fixtures authored/unrun |
+| NAR-008 | FACT save participant | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007, PERS-001 | yes | todo |  |  |  |  |
 | NAR-009 | Import-time compile pipeline | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, NAR-006 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Recycled presentation worker; editor compilation and drawers, three focused checks after implementation |
-| NAR-010 | NarrativeService tick and dependency index | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007 | no | todo |  |  |  |  |
+| NAR-010 | NarrativeService tick and dependency index | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007 | yes | todo |  |  |  |  |
 | NAR-011 | LogicContext and LogicWorldAdapter in Game.App | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-005, NAR-010, FND-001, ECO-001, QST-001 | no | todo |  |  |  |  |
 | NAR-012 | World-event bridge | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-011, SYS-001, ENC-001 | no | todo |  |  |  |  |
 | NAR-013 | Narrative validator framework and fact rules | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-009 | no | todo |  |  |  |  |
@@ -903,6 +903,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 310 | SPEC-23 Q27: fleet/swarm fixture geometry and measurement scope | Resolved: compact authored-block CPU fixtures with real AI, physics and damage; single-brick craft, actual pose/slot visual harness, separate AI/fixed-tick measures and explicit unavailable/casualty records. Measurements opt-in; visual acceptance remains pending. | Tech lead |
 | 311 | SPEC-61 Q21: HUD byte counts and radar fixture semantics | Resolved: saturate count255, internal instance clock seam, disjoint radar categories; route waypoint resolution remains HUD-009. | Tech lead |
 | 312 | SPEC-50 Q26: loot buffer/draw order and economy lifecycle defaults | Resolved: clear reusable results, checked first-appearance merging, specified deterministic draws, validated indices/rows, stable models and direct event forwarding; no gameplay waits. | Tech lead |
+| 313 | SPEC-40 Q15: FactStore trace composition and count/copy semantics | Resolved: internal world-facade binding, zero time before binding, chronological bounded trace copy; known-slot NonDefaultCount, separate orphan retention. NAR-010 composition TODO retained. | Tech lead |
 
 
 ## Measurements
@@ -1014,6 +1015,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Fact store accepted — astra (gpt-6)
+
+- NAR-00718906e47 implements dense values, clamping/saturation, deferred FactChanged events, deduped change order, ordinal snapshots, orphan/alias restoration, Session reset and bounded developer trace. Q15 mirrored313; NAR-010 still owns binding the world facade for trace time.
+- Functional checks68749 seven passed; compile57658 clean after trace hook. Two required advisory fixtures authored and intentionally unrun. Evidence `Logs/playtest/fact-store/`. No gameplay waits or tuning.
+- Test count: spec-required: 9 (7 functional executed,2 advisory deferred), extra: 0.
 
 ### 2026-10-13 — HUD review repairs accepted — astra (gpt-6)
 

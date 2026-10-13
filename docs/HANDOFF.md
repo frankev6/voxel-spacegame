@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Fact store accepted:** NAR-00718906e47 preserves facts, aliases/orphans and Session semantics with deferred notifications; seven functional checks pass and final compile is clean. Save chunk NAR-008 and narrative evaluation service NAR-010 are next dependencies. Two advisory measurements remain unrun.
+
 - **HUD data and loot accepted:** HUD-00888a324e0 supplies combat snapshot/nearest64 radar (nine checks); ECO-0049d457784 supplies seeded loot and economy facade (eight checks). Both compile cleanly. Visible flight HUD still needs HUD-002/007/009; no claim of new onscreen UI.
 
 - **Combat HUD underway:** lead HUD-008 is implementing ECS snapshot/radar jobs; not yet wired or validated. Fleet AI-015 compiles, with actual firing/movement readbacks, but Scene-view capture was blank: visual acceptance remains open and benchmarks deferred. Workers continue NAR-004 condition evaluation, ECO-004 loot/economy, NAR-009 import compilation.
