@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-009 | dispatched from main 7c5b9d08; DMG-015 delivered 559db043 | loop voices |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-009 | delivered 80ba1e65; real validation dependency wait | AUD-013 after AUD-008/009 done |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-012 | dispatched from main ac6ce962; AUD-008 delivered 5bf0008e | faction converter |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-001 | dispatched from main 8217719f; AUD-007 delivered 3cef9d81 | quest contracts |
 
@@ -18,7 +18,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- **Now:** AUD-007 generation and acceptance session 78232 exited 0: compile clean, **5/0/0** required EditMode tests. AUD-008 delivered and integrated **65c6ed89**, preserving cue binding and deduplicating Hash helper. Music compile + six EditMode/one PlayMode acceptance checks running in **session 92934**; do not mutate primary runtime until terminal. Lead claimed AUD-012 on main f572f201 and prepared isolated `task/AUD-012-origin-lifecycle` in existing lead checkout (no code yet). Same workers: AUD-009 loops active; music worker reused for MIG-012 from main ac6ce962; presentation on QST-001. R25/R26 both green, full soak/regression and live proof still required before closeout.
+- **Now:** music session **92934 exited 0**, compile clean, six required EditMode and one PlayMode acceptance passed. AUD-009 loops delivered/integrated **eaa565d2**; lead AUD-012 origin/reset implementation and three required tests integrated **f9fed29a**. Shared service retains cue binding, music and loop lifecycle. Grouped compile/PlayMode loop+origin+music validation is **session 91155 active**; no primary runtime edits until terminal. Worker 1 has a real dependency wait for AUD-013 (AUD-008/009 validation); worker 2 active MIG-012, worker 3 active QST-001. Full suites with ten-minute soak and live range/CLI/audio evidence remain before closeout.
 
 - **Review while session 8009 runs:** Unity's NoUnexpectedReceived checks all logs, so the three new destruction fixtures encounter normal content-load and partial-system ordering diagnostics before their gameplay assertions. Prepared `task/DMG-015-log-expectations` in the isolated lead worktree: explicitly expect only the five observed message kinds; retain strict errors/exceptions/other warnings. Do not integrate until session 8009 is terminal; inspect final XML first. Primary runtime unchanged.
 
