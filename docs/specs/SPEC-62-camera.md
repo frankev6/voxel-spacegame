@@ -449,10 +449,10 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Do:** Implement `AddImpulse`, shake in `Tick`, `FxFrameReader : IFxFrameReader` over SPEC-63 (§10 Q4), §5.1 step 6, and the default `ShakeRules` rows in `CameraConfig.asset` (§10 Q5).
 - **Files:** `Assets/Game/Presentation/Services/{CameraRigService,FxFrameReader}.cs`, `Assets/Game/Presentation/Systems/CameraTargetSyncSystem.cs`, `Assets/Game/Presentation/Data/{ShakeRule.cs,CameraConfig.asset}`
 - **Acceptance criteria:**
-  - [ ] An impulse of strength 1 at distance 0 gives trauma 1, which decays to 0 in 1/1.4 s.
-  - [ ] An impulse beyond its radius adds nothing.
-  - [ ] `ShakeScale = 0` or reduce motion → output pose identical to the unshaken pose.
-  - [ ] The logical `Focus` is never changed by shake.
+  - [x] An impulse of strength 1 at distance 0 gives trauma 1, which decays to 0 in 1/1.4 s.
+  - [x] An impulse beyond its radius adds nothing.
+  - [x] `ShakeScale = 0` or reduce motion → output pose identical to the unshaken pose.
+  - [x] The logical `Focus` is never changed by shake.
 - **Tests:** `Assets/Game/Tests/EditMode/Presentation/CameraShakeTests.cs`: `Impulse_AtZero_TraumaOne`, `Trauma_Decays`, `Impulse_BeyondRadius_Ignored`, `ShakeScaleZero_NoOffset`, `ReduceMotion_NoOffset`, `Shake_DoesNotMoveFocus`, `Over256Events_Capped`.
 
 ### CAM-009 — Editor orbit mode
@@ -462,10 +462,10 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Do:** Implement `EnterEditorOrbit`, `FocusOn`, `SnapView`, `SetEditorSuppression`, the editor branch of `Tick`, and the editor actions in `InputCameraInput`.
 - **Files:** `Assets/Game/Presentation/Services/CameraRigService.cs`, `Assets/Game/Presentation/Input/InputCameraInput.cs`
 - **Acceptance criteria:**
-  - [ ] Entering with radius 10 → distance 30 m, yaw 45°, pitch 30°.
-  - [ ] Pitch clamps at ±89°; pan keeps the pivot within bounds + 50 m.
-  - [ ] `SetEditorSuppression(zoom: true, …)` ignores scroll; `SetMode` clears suppression.
-  - [ ] `FocusOn` frames a sphere of the given radius inside the vertical FOV.
+  - [x] Entering with radius 10 → distance 30 m, yaw 45°, pitch 30°.
+  - [x] Pitch clamps at ±89°; pan keeps the pivot within bounds + 50 m.
+  - [x] `SetEditorSuppression(zoom: true, …)` ignores scroll; `SetMode` clears suppression.
+  - [x] `FocusOn` frames a sphere of the given radius inside the vertical FOV.
 - **Tests:** `Assets/Game/Tests/EditMode/Presentation/EditorOrbitCameraModeTests.cs`: `Enter_DefaultPose`, `Orbit_PitchClamped`, `Pan_PivotClamped`, `Zoom_Suppressed`, `SnapViews_Angles`, `FocusOn_SphereFitsFov`.
 
 ### CAM-010 — Map view transform
@@ -475,9 +475,9 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
 - **Do:** Implement `MapViewTransform` methods exactly as documented in §4.3 (double precision; zoom factor 0.85 per step; `Frame` uses the larger of the two axis fits).
 - **Files:** `Assets/Game/UI/Data/MapViewTransform.cs`
 - **Acceptance criteria:**
-  - [ ] `ViewToMap(MapToView(p)) == p` within 1e-9 relative for |p| ≤ 1e12.
-  - [ ] `ZoomAt(cursor, s)` keeps the map point under the cursor fixed (±0.01 px).
-  - [ ] Zoom clamps to `[MinUnitsPerPixel, MaxUnitsPerPixel]`.
+  - [x] `ViewToMap(MapToView(p)) == p` within 1e-9 relative for |p| ≤ 1e12.
+  - [x] `ZoomAt(cursor, s)` keeps the map point under the cursor fixed (±0.01 px).
+  - [x] Zoom clamps to `[MinUnitsPerPixel, MaxUnitsPerPixel]`.
 - **Tests:** `Assets/Game/Tests/EditMode/UI/MapViewTransformTests.cs`: `RoundTrip_Exact`, `ZoomAt_KeepsPointUnderCursor`, `Zoom_Clamped`, `Pan_MovesOppositeToDrag`, `Frame_FitsBoxWithPadding`, `ClampCenter_StaysInside`.
 
 ### CAM-011 — Camera performance and framing tests

@@ -437,8 +437,8 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 - **Do:** Create every view model and item view model of §4.2 (rule in §4.2), `MapData` and its structs, `SaveSlotsMode`, `SettingKey`, every command interface of §4.3, `IHudRadarSource`, `HudRadarBlipView`, the snapshot types of §4.5 (Presentation), view class shells for every screen in §4.1 (constructors per §6, `Key`/`Layer`/`Context`/flags exactly as §4.1, `OnBuild` empty), and the `UiComposition` shell.
 - **Files:** `Assets/Game/UI/ViewModels/*.cs` (one file per view model), `Assets/Game/UI/Data/{MapData,MapPoint,MapPointFlags,MapLine,MapRing,MapMarker,MapMarkerKind}.cs`, `Assets/Game/UI/Views/Commands/*.cs`, `Assets/Game/UI/Views/{MainMenuView,SaveSlotsView,SettingsView,PauseView,FlightHudView,InventoryView,MerchantView,DialogView,ShipLogView,GalaxyMapView,StarSystemMapView,FleetView,ShipEditorView,DockView,LoadingView,IHudRadarSource,HudRadarBlipView,IRootScreenSet}.cs`, `Assets/Game/Presentation/Components/{HudSnapshot,HudFlags,HudWeaponGroupState,HudAbilityState,HudRadarBlip}.cs`, `Assets/Game/App/Presenters/UiComposition.cs`
 - **Acceptance criteria:**
-  - [ ] Compiles; every screen's flags equal §4.1 (checked by test).
-  - [ ] `HudSnapshot`, `HudRadarBlip` are unmanaged; `HudWeaponGroupState` is 8 bytes, `HudAbilityState` 16 bytes.
+  - [x] Compiles; every screen's flags equal §4.1 (checked by test).
+  - [x] `HudSnapshot`, `HudRadarBlip` are unmanaged; `HudWeaponGroupState` is 8 bytes, `HudAbilityState` 16 bytes.
 - **Tests:** `Assets/Game/Tests/EditMode/UI/ScreenTableTests.cs`: `EveryScreen_FlagsMatchSpecTable` (table literal in the test). `Assets/Game/Tests/EditMode/Presentation/HudSnapshotLayoutTests.cs`: `Sizes_AsSpecified`, `Unmanaged`.
 
 ### HUD-002 — UI composition, screen registration and root switching

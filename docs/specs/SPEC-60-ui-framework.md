@@ -832,9 +832,9 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 - **Do:** Implement `Meter`, `Slot`, `TabBar` per §4.5 with child elements created in the constructor (classes from §4.6), and `meter.uss`, `slot.uss`, `tab-bar.uss`. `TabBar` wraps tabs in a `ScrollView` with `mode = Horizontal`, `horizontalScrollerVisibility = Auto`. `SetValue`/`SetFraction`/`SetCooldown`/`SetCount` must not allocate.
 - **Files:** `Assets/Game/UI/Controls/{Meter,Slot,TabBar}.cs`, `Assets/Game/UI/Theme/components/{meter,slot,tab-bar}.uss`
 - **Acceptance criteria:**
-  - [ ] `Meter.SetValue(50, 200)` → fill width 25 %, labels "50" and "200", `.meter--low` absent at threshold 0.25 (equal is not low).
-  - [ ] Nine tabs with 12-character labels at logical 1280×720 stay inside the parent (R12).
-  - [ ] Zero GC for 10,000 `SetValue` calls with changing values in [0, 9999].
+  - [x] `Meter.SetValue(50, 200)` → fill width 25 %, labels "50" and "200", `.meter--low` absent at threshold 0.25 (equal is not low).
+  - [x] Nine tabs with 12-character labels at logical 1280×720 stay inside the parent (R12).
+  - [x] Zero GC for 10,000 `SetValue` calls with changing values in [0, 9999].
 - **Tests:** `Assets/Game/Tests/PlayMode/UI/ControlsTests.cs`: `Meter_SetValue_FillAndLabels`, `Meter_Low_ClassBelowThreshold`, `Meter_SetValue_ZeroAlloc`, `Slot_CountOne_HidesBadge`, `Slot_Cooldown_OverlayHeight`, `TabBar_NineTabs_NoOverflowAt1280x720` (real panel bounds and scrolling now; UI-012 adds the canonical `UILayoutAudit` invocation, Q22), `TabBar_SelectSame_NoEvent`.
 
 ### UI-009 — Tooltip service

@@ -250,7 +250,7 @@ Scale notes: per ship per tick O(slots ≤ 8); the instance walk happens only on
 - **Do:** Create every type of §4 in the folders of decision 8; `AbilityDefinition` references SPEC-63's `FxDefinition` and SPEC-64's `AudioCueDefinition` (create empty shells with `// TODO(VFX-001)` / `// TODO(AUD-001)` if they do not exist).
 - **Files:** `Assets/Game/Data/Definitions/Abilities/{AbilityKind,AbilityStatMod,AbilityDefinition}.cs`; `Assets/Game/Simulation/Abilities/{AbilityStatModDef,AbilityDef,AbilityDefsBlob,AbilityDefsRef,AbilityContent,AbilitySlotState,AbilitySlotFlags,AbilitySlot,AbilityState,AbilityGridSetup}.cs`
 - **Acceptance criteria:**
-  - [ ] Compiles; `AbilitySlot` is 48 bytes; `AbilityStatMod.Stat` is `Game.Data.Combat.StatId`.
+  - [x] Compiles; `AbilitySlot` is 48 bytes; `AbilityStatMod.Stat` is `Game.Data.Combat.StatId`.
 - **Tests:** `AbilityContractTests.Slot_Is48Bytes`.
 
 ### ABL-002 — Ability content and boot singleton
