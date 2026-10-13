@@ -6,8 +6,11 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-013 | claimedb39fb6d7; validator implementation dispatched | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-020 | claimed595c0e29; dependency watcher dispatched | narrative follow-ups |
+
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 accepted | FACT review169 and NAR-014 review170 clear; genuine ready-standard dependency wait | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-014 | accepted2be62596; genuine ready-standard dependency wait | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-020 | claimed595c0e29; dependency watcher dispatched | narrative follow-ups |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-009 accepted | readiness audit149 delivered; genuine wait for lead HUD composition/UI audit prerequisites | HUD-003/006/007 once ready |
 
 ## Operating rules
@@ -19,6 +22,10 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Pause commands implemented:**c3c8f7e5 uses real flow save eligibility, navigator resume, confirmed save-first menu exit and confirmed desktop quit; results handled without wall-clock polling waits. Composition/presenter binding still required, old adapter remains installed. Main dispatch incorporated; workers now assigned NAR-013/020, presentation awaiting HUD. No Unity validation. Previous turn implemented menu commands (progress).
+
+- **Workers recycled:** corrected readiness inspection identifies NAR-013 and NAR-020 as genuinely ready after accepted NAR-009/004. Claimedb39fb6d7/595c0e29 and dispatched to existing combat/power threads. Presentation still waits for HUD prerequisites. Lead UI work remains task/HUD-002-ui-composition d96b3e04, no active validation. Prior all-worker dependency-wait assessment was incomplete; no owner blocker. Previous turn implemented menu commands (progress).
 
 - **Menu presenter implemented, uninstalled:** HUD-002 now has real SaveService/IGameFlow Continue/New Game/confirmed Quit, the required validated commander-name prompt, deferred operation result handling and explicit navigation delegates for remaining screens. Lifetime/session composition and dependent screen hookups still remain; no fake services installed. Main b0d32bab incorporated, preserving UI work and legacy acceptance. No Unity run this turn. Previous turn accepted NAR-014 (progress).
 
