@@ -979,6 +979,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — AUD-007 migration ownership integration repair — astra (gpt-6)
+
+- Full batch session 99862 terminated: EditMode **1163 passed / 1 failed / 1 skipped**, PlayMode not started. `MigrationGateTests.SecondRun_IsIdempotent` expected migrated audio cues to be `Unchanged`, whereas the documented AUD-007 handoff deliberately protects all twenty adopted cues as `SkippedHandEdited`. Evidence: `Logs/playtest/combat-audio-final/editmode-first.xml`.
+- Updated that existing required test with the exact twenty-cue allowlist and verified authored-manifest hashes, retaining asset byte equality, report equality and legacy manifest equality. No thresholds or production protection changed. Test count: spec-required: 1 updated, extra: 0. Compile and full-suite rerun pending.
+- QST-001 delivered `6a0f72a0`, pending next-batch review/integration. Presentation worker has a real dependency wait; combat worker awaits AUD-008/009 validation for AUD-013; MIG-012 remains active. No new owner gate or tuning pass.
+
 ### 2026-10-13 — Firing/destruction integration and fixture repairs — astra (gpt-6)
 
 - WPN-007, DMG-015/017 and ENC-002 integrated for validation. Compile clean, full EditMode **1153/0/1**; PlayMode **150/3/53**, with all three new destruction tests stopping on expected setup logs before gameplay. Evidence `Logs/playtest/firing-destruction/`. No task marked done yet.

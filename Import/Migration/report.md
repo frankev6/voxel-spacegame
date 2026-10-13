@@ -8,26 +8,26 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 |---|---|
 |Assets/Game/Content/Abilities/ability_shield_toggle.asset|Unchanged|
 |Assets/Game/Content/Abilities/ability_speed_boost.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_editor_place.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_editor_remove.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_explosion_large.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_explosion_small.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_impact_hull.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_music_combat.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_music_exploration.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_music_menu.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_music_station.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_ui_click.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_ui_fail.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_ui_hover.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_ui_slot_click.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_ui_slot_hover.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_ui_success.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_ui_view_close.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_ui_view_open.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_weapon_cannon_fire.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_weapon_laser_fire.asset|Unchanged|
-|Assets/Game/Content/Audio/cue_weapon_plasma_fire.asset|Unchanged|
+|Assets/Game/Content/Audio/cue_editor_place.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_editor_remove.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_explosion_large.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_explosion_small.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_impact_hull.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_music_combat.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_music_exploration.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_music_menu.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_music_station.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_ui_click.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_ui_fail.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_ui_hover.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_ui_slot_click.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_ui_slot_hover.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_ui_success.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_ui_view_close.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_ui_view_open.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_weapon_cannon_fire.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_weapon_laser_fire.asset|SkippedHandEdited|
+|Assets/Game/Content/Audio/cue_weapon_plasma_fire.asset|SkippedHandEdited|
 |Assets/Game/Content/Blocks/block_capacitor_small.asset|Unchanged|
 |Assets/Game/Content/Blocks/block_core_cross.asset|Unchanged|
 |Assets/Game/Content/Blocks/block_core_small.asset|Unchanged|
@@ -130,6 +130,26 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 ## Entries
 
 ```text
+[I] MIG-I011 Assets/Game/Content/Audio/cue_editor_place.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_editor_remove.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_explosion_large.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_explosion_small.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_impact_hull.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_music_combat.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_music_exploration.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_music_menu.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_music_station.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_ui_click.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_ui_fail.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_ui_hover.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_ui_slot_click.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_ui_slot_hover.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_ui_success.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_ui_view_close.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_ui_view_open.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_weapon_cannon_fire.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_weapon_laser_fire.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Audio/cue_weapon_plasma_fire.asset: Kept hand-edited asset.
 [I] MIG-I012 Assets/Game/Content/Blocks/block_shield_small.asset grantedAbilities: Kept existing link.
 [I] MIG-I012 Assets/Game/Content/Blocks/block_thruster_large.asset grantedAbilities: Kept existing link.
 [I] MIG-I012 Assets/Game/Content/Blocks/block_thruster_medium.asset grantedAbilities: Kept existing link.
@@ -308,15 +328,15 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [W] MIG-W070 content/Loot Tables/BaseLootTable.json lootItems[18].item: Ship loot entry dropped: SPEC-50 LootEntry holds only ItemDefinition: ship_fighter
 [W] MIG-W071 content/Loot Tables/CreativeModeLootTable.json lootItems[11].item: Null legacy loot item dropped; no replacement item is inferred.
 [I] MIG-I091 content/Loot Tables/StartShipsTable.json ships: Ship table intentionally not converted: StartShipsTable (5 legacy ship references). SPEC-01/50 own new-game loadouts.
-0 errors, 83 warnings, 95 infos
+0 errors, 83 warnings, 115 infos
 ```
 
 ## Summary
 
-0 errors, 83 warnings, 95 infos
+0 errors, 83 warnings, 115 infos
 
 Created: 0
 Updated: 0
-Unchanged: 99
-SkippedHandEdited: 3
+Unchanged: 79
+SkippedHandEdited: 23
 Failed: 0

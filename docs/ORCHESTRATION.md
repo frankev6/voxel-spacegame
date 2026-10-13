@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-009 | delivered 80ba1e65; real validation dependency wait | AUD-013 after AUD-008/009 done |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-012 | dispatched from main ac6ce962; AUD-008 delivered 5bf0008e | faction converter |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-001 | dispatched from main 8217719f; AUD-007 delivered 3cef9d81 | quest contracts |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-001 | delivered 6a0f72a0; real dependency/validation wait | QST-002 after QST-001 and SPEC-40 |
 
 ## Operating rules
 
@@ -18,7 +18,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- **Now:** grouped audio session **26902 exited 0**: compile zero CS warnings, loop/origin/music **7/0/0 PlayMode**. Full compatible EditMode then PlayMode run in **session 99862**, including the ten-minute DMG-015 soak. No primary runtime edits or another Unity operation until terminal. Evidence `Logs/playtest/audio-lifecycle/acceptance.xml`; full outputs go to `Logs/playtest/combat-audio-final/`. Worker 1 in real validation wait for AUD-013; worker 2 active MIG-012; worker 3 active QST-001. After full regression, run live range, normal Space fire and gh_dmg commands/audio proof before closeout and local main merge.
+- **Now:** full session **99862 exited 1**: EditMode **1163/1/1**, one stale migration outcome expectation for the twenty AUD-007-adopted audio cues; PlayMode not started. Existing test repaired with exact protected-cue allowlist and authored-manifest hash checks, retaining byte/report/manifest equality. Compile and full regression retry next; evidence `Logs/playtest/combat-audio-final/editmode-first.xml`. QST-001 delivered `6a0f72a0` for next batch, real wait pending dependencies; MIG-012 active; AUD-009 delivered, real validation wait for AUD-013. No batch completion claim.
 
 - **Review while session 8009 runs:** Unity's NoUnexpectedReceived checks all logs, so the three new destruction fixtures encounter normal content-load and partial-system ordering diagnostics before their gameplay assertions. Prepared `task/DMG-015-log-expectations` in the isolated lead worktree: explicitly expect only the five observed message kinds; retain strict errors/exceptions/other warnings. Do not integrate until session 8009 is terminal; inspect final XML first. Primary runtime unchanged.
 

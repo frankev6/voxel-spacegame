@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Game.Core;
 using Game.Data;
 using Game.Data.Definitions;
 using Game.Data.Services;
@@ -50,12 +51,26 @@ namespace Game.Tests.EditMode.Editor.Migration
         }
         [Test] public void SecondRun_IsIdempotent()
         {
+            // AUD-007 adopted these exact MIG-011 cues; the legacy writer must preserve their authored playback fields.
+            var protectedAudio = new HashSet<string>(StringComparer.Ordinal);
+            foreach (string id in ("editor_place editor_remove explosion_large explosion_small impact_hull "
+                + "music_combat music_exploration music_menu music_station ui_click ui_fail ui_hover "
+                + "ui_slot_click ui_slot_hover ui_success ui_view_close ui_view_open "
+                + "weapon_cannon_fire weapon_laser_fire weapon_plasma_fire").Split(' '))
+                protectedAudio.Add("Assets/Game/Content/Audio/cue_" + id + ".asset");
+            var audioOwnership = MigrationManifest.Load("Import/Migration/audio-content-manifest.json");
             foreach (var row in AssetRows(secondReport))
             {
                 bool protectedPlasma = row.Path == "Assets/Game/Content/Weapons/wpn_plasma_turret_medium.asset"
                     || row.Path == "Assets/Game/Content/Weapons/wpn_plasma_turret_small.asset"
                     || row.Path == "Assets/Game/Content/Weapons/wpn_plasma_turret_small_fixed.asset";
-                Assert.AreEqual(protectedPlasma ? "SkippedHandEdited" : "Unchanged", row.Outcome, row.Path);
+                bool authoredAudio = protectedAudio.Contains(row.Path);
+                if (authoredAudio)
+                {
+                    Assert.IsTrue(audioOwnership.TryGetHash(row.Path, out ulong expected), row.Path);
+                    Assert.AreEqual(expected, StableHash.Hash64(assets[row.Path]), "Legacy migration changed AUD-007 content: " + row.Path);
+                }
+                Assert.AreEqual(protectedPlasma || authoredAudio ? "SkippedHandEdited" : "Unchanged", row.Outcome, row.Path);
                 CollectionAssert.AreEqual(assets[row.Path], File.ReadAllBytes(row.Path), row.Path);
             }
             Assert.AreEqual(firstReport, secondReport); CollectionAssert.AreEqual(firstManifest, secondManifest);
