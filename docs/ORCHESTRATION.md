@@ -18,9 +18,10 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- AI-002/GAL-001/DLG-001/UI-010 full validation session 21701 exited 0: 939/0/1 EditMode, 135/0/53 PlayMode; compile clean. Closed in ledger; evidence in `Logs/playtest/ai002/`.
-- Lead next batch is prepared in `/Users/frank/.codex/worktrees/combat-hit-detection/spaceship-game-v2`: WPN-003 `6772372`, `b13fd8b`; PWR-003 `03eff52`; UI-011 `bce99a3`; partial ART-014 `8d3e706`; review repairs `c69d76b`, `b5d0c5d`, `1b3876c`. Move this sequence to primary after local main closeout, rebuild catalog and validate.
-- No Unity process active after suite completion; runner removed temporary scene. Original QualitySettings delta restored and excluded. Three workers actively implementing WPN-002, MIG-010, ABL-002.
+- Primary `task/WPN-003-combat-integration`: full session `46507` passed EditMode **968/0/1** and is still running PlayMode. No primary runtime mutation or parallel Unity; preserve its temporary scene and QualitySettings until terminal.
+- Next batch prepared in `/Users/frank/.codex/worktrees/combat-hit-detection/spaceship-game-v2`: AI-003 `21bed70`, SYS-001 `ff14d2f`, AI boot lifetime `9132fdc`. Catalog regeneration and Unity validation pending.
+- That isolated checkout is now `task/DMG-013-ship-death`, claimed on main `463660a`. First scoped implementation `7878fa4` extracts ShipDeathJob and suppresses duplicate child destruction when its root's LEG owns it. Dissolve requests/progress, core-loss SFX and three required tests remain; not validated or done. Preserve the preceding AI/SYS commits for next-batch integration.
+- Three workers: GAL-003, AST-002, MIG-014. Editor closed; goal active, fallback heartbeat paused.
 
 ## Validated and pending batches
 
