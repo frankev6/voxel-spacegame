@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | dispatched from main2485250e | audio measurements |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | WPN-018 | dispatched from main2485250e; MIG-012 prepared for generation | weapon demand/stats |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | WPN-018 | delivered 753e2de5, integrated b672f6f1; real validation wait | weapon demand/stats |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-001 | delivered 6a0f72a0; real dependency/validation wait | QST-002 after QST-001 and SPEC-40 |
 
 ## Operating rules
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Grouped validation complete:** session94395 exited0, compile clean, faction/quest/migration7/7 (`Logs/playtest/projectile-combat/faction-quest.xml`). WPN-018 delivery753e2de5 reviewed and integrated b672f6f1, five required tests/zero extras. Combined compile/full EditMode/PlayMode session43506 now running; preserve primary runtime until terminal. AUD-013 remains active, other two workers have real dependency/validation waits; WPN-009/015 follow WPN-008 closeout. No eligible unassigned standard work bypasses actual galaxy/art prerequisites.
 
 - **Current validation:** faction generation93145 exited0; exact three outputs, duplicate skipped, player preserved, byte/GUID/manifest-stable rerun. Content0errors/11existing economy-power warnings. Generated assets committed e9d50f3c; temporary job/meta removed. Compile + grouped FactionConverterTests/QuestContractTests/MigrationGateTests now session94395; no primary mutation or concurrent Unity until terminal. Worker WPN-018 has implementation and five required tests in progress; AUD-013 active; presentation dependency wait remains.
 
