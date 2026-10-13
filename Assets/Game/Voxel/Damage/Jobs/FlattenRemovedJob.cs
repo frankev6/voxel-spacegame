@@ -11,7 +11,7 @@ namespace Game.Voxel.Damage.Jobs
     [BurstCompile] internal unsafe struct FlattenRemovedJob : IJob
     {
         [ReadOnly] public NativeList<ResolvedGrid> Results;
-        [ReadOnly] public NativeStream.Reader Removed, Touched, DestroyList, Explosions;
+        [ReadOnly] public NativeStream.Reader Removed, Touched, DestroyList, Explosions, RestoredInput, HealedInput;
         public NativeStream.Writer PublishedExplosions;
         public NativeList<CellRemoved> Cells;
         public NativeList<GridRemovedRange> Ranges;
@@ -19,6 +19,7 @@ namespace Game.Voxel.Damage.Jobs
         public NativeList<Entity> Destroy;
         public NativeList<DamageGridResult> Grids;
         public NativeList<CellRestored> Restored;
+        public NativeList<RestoreHealedInstance> Healed;
         public NativeList<GridRemovedRange> RestoredRanges;
         public ComponentLookup<BrickDirty> Dirty;
         public NativeReference<byte> Warnings;
@@ -33,11 +34,17 @@ namespace Game.Voxel.Damage.Jobs
                 int count = Removed.BeginForEachIndex(i);
                 if (count > 0) Ranges.Add(new GridRemovedRange { Grid = grid.Grid, Start = Cells.Length, Count = count });
                 for (int n = 0; n < count; n++) Cells.Add(Removed.Read<CellRemoved>()); Removed.EndForEachIndex();
+                count = RestoredInput.BeginForEachIndex(i);
+                if (count > 0) RestoredRanges.Add(new GridRemovedRange { Grid = grid.Grid, Start = Restored.Length, Count = count });
+                for (int n = 0; n < count; n++) Restored.Add(RestoredInput.Read<CellRestored>()); RestoredInput.EndForEachIndex();
+                count = HealedInput.BeginForEachIndex(i);
+                for (int n = 0; n < count; n++) Healed.Add(HealedInput.Read<RestoreHealedInstance>()); HealedInput.EndForEachIndex();
                 grid.TouchedBrickStart = Bricks.Length; count = Touched.BeginForEachIndex(i); grid.TouchedBrickCount = count;
                 for (int n = 0; n < count; n++) { var brick = Touched.Read<TouchedBrick>(); Bricks.Add(brick); Dirty.SetComponentEnabled(brick.Brick, true); } Touched.EndForEachIndex();
                 count = DestroyList.BeginForEachIndex(i); for (int n = 0; n < count; n++) Destroy.Add(DestroyList.Read<Entity>()); DestroyList.EndForEachIndex();
                 count = Explosions.BeginForEachIndex(i); for (int n = 0; n < count; n++) PublishedExplosions.Write(Explosions.Read<ExplosionRequest>()); Explosions.EndForEachIndex();
                 Grids.Add(grid); Data->Current.GridsResolved++;
+                Data->Current.CellsHealed += result.Healed; Data->Current.CellsPlaced += result.Placed; Data->Current.RestoresDropped += result.RestoreDropped;
                 Data->Current.CellsDestroyed += result.Destroyed; Data->Current.CellsDetached += result.Detached; Data->Current.InstancesDestroyed += result.Instances;
                 if (result.RadiusClamped != 0 && (Warnings.Value & 1) == 0) { Warnings.Value |= 1; DamageWarnings.RadiusClamped(); }
             }

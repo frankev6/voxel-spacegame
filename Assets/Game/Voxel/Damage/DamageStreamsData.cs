@@ -9,7 +9,7 @@ using Unity.Physics;
 namespace Game.Voxel.Damage
 {
     internal unsafe struct CellMask { public fixed ulong Words[64]; }
-    internal struct DamageGridRange { public Entity Grid; public int EventStart, EventCount, DetachStart, DetachCount; }
+    internal struct DamageGridRange { public Entity Grid; public int EventStart, EventCount, DetachStart, DetachCount, RestoreStart, RestoreCount; }
     internal struct DamageGridResult { public Entity Grid; public int TouchedBrickStart, TouchedBrickCount; public byte CoreLost; public float3 CoreWorldPos; }
     internal struct TouchedBrick { public Entity Grid; public int SlotIndex; public Entity Brick; }
     internal struct IslandRecord { public Entity Grid; public int MaskStart, MaskCount, CellCount; public int3 CellMin, CellMax; public byte HasFunctional; public int Ordinal; }

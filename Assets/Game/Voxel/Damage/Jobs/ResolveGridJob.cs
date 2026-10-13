@@ -21,8 +21,10 @@ namespace Game.Voxel.Damage.Jobs
         [ReadOnly] public NativeArray<DamageGridRange> Ranges;
         [ReadOnly] public NativeList<DamageEvent> Events;
         [ReadOnly] public NativeList<PendingDetach> Pending;
+        [ReadOnly] public NativeList<RestoreSpan> Restores;
+        [ReadOnly] public NativeList<RestoreHealedInstance> PreviouslyHealed;
         public NativeArray<ResolvedGrid> Results;
-        public NativeStream.Writer Removed, Touched, DestroyList, Explosions;
+        public NativeStream.Writer Removed, Touched, DestroyList, Explosions, Restored, HealedInstances;
         public void Execute(int index)
         {
             var range = Ranges[index]; var root = range.Grid;
@@ -61,7 +63,34 @@ namespace Game.Voxel.Damage.Jobs
                     if (writer.Access.Definition.AnchorInstance == i) { var grid = writer.Access.Definition; grid.AnchorInstance = -1; writer.Access.Definition = grid; }
                 }
             }
-            // TODO(DMG-019): bounded restore pass belongs between detach and damage.
+            int healed = 0, placed = 0, restoreDropped = 0;
+            Restored.BeginForEachIndex(index); HealedInstances.BeginForEachIndex(index);
+            for (int r = range.RestoreStart; r < range.RestoreStart + range.RestoreCount; r++)
+            {
+                var span = Restores[r]; var seen = new NativeHashSet<int>(16, Allocator.Temp);
+                for (int h = 0; h < PreviouslyHealed.Length; h++)
+                    if (PreviouslyHealed[h].RequestId == span.Id) seen.Add(PreviouslyHealed[h].Instance);
+                long width = (long)span.Max.x - span.Min.x + 1, height = (long)span.Max.y - span.Min.y + 1;
+                for (int n = 0; n < span.Count; n++)
+                {
+                    long offset = span.Start + n;
+                    int3 cell = span.Min + new int3((int)(offset % width), (int)(offset / width % height), (int)(offset / (width * height)));
+                    if (span.Request.Mode == CellRestoreMode.Place)
+                    {
+                        if (writer.PlaceCell(span.Request, out var added)) { Restored.Write(added); placed++; }
+                        else restoreDropped++;
+                    }
+                    else
+                    {
+                        int instance = writer.Access.TryGetCell(cell, out var prior, out _, out _) && prior.IsInstance ? prior.InstanceIndex : -1;
+                        bool first = instance >= 0 && !seen.Contains(instance);
+                        if (writer.HealCell(cell, span.Request.HpFraction, ref seen)) healed++;
+                        if (first) HealedInstances.Write(new RestoreHealedInstance { RequestId = span.Id, Instance = instance });
+                    }
+                }
+                seen.Dispose();
+            }
+            Restored.EndForEachIndex(); HealedInstances.EndForEachIndex();
             for (int eIndex = range.EventStart; eIndex < range.EventStart + range.EventCount; eIndex++)
             {
                 var e = Events[eIndex]; writer.Event = e;
@@ -91,6 +120,7 @@ namespace Game.Voxel.Damage.Jobs
                 Destroyed = writer.Stats.CellsDestroyed - beforeStats.CellsDestroyed,
                 Detached = writer.Stats.CellsDetached - beforeStats.CellsDetached,
                 Instances = writer.Stats.InstancesDestroyed - beforeStats.InstancesDestroyed,
+                Healed = healed, Placed = placed, RestoreDropped = restoreDropped,
                 RadiusClamped = writer.BlastRadiusClamped ? (byte)1 : (byte)0
             };
             Results[index] = result;
