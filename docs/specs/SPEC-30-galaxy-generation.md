@@ -1332,6 +1332,8 @@ Visibility:
 
 | 19 | Elliptic velocity and the sign of periapsis rotation are implicit in §5.5.5. | GAL-002 default: differentiate Kepler’s equation analytically (`dE/dt = (2π/T)/(1−e cos E)`), then rotate both position and velocity with Unity’s positive-Y rotation (`x′ = cos ω·x + sin ω·z`, `z′ = −sin ω·x + cos ω·z`). Phase keeps the specified +X toward +Z convention. Use exactly six Newton steps and double-precision `t/T−floor(t/T)`; Fixed/default parent orbits bypass division and contribute zero velocity. Moving inputs retain the stated positive-period precondition and validated eccentricity range; no new validation or generation algorithms. | Tech lead — resolved by GAL-002 against §4.5/§5.5.5; central mirror pending. |
 
+| 30 | GAL-009 owns both reset methods but the GalaxyService constructor still throws for unfinished GAL-008 | Bind its existing world/state/config dependencies now so the exact public reset overloads are callable, require one generation definition, and leave generation/cache/ticker behavior as explicit GAL-008 TODOs/throwing methods. No alternative service, world model or fake galaxy generation. Dispose owns no resources until GAL-008 adds them. Serial overflow throws rather than wrapping into an unapplied stale request. | Tech lead |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/03-galaxy-world.md` (03-B1, 03-B9a–d, 03-D3), `04` (04-B1, 04-B11), `LEDGER.md` R9.
