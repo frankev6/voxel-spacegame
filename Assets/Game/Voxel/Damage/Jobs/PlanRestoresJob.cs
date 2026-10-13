@@ -79,7 +79,7 @@ namespace Game.Voxel.Damage.Jobs
                     long x = (long)pending.Max.x - pending.Min.x + 1, y = (long)pending.Max.y - pending.Min.y + 1, z = (long)pending.Max.z - pending.Min.z + 1;
                     total = x * y * z;
                 }
-                int count = (int)math.min((long)remaining, math.max(0L, total - pending.Cursor));
+                int count = (int)Math.Min((long)remaining, Math.Max(0L, total - pending.Cursor));
                 if (count > 0)
                 {
                     Spans.Add(new RestoreSpan { Request = request, Id = pending.Id, Min = pending.Min, Max = pending.Max, Start = pending.Cursor, Count = count });
