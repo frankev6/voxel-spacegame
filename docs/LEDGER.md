@@ -1061,6 +1061,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-004 boot repairs compiled — astra (gpt-6)
+
+- 37ed39f6 repairs actual reloaded condition validation/binding: Unity stores unused string slots as empty; accept null/empty for numeric/boolean slots while retaining type/conflicting-value checks. Existing ConditionNodeTests case now uses a serialized graph; no extra case. Q356 records representation, no public field/vocabulary change.
+- Default and shipped belt use1000 m sectors with existing2000 m width, fitting two rings; SYS-E003/packed identities unchanged. Q355 records corrected default. Economy worker independently confirms no remaining issue.
+- Compile65679 terminal0, zero CS warnings; evidence Logs/playtest/world-loader/boot-repair-compile.log. Focused PlayMode83915 active (spec-required: 11, extra: 0); no acceptance yet. Condition case check deferred to next compatible EditMode batch.
+- Correction to previous graph-churn diagnosis: CompilePaths already skips entirely current owners; one stale wrapper recompiles all graphs in that owner. Combat worker investigates the repeat-stale converter wrapper and selective graph preservation. Do not treat prior broad diagnosis as established cause. No normalized-byte workaround; NAR-016 remains open.
+
 ### 2026-10-13 — Real campaign compile and boot integration defects — astra (gpt-6)
 
 - NAR-016 actual generation66682: logic report0 errors/2 documented MIG-W092 warnings/1 info. Both generation passes compile, but strict byte comparison fails on beat_gate_dormant: live CompilePaths replaces compiled nodes even when source stamps match; later writes persist fresh SerializeReference IDs. NAR-016 remains open; combat worker assigned concrete repair. Evidence Logs/playtest/narrative-content-final/first-generation.log. Generated galaxy condition is now real/current; no normalized-byte workaround.

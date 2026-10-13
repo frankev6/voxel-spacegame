@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-016 graph stability | Repair unchanged compilation replacing live serialized graphs; SYS-005 still waits | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | boot belt diagnosis | Read-only actual SYS-E003 bounds investigation | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | dependency wait | Belt cause repaired by lead37ed39f6; no remaining finding246 | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | boot logic diagnosis | Read-only actual NAR-E005 count-node validation investigation | HUD-003/006/007 once ready |
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Boot repairs compiled:**37ed39f6 accepts empty unused serialized argument text and uses1000 m belt sectors at2000 m width (Q355/356), without weakening validation. Compile65679 terminal0, zero CS warnings. Focused11-case PlayMode83915 is active; poll the same handle/log before further Unity. Existing condition case now serializes graphs, awaiting its next focused EditMode batch. Combat graph-stability repair active231; economy diagnosis complete246/dependency wait; presentation finishing count-slot review. Prior turn generated real content and identified defects (progress).
 
 - **Real content compiled; boot defects identified:** NAR-016 generation66682 compiled actual content with0 errors, but raw-byte rerun failed on replacement graph IDs (worker combat repairing). Focused PlayMode7147 stopped143 immediately after8 actual boot validation errors: item-count node validation and belt bounds. Presentation/economy investigating those separately, no Unity or edits. No active Unity; next fix verified causes, rerun generation and only blocked11 cases. Previous turn accepted lane/effect batch (progress).
 

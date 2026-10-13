@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Boot repairs compiled:**37ed39f6 accepts empty unused serialized argument text and uses1000 m belt sectors at2000 m width (Q355/356), without weakening validation. Compile65679 terminal0, zero CS warnings. Focused11-case PlayMode83915 is active; poll the same handle/log before further Unity. Existing condition case now serializes graphs, awaiting its next focused EditMode batch. Combat graph-stability repair active231; economy diagnosis complete246/dependency wait; presentation finishing count-slot review. Prior turn generated real content and identified defects (progress).
+
 - **Real content compiled; boot defects identified:** NAR-016 generation66682 compiled actual content with0 errors, but raw-byte rerun failed on replacement graph IDs (worker combat repairing). Focused PlayMode7147 stopped143 immediately after8 actual boot validation errors: item-count node validation and belt bounds. Presentation/economy investigating those separately, no Unity or edits. No active Unity; next fix verified causes, rerun generation and only blocked11 cases. Previous turn accepted lane/effect batch (progress).
 
 - **TRV-003 / NAR-005 accepted:** TRV-003c716202e fixes namespace qualification; compile71665 exits0 with zero CS warnings. Focused27074 terminal0:13 pass/0 fail in0.394s test execution. No active Unity. Includes8 lane and5 effect cases. Next actual content recompile/stability and world-loader integration. Presentation bounded review active207; combat/economy dependency waits.
