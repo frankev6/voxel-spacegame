@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Pause stale-intent guard authored:** generation invalidates callbacks and old completion UI across session unbind/rebind, preserving pending completion consumption. Await HUD005 repair before combined validation; no active Unity run. Workers196/208/172 confirmed active. Previous turn connected pause destinations (progress).
+
 - **Real pause route authored:** app-owned PausePresenter/View opens SaveSlots/Settings; M1 root Back uses it while temporary flight/editor roots remain. No duplicate pause creation when menu installs. Uncompiled delta awaits combined settings repair acceptance; no active Unity run. Workers GAL012196/ENC010207/TRV002172 active; presentation has bounded HUD005 repair request. Previous turn integrated settings/fixed belt (progress).
 
 - **Settings integration needs repair:**04cf34fd/9dfc8bc installed in composition; compile91761 clean. Belt boot regression fixed d289f13f. Cancelled89902;45272 terminal with duplicate runner identities and raw3pass2rebind failures, not accepted. Worker repairs HUD005 then resumesTRV002; GAL012195/ENC010206 active. No active Unity run; fonts restored. Next fresh runner after repair; production navigation still pending. Previous turn accepted GAL005 (progress).

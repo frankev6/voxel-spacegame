@@ -1033,6 +1033,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — HUD-002 pause session guard — astra (gpt-6)
+
+- Pause presenter now invalidates old confirmation callbacks when unbound during session reset and suppresses stale completion notifications while still consuming owned completions. Commands require a bound presenter. Changes remain pending combined settings/pause validation; no extra run. Test count: existing spec-required acceptance pending, extra: 0.
+- Worker snapshots GAL012196/ENC010208/TRV002172 live; HUD005 bounded repair still requested. Previous turn connected real pause destinations (progress).
+
 ### 2026-10-13 — HUD-002 pause navigation integration — astra (gpt-6)
 
 - App composition now creates/binds the real PausePresenter/View with SaveSlots and Settings routes. Temporary flight/editor root Back opens PauseView; bridge no longer registers the obsolete resume-only modal. Menu setup reuses the same pause ownership. Full HUD/editor roots and main-menu destination remain open.
