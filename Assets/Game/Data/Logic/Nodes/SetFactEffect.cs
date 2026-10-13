@@ -8,7 +8,7 @@ namespace Game.Data.Logic.Nodes
     public sealed class SetFactEffect : IEffect
     {
         [SerializeField] private EffectArguments arguments = new EffectArguments();
-        [NonSerialized] private bool allowReserved; // TODO(NAR-005): service-only constructor, never set by compiler.
+        // TODO(NAR-005): add service-only allowReserved state/constructor; compiler never enables it.
         public SetFactEffect() { }
         internal SetFactEffect(ReadOnlySpan<object> arguments) { this.arguments = new EffectArguments(arguments); }
         public EffectFlow Flow => EffectFlow.Immediate;
