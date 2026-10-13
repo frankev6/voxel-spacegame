@@ -2,6 +2,7 @@ using Game.Core;
 using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Simulation.Commands;
+using Game.Simulation.Weapons;
 using Game.Voxel.Grid;
 using Game.Voxel.Model;
 using Unity.Burst;
@@ -16,7 +17,7 @@ namespace Game.Simulation.Ai
     [BurstCompile]
     [CreateAfter(typeof(GridSpawnSystem))]
     [UpdateInGroup(typeof(ShipCommandGroup))]
-    // TODO(WPN-005): UpdateAfter(PlayerTargetingSystem) when that specified predecessor exists (SPEC-23 Q12).
+    [UpdateAfter(typeof(PlayerTargetingSystem))]
     public partial struct AiAnchorShiftSystem : ISystem
     {
         ComponentLookup<OriginShiftRecord> shifts;

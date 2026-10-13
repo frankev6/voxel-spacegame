@@ -1004,6 +1004,8 @@ Codes (`ValidationReport` severity in brackets):
 
 Per frame, entirely in jobs with no main-thread sync point (markers `OriginRebaseSystem.Decide`, `.Shift`, `.Sync`):
 
+0. **Capture non-analytic root positions** from the preceding physics transforms using the old origin, before gather/decide. Skip this capture only for a newer enabled request changing star system: those roots already carry destination-frame UniversePosition values. This reconciles Decision 9 with the detailed pipeline and prevents the last physics step being lost at a threshold rebase (Q31).
+
 1. **`DecideJob` (`IJob`).** Inputs: `FrameOrigin` and `OriginRebaseRequest` via `ComponentLookup` on the singleton entity; the player root's `LocalTransform` via a `NativeArray` from `playerQuery.ToComponentDataListAsync` (`PlayerShip`, `WithNone<Parent>`, dependency combined); `RebaseDecision` as a `NativeReference` (`WorldUpdateAllocator`).
    1. If the request is enabled and `request.Serial > FrameOrigin.AppliedRequestSerial`:
       - `Rebase = 1`, `FromRequest = 1`, `NewOrigin = request.NewOrigin`;
@@ -1331,6 +1333,10 @@ Visibility:
 | 18 | §4.8 omits `GalaxyService.GetStartLocation`, although §6 and SPEC-01's new-game flow require it. | Include the stated `PlayerLocation GetStartLocation()` contract, with a GAL-008 throwing stub; no start-position computation in GAL-001. | Tech lead — resolved by GAL-001 against the existing public API; central mirror pending. |
 
 | 19 | Elliptic velocity and the sign of periapsis rotation are implicit in §5.5.5. | GAL-002 default: differentiate Kepler’s equation analytically (`dE/dt = (2π/T)/(1−e cos E)`), then rotate both position and velocity with Unity’s positive-Y rotation (`x′ = cos ω·x + sin ω·z`, `z′ = −sin ω·x + cos ω·z`). Phase keeps the specified +X toward +Z convention. Use exactly six Newton steps and double-precision `t/T−floor(t/T)`; Fixed/default parent orbits bypass division and contribute zero velocity. Moving inputs retain the stated positive-period precondition and validated eccentricity range; no new validation or generation algorithms. | Tech lead — resolved by GAL-002 against §4.5/§5.5.5; central mirror pending. |
+
+| 30 | GAL-009 owns both reset methods but the GalaxyService constructor still throws for unfinished GAL-008 | Bind its existing world/state/config dependencies now so the exact public reset overloads are callable, require one generation definition, and leave generation/cache/ticker behavior as explicit GAL-008 TODOs/throwing methods. No alternative service, world model or fake galaxy generation. Dispose owns no resources until GAL-008 adds them. Serial overflow throws rather than wrapping into an unapplied stale request. | Tech lead |
+
+| 31 | Decision 9 requires pre-rebase position sync, but §5.10 only specified a post-rebase sync, losing the latest physics movement when crossing the threshold. | Capture non-analytic root UniversePosition from old origin plus current local transform in a dependency-chained parallel job before gather/decide. Skip capture for a newer different-system request, preserving destination-authored positions; retain the post-placement sync. Extend the required Threshold_Rebases test with an actual pending +1 m transform write from x=2000, expecting x=0 after rebasing by 2001. No extra test or main-thread completion. | Tech lead |
 
 ## 11. References
 

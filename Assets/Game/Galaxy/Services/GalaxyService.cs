@@ -2,6 +2,7 @@ using Game.Data.Definitions;
 using Game.Galaxy.Components;
 using Game.Galaxy.Data;
 using Unity.Jobs;
+using Unity.Entities;
 using Unity.Mathematics;
 
 namespace Game.Galaxy.Services
@@ -9,7 +10,19 @@ namespace Game.Galaxy.Services
     /// <summary>Owner of GalaxyDef, star-system content cache and world commands. Implements SPEC-30 §5.8.</summary>
     public sealed class GalaxyService : System.IDisposable, IGalaxyFrameTick
     {
-        public GalaxyService(Game.Data.Services.ContentCatalog catalog, GalaxyState state, Unity.Entities.World world, GalaxyFrameTicker ticker) => throw new System.NotImplementedException("GAL-008");
+        readonly World world;
+        public GalaxyService(Game.Data.Services.ContentCatalog catalog, GalaxyState state, World world, GalaxyFrameTicker ticker)
+        {
+            if (catalog == null) throw new System.ArgumentNullException(nameof(catalog));
+            State = state ?? throw new System.ArgumentNullException(nameof(state));
+            this.world = world ?? throw new System.ArgumentNullException(nameof(world));
+            if (!world.IsCreated) throw new System.ArgumentException("World must be alive.", nameof(world));
+            if (ticker == null) throw new System.ArgumentNullException(nameof(ticker));
+            var definitions = catalog.All<GalaxyGenerationDefinition>();
+            if (definitions.Count != 1) throw new System.ArgumentException("Exactly one galaxy generation definition is required.", nameof(catalog));
+            Definition = definitions[0];
+            // TODO(GAL-008): register the implemented frame tick and initialize generation/cache ownership.
+        }
         public int TickOrder => 0;
         public GalaxyDef Galaxy { get; }                   // null until NewGame/OnSessionRestored
         public GalaxyState State { get; }
@@ -27,9 +40,20 @@ namespace Game.Galaxy.Services
         public StarSystemContent GetContent(StarSystemId id) => throw new System.NotImplementedException("GAL-008");   // completes prefetch or generates now; applies deltas; cached
         public void ReleaseContent(StarSystemId id) => throw new System.NotImplementedException("GAL-008");       // disposes the cache entry
         public void SetLiveDeltaSink(IGalaxyLiveDeltaSink sink) => throw new System.NotImplementedException("GAL-008");
-        public uint RequestOriginReset(StarSystemId id, double3 newOrigin) => throw new System.NotImplementedException("GAL-008"); // enables OriginRebaseRequest with Serial+1; returns the serial
-        public uint RequestOriginReset(StarSystemId id, double3 newOrigin, in PlayerPlacement placement) => throw new System.NotImplementedException("GAL-008"); // same, and places the player ship
-        public uint LastOriginRequestSerial { get; }
+        public uint RequestOriginReset(StarSystemId id, double3 newOrigin) => WriteOriginRequest(id, newOrigin, 0, default);
+        public uint RequestOriginReset(StarSystemId id, double3 newOrigin, in PlayerPlacement placement) => WriteOriginRequest(id, newOrigin, 1, placement);
+        public uint LastOriginRequestSerial { get; private set; }
+        uint WriteOriginRequest(StarSystemId id, double3 newOrigin, byte placePlayer, in PlayerPlacement placement)
+        {
+            var em = world.EntityManager;
+            using var query = em.CreateEntityQuery(ComponentType.ReadOnly<FrameOrigin>());
+            var entity = query.GetSingletonEntity();
+            uint serial = checked(LastOriginRequestSerial + 1);
+            em.SetComponentData(entity, new OriginRebaseRequest { StarSystem = id, NewOrigin = newOrigin, Serial = serial, PlacePlayer = placePlayer, Placement = placement });
+            em.SetComponentEnabled<OriginRebaseRequest>(entity, true);
+            LastOriginRequestSerial = serial;
+            return serial;
+        }
 
         // Queries
         public bool TryResolveStarSystem(Game.Core.ContentId authoredId, out StarSystemId id) => throw new System.NotImplementedException("GAL-008");
@@ -51,7 +75,11 @@ namespace Game.Galaxy.Services
         public void MarkVisited(StarSystemId id) => throw new System.NotImplementedException("GAL-008");          // Visited += id; Known += id and its non-hidden neighbours
 
         public void Tick(in GalaxyFrameContext ctx) => throw new System.NotImplementedException("GAL-008");       // completes finished content prefetches (§5.8 step T1); no event draining
-        public void Dispose() => throw new System.NotImplementedException("GAL-008");                             // disposes GalaxyDef and cached content
+        public void Dispose()
+        {
+            // TODO(GAL-008): unregister the frame tick and dispose GalaxyDef/cache when those resources exist.
+            // Origin state and World belong to ECS; this command surface owns no native allocation.
+        }
         // TODO(GAL-008): implement the behavior specified by SPEC-30.
     }
 }
