@@ -695,7 +695,7 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 ### MIG-009 — Weapon converter and weapon links
 - **Milestone:** M2
 - **Tier:** standard — meaning map with legacy values given (§4.6)
-- **Depends on:** `MIG-006`, `MIG-011`, `WPN-001`, `DATA-007`
+- **Depends on:** `MIG-006`, `MIG-011`, `WPN-001`, `DATA-001`
 - **Do:** `WeaponConverter` (`Order` 220, `Name` "Weapons"): one `WeaponDefinition wpn_<x>` per weapon block merged with its projectile (§4.6); then `SetLinkIfEmpty(block, "modules.Array.data[k].weapon", wpn)` on the block's `WeaponMountModule` (index `k` in `modules`) for each of the 9 weapon blocks (SPEC-04 DATA-010 field).
 - **Files:** `Assets/Game/Editor/Migration/Converters/WeaponConverter.cs`; `Assets/Game/Content/Weapons/*.asset` (9, generated); `Assets/Game/Tests/EditMode/Editor/Migration/WeaponConverterTests.cs`
 - **Acceptance criteria:**
@@ -800,7 +800,7 @@ No runtime cost. Editor budgets: full run on the real export ≤ 60 s (13 ships,
 | 16 | M0 imports blueprints, but ShipBlueprintDefinition.Validate is a VOX-010 (M1) stub | **Answer (resolved in MIG-008):** bring the already specified VOX-E001/E002/E003 validator forward into MIG-008; retain setter/config work and its tests in VOX-010. Game.Data checks the supported v1 asset contract without referencing Game.Voxel; migration verifies that VoxsCodec.Version is accepted. Finite positive cell size also rejects NaN/infinity. | Tech lead |
 | 17 | Imported ships turn the previously deferred FND-E001 start-blueprint check into an error | **Answer (resolved in MIG-008):** assign ship_base to an empty shipped config_game.startBlueprint once for development. It is the smallest imported blueprint (four cells) with a core. Preserve any existing assignment; the migration runner does not rewrite the config. Frank can choose the eventual starting ship when gameplay is available. | Tech lead |
 
-| 19 | MIG-009 depends on all SPEC-04 tasks, but DATA-010 strict link validation needs the missing migrated weapons first | **Answer (resolved, Tech lead):** depend on completed DATA-007 plus MIG-006/MIG-011/WPN-001. WeaponMountModule.weapon, its bake lookup and WeaponDefinition already exist from FND-020, so migration needs no remaining DATA-010 behavior. Supply canonical mapped assets/links before integrating strict E047; never waive missing links or invent weapon definitions. | Tech lead |
+| 19 | MIG-009 depends on all SPEC-04 tasks, but DATA-010 strict link validation needs the missing migrated weapons first | **Answer (resolved, Tech lead):** depend on the permitted cross-spec contract DATA-001 (DATA-007 implementation is already done) plus MIG-006/MIG-011/WPN-001. WeaponMountModule.weapon, its bake lookup and WeaponDefinition already exist from FND-020, so migration needs no remaining DATA-010 behavior. Supply canonical mapped assets/links before integrating strict E047; never waive missing links or invent weapon definitions. | Tech lead |
 
 ## 11. References
 
