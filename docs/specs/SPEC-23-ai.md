@@ -110,6 +110,7 @@ namespace Game.Simulation.Spatial
         public int QuerySegment(float3 p0, float3 p1, float inflate, ref FixedList512Bytes<int> output);
         public int QuerySphere(float3 center, float radius, ref FixedList512Bytes<int> output);
         public SpatialProxy Get(int index) => Proxies[index];
+        public SpatialHashQueryData AsReadOnly(); // ADR-0064: non-owning job view; excludes GuardedHandles
         public int FindIndex(Entity e);                  // binary search on Entity.Index (and Version); -1 if absent
     }
 }
@@ -303,7 +304,7 @@ Per AI ship: `AiBrain` ≈ 72 B. Hash: 64 B per proxy + ≈ 4 entries per proxy 
 ### 5.1 `SpatialHash` access rules
 
 - **Builder** (`SpatialHashBuildSystem` only): `dep = hash.Access.Acquire(state.Dependency)`; schedule the build chain; `hash.Access.Release(h); state.Dependency = h`.
-- **Job readers** (any fixed-step system): `var hash = SystemAPI.GetSingleton<SpatialHash>(); var dep = hash.BeginRead(state.Dependency);` schedule jobs with the hash as a `[ReadOnly]` field; `hash.EndRead(handle); state.Dependency = handle;`.
+- **Job readers** (any fixed-step system): `var hash = SystemAPI.GetSingleton<SpatialHash>(); var dep = hash.BeginRead(state.Dependency);` schedule jobs with `hash.AsReadOnly()` (`SpatialHashQueryData`) as a `[ReadOnly]` field; keep the owning hash and its `GuardedHandles` on the main thread (ADR-0064); `hash.EndRead(handle); state.Dependency = handle;`.
 - **Main-thread readers** outside the fixed step (HUD radar, harness): `hash.CompleteAccess()` first.
 - Never `GetSingletonRW<SpatialHash>`; never write proxy data outside the builder.
 
@@ -430,7 +431,7 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 - **Tier:** frontier — F3/F4: every hit test and target choice depends on complete, ordered query results
 - **Depends on:** `AI-001`
 - **Do:** Implement `SpatialHash` containers, `Create/Dispose`, `QuerySegment`, `QuerySphere`, `FindIndex` (§4.1, §5.2 query algorithms), testable on hand-filled data.
-- **Files:** `Assets/Game/Simulation/Spatial/SpatialHash.cs`, `Assets/Game/Tests/EditMode/Simulation/Spatial/SpatialHashQueryTests.cs`
+- **Files:** `Assets/Game/Simulation/Spatial/{SpatialHash,SpatialHashQueryData}.cs`, `Assets/Game/Tests/EditMode/Simulation/Spatial/SpatialHashQueryTests.cs`
 - **Acceptance criteria:**
   - [ ] Against a brute-force reference on 10,000 random proxies (radii 1–500 m plus 10 large ones up to 50 km) and 10,000 random queries: identical result sets, ascending, no duplicates.
   - [ ] Count returned when output overflows; scratch overflow falls back to the linear scan with the same result.
@@ -589,6 +590,8 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 
 | 7 | Query overflow requests a counter in State, but State has no such field and §5.1 parallel readers are read-only; scratch capacity is 1,023 rather than 1,024 ints. | **Resolved:** use the actual Capacity before every add; scan all proxies on overflow, preserving exact total and lowest-index output. Do not mutate State from queries or add unsafe shared writes. Shared overflow telemetry needs a future explicit owning-writer contract; no telemetry claim in AI-002. | Tech lead |
 | 8 | Very large query bounds can enumerate billions of empty cells or overflow integer cell loops. | **Resolved:** above 4,096 enumerated cells or outside representable coordinates, use the same exact linear fallback; normal bounded queries retain the specified hash/sort/dedupe algorithm. This bounds traversal work without losing candidates. | Tech lead |
+
+| 9 | Passing the whole hash into a Burst job registers main-thread GuardedHandles as job inputs and breaks EndRead/disposal. | **Resolved:** ADR-0064 adds a non-owning SpatialHashQueryData view with only spatial containers; AsReadOnly for job fields, owner handles stay on main thread. Existing owner query APIs delegate without safety suppression. Required ordered-query test covers the real Burst access lifecycle. | Tech lead |
 
 ## 11. References
 

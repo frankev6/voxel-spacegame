@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Game.Simulation.Spatial;
 using NUnit.Framework;
 using Unity.Collections;
+using Unity.Burst;
+using Unity.Jobs;
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -11,6 +13,19 @@ namespace Game.Tests.EditMode.Simulation.Spatial
     /// <summary>SPEC-23 AI-002: ordered hash results against independent double-precision reference geometry.</summary>
     public sealed class SpatialHashQueryTests
     {
+        [BurstCompile(CompileSynchronously = true)]
+        struct QueryJob : IJob
+        {
+            [ReadOnly] public SpatialHashQueryData Hash;
+            public NativeArray<int> Result;
+            public void Execute()
+            {
+                var output = new FixedList512Bytes<int>();
+                Result[0] = Hash.QuerySegment(new float3(-128, 0, 0), new float3(128, 0, 0), 1, ref output);
+                Result[1] = output.Length;
+                for (int i = 0; i < output.Length; i++) Result[i + 2] = output[i];
+            }
+        }
         sealed class Fixture : IDisposable
         {
             public SpatialHash Hash = SpatialHash.Create(128);
@@ -98,6 +113,11 @@ namespace Game.Tests.EditMode.Simulation.Spatial
             using var f = new Fixture(80, true);
             Compare(f, new float3(-128, 0, 0), new float3(128, 0, 0), 1, true);
             Compare(f, float3.zero, default, 128, false);
+            using var result = new NativeArray<int>(129, Allocator.TempJob);
+            var handle = new QueryJob { Hash = f.Hash.AsReadOnly(), Result = result }.Schedule(f.Hash.BeginRead(default));
+            f.Hash.EndRead(handle); f.Hash.CompleteAccess();
+            Assert.AreEqual(80, result[0]); Assert.AreEqual(80, result[1]);
+            for (int i = 0; i < 80; i++) Assert.AreEqual(i, result[i + 2], "Burst read-only query order");
             Assert.AreEqual(new int2(-1, -2), f.Hash.CellOf(new float3(-.1f, 0, -128.1f)));
             for (int i = 0; i < 80; i++) Assert.AreEqual(i, f.Hash.FindIndex(new Entity { Index = i + 1, Version = 2 }));
             Assert.AreEqual(-1, f.Hash.FindIndex(new Entity { Index = 40, Version = 1 }));

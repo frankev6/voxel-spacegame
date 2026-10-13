@@ -812,6 +812,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 225 | SPEC-30 Q16–18: stale VoxelStructure namespace, omitted readonly constructors and GetStartLocation signature. | Resolved: use existing Game.Voxel.Model owner, declaration-order constructors and required GAL-008 method stub; no functional galaxy claim. | Tech lead |
 | 226 | SPEC-41 Q8–9: dialog contracts overlap existing SPEC-61 view models/interface. | Resolved: extend in place, retain existing members/GUIDs and notification caches; presenter later implements both compatible command signatures. | Tech lead |
 | 227 | SPEC-60 Q25–27: notification queue/timestamp, animation timing and root integration gaps. | Resolved: bounded FIFO/coalescing wrapper, first payload and saturating amounts, token durations and unscaled lifetime; preserve both tooltip and notification lifecycle integrations. | Tech lead |
+| 228 | SPEC-23 Q9: whole-hash job fields violate main-thread-only GuardedHandles. | Resolved by ADR-0064: non-owning query-data view excludes handle metadata, retaining all spatial safety checks and existing APIs. | Tech lead |
 
 ## Measurements
 
