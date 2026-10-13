@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | SYS-010 | claimed main aae29c1 and dispatched; TRV-001 1c5e2d2 delivered | WPN-004/005 after FLT-012 |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AI-013 | claimed main bc3dca7 and dispatched; AI-005 8215e97 delivered | combat runtime as ready |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ECO-001 | claimed on main and dispatched; SYS-002 f27c54b delivered for boot/catalog review and validation | SYS-003 after VOX-020 |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | SYS-010 | delivered 929d962; waiting for validated standard-task dependencies | WPN-004/005 after FLT-012 |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | AI-013 | delivered 40f46a8; waiting for validated standard-task dependencies | combat runtime as ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ECO-001 | delivered 40ccec7; waiting for validated standard-task dependencies | SYS-003 after VOX-020 |
 
 ## Operating rules
 
@@ -19,9 +19,9 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 ## Current lead state
 
 - Main contains closed PWR-004/AST-002/AST-003 at `31af60d`: compile clean, focused **12/0/0**, full **987/0/1 EditMode, 145/0/53 PlayMode**, session 2085 exit 0. Evidence `Logs/playtest/pwr004/`; A1 art CLI exit 0, A2 expected exit 1. Latest main claim PWR-005 `b89cf3e`.
-- Primary `task/FLT-012-flight-integration` now includes full prepared FLT-012 source/eight tests, SYS-002 `4b1f349` + boot `cacfbb3`, AI-005 `b0fc87e`, TRV-001 `a68c988`, logger repair `f223bc6`. Config generation session 96990 exited 0; temporary job/meta removed, config/catalog committed `7244be6`. **Session 97067 live** runs compile and grouped PropulsionPower/PropulsionStats/ThrusterInit/StreamingConfig/AiSetup/TravelContract/ArtAssetValidator tests. No second Unity or primary source mutation until terminal.
-- Lead isolated checkout `/Users/frank/.codex/worktrees/combat-hit-detection/spaceship-game-v2` now `task/PWR-005-allocation` from main claim, ready for allocation implementation. Prior `task/FLT-012-power-stats` is fully cherry-picked into primary; do not duplicate.
-- Three workers: AI-013, SYS-010, ECO-001. AI-013 blob storage approved ADR-0065. AI-005's live initialization still awaits GAL-009 OriginShiftRecord; PWR-006 aggregate producer and ordering remain explicit TODOs. No enemy-fights-back claim yet.
+- Primary `task/FLT-012-flight-integration` now includes full prepared FLT-012 source/eight tests, SYS-002 `4b1f349` + boot `cacfbb3`, AI-005 `b0fc87e`, TRV-001 `a68c988`, logger repair `f223bc6`. Config generation session 96990 exited 0; temporary job/meta removed, config/catalog committed `7244be6`. **Session 70799 exited 0**: compile clean and grouped acceptance **26/0/0** after fixture repair `8dba629` (read singleton before retaining a DynamicBuffer). Evidence `Logs/playtest/flt012/focused-final.xml`, `compile.log`. Full EditMode + PlayMode **session 87840 live**; no second Unity or primary source mutation until terminal.
+- Lead isolated checkout `/Users/frank/.codex/worktrees/combat-hit-detection/spaceship-game-v2` now `task/PWR-005-allocation` from main claim, contains allocation implementation `41e8595` and six required tests `7b0dfdb`; Unity validation pending. SPEC-22 Q15 corrects sustain arithmetic (2000 ticks, unchanged energy inputs); mirror to ledger on integration. Prior `task/FLT-012-power-stats` is fully cherry-picked into primary; do not duplicate.
+- Three delivered workers: AI-013 `40f46a8`, SYS-010 `929d962`, ECO-001 `40ccec7`; review/integrate next compatible batch. Their dependency wait is real: current ready standard work is only FND-012 (actual galaxy prerequisites absent) and owner-only AUD-011. Reassign promptly after validated dependencies close. AI-013 blob storage approved ADR-0065. AI-005's live initialization still awaits GAL-009 OriginShiftRecord; PWR-006 aggregate producer and ordering remain explicit TODOs. No enemy-fights-back claim yet.
 - Hold GAL-003 `579394d` / MIG-014 `644622c` + `fea6357` for compatible galaxy-content generation. DLG-010 `38b2bb0` remains partial without approved sprites. SYS-003 remains blocked by unfinished VOX-020.
 - Editor closed; native goal active, heartbeat paused. Preserve pre-existing QualitySettings delta and exclude test artifacts; clean only after no test/job is active.
 
