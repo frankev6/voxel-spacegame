@@ -29,6 +29,7 @@ namespace Game.Tests.EditMode.Input
             V("Flight", "Thrust", "Axis", "1DAxis:" + K + "s," + K + "w"); V("Flight", "Strafe", "Axis", "1DAxis:" + K + "q," + K + "e");
             V("Flight", "Turn", "Axis", "1DAxis:" + K + "a," + K + "d");
             B("Flight", "StrafeModifier", K + "shift"); B("Flight", "Boost", K + "leftCtrl"); B("Flight", "Brake", K + "x"); B("Flight", "FirePrimary", M + "leftButton", K + "space");
+            V("Flight", "AimDirection", "Vector2"); // Gamepad-only; KeyboardMouse retains cursor aim.
             B("Flight", "FireSecondary", M + "rightButton"); B("Flight", "FireTertiary", K + "g"); B("Flight", "Interact", K + "f");
             for (int i = 1; i <= 4; i++) B("Flight", $"Ability{i}", K + i);
             B("Flight", "TargetNext", K + "tab"); B("Flight", "TargetUnderCursor", K + "r"); B("Flight", "TargetClear", K + "t");
@@ -63,13 +64,15 @@ namespace Game.Tests.EditMode.Input
             return t.ToArray();
         }
 
-        static List<string> Describe(InputAction action)
+        static List<string> Describe(InputAction action, string scheme = null)
         {
             var result = new List<string>();
             var bs = action.bindings;
             for (int i = 0; i < bs.Count; i++)
             {
                 if (bs[i].isPartOfComposite) continue;
+                string groups = bs[i].isComposite && i + 1 < bs.Count ? bs[i + 1].groups : bs[i].groups;
+                if (scheme != null && !(groups ?? "").Split(InputBinding.Separator).Contains(scheme)) continue;
                 if (!bs[i].isComposite) { result.Add(bs[i].path); continue; }
                 var parts = new List<string>();
                 for (int j = i + 1; j < bs.Count && bs[j].isPartOfComposite; j++) parts.Add(bs[j].path);
@@ -83,15 +86,14 @@ namespace Game.Tests.EditMode.Input
         {
             var asset = controls.asset;
             CollectionAssert.AreEquivalent(new[] { "Global", "Flight", "Menu", "Dialog", "Editor" }, asset.actionMaps.Select(m => m.name));
-            Assert.AreEqual(1, asset.controlSchemes.Count);
-            Assert.AreEqual("KeyboardMouse", asset.controlSchemes[0].name);
+            CollectionAssert.AreEqual(new[] { "KeyboardMouse", "Gamepad" }, asset.controlSchemes.Select(s => s.name));
             foreach (var (path, type, control, bindings) in Table)
             {
                 var a = asset.FindAction(path, throwIfNotFound: false);
                 Assert.IsNotNull(a, path);
                 Assert.AreEqual(type, a.type, path);
                 Assert.AreEqual(control, a.expectedControlType, path);
-                CollectionAssert.AreEqual(bindings, Describe(a), path);
+                CollectionAssert.AreEqual(bindings, Describe(a, "KeyboardMouse"), path);
             }
             foreach (var map in asset.actionMaps)
                 foreach (var a in map.actions)
@@ -105,14 +107,15 @@ namespace Game.Tests.EditMode.Input
         {
             var allowed = new Regex(@"^<Keyboard>/(escape|f([1-9]|1[0-2]))$");
             foreach (var b in controls.Global.Get().bindings)
-                Assert.IsTrue(allowed.IsMatch(b.path), $"Global binding {b.path} is not Esc or a function key (SPEC-03 decision 3)");
+                if ((b.groups ?? "").Split(InputBinding.Separator).Contains("KeyboardMouse"))
+                    Assert.IsTrue(allowed.IsMatch(b.path), $"Global binding {b.path} is not Esc or a function key (SPEC-03 decision 3)");
         }
 
         [Test]
         public void NoDuplicateBindingsWithinMap()
         {
             // Shared controls the spec defines on purpose, separated by a hold button or by Ctrl (SPEC-03 §4.2 Editor table).
-            var shared = new HashSet<string> { "Editor:<Mouse>/delta", "Editor:<Mouse>/scroll/y" };
+            var shared = new HashSet<string> { "Editor:<Mouse>/delta", "Editor:<Mouse>/scroll/y", "Flight:<Gamepad>/rightStick" }; // AimDirection and hold-gated CameraLook (Q11).
             foreach (var map in controls.asset.actionMaps)
             {
                 var seen = new Dictionary<string, string>();

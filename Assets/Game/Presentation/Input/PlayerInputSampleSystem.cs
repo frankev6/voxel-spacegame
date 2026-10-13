@@ -27,6 +27,9 @@ namespace Game.Presentation.Input
         IWorldPointerGate pointerGate;
         InputAction thrust, strafe, turn, strafeModifier, boost, brake, firePrimary, fireSecondary, fireTertiary;
         InputAction interact, ability1, ability2, ability3, ability4, targetNext, targetUnderCursor, targetClear, autofire, cruise;
+        InputAction aimDirection;
+        Entity aimPlayer;
+        float2 lastGamepadDirection;
         static readonly ProfilerMarker Sample = new ProfilerMarker(ProfilerCategory.Scripts, "PlayerInputSampleSystem.Sample");
         protected override void OnCreate()
         {
@@ -39,9 +42,11 @@ namespace Game.Presentation.Input
         public void Bind(InputService service, IWorldPointerGate gate)
         {
             input = service; pointerGate = gate;
+            aimPlayer = Entity.Null; lastGamepadDirection = float2.zero;
             if (input == null) return;
             var flight = input.Controls.Flight;
             strafeModifier = flight.Get().FindAction("StrafeModifier", true);
+            aimDirection = flight.AimDirection;
             thrust = flight.Thrust; strafe = flight.Strafe; turn = flight.Turn; boost = flight.Boost; brake = flight.Brake;
             firePrimary = flight.FirePrimary; fireSecondary = flight.FireSecondary; fireTertiary = flight.FireTertiary;
             interact = flight.Interact; ability1 = flight.Ability1; ability2 = flight.Ability2; ability3 = flight.Ability3; ability4 = flight.Ability4;
@@ -67,29 +72,52 @@ namespace Game.Presentation.Input
                 else if (boost.IsPressed()) command.Flags |= ShipCommandFlags.Boost;
                 if (brake.IsPressed()) command.Flags |= ShipCommandFlags.Brake;
                 bool allowed = false;
-                if (Mouse.current != null)
+                if (input.CurrentControlScheme == "Gamepad") AimGamepad(ref command);
+                else if (Mouse.current != null)
                 {
                     var pointer = Mouse.current.position.ReadValue();
                     allowed = pointerGate == null || pointerGate.IsWorldPointerAllowed(pointer);
                     Aim(pointer, ref command);
                 }
-                command.FireGroups = (firePrimary.IsPressed() && (allowed || KeyboardBindingPressed(firePrimary)) ? 1u : 0) | (fireSecondary.IsPressed() && allowed ? 2u : 0) | (fireTertiary.IsPressed() ? 4u : 0);
+                command.FireGroups = (firePrimary.IsPressed() && (allowed || NonPointerBindingPressed(firePrimary)) ? 1u : 0) | (fireSecondary.IsPressed() && (allowed || NonPointerBindingPressed(fireSecondary)) ? 2u : 0) | (fireTertiary.IsPressed() ? 4u : 0);
                 Count(interact, ref command.Edges.Interact); Count(ability1, ref command.Edges.Ability1);
                 Count(ability2, ref command.Edges.Ability2); Count(ability3, ref command.Edges.Ability3); Count(ability4, ref command.Edges.Ability4);
                 Count(targetNext, ref command.Edges.TargetNext); Count(targetClear, ref command.Edges.TargetClear);
-                if (allowed) Count(targetUnderCursor, ref command.Edges.TargetUnderCursor);
+                if (allowed || targetUnderCursor.activeControl?.device is Gamepad) Count(targetUnderCursor, ref command.Edges.TargetUnderCursor);
                 Count(autofire, ref command.Edges.AutofireToggle); Count(cruise, ref command.Edges.Cruise);
             }
             EntityManager.SetComponentData(commandEntity, command);
         }
-        static bool KeyboardBindingPressed(InputAction action)
+        static bool NonPointerBindingPressed(InputAction action)
         {
             foreach (var control in action.controls)
-                if (control.device is Keyboard && control is UnityEngine.InputSystem.Controls.ButtonControl button && button.isPressed) return true;
+                if ((control.device is Keyboard || control.device is Gamepad) && control is UnityEngine.InputSystem.Controls.ButtonControl button && button.isPressed) return true;
             return false;
         }
         static void Count(InputAction action, ref byte counter)
         { if (action.WasPressedThisFrame()) counter = unchecked((byte)(counter + 1)); }
+        void AimGamepad(ref PlayerCommand command)
+        {
+            players.CompleteDependency();
+            if (players.CalculateEntityCount() != 1) return;
+            Entity player = players.GetSingletonEntity();
+            if (!EntityManager.HasComponent<LocalTransform>(player)) return;
+            EntityManager.CompleteDependencyBeforeRO<LocalTransform>();
+            var transform = EntityManager.GetComponentData<LocalTransform>(player);
+            if (!math.all(math.isfinite(transform.Position))) return;
+            if (aimPlayer != player)
+            {
+                aimPlayer = player;
+                float3 forward = math.rotate(transform.Rotation, new float3(0, 0, 1));
+                lastGamepadDirection = math.normalizesafe(forward.xz, new float2(0, 1));
+            }
+            float2 direction = aimDirection.ReadValue<UnityEngine.Vector2>();
+            if (math.all(math.isfinite(direction)) && math.lengthsq(direction) > 0)
+                lastGamepadDirection = math.normalize(direction);
+            // Rebuild from the current ship position, including while the stick is released.
+            command.AimWorld = transform.Position + new float3(lastGamepadDirection.x, 0, lastGamepadDirection.y) * 50;
+            command.AimValid = 1;
+        }
         void Aim(float2 pointer, ref PlayerCommand command)
         {
             if (cameras.IsEmptyIgnoreFilter) return;

@@ -46,7 +46,7 @@ This avoids the old prototype's polling of `Keyboard.current` from many scripts,
 - Camera behaviour: SPEC-62.
 - The settings screen: SPEC-61.
 - Settings persistence: SPEC-01.
-- Gamepad bindings: M4 (INP-008).
+- Gamepad bindings: M4 (INP-008); defaults and device selection are specified below and in Q10/Q11.
 - UI Toolkit's own pointer and keyboard navigation inside panels. UI Toolkit reads the Input System directly; no map is needed for it.
 
 ## 3. Decisions (binding)
@@ -76,14 +76,14 @@ This avoids the old prototype's polling of `Keyboard.current` from many scripts,
 5. **Mouse aim is what the cursor covers.** A ray from the camera through the cursor is cast against `PhysicsLayers.PickingQuery` (grids and celestial bodies), ignoring the player's own grid; the first hit is the aim point. When nothing is hit, the ray's intersection with the flight plane `Y = 0` is used (SPEC-21 Q6). It uses the previous frame's `MainCameraState`, because SPEC-62 writes it later in the frame. A one-frame camera lag in the aim point is acceptable and deterministic for replay, since replays inject `PlayerCommand` directly (SPEC-71).
 6. **Mouse buttons do not fire through UI.** When `IWorldPointerGate.IsWorldPointerAllowed(pointer)` is false, mouse-driven fire groups and `TargetUnderCursor` are suppressed. Keyboard actions are unaffected.
 7. **Default bindings are part of this spec (§4.2).** Players change them through rebinding. Overrides are stored as the Input System JSON in `ControlSettingsData.BindingOverridesJson` and applied at boot and on change.
-8. **Display strings come from the Input System.** They use `InputBinding.ToDisplayString(DisplayStringOptions.DontIncludeInteractions)` for the first binding of the current control scheme `KeyboardMouse`. UI never hard-codes key names.
+8. **Display strings come from the Input System.** They use `InputBinding.ToDisplayString(DisplayStringOptions.DontIncludeInteractions)` for the first binding of the last meaningfully used device's control scheme (`KeyboardMouse` initially, then `Gamepad`); actions absent from that scheme fall back to `KeyboardMouse`. UI never hard-codes key names.
 
 ## 4. Data model
 
 ### 4.1 Asset and generated class (public contract)
 
 - `Assets/Game/Input/Controls.inputactions`, with importer settings "Generate C# Class" on, class `Controls`, namespace `Game.Input`, file `Assets/Game/Input/Controls.cs` (generated; committed).
-- One control scheme: `KeyboardMouse` (devices: Keyboard required, Mouse required). `Gamepad` is added in M4.
+- Control schemes: `KeyboardMouse` (Keyboard required, Mouse required) and `Gamepad` (Gamepad required, INP-008). Existing action and binding IDs are preserved for saved overrides.
 
 ### 4.2 Maps, actions and default bindings (binding)
 
@@ -168,6 +168,8 @@ Action names are PascalCase and unique within their map. The **action path** use
 | `ViewIso` / `ViewTop` / `ViewFront` / `ViewSide` | Button | `numpad5` / `numpad7` / `numpad1` / `numpad3` |
 | `Modifiers` | Pass-through Button group: `Shift` (`<Keyboard>/shift`), `Ctrl` (`<Keyboard>/ctrl`, `<Keyboard>/leftMeta`), `Alt` (`<Keyboard>/alt`) | read as three actions `ModShift`, `ModCtrl`, `ModAlt` |
 
+**Gamepad (INP-008):** every Flight action and every Menu/Dialog action has a `Gamepad` binding. `Flight/AimDirection` is a new Value / Vector2 action with only `<Gamepad>/rightStick`; KeyboardMouse continues to use the pointer ray. See Q10/Q11 for the complete device-selection, directional-aim and chord defaults. Global Back has Select + Start in addition to Escape.
+
 ### 4.3 `InputService` (public contract, `Game.Input`, namespace `Game.Input`)
 
 ```csharp
@@ -177,9 +179,10 @@ public sealed class InputService : System.IDisposable
     public InputService(Game.Core.Settings.ControlSettingsData controls);   // creates Controls, applies overrides, enables Global
     public Controls Controls { get; }                                        // generated class; read actions from here
     public Game.Core.InputContext CurrentContext { get; }
+    public string CurrentControlScheme { get; }                              // last meaningful KeyboardMouse/Gamepad activity (Q10)
     public void SetContext(Game.Core.InputContext context);                  // ADR-0044 temporary scene bridge; UI-004 transfers sole ownership to UINavigator
     public string GetBindingDisplay(string actionPath);                      // "Flight/Interact" → "F"; unknown → "?" + WarnOnce
-    public event System.Action BindingsChanged;                              // after rebind, reset or ApplyBindingOverrides
+    public event System.Action BindingsChanged;                              // after rebind, reset, ApplyBindingOverrides or device-family change
     public bool IsRebinding { get; }
     public void StartRebind(string actionPath, int bindingIndex, System.Action<RebindResult> done); // Esc cancels
     public void CancelRebind();
@@ -276,7 +279,7 @@ Disabling a map cancels its in-progress actions, so held buttons read released.
 
 **`GetBindingDisplay(path)`:**
 1. Find the action with `asset.FindAction(path, throwIfNotFound: false)`.
-2. Take the first binding whose `groups` contains `KeyboardMouse` (composites: return the display of the whole composite, e.g. "W/S").
+2. Take the first binding whose `groups` contains `CurrentControlScheme`; if absent, fall back to `KeyboardMouse` (composites: return the display of the whole composite, e.g. "W/S").
 3. Return `action.GetBindingDisplayString(index, DisplayStringOptions.DontIncludeInteractions)`.
 
 Results are cached in a `Dictionary<string, string>` that is cleared on `BindingsChanged`.
@@ -324,8 +327,8 @@ Position: `GameInitGroup`, after `OriginRebaseSystem`, before `GridSpawnSystem` 
    6. **Plane fallback:** `Planar.RayPlaneY(near, dir, 0f, out hit, out _)` → `AimWorld = hit`, `AimValid = 1`; on failure (a ray parallel to the plane or pointing away), keep the previous `AimWorld` and set `AimValid = 0`.
 
    Without a `MainCameraState`, `AimValid = 0`.
-8. **Fire groups:** bit 0 = `FirePrimary.IsPressed() && (allowed || keyboardBindingPressed)` (FND-020, ADR-0053: Space fires even when the pointer overlaps HUD; inactive Flight context still neutralizes it); bit 1 = `FireSecondary.IsPressed() && allowed`; bit 2 = `FireTertiary.IsPressed()`.
-9. **Edges:** for each edge action, if `WasPressedThisFrame()` then `counter = (byte)(counter + 1)`. For `TargetUnderCursor`, count only when `allowed`. A frame never counts more than 1 per action.
+8. **Fire groups:** bit 0 = `FirePrimary.IsPressed() && (allowed || nonPointerBindingPressed)` (FND-020, ADR-0053: Space fires even when the pointer overlaps HUD; inactive Flight context still neutralizes it); bit 1 = `FireSecondary.IsPressed() && (allowed || nonPointerBindingPressed)`; bit 2 = `FireTertiary.IsPressed()`.
+9. **Edges:** for each edge action, if `WasPressedThisFrame()` then `counter = (byte)(counter + 1)`. For `TargetUnderCursor`, count only when `allowed` or the triggering control is a Gamepad. Gamepad directional aim and device selection are defined in Q10; KeyboardMouse retains the raycast path above. A frame never counts more than 1 per action.
 10. `FrameIndex = (uint)UnityEngine.Time.frameCount`; write the singleton.
 
 The system allocates nothing per frame: action references are cached in `Bind`.
@@ -478,7 +481,7 @@ When the Editor map is disabled, set `frame = default`.
 - **Tier:** standard — bindings only
 - **Depends on:** `INP-003`
 - **Do:** Add the `Gamepad` control scheme with bindings for Flight (left stick thrust/strafe, right stick aim direction mapped to `AimWorld` = ship position + 50 m × direction, triggers fire, shoulders boost/brake), Menu and Dialog. Update `GetBindingDisplay` to use the last used device's scheme.
-- **Files:** `Assets/Game/Input/Controls.inputactions`; `Assets/Game/Presentation/Input/{PlayerInputSampleSystem,IgnoreBodyClosestHitCollector}.cs`; tests
+- **Files:** `Assets/Game/Input/{Controls.inputactions,Controls.cs,InputService.cs}`; `Assets/Game/Presentation/Input/PlayerInputSampleSystem.cs`; `Assets/Game/Tests/EditMode/Input/{GamepadTests,InputAssetTests}.cs`. Existing raycast collector remains sufficient.
 - **Acceptance criteria:**
   - [ ] Every Flight action has a gamepad binding; the display switches on device change.
 - **Tests:** `GamepadTests.AllFlightActionsBound`, `.DisplaySwitchesWithDevice`.
@@ -501,6 +504,10 @@ When the Editor map is disabled, set `frame = default`.
 | 8 | Player sampler precedes UI composition and origin rebasing; singleton reads do not implicitly wait | Bind with no pointer blocker until UIRoot exists, defer the absent ordering edge, explicitly complete physics readers | Tech lead | Resolved 2026-10-12: null pointer gate permits world pointer input while there is no UI; disabled Flight/unbound service stays neutral. UI-003 rebinds the actual gate; FND-017 owns temporary scene/pause contexts. GAL-009 must run before sampling when introduced. Physics query completion is explicit, preserving the stated read boundary without assuming singleton access waits. |
 
 | 9 | Editor sampler placement violates the Presentation boundary and its frame does not exist before EDT-001 | App host; stage the canonical input types in INP-006 | Tech lead | Resolved by [ADR-0048](../decisions/ADR-0048-editor-input-sampler-boundary.md): App/EditorHost sampler uses Game.ShipEditor.Data frame/actions; no assembly changes or enum copy. EDT-024 composes it later. |
+
+
+| 10 | INP-008 does not specify device-selection filtering, keyboard-only display fallback, or zero-stick aim behavior | Track meaningful changed state events, ignore releases/idle packets/noisy controls, use at least 0.2 actuation for gamepads and the configured deadzone if larger; retain the last planar direction on release | Tech lead | Default implemented in INP-008: `InputService.CurrentControlScheme` starts as `KeyboardMouse`, switches on Keyboard/Mouse/Gamepad activity in every context (including TextEntry), clears cached labels and raises `BindingsChanged` once per family change; disposal unsubscribes. Loss of the last enabled gamepad falls back to `KeyboardMouse`. Labels for keyboard-only actions also fall back. New gamepad-only `Flight/AimDirection` uses right stick with the device's existing deadzone. In Gamepad mode, aim is world X/Z `(stick.x, stick.y)`, normalized to 50 m from the sole root PlayerShip's current LocalTransform position; no camera or pointer is required. A new controlled ship starts facing its planar forward direction (+Z fallback), release retains direction, missing/ambiguous root or transform leaves aim invalid. Trigger fire and gamepad target-under-cursor edges bypass the mouse pointer gate; context neutralization still applies. |
+| 11 | A standard gamepad has fewer buttons than Flight actions; defaults for non-primary actions, Menu and Dialog are unspecified | Use the already configured shortcut consumption and OneModifier composites, preserving every KeyboardMouse binding | Tech lead | Default implemented in INP-008: left-stick Y/X thrust/strafe, D-pad X turn, right/left shoulder boost/brake, right/left trigger primary/secondary, East tertiary, South interact, West next target, North target-under-cursor, D-pad Down clear, D-pad Up autofire, left-stick press cruise. Hold Select + South/East/West/North for abilities 1–4; Select + left-stick press is the strafe modifier; Select + right-stick press recenters. Right-stick press holds orbit; right stick is shared by AimDirection and CameraLook (the existing camera adapter gates orbit). Select + left-stick Y feeds CameraZoom via OneModifier, suppressing the simpler thrust action; the orbit hold button remains independent of that composite. Hold Start + South/East/West/North/D-pad Up for Inventory/ShipLog/GalaxyMap/SystemMap/Fleet in both Flight and Menu; Select + Start is Global Back. Dialog choices 1–9 are South/East/West/North/D-pad Up/Right/Down/Left/left-stick press, Continue is right trigger. Existing shortcut consumption suppresses the simpler action when its chord is used; existing camera adapter settings apply. Physical gamepad ergonomics remain unverified without hardware. |
 
 ## 11. References
 

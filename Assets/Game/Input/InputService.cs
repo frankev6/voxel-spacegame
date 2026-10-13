@@ -4,13 +4,14 @@ using System.Linq;
 using Game.Core;
 using Game.Core.Events;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 
 namespace Game.Input
 {
     /// <summary>Owner of the Controls instance and the active input context (architecture §8). Main thread. Implements SPEC-03 §4.3 and §5.1.</summary>
     public sealed class InputService : IDisposable
     {
-        const string Scheme = "KeyboardMouse";
+        const string KeyboardMouseScheme = "KeyboardMouse", GamepadScheme = "Gamepad";
         readonly Dictionary<string, string> displayCache = new Dictionary<string, string>(StringComparer.Ordinal);
         float mouseSensitivity = 1f, zoomSensitivity = 1f;
         bool disposed;
@@ -31,10 +32,42 @@ namespace Game.Input
             }
             Controls.Global.Enable();
             CurrentContext = InputContext.None;
+            InputSystem.onEvent += OnInputEvent;
+            InputSystem.onDeviceChange += OnDeviceChange;
         }
 
         public Controls Controls { get; }                                         // generated class; read actions from here
         public InputContext CurrentContext { get; private set; }
+        /// <summary>Last meaningfully actuated device family; defaults to KeyboardMouse (SPEC-03 Q10).</summary>
+        public string CurrentControlScheme { get; private set; } = KeyboardMouseScheme;
+
+        void OnInputEvent(InputEventPtr eventPtr, InputDevice device)
+        {
+            if (disposed || eventPtr.handled || (!eventPtr.IsA<StateEvent>() && !eventPtr.IsA<DeltaStateEvent>())) return;
+            string scheme = device is Gamepad ? GamepadScheme : device is Keyboard || device is Mouse ? KeyboardMouseScheme : null;
+            if (scheme == null || scheme == CurrentControlScheme) return;
+            float threshold = device is Gamepad ? Math.Max(.2f, InputSystem.settings.defaultDeadzoneMin) : device is Keyboard ? .5f : .01f;
+            // Changed, actuated controls only: idle packets, releases and stick drift must not steal focus.
+            foreach (var control in eventPtr.EnumerateChangedControls(device, threshold))
+            {
+                if (control.noisy) continue;
+                SetControlScheme(scheme);
+                break;
+            }
+        }
+        void OnDeviceChange(InputDevice device, InputDeviceChange change)
+        {
+            if (CurrentControlScheme != GamepadScheme || !(device is Gamepad) ||
+                (change != InputDeviceChange.Removed && change != InputDeviceChange.Disconnected && change != InputDeviceChange.Disabled)) return;
+            foreach (var other in InputSystem.devices)
+                if (other != device && other is Gamepad && other.enabled) return;
+            SetControlScheme(KeyboardMouseScheme);
+        }
+        void SetControlScheme(string scheme)
+        {
+            CurrentControlScheme = scheme;
+            BindingsChanged?.Invoke();
+        }
 
         /// <summary>Enables exactly the maps of SPEC-03 decision 2 (Global always) and publishes InputContextChanged once per change.
         /// Sole production caller is UINavigator through InputServiceBridge (ADR-0047).</summary>
@@ -58,7 +91,7 @@ namespace Game.Input
             _ => null,                              // None, TextEntry: Global only
         };
 
-        /// <summary>"Flight/Interact" → "F"; composites give the whole composite ("W/S"); unknown → "?" + WarnOnce. Cached until BindingsChanged.</summary>
+        /// <summary>Uses the last device's scheme, falling back to KeyboardMouse for keyboard-only actions. Composite displays stay whole. Cached until BindingsChanged.</summary>
         public string GetBindingDisplay(string actionPath)
         {
             if (actionPath != null && displayCache.TryGetValue(actionPath, out var cached)) return cached;
@@ -68,23 +101,28 @@ namespace Game.Input
             else
             {
                 var bindings = action.bindings;
-                for (int i = 0; i < bindings.Count; i++)
+                for (int pass = 0; pass < 2; pass++)
                 {
-                    var b = bindings[i];
-                    if (b.isPartOfComposite) continue;
-                    bool inScheme = b.isComposite ? i + 1 < bindings.Count && InScheme(bindings[i + 1]) : InScheme(b);
-                    if (!inScheme) continue;
-                    result = action.GetBindingDisplayString(i, InputBinding.DisplayStringOptions.DontIncludeInteractions);
-                    break;
+                    string scheme = pass == 0 ? CurrentControlScheme : KeyboardMouseScheme;
+                    for (int i = 0; i < bindings.Count; i++)
+                    {
+                        var b = bindings[i];
+                        if (b.isPartOfComposite) continue;
+                        bool inScheme = b.isComposite ? i + 1 < bindings.Count && InScheme(bindings[i + 1], scheme) : InScheme(b, scheme);
+                        if (!inScheme) continue;
+                        result = action.GetBindingDisplayString(i, InputBinding.DisplayStringOptions.DontIncludeInteractions);
+                        break;
+                    }
+                    if (result != "?" || CurrentControlScheme == KeyboardMouseScheme) break;
                 }
             }
             if (actionPath != null) displayCache[actionPath] = result;
             return result;
         }
 
-        static bool InScheme(InputBinding b) => b.groups != null && b.groups.Split(InputBinding.Separator).Contains(Scheme);
+        static bool InScheme(InputBinding b, string scheme) => b.groups != null && b.groups.Split(InputBinding.Separator).Contains(scheme);
 
-        public event Action BindingsChanged;                                     // after rebind, reset or ApplyBindingOverrides
+        public event Action BindingsChanged;                                     // after rebind, reset, overrides or scheme change
         public bool IsRebinding => rebind != null;
 
         public void StartRebind(string actionPath, int bindingIndex, Action<RebindResult> done)
@@ -197,6 +235,8 @@ namespace Game.Input
         {
             if (disposed) return;
             disposed = true;
+            InputSystem.onEvent -= OnInputEvent;
+            InputSystem.onDeviceChange -= OnDeviceChange;
             try { CancelRebind(); }
             finally
             {
