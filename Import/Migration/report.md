@@ -1,6 +1,6 @@
 # Legacy migration report
 
-Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (220), Ships (300), Loot (410)
+Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (220), Ships (300), Factions (400), Loot (410)
 
 ## Assets
 
@@ -49,6 +49,9 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 |Assets/Game/Content/Blocks/weapon_plasma_turret_small_fixed.asset|Unchanged|
 |Assets/Game/Content/Blocks/weapon_railgun_medium.asset|Unchanged|
 |Assets/Game/Content/Blocks/weapon_small_beam_turret.asset|Unchanged|
+|Assets/Game/Content/Factions/faction_khuchad_clan.asset|Unchanged|
+|Assets/Game/Content/Factions/faction_tlaxcala.asset|Unchanged|
+|Assets/Game/Content/Factions/faction_vestari.asset|Unchanged|
 |Assets/Game/Content/Items/item_regeneration_serum.asset|Unchanged|
 |Assets/Game/Content/Items/item_research_blueprint.asset|Unchanged|
 |Assets/Game/Content/Items/item_slot_expansion.asset|Unchanged|
@@ -169,6 +172,7 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_small.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_small_fixed.asset: Kept hand-edited asset.
 [I] MIG-I091 content/Abilities/ability_shield_toggle.json: Dropped: legacy Description (placeholder).
+[I] MIG-I091 content/Factions/faction_4.json id: Faction intentionally not converted: faction_4 (duplicate of faction_tlaxcala).
 [I] MIG-I091 content/Items/Blocks/Cores/block_core_cross.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Cores/block_core_small.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Hulls/block_hull.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate.
@@ -328,15 +332,15 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [W] MIG-W070 content/Loot Tables/BaseLootTable.json lootItems[18].item: Ship loot entry dropped: SPEC-50 LootEntry holds only ItemDefinition: ship_fighter
 [W] MIG-W071 content/Loot Tables/CreativeModeLootTable.json lootItems[11].item: Null legacy loot item dropped; no replacement item is inferred.
 [I] MIG-I091 content/Loot Tables/StartShipsTable.json ships: Ship table intentionally not converted: StartShipsTable (5 legacy ship references). SPEC-01/50 own new-game loadouts.
-0 errors, 83 warnings, 115 infos
+0 errors, 83 warnings, 116 infos
 ```
 
 ## Summary
 
-0 errors, 83 warnings, 115 infos
+0 errors, 83 warnings, 116 infos
 
 Created: 0
 Updated: 0
-Unchanged: 79
+Unchanged: 82
 SkippedHandEdited: 23
 Failed: 0
