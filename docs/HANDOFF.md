@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Loader/event wiring authored:**3c776282 adds Burst body-event queue;55d6173e wires T2 creation/ticks/capture/retirement and destruction into loader, preserves hulk anchors and Q359 arrival-first loading. SYS-005 worker2559ea7 integrated14a0989e. Source uncompiled/unaccepted; finish shutdown retirement (cleanup entities/pins), App registration and5 T2 cases before batch validation. No Unity active. Combat/economy delivered, presentation lifetime review active213. Previous turn transitions were progress.
+
 - **T2 transitions / converter repair integrated:**6f62e17c adds ordered bounded loads, hysteresis, capture-before-retire and delayed source release; unfinished writable sources transfer to delta before retirement. NAR-016 worker c9671a1e integrated88b5a98 (preserve compiler graphs during field writes/selective recompilation). All remain uncompiled/unaccepted pending loader/events/scene wiring and focused batch. No Unity active. SYS-005 worker active248; lifetime review active213; combat delivery235 awaits acceptance/next ready work. Previous turn spawn helper was progress.
 
 - **Body-grid spawn path authored:** SYS-0066ee18d76 adds procedural source caching, writable small-body clones, delta sources, blueprint borrows, stationary grid profiles, faction/interaction tags and hulk restoration. Ownership capture2e2c1117 remains unwired; hysteresis/events/scene composition/five cases still open. No compile or acceptance claim; no Unity active. Combat repairs converter stability, economy implements SYS-005, presentation assigned bounded read-only source-lifetime review. Previous turn authored capture (progress).

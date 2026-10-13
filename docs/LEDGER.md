@@ -1064,6 +1064,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-006 loader wiring / SYS-005 integration — astra (gpt-6)
+
+- 3c776282 authors BodyGridWatchSystem with an OnCreate-owned persistent queue and Burst single-job core-loss/depletion reporting.55d6173e wires loader T2 ticks, capture, retired sources and body events; existing station grids remain physical hulks when destruction is marked. Destroyed voxel bodies retain anchors for persisted hulk restoration. Q359 resolves pre-player scene readiness using actual arrival position.
+- SYS-0052559ea7 integrated14a0989e: analytic tick-time orbits preserve rotation/scale and depend on current origin. Two required cases authored (spec-required: 2, extra: 0), not run yet.
+- Entire source batch remains uncompiled/unaccepted. Complete shutdown retirement for cleanup entities/pins, actual App registration and the five SYS-006 cases (spec-required: 5, extra: 0). No Unity operation. NAR-016 actual raw-byte stability rerun and repaired FND-012 single case remain in the pending batch. Previous turn transition code was progress.
+
 ### 2026-10-13 — SYS-006 transitions / NAR-016 repair integrated — astra (gpt-6)
 
 - 6f62e17c adds T2Streamer ordered body-distance checks, configured spawn cap, unload hysteresis and capture-before-despawn. Retired sources remain until roots/read pins are gone; the same body cannot reload before retirement. Writable clones transfer to delta even during partial spawn, preserving subsequent owner writeback (review edge identified by presentation worker).
