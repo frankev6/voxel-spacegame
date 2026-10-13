@@ -13,8 +13,7 @@ using Unity.Profiling;
 namespace Game.Simulation.Power
 {
     /// <summary>SPEC-22 §5.4 shared functional/mass/modifier stats followed by power/shield module totals.</summary>
-    [BurstCompile, UpdateInGroup(typeof(GameplayPrePhysicsGroup))]
-    // TODO(PWR-005): add UpdateAfter(PowerAllocationSystem) when the prepared allocator joins this integration branch.
+    [BurstCompile, UpdateInGroup(typeof(GameplayPrePhysicsGroup)), UpdateAfter(typeof(PowerAllocationSystem))]
     public partial struct ShipStatsAggregateSystem : ISystem
     {
         static readonly ProfilerMarker AggregateMarker = new ProfilerMarker("ShipStatsAggregateSystem.Aggregate");
