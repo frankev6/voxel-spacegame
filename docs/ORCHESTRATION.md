@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **WPN-008 acceptance authored:** isolated `task/WPN-008-projectile-step` now includes all seven required ProjectileStepTests (spec-required: 7, extra: 0), scheduled production step/compaction with real spawned cells and shield geometry. Coverage: attribution/fields, shield-first and explosive surface events, fuse endpoint, moving-target turn rate, stable 137-row compaction, 193-event output comparison at 1/max job workers. No Unity run yet. Next review fixtures, stop live Editor only for integration/validation, combine compatible deliveries if ready.
+
 - **WPN-008 isolated implementation:** head15d25437 follows beff6f4a and a1fc7218: shift, parallel 64-row hit/expiry streams, homing, hull/shield/celestial handling, audio/visual effects and stable compaction wired. Q65–66 resolve explicit batch capacity and antiparallel rotation, mirrored Q280. Seven required tests, compilation and validation still pending. Primary main/live Editor unchanged. Worker WPN-018 notified Q63 already occupied; reserved Q64 and Q67 onward, lead Q65–66.
 
 - **WPN-008 implementation started:** existing isolated lead checkout now `task/WPN-008-projectile-step` from main; commit beff6f4a adds stable compaction/batch-counter reduction and origin-shift jobs. Parallel step, homing/hull/shield/fuse effects, scheduling and seven required tests remain. No Unity validation yet. Prepared QST/MIG branch ee53fcfd preserved. Installed Collections IJobParallelForBatch has only explicit-length scheduling, so resolve the spec deferred-length assumption before wiring jobs; fixed upper-bound lanes can read actual row length only inside the job without a main-thread sync.
