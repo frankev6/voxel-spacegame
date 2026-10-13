@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | pending | pending | PHY-014 | launching | WPN-017, then ready weapon/harness tasks |
-| Power and abilities | gpt-6.1-sol high | pending | pending | PWR-001 | launching | PWR-002, ABL-001 after integration |
-| Presentation and content | gpt-6.1-sol high | pending | pending | MIG-011 | launching | CAM-008, audio content after AUD-006 |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | PHY-014 | implementing | WPN-017, then ready weapon/harness tasks |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | PWR-001 | implementing | PWR-002, ABL-001 after integration |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | MIG-011 | implementing | CAM-008, audio content after AUD-006 |
 
 ## Dispatch procedure
 
