@@ -893,6 +893,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 300 | SPEC-50 Q23: inventory boundary defaults | Resolved: default capacity20; invalid/nonpositive mutations fail or give nothing. Commit complete state before notifications, reject callback mutations but allow read-only refresh. Preserve distinct Missing OriginalIds when merging; use long delta totals, int-representable item totals and bounded shortfall reporting. Atomic overflow fails; Give jettisons excess. Restore validates before mutation; Wallet only notifies real balance changes. | Tech lead |
 | 301 | SPEC-23 Q24: fleet leader replacement representation | Resolved: promoted root retains FleetMember with null Leader and thinks as a lone leader; followers retain slots/formations. Lowest slot then PersistentId/entity index breaks ties. Incomplete/hulk roots excluded. Invalid slot leaves prior goal. | Tech lead |
 | 302 | SPEC-23 Q25: fleet arrival envelope | Resolved: member arrival/braking radius=min(configured radius,5m), preserving lone-ship radius and real thruster control; required formation envelope is15m. | Tech lead |
+| 303 | SPEC-23 Q23 / ADR-0071: static station command composition | Resolved: AiSetup adds ShipCommand with Station AiBrain, no flight/propulsion components. Station tests exercise actual profile conversion, authored turret and power/aim/fire paths. | Tech lead |
 
 
 ## Measurements

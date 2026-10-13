@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AI-009 | assigned from main c1b9a0e2; station turret integration | AI follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AI-009 | delivered4504c914, integratedaed6fcbd; focused validation wait | AI-015 after closeout |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-005 | claimed after inventory acceptance147c34f0; merchant implementation | economy follow-ups |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AI-010 | assigned from main c1b9a0e2; four combat scenarios | AI follow-ups |
 
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Turret delivery integrated:**4504c914 reviewed/cherry-picked aed6fcbd; spec merge preserves Q23/24/25, turret Q23 mirroredQ303. Combined FND-022/turret compile11012 active in open stopped Editor17922. Prior FND compile36848 passed clean. Next focused TurretAiTests and RealFire_DamagesStationaryTarget plus AiSetupTests.Anchor_FromPose; no broad run. Combat worker notified next AI-015 after closure, power/presentation remain active124/151. Previous turn integrated player fix and repaired namespace collision (progress).
 
 - **Permanent spawn fix integrated:** stopped manual Play through CLI for validation; Editor17922 remains open. Primary `task/FND-022-combat-integration` cherry-picks isolated31ad6c36 as92371889. Live compile9185 failed because fixture property Game shadows the namespace; fixedff6a2704 with global qualification. Recompile36848 active; next focused GPU/live `FiringRangeTests.RealFire_DamagesStationaryTarget`, then restart range and NPC fixture without manually supplying player allegiance. Turret worker informed reviewed composition is compatible and next batch awaits delivery; latest active142/123/150. Gameplay screenshots after-enemy-fire/combat-overview saved (enemy outside camera; do not claim otherwise). Previous turn implemented isolated fix and verified attributed enemy damage (progress).
 
