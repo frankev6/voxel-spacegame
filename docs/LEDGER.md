@@ -906,7 +906,7 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 ### 2026-10-13 — DMG-011 / second batch integration in progress — astra (gpt-6)
 
 1. Physical chunk pool, exact mass/inherited velocity, greedy colliders, expiry and deferred disposal implemented; five required tests pass, including pool eviction safety repair. Palette-lit chunk rendering compiles but still needs live verification. Test count: spec-required: 5, extra: 0. Zero optimization passes.
-2. WPN-017, CAM-008, PHY-022, PWR-002, ABL-001, HUD-001 and UI-008 integrated; all remain in-progress pending combined validation. Lead fixed PHY-022 test NativeArray ownership alias after compile failure; subsequent compile passes. Full-suite results pending.
+2. WPN-017, CAM-008, PHY-022, PWR-002, ABL-001, HUD-001 and UI-008 integrated; all remain in-progress pending combined validation. Lead fixed PHY-022 test NativeArray ownership alias after compile failure; subsequent compile passes. First full EditMode 886/1/1: static audit rejected 231 HUD cached notification fields; lead documented their readonly property-name-only lifetime (`f847997`) without changing audit coverage. Full rerun pending.
 3. Same three workers reassigned to NAR-001, CAM-010 and CAM-009. Q206–210 mirror worker spec decisions and retained EDT-001/UI-012 work. No owner gate. Exact dispatch and commit evidence in ORCHESTRATION.md.
 
 ### 2026-10-13 — PHY-014, PWR-001, MIG-011 batch complete — astra (gpt-6)
