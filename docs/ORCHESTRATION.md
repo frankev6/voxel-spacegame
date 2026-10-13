@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AI-015 | claimed after turret/fleet closure; assigned fleet/swarm scenarios | eligible standard work |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | SYS-003 | claimed after merchant closure9424cf39; structure builders | streaming follow-ups |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AI-010 | assigned from main c1b9a0e2; four combat scenarios | AI follow-ups |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-018 | claimed31d24070 after AI-010 acceptance; save/load/jump harness | eligible standard work |
 
 ## Operating rules
 
@@ -19,6 +19,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Combat scenarios closed / worker recycled:** AI-010c45ab392 accepted (clean compile11340;24943 four passed in1.01s), closeout6c9d6fb8 FF main. DEV-018 claimed31d24070 and assigned to exact presentation thread. Lead isolated NAR-0036f1f72a3 adds typed comparison nodes; emission/factories/tests remain. Editor17922 open/stopped, no active validation. AI-015151/SYS-003163 continue. Previous turn implemented compiler diagnostics/nodes (progress).
 
 - **Compiler graph staging:** isolated NAR-003852f9299 adds fact/ref suggestions, saturated constant-expression range checks and dependency equality; f6194df4 adds serialized primitive nodes with binding/dependency traversal. Evaluation explicitly remains TODO(NAR-004), now reflected in ledger Notes; function/effect nodes and emission still pending. No compilation claim or test run. Primary remains AI-010 integration branch; workers150/162/133 active, fixture repair uses aggregate thrust modifier without increasing bounds. Previous turn implemented type checker (progress).
 
