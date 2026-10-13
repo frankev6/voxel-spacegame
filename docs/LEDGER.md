@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 62 | 5 | 0 | 0 | 24 | 0 | 91 | 3 |
+| M2 | 62 | 2 | 0 | 0 | 27 | 0 | 91 | 8 |
 | M3 | 175 | 3 | 0 | 0 | 2 | 0 | 180 | 8 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -219,7 +219,7 @@
 | FND-020 | Playable stationary-target shooting and physical breakup | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-017, FND-018, FLT-001, DMG-001, WPN-001, VFX-001 | yes | done | astra (gpt-6) | 2026-10-12 | 53e61db | Playable station/Space fire; review fixes: bounded integrity, canonical masks, allocation attribution, stronger image checks; default suites green; perf advisory |
 | FND-021 | Automatic aligned test station in World | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-020, SPEC-63 | yes | done | astra (gpt-6) | 2026-10-13 | c3bb396 | Automatic World station at Y=-2 m; idempotent range request; direct World Play verified; spec-required: 1 (existing feature test extended), extra: 0 |
 | DATA-010 | Weapon and ability links on blocks | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M2 | standard | DATA-007, WPN-001, ABL-001 | no | todo |  |  |  |  |
-| PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | in-progress | combat (gpt-6.1-sol) | 2026-10-13 |  |  |
+| PHY-014 | SplitGrace contact suppression | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M2 | standard | PHY-002, DMG-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | 094f430 | Pair-specific grace; three required tests. Full EM 861/0/1, PM 121/0/53; compile clean. |
 | DMG-002 | DamageStreams and DamageStreamsSystem | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-001, SPEC-10, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-12 | e3377fa | Four channels, owned phase memory, stable explosion drains; 5 tests; Q179–180 |
 | DMG-003 | Damage config asset and boot hookup | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-001 | yes | done | astra (gpt-6) | 2026-10-12 | c1d6af2 | Shipped config/4 damage types/4 armor classes, validation and boot-owned table; 3 tests; Q181 |
 | DMG-004 | Cell access, quantization and RemoveCell | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-002 | yes | done | astra (gpt-6) | 2026-10-12 | 8b20d15 | Cell writes, DDA, deterministic quantization and debris kinematics; 10 required tests pass |
@@ -229,17 +229,17 @@
 | DMG-008 | Brick connectivity summaries | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | done | astra (gpt-6) | 2026-10-12 | 36e838d | Scanline brick flood, instance unions, touched checks and deterministic warm-up; 1000 reference masks; three required tests |
 | DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | yes | done | astra (gpt-6) | 2026-10-12 | 1cf796e | Parallel hybrid race, canonical masks, retained seeds and forced retries; 300 reference structures; live Space cut detached 205 cells |
 | DMG-010 | SplitSystem: plan, particle tier, deferred detach and debris FX | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-009, VFX-001, AUD-001 | yes | done | astra (gpt-6) | 2026-10-12 | e3045a8 | Canonical tier/budget planning, next-tick particles, complete deferred reseeding, debris/SFX events; four required tests; existing hulk path retained |
-| DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | no | todo |  |  |  | partial in FND-020: hulk-body scaffolding; DMG-010 classifies and defers chunks / chunk pool, colliders, lifetime and required tests |
+| DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | yes | todo |  |  |  | partial in FND-020: hulk-body scaffolding; DMG-010 classifies and defers chunks / chunk pool, colliders, lifetime and required tests |
 | DMG-012 | Hulk grids from splits | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-011, FND-001, SPEC-12 | no | todo |  |  |  | partial in FND-020: hulk cells/instances, bodies and functional transfer / remaining lifecycle, integration and required tests |
 | DMG-013 | ShipDeathSystem, despawn dissolve and the destroy pass | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-012 | no | todo |  |  |  | partial in FND-020: initial core-loss and destroyed-instance cleanup / despawn dissolve, final death presentation and required tests |
 | DMG-014 | Determinism hash and frame-rate determinism tests | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-013, TST-001 | no | todo |  |  |  | partial in DMG-006: CellStateHasher / integrated 600-tick frame-rate and worker-count scenarios |
 | DMG-015 | Regression scenarios R25/R26 and soak | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014 | no | todo |  |  |  |  |
 | DMG-016 | Performance gates | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-014 | no | todo |  |  |  |  |
 | DMG-017 | Harness commands | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014, DEV-001 | no | todo |  |  |  |  |
-| FLT-012 | Power and stat integration (M2) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, PWR-001 | no | todo |  |  |  |  |
+| FLT-012 | Power and stat integration (M2) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, PWR-001 | yes | todo |  |  |  |  |
 | FLT-013 | Owner flight-control correction before the firing range | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, FLT-009, SPEC-03 | yes | done | astra (gpt-6) | 2026-10-12 | 1bc23e8 | Shift strafe, Ctrl boost, gentle coast, bounded assist; live Fighter verified; Q182 |
 | WPN-002 | Weapon content: definitions, blob, boot singletons | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, SPEC-04 | no | todo |  |  |  | partial in FND-020: plasma definitions, blob and boot singleton / faction relations and full validation |
-| WPN-003 | CombatHitTest | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-001, SPEC-10, AI-001, PWR-001 | no | todo |  |  |  | partial in FND-020: ordered-grid broadphase and current-cell raycast / spatial hash, shields and required tests; partial in VFX-004: world contact normal from cell face / spatial hash, shields, shape-accurate collision and required tests |
+| WPN-003 | CombatHitTest | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-001, SPEC-10, AI-001, PWR-001 | yes | todo |  |  |  | partial in FND-020: ordered-grid broadphase and current-cell raycast / spatial hash, shields and required tests; partial in VFX-004: world contact normal from cell face / spatial hash, shields, shape-accurate collision and required tests |
 | WPN-004 | WeaponInitSystem and mounts | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-002, SPEC-10, SPEC-20 | no | todo |  |  |  | partial in FND-020: installed mount initialization and reparenting / complete spec validation and required tests |
 | WPN-005 | PlayerTargetingSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, AI-001, SPEC-20 | no | todo |  |  |  |  |
 | WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | no | todo |  |  |  | partial in FND-020: manual aim and arcs / targeting, lead, autofire and required tests |
@@ -254,8 +254,8 @@
 | WPN-015 | Harness hooks | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | no | todo |  |  |  |  |
 | WPN-017 | ShipDestroyed payload and bridge | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, DMG-001, CORE-001 | yes | in-progress | combat (gpt-6.1-sol) | 2026-10-13 |  | Claimed centrally under ADR-0062; worker implementation, lead validation. |
 | WPN-018 | Weapon power demand and weapon stats | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, WPN-007, PWR-001 | no | todo |  |  |  |  |
-| PWR-001 | Public contract types | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | CORE-001, DATA-001, VOX-001, DMG-001 | yes | in-progress | power (gpt-6.1-sol) | 2026-10-13 |  | partial in VFX-015: ShieldState/ShieldFlags/ShieldRipple contracts / remaining power contracts and all simulation still open |
-| PWR-002 | Shield maths | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001 | no | todo |  |  |  |  |
+| PWR-001 | Public contract types | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | CORE-001, DATA-001, VOX-001, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | eeed571 | Canonical declarations; three required tests; Q202 deferred allocator ordering. Full batch green. |
+| PWR-002 | Shield maths | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001 | yes | todo |  |  |  |  |
 | PWR-003 | Tuning definition, baker and spawn helper | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | PWR-001, SPEC-04 | no | todo |  |  |  |  |
 | PWR-004 | Registration and `PowerInitSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-003, WPN-001, VOX-001, SPEC-10 | no | todo |  |  |  |  |
 | PWR-005 | `PowerAllocationSystem` | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | frontier | PWR-004, ABL-001 | no | todo |  |  |  |  |
@@ -275,7 +275,7 @@
 | AI-010 | AI combat scenarios | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007, AI-008, SPEC-21, SPEC-22 | no | todo |  |  |  |  |
 | AI-011 | AI determinism | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010 | no | todo |  |  |  |  |
 | AI-012 | AI and hash performance | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010, TST-001 | no | todo |  |  |  |  |
-| ABL-001 | Public contract types | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | CORE-001, DATA-001, PWR-001 | no | todo |  |  |  |  |
+| ABL-001 | Public contract types | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | CORE-001, DATA-001, PWR-001 | yes | todo |  |  |  |  |
 | ABL-002 | Ability content and boot singleton | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-001, SPEC-04 | no | todo |  |  |  |  |
 | ABL-003 | AbilitySystem | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | frontier | ABL-002, SPEC-20, SPEC-22 | no | todo |  |  |  |  |
 | ABL-004 | Effect systems | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-003, SPEC-22 | no | todo |  |  |  |  |
@@ -288,7 +288,7 @@
 | VFX-006 | Projectile tracers | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002, WPN-001, CORE-001 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | Guarded indexed tracer gather, origin correction, instanced shader; 5k median 0.0385 ms; spec-required: 6, extra: 0 |
 | VFX-007 | Beams clipped at the hit point | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003, WPN-001 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | Hit-clipped instanced beams and six-frame impact sparks; spec-required: 3, extra: 0 |
 | VFX-008 | Thruster plumes | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, FLT-001 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | State-driven white-blue plumes, rotated nozzles and hulk suppression; spec-required: 4, extra: 0 |
-| VFX-009 | Shield shells and ripples | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, PWR-001, CORE-001 | no | done | astra (gpt-6) | 2026-10-13 | b575efe | Ellipsoid shells, eight timed ripples and hit flash; PWR gameplay remains open (ADR-0060); spec-required: 3, extra: 0 |
+| VFX-009 | Shield shells and ripples | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, PWR-001, CORE-001 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | Ellipsoid shells, eight timed ripples and hit flash; PWR gameplay remains open (ADR-0060); spec-required: 3, extra: 0 |
 | VFX-010 | Chunk-body dissolve hook | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, DMG-001 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | Sole ChunkDissolve writer derives lifetime from EndTick; spec-required: 1, extra: 0 |
 | VFX-011 | Quality levels and the settings hook | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | All quality caps applied without buffer reallocation; spec-required: 2, extra: 0 |
 | VFX-012 | Regression and budget tests (02-C29, GC, upload) | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-005, VFX-006, VFX-007 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | Warmed real hit upload 0 B GC, fixed object count; upload timing misses advisory; spec-required: 4, extra: 0 |
@@ -305,7 +305,7 @@
 | TST-006 | Ten-minute combat soak | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | standard | TST-005, SPEC-70 | no | todo |  |  |  |  |
 | MIG-009 | Weapon converter and weapon links | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-006, MIG-011, WPN-001, SPEC-04 | no | todo |  |  |  |  |
 | MIG-010 | Ability converter and ability grants | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-006, ABL-001, SPEC-04 | no | todo |  |  |  |  |
-| MIG-011 | Audio cue converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-004, AUD-001 | yes | in-progress | content (gpt-6.1-sol) | 2026-10-13 |  |  |
+| MIG-011 | Audio cue converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-004, AUD-001 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | ca37e33 | 20 generated cues; lead fixture fix ed77024; one required + three migration safety tests. Full batch green. |
 | FND-011 | Load flow end to end (R28) | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | frontier | FND-010, SPEC-30, SPEC-31 | no | todo |  |  |  |  |
 | FND-013 | Blueprint Lab entry and exit | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | frontier | FND-011, EDT-001 | no | todo |  |  |  |  |
 | FND-015 | Boot from any scene and the defeat flow | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | standard | FND-011, HUD-001 | no | todo |  |  |  |  |
@@ -893,6 +893,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — PHY-014, PWR-001, MIG-011 batch complete — astra (gpt-6)
+
+1. Full EditMode **861 passed, 0 failed, 1 skipped**, PlayMode **121 passed, 0 failed, 53 skipped**, both exit 0; compile zero CS warnings. Evidence `Logs/playtest/orchestration-batch1/{editmode,playmode}.xml`. PHY-014 spec-required: 3, extra: 0; PWR-001 spec-required: 3, extra: 0; MIG-011 spec-required: 1, extra: 3.
+2. Migration generated all 20 mapped audio cues and updated database/manifest/report; legacy volumes and clip references verified by required real-export test. Audio remains development-only under existing provenance policy. No tuning or new owner gate.
+3. Split-contact grace is now validated, unblocking chunk work. Next batch: delivered WPN-017/CAM-008, then worker PHY-022/HUD-001/UI-008. QualitySettings backup restored; unrelated original serialization delta remains excluded.
 
 ### 2026-10-13 — First worker batch integrated, validation pending — astra (gpt-6)
 
