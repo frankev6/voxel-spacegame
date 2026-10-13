@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b28f458b2ed2472c8a0a0f83aaaa2ad7, type: 3}
+  m_Name: ShipEditorConfig
+  m_EditorClassIdentifier: Game.ShipEditor::Game.ShipEditor.Data.ShipEditorConfig
+  MaxCells: 1000000
+  MaxExtentCells: {x: 256, y: 128, z: 256}
+  BuildLimitMin: {x: -512, y: -256, z: -512}
+  BuildLimitMax: {x: 511, y: 255, z: 511}
+  HistoryBudgetBytes: 67108864
+  HistoryMaxEntries: 4096
+  SplitCheckBudgetCells: 8192
+  MaxBatchCells: 262144
+  FillMaxCells: 65536
+  LineMaxCells: 256
+  SyncRemeshBricksPerFrame: 8
+  AsyncRemeshBricksPerFrame: 64
+  OverlayMaxInstances: 65536
+  PreviewOutlineThreshold: 4096
+  PresenterRefreshSeconds: 0.1
+  MaxPickSteps: 4096
+  BrickMaterial: {fileID: 0}
+  BrickXRayMaterial: {fileID: 0}
+  OverlayMaterial: {fileID: 0}
+  ValidColor: {r: 0.239215686, g: 0.839215686, b: 0.639215686, a: 1}
+  InvalidColor: {r: 1.000000000, g: 0.360784314, b: 0.478431373, a: 1}
+  ClearanceColor: {r: 1.000000000, g: 0.760784314, b: 0.278431373, a: 1}
+  MirrorGhostColor: {r: 0.560784314, g: 0.690196078, b: 1.000000000, a: 1}
+  SelectionColor: {r: 0.223529412, g: 0.835294118, b: 1.000000000, a: 1}
+  DisconnectedColor: {r: 1.000000000, g: 0.760784314, b: 0.278431373, a: 1}
+  DamagedColor: {r: 1.000000000, g: 0.360784314, b: 0.478431373, a: 1}
+  MirrorPlaneColor: {r: 0.650980392, g: 0.933333333, b: 1.000000000, a: 1}
+  GridColor: {r: 0.164705882, g: 0.231372549, b: 0.333333333, a: 1}

@@ -1,8 +1,29 @@
 namespace Game.UI.Views
 {
-    /// <summary>Canonical SPEC-51 §4.4 identity staged for the SPEC-61 §6 editor-screen constructor (SPEC-61 Q20).</summary>
+    /// <summary>Implements SPEC-51 §4.4. Editor commands; implemented by the App presenter.</summary>
     public interface IShipEditorCommands
     {
-        // TODO(EDT-001): add the SPEC-51 §4.4 tool, palette, history, symmetry, slice, issue, blueprint, commit and leave methods, including OnBackPressed.
+        void SelectTool(int toolId);
+        void SelectBlock(string blockId);
+        void SelectColor(int index);
+        void SelectCategory(int index);
+        void SetSearch(string text);
+        void Undo();
+        void Redo();
+        void ToggleMirror(int axis); // 0 X, 1 Y, 2 Z
+        void NudgeMirrorPlane(int axis, int halfCells);
+        void ToggleSlice();
+        void StepSlice(int delta);
+        void ToggleXRay();
+        void CycleBoxMode();
+        void FocusIssue(int index);
+        void RemoveFloatingParts();
+        void RevertAll();
+        void SaveBlueprint();
+        void OpenBlueprintBrowser();
+        void RequestCommit();
+        void RequestLeave();
+        void OpenSettings();
+        bool OnBackPressed(); // cancel chain; always returns true
     }
 }
