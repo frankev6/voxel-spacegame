@@ -68,6 +68,8 @@ namespace Game.Tests.EditMode.Presentation
         {
             Contact(10); var v = Tick(); Assert.AreEqual(HudFlags.None, v.Flags);
             Assert.AreEqual(0, v.FrameIndex); Assert.AreEqual(0, v.RadarVersion); Assert.AreEqual(0, Radar().Length);
+            Player(); var duplicate = Player(); Assert.AreEqual(HudFlags.None, Tick().Flags);
+            Assert.AreEqual(0, Radar().Length); em.DestroyEntity(duplicate); Assert.IsTrue((Tick().Flags & HudFlags.HasShip) != 0);
         }
         [Test] public void ShipValues_Copied()
         {
@@ -120,7 +122,11 @@ namespace Game.Tests.EditMode.Presentation
         }
         [Test] public void Radar_BeyondRange_Clamped()
         {
-            Player(); Contact(3000); Tick(); var b = Radar()[0]; Assert.AreEqual(2000, math.length(b.OffsetXZ), .001f); Assert.AreEqual(2, b.Flags & 2);
+            Player(); Contact(3000);
+            var anchor = em.CreateEntity(typeof(Interactable), typeof(StarSystemBody), typeof(LocalToWorld));
+            em.SetComponentData(anchor, new LocalToWorld { Value = float4x4.Translate(new float3(4000, 0, 0)) });
+            Tick(); Assert.AreEqual(2, Radar().Length); Assert.AreEqual(3, Radar()[1].Kind);
+            var b = Radar()[0]; Assert.AreEqual(2000, math.length(b.OffsetXZ), .001f); Assert.AreEqual(2, b.Flags & 2);
         }
         [Test] public void Radar_RefreshRate10Hz()
         {
@@ -130,7 +136,14 @@ namespace Game.Tests.EditMode.Presentation
         }
         [Test] public void Hulk_FlagSet()
         {
-            var p = Player(); em.AddComponent<Hulk>(p); Assert.IsTrue((Tick().Flags & HudFlags.IsHulk) != 0);
+            var p = Player(); em.AddComponentData(p, new ShipStats { MassFraction = .8f });
+            em.AddComponentData(p, new ShipPower { Stored = 50, Capacity = 100 });
+            em.AddComponentData(p, new ShieldState { Hp = 20, MaxHp = 40, Active = 1 }); Tick();
+            em.AddComponent<Hulk>(p); em.SetComponentData(p, default(ShipPower)); em.SetComponentData(p, default(ShieldState));
+            em.SetComponentData(p, new ShipStats { MassFraction = .1f });
+            var v = Tick(.1); Assert.IsTrue((v.Flags & HudFlags.IsHulk) != 0);
+            Assert.AreEqual(.8f, v.Hull01); Assert.AreEqual(50, v.Energy); Assert.AreEqual(100, v.EnergyMax);
+            Assert.AreEqual(20, v.ShieldHp); Assert.AreEqual(40, v.ShieldMax); Assert.AreEqual(1, v.ShieldStatus);
         }
     }
 }

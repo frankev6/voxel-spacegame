@@ -1,3 +1,4 @@
+using Game.Core;
 using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Galaxy.Bodies;
@@ -34,7 +35,9 @@ namespace Game.Presentation.Systems
         static readonly ProfilerMarker WeaponsMarker = new ProfilerMarker(ProfilerCategory.Scripts, "HudSnapshotSystem.Weapons");
         static readonly ProfilerMarker RadarMarker = new ProfilerMarker(ProfilerCategory.Scripts, "HudSnapshotSystem.Radar");
         Entity snapshot;
-        EntityQuery weapons, grids, bodies, points;
+        EntityQuery players, weapons, grids, bodies, points, bodyPoints;
+        Entity lastLivePlayer;
+        HudSnapshot lastLiveMeters;
         ComponentTypeHandle<FunctionalBlock> blockHandle;
         ComponentTypeHandle<WeaponState> weaponHandle;
         ComponentTypeHandle<LocalToWorld> transformHandle;
@@ -56,10 +59,12 @@ namespace Game.Presentation.Systems
             snapshot = state.EntityManager.CreateEntity(typeof(HudSnapshot));
             var radar = state.EntityManager.AddBuffer<HudRadarBlip>(snapshot); radar.Capacity = 64;
             state.RequireForUpdate<GameplayActive>();
+            players = SystemAPI.QueryBuilder().WithAll<PlayerShip>().Build();
             weapons = SystemAPI.QueryBuilder().WithAll<FunctionalBlock, WeaponState>().Build();
             grids = SystemAPI.QueryBuilder().WithAll<VoxelGrid, Allegiance, LocalToWorld>().WithNone<PlayerShip>().Build();
             bodies = SystemAPI.QueryBuilder().WithAll<StarSystemBody, SpatialBody, LocalToWorld>().WithNone<VoxelGrid, PlayerShip>().Build();
             points = SystemAPI.QueryBuilder().WithAll<Interactable, LocalToWorld>().WithNone<VoxelGrid, StarSystemBody, PlayerShip>().Build();
+            bodyPoints = SystemAPI.QueryBuilder().WithAll<Interactable, StarSystemBody, LocalToWorld>().WithNone<VoxelGrid, SpatialBody, PlayerShip>().Build();
             blockHandle = state.GetComponentTypeHandle<FunctionalBlock>(true);
             weaponHandle = state.GetComponentTypeHandle<WeaponState>(true);
             transformHandle = state.GetComponentTypeHandle<LocalToWorld>(true);
@@ -80,8 +85,11 @@ namespace Game.Presentation.Systems
 
         public void OnUpdate(ref SystemState state)
         {
-            if (!SystemAPI.TryGetSingletonEntity<PlayerShip>(out var player))
+            int playerCount = players.CalculateEntityCount();
+            if (playerCount != 1)
             {
+                if (playerCount > 1) GameLog.WarnOnce("HUD.MultiplePlayers", "UI", "Multiple player ships; hiding ship HUD until exactly one remains.");
+                lastLivePlayer = Entity.Null;
                 var empty = SystemAPI.GetComponent<HudSnapshot>(snapshot);
                 empty.Flags = HudFlags.None;
                 SystemAPI.SetComponent(snapshot, empty);
@@ -89,6 +97,7 @@ namespace Game.Presentation.Systems
                 lastRadar = double.NegativeInfinity;
                 return;
             }
+            var player = players.GetSingletonEntity();
             var value = new HudSnapshot { Flags = HudFlags.HasShip, TargetFaction = 255, RadarVersion = radarVersion,
                 FrameIndex = UseTestClock ? TestFrame : (uint)UnityEngine.Time.frameCount };
             float3 position = 0;
@@ -147,6 +156,14 @@ namespace Game.Presentation.Systems
                 }
                 if (SystemAPI.TryGetSingleton<CurrentStarSystemInfo>(out var system)) value.StarSystemIdValue = system.Changing == 1 ? 0 : system.Id.Value;
             }
+            if ((value.Flags & HudFlags.IsHulk) == 0)
+            { lastLivePlayer = player; lastLiveMeters = value; }
+            else if (lastLivePlayer == player)
+            {
+                value.Hull01 = lastLiveMeters.Hull01;
+                value.ShieldHp = lastLiveMeters.ShieldHp; value.ShieldMax = lastLiveMeters.ShieldMax;
+                value.ShieldStatus = lastLiveMeters.ShieldStatus; value.Energy = lastLiveMeters.Energy; value.EnergyMax = lastLiveMeters.EnergyMax;
+            }
             blockHandle.Update(ref state); weaponHandle.Update(ref state); transformHandle.Update(ref state); entityHandle.Update(ref state);
             gridLookup.Update(ref state); allegianceLookup.Update(ref state); snapshotLookup.Update(ref state); radarLookup.Update(ref state);
             using (WeaponsMarker.Auto())
@@ -171,6 +188,7 @@ namespace Game.Presentation.Systems
                         state.Dependency = gather.Schedule(grids, state.Dependency);
                         gather.Kind = 2; state.Dependency = gather.Schedule(bodies, state.Dependency);
                         gather.Kind = 3; state.Dependency = gather.Schedule(points, state.Dependency);
+                        state.Dependency = gather.Schedule(bodyPoints, state.Dependency);
                         state.Dependency = new HudRadarSortJob { Heap = heap, Count = count, Blips = radarLookup, Snapshot = snapshot }.Schedule(state.Dependency);
                         state.Dependency = heap.Dispose(state.Dependency); state.Dependency = count.Dispose(state.Dependency);
                     }
