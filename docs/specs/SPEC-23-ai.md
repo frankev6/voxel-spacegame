@@ -488,11 +488,11 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 - **Do:** Implement §5.4 (including step 8, ability rules) and the `abilityRules` bake in `AiContent`.
 - **Files:** `Assets/Game/Simulation/Ai/{AiDecisionSystem,AiThinkJob}.cs`, `Assets/Game/Tests/EditMode/Simulation/Ai/AiDecisionTests.cs`
 - **Acceptance criteria:**
-  - [ ] Each ship thinks exactly on its stagger ticks (and 6× less often while dormant).
-  - [ ] Target choice prefers nearer hostiles, honours player bias and stickiness, never picks allies, neutrals, hulks or itself.
-  - [ ] State transitions of §5.4 step 4 hold in table-driven tests; leash and return work.
-  - [ ] Friendly-fire block suspends autofire while an ally crosses the line of fire.
-  - [ ] Ability rules: a fleeing ship with a Ready speed-boost slot sets that slot's edge on its think tick; a Blocked or cooling-down slot is never pressed; `AbilityEdgesTick` identifies the production tick. AI-007 owns and verifies delivery into `ShipCommand.Edges` on that tick only (Q20).
+  - [x] Each ship thinks exactly on its stagger ticks (and 6× less often while dormant).
+  - [x] Target choice prefers nearer hostiles, honours player bias and stickiness, never picks allies, neutrals, hulks or itself.
+  - [x] State transitions of §5.4 step 4 hold in table-driven tests; leash and return work.
+  - [x] Friendly-fire block suspends autofire while an ally crosses the line of fire.
+  - [x] Ability rules: a fleeing ship with a Ready speed-boost slot sets that slot's edge on its think tick; a Blocked or cooling-down slot is never pressed; `AbilityEdgesTick` identifies the production tick. AI-007 owns and verifies delivery into `ShipCommand.Edges` on that tick only (Q20).
 - **Tests:** `AiDecisionTests.AbilityRules_Fleeing_Boosts`, `.AbilityRules_RespectsBlocked`, `AiDecisionTests.ThinkSchedule`, `.Target_Scoring`, `.Target_NeverAlly`, `.States_Table`, `.Leash_Return`, `.FriendlyFire_Blocks`, `.Avoidance_ShiftsGoal`.
 
 ### AI-007 — AiSteeringSystem

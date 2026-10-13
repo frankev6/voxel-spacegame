@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **AI-006 closed:** session91602 exited0 with compile clean,1207/0/1 EditMode,170/0/53 PlayMode; soak600.00s/36000ticks/zero leaks. Unity82054/compiler82067 are gone. Original QualitySettings restored/excluded, test debris cleaned after terminal. Next local FF main and claim/dispatch AI-007/008 to existing combat/presentation workers; lead integrates staged VOX-020/ABL-005 batch.
+
 - **Next compatible batch staged without Unity:** existing lead checkout is now `task/VOX-020-ability-integration`, based on primary64eb9098, with VOX-0207cb20474/eb522e0f/4a3914fd/0bdffe92 and ABL-005e7be1baa. Original isolated branchfba40c66 preserved. Clean checkout and docs check pass; compile/tests still pending. Primary full PlayMode91602 remains live and unchanged. Worker2 final delivery verified atcursor136; all workers now have real validation/dependency waits. After current run closes, integrate these scoped commits and mirror SPEC24Q9, alongside newly unlocked AI-007/008 dispatch.
 
 - **ABL-005 delivered:** existing power worker committedafe60010 (four required scenarios, extra:0; clean checkout). Reviewed destruction-loop correction: now compares authored thruster block index and asserts non-thruster survival. SPEC24Q9 preserves60-tick active life/59 next-tick modifier ticks; ledger mirror pending integration. Do not integrate during current full PlayMode91602. Next compatible batch includes this delivery and isolated VOX-020. All three standard workers now have real validation/dependency waits; AI-006 closeout unlocks AI-007/008.

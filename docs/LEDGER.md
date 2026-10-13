@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 18 | 0 | 0 | 0 | 73 | 0 | 91 | 7 |
+| M2 | 16 | 1 | 0 | 0 | 74 | 0 | 91 | 7 |
 | M3 | 144 | 4 | 0 | 0 | 32 | 0 | 180 | 11 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
@@ -268,9 +268,9 @@
 | AI-003 | AI content and boot singletons | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 21337c2 | Profiles/config, boot-owned singleton and catalog; 2 required tests; full batch green |
 | AI-004 | SpatialHashBuildSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-002, SPEC-10, PWR-001, DMG-001 | yes | done | astra (gpt-6) | 2026-10-13 | f99a02c | Guarded parallel proxy gathering, canonical sort/bucket and boot-safe hash lifetime; full 968 EM /145 PM green |
 | AI-005 | AI setup and anchor shift | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-003, SPEC-02 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b0fc87e | Brain registration and origin anchor shift; 4 required tests; live origin producer awaits GAL-009 |
-| AI-006 | AiDecisionSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-004, AI-005, SPEC-20, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, ABL-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Claimed after green combat/effects batch; lead owns serialized validation |
-| AI-007 | AiSteeringSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006 | no | todo |  |  |  |  |
-| AI-008 | PlayerCombatStatusSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006, DMG-001 | no | todo |  |  |  |  |
+| AI-006 | AiDecisionSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-004, AI-005, SPEC-20, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, ABL-001 | yes | done | astra (gpt-6) | 2026-10-13 | 7c50bdaa | Decisions and nine required checks verified; full1207/170 green; Q291-293; steering edge delivery remains AI-007 |
+| AI-007 | AiSteeringSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006 | yes | todo |  |  |  |  |
+| AI-008 | PlayerCombatStatusSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006, DMG-001 | yes | todo |  |  |  |  |
 | AI-009 | Station turret AI | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007 | no | todo |  |  |  |  |
 | AI-010 | AI combat scenarios | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007, AI-008, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-008, PWR-010 | no | todo |  |  |  |  |
 | AI-011 | AI determinism | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010 | no | todo |  |  |  |  |
@@ -994,6 +994,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — AI-006 enemy decisions verified — astra (gpt-6)
+
+- Closed AI-006 (runtime7c50bdaa, content e2f96ddf, tests4fda59f2) after session91602 exited0: compile zero warning CS, full EditMode **1207 passed/0 failed/1 skipped**, PlayMode **170 passed/0 failed/53 skipped**. Evidence `Logs/playtest/ai-decisions/{acceptance.xml,compile-full.log,editmode-full.xml,playmode-full.xml,playmode-full.log}`. Soak600.00s/36000ticks,60 chunks/hulks/rams,36 dissolved/24 silent,peak2/64,zero native leaks.
+- Parallel decisions now own staggered target scoring, hostile validity, engage/flee/return/patrol/hold goals, obstacle clearance, friendly-fire suppression, authored ability rules and tick-stamped requests. Exactly nine required decision tests pass; two existing content checks extended for rule parity/validation. Test count: spec-required:9, extra:0. Zero optimization passes; no live enemy claim until steering and combat integration.
+- Q291-293 mirror SPEC23Q18-20: reject uncatalogued ability rules, resolve fallback/return/clearance boundaries, and retain end-to-end ability-edge command delivery under AI-007 RewritesEveryTick to avoid circular acceptance. No new owner gate or public contract change. Original QualitySettings restored by cp/excluded; orphan test metadata removed only after terminal.
+- Next: existing combat/presentation workers AI-007/008. ABL-005 worker deliveryafe60010 and isolated VOX-020 are staged together ate7be1baa, still unvalidated; lead integrates after closeout. Controls, Space fire, lowered3x station and Nocturne preserved.
+
 
 ### 2026-10-13 — Combat scenarios and ability effects verified — astra (gpt-6)
 
