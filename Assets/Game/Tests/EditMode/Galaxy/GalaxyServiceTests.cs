@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Game.Core;
 using Game.Core.Components;
+using Game.Core.Events;
 using Game.Data.Definitions;
 using Game.Data.Services;
 using Game.Data.Validation;
@@ -59,6 +60,11 @@ namespace Game.Tests.EditMode.Galaxy
             Assert.IsTrue(service.CapturePlayerLocation()); Assert.IsTrue(session.State.HasPlayerLocation);
             Assert.AreEqual(new double3(1e10, 0, -5), session.State.PlayerLocation.PositionM);
             Assert.That(session.State.PlayerLocation.YawRad, Is.EqualTo(.7f).Within(.00001f));
+            session.State.Clear(); EventBus<SessionReset>.Publish(new SessionReset(SessionResetReason.Cleared));
+            service.NewGame(42); EventBus<SessionReset>.Drain();
+            Assert.AreEqual(hash, service.Galaxy.Hash, "A deferred old reset must not clear the new campaign.");
+            session.State.Clear(); EventBus<SessionReset>.Publish(new SessionReset(SessionResetReason.NewGame));
+            EventBus<SessionReset>.Drain(); Assert.IsNull(service.Galaxy, "Sandbox releases generated content.");
         }
         [Test] public void Content_GeneratedOnce()
         {

@@ -32,8 +32,13 @@ namespace Game.App.Session
                 if (Game.Core.Services.TryGet<Game.App.Spawning.ShipSpawnService>(out var spawner))
                 {
                     float3 position = float3.zero; quaternion rotation = quaternion.identity;
-                    if (!session.IsSandbox && Game.Core.Services.TryGet<Game.Galaxy.Services.GalaxyService>(out var galaxy) && galaxy.State.HasPlayerLocation)
+                    if (!session.IsSandbox && Game.Core.Services.TryGet<Game.Galaxy.Services.GalaxyService>(out var galaxy))
                     {
+                        if (!galaxy.State.HasPlayerLocation)
+                        {
+                            // World's restored SimClock exists now; orbit placement uses the saved time.
+                            galaxy.State.PlayerLocation = galaxy.GetStartLocation(); galaxy.State.HasPlayerLocation = true;
+                        }
                         using var origins = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Game.Galaxy.Components.FrameOrigin>());
                         if (origins.IsEmptyIgnoreFilter) throw new InvalidOperationException("Player placement requires FrameOrigin.");
                         var location = galaxy.State.PlayerLocation;

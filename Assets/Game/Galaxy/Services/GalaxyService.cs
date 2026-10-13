@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Game.Core;
 using Game.Core.Components;
+using Game.Core.Events;
 using Game.Simulation.Commands;
 using Unity.Transforms;
 using Game.Data.Services;
@@ -39,6 +40,7 @@ namespace Game.Galaxy.Services
             if (definitions.Count != 1) throw new System.ArgumentException("Exactly one galaxy generation definition is required.", nameof(catalog));
             Definition = definitions[0];
             this.catalog = catalog; this.ticker = ticker; ticker.Register(this);
+            EventBus<SessionReset>.Subscribe(OnSessionReset);
         }
         public int TickOrder => 0;
         public GalaxyDef Galaxy { get; private set; }                   // null until NewGame/OnSessionRestored
@@ -314,6 +316,12 @@ namespace Game.Galaxy.Services
             CheckAlive();
             if (Galaxy == null || !Galaxy.TryGetIndex(id, out _)) throw new KeyNotFoundException("Unknown star system: " + id);
         }
+        void OnSessionReset(SessionReset reset)
+        {
+            // Events are deferred: an old Cleared event must not discard a newer campaign.
+            if (State.Seed == 0 && (reset.Reason == SessionResetReason.Cleared ||
+                reset.Reason == SessionResetReason.NewGame)) ClearGenerated();
+        }
         void ClearGenerated()
         {
             // Jobs read Galaxy's arrays: complete/dispose every outstanding output before disposing it.
@@ -326,8 +334,8 @@ namespace Game.Galaxy.Services
         public void Dispose()
         {
             if (disposed) return;
-            ticker.Unregister(this); ClearGenerated(); liveSink = null; disposed = true;
+            EventBus<SessionReset>.Unsubscribe(OnSessionReset); ticker.Unregister(this); ClearGenerated(); liveSink = null; disposed = true;
         }
-        // TODO(GAL-008): production composition/session binding and six required acceptance cases.
+        // Streamed scene bodies and PLOC restoration remain owned by SPEC-31.
     }
 }

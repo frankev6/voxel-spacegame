@@ -142,6 +142,12 @@ namespace Game.App.Boot
             Save.AttachContext(Session); Save.Register(new SessionSaveParticipant(Session));
             Register(Session); Register<IGameFlow>(Session); Register<IPersistentIdAllocator>(Session);
             Step("8 session");
+            var galaxyTicker = new GalaxyFrameTicker(); Register(galaxyTicker);
+            var campaignGalaxy = Push(new GalaxyService(Content.Catalog, Session.Galaxy, world, galaxyTicker));
+            Register(campaignGalaxy); Session.BindGalaxy(campaignGalaxy);
+            Save.Register(new GalaxySaveParticipant(Session.Galaxy, Content.Catalog));
+            // TODO(SYS-004/SYS-009): install loader and PLOC before claiming full world/pose restore.
+
             Session.BindFleet(Blueprints, Registry, Content.Catalog); Save.Register(Session.FleetParticipant);
             Register(Session.Fleet);
             var rangeConfig = Content.Catalog.Get<FiringRangeConfigDefinition>(new ContentId("config_firing_range"));

@@ -79,6 +79,8 @@ namespace Game.App.Session
         internal bool IsSandbox { get; private set; }
         internal bool SpawnPlayerInWorld { get; private set; } = true;
         public FleetModel Fleet { get; }
+        public Game.Galaxy.Data.GalaxyState Galaxy { get; } = new();
+        Game.Galaxy.Services.GalaxyService galaxyService;
         internal FleetSaveParticipant FleetParticipant { get; private set; }
         internal PlayerShipSpawner PlayerSpawner { get; private set; }
         VoxelStructureRegistry fleetRegistry;
@@ -98,8 +100,15 @@ namespace Game.App.Session
             flow.BindSession(this);
             flow.RegisterReady(this);
             RegisterWriteback(new SimClockWriteback(world, value => UniversalTime = value));
-            // TODO(GAL-008): bind GalaxyService and GalaxyState; M1 enters World without streaming.
+            // Composition binds the session-owned galaxy state after constructing this session.
             // Composition binds the existing blueprint library/registry through BindFleet.
+        }
+
+        internal void BindGalaxy(Game.Galaxy.Services.GalaxyService galaxy)
+        {
+            if (galaxyService != null) throw new InvalidOperationException("Galaxy already bound");
+            if (galaxy == null || !ReferenceEquals(galaxy.State, Galaxy)) throw new ArgumentException("Galaxy must use this session's state", nameof(galaxy));
+            galaxyService = galaxy;
         }
 
         internal void BindFleet(BlueprintLibrary blueprints, VoxelStructureRegistry registry, ContentCatalog catalog)
@@ -167,7 +176,12 @@ namespace Game.App.Session
             CampaignSeed = args.GalaxySeed != 0 ? args.GalaxySeed : (ulong)System.Diagnostics.Stopwatch.GetTimestamp() | 1ul;
             UniversalTime = 0; PlaytimeSeconds = 0; IsCreativeSession = args.Creative; PlayerDefeated = false;
             IsSandbox = sandbox; SpawnPlayerInWorld = true;
-            // TODO(GAL-008): clear galaxy state for IsSandbox; otherwise galaxy.NewGame and the canonical start location.
+            Galaxy.Clear();
+            if (!sandbox && galaxyService != null)
+            {
+                galaxyService.NewGame(CampaignSeed);
+                Galaxy.PlayerLocation = galaxyService.GetStartLocation(); Galaxy.HasPlayerLocation = true;
+            }
             if (FleetParticipant != null) Fleet.Add(FleetParticipant.CreateStartShip(), true);
             if (!sandbox) foreach (var initializer in initializers) initializer.InitializeNewGame(args);
             EventBus<SessionReset>.Publish(new SessionReset(SessionResetReason.NewGame));
@@ -179,7 +193,22 @@ namespace Game.App.Session
             var report = save.Restore(loaded.Save);
             PlayerDefeated = false;
             EventBus<SessionReset>.Publish(new SessionReset(SessionResetReason.Loaded));
-            // TODO(GAL-008): galaxy.OnSessionRestored after publishing Loaded, before World entry (Decision 8).
+            if (galaxyService != null)
+            {
+                if (Galaxy.Seed == 0)
+                {
+                    // Older saves predate GLXY. Preserve their fleet and session identity, regenerate the world explicitly.
+                    galaxyService.NewGame(CampaignSeed);
+                    save.ReportRestoreWarning("GAL-W001", "GLXY", "Seed", "Missing galaxy state; regenerated from the saved campaign seed.");
+                }
+                else galaxyService.OnSessionRestored();
+                // TODO(SYS-009): PLOC restores current system/pose; until then use the real start location.
+                if (!Galaxy.HasPlayerLocation)
+                {
+                    Galaxy.CurrentStarSystem = galaxyService.Galaxy.StartStarSystem;
+                    save.ReportRestoreWarning("GAL-W002", "PLOC", "PlayerLocation", "Missing player location; return to the start body when World is ready.");
+                }
+            }
             HasActiveSession = true;
             if (report.ErrorCount > 0) GameLog.Warn(LogCategories.Flow, "Loaded with " + report.ErrorCount + " problems; see the log");
             // TODO(UI-003): surface the report through the notification service when it exists.
@@ -190,6 +219,7 @@ namespace Game.App.Session
             IsSandbox = false; SpawnPlayerInWorld = true;
             ReleaseFleetWorld();
             foreach (var model in models) model.ResetToEmpty();
+            Galaxy.Clear();
             EventBus<SessionReset>.Publish(new SessionReset(SessionResetReason.Cleared));
         }
         internal void ApplySavedState(string commander, ulong seed, double time, double playtime, ulong next, bool creative)
@@ -220,7 +250,8 @@ namespace Game.App.Session
         public void DescribeForMeta(SaveMeta meta)
         {
             meta.CommanderName = CommanderName; meta.PlaytimeSeconds = PlaytimeSeconds;
-            meta.LocationText = "Sandbox"; // TODO(GAL-008): current star-system display name.
+            meta.LocationText = !IsSandbox && galaxyService?.Galaxy != null && Galaxy.CurrentStarSystem.IsValid
+                ? galaxyService.GetStarSystemName(Galaxy.CurrentStarSystem) : "Sandbox";
         }
         public void CollectThumbnails(List<ThumbnailRequest> changed, HashSet<string> keep)
         {
@@ -359,7 +390,7 @@ namespace Game.App.Session
             flow?.UnregisterReady(this);
             if (PlayerSpawner != null) { flow?.UnregisterReady(PlayerSpawner); flow?.UnregisterExiting(PlayerSpawner); }
             flow?.BindSession(null); save?.AttachContext(null);
-            ReleaseFleetWorld(); PlayerSpawner?.Dispose(); Fleet.Dispose();
+            ReleaseFleetWorld(); PlayerSpawner?.Dispose(); Fleet.Dispose(); Galaxy.Dispose();
             DisposeThumbnailCaptures();
             if (world.IsCreated) ResetPersistentIds(NextPersistentId, false);
             models.Clear(); writebacks.Clear(); initializers.Clear(); blockers.Clear();
