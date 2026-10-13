@@ -454,7 +454,7 @@
 | HUD-001 | Public contract types | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | UI-001, CORE-001, CAM-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | a983d88 | Screen/VM/snapshot contracts; static notification lifetime fix f847997; 3 required tests; full batch 901 EM / 128 PM, zero failures |
 | HUD-002 | UI composition, screen registration and root switching | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, UI-001, UI-002, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead composition/root/session infrastructure under ADR-0072; preserve existing playable menu/pause/flight |
 | HUD-003 | Main menu and new game | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: menu view and service-backed presenter with name prompt/continue/quit / composition hookup and layout acceptance remain |
-| HUD-004 | Save and load slots | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, PERS-002, PERS-005, PERS-006, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Presentation worker: save/load UI; shared HUD-002 production hookup required |
+| HUD-004 | Save and load slots | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, PERS-002, PERS-005, PERS-006, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | a8d00e7a/9e5db398: view + persistent composition; 5 required screen and4 boot checks pass; visible menu routing/review pending |
 | HUD-005 | Settings screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
 | HUD-006 | Pause screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: authored pause view and service-backed presenter/save eligibility/confirmation / composition hookup, key hints and acceptance remain |
 | HUD-007 | Flight HUD view and layout | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: view-model binding and Esc-to-pause route / HUD layout, data integration and acceptance remain |
@@ -1027,6 +1027,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Save screen integration verified — astra (gpt-6)
+
+- HUD-004a8d00e7a +9e5db398 supplies real slot operations/confirmations, virtualized screen and persistent composition lifetime. Compile35034 clean, focused60326 five required screen checks passed;56386 four existing boot ownership checks passed. Evidence `Logs/playtest/save-slots/{compile.log,acceptance.xml,boot.xml}`.
+- Test count: spec-required: 5 plus4 existing boot checks, extra: 0. No broad suite or benchmark; dynamic fonts backed up/restored.
+- HUD-004 stays in-progress: worker review161 active and reachable menu/pause routing depends on remaining HUD-002 bindings. No claim that visible navigation is complete.
 
 ### 2026-10-13 — Accessibility accepted — astra (gpt-6)
 
