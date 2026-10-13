@@ -3,6 +3,7 @@ using Game.Core.Systems;
 using Game.Data.Blocks;
 using Game.Data.Components;
 using Game.Voxel.Grid;
+using Game.Voxel.Damage.Jobs;
 using Game.Voxel.Model;
 using Game.Voxel.PhysicsBody;
 using Unity.Burst;
@@ -15,7 +16,7 @@ using Unity.Profiling;
 
 namespace Game.Voxel.Damage
 {
-    /// <summary>FND-020 / ADR-0053: exact changed-grid connectivity; DMG-008/009 add the budgeted brick/race traversal.</summary>
+    /// <summary>FND-020 / ADR-0053: exact changed-grid connectivity; DMG-008 caches brick connectivity; DMG-009 adds the hybrid race traversal.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup))]
     [UpdateAfter(typeof(DamageResolveSystem)), UpdateBefore(typeof(GridMassUpdateSystem))]
     public unsafe partial struct IntegritySystem : ISystem
@@ -28,6 +29,7 @@ namespace Game.Voxel.Damage
             sizeWarnings = new NativeParallelHashSet<Entity>(64, Allocator.Persistent);
             grids = new EntityQueryBuilder(Allocator.Temp).WithAll<VoxelGrid, IntegritySeed>().Build(ref state);
             job.Seeds = state.GetBufferLookup<IntegritySeed>();
+            job.Summaries = state.GetComponentLookup<BrickIntegrity>();
             job.Reader = GridCellReader.Create(ref state); job.Instances = state.GetBufferLookup<BlockInstance>(true);
             job.Palettes = state.GetBufferLookup<PaletteEntry>(true); job.Bricks = state.GetComponentLookup<Brick>(true);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<DamageStreams>(); state.RequireForUpdate<BlockDefsRef>();
@@ -37,10 +39,11 @@ namespace Game.Voxel.Damage
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             using var marker = Race.Auto(); job.Reader.Update(ref state); job.Instances.Update(ref state); job.Palettes.Update(ref state); job.Bricks.Update(ref state);
-            job.Seeds.Update(ref state);
+            job.Seeds.Update(ref state); job.Summaries.Update(ref state);
             job.Roots = grids.ToEntityListAsync(state.WorldUpdateAllocator, state.Dependency, out var gather);
             state.Dependency = JobHandle.CombineDependencies(state.Dependency, gather);
             var data = SystemAPI.GetSingleton<DamageStreams>().Data;
+            job.Touched = data->TouchedBricks; job.WarmupBudget = SystemAPI.GetSingleton<DamageConfig>().BrickWarmupPerTick;
             job.Removed = data->Removed; job.Ranges = data->RemovedGrids; job.Islands = data->Islands; job.Masks = data->IslandMasks;
             job.Blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value; job.Orientations = SystemAPI.GetSingleton<OrientationTablesRef>().Value;
             job.Stats = data; job.SizeWarnings = sizeWarnings; job.CellCap = SystemAPI.GetSingleton<DamageConfig>().MaxFullFloodCells;
@@ -49,7 +52,9 @@ namespace Game.Voxel.Damage
         [BurstCompile] struct ConnectivityJob : IJob
         {
             public GridCellReader Reader;
-            public int CellCap;
+            public int CellCap, WarmupBudget;
+            public ComponentLookup<BrickIntegrity> Summaries;
+            [ReadOnly] public NativeList<TouchedBrick> Touched;
             public NativeParallelHashSet<Entity> SizeWarnings;
             [ReadOnly] public NativeList<Entity> Roots;
             public BufferLookup<IntegritySeed> Seeds;
@@ -86,16 +91,39 @@ namespace Game.Voxel.Damage
                         if (Removed[i].Reason == CellRemovedReason.Destroyed) { changed.Add(range.Grid); if (Seeds[range.Grid].Length == 0) Seeds[range.Grid].Add(new IntegritySeed { Cell = Removed[i].Cell }); break; }
                 }
                 changed.Sort(new RootOrder());
+                int count = 0;
                 for (int i = 0; i < changed.Length; i++)
-                    if ((i == 0 || changed[i] != changed[i - 1]) && Reader.Grids.HasComponent(changed[i])) Find(changed[i]);
+                    if ((i == 0 || changed[i] != changed[i - 1]) && Reader.Grids.HasComponent(changed[i])) count++;
+                int ordinal = 0;
+                for (int i = 0; i < changed.Length; i++)
+                    if ((i == 0 || changed[i] != changed[i - 1]) && Reader.Grids.HasComponent(changed[i]))
+                    {
+                        int share = math.max(0, WarmupBudget) / count + (ordinal++ < math.max(0, WarmupBudget) % count ? 1 : 0);
+                        CheckBricks(changed[i], share); Find(changed[i]);
+                    }
             }
             struct RootOrder : System.Collections.Generic.IComparer<Entity>
             { public int Compare(Entity a, Entity b) => a.Index.CompareTo(b.Index); }
+            void CheckBricks(Entity root, int warmup)
+            {
+                foreach (var touched in Touched)
+                    if (touched.Grid == root && Summaries.HasComponent(touched.Brick) && Bricks[touched.Brick].SolidCount != 0)
+                        Check(touched.Brick);
+                var slots = Reader.Slots[root];
+                for (int slot = 0; slot < slots.Length && warmup > 0; slot++)
+                {
+                    var brick = slots[slot].Brick;
+                    if (brick == Entity.Null || !Summaries.HasComponent(brick) || Bricks[brick].SolidCount == 0) continue;
+                    if (Summaries[brick].State != BrickConnectivity.Unknown) continue;
+                    Check(brick); warmup--;
+                }
+            }
+            void Check(Entity brick) => Summaries[brick] = BrickConnectivityCheck.Evaluate(Bricks[brick].SolidCount,
+                Reader.Masks[brick], Reader.Cells[brick], Reader.Sparse[brick]);
             void Find(Entity root)
             {
                 Stats->Current.IntegrityGrids++;
                 var grid = Reader.Grids[root]; var slots = Reader.Slots[root]; var instances = Instances[root]; var palette = Palettes[root];
-                // TODO(DMG-008): replace the bounded full-grid fallback with cached brick summaries.
                 // TODO(DMG-009): hybrid race traversal, node budgets and force-after-deferral semantics.
                 long occupied = 0;
                 foreach (var slot in slots) if (slot.Brick != Entity.Null) occupied += Bricks[slot.Brick].SolidCount;
