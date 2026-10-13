@@ -10,7 +10,7 @@ using Unity.Entities;
 
 namespace Game.Simulation.Weapons
 {
-    /// <summary>SPEC-21 §5.2: registers combat composition and initializes new/reparented mount geometry.</summary>
+    /// <summary>SPEC-21 §5.2/§5.12: registers combat/consumer composition, initializes mounts, then fills unbound weapon requests.</summary>
     [BurstCompile]
     [CreateAfter(typeof(GridSpawnSystem))]
     [UpdateInGroup(typeof(GameInitGroup))]
@@ -25,6 +25,7 @@ namespace Game.Simulation.Weapons
         {
             CombatGridSetup.Register(SystemAPI.GetSingletonBuffer<RootComponentRegistration>());
             var registrations = SystemAPI.GetSingletonBuffer<FunctionalComponentRegistration>();
+            PowerRegistration.RegisterConsumer(registrations, BlockModuleId.WeaponMount);
             var types = new ComponentTypeSet(ComponentType.ReadWrite<WeaponState>(), ComponentType.ReadWrite<WeaponMount>(),
                 ComponentType.ReadWrite<WeaponAim>(), ComponentType.ReadWrite<BeamState>());
             for (int i = 0; i < types.Length; i++)
@@ -48,6 +49,9 @@ namespace Game.Simulation.Weapons
             job.Orientations = SystemAPI.GetSingleton<OrientationTablesRef>().Value;
             job.Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value;
             state.Dependency = job.ScheduleParallel(state.Dependency);
+            // Keep geometry initialization available without M2 power. Only this optional phase requires power composition.
+            if (SystemAPI.TryGetSingleton<PowerTuning>(out var tuning))
+                state.Dependency = new WeaponRequestInitJob { Weapons = job.Weapons, Priority = tuning.PriorityWeapon }.ScheduleParallel(state.Dependency);
         }
     }
 }
