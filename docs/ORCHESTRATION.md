@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Overbroad galaxy hold corrected:** reread GAL-003 exact acceptance (per-code failing/passing and four in-memory fixtures) and MIG-014 (20 named/role/tag stubs). Neither requires finished production GAL-012 assets. Under existing ADR-0070, scoped checks/generation can close these tasks while strict validators continue reporting unfinished downstream content. Workers185/199 instructed to deliver promptly for scoped acceptance. HUD review162 found a stale-session completion issue and is repairing it before HUD-005. Previous turn unlocked settings construction (progress).
+
 - **Settings construction unlocked:** ADR-0072/SPEC61Q25/ledger327 replace HUD-005 circular construction dependency with actual completed services. Keep full five-case and production navigation acceptance. HUD-004 tested checkpoint a59c0e12 remains open pending review/reachable roots; no new Unity run. GAL-003184/MIG-014198 active. Previous turn verified save screen (progress).
 
 - **Save screen checks green:**35034 clean compile;60326 five required cases and56386 four existing boot checks pass; evidence save-slots/. a8d00e7a/9e5db398 remain integration branch; HUD-004 open for worker review and visible menu/pause routing. No active validation; font changes restored. GAL-003183/MIG-014197 continue. Previous turn installed save presenter lifetime (progress).
@@ -317,7 +319,7 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - **Latest reviewed deliveries:** PWR-008 `ff548e3` integrated as `2edb150`; protected small-shield generation recipe and SPEC-04 values `fdba1fa` prepared, not executed. ECO-002 `2de0009` integrated as `6036b77`; worker is adding its omitted generation recipe to tools/jobs. Tests authored: PWR-008 3, ECO-002 15; extras 0. PWR worker recycled to EDT-001 on main `cad43d7`. After the ECO recipe arrives, presentation has a genuine dependency/validation wait: no other eligible standard main task remains, owner-only gates and false-ready runtime dependencies stay excluded.
 - **Next playable work:** after WPN-004/005 close, claim WPN-006 aiming/lead, then firing/projectile/shield producers and an enemy that fights back. No enemy-combat completion claim yet.
 - **Preservation:** restore pre-existing QualitySettings from `Logs/playtest/orchestration-batch2/QualitySettings.before.asset` only after validation terminates; exclude that delta from commits. Delete only inactive test-runner scenes and orphan test metas. No remotes.
-- **Real dependency waits:** FND-012/DEV-018 lack actual galaxy generation/current-system services, saved UniversePosition and travel lifecycle despite contract-level Ready. SYS-010 only validates contract forwarding. Hold GAL-003 `579394d` / MIG-014 `644622c` + `fea6357` for compatible galaxy-content generation. DLG-010 `38b2bb0` remains partial without approved sprites; SYS-003 awaits VOX-020.
+- **Real dependency waits:** FND-012/DEV-018 lack actual galaxy generation/current-system services, saved UniversePosition and travel lifecycle despite contract-level Ready. SYS-010 only validates contract forwarding. Historical hold of GAL-003 `579394d` / MIG-014 `644622c` + `fea6357` is superseded: exact scoped acceptance does not require production GAL-012 content (see current lead state). DLG-010 `38b2bb0` remains partial without approved sprites; SYS-003 awaits VOX-020.
 
 ## Validated and pending batches
 

@@ -1029,6 +1029,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Galaxy delivery hold corrected — astra (gpt-6)
+
+- Re-read GAL-003 and MIG-014 acceptance: production galaxy content is outside their closure criteria. Earlier whole-content hold is superseded by ADR-0070 scoped verification, without relaxing any validator. Existing workers reconcile deliveries; lead will verify validator fixtures and generate20 required stubs, then dispatch unlocked content work.
+- HUD-004 bounded review found stale-session completion UI behavior; repair pending before HUD-005 construction. No new tests or Unity runs in this coordination turn (spec-required: 0, extra: 0).
+
 ### 2026-10-13 — Save screen integration verified — astra (gpt-6)
 
 - HUD-004a8d00e7a +9e5db398 supplies real slot operations/confirmations, virtualized screen and persistent composition lifetime. Compile35034 clean, focused60326 five required screen checks passed;56386 four existing boot ownership checks passed. Evidence `Logs/playtest/save-slots/{compile.log,acceptance.xml,boot.xml}`.
