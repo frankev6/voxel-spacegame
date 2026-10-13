@@ -36,7 +36,8 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             {
                 using var builder = new BlobBuilder(Allocator.Temp);
                 ref var blob = ref builder.ConstructRoot<WeaponDefsBlob>();
-                var rows = builder.Allocate(ref blob.Weapons, 2); rows[1] = weapon;
+                var rows = builder.Allocate(ref blob.Weapons, 4); rows[1] = weapon;
+                rows[2] = Definition(); var beam = Definition(); beam.Delivery = WeaponDelivery.Beam; rows[3] = beam;
                 definitions = builder.CreateBlobAssetReference<WeaponDefsBlob>(Allocator.Persistent);
                 World = EcsTestWorld.Create(typeof(WeaponFireSystem), typeof(ProjectileShotHandlerSystem), typeof(BeamShotHandlerSystem),
                     typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(FireCaptureSystem), typeof(SimClockAdvanceSystem));
@@ -50,11 +51,11 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 Em.SetComponentData(Root, new ShipCommand { AimValid = 1, FireGroups = 1 });
                 Mount = AddMount(0);
             }
-            public Entity AddMount(int index)
+            public Entity AddMount(int index, ushort definition = 1)
             {
                 var entity = Em.CreateEntity(typeof(FunctionalBlock), typeof(WeaponMount), typeof(WeaponAim), typeof(WeaponState), typeof(BeamState));
                 Em.SetComponentData(entity, new FunctionalBlock { Grid = Root, InstanceIndex = index });
-                Em.SetComponentData(entity, new WeaponMount { Initialized = 1, WeaponIndex = 1, ForwardLocal = new float3(0,0,1), UpLocal = new float3(0,1,0) });
+                Em.SetComponentData(entity, new WeaponMount { Initialized = 1, WeaponIndex = definition, ForwardLocal = new float3(0,0,1), UpLocal = new float3(0,1,0) });
                 Em.SetComponentData(entity, new WeaponAim { HasAim = 1, Aligned = 1, InRange = 1, FireDirLocal = new float3(0,0,1) });
                 Em.SetComponentData(entity, new WeaponState { Group = 1 });
                 return entity;
@@ -108,7 +109,8 @@ namespace Game.Tests.EditMode.Simulation.Weapons
         [Test] public void ShotIds_Unique()
         {
             var weapon = Definition(); weapon.PelletsPerRound = 4; weapon.BurstCount = 2;
-            using var f = new Fixture(weapon); f.AddMount(1); f.Step();
+            using var f = new Fixture(weapon); var secondMount = f.AddMount(1);
+            f.Em.AddComponent<SecondChunk>(secondMount); f.Step();
             Assert.AreEqual(16, f.Store.Rows.Length); var ids = new HashSet<uint>();
             foreach (var row in f.Store.Rows) { Assert.IsTrue(ids.Add(row.ShotId)); Assert.AreEqual(f.Root, row.Source); Assert.AreEqual(f.Root, row.Instigator); }
             for (int i = 0; i < 8; i++) Assert.AreEqual((uint)i + 1, f.Store.Rows[i].ShotId);
@@ -138,13 +140,16 @@ namespace Game.Tests.EditMode.Simulation.Weapons
         [Test] public void CustomDelivery_ReceivesOnlyItsShots()
         {
             var weapon = Definition(); weapon.Delivery = (WeaponDelivery)250;
-            using var f = new Fixture(weapon); f.Step();
+            using var f = new Fixture(weapon); f.AddMount(1, 2); var beamMount = f.AddMount(2, 3); f.Step();
             using var query = f.Em.CreateEntityQuery(typeof(FireCapture));
-            Assert.AreEqual(1, query.GetSingleton<FireCapture>().CustomCount.Value);
-            Assert.AreEqual(0, f.Store.Rows.Length); Assert.AreEqual(0, f.Em.GetComponentData<BeamState>(f.Mount).Active);
+            Assert.AreEqual(1, query.GetSingleton<FireCapture>().CustomCount.Value, "Custom handler receives only its own delivery among all three kinds.");
+            Assert.AreEqual(1, f.Store.Rows.Length); Assert.AreEqual(2, f.Store.Rows[0].Weapon);
+            Assert.AreEqual(0, f.Em.GetComponentData<BeamState>(f.Mount).Active);
+            Assert.AreEqual(1, f.Em.GetComponentData<BeamState>(beamMount).Active);
         }
     }
 
+    struct SecondChunk : IComponentData { }
     struct FireCapture : IComponentData { public NativeList<ulong> Hashes; public NativeReference<int> CustomCount; }
     [DisableAutoCreation, UpdateInGroup(typeof(GameplayPrePhysicsGroup)), UpdateAfter(typeof(ProjectileShotHandlerSystem)), UpdateAfter(typeof(BeamShotHandlerSystem))]
     public partial struct FireCaptureSystem : ISystem
