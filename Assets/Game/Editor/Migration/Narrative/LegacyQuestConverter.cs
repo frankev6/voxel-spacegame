@@ -72,6 +72,8 @@ namespace Game.Editor.Migration.Narrative
             var dialogueLogs = translator.Logs.ToArray();
             // SPEC-42 rumor resolution reads this authored opening-chapter fact; its writer is QST-009.
             translator.DeclareFact(Declaration("opening_cache_found", FactKind.Bool));
+            // quest_stage is -1 once failed; preserve the current chapter for its failure beat.
+            translator.DeclareFact(Declaration("whisper_chain_chapter", FactKind.Int));
             foreach (var source in sources.Quests)
             {
                 string id = QuestId(source.Id); bool chain = id == "quest_whisper_chain";
@@ -92,6 +94,7 @@ namespace Game.Editor.Migration.Narrative
                 Field(source.SourcePath + "/detailedDescription", source.DetailedDescription, asset, "description");
                 ConvertObjectives(source.Objectives, source.Markers, stage, index, source.SourcePath, asset);
                 var accepted = Actions(source.OnAcceptedActions, source.Id, source.SourcePath + "/onAcceptedActions", asset, quest);
+                if (chain) accepted.Insert(0, "set_fact whisper_chain_chapter " + index.ToString(CultureInfo.InvariantCulture));
                 if (index == 0) quest.Accepted.AddRange(accepted);
                 else quest.Stages[index - 1].OnComplete.AddRange(accepted); // next-stage acceptance follows previous-stage completion
                 var completed = Actions(source.OnCompletedActions, source.Id, source.SourcePath + "/onCompletedActions", asset, quest);
@@ -103,7 +106,7 @@ namespace Game.Editor.Migration.Narrative
                     // QuestStage has no onFailed list. Existing condition beats select the actual failed
                     // stage instead of executing all three mutually exclusive legacy failure logs.
                     var failure = new Beat { Id = "beat_whisper_chain_failed_" + stage.Id, Trigger = BeatTrigger.Condition,
-                        Condition = "quest_failed(\"quest_whisper_chain\") and quest_stage(\"quest_whisper_chain\") == " + index,
+                        Condition = "quest_failed(\"quest_whisper_chain\") and $whisper_chain_chapter == " + index,
                         Repeat = BeatRepeat.Once };
                     failure.OnStart.AddRange(failed); result.Beats.Add(failure);
                 }

@@ -31,6 +31,13 @@ namespace Game.Tests.EditMode.Editor.Migration
             Assert.AreEqual(3, plan.Quests.Quests.Count(q => q.Kind == QuestKind.Contract));
             var chain = plan.Quests.Quests.Single(q => q.Id == "quest_whisper_chain");
             CollectionAssert.AreEqual(new[] { "triangulate", "intercept", "debrief" }, chain.Stages.Select(s => s.Id));
+            Assert.Contains("set_fact whisper_chain_chapter 0", chain.Accepted);
+            for (int chapter = 0; chapter < chain.Stages.Count; chapter++)
+            {
+                var failure = plan.Quests.Beats.Single(b => b.Id == "beat_whisper_chain_failed_" + chain.Stages[chapter].Id);
+                Assert.AreEqual("quest_failed(\"quest_whisper_chain\") and $whisper_chain_chapter == " + chapter, failure.Condition);
+                if (chapter > 0) Assert.Contains("set_fact whisper_chain_chapter " + chapter, chain.Stages[chapter - 1].OnComplete);
+            }
             Assert.AreEqual(QuestKind.Debug, plan.Quests.Quests.Single(q => q.Id == "quest_debug_fail_sandbox").Kind);
             Assert.AreEqual(4, plan.Quests.Beats.Count(b => b.Trigger == BeatTrigger.Interact));
             Assert.AreEqual(2, plan.Quests.Beats.Count(b => b.Trigger == BeatTrigger.StarSystemEntered));
