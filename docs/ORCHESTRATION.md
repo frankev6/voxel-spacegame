@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AI-007 | active; steering and four required checks | enemy flight |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AI-007 | delivered 2a92fd81; integrated 2a6444b2, validation wait | enemy flight |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-005 | repairing two scenario failures after validation | ability integration |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AI-008 | active; combat status and three required checks | combat integration |
 
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Integrated steering / shield repair:** lead cad09f48 preserves charge across toggle-on before the next power grant, retaining real requesting-brownout loss; SPEC22Q43 mirrored Q295. Worker fixture repair is still active (cursor141). Combat delivery2a92fd81 integrated2a6444b2; four required steering tests pending Unity. SPEC23Q21 mirroredQ296, station command composition deferred explicitly to AI-009. Combat worker has a real validation wait; presentation AI-008 activecursor115. No Unity running. Next integrate remaining compatible deliveries and validate as one batch. Prior turn made progress by archiving the passing preview measurement.
 
 - **Preview acceptance / ability repair:** session56615 terminated exit1: compile clean, GridEditTests3/3 passed, AbilityScenarioTests2/4 passed. Failed boost physical speed settling (141.159866 versus120±2.4 after180ticks) and shield re-enable expected1/actual0; archived `preview-abilities/abilities-first-failed.xml`. Existing ability worker assigned evidence-based repair, preserving functional assertions; combat/presentation workers confirmed active atcursors127/112. Advisory GridEditPerfTests session67932 terminated: PlayMode1/0/0, median0.2135ms/p950.2266ms against2ms PASS; wrapper exit1 because the same filter has zero EditMode matches. Evidence archived `preview-abilities/preview-perf*`; no functional failure or tuning pass. No Unity validation currently active. Full compatible regression remains pending; neither task closed. Previous owner-question turn was no implementation progress; this continuation dispatched repairs and started required measurement.
 
