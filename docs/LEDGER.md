@@ -880,6 +880,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 288 | SPEC-24 Q8: effect prerequisites and resync reconciliation | Both kind readers require AbilityDefsRef and skip spawning roots. Toggle once across available slots; unavailable slots stay inactive. Guarded boost requests cancel all old slot/stat keys before re-posting active survivors, including empty-list resync, preserving expiry and other producers. Exactly two required tests; Unity validation pending. | Tech lead |
 | 289 | SPEC-10 Q42: preview edits and source/functional lifetime | Ready registered EditorPreview only; coalesce changed coordinates, pin only while consuming, retain invalid-bounds/pinned work. Preserve root/untouched bricks and unchanged functional entities; replace changed functionals, queue affected meshes/colliders and mass recompute. Empty drafts retain table extent. Isolated VOX-020 implementation; tests/validation pending. | Tech lead |
 | 290 | SPEC-23 Q17: AI combat scenarios inherit advisory/owner dependencies | Apply ADR-0068 to AI-010: explicitly retain all M2 functional weapon/power tasks and AI-007/008; exclude only WPN-013/014 and PWR-009. Full combat WPN-012 remains required. No removed functional prerequisite, runtime change or new owner gate. | Tech lead |
+| 291 | SPEC-23 Q18: AI rules can reference an uncatalogued ability | Reject with AI-E003 before blob allocation; preserve authored order and canonical ability-family indices, with independently allocated default-profile rules. | Tech lead |
 
 
 ## Measurements

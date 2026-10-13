@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **AI-006 rule bake implemented:** AiContent now bakes authored ability indices/triggers/thresholds, including independent default-profile arrays, and rejects uncatalogued references before allocation (SPEC23Q18 / ledgerQ291). Existing two content checks extended, no additional tests. Decision job and nine required checks remain; compilation deferred to the compatible batch. Exact three workers rechecked: power ABL-005 active (cursor130), combat/presentation remain genuine AI-006 dependency waits (cursors123/109). Prior turn answered the owner scheduling question; no implementation progress claimed for that turn.
+
 - **Next slice claimed:** AI-006 lead and ABL-005 existing power worker, after main8b3623f6 full-green closeout. Lead uses primary `task/AI-006-enemy-decisions`; worker starts from current main in its existing checkout. Other workers wait for AI-006 to unlock AI-007/008. Isolated VOX-020 remains on its own branchfba40c66; no Unity active.
 
 - **Combat/effects batch closed:** session21032 exited0: compile0C#warnings,1198/0/1 EditMode and170/0/53 PlayMode. Soak600s/36000ticks/zero native leaks. WPN-012 and ABL-004 done, archived `ability-effects/`. No active Unity; original QualitySettings preserved and test debris removed. Next FF main, claim AI-006 lead and ABL-005 existing power worker. Isolated VOX-020 headfba40c66 remains unvalidated, preserved for the next compatible batch.

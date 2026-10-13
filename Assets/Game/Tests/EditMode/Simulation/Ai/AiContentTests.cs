@@ -57,6 +57,9 @@ namespace Game.Tests.EditMode.Simulation.Ai
             Assert.AreEqual(2000f, definition.CombatBubbleRadius); Assert.AreEqual(40f, definition.ArrivalRadius);
             Assert.AreEqual(25f, definition.AvoidanceMargin);
             var defs = new List<ContentDefinition>(profiles); defs.Add(definition);
+            foreach (var profile in profiles)
+                foreach (var rule in profile.AbilityRules)
+                    if (!defs.Contains(rule.ability)) defs.Add(rule.ability);
             var catalog = Catalog(defs.ToArray());
             using var world = new World("AiContent");
             var em = world.EntityManager;
@@ -79,9 +82,8 @@ namespace Game.Tests.EditMode.Simulation.Ai
                 Assert.AreEqual(catalog.IndexOf(definition.DefaultProfile), config.DefaultProfileIndex);
                 Assert.AreEqual(profiles.Count + 1, blob.Value.Profiles.Length);
                 foreach (var asset in profiles)
-                    AssertProfile(asset, ref blob.Value.Profiles[catalog.IndexOf(asset)]);
-                AssertProfile(definition.DefaultProfile, ref blob.Value.Profiles[0]);
-                // AI-006 owns rule baking; the authored rules above remain validated content meanwhile.
+                    AssertProfile(asset, ref blob.Value.Profiles[catalog.IndexOf(asset)], catalog);
+                AssertProfile(definition.DefaultProfile, ref blob.Value.Profiles[0], catalog);
             }
             finally
             {
@@ -134,6 +136,8 @@ namespace Game.Tests.EditMode.Simulation.Ai
             var second = Create<AiConfigDefinition>("config_ai_other", so => Set(so, "defaultProfile", profile));
             error = Assert.Throws<ContentValidationException>(() => AiContent.CreateSingletons(world.EntityManager, Catalog(profile, config, second), created));
             StringAssert.Contains("AI-E002", error.Message);
+            error = Assert.Throws<ContentValidationException>(() => AiContent.CreateSingletons(world.EntityManager, Catalog(profile, config), created));
+            StringAssert.Contains("AI-E003", error.Message, "rules cannot bake an absent ability as index zero");
             var foreign = Create<AiProfileDefinition>("ai_foreign");
             Edit(config, so => Set(so, "defaultProfile", foreign));
             error = Assert.Throws<ContentValidationException>(() => AiContent.CreateSingletons(world.EntityManager, Catalog(profile, config), created));
@@ -143,7 +147,7 @@ namespace Game.Tests.EditMode.Simulation.Ai
             Assert.AreEqual(0, query.CalculateEntityCount(), "invalid content allocates no persistent profiles/singleton");
         }
 
-        static void AssertProfile(AiProfileDefinition expected, ref AiProfile actual)
+        static void AssertProfile(AiProfileDefinition expected, ref AiProfile actual, ContentCatalog catalog)
         {
             Assert.AreEqual(expected.Role, actual.Role); Assert.AreEqual(expected.Facing, actual.Facing);
             Assert.AreEqual(expected.AvoidFriendlyFire ? 1 : 0, actual.AvoidFriendlyFire);
@@ -155,6 +159,13 @@ namespace Game.Tests.EditMode.Simulation.Ai
             Assert.AreEqual(expected.Stickiness, actual.Stickiness); Assert.AreEqual(expected.OrbitFlipThinks, actual.OrbitFlipThinks);
             Assert.AreEqual(expected.OrbitStepRad, actual.OrbitStepRad, "the authored value is already radians");
             Assert.AreEqual(expected.Id.Hash, actual.IdHash); Assert.AreEqual(0, actual.Reserved);
+            Assert.AreEqual(expected.AbilityRules.Count, actual.AbilityRules.Length);
+            for (int i = 0; i < expected.AbilityRules.Count; i++)
+            {
+                Assert.AreEqual(catalog.IndexOf(expected.AbilityRules[i].ability), actual.AbilityRules[i].AbilityIndex);
+                Assert.AreEqual(expected.AbilityRules[i].trigger, actual.AbilityRules[i].Trigger);
+                Assert.AreEqual(expected.AbilityRules[i].threshold, actual.AbilityRules[i].Threshold);
+            }
         }
         static ContentCatalog Catalog(params ContentDefinition[] definitions)
         {

@@ -619,3 +619,5 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 - SPEC-20 §6 AI writer contract; SPEC-21 §4.8 hash contract.
 
 | 17 | AI-010 still expands whole weapon/power specs, including advisory performance and owner feel work | Under ADR-0068, retain every same-milestone functional weapon/power prerequisite explicitly, excluding only WPN-013/014 and PWR-009. AI-007/008 and full combat WPN-012 remain required. Performance and balance tasks retain their full scope; no runtime contract or owner gate changes. | Tech lead |
+
+| 18 | An authored rule can reference an ability asset outside the catalog, producing index zero during the AI-006 bake | Reject absent non-null ability references with AI-E003 before allocating the profiles blob. Bake rules in authored order with the canonical ability-family index, trigger and threshold; independently allocate the default profile's rules. Existing content parity/validation tests cover this completion of the AI-003 staging boundary. | Tech lead |

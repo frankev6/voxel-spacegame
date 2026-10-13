@@ -32,7 +32,16 @@ namespace Game.Simulation.Ai
             if (config.DefaultProfile != null && defaultIndex == 0)
                 report.Error("AI-E002", "content:" + config.IdString, "defaultProfile", "The default AI profile must be in the content catalog.");
             foreach (var definition in definitions)
+            {
                 definition.Validate(report.For("content:" + definition.IdString), null);
+                for (int i = 0; i < definition.AbilityRules.Count; i++)
+                {
+                    var ability = definition.AbilityRules[i].ability;
+                    if (ability != null && catalog.IndexOf(ability) == 0)
+                        report.Error("AI-E003", "content:" + definition.IdString,
+                            $"abilityRules[{i}].ability", "The ability rule must reference an ability in the content catalog.");
+                }
+            }
             foreach (var formation in formations)
                 formation.Validate(report.For("content:" + formation.IdString), null);
             if (report.HasErrors) throw new ContentValidationException(report);
@@ -59,9 +68,18 @@ namespace Game.Simulation.Ai
                     p.PlayerBias = d.PlayerBias; p.Stickiness = d.Stickiness;
                     p.OrbitStepRad = d.OrbitStepRad; p.OrbitFlipThinks = d.OrbitFlipThinks;
                     p.IdHash = d.Id.Hash;
-                    // TODO(AI-006): bake ability rules when implementing AiDecisionSystem's rule consumption.
-                    // Build entry 0 from managed data too: copying a populated BlobArray header would invalidate its offsets.
-                    builder.Allocate(ref p.AbilityRules, 0);
+                    // Allocate entry 0 independently too: copying a populated BlobArray header invalidates its offsets.
+                    var rules = builder.Allocate(ref p.AbilityRules, d.AbilityRules.Count);
+                    for (int j = 0; j < rules.Length; j++)
+                    {
+                        var rule = d.AbilityRules[j];
+                        rules[j] = new AiAbilityRuleDef
+                        {
+                            AbilityIndex = catalog.IndexOf(rule.ability),
+                            Trigger = rule.trigger,
+                            Threshold = rule.threshold,
+                        };
+                    }
                 }
                 var formationRows = builder.Allocate(ref root.Formations, formations.Count + 1);
                 formationRows[0] = default;
