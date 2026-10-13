@@ -687,6 +687,8 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 
 | 20 | Owner requests Shift strafe, gentle coast and thruster-based reverse/turn handling | ADR-0052, V2 implementation only | Tech lead | Resolved FLT-013: Shift modifies A/D; Ctrl boosts; config-controlled neutral braking through real thrusters; capacity-bounded assist. Fighter directional and live checks required. No V1 code copied. |
 
+| 21 | FLT-012 consumes PowerTuning and orders after the not-yet-defined ShipStatsAggregateSystem | Require PowerTuning for ThrusterInitSystem, and defer only the missing PWR-006 ordering type | Tech lead | Resolved FLT-012: preserve geometry initialization and add a separate PowerLink-change-filtered request job before PowerInitSystem. PropulsionStatsSystem explicitly precedes PropulsionSystem; TODO(PWR-006) requires the aggregate producer to precede feature stats when implemented. Mass-part invalidation observes PhysicsMass as well as ShipStats and multipliers, matching the contract comment. No fake aggregator or alternate writer. |
+
 ## 11. References
 
 - Audit (background only): `docs/reference/audit-2026-10/01-voxel-core.md` B13 (velocity overwrite, frame-rate drag, speed = thrust), B14 (mass never updated); `00-synthesis.md` row 25.

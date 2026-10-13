@@ -371,7 +371,7 @@ Creates ECS configuration singletons from content, once per boot, **in table ord
 | `WeaponDefsRef`, `WeaponTuning`, default `FactionRelations` | `WeaponContent.CreateSingletons(em, catalog, created)` | WPN content task |
 | `AiConfig` | `AiContent.CreateSingletons(em, catalog, created)` | AI content task |
 | `AbilityDefsRef` | `AbilityContent.CreateSingletons(em, catalog, created)` | ABL content task |
-| `StreamingConfig` | `StreamingConfigFactory.Create(catalog.Get<StreamingConfigDefinition>("config_streaming"))` | SYS config task |
+| `StreamingConfig` | `StreamingConfigFactory.Create(catalog.Get<StreamingConfigDefinition>("config_streaming"))` | SYS-002 |
 | `EconomyConfigRef` | `EconomyConfigRefFactory.Create(catalog.Get<EconomyConfigDefinition>("config_economy"))` | ECO-007 |
 | `PersistentIdAllocator { Next = 0, End = 0 }` | FND-008 | FND-008 |
 
