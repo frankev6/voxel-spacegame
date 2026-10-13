@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **FactStore functional checks green:** compile89860 clean;68749 seven passed, evidence `fact-store/`. Two required opt-in performance fixtures authored, not run; final compile49015 pending at record time. Review trace metadata/default semantics before closing. No gameplay waits; previous turn repaired HUD (progress). Workers NAR-004164/NAR-014177/NAR-009147 active.
+
 - **HUD review repairs accepted:**13c85bbd fixes duplicates, hulk meters and optional-body radar; compile45635 clean,2563 nine passed. No active Unity validation. Lead FactStore work preserved on task/NAR-007-fact-store64421ac4, unvalidated; return there next. Workers NAR-004163/NAR-014177/NAR-009147 active. Previous turn implemented facts and recycled worker (progress).
 
 - **Review follow-ups / worker recycled:** HUD review176 found duplicate-player exception, hulk meter freeze gap and interactable body without SpatialBody radar omission; lead repair required, keep findings open despite nine green checks. Power worker recycled to NAR-014 claimc76e4a29. FactStore88312cd6 implemented but unvalidated.
