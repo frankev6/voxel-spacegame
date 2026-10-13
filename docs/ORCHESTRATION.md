@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Narrative graph emission:** isolated NAR-003e2527030/dc961079 constructs vocabulary condition graphs, binds references/facts and collects dependencies; emits typed primitive/operator/call ASTs with default parameters. Effect factories, compiler entry points, runtime evaluation and six acceptance checks remain. No compilation claim. Workers AI-015152/SYS-003163/DEV-018135 active. Primary main unchanged runtime; no Unity run. Previous turn closed combat/recycled presentation worker (progress).
+
 - **Combat scenarios closed / worker recycled:** AI-010c45ab392 accepted (clean compile11340;24943 four passed in1.01s), closeout6c9d6fb8 FF main. DEV-018 claimed31d24070 and assigned to exact presentation thread. Lead isolated NAR-0036f1f72a3 adds typed comparison nodes; emission/factories/tests remain. Editor17922 open/stopped, no active validation. AI-015151/SYS-003163 continue. Previous turn implemented compiler diagnostics/nodes (progress).
 
 - **Compiler graph staging:** isolated NAR-003852f9299 adds fact/ref suggestions, saturated constant-expression range checks and dependency equality; f6194df4 adds serialized primitive nodes with binding/dependency traversal. Evaluation explicitly remains TODO(NAR-004), now reflected in ledger Notes; function/effect nodes and emission still pending. No compilation claim or test run. Primary remains AI-010 integration branch; workers150/162/133 active, fixture repair uses aggregate thrust modifier without increasing bounds. Previous turn implemented type checker (progress).
