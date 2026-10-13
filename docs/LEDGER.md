@@ -1054,6 +1054,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — NAR-005 guarded facts and deterministic rewards — astra (gpt-6)
+
+- 1261ffbb implements SetFact/AddFact eligibility and service-only allowReserved constructors, specified give_loot salt, and RemoveBody/ReplaceBody scope checks. Nine effects and atomic list execution remain; all five required cases remain planned (spec-required: 5, extra: 0). No compile/acceptance claim.
+- TRV-004ffc1a1bc delivered240; bounded static review assigned. Its new SPEC-32 Q16 collides with lead lane-access Q16 and will be renumberedQ17 during integration. Combat SYS-005 prep complete229; dependency wait on SYS-004 acceptance is explicit. TRV-003 continues. No active Unity.
+- Previous turn effect routing and matcher integration were progress.
+
 ### 2026-10-13 — NAR-005 effect routes authored — astra (gpt-6)
 
 - 0f9b3acd implements fifteen non-cost narrative/world routes and bound-reference failure logging; unknown refs skip the effect per SPEC-40 §7. Flow flags unchanged. Fact writes, numeric effects, spending and atomic list application remain; no acceptance claim.

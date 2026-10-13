@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Fact/loot/body effects authored:** NAR-0051261ffbb implements guarded Set/Add facts with service-only reserved access, deterministic loot salt, and body-scope checks. Nine effect nodes plus atomic lists/five cases remain; uncompiled/unaccepted. TRV-004ffc1a1bc delivered, bounded review requested (its Q16 must become Q17; lead Q16 already owns lane sequencing). TRV-003 active; combat SYS-005 preparation done229, actual wait on SYS-004 acceptance. No Unity operation. Previous turn added15 routes (progress).
+
 - **Effect routing authored:** task/NAR-005-atomic-effects at0f9b3acd routes15 non-cost effects with bound-reference guards; fact/numeric/cost/list execution and five cases remain. QST-002 matcher repair integrated9ca0b84, single-case recheck deferred to next compatible compile. No active Unity. TRV-003/TRV-004 active; combat prepares SYS-005 then waits for SYS-004 acceptance. ENC-0068bd541d5 remains reviewed delivery. Previous turn accepted economy/arrival and generated content (progress).
 
 - **Content batch validated / lane work dispatched:** QST-0020e064777 compiles clean; generationbd158825 created12 quests/contracts,41 beats,16 clue-family assets. Whole-content compile fails only TRV-003 lane-owner stub. Focused49682 terminal:36 pass/1 QST diagnostic-path matcher failure,11.498s test bodies. ECO-009/TRV-005 done; QST matcher repair and NAR-016 compiler/stability remain. TRV-003 claimed949c0afc and dispatched; TRV-004 active; ENC-0068bd541d5 delivered/reviewed, combat preparing SYS-005 then dependency wait. No Unity operation. NAR-005 preserveda381d1dd. Previous turn authored summed costs (progress).

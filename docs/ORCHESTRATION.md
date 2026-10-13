@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | SYS-005 preparation | ENC-0068bd541d5 delivered/reviewed; read-only preparation then waits for SYS-004 acceptance | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-004 | claimed3ab2e8a3; route planner dispatched; TRV-005/ECO-009 source-integrated pending validation | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-004 review | deliveredffc1a1bc; bounded static review; TRV-005/ECO-009 accepted | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | TRV-003 | claimed949c0afc; finish QST matcher repair then implement lane access | HUD-003/006/007 once ready |
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Fact/loot/body effects authored:** NAR-0051261ffbb implements guarded Set/Add facts with service-only reserved access, deterministic loot salt, and body-scope checks. Nine effect nodes plus atomic lists/five cases remain; uncompiled/unaccepted. TRV-004ffc1a1bc delivered, bounded review requested (its Q16 must become Q17; lead Q16 already owns lane sequencing). TRV-003 active; combat SYS-005 preparation done229, actual wait on SYS-004 acceptance. No Unity operation. Previous turn added15 routes (progress).
 
 - **Effect routing authored:** task/NAR-005-atomic-effects at0f9b3acd routes15 non-cost effects with bound-reference guards; fact/numeric/cost/list execution and five cases remain. QST-002 matcher repair integrated9ca0b84, single-case recheck deferred to next compatible compile. No active Unity. TRV-003/TRV-004 active; combat prepares SYS-005 then waits for SYS-004 acceptance. ENC-0068bd541d5 remains reviewed delivery. Previous turn accepted economy/arrival and generated content (progress).
 
