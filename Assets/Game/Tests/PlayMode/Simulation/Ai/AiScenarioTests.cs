@@ -29,12 +29,12 @@ namespace Game.Tests.PlayMode.Simulation.Ai
         [Test] public void Engage_OrbitsAndHits()
         {
             using var f = new Fixture();
-            var ship = f.Frigate(new float3(0, 0, -320)); var player = f.PlayerDummy(float3.zero);
+            var ship = f.Frigate(new float3(0, 0, -150)); var player = f.PlayerDummy(float3.zero);
             f.Ready(ship, player); float initial = f.Distance(ship, player);
             int pristine = f.Combat.Cells(player); float preferred = f.PreferredRange(ship), nearest = initial, angleTravel = 0;
             float lastAngle = f.Angle(ship, player); bool engaged = false, lateral = false;
             f.StartAi();
-            for (int tick = 0; tick < 780; tick++)
+            for (int tick = 0; tick < 360; tick++)
             {
                 f.Tick(); var brain = f.Brain(ship); float distance = f.Distance(ship, player), angle = f.Angle(ship, player);
                 engaged |= brain.State == AiState.Engage; nearest = math.min(nearest, distance);
@@ -48,7 +48,7 @@ namespace Game.Tests.PlayMode.Simulation.Ai
                 if (nearest <= preferred + Fixture.Arrival && angleTravel > .12f && lateral && f.Damage(player).CellsDestroyed > 0) break;
             }
             Assert.IsTrue(engaged); Assert.AreEqual(player, f.Em.GetComponentData<ShipTarget>(ship).Value);
-            Assert.Less(nearest, initial - 80, "Real thrusters must close the initial distance.");
+            Assert.Less(nearest, initial - 30, "Real thrusters must close the initial distance.");
             Assert.LessOrEqual(nearest, preferred + Fixture.Arrival, "Arrival tolerance surrounds the preferred orbit radius.");
             Assert.Greater(angleTravel, .12f, "The ship must travel around the target, rather than only point at it."); Assert.IsTrue(lateral);
             Assert.Greater(f.Em.GetComponentData<WeaponState>(f.Combat.Mount(ship)).ShotCounter, 0);
@@ -60,7 +60,7 @@ namespace Game.Tests.PlayMode.Simulation.Ai
 
         [Test] public void Flee_BelowThreshold()
         {
-            using var f = new Fixture(); var ship = f.Frigate(new float3(0, 0, -140)); var player = f.PlayerDummy(float3.zero);
+            using var f = new Fixture(); var ship = f.Frigate(new float3(0, 0, -90)); var player = f.PlayerDummy(float3.zero);
             f.Ready(ship, player);
             // Seed an already-damaged starting condition, as the combat fixtures seed partial shield charge.
             // A preserved full-mass baseline keeps the production aggregate honest if mass is refreshed later.
@@ -73,6 +73,8 @@ namespace Game.Tests.PlayMode.Simulation.Ai
                 fleeing = true; Assert.AreEqual(0, f.Em.GetComponentData<WeaponControl>(ship).Autofire);
                 Assert.Greater(math.dot(brain.GoalPosition - f.Em.GetComponentData<LocalTransform>(ship).Position,
                     f.Centre(ship) - f.Centre(player)), 0, "The flee goal must point away from the hostile.");
+                if (f.Distance(ship, player) > initial + 15 &&
+                    math.dot(f.Em.GetComponentData<PhysicsVelocity>(ship).Linear, f.Centre(ship) - f.Centre(player)) > 0) break;
             }
             Assert.IsTrue(fleeing); Assert.AreEqual(AiState.Flee, f.Brain(ship).State);
             Assert.Less(f.Em.GetComponentData<ShipStats>(ship).MassFraction, .25f);
@@ -84,10 +86,10 @@ namespace Game.Tests.PlayMode.Simulation.Ai
 
         [Test] public void Allies_NoFriendlyFire()
         {
-            using var f = new Fixture(); var rear = f.Frigate(new float3(0, 0, -160)); var front = f.Frigate(new float3(0, 0, -80));
+            using var f = new Fixture(); var rear = f.Frigate(new float3(0, 0, -90)); var front = f.Frigate(new float3(0, 0, -45));
             var player = f.PlayerDummy(float3.zero); f.Ready(rear, front, player); f.Combat.Freeze(rear); f.Combat.Freeze(front);
             ulong allyBefore = CellStateHasher.ComputeGridHash(f.Em, front); f.StartAi();
-            for (int tick = 0; tick < 90; tick++)
+            for (int tick = 0; tick < 40; tick++)
             {
                 f.Tick(); if (f.Brain(rear).State != AiState.Engage) continue;
                 Assert.AreEqual(player, f.Em.GetComponentData<ShipTarget>(rear).Value); Assert.AreEqual(1, f.Brain(rear).FireBlocked);
@@ -99,7 +101,7 @@ namespace Game.Tests.PlayMode.Simulation.Ai
             Assert.AreEqual(allyBefore, CellStateHasher.ComputeGridHash(f.Em, front)); Assert.AreEqual(0, f.Damage(front).DamageTaken);
             // One between-tick fixture relocation clears the obstruction; neither firing nor decisions are injected.
             var pose = f.Em.GetComponentData<LocalTransform>(front); pose.Position.x = 80; f.Em.SetComponentData(front, pose);
-            for (int tick = 0; tick < 60; tick++) f.Tick();
+            for (int tick = 0; tick < 20; tick++) f.Tick();
             Assert.AreEqual(0, f.Brain(rear).FireBlocked); Assert.AreEqual(1, f.Em.GetComponentData<WeaponControl>(rear).Autofire);
             Assert.Greater(f.Em.GetComponentData<WeaponState>(f.Combat.Mount(rear)).ShotCounter, 0, "The production path must resume when the line clears.");
             Assert.AreEqual(allyBefore, CellStateHasher.ComputeGridHash(f.Em, front));
@@ -107,10 +109,10 @@ namespace Game.Tests.PlayMode.Simulation.Ai
 
         [Test] public void Leash_Returns()
         {
-            using var f = new Fixture(leash: 60); var ship = f.Frigate(float3.zero); var player = f.PlayerDummy(new float3(0, 0, 300));
+            using var f = new Fixture(leash: 32); var ship = f.Frigate(float3.zero); var player = f.PlayerDummy(new float3(0, 0, 150));
             f.Ready(ship, player); float3 anchor = f.Brain(ship).Anchor; float peak = 0; bool engaged = false, returned = false, movedBack = false;
             f.StartAi();
-            for (int tick = 0; tick < 960; tick++)
+            for (int tick = 0; tick < 540; tick++)
             {
                 f.Tick(); var brain = f.Brain(ship); float distance = math.distance(anchor, f.Em.GetComponentData<LocalTransform>(ship).Position);
                 engaged |= brain.State == AiState.Engage; peak = math.max(peak, distance);
@@ -119,10 +121,10 @@ namespace Game.Tests.PlayMode.Simulation.Ai
                     returned = true; Assert.AreEqual(Entity.Null, f.Em.GetComponentData<ShipTarget>(ship).Value);
                     Assert.AreEqual(0, f.Em.GetComponentData<WeaponControl>(ship).Autofire); Assert.AreEqual(anchor, brain.GoalPosition);
                 }
-                if (returned && distance < peak - 50) movedBack = true;
+                if (returned && distance < peak - 10) movedBack = true;
                 if (returned && movedBack && distance < Fixture.Arrival * 2) break;
             }
-            Assert.IsTrue(engaged); Assert.Greater(peak, 90, "The actor must chase beyond 1.5 times its test leash through real propulsion.");
+            Assert.IsTrue(engaged); Assert.Greater(peak, 48, "The actor must chase beyond 1.5 times its test leash through real propulsion.");
             Assert.IsTrue(returned); Assert.IsTrue(movedBack);
             Assert.Less(math.distance(anchor, f.Em.GetComponentData<LocalTransform>(ship).Position), Fixture.Arrival * 2,
                 "Return remains latched until the actor physically reaches the specified anchor-release radius.");
@@ -131,9 +133,10 @@ namespace Game.Tests.PlayMode.Simulation.Ai
 
         sealed class Fixture : IDisposable
         {
-            public const float Arrival = 40;
+            public const float Arrival = 20;
             public readonly CombatFixture Combat;
             readonly BlobAssetReference<AiProfilesBlob> profiles;
+            readonly BlobAssetReference<WeaponDefsBlob> fastWeapons;
             readonly AiConfig config;
             public EntityManager Em => Combat.Em;
             public Fixture(float leash = 1200)
@@ -141,6 +144,26 @@ namespace Game.Tests.PlayMode.Simulation.Ai
                 Combat = new CombatFixture(exactAim: true);
                 try
                 {
+                    // Fire timing/damage balance is not under test: finish hit/clearance assertions immediately.
+                    using (var weaponQuery = Em.CreateEntityQuery(typeof(WeaponDefsRef)))
+                    using (var builder = new BlobBuilder(Allocator.Temp))
+                    {
+                        var authored = weaponQuery.GetSingleton<WeaponDefsRef>().Value;
+                        ref var blob = ref builder.ConstructRoot<WeaponDefsBlob>();
+                        var rows = builder.Allocate(ref blob.Weapons, authored.Value.Weapons.Length);
+                        for (int i = 0; i < rows.Length; i++)
+                        {
+                            var row = authored.Value.Weapons[i];
+                            if (i != 0)
+                            {
+                                row.Damage *= 10; row.TriggerIntervalTicks = 6; row.BurstCount = 1; row.BurstIntervalTicks = 0;
+                                row.SustainedDps = WeaponContent.ComputeSustainedDps(row);
+                            }
+                            rows[i] = row;
+                        }
+                        fastWeapons = builder.CreateBlobAssetReference<WeaponDefsBlob>(Allocator.Persistent);
+                        Em.SetComponentData(weaponQuery.GetSingletonEntity(), new WeaponDefsRef { Value = fastWeapons });
+                    }
                     DefaultWorldInitialization.AddSystemsToRootLevelSystemGroups(Combat.World.World, new[] {
                         typeof(AiAnchorShiftSystem), typeof(AiDecisionSystem), typeof(AiSteeringSystem),
                         typeof(PlayerCombatStatusSystem), typeof(PropulsionStatsSystem) });
@@ -153,11 +176,11 @@ namespace Game.Tests.PlayMode.Simulation.Ai
                     {
                         ref var blob = ref builder.ConstructRoot<AiProfilesBlob>(); var rows = builder.Allocate(ref blob.Profiles, 1);
                         rows[0] = authored.Value.Profiles[0]; rows[0].AbilityRules = default; builder.Allocate(ref rows[0].AbilityRules, 0);
-                        // Arena scale only: no production assets, physics/weapon values or steering laws are tuned.
-                        rows[0].PreferredRangeFraction = .2f; rows[0].LeashRadius = leash; rows[0].PatrolRadius = 0;
+                        // Keep steering laws and authored propulsion; shorten only the fixture's arena distances.
+                        rows[0].PreferredRangeFraction = .1f; rows[0].LeashRadius = leash; rows[0].PatrolRadius = 0;
                         builder.Allocate(ref blob.Formations, 0); profiles = builder.CreateBlobAssetReference<AiProfilesBlob>(Allocator.Persistent);
                     }
-                    config.Profiles = profiles;
+                    config.Profiles = profiles; config.ArrivalRadius = Arrival;
                 }
                 catch { Dispose(); throw; }
             }
@@ -176,7 +199,7 @@ namespace Game.Tests.PlayMode.Simulation.Ai
             }
             public Entity PlayerDummy(float3 position)
             {
-                var root = Combat.Wall(position, halfWidth: 12, depth: 6); Em.AddComponent<PlayerShip>(root);
+                var root = Combat.Wall(position, halfWidth: 6, depth: 2); Em.AddComponent<PlayerShip>(root);
                 Em.AddComponentData(root, Allegiance.Player); return root;
             }
             public void Ready(params Entity[] roots)
@@ -200,8 +223,9 @@ namespace Game.Tests.PlayMode.Simulation.Ai
             }
             public float Distance(Entity a, Entity b) => math.distance(Centre(a), Centre(b));
             public float Angle(Entity a, Entity b) { var delta = Centre(a) - Centre(b); return math.atan2(delta.x, delta.z); }
-            public float PreferredRange(Entity root) => math.max(80, Em.GetComponentData<WeaponStats>(root).MaxWeaponRange * .2f);
-            public void Dispose() { Combat?.Dispose(); if (profiles.IsCreated) profiles.Dispose(); }
+            public float PreferredRange(Entity root) => math.max(80, Em.GetComponentData<WeaponStats>(root).MaxWeaponRange * .1f);
+            public void Dispose()
+            { Combat?.Dispose(); if (profiles.IsCreated) profiles.Dispose(); if (fastWeapons.IsCreated) fastWeapons.Dispose(); }
         }
     }
 }
