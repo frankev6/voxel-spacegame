@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 16 | 1 | 0 | 0 | 74 | 0 | 91 | 7 |
+| M2 | 14 | 3 | 0 | 0 | 74 | 0 | 91 | 5 |
 | M3 | 144 | 4 | 0 | 0 | 32 | 0 | 180 | 11 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
@@ -269,8 +269,8 @@
 | AI-004 | SpatialHashBuildSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-002, SPEC-10, PWR-001, DMG-001 | yes | done | astra (gpt-6) | 2026-10-13 | f99a02c | Guarded parallel proxy gathering, canonical sort/bucket and boot-safe hash lifetime; full 968 EM /145 PM green |
 | AI-005 | AI setup and anchor shift | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-003, SPEC-02 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b0fc87e | Brain registration and origin anchor shift; 4 required tests; live origin producer awaits GAL-009 |
 | AI-006 | AiDecisionSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-004, AI-005, SPEC-20, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, ABL-001 | yes | done | astra (gpt-6) | 2026-10-13 | 7c50bdaa | Decisions and nine required checks verified; full1207/170 green; Q291-293; steering edge delivery remains AI-007 |
-| AI-007 | AiSteeringSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006 | yes | todo |  |  |  |  |
-| AI-008 | PlayerCombatStatusSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006, DMG-001 | yes | todo |  |  |  |  |
+| AI-007 | AiSteeringSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Claimed after AI-006 full-green integration; existing combat worker; lead owns Unity |
+| AI-008 | PlayerCombatStatusSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006, DMG-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Claimed after AI-006 full-green integration; existing presentation worker; lead owns Unity |
 | AI-009 | Station turret AI | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007 | no | todo |  |  |  |  |
 | AI-010 | AI combat scenarios | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-007, AI-008, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-008, PWR-010 | no | todo |  |  |  |  |
 | AI-011 | AI determinism | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010 | no | todo |  |  |  |  |
