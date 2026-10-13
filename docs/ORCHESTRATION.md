@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Catalog prerequisite implemented:** NAR-006 claimed8c989a8d, isolated lead tree now `task/NAR-006-fact-catalog` at837c19ad. Canonical content/list resolvers4b77303d, ordinal authored/generated facts, aliases, diagnostics and family/source-hash lookup implemented. Required tests/review/compile remain. NAR-003 preserved atfeef0b40 on its branch. No Unity run; primary runtime unchanged. Workers AI-015148, SYS-003159, AI-010130 remain active. Previous turn implemented binder/wrappers (progress).
+
 - **NAR-003 binding progress:** isolated64483236/feef0b40 implement fact/reference binding diagnostics, compiled graph traversal, source-hash/version stamps and stale validation. Registry97e102ca precedes these. Compiler/type checker/node emission remain; NAR-006 catalog/resolver methods are still stubs and must be implemented before end-to-end binding acceptance (real dependency, not a test workaround). No Unity run or acceptance claim. Workers AI-015148/SYS-003158/AI-010130 active. Previous turn implemented registry (progress).
 
 - **NAR-003 implementation underway:** claimed400d939f; isolated lead branch `task/NAR-003-logic-compiler` at97e102ca implements registry vocabulary metadata and ordinal nearest-name suggestions. Public mutable metadata is copied on lookup to protect the private table. Type checking/emission/binding and required tests remain; no compile claim. Workers AI-015148, SYS-003157, AI-010129 verified active; presentation is shortening deliveredaa12b616 fixtures before final integration. Primary runtime remains validated53f8012e; no Unity run this turn. Previous turn closed NAR-002 (progress).
