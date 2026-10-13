@@ -105,7 +105,9 @@ namespace Game.Tests.PlayMode.Galaxy
                 State.PlayerLocation = Galaxy.GetStartLocation(); State.HasPlayerLocation = true;
                 if (streaming)
                 {
-                    VoxelContent = ContentService.CreateForTests(definitions); VoxelContent.CreateSingletons(Em);
+                    // Block definitions are unchanged; build native voxel data from the valid production graph.
+                    // The tiny isolated galaxy fixture is not a replacement campaign database.
+                    VoxelContent = new ContentService(database); VoxelContent.CreateSingletons(Em);
                     Em.CreateSingleton(new VoxelStructureRegistryRef { Value = Registry });
                     Em.CreateSingleton(new VoxelConfig { SpawnBricksPerFrame = 8, DefaultCellSize = .5f, RequireRenderer = 0 });
                     Em.CreateSingleton(new StreamingConfig { T2UnloadFactor = 1.25f, MaxGridSpawnsPerFrame = 1, PersistDamageMaxCells = persistLimit });

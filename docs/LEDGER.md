@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 6 |
-| M3 | 98 | 10 | 0 | 0 | 72 | 0 | 180 | 7 |
+| M3 | 98 | 9 | 0 | 0 | 73 | 0 | 180 | 7 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -336,7 +336,7 @@
 | SYS-002 | Streaming config and boot singleton | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 7244be6 | Config validation/factory, boot singleton and catalog asset; 2 required tests; full suites green |
 | SYS-003 | Structure builders | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-10 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 971ae0b7 | Deterministic shape/asteroid builders;4 focused tests pass; Q307 |
 | SYS-004 | Load and unload (T1) | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-002, GAL-008, GAL-009, SPEC-10, PHY-001, PHY-012 | yes | done | astra (gpt-6) | 2026-10-13 | 37ed39f6 | Five T1 cases pass; Q357 stages actual scene registration with SYS-006 T2; missing grids correctly block arrival. |
-| SYS-005 | BodyOnRailsSystem | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  |  |
+| SYS-005 | BodyOnRailsSystem | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 370ffff | BodyOnRailsSystem integrated14a0989e; two required cases pass9669, preserves exact cross-FPS results and 1mm local tolerance. |
 | SYS-006 | T2 voxel bodies and damage persistence | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-003, SYS-004, DMG-014, WPN-012, AI-010 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
 | SYS-007 | T3 asteroid belts | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006 | no | todo |  |  |  |  |
 | SYS-008 | InteractionQuerySystem, docking and BodyInteracted | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-004, SPEC-20, SPEC-23 | no | todo |  |  |  |  |
@@ -1065,6 +1065,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — SYS-005 accepted / T2 gameplay review repairs — astra (gpt-6)
+
+- SYS-005 worker repair af68534a integrated370ffff: 10nm managed-versus-Burst oracle tolerance; exact cross-FPS comparisons and 1mm local tolerance remain. Required two cases pass. Spec-required: 2, extra: 0. NAR-016 repair448ee47c integrated1b0cb271 explicitly transfers compiled graphs/stamps; existing converter/compiler checks now pass. Actual production raw-byte stability rerun still pending; NAR-016 remains in progress.
+- Compile89524 terminal0, zero CS warnings. Focused EditMode9669 terminal0:10 passed/0 failed,21.582s test execution excluding startup/shutdown. Evidence Logs/playtest/streaming-content-batch/repaired-compile.log and repaired-editmode.*. No broad/performance run.
+- Presentation review216 found four gameplay defects; lead eff2a355 fixes large destroyed station retirement, orbital grid/anchor divergence (Q361), exact arrival boundary mismatch, and dead weapon mounts selecting armed AI. Existing large-station case now also checks destroyed-hulk unload/no-respawn. SYS-006 spec-required: 5, extra: 0.
+- PlayMode28579 terminal failure (Unity exit2): five shared setup failures; isolated galaxy references intentionally do not replace narrative marker references and its tiny shape has no core. Native voxel data now builds from the unchanged valid production database (same block indices), keeping tiny galaxy-only overrides separate. Repair pending validation; evidence Logs/playtest/t2-streaming/third-acceptance.*. No Unity active. Combat238 and economy251 delivered; presentation216 review complete. Next accept actual streaming results, run real content stability, and integrate checkpoint/dispatch DEV-009 now canonical spawning and coordinates exist. Prior turn fixture/source repair and FND-012 acceptance were progress.
 
 ### 2026-10-13 — FND-012 accepted / streaming-content batch follow-up — astra (gpt-6)
 

@@ -6,10 +6,10 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-016 repair | Active236: compiler copy-back stale after focused run13914 | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | SYS-005 repair | Active250: managed-oracle precision; preserve cross-rate equality | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | integration wait | Delivered238 integrated1b0cb271, focused checks pass; actual content stability pending | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | integration wait | Delivered251 integrated370ffff, SYS-005 accepted; next DEV-009 after main checkpoint | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | SYS-006 review | Active215: bounded gameplay-semantics review, read-only | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | Review216 complete; four findings repaired eff2a355 | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Orbit/compiler batch passes:** compile89524 terminal0 with zero CS warnings; focused EditMode9669 terminal0,10 passed. SYS-005 accepted; converter actual production byte stability remains pending. Lead eff2a355 fixes four T2 gameplay review findings (Q361). PlayMode28579 terminal failure: five setup failures from validating the isolated galaxy fixture as a complete campaign. Voxel data now builds from the unchanged production database; fixture remaps remain limited to galaxy generation. Repair pending validation; no Unity active. Workers delivered238/251; presentation review216 complete. Next streaming acceptance, content stability and DEV-009 dispatch after local integration. Previous turn made implementation/acceptance progress.
 
 - **Batch follow-ups active:** FND-012 accepted from six required cases across focused runs83915/86452 and production composition. EditMode13914 exposed compiler copy-back regression (combat repairing) and orbit oracle precision (economy repairing). PlayMode92285 exposed remaining fixture generation references; lead remapped them, pending validation. Presentation reviews T2 gameplay semantics. No Unity active; batch repairs before next validation. Previous turn fixture repair changed source (progress).
 
