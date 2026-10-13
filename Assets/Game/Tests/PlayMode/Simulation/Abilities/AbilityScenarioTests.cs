@@ -170,7 +170,7 @@ namespace Game.Tests.PlayMode.Simulation.Abilities
             {
                 using var f = new Fixture();
                 f.Em.AddComponentData(f.Root, new Script { Input = f.InputEntity, BoostSlot = f.Slot(AbilityKind.StatBoost), ShieldSlot = f.Slot(AbilityKind.ShieldToggle) });
-                f.Em.AddBuffer<History>(f.Root).Capacity = 240;
+                var history = f.Em.AddBuffer<History>(f.Root); history.Capacity = 240;
                 var command = f.World.World.GetExistingSystemManaged<ShipCommandGroup>(); command.AddSystemToUpdateList(f.World.World.GetOrCreateSystem<ScriptSystem>()); command.SortSystems();
                 var post = f.World.World.GetExistingSystemManaged<GameplayPostPhysicsGroup>(); post.AddSystemToUpdateList(f.World.World.GetOrCreateSystem<RecordSystem>()); post.SortSystems();
                 uint start = f.World.TicksRun; int frames = 0;

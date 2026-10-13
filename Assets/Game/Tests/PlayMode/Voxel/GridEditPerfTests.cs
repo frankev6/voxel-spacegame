@@ -40,7 +40,7 @@ namespace Game.Tests.PlayMode.Voxel
                 var root = GridSpawnApi.RequestSpawn(em, registry, registry.Register(source), new GridSpawnParams
                 { Pose = RigidTransform.identity, Flags = GridSpawnFlags.EditorPreview | GridSpawnFlags.NoRender });
                 system.Update(world.Unmanaged); Assert.IsFalse(source.IsPinned);
-                var at = new int3(50, 10, 50); using var changed = new NativeArray<int3>(1, Allocator.Temp); changed[0] = BrickMath.BrickOf(at);
+                var at = new int3(50, 10, 50); using var changed = new NativeArray<int3>(new[] { BrickMath.BrickOf(at) }, Allocator.Temp);
                 double Sample(bool place)
                 {
                     long start = Stopwatch.GetTimestamp();
