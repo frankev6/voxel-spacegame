@@ -281,7 +281,7 @@ Scale notes: per ship per tick O(slots ≤ 8); the instance walk happens only on
 ### ABL-004 — Effect systems
 - **Milestone:** M2
 - **Tier:** standard — two small writers specified in §5.2–§5.3
-- **Depends on:** `ABL-003`, `SPEC-22`
+- **Depends on:** `ABL-003`, `PWR-001`, `PWR-002`, `PWR-003`, `PWR-004`, `PWR-005`, `PWR-006`, `PWR-007`, `PWR-010`, `PWR-008`
 - **Do:** Implement `ShieldToggleEffectSystem` (§5.2) and `StatBoostEffectSystem` (§5.3).
 - **Files:** `Assets/Game/Simulation/Abilities/{ShieldToggleEffectSystem,StatBoostEffectSystem}.cs`, `Assets/Game/Tests/EditMode/Simulation/Abilities/AbilityEffectTests.cs`
 - **Acceptance criteria:**
@@ -291,7 +291,7 @@ Scale notes: per ship per tick O(slots ≤ 8); the instance walk happens only on
 ### ABL-005 — Ability scenarios and frame-rate independence
 - **Milestone:** M2
 - **Tier:** standard — PlayMode tests of specified behaviour
-- **Depends on:** `ABL-004`, `SPEC-21`
+- **Depends on:** `ABL-004`, `WPN-001`, `WPN-002`, `WPN-003`, `WPN-004`, `WPN-005`, `WPN-006`, `WPN-007`, `WPN-008`, `WPN-009`, `WPN-010`, `WPN-011`, `WPN-012`, `WPN-015`, `WPN-017`, `WPN-018`
 - **Do:** PlayMode: a ship with thrusters and a shield emitter: (1) boost raises top speed by 80% for 1 s (with SPEC-20/22 running); (2) shield toggled off and on; (3) destroying all thrusters removes the boost slot; (4) the same scripted presses at 30/60/144 FPS give identical slot histories per tick.
 - **Files:** `Assets/Game/Tests/PlayMode/Simulation/Abilities/AbilityScenarioTests.cs`
 - **Acceptance criteria:**
@@ -307,7 +307,7 @@ Scale notes: per ship per tick O(slots ≤ 8); the instance walk happens only on
 | 3 | Inspector ranges do not validate serialized floats/enums; duplicate boost stats or a positive duration rounding to zero would break the effect/request semantics | Reject invalid/duplicate stats and multipliers below 0.01 as ABL-E001; require a boost duration rounding to at least one tick as E002; enforce 1..9 charges and multi-charge recharge as E003; E006 covers unknown kinds/nonfinite or negative scalars, invalid threshold and float-tick overflow | Tech lead |
 | 4 | Boot row/lifetime are not wired yet and MIG-010's production definitions are absent; the factory has no owned teardown API | Lead adds AbilityContent.CreateSingletons before the boot snapshot, after the AI row when present and before streaming/economy/allocator, retains its persistent blob in the boot lifetime and disposes after jobs complete/entity destruction. An empty ability family publishes one none entry; never invent production definitions or require their IDs. ABL-003 calls AbilityGridSetup.Register once from AbilitySystem.OnCreate after GridSpawnSystem. | Tech lead |
 | 5 | Hand-authored test definitions under Tests violate the binding DATA-E011 production-content location rule | Store the two hand-authored fixture payloads as JSON under the test folder and load them into transient AbilityDefinition instances via JsonUtility. Keep DATA-E011 strict and production content unchanged; the same three required tests remain. | Tech lead |
-| 6 | ABL-003 broad spec dependencies include advisory performance or owner feel work | Replace the broad dependency with its explicit same-milestone functional prerequisites, excluding only PWR-009. Those tasks retain their full scope and tests but do not block this implementation. No runtime contract or functional prerequisite is removed; owner feel sign-off remains pending in its own task. Follows ADR-0042 and the owner instruction to build systems before tuning. | Tech lead |
+| 6 | ABL-003/004/005 broad spec dependencies include advisory performance or owner feel work | Replace the broad dependency with its explicit same-milestone functional prerequisites, excluding only PWR-009 for lifecycle/effects and WPN-013/014 for scenarios. Those tasks retain their full scope and tests but do not block this implementation. No runtime contract or functional prerequisite is removed; owner feel sign-off remains pending in its own task. Follows ADR-0042 and the owner instruction to build systems before tuning. | Tech lead |
 
 | 7 | Empty resync cannot signal cancellation, pending grant bits move with old slot positions, and recharge starts one tick late | Accepted ADR-0069 supplies root Resynced/OverflowWarned in existing padding. Capture original slot indices before resync for grant interpretation; removed abilities never activate. Seed recharge on spending the first charge so its timer expires at exactly 180 ticks. Required tests cover these within the existing nine cases; ABL-004 consumes the root resync signal. | Tech lead |
 

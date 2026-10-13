@@ -10,7 +10,7 @@ The dependency grammar permits only another module's contract task or an entire 
 
 Permit an explicit existing task ID from another spec as a dependency. Preserve unknown-ID rejection, milestone ordering, cycle detection and the requirement that every listed dependency is done before claiming. Whole-spec and contract dependencies retain their existing meanings. This is workflow metadata only: assembly boundaries, APIs, single writers and runtime contracts are unchanged.
 
-WPN-012, AI-006 and ABL-003 replace the affected whole-spec dependencies with all previously expanded functional tasks, excluding only DMG-016/PWR-009 performance measurements and WPN-013/014 performance/feel work where applicable. These excluded tasks retain their scope, tests and owner-sign-off obligations; they simply do not gate functional development.
+WPN-012, AI-006 and ABL-003/004/005 replace the affected whole-spec dependencies with all previously expanded functional tasks, excluding only DMG-016/PWR-009 performance measurements and WPN-013/014 performance/feel work where applicable. These excluded tasks retain their scope, tests and owner-sign-off obligations; they simply do not gate functional development.
 
 ## Consequences
 
