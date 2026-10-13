@@ -151,8 +151,9 @@ namespace Game.Simulation.Abilities
     {
         public uint SyncedRevision;      // ShipStats.FunctionalRevision the slots were built from; 0 = never
         public byte SlotCount;
-        public byte Reserved0;
-        public ushort Reserved1;
+        public byte Resynced;            // this tick, including empty slot list (ADR-0069)
+        public byte OverflowWarned;     // once per root lifetime
+        public byte Reserved;
     }
 
     /// <summary>Root composition for abilities (ADR-0015). Registered once by AbilitySystem.OnCreate.</summary>
@@ -203,8 +204,8 @@ Tick timeline for a costed ability pressed during frame f: tick N `PlayerCommand
 
 ### 5.3 `StatBoostEffectSystem` (kind StatBoost; ADR-0016 requests)
 
-`IJobEntity, IJobEntityChunkBeginEnd` (`ScheduleParallel`) over roots with `AbilitySlot`; writes `StatModifierRequest`s through `StatusChannels.StatModifiers.BeginWrite(ref state, ProducerKind.Ability, chunkCount)` at foreach index `unfilteredChunkIndex`. Per root:
-1. If any slot has `Resynced`: post a cancel (`Multiplier = 1`) for every `(SourceId = s, Stat)` with `s` in 0..7 and every `StatId` value (`Sequence = s × 16 + stat`), then re-post `{ Root, Stat, Ability, SourceId = s, Multiplier, UntilTick = ActiveUntilTick, Sequence = 1000 + s × 8 + mod }` for every StatBoost slot `s` with `Active == 1`.
+`IJobEntity, IJobEntityChunkBeginEnd` (`ScheduleParallel`) over roots with `AbilitySlot`, `AbilityState`; writes `StatModifierRequest`s through `StatusChannels.StatModifiers.BeginWrite(ref state, ProducerKind.Ability, chunkCount)` at foreach index `unfilteredChunkIndex`. Per root:
+1. If `AbilityState.Resynced != 0` or any slot has `Resynced`: post a cancel (`Multiplier = 1`) for every `(SourceId = s, Stat)` with `s` in 0..7 and every `StatId` value (`Sequence = s × 16 + stat`), then re-post `{ Root, Stat, Ability, SourceId = s, Multiplier, UntilTick = ActiveUntilTick, Sequence = 1000 + s × 8 + mod }` for every StatBoost slot `s` with `Active == 1`.
 2. Else for every StatBoost slot `s` with `ActivatedThisTick`: post one request per mod (`Sequence = 1000 + s × 8 + mod`).
 StatBoost slots are never `Blocked` (the system writes 0). `StatusSystem` (SPEC-22) applies the requests the next tick.
 
@@ -307,6 +308,8 @@ Scale notes: per ship per tick O(slots ≤ 8); the instance walk happens only on
 | 4 | Boot row/lifetime are not wired yet and MIG-010's production definitions are absent; the factory has no owned teardown API | Lead adds AbilityContent.CreateSingletons before the boot snapshot, after the AI row when present and before streaming/economy/allocator, retains its persistent blob in the boot lifetime and disposes after jobs complete/entity destruction. An empty ability family publishes one none entry; never invent production definitions or require their IDs. ABL-003 calls AbilityGridSetup.Register once from AbilitySystem.OnCreate after GridSpawnSystem. | Tech lead |
 | 5 | Hand-authored test definitions under Tests violate the binding DATA-E011 production-content location rule | Store the two hand-authored fixture payloads as JSON under the test folder and load them into transient AbilityDefinition instances via JsonUtility. Keep DATA-E011 strict and production content unchanged; the same three required tests remain. | Tech lead |
 | 6 | ABL-003 broad spec dependencies include advisory performance or owner feel work | Replace the broad dependency with its explicit same-milestone functional prerequisites, excluding only PWR-009. Those tasks retain their full scope and tests but do not block this implementation. No runtime contract or functional prerequisite is removed; owner feel sign-off remains pending in its own task. Follows ADR-0042 and the owner instruction to build systems before tuning. | Tech lead |
+
+| 7 | Empty resync cannot signal cancellation, pending grant bits move with old slot positions, and recharge starts one tick late | Accepted ADR-0069 supplies root Resynced/OverflowWarned in existing padding. Capture original slot indices before resync for grant interpretation; removed abilities never activate. Seed recharge on spending the first charge so its timer expires at exactly 180 ticks. Required tests cover these within the existing nine cases; ABL-004 consumes the root resync signal. | Tech lead |
 
 ## 11. References
 

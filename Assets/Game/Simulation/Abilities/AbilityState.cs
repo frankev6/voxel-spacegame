@@ -7,7 +7,8 @@ namespace Game.Simulation.Abilities
     {
         public uint SyncedRevision;      // ShipStats.FunctionalRevision the slots were built from; 0 = never
         public byte SlotCount;
-        public byte Reserved0;
-        public ushort Reserved1;
+        public byte Resynced;            // this tick, including an empty result (ADR-0069)
+        public byte OverflowWarned;     // once per root lifetime
+        public byte Reserved;
     }
 }
