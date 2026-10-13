@@ -911,7 +911,7 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 ### ENC-006 — Composition and placement
 - **Milestone:** M3
 - **Tier:** standard — pure functions with fixed draw orders (§5.5, §5.6)
-- **Depends on:** `ENC-002`, `SPEC-30`
+- **Depends on:** `ENC-002`, `GAL-006`, `GAL-008`
 - **Do:** Implement `EncounterComposer` and `EncounterPlacement`.
 - **Files:** `Assets/Game/Galaxy/Encounters/{EncounterComposer,EncounterPlacement}.cs`; `Assets/Game/Tests/EditMode/Galaxy/Encounters/{ComposerTests,PlacementTests}.cs`
 - **Acceptance criteria:**
@@ -1112,6 +1112,8 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 | 23 | ValidationScope has no report accessor and the canonical logic compiler/wrapper are still NAR-003 stubs | Compile the owned condition with LogicUsage.EncounterCondition, scope.AssetPath and field condition into a temporary report, forwarding each diagnostic through the scope. Bind through CompiledCondition.Bind. No new scope API, compiler implementation or NAR completion claim. Local definition checks own field diagnostics; EncounterContentValidator Order 330 owns counts, reverse-pair conflicts, territory conflicts and warnings using config thresholds (the player is always friendly). All stated fields/defaults/getters remain unchanged. | Tech lead |
 
 | 24 | ENC-010's first-formation import rule disagrees with its authored final table: enemy/hunter first formations contain one Shuttle, while the merchant has no combat formation | **Resolved (2026-10-13, ledger Q334):** group and resolve the exact first formation in memory, report later formations as ENC-I001, and report the three authored composition replacements as ENC-I002. The final ENC-010 table wins: Raiders use 2–3 Fighters, Hunter one Red Elite, Merchant one Freighter with ai_civilian; Probe retains three Frigates. All four use explicit ship entries rather than the legacy doctrine switch. Existing imported ships/profiles are mandatory, never substitutes. Story entries persist; unspecified placement ranges retain definition defaults and unspecified conditions/formation/loot/spacing remain intact. Preserve ARK/legacy faction fields; add real GAL-012 ownership only through empty-link fills. Generation preflights real Ark Start, Whisper and danger-2 Drift, and validates ENC content separately from unfinished GAL content. | Tech lead |
+
+| 25 | Pure encounter composition/placement waits for whole SPEC-30 including later map/performance/M4 work | Use completed ENC-002 definitions and GAL-006/008 generated content and service queries. Preserve specified RNG streams, obstruction geometry and all required tests; director, spawning and live encounter acceptance remain ENC-007. | Tech lead |
 
 ## 11. References
 

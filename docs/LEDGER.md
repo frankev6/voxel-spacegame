@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 105 | 11 | 0 | 0 | 64 | 0 | 180 | 9 |
+| M3 | 104 | 12 | 0 | 0 | 64 | 0 | 180 | 9 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -363,7 +363,7 @@
 | ENC-003 | Faction singleton, index map and FactionStandingSystem | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-002, SPEC-21, SPEC-13, SPEC-23 | no | todo |  |  |  |  |
 | ENC-004 | FactionService and FACN | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-003, PERS-001, FND-001 | no | todo |  |  |  |  |
 | ENC-005 | TerritoryService (authored ownership) | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-30 | no | todo |  |  |  |  |
-| ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-30 | no | todo |  |  |  |  |
+| ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, GAL-006, GAL-008 | yes | todo |  |  |  |  |
 | ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SPEC-31, SPEC-32, SPEC-23 | no | todo |  |  |  |  |
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | no | todo |  |  |  |  |
 | ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, SPEC-40 | no | todo |  |  |  |  |
@@ -919,6 +919,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 340 | SPEC-30 Q35: live session composition before PLOC/loader | Resolved: actual galaxy/ticker/GLXY registered and owned; missing old chunks warn, start fallback waits for restored SimClock, stale deferred reset cannot dispose a newer campaign. Pose/docking and streaming remain SYS tasks. | Tech lead |
 | 341 | SPEC-31 Q13: world-loader dependencies include later and optional work | Resolved: explicit completed galaxy/origin, voxel and physics lifetime prerequisites for SYS-004; full T1 acceptance preserved, later streaming tiers and visuals remain separate. | Tech lead |
 | 342 | SPEC-32 Q13: arrival solver held by whole galaxy spec | Resolved: completed TRV-001, GAL-002 and GAL-008 are its actual prerequisites; retain five functional checks and advisory fixture, leave travel/streaming acceptance separate. | Tech lead |
+| 344 | SPEC-33 Q25: composition/placement sequencing | Resolved: completed ENC-002 and GAL-006/008 are direct prerequisites; fixed RNG/geometry/tests remain unchanged, director integration is ENC-007. | Tech lead |
 | 334 | SPEC-33 Q24: legacy first formation conflicts with final encounter table | Resolved: retain/report original formation and explicit replacement diagnostics; authored ENC-010 composition table governs final fleets, real assets required. | Tech lead |
 | 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
 
@@ -1045,6 +1046,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — SYS-004 required fixtures compile — astra (gpt-6)
+
+- Adds five direct-update PlayMode cases against shipped galaxy definitions and actual OriginRebaseSystem: anchor identity/positions/destroyed omission, unload and deferred collider release, split membership, registry hook propagation, exactly-once entry/visits. Nearby missing grids remain not-ready. No wall-clock/frame waits.
+- Compile96149 clean with zero C# warnings after two missing test imports corrected. Evidence Logs/playtest/world-loader/compile.log. Tests: spec-required: 5, extra: 0; execution deferred until known QST-002 boot failure is repaired, avoiding a guaranteed failed PlayMode restart. Loader remains in-progress, not installed before SYS-006 arrival grids.
+- ENC-006 direct completed dependencies resolvedQ344, ready for the worker who delivered NAR-016. Previous turn accepted galaxy map and dispatched arrival solver (progress).
 
 ### 2026-10-13 — GAL-011 accepted in loader batch — astra (gpt-6)
 
