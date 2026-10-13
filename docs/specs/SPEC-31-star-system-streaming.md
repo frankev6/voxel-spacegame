@@ -510,7 +510,7 @@ sequenceDiagram
 ### SYS-006 — T2 voxel bodies and damage persistence
 - **Milestone:** M3
 - **Tier:** frontier — F5/F1: ownership transfer of structures between the loader, the registry and deltas; save correctness
-- **Depends on:** `SYS-003`, `SYS-004`, `SPEC-13`, `SPEC-21`, `SPEC-23`
+- **Depends on:** `SYS-003`, `SYS-004`, `DMG-014`, `WPN-012`, `AI-010`
 - **Do:** §5.4, §5.6 (station part), §5.7. Install the actual loader in GameComposition with its scene hooks/ticker and T2 arrival readiness (Q14).
 - **Files:** `Assets/Game/Galaxy/Streaming/{T2Streamer,BodyGridSpawner,DamageCapture}.cs`, `Assets/Game/Galaxy/Bodies/BodyGridWatchSystem.cs`, `Assets/Game/Tests/PlayMode/Galaxy/T2StreamingTests.cs`
 - **Acceptance criteria:**
@@ -625,6 +625,8 @@ sequenceDiagram
 | 13 | SYS-004 whole-spec dependencies include later map/content/performance, M4 diffs and optional region compounds | Use completed direct dependencies SYS-002, GAL-008/009, SPEC-10 and PHY-001/012 for T1 load/unload, origin, grid hook and deferred collider lifetime. Keep all five required cases; actual scene integration follows Q14 with T2; T2/T3, visuals, interaction and travel remain their owning tasks. Later map/diff/performance work does not gate loading. | Tech lead |
 
 | 14 | T1 task cannot install the scene-ready hook before T2 exists, while T2 depends on T1 | Resolved: accept SYS-004 after its five T1 lifecycle cases pass, preserving real IsAreaReady checks (false for missing nearby grids). SYS-006 owns live loader registration with actual T2 construction and arrival readiness. This avoids a circular task gate without pretending streamed stations exist or weakening readiness. | Tech lead — ledger Q357 |
+
+| 15 | T2 whole-spec dependencies include advisory gates, balance and M4 work | Resolved: completed SYS-003/004 and integrated DMG-014, WPN-012, AI-010 provide shape/grid ownership, destruction, weapon and AI runtime. Later tuning, scenarios and M4 extensions do not gate T2. Preserve all five functional cases and real scene composition. | Tech lead — ledger Q358 |
 
 ## 11. References
 

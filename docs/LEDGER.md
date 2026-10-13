@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 100 | 8 | 0 | 0 | 72 | 0 | 180 | 8 |
+| M3 | 99 | 9 | 0 | 0 | 72 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -337,7 +337,7 @@
 | SYS-003 | Structure builders | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-10 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 971ae0b7 | Deterministic shape/asteroid builders;4 focused tests pass; Q307 |
 | SYS-004 | Load and unload (T1) | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-002, GAL-008, GAL-009, SPEC-10, PHY-001, PHY-012 | yes | done | astra (gpt-6) | 2026-10-13 | 37ed39f6 | Five T1 cases pass; Q357 stages actual scene registration with SYS-006 T2; missing grids correctly block arrival. |
 | SYS-005 | BodyOnRailsSystem | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  |  |
-| SYS-006 | T2 voxel bodies and damage persistence | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-003, SYS-004, SPEC-13, SPEC-21, SPEC-23 | no | todo |  |  |  |  |
+| SYS-006 | T2 voxel bodies and damage persistence | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-003, SYS-004, DMG-014, WPN-012, AI-010 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
 | SYS-007 | T3 asteroid belts | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006 | no | todo |  |  |  |  |
 | SYS-008 | InteractionQuerySystem, docking and BodyInteracted | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-004, SPEC-20, SPEC-23 | no | todo |  |  |  |  |
 | SYS-009 | PLOC participant | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-008, PERS-001 | no | todo |  |  |  |  |
@@ -931,6 +931,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 351 | SPEC-40 Q27: effect context hooks | Resolved in ADR-0075: optional Data ILogicEffectHost supplies rejection trace and merchant continuation; no cross-module reference. NAR-011/DLG-006 own production wiring. | Tech lead |
 | 352 | SPEC-33 Q26: pure composition boundaries | Resolved: composition returns full ordered fleet; director owns live-cap truncation. Preserve maximum RNG draws, blueprint-owned cell size and authored spacing; automatic spacing uses largest radius and M3 uses line abreast. | Tech lead |
 | 355 | SPEC-30 Q36: default belt geometry | Resolved: 2000 m width with1000 m sectors yields two identity-safe rings; keep SYS-E003 and packed ID contract unchanged. | Tech lead |
+| 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
 | 356 | SPEC-40 Q28: reloaded argument slots | Resolved: accept null/empty unused text for numeric and boolean slots; reject nonempty text and conflicting expression slots consistently at validation/bind. | Tech lead |
 | 354 | SPEC-32 Q18: lane-only lifecycle | Resolved: constructor owns config, scene query and lane watchers; missing context closes gated lanes until rebuild; generation changes dispose subscriptions. Execution remains TRV-006 and related tasks. | Tech lead |
