@@ -900,6 +900,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 307 | SPEC-31 Q12: builder geometry, inputs and ownership | Resolved: injected baked content/catalog, caller-owned sources and loader-owned cache; centered cell sampling, shell subtraction, deterministic nearest-core footprint replacement, seeded simplex offset and bounded native staging. No new assets. | Tech lead |
 | 308 | SPEC-50 Q25: actual ECO-004 narrative dependency | Resolved under ADR-0068: require NAR-001 interface plus completed ECO-003/005 runtime; retain full loot/service scope and eight required tests. | Tech lead |
 | 309 | SPEC-40 Q14: runtime vocabulary invocation boundary | Resolved: SPEC-41 Invoke serves expression functions with evaluated values/resolved indices and retained canonical IDs; commands use compiled effect preflight/flow, never direct Invoke. | Tech lead |
+| 310 | SPEC-23 Q27: fleet/swarm fixture geometry and measurement scope | Resolved: compact authored-block CPU fixtures with real AI, physics and damage; single-brick craft, actual pose/slot visual harness, separate AI/fixed-tick measures and explicit unavailable/casualty records. Measurements opt-in; visual acceptance remains pending. | Tech lead |
 
 
 ## Measurements
@@ -1011,6 +1012,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Fleet scenario delivery integrated — astra (gpt-6)
+
+- AI-015322612a8 adds two compact fleet/swarm CPU fixtures and an owned Scene-view formation harness. Lead fixed a missing Power namespace; compile66386 passed with zero CS warnings, evidence `Logs/playtest/AI015/compile.log`.
+- Q27 mirrored310. No benchmark or full-suite run; measurement deferred under ADR-0070, visual acceptance still pending, task remains in-progress.
+- Test count: spec-required: 2 (authored, not run), extra: 0.
 
 ### 2026-10-13 — Fast validation and worker recycling — astra (gpt-6)
 

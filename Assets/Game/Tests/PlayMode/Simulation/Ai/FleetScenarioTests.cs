@@ -10,6 +10,7 @@ using Game.Simulation;
 using Game.Simulation.Ai;
 using Game.Simulation.Commands;
 using Game.Simulation.Flight;
+using Game.Simulation.Power;
 using Game.Simulation.Spatial;
 using Game.Simulation.Weapons;
 using Game.Tests.Common;

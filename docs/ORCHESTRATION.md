@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Fleet scenarios integrated for review:** branch task/AI-015-fleet-integration, delivery322612a8 plus missing Power namespace repair. Compile66386 clean (zero CS warnings); evidence `AI015/compile.log`. Two Performance fixtures deliberately not run; visual acceptance remains pending, AI-015 stays in-progress. Q27 mirrored310. Workers NAR-004158/ECO-004170/NAR-009142 active. No Unity validation active; Editor open/stopped. Previous turn claimed/recycled NAR-009 (progress).
+
 - **Fast validation / recycling:** worker snapshots NAR-004157 and ECO-004170 active; DEV-018141 delivered866cb01b, acceptance blocked on actual GAL-008/SYS-009/TRV-006/HUD-002/003. Presentation recycled to NAR-009. AI-015 review pending; no Unity tests launched this turn. Preserve incidental fixture acceleration and production balance.
 
 - **Catalog closed / combat worker recycled:** NAR-006309a55c1 adds opt-in20k build+2k binding fixture, compile35729 clean; four prior functional checks remain valid, benchmark deliberately unrun. AI-015 delivered dab28594 (review/integration/visual acceptance pending; no measurement run). Worker recycled to NAR-004 claim920f5f71. ECO-004168/DEV-018139 active. Editor17922 open/stopped, no live validation. Previous turn closed compiler (progress).
