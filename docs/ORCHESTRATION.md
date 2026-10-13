@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Current validation:** faction generation93145 exited0; exact three outputs, duplicate skipped, player preserved, byte/GUID/manifest-stable rerun. Content0errors/11existing economy-power warnings. Generated assets committed e9d50f3c; temporary job/meta removed. Compile + grouped FactionConverterTests/QuestContractTests/MigrationGateTests now session94395; no primary mutation or concurrent Unity until terminal. Worker WPN-018 has implementation and five required tests in progress; AUD-013 active; presentation dependency wait remains.
+
 - **Current generation:** projectile rerun40752 exited0, compile clean and7/7 required tests pass (`Logs/playtest/projectile-combat/acceptance.xml`). Reviewed QST/MIG preparation integrated95f80410/6b4a7571/e4635ed3/13ad4fb4; ledger merge retains Q278–280. Faction generation session93145 active through temporary `Assets/Game/Editor/FactionMigrationJob.cs`; remove script/meta only after terminal, inspect generation evidence, then run grouped faction/quest acceptance before full compatible regression. No primary mutation or concurrent Unity until terminal.
 
 - **Projectile validation repair:** session53533 compiled clean; focused tests5/2/0. Multi-batch runs caught NativeStream lane index1 being checked against row range64–127. Repair2e5247ca uses NativeDisableParallelForRestriction on the three stream writers only; exclusive row/64 lane ownership and all container lifetime checks retained. Serialized compile + seven-test rerun session40752 active. Failed evidence `Logs/playtest/projectile-combat/acceptance-first.xml`. No primary mutations until terminal.
