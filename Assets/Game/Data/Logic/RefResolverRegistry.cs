@@ -1,20 +1,38 @@
+using System;
+using System.Collections.Generic;
+using Game.Data.Definitions;
+using Game.Data.Services;
+
 namespace Game.Data.Logic
 {
-    /// <summary>Public narrative contract (SPEC-40 §4.4); later task implementations are explicitly labelled.</summary>
+    /// <summary>Canonical content-family resolvers; explicit registration replaces a family's resolver.</summary>
     public sealed class RefResolverRegistry
     {
-        // TODO(NAR-006): register canonical content-family resolvers and implement lookup.
-        public static RefResolverRegistry CreateDefault(Game.Data.Services.ContentCatalog content)
+        readonly Dictionary<RefKind, IRefResolver> resolvers = new Dictionary<RefKind, IRefResolver>();
+        public static RefResolverRegistry CreateDefault(ContentCatalog content)
         {
-            // QST-001 supplies the four canonical families. NAR-006 still owns resolver behavior and the remaining families.
+            if (content == null) throw new ArgumentNullException(nameof(content));
             var registry = new RefResolverRegistry();
-            registry.Register(new CatalogRefResolver<Game.Data.Definitions.QuestDefinition>(RefKind.Quest, content));
-            registry.Register(new CatalogRefResolver<Game.Data.Definitions.ClueDefinition>(RefKind.Clue, content)); // Includes RumorDefinition through inheritance.
-            registry.Register(new CatalogRefResolver<Game.Data.Definitions.StoryBeatDefinition>(RefKind.Beat, content));
-            registry.Register(new CatalogRefResolver<Game.Data.Definitions.MysteryDefinition>(RefKind.Mystery, content));
-            throw new System.NotImplementedException("NAR-006");
+            registry.Register(new CatalogRefResolver<ItemDefinition>(RefKind.Item, content));
+            registry.Register(new CatalogRefResolver<QuestDefinition>(RefKind.Quest, content));
+            registry.Register(new CatalogRefResolver<ClueDefinition>(RefKind.Clue, content));
+            registry.Register(new CatalogRefResolver<StoryBeatDefinition>(RefKind.Beat, content));
+            registry.Register(new CatalogRefResolver<MysteryDefinition>(RefKind.Mystery, content));
+            registry.Register(new CatalogRefResolver<LootTableDefinition>(RefKind.LootTable, content));
+            registry.Register(new CatalogRefResolver<MerchantDefinition>(RefKind.Merchant, content));
+            registry.Register(new CatalogRefResolver<AuthoredStarSystemDefinition>(RefKind.StarSystem, content));
+            registry.Register(new CatalogRefResolver<FactionDefinition>(RefKind.Faction, content));
+            registry.Register(new CatalogRefResolver<EncounterDefinition>(RefKind.Encounter, content));
+            registry.Register(new CatalogRefResolver<ShipBlueprintDefinition>(RefKind.Blueprint, content));
+            registry.Register(new CatalogRefResolver<AudioCueDefinition>(RefKind.AudioCue, content));
+            registry.Register(new CatalogRefResolver<BodyTemplateDefinition>(RefKind.Entity, content));
+            return registry;
         }
-        public void Register(IRefResolver resolver) => throw new System.NotImplementedException("NAR-006");                    // replaces an existing resolver of the same kind
-        public bool TryGet(RefKind kind, out IRefResolver resolver) => throw new System.NotImplementedException("NAR-006");
+        public void Register(IRefResolver resolver)
+        {
+            if (resolver == null) throw new ArgumentNullException(nameof(resolver));
+            resolvers[resolver.Kind] = resolver;
+        }
+        public bool TryGet(RefKind kind, out IRefResolver resolver) => resolvers.TryGetValue(kind, out resolver);
     }
 }
