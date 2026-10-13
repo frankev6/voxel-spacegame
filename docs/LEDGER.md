@@ -1054,6 +1054,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — NAR-005 effect routes authored — astra (gpt-6)
+
+- 0f9b3acd implements fifteen non-cost narrative/world routes and bound-reference failure logging; unknown refs skip the effect per SPEC-40 §7. Flow flags unchanged. Fact writes, numeric effects, spending and atomic list application remain; no acceptance claim.
+- Five required NAR-005 cases remain to author: spec-required: 5, extra: 0. QST-002 matcher repair9ca0b84 is integrated; only Usage_Enforced needs recheck in the next compatible validation batch. No Unity operation.
+- Workers verified: combat228 preparing SYS-005 before its dependency wait; route planner239 active; lane access203 active. Previous turn accepted ECO-009/TRV-005 and generated real narrative content (progress).
+
 ### 2026-10-13 — ECO-009 / TRV-005 done; quest content generated — astra (gpt-6)
 
 - Clean compile62184, zero CS warnings. Generation1415 terminal exit1: economy readback passes with zero errors/three existing tradeability warnings; narrative assets generatedbd158825, but whole-content compilation reports TRV-003 galaxy_main owner stub. Evidence Logs/playtest/narrative-content-batch/ and Logs/playtest/eco009/.
