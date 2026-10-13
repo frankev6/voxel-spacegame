@@ -920,6 +920,8 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 
 | 60 | Target-lead centre lookup when a grid origin differs from its occupied hull centre | Match SpatialProxy: transform `(CellMin + CellMax + 1) × CellSize / 2` through the target pose; a non-grid target uses its transform position. Cache a read-only VoxelGrid lookup. The required analytic moving-target test includes an offset, rotated target hull. | Tech lead — resolved WPN-006; no new public API. |
 
+| 61 | Fractional trigger carry and reconstructing a pellet RNG in a later delivery handler | Preserve negative sub-tick carry while actively firing; clamp idle/power/active-beam waiting to zero so no triggers bank. A zero initial cooldown fires immediately without subtracting an extra first tick. Seed each pellet with decision 8 using its own ShotId and shooter persistent id (zero for unidentified fixtures); consume two spread samples, then reconstruct that same seed and skip those two samples for lifetime. This makes variable lifetime independent of delivery batching and entity allocation. | Tech lead |
+
 ## 11. References
 
 - Audit (background only): `docs/reference/audit-2026-10/02-combat-destruction.md` C22 (double energy drain), R26 (beam through targets), 01-B2 (wrong-cell hits).
