@@ -60,6 +60,7 @@ namespace Game.Presentation.Systems
                 if (origins.IsEmptyIgnoreFilter) hasLastOrigin = false;
                 else
                 {
+                    EntityManager.CompleteDependencyBeforeRO<FrameOrigin>();
                     var current = origins.GetSingleton<FrameOrigin>().OriginInStarSystem;
                     if (hasLastOrigin && math.any(current != lastOrigin))
                     {

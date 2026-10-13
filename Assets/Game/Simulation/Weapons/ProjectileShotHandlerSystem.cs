@@ -14,17 +14,20 @@ namespace Game.Simulation.Weapons
     [BurstCompile, UpdateInGroup(typeof(GameplayPrePhysicsGroup)), UpdateAfter(typeof(WeaponFireSystem)), UpdateBefore(typeof(AbilityActivationGroup))]
     public partial struct ProjectileShotHandlerSystem : ISystem
     {
+        ComponentLookup<OriginShiftRecord> shifts;
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
+            shifts = state.GetComponentLookup<OriginShiftRecord>(true);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<WeaponShots>(); state.RequireForUpdate<ProjectileStore>();
             state.RequireForUpdate<WeaponDefsRef>(); state.RequireForUpdate<WeaponTuning>(); state.RequireForUpdate<SimClock>();
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             var shots = SystemAPI.GetSingleton<WeaponShots>(); var store = SystemAPI.GetSingleton<ProjectileStore>();
-            var shift = SystemAPI.TryGetSingleton<OriginShiftRecord>(out var record) ? record : default;
+            shifts.Update(ref state);
+            SystemAPI.TryGetSingletonEntity<OriginShiftRecord>(out var shiftEntity);
             state.Dependency = new AppendJob { Shots = shots.Shots, Rows = store.Rows, Stats = store.Stats, Applied = store.AppliedShiftSequence,
-                Shift = shift, Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value, Tick = SystemAPI.GetSingleton<SimClock>().Tick,
+                Shifts = shifts, ShiftEntity = shiftEntity, Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value, Tick = SystemAPI.GetSingleton<SimClock>().Tick,
                 Capacity = SystemAPI.GetSingleton<WeaponTuning>().MaxProjectiles }.Schedule(store.Acquire(shots.Access.BeginRead(state.Dependency)));
             shots.Access.EndRead(state.Dependency); store.Release(state.Dependency);
         }
@@ -32,10 +35,11 @@ namespace Game.Simulation.Weapons
         {
             [ReadOnly] public NativeList<WeaponShot> Shots;
             public NativeList<ProjectileRow> Rows; public NativeReference<ProjectileStoreStats> Stats; public NativeReference<uint> Applied;
-            public OriginShiftRecord Shift; public BlobAssetReference<WeaponDefsBlob> Weapons; public uint Tick; public int Capacity;
+            [ReadOnly] public ComponentLookup<OriginShiftRecord> Shifts;
+            public Entity ShiftEntity; public BlobAssetReference<WeaponDefsBlob> Weapons; public uint Tick; public int Capacity;
             public void Execute()
             {
-                ProjectileStore.ApplyPendingShift(ref Rows, Shift, ref Applied); var stats = Stats.Value;
+                ProjectileStore.ApplyPendingShift(ref Rows, Shifts.HasComponent(ShiftEntity) ? Shifts[ShiftEntity] : default, ref Applied); var stats = Stats.Value;
                 foreach (var shot in Shots)
                 {
                     if (shot.Delivery != WeaponDelivery.Projectile) continue; // WPN-008 adds guided missile delivery.

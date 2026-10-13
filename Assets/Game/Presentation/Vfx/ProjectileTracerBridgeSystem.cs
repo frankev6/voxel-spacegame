@@ -20,6 +20,7 @@ namespace Game.Presentation.Vfx
         {
             var batch = Rig?.Tracers; if (batch == null) return; batch.Begin();
             var store = SystemAPI.GetSingleton<ProjectileStore>(); store.CompleteAccess();
+            EntityManager.CompleteDependencyBeforeRO<OriginShiftRecord>();
             var record = SystemAPI.TryGetSingleton<OriginShiftRecord>(out var r) ? r : default;
             if (!TracerGatherJob.PendingShift(record, store.AppliedShiftSequence.Value, out var correction)) return;
             float alpha = 0;
