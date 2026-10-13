@@ -122,7 +122,7 @@ namespace Game.Simulation.Abilities
             }
             state.SlotCount = (byte)slots.Length; state.SyncedRevision = revision; state.Resynced = 1;
             if (overflow && state.OverflowWarned == 0)
-            { GameLog.Burst.Warn(new FixedString128Bytes("Ability slots exceed 8; retaining the first eight in block instance order.")); state.OverflowWarned = 1; }
+            { FixedString128Bytes warning = "Ability slots exceed 8; retaining the first eight in block instance order."; GameLog.Burst.Warn(warning); state.OverflowWarned = 1; }
         }
 
         void Activate(Entity root, ref AbilitySlot slot, ref AbilityDef def)
