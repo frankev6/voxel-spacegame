@@ -62,7 +62,7 @@ namespace Game.Simulation.Power
             gather = new ShieldHitGatherJob { Hits = hits, Ranges = ranges }.Schedule(gather);
             var damage = SystemAPI.GetSingleton<DamageStreams>(); var fx = SystemAPI.GetSingleton<FxEventQueue>();
             update.Hits = hits; update.Ranges = ranges;
-            update.Damage = damage.Damage.BeginWrite(ref state, ProducerKind.ShieldOverflow, roots.CalculateChunkCountWithoutFiltering());
+            update.Damage = damage.Damage.BeginWrite(ref state, ProducerKind.ShieldOverflow, math.max(1, roots.CalculateChunkCountWithoutFiltering()));
             update.Fx = fx.Queue.AsParallelWriter();
             var handle = update.ScheduleParallel(roots, fx.Access.BeginRead(JobHandle.CombineDependencies(gather, state.Dependency)));
             damage.Damage.EndWrite(handle); owned.Hits.EndRead(handle); fx.Access.EndRead(handle);
