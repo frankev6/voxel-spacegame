@@ -25,7 +25,8 @@ namespace Game.Simulation.Weapons
         [ReadOnly] public SpatialHashQueryData Hash;
         [ReadOnly] public ComponentLookup<PhysicsVelocity> Velocities;
         [ReadOnly] public BlobAssetReference<WeaponDefsBlob> Weapons;
-        public NativeStream.Writer Damage, Explosions, Shields;
+        // Batch row ranges map to lane indices (row / 64); each lane still has exactly one writer.
+        [NativeDisableParallelForRestriction] public NativeStream.Writer Damage, Explosions, Shields;
         [NativeDisableContainerSafetyRestriction] public NativeQueue<FxEvent>.ParallelWriter Fx;
         [NativeDisableContainerSafetyRestriction] public NativeQueue<SfxEvent>.ParallelWriter Sfx;
         public CombatAudioCues Cues;
