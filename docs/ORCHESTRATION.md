@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **NAR-003 implementation underway:** claimed400d939f; isolated lead branch `task/NAR-003-logic-compiler` at97e102ca implements registry vocabulary metadata and ordinal nearest-name suggestions. Public mutable metadata is copied on lookup to protect the private table. Type checking/emission/binding and required tests remain; no compile claim. Workers AI-015148, SYS-003157, AI-010129 verified active; presentation is shortening deliveredaa12b616 fixtures before final integration. Primary runtime remains validated53f8012e; no Unity run this turn. Previous turn closed NAR-002 (progress).
+
 - **NAR-002 accepted:** primary integration67ce3485, compile93926 clean, focused21386 seven passed. Evidence `narrative-parser/`; ready to FF main and claim NAR-003. AI-010aa12b616 reviewed but worker actively shortening fixtures; wait for final delivery before integration. AI-015147/SYS-003156 active. Editor17922 open/stopped; no active validation. Previous turn implemented parser (progress).
 
 - **Fast fixtures persisted / parser implemented:** owner correction committed23799d99 and delivered to all three exact workers. Lead isolated NAR-002 e6e9ee02 adds AST and expression/command parsing with bounded nesting and first-error diagnostics; seven required tests and compilation remain. No Unity run this turn. Primary runtime unchanged; last worker snapshots AI-015146, SYS-003155, AI-010128 active. Prior acknowledgment alone was no progress; this turn changes authoritative docs/code.
