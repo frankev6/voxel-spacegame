@@ -114,10 +114,10 @@ namespace Game.Editor.Migration.Narrative
                 }
             }, out _);
         }
-        static void Strings(SerializedProperty property, string[] values)
+        static void Strings(SerializedProperty property, IReadOnlyList<string> values)
         {
-            property.arraySize = values.Length;
-            for (int i = 0; i < values.Length; i++) property.GetArrayElementAtIndex(i).stringValue = values[i];
+            property.arraySize = values.Count;
+            for (int i = 0; i < values.Count; i++) property.GetArrayElementAtIndex(i).stringValue = values[i];
         }
     }
 }
