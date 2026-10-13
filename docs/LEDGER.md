@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 120 | 8 | 0 | 0 | 52 | 0 | 180 | 8 |
+| M3 | 119 | 8 | 0 | 0 | 53 | 0 | 180 | 10 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -347,7 +347,7 @@
 | SYS-013 | Jump integration hooks | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006, SYS-008 | no | todo |  |  |  |  |
 | SYS-014 | World gates: streaming performance and soak | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-007, SYS-013, TST-001 | no | todo |  |  |  |  |
 | TRV-001 | Public contract types | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, FLT-001, NAR-001, AUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a68c988 | Canonical travel contracts and staged watcher API; 2 required tests; runtime travel remains later tasks |
-| TRV-002 | Travel config definition and validator | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-04, SPEC-72 | no | todo |  |  |  |  |
+| TRV-002 | Travel config definition and validator | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-04, SPEC-72 | yes | todo |  |  |  |  |
 | TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, SPEC-30, SPEC-40 | no | todo |  |  |  |  |
 | TRV-004 | Route planner | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-30 | no | todo |  |  |  |  |
 | TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-30 | no | todo |  |  |  |  |
@@ -367,7 +367,7 @@
 | ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SPEC-31, SPEC-32, SPEC-23 | no | todo |  |  |  |  |
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | no | todo |  |  |  |  |
 | ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, SPEC-40 | no | todo |  |  |  |  |
-| ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | no | todo |  |  |  | partial in ENC-002: locked player faction prerequisite / remaining factions, encounters and canonical ARK ownership open |
+| ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | yes | todo |  |  |  | partial in ENC-002: locked player faction prerequisite / remaining factions, encounters and canonical ARK ownership open |
 | ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | no | todo |  |  |  |  |
 | ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-009, SPEC-70 | no | todo |  |  |  |  |
 | NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | e39b2d3 | Narrative contracts and precise future-task stubs; 2 required tests; full batch 901 EM / 128 PM, zero failures |
@@ -419,7 +419,7 @@
 | ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | yes | todo |  |  |  |  |
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, SPEC-13, SPEC-31, SPEC-12 | no | todo |  |  |  |  |
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
-| ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | no | todo |  |  |  | partial in ECO-002: canonical resource_scrap generation prepared / execution and remaining narrative, loot and merchant content pending |
+| ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | todo |  |  |  | partial in ECO-002: canonical resource_scrap generation prepared / execution and remaining narrative, loot and merchant content pending |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
 | EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 9c627fd | Editor contracts/config; 4 required tests; runtime tools remain EDT-002 onward |
 | EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | todo |  |  |  |  |
@@ -485,7 +485,7 @@
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
 | MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e9d50f3c | Three exact factions generated; duplicate skipped, player/AI ownership preserved; rerun byte/GUID/manifest stable |
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3d65849 | Protected ordered loot assets/catalog; rerun byte-identical; 1 required and 1 migration-safety test |
-| MIG-014 | Body template stubs | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-004, GAL-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Resumed on current main: reconcile preserved implementation and exact acceptance, lead owns content generation/Unity |
+| MIG-014 | Body template stubs | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-004, GAL-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | e01dcf3f | Twenty generated body stubs; protected writer cbc6029b; required test passes; byte/GUID-stable rerun; Q328 |
 | MIG-015 | Hand-off package | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-002, MIG-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 5241ee5 | Typed legacy handoff metadata; spec-required: 3, extra: 0 |
 | INP-008 | Gamepad scheme | [SPEC-03](specs/SPEC-03-input.md) | M4 | standard | INP-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 33e24c3 | Gamepad bindings/device labels/aim; hardware feel untested; spec-required: 2, extra: 0 |
 | REN-015 | LOD2 grid proxies | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M4 | frontier | REN-012 | yes | todo |  |  |  |  |
@@ -911,6 +911,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 318 | SPEC-40 Q19: legacy translation boundary and defaults | Resolved: retain source metadata for emission; decimal cumulative thresholds, source-ordered quest logs, canonical provisional journal labels and contextual item mappings. No runtime/asset emission in NAR-014. | Tech lead |
 | 319 | SPEC-61 Q23: save/load construction versus composition cycle | Resolved: explicit completed UI/save/flow prerequisites allow parallel source construction; shared production hookup and full functional/layout acceptance remain required. ADR-0072 amended. | Tech lead |
 | 320 | SPEC-60 Q30: layout audit scroll/measurement semantics | Resolved: exclude scroll content subtree but audit viewport; use intrinsic nowrap width, clear result list and check all containing panels. Functional acceptance pending. | Tech lead |
+| 328 | SPEC-72 Q45: body-stub field ownership | Resolved: preserve non-owned authored fields and object name even on forced refresh; exact twenty-stub acceptance is independent of downstream GAL-012. | Tech lead |
 | 327 | SPEC-61 Q25: settings destination/composition cycle | Resolved via ADR-0072: construct against completed settings/input/UI services; real navigation/lifetime and five checks still required before closure. | Tech lead |
 | 326 | SPEC-61 Q24: named save API and presenter lifecycle | Resolved: SaveService.SaveAsync preserves names and owning safety checks; flow loads; persistent composition owns register/bind/tick/session rebind/dispose. Five screen checks and reachable production navigation remain required. | Tech lead |
 | 324 | SPEC-60 Q32: stale accessibility font-size example | Resolved: use approved 16px body token, 21px at130%; preserve theme and factor-based checks. | Tech lead |
@@ -1028,6 +1029,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — MIG-014 accepted — astra (gpt-6)
+
+- Reviewed converter cbc6029b; generated twenty canonical stubs, catalog references and migration hashes in e01dcf3f. Generation/rerun: zero errors, zero warnings; byte and GUID stability verified. Temporary editor job removed.
+- Compile clean with zero CS warnings; focused BodyTemplateConverterTests: one passed, zero failed, 2.71s total reported test duration. Evidence `Logs/playtest/mig014/{compile.log,acceptance.xml,targeted-generation.txt,targeted-rerun.txt}`. No full suite, benchmark or soak. Test count: spec-required: 1, extra: 0.
+- Q328/SPEC-72 Q45 records field preservation. Production world resources remain GAL-012; unrelated QualitySettings excluded. Fast-fixture owner guidance remains in testing/handoff/worker dispatch.
 
 ### 2026-10-13 — Save session race repaired — astra (gpt-6)
 

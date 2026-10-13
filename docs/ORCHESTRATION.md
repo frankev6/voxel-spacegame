@@ -6,8 +6,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | GAL-003 | resuming preserved579394d on current main | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-014 | resuming preserved644622c/fea6357 on current main | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | GAL-003 | delivered a1d48092; lead scoped review pending | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-014 | accepted e01dcf3f; next ready assignment pending claim | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-005 | claimed; finish HUD-004 bounded review then settings from current main | HUD-003/006/007 once ready |
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Body migration accepted:** cbc6029b/e01dcf3f, twenty canonical stubs, generation and byte/GUID-stable rerun clean; compile80221 clean, focused62647 one passed (2.71s). Evidence mig014/. No active Unity run. GAL-003 delivered a1d48092 cursor188; settings continues. Recycle power into ready work after ledger sync.
 
 - **Save session repair accepted:** worker937fa75b integratedb05b62f; composition now calls ResetSession. Compile52462 clean, focused78374 five passed; evidence save-slots/session-repair.xml. No active validation, fonts restored. HUD-004 remains open only for reachable production navigation; HUD-005164 underway. GAL-003186/MIG-014201 active. Previous turn corrected overbroad galaxy hold (progress).
 

@@ -845,3 +845,5 @@ MIG-013 source provenance (SHA-256 of unchanged export bytes; generated target o
 - Legacy export: `Import/Legacy/content/**` (155 files), `Import/Legacy/narrative/*.json`.
 - Audit background: `docs/reference/audit-2026-10/00-synthesis.md` §7 (what to keep: 69 RegistryKeys, ship templates); `01-voxel-core.md` B1, §6.6, §6.9; `04-persistence-data.md` §6.2, §6.9; `05-narrative-quests.md` B2, §4, §5.13; `06-ui-shipeditor.md` C3, C13.
 - Unity: `SerializedObject`, `EditorUtility.CopySerialized`, `TypeCache`, `Quaternion.Euler` (applies Z, then X, then Y), OBJ importer (negates X).
+
+| 45 | Which authored fields survive body-stub conversion? | The partial protected writer seeds existing objects and changes only mapped display name, description, role and story tag; preserve all other fields and Unity object name, including forced reruns. GAL-012 owns subsequent world resources and validation; MIG-014 closes on its exact twenty-stub acceptance. | Tech lead |
