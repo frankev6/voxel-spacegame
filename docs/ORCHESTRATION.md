@@ -18,7 +18,7 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- **Merchant rounding repair:** compile22093 clean; focused51576 returned7/1/0, only Prices_Relation (45 expected,44 actual). Failure archived `merchants/acceptance-first.xml`. f4cae431 floors sales with MathF in authored float domain before widening (avoids double promotion at floor); unchanged assertions. Recompile49620 active, then eight-check focused rerun. No full suite/tuning. Previous turn closed combat and recycled worker (progress).
+- **Merchant rounding repair:** compile22093 clean; focused51576 returned7/1/0, only Prices_Relation (45 expected,44 actual). Failure archived `merchants/acceptance-first.xml`. f4cae431 floors sales with MathF in authored float domain before widening (avoids double promotion at floor); unchanged assertions. Recompile49620 clean; eight-check focused rerun91104 active. No full suite/tuning. Previous turn closed combat and recycled worker (progress).
 
 - **Merchant integration:** stopped Play for validation; Editor17922 open. Primary `task/ECO-005-merchant-integration` integrates6cd04fb0 as58637745; Q24 mirroredQ304. Compile22093 active; next eight MerchantTests only. AI-010 active124, AI-015 active144, power delivered/validation wait153. Next eligible standard assignment for power: SYS-003 structure builders (real dependencies done), after merchant closure. Previous turn closed combat and dispatched fleet scenarios (progress).
 
