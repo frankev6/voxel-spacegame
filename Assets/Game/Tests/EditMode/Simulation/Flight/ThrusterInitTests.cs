@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Game.Core;
 using Game.Data.Components;
+using Game.Data.Blocks;
 using Game.Data.Definitions;
 using Game.Data.Services;
 using Game.Data.Validation;
@@ -97,6 +98,13 @@ namespace Game.Tests.EditMode.Simulation.Flight
                     Assert.IsTrue(EM.HasComponent<ThrusterState>(instance.Functional));
                     Assert.IsTrue(EM.HasComponent<ThrusterVisual>(instance.Functional));
                     Assert.AreEqual(0, EM.GetComponentData<ThrusterState>(instance.Functional).Intensity);
+                    Assert.IsTrue(EM.HasComponent<Powered>(instance.Functional));
+                    var requests = EM.GetBuffer<PowerRequest>(instance.Functional);
+                    Assert.AreEqual(1, requests.Length);
+                    Assert.AreEqual(BlockModuleId.Thruster, requests[0].Module);
+                    Assert.AreEqual(PowerTuning.Defaults.PriorityThruster, requests[0].Priority);
+                    Assert.IsTrue(content.Service.BlockModules.Value.TryGet(BlockModuleId.Thruster, instance.Block, out ThrusterParams row));
+                    Assert.AreEqual(row.PowerDraw, requests[0].Draw);
                     Assert.Greater(EM.GetComponentData<ThrusterVisual>(instance.Functional).NozzleRadius, 0);
                 }
             }
