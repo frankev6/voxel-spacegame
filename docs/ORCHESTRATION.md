@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 | claimed920f5f71 after AI-015 delivery; condition evaluation | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 accepted | FACT correctness review active; awaiting next real standard dependency | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-014 | claimedc76e4a29; legacy translation after ECO acceptance and HUD review | narrative follow-ups |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-009 delivered | 20f487c0 pending integration; bounded HUD-002/FND-012 readiness audit active | awaiting actual ready standard work |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-009 accepted | readiness audit149 delivered; genuine wait for lead HUD composition/UI audit prerequisites | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -19,6 +19,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Conditions accepted / HUD dependency action:**66fad93a compile21158 clean,89147 five passed; Q18→316. Presentation audit149 confirms HUD-002 whole-SPEC60 dependency overbroad and downstream binding cycle; next lead resolve sequencing and implement composition, retain actual travel gates. UI-012 still owns layout acceptance. Presentation has genuine ready-standard dependency wait; combat FACT review167 active, NAR-014180 active. No validation active. Previous turn closed FACT/import pipeline (progress).
 
 - **Import compiler accepted:**36adef2b compile20292 clean,50859 three passed; evidence `logic-import/`, Q17→315. NAR-0048243b1a4 delivered166, review/integration pending (draft Q15 must become18). Same combat thread on bounded FACT correctness review; presentation on HUD/spawn readiness audit; NAR-014 remains implementing. No Unity validation active. Previous turn implemented FACT (progress).
 

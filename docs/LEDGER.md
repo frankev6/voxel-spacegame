@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 127 | 7 | 0 | 0 | 46 | 0 | 180 | 8 |
+| M3 | 127 | 6 | 0 | 0 | 47 | 0 | 180 | 10 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -373,8 +373,8 @@
 | NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | e39b2d3 | Narrative contracts and precise future-task stubs; 2 required tests; full batch 901 EM / 128 PM, zero failures |
 | NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 67ce3485 | Located lexer/AST/parser; seven focused checks pass; Q305 resolves grammar example |
 | NAR-003 | Type checker, registry, compiler and binder | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-002 | yes | done | astra (gpt-6) | 2026-10-13 | d3f59c1c | Compiler, registry, binder, graph emission and scoped Invoke; six focused checks pass; runtime nodes NAR-004/005 |
-| NAR-004 | Condition and expression nodes | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | partial in NAR-003: serializable primitive node shapes and binding/dependency traversal / evaluation, function dispatch and required tests missing |
-| NAR-005 | Effect nodes and atomic effect lists | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-004 | no | todo |  |  |  | partial in NAR-003: serialized effect shapes, flow flags and binding / execution, preflight, atomic requirements and required tests missing |
+| NAR-004 | Condition and expression nodes | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 66fad93a | Bound condition/expression evaluation; clean compile and five required checks pass; effects remain NAR-005 |
+| NAR-005 | Effect nodes and atomic effect lists | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-004 | yes | todo |  |  |  | partial in NAR-003: serialized effect shapes, flow flags and binding / execution, preflight, atomic requirements and required tests missing |
 | NAR-006 | Fact catalog and reference resolvers | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 309a55c1 | Fact catalog/resolvers;4 functional checks pass, Build20k fixture authored and measurement deferred ADR-0070 |
 | NAR-007 | FactStore | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-006 | yes | done | astra (gpt-6) | 2026-10-13 | 18906e47 | Dense facts, deferred changes, orphan/alias restore and trace; seven functional checks pass, two advisory fixtures authored/unrun |
 | NAR-008 | FACT save participant | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | 6a0c3c47 | Atomic versioned FACT payload; five functional checks pass, Capture5k measurement authored/unrun |
@@ -388,7 +388,7 @@
 | NAR-016 | Legacy converter: quests, triggers, templates and flag assets | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-015 | no | todo |  |  |  |  |
 | NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | no | todo |  |  |  |  |
 | NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | no | todo |  |  |  |  |
-| NAR-020 | LogicWatcher | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-004 | no | todo |  |  |  |  |
+| NAR-020 | LogicWatcher | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-004 | yes | todo |  |  |  |  |
 | DLG-001 | Public contract types | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | NAR-001, UI-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 67e0ffd | Dialog contracts, one required test; full suites green |
 | DLG-002 | Dialog script parser | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, SPEC-40 | no | todo |  |  |  |  |
 | DLG-003 | Dialog validator rules and generated files | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-002 | no | todo |  |  |  |  |
@@ -906,6 +906,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 313 | SPEC-40 Q15: FactStore trace composition and count/copy semantics | Resolved: internal world-facade binding, zero time before binding, chronological bounded trace copy; known-slot NonDefaultCount, separate orphan retention. NAR-010 composition TODO retained. | Tech lead |
 | 314 | SPEC-40 Q16: FACT malformed payload atomicity | Resolved: validate the exact version1 ordered/unique payload fully before store mutation; reject malformed count/name/order/trailing data; version0 resets. | Tech lead |
 | 315 | SPEC-40 Q17: import compiler enumeration and diagnostics | Resolved: serialized wrapper stamps, coalesced current catalog, Play deferral and cached diagnostics; real owner CompileLogic methods retain their task scope. | Tech lead |
+| 316 | SPEC-40 Q18: bound condition dispatch and dynamic owner dependencies | Resolved: cache numeric dispatch/argument storage/generated slots at binding; owner relations expand to Location plus registered faction dependencies; preserve public Invoke and fail-closed errors. | Tech lead |
 
 
 ## Measurements
@@ -1017,6 +1018,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Condition evaluation accepted — astra (gpt-6)
+
+- NAR-00466fad93a adds primitive/function evaluation, short circuit, saturation, baseline reads and bound generated/owner dependencies. Public invocation/serialized layouts preserved; effect execution remains NAR-005. Q18 mirrored316.
+- Compile21158 clean; focused89147 five passed, evidence `Logs/playtest/condition-evaluation/`. No broad suite or benchmark.
+- Test count: spec-required: 5, extra: 0.
 
 ### 2026-10-13 — Import-time logic compiler accepted — astra (gpt-6)
 
