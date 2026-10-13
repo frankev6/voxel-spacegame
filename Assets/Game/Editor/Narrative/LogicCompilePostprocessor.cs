@@ -196,7 +196,23 @@ namespace Game.Editor.Narrative
                 int index = before.FindIndex(old => old.Path == stamp.Path);
                 if (index >= 0 && before[index].SourceHash == stamp.SourceHash && before[index].Version == stamp.Version) continue;
                 using var property = source.FindProperty(stamp.Path);
-                target.CopyFromSerializedProperty(property);
+                using var destination = target.FindProperty(stamp.Path);
+                // Generic wrapper properties do not copy their children. Transfer the serialized
+                // graph explicitly; current wrappers never enter this path and retain their IDs.
+                using var root = property.FindPropertyRelative("root");
+                if (root != null)
+                    destination.FindPropertyRelative("root").managedReferenceValue = root.managedReferenceValue;
+                else
+                {
+                    using var effects = property.FindPropertyRelative("effects");
+                    using var into = destination.FindPropertyRelative("effects");
+                    into.arraySize = effects.arraySize;
+                    for (int i = 0; i < effects.arraySize; i++)
+                        into.GetArrayElementAtIndex(i).managedReferenceValue = effects.GetArrayElementAtIndex(i).managedReferenceValue;
+                }
+                destination.FindPropertyRelative("sourceHash").ulongValue = stamp.SourceHash;
+                destination.FindPropertyRelative("compilerVersion").intValue = stamp.Version;
+                destination.FindPropertyRelative("hasErrors").boolValue = property.FindPropertyRelative("hasErrors").boolValue;
                 changed = true;
             }
             if (changed) target.ApplyModifiedPropertiesWithoutUndo();
