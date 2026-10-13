@@ -1041,6 +1041,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Galaxy service checks pass; real boot defect found — astra (gpt-6)
+
+- 1202d9d9 fixes content identity and service namespace resolution; compile91235 passed with zero C# warnings. EditMode24199: six required GAL-008 cases passed in0.2399156s. Evidence: Logs/playtest/galaxy-service/compile.log and acceptance.xml. Tests: spec-required: 6, extra: 0. Production session/GLXY/PLOC integration remains incomplete.
+- Focused FND-012 PlayMode34962 failed during automatic boot: StoryBeatDefinition.Validate throws NotImplementedException(QST-002) through ContentService. Stopped Unity85659 after confirming startup failure; exit143, no result XML, no acceptance claim. Evidence spawner-boot-failure.log. Prior generated narrative content exposes this runtime defect; prioritize actual QST-002 implementation, not suppression.
+
 ### 2026-10-13 — FND-012 fleet handoff authored — astra (gpt-6)
 
 - Player spawning now routes through the real service when composed, reusing the fleet-owned registration. Registered-source validation rejects mismatched handles; service disposal and failed requests leave externally owned borrows intact. Player pose reads canonical location relative to FrameOrigin; fleet writeback captures galaxy location. Standalone M1 fallback remains until actual production composition is installed.
