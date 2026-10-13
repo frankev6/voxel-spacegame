@@ -943,6 +943,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — Power acceptance green; flight integration started — astra (gpt-6)
+
+- PWR-004 five required tests pass; AST-002 seven required tests pass after repairing Unity default-sprite BC7 rejection with explicit desktop overrides. Grouped **12/0/0**, compile clean; evidence `Logs/playtest/pwr004/`. Tests: PWR-004 spec-required: 5, extra: 0; AST-002 spec-required: 7, extra: 0. No optimization passes.
+- Art CLI A1 exits 0 with no errors. A2 exits 1 as required for retained placeholders: 135 E006, 94 E007, 10 retained-font E001, one missing-production-material E005. Q243–244 preserve strict production acceptance while documenting A1 staging.
+- AST-003 audited 150/150 required files, 178 register rows total (11 verified, 165 placeholder-only, two remove); no assets deleted or licences invented. Existing audio statuses unchanged. Tests: spec-required: 0 new tests (validator/inventory audit), extra: 0.
+- Full compatible regression session 2085 is running; these tasks remain in-progress pending it. FLT-012 claimed; isolated d3618f1 implements same-tick/coast demand and Powered/stat-scaled thrust. Registration/stats/eight required tests remain. Three workers active on AI-005, SYS-002, TRV-001.
+
 ### 2026-10-13 — DMG-013 / AI-003 / SYS-001 full batch green — astra (gpt-6)
 
 - DMG-013 completes core-loss conversion, capped exposed-cell dissolve and deduplicated destruction of root/child sets. Packed cursor Q240 preserves in-brick progress; 20,000-cell fixture stays within 1,500 emitted particles/tick and 12,000 total. Tests: spec-required: 3, extra: 0. No live dissolve screenshot claimed.
