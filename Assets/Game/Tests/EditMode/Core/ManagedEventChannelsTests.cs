@@ -18,8 +18,8 @@ namespace Game.Tests.EditMode.Core
         { "ShipDestroyed", "StarSystemEntered", "BodyInteracted", "BodyDestroyed", "LaneJumped", "ItemAcquired", "FactChanged", "SessionReset", "GameSaved", "GameLoaded" };
 
         // Unmanaged payloads that only managed code publishes, straight through EventBus<T>: no ECS producer, so no queue
-        // (SPEC-02 open question 12). SessionReset: SPEC-01 SessionModel; BodyDestroyed: SPEC-31 managed loader (SYS-001 Q7); LaneJumped: SPEC-32 TravelService (decision 11).
-        static readonly HashSet<string> ManagedOnly = new HashSet<string> { "SessionReset", "BodyDestroyed", "LaneJumped" };
+        // SessionReset: SPEC-01; BodyDestroyed: SPEC-31; LaneJumped: SPEC-32; ItemAcquired: SPEC-50.
+        static readonly HashSet<string> ManagedOnly = new HashSet<string> { "SessionReset", "BodyDestroyed", "LaneJumped", "ItemAcquired" };
 
         static IEnumerable<Type> PayloadTypes()
         {

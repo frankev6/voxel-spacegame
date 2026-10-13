@@ -17,8 +17,7 @@ using Unity.Physics;
 namespace Game.Simulation.Flight
 {
     /// <summary>Revision-cached functional thrust and change-filtered mass stats (SPEC-20 §5.7).</summary>
-    [BurstCompile, UpdateInGroup(typeof(GameplayPrePhysicsGroup)), UpdateBefore(typeof(PropulsionSystem))]
-    // TODO(PWR-006): ShipStatsAggregateSystem must order before this feature-stat consumer.
+    [BurstCompile, UpdateInGroup(typeof(GameplayPrePhysicsGroup)), UpdateAfter(typeof(ShipStatsAggregateSystem)), UpdateBefore(typeof(PropulsionSystem))]
     public partial struct PropulsionStatsSystem : ISystem
     {
         StatsJob job;

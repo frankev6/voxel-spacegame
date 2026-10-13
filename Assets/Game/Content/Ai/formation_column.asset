@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 364b6b975ab24f399a5355ec493f7f14, type: 3}
+  m_Name: formation_column
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.FormationDefinition
+  id: formation_column
+  formerIds: []
+  slots:
+  - {x: 0, y: -40}
+  - {x: 0, y: -80}
+  - {x: 0, y: -120}
+  - {x: 0, y: -160}
+  - {x: 0, y: -200}
+  - {x: 0, y: -240}
+  - {x: 0, y: -280}
+  - {x: 0, y: -320}
+  - {x: 0, y: -360}
+  - {x: 0, y: -400}

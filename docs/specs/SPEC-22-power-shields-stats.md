@@ -657,7 +657,7 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 - **Do:** Implement jobs A and B exactly as §5.3, including the two-pass split for ability costs and the hulk branch. Tests drive demand by setting `PowerRequest.Requesting` directly.
 - **Files:** `Assets/Game/Simulation/Power/{PowerAllocationSystem,PowerAllocateJob,PoweredApplyJob}.cs`
 - **Acceptance criteria:**
-  - [ ] Gen 40, cap 200, one weapon group held with draw 46 E/s: first brownout at tick 1,980 ± 1 (33 s); afterwards the lowest-priority, highest-index weapons stay off for ≥ 30 ticks at a time.
+  - [ ] Gen 40, cap 200, one weapon group held with draw 46 E/s: first brownout at tick 2,000 ± 1 (33⅓ s; Q15); afterwards the lowest-priority, highest-index weapons stay off for ≥ 30 ticks at a time.
   - [ ] Shield emitters keep `Granted` while weapons brown out.
   - [ ] An ability slot in `PendingPower` with cost 20 and `Stored ≥ 20` sets its bit in `AbilityGrantMask` with `AbilityGrantTick == Tick`; with `Stored = 10` and generation 0 the bit stays 0.
   - [ ] `Hulk` → `Stored = 0`, every `Powered` bit disabled the same tick.
@@ -745,6 +745,9 @@ These are this spec's share of the skirmish gate (30 ships × 20k cells, main th
 | 13 | Minimum-only float attributes do not exclude infinity, and `shieldMult*` fields remain on the authoring definition after their runtime ownership moved to SPEC-13. | Require finite values for the five float tunables carrying Min/Range attributes, in addition to their stated ranges; byte priorities fit their storage range inherently. Preserve legacy `shieldMult*` fields/getters without inventing ranges or baking them into PowerTuning; DamageTableBlob remains the multiplier source. | Tech lead — resolved by PWR-003; central mirror pending. |
 
 | 14 | PWR-004 lists 28 base consumers but 15 after adding a shield, requires links on non-consumers despite §5.1, and includes PWR-005-owned Powered writes | Use 29 after the one-shield rebuild, bind only consuming functional entities, and verify two module bindings in the existing spawn test. Powered enable bits remain solely PWR-005 behavior; registration/init never writes them. Keep the five required test methods and exact initial energy values. | Tech lead |
+
+| 15 | PWR-005 converts the rounded 33 s sustain label to 1,980 ticks, contradicting its exact energy inputs | Keep generation 40, capacity 200 and draw 46 unchanged. Exact sustain is 200 / (46 − 40) = 33⅓ s, so assert the first denial at 2,000 ± 1 ticks under the specified fixed-step allocator. No energy tuning or threshold relaxation; correct the arithmetic. | Tech lead |
+| 16 | PWR-006 global LastSystemVersion advances while dormant/spawning roots are skipped, so their changes can be missed on wake | When Dormant or GridSpawning changes to disabled, compare the functional signature again and refresh mass/modifiers even if their ordinary change filters are now cold. Enable writes update Unity component change versions. Keep the revision unchanged when the signature still matches; no writes while dormant, no extra test beyond Dormant_Skipped. | Tech lead |
 
 ## 11. References
 
