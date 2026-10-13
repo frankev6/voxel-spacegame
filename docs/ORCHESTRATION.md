@@ -6,8 +6,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-016 | claimed; NAR-015 accepted, implement quests/triggers/clues | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | GAL-011 | claimed19bb5361; dispatched galaxy map implementation; ECO-009 delivered separately | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-016 | delivered44bace47; lead generation/validation pending, explicit dependency wait219 | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-005 | claimedadce6f4b; arrival geometry dispatched; ECO-009 delivered separately | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-002 | claimed ccef7c0d; implement definitions/validators to repair real boot | HUD-003/006/007 once ready |
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Map accepted / worker recycled:** GAL-011a229844 and app registration accepted, clean compile32938, four checks pass0.228s (galaxy-map/). Loader source now compiles but five SYS-004 cases and production integration remain. TRV-005 claimedadce6f4b and dispatched to same economy worker. NAR-01644bace47 delivered219, waiting for lead content integration/next eligible work; QST-002 active194 repairs boot and needs real graph recompile. No Unity operation. Previous turn loader lifecycle was progress.
 
 - **Loader lifecycle authored:**85d75afe adds origin acknowledgement, T1 entry/visit event, owned queries/info/hook, delta refresh and filtered unload with deferred collider retirement. Five cases/compile remain. Arrival checks require actual nearby grids, so production installation waits for SYS-006; no fake readiness. Current branch task/SYS-004-world-loader; no Unity operation. Workers NAR-016218, GAL-011230, QST-002194 active. Previous turn anchor construction was progress.
 
