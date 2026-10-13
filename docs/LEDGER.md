@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 123 | 9 | 0 | 0 | 48 | 0 | 180 | 9 |
+| M3 | 122 | 10 | 0 | 0 | 48 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -910,6 +910,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 317 | SPEC-61 Q22: circular HUD composition sequence | Resolved ADR-0072: explicit UI foundation dependencies, preserve playable roots, downstream feature owners install bindings; no fake services or removed acceptance. | Tech lead |
 | 318 | SPEC-40 Q19: legacy translation boundary and defaults | Resolved: retain source metadata for emission; decimal cumulative thresholds, source-ordered quest logs, canonical provisional journal labels and contextual item mappings. No runtime/asset emission in NAR-014. | Tech lead |
 | 319 | SPEC-61 Q23: save/load construction versus composition cycle | Resolved: explicit completed UI/save/flow prerequisites allow parallel source construction; shared production hookup and full functional/layout acceptance remain required. ADR-0072 amended. | Tech lead |
+| 320 | SPEC-60 Q30: layout audit scroll/measurement semantics | Resolved: exclude scroll content subtree but audit viewport; use intrinsic nowrap width, clear result list and check all containing panels. Functional acceptance pending. | Tech lead |
 
 
 ## Measurements
