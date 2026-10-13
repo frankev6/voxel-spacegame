@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | integrated 8a24a71f; four focused checks passed; full batch validation wait | audio measurements |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | WPN-009 | delivered eee18b830; reviewed/integrated dabc1fa4; validation wait | beam hit/damage integration |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-015 | delivered 5e223c83; reviewed/integrated dceee015; validation wait | weapon harness |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | done; full batch green; dependency wait | audio measurements |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | WPN-009 | done; full batch green; next ABL-004 | beam hit/damage integration |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-015 | done; full batch green; dependency wait | weapon harness |
 
 ## Operating rules
 
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Batch closed:** session21253 exited0, compile clean,1196/0/1 EditMode and164/0/53 PlayMode. Soak600.33s/36000 ticks/zero leaks. WPN-009/010/015,AUD-013,ABL-003 done; full evidence archived `ability-lifecycle/`. Original QualitySettings preserved, orphan test metas removed after terminal. Next local FF main, claim WPN-012 lead and ABL-004 existing power worker. No Unity process remains; live proof from beam/reactor range retained.
 
 - **EditMode green after Burst fix:** session21253 compile clean, zero warning CS; full1196 passed/0 failed/1 skipped, archived `ability-lifecycle/editmode-full.xml` and `compile-full.log`. Same live session now runs full PlayMode; interactive Editor remains closed. No runtime mutations or task closeout before terminal. HANDOFF updated to current batch and next ABL-004/WPN-012 dispatch.
 

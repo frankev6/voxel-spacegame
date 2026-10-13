@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 20 | 5 | 0 | 0 | 66 | 0 | 91 | 3 |
+| M2 | 20 | 0 | 0 | 0 | 71 | 0 | 91 | 5 |
 | M3 | 145 | 3 | 0 | 0 | 32 | 0 | 180 | 12 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
@@ -245,13 +245,13 @@
 | WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | yes | done | astra (gpt-6) | 2026-10-13 | fc32163 | Target velocity lead and occupied hull centre aiming; 5 required tests |
 | WPN-007 | WeaponFireSystem and the projectile store append | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-006, PWR-001 | yes | done | astra (gpt-6) | 2026-10-13 | c0f3b458 | Parallel ordered firing/store append; eight required checks and live Space fire pass; WPN-008/009 remaining scope retained |
 | WPN-008 | ProjectileStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-003, WPN-007, PWR-001, SPEC-13 | no | done | astra (gpt-6) | 2026-10-13 | 2e5247ca | Parallel homing/hull/shield/fuse streams and stable compaction; seven required tests, full suites and live 345 projectile hits pass |
-| WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | partial in WPN-007: pulse clock, muzzle/range endpoint and cancellation / first-hit casts, hull/shield damage streams and impact effects; Claimed after projectile batch green; lead owns Unity |
-| WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | partial in FND-020: explosion requests into damage / shields, audio and required tests; partial in VFX-004: guarded explosion visual event / shields, audio and required tests; Claimed after projectile batch green; lead owns Unity |
+| WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | dabc1fa4 | First-hit beams, shield/hull damage, clipped endpoints and power cancellation; 3 required tests and live four-beam proof |
+| WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | yes | done | astra (gpt-6) | 2026-10-13 | d8e7855f | Shield-first spatial explosions, canonical fallback, guarded streams; reactor writer repaired and verified live; 4 required tests |
 | WPN-011 | CombatGridSetup and turret visuals | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, PWR-001, ABL-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | c5122fd | Combat composition and absolute turret poses with split refresh; 3 required tests |
-| WPN-012 | Combat scenarios and determinism | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-009, WPN-010, WPN-011, DMG-001, DMG-002, DMG-003, DMG-004, DMG-005, DMG-006, DMG-007, DMG-008, DMG-009, DMG-010, DMG-011, DMG-012, DMG-013, DMG-014, DMG-015, DMG-017, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | no | todo |  |  |  |  |
+| WPN-012 | Combat scenarios and determinism | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-009, WPN-010, WPN-011, DMG-001, DMG-002, DMG-003, DMG-004, DMG-005, DMG-006, DMG-007, DMG-008, DMG-009, DMG-010, DMG-011, DMG-012, DMG-013, DMG-014, DMG-015, DMG-017, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | yes | todo |  |  |  |  |
 | WPN-013 | Weapon performance gates | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, TST-001 | no | todo |  |  |  |  |
 | WPN-014 | Weapon balance pass | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, SPEC-72 | no | todo |  |  |  |  |
-| WPN-015 | Harness hooks | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | ; Claimed after projectile batch green; lead owns Unity |
+| WPN-015 | Harness hooks | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | dceee015 | Read-only weapon snapshots and projectile statistics; 1 required test |
 | WPN-017 | ShipDestroyed payload and bridge | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, DMG-001, CORE-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | ec9a6f1 | Canonical destruction event bridge; 4 required tests; full batch 901 EM / 128 PM, zero failures |
 | WPN-018 | Weapon power demand and weapon stats | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, WPN-007, PWR-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b672f6f1 | Same-tick weapon demand and revision-cached stats; five required tests; live firing demand/grant20 E/s returns to zero on release |
 | PWR-001 | Public contract types | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | CORE-001, DATA-001, VOX-001, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | eeed571 | Canonical declarations; three required tests; Q202 deferred allocator ordering. Full batch green. |
@@ -277,8 +277,8 @@
 | AI-012 | AI and hash performance | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-010, TST-001 | no | todo |  |  |  |  |
 | ABL-001 | Public contract types | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | CORE-001, DATA-001, PWR-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 1bc7515 | Canonical ability contracts; 48-byte slot; 1 required test; full batch 901 EM / 128 PM, zero failures |
 | ABL-002 | Ability content and boot singleton | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 900e223 | Ability definition bake and boot lifetime 9534014; fixture repair 48ad51a; full 968 EM /145 PM green |
-| ABL-003 | AbilitySystem | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | frontier | ABL-002, SPEC-20, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead isolated implementation; primary combat validation remains untouched |
-| ABL-004 | Effect systems | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-003, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | no | todo |  |  |  |  |
+| ABL-003 | AbilitySystem | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | frontier | ABL-002, SPEC-20, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | yes | done | astra (gpt-6) | 2026-10-13 | e2b9bda3 | Slot sync, charges/duration, one-tick power handshake and guarded feedback; ADR-0069 empty resync; 9 required tests; effects remain ABL-004 |
+| ABL-004 | Effect systems | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-003, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | yes | todo |  |  |  |  |
 | ABL-005 | Ability scenarios and frame-rate independence | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-004, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018 | no | todo |  |  |  |  |
 | CAM-008 | Screen shake from FxEvents | [SPEC-62](specs/SPEC-62-camera.md) | M2 | standard | CAM-005, SPEC-63 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 9d59a62 | Impact shake and borrowed frame reader; Boot binding e265f13; 7 required tests; full batch 901 EM / 128 PM, zero failures |
 | VFX-002 | FxRig: slots, effects, buffers and binding | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-12 | f2b8118 | Session rig, graph validation, pooled/batched/instanced resources and binding; 5 GPU tests pass; final content budget advisory follow-up in VFX-004 |
@@ -297,7 +297,7 @@
 | AUD-007 | Cue content, legacy import and the CombatAudioCues singleton | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 17fbd4e6 | 30 protected cues/config generated and idempotent; five required checks; live weapon/music sources playing; licences retain AUD-011 gate |
 | AUD-008 | Music director, crossfades and scene contexts | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006, FND-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 65c6ed89 | Six EditMode plus one PlayMode required checks; live exploration-to-combat music transition verified |
 | AUD-009 | Loop voices: player engine and beams | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006, FLT-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 5401ca29 | Three required loop tests pass; engine/beam loop assets remain null per authored config |
-| AUD-013 | Audio performance and allocation tests | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-008, AUD-009 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | ; Claimed after green combat batch; lead owns serialized Unity |
+| AUD-013 | Audio performance and allocation tests | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-008, AUD-009 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 8a24a71f | 4 required measurements; zero warmed GC; performance deferred: drain500/4096 misses, zero optimization passes |
 | DEV-010 | aim and fire commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, WPN-001, INP-001, CAM-001 | no | todo |  |  |  |  |
 | DEV-011 | perf command and gh_perf extensions | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, VFX-001, AUD-001, TST-001 | no | todo |  |  |  |  |
 | DEV-013 | Overlays: islands and spatial hash | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-012, AI-001 | no | todo |  |  |  |  |
@@ -988,6 +988,14 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Beams, explosions, audio measurements and ability lifecycle verified — astra (gpt-6)
+
+- Closed WPN-009/010/015, AUD-013 and ABL-003 after session21253 exited0: compile zero warning CS, full EditMode **1196 passed/0 failed/1 skipped**, PlayMode **164 passed/0 failed/53 skipped**. Evidence `Logs/playtest/ability-lifecycle/{compile-full.log,editmode-full.xml,playmode-full.xml}`. Ten-minute soak600.33s/36000 ticks,60 chunks/hulks/rams,36 dissolved/24 silent,peak2/64,zero native leaks.
+- Beam and reactor live proof remains `Logs/playtest/beam-explosion-audio/`: four secondary beams clipped at26.4–33.7m,22 station cells destroyed; repaired reactor writer produces next-tick blast with18 cells/1 instance removed and no new errors. Ability lifecycle now owns ordered slots, resync/timers, charges, one-tick power handshake and feedback; effects remain ABL-004. ADR-0069/Q287 records empty-slot resync within the existing8B contract.
+- Audio300-frame measurements: Drain500 median0.5072295ms/p950.527542 versus0.15; Drain4096 median1.4630835ms/p952.27375 versus0.4; ServiceAndLoops median0.012708ms/p950.013167 versus0.05. Warmed gameplay allocation check passes; timing misses retained in PerfRun JSON as advisory. Zero optimization passes.
+- Test counts: WPN-009 spec-required:3, extra:0; WPN-010 spec-required:4, extra:0 (existing reactor required test extended); WPN-015 spec-required:1, extra:0; AUD-013 spec-required:4, extra:0; ABL-003 spec-required:9, extra:0. No new owner gate. Original QualitySettings delta preserved/excluded; test orphan metas removed only after terminal.
+- Next: lead WPN-012 full-pipeline combat scenarios; existing power worker ABL-004 effects. Other two workers retain genuine dependency waits until eligible standard tasks unlock. Preserve controls, Space fire, automatic lowered3x station and Nocturne; interactive Editor is currently closed after validation.
 
 ### 2026-10-13 — ABL-003 Burst validation repair — astra (gpt-6)
 
