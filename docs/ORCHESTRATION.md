@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-004 | claimed920f5f71 after AI-015 delivery; condition evaluation | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-004 | claimed6c4a3b4b; loot and economy service | economy follow-ups |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-018 | claimed31d24070 after AI-010 acceptance; save/load/jump harness | eligible standard work |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-009 | claimed on main; import-time compile pipeline; DEV-018 delivered with real dependency wait | eligible standard work |
 
 ## Operating rules
 
@@ -19,6 +19,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Fast validation / recycling:** worker snapshots NAR-004157 and ECO-004170 active; DEV-018141 delivered866cb01b, acceptance blocked on actual GAL-008/SYS-009/TRV-006/HUD-002/003. Presentation recycled to NAR-009. AI-015 review pending; no Unity tests launched this turn. Preserve incidental fixture acceleration and production balance.
 
 - **Catalog closed / combat worker recycled:** NAR-006309a55c1 adds opt-in20k build+2k binding fixture, compile35729 clean; four prior functional checks remain valid, benchmark deliberately unrun. AI-015 delivered dab28594 (review/integration/visual acceptance pending; no measurement run). Worker recycled to NAR-004 claim920f5f71. ECO-004168/DEV-018139 active. Editor17922 open/stopped, no live validation. Previous turn closed compiler (progress).
 
