@@ -831,6 +831,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 243 | SPEC-81 Q25: Unity default sprite format rejects BC7. | Automatic compressed default format plus mandatory Standalone BC7/BC5 override; unchanged desktop target. Repair actual import errors, do not suppress logs or loosen tests. | Tech lead |
 
+| 244 | SPEC-81 Q26: current A1 acceptance versus later-owned production font/material assets. | Verified retained OfficeCodePro naming and unassigned ArtDirection prop material warn in A1, fail in A2. Preserve other functional errors, explicit AST-004/008 work and existing visuals. | Tech lead |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).

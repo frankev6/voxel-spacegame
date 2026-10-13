@@ -655,6 +655,8 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 
 | 25 | Unity rejects BC7 as the default sprite import format | **Resolved AST-002 integration:** use Automatic for compressed default-platform textures and require the explicit Standalone BC7/BC5 override. The desktop format target is unchanged; validation requires the override instead of accepting inheritance. Confirmed by two required tests failing on Unity 6000.6.5f1 before repair | Tech lead |
 
+| 26 | A1 zero-error acceptance conflicts with retained verified Office Code Pro filenames and the absent AST-008 shared prop material | **Resolved integration:** report verified OfficeCodePro subtree naming and an unassigned ArtDirection prop material as A1 warnings, A2 errors, retaining E001/E005. AST-004 owns filename migration and AST-008 owns production material creation. Other naming violations, foreign assigned materials and functional import defects remain hard errors. No visual content or licence status changes | Tech lead |
+
 ## 11. References
 
 - [DESIGN-SYSTEM.md](../design/DESIGN-SYSTEM.md) (approved version), [SPEC-80](SPEC-80-art-direction.md).

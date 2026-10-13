@@ -88,7 +88,12 @@ namespace Game.Editor.Art
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 var direction = AssetDatabase.LoadAssetAtPath<ArtDirectionDefinition>(path);
-                if (direction != null) ValidateMaterial(direction.PropMaterial, path, "propMaterial", report, a2Mode);
+                if (direction != null)
+                {
+                    if (direction.PropMaterial == null)
+                        StageIssue(report, a2Mode, "AST-E005", path, "propMaterial", "Shared production prop material is not assigned; TODO(AST-008): author and assign M_Prop_Trim.");
+                    else ValidateMaterial(direction.PropMaterial, path, "propMaterial", report, a2Mode);
+                }
             }
             foreach (string path in paths)
             {
@@ -133,7 +138,12 @@ namespace Game.Editor.Art
             if (IsPlaceholder(rulePath) || retainedPlaceholder) return;
             string pattern = NamingPattern(rulePath);
             if (pattern != null && !ArtImportPostprocessor.Matches(rulePath, pattern))
-                report.Error("AST-E001", path, "name", "Expected " + pattern + ".");
+            {
+                // TODO(AST-004): migrate retained, verified Office Code Pro filenames with their references.
+                if (verified && ArtImportPostprocessor.Under(rulePath, ArtAssetRules.ThemeFolder + "/Fonts/OfficeCodePro"))
+                    StageIssue(report, a2Mode, "AST-E001", path, "name", "Retained verified font; production naming expected " + pattern + ".");
+                else report.Error("AST-E001", path, "name", "Expected " + pattern + ".");
+            }
             var importer = AssetImporter.GetAtPath(path);
             if (importer is TextureImporter textureImporter)
             {
