@@ -71,7 +71,7 @@ namespace Game.Presentation.Audio
         }
         internal static ulong GroupKey(int slot, in SfxCueInfo cue, float3 position, int order)
         {
-            if (cue.Coalesce == CoalesceMode.None) return StableHash.Combine((ulong)slot, (ulong)order | (1UL << 63));
+            if (cue.Coalesce == CoalesceMode.None) return StableHash.Combine((ulong)slot, (ulong)(uint)order | (1UL << 63));
             if (cue.Coalesce != CoalesceMode.PerCell || cue.SpatialBlend <= 0) return (ulong)slot;
             int3 cell = (int3)math.floor(position / cue.CoalesceCellSize);
             ulong hash = StableHash.Combine(StableHash.Combine((uint)cell.x, (uint)cell.y), (uint)cell.z);

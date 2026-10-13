@@ -1,6 +1,7 @@
 using System.Collections;
 using Game.Core;
 using Game.Voxel.Model;
+using Game.Voxel.Damage;
 using NUnit.Framework;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
