@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.App.Systems;
+using Game.Core;
 using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Data.Combat;
@@ -133,17 +134,50 @@ namespace Game.Tests.PlayMode.Simulation.Abilities
             }
             Assert.AreEqual(59, boostedTicks, "The 60-tick ability posts modifiers for next tick with its original expiry deadline.");
             Assert.That(peak, Is.EqualTo(baseline * 1.8f).Within(baseline * .02f), "Real impulses must reach the increased top speed during this pulse.");
-            f.Tick(180); Assert.That(f.ForwardSpeed, Is.EqualTo(baseline).Within(baseline * .02f), "The installed reverse thrusters return physical speed to the original cap.");
+            // Caps are targets, not velocity assignments. Installed reverse force bounds the physical settling time;
+            // allow half of its axial capacity for the existing coupled force/yaw allocation, retaining the same speed tolerance.
+            var propulsion = f.Em.GetComponentData<PropulsionStats>(f.Root);
+            float mass = 1 / f.Em.GetComponentData<PhysicsMass>(f.Root).InverseMass;
+            float expiredSpeed = f.ForwardSpeed, tolerance = baseline * .02f;
+            Assert.Greater(propulsion.ReverseThrust, 0);
+            Assert.AreEqual(propulsion.ReverseThrust / mass, propulsion.ReverseAccel, .001f);
+            int limit = (int)math.ceil(math.max(0, expiredSpeed - baseline - tolerance) /
+                (propulsion.ReverseAccel * .5f * SimTime.FixedTimestep)) + 1;
+            int settledTicks = 0; float brakingImpulse = 0;
+            while (f.ForwardSpeed > baseline + tolerance && settledTicks < limit)
+            {
+                f.Tick(); settledTicks++;
+                float axialForce = 0;
+                foreach (var thruster in f.Em.GetBuffer<FlightThruster>(f.Root))
+                    axialForce += thruster.MaxForce * thruster.Throttle * thruster.ForceDirLocal.z;
+                brakingImpulse -= axialForce * SimTime.FixedTimestep;
+                Assert.AreEqual(baseline, f.Cap, .001f);
+            }
+            TestContext.WriteLine($"ABL-005 settling: mass={mass:G9} kg, reverse={propulsion.ReverseThrust:G9} N, " +
+                $"capacity acceleration={propulsion.ReverseAccel:G9} m/s², expiry speed={expiredSpeed:G9}, " +
+                $"ticks={settledTicks}/{limit}, allocated braking impulse={brakingImpulse:G9} N·s, final speed={f.ForwardSpeed:G9}");
+            Assert.Greater(brakingImpulse, 0, "Production thruster impulses must physically remove the excess speed.");
+            Assert.That(f.ForwardSpeed, Is.EqualTo(baseline).Within(tolerance), "The installed reverse thrusters return physical speed to the original cap within the capacity-derived bound.");
         }
         [Test] public void Shield_Toggle()
         {
-            using var f = new Fixture(); float hp = f.Em.GetComponentData<ShieldState>(f.Root).Hp;
+            using var f = new Fixture(); var charged = f.Em.GetComponentData<ShieldState>(f.Root);
+            float hp = charged.Hp;
             f.Input(press: AbilityKind.ShieldToggle); f.Tick(); Assert.AreEqual(0, f.Em.GetComponentData<ShieldControl>(f.Root).RequestedOn);
             Assert.AreEqual(0, f.Em.GetComponentData<ShieldState>(f.Root).Active); Assert.AreEqual(0, f.Ability(AbilityKind.ShieldToggle).Active);
             f.Tick(60); Assert.AreEqual(0, f.Em.GetComponentData<ShieldState>(f.Root).Active);
             Assert.AreEqual(hp, f.Em.GetComponentData<ShieldState>(f.Root).Hp, .001f, "Manual off preserves stored charge.");
             f.Input(press: AbilityKind.ShieldToggle); f.Tick(); Assert.AreEqual(1, f.Em.GetComponentData<ShieldControl>(f.Root).RequestedOn);
-            Assert.AreEqual(1, f.Em.GetComponentData<ShieldState>(f.Root).Active); Assert.AreEqual(1, f.Ability(AbilityKind.ShieldToggle).Active);
+            Assert.AreEqual(1, f.Ability(AbilityKind.ShieldToggle).Active, "The ability slot reflects requested state immediately.");
+            var enabling = f.Em.GetComponentData<ShieldState>(f.Root);
+            Assert.AreEqual(0, enabling.Active, "Power demand sampled the previous off state before this activation.");
+            Assert.AreEqual(charged.MaxHp, enabling.MaxHp, .001f, "A non-requesting emitter's manual transition retains capacity.");
+            Assert.AreEqual(hp, enabling.Hp, .001f, "Re-enable must retain charge while awaiting next tick's power demand.");
+            f.Tick();
+            var enabled = f.Em.GetComponentData<ShieldState>(f.Root);
+            Assert.AreEqual(1, enabled.Active, "The next tick's emitter grant must reactivate the shield.");
+            Assert.AreEqual(charged.MaxHp, enabled.MaxHp, .001f);
+            Assert.AreEqual(hp, enabled.Hp, .001f, "Re-enable must preserve the manually retained charge across demand latency.");
         }
         [Test] public void ThrustersLost_RemovesBoost()
         {
