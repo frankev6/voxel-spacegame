@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 24 | 1 | 0 | 0 | 66 | 0 | 91 | 6 |
+| M2 | 21 | 4 | 0 | 0 | 66 | 0 | 91 | 3 |
 | M3 | 145 | 3 | 0 | 0 | 32 | 0 | 180 | 12 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
@@ -245,13 +245,13 @@
 | WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | yes | done | astra (gpt-6) | 2026-10-13 | fc32163 | Target velocity lead and occupied hull centre aiming; 5 required tests |
 | WPN-007 | WeaponFireSystem and the projectile store append | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-006, PWR-001 | yes | done | astra (gpt-6) | 2026-10-13 | c0f3b458 | Parallel ordered firing/store append; eight required checks and live Space fire pass; WPN-008/009 remaining scope retained |
 | WPN-008 | ProjectileStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-003, WPN-007, PWR-001, SPEC-13 | no | done | astra (gpt-6) | 2026-10-13 | 2e5247ca | Parallel homing/hull/shield/fuse streams and stable compaction; seven required tests, full suites and live 345 projectile hits pass |
-| WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | yes | todo |  |  |  | partial in WPN-007: pulse clock, muzzle/range endpoint and cancellation / first-hit casts, hull/shield damage streams and impact effects |
-| WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | yes | todo |  |  |  | partial in FND-020: explosion requests into damage / shields, audio and required tests; partial in VFX-004: guarded explosion visual event / shields, audio and required tests |
+| WPN-009 | BeamStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | partial in WPN-007: pulse clock, muzzle/range endpoint and cancellation / first-hit casts, hull/shield damage streams and impact effects; Claimed after projectile batch green; lead owns Unity |
+| WPN-010 | ExplosionSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-008 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | partial in FND-020: explosion requests into damage / shields, audio and required tests; partial in VFX-004: guarded explosion visual event / shields, audio and required tests; Claimed after projectile batch green; lead owns Unity |
 | WPN-011 | CombatGridSetup and turret visuals | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, PWR-001, ABL-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | c5122fd | Combat composition and absolute turret poses with split refresh; 3 required tests |
 | WPN-012 | Combat scenarios and determinism | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-009, WPN-010, WPN-011, SPEC-13, SPEC-22 | no | todo |  |  |  |  |
 | WPN-013 | Weapon performance gates | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, TST-001 | no | todo |  |  |  |  |
 | WPN-014 | Weapon balance pass | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-012, SPEC-72 | no | todo |  |  |  |  |
-| WPN-015 | Harness hooks | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | yes | todo |  |  |  |  |
+| WPN-015 | Harness hooks | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-008 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | ; Claimed after projectile batch green; lead owns Unity |
 | WPN-017 | ShipDestroyed payload and bridge | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, DMG-001, CORE-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | ec9a6f1 | Canonical destruction event bridge; 4 required tests; full batch 901 EM / 128 PM, zero failures |
 | WPN-018 | Weapon power demand and weapon stats | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-004, WPN-007, PWR-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b672f6f1 | Same-tick weapon demand and revision-cached stats; five required tests; live firing demand/grant20 E/s returns to zero on release |
 | PWR-001 | Public contract types | [SPEC-22](specs/SPEC-22-power-shields-stats.md) | M2 | standard | CORE-001, DATA-001, VOX-001, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | eeed571 | Canonical declarations; three required tests; Q202 deferred allocator ordering. Full batch green. |
