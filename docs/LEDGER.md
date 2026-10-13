@@ -933,6 +933,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — AI-004 builder verified; orbit precision repaired — astra (gpt-6)
+
+1. AI-004 five required tests passed in session 43399: proxy values/flags and shield reach, ordered output, same/next-tick reader ordering with Burst safety, worker-count independence and spawning exclusion. Spec-required: 5, extra: 0. Compile clean; full suites pending. Evidence `Logs/playtest/combat-content-batch/spatial-orbit-initial.xml`.
+2. The same group found four GAL-002 failures caused by float math.PI in double calculations/fixtures, including period-wrap velocity discontinuity. Repair `b41aab2` uses System.Math.PI with unchanged tolerances and algorithms. Spec-required: 5, extra: 0; compile + orbit rerun session 15882 active. No tuning pass or new owner gate.
+
 ### 2026-10-13 — Combat batch integration repairs — astra (gpt-6)
 
 1. Full session 73612 exited with **952 EditMode passed / 6 failed / 1 skipped**; PlayMode did not start. Two failures were strict DATA-E011 against test ability assets; four shared the migration gate setup's duplicate block paths. No performance-only failure or production validation rule weakened.
