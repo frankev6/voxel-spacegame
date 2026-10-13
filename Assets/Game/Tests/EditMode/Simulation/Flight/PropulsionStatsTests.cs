@@ -13,9 +13,9 @@ namespace Game.Tests.EditMode.Simulation.Flight
         [Test] public void Spawn_Totals()
         {
             var root = Ship(); Tick(); var stats = Stats(root);
-            Assert.AreEqual(4, stats.AliveThrusterCount); Assert.AreEqual(40000, stats.ForwardThrust);
-            Assert.AreEqual(40000, stats.ReverseThrust); Assert.AreEqual(40000, stats.StrafeThrust);
-            Assert.AreEqual(100, stats.ForwardAccel);
+            Assert.AreEqual(4, stats.AliveThrusterCount); Assert.That(stats.ForwardThrust, Is.EqualTo(40000).Within(.01f));
+            Assert.That(stats.ReverseThrust, Is.EqualTo(40000).Within(.01f)); Assert.That(stats.StrafeThrust, Is.EqualTo(40000).Within(.01f));
+            Assert.That(stats.ForwardAccel, Is.EqualTo(100).Within(.0001f));
             Assert.AreEqual(EM.GetComponentData<ShipStats>(root).FunctionalRevision, stats.SourceRevision);
         }
         [Test] public void ThrusterDestroyed_Recomputes()
