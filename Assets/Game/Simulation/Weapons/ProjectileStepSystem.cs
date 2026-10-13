@@ -27,6 +27,7 @@ namespace Game.Simulation.Weapons
             owned = ProjectileStore.Create(8192); state.EntityManager.CreateSingleton(owned);
             grids = new EntityQueryBuilder(Allocator.Temp).WithAll<VoxelGrid>().Build(ref state); job.HitTest = CombatHitTest.Create(ref state);
             job.Velocities = state.GetComponentLookup<PhysicsVelocity>(true);
+            job.Shifts = state.GetComponentLookup<OriginShiftRecord>(true);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<WeaponDefsRef>(); state.RequireForUpdate<SimClock>(); state.RequireForUpdate<DamageStreams>();
         }
         [BurstCompile] public void OnDestroy(ref SystemState state) { state.CompleteDependency(); owned.Dispose(); }
@@ -34,13 +35,13 @@ namespace Game.Simulation.Weapons
         [BurstCompile] public void OnStopRunning(ref SystemState state) { owned.CompleteAccess(); owned.Rows.Clear(); owned.Stats.Value = default; }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
-            job.HitTest.Update(ref state); job.Velocities.Update(ref state);
+            job.HitTest.Update(ref state); job.Velocities.Update(ref state); job.Shifts.Update(ref state);
             job.Grids = grids.ToEntityListAsync(state.WorldUpdateAllocator, state.Dependency, out var gather);
             var streams = SystemAPI.GetSingleton<DamageStreams>();
             job.Damage = streams.Damage.BeginWrite(ref state, ProducerKind.Projectile, 1);
             job.Explosions = streams.Explosions.BeginWrite(ref state, ProducerKind.Projectile, 1);
             job.Rows = owned.Rows; job.Stats = owned.Stats; job.Applied = owned.AppliedShiftSequence;
-            job.Shift = SystemAPI.TryGetSingleton<OriginShiftRecord>(out var shift) ? shift : default;
+            SystemAPI.TryGetSingletonEntity<OriginShiftRecord>(out job.ShiftEntity);
             job.Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value; job.Tick = SystemAPI.GetSingleton<SimClock>().Tick;
             var fx = SystemAPI.GetSingleton<FxEventQueue>(); job.Fx = fx.Queue.AsParallelWriter();
             state.Dependency = job.Schedule(fx.Access.BeginRead(owned.Acquire(JobHandle.CombineDependencies(state.Dependency, gather)))); fx.Access.EndRead(state.Dependency);
@@ -55,13 +56,14 @@ namespace Game.Simulation.Weapons
             public NativeList<ProjectileRow> Rows;
             public NativeReference<ProjectileStoreStats> Stats;
             public NativeReference<uint> Applied;
-            public OriginShiftRecord Shift;
+            [ReadOnly] public ComponentLookup<OriginShiftRecord> Shifts;
+            public Entity ShiftEntity;
             public BlobAssetReference<WeaponDefsBlob> Weapons;
             public NativeStream.Writer Damage, Explosions;
             public uint Tick;
             public void Execute()
             {
-                ProjectileStore.ApplyPendingShift(ref Rows, Shift, ref Applied);
+                ProjectileStore.ApplyPendingShift(ref Rows, Shifts.HasComponent(ShiftEntity) ? Shifts[ShiftEntity] : default, ref Applied);
                 var stats = Stats.Value; int live = 0; Damage.BeginForEachIndex(0); Explosions.BeginForEachIndex(0);
                 Grids.Sort(new EntityOrder());
                 for (int i = 0; i < Rows.Length; i++)

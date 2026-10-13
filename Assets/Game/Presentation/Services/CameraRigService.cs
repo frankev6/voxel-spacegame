@@ -110,7 +110,17 @@ namespace Game.Presentation.Services
         internal void SetTargetBounds(float3 min, float3 max, float4x4 localToWorld)
         { boundsMin = min; boundsMax = max; boundsTransform = localToWorld; hasBounds = true; }
         public void ClearTarget() { HasTarget = false; CutRequested = false; }
-        public void Warp(float3 delta) => throw new NotImplementedException("CAM-006");
+        public void Warp(float3 delta)
+        {
+            if (disposed) return;
+            FocusState += delta; TargetPosition += delta;
+            pivot += delta; pivotTarget += delta; boundsCenter += delta;
+            blendFromPos += delta; previousFollowPosition += delta;
+            outPos += delta; unshakenPos += delta;
+            if (hasBounds) boundsTransform.c3.xyz += delta;
+            // Directions, framing displacement, damping and blend progress remain in the same relative state.
+            ApplyPose();
+        }
         public void AddImpulse(float3 worldPos, float strength, float radius)
         {
             if (disposed || !math.all(math.isfinite(worldPos)) || !math.isfinite(strength) || !math.isfinite(radius) || strength <= 0 || radius <= 0) return;

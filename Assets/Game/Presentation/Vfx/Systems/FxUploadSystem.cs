@@ -138,7 +138,9 @@ namespace Game.Presentation.Vfx
         }
         void ApplyOriginShift()
         {
-            if (Rig == null || !SystemAPI.TryGetSingleton<OriginShiftRecord>(out var shift)) return;
+            if (Rig == null) return;
+            EntityManager.CompleteDependencyBeforeRO<OriginShiftRecord>();
+            if (!SystemAPI.TryGetSingleton<OriginShiftRecord>(out var shift)) return;
             if (!hasShiftSequence) { hasShiftSequence = true; lastShiftSequence = shift.Sequence; return; }
             if (shift.Sequence == lastShiftSequence) return;
             bool discontinuity = shift.StarSystemChanged != 0 || shift.Sequence - lastShiftSequence != 1 || math.lengthsq(shift.Delta) > 20000f * 20000f;
