@@ -5,7 +5,9 @@ using Unity.Mathematics;
 
 namespace Game.Simulation.Spatial
 {
-    /// <summary>Implements SPEC-23 §4.1: SpatialHash.</summary>
+    /// <summary>SPEC-23 §4.1/5.1. The builder owns storage and publishes its write handle.
+    /// Readers schedule with BeginRead(dependency), pass only AsReadOnly() into the job, then call EndRead(handle).
+    /// Main-thread reads outside fixed-step simulation call CompleteAccess first; never use GetSingletonRW.</summary>
     public struct SpatialHash : IComponentData
     {
         public NativeList<SpatialProxy> Proxies;         // sorted by Entity.Index
