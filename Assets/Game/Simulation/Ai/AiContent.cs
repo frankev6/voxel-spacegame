@@ -5,19 +5,21 @@ using Game.Data.Services;
 using Game.Data.Validation;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace Game.Simulation.Ai
 {
     /// <summary>Implements SPEC-23 §4.3: AiContent.</summary>
     public static class AiContent
     {
-        /// <summary>Creates the boot-owned profiles blob. The caller retains AiConfig.Profiles and disposes it after completing world jobs.</summary>
+        /// <summary>Creates the boot-owned profiles/formations blob. The caller retains AiConfig.Profiles and disposes it after completing world jobs.</summary>
         public static void CreateSingletons(EntityManager em, ContentCatalog catalog, List<Entity> created)
         {
             if (catalog == null) throw new ArgumentNullException(nameof(catalog));
             if (created == null) throw new ArgumentNullException(nameof(created));
             var configs = catalog.All<AiConfigDefinition>();
             var definitions = catalog.All<AiProfileDefinition>();
+            var formations = catalog.All<FormationDefinition>();
             var report = new ValidationReport("AiContent");
             if (configs.Count != 1)
             {
@@ -31,6 +33,8 @@ namespace Game.Simulation.Ai
                 report.Error("AI-E002", "content:" + config.IdString, "defaultProfile", "The default AI profile must be in the content catalog.");
             foreach (var definition in definitions)
                 definition.Validate(report.For("content:" + definition.IdString), null);
+            foreach (var formation in formations)
+                formation.Validate(report.For("content:" + formation.IdString), null);
             if (report.HasErrors) throw new ContentValidationException(report);
             using var existing = em.CreateEntityQuery(ComponentType.ReadOnly<AiConfig>());
             if (!existing.IsEmpty) return;
@@ -58,6 +62,18 @@ namespace Game.Simulation.Ai
                     // TODO(AI-006): bake ability rules when implementing AiDecisionSystem's rule consumption.
                     // Build entry 0 from managed data too: copying a populated BlobArray header would invalidate its offsets.
                     builder.Allocate(ref p.AbilityRules, 0);
+                }
+                var formationRows = builder.Allocate(ref root.Formations, formations.Count + 1);
+                formationRows[0] = default;
+                builder.Allocate(ref formationRows[0].Slots, 0);
+                for (int i = 0; i < formations.Count; i++)
+                {
+                    var definition = formations[i];
+                    ref var target = ref formationRows[i + 1];
+                    target.IdHash = definition.Id.Hash;
+                    var slots = builder.Allocate(ref target.Slots, definition.Slots.Count);
+                    for (int j = 0; j < slots.Length; j++)
+                        slots[j] = new float2(definition.Slots[j].x, definition.Slots[j].y);
                 }
                 blob = builder.CreateBlobAssetReference<AiProfilesBlob>(Allocator.Persistent);
                 entity = em.CreateSingleton(new AiConfig
