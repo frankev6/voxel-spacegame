@@ -150,7 +150,7 @@ namespace Game.App.Boot
 
             // GAL-008 installs and registers its real GalaxyService at row 8.1 before this point.
             // 8.3 FND-012: install both canonical surfaces only after that production dependency exists.
-            if (Services.TryGet<GalaxyService>(out var galaxy))
+            if (Game.Core.Services.TryGet<GalaxyService>(out var galaxy))
             {
                 Spawner = Push(new ShipSpawnService(world, Registry, Content.Catalog, Session, galaxy));
                 Register(Spawner); Register<IShipSpawner>(Spawner);

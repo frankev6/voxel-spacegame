@@ -6,6 +6,7 @@ using Game.App.Spawning;
 using Game.Core;
 using Game.Core.Components;
 using Game.Data.Definitions;
+using Game.Data.Components;
 using Game.Data.Services;
 using Game.Data.Validation;
 using Game.Galaxy.Components;

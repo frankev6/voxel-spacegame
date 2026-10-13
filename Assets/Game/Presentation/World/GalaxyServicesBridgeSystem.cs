@@ -13,7 +13,7 @@ namespace Game.Presentation.Systems
         protected override void OnCreate() { RequireForUpdate<GameplayActive>(); RequireForUpdate<SimClock>(); }
         protected override void OnUpdate()
         {
-            if (!Services.TryGet<GalaxyFrameTicker>(out var ticker))
+            if (!Game.Core.Services.TryGet<GalaxyFrameTicker>(out var ticker))
             { GameLog.WarnOnce("GAL.MissingTicker", "Galaxy", "Galaxy frame ticker is not registered."); return; }
             var clock = SystemAPI.GetSingleton<SimClock>();
             ticker.Tick(new GalaxyFrameContext(EntityManager, clock.UniversalTime, clock.Tick,

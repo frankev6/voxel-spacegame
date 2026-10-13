@@ -29,10 +29,10 @@ namespace Game.App.Session
             int handle = record.Register(registry);
             try
             {
-                if (Services.TryGet<Game.App.Spawning.ShipSpawnService>(out var spawner))
+                if (Game.Core.Services.TryGet<Game.App.Spawning.ShipSpawnService>(out var spawner))
                 {
                     float3 position = float3.zero; quaternion rotation = quaternion.identity;
-                    if (!session.IsSandbox && Services.TryGet<Game.Galaxy.Services.GalaxyService>(out var galaxy) && galaxy.State.HasPlayerLocation)
+                    if (!session.IsSandbox && Game.Core.Services.TryGet<Game.Galaxy.Services.GalaxyService>(out var galaxy) && galaxy.State.HasPlayerLocation)
                     {
                         using var origins = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Game.Galaxy.Components.FrameOrigin>());
                         if (origins.IsEmptyIgnoreFilter) throw new InvalidOperationException("Player placement requires FrameOrigin.");

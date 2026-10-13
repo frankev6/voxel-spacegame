@@ -145,7 +145,7 @@ namespace Game.Galaxy.Services
         {
             id = default;
             if (Galaxy == null || !catalog.TryGet<AuthoredStarSystemDefinition>(authoredId, out var definition)) return false;
-            var candidate = StarSystemId.FromAuthored(definition.Hash);
+            var candidate = StarSystemId.FromAuthored(definition.Id.Hash);
             if (!Galaxy.TryGetIndex(candidate, out _)) return false;
             id = candidate; return true;
         }
