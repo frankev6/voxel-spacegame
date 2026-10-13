@@ -896,7 +896,7 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 - **Do:** Implement `ApplyAccessibility`; fill `accessibility.uss` with `.text-scale-115` and `.text-scale-130` blocks (values = round(token value × factor) of the current `tokens.uss`) and `.reduce-motion` rules; make `NotificationService` use exit time 0 when reduce motion is on.
 - **Files:** `Assets/Game/UI/Services/UIRoot.cs`, `Assets/Game/UI/Theme/accessibility.uss`, `Assets/Game/UI/Services/NotificationService.cs`
 - **Acceptance criteria:**
-  - [ ] Text scale 130 % changes `resolvedStyle.fontSize` of a `.text-m` label to round(15 × 1.3) = 20 px with the current tokens.
+  - [ ] Text scale 130 % changes `resolvedStyle.fontSize` of a `.text-m` label to round(16 × 1.3) = 21 px with the current tokens.
   - [ ] UI scale 2.0 is clamped to 1.5.
   - [ ] `ControlsGallery` at text scale 130 % and logical 1280×720 has no `TextOverflow` issues.
 - **Tests:** `Assets/Game/Tests/EditMode/UI/AccessibilityTokensTests.cs`: `ScaledTokens_MatchBaseTimesFactor` (parses `tokens.uss` and `accessibility.uss` text). `Assets/Game/Tests/PlayMode/UI/AccessibilityTests.cs`: `TextScale130_FontSizeScaled`, `UiScale_Clamped`, `ReduceMotion_ToastExitImmediate`, `Gallery_TextScale130_NoOverflow`.
@@ -941,6 +941,8 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 | 30 | Layout audit scroll-content exclusion and nowrap measurement | Resolved: skip the ScrollView content container itself as well as its descendants, retaining viewport/chrome checks; its intentional oversized bounds must not fail scrolling controls. Measure nowrap text with Undefined width to recover intrinsic width; AtMost would clamp and hide the required overflow fixture. Results are cleared per Run. Wrapping text retains AtMost width and Undefined height; named panel descendants are checked against every containing panel. | Tech lead | UI-012 implementation default; acceptance pending |
 
 | 31 | Contrast audit missing theme and transparent text/background treatment | Resolved: require the actual resolved opaque --color-bg token; missing theme is an error instead of a guessed colour. Composite ancestors outermost first and the text element's own background, then alpha-composite foreground before WCAG luminance calculation. Skip display:none/zero-opacity subtrees; visibility:hidden skips that text but permits explicitly visible children. Clear results on each Run. Uses the updated WCAG sRGB 0.04045 breakpoint. | Tech lead | UI-012 implementation default; acceptance pending |
+
+| 32 | UI-013 example assumes a 15px body token, while approved NOCTURNE uses 16px | Resolved: scale the current approved tokens, as §4.8 requires; body text is 21px at 130%. Do not change the base palette/type scale to match the stale example. | Tech lead | UI-013 acceptance correction |
 
 ## 11. References
 
