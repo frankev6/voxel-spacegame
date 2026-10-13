@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Game.Core;
+using Game.Core.Components;
+using Game.Simulation.Commands;
+using Unity.Transforms;
 using Game.Data.Services;
 using Game.Galaxy.Generation;
 using Game.Data.Definitions;
@@ -63,7 +66,21 @@ namespace Game.Galaxy.Services
             if (Galaxy.SkippedProceduralCount != 0)
                 GameLog.Info("Galaxy", "Skipped " + Galaxy.SkippedProceduralCount + " procedural systems during placement.");
         }                   // after GameSession restored GalaxyState in place
-        public PlayerLocation GetStartLocation() => throw new System.NotImplementedException("GAL-008"); // SPEC-30 §6 and SPEC-01 new-game flow
+        public PlayerLocation GetStartLocation()
+        {
+            CheckAlive();
+            if (Galaxy == null) throw new InvalidOperationException("Galaxy is not generated.");
+            var start = Definition.StartStarSystem;
+            if (!TryResolveBody(start.Id, start.StartBodyKey, out var id)) throw new GalaxyGenerationException("Authored start body is missing.");
+            var content = GetContent(id.System);
+            if (!content.TryFind(id.LocalKey, out int index)) throw new GalaxyGenerationException("Generated start body is missing.");
+            var body = content.Bodies[index];
+            using var clocks = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<SimClock>());
+            double time = clocks.IsEmptyIgnoreFilter ? 0 : clocks.GetSingleton<SimClock>().UniversalTime;
+            var offset = math.mul(Planar.YawRotation(body.YawRad), (float3)start.StartOffsetM);
+            return new PlayerLocation { StarSystem = id.System, PositionM = OrbitMath.Position(body, time) + (double3)offset,
+                YawRad = math.radians(start.StartYawDegrees) };
+        } // SPEC-30 §6 and SPEC-01 new-game flow
 
         // Content
         public JobHandle PrefetchContent(StarSystemId id)
@@ -124,21 +141,158 @@ namespace Game.Galaxy.Services
         }
 
         // Queries
-        public bool TryResolveStarSystem(Game.Core.ContentId authoredId, out StarSystemId id) => throw new System.NotImplementedException("GAL-008");
-        public bool TryResolveBody(Game.Core.ContentId authoredStarSystem, string bodyKey, out BodyId id) => throw new System.NotImplementedException("GAL-008");
-        public BodyTemplateDefinition GetBodyTemplate(ushort templateIndex) => throw new System.NotImplementedException("GAL-008");
-        public string GetStarSystemName(StarSystemId id) => throw new System.NotImplementedException("GAL-008");  // §5.7
-        public string GetBodyName(BodyId id) => throw new System.NotImplementedException("GAL-008");              // authored override, else template display name + " " + roman/letter suffix (§5.7)
-        public string GetLocationKey(BodyId id) => throw new System.NotImplementedException("GAL-008");           // "<starsys id>/<body key>" for authored bodies, else "<ss:XXXXXXXX>/<role>:<slot>.<subslot>"
-        public bool CapturePlayerLocation() => throw new System.NotImplementedException("GAL-008");               // reads PlayerShip UniversePosition + yaw into State; false when no player ship
+        public bool TryResolveStarSystem(ContentId authoredId, out StarSystemId id)
+        {
+            id = default;
+            if (Galaxy == null || !catalog.TryGet<AuthoredStarSystemDefinition>(authoredId, out var definition)) return false;
+            var candidate = StarSystemId.FromAuthored(definition.Hash);
+            if (!Galaxy.TryGetIndex(candidate, out _)) return false;
+            id = candidate; return true;
+        }
+        public bool TryResolveBody(ContentId authoredStarSystem, string bodyKey, out BodyId id)
+        {
+            id = default;
+            if (!TryResolveStarSystem(authoredStarSystem, out var system)) return false;
+            var definition = Galaxy.Authored[Galaxy.Get(system).AuthoredIndex - 1];
+            for (int i = 0; i < definition.Bodies.Count; i++)
+                if (string.Equals(definition.Bodies[i].key, bodyKey, StringComparison.Ordinal))
+                { id = AuthoredId(system, definition, i); return true; }
+            return false;
+        }
+        static BodyId AuthoredId(StarSystemId system, AuthoredStarSystemDefinition definition, int index)
+        {
+            var body = definition.Bodies[index];
+            if (body.role != BodyRole.Moon) return new BodyId(system, body.role, body.slot, 0);
+            ushort parentSlot = 0, sub = 0;
+            foreach (var candidate in definition.Bodies)
+                if (candidate.key == body.parentKey) { parentSlot = candidate.slot; break; }
+            for (int i = 0; i < index; i++)
+                if (definition.Bodies[i].role == BodyRole.Moon && definition.Bodies[i].parentKey == body.parentKey) sub++;
+            return new BodyId(system, BodyRole.Moon, parentSlot, sub);
+        }
+        AuthoredBody FindAuthoredBody(BodyId id, out AuthoredStarSystemDefinition definition)
+        {
+            definition = null;
+            var system = Galaxy.Get(id.System);
+            if (system.AuthoredIndex == 0) return null;
+            definition = Galaxy.Authored[system.AuthoredIndex - 1];
+            for (int i = 0; i < definition.Bodies.Count; i++)
+                if (AuthoredId(id.System, definition, i).Equals(id)) return definition.Bodies[i];
+            return null;
+        }
+        public BodyTemplateDefinition GetBodyTemplate(ushort templateIndex)
+        {
+            CheckAlive();
+            if (Galaxy == null || templateIndex >= Galaxy.BodyTemplates.Count) throw new ArgumentOutOfRangeException(nameof(templateIndex));
+            return Galaxy.BodyTemplates[templateIndex];
+        }
+        public string GetStarSystemName(StarSystemId id) { RequireSystem(id); return GalaxyNames.System(Galaxy, id); }
+        public string GetBodyName(BodyId id)
+        {
+            RequireSystem(id.System);
+            if (names.TryGetValue(id, out string name)) return name;
+            var content = GetContent(id.System);
+            if (!content.TryFind(id.LocalKey, out int index)) throw new KeyNotFoundException("Unknown body: " + id);
+            var authored = FindAuthoredBody(id, out _);
+            var body = content.Bodies[index];
+            if (authored != null && !string.IsNullOrEmpty(authored.displayNameOverride)) name = authored.displayNameOverride;
+            else name = id.Role switch
+            {
+                BodyRole.Star => GetStarSystemName(id.System),
+                BodyRole.Planet => GetStarSystemName(id.System) + " " + GalaxyNames.Roman(id.Slot + 1),
+                BodyRole.Moon => GetBodyName(BodyId.FromLocalKey(id.System, body.ParentKey)) + " " + (char)('a' + id.SubSlot),
+                BodyRole.LaneGate => "Gate to " + GetStarSystemName(GalaxyDef.Neighbour(Galaxy.Lanes[body.LaneIndex], id.System)),
+                _ => GetBodyTemplate(body.TemplateIndex).DisplayName
+            };
+            names.Add(id, name); return name;
+        }
+        public string GetLocationKey(BodyId id)
+        {
+            RequireSystem(id.System);
+            var body = FindAuthoredBody(id, out var definition);
+            return body != null ? definition.IdString + "/" + body.key : id.ToString();
+        }
+        public bool CapturePlayerLocation()
+        {
+            CheckAlive();
+            using var players = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerShip>(),
+                ComponentType.ReadOnly<UniversePosition>(), ComponentType.ReadOnly<LocalTransform>());
+            if (players.IsEmptyIgnoreFilter) return false;
+            var pose = players.GetSingleton<LocalTransform>();
+            State.PlayerLocation = new PlayerLocation { StarSystem = State.CurrentStarSystem,
+                PositionM = players.GetSingleton<UniversePosition>().Value,
+                YawRad = Planar.YawFromForward(math.mul(pose.Rotation, new float3(0, 0, 1))) };
+            State.HasPlayerLocation = true; return true;
+        }
 
         // World commands (narrative effects reach these through ILogicContext in Game.App)
-        public void ReplaceBody(BodyId body, Game.Core.ContentId template) => throw new System.NotImplementedException("GAL-008");
-        public BodyId AddStorySpawn(StarSystemId sys, Game.Core.ContentId template, BodyId anchor, double3 offsetM, float yawRad) => throw new System.NotImplementedException("GAL-008");
-        public bool RemoveStorySpawn(BodyId storySpawn) => throw new System.NotImplementedException("GAL-008");
-        public bool MarkBodyDestroyed(BodyId body) => throw new System.NotImplementedException("GAL-008");
-        public bool MarkBodyInteracted(BodyId body) => throw new System.NotImplementedException("GAL-008");
-        public bool IsBodyDestroyed(BodyId body) => throw new System.NotImplementedException("GAL-008");
+        public void ReplaceBody(BodyId body, ContentId template)
+        {
+            RequireSystem(body.System);
+            if (!ResolveCommandTemplate(template, out _, out ushort index)) return;
+            State.GetOrCreateDelta(body.System).SetReplacement(body.LocalKey, template);
+            if (cache.TryGetValue(body.System, out var content) && content.TryFind(body.LocalKey, out int bodyIndex))
+            {
+                var changed = content.Bodies[bodyIndex]; changed.TemplateIndex = index; changed.State |= BodyStateFlags.Replaced;
+                content.Bodies[bodyIndex] = changed;
+            }
+            names.Remove(body); liveSink?.OnBodyDeltaChanged(body);
+        }
+        public BodyId AddStorySpawn(StarSystemId system, ContentId template, BodyId anchor, double3 offsetM, float yawRad)
+        {
+            RequireSystem(system);
+            if (anchor.IsValid && !anchor.System.Equals(system)) throw new ArgumentException("Story anchor belongs to another system.", nameof(anchor));
+            if (!ResolveCommandTemplate(template, out var definition, out ushort index)) return default;
+            var record = new StorySpawnRecord { Template = template, AnchorBodyKey = anchor.IsValid ? anchor.LocalKey : 0, OffsetM = offsetM, YawRad = yawRad };
+            int slot = State.GetOrCreateDelta(system).AddStorySpawn(record);
+            var id = new BodyId(system, BodyRole.StorySpawn, checked((ushort)slot), 0);
+            if (cache.TryGetValue(system, out var content)) StarSystemDeltaApplier.AppendStory(content, record, slot, Galaxy, definition, index);
+            liveSink?.OnBodyDeltaChanged(id); return id;
+        }
+        public bool RemoveStorySpawn(BodyId body)
+        {
+            RequireSystem(body.System);
+            if (body.Role != BodyRole.StorySpawn || body.SubSlot != 0 || !State.TryGetDelta(body.System, out var delta) || !delta.RemoveStorySpawn(body.Slot)) return false;
+            if (cache.TryGetValue(body.System, out var content) && content.TryFind(body.LocalKey, out int index)) content.Bodies.RemoveAt(index);
+            names.Remove(body); liveSink?.OnBodyDeltaChanged(body); return true;
+        }
+        public bool MarkBodyDestroyed(BodyId body)
+        {
+            RequireSystem(body.System);
+            if (!State.GetOrCreateDelta(body.System).MarkDestroyed(body.LocalKey)) return false;
+            PatchFlag(body, BodyStateFlags.Destroyed); return true;
+        }
+        public bool MarkBodyInteracted(BodyId body)
+        {
+            RequireSystem(body.System);
+            if (!State.GetOrCreateDelta(body.System).MarkInteracted(body.LocalKey)) return false;
+            PatchFlag(body, BodyStateFlags.Interacted); return true;
+        }
+        void PatchFlag(BodyId body, BodyStateFlags flag)
+        {
+            if (cache.TryGetValue(body.System, out var content) && content.TryFind(body.LocalKey, out int index))
+            { var changed = content.Bodies[index]; changed.State |= flag; content.Bodies[index] = changed; }
+            liveSink?.OnBodyDeltaChanged(body);
+        }
+        bool ResolveCommandTemplate(ContentId id, out BodyTemplateDefinition template, out ushort index)
+        {
+            index = GalaxyConstants.NoIndex;
+            if (catalog.TryGet(id, out template)) index = Galaxy.BodyTemplateIndexOf(template);
+            if (index != GalaxyConstants.NoIndex) return true;
+            GameLog.Warn("Galaxy", "Unknown body template: " + id); return false;
+        }
+        public bool IsBodyDestroyed(BodyId body)
+        {
+            if (!State.TryGetDelta(body.System, out var delta)) return false;
+            int lo = 0, hi = delta.Destroyed.Count - 1;
+            while (lo <= hi)
+            {
+                int mid = lo + (hi - lo) / 2; ulong key = delta.Destroyed[mid];
+                if (key == body.LocalKey) return true;
+                if (key < body.LocalKey) lo = mid + 1; else hi = mid - 1;
+            }
+            return false;
+        }
         public void Reveal(StarSystemId id) { RequireSystem(id); State.AddKnown(id); }               // Known += id (also hidden ones)
         public void MarkVisited(StarSystemId id)
         {
@@ -174,6 +328,6 @@ namespace Game.Galaxy.Services
             if (disposed) return;
             ticker.Unregister(this); ClearGenerated(); liveSink = null; disposed = true;
         }
-        // TODO(GAL-008): queries, names, player placement/capture, delta command patches and required acceptance.
+        // TODO(GAL-008): production composition/session binding and six required acceptance cases.
     }
 }

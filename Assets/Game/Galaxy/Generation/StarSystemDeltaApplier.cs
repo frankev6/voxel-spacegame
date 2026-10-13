@@ -32,6 +32,29 @@ namespace Game.Galaxy.Generation
             {
                 var spawn = delta.StorySpawns[slot];
                 if (spawn.Removed || !Resolve(spawn.Template, out var template, out ushort templateIndex)) continue;
+                AppendStory(content, spawn, slot, galaxy, template, templateIndex);
+            }
+            foreach (ulong key in delta.Interacted) Mark(key, BodyStateFlags.Interacted);
+            foreach (ulong key in delta.Destroyed) Mark(key, BodyStateFlags.Destroyed);
+            foreach (var record in delta.StructureDiffs) Mark(record.BodyKey, BodyStateFlags.HasStructure);
+
+            bool Resolve(ContentId id, out BodyTemplateDefinition template, out ushort index)
+            {
+                index = GalaxyConstants.NoIndex;
+                if (!catalog.TryResolve(id, "Galaxy delta " + content.Id, out template)) return false;
+                index = galaxy.BodyTemplateIndexOf(template);
+                if (index == GalaxyConstants.NoIndex) throw new InvalidOperationException("Resolved delta template is absent from this galaxy's catalog snapshot.");
+                return true;
+            }
+            void Mark(ulong key, BodyStateFlags state)
+            {
+                if (!content.TryFind(key, out int index)) return;
+                var body = content.Bodies[index]; body.State |= state; content.Bodies[index] = body;
+            }
+        }
+        internal static void AppendStory(StarSystemContent content, in StorySpawnRecord spawn, int slot,
+            GalaxyDef galaxy, BodyTemplateDefinition template, ushort templateIndex)
+        {
                 ulong parentKey = spawn.AnchorBodyKey;
                 OrbitElements parentOrbit = default;
                 if (parentKey != 0 && content.TryFind(parentKey, out int anchorIndex))
@@ -55,24 +78,6 @@ namespace Game.Galaxy.Generation
                     YawRad = spawn.YawRad, RadiusM = template.RadiusMaxM,
                     Seed = StableHash.Combine(galaxy.Get(content.Id).Seed, id.LocalKey), State = BodyStateFlags.StorySpawn
                 });
-            }
-            foreach (ulong key in delta.Interacted) Mark(key, BodyStateFlags.Interacted);
-            foreach (ulong key in delta.Destroyed) Mark(key, BodyStateFlags.Destroyed);
-            foreach (var record in delta.StructureDiffs) Mark(record.BodyKey, BodyStateFlags.HasStructure);
-
-            bool Resolve(ContentId id, out BodyTemplateDefinition template, out ushort index)
-            {
-                index = GalaxyConstants.NoIndex;
-                if (!catalog.TryResolve(id, "Galaxy delta " + content.Id, out template)) return false;
-                index = galaxy.BodyTemplateIndexOf(template);
-                if (index == GalaxyConstants.NoIndex) throw new InvalidOperationException("Resolved delta template is absent from this galaxy's catalog snapshot.");
-                return true;
-            }
-            void Mark(ulong key, BodyStateFlags state)
-            {
-                if (!content.TryFind(key, out int index)) return;
-                var body = content.Bodies[index]; body.State |= state; content.Bodies[index] = body;
-            }
         }
     }
 }

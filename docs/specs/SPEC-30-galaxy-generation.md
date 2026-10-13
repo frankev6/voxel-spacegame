@@ -1340,6 +1340,8 @@ Visibility:
 
 | 32 | BodySpec.LaneIndex is ushort while the galaxy cap can produce more lanes | Preserve the declared type; fail content generation explicitly with GalaxyGenerationException before scheduling if an adjacent index reaches NoIndex. Never wrap or silently omit a gate. Wider indices require a future accepted contract change if integrated content reaches the limit. | Tech lead |
 
+| 33 | GetStartLocation refers to current time on GalaxyState, which has no time field | Resolve current UniversalTime from the existing SimClock singleton; use zero before a clock exists for standalone new-game generation. App session integration must initialize/restore SimClock before requesting start placement. No duplicate clock or public state field. | Tech lead |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/03-galaxy-world.md` (03-B1, 03-B9a–d, 03-D3), `04` (04-B1, 04-B11), `LEDGER.md` R9.
