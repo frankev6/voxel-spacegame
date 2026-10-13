@@ -12,6 +12,7 @@ using Game.Simulation;
 using Game.Simulation.Commands;
 using Game.Simulation.Power;
 using Game.Simulation.Weapons;
+using Game.Simulation.Spatial;
 using Game.Tests.Common;
 using Game.Voxel.Damage;
 using Game.Voxel.Model;
@@ -134,6 +135,7 @@ namespace Game.Tests.PlayMode.Combat
                 expected = message.StartsWith("Ignoring invalid [Unity.Entities.UpdateBeforeAttribute] attribute on Game.Simulation.Flight.ThrusterInitSystem targeting Game.Simulation.Power.PowerInitSystem.", StringComparison.Ordinal) ||
                     message.StartsWith("Ignoring invalid [Unity.Entities.UpdateAfterAttribute] attribute on Game.Simulation.Flight.PropulsionSystem targeting Game.Simulation.Flight.PropulsionStatsSystem.", StringComparison.Ordinal) ||
                     message.StartsWith("Ignoring invalid [Unity.Entities.UpdateAfterAttribute] attribute on Game.Simulation.Weapons.ExplosionSystem targeting Game.Simulation.Weapons.ProjectileStepSystem.", StringComparison.Ordinal) ||
+                    message.StartsWith("Ignoring invalid [Unity.Entities.UpdateAfterAttribute] attribute on Game.Simulation.Weapons.ExplosionSystem targeting Game.Simulation.Weapons.BeamStepSystem.", StringComparison.Ordinal) ||
                     message.StartsWith("'Game.Voxel.Grid.GridSpawnSystem' creates a Lookup object", StringComparison.Ordinal);
             if (expected) LogAssert.Expect(type, message);
         }
@@ -155,7 +157,7 @@ namespace Game.Tests.PlayMode.Combat
         {
             var systems = new List<Type> { typeof(DamageStreamsSystem), typeof(ImpactEventSystem), typeof(DamageResolveSystem),
                 typeof(IntegritySystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(ChunkColliderCleanupSystem),
-                typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(ExplosionSystem), typeof(SplitGraceContactSystem) };
+                typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(SpatialHashBuildSystem), typeof(ShieldSystem), typeof(ExplosionSystem), typeof(SplitGraceContactSystem) };
             if (firing) systems.AddRange(new[] { typeof(WeaponInitSystem), typeof(WeaponAimSystem), typeof(WeaponFireSystem),
                 typeof(PowerRegistrationSystem), typeof(PowerInitSystem), typeof(PowerAllocationSystem), typeof(ShipStatsAggregateSystem), typeof(RegressionCoreKillSystem) });
             var f = new FlightFixture(systems.ToArray());

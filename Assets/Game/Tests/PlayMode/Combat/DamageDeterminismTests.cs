@@ -4,6 +4,8 @@ using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Data.Combat;
 using Game.Simulation.Weapons;
+using Game.Simulation.Spatial;
+using Game.Simulation.Power;
 using Game.Tests.Common;
 using Game.Voxel.Damage;
 using Game.Voxel.Grid;
@@ -88,7 +90,7 @@ namespace Game.Tests.PlayMode.Combat
                 this.chunkSpur = chunkSpur;
                 var systems = new List<Type> { typeof(DamageStreamsSystem), typeof(ImpactEventSystem), typeof(DamageResolveSystem),
                     typeof(IntegritySystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(ChunkColliderCleanupSystem),
-                    typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(ExplosionSystem), typeof(SkirmishShotsSystem) };
+                    typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(SpatialHashBuildSystem), typeof(ShieldSystem), typeof(ExplosionSystem), typeof(SkirmishShotsSystem) };
                 if (chunkSpur) systems.Add(typeof(SplitGraceContactSystem));
                 Flight = new FlightFixture(systems.ToArray());
                 Em.CreateSingleton(new PersistentIdAllocator { Next = 1000, End = 2000 });
