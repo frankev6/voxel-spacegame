@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Menu presenter implemented, uninstalled:** HUD-002 now has real SaveService/IGameFlow Continue/New Game/confirmed Quit, the required validated commander-name prompt, deferred operation result handling and explicit navigation delegates for remaining screens. Lifetime/session composition and dependent screen hookups still remain; no fake services installed. Main b0d32bab incorporated, preserving UI work and legacy acceptance. No Unity run this turn. Previous turn accepted NAR-014 (progress).
+
 - **Legacy logic accepted:**2be62596 clean compiles89361/43204; five focused checks11720 pass after exact salvage removal expectation repair. NAR-014 closes; NAR-015 frontier emission unlocked. All three workers currently have real standard-task dependency waits. Lead returns to HUD-002 preserved e7bcf344; composition/session/presenters remain. No Unity validation active. Previous turn staged UI views (progress).
 
 - **Menu/pause views staged:** HUD-002 now has authored main-menu and pause UXML/styles, view-model visibility/save-block updates, command bindings, and specified root Back routing. Presenters/lifetime/session hookup remain unfinished; temporary adapter stays installed. Partial owning HUD rows updated. No Unity validation this turn; previous turn built loading UI (progress). NAR-014 review170 found no actionable defects; lead integration/validation remains queued.
