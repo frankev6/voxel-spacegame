@@ -20,6 +20,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **AI-010 integrated:** primary `task/AI-010-scenario-integration` at93406a7d integrates439002e3/26c91af1, keeps existing Ai folder GUID, fixes missing Flight namespace and mirrors Q26→ledger306. Recompile81930 clean; four focused PlayMode scenarios active80177 in Editor17922. No concurrent runtime changes until terminal. Presentation notified; next candidate DEV-018 after acceptance/claim. NAR-006 functional code is on maind4560a44; advisory fixture remains open. Previous turn authored catalog acceptance and integrated it (progress).
+
 - **Catalog functional checks green:** integrated4f205524, compile26449 clean, focused15122 four passed. Evidence `fact-catalog/`. Required Build20k advisory fixture still to author, including actual binding once NAR-003 is integrated; NAR-006 remains in-progress. AI-010 final shorteningdf1cda4b reviewed; worker notified of imminent integration after catalog validation. Lead NAR-003 code preservedfeef0b40. Previous turn implemented catalog (progress).
 
 - **Catalog prerequisite implemented:** NAR-006 claimed8c989a8d, isolated lead tree now `task/NAR-006-fact-catalog` at837c19ad. Canonical content/list resolvers4b77303d, ordinal authored/generated facts, aliases, diagnostics and family/source-hash lookup implemented. Required tests/review/compile remain. NAR-003 preserved atfeef0b40 on its branch. No Unity run; primary runtime unchanged. Workers AI-015148, SYS-003159, AI-010130 remain active. Previous turn implemented binder/wrappers (progress).
