@@ -89,7 +89,16 @@ namespace Game.Tests.EditMode.Simulation.Power
         [Test] public void Hulk_ClearsPower()
         {
             var root = Root(); var a = Consumer(root, 8, 200); var b = Consumer(root, 46);
-            Step(); Em.AddComponent<Hulk>(root); Step(); var power = Em.GetComponentData<ShipPower>(root);
+            // A functional with two consuming modules is off if either module browns out.
+            var mixed = Root(0, 40); var combined = Consumer(mixed, 8, 200);
+            var requests = Em.GetBuffer<PowerRequest>(combined);
+            requests.Add(new PowerRequest { Module = BlockModuleId.Thruster, Draw = 46, Priority = 100, Requesting = 1, ConsumerIndex = 1 });
+            Em.SetComponentData(combined, new PowerLink { Bound = 1, ConsumerCount = 2 });
+            Em.GetBuffer<PowerConsumer>(mixed).Add(new PowerConsumer { Functional = combined, InstanceIndex = 0,
+                Module = BlockModuleId.Thruster, Draw = 46, Priority = 100, RequestIndex = 1 });
+            Step(); Assert.That(Em.IsComponentEnabled<Powered>(combined), Is.False);
+            Assert.That(Em.GetBuffer<PowerConsumer>(mixed)[0].Flags & PowerConsumerFlags.Granted, Is.Not.EqualTo((PowerConsumerFlags)0));
+            Em.AddComponent<Hulk>(root); Step(); var power = Em.GetComponentData<ShipPower>(root);
             Assert.AreEqual(0, power.Stored); Assert.AreEqual(0, power.Generation); Assert.AreEqual(0, power.Capacity);
             Assert.AreEqual(0, power.DemandPerSecond); Assert.AreEqual(0, power.GrantedPerSecond); Assert.AreEqual(0u, power.AbilityGrantMask);
             Assert.That(Em.IsComponentEnabled<Powered>(a), Is.False); Assert.That(Em.IsComponentEnabled<Powered>(b), Is.False);
