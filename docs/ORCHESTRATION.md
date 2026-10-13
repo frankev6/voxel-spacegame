@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Per-system generation underway:** GAL006 claimed3dc7cc6a, task/GAL-006-system-content authors body hashes/lookup/disposal plus authored/gate helpers. Procedural placement/job wrapper/six checks pending, unvalidated. Workers197/209/173 active; presentation explicitly switched to HUD005 repair after preserving TRV002. No active Unity run. Previous turn guarded pause intents (progress).
+
 - **Settings work preserved for repair:** task/HUD-005-settings-integration at dbe07d59 includes real pause routes and session callback guards, unvalidated delta. Belt boot correction alone is on main6c89f0b0 so unrelated gameplay is not held behind settings. Next integrate worker HUD005 repair and validate on that branch. Workers GAL012196/ENC010208/TRV002172 active; no Unity run. Previous turn authored pause routes (progress).
 
 - **Lanes accepted:**03a6cec6 compile91840 clean; four lane and two hash checks pass, evidence galaxy-lanes/. No active Unity run. HUD-005366615a9+114e6713 integration next; worker prepares TRV-002 pending main claim. GAL-012193/ENC-010205 active. Previous turn implemented lane/hash algorithms (progress).

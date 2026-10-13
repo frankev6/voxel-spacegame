@@ -11,8 +11,26 @@ namespace Game.Galaxy.Data
         public double LaneRingRadiusM { get; internal set; }
         public double ExtentM { get; internal set; }
         public ulong GeneratedHash { get; internal set; }        // StarSystemContentHash over Bodies before deltas
-        public bool TryFind(ulong localKey, out int index) => throw new System.NotImplementedException("GAL-006");       // binary search
-        public void Dispose() => throw new System.NotImplementedException("GAL-006");
-        // TODO(GAL-006): implement the behavior specified by SPEC-30.
+        internal StarSystemContent(StarSystemId id)
+        {
+            Id = id;
+            Bodies = new Unity.Collections.NativeList<BodySpec>(Unity.Collections.Allocator.Persistent);
+        }
+        public bool TryFind(ulong localKey, out int index)
+        {
+            index = -1;
+            if (!Bodies.IsCreated) return false;
+            int low = 0, high = Bodies.Length - 1;
+            while (low <= high)
+            {
+                int middle = low + (high - low) / 2;
+                ulong key = Bodies[middle].Id.LocalKey;
+                if (key == localKey) { index = middle; return true; }
+                if (key < localKey) low = middle + 1;
+                else high = middle - 1;
+            }
+            return false;
+        }
+        public void Dispose() { if (Bodies.IsCreated) Bodies.Dispose(); }
     }
 }

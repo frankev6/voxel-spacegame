@@ -1032,6 +1032,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — GAL-006 body foundation checkpoint — astra (gpt-6)
+
+- Claimed3dc7cc6a; implemented content binary lookup/disposal, explicit declaration-order body hash excluding mutable state, fixed five-draw body streams, authored orbit/parent/radius transfer, extent calculation and bounded arc-separated gate placement. Procedural counts/bodies, scheduled wrapper and six required checks remain; no compile/acceptance claim. Test count: spec-required: 6 pending, extra: 0.
+- Existing workers GAL012197/ENC010209/HUD005 repair173 active; repair worker preserved TRV002 before switching. Settings integration remains on dbe07d59; main belt repair6c89f0b0 is retained. Previous turn repaired pause session intents (progress).
+
 ### 2026-10-13 — Boot correction on main, settings checkpoint preserved — astra (gpt-6)
 
 - Applied canonical belt block correction6c89f0b0 to main independently of unfinished settings. Settings/pause navigation and session guards preserved on task/HUD-005-settings-integration dbe07d59; rebind repair/accepted checks and complete main-menu navigation remain. No active validation or repeated test run. Test count: existing spec-required acceptance pending, extra: 0.
