@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **AI-014 accepted:** compile99129 and focused76219 exited0;25/0/0 includes all3 required fleet cases and affected AI/steering regressions. Evidence `fleet-ai/`. Closeout ready for FF main. Worker snapshots combat139/presentation122/power147 active; turret composition/ADR-0071 reviewed as compatible but delivery not yet committed. Next integrate delivered AI-009/010, live enemy proof; AI-015 becomes eligible. Previous turn authored acceptance and compiled (progress).
+
 - **Fleet acceptance authored:**70eb3dc3 adds exactly three required FleetTests using shared real steering/physics fixture (spec-required:3, extra:0). Formation tracking, leader target with sphere-query count, destroyed/hulk promotion. Q25 mirroredQ302 resolves general40m arrival versus15m formation envelope with member-only5m arrival. Compile99129 active; focused fleet/decision/steering checks next. No acceptance claim. Previous turn implemented ordered member thinking (progress).
 
 - **Fleet decisions implemented:** AI-014 now schedules leaders/lone ships, a target/state snapshot, then members. Members retain abilities and friendly-fire segment checks while skipping sphere target search/avoidance. Null-Leader promoted roots think normally. Exactly three required fleet tests and compile remain next; no validation claim. Avoid overlapping AiThinkJob changes with AI-010 worker (notified).

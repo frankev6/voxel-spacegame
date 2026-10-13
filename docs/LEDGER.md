@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 2 | 0 | 0 | 77 | 0 | 91 | 5 |
-| M3 | 142 | 3 | 0 | 0 | 35 | 0 | 180 | 12 |
+| M3 | 140 | 4 | 0 | 0 | 36 | 0 | 180 | 11 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -316,8 +316,8 @@
 | PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | a606bfc | Restored-cell mass accumulator; ownership fixture repair; 1 required test; full batch 901 EM / 128 PM, zero failures |
 | DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | 0b93d402 | Nine request-channel checks pass; ordered impulse and bounded heal/place |
 | AI-013 | Fleet data and formations | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | bf5e81f | Formation validation and boot-owned blob/catalog; 2 required tests. AI-014 steering remains open. Full 1027 EM / 145 PM passed. |
-| AI-014 | FleetSystem and member thinking | [SPEC-23](specs/SPEC-23-ai.md) | M3 | frontier | AI-013, AI-007 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead fleet coordination while three standard workers implement; focused acceptance ADR-0070 |
-| AI-015 | Fleet and swarm scenario and performance | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-014 | no | todo |  |  |  |  |
+| AI-014 | FleetSystem and member thinking | [SPEC-23](specs/SPEC-23-ai.md) | M3 | frontier | AI-013, AI-007 | yes | done | astra (gpt-6) | 2026-10-13 | 70eb3dc3 | Scheduled fleet goals/promotion and shared leader decisions; 3 required checks pass; grouped25/0/0 |
+| AI-015 | Fleet and swarm scenario and performance | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-014 | yes | todo |  |  |  |  |
 | GAL-001 | Public contract types | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | CORE-001, DATA-001, VOX-001, NAR-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 6d49a49 | Galaxy contracts, three required tests; full suites green |
 | GAL-002 | Orbit math | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b41aab2 | Double-precision Kepler position/velocity and period wrapping; full 968 EM /145 PM green |
 | GAL-003 | Definitions, properties and validator | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable combat worker validates galaxy definitions while full combat batch completes |
@@ -1003,6 +1003,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Fleet coordination verified — astra (gpt-6)
+
+- AI-014 b4fcfff5/0a23c0da/70eb3dc3 schedules formation goals and deterministic lowest-slot promotion, then feeds real steering. Leaders decide before a target/state snapshot; members skip sphere target search and avoidance while retaining abilities and friendly-fire protection. Q24/25 mirroredQ301/302 explain null-leader promotion and5m member arrival versus configured lone-ship radius.
+- Compile99129 clean, zero CS warnings. Focused76219 exited0:25 passed/0 failed/0 skipped, including all3 FleetTests,9 decision and4 steering checks plus9 existing app fleet tests selected by the shared name. Evidence `Logs/playtest/fleet-ai/{compile.log,acceptance.xml,acceptance.log}`. Formation test tracks a cruising leader for600 fixed ticks through real thrusters and physics within15m; member sphere-query count remains zero; destroyed and hulk leader cases promote stably.
+- Test count: spec-required:3, extra:0. No performance tuning or full-suite rerun. Original QualitySettings delta preserved/excluded and orphan metadata cleaned after terminal. Existing workers continue AI-009/010 and ECO-005; AI-015 now eligible after integration.
 
 ### 2026-10-13 — Repair channels and inventory foundation verified — astra (gpt-6)
 

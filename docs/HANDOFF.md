@@ -30,6 +30,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Fleet coordination accepted:** AI-01470eb3dc3, clean compile and25 focused checks including3 required fleet cases. Actual thrusters track formation within15m, members inherit targets without sphere queries, and lowest-slot promotion survives leader destruction/hulk conversion. Evidence `Logs/playtest/fleet-ai/`; no live fleet demonstration yet. Workers continue station turrets, combat scenarios and merchants.
+
 - **Repair/inventory complete:** DMG-019 ordered impulses and bounded heal/place plus ECO-003 atomic inventory/wallet pass clean compile and21 focused checks, evidence `Logs/playtest/repair-inventory/`. Advisory Apply40 deferred. Existing power worker now moves to ECO-005 merchants; AI-009/010 remain active. No broad validation wait.
 
 - **Current:** preview/ability/AI batch closed3b1e944b and merged locally. Existing workers assigned AI-009 station turrets and AI-010 combat scenarios; power prepares merchants pending inventory acceptance. Lead integrated DMG-019/ECO-003 on `task/DMG-019-focused-integration` at2e364ad5, compiling once before focused checks. No full regression gate.
