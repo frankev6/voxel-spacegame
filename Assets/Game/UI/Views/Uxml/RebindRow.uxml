@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="settings-rebind-row" class="list-row settings-rebind-row" picking-mode="Ignore">
+        <ui:Label name="settings-rebind-action" class="settings-rebind-action" picking-mode="Ignore" />
+        <ui:Label name="settings-rebind-binding" class="settings-rebind-binding text-muted" picking-mode="Ignore" />
+        <ui:Button name="settings-rebind-button" text="Rebind" class="btn btn--secondary" />
+    </ui:VisualElement>
+</ui:UXML>

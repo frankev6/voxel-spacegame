@@ -40,7 +40,7 @@ namespace Game.App.Settings
                 camera.ApplySettings(new Game.Presentation.Data.CameraSettings
                 {
                     MouseSensitivity = s.Controls.MouseSensitivity, InvertOrbitY = s.Controls.InvertCameraY,
-                    YawMode = Game.Presentation.Data.CameraYawMode.FollowHeading,
+                    YawMode = s.Controls.CameraYawModeIndex == 1 ? Game.Presentation.Data.CameraYawMode.Free : Game.Presentation.Data.CameraYawMode.FollowHeading,
                     ShakeScale = s.Accessibility.ScreenShakeScale, ReduceMotion = s.Accessibility.ReduceMotion
                 });
             if ((sections & SettingsSection.Accessibility) != 0 && Game.Core.Services.TryGet<Game.UI.Services.UIRoot>(out var ui))

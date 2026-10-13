@@ -719,6 +719,8 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 
 | 27 | Required rebinding acceptance needs clock control in PlayMode | Resolved ADR-0074: test-only InputSystem.TestFramework reference; advance input clock directly and restore state, preserving real behavior/assertions. | Tech lead |
 
+| 28 | HUD-005 concrete option and presenter lifecycle defaults | One virtual row per eligible noncomposite binding in Global/Flight/Editor/Dialog, excluding mouse position/delta/scroll; each row displays its own binding index. Resolution choice 0 preserves the current display; quality choice 0 preserves the project default. Settings edits use the existing Apply + Flush API for immediate persistence; accessibility also calls UIRoot.ApplyAccessibility immediately. Constructor takes UIRoot, the app-owned SettingsViewModel, SettingsService and InputService. Register SettingsView(model,presenter), then Bind; Show refreshes and opens, Refresh handles session rebind, Unbind/Dispose cancels listening and removes subscriptions. No presenter Tick is needed; SettingsService remains ticked by GameRoot. A 960×720 panel capped at 90% uses approved theme tokens. Lead owns production composition/menu/pause hooks and Unity acceptance before closure. | Tech lead — HUD-005 implementation default; central mirror pending |
+
 ## 11. References
 
 - Audit `06-ui-shipeditor.md` §1.1 (17 views), §2 B/D/E bugs, §5.2; `LEDGER.md` R4, R7, R8, R11, R12, R13, R31; screenshots `02-newgame.png`, `04-after-intro.png`, `05-flying.png`, `07-ark-dialog.png`, `09-trade.png`, `10-hangar.png`, `22-inventory.png`, `23-fleet.png`.
