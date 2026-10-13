@@ -79,7 +79,7 @@ namespace Game.Tests.PlayMode.UI
             Game.Core.Services.Register(ui);
             try
             {
-                using var settings = new SettingsService(new NewtonsoftSaveJsonCodec(), new SettingsPaths(Path.Combine(folder, "settings.json")));
+                using var settings = new Game.App.Settings.SettingsService(new NewtonsoftSaveJsonCodec(), new SettingsPaths(Path.Combine(folder, "settings.json")));
                 settings.Load(); using var applier = new SettingsApplier(settings);
                 SettingsApplier.Apply(SettingsSection.Accessibility, settings.Current);
                 Assert.AreEqual(1, panel.Settings.scale); Assert.IsFalse(ui.ReduceMotion);
@@ -113,8 +113,7 @@ namespace Game.Tests.PlayMode.UI
             Build(); yield return null;
             ui.Notifications.Post(new Notification { Label = "Normal toast" });
             var toast = ui.GetLayer(UILayer.Toasts).Q<VisualElement>("toast-0"); Assert.IsNotNull(toast);
-            yield return Until(() => toast.resolvedStyle.transitionDuration.Count > 0
-                && toast.resolvedStyle.transitionDuration[0].value > 0, "normal toast duration");
+            yield return Until(() => HasPositiveDuration(toast), "normal toast duration");
             Step(config.ToastLifetimeSeconds);
             Assert.AreEqual(1, ui.Notifications.VisibleCount, "Normal motion keeps the toast during its exit transition.");
             ui.ApplyAccessibility(Options(motion: true)); Step(0);
@@ -169,10 +168,16 @@ namespace Game.Tests.PlayMode.UI
 
         static bool HasZeroDuration(VisualElement element)
         {
-            var durations = element.resolvedStyle.transitionDuration;
-            if (durations.Count == 0) return false;
-            for (int i = 0; i < durations.Count; i++) if (durations[i].value != 0) return false;
-            return true;
+            bool any = false;
+            foreach (var duration in element.resolvedStyle.transitionDuration)
+            { any = true; if (duration.value != 0) return false; }
+            return any;
+        }
+        static bool HasPositiveDuration(VisualElement element)
+        {
+            foreach (var duration in element.resolvedStyle.transitionDuration)
+                if (duration.value > 0) return true;
+            return false;
         }
         static float TextToken(string name)
         {
