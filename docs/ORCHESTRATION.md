@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | MIG-013 | repair 2816e5 integrated b861ac5; generation/validation pending, dependency wait | combat/migration work as ready |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-001 | EDT-001 delivered 6712061; integrated 9c627fd, dependency wait pending validation | editor contracts as ready |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-011 | claimed main 2442bc0; finish ECO recipe then dispatch queued | combat composition |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-011 | delivered 0a9da66; reviewed, awaiting next validation batch | combat composition |
 
 ## Operating rules
 
@@ -17,6 +17,9 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Latest continuation:** session 22999 has completed EditMode **1097/0/1** and is still running PlayMode. All three exact worker threads inspected: MIG-013/EDT-001 dependency waits; WPN-011 delivered **0a9da66**, source reviewed, queued for next batch. Lead AUD-006 isolated **3717708** adds spatial pooled playback, binding and bounded event drain/coalescing/cooldown; required tests, producer dependency verification and Unity validation remain. No audio or WPN-011 runtime changes entered the active validation checkout. Previous turn answered the owner's goal/scheduling question; this continuation resumes implementation.
+
 
 - **Newest:** full batch session 2980 exited 1: EditMode **1096/1/1**, only ContentValidatorRunnerTests.Cli_ExitCodeReflectsErrors. Its synthetic baseline omitted the newly required economy config; `6634507` uses the complete authored baseline before adding one invalid item, keeping production validation strict. Focused session **66083** exited 0 (1/0/0); full EditMode then PlayMode session **22999** is active; no primary runtime edits until terminal. Failed XML archived `Logs/playtest/shield-combat/editmode-first.xml`. DMG-014 remains 3/0/0 with six-way hash 05E17322302FAC7F; corrected aiming 5/0/0. AUD-006 claimed on main **2edfb80**, isolated branch `task/AUD-006-sfx-drain` in lead checkout: initial coalescer/drain/voice selection `3c87a96`, service binding/playback and 13 required tests remain. No audio code integrated into validation checkout. MIG-013/EDT-001 workers have real dependency waits; WPN-011 continues finishing. No full-batch closure yet.
 
