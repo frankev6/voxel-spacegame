@@ -18,11 +18,11 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
-- DMG-011 complete on `task/DMG-011-chunk-bodies`; final runtime repair `e2cbd81`. Local main integration follows closeout.
+- DMG-011 completed and fast-forward merged into local main at `b87aec3`; final runtime repair `e2cbd81`. DMG-012 claimed on main `d40c19e`; lead now on `task/DMG-012-hulk-grids`.
 - Physical chunks: pool, exact mass/momentum, greedy colliders, retirement and palette-lit rendering verified. Five required tests including native leak checks pass. ADR-0063 clearance contact repair passes existing three contact tests and live 264-cell slab separation proof.
 - Full validation session 46677 completed exit 0: compile zero CS warnings, EditMode **901/0/1**, PlayMode **128/0/53**. Evidence `Logs/playtest/dmg011/{editmode-repair,playmode-repair}.xml`, `contact-handoff-fixed.txt`, `chunk-fixed-moving.png`.
 - No Unity process active; runner cleaned test scene. Original QualitySettings delta restored from `Logs/playtest/orchestration-batch2/QualitySettings.before.asset` and remains excluded.
-- Next lead claim DMG-012 hulk completion after merging DMG-011; next compatible worker batch includes MIG-009 content before strict DATA-010, plus pending deliveries below.
+- Lead next: extract/complete staged hulk recorder and seven required lifecycle tests under DMG-012. Next compatible worker batch includes MIG-009 content before strict DATA-010, plus pending deliveries below.
 
 ## Validated and pending batches
 
