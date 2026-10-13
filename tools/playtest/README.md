@@ -20,7 +20,7 @@ check takes seconds. Outputs go to `Logs/playtest/` (never `Temp/`, which Unity 
 
 ## Destruction test station
 
-Run `tools/playtest/range.sh 7` with the Editor open. It starts a fresh game and places the test station ahead of the Fighter. In an existing World session, enter `range` in the dev console instead. Aim with the mouse and hold **Space** or left mouse to fire. W/S thrusts forward/reverse; A/D turns; Shift+A/D strafes; Ctrl boosts. Restart the range script to restore every cell and clear debris/projectiles.
+For the current testing phase, entering World with a player automatically spawns the enlarged station 2 m below its previous height (FND-021). Run `tools/playtest/range.sh 7` with the Editor open to reset the game and target. In an existing World session, `range` reuses the current target. Turn off `AutoSpawnInWorld` in the firing-range config when the test target is no longer wanted. Aim with the mouse and hold **Space** or left mouse to fire. W/S thrusts forward/reverse; A/D turns; Shift+A/D strafes; Ctrl boosts. Restart the range script to restore every cell and clear debris/projectiles.
 
 The cyan connections identify cuts to try:
 

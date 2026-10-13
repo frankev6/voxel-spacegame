@@ -13,6 +13,7 @@ namespace Game.Data.Definitions
         [SerializeField, Min(1)] int stationScale = 1;
         [SerializeField] Vector3 targetOffset = new Vector3(0, 0, 45);
         [SerializeField] float targetYaw;
+        [SerializeField] bool autoSpawnInWorld;
         [SerializeField] Material tracerMaterial;
         [SerializeField] float tracerLength = 3, tracerWidth = .12f;
         public BlockDefinition Hull => hull;
@@ -29,6 +30,7 @@ namespace Game.Data.Definitions
         public int StationScale => stationScale;
         public Vector3 TargetOffset => targetOffset;
         public float TargetYaw => targetYaw;
+        public bool AutoSpawnInWorld => autoSpawnInWorld;
         public Material TracerMaterial => tracerMaterial;
         public float TracerLength => tracerLength;
         public float TracerWidth => tracerWidth;

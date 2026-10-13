@@ -26,8 +26,9 @@ MonoBehaviour:
   moduleColor: 10
   targetCellSize: 1
   stationScale: 3
-  targetOffset: {x: 0, y: 0, z: 45}
+  targetOffset: {x: 0, y: -2, z: 45}
   targetYaw: 0
+  autoSpawnInWorld: 1
   tracerMaterial: {fileID: 2100000, guid: 5f9e0d702d3b49b4920f4f6470f5c494, type: 2}
   tracerLength: 5
   tracerWidth: 0.3

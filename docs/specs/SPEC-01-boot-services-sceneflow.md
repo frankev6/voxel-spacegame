@@ -931,12 +931,12 @@ If no save exists, "Load last save" is disabled.
 ### FND-021 — Automatic aligned test station in World
 - **Milestone:** M2
 - **Tier:** standard — owner-requested range placement and scene-ready hook
-- **Depends on:** `FND-020`, `VFX-015`
+- **Depends on:** `FND-020`, `SPEC-63`
 - **Do:** Lower the production test station by 2 m so its three-cell floor crosses the firing plane. Enable automatic spawning on World entry after the player spawn completes, using the existing range service and a reversible content setting. Repeated range requests return the existing target; scene exit releases the source normally.
 - **Files:** `Assets/Game/App/Session/FiringRangeService.cs`, `Assets/Game/App/Boot/GameComposition.cs`, `Assets/Game/Data/Definitions/Config/FiringRangeConfigDefinition.cs`, `Assets/Game/Content/Config/config_firing_range.asset`, `Assets/Game/Tests/PlayMode/App/FiringRangeTests.cs`
 - **Acceptance criteria:**
-  - [ ] World entry with a player automatically produces one lowered test station, including direct World Play and new-game restarts.
-  - [ ] The range command does not duplicate that station; actual Space fire still damages it.
+  - [x] World entry with a player automatically produces one lowered test station, including direct World Play and new-game restarts.
+  - [x] The range command does not duplicate that station; actual Space fire still damages it.
 - **Tests:** Extend `FiringRangeTests.RealFire_DamagesStationaryTarget` to verify automatic target, lowered position and idempotent range request; use existing restart coverage.
 
 ## 10. Open questions
@@ -981,6 +981,8 @@ If no save exists, "Load last save" is disabled.
 | 27 | Direct World reload lets a new environment borrow the old scene’s Skybox while its Destroy is pending | Wait one frame before acquiring the persistent-camera override | Tech lead | Resolved FND-019: Start yields once, then captures/restores the prior camera state and creates the sky/debris. Destroy remains deferred and owned; no persistent extra component, per-frame repair, or material change. Regression failed on restart 1 before this fix. |
 
 | 28 | Owner needs playable shooting and breakup before complete combat feature coverage | Bounded production-system slice, ADR-0053 | Tech lead | Resolved FND-020 sequencing: owner-requested procedural test station, real input/projectiles, authoritative damage and physical split pieces. Ordered-grid broad phase, serial scheduled resolver, simple changed-grid connectivity and hulk representation may ship first under ADR-0053; broader owning tasks stay todo. No AI/shield/galaxy or finished-art prerequisite. Frank: “Get that playable and show me it working.” |
+
+| 29 | Owner requests the lowered test target on every World entry during testing | Config-controlled scene-ready range, Y=-2 m | Tech lead | Resolved FND-021 / ADR-0061: production AutoSpawnInWorld enabled, after player readiness; repeated range requests reuse the target and World exit resets it. No player means no station. |
 
 ## 11. References
 

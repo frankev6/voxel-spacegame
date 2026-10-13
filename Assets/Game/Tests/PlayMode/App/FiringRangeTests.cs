@@ -30,7 +30,8 @@ namespace Game.Tests.PlayMode.App
         {
             yield return Run(Game.Session.NewGameAsync(new NewGameArgs("Range", 7, false, ContentId.None)));
             yield return Until(() => Game.Input.CurrentContext == InputContext.Flight && Game.Camera.HasTarget, "Flight camera ready");
-            target = Services.Get<FiringRangeService>().Spawn(Root);
+            target = Services.Get<FiringRangeService>().Target;
+            Assert.AreNotEqual(Entity.Null, target, "World entry automatically spawns the station");
             yield return Until(() => EM.HasComponent<GridColliderState>(target) && EM.GetComponentData<GridColliderState>(target).Phase == GridColliderPhase.Ready,
                 "Station has its real compound collider", 30);
             Assert.IsFalse(EM.HasComponent<PhysicsVelocity>(target), "The initial station is static");
@@ -58,6 +59,8 @@ namespace Game.Tests.PlayMode.App
         [UnityTest] public IEnumerator RealFire_DamagesStationaryTarget()
         {
             yield return StartRange(); var pose = EM.GetComponentData<LocalTransform>(target); int cells = Cells(target);
+            Assert.AreEqual(target, Services.Get<FiringRangeService>().Spawn(Root), "Range command reuses the automatic target");
+            Assert.AreEqual(-2f, pose.Position.y, "Station floor intersects the firing plane");
             var bounds = EM.GetComponentData<VoxelGrid>(target);
             Assert.GreaterOrEqual(bounds.BrickDims.x * BrickMath.Size, 153, "Production station spans three times its original 51-cell width");
             Assert.Greater(cells, 10000, "Geometry is enlarged at unchanged voxel resolution");

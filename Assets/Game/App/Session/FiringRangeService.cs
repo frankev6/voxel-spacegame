@@ -1,6 +1,8 @@
 using System;
 using Game.Core;
 using Game.Core.Flow;
+using Game.Simulation.Commands;
+using Unity.Collections;
 using Game.Data.Definitions;
 using Game.Data.Services;
 using Game.Voxel.Grid;
@@ -11,18 +13,34 @@ using Unity.Transforms;
 
 namespace Game.App.Session
 {
-    /// <summary>FND-020 optional live range; the normal spawn pipeline owns target creation and runtime cells.</summary>
-    public sealed class FiringRangeService : ISceneExiting, IDisposable
+    /// <summary>FND-020/FND-021 live range; the normal spawn pipeline owns target creation and runtime cells.</summary>
+    public sealed class FiringRangeService : ISceneReady, ISceneExiting, IDisposable
     {
         readonly World world; readonly ContentCatalog catalog; readonly VoxelContent content; readonly VoxelStructureRegistry registry;
         readonly IPersistentIdAllocator ids; readonly FiringRangeConfigDefinition config;
         VoxelStructure source; int handle = -1;
         public Entity Target { get; private set; }
         public int SceneExitOrder => SceneHookOrder.PlayerShip;
+        public int SceneReadyOrder => SceneHookOrder.PlayerShip + 1;
+        public void OnSceneReady(in SceneReadyContext context)
+        {
+            if (context.Scene != GameScene.World || !config.AutoSpawnInWorld) return;
+            using var query = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerShip>(), ComponentType.ReadOnly<LocalTransform>());
+            using var players = query.ToEntityArray(Allocator.Temp);
+            if (players.Length == 1) Spawn(players[0]);
+        }
+        public bool IsSceneReadyComplete(in SceneReadyContext context)
+        {
+            if (context.Scene != GameScene.World || Target == Entity.Null) return true;
+            var em = world.EntityManager;
+            if (!em.Exists(Target)) throw new InvalidOperationException("Station spawn request was rejected");
+            return em.HasComponent<GridSpawning>(Target) && !em.IsComponentEnabled<GridSpawning>(Target);
+        }
         public FiringRangeService(World world, ContentCatalog catalog, VoxelContent content, VoxelStructureRegistry registry, IPersistentIdAllocator ids, FiringRangeConfigDefinition config)
         { this.world = world; this.catalog = catalog; this.content = content; this.registry = registry; this.ids = ids; this.config = config; }
         public Entity Spawn(Entity player)
         {
+            if (source != null && world.EntityManager.Exists(Target)) return Target;
             if (source != null) throw new InvalidOperationException("Range already created; start a new game to reset it.");
             var em = world.EntityManager; var playerPose = em.GetComponentData<LocalTransform>(player);
             source = BuildStation(config, catalog, content);
