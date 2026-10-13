@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Beat/fact writer authored:** NAR-015 now maps all34 SPEC-42 placements explicitly, preserves typed star-system/hail references, nested Manual triggers, conditions/salience/repeat/debug and sorted legacy fact fields. Shared migration writer preserves existing GUIDs; converter-level preflight/force handling, asset generation and six acceptance cases still remain. No compile/test yet. Accepted main merged1485eee7; earlier emitter/manifest work preserved. Previous turn accepted accessibility (progress).
+
 - **Accessibility accepted:**63b7f4ef/e3fa8660, compile76886 clean;79288 one EditMode +10047 four PlayMode passed. Fonts restored from backups; no active validation. Both combat and power now have explicit ready-standard dependency waits; HUD-004156 active. Lead NAR-015 preserved4e7533c0; continue asset writing to unlock NAR-016. Previous turn closed validator (progress).
 
 - **Validator accepted:** e81dc6d reviewed repair, compile33600 clean and focused7179 seven passed. Evidence narrative-validator/*-final. Q323 resolves provider order. Combat has explicit dependency wait for NAR-015; UI-0131a668f8c delivered193 and bounded review dispatched; HUD-004156 active. Lead NAR-015 emitter/manifest preserved on task/NAR-015-dialogue-conversion4e7533c0. No active validation. Previous turn implemented preservation manifest (progress).
