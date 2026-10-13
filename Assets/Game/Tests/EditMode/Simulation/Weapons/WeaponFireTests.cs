@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.Core;
+using Game.App.Systems;
 using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Data.Definitions;
@@ -131,7 +132,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 for (int tick = 0; tick < 120; tick += ticksPerFrame) f.World.StepFrame(ticksPerFrame * EcsTestWorld.TickSeconds);
                 f.Em.CompleteAllTrackedJobs();
                 using var query = f.Em.CreateEntityQuery(typeof(FireCapture)); var capture = query.GetSingleton<FireCapture>();
-                var hashes = capture.Hashes.ToArray(); Assert.AreEqual(120, hashes.Length);
+                var hashes = capture.Hashes.AsArray().ToArray(); Assert.AreEqual(120, hashes.Length);
                 if (expected == null) expected = hashes; else CollectionAssert.AreEqual(expected, hashes, "Every tick must match, independent of frame grouping.");
             }
         }
