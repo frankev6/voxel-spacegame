@@ -469,8 +469,9 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 ### HUD-004 — Save and load slots
 - **Milestone:** M3
 - **Tier:** standard — view on an existing view model; presenter steps in §5.4
-- **Depends on:** `HUD-002`, `PERS-001`
+- **Depends on:** `HUD-001`, `UI-011`, `PERS-002`, `PERS-005`, `PERS-006`, `FND-009`
 - **Do:** `SaveSlotsView` (ListView with `makeItem`/`bindItem`), `SaveSlotsPresenter` with confirmations.
+- **Integration:** ADR-0072 Q23: construct against completed view-model, UI and save/flow contracts in parallel with HUD-002. Production registration/session rebind is completed in the shared integration batch; layout audit and all five tests remain required.
 - **Files:** `Assets/Game/UI/Views/SaveSlotsView.cs`, `Assets/Game/UI/Views/Uxml/{SaveSlotsView,SaveSlotItem}.uxml`, `Assets/Game/UI/Theme/screens/save-slots.uss`, `Assets/Game/App/Presenters/SaveSlotsPresenter.cs`
 - **Acceptance criteria:**
   - [ ] Delete requires confirmation; Esc on the confirm keeps the slot (06-B12).
@@ -706,6 +707,8 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 | 21 | HUD-008 byte weapon counts, repeatable unscaled-clock acceptance and overlapping radar categories | Resolved: saturate the public byte weapon count at255 rather than wrapping; production radar uses unscaled engine time, with an internal per-system clock seam for the required144-FPS simulated acceptance. Radar queries are disjoint: grids take precedence, then bodies, then nongrid interactables not already in the body pass (including StarSystemBody anchors lacking SpatialBody). The future route-service bridge in HUD-009 supplies waypoint identity; HUD-008 does not fabricate a gate. | Tech lead |
 
 | 22 | HUD-002 waits for whole SPEC-60 and downstream systems that depend on HUD-002 | Resolved by ADR-0072: explicit completed UI foundations; composition/root/session infrastructure first while preserving current playable roots. Each downstream task owns its production hookup and full feature acceptance. UI audits/accessibility remain required, and actual travel gates remain. | Tech lead |
+
+| 23 | Save/load screen construction waits on composition that needs its navigation | Resolved: HUD-004 depends on the completed HUD/UI/save/flow contracts explicitly, so construction can proceed alongside HUD-002. Final production registration, session rebind and layout acceptance remain mandatory in the shared integration batch; no fake navigation or early done claim. | Tech lead |
 
 ## 11. References
 

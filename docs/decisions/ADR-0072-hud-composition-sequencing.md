@@ -14,6 +14,10 @@ Implement HUD-002's app-lifetime view-model ownership, registration, root switch
 
 Feature presenters, complete screen layouts, HUD synchronization and hotkey bindings are completed and installed by their owning HUD-003 through HUD-013 tasks as their real services become available. HUD-007 retains UI-012's audit requirements, and HUD-009 retains real travel/route requirements. HUD-002 is not evidence that those features or the full UI composition are finished. Each owning task must include its production composition hookup, not only isolated tests.
 
+## Construction and integration (SPEC-61 Q23)
+
+HUD-004 can construct its view/presenter against HUD-001, UI-011, PERS-002/005/006 and FND-009, all completed contracts and services. It does not need HUD-002 to be accepted before source implementation. HUD-002 still owns the app-lifetime instances and the lead integrates HUD-004 registration/session refresh in the same compatible batch. Keep both tasks open until their own required acceptance is satisfied, including layout auditing; source delivery alone is not completion. This removes a construction cycle without weakening production hookup or supplying fake services.
+
 ## Consequences
 
 The composition foundation can unlock independently implementable screens without inventing services or discarding downstream obligations. No assembly/API contract or owner art decision changes. Full-screen and integrated gameplay acceptance remain required by the owning tasks and milestone review; performance measurements remain advisory.
