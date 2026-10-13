@@ -1045,6 +1045,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-004 loader lifecycle authored — astra (gpt-6)
+
+- Implements constructor-owned queries/info singleton and spawn hook, real origin-serial acknowledgement before T1 creation, visit/known bookkeeping and one entry event, filtered unload including split adoption/chunks, deferred collider retirement, content release and disposal. Cached T1 deltas request anchor refresh without another entry event.
+- Arrival readiness checks actual nearby grid completion; SYS-006/007 streaming remains explicit. Loader is deliberately not installed into World while required arrival grids cannot be produced. Travel entry remains SYS-013. Five required cases, compile and real production integration remain; no acceptance claim. Test plan: spec-required: 5, extra: 0. No Unity run; previous anchor implementation was progress.
+
 ### 2026-10-13 — SYS-004 anchor batches authored — astra (gpt-6)
 
 - AnchorBuilder groups surviving bodies by orbit/collider/interaction archetypes; AnchorFillJob fills absolute/local transforms, body identity and analytic orbit data in a Burst parallel batch. Sphere colliders cached per radius, interaction data and star-system membership added, failure destroys created anchors while retaining collider cleanup ownership with loader. A DisableAutoCreation helper supplies system-owned lookups to the managed loader; no auto-update loop.
