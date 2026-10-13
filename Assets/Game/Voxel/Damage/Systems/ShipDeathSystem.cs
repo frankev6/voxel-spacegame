@@ -60,8 +60,8 @@ namespace Game.Voxel.Damage
             job.Ecb = SystemAPI.GetSingleton<GameplayEndCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
             var fx = SystemAPI.GetSingleton<FxEventQueue>();
             job.Sfx = SystemAPI.GetSingletonRW<SfxEventQueue>().ValueRW.Queue.AsParallelWriter();
-            dissolve.RequestEntities = requests.ToEntityArrayAsync(Allocator.TempJob, out var requestHandle);
-            dissolve.DissolvingEntities = dissolving.ToEntityArrayAsync(Allocator.TempJob, out var dissolveHandle);
+            dissolve.RequestEntities = requests.ToEntityListAsync(Allocator.TempJob, out var requestHandle);
+            dissolve.DissolvingEntities = dissolving.ToEntityListAsync(Allocator.TempJob, out var dissolveHandle);
             dissolve.Destroy = new NativeList<Entity>(Allocator.TempJob);
             dissolve.Config = job.Config; dissolve.Tick = job.Tick; dissolve.Ecb = job.Ecb;
             dissolve.Blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value; dissolve.Fx = fx.Queue.AsParallelWriter();

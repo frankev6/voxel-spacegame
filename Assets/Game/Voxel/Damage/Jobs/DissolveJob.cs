@@ -27,7 +27,7 @@ namespace Game.Voxel.Damage.Jobs
         [ReadOnly] public BufferLookup<BlockInstance> Instances;
         [ReadOnly] public ComponentLookup<GridDissolveRequest> Requests;
         public ComponentLookup<GridDissolving> Progress;
-        public NativeArray<Entity> RequestEntities, DissolvingEntities;
+        public NativeList<Entity> RequestEntities, DissolvingEntities;
         public NativeList<Entity> Destroy;
         public BlobAssetReference<BlockDefsBlob> Blocks;
         [NativeDisableContainerSafetyRestriction] public NativeQueue<FxEvent>.ParallelWriter Fx;
