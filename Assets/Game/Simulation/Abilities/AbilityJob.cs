@@ -47,9 +47,10 @@ namespace Game.Simulation.Abilities
             {
                 for (int i = 0; i < slots.Length; i++)
                 {
-                    var slot = slots[i]; if (slot.State != AbilitySlotState.Unavailable) state.Resynced = 1;
+                    var slot = slots[i];
+                    if (slot.State != AbilitySlotState.Unavailable) { state.Resynced = 1; slot.Flags = AbilitySlotFlags.Resynced; }
                     slot.State = AbilitySlotState.Unavailable; slot.Active = 0; slot.PendingCost = 0;
-                    slot.Flags = AbilitySlotFlags.Resynced; slots[i] = slot;
+                    slots[i] = slot;
                 }
                 return;
             }
