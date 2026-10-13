@@ -33,6 +33,7 @@ namespace Game.Voxel.Damage.Jobs
         [ReadOnly] public BufferLookup<BlockInstance> Instances;
         public NativeArray<Entity> Slots;
         public NativeArray<ChunkBody> Bodies;
+        public NativeList<BlobAssetReference<Collider>> Retired;
         public EntityArchetype Archetype;
         public BlobAssetReference<BlockDefsBlob> Blocks;
         public DamageConfig Config;
@@ -75,7 +76,7 @@ namespace Game.Voxel.Damage.Jobs
                             Scale = old.CellSize, Color = (uint)(cell.Color | (Blocks.Value.Blocks[cell.Block].MaterialLayer << 8)) });
                     }
                 }
-                if (blobs[slot].IsCreated) Data->RetiredChunkBlobs.Add(blobs[slot]);
+                if (blobs[slot].IsCreated) Retired.Add(blobs[slot]);
                 var grid = Reader.Grids[island.Grid]; var parent = Transforms[island.Grid];
                 var palette = Palettes[island.Grid];
                 using var cells = new NativeList<ChunkCell>(island.CellCount, Allocator.Temp);

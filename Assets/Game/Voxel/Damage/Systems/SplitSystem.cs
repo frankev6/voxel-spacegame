@@ -86,7 +86,7 @@ namespace Game.Voxel.Damage
             job.Islands = bodies;
             dependency = new RecordChunkJob { Islands = chunks, Masks = data->IslandMasks, Reader = job.Reader, Bricks = job.Bricks,
                 Transforms = job.Transforms, Masses = job.Masses, Velocities = job.Velocities, Colliders = chunkColliders,
-                OldCells = chunkCells, Palettes = job.Palettes, Instances = job.Instances, Slots = slots, Bodies = chunkBodies,
+                OldCells = chunkCells, Palettes = job.Palettes, Instances = job.Instances, Slots = slots, Bodies = chunkBodies, Retired = data->RetiredChunkBlobs,
                 Archetype = chunkType, Blocks = job.Blocks, Config = job.Config, Tick = job.Tick, Ecb = job.Ecb,
                 Fx = fx.Queue.AsParallelWriter(), Data = data }.Schedule(dependency);
             dependency = job.Schedule(dependency);
