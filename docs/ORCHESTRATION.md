@@ -23,6 +23,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Composition lifetime implemented:** UiComposition now owns all15 screen view models, loading registration/presenter, real menu/pause registration hooks, root installation with required real dependencies, session rebind and disposal. Still not installed in Boot: editor host/launcher/controllers and secondary-screen navigation are unfinished, so existing adapter remains. Four acceptance checks pending. Compile6483 found App.Services namespace shadowing; qualified Core.Services in flow/composition, recompile87462 clean, zero CS warnings; staged evidence ui-composition/compile-staged.log. Workers NAR-013172/NAR-020185 active, presentation still waits. Previous turn implemented pause/recycled workers (progress).
+
 - **Pause commands implemented:**c3c8f7e5 uses real flow save eligibility, navigator resume, confirmed save-first menu exit and confirmed desktop quit; results handled without wall-clock polling waits. Composition/presenter binding still required, old adapter remains installed. Main dispatch incorporated; workers now assigned NAR-013/020, presentation awaiting HUD. No Unity validation. Previous turn implemented menu commands (progress).
 
 - **Workers recycled:** corrected readiness inspection identifies NAR-013 and NAR-020 as genuinely ready after accepted NAR-009/004. Claimedb39fb6d7/595c0e29 and dispatched to existing combat/power threads. Presentation still waits for HUD prerequisites. Lead UI work remains task/HUD-002-ui-composition d96b3e04, no active validation. Prior all-worker dependency-wait assessment was incomplete; no owner blocker. Previous turn implemented menu commands (progress).

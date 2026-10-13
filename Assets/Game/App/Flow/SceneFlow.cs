@@ -84,7 +84,7 @@ namespace Game.App.Flow
         public void SetRootScreens(IRootScreenSet screens)
         {
             if (disposed) throw new ObjectDisposedException(nameof(SceneFlow));
-            var nextNavigator = screens == null ? null : Services.Get<UINavigator>();
+            var nextNavigator = screens == null ? null : Game.Core.Services.Get<UINavigator>();
             rootScreens = screens;
             navigator = nextNavigator;
         }
