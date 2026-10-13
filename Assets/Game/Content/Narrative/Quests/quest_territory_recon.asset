@@ -1,0 +1,207 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78d862c52844416aa80f51a945d09ec8, type: 3}
+  m_Name: quest_territory_recon
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.QuestDefinition
+  id: quest_territory_recon
+  formerIds: []
+  title: Hostile Territory Recon
+  shortDescription: Enter hostile territory, survive one encounter, and report to ARK.
+  description: Command has requested recon in hostile space. Survive one encounter and report your findings at ARK.
+  kind: 1
+  autoTrack: 1
+  stages:
+  - id: main
+    title: Hostile Territory Recon
+    objectives:
+    - id: fight_once
+      text: 'Survive One Encounter
+
+        Complete one encounter successfully.'
+      doneWhen:
+        source: since_accept("sys_beats_completed") >= 1
+        sourceHash: 8530464506769404826
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: 6548929065634496687
+      progress:
+        source: 
+        sourceHash: 3244421341483603138
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: -2
+      target: 0
+      latch: 1
+      optional: 0
+      marker:
+        starSystem: {fileID: 0}
+        bodyTag: 
+        label: 
+    - id: report_back
+      text: 'Report to ARK
+
+        Interact with ARK station to submit your report.'
+      doneWhen:
+        source: since_accept("interacted_body_station_ark") >= 1
+        sourceHash: 13965736998630495526
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: 6548929065634496688
+      progress:
+        source: 
+        sourceHash: 3244421341483603138
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: -2
+      target: 0
+      latch: 1
+      optional: 0
+      marker:
+        starSystem: {fileID: 11400000, guid: a93d1205a81b5ca3be814bc3473818ac, type: 2}
+        bodyTag: ark_station
+        label: Submit Recon Report
+    onComplete:
+      source:
+      - quest_log quest_territory_recon legacy_2
+      sourceHash: 3831990143131184678
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929065634496689
+  failWhen:
+    source: 
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: -2
+  onAccepted:
+    source:
+    - quest_log quest_territory_recon legacy_1
+    sourceHash: 952321469442505646
+    compilerVersion: 1
+    hasErrors: 0
+    effects:
+    - rid: 6548929065634496690
+  onCompleted:
+    source: []
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
+    hasErrors: 0
+    effects: []
+  onFailed:
+    source:
+    - quest_log quest_territory_recon legacy_3
+    sourceHash: 9970373021954164361
+    compilerVersion: 1
+    hasErrors: 0
+    effects:
+    - rid: 6548929065634496691
+  logEntries:
+  - id: legacy_1
+    text: Recon assignment accepted.
+  - id: legacy_2
+    text: Recon complete. Debrief transmitted.
+  - id: legacy_3
+    text: Recon assignment failed.
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6548929065634496687
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 6548929065634496692
+        right:
+          rid: 6548929065634496693
+    - rid: 6548929065634496688
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 6548929065634496694
+        right:
+          rid: 6548929065634496695
+    - rid: 6548929065634496689
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_territory_recon
+          - legacy_2
+    - rid: 6548929065634496690
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_territory_recon
+          - legacy_1
+    - rid: 6548929065634496691
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_territory_recon
+          - legacy_3
+    - rid: 6548929065634496692
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: since_accept
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - sys_beats_completed
+    - rid: 6548929065634496693
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929065634496694
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: since_accept
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - interacted_body_station_ark
+    - rid: 6548929065634496695
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1

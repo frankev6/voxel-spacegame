@@ -1,0 +1,9 @@
+title: survey_local_materials_turn_in_raw_materials_at_ark_start
+tags: 
+---
+Hand over raw materials #line:survey_local_materials_turn_in_raw_materials_at_ark_start_00
+-> Leave #leave #line:survey_local_materials_turn_in_raw_materials_at_ark_start_leave
+    <<abort_beat>>
+    <<stop>>
+===
+

@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41286e6499af441faa07bf2d386432ad, type: 3}
+  m_Name: rumor_hidden_research_station
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.RumorDefinition
+  id: rumor_hidden_research_station
+  formerIds: []
+  title: Hidden Research Station
+  body: The signal traces back to a research station that does not answer.
+  mystery: {fileID: 0}
+  links: []
+  target: {fileID: 11400000, guid: b2d65c9fab5453daa42671c1e5b3ebc6, type: 2}
+  targetBodyTag: 
+  resolvedWhen:
+    source: quest_completed("quest_signal_trace")
+    sourceHash: 13433278216624605058
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 6548929065634496598
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6548929065634496598
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_completed
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_signal_trace

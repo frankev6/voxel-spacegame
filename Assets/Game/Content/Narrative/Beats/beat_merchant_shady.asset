@@ -21,8 +21,8 @@ MonoBehaviour:
     hailEncounter: {fileID: 11400000, guid: 9ff0aeee6720e495e871ecc89ffd17e0, type: 2}
   condition:
     source: 
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
     hasErrors: 0
     root:
       rid: -2
@@ -33,14 +33,14 @@ MonoBehaviour:
   yarnNode: merchant_shady_start
   onStart:
     source: []
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
     hasErrors: 0
     effects: []
   onComplete:
     source: []
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
     hasErrors: 0
     effects: []
   debug: 0

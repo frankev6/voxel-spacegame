@@ -22,11 +22,11 @@ MonoBehaviour:
     hailEncounter: {fileID: 0}
   condition:
     source: not $gate_ark_start_active
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 8498648222443715009
+    compilerVersion: 1
     hasErrors: 0
     root:
-      rid: -2
+      rid: 6548929065634496512
   salience: 50
   weight: 1
   repeat: 2
@@ -34,19 +34,26 @@ MonoBehaviour:
   yarnNode: gate_dormant_start
   onStart:
     source: []
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
     hasErrors: 0
     effects: []
   onComplete:
     source: []
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
     hasErrors: 0
     effects: []
   debug: 0
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 6548929065634496512
+      type: {class: NotCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        operand:
+          rid: 6548929065634496513
+    - rid: 6548929065634496513
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: gate_ark_start_active

@@ -1,0 +1,160 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78d862c52844416aa80f51a945d09ec8, type: 3}
+  m_Name: quest_signal_trace
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.QuestDefinition
+  id: quest_signal_trace
+  formerIds: []
+  title: Signal Trace
+  shortDescription: Track and resolve one mystery signal encounter.
+  description: Intel wants rapid validation of unknown comm signatures. Resolve one mystery signal contact and upload telemetry.
+  kind: 1
+  autoTrack: 1
+  stages:
+  - id: main
+    title: Signal Trace
+    objectives:
+    - id: resolve_signal_contact
+      text: 'Resolve Mystery Signal
+
+        Complete the mystery signal encounter.'
+      doneWhen:
+        source: since_accept("beat_mystery_signal") >= 1
+        sourceHash: 12801817228974137493
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: 6548929065634496649
+      progress:
+        source: 
+        sourceHash: 3244421341483603138
+        compilerVersion: 1
+        hasErrors: 0
+        root:
+          rid: -2
+      target: 0
+      latch: 1
+      optional: 0
+      marker:
+        starSystem: {fileID: 0}
+        bodyTag: 
+        label: 
+    onComplete:
+      source:
+      - quest_log quest_signal_trace legacy_2
+      sourceHash: 16418039904385407532
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929065634496650
+  failWhen:
+    source: 
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: -2
+  onAccepted:
+    source:
+    - quest_log quest_signal_trace legacy_1
+    sourceHash: 1796212318626215997
+    compilerVersion: 1
+    hasErrors: 0
+    effects:
+    - rid: 6548929065634496651
+  onCompleted:
+    source: []
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
+    hasErrors: 0
+    effects: []
+  onFailed:
+    source:
+    - quest_log quest_signal_trace legacy_3
+    sourceHash: 15319733288494734348
+    compilerVersion: 1
+    hasErrors: 0
+    effects:
+    - rid: 6548929065634496652
+  logEntries:
+  - id: legacy_1
+    text: Signal Trace contract accepted.
+  - id: legacy_2
+    text: Signal telemetry uploaded.
+  - id: legacy_3
+    text: Signal trace aborted.
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6548929065634496649
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 6548929065634496653
+        right:
+          rid: 6548929065634496654
+    - rid: 6548929065634496650
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_signal_trace
+          - legacy_2
+    - rid: 6548929065634496651
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_signal_trace
+          - legacy_1
+    - rid: 6548929065634496652
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_signal_trace
+          - legacy_3
+    - rid: 6548929065634496653
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: since_accept
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - beat_mystery_signal
+    - rid: 6548929065634496654
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1

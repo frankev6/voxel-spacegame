@@ -21,26 +21,30 @@ MonoBehaviour:
     hailEncounter: {fileID: 0}
   condition:
     source: star_system_owned() and relation("owner") < 0
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 4162455795331403023
+    compilerVersion: 1
     hasErrors: 0
     root:
-      rid: -2
+      rid: 6548929065634496572
   salience: 20
   weight: 1
   repeat: 2
   firstVisitOnly: 1
   yarnNode: territory_hostile_entry_start
   onStart:
-    source: []
-    sourceHash: 0
-    compilerVersion: 0
+    source:
+    - start_quest quest_hostile_blackbox
+    - start_quest contract_bounty_probe
+    sourceHash: 5288547363644128036
+    compilerVersion: 1
     hasErrors: 0
-    effects: []
+    effects:
+    - rid: 6548929065634496573
+    - rid: 6548929065634496574
   onComplete:
     source: []
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
     hasErrors: 0
     effects: []
   debug: 0
@@ -49,3 +53,59 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 6548929065634496572
+      type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 6548929065634496575
+        right:
+          rid: 6548929065634496576
+    - rid: 6548929065634496573
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_hostile_blackbox
+    - rid: 6548929065634496574
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - contract_bounty_probe
+    - rid: 6548929065634496575
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: star_system_owned
+        intArgs: []
+        boolArgs: []
+        textArgs: []
+    - rid: 6548929065634496576
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 2
+        left:
+          rid: 6548929065634496577
+        right:
+          rid: 6548929065634496578
+    - rid: 6548929065634496577
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: relation
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - owner
+    - rid: 6548929065634496578
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 0

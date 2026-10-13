@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d07ab84a062445b79a70b6579a383198, type: 3}
+  m_Name: clue_vanguard_spire
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ClueDefinition
+  id: clue_vanguard_spire
+  formerIds: []
+  title: Glass Spire
+  body: A spire of fused glass marks where a city stood. The Vanguard's beam did this, a thousand years ago.
+  mystery: {fileID: 11400000, guid: e79d0b88e43ba479b9b65cf346b0c212, type: 2}
+  links: []

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41286e6499af441faa07bf2d386432ad, type: 3}
+  m_Name: rumor_silence_incursions
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.RumorDefinition
+  id: rumor_silence_incursions
+  formerIds: []
+  title: Silence Incursions
+  body: Vanguard charts mark systems that went quiet, one after another, along the outer lanes.
+  mystery: {fileID: 0}
+  links: []
+  target: {fileID: 0}
+  targetBodyTag: 
+  resolvedWhen:
+    source: 
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }

@@ -24,8 +24,8 @@ MonoBehaviour:
     hailEncounter: {fileID: 0}
   condition:
     source: 
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
     hasErrors: 0
     root:
       rid: -2
@@ -36,14 +36,14 @@ MonoBehaviour:
   yarnNode: derelict_salvage_start
   onStart:
     source: []
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
     hasErrors: 0
     effects: []
   onComplete:
     source: []
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
     hasErrors: 0
     effects: []
   debug: 0

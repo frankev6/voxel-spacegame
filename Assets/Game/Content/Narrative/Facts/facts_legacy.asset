@@ -45,6 +45,16 @@ MonoBehaviour:
     FormerNames: []
     Note: 'Converted legacy narrative fact: has_hacking'
     JournalText: 
+  - Name: hostile_blackbox_submit_blackbox
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: hostile_blackbox_submit_blackbox'
+    JournalText: 
   - Name: hostile_blackbox_turned_in
     Kind: 1
     Scope: 0
@@ -85,6 +95,16 @@ MonoBehaviour:
     FormerNames: []
     Note: 'Converted legacy narrative fact: morale_boost'
     JournalText: morale_boost
+  - Name: opening_cache_found
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: opening_cache_found'
+    JournalText: 
   - Name: pirate_bounty_accepted
     Kind: 1
     Scope: 0
@@ -104,6 +124,26 @@ MonoBehaviour:
     Max: 0
     FormerNames: []
     Note: 'Converted legacy narrative fact: relation_watch_report_submitted'
+    JournalText: 
+  - Name: relation_watch_submit_report
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: relation_watch_submit_report'
+    JournalText: 
+  - Name: relation_watch_territory_seen
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: relation_watch_territory_seen'
     JournalText: 
   - Name: rep_ark
     Kind: 0
@@ -155,6 +195,16 @@ MonoBehaviour:
     FormerNames: []
     Note: 'Converted legacy narrative fact: station_boarding_trial_meet_shady_contact'
     JournalText: 
+  - Name: station_data_delivery_submit_fragments
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: station_data_delivery_submit_fragments'
+    JournalText: 
   - Name: station_data_delivery_submitted
     Kind: 1
     Scope: 0
@@ -174,6 +224,16 @@ MonoBehaviour:
     Max: 0
     FormerNames: []
     Note: 'Converted legacy narrative fact: story_survey_complete'
+    JournalText: 
+  - Name: survey_local_materials_deliver_to_ark
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: survey_local_materials_deliver_to_ark'
     JournalText: 
   - Name: trait_existential_dread
     Kind: 1
@@ -205,3 +265,13 @@ MonoBehaviour:
     FormerNames: []
     Note: 'Converted legacy narrative fact: trait_solar_charged_engines'
     JournalText: trait_solar_charged_engines
+  - Name: whisper_chain_chapter
+    Kind: 0
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note: 'Converted legacy narrative fact: whisper_chain_chapter'
+    JournalText: 

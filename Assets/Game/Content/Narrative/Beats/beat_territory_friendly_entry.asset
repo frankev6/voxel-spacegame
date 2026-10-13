@@ -21,26 +21,32 @@ MonoBehaviour:
     hailEncounter: {fileID: 0}
   condition:
     source: star_system_owned() and relation("owner") >= 0
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 12039622634194071428
+    compilerVersion: 1
     hasErrors: 0
     root:
-      rid: -2
+      rid: 6548929065634496563
   salience: 20
   weight: 1
   repeat: 2
   firstVisitOnly: 1
   yarnNode: territory_friendly_entry_start
   onStart:
-    source: []
-    sourceHash: 0
-    compilerVersion: 0
+    source:
+    - start_quest quest_relation_watch
+    - set_fact relation_watch_territory_seen true
+    - start_quest contract_signal_relay
+    sourceHash: 9112410760409250517
+    compilerVersion: 1
     hasErrors: 0
-    effects: []
+    effects:
+    - rid: 6548929065634496564
+    - rid: 6548929065634496565
+    - rid: 6548929065634496566
   onComplete:
     source: []
-    sourceHash: 0
-    compilerVersion: 0
+    sourceHash: 3244421341483603138
+    compilerVersion: 1
     hasErrors: 0
     effects: []
   debug: 0
@@ -49,3 +55,76 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 6548929065634496563
+      type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 6548929065634496567
+        right:
+          rid: 6548929065634496568
+    - rid: 6548929065634496564
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_relation_watch
+    - rid: 6548929065634496565
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929065634496569
+          Text:
+          - relation_watch_territory_seen
+          - 
+    - rid: 6548929065634496566
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - contract_signal_relay
+    - rid: 6548929065634496567
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: star_system_owned
+        intArgs: []
+        boolArgs: []
+        textArgs: []
+    - rid: 6548929065634496568
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 6548929065634496570
+        right:
+          rid: 6548929065634496571
+    - rid: 6548929065634496569
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929065634496570
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: relation
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - owner
+    - rid: 6548929065634496571
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 0
