@@ -2,6 +2,7 @@ using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Data.Blocks;
 using Game.Data.Components;
+using Game.Simulation.Power;
 using Game.Voxel.Grid;
 using Game.Voxel.Model;
 using Unity.Burst;
@@ -14,6 +15,7 @@ namespace Game.Simulation.Flight
     [CreateAfter(typeof(GridSpawnSystem))]
     [UpdateInGroup(typeof(GameInitGroup))]
     [UpdateAfter(typeof(GridSpawnSystem))]
+    [UpdateBefore(typeof(PowerInitSystem))]
     public partial struct ThrusterInitSystem : ISystem
     {
         ComponentLookup<VoxelGrid> grids;
@@ -26,8 +28,10 @@ namespace Game.Simulation.Flight
             state.RequireForUpdate<BlockDefsRef>();
             state.RequireForUpdate<BlockModulesRef>();
             state.RequireForUpdate<OrientationTablesRef>();
+            state.RequireForUpdate<PowerTuning>();
             FlightSetup.Register(SystemAPI.GetSingletonBuffer<RootComponentRegistration>());
             var registrations = SystemAPI.GetSingletonBuffer<FunctionalComponentRegistration>();
+            PowerRegistration.RegisterConsumer(registrations, BlockModuleId.Thruster);
             registrations.Add(new FunctionalComponentRegistration { Module = BlockModuleId.Thruster, Type = ComponentType.ReadWrite<ThrusterState>() });
             registrations.Add(new FunctionalComponentRegistration { Module = BlockModuleId.Thruster, Type = ComponentType.ReadWrite<ThrusterVisual>() });
             grids = state.GetComponentLookup<VoxelGrid>(true);
@@ -44,6 +48,11 @@ namespace Game.Simulation.Flight
                 Grids = grids, Instances = instances,
                 Blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value,
                 Orientations = SystemAPI.GetSingleton<OrientationTablesRef>().Value
+            }.ScheduleParallel(state.Dependency);
+            state.Dependency = new ThrusterRequestInitJob
+            {
+                Instances = instances, Modules = SystemAPI.GetSingleton<BlockModulesRef>().Value,
+                Priority = SystemAPI.GetSingleton<PowerTuning>().PriorityThruster
             }.ScheduleParallel(state.Dependency);
         }
     }

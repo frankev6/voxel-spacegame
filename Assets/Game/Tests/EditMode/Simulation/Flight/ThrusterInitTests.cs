@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 using Game.Core;
 using Game.Data.Components;
+using Game.Data.Blocks;
 using Game.Data.Definitions;
 using Game.Data.Services;
 using Game.Data.Validation;
 using Game.Simulation.Commands;
 using Game.Simulation.Common;
 using Game.Simulation.Flight;
+using Game.Simulation.Power;
 using Game.Tests.Common;
 using Game.Tests.EditMode.Data;
 using Game.Tests.EditMode.Voxel;
@@ -59,6 +61,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
             content.Service.CreateSingletons(EM);
             world.AddSingleton(new VoxelStructureRegistryRef { Value = registry });
             world.AddSingleton(new VoxelConfig { SpawnBricksPerFrame = 1024, DefaultCellSize = .5f });
+            world.AddSingleton(PowerTuning.Defaults);
             world.AddGameplayActive();
         }
 
@@ -78,6 +81,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
         [Test]
         public void Registered_ComponentsPresent()
         {
+            var modules = world.GetSingleton<BlockModulesRef>().Value;
             for (GridProfile profile = GridProfile.None; profile <= GridProfile.Dummy; profile++)
             {
                 var root = Spawn(profile); Frame();
@@ -95,6 +99,13 @@ namespace Game.Tests.EditMode.Simulation.Flight
                     Assert.IsTrue(EM.HasComponent<ThrusterState>(instance.Functional));
                     Assert.IsTrue(EM.HasComponent<ThrusterVisual>(instance.Functional));
                     Assert.AreEqual(0, EM.GetComponentData<ThrusterState>(instance.Functional).Intensity);
+                    Assert.IsTrue(EM.HasComponent<Powered>(instance.Functional));
+                    var requests = EM.GetBuffer<PowerRequest>(instance.Functional);
+                    Assert.AreEqual(1, requests.Length);
+                    Assert.AreEqual(BlockModuleId.Thruster, requests[0].Module);
+                    Assert.AreEqual(PowerTuning.Defaults.PriorityThruster, requests[0].Priority);
+                    Assert.IsTrue(modules.Value.TryGet(BlockModuleId.Thruster, instance.Block, out ThrusterParams row));
+                    Assert.AreEqual(row.PowerDraw, requests[0].Draw);
                     Assert.Greater(EM.GetComponentData<ThrusterVisual>(instance.Functional).NozzleRadius, 0);
                 }
             }

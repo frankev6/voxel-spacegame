@@ -7,6 +7,7 @@ using Game.Data.Components;
 using Game.Core;
 using Game.Core.Components;
 using Game.Data.Definitions;
+using Game.Galaxy.Bodies;
 using Game.Voxel.PhysicsBody;
 using Game.Voxel.Grid;
 using Game.Simulation;
@@ -81,7 +82,8 @@ namespace Game.App.Boot
                     lifetime.AiEntity = created[i];
                     lifetime.AiProfiles = em.GetComponentData<AiConfig>(created[i]).Profiles;
                 }
-                // Later rows (ENC-001, SYS, ECO-007) are added by their tasks (SPEC-01 §5.3).
+                Create(em, StreamingConfigFactory.Create(catalog.Get<StreamingConfigDefinition>(new ContentId("config_streaming"))), created);
+                // Later rows (ENC-001, ECO-007) are added by their tasks (SPEC-01 §5.3).
 
                 Create(em, default(PersistentIdAllocator), created);
 

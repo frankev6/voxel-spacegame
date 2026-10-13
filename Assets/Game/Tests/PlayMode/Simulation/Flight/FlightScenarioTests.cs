@@ -10,6 +10,7 @@ using Game.Data.Services;
 using Game.Simulation.Commands;
 using Game.Simulation.Common;
 using Game.Simulation.Flight;
+using Game.Simulation.Power;
 using Game.Tests.Common;
 using Game.Voxel.Grid;
 using Game.Voxel.Model;
@@ -75,6 +76,7 @@ namespace Game.Tests.PlayMode.Simulation.Flight
                 Em.CreateSingleton(new VoxelConfig { SpawnBricksPerFrame = 1024, DefaultCellSize = .5f });
                 var physics = content.Catalog.Get<PhysicsVoxelConfigDefinition>(new ContentId("config_physics"));
                 Em.CreateSingleton(PhysicsVoxelConfigFactory.Create(physics)); Em.CreateSingleton(PhysicsVoxelConfigFactory.CreatePhysicsStep(physics));
+                Em.CreateSingleton(PowerTuning.Defaults);
                 ConfigEntity = Em.CreateSingleton(FlightConfig.Default); InputEntity = Em.CreateSingleton(default(PlayerCommand));
             }
             // Synthetic physics fixture only: no art asset or player ship design is created.

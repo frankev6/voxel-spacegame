@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Game.Data.Blocks;
+using Game.Core;
 using Game.Data.Definitions;
 using Game.Data.Validation;
 using Game.Editor.Audio;
@@ -125,10 +126,10 @@ namespace Game.Editor.Art
                 var report = new ValidationReport(a2Mode ? "Art assets (A2)" : "Art assets (A1)");
                 Run(report, a2Mode);
                 // Preserve every entry; a logging cap must not hide a placeholder reference from the CLI evidence.
-                Debug.Log(report.ToText(int.MaxValue));
+                GameLog.Info("Art", report.ToText(int.MaxValue));
                 exitCode = report.HasErrors ? 1 : 0;
             }
-            catch (Exception exception) { Debug.LogException(exception); }
+            catch (Exception exception) { GameLog.Error("Art", exception.ToString()); }
             EditorApplication.Exit(exitCode);
         }
 
