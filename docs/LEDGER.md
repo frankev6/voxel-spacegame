@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 107 | 10 | 0 | 0 | 63 | 0 | 180 | 8 |
+| M3 | 106 | 11 | 0 | 0 | 63 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -335,7 +335,7 @@
 | SYS-001 | Public contract types | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | CORE-001, DATA-001, GAL-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e738e71 | Streaming contracts and service shells; 2 required tests; full batch green |
 | SYS-002 | Streaming config and boot singleton | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 7244be6 | Config validation/factory, boot singleton and catalog asset; 2 required tests; full suites green |
 | SYS-003 | Structure builders | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-10 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 971ae0b7 | Deterministic shape/asteroid builders;4 focused tests pass; Q307 |
-| SYS-004 | Load and unload (T1) | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-002, SPEC-30, SPEC-10, SPEC-12 | no | todo |  |  |  |  |
+| SYS-004 | Load and unload (T1) | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-002, GAL-008, GAL-009, SPEC-10, PHY-001, PHY-012 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
 | SYS-005 | BodyOnRailsSystem | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004 | no | todo |  |  |  |  |
 | SYS-006 | T2 voxel bodies and damage persistence | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-003, SYS-004, SPEC-13, SPEC-21, SPEC-23 | no | todo |  |  |  |  |
 | SYS-007 | T3 asteroid belts | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006 | no | todo |  |  |  |  |
@@ -917,6 +917,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 338 | SPEC-42 Q9: quest-definition construction blocked by whole narrative spec | Resolved: explicit completed compiler/binder/catalog/import/validator prerequisites; actual boot exception requires real QST-002 implementation. Runtime narrative execution remains separate, all required validation cases retained. | Tech lead |
 | 339 | SPEC-30 Q34: GLXY restore bounds and ownership | Resolved: direct internal visit-count restore, remaining-byte count bounds, canonical sorted unique records, failed restore clears partial state; independently framed corrupt VOXS drops only that record with a warning. | Tech lead |
 | 340 | SPEC-30 Q35: live session composition before PLOC/loader | Resolved: actual galaxy/ticker/GLXY registered and owned; missing old chunks warn, start fallback waits for restored SimClock, stale deferred reset cannot dispose a newer campaign. Pose/docking and streaming remain SYS tasks. | Tech lead |
+| 341 | SPEC-31 Q13: world-loader dependencies include later and optional work | Resolved: explicit completed galaxy/origin, voxel and physics lifetime prerequisites for SYS-004; full T1 acceptance preserved, later streaming tiers and visuals remain separate. | Tech lead |
 | 334 | SPEC-33 Q24: legacy first formation conflicts with final encounter table | Resolved: retain/report original formation and explicit replacement diagnostics; authored ENC-010 composition table governs final fleets, real assets required. | Tech lead |
 | 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
 
