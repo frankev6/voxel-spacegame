@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-001 | implementing; HUD-001 integrated a983d88, validation pending | Ready narrative/weapon contracts after batch closeout |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-015 | implementing; CAM-010 delivered fcdb195, pending integration | Ready power/ability work after batch closeout |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AST-001 | implementing contracts/planned manifest only; CAM-009 delivered 7716d3d, pending integration | Ready presentation work; audio content after AUD-006 |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | INP-008 | implementing; NAR-001 integrated e39b2d3, validation pending | Ready narrative/weapon work after batch closeout |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-015 | implementing; CAM-010 integrated 014ed0b, validation pending | Ready power/ability work after batch closeout |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | AST-001 | implementing contracts/planned manifest only; CAM-009 integrated 21e43a1, validation pending | Ready presentation work; audio content after AUD-006 |
 
 ## Dispatch procedure
 
@@ -25,3 +25,5 @@ Batch 2 integrated on main and merged into lead branch: WPN-017 `ec9a6f1`, CAM-0
 Lead branch `task/DMG-011-chunk-bodies`: physical pool, exact mass/velocity, greedy colliders, lifetime and deferred retirement implemented. Five required tests pass (5/0/0), evidence `Logs/playtest/dmg011/chunk-tests.xml`; they caught and fixed pool eviction native-container write safety. Chunk renderer `186f663` reuses palette-lit cube instancing with per-slot buffers and COM-aligned transforms. Compile passes; GPU/live rendering still unverified. No completion claim yet. Zero tuning passes.
 
 During PlayMode validation, lead claimed MIG-015 (`7e14f5f`) and AST-001 (`844f375`) on main through the respective idle clean worker checkouts, then switched each to its new task branch and dispatched it. Primary checkout and Unity-tested code were not changed. Merge these main claims into the lead branch once Unity exits. CAM-010/CAM-009 deliveries await integration; NAR-001 remains active with lead-resolved factory signatures.
+
+Latest validation supersedes earlier process state: session 56515 finished, EditMode 887/0/1 and PlayMode 127/1/53. Framing fixture now disables post-framing shake per SPEC-62 (Q214), and existing chunk lifecycle tests explicitly probe leaks. CAM-010, CAM-009 and NAR-001 integrated into lead branch; compile clean; full rerun session 77989 active. Combat worker recycled to INP-008 (main claim 20de50b, merge after tests); all three implementing. Live chunk rendering remains unverified. No additional optimization passes.

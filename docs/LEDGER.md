@@ -793,6 +793,11 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 209 | 2026-10-13 | SPEC-60 Q21 / UI-008 | Control defaults unspecified | Clamp invalid fractions, zero fill for invalid maxima, cached labels, named children and explicit tab defaults | Tech lead | Resolved; validation pending |
 | 210 | 2026-10-13 | SPEC-60 Q22 / UI-008 | Tab test depends on later frontier layout audit | Check actual panel bounds/clipping/scroll now; canonical audit invocation remains UI-012 | Tech lead | Resolved; no frontier implementation delegated |
 
+| 211 | 2026-10-13 | SPEC-62 Q17 / CAM-010 | Float pixel API cannot ensure universal 1e-9 map round trips | Preserve API and double arithmetic; assert precision on independently conditioned pixel-representable fixtures and document general float pixel error | Tech lead | Resolved; no universal precision claim |
+| 212 | 2026-10-13 | SPEC-62 Q18 / CAM-009 | Focus key has no selection payload | Focus whole configured bounds; hosts use FocusOn for selection. Editor getters expose editor pose; reduced motion snaps entry | Tech lead | Resolved; validation pending |
+| 213 | 2026-10-13 | SPEC-40 Q12 / NAR-001 | Missing registry factory signatures | CreateNode takes bound objects and returns selected node interface as object; Invoke consumes runtime LogicValue arguments; bodies remain NAR-003 stubs | Tech lead | Resolved; existing contracts unchanged |
+| 214 | 2026-10-13 | SPEC-62 §5.3 / CAM-008 integration | Framing test assumed no post-framing impact shake | Disable shake in framing fixture only, retaining strict viewport assertions and separate shake tests; production shake remains after framing as specified | Tech lead | Resolved; full PlayMode rerun pending |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
@@ -902,6 +907,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DMG-011 integration validation and worker recycling — astra (gpt-6)
+
+1. First corrected batch: compile clean, EditMode **887/0/1**; PlayMode **127/1/53**. One framing assertion failed when new impact shake shifted a corner after framing. SPEC-62 explicitly orders shake after framing; fixture now selects ShakeScale=0 while preserving all viewport limits and independent shake checks. No production effect reduction. Evidence Logs/playtest/orchestration-batch2/.
+2. Added explicit warmed native leak detection to both existing chunk lifetime/unload tests; test count remains spec-required: 5, extra: 0. Live renderer verification still pending. Prepared production-projectile wall cut at Logs/playtest/dmg011/cut-wall.cs.txt; not executed yet.
+3. Integrated CAM-010 `014ed0b` (spec-required: 6, extra: 0), CAM-009 `21e43a1` (spec-required: 6, extra: 0), NAR-001 `e39b2d3` (spec-required: 2, extra: 0). Compile passes; full EditMode/PlayMode running in session 77989. Q211–214 capture integration decisions. Zero tuning passes.
+4. Same three workers recycled to INP-008, MIG-015 and AST-001. Main claims made through idle clean worker checkouts so the primary code under Unity validation stayed unchanged; no duplicate workers. Main INP-008 claim must merge into lead after Unity exits. All integrated tasks remain in-progress until validation and live requirements are satisfied.
 
 ### 2026-10-13 — DMG-011 / second batch integration in progress — astra (gpt-6)
 
