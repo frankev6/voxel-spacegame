@@ -29,6 +29,7 @@ namespace Game.Galaxy.Data
         public bool IsEmpty => VisitCount == 0 && destroyed.Count == 0 && interacted.Count == 0 &&
             stories.Count == 0 && replacements.Count == 0 && structures.Count == 0;
         public void IncrementVisit() => VisitCount = checked(VisitCount + 1);
+        internal void RestoreVisitCount(uint value) => VisitCount = value;
         public bool MarkDestroyed(ulong bodyKey) => Insert(destroyed, bodyKey);
         public bool MarkInteracted(ulong bodyKey) => Insert(interacted, bodyKey);
         static bool Insert(List<ulong> list, ulong key)

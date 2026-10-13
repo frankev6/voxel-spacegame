@@ -915,6 +915,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 335 | SPEC-30 Q33: start-location time source | Resolved: use canonical SimClock UniversalTime, zero before a clock exists; app sets/restores clock before placement. No duplicate saved time. | Tech lead |
 | 336 | SPEC-01 Q30/Q31: real spawner integration and duplicate fleet borrow | Resolved: install against actual galaxy service; internal registered-source path reuses the fleet-owned handle and never releases it. Service releases only its own registrations. Production session binding remains pending. | Tech lead |
 | 338 | SPEC-42 Q9: quest-definition construction blocked by whole narrative spec | Resolved: explicit completed compiler/binder/catalog/import/validator prerequisites; actual boot exception requires real QST-002 implementation. Runtime narrative execution remains separate, all required validation cases retained. | Tech lead |
+| 339 | SPEC-30 Q34: GLXY restore bounds and ownership | Resolved: direct internal visit-count restore, remaining-byte count bounds, canonical sorted unique records, failed restore clears partial state; independently framed corrupt VOXS drops only that record with a warning. | Tech lead |
 | 334 | SPEC-33 Q24: legacy first formation conflicts with final encounter table | Resolved: retain/report original formation and explicit replacement diagnostics; authored ENC-010 composition table governs final fleets, real assets required. | Tech lead |
 | 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
 
@@ -1041,6 +1042,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — GAL-010 persistence authored — astra (gpt-6)
+
+- Implements canonical GLXY v1 capture/restore over session-owned state: sorted visibility and deltas, stable tombstoned stories, unresolved IDs, deferred VOXS snapshots and per-record corrupt-structure recovery. Adds direct internal visit-count restoration and malformed-input ownership cleanup (Q339). Existing SaveChunkRegistry GLXY order80 already present.
+- Required four tests and v1 fixture remain to author; no compilation or acceptance claim. Test plan: spec-required: 4, extra: 0. No Unity run this turn. Previous turn compiled GAL-008, passed six checks, exposed boot failure and dispatched QST-002 (progress).
 
 ### 2026-10-13 — Galaxy service checks pass; real boot defect found — astra (gpt-6)
 

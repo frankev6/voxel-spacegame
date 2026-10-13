@@ -1342,6 +1342,8 @@ Visibility:
 
 | 33 | GetStartLocation refers to current time on GalaxyState, which has no time field | Resolve current UniversalTime from the existing SimClock singleton; use zero before a clock exists for standalone new-game generation. App session integration must initialize/restore SimClock before requesting start placement. No duplicate clock or public state field. | Tech lead |
 
+| 34 | GLXY restore needs direct visit-count assignment and malformed-payload ownership cleanup | Use an internal RestoreVisitCount method rather than looping a serialized uint. Bound counts by remaining bytes, require canonical sorted unique lists, reject trailing data/unsupported versions, and clear partially restored state on failure so decoded structures cannot leak. Framed corrupt VOXS records alone are dropped with one warning. Construct participant with the actual GalaxyState and ContentCatalog for snapshot names/decoding. | Tech lead |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/03-galaxy-world.md` (03-B1, 03-B9a–d, 03-D3), `04` (04-B1, 04-B11), `LEDGER.md` R9.
