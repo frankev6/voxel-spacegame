@@ -12,6 +12,7 @@ namespace Game.Data.Logic.Nodes
         [SerializeField] internal string[] Text = Array.Empty<string>();
         [NonSerialized] internal int[] Indices;
         [NonSerialized] internal int[] FactSlots;
+        [NonSerialized] bool referencesValid;
         internal EffectArguments() { }
         internal EffectArguments(ReadOnlySpan<object> arguments)
         {
@@ -29,13 +30,25 @@ namespace Game.Data.Logic.Nodes
         {
             if (!new LogicFunctionRegistry().TryGet(name, out var info)) throw new InvalidOperationException(name);
             Indices = new int[info.Params.Length]; FactSlots = new int[info.Params.Length];
+            referencesValid = true;
             for (int i = 0; i < info.Params.Length; i++)
             {
                 FactSlots[i] = -1; Integers[i]?.Bind(binder); Booleans[i]?.Bind(binder);
                 if (info.Params[i].ArgKind == LogicArgKind.Fact) FactSlots[i] = binder.BindFact(Text[i]);
                 if (info.Params[i].ArgKind == LogicArgKind.Ref)
-                    Indices[i] = info.Params[i].RefKind == RefKind.Faction && Text[i] == "owner" ? 0 : binder.BindRef(info.Params[i].RefKind, Text[i]);
+                {
+                    bool owner = info.Params[i].RefKind == RefKind.Faction && Text[i] == "owner";
+                    Indices[i] = owner ? 0 : binder.BindRef(info.Params[i].RefKind, Text[i]);
+                    if (!owner && Indices[i] == 0) referencesValid = false;
+                }
             }
+        }
+        internal bool CanRoute(string operation)
+        {
+            if (Indices != null && referencesValid) return true;
+            Game.Core.GameLog.ErrorOnce("NAR.Effect.Unbound." + operation, "Narrative",
+                operation + " has an unresolved reference or has not been bound; effect skipped.");
+            return false;
         }
     }
 }
