@@ -43,11 +43,43 @@ namespace Game.Data.Definitions
         public BodyTemplateDefinition DefaultHyperlaneGate => defaultHyperlaneGate;
         public BodyTemplateDefinition DefaultAncientGate => defaultAncientGate;
 
-        // TODO(GAL-003): validate the authored world fields and cross-content references.
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
             base.Validate(scope, context);
-            throw new System.NotImplementedException("GAL-003");
+            var check = scope;
+            WorldDefinitionValidation.Require(check, "GAL-E003", nameof(startStarSystem), startStarSystem != null && authoredStarSystems != null && authoredStarSystems.Contains(startStarSystem), "Start star system must belong to the authored list.");
+            WorldDefinitionValidation.Positive(check, nameof(galaxyRadiusLy), galaxyRadiusLy);
+            WorldDefinitionValidation.Positive(check, nameof(minStarSystemSpacingLy), minStarSystemSpacingLy);
+            WorldDefinitionValidation.Positive(check, nameof(maxLaneLengthLy), maxLaneLengthLy);
+            WorldDefinitionValidation.Require(check, "GAL-E017", nameof(placementAttemptsPerStarSystem), placementAttemptsPerStarSystem >= 1 && placementAttemptsPerStarSystem <= 100, "Placement attempts must be in 1..100.");
+            WorldDefinitionValidation.Require(check, "GAL-E017", nameof(laneCandidateNeighbours), laneCandidateNeighbours >= 1 && laneCandidateNeighbours <= 16, "Candidate neighbours must be in 1..16.");
+            WorldDefinitionValidation.Require(check, "GAL-E017", nameof(maxLaneDegree), maxLaneDegree >= 1 && maxLaneDegree <= 16, "Maximum lane degree must be in 1..16.");
+            WorldDefinitionValidation.Require(check, "GAL-E017", nameof(extraLaneChance), float.IsFinite(extraLaneChance) && extraLaneChance >= 0 && extraLaneChance <= 1, "Extra lane chance must be in 0..1.");
+            WorldDefinitionValidation.Require(check, "GAL-E011", nameof(templatePool), proceduralStarSystemCount <= 0 || (templatePool != null && templatePool.Count > 0), "Procedural star systems require a template pool.");
+            if (templatePool != null)
+                for (int i = 0; i < templatePool.Count; i++)
+                {
+                    var entry = templatePool[i];
+                    WorldDefinitionValidation.Require(check, "GAL-E010", $"templatePool[{i}].template", entry.template != null, "Star system template must be set.");
+                    WorldDefinitionValidation.Require(check, "GAL-E011", $"templatePool[{i}].weight", float.IsFinite(entry.weight) && entry.weight > 0, "Weight must be finite and positive.");
+                }
+            var pairs = new System.Collections.Generic.HashSet<(AuthoredStarSystemDefinition, AuthoredStarSystemDefinition)>();
+            if (authoredLanes != null)
+                for (int i = 0; i < authoredLanes.Count; i++)
+                {
+                    var lane = authoredLanes[i]; string path = $"authoredLanes[{i}]";
+                    bool endsValid = lane != null && lane.a != null && lane.b != null && lane.a != lane.b;
+                    WorldDefinitionValidation.Require(check, "GAL-E009", path, endsValid, "Lane ends must be set and different.");
+                    if (!endsValid) continue;
+                    WorldDefinitionValidation.Require(check, "GAL-E009", path, authoredStarSystems != null && authoredStarSystems.Contains(lane.a) && authoredStarSystems.Contains(lane.b), "Lane ends must belong to the authored list.");
+                    WorldDefinitionValidation.Require(check, "GAL-E009", path, !pairs.Contains((lane.b, lane.a)) && pairs.Add((lane.a, lane.b)), "Lane pair must be unique, including reversed pairs.");
+                    if (lane.gateTemplateA != null) WorldDefinitionValidation.Require(check, "GAL-E010", path + ".gateTemplateA", lane.gateTemplateA.Role == BodyRole.LaneGate, "Lane override must be a LaneGate template.");
+                    if (lane.gateTemplateB != null) WorldDefinitionValidation.Require(check, "GAL-E010", path + ".gateTemplateB", lane.gateTemplateB.Role == BodyRole.LaneGate, "Lane override must be a LaneGate template.");
+                }
+            if (startStarSystem != null)
+                WorldDefinitionValidation.Require(check, "GAL-E018", "startStarSystem.startBodyKey", !string.IsNullOrEmpty(startStarSystem.StartBodyKey) && startStarSystem.Bodies != null && System.Linq.Enumerable.Any(startStarSystem.Bodies, b => b != null && b.key == startStarSystem.StartBodyKey), "Start body key must name a body of the start star system.");
+            WorldDefinitionValidation.Require(check, "GAL-E019", nameof(defaultHyperlaneGate), defaultHyperlaneGate != null && defaultHyperlaneGate.Role == BodyRole.LaneGate, "Default hyperlane gate must be a LaneGate template.");
+            WorldDefinitionValidation.Require(check, "GAL-E019", nameof(defaultAncientGate), defaultAncientGate != null && defaultAncientGate.Role == BodyRole.LaneGate, "Default ancient gate must be a LaneGate template.");
         }
 
         // TODO(TRV-003): compile and bind authored lane conditions.

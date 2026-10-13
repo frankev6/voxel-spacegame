@@ -60,11 +60,27 @@ namespace Game.Data.Definitions
         public float AsteroidNoiseAmplitude => asteroidNoiseAmplitude;
         public float AsteroidNoiseFrequency => asteroidNoiseFrequency;
 
-        // TODO(GAL-003): validate the authored world fields and cross-content references.
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
             base.Validate(scope, context);
-            throw new System.NotImplementedException("GAL-003");
+            WorldDefinitionValidation.Range(scope, nameof(radiusMinM), radiusMinM, radiusMaxM);
+            if (structureSource == Game.Data.Definitions.StructureSource.Blueprint)
+                WorldDefinitionValidation.Require(scope, "GAL-E015", nameof(blueprint), blueprint != null, "Blueprint structure source requires a blueprint.");
+            if (structureSource == Game.Data.Definitions.StructureSource.ProceduralShape)
+            {
+                WorldDefinitionValidation.Require(scope, "GAL-E015", "shape.sizeCells", shape.sizeCells.x > 0 && shape.sizeCells.y > 0 && shape.sizeCells.z > 0, "Shape dimensions must be positive.");
+                WorldDefinitionValidation.Require(scope, "GAL-E015", "shape.wallThicknessCells", shape.wallThicknessCells >= 0, "Wall thickness must be nonnegative; zero is solid.");
+                WorldDefinitionValidation.Require(scope, "GAL-E015", "shape.hullBlock", shape.hullBlock != null, "Shape needs a hull block.");
+                WorldDefinitionValidation.Require(scope, "GAL-E015", "shape.coreBlock", !destructible || shape.coreBlock != null, "Destructible shape needs a core block.");
+            }
+            if (role == BodyRole.Belt)
+            {
+                WorldDefinitionValidation.Require(scope, "GAL-E016", nameof(asteroidBlock), asteroidBlock != null, "Belt requires an asteroid block.");
+                WorldDefinitionValidation.Require(scope, "GAL-E016", nameof(asteroidsPerSectorMin), asteroidsPerSectorMin >= 1 && asteroidsPerSectorMax >= asteroidsPerSectorMin && asteroidsPerSectorMax <= 8, "Asteroid counts must be ordered in 1..8.");
+                WorldDefinitionValidation.Require(scope, "GAL-E016", nameof(sectorSizeM), float.IsFinite(sectorSizeM) && sectorSizeM >= 100, "Sector size must be finite and at least 100 metres.");
+                WorldDefinitionValidation.Range(scope, nameof(asteroidRadiusMinM), asteroidRadiusMinM, asteroidRadiusMaxM);
+                WorldDefinitionValidation.Positive(scope, nameof(beltWidthM), beltWidthM);
+            }
         }
     }
 }
