@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d84df80fc664ff8a9e35237faafb53f, type: 3}
+  m_Name: merchant_shady_trader
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.MerchantDefinition
+  id: merchant_shady_trader
+  formerIds: []
+  displayName: Shady Trader
+  stock:
+  - item: {fileID: 11400000, guid: 691e9fca5c4c4459086ee9a30a0846b4, type: 2}
+    count: 40
+    priceFactor: 1
+  - item: {fileID: 11400000, guid: 747c899217dc244fe8b10cef3c51e294, type: 2}
+    count: 2
+    priceFactor: 1
+  - item: {fileID: 11400000, guid: 846703ccf195b441cafc07b04f1279fa, type: 2}
+    count: 2
+    priceFactor: 1
+  - item: {fileID: 11400000, guid: 095a2b09a878437e8d2ddf460e56d71b, type: 2}
+    count: 3
+    priceFactor: 1
+  buys: 138
+  sellPriceFactor: 1.3
+  buyPriceFactor: 0.6
+  restockHours: 48
+  bodyTemplates: []
+  authoredBodies: []

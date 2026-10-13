@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f32f1d9899aa4f82bbd1702985370dbb, type: 3}
+  m_Name: loot_salvage_module
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.LootTableDefinition
+  id: loot_salvage_module
+  formerIds: []
+  entries:
+  - item: {fileID: 11400000, guid: fb7feb9978ed1433f948d720121373c2, type: 2}
+    min: 1
+    max: 1
+    chancePercent: 30
+  - item: {fileID: 11400000, guid: 747c899217dc244fe8b10cef3c51e294, type: 2}
+    min: 1
+    max: 1
+    chancePercent: 30
+  - item: {fileID: 11400000, guid: 846703ccf195b441cafc07b04f1279fa, type: 2}
+    min: 1
+    max: 1
+    chancePercent: 30
+  - item: {fileID: 11400000, guid: 593e893b1b7384aa093e52b87f87c8e6, type: 2}
+    min: 1
+    max: 1
+    chancePercent: 20
+  defaultPicks: 1

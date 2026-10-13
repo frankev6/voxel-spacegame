@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d84df80fc664ff8a9e35237faafb53f, type: 3}
+  m_Name: merchant_station_market
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.MerchantDefinition
+  id: merchant_station_market
+  formerIds: []
+  displayName: ARK Station Market
+  stock:
+  - item: {fileID: 11400000, guid: 691e9fca5c4c4459086ee9a30a0846b4, type: 2}
+    count: -1
+    priceFactor: 1
+  - item: {fileID: 11400000, guid: dfcc75e2220ed476babe83e285ee98e6, type: 2}
+    count: 200
+    priceFactor: 1
+  - item: {fileID: 11400000, guid: 00d412694742541778dbaf188c993e5e, type: 2}
+    count: 100
+    priceFactor: 1
+  - item: {fileID: 11400000, guid: cd36367c9f3b348ac98cb9f0288f95c7, type: 2}
+    count: 10
+    priceFactor: 1
+  - item: {fileID: 11400000, guid: e359aa29e6b064108934b2dac57ec713, type: 2}
+    count: 6
+    priceFactor: 1
+  - item: {fileID: 11400000, guid: 863c5916c5e6c4806ad23751a5746537, type: 2}
+    count: 4
+    priceFactor: 1
+  - item: {fileID: 11400000, guid: 1953086de6a6a4793a031810332c3d68, type: 2}
+    count: 2
+    priceFactor: 1
+  - item: {fileID: 11400000, guid: 21d93224948934a8094c44cf92225179, type: 2}
+    count: 4
+    priceFactor: 1
+  - item: {fileID: 11400000, guid: 4e4b5ecd21b5f473d81f7bc3325df389, type: 2}
+    count: 2
+    priceFactor: 1
+  buys: 11
+  sellPriceFactor: 1
+  buyPriceFactor: 0.5
+  restockHours: 24
+  bodyTemplates: []
+  authoredBodies:
+  - starSystem: {fileID: 11400000, guid: a93d1205a81b5ca3be814bc3473818ac, type: 2}
+    bodyKey: ark_station
