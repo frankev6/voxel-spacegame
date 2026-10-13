@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Save session repair accepted:** worker937fa75b integratedb05b62f; composition now calls ResetSession. Compile52462 clean, focused78374 five passed; evidence save-slots/session-repair.xml. No active validation, fonts restored. HUD-004 remains open only for reachable production navigation; HUD-005164 underway. GAL-003186/MIG-014201 active. Previous turn corrected overbroad galaxy hold (progress).
+
 - **Overbroad galaxy hold corrected:** reread GAL-003 exact acceptance (per-code failing/passing and four in-memory fixtures) and MIG-014 (20 named/role/tag stubs). Neither requires finished production GAL-012 assets. Under existing ADR-0070, scoped checks/generation can close these tasks while strict validators continue reporting unfinished downstream content. Workers185/199 instructed to deliver promptly for scoped acceptance. HUD review162 found a stale-session completion issue and is repairing it before HUD-005. Previous turn unlocked settings construction (progress).
 
 - **Settings construction unlocked:** ADR-0072/SPEC61Q25/ledger327 replace HUD-005 circular construction dependency with actual completed services. Keep full five-case and production navigation acceptance. HUD-004 tested checkpoint a59c0e12 remains open pending review/reachable roots; no new Unity run. GAL-003184/MIG-014198 active. Previous turn verified save screen (progress).
