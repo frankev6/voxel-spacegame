@@ -20,7 +20,11 @@ namespace Game.Galaxy.Generation
                 var entry = entries[i];
                 if (!Eligible(entry, used, i)) continue;
                 cumulative += entry.Weight;
-                if (cumulative > target) return entry.Index;
+                if (cumulative > target)
+                {
+                    if (used.IsCreated) used[i]++;
+                    return entry.Index;
+                }
             }
             return GalaxyConstants.NoIndex;
         }

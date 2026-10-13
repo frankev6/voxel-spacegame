@@ -17,9 +17,17 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
-All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
+All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **System content accepted:**e421d5ee compile6163 clean; headless88933 six passed0.193s. Live80985 blocked by native save-scene dialog (sample captured); Editor17922 terminated after CLI cancel/exit unable to proceed, all handles terminal. No Editor or Unity run active. HUD005 repair a03ac074 integration next, TRV0024fed054f/dd9f3fec review175; GAL012199/ENC010211 active. Previous turn authored procedural job (progress).
+
+- **Procedural content job authored:** GAL006 now has fixed-draw procedural bodies, usage-limited pools, scheduled wrapper and overflow reporting; six checks/compile pending. Q332/SPEC30Q32 guards lane-index capacity. HUD005 repair a03ac074 delivered174, queued on preserved settings branch; TRV002 resumed. GAL012198/ENC010210 active. No Unity run. Previous turn authored content foundation (progress).
+
+- **Per-system generation underway:** GAL006 claimed3dc7cc6a, task/GAL-006-system-content authors body hashes/lookup/disposal plus authored/gate helpers. Procedural placement/job wrapper/six checks pending, unvalidated. Workers197/209/173 active; presentation explicitly switched to HUD005 repair after preserving TRV002. No active Unity run. Previous turn guarded pause intents (progress).
+
+- **Settings work preserved for repair:** task/HUD-005-settings-integration at dbe07d59 includes real pause routes and session callback guards, unvalidated delta. Belt boot correction alone is on main6c89f0b0 so unrelated gameplay is not held behind settings. Next integrate worker HUD005 repair and validate on that branch. Workers GAL012196/ENC010208/TRV002172 active; no Unity run. Previous turn authored pause routes (progress).
 
 - **Pause stale-intent guard authored:** generation invalidates callbacks and old completion UI across session unbind/rebind, preserving pending completion consumption. Await HUD005 repair before combined validation; no active Unity run. Workers196/208/172 confirmed active. Previous turn connected pause destinations (progress).
 

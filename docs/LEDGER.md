@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 115 | 9 | 0 | 0 | 56 | 0 | 180 | 10 |
+| M3 | 113 | 10 | 0 | 0 | 57 | 0 | 180 | 9 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -324,8 +324,8 @@
 | GAL-003 | Definitions, properties and validator | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 29aa4c47 | All 24 diagnostics and four in-memory fixtures; clean compile, 48 required cases pass; production content GAL-012 remains |
 | GAL-004 | GalaxyDefBuilder and layout job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-003 | yes | done | astra (gpt-6) | 2026-10-13 | 42ecb93f | Deterministic layout, packing, queries and disposal; five focused checks pass; GAL-005 lanes/hash remain |
 | GAL-005 | Lane graph and galaxy hash | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-004 | yes | done | astra (gpt-6) | 2026-10-13 | 03a6cec6 | Connected lane graph, gate metadata, sorted adjacency and version-one golden; six focused checks pass |
-| GAL-006 | Star-system content job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-002, GAL-005 | yes | todo |  |  |  |  |
-| GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | no | todo |  |  |  |  |
+| GAL-006 | Star-system content job | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-002, GAL-005 | yes | done | astra (gpt-6) | 2026-10-13 | e421d5ee | Complete system content generation/hash/ownership; six focused checks pass in0.193s; Q332 capacity guard |
+| GAL-007 | StarSystemDelta, GalaxyState and the applier | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-006 | yes | todo |  |  |  |  |
 | GAL-008 | GalaxyService, ticker and bridge system | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, FND-001 | no | todo |  |  |  |  |
 | GAL-009 | OriginRebaseSystem | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-001, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | 5bf0a47 | Asynchronous origin capture/rebase/placement and dependent consumers; full 1051 EM /146 PM passed; 5000-root p95 0.2959 ms. |
 | GAL-010 | GLXY save participant | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, PERS-001 | no | todo |  |  |  |  |
@@ -911,6 +911,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 318 | SPEC-40 Q19: legacy translation boundary and defaults | Resolved: retain source metadata for emission; decimal cumulative thresholds, source-ordered quest logs, canonical provisional journal labels and contextual item mappings. No runtime/asset emission in NAR-014. | Tech lead |
 | 319 | SPEC-61 Q23: save/load construction versus composition cycle | Resolved: explicit completed UI/save/flow prerequisites allow parallel source construction; shared production hookup and full functional/layout acceptance remain required. ADR-0072 amended. | Tech lead |
 | 320 | SPEC-60 Q30: layout audit scroll/measurement semantics | Resolved: exclude scroll content subtree but audit viewport; use intrinsic nowrap width, clear result list and check all containing panels. Functional acceptance pending. | Tech lead |
+| 332 | SPEC-30 Q32: body lane-index capacity | Resolved: reject unrepresentable adjacent indices before scheduling; preserve ushort contract and never silently omit or wrap gates. | Tech lead |
+
 | 331 | SPEC-61 Q28: settings binding and lifecycle | Resolved: real Apply/Flush persistence, binding-index rows, owned rebind cancellation on cover/unbind and persistent app composition. Visible menu/pause navigation still required for closure. | Tech lead |
 | 330 | SPEC-61 Q27: fast PlayMode rebind fixture | Resolved ADR-0074: existing InputSystem test framework reference permitted for PlayMode; direct clock advance with state restoration. | Tech lead |
 | 329 | SPEC-02 Q17 / SPEC-61 Q26: persisted camera orientation | Resolved ADR-0073: additive Controls byte with legacy default0, real app mapping and settings binding; implementation in HUD-005. | Tech lead |
@@ -1032,6 +1034,26 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — GAL-006 accepted — astra (gpt-6)
+
+- e421d5ee verifies6bc17a47/fcd27c85: authored/procedural bodies, fixed draw order, per-pool max counts, moon parents, separated stations/gates, deterministic hashes and100 regenerations. Compile6163 clean; fresh headless88933 six passed/zero failed/skipped in0.1929481s test execution. Test count: spec-required: 6, extra: 0. Evidence `Logs/playtest/system-content/{compile.log,acceptance.xml}`.
+- Live80985 stalled before results; process sample proved native SaveModifiedScenesIfUserWantsTo dialog, not generation work. CLI cancel80140/exit82018 could not reach blocked Editor; terminated test Editor17922 with TERM, confirmed exited and all handles terminal before headless run. Evidence editor-sample.txt/aborted-editor.json. Do not reuse this failed live run as passing evidence. No Editor remains open.
+- Worker HUD005 repair a03ac074 ready; TRV0024fed054f/dd9f3fec delivered175 and bounded review dispatched. GAL012199/ENC010211 active. Previous turn implemented procedural job (progress).
+
+### 2026-10-13 — GAL-006 procedural job checkpoint — astra (gpt-6)
+
+- Procedural planet/moon/belt/station/POI generation and scheduled content wrapper authored: maximum-count draws, per-entry pool usage, bounded fixed placement, ring gates, sorted keys, truncation flag, generated hash and exception cleanup. Six required checks remain; no compile/test run yet. Test count: spec-required: 6 pending, extra: 0.
+- SPEC30Q32/ledger332 makes ushort lane overflow an explicit pre-schedule failure rather than corrupt identity or missing gates. HUD005 repair a03ac074 delivered; presentation resumes TRV002. Worker snapshots198/210/174 active. Previous turn implemented authored body/hash foundation (progress).
+
+### 2026-10-13 — GAL-006 body foundation checkpoint — astra (gpt-6)
+
+- Claimed3dc7cc6a; implemented content binary lookup/disposal, explicit declaration-order body hash excluding mutable state, fixed five-draw body streams, authored orbit/parent/radius transfer, extent calculation and bounded arc-separated gate placement. Procedural counts/bodies, scheduled wrapper and six required checks remain; no compile/acceptance claim. Test count: spec-required: 6 pending, extra: 0.
+- Existing workers GAL012197/ENC010209/HUD005 repair173 active; repair worker preserved TRV002 before switching. Settings integration remains on dbe07d59; main belt repair6c89f0b0 is retained. Previous turn repaired pause session intents (progress).
+
+### 2026-10-13 — Boot correction on main, settings checkpoint preserved — astra (gpt-6)
+
+- Applied canonical belt block correction6c89f0b0 to main independently of unfinished settings. Settings/pause navigation and session guards preserved on task/HUD-005-settings-integration dbe07d59; rebind repair/accepted checks and complete main-menu navigation remain. No active validation or repeated test run. Test count: existing spec-required acceptance pending, extra: 0.
 
 ### 2026-10-13 — HUD-002 pause session guard — astra (gpt-6)
 
