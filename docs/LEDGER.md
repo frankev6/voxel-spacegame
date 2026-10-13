@@ -1045,6 +1045,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-004 anchor batches authored — astra (gpt-6)
+
+- AnchorBuilder groups surviving bodies by orbit/collider/interaction archetypes; AnchorFillJob fills absolute/local transforms, body identity and analytic orbit data in a Burst parallel batch. Sphere colliders cached per radius, interaction data and star-system membership added, failure destroys created anchors while retaining collider cleanup ownership with loader. A DisableAutoCreation helper supplies system-owned lookups to the managed loader; no auto-update loop.
+- SYS-012 visual children remain explicit TODO. Loader state machine, safe retirement/unload, scene hookup and five required cases remain; these helpers are not yet invoked by a completed loader. Test plan: spec-required: 5, extra: 0. No Unity run. Previous turn claimed loader/added ownership helpers (progress).
+
 ### 2026-10-13 — SYS-004 claimed and ownership helpers authored — astra (gpt-6)
 
 - Claim6ec2de25 resolves whole-spec sequencing with actual completed prerequisites (Q341). Adds StarSystemSpawnHook propagation to created grid children and deterministic SplitAdoption: sorted roots, parent membership or loaded-system fallback, deduplicated linked groups, one shared-component batch per system and marker consumption. These helpers are not wired into a completed loader yet.
