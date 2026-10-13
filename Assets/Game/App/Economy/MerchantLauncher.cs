@@ -3,7 +3,7 @@ namespace Game.App.Economy
     /// <summary>SPEC-50 §4.6 app entry-point shell; ECO-008 owns routing/UI wiring.</summary>
     public sealed class MerchantLauncher
     {
-        // TODO(ECO-008 / ENC-001): attach the exact §4.6 constructor after FactionService,
+        // TODO(ECO-008): attach the exact §4.6 constructor after ENC-001 supplies FactionService,
         // TerritoryService and EncounterDirectorService exist. Do not invent substitute services.
 
         public bool TryOpenForBody(Game.Galaxy.Data.BodyId body, System.Action onClosed) => throw new System.NotImplementedException("ECO-008");          // false when no merchant

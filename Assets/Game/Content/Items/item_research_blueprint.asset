@@ -21,3 +21,4 @@ MonoBehaviour:
   basePrice: 0
   maxStack: 999
   icon: {fileID: 448677632, guid: f8a50dec0611c624ca8569633b602306, type: 3}
+  tradeable: 1
