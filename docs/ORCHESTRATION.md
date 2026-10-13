@@ -6,8 +6,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | UI-011 | UI-011 active; MIG-009 validated and merged | Ready standard work after batch integration |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | PWR-003 | dispatched from main 7b8cf39; DLG-001 d07fd9b and GAL-001 9c177ac pending validation | M2 power/ability work |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | WPN-002 | dispatched from main 4f303b3; UI-011 73f3164 reviewed and integrated in isolated lead checkout, validation pending | Ready standard work after batch integration |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-010 | dispatched from main ac16ffb; PWR-003 ae092578 reviewed and integrated in isolated lead checkout, validation pending | M2 power/ability work |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ABL-002 | dispatched from main claim 0795eb9; ART-014 partial delivery pending integration | M2 ability content and grants |
 
 ## Operating rules
@@ -70,3 +70,5 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 - ART-014 mechanical delivery reported `f7ae676fa4817d1e7e166be2097e4b9ceb77981a`; verify final amended branch head before integration. Full acceptance remains open for validator, ARK definition, production looks and approved typography. Same presentation worker dispatched ready ABL-002 from main `0795eb9`. Lead WPN-003 claimed main `85c018e`; isolated checkout creation pending operation `a8ba9621-ce48-440b-81fc-e621af00fdaf`, based on current query integration branch. No Unity there; primary session `21701` continues unchanged.
 
 - Full batch session `21701`: EditMode **939/0/1** passed, PlayMode continues. Lead isolated checkout `/Users/frank/.codex/worktrees/combat-hit-detection/spaceship-game-v2`, branch `task/WPN-003-combat-hit-test`, now contains hit selection implementation (query-data overload, candidate cap/warn, active analytic shields, hull/celestial nearest hit and deterministic ties). Seven required WPN-003 tests and validation still pending; do not mark done or touch primary runtime source while 21701 runs. No Unity in the isolated checkout.
+
+- Reconciled all three exact threads: WPN-002, MIG-010 and ABL-002 actively implementing. Isolated WPN-003 commits `6772372` / `b13fd8b` contain implementation and seven required tests (spec-required: 7, extra: 0); reviewed PWR-003 integrated as `03eff52`, UI-011 integrated retaining tooltip/notification/dialog lifecycle. Unity has not validated this next batch. Primary PlayMode session `21701` remains live, process 40308; primary runtime source unchanged.
