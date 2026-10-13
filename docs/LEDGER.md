@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 44 | 2 | 0 | 0 | 45 | 0 | 91 | 5 |
-| M3 | 156 | 8 | 0 | 0 | 16 | 0 | 180 | 10 |
+| M2 | 42 | 2 | 0 | 0 | 47 | 0 | 91 | 5 |
+| M3 | 156 | 6 | 0 | 0 | 18 | 0 | 180 | 12 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 2 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -236,12 +236,12 @@
 | DMG-015 | Regression scenarios R25/R26 and soak | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014 | no | todo |  |  |  |  |
 | DMG-016 | Performance gates | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-014 | no | todo |  |  |  |  |
 | DMG-017 | Harness commands | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014, DEV-001 | no | todo |  |  |  |  |
-| FLT-012 | Power and stat integration (M2) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, PWR-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead flight power/stat integration; PWR-004 helpers focused green, full batch pending |
+| FLT-012 | Power and stat integration (M2) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, PWR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 8dba629 | Power demand, powered actuator gating, stat multipliers and propulsion caches; 8 required tests; full 1003 EM / 145 PM green |
 | FLT-013 | Owner flight-control correction before the firing range | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, FLT-009, SPEC-03 | yes | done | astra (gpt-6) | 2026-10-12 | 1bc23e8 | Shift strafe, Ctrl boost, gentle coast, bounded assist; live Fighter verified; Q182 |
 | WPN-002 | Weapon content: definitions, blob, boot singletons | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 702c1a6 | Weapon definitions, blob and boot-owned singleton lifetime; full 968 EM /145 PM green |
 | WPN-003 | CombatHitTest | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-001, SPEC-10, AI-001, PWR-001 | yes | done | astra (gpt-6) | 2026-10-13 | acdebc2 | Burst nearest-hit queries for hulls, shields and celestial bodies; repairs f376412/528ae87; full 968 EM /145 PM green |
-| WPN-004 | WeaponInitSystem and mounts | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-002, SPEC-10, SPEC-20 | no | todo |  |  |  | partial in FND-020: installed mount initialization and reparenting / complete spec validation and required tests |
-| WPN-005 | PlayerTargetingSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, AI-001, SPEC-20 | no | todo |  |  |  |  |
+| WPN-004 | WeaponInitSystem and mounts | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-002, SPEC-10, SPEC-20 | yes | todo |  |  |  | partial in FND-020: installed mount initialization and reparenting / complete spec validation and required tests |
+| WPN-005 | PlayerTargetingSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, AI-001, SPEC-20 | yes | todo |  |  |  |  |
 | WPN-006 | WeaponAimSystem and lead | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-004, WPN-005 | no | todo |  |  |  | partial in FND-020: manual aim and arcs / targeting, lead, autofire and required tests |
 | WPN-007 | WeaponFireSystem and the projectile store append | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-006, PWR-001 | no | todo |  |  |  | partial in FND-020: serial fire and projectile append / parallel stream flattening, power, beam delivery/pulses and full required tests; partial in VFX-004: guarded muzzle emission with overrides / parallel stream flattening, power, beams and full required tests |
 | WPN-008 | ProjectileStepSystem | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-003, WPN-007, PWR-001, SPEC-13 | no | todo |  |  |  | partial in FND-020: movement, hull hits and lifetime; DMG-007 orders stepping after impact / parallel stream/compaction pipeline, homing, shields and full required tests; partial in VFX-004: guarded hull-hit emission with normal, velocity and overrides / parallel pipeline, homing, shields and full required tests |
@@ -267,7 +267,7 @@
 | AI-002 | SpatialHash queries | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-001 | yes | done | astra (gpt-6) | 2026-10-13 | 470001e | Ordered spatial queries and Burst-safe read view; five required tests, full suites green |
 | AI-003 | AI content and boot singletons | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 21337c2 | Profiles/config, boot-owned singleton and catalog; 2 required tests; full batch green |
 | AI-004 | SpatialHashBuildSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-002, SPEC-10, PWR-001, DMG-001 | yes | done | astra (gpt-6) | 2026-10-13 | f99a02c | Guarded parallel proxy gathering, canonical sort/bucket and boot-safe hash lifetime; full 968 EM /145 PM green |
-| AI-005 | AI setup and anchor shift | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-003, SPEC-02 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable power worker: AI setup and anchor shift; lead validates |
+| AI-005 | AI setup and anchor shift | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-003, SPEC-02 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b0fc87e | Brain registration and origin anchor shift; 4 required tests; live origin producer awaits GAL-009 |
 | AI-006 | AiDecisionSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | frontier | AI-004, AI-005, SPEC-20, SPEC-21, ABL-001 | no | todo |  |  |  |  |
 | AI-007 | AiSteeringSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006 | no | todo |  |  |  |  |
 | AI-008 | PlayerCombatStatusSystem | [SPEC-23](specs/SPEC-23-ai.md) | M2 | standard | AI-006, DMG-001 | no | todo |  |  |  |  |
@@ -332,7 +332,7 @@
 | GAL-012 | M3 galaxy content | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-003, SPEC-72 | no | todo |  |  |  |  |
 | GAL-013 | Performance gates | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-005, GAL-006, GAL-009, GAL-011, TST-001 | no | todo |  |  |  |  |
 | SYS-001 | Public contract types | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | CORE-001, DATA-001, GAL-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e738e71 | Streaming contracts and service shells; 2 required tests; full batch green |
-| SYS-002 | Streaming config and boot singleton | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-04 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable presentation worker: streaming config and singleton; lead integrates boot |
+| SYS-002 | Streaming config and boot singleton | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 7244be6 | Config validation/factory, boot singleton and catalog asset; 2 required tests; full suites green |
 | SYS-003 | Structure builders | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-10 | no | todo |  |  |  |  |
 | SYS-004 | Load and unload (T1) | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-002, SPEC-30, SPEC-10, SPEC-12 | no | todo |  |  |  |  |
 | SYS-005 | BodyOnRailsSystem | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004 | no | todo |  |  |  |  |
@@ -345,13 +345,13 @@
 | SYS-012 | Regression scenarios R9, R28 | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-006, SYS-009, FND-001 | no | todo |  |  |  |  |
 | SYS-013 | Jump integration hooks | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006, SYS-008 | no | todo |  |  |  |  |
 | SYS-014 | World gates: streaming performance and soak | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-007, SYS-013, TST-001 | no | todo |  |  |  |  |
-| TRV-001 | Public contract types | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, FLT-001, NAR-001, AUD-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable combat worker: travel contracts; SYS-003 awaits VOX-020 |
+| TRV-001 | Public contract types | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, FLT-001, NAR-001, AUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a68c988 | Canonical travel contracts and staged watcher API; 2 required tests; runtime travel remains later tasks |
 | TRV-002 | Travel config definition and validator | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-04, SPEC-72 | no | todo |  |  |  |  |
 | TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, SPEC-30, SPEC-40 | no | todo |  |  |  |  |
 | TRV-004 | Route planner | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-30 | no | todo |  |  |  |  |
 | TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-30 | no | todo |  |  |  |  |
 | TRV-006 | TravelService jump timeline | [SPEC-32](specs/SPEC-32-travel.md) | M3 | frontier | TRV-003, TRV-005, TRV-007, SPEC-31, SPEC-30, FND-001 | no | todo |  |  |  |  |
-| TRV-007 | PlayerControlLock consumption | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-20 | no | todo |  |  |  |  |
+| TRV-007 | PlayerControlLock consumption | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-20 | yes | todo |  |  |  |  |
 | TRV-008 | Gate interaction, gate info and notices | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006 | no | todo |  |  |  |  |
 | TRV-009 | Travel presentation | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006, SPEC-60, SPEC-63, SPEC-64, SPEC-31 | no | todo |  |  |  |  |
 | TRV-010 | Destination and route service | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-004, TRV-006 | no | todo |  |  |  |  |
@@ -475,12 +475,12 @@
 | CAM-009 | Editor orbit mode | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-005 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 21e43a1 | Editor orbit, bounded pan/zoom, snap/focus and suppression; 6 required tests; full batch 901 EM / 128 PM, zero failures |
 | CAM-010 | Map view transform | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 014ed0b | Map transforms, zoom anchoring, framing and clamps; 6 required tests; full batch 901 EM / 128 PM, zero failures |
 | VFX-013 | Floating-origin shift and clears | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | frontier | VFX-003, GAL-001, SYS-001, FND-001 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | Canonical rebase anchors, reset/system clears, idle reset; gameplay streaming remains open; spec-required: 5, extra: 0 |
-| VFX-014 | Warp effect and strict config validation | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | standard | VFX-004, TRV-001 | no | done | astra (gpt-6) | 2026-10-13 | b575efe | 600-particle pooled warp with oldest stealing, all 13 defaults strict; travel gameplay remains open; spec-required: 3, extra: 0 |
+| VFX-014 | Warp effect and strict config validation | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | standard | VFX-004, TRV-001 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | 600-particle pooled warp with oldest stealing, all 13 defaults strict; travel gameplay remains open; spec-required: 3, extra: 0 |
 | AUD-011 | GATE: Owner confirms licences of the carried-over audio | [SPEC-64](specs/SPEC-64-audio.md) | M3 | standard | AUD-010 | yes | todo |  |  |  |  |
 | AUD-012 | Floating-origin shift and clears | [SPEC-64](specs/SPEC-64-audio.md) | M3 | frontier | AUD-006, GAL-001, SYS-001 | no | todo |  |  |  |  |
 | DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-001, INP-001 | no | todo |  |  |  |  |
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | no | todo |  |  |  |  |
-| DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | no | todo |  |  |  |  |
+| DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | todo |  |  |  |  |
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
 | MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | no | todo |  |  |  |  |
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | no | todo |  |  |  |  |
@@ -948,6 +948,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — FLT-012 / SYS-002 / AI-005 / TRV-001 full batch green — astra (gpt-6)
+
+- Compile clean; grouped acceptance 26/0/0; full EditMode **1003/0/1**, PlayMode **145/0/53**, session 87840 exit 0. Evidence `Logs/playtest/flt012/{compile.log,focused-final.xml,editmode-final.xml,playmode-final.xml}`. No timing threshold changes; zero tuning passes.
+- Flight consumes power enable bits and stat multipliers; demand includes passive coast/spin assists. SYS-002 validates/bakes streaming config and owns the boot singleton. AI setup/anchor shifting and travel contracts are validated; GAL-009 still supplies the live origin producer, and full travel behavior remains open.
+- Tests: FLT-012 spec-required: 8, extra: 0; SYS-002 spec-required: 2, extra: 0; AI-005 spec-required: 4, extra: 0; TRV-001 spec-required: 2, extra: 0. Existing thruster fixture repaired by reading the singleton before retaining its buffer. QualitySettings restored from preserved pre-run backup; runner scenes excluded.
+- PWR-005/006 and SYS-010/AI-013/ECO-001 prepared in the isolated branch through d96f714, not yet Unity-validated. Next: reuse ready workers for combat and validate the combined power batch.
 
 ### 2026-10-13 — Flight integration regression and allocator preparation — astra (gpt-6)
 
