@@ -22,7 +22,7 @@ namespace Game.Voxel.Damage.Jobs
         [NativeDisableParallelForRestriction] public BufferLookup<BrickCells> Dense;
         [NativeDisableParallelForRestriction] public BufferLookup<BrickSparseCells> Sparse;
         [NativeDisableParallelForRestriction] public BufferLookup<BrickSolidMask> Masks;
-        [ReadOnly] public BufferLookup<PaletteEntry> Palettes;
+        [NativeDisableParallelForRestriction] public BufferLookup<PaletteEntry> Palettes;
         [ReadOnly] public ComponentLookup<PersistentId> Ids;
         [ReadOnly] public ComponentLookup<LocalTransform> Transforms;
         [ReadOnly] public ComponentLookup<PhysicsMass> Masses;
@@ -34,7 +34,7 @@ namespace Game.Voxel.Damage.Jobs
             Ids = s.GetComponentLookup<PersistentId>(true), Grids = s.GetComponentLookup<VoxelGrid>(), Bricks = s.GetComponentLookup<Brick>(), Dirty = s.GetComponentLookup<BrickDirty>(),
             Stats = s.GetComponentLookup<GridDamageStats>(), Impulses = s.GetComponentLookup<PendingImpulse>(),
             Slots = s.GetBufferLookup<BrickSlot>(), Instances = s.GetBufferLookup<BlockInstance>(), Dense = s.GetBufferLookup<BrickCells>(),
-            Sparse = s.GetBufferLookup<BrickSparseCells>(), Masks = s.GetBufferLookup<BrickSolidMask>(), Palettes = s.GetBufferLookup<PaletteEntry>(true),
+            Sparse = s.GetBufferLookup<BrickSparseCells>(), Masks = s.GetBufferLookup<BrickSolidMask>(), Palettes = s.GetBufferLookup<PaletteEntry>(),
             Transforms = s.GetComponentLookup<LocalTransform>(true), Masses = s.GetComponentLookup<PhysicsMass>(true),
             Velocities = s.GetComponentLookup<PhysicsVelocity>(true), Immune = s.GetComponentLookup<DamageImmune>(true), Spawning = s.GetComponentLookup<GridSpawning>(true)
         };
