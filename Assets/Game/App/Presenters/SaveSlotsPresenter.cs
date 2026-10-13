@@ -27,7 +27,7 @@ namespace Game.App.Presenters
         Awaitable<FlowResult> loading;
         SlotRef target;
         string operationError;
-        uint generation;
+        uint generation, operationGeneration;
         bool bound, disposed, ownsOperation;
         public SaveSlotsPresenter(UIRoot ui, SaveSlotsViewModel model, SaveService save, IGameFlow flow)
         {
@@ -59,6 +59,8 @@ namespace Game.App.Presenters
         }
         void StackChanged() { if (ui.Navigator.Top is SaveSlotsView) Refresh(); }
         void OnGameSaved(GameSaved e) { if (e.ProfileId == save.ActiveProfile.Value) Refresh(); }
+        /// <summary>Invalidate confirmations/prompts and old completion UI across SessionReset; keep the model instance.</summary>
+        public void ResetSession() { if (disposed) return; generation++; Refresh(); }
         public void Refresh()
         {
             if (disposed) return;
@@ -154,7 +156,7 @@ namespace Game.App.Presenters
         }
         void StartSave(SlotRef slot, string displayName)
         {
-            target = slot; ownsOperation = true; operationError = null;
+            target = slot; operationGeneration = generation; ownsOperation = true; operationError = null;
             try
             {
                 // IGameFlow has no display-name parameter. The owning save API preserves the named slot without a contract change.
@@ -165,7 +167,7 @@ namespace Game.App.Presenters
         }
         void StartLoad(SlotRef slot)
         {
-            target = slot; ownsOperation = true; operationError = null;
+            target = slot; operationGeneration = generation; ownsOperation = true; operationError = null;
             try { loading = flow.LoadGameAsync(slot.Slot.Value); }
             catch (Exception e) { ownsOperation = false; Error("Unable to load: " + e.Message); }
             UpdateActions();
@@ -175,6 +177,7 @@ namespace Game.App.Presenters
             if (!ownsOperation || !result.Slot.Equals(target)) return;
             if (!result.Success) operationError = result.Message;
         }
+        bool CompletionIsCurrent => bound && operationGeneration == generation && target.Profile.Equals(save.ActiveProfile);
         public void Tick()
         {
             if (disposed) return;
@@ -184,20 +187,28 @@ namespace Game.App.Presenters
                 {
                     var pending = saving; saving = null; var result = pending.GetAwaiter().GetResult();
                     ownsOperation = false;
-                    if (!result.Success) Error(result.Message);
+                    if (!result.Success && CompletionIsCurrent) Error(result.Message);
                     Refresh();
                 }
                 else if (loading != null && loading.GetAwaiter().IsCompleted)
                 {
                     var pending = loading; loading = null; var result = pending.GetAwaiter().GetResult();
                     ownsOperation = false;
-                    if (result != FlowResult.Ok) Error(operationError ?? "Unable to load: " + result);
-                    else if (ui.Navigator.IsOpen<SaveSlotsView>()) ui.Navigator.Pop(ui.Navigator.Get<SaveSlotsView>());
+                    if (CompletionIsCurrent)
+                    {
+                        if (result != FlowResult.Ok) Error(operationError ?? "Unable to load: " + result);
+                        else if (ui.Navigator.IsOpen<SaveSlotsView>()) ui.Navigator.Pop(ui.Navigator.Get<SaveSlotsView>());
+                    }
                     Refresh();
                 }
                 else if (ui.Navigator.IsOpen<SaveSlotsView>()) UpdateActions();
             }
-            catch (Exception e) { ownsOperation = false; saving = null; loading = null; Error("Save operation failed: " + e.Message); Refresh(); }
+            catch (Exception e)
+            {
+                ownsOperation = false; saving = null; loading = null;
+                if (CompletionIsCurrent) Error("Save operation failed: " + e.Message);
+                Refresh();
+            }
         }
         void Error(string message)
         {

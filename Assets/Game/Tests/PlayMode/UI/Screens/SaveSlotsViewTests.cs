@@ -132,6 +132,10 @@ namespace Game.Tests.PlayMode.UI.Screens
             window.UI.HandleBackPressed();
             Assert.IsFalse(window.UI.Confirm.IsOpen); CollectionAssert.AreEqual(before, File.ReadAllBytes(data.Paths.WorldFile(slot)));
             Assert.AreEqual(1, window.Model.Slots.Count);
+            window.Click("save-slots-delete"); Assert.IsTrue(window.UI.Confirm.IsOpen);
+            var model = window.Model; window.Presenter.ResetSession(); window.Accept();
+            Assert.AreSame(model, window.Model); CollectionAssert.AreEqual(before, File.ReadAllBytes(data.Paths.WorldFile(slot)),
+                "A confirmation from the old session must not delete a save after reset.");
         }
         [UnityTest] public IEnumerator Overwrite_RequiresConfirm()
         {
@@ -146,6 +150,9 @@ namespace Game.Tests.PlayMode.UI.Screens
             window.Click("save-slots-load"); Assert.IsTrue(window.UI.Confirm.IsOpen); Assert.AreEqual(0, window.Flow.Loads);
             window.Accept(); Assert.AreEqual(1, window.Flow.Loads); window.Presenter.Tick();
             Assert.IsFalse(window.View.IsOpen);
+            window.Show(SaveSlotsMode.Load); window.Click("save-slots-load"); window.Accept();
+            window.Presenter.ResetSession(); window.Presenter.Tick();
+            Assert.IsTrue(window.View.IsOpen, "An old load result must not close a view belonging to the reset session.");
         }
         [UnityTest] public IEnumerator SaveError_ShowsDangerToast()
         {
