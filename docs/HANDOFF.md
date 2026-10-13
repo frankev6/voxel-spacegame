@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Arrival integrated / worker recycled:** main includes TRV-0056f940373 and converter rerun repair19dea5e0; these remain uncompiled/unaccepted pending QST-002 batch. TRV-004 claimed3ab2e8a3 and dispatched to the same economy worker; ENC-006 and QST-002 continue. No Unity operation. Next generate/recompile real content and run focused acceptance together. Previous turn integrated source (progress).
+
 - **Quest/economy source integrated:** branch task/NAR-016-integration contains f26977f/c0f0c244. Real quest generation, graph compilation and six focused checks remain pending the QST-002 compiler batch; no acceptance claim or active Unity operation. Workers ENC-006222/TRV-005234/QST-002196 are active. Questions337/343 reconciled. Previous turn verified live workers; this turn integrates source.
 
 - **Loader fixtures compile / worker recycled:**2b278b11 adds five required direct-update SYS-004 cases; compile96149 clean, zero CS warnings (world-loader/compile.log). PlayMode execution waits for real QST-002 boot repair, not another known-failing run. No active Unity. ENC-006 claimedb5364ab3 and dispatched to combat worker; TRV-005 active232; QST-002 active195. NAR-01644bace47/ECO-0098d9ec70f remain delivered for lead integration. Previous turn map acceptance was progress.

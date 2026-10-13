@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-006 | claimedb5364ab3; composition/placement dispatched; NAR-016 delivered44bace47 | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-005 | claimedadce6f4b; arrival geometry dispatched; ECO-009 delivered separately | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-004 | claimed3ab2e8a3; route planner dispatched; TRV-005/ECO-009 source-integrated pending validation | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-002 | claimed ccef7c0d; implement definitions/validators to repair real boot | HUD-003/006/007 once ready |
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Arrival integrated / worker recycled:** main includes TRV-0056f940373 and converter rerun repair19dea5e0; these remain uncompiled/unaccepted pending QST-002 batch. TRV-004 claimed3ab2e8a3 and dispatched to the same economy worker; ENC-006 and QST-002 continue. No Unity operation. Next generate/recompile real content and run focused acceptance together. Previous turn integrated source (progress).
 
 - **Quest/economy source integrated:** branch task/NAR-016-integration contains f26977f/c0f0c244. Real quest generation, graph compilation and six focused checks remain pending the QST-002 compiler batch; no acceptance claim or active Unity operation. Workers ENC-006222/TRV-005234/QST-002196 are active. Questions337/343 reconciled. Previous turn verified live workers; this turn integrates source.
 
