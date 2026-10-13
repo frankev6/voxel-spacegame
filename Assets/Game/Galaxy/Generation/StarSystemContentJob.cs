@@ -61,31 +61,61 @@ namespace Game.Galaxy.Generation
     {
         internal static StarSystemContent Build(GalaxyDef galaxy, StarSystemId id, out bool warning, out bool error)
         {
+            using var pending = new PendingStarSystemContent(galaxy, id, true);
+            return pending.Take(out warning, out error);
+        }
+    }
+
+    /// <summary>Owns all asynchronous job outputs until the cache takes the completed content.</summary>
+    internal sealed class PendingStarSystemContent : System.IDisposable
+    {
+        StarSystemContent content;
+        NativeReference<double2> extents;
+        NativeReference<int> warnings, errors;
+        readonly int version;
+        internal JobHandle Handle { get; private set; }
+        internal PendingStarSystemContent(GalaxyDef galaxy, StarSystemId id, bool synchronous = false)
+        {
             var system = galaxy.Get(id);
             for (int slot = 0; slot < system.LaneCount; slot++)
                 if (galaxy.Adjacency[system.FirstAdjacency + slot] >= GalaxyConstants.NoIndex)
                     throw new GalaxyGenerationException("Adjacent lane index exceeds BodySpec ushort capacity.");
-            var result = new StarSystemContent(id);
+            version = galaxy.GeneratorVersion;
             try
             {
-                using var extents = new NativeReference<double2>(Allocator.TempJob);
-                using var warnings = new NativeReference<int>(Allocator.TempJob);
-                using var errors = new NativeReference<int>(Allocator.TempJob);
+                content = new StarSystemContent(id);
+                extents = new NativeReference<double2>(Allocator.Persistent);
+                warnings = new NativeReference<int>(Allocator.Persistent);
+                errors = new NativeReference<int>(Allocator.Persistent);
                 bool authored = system.AuthoredIndex > 0;
-                new StarSystemContentJob
+                var job = new StarSystemContentJob
                 {
                     System = system, Settings = authored ? galaxy.AuthoredTemplateParams[system.AuthoredIndex - 1] : galaxy.TemplateParams[system.TemplateIndex],
                     Pools = galaxy.PoolEntries, Templates = galaxy.BodyTemplateParams, Authored = galaxy.AuthoredBodies,
                     AuthoredRange = authored ? galaxy.AuthoredBodyRanges[system.AuthoredIndex - 1] : default,
                     Lanes = galaxy.Lanes, Adjacency = galaxy.Adjacency, Systems = galaxy.StarSystems, IndexById = galaxy.IndexById,
-                    Output = result.Bodies, Extents = extents, Warning = warnings, Error = errors
-                }.Schedule().Complete();
-                result.LaneRingRadiusM = extents.Value.x; result.ExtentM = extents.Value.y;
-                result.GeneratedHash = StarSystemContentHash.Compute(result.Bodies.AsArray(), galaxy.GeneratorVersion);
-                warning = warnings.Value != 0; error = errors.Value != 0;
-                return result;
+                    Output = content.Bodies, Extents = extents, Warning = warnings, Error = errors
+                };
+                if (synchronous) job.Run(); else Handle = job.Schedule();
             }
-            catch { result.Dispose(); throw; }
+            catch { Dispose(); throw; }
+        }
+        internal StarSystemContent Take(out bool warning, out bool error)
+        {
+            Handle.Complete();
+            if (content == null) throw new System.InvalidOperationException("Content was already transferred or disposed.");
+            content.LaneRingRadiusM = extents.Value.x; content.ExtentM = extents.Value.y;
+            content.GeneratedHash = StarSystemContentHash.Compute(content.Bodies.AsArray(), version);
+            warning = warnings.Value != 0; error = errors.Value != 0;
+            var result = content; content = null; return result;
+        }
+        public void Dispose()
+        {
+            Handle.Complete();
+            content?.Dispose(); content = null;
+            if (extents.IsCreated) extents.Dispose();
+            if (warnings.IsCreated) warnings.Dispose();
+            if (errors.IsCreated) errors.Dispose();
         }
     }
 }

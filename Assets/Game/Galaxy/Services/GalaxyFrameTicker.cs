@@ -1,17 +1,38 @@
-using Game.Data.Definitions;
-using Game.Galaxy.Components;
-using Game.Galaxy.Data;
-using Unity.Jobs;
-using Unity.Mathematics;
+using System;
+using System.Collections.Generic;
+using Game.Core;
 
 namespace Game.Galaxy.Services
 {
-    /// <summary>Registry of IGalaxyFrameTick. Constructed by SPEC-01 before every Galaxy service; ticked by GalaxyServicesBridgeSystem. Implements SPEC-30 §4.8.</summary>
+    /// <summary>Ordered frame services; mutations during a tick affect the next tick.</summary>
     public sealed class GalaxyFrameTicker
     {
-        public void Register(IGalaxyFrameTick t) => throw new System.NotImplementedException("GAL-008");     // idempotent
-        public void Unregister(IGalaxyFrameTick t) => throw new System.NotImplementedException("GAL-008");
-        public void Tick(in GalaxyFrameContext ctx) => throw new System.NotImplementedException("GAL-008");  // order: TickOrder ascending, then type full name (ordinal); per-service try/catch → GameLog.Error, others still run
-        // TODO(GAL-008): implement the behavior specified by SPEC-30.
+        readonly List<IGalaxyFrameTick> services = new(), snapshot = new();
+        bool ticking;
+        public void Register(IGalaxyFrameTick service)
+        {
+            if (service == null) throw new ArgumentNullException(nameof(service));
+            if (services.Contains(service)) return;
+            services.Add(service);
+            services.Sort((a, b) =>
+            {
+                int order = a.TickOrder.CompareTo(b.TickOrder);
+                return order != 0 ? order : string.CompareOrdinal(a.GetType().FullName, b.GetType().FullName);
+            });
+        }
+        public void Unregister(IGalaxyFrameTick service) => services.Remove(service);
+        public void Tick(in GalaxyFrameContext context)
+        {
+            if (ticking) throw new InvalidOperationException("Galaxy frame ticks cannot be nested.");
+            ticking = true;
+            snapshot.Clear(); snapshot.AddRange(services);
+            try
+            {
+                foreach (var service in snapshot)
+                    try { service.Tick(context); }
+                    catch (Exception error) { GameLog.Error("Galaxy", service.GetType().FullName + " tick failed: " + error); }
+            }
+            finally { snapshot.Clear(); ticking = false; }
+        }
     }
 }
