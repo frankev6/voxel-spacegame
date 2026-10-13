@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Structure builders accepted:** SYS-003971ae0b7; deterministic procedural shapes/asteroids, four focused checks and clean compile. Loader ownership/geometry defaults recorded in ledger307. Narrative compiler progresses in isolation; real travel/PLOC prerequisites still block complete DEV-018 acceptance.
+
 - **AI combat scenarios accepted:** AI-010c45ab392; clean compile and4 focused checks cover physical orbit/hits, flee, ally obstruction and leash return. Fixture-only thrust resolved short-run travel; production balance untouched. Next presentation assignment DEV-018; lead narrative compiler continues.
 
 - **Narrative grammar accepted:** NAR-00267ce3485; clean compile and7 focused checks. Lexer/AST/parser ready for NAR-003 type checking and binding. Workers continue AI-010 fixture shortening, AI-015 fleet scenarios and SYS-003 structures.

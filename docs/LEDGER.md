@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 135 | 7 | 0 | 0 | 38 | 0 | 180 | 7 |
+| M3 | 134 | 7 | 0 | 0 | 39 | 0 | 180 | 6 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -334,7 +334,7 @@
 | GAL-013 | Performance gates | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-005, GAL-006, GAL-009, GAL-011, TST-001 | no | todo |  |  |  |  |
 | SYS-001 | Public contract types | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | CORE-001, DATA-001, GAL-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e738e71 | Streaming contracts and service shells; 2 required tests; full batch green |
 | SYS-002 | Streaming config and boot singleton | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 7244be6 | Config validation/factory, boot singleton and catalog asset; 2 required tests; full suites green |
-| SYS-003 | Structure builders | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-10 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Recycled power worker; procedural structure builders, no new ship art |
+| SYS-003 | Structure builders | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-10 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 971ae0b7 | Deterministic shape/asteroid builders;4 focused tests pass; Q307 |
 | SYS-004 | Load and unload (T1) | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-002, SPEC-30, SPEC-10, SPEC-12 | no | todo |  |  |  |  |
 | SYS-005 | BodyOnRailsSystem | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004 | no | todo |  |  |  |  |
 | SYS-006 | T2 voxel bodies and damage persistence | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-003, SYS-004, SPEC-13, SPEC-21, SPEC-23 | no | todo |  |  |  |  |
@@ -374,7 +374,7 @@
 | NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 67ce3485 | Located lexer/AST/parser; seven focused checks pass; Q305 resolves grammar example |
 | NAR-003 | Type checker, registry, compiler and binder | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-002 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Narrative compilation and binding after NAR-002 acceptance |
 | NAR-004 | Condition and expression nodes | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003 | no | todo |  |  |  | partial in NAR-003: serializable primitive node shapes and binding/dependency traversal / evaluation, function dispatch and required tests missing |
-| NAR-005 | Effect nodes and atomic effect lists | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-004 | no | todo |  |  |  |  |
+| NAR-005 | Effect nodes and atomic effect lists | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-004 | no | todo |  |  |  | partial in NAR-003: serialized effect shapes, flow flags and binding / execution, preflight, atomic requirements and required tests missing |
 | NAR-006 | Fact catalog and reference resolvers | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Implementation4f205524; clean compile and4 functional checks pass; advisory Build20k fixture still pending actual binder integration |
 | NAR-007 | FactStore | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-006 | no | todo |  |  |  |  |
 | NAR-008 | FACT save participant | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007, PERS-001 | no | todo |  |  |  |  |
@@ -897,6 +897,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 304 | SPEC-50 Q24: merchant session and numeric boundaries | Resolved: canonical stock index, finite game time, no backward-clock restock, closed sessions reject trades; nested merchant trades rejected, readonly refresh retained. Prices use specified rounding and bounded int values, quantity totals use long; finite stock overflow rejected before sale. Existing wallet/cargo sequence and refund preserved. | Tech lead |
 | 305 | SPEC-40 Q13: parser precedence example and internal results | Resolved: follow the grammar with $-prefixed variables; internal location-bearing AST and first-error code/line/column diagnostics, translated by NAR-003. Command integers use the Int32 domain. | Tech lead |
 | 306 | SPEC-23 Q26: fast physical AI scenario fixtures | Resolved: frozen player dummy without Hulk, real physical frigate/pipeline; fixture-only arena and weapon changes, fixed ticks and early exit retain functional assertions. Production balance unchanged. | Tech lead |
+| 307 | SPEC-31 Q12: builder geometry, inputs and ownership | Resolved: injected baked content/catalog, caller-owned sources and loader-owned cache; centered cell sampling, shell subtraction, deterministic nearest-core footprint replacement, seeded simplex offset and bounded native staging. No new assets. | Tech lead |
 
 
 ## Measurements
@@ -1008,6 +1009,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Procedural structure builders accepted — astra (gpt-6)
+
+- SYS-003971ae0b7 builds deterministic geometric shells and seeded asteroids through per-brick Burst jobs, then owned voxel-source assembly. Optional core footprint placement is deterministic; no new art assets. SPEC-31 Q12 mirrored307.
+- Compile37644 clean; focused41108 four passed. Evidence `Logs/playtest/structure-builders/`. Zero gameplay ticks/waits; no broad or performance run and zero tuning passes.
+- Test count: spec-required: 4, extra: 0.
 
 ### 2026-10-13 — Physical AI combat scenarios accepted — astra (gpt-6)
 

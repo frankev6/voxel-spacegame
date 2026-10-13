@@ -482,7 +482,7 @@ sequenceDiagram
 - **Do:** `ProceduralShapeBuilder` and `AsteroidBuilder` (§5.8) as Burst jobs plus main-thread assembly.
 - **Files:** `Assets/Game/Galaxy/Bodies/{ProceduralShapeBuilder,AsteroidBuilder}.cs`, `Assets/Game/Galaxy/Bodies/Jobs/{ShapeFillJob,AsteroidFillJob}.cs`, tests
 - **Acceptance criteria:**
-  - [ ] Same inputs → identical `ComputeContentHash`; ring/cylinder/box/sphere cell counts match closed-form references within 2%; exactly one core instance in procedural stations.
+  - [x] Same inputs → identical `ComputeContentHash`; ring/cylinder/box/sphere cell counts match closed-form references within 2%; exactly one core instance in procedural stations.
 - **Tests:** `StructureBuilderTests.Deterministic`, `.ShapeCounts`, `.OneCore`, `.Asteroid_RadiusAndNoise`.
 
 ### SYS-004 — Load and unload (T1)
