@@ -144,9 +144,9 @@ namespace Game.Tests.EditMode.Simulation.Abilities
         {
             using var f = new Fixture(); f.Blocks(2); f.Step();
             // ABL-004 owns the threshold calculation; ABL-003 must obey its Blocked input without writing it.
-            var slot = f.Slots[0]; slot.Blocked = 1; f.Slots[0] = slot; f.Step(ShipCommandEdges.Ability1);
+            var slots = f.Slots; var slot = slots[0]; slot.Blocked = 1; slots[0] = slot; f.Step(ShipCommandEdges.Ability1);
             Assert.AreEqual(1, f.Slots[0].Charges); Assert.AreNotEqual(0, f.Slots[0].Flags & AbilitySlotFlags.DeniedThisTick);
-            slot = f.Slots[0]; slot.Blocked = 0; f.Slots[0] = slot; f.Step(ShipCommandEdges.Ability1);
+            slots = f.Slots; slot = slots[0]; slot.Blocked = 0; slots[0] = slot; f.Step(ShipCommandEdges.Ability1);
             Assert.AreEqual(0, f.Slots[0].Charges); Assert.AreNotEqual(0, f.Slots[0].Flags & AbilitySlotFlags.ActivatedThisTick); Assert.AreEqual(0, f.Slots[0].Active);
         }
         [Test] public void Hulk_Unavailable()
