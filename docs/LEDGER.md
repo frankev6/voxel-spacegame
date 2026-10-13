@@ -1063,6 +1063,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-006 body source/spawn ownership authored — astra (gpt-6)
+
+- 6ee18d76 adds BodyGridSpawner: cache procedural templates/seeds for loaded-system lifetime; borrow immutable blueprints through the canonical blueprint spawn path; register mutable clones for small destructible bodies and saved delta structures. Spawn static stations/hulks with body identity, interaction, faction, weapon-profile AI and immunity tags. Release waits for root destruction/read pins; transferred delta structures are never locally disposed.
+- Hysteresis, core-loss queue, loader wiring and real scene registration remain. Source uncompiled/unaccepted; no Unity operation. Planned spec-required: 5, extra: 0; no new tests this checkpoint. Existing single FND-012 retry and serialized condition case remain queued for a compatible batch.
+- Workers verified combat234 NAR-016 repair, economy247 SYS-005, presentation assigned bounded read-only lifetime review (does not own frontier implementation). Previous turn capture helper was progress.
+
 ### 2026-10-13 — SYS-005 dispatched / SYS-006 ownership implementation — astra (gpt-6)
 
 - SYS-005 claimed aac4a2f6 and assigned to the existing economy worker; two direct-tick required cases, no worker Unity. Combat repairs NAR-016 graph persistence; presentation has a genuine ready-task dependency wait. Remaining standard-ready rows are advisory GAL-013 and owner-only AUD-011, neither used as busywork.

@@ -9,7 +9,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-016 graph stability | Repair unchanged compilation replacing live serialized graphs; SYS-005 still waits | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | SYS-005 | Claimed aac4a2f6; analytic body orbit implementation dispatched | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | Count-slot diagnosis complete211; lead repair verified by boot | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | source-lifetime review | Read-only review of lead SYS-006 spawn/capture helpers; no frontier implementation | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Body-grid spawn path authored:** SYS-0066ee18d76 adds procedural source caching, writable small-body clones, delta sources, blueprint borrows, stationary grid profiles, faction/interaction tags and hulk restoration. Ownership capture2e2c1117 remains unwired; hysteresis/events/scene composition/five cases still open. No compile or acceptance claim; no Unity active. Combat repairs converter stability, economy implements SYS-005, presentation assigned bounded read-only source-lifetime review. Previous turn authored capture (progress).
 
 - **T2 ownership work underway:** SYS-006 claimed32c7be10;2e2c1117 adds snapshot capture/ownership transfer helper, uncompiled and not yet wired. Next grid spawning, hysteresis, core-loss events and real scene registration before five focused checks. SYS-005 claim aac4a2f6 dispatched to economy worker; combat NAR-016 stability repair active233; presentation dependency wait (boot diagnosis complete211). No Unity active. FND-012 UnknownBlueprint and serialized-condition case await next focused batch. Previous turn boot fixes were progress.
 

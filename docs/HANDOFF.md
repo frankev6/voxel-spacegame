@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Body-grid spawn path authored:** SYS-0066ee18d76 adds procedural source caching, writable small-body clones, delta sources, blueprint borrows, stationary grid profiles, faction/interaction tags and hulk restoration. Ownership capture2e2c1117 remains unwired; hysteresis/events/scene composition/five cases still open. No compile or acceptance claim; no Unity active. Combat repairs converter stability, economy implements SYS-005, presentation assigned bounded read-only source-lifetime review. Previous turn authored capture (progress).
+
 - **T2 ownership work underway:** SYS-006 claimed32c7be10;2e2c1117 adds snapshot capture/ownership transfer helper, uncompiled and not yet wired. Next grid spawning, hysteresis, core-loss events and real scene registration before five focused checks. SYS-005 claim aac4a2f6 dispatched to economy worker; combat NAR-016 stability repair active233; presentation dependency wait (boot diagnosis complete211). No Unity active. FND-012 UnknownBlueprint and serialized-condition case await next focused batch. Previous turn boot fixes were progress.
 
 - **T1 loader accepted:** PlayMode83915 terminal2: all5 SYS-004 cases plus5 spawn cases pass; one FND-012 assertion rejected routine setup info, now repaired awaiting single-case retry. Q357 stages live loader installation with SYS-006 T2 so missing grids still block arrival. No Unity active. Next dispatch SYS-005 and implement T2; graph stability repair continues.
