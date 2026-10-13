@@ -101,7 +101,7 @@ namespace Game.Simulation.Weapons
                 if (length > 1e-8f)
                 {
                     var query = new GridCellQuery { Reader = Reader, Grid = grid };
-                    if (VoxelRaycast.Cast(ref query, a / size, delta / size, length / size, out var hit))
+                    if (VoxelRaycast.Cast(ref query, a / size, delta / size, length / size + 1, out var hit))
                     {
                         hullFraction = hit.DistanceCells * size / length;
                         float3 normal = -math.normalizesafe(delta);
