@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 12 | 0 | 0 | 0 | 80 | 0 | 92 | 7 |
-| M3 | 120 | 8 | 0 | 0 | 52 | 0 | 180 | 7 |
+| M3 | 120 | 8 | 0 | 0 | 52 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -455,7 +455,7 @@
 | HUD-002 | UI composition, screen registration and root switching | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, UI-001, UI-002, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead composition/root/session infrastructure under ADR-0072; preserve existing playable menu/pause/flight |
 | HUD-003 | Main menu and new game | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: menu view and service-backed presenter with name prompt/continue/quit / composition hookup and layout acceptance remain |
 | HUD-004 | Save and load slots | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, PERS-002, PERS-005, PERS-006, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | a8d00e7a/9e5db398: view + persistent composition; 5 required screen and4 boot checks pass; visible menu routing/review pending |
-| HUD-005 | Settings screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
+| HUD-005 | Settings screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, UI-012, UI-013, FND-004, INP-003 | yes | todo |  |  |  |  |
 | HUD-006 | Pause screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: authored pause view and service-backed presenter/save eligibility/confirmation / composition hookup, key hints and acceptance remain |
 | HUD-007 | Flight HUD view and layout | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: view-model binding and Esc-to-pause route / HUD layout, data integration and acceptance remain |
 | HUD-008 | HudSnapshotSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, PWR-001, WPN-001, ABL-001, SYS-001, GAL-001, FLT-001, VOX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 13c85bbd | Review repairs complete: duplicate players, frozen hulk meters and interactable-body radar; nine focused checks pass |
@@ -911,6 +911,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 318 | SPEC-40 Q19: legacy translation boundary and defaults | Resolved: retain source metadata for emission; decimal cumulative thresholds, source-ordered quest logs, canonical provisional journal labels and contextual item mappings. No runtime/asset emission in NAR-014. | Tech lead |
 | 319 | SPEC-61 Q23: save/load construction versus composition cycle | Resolved: explicit completed UI/save/flow prerequisites allow parallel source construction; shared production hookup and full functional/layout acceptance remain required. ADR-0072 amended. | Tech lead |
 | 320 | SPEC-60 Q30: layout audit scroll/measurement semantics | Resolved: exclude scroll content subtree but audit viewport; use intrinsic nowrap width, clear result list and check all containing panels. Functional acceptance pending. | Tech lead |
+| 327 | SPEC-61 Q25: settings destination/composition cycle | Resolved via ADR-0072: construct against completed settings/input/UI services; real navigation/lifetime and five checks still required before closure. | Tech lead |
 | 326 | SPEC-61 Q24: named save API and presenter lifecycle | Resolved: SaveService.SaveAsync preserves names and owning safety checks; flow loads; persistent composition owns register/bind/tick/session rebind/dispose. Five screen checks and reachable production navigation remain required. | Tech lead |
 | 324 | SPEC-60 Q32: stale accessibility font-size example | Resolved: use approved 16px body token, 21px at130%; preserve theme and factor-based checks. | Tech lead |
 | 323 | SPEC-40 Q21 / SPEC-41 Q10: contradictory narrative rule provider order | Resolved: dialog10, quest20, mystery30 using numeric sorting; runtime system order unchanged. | Tech lead |

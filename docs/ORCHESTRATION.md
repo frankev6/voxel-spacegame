@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Settings construction unlocked:** ADR-0072/SPEC61Q25/ledger327 replace HUD-005 circular construction dependency with actual completed services. Keep full five-case and production navigation acceptance. HUD-004 tested checkpoint a59c0e12 remains open pending review/reachable roots; no new Unity run. GAL-003184/MIG-014198 active. Previous turn verified save screen (progress).
+
 - **Save screen checks green:**35034 clean compile;60326 five required cases and56386 four existing boot checks pass; evidence save-slots/. a8d00e7a/9e5db398 remain integration branch; HUD-004 open for worker review and visible menu/pause routing. No active validation; font changes restored. GAL-003183/MIG-014197 continue. Previous turn installed save presenter lifetime (progress).
 
 - **Save screen integration underway:** HUD-0042ae551ed integrated as a8d00e7a; UiComposition now registers/binds persistent SaveSlotsPresenter/View, ticks it and rebinds on SessionReset/disposes with app. Real visible menu/pause navigation still pending HUD-002, so no done claim. Five required checks unrun; worker review161 active. GAL-003183/MIG-014197 active. Q326 mirrors SPEC61Q24. Previous turn resumed missing content deliveries (progress).

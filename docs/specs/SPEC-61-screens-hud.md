@@ -482,7 +482,8 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 ### HUD-005 — Settings screen
 - **Milestone:** M3
 - **Tier:** standard — view on an existing view model; rebinding through SPEC-03's API
-- **Depends on:** `HUD-002`
+- **Depends on:** `HUD-001`, `UI-011`, `UI-012`, `UI-013`, `FND-004`, `INP-003`
+- **Sequencing:** ADR-0072 permits construction against completed services alongside HUD-002; real app registration, lifecycle and menu/pause navigation remain required before closure.
 - **Do:** `SettingsView` with five tabs, `SettingsPresenter`; accessibility settings call `UIRoot.ApplyAccessibility`; camera settings forwarded to SPEC-62 by SPEC-01's settings hookup.
 - **Files:** `Assets/Game/UI/Views/SettingsView.cs`, `Assets/Game/UI/Views/Uxml/{SettingsView,RebindRow}.uxml`, `Assets/Game/UI/Theme/screens/settings.uss`, `Assets/Game/App/Presenters/SettingsPresenter.cs`
 - **Acceptance criteria:**
@@ -711,6 +712,8 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 | 23 | Save/load screen construction waits on composition that needs its navigation | Resolved: HUD-004 depends on the completed HUD/UI/save/flow contracts explicitly, so construction can proceed alongside HUD-002. Final production registration, session rebind and layout acceptance remain mandatory in the shared integration batch; no fake navigation or early done claim. | Tech lead |
 
 | 24 | HUD-004's new-save name prompt has no display-name argument on IGameFlow, and the persistent presenter/view lifecycle is unspecified | Use SaveService.SaveAsync(slot, Manual, displayName) for named new saves and confirmed overwrites (preserving the existing title), and IGameFlow.LoadGameAsync for loading. This uses existing owning APIs without changing a shared contract. SaveService still owns capture/writeback, blockers, queueing, atomic writes and completion errors. Presenter constructor takes UIRoot, the app-owned SaveSlotsViewModel, SaveService and IGameFlow; register SaveSlotsView(model,presenter), then Bind; Tick consumes each owned Awaitable once, Refresh is the session/profile refresh hook, Show(mode) opens the screen, and Unbind/Dispose removes subscriptions. Confirmations capture a SlotRef/profile and recheck current operation/session access after pop; list refresh preserves exact slot identity. Use an 880×720 logical-pixel panel capped at 90% of the viewport and 88px virtual rows, with appearance exclusively from existing NOCTURNE tokens; canonical five-size acceptance remains required. Source delivery includes the five required tests using real controlled save files and UI-012's canonical UITestPanel/UILayoutAudit; audit-helper and production HUD-002 integration remain lead-owned acceptance, with no early done claim. | Tech lead — HUD-004 implementation default; central mirror pending |
+
+| 25 | Settings construction waits on composition that requires a settings destination | Resolved: construct HUD-005 against completed HUD-001, UI-011/012/013, FND-004 and INP-003; retain all five required cases and actual production registration/lifecycle/menu navigation before closure. Lead integrates persistent model/presenter in HUD-002. No no-op destination or early completion. | Tech lead |
 
 ## 11. References
 
