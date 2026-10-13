@@ -70,7 +70,8 @@ namespace Game.Data.Definitions
             Check(scope, "TRV-E004", nameof(arrivalStandoffM), FiniteRange(arrivalStandoffM, 50, 2000), "Arrival standoff must be finite and in 50..2000 metres.");
             Check(scope, "TRV-E004", nameof(arrivalStepM), FiniteRange(arrivalStepM, 10, 500), "Arrival step must be finite and in 10..500 metres.");
             Check(scope, "TRV-E004", nameof(arrivalMaxSteps), arrivalMaxSteps >= 0 && arrivalMaxSteps <= 64, "Arrival steps must be in 0..64.");
-            Check(scope, "TRV-E004", nameof(playerClearanceM), float.IsFinite(playerClearanceM) && playerClearanceM >= 0 && playerClearanceM <= arrivalStandoffM, "Player clearance must be finite and in 0..arrival standoff.");
+            // Compare the clearance upper bound only after the standoff itself is valid.
+            Check(scope, "TRV-E004", nameof(playerClearanceM), float.IsFinite(playerClearanceM) && playerClearanceM >= 0 && (!FiniteRange(arrivalStandoffM, 50, 2000) || playerClearanceM <= arrivalStandoffM), "Player clearance must be finite and in 0..arrival standoff.");
             Check(scope, "TRV-E008", nameof(departCue), departCue != null, "Departure cue must be set.");
             Check(scope, "TRV-E008", nameof(arriveCue), arriveCue != null, "Arrival cue must be set.");
             Check(scope, "TRV-E008", nameof(warpFxScale), float.IsFinite(warpFxScale) && warpFxScale > 0, "Warp scale must be finite and positive.");
