@@ -93,10 +93,9 @@ namespace Game.App.Presenters
             // Never replace view models: views and bindings retain these exact objects across sessions.
             menuPresenter?.Unbind();
             pausePresenter?.Unbind();
-            saveSlotsPresenter.Unbind();
             menuPresenter?.Bind();
             pausePresenter?.Bind();
-            saveSlotsPresenter.Bind();
+            saveSlotsPresenter.ResetSession();
             loadingPresenter.Dispose();
             loadingPresenter.Bind();
             // TODO(HUD-009/010/011/012/013/014/015/016/017/018/019): rebind the owning feature presenters
