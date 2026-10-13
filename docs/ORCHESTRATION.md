@@ -6,8 +6,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-009 | delivered 80ba1e65; real validation dependency wait | AUD-013 after AUD-008/009 done |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | MIG-012 | delivered 848b2932; real validation/dependency wait | next eligible standard task after batch closeout |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | dispatched from main2485250e | audio measurements |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | WPN-018 | dispatched from main2485250e; MIG-012 prepared for generation | weapon demand/stats |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-001 | delivered 6a0f72a0; real dependency/validation wait | QST-002 after QST-001 and SPEC-40 |
 
 ## Operating rules
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Current:** combat/audio eight-task batch closed and locally FF merged main c70dcfa8; claim2485250e assigns lead WPN-008, combat worker AUD-013 and power worker WPN-018 (follow-ups sent). Full1164/0/1 EM +160/0/53 PM, live Space station damage/audio music switch and all four damage commands verified. Range reset for owner; Editor8032 remains live. Isolated lead branch `task/MIG-012-faction-integration` head ee53fcfd preserves reviewed QST/MIG preparation; no generation yet. Presentation remains genuine dependency wait. Lead should start separate WPN-008 branch from main in existing isolated checkout, preserving prepared branch; no main runtime mutation until intentionally stopping live Editor for next validation.
 
 - **Full regression complete:** session73915 exited 0: compile clean, **1164/0/1 EditMode, 160/0/53 PlayMode**. TenMinuteSoak passed in 600.33 s: 36,000 ticks, 60 chunks/hulks/rams, 36 dissolved + 24 silent despawns, peak 2/64 live chunks, zero native leaks. Evidence `Logs/playtest/combat-audio-final/`. Original QualitySettings restored/excluded and orphan test metas removed after terminal. Next live range, Space fire, four gh_dmg commands and audio source readback, then current-batch closeout. Prepared QST/MIG batch remains isolated.
 
