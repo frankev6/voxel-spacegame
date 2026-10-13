@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 81 | 0 | 0 | 0 | 8 | 0 | 89 | 9 |
+| M2 | 80 | 0 | 0 | 0 | 9 | 0 | 89 | 9 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 11 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -225,8 +225,8 @@
 | DMG-005 | Point and blast damage | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | done | astra (gpt-6) | 2026-10-12 | 7dbd025 | Point/blast/instance rules complete; 10 required tests; full suites green; Q189 occlusion fixture correction; zero tuning passes |
 | DMG-006 | DamageResolveSystem pipeline | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-005 | yes | done | astra (gpt-6) | 2026-10-12 | 0018fd1 | Ordered gather/sort/plan, exclusive parallel grid resolution and canonical publication; seven tests; full suites green; Q190; repairs remain DMG-019 |
 | DMG-007 | ImpactEventSystem (rams and knockback) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, PHY-001 | yes | done | astra (gpt-6) | 2026-10-12 | 01d5ff2 | Canonical ram pairs, energy/hardness split, cooldown, next-tick planar knockback; six required tests; ADR-0058 |
-| DMG-008 | Brick connectivity summaries | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | partial in FND-020: bounded full-grid fallback connectivity / cached brick connectivity summaries, warm-up and required tests |
-| DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | no | todo |  |  |  | partial in FND-020: bounded full-grid flood and canonical masks / hybrid graph race, node budgets, forced deferrals and full required tests |
+| DMG-008 | Brick connectivity summaries | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-004 | yes | done | astra (gpt-6) | 2026-10-12 | 36e838d | Scanline brick flood, instance unions, touched checks and deterministic warm-up; 1000 reference masks; three required tests |
+| DMG-009 | IntegritySystem (race on the hybrid graph) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-006, DMG-008 | yes | todo |  |  |  | partial in FND-020: bounded full-grid flood and canonical masks; DMG-008 caches brick summaries / hybrid graph race, node budgets, forced deferrals and full required tests |
 | DMG-010 | SplitSystem: plan, particle tier, deferred detach and debris FX | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-009, VFX-001, AUD-001 | no | todo |  |  |  | partial in FND-020: physical splits and retained deferred seeds / particle/chunk tiers, debris FX/audio and required tests |
 | DMG-011 | Chunk bodies (pool, collider, lifetime) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-010, SPEC-12 | no | todo |  |  |  | partial in FND-020: all pieces temporarily use hulk grids / chunk pool, colliders, lifetime and required tests |
 | DMG-012 | Hulk grids from splits | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | frontier | DMG-011, FND-001, SPEC-12 | no | todo |  |  |  | partial in FND-020: hulk cells/instances, bodies and functional transfer / remaining lifecycle, integration and required tests |
@@ -769,6 +769,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 189 | 2026-10-12 | SPEC-13 Q27 / DMG-005 | Blast occlusion test geometry and warning scope | Preserve 400-damage symmetry; use 1600 damage to reach shielded cells; warn once per resolver lifetime using native state | Tech lead | Resolved DMG-005; no owner gate |
 | 190 | 2026-10-12 | SPEC-13 Q28 / DMG-006 | Deferred range outputs, hasher dependency and repair scope | Per-range native streams; canonical serial explosion publication; bring forward CellStateHasher; repair pass remains DMG-019 | Tech lead | Resolved; no public API change, fixed-step completion or owner gate |
 | 191 | 2026-10-12 | SPEC-13 Q29 / SPEC-63 Q19 | Missing ram effect kind and opposite Unity collision normal convention | Append RamImpact = 13, 14-entry defaults; convert B-to-A normal at collection | Tech lead | Resolved ADR-0058; no new art, owner gate or enum renumbering |
+| 192 | 2026-10-12 | SPEC-13 Q30 | Deterministic brick warm-up remainder and staged integration | Earliest sorted candidates get remainder; touched bricks outside quota | Tech lead | Resolved DMG-008; summaries precede full-flood size guard; DMG-009 retains graph traversal scope |
 
 ## Measurements
 
@@ -878,6 +879,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-12 — DMG-008 brick connectivity summaries — astra (gpt-6)
+
+1. **Implemented:** `36e838d` — BrickConnectivityCheck floods 16-bit X rows, propagates across Y/Z, and unions spatial components sharing an instance reference. Full and single-cell bricks bypass flooding. The summary records connectivity, instance presence and SolidCountAtCheck. IntegritySystem checks touched bricks and warms Unknown bricks in ascending slot order, with the global budget divided deterministically across sorted candidate grids. This runs before the temporary size guard, so oversized grids still gain summaries and retain seeds. DMG-009 remains responsible for using summaries in the hybrid race; its TODO and incomplete ledger notes remain.
+2. **Validation:** the three required tests pass. **1,000** seeded masks at 10–90% density, alternating dense/sparse storage, exactly match an independent six-neighbour BFS (**163 connected / 837 split**). Instance links join spatially separated cells in both storage forms. Full/single-cell results and production warm-up selection pass, including a 3-check budget split 2/1 across two grids and touched-brick refresh with zero warm-up budget. Compile zero C# warnings; full EditMode **816 passed, 0 failed, 1 skipped**, full PlayMode **116 passed, 0 failed, 29 skipped**, both exit 0, including production firing-range tests. Evidence: `Logs/playtest/dmg008/`. **spec-required: 3, extra: 0**; zero optimization passes; no task-specific perf gate.
+3. **Decision/closeout:** SPEC-13 Q30 / ledger Q192 records deterministic budget remainders and staged integration, with no new owner gate. Existing integrity code is updated for this task's required warm-up wiring; full-grid traversal, node budgets and forced retries are still DMG-009. Controls, Nocturne, procedural station and Space fire are untouched. QualitySettings matches the pre-existing backup and is excluded; no stray InitTestScene remains after the test runner stopped. Git stays local. Next: DMG-009 hybrid integrity and its station-cut checks.
 
 ### 2026-10-12 — DMG-007 collision damage and next-tick knockback — astra (gpt-6)
 
