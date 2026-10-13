@@ -23,6 +23,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Audit batch authored:** UI-012 adds severity1 Machado matrices with linear-sRGB/D65 CIE76 minimum, verified against the authors' supplementary table; exactly eight required AuditTests now authored plus existing tab case. First compile84878 found a fixture Color32-to-StyleColor conversion; explicit Color cast fixes it, compile73024 pending. Functional checks next; no acceptance claim. Previous turn supplied shared panels (progress).
+
 - **Shared UI panel implemented:** UI-012 adds UITestPanel with production theme/settings clones and all five logical sizes, owned render-target disposal and one-frame layout contract. Existing nine-tab test now calls the canonical audit in addition to retained bounds/scroll assertions. No tests run yet; CVD utility/eight AuditTests remain. HUD-004 receives the concrete helper API to avoid duplicate setup. Previous turn implemented contrast (progress).
 
 - **Contrast audit implemented:** UI-012 now evaluates resolved text over ancestor/self backgrounds with WCAG luminance and specified size/weight thresholds; missing theme fails explicitly. SPEC60Q31 mirrored321. NAR-020 delivered8290448c187 (four checks unrun); lead review pending. CVD utility, UITestPanel and eight required checks remain; no Unity run/acceptance claim. Previous turn implemented geometry (progress).
