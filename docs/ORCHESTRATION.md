@@ -18,6 +18,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 
 ## Current lead state
 
+- **Compile repair:** first integrated compile55556 failed only missing ValidationReport context in the new inventory fixture. Fixed80a8bd18; serialized compile12640 active. Next focused EditMode filter `RequestChannelTests|InventoryModelTests|WalletTests` (headless regex), excluding benchmarks. No full or audio reruns; AI workers continue independently.
+
 - **Implementation resumed:** closeout3b1e944b on main accepts VOX-020/ABL-005/AI-007/008 using verified focused evidence under ADR-0070. Claimc1b9a0e2 and follow-ups dispatch AI-009/010 to existing combat/presentation threads; power reads ECO-005 while its real inventory dependency finishes. Primary now `task/DMG-019-focused-integration` at2e364ad5: all prepared repair/impulse and inventory/wallet commits integrated, one compile started; focused acceptance next. No full-suite rerun. Previous goal turn made progress by committing the validation policy.
 
 - **Owner workflow correction (ADR-0070), supersedes validation waits below:** default commands now exclude Performance/LongRunning; focused acceptance unlocks closure and dispatch. Audio rerun41147 already terminated2 passed/1 failed in225.83s before cancellation; no restart. No Unity process remains. Existing preview/ability/AI focused checks pass; close those rows with scoped evidence, then dispatch AI-009/010. Prepared DMG-019/ECO-003 needs one compile/focused acceptance batch, then ECO-005. Broad regression is a gameplay checkpoint, never a repeated per-task gate.
