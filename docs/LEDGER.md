@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 1 | 0 | 0 | 80 | 0 | 92 | 6 |
-| M3 | 110 | 9 | 0 | 0 | 61 | 0 | 180 | 9 |
+| M3 | 109 | 10 | 0 | 0 | 61 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 3 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -215,7 +215,7 @@
 | TST-002 | Record and replay | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, FLT-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 9349e78 | Sparse text recorder/replay; five required tests; even-tick 30/60/144 commands match |
 | TST-003 | Game flow fixture and boot test hooks | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | standard | TST-001, SPEC-01, SPEC-05 | yes | done | astra (gpt-6) | 2026-10-12 | 1392d35 | Real Boot/flow fixture; four tests; temp saves/settings and unchanged real profile timestamps |
 | TST-004 | Integrated voxel gate suite (moved from SPEC-10 VOX-018) | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M1 | frontier | TST-001, SPEC-10, SPEC-11, SPEC-12 | yes | done | astra (gpt-6) | 2026-10-12 | a56c266 | Full pipeline: 15-frame readiness, idle 0.224481 ms; total memory performance deferred (Q174); zero tuning |
-| FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Await actual galaxy services; SYS-010 partial contract mapping: add Allegiance, real profiles/hooks, supplied StarSystemMember, ulong lookup/despawn adapter and dual service registration; fake tests do not complete runtime |
+| FND-012 | ShipSpawnService | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-010, WPN-001, FLT-001, AI-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | c7ac4bc9 integrates worker d440434e: actual profiles/hooks, allegiance, membership, root lookup/despawn and adapter; six required fixtures authored, unrun. Production galaxy registration and single-borrow player handoff still pending; not accepted. |
 | FND-020 | Playable stationary-target shooting and physical breakup | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-017, FND-018, FLT-001, DMG-001, WPN-001, VFX-001 | yes | done | astra (gpt-6) | 2026-10-12 | 53e61db | Playable station/Space fire; review fixes: bounded integrity, canonical masks, allocation attribution, stronger image checks; default suites green; perf advisory |
 | FND-021 | Automatic aligned test station in World | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | standard | FND-020, SPEC-63 | yes | done | astra (gpt-6) | 2026-10-13 | c3bb396 | Automatic World station at Y=-2 m; idempotent range request; direct World Play verified; spec-required: 1 (existing feature test extended), extra: 0 |
 | FND-022 | Player allegiance in the current world spawn path | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M2 | frontier | FND-010, WPN-001 | yes | done | astra (gpt-6) | 2026-10-13 | ff6a2704 | Canonical player allegiance; real-fire check passes; fresh NPC destroyed168/detached15 cells |
@@ -1039,6 +1039,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — FND-012 source integrated into galaxy batch — astra (gpt-6)
+
+- Integrated worker d440434e as c7ac4bc9, retaining attribution. Reviewed source registration against FleetShipRecord: production handoff must avoid registering two borrows for one fleet ship. Conditional composition remains inactive until real GalaxyService installation; no fabricated service or completion claim.
+- Tests authored: spec-required: 6, extra: 0; unrun pending complete session/player integration. No Unity run or performance measurement this turn. QualitySettings and orphan test metadata remain excluded.
+- Worker state: NAR-016 active; ECO-009 delivered and in explicit standard-task dependency wait; FND-012 delivered and awaiting lead integration/acceptance. Previous turn reinforced owner policy without implementation progress; this turn integrates source.
 
 ### 2026-10-13 — GAL-008 queries and live changes checkpoint — astra (gpt-6)
 

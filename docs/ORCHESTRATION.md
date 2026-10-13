@@ -7,9 +7,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-016 | claimed; NAR-015 accepted, implement quests/triggers/clues | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-009 | delivered8d9ec70f220; bounded review then dependency wait for ready standard work | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-009 | delivered8d9ec70f; review complete, dependency wait225 for ready standard work | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | FND-012 | delivered d440434e186; bounded review and lead galaxy/player integration pending | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | FND-012 | integrated c7ac4bc9; dependency wait188 for lead galaxy/player integration | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Spawner source integrated:** c7ac4bc9 brings FND-012 into task/GAL-008-campaign-service. Next resolve fleet single-borrow ownership and real session/galaxy registration before one focused validation batch. No Unity operation. NAR-016 active210; ECO-009 explicit dependency wait225; FND-012 integration wait188. Previous policy-only turn made no implementation progress; source integration advances this turn.
 
 - **Galaxy queries/live commands authored:**7b11b7fa adds authored body identity lookup, names, start placement/capture, cached replacement/story/flag patches and six required service cases. Q335 resolves current time via SimClock. Still uncompiled pending composition/integration batch. FND-012d440434e delivered186, bounded review requested; ECO-0098d9ec70f review223; NAR-016 active. No Unity run.
 

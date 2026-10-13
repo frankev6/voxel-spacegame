@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Galaxy/spawner integration underway:** GAL-008 queries, live patches and six checks are authored; FND-012 source integrated as c7ac4bc9. Still uncompiled and unaccepted: finish session lifecycle and single-borrow fleet handoff, then focused batch validation. NAR-016 active; ECO-009/FND-012 delivered and waiting on lead integration. No Unity run.
+
 - **Galaxy deltas accepted:**f90c0fd3 implements sorted saved changes, stable story-spawn IDs, owned structure snapshots and ordered application. Clean compile, six checks pass0.29s. GAL-008 is next to connect generation/cache/session lifecycle. All three workers active on NAR-016/ECO-009/FND-012; no active Unity run.
 
 - **Narrative conversion accepted:**5d85a419 generates34 dialogues/34beats/facts with145 byte-stable files and35 registered definitions; six required checks previously passed, current compile clean. NAR-016 unlocked for waiting worker; lead resumes GAL-007/008. No Unity operation active.
