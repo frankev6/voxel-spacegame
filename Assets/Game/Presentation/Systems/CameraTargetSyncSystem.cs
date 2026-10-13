@@ -1,5 +1,6 @@
 using Game.Core;
 using Game.Core.Systems;
+using Game.Galaxy.Components;
 using Game.Presentation.Components;
 using Game.Presentation.Services;
 using Game.Presentation.Vfx;
@@ -25,10 +26,12 @@ namespace Game.Presentation.Systems
     public partial class CameraTargetSyncSystem : SystemBase
     {
         static readonly ProfilerMarker TargetMarker = new ProfilerMarker(ProfilerCategory.Scripts, "CameraTargetSyncSystem.ReadTarget");
-        // TODO(CAM-006): Origin marker with origin warp.
+        static readonly ProfilerMarker OriginMarker = new ProfilerMarker(ProfilerCategory.Scripts, "CameraTargetSyncSystem.Origin");
         // TODO(CAM-007): Occlusion marker with the physics ray.
         static readonly ProfilerMarker ShakeMarker = new ProfilerMarker(ProfilerCategory.Scripts, "CameraTargetSyncSystem.Shake");
-        EntityQuery players, viewers, renderCameras;
+        EntityQuery players, viewers, renderCameras, origins;
+        double3 lastOrigin;
+        bool hasLastOrigin;
         Entity viewEntity, lastTarget;
         float3 lastTargetPos;
         CameraRigService rig;
@@ -37,6 +40,7 @@ namespace Game.Presentation.Systems
         protected override void OnCreate()
         {
             viewEntity = EntityManager.CreateSingleton<MainCameraState>();
+            origins = GetEntityQuery(ComponentType.ReadOnly<FrameOrigin>());
             players = GetEntityQuery(ComponentType.ReadOnly<PlayerShip>(), ComponentType.ReadOnly<LocalToWorld>());
             viewers = GetEntityQuery(ComponentType.ReadWrite<VoxelViewer>());
             renderCameras = GetEntityQuery(ComponentType.ReadWrite<VoxelRenderCamera>());
@@ -44,12 +48,27 @@ namespace Game.Presentation.Systems
         }
         public void Bind(CameraRigService rig, IFxFrameReader fx)
         {
-            this.rig = rig; this.fx = fx; lastTarget = Entity.Null;
+            this.rig = rig; this.fx = fx; lastTarget = Entity.Null; hasLastOrigin = false;
         }
         protected override void OnUpdate()
         {
             if (rig == null || rig.Camera == null) return;
             float dt = math.clamp(UnityEngine.Time.unscaledDeltaTime, 0, .1f);
+            float3 warpDelta = 0;
+            using (OriginMarker.Auto())
+            {
+                if (origins.IsEmptyIgnoreFilter) hasLastOrigin = false;
+                else
+                {
+                    var current = origins.GetSingleton<FrameOrigin>().OriginInStarSystem;
+                    if (hasLastOrigin && math.any(current != lastOrigin))
+                    {
+                        warpDelta = (float3)(lastOrigin - current);
+                        rig.Warp(warpDelta);
+                    }
+                    lastOrigin = current; hasLastOrigin = true;
+                }
+            }
             using (TargetMarker.Auto())
             {
                 int count = players.CalculateEntityCount();
@@ -78,8 +97,7 @@ namespace Game.Presentation.Systems
                         boundsMax = ((float3)grid.CellMax + 1) * grid.CellSize;
                         radius = math.max(2, .5f * math.length(boundsMax - boundsMin));
                     }
-                    // TODO(CAM-006): subtract the same-frame origin warp before measuring teleport distance.
-                    bool cut = target != lastTarget || math.distance(pos, lastTargetPos) > rig.Config.TeleportCutDistance;
+                    bool cut = target != lastTarget || math.distance(pos, lastTargetPos + warpDelta) > rig.Config.TeleportCutDistance;
                     rig.SetTarget(pos, rotation, velocity, radius, cut);
                     if (hasBounds) rig.SetTargetBounds(boundsMin, boundsMax, ltw.Value);
                     lastTarget = target; lastTargetPos = pos;
