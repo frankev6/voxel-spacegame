@@ -33,6 +33,10 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 - **UI composition checkpoint:** compiled50fc418a/57ad0950 is on local main, still HUD-002 in-progress: persistent15 view models, loading/menu/pause views/presenters and root lifecycle exist; Boot continues using the playable M1 adapter until real destinations/editor are connected. No UI acceptance claim. Workers now build NAR-013 validator, NAR-020 watcher and HUD-004 save/load (claim93cfef3d); ADR-0072Q23 separates screen construction from shared final integration. Compile zero CS warnings; no broad tests.
 
+- **Accessibility complete:** UI-013e3fa8660 applies saved UI/text scale and reduced motion to the real UI root. Clean compile, one EditMode and four PlayMode cases pass, including 130% gallery text and immediate toast exit. HUD-004 is active; NAR-015 asset writing remains lead work.
+
+- **Narrative validator accepted:** NAR-013e81dc6d passes clean compile and seven focused checks after review repairs. Downstream quest/dialog compiler stubs remain explicit diagnostics. NAR-015 dialogue emission and preservation manifest are in progress; generated assets/acceptance remain. UI-013 delivered for review, HUD-004 active.
+
 - **Latest UI integration:** HUD-0025433d3b1 installs app-owned screen composition and update/disposal. Clean compile and four existing boot checks pass. Visible menu/HUD root replacement still awaits real destination/editor bindings; HUD-002 remains open. UI-012 and NAR-020 accepted; NAR-013 delivered for review, UI-013 and HUD-004 active.
 
 - **Latest:** NAR-0142be62596 translates the five legacy narrative exports; five focused checks pass after correcting a source-incomplete test expectation. Emission/preservation and asset writing remain NAR-015/016. HUD-002 is staged separately: scene roots and loading/menu/pause views exist, but persistent composition/presenters are not installed or accepted. Preserve the current playable adapter until replacement is complete. No broad suite or benchmark run.

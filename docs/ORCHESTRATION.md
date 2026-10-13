@@ -6,8 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-013 | delivered20b74933 + repair20615a16; real dependency wait for NAR-015 / NAR-016 | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | UI-013 | accessibility active188; NAR-020 acceptedb4344a9 | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-013 | accepted e81dc6d; dependency wait for NAR-015 to unlock NAR-016 | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | UI-013 | accepted e3fa8660; ready-standard dependency wait | narrative follow-ups |
+
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-004 | claimed93cfef3d; save/load UI dispatched under Q23 | HUD-003/006/007 once ready |
 
 ## Operating rules
@@ -19,6 +20,12 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs.
 
 ## Current lead state
+
+- **Accessibility accepted:**63b7f4ef/e3fa8660, compile76886 clean;79288 one EditMode +10047 four PlayMode passed. Fonts restored from backups; no active validation. Both combat and power now have explicit ready-standard dependency waits; HUD-004156 active. Lead NAR-015 preserved4e7533c0; continue asset writing to unlock NAR-016. Previous turn closed validator (progress).
+
+- **Validator accepted:** e81dc6d reviewed repair, compile33600 clean and focused7179 seven passed. Evidence narrative-validator/*-final. Q323 resolves provider order. Combat has explicit dependency wait for NAR-015; UI-0131a668f8c delivered193 and bounded review dispatched; HUD-004156 active. Lead NAR-015 emitter/manifest preserved on task/NAR-015-dialogue-conversion4e7533c0. No active validation. Previous turn implemented preservation manifest (progress).
+
+- **Validator integrated:** NAR-0136cb6983 compile94721 clean, focused21698 seven passed; evidence narrative-validator/. Worker bounded review178 still active; close after reconciling findings. UI-013191/HUD-004154 active. No active validation. Previous turn verified and merged UI boot ownership (progress).
 
 - **Preservation manifest implemented:** NAR-0159b5fb7b2 adds deterministic source/text/destination records, global line-ID/source duplicate rejection and safe Markdown emission, with quest-field extension for NAR-016. Asset writing and six acceptance cases remain; no validation yet. NAR-01320615a16 review repair delivered180; integrate on preserved task/NAR-013-validator-integration next, resolve provider-order contradiction and rerun seven changed checks. Combat worker explicitly waiting for genuinely ready standard work (NAR-016 waits for lead NAR-015); other two retain UI assignments. Previous turn implemented dialogue emitter (progress).
 
