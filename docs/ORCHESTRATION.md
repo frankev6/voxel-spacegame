@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | WPN-004 | delivered abffb45; reviewed and prepared with GAL-009; real dependency wait for power batch closure | combat runtime as ready |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | WPN-005 | claimed main 04a0c30 and dispatched; prior AI-013 integrated, pending validation | combat runtime as ready |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | WPN-005 | delivered 2bbffb6; reviewed and prepared with GAL-009; waiting for validated standard dependencies | combat runtime as ready |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | TRV-007 | delivered 4f44ffa, integrated 75ba22b; waiting for ECO-001 validation | ECO-002 after batch closure |
 
 ## Operating rules
