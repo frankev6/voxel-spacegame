@@ -40,6 +40,7 @@ MonoBehaviour:
   blockCategory: 6
   modules:
   - rid: 6
+  grantedAbilities: []
   references:
     version: 2
     RefIds:

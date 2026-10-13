@@ -49,6 +49,7 @@ MonoBehaviour:
   blockCategory: 3
   modules:
   - rid: 4
+  grantedAbilities: []
   references:
     version: 2
     RefIds:

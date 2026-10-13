@@ -42,6 +42,7 @@ MonoBehaviour:
   - rid: 1
   - rid: 2
   - rid: 3
+  grantedAbilities: []
   references:
     version: 2
     RefIds:

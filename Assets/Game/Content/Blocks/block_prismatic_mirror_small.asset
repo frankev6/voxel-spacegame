@@ -40,6 +40,7 @@ MonoBehaviour:
   propMesh: {fileID: 8210001044619210013, guid: 63a3bcd06c5b4114096dfe9e982274e0, type: 3}
   blockCategory: 1
   modules: []
+  grantedAbilities: []
   references:
     version: 2
     RefIds: []

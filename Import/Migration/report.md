@@ -1,6 +1,6 @@
 # Legacy migration report
 
-Converters: Items (100), Blocks (110), Audio (200), Ships (300)
+Converters: Items (100), Blocks (110), Audio (200), Weapons (220), Ships (300)
 
 ## Assets
 
@@ -95,6 +95,15 @@ Converters: Items (100), Blocks (110), Audio (200), Ships (300)
 |Assets/Game/Content/Ships/ship_shuttle.asset|Unchanged|
 |Assets/Game/Content/Ships/ship_striker.asset|Unchanged|
 |Assets/Game/Content/Ships/ship_vestari.asset|Unchanged|
+|Assets/Game/Content/Weapons/wpn_ark_lance_medium.asset|Unchanged|
+|Assets/Game/Content/Weapons/wpn_fixed_beam_turret_small.asset|Unchanged|
+|Assets/Game/Content/Weapons/wpn_flak_cannon_medium.asset|Unchanged|
+|Assets/Game/Content/Weapons/wpn_missile_launcher_small.asset|Unchanged|
+|Assets/Game/Content/Weapons/wpn_plasma_turret_medium.asset|SkippedHandEdited|
+|Assets/Game/Content/Weapons/wpn_plasma_turret_small.asset|SkippedHandEdited|
+|Assets/Game/Content/Weapons/wpn_plasma_turret_small_fixed.asset|SkippedHandEdited|
+|Assets/Game/Content/Weapons/wpn_railgun_medium.asset|Unchanged|
+|Assets/Game/Content/Weapons/wpn_small_beam_turret.asset|Unchanged|
 
 ## Ships
 
@@ -117,6 +126,9 @@ Converters: Items (100), Blocks (110), Audio (200), Ships (300)
 ## Entries
 
 ```text
+[I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_medium.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_small.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_small_fixed.asset: Kept hand-edited asset.
 [I] MIG-I091 content/Items/Blocks/Cores/block_core_cross.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Cores/block_core_small.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Hulls/block_hull.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate.
@@ -131,19 +143,28 @@ Converters: Items (100), Blocks (110), Audio (200), Ships (300)
 [I] MIG-I091 content/Items/Blocks/Misc/block_thruster_medium.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Misc/block_thruster_small.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Weapons/weapon_ark_lance_medium.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate, disableInputTrigger, MuzzlePoint.
+[I] MIG-I091 content/Items/Blocks/Weapons/weapon_ark_lance_medium.json: Legacy numeric weapon/projectile tuning replaced by SPEC-21 §4.9. Block geometry/item fields belong to MIG-006; disableInputTrigger and MuzzlePoint are dropped there.
 [W] MIG-W032 content/Items/Blocks/Weapons/weapon_ark_lance_medium.json BlockMesh: Mesh bounds differ from the footprint by more than 0.6 cell.
 [W] MIG-W033 content/Items/Blocks/Weapons/weapon_ark_lance_medium.json ClearanceDirections: Dropped footprint cell (0, 0, 1).
 [W] MIG-W033 content/Items/Blocks/Weapons/weapon_ark_lance_medium.json ClearanceDirections: Dropped footprint cell (0, 0, 2).
 [I] MIG-I091 content/Items/Blocks/Weapons/weapon_fixed_beam_turret_small.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate, disableInputTrigger, MuzzlePoint.
+[I] MIG-I091 content/Items/Blocks/Weapons/weapon_fixed_beam_turret_small.json: Legacy numeric weapon/projectile tuning replaced by SPEC-21 §4.9. Block geometry/item fields belong to MIG-006; disableInputTrigger and MuzzlePoint are dropped there.
 [I] MIG-I091 content/Items/Blocks/Weapons/weapon_flak_cannon_medium.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate, disableInputTrigger, MuzzlePoint.
+[I] MIG-I091 content/Items/Blocks/Weapons/weapon_flak_cannon_medium.json: Legacy numeric weapon/projectile tuning replaced by SPEC-21 §4.9. Block geometry/item fields belong to MIG-006; disableInputTrigger and MuzzlePoint are dropped there.
 [I] MIG-I091 content/Items/Blocks/Weapons/weapon_missile_launcher_small.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate, disableInputTrigger, MuzzlePoint.
+[I] MIG-I091 content/Items/Blocks/Weapons/weapon_missile_launcher_small.json: Legacy numeric weapon/projectile tuning replaced by SPEC-21 §4.9. Block geometry/item fields belong to MIG-006; disableInputTrigger and MuzzlePoint are dropped there.
 [I] MIG-I091 content/Items/Blocks/Weapons/weapon_plasma_turret_medium.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate, disableInputTrigger, MuzzlePoint.
+[I] MIG-I091 content/Items/Blocks/Weapons/weapon_plasma_turret_medium.json: Legacy numeric weapon/projectile tuning replaced by SPEC-21 §4.9. Block geometry/item fields belong to MIG-006; disableInputTrigger and MuzzlePoint are dropped there.
 [W] MIG-W032 content/Items/Blocks/Weapons/weapon_plasma_turret_medium.json BlockMesh: Mesh bounds differ from the footprint by more than 0.6 cell.
 [I] MIG-I091 content/Items/Blocks/Weapons/weapon_plasma_turret_small.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate, disableInputTrigger, MuzzlePoint.
+[I] MIG-I091 content/Items/Blocks/Weapons/weapon_plasma_turret_small.json: Legacy numeric weapon/projectile tuning replaced by SPEC-21 §4.9. Block geometry/item fields belong to MIG-006; disableInputTrigger and MuzzlePoint are dropped there.
 [I] MIG-I091 content/Items/Blocks/Weapons/weapon_plasma_turret_small_fixed.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate, disableInputTrigger, MuzzlePoint.
+[I] MIG-I091 content/Items/Blocks/Weapons/weapon_plasma_turret_small_fixed.json: Legacy numeric weapon/projectile tuning replaced by SPEC-21 §4.9. Block geometry/item fields belong to MIG-006; disableInputTrigger and MuzzlePoint are dropped there.
 [I] MIG-I091 content/Items/Blocks/Weapons/weapon_railgun_medium.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate, disableInputTrigger, MuzzlePoint.
+[I] MIG-I091 content/Items/Blocks/Weapons/weapon_railgun_medium.json: Legacy numeric weapon/projectile tuning replaced by SPEC-21 §4.9. Block geometry/item fields belong to MIG-006; disableInputTrigger and MuzzlePoint are dropped there.
 [W] MIG-W033 content/Items/Blocks/Weapons/weapon_railgun_medium.json ClearanceDirections: Dropped footprint cell (0, 0, 1).
 [I] MIG-I091 content/Items/Blocks/Weapons/weapon_small_beam_turret.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate, disableInputTrigger, MuzzlePoint.
+[I] MIG-I091 content/Items/Blocks/Weapons/weapon_small_beam_turret.json: Legacy numeric weapon/projectile tuning replaced by SPEC-21 §4.9. Block geometry/item fields belong to MIG-006; disableInputTrigger and MuzzlePoint are dropped there.
 [I] MIG-I091 content/Items/Consumables/Paint/PaintBucket_00_Default.json: Dropped: PaletteIndex 0, legacy Category Consumable, EffectType Paint.
 [I] MIG-I091 content/Items/Consumables/Paint/PaintBucket_01_DarkGray.json: Dropped: PaletteIndex 1, legacy Category Consumable, EffectType Paint.
 [I] MIG-I091 content/Items/Consumables/Paint/PaintBucket_02_Red.json: Dropped: PaletteIndex 2, legacy Category Consumable, EffectType Paint.
@@ -261,15 +282,15 @@ Converters: Items (100), Blocks (110), Audio (200), Ships (300)
 [W] MIG-W041 content/Items/Ships/ship_striker.json voxels[9]: Rotation snapped to a cube rotation.
 [I] MIG-I091 content/Items/Ships/ship_vestari.json: Dropped: Thumbnail, ItemImage, AbilityIds, OfficerIds, GlobalStats, width, height, length, moduleSlots, Category, Rarity, isStackable, EffectType, GrantsAbilities.
 [I] MIG-I090 content/Items/Ships/ship_vestari.json Description/BasePrice: ShipBlueprintDefinition has no description or price fields; both dropped.
-0 errors, 67 warnings, 77 infos
+0 errors, 67 warnings, 89 infos
 ```
 
 ## Summary
 
-0 errors, 67 warnings, 77 infos
+0 errors, 67 warnings, 89 infos
 
 Created: 0
 Updated: 0
-Unchanged: 89
-SkippedHandEdited: 0
+Unchanged: 95
+SkippedHandEdited: 3
 Failed: 0

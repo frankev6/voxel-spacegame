@@ -39,6 +39,7 @@ MonoBehaviour:
   propMesh: {fileID: 0}
   blockCategory: 0
   modules: []
+  grantedAbilities: []
   references:
     version: 2
     RefIds: []
