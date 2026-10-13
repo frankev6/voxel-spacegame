@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **World generation underway:** GAL-00329aa4c47 accepted with clean compile and48 focused checks; GAL-004 lead layout checkpoint is unvalidated, builder/lifetime/tests remain. Workers now author actual GAL-012 world content, ENC-010 encounters and HUD-005 settings. ADR-0073 supplies missing persistent camera orientation contract. No broad suite or benchmark.
+
 - **Body migration accepted:** MIG-014 e01dcf3f supplies twenty canonical stubs with stable GUIDs/bytes; clean compile and one focused check passed (2.71s reported suite duration). GAL-003 a1d48092 is delivered for scoped review; HUD-005 continues. Real world authoring remains GAL-012. Fast test fixtures and focused batch checks remain mandatory.
 
 - **UI composition checkpoint:** compiled50fc418a/57ad0950 is on local main, still HUD-002 in-progress: persistent15 view models, loading/menu/pause views/presenters and root lifecycle exist; Boot continues using the playable M1 adapter until real destinations/editor are connected. No UI acceptance claim. Workers now build NAR-013 validator, NAR-020 watcher and HUD-004 save/load (claim93cfef3d); ADR-0072Q23 separates screen construction from shared final integration. Compile zero CS warnings; no broad tests.

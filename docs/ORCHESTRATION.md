@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Layout implementation underway:** GAL-004 claimed c889b973; task/GAL-004-galaxy-layout adds ordered Burst placement with spatial grid, fixed RNG draws, structural IDs and weighted picks. Builder, queries/disposal and five required tests remain; uncompiled/unvalidated checkpoint, no acceptance claim. All workers live at snapshots combat189/power203/presentation166; assignments GAL-012/ENC-010/HUD-005. ADR-0073 resolves camera persistence and is dispatched. Previous goal turn accepted GAL-003 (progress).
+
 - **Galaxy validators accepted:**29aa4c47 compile99024 clean; focused13010 all48 passed, evidence galaxy-validator/. ENC-010 dispatched on acb4ba7f; HUD-005165 active. GAL-004/012 unlocked. No active Unity run. Previous goal turn closed MIG-014 (progress).
 
 - **Body migration accepted:** cbc6029b/e01dcf3f, twenty canonical stubs, generation and byte/GUID-stable rerun clean; compile80221 clean, focused62647 one passed (2.71s). Evidence mig014/. No active Unity run. GAL-003 delivered a1d48092 cursor188; settings continues. Recycle power into ready work after ledger sync.

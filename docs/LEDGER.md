@@ -1031,6 +1031,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — GAL-004 implementation checkpoint — astra (gpt-6)
+
+- Ordered Burst layout job and weighted pool selection authored: spatial rejection grid, fixed per-attempt/per-system draws, sorted structural IDs and skipped count. Builder and GalaxyDef lifetime/query integration remain. No compile/test run yet; validate once the compatible implementation is complete.
+- Test count: spec-required: 5 pending, extra: 0. Three existing workers continue GAL-012, ENC-010 and HUD-005; ADR-0073 resolves the real persisted camera-setting gap for HUD-005. Previous goal turn completed GAL-003 (progress).
+
 ### 2026-10-13 — GAL-003 accepted — astra (gpt-6)
 
 - Reviewed 29aa4c47: local definition and catalog validation, all21 error/three warning codes and four valid in-memory fixtures. Fixed collision IDs avoid fixture search overhead.
