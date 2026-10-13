@@ -14,6 +14,7 @@ using Game.Simulation.Flight;
 using Game.Simulation.Weapons;
 using Game.Simulation.Power;
 using Game.Simulation.Abilities;
+using Game.Simulation.Ai;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -72,7 +73,15 @@ namespace Game.App.Boot
                     lifetime.Abilities = abilities.GetSingleton<AbilityDefsRef>().Value;
                 }
                 Create(em, FlightConfigFactory.Create(catalog.Get<FlightConfigDefinition>(new ContentId("config_flight"))), created);
-                // Later rows (ENC-001, WPN, AI, SYS, ECO-007) are added by their tasks (SPEC-01 §5.3).
+                int firstAiEntity = created.Count;
+                AiContent.CreateSingletons(em, catalog, created);
+                for (int i = firstAiEntity; i < created.Count; i++)
+                {
+                    if (!em.HasComponent<AiConfig>(created[i])) continue;
+                    lifetime.AiEntity = created[i];
+                    lifetime.AiProfiles = em.GetComponentData<AiConfig>(created[i]).Profiles;
+                }
+                // Later rows (ENC-001, SYS, ECO-007) are added by their tasks (SPEC-01 §5.3).
 
                 Create(em, default(PersistentIdAllocator), created);
 
@@ -88,6 +97,8 @@ namespace Game.App.Boot
             readonly World world;
             VoxelRenderConfig config;
             internal Entity ConfigEntity, DamageEntity, WeaponEntity, WeaponTuningEntity, FactionEntity, AbilityEntity;
+            internal Entity AiEntity;
+            internal BlobAssetReference<AiProfilesBlob> AiProfiles;
             internal FactionRelations Factions;
             internal BlobAssetReference<AbilityDefsBlob> Abilities;
             internal BlobAssetReference<WeaponDefsBlob> Weapons;
@@ -102,6 +113,10 @@ namespace Game.App.Boot
                     if (DamageEntity != Entity.Null && world.EntityManager.Exists(DamageEntity))
                         world.EntityManager.SetComponentData(DamageEntity, DamageConfig.Default);
                 }
+                if (world.IsCreated && AiEntity != Entity.Null && world.EntityManager.Exists(AiEntity))
+                    world.EntityManager.DestroyEntity(AiEntity);
+                AiEntity = Entity.Null;
+                if (AiProfiles.IsCreated) AiProfiles.Dispose(); AiProfiles = default;
                 if (Abilities.IsCreated) Abilities.Dispose(); Abilities = default;
                 if (world.IsCreated && world.EntityManager.Exists(AbilityEntity)) world.EntityManager.DestroyEntity(AbilityEntity);
                 AbilityEntity = Entity.Null;
