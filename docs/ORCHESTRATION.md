@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Fleet handoff authored:** bc25501c reuses the fleet-owned handle in canonical spawning, captures location during writeback and extends the existing player-profile fixture. Production session/galaxy composition is still pending; all current GAL-008/FND-012 changes remain uncompiled/unaccepted. Next connect session state/lifecycle and resolve actual GLXY/PLOC/loader staging without fabricated save support, then focused batch validation. No Unity operation. Workers: NAR-016 active211, ECO-009 dependency wait225, FND-012 integration wait188. Previous turn source integration was progress.
+
 - **Spawner source integrated:** c7ac4bc9 brings FND-012 into task/GAL-008-campaign-service. Next resolve fleet single-borrow ownership and real session/galaxy registration before one focused validation batch. No Unity operation. NAR-016 active210; ECO-009 explicit dependency wait225; FND-012 integration wait188. Previous policy-only turn made no implementation progress; source integration advances this turn.
 
 - **Galaxy queries/live commands authored:**7b11b7fa adds authored body identity lookup, names, start placement/capture, cached replacement/story/flag patches and six required service cases. Q335 resolves current time via SimClock. Still uncompiled pending composition/integration batch. FND-012d440434e delivered186, bounded review requested; ECO-0098d9ec70f review223; NAR-016 active. No Unity run.

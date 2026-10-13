@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Fleet handoff authored:** bc25501c reuses the fleet-owned handle in canonical spawning, captures location during writeback and extends the existing player-profile fixture. Production session/galaxy composition is still pending; all current GAL-008/FND-012 changes remain uncompiled/unaccepted. Next connect session state/lifecycle and resolve actual GLXY/PLOC/loader staging without fabricated save support, then focused batch validation. No Unity operation. Workers: NAR-016 active211, ECO-009 dependency wait225, FND-012 integration wait188. Previous turn source integration was progress.
+
 - **Galaxy/spawner integration underway:** GAL-008 queries, live patches and six checks are authored; FND-012 source integrated as c7ac4bc9. Still uncompiled and unaccepted: finish session lifecycle and single-borrow fleet handoff, then focused batch validation. NAR-016 active; ECO-009/FND-012 delivered and waiting on lead integration. No Unity run.
 
 - **Galaxy deltas accepted:**f90c0fd3 implements sorted saved changes, stable story-spawn IDs, owned structure snapshots and ordered application. Clean compile, six checks pass0.29s. GAL-008 is next to connect generation/cache/session lifecycle. All three workers active on NAR-016/ECO-009/FND-012; no active Unity run.
