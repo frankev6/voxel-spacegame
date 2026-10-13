@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Validator integrated:** NAR-0136cb6983 compile94721 clean, focused21698 seven passed; evidence narrative-validator/. Worker bounded review178 still active; close after reconciling findings. UI-013191/HUD-004154 active. No active validation. Previous turn verified and merged UI boot ownership (progress).
+
 - **Boot composition verified:** HUD-0025433d3b1 installs app-owned models/loading presenter and Tick/disposal; compile51858 clean, focused59148 four existing boot checks pass. Evidence ui-composition/boot.xml. Actual destination/root bindings and four HUD acceptance cases remain; task stays in-progress. NAR-01320b74933 delivered and worker doing bounded review; UI-013190/HUD-004153 active. No active validation. Previous acknowledgment turn was no progress; this turn changes and verifies startup integration.
 
 - **Watcher accepted:**b4344a9 clean compile86065, focused95813 four passed0.17s; evidence logic-watcher/. No active validation. All three current worker snapshots active: NAR-013175, UI-013188, HUD-004152. UI-generated font assets backed up/restored, unrelated QualitySettings excluded. Lead returns to HUD composition after review/integration; previous turn closed UI audits/recycled worker (progress).

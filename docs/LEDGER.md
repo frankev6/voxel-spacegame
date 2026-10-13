@@ -911,6 +911,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 318 | SPEC-40 Q19: legacy translation boundary and defaults | Resolved: retain source metadata for emission; decimal cumulative thresholds, source-ordered quest logs, canonical provisional journal labels and contextual item mappings. No runtime/asset emission in NAR-014. | Tech lead |
 | 319 | SPEC-61 Q23: save/load construction versus composition cycle | Resolved: explicit completed UI/save/flow prerequisites allow parallel source construction; shared production hookup and full functional/layout acceptance remain required. ADR-0072 amended. | Tech lead |
 | 320 | SPEC-60 Q30: layout audit scroll/measurement semantics | Resolved: exclude scroll content subtree but audit viewport; use intrinsic nowrap width, clear result list and check all containing panels. Functional acceptance pending. | Tech lead |
+| 322 | SPEC-40 Q20: narrative validator partial owner and analysis semantics | Resolved: declared defaults/comparison polarity, explicit debug exemption, scratch ownership and missing adapter manifest warnings; source-owner stubs remain diagnostics. Seven required cases pass. | Tech lead |
 | 321 | SPEC-60 Q31: contrast audit theme/compositing | Resolved: require opaque resolved theme background, composite ancestors/self and transparent text, clear results and respect display/visibility. No guessed colours. | Tech lead |
 
 
@@ -1023,6 +1024,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — Narrative validator integrated — astra (gpt-6)
+
+- NAR-013 `6cb6983`: scratch compilation/binding and root diagnostics, fact read/write rules V001–008, ordered providers and narrative CLI. Source assets remain untouched. Existing unfinished quest/dialog owner compilers report diagnostics; this does not claim full narrative content is valid.
+- Compile94721 clean, zero CS warnings; focused21698 seven passed. Evidence `Logs/playtest/narrative-validator/{compile.log,acceptance.xml}`. Test count: spec-required: 7, extra: 0. No full suite or performance run.
+- SPEC-40 Q20 mirrored322; worker bounded correctness review still active, so row remains in-progress pending its outcome.
 
 ### 2026-10-13 — UI boot ownership integrated — astra (gpt-6)
 
