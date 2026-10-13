@@ -727,6 +727,18 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
   - [ ] `config_vfx.asset` passes the strict rule.
 - **Tests:** `WarpFxTests.WarpEvent_PlaysPooledInstance`, `WarpFxTests.ThirdWarp_StealsOldest`, `FxContentTests.VfxConfig_AllDefaultsPresent`.
 
+### VFX-015 — Owner-requested complete effects batch and larger range
+- **Milestone:** M2
+- **Tier:** frontier — cross-module VFX integration and staged producer contracts
+- **Depends on:** `VFX-004`
+- **Do:** Complete VFX-005 through VFX-014 together, bringing forward only their missing specified input contracts; triple the test station geometry at unchanged cell size. Owner 2026-10-12 explicitly requests one implementation batch and testing only at the end; this overrides per-task validation/branch sequencing for this batch.
+- **Files:** VFX-005…014 file lists; `Assets/Game/App/Session/FiringRangeService.cs`; specified shield and star-system entry contracts.
+- **Acceptance criteria:**
+  - [ ] All remaining VFX functional criteria implemented and validated in one final validation phase.
+  - [ ] Station geometry is three times larger on each axis, using normal cells and working real shooting/destruction.
+  - [ ] Missing gameplay producers remain explicitly tracked under their owning tasks; no claim of implemented travel, shields or galaxy streaming.
+- **Tests:** VFX-005…014 required tests plus `FiringRangeTests.RealFire_DamagesStationaryTarget` extended for station dimensions (one existing functional feature test).
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
@@ -755,6 +767,8 @@ All perf tests write their results through the SPEC-71 harness (`Logs/perf/lates
 | 21 | Upload accounting, palette index zero, and fake-rig seam | Count accepted debris only; preserve live estimates on ring wrap; palette flag takes precedence | Tech lead | Resolved VFX-003: slot overflow does not spend debris budget or inflate live estimates; merge unexpired overwritten ring buckets conservatively. PaletteColor index 0 is valid. Internal IFxUploadTarget exposes the same rig data/submission to the specified fake-rig tests without requiring GPU assets. The combined queue plus pending-impact input obeys the 65,536 cap. Unresolved warnings retain at most 65,536 unique hashes per world (architecture §11.1); later unresolved events are still fully counted. No public producer contract change. |
 
 | 22 | Eight hit particles plus a flash, staged boot defaults and real weapon integration | Follow the specified eight spawn requests; render one additional flash output | Tech lead | Resolved VFX-004 / ADR-0059: every eighth hit particle also draws a 55 ms impact flash, giving eight sparks plus one flash without a ninth spawn. Add RamImpact content per ADR-0058. Bind the rig before the boot snapshot; Null graphics skips GPU allocation. Missing future defaults remain warnings until VFX-014. Guarded weapon producers now emit muzzle, hull-hit and explosion events; full weapon tasks remain open. Own procedural radial texture uses the approved design palette. |
+
+| 23 | Bulk completion before missing gameplay producers and stale origin/chunk inputs | Canonical contracts, OriginShiftRecord and EndTick | Tech lead | Resolved ADR-0060 / VFX-015: owner-authorized single implementation batch followed by final validation. Bring shield/entry payloads forward, use same-frame OriginShiftRecord and derive chunk lifetime from EndTick. Triple station geometry at unchanged cell size. |
 
 ## 11. References
 

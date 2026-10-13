@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 1 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 75 | 0 | 0 | 0 | 14 | 0 | 89 | 13 |
+| M2 | 76 | 0 | 0 | 0 | 14 | 0 | 90 | 14 |
 | M3 | 180 | 0 | 0 | 0 | 0 | 0 | 180 | 11 |
 | M4 | 14 | 0 | 0 | 0 | 0 | 0 | 14 | 3 |
 | A0 | 7 | 1 | 0 | 1 | 7 | 0 | 16 | 1 |
@@ -283,14 +283,15 @@
 | VFX-002 | FxRig: slots, effects, buffers and binding | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-12 | f2b8118 | Session rig, graph validation, pooled/batched/instanced resources and binding; 5 GPU tests pass; final content budget advisory follow-up in VFX-004 |
 | VFX-003 | FxUploadSystem: drain, batch, submit, stats | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002 | yes | done | astra (gpt-6) | 2026-10-12 | f24d8c1 | Guarded drain even unbound, bounded batching/submission, lifetime accounting and stats; 12 required tests; visible content and boot binding next in VFX-004 |
 | VFX-004 | Template graphs and content assets for hits, explosions, muzzle and shield sparks | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | yes | done | astra (gpt-6) | 2026-10-12 | 7327e4c | Authored hit/muzzle/explosion/shield-spark/ram content, boot binding and real firing hooks; 3 required GPU/content tests; complete GPU/native memory total remains advisory follow-up |
-| VFX-005 | Voxel debris particles and the 50k GPU gate | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-004 | yes | todo |  |  |  | partial in FND-020: physical-grid pieces as temporary substitute / debris particle implementation and required tests |
-| VFX-006 | Projectile tracers | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002, WPN-001, CORE-001 | yes | todo |  |  |  | partial in FND-020: simple instanced projectile tracer / final batching, styles, effects and required tests |
-| VFX-007 | Beams clipped at the hit point | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003, WPN-001 | yes | todo |  |  |  |  |
-| VFX-008 | Thruster plumes | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, FLT-001 | yes | todo |  |  |  |  |
-| VFX-009 | Shield shells and ripples | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, PWR-001, CORE-001 | no | todo |  |  |  |  |
-| VFX-010 | Chunk-body dissolve hook | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, DMG-001 | yes | todo |  |  |  |  |
-| VFX-011 | Quality levels and the settings hook | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | yes | todo |  |  |  |  |
-| VFX-012 | Regression and budget tests (02-C29, GC, upload) | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-005, VFX-006, VFX-007 | no | todo |  |  |  |  |
+| VFX-005 | Voxel debris particles and the 50k GPU gate | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-004 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | partial in FND-020: physical-grid pieces as temporary substitute / debris particle implementation and required tests; owner-authorized VFX-015 batch, validate at end (ADR-0060) |
+| VFX-006 | Projectile tracers | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002, WPN-001, CORE-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  | partial in FND-020: simple instanced projectile tracer / final batching, styles, effects and required tests; owner-authorized VFX-015 batch, validate at end (ADR-0060) |
+| VFX-007 | Beams clipped at the hit point | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003, WPN-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |; owner-authorized VFX-015 batch, validate at end (ADR-0060) |
+| VFX-008 | Thruster plumes | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, FLT-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |; owner-authorized VFX-015 batch, validate at end (ADR-0060) |
+| VFX-009 | Shield shells and ripples | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, PWR-001, CORE-001 | no | in-progress | astra (gpt-6) | 2026-10-12 |  |; owner-authorized VFX-015 batch, validate at end (ADR-0060) |
+| VFX-010 | Chunk-body dissolve hook | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-002, DMG-001 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |; owner-authorized VFX-015 batch, validate at end (ADR-0060) |
+| VFX-011 | Quality levels and the settings hook | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-003 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |; owner-authorized VFX-015 batch, validate at end (ADR-0060) |
+| VFX-012 | Regression and budget tests (02-C29, GC, upload) | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | standard | VFX-005, VFX-006, VFX-007 | no | in-progress | astra (gpt-6) | 2026-10-12 |  |; owner-authorized VFX-015 batch, validate at end (ADR-0060) |
+| VFX-015 | Owner-requested complete effects batch and larger range | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-004 | yes | in-progress | astra (gpt-6) | 2026-10-12 |  |; owner-authorized VFX-015 batch, validate at end (ADR-0060) |
 | AUD-006 | SfxEvent drain: coalescing, cooldown and voice allocation | [SPEC-64](specs/SPEC-64-audio.md) | M2 | frontier | AUD-005, TST-001 | yes | todo |  |  |  |  |
 | AUD-007 | Cue content, legacy import and the CombatAudioCues singleton | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006 | no | todo |  |  |  |  |
 | AUD-008 | Music director, crossfades and scene contexts | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006, FND-001 | no | todo |  |  |  |  |
@@ -472,8 +473,8 @@
 | CAM-007 | Occlusion pull-in | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, PHY-001 | yes | todo |  |  |  |  |
 | CAM-009 | Editor orbit mode | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-005 | yes | todo |  |  |  |  |
 | CAM-010 | Map view transform | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-001 | yes | todo |  |  |  |  |
-| VFX-013 | Floating-origin shift and clears | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | frontier | VFX-003, GAL-001, SYS-001, FND-001 | no | todo |  |  |  |  |
-| VFX-014 | Warp effect and strict config validation | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | standard | VFX-004, TRV-001 | no | todo |  |  |  |  |
+| VFX-013 | Floating-origin shift and clears | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | frontier | VFX-003, GAL-001, SYS-001, FND-001 | no | in-progress | astra (gpt-6) | 2026-10-12 |  |; owner-authorized VFX-015 batch, validate at end (ADR-0060) |
+| VFX-014 | Warp effect and strict config validation | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | standard | VFX-004, TRV-001 | no | in-progress | astra (gpt-6) | 2026-10-12 |  |; owner-authorized VFX-015 batch, validate at end (ADR-0060) |
 | AUD-011 | GATE: Owner confirms licences of the carried-over audio | [SPEC-64](specs/SPEC-64-audio.md) | M3 | standard | AUD-010 | yes | todo |  |  |  |  |
 | AUD-012 | Floating-origin shift and clears | [SPEC-64](specs/SPEC-64-audio.md) | M3 | frontier | AUD-006, GAL-001, SYS-001 | no | todo |  |  |  |  |
 | DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-001, INP-001 | no | todo |  |  |  |  |
@@ -775,6 +776,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 195 | 2026-10-12 | SPEC-63 Q20 | Rig binding before consumer systems exist and palette double-conversion ambiguity | Internal consumer hook; session registry reset; linear palette unpacked without a second gamma conversion | Tech lead | Resolved VFX-002; actual VFX-004 content budget remains to measure when authored; no owner gate |
 | 196 | 2026-10-12 | SPEC-63 Q21 | Upload counting before slot acceptance, lifetime-ring overwrite, palette index zero | Count accepted submissions; conservatively merge live buckets; flag selects palette including zero | Tech lead | Resolved VFX-003; internal fake-rig seam and combined hard cap documented; no owner gate |
 | 197 | 2026-10-12 | SPEC-63 Q22 / SPEC-21 Q12 | Hit flash particle-count ambiguity and missing live FX producer hooks | Shared flash output; world contact normal and guarded queue producers | Tech lead | Resolved VFX-004 / ADR-0059; staged weapon criteria stay open, no owner gate |
+| 198 | 2026-10-12 | SPEC-63 Q23 / VFX-015 | Owner requests all remaining effects in one batch and triple-size station | Final-only validation; canonical missing input contracts brought forward | Tech lead | Resolved ADR-0060; owning gameplay systems stay incomplete; no owner gate |
 
 ## Measurements
 
