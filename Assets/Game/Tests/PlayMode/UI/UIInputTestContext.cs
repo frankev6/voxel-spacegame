@@ -61,9 +61,10 @@ namespace Game.Tests.PlayMode.UI
         internal readonly RootView Root = new RootView();
         internal readonly OverlayView Overlay = new OverlayView();
         internal readonly UIRoot UI;
-        internal UIInputTestContext()
+        internal UIInputTestContext(float tooltipDelaySeconds = .35f)
         {
             config = Object.Instantiate(UnityEditor.AssetDatabase.LoadAssetAtPath<UIConfig>("Assets/Game/UI/Data/UIConfig.asset"));
+            config.TooltipDelaySeconds = tooltipDelaySeconds;
             var empty = config.Screens[0].Uxml;
             config.Screens = new[] { new ScreenAsset { Key = Root.Key, Uxml = empty }, new ScreenAsset { Key = Overlay.Key, Uxml = empty } };
             panel = Object.Instantiate(config.PanelSettings); config.PanelSettings = panel;
@@ -75,6 +76,7 @@ namespace Game.Tests.PlayMode.UI
             UI = new UIRoot(document, config, new Pause(), Target, new NullUISoundSink(), Frames);
             UI.Register(Root); UI.Register(Overlay); UI.Navigator.SetRoot(Root); Frames.FrameCount += 2;
         }
+        internal void SetScreenMapping(Func<Vector2, Vector2> mapping) => panel.SetScreenToPanelSpaceFunction(mapping);
         internal TextField OpenField()
         {
             UI.Navigator.Push(Overlay);

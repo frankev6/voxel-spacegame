@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="tooltip" class="tooltip is-hidden" picking-mode="Ignore">
+        <ui:Label name="tooltip-title" class="tooltip__title" picking-mode="Ignore" />
+        <ui:Label name="tooltip-subtitle" class="tooltip__subtitle" picking-mode="Ignore" />
+        <ui:Label name="tooltip-body" class="tooltip__body" picking-mode="Ignore" />
+        <ui:VisualElement name="tooltip-stats" class="tooltip__stats" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

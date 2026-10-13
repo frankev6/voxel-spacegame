@@ -552,7 +552,7 @@ State: one tooltip element instantiated from `UIConfig.TooltipUxml` into `layer-
 3. Delay elapsed and target still hovered → `content.Clear(); fill(content);` copy fields to labels; show up to 8 stat rows (rows beyond `Stats.Count` get `.is-hidden`; value class `__stat-value--better`/`--worse` by `Sign`); remove `.is-hidden`.
 4. Position (on show, on `PointerMoveEvent`, on tooltip `GeometryChangedEvent`): read USS custom properties from the tooltip's `customStyle`: `--tooltip-offset-x` (default 16), `--tooltip-offset-y` (default 20), `--tooltip-edge-margin` (default 8), declared in `components/tooltip.uss`. `x = pointer.x + offX`, `y = pointer.y + offY`. If `x + w > panelW - margin`, `x = pointer.x - offX - w`. If `y + h > panelH - margin`, `y = pointer.y - offY - h`. Clamp both to `[margin, panelSize - size - margin]`. Write `style.left`/`style.top`.
 5. Pointer leave, pointer down, target detached (`DetachFromPanelEvent`) or `Navigator.StackChanged` → hide and pause the delay item.
-6. `ShowAtScreen(Action<TooltipContent> fill, Vector2 screenPosBottomLeft)` for world objects: converts with `RuntimePanelUtils.ScreenToPanel(panel, new Vector2(x, Screen.height - y))` and shows immediately; `HideScreenTooltip()` hides it.
+6. `ShowAtScreen(Action<TooltipContent> fill, Vector2 screenPosBottomLeft)` for world objects: converts with `RuntimePanelUtils.ScreenToPanel(panel, screenPosBottomLeft)` and flips the result’s Y in the actual panel height, matching §5.5 (Q23), then shows immediately; `HideScreenTooltip()` hides a world tooltip.
 
 ### 5.8 Notification service (`NotificationService`)
 
@@ -842,7 +842,7 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 - **Tier:** standard — algorithm fully given in §5.7
 - **Depends on:** `UI-008`
 - **Do:** Implement `TooltipService`, internal `TooltipManipulator`, `Tooltip.uxml`, `components/tooltip.uss` (including the three custom properties with their defaults).
-- **Files:** `Assets/Game/UI/Services/{TooltipService,TooltipManipulator}.cs`, `Assets/Game/UI/Views/Uxml/Tooltip.uxml`, `Assets/Game/UI/Theme/components/tooltip.uss`
+- **Files:** `Assets/Game/UI/Services/{TooltipService,TooltipManipulator}.cs`, supporting UIRoot lifecycle, `Assets/Game/UI/Views/Uxml/Tooltip.uxml`, `Assets/Game/UI/Theme/{Game.tss,components/tooltip.uss}`, `Assets/Game/UI/Data/UIConfig.asset` (Q24)
 - **Acceptance criteria:**
   - [ ] Tooltip appears after 0.35 s hover and hides on leave, pointer down, detach and navigator stack change.
   - [ ] Near the right/bottom edge it stays fully inside the panel.
@@ -926,6 +926,8 @@ Scalability rules applied here: no per-frame allocation (pooled toasts, one tool
 | 20 | DEV-015 requires a programmatic screen but UIRoot only builds configured UXML | Explicit opt-in CreateView fallback | Tech lead | Resolved by accepted ADR-0049: default null preserves missing-view errors; both view sources use the same navigator, theme and lifetime. |
 | 21 | Control shells leave invalid fractions, maxima, child names, ready state and tab selection defaults unspecified | Preserve supplied number labels; use zero fill for nonpositive maxima, clamp fractions and map nonfinite input to zero. Name children on attachment; ready means an icon with zero cooldown and no disabled/locked state. Empty tabs use −1, nonempty initial tabs select 0 and rebuilds retain valid selection; invalid arguments fail loudly | Tech lead | UI-008 uses these defaults with the existing cached-number range; no per-frame name formatting or new public contract. |
 | 22 | UI-008's required tab test names UILayoutAudit, but frontier UI-012 owns that audit and depends on UI-008 | Validate actual 1280×720 panel bounds, clipping viewport, label widths and scrolling in UI-008; UI-012 adds its canonical audit invocation | Tech lead | Resolved by lead direction 2026-10-13: retain the real panel bounds check with TODO(UI-012), assign the full audit invocation to UI-012 and do not weaken viewport overflow assertions or implement the frontier audit in UI-008. |
+| 23 | Tooltip world conversion uses Screen.height, while the runtime pointer gate already fixes Editor-window height mismatch in panel coordinates | ScreenToPanel first, then flip Y in panel.visualTree.layout.height, matching §5.5 | Tech lead | Resolved in UI-009: render-texture tests cover bottom-left input and a nonidentity mapping; offset/edge geometry stays in the layer’s local panel units. No input or camera contract changes. |
+| 24 | UI-009 lists only service/template/style files but the staged root/config have no tooltip asset or lifecycle; attach replacement and missing fields are unspecified | Wire creation/tick/disposal in UIRoot, reference Tooltip.uxml in UIConfig and import tooltip.uss in Game.tss; validate required template/delay, replace same-target attachments, ignore absent Detach, hide empty fields and cancel stale provider results | Tech lead | Resolved in UI-009: internal construction/lifecycle only; public §6 methods stay unchanged. One reusable scheduler/content/tooltip and eight rows; all tooltip descendants ignore picking. The three local custom properties use unitless panel-coordinate numbers with 16/20/8 defaults; global tokens and their values remain unchanged. |
 
 ## 11. References
 

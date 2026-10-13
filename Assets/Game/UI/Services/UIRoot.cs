@@ -54,7 +54,7 @@ namespace Game.UI.Services
                     if (layers[i].name != name) throw new InvalidOperationException("UIRoot missing or out-of-order layer '" + name + "'");
                 }
                 Navigator = new UINavigator(this, pause, contextTarget, clock);
-                Tooltips = new TooltipService(); Notifications = new NotificationService();
+                Tooltips = new TooltipService(this, config); Notifications = new NotificationService();
                 Confirm = new ConfirmDialog(); Prompt = new TextPrompt();
                 RootElement.RegisterCallback<ClickEvent>(OnClick);
                 RootElement.RegisterCallback<PointerOverEvent>(OnPointerOver);
@@ -62,7 +62,7 @@ namespace Game.UI.Services
                 RootElement.RegisterCallback<FocusInEvent>(OnFocusIn, TrickleDown.TrickleDown);
                 RootElement.RegisterCallback<FocusOutEvent>(OnFocusOut, TrickleDown.TrickleDown);
                 UIConverters.RegisterAll();
-                // TODO(UI-009): tooltip lifecycle. TODO(UI-010): notification lifecycle. TODO(UI-011): dialog registration.
+                // TODO(UI-010): notification lifecycle. TODO(UI-011): dialog registration.
                 // TODO(UI-013): ApplyAccessibility; until then use the specified construction defaults.
                 config.PanelSettings.scale = 1;
             }
@@ -114,7 +114,8 @@ namespace Game.UI.Services
             if (disposed) return;
             using (TickMarker.Auto())
             {
-                // TODO(UI-009): tooltip tick when implemented. TODO(UI-010): notification tick when implemented.
+                Tooltips.Tick();
+                // TODO(UI-010): notification tick when implemented.
             }
         }
         public void HandleBackPressed() => Navigator.Back();
@@ -158,6 +159,7 @@ namespace Game.UI.Services
             RootElement?.UnregisterCallback<ClickEvent>(OnClick);
             RootElement?.UnregisterCallback<PointerOverEvent>(OnPointerOver);
             RootElement?.UnregisterCallback<PointerOutEvent>(OnPointerOut);
+            Tooltips?.Dispose();
             Navigator?.DisposeOwnedScreens();
             lastHover = null;
             Game.Core.Services.Unregister(this);

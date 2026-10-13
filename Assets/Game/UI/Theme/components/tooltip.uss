@@ -1,0 +1,25 @@
+/* SPEC-60 §5.7; DESIGN-SYSTEM §10.4.1. Offsets are panel-coordinate numbers read by the service. */
+.tooltip {
+    --tooltip-offset-x: 16;
+    --tooltip-offset-y: 20;
+    --tooltip-edge-margin: 8;
+    position: absolute;
+    max-width: 360px;
+    padding: var(--space-3);
+    background-color: var(--color-surface-1);
+    color: var(--color-text);
+    border-color: var(--color-border);
+    border-width: var(--border-thin);
+    border-radius: var(--radius-s);
+    font-size: var(--text-s);
+    white-space: normal;
+}
+.tooltip__title { -unity-font-definition: var(--font-display); font-size: var(--text-l); }
+.tooltip__subtitle { color: var(--color-text-muted); font-size: var(--text-s); }
+.tooltip__body { margin-top: var(--space-2); }
+.tooltip__stats { margin-top: var(--space-2); }
+.tooltip__stat-row { flex-direction: row; }
+.tooltip__stat-label { flex-grow: 1; margin-right: var(--space-3); }
+.tooltip__stat-value { -unity-font-definition: var(--font-mono); white-space: nowrap; }
+.tooltip__stat-value--better { color: var(--color-positive); }
+.tooltip__stat-value--worse { color: var(--color-danger); }
