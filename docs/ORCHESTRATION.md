@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | AUD-013 | done; full batch green; dependency wait | audio measurements |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-004 | done; full batch green; next ABL-005 | ABL-005 after WPN-012 |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ABL-005 | claimed; dispatching four ability scenarios | ability integration |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | WPN-015 | done; full batch green; dependency wait | weapon harness |
 
 ## Operating rules
@@ -17,6 +17,8 @@ Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol
 Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
 
 ## Current lead state
+
+- **Next slice claimed:** AI-006 lead and ABL-005 existing power worker, after main8b3623f6 full-green closeout. Lead uses primary `task/AI-006-enemy-decisions`; worker starts from current main in its existing checkout. Other workers wait for AI-006 to unlock AI-007/008. Isolated VOX-020 remains on its own branchfba40c66; no Unity active.
 
 - **Combat/effects batch closed:** session21032 exited0: compile0C#warnings,1198/0/1 EditMode and170/0/53 PlayMode. Soak600s/36000ticks/zero native leaks. WPN-012 and ABL-004 done, archived `ability-effects/`. No active Unity; original QualitySettings preserved and test debris removed. Next FF main, claim AI-006 lead and ABL-005 existing power worker. Isolated VOX-020 headfba40c66 remains unvalidated, preserved for the next compatible batch.
 
