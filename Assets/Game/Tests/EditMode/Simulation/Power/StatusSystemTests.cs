@@ -18,7 +18,7 @@ using Unity.Jobs.LowLevel.Unsafe;
 namespace Game.Tests.EditMode.Simulation.Power
 {
     /// <summary>Six PWR-010 scenarios use the production channel/status/allocation/aggregation pipeline (SPEC-22 §5.3b).</summary>
-    public sealed class StatusSystemTests
+    public sealed partial class StatusSystemTests
     {
         VoxelTestContent content;
         EcsTestWorld world;
