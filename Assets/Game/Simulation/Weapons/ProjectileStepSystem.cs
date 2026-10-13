@@ -24,7 +24,7 @@ namespace Game.Simulation.Weapons
         ProjectileStore owned; EntityQuery grids; StepJob job;
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
-            owned = ProjectileStore.Create(8192); state.EntityManager.CreateSingleton(owned);
+            owned = ProjectileStore.Create(SystemAPI.TryGetSingleton<WeaponTuning>(out var tuning) ? tuning.MaxProjectiles : 8192); state.EntityManager.CreateSingleton(owned);
             grids = new EntityQueryBuilder(Allocator.Temp).WithAll<VoxelGrid>().Build(ref state); job.HitTest = CombatHitTest.Create(ref state);
             job.Velocities = state.GetComponentLookup<PhysicsVelocity>(true);
             job.Shifts = state.GetComponentLookup<OriginShiftRecord>(true);
