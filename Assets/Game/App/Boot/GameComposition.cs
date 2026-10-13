@@ -161,7 +161,10 @@ namespace Game.App.Boot
                 Spawner = Push(new ShipSpawnService(world, Registry, Content.Catalog, Session, galaxy));
                 Register(Spawner); Register<IShipSpawner>(Spawner);
             }
-            // Remaining galaxy/travel/faction/map/economy/narrative bindings follow SPEC-01 §5.2.
+            // SPEC-30 permits absent lane/ownership services until their implementations are composed.
+            // TODO(TRV-006/ENC-007): pass their actual interfaces here when those services are installed above.
+            Register(new GalaxyMapModel(campaignGalaxy, null, null));
+            // Remaining travel/faction/economy/narrative bindings follow SPEC-01 §5.2.
 
             // 9. Persistent UI document and root (UI-003). Navigation owns pause/context (UI-004).
             var inputBridge = Push(new InputServiceBridge(Input)); Register(inputBridge);

@@ -32,8 +32,7 @@ namespace Game.Galaxy.Streaming
             }
             foreach (var group in groups)
             {
-                using var entities = new NativeArray<Entity>(group.Value.Count, Allocator.Temp);
-                for (int i = 0; i < group.Value.Count; i++) entities[i] = group.Value[i];
+                using var entities = new NativeArray<Entity>(group.Value.ToArray(), Allocator.Temp);
                 em.AddSharedComponent(entities, new StarSystemMember { Id = new StarSystemId(group.Key) });
             }
             em.RemoveComponent<SplitOrigin>(query);
