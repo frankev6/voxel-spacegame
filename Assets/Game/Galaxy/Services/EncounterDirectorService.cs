@@ -289,7 +289,9 @@ namespace Game.Galaxy.Services
         public void Dispose()
         {
             if (disposed) return; disposed = true; EventBus<StarSystemEntered>.Unsubscribe(Entered); EventBus<SessionReset>.Unsubscribe(Reset);
-            players.Dispose(); origins.Dispose(); clocks.Dispose(); combatStatus.Dispose(); worldScene.Dispose(); shifts.Dispose(); gameplay.Dispose();
+            // Unity may dispose the ECS world before GameRoot.OnDestroy during Editor exit.
+            if (world != null && world.IsCreated)
+            { players.Dispose(); origins.Dispose(); clocks.Dispose(); combatStatus.Dispose(); worldScene.Dispose(); shifts.Dispose(); gameplay.Dispose(); }
             active.Clear(); members.Clear(); pending.Clear();
         }
     }
