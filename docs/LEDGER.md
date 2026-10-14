@@ -16,8 +16,8 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 32 | 13 | 0 | 0 | 137 | 0 | 182 | 6 |
-| M4 | 9 | 3 | 0 | 0 | 2 | 0 | 14 | 5 |
+| M3 | 30 | 15 | 0 | 0 | 137 | 0 | 182 | 6 |
+| M4 | 8 | 4 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -366,10 +366,10 @@
 | ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, GAL-006, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 21d0996b | Full ordered seeded composition, clearance placement and line-abreast formation; 9 required cases pass. Director cap remains ENC-007. |
 | ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SYS-008, SYS-013, FND-012, TRV-006, AI-008 | yes | done | astra (gpt-6) | 2026-10-14 | a445825b | Real production director; ten functional cases accepted across batch/fix; two advisory perf fixtures authored, measurements deferred. ENCT binary persistence stays ENC-008. |
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | yes | todo |  |  |  |  |
-| ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, SPEC-40 | no | todo |  |  |  |  |
+| ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, NAR-011, NAR-012, NAR-020 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Economy worker: actual narrative encounter/faction routing and event dependencies. |
 | ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | cdf292d6 | Ten canonical encounters, six factions, real ARK/Whisper ownership; generation/rerun zero errors, two required checks pass |
 | ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | no | todo |  |  |  |  |
-| ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-009, SPEC-70 | no | todo |  |  |  |  |
+| ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, ENC-004, DEV-003, DEV-005, DEV-006 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Combat worker: encounter/relation commands, probes and CLI over accepted director. |
 | NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | e39b2d3 | Narrative contracts and precise future-task stubs; 2 required tests; full batch 901 EM / 128 PM, zero failures |
 | NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 67ce3485 | Located lexer/AST/parser; seven focused checks pass; Q305 resolves grammar example |
 | NAR-003 | Type checker, registry, compiler and binder | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-002 | yes | done | astra (gpt-6) | 2026-10-13 | d3f59c1c | Compiler, registry, binder, graph emission and scoped Invoke; six focused checks pass; runtime nodes NAR-004/005 |
@@ -497,7 +497,7 @@
 | GAL-014 | Brick-level structure diffs | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M4 | frontier | GAL-010 | yes | todo |  |  |  |  |
 | TRV-013 | Supercruise (in-system hop) | [SPEC-32](specs/SPEC-32-travel.md) | M4 | frontier | TRV-012, SPEC-23, SPEC-61 | no | todo |  |  |  |  |
 | TRV-014 | Escort transfer hooks | [SPEC-32](specs/SPEC-32-travel.md) | M4 | standard | TRV-006, TRV-009, AI-001, FND-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Economy worker: actual travel escort callbacks and three required contract cases; fleet implementation stays with SPEC-01. |
-| ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011, AI-001 | no | todo |  |  |  |  |
+| ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-006, ENC-007, AI-013, AI-014 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Presentation worker: formation poses, FleetMember assignment and wedge asset; no new ship art. |
 | ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-005, GAL-008, CORE-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Combat worker: deterministic procedural territory BFS and owner-change events; advisory large measurement deferred. |
 | NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 4ca00b3 | Partial4ca00b3 +6d6e1ce9; fact editing required case passes39710, formatter also green. Baseline/Play beat live acceptance still awaits QST-005/006 and DLG-006; remains in progress. |
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
@@ -1067,6 +1067,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 465 | SPEC-51 Q57: production editor/HUD composition | Resolved ADR-0098: real profile storage, reused editor view/model, actual HUD and launcher, creative startup and ordered disposal. | Tech lead |
 | 466 | SPEC-01 Q33: defeat composition and isolated startup | Root owns watcher lifetime/tick; current readable save or latest autosave, disabled Load without saves. Isolated SaveRoot suppresses dev playground takeover; ordinary World Play unchanged. | Tech lead |
 | 467 | SPEC-33 Q30: director prerequisites, pending target and spawn readiness | ADR-0099; actual GameplayActive guard, pending transit destination, unconverted spawn pose/AI shift sequence, unload-safe sweep. ENCT remains separate. | Tech lead |
+| 468 | SPEC-33 Q31: independent encounter follow-up prerequisites | ADR-0100 supplies completed runtime owners for narrative commands, dev commands/probes and formations; combined integration acceptance unchanged. | Tech lead |
 
 ## Measurements
 

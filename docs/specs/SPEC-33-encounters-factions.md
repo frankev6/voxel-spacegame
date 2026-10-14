@@ -976,7 +976,8 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 ### ENC-009 — Narrative wiring
 - **Milestone:** M3
 - **Tier:** standard — routing of existing APIs per §6
-- **Depends on:** `ENC-007`, `SPEC-40`
+- **Depends on:** `ENC-007`, `NAR-011`, `NAR-012`, `NAR-020`
+- **Sequencing:** ADR-0100 uses the completed runtime owners.
 - **Do:** In `LogicWorldAdapter` (Game.App), wire these members and remove them from `UnwiredMembers`:
   - `GetRelation(i)`: faction = `catalog.GetByIndex<FactionDefinition>(i)`, or the current owner when `i == −1`; returns `factions.GetRelation`.
   - `AdjustRelation`.
@@ -1056,7 +1057,8 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 ### ENC-012 — Dev commands and probes
 - **Milestone:** M3
 - **Tier:** standard — harness wiring per SPEC-70 conventions
-- **Depends on:** `ENC-009`, `SPEC-70`
+- **Depends on:** `ENC-007`, `ENC-004`, `DEV-003`, `DEV-005`, `DEV-006`
+- **Sequencing:** ADR-0100: direct service commands do not wait for narrative routing or overlays.
 - **Do:**
   1. Add commands:
      - `encounter spawn=<id> [count=1] [anchor=player|<tag>]` → `SpawnEncounter(…, Dev)`;
@@ -1075,7 +1077,8 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 ### ENC-013 — Encounter formations
 - **Milestone:** M4
 - **Tier:** standard — slot placement and component given in §5.6/§5.7
-- **Depends on:** `ENC-011`, `AI-001`
+- **Depends on:** `ENC-006`, `ENC-007`, `AI-013`, `AI-014`
+- **Sequencing:** ADR-0100: formation implementation precedes combined encounter integration scenarios.
 - **Do:** Implement formation poses (§5.6) and `FleetMember` assignment at spawn (§5.7 step 6). Promote encounters with 3+ ships to use `formation_wedge` (new `FormationDefinition` asset: slots (−40, −40), (40, −40), (−80, −80), (80, −80), …).
 - **Files:** `Assets/Game/Galaxy/Encounters/EncounterPlacement.cs`; `Assets/Game/Galaxy/Services/EncounterDirectorService.cs`; `Assets/Game/Content/Formations/formation_wedge.asset`; tests
 - **Acceptance criteria:**
@@ -1136,3 +1139,5 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 | 28 | Procedural territory waits on unrelated encounter integration scenarios | Use completed authored territory, galaxy generation and deterministic RNG under ADR-0068. No encounter director or spawning dependency exists in the specified BFS/event algorithm. | Tech lead — resolved; ledger Q458 |
 
 | 30 | Director integration needs concrete runtime prerequisites and asynchronous spawn readiness | ADR-0099 selects completed runtime owners; no acceptance is waived. Transit requests target TravelService.Target; pre-load requests use current galaxy system. Spawn readiness includes GameplayActive because the real spawner requires it. Sweeps retain unconverted requests and use their requested pose until LocalTransform exists; never defeat members during loader unload. Ambush initialization stamps the current origin-shift sequence so the first AI update preserves its player goal. ENCT persistence remains ENC-008. | Tech lead | Resolved; ledger Q467. |
+
+| 31 | Independent encounter follow-ups wait on aggregate tests/unrelated owners | ADR-0100 uses completed real runtime prerequisites for ENC-009/012/013. Existing scopes/tests and later combined integration acceptance remain unchanged. | Tech lead | Resolved; ledger Q468. |
