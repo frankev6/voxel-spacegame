@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 8 |
-| M3 | 91 | 9 | 0 | 0 | 80 | 0 | 180 | 8 |
+| M3 | 91 | 8 | 0 | 0 | 81 | 0 | 180 | 8 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -403,7 +403,7 @@
 | DLG-012 | Harness commands for dialog | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, DEV-001 | no | todo |  |  |  |  |
 | QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 95f80410 | Public quest/mystery contracts and required assembly test; behavior remains QST-002 onward |
 | QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, NAR-003, NAR-004, NAR-006, NAR-009, NAR-013 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9ca0b84 | Real definitions, compile/bind and validation; 24 prior cases plus repaired Usage_Enforced pass; generated content compiled except separate TRV-003 owner stub. |
-| QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Q370 actual runtime prerequisites accepted; lead implements quest baselines, progression and restore semantics. |
+| QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | done | astra (gpt-6) | 2026-10-13 | a8b2d6d1 | Quest runtime/baselines/progression/restore implemented; seven required functional cases pass39710; Q371, trace and objective dependency review fixes. QUST/live adapter remain owning tasks. |
 | QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Existing economy worker: complete clue/mystery/rumor lifecycle, five direct required cases; Q370 dependencies. |
 | QST-005 | BeatService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, SPEC-41 | no | todo |  |  |  |  |
 | QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | no | todo |  |  |  |  |
@@ -497,7 +497,7 @@
 | TRV-014 | Escort transfer hooks | [SPEC-32](specs/SPEC-32-travel.md) | M4 | standard | TRV-012, AI-001, FND-001 | no | todo |  |  |  |  |
 | ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011, AI-001 | no | todo |  |  |  |  |
 | ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011 | no | todo |  |  |  |  |
-| NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 4ca00b3 | Partial editor controls integrated under ADR-0062; fact editing/Debug menus implemented. Baseline/Play beat acceptance awaits QST-003/005/006 and DLG-006; validation pending compatible batch. |
+| NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 4ca00b3 | Partial4ca00b3 +6d6e1ce9; fact editing required case passes39710, formatter also green. Baseline/Play beat live acceptance still awaits QST-005/006 and DLG-006; remains in progress. |
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | no | todo |  |  |  |  |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | no | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
@@ -1075,6 +1075,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — QST-003 done: quest runtime and baseline correctness — astra (gpt-6)
+
+- 63a88873/a8b2d6d1 implements accepted-instance baselines, stage effects and recapture, idempotent starts/contracts, failure/completion, tracking, log/objective reads and initial restore suppression. Review232 caught release-null tracing and missing objective-bit dependency notification; both fixed. QUST import/live adapter/registration remain QST-007 and QST-006/008.
+- Compile81483 failed on delivered NAR-018 test missing FactDeclaration import; fixed6d6e1ce9. Compile25763 terminal0, zero CS warnings. Focused EditMode39710 terminal0: nine passes (seven required quest cases + NAR-018 fact-edit and existing debugger formatter), 0.1948616s bodies. Evidence Logs/playtest/quest-runtime. Spec-required: QST-0038 (7 functional run, 1 advisory fixture compiled/excluded), NAR-0181; extra:0. No broad/perf/PlayMode run for this managed service batch.
+- NAR-018 still in progress: live baseline/beat acceptance needs remaining owners. No Unity active. Clue worker active275; combat audit258 completed with DLG-002/006 concrete prerequisites and command-table contract gap; presentation review232 complete/dependency wait. Next apply dialog scheduling resolution, implement parser and integrate ClueService when delivered. Previous runtime authorship and current focused acceptance are progress.
 
 ### 2026-10-13 — QST-003 runtime authored — astra (gpt-6)
 

@@ -6,10 +6,10 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-018 | Partial integrated4ca00b3; dialog dependency audit active | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-018 | Dialog audit258 complete; dependency wait | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | QST-004 | Claimed c59e9110; full clue/mystery service implementation dispatched | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-003 review | Quest runtime63a88873 review dispatched; debugger review230 clear | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-003 review | Review232 complete; dependency wait | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Quest runtime accepted:** QST-003a8b2d6d1 done. Compile25763 clean; focused EditMode39710 passes9 (seven quest + two debugger cases), 0.1949s bodies; evidence Logs/playtest/quest-runtime. Advisory fixture excluded. NAR-018 fact editing passes but live baseline/beat acceptance remains pending owners. No Unity active. Clue worker active275; dialog audit258 and quest review232 complete. Next dialog parser prerequisites/implementation and ClueService integration. Previous runtime work and this acceptance are progress.
 
 - **Quest runtime authored:** QST-00363a88873 implements instances, captured baselines, stage/failure/completion, tracking/log/objective reads and initial restore suppression (Q371/SPEC-42 Q12). Not compiled or accepted; next seven required functional cases plus advisory fixture, then batch with NAR-018. No Unity active. Clue worker active274; combat dialog dependency audit active257; presentation debugger review230 complete and now reviews quest runtime. Previous dependency repair and this implementation are progress.
 

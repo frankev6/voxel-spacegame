@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Quest runtime accepted:** QST-003a8b2d6d1 done. Compile25763 clean; focused EditMode39710 passes9 (seven quest + two debugger cases), 0.1949s bodies; evidence Logs/playtest/quest-runtime. Advisory fixture excluded. NAR-018 fact editing passes but live baseline/beat acceptance remains pending owners. No Unity active. Clue worker active275; dialog audit258 and quest review232 complete. Next dialog parser prerequisites/implementation and ClueService integration. Previous runtime work and this acceptance are progress.
+
 - **Quest runtime authored:** QST-00363a88873 implements instances, captured baselines, stage/failure/completion, tracking/log/objective reads and initial restore suppression (Q371/SPEC-42 Q12). Not compiled or accepted; next seven required functional cases plus advisory fixture, then batch with NAR-018. No Unity active. Clue worker active274; combat dialog dependency audit active257; presentation debugger review230 complete and now reviews quest runtime. Previous dependency repair and this implementation are progress.
 
 - **Quest runtime unblocked:** QST-003 claimed d1ab9183 for lead; QST-004 claimed c59e9110 and dispatched to the existing economy worker. SPEC-42 Q11/global Q370 replaces circular whole-spec dependencies with accepted real runtime prerequisites under ADR-0068. NAR-018 partial4ca00b3 is integrated but remains unaccepted; validate with the next compatible batch. Combat audits dialog prerequisites; presentation reviews the debugger source. No Unity active. Previous persistence acceptance and current source integration/dependency repair are progress.
