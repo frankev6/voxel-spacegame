@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Game.App.Boot;
 using Game.Core.Components;
 using Unity.Entities;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -20,6 +21,8 @@ namespace Game.App.DevRuntime
         readonly long errors, exceptions, warnings, logSequence;
         World queryWorld;
         bool typesLoaded;
+        EntityQuery gridQuery;
+        bool hasGridQuery;
         public DevRuntimeHost Host { get; }
         internal DevContext(DevRuntimeHost host, bool snapshot = false)
         {
@@ -43,8 +46,7 @@ namespace Game.App.DevRuntime
         public long LogWarnings => Logs.Warnings - warnings;
         public long LogStartSequence => logSequence;
         public long EventCount(string name) => Events.Count(name) - (eventBaseline != null && eventBaseline.TryGetValue(name, out long count) ? count : 0);
-        // TODO(DEV-009): expose the existing camera service in the snapshot/aim integration.
-        public Camera GameplayCamera => null;
+        public Camera GameplayCamera => TryGetService<Game.Presentation.Services.CameraRigService>(out var rig) ? rig.Camera : null;
         public Entity PlayerShipRoot
         {
             get
@@ -56,6 +58,22 @@ namespace Game.App.DevRuntime
         }
         internal bool HasGameplay => World != null && World.IsCreated && !Query(TypeManager.GetTypeIndex<GameplayActive>()).IsEmptyIgnoreFilter;
         internal bool ServicesReady => GameRoot.Instance != null && GameRoot.Instance.Composition != null;
+        internal bool TryGetFrame(out Game.Galaxy.Components.FrameOrigin frame)
+        {
+            frame = default;
+            return World != null && World.IsCreated && Query(TypeManager.GetTypeIndex<Game.Galaxy.Components.FrameOrigin>()).TryGetSingleton(out frame);
+        }
+        internal NativeArray<Entity> GridEntities()
+        {
+            if (queryWorld != World) { ReleaseQueries(); queryWorld = World; }
+            if (!hasGridQuery)
+            {
+                gridQuery = queryWorld.EntityManager.CreateEntityQuery(new EntityQueryDesc {
+                    All = new[] { ComponentType.ReadOnly<Game.Voxel.Model.VoxelGrid>() }, Options = EntityQueryOptions.IncludeDisabledEntities });
+                hasGridQuery = true;
+            }
+            return gridQuery.ToEntityArray(Allocator.Temp);
+        }
         EntityQuery Query(TypeIndex type)
         {
             if (queryWorld != World)
@@ -115,6 +133,8 @@ namespace Game.App.DevRuntime
         }
         void ReleaseQueries()
         {
+            if (hasGridQuery && queryWorld != null && queryWorld.IsCreated) gridQuery.Dispose();
+            hasGridQuery = false;
             if (queryWorld != null && queryWorld.IsCreated) foreach (var query in queries.Values) query.Dispose();
             queries.Clear(); queryWorld = null;
         }

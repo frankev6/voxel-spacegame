@@ -332,6 +332,8 @@ namespace Game.DevTools.Editor
                 return $"{c.name} pos={c.transform.position} fwd={c.transform.forward} fov={c.fieldOfView:F0} far={c.farClipPlane} audioListeners={listeners}";
             });
             if (ecs) Section(sb, "ecs", () => EcsSummary(null, 0));
+            Section(sb, "session", DevSnapshotSections.Session);
+            Section(sb, "player", DevSnapshotSections.Player);
             if (logs) sb.Append(LogReport("all", mark, 40));
             return sb.ToString();
         }
