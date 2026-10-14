@@ -152,6 +152,9 @@ namespace Game.App.Boot
             Flow.RegisterReady(systemLoader); Flow.RegisterExiting(systemLoader);
             Session.RegisterWriteback(new GalaxyFlushWriteback(systemLoader));
             Save.Register(new PlayerLocationSaveParticipant(Session.Galaxy, docking));
+            var travel = Push(new TravelService(campaignGalaxy, systemLoader, docking, world, Content.Catalog, Pause, Audio));
+            Register(travel); Register<ILaneAccess>(travel); galaxyTicker.Register(travel);
+            Session.RegisterSaveBlocker(travel); Flow.RegisterExiting(travel);
 
             Session.BindFleet(Blueprints, Registry, Content.Catalog); Save.Register(Session.FleetParticipant);
             Register(Session.Fleet);

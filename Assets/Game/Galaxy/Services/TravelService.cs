@@ -14,6 +14,9 @@ using Game.Galaxy.Travel;
 using Game.Simulation.Commands;
 using Game.Voxel.Damage;
 using Unity.Collections;
+using Unity.Transforms;
+using Unity.Physics;
+using Game.Voxel.PresentationStreams;
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -30,7 +33,15 @@ namespace Game.Galaxy.Services
         readonly IPauseService pause;
         readonly IAudioService audio;
         readonly LaneAccessTable lanes = new();
-        readonly EntityQuery worldScene, players;
+        readonly EntityQuery worldScene, players, clocks, controlLocks;
+        PauseToken pauseToken;
+        IJumpEscorts escorts;
+        StarSystemId jumpFrom;
+        JumpSource jumpSource;
+        int jumpLane, readyFrames;
+        uint spoolStartTick, arrivalStartTick;
+        float transitSeconds;
+        bool timeoutReported;
         readonly int fuelIndex;
         uint lastRefreshTick;
         bool disposed;
@@ -50,6 +61,9 @@ namespace Game.Galaxy.Services
             if (fuelIndex == 0) GameLog.WarnOnce("TRV.Fuel.NoItem", LogCategories.Travel, "Travel fuel is not in the catalog; fuel costs are not enforced.");
             worldScene = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<WorldSceneActive>());
             players = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerShip>());
+            clocks = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<SimClock>());
+            controlLocks = world.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<PlayerControlLock>());
+            EventBus<BodyInteracted>.Subscribe(OnBodyInteracted);
             EventBus<StarSystemEntered>.Subscribe(OnStarSystemEntered);
         }
         public int TickOrder => 200;
@@ -108,7 +122,94 @@ namespace Game.Galaxy.Services
                 if (selected == Entity.Null || entity.Index < selected.Index) selected = entity;
             return selected;
         }
-        public JumpRequestResult RequestJump(StarSystemId target, JumpSource source) => throw new NotImplementedException("TRV-006");
+        public JumpRequestResult RequestJump(StarSystemId target, JumpSource source)
+        {
+            var result = CanJump(target, source);
+            if (!result.Accepted) return result;
+            if (source == JumpSource.Narrative && docking.IsDocked) docking.Undock();
+            if (players.CalculateEntityCount() > 1)
+                GameLog.WarnOnce("TRV.MultiplePlayers", LogCategories.Travel, "Multiple player ships; travel uses the lowest entity index.");
+            Kind = TravelKind.LaneJump; Target = target; jumpFrom = loader.Loaded; jumpSource = source;
+            galaxy.Galaxy.TryFindLane(jumpFrom, target, out jumpLane);
+            spoolStartTick = Clock.Tick;
+            galaxy.PrefetchContent(target);
+            WriteLock(PlayerControlLockFlags.Movement | PlayerControlLockFlags.Actions);
+            var direction = galaxy.Galaxy.Get(target).PositionLy - galaxy.Galaxy.Get(jumpFrom).PositionLy;
+            EmitWarp(math.normalizesafe(new float3((float)direction.x, 0, (float)direction.y), new float3(0, 0, 1)));
+            if (Config.DepartCue != null) audio.PlayCue(Config.DepartCue.Id);
+            Phase = TravelPhase.Spooling; CoverRequested = true;
+            return result;
+        }
+        SimClock Clock => clocks.IsEmptyIgnoreFilter ? default : clocks.GetSingleton<SimClock>();
+        void WriteLock(PlayerControlLockFlags flags)
+        {
+            if (!world.IsCreated) return;
+            if (controlLocks.IsEmptyIgnoreFilter)
+            { GameLog.ErrorOnce("TRV.Lock.Missing", LogCategories.Travel, "Player control lock is missing."); return; }
+            // Read current singleton state so recreated entities and scene resets self-heal.
+            if (controlLocks.GetSingleton<PlayerControlLock>().Flags != flags)
+                world.EntityManager.SetComponentData(controlLocks.GetSingletonEntity(), new PlayerControlLock { Flags = flags });
+        }
+        void EmitWarp(float3 direction)
+        {
+            var player = FindPlayer(); var em = world.EntityManager;
+            if (player == Entity.Null || !em.HasComponent<LocalTransform>(player)) return;
+            var transform = em.GetComponentData<LocalTransform>(player);
+            var velocity = em.HasComponent<PhysicsVelocity>(player) ? em.GetComponentData<PhysicsVelocity>(player).Linear : float3.zero;
+            FxEvents.EnqueueMainThread(em, FxEvents.Warp(transform.Position, direction, velocity, Config.WarpFxScale));
+        }
+        void OnBodyInteracted(BodyInteracted interaction)
+        {
+            // TODO(TRV-008): resolve gate interaction and publish refusal notices.
+        }
+        void CommitJump()
+        {
+            var content = galaxy.GetContent(Target);
+            var plan = ArrivalSolver.SolveJump(content, jumpLane, galaxy.Galaxy.Get(Target).PositionLy,
+                galaxy.Galaxy.Get(jumpFrom).PositionLy, Clock.UniversalTime, new ArrivalParams {
+                    StandoffM = Config.ArrivalStandoffM, StepM = Config.ArrivalStepM,
+                    ClearanceM = Config.PlayerClearanceM, MaxSteps = Config.ArrivalMaxSteps });
+            int cost = GetFuelCost(jumpLane), held = FuelHeld;
+            if (jumpSource == JumpSource.Gate && held >= 0 && held < cost)
+            { Abort($"Not enough fuel: {cost} needed, {held} in the hold."); return; }
+            Game.Core.Services.TryGet<IJumpEscorts>(out escorts);
+            escorts?.CaptureEscorts(Config.EscortRadiusM);
+            if (!loader.BeginStarSystemChange(Target, plan.PositionM, plan.YawRad, StarSystemEntryReason.Jump))
+            { escorts?.RestoreEscorts(); escorts = null; Abort("Jump aborted: the star system is busy."); return; }
+            if (jumpSource == JumpSource.Gate && held >= 0)
+            {
+                Game.Core.Services.TryGet<ILogicContext>(out var context);
+                if (context?.Economy == null || !context.Economy.TryTakeItems(fuelIndex, cost))
+                    GameLog.Error(LogCategories.Travel, "TRV.Fuel.Payment: fuel changed during jump commit.");
+            }
+            pauseToken = pause.Acquire("Travel"); LastArrival = plan; Phase = TravelPhase.Transit;
+            transitSeconds = 0; readyFrames = 0; timeoutReported = false;
+        }
+        void BeginArrival()
+        {
+            escorts?.PlaceEscorts(LastArrival.PositionM, LastArrival.YawRad); escorts = null;
+            pauseToken.Dispose(); pauseToken = default;
+            Phase = TravelPhase.Arriving; arrivalStartTick = Clock.Tick; CoverRequested = false;
+            var player = FindPlayer();
+            var forward = player != Entity.Null && world.EntityManager.HasComponent<LocalTransform>(player)
+                ? math.mul(world.EntityManager.GetComponentData<LocalTransform>(player).Rotation, new float3(0, 0, 1)) : new float3(0, 0, 1);
+            EmitWarp(forward);
+            if (Config.ArriveCue != null) audio.PlayCue(Config.ArriveCue.Id);
+            var stats = Stats; stats.LastTransitSeconds = transitSeconds;
+            stats.MaxTransitSeconds = math.max(stats.MaxTransitSeconds, transitSeconds); stats.JumpsCompleted++; Stats = stats;
+            EventBus<LaneJumped>.Publish(new LaneJumped(jumpFrom.Value, Target.Value, jumpLane, jumpSource));
+        }
+        void Abort(string text, bool silent = false)
+        {
+            bool active = Phase != TravelPhase.Idle; var target = Target;
+            pauseToken.Dispose(); pauseToken = default; escorts = null;
+            WriteLock(PlayerControlLockFlags.None); CoverRequested = false;
+            if (active && !target.Equals(loader.Loaded)) galaxy.ReleaseContent(target);
+            Phase = TravelPhase.Idle; Kind = TravelKind.None; Target = default;
+            if (!active) return;
+            var stats = Stats; stats.JumpsAborted++; Stats = stats;
+            if (!silent) EventBus<TravelNotice>.Publish(new TravelNotice(TravelNoticeKind.JumpAborted, target.Value, text));
+        }
         public bool TryGetGateInfo(ulong gateKey, out GateInfo info) => throw new NotImplementedException("TRV-008");
 
         public StarSystemId Destination => throw new NotImplementedException("TRV-010");
@@ -197,16 +298,47 @@ namespace Game.Galaxy.Services
             EnsureLaneState(); if (disposed || galaxy.Galaxy == null || !world.IsCreated || worldScene.IsEmptyIgnoreFilter) return;
             if (unchecked(ctx.Tick - lastRefreshTick) >= Config.LaneRefreshTicks)
             { RefreshLaneConditions(); lastRefreshTick = ctx.Tick; }
-            // TODO(TRV-006): add jump execution after the lane refresh; no phase, lock or transit behavior is supplied here.
+            switch (Phase)
+            {
+                case TravelPhase.Idle: WriteLock(PlayerControlLockFlags.None); break;
+                case TravelPhase.Spooling:
+                    var player = FindPlayer();
+                    if (player == Entity.Null || world.EntityManager.HasComponent<Hulk>(player))
+                        Abort("Jump aborted: your ship cannot jump.");
+                    else if (unchecked(ctx.Tick - spoolStartTick) >= Config.SpoolTicks) CommitJump();
+                    break;
+                case TravelPhase.Transit:
+                    transitSeconds += ctx.UnscaledDeltaTime;
+                    readyFrames = loader.IsArrivalReady ? readyFrames + 1 : 0;
+                    bool loaded = loader.IsReady && loader.Loaded.Equals(Target);
+                    if (loaded && readyFrames >= Config.RevealDelayFrames && transitSeconds >= Config.CoverMinSeconds)
+                        BeginArrival();
+                    else if (transitSeconds >= Config.TransitTimeoutSeconds)
+                    {
+                        if (!timeoutReported)
+                        {
+                            timeoutReported = true; var stats = Stats; stats.TransitTimeouts++; Stats = stats;
+                            GameLog.Error(LogCategories.Travel, "TRV.TransitTimeout: loaded " + loader.Loaded +
+                                ", ready " + loader.IsReady + ", arrival ready " + loader.IsArrivalReady);
+                        }
+                        if (loaded) BeginArrival();
+                    }
+                    break;
+                case TravelPhase.Arriving:
+                    if (unchecked(ctx.Tick - arrivalStartTick) >= Config.ArrivalTicks)
+                    { WriteLock(PlayerControlLockFlags.None); Phase = TravelPhase.Idle; Kind = TravelKind.None; Target = default; }
+                    break;
+            }
         }
-        public SaveBlockReason GetSaveBlock() => throw new NotImplementedException("TRV-006");
-        public void OnSceneExiting(in SceneExitContext context) => throw new NotImplementedException("TRV-006");
+        public SaveBlockReason GetSaveBlock() => Phase == TravelPhase.Idle ? SaveBlockReason.None : SaveBlockReason.Transitioning;
+        public void OnSceneExiting(in SceneExitContext context) => Abort("", true);
         public void Dispose()
         {
             if (disposed) return;
+            Abort("", true); EventBus<BodyInteracted>.Unsubscribe(OnBodyInteracted);
             disposed = true; EventBus<StarSystemEntered>.Unsubscribe(OnStarSystemEntered); lanes.Dispose();
-            if (world.IsCreated) { worldScene.Dispose(); players.Dispose(); }
-            // TRV-006 owns any later execution resources, pause token and control lock.
+            if (world.IsCreated) { worldScene.Dispose(); players.Dispose(); clocks.Dispose(); controlLocks.Dispose(); }
+
         }
     }
 }
