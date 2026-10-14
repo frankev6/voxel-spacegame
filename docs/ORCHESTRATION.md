@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | QST-010 | Delivered hand-in24090059; genuine dependency wait while lead integrates completed sources | Next ready standard implementation after frontier/integration dependency |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-019 | Accepted9d6c7c96/080e2390, three required cases pass; genuine ready-standard dependency wait | Next substantial standard feature unlocked by frontier/integration owner |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-021 | Acceptede5850d70/0c2e5059, expanded case and live story activation pass; genuine ready-standard dependency wait | Canonical clue evaluation owner; no Unity |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DEV-021 | Dispatching power/shield/ability trial module | Lead owns shared routing/tests |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-021 | Dispatching real salvage trial module | Lead owns shared routing/tests |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-021 | Dispatching isolated campaign portal module | Lead owns shared routing/tests |
 
 ## Operating rules
 
