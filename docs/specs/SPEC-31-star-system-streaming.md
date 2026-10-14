@@ -636,6 +636,8 @@ sequenceDiagram
 
 | 20 | SYS-008 whole-spec dependencies include unrelated later AI/performance work | Use actual accepted owners SYS-006 (composed streamed bodies), INP-005 (Interact counter), AI-004 (spatial proxies/radii), CORE-006 (event delivery). Query, singleton lifecycle, docking and loader handler remain SYS-008 work; downstream dialog/merchant consumers remain separate. | Tech lead — ledger Q384 |
 
+| 21 | Shared docking owner and managed interaction composition missing | ADR-0083 adds compatible optional loader injection; production registers and injects the shared service. Ignore stale/unknown bodies, persist Interacted without rebuilding geometry, dock through the owner, undock on unload. PLOC restore stays SYS-009. | Tech lead — ledger Q386 |
+
 ## 11. References
 
 - Audit (background only): `docs/reference/audit-2026-10/03-galaxy-world.md` B1/D3 (R9), R10, R28; `00-synthesis.md` §5.

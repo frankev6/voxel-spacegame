@@ -26,6 +26,7 @@ namespace Game.Galaxy.Services
     public sealed class StarSystemLoader : IGalaxyFrameTick, IGalaxyLiveDeltaSink, ISceneReady, ISceneExiting, IDisposable
     {
         readonly GalaxyService galaxy;
+        readonly DockingService docking;
         readonly World world;
         readonly VoxelStructureRegistry registry;
         readonly StarSystemSpawnHook hook = new();
@@ -40,7 +41,7 @@ namespace Game.Galaxy.Services
         T2Streamer t2;
         BeltStreamer t3;
         readonly List<BeltStreamer> retiringBelts = new();
-        bool applyingDestruction;
+        bool applyingBodyState;
         readonly Entity infoEntity;
         readonly bool ownsInfo;
         StarSystemId target;
@@ -49,9 +50,10 @@ namespace Game.Galaxy.Services
         uint originSerial;
         bool disposed, anchorsDirty;
         public StarSystemLoader(GalaxyService galaxy, World world, VoxelStructureRegistry registry,
-            BlueprintLibrary blueprints, IPersistentIdAllocator ids, ContentCatalog catalog)
+            BlueprintLibrary blueprints, IPersistentIdAllocator ids, ContentCatalog catalog, DockingService docking = null)
         {
             this.galaxy = galaxy ?? throw new ArgumentNullException(nameof(galaxy));
+            this.docking = docking ?? new DockingService();
             this.world = world ?? throw new ArgumentNullException(nameof(world));
             this.registry = registry != null ? registry : throw new ArgumentNullException(nameof(registry));
             if (blueprints == null || ids == null || catalog == null) throw new ArgumentNullException("Loader dependencies");
@@ -73,6 +75,7 @@ namespace Game.Galaxy.Services
             ownsInfo = info.IsEmptyIgnoreFilter;
             infoEntity = ownsInfo ? em.CreateEntity(typeof(CurrentStarSystemInfo)) : info.GetSingletonEntity();
             registry.AddSpawnHook(hook); galaxy.SetLiveDeltaSink(this);
+            EventBus<BodyInteracted>.Subscribe(OnBodyInteracted);
         }
         public int TickOrder => 100;
         public int SceneReadyOrder => SceneHookOrder.Galaxy;
@@ -162,7 +165,7 @@ namespace Game.Galaxy.Services
             foreach (var old in retiring) old.DiscardBody(body);
         }
         public void OnBodyDeltaChanged(BodyId body)
-        { CheckAlive(); if (!applyingDestruction && body.System.Equals(Loaded)) anchorsDirty = true; }
+        { CheckAlive(); if (!applyingBodyState && body.System.Equals(Loaded)) anchorsDirty = true; }
         void RefreshAnchors(double time)
         {
             FlushStructures(); RetireStreaming(); var em = world.EntityManager; em.CompleteAllTrackedJobs();
@@ -179,8 +182,21 @@ namespace Game.Galaxy.Services
             world.EntityManager.CompleteAllTrackedJobs();
             t2?.Flush(); foreach (var old in retiring) old.Flush();
         }
+        void OnBodyInteracted(BodyInteracted value)
+        {
+            if (disposed || !IsReady || value.StarSystemValue != Loaded.Value ||
+                !bodies.TryGetValue(value.BodyKey, out var loaded)) return;
+            var body = BodyId.FromLocalKey(Loaded, value.BodyKey);
+            if (!body.IsValid || !world.IsCreated || !world.EntityManager.Exists(loaded.Anchor)) return;
+            // Interacted is persistent metadata, not a request to retire and recreate live geometry.
+            applyingBodyState = true;
+            try { galaxy.MarkBodyInteracted(body); }
+            finally { applyingBodyState = false; }
+            if ((InteractionKind)value.Kind == InteractionKind.Dock) docking.Dock(body);
+        }
         void Unload()
         {
+            docking.Undock();
             if (!world.IsCreated) return;
             State = LoaderState.Unloading; var em = world.EntityManager;
             FlushStructures(); RetireStreaming(); em.CompleteAllTrackedJobs();
@@ -233,9 +249,9 @@ namespace Game.Galaxy.Services
                     body.Grid != change.Grid || !em.Exists(body.Anchor)) continue;
                 t2?.Flush();
                 bool changed;
-                applyingDestruction = true;
+                applyingBodyState = true;
                 try { changed = galaxy.MarkBodyDestroyed(change.Body); }
-                finally { applyingDestruction = false; }
+                finally { applyingBodyState = false; }
                 var anchor = em.GetComponentData<StarSystemBody>(body.Anchor);
                 anchor.Flags |= BodyFlags.Destroyed; em.SetComponentData(body.Anchor, anchor);
                 if (changed) EventBus<BodyDestroyed>.Publish(new BodyDestroyed(change.Body.System.Value, change.Body.LocalKey));
@@ -271,7 +287,7 @@ namespace Game.Galaxy.Services
             if (disposed) return;
             Unload(); DrainRetired();
             if (retiring.Count != 0 || retiringBelts.Count != 0) throw new InvalidOperationException("Loader disposal requires completed grid/read retirement.");
-            disposed = true; registry.RemoveSpawnHook(hook); galaxy.SetLiveDeltaSink(null);
+            disposed = true; EventBus<BodyInteracted>.Unsubscribe(OnBodyInteracted); registry.RemoveSpawnHook(hook); galaxy.SetLiveDeltaSink(null);
             if (!world.IsCreated) return;
             if (ownsInfo && world.EntityManager.Exists(infoEntity)) world.EntityManager.DestroyEntity(infoEntity);
             players.Dispose(); streaming.Dispose(); blockDefs.Dispose(); orientations.Dispose(); bodyEvents.Dispose();

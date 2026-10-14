@@ -146,7 +146,8 @@ namespace Game.App.Boot
             var campaignGalaxy = Push(new GalaxyService(Content.Catalog, Session.Galaxy, world, galaxyTicker));
             Register(campaignGalaxy); Session.BindGalaxy(campaignGalaxy);
             Save.Register(new GalaxySaveParticipant(Session.Galaxy, Content.Catalog));
-            var systemLoader = Push(new StarSystemLoader(campaignGalaxy, world, Registry, Blueprints, Session, Content.Catalog));
+            var docking = new DockingService(); Register(docking);
+            var systemLoader = Push(new StarSystemLoader(campaignGalaxy, world, Registry, Blueprints, Session, Content.Catalog, docking));
             Register(systemLoader); galaxyTicker.Register(systemLoader);
             Flow.RegisterReady(systemLoader); Flow.RegisterExiting(systemLoader);
             Session.RegisterWriteback(new GalaxyFlushWriteback(systemLoader));
