@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 19 | 18 | 0 | 0 | 145 | 0 | 182 | 5 |
+| M3 | 19 | 17 | 0 | 0 | 146 | 0 | 182 | 5 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -406,8 +406,8 @@
 | QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | done | astra (gpt-6) | 2026-10-13 | a8b2d6d1 | Quest runtime/baselines/progression/restore implemented; seven required functional cases pass39710; Q371, trace and objective dependency review fixes. QUST/live adapter remain owning tasks. |
 | QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 19b24412 | Clue/mystery/rumor lifecycle accepted; five required functional cases pass in focused nine-case batch; Q377. |
 | QST-005 | BeatService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, DLG-006, DLG-007, DLG-008 | yes | done | astra (gpt-6) | 2026-10-14 | 30762271 | Deterministic scheduler/queue/completion implemented; nine required functional checks pass; two advisory fixtures authored, deferred. QST-006/008 own adapter/live registration. |
-| QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same presentation worker; full narrative adapter, ship log and markers after accepted BeatService. |
-| QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, QST-005, PERS-001 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead implements actual QUST snapshot/raw preservation; independent service prerequisites ADR-0105. |
+| QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Worker c7b8fa41 delivered real adapter/log/markers and accepted ADR-0103; lead focused acceptance next. Worker now HUD-010 actual presenter/hotkey composition. |
+| QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, QST-005, PERS-001 | yes | done | astra (gpt-6) | 2026-10-14 | 8e16b5e7 | QUST version1, raw IDs/name baselines, atomic restore; three required functional plus malformed-state case pass; capture advisory deferred. App registration QST-008. |
 | QST-008 | Bridge rules, player-free gating and registration | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005, QST-006, SPEC-40, SPEC-32, SPEC-33 | no | todo |  |  |  |  |
 | QST-009 | Opening chapter content | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, GAL-003, NAR-013, DLG-003, ENC-002, ECO-002 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same economy worker reconciling e987aae8 opening assets/import with accepted actual DLG-007 compiler; lead import and two required checks pending. |
 | QST-010 | Opening chapter playthrough | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-008, QST-009, QST-007, SPEC-70, SPEC-32, SPEC-50 | no | todo |  |  |  |  |
@@ -1082,6 +1082,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 480 | SPEC-62 Q19: camera occlusion recovery | Separate requested/effective distance, immediate pull-in and configured release half-life, preserve ordinary zoom/framing, cached synchronized Unity Physics query and own-grid exclusion. Advisory timing fixture extended, deferred. | Tech lead |
 | 481 | SPEC-33 Q37: actual encounter scenario fixtures | Six specified cases; four real functional scenarios pass using bounded fixed ticks, actual combat and pending ENCT save/load. Clear neutral derelict from firing lane by fixture placement, retain friendly-fire avoidance. Separate optional battle fixture, dialogue case retains QST-008 dependency. | Tech lead |
 | 482 | SPEC-33 Q29: procedural territory and lifecycle | Canonical seeded FIFO expansion; exhaust seeds without looping; first/different owned entry emits, reset clears previous system, disposal unsubscribes. Production Push owns lifetime. Four functional checks pass; existing zero seed content retained, advisory100k deferred. | Tech lead |
+| 483 | SPEC-42 Q18: QUST snapshot/restore boundaries | ADR-0105; parse/validate completely before mutation, preserve missing IDs/baseline names and dormant queue entries; changed unusable quest histories remain raw. No restore effects or fact writes; host owns OnRestored. Existing registry QUST/order40 reused; production registration QST-008. | Tech lead |
 
 ## Measurements
 
@@ -1194,6 +1195,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — QST-007 quest save owner accepted — astra (gpt-6)
+
+- 8e16b5e7 implements canonical QUST version1 across actual quest/clue/beat owners: instances/status/stages/bits, named baselines, ordered logs, tracked ID, per-body keys, FIFO body scopes and seen/resolved IDs. Unknown IDs/names and unusable changed quest histories remain raw; unknown queued beats stay dormant instead of disappearing. Full parse/order/count/version validation precedes owner mutation. Restore emits no effects/facts/events; NarrativeService owns the later restore evaluation. Q483/SPEC-42 Q18 and ADR-0105 record construction and concrete prerequisite correction; existing QUST registry/order40 reused. Production registration remains QST-008.
+- Three specified functional cases plus one malformed-save case pass in0.56s total:60-instance byte-identical round trip (58 contract instances, one story, one unknown), raw unknown retention, no effects during restore and rejected truncation/trailing/version data leaving live state unchanged. Initial check caught treating local log IDs as prefixed content IDs; corrected string validation. The first exhaustive truncation fixture took11.49s; replaced it with17 distributed truncation points plus final-byte truncation, retaining atomicity assertions and avoiding a long routine test. Seven existing quest and nine beat regressions pass. Test count: spec-required: 4, extra: 1; separate capture timing fixture authored/deferred, zero tuning passes. Compile clean/zero CS warnings. Evidence Logs/playtest/quest-save/{functional,quest-regression,beat-regression}.xml; no broad/performance/soak runs.
+- QST-006c7b8fa41 source delivered; presentation worker recycled immediately to HUD-010 actual notifications/hotkeys. Other same workers continue ECO-008 merchant/salvage composition and QST-009 opening import/content. Next lead integrates adapter then actual world story composition; no live quest persistence claim before registration.
 
 ### 2026-10-14 — ENC-014 procedural territory integrated — astra (gpt-6)
 
