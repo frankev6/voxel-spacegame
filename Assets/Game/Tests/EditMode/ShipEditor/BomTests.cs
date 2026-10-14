@@ -114,7 +114,7 @@ namespace Game.Tests.EditMode.ShipEditor
                 for (int block = 0; block < intact.Length; block++)
                 { Assert.AreEqual(intact[block], session.DraftCounts.Intact(block)); Assert.AreEqual(damaged[block], session.DraftCounts.Damaged(block)); }
                 Assert.AreEqual(pairs.Count, session.DraftCounts.Orientations.Count);
-                foreach (var pair in pairs) Assert.AreEqual(pair.Value, session.DraftCounts.Orientations[pair.Key]);
+                foreach (var pair in pairs) Assert.AreEqual(pair.Value, session.DraftCounts.Orientations[pair.Key.Block * 24 + pair.Key.Orient]);
             }
         }
     }

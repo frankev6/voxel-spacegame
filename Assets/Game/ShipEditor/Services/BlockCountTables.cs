@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Game.ShipEditor.Data;
 using Game.Voxel.Model;
 using Unity.Collections;
@@ -8,15 +7,16 @@ using Unity.Mathematics;
 namespace Game.ShipEditor.Services
 {
     /// <summary>SPEC-51 §5.7: block counts, not occupied-cell counts. Owned by the session.</summary>
-    internal sealed class BlockCountTables
+    internal sealed class BlockCountTables : IDisposable
     {
         readonly int[] intact, damaged;
-        readonly Dictionary<(ushort Block, byte Orient), int> orientations = new();
+        NativeHashMap<int, int> orientations;
         internal int TypeCount => intact.Length;
-        internal IReadOnlyDictionary<(ushort Block, byte Orient), int> Orientations => orientations;
+        internal NativeHashMap<int, int>.ReadOnly Orientations => orientations.AsReadOnly();
         internal int Intact(int block) => intact[block];
         internal int Damaged(int block) => damaged[block];
-        internal BlockCountTables(int types) { intact = new int[types]; damaged = new int[types]; }
+        internal BlockCountTables(int types)
+        { intact = new int[types]; damaged = new int[types]; orientations = new NativeHashMap<int, int>(types, Allocator.Persistent); }
         internal void CopyFrom(BlockCountTables source)
         {
             Array.Copy(source.intact, intact, intact.Length); Array.Copy(source.damaged, damaged, damaged.Length);
@@ -55,11 +55,12 @@ namespace Game.ShipEditor.Services
             uint bits = (uint)(bytes[offset] | bytes[offset + 1] << 8 | bytes[offset + 2] << 16 | bytes[offset + 3] << 24);
             return math.asfloat(bits) < definition.FunctionHp;
         }
+        public void Dispose() { if (orientations.IsCreated) orientations.Dispose(); }
         void Add(BlockRecord record, bool isDamaged, int delta)
         {
             var counts = isDamaged ? damaged : intact;
             counts[record.Block] += delta;
-            var key = (record.Block, record.Orient); orientations.TryGetValue(key, out int count); count += delta;
+            int key = record.Block * 24 + record.Orient; orientations.TryGetValue(key, out int count); count += delta;
             if (count == 0) orientations.Remove(key); else orientations[key] = count;
         }
     }

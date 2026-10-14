@@ -167,6 +167,7 @@ namespace Game.ShipEditor.Services
             if (disposed) return;
             // TODO(EDT-008): join/release connectivity jobs before disposing source storage.
             if (!Options.Creative && entry.Inventory != null) entry.Inventory.Changed -= InvalidateBom;
+            OriginalCounts?.Dispose(); DraftCounts?.Dispose();
             History?.Dispose(); Draft?.Dispose(); Original?.Dispose(); dirty.Clear();
             Changed = null; disposed = true;
         }
