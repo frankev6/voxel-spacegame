@@ -32,7 +32,7 @@ namespace Game.App.DevRuntime.Playground
         readonly DevContext context;
         readonly UIRoot ui;
         readonly SceneFlow flow;
-        VisualElement panel;
+        VisualElement panel, hiddenMap;
         Label energy, shield, abilities, feedback;
         Button shieldButton, boostButton;
         AbilityOperation operation;
@@ -163,6 +163,8 @@ namespace Game.App.DevRuntime.Playground
         void Show()
         {
             if (panel != null) return;
+            hiddenMap = ui.RootElement.Q<VisualElement>("dev-playground-map");
+            if (hiddenMap != null) hiddenMap.style.display = DisplayStyle.None;
             panel = new VisualElement { name = "dev-power-trial" }; panel.AddToClassList("panel");
             panel.style.position = Position.Absolute; panel.style.right = 24; panel.style.top = 90;
             panel.style.width = 390; panel.style.maxWidth = Length.Percent(45); panel.style.paddingLeft = 14;
@@ -181,6 +183,7 @@ namespace Game.App.DevRuntime.Playground
         Label Row(string name)
         {
             var label = new Label { name = name }; label.AddToClassList("label"); label.AddToClassList("label--mono");
+            label.style.whiteSpace = WhiteSpace.Normal;
             panel.Add(label); return label;
         }
         Button ActionButton(string name, string title, string action)
@@ -196,6 +199,8 @@ namespace Game.App.DevRuntime.Playground
         {
             if (disposed || panel == null) return;
             if (!IsLiveTrial(ctx, out var session) || session.IsTransitioning) { Close(); return; }
+            bool visible = ctx.TryGetService<InputService>(out var currentInput) && currentInput.CurrentContext == InputContext.Flight;
+            panel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
             if (operationId != 0 && ctx.Host.TryGetOperation(operationId, out var observed) && observed.Status != DevOperationStatus.Running)
             { feedback.text = observed.Status + ": " + observed.Message; operation?.Cancel("Ability observation finished."); operationId = 0; }
             // No owner writes or per-frame formatting. Read the same live state as the production HUD.
@@ -225,6 +230,8 @@ namespace Game.App.DevRuntime.Playground
         void Close()
         {
             operation?.Cancel("Power trial closed."); operation = null; operationId = 0;
+            if (hiddenMap != null) hiddenMap.style.display = DisplayStyle.Flex;
+            hiddenMap = null;
             panel?.RemoveFromHierarchy(); panel = null; energy = shield = abilities = feedback = null;
             shieldButton = boostButton = null; lastEnergy = lastShield = lastAbilities = null;
         }

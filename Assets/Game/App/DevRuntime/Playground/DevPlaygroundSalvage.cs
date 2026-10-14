@@ -200,7 +200,7 @@ namespace Game.App.DevRuntime.Playground
         static void CancelRequest(EntityManager em, Entity root)
         {
             if (em.HasComponent<GridDespawnRequest>(root)) GridSpawnApi.RequestDespawn(em, root);
-            else if (em.HasComponent<GridSpawnRequest>(root) && !em.HasComponent<SpawnReadToken>(root))
+            else if (em.HasComponent<GridSpawnRequest>(root) && !em.HasComponent<VoxelGrid>(root))
                 em.DestroyEntity(root); // caller-owned, unconsumed blueprint request; no spawn lease yet
         }
         void SetStatus(string text) { status = text; report?.Invoke(text); }

@@ -130,7 +130,9 @@ From a terminal at the repository root, run `tools/playtest/playground.sh`. This
 
 **Reset everything with `playground reset` in Console.** This restores the player and procedural station and clears enemies, broken pieces, projectiles, inventory grants, facts and trial state. Reset remains a command. Entry uses the separate `dev-playground` profile and saves any prior real campaign before switching; a failed save stops entry safely.
 
-Fly into a ring and press **F**:
+Use `playground run=<id>` to close Console, move to a trial and activate it, or fly into a ring and press **F**. Full reviewer checklist: [QA-PLAYGROUND](../../docs/QA-PLAYGROUND.md).
+
+Available trials:
 
 - `flight`: begin a four-checkpoint course; fly through each highlighted ring.
 - `range`: align with the stationary target; hold Space to shoot and break off its structures.
@@ -144,7 +146,11 @@ Fly into a ring and press **F**:
 - `survey`: collect one actual palladium per interaction, topping up to three, and reopen the quest log to inspect progress. The collection objective becomes done at three; ARK hand-in still belongs to campaign station dialogue.
 - `map`: open the actual galaxy map with the research-station rumor selected. Pan/zoom and inspect known systems and the rumor marker. An unknown target keeps its uncharted presentation.
 
-`playground goto=<id>` teleports to any of those areas. `playground status` lists them. The old informational facts/grid/directory circles were removed; inspection commands remain available but do not count as playable activities. `editor` opens the actual creative Blueprint Lab: place/remove blocks, undo/redo, inspect overlays, and save blueprints. Exit the Lab to Main Menu, then run `playground reset` to return. Stored blueprints survive playground resets. The story/survey/map beacons form a far-south preview area. Their explicit actions use the registered quest/clue owners, log query and map presenters; the generated galaxy is metadata only, with no body load or player relocation. Quest/clue evaluation and marker refresh occur on those actions; automatic campaign dialogue stays disabled. Reset clears their quest, clue/seen state, cargo and map metadata through normal session owners. Docked fleet editing, campaign travel and story dialogue remain separate integration work.
+- `power`: live power/shield/ability instruments; `playground run=shield` and `playground run=boost` trigger real equipped abilities.
+- `campaign`: real opening campaign in the isolated profile, including station dialogue, docked editor and travel. `playground run=station` reaches ARK interaction after opening dialogue.
+- `salvage`: prepare a bounded approved fighter wreck, then use F at its real Salvage prompt to recover cargo.
+
+`playground goto=<id>` teleports to any of those areas. `playground status` lists them. The old informational facts/grid/directory circles were removed; inspection commands remain available but do not count as playable activities. `editor` opens the actual creative Blueprint Lab: place/remove blocks, undo/redo, inspect overlays, and save blueprints. Exit the Lab to Main Menu, then run `playground reset` to return. Stored blueprints survive playground resets. The story/survey/map beacons form a far-south preview area. Their explicit actions use the registered quest/clue owners, log query and map presenters; the generated galaxy is metadata only, with no body load or player relocation. Quest/clue evaluation and marker refresh occur on those actions; automatic campaign dialogue stays disabled. Reset clears their quest, clue/seen state, cargo and map metadata through normal session owners. Use the campaign portal for actual station dialogue, docked fleet editing and travel. The preview pads do not grant campaign progression. `playground reset` also returns directly from the isolated Lab/campaign.
 
 CLI while playing: `tools/playtest/g.sh dev --cmd "playground reset"`; poll its returned operation with `tools/playtest/g.sh op --id N`.
 

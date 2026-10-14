@@ -150,6 +150,30 @@ namespace Game.Tests.PlayMode.App
             Assert.AreEqual(sceneBeforeStory, Game.Session.CurrentScene); Assert.AreEqual(locationBeforeStory, galaxy.State.PlayerLocation);
             Assert.AreEqual(hasLocationBeforeStory, galaxy.State.HasPlayerLocation);
             Assert.IsFalse(Services.Get<Game.Narrative.Dialog.DialogService>().IsActive, "Explicit quest/clue/map actions must not launch automatic campaign dialogue.");
+            // Console shortcuts must remove TextEntry before dispatching actual ability input.
+            DialogTestContext.Activate(ui.RootElement.Q<Button>("btn-open-console"));
+            Assert.AreEqual(InputContext.TextEntry, Services.Get<global::Game.Input.InputService>().CurrentContext);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground run=power", Host.Context).Kind);
+            Assert.AreEqual(InputContext.Flight, Services.Get<global::Game.Input.InputService>().CurrentContext);
+            Assert.NotNull(ui.RootElement.Q<VisualElement>("dev-power-trial"));
+            EM.CompleteAllTrackedJobs();
+            byte requested = EM.GetComponentData<global::Game.Simulation.Power.ShieldControl>(Root).RequestedOn;
+            yield return RunCommand("playground run=shield");
+            EM.CompleteAllTrackedJobs();
+            Assert.AreNotEqual(requested, EM.GetComponentData<global::Game.Simulation.Power.ShieldControl>(Root).RequestedOn);
+            yield return RunCommand("playground run=boost");
+            EM.CompleteAllTrackedJobs();
+            Assert.Greater(EM.GetComponentData<global::Game.Simulation.Power.ShipStatMultipliers>(Root).Get(global::Game.Data.Combat.StatId.Thrust), 1);
+            int scrapBefore = economy.Inventory.CountOf(new ContentId("resource_scrap"));
+            yield return RunCommand("playground run=salvage");
+            Assert.AreEqual(scrapBefore, economy.Inventory.CountOf(new ContentId("resource_scrap")), "Wreck preparation grants no cargo.");
+            yield return Until(() => Host.Context.TryGetInteractionTarget(out var salvageTarget)
+                && salvageTarget.Kind == InteractionKind.Salvage && salvageTarget.InRange != 0,
+                "Actual salvage prompt is available", 3);
+            yield return RunCommand("playground run=salvage");
+            Assert.Greater(economy.Inventory.CountOf(new ContentId("resource_scrap")), scrapBefore, "Production salvage transfers actual cargo.");
+            Assert.IsTrue(ui.Navigator.Get<InventoryView>().IsOpen);
+            ui.Navigator.Pop(ui.Navigator.Get<InventoryView>());
             Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=combat", Host.Context).Kind);
             yield return RunCommand("playground activate");
             EM.CompleteAllTrackedJobs();
@@ -185,11 +209,20 @@ namespace Game.Tests.PlayMode.App
             Assert.AreEqual(global::Game.Core.Flow.GameScene.BlueprintLab, Game.Session.CurrentScene);
             Assert.IsNotNull(UnityEngine.Object.FindAnyObjectByType<Game.App.EditorHost.ShipEditorHost>());
             Assert.AreEqual(global::Game.Core.InputContext.Editor, Services.Get<global::Game.Input.InputService>().CurrentContext);
-            Services.Get<Game.App.EditorHost.EditorHostServices>().RequestLeave();
-            yield return Until(() => Game.Session.CurrentScene == global::Game.Core.Flow.GameScene.MainMenu && !Game.Session.IsTransitioning, "Lab exit returns to MainMenu", 10);
+            // The isolated Lab is part of the playground: reset must work directly without a manual Exit step.
             yield return RunCommand("playground reset");
             Assert.IsTrue(Game.Session.IsSandbox);
             StringAssert.Contains("Playground active", Host.Commands.Execute("playground status", Host.Context).Text);
+            var trialProfile = Services.Get<global::Game.Persistence.Services.SaveService>().ActiveProfile;
+            yield return RunCommand("playground run=campaign");
+            Assert.IsFalse(Game.Session.IsSandbox);
+            Assert.AreEqual(trialProfile, Services.Get<global::Game.Persistence.Services.SaveService>().ActiveProfile);
+            Assert.IsTrue(Services.Get<Game.Narrative.Dialog.DialogService>().IsActive, "The real opening dialogue must be playable.");
+            Assert.NotNull(ui.RootElement.Q<VisualElement>("dev-campaign-guide"));
+            yield return RunCommand("playground reset");
+            Assert.IsTrue(Game.Session.IsSandbox);
+            Assert.IsFalse(Services.Get<Game.Narrative.Dialog.DialogService>().IsActive);
+            Assert.IsNull(ui.RootElement.Q<VisualElement>("dev-campaign-guide"));
             yield return Run(Game.Session.QuitToMainMenuAsync(false));
             yield return null;
             StringAssert.Contains("Playground inactive", Host.Commands.Execute("playground status", Host.Context).Text);

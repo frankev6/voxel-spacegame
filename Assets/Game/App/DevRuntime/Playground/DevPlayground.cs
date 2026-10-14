@@ -47,11 +47,17 @@ namespace Game.App.DevRuntime.Playground
             new Pad("settings", "05  SETTINGS", 0, -180, "F opens real settings. Change audio, display, accessibility and control settings; close to return to flight."),
             new Pad("merchant", "06  TRADE", 160, -180, "F opens ARK Station Market with real stock, prices, Buy and Sell. First visit grants 2000 test credits; trades change your actual cargo and wallet."),
             new Pad("fleet", "07  FLEET", -320, -180, "F opens your actual fleet. Select a ship to inspect hull condition, blocks, thrust, power, shields and cargo capacity. Docked fleet editing is separate from the creative Lab beacon."),
-            new Pad("editor", "08  BLUEPRINT LAB", -320, 0, "F opens the real creative Blueprint Lab. Place/remove blocks, rotate, mirror, undo/redo, inspect overlays and save a blueprint.\nThis leaves the sandbox. Exit the Lab to Main Menu, then use playground reset to return. Saved blueprints survive reset."),
+            new Pad("editor", "08  BLUEPRINT LAB", -320, 0, "F opens the real creative Blueprint Lab. Place/remove blocks, rotate, mirror, undo/redo, inspect overlays and save a blueprint.\nThis leaves the sandbox. Use playground reset directly to return. Saved blueprints survive reset."),
             new Pad("story", "09  STORY / SHIP LOG", -160, -360, "F accepts the authored Survey Local Materials quest and reveals Fragmented Warning plus a targeted research-station rumor.\nInspect the real log: track the quest, read the clue, or select Rumors → Show on map. No campaign intro starts."),
             new Pad("survey", "10  SURVEY SUPPLIES", 0, -360, "F collects one actual palladium (up to three) and opens the survey log. Repeat to see real objective progress and completion of the collection step.\nThe ARK delivery step stays unfinished here; use the campaign for its station dialogue."),
-            new Pad("map", "11  GALAXY / RUMOR", 160, -360, "F opens the real galaxy map at the research-station rumor. Pan, zoom, inspect systems and the quest/rumor markers.\nThis previews the generated galaxy without loading its bodies or starting travel; your sandbox ship stays here.")
+            new Pad("map", "11  GALAXY / RUMOR", 160, -360, "F opens the real galaxy map at the research-station rumor. Pan, zoom, inspect systems and the quest/rumor markers.\nThis previews the generated galaxy without loading its bodies or starting travel; your sandbox ship stays here."),
+            new Pad("power", "12  POWER / ABILITIES", -320, -360, "F opens live power and shield instruments. Toggle shield or trigger Speed Boost using the buttons or equipped ability keys. Console: playground run=shield or run=boost."),
+            new Pad("campaign", "13  PRACTICE CAMPAIGN", -160, -540, "F starts the real opening campaign in the isolated playground profile: dialogue, combat, station docking, trade and travel. Console: playground reset returns here."),
+            new Pad("salvage", "14  SALVAGE / RECOVER CARGO", 0, -540, DevPlaygroundSalvage.PadDetail)
         };
+        DevPlaygroundPower power;
+        DevPlaygroundSalvage salvage;
+        readonly DevPlaygroundCampaign campaign = new();
         InputService input;
         UIRoot ui;
         VisualElement panel, markers, map, launcher;
@@ -71,6 +77,8 @@ namespace Game.App.DevRuntime.Playground
         internal void Bind(InputService service, UIRoot root)
         {
             input = service; ui = root;
+            power = new DevPlaygroundPower(host.Context, ui);
+            salvage = new DevPlaygroundSalvage(host, SetReport);
             input.Controls.Flight.Interact.performed += OnInteract;
             launcher = new VisualElement { name = "dev-launcher", pickingMode = PickingMode.Ignore };
             launcher.style.position = Position.Absolute; launcher.style.right = 24; launcher.style.top = 16;
@@ -89,20 +97,25 @@ namespace Game.App.DevRuntime.Playground
             if (entering || !ctx.TryGetService<IGameFlow>(out var flow) || flow.IsTransitioning
                 || !ctx.TryGetService<SaveService>(out var save) || save.IsBusy
                 || !ctx.TryGetService<SceneFlow>(out var scenes)) return DevCommandResult.Fail("flow/save busy or unavailable");
-            if (flow.CurrentScene != GameScene.World && flow.CurrentScene != GameScene.MainMenu)
-                return DevCommandResult.Fail("Leave the current editor/dialog flow for World or MainMenu first");
+            if (flow.CurrentScene != GameScene.World && flow.CurrentScene != GameScene.MainMenu
+                && !(flow.CurrentScene == GameScene.BlueprintLab && IsPlaygroundProfile(save)))
+                return DevCommandResult.Fail("Leave the current editor for World or MainMenu first; direct Lab reset is limited to the playground profile");
             entering = true;
             ClearPresentation(); active = false;
             var operation = new EntryOperation(this, Begin(flow, save, scenes));
             return DevCommandResult.Pending(host.AddOperation(operation), "resetting isolated playground");
         }
+        static bool IsPlaygroundProfile(SaveService save)
+        {
+            foreach (var profile in save.ListProfiles())
+                if (profile.Id.Equals(save.ActiveProfile) && profile.DisplayName == "dev-playground") return true;
+            return false;
+        }
         async Awaitable<FlowResult> Begin(IGameFlow flow, SaveService save, SceneFlow scenes)
         {
             try
             {
-                bool ownProfile = false;
-                foreach (var profile in save.ListProfiles())
-                    if (profile.Id.Equals(save.ActiveProfile) && profile.DisplayName == "dev-playground") ownProfile = true;
+                bool ownProfile = IsPlaygroundProfile(save);
                 // Save a real campaign BEFORE switching profiles. Playground reset deliberately discards its own trials.
                 if (flow.HasActiveSession)
                 {
@@ -165,6 +178,7 @@ namespace Game.App.DevRuntime.Playground
             active = true; enemyRequested = false; tradeGranted = false; pending = 0; nearest = -1;
             courseGate = -1;
             report = "Quiet sandbox ready. No hostile ships spawn until you activate COMBAT.";
+            salvage?.Reset();
             DevPlaygroundStory.RefreshResetMarkers(ctx);
             BuildPresentation();
             GoTo("flight");
@@ -183,11 +197,36 @@ namespace Game.App.DevRuntime.Playground
                 }
             return DevCommandResult.Fail("Unknown pad. " + Directory());
         }
+        internal DevCommandResult Run(string id)
+        {
+            // Console text entry must be removed before normal Flight actions can run.
+            if (host.Console.Screen.IsOpen) host.Console.Toggle();
+            if (id == "station")
+            {
+                if (!host.Context.TryGetService<SaveService>(out var save) || !IsPlaygroundProfile(save)
+                    || !host.Context.TryGetService<GameSession>(out var session) || session.IsSandbox)
+                    return DevCommandResult.Fail("Start playground run=campaign first, then finish the opening dialogue.");
+                return host.Commands.Execute("interact body=ark_station", host.Context);
+            }
+            var moved = GoTo(id == "shield" || id == "boost" ? "power" : id);
+            if (moved.Kind == DevResultKind.Failed) return moved;
+            if (id == "shield" || id == "boost")
+            {
+                var result = power.Activate(host.Context, ui, id);
+                pending = result.Kind == DevResultKind.Pending ? result.OperationId : 0;
+                SetReport(result.Text); return result;
+            }
+            var activation = Activate();
+            if (id == "salvage" && activation.Kind == DevResultKind.Ok && salvage.Target != Entity.Null)
+                return host.Commands.Execute("interact", host.Context);
+            return activation;
+        }
         internal DevCommandResult Status() => DevCommandResult.Ok((active ? "Playground active. " : "Playground inactive. F1: playground to enter. ") + Directory() + "\n" + report);
         string Directory()
         {
-            var text = new System.Text.StringBuilder("F1: playground reset | playground goto=<id>\n");
+            var text = new System.Text.StringBuilder("Console: playground reset | playground run=<id> | playground goto=<id>\n");
             foreach (var pad in pads) text.Append(pad.Id).Append(" — ").Append(pad.Title).Append('\n');
+            text.Append("shield / boost — trigger equipped abilities\nstation — ARK interaction in practice campaign\n");
             return text.ToString();
         }
         void OnInteract(InputAction.CallbackContext _) { Activate(); }
@@ -246,6 +285,15 @@ namespace Game.App.DevRuntime.Playground
                 case "map":
                     result = DevPlaygroundStory.Activate(host.Context, ui, pad.Id);
                     break;
+                case "power":
+                    result = power.Activate(host.Context, ui, "power");
+                    break;
+                case "salvage":
+                    result = salvage.Activate(host.Context, ui, origin + pad.Offset);
+                    break;
+                case "campaign":
+                    result = campaign.Activate(host.Context, ui);
+                    break;
                 case "editor":
                     if (host.Context.TryGetService<GameSession>(out var editorSession) && editorSession.IsSandbox)
                         result = DevCommandResult.Pending(host.AddOperation(new LabEntryOperation(editorSession)), "Opening creative Blueprint Lab");
@@ -282,6 +330,7 @@ namespace Game.App.DevRuntime.Playground
         {
             if (launcher != null) launcher.style.display = host.Console.Screen.IsOpen ? DisplayStyle.None : DisplayStyle.Flex;
             var ctx = host.Context;
+            power?.Tick(ctx); salvage?.Tick();
             if (autoEnter && !entering && input != null && PlayerScenarioProbes.IsReady(ctx)
                 && ctx.TryGetService<IGameFlow>(out var startup) && !startup.IsTransitioning)
             { autoEnter = false; Enter(); }
@@ -305,7 +354,7 @@ namespace Game.App.DevRuntime.Playground
             {
                 nearest = next;
                 if (heading != null) heading.text = next < 0 ? "DEV PLAYGROUND  /  FLY TO A BEACON" : pads[next].Title + "  /  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
-                if (detail != null) detail.text = next < 0 ? "North: Lab / flight / range / enemy · South: fleet / cargo / settings / trade\nFar south: story / survey supplies / galaxy map. Console: playground goto=<id> · playground status lists all beacons" : pads[next].Detail;
+                if (detail != null) detail.text = next < 0 ? "North: Lab / flight / range / enemy · South: fleet / cargo / settings / trade\nFar south: power / story / survey / map · Campaign / salvage further south. Console: playground goto=<id> · playground status lists all beacons" : pads[next].Detail;
             }
             if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status != DevOperationStatus.Running)
             { pending = 0; SetReport(operation.Status + ": " + operation.Message); }
@@ -313,7 +362,7 @@ namespace Game.App.DevRuntime.Playground
             {
                 var offset = current - origin;
                 playerDot.style.left = (float)math.clamp((offset.x + 360) * .24, 0, 240);
-                playerDot.style.top = (float)math.clamp((60 - offset.z) * .30, 0, 140);
+                playerDot.style.top = (float)math.clamp((60 - offset.z) * .24, 0, 180);
             }
             var camera = ctx.GameplayCamera;
             if (markers == null || camera == null || !ctx.TryGetFrame(out var frame)) return;
@@ -368,15 +417,15 @@ namespace Game.App.DevRuntime.Playground
             map.AddToClassList("panel"); map.style.position = Position.Absolute; map.style.right = 24; map.style.bottom = 32;
             map.style.width = 280; map.style.paddingLeft = 16; map.style.paddingTop = 12; map.style.paddingBottom = 12;
             AddLabel(map, "BEACONS / NORTH UP", "panel__title");
-            var chart = new VisualElement { pickingMode = PickingMode.Ignore }; chart.style.height = 165; map.Add(chart);
+            var chart = new VisualElement { pickingMode = PickingMode.Ignore }; chart.style.height = 180; map.Add(chart);
             for (int i = 0; i < pads.Length; i++)
             {
                 var dot = AddLabel(chart, (i + 1).ToString(System.Globalization.CultureInfo.InvariantCulture), "text-muted");
                 dot.style.position = Position.Absolute;
-                dot.style.left = (pads[i].Offset.x + 360) * .24f; dot.style.top = (60 - pads[i].Offset.z) * .30f;
+                dot.style.left = (pads[i].Offset.x + 360) * .24f; dot.style.top = (60 - pads[i].Offset.z) * .24f;
             }
             playerDot = AddLabel(chart, "+", "panel__title"); playerDot.style.position = Position.Absolute;
-            AddLabel(map, "1 Flight    2 Range    3 Enemy\n4 Cargo     5 Settings   6 Trade\n7 Fleet     8 Lab     9 Story\n10 Survey   11 Map\n+ Your ship", "text-mono");
+            AddLabel(map, "1 Flight    2 Range    3 Enemy\n4 Cargo     5 Settings   6 Trade\n7 Fleet     8 Lab     9 Story\n10 Survey   11 Map    12 Power\n13 Campaign 14 Salvage\n+ Your ship", "text-mono");
             ui.GetLayer(UILayer.Hud).Add(map);
             markers = new VisualElement { name = "dev-playground-beacons", pickingMode = PickingMode.Ignore };
             markers.style.position = Position.Absolute; markers.style.left = 0; markers.style.top = 0;
@@ -417,6 +466,7 @@ namespace Game.App.DevRuntime.Playground
         public void Dispose()
         {
             if (input != null) input.Controls.Flight.Interact.performed -= OnInteract;
+            power?.Dispose(); campaign.Dispose(); salvage?.Dispose();
             active = false; ClearPresentation();
             launcher?.RemoveFromHierarchy(); launcher = null;
         }
