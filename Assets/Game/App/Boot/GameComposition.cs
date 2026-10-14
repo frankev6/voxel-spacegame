@@ -195,6 +195,9 @@ namespace Game.App.Boot
             var economy = new Game.Economy.EconomyService(Content.Catalog, economyConfig[0],
                 () => Session.CampaignSeed, () => logicWorld.UniversalTime);
             Register(economy); Register<Game.Data.Logic.ILogicEconomy>(economy);
+            var cargoCapacity = Push(new Game.App.Economy.CargoCapacitySync(economy.Inventory, Session.Fleet, Content.Catalog, economyConfig[0]));
+            Register(cargoCapacity); Session.RegisterNewGameInitializer(cargoCapacity);
+            Register(new Game.App.Economy.MerchantDirectory(Content.Catalog, campaignGalaxy));
             Session.RegisterModel(economy); Session.RegisterNewGameInitializer(economy);
             Save.Register(new Game.Economy.InventorySaveParticipant(economy, Content.Catalog));
             var narrativeOwner = new Game.Narrative.ShipLog.NarrativeLogicAdapter();
