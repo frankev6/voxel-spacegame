@@ -44,6 +44,7 @@ namespace Game.ShipEditor.Services
         }
         internal void Register(IEditorTool tool) => tools.Add(tool.Id, tool);
         public ToolId ActiveTool => active.Id;
+        public int SelectedCount => Selection.Count;
         public SymmetrySettings Symmetry => context.Symmetry;
         public bool ConsumesWheel => active.ConsumesWheel;
         public int StateVersion { get; private set; }

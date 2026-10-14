@@ -1089,3 +1089,5 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 | 53 | Inverse deltas cannot restore overflow or exact slots after target rejection | Capture and restore an inventory-owned checkpoint, preallocate replacement baseline before mutation, and guard reentrant editor edits. ADR-0096. | Tech lead | Resolved; ledger Q452. |
 
 | 54 | Editor host waits on unrelated camera occlusion | Use completed editor orbit, editor sampler and UI host/modal tasks as concrete dependencies under ADR-0068. Flight occlusion does not participate in the editor host. | Tech lead | Resolved; ledger Q455. |
+
+| 55 | Scene-owned host versus persistent screen registration | EditorHostServices registers editor/browser models once and forwards to the active scene presenter. Launcher owns real leave/settings/name callbacks; detach before native disposal. Controller exposes read-only SelectedCount. Palette/props use actual render content. ADR-0097. | Tech lead | Resolved; ledger Q456. |
