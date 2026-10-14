@@ -54,6 +54,10 @@ namespace Game.App.Boot
                     if (!created.Contains(lifetime.DamageEntity)) created.Add(lifetime.DamageEntity);
                 }
                 int firstWeaponEntity = created.Count;
+                Game.Simulation.Factions.FactionContent.CreateSingletons(em, catalog,
+                    catalog.Get<EncounterConfigDefinition>(new ContentId("config_encounters")), created);
+                lifetime.FactionEntity = created[created.Count - 1];
+                lifetime.Factions = em.GetComponentData<FactionRelations>(lifetime.FactionEntity);
                 WeaponContent.CreateSingletons(em, catalog, created);
                 using (var weapons = em.CreateEntityQuery(ComponentType.ReadOnly<WeaponDefsRef>()))
                 { lifetime.WeaponEntity = weapons.GetSingletonEntity(); lifetime.Weapons = weapons.GetSingleton<WeaponDefsRef>().Value; }
