@@ -24,6 +24,9 @@ namespace Game.ShipEditor.Services
         readonly ProfilerMarker validateMarker = new("EditSession.Validate");
         readonly BillOfMaterials bom = new();
         bool bomDirty = true;
+        readonly System.Collections.Generic.List<EditIssue> issues = new();
+        bool issuesDirty = true;
+        double nextIssueRefresh;
         internal PlacementIndexes Placement => placement;
         StatsCalculator originalStats, draftStats;
         StatTotals originalTotals, draftTotals;
@@ -164,7 +167,7 @@ namespace Game.ShipEditor.Services
         internal void DrainDirtyBricks(NativeList<int3> output) { CheckAlive(); dirty.Drain(output); }
         void Notify(EditChangeKind kind, int count)
         { Revision++; Changed?.Invoke(new EditChange { Kind = kind, OpsApplied = count, Revision = Revision }); }
-        void InvalidateBom() => bomDirty = true;
+        void InvalidateBom() { bomDirty = true; issuesDirty = true; }
         public BillOfMaterials GetBom()
         {
             CheckAlive();
@@ -186,8 +189,36 @@ namespace Game.ShipEditor.Services
             if (draftStatsDirty) { draftTotals = draftStats.Calculate(DraftCounts, Draft); draftStatsDirty = false; }
             return draftTotals;
         }
-        // TODO(EDT-009): full validation and issue list.
-        public void GetIssues(System.Collections.Generic.List<EditIssue> result) => throw new System.NotImplementedException("EDT-009");
+        public void GetIssues(System.Collections.Generic.List<EditIssue> result)
+        {
+            CheckAlive(); if (result == null) throw new ArgumentNullException(nameof(result));
+            if (issuesDirty && UnityEngine.Time.realtimeSinceStartupAsDouble >= nextIssueRefresh) RefreshIssuesNow();
+            result.Clear(); result.AddRange(issues);
+        }
+        internal void RefreshIssuesNow()
+        {
+            CheckAlive(); FullValidator.Evaluate(this, context, issues); issuesDirty = false;
+            nextIssueRefresh = UnityEngine.Time.realtimeSinceStartupAsDouble + .25;
+        }
+        public bool RemoveFloatingParts(ApplyReport report)
+        {
+            CheckAlive(); if (report == null) throw new ArgumentNullException(nameof(report)); report.Clear(); CompleteRelabel();
+            if (connectivity.IslandCount <= 1) return false;
+            using var records = new NativeList<BlockRecord>(Allocator.TempJob); new DraftReader(Draft, context).Enumerate(records);
+            int keep = FullValidator.KeptRoot(this, context, records);
+            using var batch = new EditBatch();
+            foreach (var record in records)
+            {
+                if (context.Definitions.Value.Blocks[record.Block].IsCore) continue;
+                foreach (var offset in context.Footprints.Get(record.Block, record.Orient).Cells)
+                {
+                    int3 cell = record.Origin + offset;
+                    if (!FullValidator.OwnsCell(this, record, cell) || connectivity.RootAt(cell) == keep) continue;
+                    batch.Ops.Add(new DiffOp { Kind = DiffOpKind.Remove, Record = record }); break;
+                }
+            }
+            return TryApply(batch, AtomicityMode.AllOrNothing, 0, ToolId.Remove, "Remove floating parts", report);
+        }
         // TODO(EDT-011): atomic inventory/target commit.
         public CommitResult Commit() => throw new System.NotImplementedException("EDT-011");
         public void Discard()

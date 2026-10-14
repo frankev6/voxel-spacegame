@@ -1046,6 +1046,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 444 | SPEC-61 Q40: flight HUD concrete prerequisites | Resolved: completed framework/view contracts unblock full HUD view implementation; snapshot synchronization and root wiring stay HUD-009/002. | Tech lead |
 | 445 | SPEC-61 Q41: pause-screen concrete prerequisites | Resolved under ADR-0072: completed UI/pause/session contracts unblock implementation; lead retains root wiring. | Tech lead |
 | 446 | SPEC-61 Q42: main-menu concrete prerequisites | Resolved under ADR-0072: completed UI/save/flow contracts unblock complete menu/prompt; lead retains root wiring. | Tech lead |
+| 447 | SPEC-51 Q51: full validation and removal contract | Resolved: ADR-0095 session action, surviving-cell ownership, throttled display/immediate commit validation; four omitted issue-kind cases follow explicit acceptance (11 required). | Tech lead |
 
 ## Measurements
 
