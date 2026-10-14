@@ -7,5 +7,9 @@ namespace Game.UI.Views
         void Move(int fromSlot, int toSlot);
         void Sort();
         void StackAll();
+        /// QA-001: right-click halves a stack into the first empty slot.
+        void Split(int slot);
+        /// QA-001: shift-click gathers every stack of that item into the clicked one.
+        void Gather(int slot);
     }
 }

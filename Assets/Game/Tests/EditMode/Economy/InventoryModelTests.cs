@@ -159,6 +159,17 @@ namespace Game.Tests.EditMode.Economy
             Assert.IsTrue(f.Inventory.TryMove(1, 0)); Assert.AreEqual(f.Items[1], f.Inventory.Get(0).Item);
             Assert.AreEqual(f.Items[0], f.Inventory.Get(1).Item); f.Invariants();
         }
+        [Test] public void Split_HalfIntoFirstEmpty_Gather_Rejoins()
+        {
+            // QA-001: right-click split and shift-click gather keep counts and invariants.
+            using var f = new Fixture(); f.Add(0, 9);
+            Assert.IsTrue(f.Inventory.TrySplit(0, out int to)); Assert.AreEqual(1, to);
+            Assert.AreEqual(4, f.Inventory.Get(0).Count); Assert.AreEqual(5, f.Inventory.Get(1).Count); f.Invariants();
+            Assert.IsTrue(f.Inventory.Gather(1)); Assert.IsTrue(f.Inventory.Get(0).IsEmpty); Assert.AreEqual(9, f.Inventory.Get(1).Count);
+            Assert.AreEqual(9, f.Inventory.CountOf(f.Items[0].Id)); f.Invariants();
+            f.Inventory.SetCapacity(2); f.Add(1, 3); var before = f.Snapshot();
+            Assert.IsFalse(f.Inventory.TrySplit(1, out _), "no empty in-capacity slot"); f.SameSlots(before);
+        }
         [Test] public void Sort_KeepsCounts()
         {
             using var f = new Fixture(); f.Add(2, 13); f.Add(0, 18); f.Add(1, 7); f.Inventory.SetCapacity(1);

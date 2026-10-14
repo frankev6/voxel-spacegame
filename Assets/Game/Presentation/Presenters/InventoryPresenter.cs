@@ -40,7 +40,7 @@ namespace Game.Presentation.Presenters
             var stack = inventory != null ? inventory.Get(index) : default;
             var row = model.Slots[index]; row.Index = index;
             row.ItemId = stack.IsEmpty ? null : string.IsNullOrEmpty(stack.OriginalId.Value) ? stack.Item.IdString : stack.OriginalId.Value;
-            row.Icon = stack.Item != null ? stack.Item.Icon : null; row.Count = stack.Count; row.IsEmpty = stack.IsEmpty;
+            row.Name = stack.Item != null ? stack.Item.DisplayName : null; row.Icon = stack.Item != null ? stack.Item.Icon : null; row.Count = stack.Count; row.IsEmpty = stack.IsEmpty;
             row.InCapacity = inventory != null && index < inventory.Capacity; row.IsSelected = model.SelectedIndex == index;
         }
         void RefreshCounts()
@@ -68,6 +68,8 @@ namespace Game.Presentation.Presenters
         { if (inventory != null && inventory.TryMove(fromSlot, toSlot)) Select(toSlot); }
         public void Sort() { inventory?.Sort(); }
         public void StackAll() { inventory?.StackAll(); }
+        public void Split(int slot) { if (inventory != null && inventory.TrySplit(slot, out int to)) Select(to); }
+        public void Gather(int slot) { if (inventory != null && inventory.Gather(slot)) Select(slot); }
         public void Dispose() { if (disposed) return; Unbind(); disposed = true; }
     }
 }

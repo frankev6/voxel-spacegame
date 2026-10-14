@@ -23,6 +23,9 @@ namespace Game.UI.Views
         Button sort, stack;
         bool observing;
         Drag activeDrag;
+        VisualElement ghost;   // QA-001: follows the pointer while dragging (not a Slot: the pool stays 200)
+        Image ghostIcon; Label ghostCount;
+        int dropHover = -1;
         public InventoryView(InventoryViewModel vm, IInventoryCommands commands)
         { viewModel = vm ?? throw new ArgumentNullException(nameof(vm)); this.commands = commands ?? throw new ArgumentNullException(nameof(commands)); }
         public override string Key => "inventory";
@@ -49,8 +52,21 @@ namespace Game.UI.Views
                 rows[i / 10].Add(slot); slot.AddManipulator(new Drag(this, i));
                 slot.RegisterCallback<NavigationSubmitEvent>(evt => { if (observing) commands.Select(index); evt.StopPropagation(); });
                 slot.RegisterCallback<FocusInEvent>(_ => grid.ScrollTo(slot));
+                // QA-001 conveniences: right-click splits a stack, shift-click gathers that item; hover shows the item.
+                slot.RegisterCallback<PointerDownEvent>(evt =>
+                {
+                    if (!observing || !Visible(index)) return;
+                    if (evt.button == (int)MouseButton.RightMouse) { commands.Split(index); evt.StopPropagation(); }
+                    else if (evt.button == (int)MouseButton.LeftMouse && evt.shiftKey) { commands.Gather(index); evt.StopPropagation(); }
+                }, TrickleDown.TrickleDown);
+                slot.RegisterCallback<PointerEnterEvent>(_ => { if (observing && activeDrag == null && index < viewModel.Slots.Count && !viewModel.Slots[index].IsEmpty) slot.tooltip = Tooltip(index); });
                 rowChanged[i] = (_, _) => { RefreshSlot(index); RefreshRow(index / 10); };
             }
+            ghost = new VisualElement { name = "inventory-drag-ghost", pickingMode = PickingMode.Ignore };
+            ghost.AddToClassList("slot"); ghost.AddToClassList("inventory-drag-ghost"); ghost.AddToClassList(UIStyleClasses.IsHidden);
+            ghostIcon = new Image { pickingMode = PickingMode.Ignore }; ghostIcon.AddToClassList("slot__icon"); ghost.Add(ghostIcon);
+            ghostCount = new Label { pickingMode = PickingMode.Ignore }; ghostCount.AddToClassList("slot__count"); ghost.Add(ghostCount);
+            Root.Add(ghost);
             Root.RegisterCallback<DetachFromPanelEvent>(evt => { if (ReferenceEquals(evt.target, Root)) Stop(); });
             Root.RegisterCallback<AttachToPanelEvent>(evt => { if (ReferenceEquals(evt.target, Root) && IsOpen) Start(); });
         }
@@ -97,6 +113,30 @@ namespace Game.UI.Views
             slot.EnableInClassList("slot--overflow", model != null && !model.InCapacity && !model.IsEmpty);
             if (activeDrag != null && activeDrag.Index == index && !activeDrag.Matches()) activeDrag.Cancel();
         }
+        string Tooltip(int index)
+        {
+            var model = viewModel.Slots[index];
+            return model.Name + "  ×" + NumberStringCache.Get(model.Count) + "\nLeft-drag move · Right-click split · Shift-click gather";
+        }
+        void MoveGhost(Vector2 panelPosition)
+        {
+            ghost.style.left = panelPosition.x - Root.worldBound.x + 10; ghost.style.top = panelPosition.y - Root.worldBound.y + 10;
+        }
+        void HoverDrop(Vector2 panelPosition)
+        {
+            var picked = Root.panel?.Pick(panelPosition);
+            var slot = picked as Slot ?? picked?.GetFirstAncestorOfType<Slot>();
+            int index = slot != null && slot.userData is int i ? i : -1;
+            if (index == dropHover) return;
+            if (dropHover >= 0) slots[dropHover].RemoveFromClassList("inventory-slot--drop");
+            dropHover = activeDrag != null && index != activeDrag.Index ? index : -1;
+            if (dropHover >= 0) slots[dropHover].AddToClassList("inventory-slot--drop");
+        }
+        void EndDragPresentation()
+        {
+            ghost?.AddToClassList(UIStyleClasses.IsHidden);
+            if (dropHover >= 0) slots[dropHover].RemoveFromClassList("inventory-slot--drop"); dropHover = -1;
+        }
         void RefreshRow(int row)
         { bool any = false; for (int i = row * 10; i < (row + 1) * 10; i++) any |= Visible(i); rows[row].EnableInClassList(UIStyleClasses.IsHidden, !any); }
         sealed class Drag : PointerManipulator
@@ -109,21 +149,28 @@ namespace Game.UI.Views
             { this.view = view; Index = index; activators.Add(new ManipulatorActivationFilter { button = MouseButton.LeftMouse }); }
             protected override void RegisterCallbacksOnTarget()
             {
-                target.RegisterCallback<PointerDownEvent>(Down); target.RegisterCallback<PointerUpEvent>(Up);
+                target.RegisterCallback<PointerDownEvent>(Down); target.RegisterCallback<PointerUpEvent>(Up); target.RegisterCallback<PointerMoveEvent>(Move);
                 target.RegisterCallback<PointerCancelEvent>(Cancelled); target.RegisterCallback<PointerCaptureOutEvent>(CaptureLost);
             }
             protected override void UnregisterCallbacksFromTarget()
             {
-                Cancel(); target.UnregisterCallback<PointerDownEvent>(Down); target.UnregisterCallback<PointerUpEvent>(Up);
+                Cancel(); target.UnregisterCallback<PointerDownEvent>(Down); target.UnregisterCallback<PointerUpEvent>(Up); target.UnregisterCallback<PointerMoveEvent>(Move);
                 target.UnregisterCallback<PointerCancelEvent>(Cancelled); target.UnregisterCallback<PointerCaptureOutEvent>(CaptureLost);
             }
             void Down(PointerDownEvent evt)
             {
-                if (!view.observing || !CanStartManipulation(evt) || !view.Visible(Index)) return;
+                if (!view.observing || !CanStartManipulation(evt) || evt.shiftKey || !view.Visible(Index)) return;
                 view.commands.Select(Index); var model = view.viewModel.Slots[Index];
                 if (model.IsEmpty) { evt.StopPropagation(); return; }
                 view.activeDrag?.Cancel(); sourceId = model.ItemId; sourceCount = model.Count; pointer = evt.pointerId;
                 view.activeDrag = this; target.CapturePointer(pointer); target.AddToClassList("inventory-slot--dragging"); evt.StopPropagation();
+                view.ghostIcon.sprite = model.Icon; view.ghostCount.text = model.Count > 1 ? NumberStringCache.Get(model.Count) : ""; view.MoveGhost(evt.position);
+                view.ghost.RemoveFromClassList(UIStyleClasses.IsHidden); view.ghost.BringToFront();
+            }
+            void Move(PointerMoveEvent evt)
+            {
+                if (evt.pointerId != pointer || !ReferenceEquals(view.activeDrag, this)) return;
+                view.MoveGhost(evt.position); view.HoverDrop(evt.position);
             }
             internal bool Matches()
             { var model = view.viewModel.Slots[Index]; return !model.IsEmpty && model.ItemId == sourceId && model.Count == sourceCount; }
@@ -143,7 +190,7 @@ namespace Game.UI.Views
             {
                 int captured = pointer; pointer = -1; sourceId = null;
                 if (ReferenceEquals(view.activeDrag, this)) view.activeDrag = null;
-                target.RemoveFromClassList("inventory-slot--dragging");
+                target.RemoveFromClassList("inventory-slot--dragging"); view.EndDragPresentation();
                 if (captured >= 0 && target.HasPointerCapture(captured)) target.ReleasePointer(captured);
             }
         }

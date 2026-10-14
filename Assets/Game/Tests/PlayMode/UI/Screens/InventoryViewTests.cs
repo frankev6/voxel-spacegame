@@ -81,6 +81,8 @@ namespace Game.Tests.PlayMode.UI.Screens
             public void Move(int from, int to) { MoveCalls++; From = from; To = to; Presenter.Move(from, to); }
             public void Sort() => Presenter.Sort();
             public void StackAll() => Presenter.StackAll();
+            public void Split(int slot) => Presenter.Split(slot);
+            public void Gather(int slot) => Presenter.Gather(slot);
             public void Dispose() { UI.Dispose(); Presenter.Dispose(); Object.DestroyImmediate(config); Panel.Dispose(); }
         }
         static HashSet<VisualElement> Elements(VisualElement root)

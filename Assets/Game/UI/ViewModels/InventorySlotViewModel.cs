@@ -17,6 +17,12 @@ namespace Game.UI.ViewModels
         [CreateProperty] public string ItemId { get => itemId; set => Set(ref itemId, value, ItemIdChanged); }
 
         [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs NameChanged = new BindablePropertyChangedEventArgs(nameof(Name));
+        string name;
+        /// QA-001: display name for the hover tooltip.
+        [CreateProperty] public string Name { get => name; set => Set(ref name, value, NameChanged); }
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
         static readonly BindablePropertyChangedEventArgs IconChanged = new BindablePropertyChangedEventArgs(nameof(Icon));
         UnityEngine.Sprite icon;
         [CreateProperty] public UnityEngine.Sprite Icon { get => icon; set => Set(ref icon, value, IconChanged); }

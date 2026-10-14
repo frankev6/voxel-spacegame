@@ -11,3 +11,6 @@
 .inventory-detail-text { white-space: normal; margin-bottom: var(--space-2); }
 .slot--overflow { border-color: var(--color-warning); }
 .inventory-slot--dragging { border-color: var(--color-accent); }
+/* QA-001: drag ghost and drop target. */
+.inventory-drag-ghost { position: absolute; width: 64px; height: 64px; opacity: 0.85; border-color: var(--color-accent); }
+.inventory-slot--drop { border-color: var(--color-accent-strong); background-color: var(--color-surface-3); }

@@ -241,6 +241,34 @@ namespace Game.Economy
             else (scratch[fromSlot], scratch[toSlot]) = (scratch[toSlot], scratch[fromSlot]);
             Commit(); return true;
         }
+        /// <summary>QA-001: moves half of a stack (rounded up) into the first empty in-capacity slot. False if none fits.</summary>
+        public bool TrySplit(int slot, out int toSlot)
+        {
+            CheckMutation(); toSlot = -1;
+            if ((uint)slot >= MaxSlots || slots[slot].IsEmpty || slots[slot].Count < 2) return false;
+            for (int i = 0; i < Capacity; i++) if (slots[i].IsEmpty) { toSlot = i; break; }
+            if (toSlot < 0) return false;
+            CopyScratch();
+            int moved = (scratch[slot].Count + 1) / 2;
+            scratch[toSlot] = scratch[slot]; scratch[toSlot].Count = moved; scratch[slot].Count -= moved;
+            Commit(); return true;
+        }
+        /// <summary>QA-001: pulls every other stack of the same kind into <paramref name="slot"/>, up to its max stack.</summary>
+        public bool Gather(int slot)
+        {
+            CheckMutation();
+            if ((uint)slot >= MaxSlots || slots[slot].IsEmpty) return false;
+            CopyScratch(); bool changed = false;
+            for (int j = 0; j < MaxSlots && scratch[slot].Count < scratch[slot].Item.MaxStack; j++)
+                if (j != slot && !scratch[j].IsEmpty && SameKind(scratch[slot], scratch[j]))
+                {
+                    int moved = Math.Min(scratch[j].Count, scratch[slot].Item.MaxStack - scratch[slot].Count);
+                    scratch[slot].Count += moved; scratch[j].Count -= moved; changed = true;
+                    if (scratch[j].Count == 0) scratch[j] = default;
+                }
+            if (changed) Commit();
+            return changed;
+        }
         public void StackAll()
         {
             CheckMutation(); CopyScratch(); MergeScratch(); Commit();
