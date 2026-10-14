@@ -150,7 +150,7 @@ namespace Game.Tests.EditMode.Narrative
             original.Facts.SetBySlot(original.ResolveSlot, 1, FactWriteSource.Debugger); original.Runtime.Tick();
             var savedFacts = original.Facts.Capture(); var seen = new List<ContentId>(); var resolved = new List<ContentId>();
             original.Clues.CaptureState(seen, resolved); Assert.IsTrue(resolved.Remove(original.Rumor.Id));
-            var orphanClue = new ContentId("clue_removed"), orphanRumor = new ContentId("rumor_removed"); seen.Add(orphanClue); resolved.Add(orphanRumor);
+            ContentId orphanClue = new ContentId("clue_removed"), orphanRumor = new ContentId("rumor_removed"); seen.Add(orphanClue); resolved.Add(orphanRumor);
             var f = new Fixture(); int changed = 0, solved = 0;
             f.Clues.ClueChanged += _ => changed++; f.Clues.MysterySolved += _ => solved++;
             f.Runtime.SetWorldReady(false); f.Facts.Restore(savedFacts); f.Clues.RestoreState(seen, resolved); f.Runtime.OnSessionRestored();
