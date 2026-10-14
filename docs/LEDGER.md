@@ -14,9 +14,9 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
-| M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 29 | 14 | 0 | 0 | 139 | 0 | 182 | 5 |
+| M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
+| M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 7 |
+| M3 | 29 | 14 | 0 | 0 | 139 | 0 | 182 | 6 |
 | M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -208,7 +208,7 @@
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | yes | done | astra (gpt-6) | 2026-10-12 | 8f8adc3 | Automatic file cases; live Boot smoke passes, added active case discovered, future-command draft ignored (Q176) |
 | DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0b4269c | Real launch/probes, isolated profile, live edit-mode launch 1.370 s; Q144–146 |
 | DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 348fa4f7 | Teleport/spawn/grid commands, probes/CLI/snapshots; explicit sandbox NPCs ADR-0079. Three required cases passed across focused runs7809/54555; evidence Logs/playtest/dev009. |
-| DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead live brick/dirty/collider overlay renderer; unlock DEV-013/014 workers. |
+| DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | yes | done | astra (gpt-6) | 2026-10-14 | 53b1466a | Live brick/dirty/collider overlays and CLI; 3 required checks pass; GPU screenshot verified; advisory fixture authored/deferred. |
 | DEV-015 | In-game dev console | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-003, UI-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 8cf2df1 | F1 console; history/completion, async results, 0 B closed; ADR-0049 |
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | yes | done | astra (gpt-6) | 2026-10-12 | f1f6cd2 | Console/CLI replay; real seed-7 Fighter 300 ticks, 0 m error; live 1790-tick recording and screenshot; Q175 |
 | DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | yes | done | astra (gpt-6) | 2026-10-12 | f891b9d | Six drafts parse; active Boot passes and all six drafts are ignored; activation prerequisites Q177 |
@@ -301,7 +301,7 @@
 | AUD-013 | Audio performance and allocation tests | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-008, AUD-009 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 8a24a71f | 4 required measurements; zero warmed GC; performance deferred: drain500/4096 misses, zero optimization passes |
 | DEV-010 | aim and fire commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, WPN-001, INP-001, CAM-001 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-13 | c5c7fc15 | Aim/tracking/fire CLI accepted; two real-input/weapon PlayMode cases pass; Q379. |
 | DEV-011 | perf command and gh_perf extensions | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, VFX-001, AUD-001, TST-001 | yes | in-progress | economy (gpt-6.1-sol high) | 2026-10-13 |  | Source integrated2d39e5aa; JSON passes; marker real-work483542ns but headless Count0 inconclusive; no more blind retries; interactive verification pending |
-| DEV-013 | Overlays: islands and spatial hash | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-012, AI-001 | no | todo |  |  |  |  |
+| DEV-013 | Overlays: islands and spatial hash | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-012, AI-001 | yes | todo |  |  |  |  |
 | TST-005 | Determinism runner and the combat determinism gate | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | frontier | TST-002, TST-003, SPEC-13, SPEC-20, SPEC-21, SPEC-22, SPEC-23 | no | todo |  |  |  |  |
 | TST-006 | Ten-minute combat soak | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | standard | TST-005, SPEC-70 | no | todo |  |  |  |  |
 | MIG-009 | Weapon converter and weapon links | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-006, MIG-011, WPN-001, DATA-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 132a02a | Nine weapons and canonical mount links; content 8204e88; spec-required: 3, extra: 0 |
@@ -480,7 +480,7 @@
 | VFX-014 | Warp effect and strict config validation | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | standard | VFX-004, TRV-001 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | 600-particle pooled warp with oldest stealing, all 13 defaults strict; travel gameplay remains open; spec-required: 3, extra: 0 |
 | AUD-011 | GATE: Owner confirms licences of the carried-over audio | [SPEC-64](specs/SPEC-64-audio.md) | M3 | standard | AUD-010 | yes | todo |  |  |  |  |
 | AUD-012 | Floating-origin shift and clears | [SPEC-64](specs/SPEC-64-audio.md) | M3 | frontier | AUD-006, GAL-001, SYS-001 | yes | done | astra (gpt-6) | 2026-10-13 | f9fed29a | Three required origin/system/reset audio checks pass; spatial shifts and clears preserve appropriate music lifecycle |
-| DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-008, DEV-012, INP-005 | no | todo |  |  |  |  |
+| DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-008, DEV-012, INP-005 | yes | todo |  |  |  |  |
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | yes | done | economy (gpt-6.1-sol high) | 2026-10-13 | 40421f42 | Real inv/give/facts owners, probes and CLI; three required cases pass in focused seven-case batch. |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-14 | f6304ccd | Save/load/jump commands integrated; all 3 required checks pass (position fixture corrected a5833668); real menu routing/toworld acceptance still HUD-002-dependent; Q430 |
 | DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | done | astra (gpt-6) | 2026-10-14 | 54734103 | Direct World Play, visible Console/entry and launcher; six actual trials/screens. 15-case compatible batch green; broader campaign/story/editor areas remain absent. |
@@ -1183,6 +1183,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — DEV-012 live voxel overlays accepted — astra (gpt-6)
+
+- 53b1466a adds one dynamic capped line mesh, persistent native vertices, read-only Burst brick/dirty/collider gather jobs, nested Physics collider transforms, host disposal, overlay command and gh_overlay. White brick bounds, yellow/red/orange dirty bounds, green compound leaves and cyan provisional roots. Unimplemented overlay names fail explicitly. Q472 records defaults.
+- Three required functional cases pass: exactly24 edges for two bricks; two nested collider leaves/transform composition and cyan root box; host disposes native output. One advisory Bricks1M fixture authored (870 brick descriptors, one million occupied cells represented); measurement deferred under ADR-0042/0070. Test count: spec-required: 4, extra: 0. Compile clean/zero CS warnings after correcting type ambiguity and readonly native-array initialization. No broad/performance runs.
+- Live playground rendered 2,820 brick/collider edges with zero error logs; screenshot inspected at Logs/playtest/voxel-overlays-live.png, focused result Logs/playtest/voxel-overlays/functional.xml. F1 commands overlay name=bricks/dirty/colliders; overlay alone reports status; overlay name=none disables. DEV-013/014 now unlock substantial work for the same waiting workers. ENC-009cb960707 delivered; lead acceptance next unlocks ENC-011.
 
 ### 2026-10-14 — ENC-013 formations accepted — astra (gpt-6)
 
