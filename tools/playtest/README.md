@@ -35,6 +35,9 @@ This is a procedural test fixture using existing blocks, not a finished station 
 
 | Command (args, defaults) | Purpose |
 |---|---|
+| `gh_save` (`--slot`) | Manual save in the active profile through game flow; completes after the matching GameSaved |
+| `gh_load` (`--slot`) | Load through game flow/PLOC and the real player spawner; completes after matching GameLoaded and player readiness |
+| `gh_jump` (`--to`) | TravelService dev jump to a numeric system ID, authored content ID or unique authored display name; retains lane locks and refusal reasons |
 | `snapshot [--logs true] [--mark true] [--ecs true] [--ui true]` | Frame/time, scenes, visible UI text, camera + AudioListener count, ECS summary, deduplicated logs since mark |
 | `logs [--level all\|warn\|error] [--mark true] [--max 80]` | Deduplicated console since the mark: one line per unique message with a count and the first `Assets/Game` frame |
 | `mark` | Move the log mark |
@@ -79,6 +82,8 @@ Runtime dev commands, reachable as `gh_<name>` and in the in-game console. Each 
 
 Useful built-ins: `editor_play`, `editor_stop`, `open_scene`, `recompile`, `recompile_status`, `editor_status`,
 `capture_game_view`, `get_performance_stats`, `run_tests`, `eval`, `run_script`. List them with `unity command`.
+
+`toworld.sh` enters Boot/Play, clicks the real New Game menu, submits the commander name and advances opening dialog input until Flight/player readiness, then prints a snapshot. It uses the normal menu seed; explicit seed arguments fail while the menu has no seed selector. Live acceptance requires HUD-002 to bind the real MainMenu root (SPEC-70 Q31).
 
 ## Gotchas learned the hard way
 
