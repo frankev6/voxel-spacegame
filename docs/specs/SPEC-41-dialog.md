@@ -753,6 +753,8 @@ sequenceDiagram
 
 | 12 | Parser AST diagnostics and conditional-body indentation are not fully typed; generated declarations have no normal node headers | **Resolved:** editor AST carries ValidationReport diagnostics with source path and one-based line field, tags without the leading hash and original command spelling for DLG-E012. Parse same-indent conditional bodies used by converted files, and uniformly one-level-indented branch bodies; option bodies always require one level. Retain generated declarations separately only for _Generated/facts.yarn; no runtime reparsing or execution. Unsupported/dangling text escapes diagnose DLG-E001. Cross-file uniqueness, tag semantics and expression/command compilation remain DLG-003. | Tech lead |
 
+| 13 | Converted input has empty tags headers and a conditional option between ordinary menu options | **Resolved:** accept empty tags headers as an empty tag list. Preserve conditional-option AST branches and authored order; DLG-007 must coalesce an adjacent sequence of option groups and option-only conditional branches into one choice set. Use existing BranchIfFalse/Option/ShowOptions control flow so an outer false branch omits its option while an inline false condition retains its original grey/hidden semantics. Do not rewrite authored text, collapse branch visibility into inline availability, or present several consecutive menus. Extend the existing runner Options_AvailabilityAndHide/LegacyBeats_RunClean checks when DLG-007 is implemented. | Tech lead |
+
 ## 11. References
 
 - Audit `05-narrative-quests.md` B4, B5, B6, B11, B12, §5.9 (Yarn vs Ink), §5.13 phase 3; `LEDGER.md` R6, R11, R19; legacy UI `Import/Legacy/ui/Pages/NarrativeViewUI.uxml` (layout reference only).

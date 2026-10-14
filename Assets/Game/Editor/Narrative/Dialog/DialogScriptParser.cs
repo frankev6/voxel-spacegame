@@ -104,6 +104,7 @@ namespace Game.Editor.Narrative.Dialog
                     else if (!titles.Add(node.Title)) Error(node.Line, "DLG-E001", "Duplicate node title: " + node.Title);
                     if (End || Current.Text != "---")
                     { Error(node.Line, "DLG-E001", "Missing node body separator ---."); if (!End) at++; continue; }
+                    if (Current.Indent != 0) Error(Current.Number, "DLG-E011", "Node body separators cannot be indented.");
                     at++; ReadBody(node.Body, 0, false); ast.Nodes.Add(node);
                     if (End || Current.Text != "===") Error(node.Line, "DLG-E001", "Missing node terminator ===.");
                     else { if (Current.Indent != 0) Error(Current.Number, "DLG-E011", "Node terminators cannot be indented."); at++; }
