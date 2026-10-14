@@ -34,6 +34,9 @@ namespace Game.Tests.PlayMode.Galaxy
             }
             Assert.AreEqual(1, notifications); Assert.IsFalse(docking.HasPendingRestore);
             using var after = new SaveWriter(); participant.Capture(after); CollectionAssert.AreEqual(saved, after.ToArray());
+            participant.Restore(new SaveReader(saved), 1);
+            EventBus<SessionReset>.Publish(new SessionReset(SessionResetReason.Cleared)); EventBus<SessionReset>.Drain();
+            Assert.IsFalse(docking.IsDocked); Assert.IsFalse(docking.HasPendingRestore);
         }
     }
 }

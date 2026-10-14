@@ -77,6 +77,7 @@ namespace Game.Galaxy.Services
             registry.AddSpawnHook(hook); galaxy.SetLiveDeltaSink(this);
             EventBus<BodyInteracted>.Subscribe(OnBodyInteracted);
             EventBus<SceneTransitionFinished>.Subscribe(OnTransitionFinished);
+            EventBus<SessionReset>.Subscribe(OnSessionReset);
         }
         public int TickOrder => 100;
         public int SceneReadyOrder => SceneHookOrder.Galaxy;
@@ -184,6 +185,10 @@ namespace Game.Galaxy.Services
             world.EntityManager.CompleteAllTrackedJobs();
             t2?.Flush(); foreach (var old in retiring) old.Flush();
         }
+        void OnSessionReset(SessionReset value)
+        {
+            if (value.Reason != SessionResetReason.Loaded) docking.RestoreDocked(default);
+        }
         void OnTransitionFinished(SceneTransitionFinished value)
         {
             if (value.Success && value.Scene == GameScene.World && !disposed)
@@ -196,7 +201,8 @@ namespace Game.Galaxy.Services
             var em = world.EntityManager;
             if (!em.Exists(loaded.Anchor)) return false;
             var target = em.Exists(loaded.Grid) ? loaded.Grid : loaded.Anchor;
-            return em.HasComponent<Game.Galaxy.Interaction.Interactable>(target) &&
+            return !em.HasComponent<Game.Voxel.Damage.Hulk>(target) &&
+                em.HasComponent<Game.Galaxy.Interaction.Interactable>(target) &&
                 em.GetComponentData<Game.Galaxy.Interaction.Interactable>(target).Kind == InteractionKind.Dock;
         }
         void OnBodyInteracted(BodyInteracted value)
@@ -302,9 +308,11 @@ namespace Game.Galaxy.Services
         public void Dispose()
         {
             if (disposed) return;
+            docking.RestoreDocked(default);
             Unload(); DrainRetired();
             if (retiring.Count != 0 || retiringBelts.Count != 0) throw new InvalidOperationException("Loader disposal requires completed grid/read retirement.");
             disposed = true; EventBus<BodyInteracted>.Unsubscribe(OnBodyInteracted);
+            EventBus<SessionReset>.Unsubscribe(OnSessionReset);
             EventBus<SceneTransitionFinished>.Unsubscribe(OnTransitionFinished); registry.RemoveSpawnHook(hook); galaxy.SetLiveDeltaSink(null);
             if (!world.IsCreated) return;
             if (ownsInfo && world.EntityManager.Exists(infoEntity)) world.EntityManager.DestroyEntity(infoEntity);
