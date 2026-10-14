@@ -11,7 +11,7 @@ namespace Game.Voxel.Model
 
     /// <summary>Implements SPEC-10 §4.3. Managed owner of one structure's native storage; behaviour in §5.1–§5.4.
     /// VOXS content identity uses the canonical SPEC-05 payload (§5.4).</summary>
-    public sealed class VoxelStructure : IDisposable
+    public sealed partial class VoxelStructure : IDisposable
     {
         VoxelStructureData data;
 
