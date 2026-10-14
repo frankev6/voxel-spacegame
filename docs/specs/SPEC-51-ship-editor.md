@@ -1033,6 +1033,8 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 
 | 28 | Damaged instances can share an origin and retain negative function HP | **Resolved:** preserve all finite HP at or below the definition maximum, including negative damage-produced values. Sort instance hash input by origin, block, orientation, colour and HP bits; hash identity with HP so swapping HP between co-located blocks changes the hash. ADR-0082; ledger Q383. | Tech lead | Exact damage restore and identity-preserving hash. |
 
+| 29 | History accessors/ownership and saved cursor on branch replacement or stroke merge are unspecified | ADR-0086 defines transferred native command ownership, cursor-only MoveUndo/MoveRedo after successful session writes, MarkSaved, and immutable unreachable saved-cursor sentinel. Invalidate a saved state replaced by a merge or redo-branch disposal; trim after merges as well as pushes. | Tech lead | Resolved; ledger Q398. |
+
 ## 11. References
 
 - Audit `06-ui-shipeditor.md` §1.4–1.5 (old editor), §2 A1–A14, B3, B7, B9, C1–C14, E3–E6, §4 P1–P5, §5.3 (target editor design); `LEDGER.md` R13, R14, R15, R16, R19; screenshot `10-hangar.png`.
