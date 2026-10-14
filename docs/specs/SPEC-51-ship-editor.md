@@ -1051,3 +1051,5 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 - Audit `06-ui-shipeditor.md` §1.4–1.5 (old editor), §2 A1–A14, B3, B7, B9, C1–C14, E3–E6, §4 P1–P5, §5.3 (target editor design); `LEDGER.md` R13, R14, R15, R16, R19; screenshot `10-hangar.png`.
 - Synthesis §6b (voxel model), §6k (ship editor), §8 phase 4.
 - Amanatides & Woo, "A Fast Voxel Traversal Algorithm for Ray Tracing" (1987).
+
+| 35 | Mirror helper signatures and damage ownership | Internal SymmetryMapper borrows EditorContext; callers own appended record/damage outputs. Remap cell HP bytes into the mirrored canonical footprint order and preserve the four functional-HP bytes. Unsupported copies roll both outputs back to their initial lengths; exact mirrored removals preserve actual colour and let the session capture damage. No cross-module contract change. | Tech lead | Resolved; ledger Q409. |

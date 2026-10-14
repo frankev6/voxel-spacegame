@@ -16,8 +16,8 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 66 | 9 | 0 | 0 | 105 | 0 | 180 | 9 |
-| M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
+| M3 | 64 | 10 | 0 | 0 | 106 | 0 | 180 | 8 |
+| M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -433,8 +433,8 @@
 | EDT-010 | Stats accumulator and diff | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-006, PWR-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 73bcc085 | Exact moments, canonical sorted stats and deltas; four required cases pass; spec-required: 4, extra: 0 |
 | EDT-011 | Commit pipeline and R15 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-009, EDT-010, SPEC-50 | no | todo |  |  |  |  |
 | EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | ed61500 | Bounded DDA, slice/X-ray, working plane and placement origin; seven required methods (12 parameterized cases) pass; spec-required: 7, extra: 0 |
-| EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead: chiral mirrors, damage remapping, atomic copies and exact mirrored removal |
-| EDT-014 | Controller, tool framework and basic tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-012, EDT-013 | no | todo |  |  |  |  |
+| EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | yes | done | astra (gpt-6) | 2026-10-13 | 94110337 | Chiral mirrors, canonical damage remapping, atomic copies, exact removal; seven required checks pass |
+| EDT-014 | Controller, tool framework and basic tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-012, EDT-013 | yes | todo |  |  |  |  |
 | EDT-015 | Line, box and fill tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-014 | no | todo |  |  |  |  |
 | EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | no | todo |  |  |  |  |
 | EDT-017 | Copy, cut, paste and stamp | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-016 | no | todo |  |  |  |  |
@@ -499,7 +499,7 @@
 | ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011 | no | todo |  |  |  |  |
 | NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 4ca00b3 | Partial4ca00b3 +6d6e1ce9; fact editing required case passes39710, formatter also green. Baseline/Play beat live acceptance still awaits QST-005/006 and DLG-006; remains in progress. |
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
-| EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | no | todo |  |  |  |  |
+| EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
@@ -980,6 +980,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 406 | SPEC-51 Q32: canonical stats and exact mass moments | Sorted native pair totals, signed milli-mass moments, specified module contributions, lazy caches and numerical rows with improvement signs; four required cases pass. | Tech lead — resolved |
 | 407 | SPEC-31 Q25: registered celestial lifetime and compression | World-owned registered IDs/prototypes, loader-owned children, render-only compression/visibility and emission preservation; ADR-0090 adds installed engine bounds reference. Three actual Metal cases pass. | Tech lead — resolved |
 | 408 | SPEC-32 Q22: travel presentation whole-spec prerequisite overreach | Under ADR-0068 depend on completed travel timeline, celestial visuals, root/theme/controls/layout audit and warp/audio owners. Retain cover timing, live gate emission and layout acceptance. Owner audio licence gate remains pending independently. | Tech lead — resolved |
+| 409 | SPEC-51 Q35: mirror helper damage/output ownership | Borrow context; append caller-owned outputs, remap canonical cell HP and retain functional HP; rollback unsupported groups atomically; removal captures actual draft identity. | Tech lead — resolved |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1112,6 +1113,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — EDT-013 mirror symmetry accepted — astra (gpt-6)
+
+- 94110337 implements chiral partner mapping, all enabled-axis combinations in canonical order, exact dedupe, damage-byte remapping, atomic unsupported-group rollback, mirrored removal and plane defaults/nudges. SPEC-51 Q35/global409 records internal helper ownership. No cross-module API change or new art.
+- Compile log has zero CS warnings/errors. Focused EditMode96269 exited0:7 passed,0 failed,0 skipped; test bodies0.2639883s. Evidence Logs/playtest/editor-mirror. spec-required:7,extra:0. No full suite, perf run or combat wait. Source review assigned to existing combat worker; findings will be fixed without a new owner gate.
+- Previous reminder turn only restated policy (no implementation progress); this turn verified the mirror implementation and closes its acceptance. Presentation remains active on TRV-009; economy has a genuine ready-standard dependency wait. Next lead EDT-014 controller/basic tools to unlock EDT-015. Full roadmap goal remains active.
 
 ### 2026-10-13 — EDT-010 / SYS-011 accepted: stats and celestial visuals — astra (gpt-6)
 
