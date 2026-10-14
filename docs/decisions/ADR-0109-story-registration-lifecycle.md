@@ -1,6 +1,6 @@
 # ADR-0109 — Story registration and campaign lifecycle
 
-**Status:** Proposed (QST-008 implementation default; Tech lead integration review pending, 2026-10-14).
+**Status:** Accepted (Tech lead, 2026-10-14).
 
 ## Context
 
@@ -16,4 +16,4 @@ An internal production bridge factory binds real travel/encounter/beat/UI/dialog
 
 ## Consequences
 
-No public API, package, assembly-reference, shared data contract, RNG algorithm or state-writer change. Exactly the five required QST-008 functional tests remain; they use real app owners, compiled GraphDialogRunner and the actual navigation/presentation bridge. Source checks do not replace the lead's Unity compile and functional run.
+Accepted lifecycle overload: NarrativeService.BeginNewGame(bool runStory), with the existing no-argument method retaining true. GameSession passes !sandbox; canonical state still resets, but sandbox ticks cannot launch campaign story. Ordinary and creative campaigns retain story; restored campaigns enable evaluation as before. Live integration exposed the intro pausing sandbox startup, so the existing playground entry/reset case also verifies no dialog. No package, assembly-reference, shared data contract, RNG algorithm or state-writer change. Exactly the five required QST-008 functional tests remain; they use real app owners, compiled GraphDialogRunner and the actual navigation/presentation bridge. Source checks do not replace the lead's Unity compile and functional run.

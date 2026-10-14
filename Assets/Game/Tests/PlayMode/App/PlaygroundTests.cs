@@ -22,6 +22,7 @@ namespace Game.Tests.PlayMode.App
         {
             yield return RunCommand("playground");
             Assert.IsTrue(Game.Session.IsSandbox);
+            Assert.IsFalse(Services.Get<Game.Narrative.Dialog.DialogService>().IsActive, "Sandbox entry must not launch the campaign intro");
             StringAssert.Contains("Playground active", Host.Commands.Execute("playground status", Host.Context).Text);
             var ui = Services.Get<UIRoot>();
             Assert.NotNull(ui.RootElement.Q<Button>("btn-open-console"), "Console access cannot require F1");
@@ -72,6 +73,7 @@ namespace Game.Tests.PlayMode.App
             Assert.AreEqual(-70, standings.GetRelation(neutral));
             yield return RunCommand("playground reset");
             Assert.AreEqual(neutral.BasePlayerRelation, standings.GetRelation(neutral), "Reset clears faction changes as well as the visible trial");
+            Assert.IsFalse(Services.Get<Game.Narrative.Dialog.DialogService>().IsActive, "Sandbox reset must not replay the campaign intro");
             Assert.IsFalse(EM.Exists(originalPlayer), "Reset disposes previous player");
             Assert.IsFalse(EM.Exists(originalStation), "Reset disposes previous station");
             Assert.IsTrue(EM.Exists(range.Target));

@@ -37,10 +37,13 @@ namespace Game.Narrative
             while (index < systems.Count && systems[index].Order <= system.Order) index++;
             systems.Insert(index, system); // Equal orders retain registration order.
         }
-        public void BeginNewGame()
+        public void BeginNewGame() => BeginNewGame(true);
+        /// <summary>Reset canonical state; isolated sandboxes leave story evaluation disabled.</summary>
+        public void BeginNewGame(bool runStory)
         {
             BeginSession(); Facts.ResetToDefaults();
             for (int i = 0; i < systems.Count; i++) systems[i].OnNewGame();
+            session = runStory;
         }
         public void OnSessionRestored()
         {

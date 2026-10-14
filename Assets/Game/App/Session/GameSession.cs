@@ -218,7 +218,7 @@ namespace Game.App.Session
                 Galaxy.PlayerLocation = galaxyService.GetStartLocation(); Galaxy.HasPlayerLocation = true;
             }
             if (FleetParticipant != null) Fleet.Add(FleetParticipant.CreateStartShip(), true);
-            narrative?.BeginNewGame();
+            narrative?.BeginNewGame(!sandbox);
             if (!sandbox) foreach (var initializer in initializers) initializer.InitializeNewGame(args);
             EventBus<SessionReset>.Publish(new SessionReset(SessionResetReason.NewGame));
             HasActiveSession = true;
