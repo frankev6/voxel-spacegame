@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 16 | 15 | 0 | 0 | 151 | 0 | 182 | 6 |
+| M3 | 15 | 15 | 0 | 0 | 152 | 0 | 182 | 5 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -466,7 +466,7 @@
 | HUD-012 | Merchant screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-005 | yes | done | combat (gpt-6.1-sol high) | 2026-10-14 | f5e9e949 | Real MerchantSession screen/presenter registered/reset in UiComposition and playground; four required cases pass; live Buy verified. Normal faction launcher remains ECO-008. |
 | HUD-013 | Dialog host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, DLG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f3eea58 | Complete dialog host; five required plus four preserved DLG-009 cases pass. Production story driver remains DLG-007; no fake dialog pad. |
 | HUD-014 | Ship log screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-42 | no | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Source pipeline against accepted QST-006; actual view/query presenter and composition hook. Map navigation acceptance waits HUD-015/016; no substitute map. |
-| HUD-015 | MapCanvas control | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-62 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead implements actual cached map drawing/pan/zoom/hit-selection control, unlocking HUD-016. |
+| HUD-015 | MapCanvas control | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-62 | yes | done | astra (gpt-6) | 2026-10-14 | f2df90b8 | Retained Painter2D maps, transform-only pan/small zoom, 64 labels, token colours and captured point selection; five required cases pass, two advisory fixtures deferred. |
 | HUD-016 | Galaxy map and star-system map screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-015, SPEC-30, SPEC-31, TRV-001, QST-001 | no | todo |  |  |  |  |
 | HUD-017 | Fleet screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, FND-010, SYS-008, EDT-001, EDT-010 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 0f00dd27 | Fleet view/presenter, canonical committed stats and actual playground trigger; three required cases plus live screenshot pass. Actual edit launcher remains EDT-023; switch unavailable. |
 | HUD-018 | Ship editor host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, EDT-001, EDT-021 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 46d844de | Four-region editor host mounts accepted panels; four required graphics cases pass. Playable editor launcher remains EDT-023/HUD-002. |
@@ -1084,6 +1084,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 482 | SPEC-33 Q29: procedural territory and lifecycle | Canonical seeded FIFO expansion; exhaust seeds without looping; first/different owned entry emits, reset clears previous system, disposal unsubscribes. Production Push owns lifetime. Four functional checks pass; existing zero seed content retained, advisory100k deferred. | Tech lead |
 | 485 | SPEC-50 Q31: merchant and economy composition | Actual faction owner precedence; malformed/missing routes release continuation; shared economy uses live clock; own/dispose salvage and bind real dock launchers. Two required cases accepted. | Tech lead |
 | 486 | SPEC-61 Q49: loading/dock lifecycle | Synchronize current docking and flow state; actual launchers, real merchant route and close, unavailable reasons only for missing owners; four required cases pass. | Tech lead |
+| 491 | SPEC-61 Q51: MapCanvas ownership and extreme geometry | ADR-0110 public control methods, retained transforms, pre-render label/style changes, bounded colour cache and extreme dash subdivisions. Five functional cases pass; actual screens HUD-016. | Tech lead |
 | 488 | SPEC-42 Q17: opening import and content ownership | Preserve authored IDs/lore; facts_opening owns opening facts, derelict uses Inspect, actual DialogMenu compiles program and command table with matching current hashes. Imported98 nodes/2079 instructions; array wrappers traversed by element in compiler/validator. | Tech lead |
 | 487 | SPEC-61 Q50: HUD lifetime and input | Accepted ADR-0106; app-owned subscriptions and actual registered screens only, no blank log/map views. Canonical objective query binding via QST-008; nine required cases pass. | Tech lead |
 | 484 | SPEC-42 Q16: adapter and ship-log ownership | ADR-0103; bind actual owners, coalesce changes after evaluation, latest quest instance lists, cached journal labels and progress-only invalidation. Raw save history stays QUST-owned. | Tech lead |
@@ -1200,6 +1201,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — HUD-015 retained map control accepted — astra (gpt-6)
+
+- f2df90b8 adds actual Painter2D lanes/dashes,96-segment orbits, points/player/destination/rumor markers, theme/faction token resolution and64 pooled labels. Pan and small zoom change only retained transforms; zoom past10%, data/version, size and style invalidate drawing. Captured gestures latch drag at4px and select nearest within12px. ADR-0110/Q491 define construction and bounded extreme dash geometry; HUD-016 owns live galaxy/system views and data.
+- Five required rendered-panel cases pass: Pan_NoTessellation, SmallZoom_NoTessellation, LargeZoom_Tessellates, Click_SelectsNearestWithin12px and Drag_DoesNotSelect. Initial run exposed illegal style mutation inside generateVisualContent; moved all style/label preparation before rendering. Final bounded dash-loop correction passed focused Pan rendering again. Compile clean/zero CS warnings. Test count: spec-required: 7, extra: 0; two opt-in advisory measurements authored/deferred, zero tuning passes. Evidence Logs/playtest/map-canvas/{initial,functional,final-pan}.xml. No full/performance/soak run.
+- QST-00855981e06 delivered real story registration; same worker next real map screens once claim lands. QST-010 opening/reward fixes and HUD-014 ship-log implementations continue. No fake map/view or new worker.
 
 ### 2026-10-14 — QST-009 opening content imported — astra (gpt-6)
 

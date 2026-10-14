@@ -81,3 +81,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - Economy/dock/HUD batch00094da7/188ecaae/92d9da23 accepted: nineteen focused cases pass including regressions, compile clean. Next lead QST-009 import/actual story integration; same three workers implement QST-008/QST-010/HUD-004/005.
 
 - QST-009f468139e accepted: actual98-node opening program, two required content checks and fourteen existing regression cases pass across corrections. Compiler/validator array traversal and actual adapter namespace fixed. QST-010 worker fixes real missing hand-in reward (Q19/global489 reserved); QST-008 and HUD-014 active.
+
+- HUD-015f2df90b8 accepted: actual retained mapcontrol, five required rendered cases pass; two advisory fixtures deferred. Lead next QST-00855981e06 integration; combatworker nextHUD016 real maps; other workers QST010/HUD014 continue.
