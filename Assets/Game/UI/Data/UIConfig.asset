@@ -77,6 +77,9 @@ MonoBehaviour:
   - Key: fleet
     Uxml: {fileID: 9197481963319205126, guid: eab1a7ec7ca74cb4b414039e16662dfe, type: 3}
     Prewarm: 0
+  - Key: hud
+    Uxml: {fileID: 9197481963319205126, guid: 3edded8a0d9241afa9ea140c95806db2, type: 3}
+    Prewarm: 0
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32

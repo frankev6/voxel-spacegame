@@ -1,0 +1,46 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:controls="Game.UI.Controls">
+    <Style src="../../Theme/screens/hud.uss" />
+    <ui:VisualElement class="flight-hud" picking-mode="Ignore">
+        <ui:VisualElement name="hud-region-location" class="hud-region hud-plate anchor-top-left hud-location" picking-mode="Ignore">
+            <ui:Label name="hud-star-system" class="text-display text-m text-ellipsis" picking-mode="Ignore"><Bindings><ui:DataBinding property="text" data-source-path="StarSystemName" binding-mode="ToTarget" /></Bindings></ui:Label>
+            <ui:Label name="hud-zone" class="text-s text-muted text-ellipsis" picking-mode="Ignore"><Bindings><ui:DataBinding property="text" data-source-path="ZoneName" binding-mode="ToTarget" /></Bindings></ui:Label>
+        </ui:VisualElement>
+        <ui:VisualElement name="hud-region-objective" class="hud-region hud-plate anchor-top-center hud-objective" picking-mode="Ignore">
+            <ui:Label name="hud-objective-title" class="text-m text-ellipsis" picking-mode="Ignore"><Bindings><ui:DataBinding property="text" data-source-path="ObjectiveTitle" binding-mode="ToTarget" /></Bindings></ui:Label>
+            <ui:Label name="hud-objective-text" class="text-s text-ellipsis hud-objective-text" picking-mode="Ignore"><Bindings><ui:DataBinding property="text" data-source-path="ObjectiveText" binding-mode="ToTarget" /></Bindings></ui:Label>
+            <ui:Label name="hud-route" class="text-s text-muted text-ellipsis" picking-mode="Ignore"><Bindings><ui:DataBinding property="text" data-source-path="RouteText" binding-mode="ToTarget" /></Bindings></ui:Label>
+        </ui:VisualElement>
+        <ui:VisualElement name="hud-region-radar" class="hud-region hud-plate anchor-top-right hud-radar-plate" picking-mode="Ignore">
+            <ui:VisualElement name="hud-radar" class="hud-radar" picking-mode="Ignore" />
+            <ui:VisualElement class="hud-number-line" picking-mode="Ignore"><ui:Label name="hud-radar-range" class="text-s" picking-mode="Ignore" /><ui:Label text=" m" class="text-s text-muted" picking-mode="Ignore" /></ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="hud-region-target" class="hud-region hud-plate anchor-right-center hud-target" picking-mode="Ignore">
+            <ui:VisualElement class="hud-target-heading" picking-mode="Ignore">
+                <ui:VisualElement name="hud-target-relation" class="marker" picking-mode="Ignore" />
+                <ui:Label name="hud-target-name" class="text-m text-ellipsis hud-target-name" picking-mode="Ignore"><Bindings><ui:DataBinding property="text" data-source-path="TargetName" binding-mode="ToTarget" /></Bindings></ui:Label>
+            </ui:VisualElement>
+            <controls:Meter name="hud-target-hull" caption="Hull" variant="hull" show-numbers="false" />
+            <controls:Meter name="hud-target-shield" caption="Shield" variant="shield" show-numbers="false" />
+            <ui:VisualElement class="hud-number-line" picking-mode="Ignore"><ui:Label name="hud-target-distance" class="text-s hud-target-distance" picking-mode="Ignore" /><ui:Label text=" m" class="text-s text-muted" picking-mode="Ignore" /></ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="hud-region-prompt" class="hud-region hud-plate anchor-center hud-prompt" picking-mode="Ignore">
+            <ui:VisualElement class="hud-prompt-main" picking-mode="Ignore">
+                <controls:KeyHint name="hud-interaction-key" action-path="Flight/Interact" picking-mode="Ignore"><Bindings><ui:DataBinding property="text" data-source-path="InteractionKeyText" binding-mode="ToTarget" /></Bindings></controls:KeyHint>
+                <ui:Label name="hud-interaction-verb" class="text-s hud-interaction-verb" picking-mode="Ignore"><Bindings><ui:DataBinding property="text" data-source-path="InteractionVerbText" binding-mode="ToTarget" /></Bindings></ui:Label>
+                <ui:Label name="hud-interaction-target" class="text-s text-ellipsis hud-interaction-target" picking-mode="Ignore"><Bindings><ui:DataBinding property="text" data-source-path="InteractionTargetName" binding-mode="ToTarget" /></Bindings></ui:Label>
+            </ui:VisualElement>
+            <ui:Label name="hud-interaction-detail" class="text-xs text-ellipsis" picking-mode="Ignore"><Bindings><ui:DataBinding property="text" data-source-path="InteractionDetailText" binding-mode="ToTarget" /></Bindings></ui:Label>
+        </ui:VisualElement>
+        <ui:VisualElement name="hud-region-status" class="hud-region hud-plate anchor-bottom-left hud-status" picking-mode="Ignore">
+            <controls:Meter name="hud-hull-meter" caption="Hull" variant="hull" />
+            <controls:Meter name="hud-shield-meter" caption="Shield" variant="shield" />
+            <controls:Meter name="hud-energy-meter" caption="Energy" variant="energy" />
+            <ui:VisualElement class="hud-number-line" picking-mode="Ignore"><ui:Label name="hud-speed" class="text-m" picking-mode="Ignore" /><ui:Label text=" m/s" class="text-s text-muted" picking-mode="Ignore" /></ui:VisualElement>
+            <ui:Label name="hud-shield-status" class="text-xs text-muted" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement name="hud-region-weapons" class="hud-region hud-plate anchor-bottom-center hud-weapons" picking-mode="Ignore">
+            <ui:VisualElement name="hud-weapon-row" class="hud-slot-row" picking-mode="Ignore" />
+            <ui:VisualElement name="hud-ability-row" class="hud-slot-row" picking-mode="Ignore" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

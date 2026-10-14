@@ -6,7 +6,7 @@ using Game.UI.ViewModels;
 
 namespace Game.UI.Views
 {
-    /// <summary>Screen contract shell with SPEC-61 §4.1 metadata and §6 constructor.</summary>
+    /// <summary>HUD-003: authored root menu, change-driven availability and app-owned command routing.</summary>
     public sealed class MainMenuView : UIScreen
     {
         readonly MainMenuViewModel viewModel;
@@ -26,7 +26,8 @@ namespace Game.UI.Views
         public override bool HidesHud => false;
         public override bool IsRoot => true;
         Button continueButton, newGameButton;
-        Label subtitle;
+        Label subtitle, version;
+        bool observing;
         public override VisualElement DefaultFocus => viewModel.HasContinue ? continueButton : newGameButton;
         protected override void OnBuild()
         {
@@ -38,20 +39,24 @@ namespace Game.UI.Views
             Q<Button>("main-menu-settings").clicked += commands.OpenSettings;
             Q<Button>("main-menu-quit").clicked += commands.Quit;
             subtitle = Q<Label>("main-menu-continue-subtitle");
+            version = Q<Label>("main-menu-version");
         }
         public override void OnPush(object args)
         {
-            viewModel.propertyChanged += OnModelChanged;
+            if (!observing) { viewModel.propertyChanged += OnModelChanged; observing = true; }
             Refresh();
         }
-        public override void OnPop() => viewModel.propertyChanged -= OnModelChanged;
+        public override void OnPop()
+        { if (observing) { viewModel.propertyChanged -= OnModelChanged; observing = false; } }
         public override bool OnBack() => true;
         void OnModelChanged(object sender, BindablePropertyChangedEventArgs args) => Refresh();
         void Refresh()
         {
             continueButton.EnableInClassList(UIStyleClasses.IsHidden, !viewModel.HasContinue);
+            continueButton.SetEnabled(viewModel.HasContinue);
             subtitle.EnableInClassList(UIStyleClasses.IsHidden, !viewModel.HasContinue);
+            subtitle.text = viewModel.ContinueSubtitle;
+            version.text = viewModel.VersionText;
         }
-        // TODO(HUD-003): complete presenter integration and the required layout/name-entry acceptance.
     }
 }

@@ -1060,6 +1060,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 458 | SPEC-33 Q28: procedural territory concrete prerequisites | Use ENC-005, GAL-008 and CORE-003; encounter integration scenarios are unrelated to BFS and ownership events. | Tech lead |
 | 459 | SPEC-01 Q32: defeat/startup concrete prerequisites | FND-010 and HUD-001 provide actual owners; Lab acceptance waits for EDT-023 integration. | Tech lead |
 | 460 | SPEC-51 Q56: editor launcher concrete prerequisites | Completed host/fleet/spawn/galaxy/docking/transition owners; real dialog case remains DLG-007-dependent. | Tech lead |
+| 461 | SPEC-61 Q45: menu lifetime and Continue eligibility | Actual save/flow owners, generation/profile guards and bounded completion; two failed acceptance cases returned to the same implementing worker. | Tech lead |
+| 462 | SPEC-61 Q46: pause hints and accessibility layout | Existing real input bindings and owner routes, guarded modal callbacks and scrolling at 130 percent text. Four specified cases pass. | Tech lead |
+| 463 | SPEC-61 Q47: pooled flight HUD construction | Five weapon/four ability/64 radar pools and direct updates; real source binding remains HUD-009/002. Five specified cases pass. | Tech lead |
 
 ## Measurements
 

@@ -1,2 +1,8 @@
-/* SPEC-61 pause region. */
-.pause-window { width: 420px; max-width: 90%; max-height: 90%; }
+/* HUD-006: approved modal tokens; all actions remain reachable at 130% text scale. */
+.pause-window { width: 420px; max-width: 90%; height: 600px; max-height: 90%; }
+.pause-actions-scroll { flex-grow: 1; flex-basis: 0; min-height: 0; flex-shrink: 1; }
+.pause-actions { align-items: stretch; }
+.pause-actions > .btn { flex-shrink: 0; }
+#pause-save-blocked { white-space: normal; margin-left: var(--space-1); margin-right: var(--space-1); }
+.pause-key-hints { flex-shrink: 0; margin-top: var(--space-3); }
+.pause-hint-row { flex-direction: row; align-items: center; }

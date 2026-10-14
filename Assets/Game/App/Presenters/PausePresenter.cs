@@ -60,7 +60,7 @@ namespace Game.App.Presenters
                 _ => "Saving is unavailable."
             };
         }
-        bool CanAct => bound && !disposed && pending == null && !flow.IsTransitioning;
+        bool CanAct => bound && !disposed && pending == null && !flow.IsTransitioning && ui.Navigator.IsOpen<PauseView>();
         public void Resume() { if (CanAct) ui.Navigator.Pop(ui.Navigator.Get<PauseView>()); }
         public void Save()
         {
@@ -125,6 +125,5 @@ namespace Game.App.Presenters
             if (disposed) return;
             Unbind(); disposed = true; pending = null;
         }
-        // TODO(HUD-006): key hints and required acceptance.
     }
 }

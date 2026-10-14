@@ -1,0 +1,31 @@
+/* SPEC-61 HUD-007. Seven information plates leave the world centre and bottom-right open. */
+.flight-hud { flex-grow: 1; min-width: 0; min-height: 0; }
+.hud-location { width: 280px; }
+.hud-objective { width: 560px; max-width: 560px; }
+.hud-narrow .hud-objective { width: 480px; max-width: 480px; }
+.hud-objective-text { white-space: normal; max-height: 54px; overflow: hidden; text-overflow: ellipsis; }
+.hud-radar-plate { width: 268px; }
+.hud-radar { width: 240px; height: 240px; position: relative; overflow: hidden; background-color: var(--color-surface-2); border-color: var(--color-border); border-width: var(--border-thin); border-radius: 50%; }
+.hud-blip { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; }
+.hud-blip--station { width: 10px; height: 10px; }
+.hud-blip--body { border-radius: 50%; }
+.hud-blip--poi, .hud-blip--waypoint { border-color: var(--color-objective); }
+.hud-blip--beyond { opacity: 0.65; }
+.hud-target { width: 306px; top: 55%; }
+.hud-target-heading, .hud-number-line, .hud-prompt-main { flex-direction: row; align-items: center; }
+.hud-target-name { flex-grow: 1; min-width: 0; }
+.hud-target .meter { width: 280px; }
+.hud-target-distance { min-width: 0; }
+.hud-prompt { width: 480px; top: 68%; }
+.hud-interaction-verb { flex-shrink: 0; margin-left: var(--space-2); margin-right: var(--space-2); }
+.hud-interaction-target { flex-grow: 1; min-width: 0; }
+.hud-prompt--out-of-range .hud-interaction-verb { color: var(--color-text-muted); }
+.hud-status { width: 348px; }
+.hud-status .meter { width: 320px; }
+.hud-speed--boosting { color: var(--color-accent); }
+.hud-weapons { width: 320px; }
+.hud-slot-row { flex-direction: row; justify-content: center; }
+.hud-slot-row > .slot { width: 48px; height: 56px; margin: var(--space-1); }
+.hud-slot-number { position: absolute; left: 0; right: 0; top: 20px; -unity-text-align: middle-center; color: var(--color-text); font-size: var(--text-s); }
+
+.flight-hud .is-warning { color: var(--color-warning); }

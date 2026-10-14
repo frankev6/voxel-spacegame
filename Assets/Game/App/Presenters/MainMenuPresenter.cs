@@ -1,6 +1,7 @@
 using System;
 using Game.Core;
 using Game.Core.Flow;
+using Game.Core.Events;
 using Game.Persistence.Data;
 using Game.Persistence.Services;
 using Game.UI.Data;
@@ -21,6 +22,9 @@ namespace Game.App.Presenters
         readonly Action showLoad, openLab, showSettings;
         Awaitable<FlowResult> pending;
         string continueSlot;
+        string operationLabel;
+        ProfileId operationProfile;
+        uint generation, operationGeneration;
         bool bound, disposed;
 
         internal MainMenuPresenter(UIRoot ui, MainMenuViewModel model, IGameFlow flow, SaveService save,
@@ -38,22 +42,27 @@ namespace Game.App.Presenters
         {
             if (disposed) throw new ObjectDisposedException(nameof(MainMenuPresenter));
             if (bound) return;
-            bound = true;
+            bound = true; generation++;
             ui.Navigator.StackChanged += OnStackChanged;
+            EventBus<GameSaved>.Subscribe(OnGameSaved);
             Refresh();
         }
         internal void Unbind()
         {
             if (!bound) return;
-            bound = false;
+            bound = false; generation++;
             ui.Navigator.StackChanged -= OnStackChanged;
+            EventBus<GameSaved>.Unsubscribe(OnGameSaved);
         }
         void OnStackChanged()
         {
             if (ui.Navigator.Top is MainMenuView) Refresh();
         }
+        void OnGameSaved(GameSaved saved)
+        { if (saved.ProfileId == save.ActiveProfile.Value) Refresh(); }
         internal void Refresh()
         {
+            if (disposed) return;
             continueSlot = null;
             model.ContinueSubtitle = string.Empty;
             var slots = save.ListSlots(save.ActiveProfile);
@@ -67,25 +76,43 @@ namespace Game.App.Presenters
             model.HasContinue = continueSlot != null;
             model.VersionText = Application.version;
         }
-        bool CanAct => !disposed && pending == null && !flow.IsTransitioning;
+        bool CanAct => bound && !disposed && pending == null && !save.IsBusy && !flow.IsTransitioning &&
+            ui.Navigator.Top is MainMenuView && !ui.Prompt.IsOpen && !ui.Confirm.IsOpen;
+        bool Current(uint version, ProfileId profile, UIScreen source)
+            => version == generation && profile.Equals(save.ActiveProfile) && ReferenceEquals(ui.Navigator.Top, source) && CanAct;
         public void Continue()
         {
             if (!CanAct) return;
             Refresh();
-            if (continueSlot != null) pending = flow.LoadGameAsync(continueSlot);
+            if (continueSlot != null) Start(() => flow.LoadGameAsync(continueSlot), "load the saved game");
         }
         public void NewGame()
         {
             if (!CanAct) return;
+            uint version = generation; var profile = save.ActiveProfile; var source = ui.Navigator.Top;
             ui.Prompt.Show(new TextPromptRequest
             {
-                Title = "New game", Label = "Commander name", MaxLength = 24,
+                Title = "New game", Label = "Commander name", MaxLength = 24, OkLabel = "Start",
                 Validate = ValidateCommanderName
-            }, StartNewGame, null);
+            }, name => { if (Current(version, profile, source)) StartNewGame(name); }, null);
         }
         void StartNewGame(string name)
         {
-            if (CanAct) pending = flow.NewGameAsync(new NewGameArgs(name, 0, false, ContentId.None));
+            name = name?.Trim();
+            if (CanAct && ValidateCommanderName(name) == null)
+                Start(() => flow.NewGameAsync(new NewGameArgs(name, 0, false, ContentId.None)), "start the game");
+        }
+        void Start(Func<Awaitable<FlowResult>> action, string label)
+        {
+            operationGeneration = generation; operationProfile = save.ActiveProfile; operationLabel = label;
+            try { pending = action(); }
+            catch (Exception error) { Error(error.Message); }
+        }
+        bool CurrentOperation => bound && !disposed && operationGeneration == generation && operationProfile.Equals(save.ActiveProfile);
+        void Error(string reason)
+        {
+            if (CurrentOperation && ui.Navigator.Top is MainMenuView)
+                ui.Notifications.Post(new Notification { Kind = NotificationKind.Danger, Label = "Unable to " + operationLabel + ": " + reason });
         }
         internal static string ValidateCommanderName(string name)
         {
@@ -101,6 +128,7 @@ namespace Game.App.Presenters
         public void Quit()
         {
             if (!CanAct) return;
+            uint version = generation; var profile = save.ActiveProfile; var source = ui.Navigator.Top;
             ui.Confirm.Show(new ConfirmRequest
             {
                 Title = "Quit", Body = "Quit to desktop?", CancelIndex = 1, DefaultFocusIndex = 1,
@@ -109,7 +137,7 @@ namespace Game.App.Presenters
                     new ConfirmOption { Label = "Quit", Variant = ButtonVariant.Danger, Enabled = true },
                     new ConfirmOption { Label = "Cancel", Variant = ButtonVariant.Secondary, Enabled = true }
                 }
-            }, choice => { if (choice == 0 && CanAct) flow.QuitToDesktop(); });
+            }, choice => { if (choice == 0 && Current(version, profile, source)) flow.QuitToDesktop(); });
         }
         internal void Tick()
         {
@@ -120,13 +148,11 @@ namespace Game.App.Presenters
             try
             {
                 var result = awaiter.GetResult();
-                if (result != FlowResult.Ok)
-                    ui.Notifications.Post(new Notification { Kind = NotificationKind.Danger, Label = "Unable to start the game: " + result });
+                if (result != FlowResult.Ok) Error(result.ToString());
             }
             catch (Exception error)
             {
-                GameLog.Exception(LogCategories.Flow, error, "Main menu operation");
-                ui.Notifications.Post(new Notification { Kind = NotificationKind.Danger, Label = "Unable to start the game." });
+                Error(error.Message);
             }
         }
         public void Dispose()
@@ -136,6 +162,5 @@ namespace Game.App.Presenters
             disposed = true;
             pending = null;
         }
-        // TODO(HUD-003): complete composition hookup and required name-entry/layout acceptance.
     }
 }

@@ -1,4 +1,5 @@
 /* SPEC-61: screen regions own dimensions; appearance uses the approved theme. */
 .main-menu-screen { justify-content: center; background-color: var(--color-bg); }
 .main-menu-column { width: 420px; max-width: 90%; margin-left: var(--space-8); }
+.main-menu-subtitle { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .main-menu-version { position: absolute; right: var(--space-8); bottom: var(--space-8); }
