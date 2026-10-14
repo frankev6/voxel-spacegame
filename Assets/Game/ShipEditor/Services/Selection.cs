@@ -23,7 +23,7 @@ namespace Game.ShipEditor.Services
         internal int Version { get; private set; }
         internal PlacementError Error { get; private set; }
         internal Selection(EditSession session, EditorContext content)
-        { this.session = session; this.content = content; mirrors = new SymmetryMapper(content); }
+        { this.session = session; this.content = content; mirrors = new SymmetryMapper(content); session.Changed += OnSessionChanged; }
         internal bool Contains(int3 origin) => origins.Contains(origin);
         internal bool Add(int3 origin)
         {
@@ -141,6 +141,7 @@ namespace Game.ShipEditor.Services
         { Error = PlacementError.None; batch.Clear(); target.Clear(); Capture(source, damage); }
         bool Apply(int stroke, string label)
         {
+            batch.PreserveDamagedLayout = target.Length != 0;
             foreach (var original in source)
             { var record = original; record.DamageOffset = -1; batch.Ops.Add(new DiffOp { Kind = DiffOpKind.Remove, Record = record }); }
             foreach (var record in target) batch.Ops.Add(new DiffOp { Kind = DiffOpKind.Add, Record = record });
@@ -149,6 +150,23 @@ namespace Game.ShipEditor.Services
             Error = report.GroupErrors.Count > 0 ? report.GroupErrors[0] : PlacementError.None;
             if (applied) { origins.Clear(); foreach (var record in target) origins.Add(record.Origin); Version++; }
             return applied;
+        }
+        void OnSessionChanged(EditChange change)
+        {
+            if (change.Kind == EditChangeKind.Discarded) { Clear(); return; }
+            bool undo = change.Kind == EditChangeKind.Undone;
+            if (!undo && change.Kind != EditChangeKind.Redone) return;
+            var command = session.History[undo ? session.History.Cursor : session.History.Cursor - 1];
+            var removedKind = undo ? DiffOpKind.Add : DiffOpKind.Remove;
+            bool selected = false;
+            foreach (var op in command.Ops)
+                if (op.Kind == removedKind && origins.Contains(op.Record.Origin)) { selected = true; break; }
+            if (!selected) return;
+            foreach (var op in command.Ops)
+                if (op.Kind == removedKind) origins.Remove(op.Record.Origin);
+            foreach (var op in command.Ops)
+                if (op.Kind != removedKind) Add(op.Record.Origin);
+            Version++;
         }
         internal void Bounds(NativeList<BlockRecord> records, out int3 min, out int3 max)
         {
@@ -182,6 +200,7 @@ namespace Game.ShipEditor.Services
         }
         public void Dispose()
         {
+            session.Changed -= OnSessionChanged;
             batch.Dispose(); if (origins.IsCreated) origins.Dispose(); if (source.IsCreated) source.Dispose();
             if (target.IsCreated) target.Dispose(); if (damage.IsCreated) damage.Dispose();
         }

@@ -50,7 +50,8 @@ namespace Game.Tests.EditMode.ShipEditor
             f.Edits(new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = f.Multi },
                 new VoxelEdit { Kind = VoxelEditKind.ClearCell },
                 new VoxelEdit { Kind = VoxelEditKind.SetCellHp, Cell = new int3(1, 0, 0), Hp = 43 },
-                new VoxelEdit { Kind = VoxelEditKind.SetFunctionHp, Block = f.Multi, FunctionHp = 0 });
+                new VoxelEdit { Kind = VoxelEditKind.SetFunctionHp, Block = f.Multi, FunctionHp = 0 },
+                new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = f.Hull });
             using var session = Session(f); using var controller = new ShipEditorController(session, f.Context);
             var reader = new DraftReader(session.Draft, f.Context);
             Assert.IsTrue(reader.TryGetBlockAt(new int3(1, 0, 0), out var original));
@@ -62,6 +63,14 @@ namespace Game.Tests.EditMode.ShipEditor
             using var actual = new NativeList<byte>(Allocator.Temp); reader.CaptureDamage(moved, actual);
             CollectionAssert.AreEqual(expected.AsArray().ToArray(), actual.AsArray().ToArray());
             Assert.AreEqual(0, session.GetBom().Lines.Count); Assert.IsTrue(controller.Selection.Contains(moved.Origin));
+            Assert.IsTrue(reader.TryGetBlockAt(new int3(1, 0, 0), out var movedHull)); Assert.AreEqual(f.Hull, movedHull.Block);
+            Assert.IsTrue(session.Undo()); Assert.IsTrue(controller.Selection.Contains(int3.zero));
+            Assert.IsFalse(controller.Selection.Contains(new int3(1, 0, 0)));
+            Assert.IsTrue(session.Redo()); Assert.IsTrue(controller.Selection.Contains(new int3(1, 0, 0)));
+            Assert.IsFalse(controller.Selection.Contains(int3.zero));
+            Assert.IsTrue(session.Undo());
+            Action(controller, EditorActions.MoveRight); Assert.AreEqual(PlacementError.None, controller.LastError);
+
         }
         [Test] public void Move_IntoOccupied_RejectedAll()
         {

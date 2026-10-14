@@ -101,10 +101,13 @@ namespace Game.ShipEditor.Validation
             var limit = context.Config.MaxExtentCells;
             if ((long)max.x - min.x + 1 > limit.x || (long)max.y - min.y + 1 > limit.y || (long)max.z - min.z + 1 > limit.z)
                 return PlacementError.OutOfBounds;
-            foreach (var offset in footprint.Cells)
+            for (int i = 0; i < footprint.Cells.Length; i++)
             {
-                int3 cell = record.Origin + offset; var occupant = At(cell);
-                if (occupant.Present || occupant.Reserved)
+                bool present = record.DamageOffset == -1 || batch.Damage[record.DamageOffset + i] != 0;
+                // Rigid transforms retain holes and their current interleaved blocks; no voxel is placed in a hole.
+                if (batch.PreserveDamagedLayout && !present) continue;
+                int3 cell = record.Origin + footprint.Cells[i]; var occupant = At(cell);
+                if (occupant.Present || occupant.Reserved && !batch.PreserveDamagedLayout)
                     return occupant.Group == group ? PlacementError.SymmetryOverlap : PlacementError.Occupied;
                 scratch.ClearanceDelta.TryGetValue(cell, out int delta);
                 if (indexes.Clearance[cell] + delta != 0) return PlacementError.InOtherClearance;
@@ -118,9 +121,18 @@ namespace Game.ShipEditor.Validation
             {
                 int3 cell = record.Origin + footprint.Cells[i];
                 bool present = record.DamageOffset == -1 || batch.Damage[record.DamageOffset + i] != 0;
-                scratch.SetOverlayCell(cell, new ValidationScratch.CellState { Block = record, Group = group, Present = present, Reserved = !present });
-                if (present) { scratch.CellDelta++; scratch.Candidates.Add(cell); }
-                else scratch.ChangeMissing(cell, 1);
+                if (present)
+                {
+                    scratch.SetOverlayCell(cell, new ValidationScratch.CellState { Block = record, Group = group, Present = true });
+                    scratch.CellDelta++; scratch.Candidates.Add(cell);
+                }
+                else
+                {
+                    // Keep a different block already occupying this damaged cell in the overlay.
+                    if (!batch.PreserveDamagedLayout)
+                        scratch.SetOverlayCell(cell, new ValidationScratch.CellState { Block = record, Group = group, Reserved = true });
+                    scratch.ChangeMissing(cell, 1);
+                }
                 scratch.Include(cell);
             }
             foreach (var offset in footprint.Clearance) scratch.ChangeClearance(record.Origin + offset, 1);

@@ -11,6 +11,8 @@ namespace Game.ShipEditor.Services
         NativeList<byte> damage;
         NativeList<BatchGroup> groups;
         bool disposed;
+        // Only rigid, damage-preserving selection transforms may reuse holes in a damaged footprint.
+        internal bool PreserveDamagedLayout;
         public NativeList<DiffOp> Ops { get { CheckAlive(); return ops; } }
         public NativeList<byte> Damage { get { CheckAlive(); return damage; } }
         public NativeList<BatchGroup> Groups { get { CheckAlive(); return groups; } }
@@ -24,7 +26,7 @@ namespace Game.ShipEditor.Services
             }
             catch { Dispose(); throw; }
         }
-        public void Clear() { CheckAlive(); ops.Clear(); damage.Clear(); groups.Clear(); }
+        public void Clear() { CheckAlive(); ops.Clear(); damage.Clear(); groups.Clear(); PreserveDamagedLayout = false; }
         void CheckAlive() { if (disposed) throw new ObjectDisposedException(nameof(EditBatch)); }
         public void Dispose()
         {
