@@ -425,7 +425,7 @@
 | EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-13 | 0089c35c | Context/rotated footprints/item tables accepted; five required cases pass; ADR-0081/Q380. |
 | EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-13 | 2d3181ff | Atomic draft adapters, native canonical hash/enumeration and exact damage restore; four required cases pass, including negative HP/shared origins. |
 | EDT-004 | Edit history and diff commands | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001 | yes | done | astra (gpt-6) | 2026-10-13 | 9d447ea5 | Owned compact diffs, exact offset merge and saved-state tracking; six direct checks pass; spec-required: 6, extra: 0 |
-| EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | yes | todo |  |  |  |  |
+| EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead draft session apply undo redo |
 | EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | no | todo |  |  |  |  |
 | EDT-007 | Placement validator | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | no | todo |  |  |  |  |
 | EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | no | todo |  |  |  |  |
