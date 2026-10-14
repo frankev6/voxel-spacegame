@@ -495,7 +495,7 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 ### HUD-006 — Pause screen
 - **Milestone:** M3
 - **Tier:** standard — view on an existing view model
-- **Depends on:** `HUD-002`
+- **Depends on:** `HUD-001`, `UI-003`, `UI-004`, `UI-005`, `UI-006`, `UI-007`, `UI-008`, `UI-009`, `UI-010`, `UI-011`, `FND-003`, `FND-009`
 - **Do:** `PauseView`, `PausePresenter` (§5.4).
 - **Files:** `Assets/Game/UI/Views/PauseView.cs`, `Assets/Game/UI/Views/Uxml/PauseView.uxml`, `Assets/Game/UI/Theme/screens/pause.uss`, `Assets/Game/App/Presenters/PausePresenter.cs`
 - **Acceptance criteria:**
@@ -744,3 +744,5 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 | 36 | Fleet view prerequisites and unimplemented actions | ADR-0068 concrete completed UI, fleet, docking and stats dependencies replace umbrella HUD-002. Use existing editor launcher contract; EDT-023 owns actual launch, report unavailable without pretending success. Flagship switching has no owner API, so CanSetActive stays false. | Tech lead — resolved; ledger Q436 |
 
 | 40 | HUD-007 view construction depends on unfinished composition instead of completed UI contracts | Under ADR-0072 use concrete completed view/control/theme/input framework prerequisites. Implement the full authored flight HUD and direct-update path now; real snapshot synchronization and root wiring remain HUD-009 and HUD-002. No fabricated gameplay source. | Tech lead — resolved; ledger Q444 |
+
+| 41 | HUD-006 pause-screen completion depends on unfinished root composition | Use completed framework, modal, pause and session contracts for construction/acceptance under ADR-0072. Complete existing view/presenter and four cases; lead retains root wiring and visible playground integration. | Tech lead — resolved; ledger Q445 |
