@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Narrative frame bridge authored:** NAR-011915ffb2f adds ordered per-frame tick/UI/combat gates and two direct acceptance cases, uncompiled/unaccepted. Three of4 required cases authored; next owner-routing/removal case then one focused batch. No Unity active. NAR-017 delivered e83a0606 awaiting review/integration; DEV-00937d1d116 pending integration/sandbox fix; presentation review224 complete. Workers have delivery/dependency waits. Previous boot wiring and this bridge work are progress.
+
 - **Narrative boot/session wired:** NAR-01119839c0e binds content, registers live owners/FACT saving and new/restore lifecycle. Still uncompiled/unaccepted: frame bridge and remaining3 cases next. Economy saving remains ECO-006, quest facade remains QST-006; explicit TODOs preserved. No Unity active. NAR-017 active245; DEV-00937d1d116 pending integration, sandbox diagnosis267 delivered; removal review224 found no defect/presentation dependency wait. Previous removal and current composition are progress.
 
 - **Narrative removal authored:** NAR-011 bb10c347 implements ADR-0077/Q364 persistent removal using existing tombstones and safe source retirement; uncompiled/unaccepted. Next boot/session/tick wiring and remaining3 cases, including removal, before focused validation. No Unity active. NAR-017 active244; DEV-00937d1d116 pending integration/sandbox diagnosis266; presentation assigned removal lifetime review. Previous routing work and this source change are progress.

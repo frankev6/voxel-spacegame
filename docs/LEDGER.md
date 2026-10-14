@@ -1070,6 +1070,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — NAR-011 frame bridge and acceptance fixtures authored — astra (gpt-6)
+
+- 915ffb2f adds NarrativeTickBridgeSystem after managed-event delivery, with world readiness, UI-layer, dialog/travel, player/hulk and combat gates. ADR-0078/Q365 supplies a read-only navigation-layer query and places both drain/bridge in Unity's OrderLast partition. Bootstrap binding/catalog failure and direct-update event-order cases added.
+- Uncompiled/unaccepted. Spec-required: 3 authored of4, extra: 0. Remaining WorldAdapter_RoutesOrLogsOnce must cover owner routes and removal/snapshot suppression; then one compatible compile/focused batch. No Unity this turn.
+- NAR-017 delivered e83a0606 (one formatter case, Quests unavailable until QST-006); review/integration pending. DEV-00937d1d116 pending integration, sandbox diagnosis267 delivered. Presentation removal review224 complete. All workers now have real delivery/dependency waits until integration or new ready standard work. Previous boot wiring and current frame bridge/tests are progress.
+
 ### 2026-10-13 — NAR-011 boot and session composition authored — astra (gpt-6)
 
 - 19839c0e adds NarrativeBootstrap with ordered content binding and hard ContentValidationException on catalog/binding errors. Composition builds live context/world/economy owners, registers NarrativeService/ILogicContext/FactStore and FACT saving, forwards economy dependency changes, and binds session new/restore/reset lifecycle. Existing unfinished QST owner, NAR-012 event bridge and ECO-006 INVT registration retain TODO markers.
