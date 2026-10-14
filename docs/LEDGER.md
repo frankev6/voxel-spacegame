@@ -1086,6 +1086,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — EDT-003 atomic source batches authored — astra (gpt-6)
+
+- 257a98bc adds ADR-0082 atomic VoxelEdit batches within the owning voxel module. Touched cells/instances and prospective palette/free slots are staged before source mutation; invalid batches leave source/touched output unchanged. Commit sorts cells/bricks canonically. Missing-root remove/HP uses the supplied definition footprint. No whole-ship rollback clone or ShipEditor cell writes.
+- Uncompiled/unaccepted; writer, native jobs and four required cases still pending. spec-required: 4 planned, extra: 0. No Unity/optimization pass. DEV-017f8f376aa delivered, lead integration pending; worker now reviews editor source including transaction. DLG-003268 and NAR-019244 active. Previous reader work and current source changes are progress.
+
 ### 2026-10-13 — EDT-003 damage reader started — astra (gpt-6)
 
 - c68d75d8 adds DraftReader block identity and exact HP/FunctionHp byte capture. Missing cells contribute zero; pristine capture removes temporary bytes. Missing root can be resolved through a surviving footprint cell. No writes are performed by ShipEditor.
