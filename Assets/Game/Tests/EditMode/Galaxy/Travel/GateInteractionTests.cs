@@ -143,7 +143,7 @@ namespace Game.Tests.EditMode.Galaxy.Travel
             Assert.AreEqual(f.Economy.GetItemCount(f.FuelIndex), info.FuelHeld); Assert.IsTrue(info.CanAfford);
             Assert.IsFalse(info.OnRoute);
             // TRV-010 owns the actual route; this case requires its implementation in the integration batch.
-            Assert.IsTrue(f.Travel.SetDestination(f.Target));
+            Assert.IsTrue(f.Travel.SetDestination(f.Target, out _));
             Assert.IsTrue(f.Travel.TryGetNextHop(out var hop));
             Assert.IsTrue(f.Travel.TryGetGateInfo(f.Gate.Id.LocalKey, out info));
             Assert.AreEqual(hop.LaneIndex == info.LaneIndex, info.OnRoute); Assert.IsTrue(info.OnRoute);
