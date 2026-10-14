@@ -1081,6 +1081,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — QST-004 integrated; NAR-012 cases authored — astra (gpt-6)
+
+- QST-004 worker3b4a3895 integrated on task/QST-004-clue-integration after source review; acceptance pending. Implements discovery order, idempotent mystery effects, rumor latching and preserved seen/resolved IDs. spec-required: 5 authored, extra: 0. SPEC-42 Q13 central question mirror still pending.
+- NAR-012658a627f adds exactly five direct-event cases (one advisory allocation category), no timed combat. Source checkpoint merged under ADR-0062; task stays in progress until validation/composition resolved. No Unity run. Economy worker assigned bounded bridge review; other two implement DLG-003/DEV-010. Next finish integration then one compatible batch.
+
 ### 2026-10-13 — NAR-012 routing authored — astra (gpt-6)
 
 - c795e4de implements event subscription/disposal, counter-before-trigger ordering, player/salvage exclusions, unhandled inspections and location/relation dependencies. Counter effects cache by slot, unknown hashes warn once. Q376 records canonical callback composition and real staged BeatService/TravelService gaps.
