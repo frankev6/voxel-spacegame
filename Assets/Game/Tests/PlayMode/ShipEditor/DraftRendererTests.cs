@@ -10,6 +10,8 @@ using Game.ShipEditor.Services;
 using Game.Voxel.Model;
 using NUnit.Framework;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -93,7 +95,8 @@ namespace Game.Tests.PlayMode.ShipEditor
             var mesh = f.Renderer.Slots[int3.zero].Mesh;
             using var fresh = new Fixture(new int3(4,3,3)); fresh.Renderer.UpdateMeshes();
             var expected = fresh.Renderer.Slots[int3.zero].Mesh;
-            Assert.AreEqual(expected.vertexCount, mesh.vertexCount); CollectionAssert.AreEqual(expected.triangles, mesh.triangles);
+            Assert.AreEqual(expected.vertexCount, mesh.vertexCount); Assert.AreEqual(expected.bounds, mesh.bounds);
+            CollectionAssert.AreEqual(expected.triangles, mesh.triangles);
             using var actualData = Mesh.AcquireReadOnlyMeshData(mesh); using var expectedData = Mesh.AcquireReadOnlyMeshData(expected);
             CollectionAssert.AreEqual(expectedData[0].GetVertexData<byte>().ToArray(), actualData[0].GetVertexData<byte>().ToArray());
         }
@@ -108,10 +111,33 @@ namespace Game.Tests.PlayMode.ShipEditor
         { using var f = new Fixture(new int3(3,3,3)); f.ExerciseProps(); }
         [UnityTest] public IEnumerator Dispose_NoLeaks()
         {
-            var f = new Fixture(new int3(3,3,3)); f.Config.SyncRemeshBricksPerFrame = 0;
-            f.Renderer.UpdateMeshes(); var meshes = f.Renderer.Slots.Values.Select(slot => slot.Mesh).ToArray();
-            f.Dispose(); yield return null;
-            Assert.IsTrue(meshes.All(mesh => mesh == null));
+            var presentation = World.DefaultGameObjectInjectionWorld?.GetExistingSystemManaged<PresentationSystemGroup>();
+            bool wasEnabled = presentation != null && presentation.Enabled;
+            var leakMode = NativeLeakDetection.Mode;
+            if (presentation != null) presentation.Enabled = false;
+            NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace;
+            try
+            {
+                using (var warmup = new Fixture(new int3(3,3,3))) warmup.Renderer.UpdateMeshes();
+                yield return null;
+                UnsafeUtility.CheckForLeaks();
+                Mesh[] meshes;
+                using (var f = new Fixture(new int3(3,3,3)))
+                {
+                    f.Config.SyncRemeshBricksPerFrame = 0;
+                    f.Renderer.UpdateMeshes(); Assert.Greater(f.Renderer.PendingJobs, 0);
+                    meshes = f.Renderer.Slots.Values.Select(slot => slot.Mesh).ToArray();
+                    f.ExerciseProps();
+                }
+                yield return null;
+                Assert.IsTrue(meshes.All(mesh => mesh == null));
+                Assert.AreEqual(0, UnsafeUtility.CheckForLeaks(), "Renderer snapshot, shape, slot and prop allocations must be released.");
+            }
+            finally
+            {
+                NativeLeakDetection.Mode = leakMode;
+                if (presentation != null) presentation.Enabled = wasEnabled;
+            }
         }
     }
 }
