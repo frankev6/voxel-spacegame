@@ -1470,6 +1470,8 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 
 | 30 | RemoveBody has no general owner API and destruction can retain a hulk | Resolved: ADR-0077 adds GalaxyService.RemoveBody and a pre-removal live-sink hook. Suppress capture, transfer pinned snapshot ownership to retirement, clear the snapshot and retain the existing destroyed/story tombstone. Destroyed bodies without snapshots have no anchor on reload. No GLXY format change. | Tech lead — ledger Q364 |
 
+| 31 | Narrative UI gates require inspecting layers and event drain is OrderLast | Resolved: ADR-0078 adds read-only UINavigator.HasOpenLayer; narrative bridge is OrderLast plus UpdateAfter ManagedEventDrainSystem so Unity ordering partitions preserve drain-before-tick. | Tech lead — ledger Q365 |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/05-narrative-quests.md` (B3, B8, B10, B13, B14, B17; §5.3–§5.5, §5.12–§5.13), `00-synthesis.md` §6h.

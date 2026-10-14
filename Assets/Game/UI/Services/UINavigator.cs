@@ -44,6 +44,12 @@ namespace Game.UI.Services
         }
         public UIScreen Top => stack.Count == 0 ? null : stack[stack.Count - 1];
         public int Count => stack.Count;
+        /// <summary>ADR-0078: query a layer without exposing or allocating a copy of the navigation stack.</summary>
+        public bool HasOpenLayer(UILayer layer)
+        {
+            for (int i = 0; i < stack.Count; i++) if (stack[i].Layer == layer) return true;
+            return false;
+        }
         public bool WorldPointerBlocked { get; private set; }
         public int LastStackChangeFrame { get; private set; }
         public InputContext CurrentContext => lastContext;
