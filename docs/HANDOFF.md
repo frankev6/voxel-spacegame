@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Exporter accepted; profiler limitation deferred:** DLG-013ff17985b required case passes. DEV-0112d39e5aa compiles clean; marker check inconclusive on headless backend (real work483542ns, no completed samples), interactive verification pending without blind retries. Presenter DLG-008 active; next lead SYS-009 pose/docking persistence. No Unity active.
+
 - **Dialog runtime accepted:** DLG-00699290d38 passes seven direct cases (0.1309s bodies), compile clean. Review fixes stale merchant callbacks and detour roll restoration. Next DLG-008 presenter worker, integrate DLG-013/DEV-011 deliveries and continue production runner prerequisites. No Unity active.
 
 - **Dialog execution loop authored:** DLG-0061925068d replaces the service shell with queued progression, terminal/blocking handling, cleanup and deterministic rolls. Still uncompiled/unaccepted; next seven required functional cases and review corrections, then one compatible batch. All three existing workers now review concrete deliveries/runtime; no Unity active.

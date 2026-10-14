@@ -16,8 +16,8 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 82 | 8 | 0 | 0 | 90 | 0 | 180 | 8 |
-| M4 | 11 | 2 | 0 | 0 | 1 | 0 | 14 | 4 |
+| M3 | 81 | 9 | 0 | 0 | 90 | 0 | 180 | 7 |
+| M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -300,7 +300,7 @@
 | AUD-009 | Loop voices: player engine and beams | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006, FLT-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 5401ca29 | Three required loop tests pass; engine/beam loop assets remain null per authored config |
 | AUD-013 | Audio performance and allocation tests | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-008, AUD-009 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 8a24a71f | 4 required measurements; zero warmed GC; performance deferred: drain500/4096 misses, zero optimization passes |
 | DEV-010 | aim and fire commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, WPN-001, INP-001, CAM-001 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-13 | c5c7fc15 | Aim/tracking/fire CLI accepted; two real-input/weapon PlayMode cases pass; Q379. |
-| DEV-011 | perf command and gh_perf extensions | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, VFX-001, AUD-001, TST-001 | yes | in-progress | economy (gpt-6.1-sol high) | 2026-10-13 |  | Existing economy worker implements counter command/probes; no benchmark or soak run. |
+| DEV-011 | perf command and gh_perf extensions | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, VFX-001, AUD-001, TST-001 | yes | in-progress | economy (gpt-6.1-sol high) | 2026-10-13 |  | Source integrated2d39e5aa; JSON passes; marker real-work483542ns but headless Count0 inconclusive; no more blind retries; interactive verification pending |
 | DEV-013 | Overlays: islands and spatial hash | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-012, AI-001 | no | todo |  |  |  |  |
 | TST-005 | Determinism runner and the combat determinism gate | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | frontier | TST-002, TST-003, SPEC-13, SPEC-20, SPEC-21, SPEC-22, SPEC-23 | no | todo |  |  |  |  |
 | TST-006 | Ten-minute combat soak | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | standard | TST-005, SPEC-70 | no | todo |  |  |  |  |
@@ -498,7 +498,7 @@
 | ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011, AI-001 | no | todo |  |  |  |  |
 | ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011 | no | todo |  |  |  |  |
 | NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 4ca00b3 | Partial4ca00b3 +6d6e1ce9; fact editing required case passes39710, formatter also green. Baseline/Play beat live acceptance still awaits QST-005/006 and DLG-006; remains in progress. |
-| DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-13 |  | Existing combat worker: deterministic CSV exporter; one required case, no Unity. |
+| DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | no | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
@@ -963,6 +963,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 389 | SPEC-70 Q30: diagnostic counter ownership/availability | Use existing owner APIs and explicit unavailable values, canonical JSON, bounded marker list and disposable host-owned recorders/queries. No benchmark runs. | Tech lead |
 | 390 | SPEC-41 Q17: runtime command effect access and memory | ADR-0084 preserves concrete effect identity through guarded access; fail closed on bad table rows. Ordinal visit/raw memory retains exact save values. | Tech lead |
 | 391 | SPEC-41 Q18: non-reentrant selection, abort and roll lookup | Queue option selection through Pump; settle completion outside runner callbacks. Explicit abort clears the old page/terminal. Generated Beat family ordinal order maps the existing content index for roll count. | Tech lead |
+| 392 | SPEC-41 Q16: archived localization writing | Export the marked LEGACY-UNAVAILABLE option as non-executable archival text; ordinal line IDs, quoted UTF-8 CSV, no source rewrites. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1095,6 +1096,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DLG-013 done; DEV-011 backend limitation recorded — astra (gpt-6)
+
+- DLG-013ff17985b integrates deterministic CSV export, including preserved unavailable writing without changing execution (Q392). Required Export_IsDeterministic passes0.012873s. spec-required: 1, extra: 0. Cross-review305 no findings.
+- DEV-0110d5d127/2d39e5aa integrates real-player-frame fixture and fixes missing profiler namespace caught by compile21093. Final compile19078 terminal0, zero warning CS. Focused batch9083 terminal1: exporter passes, marker inconclusive after four frames, actual FX work483542ns but completed-frame Count0; Unity exits2 for inconclusive. This is not a green overall batch or marker acceptance. Existing JSON pass retained. spec-required: 2, extra: 0. No further blind profiler retries; interactive marker verification remains pending. Evidence Logs/playtest/dialog-export.
+- Presentation266 implements DLG-008; economy audits SYS-009 integration; combat review283 complete with a real ready-task dependency wait. Previous dialog acceptance and this exporter acceptance/source integration are progress. No Unity active. Next SYS-009 player location persistence.
 
 ### 2026-10-13 — DLG-006 done: dialog runtime and memory persistence — astra (gpt-6)
 
