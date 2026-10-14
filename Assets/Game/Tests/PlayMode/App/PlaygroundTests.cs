@@ -31,6 +31,7 @@ namespace Game.Tests.PlayMode.App
     /// <summary>One integrated owner-feature case: quiet entry, real interaction, spawn/reset and model cleanup.</summary>
     public sealed class PlaygroundTests : SessionCommandFixture
     {
+        protected override bool QuietCampaign => false;   // plays the real campaign opening through the trial pad
         [UnityTest] public IEnumerator Enter_Interact_Reset()
         {
             yield return RunCommand("playground");

@@ -24,7 +24,9 @@ namespace Game.App.Session
         public int SceneReadyOrder => SceneHookOrder.PlayerShip + 1;
         public void OnSceneReady(in SceneReadyContext context)
         {
-            if (context.Scene != GameScene.World || !config.AutoSpawnInWorld) return;
+            // QA-001: campaigns no longer get the range station (config off); the sandbox playground's combat pad still does.
+            bool sandbox = ids is GameSession session && session.IsSandbox;
+            if (context.Scene != GameScene.World || !(config.AutoSpawnInWorld || sandbox)) return;
             using var query = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerShip>(), ComponentType.ReadOnly<LocalTransform>());
             using var players = query.ToEntityArray(Allocator.Temp);
             if (players.Length == 1) Spawn(players[0]);

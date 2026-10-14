@@ -1237,7 +1237,17 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
   - UI glass skin with corner brackets and a ringed radar;
   - main menu backdrop with showcase ships.
 - Xeno (ADR-0115): per-cell depth plus surface nets in the brick mesher, obsidian & acid shading with glowing wounds, and HUSK and BROODMOTHER built from look-book SDFs with organ blocks. The xeno-faction encounters and playground pad 15 now use them.
-- QA results: QA001_RESULTS_PLACEHOLDER
+- Second polish pass. Owner, verbatim: "please do another polish pass. also make sure blocks have the procedural stuff we devised in the nocturne. if its possible to do most of the heavy lifting with textures and uv, rather than spending a lot of the budget on extra polygons please go for it".
+  - The look book's own plating generator (`ld_plating.py`, ark and yard plates) is baked by `ArtSource/Bricks/bake_plating.py` into three 1024×1024×2 BC7 texture arrays. The brick and prop shaders compose them like `ld_mats.plated_material` (plates, bolts, grilles, hatches, stencils, chevrons, wear, cavity grime, rain streaks, sodium window slits on vertical faces, relief normals) on grid-continuous UVs, with no extra geometry.
+  - Pooled bricks, props and editor drafts drew with `RenderParams` defaults (no light or reflection probes), so they had zero ambient and their dark sides were pure black. They now blend the ambient probe and reflections.
+  - The scene lights used +azimuth as yaw, mirroring DESIGN-GUIDE §4.1. They are fixed in World and MainMenu, and both scenes get a trilight ambient. The Blueprint Lab had no lights and now carries the same rig.
+  - Xeno shell highlights no longer blow out. The main menu camera is closer to the starter, with the BROODMOTHER on the opening sightline.
+- QA results: EditMode 1,778 passed, 0 failed (2 skipped/inconclusive: the documented headless-profiler case). Full PlayMode, headless: 343 passed, 12 failed, 42 skipped, against 308/45/42 on `main` (`d0c6bbfc`, same machine and runner). Every remaining failure also fails on `main`:
+  - FND-012 global-service leakage into standalone fixtures (PlayerShipTests ×2, SandboxTests);
+  - boot test-order pollution (BootTests ×2, CompositionTests.BootSingletons_Tagged);
+  - a UI Toolkit native leak report (R25_MassRamming);
+  - `Flight/Interact` needing a keyboard device that `-nographics` lacks (EditorRoundTripScenarioTests ×4, NarrativeLoadSafetyTests); these pass live.
+  The one regression this branch introduced, the firing-range station missing from the sandbox, is fixed: the station now spawns in the playground but not in campaigns.
 - Open for the owner: fonts (Michroma/Inter/JetBrains Mono, OFL) need download approval; art review of the procedural organ meshes, the magnet block and the UI sounds; Q125 flight balance by play (ADR-0114).
 
 ### 2026-10-14 — Owner correction: unbiased reviewer access brief — astra (gpt-6)

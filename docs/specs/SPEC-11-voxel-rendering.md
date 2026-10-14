@@ -668,7 +668,8 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 
 
 ## QA-001 amendment (2026-10-14): NOCTURNE plating and Xeno surface nets
-- **Plating.** Layer rows 2/3 select procedural NOCTURNE plating (`NocturnePlating.hlsl`): style, window density, relief, function colour and metal. The pool's per-slot matrix carries the brick's grid cell offset in its unused bottom row, so plating is continuous across bricks. The editor draft passes `_DraftWorldToCells`.
+- **Plating.** Layer rows 2/3 select NOCTURNE plating (`NocturnePlating.hlsl`): style, window density, relief, function colour and metal. The plate detail is texture, not geometry: `ArtSource/Bricks/bake_plating.py` bakes the look book's `ld_plating.py` into `_PlatingA`/`_PlatingB`/`_PlatingN` (Texture2DArray, slice 0 hull "ark", slice 1 "yard"), sampled at one 6 m tile per 12 cells and composed like the look book's `ld_mats.plated_material`. The pool's per-slot matrix carries the brick's grid cell offset in its unused bottom row, so plating is continuous across bricks. The editor draft passes `_DraftWorldToCells`.
+- **Ambient.** Pooled bricks, props and editor drafts draw with `LightProbeUsage.BlendProbes` and `ReflectionProbeUsage.BlendProbes`; `RenderParams` defaults to neither, which leaves the surfaces without ambient light.
 - **Xeno surface nets.** [ADR-0115](../decisions/ADR-0115-xeno-grown-hulls.md):
   - Xeno cells snapshot their depth in the orient field and emit no block faces;
   - `MeshXeno` adds a smooth shell at LOD0 and LOD1;

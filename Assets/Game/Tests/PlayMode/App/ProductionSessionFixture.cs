@@ -25,6 +25,8 @@ namespace Game.Tests.PlayMode.App
     /// <summary>Shared real-boot fixture with isolated save/settings paths; only headless runs bypass GPU readiness.</summary>
     public abstract class ProductionSessionFixture
     {
+        /// <summary>Campaigns drop their automatic beats (the opening dialogue pauses the game); story cases opt out.</summary>
+        protected virtual bool QuietCampaign => true;
         string directory;
         internal GameComposition Game => GameRoot.Instance.Composition;
         protected EntityManager EM => World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -53,7 +55,7 @@ namespace Game.Tests.PlayMode.App
             GameRootTestHooks.SettingsPath = Path.Combine(directory, "settings.json");
             GameRootTestHooks.SkipIntroScreens = true;
             // The campaign opening has its own owner tests (OpeningChapterTests); flight fixtures start in free flight.
-            GameRootTestHooks.SkipCampaignOpening = true;
+            GameRootTestHooks.SkipCampaignOpening = QuietCampaign;
             Bootstrap.Boot();
             // Only headless functional runs skip the GPU prerequisite. Live/GPU runs use the production renderer unchanged.
             if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null)

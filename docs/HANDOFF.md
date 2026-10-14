@@ -36,6 +36,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
   - owner findings: flight feel (ADR-0114), salvage, radar, editor, modal order, shake, hits, shield, inventory, sounds and the boundary snap;
   - review findings: coreless blueprints, the paused-opening test root cause, the external-pause blocker, stale TODOs and docs repair;
   - the NOCTURNE visual pass: plating, machinery, team colours, post, UI skin and the menu backdrop;
+  - the second polish pass: the look book's plating baked to textures (`ArtSource/Bricks/bake_plating.py`; rerun it and Game/Art/Bake NOCTURNE Brick Look after changing `ld_plating.py`), ambient and reflections for pooled draws, §4.1 light azimuths, and a light rig in the Lab;
   - Xeno grown hulls (ADR-0115: HUSK, BROODMOTHER, playground pad 15, campaign xeno encounters).
 - Workers stay paused. Owner QualitySettings and two untracked content metas remain intentionally uncommitted.
 
@@ -46,7 +47,7 @@ An independent reviewer still starts at [scope and access only](QA-REVIEWER-PROM
 1. Frank reviews QA-001 in the playground: pads 01–15, with 15 for the aliens; the main menu; a new campaign.
 2. Waiting on Frank:
    - download approval for the OFL fonts (AST-004);
-   - art approval of the procedural organ meshes, the magnet block and the UI sounds (`docs/design/asset-manifest.csv` status `review`);
+   - art approval of the procedural organ meshes, the magnet block, the UI sounds and the baked plating textures (`docs/design/asset-manifest.csv` status `review`);
    - Q125 flight balance by play.
 3. Not done yet:
    - navigation strobes, which need per-grid hull anchors;
