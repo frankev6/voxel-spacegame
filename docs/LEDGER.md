@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 14 | 15 | 0 | 0 | 153 | 0 | 182 | 5 |
+| M3 | 14 | 16 | 0 | 0 | 152 | 0 | 182 | 5 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -483,7 +483,7 @@
 | DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-008, DEV-012, INP-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 38d812a3 | Combined source accepted; real overlays and input interaction, five required checks pass; Q477/Q478. |
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | yes | done | economy (gpt-6.1-sol high) | 2026-10-13 | 40421f42 | Real inv/give/facts owners, probes and CLI; three required cases pass in focused seven-case batch. |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-14 | f6304ccd | Save/load/jump commands integrated; all 3 required checks pass (position fixture corrected a5833668); real menu routing/toworld acceptance still HUD-002-dependent; Q430 |
-| DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | done | astra (gpt-6) | 2026-10-14 | 54734103 | Direct World Play, visible Console/entry and launcher; six actual trials/screens. 15-case compatible batch green; broader campaign/story/editor areas remain absent. |
+| DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | in-progress | astra (gpt-6) | 2026-10-14 | 54734103 | Reopened for actual creative Blueprint Lab beacon and directory/map accessibility; existing seven trials retained. |
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
 | MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e9d50f3c | Three exact factions generated; duplicate skipped, player/AI ownership preserved; rerun byte/GUID/manifest stable |
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3d65849 | Protected ordered loot assets/catalog; rerun byte-identical; 1 required and 1 migration-safety test |
