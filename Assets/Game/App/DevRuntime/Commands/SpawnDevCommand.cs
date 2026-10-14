@@ -27,7 +27,6 @@ namespace Game.App.DevRuntime.Commands
             if (error != null || args.Positional.Count != 0) return DevCommandResult.Fail(error ?? Usage);
             if (!ctx.HasGameplay || !ctx.TryGetService<ShipSpawnService>(out var spawner) || !ctx.TryGetService<ContentService>(out var content)) return DevCommandResult.Fail("ship spawning unavailable");
             if (!args.TryGetString("blueprint", out string blueprintId) || !content.Catalog.TryGet<ShipBlueprintDefinition>(new ContentId(blueprintId), out var blueprint)) return DevCommandResult.Fail("unknown or missing blueprint");
-            if (!ctx.TryGetService<GalaxyService>(out var galaxy) || !galaxy.State.CurrentStarSystem.IsValid) return DevCommandResult.Fail("ship spawning requires a current star system");
             long count = args.GetLong("count", 1), team = args.GetLong("team", 1);
             double spacing = args.GetDouble("spacing", 60);
             if (count < 1 || count > int.MaxValue || team < 0 || team > byte.MaxValue || spacing < 0) return DevCommandResult.Fail("count must be positive, team in 0..255, spacing nonnegative");

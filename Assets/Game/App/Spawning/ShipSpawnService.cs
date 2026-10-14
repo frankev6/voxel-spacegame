@@ -40,7 +40,7 @@ namespace Game.App.Spawning
             gameplay = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<GameplayActive>());
             registry.AddSpawnHook(this);
         }
-        public PersistentId Spawn(in ShipSpawnArgs args) => SpawnCore(args, galaxy.State.CurrentStarSystem);
+        public PersistentId Spawn(in ShipSpawnArgs args) => SpawnCore(args, galaxy.State.CurrentStarSystem, allowUnscopedSandbox: ids is Game.App.Session.GameSession session && session.IsSandbox);
         public PersistentId Spawn(ContentId blueprint, float3 position, quaternion rotation, Allegiance allegiance, bool withAi)
             => Spawn(new ShipSpawnArgs { Blueprint = blueprint, Position = position, Rotation = rotation, Allegiance = allegiance, WithAi = withAi });
         // Fleet records retain ownership of their existing registry borrow through scene exit.
@@ -50,14 +50,14 @@ namespace Game.App.Spawning
                 throw new ArgumentException("The registered handle must refer to the supplied structure.", nameof(handle));
             return SpawnCore(args, galaxy.State.CurrentStarSystem, handle);
         }
-        PersistentId SpawnCore(in ShipSpawnArgs args, StarSystemId starSystem, int registeredHandle = -1)
+        PersistentId SpawnCore(in ShipSpawnArgs args, StarSystemId starSystem, int registeredHandle = -1, bool allowUnscopedSandbox = false)
         {
             if (disposed) throw new ObjectDisposedException(nameof(ShipSpawnService));
             if (!world.IsCreated || gameplay.IsEmptyIgnoreFilter) throw new InvalidOperationException("Ship spawning requires GameplayActive in a live World.");
             ShipBlueprintDefinition blueprint = null;
             if (args.Structure == null && !catalog.TryGet<ShipBlueprintDefinition>(args.Blueprint, out blueprint))
             { GameLog.Error(LogCategories.Content, "Unknown ship blueprint '" + args.Blueprint.Value + "'."); return default; }
-            if (!args.IsPlayer && !starSystem.IsValid) throw new InvalidOperationException("NPC spawning requires the actual current or supplied star system.");
+            if (!args.IsPlayer && !starSystem.IsValid && !allowUnscopedSandbox) throw new InvalidOperationException("NPC spawning requires the actual current or supplied star system.");
             ulong value = args.PersistentId == 0 ? ids.Allocate() : args.PersistentId;
             if (value == 0) throw new InvalidOperationException("Persistent id allocator returned zero.");
             if (TryGetRoot(new PersistentId(value), out _)) throw new InvalidOperationException("A ship already uses persistent id " + value + ".");
@@ -79,7 +79,7 @@ namespace Game.App.Spawning
                 }
                 else root = GridSpawnApi.RequestSpawnBlueprint(em, blueprint.Id.Hash, p);
                 em.AddComponentData(root, args.Allegiance);
-                if (!args.IsPlayer) em.AddSharedComponent(root, new StarSystemMember { Id = starSystem });
+                if (!args.IsPlayer && starSystem.IsValid) em.AddSharedComponent(root, new StarSystemMember { Id = starSystem });
                 if (args.WithAi) em.AddComponentData(root, new AiBrain { ProfileIndex = AiSetup.ProfileIndexOf(catalog, args.AiProfile) });
                 roots.Add(value, root); if (handle >= 0 && registeredHandle < 0) handles.Add(value, handle);
                 return new PersistentId(value);

@@ -51,6 +51,20 @@ namespace Game.Tests.PlayMode.DevTools
             StringAssert.Contains("PersistentId=" + f.Em.GetComponentData<PersistentId>(unpiloted).Value, nearest.Text);
             Assert.AreEqual(DevResultKind.Failed, f.Command("spawn blueprint=unknown").Kind);
             Assert.AreEqual(DevResultKind.Failed, f.Command("spawn blueprint=" + f.Blueprint.IdString + " x=1").Kind);
+            f.State.CurrentStarSystem = default;
+            var request = new Game.App.Spawning.ShipSpawnArgs { Blueprint = f.Blueprint.Id, Rotation = quaternion.identity };
+            Assert.Throws<System.InvalidOperationException>(() => f.Spawner.Spawn(request));
+            // Arrange the real session's mode without a scene transition; keep this fixture one cell/direct ticks.
+            typeof(Game.App.Session.GameSession).GetProperty(nameof(f.Session.IsSandbox)).SetValue(f.Session, true);
+            Assert.Throws<System.InvalidOperationException>(() => ((Game.Galaxy.Services.IShipSpawner)f.Spawner).Spawn(
+                new Game.Galaxy.Services.GalaxyShipSpawnArgs { Blueprint = f.Blueprint.Id, Rotation = quaternion.identity }));
+            result = f.Command("spawn blueprint=" + f.Blueprint.IdString + " x=9 z=10 ai=false");
+            Assert.AreEqual(DevResultKind.Pending, result.Kind, result.Text); f.Test.StepTicks(1); f.Host.Update();
+            Assert.IsTrue(f.Host.TryGetOperation(result.OperationId, out operation)); Assert.AreEqual(DevOperationStatus.Succeeded, operation.Status);
+            using var sandboxRoots = query.ToEntityArray(Allocator.Temp); int sandboxCount = 0;
+            foreach (var root in sandboxRoots)
+                if (root != f.Player && !f.Em.HasComponent<Game.Galaxy.Components.StarSystemMember>(root)) sandboxCount++;
+            Assert.AreEqual(1, sandboxCount, "Only the explicitly sandbox-spawned NPC omits membership.");
         }
     }
 }

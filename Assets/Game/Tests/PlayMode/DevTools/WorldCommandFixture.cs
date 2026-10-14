@@ -32,7 +32,7 @@ namespace Game.Tests.PlayMode.DevTools
     /// <summary>One-cell sandbox World, real spawn/profile/origin data and optional real Unity Physics; no loader readiness substitute.</summary>
     internal sealed class WorldCommandFixture : IDisposable
     {
-        sealed class Ids : IPersistentIdAllocator { ulong next = 1; public ulong Allocate() => next++; }
+        internal readonly Game.App.Session.GameSession Session;
         sealed class Slot<T> : IDisposable where T : class
         {
             readonly T previous, current;
@@ -102,7 +102,9 @@ namespace Game.Tests.PlayMode.DevTools
             Assert.IsFalse(report.HasErrors, report.ToText());
             Galaxy = new GalaxyService(catalog, State, Test.World, new GalaxyFrameTicker()); Galaxy.NewGame(7);
             Em.CreateSingleton(new FrameOrigin { StarSystem = State.CurrentStarSystem, OriginInStarSystem = Origin });
-            Spawner = new ShipSpawnService(Test.World, registry, Content.Catalog, new Ids(), Galaxy);
+            Session = new Game.App.Session.GameSession(Test.World,
+                AssetDatabase.LoadAssetAtPath<GameConfigDefinition>("Assets/Game/Content/Config/config_game.asset"));
+            Spawner = new ShipSpawnService(Test.World, registry, Content.Catalog, Session, Galaxy);
             var playerId = Spawner.Spawn(new ShipSpawnArgs { Blueprint = Blueprint.Id, IsPlayer = true, Allegiance = Allegiance.Player, Rotation = quaternion.identity });
             Test.StepTicks(1); Assert.IsTrue(Spawner.TryGetRoot(playerId, out Player));
             Assert.IsTrue(Em.HasComponent<VoxelGrid>(Player));
@@ -115,7 +117,7 @@ namespace Game.Tests.PlayMode.DevTools
         {
             Em.CompleteAllTrackedJobs(); registry.CancelSpawnReads();
             for (int i = slots.Count - 1; i >= 0; i--) slots[i].Dispose();
-            Host.Dispose(); Spawner.Dispose(); Galaxy.Dispose(); State.Dispose();
+            Host.Dispose(); Spawner.Dispose(); Galaxy.Dispose(); State.Dispose(); Session.Dispose();
             Test.Dispose(); registry.Dispose(); Object.DestroyImmediate(registry); library.Dispose(); Content.Dispose(); source.Dispose(); Object.DestroyImmediate(Blueprint);
         }
     }
