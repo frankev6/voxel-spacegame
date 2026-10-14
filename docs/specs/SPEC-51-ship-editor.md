@@ -812,7 +812,7 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 ### EDT-011 — Commit pipeline and R15 regression
 - **Milestone:** M3
 - **Tier:** frontier — F5: validation, inventory and commit target ordering across modules; owns R15
-- **Depends on:** `EDT-009`, `EDT-010`, `SPEC-50`
+- **Depends on:** `EDT-009`, `EDT-010`, `ECO-003`
 - **Do:** `Commit()` and `Discard()` per §5.9; R15 scenario tests with the real `InventoryModel`.
 - **Files:** `Assets/Game/ShipEditor/Services/EditSession.cs`, `Assets/Game/Tests/EditMode/ShipEditor/CommitTests.cs`
 - **Acceptance criteria:**
@@ -1083,3 +1083,5 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 | 50 | Connectivity for damaged footprints and final split component | Union surviving cells individually, because damage may disconnect a definition footprint. Remove the complete surviving footprint before bounded checks, grouped by its previous roots. Completed components receive new labels; the final component retains the old root, avoiding double-counting an empty root. Large checks relabel into a second buffer; every read/write/dispose joins first. Session applies exact damage masks in forward/inverse command order. Disconnected-cell job is capped; EDT-019 host owns presentation refresh cadence. | Tech lead | Resolved; ledger Q443. |
 
 | 51 | Full validation omits the session remove-floating signature and four acceptance cases from its test list | Accepted ADR-0095 adds the existing action to EditSession. Errors precede warnings; missing damaged origins resolve through surviving owned cells. Public issues cache refreshes at most every 0.25 s after changes; commit uses the internal immediate refresh. The explicit acceptance requirement for every issue kind also requires OutOfBounds_Error, OverCellBudget_Error, DamageInvariant_Error and NoWeapons_Warning (11 required cases total, no extras). | Tech lead | Resolved; ledger Q447. |
+
+| 52 | Commit waits on whole economy spec although it consumes only completed atomic inventory operations | Use EDT-009/010 and ECO-003 as concrete dependencies under ADR-0068. Merchant launcher and advisory gates do not participate in editor commit. | Tech lead | Resolved; ledger Q451. |
