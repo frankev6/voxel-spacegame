@@ -1122,6 +1122,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-14 — EDT-018 prop drawing and shader adapter — astra (gpt-6)
+
+- 83d2ab8d adds reused conventional instance batches (500, below the 1,023 ceiling), per-instance palette indices, intersecting-prop slice clipping and transformed world bounds for brick and prop draws. Accepted ADR-0092 preserves the existing procedural live-world shader path and borrows shared materials without per-block material allocation.
+- Material setup and six renderer cases remain; source is uncompiled/unaccepted. spec-required:0 authored this checkpoint (six pending),extra:0. No Unity run; focused validation stays batched. Previous turn added incremental transactions; this turn adds the actual prop draw path.
+- Combat review332 found no additional EDT-017 issues beyond stale EDT-016 selection; economy review352 found no EDT-015 defects; presentation review307 found no EDT-021 defects. Known shared-origin transform/undo-selection fixes remain lead-owned. Combat now audits genuinely ready standard work; presentation reviews the concrete shader adapter; economy has an acceptance/dependency wait. No new workers. Goal remains active.
+
 ### 2026-10-14 — EDT-018 incremental prop transactions — astra (gpt-6)
 
 - f718c5b4 wires module-internal borrowed diffs to per-mesh prop sets before history merges/disposes commands. Undo processes inverse operations in reverse order. Opening/discard rebuilds enumerate once, observer recovery cannot interrupt history bookkeeping, and disposal unsubscribes before releasing owned native sets. SPEC-51 Q45/global417 records the default.

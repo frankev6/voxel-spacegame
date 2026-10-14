@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-14)
 
+- **Draft prop drawing authored:** EDT-01883d2ab8d adds conventional instance batches, palette indices, slice clipping and transformed brick/prop bounds under ADR-0092. Material setup and six required cases remain; uncompiled/unaccepted. Tool/panel reviews clear apart from known EDT-016 selection defects. Combat audits ready standard work, presentation reviews shader compatibility; economy has a verified acceptance/dependency wait. No Unity active.
+
 - **Incremental draft props authored:** EDT-018f718c5b4 consumes edit diffs before history merge, reverses undo operations and maintains exact prop instances; opening/discard rebuilds are explicit. Drawing/materials and six cases remain; uncompiled/unaccepted. EDT-0153991bae4, EDT-021ef94aca8 and EDT-01799ec7ef5 delivered; combat/economy cross-review; presentation review307 found no panel defects and awaits lead acceptance/dependencies. Selection review found shared-origin transform rejection and stale selection after undo; lead fixes pending. No Unity active.
 
 - **Draft scheduler authored:** EDT-018756bd8f6 adds nearest-pivot sync/async queues, dirty requeueing, sliced brick drawing and exact-identity prop storage. Prop event/draw bindings and six cases remain pending; uncompiled/unaccepted. EDT-0153991bae4 delivered awaiting integration, its worker reviews selection; EDT-021/017 active. No Unity active.

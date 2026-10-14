@@ -6,10 +6,10 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-015 | 3991bae4 delivered; reviewing EDT-01799ec7ef5; selection findings queued for lead | EDT-017 after EDT-016 |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-021 | ef94aca8 delivered; reviewing EDT-0153991bae4 | DLG-012 after DLG-007 |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-015 | 3991bae4 delivered; review332 confirms selection findings; auditing ready standard work | EDT-017 after EDT-016 |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-021 | ef94aca8 delivered; area-tool review352 clear; acceptance/dependency wait | DLG-012 after DLG-007 |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | EDT-017 | 99ec7ef5 delivered; panel review307 clear; acceptance/dependency wait | EDT-020 after acceptance |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | EDT-017 | 99ec7ef5 delivered; reviewing EDT-01883d2ab8d shader compatibility | EDT-020 after acceptance |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Draft prop drawing authored:** EDT-01883d2ab8d adds conventional instance batches, palette indices, slice clipping and transformed brick/prop bounds under ADR-0092. Material setup and six required cases remain; uncompiled/unaccepted. Tool/panel reviews clear apart from known EDT-016 selection defects. Combat audits ready standard work, presentation reviews shader compatibility; economy has a verified acceptance/dependency wait. No Unity active.
 
 - **Incremental draft props authored:** EDT-018f718c5b4 consumes edit diffs before history merge, reverses undo operations and maintains exact prop instances; opening/discard rebuilds are explicit. Drawing/materials and six cases remain; uncompiled/unaccepted. EDT-0153991bae4, EDT-021ef94aca8 and EDT-01799ec7ef5 delivered; combat/economy cross-review; presentation review307 found no panel defects and awaits lead acceptance/dependencies. Selection review found shared-origin transform rejection and stale selection after undo; lead fixes pending. No Unity active.
 
