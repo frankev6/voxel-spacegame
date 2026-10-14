@@ -204,7 +204,6 @@ namespace Game.App.Presenters
             }
             else shipLogPresenter.Bind(query);
         }
-        // TODO(HUD-016): callback opens the real registered map and selects this authored star system.
         internal void BindShipLogMapNavigation(Func<ContentId, bool> navigate)
         { CheckAlive(); rumorMapNavigation = navigate ?? throw new ArgumentNullException(nameof(navigate)); }
 

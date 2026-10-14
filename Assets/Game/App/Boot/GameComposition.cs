@@ -237,6 +237,8 @@ namespace Game.App.Boot
             Register(story.Quests); Register(story.Clues); Register(story.Beats); Register(story.ShipLog);
             Save.Register(story.Save);
             Screens.BindMapPresenters(world);
+            Screens.BindShipLogQuery(story.ShipLog);
+            Screens.BindShipLogMapNavigation(id => Screens.ShowGalaxyMapSelected(Game.Galaxy.Data.StarSystemId.FromAuthored(id.Hash)));
             // Travel subscribed first: a successful gate jump is already Spooling when this bridge sees it.
             Push(NarrativeWorldEventBridge.CreateForWorld(narrative, Content.Catalog, campaignGalaxy,
                 world, travel, encounters, story.Beats, dialogService, UI.Navigator));

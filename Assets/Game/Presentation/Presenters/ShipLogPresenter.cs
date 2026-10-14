@@ -154,7 +154,6 @@ namespace Game.Presentation.Presenters
         public void ShowRumorOnMap(int index)
         {
             if (query == null || index < 0 || index >= rumors.Count || !model.Rumors[index].HasMapTarget) return;
-            // TODO(HUD-016): App supplies real registered galaxy-map navigation with this authored system selected.
             if (showOnMap == null || !showOnMap(rumors[index].TargetStarSystem)) unavailable?.Invoke("Galaxy map is not available yet");
         }
         public void Dispose() { if (disposed) return; Unbind(); disposed = true; }

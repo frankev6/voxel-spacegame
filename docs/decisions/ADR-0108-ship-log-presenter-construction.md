@@ -8,7 +8,7 @@ Construct ShipLogPresenter(ShipLogViewModel, ContentCatalog, optional Func<Conte
 
 UiComposition.BindShipLogQuery(query) creates the presenter and registers the actual ShipLogView once. QST-008 calls this after registering its canonical query; no replacement query or blank view is installed. Session reset clears selection/rebinds the registered query for new/load, leaves clear unbound, and keeps ShipLogModel identity. Dispose the presenter before UI/query teardown.
 
-UiComposition.BindShipLogMapNavigation(Func<ContentId, bool>) supplies the later real map navigation. Input is the authored star-system ContentId, not a generated system index. HUD-016 resolves it through StarSystemId.FromAuthored and opens/selects via its real ShowGalaxyMapSelected(StarSystemId) owner. Return false without stack mutation when navigation is unavailable; the ship-log command posts an explicit Info notice and preserves the current view. TODO(HUD-016) remains until that hookup and the prescribed map acceptance pass.
+UiComposition.BindShipLogMapNavigation(Func<ContentId, bool>) supplies the later real map navigation. Input is the authored star-system ContentId, not a generated system index. HUD-016 resolves it through StarSystemId.FromAuthored and opens/selects via its real ShowGalaxyMapSelected(StarSystemId) owner. Return false without stack mutation when navigation is unavailable; the ship-log command posts an explicit Info notice and preserves the current view. The production hookup and prescribed real map acceptance pass are complete.
 
 ## Validation and limits
 
