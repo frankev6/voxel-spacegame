@@ -55,6 +55,9 @@ Shader "Game/Voxel/PropInstanced"
         _Damage01("Damage fraction",Range(0,1))=0
         _Powered("Powered",Range(0,1))=1
         _Throttle("Throttle",Range(0,1))=0
+        [HideInInspector] _DraftPaintIndex("Draft paint index",Float)=0
+        [HideInInspector] _DraftSliceEnabled("Draft slice enabled",Float)=0
+        [HideInInspector] _DraftSliceTop("Draft slice top",Float)=0
     }
     SubShader
     {
@@ -67,6 +70,11 @@ Shader "Game/Voxel/PropInstanced"
         StructuredBuffer<PropInstanceGpu> _PropInstances;
         StructuredBuffer<float4x4> _GridMatrices;
         float4x4 _OrientMatrices[24];
+        UNITY_INSTANCING_BUFFER_START(DraftProps)
+            UNITY_DEFINE_INSTANCED_PROP(float, _DraftPaintIndex)
+        UNITY_INSTANCING_BUFFER_END(DraftProps)
+        float _DraftSliceEnabled, _DraftSliceTop;
+        float4x4 _DraftWorldToCells;
         // Vertex pulling below uses the same instance ID; no per-instance material or object is created.
         void PropSetup() { }
         struct PropAttributes
@@ -103,7 +111,7 @@ Shader "Game/Voxel/PropInstanced"
 #else
             o.positionWS=TransformObjectToWorld(a.position); o.normalWS=TransformObjectToWorldNormal(a.normal);
             o.tangentWS=TransformObjectToWorldDir(tangent); o.bitangentWS=TransformObjectToWorldDir(bitangent);
-            o.colour=0;
+            o.colour=(uint)UNITY_ACCESS_INSTANCED_PROP(DraftProps, _DraftPaintIndex);
 #endif
             o.positionCS=TransformWorldToHClip(o.positionWS); o.uv=a.uv; o.paint=a.paint; o.blink=a.blink.x;
             return o;
@@ -111,6 +119,10 @@ Shader "Game/Voxel/PropInstanced"
         half4 PropFrag(PropVaryings v):SV_Target
         {
             UNITY_SETUP_INSTANCE_ID(v); UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(v);
+#if !defined(UNITY_PROCEDURAL_INSTANCING_ENABLED)
+            if (_DraftSliceEnabled > .5)
+                clip(_DraftSliceTop - mul(_DraftWorldToCells, float4(v.positionWS, 1)).y);
+#endif
             half dissolve=BrickDissolve(v.uv);
             half3 albedo=SAMPLE_TEXTURE2D(_PropAlbedo,sampler_PropAlbedo,v.uv).rgb;
             half4 mask=SAMPLE_TEXTURE2D(_PropMask,sampler_PropMask,v.uv);

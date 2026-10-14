@@ -27,7 +27,11 @@ namespace Game.ShipEditor.Rendering
         readonly ProfilerMarker remesh = new("DraftRenderer.Remesh"), draw = new("DraftRenderer.Draw");
         NativeList<int3> incoming = new(Allocator.Persistent);
         BlobAssetReference<BrickShapeTables> shapes;
-        readonly Material brickMaterial, xrayMaterial;
+        readonly Material brickMaterial, xrayMaterial, propMaterial;
+        // Below the 1,023 API ceiling and within the shader's conventional 500-instance buffer.
+        readonly Matrix4x4[] drawMatrices = new Matrix4x4[500];
+        readonly float[] drawPaint = new float[500];
+        readonly MaterialPropertyBlock propProperties = new();
         bool disposed, sliceEnabled;
         bool rebuildProps;
         int sliceLevel;
@@ -39,11 +43,12 @@ namespace Game.ShipEditor.Rendering
         internal IReadOnlyDictionary<int3, BrickRenderSlot> Slots => slots;
         internal IReadOnlyDictionary<int, InstancedPropSet> Props => props;
         public DraftRenderer(EditSession session, EditorContext content, Material brickMaterial, Material xrayMaterial,
-            IReadOnlyList<Mesh> propMeshes = null)
+            IReadOnlyList<Mesh> propMeshes = null, Material propMaterial = null)
         {
             this.session = session ?? throw new ArgumentNullException(nameof(session));
             this.content = content ?? throw new ArgumentNullException(nameof(content));
             this.brickMaterial = brickMaterial; this.xrayMaterial = xrayMaterial;
+            this.propMaterial = propMaterial;
             this.propMeshes = propMeshes ?? Array.Empty<Mesh>();
             try
             {
@@ -163,9 +168,51 @@ namespace Game.ShipEditor.Rendering
                 var slot = entry.Value;
                 if (slot.Empty || sliceEnabled && (long)entry.Key.y * 16 > sliceLevel) continue;
                 var local = Matrix4x4.TRS((Vector3)((float3)entry.Key * (16 * cellSize)), Quaternion.identity, Vector3.one * cellSize);
-                Graphics.RenderMesh(parameters, slot.Mesh, 0, GridToWorld * local);
+                var world = GridToWorld * local;
+                parameters.worldBounds = TransformBounds(slot.Mesh.bounds, world);
+                Graphics.RenderMesh(parameters, slot.Mesh, 0, world);
             }
-            // TODO(EDT-018): draw visible prop/functional sets in chunks of at most 1,023.
+            DrawProps(camera, cellSize);
+        }
+        void DrawProps(Camera camera, float cellSize)
+        {
+            propProperties.SetFloat("_DraftSliceEnabled", sliceEnabled ? 1 : 0);
+            propProperties.SetFloat("_DraftSliceTop", (float)((double)sliceLevel + 1));
+            propProperties.SetMatrix("_DraftWorldToCells", Matrix4x4.Scale(Vector3.one / cellSize) * GridToWorld.inverse);
+            foreach (var set in props.Values)
+            {
+                if (set.Count == 0) continue;
+                if (propMaterial == null || !propMaterial.enableInstancing)
+                    throw new InvalidOperationException("EDT: draft props require a shared instancing-enabled material.");
+                int count = 0; Bounds bounds = default;
+                var records = set.Records; var matrices = set.Matrices;
+                for (int i = 0; i < set.Count; i++)
+                {
+                    var record = records[i];
+                    if (sliceEnabled && (long)record.Origin.y + content.Footprints.Get(record.Block, record.Orient).Min.y > sliceLevel) continue;
+                    var matrix = GridToWorld * matrices[i];
+                    var instanceBounds = TransformBounds(set.Mesh.bounds, matrix);
+                    if (count == 0) bounds = instanceBounds; else bounds.Encapsulate(instanceBounds);
+                    drawMatrices[count] = matrix; drawPaint[count] = record.Color; count++;
+                    if (count == drawMatrices.Length) { FlushProps(camera, set.Mesh, count, bounds); count = 0; }
+                }
+                if (count != 0) FlushProps(camera, set.Mesh, count, bounds);
+            }
+        }
+        void FlushProps(Camera camera, Mesh mesh, int count, Bounds bounds)
+        {
+            propProperties.SetFloatArray("_DraftPaintIndex", drawPaint);
+            var parameters = new RenderParams(propMaterial) { camera = camera, matProps = propProperties, worldBounds = bounds };
+            Graphics.RenderMeshInstanced(parameters, mesh, 0, drawMatrices, count);
+        }
+        static Bounds TransformBounds(Bounds local, Matrix4x4 transform)
+        {
+            var x = transform.MultiplyVector(new Vector3(local.extents.x, 0, 0));
+            var y = transform.MultiplyVector(new Vector3(0, local.extents.y, 0));
+            var z = transform.MultiplyVector(new Vector3(0, 0, local.extents.z));
+            var extent = new Vector3(Mathf.Abs(x.x) + Mathf.Abs(y.x) + Mathf.Abs(z.x),
+                Mathf.Abs(x.y) + Mathf.Abs(y.y) + Mathf.Abs(z.y), Mathf.Abs(x.z) + Mathf.Abs(y.z) + Mathf.Abs(z.z));
+            return new Bounds(transform.MultiplyPoint3x4(local.center), extent * 2);
         }
         void CheckAlive() { if (disposed) throw new ObjectDisposedException(nameof(DraftRenderer)); }
         public void Dispose()
