@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 1 | 0 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 6 |
-| M3 | 97 | 7 | 0 | 0 | 76 | 0 | 180 | 7 |
+| M3 | 96 | 7 | 0 | 0 | 77 | 0 | 180 | 8 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -379,14 +379,14 @@
 | NAR-007 | FactStore | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-006 | yes | done | astra (gpt-6) | 2026-10-13 | 18906e47 | Dense facts, deferred changes, orphan/alias restore and trace; seven functional checks pass, two advisory fixtures authored/unrun |
 | NAR-008 | FACT save participant | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | 6a0c3c47 | Atomic versioned FACT payload; five functional checks pass, Capture5k measurement authored/unrun |
 | NAR-009 | Import-time compile pipeline | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, NAR-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 36adef2b | Deferred import compilation/menu/drawers; clean compile and three focused checks pass |
-| NAR-010 | NarrativeService tick and dependency index | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
-| NAR-011 | LogicContext and LogicWorldAdapter in Game.App | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-005, NAR-010, FND-001, ECO-001, QST-001 | no | todo |  |  |  |  |
+| NAR-010 | NarrativeService tick and dependency index | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007 | yes | done | astra (gpt-6) | 2026-10-13 | c2e2084d | Ordered runtime/index; 5 direct-tick cases pass, 2 advisory fixtures compiled but not run; Q363. Boot wiring remains NAR-011 |
+| NAR-011 | LogicContext and LogicWorldAdapter in Game.App | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-005, NAR-010, FND-001, ECO-001, QST-001 | yes | todo |  |  |  |  |
 | NAR-012 | World-event bridge | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-011, SYS-001, ENC-001 | no | todo |  |  |  |  |
 | NAR-013 | Narrative validator framework and fact rules | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-009 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | e81dc6d | Scratch validator, V001–008 and CLI; reviewed repair, 7 focused checks pass; downstream owner stubs remain explicit diagnostics |
 | NAR-014 | Legacy converter: reading, mapping tables and logic translation | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, MIG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 2be62596 | Strict five-file loader and mapped logic; 5 focused checks pass; emission/assets remain NAR-015/016 |
 | NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 5d85a419 | 34 Yarn/34 beats/facts and manifest generated;145 files byte-stable,35 definitions registered; six required checks accepted, clean compile; Q325 |
 | NAR-016 | Legacy converter: quests, triggers, templates and flag assets | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-015 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 1b0cb271 | Four required converter cases pass9669; real generation42967 terminal0, 225 files raw-byte identical across rerun;9 total quests incl Whisper,3 contracts,143 source strings; Q337/343. |
-| NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | no | todo |  |  |  |  |
+| NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | yes | todo |  |  |  |  |
 | NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | no | todo |  |  |  |  |
 | NAR-020 | LogicWatcher | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-004 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | b4344a9 | Sorted/deduplicated dependency watcher; 4 focused tests pass |
 | DLG-001 | Public contract types | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | NAR-001, UI-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 67e0ffd | Dialog contracts, one required test; full suites green |
@@ -1067,6 +1067,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — NAR-010 done: bounded narrative evaluation — astra (gpt-6)
+
+- e3617234 runtime and c2e2084d acceptance fixtures implement ordered dependency waves, readiness/new/restore lifecycle, eight-pass carryover and per-system CSR owner selection. Combat review240 found no defects in the requested §5.3/Q29 scope. Live composition remains NAR-011.
+- Compile93898 terminal0, zero CS warnings. Focused EditMode66456 terminal0: 5 passed/0 failed, 0.1487802s test bodies (excludes Unity startup/shutdown). Evidence Logs/playtest/narrative-runtime/{compile.log,acceptance.xml,acceptance.log}. Spec-required: 7 (5 functional passed; 2 advisory performance fixtures compiled, not run), extra: 0. No full-suite/performance claim.
+- No Unity active. DEV-009 active262; sandbox spawn integration limitation identified and lead will resolve its canonical semantics. Presentation dependency wait; NAR-017 now ready for existing combat worker. Previous continuation yielded source-review evidence; this turn adds and verifies required acceptance.
 
 ### 2026-10-13 — NAR-010 ordered narrative runtime authored — astra (gpt-6)
 

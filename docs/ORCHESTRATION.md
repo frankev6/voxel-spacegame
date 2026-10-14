@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Narrative runtime accepted:** NAR-010 c2e2084d done; compile93898 clean and focused EditMode66456 terminal0 with5 passes (0.1487802s test bodies). Two advisory fixtures compiled only; no Unity active. Next dispatch NAR-017 to existing combat worker and implement NAR-011 live context/bootstrap. DEV-009 active262 with explicit sandbox spawn gap for lead integration; presentation dependency wait. Source review240 found no defects.
+
 - **Narrative runtime authored:** NAR-010claimed d83c57dd; e3617234 implements ordered eight-pass evaluation, queued dependency dedup, session/full-ready lifecycle, tracing and per-system CSR content-owner index. Q363 resolves full flag across all systems without changing INarrativeSystem. Uncompiled/unaccepted; next five required functional cases and two advisory fixtures, then focused batch. No Unity active. DEV-009 active260; combat assigned bounded narrative source review; presentation waits for ready work. Previous turn accepted belt streaming (progress).
 
 - **Belt streaming accepted:** SYS-00796127285 done; compile98274 clean, PlayMode61443 terminal0 with9 passes (4 belt+5 T2), evidence Logs/playtest/belt-streaming. Runtime now streams dynamic asteroid grids with bounded jobs/shared spawn budget and destruction persistence. No Unity active. DEV-009 worker active259; other two dependency waits. Next ready frontier integration and worker recycling; previous turn/runtime acceptance made progress.
