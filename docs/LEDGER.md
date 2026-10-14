@@ -364,7 +364,7 @@
 | ENC-004 | FactionService and FACN | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-003, PERS-001, FND-001 | yes | done | astra (gpt-6) | 2026-10-14 | 3b4929e9 | Queued reads, FACN unknown-ID preservation and atomic restore; production save/new-game/sandbox reset registration. Six service and two integration cases pass. |
 | ENC-005 | TerritoryService (authored ownership) | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, ENC-003, ENC-004, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | de3f1ee | Authored territory ownership, generation/reset rebuild; production map/ticker registration 0f00dd27; three required cases pass. |
 | ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, GAL-006, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 21d0996b | Full ordered seeded composition, clearance placement and line-abreast formation; 9 required cases pass. Director cap remains ENC-007. |
-| ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SYS-008, SYS-013, FND-012, TRV-006, AI-008 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead implementing actual director runtime under ADR-0099; worker follow-ups wait for working owner. |
+| ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SYS-008, SYS-013, FND-012, TRV-006, AI-008 | yes | in-progress | astra (gpt-6) | 2026-10-14 | 247fd49a | Real runtime composed; tags/allegiance, ambush and caps pass. Schedule, defeat/loot, despawn, pending acceptance and two advisory fixtures remain; not done. |
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | no | todo |  |  |  |  |
 | ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, SPEC-40 | no | todo |  |  |  |  |
 | ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | cdf292d6 | Ten canonical encounters, six factions, real ARK/Whisper ownership; generation/rerun zero errors, two required checks pass |
@@ -1066,6 +1066,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 464 | SPEC-61 Q48: HUD names and radar bridge defaults | Real owner caches, fuel-aware gate invalidation and final-contact waypoint comparison; encounter display requires actual ENC-007, no fake director. | Tech lead |
 | 465 | SPEC-51 Q57: production editor/HUD composition | Resolved ADR-0098: real profile storage, reused editor view/model, actual HUD and launcher, creative startup and ordered disposal. | Tech lead |
 | 466 | SPEC-01 Q33: defeat composition and isolated startup | Root owns watcher lifetime/tick; current readable save or latest autosave, disabled Load without saves. Isolated SaveRoot suppresses dev playground takeover; ordinary World Play unchanged. | Tech lead |
+| 467 | SPEC-33 Q30: director prerequisites, pending target and spawn readiness | ADR-0099; actual GameplayActive guard, pending transit destination, unconverted spawn pose/AI shift sequence, unload-safe sweep. ENCT remains separate. | Tech lead |
 
 ## Measurements
 
@@ -1177,6 +1178,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — ENC-007 real director implementation, acceptance partial — astra (gpt-6)
+
+- 247fd49a replaces the throwing director shell with actual scheduled seeded rolls, ordered content conditions/weights, real fleet composition/placement/spawner calls, tags/allegiance/hail lookup, ambush goals, caps, defeat events/loot, far-patrol retirement and pending story encounters. GameComposition owns registration/disposal and HUD names now query the real director. ShipDestroyed bridge carries actual encounter identity. ADR-0099 removes aggregate performance/scenario dependencies from this runtime owner; their own acceptance remains open. Q467 records concrete integration defaults.
+- Review fixes preserve asynchronous spawn ownership: newborn roots use GridSpawnRequest pose until converted; AI anchors record current origin sequence; unloaded ships are not treated as defeated during streaming; pending Transit requests target the actual travel destination. GameplayActive guards the real spawner's readiness.
+- Three required cases authored: tags/allegiance/800m clearance, player-directed ambush goals and caps. Initial two passed/one fixture-position failure; corrected spawn case passed. Compile clean, zero CS warnings, including final readiness guard. Evidence Logs/playtest/encounter-director/{initial,spawn}.xml. Test count: spec-required: 3 of 12 authored, extra: 0. No full suite/performance/soak.
+- ENC-007 stays in progress: schedule/determinism/preconditions, defeat+loot, despawn and pending scenarios plus two advisory fixture definitions remain. ENC-008 owns save serialization; no claim of encounter save persistence. Same three workers have exact recorded dependency waits; finish this actual owner to unlock substantial follow-ups, not placeholder assignments.
 
 ### 2026-10-14 — FND-015 defeat recovery and startup accepted — astra (gpt-6)
 

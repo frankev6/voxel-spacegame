@@ -37,4 +37,6 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 3. Next
 
+ENC-007247fd49a now supplies the actual encounter director and production composition: three required spawn/ambush/cap checks pass; nine acceptance/fixture definitions remain, including pending travel and defeat rewards. Prioritize finishing this owner to unlock the three standard workers. ENCT save persistence remains ENC-008.
+
 Finish real fleet edit/return scenarios and a usable editor playground interaction. Defeat recovery is now integrated and verified. Integrate compatible territory/escort/hotkey deliveries; unblock frontier EncounterDirector, dialogue and map owners to feed the same three workers substantial standard features. Do not represent pending scene scenarios or unimplemented pads as working. HUD-009 production binding is now live; three opt-in performance fixture definitions remain, measurements advisory. DEV-018 actual menu-route and TRV-011 R30 acceptance remain open.

@@ -51,3 +51,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - b9f9cb46 accepts HUD-003 after actual Continue passes (worker b1da267c fixes fixture panel lifetime). EDT-023 real Lab save/reload/MainMenu return passes; four fleet/dialog scenarios remain. All three recorded workers delivered, genuine frontier-owner dependency waits; no duplicate/review-only assignments.
 
 - FND-01518910e5a accepted: root-owned defeat recovery, actual save/load/menu and all scene starts pass. Same three workers delivered/accepted; next lead must unblock EncounterDirector/dialog/map/dev-overlay owners for substantial ready standard follow-ups. No routine test queues.
+
+- ENC-007247fd49a replaces the throwing shell and is composed; three spawn/ambush/cap checks pass. Lead retains schedule/defeat/despawn/pending acceptance and two advisory fixtures before acceptance. All three exact workers confirmed idle with genuine dependencies; director completion unlocks standard follow-ups.
