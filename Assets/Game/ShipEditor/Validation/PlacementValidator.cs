@@ -73,7 +73,7 @@ namespace Game.ShipEditor.Validation
                 int3 cell = current.Origin + offset;
                 var occupant = At(cell);
                 if (occupant.Present && occupant.Block.Equals(record))
-                { scratch.CellDelta--; scratch.SetCell(cell, new ValidationScratch.CellState { Group = -1 }); }
+                { scratch.CellDelta--; scratch.SetOverlayCell(cell, new ValidationScratch.CellState { Group = -1 }); }
                 else scratch.ChangeMissing(cell, -1);
             }
             foreach (var offset in footprint.Clearance) scratch.ChangeClearance(current.Origin + offset, -1);
@@ -118,7 +118,7 @@ namespace Game.ShipEditor.Validation
             {
                 int3 cell = record.Origin + footprint.Cells[i];
                 bool present = record.DamageOffset == -1 || batch.Damage[record.DamageOffset + i] != 0;
-                scratch.SetCell(cell, new ValidationScratch.CellState { Block = record, Group = group, Present = present, Reserved = !present });
+                scratch.SetOverlayCell(cell, new ValidationScratch.CellState { Block = record, Group = group, Present = present, Reserved = !present });
                 if (present) { scratch.CellDelta++; scratch.Candidates.Add(cell); }
                 else scratch.ChangeMissing(cell, 1);
                 scratch.Include(cell);

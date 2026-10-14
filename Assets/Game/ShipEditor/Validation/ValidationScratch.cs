@@ -46,7 +46,7 @@ namespace Game.ShipEditor.Validation
         }
         internal Checkpoint Mark() => new() { Journal = journal.Length, Candidates = Candidates.Length,
             Cells = CellDelta, Cores = CoreDelta, Min = Min, Max = Max, Bounds = HasBounds };
-        internal void SetCell(int3 cell, CellState value)
+        internal void SetOverlayCell(int3 cell, CellState value)
         {
             bool found = Cells.TryGetValue(cell, out var before);
             journal.Add(new Change { Kind = 0, Cell = cell, Before = before, Existed = found }); Cells[cell] = value;
