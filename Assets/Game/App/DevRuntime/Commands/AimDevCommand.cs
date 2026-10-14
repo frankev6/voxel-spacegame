@@ -55,7 +55,7 @@ namespace Game.App.DevRuntime.Commands
                 else return DevCommandResult.Fail("unknown aim target '" + target + "'");
                 if (root == Entity.Null || !em.HasComponent<LocalTransform>(root)) return DevCommandResult.Fail("aim target not found");
                 id = em.GetComponentData<PersistentId>(root).Value;
-                point = em.GetComponentData<LocalTransform>(root).Position;
+                point = AimPoint(em, root);
             }
             error = Move(ctx, point);
             if (error != null) return DevCommandResult.Fail(error);
@@ -79,6 +79,13 @@ namespace Game.App.DevRuntime.Commands
                 if (id != 0 && (distance < best || distance == best && id < bestId)) { found = root; best = distance; bestId = id; }
             }
             return found;
+        }
+        static float3 AimPoint(EntityManager em, Entity root)
+        {
+            var pose = em.GetComponentData<LocalTransform>(root);
+            if (!em.HasComponent<VoxelGrid>(root)) return pose.Position;
+            var grid = em.GetComponentData<VoxelGrid>(root);
+            return pose.TransformPoint(((float3)grid.CellMin + (float3)(grid.CellMax + 1)) * (.5f * grid.CellSize));
         }
         static string Move(DevContext ctx, float3 point)
         {
@@ -115,7 +122,7 @@ namespace Game.App.DevRuntime.Commands
                     ctx.EntityManager.CompleteAllTrackedJobs();
                     Entity root = DevEcs.FindGrid(ctx, id);
                     if (root == Entity.Null || !ctx.EntityManager.HasComponent<LocalTransform>(root)) { Fail("aim target disappeared"); return; }
-                    target = ctx.EntityManager.GetComponentData<LocalTransform>(root).Position;
+                    target = AimPoint(ctx.EntityManager, root);
                 }
                 string error = Move(ctx, target); if (error != null) Fail(error);
             }

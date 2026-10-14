@@ -53,7 +53,8 @@ namespace Game.Tests.PlayMode.Galaxy
         protected GalaxyFrameContext Context(float seconds = 0) => new(Em, Clock.UniversalTime, Clock.Tick, seconds, Time.frameCount);
 
         // The production fixed group, including physics, advances exactly once per request.
-        // Automatic fixed updates stay disabled while streaming/init frames are yielded.
+        // The rate manager prevents automatic ticks. Yielding combat fixtures keep the group
+        // enabled so OnStopRunning does not clear active projectiles between frames.
         // Borrow/restore the group's time and rewindable allocator as Entities rate managers do.
         protected sealed unsafe class FixedTicks : IDisposable
         {
@@ -83,21 +84,21 @@ namespace Game.Tests.PlayMode.Galaxy
             readonly World world;
             readonly FixedStepSimulationSystemGroup group;
             readonly IRateManager previous;
-            readonly bool enabled;
+            readonly bool enabled, preserveBetweenFrames;
             readonly Rate rate;
             readonly List<double> samples = new(512);
-            internal FixedTicks(World world)
+            internal FixedTicks(World world, bool preserveBetweenFrames = false)
             {
-                this.world = world; group = world.GetExistingSystemManaged<FixedStepSimulationSystemGroup>();
+                this.world = world; this.preserveBetweenFrames = preserveBetweenFrames; group = world.GetExistingSystemManaged<FixedStepSimulationSystemGroup>();
                 previous = group.RateManager; enabled = group.Enabled; rate = new Rate(world.Time.ElapsedTime);
-                group.Enabled = false; group.RateManager = rate;
+                group.Enabled = preserveBetweenFrames; group.RateManager = rate;
             }
             internal void Step()
             {
                 long start = Stopwatch.GetTimestamp();
                 rate.Remaining = 1; group.Enabled = true;
                 try { group.Update(); world.EntityManager.CompleteAllTrackedJobs(); }
-                finally { rate.Restore(group); group.Enabled = false; }
+                finally { rate.Restore(group); group.Enabled = preserveBetweenFrames; }
                 samples.Add((Stopwatch.GetTimestamp() - start) * 1000.0 / Stopwatch.Frequency);
                 EventHub.DrainAll();
             }

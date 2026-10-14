@@ -73,7 +73,9 @@ namespace Game.App.Presenters
                 model.CanEditShip = show && editor != null;
                 model.EditBlockedReason = model.CanEditShip ? "" : "Ship editing is unavailable.";
                 var view = ui.Navigator.Get<DockView>();
-                if (show && !view.IsOpen) ui.Navigator.Push(view);
+                // BodyInteracted can start a dialog before the queued docking event arrives.
+                // Keep its input context on top; StackChanged opens the dock after it closes.
+                if (show && !view.IsOpen && ui.Navigator.Top is not DialogView) ui.Navigator.Push(view);
                 else if (!show && view.IsOpen) ui.Navigator.Pop(view);
             }
             finally { synchronizing = false; }

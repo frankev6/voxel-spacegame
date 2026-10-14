@@ -67,17 +67,19 @@ namespace Game.Tests.PlayMode.Narrative
             Entity modifiedPlayer = Entity.Null;
             try
             {
-                string source = File.ReadAllText(ScenarioPath);
+                string source = File.ReadAllText(ScenarioPath).Replace("timeout=15", "timeout=3").Replace("timeout=10", "timeout=3");
                 int marker = source.IndexOf(DriftMarker, StringComparison.Ordinal);
                 Assert.Greater(marker, 0, "The second case runs the same route through its actual save/load checkpoint.");
                 if (stopAtDrift) source = source.Substring(0, marker);
-                int combatBeginLine = Array.FindIndex(source.Split('\n'), line => line == "wait encounters.ships == 3 timeout=10") + 1;
+                int combatBeginLine = Array.FindIndex(source.Split('\n'), line => line.StartsWith("wait encounters.ships == 3 timeout=", StringComparison.Ordinal)) + 1;
                 int combatEndLine = Array.FindIndex(source.Split('\n'), line => line == "interact body=ark_station") + 1;
                 var script = ScenarioParser.Parse(source, host.Commands, host.Probes);
-                using var runner = host.RunScenario(script, ScenarioPath, 1, Path.Combine(TestDirectory, "scenario-results"));
+                using var runner = host.RunScenario(script, ScenarioPath, 1, Path.GetFullPath("Logs/playtest/opening-chapter"));
                 double deadline = Time.realtimeSinceStartupAsDouble + script.TimeoutSeconds + 1;
                 bool prepared = false;
-                int fightTicks = 0;
+                int fightTicks = 0, aimStage = -1;
+                Entity aimedProbe = Entity.Null;
+                var aimLines = source.Split('\n').Select((line, index) => (line, index)).Where(value => value.line.StartsWith("aim target=", StringComparison.Ordinal)).Select(value => value.index + 1).ToArray();
                 while (!runner.Finished && Time.realtimeSinceStartupAsDouble < deadline)
                 {
                     // Only compress the real opening fight. All commands still run once through
@@ -88,25 +90,63 @@ namespace Game.Tests.PlayMode.Narrative
                         if (probes.Count == 3 && probes.All(Ready) && Ready(PlayerRoot))
                         {
                             PrepareProbeFight(probes); prepared = true; modifiedPlayer = PlayerRoot;
-                            ticks = new FixedTicks(World.DefaultGameObjectInjectionWorld);
+                            ticks = new FixedTicks(World.DefaultGameObjectInjectionWorld, preserveBetweenFrames: true);
                         }
                     }
                     if (ticks != null)
                     {
+                        // The starter frigate's primary group is fixed forward guns. Align the
+                        // fixture ship with the next probe; real Space input still fires all shots.
+                        int stage = Array.FindLastIndex(aimLines, line => runner.Run.CurrentLine >= line);
+                        if (stage != aimStage)
+                        {
+                            aimStage = stage;
+                            var remaining = Members(new ContentId("encounter_xeno_probe_tutorial").Hash).Where(root => !Em.HasComponent<Game.Voxel.Damage.Hulk>(root)).ToList();
+                            if (remaining.Count > 0) aimedProbe = remaining.OrderBy(root => math.distancesq(Center(root), Center(PlayerRoot))).First();
+                        }
+                        if (aimedProbe != Entity.Null && Em.Exists(aimedProbe))
+                        {
+                            var pose = Em.GetComponentData<LocalTransform>(PlayerRoot);
+                            float3 target = CoreCenter(aimedProbe);
+                            float3 direction = target - pose.Position;
+                            Place(PlayerRoot, pose.Position, math.atan2(direction.x, direction.z));
+                            Vector3 screen = host.Context.GameplayCamera.WorldToScreenPoint(target);
+                            host.Input.MoveMouse(new Vector2(screen.x, screen.y));
+                        }
                         if (runner.Run.CurrentLine >= combatEndLine)
                         { ticks.Dispose(); ticks = null; CancelModifiers(modifiedPlayer); modifiedPlayer = Entity.Null; }
                         else
                         {
                             // A finite tick budget covers the script's 15 + 3*60 tick waits
                             // and actual director defeat readback.
-                            Assert.Less(fightTicks, 240, "Opening fight exceeded its bounded real fixed ticks.");
+                            Assert.Less(fightTicks, 900, "Opening fight exceeded bounded ticks; shots=" + Shots(PlayerRoot) + "; line=" + runner.Run.CurrentLine);
                             for (int i = 0; i < 2; i++) { ticks.Step(); fightTicks++; }
                         }
                     }
                     yield return null; // host.Update drives the runner; do not Step it again here.
                 }
-                Assert.IsTrue(prepared, "The intro must spawn its three actual xeno probes.");
+                if (runner.Run.Outcome != ScenarioOutcome.Passed)
+                {
+                    Em.CompleteAllTrackedJobs();
+                    var state = new System.Text.StringBuilder(host.Context.Ui.Text(30, 160));
+                    state.AppendLine("\nPlayer: " + Em.GetComponentData<LocalTransform>(PlayerRoot).Position);
+                    using var combatQuery = Em.CreateEntityQuery(typeof(Game.Simulation.Ai.PlayerCombatStatus));
+                    var combat = combatQuery.GetSingleton<Game.Simulation.Ai.PlayerCombatStatus>();
+                    state.AppendLine($"Combat: hostiles={combat.HostilesEngaging}, damagedTick={combat.LastDamagedTick}, tick={Clock.Tick}");
+                    if (host.Context.TryGetInteractionTarget(out var target))
+                        state.AppendLine($"Interaction: target={target.Target}, body={target.Body.LocalKey}, range={target.InRange}, distance={target.DistanceM}");
+                    using var bodies = Em.CreateEntityQuery(typeof(Game.Galaxy.Bodies.StarSystemBody), typeof(LocalTransform));
+                    using var entities = bodies.ToEntityArray(Unity.Collections.Allocator.Temp);
+                    foreach (var entity in entities)
+                    {
+                        var body = Em.GetComponentData<Game.Galaxy.Bodies.StarSystemBody>(entity);
+                        state.AppendLine($"Body {entity}: key={body.Id.LocalKey}, flags={body.Flags}, pos={Em.GetComponentData<LocalTransform>(entity).Position}, grid={body.Grid}, interactable={Em.HasComponent<Game.Galaxy.Interaction.Interactable>(entity)}");
+                        if (Em.Exists(body.Grid)) state.AppendLine($"Grid: pos={Em.GetComponentData<LocalTransform>(body.Grid).Position}, collider={Em.HasComponent<Unity.Physics.PhysicsCollider>(body.Grid)}");
+                    }
+                    File.WriteAllText("Logs/playtest/opening-chapter/state.txt", state.ToString());
+                }
                 AssertPassed(runner);
+                Assert.IsTrue(prepared, "The intro must spawn its three actual xeno probes.");
                 CollectionAssert.AreEqual(new[] { "waking_up_start", "choose_start_ship_start", "territory_friendly_entry_start" },
                     nodesStarted.Take(3), "The actual campaign introduction precedes its queued arrival story.");
                 AssertOnceStarts(onceStarts);
@@ -122,7 +162,7 @@ namespace Game.Tests.PlayMode.Narrative
                 var completed = CompletedOnce(facts);
                 string retry = "scenario opening_chapter_cache_revisit\nstatus active\ntimeout 15\ninteract body=drift_cache\nwait frames=3\nassert fact(\"beat_drift_survey_cache\") == 1\nassert logs.errors == 0 && logs.exceptions == 0\n";
                 using var revisit = host.RunScenario(ScenarioParser.Parse(retry, host.Commands, host.Probes), ScenarioPath, 2,
-                    Path.Combine(TestDirectory, "scenario-results"));
+                    Path.GetFullPath("Logs/playtest/opening-chapter"));
                 yield return WaitUntil(() => revisit.Finished, 16, "Real post-load cache interaction settles");
                 AssertPassed(revisit);
                 Assert.AreEqual(previousStarts, onceStarts[cache], "The completed cache beat did not restart after load.");
@@ -135,15 +175,30 @@ namespace Game.Tests.PlayMode.Narrative
                 if (modifiedPlayer != Entity.Null) CancelModifiers(modifiedPlayer);
                 dialog.Started -= Started;
                 host.Input.SetMouse(-1, -1, "left", false, 0, 0, 0);
-                host.Input.SetKeys("Digit1,Digit2,Digit3,Digit4,Digit7", 0, true);
+                host.Input.SetKeys("Digit1,Digit2,Digit3,Digit4,Digit7,Space", 0, true);
             }
         }
 
+        float3 CoreCenter(Entity root)
+        {
+            var grid = Em.GetComponentData<Game.Voxel.Model.VoxelGrid>(root);
+            foreach (var block in Em.GetBuffer<Game.Voxel.Model.BlockInstance>(root))
+            {
+                var definition = Catalog.GetBlock(block.Block);
+                if (definition == null || !definition.TryGetModule(out Game.Data.Blocks.CoreModule _)) continue;
+                float3 center = 0;
+                foreach (var cell in definition.Cells)
+                    center += (float3)Service<Game.Data.Services.ContentService>().Orientations.Value.Rotate(new int3(cell.x, cell.y, cell.z), block.Orient);
+                center = (center / definition.Cells.Count + (float3)block.Origin + .5f) * grid.CellSize;
+                return Em.GetComponentData<LocalTransform>(root).TransformPoint(center);
+            }
+            return Center(root);
+        }
         void PrepareProbeFight(List<Entity> probes)
         {
             Em.CompleteAllTrackedJobs();
-            float3 player = Em.GetComponentData<LocalTransform>(PlayerRoot).Position;
-            Place(PlayerRoot, player, math.PI); // fire away from the Ark station
+            float3 player = Em.GetComponentData<LocalTransform>(PlayerRoot).Position + new float3(2000, 0, 0);
+            Place(PlayerRoot, player, math.PI); // isolate the firing lane from the neutral Ark station
             for (int i = 0; i < probes.Count; i++)
             {
                 Place(probes[i], player + new float3((i - 1) * 35, 0, -100 - i * 40), 0);

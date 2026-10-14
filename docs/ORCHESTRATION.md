@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | TRV-014 | NAR-0180dd949f3 delivered; completes actual escort transfer integration | Real fleet/travel owners; no Unity |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-010 | QST-010 source delivered pending lead acceptance; implements real economy scenarios | Trade/save/salvage/editor owners integrated; no Unity |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ENC-011 | HUD-014c52ad5e2 delivered; completes actual dialogue combat and defeat fact | QST008 owners integrated; no Unity |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | QST-010 | TRV011fc64807f and input probe74a97706 delivered; investigates actual Drift cache interaction | Actual streaming/interaction owners; no Unity |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-019 | ECO0105dc40d39/6c5a4b45 delivered; completes actual load-safety scenarios | Canonical narrative/save owners; no Unity |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-021 | HUD004/005 routes already implemented, acceptance with lead; implements real story/map/log playground area | Canonical narrative/UI owners; no Unity |
 
 ## Operating rules
 
@@ -16,7 +16,7 @@ Owner correction 2026-10-14: all three workers implement substantial feature del
 
 Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol high threads; no replacements or subagents. Lead owns central docs/main, reviews, frontier work and the serialized Unity channel. Workers use isolated task branches, no Unity, no remotes and no central workflow docs. Read all three exact thread states at work boundaries; recycle to ready standard tasks. Record real waits. Advisory performance policy and art restrictions remain binding.
 
-Native goal was previously paused, but get_goal now confirms active on 2026-10-14 at this continuation. Keep the full objective intact. The existing heartbeat remains configured; do not create another goal or schedule. No duplicate workers.
+The heartbeat supplies continuation; do not infer native goal activation or completion from it. Keep the full objective intact and do not create another goal, schedule or duplicate worker.
 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
@@ -91,3 +91,7 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - EDT-02371bbad74 accepted: all five actual station-dialog/editor/respawn cases pass in4.2s; successful interaction key release fixed. HUD01695ecdaf8 and QST0108bb1bcd1 ready for compatible integration; same workers recycled to NAR018/ECO010, HUD014 still active.
 
 - HUD-014a754ae35/HUD-01647ddeaa4 accepted: ten required functional cases pass with actual rumor-to-map navigation, zero skips. Theme root colour resolution fixed. NAR0180dd949f3 delivered; same worker recycled to TRV014 remaining integration. QST010 pending lead acceptance.
+
+- QST-010 integration a2c53015 remains unaccepted: actual route reaches The Drift after real probe combat, patrol hand-in and rumor. Lead fixed deferred DockPresenter navigation covering the active dialogue and corrected scenario key release/option selection; pending-spawn rebasing now passes ten existing checks and cache/derelict interactions succeed; the save checkpoint is blocked by combat state, under diagnosis. No full route or save/replay pass claimed. Three exact workers recycled as above; NAR019 remains active.
+
+- 14:39Z recovery: all three recorded worker turns were interrupted with source preserved. Resumed the same threads on QST010 later-route support, NAR019 load safety and DEV021 actual story/log/map beacons. No duplicates; Editor stopped and no test run active before lead resumed focused validation.

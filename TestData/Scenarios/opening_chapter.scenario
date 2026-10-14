@@ -6,37 +6,61 @@ timeout 180
 newgame seed=42010 intro=true
 encounter director=off
 wait dialog.option("Try to move") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
 wait dialog.option("Vomit") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
 wait dialog.option("Look Around") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
 wait dialog.option("Try to move") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
 wait dialog.option("Where am I?") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
 wait dialog.option("Understood") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
 wait dialog.option("Take Frigate") == 2 timeout=15
-key keys=Digit2 hold=0.01
 wait frames=2
+key keys=Digit2 hold=0
+wait frames=2
+key keys=Digit2 release=true
+wait frames=1
 # The initial arrival story retains FIFO placement after the authored intro chain.
 wait dialog.option("Continue Patrol") == 3 timeout=15
-key keys=Digit3 hold=0.01
 wait frames=2
+key keys=Digit3 hold=0
+wait frames=2
+key keys=Digit3 release=true
+wait frames=1
 wait player.ready timeout=20
 assert fact("intro_awake") == 1 "intro complete"
 assert fact("intro_ship_chosen") == 1 "real starter choice"
 # COMBAT_BEGIN
 wait encounters.ships == 3 timeout=10
 wait ticks=15
-mouse button=left down=true
+key keys=Space hold=0
 aim target=nearest_hostile
 wait ticks=60
 wait encounters.ships == 2 timeout=10
@@ -46,7 +70,7 @@ wait encounters.ships == 1 timeout=10
 aim target=nearest_hostile
 wait ticks=60
 wait encounters.ships == 0 timeout=10
-mouse button=left down=false
+key keys=Space release=true
 wait encounter_defeated("encounter_xeno_probe_tutorial") == 1 timeout=10
 assert encounters.ships == 0 "all three real intro probes defeated"
 # COMBAT_END
@@ -54,35 +78,72 @@ assert encounters.ships == 0 "all three real intro probes defeated"
 # hand-in outranks the hub, so acknowledge it before entering Mission Control.
 interact body=ark_station
 wait dialog.option("Leave") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
+# Return from the actual dock screen through its Back/Undock action.
+key keys=Escape hold=0
+wait frames=2
+key keys=Escape release=true
+wait frames=1
 wait player.ready && quest("quest_relation_watch") == "Completed" timeout=10
 interact body=ark_station
 wait dialog.option("Mission Control") == 4 timeout=15
-key keys=Digit4 hold=0.01
 wait frames=2
+key keys=Digit4 hold=0
+wait frames=2
+key keys=Digit4 release=true
+wait frames=1
 wait dialog.option("Accept Material Turn-In Test") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
 assert quest("quest_survey_local_materials") == "Active" "hub accepted the survey quest"
 wait dialog.option("Station Bar") == 2 timeout=15
-key keys=Digit2 hold=0.01
 wait frames=2
+key keys=Digit2 hold=0
+wait frames=2
+key keys=Digit2 release=true
+wait frames=1
 wait dialog.option("Talk to Shady Figure") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
 wait dialog.option("Pay for Info (100 Scrap)") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
 wait dialog.option("Thanks") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
-wait dialog.option("Back") == 1 timeout=15
-key keys=Digit1 hold=0.01
+key keys=Digit1 hold=0
 wait frames=2
+key keys=Digit1 release=true
+wait frames=1
+wait dialog.option("Back") == 2 timeout=15
+wait frames=2
+key keys=Digit2 hold=0
+wait frames=2
+key keys=Digit2 release=true
+wait frames=1
 wait dialog.option("Undock") == 7 timeout=15
-key keys=Digit7 hold=0.01
 wait frames=2
+key keys=Digit7 hold=0
+wait frames=2
+key keys=Digit7 release=true
+wait frames=1
+# Return from the actual dock screen through its Back/Undock action.
+key keys=Escape hold=0
+wait frames=2
+key keys=Escape release=true
+wait frames=1
 wait player.ready timeout=10
 assert clue("rumor_hidden_cache") == 1 "first discovery is the bar rumor"
 jump to=starsys_drift
@@ -90,16 +151,25 @@ wait travel.phase == "Idle" && player.ready timeout=30
 assert star_system == star_system_id("starsys_drift")
 interact body=drift_cache
 wait dialog.option("Take it") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
 wait player.ready timeout=10
 interact body=drift_derelict
 wait dialog.option("Investigate Logs") == 2 timeout=15
-key keys=Digit2 hold=0.01
 wait frames=2
+key keys=Digit2 hold=0
+wait frames=2
+key keys=Digit2 release=true
+wait frames=1
 wait dialog.option("Continue") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
 wait player.ready timeout=10
 assert inv("resource_palladium") >= 3 && clue("clue_ark_mutiny") == 2 "Drift materials and second discovery"
 assert clue("rumor_hidden_cache") == 1 "rumor precedes mutiny in the shared discovery order"
@@ -126,8 +196,16 @@ jump to=starsys_ark_start
 wait player.ready && travel.phase == "Idle" timeout=30
 interact body=ark_station
 wait dialog.option("Leave") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
+# Return from the actual dock screen through its Back/Undock action.
+key keys=Escape hold=0
+wait frames=2
+key keys=Escape release=true
+wait frames=1
 wait player.ready timeout=10
 wait quest("quest_survey_local_materials") == "Completed" timeout=10
 assert fact("story_survey_complete") == 1
@@ -135,16 +213,22 @@ assert inv("item_strange_matter_container_full") == 1 "quest completion grants t
 assert inv("resource_palladium") == $palladium - 3 "hand-in consumes three palladium"
 interact body=gate_dormant
 wait dialog.option("Re-activate Gate") == 1 timeout=15
-key keys=Digit1 hold=0.01
 wait frames=2
+key keys=Digit1 hold=0
+wait frames=2
+key keys=Digit1 release=true
+wait frames=1
 wait player.ready timeout=10
 wait fact("gate_ark_start_active") == 1 && fact("opening_chapter_done") == 1 timeout=10
 assert inv("item_strange_matter_container_full") == 0 "activation consumes the only container"
 jump to=starsys_whisper
 wait travel.phase == "Idle" timeout=30
 wait dialog.option("Ignore Signal") == 3 timeout=15
-key keys=Digit3 hold=0.01
 wait frames=2
+key keys=Digit3 hold=0
+wait frames=2
+key keys=Digit3 release=true
+wait frames=1
 wait player.ready timeout=10
 assert star_system == star_system_id("starsys_whisper") "final authored system"
 assert fact("beat_mystery_signal") == 1 "signal beat complete"

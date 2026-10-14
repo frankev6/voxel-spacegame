@@ -407,7 +407,7 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | `PowerRequest` element of module m | The feature that owns m (`Draw`/`Priority` at init, `Requesting` in `PowerDemandGroup`); `ConsumerIndex`: `PowerInitSystem` | Read by `PowerAllocationSystem` |
 | `Powered` bits, `ShipPower` | `PowerAllocationSystem` | Read |
 | `ShieldState` HP | `ShieldSystem` (resolves shield hits before grid damage) | Read |
-| Root `LocalTransform` shift for floating origin | `OriginRebaseSystem` | — |
+| Root `LocalTransform` and pending root `GridSpawnRequest.Pose` shift for floating origin (ADR-0113) | `OriginRebaseSystem` | — |
 | `FrameOrigin`, `UniversePosition` sync | `OriginRebaseSystem` | Read |
 | Loaded star system set | `StarSystemLoader` (the "StarSystemStreamingSystem" of §5) | Read |
 | Travel state (phase, destination, route) | `TravelService` | Read |

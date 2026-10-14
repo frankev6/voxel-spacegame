@@ -104,7 +104,9 @@ namespace Game.Tests.PlayMode.DevTools
         internal DevCommandResult Command(string text) => Host.Commands.Execute(text, Host.Context);
         internal void AssertMouse(Entity target)
         {
-            Vector3 screen = Rig.Camera.WorldToScreenPoint(Em.GetComponentData<LocalTransform>(target).Position);
+            var grid = Em.GetComponentData<VoxelGrid>(target);
+            var center = Em.GetComponentData<LocalTransform>(target).TransformPoint(((float3)grid.CellMin + (float3)(grid.CellMax + 1)) * (.5f * grid.CellSize));
+            Vector3 screen = Rig.Camera.WorldToScreenPoint(center);
             Assert.Less(Vector2.Distance(new Vector2(screen.x, screen.y), Host.Input.MouseDevice.position.ReadValue()), 2);
         }
         public void Dispose()

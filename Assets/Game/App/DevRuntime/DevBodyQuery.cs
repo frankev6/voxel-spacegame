@@ -32,7 +32,7 @@ namespace Game.App.DevRuntime
                 if (!candidate.Id.System.Equals(galaxy.State.CurrentStarSystem) || (candidate.Flags & BodyFlags.Destroyed) != 0) continue;
                 string key = galaxy.GetLocationKey(candidate.Id); int slash = key.LastIndexOf('/');
                 bool match = Same(query, key) || slash >= 0 && Same(query, key.Substring(slash + 1)) ||
-                    Same(query, galaxy.GetBodyName(candidate.Id)) || Same(query, galaxy.GetBodyTemplate(candidate.TemplateIndex).StoryTag);
+                    Same(query, BodyName(galaxy, candidate.Id, candidate.TemplateIndex)) || Same(query, galaxy.GetBodyTemplate(candidate.TemplateIndex).StoryTag);
                 if (!match) continue;
                 float distance = math.distancesq(player, em.GetComponentData<LocalTransform>(entity).Position);
                 if (distance > nearest || distance == nearest && (candidate.Id.LocalKey > bestKey ||
@@ -49,12 +49,16 @@ namespace Game.App.DevRuntime
             }
             return body != Entity.Null;
         }
+        // Streamed asteroid sector members have stable IDs but are not content-table bodies.
+        static string BodyName(GalaxyService galaxy, Game.Galaxy.Data.BodyId id, ushort templateIndex)
+            => galaxy.GetContent(id.System).TryFind(id.LocalKey, out _)
+                ? galaxy.GetBodyName(id) : galaxy.GetBodyTemplate(templateIndex).DisplayName;
         static bool Same(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
         internal static string TargetName(DevContext ctx)
         {
             if (!ctx.TryGetInteractionTarget(out var target) || target.Target == Entity.Null || !target.Body.IsValid ||
                 !ctx.TryGetService<GalaxyService>(out var galaxy) || galaxy.Galaxy == null || !target.Body.System.Equals(galaxy.State.CurrentStarSystem)) return "";
-            return galaxy.GetBodyName(target.Body);
+            return BodyName(galaxy, target.Body, target.TemplateIndex);
         }
     }
 }
