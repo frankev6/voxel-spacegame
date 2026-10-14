@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Ship-editor content tables authored:** EDT-002d3261523 builds all24 rotated cell/clearance sets and face masks, item/price mapping and context with owned footprints/borrowed blobs (ADR-0081/Q380). Uncompiled/unaccepted; next five required cases and one focused batch. No Unity active. DLG-003265, DEV-017286 and NAR-019242 active. Previous aim/fire acceptance and current editor implementation are progress.
+
 - **Aim/fire commands accepted:** DEV-010c5c7fc15 done; compile11416 clean and PlayMode30736 passes both real-input/weapon cases. No Unity active. Presentation recycled to NAR-0192919e717, economy implements DEV-017, combat implements DLG-003. Next dialog runtime prerequisites and compatible worker integration. Evidence Logs/playtest/dev010.
 
 - **World-event bridge accepted:** NAR-0123a6ebd75 done, canonical factory ec427094; four functional cases plus hail-fix retry pass, final compile63987 clean. Live registration remains QST-008 after actual dependent owners. No Unity active. DEV-017 dispatched7b2afbc3; DEV-010240 finalizing delivery; DLG-003265 active. Next integrate aim/fire delivery and continue narrative runtime prerequisites.

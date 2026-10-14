@@ -1085,6 +1085,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — EDT-002 content tables authored — astra (gpt-6)
+
+- d3261523 implements EditorContext, FootprintCache and BlockItemMap. Rotations preserve BlockDef.Cells order and rotate clearance/attach faces; inclusive bounds computed per orientation. Cache owns Persistent arrays with failure cleanup; shared blobs are borrowed. Air/Missing have no inventory item; category order remains enum order. ADR-0081/Q380 defines API/ownership.
+- Uncompiled/unaccepted; next five required cases before a focused batch. spec-required: 5 planned, extra: 0. No Unity run or optimization pass. Workers DLG-003265/DEV-017286/NAR-019242 active; previous command acceptance and current editor implementation are progress.
+
 ### 2026-10-13 — DEV-010 done: aim and fire commands — astra (gpt-6)
 
 - c5c7fc15 integrates worker5924eb13 aim target selection/tracking and real Flight-action fire, registry and CLI wrappers. Q379/SPEC-70 Q27 records defaults; no control bindings or production balance changed.
