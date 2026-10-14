@@ -55,6 +55,18 @@ Material:
         m_Texture: {fileID: 2800000, guid: 151383d7e53d449febb2450db41e7505, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _PlatingA:
+        m_Texture: {fileID: 18700000, guid: 7e27864e86f2544f7a72f0c183cd1053, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlatingB:
+        m_Texture: {fileID: 18700000, guid: cac91d3b18ef0411c83c9056c9bd7324, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlatingN:
+        m_Texture: {fileID: 18700000, guid: 7c8463c70e8884d1aa77453a771c49f4, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _PropAlbedo:
         m_Texture: {fileID: 2800000, guid: 98001f519755743449050ccae28d63df, type: 2}
         m_Scale: {x: 1, y: 1}
@@ -77,6 +89,9 @@ Material:
     - _CrackTiling: 2
     - _Damage01: 0
     - _Dissolve01: 0
+    - _DraftPaintIndex: 0
+    - _DraftSliceEnabled: 0
+    - _DraftSliceTop: 0
     - _EmberFadeSeconds: 8
     - _EmberIntensity: 4
     - _EmissiveIntensity: 1
@@ -87,6 +102,7 @@ Material:
     - _MacroScale: 64
     - _MacroStrength: 0.03
     - _Powered: 1
+    - _PropLayer: 0
     - _RimStrength: 0
     - _ScorchStrength: 0.6
     - _SeamEmission: 0

@@ -104,7 +104,8 @@ namespace Game.Voxel.Rendering
                     if (counts[m] == 0 || !config.PropMeshes[m].Value) continue;
                     managed.PropBlocks[m].SetBuffer("_GridMatrices", managed.GridMatrices);
                     var parameters = new RenderParams(managed.PropMaterial) { camera = camera, matProps = managed.PropBlocks[m],
-                        worldBounds = worldBounds, shadowCastingMode = ShadowCastingMode.On, receiveShadows = true, renderingLayerMask = 1 };
+                        worldBounds = worldBounds, shadowCastingMode = ShadowCastingMode.On, receiveShadows = true, renderingLayerMask = 1,
+                        lightProbeUsage = LightProbeUsage.BlendProbes, reflectionProbeUsage = ReflectionProbeUsage.BlendProbes };   // QA-001 ambient
                     Graphics.RenderMeshPrimitives(parameters, config.PropMeshes[m].Value, 0, counts[m]);
                 }
             }

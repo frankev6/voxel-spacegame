@@ -10,6 +10,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Profiling;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Game.ShipEditor.Rendering
 {
@@ -166,7 +167,7 @@ namespace Game.ShipEditor.Rendering
             // QA-001: the brick shader plates the hull in grid cells; per-brick meshes carry brick-local positions only.
             brickProperties.SetMatrix("_DraftWorldToCells", Matrix4x4.Scale(Vector3.one / cellSize) * GridToWorld.inverse);
             brickProperties.SetFloat("_DraftCellsValid", 1);
-            var parameters = new RenderParams(material) { camera = camera, matProps = brickProperties };
+            var parameters = new RenderParams(material) { camera = camera, matProps = brickProperties, lightProbeUsage = LightProbeUsage.BlendProbes, reflectionProbeUsage = ReflectionProbeUsage.BlendProbes };
             foreach (var entry in slots)
             {
                 var slot = entry.Value;
@@ -206,7 +207,7 @@ namespace Game.ShipEditor.Rendering
         void FlushProps(Camera camera, Mesh mesh, int count, Bounds bounds)
         {
             propProperties.SetFloatArray("_DraftPaintIndex", drawPaint);
-            var parameters = new RenderParams(propMaterial) { camera = camera, matProps = propProperties, worldBounds = bounds };
+            var parameters = new RenderParams(propMaterial) { camera = camera, matProps = propProperties, worldBounds = bounds, lightProbeUsage = LightProbeUsage.BlendProbes, reflectionProbeUsage = ReflectionProbeUsage.BlendProbes };
             Graphics.RenderMeshInstanced(parameters, mesh, 0, drawMatrices, count);
         }
         static Bounds TransformBounds(Bounds local, Matrix4x4 transform)

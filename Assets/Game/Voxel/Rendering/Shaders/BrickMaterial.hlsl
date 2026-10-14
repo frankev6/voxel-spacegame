@@ -43,6 +43,10 @@
         TEXTURE2D(_DamageRamp);    SAMPLER(sampler_DamageRamp);
         TEXTURE2D(_MacroNoiseTex); SAMPLER(sampler_MacroNoiseTex);
         TEXTURE2D(_ToonRamp);      SAMPLER(sampler_ToonRamp);
+        // QA-001 NOCTURNE plating (ArtSource/Bricks/bake_plating.py). Own samplers: depth passes strip some of the arrays.
+        TEXTURE2D_ARRAY(_PlatingA); SAMPLER(sampler_PlatingA);
+        TEXTURE2D_ARRAY(_PlatingB); SAMPLER(sampler_PlatingB);
+        TEXTURE2D_ARRAY(_PlatingN); SAMPLER(sampler_PlatingN);
 
 
 TEXTURE2D(_PropAlbedo); SAMPLER(sampler_PropAlbedo);

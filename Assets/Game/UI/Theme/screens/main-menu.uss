@@ -5,3 +5,5 @@
 .main-menu-column { width: 420px; max-width: 90%; margin-left: var(--space-8); }
 .main-menu-subtitle { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .main-menu-version { position: absolute; right: var(--space-8); bottom: var(--space-8); }
+/* DESIGN-GUIDE §8: display type is wide, uppercase and letter-spaced (the Michroma face is pending; spacing carries it). */
+#main-menu-title { letter-spacing: 9px; margin-bottom: var(--space-4); }

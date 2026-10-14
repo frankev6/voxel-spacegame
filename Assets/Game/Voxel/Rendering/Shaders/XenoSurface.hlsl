@@ -46,7 +46,7 @@ XenoResult XenoShade(float3 cells, half depth, half glow, half3 shellA, half3 sh
     r.albedo = lerp(r.albedo, half3(.0009, .001, .0012), groove * .85h);
     r.albedo = lerp(r.albedo, vein * .35h, veins);
     // Chitin is glossy: strong white highlights on black (look book GRAVID / BROODMOTHER).
-    r.smoothness = lerp(.86h, .5h, groove);
+    r.smoothness = lerp(.72h, .45h, groove);   // glossy, but broad enough that the key and rim don't blow out to white
     r.metallic = .05h;
     half pulse = .82h + .18h * (half)sin(_Time.y * 1.6 + p.x * .35 + p.z * .21);
     // The grown shell's shallowest tissue sits < 0.75 cells deep; anything deeper is a wound (or a sac) and glows.

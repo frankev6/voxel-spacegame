@@ -1024,3 +1024,6 @@ cue_stinger_whisper,definition,Assets/Game/Content/Audio/cue_stinger_whisper.ass
 MSH_xeno_sac,mesh,Assets/Game/Art/Xeno/Meshes/xeno_sac.asset,block_xeno_heart,,QA-001,own,Own work (procedural: Editor/Content/XenoContentBuilder),review
 MSH_xeno_eye,mesh,Assets/Game/Art/Xeno/Meshes/xeno_eye.asset,weapon_xeno_spitter,,QA-001,own,Own work (procedural: Editor/Content/XenoContentBuilder),review
 MSH_xeno_vent,mesh,Assets/Game/Art/Xeno/Meshes/xeno_vent.asset,block_xeno_fin,,QA-001,own,Own work (procedural: Editor/Content/XenoContentBuilder),review
+TEX_Plating_A,texture,Assets/Game/Art/Nocturne/Plating/Plating_A.png,,tex:1024x1024x2,QA-001,own,Own work (baked from ArtSource/LookDev/ld_plating.py by ArtSource/Bricks/bake_plating.py),review
+TEX_Plating_B,texture,Assets/Game/Art/Nocturne/Plating/Plating_B.png,,tex:1024x1024x2,QA-001,own,Own work (baked from ArtSource/LookDev/ld_plating.py by ArtSource/Bricks/bake_plating.py),review
+TEX_Plating_N,texture,Assets/Game/Art/Nocturne/Plating/Plating_N.png,,tex:1024x1024x2,QA-001,own,Own work (baked from ArtSource/LookDev/ld_plating.py by ArtSource/Bricks/bake_plating.py),review

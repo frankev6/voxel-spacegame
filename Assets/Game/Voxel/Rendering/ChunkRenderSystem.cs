@@ -56,7 +56,8 @@ namespace Game.Voxel.Rendering
                 var parameters = new RenderParams(runtime.Managed.Value.PropMaterial)
                 {
                     camera = camera, matProps = properties, worldBounds = new Bounds(transform.ValueRO.Value.c3.xyz, Vector3.one * (2 * radius)),
-                    shadowCastingMode = ShadowCastingMode.On, receiveShadows = true, renderingLayerMask = 1
+                    shadowCastingMode = ShadowCastingMode.On, receiveShadows = true, renderingLayerMask = 1,
+                    lightProbeUsage = LightProbeUsage.BlendProbes, reflectionProbeUsage = ReflectionProbeUsage.BlendProbes   // QA-001 ambient
                 };
                 Graphics.RenderMeshPrimitives(parameters, resources.Cube, 0, count);
             }

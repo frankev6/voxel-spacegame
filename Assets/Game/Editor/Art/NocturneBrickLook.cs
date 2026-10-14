@@ -6,8 +6,9 @@ using UnityEngine;
 namespace Game.Editor.Art
 {
     /// <summary>QA-001: bakes the NOCTURNE brick look (DESIGN-GUIDE §3, §5.2) into the shared brick inputs.
-    /// Writes layer rows 2/3 for procedural plating (NocturnePlating.hlsl), function layers with the guide's machinery and
-    /// light colours, the ARK team colours on every brick material, and each block's material layer by function.</summary>
+    /// Writes layer rows 2/3 for the plating (NocturnePlating.hlsl), function layers with the guide's machinery and light
+    /// colours, the ARK team colours and the baked plate maps (ArtSource/Bricks/bake_plating.py) on every brick material,
+    /// the plate maps on the prop material, and each block's material layer by function.</summary>
     public static class NocturneBrickLook
     {
         const string LayerParams = "Assets/Game/Art/_Placeholder/Textures/BrickLayerParams.asset";
@@ -16,6 +17,8 @@ namespace Game.Editor.Art
             "Assets/Game/Content/Config/BrickPool.mat", "Assets/Game/ShipEditor/Rendering/EditorBrick.mat",
             "Assets/Game/Art/_Placeholder/Materials/BrickPlaceholder.mat"
         };
+        const string PropMaterial = "Assets/Game/Art/_Placeholder/Materials/PropPlaceholder.mat";
+        const string Plating = "Assets/Game/Art/Nocturne/Plating/Plating_";
         public const int Hull = 0, Armour = 1, Engine = 2, Weapon = 3, Power = 4, Shield = 5, Cargo = 6, Utility = 7, XenoTissue = 8, XenoOrgan = 9;
 
         struct Layer
@@ -70,8 +73,9 @@ namespace Game.Editor.Art
                 material.SetVector("_TeamAccent", Hex("B23A2A").linear);
                 material.SetFloat("_AOStrength", .75f); material.SetColor("_AOColor", Hex("0D0E0C"));
                 material.SetFloat("_MacroStrength", .025f); material.SetFloat("_EmissiveIntensity", 1);
-                EditorUtility.SetDirty(material);
+                AssignPlating(material);
             }
+            AssignPlating(AssetDatabase.LoadAssetAtPath<Material>(PropMaterial));
             int changed = 0;
             foreach (string guid in AssetDatabase.FindAssets("t:BlockDefinition", new[] { "Assets/Game/Content/Blocks" }))
             {
@@ -84,6 +88,14 @@ namespace Game.Editor.Art
             }
             AssetDatabase.SaveAssets();
             GameLog.Info("Art", "Baked NOCTURNE brick look: " + Layers.Length + " layers, " + changed + " block layer changes.");
+        }
+        static void AssignPlating(Material material)
+        {
+            if (material == null) return;
+            foreach (string map in new[] { "A", "B", "N" })
+                material.SetTexture("_Plating" + map, AssetDatabase.LoadAssetAtPath<Texture2DArray>(Plating + map + ".png")
+                    ?? throw new InvalidOperationException("Missing " + Plating + map + ".png (run ArtSource/Bricks/bake_plating.py)"));
+            EditorUtility.SetDirty(material);
         }
         static int LayerFor(string id)
         {

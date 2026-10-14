@@ -35,8 +35,10 @@ namespace Game.App.Session
             var root = new GameObject("Main menu showcase");
             try
             {
+                // The menu camera orbits the starter at ~48 m (CameraConfig.MenuPosition); the BROODMOTHER waits on the opening
+                // sightline beyond it and comes back into frame once per orbit.
                 Show(root.transform, "ship_fighter", new Vector3(0, 0, 0), 205);
-                Show(root.transform, "ship_xeno_broodmother", new Vector3(-95, -28, 175), 120);
+                Show(root.transform, "ship_xeno_broodmother", new Vector3(30, -24, 190), 120);
             }
             catch (System.Exception e) { GameLog.Exception(LogCategories.Flow, e, "Main menu showcase"); }
         }

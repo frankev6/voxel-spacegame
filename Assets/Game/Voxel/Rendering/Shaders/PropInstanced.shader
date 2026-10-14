@@ -37,6 +37,9 @@ Shader "Game/Voxel/PropInstanced"
         _RimStrength ("Rim strength", Range(0, 1)) = 0
         _ShadingMode ("Shading mode (0 PBR, 1 toon ramp)", Range(0, 1)) = 0
         [NoScaleOffset] _ToonRamp ("Toon ramp", 2D) = "white" {}
+        [NoScaleOffset] _PlatingA ("NOCTURNE plating A (tint, secondary, black, accent)", 2DArray) = "" {}
+        [NoScaleOffset] _PlatingB ("NOCTURNE plating B (height, metal, wear, windows)", 2DArray) = "" {}
+        [NoScaleOffset] _PlatingN ("NOCTURNE plating N (normal, cavity)", 2DArray) = "" {}
         _HalftoneScale ("Halftone scale (screen px per dot; 0 = off)", Float) = 0
 
         [Header(Per grid values set by Presentation at runtime)]
@@ -166,12 +169,11 @@ Shader "Game/Voxel/PropInstanced"
             {
                 float3 on=normalize(v.objectNormal), an=abs(on);
                 float2 puv=(an.x>an.y&&an.x>an.z?v.objectPos.zy:an.y>an.z?v.objectPos.xz:v.objectPos.xy)*2.5;
-                PlatingResult pl=NocturnePlating(puv,v.objectPos*2.5,on,dot(an,float3(1,2,3)),3,0,l2.b,layer*1.7);
                 half3 tint=l2.a>.5h?l3.rgb:BrickPaint(v.colour);
-                s.albedo=tint*pl.tone*(1-.7h*pl.seam); s.albedo=lerp(s.albedo,half3(.36,.36,.35),pl.bare*.85h);
-                s.metallic=lerp(l3.a,1,pl.bare); s.smoothness=.42h+pl.smoothness;
-                half3 bump=normalize(half3(pl.normalTS.xy,1)); s.normalTS=normalize(half3(s.normalTS.xy*.3h+bump.xy,s.normalTS.z*bump.z));
-                glowSlot=pl.emission;
+                PlatingResult pl=NocturnePlating(puv,v.objectPos*2.5,on,3,0,l2.b,l3.a,tint,Brick_TeamAccent().rgb);
+                s.albedo=pl.albedo; s.metallic=pl.metallic; s.smoothness=pl.smoothness;
+                s.normalTS=normalize(half3(s.normalTS.xy*.3h+pl.normalTS.xy,s.normalTS.z*pl.normalTS.z));
+                glowSlot=pl.glow;
             }
             half blink=v.blink<=0 ? 1 : step(frac(_Time.y-v.blink),.1);
             half powered=Brick_Powered();

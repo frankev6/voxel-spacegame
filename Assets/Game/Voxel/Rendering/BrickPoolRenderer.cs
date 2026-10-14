@@ -246,7 +246,10 @@ namespace Game.Voxel.Rendering
             }
             if (DrawCount == 0) return;
             argumentBuffer.SetData(arguments.AsArray(), 0, 0, DrawCount);
+            // QA-001: RenderParams default to no light or reflection probes, which left every pooled brick without ambient SH
+            // (shadowed sides rendered pure black); blend the scene's ambient probe and reflections like any mesh renderer.
             var parameters = new RenderParams(material) { camera = view, matProps = properties, shadowCastingMode = ShadowCastingMode.On, receiveShadows = true,
+                lightProbeUsage = LightProbeUsage.BlendProbes, reflectionProbeUsage = ReflectionProbeUsage.BlendProbes,
                 worldBounds = new Bounds((cull.BoundsMin + cull.BoundsMax) * .5f, cull.BoundsMax - cull.BoundsMin) };
             Graphics.RenderPrimitivesIndexedIndirect(parameters, MeshTopology.Triangles, indexBuffer, argumentBuffer, DrawCount);
         }

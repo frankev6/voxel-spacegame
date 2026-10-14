@@ -49,7 +49,7 @@ MonoBehaviour:
   EditorFocusPadding: 1.2
   EditorPivotBoundsPad: 50
   BlendSeconds: 0.5
-  MenuPosition: {x: 0, y: 60, z: -120}
+  MenuPosition: {x: 0, y: 13, z: -46}
   MenuLookAt: {x: 0, y: 0, z: 0}
   MenuDriftDegPerSecond: 2
   TraumaDecayPerSecond: 2

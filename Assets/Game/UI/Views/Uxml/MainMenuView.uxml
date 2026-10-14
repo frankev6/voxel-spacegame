@@ -2,7 +2,7 @@
     <Style src="../../Theme/screens/main-menu.uss" />
     <ui:VisualElement class="main-menu-screen grow" picking-mode="Position">
         <ui:VisualElement name="main-menu-column" class="main-menu-column stack-m">
-            <ui:Label name="main-menu-title" text="Spaceship" class="text-display text-xxl" picking-mode="Ignore" />
+            <ui:Label name="main-menu-title" text="SPACESHIP" class="text-display text-xxl" picking-mode="Ignore" />
             <ui:Button name="main-menu-continue" text="Continue" class="btn btn--primary btn--wide" />
             <ui:Label name="main-menu-continue-subtitle" class="main-menu-subtitle text-muted text-xs text-ellipsis" picking-mode="Ignore">
                 <Bindings><ui:DataBinding property="text" data-source-path="ContinueSubtitle" binding-mode="ToTarget" /></Bindings>

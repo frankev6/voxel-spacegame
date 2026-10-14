@@ -37,6 +37,9 @@ Shader "Game/Voxel/BrickLit"
         _RimStrength ("Rim strength", Range(0, 1)) = 0
         _ShadingMode ("Shading mode (0 PBR, 1 toon ramp)", Range(0, 1)) = 0
         [NoScaleOffset] _ToonRamp ("Toon ramp", 2D) = "white" {}
+        [NoScaleOffset] _PlatingA ("NOCTURNE plating A (tint, secondary, black, accent)", 2DArray) = "" {}
+        [NoScaleOffset] _PlatingB ("NOCTURNE plating B (height, metal, wear, windows)", 2DArray) = "" {}
+        [NoScaleOffset] _PlatingN ("NOCTURNE plating N (normal, cavity)", 2DArray) = "" {}
         _HalftoneScale ("Halftone scale (screen px per dot; 0 = off)", Float) = 0
 
         [Header(Per grid values set by Presentation at runtime)]

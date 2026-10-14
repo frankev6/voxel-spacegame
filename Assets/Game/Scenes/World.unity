@@ -20,11 +20,11 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.047058824, g: 0.0627451, b: 0.05490196, a: 1}
-  m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
-  m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
+  m_AmbientSkyColor: {r: 0.4, g: 0.47, b: 0.44, a: 1}
+  m_AmbientEquatorColor: {r: 0.3, g: 0.33, b: 0.32, a: 1}
+  m_AmbientGroundColor: {r: 0.16, g: 0.15, b: 0.13, a: 1}
   m_AmbientIntensity: 0.18
-  m_AmbientMode: 3
+  m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 0}
   m_HaloStrength: 0.5
@@ -237,7 +237,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b0ab8f8a419d4bcd978f4fb6e3a0b23c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Game.Presentation::Game.Presentation.Environment.NocturneFlightEnvironment
   distantSky: {fileID: 2100000, guid: d8f225dcfe7544e3c9a9d78a0d1d63da, type: 2}
   debrisMaterial: {fileID: 2100000, guid: 7b98bd3cf0676483895654f38ac24288, type: 2}
@@ -282,7 +282,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 516724049}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.0113761155, y: 0.98767215, z: -0.13002951, w: 0.08641018}
+  m_LocalRotation: {x: -0.011376114, y: 0.98767215, z: -0.13002954, w: -0.08641014}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -469,7 +469,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1851714801}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.29619813, y: -0.46984634, z: 0.17101008, w: 0.8137977}
+  m_LocalRotation: {x: 0.29619816, y: 0.46984634, z: -0.17101009, w: 0.8137977}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -568,7 +568,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 07a0264cba384b31ba8e9eda75ca604b, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Game.App::Game.App.Boot.WorldLightingRig
 --- !u!4 &1919967685
 Transform:
@@ -613,7 +613,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2020319103}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.13302222, y: 0.6330222, z: 0.11161889, w: 0.7544065}
+  m_LocalRotation: {x: -0.13302231, y: -0.63302225, z: -0.11161898, w: 0.7544065}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

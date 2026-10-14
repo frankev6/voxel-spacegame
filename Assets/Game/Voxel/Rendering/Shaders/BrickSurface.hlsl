@@ -64,17 +64,11 @@ void BrickSurface(BrickSurfaceInput i, inout SurfaceData s)
     }
     else if (style > 0)
     {
-        float3 n = normalize(i.faceNormal);
-        float faceId = dot(abs(n), float3(1, 2, 3)) * 31 + round(dot(i.positionCells, n) * 2);
-        plating = NocturnePlating(i.uv, i.positionCells, n, faceId, style, p2.g, p2.b, i.layer * 1.7);
-        albedo = paint * (Luminance(albedo) / max(mean, .02h)) * plating.tone;
-        if (plating.stripe > .5h) albedo = plating.stripe > 1.5h ? half3(.49, .37, .13) : half3(.012, .013, .011);
-        s.normalTS = normalize(half3(s.normalTS.xy * .35h + plating.normalTS.xy, s.normalTS.z * plating.normalTS.z));
-        albedo *= 1 - .7h * plating.seam;
-        albedo = lerp(albedo, half3(.006, .007, .008), plating.glass);
-        mask.r = p3.a; mask.g = .38h + plating.smoothness;
-        albedo = lerp(albedo, half3(.36, .36, .35), plating.bare * .85h);
-        mask.r = lerp(mask.r, 1, plating.bare); mask.g = lerp(mask.g, .6h, plating.bare);
+        // QA-001 NOCTURNE plating: the look book's baked plate maps replace the legacy layer albedo entirely.
+        plating = NocturnePlating(i.uv, i.positionCells, normalize(i.faceNormal), style, p2.g, p2.b, p3.a,
+            paint, Brick_TeamAccent().rgb);
+        albedo = plating.albedo; s.normalTS = plating.normalTS;
+        mask = half4(plating.metallic, plating.smoothness, 0, 0);
     }
     half macro = SAMPLE_TEXTURE2D(_MacroNoiseTex, sampler_MacroNoiseTex, i.uv / max(_MacroScale, 1)).r;
     albedo *= 1 + (macro - .5h) * 2 * _MacroStrength;
@@ -113,7 +107,7 @@ void BrickSurface(BrickSurfaceInput i, inout SurfaceData s)
     half fresnel = 1 - saturate(dot(normalWS, GetWorldSpaceNormalizeViewDir(i.positionWS)));
     half powered = Brick_GridPowered();
     half3 layerEmission = p0.a > .5 ? Brick_TeamAccent().rgb * max(p0.r, max(p0.g, p0.b)) : p0.rgb;
-    s.emission = layerEmission * (mask.a + plating.emission) * _EmissiveIntensity * powered + xenoEmission * _EmissiveIntensity;
+    s.emission = layerEmission * (mask.a + plating.glow) * _EmissiveIntensity * powered + xenoEmission * _EmissiveIntensity;
     if (_SeamEmission > 0 && i.layer < 16)
     {
         float2 panel = frac(uv); float d = min(min(panel.x, 1 - panel.x), min(panel.y, 1 - panel.y));
