@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 56 | 12 | 0 | 0 | 113 | 0 | 181 | 8 |
+| M3 | 55 | 13 | 0 | 0 | 113 | 0 | 181 | 9 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -356,7 +356,7 @@
 | TRV-008 | Gate interaction, gate info and notices | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 8c2e7cd8 | Integrated real gate/destination routing; focused batch 11/11 passes, compile clean; spec-required: 6, extra: 0 |
 | TRV-009 | Travel presentation | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006, SYS-011, UI-003, UI-007, UI-012, VFX-014, AUD-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 89a0187b | Travel cover/fade, opaque Transit and real gate emission; four graphics checks pass; spec-required:4,extra:0 |
 | TRV-010 | Destination and route service | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-004, TRV-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 8c2e7cd8 | Integrated real gate/destination routing; focused batch 11/11 passes, compile clean; spec-required: 5, extra: 0 |
-| TRV-011 | Narrative, dev probes and the R30 scenario | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-008, TRV-010, SPEC-40, SPEC-70 | no | todo |  |  |  |  |
+| TRV-011 | Narrative, dev probes and the R30 scenario | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-008, TRV-010, NAR-011, DEV-006, DEV-008 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-14 |  | Authorized follow-up delivered703923ba; concrete source dependencies Q426; lead integration and R30 acceptance pending |
 | TRV-012 | Jump integration, R30 regression and budget | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-009, TRV-011, TST-001 | no | todo |  |  |  |  |
 | ENC-001 | Public contract types | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, TRV-001, WPN-001, AI-001, NAR-001, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 101ff7b | Encounter contracts and faction event channel; 2 required tests; runtime ENC-002 onward remains |
 | ENC-002 | Definitions, config and validators | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 40501eb0 | 31 validator checks pass; config and locked ARK generated; remaining encounter content stays ENC-010 |
@@ -462,7 +462,7 @@
 | HUD-009 | HudSyncSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-008, HUD-007, TRV-001, ENC-001 | no | todo |  |  |  |  |
 | HUD-010 | HUD presenters and screen hotkeys | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-009, QST-001, ECO-001, INP-001, TRV-001, NAR-001 | no | todo |  |  |  |  |
 | HUD-011 | Inventory screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-006 | yes | in-progress | presentation (gpt-6.1-sol high) | 2026-10-14 |  | Existing presentation worker: complete inventory screen/presenter, 200 pooled slots and real drag/sort/stack; Q425 |
-| HUD-012 | Merchant screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-50 | no | todo |  |  |  |  |
+| HUD-012 | Merchant screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-005 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-14 |  | Complete real trade-session screen/presenter, tabs and buy/sell/refusal lifecycle; Q427 |
 | HUD-013 | Dialog host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
 | HUD-014 | Ship log screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-42 | no | todo |  |  |  |  |
 | HUD-015 | MapCanvas control | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-62 | no | todo |  |  |  |  |
@@ -1022,6 +1022,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 424 | SPEC-42: QST-009 concrete content-authoring prerequisites | Resolved: accepted definition/compiler/validator owners replace whole-spec cycles under ADR-0068; actual opening gameplay remains QST-010. | Tech lead |
 
 | 425 | SPEC-61 Q29: HUD-011 concrete inventory-screen prerequisites | Resolved: real inventory/economy and UI owners replace whole-spec cycles under ADR-0068; root navigation remains its own task. | Tech lead |
+
+| 426 | SPEC-32 Q24: TRV-011 concrete narrative/travel/harness prerequisites | Resolved under ADR-0068: accepted TRV-008/010, NAR-011 and DEV-006/008 supply owners; DEV-018 integrated commands pass focused acceptance, while its unrelated menu-routing acceptance remains open. R30 remains required for TRV-011 closure. | Tech lead |
+| 427 | SPEC-61 Q30: HUD-012 concrete merchant-screen prerequisites | Resolved: accepted UI and real inventory/economy/trade-session owners replace whole-spec cycles; registration and all four cases remain required. | Tech lead |
 
 ## Measurements
 

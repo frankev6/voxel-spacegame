@@ -1036,7 +1036,7 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 ### TRV-011 — Narrative, dev probes and the R30 scenario
 - **Milestone:** M3
 - **Tier:** standard — wiring of existing APIs per §5.7
-- **Depends on:** `TRV-008`, `TRV-010`, `SPEC-40`, `SPEC-70`
+- **Depends on:** `TRV-008`, `TRV-010`, `NAR-011`, `DEV-006`, `DEV-008`
 - **Do:**
   1. Wire `LogicWorldAdapter.RequestLaneJump` (§5.7) and remove it from `UnwiredMembers`.
   2. Add `TravelScenarioProbes` (§5.7 table) and register them.

@@ -1,7 +1,6 @@
 using System.Collections;
 using Game.App.DevRuntime;
 using Game.Core;
-using Game.Galaxy.Components;
 using Game.Galaxy.Services;
 using NUnit.Framework;
 using Unity.Mathematics;
@@ -23,16 +22,18 @@ namespace Game.Tests.PlayMode.App
             using (Services.Get<IPauseService>().Acquire("DEV-018 round trip"))
             {
                 EM.CompleteAllTrackedJobs();
-                saved = EM.GetComponentData<UniversePosition>(Root).Value;
+                Assert.IsTrue(DevEcs.TryGetUniversePosition(Host.Context, Root, out saved));
                 yield return RunCommand("save slot=a");
                 var moved = Host.Commands.Execute("teleport x=64 z=-32", Host.Context);
                 Assert.AreEqual(DevResultKind.Ok, moved.Kind, moved.Text);
-                Assert.Greater(math.distance(saved, EM.GetComponentData<UniversePosition>(Root).Value), 1,
+                Assert.IsTrue(DevEcs.TryGetUniversePosition(Host.Context, Root, out var afterMove));
+                Assert.Greater(math.distance(saved, afterMove), 1,
                     "The live player must move before restoring the save.");
             }
             yield return RunCommand("load slot=a");
             EM.CompleteAllTrackedJobs();
-            Assert.LessOrEqual(math.distance(saved, EM.GetComponentData<UniversePosition>(Root).Value), .01,
+            Assert.IsTrue(DevEcs.TryGetUniversePosition(Host.Context, Root, out var restored));
+            Assert.LessOrEqual(math.distance(saved, restored), .01,
                 "Restore the actual player UniversePosition, not just the saved model.");
             Assert.AreEqual(system, galaxy.State.CurrentStarSystem);
             Assert.AreEqual(profile, Game.Save.ActiveProfile);
