@@ -17,7 +17,7 @@
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
 | M3 | 29 | 14 | 0 | 0 | 139 | 0 | 182 | 5 |
-| M4 | 8 | 4 | 0 | 0 | 2 | 0 | 14 | 5 |
+| M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -497,7 +497,7 @@
 | GAL-014 | Brick-level structure diffs | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M4 | frontier | GAL-010 | yes | todo |  |  |  |  |
 | TRV-013 | Supercruise (in-system hop) | [SPEC-32](specs/SPEC-32-travel.md) | M4 | frontier | TRV-012, SPEC-23, SPEC-61 | no | todo |  |  |  |  |
 | TRV-014 | Escort transfer hooks | [SPEC-32](specs/SPEC-32-travel.md) | M4 | standard | TRV-006, TRV-009, AI-001, FND-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Economy worker: actual travel escort callbacks and three required contract cases; fleet implementation stays with SPEC-01. |
-| ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-006, ENC-007, AI-013, AI-014 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Presentation worker: formation poses, FleetMember assignment and wedge asset; no new ship art. |
+| ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-006, ENC-007, AI-013, AI-014 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 078e8058 | Worker a2da8551 integrated; rotated authored slots and FleetMember leaders, six encounter assets; two required checks pass. |
 | ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-005, GAL-008, CORE-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Combat worker: deterministic procedural territory BFS and owner-change events; advisory large measurement deferred. |
 | NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 4ca00b3 | Partial4ca00b3 +6d6e1ce9; fact editing required case passes39710, formatter also green. Baseline/Play beat live acceptance still awaits QST-005/006 and DLG-006; remains in progress. |
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
@@ -1182,6 +1182,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — ENC-013 formations accepted — astra (gpt-6)
+
+- 078e8058 integrates a2da8551: authored wedge slots rotate toward the player, ship zero leads and followers receive the existing FleetMember contract. Six encounters reuse the canonical AI-013 wedge/GUID. Missing formation index or insufficient slots falls back to line abreast. Merged director formation edits preserve ENCT save/reset lifecycle. SPEC-33 Q34/Q35 / ledger Q471 records defaults.
+- Compile clean with zero CS warnings. Required slot geometry EditMode and real director FleetMember PlayMode cases both pass; Logs/playtest/encounter-formations/{slots,fleet}.xml. Test count: spec-required: 2, extra: 0. Presentation worker delivered; genuine dependency wait pending next standard owner. Narrative worker is finishing ENC-009; acceptance unlocks ENC-011 integration scenarios. Lead next DEV-012 overlay owner, which unlocks independent standard overlay/interaction work.
 
 ### 2026-10-14 — ENC-012 encounter commands accepted — astra (gpt-6)
 

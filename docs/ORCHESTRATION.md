@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-012 | Accepted a9adf708; dependency wait: no unclaimed ready standard implementation | Next standard owner unlocked by lead; no review-only dispatch |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ENC-009 | Dispatched on main57dbe986: narrative/faction routing | Complete owner routes and five spec checks |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ENC-013 | Delivered a2da8551; lead integrating | Formation-only director edits; lead owns save/pending lifecycle |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ENC-013 | Accepted078e8058; dependency wait pending standard owner | Next standard owner unlocked by lead; no review-only dispatch |
 
 ## Operating rules
 
@@ -57,3 +57,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - ENC-007 accepted a445825b (ten functional cases across batch/fix; two advisory fixtures authored, deferred). ADR-0100 and claim57dbe986 unlock same three workers on ENC-012 commands, ENC-009 narrative and ENC-013 formations. Lead next ENC-008 save persistence; serialize primary Unity checks only after compatible deliveries.
 
 - ENC-008 f9c6f0d5 accepted: 3 binary checks and actual SaveGame/LoadGame same-instance respawn/combat refusal pass. Worker ENC-012230f64b8 delivered; others implementing. Integrate compatible encounter deliveries next.
+
+- ENC-012a9adf708 and ENC-013078e8058 accepted with two focused cases each. Those two workers have genuine ready-standard dependency waits; ENC-009 worker still finishing source. Next lead DEV-012 unlocks standard overlay/interaction work; ENC-009 acceptance unlocks ENC-011.
