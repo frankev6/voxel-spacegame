@@ -77,9 +77,9 @@ namespace Game.Tests.PlayMode.Presentation
             }
         }
 
-        static ProfilerRecorder Record(Fixture f)
+        static ProfilerRecorder Record(EcsTestWorld test, CameraTargetSyncSystem sync)
         {
-            string name = EntityManager.EntityManagerDebug.GetSystemProfilerMarkerName(f.Test.World, f.Sync.SystemHandle);
+            string name = EntityManager.EntityManagerDebug.GetSystemProfilerMarkerName(test.World, sync.SystemHandle);
             var handles = new List<ProfilerRecorderHandle>(); ProfilerRecorderHandle.GetAvailable(handles);
             foreach (var handle in handles)
             {
@@ -101,7 +101,7 @@ namespace Game.Tests.PlayMode.Presentation
         [UnityTest, Performance, Category("Performance")]
         public IEnumerator FlightFrame_Under0_15ms()
         {
-            PerfSettings.AssertReference(); using var f = new Fixture(); using var recorder = Record(f);
+            PerfSettings.AssertReference(); using var f = new Fixture(); using var recorder = Record(f.Test, f.Sync);
             var samples = new double[Samples];
             for (int i = 0; i < Warmup + Samples; i++)
             {
@@ -110,8 +110,16 @@ namespace Game.Tests.PlayMode.Presentation
                 if (i >= Warmup) samples[i - Warmup] = (recorder.CurrentValue - before) * 1e-6;
             }
             // Inclusive system marker contains Tick: never add its nested marker a second time.
-            // SPEC-62 Q14: M1 has no occlusion yet; enforce the stricter 0.05 ms gate now.
             Gate("CameraWithoutOcclusion", samples, .05);
+            using var occlusion = new CameraOcclusionTests.Fixture(); occlusion.Box();
+            using var rayRecorder = Record(occlusion.Test, occlusion.Sync);
+            for (int i = 0; i < Warmup + Samples; i++)
+            {
+                yield return null; long before = rayRecorder.CurrentValue; occlusion.Sync.Update();
+                if (i >= Warmup) samples[i - Warmup] = (rayRecorder.CurrentValue - before) * 1e-6;
+            }
+            Assert.AreEqual(58, occlusion.Distance, .01f, "Measured fixture must actually hit the obstruction.");
+            Gate("CameraWithOcclusion", samples, .15);
         }
 
         [UnityTest, Performance, Category("Performance")]

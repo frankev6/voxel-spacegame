@@ -6,6 +6,7 @@ using Game.Presentation.Services;
 using Game.Presentation.Vfx;
 using Game.Simulation.Commands;
 using Game.Voxel.Model;
+using Game.Voxel.PhysicsBody;
 using Game.Voxel.Rendering;
 using Unity.Collections;
 using Unity.Entities;
@@ -27,9 +28,9 @@ namespace Game.Presentation.Systems
     {
         static readonly ProfilerMarker TargetMarker = new ProfilerMarker(ProfilerCategory.Scripts, "CameraTargetSyncSystem.ReadTarget");
         static readonly ProfilerMarker OriginMarker = new ProfilerMarker(ProfilerCategory.Scripts, "CameraTargetSyncSystem.Origin");
-        // TODO(CAM-007): Occlusion marker with the physics ray.
+        static readonly ProfilerMarker OcclusionMarker = new ProfilerMarker(ProfilerCategory.Scripts, "CameraTargetSyncSystem.Occlusion");
         static readonly ProfilerMarker ShakeMarker = new ProfilerMarker(ProfilerCategory.Scripts, "CameraTargetSyncSystem.Shake");
-        EntityQuery players, viewers, renderCameras, origins;
+        EntityQuery players, viewers, renderCameras, origins, physics;
         double3 lastOrigin;
         bool hasLastOrigin;
         Entity viewEntity, lastTarget;
@@ -40,6 +41,7 @@ namespace Game.Presentation.Systems
         protected override void OnCreate()
         {
             viewEntity = EntityManager.CreateSingleton<MainCameraState>();
+            physics = GetEntityQuery(ComponentType.ReadOnly<PhysicsWorldSingleton>());
             origins = GetEntityQuery(ComponentType.ReadOnly<FrameOrigin>());
             players = GetEntityQuery(ComponentType.ReadOnly<PlayerShip>(), ComponentType.ReadOnly<LocalToWorld>());
             viewers = GetEntityQuery(ComponentType.ReadWrite<VoxelViewer>());
@@ -122,6 +124,21 @@ namespace Game.Presentation.Systems
                             }
                     }
                 }
+            }
+            using (OcclusionMarker.Auto())
+            {
+                float limit = float.PositiveInfinity;
+                if (rig.Mode == Data.CameraMode.Flight && rig.HasTarget && !physics.IsEmptyIgnoreFilter)
+                {
+                    CompleteDependency(); EntityManager.CompleteDependencyBeforeRO<PhysicsWorldSingleton>();
+                    float3 start = rig.Focus, end = rig.DesiredFlightPosition();
+                    var ray = new RaycastInput { Start = start, End = end, Filter = PhysicsLayers.CameraOcclusionQuery };
+                    var collector = new IgnoreEntityClosestHitCollector(lastTarget);
+                    var collision = physics.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
+                    if (collision.CastRay(ray, ref collector))
+                        limit = math.max(rig.Config.OcclusionMinDistance, collector.ClosestHit.Fraction * math.distance(start, end) - rig.Config.OcclusionMargin);
+                }
+                rig.SetOcclusionDistance(limit);
             }
             rig.Tick(dt);
             var camera = rig.Camera;

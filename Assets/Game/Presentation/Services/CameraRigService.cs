@@ -20,6 +20,8 @@ namespace Game.Presentation.Services
         CameraSettings settings = new CameraSettings { MouseSensitivity = 1, ShakeScale = 1 };
         bool blending, disposed;
         float blendT, yawDeg, yawOffsetDeg, pitchDeg, pitchTargetDeg, distance, distanceTarget;
+        float occlusionDistance = float.PositiveInfinity, effectiveDistance;
+        bool occlusionRecovering;
         float3 lookAhead, previousFollowPosition, framingOffset;
         float3 boundsMin, boundsMax;
         float4x4 boundsTransform;
@@ -61,7 +63,7 @@ namespace Game.Presentation.Services
                 listenerPivot = new GameObject("ListenerPivot").transform;
                 listenerPivot.SetParent(instance.transform, false);
                 mode = CameraMode.Menu; FocusState = config.MenuLookAt;
-                pitchDeg = pitchTargetDeg = config.DefaultPitchDeg; distance = distanceTarget = config.DefaultDistance;
+                pitchDeg = pitchTargetDeg = config.DefaultPitchDeg; distance = distanceTarget = config.DefaultDistance; effectiveDistance = distance;
                 MenuPose(out outPos, out outRot);
                 unshakenPos = outPos; unshakenRot = outRot;
                 ApplyPose();
@@ -80,7 +82,7 @@ namespace Game.Presentation.Services
         public void SetMode(CameraMode mode, bool cut)
         {
             if (disposed) return;
-            this.mode = mode;
+            this.mode = mode; occlusionDistance = float.PositiveInfinity; occlusionRecovering = false;
             blending = !cut && !settings.ReduceMotion && config.BlendSeconds > 0;
             blendT = 0; blendFromPos = outPos; blendFromRot = outRot;
             if (mode == CameraMode.Flight)
@@ -128,7 +130,7 @@ namespace Game.Presentation.Services
             trauma = math.saturate(trauma + strength * falloff);
         }
         public float3 DesiredFlightPosition() => CameraMath.OrbitPosition(Focus, CameraMath.OrbitRotation(pitchDeg, yawDeg), distance);
-        public void SetOcclusionDistance(float distance) => throw new NotImplementedException("CAM-007");
+        public void SetOcclusionDistance(float distance) => occlusionDistance = math.isnan(distance) ? float.PositiveInfinity : math.max(0, distance);
         public void EnterEditorOrbit(float3 center, float radius, bool cut)
         {
             if (disposed) return;
@@ -250,7 +252,7 @@ namespace Game.Presentation.Services
             float desiredYaw = (settings.YawMode == CameraYawMode.FollowHeading ? CameraMath.HeadingYawDeg(TargetRotation) : 0) + yawOffsetDeg;
             if (CutRequested)
             {
-                yawDeg = desiredYaw; pitchDeg = pitchTargetDeg; distance = distanceTarget;
+                yawDeg = desiredYaw; pitchDeg = pitchTargetDeg; distance = distanceTarget; effectiveDistance = distance; occlusionRecovering = false;
                 lookAhead = 0; FocusState = TargetPosition; CutRequested = false;
             }
             else
@@ -264,13 +266,17 @@ namespace Game.Presentation.Services
             }
             previousFollowPosition = TargetPosition;
             rotation = CameraMath.OrbitRotation(pitchDeg, yawDeg);
-            framingOffset = FrameFlightFocus(rotation) - FocusState;
-            position = CameraMath.OrbitPosition(Focus, rotation, distance);
-            // TODO(CAM-007): immediate occlusion pull-in and damped release.
+            float limit = math.min(distance, occlusionDistance);
+            if (limit < distance) occlusionRecovering = true;
+            if (!occlusionRecovering || limit <= effectiveDistance) effectiveDistance = limit;
+            else effectiveDistance = CameraMath.Damp(effectiveDistance, limit, config.OcclusionReleaseHalfLife, dt);
+            if (math.abs(effectiveDistance - distance) < .0001f) { effectiveDistance = distance; occlusionRecovering = false; }
+            framingOffset = FrameFlightFocus(rotation, effectiveDistance) - FocusState;
+            position = CameraMath.OrbitPosition(Focus, rotation, effectiveDistance);
         }
 
         // SPEC-62 §5.3/Q15: clip only the output translation, leaving the follow filter and player input intact.
-        float3 FrameFlightFocus(quaternion rotation)
+        float3 FrameFlightFocus(quaternion rotation, float effective)
         {
             var min = hasBounds ? boundsMin : new float3(-math.max(0, TargetRadius));
             var max = hasBounds ? boundsMax : -min;
@@ -285,7 +291,7 @@ namespace Game.Presentation.Services
                 float3 corner = new float3((i & 1) == 0 ? min.x : max.x,
                     (i & 2) == 0 ? min.y : max.y, (i & 4) == 0 ? min.z : max.z);
                 float3 v = math.rotate(inverse, math.transform(transform, corner) - center);
-                v.z += distance;
+                v.z += effective;
                 if (!Clip(v.z * tanX - v.x, translation.x - translation.z * tanX, ref fraction)
                     || !Clip(v.z * tanX + v.x, -translation.x - translation.z * tanX, ref fraction)
                     || !Clip(v.z * tanY - v.y, translation.y - translation.z * tanY, ref fraction)
