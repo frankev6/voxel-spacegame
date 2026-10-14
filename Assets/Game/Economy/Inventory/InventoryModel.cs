@@ -204,6 +204,23 @@ namespace Game.Economy
             }
             return true;
         }
+        /// <summary>ADR-0096: bounded owner-bound rollback state for a synchronous editor commit.</summary>
+        public sealed class Checkpoint
+        {
+            internal readonly InventoryModel Owner;
+            internal readonly ItemStack[] Slots;
+            internal readonly int Capacity;
+            internal Checkpoint(InventoryModel owner)
+            { Owner = owner; Slots = (ItemStack[])owner.slots.Clone(); Capacity = owner.Capacity; }
+        }
+        public Checkpoint CaptureCheckpoint() { CheckMutation(); return new Checkpoint(this); }
+        public void RestoreCheckpoint(Checkpoint checkpoint)
+        {
+            CheckMutation();
+            if (checkpoint == null || !ReferenceEquals(checkpoint.Owner, this)) throw new ArgumentException("Inventory checkpoint belongs to another owner.", nameof(checkpoint));
+            Array.Copy(checkpoint.Slots, scratch, MaxSlots); Capacity = checkpoint.Capacity;
+            Commit(reset: true, force: true);
+        }
         public bool TryApplyAtomic(ReadOnlySpan<ItemDelta> deltas)
         {
             CheckMutation(); if (!Simulate(deltas, null, out _)) return false;

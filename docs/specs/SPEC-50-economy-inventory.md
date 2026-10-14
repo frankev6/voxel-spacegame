@@ -988,3 +988,9 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
 
 - Audit (background only): `docs/reference/audit-2026-10/06-ui-shipeditor.md` (06-A13 merchant stack bug, 06-D1 last slot), `04-persistence-data.md` §12 (linear scans, unsaved fuel and toolbar), `LEDGER.md` R12, R15.
 - SPEC-04 §3 decisions 6 and 11, §4.4, §4.10 (blocks, cargo capacity); SPEC-40 §4.3 (`ILogicEconomy`), §5.5 (`OpenMerchant`); SPEC-51 §5.7, §5.9 (BOM and commit); SPEC-72 §4.5 (legacy item values), §4.6 (loot tables).
+
+### Editor rollback checkpoint (ADR-0096)
+
+`InventoryModel.Checkpoint CaptureCheckpoint()` captures the bounded slots and capacity. `RestoreCheckpoint(Checkpoint)` validates the originating owner and restores slots, counts, capacity and normal notifications synchronously. These APIs support exact rejected editor transactions; they are not a save format.
+
+| 29 | Exact rejected editor transaction rollback | Inventory-owned opaque checkpoint restores slots and overflow even when normal capacity is full; inverse deltas are insufficient. ADR-0096; ledger Q452. | Tech lead | Resolved. |

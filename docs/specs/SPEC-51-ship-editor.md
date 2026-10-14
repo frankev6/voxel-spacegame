@@ -451,10 +451,10 @@ For every block type b with any non-zero count: `delta = draftIntact[b] - origin
 1. `!IsDirty` → `NothingToCommit`.
 2. Full validation (§5.6). Errors → `Invalid` with the first error's text.
 3. Refresh BOM. Non-creative: deltas = for each line with an item: `Refunded - Required` (skip 0). `inventory.CanApply(deltas, shortfalls, out cargoFull)`: shortfall → `MissingItems` ("Missing 4 Hull"), cargo full → `CargoFull` ("Cargo full: free 3 slots").
-4. `committed = Draft.Clone(Persistent)`.
-5. Non-creative: `inventory.TryApplyAtomic(deltas)`; false → dispose `committed`, return `MissingItems`/`CargoFull` from a fresh check.
-6. `target.TryCommitStructure(committed, out error)`; false → non-creative: `TryApplyAtomic(inverted deltas)` (failure logs `GameLog.Error("EDT", "inventory rollback failed")`); dispose `committed`; return `TargetRejected` with `error`.
-7. Success: `Original.Dispose(); Original = Draft.Clone(Persistent)`; copy draft count tables to original; `History.Clear()`; `Changed(Committed)`; return `Committed` with item totals.
+4. Preallocate `committed = Draft.Clone(Persistent)`, the new baseline clone and its count tables before mutating inventory.
+5. Non-creative: capture an owner-bound inventory checkpoint (ADR-0096), then `inventory.TryApplyAtomic(deltas)`; false → dispose `committed`, return `MissingItems`/`CargoFull` from a fresh check.
+6. `target.TryCommitStructure(committed, out error)`; false → non-creative: `RestoreCheckpoint(checkpoint)` to restore exact slots, overflow and capacity; dispose `committed`; return `TargetRejected` with `error`.
+7. Success: `Original.Dispose(); Original = preallocatedBaseline`; copy draft count tables to original; `History.Clear()`; `Changed(Committed)`; return `Committed` with item totals.
 
 `EditSession.Discard()` (button "Revert"): `Draft.Dispose(); Draft = Original.Clone(Persistent)`; rebuild indexes as in §5.1 steps 2–5; `History.Clear()`; `Changed(Discarded)`.
 
@@ -1085,3 +1085,5 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 | 51 | Full validation omits the session remove-floating signature and four acceptance cases from its test list | Accepted ADR-0095 adds the existing action to EditSession. Errors precede warnings; missing damaged origins resolve through surviving owned cells. Public issues cache refreshes at most every 0.25 s after changes; commit uses the internal immediate refresh. The explicit acceptance requirement for every issue kind also requires OutOfBounds_Error, OverCellBudget_Error, DamageInvariant_Error and NoWeapons_Warning (11 required cases total, no extras). | Tech lead | Resolved; ledger Q447. |
 
 | 52 | Commit waits on whole economy spec although it consumes only completed atomic inventory operations | Use EDT-009/010 and ECO-003 as concrete dependencies under ADR-0068. Merchant launcher and advisory gates do not participate in editor commit. | Tech lead | Resolved; ledger Q451. |
+
+| 53 | Inverse deltas cannot restore overflow or exact slots after target rejection | Capture and restore an inventory-owned checkpoint, preallocate replacement baseline before mutation, and guard reentrant editor edits. ADR-0096. | Tech lead | Resolved; ledger Q452. |

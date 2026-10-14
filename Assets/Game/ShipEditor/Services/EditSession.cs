@@ -3,6 +3,8 @@ using Unity.Collections;
 using Unity.Profiling;
 using Unity.Mathematics;
 using Game.ShipEditor.Data;
+using Game.Economy;
+using Game.Core;
 using Game.ShipEditor.Validation;
 using Game.Voxel.Model;
 
@@ -22,6 +24,8 @@ namespace Game.ShipEditor.Services
         readonly ProfilerMarker applyMarker = new("EditSession.Apply");
         readonly ProfilerMarker undoMarker = new("EditSession.Undo");
         readonly ProfilerMarker validateMarker = new("EditSession.Validate");
+        readonly ProfilerMarker commitMarker = new("EditSession.Commit");
+        bool committing;
         readonly BillOfMaterials bom = new();
         bool bomDirty = true;
         readonly System.Collections.Generic.List<EditIssue> issues = new();
@@ -71,7 +75,7 @@ namespace Game.ShipEditor.Services
         internal event Action<DiffCommand, bool> DraftApplied;
         public bool TryApply(EditBatch batch, AtomicityMode mode, int strokeId, ToolId tool, string label, ApplyReport report)
         {
-            CheckAlive();
+            CheckAlive(); CheckNotCommitting();
             if (batch == null) throw new ArgumentNullException(nameof(batch));
             if (report == null) throw new ArgumentNullException(nameof(report));
             report.Clear(); CompleteRelabel();
@@ -124,13 +128,13 @@ namespace Game.ShipEditor.Services
         public bool Undo()
         {
             using var marker = undoMarker.Auto();
-            CheckAlive(); CompleteRelabel(); if (!History.CanUndo) return false;
+            CheckAlive(); CheckNotCommitting(); CompleteRelabel(); if (!History.CanUndo) return false;
             var command = History[History.Cursor - 1]; ApplyCommand(command, false); History.MoveUndo();
             Notify(EditChangeKind.Undone, command.Ops.Length); return true;
         }
         public bool Redo()
         {
-            CheckAlive(); CompleteRelabel(); if (!History.CanRedo) return false;
+            CheckAlive(); CheckNotCommitting(); CompleteRelabel(); if (!History.CanRedo) return false;
             var command = History[History.Cursor]; ApplyCommand(command, true); History.MoveRedo();
             Notify(EditChangeKind.Redone, command.Ops.Length); return true;
         }
@@ -219,11 +223,92 @@ namespace Game.ShipEditor.Services
             }
             return TryApply(batch, AtomicityMode.AllOrNothing, 0, ToolId.Remove, "Remove floating parts", report);
         }
-        // TODO(EDT-011): atomic inventory/target commit.
-        public CommitResult Commit() => throw new System.NotImplementedException("EDT-011");
+        public CommitResult Commit()
+        {
+            CheckAlive();
+            if (committing) return Result(CommitStatus.Invalid, "A ship commit is already in progress");
+            if (!IsDirty) return Result(CommitStatus.NothingToCommit, "No changes to commit");
+            using var marker = commitMarker.Auto();
+            committing = true;
+            VoxelStructure committed = null, baseline = null;
+            BlockCountTables baselineCounts = null;
+            InventoryModel.Checkpoint checkpoint = null;
+            bool accepted = false;
+            try
+            {
+                RefreshIssuesNow();
+                foreach (var issue in issues) if (issue.IsError) return Result(CommitStatus.Invalid, IssueText(issue));
+                if (entry.CommitTarget == null) return Result(CommitStatus.TargetRejected, "Ship commit target is unavailable");
+                if (Original.IsPinned) return Result(CommitStatus.Invalid, "Original ship is still being read");
+                var material = GetBom(); int used = Options.Creative ? 0 : material.TotalRequired, refunded = Options.Creative ? 0 : material.TotalRefunded;
+                var deltas = new System.Collections.Generic.List<ItemDelta>();
+                if (!Options.Creative)
+                {
+                    if (entry.Inventory == null) return Result(CommitStatus.Invalid, "Ship inventory is unavailable");
+                    foreach (var line in material.Lines)
+                        if (line.HasItem && line.Refunded != line.Required) deltas.Add(new ItemDelta(line.Item, line.Refunded - line.Required));
+                }
+                var changes = deltas.ToArray();
+                if (!Options.Creative && !CanAfford(changes, out var refusal)) return refusal;
+                committed = Draft.Clone(); baseline = Draft.Clone();
+                baselineCounts = new BlockCountTables(context.Items.Count); baselineCounts.CopyFrom(DraftCounts);
+                if (!Options.Creative)
+                {
+                    checkpoint = entry.Inventory.CaptureCheckpoint();
+                    if (!entry.Inventory.TryApplyAtomic(changes))
+                    { checkpoint = null; if (!CanAfford(changes, out refusal)) return refusal; return Result(CommitStatus.MissingItems, "Inventory changed; try again"); }
+                }
+                string error;
+                try { accepted = entry.CommitTarget.TryCommitStructure(committed, out error); }
+                catch (Exception exception) { error = exception.Message; }
+                if (!accepted) return Result(CommitStatus.TargetRejected, string.IsNullOrEmpty(error) ? "Ship commit was rejected" : error);
+                committed = null; // Target owns this clone from this point onward.
+                checkpoint = null;
+                Original.Dispose(); Original = baseline; baseline = null;
+                OriginalCounts.Dispose(); OriginalCounts = baselineCounts; baselineCounts = null;
+                originalStats.CopyFrom(draftStats); originalStatsDirty = true;
+                History.Clear(); InvalidateBom(); nextIssueRefresh = 0;
+                try { Notify(EditChangeKind.Committed, 0); }
+                catch (Exception exception) { GameLog.Warn("EDT", "Ship committed; observer failed: " + exception.Message); }
+                return new CommitResult { Status = CommitStatus.Committed, Message = "Ship changes committed", ItemsUsed = used, ItemsRefunded = refunded };
+            }
+            catch (Exception exception)
+            { return Result(accepted ? CommitStatus.Committed : CommitStatus.TargetRejected, exception.Message); }
+            finally
+            {
+                try
+                {
+                    if (checkpoint != null)
+                        try { entry.Inventory.RestoreCheckpoint(checkpoint); }
+                        catch (Exception exception) { GameLog.Error("EDT", "inventory rollback failed: " + exception.Message); }
+                }
+                finally { committed?.Dispose(); baseline?.Dispose(); baselineCounts?.Dispose(); committing = false; }
+            }
+        }
+        bool CanAfford(ItemDelta[] changes, out CommitResult result)
+        {
+            var missing = new System.Collections.Generic.List<ItemShortfall>();
+            if (entry.Inventory.CanApply(changes, missing, out bool full)) { result = default; return true; }
+            if (missing.Count > 0)
+            {
+                var first = missing[0];
+                string name = context.Catalog.TryGet<Game.Data.Definitions.ItemDefinition>(first.Item, out var definition) ? definition.DisplayName : first.Item.Value;
+                result = Result(CommitStatus.MissingItems, "Missing " + first.Missing + " " + name);
+            }
+            else result = Result(full ? CommitStatus.CargoFull : CommitStatus.MissingItems, full ? "Cargo full: free space before committing" : "Inventory changes cannot be applied");
+            return false;
+        }
+        static CommitResult Result(CommitStatus status, string message) => new() { Status = status, Message = message };
+        static string IssueText(EditIssue issue) => issue.Kind switch
+        {
+            EditIssueKind.NoCore => "Ship needs a core", EditIssueKind.MultipleCores => "Ship has multiple cores",
+            EditIssueKind.Disconnected => "Ship contains disconnected blocks", EditIssueKind.OutOfBounds => "Ship exceeds the size limit",
+            EditIssueKind.OverCellBudget => "Ship exceeds the cell budget", EditIssueKind.DamageInvariant => "Damaged block count increased",
+            EditIssueKind.UnbuildableBlock => "Ship requires an unavailable block", _ => "Ship is invalid"
+        };
         public void Discard()
         {
-            CheckAlive(); CompleteRelabel(); var replacement = Original.Clone();
+            CheckAlive(); CheckNotCommitting(); CompleteRelabel(); var replacement = Original.Clone();
             MarkAllBricks(Draft); MarkAllBricks(replacement);
             Draft.Dispose(); Draft = replacement; History.Clear();
             DraftCounts.CopyFrom(OriginalCounts); placement.Initialize(Draft, context); InvalidateBom();
@@ -234,10 +319,11 @@ namespace Game.ShipEditor.Services
         public void CompleteRelabel()
         { CheckAlive(); connectivity.CompleteRelabel(); }
         public ulong ComputeDraftHash() { CheckAlive(); return new DraftReader(Draft, context).ComputeDraftHash(); }
+        void CheckNotCommitting() { if (committing) throw new InvalidOperationException("EDT: edits cannot change during commit."); }
         void CheckAlive() { if (disposed) throw new ObjectDisposedException(nameof(EditSession)); }
         public void Dispose()
         {
-            if (disposed) return;
+            if (disposed) return; CheckNotCommitting();
             connectivity?.Dispose();
             if (!Options.Creative && entry.Inventory != null) entry.Inventory.Changed -= InvalidateBom;
             OriginalCounts?.Dispose(); DraftCounts?.Dispose(); placement?.Dispose(); validation?.Dispose();
