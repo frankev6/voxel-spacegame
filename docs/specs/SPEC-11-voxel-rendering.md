@@ -666,3 +666,11 @@ Own budgets: `BrickMeshApplySystem` ≤ 2.5 ms main thread for a 128-brick batch
 - Unity: `EntitiesGraphicsSystem.RegisterMesh/RegisterMaterial/UnregisterMesh`, `MaterialMeshInfo(BatchMaterialID, BatchMeshID)`, `RenderMeshUtility.AddComponents`, `Mesh.AllocateWritableMeshData`, `Mesh.ApplyAndDisposeWritableMeshData`, `Graphics.RenderMeshPrimitives`, `Graphics.RenderPrimitivesIndexedIndirect`, `UnityIndirect.cginc`.
 - Prior art: 0fps "Ambient occlusion for Minecraft-like worlds" (vertex AO rule and diagonal flip).
 
+
+## QA-001 amendment (2026-10-14): NOCTURNE plating and Xeno surface nets
+- **Plating.** Layer rows 2/3 select procedural NOCTURNE plating (`NocturnePlating.hlsl`): style, window density, relief, function colour and metal. The pool's per-slot matrix carries the brick's grid cell offset in its unused bottom row, so plating is continuous across bricks. The editor draft passes `_DraftWorldToCells`.
+- **Xeno surface nets.** [ADR-0115](../decisions/ADR-0115-xeno-grown-hulls.md):
+  - Xeno cells snapshot their depth in the orient field and emit no block faces;
+  - `MeshXeno` adds a smooth shell at LOD0 and LOD1;
+  - smooth vertices set flag bit 5, with 1/8-cell positions, an octahedral normal (normal byte plus `Lo` bits 24..31) and a 0..15 wound depth (AO bits plus flag bits 6..7);
+  - a mesh with no indices never keeps vertices.

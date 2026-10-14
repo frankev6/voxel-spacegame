@@ -87,6 +87,7 @@ namespace Game.Voxel.Rendering
                 }
             }
             MeshXeno(snapshot, 1, ref output);
+            if (indices.Length == 0) vertices.Clear();   // the pool treats any vertex without an index as invalid geometry
             min = vertices.Length == 0 ? float3.zero : output.Min; max = vertices.Length == 0 ? float3.zero : output.Max;
         }
         static void BuildMasks(NativeArray<uint> snapshot, ref BrickShapeTables shapes, NativeArray<uint> masks)
@@ -167,6 +168,7 @@ namespace Game.Voxel.Rendering
                 Greedy(faceKeys, direction, slice, ref output);
             }
             MeshXeno(snapshot, 2, ref output);
+            if (indices.Length == 0) vertices.Clear();
             min = vertices.Length == 0 ? float3.zero : output.Min; max = vertices.Length == 0 ? float3.zero : output.Max;
         }
         static int SuperIndex(int3 p) => p.x + 8 * p.y + 64 * p.z;
@@ -203,6 +205,7 @@ namespace Game.Voxel.Rendering
             var values = new NativeArray<uint>(side * side * side, Allocator.Temp);
             var tissue = new NativeArray<bool>(side * side * side, Allocator.Temp);
             var vertexOf = new NativeArray<int>(cubes * cubes * cubes, Allocator.Temp);
+            var pending = new NativeArray<PackedBrickVertex>(cubes * cubes * cubes, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             try
             {
                 for (int z = -1; z <= n; z++) for (int y = -1; y <= n; y++) for (int x = -1; x <= n; x++)
@@ -211,12 +214,12 @@ namespace Game.Voxel.Rendering
                     field[k] = XenoSample(snapshot, new int3(x, y, z), stride, true, out uint v, out bool t);
                     values[k] = v; tissue[k] = t;
                 }
-                MeshXenoQuads(field, values, tissue, vertexOf, side, cubes, n, stride, ref output);
+                MeshXenoQuads(field, values, tissue, vertexOf, pending, side, cubes, n, stride, ref output);
             }
-            finally { field.Dispose(); values.Dispose(); tissue.Dispose(); vertexOf.Dispose(); }
+            finally { field.Dispose(); values.Dispose(); tissue.Dispose(); vertexOf.Dispose(); pending.Dispose(); }
         }
         static void MeshXenoQuads(NativeArray<float> field, NativeArray<uint> values, NativeArray<bool> tissue, NativeArray<int> vertexOf,
-            int side, int cubes, int n, int stride, ref Output output)
+            NativeArray<PackedBrickVertex> pending, int side, int cubes, int n, int stride, ref Output output)
         {
             for (int i = 0; i < vertexOf.Length; i++) vertexOf[i] = -1;
             float half = stride * .5f;
@@ -259,8 +262,10 @@ namespace Game.Voxel.Rendering
                 // Sample s sits at the centre of its (stride-sized) cell: brick position = (s + local) * stride + stride/2.
                 float3 position = (new float3(x, y, z) + local) * stride + half;
                 int depth = (int)math.round(math.max(0, shallowest - 1f / 16) * 4);
-                vertexOf[(x + 1) + cubes * (y + 1) + cubes * cubes * (z + 1)] = (int)output.Add(PackedBrickVertex.PackSmooth(position, normal,
-                    MeshCell.Layer(attribute), MeshCell.Colour(attribute), depth, MeshCell.Damage(attribute)));
+                // Emitted lazily by the first quad that uses it: cubes whose quads all belong to a neighbour brick add nothing.
+                int slot = (x + 1) + cubes * (y + 1) + cubes * cubes * (z + 1);
+                pending[slot] = PackedBrickVertex.PackSmooth(position, normal, MeshCell.Layer(attribute), MeshCell.Colour(attribute), depth, MeshCell.Damage(attribute));
+                vertexOf[slot] = -2;
             }
             for (int z = 0; z < n; z++) for (int y = 0; y < n; y++) for (int x = 0; x < n; x++)
             {
@@ -279,11 +284,17 @@ namespace Game.Voxel.Rendering
                     {
                         int3 cube = new int3(x, y, z); cube[u] -= (c == 1 || c == 2) ? 1 : 0; cube[v] -= c >= 2 ? 1 : 0;
                         if (math.any(cube < -1) || math.any(cube >= n)) { ok = false; break; }
-                        int id = vertexOf[(cube.x + 1) + cubes * (cube.y + 1) + cubes * cubes * (cube.z + 1)];
-                        if (id < 0) { ok = false; break; }
-                        ids[c] = id;
+                        int slot = (cube.x + 1) + cubes * (cube.y + 1) + cubes * cubes * (cube.z + 1), id = vertexOf[slot];
+                        if (id == -1) { ok = false; break; }
+                        ids[c] = slot;
                     }
                     if (!ok) continue;
+                    for (int c = 0; c < 4; c++)
+                    {
+                        int slot = ids[c];
+                        if (vertexOf[slot] == -2) vertexOf[slot] = (int)output.Add(pending[slot]);
+                        ids[c] = vertexOf[slot];
+                    }
                     // ids walk (0,0) -> (-u) -> (-u,-v) -> (-v) around the edge; flip so the quad faces the outside.
                     if (insideFirst) { Triangle((uint)ids.x, (uint)ids.y, (uint)ids.z, ref output); Triangle((uint)ids.x, (uint)ids.z, (uint)ids.w, ref output); }
                     else { Triangle((uint)ids.x, (uint)ids.z, (uint)ids.y, ref output); Triangle((uint)ids.x, (uint)ids.w, (uint)ids.z, ref output); }

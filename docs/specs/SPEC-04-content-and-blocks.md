@@ -1171,3 +1171,6 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 - Audit background: `docs/reference/audit-2026-10/00-synthesis.md` §6b (block definitions and the orientation group), §6l (ContentDatabase); `04-persistence-data.md` B9, B10, B20, B31, §6.2; `01-voxel-core.md` B1, B9, §6.2, §6.6; `06-ui-shipeditor.md` C2, C3, C13, §5.3.1, §5.3.3.
 - Legacy block data: `Import/Legacy/content/Items/Blocks/**` (21 assets). Legacy mesh bounds were checked against `Assets/Game/Art/_Placeholder/Meshes/{shipVoxels,hulls}.obj` (the Unity OBJ importer negates X; block meshes are pivoted at the root cell centre and extend towards +X, +Y, +Z after import).
 - Unity: Blob assets (`BlobBuilder`), `AssetPostprocessor.OnPostprocessAllAssets`, `IPreprocessBuildWithReport`, `TypeCache`.
+
+## QA-001 amendment (2026-10-14): Xeno shape
+`BlockShape.Xeno = 5` is valid for single-cell structural blocks ([ADR-0115](../decisions/ADR-0115-xeno-grown-hulls.md)). It renders as a grown smooth shell and behaves as a full cube everywhere else. The ARK slope kit is unchanged for human hulls.

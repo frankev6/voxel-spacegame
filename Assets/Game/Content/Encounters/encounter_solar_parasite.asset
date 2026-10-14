@@ -18,10 +18,10 @@ MonoBehaviour:
   faction: {fileID: 11400000, guid: e3dac7edc6d274253b285865e485684d, type: 2}
   kind: 3
   ships:
-  - blueprint: {fileID: 11400000, guid: 0250e5457e53948f283c55479efd7934, type: 2}
+  - blueprint: {fileID: 11400000, guid: e0473605698cf42fb9278fcdf9a6c8bb, type: 2}
     aiProfile: {fileID: 0}
-    countMin: 2
-    countMax: 2
+    countMin: 1
+    countMax: 1
   useFactionDoctrine: 0
   doctrineMinShips: 2
   doctrineMaxShips: 3

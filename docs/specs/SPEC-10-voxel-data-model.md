@@ -1144,3 +1144,6 @@ Evidence retained locally in ignored `Logs/tools/vox003-{reference,thin-shell}.t
 [ADR-0082](../decisions/ADR-0082-atomic-source-voxel-edits.md) adds source-only VoxelEdit batches through VoxelStructure.ApplyEdits using VoxelContent. Validation stages touched data before commit; individual source APIs and runtime damage ownership remain unchanged. This fulfills SPEC-51’s missing assumed dependency; implementation/acceptance is tracked by EDT-003.
 
 [ADR-0089](../decisions/ADR-0089-atomic-damaged-block-restoration.md) appends source-only RestoreBlock/DamageOffset and an ApplyEdits overload borrowing canonical damage bytes. Missing footprint cells never overwrite neighbours; ordinary placement remains unchanged. Explicit block removal resolves colour as part of identity. EDT-007 owns this correctness follow-up and its existing required damaged-block/adapter evidence.
+
+## QA-001 amendment (2026-10-14): Xeno tissue depth
+[ADR-0115](../decisions/ADR-0115-xeno-grown-hulls.md) claims `CellFlags` bits 2..7 for cells of `BlockShape.Xeno`: the depth below the grown surface, 0..63 sixteenths of a cell (`XenoDepth`). Other shapes keep these bits 0. Codec, saves and damage carry flags unchanged, so no format change is needed.
