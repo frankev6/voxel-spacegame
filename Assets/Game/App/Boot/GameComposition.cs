@@ -143,6 +143,10 @@ namespace Game.App.Boot
             Save.AttachContext(Session); Save.Register(new SessionSaveParticipant(Session));
             Register(Session); Register<IGameFlow>(Session); Register<IPersistentIdAllocator>(Session);
             Step("8 session");
+            var factions = Push(new FactionService(world, Content.Catalog));
+            Register(factions); Session.RegisterNewGameInitializer(factions);
+            Session.RegisterModel(new FactionSessionModel(factions));
+            Save.Register(new FactionSaveParticipant(factions, Content.Catalog));
             var galaxyTicker = new GalaxyFrameTicker(); Register(galaxyTicker);
             var campaignGalaxy = Push(new GalaxyService(Content.Catalog, Session.Galaxy, world, galaxyTicker));
             Register(campaignGalaxy); Session.BindGalaxy(campaignGalaxy);
@@ -272,6 +276,12 @@ namespace Game.App.Boot
             if (FailAfterStep != null && FailAfterStep == name) throw new InvalidOperationException("GameComposition test failure after step " + name);
         }
 
+        sealed class FactionSessionModel : ISessionModel
+        {
+            readonly FactionService factions;
+            internal FactionSessionModel(FactionService factions) { this.factions = factions; }
+            public void ResetToEmpty() => factions.InitializeNewGame(default);
+        }
         static void Register<T>(T service) where T : class => Game.Core.Services.Register(service);
 
         T Push<T>(T service) where T : IDisposable

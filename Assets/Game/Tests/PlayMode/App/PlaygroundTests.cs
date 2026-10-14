@@ -60,7 +60,13 @@ namespace Game.Tests.PlayMode.App
                 Assert.IsTrue(hostile, "Combat trial must spawn an actual hostile faction, not only a differently numbered team");
             }
             Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind, "Repeated combat activation cannot spawn another fighter");
+            var standings = Services.Get<Game.Galaxy.Services.FactionService>();
+            var neutral = standings.Indices.ByIndex(1);
+            Assert.IsFalse(neutral.RelationLocked);
+            standings.SetRelation(neutral, -70);
+            Assert.AreEqual(-70, standings.GetRelation(neutral));
             yield return RunCommand("playground reset");
+            Assert.AreEqual(neutral.BasePlayerRelation, standings.GetRelation(neutral), "Reset clears faction changes as well as the visible trial");
             Assert.IsFalse(EM.Exists(originalPlayer), "Reset disposes previous player");
             Assert.IsFalse(EM.Exists(originalStation), "Reset disposes previous station");
             Assert.IsTrue(EM.Exists(range.Target));

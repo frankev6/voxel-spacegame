@@ -1040,6 +1040,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 438 | SPEC-61 Q35: editor host construction | Resolved: existing public constructor, exact owning navigator root and four authored panel regions; four acceptance cases pass. | Tech lead |
 | 439 | SPEC-30 Q38: advisory galaxy fixtures | Resolved: real generation/deltas and separate unchanged budgets; compiled, measurements deferred without tuning. | Tech lead |
 | 440 | SPEC-50 Q28: directory/capacity ownership | Resolved: authored-first real body lookup and fleet/reset-driven cargo capacity; three transferred cases pass. | Tech lead |
+| 441 | SPEC-33 Q20: queued relation reads, FACN and sandbox reset | Resolved: per-operation clamp matches fixed step; session adapter clears relations and unknown records for sandbox/new sessions; validate entire FACN before mutation. | Tech lead |
 
 ## Measurements
 
