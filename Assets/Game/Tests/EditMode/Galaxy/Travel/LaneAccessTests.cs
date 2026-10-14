@@ -65,7 +65,7 @@ namespace Game.Tests.EditMode.Galaxy.Travel
         }
         internal sealed class Fixture : IDisposable
         {
-            internal readonly TestGalaxyFixtures.Fixture Content = new(2, 0, 42, false);
+            internal readonly TestGalaxyFixtures.Fixture Content;
             internal readonly World World = new("TRV-003 lane fixture");
             internal readonly GalaxyState State = new();
             internal readonly GalaxyService Galaxy;
@@ -74,8 +74,9 @@ namespace Game.Tests.EditMode.Galaxy.Travel
             internal readonly Context Logic;
             internal readonly FactCatalog Facts;
             readonly PauseService pause = new();
-            internal Fixture(string source = "$gate_open", bool registerContext = true, bool generate = true, ITravelLoader loader = null, IPauseService pauseOverride = null, IAudioService audio = null, DockingService docking = null)
+            internal Fixture(string source = "$gate_open", bool registerContext = true, bool generate = true, ITravelLoader loader = null, IPauseService pauseOverride = null, IAudioService audio = null, DockingService docking = null, int authoredCount = 2)
             {
+                Content = new TestGalaxyFixtures.Fixture(authoredCount, 0, 42, false);
                 var fuel = AssetDatabase.LoadAssetAtPath<ItemDefinition>("Assets/Game/Content/Items/resource_fuel.asset");
                 var cue = AssetDatabase.LoadAssetAtPath<AudioCueDefinition>("Assets/Game/Content/Audio/cue_warp.asset");
                 Assert.IsNotNull(fuel); Assert.IsNotNull(cue); Content.Definitions.Add(fuel); Content.Definitions.Add(cue);

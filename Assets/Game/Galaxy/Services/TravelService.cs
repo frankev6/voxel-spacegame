@@ -19,6 +19,7 @@ using Unity.Physics;
 using Game.Voxel.PresentationStreams;
 using Unity.Entities;
 using Unity.Mathematics;
+using RouteState = Game.Galaxy.Travel.RouteStatus;
 
 namespace Game.Galaxy.Services
 {
@@ -33,6 +34,17 @@ namespace Game.Galaxy.Services
         readonly IPauseService pause;
         readonly IAudioService audio;
         readonly LaneAccessTable lanes = new();
+        readonly RouteScratch routeScratch = new();
+        readonly List<int> routeLanes = new();
+        readonly List<StarSystemId> routeSystems = new();
+        readonly IReadOnlyList<StarSystemId> routeView;
+        RouteState routeStatus;
+        string routeBlockedReason = "";
+        int routeFuelCost, routeGeneration = -1, flagsGeneration = -1;
+        uint routeStateRevision, routeLaneRevision, flagsRevision;
+        StarSystemId routeDestination, routeSource;
+        bool routeStamped, hasNextHop;
+        NextHop nextHop;
         readonly EntityQuery worldScene, players, clocks, controlLocks;
         PauseToken pauseToken;
         IJumpEscorts escorts;
@@ -56,6 +68,7 @@ namespace Game.Galaxy.Services
             this.catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
             this.pause = pause ?? throw new ArgumentNullException(nameof(pause));
             this.audio = audio ?? throw new ArgumentNullException(nameof(audio));
+            routeView = routeSystems.AsReadOnly();
             Config = catalog.Get<TravelConfigDefinition>(new ContentId("config_travel"));
             fuelIndex = catalog.IndexOf(Config.FuelItem);
             if (fuelIndex == 0) GameLog.WarnOnce("TRV.Fuel.NoItem", LogCategories.Travel, "Travel fuel is not in the catalog; fuel costs are not enforced.");
@@ -250,15 +263,124 @@ namespace Game.Galaxy.Services
             return true;
         }
 
-        public StarSystemId Destination => throw new NotImplementedException("TRV-010");
-        public RouteStatus RouteStatus => throw new NotImplementedException("TRV-010");
-        public string RouteBlockedReason => throw new NotImplementedException("TRV-010");
-        public IReadOnlyList<StarSystemId> Route => throw new NotImplementedException("TRV-010");
-        public int RouteFuelCost => throw new NotImplementedException("TRV-010");
-        public bool CanSetDestination(StarSystemId id, out string reason) => throw new NotImplementedException("TRV-010");
-        public bool SetDestination(StarSystemId id, out string reason) => throw new NotImplementedException("TRV-010");
-        public void ClearDestination() => throw new NotImplementedException("TRV-010");
-        public bool TryGetNextHop(out NextHop hop) => throw new NotImplementedException("TRV-010");
+        public StarSystemId Destination => galaxy.State.RouteDestination;
+        public RouteStatus RouteStatus => routeStatus;
+        public string RouteBlockedReason => routeBlockedReason;
+        public IReadOnlyList<StarSystemId> Route => routeView;
+        public int RouteFuelCost => routeFuelCost;
+        public bool CanSetDestination(StarSystemId id, out string reason)
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(TravelService));
+            EnsureLaneState(); var g = galaxy.Galaxy;
+            if (g == null) { reason = "No galaxy is loaded."; return false; }
+            if (!g.TryGetIndex(id, out int target) || !galaxy.State.IsKnown(id))
+            { reason = "Uncharted star system."; return false; }
+            var source = loader.Loaded;
+            if (id.Equals(source)) { reason = "You are already there."; return false; }
+            PrepareRouteInputs(g);
+            if (g.TryGetIndex(source, out int start))
+            {
+                if (RoutePlanner.TryFindRoute(g, routeScratch, start, target, false, routeLanes, out _))
+                { reason = ""; return true; }
+                if (RoutePlanner.TryFindRoute(g, routeScratch, start, target, true, routeLanes, out _))
+                { reason = FirstLockedRouteMessage(); return false; }
+            }
+            reason = "No known route."; return false;
+        }
+        public bool SetDestination(StarSystemId id, out string reason)
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(TravelService));
+            if (id.Equals(Destination)) { reason = ""; return true; }
+            if (!CanSetDestination(id, out reason)) return false;
+            galaxy.State.RouteDestination = id; RecomputeRoute(); return true;
+        }
+        public void ClearDestination()
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(TravelService));
+            galaxy.State.RouteDestination = default; ResetRouteCache(); routeStamped = false;
+        }
+        public bool TryGetNextHop(out NextHop hop)
+        { hop = routeStatus == RouteState.Ok && hasNextHop ? nextHop : default; return routeStatus == RouteState.Ok && hasNextHop; }
+        void PrepareRouteInputs(GalaxyDef g)
+        {
+            routeScratch.EnsureCapacity(g.StarSystems.Length, g.LaneGates.Count, g.Lanes.Length);
+            if (flagsGeneration != galaxy.GenerationCount || flagsRevision != galaxy.State.Revision)
+            {
+                for (int i = 0; i < routeScratch.SystemFlags.Length; i++) routeScratch.SystemFlags[i] = 0;
+                foreach (uint id in galaxy.State.Known)
+                    if (g.TryGetIndex(new StarSystemId(id), out int index)) routeScratch.SystemFlags[index] |= 1;
+                foreach (uint id in galaxy.State.Visited)
+                    if (g.TryGetIndex(new StarSystemId(id), out int index)) routeScratch.SystemFlags[index] |= 2;
+                flagsGeneration = galaxy.GenerationCount; flagsRevision = galaxy.State.Revision;
+            }
+            for (int i = 0; i < routeScratch.GateOpen.Length; i++) routeScratch.GateOpen[i] = 0;
+            for (int i = 0; i < lanes.GateOpen.Length; i++) routeScratch.GateOpen[i] = lanes.GateOpen[i] ? (byte)1 : (byte)0;
+        }
+        string FirstLockedRouteMessage()
+        {
+            foreach (int lane in routeLanes) if (!IsLaneOpen(lane)) return GetLockedMessage(lane);
+            return "This lane is locked.";
+        }
+        void ResetRouteCache()
+        {
+            routeSystems.Clear(); routeFuelCost = 0; routeBlockedReason = ""; routeStatus = RouteState.None;
+            nextHop = default; hasNextHop = false;
+        }
+        void UpdateRoute()
+        {
+            // No destination requires no loader access, native search, statistics or notice.
+            if (!Destination.IsValid || galaxy.Galaxy == null) { ResetRouteCache(); routeStamped = false; return; }
+            if (!routeStamped || !routeDestination.Equals(Destination) || !routeSource.Equals(loader.Loaded) ||
+                routeLaneRevision != lanes.Revision || routeStateRevision != galaxy.State.Revision || routeGeneration != galaxy.GenerationCount)
+                RecomputeRoute();
+        }
+        void RecomputeRoute()
+        {
+            var g = galaxy.Galaxy; var destination = Destination; var source = loader.Loaded;
+            var previous = routeStatus; ResetRouteCache();
+            if (!destination.IsValid || g == null) { routeStamped = false; return; }
+            if (!g.TryGetIndex(destination, out int target)) { ClearDestination(); return; }
+            if (destination.Equals(source))
+            {
+                EventBus<TravelNotice>.Publish(new TravelNotice(TravelNoticeKind.DestinationReached, destination.Value,
+                    "Arrived at " + galaxy.GetStarSystemName(destination) + "."));
+                ClearDestination(); return;
+            }
+            long started = System.Diagnostics.Stopwatch.GetTimestamp();
+            PrepareRouteInputs(g);
+            bool found = g.TryGetIndex(source, out int start) &&
+                RoutePlanner.TryFindRoute(g, routeScratch, start, target, false, routeLanes, out _);
+            if (found)
+            {
+                routeStatus = RouteState.Ok; var at = source; long fuel = 0;
+                foreach (int lane in routeLanes)
+                { at = GalaxyDef.Neighbour(g.Lanes[lane], at); routeSystems.Add(at); fuel += GetFuelCost(lane); }
+                routeFuelCost = (int)Math.Min(fuel, int.MaxValue);
+                if (routeLanes.Count != 0)
+                {
+                    int first = routeLanes[0]; var content = galaxy.GetContent(source);
+                    foreach (var body in content.Bodies)
+                        if (body.Id.Role == BodyRole.LaneGate && body.LaneIndex == first)
+                        {
+                            nextHop = new NextHop { Next = routeSystems[0], LaneIndex = first, GateKey = body.Id.LocalKey,
+                                GatePositionM = OrbitMath.Position(body, Clock.UniversalTime) };
+                            hasNextHop = true; break;
+                        }
+                }
+            }
+            else if (g.TryGetIndex(source, out start) && RoutePlanner.TryFindRoute(g, routeScratch, start, target, true, routeLanes, out _))
+            { routeStatus = RouteState.Blocked; routeBlockedReason = FirstLockedRouteMessage(); }
+            else { routeStatus = RouteState.Unreachable; routeBlockedReason = "No known route."; }
+            if (previous == RouteState.Ok && (routeStatus == RouteState.Blocked || routeStatus == RouteState.Unreachable))
+                EventBus<TravelNotice>.Publish(new TravelNotice(TravelNoticeKind.RouteBlocked, destination.Value, routeBlockedReason));
+            else if ((previous == RouteState.Blocked || previous == RouteState.Unreachable) && routeStatus == RouteState.Ok)
+                EventBus<TravelNotice>.Publish(new TravelNotice(TravelNoticeKind.RouteRestored, destination.Value,
+                    "Route to " + galaxy.GetStarSystemName(destination) + " is open."));
+            routeDestination = Destination; routeSource = source; routeLaneRevision = lanes.Revision;
+            routeStateRevision = galaxy.State.Revision; routeGeneration = galaxy.GenerationCount; routeStamped = true;
+            var stats = Stats; stats.RouteComputations++;
+            stats.LastRouteMs = (float)((System.Diagnostics.Stopwatch.GetTimestamp() - started) * 1000.0 / System.Diagnostics.Stopwatch.Frequency); Stats = stats;
+        }
 
         public bool IsLaneOpen(int laneIndex)
         {
@@ -333,9 +455,12 @@ namespace Game.Galaxy.Services
         public JumpRequestResult RequestCruise(double3 targetPositionM, float targetRadiusM) => throw new NotImplementedException("TRV-013");
         public void Tick(in GalaxyFrameContext ctx)
         {
-            EnsureLaneState(); if (disposed || galaxy.Galaxy == null || !world.IsCreated || worldScene.IsEmptyIgnoreFilter) return;
+            EnsureLaneState(); if (disposed) return;
+            if (galaxy.Galaxy == null) { UpdateRoute(); return; }
+            if (!world.IsCreated || worldScene.IsEmptyIgnoreFilter) return;
             if (unchecked(ctx.Tick - lastRefreshTick) >= Config.LaneRefreshTicks)
             { RefreshLaneConditions(); lastRefreshTick = ctx.Tick; }
+            UpdateRoute();
             switch (Phase)
             {
                 case TravelPhase.Idle: WriteLock(PlayerControlLockFlags.None); break;
@@ -374,7 +499,7 @@ namespace Game.Galaxy.Services
         {
             if (disposed) return;
             Abort("", true); EventBus<BodyInteracted>.Unsubscribe(OnBodyInteracted);
-            disposed = true; EventBus<StarSystemEntered>.Unsubscribe(OnStarSystemEntered); lanes.Dispose();
+            disposed = true; EventBus<StarSystemEntered>.Unsubscribe(OnStarSystemEntered); lanes.Dispose(); routeScratch.Dispose(); ResetRouteCache();
             if (world.IsCreated) { worldScene.Dispose(); players.Dispose(); clocks.Dispose(); controlLocks.Dispose(); }
 
         }
