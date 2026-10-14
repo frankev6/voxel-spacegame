@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **World-event bridge accepted:** NAR-0123a6ebd75 done, canonical factory ec427094; four functional cases plus hail-fix retry pass, final compile63987 clean. Live registration remains QST-008 after actual dependent owners. No Unity active. DEV-017 dispatched7b2afbc3; DEV-010240 finalizing delivery; DLG-003265 active. Next integrate aim/fire delivery and continue narrative runtime prerequisites.
+
 - **Canonical bridge lookups authored:** NAR-012ec427094 adds CreateForWorld using real galaxy body templates, prebuilt authored-system hashes and faction catalog indices. SPEC-42 QST-008 owns live registration after its beat/travel/encounter dependencies; GameComposition TODO now names that owner. Four functional cases already passed; final factory compile/review pending next compatible batch. No Unity active. Workers DLG-003265, bounded bridge review283 and DEV-010237 active. Previous clue acceptance and current canonical source work are progress.
 
 - **Clue lifecycle accepted:** QST-00419b24412 done; compile75549 clean and focused EditMode89861 passes9 (five clue/four world-event cases), 0.1676s bodies, about43s total including Unity lifecycle. No Unity active. NAR-012 stays in progress pending canonical lookups/composition resolution and review; allocation fixture compiled only. Next finish that integration and advance dialog work. Workers DLG-003265, bridge review283 and DEV-010236 active.

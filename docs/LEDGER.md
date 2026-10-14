@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 10 | 1 | 0 | 0 | 81 | 0 | 92 | 7 |
-| M3 | 88 | 9 | 0 | 0 | 83 | 0 | 180 | 8 |
+| M3 | 87 | 9 | 0 | 0 | 84 | 0 | 180 | 8 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -381,13 +381,13 @@
 | NAR-009 | Import-time compile pipeline | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, NAR-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 36adef2b | Deferred import compilation/menu/drawers; clean compile and three focused checks pass |
 | NAR-010 | NarrativeService tick and dependency index | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007 | yes | done | astra (gpt-6) | 2026-10-13 | c2e2084d | Ordered runtime/index; 5 direct-tick cases pass, 2 advisory fixtures compiled but not run; Q363. Boot wiring remains NAR-011 |
 | NAR-011 | LogicContext and LogicWorldAdapter in Game.App | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-005, NAR-010, FND-001, ECO-001, QST-001 | yes | done | astra (gpt-6) | 2026-10-13 | ce82fed9 | Live boot/context/FACT/tick routing; 4 required checks + production boot/T2 green; Q364/365; INVT/QST runtime remain owning tasks |
-| NAR-012 | World-event bridge | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-011, SYS-001, ENC-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Claimed for focused implementation; batch validation after code complete. |
+| NAR-012 | World-event bridge | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-011, SYS-001, ENC-001 | yes | done | astra (gpt-6) | 2026-10-13 | 3a6ebd75 | Event routing and canonical factory accepted; four functional cases plus hail retry pass. Live registration QST-008; allocation advisory compiled only. |
 | NAR-013 | Narrative validator framework and fact rules | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-009 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | e81dc6d | Scratch validator, V001–008 and CLI; reviewed repair, 7 focused checks pass; downstream owner stubs remain explicit diagnostics |
 | NAR-014 | Legacy converter: reading, mapping tables and logic translation | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, MIG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 2be62596 | Strict five-file loader and mapped logic; 5 focused checks pass; emission/assets remain NAR-015/016 |
 | NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 5d85a419 | 34 Yarn/34 beats/facts and manifest generated;145 files byte-stable,35 definitions registered; six required checks accepted, clean compile; Q325 |
 | NAR-016 | Legacy converter: quests, triggers, templates and flag assets | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-015 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 1b0cb271 | Four required converter cases pass9669; real generation42967 terminal0, 225 files raw-byte identical across rerun;9 total quests incl Whisper,3 contracts,143 source strings; Q337/343. |
 | NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 6276ae7b | Facts/Trace/read-only debugger; formatter passes; Quests shows unavailable until QST-006 |
-| NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | no | todo |  |  |  |  |
+| NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | yes | todo |  |  |  |  |
 | NAR-020 | LogicWatcher | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-004 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | b4344a9 | Sorted/deduplicated dependency watcher; 4 focused tests pass |
 | DLG-001 | Public contract types | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | NAR-001, UI-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 67e0ffd | Dialog contracts, one required test; full suites green |
 | DLG-002 | Dialog script parser | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, NAR-003, NAR-016 | yes | done | astra (gpt-6) | 2026-10-13 | 179603ec | Parser and seven required cases accepted; 38 converted files parse cleanly; focused separator review fix passes. |
@@ -1082,6 +1082,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — NAR-012 done: world-event bridge — astra (gpt-6)
+
+- 3a6ebd75 accepted with canonical factory ec427094. Review284 identified zero-key NPC Hail exclusion; fixed with Q378 and the existing interaction case. All four functional cases passed89861; hail retry96646 terminal0 (0.1040584s bodies). Compile63987 terminal0, zero CS warnings. Evidence Logs/playtest/narrative-world-clues including final-compile and hail-editmode. spec-required: 5 (four functional passed, one advisory allocation fixture compiled only), extra: 0; no optimization passes.
+- Live bridge registration belongs to existing QST-008 after beat/travel/encounter owners, explicitly documented in Q376 and GameComposition. No claim of live dialogs yet. No Unity active. DEV-017 claimed7b2afbc3 and dispatched to existing economy worker; DEV-010240 finalizing; DLG-003265 active. Previous canonical lookups and current review fix/acceptance are progress.
 
 ### 2026-10-13 — NAR-012 canonical composition entry authored — astra (gpt-6)
 

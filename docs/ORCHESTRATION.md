@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DLG-003 | Claimed c513df81; full validator/generated files dispatched | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | QST-004 | Delivered3b4a3895; lead integrating, bounded NAR-012 review dispatched | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-017 | Claimed7b2afbc3; inventory/facts commands dispatched | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-010 | Claimed7ed74de3; aim/fire commands dispatched | HUD-003/006/007 once ready |
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **World-event bridge accepted:** NAR-0123a6ebd75 done, canonical factory ec427094; four functional cases plus hail-fix retry pass, final compile63987 clean. Live registration remains QST-008 after actual dependent owners. No Unity active. DEV-017 dispatched7b2afbc3; DEV-010240 finalizing delivery; DLG-003265 active. Next integrate aim/fire delivery and continue narrative runtime prerequisites.
 
 - **Canonical bridge lookups authored:** NAR-012ec427094 adds CreateForWorld using real galaxy body templates, prebuilt authored-system hashes and faction catalog indices. SPEC-42 QST-008 owns live registration after its beat/travel/encounter dependencies; GameComposition TODO now names that owner. Four functional cases already passed; final factory compile/review pending next compatible batch. No Unity active. Workers DLG-003265, bounded bridge review283 and DEV-010237 active. Previous clue acceptance and current canonical source work are progress.
 
