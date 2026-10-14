@@ -1218,6 +1218,28 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-14 — QA-001: owner findings fixed, NOCTURNE visual pass, Xeno grown hulls (lead, claude-opus-5-5)
+- Owner, verbatim: "1. you fix everything mentioned in your findings and review 2. QA 3. I review 4. we start working on m4 when everything is solid here"; then "when you fix all the issues and findings from your review. please do a STRONG visual polish pass and overhaul to get to the nocturne look both visually in terms of blocks/block visuals and also in terms of UI. also i want you to add in the alien looking ship and its functinality (it uses a different method of rendering than normal blocks, read about it in the design and lookbook)".
+- Findings fixed on `task/QA-001-owner-findings` (local only), in this order:
+  - modal draw order, editor held strokes, shake and flight feel (ADR-0114), boost FOV, and radar rotation with beacons;
+  - salvage reach, magnet, staggered pull-in and world tags; hit FX, hit markers, shield lattice and inventory QoL;
+  - UI sounds and the friendlier editor;
+  - origin-aware placeholder planet (the boundary snap);
+  - cores in the five coreless blueprints; cached spawn lookups; the stale TODO sweep and load toasts;
+  - pause "leave without saving" when saving is blocked, and the external-pause input blocker restored;
+  - 223 mangled doc lines repaired.
+- Root cause of several "pre-existing" PlayMode failures: the campaign opening dialogue (QST-010) pauses the game, so session tests never reached flight. `BeatService` quiet mode drops automatic beats for harness and test campaigns; story fixtures opt out.
+- Visual pass (DESIGN-GUIDE §3–§8):
+  - procedural NOCTURNE hull plating in the brick shader, continuous across bricks (panels, rivets, seams, sodium windows);
+  - function machinery layers, and functional props coloured by `_PropLayer`;
+  - ARK team colours, and stock blueprints repainted into team roles; firing-range station no longer auto-spawns in campaigns;
+  - post grade on the camera;
+  - UI glass skin with corner brackets and a ringed radar;
+  - main menu backdrop with showcase ships.
+- Xeno (ADR-0115): per-cell depth plus surface nets in the brick mesher, obsidian & acid shading with glowing wounds, and HUSK and BROODMOTHER built from look-book SDFs with organ blocks. The xeno-faction encounters and playground pad 15 now use them.
+- QA results: QA001_RESULTS_PLACEHOLDER
+- Open for the owner: fonts (Michroma/Inter/JetBrains Mono, OFL) need download approval; art review of the procedural organ meshes, the magnet block and the UI sounds; Q125 flight balance by play (ADR-0114).
+
 ### 2026-10-14 — Owner correction: unbiased reviewer access brief — astra (gpt-6)
 
 - Frank clarified that the initial reviewer prompt must provide access instructions and scope, not directed checks or coordinator bias. Replaced QA-REVIEWER-PROMPT.md with scope, launch/navigation commands, controls, pause constraints and neutral reporting instructions. Removed expected outcomes, prioritized checks, known findings and decision summaries. Prior evaluative documents remain available only for later reconciliation after independent findings are recorded and Frank authorizes it.

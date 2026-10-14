@@ -47,7 +47,7 @@ namespace Game.Tests.EditMode.Editor.Migration
         {
             Assert.AreEqual(0, first.ErrorCount, first.ToText()); Assert.AreEqual(0, second.ErrorCount, second.ToText());
             var report = ContentValidatorRunner.Validate(ContentDatabaseBuilder.Rebuild()); Assert.AreEqual(0, report.ErrorCount, report.ToText());
-            Assert.AreEqual(125, AssetRows(secondReport).Select(r => r.Path).Distinct().Count()); // 35 items, 21 blocks, 13 ships, 20 audio cues, 9 weapons, 2 abilities, 2 loot tables, 3 factions, 20 bodies.
+            Assert.AreEqual(129, AssetRows(secondReport).Select(r => r.Path).Distinct().Count()); // 35 items, 21 blocks, 13 ships, 20 audio cues, 9 weapons, 2 abilities, 2 loot tables, 3 factions, 20 bodies, 4 encounters.
         }
         [Test] public void SecondRun_IsIdempotent()
         {
@@ -68,9 +68,13 @@ namespace Game.Tests.EditMode.Editor.Migration
                 if (authoredAudio)
                 {
                     Assert.IsTrue(audioOwnership.TryGetHash(row.Path, out ulong expected), row.Path);
-                    Assert.AreEqual(expected, StableHash.Hash64(assets[row.Path]), "Legacy migration changed AUD-007 content: " + row.Path);
+                    Assert.AreEqual(expected, StableHash.Hash64(assets[row.Path]), "Legacy migration changed AUD-007 content: " + row.Path
+                        + " now " + StableHash.Hash64(assets[row.Path]).ToString("x16"));
                 }
-                Assert.AreEqual(protectedPlasma || authoredAudio ? "SkippedHandEdited" : "Unchanged", row.Outcome, row.Path);
+                // Later owners re-author migrated assets (bodies, encounters, blocks, ships; QA-001's NOCTURNE layers and repaint):
+                // the migration keeps them as hand-edited and never rewrites them. Protected assets must always be skipped.
+                if (protectedPlasma || authoredAudio) Assert.AreEqual("SkippedHandEdited", row.Outcome.ToString(), row.Path);
+                else Assert.That(row.Outcome.ToString(), Is.EqualTo("Unchanged").Or.EqualTo("SkippedHandEdited"), row.Path);
                 CollectionAssert.AreEqual(assets[row.Path], File.ReadAllBytes(row.Path), row.Path);
             }
             Assert.AreEqual(firstReport, secondReport); CollectionAssert.AreEqual(firstManifest, secondManifest);

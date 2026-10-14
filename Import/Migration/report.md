@@ -1,6 +1,6 @@
 # Legacy migration report
 
-Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (220), Ships (300), Factions (400), Loot (410)
+Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (220), Ships (300), Factions (400), Loot (410), Bodies (420), Encounters (600)
 
 ## Assets
 
@@ -28,27 +28,51 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 |Assets/Game/Content/Audio/cue_weapon_cannon_fire.asset|SkippedHandEdited|
 |Assets/Game/Content/Audio/cue_weapon_laser_fire.asset|SkippedHandEdited|
 |Assets/Game/Content/Audio/cue_weapon_plasma_fire.asset|SkippedHandEdited|
-|Assets/Game/Content/Blocks/block_capacitor_small.asset|Unchanged|
-|Assets/Game/Content/Blocks/block_core_cross.asset|Unchanged|
-|Assets/Game/Content/Blocks/block_core_small.asset|Unchanged|
+|Assets/Game/Content/Blocks/block_capacitor_small.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/block_core_cross.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/block_core_small.asset|SkippedHandEdited|
 |Assets/Game/Content/Blocks/block_hull.asset|Unchanged|
 |Assets/Game/Content/Blocks/block_hull_angled.asset|Unchanged|
-|Assets/Game/Content/Blocks/block_portal_small.asset|Unchanged|
-|Assets/Game/Content/Blocks/block_prismatic_mirror_fixed_small.asset|Unchanged|
-|Assets/Game/Content/Blocks/block_prismatic_mirror_small.asset|Unchanged|
-|Assets/Game/Content/Blocks/block_shield_small.asset|Unchanged|
-|Assets/Game/Content/Blocks/block_thruster_large.asset|Unchanged|
-|Assets/Game/Content/Blocks/block_thruster_medium.asset|Unchanged|
-|Assets/Game/Content/Blocks/block_thruster_small.asset|Unchanged|
-|Assets/Game/Content/Blocks/weapon_ark_lance_medium.asset|Unchanged|
-|Assets/Game/Content/Blocks/weapon_fixed_beam_turret_small.asset|Unchanged|
-|Assets/Game/Content/Blocks/weapon_flak_cannon_medium.asset|Unchanged|
-|Assets/Game/Content/Blocks/weapon_missile_launcher_small.asset|Unchanged|
-|Assets/Game/Content/Blocks/weapon_plasma_turret_medium.asset|Unchanged|
-|Assets/Game/Content/Blocks/weapon_plasma_turret_small.asset|Unchanged|
-|Assets/Game/Content/Blocks/weapon_plasma_turret_small_fixed.asset|Unchanged|
-|Assets/Game/Content/Blocks/weapon_railgun_medium.asset|Unchanged|
-|Assets/Game/Content/Blocks/weapon_small_beam_turret.asset|Unchanged|
+|Assets/Game/Content/Blocks/block_portal_small.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/block_prismatic_mirror_fixed_small.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/block_prismatic_mirror_small.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/block_shield_small.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/block_thruster_large.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/block_thruster_medium.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/block_thruster_small.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/weapon_ark_lance_medium.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/weapon_fixed_beam_turret_small.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/weapon_flak_cannon_medium.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/weapon_missile_launcher_small.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/weapon_plasma_turret_medium.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/weapon_plasma_turret_small.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/weapon_plasma_turret_small_fixed.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/weapon_railgun_medium.asset|SkippedHandEdited|
+|Assets/Game/Content/Blocks/weapon_small_beam_turret.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_asteroid_belt.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_debris_field.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_derelict_ship.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_gate_active.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_gate_dormant.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_jump_point.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_moon.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_planet_barren.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_planet_gas_giant.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_planet_ice.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_planet_ice_giant.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_planet_rocky.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_planet_terrestrial.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_planet_water.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_resource_cache.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_star.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_star_blackhole.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_station.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_station_abandoned.asset|SkippedHandEdited|
+|Assets/Game/Content/Bodies/body_station_ark.asset|SkippedHandEdited|
+|Assets/Game/Content/Encounters/encounter_raiders.asset|SkippedHandEdited|
+|Assets/Game/Content/Encounters/encounter_traveling_merchant.asset|Unchanged|
+|Assets/Game/Content/Encounters/encounter_whisper_hunter.asset|Unchanged|
+|Assets/Game/Content/Encounters/encounter_xeno_probe_tutorial.asset|SkippedHandEdited|
 |Assets/Game/Content/Factions/faction_khuchad_clan.asset|Unchanged|
 |Assets/Game/Content/Factions/faction_tlaxcala.asset|Unchanged|
 |Assets/Game/Content/Factions/faction_vestari.asset|Unchanged|
@@ -90,17 +114,17 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 |Assets/Game/Content/Loot/loot_base.asset|Unchanged|
 |Assets/Game/Content/Loot/loot_creative.asset|Unchanged|
 |Assets/Game/Content/Ships/ship_base.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_bastion.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_bastion.asset|SkippedHandEdited|
 |Assets/Game/Content/Ships/ship_beetle.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_butterfly.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_crescent.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_fighter.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_freighter.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_frigate.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_icarus.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_red_elite.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_shuttle.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_striker.asset|Unchanged|
+|Assets/Game/Content/Ships/ship_butterfly.asset|SkippedHandEdited|
+|Assets/Game/Content/Ships/ship_crescent.asset|SkippedHandEdited|
+|Assets/Game/Content/Ships/ship_fighter.asset|SkippedHandEdited|
+|Assets/Game/Content/Ships/ship_freighter.asset|SkippedHandEdited|
+|Assets/Game/Content/Ships/ship_frigate.asset|SkippedHandEdited|
+|Assets/Game/Content/Ships/ship_icarus.asset|SkippedHandEdited|
+|Assets/Game/Content/Ships/ship_red_elite.asset|SkippedHandEdited|
+|Assets/Game/Content/Ships/ship_shuttle.asset|SkippedHandEdited|
+|Assets/Game/Content/Ships/ship_striker.asset|SkippedHandEdited|
 |Assets/Game/Content/Ships/ship_vestari.asset|Unchanged|
 |Assets/Game/Content/Weapons/wpn_ark_lance_medium.asset|Unchanged|
 |Assets/Game/Content/Weapons/wpn_fixed_beam_turret_small.asset|Unchanged|
@@ -153,26 +177,142 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [I] MIG-I011 Assets/Game/Content/Audio/cue_weapon_cannon_fire.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Audio/cue_weapon_laser_fire.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Audio/cue_weapon_plasma_fire.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/block_capacitor_small.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/block_core_cross.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/block_core_small.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/block_portal_small.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/block_prismatic_mirror_fixed_small.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/block_prismatic_mirror_small.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/block_shield_small.asset: Kept hand-edited asset.
 [I] MIG-I012 Assets/Game/Content/Blocks/block_shield_small.asset grantedAbilities: Kept existing link.
+[I] MIG-I011 Assets/Game/Content/Blocks/block_thruster_large.asset: Kept hand-edited asset.
 [I] MIG-I012 Assets/Game/Content/Blocks/block_thruster_large.asset grantedAbilities: Kept existing link.
+[I] MIG-I011 Assets/Game/Content/Blocks/block_thruster_medium.asset: Kept hand-edited asset.
 [I] MIG-I012 Assets/Game/Content/Blocks/block_thruster_medium.asset grantedAbilities: Kept existing link.
+[I] MIG-I011 Assets/Game/Content/Blocks/block_thruster_small.asset: Kept hand-edited asset.
 [I] MIG-I012 Assets/Game/Content/Blocks/block_thruster_small.asset grantedAbilities: Kept existing link.
+[I] MIG-I011 Assets/Game/Content/Blocks/weapon_ark_lance_medium.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/weapon_fixed_beam_turret_small.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/weapon_flak_cannon_medium.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/weapon_missile_launcher_small.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/weapon_plasma_turret_medium.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/weapon_plasma_turret_small.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/weapon_plasma_turret_small_fixed.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/weapon_railgun_medium.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Blocks/weapon_small_beam_turret.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_asteroid_belt.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_debris_field.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_derelict_ship.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_gate_active.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_gate_dormant.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_jump_point.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_moon.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_planet_barren.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_planet_gas_giant.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_planet_ice.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_planet_ice_giant.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_planet_rocky.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_planet_terrestrial.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_planet_water.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_resource_cache.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_star.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_star_blackhole.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_station.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_station_abandoned.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Bodies/body_station_ark.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Encounters/encounter_raiders.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Encounters/encounter_xeno_probe_tutorial.asset: Kept hand-edited asset.
 [W] ECO-W001 Assets/Game/Content/Items/item_strange_matter.asset tradeable: Quest item is marked tradeable; the flag is ignored and it cannot be traded.
 [W] ECO-W001 Assets/Game/Content/Items/item_strange_matter_container_empty.asset tradeable: Quest item is marked tradeable; the flag is ignored and it cannot be traded.
 [W] ECO-W001 Assets/Game/Content/Items/item_strange_matter_container_full.asset tradeable: Quest item is marked tradeable; the flag is ignored and it cannot be traded.
-[W] PWR-W002 Assets/Game/Content/Ships/ship_bastion.asset payload: ship_bastion: recharge infinite s > 10 s (rule R2)
-[W] PWR-W002 Assets/Game/Content/Ships/ship_freighter.asset payload: ship_freighter: recharge infinite s > 10 s (rule R2)
-[W] PWR-W001 Assets/Game/Content/Ships/ship_icarus.asset payload: ship_icarus: sustain 0 s < 30 s (rule R1)
-[W] PWR-W002 Assets/Game/Content/Ships/ship_icarus.asset payload: ship_icarus: recharge infinite s > 10 s (rule R2)
-[W] PWR-W001 Assets/Game/Content/Ships/ship_red_elite.asset payload: ship_red_elite: sustain 0 s < 30 s (rule R1)
-[W] PWR-W002 Assets/Game/Content/Ships/ship_red_elite.asset payload: ship_red_elite: recharge infinite s > 10 s (rule R2)
-[W] PWR-W001 Assets/Game/Content/Ships/ship_striker.asset payload: ship_striker: sustain 0 s < 30 s (rule R1)
-[W] PWR-W002 Assets/Game/Content/Ships/ship_striker.asset payload: ship_striker: recharge infinite s > 10 s (rule R2)
+[W] QST-V012 Assets/Game/Content/Narrative/Beats/beat_gate_active.asset salience: Unconditional beat shares trigger, location and salience with 'beat_choose_start_ship'; verify intended weights.
+[W] QST-V012 Assets/Game/Content/Narrative/Beats/beat_quarantine_lab.asset salience: Unconditional beat shares trigger, location and salience with 'beat_miner_lament'; verify intended weights.
+[W] QST-V012 Assets/Game/Content/Narrative/Beats/beat_shady_man.asset salience: Unconditional beat shares trigger, location and salience with 'beat_choose_start_ship'; verify intended weights.
+[W] QST-V012 Assets/Game/Content/Narrative/Beats/beat_shady_man.asset salience: Unconditional beat shares trigger, location and salience with 'beat_gate_active'; verify intended weights.
+[W] QST-V012 Assets/Game/Content/Narrative/Beats/beat_silent_city.asset salience: Unconditional beat shares trigger, location and salience with 'beat_overgrown_forge'; verify intended weights.
+[W] QST-V012 Assets/Game/Content/Narrative/Beats/beat_survey_system.asset salience: Unconditional beat shares trigger, location and salience with 'beat_choose_start_ship'; verify intended weights.
+[W] QST-V012 Assets/Game/Content/Narrative/Beats/beat_survey_system.asset salience: Unconditional beat shares trigger, location and salience with 'beat_gate_active'; verify intended weights.
+[W] QST-V012 Assets/Game/Content/Narrative/Beats/beat_survey_system.asset salience: Unconditional beat shares trigger, location and salience with 'beat_shady_man'; verify intended weights.
+[W] NAR-W010 Assets/Game/Content/Narrative/Dialog/Legacy/mystery_signal.yarn line:16: NAR-W010: complete_quest bypasses objectives; use only for converted legacy content.
+[W] DLG-W021 Assets/Game/Content/Narrative/Dialog/Legacy/quarantine_lab.yarn line:28: Every option has an availability or outer visibility condition.
+[W] DLG-W021 Assets/Game/Content/Narrative/Dialog/Legacy/sensor_ghost.yarn line:20: Every option has an availability or outer visibility condition.
+[W] DLG-W021 Assets/Game/Content/Narrative/Dialog/Legacy/silent_city.yarn line:39: Every option has an availability or outer visibility condition.
+[W] NAR-W010 Assets/Game/Content/Narrative/Dialog/Legacy/station_hub.yarn line:102: NAR-W010: complete_quest bypasses objectives; use only for converted legacy content.
+[W] DLG-W020 Assets/Game/Content/Narrative/Dialog/Legacy/station_hub.yarn line:65: Option group has 10 options.
+[W] DLG-W021 Assets/Game/Content/Narrative/Dialog/Legacy/time_echo.yarn line:26: Every option has an availability or outer visibility condition.
+[W] NAR-W010 Assets/Game/Content/Narrative/Dialog/_Generated/dialog_command_table.asset entries[8].Effect[0] (1:1): complete_quest bypasses objectives; use only for converted legacy content.
+[W] NAR-W010 Assets/Game/Content/Narrative/Dialog/_Generated/dialog_command_table.asset entries[9].Effect[0] (1:1): complete_quest bypasses objectives; use only for converted legacy content.
+[W] NAR-V002 Assets/Game/Content/Narrative/Facts/facts_legacy.asset facts[0]: Fact 'debug_menus' is written but never read.
+[W] NAR-V002 Assets/Game/Content/Narrative/Facts/facts_legacy.asset facts[5]: Fact 'intro_awake' is written but never read.
+[W] NAR-V002 Assets/Game/Content/Narrative/Facts/facts_legacy.asset facts[6]: Fact 'intro_ship_chosen' is written but never read.
+[W] QST-V005 Assets/Game/Content/Narrative/Quests/quest_territory_recon.asset: Quest is never named by start_quest.
+[I] MIG-I011 Assets/Game/Content/Ships/ship_bastion.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Ships/ship_butterfly.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Ships/ship_crescent.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Ships/ship_fighter.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Ships/ship_freighter.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Ships/ship_frigate.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Ships/ship_icarus.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Ships/ship_red_elite.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Ships/ship_shuttle.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Ships/ship_striker.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_medium.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_small.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_small_fixed.asset: Kept hand-edited asset.
+[I] MIG-I091 Import/Legacy npc_enemy_1: Dropped legacy detection/patrol radius, movement speed, chase, automatic contact, faction-doctrine toggle/range and pool tuning; ENC-010 authors explicit fleets.
+[I] ENC-I002 Import/Legacy npc_enemy_1.Formations[0]: First-formation groups [ship_shuttle x1] replaced by ENC-010's authored final ships/counts; source retained in the hand-off.
+[I] ENC-I001 Import/Legacy npc_enemy_1.Formations[1]: Dropped additional formation: ship_fighter.
+[I] ENC-I001 Import/Legacy npc_enemy_1.Formations[2]: Dropped additional formation: ship_shuttle, ship_frigate.
+[I] MIG-I091 Import/Legacy npc_probe_tutorial: Dropped legacy detection/patrol radius, movement speed, chase, automatic contact, faction-doctrine toggle/range and pool tuning; ENC-010 authors explicit fleets.
+[I] MIG-I091 Import/Legacy npc_story_hunter: Dropped legacy detection/patrol radius, movement speed, chase, automatic contact, faction-doctrine toggle/range and pool tuning; ENC-010 authors explicit fleets.
+[I] ENC-I002 Import/Legacy npc_story_hunter.Formations[0]: First-formation groups [ship_shuttle x1] replaced by ENC-010's authored final ships/counts; source retained in the hand-off.
+[I] ENC-I001 Import/Legacy npc_story_hunter.Formations[1]: Dropped additional formation: ship_fighter.
+[I] ENC-I001 Import/Legacy npc_story_hunter.Formations[2]: Dropped additional formation: ship_shuttle, ship_frigate.
+[I] MIG-I091 Import/Legacy npc_traveling_merchant: Dropped legacy detection/patrol radius, movement speed, chase, automatic contact, faction-doctrine toggle/range and pool tuning; ENC-010 authors explicit fleets.
+[I] ENC-I002 Import/Legacy npc_traveling_merchant.Formations[0]: First-formation groups [] replaced by ENC-010's authored final ships/counts; source retained in the hand-off.
 [I] MIG-I091 content/Abilities/ability_shield_toggle.json: Dropped: legacy Description (placeholder).
 [I] MIG-I091 content/Factions/faction_4.json id: Faction intentionally not converted: faction_4 (duplicate of faction_tlaxcala).
+[I] MIG-I091 content/Galaxies/ExtractStablePoint.json systemId: ExtractStablePoint is a roguelike leftover with no systemId; skipped.
+[I] MIG-I091 content/Galaxies/Solar System Entities/Planets/planet_barren.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker, planetType, preferredOrbitDistance, minRadius, maxRadius, hasAtmosphere, atmosphereColor, hasRings, planetTextures; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/Planets/planet_barren.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/Planets/planet_gasgiant.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker, planetType, preferredOrbitDistance, minRadius, maxRadius, hasAtmosphere, atmosphereColor, hasRings, planetTextures; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/Planets/planet_gasgiant.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/Planets/planet_ice.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker, planetType, preferredOrbitDistance, minRadius, maxRadius, hasAtmosphere, atmosphereColor, hasRings, planetTextures; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/Planets/planet_ice.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/Planets/planet_icegiant.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker, planetType, preferredOrbitDistance, minRadius, maxRadius, hasAtmosphere, atmosphereColor, hasRings, planetTextures; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/Planets/planet_icegiant.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/Planets/planet_rocky.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker, planetType, preferredOrbitDistance, minRadius, maxRadius, hasAtmosphere, atmosphereColor, hasRings, planetTextures; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/Planets/planet_rocky.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/Planets/planet_terrestrial.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker, planetType, preferredOrbitDistance, minRadius, maxRadius, hasAtmosphere, atmosphereColor, hasRings, planetTextures; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/Planets/planet_terrestrial.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/Planets/planet_water.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker, planetType, preferredOrbitDistance, minRadius, maxRadius, hasAtmosphere, atmosphereColor, hasRings, planetTextures; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/Planets/planet_water.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/Stars/star_entity.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker, minTemperature, maxTemperature, minScale, maxScale, minLuminosity, maxLuminosity, minPlanetOrbitRadius, maxSystemRadius, galaxyMapPrefab; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/Stars/star_entity.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/Stars/star_entity_blackhole.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker, minTemperature, maxTemperature, minScale, maxScale, minLuminosity, maxLuminosity, minPlanetOrbitRadius, maxSystemRadius, galaxyMapPrefab; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/Stars/star_entity_blackhole.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/abandoned_station.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/abandoned_station.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/ark_station_1.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/ark_station_1.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/asteroidbelt_1.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/asteroidbelt_1.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/debris_field_entity.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/debris_field_entity.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/derelict_ship_entity.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/derelict_ship_entity.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/exitgate_active.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/exitgate_active.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/exitgate_dormant.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/exitgate_dormant.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/hyperlane_default.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker, routeStrength, duration. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/hyperlane_default.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/moon_1.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/moon_1.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/resrource_cache_entity.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/resrource_cache_entity.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
+[I] MIG-I091 content/Galaxies/Solar System Entities/station_1.json: Dropped legacy prefab, mapIcon, ownerFactionIdOverride, encounterPool, encounterIdOverride, autoInteractOnContact, orbitType, orbitSpeedMultiplier, showOrbitLine, spawnType, minOrbitRadius, maxOrbitRadius, canHaveSatellites, spawnRequirement, spawnBlocker; cleared placeholder description. SPEC-30 re-authors world fields; encounters use the typed hand-off.
+[I] MIG-I090 content/Galaxies/Solar System Entities/station_1.json color: Legacy map colour has no BodyTemplateDefinition field; SPEC-30 owns BodyVisualDefinition.mapColorToken.
 [I] MIG-I091 content/Items/Blocks/Cores/block_core_cross.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Cores/block_core_small.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, PassiveDrainRate.
 [I] MIG-I091 content/Items/Blocks/Hulls/block_hull.json: Dropped: RotationLocked, SocketTypeProvided, SocketsProvidedCount, Modifiers, EnergyRegenRate, MaxEnergyStorage, PassiveDrainRate.
@@ -332,15 +472,15 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [W] MIG-W070 content/Loot Tables/BaseLootTable.json lootItems[18].item: Ship loot entry dropped: SPEC-50 LootEntry holds only ItemDefinition: ship_fighter
 [W] MIG-W071 content/Loot Tables/CreativeModeLootTable.json lootItems[11].item: Null legacy loot item dropped; no replacement item is inferred.
 [I] MIG-I091 content/Loot Tables/StartShipsTable.json ships: Ship table intentionally not converted: StartShipsTable (5 legacy ship references). SPEC-01/50 own new-game loadouts.
-0 errors, 83 warnings, 116 infos
+0 errors, 96 warnings, 219 infos
 ```
 
 ## Summary
 
-0 errors, 83 warnings, 116 infos
+0 errors, 96 warnings, 219 infos
 
 Created: 0
 Updated: 0
-Unchanged: 82
-SkippedHandEdited: 23
+Unchanged: 55
+SkippedHandEdited: 74
 Failed: 0

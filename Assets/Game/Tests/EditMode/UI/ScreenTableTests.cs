@@ -10,6 +10,13 @@ namespace Game.Tests.EditMode.UI
     [Category("UI")]
     public sealed class ScreenTableTests
     {
+        // Views require their commands (HUD-002/018); the flag table never invokes them, so a null object stands in.
+        public class NullCommands : System.Reflection.DispatchProxy
+        {
+            protected override object Invoke(System.Reflection.MethodInfo method, object[] args)
+                => method.ReturnType.IsValueType && method.ReturnType != typeof(void) ? System.Activator.CreateInstance(method.ReturnType) : null;
+        }
+        static T Null<T>() where T : class => System.Reflection.DispatchProxy.Create<T, NullCommands>();
         readonly struct Expected
         {
             public readonly string Key;
@@ -29,20 +36,20 @@ namespace Game.Tests.EditMode.UI
         {
             var screens = new UIScreen[]
             {
-                new MainMenuView(new MainMenuViewModel(), null),
-                new SaveSlotsView(new SaveSlotsViewModel(), null),
-                new SettingsView(new SettingsViewModel(), null),
-                new PauseView(new PauseViewModel(), null),
+                new MainMenuView(new MainMenuViewModel(), Null<IMainMenuCommands>()),
+                new SaveSlotsView(new SaveSlotsViewModel(), Null<ISaveSlotsCommands>()),
+                new SettingsView(new SettingsViewModel(), Null<ISettingsCommands>()),
+                new PauseView(new PauseViewModel(), Null<IPauseCommands>()),
                 new FlightHudView(new HudViewModel(), null, null),
-                new InventoryView(new InventoryViewModel(), null),
-                new MerchantView(new MerchantViewModel(), null),
-                new DialogView(new DialogViewModel(), null),
-                new ShipLogView(new ShipLogViewModel(), null),
-                new GalaxyMapView(new GalaxyMapViewModel(), null),
-                new StarSystemMapView(new StarSystemMapViewModel(), null),
-                new FleetView(new FleetViewModel(), null),
-                new ShipEditorView(new ShipEditorViewModel(), null),
-                new DockView(new DockViewModel(), null),
+                new InventoryView(new InventoryViewModel(), Null<IInventoryCommands>()),
+                new MerchantView(new MerchantViewModel(), Null<IMerchantCommands>()),
+                new DialogView(new DialogViewModel(), Null<IDialogCommands>()),
+                new ShipLogView(new ShipLogViewModel(), Null<IShipLogCommands>()),
+                new GalaxyMapView(new GalaxyMapViewModel(), Null<IGalaxyMapCommands>()),
+                new StarSystemMapView(new StarSystemMapViewModel(), Null<IStarSystemMapCommands>()),
+                new FleetView(new FleetViewModel(), Null<IFleetCommands>()),
+                new ShipEditorView(new ShipEditorViewModel(), Null<IShipEditorCommands>()),
+                new DockView(new DockViewModel(), Null<IDockCommands>()),
                 new LoadingView(new LoadingViewModel())
             };
             var expected = new[]

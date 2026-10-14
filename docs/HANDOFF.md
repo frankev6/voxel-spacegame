@@ -29,15 +29,27 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 - **Ship lines follow Starsector's depth without copying it.** Approved 2D silhouettes come before any 3D build. Form follows function. Use asymmetry with a reason, and refit variants. Human hulls are blocky, alien hulls smooth. Factions come from the existing lore in `Import/Legacy/content/Factions` and the DESIGN-GUIDE faction section.
 - **Look-book ships are concepts, not final designs**, and the 2D ship lines are not approved yet.
 
-## 2. Where things stand (2026-10-14)
+## 2. Where things stand (2026-10-14, QA-001)
 
-- **Paused for independent QA at Frank's request. Do not resume implementation, workers or scheduling until Frank explicitly resumes.** Latest three deliveries consolidated in 9805787b; all three recorded worker threads idle, with clean worktrees retained. Native goal and heartbeat remain paused.
-- Playground has fourteen playable areas and direct `playground run=<id>` shortcuts. New power/shield/boost controls, actual salvage transfer and isolated opening campaign supplement all eleven previous trials. `playground reset` returns from the practice campaign or its Blueprint Lab. World Play auto-enters; visible Console/entry controls remain. Start with [QA-PLAYGROUND](QA-PLAYGROUND.md) for exact feature commands and limitations.
-- Compile clean/zero C# warnings; expanded existing playground acceptance passes in 2.50s. Live power/inventory screenshots inspected, real salvage transfers 33 items including 20 scrap; quiet playground reset left running. Evidence Logs/playtest/qa-handoff and newest LEDGER entry. No full-suite or final milestone/owner acceptance claimed.
-- Earlier opening chapter4bb3198b and load safety9d6c7c96/080e2390 accepted. Historical delivered scenarios ECO-010, ENC-011, DLG-011, TRV-011/014 and NAR-018 still have pending lead acceptance; M4 sources remain preserved/deferred. Do not accidentally mark those accepted from the playground pass. Owner QualitySettings and two untracked content metas remain intentionally uncommitted.
+- **QA-001 on `task/QA-001-owner-findings`** (local only, 25+ commits on top of DEV-021). Frank's plan, verbatim: "1. you fix everything mentioned in your findings and review 2. QA 3. I review 4. we start working on m4 when everything is solid here". Steps 1–2 are done; **step 3, Frank's review, is next**. See the newest LEDGER log entry.
+- Done:
+  - owner findings: flight feel (ADR-0114), salvage, radar, editor, modal order, shake, hits, shield, inventory, sounds and the boundary snap;
+  - review findings: coreless blueprints, the paused-opening test root cause, the external-pause blocker, stale TODOs and docs repair;
+  - the NOCTURNE visual pass: plating, machinery, team colours, post, UI skin and the menu backdrop;
+  - Xeno grown hulls (ADR-0115: HUSK, BROODMOTHER, playground pad 15, campaign xeno encounters).
+- Workers stay paused. Owner QualitySettings and two untracked content metas remain intentionally uncommitted.
 
 ## 3. Next
 
-Independent reviewer entry point: [scope and access only](QA-REVIEWER-PROMPT.md). Frank corrected the earlier directed checklist: first-pass reviewers must defer previous findings, acceptance summaries and decision-audit material until recording their own findings. Historical QA/decision documents are retained for a separately authorized reconciliation, not first-pass briefing. Implementation remains paused.
+An independent reviewer still starts at [scope and access only](QA-REVIEWER-PROMPT.md).
 
-Wait for the independent reviewer/QA and Frank's instructions. Address reported M1–M3 functional issues and verify those systems with Frank before further M4 depth/scale/polish. No automatic worker recycling during this pause. Existing startup warnings and open task/gate details remain in LEDGER; advisory performance targets do not justify new benchmark or soak loops.
+1. Frank reviews QA-001 in the playground: pads 01–15, with 15 for the aliens; the main menu; a new campaign.
+2. Waiting on Frank:
+   - download approval for the OFL fonts (AST-004);
+   - art approval of the procedural organ meshes, the magnet block and the UI sounds (`docs/design/asset-manifest.csv` status `review`);
+   - Q125 flight balance by play.
+3. Not done yet:
+   - navigation strobes, which need per-grid hull anchors;
+   - GRAVID, LAMPREY and CRINOID (the builder supports them);
+   - per-faction team colours in the pooled path (currently material-wide ARK).
+4. Merge to local `main` after Frank's review. M4 starts only when Frank says the M1–M3 base is solid.

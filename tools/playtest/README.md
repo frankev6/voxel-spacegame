@@ -51,7 +51,17 @@ This is a procedural test fixture using existing blocks, not a finished station 
 | `get --type T [--path a.b] [--depth 1]` | Reflection read of a static or singleton member (debugging only; scenarios must not use it) |
 | `invoke --type T --method M [--args a,b] [--path ""]` | Reflection call with primitive args (debugging only) |
 | `find --type T [--max 30]` | Scene objects with a component type, with positions |
-| `perf` | Main-thread ms (15-frame average), draws, triangles, GC alloc per frame, memory, entity totals |
+| `perf` | Main-thread ms (15-frame average), draws, triangles, GC alloc per frame, memory, entity totals. `--voxel` adds grid/brick/chunk counters, `--combat` projectile/beam/FX/audio counters, `--markers` the 15 slowest game markers of the last frame, `--json` one JSON object |
+| `dialog` | Active dialog beat, node, page and numbered options as JSON (play mode) |
+| `dialog_choose` | Choose a displayed dialog option by its UI number: `--n` 1..9 (play mode) |
+| `spawn` | Request ships through the runtime registry (play mode): `--blueprint`, `--x`/`--z` local or `--dx`/`--dz` player-relative metres, `--yaw` or `--face player`, `--faction`, `--team`, `--count`, `--spacing`, `--ai` |
+| `grid` | Inspect a voxel grid (play mode): `--id`, `--player` or `--nearest`; `--bricks` adds up to 200 brick rows |
+| `inv` | Cargo, overflow, capacity and credits (play mode); `--max` limits occupied slots shown; `--item`/`--count`/`--credits` as in `give` |
+| `give` | Grant an item or credits (play mode): `--item` with `--count`, or `--credits` |
+| `facts` | Facts (play mode): `--get` name, `--set` name=value, `--list` prefix, `--eval` condition; no arguments lists all |
+| `aim` | Project a target to the agent mouse (play mode): `--target` nearest_hostile, nearest, id:<PersistentId> or point with `--x`/`--z`; `--track` seconds |
+| `fire` | Hold a real Flight fire action (play mode): `--group` 1..3, `--seconds` |
+| `playground` | Start the interactive playground, entering Play if needed |
 | `gh_dmg_hash` | One JSON line with the canonical ComputeWorldHash (hex string) and current tick; Play mode required |
 | `gh_dmg_stats` | One JSON line with published prior-tick DamageTickStats and cumulative GridDamageStats, sorted by persistent id; Play mode required |
 | `gh_dmg_hit --x <metres> --y <metres> --z <metres> --amount <positive> --radius <nonnegative>` | Queue one kinetic DamageEvent on the first ready damageable persistent grid whose root-local half-open bounds contain this local-frame world point; overlaps choose the lowest persistent id. Radius 0 targets one cell, positive radius uses the resolver's blast path. JSON reports queued, not applied |

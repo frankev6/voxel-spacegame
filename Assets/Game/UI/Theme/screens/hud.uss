@@ -29,6 +29,6 @@
 .hud-slot-row > .slot { width: 64px; height: 60px; margin: var(--space-1); }
 .hud-slot-number { position: absolute; left: 0; right: 0; top: 18px; -unity-text-align: middle-center; color: var(--color-text); font-size: var(--text-m); }
 /* QA-001: the weapon count sat on top of the group number; give it its own row along the bottom edge. */
-#hud-weapon-row .slot__count { left: 0; right: 0; bottom: 2px; -unity-text-align: middle-center; background-color: rgba(0, 0, 0, 0); color: var(--color-text-muted); }
+#hud-weapon-row .slot__count { left: 0; right: 0; bottom: 2px; -unity-text-align: middle-center; background-color: var(--color-transparent); color: var(--color-text-muted); }
 
 .flight-hud .is-warning { color: var(--color-warning); }

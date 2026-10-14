@@ -38,10 +38,10 @@ namespace Game.Tests.EditMode.Simulation.Weapons
         {
             var catalog = Catalog();
             var definitions = catalog.All<WeaponDefinition>();
-            Assert.That(definitions.Count, Is.EqualTo(9));
+            Assert.That(definitions.Count, Is.EqualTo(10));
             using (var blob = WeaponContent.BuildBlob(catalog))
             {
-                Assert.That(blob.Value.Weapons.Length, Is.EqualTo(10));
+                Assert.That(blob.Value.Weapons.Length, Is.EqualTo(11));
                 for (int i = 0; i < definitions.Count; i++)
                 {
                     var d = definitions[i];
@@ -256,6 +256,8 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             switch (id)
             {
                 case "wpn_plasma_turret_small": break;
+                case "wpn_xeno_acid":   // ADR-0115 spitter
+                    w.Damage = 45; w.TriggerIntervalTicks = 40; w.SpreadRad = math.radians(3f); w.ProjectileSpeed = 340; w.Range = 510; w.SustainedDps = 67.5f; break;
                 case "wpn_plasma_turret_small_fixed":
                     w.IsFixed = 1; w.TriggerIntervalTicks = 24; w.SpreadRad = math.radians(.5f); w.TraverseHalfArcRad = w.TraverseRateRad = 0; w.SustainedDps = 150; break;
                 case "wpn_plasma_turret_medium":

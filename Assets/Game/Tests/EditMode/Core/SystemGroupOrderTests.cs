@@ -88,7 +88,9 @@ namespace Game.Tests.EditMode.Core
         public void PrePhysics_ShipCommandGroupFirst()
         {
             var o = Order<GameplayPrePhysicsGroup>(FullWorld());
-            Assert.AreEqual(typeof(ShipCommandGroup), o[0], string.Join(", ", o.Select(t => t.Name)));
+            // SPEC-33 §5 decision 3: FactionStandingSystem writes relations before ShipCommandGroup reads them; nothing else precedes it.
+            int first = o[0].Name == "FactionStandingSystem" ? 1 : 0;
+            Assert.AreEqual(typeof(ShipCommandGroup), o[first], string.Join(", ", o.Select(t => t.Name)));
         }
 
         [Test]

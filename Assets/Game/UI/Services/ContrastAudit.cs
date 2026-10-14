@@ -9,7 +9,7 @@ namespace Game.UI.Services
     /// <summary>SPEC-60 §5.12. WCAG sRGB luminance over the resolved, composited UI background.</summary>
     public static class ContrastAudit
     {
-        static readonly CustomStyleProperty<Color> BackgroundToken = new CustomStyleProperty<Color>("--color-bg");
+        [Game.Core.StaticStateOk("immutable style property key")] static readonly CustomStyleProperty<Color> BackgroundToken = new CustomStyleProperty<Color>("--color-bg");
         public static void Run(VisualElement root, List<ContrastIssue> results)
         {
             if (root == null) throw new ArgumentNullException(nameof(root));

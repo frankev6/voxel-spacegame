@@ -20,10 +20,10 @@ namespace Game.Tests.EditMode.Data
         }
 
         [Test]
-        public void BlockShape_HasBindingValues()   // ADR-0018
+        public void BlockShape_HasBindingValues()   // ADR-0018, ADR-0115 (Xeno appended)
         {
             Assert.AreEqual(typeof(byte), Enum.GetUnderlyingType(typeof(BlockShape)));
-            CollectionAssert.AreEqual(new[] { BlockShape.Cube, BlockShape.Wedge, BlockShape.HipCorner, BlockShape.LongSlopeHigh, BlockShape.LongSlopeLow },
+            CollectionAssert.AreEqual(new[] { BlockShape.Cube, BlockShape.Wedge, BlockShape.HipCorner, BlockShape.LongSlopeHigh, BlockShape.LongSlopeLow, BlockShape.Xeno },
                                       Enum.GetValues(typeof(BlockShape)).Cast<BlockShape>().ToArray());
             for (byte i = 0; i < 5; i++) Assert.AreEqual(i, (byte)Enum.GetValues(typeof(BlockShape)).Cast<BlockShape>().ElementAt(i));
         }

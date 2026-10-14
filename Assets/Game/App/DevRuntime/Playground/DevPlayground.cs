@@ -90,7 +90,7 @@ namespace Game.App.DevRuntime.Playground
             launcher.style.flexDirection = FlexDirection.Row;
             var console = new Button(() => host.Console.Toggle()) { name = "btn-open-console", text = "Console" };
             console.AddToClassList("btn"); console.AddToClassList("btn--secondary"); launcher.Add(console);
-            var enter = new Button(() => { var result = Enter(); if (result.Kind == DevResultKind.Failed) Debug.LogWarning(result.Text); })
+            var enter = new Button(() => { var result = Enter(); if (result.Kind == DevResultKind.Failed) Game.Core.GameLog.Warn(Game.Core.LogCategories.Dev, result.Text); })
                 { name = "btn-enter-playground", text = "Enter playground" };
             enter.AddToClassList("btn"); enter.AddToClassList("btn--secondary"); launcher.Add(enter); enterButton = enter;
             console.AddToClassList("btn--small"); enter.AddToClassList("btn--small");
@@ -170,7 +170,7 @@ namespace Game.App.DevRuntime.Playground
                 var result = awaiter.GetResult();
                 bool ready = result == FlowResult.Ok && ctx.TryGetService<IGameFlow>(out var game)
                     && game.CurrentScene == GameScene.BlueprintLab && !game.IsTransitioning
-                    && UnityEngine.Object.FindAnyObjectByType<ShipEditorHost>() != null;
+                    && ctx.TryGetService<Game.UI.Services.UIRoot>(out var ui) && ui.Navigator.IsOpen<Game.UI.Views.ShipEditorView>();
                 Status = ready ? DevOperationStatus.Succeeded : DevOperationStatus.Failed;
                 Message = ready ? "Blueprint Lab ready. Save a blueprint, then Exit and run playground reset to return."
                     : "Blueprint Lab unavailable: " + result;

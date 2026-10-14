@@ -50,9 +50,10 @@ namespace Game.Tests.EditMode.App
             string spec = File.ReadAllText(Path.Combine(UnityEngine.Application.dataPath, "../docs/specs/SPEC-70-devtools-harness.md"));
             int start = spec.IndexOf("scenario r28_pause_load", StringComparison.Ordinal), end = spec.IndexOf("```", start, StringComparison.Ordinal);
             var commands = new List<IDevCommand>(DevCommandRegistry.CreateDefault().Commands);
-            foreach (string name in new[] { "teleport", "save" }) commands.Add(new FutureCommand(name));
+            // Stand-ins only for what the registry still lacks; teleport and save have since become real commands.
+            foreach (string name in new[] { "teleport", "save" }) if (!commands.Exists(c => c.Name == name)) commands.Add(new FutureCommand(name));
             var probes = Probes();
-            foreach (string name in new[] { "player.upos.x", "player.upos.z", "star_system" }) probes.Register(new FutureProbe(name));
+            foreach (string name in new[] { "player.upos.x", "player.upos.z", "star_system" }) if (!probes.TryGet(name, out _)) probes.Register(new FutureProbe(name));
             var script = ScenarioParser.Parse(spec.Substring(start, end - start), new DevCommandRegistry(commands.ToArray()), probes);
             Assert.AreEqual("r28_pause_load", script.Name); Assert.AreEqual("draft", script.Status);
             CollectionAssert.Contains(script.Tags, "R28"); Assert.AreEqual(180, script.TimeoutSeconds);

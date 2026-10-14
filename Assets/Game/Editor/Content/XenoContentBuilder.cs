@@ -45,7 +45,7 @@ namespace Game.Editor.Content
             });
             var acid = Weapon("wpn_plasma_turret_small", "wpn_xeno_acid", "Acid spitter", so =>
             {
-                Set(so, "damage", 45f); Set(so, "fireRate", 1.6f); Set(so, "projectileSpeed", 340f); Set(so, "spreadDeg", 3f);
+                Set(so, "damage", 45f); Set(so, "impulsePerHit", 90f); Set(so, "fireRate", 1.5f); Set(so, "projectileSpeed", 340f); Set(so, "spreadDeg", 3f);
                 so.FindProperty("tracerColor").colorValue = new Color(.72f, 1f, .18f, 1);
             });
             Block("weapon_plasma_turret_small", "weapon_xeno_spitter", "Xeno spitter", "An eye that spits corrosive acid.", OrganLayer, eye, so =>

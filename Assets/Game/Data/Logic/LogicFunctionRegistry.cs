@@ -6,7 +6,7 @@ namespace Game.Data.Logic
     /// <summary>Canonical SPEC-40 vocabulary. Lookup copies mutable public metadata so callers cannot alter the table.</summary>
     public sealed class LogicFunctionRegistry
     {
-        static readonly Dictionary<string, LogicFunctionInfo> entries = Build();
+        [Game.Core.StaticStateOk("built once from constant function table, never written")] static readonly Dictionary<string, LogicFunctionInfo> entries = Build();
 
         public bool TryGet(string name, out LogicFunctionInfo info)
         {

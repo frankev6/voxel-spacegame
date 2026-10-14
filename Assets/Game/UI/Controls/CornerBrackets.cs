@@ -7,7 +7,7 @@ namespace Game.UI.Controls
     public static class CornerBrackets
     {
         public const string Class = "corner-bracket";
-        static readonly string[] Corners = { "corner-bracket--tl", "corner-bracket--tr", "corner-bracket--bl", "corner-bracket--br" };
+        [Game.Core.StaticStateOk("constant class names, never written")] static readonly string[] Corners = { "corner-bracket--tl", "corner-bracket--tr", "corner-bracket--bl", "corner-bracket--br" };
         public static void Decorate(VisualElement element)
         {
             if (element == null || element.Q(className: Class) != null) return;

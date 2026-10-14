@@ -22,8 +22,8 @@ MonoBehaviour:
   explosionRadius: 0
   explosionDamage: 0
   explodeOnExpire: 0
-  impulsePerHit: 120
-  fireRate: 1.6
+  impulsePerHit: 90
+  fireRate: 1.5
   burstCount: 1
   burstInterval: 0
   pelletsPerRound: 1

@@ -208,7 +208,7 @@ namespace Game.UI.Views
                 Tip(blocksToggle, content => content.Title = "Block catalogue (Tab)");
                 Tip(detailsToggle, content => content.Title = "Full stats, bill of materials and issues");
             }
-            static readonly string[] KeyStats = { "Mass kg", "Thrust / weight", "Power generation", "Power use", "DPS", "Cost" };
+            [Game.Core.StaticStateOk("constant stat ids, never written")] static readonly string[] KeyStats = { "Mass kg", "Thrust / weight", "Power generation", "Power use", "DPS", "Cost" };
             Button Button(VisualElement region, string name, Action action)
             { var button = region.Q<Button>(name) ?? throw new InvalidOperationException("Editor panel missing " + name); button.clicked += () => { if (active) action(); }; return button; }
             void Tip(VisualElement element, Action<TooltipContent> fill) => tips.Add((element, fill));

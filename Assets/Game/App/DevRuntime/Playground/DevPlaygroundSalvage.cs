@@ -31,7 +31,7 @@ namespace Game.App.DevRuntime.Playground
         internal const string PadId = "salvage";
         internal const string PadTitle = "12  SALVAGE / RECOVER CARGO";
         internal const string PadDetail = "F prepares one stationary fighter wreck nearby. Wait for the HUD Salvage prompt, then press F again.\nThe normal salvage owner pulls the wreck into your hold; item toasts list the haul (I opens cargo). A full hold leaves salvage on that same wreck; make room and return. Three wrecks per playground reset.";
-        static readonly ContentId BlueprintId = new("ship_fighter");
+        [Game.Core.StaticStateOk("constant content id")] static readonly ContentId BlueprintId = new("ship_fighter");
         readonly DevRuntimeHost host;
         readonly Action<string> report;
         World world;
