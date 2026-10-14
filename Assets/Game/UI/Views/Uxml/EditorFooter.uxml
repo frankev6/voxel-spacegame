@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:controls="Game.UI.Controls">
+    <Style src="../../Theme/screens/editor.uss" />
+    <ui:VisualElement name="editor-footer" class="panel editor-footer">
+        <ui:Label name="editor-hover-info" class="text-s text-ellipsis editor-footer-label" picking-mode="Ignore" />
+        <ui:Label name="editor-status" class="text-s text-ellipsis editor-footer-label" picking-mode="Ignore" />
+        <ui:VisualElement name="editor-key-hints" class="editor-key-hints">
+            <controls:KeyHint name="editor-key-primary" action-path="Editor/Primary" />
+            <controls:KeyHint name="editor-key-secondary" action-path="Editor/Secondary" />
+            <controls:KeyHint name="editor-key-cancel" action-path="Global/Back" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

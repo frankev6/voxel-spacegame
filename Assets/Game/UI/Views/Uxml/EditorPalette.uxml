@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:controls="Game.UI.Controls">
+    <Style src="../../Theme/screens/editor.uss" />
+    <ui:VisualElement name="editor-palette" class="panel editor-pane">
+        <ui:Label text="BLOCKS" class="text-display text-s editor-heading" picking-mode="Ignore" />
+        <controls:TabBar name="editor-palette-tabs" />
+        <ui:TextField name="editor-palette-search" class="text-field" label="Search" />
+        <ui:ScrollView name="editor-palette-grid" class="editor-palette-grid editor-scroll" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
+        <ui:VisualElement name="editor-palette-grid-pages" class="editor-pager" />
+        <ui:VisualElement name="editor-colors" class="editor-colors" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -50,6 +50,18 @@ MonoBehaviour:
   - Key: dialog
     Uxml: {fileID: 9197481963319205126, guid: 698b98cba57647febcaf2a3da3f383c0, type: 3}
     Prewarm: 0
+  - Key: editor-toolbar-fragment
+    Uxml: {fileID: 9197481963319205126, guid: 2ac60bb5753d430d9a537501c210c923, type: 3}
+    Prewarm: 0
+  - Key: editor-palette-fragment
+    Uxml: {fileID: 9197481963319205126, guid: fd7d1e1315a54387888e326d7268ae2f, type: 3}
+    Prewarm: 0
+  - Key: editor-stats-fragment
+    Uxml: {fileID: 9197481963319205126, guid: 235a0336810f486696d14c494b316dde, type: 3}
+    Prewarm: 0
+  - Key: editor-footer-fragment
+    Uxml: {fileID: 9197481963319205126, guid: 6ac73af85c9e460d851980a7e29ecafa, type: 3}
+    Prewarm: 0
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32

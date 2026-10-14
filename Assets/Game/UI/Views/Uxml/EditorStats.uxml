@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:controls="Game.UI.Controls">
+    <Style src="../../Theme/screens/editor.uss" />
+    <ui:VisualElement name="editor-details" class="panel editor-pane">
+        <ui:Label text="SHIP STATS" class="text-display text-s editor-heading" picking-mode="Ignore" />
+        <ui:ScrollView name="editor-stats" class="editor-scroll editor-stats" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
+        <ui:VisualElement name="editor-stats-pages" class="editor-pager" />
+        <ui:Label text="BILL OF MATERIALS" class="text-display text-s editor-heading" picking-mode="Ignore" />
+        <ui:ScrollView name="editor-bom" class="editor-scroll editor-bom" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
+        <ui:VisualElement name="editor-bom-pages" class="editor-pager" />
+        <ui:Label name="editor-bom-summary" class="text-s text-ellipsis editor-summary" picking-mode="Ignore" />
+        <ui:Label name="editor-issues-summary" class="text-s editor-heading" picking-mode="Ignore" />
+        <ui:ScrollView name="editor-issues" class="editor-scroll editor-issues" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
+        <ui:VisualElement name="editor-issues-pages" class="editor-pager" />
+        <ui:VisualElement class="editor-actions">
+            <ui:Button name="editor-remove-floating" text="Remove floating" class="btn btn--small" />
+            <ui:Button name="editor-revert" text="Revert" class="btn btn--small btn--danger" />
+            <ui:Button name="editor-commit" text="Commit" class="btn btn--small btn--primary" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

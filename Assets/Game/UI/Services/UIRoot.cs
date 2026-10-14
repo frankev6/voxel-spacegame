@@ -93,6 +93,13 @@ namespace Game.UI.Services
             Navigator.Register(screen);
         }
         internal bool ShouldPrewarm(string key) => assets.TryGetValue(key, out var asset) && asset.Prewarm;
+        /// <summary>Clone an authored fragment registered in UIConfig; the caller owns its hierarchy/lifecycle.</summary>
+        internal VisualElement CloneFragment(string key)
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(UIRoot));
+            if (!assets.TryGetValue(key, out var asset)) throw new InvalidOperationException("UIConfig missing fragment '" + key + "'");
+            return asset.Uxml.Instantiate();
+        }
         internal void BuildScreen(UIScreen screen)
         {
             if (screen.IsBuilt) return;
