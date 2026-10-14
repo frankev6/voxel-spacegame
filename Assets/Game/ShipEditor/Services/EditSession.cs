@@ -15,6 +15,8 @@ namespace Game.ShipEditor.Services
         readonly ShipEditorEntryArgs entry;
         readonly DirtyBrickSet dirty = new();
         readonly PlacementIndexes placement;
+        readonly ConnectivityTracker connectivity;
+        internal ConnectivityTracker Connectivity => connectivity;
         readonly ValidationScratch validation;
         readonly PlacementValidator validator;
         readonly ProfilerMarker applyMarker = new("EditSession.Apply");
@@ -37,6 +39,7 @@ namespace Game.ShipEditor.Services
             Options = args.Options;
             try
             {
+                connectivity = new ConnectivityTracker(context.Config.SplitCheckBudgetCells);
                 placement = new PlacementIndexes(); validation = new ValidationScratch();
                 validator = new PlacementValidator(context, placement, validation);
                 Original = args.Source.Clone(); Draft = args.Source.Clone();
@@ -47,7 +50,7 @@ namespace Game.ShipEditor.Services
                 DraftCounts = new BlockCountTables(context.Items.Count); DraftCounts.CopyFrom(OriginalCounts);
                 placement.Initialize(Draft, context); draftStats.CopyFrom(originalStats);
                 if (!Options.Creative && entry.Inventory != null) entry.Inventory.Changed += InvalidateBom;
-                // TODO(EDT-008): initialize connectivity; share the opening enumeration.
+                connectivity.Initialize(Draft);
                 Notify(EditChangeKind.Opened, 0);
             }
             catch { Dispose(); throw; }
@@ -58,8 +61,7 @@ namespace Game.ShipEditor.Services
         public EditHistory History { get; private set; }
         public bool IsDirty => History.IsDirty;
         public int Revision { get; private set; }
-        // TODO(EDT-008): own and complete asynchronous connectivity work.
-        public bool ConnectivityPending => false;
+        public bool ConnectivityPending => connectivity.ConnectivityPending;
         public event Action<EditChange> Changed;
         // Borrowed only during the callback, before History.Push can merge/dispose this command.
         // Presentation observers must contain their failures so they cannot interrupt history bookkeeping.
@@ -140,7 +142,19 @@ namespace Game.ShipEditor.Services
                     dirty.AddCell(op.Record.Origin + cell);
             DraftCounts.Apply(command, forward, context); placement.Apply(command, forward, context); InvalidateBom();
             draftStats.Apply(command, forward); draftStatsDirty = true;
-            // TODO(EDT-008): update connectivity in operation order.
+            using (var cells = new NativeList<int3>(Allocator.Temp))
+            {
+                for (int n = 0; n < command.Ops.Length; n++)
+                {
+                    var op = command.Ops[forward ? n : command.Ops.Length - 1 - n];
+                    var record = op.Record; cells.Clear();
+                    var footprint = context.Footprints.Get(record.Block, record.Orient).Cells;
+                    for (int i = 0; i < footprint.Length; i++)
+                        if (record.DamageOffset < 0 || command.Damage[record.DamageOffset + i] > 0) cells.Add(record.Origin + footprint[i]);
+                    if ((op.Kind == DiffOpKind.Add) == forward) connectivity.OnAdd(cells.AsArray());
+                    else connectivity.OnRemove(cells.AsArray());
+                }
+            }
             DraftApplied?.Invoke(command, forward);
         }
         void MarkAllBricks(VoxelStructure source)
@@ -183,17 +197,17 @@ namespace Game.ShipEditor.Services
             Draft.Dispose(); Draft = replacement; History.Clear();
             DraftCounts.CopyFrom(OriginalCounts); placement.Initialize(Draft, context); InvalidateBom();
             draftStats.CopyFrom(originalStats); draftStatsDirty = true;
-            // TODO(EDT-008): reset connectivity from Original alongside the clone.
+            connectivity.Initialize(Draft);
             Notify(EditChangeKind.Discarded, 0);
         }
         public void CompleteRelabel()
-        { CheckAlive(); /* TODO(EDT-008): complete the owned relabel job before reads or writes. */ }
+        { CheckAlive(); connectivity.CompleteRelabel(); }
         public ulong ComputeDraftHash() { CheckAlive(); return new DraftReader(Draft, context).ComputeDraftHash(); }
         void CheckAlive() { if (disposed) throw new ObjectDisposedException(nameof(EditSession)); }
         public void Dispose()
         {
             if (disposed) return;
-            // TODO(EDT-008): join/release connectivity jobs before disposing source storage.
+            connectivity?.Dispose();
             if (!Options.Creative && entry.Inventory != null) entry.Inventory.Changed -= InvalidateBom;
             OriginalCounts?.Dispose(); DraftCounts?.Dispose(); placement?.Dispose(); validation?.Dispose();
             History?.Dispose(); Draft?.Dispose(); Original?.Dispose(); dirty.Clear();

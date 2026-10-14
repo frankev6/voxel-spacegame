@@ -98,10 +98,9 @@ namespace Game.Tests.EditMode.ShipEditor
                     Assert.AreEqual(row.Value, field.GetValue(defaults), "constructor: " + row.Field);
                     Assert.AreEqual(row.Value, field.GetValue(asset), "asset: " + row.Field);
                 }
-                foreach (var config in new[] { defaults, asset })
-                {
-                    Assert.IsNull(config.BrickMaterial); Assert.IsNull(config.BrickXRayMaterial); Assert.IsNull(config.OverlayMaterial);
-                }
+                Assert.IsNull(defaults.BrickMaterial); Assert.IsNull(defaults.BrickXRayMaterial); Assert.IsNull(defaults.OverlayMaterial);
+                // EDT-018 now supplies real draft materials; only the EDT-019 overlay remains unassigned.
+                Assert.IsNotNull(asset.BrickMaterial); Assert.IsNotNull(asset.BrickXRayMaterial); Assert.IsNull(asset.OverlayMaterial);
                 // Provisional asset colours come from the approved theme; no new art or C# style constants (Q25).
                 string tokens = File.ReadAllText(Path.Combine(Application.dataPath, "Game/UI/Theme/tokens.uss"));
                 (string Field, string Token)[] colours =

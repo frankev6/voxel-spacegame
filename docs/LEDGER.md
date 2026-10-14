@@ -1042,6 +1042,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 440 | SPEC-50 Q28: directory/capacity ownership | Resolved: authored-first real body lookup and fleet/reset-driven cargo capacity; three transferred cases pass. | Tech lead |
 | 441 | SPEC-33 Q20: queued relation reads, FACN and sandbox reset | Resolved: per-operation clamp matches fixed step; session adapter clears relations and unknown records for sandbox/new sessions; validate entire FACN before mutation. | Tech lead |
 | 442 | SPEC-33 Q21: territory concrete prerequisites | Resolved: ENC-002/003/004 and GAL-008 replace broad SPEC-30 dependency; all completed before dispatch. | Tech lead |
+| 443 | SPEC-51 Q50: damaged-footprint connectivity | Resolved: surviving-cell union, removal by previous roots, retain final split root, second-buffer job and exact undo/redo masks; overlay host owns refresh cadence. | Tech lead |
 
 ## Measurements
 
