@@ -1118,6 +1118,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-14 — TRV-009 source integrated; EDT-017 dispatched — astra (gpt-6)
+
+- Presentation delivered2836b721 with travel cover ownership, 0.5-second CSS fade/forced opaque Transit and locked/open gate emission tied to real SYS-011 children. Four required cases authored; lead source review found no immediate defect. Integrated locally on task/TRV-009-travel-integration; still uncompiled/unaccepted pending graphics-enabled focused checks. spec-required:4 authored,extra:0.
+- Claimed EDT-017ccfac595 on main and recycled the same presentation worker to clipboard/cut/paste/stamp. SPEC-51 Q42 reserved. EDT-015/021 workers remain active. No Unity active. Lead next travel acceptance and renderer/connectivity prerequisites; full roadmap goal remains active.
+
 ### 2026-10-14 — EDT-016 selection and transforms accepted — astra (gpt-6)
 
 - dd5467a7 connects click/Ctrl-click, bounded box selection, select-all, movement, Y rotation, X mirror and deletion to the controller. Native selection captures all exact records at an origin in canonical order, and rebuilds origins only after a successful all-or-nothing transform. Replace handles selected matching types or exact mirror copies, preserving colours and skipping incompatible footprints. SPEC-51 Q41/global413 records lattice rounding; four rotations and two chiral mirrors restore exact damaged draft hashes.

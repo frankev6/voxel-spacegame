@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-14)
 
+- **Travel presentation delivered:** TRV-0092836b721 integrated on task/TRV-009-travel-integration, awaiting focused graphics acceptance. Same presentation worker recycled to EDT-017 clipboard/stamp; combat EDT-015 and economy EDT-021 remain active. No Unity active.
+
 - **Selection/transforms accepted:** EDT-016dd5467a7 clean compile and14 focused checks pass (six required, seven basic tools, core limit). Damage survives movement/rotation/chiral mirroring; blocked moves are atomic. Clipboard/stamp EDT-017 now ready. Existing workers continue EDT-015, EDT-021 and TRV-009; lead next renderer/connectivity and delivery integration. No Unity active.
 
 - **Selection transactions authored:** EDT-0165c3d54af adds atomic damage-preserving move/rotate/mirror/delete and replacement transactions, with canonical same-origin lookup. Select gestures/controller actions and six required cases remain next; uncompiled/unaccepted. EDT-015, EDT-021 and TRV-009 workers all active; travel source nearly ready. No Unity active.

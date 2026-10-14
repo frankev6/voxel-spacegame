@@ -9,7 +9,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-015 | Line/box/fill implementation dispatched after controller acceptance; finish review320 first | EDT-017 after EDT-016 |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-021 | Editor panels dispatched from completed concrete UI owners | DLG-012 after DLG-007 |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | TRV-009 | Travel cover/emission dispatched after SYS-011 acceptance | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | EDT-017 | Clipboard/stamp dispatched after TRV-0092836b721 delivery; lead integrating travel | EDT-020 after acceptance |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Travel delivered / worker recycled:** TRV-0092836b721 integrated on task/TRV-009-travel-integration, validation pending. Presentation worker now EDT-017 (claimccfac595; SPEC-51 Q42 reserved). Combat EDT-015 and economy EDT-021 active. Lead next focused travel graphics acceptance, then renderer/connectivity. No Unity active.
 
 - **Selection/transforms accepted:** EDT-016dd5467a7 clean compile and14 focused checks pass (six required, seven basic tools, core limit). Damage survives movement/rotation/chiral mirroring; blocked moves are atomic. Clipboard/stamp EDT-017 now ready. Existing workers continue EDT-015, EDT-021 and TRV-009; lead next renderer/connectivity and delivery integration. No Unity active.
 
