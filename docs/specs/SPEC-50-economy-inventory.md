@@ -882,7 +882,7 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
 ### ECO-008 — App glue and wiring
 - **Milestone:** M3
 - **Tier:** standard — lookups and calls specified in §5.8
-- **Depends on:** `ECO-011`, `ECO-004`, `ECO-005`, `ECO-007`, `SPEC-33`, `SPEC-01`
+- **Depends on:** `ECO-011`, `ECO-004`, `ECO-005`, `ECO-007`, `ENC-004`, `ENC-005`, `ENC-007`, `FND-005`, `FND-009`, `HUD-012` (ADR-0104)
 - **Do:**
   1. Implement `MerchantLauncher` (§5.8); use the directory/capacity owners implemented in ECO-011.
   2. Wire `LogicWorldAdapter.OpenMerchant` and remove it from `UnwiredMembers`.

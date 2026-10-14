@@ -9,3 +9,5 @@ ECO-007 consumes accepted cargo (ECO-003), hulk state/creation (DMG-012), mass (
 ## Consequences
 
 Implement salvage now. ECO-008 still owns production service registration and merchant wiring. ECO-007 owns the specified boot singleton factory and placement; no assembly-reference change is needed. Performance measurements remain opt-in and advisory.
+
+ECO-008 likewise consumes accepted ECO-011/004/005/007, faction/territory/director ENC-004/005/007, boot/session FND-005/009 and actual merchant presenter HUD-012. These replace whole SPEC-33/01 dependencies, preserving both specified wiring checks and the complete production registration scope.

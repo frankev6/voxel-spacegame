@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 22 | 16 | 0 | 0 | 144 | 0 | 182 | 5 |
+| M3 | 21 | 17 | 0 | 0 | 144 | 0 | 182 | 5 |
 | M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -418,7 +418,7 @@
 | ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | f4cae431 | Merchant pricing, stock/restock and trading; eight required checks pass; sale rounding repaired |
 | ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | d3c8b0bc | INVT v1 and boot registration: slots/overflow, wallet, merchant state and missing identities. Q368; four functional cases and eight affected merchant cases pass, production save passes. Advisory capture fixture compiled only. |
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, DMG-012, SYS-008, PHY-013, VOX-014 | yes | done | astra (gpt-6) | 2026-10-14 | a7a433f2 | Hulk mark/config/yields/partial ledger/despawn; five required functional cases pass, two advisory fixtures deferred. Production service registration ECO-008. |
-| ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-011, ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
+| ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-011, ECO-004, ECO-005, ECO-007, ENC-004, ENC-005, ENC-007, FND-005, FND-009, HUD-012 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same combat worker; real merchant launcher, OpenMerchant and production salvage wiring. Concrete owners ADR-0104. |
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c0f0c244 | 17 assets plus existing Scrap; real catalog/readback zero errors; two required checks pass; three existing quest-item warnings retained |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
 | ECO-011 | Merchant directory and fleet cargo capacity | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, GAL-008, FND-010 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | a8f76a68 | Real authored-first merchant directory and fleet-driven cargo capacity registered; three transferred required cases pass. |
