@@ -3,6 +3,7 @@ using Unity.Collections;
 using Unity.Profiling;
 using Unity.Mathematics;
 using Game.ShipEditor.Data;
+using Game.ShipEditor.Validation;
 using Game.Voxel.Model;
 
 namespace Game.ShipEditor.Services
@@ -13,6 +14,7 @@ namespace Game.ShipEditor.Services
         readonly EditorContext context;
         readonly ShipEditorEntryArgs entry;
         readonly DirtyBrickSet dirty = new();
+        readonly PlacementIndexes placement;
         readonly ProfilerMarker applyMarker = new("EditSession.Apply");
         readonly ProfilerMarker undoMarker = new("EditSession.Undo");
         readonly ProfilerMarker validateMarker = new("EditSession.Validate");
@@ -29,13 +31,15 @@ namespace Game.ShipEditor.Services
             Options = args.Options;
             try
             {
+                placement = new PlacementIndexes();
                 Original = args.Source.Clone(); Draft = args.Source.Clone();
                 History = new EditHistory(context.Config.HistoryBudgetBytes, context.Config.HistoryMaxEntries);
                 MarkAllBricks(Draft);
                 OriginalCounts = new BlockCountTables(context.Items.Count); OriginalCounts.Initialize(Original, context);
                 DraftCounts = new BlockCountTables(context.Items.Count); DraftCounts.CopyFrom(OriginalCounts);
+                placement.Initialize(Draft, context);
                 if (!Options.Creative && entry.Inventory != null) entry.Inventory.Changed += InvalidateBom;
-                // TODO(EDT-007/008/010): initialize placement/connectivity/stat indexes; share the opening enumeration.
+                // TODO(EDT-008/010): initialize connectivity/stat indexes; share the opening enumeration.
                 Notify(EditChangeKind.Opened, 0);
             }
             catch { Dispose(); throw; }
@@ -122,8 +126,8 @@ namespace Game.ShipEditor.Services
             foreach (var op in command.Ops)
                 foreach (var cell in context.Footprints.Get(op.Record.Block, op.Record.Orient).Cells)
                     dirty.AddCell(op.Record.Origin + cell);
-            DraftCounts.Apply(command, forward, context); InvalidateBom();
-            // TODO(EDT-007/008/010): update clearance, reserved-missing, connectivity and stats indexes in operation order.
+            DraftCounts.Apply(command, forward, context); placement.Apply(command, forward, context); InvalidateBom();
+            // TODO(EDT-008/010): update connectivity and stats indexes in operation order.
         }
         void MarkAllBricks(VoxelStructure source)
         {
@@ -154,8 +158,8 @@ namespace Game.ShipEditor.Services
             CheckAlive(); CompleteRelabel(); var replacement = Original.Clone();
             MarkAllBricks(Draft); MarkAllBricks(replacement);
             Draft.Dispose(); Draft = replacement; History.Clear();
-            DraftCounts.CopyFrom(OriginalCounts); InvalidateBom();
-            // TODO(EDT-007/008/010): reset placement/connectivity/stat indexes from Original alongside the clone.
+            DraftCounts.CopyFrom(OriginalCounts); placement.Initialize(Draft, context); InvalidateBom();
+            // TODO(EDT-008/010): reset connectivity/stat indexes from Original alongside the clone.
             Notify(EditChangeKind.Discarded, 0);
         }
         public void CompleteRelabel()
@@ -167,7 +171,7 @@ namespace Game.ShipEditor.Services
             if (disposed) return;
             // TODO(EDT-008): join/release connectivity jobs before disposing source storage.
             if (!Options.Creative && entry.Inventory != null) entry.Inventory.Changed -= InvalidateBom;
-            OriginalCounts?.Dispose(); DraftCounts?.Dispose();
+            OriginalCounts?.Dispose(); DraftCounts?.Dispose(); placement?.Dispose();
             History?.Dispose(); Draft?.Dispose(); Original?.Dispose(); dirty.Clear();
             Changed = null; disposed = true;
         }
