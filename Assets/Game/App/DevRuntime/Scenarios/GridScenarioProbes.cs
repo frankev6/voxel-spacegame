@@ -49,7 +49,7 @@ namespace Game.App.DevRuntime.Scenarios
         {
             if (value.Kind == ScenarioValueKind.String && ulong.TryParse(value.String, NumberStyles.None, CultureInfo.InvariantCulture, out ulong id)) return id;
             double number = RequireNumber(value);
-            if (!double.IsFinite(number) || number < 0 || number >= 18446744073709551616d || Math.Truncate(number) != number) throw new InvalidOperationException("grid ID must be an unsigned integer");
+            if (!double.IsFinite(number) || number < 0 || number >= 18446744073709551616d || System.Math.Truncate(number) != number) throw new InvalidOperationException("grid ID must be an unsigned integer");
             return (ulong)number;
         }
         internal static void Register(ScenarioProbeRegistry registry)
