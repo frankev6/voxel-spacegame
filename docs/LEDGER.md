@@ -16,8 +16,8 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 1 | 0 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 6 |
-| M3 | 95 | 8 | 0 | 0 | 77 | 0 | 180 | 7 |
-| M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
+| M3 | 94 | 7 | 0 | 0 | 79 | 0 | 180 | 7 |
+| M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -380,13 +380,13 @@
 | NAR-008 | FACT save participant | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | 6a0c3c47 | Atomic versioned FACT payload; five functional checks pass, Capture5k measurement authored/unrun |
 | NAR-009 | Import-time compile pipeline | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, NAR-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 36adef2b | Deferred import compilation/menu/drawers; clean compile and three focused checks pass |
 | NAR-010 | NarrativeService tick and dependency index | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-007 | yes | done | astra (gpt-6) | 2026-10-13 | c2e2084d | Ordered runtime/index; 5 direct-tick cases pass, 2 advisory fixtures compiled but not run; Q363. Boot wiring remains NAR-011 |
-| NAR-011 | LogicContext and LogicWorldAdapter in Game.App | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-005, NAR-010, FND-001, ECO-001, QST-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
-| NAR-012 | World-event bridge | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-011, SYS-001, ENC-001 | no | todo |  |  |  |  |
+| NAR-011 | LogicContext and LogicWorldAdapter in Game.App | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-005, NAR-010, FND-001, ECO-001, QST-001 | yes | done | astra (gpt-6) | 2026-10-13 | ce82fed9 | Live boot/context/FACT/tick routing; 4 required checks + production boot/T2 green; Q364/365; INVT/QST runtime remain owning tasks |
+| NAR-012 | World-event bridge | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-011, SYS-001, ENC-001 | yes | todo |  |  |  |  |
 | NAR-013 | Narrative validator framework and fact rules | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-009 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | e81dc6d | Scratch validator, V001–008 and CLI; reviewed repair, 7 focused checks pass; downstream owner stubs remain explicit diagnostics |
 | NAR-014 | Legacy converter: reading, mapping tables and logic translation | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, MIG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 2be62596 | Strict five-file loader and mapped logic; 5 focused checks pass; emission/assets remain NAR-015/016 |
 | NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 5d85a419 | 34 Yarn/34 beats/facts and manifest generated;145 files byte-stable,35 definitions registered; six required checks accepted, clean compile; Q325 |
 | NAR-016 | Legacy converter: quests, triggers, templates and flag assets | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-015 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 1b0cb271 | Four required converter cases pass9669; real generation42967 terminal0, 225 files raw-byte identical across rerun;9 total quests incl Whisper,3 contracts,143 source strings; Q337/343. |
-| NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Existing combat worker; read-only debugger Facts/Trace/Quests, one required formatting case |
+| NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 6276ae7b | Facts/Trace/read-only debugger; formatter passes; Quests shows unavailable until QST-006 |
 | NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | no | todo |  |  |  |  |
 | NAR-020 | LogicWatcher | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-004 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | b4344a9 | Sorted/deduplicated dependency watcher; 4 focused tests pass |
 | DLG-001 | Public contract types | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | NAR-001, UI-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 67e0ffd | Dialog contracts, one required test; full suites green |
@@ -497,7 +497,7 @@
 | TRV-014 | Escort transfer hooks | [SPEC-32](specs/SPEC-32-travel.md) | M4 | standard | TRV-012, AI-001, FND-001 | no | todo |  |  |  |  |
 | ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011, AI-001 | no | todo |  |  |  |  |
 | ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011 | no | todo |  |  |  |  |
-| NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | no | todo |  |  |  |  |
+| NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | todo |  |  |  |  |
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | no | todo |  |  |  |  |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | no | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
@@ -1069,6 +1069,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — NAR-011 and NAR-017 done: live narrative foundation — astra (gpt-6)
+
+- NAR-011ce82fed9 completes live context/bootstrap/session/FACT/frame wiring and owner routes, including ADR-0077 persistent removal and ADR-0078 UI gates. ef32547c supplies the missing default narrative config. NAR-0176276ae7b integrates worker debugger Facts/Trace/Quests-read surface; Quests correctly reports QST-006 unavailable. No claim that quest/beat execution or INVT saving exists yet.
+- Compile43027 clean, zero CS warnings; focused EditMode52808 passes10 (0.4966072s bodies). Production retry PlayMode17661 terminal0 passes6, 1.1114212s bodies: five affected T2 cases (existing hulk case extended with removal/flush suppression/source release) plus actual newgame/save. Evidence Logs/playtest/narrative-live. Spec-required: NAR-0114, NAR-0171; extra:0 new cases. No broad/perf run. Lifecycle review225 found no concrete defects.
+- No Unity active. Prior compile/import repairs and aborted missing-config run remain documented; no stale XML accepted. Next recycle workers from newly ready ledger rows and implement missing inventory save before treating economy persistence as available. DEV-009 delivery37d1d116/sandbox fix still pending. Previous acceptance/config repair and this verified live integration are progress.
 
 ### 2026-10-13 — NAR-011 focused acceptance green; production config repaired — astra (gpt-6)
 

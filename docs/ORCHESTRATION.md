@@ -6,10 +6,10 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-017 | Integrated6276ae7b; focused validation pending | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-017 | Accepted6276ae7b; ready for next assignment | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-009 | Delivered37d1d116; sandbox diagnosis267 delivered; integration wait | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-011 lifecycle review | Final boot/session/bridge review dispatched | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | Final lifecycle review225 complete | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Live narrative foundation accepted:** NAR-011ce82fed9 and NAR-0176276ae7b done. Compile clean; EditMode10 pass; production PlayMode17661 passes6 including newgame/save and hulk-removal retirement. Evidence Logs/playtest/narrative-live. No Unity active. Next recycle newly ready standard work and implement INVT (ECO-006); DEV-009 integration/sandbox fix pending. QST-006 execution remains unfinished. Previous repair and this acceptance are progress.
 
 - **Narrative focused checks green; boot repair pending:** compile43027 clean; EditMode52808 passes10 (0.4966s test bodies). NAR-017 integrated6276ae7b. Production PlayMode3205 failed missing narrative config; deliberately stopped terminal143/no XML rather than wait for timeout. ef32547c registers defaults; retry production/T2 next. No Unity active; both tasks unaccepted. Presentation final lifecycle review dispatched; other workers integration/dependency waits. DEV-009 sandbox integration remains next.
 

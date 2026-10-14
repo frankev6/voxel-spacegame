@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Live narrative foundation accepted:** NAR-011ce82fed9 and NAR-0176276ae7b done. Compile clean; EditMode10 pass; production PlayMode17661 passes6 including newgame/save and hulk-removal retirement. Evidence Logs/playtest/narrative-live. No Unity active. Next recycle newly ready standard work and implement INVT (ECO-006); DEV-009 integration/sandbox fix pending. QST-006 execution remains unfinished. Previous repair and this acceptance are progress.
+
 - **Narrative focused checks green; boot repair pending:** compile43027 clean; EditMode52808 passes10 (0.4966s test bodies). NAR-017 integrated6276ae7b. Production PlayMode3205 failed missing narrative config; deliberately stopped terminal143/no XML rather than wait for timeout. ef32547c registers defaults; retry production/T2 next. No Unity active; both tasks unaccepted. Presentation final lifecycle review dispatched; other workers integration/dependency waits. DEV-009 sandbox integration remains next.
 
 - **Narrative frame bridge authored:** NAR-011915ffb2f adds ordered per-frame tick/UI/combat gates and two direct acceptance cases, uncompiled/unaccepted. Three of4 required cases authored; next owner-routing/removal case then one focused batch. No Unity active. NAR-017 delivered e83a0606 awaiting review/integration; DEV-00937d1d116 pending integration/sandbox fix; presentation review224 complete. Workers have delivery/dependency waits. Previous boot wiring and this bridge work are progress.
