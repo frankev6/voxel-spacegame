@@ -27,6 +27,7 @@ using Unity.Profiling;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.Profiling;
 
 namespace Game.Tests.EditMode.DevTools
 {
