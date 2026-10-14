@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **World-event bridge started:** NAR-012 claimed7ed74de3; 93d9f3f7 adds ADR-0080 pre-bound counter effects with explicit WorldEvent provenance and variable amounts. Uncompiled/unaccepted; next full event routing/composition and five required cases before a focused batch. No Unity active. DLG-003 worker263 active; QST-004 worker280 active; presentation dispatched DEV-010 aim/fire from the same claim. Previous turn completed parser acceptance and this turn adds a runtime contract prerequisite.
+
 - **Dialog parser accepted:** DLG-002179603ec done; seven required cases including 38 real converted files pass, plus one targeted separator-fix retry. Compile clean; no Unity active. DLG-003 claimed c513df81 and dispatched to existing combat worker. QST-004 worker279 active; presentation review234 complete with its sole finding fixed. Evidence Logs/playtest/dialog-parser.
 
 - **Dialog structural parser authored:** DLG-002daea28bc adds node/header, choice-group, if/elseif/else, flow/set/command and text/tag/speaker parsing with diagnostics; Q373/SPEC-41 Q12 records representation/indentation defaults. Uncompiled/unaccepted. Next seven required cases plus actual converted-file readback before one focused batch. No Unity active. Clue worker active277; combat converted-input audit active260; presentation assigned parser review. Previous syntax work and this implementation are progress.

@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
-| M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 8 |
-| M3 | 89 | 9 | 0 | 0 | 82 | 0 | 180 | 9 |
+| M2 | 10 | 1 | 0 | 0 | 81 | 0 | 92 | 7 |
+| M3 | 88 | 10 | 0 | 0 | 82 | 0 | 180 | 8 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -1079,6 +1079,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — NAR-012 counter contract authored — astra (gpt-6)
+
+- 93d9f3f7 adds ADR-0080/Q375 code-owned AddFactEffect counters with explicit amount/source and slot cache semantics. Authored effects keep their existing behavior. No acceptance claim; event routing, composition and required cases remain.
+- spec-required: 5 planned, extra: 0. No Unity run this turn; batch after implementation. DEV-010 claimed7ed74de3 and dispatched to existing presentation worker; DLG-003 and QST-004 remain active. Previous parser acceptance and current contract source changes are progress.
 
 ### 2026-10-13 — DLG-002 done: converted dialog parser — astra (gpt-6)
 
