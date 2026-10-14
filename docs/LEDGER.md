@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 69 | 11 | 0 | 0 | 100 | 0 | 180 | 9 |
+| M3 | 68 | 11 | 0 | 0 | 101 | 0 | 180 | 9 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -426,11 +426,11 @@
 | EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-13 | 2d3181ff | Atomic draft adapters, native canonical hash/enumeration and exact damage restore; four required cases pass, including negative HP/shared origins. |
 | EDT-004 | Edit history and diff commands | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001 | yes | done | astra (gpt-6) | 2026-10-13 | 9d447ea5 | Owned compact diffs, exact offset merge and saved-state tracking; six direct checks pass; spec-required: 6, extra: 0 |
 | EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | yes | done | astra (gpt-6) | 2026-10-13 | 5520be15 | Draft clone/apply/undo/redo/discard and dirty bricks; six direct cases pass, final compile clean; spec-required: 6, extra: 0 |
-| EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead: incremental counts and lazy inventory BOM; five required direct cases |
+| EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | yes | done | astra (gpt-6) | 2026-10-13 | d0a167dc | Incremental intact/damaged and orientation counts, lazy inventory-aware BOM; five required plus six session regressions pass; spec-required: 5, extra: 0 |
 | EDT-007 | Placement validator | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | todo |  |  |  |  |
 | EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | todo |  |  |  |  |
 | EDT-009 | Full validation, issues and remove-floating | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-006, EDT-007, EDT-008 | no | todo |  |  |  |  |
-| EDT-010 | Stats accumulator and diff | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-006, PWR-001 | no | todo |  |  |  |  |
+| EDT-010 | Stats accumulator and diff | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-006, PWR-001 | yes | todo |  |  |  |  |
 | EDT-011 | Commit pipeline and R15 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-009, EDT-010, SPEC-50 | no | todo |  |  |  |  |
 | EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Combat worker recycled to picker; travel delivery pending compatible batch |
 | EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | no | todo |  |  |  |  |
@@ -1106,6 +1106,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — EDT-006 done: block counts and material costs — astra (gpt-6)
+
+- d0a167dc maintains intact/damaged counts and orientation pairs after successful forward/inverse writes; opening enumeration captures actual missing-cell/function damage, discard copies original counts. Lazy BOM sorts item IDs ordinally, charges intact increases, refunds intact decreases, reports damaged losses and refreshes availability after inventory changes. Inventory stays untouched until the future commit owner. Full damage-invariant validation remains EDT-009.
+- Compile43726 terminal0, zero warning CS. Focused EditMode55814 terminal0:11 passed,0 failed (0.3124746s test bodies): five required BOM cases, including1,000 fixed-seed edits/undos versus fresh enumeration, plus six existing session checks for the changed lifecycle. spec-required:5,extra:0. Evidence Logs/playtest/editor-bom. No full suite, benchmark or wall-clock combat wait.
+- EDT-012c3fbd13e delivered, pending compatible integration/validation; SYS-011 active. EDT-010 now unlocks for the economy worker; lead continues editor prerequisites. Previous gate acceptance and current implementation/acceptance are progress; roadmap goal stays active.
 
 ### 2026-10-13 — TRV-008 / TRV-010 accepted: gates and destination routing — astra (gpt-6)
 
