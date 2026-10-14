@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 14 | 15 | 0 | 0 | 153 | 0 | 182 | 5 |
+| M3 | 13 | 16 | 0 | 0 | 153 | 0 | 182 | 4 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -420,7 +420,7 @@
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, DMG-012, SYS-008, PHY-013, VOX-014 | yes | done | astra (gpt-6) | 2026-10-14 | a7a433f2 | Hulk mark/config/yields/partial ledger/despawn; five required functional cases pass, two advisory fixtures deferred. Production service registration ECO-008. |
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-011, ECO-004, ECO-005, ECO-007, ENC-004, ENC-005, ENC-007, FND-005, FND-009, HUD-012 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 00094da7 | Actual merchant launcher/faction refusal/continuation and salvage composition; two required cases plus three capacity/directory regressions pass. |
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c0f0c244 | 17 assets plus existing Scrap; real catalog/readback zero errors; two required checks pass; three existing quest-item warnings retained |
-| ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | yes | todo |  |  |  |  |
+| ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same economy worker: actual trade/save/salvage/editor integration scenarios; no Unity worker run, bounded real owners. |
 | ECO-011 | Merchant directory and fleet cargo capacity | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, GAL-008, FND-010 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | a8f76a68 | Real authored-first merchant directory and fleet-driven cargo capacity registered; three transferred required cases pass. |
 | EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 9c627fd | Editor contracts/config; 4 required tests; runtime tools remain EDT-002 onward |
 | EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-13 | 0089c35c | Context/rotated footprints/item tables accepted; five required cases pass; ADR-0081/Q380. |
