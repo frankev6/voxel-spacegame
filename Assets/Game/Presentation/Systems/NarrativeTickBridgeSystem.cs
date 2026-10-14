@@ -28,12 +28,12 @@ namespace Game.Presentation.Systems
         }
         protected override void OnUpdate()
         {
-            if (!Services.TryGet<NarrativeService>(out var narrative)) return;
+            if (!Game.Core.Services.TryGet<NarrativeService>(out var narrative)) return;
             narrative.SetWorldReady(SystemAPI.HasSingleton<GameplayActive>() && SystemAPI.HasSingleton<WorldSceneActive>());
-            bool idle = !Services.TryGet<TravelService>(out var travel) || travel.Phase == TravelPhase.Idle;
-            bool dialogFree = !Services.TryGet<DialogService>(out var dialog) || !dialog.IsActive;
+            bool idle = !Game.Core.Services.TryGet<TravelService>(out var travel) || travel.Phase == TravelPhase.Idle;
+            bool dialogFree = !Game.Core.Services.TryGet<DialogService>(out var dialog) || !dialog.IsActive;
             bool modal = false, screen = false;
-            if (Services.TryGet<UINavigator>(out var navigation))
+            if (Game.Core.Services.TryGet<UINavigator>(out var navigation))
             {
                 modal = navigation.HasOpenLayer(UILayer.Modals);
                 screen = navigation.HasOpenLayer(UILayer.Screens);
