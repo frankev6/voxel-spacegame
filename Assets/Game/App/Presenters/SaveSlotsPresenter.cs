@@ -139,7 +139,9 @@ namespace Game.App.Presenters
         {
             if (!OnScreen || !model.CanLoad || Selected == null) return;
             var slot = Selected;
-            if (flow.CurrentScene == GameScene.World)
+            // Blueprint Lab can also hold a live campaign and unsaved edits. The session
+            // owner decides whether loading replaces play; the current scene is insufficient.
+            if (flow.HasActiveSession)
                 Confirm("Load game", "Unsaved progress since the last save will be lost.", "Load", slot.Ref, () => StartLoad(slot.Ref));
             else StartLoad(slot.Ref);
         }

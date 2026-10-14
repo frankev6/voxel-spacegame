@@ -64,10 +64,12 @@ namespace Game.Tests.PlayMode.UI.Screens
         {
             readonly Saves saves;
             internal int Loads;
+            internal GameScene Scene = GameScene.World;
+            internal bool Active = true;
             internal ControlledFlow(Saves saves) { this.saves = saves; }
-            public GameScene CurrentScene => GameScene.World;
+            public GameScene CurrentScene => Scene;
             public bool IsTransitioning => false;
-            public bool HasActiveSession => true;
+            public bool HasActiveSession => Active;
             public bool IsCreativeSession => false;
             public SaveBlockReason GetSaveBlock() => SaveBlockReason.None;
             public Awaitable<FlowResult> LoadGameAsync(string id)
@@ -106,7 +108,12 @@ namespace Game.Tests.PlayMode.UI.Screens
                 Flow = new ControlledFlow(saves); Presenter = new SaveSlotsPresenter(UI, Model, saves.Service, Flow);
                 View = new SaveSlotsView(Model, Presenter); UI.Register(View); Presenter.Bind();
             }
-            internal void Show(SaveSlotsMode mode) { Presenter.Show(mode); Presenter.Select(0); }
+            internal void Show(SaveSlotsMode mode)
+            {
+                Presenter.Show(mode);
+                // Select through the real widget callback, not directly through the presenter.
+                View.Root.Q<ListView>("save-slots-list").SetSelection(0);
+            }
             internal SlotRef Selected => new SlotRef(saves.Service.ActiveProfile, new SlotId(Model.Slots[Model.SelectedIndex].SlotId));
             internal void Click(string name) => DialogTestContext.Activate(View.Root.Q<Button>(name));
             internal void Accept() => DialogTestContext.Activate(UI.Navigator.Get<ConfirmDialogView>().Root.Q<Button>("save-slots-confirm-action"));
@@ -150,9 +157,23 @@ namespace Game.Tests.PlayMode.UI.Screens
             window.Click("save-slots-load"); Assert.IsTrue(window.UI.Confirm.IsOpen); Assert.AreEqual(0, window.Flow.Loads);
             window.Accept(); Assert.AreEqual(1, window.Flow.Loads); window.Presenter.Tick();
             Assert.IsFalse(window.View.IsOpen);
+            // Loading replaces an active campaign in Blueprint Lab too; cancel must leave
+            // both the screen and the actual saved file intact before accepting the same load.
+            window.Flow.Scene = GameScene.BlueprintLab;
+            window.Show(SaveSlotsMode.Load); window.Click("save-slots-load");
+            Assert.IsTrue(window.UI.Confirm.IsOpen); Assert.AreEqual(1, window.Flow.Loads);
+            window.UI.HandleBackPressed(); Assert.IsTrue(window.View.IsOpen);
+            Assert.AreEqual(1, window.Flow.Loads); CollectionAssert.AreEqual(before, File.ReadAllBytes(data.Paths.WorldFile(slot)));
+            window.Click("save-slots-load"); window.Accept();
+            Assert.AreEqual(2, window.Flow.Loads); window.Presenter.Tick(); Assert.IsFalse(window.View.IsOpen);
+            window.Flow.Scene = GameScene.World;
             window.Show(SaveSlotsMode.Load); window.Click("save-slots-load"); window.Accept();
             window.Presenter.ResetSession(); window.Presenter.Tick();
             Assert.IsTrue(window.View.IsOpen, "An old load result must not close a view belonging to the reset session.");
+            window.UI.Navigator.Pop(window.View); window.Flow.Scene = GameScene.MainMenu; window.Flow.Active = false;
+            window.Show(SaveSlotsMode.Load); int loads = window.Flow.Loads; window.Click("save-slots-load");
+            Assert.IsFalse(window.UI.Confirm.IsOpen, "Loading from the menu has no active progress to replace.");
+            Assert.AreEqual(loads + 1, window.Flow.Loads); window.Presenter.Tick(); Assert.IsFalse(window.View.IsOpen);
         }
         [UnityTest] public IEnumerator SaveError_ShowsDangerToast()
         {
