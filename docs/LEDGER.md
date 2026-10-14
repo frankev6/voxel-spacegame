@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 63 | 11 | 0 | 0 | 106 | 0 | 180 | 7 |
+| M3 | 63 | 11 | 0 | 0 | 106 | 0 | 180 | 8 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -441,7 +441,7 @@
 | EDT-018 | Draft renderer | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, SPEC-11 | yes | todo |  |  |  |  |
 | EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | no | todo |  |  |  |  |
 | EDT-020 | Blueprint store, browser and name sanitising | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-017, PERS-001, SPEC-60 | no | todo |  |  |  |  |
-| EDT-021 | Editor UI panels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-001, SPEC-60, SPEC-61 | no | todo |  |  |  |  |
+| EDT-021 | Editor UI panels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-001, UI-003, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, HUD-001 | yes | todo |  |  |  |  |
 | EDT-022 | Editor host, input, presenter and leave prompt | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-011, EDT-015, EDT-019, EDT-021, SPEC-62, INP-001 | no | todo |  |  |  |  |
 | EDT-023 | Lab and ship-edit scene flow; R16/R19 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, SPEC-01, SPEC-31 | no | todo |  |  |  |  |
 | EDT-024 | Editor performance gates | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, TST-001 | no | todo |  |  |  |  |
@@ -983,6 +983,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 409 | SPEC-51 Q35: mirror helper damage/output ownership | Borrow context; append caller-owned outputs, remap canonical cell HP and retain functional HP; rollback unsupported groups atomically; removal captures actual draft identity. | Tech lead — resolved |
 | 410 | SPEC-51 Q36: internal tool and preview ownership | Controller owns reusable tool context/batch/preview and validation scratch; tools borrow; all edits use session transactions and stroke IDs. Preview does not mutate draft. | Tech lead — resolved |
 | 411 | SPEC-51 Q37: controller construction and state | ADR-0091 supplies borrowed session/content constructor, leave callback and read-only palette/hover state; maintain core identities incrementally and query bounded removal volumes. | Tech lead — resolved |
+| 412 | SPEC-51 Q38: editor-panel concrete prerequisites | ADR-0068 replaces whole UI/screen specifications with completed view-model/command, root, binding, input, control, tooltip and audit owners; host integration remains EDT-022. | Tech lead — resolved |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |

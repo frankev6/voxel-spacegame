@@ -931,7 +931,7 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 ### EDT-021 — Editor UI panels
 - **Milestone:** M3
 - **Tier:** standard — views on existing view models; names in §5.14
-- **Depends on:** `EDT-001`, `SPEC-60`, `SPEC-61`
+- **Depends on:** `EDT-001`, `UI-003`, `UI-005`, `UI-006`, `UI-007`, `UI-008`, `UI-009`, `UI-012`, `HUD-001`
 - **Do:** `ShipEditorPanels.Mount` building toolbar, palette (pooled 128 slots, 16 swatches), stats (12 pooled rows), BOM and issues (ListViews), footer; UXML and `Theme/screens/editor.uss`.
 - **Files:** `Assets/Game/UI/Views/ShipEditorPanels.cs`, `Assets/Game/UI/Views/Uxml/{EditorToolbar,EditorPalette,EditorStats,EditorFooter}.uxml`, `Assets/Game/UI/Theme/screens/editor.uss`
 - **Acceptance criteria:**
@@ -1057,3 +1057,5 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 | 36 | Tool/preview helper ownership and unspecified internal signatures | Controller owns one reusable ToolContext, EditBatch, validation scratch and PreviewBuffer; tools borrow them. IEditorTool exposes Tick, BuildPreview, Cancel and gesture/version state. Preview validates against session indexes without writing the draft. Place/removal mirror groups and paint remove/add pairs use the existing TryApply path and shared stroke IDs. Helpers stay internal; EDT-014 controller integration and required acceptance remain pending. | Tech lead | Resolved; ledger Q410. |
 
 | 37 | Controller construction, readable palette state and core query | ADR-0091 adds the session/content/optional-leave-callback constructor and read-only palette, slice, hover and error state. Controller owns tools/previews only; existing session owns edits. Core identities are indexed incrementally; default mirror core is lexicographic on invalid multi-core drafts. Remove-box gestures query bounded cells before removal, avoiding whole-ship passes. | Tech lead | Resolved; ledger Q411. |
+
+| 38 | Editor UI panels blocked by unrelated whole screen specifications | Under ADR-0068, EDT-021 uses completed EDT-001 view models/commands, UI-003 root, UI-005 pointer/text entry, UI-006 binding, UI-007/008 controls, UI-009 tooltips, UI-012 layout audits and HUD-001 stat-row vocabulary. Other screens and editor host wiring remain their own tasks. | Tech lead | Resolved; ledger Q412. |

@@ -24,7 +24,7 @@ namespace Game.ShipEditor.Services
         IEditorTool active;
         ToolId previousTool = ToolId.Place;
         bool disposed, previewValid;
-        (DraftPicker.HitKind, int3, int3, ushort, byte, byte, int, int, ToolId, int) previewKey;
+        (DraftPicker.HitKind, int3, int3, ushort, byte, byte, int, int, ToolId, int, bool) previewKey;
         public ShipEditorController(EditSession session, EditorContext content, Action requestLeave = null)
         {
             this.session = session ?? throw new ArgumentNullException(nameof(session));
@@ -65,7 +65,7 @@ namespace Game.ShipEditor.Services
             active.Tick(context, input);
             if (palette != (SelectedBlock, Orient, Color) || toolVersion != active.Version || revision != session.Revision) StateVersion++;
             var key = (context.Hover.Kind, context.Hover.Cell, context.Hover.Normal, SelectedBlock, Orient, Color,
-                Symmetry.Version, session.Revision, ActiveTool, active.Version);
+                Symmetry.Version, session.Revision, ActiveTool, active.Version, input.PointerAllowed);
             if (!previewValid || !previewKey.Equals(key))
             {
                 if (input.PointerAllowed) active.BuildPreview(context, Preview); else Preview.Clear();
