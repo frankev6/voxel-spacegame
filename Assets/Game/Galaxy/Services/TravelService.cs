@@ -355,7 +355,7 @@ namespace Game.Galaxy.Services
                 routeStatus = RouteState.Ok; var at = source; long fuel = 0;
                 foreach (int lane in routeLanes)
                 { at = GalaxyDef.Neighbour(g.Lanes[lane], at); routeSystems.Add(at); fuel += GetFuelCost(lane); }
-                routeFuelCost = (int)Math.Min(fuel, int.MaxValue);
+                routeFuelCost = (int)System.Math.Min(fuel, int.MaxValue);
                 if (routeLanes.Count != 0)
                 {
                     int first = routeLanes[0]; var content = galaxy.GetContent(source);
