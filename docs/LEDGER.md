@@ -1218,6 +1218,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-14 — Independent reviewer briefing and decision disclosure — astra (gpt-6)
+
+- Owner requested a handoff prompt covering all playground trials, known issues and autonomous decisions while keeping implementation paused. Added QA-REVIEWER-PROMPT.md with access/reproduction checklist, existing warnings/limitations, pending acceptance and read-only review boundaries. QA-DECISION-REGISTER.md reproduces all 500 recorded question rows without filtering and indexes 113 actual ADRs plus all 33 specs; distinguishes technical defaults, predecessor authorship, explicit owner approval and unapproved choices. No claim that undocumented judgments are exhaustively captured.
+- Documentation only; gameplay baseline remains 9805787b / consolidated main4fa507ad. No Unity tests, worker messages, scheduling or goal changes. check-docs clean. spec-required: 0, extra: 0. Implementation stays paused for QA.
+
 ### 2026-10-14 — DEV-021 consolidated playground; owner QA pause — astra (gpt-6)
 
 - Frank requested review/consolidation of all three latest workers, explicitly let worker 2 finish, expose usable gameplay through the playground/console, then stop for independent QA. Worker sources be333788 (power), 73a8bb89 (campaign), 00e379f1 (salvage) integrated as 1b6a5a47/7f074453/ff21a6bb; lead wiring and fixes 9805787b. All three exact threads confirmed idle, worktrees retained, no new assignments. Native goal and existing heartbeat remain paused; do not resume without Frank.
