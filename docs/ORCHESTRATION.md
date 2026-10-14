@@ -6,10 +6,10 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-018 | Claimed; debugger editing and explicit owner dependency assessment | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-009 | Accepted348fa4f7; bounded INVT state review | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-018 | Partial2751035d delivered; concrete dependency-cycle audit active | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-009 | Review273 complete; dependency wait | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | Final lifecycle review225 complete | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | INVT review228 complete | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -21,7 +21,7 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
-- **Inventory persistence started:** ECO-006 claimed febfb6cd on task/ECO-006-inventory-save. Next implement INVT capture/restore and composition registration, including Missing items and unknown merchant preservation, then four focused functional cases; advisory timing fixture will not gate completion. No Unity active. NAR-018 active250; economy INVT review active270; presentation remains in a genuine dependency wait. Previous DEV-009 acceptance is progress.
+- **Inventory persistence accepted:** ECO-006d3c8b0bc saves wallet, cargo/overflow and merchant stock, preserving missing/unknown identities; real boot registration is in place. Compile clean, final focused EditMode12 passes (0.2672s bodies), production newgame/save1 pass (1.0264s). No broad/perf run; evidence Logs/playtest/inventory-save. No Unity active. NAR-018 partial2751035d awaits integration/real owners; combat audits dependency cycle, other workers have genuine dependency waits. Next NAR-012 and quest/dialog prerequisites. Previous acceptance and this persistence work are progress.
 
 - **DEV-009 accepted:**348fa4f7 completes world commands and explicit sandbox NPC spawning. Compile12672 clean; spawn/grid pass7809 and teleport retry54555 passes after actual physics fixture setup. Three required cases, no broad/perf run; evidence Logs/playtest/dev009. No Unity active. Next ECO-006 inventory saving; NAR-018 active249, economy reviewing INVT state, presentation dependency wait. Previous correction and current acceptance are progress.
 

@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 8 |
-| M3 | 93 | 8 | 0 | 0 | 79 | 0 | 180 | 8 |
+| M3 | 93 | 7 | 0 | 0 | 80 | 0 | 180 | 8 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -416,7 +416,7 @@
 | ECO-003 | InventoryModel and Wallet | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-001 | yes | done | astra (gpt-6) | 2026-10-13 | 80a8bd18 | Twelve functional inventory/wallet checks pass; advisory Apply40 unmeasured (ADR-0070) |
 | ECO-004 | Loot and EconomyService | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003, ECO-005, NAR-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9d457784 | Seeded loot and stable economy lifecycle facade; clean compile, eight required checks pass |
 | ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | f4cae431 | Merchant pricing, stock/restock and trading; eight required checks pass; sale rounding repaired |
-| ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | NAR-011 composes EconomyService; INVT participant/registration remain wholly ECO-006, inventory persistence not yet supported |
+| ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | d3c8b0bc | INVT v1 and boot registration: slots/overflow, wallet, merchant state and missing identities. Q368; four functional cases and eight affected merchant cases pass, production save passes. Advisory capture fixture compiled only. |
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, SPEC-13, SPEC-31, SPEC-12 | no | todo |  |  |  |  |
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c0f0c244 | 17 assets plus existing Scrap; real catalog/readback zero errors; two required checks pass; three existing quest-item warnings retained |
@@ -1072,6 +1072,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — ECO-006 done: inventory and merchant persistence — astra (gpt-6)
+
+- 9dd76fb2/d3c8b0bc implements INVT v1 capture/restore and real boot registration: wallet, all 200 indexed cargo/overflow slots, stored merchant rows/timestamps/buybacks, missing identities and unknown merchant preservation. Capacity remains derived; corrected SPEC-05/runtime registry prose (Q368/SPEC-50 Q27). Known aliases migrate canonically; unknown merchant rows retain raw IDs. Missing placeholders cannot trade through identity-losing item-only APIs.
+- Compile77232 terminal0, zero CS warnings. Initial four required functional cases pass18874 (0.1995098s bodies); production newgame/save48318 terminal0, one pass (1.0264211s). Alias-only check2888 passes. Final corrected focused EditMode46435 terminal0: 12 passes (four required save cases plus eight existing merchant cases), 0.2672301s bodies, zero CS warnings. Evidence Logs/playtest/inventory-save. Spec-required: 5 (4 functional run, 1 advisory capture fixture compiled/excluded), extra: 0 new cases; no broad/perf run.
+- Bounded reviews273/228 found normalization/alias/Missing-transfer risks; fixed and extended existing save cases. No Unity active. NAR-018 partial2751035d delivered but not integrated/accepted; real baseline/beat owners remain unfinished. Combat worker now audits the concrete narrative/quest/dialog dependency cycle under ADR-0068; economy/presentation reviews finished and wait for ready standard work. Previous command acceptance and this persistence implementation are progress. Next NAR-012/world events and dependency resolution to unlock quest/dialog work.
 
 ### 2026-10-13 — DEV-009 done: world commands and sandbox spawning — astra (gpt-6)
 
