@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 51 | 13 | 0 | 0 | 118 | 0 | 182 | 6 |
+| M3 | 50 | 14 | 0 | 0 | 118 | 0 | 182 | 6 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -360,7 +360,7 @@
 | TRV-012 | Jump integration, R30 regression and budget | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-009, TRV-011, TST-001 | no | todo |  |  |  |  |
 | ENC-001 | Public contract types | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, TRV-001, WPN-001, AI-001, NAR-001, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 101ff7b | Encounter contracts and faction event channel; 2 required tests; runtime ENC-002 onward remains |
 | ENC-002 | Definitions, config and validators | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 40501eb0 | 31 validator checks pass; config and locked ARK generated; remaining encounter content stays ENC-010 |
-| ENC-003 | Faction singleton, index map and FactionStandingSystem | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-002, SPEC-21, SPEC-13, SPEC-23 | no | todo |  |  |  |  |
+| ENC-003 | Faction singleton, index map and FactionStandingSystem | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-002, WPN-012, DMG-015, AI-010 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Faction runtime to unblock territory and real merchant refusal; isolated lead worktree preserves live game |
 | ENC-004 | FactionService and FACN | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-003, PERS-001, FND-001 | no | todo |  |  |  |  |
 | ENC-005 | TerritoryService (authored ownership) | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-30 | no | todo |  |  |  |  |
 | ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, GAL-006, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 21d0996b | Full ordered seeded composition, clearance placement and line-abreast formation; 9 required cases pass. Director cap remains ENC-007. |
@@ -1033,6 +1033,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 431 | SPEC-61 Q31: inventory construction | Resolved: ADR-0094 accepted; actual InventoryModel/Wallet presenter rebind and pooled screen. | Tech lead |
 | 432 | SPEC-61 Q32: editor host prerequisites | Resolved: ADR-0068 concrete completed UI/panel prerequisites, production root integration stays HUD-002. | Tech lead |
 | 433 | SPEC-61 Q33: merchant lifecycle and filtered selections | Resolved: real MerchantSession owner, stable row identities, exact stock/cargo mappings; UiComposition registers and resets presenter, playground opens actual market. | Tech lead |
+| 434 | SPEC-33 Q18: faction runtime prerequisites | Resolved: ADR-0068 concrete completed runtime prerequisites; no performance/balance gate. | Tech lead |
 
 ## Measurements
 

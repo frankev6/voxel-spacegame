@@ -872,7 +872,7 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 ### ENC-003 — Faction singleton, index map and FactionStandingSystem
 - **Milestone:** M3
 - **Tier:** frontier — F1/F2: sole writer of a matrix read by weapon and AI jobs every tick; ordering through RW lookups without sync points
-- **Depends on:** `ENC-002`, `SPEC-21`, `SPEC-13`, `SPEC-23`
+- **Depends on:** `ENC-002`, `WPN-012`, `DMG-015`, `AI-010`
 - **Do:** Implement `FactionIndexMap`, `FactionContent.CreateSingletons` (§5.1) and `FactionStandingSystem` (§5.2).
 - **Files:** `Assets/Game/Simulation/Factions/{FactionIndexMap,FactionContent,FactionStandingSystem,ProvokeJob,FactionApplyJob}.cs`; `Assets/Game/Tests/EditMode/Simulation/Factions/{FactionStandingTests,FactionStandingPerfTests}.cs`
 - **Acceptance criteria:**
@@ -1121,3 +1121,5 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 
 - Audit (background only): `docs/reference/audit-2026-10/05-narrative-quests.md` (encounters unreachable, flags), `03-galaxy-world.md` (NPC fleets), `00-synthesis.md` §5.
 - SPEC-21 §4.3 (`Allegiance`, `FactionRelations`); SPEC-23 §3–§5 (AI states, anchors, `PlayerCombatStatus`); SPEC-40 §4.7 (`spawn_encounter`, `start_combat`, `relation`, `adjust_relation`), §4.13 (IDs); SPEC-72 §4.6–§4.7 (faction values, fleet hand-off).
+
+| 18 | ENC-003 faction runtime waits for whole-spec performance/balance work | Under ADR-0068 use accepted ENC-002, WPN-012, DMG-015 and AI-010 runtime/integration prerequisites. Advisory timing/balance and unrelated later follow-ups do not gate the standing writer. | Tech lead — resolved; ledger Q434 |
