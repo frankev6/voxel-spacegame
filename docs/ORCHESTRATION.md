@@ -7,9 +7,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DLG-003 | Claimed c513df81; full validator/generated files dispatched | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-017 | Deliveredf8f376aa; pending integration, bounded editor-source review active | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-011 | Claimed; counter command/probes implementation dispatched; no benchmark runs | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-019 | Claimed2919e717; required load-safety cases dispatched | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-019 | Delivered310332f7/a1fbc3cb pending integration; bounded SYS-008 dependency audit | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Final adapter review295:** two remaining EDT-003 defects: exact restoration must allow damage-produced negative non-functional HP; equal-origin hash must preserve HP-to-block identity. Lead fixes next, task remains unaccepted. DEV-017 accepted/main700c1adf. Economy recycled DEV-011 (counter plumbing only, no benchmarks); presentation audits SYS-008, combat DLG-003. No Unity active.
 
 - **State commands accepted; editor adapter review:** DEV-01740421f42 done. EDT-00313b2ef45 has four passing required cases and reviewed identity/hash/destroyed-state fixes; remains in progress for final damage-restoration review. Compile clean; focused seven-case batch passes in0.3734s test bodies (handle62393 terminal0), evidence Logs/playtest/editor-state. No Unity active. DLG-003271 active; economy294 reviews adapter; presentation audits real SYS-008/DEV-014 prerequisites. NAR-019310332f7/a1fbc3cb delivered pending integration, explicit live-owner gaps. Next finish adapter review, dispatch ready standard work and integrate dialog delivery.
 
