@@ -79,6 +79,16 @@ namespace Game.Tests.PlayMode.App
             Assert.IsTrue(EM.Exists(range.Target));
             StringAssert.Contains("credits 0", Host.Commands.Execute("inv", Host.Context).Text);
             StringAssert.Contains("Playground active", Host.Commands.Execute("playground status", Host.Context).Text);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=editor", Host.Context).Kind);
+            yield return RunCommand("playground activate");
+            Assert.AreEqual(global::Game.Core.Flow.GameScene.BlueprintLab, Game.Session.CurrentScene);
+            Assert.IsNotNull(UnityEngine.Object.FindAnyObjectByType<Game.App.EditorHost.ShipEditorHost>());
+            Assert.AreEqual(global::Game.Core.InputContext.Editor, Services.Get<global::Game.Input.InputService>().CurrentContext);
+            Services.Get<Game.App.EditorHost.EditorHostServices>().RequestLeave();
+            yield return Until(() => Game.Session.CurrentScene == global::Game.Core.Flow.GameScene.MainMenu && !Game.Session.IsTransitioning, "Lab exit returns to MainMenu", 10);
+            yield return RunCommand("playground reset");
+            Assert.IsTrue(Game.Session.IsSandbox);
+            StringAssert.Contains("Playground active", Host.Commands.Execute("playground status", Host.Context).Text);
             yield return Run(Game.Session.QuitToMainMenuAsync(false));
             yield return null;
             StringAssert.Contains("Playground inactive", Host.Commands.Execute("playground status", Host.Context).Text);

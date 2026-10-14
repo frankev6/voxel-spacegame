@@ -2,6 +2,7 @@
 using System;
 using Game.App.DevRuntime.Commands;
 using Game.App.Flow;
+using Game.App.EditorHost;
 using Game.Economy;
 using Game.Data.Services;
 using Game.Data.Definitions;
@@ -45,7 +46,8 @@ namespace Game.App.DevRuntime.Playground
             new Pad("cargo", "04  CARGO / CREDITS", -160, -180, "F grants fuel and 1000 credits through the real inventory/wallet owners. Repeat to exercise stacking/capacity.\nOpens your inventory: drag items, inspect, sort and stack cargo."),
             new Pad("settings", "05  SETTINGS", 0, -180, "F opens real settings. Change audio, display, accessibility and control settings; close to return to flight."),
             new Pad("merchant", "06  TRADE", 160, -180, "F opens ARK Station Market with real stock, prices, Buy and Sell. First visit grants 2000 test credits; trades change your actual cargo and wallet."),
-            new Pad("fleet", "07  FLEET", -320, -180, "F opens your actual fleet. Select a ship to inspect hull condition, blocks, thrust, power, shields and cargo capacity. Ship editing is still being connected.")
+            new Pad("fleet", "07  FLEET", -320, -180, "F opens your actual fleet. Select a ship to inspect hull condition, blocks, thrust, power, shields and cargo capacity. Docked fleet editing is separate from the creative Lab beacon."),
+            new Pad("editor", "08  BLUEPRINT LAB", -320, 0, "F opens the real creative Blueprint Lab. Place/remove blocks, rotate, mirror, undo/redo, inspect overlays and save a blueprint.\nThis leaves the sandbox. Exit the Lab to Main Menu, then use playground reset to return. Saved blueprints survive reset.")
         };
         InputService input;
         UIRoot ui;
@@ -122,6 +124,34 @@ namespace Game.App.DevRuntime.Playground
             {
                 session.Tick(ctx);
                 if (session.Status == DevOperationStatus.Succeeded && !owner.active) owner.Start();
+            }
+        }
+        sealed class LabEntryOperation : IDevOperation
+        {
+            readonly Awaitable<FlowResult> flow;
+            public DevOperationStatus Status { get; private set; }
+            public string Message { get; private set; } = "Opening Blueprint Lab";
+            public double TimeoutSeconds => 20;
+            internal LabEntryOperation(IGameFlow game) { flow = Open(game); }
+            static async Awaitable<FlowResult> Open(IGameFlow game)
+            {
+                // Activation is sandbox-only: discard the trial, preserve stored blueprints.
+                var result = await game.QuitToMainMenuAsync(false);
+                if (result != FlowResult.Ok) return result;
+                return await game.EnterBlueprintLabAsync(new BlueprintLabArgs(BlueprintLabMode.Creative, 0, ContentId.None));
+            }
+            public void Tick(DevContext ctx)
+            {
+                if (Status != DevOperationStatus.Running) return;
+                var awaiter = flow.GetAwaiter();
+                if (!awaiter.IsCompleted) return;
+                var result = awaiter.GetResult();
+                bool ready = result == FlowResult.Ok && ctx.TryGetService<IGameFlow>(out var game)
+                    && game.CurrentScene == GameScene.BlueprintLab && !game.IsTransitioning
+                    && UnityEngine.Object.FindAnyObjectByType<ShipEditorHost>() != null;
+                Status = ready ? DevOperationStatus.Succeeded : DevOperationStatus.Failed;
+                Message = ready ? "Blueprint Lab ready. Save a blueprint, then Exit and run playground reset to return."
+                    : "Blueprint Lab unavailable: " + result;
             }
         }
         void Start()
@@ -207,6 +237,11 @@ namespace Game.App.DevRuntime.Playground
                     }
                     else result = DevCommandResult.Fail("Merchant services unavailable");
                     break;
+                case "editor":
+                    if (host.Context.TryGetService<GameSession>(out var editorSession) && editorSession.IsSandbox)
+                        result = DevCommandResult.Pending(host.AddOperation(new LabEntryOperation(editorSession)), "Opening creative Blueprint Lab");
+                    else result = DevCommandResult.Fail("Editor trial requires the isolated playground");
+                    break;
                 case "fleet":
                     if (host.Context.TryGetService<UiComposition>(out var fleetUi))
                     { fleetUi.ShowFleet(); result = DevCommandResult.Ok("Fleet opened. Select a ship to inspect its committed design and condition."); }
@@ -261,14 +296,14 @@ namespace Game.App.DevRuntime.Playground
             {
                 nearest = next;
                 if (heading != null) heading.text = next < 0 ? "DEV PLAYGROUND  /  FLY TO A BEACON" : pads[next].Title + "  /  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
-                if (detail != null) detail.text = next < 0 ? "Flight/range/enemy: north row · Cargo/settings/trade: south row\nConsole: playground goto=range (or combat, cargo, settings, merchant, flight)" : pads[next].Detail;
+                if (detail != null) detail.text = next < 0 ? "North: Lab / flight / range / enemy · South: fleet / cargo / settings / trade\nConsole: playground goto=<id> · playground status lists all beacons" : pads[next].Detail;
             }
             if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status != DevOperationStatus.Running)
             { pending = 0; SetReport(operation.Status + ": " + operation.Message); }
             if (playerDot != null && DevEcs.TryGetUniversePosition(ctx, ctx.PlayerShipRoot, out var current))
             {
                 var offset = current - origin;
-                playerDot.style.left = (float)math.clamp((offset.x + 210) * .28, 0, 225);
+                playerDot.style.left = (float)math.clamp((offset.x + 360) * .24, 0, 240);
                 playerDot.style.top = (float)math.clamp((60 - offset.z) * .30, 0, 140);
             }
             var camera = ctx.GameplayCamera;
@@ -329,10 +364,10 @@ namespace Game.App.DevRuntime.Playground
             {
                 var dot = AddLabel(chart, (i + 1).ToString(System.Globalization.CultureInfo.InvariantCulture), "text-muted");
                 dot.style.position = Position.Absolute;
-                dot.style.left = (pads[i].Offset.x + 210) * .28f; dot.style.top = (60 - pads[i].Offset.z) * .30f;
+                dot.style.left = (pads[i].Offset.x + 360) * .24f; dot.style.top = (60 - pads[i].Offset.z) * .30f;
             }
             playerDot = AddLabel(chart, "+", "panel__title"); playerDot.style.position = Position.Absolute;
-            AddLabel(map, "1 Flight    2 Range    3 Enemy\n4 Cargo     5 Settings   6 Trade\n+ Your ship", "text-mono");
+            AddLabel(map, "1 Flight    2 Range    3 Enemy\n4 Cargo     5 Settings   6 Trade\n7 Fleet     8 Lab        + Your ship", "text-mono");
             ui.GetLayer(UILayer.Hud).Add(map);
             markers = new VisualElement { name = "dev-playground-beacons", pickingMode = PickingMode.Ignore };
             markers.style.position = Position.Absolute; markers.style.left = 0; markers.style.top = 0;

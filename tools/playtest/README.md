@@ -124,7 +124,7 @@ W/S requests forward/reverse thrust, A/D turns, Shift+A/D strafes while the turn
 
 ## Interactive development playground (DEV-021)
 
-**Open World and press Play.** Direct Editor launches of World automatically enter the isolated playground. From any running scene, click **Enter playground** at the upper right. Click **Console** to type commands; F1 is optional and the console has a Close control.
+**Open World and press Play.** Direct Editor launches of World automatically enter the isolated playground. From World or Main Menu, click **Enter playground** at the upper right. Click **Console** to type commands; F1 is optional and the console has a Close control.
 
 From a terminal at the repository root, run `tools/playtest/playground.sh`. This enters Play if necessary, starts the playground and waits for readiness. No manual console setup is needed.
 
@@ -138,8 +138,10 @@ Fly into a ring and press **F**:
 - `cargo`: grant test fuel/credits and open the inventory; drag, inspect, sort or stack cargo.
 - `settings`: open the real settings screen and change settings.
 - `merchant`: open ARK Station Market; buy/sell actual cargo and stock. First visit grants 2,000 test credits.
+- `fleet`: inspect committed ship designs and stats.
+- `editor`: leave the sandbox and open the real creative Blueprint Lab.
 
-`playground goto=<id>` teleports to any of those areas. `playground status` lists them. The old informational facts/grid/directory circles were removed; inspection commands remain available but do not count as playable activities. Campaign travel, story and editor gameplay still need integration before becoming playable areas here.
+`playground goto=<id>` teleports to any of those areas. `playground status` lists them. The old informational facts/grid/directory circles were removed; inspection commands remain available but do not count as playable activities. `editor` opens the actual creative Blueprint Lab: place/remove blocks, undo/redo, inspect overlays, and save blueprints. Exit the Lab to Main Menu, then run `playground reset` to return. Stored blueprints survive playground resets. Docked fleet editing, campaign travel and story trials remain separate integration work.
 
 CLI while playing: `tools/playtest/g.sh dev --cmd "playground reset"`; poll its returned operation with `tools/playtest/g.sh op --id N`.
 
