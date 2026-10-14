@@ -1180,6 +1180,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-14 — Three worker implementation dispatch resumed — astra (gpt-6)
+
+- Claim57dbe986 / ADR-0100 / Q468: accepted director now supplies the real owner for independent standard work. Same three recorded chats dispatched ENC-012 encounter/relation commands+probes, ENC-009 narrative/faction routes and ENC-013 formations/wedge content. No duplicates or review-only work. Worker scopes isolate director formation edits from lead ENC-008 persistence. All test requirements retained; no speculative services or owner gates.
+- Lead next ENC-008; current playground restored after focused validation. Central status in ORCHESTRATION is authoritative; historical dependency-wait entries are superseded by this dispatch.
+
 ### 2026-10-14 — ENC-007 accepted: real director lifecycle — astra (gpt-6)
 
 - a445825b completes all twelve specified fixture definitions over the actual boot/loader/travel/spawn/faction/economy owners. Functional batch nine passed/one fixture ID failure in 5.19s; corrected resource_fuel lookup and focused defeat/loot case passed. All ten functional cases accepted: schedule, deterministic visits, preconditions, spawn allegiance/clearance, ambush, exactly-once rewards with hulks retained, director-only retirement, actual travel away/back with preserved instance ID, requests queued during Transit, and caps. Evidence Logs/playtest/encounter-director/{lifecycle,loot}.xml.

@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-014 delivered | e0157b39 pending validation/composition disposal; real dependency wait | EncounterDirector, MapCanvas, BeatService/dialog or dev overlay must unblock next standard features |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | HUD-003 accepted | b9f9cb46 accepted; real dependency wait | Frontier runtime owners must unblock remaining standard features |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | FND-015 accepted | 18910e5a accepted; real frontier dependency wait | Other standard features require frontier runtime owners; no substitute implementation |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-012 | Dispatched on main57dbe986: commands, probes, CLI | Complete substantial feature; lead owns ENCT and validation |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ENC-009 | Dispatched on main57dbe986: narrative/faction routing | Complete owner routes and five spec checks |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ENC-013 | Dispatched on main57dbe986: formation placement and content | Formation-only director edits; lead owns save/pending lifecycle |
 
 ## Operating rules
 
@@ -53,3 +53,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - FND-01518910e5a accepted: root-owned defeat recovery, actual save/load/menu and all scene starts pass. Same three workers delivered/accepted; next lead must unblock EncounterDirector/dialog/map/dev-overlay owners for substantial ready standard follow-ups. No routine test queues.
 
 - ENC-007247fd49a replaces the throwing shell and is composed; three spawn/ambush/cap checks pass. Lead retains schedule/defeat/despawn/pending acceptance and two advisory fixtures before acceptance. All three exact workers confirmed idle with genuine dependencies; director completion unlocks standard follow-ups.
+
+- ENC-007 accepted a445825b (ten functional cases across batch/fix; two advisory fixtures authored, deferred). ADR-0100 and claim57dbe986 unlock same three workers on ENC-012 commands, ENC-009 narrative and ENC-013 formations. Lead next ENC-008 save persistence; serialize primary Unity checks only after compatible deliveries.
