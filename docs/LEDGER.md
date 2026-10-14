@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 76 | 11 | 0 | 0 | 93 | 0 | 180 | 6 |
+| M3 | 76 | 11 | 0 | 0 | 93 | 0 | 180 | 7 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -351,7 +351,7 @@
 | TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, GAL-008, NAR-003, NAR-004, NAR-006, NAR-020 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c716202e | Lane watchers, fuel, revision and authored compile/bind; 8 required cases pass. Execution stays TRV-006. |
 | TRV-004 | Route planner | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-005, GAL-007 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c39d6148 | Deterministic Burst route search and reusable caller-populated scratch; 5 functional cases pass; advisory perf unrun. |
 | TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-002, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 6f940373 | Analytic jump/cruise arrival; five required functional checks pass; Perf_512Bodies authored, measurement deferred |
-| TRV-006 | TravelService jump timeline | [SPEC-32](specs/SPEC-32-travel.md) | M3 | frontier | TRV-003, TRV-005, TRV-007, SPEC-31, SPEC-30, FND-001 | no | todo |  |  |  |  |
+| TRV-006 | TravelService jump timeline | [SPEC-32](specs/SPEC-32-travel.md) | M3 | frontier | TRV-003, TRV-005, TRV-007, GAL-008, GAL-009, SYS-007, SYS-009, SYS-013, FND-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead jump timeline integration |
 | TRV-007 | PlayerControlLock consumption | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 75ba22b | Movement/action lock consumption without press replay; 4 required tests. TRV-006 owns lifecycle. Full 1027 EM / 145 PM passed. |
 | TRV-008 | Gate interaction, gate info and notices | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006 | no | todo |  |  |  |  |
 | TRV-009 | Travel presentation | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006, SPEC-60, SPEC-63, SPEC-64, SPEC-31 | no | todo |  |  |  |  |
@@ -967,6 +967,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 393 | SPEC-31 Q22: PLOC lifecycle and missing chunk defaults | ADR-0085 supplies delayed validated docking notification; preserve independently restored pose during missing-GLXY regeneration; missing PLOC clears stale pose/dock and uses the existing start fallback. | Tech lead |
 | 394 | SPEC-41 Q19: presenter pooling and staged composition | Accept worker defaults: bounded32 displayed lines, pooled options without authored truncation, synthetic labels supplied by view, conditional real-service composition and explicit production runner/view ownership. | Tech lead |
 | 395 | SPEC-41 Q21: dialog harness diagnostics and missing production runner | Internal owner-read diagnostics and real presenter selections only; explicit unavailable responses without a substitute runner. Live intro acceptance remains dependent on DLG-007. | Tech lead |
+| 396 | SPEC-32 Q19: functional jump dependencies and pure validation | Use completed concrete owners under ADR-0068; CanJump only reads current conditions/economy/player state; narrative undock occurs on request acceptance. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |

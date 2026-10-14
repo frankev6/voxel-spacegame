@@ -944,7 +944,7 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 ### TRV-006 — TravelService jump timeline
 - **Milestone:** M3
 - **Tier:** frontier — F5: coordinates the loader, origin placement, pause tokens, the control lock, fuel and scene flow across frames
-- **Depends on:** `TRV-003`, `TRV-005`, `TRV-007`, `SPEC-31`, `SPEC-30`, `FND-001`
+- **Depends on:** `TRV-003`, `TRV-005`, `TRV-007`, `GAL-008`, `GAL-009`, `SYS-007`, `SYS-009`, `SYS-013`, `FND-001`
 - **Do:**
   1. Implement in `TravelService`: §5.2 (validation and acceptance), §5.3 (Spooling, commit, Transit, BeginArrival, Arriving, Abort, lock writes), `GetSaveBlock` and `OnSceneExiting`.
   2. Implement the `BodyInteracted` subscription skeleton (the handler body is TRV-008).
@@ -1128,6 +1128,8 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 | 16 | Lane access waits for whole galaxy/narrative milestones while galaxy_main compilation already requires TRV-003 | Resolved: completed TRV-002, GAL-008 and NAR-003/004/006/020 provide config, live generation, compiler/binder and watchers. Implement the existing TravelService constructor/config and disposal only as needed to own lane state; retain explicit TRV-006 stubs for travel execution. Full lane-access acceptance remains; missing runtime ILogicContext follows the specified closed-and-rebuild behavior. | Tech lead — ledger Q349 |
 
 | 18 | TRV-003 lane-only ownership and steady-state defaults before jump execution | Constructor retains canonical dependencies, obtains config/fuel index, and owns only lane watchers, StarSystemEntered subscription and the World-scene query. Tick performs specified lane refresh only while WorldSceneActive exists; execution state/API stubs remain TRV-006/008/010/013. Disposal removes those lane resources without inventing a pause token or lock. Null galaxy clears watchers and returns default queries; revision is preserved and increments on rebuild/actual flips. Generation rebuild resets the periodic-refresh baseline. FuelHeld is internal for the later request validator, with the specified unavailable-economy fallback. Pure fuel cost saturates an otherwise overflowing positive int result. Eight required cases use a two-system/one-lane live galaxy, real FactStore/LogicWatcher, explicitly registered test-only read context, direct drains/ticks and a short warmed allocation check; no production fallback context or extra tests. | Tech lead — resolved, ledger Q354 |
+
+| 19 | Jump timeline waits for whole galaxy/streaming specs including later presentation and advisory measurements | Under ADR-0068 use completed lane/config, arrival, control lock, galaxy/cache/origin, belt/T2 loader, pose/docking and jump-hook owners as direct dependencies. All timeline acceptance remains required. CanJump must not undock or rebuild watchers: evaluate the current compiled lane condition without cache mutation, read economy without emitting warnings, and defer narrative undocking to accepted RequestJump. | Tech lead — resolved; ledger Q396 |
 
 ## 11. References
 
