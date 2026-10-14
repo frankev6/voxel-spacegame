@@ -1081,6 +1081,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — NAR-012 routing authored — astra (gpt-6)
+
+- c795e4de implements event subscription/disposal, counter-before-trigger ordering, player/salvage exclusions, unhandled inspections and location/relation dependencies. Counter effects cache by slot, unknown hashes warn once. Q376 records canonical callback composition and real staged BeatService/TravelService gaps.
+- Uncompiled/unaccepted; next canonical world lookups, composition resolution and required cases. spec-required: 5 planned, extra: 0. No test run this turn. All three exact workers active264/281/235; internal immutable registry metadata accessor approved for DLG-003. Previous contract and current routing source work are progress.
+
 ### 2026-10-13 — NAR-012 counter contract authored — astra (gpt-6)
 
 - 93d9f3f7 adds ADR-0080/Q375 code-owned AddFactEffect counters with explicit amount/source and slot cache semantics. Authored effects keep their existing behavior. No acceptance claim; event routing, composition and required cases remain.
