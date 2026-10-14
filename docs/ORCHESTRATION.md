@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ECO-008 | DLG-011571ae6f6 delivered pending QST-006/008; now merchant/salvage production wiring | Salvage accepted a7a433f2; no Unity |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | QST-008 | ECO-008bad3f9b7/HUD-019795cc3fb delivered; implements actual story registration/bridge/gating | Lead integrates economy delivery; no Unity |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | QST-009 | ENC-014461ffc36 accepted; reconciles opening content e987aae8 with actual dialog compiler | Lead owns Unity import/validation; no Unity in worker |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-010 | QST-006c7b8fa41 delivered; completes real notification/hotkey composition from aee6a04d | Preserve objective binding hook for QST-008; ADR0106 reserved; no Unity |
 
@@ -75,3 +75,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - ENC-014461ffc36 accepted: four required functional cases and five adapter regressions pass, production service lifetime wired. Existing seeds0 preserved; advisory100k deferred. Worker recycled to QST-009 compiler/content reconciliation, other two implementing ECO-008/QST-006.
 
 - QST-0078e16b5e7 accepted: actual atomic QUST and raw preservation; four functional checks plus seven quest/nine beat regressions pass. QST-006c7b8fa41 ready for lead integration. All three exact workers active on ECO-008/QST-009/HUD-010; lead next real story bridge/registration after adapter acceptance.
+
+- QST-0064738dc21/f71186b4 accepted: six required cases plus four save regressions pass. ADR-0107 unlocks concrete QST-008 routing; same combat worker implementing it. Lead next integrates delivered merchant/salvage/dock batch, then real story composition. Other workers QST-009/HUD-010 active.

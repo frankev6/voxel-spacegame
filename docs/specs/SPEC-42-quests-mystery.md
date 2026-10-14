@@ -900,7 +900,7 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 ### QST-008 — Bridge rules, player-free gating and registration
 - **Milestone:** M3
 - **Tier:** standard — routing rules of §5.1 and §5.6
-- **Depends on:** `QST-005`, `QST-006`, `SPEC-40`, `SPEC-32`, `SPEC-33`
+- **Depends on:** `QST-005`, `QST-006`, `QST-007`, `NAR-011`, `NAR-012`, `TRV-006`, `ENC-007`, `ENC-009`, `DLG-008`
 - **Do:**
   1. Extend `NarrativeWorldEventBridge` with the §5.6 rules.
   2. Extend `NarrativeTickBridgeSystem` with the §5.1 `free` and `canTalk` values.
