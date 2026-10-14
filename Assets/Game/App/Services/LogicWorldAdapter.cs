@@ -4,6 +4,7 @@ using Game.App.Session;
 using Game.Core;
 using Game.Core.Audio;
 using Game.Core.Components;
+using Game.Core.Events;
 using Game.Core.Flow;
 using Game.Data.Definitions;
 using Game.Data.Logic;
@@ -25,7 +26,7 @@ namespace Game.App.Services
         [field: StaticStateOk("Immutable read-only view of task-owned missing routes; never changed at runtime") ]
         public static IReadOnlyList<string> UnwiredMembers { get; } = Array.AsReadOnly(new[] { nameof(GetRelation), nameof(AdjustRelation),
             nameof(CurrentStarSystemOwnerFactionIndex), nameof(SpawnEncounter), nameof(StartCombat),
-            nameof(RequestLaneJump), nameof(OpenMerchant) });
+            nameof(OpenMerchant) });
         readonly ContentCatalog content;
         readonly GameSession session;
         readonly GalaxyService galaxy;
@@ -65,7 +66,20 @@ namespace Game.App.Services
         public void SpawnEncounter(int encounterIndex, string anchorTag, int count, in LogicScope scope)
             => Missing(nameof(SpawnEncounter), "ENC-007/009");
         public void StartCombat(int encounterIndex, in LogicScope scope) => Missing(nameof(StartCombat), "ENC-007/009");
-        public void RequestLaneJump(int starSystemIndex) => Missing(nameof(RequestLaneJump), "TRV-006/011");
+        public void RequestLaneJump(int starSystemIndex)
+        {
+            var definition = Definition<AuthoredStarSystemDefinition>(starSystemIndex);
+            if (definition == null)
+            { GameLog.ErrorOnce("Narrative.RequestLaneJump.Definition", "Narrative", "request_lane_jump requires an authored star system."); return; }
+            if (!galaxy.TryResolveStarSystem(definition.Id, out var target))
+            { GameLog.ErrorOnce("Narrative.RequestLaneJump.System", "Narrative", "request_lane_jump target is absent from the generated galaxy."); return; }
+            if (!Game.Core.Services.TryGet<TravelService>(out var travel))
+            { GameLog.ErrorOnce("Narrative.RequestLaneJump.Travel", "Narrative", "request_lane_jump requires TravelService."); return; }
+            var result = travel.RequestJump(target, JumpSource.Narrative);
+            if (result.Accepted) return;
+            GameLog.Warn("Narrative", "request_lane_jump refused: " + result.Reason);
+            EventBus<TravelNotice>.Publish(new TravelNotice(TravelNoticeKind.JumpRefused, target.Value, result.Reason));
+        }
         public void OpenMerchant(int merchantIndex, in LogicScope scope, Action onClosed)
         {
             Missing(nameof(OpenMerchant), "ECO-008"); onClosed?.Invoke();

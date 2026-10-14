@@ -358,7 +358,7 @@ All use `to.sh` for hard timeouts and print `Editor unreachable (is a modal dial
 | `r16_r19_editor_round_trip.scenario` | SPEC-51, SPEC-01 | newgame → record `player.upos`, `ecs.count("Brick")` → editor round trip with commit → position within 1 m, brick count equals the committed ship's, `interact` still reaches `Dialog` |
 | `r25_r26_ship_death_no_ecb_errors.scenario` | SPEC-13 | sandbox → `spawn blueprint=<frigate> count=30 spacing=5 team=2 ai=true` → `wait ticks=1200` → `logs.exceptions == 0 && !logs.contains("EntityCommandBuffer")`, `grids.count("Hulk") > 0` |
 | `r28_pause_load.scenario` | SPEC-05, SPEC-31 | §6.2 example |
-| `r30_lane_jump_entry.scenario` | SPEC-32 | newgame → `jump to=<adjacent>` → `star_system` is the target; player within 500 m of the lane entry (probe added by SPEC-32) |
+| `r30_lane_jump_entry.scenario` | SPEC-32 TRV-011 (active) | newgame → jump to Drift → return to the exact captured Ark system ID; after each Idle arrival, actual player gap 0..200 m and inside that system's lane ring |
 
 ## 7. Edge cases and failure behaviour
 

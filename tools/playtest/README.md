@@ -85,6 +85,8 @@ Useful built-ins: `editor_play`, `editor_stop`, `open_scene`, `recompile`, `reco
 
 `toworld.sh` enters Boot/Play, clicks the real New Game menu, submits the commander name and advances opening dialog input until Flight/player readiness, then prints a snapshot. It uses the normal menu seed; explicit seed arguments fail while the menu has no seed selector. Live acceptance requires HUD-002 to bind the real MainMenu root (SPEC-70 Q31).
 
+Travel scenario probes are `travel.phase`, `travel.arrival_gap`, `travel.inside_ring`, `travel.destination` and `travel.route_hops`. `r30_lane_jump_entry` is active and checks the real Drift/Ark round trip: both arrivals finish Idle inside the lane ring with a 0–200 m gate gap.
+
 ## Gotchas learned the hard way
 
 - `capture_game_view --save_path` always writes under `Assets/` (creating `.meta` files). `shot.sh` fetches the image inline instead.

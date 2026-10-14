@@ -1,6 +1,6 @@
 scenario r30_lane_jump_entry
 desc "Adjacent lane round trip enters inside each lane ring"
-status draft
+status active
 tags regression R30
 timeout 180
 newgame seed=19019

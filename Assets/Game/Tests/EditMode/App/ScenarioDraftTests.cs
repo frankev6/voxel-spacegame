@@ -40,9 +40,12 @@ namespace Game.Tests.EditMode.App
             string[][] tags = { new[] { "R10" }, new[] { "R15" }, new[] { "R16", "R19" }, new[] { "R25", "R26" }, new[] { "R28" }, new[] { "R30" } };
             for (int i = 0; i < names.Length; i++)
             {
-                var script = ScenarioParser.Parse(File.ReadAllText(Path.Combine(UnityEngine.Application.dataPath, "../TestData/Scenarios", names[i] + ".scenario")), new DevCommandRegistry(commands.ToArray()), probes);
+                bool activeTravel = names[i] == "r30_lane_jump_entry";
+                var script = ScenarioParser.Parse(File.ReadAllText(Path.Combine(UnityEngine.Application.dataPath, "../TestData/Scenarios", names[i] + ".scenario")),
+                    activeTravel ? DevCommandRegistry.CreateDefault() : new DevCommandRegistry(commands.ToArray()),
+                    activeTravel ? ScenarioProbeRegistry.CreateDefault() : probes);
                 Assert.AreEqual(names[i], script.Name);
-                Assert.AreEqual("draft", script.Status);
+                Assert.AreEqual(activeTravel ? "active" : "draft", script.Status);
                 CollectionAssert.Contains(script.Tags, "regression");
                 foreach (string tag in tags[i]) CollectionAssert.Contains(script.Tags, tag);
                 Assert.Greater(script.Statements.Count, 0);
