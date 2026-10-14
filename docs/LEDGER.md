@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 45 | 14 | 0 | 0 | 123 | 0 | 182 | 5 |
+| M3 | 45 | 13 | 0 | 0 | 124 | 0 | 182 | 6 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -429,8 +429,8 @@
 | EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | yes | done | astra (gpt-6) | 2026-10-13 | 5520be15 | Draft clone/apply/undo/redo/discard and dirty bricks; six direct cases pass, final compile clean; spec-required: 6, extra: 0 |
 | EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | yes | done | astra (gpt-6) | 2026-10-13 | d0a167dc | Incremental intact/damaged and orientation counts, lazy inventory-aware BOM; five required plus six session regressions pass; spec-required: 5, extra: 0 |
 | EDT-007 | Placement validator | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | done | astra (gpt-6) | 2026-10-13 | 633e952c | Placement checks, atomic group rollback, exact damaged identity/restore; 17 required cases pass; spec-required: 17, extra: 0 |
-| EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead: incremental connectivity, bounded split jobs and session undo/redo/discard integration. |
-| EDT-009 | Full validation, issues and remove-floating | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-006, EDT-007, EDT-008 | no | todo |  |  |  |  |
+| EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | done | astra (gpt-6) | 2026-10-14 | c86bd67b | Incremental islands, bounded split/Burst async relabel, disconnected-cell job; integrated exact damage masks through apply/undo/redo/discard. Six required cases pass; advisory timing deferred. |
+| EDT-009 | Full validation, issues and remove-floating | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-006, EDT-007, EDT-008 | yes | todo |  |  |  |  |
 | EDT-010 | Stats accumulator and diff | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-006, PWR-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 73bcc085 | Exact moments, canonical sorted stats and deltas; four required cases pass; spec-required: 4, extra: 0 |
 | EDT-011 | Commit pipeline and R15 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-009, EDT-010, SPEC-50 | no | todo |  |  |  |  |
 | EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | ed61500 | Bounded DDA, slice/X-ray, working plane and placement origin; seven required methods (12 parameterized cases) pass; spec-required: 7, extra: 0 |
@@ -1153,6 +1153,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — EDT-008 draft connectivity accepted — astra (gpt-6)
+
+- c86bd67b implements brick-slot union-find, bounded split BFS, scheduled second-buffer full relabel and capped disconnected-cell extraction. EditSession owns lifecycle and applies exact surviving damage masks in command order through apply/undo/redo/discard; pending jobs join before reads, mutations and disposal. Q443 resolves damaged/disconnected footprints and retaining the final split root. EDT-019 owns overlay refresh cadence; full validation/commit/host remain EDT-009/011/022.
+- Six required cases prove merge/leaf/small split, two 9,000-cell lobes exceeding the 8,192 visit budget, 2,000 operations in a 32³ region compared against an independent flood, and pending-job disposal with zero newly tracked leaks. spec-required: 6, extra: 0. Advisory 100k timing unmeasured; no tuning passes.
+- Compile clean, zero CS warnings. Focused editor batch initially 95/98 passed: fixed Temp versus TempJob output in the job fixture, baseline engine allocation diagnostics in the leak check, and the older EDT-001 material assertion that contradicted accepted EDT-018 authored materials. Final batch 97 passed with only baseline-log fixture issue; fixed using the existing synchronous baseline diagnostic pattern, then that exact test passed. Evidence `Logs/playtest/editor-connectivity/batch.xml` and `dispose.xml`. The initial complete batch took 5.65 seconds of test bodies; no broad/perf/soak runs. Existing session, tool, damaged transform, BOM and stats cases passed. Owner QualitySettings/metas excluded.
+- Same three workers remain active on ENC-005 territory, HUD-013 dialog host and HUD-017 fleet screen. Lead next frontier is full validation/removal and commit, enabling the real editor playground interaction.
 
 ### 2026-10-14 — ENC-004 faction persistence and playground reset — astra (gpt-6)
 
