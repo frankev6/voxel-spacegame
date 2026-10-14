@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Placement indexes authored:** EDT-00771fd04e4 owns clearance/missing-cell/origin indexes and exact shrinking bounds; validation/rollback and required cases still next. EDT-006 native-map correction181b1cd1 and integrated picker await compatible validation. EDT-010 stats and SYS-011 visuals active; combat worker has a real dependency wait after review309. No Unity active.
+
 - **Editor material costs accepted:** EDT-006d0a167dc clean compile and11 focused checks pass (five required BOM plus six existing session cases). EDT-010 stats dispatched to the reusable worker. EDT-012ed61500 picker integrated pending validation; SYS-011 visuals active. Next lead placement/connectivity prerequisites and compatible delivery integration. No Unity active.
 
 - **Gate and route slice accepted:** TRV-008/TRV-010 integrated through8c2e7cd8; compile clean and11 required focused checks pass. EDT-012 picker and SYS-011 celestial visuals active; route worker has a genuine dependency wait. Next lead editor count/BOM prerequisite to unlock stats work. No Unity active.

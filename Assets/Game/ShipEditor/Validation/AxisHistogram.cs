@@ -27,7 +27,8 @@ namespace Game.ShipEditor.Validation
                 int i = (int)index, count = counts[i] + delta;
                 if (count < 0) throw new InvalidOperationException("EDT: negative axis occupancy.");
                 counts[i] = count;
-                if (count > 0) { min = Math.Min(min, i); max = Math.Max(max, i); }
+                if (count > 0)
+                { if (min > max) min = max = i; else { min = Math.Min(min, i); max = Math.Max(max, i); } }
                 else
                 {
                     while (min <= max && counts[min] == 0) min++;

@@ -975,6 +975,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 401 | SPEC-51 Q30: batch/report storage contract | ADR-0088 defines native input ownership and per-group reports; dirty cells mark only owning/face-neighbour bricks. Later placement rules remain EDT-007. | Tech lead |
 | 402 | SPEC-32 Q21: destination cache lifetime and missing-content defaults | One service-owned scratch/read-only route view; stamp state, generation and lanes; count displayed recomputations only. Missing galaxy retains saved destination, removed destination clears, fuel saturates, missing gate yields no next hop. | Tech lead — resolved |
 | 403 | SPEC-51 Q31: picker signatures and boundary defaults | Stateless grid-ray picker with immutable hit; normalize direction, begin traversal at expanded bounds, canonical XYZ ties and opposite dominant normal for inside hits. Clamp configured steps to1..4096; plane reach4096. | Tech lead — resolved |
+| 404 | SPEC-51 Q33: placement index lifetime and out-of-window source bounds | Fixed histograms plus sparse overflow retain removable imported drafts; native origin identities preserve damaged-root removal; checked clearance counts and native orientation map ownership. | Tech lead — resolved |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1107,6 +1108,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — EDT-007 placement indexes authored — astra (gpt-6)
+
+- 71fd04e4 adds native clearance reservations, missing-cell reservations and block-origin lookup plus exact axis histograms, updated after forward/inverse writes and rebuilt on discard. Sparse overflow keeps imported out-of-limit cells removable (SPEC-51 Q33/global404); empty histogram reinsertion corrected in this checkpoint. Placement validation/rollback and its required cases remain next; task stays in-progress, uncompiled/unaccepted. spec-required:0 authored this checkpoint (required suite pending),extra:0.
+- Spec audit corrected EDT-006's managed orientation dictionary to the required owned NativeHashMap<int,int> in181b1cd1; native map correction awaits next compatible validation, earlier functional evidence remains for d0a167dc. Stats worker notified of exact key/API. EDT-012 picker also awaits that batch. No new Unity runs.
+- Worker review309 found no visual-link/cleanup ownership defects in active SYS-011. Presentation289 finishes the three required fixtures; EDT-010334 stats active. Combat has a genuine implementation dependency wait until a ready standard task unlocks. No duplicate worker, benchmark or busywork. Previous accepted BOM and current index implementation are progress.
 
 ### 2026-10-13 — EDT-012 picker source integrated; EDT-010 dispatched — astra (gpt-6)
 
