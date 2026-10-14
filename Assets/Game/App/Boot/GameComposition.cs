@@ -214,7 +214,6 @@ namespace Game.App.Boot
             Session.RegisterModel(economy); Session.RegisterNewGameInitializer(economy);
             Save.Register(new Game.Economy.InventorySaveParticipant(economy, Content.Catalog));
             var narrativeOwner = new Game.Narrative.ShipLog.NarrativeLogicAdapter();
-            // TODO(QST-006): narrativeOwner routes remain task-owned shells until quest/beat services exist.
             var narrative = NarrativeBootstrap.Build(Content.Catalog, config.ContentDatabase.Definitions,
                 facts => new LogicContext(facts, economy, narrativeOwner, logicWorld, () => Session.CampaignSeed));
             Register(narrative); Register(narrative.Facts); Register<Game.Data.Logic.ILogicContext>(narrative.Context);
@@ -225,21 +224,21 @@ namespace Game.App.Boot
             Save.Register(new Game.Narrative.Dialog.DialogSaveParticipant(dialogService.Memory));
             Session.RegisterSaveBlocker(Push(new DialogSessionBinding(dialogService)));
             Push(new NarrativeEconomyDependencies(economy, narrative));
-            // TODO(QST-002/003/004/005): register implemented INarrativeSystem owners here before sessions begin.
-            // TODO(QST-008): construct NarrativeWorldEventBridge.CreateForWorld after real beat/travel/encounter owners; do not instantiate their staged shells.
 
             // 10. App-lifetime UI models and implemented presenter bindings (HUD-002).
             Screens = Push(new UiComposition(UI));
             Register(Screens);
             var merchantLauncher = new Game.App.Economy.MerchantLauncher(economy, merchants, factions, territory, encounters, systemLoader, UI.Navigator);
             Register(merchantLauncher);
-            // DLG-007 installs the actual runner/service before this point; DLG-009 owns the authored view.
-            if (Game.Core.Services.TryGet<Game.Narrative.Dialog.DialogService>(out var dialog))
-            {
-                Screens.BindDialog(dialog, Content.Catalog, new AppUiSoundSink(Audio, config.UiConfig));
-                Register(Screens.DialogPresenter);
-            }
-            // TODO(DLG-007): construct/register the production DialogService; do not use a substitute runner.
+            Screens.BindDialog(dialogService, Content.Catalog, new AppUiSoundSink(Audio, config.UiConfig));
+            Register(Screens.DialogPresenter);
+            var story = Push(NarrativeBootstrap.BuildStory(Content.Catalog, narrative, narrativeOwner, dialogService, Session.CampaignSeed));
+            Register(narrativeOwner); Register<Game.Data.Logic.ILogicNarrative>(narrativeOwner);
+            Register(story.Quests); Register(story.Clues); Register(story.Beats); Register(story.ShipLog);
+            Save.Register(story.Save);
+            // Travel subscribed first: a successful gate jump is already Spooling when this bridge sees it.
+            Push(NarrativeWorldEventBridge.CreateForWorld(narrative, Content.Catalog, campaignGalaxy,
+                world, travel, encounters, story.Beats, dialogService, UI.Navigator));
             Step("10 ui composition");
 
             // 9.1 Flight input uses the live UI pointer gate; ADR-0047 supplies scene roots through the navigator.
@@ -270,6 +269,7 @@ namespace Game.App.Boot
             Input.BindingsChanged += hudSync.RefreshBindings;
             Screens.BindSceneRoots(hudSync, Input.GetBindingDisplay, editorServices);
             Screens.BindHudPresenters(Input, Content.Catalog);
+            Screens.BindHudObjectiveQuery(story.ShipLog);
             world.GetExistingSystemManaged<SceneNavigationBridgeSystem>().Unbind();
             Defeat = Push(new DefeatWatcher(Session, Save, UI, GameConfig));
             Defeat.Bind();

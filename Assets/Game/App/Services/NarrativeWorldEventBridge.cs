@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Game.Core;
 using Game.Core.Events;
+using Game.Core.Components;
 using Game.Data.Definitions;
 using Game.Data.Logic;
 using Game.Data.Logic.Nodes;
@@ -9,6 +10,14 @@ using Game.Data.Services;
 using Game.Galaxy.Data;
 using Game.Galaxy.Services;
 using Game.Narrative;
+using Game.Narrative.Beats;
+using Game.Narrative.Dialog;
+using Game.Galaxy.Travel;
+using Game.UI.Data;
+using Game.UI.Services;
+using Game.Voxel.Damage;
+using Unity.Collections;
+using Unity.Entities;
 
 namespace Game.App.Services
 {
@@ -28,6 +37,9 @@ namespace Game.App.Services
         readonly Action<ContentHash, ulong, bool> hail;
         readonly Action<uint, bool> enter;
         readonly int systemsEntered, territoriesEntered;
+        World world;
+        EntityQuery hulks;
+        Func<bool> canTalk;
         bool disposed;
 
         // Composition supplies canonical owner lookups; no service locator or alternate world state.
@@ -88,6 +100,37 @@ namespace Game.App.Services
                 encounterOfMember, travelIdle, ResolveFaction, interact, hail, enter);
         }
 
+        internal static NarrativeWorldEventBridge CreateForWorld(NarrativeService narrative,
+            ContentCatalog content, GalaxyService galaxy, World world, TravelService travel,
+            EncounterDirectorService encounters, BeatService beats, DialogService dialog, UINavigator navigation)
+        {
+            if (world == null || !world.IsCreated) throw new ArgumentException("A live world is required.", nameof(world));
+            if (travel == null) throw new ArgumentNullException(nameof(travel));
+            if (encounters == null) throw new ArgumentNullException(nameof(encounters));
+            if (beats == null) throw new ArgumentNullException(nameof(beats));
+            if (dialog == null) throw new ArgumentNullException(nameof(dialog));
+            if (navigation == null) throw new ArgumentNullException(nameof(navigation));
+            var bridge = CreateForWorld(narrative, content, galaxy,
+                id => encounters.TryGetInstanceByMember(id, out var instance) ? instance.Definition.Id.Hash : (ContentHash?)null,
+                () => travel.Phase == TravelPhase.Idle, (body, allowed) => beats.OnBodyInteracted(body, allowed),
+                (encounter, member, allowed) => beats.OnHail(encounter, member, allowed), beats.OnStarSystemEntered);
+            bridge.world = world;
+            bridge.hulks = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Hulk>(), ComponentType.ReadOnly<PersistentId>());
+            // Explicit interactions allow Screens/combat; read current owners, since UI may have changed since the tick.
+            bridge.canTalk = () => !navigation.HasOpenLayer(UILayer.Modals) && !dialog.IsActive && travel.Phase == TravelPhase.Idle;
+            return bridge;
+        }
+
+        bool IsHulk(ulong persistentId)
+        {
+            if (persistentId == 0 || world == null || !world.IsCreated) return false;
+            world.EntityManager.CompleteDependencyBeforeRO<Hulk>();
+            world.EntityManager.CompleteDependencyBeforeRO<PersistentId>();
+            using var ids = hulks.ToComponentDataArray<PersistentId>(Allocator.Temp);
+            foreach (var id in ids) if (id.Value == persistentId) return true;
+            return false;
+        }
+
         void Add(int slot, int amount)
         {
             if (slot < 0) return;
@@ -111,19 +154,19 @@ namespace Game.App.Services
         {
             if (disposed) return;
             var kind = (InteractionKind)value.Kind;
-            if (kind == InteractionKind.Salvage) return;
+            if (kind == InteractionKind.Salvage || IsHulk(value.GridPersistentId)) return;
             if (kind == InteractionKind.LaneGate && !travelIdle()) return;
             if (kind == InteractionKind.Hail)
             {
                 var encounter = resolveEncounter(value.GridPersistentId);
-                if (encounter.HasValue) hail(encounter.Value, value.GridPersistentId, narrative.PlayerCanTalk);
+                if (encounter.HasValue) hail(encounter.Value, value.GridPersistentId, canTalk?.Invoke() ?? narrative.PlayerCanTalk);
                 return;
             }
             if (value.BodyKey == 0) return;
             var body = resolveBody(value.StarSystemValue, value.BodyKey);
             if (!body.HasValue) return;
             Add(FactFamily.Interacted, body.Value.Template, 1);
-            bool handled = interact(body.Value, narrative.PlayerCanTalk);
+            bool handled = interact(body.Value, canTalk?.Invoke() ?? narrative.PlayerCanTalk);
             if (!handled && kind == InteractionKind.Inspect)
                 EventBus<InteractionUnhandled>.Publish(new InteractionUnhandled(body.Value));
         }
@@ -179,6 +222,7 @@ namespace Game.App.Services
             EventBus<FactionRelationChanged>.Unsubscribe(OnRelation);
             EventBus<TerritoryEntered>.Unsubscribe(OnTerritory);
             EventBus<ItemAcquired>.Unsubscribe(OnAcquired);
+            if (world != null && world.IsCreated) hulks.Dispose();
         }
     }
 }

@@ -38,10 +38,14 @@ namespace Game.Presentation.Systems
                 modal = navigation.HasOpenLayer(UILayer.Modals);
                 screen = navigation.HasOpenLayer(UILayer.Screens);
             }
-            narrative.SetPlayerCanTalk(!modal && dialogFree && idle);
+            // Explicit body/hail interactions permit combat and Screens (for example Dock).
+            bool canTalk = !modal && dialogFree && idle;
+            narrative.SetPlayerCanTalk(canTalk);
             EntityManager.CompleteDependencyBeforeRO<PlayerCombatStatus>();
             int hostiles = combat.IsEmptyIgnoreFilter ? 0 : combat.GetSingleton<PlayerCombatStatus>().HostilesEngaging;
-            narrative.SetPlayerFree(!modal && !screen && dialogFree && idle && !players.IsEmptyIgnoreFilter && hostiles == 0);
+            // Automatic/queued beats additionally require an unobstructed, living player outside combat.
+            bool free = canTalk && !screen && !players.IsEmptyIgnoreFilter && hostiles == 0;
+            narrative.SetPlayerFree(free);
             narrative.Tick();
             if (Game.Core.Services.TryGet<Game.Presentation.Bridges.DialogPresenter>(out var presenter)) presenter.Tick();
         }

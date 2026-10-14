@@ -17,7 +17,7 @@ namespace Game.Narrative.Beats
         readonly DialogService dialog;
         readonly Func<ContentHash, uint> authoredStarSystemValue;
         readonly Func<ContentHash, string> bodyTagOfTemplate;
-        readonly ulong campaignSeed;
+        ulong campaignSeed;
         readonly IReadOnlyList<StoryBeatDefinition> beats;
         readonly int[] slots;
         readonly int completedSlot;
@@ -193,10 +193,15 @@ namespace Game.Narrative.Beats
             CompleteInternal(beatIndex, current == 0 ? default : currentScope);
         }
         public void AbortCurrent() { if (current != 0) abortRequested = true; }
-        public void OnNewGame() { QueueState.Clear(); PerBody.Clear(); dirty.Clear(); current = 0; gameStartPending = true; restored = false; }
+        public void OnNewGame()
+        {
+            // App owners outlive campaigns. GameSession sets the seed before this lifecycle callback.
+            campaignSeed = context.CampaignSeed;
+            QueueState.Clear(); PerBody.Clear(); ResetForRestore(); gameStartPending = true;
+        }
         internal void ResetForRestore()
         { current = 0; currentScope = default; gameStartPending = false; dirty.Clear(); completing.Clear(); abortRequested = completedByEffect = false; restored = false; }
-        public void OnRestored() { ResetForRestore(); restored = true; }
+        public void OnRestored() { campaignSeed = context.CampaignSeed; ResetForRestore(); restored = true; }
         public void Evaluate(IReadOnlyList<LogicDependency> changed, bool fullReevaluate)
         {
             if (changed != null) dependencies.Collect(changed, dirty);
