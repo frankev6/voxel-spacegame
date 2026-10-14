@@ -23,14 +23,14 @@ namespace Game.DevTools.Editor.Commands
         }
 
         [CliCommand("gh_facts", "Get, set, list or evaluate facts; no arguments lists all (play mode).")]
-        public static string Facts([CliArg("get", "Fact name")] string get = "", [CliArg("set", "Fact name=Int32 value")] string set = "",
-            [CliArg("list", "Ordinal name prefix; empty lists all")] string list = "", [CliArg("eval", "Canonical logic condition, e.g. $story_count >= 3")] string eval = "")
+        public static string Facts([CliArg("get", "Fact name")] string get = null, [CliArg("set", "Fact name=Int32 value")] string set = null,
+            [CliArg("list", "Ordinal name prefix; empty lists all")] string list = null, [CliArg("eval", "Canonical logic condition, e.g. $story_count >= 3")] string eval = null)
         {
             var args = new List<string> { "facts" };
-            if (!string.IsNullOrEmpty(get)) args.Add("get=" + DevJsonWriter.Quote(get));
-            if (!string.IsNullOrEmpty(set)) args.Add("set=" + DevJsonWriter.Quote(set));
-            if (!string.IsNullOrEmpty(eval)) args.Add("eval=" + DevJsonWriter.Quote(eval));
-            if (!string.IsNullOrEmpty(list) || args.Count == 1) args.Add("list=" + DevJsonWriter.Quote(list));
+            if (get != null) args.Add("get=" + DevJsonWriter.Quote(get));
+            if (set != null) args.Add("set=" + DevJsonWriter.Quote(set));
+            if (eval != null) args.Add("eval=" + DevJsonWriter.Quote(eval));
+            if (list != null || args.Count == 1) args.Add("list=" + DevJsonWriter.Quote(list ?? ""));
             return CoreDevCliCommands.Dev(string.Join(" ", args));
         }
     }
