@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | TRV-008 | Gate interaction/info implementation dispatched | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | TRV-008 | Delivered40452bf0; review301 complete; gate-info checks wait real TRV-010 | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-010 | Destination/route service dispatched; DLG-012 live acceptance waits DLG-007 | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | SYS-011 | Celestial visual owner dispatched; TRV-009 waits this actual prerequisite | HUD-003/006/007 once ready |
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Editor history accepted:** EDT-0049d447ea5 clean compile, six direct checks pass. Next lead EDT-005 actual draft apply/undo/redo. TRV-00840452bf0 delivered; gate-info validation waits real TRV-010 (economy active). SYS-011 celestial worker active. Combat review301 complete, route/integration wait. No Unity active.
 
 - **Editor history source / visual prerequisite:** EDT-0047f26b7d1 adds compact native diffs, stroke merge, bounded history and correct saved-state invalidation (ADR-0086/Q398). Uncompiled/unaccepted; six required cases next. All three workers active: TRV-008 gates, TRV-010 routes, newly claimed SYS-011 celestial visuals (Q399); TRV-009 genuinely depends on those visuals. No Unity active.
 

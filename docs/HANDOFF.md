@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Editor history accepted:** EDT-0049d447ea5 clean compile, six direct checks pass. Next lead EDT-005 actual draft apply/undo/redo. TRV-00840452bf0 delivered; gate-info validation waits real TRV-010 (economy active). SYS-011 celestial worker active. Combat review301 complete, route/integration wait. No Unity active.
+
 - **Editor history source / visual prerequisite:** EDT-0047f26b7d1 adds compact native diffs, stroke merge, bounded history and correct saved-state invalidation (ADR-0086/Q398). Uncompiled/unaccepted; six required cases next. All three workers active: TRV-008 gates, TRV-010 routes, newly claimed SYS-011 celestial visuals (Q399); TRV-009 genuinely depends on those visuals. No Unity active.
 
 - **Travel/dialog focused batch accepted:** TRV-006/SYS-012/DLG-009 done. Clean compile;21 EditMode pass; six PlayMode cases pass across initial5 and one corrected layout retry (Burst startup fixed39b1cf0c). DLG-012 direct check passes, live intro awaits DLG-007. Next gate/destination workers and lead presentation/production-runner prerequisites. No Unity active.

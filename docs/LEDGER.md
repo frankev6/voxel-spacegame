@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 72 | 12 | 0 | 0 | 96 | 0 | 180 | 6 |
+| M3 | 71 | 12 | 0 | 0 | 97 | 0 | 180 | 6 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -424,8 +424,8 @@
 | EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 9c627fd | Editor contracts/config; 4 required tests; runtime tools remain EDT-002 onward |
 | EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-13 | 0089c35c | Context/rotated footprints/item tables accepted; five required cases pass; ADR-0081/Q380. |
 | EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-13 | 2d3181ff | Atomic draft adapters, native canonical hash/enumeration and exact damage restore; four required cases pass, including negative HP/shared origins. |
-| EDT-004 | Edit history and diff commands | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead compact native undo history |
-| EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | no | todo |  |  |  |  |
+| EDT-004 | Edit history and diff commands | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001 | yes | done | astra (gpt-6) | 2026-10-13 | 9d447ea5 | Owned compact diffs, exact offset merge and saved-state tracking; six direct checks pass; spec-required: 6, extra: 0 |
+| EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | yes | todo |  |  |  |  |
 | EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | no | todo |  |  |  |  |
 | EDT-007 | Placement validator | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | no | todo |  |  |  |  |
 | EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | no | todo |  |  |  |  |
@@ -1103,6 +1103,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — EDT-004 done: compact edit history — astra (gpt-6)
+
+- 7f26b7d1/9d447ea5 implements persistent diffs, same-stroke/tool merging, rebased damage, redo disposal, byte/count trimming and saved-state identity. Review301 found no ownership/merge/trim defects. spec-required:6,extra:0; NativeLeakDetection.EnabledWithStackTrace active in required fixtures. EDT-005 still owns actual voxel application.
+- Compile77954 terminal0, zero warning CS; focused EditMode88659 terminal0,6passed,0.1493642s bodies. Evidence Logs/playtest/editor-history. No PlayMode/runtime-flow changes, perf or broad suite. No Unity active.
+- TRV-00840452bf0 delivered pending real TRV-010 for gate-info acceptance; combat review complete and has a concrete route/integration wait. Economy323 routing and presentation282 SYS-011 visuals active. Next lead EDT-005 session and compatible travel integration. Previous source and current acceptance are progress.
 
 ### 2026-10-13 — EDT-004 history authored; SYS-011 dispatched — astra (gpt-6)
 
