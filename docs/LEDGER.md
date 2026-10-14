@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 29 | 16 | 0 | 0 | 137 | 0 | 182 | 5 |
+| M3 | 29 | 15 | 0 | 0 | 138 | 0 | 182 | 5 |
 | M4 | 8 | 4 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -365,7 +365,7 @@
 | ENC-005 | TerritoryService (authored ownership) | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, ENC-003, ENC-004, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | de3f1ee | Authored territory ownership, generation/reset rebuild; production map/ticker registration 0f00dd27; three required cases pass. |
 | ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, GAL-006, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 21d0996b | Full ordered seeded composition, clearance placement and line-abreast formation; 9 required cases pass. Director cap remains ENC-007. |
 | ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SYS-008, SYS-013, FND-012, TRV-006, AI-008 | yes | done | astra (gpt-6) | 2026-10-14 | a445825b | Real production director; ten functional cases accepted across batch/fix; two advisory perf fixtures authored, measurements deferred. ENCT binary persistence stays ENC-008. |
-| ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead ENCT persistence, raw unknown IDs, atomic restore and SessionReset load preservation. |
+| ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | yes | done | astra (gpt-6) | 2026-10-14 | f9c6f0d5 | ENCT v1, atomic raw preservation and Loaded lifecycle; 3 spec checks and 1 real save/load/combat-refusal scenario pass. |
 | ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, NAR-011, NAR-012, NAR-020 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Economy worker: actual narrative encounter/faction routing and event dependencies. |
 | ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | cdf292d6 | Ten canonical encounters, six factions, real ARK/Whisper ownership; generation/rerun zero errors, two required checks pass |
 | ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | no | todo |  |  |  |  |
@@ -1180,6 +1180,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — ENC-008 encounter save persistence accepted — astra (gpt-6)
+
+- f9c6f0d5 implements ENCT v1 in canonical order, including persistent active encounters converted non-mutatingly to pending; preserves unknown IDs and rejects malformed payloads before state replacement. Director-owned shared state survives SessionReset(Loaded), which follows participant restore. New sessions still clear everything. Registry order100 was already present; composition now registers the real participant. SPEC-33 Q32 / ledger Q469 records defaults.
+- Connected the existing AI-008 combat singleton to the GameSession save guard (cached dependency-completed queries, recent-damage window, tick-zero sentinel). Actual production SaveGame/LoadGame proves combat refusal and same-ID story respawn after reload. Binary checks cover exact round-trip, unknown preservation/report-once and clearing active state; malformed save edge checks are included.
+- Compile clean, zero CS warnings. Focused EditMode 3 passed, PlayMode 1 passed; evidence Logs/playtest/encounter-save/{format,integration}.xml. Test count: spec-required: 3, extra: 1 (save/load integration). No full/performance/soak runs. Initial integration compile typo corrected before execution. Worker ENC-012 delivery230f64b8 received; other workers continue, integration next.
 
 ### 2026-10-14 — Three worker implementation dispatch resumed — astra (gpt-6)
 

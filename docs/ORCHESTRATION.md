@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-012 | Dispatched on main57dbe986: commands, probes, CLI | Complete substantial feature; lead owns ENCT and validation |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-012 | Delivered230f64b8; lead integration/focused validation pending | Complete substantial feature; lead owns ENCT and validation |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ENC-009 | Dispatched on main57dbe986: narrative/faction routing | Complete owner routes and five spec checks |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ENC-013 | Dispatched on main57dbe986: formation placement and content | Formation-only director edits; lead owns save/pending lifecycle |
 
@@ -55,3 +55,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - ENC-007247fd49a replaces the throwing shell and is composed; three spawn/ambush/cap checks pass. Lead retains schedule/defeat/despawn/pending acceptance and two advisory fixtures before acceptance. All three exact workers confirmed idle with genuine dependencies; director completion unlocks standard follow-ups.
 
 - ENC-007 accepted a445825b (ten functional cases across batch/fix; two advisory fixtures authored, deferred). ADR-0100 and claim57dbe986 unlock same three workers on ENC-012 commands, ENC-009 narrative and ENC-013 formations. Lead next ENC-008 save persistence; serialize primary Unity checks only after compatible deliveries.
+
+- ENC-008 f9c6f0d5 accepted: 3 binary checks and actual SaveGame/LoadGame same-instance respawn/combat refusal pass. Worker ENC-012230f64b8 delivered; others implementing. Integrate compatible encounter deliveries next.
