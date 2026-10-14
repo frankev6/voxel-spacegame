@@ -50,6 +50,7 @@ namespace Game.App.Boot
             Composition?.Session?.Tick(dt);
             Composition?.Save?.Autosave.Update(dt);
             Composition?.Screens?.Tick();
+            Composition?.Defeat?.Tick(dt);
             Composition?.UI?.Tick(dt);
             Composition?.Settings?.Tick(dt);                      // debounced save
         }

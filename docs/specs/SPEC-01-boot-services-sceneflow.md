@@ -1000,6 +1000,7 @@ If no save exists, "Load last save" is disabled.
 | 31 | §5.7 registers the fleet structure in both PlayerShipSpawner and ShipSpawnService, leaving two borrows for one source | FleetShipRecord retains its existing handle and release ownership. PlayerShipSpawner uses an internal SpawnRegistered path that validates handle/source identity and passes that same handle to GridSpawnApi. The service only releases handles it registered itself; public Spawn retains its existing contract. Extend the required Player_NoMember case to assert handle identity and survival after service disposal. | Tech lead |
 
 | 32 | FND-015 waits on aggregate world integration rather than its implemented session owner | Use FND-010 and HUD-001. Actual Lab startup remains dependent on EDT-023 integration and cannot be claimed passing before that exists. | Tech lead | Resolved under ADR-0068; ledger Q459. |
+| 33 | Defeat composition and automatic playground interference with isolated startup checks | Root owns, binds, ticks and disposes DefeatWatcher; use current readable save or latest readable autosave, disable Load with none. Existing isolated SaveRoot test hook suppresses automatic playground takeover, preserving actual World quick-start acceptance; ordinary World Play still auto-enters playground. Creative Lab startup is now composed by EDT-023. | Tech lead | Resolved; ledger Q466. |
 
 ## 11. References
 

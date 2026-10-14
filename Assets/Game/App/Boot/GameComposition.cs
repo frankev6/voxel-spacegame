@@ -34,6 +34,7 @@ namespace Game.App.Boot
     /// type does not exist yet is a comment naming the task that adds it; each task adds exactly its own line.</summary>
     internal sealed class GameComposition : IDisposable
     {
+        internal DefeatWatcher Defeat { get; private set; }
         internal readonly List<IDisposable> DisposeStack = new List<IDisposable>();
 
         /// <summary>Step names in construction order (FND-005 test hook).</summary>
@@ -256,6 +257,8 @@ namespace Game.App.Boot
             Input.BindingsChanged += hudSync.RefreshBindings;
             Screens.BindSceneRoots(hudSync, Input.GetBindingDisplay, editorServices);
             world.GetExistingSystemManaged<SceneNavigationBridgeSystem>().Unbind();
+            Defeat = Push(new DefeatWatcher(Session, Save, UI, GameConfig));
+            Defeat.Bind();
             Step("11 camera and scene roots");
 
             // 12. Authored VFX. Null graphics runs retain the unbound drain instead of allocating GPU resources.

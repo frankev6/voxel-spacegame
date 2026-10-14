@@ -62,7 +62,7 @@ namespace Game.App.DevRuntime.Playground
         int nearest = -1, pending;
         string report = "";
         internal DevPlayground(DevRuntimeHost host)
-        { this.host = host; autoEnter = Application.isEditor && SceneManager.GetActiveScene().name == "World"; }
+        { this.host = host; autoEnter = Application.isEditor && Game.App.Testing.GameRootTestHooks.SaveRoot == null && SceneManager.GetActiveScene().name == "World"; }
         internal void Bind(InputService service, UIRoot root)
         {
             input = service; ui = root;
