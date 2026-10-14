@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 10 | 0 | 0 | 0 | 82 | 0 | 92 | 7 |
-| M3 | 86 | 10 | 0 | 0 | 84 | 0 | 180 | 7 |
+| M3 | 85 | 10 | 0 | 0 | 85 | 0 | 180 | 7 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -422,8 +422,8 @@
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c0f0c244 | 17 assets plus existing Scrap; real catalog/readback zero errors; two required checks pass; three existing quest-item warnings retained |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
 | EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 9c627fd | Editor contracts/config; 4 required tests; runtime tools remain EDT-002 onward |
-| EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead builds rotated footprints, block item map and editor context; one focused batch after five required cases. |
-| EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | no | todo |  |  |  |  |
+| EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-13 | 0089c35c | Context/rotated footprints/item tables accepted; five required cases pass; ADR-0081/Q380. |
+| EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | yes | todo |  |  |  |  |
 | EDT-004 | Edit history and diff commands | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001 | yes | todo |  |  |  |  |
 | EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | no | todo |  |  |  |  |
 | EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | no | todo |  |  |  |  |
@@ -1084,6 +1084,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — EDT-002 done: ship-editor content tables — astra (gpt-6)
+
+- 0089c35c accepted: context, rotated cells/clearance/bounds/face masks, item mapping/prices and categories. Five cases cover all24 orientations, all64 face masks with inverse rotation, explicit L-shape yaw/clearance/bounds, price/identity mapping and air/Missing exclusions.
+- Compile6917 terminal0, zero CS warnings; focused EditMode29238 terminal0: five passed, zero failed, 0.3253108s test bodies (Unity lifecycle separate). Evidence Logs/playtest/editor-content. spec-required: 5, extra: 0. No broad/perf/PlayMode run. No optimization passes.
+- No Unity active. DLG-003266, DEV-017287 and NAR-019243 active; NAR-019 reports its interaction determinism acceptance still needs QST-008 real bridge registration. Next EDT-003 canonical draft write/read/hash path and compatible worker integration. Previous table implementation and current acceptance are progress.
 
 ### 2026-10-13 — EDT-002 content tables authored — astra (gpt-6)
 

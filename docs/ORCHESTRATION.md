@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Ship-editor content tables accepted:** EDT-0020089c35c done; compile6917 clean, focused EditMode29238 passes5 (0.3253s bodies). Next EDT-003 draft read/write/hash path. No Unity active. DLG-003266, DEV-017287, NAR-019243 active; the latter has a real QST-008 interaction-determinism dependency. Evidence Logs/playtest/editor-content.
+
 - **Ship-editor content tables authored:** EDT-002d3261523 builds all24 rotated cell/clearance sets and face masks, item/price mapping and context with owned footprints/borrowed blobs (ADR-0081/Q380). Uncompiled/unaccepted; next five required cases and one focused batch. No Unity active. DLG-003265, DEV-017286 and NAR-019242 active. Previous aim/fire acceptance and current editor implementation are progress.
 
 - **Aim/fire commands accepted:** DEV-010c5c7fc15 done; compile11416 clean and PlayMode30736 passes both real-input/weapon cases. No Unity active. Presentation recycled to NAR-0192919e717, economy implements DEV-017, combat implements DLG-003. Next dialog runtime prerequisites and compatible worker integration. Evidence Logs/playtest/dev010.
