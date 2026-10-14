@@ -5,7 +5,6 @@ We must repair the hull breach left by the xeno probes. We'll need raw materials
 -> Hand over the raw materials <<if (has_item("resource_palladium", 3)) and (has_item("resource_palladium", 3))>> #line:survey_system_start_01
     <<take_item resource_palladium 3>>
     <<set_fact story_survey_complete true>>
-    <<give_item item_strange_matter_container_full 1>>
     <<stop>>
 -> Leave #line:survey_system_start_02 #leave
     <<abort_beat>>

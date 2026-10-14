@@ -91,6 +91,31 @@ namespace Game.Tests.EditMode.Narrative
             f.Beats.AfterEvaluation(true); Assert.AreEqual(1, f.Count(c)); Assert.AreEqual(0, f.Count(a)); Assert.AreEqual(2, f.Beats.QueuedCount);
             f.Beats.AfterEvaluation(true); Assert.AreEqual(1, f.Count(a)); Assert.AreEqual(0, f.Count(b));
             f.Beats.AfterEvaluation(true); Assert.AreEqual(1, f.Count(b));
+
+            // QST-010 live regression: streaming queues arrival before the first free
+            // narrative frame. Intro and its terminal follow-up precede that FIFO.
+            var intro = Beat("beat_intro", BeatTrigger.GameStart, node: "start");
+            var followup = Beat("beat_starter", BeatTrigger.Manual);
+            var arrival = Beat("beat_arrival", BeatTrigger.StarSystemEntered);
+            var ambient = Beat("beat_ambient", BeatTrigger.Manual);
+            var terminal = new Terminal(); FakeDialogRunner runner = null;
+            runner = new FakeDialogRunner(host => { host.OnCommand("terminal"); runner.Stop(); });
+            using var opening = new Fixture(new[] { intro, followup, arrival, ambient }, runner: runner,
+                commands: DialogServiceTests.Table(("terminal", terminal)));
+            terminal.Action = _ =>
+            {
+                Assert.IsFalse(opening.Dialog.IsActive); Assert.AreEqual(0, opening.Beats.CurrentBeatIndex);
+                opening.Beats.Queue(opening.Index(followup));
+            };
+            opening.Beats.OnNewGame(); opening.Beats.OnStarSystemEntered(4, true);
+            opening.Beats.Queue(opening.Index(ambient)); opening.Beats.AfterEvaluation(false);
+            opening.Beats.AfterEvaluation(true);
+            Assert.AreEqual(1, opening.Count(intro)); Assert.AreEqual(0, opening.Count(arrival));
+            opening.Beats.AfterEvaluation(true);
+            Assert.AreEqual(1, opening.Count(followup)); Assert.AreEqual(0, opening.Count(arrival));
+            opening.Beats.AfterEvaluation(true);
+            Assert.AreEqual(1, opening.Count(arrival)); Assert.AreEqual(0, opening.Count(ambient));
+            opening.Beats.AfterEvaluation(true); Assert.AreEqual(1, opening.Count(ambient));
         }
         [Test] public void ConditionBeat_QueuesAndPlays()
         {

@@ -38,6 +38,16 @@ namespace Game.Editor.Migration.Narrative
             var translator = new LegacyActionTranslator(sources);
             var encounters = translator.ConvertAll(report);
             if (encounters == null) return null;
+            // SPEC-42 Q19 moves this authored reward to Quest.OnCompleted. Preserve
+            // all dialogue text while preventing a reimport from duplicating it.
+            foreach (var encounter in encounters)
+                if (encounter.BeatId == "beat_survey_system")
+                    foreach (var node in encounter.Nodes)
+                        foreach (var option in node.Options)
+                        {
+                            option.Statements.Remove("<<give_item item_strange_matter_container_full 1>>");
+                            option.Commands.Remove("give_item item_strange_matter_container_full 1");
+                        }
             var plan = new Plan(encounters, translator.Facts, root, manifestPath);
             var starts = new Dictionary<string, string>(StringComparer.Ordinal);
             foreach (var encounter in encounters)

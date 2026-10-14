@@ -31,6 +31,7 @@ namespace Game.Narrative.Beats
         internal readonly BeatQueue QueueState = new();
         internal readonly HashSet<(ContentId Beat, uint System, ulong Key)> PerBody = new();
         int current;
+        bool currentIntroduction;
         LogicScope currentScope;
         bool abortRequested, completedByEffect, gameStartPending, restored, disposed;
         public BeatService(ContentCatalog catalog, FactStore facts, ILogicContext context, DialogService dialog,
@@ -146,19 +147,20 @@ namespace Game.Narrative.Beats
             int selected = Select(triggers[(int)BeatTrigger.StarSystemEntered], default, starSystemValue, starSystemValue, firstVisit);
             if (selected != 0) Enqueue(selected, default);
         }
-        void Enqueue(int index, in LogicScope scope, bool first = false)
-        { if (Valid(index)) QueueState.Add(new BeatQueue.Entry(index, Scope(index, scope, LogicUsage.BeatEffect), beats[index - 1].Trigger == BeatTrigger.Condition), first); }
-        public void Queue(int beatIndex) => Enqueue(beatIndex, current == 0 ? default : currentScope);
+        void Enqueue(int index, in LogicScope scope, bool first = false, bool introduction = false)
+        { if (Valid(index)) QueueState.Add(new BeatQueue.Entry(index, Scope(index, scope, LogicUsage.BeatEffect), beats[index - 1].Trigger == BeatTrigger.Condition, introduction: introduction), first); }
+        public void Queue(int beatIndex) => Enqueue(beatIndex, current == 0 ? default : currentScope, introduction: currentIntroduction);
         public void DebugPlay(int beatIndex)
         { if (!Valid(beatIndex)) throw new ArgumentOutOfRangeException(nameof(beatIndex)); if (current != 0 || dialog.IsActive) { Enqueue(beatIndex, default); return; } Play(beatIndex, default); }
-        void Play(int index, in LogicScope scope)
+        void Play(int index, in LogicScope scope, bool introduction = false)
         {
+            currentIntroduction = introduction;
             current = index; currentScope = Scope(index, scope, LogicUsage.BeatEffect); abortRequested = completedByEffect = false;
             Apply(beats[index - 1].OnStart, currentScope);
             if (string.IsNullOrEmpty(beats[index - 1].YarnNode))
-            { if (!abortRequested && !completedByEffect) CompleteInternal(index, currentScope); current = 0; return; }
+            { if (!abortRequested && !completedByEffect) CompleteInternal(index, currentScope); current = 0; currentIntroduction = false; return; }
             if (!dialog.TryStart(new DialogRequest(index, beats[index - 1].YarnNode, currentScope)))
-            { Enqueue(index, currentScope, true); current = 0; }
+            { Enqueue(index, currentScope, true, currentIntroduction); current = 0; currentIntroduction = false; }
         }
         void Apply(CompiledEffectList effects, in LogicScope scope)
         {
@@ -169,11 +171,15 @@ namespace Game.Narrative.Beats
         void Ended(DialogEnded ended)
         {
             if (current == 0 || ended.BeatIndex != current) return;
-            if (ended.Outcome == DialogOutcome.Completed && !abortRequested && !completedByEffect) CompleteInternal(current, currentScope);
-            current = 0;
-            if (ended.PendingTerminal == null) return;
-            context.PushScope(Scope(ended.BeatIndex, ended.Scope, LogicUsage.BeatEffect));
-            try { ended.PendingTerminal.Apply(context); } finally { context.PopScope(); }
+            try
+            {
+                if (ended.Outcome == DialogOutcome.Completed && !abortRequested && !completedByEffect) CompleteInternal(current, currentScope);
+                current = 0;
+                if (ended.PendingTerminal == null) return;
+                context.PushScope(Scope(ended.BeatIndex, ended.Scope, LogicUsage.BeatEffect));
+                try { ended.PendingTerminal.Apply(context); } finally { context.PopScope(); }
+            }
+            finally { currentIntroduction = false; }
         }
         void CompleteInternal(int index, in LogicScope scope)
         {
@@ -200,7 +206,7 @@ namespace Game.Narrative.Beats
             QueueState.Clear(); PerBody.Clear(); ResetForRestore(); gameStartPending = true;
         }
         internal void ResetForRestore()
-        { current = 0; currentScope = default; gameStartPending = false; dirty.Clear(); completing.Clear(); abortRequested = completedByEffect = false; restored = false; }
+        { current = 0; currentIntroduction = false; currentScope = default; gameStartPending = false; dirty.Clear(); completing.Clear(); abortRequested = completedByEffect = false; restored = false; }
         public void OnRestored() { campaignSeed = context.CampaignSeed; ResetForRestore(); restored = true; }
         public void Evaluate(IReadOnlyList<LogicDependency> changed, bool fullReevaluate)
         {
@@ -218,9 +224,10 @@ namespace Game.Narrative.Beats
                 if (gameStartPending)
                 {
                     gameStartPending = false;
-                    foreach (int index in triggers[(int)BeatTrigger.GameStart]) if (Eligible(index, default, CurrentSystem(), 0, true)) Enqueue(index, default);
+                    foreach (int index in triggers[(int)BeatTrigger.GameStart])
+                        if (Eligible(index, default, CurrentSystem(), 0, true)) Enqueue(index, default, introduction: true);
                 }
-                if (QueueState.TryPop(out var entry)) Play(entry.Beat, entry.Scope);
+                if (QueueState.TryPop(out var entry)) Play(entry.Beat, entry.Scope, entry.Introduction);
             }
             finally { ShipLogAfterEvaluation?.Invoke(); }
         }

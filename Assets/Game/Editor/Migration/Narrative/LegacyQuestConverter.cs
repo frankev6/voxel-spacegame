@@ -99,6 +99,10 @@ namespace Game.Editor.Migration.Narrative
                 else quest.Stages[index - 1].OnComplete.AddRange(accepted); // next-stage acceptance follows previous-stage completion
                 var completed = Actions(source.OnCompletedActions, source.Id, source.SourcePath + "/onCompletedActions", asset, quest);
                 stage.OnComplete.AddRange(completed);
+                // SPEC-42 Q19: the existing opening reward belongs to the reachable,
+                // non-repeatable survey hand-in, rather than the unqueued legacy beat.
+                if (id == "quest_survey_local_materials" && index == 0)
+                    quest.Completed.Add("give_item item_strange_matter_container_full 1");
                 var failed = Actions(source.OnFailedActions, source.Id, source.SourcePath + "/onFailedActions", asset, quest);
                 if (!chain) quest.Failed.AddRange(failed);
                 else if (failed.Count != 0)
