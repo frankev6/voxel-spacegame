@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 29 | 15 | 0 | 0 | 138 | 0 | 182 | 5 |
+| M3 | 29 | 14 | 0 | 0 | 139 | 0 | 182 | 5 |
 | M4 | 8 | 4 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -369,7 +369,7 @@
 | ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, NAR-011, NAR-012, NAR-020 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Economy worker: actual narrative encounter/faction routing and event dependencies. |
 | ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | cdf292d6 | Ten canonical encounters, six factions, real ARK/Whisper ownership; generation/rerun zero errors, two required checks pass |
 | ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | no | todo |  |  |  |  |
-| ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, ENC-004, DEV-003, DEV-005, DEV-006 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Combat worker: encounter/relation commands, probes and CLI over accepted director. |
+| ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, ENC-004, DEV-003, DEV-005, DEV-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | a9adf708 | Worker230f64b8 integrated; actual encounter/relation commands, probes and CLI; two required production-owner cases pass. |
 | NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | e39b2d3 | Narrative contracts and precise future-task stubs; 2 required tests; full batch 901 EM / 128 PM, zero failures |
 | NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 67ce3485 | Located lexer/AST/parser; seven focused checks pass; Q305 resolves grammar example |
 | NAR-003 | Type checker, registry, compiler and binder | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-002 | yes | done | astra (gpt-6) | 2026-10-13 | d3f59c1c | Compiler, registry, binder, graph emission and scoped Invoke; six focused checks pass; runtime nodes NAR-004/005 |
@@ -1181,6 +1181,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — ENC-012 encounter commands accepted — astra (gpt-6)
+
+- a9adf708 integrates worker230f64b8: encounter spawn/combat/list/director commands, queued relation changes, CLI wrappers and five scenario probes. Counts are actual director state; typed defeat counters are relative to each scenario. Sandbox requests explicitly explain the missing galaxy rather than claiming a spawn. SPEC-33 Q33 / ledger Q470 reconciles zero-return combat output.
+- Clean compile, zero CS warnings; both required production boot/owner PlayMode cases pass (Logs/playtest/encounter-commands/commands.xml). Test count: spec-required: 2, extra: 0. No broad/performance runs. Combat worker delivery accepted; genuine dependency wait (only ready standard todo is owner-only audio licence gate). Presentation formation deliverya2da8551 received; narrative worker still implementing.
 
 ### 2026-10-14 — ENC-008 encounter save persistence accepted — astra (gpt-6)
 

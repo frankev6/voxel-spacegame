@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-012 | Delivered230f64b8; lead integration/focused validation pending | Complete substantial feature; lead owns ENCT and validation |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-012 | Accepted a9adf708; dependency wait: no unclaimed ready standard implementation | Next standard owner unlocked by lead; no review-only dispatch |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ENC-009 | Dispatched on main57dbe986: narrative/faction routing | Complete owner routes and five spec checks |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ENC-013 | Dispatched on main57dbe986: formation placement and content | Formation-only director edits; lead owns save/pending lifecycle |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ENC-013 | Delivered a2da8551; lead integrating | Formation-only director edits; lead owns save/pending lifecycle |
 
 ## Operating rules
 
