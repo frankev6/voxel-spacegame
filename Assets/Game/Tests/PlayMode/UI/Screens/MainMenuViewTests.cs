@@ -44,7 +44,11 @@ namespace Game.Tests.PlayMode.UI.Screens
             readonly UIConfig config;
             internal Window(IGameFlow flow, SaveService save, IPauseService pause, int width = 1280, int height = 720)
             {
-                Panel = new UITestPanel(width, height); bridge = new InputServiceBridge(input);
+                Panel = new UITestPanel(width, height);
+                // Real flow loads scenes in Single mode. This window, like the production root,
+                // must survive NewGame/quit/load; UITestPanel.Dispose still owns its destruction.
+                Object.DontDestroyOnLoad(Panel.Document.gameObject);
+                bridge = new InputServiceBridge(input);
                 config = Object.Instantiate(AssetDatabase.LoadAssetAtPath<UIConfig>("Assets/Game/UI/Data/UIConfig.asset")); config.PanelSettings = Panel.Settings;
                 UI = new UIRoot(Panel.Document, config, pause, bridge, new NullUISoundSink(), new UnityFrameClock());
                 bridge.BindBack(UI.HandleBackPressed);
@@ -141,6 +145,11 @@ namespace Game.Tests.PlayMode.UI.Screens
             EventHub.DrainAll(); window.Presenter.Refresh();
             Assert.IsTrue(window.Model.HasContinue); Assert.AreEqual("Latest save", window.Model.ContinueSubtitle);
             Assert.AreEqual("Latest save", window.View.Root.Q<Label>("main-menu-continue-subtitle").text);
+            Assert.IsTrue(window.Panel.Document != null, "The isolated menu document survives real scene loads.");
+            Assert.IsNotNull(window.View.Root.panel, "Continue must target an attached runtime view.");
+            var continueButton = window.View.Root.Q<Button>("main-menu-continue");
+            yield return WaitUntil(() => continueButton.enabledInHierarchy && continueButton.resolvedStyle.display == DisplayStyle.Flex &&
+                continueButton.worldBound.width > 0 && continueButton.worldBound.height > 0, 10, "Continue is visible and enabled on the runtime panel");
             window.Click("main-menu-continue");
             yield return Settle(window, () => flow.CurrentScene == GameScene.World && !flow.IsTransitioning && session.HasActiveSession, "Menu Continue reaches an active World session");
             Assert.AreEqual(latest, save.CurrentSlot); Assert.AreEqual("Ada O'Neil", session.CommanderName);
