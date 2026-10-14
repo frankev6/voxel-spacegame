@@ -73,6 +73,8 @@ Runtime dev commands, reachable as `gh_<name>` and in the in-game console. Each 
 | `gh_replay` (`--name`) | Replay from the current simulation tick; returns an operation ID until playback ends |
 | `gh_help` (`--cmd=""`) | List runtime commands or show one usage; play mode required |
 | `range` (via `gh_dev --cmd range` or the console) | Spawn the test station in World. Left pod has one bridge; right pod has two; rear bay has paired reactors. New game resets all pieces and projectiles |
+| `gh_encounter` (`--spawn`, `--combat`, `--director=on\|off`, `--list=false`, `--count=1`, `--anchor`) | List definitions/active instances by default; Dev spawn uses 1–10 encounter instances at the player or a body story tag. Combat uses StartCombat; zero created is reported as queued/refused, never as spawn success. Sandbox has no galaxy |
+| `gh_relation` (`--faction`, `--set`, `--add`) | Read relation/stance, or queue one Int32 set/add through FactionService. Relations clamp to −100..100; the matrix changes at the next fixed tick |
 | `gh_dev` (`--cmd`) | Execute any runtime command line |
 | `gh_op` (`--id`) | Poll `running/succeeded/failed` status without blocking |
 | `gh_until` (`--cond`) | Evaluate a typed scenario expression once; returns true/false |
@@ -86,6 +88,8 @@ Useful built-ins: `editor_play`, `editor_stop`, `open_scene`, `recompile`, `reco
 `toworld.sh` enters Boot/Play, clicks the real New Game menu, submits the commander name and advances opening dialog input until Flight/player readiness, then prints a snapshot. It uses the normal menu seed; explicit seed arguments fail while the menu has no seed selector. Live acceptance requires HUD-002 to bind the real MainMenu root (SPEC-70 Q31).
 
 Travel scenario probes are `travel.phase`, `travel.arrival_gap`, `travel.inside_ring`, `travel.destination` and `travel.route_hops`. `r30_lane_jump_entry` is active and checks the real Drift/Ark round trip: both arrivals finish Idle inside the lane ring with a 0–200 m gate gap.
+
+Encounter probes are `encounters.active`, `encounters.ships`, `relation("faction_id")`, `stance("faction_id")` and `encounter_defeated("encounter_id")`. Defeats count real EncounterDefeated events since each scenario started; a concurrent or later run has its own baseline. Unknown IDs and unavailable owners fail explicitly. Example: `g.sh encounter --spawn encounter_raiders`, then `g.sh until --cond 'encounters.ships >= 2'`; `g.sh relation --faction faction_vestari --set -50` queues hostility for the next tick.
 
 ## Gotchas learned the hard way
 

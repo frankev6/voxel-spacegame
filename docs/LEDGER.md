@@ -1069,6 +1069,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 467 | SPEC-33 Q30: director prerequisites, pending target and spawn readiness | ADR-0099; actual GameplayActive guard, pending transit destination, unconverted spawn pose/AI shift sequence, unload-safe sweep. ENCT remains separate. | Tech lead |
 | 468 | SPEC-33 Q31: independent encounter follow-up prerequisites | ADR-0100 supplies completed runtime owners for narrative commands, dev commands/probes and formations; combined integration acceptance unchanged. | Tech lead |
 | 469 | SPEC-33 Q32: ENCT restore lifecycle and combat save guard | Preserve restored pending/global state across Loaded; atomic payload validation and raw unknown preservation; connect existing PlayerCombatStatus to session save blocker, with zero damage tick sentinel. | Tech lead |
+| 470 | SPEC-33 Q33: encounter dev commands and queued combat requests | Use real services; zero-return combat is explicitly queued-or-refused without claimed success; per-scenario typed defeat baselines; relations queue through existing owner. | Tech lead |
 
 ## Measurements
 

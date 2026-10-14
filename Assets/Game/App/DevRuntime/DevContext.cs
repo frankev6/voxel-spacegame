@@ -18,6 +18,7 @@ namespace Game.App.DevRuntime
         readonly List<GameObject> sceneRoots = new List<GameObject>();
         readonly List<AudioListener> listeners = new List<AudioListener>();
         readonly Dictionary<string, long> eventBaseline;
+        readonly Dictionary<Game.Core.ContentHash, long> defeatBaseline;
         readonly long errors, exceptions, warnings, logSequence;
         World queryWorld;
         bool typesLoaded;
@@ -30,7 +31,7 @@ namespace Game.App.DevRuntime
             if (snapshot)
             {
                 errors = Logs.Errors; exceptions = Logs.Exceptions; warnings = Logs.Warnings; logSequence = Logs.MessageCount;
-                eventBaseline = Events.Snapshot();
+                eventBaseline = Events.Snapshot(); defeatBaseline = Events.DefeatSnapshot();
             }
         }
         public DevContext CreateScenarioContext() => new DevContext(Host, true);
@@ -46,6 +47,8 @@ namespace Game.App.DevRuntime
         public long LogWarnings => Logs.Warnings - warnings;
         public long LogStartSequence => logSequence;
         public long EventCount(string name) => Events.Count(name) - (eventBaseline != null && eventBaseline.TryGetValue(name, out long count) ? count : 0);
+        internal long EncounterDefeatedCount(Game.Core.ContentHash encounter) => Events.DefeatCount(encounter) -
+            (defeatBaseline != null && defeatBaseline.TryGetValue(encounter, out long count) ? count : 0);
         public Camera GameplayCamera => TryGetService<Game.Presentation.Services.CameraRigService>(out var rig) ? rig.Camera : null;
         public Entity PlayerShipRoot
         {
