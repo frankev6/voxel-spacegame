@@ -1070,6 +1070,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — NAR-011 focused acceptance green; production config repaired — astra (gpt-6)
+
+- c4ac97b0 completes the four named context fixtures using one-cell ship/direct requests; NAR-017 worker deliverye83a0606 reviewed and integrated6276ae7b. f661fa35/6670c072 fix namespace/extension imports exposed by compile. Compile43027 terminal0, zero CS warnings; EditMode52808 terminal0: 10 passed/0 failed, 0.4966072s test bodies (4 context,5 runtime,1 debugger). Evidence Logs/playtest/narrative-live/{compile.log,editmode.xml,editmode.log}. Spec-required: NAR-0114, NAR-0171; extra:0.
+- Production newgame/T2 PlayMode3205 hit a real boot failure: missing NarrativeConfigDefinition asset. Stopped the exact failed Unity process rather than waiting out its fixture timeout (terminal143, no results XML; no PlayMode acceptance claim). Evidence boot-failed.log. ef32547c adds/registers narrative_config with specified defaults. Source/data repair awaits the focused production retry. Stray InitTestScened9168eae scene/meta removed only after terminal exit; unrelated QualitySettings/_Test metadata preserved.
+- No Unity active. Both NAR tasks remain unaccepted pending live boot/relevant regression; NAR-011 routing also still needs explicit live suppression evidence beyond read-only review224. Presentation assigned final boot/lifecycle review; other workers genuine integration/dependency waits. DEV-00937d1d116 and sandbox fix still pending. Previous bridge turn and this acceptance/config repair are progress.
+
 ### 2026-10-13 — NAR-011 frame bridge and acceptance fixtures authored — astra (gpt-6)
 
 - 915ffb2f adds NarrativeTickBridgeSystem after managed-event delivery, with world readiness, UI-layer, dialog/travel, player/hulk and combat gates. ADR-0078/Q365 supplies a read-only navigation-layer query and places both drain/bridge in Unity's OrderLast partition. Bootstrap binding/catalog failure and direct-update event-order cases added.
