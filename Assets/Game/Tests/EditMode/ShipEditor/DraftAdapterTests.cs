@@ -65,8 +65,8 @@ namespace Game.Tests.EditMode.ShipEditor
             ulong before = f.Reader.ComputeDraftHash();
             using var records = new NativeList<BlockRecord>(Allocator.TempJob); f.Reader.Enumerate(records);
             Assert.AreEqual(1, records.Length); Assert.AreEqual(int3.zero, records[0].Origin);
-            using var operations = new NativeArray<DiffOp>(1, Allocator.Temp);
-            operations[0] = new DiffOp { Kind = DiffOpKind.Remove, Record = record };
+            using var operations = new NativeArray<DiffOp>(new[] {
+                new DiffOp { Kind = DiffOpKind.Remove, Record = record } }, Allocator.Temp);
             using var touched = new NativeList<int3>(Allocator.Temp);
             f.Writer.Apply(operations, damage.AsArray(), true, touched); Assert.AreEqual(0, f.Draft.SolidCellCount);
             f.Writer.Apply(operations, damage.AsArray(), false, touched); Assert.AreEqual(before, f.Reader.ComputeDraftHash());
