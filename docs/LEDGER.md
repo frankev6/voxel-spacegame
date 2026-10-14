@@ -1076,6 +1076,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — QST-003 runtime authored — astra (gpt-6)
+
+- 63a88873 replaces QuestService shells with canonical indexed instances, accept/stage baselines, idempotent start/repeatable contracts, ordered progression/effects, failure/completion, tracking, logs/objective reads and restore suppression. Q371 resolves saved-bit authority and nested effect defaults. QUST import and live adapter/registration remain QST-007 and QST-006/008.
+- Spec-required: 7 functional + 1 advisory fixture pending authoring, extra: 0. Not compiled/tested/accepted yet; next focused batch will include pending NAR-018 fact editing. No Unity active.
+- Economy worker implements ClueService; combat audits remaining dialog prerequisites; presentation review230 found no debugger defects and is now reviewing quest runtime. Previous dependency repair and this source implementation are progress.
+
 ### 2026-10-13 — NAR-018 partial source integration — astra (gpt-6)
 
 - Worker2751035d integrated4ca00b3 under ADR-0062: selected fact edits and debug_menus use Debugger writes; baselines and Play beat call canonical owners. Q369 mirrors SPEC-40 Q32. Status remains in progress because QST-003/005/006 and DLG-006 are unfinished; unavailable controls do not satisfy live acceptance.
