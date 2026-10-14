@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Narrative gameplay routes authored:** NAR-011 39b6abf7/a6474598 add hull request translation and available world-owner routing, uncompiled/unaccepted. General RemoveBody still needs owner semantics (destruction can leave a hulk), then boot/session/tick wiring and remaining3 cases before validation. No Unity active. NAR-017 active243; DEV-00937d1d116 delivery pending, sandbox diagnosis265 active; presentation API review223 complete/dependency wait. Previous context turn and current routing work are progress.
+
 - **Live narrative context started:** NAR-011 claimed bef52421; 4e20b697 adds context/scope and ADR-0075 hooks plus one required fixture, uncompiled/unaccepted. Next world routing, boot/session and tick bridge, then one focused batch. No Unity active. NAR-017 active242; DEV-009 delivered37d1d116 (integration pending, sandbox diagnosis dispatched); presentation review221 inventories routing APIs. Previous turn accepted NAR-010; this turn adds source implementation.
 
 - **Narrative runtime accepted:** NAR-010 c2e2084d done; compile93898 clean and focused EditMode66456 terminal0 with5 passes (0.1487802s test bodies). Two advisory fixtures compiled only; no Unity active. Next dispatch NAR-017 to existing combat worker and implement NAR-011 live context/bootstrap. DEV-009 active262 with explicit sandbox spawn gap for lead integration; presentation dependency wait. Source review240 found no defects.

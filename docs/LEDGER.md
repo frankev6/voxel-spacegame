@@ -1068,6 +1068,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — NAR-011 gameplay routes authored — astra (gpt-6)
+
+- 39b6abf7 adds narrative repair/damage request translation: heal existing cells through Restores; deterministic reservoir selection of a live solid surface cell, cell-size-scaled radius and configured damage through Damage. a6474598 routes current authored system/time, fleet grants with owned clones, body replacement, editor flow, audio and notifications. Missing faction/territory/encounter/travel/merchant owners report explicit task-owned fallbacks.
+- Source only, uncompiled/unaccepted. General RemoveBody is explicitly unfinished: MarkBodyDestroyed may retain a hulk and RemoveStorySpawn handles only story spawns; resolve the owner API semantics before acceptance. Remaining: this removal contract, boot/session composition, tick bridge and three required cases, then one compatible focused batch. Spec-required: 1 authored of4, extra: 0; no Unity/performance run this turn.
+- Presentation API review223 completed and informs these routes; combat NAR-017 active243. DEV-009 delivery37d1d116 still awaits integration, sandbox diagnosis265 active. Previous turn context implementation and this turn gameplay routes are progress.
+
 ### 2026-10-13 — NAR-011 context and scope implementation started — astra (gpt-6)
 
 - Claimed bef52421; 4e20b697 adds LogicContext with injected owners, eight-deep scope stack, live campaign seed and ADR-0075 continuation/rejection hooks. One combined required scope fixture authored. Uncompiled/unaccepted; world adapter, boot/session composition, presentation bridge and remaining three required cases are next. Spec-required: 1 authored of4, extra: 0. No Unity this turn.

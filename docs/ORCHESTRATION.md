@@ -9,7 +9,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-017 | Claimed after NAR-010 acceptance; existing worker receives read-only debugger implementation | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-009 | Delivered37d1d116, pending integration; bounded sandbox diagnosis dispatched | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-011 API review | Bounded read-only routing inventory active221 | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | API inventory223 delivered; no ready standard implementation | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Narrative gameplay routes authored:** NAR-011 39b6abf7/a6474598 add hull request translation and available world-owner routing, uncompiled/unaccepted. General RemoveBody still needs owner semantics (destruction can leave a hulk), then boot/session/tick wiring and remaining3 cases before validation. No Unity active. NAR-017 active243; DEV-00937d1d116 delivery pending, sandbox diagnosis265 active; presentation API review223 complete/dependency wait. Previous context turn and current routing work are progress.
 
 - **Live narrative context started:** NAR-011 claimed bef52421; 4e20b697 adds context/scope and ADR-0075 hooks plus one required fixture, uncompiled/unaccepted. Next world routing, boot/session and tick bridge, then one focused batch. No Unity active. NAR-017 active242; DEV-009 delivered37d1d116 (integration pending, sandbox diagnosis dispatched); presentation review221 inventories routing APIs. Previous turn accepted NAR-010; this turn adds source implementation.
 
