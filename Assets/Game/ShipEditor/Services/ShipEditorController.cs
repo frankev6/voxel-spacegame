@@ -20,7 +20,7 @@ namespace Game.ShipEditor.Services
         readonly Action requestLeave;
         readonly ProfilerMarker marker = new("ShipEditorController.Tick");
         internal readonly PreviewBuffer Preview = new();
-        internal readonly HashSet<int3> Selection = new();
+        internal Selection Selection => context.Selection;
         IEditorTool active;
         ToolId previousTool = ToolId.Place;
         bool disposed, previewValid;
@@ -158,7 +158,7 @@ namespace Game.ShipEditor.Services
         {
             if (disposed) return;
             active?.Cancel(); foreach (var tool in tools.Values) if (tool is IDisposable owner) owner.Dispose();
-            context.Dispose(); Preview.Dispose(); Selection.Clear(); tools.Clear(); FocusRequested = null; disposed = true;
+            context.Dispose(); Preview.Dispose(); tools.Clear(); FocusRequested = null; disposed = true;
         }
     }
 }

@@ -15,6 +15,7 @@ namespace Game.ShipEditor.Validation
         NativeHashSet<int3> reservedMissing = new(64, Allocator.Persistent);
         NativeHashMap<int3, int> missingCounts = new(64, Allocator.Persistent);
         NativeHashMap<BlockRecord, BlockRecord> origins = new(64, Allocator.Persistent);
+        NativeParallelMultiHashMap<int3, BlockRecord> byOrigin = new(64, Allocator.Persistent);
         NativeHashSet<BlockRecord> cores = new(4, Allocator.Persistent);
         internal int Cores => cores.Count;
         internal BlockRecord? Core
@@ -39,6 +40,14 @@ namespace Game.ShipEditor.Validation
         internal bool IsReservedMissing(int3 cell) => reservedMissing.Contains(cell);
         internal int MissingCount(int3 cell) => missingCounts.TryGetValue(cell, out int count) ? count : 0;
         internal bool TryGetBlock(BlockRecord identity, out BlockRecord block) => origins.TryGetValue(identity, out block);
+        internal void AtOrigin(int3 origin, NativeList<BlockRecord> output)
+        {
+            if (byOrigin.TryGetFirstValue(origin, out var record, out var iterator))
+                do { output.Add(record); } while (byOrigin.TryGetNextValue(out record, ref iterator));
+        }
+        internal bool HasOrigin(int3 origin) => byOrigin.ContainsKey(origin);
+        internal void AllOrigins(NativeHashSet<int3> output)
+        { foreach (var entry in origins) output.Add(entry.Key.Origin); }
         internal bool TryGetBounds(out int3 min, out int3 max)
         {
             bool exists = X.TryGetBounds(out int x0, out int x1);
@@ -47,7 +56,7 @@ namespace Game.ShipEditor.Validation
         }
         internal void Initialize(VoxelStructure source, EditorContext context)
         {
-            Clearance.Clear(); reservedMissing.Clear(); missingCounts.Clear(); origins.Clear(); X.Clear(); Y.Clear(); Z.Clear(); cores.Clear();
+            Clearance.Clear(); reservedMissing.Clear(); missingCounts.Clear(); origins.Clear(); byOrigin.Clear(); X.Clear(); Y.Clear(); Z.Clear(); cores.Clear();
             var reader = new DraftReader(source, context);
             using var records = new NativeList<BlockRecord>(Allocator.TempJob);
             using var bytes = new NativeList<byte>(Allocator.Temp);
@@ -69,8 +78,14 @@ namespace Game.ShipEditor.Validation
         void Change(BlockRecord record, NativeArray<byte> bytes, EditorContext context, int delta)
         {
             var footprint = context.Footprints.Get(record.Block, record.Orient);
-            if (delta > 0) { var identity = record; identity.DamageOffset = -1; origins.Add(identity, identity); }
-            else origins.Remove(record);
+            if (delta > 0) { var identity = record; identity.DamageOffset = -1; origins.Add(identity, identity); byOrigin.Add(identity.Origin, identity); }
+            else
+            {
+                origins.Remove(record);
+                if (byOrigin.TryGetFirstValue(record.Origin, out var found, out var iterator))
+                    do { if (found.Equals(record)) { byOrigin.Remove(iterator); break; } }
+                    while (byOrigin.TryGetNextValue(out found, ref iterator));
+            }
             if (context.Definitions.Value.Blocks[record.Block].IsCore)
             { if (delta > 0) cores.Add(record); else cores.Remove(record); }
             foreach (var clearance in footprint.Clearance) Clearance.Add(record.Origin + clearance, delta);
@@ -92,6 +107,7 @@ namespace Game.ShipEditor.Validation
             Clearance.Dispose();
             if (reservedMissing.IsCreated) reservedMissing.Dispose();
             if (origins.IsCreated) origins.Dispose();
+            if (byOrigin.IsCreated) byOrigin.Dispose();
             if (cores.IsCreated) cores.Dispose(); if (missingCounts.IsCreated) missingCounts.Dispose();
         }
     }

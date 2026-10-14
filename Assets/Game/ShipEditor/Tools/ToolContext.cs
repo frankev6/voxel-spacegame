@@ -14,6 +14,7 @@ namespace Game.ShipEditor.Tools
         internal readonly ApplyReport Report = new();
         internal readonly EditBatch Batch = new();
         internal readonly SymmetryMapper Mapper;
+        internal readonly Selection Selection;
         readonly ValidationScratch previewScratch = new();
         readonly PlacementValidator previewValidator;
         NativeList<BlockRecord> copies = new(Allocator.Persistent);
@@ -28,7 +29,7 @@ namespace Game.ShipEditor.Tools
         {
             Session = session ?? throw new ArgumentNullException(nameof(session));
             Content = content ?? throw new ArgumentNullException(nameof(content));
-            Mapper = new SymmetryMapper(content);
+            Mapper = new SymmetryMapper(content); Selection = new Selection(session, content);
             previewValidator = new PlacementValidator(content, session.Placement, previewScratch);
         }
         internal void SetError(PlacementError error) => Error = error;
@@ -101,7 +102,7 @@ namespace Game.ShipEditor.Tools
         }
         public void Dispose()
         {
-            Batch.Dispose(); previewScratch.Dispose();
+            Selection.Dispose(); Batch.Dispose(); previewScratch.Dispose();
             if (copies.IsCreated) copies.Dispose(); copies = default;
         }
     }
