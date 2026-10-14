@@ -180,9 +180,9 @@ namespace Game.Narrative.Dialog
                     if (!IsActive || generation != dialogToken || blockingGeneration != blockToken || !blocked) return;
                     blocked = false; resumePending = true;
                 };
-                effect.Apply(context); return DialogCommandResult.Block;
+                effect.Apply(context); LogicEffectTrace.Applied(context); return DialogCommandResult.Block;
             }
-            effect.Apply(context); return stopPending ? DialogCommandResult.Stop : DialogCommandResult.Continue;
+            effect.Apply(context); LogicEffectTrace.Applied(context); return stopPending ? DialogCommandResult.Stop : DialogCommandResult.Continue;
         }
         public void OnNodeStarted(string node)
         { rollFrame = new RollFrame { Node = node, Visit = ++nodeVisitIndex, Parent = rollFrame }; }

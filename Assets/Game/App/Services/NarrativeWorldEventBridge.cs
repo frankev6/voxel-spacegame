@@ -173,6 +173,9 @@ namespace Game.App.Services
         void OnEntry(StarSystemEntered value)
         {
             if (disposed) return;
+            // Loading rehydrates the already-saved location. Streaming still publishes
+            // readiness, but it must not create a narrative visit or trigger an entry beat.
+            if (value.Reason == StarSystemEntryReason.Load) { Location(); return; }
             Add(systemsEntered, 1);
             Add(FactFamily.Visited, resolveAnchor(value.StarSystemValue), 1);
             Location();

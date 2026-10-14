@@ -108,6 +108,8 @@ namespace Game.Galaxy.Services
             var next = new StarSystemId(value.StarSystemValue);
             byte owner = GetOwnerFaction(next), previous = GetOwnerFaction(previousSystem);
             previousSystem = next;
+            // Restore the previous-owner baseline without announcing a new crossing.
+            if (value.Reason == StarSystemEntryReason.Load) return;
             if (owner != 255 && owner != previous)
                 EventBus<TerritoryEntered>.Publish(new TerritoryEntered(factions.Indices.ByIndex(owner).Id.Hash, next.Value));
         }

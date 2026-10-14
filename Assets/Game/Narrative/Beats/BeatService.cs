@@ -165,7 +165,12 @@ namespace Game.Narrative.Beats
         void Apply(CompiledEffectList effects, in LogicScope scope)
         {
             context.PushScope(scope);
-            try { if (effects != null && !effects.ApplyAll(context, requirements)) Trace(LogicTraceKind.EffectRejected, scope.BeatIndex); }
+            try
+            {
+                if (effects == null) return;
+                if (!effects.ApplyAll(context, requirements)) Trace(LogicTraceKind.EffectRejected, scope.BeatIndex);
+                else if (!effects.IsEmpty) LogicEffectTrace.Applied(context);
+            }
             finally { context.PopScope(); }
         }
         void Ended(DialogEnded ended)
@@ -177,7 +182,7 @@ namespace Game.Narrative.Beats
                 current = 0;
                 if (ended.PendingTerminal == null) return;
                 context.PushScope(Scope(ended.BeatIndex, ended.Scope, LogicUsage.BeatEffect));
-                try { ended.PendingTerminal.Apply(context); } finally { context.PopScope(); }
+                try { ended.PendingTerminal.Apply(context); LogicEffectTrace.Applied(context); } finally { context.PopScope(); }
             }
             finally { currentIntroduction = false; }
         }

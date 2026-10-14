@@ -101,7 +101,7 @@ namespace Game.Narrative.Quests
         {
             if (effects == null || effects.IsEmpty && !effects.HasErrors) return;
             context.PushScope(Scope(i, LogicUsage.QuestEffect));
-            try { effects.ApplyAll(context, requirements); }
+            try { if (effects.ApplyAll(context, requirements) && !effects.IsEmpty) LogicEffectTrace.Applied(context); }
             finally { context.PopScope(); }
         }
         void Trace(QuestInstance i, LogicTraceKind kind, int oldValue = 0, int newValue = 0)
