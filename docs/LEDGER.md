@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 82 | 9 | 0 | 0 | 89 | 0 | 180 | 7 |
+| M3 | 82 | 8 | 0 | 0 | 90 | 0 | 180 | 8 |
 | M4 | 11 | 2 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -394,9 +394,9 @@
 | DLG-003 | Dialog validator rules and generated files | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-002 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | 32bbc244 | Validator/tagger/generators; real outputs byte-identical on repeat; four required cases pass across focused run and one retry. |
 | DLG-004 | Yarn Spinner 3 compatibility spike | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-002 | yes | todo |  |  |  |  |
 | DLG-005 | GATE: Yarn Spinner adoption | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-004 | no | todo |  |  |  |  |
-| DLG-006 | DialogService, memory and DLGS chunk | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, DLG-003, NAR-011, CORE-003, CORE-007 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead implements command lookup, lifecycle, memory and DLGS; accepted ADR required for single-effect accessor. |
+| DLG-006 | DialogService, memory and DLGS chunk | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, DLG-003, NAR-011, CORE-003, CORE-007 | yes | done | astra (gpt-6) | 2026-10-13 | 99290d38 | Queued lifecycle, scoped blocking/terminal flow, detour-safe rolls and DLGS; seven direct cases pass; production runner/registration DLG-007; spec-required: 7, extra: 0 |
 | DLG-007 | Production dialog runner (path chosen by DLG-005) | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-005, DLG-006, DLG-003 | no | todo |  |  |  |  |
-| DLG-008 | Dialog presenter | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-006 | no | todo |  |  |  |  |
+| DLG-008 | Dialog presenter | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-006 | yes | todo |  |  |  |  |
 | DLG-009 | Dialog view screen | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, UI-001, INP-001 | no | todo |  |  |  |  |
 | DLG-010 | Speakers and illustrations | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 6629f3aa | Metadata integrated; all converted tag IDs resolve. Seven approved portrait/illustration sprites unavailable; remains partial, no new art or owner gate. |
 | DLG-011 | Dialog PlayMode scenarios | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-007, DLG-009, QST-001 | no | todo |  |  |  |  |
@@ -1095,6 +1095,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DLG-006 done: dialog runtime and memory persistence — astra (gpt-6)
+
+- 99290d38 implements service lifecycle, queued option/resume calls, terminal/abort/interruption, per-block stale-callback protection, detour-safe deterministic rolls and canonical validated DLGS restore. Review264 identified two state bugs; fixed and review265 confirms both resolved. Production runner/bootstrap registration remains DLG-007 as specified.
+- Compile39639 terminal0, zero warning CS; focused EditMode16722 terminal0: seven passed, zero failed, 0.1308754s test bodies. Evidence Logs/playtest/dialog-runtime. spec-required: 7, extra: 0; advisory Pump_Idle authored/compiled but not run. No full/perf/soak loop.
+- DLG-0130d09a8cf and DEV-01162f2c25e cross-reviews305/283 report no findings; integration pending. DLG-008 presenter now unlocks. Previous execution-loop implementation and current passing acceptance are progress. No Unity active.
 
 ### 2026-10-13 — DLG-006 execution loop authored — astra (gpt-6)
 

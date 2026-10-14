@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Dialog runtime accepted:** DLG-00699290d38 passes seven direct cases (0.1309s bodies), compile clean. Review fixes stale merchant callbacks and detour roll restoration. Next DLG-008 presenter worker, integrate DLG-013/DEV-011 deliveries and continue production runner prerequisites. No Unity active.
+
 - **Dialog execution loop authored:** DLG-0061925068d replaces the service shell with queued progression, terminal/blocking handling, cleanup and deterministic rolls. Still uncompiled/unaccepted; next seven required functional cases and review corrections, then one compatible batch. All three existing workers now review concrete deliveries/runtime; no Unity active.
 
 - **Dialog memory persistence authored:** DLG-006f610e52e adds canonical DLGS save/validated restore; lifecycle and seven-case acceptance still pending. No Unity run. DLG-0130d09a8cf and DEV-01162f2c25e delivered, existing combat/economy cross-review; presentation has a verified ready-task dependency wait until dialog runtime unlocks presenter work. Next finish runtime and validate a compatible focused batch.
