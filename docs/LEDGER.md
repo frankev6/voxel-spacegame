@@ -422,7 +422,7 @@
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c0f0c244 | 17 assets plus existing Scrap; real catalog/readback zero errors; two required checks pass; three existing quest-item warnings retained |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
 | EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 9c627fd | Editor contracts/config; 4 required tests; runtime tools remain EDT-002 onward |
-| EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | todo |  |  |  |  |
+| EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead builds rotated footprints, block item map and editor context; one focused batch after five required cases. |
 | EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | no | todo |  |  |  |  |
 | EDT-004 | Edit history and diff commands | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001 | yes | todo |  |  |  |  |
 | EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | no | todo |  |  |  |  |
