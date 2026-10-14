@@ -269,6 +269,7 @@ namespace Game.App.Boot
             hudSync.Bind(Screens.HudModel, hudNames, Input.GetBindingDisplay);
             Input.BindingsChanged += hudSync.RefreshBindings;
             Screens.BindSceneRoots(hudSync, Input.GetBindingDisplay, editorServices);
+            Screens.BindHudPresenters(Input, Content.Catalog);
             world.GetExistingSystemManaged<SceneNavigationBridgeSystem>().Unbind();
             Defeat = Push(new DefeatWatcher(Session, Save, UI, GameConfig));
             Defeat.Bind();

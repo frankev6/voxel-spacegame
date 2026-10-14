@@ -13,16 +13,15 @@ namespace Game.Presentation.Presenters
         bool disposed;
         public bool IsBound => query != null;
         public HudObjectivePresenter(HudViewModel model) => this.model = model ?? throw new ArgumentNullException(nameof(model));
-        /// <summary>False means no runtime ShipLogQuery is available; QST-006 owns that implementation.</summary>
+        /// <summary>False means no canonical ShipLogQuery is supplied; composition binds it when registered.</summary>
         public bool Bind(ShipLogQuery source)
         {
             if (disposed) throw new ObjectDisposedException(nameof(HudObjectivePresenter)); Unbind();
             if (source == null) return false;
-            try { source.Changed += Refresh; }
-            catch (NotImplementedException) { return false; }
+            source.Changed += Refresh;
             query = source;
             try { Refresh(); return true; }
-            catch (NotImplementedException) { Unbind(); return false; }
+            catch { Unbind(); throw; }
         }
         public void Unbind()
         {
@@ -34,7 +33,8 @@ namespace Game.Presentation.Presenters
             if (query == null || !query.TryGetTracked(out var quest, out var objective))
             { model.HasObjective = false; model.ObjectiveTitle = ""; model.ObjectiveText = ""; return; }
             model.ObjectiveTitle = quest.Title;
-            model.ObjectiveText = objective.Target > 0 ? objective.Text + " (" + NumberStringCache.Get(objective.Progress) + "/" + NumberStringCache.Get(objective.Target) + ")" : objective.Text;
+            string text = string.IsNullOrEmpty(objective.Text) ? quest.StageText : objective.Text;
+            model.ObjectiveText = objective.Target > 0 ? text + " (" + NumberStringCache.Get(objective.Progress) + "/" + NumberStringCache.Get(objective.Target) + ")" : text;
             model.HasObjective = true;
         }
         public void Dispose() { if (disposed) return; Unbind(); disposed = true; }

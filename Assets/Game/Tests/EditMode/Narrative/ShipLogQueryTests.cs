@@ -35,7 +35,7 @@ namespace Game.Tests.EditMode.Narrative
             }
             Assert.Fail("Fixture field missing: " + name);
         }
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             internal readonly QuestDefinition Main, Contract;
             internal readonly ClueDefinition Alpha = TestContentFactory.Create<ClueDefinition>("clue_alpha");

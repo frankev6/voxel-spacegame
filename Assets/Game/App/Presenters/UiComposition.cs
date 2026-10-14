@@ -22,6 +22,9 @@ namespace Game.App.Presenters
         readonly DockPresenter dockPresenter;
         readonly Game.Presentation.Presenters.InventoryPresenter inventoryPresenter;
         readonly Game.Presentation.Presenters.MerchantPresenter merchantPresenter;
+        Game.Presentation.Presenters.HudNotificationPresenter hudNotifications;
+        Game.Presentation.Presenters.HudObjectivePresenter hudObjective;
+        Game.Presentation.Presenters.ScreenHotkeyRouter screenHotkeys;
         MainMenuPresenter menuPresenter;
         PausePresenter pausePresenter;
         bool rootsBound, disposed;
@@ -95,6 +98,52 @@ namespace Game.App.Presenters
 
         internal void ShowSettings() => settingsPresenter.Show();
 
+        internal void BindHudPresenters(Game.Input.InputService input, Game.Data.Services.ContentCatalog content)
+        {
+            CheckAlive();
+            if (!rootsBound) throw new InvalidOperationException("Install scene roots before HUD presenters.");
+            if (screenHotkeys != null) throw new InvalidOperationException("HUD presenters are already installed.");
+            hudNotifications = new Game.Presentation.Presenters.HudNotificationPresenter(ui.Notifications, content);
+            hudObjective = new Game.Presentation.Presenters.HudObjectivePresenter(HudModel);
+            screenHotkeys = new Game.Presentation.Presenters.ScreenHotkeyRouter(ui.Navigator, input, ResolveHotkeyScreen,
+                text => ui.Notifications.Post(new Game.UI.Data.Notification { Kind = Game.UI.Data.NotificationKind.Info, Label = text }));
+            hudNotifications.Bind(); screenHotkeys.Bind();
+            RebindHudObjective();
+        }
+        // QST-008 calls this if its canonical query is registered after BindHudPresenters.
+        internal bool BindHudObjectiveQuery(Game.Narrative.ShipLog.ShipLogQuery query)
+        {
+            CheckAlive();
+            if (hudObjective == null) throw new InvalidOperationException("Install HUD presenters before binding their query.");
+            return hudObjective.Bind(query);
+        }
+        void RebindHudObjective()
+        {
+            if (hudObjective == null) return;
+            hudObjective.Unbind();
+            if (Game.Core.Services.TryGet<Game.Narrative.ShipLog.ShipLogQuery>(out var query)) hudObjective.Bind(query);
+        }
+        UIScreen ResolveHotkeyScreen(string key)
+        {
+            UIScreen screen;
+            // Get is the existing canonical registration API. Pending feature views stay unavailable.
+            try
+            {
+                switch (key)
+                {
+                    case "inventory": screen = ui.Navigator.Get<InventoryView>(); break;
+                    case "fleet": screen = ui.Navigator.Get<FleetView>(); break;
+                    case "ship-log": screen = ui.Navigator.Get<ShipLogView>(); break;
+                    case "galaxy-map": screen = ui.Navigator.Get<GalaxyMapView>(); break;
+                    case "system-map": screen = ui.Navigator.Get<StarSystemMapView>(); break;
+                    default: return null;
+                }
+            }
+            catch (InvalidOperationException) { return null; }
+            if (screen is FleetView) fleetPresenter.Refresh();
+            return screen;
+        }
+
         internal void BindDialog(Game.Narrative.Dialog.DialogService service, Game.Data.Services.ContentCatalog content, IUISoundSink sound)
         {
             CheckAlive();
@@ -148,7 +197,9 @@ namespace Game.App.Presenters
             inventoryPresenter.Bind(economy.Inventory, economy.Wallet);
             merchantPresenter.ResetSession();
             fleetPresenter.Bind(Game.Core.Services.Get<Game.App.Session.GameSession>().Fleet, Game.Core.Services.Get<Game.Galaxy.Services.DockingService>());
-            // TODO(HUD-009/010/013/014/015/016/018/019): rebind the owning feature presenters
+            hudObjective?.Unbind();
+            if (value.Reason != SessionResetReason.Cleared) RebindHudObjective();
+            // TODO(HUD-013/014/015/016): rebind the owning feature presenters
             // to the new session models here when those features install their production bindings.
         }
         internal void Tick()
@@ -165,6 +216,7 @@ namespace Game.App.Presenters
             if (disposed) return;
             disposed = true;
             EventBus<SessionReset>.Unsubscribe(OnSessionReset);
+            screenHotkeys?.Dispose(); hudNotifications?.Dispose(); hudObjective?.Dispose();
             DialogPresenter?.Dispose();
             Game.Core.Services.Unregister(dockPresenter); dockPresenter.Dispose();
             loadingPresenter.Dispose();
@@ -178,6 +230,6 @@ namespace Game.App.Presenters
             menuPresenter?.Dispose();
             if (rootsBound) flow.SetRootScreens(null);
         }
-        // Remaining downstream screens and HUD-010 hotkeys retain their own implementation tasks.
+        // Remaining downstream screens retain their own implementation tasks.
     }
 }
