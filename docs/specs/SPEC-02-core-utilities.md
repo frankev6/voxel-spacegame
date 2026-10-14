@@ -1461,7 +1461,7 @@ Every Core file with a mutable static has `[UnityEngine.RuntimeInitializeOnLoadM
 
 | 16 | Event streams can await a later fixed tick or pause beyond four rendered frames | Persistent stream allocations with existing explicit disposal | Tech lead | Resolved FND-020 / ADR-0056: registered NativeStreams use Persistent; EndRead/stale cleanup/Dispose keep ownership and fences. Read-set metadata remains same-update TempJob. |
 
-| 17 | Settings UI exposes camera orientation but Core cannot reference Presentation | Persist byte CameraYawModeIndex (0 FollowHeading, 1 Free), copy/compare/clamp in Controls; missing JSON defaults to0. App maps to Presentation enum. ADR-0073. | Tech lead | Resolved HUD-005. |
+| 17 | Settings UI exposes camera orientation but Core cannot reference Presentation | Persist byte CameraYawModeIndex (0 FollowHeading, 1 Free), copy/compare/clamp in Controls; missing JSON defaults to 0. App maps to Presentation enum. ADR-0073. | Tech lead | Resolved HUD-005. |
 
 ## 11. References
 

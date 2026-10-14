@@ -40,7 +40,7 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 - EDT-019 accepted 38c38243: all four required overlay checks pass, including Metal support and 65,536 instances in one category draw. Next EDT-022 host and compatible pending HUD deliveries; updated active table is authoritative.
 
-- EDT-022 accepted 1448b2fb/b5922750: six required host behaviors pass across initial and focused lifetime results. Native check attributes Toolkit caches explicitly and forbids editor allocations; launcher remains EDT-023. Pending compatible HUD003/006/007 hashes in ledger; active table tracks recycled workers.
+- EDT-022 accepted 1448b2fb/b5922750: six required host behaviors pass across initial and focused lifetime results. Native check attributes Toolkit caches explicitly and forbids editor allocations; launcher remains EDT-023. Pending compatible HUD-003/006/007 hashes in ledger; active table tracks recycled workers.
 
 - EDT-023 claimed: real launcher/commit targets/world return. TRV-014 delivery 2e03c4cb received; economy worker has a recorded dependency wait (no ready standard implementation without missing frontier owners). FND-015 active on the same presentation thread.
 
@@ -48,58 +48,58 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 - HUD-006/007 accepted67c25036: 4/5 specified cases pass. HUD-0033/5: two failures assigned to its original worker, now active. Lead next HUD-009 actual sync before replacing temporary roots and installing EDT-023. No empty HUD source or fake interaction owner.
 
-- HUD-00939074534 source integrated: six required EditMode behaviors accepted, production Bind/root wiring and three performance fixture definitions remain. All three workers delivered and are in explicitly recorded dependency waits. Next lead actual HUD/editor composition, not another empty screen or placeholder owner.
+- HUD-009 39074534 source integrated: six required EditMode behaviors accepted, production Bind/root wiring and three performance fixture definitions remain. All three workers delivered and are in explicitly recorded dependency waits. Next lead actual HUD/editor composition, not another empty screen or placeholder owner.
 
 - Production roots accepted 057f29ea: HUD-002 four required cases and live flight HUD/creative Lab verified. EDT-023 scenario acceptance remains open. HUD-003 four of five pass, Continue correction returned to original worker; other two deliveries retain genuine dependency waits.
 
 - b9f9cb46 accepts HUD-003 after actual Continue passes (worker b1da267c fixes fixture panel lifetime). EDT-023 real Lab save/reload/MainMenu return passes; four fleet/dialog scenarios remain. All three recorded workers delivered, genuine frontier-owner dependency waits; no duplicate/review-only assignments.
 
-- FND-01518910e5a accepted: root-owned defeat recovery, actual save/load/menu and all scene starts pass. Same three workers delivered/accepted; next lead must unblock EncounterDirector/dialog/map/dev-overlay owners for substantial ready standard follow-ups. No routine test queues.
+- FND-015 18910e5a accepted: root-owned defeat recovery, actual save/load/menu and all scene starts pass. Same three workers delivered/accepted; next lead must unblock EncounterDirector/dialog/map/dev-overlay owners for substantial ready standard follow-ups. No routine test queues.
 
-- ENC-007247fd49a replaces the throwing shell and is composed; three spawn/ambush/cap checks pass. Lead retains schedule/defeat/despawn/pending acceptance and two advisory fixtures before acceptance. All three exact workers confirmed idle with genuine dependencies; director completion unlocks standard follow-ups.
+- ENC-007 247fd49a replaces the throwing shell and is composed; three spawn/ambush/cap checks pass. Lead retains schedule/defeat/despawn/pending acceptance and two advisory fixtures before acceptance. All three exact workers confirmed idle with genuine dependencies; director completion unlocks standard follow-ups.
 
 - ENC-007 accepted a445825b (ten functional cases across batch/fix; two advisory fixtures authored, deferred). ADR-0100 and claim57dbe986 unlock same three workers on ENC-012 commands, ENC-009 narrative and ENC-013 formations. Lead next ENC-008 save persistence; serialize primary Unity checks only after compatible deliveries.
 
-- ENC-008 f9c6f0d5 accepted: 3 binary checks and actual SaveGame/LoadGame same-instance respawn/combat refusal pass. Worker ENC-012230f64b8 delivered; others implementing. Integrate compatible encounter deliveries next.
+- ENC-008 f9c6f0d5 accepted: 3 binary checks and actual SaveGame/LoadGame same-instance respawn/combat refusal pass. Worker ENC-012 230f64b8 delivered; others implementing. Integrate compatible encounter deliveries next.
 
-- ENC-012a9adf708 and ENC-013078e8058 accepted with two focused cases each. Those two workers have genuine ready-standard dependency waits; ENC-009 worker still finishing source. Next lead DEV-012 unlocks standard overlay/interaction work; ENC-009 acceptance unlocks ENC-011.
+- ENC-012 a9adf708 and ENC-013 078e8058 accepted with two focused cases each. Those two workers have genuine ready-standard dependency waits; ENC-009 worker still finishing source. Next lead DEV-012 unlocks standard overlay/interaction work; ENC-009 acceptance unlocks ENC-011.
 
-- DEV-01253b1466a accepted with three focused cases and real GPU screenshot; ENC-009aae617cd accepted with five routing cases. All three same workers now dispatched implementation: DEV-014 interaction, DEV-013 island/spatial overlays, ENC-011 actual encounter scenarios. Prior dependency waits superseded; only dialogue scenario remains genuinely dependent on DLG-007/QST-008. Lead next actual dialogue owner and remaining playground integration.
+- DEV-012 53b1466a accepted with three focused cases and real GPU screenshot; ENC-009 aae617cd accepted with five routing cases. All three same workers now dispatched implementation: DEV-014 interaction, DEV-013 island/spatial overlays, ENC-011 actual encounter scenarios. Prior dependency waits superseded; only dialogue scenario remains genuinely dependent on DLG-007/QST-008. Lead next actual dialogue owner and remaining playground integration.
 
 - DLG-007 d835fa49 accepted: eleven conformance checks and live dialog choice/pause verified. Combat worker recycled to now-ready DLG-011; DEV-013 and ENC-011 continue. Pending compatible overlays remain for lead integration. Next frontier BeatService unlocks automatic story interactions.
 
-- QST-00530762271 accepted with nine required functional cases; two advisory fixtures deferred. Presentation recycled to ready QST-006. Combined DEV-013/014 accepted38d812a3 with five focused cases and live rendering; other workers DLG-011 and ENC-011 remain active.
+- QST-005 30762271 accepted with nine required functional cases; two advisory fixtures deferred. Presentation recycled to ready QST-006. Combined DEV-013/014 accepted38d812a3 with five focused cases and live rendering; other workers DLG-011 and ENC-011 remain active.
 
-- ECO-007a7a433f2 accepted: five functional salvage cases, two advisory fixtures deferred. Combat worker recycled to ready ECO-008 real launcher/production wiring. DLG-011571ae6f6 retains actual intro QST-006/008 prerequisite; no substitute queue. Other workers QST-006 and ENC-011 continue.
+- ECO-007 a7a433f2 accepted: five functional salvage cases, two advisory fixtures deferred. Combat worker recycled to ready ECO-008 real launcher/production wiring. DLG-011 571ae6f6 retains actual intro QST-006/008 prerequisite; no substitute queue. Other workers QST-006 and ENC-011 continue.
 
-- CAM-0078da588cd accepted: four required occlusion checks and seven flight regressions pass; real-ray advisory measurement deferred. ENC-0113415b964 delivered pending focused acceptance and QST-008 dialogue case; same worker now finishes ENC-014 production territory wiring. ECO-008 and QST-006 remain active.
+- CAM-007 8da588cd accepted: four required occlusion checks and seven flight regressions pass; real-ray advisory measurement deferred. ENC-011 3415b964 delivered pending focused acceptance and QST-008 dialogue case; same worker now finishes ENC-014 production territory wiring. ECO-008 and QST-006 remain active.
 
-- ENC-011d950ca41 integrated: four real combat/pending-save scenarios pass; neutral derelict correctly blocked initial raider shot, fixed fixture placement rather than runtime logic. Dialogue defeat remains QST-008; separate opt-in battle deferred. All three workers confirmed active; no replacements.
+- ENC-011 d950ca41 integrated: four real combat/pending-save scenarios pass; neutral derelict correctly blocked initial raider shot, fixed fixture placement rather than runtime logic. Dialogue defeat remains QST-008; separate opt-in battle deferred. All three workers confirmed active; no replacements.
 
-- ENC-014461ffc36 accepted: four required functional cases and five adapter regressions pass, production service lifetime wired. Existing seeds0 preserved; advisory100k deferred. Worker recycled to QST-009 compiler/content reconciliation, other two implementing ECO-008/QST-006.
+- ENC-014 461ffc36 accepted: four required functional cases and five adapter regressions pass, production service lifetime wired. Existing seeds0 preserved; advisory100k deferred. Worker recycled to QST-009 compiler/content reconciliation, other two implementing ECO-008/QST-006.
 
-- QST-0078e16b5e7 accepted: actual atomic QUST and raw preservation; four functional checks plus seven quest/nine beat regressions pass. QST-006c7b8fa41 ready for lead integration. All three exact workers active on ECO-008/QST-009/HUD-010; lead next real story bridge/registration after adapter acceptance.
+- QST-007 8e16b5e7 accepted: actual atomic QUST and raw preservation; four functional checks plus seven quest/nine beat regressions pass. QST-006 c7b8fa41 ready for lead integration. All three exact workers active on ECO-008/QST-009/HUD-010; lead next real story bridge/registration after adapter acceptance.
 
-- QST-0064738dc21/f71186b4 accepted: six required cases plus four save regressions pass. ADR-0107 unlocks concrete QST-008 routing; same combat worker implementing it. Lead next integrates delivered merchant/salvage/dock batch, then real story composition. Other workers QST-009/HUD-010 active.
+- QST-006 4738dc21/f71186b4 accepted: six required cases plus four save regressions pass. ADR-0107 unlocks concrete QST-008 routing; same combat worker implementing it. Lead next integrates delivered merchant/salvage/dock batch, then real story composition. Other workers QST-009/HUD-010 active.
 
 - Economy/dock/HUD batch00094da7/188ecaae/92d9da23 accepted: nineteen focused cases pass including regressions, compile clean. Next lead QST-009 import/actual story integration; same three workers implement QST-008/QST-010/HUD-004/005.
 
-- QST-009f468139e accepted: actual98-node opening program, two required content checks and fourteen existing regression cases pass across corrections. Compiler/validator array traversal and actual adapter namespace fixed. QST-010 worker fixes real missing hand-in reward (Q19/global489 reserved); QST-008 and HUD-014 active.
+- QST-009 f468139e accepted: actual98-node opening program, two required content checks and fourteen existing regression cases pass across corrections. Compiler/validator array traversal and actual adapter namespace fixed. QST-010 worker fixes real missing hand-in reward (Q19/global489 reserved); QST-008 and HUD-014 active.
 
-- HUD-015f2df90b8 accepted: actual retained mapcontrol, five required rendered cases pass; two advisory fixtures deferred. Lead next QST-00855981e06 integration; combatworker nextHUD016 real maps; other workers QST010/HUD014 continue.
+- HUD-015 f2df90b8 accepted: actual retained mapcontrol, five required rendered cases pass; two advisory fixtures deferred. Lead next QST-008 55981e06 integration; combatworker nextHUD016 real maps; other workers QST-010/HUD-014 continue.
 
-- QST-008841a3882/64156bf6 accepted: five routing checks plus playground entry/reset pass; actual sandbox lifecycle fixed. Live campaign initial territory greeting precedes waking-up: assigned to QST-010 (Q22/global493), not claimed full opening acceptance. HUD-016 owns accepted Route flag ADR0112/global492, HUD-014 continues real log.
+- QST-008 841a3882/64156bf6 accepted: five routing checks plus playground entry/reset pass; actual sandbox lifecycle fixed. Live campaign initial territory greeting precedes waking-up: assigned to QST-010 (Q22/global493), not claimed full opening acceptance. HUD-016 owns accepted Route flag ADR0112/global492, HUD-014 continues real log.
 
-- DEV-0215871d067 adds actual creative Blueprint Lab beacon (eight areas); expanded existing playground test passes, live Lab screenshot inspected, reset returns from MainMenu. Same three workers actively implement maps/log/chapter. Remaining docked fleet scenarios are EDT-023, not claimed by the creative beacon.
+- DEV-021 5871d067 adds actual creative Blueprint Lab beacon (eight areas); expanded existing playground test passes, live Lab screenshot inspected, reset returns from MainMenu. Same three workers actively implement maps/log/chapter. Remaining docked fleet scenarios are EDT-023, not claimed by the creative beacon.
 
-- EDT-02371bbad74 accepted: all five actual station-dialog/editor/respawn cases pass in4.2s; successful interaction key release fixed. HUD01695ecdaf8 and QST0108bb1bcd1 ready for compatible integration; same workers recycled to NAR018/ECO010, HUD014 still active.
+- EDT-023 71bbad74 accepted: all five actual station-dialog/editor/respawn cases pass in 4.2s; successful interaction key release fixed. HUD-016 95ecdaf8 and QST-010 8bb1bcd1 ready for compatible integration; same workers recycled to NAR-018/ECO-010, HUD-014 still active.
 
-- HUD-014a754ae35/HUD-01647ddeaa4 accepted: ten required functional cases pass with actual rumor-to-map navigation, zero skips. Theme root colour resolution fixed. NAR0180dd949f3 delivered; same worker recycled to TRV014 remaining integration. QST010 pending lead acceptance.
+- HUD-014 a754ae35/HUD-016 47ddeaa4 accepted: ten required functional cases pass with actual rumor-to-map navigation, zero skips. Theme root colour resolution fixed. NAR-018 0dd949f3 delivered; same worker recycled to TRV-014 remaining integration. QST-010 pending lead acceptance.
 
-- QST-010 integration a2c53015 remains unaccepted: actual route reaches The Drift after real probe combat, patrol hand-in and rumor. Lead fixed deferred DockPresenter navigation covering the active dialogue and corrected scenario key release/option selection; pending-spawn rebasing now passes ten existing checks and cache/derelict interactions succeed; save refusal was the normal damage cooldown (0 hostiles,310/600 ticks); fixture shortens its restored config, scenario waits on actual save eligibility. No full route or save/replay pass claimed. Three exact workers recycled as above; NAR019 remains active.
+- QST-010 integration a2c53015 remains unaccepted: actual route reaches The Drift after real probe combat, patrol hand-in and rumor. Lead fixed deferred DockPresenter navigation covering the active dialogue and corrected scenario key release/option selection; pending-spawn rebasing now passes ten existing checks and cache/derelict interactions succeed; save refusal was the normal damage cooldown (0 hostiles,310/600 ticks); fixture shortens its restored config, scenario waits on actual save eligibility. No full route or save/replay pass claimed. Three exact workers recycled as above; NAR-019 remains active.
 
-- 14:39Z recovery: all three recorded worker turns were interrupted with source preserved. Resumed the same threads on QST010 later-route support, NAR019 load safety and DEV021 actual story/log/map beacons. No duplicates; Editor stopped and no test run active before lead resumed focused validation.
+- 14:39Z recovery: all three recorded worker turns were interrupted with source preserved. Resumed the same threads on QST-010 later-route support, NAR-019 load safety and DEV-021 actual story/log/map beacons. No duplicates; Editor stopped and no test run active before lead resumed focused validation.
 
-- QST0104bb3198b accepted: actual full route8.512s and replay4.520s pass, including reward consumption and Whisper arrival. NAR0199d6c7c96 load boundary/unknown FACT cases pass; worker repairs paused-query deterministic fixture. DEV021e5850d70/0c2e5059 adds three real story/supplies/map beacons and fixes canonical rumor condition scope; focused entry/reset check pending.
+- QST-010 4bb3198b accepted: actual full route8.512s and replay4.520s pass, including reward consumption and Whisper arrival. NAR-019 9d6c7c96 load boundary/unknown FACT cases pass; worker repairs paused-query deterministic fixture. DEV-021 e5850d70/0c2e5059 adds three real story/supplies/map beacons and fixes canonical rumor condition scope; focused entry/reset check pending.
 
-- Final compatible batch: QST010 and NAR019 accepted, DEV021 eleven functional areas accepted with live story screenshot. All three exact workers have delivered; genuine ready-standard waits remain while lead integrates remaining already-delivered scenarios and takes next frontier work. No new duplicate threads or review-only assignment.
+- Final compatible batch: QST-010 and NAR-019 accepted, DEV-021 eleven functional areas accepted with live story screenshot. All three exact workers have delivered; genuine ready-standard waits remain while lead integrates remaining already-delivered scenarios and takes next frontier work. No new duplicate threads or review-only assignment.
