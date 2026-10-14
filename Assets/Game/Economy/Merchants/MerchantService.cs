@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Game.Core;
 using Game.Data.Definitions;
 using Game.Data.Services;
 
@@ -13,7 +14,8 @@ namespace Game.Economy
         internal readonly EconomyConfigDefinition Config;
         readonly ContentCatalog catalog;
         readonly Func<double> universalTime;
-        readonly Dictionary<ushort, State> states = new Dictionary<ushort, State>();
+        readonly Dictionary<ContentId, State> states = new Dictionary<ContentId, State>();
+        internal IReadOnlyDictionary<ContentId, State> SavedStates => states;
         bool trading;
         public MerchantSession Current { get; private set; }
 
@@ -22,7 +24,8 @@ namespace Game.Economy
             public readonly List<MerchantStockState> Rows = new List<MerchantStockState>();
             public readonly IReadOnlyList<MerchantStockState> View;
             public double LastRestock;
-            public State(MerchantDefinition merchant, double now) { View = Rows.AsReadOnly(); Restock(merchant, now); }
+            public State() { View = Rows.AsReadOnly(); }
+            public State(MerchantDefinition merchant, double now) : this() { Restock(merchant, now); }
             public void Restock(MerchantDefinition merchant, double now)
             {
                 // Rebuild in authored order; this also removes buybacks and restores missing/depleted authored rows.
@@ -48,7 +51,7 @@ namespace Game.Economy
             double now = universalTime();
             if (double.IsNaN(now) || double.IsInfinity(now)) throw new InvalidOperationException("Merchant game time must be finite.");
             Current?.Close();
-            if (!states.TryGetValue(index, out var state)) states.Add(index, state = new State(merchant, now));
+            if (!states.TryGetValue(merchant.Id, out var state)) states.Add(merchant.Id, state = new State(merchant, now));
             else if (merchant.RestockHours > 0 && now - state.LastRestock >= (double)merchant.RestockHours * 3600)
                 state.Restock(merchant, now);
             return Current = new MerchantSession(this, state, merchant, relation, refuse, refusalReason);
@@ -63,7 +66,12 @@ namespace Game.Economy
         internal void Closed(MerchantSession session) { if (ReferenceEquals(Current, session)) Current = null; }
         void CheckIdle() { if (trading) throw new InvalidOperationException("Cannot open or reset merchants during a trade."); }
         public void ResetToEmpty() { CheckIdle(); Current?.Close(); states.Clear(); }
-        // TODO(ECO-006): the spec leaves INVT restore parameters unspecified; define them with the participant.
-        internal void RestoreState() => throw new System.NotImplementedException("ECO-006");
+        // Content IDs also retain removed merchants until their definitions return.
+        internal void RestoreState(ContentId id, double lastRestock, List<MerchantStockState> rows)
+        {
+            CheckIdle();
+            var state = new State { LastRestock = lastRestock };
+            state.Rows.AddRange(rows); states.Add(id, state);
+        }
     }
 }

@@ -191,7 +191,7 @@ namespace Game.App.Boot
                 () => Session.CampaignSeed, () => logicWorld.UniversalTime);
             Register(economy); Register<Game.Data.Logic.ILogicEconomy>(economy);
             Session.RegisterModel(economy); Session.RegisterNewGameInitializer(economy);
-            // TODO(ECO-006): register the real INVT participant once its binary owner is implemented.
+            Save.Register(new Game.Economy.InventorySaveParticipant(economy, Content.Catalog));
             var narrativeOwner = new Game.Narrative.ShipLog.NarrativeLogicAdapter();
             // TODO(QST-006): narrativeOwner routes remain task-owned shells until quest/beat services exist.
             var narrative = NarrativeBootstrap.Build(Content.Catalog, config.ContentDatabase.Definitions,

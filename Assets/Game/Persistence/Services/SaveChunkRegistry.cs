@@ -14,7 +14,7 @@ namespace Game.Persistence.Services
             new ChunkRegistration("FACN", 30, "SPEC-33", "faction relations"),
             new ChunkRegistration("QUST", 40, "SPEC-42", "quests, stage baselines, clues, mysteries"),
             new ChunkRegistration("DLGS", 50, "SPEC-41", "dialog state (once-only lines, active beat)"),
-            new ChunkRegistration("INVT", 60, "SPEC-50", "wallet, cargo slots (overflow included) with slot indices and capacity, merchant stock (no hotbar)"),
+            new ChunkRegistration("INVT", 60, "SPEC-50", "wallet, cargo slots (overflow included) with slot indices; capacity is derived, merchant stock (no hotbar)"),
             new ChunkRegistration("FLET", 70, "SPEC-01", "fleet records, flagship, ship structures as VOXS (damage written back first)"),
             new ChunkRegistration("GLXY", 80, "SPEC-30", "per-star-system deltas, edited structures as Partial VOXS"),
             new ChunkRegistration("PLOC", 90, "SPEC-31", "player location: StarSystemId, UniversePosition (double3), yaw, docked body"),

@@ -480,7 +480,7 @@ namespace Game.Voxel.Data
 | 30 | `FACN` | SPEC-33 | `Game.Galaxy` | faction relations |
 | 40 | `QUST` | SPEC-42 | `Game.Narrative` | quests, stage baselines, clues, mysteries |
 | 50 | `DLGS` | SPEC-41 | `Game.Narrative` | dialog state (once-only lines, active beat) |
-| 60 | `INVT` | SPEC-50 | `Game.Economy` | wallet, cargo slots (overflow included) with slot indices and capacity, merchant stock (no hotbar) |
+| 60 | `INVT` | SPEC-50 | `Game.Economy` | wallet, cargo slots (overflow included) with slot indices; capacity is derived (SPEC-50 §5.5), merchant stock (no hotbar) |
 | 70 | `FLET` | SPEC-01 | `Game.App` | fleet records, flagship, ship structures as VOXS (damage written back first) |
 | 80 | `GLXY` | SPEC-30 | `Game.Galaxy` | per-star-system deltas, edited structures as Partial VOXS |
 | 90 | `PLOC` | SPEC-31 | `Game.Galaxy` | player location: `StarSystemId`, `UniversePosition` (double3), yaw, docked body |
