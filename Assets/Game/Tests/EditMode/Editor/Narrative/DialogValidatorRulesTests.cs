@@ -10,7 +10,7 @@ using Game.Editor.Narrative;
 using Game.Editor.Narrative.Dialog;
 using Game.Tests.EditMode.Data;
 using Game.Tests.EditMode.Data.Logic;
-using Newtonsoft.Json.Linq;
+using UnityEngine;
 using NUnit.Framework;
 using UnityEditor;
 
@@ -18,6 +18,10 @@ namespace Game.Tests.EditMode.Editor.Narrative
 {
     public sealed class DialogValidatorRulesTests
     {
+        [Serializable] sealed class Ysls { public YslsRow[] commands = null, functions = null; }
+        [Serializable] sealed class YslsRow { public string yarnName = null; public YslsParam[] parameters = null; public YslsReturn @return = null; }
+        [Serializable] sealed class YslsParam { public string name = null; }
+        [Serializable] sealed class YslsReturn { public string type = null; }
         const string Root = "Assets/Game/Content/_Test/DLG003";
         readonly List<ContentDefinition> definitions = new();
         [SetUp] public void SetUp()
@@ -121,13 +125,13 @@ namespace Game.Tests.EditMode.Editor.Narrative
             string facts = File.ReadAllText(Root + "/_Generated/facts.yarn");
             StringAssert.Contains("<<declare $story_flag = false>>", facts); StringAssert.Contains("<<declare $story_number = 0>>", facts);
             Assert.IsFalse(facts.Contains("$sys_"));
-            var ysls = JObject.Parse(File.ReadAllText(Root + "/_Generated/logic.ysls.json"));
+            var ysls = JsonUtility.FromJson<Ysls>(File.ReadAllText(Root + "/_Generated/logic.ysls.json"));
             var registry = new LogicFunctionRegistry();
             foreach (var info in registry.Snapshot().Where(info => (info.AllowedUsage & (info.IsEffect ? LogicUsage.DialogCommand : LogicUsage.DialogCondition)) != 0))
             {
-                var row = ysls[info.IsEffect ? "commands" : "functions"].Single(item => (string)item["yarnName"] == info.Name);
-                Assert.AreEqual(info.Params.Length, row["parameters"].Count());
-                Assert.AreEqual(!info.IsEffect, row["return"] != null);
+                var row = (info.IsEffect ? ysls.commands : ysls.functions).Single(item => item.yarnName == info.Name);
+                Assert.AreEqual(info.Params.Length, row.parameters.Length);
+                Assert.AreEqual(!info.IsEffect, row.@return != null);
             }
             var snapshot = registry.Snapshot(); snapshot[0].Name = "changed"; snapshot[0].Params = Array.Empty<LogicParamInfo>();
             Assert.IsFalse(registry.Snapshot().Any(info => info.Name == "changed"));
