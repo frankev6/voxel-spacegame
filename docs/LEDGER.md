@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 42 | 16 | 0 | 0 | 124 | 0 | 182 | 5 |
+| M3 | 41 | 17 | 0 | 0 | 124 | 0 | 182 | 5 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -454,7 +454,7 @@
 | UI-013 | Accessibility options | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-010, UI-012 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | e3fa8660 | Accessibility settings applied to live root; scaled tokens/reduced motion; 1 EditMode + 4 PlayMode pass |
 | HUD-001 | Public contract types | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | UI-001, CORE-001, CAM-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | a983d88 | Screen/VM/snapshot contracts; static notification lifetime fix f847997; 3 required tests; full batch 901 EM / 128 PM, zero failures |
 | HUD-002 | UI composition, screen registration and root switching | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, UI-001, UI-002, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead composition/root/session infrastructure under ADR-0072; preserve existing playable menu/pause/flight |
-| HUD-003 | Main menu and new game | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: menu view and service-backed presenter with name prompt/continue/quit / composition hookup and layout acceptance remain |
+| HUD-003 | Main menu and new game | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-011, PERS-002, PERS-006, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Economy worker: complete main-menu/new-game prompt and five required cases; lead retains composition/root navigation. |
 | HUD-004 | Save and load slots | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, PERS-002, PERS-005, PERS-006, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | a8d00e7a/9e5db398: view + persistent composition; 5 required screen and4 boot checks pass; session-race review repaired b05b62f; visible menu routing pending |
 | HUD-005 | Settings screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, UI-012, UI-013, FND-004, INP-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Presentation worker next after bounded HUD-004 review; ADR-0072/Q327 construction split, lead owns actual navigation |
 | HUD-006 | Pause screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-003, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Combat worker: finish existing pause view/presenter, key hints and four required acceptance cases; lead retains root wiring. |
@@ -1045,6 +1045,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 443 | SPEC-51 Q50: damaged-footprint connectivity | Resolved: surviving-cell union, removal by previous roots, retain final split root, second-buffer job and exact undo/redo masks; overlay host owns refresh cadence. | Tech lead |
 | 444 | SPEC-61 Q40: flight HUD concrete prerequisites | Resolved: completed framework/view contracts unblock full HUD view implementation; snapshot synchronization and root wiring stay HUD-009/002. | Tech lead |
 | 445 | SPEC-61 Q41: pause-screen concrete prerequisites | Resolved under ADR-0072: completed UI/pause/session contracts unblock implementation; lead retains root wiring. | Tech lead |
+| 446 | SPEC-61 Q42: main-menu concrete prerequisites | Resolved under ADR-0072: completed UI/save/flow contracts unblock complete menu/prompt; lead retains root wiring. | Tech lead |
 
 ## Measurements
 

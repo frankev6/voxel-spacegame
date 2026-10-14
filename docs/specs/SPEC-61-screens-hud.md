@@ -457,7 +457,7 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 ### HUD-003 — Main menu and new game
 - **Milestone:** M3
 - **Tier:** standard — view on an existing view model; presenter steps in §5.4
-- **Depends on:** `HUD-002`
+- **Depends on:** `HUD-001`, `UI-003`, `UI-004`, `UI-005`, `UI-006`, `UI-007`, `UI-008`, `UI-009`, `UI-011`, `PERS-002`, `PERS-006`, `FND-009`
 - **Do:** `MainMenuView` (UXML + `screens/main-menu.uss`), `MainMenuPresenter` (§5.4).
 - **Files:** `Assets/Game/UI/Views/MainMenuView.cs`, `Assets/Game/UI/Views/Uxml/MainMenuView.uxml`, `Assets/Game/UI/Theme/screens/main-menu.uss`, `Assets/Game/App/Presenters/MainMenuPresenter.cs`
 - **Acceptance criteria:**
@@ -746,3 +746,5 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 | 40 | HUD-007 view construction depends on unfinished composition instead of completed UI contracts | Under ADR-0072 use concrete completed view/control/theme/input framework prerequisites. Implement the full authored flight HUD and direct-update path now; real snapshot synchronization and root wiring remain HUD-009 and HUD-002. No fabricated gameplay source. | Tech lead — resolved; ledger Q444 |
 
 | 41 | HUD-006 pause-screen completion depends on unfinished root composition | Use completed framework, modal, pause and session contracts for construction/acceptance under ADR-0072. Complete existing view/presenter and four cases; lead retains root wiring and visible playground integration. | Tech lead — resolved; ledger Q445 |
+
+| 42 | HUD-003 menu acceptance depends on incomplete root composition | Complete existing menu and prompt implementation against the completed framework/save/flow owners under ADR-0072. Lead retains root switching, shared composition and Blueprint Lab launcher. | Tech lead — resolved; ledger Q446 |
