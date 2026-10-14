@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 13 | 12 | 0 | 0 | 157 | 0 | 182 | 4 |
+| M3 | 13 | 11 | 0 | 0 | 158 | 0 | 182 | 4 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -483,7 +483,7 @@
 | DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-008, DEV-012, INP-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 38d812a3 | Combined source accepted; real overlays and input interaction, five required checks pass; Q477/Q478. |
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | yes | done | economy (gpt-6.1-sol high) | 2026-10-13 | 40421f42 | Real inv/give/facts owners, probes and CLI; three required cases pass in focused seven-case batch. |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-14 | f6304ccd | Save/load/jump commands integrated; all 3 required checks pass (position fixture corrected a5833668); real menu routing/toworld acceptance still HUD-002-dependent; Q430 |
-| DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | in-progress | astra (gpt-6) | 2026-10-14 | 0c2e5059 | Owner-requested expansion: power/abilities, salvage and isolated campaign portal implementing in three exclusive worker modules; accepted baseline has eleven actual beacons, including real story/log, supplies and rumor map; expanded owner-feature case passes. Live story log screenshot verified, zero new errors; reset clears canonical demo state. |
+| DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | done | astra (gpt-6) | 2026-10-14 | 9805787b | Fourteen playable areas; power/shield/boost, actual salvage and isolated campaign. Direct run shortcuts and Lab/campaign reset. Expanded owner-feature case passes 2.50s; live power/cargo inspected. Paused for independent QA, not owner acceptance. |
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
 | MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e9d50f3c | Three exact factions generated; duplicate skipped, player/AI ownership preserved; rerun byte/GUID/manifest stable |
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3d65849 | Protected ordered loot assets/catalog; rerun byte-identical; 1 required and 1 migration-safety test |
@@ -1104,6 +1104,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 | 498 | SPEC-40 Q36/Q37: real load safety and effect trace | Load entry refreshes location without incrementing narrative visits or emitting territory crossings; real successful dispatches produce existing EffectApplied trace. Three specified live scenarios use actual owners; acceptance pending focused checks. | Tech lead |
 | 499 | SPEC-70 Q35: real story playground | Three explicit sandbox beacons use canonical quest/clue/cargo/log/map owners, preserve quiet startup and physical world, and reset through the session. Existing entry/reset case extended; acceptance pending scope repair. | Tech lead |
+| 500 | SPEC-70 Q36: usable power, salvage and campaign trials | Resolved: prepare approved shield through editor/fleet owners before player spawn; normal ability input and real salvage transfer; same-profile campaign with no progress grants; console run shortcuts and isolated Lab reset. Details SPEC-70 Q36 and implementation 9805787b. | Tech lead |
 
 ## Measurements
 
@@ -1216,6 +1217,14 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — DEV-021 consolidated playground; owner QA pause — astra (gpt-6)
+
+- Frank requested review/consolidation of all three latest workers, explicitly let worker 2 finish, expose usable gameplay through the playground/console, then stop for independent QA. Worker sources be333788 (power), 73a8bb89 (campaign), 00e379f1 (salvage) integrated as 1b6a5a47/7f074453/ff21a6bb; lead wiring and fixes 9805787b. All three exact threads confirmed idle, worktrees retained, no new assignments. Native goal and existing heartbeat remain paused; do not resume without Frank.
+- Fourteen areas: all eleven previous areas plus power/abilities, salvage and real practice campaign. `playground run=<id>` closes Console and invokes actual owners; shield/boost actions verify state changes, repeated salvage run uses actual interaction, station shortcut opens ARK in the practice campaign. Reset returns directly from the isolated Lab/campaign; saved blueprints/settings are retained. Full reviewer guide: docs/QA-PLAYGROUND.md.
+- Review fixes: salvage cleanup no longer references private SpawnReadToken; public grid/despawn state controls cancellation. Added console-context handling, isolated Lab reset, bounded pad map expansion. Live screenshot caught clipped power values and instrumentation over inventory: wrapped readouts, temporarily hid beacon map and hid instruments outside Flight. Final live screenshots inspected; no gameplay-owner substitutes or new art.
+- `tools/compile.sh` clean, zero warning CS. Expanded existing PlaygroundTests.Enter_Interact_Reset: 1 passed, 0 failed/skipped, 2.4998576s; includes console closure, actual shield/boost state, salvage cargo transfer, Lab reset and real campaign intro/reset plus prior eleven-area checks. spec-required: 1, extra: 0. Evidence Logs/playtest/qa-handoff/playground.xml and compile.log. Subsequent presentation-only wrapping/visibility fixes compiled and checked live, no duplicate full suite or soak.
+- Live salvage recovered 33 items including 20 scrap through the production owner; reset succeeded in 0.972s and left quiet World running. Logs after the trial/reset: zero new errors/warnings. Startup retains existing unsupported first-child stylesheet warnings, advisory content power warnings and GridSpawnSystem lookup warning; these are not new C# warnings. Screenshots Logs/playtest/playground-qa-power.png, playground-qa-salvage.png, playground-qa-inventory.png. Owner QualitySettings and two untracked content metas preserved/excluded; task-owned font churn restored. M4 stays deferred. Independent review and Frank's M1–M3 play verification remain outstanding.
 
 ### 2026-10-14 — Owner sequencing: M1–M3 before further M4 — astra (gpt-6)
 

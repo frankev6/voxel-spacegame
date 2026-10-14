@@ -1,14 +1,16 @@
 # Implementation dispatch board
 
+**Owner QA pause requested 2026-10-14:** consolidate the current three DEV-021 deliveries (let salvage worker finish), run focused acceptance and leave a stable local handoff. Do not dispatch new implementation or resume roadmap work until Frank explicitly resumes after independent QA. This instruction supersedes historical keep-working directions below.
+
 Owner authorization and revised goal: ADR-0062. Read this with HANDOFF and LEDGER on every resumed orchestration turn.
 
 Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DEV-021 | Dispatching power/shield/ability trial module | Lead owns shared routing/tests |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-021 | Dispatching real salvage trial module | Lead owns shared routing/tests |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-021 | Dispatching isolated campaign portal module | Lead owns shared routing/tests |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DEV-021 | Delivered be333788; integrated/validated9805787b; idle for QA | No follow-up until Frank resumes |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-021 | Delivered00e379f1; integrated/validated9805787b; idle for QA | No follow-up until Frank resumes |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-021 | Delivered73a8bb89; integrated/validated9805787b; idle for QA | No follow-up until Frank resumes |
 
 ## Operating rules
 
