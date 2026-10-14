@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-018 | HUD-01695ecdaf8 delivered for lead acceptance; completes real narrative debugger | Actual QST008 owners; no Unity |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | TRV-014 | NAR-0180dd949f3 delivered; completes actual escort transfer integration | Real fleet/travel owners; no Unity |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ECO-010 | QST-010 source delivered pending lead acceptance; implements real economy scenarios | Trade/save/salvage/editor owners integrated; no Unity |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-014 | HUD-004/005 source already wired; implements actual ship-log view/presenter and binding hook | Map route remains HUD-015/016; no fake map; ADR0108 reserved |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ENC-011 | HUD-014c52ad5e2 delivered; completes actual dialogue combat and defeat fact | QST008 owners integrated; no Unity |
 
 ## Operating rules
 
@@ -89,3 +89,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - DEV-0215871d067 adds actual creative Blueprint Lab beacon (eight areas); expanded existing playground test passes, live Lab screenshot inspected, reset returns from MainMenu. Same three workers actively implement maps/log/chapter. Remaining docked fleet scenarios are EDT-023, not claimed by the creative beacon.
 
 - EDT-02371bbad74 accepted: all five actual station-dialog/editor/respawn cases pass in4.2s; successful interaction key release fixed. HUD01695ecdaf8 and QST0108bb1bcd1 ready for compatible integration; same workers recycled to NAR018/ECO010, HUD014 still active.
+
+- HUD-014a754ae35/HUD-01647ddeaa4 accepted: ten required functional cases pass with actual rumor-to-map navigation, zero skips. Theme root colour resolution fixed. NAR0180dd949f3 delivered; same worker recycled to TRV014 remaining integration. QST010 pending lead acceptance.

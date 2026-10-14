@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 13 | 15 | 0 | 0 | 154 | 0 | 182 | 4 |
+| M3 | 13 | 13 | 0 | 0 | 156 | 0 | 182 | 4 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -368,7 +368,7 @@
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | yes | done | astra (gpt-6) | 2026-10-14 | f9c6f0d5 | ENCT v1, atomic raw preservation and Loaded lifecycle; 3 spec checks and 1 real save/load/combat-refusal scenario pass. |
 | ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, NAR-011, NAR-012, NAR-020 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | aae617cd | Worker cb960707 integrated; five real-owner routing/dependency cases pass. Live all-event bridge composition remains QST-008. |
 | ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | cdf292d6 | Ten canonical encounters, six factions, real ARK/Whisper ownership; generation/rerun zero errors, two required checks pass |
-| ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 | d950ca41 | Four real functional scenarios pass; dialogue-driven defeat pending QST-008, opt-in battle authored/deferred. Worker now ENC-014. |
+| ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 | d950ca41 | Four real functional scenarios pass; same worker now completes real dialogue-driven defeat against accepted QST-008; opt-in battle deferred. |
 | ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, ENC-004, DEV-003, DEV-005, DEV-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | a9adf708 | Worker230f64b8 integrated; actual encounter/relation commands, probes and CLI; two required production-owner cases pass. |
 | NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | e39b2d3 | Narrative contracts and precise future-task stubs; 2 required tests; full batch 901 EM / 128 PM, zero failures |
 | NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 67ce3485 | Located lexer/AST/parser; seven focused checks pass; Q305 resolves grammar example |
@@ -465,9 +465,9 @@
 | HUD-011 | Inventory screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-006 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-14 | f8adea23 | Real inventory screen/presenter integrated into UiComposition and playground; five required cases pass; live cargo screen verified. |
 | HUD-012 | Merchant screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-005 | yes | done | combat (gpt-6.1-sol high) | 2026-10-14 | f5e9e949 | Real MerchantSession screen/presenter registered/reset in UiComposition and playground; four required cases pass; live Buy verified. Normal faction launcher remains ECO-008. |
 | HUD-013 | Dialog host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, DLG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f3eea58 | Complete dialog host; five required plus four preserved DLG-009 cases pass. Production story driver remains DLG-007; no fake dialog pad. |
-| HUD-014 | Ship log screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-42 | no | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Source pipeline against accepted QST-006; actual view/query presenter and composition hook. Map navigation acceptance waits HUD-015/016; no substitute map. |
+| HUD-014 | Ship log screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-42 | no | done | sol (gpt-6.1-sol high) | 2026-10-14 | a754ae35 | Canonical log/query and actual selected rumor map navigation; three required cases pass without skips. |
 | HUD-015 | MapCanvas control | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-62 | yes | done | astra (gpt-6) | 2026-10-14 | f2df90b8 | Retained Painter2D maps, transform-only pan/small zoom, 64 labels, token colours and captured point selection; five required cases pass, two advisory fixtures deferred. |
-| HUD-016 | Galaxy map and star-system map screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-015, GAL-008, GAL-011, SYS-007, SYS-008, TRV-006, QST-006 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | ADR-0111 concrete owners; combat worker builds real galaxy/system views, routes and query markers. |
+| HUD-016 | Galaxy map and star-system map screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-015, GAL-008, GAL-011, SYS-007, SYS-008, TRV-006, QST-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 47ddeaa4 | Actual maps, routes, gate reasons, rumor markers and theme colours; seven required cases pass. |
 | HUD-017 | Fleet screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, FND-010, SYS-008, EDT-001, EDT-010 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 0f00dd27 | Fleet view/presenter, canonical committed stats and actual playground trigger; three required cases plus live screenshot pass. Actual edit launcher remains EDT-023; switch unavailable. |
 | HUD-018 | Ship editor host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, EDT-001, EDT-021 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 46d844de | Four-region editor host mounts accepted panels; four required graphics cases pass. Playable editor launcher remains EDT-023/HUD-002. |
 | HUD-019 | Loading and dock screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-006, SYS-008, ECO-001, EDT-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 188ecaae | Actual loading/dock screen and merchant/editor launchers; four required production cases pass, no Ignore. |
@@ -1091,6 +1091,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 484 | SPEC-42 Q16: adapter and ship-log ownership | ADR-0103; bind actual owners, coalesce changes after evaluation, latest quest instance lists, cached journal labels and progress-only invalidation. Raw save history stays QUST-owned. | Tech lead |
 | 483 | SPEC-42 Q18: QUST snapshot/restore boundaries | ADR-0105; parse/validate completely before mutation, preserve missing IDs/baseline names and dormant queue entries; changed unusable quest histories remain raw. No restore effects or fact writes; host owns OnRestored. Existing registry QUST/order40 reused; production registration QST-008. | Tech lead |
 
+| 492 | SPEC-61 Q53: map route and real navigation | Accepted ADR-0112; explicit route edges, actual registered map selection, ancestor theme tokens and canonical owners. Seven required cases pass. | Tech lead |
+| 494 | SPEC-61 Q52: ship log composition | Accepted ADR-0108; canonical query, pooled rows and actual rumor-to-map navigation. Three required cases pass without conditional skips. | Tech lead |
+
 ## Measurements
 
 Record perf gate measurements here (date, task, scenario, numbers, machine).
@@ -1202,6 +1205,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — HUD-014/016 real ship log and map integration accepted — astra (gpt-6)
+
+- HUD-01634529fcb/47ddeaa4 provides actual galaxy/system screens, current location centering, gated destinations and routes, faction colours, rumor and objective markers. Lead fixed missing namespace imports and UI Toolkit local customStyle lookup by resolving approved theme tokens on ancestors; the existing colour case checks the renderer's actual colour. Six initial cases passed; corrected colour case passes. Evidence Logs/playtest/map-views/{initial,colour}.xml. Test count: spec-required: 7, extra: 0.
+- HUD-014f73af688/a754ae35 provides real quest/clue/rumor/mystery/journal views, tracking and read flags; production query binding and map callback now installed after canonical story registration. All three required cases pass, zero skipped, including an actual rumor button opening the real galaxy map with the target selected. Evidence Logs/playtest/ship-log/functional.xml. Test count: spec-required: 3, extra: 0. Compile clean, zero CS warnings; no full suites, performance runs or tuning passes.
+- Same exact workers continue ECO-010, ENC-011 dialogue combat and TRV-014 remaining escort integration. NAR-0180dd949f3 and QST-0108bb1bcd1 delivered pending lead acceptance. Owner QualitySettings/content metas excluded; font test churn restored. No complete opening-chapter acceptance claimed.
 
 ### 2026-10-14 — EDT-023 actual fleet-editor round trips accepted — astra (gpt-6)
 
