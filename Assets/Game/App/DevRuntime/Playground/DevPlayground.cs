@@ -47,7 +47,10 @@ namespace Game.App.DevRuntime.Playground
             new Pad("settings", "05  SETTINGS", 0, -180, "F opens real settings. Change audio, display, accessibility and control settings; close to return to flight."),
             new Pad("merchant", "06  TRADE", 160, -180, "F opens ARK Station Market with real stock, prices, Buy and Sell. First visit grants 2000 test credits; trades change your actual cargo and wallet."),
             new Pad("fleet", "07  FLEET", -320, -180, "F opens your actual fleet. Select a ship to inspect hull condition, blocks, thrust, power, shields and cargo capacity. Docked fleet editing is separate from the creative Lab beacon."),
-            new Pad("editor", "08  BLUEPRINT LAB", -320, 0, "F opens the real creative Blueprint Lab. Place/remove blocks, rotate, mirror, undo/redo, inspect overlays and save a blueprint.\nThis leaves the sandbox. Exit the Lab to Main Menu, then use playground reset to return. Saved blueprints survive reset.")
+            new Pad("editor", "08  BLUEPRINT LAB", -320, 0, "F opens the real creative Blueprint Lab. Place/remove blocks, rotate, mirror, undo/redo, inspect overlays and save a blueprint.\nThis leaves the sandbox. Exit the Lab to Main Menu, then use playground reset to return. Saved blueprints survive reset."),
+            new Pad("story", "09  STORY / SHIP LOG", -160, -360, "F accepts the authored Survey Local Materials quest and reveals Fragmented Warning plus a targeted research-station rumor.\nInspect the real log: track the quest, read the clue, or select Rumors → Show on map. No campaign intro starts."),
+            new Pad("survey", "10  SURVEY SUPPLIES", 0, -360, "F collects one actual palladium (up to three) and opens the survey log. Repeat to see real objective progress and completion of the collection step.\nThe ARK delivery step stays unfinished here; use the campaign for its station dialogue."),
+            new Pad("map", "11  GALAXY / RUMOR", 160, -360, "F opens the real galaxy map at the research-station rumor. Pan, zoom, inspect systems and the quest/rumor markers.\nThis previews the generated galaxy without loading its bodies or starting travel; your sandbox ship stays here.")
         };
         InputService input;
         UIRoot ui;
@@ -162,6 +165,7 @@ namespace Game.App.DevRuntime.Playground
             active = true; enemyRequested = false; tradeGranted = false; pending = 0; nearest = -1;
             courseGate = -1;
             report = "Quiet sandbox ready. No hostile ships spawn until you activate COMBAT.";
+            DevPlaygroundStory.RefreshResetMarkers(ctx);
             BuildPresentation();
             GoTo("flight");
         }
@@ -237,6 +241,11 @@ namespace Game.App.DevRuntime.Playground
                     }
                     else result = DevCommandResult.Fail("Merchant services unavailable");
                     break;
+                case "story":
+                case "survey":
+                case "map":
+                    result = DevPlaygroundStory.Activate(host.Context, ui, pad.Id);
+                    break;
                 case "editor":
                     if (host.Context.TryGetService<GameSession>(out var editorSession) && editorSession.IsSandbox)
                         result = DevCommandResult.Pending(host.AddOperation(new LabEntryOperation(editorSession)), "Opening creative Blueprint Lab");
@@ -296,7 +305,7 @@ namespace Game.App.DevRuntime.Playground
             {
                 nearest = next;
                 if (heading != null) heading.text = next < 0 ? "DEV PLAYGROUND  /  FLY TO A BEACON" : pads[next].Title + "  /  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
-                if (detail != null) detail.text = next < 0 ? "North: Lab / flight / range / enemy · South: fleet / cargo / settings / trade\nConsole: playground goto=<id> · playground status lists all beacons" : pads[next].Detail;
+                if (detail != null) detail.text = next < 0 ? "North: Lab / flight / range / enemy · South: fleet / cargo / settings / trade\nFar south: story / survey supplies / galaxy map. Console: playground goto=<id> · playground status lists all beacons" : pads[next].Detail;
             }
             if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status != DevOperationStatus.Running)
             { pending = 0; SetReport(operation.Status + ": " + operation.Message); }
@@ -367,7 +376,7 @@ namespace Game.App.DevRuntime.Playground
                 dot.style.left = (pads[i].Offset.x + 360) * .24f; dot.style.top = (60 - pads[i].Offset.z) * .30f;
             }
             playerDot = AddLabel(chart, "+", "panel__title"); playerDot.style.position = Position.Absolute;
-            AddLabel(map, "1 Flight    2 Range    3 Enemy\n4 Cargo     5 Settings   6 Trade\n7 Fleet     8 Lab        + Your ship", "text-mono");
+            AddLabel(map, "1 Flight    2 Range    3 Enemy\n4 Cargo     5 Settings   6 Trade\n7 Fleet     8 Lab     9 Story\n10 Survey   11 Map\n+ Your ship", "text-mono");
             ui.GetLayer(UILayer.Hud).Add(map);
             markers = new VisualElement { name = "dev-playground-beacons", pickingMode = PickingMode.Ignore };
             markers.style.position = Position.Absolute; markers.style.left = 0; markers.style.top = 0;

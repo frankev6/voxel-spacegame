@@ -1,4 +1,16 @@
 using System.Collections;
+using System.Collections.Generic;
+using Game.App.Presenters;
+using Game.Data.Definitions;
+using Game.Data.Logic;
+using Game.Data.Services;
+using Game.Galaxy.Data;
+using Game.Galaxy.Services;
+using Game.Narrative.Clues;
+using Game.Narrative.Quests;
+using Game.Narrative.ShipLog;
+using Game.Tests.PlayMode.UI;
+using Game.UI.Data;
 using Game.App.DevRuntime;
 using Game.App.Session;
 using Game.Core;
@@ -6,6 +18,7 @@ using Game.Economy;
 using Game.Simulation;
 using Game.Simulation.Ai;
 using Unity.Entities;
+using Unity.Transforms;
 using Unity.Collections;
 using Game.UI.Services;
 using Game.UI.Views;
@@ -53,6 +66,88 @@ namespace Game.Tests.PlayMode.App
             Assert.IsTrue(ui.Navigator.Get<FleetView>().IsOpen, "Fleet trial must open the real fleet screen");
             Assert.Greater(Services.Get<Game.App.Session.GameSession>().Fleet.Ships.Count, 0);
             ui.Navigator.Pop(ui.Navigator.Get<FleetView>());
+            // The explicit story area uses the registered owners; quiet entry above still has no campaign intro.
+            var catalog = Services.Get<ContentService>().Catalog; var quests = Services.Get<QuestService>();
+            var clues = Services.Get<ClueService>(); var query = Services.Get<ShipLogQuery>(); var screens = Services.Get<UiComposition>();
+            var economy = Services.Get<EconomyService>(); var galaxy = Services.Get<GalaxyService>();
+            var quest = catalog.Get<QuestDefinition>(new ContentId("quest_survey_local_materials")); int questIndex = catalog.IndexOf(quest);
+            int clueIndex = catalog.IndexOf<ClueDefinition>(catalog.Get<ClueDefinition>(new ContentId("clue_fragmented_warning")));
+            var rumor = catalog.Get<RumorDefinition>(new ContentId("rumor_hidden_research_station")); int rumorIndex = catalog.IndexOf<ClueDefinition>(rumor);
+            var palladium = new ContentId("resource_palladium"); var objectives = new List<QuestObjectiveView>();
+            Assert.AreEqual(QuestStatus.NotStarted, quests.GetStatus(questIndex)); Assert.IsFalse(clues.IsKnown(clueIndex)); Assert.IsFalse(clues.IsKnown(rumorIndex));
+            Assert.AreEqual(0, query.Markers.Count, "A fresh quiet sandbox must not retain campaign markers.");
+            var sceneBeforeStory = Game.Session.CurrentScene; var locationBeforeStory = galaxy.State.PlayerLocation;
+            bool hasLocationBeforeStory = galaxy.State.HasPlayerLocation; ulong seedBeforeStory = Game.Session.CampaignSeed;
+            int generationsBeforeStory = galaxy.GenerationCount;
+            // Release the earlier cargo injection before another actual F press; screen changes can finish in one frame.
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("key keys=F release=true", Host.Context).Kind);
+            yield return null;
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=story", Host.Context).Kind);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("key keys=F hold=0.02", Host.Context).Kind);
+            yield return Until(() => ui.Navigator.IsOpen<ShipLogView>(), "F opens the canonical story log", 5);
+            var log = ui.Navigator.Get<ShipLogView>(); Assert.AreSame(log, ui.Navigator.Top);
+            Assert.AreEqual(QuestStatus.Active, quests.GetStatus(questIndex)); Assert.AreEqual(questIndex, quests.TrackedQuestIndex);
+            Assert.AreEqual(1, quests.GetInstanceCount(questIndex)); Assert.IsTrue(clues.IsKnown(clueIndex)); Assert.IsTrue(clues.IsKnown(rumorIndex));
+            int clueOrdinal = clues.OrdinalOf(clueIndex), rumorOrdinal = clues.OrdinalOf(rumorIndex);
+            Assert.Greater(rumorOrdinal, clueOrdinal); Assert.AreEqual(quest.Title, screens.ShipLogModel.QuestTitle);
+            quests.GetObjectives(questIndex, objectives); Assert.AreEqual(0, objectives[0].Progress); Assert.IsFalse(objectives[0].Done);
+            bool objectiveMarker = false, rumorMarker = false;
+            foreach (var marker in query.Markers)
+            {
+                objectiveMarker |= marker.Kind == NarrativeMarkerKind.Objective && marker.QuestIndex == questIndex;
+                rumorMarker |= marker.Kind == NarrativeMarkerKind.Rumor && marker.ClueIndex == rumorIndex && marker.StarSystem == rumor.Target.Id;
+            }
+            Assert.IsTrue(objectiveMarker); Assert.IsTrue(rumorMarker); Assert.IsNotNull(galaxy.Galaxy);
+            Assert.AreEqual(generationsBeforeStory + 1, galaxy.GenerationCount);
+            Assert.AreEqual(sceneBeforeStory, Game.Session.CurrentScene); Assert.AreEqual(seedBeforeStory, Game.Session.CampaignSeed);
+            Assert.AreEqual(hasLocationBeforeStory, galaxy.State.HasPlayerLocation); Assert.AreEqual(locationBeforeStory, galaxy.State.PlayerLocation);
+            Assert.AreEqual(galaxy.Galaxy.StartStarSystem, galaxy.State.CurrentStarSystem, "NewGame initializes chart metadata at its start system; the sandbox has no campaign player location.");
+            DialogTestContext.Activate(log.Root.Q<Button>("ship-log-tab-clues"));
+            Assert.IsTrue(clues.IsSeen(clueIndex), "Selecting the real clue tab records the canonical seen state.");
+            DialogTestContext.Activate(log.Root.Q<Button>("ship-log-close")); Assert.IsFalse(log.IsOpen);
+            for (int collected = 1; collected <= 3; collected++)
+            {
+                Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=survey", Host.Context).Kind);
+                Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind);
+                Assert.AreSame(log, ui.Navigator.Top); Assert.AreEqual(collected, economy.Inventory.CountOf(palladium));
+                quests.GetObjectives(questIndex, objectives); Assert.AreEqual(collected, objectives[0].Progress);
+                Assert.AreEqual(collected == 3, objectives[0].Done); Assert.IsFalse(objectives[1].Done, "This supplies trial does not fake ARK hand-in.");
+                Assert.IsTrue(screens.ShipLogModel.Objectives[0].Text.Contains(collected + "/3"));
+                Assert.AreEqual(collected == 3, screens.ShipLogModel.Objectives[0].IsDone);
+                DialogTestContext.Activate(log.Root.Q<Button>("ship-log-close"));
+            }
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind);
+            Assert.AreEqual(3, economy.Inventory.CountOf(palladium), "Completed collection cannot farm more survey grants.");
+            Assert.AreEqual(1, quests.GetInstanceCount(questIndex)); Assert.AreEqual(clueOrdinal, clues.OrdinalOf(clueIndex)); Assert.AreEqual(rumorOrdinal, clues.OrdinalOf(rumorIndex));
+            DialogTestContext.Activate(log.Root.Q<Button>("ship-log-tab-rumors"));
+            yield return Until(() => log.Root.Q<Button>("ship-log-rumor-map-0") != null, "The actual rumor row is realized", 2);
+            var loadedBeforeMap = Services.Get<StarSystemLoader>().Loaded;
+            DialogTestContext.Activate(log.Root.Q<Button>("ship-log-rumor-map-0"));
+            var map = ui.Navigator.Get<GalaxyMapView>(); Assert.AreSame(map, ui.Navigator.Top);
+            Assert.IsTrue(galaxy.Galaxy.TryGetIndex(StarSystemId.FromAuthored(rumor.Target.Id.Hash), out int rumorSystem));
+            Assert.GreaterOrEqual(screens.GalaxyMapModel.SelectedIndex, 0);
+            var rumorPosition = galaxy.Galaxy.StarSystems[rumorSystem].PositionLy;
+            Assert.AreEqual(rumorPosition, screens.GalaxyMapModel.Data.Points[screens.GalaxyMapModel.SelectedIndex].Pos,
+                "The real rumor route selects the canonical target, even while its name is uncharted.");
+            bool renderedRumor = false;
+            foreach (var marker in screens.GalaxyMapModel.Data.Markers)
+                renderedRumor |= marker.Kind == MapMarkerKind.Rumor && marker.Label == rumor.Title && marker.Pos.Equals(rumorPosition);
+            Assert.IsTrue(renderedRumor, "The actual map data contains the revealed rumor marker.");
+            DialogTestContext.Activate(map.Root.Q<Button>("galaxy-map-close")); Assert.AreSame(log, ui.Navigator.Top);
+            DialogTestContext.Activate(log.Root.Q<Button>("ship-log-close"));
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=map", Host.Context).Kind);
+            var poseBeforeMap = EM.GetComponentData<LocalTransform>(Root);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind);
+            Assert.AreEqual(poseBeforeMap.Position, EM.GetComponentData<LocalTransform>(Root).Position);
+            Assert.AreEqual(generationsBeforeStory + 1, galaxy.GenerationCount, "Repeated beacons reuse the generated metadata, including a valid seed-zero galaxy.");
+            Assert.AreSame(map, ui.Navigator.Top); Assert.GreaterOrEqual(screens.GalaxyMapModel.SelectedIndex, 0);
+            Assert.AreEqual(rumorPosition, screens.GalaxyMapModel.Data.Points[screens.GalaxyMapModel.SelectedIndex].Pos);
+            DialogTestContext.Activate(map.Root.Q<Button>("galaxy-map-close"));
+            Assert.AreEqual(loadedBeforeMap, Services.Get<StarSystemLoader>().Loaded, "Map inspection cannot load campaign bodies into the sandbox.");
+            Assert.IsTrue(Game.Session.IsSandbox); Assert.IsTrue(EM.Exists(originalStation));
+            Assert.AreEqual(sceneBeforeStory, Game.Session.CurrentScene); Assert.AreEqual(locationBeforeStory, galaxy.State.PlayerLocation);
+            Assert.AreEqual(hasLocationBeforeStory, galaxy.State.HasPlayerLocation);
+            Assert.IsFalse(Services.Get<Game.Narrative.Dialog.DialogService>().IsActive, "Explicit quest/clue/map actions must not launch automatic campaign dialogue.");
             Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=combat", Host.Context).Kind);
             yield return RunCommand("playground activate");
             EM.CompleteAllTrackedJobs();
@@ -74,6 +169,10 @@ namespace Game.Tests.PlayMode.App
             yield return RunCommand("playground reset");
             Assert.AreEqual(neutral.BasePlayerRelation, standings.GetRelation(neutral), "Reset clears faction changes as well as the visible trial");
             Assert.IsFalse(Services.Get<Game.Narrative.Dialog.DialogService>().IsActive, "Sandbox reset must not replay the campaign intro");
+            Assert.AreEqual(QuestStatus.NotStarted, quests.GetStatus(questIndex)); Assert.AreEqual(0, quests.GetInstanceCount(questIndex));
+            Assert.IsFalse(clues.IsKnown(clueIndex)); Assert.IsFalse(clues.IsKnown(rumorIndex)); Assert.IsFalse(clues.IsSeen(clueIndex));
+            Assert.AreEqual(0, economy.Inventory.CountOf(palladium)); Assert.AreEqual(0, query.Markers.Count);
+            Assert.IsNull(galaxy.Galaxy, "Reset releases the explicitly generated map through the normal session owner.");
             Assert.IsFalse(EM.Exists(originalPlayer), "Reset disposes previous player");
             Assert.IsFalse(EM.Exists(originalStation), "Reset disposes previous station");
             Assert.IsTrue(EM.Exists(range.Target));
