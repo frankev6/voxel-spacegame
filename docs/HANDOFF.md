@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Inventory persistence started:** ECO-006 claimed febfb6cd on task/ECO-006-inventory-save. Next implement INVT capture/restore and composition registration, including Missing items and unknown merchant preservation, then four focused functional cases; advisory timing fixture will not gate completion. No Unity active. NAR-018 active250; economy INVT review active270; presentation remains in a genuine dependency wait. Previous DEV-009 acceptance is progress.
+
 - **DEV-009 accepted:**348fa4f7 completes world commands and explicit sandbox NPC spawning. Compile12672 clean; spawn/grid pass7809 and teleport retry54555 passes after actual physics fixture setup. Three required cases, no broad/perf run; evidence Logs/playtest/dev009. No Unity active. Next ECO-006 inventory saving; NAR-018 active249, economy reviewing INVT state, presentation dependency wait. Previous correction and current acceptance are progress.
 
 - **Live narrative foundation accepted:** NAR-011ce82fed9 and NAR-0176276ae7b done. Compile clean; EditMode10 pass; production PlayMode17661 passes6 including newgame/save and hulk-removal retirement. Evidence Logs/playtest/narrative-live. No Unity active. Next recycle newly ready standard work and implement INVT (ECO-006); DEV-009 integration/sandbox fix pending. QST-006 execution remains unfinished. Previous repair and this acceptance are progress.
