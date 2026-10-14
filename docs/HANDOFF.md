@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-14)
 
+- **Draft mesh slots authored:** EDT-018c4dcf0a3 owns snapshot jobs, reuses meshes and applies packed results through writable mesh data; slice clipping and disposal are explicit. Scheduler/draw, materials, props and six cases remain next, uncompiled/unaccepted. EDT-015/021 workers finalizing cases; EDT-017 active. No Unity active.
+
 - **Travel presentation accepted:** TRV-00989a0187b compiles clean; all four graphics-enabled cases pass with none skipped. Opaque Transit, reveal fade, real gate emission and layout verified; owner quality settings preserved. EDT-015/021/017 workers active. Lead next EDT-018 draft rendering and remaining editor prerequisites. No Unity active.
 
 - **Travel presentation delivered:** TRV-0092836b721 integrated on task/TRV-009-travel-integration, awaiting focused graphics acceptance. Same presentation worker recycled to EDT-017 clipboard/stamp; combat EDT-015 and economy EDT-021 remain active. No Unity active.

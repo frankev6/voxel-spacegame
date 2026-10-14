@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 59 | 12 | 0 | 0 | 109 | 0 | 180 | 7 |
+| M3 | 58 | 13 | 0 | 0 | 109 | 0 | 180 | 6 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -1119,6 +1119,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — EDT-018 snapshot mesh slots authored — astra (gpt-6)
+
+- e05242e1/c4dcf0a3 adds an owned per-brick snapshot job and reused Mesh, using actual BrickSnapshotUtility/MeshLod0 APIs, packed BrickLit vertex layout and Mesh.ApplyAndDisposeWritableMeshData. Snapshot copies pin only during the copy; the asynchronous job never reads the live draft. Slice clears cells and halo above the plane. Disposal completes the handle before releasing native buffers or Mesh. SPEC-51 Q43/global415 records the adapter default.
+- Scheduler/draw lifecycle, materials, incremental props and six required DraftRendererTests remain pending; source uncompiled/unaccepted and EDT-018 in-progress. spec-required:0 authored this checkpoint (six pending),extra:0. No Unity run while building this slice.
+- Existing workers remain active: combat328 EDT-015 seven cases authored; economy348 EDT-021 four cases authored; presentation305 EDT-017 implementing real paste/cancel path. No replacements or artificial waits. Prior travel acceptance and current renderer source are progress. Next complete renderer and integrate compatible deliveries before focused validation. Full roadmap goal remains active.
 
 ### 2026-10-14 — TRV-009 travel presentation accepted — astra (gpt-6)
 
