@@ -1072,6 +1072,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — DEV-009 integrated with explicit sandbox spawning — astra (gpt-6)
+
+- Worker37d1d116 integrated9c74eb42: teleport/spawn/grid commands, grid probes, CLI wrappers and snapshot sections. 25defe8f implements ADR-0079/Q367: composition-bound GameSession.IsSandbox permits unscoped NPCs on the public path; campaign and explicit IShipSpawner requests remain strict. Q366 mirrors worker coordinate/faction defaults (ENC-003/004 optional faction map remains unavailable).
+- Existing one-cell spawn case now checks campaign/interface rejection and successful unscoped sandbox command without scene waits. Spec-required: 3, extra:0 new cases. Compile55432 active; poll this exact handle before source changes or further Unity. No acceptance claim yet. Lead-owned QualitySettings and _Test metadata remain excluded.
+- NAR-018 worker active247; economy assigned bounded review of the integrated sandbox path; presentation dependency wait. Previous NAR-011/017 acceptance and this DEV-009 integration are progress. Next focused three-case validation, then INVT persistence.
+
 ### 2026-10-13 — NAR-011 and NAR-017 done: live narrative foundation — astra (gpt-6)
 
 - NAR-011ce82fed9 completes live context/bootstrap/session/FACT/frame wiring and owner routes, including ADR-0077 persistent removal and ADR-0078 UI gates. ef32547c supplies the missing default narrative config. NAR-0176276ae7b integrates worker debugger Facts/Trace/Quests-read surface; Quests correctly reports QST-006 unavailable. No claim that quest/beat execution or INVT saving exists yet.

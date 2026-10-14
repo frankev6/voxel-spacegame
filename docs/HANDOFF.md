@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **DEV-009 integrated / compile active:** worker37d1d116 integrated9c74eb42;25defe8f fixes sandbox NPC commands through explicit GameSession mode (ADR-0079/Q367), extends existing one-cell case. Compile55432 active: poll same handle before more Unity/source edits. Three required cases next; still unaccepted. NAR-018 active247, economy reviews sandbox integration, presentation dependency wait. Prior narrative acceptance and current command integration are progress.
+
 - **Live narrative foundation accepted:** NAR-011ce82fed9 and NAR-0176276ae7b done. Compile clean; EditMode10 pass; production PlayMode17661 passes6 including newgame/save and hulk-removal retirement. Evidence Logs/playtest/narrative-live. No Unity active. Next recycle newly ready standard work and implement INVT (ECO-006); DEV-009 integration/sandbox fix pending. QST-006 execution remains unfinished. Previous repair and this acceptance are progress.
 
 - **Narrative focused checks green; boot repair pending:** compile43027 clean; EditMode52808 passes10 (0.4966s test bodies). NAR-017 integrated6276ae7b. Production PlayMode3205 failed missing narrative config; deliberately stopped terminal143/no XML rather than wait for timeout. ef32547c registers defaults; retry production/T2 next. No Unity active; both tasks unaccepted. Presentation final lifecycle review dispatched; other workers integration/dependency waits. DEV-009 sandbox integration remains next.
