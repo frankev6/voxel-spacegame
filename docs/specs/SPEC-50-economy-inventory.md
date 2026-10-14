@@ -706,6 +706,10 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
 | `MerchantLauncher.Open` / `TryOpenForBody` | Main thread, World scene | Merchant screen pushed |
 | `LootRoller.Roll`, `PriceMath.*`, `ComputeYields`, `ComputeCapacity` | — | Pure, deterministic |
 
+### Editor rollback checkpoint (ADR-0096)
+
+`InventoryModel.Checkpoint CaptureCheckpoint()` captures the bounded slots and capacity. `RestoreCheckpoint(Checkpoint)` validates the originating owner and restores slots, counts, capacity and normal notifications synchronously. These APIs support exact rejected editor transactions; they are not a save format.
+
 ## 7. Edge cases and failure behaviour
 
 | Situation | Required behaviour |
@@ -984,13 +988,9 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
 
 | 28 | ECO-011 lookup and capacity lifetime defaults | Keep the canonical APIs, current galaxy body identity and prescribed owner events; no launcher/faction substitutes. | Tech lead — delivery default. Directory builds ordinal first-wins authored-location and template maps once, verifies the current generated body, then uses GalaxyService.GetLocationKey for authored precedence and the current content template for fallback; absent galaxy, unknown body/system and no placement return null. Capacity sums each nonfree, nondestroyed block instance with CargoModule once, including multi-cell blocks, in double precision; floor slots and clamp before integer conversion. Borrow committed fleet/native content/config, validate finite capacity divisors/contributions, and treat null/disposed structures as the configured base. Constructor recomputes before subscribing, new-game order is40, FleetModel.Changed and SessionReset recompute synchronously, and idempotent disposal removes both subscriptions. Composition owns/disposes/registers the synchronizer and registers the directory beside the existing economy service, without UiComposition/playground/launcher edits. Exactly the three transferred EconomyWiringTests use tiny real structures/catalog/galaxy, actual cargo-small footprints, fleet replacement and direct reset events; no extra cases, Unity runs or performance tuning. Central task extraction/claim and Unity acceptance remain lead-owned. |
 
+| 29 | Exact rejected editor transaction rollback | Inventory-owned opaque checkpoint restores slots and overflow even when normal capacity is full; inverse deltas are insufficient. ADR-0096; ledger Q452. | Tech lead | Resolved. |
+
 ## 11. References
 
 - Audit (background only): `docs/reference/audit-2026-10/06-ui-shipeditor.md` (06-A13 merchant stack bug, 06-D1 last slot), `04-persistence-data.md` §12 (linear scans, unsaved fuel and toolbar), `LEDGER.md` R12, R15.
 - SPEC-04 §3 decisions 6 and 11, §4.4, §4.10 (blocks, cargo capacity); SPEC-40 §4.3 (`ILogicEconomy`), §5.5 (`OpenMerchant`); SPEC-51 §5.7, §5.9 (BOM and commit); SPEC-72 §4.5 (legacy item values), §4.6 (loot tables).
-
-### Editor rollback checkpoint (ADR-0096)
-
-`InventoryModel.Checkpoint CaptureCheckpoint()` captures the bounded slots and capacity. `RestoreCheckpoint(Checkpoint)` validates the originating owner and restores slots, counts, capacity and normal notifications synchronously. These APIs support exact rejected editor transactions; they are not a save format.
-
-| 29 | Exact rejected editor transaction rollback | Inventory-owned opaque checkpoint restores slots and overflow even when normal capacity is full; inverse deltas are insufficient. ADR-0096; ledger Q452. | Tech lead | Resolved. |

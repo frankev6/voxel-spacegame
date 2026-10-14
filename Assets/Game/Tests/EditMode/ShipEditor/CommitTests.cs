@@ -1,6 +1,7 @@
 using System;
 using Game.App.Session;
 using Game.Core;
+using Game.Core.Events;
 using Game.Data.Blocks;
 using Game.Data.Definitions;
 using Game.Economy;
