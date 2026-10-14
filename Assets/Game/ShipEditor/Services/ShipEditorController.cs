@@ -24,7 +24,7 @@ namespace Game.ShipEditor.Services
         IEditorTool active;
         ToolId previousTool = ToolId.Place;
         bool disposed, previewValid;
-        (DraftPicker.HitKind, int3, int3, ushort, byte, byte, int, int, ToolId, int, bool) previewKey;
+        (DraftPicker.HitKind, int3, int3, ushort, byte, byte, int, int, ToolId, int, bool, int) previewKey;
         public ShipEditorController(EditSession session, EditorContext content, Action requestLeave = null)
         {
             this.session = session ?? throw new ArgumentNullException(nameof(session));
@@ -32,6 +32,7 @@ namespace Game.ShipEditor.Services
             this.requestLeave = requestLeave;
             context = new ToolContext(session, content);
             Register(new PlaceTool()); Register(new RemoveTool()); Register(new PaintTool()); Register(new EyedropperTool());
+            Register(new ReplaceTool()); Register(new SelectTool());
             active = tools[ToolId.Place];
             for (int block = 1; block < content.Footprints.BlockCount; block++)
                 if (content.Items.HasItem(block) && content.Definitions.Value.Blocks[block].AllowedOrientations != 0)
@@ -61,11 +62,11 @@ namespace Game.ShipEditor.Services
             context.GridRay = gridRay;
             context.Hover = input.PointerAllowed ? DraftPicker.Raycast(session.Draft, content, gridRay, SliceEnabled, SliceLevel, XRay) : default;
             if (previous.Kind != context.Hover.Kind || !previous.Cell.Equals(context.Hover.Cell) || !previous.Normal.Equals(context.Hover.Normal)) StateVersion++;
-            var palette = (SelectedBlock, Orient, Color); int toolVersion = active.Version, revision = session.Revision;
+            var palette = (SelectedBlock, Orient, Color); int toolVersion = active.Version, revision = session.Revision, selectionVersion = Selection.Version;
             active.Tick(context, input);
-            if (palette != (SelectedBlock, Orient, Color) || toolVersion != active.Version || revision != session.Revision) StateVersion++;
+            if (palette != (SelectedBlock, Orient, Color) || toolVersion != active.Version || revision != session.Revision || selectionVersion != Selection.Version) StateVersion++;
             var key = (context.Hover.Kind, context.Hover.Cell, context.Hover.Normal, SelectedBlock, Orient, Color,
-                Symmetry.Version, session.Revision, ActiveTool, active.Version, input.PointerAllowed);
+                Symmetry.Version, session.Revision, ActiveTool, active.Version, input.PointerAllowed, Selection.Version);
             if (!previewValid || !previewKey.Equals(key))
             {
                 if (input.PointerAllowed) active.BuildPreview(context, Preview); else Preview.Clear();
@@ -78,9 +79,26 @@ namespace Game.ShipEditor.Services
             if (Has(EditorActions.Undo)) { active.Cancel(); if (session.Undo()) StateVersion++; }
             if (Has(EditorActions.Redo)) { active.Cancel(); if (session.Redo()) StateVersion++; }
             for (int i = 0; i < 9; i++) if (((ulong)actions & (1ul << (9 + i))) != 0) SelectTool((ToolId)(i + 1));
-            if (Has(EditorActions.RotateYaw)) Rotate(1, reverse);
-            if (Has(EditorActions.RotatePitch)) Rotate(0, reverse);
-            if (Has(EditorActions.RotateRoll)) Rotate(2, reverse);
+            if (ActiveTool == ToolId.Select)
+            {
+                int before = Selection.Version; context.BeginStroke();
+                if (Has(EditorActions.RotateYaw)) Selection.Rotate(reverse ? -1 : 1, context.StrokeId);
+                if (Has(EditorActions.MirrorSelection)) Selection.Mirror(context.StrokeId);
+                int3 move = new((Has(EditorActions.MoveRight) ? 1 : 0) - (Has(EditorActions.MoveLeft) ? 1 : 0),
+                    (Has(EditorActions.MoveUp) ? 1 : 0) - (Has(EditorActions.MoveDown) ? 1 : 0),
+                    (Has(EditorActions.MoveForward) ? 1 : 0) - (Has(EditorActions.MoveBack) ? 1 : 0));
+                if (math.any(move != 0)) Selection.Move(move, context.StrokeId);
+                if (before != Selection.Version) Changed(); context.SetError(Selection.Error);
+            }
+            else
+            {
+                if (Has(EditorActions.RotateYaw)) Rotate(1, reverse);
+                if (Has(EditorActions.RotatePitch)) Rotate(0, reverse);
+                if (Has(EditorActions.RotateRoll)) Rotate(2, reverse);
+            }
+            if (Has(EditorActions.SelectAll)) { SelectTool(ToolId.Select); Selection.SelectAll(); Changed(); }
+            if (Has(EditorActions.Delete) && Selection.Count != 0)
+            { context.BeginStroke(); Selection.Delete(context.StrokeId); context.SetError(Selection.Error); Changed(); }
             if (Has(EditorActions.MirrorX)) ToggleMirror(0);
             if (Has(EditorActions.MirrorY)) ToggleMirror(1);
             if (Has(EditorActions.MirrorZ)) ToggleMirror(2);
@@ -89,7 +107,6 @@ namespace Game.ShipEditor.Services
             if (Has(EditorActions.SliceDown)) StepSlice(-1);
             if (Has(EditorActions.XRayToggle)) ToggleXRay();
             if (Has(EditorActions.BoxModeCycle)) CycleBoxMode();
-            // TODO(EDT-016): selection movement, rotation, delete and select-all actions.
             // TODO(EDT-017): copy, cut and paste actions and stamp-specific rotation.
         }
         internal void Rotate(int axis, bool reverse)
@@ -110,7 +127,7 @@ namespace Game.ShipEditor.Services
             CheckAlive();
             if (active.Id == tool || !tools.TryGetValue(tool, out var next)) return;
             // TODO(EDT-015): register line, box and fill.
-            // TODO(EDT-016): register replace/select. TODO(EDT-017): register paste.
+            // TODO(EDT-017): register paste.
             active.Cancel(); if (tool == ToolId.Paste) previousTool = active.Id;
             active = next; Changed();
         }

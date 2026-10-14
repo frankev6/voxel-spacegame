@@ -41,11 +41,32 @@ namespace Game.ShipEditor.Services
             if (all.Count > Limit) { Error = PlacementError.OverBudget; return; }
             origins.Clear(); foreach (var origin in all) origins.Add(origin); Version++;
         }
-        internal void Capture(NativeList<BlockRecord> records, NativeList<byte> bytes)
+        internal void CopyRecords(NativeList<BlockRecord> records)
         {
-            records.Clear(); bytes.Clear();
+            records.Clear();
             foreach (var origin in origins) session.Placement.AtOrigin(origin, records);
             records.AsArray().Sort(new CanonicalOrder());
+        }
+        internal void Box(int3 min, int3 max, bool additive)
+        {
+            long volume = ((long)max.x - min.x + 1) * ((long)max.y - min.y + 1) * ((long)max.z - min.z + 1);
+            if (volume < 0 || volume > content.Config.MaxBatchCells) { Error = PlacementError.OverBudget; return; }
+            using var found = new NativeHashSet<int3>(64, Allocator.Temp);
+            if (additive) foreach (var origin in origins) found.Add(origin);
+            for (int x = min.x; x <= max.x; x++)
+                for (int y = min.y; y <= max.y; y++)
+                    for (int z = min.z; z <= max.z; z++)
+                    {
+                        var origin = new int3(x, y, z);
+                        if (!session.Placement.HasOrigin(origin)) continue;
+                        found.Add(origin);
+                        if (found.Count > Limit) { Error = PlacementError.OverBudget; return; }
+                    }
+            origins.Clear(); foreach (var origin in found) origins.Add(origin); Error = PlacementError.None; Version++;
+        }
+        internal void Capture(NativeList<BlockRecord> records, NativeList<byte> bytes)
+        {
+            CopyRecords(records); bytes.Clear();
             var reader = new DraftReader(session.Draft, content);
             for (int i = 0; i < records.Length; i++)
             { var record = records[i]; record.DamageOffset = reader.CaptureDamage(record, bytes); records[i] = record; }
