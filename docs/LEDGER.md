@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 71 | 12 | 0 | 0 | 97 | 0 | 180 | 6 |
+| M3 | 70 | 12 | 0 | 0 | 98 | 0 | 180 | 10 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -425,20 +425,20 @@
 | EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-13 | 0089c35c | Context/rotated footprints/item tables accepted; five required cases pass; ADR-0081/Q380. |
 | EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-13 | 2d3181ff | Atomic draft adapters, native canonical hash/enumeration and exact damage restore; four required cases pass, including negative HP/shared origins. |
 | EDT-004 | Edit history and diff commands | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001 | yes | done | astra (gpt-6) | 2026-10-13 | 9d447ea5 | Owned compact diffs, exact offset merge and saved-state tracking; six direct checks pass; spec-required: 6, extra: 0 |
-| EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead draft session apply undo redo |
-| EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | no | todo |  |  |  |  |
-| EDT-007 | Placement validator | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | no | todo |  |  |  |  |
-| EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | no | todo |  |  |  |  |
+| EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | yes | done | astra (gpt-6) | 2026-10-13 | 5520be15 | Draft clone/apply/undo/redo/discard and dirty bricks; six direct cases pass, final compile clean; spec-required: 6, extra: 0 |
+| EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | yes | todo |  |  |  |  |
+| EDT-007 | Placement validator | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | todo |  |  |  |  |
+| EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | todo |  |  |  |  |
 | EDT-009 | Full validation, issues and remove-floating | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-006, EDT-007, EDT-008 | no | todo |  |  |  |  |
 | EDT-010 | Stats accumulator and diff | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-006, PWR-001 | no | todo |  |  |  |  |
 | EDT-011 | Commit pipeline and R15 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-009, EDT-010, SPEC-50 | no | todo |  |  |  |  |
-| EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | no | todo |  |  |  |  |
+| EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | yes | todo |  |  |  |  |
 | EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | no | todo |  |  |  |  |
 | EDT-014 | Controller, tool framework and basic tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-012, EDT-013 | no | todo |  |  |  |  |
 | EDT-015 | Line, box and fill tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-014 | no | todo |  |  |  |  |
 | EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | no | todo |  |  |  |  |
 | EDT-017 | Copy, cut, paste and stamp | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-016 | no | todo |  |  |  |  |
-| EDT-018 | Draft renderer | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, SPEC-11 | no | todo |  |  |  |  |
+| EDT-018 | Draft renderer | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, SPEC-11 | yes | todo |  |  |  |  |
 | EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | no | todo |  |  |  |  |
 | EDT-020 | Blueprint store, browser and name sanitising | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-017, PERS-001, SPEC-60 | no | todo |  |  |  |  |
 | EDT-021 | Editor UI panels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-001, SPEC-60, SPEC-61 | no | todo |  |  |  |  |
@@ -1105,6 +1105,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — EDT-005 done: draft editing session — astra (gpt-6)
+
+- 5520be15 includes required profiling scopes; final compile56519 terminal0, zero warning CS. Six required functional cases passed79691 before profiling-only additions (0.225383s bodies); no unnecessary rerun. Review304 found no runtime defects in ownership/damage/history/dirty paths. spec-required:6,extra:0. Evidence Logs/playtest/editor-session including final-compile.log.
+- Original remains separate, damage restores through atomic DraftWriter, cursor moves after successful application and discard invalidates removed geometry. Placement validation is the explicitly permitted EDT-007 pass-through; counts/connectivity/stats/commit still belong to their named tasks. Next newly ready editor dependencies and compatible route/gate integration. TRV-008 delivery40452bf0 awaits route326; SYS-011 continues accepted factory contract. No Unity active. Previous functional acceptance and current final compile/closeout are progress.
 
 ### 2026-10-13 — EDT-005 draft lifecycle functional checks pass — astra (gpt-6)
 

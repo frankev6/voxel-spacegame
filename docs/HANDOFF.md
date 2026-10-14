@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Draft editor session accepted:** EDT-0055520be15 final compile clean, six required direct cases passed; source review304 found no defects. Next editor dependencies and gate/route delivery integration. TRV-00840452bf0 waiting for route326 delivery; SYS-011 factory implementation active. No Unity active.
+
 - **Draft lifecycle passes:** EDT-0056fa8c55a/dca0bd98 clean compile and six direct checks pass (0.225383s bodies). Required profiling scopes73b22759 added afterward; final compile pending, still in-progress. Combat303 reviews runtime; TRV-010 routing and SYS-011 visuals active. Next finish session acceptance and integrate travel deliveries. No Unity active.
 
 - **Draft session support authored:** EDT-00502d69553 adds owned batches, per-group reports and face-neighbour dirty tracking (ADR-0088/Q401); session apply/undo/redo and six cases remain next, uncompiled/unaccepted. SYS-011 unblocked through accepted loader-owned factory ADR-0087/Q400. TRV-008 delivered; TRV-010 and SYS-011 active. No Unity active.
