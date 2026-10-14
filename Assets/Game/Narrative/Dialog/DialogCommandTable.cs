@@ -1,11 +1,27 @@
+using System;
+using System.Collections.Generic;
+using Game.Data.Definitions;
+using Game.Data.Logic;
+
 namespace Game.Narrative.Dialog
 {
-    /// <summary>Runtime command lookup built at boot from DialogCommandTableDefinition. Implements SPEC-41 §5.5.</summary>
+    /// <summary>SPEC-41 §5.5 and ADR-0084: ordinal lookup of the generated, precompiled command nodes.</summary>
     public sealed class DialogCommandTable
     {
-        public DialogCommandTable(Game.Data.Definitions.DialogCommandTableDefinition definition) => throw new System.NotImplementedException("DLG-006");
-        public bool TryGet(string normalizedText, out Game.Data.Logic.IEffect effect) => throw new System.NotImplementedException("DLG-006");   // Dictionary<string, IEffect>, ordinal
-        public int Count { get; }
-        // TODO(DLG-006): implement SPEC-41 service, command lookup and visit memory behavior.
+        readonly Dictionary<string, IEffect> entries = new(StringComparer.Ordinal);
+        public DialogCommandTable(DialogCommandTableDefinition definition)
+        {
+            if (definition == null) throw new ArgumentNullException(nameof(definition));
+            if (definition.Entries == null) throw new ArgumentException("Dialog command entries are missing", nameof(definition));
+            foreach (var entry in definition.Entries)
+            {
+                if (string.IsNullOrWhiteSpace(entry.Text) || entry.Effect == null || !entry.Effect.TryGetSingleEffect(out var effect))
+                    throw new ArgumentException("Dialog command is missing, stale or not a single compiled effect: " + entry.Text, nameof(definition));
+                if (!entries.TryAdd(entry.Text, effect)) throw new ArgumentException("Duplicate dialog command: " + entry.Text, nameof(definition));
+            }
+        }
+        public bool TryGet(string normalizedText, out IEffect effect)
+        { effect = null; return normalizedText != null && entries.TryGetValue(normalizedText, out effect); }
+        public int Count => entries.Count;
     }
 }

@@ -55,6 +55,13 @@ namespace Game.Data.Logic
         }
         public bool IsStale => compilerVersion != Compiler.LogicCompiler.Version ||
             sourceHash != Game.Core.StableHash.Hash64(string.Join("\n", source ?? System.Array.Empty<string>()));
+        /// <summary>ADR-0084: borrow the one current compiled node without losing concrete command identity.</summary>
+        public bool TryGetSingleEffect(out IEffect effect)
+        {
+            effect = null;
+            if (hasErrors || IsStale || effects == null || effects.Length != 1 || effects[0] == null) return false;
+            effect = effects[0]; return true;
+        }
         internal void SetCompiled(IEffect[] compiledEffects, bool failed)
         {
             hasErrors = failed;

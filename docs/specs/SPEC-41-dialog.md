@@ -759,6 +759,8 @@ sequenceDiagram
 
 | 15 | DLG-010 has no approved/own-work dialog placeholder sprites available in the current project. | Author the eight prescribed content IDs and exact display names; keep Captain’s portrait null by design and nameStyleClass empty (theme default). Leave NORA/Scarred Man portraits and all five illustration image fields null until usable sprites are supplied. Inventory found only the legacy item_icons_sheet as an imported Sprite, with no confirmation in LICENSES; the documented own-work placeholder textures/VFX are not dialog sprites. Do not copy legacy/third-party art, generate replacements, alter provenance or add an owner gate. Rebuild the catalog with Game/Content/Rebuild and Validate after lead integration; dialog conversion/reference coverage remains unverified while no converted .yarn files exist. | Tech lead — concrete sprite dependency reported by DLG-010; seven references remain incomplete. |
 
+| 17 | Runtime command lookup needs a concrete effect from the compiled list | ADR-0084 supplies guarded single-node access; reject stale/malformed/duplicate table rows and never reparse commands at runtime. Memory uses prescribed visit: keys and ordinal raw keys, retains explicit zero values for save round trips, clears CopySorted output and saturates visit count at Int32.MaxValue. | Tech lead — ledger Q390 |
+
 ## 11. References
 
 - Audit `05-narrative-quests.md` B4, B5, B6, B11, B12, §5.9 (Yarn vs Ink), §5.13 phase 3; `LEDGER.md` R6, R11, R19; legacy UI `Import/Legacy/ui/Pages/NarrativeViewUI.uxml` (layout reference only).
