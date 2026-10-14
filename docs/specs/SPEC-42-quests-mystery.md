@@ -878,7 +878,8 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 ### QST-007 — QUST participant
 - **Milestone:** M3
 - **Tier:** frontier — F3: binary save format with raw preservation and name-keyed baselines
-- **Depends on:** `QST-006`, `PERS-001`
+- **Depends on:** `QST-003`, `QST-004`, `QST-005`, `PERS-001`
+- **Sequencing:** ADR-0105: save consumes service state, independently of the ship-log adapter.
 - **Do:** Implement `QuestSaveParticipant` (§4.6, §5.7) and the SPEC-05 registry row `QUST`.
 - **Files:** `Assets/Game/Narrative/ShipLog/QuestSaveParticipant.cs`; `Assets/Game/Tests/EditMode/Narrative/QuestSaveTests.cs`
 - **Acceptance criteria:**

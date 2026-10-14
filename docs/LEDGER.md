@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 20 | 17 | 0 | 0 | 145 | 0 | 182 | 5 |
+| M3 | 19 | 18 | 0 | 0 | 145 | 0 | 182 | 5 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -407,7 +407,7 @@
 | QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 19b24412 | Clue/mystery/rumor lifecycle accepted; five required functional cases pass in focused nine-case batch; Q377. |
 | QST-005 | BeatService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, DLG-006, DLG-007, DLG-008 | yes | done | astra (gpt-6) | 2026-10-14 | 30762271 | Deterministic scheduler/queue/completion implemented; nine required functional checks pass; two advisory fixtures authored, deferred. QST-006/008 own adapter/live registration. |
 | QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same presentation worker; full narrative adapter, ship log and markers after accepted BeatService. |
-| QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-006, PERS-001 | no | todo |  |  |  |  |
+| QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, QST-005, PERS-001 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead implements actual QUST snapshot/raw preservation; independent service prerequisites ADR-0105. |
 | QST-008 | Bridge rules, player-free gating and registration | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005, QST-006, SPEC-40, SPEC-32, SPEC-33 | no | todo |  |  |  |  |
 | QST-009 | Opening chapter content | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, GAL-003, NAR-013, DLG-003, ENC-002, ECO-002 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same economy worker reconciling e987aae8 opening assets/import with accepted actual DLG-007 compiler; lead import and two required checks pending. |
 | QST-010 | Opening chapter playthrough | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-008, QST-009, QST-007, SPEC-70, SPEC-32, SPEC-50 | no | todo |  |  |  |  |
