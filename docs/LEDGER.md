@@ -1077,6 +1077,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — DLG-002 syntax model authored — astra (gpt-6)
+
+- 9b171637 adds the editor AST and exact SPEC-41 text escape/unescape table. Structural Parse, diagnostics and required cases remain open; explicit TODO retained. Q372/SPEC-41 Q11 resolves actual dialog scheduling prerequisites under ADR-0068; DLG-006 command effect access still needs its accepted contract resolution before implementation.
+- Spec-required: 7 pending, extra:0. No Unity/compile/test run for this incomplete batch. No acceptance claim. Next structural parsing and all required cases before validation.
+- Clue worker active276; combat assigned bounded audit of actual converted Yarn; presentation dependency wait. Previous quest acceptance and current parser source changes are progress. No Unity active; unrelated QualitySettings and _Test metadata excluded.
+
 ### 2026-10-13 — QST-003 done: quest runtime and baseline correctness — astra (gpt-6)
 
 - 63a88873/a8b2d6d1 implements accepted-instance baselines, stage effects and recapture, idempotent starts/contracts, failure/completion, tracking, log/objective reads and initial restore suppression. Review232 caught release-null tracing and missing objective-bit dependency notification; both fixed. QUST import/live adapter/registration remain QST-007 and QST-006/008.
