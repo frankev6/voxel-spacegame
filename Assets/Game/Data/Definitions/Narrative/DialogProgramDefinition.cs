@@ -19,10 +19,25 @@ namespace Game.Data.Definitions
         public System.Collections.Generic.IReadOnlyList<Game.Data.Logic.CompiledIntExpr> IntExprs => intExprs;
         public ulong SourcesHash => sourcesHash;
 
-        // TODO(DLG-007): compile and bind the definition's authored logic wrappers.
         public void CompileLogic(Game.Data.Logic.Compiler.LogicCompiler compiler, Game.Data.Validation.ValidationScope scope)
-            => throw new System.NotImplementedException("DLG-007");
+        {
+            var report = new Game.Data.Validation.ValidationReport(scope.AssetPath);
+            for (int i = 0; i < conditions.Length; i++)
+                compiler.Compile(conditions[i], new Game.Data.Logic.Compiler.LogicCompileOptions(Game.Data.Logic.LogicUsage.DialogCondition, scope.AssetPath, "conditions[" + i + "]"), report);
+            for (int i = 0; i < intExprs.Length; i++)
+                compiler.Compile(intExprs[i], new Game.Data.Logic.Compiler.LogicCompileOptions(Game.Data.Logic.LogicUsage.DialogCondition, scope.AssetPath, "intExprs[" + i + "]"), report);
+            foreach (var entry in report.Entries)
+                switch (entry.Severity)
+                {
+                    case Game.Data.Validation.ValidationSeverity.Error: scope.Error(entry.Code, entry.Field, entry.Message); break;
+                    case Game.Data.Validation.ValidationSeverity.Warning: scope.Warning(entry.Code, entry.Field, entry.Message); break;
+                    default: scope.Info(entry.Code, entry.Field, entry.Message); break;
+                }
+        }
         public void BindLogic(Game.Data.Logic.LogicBinder binder)
-            => throw new System.NotImplementedException("DLG-007");
+        {
+            foreach (var condition in conditions) condition.Bind(binder);
+            foreach (var expression in intExprs) expression.Bind(binder);
+        }
     }
 }

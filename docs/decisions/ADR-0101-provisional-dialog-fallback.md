@@ -11,3 +11,5 @@ DLG-004's package spike and DLG-005's owner decision remain open; this is neithe
 ## Consequences
 
 Dialogue, beats and real story interactions can be implemented now. The owner gate remains visible and does not prevent DLG-007's functional acceptance or subsequent work. Change DLG-007's prerequisites to the completed DLG-003 and DLG-006; preserve all eleven required conformance cases. No test or runtime behavior is waived.
+
+The existing NarrativeLogicAdapter gains an additive BindDialog(DialogService) composition hook for its two already-specified dialog queries (visited_count and roll); other QST-006 methods remain explicitly pending. This resolves the context/service construction cycle without service-location during expressions or changing ILogicNarrative.

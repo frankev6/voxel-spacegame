@@ -215,6 +215,10 @@ namespace Game.App.Boot
             Register(narrative); Register(narrative.Facts); Register<Game.Data.Logic.ILogicContext>(narrative.Context);
             Save.Register(new Game.Narrative.FactSaveParticipant(narrative.Facts));
             Session.BindNarrative(narrative);
+            var dialogService = NarrativeBootstrap.BuildDialog(Content.Catalog, narrative.Context);
+            narrativeOwner.BindDialog(dialogService); Register(dialogService);
+            Save.Register(new Game.Narrative.Dialog.DialogSaveParticipant(dialogService.Memory));
+            Session.RegisterSaveBlocker(Push(new DialogSessionBinding(dialogService)));
             Push(new NarrativeEconomyDependencies(economy, narrative));
             // TODO(QST-002/003/004/005): register implemented INarrativeSystem owners here before sessions begin.
             // TODO(QST-008): construct NarrativeWorldEventBridge.CreateForWorld after real beat/travel/encounter owners; do not instantiate their staged shells.

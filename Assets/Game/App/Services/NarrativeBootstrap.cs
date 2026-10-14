@@ -11,6 +11,17 @@ namespace Game.App.Services
     /// <summary>SPEC-40 §5.3: validate and bind every content owner before publishing the live narrative service.</summary>
     public static class NarrativeBootstrap
     {
+        public static Game.Narrative.Dialog.DialogService BuildDialog(ContentCatalog content, ILogicContext context)
+        {
+            var programs = content.All<DialogProgramDefinition>();
+            var tables = content.All<DialogCommandTableDefinition>();
+            if (programs.Count != 1 || tables.Count != 1) throw new InvalidOperationException("Dialog boot requires one compiled program and command table.");
+            if (programs[0].SourcesHash != tables[0].SourcesHash) throw new InvalidOperationException("Dialog program and command table have different source hashes; rebuild dialog tables.");
+            var memory = new Game.Narrative.Dialog.DialogMemory();
+            var runner = new Game.Narrative.Dialog.GraphDialogRunner(programs[0], context, memory);
+            return new Game.Narrative.Dialog.DialogService(runner, new Game.Narrative.Dialog.DialogCommandTable(tables[0]), context, memory);
+        }
+
         public static NarrativeService Build(ContentCatalog content, IReadOnlyList<ContentDefinition> definitions,
             Func<FactStore, ILogicContext> createContext)
         {

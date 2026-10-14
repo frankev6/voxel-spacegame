@@ -777,3 +777,5 @@ sequenceDiagram
 - Yarn Spinner 3 documentation (syntax, variable storage, functions, commands, line IDs, detour).
 
 | 22 | Owner package gate would stall the fully specified fallback | ADR-0101 implements GraphDialogRunner and its compiler as the documented pending-gate default, with all conformance checks unchanged. DLG-004 spike and DLG-005 owner choice remain open; no package adoption/rejection is claimed. | Tech lead — resolved; ledger Q474 |
+
+| 23 | Concrete graph record encoding and runtime guard | Store each of the four option data words in successive DialogInstruction.A operands behind the specified Goto skip; only executed Option instructions populate the visible menu. Cap uninterrupted execution at 10,000 instructions, log an error and stop a looping authored program. Generate a stable named asset and require its source hash to match the command table at boot. Bind visited_count/roll through the additive adapter hook in ADR-0101. Effect-only beats have no start node and are excluded from runner conformance. | Tech lead — resolved; ledger Q475 |

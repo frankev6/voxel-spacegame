@@ -19,6 +19,7 @@ namespace Game.Editor.Narrative.Dialog
             var database = ContentDatabaseBuilder.Rebuild();
             var catalog = ContentCatalog.Build(database.Definitions, report);
             if (!report.HasErrors) report.Merge(DialogCommandTableGenerator.Generate(catalog));
+            if (!report.HasErrors) report.Merge(DialogProgramCompiler.Generate(catalog));
             ContentValidatorRunner.Log(report);
             if (report.HasErrors) throw new ContentValidationException(report);
             ContentDatabaseBuilder.Rebuild();

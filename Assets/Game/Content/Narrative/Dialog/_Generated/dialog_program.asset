@@ -1,0 +1,12039 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1704f4d261594142a5a37f32096ea4c7, type: 3}
+  m_Name: dialog_program
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.DialogProgramDefinition
+  id: dialog_program
+  formerIds: []
+  nodes:
+  - Title: choose_start_ship_start
+    Start: 0
+    Length: 35
+  - Title: crew_stranded_rescued
+    Start: 35
+    Length: 13
+  - Title: crew_stranded_start
+    Start: 48
+    Length: 21
+  - Title: cryo_vault_start
+    Start: 69
+    Length: 20
+  - Title: cryo_vault_vault_damaged
+    Start: 89
+    Length: 14
+  - Title: cryo_vault_vault_enter
+    Start: 103
+    Length: 21
+  - Title: debug_audio_events_audio_played
+    Start: 124
+    Length: 12
+  - Title: debug_audio_events_start
+    Start: 136
+    Length: 29
+  - Title: debug_conditional_options_opened
+    Start: 165
+    Length: 14
+  - Title: debug_conditional_options_start
+    Start: 179
+    Length: 37
+  - Title: derelict_salvage_module_found
+    Start: 216
+    Length: 15
+  - Title: derelict_salvage_nothing_found
+    Start: 231
+    Length: 14
+  - Title: derelict_salvage_salvage_success
+    Start: 245
+    Length: 14
+  - Title: derelict_salvage_start
+    Start: 259
+    Length: 30
+  - Title: distress_trap_real_survivors
+    Start: 289
+    Length: 22
+  - Title: distress_trap_start
+    Start: 311
+    Length: 22
+  - Title: distress_trap_trap_spring
+    Start: 333
+    Length: 12
+  - Title: empty_cargo_cargo_empty
+    Start: 345
+    Length: 13
+  - Title: empty_cargo_cargo_good
+    Start: 358
+    Length: 15
+  - Title: empty_cargo_cargo_trap
+    Start: 373
+    Length: 15
+  - Title: empty_cargo_start
+    Start: 388
+    Length: 18
+  - Title: frozen_sentinel_bridge_log
+    Start: 406
+    Length: 15
+  - Title: frozen_sentinel_core_stasis
+    Start: 421
+    Length: 16
+  - Title: frozen_sentinel_start
+    Start: 437
+    Length: 28
+  - Title: fuel_station_start
+    Start: 465
+    Length: 30
+  - Title: gate_active_start
+    Start: 495
+    Length: 20
+  - Title: gate_dormant_start
+    Start: 515
+    Length: 23
+  - Title: glass_desert_reflection_event
+    Start: 538
+    Length: 13
+  - Title: glass_desert_silence_trap
+    Start: 551
+    Length: 12
+  - Title: glass_desert_spire_open
+    Start: 563
+    Length: 14
+  - Title: glass_desert_start
+    Start: 577
+    Length: 26
+  - Title: hollow_moon_engine_choice
+    Start: 603
+    Length: 21
+  - Title: hollow_moon_start
+    Start: 624
+    Length: 20
+  - Title: horizon_message_corrupt_data
+    Start: 644
+    Length: 13
+  - Title: horizon_message_message_read
+    Start: 657
+    Length: 14
+  - Title: horizon_message_start
+    Start: 671
+    Length: 19
+  - Title: hostile_blackbox_turn_in_blackbox_at_ark_start
+    Start: 690
+    Length: 13
+  - Title: merchant_shady_start
+    Start: 703
+    Length: 27
+  - Title: merchant_shady_trade_done
+    Start: 730
+    Length: 12
+  - Title: miner_lament_oil_spill
+    Start: 742
+    Length: 14
+  - Title: miner_lament_start
+    Start: 756
+    Length: 29
+  - Title: mutiny_end_log_reveal
+    Start: 785
+    Length: 14
+  - Title: mutiny_end_start
+    Start: 799
+    Length: 30
+  - Title: mystery_signal_evade_fail
+    Start: 829
+    Length: 14
+  - Title: mystery_signal_evade_success
+    Start: 843
+    Length: 12
+  - Title: mystery_signal_scan_bad
+    Start: 855
+    Length: 16
+  - Title: mystery_signal_scan_good
+    Start: 871
+    Length: 22
+  - Title: mystery_signal_signal_source
+    Start: 893
+    Length: 31
+  - Title: mystery_signal_start
+    Start: 924
+    Length: 41
+  - Title: mystery_signal_station_deep
+    Start: 965
+    Length: 23
+  - Title: mystery_signal_station_interior
+    Start: 988
+    Length: 35
+  - Title: overgrown_forge_machine_active
+    Start: 1023
+    Length: 13
+  - Title: overgrown_forge_start
+    Start: 1036
+    Length: 29
+  - Title: quarantine_lab_start
+    Start: 1065
+    Length: 28
+  - Title: quarantine_lab_vial_found
+    Start: 1093
+    Length: 13
+  - Title: quarantine_lab_virus_contract
+    Start: 1106
+    Length: 14
+  - Title: relation_watch_submit_territory_report_ark_start
+    Start: 1120
+    Length: 13
+  - Title: scavenger_king_king_impressed
+    Start: 1133
+    Length: 13
+  - Title: scavenger_king_start
+    Start: 1146
+    Length: 27
+  - Title: sensor_ghost_sanity_break
+    Start: 1173
+    Length: 14
+  - Title: sensor_ghost_start
+    Start: 1187
+    Length: 29
+  - Title: shady_man_bar_fight
+    Start: 1216
+    Length: 13
+  - Title: shady_man_info_revealed
+    Start: 1229
+    Length: 26
+  - Title: shady_man_start
+    Start: 1255
+    Length: 46
+  - Title: silent_city_food_find
+    Start: 1301
+    Length: 13
+  - Title: silent_city_network_truth
+    Start: 1314
+    Length: 13
+  - Title: silent_city_start
+    Start: 1327
+    Length: 29
+  - Title: silent_city_trap_echo
+    Start: 1356
+    Length: 13
+  - Title: singing_storm_drone_success
+    Start: 1369
+    Length: 14
+  - Title: singing_storm_fail_dive
+    Start: 1383
+    Length: 13
+  - Title: singing_storm_start
+    Start: 1396
+    Length: 30
+  - Title: singing_storm_success_dive
+    Start: 1426
+    Length: 15
+  - Title: solar_parasite_parasite_flee
+    Start: 1441
+    Length: 14
+  - Title: solar_parasite_start
+    Start: 1455
+    Length: 27
+  - Title: stable_point_start
+    Start: 1482
+    Length: 19
+  - Title: station_data_delivery_turn_in_station_data_at_ark_start
+    Start: 1501
+    Length: 13
+  - Title: station_hub_bar_menu
+    Start: 1514
+    Length: 20
+  - Title: station_hub_bounties
+    Start: 1534
+    Length: 38
+  - Title: station_hub_hub
+    Start: 1572
+    Length: 60
+  - Title: station_hub_lab_menu
+    Start: 1632
+    Length: 27
+  - Title: station_hub_market_menu
+    Start: 1659
+    Length: 28
+  - Title: station_hub_mission_control
+    Start: 1687
+    Length: 98
+  - Title: station_hub_research_view
+    Start: 1785
+    Length: 20
+  - Title: survey_local_materials_turn_in_raw_materials_at_ark_start
+    Start: 1805
+    Length: 13
+  - Title: survey_system_start
+    Start: 1818
+    Length: 23
+  - Title: territory_friendly_entry_start
+    Start: 1841
+    Length: 31
+  - Title: territory_hostile_entry_start
+    Start: 1872
+    Length: 31
+  - Title: time_echo_paradox_damage
+    Start: 1903
+    Length: 14
+  - Title: time_echo_ship_fade
+    Start: 1917
+    Length: 13
+  - Title: time_echo_start
+    Start: 1930
+    Length: 26
+  - Title: waking_up_collapse
+    Start: 1956
+    Length: 27
+  - Title: waking_up_first_breath
+    Start: 1983
+    Length: 12
+  - Title: waking_up_look_around
+    Start: 1995
+    Length: 19
+  - Title: waking_up_nora_briefing
+    Start: 2014
+    Length: 14
+  - Title: waking_up_recall_ark
+    Start: 2028
+    Length: 12
+  - Title: waking_up_start
+    Start: 2040
+    Length: 12
+  - Title: waking_up_syringe
+    Start: 2052
+    Length: 12
+  code:
+  - Op: 0
+    A: 0
+    B: 1
+    C: 2
+  - Op: 8
+    A: 14
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 19
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 7
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 24
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 12
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 29
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 17
+    B: 0
+    C: 0
+  - Op: 1
+    A: 22
+    B: 23
+    C: 2
+  - Op: 1
+    A: 24
+    B: 25
+    C: 6
+  - Op: 1
+    A: 26
+    B: 27
+    C: 10
+  - Op: 2
+    A: 14
+    B: 3
+    C: 0
+  - Op: 8
+    A: 34
+    B: 0
+    C: 0
+  - Op: 11
+    A: 28
+    B: 0
+    C: 0
+  - Op: 11
+    A: 29
+    B: 0
+    C: 0
+  - Op: 11
+    A: 30
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 34
+    B: 0
+    C: 0
+  - Op: 11
+    A: 31
+    B: 0
+    C: 0
+  - Op: 11
+    A: 32
+    B: 0
+    C: 0
+  - Op: 11
+    A: 33
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 34
+    B: 0
+    C: 0
+  - Op: 11
+    A: 34
+    B: 0
+    C: 0
+  - Op: 11
+    A: 35
+    B: 0
+    C: 0
+  - Op: 11
+    A: 36
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 34
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 37
+    B: 0
+    C: 0
+  - Op: 0
+    A: 38
+    B: 39
+    C: 40
+  - Op: 8
+    A: 42
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 45
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 45
+    B: 0
+    C: 0
+  - Op: 1
+    A: 50
+    B: 51
+    C: 38
+  - Op: 2
+    A: 42
+    B: 1
+    C: 0
+  - Op: 8
+    A: 47
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 47
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 52
+    B: 0
+    C: 0
+  - Op: 0
+    A: 53
+    B: 54
+    C: 55
+  - Op: 8
+    A: 59
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 63
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 60
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 66
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 65
+    B: 0
+    C: 0
+  - Op: 1
+    A: 70
+    B: 71
+    C: 51
+  - Op: 1
+    A: 72
+    B: 73
+    C: 55
+  - Op: 2
+    A: 59
+    B: 2
+    C: 0
+  - Op: 8
+    A: 68
+    B: 0
+    C: 0
+  - Op: 11
+    A: 74
+    B: 0
+    C: 0
+  - Op: 3
+    A: 75
+    B: 0
+    C: 0
+  - Op: 8
+    A: 68
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 68
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 76
+    B: 77
+    C: 78
+  - Op: 8
+    A: 79
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 83
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 83
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 86
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 88
+    B: 0
+    C: 0
+  - Op: 1
+    A: 93
+    B: 94
+    C: 71
+  - Op: 1
+    A: 95
+    B: 96
+    C: 75
+  - Op: 2
+    A: 79
+    B: 2
+    C: 0
+  - Op: 8
+    A: 88
+    B: 0
+    C: 0
+  - Op: 11
+    A: 97
+    B: 0
+    C: 0
+  - Op: 3
+    A: 98
+    B: 0
+    C: 0
+  - Op: 8
+    A: 88
+    B: 0
+    C: 0
+  - Op: 3
+    A: 99
+    B: 0
+    C: 0
+  - Op: 8
+    A: 88
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 100
+    B: 101
+    C: 102
+  - Op: 8
+    A: 95
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 98
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 107
+    B: 0
+    C: 0
+  - Op: 1
+    A: 112
+    B: 113
+    C: 91
+  - Op: 2
+    A: 95
+    B: 1
+    C: 0
+  - Op: 8
+    A: 102
+    B: 0
+    C: 0
+  - Op: 11
+    A: 114
+    B: 0
+    C: 0
+  - Op: 11
+    A: 115
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 102
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 116
+    B: 117
+    C: 118
+  - Op: 8
+    A: 113
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 117
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 123
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 120
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 128
+    B: 0
+    C: 0
+  - Op: 1
+    A: 133
+    B: 134
+    C: 105
+  - Op: 1
+    A: 135
+    B: 136
+    C: 109
+  - Op: 2
+    A: 113
+    B: 2
+    C: 0
+  - Op: 8
+    A: 123
+    B: 0
+    C: 0
+  - Op: 11
+    A: 137
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 123
+    B: 0
+    C: 0
+  - Op: 11
+    A: 138
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 123
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 139
+    B: 140
+    C: 141
+  - Op: 8
+    A: 130
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 133
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 146
+    B: 0
+    C: 0
+  - Op: 1
+    A: 151
+    B: 152
+    C: 126
+  - Op: 2
+    A: 130
+    B: 1
+    C: 0
+  - Op: 8
+    A: 135
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 135
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 153
+    B: 0
+    C: 0
+  - Op: 0
+    A: 154
+    B: 155
+    C: 156
+  - Op: 8
+    A: 151
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 156
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 161
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 159
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 166
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 162
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 171
+    B: 0
+    C: 0
+  - Op: 1
+    A: 176
+    B: 177
+    C: 139
+  - Op: 1
+    A: 178
+    B: 179
+    C: 143
+  - Op: 1
+    A: 180
+    B: 181
+    C: 147
+  - Op: 2
+    A: 151
+    B: 3
+    C: 0
+  - Op: 8
+    A: 164
+    B: 0
+    C: 0
+  - Op: 11
+    A: 182
+    B: 0
+    C: 0
+  - Op: 3
+    A: 183
+    B: 0
+    C: 0
+  - Op: 8
+    A: 164
+    B: 0
+    C: 0
+  - Op: 11
+    A: 184
+    B: 0
+    C: 0
+  - Op: 3
+    A: 185
+    B: 0
+    C: 0
+  - Op: 8
+    A: 164
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 164
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 186
+    B: 0
+    C: 0
+  - Op: 0
+    A: 187
+    B: 188
+    C: 189
+  - Op: 8
+    A: 172
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 175
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 194
+    B: 0
+    C: 0
+  - Op: 1
+    A: 199
+    B: 200
+    C: 168
+  - Op: 2
+    A: 172
+    B: 1
+    C: 0
+  - Op: 8
+    A: 178
+    B: 0
+    C: 0
+  - Op: 11
+    A: 201
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 178
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 202
+    B: 203
+    C: 204
+  - Op: 8
+    A: 197
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 205
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 209
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 208
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 214
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 211
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 219
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 213
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 224
+    B: 0
+    C: 0
+  - Op: 1
+    A: 229
+    B: 230
+    C: 181
+  - Op: 1
+    A: 231
+    B: 232
+    C: 185
+  - Op: 7
+    A: 2
+    B: 202
+    C: 0
+  - Op: 1
+    A: 233
+    B: 234
+    C: 189
+  - Op: 8
+    A: 202
+    B: 0
+    C: 0
+  - Op: 1
+    A: 235
+    B: 236
+    C: 193
+  - Op: 2
+    A: 197
+    B: 4
+    C: 0
+  - Op: 8
+    A: 215
+    B: 0
+    C: 0
+  - Op: 11
+    A: 237
+    B: 0
+    C: 0
+  - Op: 3
+    A: 238
+    B: 0
+    C: 0
+  - Op: 8
+    A: 215
+    B: 0
+    C: 0
+  - Op: 11
+    A: 239
+    B: 0
+    C: 0
+  - Op: 3
+    A: 240
+    B: 0
+    C: 0
+  - Op: 8
+    A: 215
+    B: 0
+    C: 0
+  - Op: 3
+    A: 241
+    B: 0
+    C: 0
+  - Op: 8
+    A: 215
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 215
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 242
+    B: 0
+    C: 0
+  - Op: 0
+    A: 243
+    B: 244
+    C: 245
+  - Op: 8
+    A: 223
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 226
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 250
+    B: 0
+    C: 0
+  - Op: 1
+    A: 255
+    B: 256
+    C: 219
+  - Op: 2
+    A: 223
+    B: 1
+    C: 0
+  - Op: 8
+    A: 230
+    B: 0
+    C: 0
+  - Op: 11
+    A: 257
+    B: 0
+    C: 0
+  - Op: 11
+    A: 258
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 230
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 259
+    B: 0
+    C: 0
+  - Op: 0
+    A: 260
+    B: 261
+    C: 262
+  - Op: 8
+    A: 238
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 241
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 267
+    B: 0
+    C: 0
+  - Op: 1
+    A: 272
+    B: 273
+    C: 234
+  - Op: 2
+    A: 238
+    B: 1
+    C: 0
+  - Op: 8
+    A: 244
+    B: 0
+    C: 0
+  - Op: 11
+    A: 274
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 244
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 275
+    B: 276
+    C: 277
+  - Op: 8
+    A: 251
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 254
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 282
+    B: 0
+    C: 0
+  - Op: 1
+    A: 287
+    B: 288
+    C: 247
+  - Op: 2
+    A: 251
+    B: 1
+    C: 0
+  - Op: 8
+    A: 258
+    B: 0
+    C: 0
+  - Op: 11
+    A: 289
+    B: 0
+    C: 0
+  - Op: 11
+    A: 290
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 258
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 291
+    B: 292
+    C: 293
+  - Op: 8
+    A: 273
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 278
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 298
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 281
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 303
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 286
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 308
+    B: 0
+    C: 0
+  - Op: 1
+    A: 313
+    B: 314
+    C: 261
+  - Op: 1
+    A: 315
+    B: 316
+    C: 265
+  - Op: 1
+    A: 317
+    B: 318
+    C: 269
+  - Op: 2
+    A: 273
+    B: 3
+    C: 0
+  - Op: 8
+    A: 288
+    B: 0
+    C: 0
+  - Op: 11
+    A: 319
+    B: 0
+    C: 0
+  - Op: 3
+    A: 320
+    B: 0
+    C: 0
+  - Op: 8
+    A: 288
+    B: 0
+    C: 0
+  - Op: 7
+    A: 3
+    B: 284
+    C: 0
+  - Op: 3
+    A: 321
+    B: 0
+    C: 0
+  - Op: 8
+    A: 285
+    B: 0
+    C: 0
+  - Op: 3
+    A: 322
+    B: 0
+    C: 0
+  - Op: 8
+    A: 288
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 288
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 323
+    B: 0
+    C: 0
+  - Op: 0
+    A: 324
+    B: 325
+    C: 326
+  - Op: 8
+    A: 300
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 304
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 331
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 308
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 336
+    B: 0
+    C: 0
+  - Op: 1
+    A: 341
+    B: 342
+    C: 292
+  - Op: 1
+    A: 343
+    B: 344
+    C: 296
+  - Op: 2
+    A: 300
+    B: 2
+    C: 0
+  - Op: 8
+    A: 310
+    B: 0
+    C: 0
+  - Op: 11
+    A: 345
+    B: 0
+    C: 0
+  - Op: 11
+    A: 346
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 310
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 310
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 347
+    B: 348
+    C: 349
+  - Op: 8
+    A: 321
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 325
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 354
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 330
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 359
+    B: 0
+    C: 0
+  - Op: 1
+    A: 364
+    B: 365
+    C: 313
+  - Op: 1
+    A: 366
+    B: 367
+    C: 317
+  - Op: 2
+    A: 321
+    B: 2
+    C: 0
+  - Op: 8
+    A: 332
+    B: 0
+    C: 0
+  - Op: 7
+    A: 5
+    B: 328
+    C: 0
+  - Op: 3
+    A: 368
+    B: 0
+    C: 0
+  - Op: 8
+    A: 329
+    B: 0
+    C: 0
+  - Op: 3
+    A: 369
+    B: 0
+    C: 0
+  - Op: 8
+    A: 332
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 332
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 370
+    B: 371
+    C: 372
+  - Op: 8
+    A: 339
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 342
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 377
+    B: 0
+    C: 0
+  - Op: 1
+    A: 382
+    B: 383
+    C: 335
+  - Op: 2
+    A: 339
+    B: 1
+    C: 0
+  - Op: 8
+    A: 344
+    B: 0
+    C: 0
+  - Op: 11
+    A: 384
+    B: 0
+    C: 0
+  - Op: 8
+    A: 344
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 385
+    B: 386
+    C: 387
+  - Op: 8
+    A: 351
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 354
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 392
+    B: 0
+    C: 0
+  - Op: 1
+    A: 397
+    B: 398
+    C: 347
+  - Op: 2
+    A: 351
+    B: 1
+    C: 0
+  - Op: 8
+    A: 357
+    B: 0
+    C: 0
+  - Op: 11
+    A: 399
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 357
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 400
+    B: 0
+    C: 0
+  - Op: 0
+    A: 401
+    B: 402
+    C: 403
+  - Op: 8
+    A: 365
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 368
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 408
+    B: 0
+    C: 0
+  - Op: 1
+    A: 413
+    B: 414
+    C: 361
+  - Op: 2
+    A: 365
+    B: 1
+    C: 0
+  - Op: 8
+    A: 372
+    B: 0
+    C: 0
+  - Op: 11
+    A: 415
+    B: 0
+    C: 0
+  - Op: 11
+    A: 416
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 372
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 417
+    B: 0
+    C: 0
+  - Op: 0
+    A: 418
+    B: 419
+    C: 420
+  - Op: 8
+    A: 380
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 383
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 425
+    B: 0
+    C: 0
+  - Op: 1
+    A: 430
+    B: 431
+    C: 376
+  - Op: 2
+    A: 380
+    B: 1
+    C: 0
+  - Op: 8
+    A: 387
+    B: 0
+    C: 0
+  - Op: 11
+    A: 432
+    B: 0
+    C: 0
+  - Op: 11
+    A: 433
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 387
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 434
+    B: 435
+    C: 436
+  - Op: 8
+    A: 394
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 397
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 441
+    B: 0
+    C: 0
+  - Op: 1
+    A: 446
+    B: 447
+    C: 390
+  - Op: 2
+    A: 394
+    B: 1
+    C: 0
+  - Op: 8
+    A: 405
+    B: 0
+    C: 0
+  - Op: 7
+    A: 6
+    B: 400
+    C: 0
+  - Op: 3
+    A: 448
+    B: 0
+    C: 0
+  - Op: 8
+    A: 404
+    B: 0
+    C: 0
+  - Op: 7
+    A: 7
+    B: 403
+    C: 0
+  - Op: 3
+    A: 449
+    B: 0
+    C: 0
+  - Op: 8
+    A: 404
+    B: 0
+    C: 0
+  - Op: 3
+    A: 450
+    B: 0
+    C: 0
+  - Op: 8
+    A: 405
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 451
+    B: 452
+    C: 453
+  - Op: 8
+    A: 412
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 415
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 458
+    B: 0
+    C: 0
+  - Op: 1
+    A: 463
+    B: 464
+    C: 408
+  - Op: 2
+    A: 412
+    B: 1
+    C: 0
+  - Op: 8
+    A: 420
+    B: 0
+    C: 0
+  - Op: 11
+    A: 465
+    B: 0
+    C: 0
+  - Op: 11
+    A: 466
+    B: 0
+    C: 0
+  - Op: 11
+    A: 467
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 420
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 468
+    B: 469
+    C: 470
+  - Op: 8
+    A: 427
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 430
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 475
+    B: 0
+    C: 0
+  - Op: 1
+    A: 480
+    B: 481
+    C: 423
+  - Op: 2
+    A: 427
+    B: 1
+    C: 0
+  - Op: 8
+    A: 436
+    B: 0
+    C: 0
+  - Op: 11
+    A: 482
+    B: 0
+    C: 0
+  - Op: 11
+    A: 483
+    B: 0
+    C: 0
+  - Op: 11
+    A: 484
+    B: 0
+    C: 0
+  - Op: 11
+    A: 485
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 436
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 486
+    B: 487
+    C: 488
+  - Op: 8
+    A: 451
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 456
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 493
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 458
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 498
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 460
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 503
+    B: 0
+    C: 0
+  - Op: 1
+    A: 508
+    B: 509
+    C: 439
+  - Op: 1
+    A: 510
+    B: 511
+    C: 443
+  - Op: 1
+    A: 512
+    B: 513
+    C: 447
+  - Op: 2
+    A: 451
+    B: 3
+    C: 0
+  - Op: 8
+    A: 464
+    B: 0
+    C: 0
+  - Op: 3
+    A: 514
+    B: 0
+    C: 0
+  - Op: 8
+    A: 464
+    B: 0
+    C: 0
+  - Op: 3
+    A: 515
+    B: 0
+    C: 0
+  - Op: 8
+    A: 464
+    B: 0
+    C: 0
+  - Op: 11
+    A: 516
+    B: 0
+    C: 0
+  - Op: 11
+    A: 517
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 464
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 518
+    B: 519
+    C: 520
+  - Op: 8
+    A: 479
+    B: 0
+    C: 0
+  - Op: 8
+    A: 8
+    B: 0
+    C: 0
+  - Op: 8
+    A: 484
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 525
+    B: 0
+    C: 0
+  - Op: 8
+    A: 9
+    B: 0
+    C: 0
+  - Op: 8
+    A: 488
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 530
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 492
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 535
+    B: 0
+    C: 0
+  - Op: 1
+    A: 540
+    B: 541
+    C: 467
+  - Op: 1
+    A: 542
+    B: 543
+    C: 471
+  - Op: 1
+    A: 544
+    B: 545
+    C: 475
+  - Op: 2
+    A: 479
+    B: 3
+    C: 0
+  - Op: 8
+    A: 494
+    B: 0
+    C: 0
+  - Op: 11
+    A: 546
+    B: 0
+    C: 0
+  - Op: 11
+    A: 547
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 494
+    B: 0
+    C: 0
+  - Op: 11
+    A: 548
+    B: 0
+    C: 0
+  - Op: 11
+    A: 549
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 494
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 494
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 550
+    B: 551
+    C: 552
+  - Op: 8
+    A: 505
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 509
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 557
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 511
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 562
+    B: 0
+    C: 0
+  - Op: 1
+    A: 567
+    B: 568
+    C: 497
+  - Op: 1
+    A: 569
+    B: 570
+    C: 501
+  - Op: 2
+    A: 505
+    B: 2
+    C: 0
+  - Op: 8
+    A: 514
+    B: 0
+    C: 0
+  - Op: 11
+    A: 571
+    B: 0
+    C: 0
+  - Op: 8
+    A: 514
+    B: 0
+    C: 0
+  - Op: 11
+    A: 572
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 514
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 573
+    B: 574
+    C: 575
+  - Op: 8
+    A: 525
+    B: 0
+    C: 0
+  - Op: 8
+    A: 10
+    B: 0
+    C: 0
+  - Op: 8
+    A: 529
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 580
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 534
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 585
+    B: 0
+    C: 0
+  - Op: 1
+    A: 590
+    B: 591
+    C: 517
+  - Op: 1
+    A: 592
+    B: 593
+    C: 521
+  - Op: 2
+    A: 525
+    B: 2
+    C: 0
+  - Op: 8
+    A: 537
+    B: 0
+    C: 0
+  - Op: 11
+    A: 594
+    B: 0
+    C: 0
+  - Op: 11
+    A: 595
+    B: 0
+    C: 0
+  - Op: 11
+    A: 596
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 537
+    B: 0
+    C: 0
+  - Op: 11
+    A: 597
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 537
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 598
+    B: 599
+    C: 600
+  - Op: 8
+    A: 544
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 547
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 605
+    B: 0
+    C: 0
+  - Op: 1
+    A: 610
+    B: 611
+    C: 540
+  - Op: 2
+    A: 544
+    B: 1
+    C: 0
+  - Op: 8
+    A: 550
+    B: 0
+    C: 0
+  - Op: 11
+    A: 612
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 550
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 613
+    B: 614
+    C: 615
+  - Op: 8
+    A: 557
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 560
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 620
+    B: 0
+    C: 0
+  - Op: 1
+    A: 625
+    B: 626
+    C: 553
+  - Op: 2
+    A: 557
+    B: 1
+    C: 0
+  - Op: 8
+    A: 562
+    B: 0
+    C: 0
+  - Op: 11
+    A: 627
+    B: 0
+    C: 0
+  - Op: 8
+    A: 562
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 628
+    B: 629
+    C: 630
+  - Op: 8
+    A: 569
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 572
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 635
+    B: 0
+    C: 0
+  - Op: 1
+    A: 640
+    B: 641
+    C: 565
+  - Op: 2
+    A: 569
+    B: 1
+    C: 0
+  - Op: 8
+    A: 576
+    B: 0
+    C: 0
+  - Op: 11
+    A: 642
+    B: 0
+    C: 0
+  - Op: 11
+    A: 643
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 576
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 644
+    B: 645
+    C: 646
+  - Op: 8
+    A: 591
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 596
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 651
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 598
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 656
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 600
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 661
+    B: 0
+    C: 0
+  - Op: 1
+    A: 666
+    B: 667
+    C: 579
+  - Op: 1
+    A: 668
+    B: 669
+    C: 583
+  - Op: 1
+    A: 670
+    B: 671
+    C: 587
+  - Op: 2
+    A: 591
+    B: 3
+    C: 0
+  - Op: 8
+    A: 602
+    B: 0
+    C: 0
+  - Op: 3
+    A: 672
+    B: 0
+    C: 0
+  - Op: 8
+    A: 602
+    B: 0
+    C: 0
+  - Op: 3
+    A: 673
+    B: 0
+    C: 0
+  - Op: 8
+    A: 602
+    B: 0
+    C: 0
+  - Op: 3
+    A: 674
+    B: 0
+    C: 0
+  - Op: 8
+    A: 602
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 675
+    B: 676
+    C: 677
+  - Op: 8
+    A: 613
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 617
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 682
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 620
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 687
+    B: 0
+    C: 0
+  - Op: 1
+    A: 692
+    B: 693
+    C: 605
+  - Op: 1
+    A: 694
+    B: 695
+    C: 609
+  - Op: 2
+    A: 613
+    B: 2
+    C: 0
+  - Op: 8
+    A: 623
+    B: 0
+    C: 0
+  - Op: 11
+    A: 696
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 623
+    B: 0
+    C: 0
+  - Op: 11
+    A: 697
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 623
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 698
+    B: 699
+    C: 700
+  - Op: 8
+    A: 634
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 638
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 705
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 640
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 710
+    B: 0
+    C: 0
+  - Op: 1
+    A: 715
+    B: 716
+    C: 626
+  - Op: 1
+    A: 717
+    B: 718
+    C: 630
+  - Op: 2
+    A: 634
+    B: 2
+    C: 0
+  - Op: 8
+    A: 643
+    B: 0
+    C: 0
+  - Op: 3
+    A: 719
+    B: 0
+    C: 0
+  - Op: 8
+    A: 643
+    B: 0
+    C: 0
+  - Op: 11
+    A: 720
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 643
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 721
+    B: 722
+    C: 723
+  - Op: 8
+    A: 650
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 653
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 728
+    B: 0
+    C: 0
+  - Op: 1
+    A: 733
+    B: 734
+    C: 646
+  - Op: 2
+    A: 650
+    B: 1
+    C: 0
+  - Op: 8
+    A: 656
+    B: 0
+    C: 0
+  - Op: 11
+    A: 735
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 656
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 736
+    B: 737
+    C: 738
+  - Op: 8
+    A: 663
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 666
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 743
+    B: 0
+    C: 0
+  - Op: 1
+    A: 748
+    B: 749
+    C: 659
+  - Op: 2
+    A: 663
+    B: 1
+    C: 0
+  - Op: 8
+    A: 670
+    B: 0
+    C: 0
+  - Op: 11
+    A: 750
+    B: 0
+    C: 0
+  - Op: 11
+    A: 751
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 670
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 752
+    B: 753
+    C: 754
+  - Op: 8
+    A: 681
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 685
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 759
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 687
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 764
+    B: 0
+    C: 0
+  - Op: 1
+    A: 769
+    B: 770
+    C: 673
+  - Op: 1
+    A: 771
+    B: 772
+    C: 677
+  - Op: 2
+    A: 681
+    B: 2
+    C: 0
+  - Op: 8
+    A: 689
+    B: 0
+    C: 0
+  - Op: 3
+    A: 773
+    B: 0
+    C: 0
+  - Op: 8
+    A: 689
+    B: 0
+    C: 0
+  - Op: 3
+    A: 774
+    B: 0
+    C: 0
+  - Op: 8
+    A: 689
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 775
+    B: 776
+    C: 777
+  - Op: 8
+    A: 696
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 699
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 782
+    B: 0
+    C: 0
+  - Op: 1
+    A: 787
+    B: 788
+    C: 692
+  - Op: 2
+    A: 696
+    B: 1
+    C: 0
+  - Op: 8
+    A: 702
+    B: 0
+    C: 0
+  - Op: 11
+    A: 789
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 702
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 790
+    B: 791
+    C: 792
+  - Op: 8
+    A: 717
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 722
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 797
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 725
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 802
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 727
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 807
+    B: 0
+    C: 0
+  - Op: 1
+    A: 812
+    B: 813
+    C: 705
+  - Op: 1
+    A: 814
+    B: 815
+    C: 709
+  - Op: 1
+    A: 816
+    B: 817
+    C: 713
+  - Op: 2
+    A: 717
+    B: 3
+    C: 0
+  - Op: 8
+    A: 729
+    B: 0
+    C: 0
+  - Op: 11
+    A: 818
+    B: 0
+    C: 0
+  - Op: 3
+    A: 819
+    B: 0
+    C: 0
+  - Op: 8
+    A: 729
+    B: 0
+    C: 0
+  - Op: 11
+    A: 820
+    B: 0
+    C: 0
+  - Op: 8
+    A: 729
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 729
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 821
+    B: 822
+    C: 823
+  - Op: 8
+    A: 736
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 739
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 828
+    B: 0
+    C: 0
+  - Op: 1
+    A: 833
+    B: 834
+    C: 732
+  - Op: 2
+    A: 736
+    B: 1
+    C: 0
+  - Op: 8
+    A: 741
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 741
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 835
+    B: 836
+    C: 837
+  - Op: 8
+    A: 748
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 751
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 842
+    B: 0
+    C: 0
+  - Op: 1
+    A: 847
+    B: 848
+    C: 744
+  - Op: 2
+    A: 748
+    B: 1
+    C: 0
+  - Op: 8
+    A: 755
+    B: 0
+    C: 0
+  - Op: 11
+    A: 849
+    B: 0
+    C: 0
+  - Op: 11
+    A: 850
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 755
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 851
+    B: 852
+    C: 853
+  - Op: 8
+    A: 770
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 775
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 858
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 777
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 863
+    B: 0
+    C: 0
+  - Op: 8
+    A: 11
+    B: 0
+    C: 0
+  - Op: 8
+    A: 780
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 868
+    B: 0
+    C: 0
+  - Op: 1
+    A: 873
+    B: 874
+    C: 758
+  - Op: 1
+    A: 875
+    B: 876
+    C: 762
+  - Op: 1
+    A: 877
+    B: 878
+    C: 766
+  - Op: 2
+    A: 770
+    B: 3
+    C: 0
+  - Op: 8
+    A: 784
+    B: 0
+    C: 0
+  - Op: 3
+    A: 879
+    B: 0
+    C: 0
+  - Op: 8
+    A: 784
+    B: 0
+    C: 0
+  - Op: 11
+    A: 880
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 784
+    B: 0
+    C: 0
+  - Op: 11
+    A: 881
+    B: 0
+    C: 0
+  - Op: 11
+    A: 882
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 784
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 883
+    B: 884
+    C: 885
+  - Op: 8
+    A: 791
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 794
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 890
+    B: 0
+    C: 0
+  - Op: 1
+    A: 895
+    B: 896
+    C: 787
+  - Op: 2
+    A: 791
+    B: 1
+    C: 0
+  - Op: 8
+    A: 798
+    B: 0
+    C: 0
+  - Op: 11
+    A: 897
+    B: 0
+    C: 0
+  - Op: 11
+    A: 898
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 798
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 899
+    B: 900
+    C: 901
+  - Op: 8
+    A: 813
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 818
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 906
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 822
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 911
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 824
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 916
+    B: 0
+    C: 0
+  - Op: 1
+    A: 921
+    B: 922
+    C: 801
+  - Op: 1
+    A: 923
+    B: 924
+    C: 805
+  - Op: 1
+    A: 925
+    B: 926
+    C: 809
+  - Op: 2
+    A: 813
+    B: 3
+    C: 0
+  - Op: 8
+    A: 828
+    B: 0
+    C: 0
+  - Op: 11
+    A: 927
+    B: 0
+    C: 0
+  - Op: 11
+    A: 928
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 828
+    B: 0
+    C: 0
+  - Op: 3
+    A: 929
+    B: 0
+    C: 0
+  - Op: 8
+    A: 828
+    B: 0
+    C: 0
+  - Op: 11
+    A: 930
+    B: 0
+    C: 0
+  - Op: 11
+    A: 931
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 828
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 932
+    B: 0
+    C: 0
+  - Op: 0
+    A: 933
+    B: 934
+    C: 935
+  - Op: 8
+    A: 836
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 839
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 940
+    B: 0
+    C: 0
+  - Op: 1
+    A: 945
+    B: 946
+    C: 832
+  - Op: 2
+    A: 836
+    B: 1
+    C: 0
+  - Op: 8
+    A: 842
+    B: 0
+    C: 0
+  - Op: 11
+    A: 947
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 842
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 948
+    B: 949
+    C: 950
+  - Op: 8
+    A: 849
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 852
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 955
+    B: 0
+    C: 0
+  - Op: 1
+    A: 960
+    B: 961
+    C: 845
+  - Op: 2
+    A: 849
+    B: 1
+    C: 0
+  - Op: 8
+    A: 854
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 854
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 962
+    B: 0
+    C: 0
+  - Op: 0
+    A: 963
+    B: 964
+    C: 965
+  - Op: 8
+    A: 862
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 865
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 970
+    B: 0
+    C: 0
+  - Op: 1
+    A: 975
+    B: 976
+    C: 858
+  - Op: 2
+    A: 862
+    B: 1
+    C: 0
+  - Op: 8
+    A: 870
+    B: 0
+    C: 0
+  - Op: 7
+    A: 12
+    B: 868
+    C: 0
+  - Op: 3
+    A: 977
+    B: 0
+    C: 0
+  - Op: 8
+    A: 869
+    B: 0
+    C: 0
+  - Op: 3
+    A: 978
+    B: 0
+    C: 0
+  - Op: 8
+    A: 870
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 979
+    B: 0
+    C: 0
+  - Op: 0
+    A: 980
+    B: 981
+    C: 982
+  - Op: 8
+    A: 882
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 886
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 987
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 889
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 992
+    B: 0
+    C: 0
+  - Op: 1
+    A: 997
+    B: 998
+    C: 874
+  - Op: 1
+    A: 999
+    B: 1000
+    C: 878
+  - Op: 2
+    A: 882
+    B: 2
+    C: 0
+  - Op: 8
+    A: 892
+    B: 0
+    C: 0
+  - Op: 4
+    A: 1001
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1002
+    B: 0
+    C: 0
+  - Op: 8
+    A: 892
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1003
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 892
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1004
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1005
+    B: 1006
+    C: 1007
+  - Op: 8
+    A: 908
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 913
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1012
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 916
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1017
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 921
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1022
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1027
+    B: 1028
+    C: 896
+  - Op: 1
+    A: 1029
+    B: 1030
+    C: 900
+  - Op: 1
+    A: 1031
+    B: 1032
+    C: 904
+  - Op: 2
+    A: 908
+    B: 3
+    C: 0
+  - Op: 8
+    A: 923
+    B: 0
+    C: 0
+  - Op: 4
+    A: 1033
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1034
+    B: 0
+    C: 0
+  - Op: 8
+    A: 923
+    B: 0
+    C: 0
+  - Op: 7
+    A: 13
+    B: 919
+    C: 0
+  - Op: 3
+    A: 1035
+    B: 0
+    C: 0
+  - Op: 8
+    A: 920
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1036
+    B: 0
+    C: 0
+  - Op: 8
+    A: 923
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 923
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1037
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1038
+    B: 1039
+    C: 1040
+  - Op: 8
+    A: 943
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 953
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1045
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 956
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1050
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 959
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1055
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 962
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1060
+    B: 0
+    C: 0
+  - Op: 7
+    A: 14
+    B: 946
+    C: 0
+  - Op: 1
+    A: 1065
+    B: 1066
+    C: 927
+  - Op: 8
+    A: 946
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1067
+    B: 1068
+    C: 931
+  - Op: 7
+    A: 15
+    B: 950
+    C: 0
+  - Op: 1
+    A: 1069
+    B: 1070
+    C: 935
+  - Op: 8
+    A: 950
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1071
+    B: 1072
+    C: 939
+  - Op: 2
+    A: 943
+    B: 4
+    C: 0
+  - Op: 8
+    A: 964
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1073
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1074
+    B: 0
+    C: 0
+  - Op: 8
+    A: 964
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1075
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1076
+    B: 0
+    C: 0
+  - Op: 8
+    A: 964
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1077
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 964
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 964
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1078
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1079
+    B: 1080
+    C: 1081
+  - Op: 8
+    A: 976
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 980
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1086
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 984
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1091
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1096
+    B: 1097
+    C: 968
+  - Op: 1
+    A: 1098
+    B: 1099
+    C: 972
+  - Op: 2
+    A: 976
+    B: 2
+    C: 0
+  - Op: 8
+    A: 987
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1100
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1101
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 987
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1102
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 987
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1103
+    B: 1104
+    C: 1105
+  - Op: 8
+    A: 1006
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1012
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1110
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1015
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1115
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1018
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1120
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1020
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1125
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1130
+    B: 1131
+    C: 990
+  - Op: 1
+    A: 1132
+    B: 1133
+    C: 994
+  - Op: 1
+    A: 1134
+    B: 1135
+    C: 998
+  - Op: 1
+    A: 1136
+    B: 1137
+    C: 1002
+  - Op: 2
+    A: 1006
+    B: 4
+    C: 0
+  - Op: 8
+    A: 1022
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1138
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1022
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1139
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1022
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1140
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1022
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1022
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1141
+    B: 1142
+    C: 1143
+  - Op: 8
+    A: 1029
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1032
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1148
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1153
+    B: 1154
+    C: 1025
+  - Op: 2
+    A: 1029
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1035
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1155
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1156
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1035
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1157
+    B: 1158
+    C: 1159
+  - Op: 8
+    A: 1050
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1055
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1164
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1057
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1169
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1060
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1174
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1179
+    B: 1180
+    C: 1038
+  - Op: 1
+    A: 1181
+    B: 1182
+    C: 1042
+  - Op: 1
+    A: 1183
+    B: 1184
+    C: 1046
+  - Op: 2
+    A: 1050
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1064
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1185
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1064
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1186
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1064
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1187
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1188
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1064
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1189
+    B: 1190
+    C: 1191
+  - Op: 8
+    A: 1079
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1084
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1196
+    B: 0
+    C: 0
+  - Op: 8
+    A: 16
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1086
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1201
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1090
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1206
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1211
+    B: 1212
+    C: 1067
+  - Op: 1
+    A: 1213
+    B: 1214
+    C: 1071
+  - Op: 1
+    A: 1215
+    B: 1216
+    C: 1075
+  - Op: 2
+    A: 1079
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1092
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1217
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1092
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1218
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1219
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1092
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1220
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1092
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1221
+    B: 1222
+    C: 1223
+  - Op: 8
+    A: 1099
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1102
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1228
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1233
+    B: 1234
+    C: 1095
+  - Op: 2
+    A: 1099
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1105
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1235
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1105
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1236
+    B: 1237
+    C: 1238
+  - Op: 8
+    A: 1112
+    B: 0
+    C: 0
+  - Op: 8
+    A: 17
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1115
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1243
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1248
+    B: 1249
+    C: 1108
+  - Op: 2
+    A: 1112
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1119
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1250
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1251
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1119
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1252
+    B: 1253
+    C: 1254
+  - Op: 8
+    A: 1126
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1129
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1259
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1264
+    B: 1265
+    C: 1122
+  - Op: 2
+    A: 1126
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1132
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1266
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1132
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1267
+    B: 1268
+    C: 1269
+  - Op: 8
+    A: 1139
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1142
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1274
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1279
+    B: 1280
+    C: 1135
+  - Op: 2
+    A: 1139
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1145
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1281
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1145
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1282
+    B: 1283
+    C: 1284
+  - Op: 8
+    A: 1160
+    B: 0
+    C: 0
+  - Op: 8
+    A: 18
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1165
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1289
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1168
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1294
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1170
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1299
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1304
+    B: 1305
+    C: 1148
+  - Op: 1
+    A: 1306
+    B: 1307
+    C: 1152
+  - Op: 1
+    A: 1308
+    B: 1309
+    C: 1156
+  - Op: 2
+    A: 1160
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1172
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1310
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1172
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1311
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1172
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1312
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1172
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1313
+    B: 1314
+    C: 1315
+  - Op: 8
+    A: 1179
+    B: 0
+    C: 0
+  - Op: 8
+    A: 19
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1182
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1320
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1325
+    B: 1326
+    C: 1175
+  - Op: 2
+    A: 1179
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1186
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1327
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1328
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1186
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1329
+    B: 1330
+    C: 1331
+  - Op: 8
+    A: 1201
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1206
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1336
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1209
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1341
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1211
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1346
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1351
+    B: 1352
+    C: 1189
+  - Op: 1
+    A: 1353
+    B: 1354
+    C: 1193
+  - Op: 1
+    A: 1355
+    B: 1356
+    C: 1197
+  - Op: 2
+    A: 1201
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1215
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1357
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1215
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1358
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1215
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1359
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1360
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1215
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1361
+    B: 1362
+    C: 1363
+  - Op: 8
+    A: 1222
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1225
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1368
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1373
+    B: 1374
+    C: 1218
+  - Op: 2
+    A: 1222
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1228
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1375
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1228
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1376
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1377
+    B: 1378
+    C: 1379
+  - Op: 8
+    A: 1240
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1246
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1384
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1250
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1389
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1394
+    B: 1395
+    C: 1232
+  - Op: 7
+    A: 20
+    B: 1244
+    C: 0
+  - Op: 1
+    A: 1396
+    B: 1397
+    C: 1236
+  - Op: 8
+    A: 1244
+    B: 0
+    C: 0
+  - Op: 2
+    A: 1240
+    B: 2
+    C: 0
+  - Op: 8
+    A: 1254
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1398
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1399
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1254
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1400
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1401
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1254
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1402
+    B: 1403
+    C: 1404
+  - Op: 8
+    A: 1273
+    B: 0
+    C: 0
+  - Op: 8
+    A: 21
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1281
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1409
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1285
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1414
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1290
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1419
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1296
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1424
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1429
+    B: 1430
+    C: 1257
+  - Op: 7
+    A: 22
+    B: 1277
+    C: 0
+  - Op: 1
+    A: 1431
+    B: 1432
+    C: 1261
+  - Op: 8
+    A: 1277
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1433
+    B: 1434
+    C: 1265
+  - Op: 1
+    A: 1435
+    B: 1436
+    C: 1269
+  - Op: 2
+    A: 1273
+    B: 4
+    C: 0
+  - Op: 8
+    A: 1300
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1437
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1438
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1439
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1300
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1440
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1441
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1442
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1443
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1300
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1444
+    B: 0
+    C: 0
+  - Op: 7
+    A: 23
+    B: 1294
+    C: 0
+  - Op: 3
+    A: 1445
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1295
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1446
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1300
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1447
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1448
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1300
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1449
+    B: 1450
+    C: 1451
+  - Op: 8
+    A: 1307
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1310
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1456
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1461
+    B: 1462
+    C: 1303
+  - Op: 2
+    A: 1307
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1313
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1463
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1313
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1464
+    B: 1465
+    C: 1466
+  - Op: 8
+    A: 1320
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1323
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1471
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1476
+    B: 1477
+    C: 1316
+  - Op: 2
+    A: 1320
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1326
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1478
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1326
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1479
+    B: 1480
+    C: 1481
+  - Op: 8
+    A: 1341
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1346
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1486
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1351
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1491
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1353
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1496
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1501
+    B: 1502
+    C: 1329
+  - Op: 1
+    A: 1503
+    B: 1504
+    C: 1333
+  - Op: 1
+    A: 1505
+    B: 1506
+    C: 1337
+  - Op: 2
+    A: 1341
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1355
+    B: 0
+    C: 0
+  - Op: 7
+    A: 24
+    B: 1349
+    C: 0
+  - Op: 3
+    A: 1507
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1350
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1508
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1355
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1509
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1355
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1355
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1510
+    B: 1511
+    C: 1512
+  - Op: 8
+    A: 1362
+    B: 0
+    C: 0
+  - Op: 8
+    A: 25
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1365
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1517
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1522
+    B: 1523
+    C: 1358
+  - Op: 2
+    A: 1362
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1368
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1524
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1368
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1525
+    B: 1526
+    C: 1527
+  - Op: 8
+    A: 1375
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1378
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1532
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1537
+    B: 1538
+    C: 1371
+  - Op: 2
+    A: 1375
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1382
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1539
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1540
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1382
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1541
+    B: 1542
+    C: 1543
+  - Op: 8
+    A: 1389
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1392
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1548
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1553
+    B: 1554
+    C: 1385
+  - Op: 2
+    A: 1389
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1395
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1555
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1395
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1556
+    B: 1557
+    C: 1558
+  - Op: 8
+    A: 1410
+    B: 0
+    C: 0
+  - Op: 8
+    A: 26
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1415
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1563
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1421
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1568
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1423
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1573
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1578
+    B: 1579
+    C: 1398
+  - Op: 1
+    A: 1580
+    B: 1581
+    C: 1402
+  - Op: 1
+    A: 1582
+    B: 1583
+    C: 1406
+  - Op: 2
+    A: 1410
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1425
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1584
+    B: 0
+    C: 0
+  - Op: 7
+    A: 27
+    B: 1419
+    C: 0
+  - Op: 3
+    A: 1585
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1420
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1586
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1425
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1587
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1425
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1425
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1588
+    B: 1589
+    C: 1590
+  - Op: 8
+    A: 1432
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1435
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1595
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1600
+    B: 1601
+    C: 1428
+  - Op: 2
+    A: 1432
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1440
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1602
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1603
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1604
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1440
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1605
+    B: 1606
+    C: 1607
+  - Op: 8
+    A: 1447
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1450
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1612
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1617
+    B: 1618
+    C: 1443
+  - Op: 2
+    A: 1447
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1454
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1619
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1620
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1454
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1621
+    B: 1622
+    C: 1623
+  - Op: 8
+    A: 1469
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1474
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1628
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1476
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1633
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1478
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1638
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1643
+    B: 1644
+    C: 1457
+  - Op: 1
+    A: 1645
+    B: 1646
+    C: 1461
+  - Op: 1
+    A: 1647
+    B: 1648
+    C: 1465
+  - Op: 2
+    A: 1469
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1481
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1649
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1481
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1650
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1481
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1651
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1481
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1652
+    B: 1653
+    C: 1654
+  - Op: 8
+    A: 1492
+    B: 0
+    C: 0
+  - Op: 8
+    A: 28
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1496
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1659
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1498
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1664
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1669
+    B: 1670
+    C: 1484
+  - Op: 1
+    A: 1671
+    B: 1672
+    C: 1488
+  - Op: 2
+    A: 1492
+    B: 2
+    C: 0
+  - Op: 8
+    A: 1500
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1673
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1500
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1500
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1674
+    B: 1675
+    C: 1676
+  - Op: 8
+    A: 1507
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1510
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1681
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1686
+    B: 1687
+    C: 1503
+  - Op: 2
+    A: 1507
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1513
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1688
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1513
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1689
+    B: 1690
+    C: 1691
+  - Op: 8
+    A: 1524
+    B: 0
+    C: 0
+  - Op: 8
+    A: 29
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1528
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1696
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1531
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1701
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1706
+    B: 1707
+    C: 1516
+  - Op: 1
+    A: 1708
+    B: 1709
+    C: 1520
+  - Op: 2
+    A: 1524
+    B: 2
+    C: 0
+  - Op: 8
+    A: 1533
+    B: 0
+    C: 0
+  - Op: 4
+    A: 1710
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1711
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1533
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1533
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1712
+    B: 1713
+    C: 1714
+  - Op: 8
+    A: 1552
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1560
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1719
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1563
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1724
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1566
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1729
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1569
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1734
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1739
+    B: 1740
+    C: 1536
+  - Op: 7
+    A: 30
+    B: 1556
+    C: 0
+  - Op: 1
+    A: 1741
+    B: 1742
+    C: 1540
+  - Op: 8
+    A: 1556
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1743
+    B: 1744
+    C: 1544
+  - Op: 1
+    A: 1745
+    B: 1746
+    C: 1548
+  - Op: 2
+    A: 1552
+    B: 4
+    C: 0
+  - Op: 8
+    A: 1571
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1747
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1571
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1748
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1571
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1749
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1571
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1571
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1750
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1751
+    B: 1752
+    C: 1753
+  - Op: 8
+    A: 1603
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1612
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1758
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1615
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1763
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1618
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1768
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1621
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1773
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1624
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1778
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1627
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1783
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1629
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1788
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1793
+    B: 1794
+    C: 1575
+  - Op: 1
+    A: 1795
+    B: 1796
+    C: 1579
+  - Op: 1
+    A: 1797
+    B: 1798
+    C: 1583
+  - Op: 1
+    A: 1799
+    B: 1800
+    C: 1587
+  - Op: 1
+    A: 1801
+    B: 1802
+    C: 1591
+  - Op: 1
+    A: 1803
+    B: 1804
+    C: 1595
+  - Op: 1
+    A: 1805
+    B: 1806
+    C: 1599
+  - Op: 2
+    A: 1603
+    B: 7
+    C: 0
+  - Op: 8
+    A: 1631
+    B: 0
+    C: 0
+  - Op: 4
+    A: 1807
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1808
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1631
+    B: 0
+    C: 0
+  - Op: 4
+    A: 1809
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1810
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1631
+    B: 0
+    C: 0
+  - Op: 4
+    A: 1811
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1812
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1631
+    B: 0
+    C: 0
+  - Op: 4
+    A: 1813
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1814
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1631
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1815
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1816
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1631
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1817
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1631
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1631
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1818
+    B: 1819
+    C: 1820
+  - Op: 8
+    A: 1646
+    B: 0
+    C: 0
+  - Op: 8
+    A: 31
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1651
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1825
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1654
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1830
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1656
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1835
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1840
+    B: 1841
+    C: 1634
+  - Op: 1
+    A: 1842
+    B: 1843
+    C: 1638
+  - Op: 1
+    A: 1844
+    B: 1845
+    C: 1642
+  - Op: 2
+    A: 1646
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1658
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1846
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1658
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1847
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1658
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1658
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1848
+    B: 1849
+    C: 1850
+  - Op: 8
+    A: 1673
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1678
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1855
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1681
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1860
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1684
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1865
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1870
+    B: 1871
+    C: 1661
+  - Op: 1
+    A: 1872
+    B: 1873
+    C: 1665
+  - Op: 1
+    A: 1874
+    B: 1875
+    C: 1669
+  - Op: 2
+    A: 1673
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1686
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1876
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1877
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1686
+    B: 0
+    C: 0
+  - Op: 4
+    A: 1878
+    B: 0
+    C: 0
+  - Op: 3
+    A: 1879
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1686
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1686
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1880
+    B: 1881
+    C: 1882
+  - Op: 8
+    A: 1729
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1755
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1887
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1758
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1892
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1761
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1897
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1764
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1902
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1767
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1907
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1770
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1912
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1773
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1917
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1776
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1922
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1779
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1927
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1782
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1932
+    B: 0
+    C: 0
+  - Op: 7
+    A: 32
+    B: 1732
+    C: 0
+  - Op: 1
+    A: 1937
+    B: 1938
+    C: 1689
+  - Op: 8
+    A: 1732
+    B: 0
+    C: 0
+  - Op: 7
+    A: 33
+    B: 1735
+    C: 0
+  - Op: 1
+    A: 1939
+    B: 1940
+    C: 1693
+  - Op: 8
+    A: 1735
+    B: 0
+    C: 0
+  - Op: 7
+    A: 34
+    B: 1738
+    C: 0
+  - Op: 1
+    A: 1941
+    B: 1942
+    C: 1697
+  - Op: 8
+    A: 1738
+    B: 0
+    C: 0
+  - Op: 7
+    A: 35
+    B: 1741
+    C: 0
+  - Op: 1
+    A: 1943
+    B: 1944
+    C: 1701
+  - Op: 8
+    A: 1741
+    B: 0
+    C: 0
+  - Op: 7
+    A: 36
+    B: 1744
+    C: 0
+  - Op: 1
+    A: 1945
+    B: 1946
+    C: 1705
+  - Op: 8
+    A: 1744
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1947
+    B: 1948
+    C: 1709
+  - Op: 1
+    A: 1949
+    B: 1950
+    C: 1713
+  - Op: 7
+    A: 37
+    B: 1749
+    C: 0
+  - Op: 1
+    A: 1951
+    B: 1952
+    C: 1717
+  - Op: 8
+    A: 1749
+    B: 0
+    C: 0
+  - Op: 7
+    A: 38
+    B: 1752
+    C: 0
+  - Op: 1
+    A: 1953
+    B: 1954
+    C: 1721
+  - Op: 8
+    A: 1752
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1955
+    B: 1956
+    C: 1725
+  - Op: 2
+    A: 1729
+    B: 10
+    C: 0
+  - Op: 8
+    A: 1784
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1957
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1784
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1958
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1784
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1959
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1784
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1960
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1784
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1961
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1784
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1962
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1784
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1963
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1784
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1964
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1784
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1965
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1784
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1784
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1966
+    B: 1967
+    C: 1968
+  - Op: 8
+    A: 1795
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1799
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1973
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1802
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1978
+    B: 0
+    C: 0
+  - Op: 1
+    A: 1983
+    B: 1984
+    C: 1787
+  - Op: 1
+    A: 1985
+    B: 1986
+    C: 1791
+  - Op: 2
+    A: 1795
+    B: 2
+    C: 0
+  - Op: 8
+    A: 1804
+    B: 0
+    C: 0
+  - Op: 11
+    A: 1987
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1804
+    B: 0
+    C: 0
+  - Op: 5
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1804
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 1988
+    B: 1989
+    C: 1990
+  - Op: 8
+    A: 1811
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1814
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1995
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2000
+    B: 2001
+    C: 1807
+  - Op: 2
+    A: 1811
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1817
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2002
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1817
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2003
+    B: 2004
+    C: 2005
+  - Op: 8
+    A: 1828
+    B: 0
+    C: 0
+  - Op: 8
+    A: 39
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1832
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2010
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1837
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2015
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2020
+    B: 2021
+    C: 1820
+  - Op: 1
+    A: 2022
+    B: 2023
+    C: 1824
+  - Op: 2
+    A: 1828
+    B: 2
+    C: 0
+  - Op: 8
+    A: 1840
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2024
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2025
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2026
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1840
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2027
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1840
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2028
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2029
+    B: 2030
+    C: 2031
+  - Op: 8
+    A: 1856
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1863
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2036
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1866
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2041
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1869
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2046
+    B: 0
+    C: 0
+  - Op: 7
+    A: 40
+    B: 1859
+    C: 0
+  - Op: 1
+    A: 2051
+    B: 2052
+    C: 1844
+  - Op: 8
+    A: 1859
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2053
+    B: 2054
+    C: 1848
+  - Op: 1
+    A: 2055
+    B: 2056
+    C: 1852
+  - Op: 2
+    A: 1856
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1871
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2057
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1871
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2058
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1871
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1871
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2059
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2060
+    B: 2061
+    C: 2062
+  - Op: 8
+    A: 1887
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1894
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2067
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1897
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2072
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1900
+    B: 0
+    C: 0
+  - Op: 8
+    A: 4
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2077
+    B: 0
+    C: 0
+  - Op: 7
+    A: 41
+    B: 1890
+    C: 0
+  - Op: 1
+    A: 2082
+    B: 2083
+    C: 1875
+  - Op: 8
+    A: 1890
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2084
+    B: 2085
+    C: 1879
+  - Op: 1
+    A: 2086
+    B: 2087
+    C: 1883
+  - Op: 2
+    A: 1887
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1902
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2088
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1902
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2089
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1902
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1902
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2090
+    B: 2091
+    C: 2092
+  - Op: 8
+    A: 1909
+    B: 0
+    C: 0
+  - Op: 8
+    A: 42
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1912
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2097
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2102
+    B: 2103
+    C: 1905
+  - Op: 2
+    A: 1909
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1916
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2104
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2105
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1916
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2106
+    B: 2107
+    C: 2108
+  - Op: 8
+    A: 1923
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1926
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2113
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2118
+    B: 2119
+    C: 1919
+  - Op: 2
+    A: 1923
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1929
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2120
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1929
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2121
+    B: 2122
+    C: 2123
+  - Op: 8
+    A: 1944
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1949
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2128
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1951
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2133
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1953
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2138
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2143
+    B: 2144
+    C: 1932
+  - Op: 1
+    A: 2145
+    B: 2146
+    C: 1936
+  - Op: 1
+    A: 2147
+    B: 2148
+    C: 1940
+  - Op: 2
+    A: 1944
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1955
+    B: 0
+    C: 0
+  - Op: 3
+    A: 2149
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1955
+    B: 0
+    C: 0
+  - Op: 3
+    A: 2150
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1955
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2151
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1955
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2152
+    B: 2153
+    C: 2154
+  - Op: 0
+    A: 2159
+    B: 2160
+    C: 2161
+  - Op: 8
+    A: 1971
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1976
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2166
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1978
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2171
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1980
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2176
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2181
+    B: 2182
+    C: 1959
+  - Op: 1
+    A: 2183
+    B: 2184
+    C: 1963
+  - Op: 1
+    A: 2185
+    B: 2186
+    C: 1967
+  - Op: 2
+    A: 1971
+    B: 3
+    C: 0
+  - Op: 8
+    A: 1982
+    B: 0
+    C: 0
+  - Op: 3
+    A: 2187
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1982
+    B: 0
+    C: 0
+  - Op: 3
+    A: 2188
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1982
+    B: 0
+    C: 0
+  - Op: 3
+    A: 2189
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1982
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2190
+    B: 2191
+    C: 2192
+  - Op: 8
+    A: 1989
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1992
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2197
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2202
+    B: 2203
+    C: 1985
+  - Op: 2
+    A: 1989
+    B: 1
+    C: 0
+  - Op: 8
+    A: 1994
+    B: 0
+    C: 0
+  - Op: 3
+    A: 2204
+    B: 0
+    C: 0
+  - Op: 8
+    A: 1994
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2205
+    B: 2206
+    C: 2207
+  - Op: 8
+    A: 2005
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2009
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2212
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2011
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2217
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2222
+    B: 2223
+    C: 1997
+  - Op: 1
+    A: 2224
+    B: 2225
+    C: 2001
+  - Op: 2
+    A: 2005
+    B: 2
+    C: 0
+  - Op: 8
+    A: 2013
+    B: 0
+    C: 0
+  - Op: 3
+    A: 2226
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2013
+    B: 0
+    C: 0
+  - Op: 3
+    A: 2227
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2013
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2228
+    B: 2229
+    C: 2230
+  - Op: 8
+    A: 2020
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2023
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2235
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2240
+    B: 2241
+    C: 2016
+  - Op: 2
+    A: 2020
+    B: 1
+    C: 0
+  - Op: 8
+    A: 2027
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2242
+    B: 0
+    C: 0
+  - Op: 11
+    A: 2243
+    B: 0
+    C: 0
+  - Op: 6
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2027
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2244
+    B: 2245
+    C: 2246
+  - Op: 8
+    A: 2034
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2037
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2251
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2256
+    B: 2257
+    C: 2030
+  - Op: 2
+    A: 2034
+    B: 1
+    C: 0
+  - Op: 8
+    A: 2039
+    B: 0
+    C: 0
+  - Op: 3
+    A: 2258
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2039
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2259
+    B: 2260
+    C: 2261
+  - Op: 8
+    A: 2046
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2049
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2266
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2271
+    B: 2272
+    C: 2042
+  - Op: 2
+    A: 2046
+    B: 1
+    C: 0
+  - Op: 8
+    A: 2051
+    B: 0
+    C: 0
+  - Op: 3
+    A: 2273
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2051
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  - Op: 0
+    A: 2274
+    B: 2275
+    C: 2276
+  - Op: 8
+    A: 2058
+    B: 0
+    C: 0
+  - Op: 8
+    A: -1
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2061
+    B: 0
+    C: 0
+  - Op: 8
+    A: 0
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2281
+    B: 0
+    C: 0
+  - Op: 1
+    A: 2286
+    B: 2287
+    C: 2054
+  - Op: 2
+    A: 2058
+    B: 1
+    C: 0
+  - Op: 8
+    A: 2063
+    B: 0
+    C: 0
+  - Op: 3
+    A: 2288
+    B: 0
+    C: 0
+  - Op: 8
+    A: 2063
+    B: 0
+    C: 0
+  - Op: 12
+    A: 0
+    B: 0
+    C: 0
+  strings:
+  - The ARK bay systems come online. Choose your starting ship chassis.
+  - choose_start_ship_start_00
+  - 
+  - speaker_nora
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Take Fighter
+  - choose_start_ship_start_01
+  - Take Frigate
+  - choose_start_ship_start_02
+  - Take Vestari
+  - choose_start_ship_start_03
+  - give_ship ship_fighter
+  - spawn_encounter encounter_xeno_probe_tutorial ark_station 1
+  - set_fact intro_ship_chosen true
+  - give_ship ship_frigate
+  - spawn_encounter encounter_xeno_probe_tutorial ark_station 1
+  - set_fact intro_ship_chosen true
+  - give_ship ship_vestari
+  - spawn_encounter encounter_xeno_probe_tutorial ark_station 1
+  - set_fact intro_ship_chosen true
+  - play_sfx cue_ui_success
+  - A grateful engineer joins your crew. 'I won't forget this. Let me repay you with my skills.'
+  - crew_stranded_rescued_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Welcome Aboard
+  - crew_stranded_rescued_01
+  - play_sfx cue_ui_click
+  - A distress pod from a destroyed vessel floats nearby. Life signs detected inside.
+  - crew_stranded_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Rescue Survivor
+  - crew_stranded_start_01
+  - Ignore
+  - crew_stranded_start_02
+  - give_item resource_crew 1
+  - crew_stranded_rescued
+  - "Buried in the ice ring is a vault marked with the symbol of the 'First Ark'\u2014a mission launched 500 years ago that was presumed lost. The airlock is frozen shut."
+  - cryo_vault_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Melt Seal
+  - cryo_vault_start_01
+  - Use Explosives
+  - cryo_vault_start_02
+  - take_item resource_fuel 3
+  - cryo_vault_vault_enter
+  - cryo_vault_vault_damaged
+  - The explosion compromises some of the samples, but you gain access. Inside are genetic samples and a custodian AI that powers down from the shock.
+  - cryo_vault_vault_damaged_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Salvage What You Can
+  - cryo_vault_vault_damaged_01
+  - give_item item_genetic_stimulants 1
+  - damage_ship 5
+  - "Inside are thousands of genetic samples\u2014embryos of Earth's extinct animals. A custodian AI wakes up. 'Are you the Gardeners? Is it safe to plant yet?'"
+  - cryo_vault_vault_enter_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 'Lie: ''Yes, it is safe.'''
+  - cryo_vault_vault_enter_01
+  - 'Truth: ''No, the galaxy is dying.'''
+  - cryo_vault_vault_enter_02
+  - give_item item_seed_bank 1
+  - give_item item_genetic_stimulants 1
+  - You should have heard a sound effect!
+  - debug_audio_events_audio_played_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - End Demo
+  - debug_audio_events_audio_played_01
+  - play_sfx cue_ui_view_open
+  - This encounter demonstrates audio feedback on pages and actions.
+  - debug_audio_events_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Play Success Sound
+  - debug_audio_events_start_01
+  - Play Fail Sound
+  - debug_audio_events_start_02
+  - Silent Option
+  - debug_audio_events_start_03
+  - play_sfx cue_ui_success
+  - debug_audio_events_audio_played
+  - play_sfx cue_ui_fail
+  - debug_audio_events_audio_played
+  - play_sfx cue_ui_success
+  - The container opens, revealing valuable cargo!
+  - debug_conditional_options_opened_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Take the Loot
+  - debug_conditional_options_opened_01
+  - give_item resource_palladium 3
+  - You encounter a locked container. Your options depend on your abilities and inventory.
+  - debug_conditional_options_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Force it Open (Costs Hull)
+  - debug_conditional_options_start_01
+  - Use Keycard
+  - debug_conditional_options_start_02
+  - Hack (Requires Skill)
+  - debug_conditional_options_start_03
+  - Leave
+  - debug_conditional_options_start_04
+  - damage_ship 10
+  - debug_conditional_options_opened
+  - take_item resource_palladium 1
+  - debug_conditional_options_opened
+  - debug_conditional_options_opened
+  - play_sfx cue_ui_success
+  - Deep in the wreckage, you find an intact Weapon Module!
+  - derelict_salvage_module_found_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Take Module
+  - derelict_salvage_module_found_01
+  - give_loot loot_salvage_module 1
+  - remove_body
+  - play_sfx cue_ui_fail
+  - The wreckage is picked clean. Nothing of value remains.
+  - derelict_salvage_nothing_found_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Leave
+  - derelict_salvage_nothing_found_01
+  - remove_body
+  - You extract useful materials, but the unstable reactor leaks radiation, slightly damaging your hull.
+  - derelict_salvage_salvage_success_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - derelict_salvage_salvage_success_01
+  - damage_ship 10
+  - remove_body
+  - A drifting cruiser, split in half by some massive impact, floats nearby. Sensors detect lingering radiation and valuable scrap.
+  - derelict_salvage_start_00
+  - 
+  - 
+  - 
+  - illustration_wreckage
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Salvage Scrap
+  - derelict_salvage_start_01
+  - Scan for Modules
+  - derelict_salvage_start_02
+  - Leave
+  - derelict_salvage_start_03
+  - give_loot loot_base 3
+  - derelict_salvage_salvage_success
+  - derelict_salvage_module_found
+  - derelict_salvage_nothing_found
+  - play_sfx cue_ui_success
+  - You find a small pod with a grateful survivor. They offer a Blueprint in exchange for the fuel.
+  - distress_trap_real_survivors_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Trade Fuel for Blueprint
+  - distress_trap_real_survivors_01
+  - Leave them
+  - distress_trap_real_survivors_02
+  - take_item resource_fuel 2
+  - give_item item_research_blueprint 1
+  - A distress beacon pulsates from a debris field. It claims to be a civilian transport out of fuel.
+  - distress_trap_start_00
+  - 
+  - 
+  - 
+  - illustration_beacon
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Approach to assist
+  - distress_trap_start_01
+  - Ignore
+  - distress_trap_start_02
+  - distress_trap_trap_spring
+  - distress_trap_real_survivors
+  - As you power down weapons to transfer fuel, pirate signatures flare to life all around you! It's a trap!
+  - distress_trap_trap_spring_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Battle Stations!
+  - distress_trap_trap_spring_01
+  - start_combat encounter_raiders
+  - The pod is empty. Someone got here first.
+  - empty_cargo_cargo_empty_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - empty_cargo_cargo_empty_01
+  - remove_body
+  - play_sfx cue_ui_success
+  - The pod contains valuable supplies!
+  - empty_cargo_cargo_good_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Take It
+  - empty_cargo_cargo_good_01
+  - give_credits 150
+  - remove_body
+  - play_sfx cue_ui_fail
+  - The pod was rigged! It explodes near your hull!
+  - empty_cargo_cargo_trap_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Damage Report
+  - empty_cargo_cargo_trap_01
+  - damage_ship 10
+  - remove_body
+  - You find a small cargo pod floating in space. It seems intact.
+  - empty_cargo_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Open It
+  - empty_cargo_start_01
+  - empty_cargo_cargo_good
+  - empty_cargo_cargo_trap
+  - empty_cargo_cargo_empty
+  - The bridge logs reveal this ship was on a reconnaissance mission mapping Silence incursion zones. The star charts are invaluable.
+  - frozen_sentinel_bridge_log_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Download Charts
+  - frozen_sentinel_bridge_log_01
+  - reveal_clue rumor_silence_incursions
+  - add_fact research_points 25
+  - remove_body
+  - 'You find a stasis pod. Inside is a human... from your Ark. But he''s aged 100 years. He wakes up screaming: ''Don''t let me go back! I''ve seen the loop!'' then turns to dust as the pod opens.'
+  - frozen_sentinel_core_stasis_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - frozen_sentinel_core_stasis_01
+  - set_fact trait_existential_dread true
+  - reveal_clue clue_seen_the_loop
+  - give_credits 500
+  - remove_body
+  - A Vanguard warship drifts here, dead in the water. It's covered in ice, but your thermal scans show a faint heat signature in the core. It's not a reactor; it's a biological life sign.
+  - frozen_sentinel_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 'Board: Bridge'
+  - frozen_sentinel_start_01
+  - 'Board: Core'
+  - frozen_sentinel_start_02
+  - Salvage Exterior
+  - frozen_sentinel_start_03
+  - frozen_sentinel_bridge_log
+  - frozen_sentinel_core_stasis
+  - give_credits 200
+  - remove_body
+  - An automated refueling depot orbits a gas giant. The docking fees are reasonable.
+  - fuel_station_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Refuel (50 Scrap)
+  - fuel_station_start_01
+  - Quick Top-Off (20 Scrap)
+  - fuel_station_start_02
+  - Leave
+  - fuel_station_start_03
+  - take_credits 50
+  - give_item resource_fuel 3
+  - take_credits 20
+  - give_item resource_fuel 1
+  - The gate hums with awakened energy. Do you want to engage the warpgate and exit this solar system?
+  - gate_active_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Use warpgate
+  - gate_active_start_01
+  - Leave
+  - gate_active_start_02
+  - request_lane_jump starsys_whisper
+  - abort_beat
+  - You see a circular gate large enough for a planet to fit through. Whatever technology was necessary to build this monolith, is far from any we currently possess. While we can't understand how they were built, our survey data says the gate reacts to awoken strangelets. Perhaps we can re-activate it.
+  - gate_dormant_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Re-activate Gate
+  - gate_dormant_start_01
+  - Leave
+  - gate_dormant_start_02
+  - take_item item_strange_matter_container_full 1
+  - set_fact gate_ark_start_active true
+  - set_fact gate_ark_start_active true
+  - abort_beat
+  - You align your solar panels to catch the brilliant reflection off the glass surface. Your energy banks surge with power.
+  - glass_desert_reflection_event_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - glass_desert_reflection_event_01
+  - give_item resource_fuel 5
+  - As you harvest the glass, the ground shatters. Sub-surface 'Glass Worms' (Silence constructs) erupt. They were dormant until you disturbed the seal.
+  - glass_desert_silence_trap_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Battle Stations!
+  - glass_desert_silence_trap_01
+  - start_combat encounter_glass_worms
+  - "You breach the outer shell. Inside is a perfectly preserved Vanguard terminal. It offers a single weapon schematic\u2014a 'Glass-Cannon' beam."
+  - glass_desert_spire_open_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - glass_desert_spire_open_01
+  - give_item item_blueprint_glass_beam 1
+  - reveal_clue clue_vanguard_spire
+  - This planet has no atmosphere. The surface is entirely fused glass. It wasn't formed naturally; scanning indicates the planet was 'glassed' by a weapon of impossible heat roughly 1,000 years ago. In the center of a crater, a single Vanguard spire stands untouched.
+  - glass_desert_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Excavate Spire
+  - glass_desert_start_01
+  - Reflect Sunlight
+  - glass_desert_start_02
+  - Harvest Glass
+  - glass_desert_start_03
+  - glass_desert_spire_open
+  - glass_desert_reflection_event
+  - glass_desert_silence_trap
+  - The engine is intact but requires a Strange Matter spark to start. If you start it, the moon might leave orbit... or explode.
+  - hollow_moon_engine_choice_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Ignite Engine
+  - hollow_moon_engine_choice_01
+  - Strip Engine for Parts
+  - hollow_moon_engine_choice_02
+  - reveal_clue rumor_hidden_planet
+  - give_item item_vanguard_thruster 1
+  - Scanning reveals this moon is hollow. It's a shell built around a massive, dormant engine. It looks like the Vanguard tried to turn this moon into a ship.
+  - hollow_moon_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Enter Core
+  - hollow_moon_start_01
+  - Mine Shell
+  - hollow_moon_start_02
+  - hollow_moon_engine_choice
+  - give_credits 400
+  - 'The gravity distortion corrupted the file. You only get fragments: ''...movement... dead... wipe...'' It''s useless.'
+  - horizon_message_corrupt_data_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - horizon_message_corrupt_data_01
+  - reveal_clue clue_fragmented_warning
+  - 'The message is clear: ''The Silence tracks movement. Stop moving. Play dead. That is how I survived the last wipe.'' It includes a software patch for your stealth systems.'
+  - horizon_message_message_read_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Install Patch
+  - horizon_message_message_read_01
+  - give_item item_stealth_patch 1
+  - reveal_clue clue_message_from_self
+  - 'A buoy floats dangerously close to the event horizon. It''s transmitting a text file. It''s a message from You. Timestamped: 3 cycles ago.'
+  - horizon_message_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Retrieve Buoy
+  - horizon_message_start_01
+  - Remote Download
+  - horizon_message_start_02
+  - horizon_message_message_read
+  - horizon_message_corrupt_data
+  - Turn in hostile telemetry blackbox
+  - hostile_blackbox_turn_in_blackbox_at_ark_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Leave
+  - hostile_blackbox_turn_in_blackbox_at_ark_start_leave
+  - abort_beat
+  - A sleek, unmarked vessel hails you. 'Interested in some... undocumented upgrades? No questions asked.'
+  - merchant_shady_start_00
+  - 
+  - 
+  - 
+  - illustration_merchant
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Trade
+  - merchant_shady_start_01
+  - Attack
+  - merchant_shady_start_02
+  - Leave
+  - merchant_shady_start_03
+  - open_merchant merchant_shady_trader
+  - merchant_shady_trade_done
+  - start_combat encounter_raiders
+  - '''Pleasure doing business.'' The ship engages its cloak and vanishes.'
+  - merchant_shady_trade_done_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - merchant_shady_trade_done_01
+  - You retract the drill. A geyser of raw, liquid Silence erupts. It damages your hull, but crystalizes into Dark Matter.
+  - miner_lament_oil_spill_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - miner_lament_oil_spill_01
+  - damage_ship 15
+  - give_credits 300
+  - 'A mining rig is silent. The drill is stuck deep in the rock. The logs say: ''We hit a vein of something black. It''s not ore. It''s bleeding.'''
+  - miner_lament_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Retract Drill
+  - miner_lament_start_01
+  - Loot Rig
+  - miner_lament_start_02
+  - Destroy Asteroid
+  - miner_lament_start_03
+  - miner_lament_oil_spill
+  - give_item item_mining_beam_mk2 1
+  - take_item resource_fuel 2
+  - add_fact rep_vanguard_ghosts 1
+  - The logs reveal the Captain tried to turn back to the Ark. The crew mutinied to keep going forward. 'There is nothing back there,' the final log reads. 'Only the Silence.'
+  - mutiny_end_log_reveal_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - mutiny_end_log_reveal_01
+  - reveal_clue clue_ark_mutiny
+  - remove_body
+  - This Ark ship didn't die to aliens. The blast marks are from inside. You find the mess hall barricaded. Inside are the skeletons of the crew... and one skeleton sitting on a pile of food cans, holding a pistol.
+  - mutiny_end_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Take Supplies
+  - mutiny_end_start_01
+  - Investigate Logs
+  - mutiny_end_start_02
+  - Burial
+  - mutiny_end_start_03
+  - give_item resource_fuel 3
+  - remove_body
+  - mutiny_end_log_reveal
+  - set_fact morale_boost true
+  - remove_body
+  - play_sfx cue_ui_fail
+  - A turret blast grazes your hull before you can escape.
+  - mystery_signal_evade_fail_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Damage Report
+  - mystery_signal_evade_fail_01
+  - damage_ship 15
+  - You dodge the turret fire and escape unscathed.
+  - mystery_signal_evade_success_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - mystery_signal_evade_success_01
+  - play_sfx cue_ui_fail
+  - Your scan triggers an automated defense system! Turrets target your ship!
+  - mystery_signal_scan_bad_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Evade!
+  - mystery_signal_scan_bad_01
+  - mystery_signal_evade_success
+  - mystery_signal_evade_fail
+  - play_sfx cue_ui_success
+  - Long-range scans reveal the station contains valuable research data.
+  - mystery_signal_scan_good_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Board Now
+  - mystery_signal_scan_good_01
+  - Leave With Scan Data
+  - mystery_signal_scan_good_02
+  - mystery_signal_station_interior
+  - mystery_signal_scan_good
+  - add_fact research_points 10
+  - play_sfx cue_ui_click
+  - Following the signal leads to a hidden research station. It appears abandoned... or is it?
+  - mystery_signal_signal_source_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Board the Station
+  - mystery_signal_signal_source_01
+  - Scan From Distance
+  - mystery_signal_signal_source_02
+  - Leave
+  - mystery_signal_signal_source_03
+  - mystery_signal_station_interior
+  - mystery_signal_signal_source
+  - mystery_signal_scan_good
+  - mystery_signal_scan_bad
+  - play_sfx cue_ui_click
+  - Your comms array picks up an encrypted signal. It's repeating coordinates nearby.
+  - mystery_signal_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Flag as Signal Trace Contract
+  - mystery_signal_start_01
+  - Investigate
+  - mystery_signal_start_02
+  - Submit Signal Telemetry (Debug Complete)
+  - mystery_signal_start_03
+  - Ignore Signal
+  - mystery_signal_start_04
+  - start_quest quest_signal_trace
+  - mystery_signal_signal_source
+  - reveal_clue rumor_hidden_research_station
+  - mystery_signal_signal_source
+  - complete_quest quest_signal_trace
+  - play_sfx cue_ui_click
+  - Deep inside you find an AI terminal still operational. It offers you a choice.
+  - mystery_signal_station_deep_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Download Data
+  - mystery_signal_station_deep_01
+  - Destroy the Terminal
+  - mystery_signal_station_deep_02
+  - give_item item_ai_core_data 1
+  - add_fact research_points 25
+  - damage_ship 5
+  - The station interior is dark. Emergency lights flash red. You hear strange sounds echoing through the halls.
+  - mystery_signal_station_interior_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Search Lab
+  - mystery_signal_station_interior_01
+  - Search Armory
+  - mystery_signal_station_interior_02
+  - Go Deeper
+  - mystery_signal_station_interior_03
+  - Back to Ship
+  - mystery_signal_station_interior_04
+  - give_item resource_palladium 2
+  - give_credits 250
+  - mystery_signal_station_deep
+  - 'The machine roars to life. It finishes its job: A single, perfect ''Terraforming Seed.'' But the noise attracts the local fauna.'
+  - overgrown_forge_machine_active_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Brace for Impact
+  - overgrown_forge_machine_active_01
+  - give_item item_terraforming_seed 1
+  - start_combat encounter_jungle_beasts
+  - Massive Vanguard fabricators are rusting here, wrapped in thick, purple vines. The plants seem to be feeding on the residual energy of the machines. The factory is still trying to print something.
+  - overgrown_forge_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Cut Vines
+  - overgrown_forge_start_01
+  - Harvest Plants
+  - overgrown_forge_start_02
+  - Scan Schematic
+  - overgrown_forge_start_03
+  - overgrown_forge_machine_active
+  - give_item resource_fuel 3
+  - give_item item_blueprint_vanguard_plating 1
+  - reveal_clue clue_vanguard_forge
+  - This station was a medical research facility. The air is thick with yellow spores. Bodies in hazmat suits line the halls. They were researching a 'Cure' for the Silence's erasure effect.
+  - quarantine_lab_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Search Lab
+  - quarantine_lab_start_01
+  - Purge Station
+  - quarantine_lab_start_02
+  - Download Data
+  - quarantine_lab_start_03
+  - quarantine_lab_vial_found
+  - take_item resource_fuel 5
+  - add_fact rep_ark 1
+  - quarantine_lab_virus_contract
+  - You find a single vial of 'Reality Anchor.' It prevents one instance of death/erasure.
+  - quarantine_lab_vial_found_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Take Vial
+  - quarantine_lab_vial_found_01
+  - give_item item_reality_anchor 1
+  - You download the research notes, but the spores have contaminated your ship's air supply. Your crew begins showing symptoms.
+  - quarantine_lab_virus_contract_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - quarantine_lab_virus_contract_01
+  - give_item item_research_data 1
+  - take_item resource_crew 1
+  - Submit territory intel report
+  - relation_watch_submit_territory_report_ark_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Leave
+  - relation_watch_submit_territory_report_ark_start_leave
+  - abort_beat
+  - The King laughs. 'A hunter! I like hunters.' He lets you pass and gives you a weapon from his vault.
+  - scavenger_king_king_impressed_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Accept Gift
+  - scavenger_king_king_impressed_01
+  - give_item item_scrap_cannon 1
+  - This isn't a station; it's a hundred dead ships welded together. The 'King' hails you. He sits on a throne made of Vanguard plating. 'You want to pass? Pay the toll, or become a brick in my wall.'
+  - scavenger_king_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Pay Toll
+  - scavenger_king_start_01
+  - Challenge
+  - scavenger_king_start_02
+  - Trade Info
+  - scavenger_king_start_03
+  - take_credits 50
+  - start_combat encounter_scavenger_king
+  - scavenger_king_king_impressed
+  - You hail the ghosts. The static screams back with the voices of your dead relatives. The crew panics.
+  - sensor_ghost_sanity_break_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - sensor_ghost_sanity_break_01
+  - set_fact trait_shaken true
+  - take_item resource_crew 1
+  - "Your sensors go wild. You see a massive fleet surrounding you\u2014hundreds of Ark ships. But your visual scanners show nothing. The nebula is psycho-reactive; it's projecting your crew's hopes onto the radar."
+  - sensor_ghost_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Calibrate Sensors
+  - sensor_ghost_start_01
+  - Hail Them
+  - sensor_ghost_start_02
+  - Harvest Gas
+  - sensor_ghost_start_03
+  - add_fact research_points 100
+  - sensor_ghost_sanity_break
+  - give_item item_psycho_gas 1
+  - give_credits 250
+  - He pulls a knife! Security intervenes before it escalates.
+  - shady_man_bar_fight_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Leave Quickly
+  - shady_man_bar_fight_01
+  - complete_beat beat_shady_man
+  - play_sfx cue_ui_success
+  - '''There''s a hidden cache in the asteroid belt. Coordinates transmitted.'''
+  - shady_man_info_revealed_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Thanks
+  - shady_man_info_revealed_01
+  - Log Debrief to Boarding Trial
+  - shady_man_info_revealed_02
+  - reveal_clue rumor_hidden_cache
+  - complete_beat beat_shady_man
+  - quest_log quest_station_boarding_trial legacy_1
+  - complete_beat beat_shady_man
+  - A scarred man in a dark corner beckons you over. 'I have information... for a price.'
+  - shady_man_start_00
+  - 
+  - speaker_shady_man
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Pay for Info (100 Scrap)
+  - shady_man_start_01
+  - Debrief Contact for Boarding Trial
+  - shady_man_start_02
+  - Threaten Him
+  - shady_man_start_03
+  - Walk Away
+  - shady_man_start_04
+  - set_fact station_boarding_trial_meet_shady_contact true
+  - take_credits 100
+  - shady_man_info_revealed
+  - set_fact station_boarding_trial_decode_tip true
+  - set_fact station_boarding_trial_meet_shady_contact true
+  - set_fact station_boarding_trial_decode_tip true
+  - shady_man_info_revealed
+  - set_fact station_boarding_trial_meet_shady_contact true
+  - shady_man_info_revealed
+  - shady_man_bar_fight
+  - set_fact station_boarding_trial_meet_shady_contact true
+  - complete_beat beat_shady_man
+  - You scavenge the abandoned homes and find preserved supplies still in their packaging.
+  - silent_city_food_find_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Take Supplies
+  - silent_city_food_find_01
+  - give_credits 300
+  - The logs show the city didn't die. They 'Uploaded.' The entire population transferred their consciousness into a satellite array to escape the Silence. The array is orbiting the planet now.
+  - silent_city_network_truth_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - silent_city_network_truth_01
+  - reveal_clue rumor_satellite_array
+  - You land in a sprawling metropolis. The buildings are pristine chrome and white stone. Vehicles are parked in the streets. Food is on the tables in cafes. But there are no people. No bodies. No signs of struggle. They just... vanished.
+  - silent_city_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Loot Homes
+  - silent_city_start_01
+  - Access Network
+  - silent_city_start_02
+  - Leave
+  - silent_city_start_03
+  - silent_city_food_find
+  - silent_city_trap_echo
+  - silent_city_network_truth
+  - "You enter a house. A holographic 'Echo' of a family eating dinner triggers. It loops the moment of their disappearance\u2014a flash of black light. Your crew member watching it collapses, their mind partially erased."
+  - silent_city_trap_echo_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - silent_city_trap_echo_01
+  - take_item resource_crew 1
+  - 'The pressure screams against your hull, but you snag the object. It''s a ''Black Box'' from Ark Mission 12. The audio log is terrifying: ''The clouds... they aren''t clouds. They are billions of microscopic machines eating the ship.'''
+  - singing_storm_drone_success_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - singing_storm_drone_success_01
+  - give_item item_ancient_data_log 1
+  - reveal_clue clue_ark_mission_12
+  - Turbulence slams your ship against a pocket of metallic hydrogen. You are forced to emergency ascend before the hull buckles. You lost the signal.
+  - singing_storm_fail_dive_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - singing_storm_fail_dive_01
+  - damage_ship 20
+  - "Your sensors pick up a rhythmic signal coming from inside the gas giant's crushing atmosphere. It's not random static; it's a distress beacon using an outdated Ark encryption code. The source is deep\u2014approaching hull-crush depth."
+  - singing_storm_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Dive and Retrieve
+  - singing_storm_start_01
+  - Deploy Drone
+  - singing_storm_start_02
+  - Ignore
+  - singing_storm_start_03
+  - take_item resource_fuel 2
+  - singing_storm_success_dive
+  - singing_storm_fail_dive
+  - singing_storm_drone_success
+  - 'The pressure screams against your hull, but you snag the object. It''s a ''Black Box'' from Ark Mission 12. The audio log is terrifying: ''The clouds... they aren''t clouds. They are billions of microscopic machines eating the ship.'''
+  - singing_storm_success_dive_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - singing_storm_success_dive_01
+  - give_item item_ancient_data_log 1
+  - damage_ship 5
+  - reveal_clue clue_ark_mission_12
+  - You fill your tanks with super-charged plasma. The parasite detaches and flees into deep space, terrified of you.
+  - solar_parasite_parasite_flee_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - solar_parasite_parasite_flee_01
+  - give_item resource_fuel 10
+  - set_fact trait_solar_charged_engines true
+  - Orbiting close to the star is a creature... or a ship... that looks like a tick. It has extended a siphon into the star and is sucking plasma. It hasn't noticed you.
+  - solar_parasite_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Kill It
+  - solar_parasite_start_01
+  - Siphon the Parasite
+  - solar_parasite_start_02
+  - Study
+  - solar_parasite_start_03
+  - start_combat encounter_solar_parasite
+  - solar_parasite_parasite_flee
+  - add_fact research_points 50
+  - A fluctuation in the subspace field indicates a stable jump point. However, activating it will require a massive energy discharge from a Warp Core.
+  - stable_point_start_00
+  - 
+  - 
+  - 
+  - illustration_portal
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Activate Warp Drive
+  - stable_point_start_01
+  - Leave
+  - stable_point_start_02
+  - start_combat encounter_extraction_guardians
+  - Submit station data fragments
+  - station_data_delivery_turn_in_station_data_at_ark_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Leave
+  - station_data_delivery_turn_in_station_data_at_ark_start_leave
+  - abort_beat
+  - The station bar is dimly lit and filled with suspicious characters.
+  - station_hub_bar_menu_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Talk to Shady Figure
+  - station_hub_bar_menu_01
+  - Back
+  - station_hub_bar_menu_03
+  - shady_man_start
+  - station_hub_bar_menu
+  - The bounty board lists several active contracts.
+  - station_hub_bounties_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Accept Pirate Hunt
+  - station_hub_bounties_01
+  - Accept Hostile Blackbox Contract
+  - station_hub_bounties_02
+  - Generate Bounty Template Mission
+  - station_hub_bounties_03
+  - Back
+  - station_hub_bounties_04
+  - set_fact pirate_bounty_accepted true
+  - start_quest quest_hostile_blackbox
+  - start_quest contract_bounty_probe
+  - play_sfx cue_ui_view_open
+  - Welcome to Nexus Station! The bustling marketplace offers many opportunities.
+  - station_hub_hub_00
+  - 
+  - 
+  - 
+  - illustration_station
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Visit Marketplace
+  - station_hub_hub_01
+  - Station Bar
+  - station_hub_hub_02
+  - Research Lab
+  - station_hub_hub_03
+  - Mission Control
+  - station_hub_hub_04
+  - Repair All Ships
+  - station_hub_hub_05
+  - Visit Hangar Bay
+  - station_hub_hub_06
+  - Undock
+  - station_hub_hub_07
+  - station_hub_market_menu
+  - station_hub_hub
+  - station_hub_bar_menu
+  - station_hub_hub
+  - station_hub_lab_menu
+  - station_hub_hub
+  - station_hub_mission_control
+  - station_hub_hub
+  - repair_ship 100
+  - station_hub_hub
+  - open_ship_editor
+  - The research lab hums with advanced equipment.
+  - station_hub_lab_menu_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Upgrade Shields
+  - station_hub_lab_menu_01
+  - View Research
+  - station_hub_lab_menu_02
+  - Back
+  - station_hub_lab_menu_03
+  - take_credits 500
+  - station_hub_research_view
+  - The marketplace is filled with vendors hawking exotic wares.
+  - station_hub_market_menu_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Trade Goods
+  - station_hub_market_menu_01
+  - View Bounties
+  - station_hub_market_menu_02
+  - Back
+  - station_hub_market_menu_03
+  - open_merchant merchant_station_market
+  - station_hub_market_menu
+  - station_hub_bounties
+  - station_hub_market_menu
+  - Mission Control tracks contracts, trigger listeners, and experimental quest chains.
+  - station_hub_mission_control_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Accept Material Turn-In Test
+  - station_hub_mission_control_01
+  - Accept Station Data Delivery Test
+  - station_hub_mission_control_02
+  - Accept Boarding Trial Test
+  - station_hub_mission_control_03
+  - Start Whisper Chain Storyline
+  - station_hub_mission_control_04
+  - Accept Fail-State Sandbox
+  - station_hub_mission_control_05
+  - Generate Signal Relay Template Mission
+  - station_hub_mission_control_06
+  - Generate Material Sweep Template Mission
+  - station_hub_mission_control_07
+  - Force Fail Sandbox Quest
+  - station_hub_mission_control_08
+  - Complete Sandbox Quest
+  - station_hub_mission_control_09
+  - Back
+  - station_hub_mission_control_10
+  - start_quest quest_survey_local_materials
+  - start_quest quest_station_data_delivery
+  - start_quest quest_station_boarding_trial
+  - start_quest quest_whisper_chain
+  - start_quest quest_debug_fail_sandbox
+  - start_quest contract_signal_relay
+  - start_quest contract_material_sweep
+  - fail_quest quest_debug_fail_sandbox
+  - complete_quest quest_debug_fail_sandbox
+  - Current research projects are displayed on the screen.
+  - station_hub_research_view_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Contribute Research Points
+  - station_hub_research_view_01
+  - Back
+  - station_hub_research_view_02
+  - add_fact research_points 10
+  - Hand over raw materials
+  - survey_local_materials_turn_in_raw_materials_at_ark_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Leave
+  - survey_local_materials_turn_in_raw_materials_at_ark_start_leave
+  - abort_beat
+  - We must repair the hull breach left by the xeno probes. We'll need raw materials to do so. Survey the local system for any useful materials and come back once you're done.
+  - survey_system_start_00
+  - 
+  - speaker_nora
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Hand over the raw materials
+  - survey_system_start_01
+  - Leave
+  - survey_system_start_02
+  - take_item resource_palladium 3
+  - set_fact story_survey_complete true
+  - give_item item_strange_matter_container_full 1
+  - abort_beat
+  - play_sfx cue_ui_view_open
+  - Friendly patrol signatures lock onto your ship and then stand down after an encrypted handshake. Local command uplinks fresh intel channels.
+  - territory_friendly_entry_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Acknowledge Patrol Assignment
+  - territory_friendly_entry_start_01
+  - Request Local Contract
+  - territory_friendly_entry_start_02
+  - Continue Patrol
+  - territory_friendly_entry_start_03
+  - quest_log quest_relation_watch legacy_1
+  - start_quest contract_signal_relay
+  - play_sfx cue_ui_fail
+  - Hostile sensor pings flood your tactical feed as you cross the border. Someone is tracking your vector from the dark side of the system.
+  - territory_hostile_entry_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Mark Contact in Intel
+  - territory_hostile_entry_start_01
+  - Request Reinforcement Contract
+  - territory_hostile_entry_start_02
+  - Run Silent
+  - territory_hostile_entry_start_03
+  - quest_log quest_hostile_blackbox legacy_1
+  - start_quest contract_bounty_probe
+  - As you strip parts from your future ship, reality snaps. The paradox causes internal damage to your current ship, but you get the repairs.
+  - time_echo_paradox_damage_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - time_echo_paradox_damage_01
+  - repair_ship 50
+  - take_item resource_crew 1
+  - The future ship transmits its map data before flickering out of existence like a dying star. The coordinates reveal two sectors ahead.
+  - time_echo_ship_fade_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Continue
+  - time_echo_ship_fade_01
+  - reveal_clue rumor_two_sectors_ahead
+  - "Your radar pings a ship. It has your transponder code. It has your hull configuration. It is your ship, drifting heavily damaged. A hail comes through\u2014it's your voice, but older and terrified. 'Don't go to the next sector. The Weaver is there.'"
+  - time_echo_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Demand Data
+  - time_echo_start_01
+  - Salvage Self
+  - time_echo_start_02
+  - Attack
+  - time_echo_start_03
+  - time_echo_ship_fade
+  - time_echo_paradox_damage
+  - start_combat encounter_doppelganger
+  - The glass pane slides open. Legs still weak. I collapse forward onto my knees and hands. Out the corner of my eye, a familiar face I can't fully remember.
+  - waking_up_collapse_00
+  - 
+  - speaker_nora
+  - 
+  - 
+  - 
+  - '"Welcome back, captain."'
+  - waking_up_collapse_01
+  - 
+  - speaker_nora
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Where am I?
+  - waking_up_collapse_02
+  - Who are you?
+  - waking_up_collapse_03
+  - Who am I?
+  - waking_up_collapse_04
+  - waking_up_nora_briefing
+  - waking_up_nora_briefing
+  - waking_up_nora_briefing
+  - As the pod slowly drains and fills with air, I puke out everything and take my first breath.
+  - waking_up_first_breath_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Look Around
+  - waking_up_first_breath_01
+  - waking_up_look_around
+  - As my vision clears, in front of me, through the glass pane, is a room full of cryo pods; some empty, most full. The initials A.R.K plastered all over the walls.
+  - waking_up_look_around_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Try to move
+  - waking_up_look_around_01
+  - Recall the initials
+  - waking_up_look_around_02
+  - waking_up_collapse
+  - waking_up_recall_ark
+  - '"Not the time for jokes, captain. The hull of the ARK is breached by an unknown entity. We have to neutralize it."'
+  - waking_up_nora_briefing_00
+  - 
+  - speaker_nora
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Understood
+  - waking_up_nora_briefing_01
+  - set_fact intro_awake true
+  - queue_beat beat_choose_start_ship
+  - The A.R.K expedition. I'm part of it. It was supposed to save humanity or something. A long time must have passed if we made it to our destination.
+  - waking_up_recall_ark_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Try to move
+  - waking_up_recall_ark_01
+  - waking_up_collapse
+  - Lightheaded. Nothing but a high pitched sound deep in my ear. Blurry, overexposed, shapeless blobs of light floating in front of me. Can't feel my fingers, can't move my head, can't remember anything at all. The sharp smell of metallic blood and artificial sweetener enters my nostrils simultaneously.
+  - waking_up_start_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Try to move
+  - waking_up_start_01
+  - waking_up_syringe
+  - A sharp syringe from my periphery punctures my neck. I feel the rush immediately, and the uncontrollable urge to vomit.
+  - waking_up_syringe_00
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - Vomit
+  - waking_up_syringe_01
+  - waking_up_first_breath
+  conditions:
+  - source: has_item("resource_fuel", 3)
+    sourceHash: 535632965380896695
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1000
+  - source: (has_item("resource_palladium", 1)) and (has_item("resource_palladium", 1))
+    sourceHash: 4098299070148185035
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1001
+  - source: $has_hacking
+    sourceHash: 9800322171576889431
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1002
+  - source: roll(100) <= 40
+    sourceHash: 18165727331448724118
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1003
+  - source: has_item("resource_fuel", 2)
+    sourceHash: 11938144800606381805
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1004
+  - source: roll(100) <= 70
+    sourceHash: 16590461481684190173
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1005
+  - source: roll(100) <= 50
+    sourceHash: 2944431543282772496
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1006
+  - source: roll(100) <= 80
+    sourceHash: 12352110359196077723
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1007
+  - source: (credits() >= 50) and (credits() >= 50)
+    sourceHash: 13839264186393134660
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1008
+  - source: (credits() >= 20) and (credits() >= 20)
+    sourceHash: 4340314896897831810
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1009
+  - source: (has_item("item_strange_matter_container_full", 1)) and (has_item("item_strange_matter_container_full", 1))
+    sourceHash: 963706200821869159
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1010
+  - source: has_item("resource_fuel", 2)
+    sourceHash: 11938144800606381805
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1011
+  - source: roll(100) <= 70
+    sourceHash: 16590461481684190173
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1012
+  - source: roll(100) <= 60
+    sourceHash: 16356803819080904092
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1013
+  - source: quest_not_started("quest_signal_trace")
+    sourceHash: 7714394937650331142
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1014
+  - source: quest_active("quest_signal_trace")
+    sourceHash: 8229148918411135644
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1015
+  - source: has_item("resource_fuel", 5)
+    sourceHash: 6275468230062540130
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1016
+  - source: has_item("resource_crew", 1)
+    sourceHash: 10187848293522925464
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1017
+  - source: (credits() >= 50) and (credits() >= 50)
+    sourceHash: 13839264186393134660
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1018
+  - source: has_item("resource_crew", 1)
+    sourceHash: 10187848293522925464
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1019
+  - source: quest_active("quest_station_boarding_trial")
+    sourceHash: 16474386179393346703
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1020
+  - source: (credits() >= 100) and (credits() >= 100)
+    sourceHash: 1713857764537060059
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1021
+  - source: quest_active("quest_station_boarding_trial")
+    sourceHash: 16474386179393346703
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1022
+  - source: roll(100) <= 50
+    sourceHash: 2944431543282772496
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1023
+  - source: roll(100) <= 50
+    sourceHash: 2944431543282772496
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1024
+  - source: has_item("resource_crew", 1)
+    sourceHash: 10187848293522925464
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1025
+  - source: has_item("resource_fuel", 2)
+    sourceHash: 11938144800606381805
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1026
+  - source: roll(100) <= 60
+    sourceHash: 16356803819080904092
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1027
+  - source: has_item("item_strange_matter_container_full", 1)
+    sourceHash: 8346405229006452680
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1028
+  - source: visited_count("shady_man_start") == 0
+    sourceHash: 10593631975899027571
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1029
+  - source: quest_not_started("quest_hostile_blackbox")
+    sourceHash: 1600748813803336043
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1030
+  - source: (credits() >= 500) and (credits() >= 500)
+    sourceHash: 6311774534477336826
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1031
+  - source: quest_not_started("quest_survey_local_materials")
+    sourceHash: 16191919868841342870
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1032
+  - source: quest_not_started("quest_station_data_delivery")
+    sourceHash: 6505028228326356719
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1033
+  - source: quest_not_started("quest_station_boarding_trial")
+    sourceHash: 5914402691102648211
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1034
+  - source: quest_not_started("quest_whisper_chain")
+    sourceHash: 4618918827960190696
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1035
+  - source: quest_not_started("quest_debug_fail_sandbox")
+    sourceHash: 11177366620886126825
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1036
+  - source: quest_active("quest_debug_fail_sandbox")
+    sourceHash: 3335139783244898425
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1037
+  - source: quest_active("quest_debug_fail_sandbox")
+    sourceHash: 3335139783244898425
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1038
+  - source: (has_item("resource_palladium", 3)) and (has_item("resource_palladium", 3))
+    sourceHash: 1050233700168598073
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1039
+  - source: quest_active("quest_relation_watch")
+    sourceHash: 2865388546135805762
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1040
+  - source: quest_active("quest_hostile_blackbox")
+    sourceHash: 7942799759676263982
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1041
+  - source: has_item("resource_crew", 1)
+    sourceHash: 10187848293522925464
+    compilerVersion: 1
+    hasErrors: 0
+    root:
+      rid: 1042
+  intExprs: []
+  sourcesHash: 5413496878118589984
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 1000
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1043
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_fuel
+        - 
+    - rid: 1001
+      type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 1044
+        right:
+          rid: 1045
+    - rid: 1002
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: has_hacking
+    - rid: 1003
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 3
+        left:
+          rid: 1046
+        right:
+          rid: 1047
+    - rid: 1004
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1048
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_fuel
+        - 
+    - rid: 1005
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 3
+        left:
+          rid: 1049
+        right:
+          rid: 1050
+    - rid: 1006
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 3
+        left:
+          rid: 1051
+        right:
+          rid: 1052
+    - rid: 1007
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 3
+        left:
+          rid: 1053
+        right:
+          rid: 1054
+    - rid: 1008
+      type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 1055
+        right:
+          rid: 1056
+    - rid: 1009
+      type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 1057
+        right:
+          rid: 1058
+    - rid: 1010
+      type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 1059
+        right:
+          rid: 1060
+    - rid: 1011
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1061
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_fuel
+        - 
+    - rid: 1012
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 3
+        left:
+          rid: 1062
+        right:
+          rid: 1063
+    - rid: 1013
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 3
+        left:
+          rid: 1064
+        right:
+          rid: 1065
+    - rid: 1014
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_not_started
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_signal_trace
+    - rid: 1015
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_active
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_signal_trace
+    - rid: 1016
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1066
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_fuel
+        - 
+    - rid: 1017
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1067
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_crew
+        - 
+    - rid: 1018
+      type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 1068
+        right:
+          rid: 1069
+    - rid: 1019
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1070
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_crew
+        - 
+    - rid: 1020
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_active
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_station_boarding_trial
+    - rid: 1021
+      type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 1071
+        right:
+          rid: 1072
+    - rid: 1022
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_active
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_station_boarding_trial
+    - rid: 1023
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 3
+        left:
+          rid: 1073
+        right:
+          rid: 1074
+    - rid: 1024
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 3
+        left:
+          rid: 1075
+        right:
+          rid: 1076
+    - rid: 1025
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1077
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_crew
+        - 
+    - rid: 1026
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1078
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_fuel
+        - 
+    - rid: 1027
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 3
+        left:
+          rid: 1079
+        right:
+          rid: 1080
+    - rid: 1028
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1081
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - item_strange_matter_container_full
+        - 
+    - rid: 1029
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 0
+        left:
+          rid: 1082
+        right:
+          rid: 1083
+    - rid: 1030
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_not_started
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_hostile_blackbox
+    - rid: 1031
+      type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 1084
+        right:
+          rid: 1085
+    - rid: 1032
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_not_started
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_survey_local_materials
+    - rid: 1033
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_not_started
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_station_data_delivery
+    - rid: 1034
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_not_started
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_station_boarding_trial
+    - rid: 1035
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_not_started
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_whisper_chain
+    - rid: 1036
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_not_started
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_debug_fail_sandbox
+    - rid: 1037
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_active
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_debug_fail_sandbox
+    - rid: 1038
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_active
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_debug_fail_sandbox
+    - rid: 1039
+      type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 1086
+        right:
+          rid: 1087
+    - rid: 1040
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_active
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_relation_watch
+    - rid: 1041
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_active
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_hostile_blackbox
+    - rid: 1042
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1088
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_crew
+        - 
+    - rid: 1043
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 3
+    - rid: 1044
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1089
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_palladium
+        - 
+    - rid: 1045
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1090
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_palladium
+        - 
+    - rid: 1046
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: roll
+        intArgs:
+        - rid: 1091
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - 
+    - rid: 1047
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 40
+    - rid: 1048
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 2
+    - rid: 1049
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: roll
+        intArgs:
+        - rid: 1092
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - 
+    - rid: 1050
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 70
+    - rid: 1051
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: roll
+        intArgs:
+        - rid: 1093
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - 
+    - rid: 1052
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 50
+    - rid: 1053
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: roll
+        intArgs:
+        - rid: 1094
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - 
+    - rid: 1054
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 80
+    - rid: 1055
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 1095
+        right:
+          rid: 1096
+    - rid: 1056
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 1097
+        right:
+          rid: 1098
+    - rid: 1057
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 1099
+        right:
+          rid: 1100
+    - rid: 1058
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 1101
+        right:
+          rid: 1102
+    - rid: 1059
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1103
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - item_strange_matter_container_full
+        - 
+    - rid: 1060
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1104
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - item_strange_matter_container_full
+        - 
+    - rid: 1061
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 2
+    - rid: 1062
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: roll
+        intArgs:
+        - rid: 1105
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - 
+    - rid: 1063
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 70
+    - rid: 1064
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: roll
+        intArgs:
+        - rid: 1106
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - 
+    - rid: 1065
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 60
+    - rid: 1066
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 5
+    - rid: 1067
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 1068
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 1107
+        right:
+          rid: 1108
+    - rid: 1069
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 1109
+        right:
+          rid: 1110
+    - rid: 1070
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 1071
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 1111
+        right:
+          rid: 1112
+    - rid: 1072
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 1113
+        right:
+          rid: 1114
+    - rid: 1073
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: roll
+        intArgs:
+        - rid: 1115
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - 
+    - rid: 1074
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 50
+    - rid: 1075
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: roll
+        intArgs:
+        - rid: 1116
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - 
+    - rid: 1076
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 50
+    - rid: 1077
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 1078
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 2
+    - rid: 1079
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: roll
+        intArgs:
+        - rid: 1117
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - 
+    - rid: 1080
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 60
+    - rid: 1081
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 1082
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: visited_count
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - shady_man_start
+    - rid: 1083
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 0
+    - rid: 1084
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 1118
+        right:
+          rid: 1119
+    - rid: 1085
+      type: {class: CompareIntCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        op: 5
+        left:
+          rid: 1120
+        right:
+          rid: 1121
+    - rid: 1086
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1122
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_palladium
+        - 
+    - rid: 1087
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 1123
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_palladium
+        - 
+    - rid: 1088
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 1089
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 1090
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 1091
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 1092
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 1093
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 1094
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 1095
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: credits
+        intArgs: []
+        boolArgs: []
+        textArgs: []
+    - rid: 1096
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 50
+    - rid: 1097
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: credits
+        intArgs: []
+        boolArgs: []
+        textArgs: []
+    - rid: 1098
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 50
+    - rid: 1099
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: credits
+        intArgs: []
+        boolArgs: []
+        textArgs: []
+    - rid: 1100
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 20
+    - rid: 1101
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: credits
+        intArgs: []
+        boolArgs: []
+        textArgs: []
+    - rid: 1102
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 20
+    - rid: 1103
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 1104
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 1105
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 1106
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 1107
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: credits
+        intArgs: []
+        boolArgs: []
+        textArgs: []
+    - rid: 1108
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 50
+    - rid: 1109
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: credits
+        intArgs: []
+        boolArgs: []
+        textArgs: []
+    - rid: 1110
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 50
+    - rid: 1111
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: credits
+        intArgs: []
+        boolArgs: []
+        textArgs: []
+    - rid: 1112
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 1113
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: credits
+        intArgs: []
+        boolArgs: []
+        textArgs: []
+    - rid: 1114
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 1115
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 1116
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 1117
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 1118
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: credits
+        intArgs: []
+        boolArgs: []
+        textArgs: []
+    - rid: 1119
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 500
+    - rid: 1120
+      type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: credits
+        intArgs: []
+        boolArgs: []
+        textArgs: []
+    - rid: 1121
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 500
+    - rid: 1122
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 3
+    - rid: 1123
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 3
