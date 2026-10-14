@@ -11,5 +11,5 @@ namespace Game.Voxel.PresentationStreams
     }
 
     /// <summary>Shared timing of salvage pull debris (simulation velocity and presentation lifetime must agree).</summary>
-    public static class FxCollect { public const float Seconds = 0.45f; }
+    public static class FxCollect { public const float Seconds = 0.5f, StaggerSeconds = 0.7f; }
 }

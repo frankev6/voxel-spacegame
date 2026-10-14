@@ -42,3 +42,7 @@ __pycache__/
 
 # Blender backups
 *.blend1
+
+# Unity Test Framework temporary scenes (QA-001: one was swept into a commit)
+/Assets/InitTestScene*.unity
+/Assets/InitTestScene*.unity.meta

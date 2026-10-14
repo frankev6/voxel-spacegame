@@ -71,7 +71,7 @@ namespace Game.Galaxy.Salvage
             em.CompleteDependencyBeforeRO<GridMass>(); em.CompleteDependencyBeforeRO<HulkInfo>(); em.CompleteDependencyBeforeRO<PersistentId>();
             if (!em.Exists(root) || !em.HasComponent<Hulk>(root) || em.HasComponent<PlayerShip>(root) || em.HasComponent<BodyGridOwner>(root) ||
                 !em.HasComponent<GridMass>(root) || !em.HasComponent<HulkInfo>(root) || !em.HasComponent<PersistentId>(root) ||
-                !em.HasBuffer<BlockInstance>(root) || !em.HasComponent<GridDespawnRequest>(root) || em.IsComponentEnabled<GridDespawnRequest>(root))
+                !em.HasBuffer<BlockInstance>(root) || !em.HasComponent<GridDespawnRequest>(root) || em.IsComponentEnabled<GridDespawnRequest>(root) || em.HasComponent<SalvageCollected>(root))
                 return Refuse("Nothing to salvage.", out message);
             uint cells = em.GetComponentData<GridMass>(root).Data.CellCount;
             if (cells > config.MaxSalvageCells) return Refuse("Too large to salvage.", out message);
@@ -94,10 +94,15 @@ namespace Game.Galaxy.Salvage
                 }
                 if (!remaining)
                 {
-                    // QA-001: the wreck is pulled into the player's ship (SalvagePullSystem) on its way out, not deleted outright.
+                    // QA-001: the wreck streams into the player's ship (SalvagePullSystem, which despawns it after the last wave)
+                    // instead of vanishing; without a collector it despawns at once.
                     if (players.CalculateEntityCount() == 1)
+                    {
                         em.AddComponentData(root, new SalvageCollected { Collector = players.GetSingletonEntity() });
-                    GridSpawnApi.RequestDespawn(em, root); ledger.Entries.Remove(id);
+                        if (em.HasComponent<Interactable>(root)) em.RemoveComponent<Interactable>(root);
+                    }
+                    else GridSpawnApi.RequestDespawn(em, root);
+                    ledger.Entries.Remove(id);
                     if (config.SalvageCue != null) audio.PlayCue(config.SalvageCue.Id);
                     message = "Salvaged " + total + " items.";
                     EventBus<EconomyNotice>.Publish(new EconomyNotice(EconomyNoticeKind.SalvageDone, message)); return true;

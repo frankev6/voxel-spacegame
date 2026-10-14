@@ -86,7 +86,11 @@ Each has a test here.
    - **QA-001 (owner playtest 2026-10-14):**
      - production reach is 40 m (`config_economy.salvageDistanceM`), measured from the player's hull radius;
      - every intact `SalvageMagnet` block module (`block_salvage_magnet_small`, +20 m, sold at ARK Station Market) adds reach, capped at `salvageReachBonusCapM` (60 m), through `SalvageReach`/`SalvageReachSystem` and `InteractionQueryJob.SalvageBonusM`;
-     - a completed salvage adds `SalvageCollected { Collector }` with the despawn request. `SalvagePullSystem` (GameInitGroup, before `GridSpawnSystem`) turns up to 1,500 exposed cells into debris with `FxEventFlags.Collected`, flying into the collector over `FxCollect.Seconds` (0.45 s), so the wreck is visibly sucked into the ship rather than vanishing;
+     - a completed salvage adds `SalvageCollected { Collector, Elapsed }` and removes the wreck's `Interactable`. `SalvagePullSystem` (GameInitGroup, before `GridSpawnSystem`):
+       - streams up to 1,500 exposed cells as fire-and-forget debris (`FxEventFlags.Collected`, life `FxCollect.Seconds` = 0.5 s);
+       - sends them in staggered waves over `FxCollect.StaggerSeconds` (0.7 s), nearest to the collector first, with 20% per-cell jitter;
+       - aims each cube at its own point on the collector's hull;
+       - requests the normal despawn after the last wave. Without a collector, salvage despawns at once;
      - salvageable wrecks carry a salvage-coloured world tag (SPEC-61 world overlay);
      - salvage never opens the inventory by itself.
 

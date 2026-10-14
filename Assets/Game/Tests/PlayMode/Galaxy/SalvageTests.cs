@@ -23,6 +23,7 @@ using Game.Voxel.Model;
 using Game.Voxel.PhysicsBody;
 using NUnit.Framework;
 using Unity.Entities;
+using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -117,8 +118,25 @@ namespace Game.Tests.PlayMode.Galaxy
             f.Cargo.SetCapacity(20); Assert.IsTrue(f.Salvage.TrySalvage(root, out message)); Assert.AreEqual(0, f.Salvage.PendingWrecks);
             Assert.AreEqual(collector, f.Em.GetComponentData<SalvageCollected>(root).Collector, "QA-001: the wreck is pulled into the player's ship");
             foreach (var item in expected) Assert.AreEqual(item.Count, f.Cargo.CountOf(item.ItemIndex));
-            Assert.IsTrue(f.Em.IsComponentEnabled<GridDespawnRequest>(root)); Assert.AreEqual(1, f.Sound.Calls);
+            Assert.IsFalse(f.Em.IsComponentEnabled<GridDespawnRequest>(root), "SalvagePullSystem despawns after the last wave");
+            Assert.AreEqual(1, f.Sound.Calls);
             Assert.IsFalse(f.Salvage.TrySalvage(root, out _), "Pending despawn cannot be harvested again.");
+        }
+        [Test] public void Pull_DespawnsAfterStagger()
+        {
+            using var content = new ContentService(Resources.Load<GameRoot>("GameRoot").Config.ContentDatabase);
+            using var w = EcsTestWorld.Create(typeof(Game.Voxel.PresentationStreams.FxEventQueueCreateSystem), typeof(SalvagePullSystem));
+            content.CreateSingletons(w.EntityManager);
+            var collector = w.EntityManager.CreateEntity(typeof(PlayerShip), typeof(LocalTransform));
+            w.EntityManager.SetComponentData(collector, LocalTransform.Identity);
+            var wreck = w.EntityManager.CreateEntity(typeof(VoxelGrid), typeof(LocalTransform), typeof(GridDespawnRequest));
+            w.EntityManager.SetComponentData(wreck, LocalTransform.FromPosition(new Unity.Mathematics.float3(0, 0, 30)));
+            w.EntityManager.SetComponentEnabled<GridDespawnRequest>(wreck, false);
+            w.EntityManager.AddComponentData(wreck, new SalvageCollected { Collector = collector });
+            w.StepFrame(Game.Voxel.PresentationStreams.FxCollect.StaggerSeconds * .5f);
+            Assert.IsFalse(w.EntityManager.IsComponentEnabled<GridDespawnRequest>(wreck), "the wreck stays while its waves stream out");
+            w.StepFrame(Game.Voxel.PresentationStreams.FxCollect.StaggerSeconds * .6f);
+            Assert.IsTrue(w.EntityManager.IsComponentEnabled<GridDespawnRequest>(wreck), "despawn follows the last wave");
         }
         [Test] public void Magnet_ExtendsReach_Capped()
         {

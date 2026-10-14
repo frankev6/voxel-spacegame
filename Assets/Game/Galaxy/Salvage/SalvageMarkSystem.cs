@@ -22,7 +22,7 @@ namespace Game.Galaxy.Salvage
         {
             RequireForUpdate<GameplayActive>(); RequireForUpdate<WorldSceneActive>(); RequireForUpdate<EconomyConfigRef>();
             newHulks = new EntityQueryBuilder(Allocator.Temp).WithAll<Hulk, VoxelGrid, PersistentId>()
-                .WithNone<Interactable, PlayerShip, BodyGridOwner, GridSpawning>().Build(this);
+                .WithNone<Interactable, PlayerShip, BodyGridOwner, GridSpawning>().WithNone<SalvageCollected>().Build(this);
         }
         protected override void OnUpdate()
         {

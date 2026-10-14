@@ -168,7 +168,8 @@ namespace Game.App.DevRuntime.Playground
             // transfer/despawn request, not another TrySalvage call or an inventory give.
             observedSalvage = true;
             var em = world.EntityManager; em.CompleteAllTrackedJobs();
-            bool cleared = em.HasComponent<GridDespawnRequest>(target) && em.IsComponentEnabled<GridDespawnRequest>(target);
+            bool cleared = em.HasComponent<GridDespawnRequest>(target) && em.IsComponentEnabled<GridDespawnRequest>(target)
+                || em.HasComponent<SalvageCollected>(target);   // QA-001: streaming into the hold, despawned after the last wave
             string outcome = cleared ? "Wreck cleared by the production salvage owner." : "Salvage remains on the wreck. Make room in cargo, close inventory, then return and press F; the existing yields are retained.";
             if (host.Context.TryGetService<EconomyService>(out var economy))
                 outcome += " Scrap carried: " + economy.Inventory.CountOf(new ContentId("resource_scrap"))
