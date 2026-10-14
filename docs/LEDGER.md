@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 20 | 17 | 0 | 0 | 145 | 0 | 182 | 5 |
-| M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
+| M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -409,7 +409,7 @@
 | QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same presentation worker; full narrative adapter, ship log and markers after accepted BeatService. |
 | QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-006, PERS-001 | no | todo |  |  |  |  |
 | QST-008 | Bridge rules, player-free gating and registration | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005, QST-006, SPEC-40, SPEC-32, SPEC-33 | no | todo |  |  |  |  |
-| QST-009 | Opening chapter content | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, GAL-003, NAR-013, DLG-003, ENC-002, ECO-002 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Existing economy worker authoring complete opening chapter content; concrete prerequisites Q424; no new story/art |
+| QST-009 | Opening chapter content | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, GAL-003, NAR-013, DLG-003, ENC-002, ECO-002 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same economy worker reconciling e987aae8 opening assets/import with accepted actual DLG-007 compiler; lead import and two required checks pending. |
 | QST-010 | Opening chapter playthrough | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-008, QST-009, QST-007, SPEC-70, SPEC-32, SPEC-50 | no | todo |  |  |  |  |
 | ECO-001 | Public contract types | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | CORE-001, DATA-001, NAR-001, VOX-001, DMG-001, SYS-001, FLT-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a81ff41 | Economy contracts and serialized tradeable defaults; 2 required tests. Runtime ECO-002 onward remains open. Full 1027 EM / 145 PM passed. |
 | ECO-002 | Definitions, config and validators | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | db5d72e | Strict economy validators/config and canonical scrap; 15 required tests; partial ECO-009 scrap only |
@@ -498,7 +498,7 @@
 | TRV-013 | Supercruise (in-system hop) | [SPEC-32](specs/SPEC-32-travel.md) | M4 | frontier | TRV-012, SPEC-23, SPEC-61 | no | todo |  |  |  |  |
 | TRV-014 | Escort transfer hooks | [SPEC-32](specs/SPEC-32-travel.md) | M4 | standard | TRV-006, TRV-009, AI-001, FND-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Economy worker: actual travel escort callbacks and three required contract cases; fleet implementation stays with SPEC-01. |
 | ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-006, ENC-007, AI-013, AI-014 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 078e8058 | Worker a2da8551 integrated; rotated authored slots and FleetMember leaders, six encounter assets; two required checks pass. |
-| ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-005, GAL-008, CORE-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Combat worker: deterministic procedural territory BFS and owner-change events; advisory large measurement deferred. |
+| ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-005, GAL-008, CORE-003 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 461ffc36 | Procedural BFS, canonical tie/radius rules, entry events and production disposal; four required cases plus five adapter regressions pass; advisory100k deferred. Content seeds remain zero. |
 | NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 4ca00b3 | Partial4ca00b3 +6d6e1ce9; fact editing required case passes39710, formatter also green. Baseline/Play beat live acceptance still awaits QST-005/006 and DLG-006; remains in progress. |
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
@@ -1081,6 +1081,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 479 | SPEC-50 Q30: salvage state and rounding | Exact batched hulk snapshot, O(instances) merged deterministic yields, float scrap arithmetic, entity-bound partial state, pending-despawn/reentrant guards, successful-exit/reset cleanup. Boot config created before snapshot; ECO-008 retains service registration. | Tech lead |
 | 480 | SPEC-62 Q19: camera occlusion recovery | Separate requested/effective distance, immediate pull-in and configured release half-life, preserve ordinary zoom/framing, cached synchronized Unity Physics query and own-grid exclusion. Advisory timing fixture extended, deferred. | Tech lead |
 | 481 | SPEC-33 Q37: actual encounter scenario fixtures | Six specified cases; four real functional scenarios pass using bounded fixed ticks, actual combat and pending ENCT save/load. Clear neutral derelict from firing lane by fixture placement, retain friendly-fire avoidance. Separate optional battle fixture, dialogue case retains QST-008 dependency. | Tech lead |
+| 482 | SPEC-33 Q29: procedural territory and lifecycle | Canonical seeded FIFO expansion; exhaust seeds without looping; first/different owned entry emits, reset clears previous system, disposal unsubscribes. Production Push owns lifetime. Four functional checks pass; existing zero seed content retained, advisory100k deferred. | Tech lead |
 
 ## Measurements
 
@@ -1193,6 +1194,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — ENC-014 procedural territory integrated — astra (gpt-6)
+
+- Worker9601df92 integrated as461ffc36: canonical seeded procedural ownership, bounded multi-source BFS, radius/tie rules and TerritoryEntered events with reset/disposal. Production composition shares and owns the real service via Push. Lead also disposes the service in the existing encounter-adapter fixture. Q482 mirrors SPEC-33 Q29; current authored territorySeeds remain0, so no new faction territory is invented.
+- All four required functional cases pass: deterministic generation/authored preservation, hop bound, lower-faction tie and owner-change events including reset/disposal. Five existing adapter regressions pass after cleanup. Test count: spec-required: 5, extra: 0; 100k advisory fixture authored, deferred, zero tuning passes. Compile clean/zero CS warnings. Evidence Logs/playtest/territory/{procedural,entry,adapter-regression}.xml. No full/performance/soak runs.
+- Same economy worker recycled immediately to QST-009 opening content/import against the actual dialog compiler; ECO-008 and QST-006 continue. No duplicate workers or review-only assignment.
 
 ### 2026-10-14 — ENC-011 actual combat scenarios integrated, dialogue remains — astra (gpt-6)
 
