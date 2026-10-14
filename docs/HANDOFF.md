@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Dialog parser accepted:** DLG-002179603ec done; seven required cases including 38 real converted files pass, plus one targeted separator-fix retry. Compile clean; no Unity active. Next DLG-003 claim/dispatch to existing combat worker. QST-004 worker279 active; presentation review234 complete with its sole finding fixed. Evidence Logs/playtest/dialog-parser.
+
 - **Dialog structural parser authored:** DLG-002daea28bc adds node/header, choice-group, if/elseif/else, flow/set/command and text/tag/speaker parsing with diagnostics; Q373/SPEC-41 Q12 records representation/indentation defaults. Uncompiled/unaccepted. Next seven required cases plus actual converted-file readback before one focused batch. No Unity active. Clue worker active277; combat converted-input audit active260; presentation assigned parser review. Previous syntax work and this implementation are progress.
 
 - **Dialog parser started:** DLG-002 claimed1c63949e;9b171637 adds AST nodes and exact escaping, not yet structural parsing or acceptance. Q372/SPEC-41 Q11 replaces whole-spec scheduling with actual parser/command-table prerequisites. Next full line/indent/branch parser and seven required cases, then one focused batch. No Unity active. Clue worker active276; combat audits actual converted Yarn input; presentation has a genuine dependency wait. Previous quest acceptance and this source work are progress.

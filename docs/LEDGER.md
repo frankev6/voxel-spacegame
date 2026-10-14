@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 8 |
-| M3 | 90 | 9 | 0 | 0 | 81 | 0 | 180 | 8 |
+| M3 | 90 | 8 | 0 | 0 | 82 | 0 | 180 | 10 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -390,9 +390,9 @@
 | NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | no | todo |  |  |  |  |
 | NAR-020 | LogicWatcher | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-004 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | b4344a9 | Sorted/deduplicated dependency watcher; 4 focused tests pass |
 | DLG-001 | Public contract types | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | NAR-001, UI-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 67e0ffd | Dialog contracts, one required test; full suites green |
-| DLG-002 | Dialog script parser | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, NAR-003, NAR-016 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Q372 actual parser prerequisites accepted; lead implements specified Yarn subset and seven required cases. |
-| DLG-003 | Dialog validator rules and generated files | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-002 | no | todo |  |  |  |  |
-| DLG-004 | Yarn Spinner 3 compatibility spike | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-002 | no | todo |  |  |  |  |
+| DLG-002 | Dialog script parser | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, NAR-003, NAR-016 | yes | done | astra (gpt-6) | 2026-10-13 | 179603ec | Parser and seven required cases accepted; 38 converted files parse cleanly; focused separator review fix passes. |
+| DLG-003 | Dialog validator rules and generated files | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-002 | yes | todo |  |  |  |  |
+| DLG-004 | Yarn Spinner 3 compatibility spike | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-002 | yes | todo |  |  |  |  |
 | DLG-005 | GATE: Yarn Spinner adoption | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-004 | no | todo |  |  |  |  |
 | DLG-006 | DialogService, memory and DLGS chunk | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, DLG-003, NAR-011, CORE-003, CORE-007 | no | todo |  |  |  |  |
 | DLG-007 | Production dialog runner (path chosen by DLG-005) | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-005, DLG-006, DLG-003 | no | todo |  |  |  |  |
@@ -1078,6 +1078,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DLG-002 done: converted dialog parser — astra (gpt-6)
+
+- Implementation 179603ec completes the structural parser and required cases. All 38 converted Yarn files parse cleanly. Q374 preserves conditional choices as one future runner menu without conflating visibility and availability.
+- Compile clean, zero CS warnings; seven focused EditMode cases pass (0.1305809s test bodies). Review found an indented separator omission; fixed and reran only that case, passing (0.1116417s bodies). These figures exclude Unity startup/shutdown. Evidence: Logs/playtest/dialog-parser/{compile.log,editmode.xml,indent-editmode.xml}. spec-required: 7, extra: 0. No broad/performance/PlayMode run for this editor parser.
+- Parser review234 and converted-input audit261 complete. Clue worker279 still implementing. Next DLG-003 generated tables and validation on the existing combat worker. Previous turn only restated policy (no implementation progress); this turn commits accepted work and unlocks dependencies.
 
 ### 2026-10-13 — DLG-002 structural parser authored — astra (gpt-6)
 
