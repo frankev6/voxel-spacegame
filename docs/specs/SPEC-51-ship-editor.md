@@ -1037,6 +1037,8 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 
 | 30 | Batch/report storage and implicit grouping have only staged identities | ADR-0088 defines caller-owned native batch lists, immutable-view group reports, empty-groups implicit batch and ordered partition preflight. Internal dirty set includes exact face neighbours using floor division. Placement validation remains EDT-007. | Tech lead | Resolved; ledger Q401. |
 
+| 31 | Picker/result signatures, boundary ties and a ray beginning inside a solid cell are unspecified | Use static `DraftPicker.Raycast(currentDraft, context, gridRay, sliceEnabled, sliceLevel, xRay)` with nested `HitKind` / immutable `Hit` (`Cell`, `Normal`, `Distance` in cells, `PlacementCell`); retain no draft/native ownership across calls. Expanded bounds use inclusive cell min/max; no-solid retained bricks use the empty working plane. Normalize the ray, start the capped traversal at box entry, and break boundary ties X/Y/Z as the canonical voxel DDA does. For an inside-origin hit use distance zero and the opposite dominant direction normal (ties X/Y/Z). Clamp configured traversal to 1..4096 cells; working-plane reach remains 4096 cells from the ray origin. | Tech lead | EDT-012 implementation default; central mirror pending. |
+
 ## 11. References
 
 - Audit `06-ui-shipeditor.md` §1.4–1.5 (old editor), §2 A1–A14, B3, B7, B9, C1–C14, E3–E6, §4 P1–P5, §5.3 (target editor design); `LEDGER.md` R13, R14, R15, R16, R19; screenshot `10-hangar.png`.
