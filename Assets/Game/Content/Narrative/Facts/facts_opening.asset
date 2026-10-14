@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 158350817d4346c88633e4c8b95ed779, type: 3}
+  m_Name: facts_opening
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.FactCatalogDefinition
+  id: facts_opening
+  formerIds: []
+  facts:
+  - Name: opening_cache_found
+    Kind: 1
+    Scope: 0
+    Flags: 0
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note:
+    JournalText:
+  - Name: opening_chapter_done
+    Kind: 1
+    Scope: 0
+    Flags: 4
+    Default: 0
+    Min: 0
+    Max: 0
+    FormerNames: []
+    Note:
+    JournalText: The way to Whisper is open.

@@ -23,9 +23,9 @@ MonoBehaviour:
   starClass: 2
   hasCollider: 1
   canHaveMoons: 0
-  interaction: 5
+  interaction: 2
   interactionDistanceM: 150
-  interactPrompt: Salvage
+  interactPrompt: Inspect
   storyTag: derelict
   structureSource: 1
   blueprint: {fileID: 11400000, guid: 6861f1006d5e848e2bc8d0cf43c520bb, type: 2}

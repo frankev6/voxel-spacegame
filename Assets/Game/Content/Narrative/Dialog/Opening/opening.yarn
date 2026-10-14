@@ -1,0 +1,9 @@
+title: opening_cache
+---
+A battered cargo pod, tagged with an ARK survey stencil. #line:opening_cache_00
+Inside\: refined palladium, enough for NORA's repairs. #line:opening_cache_01
+-> Take it #line:opening_cache_02
+    <<give_item resource_palladium 3>>
+    <<set_fact opening_cache_found true>>
+    <<stop>>
+===

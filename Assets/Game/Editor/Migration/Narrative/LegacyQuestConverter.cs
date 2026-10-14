@@ -70,8 +70,8 @@ namespace Game.Editor.Migration.Narrative
         {
             var result = new Plan(); var quests = new Dictionary<string, Quest>(StringComparer.Ordinal);
             var dialogueLogs = translator.Logs.ToArray();
-            // SPEC-42 rumor resolution reads this authored opening-chapter fact; its writer is QST-009.
-            translator.DeclareFact(Declaration("opening_cache_found", FactKind.Bool));
+            // SPEC-42 §4.8 owns opening_cache_found in facts_opening. Do not duplicate it
+            // in facts_legacy when the converter is rerun after QST-009 authoring.
             // quest_stage is -1 once failed; preserve the current chapter for its failure beat.
             translator.DeclareFact(Declaration("whisper_chain_chapter", FactKind.Int));
             foreach (var source in sources.Quests)

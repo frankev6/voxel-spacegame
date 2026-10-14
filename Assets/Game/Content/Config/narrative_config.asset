@@ -15,5 +15,25 @@ MonoBehaviour:
   id: narrative_config
   formerIds: []
   hullDamagePerPoint: 20
-  knownBodyTags: []
+  knownBodyTags:
+  - ark_station
+  - station
+  - abandoned_station
+  - derelict
+  - debris_field
+  - resource_cache
+  - gate_dormant
+  - gate_active
+  - jump_point
+  - asteroid_belt
+  - barren_planet
+  - gas_giant
+  - ice_planet
+  - ice_giant
+  - rocky_planet
+  - terrestrial_planet
+  - ocean_planet
+  - moon
+  - star
+  - black_hole
   knownStarSystems: []

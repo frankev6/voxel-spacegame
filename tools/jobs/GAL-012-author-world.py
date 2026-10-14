@@ -97,8 +97,10 @@ for suffix in TAGS:
               'visual': body_ref('bodyvis_nocturne_celestial' if celestial else 'bodyvis_nocturne_structure') if not belt else '{fileID: 0}',
               'starClass': 9 if suffix == 'star_blackhole' else 2,
               'hasCollider': int(celestial or not belt), 'canHaveMoons': int(suffix.startswith('planet_')),
-              'interaction': 0 if celestial or belt else 3 if gate else 1 if station else 5 if suffix in ['derelict_ship','debris_field'] else 2,
-              'interactPrompt': 'Dock' if station else 'Jump' if gate else 'Salvage' if suffix in ['derelict_ship','debris_field'] else 'Inspect' if not celestial and not belt else '',
+              # SPEC-42's opening mutiny story requires an Inspect on the derelict;
+              # the narrative bridge deliberately ignores Salvage interactions.
+              'interaction': 0 if celestial or belt else 3 if gate else 1 if station else 5 if suffix == 'debris_field' else 2,
+              'interactPrompt': 'Dock' if station else 'Jump' if gate else 'Salvage' if suffix == 'debris_field' else 'Inspect' if not celestial and not belt else '',
               'structureSource': 0 if celestial or belt else 1 if blueprint else 2,
               'blueprint': ref('Assets/Game/Content/Ships/' + ('ship_vestari' if suffix == 'station' else 'ship_frigate') + '.asset') if blueprint else '{fileID: 0}',
               'destructible': int(not celestial and not gate), 'asteroidBlock': hull if belt else '{fileID: 0}'}

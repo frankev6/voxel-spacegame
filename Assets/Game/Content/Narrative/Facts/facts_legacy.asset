@@ -95,16 +95,6 @@ MonoBehaviour:
     FormerNames: []
     Note: 'Converted legacy narrative fact: morale_boost'
     JournalText: morale_boost
-  - Name: opening_cache_found
-    Kind: 1
-    Scope: 0
-    Flags: 0
-    Default: 0
-    Min: 0
-    Max: 0
-    FormerNames: []
-    Note: 'Converted legacy narrative fact: opening_cache_found'
-    JournalText: 
   - Name: pirate_bounty_accepted
     Kind: 1
     Scope: 0
