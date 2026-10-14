@@ -72,16 +72,24 @@ namespace Game.ShipEditor.Rendering
                 else
                 {
                     // Matches the existing Game/Voxel/BrickLit packed-vertex shader, without decoding/repacking geometry.
-                    Mesh.SetVertexBufferParams(vertices.Length,
-                        new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.UNorm8, 4),
-                        new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.UNorm8, 4));
-                    Mesh.SetVertexBufferData(vertices.AsArray(), 0, 0, vertices.Length);
-                    Mesh.SetIndexBufferParams(indices.Length, IndexFormat.UInt32);
-                    Mesh.SetIndexBufferData(indices.AsArray(), 0, 0, indices.Length);
                     var meshBounds = new Bounds((Vector3)((bounds[0] + bounds[1]) * .5f), (Vector3)(bounds[1] - bounds[0]));
-                    Mesh.subMeshCount = 1;
-                    Mesh.SetSubMesh(0, new SubMeshDescriptor(0, indices.Length) { vertexCount = vertices.Length, bounds = meshBounds }, MeshUpdateFlags.DontRecalculateBounds);
-                    Mesh.bounds = meshBounds;
+                    var writable = UnityEngine.Mesh.AllocateWritableMeshData(1);
+                    bool applied = false;
+                    try
+                    {
+                        var data = writable[0];
+                        data.SetVertexBufferParams(vertices.Length,
+                            new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.UNorm8, 4),
+                            new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.UNorm8, 4));
+                        data.GetVertexData<PackedBrickVertex>().CopyFrom(vertices.AsArray());
+                        data.SetIndexBufferParams(indices.Length, IndexFormat.UInt32);
+                        data.GetIndexData<uint>().CopyFrom(indices.AsArray());
+                        data.subMeshCount = 1;
+                        data.SetSubMesh(0, new SubMeshDescriptor(0, indices.Length) { vertexCount = vertices.Length, bounds = meshBounds }, MeshUpdateFlags.DontRecalculateBounds);
+                        UnityEngine.Mesh.ApplyAndDisposeWritableMeshData(writable, Mesh, MeshUpdateFlags.DontRecalculateBounds);
+                        applied = true; Mesh.bounds = meshBounds;
+                    }
+                    finally { if (!applied) writable.Dispose(); }
                 }
                 AppliedRevision = ScheduledRevision; return true;
             }
