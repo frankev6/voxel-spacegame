@@ -4,6 +4,7 @@ using Game.App.DevRuntime;
 using Game.App.Spawning;
 using Game.Core;
 using Game.Core.Components;
+using Game.Core.Systems;
 using Game.Data.Components;
 using Game.Data.Definitions;
 using Game.Data.Services;
@@ -77,6 +78,11 @@ namespace Game.Tests.PlayMode.DevTools
             definitions.Add(Blueprint); definitions.Add(AssetDatabase.LoadAssetAtPath<AiProfileDefinition>("Assets/Game/Content/Ai/ai_skittish.asset"));
             Content = ContentService.CreateForTests(definitions);
             var systems = new List<Type> { typeof(GridSpawnSystem), typeof(GridBodyInitSystem) };
+            if (physics)
+                systems.AddRange(new[] { typeof(GridSpawnBodyInitSystem), typeof(GridMassUpdateSystem),
+                    typeof(BrickDirtyScheduleSystem), typeof(ColliderSnapshotSystem), typeof(BrickColliderBuildSystem),
+                    typeof(ColliderSwapSystem), typeof(GridColliderCleanupSystem), typeof(DeferredDisposalSystem),
+                    typeof(GameplayEndCommandBufferSystem) });
             if (physics)
                 foreach (var type in DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.Default))
                     if (type.Namespace != null && (type.Namespace.StartsWith("Unity.Physics", StringComparison.Ordinal) || type.Namespace == "Unity.Transforms")) systems.Add(type);
