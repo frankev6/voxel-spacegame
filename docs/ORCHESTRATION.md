@@ -69,3 +69,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - ECO-007a7a433f2 accepted: five functional salvage cases, two advisory fixtures deferred. Combat worker recycled to ready ECO-008 real launcher/production wiring. DLG-011571ae6f6 retains actual intro QST-006/008 prerequisite; no substitute queue. Other workers QST-006 and ENC-011 continue.
 
 - CAM-0078da588cd accepted: four required occlusion checks and seven flight regressions pass; real-ray advisory measurement deferred. ENC-0113415b964 delivered pending focused acceptance and QST-008 dialogue case; same worker now finishes ENC-014 production territory wiring. ECO-008 and QST-006 remain active.
+
+- ENC-011d950ca41 integrated: four real combat/pending-save scenarios pass; neutral derelict correctly blocked initial raider shot, fixed fixture placement rather than runtime logic. Dialogue defeat remains QST-008; separate opt-in battle deferred. All three workers confirmed active; no replacements.
