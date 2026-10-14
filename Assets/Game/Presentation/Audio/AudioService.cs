@@ -46,7 +46,7 @@ namespace Game.Presentation.Audio
         AudioRoot root;
         Transform listener, listenerTarget;
         IPauseService pause;
-        World boundWorld;
+        Unity.Entities.World boundWorld;
         AudioEventDrainSystem drainSystem;
         AudioLoopBridgeSystem loopSystem;
         internal NativeHashMap<ulong, int> CueSlots => cueSlotByHash;
@@ -133,7 +133,7 @@ namespace Game.Presentation.Audio
         }
         public void ApplyVolumes(in AudioVolumes v) { if (disposed) return; pendingVolumes = v; volumesPending = true; }
         public void BindPause(IPauseService value) { if (!disposed) pause = value; }
-        public void BindTo(World world)
+        public void BindTo(Unity.Entities.World world)
         {
             if (disposed || world == null || !world.IsCreated) return;
             if (!ReferenceEquals(boundWorld, world))
@@ -158,7 +158,7 @@ namespace Game.Presentation.Audio
             }
             else query.SetSingleton(cues);
         }
-        public void Unbind(World world)
+        public void Unbind(Unity.Entities.World world)
         {
             if (!ReferenceEquals(boundWorld, world)) return;
             if (boundWorld != null && boundWorld.IsCreated && drainSystem != null) drainSystem.Bind(null);

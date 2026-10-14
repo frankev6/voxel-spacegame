@@ -17,7 +17,7 @@ namespace Game.Presentation.Vfx
     /// <summary>SPEC-63 §6.1: session resource owner; all objects and buffers are allocated at Create.</summary>
     public sealed class FxRig : MonoBehaviour, IFxUploadTarget
     {
-        static readonly Dictionary<World, FxRig> Bindings = new Dictionary<World, FxRig>();
+        static readonly Dictionary<Unity.Entities.World, FxRig> Bindings = new Dictionary<Unity.Entities.World, FxRig>();
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetBindings() => Bindings.Clear();
         static readonly int QualityId = Shader.PropertyToID("QualityFactor");
@@ -51,7 +51,7 @@ namespace Game.Presentation.Vfx
         internal FxInstanceBatch<ShieldInstance> Shields { get; private set; }
         readonly FxStats stats = new FxStats();
         SlotResources[] resources;
-        World boundWorld;
+        Unity.Entities.World boundWorld;
         bool disposed;
         internal uint ClearRevision { get; private set; }
         internal double Now { get; set; }
@@ -185,7 +185,7 @@ namespace Game.Presentation.Vfx
             return effect.HasFloat(QualityId) ? null : "QualityFactor";
         }
         static void Reject(FxDefinition definition, string property) => GameLog.Error("Vfx", $"{definition.Id.Value}: graph '{(definition.Graph == null ? "null" : definition.Graph.name)}' missing/invalid {property}; slot skipped.");
-        public void BindTo(World world)
+        public void BindTo(Unity.Entities.World world)
         {
             if (disposed) throw new ObjectDisposedException(nameof(FxRig));
             if (world == null || !world.IsCreated) throw new ArgumentException("FX binding requires a live World.", nameof(world));
@@ -197,7 +197,7 @@ namespace Game.Presentation.Vfx
             Bindings[world] = this; boundWorld = world; stats.Bound = true;
             foreach (var system in world.Systems) if (system is IFxRigConsumer consumer) consumer.Rig = this;
         }
-        public void Unbind(World world)
+        public void Unbind(Unity.Entities.World world)
         {
             if (world == null || boundWorld != world) return;
             if (world.IsCreated)
