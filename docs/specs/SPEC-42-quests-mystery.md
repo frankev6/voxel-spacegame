@@ -776,7 +776,7 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 | Idle frame (no changes) for all three services | ≤ 0.02 ms, 0 B (inside SPEC-40's `NarrativeService.Tick` budget) | `NarrativeSystemsPerfTests.Idle` (QST-005) |
 | One fact change touching 50 objectives | ≤ 0.1 ms, 0 B | `NarrativeSystemsPerfTests.OneChange50Objectives` (QST-003) |
 | Beat selection at a body with 40 candidates | ≤ 0.1 ms | `BeatServiceTests.Select40_Time` (QST-005) |
-| `QUST` capture with 60 quest instances | ≤ 0.5 ms | `QuestSaveTests.Capture_Time` (QST-007) |
+| `QUST` capture with 60 quest instances | ≤ 0.5 ms | `QuestSavePerformanceTests.Capture_Time` (QST-007) |
 
 **Scale notes.**
 - Selection is O(candidates for a tag), not O(beats).
@@ -881,7 +881,7 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 - **Depends on:** `QST-003`, `QST-004`, `QST-005`, `PERS-001`
 - **Sequencing:** ADR-0105: save consumes service state, independently of the ship-log adapter.
 - **Do:** Implement `QuestSaveParticipant` (§4.6, §5.7) and the SPEC-05 registry row `QUST`.
-- **Files:** `Assets/Game/Narrative/ShipLog/QuestSaveParticipant.cs`; `Assets/Game/Tests/EditMode/Narrative/QuestSaveTests.cs`
+- **Files:** `Assets/Game/Narrative/ShipLog/QuestSaveParticipant.cs`; internal save state in `Quests/QuestService.Save.cs`, `Quests/QuestInstance.cs` and `Beats/BeatQueue.cs`; `Assets/Game/Tests/EditMode/Narrative/QuestSaveTests.cs`
 - **Acceptance criteria:**
   - [ ] The round trip is byte-identical. The test state contains:
     - 60 instances (including contracts);
@@ -895,7 +895,7 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
     - one unknown quest, beat and clue.
   - [ ] Restore applies no effects.
   - [ ] Capture time meets §8.
-- **Tests:** `QuestSaveTests.RoundTrip_ByteIdentical`, `.Unknown_Preserved`, `.Restore_NoEffects`, `.Capture_Time`.
+- **Tests:** `QuestSaveTests.RoundTrip_ByteIdentical`, `.Unknown_Preserved`, `.Restore_NoEffects`, `QuestSavePerformanceTests.Capture_Time`.
 
 ### QST-008 — Bridge rules, player-free gating and registration
 - **Milestone:** M3
@@ -983,3 +983,5 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 | 14 | Opening content depends on whole galaxy/narrative specs, including its own downstream integrations | Use accepted QST-002, GAL-003, NAR-013, DLG-003, ENC-002 and ECO-002 definitions/compilers/validators under ADR-0068. Existing GAL-012 authored content is input, not a runtime acceptance prerequisite for authoring. Preserve every content validation and tag-coverage criterion; production opening playthrough stays QST-010. | Tech lead — resolved; ledger Q424 |
 
 | 15 | Beat queue overflow without a Condition entry, recursive completion and concrete scheduler defaults | Keep the queue bounded at32: remove the oldest Condition entry on overflow; if none exists, warn and refuse the new request without losing an existing non-Condition entry. Deduplicate automatic Condition requests, not explicit queue effects. Suppress recursive same-beat completion while its effects execute; explicit completion of the current beat counts immediately and latches to avoid a second count at Ended. Use current authored-system index plus the supplied resolver for location filtering; body scopes carry the exact system/key. Internal per-body records and queue remain owned by BeatService for QST-007 serialization, with OnRestored preserving them and no effects during restoration. QST-006 owns ship-log forwarding; QST-008 owns production construction after the presenter. Advisory Select40 lives alongside Idle in NarrativeSystemsPerfTests so focused functional runs exclude it. | Tech lead — resolved; ledger Q476 |
+
+| 18 | QUST construction, malformed input and content removed or changed since capture | ADR-0105 supplies concrete service prerequisites and constructor. Parse every section/order/count/version before changing service state. Missing chunk0 clears saved state; unsupported versions and trailing/truncated data reject atomically. Keep unresolved quest records, tracked ID, baseline names, beat queue IDs, per-body IDs and clue/rumor IDs raw. A known quest whose saved active stage no longer exists or whose instance sequence has gaps stays wholly raw, cannot start a competing history and never applies effects. Baseline names remain alongside resolved slots; unresolved fact lookup logs once and returns0, and stage advancement captures a fresh current baseline. Local quest-log entry IDs are strings, not ContentIds. Unknown queued beats stay dormant in their original queue positions; known entries may execute without discarding them, and the existing32-entry cap remains. Restore changes no facts/effects/events; the host calls OnRestored later. Capture sorts specified records and writes queue/log order unchanged; a restored payload written by this version is byte-identical. Production save registration remains QST-008. Four required cases (including separate opt-in capture fixture), one additional bounded malformed-save case. | Tech lead | Resolved; ledger Q483. |

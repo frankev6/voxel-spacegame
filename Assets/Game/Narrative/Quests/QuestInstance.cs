@@ -5,8 +5,9 @@ namespace Game.Narrative.Quests
     {
         public int QuestIndex = default; public int Instance = default; public Game.Data.Logic.QuestStatus Status = default; public int Stage = default;
         public ulong DoneBits = default;                                   // bit i = objective i of the current stage done (latched); 16 used
-        public int[] AcceptBaselineSlots = default, AcceptBaselineValues = default;  // sorted by slot
-        public int[] StageBaselineSlots = default, StageBaselineValues = default;    // sorted by slot; recaptured on stage entry
+        public int[] AcceptBaselineSlots = default, AcceptBaselineValues = default;  // runtime slots; restored unknown names resolve to -1
+        public int[] StageBaselineSlots = default, StageBaselineValues = default;    // runtime slots; restored unknown names resolve to -1; recaptured on stage entry
+        public string[] AcceptBaselineNames, StageBaselineNames; // QUST retains unresolved names alongside resolved slots.
         public readonly System.Collections.Generic.List<string> Log = new();   // entry IDs in order
         public int AcceptOrder = default;                                  // monotonic counter value at accept (UI ordering)
     }

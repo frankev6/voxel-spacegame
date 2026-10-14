@@ -8,7 +8,7 @@ using Game.Data.Services;
 namespace Game.Narrative.Quests
 {
     /// <summary>SPEC-42 §5.3: ordered quest instances, captured baselines and effect-free restore evaluation.</summary>
-    public sealed class QuestService : INarrativeSystem
+    public sealed partial class QuestService : INarrativeSystem
     {
         readonly FactStore facts;
         readonly ILogicContext context;
@@ -72,12 +72,17 @@ namespace Game.Narrative.Quests
         }
         public int GetBaseline(in LogicScope scope, int factSlot, BaselineKind kind)
         {
+            if ((uint)factSlot >= (uint)facts.Catalog.Count)
+            {
+                GameLog.ErrorOnce("QuestBaseline:unknown:" + factSlot, "Narrative", "Unresolvable quest baseline fact; using zero.");
+                return 0;
+            }
             if (Valid(scope.QuestIndex) && (uint)scope.QuestInstance < (uint)instances[scope.QuestIndex].Count)
             {
                 var i = instances[scope.QuestIndex][scope.QuestInstance];
                 var slots = kind == BaselineKind.Accept ? i.AcceptBaselineSlots : i.StageBaselineSlots;
                 var values = kind == BaselineKind.Accept ? i.AcceptBaselineValues : i.StageBaselineValues;
-                int at = slots == null ? -1 : Array.BinarySearch(slots, factSlot);
+                int at = slots == null ? -1 : Array.IndexOf(slots, factSlot);
                 if (at >= 0 && values != null && at < values.Length) return values[at];
             }
             GameLog.ErrorOnce("QuestBaseline:" + scope.QuestIndex + ":" + scope.QuestInstance + ":" + factSlot,
@@ -106,7 +111,9 @@ namespace Game.Narrative.Quests
         public bool Start(int questIndex)
         {
             if (!Valid(questIndex)) return false;
-            var definition = definitions[questIndex]; var prior = Latest(questIndex);
+            var definition = definitions[questIndex];
+            foreach (var raw in rawSaved) if (raw.Id == definition.Id) return false;
+            var prior = Latest(questIndex);
             if (prior != null && (prior.Status == QuestStatus.Active || !definition.Repeatable)) return false;
             var slots = baselineSlots[questIndex];
             var instance = new QuestInstance { QuestIndex = questIndex, Instance = instances[questIndex].Count,
@@ -143,7 +150,9 @@ namespace Game.Narrative.Quests
         public bool ForceComplete(int questIndex) => Finish(questIndex, QuestStatus.Completed);
         public void Track(int questIndex)
         {
-            if (questIndex != 0 && GetStatus(questIndex) != QuestStatus.Active || TrackedQuestIndex == questIndex) return;
+            if (questIndex != 0 && GetStatus(questIndex) != QuestStatus.Active) return;
+            unknownTracked = default;
+            if (TrackedQuestIndex == questIndex) return;
             int old = TrackedQuestIndex; TrackedQuestIndex = questIndex;
             if (old != 0) QuestChanged?.Invoke(old);
             if (questIndex != 0) QuestChanged?.Invoke(questIndex);
@@ -175,7 +184,7 @@ namespace Game.Narrative.Quests
         public void OnNewGame()
         {
             for (int q = 1; q < instances.Length; q++) instances[q].Clear();
-            dirty.Clear(); acceptCounter = 0; TrackedQuestIndex = 0; restoring = false;
+            dirty.Clear(); acceptCounter = 0; TrackedQuestIndex = 0; restoring = false; rawSaved.Clear(); unknownTracked = default;
         }
         public void OnRestored() { restoring = true; for (int q = 1; q < definitions.Length; q++) dirty.Add(q); }
         public void Evaluate(IReadOnlyList<LogicDependency> changed, bool fullReevaluate)
@@ -221,7 +230,7 @@ namespace Game.Narrative.Quests
                     Trace(i, LogicTraceKind.StageCompleted, completedStage, completedStage + 1);
                     if (i.Status != QuestStatus.Active || !ReferenceEquals(i, Latest(q))) break;
                     if (completedStage == definition.Stages.Count - 1) { Finish(q, QuestStatus.Completed); break; }
-                    i.Stage++; i.DoneBits = 0; i.StageBaselineValues = Capture(i.StageBaselineSlots);
+                    i.Stage++; i.DoneBits = 0; i.StageBaselineSlots = baselineSlots[i.QuestIndex]; i.StageBaselineNames = null; i.StageBaselineValues = Capture(i.StageBaselineSlots);
                     Changed(q);
                 }
             }

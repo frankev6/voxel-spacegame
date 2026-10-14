@@ -194,7 +194,9 @@ namespace Game.Narrative.Beats
         }
         public void AbortCurrent() { if (current != 0) abortRequested = true; }
         public void OnNewGame() { QueueState.Clear(); PerBody.Clear(); dirty.Clear(); current = 0; gameStartPending = true; restored = false; }
-        public void OnRestored() { current = 0; gameStartPending = false; dirty.Clear(); restored = true; }
+        internal void ResetForRestore()
+        { current = 0; currentScope = default; gameStartPending = false; dirty.Clear(); completing.Clear(); abortRequested = completedByEffect = false; restored = false; }
+        public void OnRestored() { ResetForRestore(); restored = true; }
         public void Evaluate(IReadOnlyList<LogicDependency> changed, bool fullReevaluate)
         {
             if (changed != null) dependencies.Collect(changed, dirty);
@@ -211,7 +213,7 @@ namespace Game.Narrative.Beats
                 gameStartPending = false;
                 foreach (int index in triggers[(int)BeatTrigger.GameStart]) if (Eligible(index, default, CurrentSystem(), 0, true)) Enqueue(index, default);
             }
-            if (QueueState.Count != 0) { var entry = QueueState.Pop(); Play(entry.Beat, entry.Scope); }
+            if (QueueState.TryPop(out var entry)) Play(entry.Beat, entry.Scope);
             // TODO(QST-006): forward coalesced ShipLogQuery notifications after evaluation.
         }
         void Trace(LogicTraceKind kind, int index) => facts.Trace?.Add(new LogicTraceEntry

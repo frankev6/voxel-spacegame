@@ -10,9 +10,10 @@ namespace Game.Narrative.Beats
         internal readonly struct Entry
         {
             internal readonly int Beat;
+            internal readonly ContentId RawId;
             internal readonly LogicScope Scope;
             internal readonly bool Condition;
-            internal Entry(int beat, in LogicScope scope, bool condition) { Beat = beat; Scope = scope; Condition = condition; }
+            internal Entry(int beat, in LogicScope scope, bool condition, ContentId rawId = default) { Beat = beat; Scope = scope; Condition = condition; RawId = rawId; }
         }
         readonly List<Entry> entries = new(32);
         internal int Count => entries.Count;
@@ -29,7 +30,12 @@ namespace Game.Narrative.Beats
             if (first) entries.Insert(0, entry); else entries.Add(entry);
             return true;
         }
-        internal Entry Pop() { var entry = entries[0]; entries.RemoveAt(0); return entry; }
+        internal bool TryPop(out Entry entry)
+        {
+            for (int i = 0; i < entries.Count; i++) if (entries[i].Beat > 0)
+            { entry = entries[i]; entries.RemoveAt(i); return true; }
+            entry = default; return false; // Unknown saved beats remain dormant and round-trip intact.
+        }
         internal void Clear() => entries.Clear();
     }
 }
