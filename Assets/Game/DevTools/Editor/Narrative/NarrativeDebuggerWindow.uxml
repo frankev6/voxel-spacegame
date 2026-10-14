@@ -4,12 +4,20 @@
             <uie:ToolbarToggle name="facts-tab" text="Facts" />
             <uie:ToolbarToggle name="trace-tab" text="Trace" />
             <uie:ToolbarToggle name="quests-tab" text="Quests" />
+            <uie:ToolbarToggle name="baselines-tab" text="Baselines" />
+            <uie:ToolbarToggle name="debug-menus" text="Debug menus" />
             <uie:ToolbarButton name="refresh" text="Refresh" />
         </uie:Toolbar>
         <ui:Label name="status" class="narrative-debugger-status" />
         <ui:VisualElement name="facts-panel" class="narrative-debugger-panel">
             <uie:ToolbarSearchField name="search" tooltip="Filter facts by name" />
             <ui:Label name="fact-status" class="narrative-debugger-status" />
+            <ui:VisualElement class="narrative-debugger-actions">
+                <ui:Label name="selected-fact" class="narrative-debugger-selection" />
+                <ui:IntegerField name="fact-value" label="Value" />
+                <ui:Button name="apply-fact" text="Set value" />
+            </ui:VisualElement>
+            <ui:Label name="edit-status" class="narrative-debugger-status" />
         </ui:VisualElement>
         <ui:VisualElement name="trace-panel" class="narrative-debugger-panel">
             <ui:Label name="trace-status" class="narrative-debugger-status" />
@@ -17,5 +25,13 @@
         <ui:VisualElement name="quests-panel" class="narrative-debugger-panel">
             <ui:Label name="quest-status" class="narrative-debugger-status" />
         </ui:VisualElement>
+        <ui:VisualElement name="baselines-panel" class="narrative-debugger-panel">
+            <ui:Label name="baseline-status" class="narrative-debugger-status" />
+        </ui:VisualElement>
+        <ui:VisualElement class="narrative-debugger-actions">
+            <ui:DropdownField name="beat-choice" label="Beat" class="narrative-debugger-selection" />
+            <ui:Button name="play-beat" text="Play beat" />
+        </ui:VisualElement>
+        <ui:Label name="play-status" class="narrative-debugger-status" />
     </ui:VisualElement>
 </ui:UXML>

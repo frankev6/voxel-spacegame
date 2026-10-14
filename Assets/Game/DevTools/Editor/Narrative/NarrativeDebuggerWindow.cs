@@ -2,9 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Game.Data.Definitions;
+using Game.Data.Logic;
 using Game.Data.Services;
 using Game.Narrative;
 using Game.Narrative.ShipLog;
+using Game.Narrative.Quests;
+using Game.Narrative.Beats;
+using Game.Narrative.Dialog;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -12,7 +16,7 @@ using UnityEngine.UIElements;
 
 namespace Game.DevTools.Editor.Narrative
 {
-    /// <summary>SPEC-40 §5.9 M3: read-only snapshots of the live narrative services.</summary>
+    /// <summary>SPEC-40 §5.9: live snapshots and explicit debugger actions through canonical owners.</summary>
     public sealed class NarrativeDebuggerWindow : EditorWindow
     {
         const string LayoutPath = "Assets/Game/DevTools/Editor/Narrative/NarrativeDebuggerWindow.uxml";
@@ -22,12 +26,27 @@ namespace Game.DevTools.Editor.Narrative
         readonly List<string> traceRows = new(), questRows = new();
         readonly List<QuestEntryView> activeQuests = new(), finishedQuests = new();
         readonly LogicTraceEntry[] traceBuffer = new LogicTraceEntry[LogicTraceLog.Capacity];
+        readonly List<string> baselineRows = new(), beatIds = new();
+        readonly List<LogicDependency> baselineDependencies = new();
+        readonly List<int> baselineSlots = new();
+        readonly HashSet<int> baselineSet = new();
         MultiColumnListView factsView;
-        ListView traceView, questsView;
+        ListView traceView, questsView, baselinesView;
         ToolbarSearchField search;
         Label status, factStatus, traceStatus, questStatus;
         VisualElement factsPanel, tracePanel, questsPanel;
         ToolbarToggle factsTab, traceTab, questsTab;
+        ToolbarToggle baselinesTab, debugMenus;
+        VisualElement baselinesPanel;
+        Label selectedFact, editStatus, baselineStatus, playStatus;
+        IntegerField factValue;
+        Button applyFact, playBeat;
+        DropdownField beatChoice;
+        QuestService unavailableBaselines;
+        BeatService unavailableBeats;
+        int selectedFactSlot = -1;
+        bool factValueDirty, syncingFacts;
+        string playMessage;
         NarrativeService observed;
         ShipLogQuery unavailableQuery;
         int traceVersion;
@@ -38,9 +57,10 @@ namespace Game.DevTools.Editor.Narrative
         {
             internal readonly string Name, Family, Kind, Value, Default;
             internal readonly bool NonDefault;
+            internal readonly int Slot;
             internal FactRow(Game.Data.Logic.FactCatalog catalog, int slot, int value)
             {
-                Name = catalog.IdAt(slot).Name; Family = catalog.FamilyAt(slot).ToString(); Kind = catalog.KindAt(slot).ToString();
+                Slot = slot; Name = catalog.IdAt(slot).Name; Family = catalog.FamilyAt(slot).ToString(); Kind = catalog.KindAt(slot).ToString();
                 Value = value.ToString(CultureInfo.InvariantCulture); Default = catalog.DefaultAt(slot).ToString(CultureInfo.InvariantCulture);
                 NonDefault = value != catalog.DefaultAt(slot);
             }
@@ -60,6 +80,8 @@ namespace Game.DevTools.Editor.Narrative
         {
             EditorApplication.update -= OnEditorUpdate;
             observed = null; unavailableQuery = null;
+            unavailableBaselines = null; unavailableBeats = null;
+            baselineRows.Clear(); beatIds.Clear(); baselineDependencies.Clear(); baselineSlots.Clear(); baselineSet.Clear();
             facts.Clear(); traceRows.Clear(); questRows.Clear(); activeQuests.Clear(); finishedQuests.Clear();
             factsView = null;
         }
@@ -75,10 +97,21 @@ namespace Game.DevTools.Editor.Narrative
             traceStatus = rootVisualElement.Q<Label>("trace-status"); questStatus = rootVisualElement.Q<Label>("quest-status");
             factsTab = rootVisualElement.Q<ToolbarToggle>("facts-tab"); traceTab = rootVisualElement.Q<ToolbarToggle>("trace-tab");
             questsTab = rootVisualElement.Q<ToolbarToggle>("quests-tab"); search = rootVisualElement.Q<ToolbarSearchField>("search");
+            baselinesTab = rootVisualElement.Q<ToolbarToggle>("baselines-tab"); baselinesPanel = rootVisualElement.Q("baselines-panel");
+            baselineStatus = rootVisualElement.Q<Label>("baseline-status"); selectedFact = rootVisualElement.Q<Label>("selected-fact");
+            factValue = rootVisualElement.Q<IntegerField>("fact-value"); applyFact = rootVisualElement.Q<Button>("apply-fact");
+            editStatus = rootVisualElement.Q<Label>("edit-status"); debugMenus = rootVisualElement.Q<ToolbarToggle>("debug-menus");
+            beatChoice = rootVisualElement.Q<DropdownField>("beat-choice"); playBeat = rootVisualElement.Q<Button>("play-beat");
+            playStatus = rootVisualElement.Q<Label>("play-status");
             factsTab.RegisterValueChangedCallback(_ => SelectTab(0)); traceTab.RegisterValueChangedCallback(_ => SelectTab(1));
             questsTab.RegisterValueChangedCallback(_ => SelectTab(2)); search.RegisterValueChangedCallback(_ => RefreshNow());
+            baselinesTab.RegisterValueChangedCallback(_ => SelectTab(3));
+            factValue.RegisterValueChangedCallback(_ => factValueDirty = true);
+            debugMenus.RegisterValueChangedCallback(change => SetDebugMenus(change.newValue));
+            applyFact.clicked += ApplySelectedFact; playBeat.clicked += PlaySelectedBeat;
             rootVisualElement.Q<ToolbarButton>("refresh").clicked += RefreshNow;
-            factsView = new MultiColumnListView { itemsSource = facts, selectionType = SelectionType.None };
+            factsView = new MultiColumnListView { itemsSource = facts, selectionType = SelectionType.Single };
+            factsView.selectionChanged += _ => SelectFact();
             factsView.AddToClassList("narrative-debugger-list");
             string[] headers = { "Name", "Family", "Kind", "Value", "Default" };
             for (int i = 0; i < headers.Length; i++)
@@ -91,6 +124,7 @@ namespace Game.DevTools.Editor.Narrative
             factsPanel.Add(factsView);
             traceView = TextList(traceRows); tracePanel.Add(traceView);
             questsView = TextList(questRows); questsPanel.Add(questsView);
+            baselinesView = TextList(baselineRows); baselinesPanel.Add(baselinesView);
             SelectTab(0); RefreshNow();
         }
         static Label CellLabel(bool wrap)
@@ -108,9 +142,11 @@ namespace Game.DevTools.Editor.Narrative
         void SelectTab(int tab)
         {
             factsTab.SetValueWithoutNotify(tab == 0); traceTab.SetValueWithoutNotify(tab == 1); questsTab.SetValueWithoutNotify(tab == 2);
+            baselinesTab.SetValueWithoutNotify(tab == 3);
             factsPanel.EnableInClassList("narrative-debugger-hidden", tab != 0);
             tracePanel.EnableInClassList("narrative-debugger-hidden", tab != 1);
             questsPanel.EnableInClassList("narrative-debugger-hidden", tab != 2);
+            baselinesPanel.EnableInClassList("narrative-debugger-hidden", tab != 3);
         }
         void OnEditorUpdate()
         {
@@ -130,22 +166,35 @@ namespace Game.DevTools.Editor.Narrative
         }
         void Refresh(NarrativeService current)
         {
+            if (!ReferenceEquals(current, observed)) { selectedFactSlot = -1; factValueDirty = false; playMessage = null; }
             observed = current; wasPlaying = EditorApplication.isPlaying;
             traceVersion = current?.Facts.Trace?.Version ?? 0; refreshAt = EditorApplication.timeSinceStartup + RefreshSeconds;
-            facts.Clear(); traceRows.Clear(); questRows.Clear();
+            facts.Clear(); traceRows.Clear(); questRows.Clear(); baselineRows.Clear(); activeQuests.Clear(); finishedQuests.Clear();
             if (current == null)
             {
                 status.text = wasPlaying ? "NarrativeService is not registered in this Play session." : "Enter Play mode to inspect the live narrative.";
                 factStatus.text = traceStatus.text = questStatus.text = "Unavailable until a live narrative service is registered.";
+                baselineStatus.text = "Baselines require a live narrative and quest runtime.";
             }
             else
             {
-                status.text = current.IsWorldReady ? "Live narrative · read only" : "Narrative available · world not ready · read only";
+                status.text = current.IsWorldReady ? "Live narrative · debugger actions write with Debugger source" : "Narrative available · world not ready";
                 RefreshFacts(current.Facts);
                 RefreshTrace(current.Facts);
-                RefreshQuests();
+                bool questsAvailable = RefreshQuests();
+                RefreshBaselines(current.Facts, questsAvailable);
             }
-            factsView.RefreshItems(); traceView.RefreshItems(); questsView.RefreshItems();
+            syncingFacts = true;
+            try
+            {
+                factsView.RefreshItems();
+                int selected = facts.FindIndex(row => row.Slot == selectedFactSlot);
+                factsView.SetSelectionWithoutNotify(selected < 0 ? Array.Empty<int>() : new[] { selected });
+                if (selected < 0) { selectedFactSlot = -1; factValueDirty = false; }
+            }
+            finally { syncingFacts = false; }
+            traceView.RefreshItems(); questsView.RefreshItems(); baselinesView.RefreshItems();
+            RefreshEditing(current); RefreshBeats(current);
         }
         void RefreshFacts(FactStore store)
         {
@@ -186,23 +235,25 @@ namespace Game.DevTools.Editor.Narrative
             }
             return "subject:" + entry.Subject.ToString(CultureInfo.InvariantCulture);
         }
-        void RefreshQuests()
+        bool RefreshQuests()
         {
             if (!Game.Core.Services.TryGet<ShipLogQuery>(out var query))
-            { questStatus.text = "ShipLogQuery is not registered (QST-006)."; return; }
+            { questStatus.text = "ShipLogQuery is not registered (QST-006)."; return false; }
             if (ReferenceEquals(query, unavailableQuery))
-            { questStatus.text = "Ship-log reads are not implemented yet (QST-006)."; return; }
+            { questStatus.text = "Ship-log reads are not implemented yet (QST-006)."; return false; }
             activeQuests.Clear(); finishedQuests.Clear();
             try
             {
                 query.GetQuests(false, activeQuests); query.GetQuests(true, finishedQuests);
                 AppendQuests(activeQuests); AppendQuests(finishedQuests);
                 questStatus.text = string.Format(CultureInfo.InvariantCulture, "{0} active · {1} completed or failed · read only", activeQuests.Count, finishedQuests.Count);
+                return true;
             }
             catch (NotImplementedException)
             {
                 unavailableQuery = query; activeQuests.Clear(); finishedQuests.Clear(); questRows.Clear();
                 questStatus.text = "Ship-log reads are not implemented yet (QST-006).";
+                return false;
             }
         }
         void AppendQuests(List<QuestEntryView> rows)
@@ -213,6 +264,140 @@ namespace Game.DevTools.Editor.Narrative
                 questRows.Add(string.Format(CultureInfo.InvariantCulture, "{0} · {1} · {2} · instance {3}{4}\n{5}\n{6}",
                     quest.Title, quest.QuestId, quest.Status, quest.Instance, quest.Tracked ? " · tracked" : "", quest.StageText, quest.ShortDescription));
             }
+        }
+        void SelectFact()
+        {
+            if (syncingFacts || observed == null) return;
+            int row = factsView.selectedIndex;
+            selectedFactSlot = row >= 0 && row < facts.Count ? facts[row].Slot : -1;
+            factValueDirty = false;
+            RefreshEditing(observed);
+        }
+        void RefreshEditing(NarrativeService current)
+        {
+            bool selected = current != null && (uint)selectedFactSlot < (uint)current.Facts.Catalog.Count;
+            selectedFact.text = selected ? current.Facts.Catalog.IdAt(selectedFactSlot).Name : "No fact selected";
+            factValue.SetEnabled(selected); applyFact.SetEnabled(selected);
+            if (selected && !factValueDirty) factValue.SetValueWithoutNotify(current.Facts.GetBySlot(selectedFactSlot));
+            int debugSlot = current?.Facts.Catalog.SlotOf("debug_menus") ?? -1;
+            debugMenus.SetEnabled(debugSlot >= 0);
+            debugMenus.SetValueWithoutNotify(debugSlot >= 0 && current.Facts.GetBySlot(debugSlot) != 0);
+            debugMenus.tooltip = debugSlot >= 0 ? "Writes debug_menus through FactStore with Debugger source." : "debug_menus is unavailable in this runtime fact catalog.";
+            editStatus.text = current == null ? "Fact editing requires a live Play session." : "Select a fact and set its value · Debugger source · runtime clamping applies";
+        }
+        bool TryLive(out NarrativeService current)
+        {
+            current = null;
+            return EditorApplication.isPlaying && Game.Core.Services.TryGet(out current) && ReferenceEquals(current, observed);
+        }
+        void ApplySelectedFact()
+        {
+            if (!TryLive(out var current) || (uint)selectedFactSlot >= (uint)current.Facts.Catalog.Count)
+            { RefreshNow(); return; }
+            EditFact(current.Facts, selectedFactSlot, factValue.value);
+            factValueDirty = false; RefreshNow();
+        }
+        void SetDebugMenus(bool enabled)
+        {
+            if (!TryLive(out var current)) { RefreshNow(); return; }
+            int slot = current.Facts.Catalog.SlotOf("debug_menus");
+            if (slot >= 0) EditFact(current.Facts, slot, enabled ? 1 : 0);
+            RefreshNow();
+        }
+        public static void EditFact(FactStore store, int slot, int value)
+        {
+            if (store == null) throw new ArgumentNullException(nameof(store));
+            if ((uint)slot >= (uint)store.Catalog.Count) throw new ArgumentOutOfRangeException(nameof(slot));
+            store.SetBySlot(slot, value, FactWriteSource.Debugger);
+        }
+        void RefreshBaselines(FactStore store, bool questsAvailable)
+        {
+            if (!Game.Core.Services.TryGet<QuestService>(out var quests))
+            { baselineStatus.text = "QuestService baseline reads are unavailable (QST-003)."; return; }
+            if (!questsAvailable)
+            { baselineStatus.text = "Active quest instances are unavailable (QST-006)."; return; }
+            if (ReferenceEquals(quests, unavailableBaselines))
+            { baselineStatus.text = "Quest baseline reads are not implemented yet (QST-003)."; return; }
+            if (!Game.Core.Services.TryGet<ContentService>(out var content))
+            { baselineStatus.text = "ContentService is unavailable; quest definitions cannot be resolved."; return; }
+            try
+            {
+                for (int i = 0; i < activeQuests.Count; i++)
+                {
+                    var quest = activeQuests[i];
+                    if (quest.Status != QuestStatus.Active) continue;
+                    var definition = quest.QuestIndex > 0 && quest.QuestIndex <= ushort.MaxValue ?
+                        content.Catalog.GetByIndex<QuestDefinition>((ushort)quest.QuestIndex) : null;
+                    if (definition == null) { baselineRows.Add(quest.QuestId + " · quest definition unavailable"); continue; }
+                    baselineDependencies.Clear(); baselineSlots.Clear(); baselineSet.Clear();
+                    definition.FailWhen?.CollectDependencies(baselineDependencies);
+                    foreach (var stage in definition.Stages)
+                        foreach (var objective in stage.objectives)
+                        { objective.doneWhen?.CollectDependencies(baselineDependencies); objective.progress?.CollectDependencies(baselineDependencies); }
+                    bool bound = true;
+                    foreach (var dependency in baselineDependencies)
+                    {
+                        if (dependency.Kind != LogicDependencyKind.Fact) continue;
+                        if ((uint)dependency.Key >= (uint)store.Catalog.Count) { bound = false; break; }
+                        if (baselineSet.Add(dependency.Key)) baselineSlots.Add(dependency.Key);
+                    }
+                    if (!bound) { baselineRows.Add(quest.QuestId + " · fact dependencies are not bound"); continue; }
+                    baselineSlots.Sort();
+                    int instance = quests.GetInstanceCount(quest.QuestIndex) - 1; // Latest instance; LogicScope uses a zero-based index.
+                    if (instance < 0) { baselineRows.Add(quest.QuestId + " · active instance unavailable"); continue; }
+                    var scope = new LogicScope(LogicUsage.QuestObjective, quest.QuestIndex, instance, 0, false, default);
+                    if (baselineSlots.Count == 0) baselineRows.Add(quest.QuestId + " · no fact dependencies");
+                    foreach (int slot in baselineSlots)
+                    {
+                        int accept = quests.GetBaseline(scope, slot, BaselineKind.Accept), stage = quests.GetBaseline(scope, slot, BaselineKind.Stage);
+                        baselineRows.Add(string.Format(CultureInfo.InvariantCulture, "{0} · instance {1} · {2}\nAccept: {3} · Stage: {4} · Current: {5}",
+                            quest.QuestId, instance, store.Catalog.IdAt(slot).Name, accept, stage, store.GetBySlot(slot)));
+                    }
+                }
+                baselineStatus.text = activeQuests.Count == 0 ? "No active quests." : "Stored accept/stage baselines · instance indices are zero-based · read only";
+            }
+            catch (NotImplementedException)
+            {
+                // TODO(QST-003/QST-006): the debugger consumes these owners; it does not create quest state.
+                unavailableBaselines = quests; baselineRows.Clear();
+                baselineStatus.text = "Quest baseline reads are not implemented yet (QST-003).";
+            }
+        }
+        void RefreshBeats(NarrativeService current)
+        {
+            string selected = beatChoice.value;
+            beatIds.Clear();
+            if (current != null && Game.Core.Services.TryGet<ContentService>(out var content))
+                foreach (var beat in content.Catalog.All<StoryBeatDefinition>()) beatIds.Add(beat.IdString);
+            beatIds.Sort(StringComparer.Ordinal); beatChoice.choices = beatIds;
+            beatChoice.SetValueWithoutNotify(beatIds.Contains(selected) ? selected : beatIds.Count > 0 ? beatIds[0] : "");
+            beatChoice.SetEnabled(beatIds.Count > 0);
+            bool ready = current != null && current.IsWorldReady && beatIds.Count > 0;
+            if (!Game.Core.Services.TryGet<BeatService>(out var beats))
+            { ready = false; playStatus.text = "Play beat unavailable: BeatService is not registered (QST-005)."; }
+            else if (!Game.Core.Services.TryGet<DialogService>(out _))
+            { ready = false; playStatus.text = "Play beat unavailable: DialogService is not registered (DLG-006)."; }
+            else if (ReferenceEquals(beats, unavailableBeats))
+            { ready = false; playStatus.text = "Play beat runtime is not implemented (QST-005/DLG-006)."; }
+            else playStatus.text = ready ? playMessage ?? "Play beat calls the live BeatService.DebugPlay; condition and repeat checks are bypassed." : "Play beat requires a ready world and a real beat definition.";
+            playBeat.SetEnabled(ready);
+        }
+        void PlaySelectedBeat()
+        {
+            if (!TryLive(out var current) || !current.IsWorldReady || !Game.Core.Services.TryGet<ContentService>(out var content) ||
+                !Game.Core.Services.TryGet<BeatService>(out var beats) || !Game.Core.Services.TryGet<DialogService>(out _))
+            { RefreshNow(); return; }
+            ushort index = 0;
+            foreach (var beat in content.Catalog.All<StoryBeatDefinition>())
+                if (beat.IdString == beatChoice.value) { index = content.Catalog.IndexOf(beat); break; }
+            if (index == 0) { RefreshNow(); return; }
+            try { beats.DebugPlay(index); playMessage = "DebugPlay requested: " + beatChoice.value; }
+            catch (NotImplementedException)
+            {
+                // TODO(QST-005/DLG-006): actual beat/dialog startup belongs to the runtime owners.
+                unavailableBeats = beats; playMessage = null;
+            }
+            RefreshNow();
         }
         public static string FormatTraceEntry(LogicTraceEntry entry, string subjectName)
             => string.Format(CultureInfo.InvariantCulture, "{0} | {1:F3}s | {2} | {3} | {4} → {5} | {6} | ctx={7:X16}",

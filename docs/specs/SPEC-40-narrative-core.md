@@ -1472,6 +1472,8 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 
 | 31 | Narrative UI gates require inspecting layers and event drain is OrderLast | Resolved: ADR-0078 adds read-only UINavigator.HasOpenLayer; narrative bridge is OrderLast plus UpdateAfter ManagedEventDrainSystem so Unity ordering partitions preserve drain-before-tick. | Tech lead — ledger Q365 |
 
+| 32 | NAR-018 depends only on NAR-017 although active baselines and Play beat require unfinished runtime owners | **NAR-018 default:** implement editor fact edits and debug_menus through FactStore.SetBySlot with Debugger source; do not create missing facts. Route baseline reads through QST-006 active QuestEntryView records and QST-003 GetBaseline, taking the latest zero-based instance from GetInstanceCount - 1 and using the sorted union of Fact dependencies from every doneWhen/progress/failWhen exactly as SPEC-42 §5.3 captures it. Resolve Play beat against real content and call QST-005 BeatService.DebugPlay only with a registered DLG-006 DialogService and ready world. Missing/stub owners are explicit unavailable states; successful dispatch is reported as a request, not proof a dialog started. Preserve runtime TODO IDs and existing APIs. Editor delivery is partial until real QST-003/005/006 and DLG-006 owners enable baseline/dialog acceptance; the required fact-write case remains independently testable with the real FactStore. | Tech lead — dependency gap; central mirror pending. |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/05-narrative-quests.md` (B3, B8, B10, B13, B14, B17; §5.3–§5.5, §5.12–§5.13), `00-synthesis.md` §6h.

@@ -29,3 +29,9 @@
     border-bottom-color: var(--color-border);
 }
 .narrative-debugger-hidden { display: none; }
+.narrative-debugger-actions {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--space-1);
+}
+.narrative-debugger-selection { flex-grow: 1; }
