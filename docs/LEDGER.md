@@ -990,6 +990,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 416 | SPEC-51 Q44: renderer scheduling and prop identity | Join prior snapshots before draining new edits; bounded nearest-pivot queues retain hidden-above-slice work. Exact prop identity avoids shared-origin collisions; native arrays use constant-time last-element removal. | Tech lead — resolved |
 | 417 | SPEC-51 Q45: incremental renderer edit observation | Borrow the diff before history merge/disposal; reverse order/kind for undo; rebuild only on opening/discard or observer recovery. Explicit borrowed mesh table; missing geometry reports an error. | Tech lead — resolved |
 | 418 | SPEC-51 Q46: draft shared material bindings | Reuse existing baked brick textures with regular BrickLit; packed X-ray uses configured Nocturne SelectionColor and provisional opacity 0.2. Config references both shared materials; no new imagery. | Tech lead — resolved |
+| 419 | SPEC-51 Q40: bounded area-tool traversal | Reusable workspaces, canonical line ties and bounded box/fill preflight; symmetry groups apply PerGroup only after complete construction. Blocked release cancels gestures. | Tech lead — resolved |
+| 420 | SPEC-51 Q42: clipboard and stamp ownership | Controller owns pristine copied records, full-footprint pivot, independent yaw and one atomic mirrored paste; cut history retains original damage. | Tech lead — resolved |
+| 421 | SPEC-51 Q39: allocation-free panel mount | Fixed row/control pools with paging resolve ListView/TabBar rebuilding conflict; scoped subscriptions use current row identities and existing UIConfig fragments. | Tech lead — resolved |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1122,6 +1125,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — EDT-015/017/021 compatible source integration — astra (gpt-6)
+
+- EDT-018 accepted and fast-forwarded to local main ed38ff78. On task/EDT-015-editor-integration, worker3991bae4 integrated ase1f6d5e,99ec7ef5 as61e4057,ef94aca8 asf0e774dc. Controller conflicts resolved by retaining selection, area tools, paste registration and BoxMode transport together; all spec questions retained. Q40/42/39 mirrored419/420/421. All commit trailers retained plus lead trailer.
+- Compatible delivery source not yet compiled/accepted. Before focused batch, lead fixes known shared-origin transform rejection and stale selection after undo. Delivered spec-required:7 area,5 clipboard,4 panels;extra:0. No new tests or Unity runs for this integration checkpoint. Docs checker passes. Workers have acceptance/dependency waits after completed reviews/audit; no duplicates.
+- Next inspect and repair selection, validate the compatible batch once, close rows and dispatch blueprint storage with concrete dependencies. QST-009 candidate still needs dependency correction and GAL-012 acceptance (not done in ledger). Full roadmap remains active.
 
 ### 2026-10-14 — EDT-018 renderer functional acceptance — astra (gpt-6)
 
