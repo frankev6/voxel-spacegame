@@ -1,0 +1,16 @@
+/* SPEC-61 HUD-015. Functional colours are aliases of approved NOCTURNE tokens. */
+.maps-canvas {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    --maps-color-0: var(--color-neutral);
+    --maps-color-1: var(--color-ally);
+    --maps-color-2: var(--color-enemy);
+    --maps-color-3: var(--color-positive);
+    --maps-color-4: var(--color-warning);
+    --maps-color-5: var(--color-info);
+    --maps-color-6: var(--color-objective);
+    --maps-color-7: var(--color-clue);
+}
+.maps-label { color: var(--color-text); font-size: var(--text-s); white-space: nowrap; }

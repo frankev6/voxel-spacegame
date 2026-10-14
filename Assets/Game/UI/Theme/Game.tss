@@ -21,3 +21,5 @@
 @import url("components/modal.uss");
 @import url("screens/dialog-services.uss");
 @import url("screens/travel.uss");
+
+@import url("screens/maps.uss");
