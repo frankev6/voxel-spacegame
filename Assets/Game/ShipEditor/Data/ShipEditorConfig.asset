@@ -30,7 +30,7 @@ MonoBehaviour:
   MaxPickSteps: 4096
   BrickMaterial: {fileID: 2100000, guid: 8a9cb611ab59423782f8267899e1fdc2, type: 2}
   BrickXRayMaterial: {fileID: 2100000, guid: 321688d17cb048a7998133111e9897f3, type: 2}
-  OverlayMaterial: {fileID: 0}
+  OverlayMaterial: {fileID: 2100000, guid: 41d8f90e70434bbf9ac0a6ef9c1e0c0e, type: 2}
   ValidColor: {r: 0.239215686, g: 0.839215686, b: 0.639215686, a: 1}
   InvalidColor: {r: 1.000000000, g: 0.360784314, b: 0.478431373, a: 1}
   ClearanceColor: {r: 1.000000000, g: 0.760784314, b: 0.278431373, a: 1}
