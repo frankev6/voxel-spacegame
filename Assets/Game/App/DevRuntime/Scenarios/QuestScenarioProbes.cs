@@ -8,6 +8,8 @@ using Game.Narrative.Clues;
 using Game.Narrative.Dialog;
 using Game.Narrative.Quests;
 using Game.Presentation.Bridges;
+using Game.Input;
+using Game.UI.Services;
 using static Game.App.DevRuntime.Scenarios.ScenarioExpression;
 
 namespace Game.App.DevRuntime.Scenarios
@@ -28,7 +30,11 @@ namespace Game.App.DevRuntime.Scenarios
                         throw new InvalidOperationException("production dialog service/presenter unavailable");
                     string text = RequireString(args[0]);
                     if (string.IsNullOrWhiteSpace(text)) throw new ArgumentException("dialog.option expects visible option text");
-                    if (dialog.IsActive && presenter.Model.IsWaitingForChoice)
+                    // A populated page can be covered before deferred docking/navigation settles.
+                    // Advertise a number only when its actual input route can receive the press.
+                    if (dialog.IsActive && presenter.Model.IsWaitingForChoice && presenter.View.IsOpen &&
+                        ctx.TryGetService<UINavigator>(out var navigation) && ReferenceEquals(navigation.Top, presenter.View) &&
+                        ctx.TryGetService<InputService>(out var input) && input.CurrentContext == InputContext.Dialog && input.Controls.Dialog.enabled)
                         foreach (var option in presenter.Model.Options)
                             if (option.Text == text && option.Enabled) return Number(option.Number);
                     return Number(0);
