@@ -33,6 +33,7 @@ namespace Game.Voxel.Grid
         [NativeDisableParallelForRestriction] public ComponentLookup<Parent> Parents;
         [NativeDisableParallelForRestriction] public ComponentLookup<MaterialMeshInfo> MeshInfo;
         [NativeDisableParallelForRestriction] public ComponentLookup<RenderBounds> RenderBounds;
+        [NativeDisableParallelForRestriction] public ComponentLookup<Game.Voxel.Rendering.PropLayer> Layers;
         public void Execute(int i)
         {
             Entity e = Entities[i]; int index = Indices[i]; var instance = Instances[index];
@@ -42,6 +43,7 @@ namespace Game.Voxel.Grid
             Parents[e] = new Parent { Value = Root };
             if (Render == 0) return;
             int mesh = Blocks.Value.Blocks[instance.Block].PropMeshIndex;
+            Layers[e] = new Game.Voxel.Rendering.PropLayer { Value = Blocks.Value.Blocks[instance.Block].MaterialLayer };
             bool valid = (uint)mesh < (uint)Meshes.Length;
             if (valid)
             {

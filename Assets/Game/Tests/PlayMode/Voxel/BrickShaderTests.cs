@@ -56,9 +56,13 @@ namespace Game.Tests.PlayMode.Voxel
             for (int i = 0; i < 64; i++) masks.SetPixels(new[] { new Color(0, 0, 1, 0) }, i);
             masks.Apply();
             var propMask = Own(Flat(new Color(0, 0, 1, 0)));
+            // The REN-008 contract is checked on bare layers: QA-001's NOCTURNE plating rows (2/3) stay zero here.
+            var layerParams = Own(new Texture2D(64, 4, TextureFormat.RGBAHalf, false, true) { filterMode = FilterMode.Point });
+            for (int x = 0; x < 64; x++) for (int y = 0; y < 4; y++) layerParams.SetPixel(x, y, y == 1 ? new Color(1, 1, 1, 0) : Color.clear);
+            layerParams.Apply();
             foreach (var material in new[] { brickMaterial, propMaterial })
             {
-                material.enableInstancing = true; material.SetTexture("_PaintPalette", palette);
+                material.enableInstancing = true; material.SetTexture("_PaintPalette", palette); material.SetTexture("_BrickLayerParams", layerParams);
                 material.SetTexture("_BrickMaskArray", masks); material.SetTexture("_DamageRamp", Texture2D.whiteTexture);
                 material.SetFloat("_MacroStrength", 0); material.SetFloat("_ScorchStrength", 0); material.SetFloat("_AOStrength", 1);
                 material.SetFloat("_EmissiveIntensity", 0); material.SetFloat("_EmberIntensity", 0); material.SetFloat("_RimStrength", 0); material.SetFloat("_SeamEmission", 0);

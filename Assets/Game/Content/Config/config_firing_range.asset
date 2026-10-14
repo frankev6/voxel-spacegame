@@ -21,14 +21,14 @@ MonoBehaviour:
   reactor: {fileID: 11400000, guid: 1953086de6a6a4793a031810332c3d68, type: 2}
   cargo: {fileID: 11400000, guid: e359aa29e6b064108934b2dac57ec713, type: 2}
   thruster: {fileID: 11400000, guid: cd36367c9f3b348ac98cb9f0288f95c7, type: 2}
-  hullColor: 15
-  bridgeColor: 13
+  hullColor: 0
+  bridgeColor: 18
   moduleColor: 10
   targetCellSize: 1
   stationScale: 3
   targetOffset: {x: 0, y: -2, z: 45}
   targetYaw: 0
-  autoSpawnInWorld: 1
+  autoSpawnInWorld: 0
   tracerMaterial: {fileID: 2100000, guid: 5f9e0d702d3b49b4920f4f6470f5c494, type: 2}
   tracerLength: 5
   tracerWidth: 0.3

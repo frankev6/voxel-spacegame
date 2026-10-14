@@ -21,10 +21,12 @@ MonoBehaviour:
   basePrice: 150
   maxStack: 999
   icon: {fileID: -527274513, guid: f8a50dec0611c624ca8569633b602306, type: 3}
+  tradeable: 1
   kind: 2
   shape: 0
   cells:
   - {x: 0, y: 0, z: 0}
+  shapes: 
   clearance: []
   allowedOrientations:
     Bits: 16777215
@@ -34,11 +36,12 @@ MonoBehaviour:
   functionHp: 200
   cellMass: 20
   armorClass: 0
-  materialLayer: 0
+  materialLayer: 7
   propMesh: {fileID: 8210001044619210013, guid: 63a3bcd06c5b4114096dfe9e982274e0, type: 3}
   blockCategory: 7
   modules:
   - rid: 7
+  grantedAbilities: []
   references:
     version: 2
     RefIds:

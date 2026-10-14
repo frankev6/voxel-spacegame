@@ -3,6 +3,7 @@
 #define GAME_BRICK_SURFACE_INCLUDED
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "BrickMaterial.hlsl"
+#include "NocturnePlating.hlsl"
 
 struct BrickSurfaceInput
 {
@@ -11,6 +12,7 @@ struct BrickSurfaceInput
     float2 uv;
     uint layer, colour, damage, scorched;
     float ao;
+    float3 faceNormal;   // grid-space face normal (QA-001 plating); positionCells and uv are grid-local
 };
 float BrickHash(float2 p)
 {
@@ -37,13 +39,34 @@ void BrickSurface(BrickSurfaceInput i, inout SurfaceData s)
     half dissolve = BrickDissolve(i.uv);
     half4 p0 = LOAD_TEXTURE2D(_BrickLayerParams, int2(i.layer, 0));
     half4 p1 = LOAD_TEXTURE2D(_BrickLayerParams, int2(i.layer, 1));
+    // QA-001 rows 2/3 (absent in older 64 x 2 bakes, which load zero = no plating):
+    // r style, g window density, b relief, a function colour override; row 3 rgb override colour (linear), a metallic.
+    half4 p2 = LOAD_TEXTURE2D(_BrickLayerParams, int2(i.layer, 2));
+    half4 p3 = LOAD_TEXTURE2D(_BrickLayerParams, int2(i.layer, 3));
+    int style = (int)round(p2.r);
     float2 uv = i.uv / max(1, round(p1.r));
     half3 albedo = SAMPLE_TEXTURE2D_ARRAY(_BrickAlbedoArray, sampler_BrickAlbedoArray, uv, i.layer).rgb;
     half4 mask = SAMPLE_TEXTURE2D_ARRAY(_BrickMaskArray, sampler_BrickMaskArray, uv, i.layer);
     half2 nxy = SAMPLE_TEXTURE2D_ARRAY(_BrickNormalArray, sampler_BrickNormalArray, uv, i.layer).rg * 2 - 1;
     s.normalTS = half3(nxy, sqrt(saturate(1 - dot(nxy, nxy))));
     half mean = Luminance(SAMPLE_TEXTURE2D_ARRAY_LOD(_BrickAlbedoArray, sampler_BrickAlbedoArray, uv, i.layer, 8).rgb);
-    albedo = lerp(albedo, BrickPaint(i.colour) * Luminance(albedo) / max(mean, .02h), mask.b);
+    half3 paint = p2.a > .5h ? p3.rgb : BrickPaint(i.colour);
+    albedo = lerp(albedo, paint * Luminance(albedo) / max(mean, .02h), mask.b);
+    PlatingResult plating = (PlatingResult)0;
+    if (style > 0)
+    {
+        float3 n = normalize(i.faceNormal);
+        float faceId = dot(abs(n), float3(1, 2, 3)) * 31 + round(dot(i.positionCells, n) * 2);
+        plating = NocturnePlating(i.uv, i.positionCells, n, faceId, style, p2.g, p2.b, i.layer * 1.7);
+        albedo = paint * (Luminance(albedo) / max(mean, .02h)) * plating.tone;
+        if (plating.stripe > .5h) albedo = plating.stripe > 1.5h ? half3(.49, .37, .13) : half3(.012, .013, .011);
+        s.normalTS = normalize(half3(s.normalTS.xy * .35h + plating.normalTS.xy, s.normalTS.z * plating.normalTS.z));
+        albedo *= 1 - .7h * plating.seam;
+        albedo = lerp(albedo, half3(.006, .007, .008), plating.glass);
+        mask.r = p3.a; mask.g = .38h + plating.smoothness;
+        albedo = lerp(albedo, half3(.36, .36, .35), plating.bare * .85h);
+        mask.r = lerp(mask.r, 1, plating.bare); mask.g = lerp(mask.g, .6h, plating.bare);
+    }
     half macro = SAMPLE_TEXTURE2D(_MacroNoiseTex, sampler_MacroNoiseTex, i.uv / max(_MacroScale, 1)).r;
     albedo *= 1 + (macro - .5h) * 2 * _MacroStrength;
     uint stage = min(i.damage, 3u);
@@ -81,7 +104,7 @@ void BrickSurface(BrickSurfaceInput i, inout SurfaceData s)
     half fresnel = 1 - saturate(dot(normalWS, GetWorldSpaceNormalizeViewDir(i.positionWS)));
     half powered = Brick_GridPowered();
     half3 layerEmission = p0.a > .5 ? Brick_TeamAccent().rgb * max(p0.r, max(p0.g, p0.b)) : p0.rgb;
-    s.emission = layerEmission * mask.a * _EmissiveIntensity * powered;
+    s.emission = layerEmission * (mask.a + plating.emission) * _EmissiveIntensity * powered;
     if (_SeamEmission > 0 && i.layer < 16)
     {
         float2 panel = frac(uv); float d = min(min(panel.x, 1 - panel.x), min(panel.y, 1 - panel.y));

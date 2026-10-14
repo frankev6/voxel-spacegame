@@ -28,9 +28,9 @@
             float _LastHitTime;
             float4 _Highlight;
             float _Dissolve01;
-            float _FunctionPaint, _Damage01, _Powered, _Throttle;
+            float _FunctionPaint, _Damage01, _Powered, _Throttle, _PropLayer;
             // Editor overrides must retain an SRP-compatible fallback for live Entities Graphics props.
-            float _DraftPaintIndex, _DraftSliceEnabled, _DraftSliceTop;
+            float _DraftPaintIndex, _DraftSliceEnabled, _DraftSliceTop, _DraftCellsValid;
             float4x4 _DraftWorldToCells;
         CBUFFER_END
 
@@ -61,6 +61,7 @@ UNITY_DOTS_INSTANCING_START(MaterialPropertyMetadata)
     UNITY_DOTS_INSTANCED_PROP(float, _Damage01)
     UNITY_DOTS_INSTANCED_PROP(float, _Powered)
     UNITY_DOTS_INSTANCED_PROP(float, _Throttle)
+    UNITY_DOTS_INSTANCED_PROP(float, _PropLayer)
 UNITY_DOTS_INSTANCING_END(MaterialPropertyMetadata)
 #endif
 float4 Brick_TeamPrimary()
@@ -117,6 +118,14 @@ float Brick_Dissolve01()
     return UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float, _Dissolve01);
 #else
     return _Dissolve01;
+#endif
+}
+float Brick_PropLayer()
+{
+#if defined(UNITY_DOTS_INSTANCING_ENABLED)
+    return UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float, _PropLayer);
+#else
+    return _PropLayer;
 #endif
 }
 float Brick_FunctionPaint()

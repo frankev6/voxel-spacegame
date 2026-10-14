@@ -47,6 +47,8 @@ Shader "Game/Voxel/BrickLit"
         _LastHitTime ("Last hit time (_Time.y)", Float) = -100000
         _Highlight ("Highlight (rgb, strength)", Vector) = (0, 0, 0, 0)
         _Dissolve01 ("Dissolve", Range(0, 1)) = 0
+        // QA-001: set only by the editor draft with _DraftWorldToCells; declared so every other material reads 0.
+        [HideInInspector] _DraftCellsValid ("Draft cells valid", Float) = 0
     }
 
     SubShader
@@ -67,6 +69,7 @@ Shader "Game/Voxel/BrickLit"
             float3 tangentWS:TEXCOORD3;
             float3 bitangentWS:TEXCOORD4;
             float2 uv:TEXCOORD5;
+            nointerpolation float3 faceNormal:TEXCOORD8;
             nointerpolation uint4 attributes:TEXCOORD6;
             float ao:TEXCOORD7;
             UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -77,12 +80,14 @@ Shader "Game/Voxel/BrickLit"
             BrickVaryings o = (BrickVaryings)0;
             UNITY_SETUP_INSTANCE_ID(a); UNITY_TRANSFER_INSTANCE_ID(a,o); UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
             BrickVertex b = DecodeBrickVertex(a.position,a.attributes);
-            o.positionCells=b.positionCells; o.positionWS=TransformObjectToWorld(b.positionCells);
+            o.positionWS=TransformObjectToWorld(b.positionCells);
+            // QA-001: the editor draft supplies its world-to-grid-cells matrix so plating is continuous across bricks.
+            o.positionCells=_DraftCellsValid>.5?mul(_DraftWorldToCells,float4(o.positionWS,1)).xyz:b.positionCells;
             o.positionCS=TransformWorldToHClip(o.positionWS);
-            float3 n=kBrickNormals[b.normalIndex], t=kBrickTangents[b.normalIndex];
+            float3 n=kBrickNormals[b.normalIndex], t=kBrickTangents[b.normalIndex]; o.faceNormal=n;
             o.normalWS=TransformObjectToWorldNormal(n); o.tangentWS=TransformObjectToWorldDir(t);
             o.bitangentWS=TransformObjectToWorldDir(cross(n,t));
-            o.uv=BrickFaceUV(b.positionCells,b.normalIndex,1);
+            o.uv=BrickFaceUV(o.positionCells,b.normalIndex,1);
             o.attributes=uint4(b.layer,b.colour,b.damage,b.scorched); o.ao=b.ao;
             return o;
         }
@@ -92,6 +97,7 @@ Shader "Game/Voxel/BrickLit"
             i.positionCells=v.positionCells; i.positionWS=v.positionWS; i.positionCS=v.positionCS;
             i.normalWS=normalize(v.normalWS); i.tangentWS=normalize(v.tangentWS); i.bitangentWS=normalize(v.bitangentWS);
             i.uv=v.uv; i.layer=v.attributes.x; i.colour=v.attributes.y; i.damage=v.attributes.z; i.scorched=v.attributes.w; i.ao=v.ao;
+            i.faceNormal=v.faceNormal;
             return i;
         }
         half4 BrickFrag(BrickVaryings v):SV_Target

@@ -32,6 +32,7 @@ namespace Game.ShipEditor.Rendering
         readonly Matrix4x4[] drawMatrices = new Matrix4x4[500];
         readonly float[] drawPaint = new float[500];
         readonly MaterialPropertyBlock propProperties = new();
+        readonly MaterialPropertyBlock brickProperties = new();
         bool disposed, sliceEnabled;
         bool rebuildProps;
         int sliceLevel;
@@ -161,8 +162,11 @@ namespace Game.ShipEditor.Rendering
             UpdateMeshes(); using var marker = draw.Auto();
             var material = XRay ? xrayMaterial : brickMaterial;
             if (material == null) throw new InvalidOperationException("EDT: draft rendering requires its configured shared material.");
-            var parameters = new RenderParams(material) { camera = camera };
             float cellSize = session.Draft.CellSize;
+            // QA-001: the brick shader plates the hull in grid cells; per-brick meshes carry brick-local positions only.
+            brickProperties.SetMatrix("_DraftWorldToCells", Matrix4x4.Scale(Vector3.one / cellSize) * GridToWorld.inverse);
+            brickProperties.SetFloat("_DraftCellsValid", 1);
+            var parameters = new RenderParams(material) { camera = camera, matProps = brickProperties };
             foreach (var entry in slots)
             {
                 var slot = entry.Value;

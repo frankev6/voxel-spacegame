@@ -55,6 +55,7 @@ Shader "Game/Voxel/PropInstanced"
         _Damage01("Damage fraction",Range(0,1))=0
         _Powered("Powered",Range(0,1))=1
         _Throttle("Throttle",Range(0,1))=0
+        _PropLayer("Material layer (functional props)",Float)=0
         [HideInInspector] _DraftPaintIndex("Draft paint index",Float)=0
         [HideInInspector] _DraftSliceEnabled("Draft slice enabled",Float)=0
         [HideInInspector] _DraftSliceTop("Draft slice top",Float)=0
@@ -89,6 +90,7 @@ Shader "Game/Voxel/PropInstanced"
             float3 normalWS:TEXCOORD1; float3 tangentWS:TEXCOORD2; float3 bitangentWS:TEXCOORD3;
             float2 uv:TEXCOORD4; float4 paint:TEXCOORD5; float blink:TEXCOORD6;
             nointerpolation uint colour:TEXCOORD7;
+            float3 objectPos:TEXCOORD8; float3 objectNormal:TEXCOORD9;
             UNITY_VERTEX_INPUT_INSTANCE_ID
             UNITY_VERTEX_OUTPUT_STEREO
         };
@@ -114,6 +116,7 @@ Shader "Game/Voxel/PropInstanced"
             o.colour=(uint)UNITY_ACCESS_INSTANCED_PROP(DraftProps, _DraftPaintIndex);
 #endif
             o.positionCS=TransformWorldToHClip(o.positionWS); o.uv=a.uv; o.paint=a.paint; o.blink=a.blink.x;
+            o.objectPos=a.position; o.objectNormal=a.normal;
             return o;
         }
         void DraftSliceClip(PropVaryings v)
@@ -148,9 +151,26 @@ Shader "Game/Voxel/PropInstanced"
             }
             SurfaceData s=(SurfaceData)0; s.albedo=albedo; s.metallic=mask.r; s.smoothness=saturate(mask.g-.1h*min(stage,1u));
             s.normalTS=half3(nxy,sqrt(saturate(1-dot(nxy,nxy)))); s.occlusion=1; s.alpha=1;
+            // QA-001: functional props take their layer's machinery look (function colour, metal, plated detail, glow slots)
+            // in mesh space; the legacy meshes carry no paint channels, so their summed paint weights read as white.
+            uint layer=(uint)round(Brick_PropLayer());
+            half4 l2=LOAD_TEXTURE2D(_BrickLayerParams,int2(layer,2)), l3=LOAD_TEXTURE2D(_BrickLayerParams,int2(layer,3));
+            half glowSlot=0;
+            if(l2.r>.5h)
+            {
+                float3 on=normalize(v.objectNormal), an=abs(on);
+                float2 puv=(an.x>an.y&&an.x>an.z?v.objectPos.zy:an.y>an.z?v.objectPos.xz:v.objectPos.xy)*2.5;
+                PlatingResult pl=NocturnePlating(puv,v.objectPos*2.5,on,dot(an,float3(1,2,3)),3,0,l2.b,layer*1.7);
+                half3 tint=l2.a>.5h?l3.rgb:BrickPaint(v.colour);
+                s.albedo=tint*pl.tone*(1-.7h*pl.seam); s.albedo=lerp(s.albedo,half3(.36,.36,.35),pl.bare*.85h);
+                s.metallic=lerp(l3.a,1,pl.bare); s.smoothness=.42h+pl.smoothness;
+                half3 bump=normalize(half3(pl.normalTS.xy,1)); s.normalTS=normalize(half3(s.normalTS.xy*.3h+bump.xy,s.normalTS.z*bump.z));
+                glowSlot=pl.emission;
+            }
             half blink=v.blink<=0 ? 1 : step(frac(_Time.y-v.blink),.1);
             half powered=Brick_Powered();
             s.emission=Brick_TeamAccent().rgb*mask.a*_EmissiveIntensity*powered*blink*(1+Brick_Throttle());
+            s.emission+=LOAD_TEXTURE2D(_BrickLayerParams,int2(layer,0)).rgb*glowSlot*_EmissiveIntensity*powered*(.6+Brick_Throttle());
             half fade=_EmberFadeSeconds>0 ? saturate(1-(_Time.y-Brick_LastHitTime())/_EmberFadeSeconds) : 0;
             s.emission+=_EmberColor.rgb*_EmberIntensity*(fade*crack*(stage==3 ? 1 : .35)+dissolve);
             float3 n=normalize(s.normalTS.x*v.tangentWS+s.normalTS.y*v.bitangentWS+s.normalTS.z*v.normalWS);

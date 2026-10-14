@@ -551,7 +551,7 @@ namespace Game.Voxel.Grid
                     foreach (var r in em.GetBuffer<FunctionalComponentRegistration>(singletons))
                         if ((r.Module == BlockModuleId.None || (group.Key & (1UL << (int)r.Module)) != 0) && !types.Contains(r.Type)) types.Add(r.Type);
                     prototype = em.CreateEntity(em.CreateArchetype(types.ToArray()));
-                    if (render) AddRender(em, prototype, runtime.PropMaterial, runtime.PlaceholderMesh);
+                    if (render) { AddRender(em, prototype, runtime.PropMaterial, runtime.PlaceholderMesh); em.AddComponent<Game.Voxel.Rendering.PropLayer>(prototype); }
                     map[group.Key] = prototype;
                 }
                 using var indices = new NativeArray<int>(group.Value.ToArray(), Allocator.TempJob);
@@ -565,7 +565,8 @@ namespace Game.Voxel.Grid
                     Render = (byte)(render ? 1 : 0), Material = runtime.PropMaterial,
                     Meshes = render ? runtime.PropMeshIds : emptyMeshes, Bounds = render ? runtime.PropMeshBounds : emptyBounds,
                     Functional = SystemAPI.GetComponentLookup<FunctionalBlock>(), Transforms = SystemAPI.GetComponentLookup<LocalTransform>(), Parents = SystemAPI.GetComponentLookup<Parent>(),
-                    MeshInfo = SystemAPI.GetComponentLookup<MaterialMeshInfo>(), RenderBounds = SystemAPI.GetComponentLookup<RenderBounds>()
+                    MeshInfo = SystemAPI.GetComponentLookup<MaterialMeshInfo>(), RenderBounds = SystemAPI.GetComponentLookup<RenderBounds>(),
+                    Layers = SystemAPI.GetComponentLookup<Game.Voxel.Rendering.PropLayer>()
                 }.Schedule(entities.Length, 8).Complete();
                 new LinkCreatedJob
                 {

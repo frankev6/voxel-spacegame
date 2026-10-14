@@ -39,7 +39,7 @@ MonoBehaviour:
   functionHp: 400
   cellMass: 35
   armorClass: 0
-  materialLayer: 0
+  materialLayer: 4
   propMesh: {fileID: 571540578178205670, guid: 4db76e41d19377c438038c4f6150b3be, type: 3}
   blockCategory: 4
   modules:

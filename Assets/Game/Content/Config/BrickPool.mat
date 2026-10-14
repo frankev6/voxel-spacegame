@@ -61,7 +61,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AOStrength: 0.6
+    - _AOStrength: 0.75
     - _CrackTiling: 2
     - _Dissolve01: 0
     - _EmberFadeSeconds: 8
@@ -71,7 +71,7 @@ Material:
     - _HalftoneScale: 0
     - _LastHitTime: -100000
     - _MacroScale: 64
-    - _MacroStrength: 0.03
+    - _MacroStrength: 0.025
     - _RimStrength: 0
     - _ScorchStrength: 0.6
     - _SeamEmission: 0
@@ -79,14 +79,14 @@ Material:
     - _SeamFadeStart: 0
     - _ShadingMode: 0
     m_Colors:
-    - _AOColor: {r: 0, g: 0, b: 0, a: 1}
+    - _AOColor: {r: 0.050980393, g: 0.05490196, b: 0.047058824, a: 1}
     - _EmberColor: {r: 1, g: 0.41568628, b: 0.16470589, a: 1}
     - _ExposedLayers: {r: 16, g: 17, b: 18, a: 3}
     - _Highlight: {r: 0, g: 0, b: 0, a: 0}
     - _RimColor: {r: 0.561, g: 0.651, b: 0.784, a: 1}
     - _ScorchColor: {r: 0.0392, g: 0.043099977, b: 0.054899976, a: 1}
     - _TeamAccent: {r: 0.44520125, g: 0.04231141, b: 0.023153365, a: 1}
-    - _TeamPrimary: {r: 0.39157256, g: 0.27889434, b: 0.11697067, a: 1}
-    - _TeamSecondary: {r: 0.034339808, g: 0.036889445, b: 0.028426038, a: 1}
+    - _TeamPrimary: {r: 0.3662527, g: 0.37123778, b: 0.33245158, a: 1}
+    - _TeamSecondary: {r: 0.39157256, g: 0.27889434, b: 0.11697067, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

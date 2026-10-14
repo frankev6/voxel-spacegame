@@ -33,7 +33,14 @@ namespace Game.Voxel.Rendering
             // Applied handles are unique per brick. Only live bricks participate; deleted slots retire before submission.
             [NativeDisableParallelForRestriction] public NativeArray<float4x4> Matrices;
             void Execute(in Game.Voxel.Model.Brick brick, in BrickRenderState render, in LocalToWorld transform)
-            { if (render.HasMesh != 0) Matrices[render.Handle.Slot] = transform.Value; }
+            {
+                if (render.HasMesh == 0) return;
+                // QA-001: the affine matrix's bottom row is unused by every consumer (positions take .xyz); it carries the
+                // brick's grid cell offset so the shader can plate the hull continuously across bricks.
+                var matrix = transform.Value; float3 offset = (float3)(brick.Coord * 16);
+                matrix.c0.w = offset.x; matrix.c1.w = offset.y; matrix.c2.w = offset.z;
+                Matrices[render.Handle.Slot] = matrix;
+            }
         }
     }
 }

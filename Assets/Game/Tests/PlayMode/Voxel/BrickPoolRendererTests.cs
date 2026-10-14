@@ -98,6 +98,10 @@ namespace Game.Tests.PlayMode.Voxel
             previousAmbientMode = RenderSettings.ambientMode; previousAmbient = RenderSettings.ambientLight; previousReflection = RenderSettings.reflectionIntensity;
             RenderSettings.ambientMode = AmbientMode.Flat; RenderSettings.ambientLight = Color.black; RenderSettings.reflectionIntensity = 0;
             reference = Own(new Material(AssetDatabase.LoadAssetAtPath<Material>("Assets/Game/Art/_Placeholder/Materials/BrickPlaceholder.mat")));
+            // Pool/registered parity is checked on bare layers; QA-001's NOCTURNE plating rows (2/3) stay zero here.
+            var layerParams = Own(new Texture2D(64, 4, TextureFormat.RGBAHalf, false, true) { filterMode = FilterMode.Point });
+            for (int x = 0; x < 64; x++) for (int y = 0; y < 4; y++) layerParams.SetPixel(x, y, y == 1 ? new Color(1, 1, 1, 0) : Color.clear);
+            layerParams.Apply(); reference.SetTexture("_BrickLayerParams", layerParams);
             indirect = Own(new Material(reference) { shader = Shader.Find("Game/Voxel/BrickLitIndirect") }); Assert.IsNotNull(indirect.shader);
             copy = AssetDatabase.LoadAssetAtPath<ComputeShader>("Assets/Game/Voxel/Rendering/Shaders/BrickPoolCopy.compute");
             target = Own(new RenderTexture(perf ? 1920 : 384, perf ? 1080 : 256, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear)); target.Create();
