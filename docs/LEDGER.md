@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 48 | 16 | 0 | 0 | 118 | 0 | 182 | 6 |
+| M3 | 48 | 12 | 0 | 0 | 122 | 0 | 182 | 8 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -331,7 +331,7 @@
 | GAL-010 | GLXY save participant | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | frontier | GAL-007, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | 54ebbf3d | GLXY capture/restore and immutable v1 fixture d481a047; compile clean, four required checks passed across focused run and repaired-log case. App registration remains session integration. |
 | GAL-011 | Galaxy map model | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | a229844 | Visibility/revisions and real app registration; four required checks passed0.228s, clean compile. Travel/ownership defaults per spec until their services exist. |
 | GAL-012 | M3 galaxy content | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-003, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | b584a451 | Production galaxy, body/tag/turret/gate and lane/fact smoke: 3 required GPU PlayMode cases pass; Q429 |
-| GAL-013 | Performance gates | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-005, GAL-006, GAL-009, GAL-011, TST-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Required advisory fixtures only; no tuning or Unity worker runs |
+| GAL-013 | Performance gates | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M3 | standard | GAL-005, GAL-006, GAL-009, GAL-011, TST-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 20e18b8a | Two specified advisory fixtures authored and compiled; 50/2/0.5 ms records retained. Measurements explicitly deferred under fast-validation policy, no tuning. |
 | SYS-001 | Public contract types | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | CORE-001, DATA-001, GAL-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e738e71 | Streaming contracts and service shells; 2 required tests; full batch green |
 | SYS-002 | Streaming config and boot singleton | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 7244be6 | Config validation/factory, boot singleton and catalog asset; 2 required tests; full suites green |
 | SYS-003 | Structure builders | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, SPEC-10 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 971ae0b7 | Deterministic shape/asteroid builders;4 focused tests pass; Q307 |
@@ -360,9 +360,9 @@
 | TRV-012 | Jump integration, R30 regression and budget | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-009, TRV-011, TST-001 | no | todo |  |  |  |  |
 | ENC-001 | Public contract types | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, TRV-001, WPN-001, AI-001, NAR-001, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 101ff7b | Encounter contracts and faction event channel; 2 required tests; runtime ENC-002 onward remains |
 | ENC-002 | Definitions, config and validators | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 40501eb0 | 31 validator checks pass; config and locked ARK generated; remaining encounter content stays ENC-010 |
-| ENC-003 | Faction singleton, index map and FactionStandingSystem | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-002, WPN-012, DMG-015, AI-010 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Faction runtime to unblock territory and real merchant refusal; isolated lead worktree preserves live game |
-| ENC-004 | FactionService and FACN | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-003, PERS-001, FND-001 | no | todo |  |  |  |  |
-| ENC-005 | TerritoryService (authored ownership) | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-30 | no | todo |  |  |  |  |
+| ENC-003 | Faction singleton, index map and FactionStandingSystem | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-002, WPN-012, DMG-015, AI-010 | yes | done | astra (gpt-6) | 2026-10-14 | a2467740 | Canonical boot matrix/index map and scheduled request/provocation writer; eight required functional checks pass; advisory 200-grid fixture authored, measurement deferred. Next ENC-004 owns reset/save. |
+| ENC-004 | FactionService and FACN | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-003, PERS-001, FND-001 | yes | todo |  |  |  |  |
+| ENC-005 | TerritoryService (authored ownership) | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-30 | yes | todo |  |  |  |  |
 | ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, GAL-006, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 21d0996b | Full ordered seeded composition, clearance placement and line-abreast formation; 9 required cases pass. Director cap remains ENC-007. |
 | ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SPEC-31, SPEC-32, SPEC-23 | no | todo |  |  |  |  |
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | no | todo |  |  |  |  |
@@ -421,7 +421,7 @@
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-011, ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c0f0c244 | 17 assets plus existing Scrap; real catalog/readback zero errors; two required checks pass; three existing quest-item warnings retained |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
-| ECO-011 | Merchant directory and fleet cargo capacity | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, GAL-008, FND-010 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Independent directory/cargo work extracted from ECO-008; launcher waits for real factions |
+| ECO-011 | Merchant directory and fleet cargo capacity | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, GAL-008, FND-010 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | a8f76a68 | Real authored-first merchant directory and fleet-driven cargo capacity registered; three transferred required cases pass. |
 | EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 9c627fd | Editor contracts/config; 4 required tests; runtime tools remain EDT-002 onward |
 | EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-13 | 0089c35c | Context/rotated footprints/item tables accepted; five required cases pass; ADR-0081/Q380. |
 | EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-13 | 2d3181ff | Atomic draft adapters, native canonical hash/enumeration and exact damage restore; four required cases pass, including negative HP/shared origins. |
@@ -469,7 +469,7 @@
 | HUD-015 | MapCanvas control | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-62 | no | todo |  |  |  |  |
 | HUD-016 | Galaxy map and star-system map screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-015, SPEC-30, SPEC-31, TRV-001, QST-001 | no | todo |  |  |  |  |
 | HUD-017 | Fleet screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, FND-010, SYS-008, EDT-001, EDT-010 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Complete fleet view/presenter; actual edit launcher remains EDT-023, flagship switching unavailable |
-| HUD-018 | Ship editor host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, EDT-001, EDT-021 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | partial in HUD-002: root view-model binding and Back command routing / editor screen and acceptance remain |
+| HUD-018 | Ship editor host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, EDT-001, EDT-021 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 46d844de | Four-region editor host mounts accepted panels; four required graphics cases pass. Playable editor launcher remains EDT-023/HUD-002. |
 | HUD-019 | Loading and dock screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-010, SYS-001, ECO-001, EDT-001 | no | todo |  |  |  | partial in HUD-002: loading view, progress presenter and UXML / composition polling, dock screen and full acceptance remain |
 | HUD-020 | Full-screen layout regression suite | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-003, HUD-004, HUD-005, HUD-006, HUD-007, HUD-011, HUD-012, HUD-013, HUD-014, HUD-016, HUD-017, HUD-018, HUD-019 | no | todo |  |  |  |  |
 | CAM-006 | Origin warp and teleport cut | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, GAL-001 | yes | done | astra (gpt-6) | 2026-10-13 | 710a668 | Origin warp preserves framing and residual teleport cuts; five required tests; full 1051 EM /146 PM passed. |
@@ -1036,6 +1036,10 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 434 | SPEC-33 Q18: faction runtime prerequisites | Resolved: ADR-0068 concrete completed runtime prerequisites; no performance/balance gate. | Tech lead |
 | 435 | SPEC-61 Q34: dialog host prerequisites | Resolved: concrete completed UI and command contracts, actual narrative driver remains SPEC-41. | Tech lead |
 | 436 | SPEC-61 Q36: fleet view prerequisites/action limits | Resolved: real fleet/docking/stats and existing launcher contract; no fake edit success or invented flagship writer. | Tech lead |
+| 437 | SPEC-33 Q19: native matrix write safety and ordering | Resolved: explicit native writer plus RW component lookup, correct OrderFirst ordering and custom allocator API; no main-thread completion. | Tech lead |
+| 438 | SPEC-61 Q35: editor host construction | Resolved: existing public constructor, exact owning navigator root and four authored panel regions; four acceptance cases pass. | Tech lead |
+| 439 | SPEC-30 Q38: advisory galaxy fixtures | Resolved: real generation/deltas and separate unchanged budgets; compiled, measurements deferred without tuning. | Tech lead |
+| 440 | SPEC-50 Q28: directory/capacity ownership | Resolved: authored-first real body lookup and fleet/reset-driven cargo capacity; three transferred cases pass. | Tech lead |
 
 ## Measurements
 
@@ -1146,6 +1150,15 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — ENC-003 faction runtime and compatible cargo/editor delivery — astra (gpt-6)
+
+- Implemented faction indices, canonical six-faction boot matrix/standings, queued relation changes and rate-limited previous-tick player-damage provocation. Integrated58484025, validated/fixeda2467740. Real reader test caught nested matrix read-only safety after a prior job: pass explicit writable native matrix while retaining RW component dependency; correct OrderFirst bucket and allocator API. No main-thread Complete in the production writer. Initial six allocator failures and subsequent reader failure resolved; one early rerun used stale Editor assemblies, corrected by explicit recompile.
+- Playable fix: playground combat previously spawned only team2 with no faction, so the AI relation predicate did not consider it hostile. Combat now uses the actual locked Raider faction and the registered canonical index map. Extended the existing owner-feature case to assert true hostility; no additional test method. Controls, station and environment preserved.
+- Accepted ECO-011a8f76a68 (workere18e77b2): real merchant body lookup and committed-fleet cargo capacity, production registration/lifetime. Accepted HUD-01846d844de (workerd099f07): complete four-region editor view; actual editor opening still depends on EDT-023/HUD-002. GAL-01320e18b8a (worker3f5265e0) supplies the two required compiled advisory fixtures; measurements deferred, original budgets and records retained, no optimization passes.
+- Final evidence `Logs/playtest/faction-integration/`: faction.xml eight passed (0.43s), economy.xml three passed (0.53s), graphics batch.xml five passed (1.026s), no failures/skips; durations are test execution, excluding startup. Compile zero CS warnings. ENC-003 spec-required:8 functional +1 advisory unmeasured, extra:0; ECO-011 spec-required:3, extra:0; HUD-018 spec-required:4, extra:0; DEV-021 existing spec-required:1, extra:0; GAL-013 spec-required:2 advisory compiled/unmeasured, extra:0. No full suite, benchmark or soak run. QualitySettings backed up/restored; owner dirt excluded.
+- Same workers recycled to HUD-013 dialog host and HUD-017 fleet view. ECO-011 worker has a real dependency wait for ENC-004 before territory/merchant refusal work; lead owns that next frontier task. QST-009 delivered source remains blocked on compiled dialogue program. Live Editor was already stopped before integration; no running game interrupted.
+
 
 ### 2026-10-14 — DEV-021 owner-playtest correction: actual access and interactions — astra (gpt-6)
 

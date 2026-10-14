@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ECO-011 | Implement real merchant directory and fleet cargo capacity owners | Full merchant launcher after faction runtime |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | GAL-013 | Implement two specified advisory generation fixtures; QST-009 delivered source awaits dialogue-program prerequisites | Ready standard implementation |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-018 | Implement editor host four-region screen and four required cases | More ready UI integration after delivery |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ECO-011 delivered | Accepted; real dependency wait for ENC-004 before territory/merchant launcher | ENC-005 after faction service |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | HUD-013 | Implement full dialog host view and five required cases; GAL-013 delivered | Ready standard implementation |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-017 | Implement fleet view/presenter and three required cases; actual edit launcher remains EDT-023 | More ready UI integration after delivery |
 
 ## Operating rules
 
@@ -26,3 +26,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - Workers dispatched to ECO-011, GAL-013 and HUD-018, same exact three threads. Lead finishes playground demonstration and keeps incoming screen integration moving; frontier editor/root work remains lead-owned. Preserve the live game after demonstration. No unchanged-state chatter or repeated review-only dispatches.
 
 - Real dependency waits: full ECO-008 launcher and ENC-005 territory need ENC-003/004 faction indices/service (currently throwing); QST-009 source needs actual compiled dialogue program DLG-005/007. No fake owners. Lead next frontier unblock is faction runtime after playground access delivery. ECO-011 extracts usable directory/cargo owners with exactly three existing acceptance cases transferred from ECO-008.
+
+- ENC-003 accepted a2467740; canonical faction runtime and actual Raider hostility in playground, 8 faction +3 cargo +5 playground/editor tests pass. ECO-011/HUD-018 accepted; GAL-013 compiled with advisory measurements deferred. Lead next ENC-004 (service/reset/save) unblocks combat worker ENC-005. Editor was stopped by the time integration began; preserve that state.
