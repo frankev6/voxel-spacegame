@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 22 | 17 | 0 | 0 | 143 | 0 | 182 | 5 |
+| M3 | 22 | 16 | 0 | 0 | 144 | 0 | 182 | 5 |
 | M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -417,7 +417,7 @@
 | ECO-004 | Loot and EconomyService | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003, ECO-005, NAR-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9d457784 | Seeded loot and stable economy lifecycle facade; clean compile, eight required checks pass |
 | ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | f4cae431 | Merchant pricing, stock/restock and trading; eight required checks pass; sale rounding repaired |
 | ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | d3c8b0bc | INVT v1 and boot registration: slots/overflow, wallet, merchant state and missing identities. Q368; four functional cases and eight affected merchant cases pass, production save passes. Advisory capture fixture compiled only. |
-| ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, DMG-012, SYS-008, PHY-013, VOX-014 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead implementing real hulk salvage; concrete runtime dependencies ADR-0104. |
+| ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, DMG-012, SYS-008, PHY-013, VOX-014 | yes | done | astra (gpt-6) | 2026-10-14 | a7a433f2 | Hulk mark/config/yields/partial ledger/despawn; five required functional cases pass, two advisory fixtures deferred. Production service registration ECO-008. |
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-011, ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c0f0c244 | 17 assets plus existing Scrap; real catalog/readback zero errors; two required checks pass; three existing quest-item warnings retained |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
@@ -1078,6 +1078,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 476 | SPEC-42 Q15: beat scheduler edge defaults | ADR-0102 concrete prerequisites; bounded queue refuses incoming work when no Condition entry can be evicted, warns; completion recursion guard/current-count latch; authored-system resolver; preserved internal save state. QST-006/008 retain integration ownership. | Tech lead |
 | 477 | SPEC-70 Q33: bounded islands and spatial overlays | 2M inclusive address-volume cap; 60-draw local-bounds cache; immediate invalidation for target/world/serial/toggle; largest white bounds first; guarded occupied hash buckets within1km. | Tech lead |
 | 478 | SPEC-70 Q34: real input interaction tools | Body lookup by key/name/tag, nearest deterministic target, legal surface offset, actual bound press and matching BodyInteracted success. Shared range circles reserve largest island box budget; no direct interaction calls. | Tech lead |
+| 479 | SPEC-50 Q30: salvage state and rounding | Exact batched hulk snapshot, O(instances) merged deterministic yields, float scrap arithmetic, entity-bound partial state, pending-despawn/reentrant guards, successful-exit/reset cleanup. Boot config created before snapshot; ECO-008 retains service registration. | Tech lead |
 
 ## Measurements
 
@@ -1189,6 +1190,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — ECO-007 salvage runtime accepted — astra (gpt-6)
+
+- a7a433f2 implements batched hulk marking, boot-lifetime EconomyConfigRef, deterministic intact-block/scrap yields, O(instances) first-order merging, partial-transfer ledger, actual grid-owner despawn requests and interaction subscriptions. Pending-despawn/reentrant calls cannot duplicate loot; dead roots are pruned and successful World exits/reset clear state. ADR-0104 supplies concrete prerequisites; Q479 resolves implementation edges. ECO-008 still owns production service registration, so live salvage is not claimed yet.
+- Five required PlayMode cases pass (Logs/playtest/salvage/functional.xml): exact marking exclusions, deterministic three-thruster/5,000-cell100-scrap yield, two-slot partial completion, 30,000-cell refusal, and actual spawned-root despawn. Initial checks caught float promotion producing99 scrap (fixed), fixture missing palette and identical stacked thrusters fitting two slots (fixtures corrected). Final compile clean/zero CS warnings. Test count: spec-required: 7, extra: 0; two advisory fixtures authored, deferred. No full/performance/soak runs.
 
 ### 2026-10-14 — DEV-013/014 compatible tools accepted — astra (gpt-6)
 
