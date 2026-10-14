@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 2 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 27 | 15 | 0 | 0 | 140 | 0 | 182 | 5 |
+| M3 | 26 | 16 | 0 | 0 | 140 | 0 | 182 | 5 |
 | M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -395,7 +395,7 @@
 | DLG-004 | Yarn Spinner 3 compatibility spike | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-002 | yes | todo |  |  |  |  |
 | DLG-005 | GATE: Yarn Spinner adoption | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-004 | no | todo |  |  |  |  |
 | DLG-006 | DialogService, memory and DLGS chunk | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, DLG-003, NAR-011, CORE-003, CORE-007 | yes | done | astra (gpt-6) | 2026-10-13 | 99290d38 | Queued lifecycle, scoped blocking/terminal flow, detour-safe rolls and DLGS; seven direct cases pass; production runner/registration DLG-007; spec-required: 7, extra: 0 |
-| DLG-007 | Production dialog runner (path chosen by DLG-005) | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-005, DLG-006, DLG-003 | no | todo |  |  |  |  |
+| DLG-007 | Production dialog runner (path chosen by DLG-005) | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-006, DLG-003 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead implements documented graph fallback under ADR-0101; Yarn spike/owner gate stay open. |
 | DLG-008 | Dialog presenter | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-006 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b1057490 | Pooled presenter and conditional composition; five direct cases pass; runner DLG-007 and authored view DLG-009 pending; spec-required: 5, extra: 0 |
 | DLG-009 | Dialog view screen | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, UI-001, INP-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | f2f3aa39 | Authored view/input/recycling; four required cases pass across batch and layout retry; spec-required: 4, extra: 0 |
 | DLG-010 | Speakers and illustrations | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 6629f3aa | Metadata integrated; all converted tag IDs resolve. Seven approved portrait/illustration sprites unavailable; remains partial, no new art or owner gate. |
@@ -1073,6 +1073,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 471 | SPEC-33 Q34/Q35: reuse authored wedge and formation fallback | Retain canonical AI-013 asset/GUID; insufficient slots or unavailable index falls back to line abreast; failed leader creates no invalid follower reference. | Tech lead |
 | 472 | SPEC-70 Q32: live debug overlay ownership and traversal | Read-only Burst gathers after tracked jobs, root rendered transforms/300 m range, nested collider leaf traversal, bounded whole-box truncation and host disposal; future overlay types remain explicit pending work. | Tech lead |
 | 473 | SPEC-33 Q36: narrative adapter owner binding | Resolve registered concrete faction/territory/loader/director owners in existing constructor; preserve editor route and canonical bridge notifications; no duplicate subscriptions. | Tech lead |
+| 474 | SPEC-41 Q22: pending Yarn gate and playable dialogue | ADR-0101 uses the documented fallback now; actual spike and owner adoption remain open. Same format/interface and eleven conformance checks retained. | Tech lead |
 
 ## Measurements
 

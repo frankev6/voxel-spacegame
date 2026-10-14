@@ -656,7 +656,8 @@ sequenceDiagram
 ### DLG-007 — Production dialog runner (path chosen by DLG-005)
 - **Milestone:** M3
 - **Tier:** frontier — F1/F3: the engine every dialog runs on; package integration or an interpreter
-- **Depends on:** `DLG-005`, `DLG-006`, `DLG-003`
+- **Depends on:** `DLG-006`, `DLG-003`
+- **Sequencing:** ADR-0101 uses the documented fallback while DLG-005 remains pending; no owner decision is inferred.
 - **Do:** **If Yarn was approved:** add the package at the ADR version, edit `Game.Narrative.asmdef` (references + `GAME_YARN` version define), implement `YarnDialogRunner`, `FactVariableStorage`, `YarnLogicBindings` + `YarnBindingGenerator` (§5.4), add `yarnProject` to `NarrativeConfigDefinition`. **If Yarn was rejected:** implement `DialogProgramCompiler` (editor) and `GraphDialogRunner` (§5.5) and generate `dialog_program.asset`. Either way, extend `NarrativeBootstrap` (SPEC-40) to construct the chosen runner, `DialogCommandTable`, `DialogMemory`, `DialogService` and register `DialogSaveParticipant`.
 - **Files:** Yarn: `Assets/Game/Narrative/Dialog/Yarn/{YarnDialogRunner,FactVariableStorage,YarnLogicBindings,YarnLogicBindings.g}.cs`, `Assets/Game/Editor/Narrative/Dialog/Yarn/YarnBindingGenerator.cs`, `Assets/Game/Narrative/Game.Narrative.asmdef`, `Packages/manifest.json`; Fallback: `Assets/Game/Editor/Narrative/Dialog/DialogProgramCompiler.cs`, `Assets/Game/Narrative/Dialog/GraphDialogRunner.cs`, `Assets/Game/Content/Narrative/Dialog/_Generated/dialog_program.asset`; both: `Assets/Game/App/Services/NarrativeBootstrap.cs`, `Assets/Game/Tests/EditMode/Narrative/DialogRunnerConformanceTests.cs`
 - **Acceptance criteria:**
@@ -774,3 +775,5 @@ sequenceDiagram
 - Audit `05-narrative-quests.md` B4, B5, B6, B11, B12, §5.9 (Yarn vs Ink), §5.13 phase 3; `LEDGER.md` R6, R11, R19; legacy UI `Import/Legacy/ui/Pages/NarrativeViewUI.uxml` (layout reference only).
 - ADR-0006, ADR-0011. SPEC-40 §4.6–§4.7 (syntax, registry). SPEC-60 §4.3–§4.7, §5.2.
 - Yarn Spinner 3 documentation (syntax, variable storage, functions, commands, line IDs, detour).
+
+| 22 | Owner package gate would stall the fully specified fallback | ADR-0101 implements GraphDialogRunner and its compiler as the documented pending-gate default, with all conformance checks unchanged. DLG-004 spike and DLG-005 owner choice remain open; no package adoption/rejection is claimed. | Tech lead — resolved; ledger Q474 |
