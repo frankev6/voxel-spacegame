@@ -55,7 +55,7 @@ namespace Game.Tests.PlayMode.DevTools
             var request = new Game.App.Spawning.ShipSpawnArgs { Blueprint = f.Blueprint.Id, Rotation = quaternion.identity };
             Assert.Throws<System.InvalidOperationException>(() => f.Spawner.Spawn(request));
             // Arrange the real session's mode without a scene transition; keep this fixture one cell/direct ticks.
-            typeof(Game.App.Session.GameSession).GetProperty(nameof(f.Session.IsSandbox)).SetValue(f.Session, true);
+            typeof(Game.App.Session.GameSession).GetProperty(nameof(f.Session.IsSandbox), System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(f.Session, true);
             Assert.Throws<System.InvalidOperationException>(() => ((Game.Galaxy.Services.IShipSpawner)f.Spawner).Spawn(
                 new Game.Galaxy.Services.GalaxyShipSpawnArgs { Blueprint = f.Blueprint.Id, Rotation = quaternion.identity }));
             result = f.Command("spawn blueprint=" + f.Blueprint.IdString + " x=9 z=10 ai=false");
