@@ -534,7 +534,7 @@ sequenceDiagram
 ### SYS-008 — InteractionQuerySystem, docking and BodyInteracted
 - **Milestone:** M3
 - **Tier:** frontier — F3: the R10 fix and variable-rate edge consumption
-- **Depends on:** `SYS-004`, `SPEC-20`, `SPEC-23`
+- **Depends on:** `SYS-006`, `INP-005`, `AI-004`, `CORE-006`
 - **Do:** §5.11, `DockingService`, the managed `BodyInteracted` handler.
 - **Files:** `Assets/Game/Galaxy/Interaction/{InteractionQuerySystem,InteractionQueryJob}.cs`, `Assets/Game/Galaxy/Services/DockingService.cs`, `Assets/Game/Tests/PlayMode/Galaxy/InteractionTests.cs`
 - **Acceptance criteria:**
@@ -633,6 +633,8 @@ sequenceDiagram
 | 17 | Unload/failed request cleanup must release abandoned registry pins without cancelling other live spawns | Resolved by ADR-0076: registry reconciles only dead/mismatched bound reads after tracked jobs finish. Cleanup-only roots do not retain source ownership. Spawn failure destroys its request, reconciles pins and releases its clone/handle. | Tech lead — ledger Q360 |
 | 18 | Orbiting T2 grids lacked the analytic movement owned by their anchors | Resolved: orbiting T2 roots carry BodyOrbit and UniversePositionIsAnalytic with the same orbit data as their anchors. BodyOnRailsSystem remains the sole analytic position writer; fixed bodies stay unchanged. This keeps physical geometry, streaming distance and interaction position together. | Tech lead — ledger Q361 |
 | 19 | T3 descriptors have no T1 anchors; which entity receives asteroid body flags? | Resolved: the dynamic asteroid grid is its own StarSystemBody anchor (BodyGridOwner.Anchor = root), with Asteroid and HasGrid flags, and is registered in the loader body map. Existing destruction watch/event handling applies without a second transform owner; sector retirement removes this map entry before source release. | Tech lead — ledger Q362 |
+
+| 20 | SYS-008 whole-spec dependencies include unrelated later AI/performance work | Use actual accepted owners SYS-006 (composed streamed bodies), INP-005 (Interact counter), AI-004 (spatial proxies/radii), CORE-006 (event delivery). Query, singleton lifecycle, docking and loader handler remain SYS-008 work; downstream dialog/merchant consumers remain separate. | Tech lead — ledger Q384 |
 
 ## 11. References
 

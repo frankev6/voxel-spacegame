@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 84 | 9 | 0 | 0 | 87 | 0 | 180 | 6 |
+| M3 | 83 | 10 | 0 | 0 | 87 | 0 | 180 | 5 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -339,7 +339,7 @@
 | SYS-005 | BodyOnRailsSystem | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 370ffff | BodyOnRailsSystem integrated14a0989e; two required cases pass9669, preserves exact cross-FPS results and 1mm local tolerance. |
 | SYS-006 | T2 voxel bodies and damage persistence | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-003, SYS-004, DMG-014, WPN-012, AI-010 | yes | done | astra (gpt-6) | 2026-10-13 | 8ec9a970 | Actual loader composed;5 required streaming/damage/hulk/lifecycle cases pass6996; compile3045 clean; Q357–361. |
 | SYS-007 | T3 asteroid belts | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006 | yes | done | astra (gpt-6) | 2026-10-13 | 96127285 | Bounded asynchronous belt sectors/shapes, shared spawn budget, destruction persistence and retirement;4 required cases plus5 T2 regressions pass61443. |
-| SYS-008 | InteractionQuerySystem, docking and BodyInteracted | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-004, SPEC-20, SPEC-23 | no | todo |  |  |  |  |
+| SYS-008 | InteractionQuerySystem, docking and BodyInteracted | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006, INP-005, AI-004, CORE-006 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead implements actual hull-to-surface query, edge consumption, docking and loader events; Q384 direct prerequisites. |
 | SYS-009 | PLOC participant | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-008, PERS-001 | no | todo |  |  |  |  |
 | SYS-010 | IShipSpawner contract for Galaxy services | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, FND-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | adcf164 | Spawner contract forwarding only; 2 required tests. FND-012 runtime remains open. Full 1027 EM / 145 PM passed. |
 | SYS-011 | Celestial visuals and distance compression | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004, SPEC-62 | no | todo |  |  |  |  |
@@ -479,7 +479,7 @@
 | VFX-014 | Warp effect and strict config validation | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | standard | VFX-004, TRV-001 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | 600-particle pooled warp with oldest stealing, all 13 defaults strict; travel gameplay remains open; spec-required: 3, extra: 0 |
 | AUD-011 | GATE: Owner confirms licences of the carried-over audio | [SPEC-64](specs/SPEC-64-audio.md) | M3 | standard | AUD-010 | yes | todo |  |  |  |  |
 | AUD-012 | Floating-origin shift and clears | [SPEC-64](specs/SPEC-64-audio.md) | M3 | frontier | AUD-006, GAL-001, SYS-001 | yes | done | astra (gpt-6) | 2026-10-13 | f9fed29a | Three required origin/system/reset audio checks pass; spatial shifts and clears preserve appropriate music lifecycle |
-| DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-001, INP-001 | yes | todo |  |  |  |  |
+| DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-008, DEV-012, INP-005 | no | todo |  |  |  |  |
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | yes | done | economy (gpt-6.1-sol high) | 2026-10-13 | 40421f42 | Real inv/give/facts owners, probes and CLI; three required cases pass in focused seven-case batch. |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Preparing working command plumbing; full jump/pose acceptance needs real TRV-006, GAL-008 and SYS-009 implementations; no dev-owned substitutes |
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
@@ -955,6 +955,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 381 | SPEC-51 Q27: atomic voxel edit API missing | Add batch API in Voxel under ADR before writer; no direct ShipEditor cell writes. Canonical damage capture begins with missing-cell bytes and explicit float encoding; task remains in progress. | Tech lead |
 | 382 | SPEC-70 Q28: DEV-017 condition syntax and state edges | Canonical `$story_count >= 3`; numeric fact probe stays separate. Owner-normalized Debugger writes, cargo-only grants, cached bound conditions; explicit empty CLI eval remains unconditional true. | Tech lead |
 | 383 | SPEC-51 Q28: negative function HP and shared-origin hash association | Preserve finite damage HP including negative values; hash each instance identity with HP in canonical identity order. ADR-0082. | Tech lead |
+| 384 | SPEC-31 Q20: SYS-008 direct prerequisites | Accepted SYS-006, INP-005, AI-004, CORE-006 supply actual owners; later AI/perf work does not block interaction. | Tech lead |
+| 385 | SPEC-70 Q29: DEV-014 missing behavior dependencies | Require SYS-008, DEV-012 and INP-005; contract-only SYS-001 cannot provide real interaction acceptance. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
