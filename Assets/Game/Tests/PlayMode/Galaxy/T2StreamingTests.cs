@@ -62,6 +62,15 @@ namespace Game.Tests.PlayMode.Galaxy
             Assert.AreEqual(root, f.Grid(), "Core loss leaves the physical grid in place.");
             f.Stream(100); f.Stream(0); Assert.IsTrue(f.Em.HasComponent<Hulk>(f.Grid()));
             Assert.AreEqual(GridKind.Hulk, f.Em.GetComponentData<VoxelGrid>(f.Grid()).Kind);
+            // ADR-0077: explicit narrative removal must suppress recapture of a live saved hulk.
+            var delta = f.State.GetOrCreateDelta(f.Station.Id.System);
+            Assert.IsTrue(delta.TryGetStructure(f.Station.Id.LocalKey, out var saved));
+            var source = saved.Structure;
+            f.Galaxy.RemoveBody(f.Station.Id); f.Loader.FlushStructures();
+            Assert.IsFalse(delta.TryGetStructure(f.Station.Id.LocalKey, out _));
+            f.Stream(100); f.Stream(0); f.Loader.FlushStructures();
+            Assert.AreEqual(Entity.Null, f.Grid()); Assert.IsFalse(delta.TryGetStructure(f.Station.Id.LocalKey, out _));
+            Assert.IsFalse(source.Data.IsCreated, "Removed source is released after the grid and spawn readers retire.");
         }
         [Test] public void NoLeaks_TwentyCycles()
         {
