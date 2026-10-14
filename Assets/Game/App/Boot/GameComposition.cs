@@ -204,9 +204,13 @@ namespace Game.App.Boot
             var economy = new Game.Economy.EconomyService(Content.Catalog, economyConfig[0],
                 () => Session.CampaignSeed, () => logicWorld.UniversalTime);
             Register(economy); Register<Game.Data.Logic.ILogicEconomy>(economy);
+            Register(economy.Inventory); Register<Game.Data.Economy.ICargo>(economy.Inventory);
+            Register(economy.Wallet); Register(economy.Merchants);
+            var salvage = Push(new Game.Galaxy.Salvage.SalvageService(world, Content.Catalog, economyConfig[0], Audio));
+            Register(salvage);
             var cargoCapacity = Push(new Game.App.Economy.CargoCapacitySync(economy.Inventory, Session.Fleet, Content.Catalog, economyConfig[0]));
             Register(cargoCapacity); Session.RegisterNewGameInitializer(cargoCapacity);
-            Register(new Game.App.Economy.MerchantDirectory(Content.Catalog, campaignGalaxy));
+            var merchants = new Game.App.Economy.MerchantDirectory(Content.Catalog, campaignGalaxy); Register(merchants);
             Session.RegisterModel(economy); Session.RegisterNewGameInitializer(economy);
             Save.Register(new Game.Economy.InventorySaveParticipant(economy, Content.Catalog));
             var narrativeOwner = new Game.Narrative.ShipLog.NarrativeLogicAdapter();
@@ -227,6 +231,8 @@ namespace Game.App.Boot
             // 10. App-lifetime UI models and implemented presenter bindings (HUD-002).
             Screens = Push(new UiComposition(UI));
             Register(Screens);
+            var merchantLauncher = new Game.App.Economy.MerchantLauncher(economy, merchants, factions, territory, encounters, systemLoader, UI.Navigator);
+            Register(merchantLauncher);
             // DLG-007 installs the actual runner/service before this point; DLG-009 owns the authored view.
             if (Game.Core.Services.TryGet<Game.Narrative.Dialog.DialogService>(out var dialog))
             {
@@ -255,6 +261,7 @@ namespace Game.App.Boot
             var editorLauncher = Push(new Game.App.EditorHost.ShipEditorLauncher(Session, Flow, world, docking, economy, editorServices));
             Register(editorLauncher);
             Screens.BindEditorLauncher(editorLauncher);
+            Screens.BindDockLaunchers(merchantLauncher, editorLauncher);
             Screens.BindMenuNavigation(Screens.ShowSaveSlots, editorLauncher.OpenLab, Screens.ShowSettings);
             var hudSync = world.GetOrCreateSystemManaged<HudSyncSystem>();
             var hudNames = new Game.Presentation.Presenters.HudNames(Content.Catalog,

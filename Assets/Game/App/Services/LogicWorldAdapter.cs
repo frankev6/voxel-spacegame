@@ -25,7 +25,7 @@ namespace Game.App.Services
     {
         // Updated by the corresponding owner wiring tasks. Callers cannot mutate this set.
         [field: StaticStateOk("Immutable read-only view of task-owned missing routes; never changed at runtime") ]
-        public static IReadOnlyList<string> UnwiredMembers { get; } = Array.AsReadOnly(new[] { nameof(OpenMerchant) });
+        public static IReadOnlyList<string> UnwiredMembers { get; } = Array.AsReadOnly(Array.Empty<string>());
         readonly ContentCatalog content;
         readonly GameSession session;
         readonly GalaxyService galaxy;
@@ -115,7 +115,17 @@ namespace Game.App.Services
         }
         public void OpenMerchant(int merchantIndex, in LogicScope scope, Action onClosed)
         {
-            Missing(nameof(OpenMerchant), "ECO-008"); onClosed?.Invoke();
+            var merchant = Definition<MerchantDefinition>(merchantIndex);
+            if (merchant == null)
+            {
+                GameLog.ErrorOnce("Narrative.OpenMerchant.Definition", "Narrative", "open_merchant requires a known merchant.");
+                onClosed?.Invoke(); return;
+            }
+            if (!Game.Core.Services.TryGet<Game.App.Economy.MerchantLauncher>(out var launcher))
+            {
+                Require(launcher, nameof(OpenMerchant)); onClosed?.Invoke(); return;
+            }
+            launcher.Open(merchant, onClosed);
         }
         public void GiveShip(int blueprintIndex)
         {

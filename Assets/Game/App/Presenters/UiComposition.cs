@@ -19,6 +19,7 @@ namespace Game.App.Presenters
         readonly SaveSlotsPresenter saveSlotsPresenter;
         readonly SettingsPresenter settingsPresenter;
         readonly FleetPresenter fleetPresenter;
+        readonly DockPresenter dockPresenter;
         readonly Game.Presentation.Presenters.InventoryPresenter inventoryPresenter;
         readonly Game.Presentation.Presenters.MerchantPresenter merchantPresenter;
         MainMenuPresenter menuPresenter;
@@ -72,6 +73,10 @@ namespace Game.App.Presenters
             fleetPresenter = new FleetPresenter(FleetModel, Game.Core.Services.Get<Game.Data.Services.ContentService>().Catalog);
             fleetPresenter.Bind(session.Fleet, docking);
             ui.Register(new FleetView(FleetModel, fleetPresenter));
+            dockPresenter = new DockPresenter(ui, DockModel, docking, Game.Core.Services.Get<Game.Galaxy.Services.GalaxyService>(),
+                Game.Core.Services.Get<Game.App.Economy.MerchantDirectory>(), Game.Core.Services.Get<IGameFlow>());
+            ui.Register(new DockView(DockModel, dockPresenter));
+            Game.Core.Services.Register(dockPresenter); dockPresenter.Bind();
             EventBus<SessionReset>.Subscribe(OnSessionReset);
         }
         public UIScreen MainMenu => ui.Navigator.Get<MainMenuView>();
@@ -80,6 +85,9 @@ namespace Game.App.Presenters
         public UIScreen Loading { get; }
 
         internal void BindEditorLauncher(Game.App.EditorHost.ShipEditorLauncher launcher) => fleetPresenter.BindLauncher(launcher);
+
+        internal void BindDockLaunchers(Game.App.Economy.MerchantLauncher merchants, Game.App.EditorHost.ShipEditorLauncher editor)
+            => dockPresenter.BindLaunchers(merchants, editor);
 
         internal void ShowFleet() { fleetPresenter.Refresh(); ui.Navigator.Push<FleetView>(); }
 
@@ -158,6 +166,7 @@ namespace Game.App.Presenters
             disposed = true;
             EventBus<SessionReset>.Unsubscribe(OnSessionReset);
             DialogPresenter?.Dispose();
+            Game.Core.Services.Unregister(dockPresenter); dockPresenter.Dispose();
             loadingPresenter.Dispose();
             saveSlotsPresenter.Dispose();
             settingsPresenter.Dispose();

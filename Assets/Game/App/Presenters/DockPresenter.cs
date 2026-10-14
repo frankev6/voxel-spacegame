@@ -32,8 +32,7 @@ namespace Game.App.Presenters
             this.directory = directory ?? throw new ArgumentNullException(nameof(directory));
             this.flow = flow ?? throw new ArgumentNullException(nameof(flow));
         }
-        // Composition binds only functioning registered owners after ECO-008 / EDT-023.
-        // Never construct the currently staged launcher shells to satisfy this hook.
+        // Composition binds the functioning registered ECO-008 / EDT-023 owners.
         internal void BindLaunchers(MerchantLauncher merchants, ShipEditorLauncher editor)
         {
             if (disposed) throw new ObjectDisposedException(nameof(DockPresenter));

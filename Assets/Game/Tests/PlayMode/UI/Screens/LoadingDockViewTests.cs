@@ -21,7 +21,7 @@ using UnityEngine.UIElements;
 
 namespace Game.Tests.PlayMode.UI.Screens
 {
-    /// <summary>HUD-019: production flow/UI/docking owners; merchant opening remains a real ECO-008 prerequisite.</summary>
+    /// <summary>HUD-019: production flow/UI/docking and the actual ECO-008/EDT-023 launcher bindings.</summary>
     public sealed class LoadingDockViewTests : GameFlowFixture
     {
         sealed class DockScreen : IDisposable
@@ -29,19 +29,14 @@ namespace Game.Tests.PlayMode.UI.Screens
             internal DockViewModel Model => (DockViewModel)View.Root.dataSource;
             internal readonly DockPresenter Presenter;
             internal readonly DockView View;
-            internal readonly bool OwnsPresenter;
             internal DockScreen()
             {
-                var ui = Services.Get<UIRoot>();
-                if (Services.TryGet<DockPresenter>(out var existing))
-                { Presenter = existing; View = ui.Navigator.Get<DockView>(); return; }
-                OwnsPresenter = true;
-                var model = new DockViewModel();
-                Presenter = new DockPresenter(ui, model, Services.Get<DockingService>(), Services.Get<GalaxyService>(),
-                    Services.Get<MerchantDirectory>(), Services.Get<IGameFlow>());
-                View = new DockView(model, Presenter); ui.Register(View); Presenter.Bind();
+                // Composition owns this presenter and its launcher bindings. Never replace a
+                // missing production registration with a separately constructed test presenter.
+                Presenter = Services.Get<DockPresenter>();
+                View = Services.Get<UIRoot>().Navigator.Get<DockView>();
             }
-            public void Dispose() { if (OwnsPresenter) Presenter.Dispose(); }
+            public void Dispose() { }
         }
         BodyId Station()
         {
@@ -72,14 +67,13 @@ namespace Game.Tests.PlayMode.UI.Screens
             var ui = Service<UIRoot>(); var docking = Service<DockingService>(); var station = Station();
             int subscribers = EventBus<DockStateChanged>.SubscriberCount;
             using var screen = new DockScreen();
-            Assert.AreEqual(subscribers + (screen.OwnsPresenter ? 1 : 0), EventBus<DockStateChanged>.SubscriberCount);
+            Assert.AreEqual(subscribers, EventBus<DockStateChanged>.SubscriberCount);
             int baseline = ui.Navigator.Count;
             docking.Dock(station); EventHub.DrainAll(); docking.Dock(station); EventHub.DrainAll();
             Assert.AreSame(screen.View, ui.Navigator.Top); Assert.AreEqual(baseline + 1, ui.Navigator.Count);
             Assert.AreEqual(Service<GalaxyService>().GetBodyName(station), screen.View.Root.Q<Label>("dock-station-name").text);
             Assert.AreEqual(InputContext.Menu, ui.Navigator.CurrentContext); Assert.AreEqual(0, Service<IPauseService>().ActiveTokenCount);
-            Assert.IsFalse(screen.Model.CanTrade); Assert.AreEqual("Trading is unavailable.", screen.Model.TradeBlockedReason);
-            screen.Presenter.Trade(); Assert.IsFalse(ui.Navigator.IsOpen<MerchantView>(), "No staged launcher is called.");
+            Assert.IsTrue(screen.Model.CanTrade); Assert.AreEqual("", screen.Model.TradeBlockedReason);
             ui.HandleBackPressed(); Assert.IsFalse(docking.IsDocked); EventHub.DrainAll(); Assert.IsFalse(screen.View.IsOpen);
             Assert.AreEqual(InputContext.Flight, ui.Navigator.CurrentContext);
             docking.Dock(station); EventHub.DrainAll();
@@ -91,11 +85,9 @@ namespace Game.Tests.PlayMode.UI.Screens
         }
         [UnityTest] public IEnumerator Dock_Trade_OpensMerchant()
         {
-            if (!Services.TryGet<MerchantLauncher>(out var launcher))
-                Assert.Ignore("ECO-008 MerchantLauncher is not implemented/registered; real dock-to-merchant acceptance is pending.");
+            Assert.IsNotNull(Service<MerchantLauncher>());
             yield return NewGame(7);
             using var screen = new DockScreen();
-            Services.TryGet<ShipEditorLauncher>(out var editor); screen.Presenter.BindLaunchers(launcher, editor);
             var docking = Service<DockingService>(); docking.Dock(Station()); EventHub.DrainAll();
             Assert.IsTrue(screen.Model.CanTrade);
             DialogTestContext.Activate(screen.View.Root.Q<Button>("dock-trade"));
@@ -116,8 +108,7 @@ namespace Game.Tests.PlayMode.UI.Screens
             Assert.AreEqual("No market here", screen.View.Root.Q<Label>("dock-trade-blocked").text);
             Assert.IsFalse(screen.View.Root.Q<Button>("dock-trade").enabledSelf);
             screen.Presenter.Trade(); Assert.IsFalse(Service<UIRoot>().Navigator.IsOpen<MerchantView>());
-            Assert.IsFalse(screen.Model.CanEditShip); Assert.AreEqual("Ship editing is unavailable.", screen.Model.EditBlockedReason);
-            screen.Presenter.EditShip(); // Likewise never calls the EDT-023 shell.
+            Assert.IsTrue(screen.Model.CanEditShip); Assert.AreEqual("", screen.Model.EditBlockedReason);
             screen.Presenter.Undock(); EventHub.DrainAll(); Assert.IsFalse(screen.View.IsOpen);
         }
     }
