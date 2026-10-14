@@ -55,8 +55,8 @@ namespace Game.Tests.PlayMode.ShipEditor
         }
         [Test] public void GhostInvalid_UsesInvalidColor()
         {
-            using var f=new Fixture();using var records=new NativeArray<BlockRecord>(1,Allocator.Temp);
-            records[0]=new BlockRecord{Block=f.Hull,DamageOffset=-1};f.Controller.Preview.Set(records,PlacementError.Occupied);
+            using var f=new Fixture();using var records=new NativeList<BlockRecord>(Allocator.Temp);
+            records.Add(new BlockRecord{Block=f.Hull,DamageOffset=-1});f.Controller.Preview.Set(records.AsArray(),PlacementError.Occupied);
             f.Renderer.Update(0);var invalid=f.Renderer.Category(OverlayKind.GhostInvalid);
             Assert.AreEqual(1,invalid.Instances.Length);Assert.AreEqual(new OverlayInstance(0,1,Color.red).ColorRGBA8,invalid.Instances[0].ColorRGBA8);
             Assert.AreEqual(0,f.Renderer.Category(OverlayKind.Ghost).Instances.Length);f.Renderer.Render();
