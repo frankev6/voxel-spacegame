@@ -13,6 +13,7 @@ using Game.Core.Components;
 using Game.Data.Definitions;
 using Unity.Entities;
 using Game.Voxel.Grid;
+using Game.Simulation.Ai;
 
 namespace Game.App.Session
 {
@@ -20,6 +21,7 @@ namespace Game.App.Session
     public sealed partial class GameSession : IPersistentIdAllocator, IGameFlow, ISaveContext, ISceneReady, IDisposable
     {
         readonly World world;
+        readonly EntityQuery combatStatusQuery, saveClockQuery;
         internal readonly int PersistentIdBlockSize, PersistentIdRefillThreshold;
         public bool HasActiveSession { get; private set; }
         public ulong NextPersistentId { get; private set; } = 1;
@@ -36,6 +38,8 @@ namespace Game.App.Session
             if (PersistentIdBlockSize < 256 || PersistentIdBlockSize > 65536 ||
                 PersistentIdRefillThreshold < 0 || PersistentIdRefillThreshold >= PersistentIdBlockSize)
                 throw new ArgumentOutOfRangeException(nameof(config), "Invalid persistent-id allocation limits");
+            combatStatusQuery = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerCombatStatus>());
+            saveClockQuery = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<SimClock>());
         }
 
         /// <summary>Returns the next ungranted id; zero and ulong.MaxValue are never issued.</summary>
@@ -283,7 +287,19 @@ namespace Game.App.Session
             if (CurrentScene == GameScene.BlueprintLab) return SaveBlockReason.EditorOpen;
             if (PlayerDefeated) return SaveBlockReason.PlayerDead;
             foreach (var blocker in blockers) { var reason = blocker.GetSaveBlock(); if (reason != SaveBlockReason.None) return reason; }
-            // TODO(AI-008): cached PlayerCombatStatus query once its AI-001 component exists; complete its readers before reading.
+            combatStatusQuery.CompleteDependency();
+            if (!combatStatusQuery.IsEmptyIgnoreFilter)
+            {
+                var combat = combatStatusQuery.GetSingleton<PlayerCombatStatus>();
+                if (combat.HostilesEngaging != 0) return SaveBlockReason.InCombat;
+                if (combat.LastDamagedTick != 0 && !saveClockQuery.IsEmptyIgnoreFilter)
+                {
+                    saveClockQuery.CompleteDependency();
+                    uint tick = saveClockQuery.GetSingleton<SimClock>().Tick;
+                    if (unchecked(tick - combat.LastDamagedTick) < gameConfig.CombatDamageWindowSeconds * 60f)
+                        return SaveBlockReason.InCombat;
+                }
+            }
             return SaveBlockReason.None;
         }
         public SaveBlockReason GetSaveBlock()
@@ -445,7 +461,11 @@ namespace Game.App.Session
             flow?.BindSession(null); save?.AttachContext(null);
             ReleaseFleetWorld(); PlayerSpawner?.Dispose(); Fleet.Dispose(); Galaxy.Dispose();
             DisposeThumbnailCaptures();
-            if (world.IsCreated) ResetPersistentIds(NextPersistentId, false);
+            if (world.IsCreated)
+            {
+                ResetPersistentIds(NextPersistentId, false);
+                combatStatusQuery.Dispose(); saveClockQuery.Dispose();
+            }
             models.Clear(); writebacks.Clear(); initializers.Clear(); blockers.Clear();
         }
         Camera thumbnailCamera;

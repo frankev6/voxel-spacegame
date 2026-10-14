@@ -1068,6 +1068,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 466 | SPEC-01 Q33: defeat composition and isolated startup | Root owns watcher lifetime/tick; current readable save or latest autosave, disabled Load without saves. Isolated SaveRoot suppresses dev playground takeover; ordinary World Play unchanged. | Tech lead |
 | 467 | SPEC-33 Q30: director prerequisites, pending target and spawn readiness | ADR-0099; actual GameplayActive guard, pending transit destination, unconverted spawn pose/AI shift sequence, unload-safe sweep. ENCT remains separate. | Tech lead |
 | 468 | SPEC-33 Q31: independent encounter follow-up prerequisites | ADR-0100 supplies completed runtime owners for narrative commands, dev commands/probes and formations; combined integration acceptance unchanged. | Tech lead |
+| 469 | SPEC-33 Q32: ENCT restore lifecycle and combat save guard | Preserve restored pending/global state across Loaded; atomic payload validation and raw unknown preservation; connect existing PlayerCombatStatus to session save blocker, with zero damage tick sentinel. | Tech lead |
 
 ## Measurements
 

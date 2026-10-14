@@ -36,17 +36,19 @@ namespace Game.Galaxy.Services
         readonly FactionService factions;
         readonly World world;
         readonly ContentCatalog catalog;
-        readonly List<EncounterInstance> active = new(16);
-        readonly Dictionary<ulong, uint> members = new(40);
-        readonly List<PendingEncounter> pending = new();
-        readonly HashSet<ContentId> globallyUsed = new();
+        internal EncounterSaveState SaveState { get; } = new();
+        List<EncounterInstance> active => SaveState.Active;
+        Dictionary<ulong, uint> members => SaveState.Members;
+        List<PendingEncounter> pending => SaveState.Pending;
+        HashSet<ContentId> globallyUsed => SaveState.GloballyUsed;
         readonly HashSet<ContentId> spawnedThisVisit = new();
         readonly List<PlannedShip> planned = new(10);
         readonly List<(double3 pos, float yaw)> poses = new(10);
         readonly List<EncounterDefinition> eligible = new();
         readonly List<EncounterDefinition> definitions = new();
         readonly EntityQuery players, origins, clocks, combatStatus, worldScene, shifts, gameplay;
-        uint nextInstanceSerial = 1, visitCount, rollIndex;
+        uint nextInstanceSerial { get => SaveState.NextInstanceSerial; set => SaveState.NextInstanceSerial = value; }
+        uint visitCount, rollIndex;
         double nextRollTime, arrivalTime;
         bool arrivedByJump, disposed;
         public EncounterDirectorService(GalaxyService galaxy, StarSystemLoader loader, TravelService travel, DockingService docking,
@@ -91,7 +93,7 @@ namespace Game.Galaxy.Services
         { info = default; return members.TryGetValue(persistentId, out var id) && TryGetInstance(id, out info); }
         public void GetActiveInstances(List<EncounterInstanceInfo> into)
         { into.Clear(); foreach (var item in active) into.Add(Info(item)); }
-        public bool IsGloballyUsed(EncounterDefinition def) => def != null && globallyUsed.Contains(def.Id);
+        public bool IsGloballyUsed(EncounterDefinition def) => def != null && (globallyUsed.Contains(def.Id) || SaveState.ResolvedGloballyUsed.Contains(def.Id));
         double Now => clocks.IsEmptyIgnoreFilter ? 0 : clocks.GetSingleton<SimClock>().UniversalTime;
         double3 Origin => origins.IsEmptyIgnoreFilter ? default : origins.GetSingleton<FrameOrigin>().OriginInStarSystem;
         Entity Player => players.IsEmptyIgnoreFilter ? Entity.Null : players.GetSingletonEntity();
@@ -248,7 +250,7 @@ namespace Game.Galaxy.Services
             foreach (var def in definitions)
             {
                 if (def.DirectorWeight <= 0 || system.Danger < def.MinDanger || system.Danger > def.MaxDanger ||
-                    def.UniquePerVisit && spawnedThisVisit.Contains(def.Id) || def.UniqueGlobal && globallyUsed.Contains(def.Id)) continue;
+                    def.UniquePerVisit && spawnedThisVisit.Contains(def.Id) || def.UniqueGlobal && IsGloballyUsed(def)) continue;
                 var condition = def.Condition;
                 if (condition != null && !condition.IsAlwaysTrue && (condition.HasErrors || logic == null || !condition.Evaluate(logic))) continue;
                 eligible.Add(def); weight += def.DirectorWeight;
@@ -271,7 +273,7 @@ namespace Game.Galaxy.Services
             arrivedByJump = value.Reason == StarSystemEntryReason.Jump; spawnedThisVisit.Clear();
         }
         void Reset(SessionReset value)
-        { active.Clear(); members.Clear(); pending.Clear(); globallyUsed.Clear(); spawnedThisVisit.Clear(); nextInstanceSerial = 1; visitCount = rollIndex = 0; }
+        { SaveState.Reset(value.Reason); spawnedThisVisit.Clear(); visitCount = rollIndex = 0; arrivedByJump = false; arrivalTime = 0; nextRollTime = Now + Config.FirstRollDelaySeconds; }
         public void OnSceneExiting(in SceneExitContext context)
         { if (context.Scene != GameScene.World) return; for (int i = active.Count - 1; i >= 0; i--) Retain(i); spawnedThisVisit.Clear(); }
         public void Dispose()
@@ -280,6 +282,5 @@ namespace Game.Galaxy.Services
             players.Dispose(); origins.Dispose(); clocks.Dispose(); combatStatus.Dispose(); worldScene.Dispose(); shifts.Dispose(); gameplay.Dispose();
             active.Clear(); members.Clear(); pending.Clear();
         }
-        // TODO(ENC-008): expose internal save capture/restore to the ENCT owner without serializing active ECS entities.
     }
 }

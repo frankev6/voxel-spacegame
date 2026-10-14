@@ -180,6 +180,7 @@ namespace Game.App.Boot
             }
             var encounters = Push(new EncounterDirectorService(campaignGalaxy, systemLoader, travel, docking, Spawner, factions, territory, world, Content.Catalog));
             Register(encounters); galaxyTicker.Register(encounters); Flow.RegisterExiting(encounters);
+            Save.Register(new EncounterSaveParticipant(encounters, Content.Catalog));
             Register(new GalaxyMapModel(campaignGalaxy, travel, territory));
             // Remaining travel/faction/economy/narrative bindings follow SPEC-01 §5.2.
 
