@@ -1067,6 +1067,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-007 asteroid grid ownership authored — astra (gpt-6)
+
+- Added AsteroidGridSpawner: consumes generated sources; canonical dynamic Asteroid/None-profile requests; actual universe position/system membership; initial-cell baseline; request failure reconciliation; despawn-before-release with read-pin checks and source disposal. No damage writeback or delta source transfer for asteroids.
+- Q362/SPEC-31 Q19 resolves the missing T3 anchor representation: the dynamic root carries StarSystemBody and references itself as BodyGridOwner.Anchor, registered in the loader map for existing destruction events. No separate physics transform writer. Streamer integration still pending; uncompiled/unaccepted.
+- Next bounded sector/shape job lifecycle and shared T2/T3 spawn budget, then exactly four required cases. Spec-required: 0 authored of4, extra: 0. No Unity/testing this turn. Three workers checked: DEV-009 active256; combat238/presentation218 genuine dependency waits. Previous turn geometry and review repairs were progress.
+
 ### 2026-10-13 — SYS-007 bounded sector geometry and review fixes — astra (gpt-6)
 
 -5393c9cb adds reusable sector geometry and bubble selection: radial bounds and angular span limit visited sectors; exact centre-distance filter; sorted IDs across the angle seam; unsupported IDs warn once and are skipped. Job and selector share ring geometry.
