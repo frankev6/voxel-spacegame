@@ -108,7 +108,9 @@ namespace Game.Tests.PlayMode.App
             for (int collected = 1; collected <= 3; collected++)
             {
                 Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=survey", Host.Context).Kind);
+                var logic = Services.Get<ILogicContext>(); var callerScope = logic.Scope;
                 Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind);
+                Assert.AreEqual(callerScope, logic.Scope, "Quest and rumor owners restore the caller scope after evaluating the authored quest_completed condition.");
                 Assert.AreSame(log, ui.Navigator.Top); Assert.AreEqual(collected, economy.Inventory.CountOf(palladium));
                 quests.GetObjectives(questIndex, objectives); Assert.AreEqual(collected, objectives[0].Progress);
                 Assert.AreEqual(collected == 3, objectives[0].Done); Assert.IsFalse(objectives[1].Done, "This supplies trial does not fake ARK hand-in.");

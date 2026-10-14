@@ -131,7 +131,14 @@ namespace Game.Narrative.Clues
             {
                 if (!dirty.Remove(i) || !IsKnown(i) || clues[i - 1] is not RumorDefinition rumor || resolvedRumors.Contains(rumor.Id)) continue;
                 // The generic empty condition is true; the rumor contract explicitly makes empty source never resolve.
-                if (rumor.ResolvedWhen == null || string.IsNullOrWhiteSpace(rumor.ResolvedWhen.Source) || !rumor.ResolvedWhen.Evaluate(context)) continue;
+                if (rumor.ResolvedWhen == null || string.IsNullOrWhiteSpace(rumor.ResolvedWhen.Source)) continue;
+                // ResolvedWhen is compiled as MarkerCondition. Own its scope just as quest/beat
+                // evaluation owns theirs; a caller's effect or empty scope must not leak into it.
+                bool resolved;
+                context.PushScope(new LogicScope(LogicUsage.MarkerCondition, 0, 0, 0, false, default));
+                try { resolved = rumor.ResolvedWhen.Evaluate(context); }
+                finally { context.PopScope(); }
+                if (!resolved) continue;
                 resolvedRumors.Add(rumor.Id); MarkersDirty = true;
                 if (!silent) ClueChanged?.Invoke(i);
             }
