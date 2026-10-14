@@ -118,10 +118,11 @@ namespace Game.Tests.EditMode.ShipEditor
             using var colors = Fixture();
             colors.Edits(new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = colors.Multi, Color = 1 },
                 new VoxelEdit { Kind = VoxelEditKind.ClearCell }, new VoxelEdit { Kind = VoxelEditKind.ClearCell, Cell = new int3(0, 1, 0) });
-            using var damage = new NativeArray<byte>(8, Allocator.Temp);
-            damage[0] = damage[2] = 255;
+            var damageBytes = new byte[8];
+            damageBytes[0] = damageBytes[2] = 255;
             uint hp = math.asuint(colors.Context.Definitions.Value.Blocks[colors.Multi].FunctionHp);
-            for (int i = 0; i < 4; i++) damage[4 + i] = (byte)(hp >> (i * 8));
+            for (int i = 0; i < 4; i++) damageBytes[4 + i] = (byte)(hp >> (i * 8));
+            using var damage = new NativeArray<byte>(damageBytes, Allocator.Temp);
             using var edits = new NativeArray<VoxelEdit>(new[] { new VoxelEdit { Kind = VoxelEditKind.RestoreBlock, Block = colors.Multi, Color = 2 } }, Allocator.Temp);
             using var touched = new NativeList<int3>(Allocator.Temp);
             Assert.IsTrue(colors.Draft.ApplyEdits(edits, damage, colors.Content, touched));
