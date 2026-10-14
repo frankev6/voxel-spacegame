@@ -53,6 +53,7 @@ namespace Game.Tests.EditMode.Narrative
             internal readonly ClueService Clues;
             internal readonly BeatService Beats;
             internal readonly DialogService Dialog;
+            internal readonly DialogMemory Memory = new();
             internal readonly ShipLogQuery Log;
             internal Fixture()
             {
@@ -96,7 +97,7 @@ namespace Game.Tests.EditMode.Narrative
                 var external = new FakeLogicContext(factCatalog); Context = new LogicContext(Facts, external, Adapter, external, () => 7);
                 Host = new NarrativeService(Facts, Context); Quests = new QuestService(Content, Facts, Context, Host);
                 Clues = new ClueService(Content, Facts, Context);
-                Dialog = new DialogService(new FakeDialogRunner(FakeDialogRunner.Line("Page")), DialogServiceTests.Table(), Context, new DialogMemory());
+                Dialog = new DialogService(new FakeDialogRunner(FakeDialogRunner.Line("Page")), DialogServiceTests.Table(), Context, Memory);
                 Adapter.BindDialog(Dialog); Beats = new BeatService(Content, Facts, Context, Dialog, _ => 4, _ => "ark", 7);
                 Adapter.BindServices(Quests, Clues, Beats); Log = new ShipLogQuery(Content, Facts, Quests, Clues, Beats);
                 Host.Register(Quests); Host.Register(Clues); Host.Register(Beats);
@@ -133,6 +134,8 @@ namespace Game.Tests.EditMode.Narrative
             int beat = f.Content.IndexOf(f.Beat); f.Adapter.CompleteBeat(beat);
             int beatSlot = f.Facts.Catalog.GeneratedSlot(FactFamily.Beat, f.Beat.Id.Hash.Value); Assert.AreEqual(1, f.Facts.GetBySlot(beatSlot));
             f.Adapter.QueueBeat(beat); Assert.AreEqual(1, f.Beats.QueuedCount); f.Host.SetPlayerFree(true); f.Frame();
+            // Visit accounting belongs to the production runner; seed memory to verify adapter routing.
+            f.Memory.IncrementVisit("start");
             Assert.IsTrue(f.Dialog.IsActive); Assert.AreEqual(1, f.Adapter.GetDialogVisitCount("start"));
             Assert.AreEqual(f.Dialog.Roll(6), f.Adapter.Roll(6));
             f.Adapter.AbortCurrentBeat(); f.Dialog.Pump(); f.Dialog.AcknowledgeEnd();
