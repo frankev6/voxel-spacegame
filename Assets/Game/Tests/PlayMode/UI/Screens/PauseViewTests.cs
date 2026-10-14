@@ -29,6 +29,7 @@ namespace Game.Tests.PlayMode.UI.Screens
     /// <summary>HUD-006: real boot/session, keyboard Back, shared pause owner and confirmations; four required cases.</summary>
     public sealed class PauseViewTests : GameFlowFixture
     {
+        protected override bool QuietCampaign => true;
         sealed class KeyboardInput : IDisposable
         {
             readonly Keyboard keyboard = InputSystem.AddDevice<Keyboard>("HUD006Keyboard");

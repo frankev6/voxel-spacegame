@@ -256,14 +256,12 @@ namespace Game.App.Presenters
             hudObjective?.Unbind();
             if (value.Reason != SessionResetReason.Cleared) RebindHudObjective();
             galaxyMapPresenter?.Reset(); systemMapPresenter?.Reset();
-            // TODO(HUD-014): rebind the owning feature presenters
             if (shipLogPresenter != null)
             {
                 shipLogPresenter.Unbind();
                 if (value.Reason != SessionResetReason.Cleared && Game.Core.Services.TryGet<Game.Narrative.ShipLog.ShipLogQuery>(out var query)) shipLogPresenter.Bind(query);
             }
-            // TODO(HUD-009/010/013/014/015/016/018/019): rebind the owning feature presenters
-            // to the new session models here when those features install their production bindings.
+            // TODO(HUD-009): rebind the HUD sync's remaining production bindings to the new session here.
         }
         internal void Tick()
         {

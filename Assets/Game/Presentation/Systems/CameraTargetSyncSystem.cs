@@ -22,8 +22,8 @@ namespace Game.Presentation.Systems
     [UpdateInGroup(typeof(PresentationBridgeGroup))]
     [UpdateAfter(typeof(FxUploadSystem))]
     [UpdateBefore(typeof(BrickPoolRenderSystem))]
-    // TODO(AUD-006): UpdateAfter AudioEventDrainSystem when that system exists.
-    // TODO(HUD-002): UpdateBefore HudSyncSystem when that system exists.
+    [UpdateAfter(typeof(Game.Presentation.Audio.AudioEventDrainSystem))]
+    // HudSnapshotSystem runs after this system and HudSyncSystem after that snapshot.
     public partial class CameraTargetSyncSystem : SystemBase
     {
         static readonly ProfilerMarker TargetMarker = new ProfilerMarker(ProfilerCategory.Scripts, "CameraTargetSyncSystem.ReadTarget");

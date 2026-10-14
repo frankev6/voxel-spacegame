@@ -148,7 +148,6 @@ namespace Game.ShipEditor.Services
         {
             CheckAlive();
             if (active.Id == tool || !tools.TryGetValue(tool, out var next)) return;
-            // TODO(EDT-015): register line, box and fill.
             active.Cancel(); if (tool == ToolId.Paste) previousTool = active.Id;
             active = next; Changed();
         }

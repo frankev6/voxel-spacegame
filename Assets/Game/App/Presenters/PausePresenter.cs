@@ -73,12 +73,16 @@ namespace Game.App.Presenters
         public void MainMenu()
         {
             if (!CanAct) return;
-            Confirm("Main menu", "Save and return to the main menu?", "Main menu", () =>
+            // QA-001: a blocked save (dialogue, combat) must not trap the player in the world; say so and offer to leave unsaved.
+            Refresh(); bool save = model.CanSave;
+            Confirm("Main menu", save ? "Save and return to the main menu?"
+                : model.SaveBlockedReason + " Return to the main menu without saving? Progress since your last save is lost.",
+                save ? "Main menu" : "Leave without saving", () =>
             {
                 if (CanAct)
                 {
                     operationGeneration = generation;
-                    pending = flow.QuitToMainMenuAsync(saveFirst: true);
+                    pending = flow.QuitToMainMenuAsync(saveFirst: save);
                 }
             });
         }

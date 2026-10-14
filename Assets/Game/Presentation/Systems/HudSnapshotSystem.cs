@@ -28,7 +28,6 @@ namespace Game.Presentation.Systems
     [BurstCompile]
     [UpdateInGroup(typeof(PresentationBridgeGroup))]
     [UpdateAfter(typeof(CameraTargetSyncSystem))]
-    // TODO(HUD-009): UpdateBefore HudSyncSystem when its implementation exists.
     public partial struct HudSnapshotSystem : ISystem
     {
         static readonly ProfilerMarker ShipMarker = new ProfilerMarker(ProfilerCategory.Scripts, "HudSnapshotSystem.Ship");

@@ -255,8 +255,12 @@ namespace Game.App.Session
             }
             narrative?.OnSessionRestored();
             HasActiveSession = true;
-            if (report.ErrorCount > 0) GameLog.Warn(LogCategories.Flow, "Loaded with " + report.ErrorCount + " problems; see the log");
-            // TODO(UI-003): surface the report through the notification service when it exists.
+            if (report.ErrorCount > 0)
+            {
+                GameLog.Warn(LogCategories.Flow, "Loaded with " + report.ErrorCount + " problems; see the log");
+                if (Game.Core.Services.TryGet<Game.UI.Services.UIRoot>(out var ui))
+                    ui.Notifications.Post(new Game.UI.Data.Notification { Kind = Game.UI.Data.NotificationKind.Warning, Label = "Save loaded with " + report.ErrorCount + " problems" });
+            }
         }
         internal void EndSession()
         {

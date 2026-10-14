@@ -239,6 +239,5 @@ namespace Game.Narrative.Quests
             finally { context.PopScope(); }
         }
         public void AfterEvaluation(bool playerFree) { }
-        // TODO(QST-007): the QUST participant owns importing serialized instances and unknown IDs.
     }
 }

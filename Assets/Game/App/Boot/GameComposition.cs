@@ -363,7 +363,7 @@ namespace Game.App.Boot
                 rig.SetMode(context.Scene == GameScene.MainMenu ? Game.Presentation.Data.CameraMode.Menu
                     : context.Scene == GameScene.World ? Game.Presentation.Data.CameraMode.Flight
                     : Game.Presentation.Data.CameraMode.Hold, cut: true);
-                // TODO(CAM-009): BlueprintLab enters editor orbit with its structure bounds.
+                // BlueprintLab: ShipEditorHost enters editor orbit with its structure bounds.
             }
             public bool IsSceneReadyComplete(in SceneReadyContext context) => true;
         }

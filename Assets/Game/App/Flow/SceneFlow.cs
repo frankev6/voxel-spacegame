@@ -288,7 +288,8 @@ namespace Game.App.Flow
             // A broken view must not retain the transition pause token or prevent the failed result.
             try { ShowSceneRoot(GameScene.MainMenu); }
             catch (Exception e) { GameLog.Exception(LogCategories.Flow, e, "SceneFlow recovery root"); }
-            // TODO(UI-003): ui.Notifications.Show("Something went wrong while loading. Returned to the main menu.", Error).
+            if (Game.Core.Services.TryGet<Game.UI.Services.UIRoot>(out var ui))
+                ui.Notifications.Post(new Game.UI.Data.Notification { Kind = Game.UI.Data.NotificationKind.Danger, Label = "Something went wrong while loading. Returned to the main menu." });
             Finish(GameScene.MainMenu, SceneEntryReason.ErrorRecovery, false);
             return FlowResult.Failed;
         }

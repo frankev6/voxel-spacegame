@@ -42,13 +42,10 @@ namespace Game.DevTools.Editor.Narrative
         IntegerField factValue;
         Button applyFact, playBeat;
         DropdownField beatChoice;
-        QuestService unavailableBaselines;
-        BeatService unavailableBeats;
         int selectedFactSlot = -1;
         bool factValueDirty, syncingFacts;
         string playMessage;
         NarrativeService observed;
-        ShipLogQuery unavailableQuery;
         int traceVersion;
         bool wasPlaying;
         double refreshAt;
@@ -79,8 +76,7 @@ namespace Game.DevTools.Editor.Narrative
         void OnDisable()
         {
             EditorApplication.update -= OnEditorUpdate;
-            observed = null; unavailableQuery = null;
-            unavailableBaselines = null; unavailableBeats = null;
+            observed = null;
             baselineRows.Clear(); beatIds.Clear(); baselineDependencies.Clear(); baselineSlots.Clear(); baselineSet.Clear();
             facts.Clear(); traceRows.Clear(); questRows.Clear(); activeQuests.Clear(); finishedQuests.Clear();
             factsView = null;
@@ -239,22 +235,11 @@ namespace Game.DevTools.Editor.Narrative
         {
             if (!Game.Core.Services.TryGet<ShipLogQuery>(out var query))
             { questStatus.text = "ShipLogQuery is not registered (QST-006)."; return false; }
-            if (ReferenceEquals(query, unavailableQuery))
-            { questStatus.text = "Ship-log reads are not implemented yet (QST-006)."; return false; }
             activeQuests.Clear(); finishedQuests.Clear();
-            try
-            {
-                query.GetQuests(false, activeQuests); query.GetQuests(true, finishedQuests);
-                AppendQuests(activeQuests); AppendQuests(finishedQuests);
-                questStatus.text = string.Format(CultureInfo.InvariantCulture, "{0} active · {1} completed or failed · read only", activeQuests.Count, finishedQuests.Count);
-                return true;
-            }
-            catch (NotImplementedException)
-            {
-                unavailableQuery = query; activeQuests.Clear(); finishedQuests.Clear(); questRows.Clear();
-                questStatus.text = "Ship-log reads are not implemented yet (QST-006).";
-                return false;
-            }
+            query.GetQuests(false, activeQuests); query.GetQuests(true, finishedQuests);
+            AppendQuests(activeQuests); AppendQuests(finishedQuests);
+            questStatus.text = string.Format(CultureInfo.InvariantCulture, "{0} active · {1} completed or failed · read only", activeQuests.Count, finishedQuests.Count);
+            return true;
         }
         void AppendQuests(List<QuestEntryView> rows)
         {
@@ -316,52 +301,41 @@ namespace Game.DevTools.Editor.Narrative
             { baselineStatus.text = "QuestService baseline reads are unavailable (QST-003)."; return; }
             if (!questsAvailable)
             { baselineStatus.text = "Active quest instances are unavailable (QST-006)."; return; }
-            if (ReferenceEquals(quests, unavailableBaselines))
-            { baselineStatus.text = "Quest baseline reads are not implemented yet (QST-003)."; return; }
             if (!Game.Core.Services.TryGet<ContentService>(out var content))
             { baselineStatus.text = "ContentService is unavailable; quest definitions cannot be resolved."; return; }
-            try
+            for (int i = 0; i < activeQuests.Count; i++)
             {
-                for (int i = 0; i < activeQuests.Count; i++)
+                var quest = activeQuests[i];
+                if (quest.Status != QuestStatus.Active) continue;
+                var definition = quest.QuestIndex > 0 && quest.QuestIndex <= ushort.MaxValue ?
+                    content.Catalog.GetByIndex<QuestDefinition>((ushort)quest.QuestIndex) : null;
+                if (definition == null) { baselineRows.Add(quest.QuestId + " · quest definition unavailable"); continue; }
+                baselineDependencies.Clear(); baselineSlots.Clear(); baselineSet.Clear();
+                definition.FailWhen?.CollectDependencies(baselineDependencies);
+                foreach (var stage in definition.Stages)
+                    foreach (var objective in stage.objectives)
+                    { objective.doneWhen?.CollectDependencies(baselineDependencies); objective.progress?.CollectDependencies(baselineDependencies); }
+                bool bound = true;
+                foreach (var dependency in baselineDependencies)
                 {
-                    var quest = activeQuests[i];
-                    if (quest.Status != QuestStatus.Active) continue;
-                    var definition = quest.QuestIndex > 0 && quest.QuestIndex <= ushort.MaxValue ?
-                        content.Catalog.GetByIndex<QuestDefinition>((ushort)quest.QuestIndex) : null;
-                    if (definition == null) { baselineRows.Add(quest.QuestId + " · quest definition unavailable"); continue; }
-                    baselineDependencies.Clear(); baselineSlots.Clear(); baselineSet.Clear();
-                    definition.FailWhen?.CollectDependencies(baselineDependencies);
-                    foreach (var stage in definition.Stages)
-                        foreach (var objective in stage.objectives)
-                        { objective.doneWhen?.CollectDependencies(baselineDependencies); objective.progress?.CollectDependencies(baselineDependencies); }
-                    bool bound = true;
-                    foreach (var dependency in baselineDependencies)
-                    {
-                        if (dependency.Kind != LogicDependencyKind.Fact) continue;
-                        if ((uint)dependency.Key >= (uint)store.Catalog.Count) { bound = false; break; }
-                        if (baselineSet.Add(dependency.Key)) baselineSlots.Add(dependency.Key);
-                    }
-                    if (!bound) { baselineRows.Add(quest.QuestId + " · fact dependencies are not bound"); continue; }
-                    baselineSlots.Sort();
-                    int instance = quests.GetInstanceCount(quest.QuestIndex) - 1; // Latest instance; LogicScope uses a zero-based index.
-                    if (instance < 0) { baselineRows.Add(quest.QuestId + " · active instance unavailable"); continue; }
-                    var scope = new LogicScope(LogicUsage.QuestObjective, quest.QuestIndex, instance, 0, false, default);
-                    if (baselineSlots.Count == 0) baselineRows.Add(quest.QuestId + " · no fact dependencies");
-                    foreach (int slot in baselineSlots)
-                    {
-                        int accept = quests.GetBaseline(scope, slot, BaselineKind.Accept), stage = quests.GetBaseline(scope, slot, BaselineKind.Stage);
-                        baselineRows.Add(string.Format(CultureInfo.InvariantCulture, "{0} · instance {1} · {2}\nAccept: {3} · Stage: {4} · Current: {5}",
-                            quest.QuestId, instance, store.Catalog.IdAt(slot).Name, accept, stage, store.GetBySlot(slot)));
-                    }
+                    if (dependency.Kind != LogicDependencyKind.Fact) continue;
+                    if ((uint)dependency.Key >= (uint)store.Catalog.Count) { bound = false; break; }
+                    if (baselineSet.Add(dependency.Key)) baselineSlots.Add(dependency.Key);
                 }
-                baselineStatus.text = activeQuests.Count == 0 ? "No active quests." : "Stored accept/stage baselines · instance indices are zero-based · read only";
+                if (!bound) { baselineRows.Add(quest.QuestId + " · fact dependencies are not bound"); continue; }
+                baselineSlots.Sort();
+                int instance = quests.GetInstanceCount(quest.QuestIndex) - 1; // Latest instance; LogicScope uses a zero-based index.
+                if (instance < 0) { baselineRows.Add(quest.QuestId + " · active instance unavailable"); continue; }
+                var scope = new LogicScope(LogicUsage.QuestObjective, quest.QuestIndex, instance, 0, false, default);
+                if (baselineSlots.Count == 0) baselineRows.Add(quest.QuestId + " · no fact dependencies");
+                foreach (int slot in baselineSlots)
+                {
+                    int accept = quests.GetBaseline(scope, slot, BaselineKind.Accept), stage = quests.GetBaseline(scope, slot, BaselineKind.Stage);
+                    baselineRows.Add(string.Format(CultureInfo.InvariantCulture, "{0} · instance {1} · {2}\nAccept: {3} · Stage: {4} · Current: {5}",
+                        quest.QuestId, instance, store.Catalog.IdAt(slot).Name, accept, stage, store.GetBySlot(slot)));
+                }
             }
-            catch (NotImplementedException)
-            {
-                // TODO(QST-003/QST-006): the debugger consumes these owners; it does not create quest state.
-                unavailableBaselines = quests; baselineRows.Clear();
-                baselineStatus.text = "Quest baseline reads are not implemented yet (QST-003).";
-            }
+            baselineStatus.text = activeQuests.Count == 0 ? "No active quests." : "Stored accept/stage baselines · instance indices are zero-based · read only";
         }
         void RefreshBeats(NarrativeService current)
         {
@@ -377,8 +351,6 @@ namespace Game.DevTools.Editor.Narrative
             { ready = false; playStatus.text = "Play beat unavailable: BeatService is not registered (QST-005)."; }
             else if (!Game.Core.Services.TryGet<DialogService>(out _))
             { ready = false; playStatus.text = "Play beat unavailable: DialogService is not registered (DLG-006)."; }
-            else if (ReferenceEquals(beats, unavailableBeats))
-            { ready = false; playStatus.text = "Play beat runtime is not implemented (QST-005/DLG-006)."; }
             else playStatus.text = ready ? playMessage ?? "Play beat calls the live BeatService.DebugPlay; condition and repeat checks are bypassed." : "Play beat requires a ready world and a real beat definition.";
             playBeat.SetEnabled(ready);
         }
@@ -391,12 +363,7 @@ namespace Game.DevTools.Editor.Narrative
             foreach (var beat in content.Catalog.All<StoryBeatDefinition>())
                 if (beat.IdString == beatChoice.value) { index = content.Catalog.IndexOf(beat); break; }
             if (index == 0) { RefreshNow(); return; }
-            try { beats.DebugPlay(index); playMessage = "DebugPlay requested: " + beatChoice.value; }
-            catch (NotImplementedException)
-            {
-                // TODO(QST-005/DLG-006): actual beat/dialog startup belongs to the runtime owners.
-                unavailableBeats = beats; playMessage = null;
-            }
+            beats.DebugPlay(index); playMessage = "DebugPlay requested: " + beatChoice.value;
             RefreshNow();
         }
         public static string FormatTraceEntry(LogicTraceEntry entry, string subjectName)

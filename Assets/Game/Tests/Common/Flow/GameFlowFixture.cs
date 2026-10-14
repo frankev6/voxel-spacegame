@@ -31,6 +31,8 @@ namespace Game.Tests.Common
         NativeLeakDetectionMode previousLeakMode;
         bool ownsSetup;
         internal string TestDirectory { get; private set; }
+        /// <summary>QA-001: fixtures that test free flight, menus or saving opt out of automatic story dialogue.</summary>
+        protected virtual bool QuietCampaign => false;
         protected EntityManager Em => World.DefaultGameObjectInjectionWorld.EntityManager;
         protected T Service<T>() where T : class => Services.Get<T>();
         protected Entity PlayerRoot
@@ -69,6 +71,7 @@ namespace Game.Tests.Common
             GameRootTestHooks.SaveRoot = Path.Combine(TestDirectory, "saves");
             GameRootTestHooks.SettingsPath = Path.Combine(TestDirectory, "settings.json");
             GameRootTestHooks.SkipIntroScreens = true;
+            GameRootTestHooks.SkipCampaignOpening = QuietCampaign;
             yield return SceneManager.LoadSceneAsync("Boot");
             Bootstrap.Boot();
             // Match production readiness on GPU; only null-device functional tests bypass rendering.

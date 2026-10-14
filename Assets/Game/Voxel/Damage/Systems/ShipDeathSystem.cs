@@ -19,7 +19,6 @@ using Unity.Jobs;
 
 namespace Game.Voxel.Damage
 {
-    // TODO(DMG-013): complete the three required acceptance tests and integrated validation.
     /// <summary>SPEC-13 §5.6: core-loss transition and the final, deduplicated structural destruction pass.</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup)), UpdateAfter(typeof(SplitSystem))]
     [UpdateBefore(typeof(GridMassUpdateSystem)), UpdateBefore(typeof(BrickDirtyScheduleSystem))]

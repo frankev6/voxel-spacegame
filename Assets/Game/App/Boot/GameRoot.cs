@@ -33,7 +33,6 @@ namespace Game.App.Boot
             var savePaths = SavePaths.CreateDefault();
             var settingsPaths = SettingsPaths.Default;
 #endif
-            // TODO(HUD-003): GameRootTestHooks.SkipIntroScreens skips the MainMenu splash once the splash exists.
             Composition = GameComposition.Build(transform, config, savePaths, settingsPaths);
         }
 

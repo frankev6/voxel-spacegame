@@ -18,7 +18,7 @@ namespace Game.Presentation.Input
     /// <summary>Samples the active Flight action map once per frame into latched commands (SPEC-03 §5.2).</summary>
     [UpdateInGroup(typeof(GameInitGroup))]
     [UpdateBefore(typeof(GridSpawnSystem))]
-    // TODO(GAL-009): OriginRebaseSystem must run before this sampler when that system is implemented.
+    // OriginRebaseSystem is OrderFirst in GameInitGroup, so a rebase precedes this sampler.
     public partial class PlayerInputSampleSystem : SystemBase
     {
         Entity commandEntity;

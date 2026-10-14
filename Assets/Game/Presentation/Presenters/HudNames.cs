@@ -87,7 +87,6 @@ namespace Game.Presentation.Presenters
             }
             if ((InteractionKind)value.InteractionKind == InteractionKind.Hail)
             {
-                // TODO(ENC-007): composition supplies the real director when its runtime implementation exists.
                 return new HudInteractionText(encounters != null && encounters.TryGetInstanceByMember(value.InteractionGridPersistentId, out var info)
                     ? info.Definition.DisplayName : "Unknown contact", "", false);
             }
