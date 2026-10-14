@@ -99,7 +99,7 @@ namespace Game.Narrative.Quests
             finally { context.PopScope(); }
         }
         void Trace(QuestInstance i, LogicTraceKind kind, int oldValue = 0, int newValue = 0)
-            => facts.Trace.Add(new LogicTraceEntry { Frame = UnityEngine.Time.frameCount, UniversalTime = context.World.UniversalTime,
+            => facts.Trace?.Add(new LogicTraceEntry { Frame = UnityEngine.Time.frameCount, UniversalTime = context.World.UniversalTime,
                 Kind = kind, Source = FactWriteSource.Quest, Subject = i.QuestIndex, OldValue = oldValue, NewValue = newValue,
                 ContextId = (ulong)(uint)i.Instance });
         void Changed(int q) { host.NotifyDependency(new LogicDependency(LogicDependencyKind.Quest, q)); QuestChanged?.Invoke(q); }
@@ -215,7 +215,7 @@ namespace Game.Narrative.Quests
                     }
                     if (restorePass) break;
                     i.DoneBits = bits;
-                    if (before != bits) QuestChanged?.Invoke(q);
+                    if (before != bits) Changed(q);
                     if (!complete || i.Status != QuestStatus.Active || !ReferenceEquals(i, Latest(q))) break;
                     int completedStage = i.Stage; Apply(i, stage.onComplete);
                     Trace(i, LogicTraceKind.StageCompleted, completedStage, completedStage + 1);
