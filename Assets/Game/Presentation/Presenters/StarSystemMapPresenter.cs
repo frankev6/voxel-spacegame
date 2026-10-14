@@ -8,6 +8,7 @@ using Game.Galaxy.Data;
 using Game.Galaxy.Services;
 using Game.Narrative.ShipLog;
 using Game.Simulation;
+using Game.Simulation.Commands;
 using Game.UI.Data;
 using Game.UI.ViewModels;
 using Game.UI.Views;
@@ -24,7 +25,7 @@ namespace Game.Presentation.Presenters
         readonly StarSystemMapViewModel model;
         readonly GalaxyService galaxy;
         readonly StarSystemLoader loader;
-        readonly World world;
+        readonly Unity.Entities.World world;
         readonly EntityQuery players, origins, clocks;
         readonly MapData data = new();
         readonly List<BodySpec> bodies = new();
@@ -33,7 +34,7 @@ namespace Game.Presentation.Presenters
         ulong selectedKey;
         double2 playerPosition;
         bool bound, dirty, disposed;
-        public StarSystemMapPresenter(StarSystemMapViewModel model, GalaxyService galaxy, StarSystemLoader loader, World world)
+        public StarSystemMapPresenter(StarSystemMapViewModel model, GalaxyService galaxy, StarSystemLoader loader, Unity.Entities.World world)
         {
             this.model = model ?? throw new ArgumentNullException(nameof(model));
             this.galaxy = galaxy ?? throw new ArgumentNullException(nameof(galaxy));

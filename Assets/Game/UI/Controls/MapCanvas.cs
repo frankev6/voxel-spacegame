@@ -148,11 +148,19 @@ namespace Game.UI.Controls
             }
             return nearest;
         }
+        bool TryColor(string token, out Color color)
+        {
+            // USS variables resolve through ancestors, but customStyle exposes local declarations.
+            var property = new CustomStyleProperty<Color>(token);
+            for (VisualElement element = this; element != null; element = element.parent)
+                if (element.customStyle.TryGetValue(property, out color)) return true;
+            color = default; return false;
+        }
         void ResolveColors()
         {
-            for (int i = 0; i < colors.Length; i++) customStyle.TryGetValue(new CustomStyleProperty<Color>("--maps-color-" + i), out colors[i]);
-            customStyle.TryGetValue(new CustomStyleProperty<Color>("--color-accent"), out accent);
-            customStyle.TryGetValue(new CustomStyleProperty<Color>("--color-text-muted"), out muted);
+            for (int i = 0; i < colors.Length; i++) TryColor("--maps-color-" + i, out colors[i]);
+            TryColor("--color-accent", out accent);
+            TryColor("--color-text-muted", out muted);
             tokenColors.Clear();
             if (data == null) return;
             foreach (var point in data.Points)
@@ -160,7 +168,7 @@ namespace Game.UI.Controls
                 string token = point.ColorToken;
                 if (string.IsNullOrEmpty(token) || tokenColors.ContainsKey(token)) continue;
                 if (tokenColors.Count == 64) { GameLog.WarnOnce("MapCanvas.ColorLimit", "UI", "Map has more than 64 distinct colour tokens; remaining tokens use the default."); break; }
-                if (!customStyle.TryGetValue(new CustomStyleProperty<Color>(token), out var color))
+                if (!TryColor(token, out var color))
                 {
                     // Screen OnPush supplies data after attachment but before the first style pass.
                     if (styleResolved && panel != null) GameLog.WarnOnce("MapCanvas.Color." + token, "UI", "Unknown map colour token: " + token);
@@ -169,7 +177,7 @@ namespace Game.UI.Controls
                 tokenColors.Add(token, color);
             }
         }
-        Color PointColor(MapPoint point)
+        internal Color PointColor(MapPoint point)
         {
             if ((point.Flags & MapPointFlags.Selected) != 0) return accent;
             if ((point.Flags & MapPointFlags.Known) == 0) return muted;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.Core.Events;
+using Game.Data.Logic;
 using Game.Galaxy.Data;
 using Game.Galaxy.Services;
 using Game.Narrative.ShipLog;

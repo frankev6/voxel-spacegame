@@ -289,7 +289,11 @@ namespace Game.Tests.PlayMode.UI.Screens
         {
             using var f = new Fixture(); f.UI.Navigator.Push(f.GalaxyView); yield return null; yield return null;
             Assert.AreEqual("--color-faction-vestari", f.GalaxyModel.Data.Points[f.Index(f.B)].ColorToken);
-            Assert.IsTrue(f.GalaxyView.Canvas.customStyle.TryGetValue(new CustomStyleProperty<Color>("--color-faction-vestari"), out var colour)); Assert.Greater(colour.a, 0);
+            Color colour = default; bool found = false;
+            for (var element = (VisualElement)f.GalaxyView.Canvas; element != null && !found; element = element.parent)
+                found = element.customStyle.TryGetValue(new CustomStyleProperty<Color>("--color-faction-vestari"), out colour);
+            Assert.IsTrue(found); Assert.Greater(colour.a, 0);
+            Assert.AreEqual(colour, f.GalaxyView.Canvas.PointColor(f.GalaxyModel.Data.Points[f.Index(f.B)]), "Drawing resolves the approved ancestor token");
             Assert.Greater(f.GalaxyView.Canvas.TessellationCount, 0);
         }
         [UnityTest] public IEnumerator RumorMarker_Shown()
