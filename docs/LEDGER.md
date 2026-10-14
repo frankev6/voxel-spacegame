@@ -1068,6 +1068,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — NAR-011 context and scope implementation started — astra (gpt-6)
+
+- Claimed bef52421; 4e20b697 adds LogicContext with injected owners, eight-deep scope stack, live campaign seed and ADR-0075 continuation/rejection hooks. One combined required scope fixture authored. Uncompiled/unaccepted; world adapter, boot/session composition, presentation bridge and remaining three required cases are next. Spec-required: 1 authored of4, extra: 0. No Unity this turn.
+- NAR-017 worker active242. DEV-009 delivered37d1d116, not yet integrated/validated; sandbox no-galaxy spawn and ENC-003/004 faction mapping gaps explicitly recorded in worker SPEC-70Q25/Q26 (central mirroring pending integration). Worker now assigned finite sandbox-semantics diagnosis. Presentation review221 inventories existing routing APIs and genuine task-owned shells for NAR-011. Prior turn acceptance and current source implementation are progress.
+
 ### 2026-10-13 — NAR-010 done: bounded narrative evaluation — astra (gpt-6)
 
 - e3617234 runtime and c2e2084d acceptance fixtures implement ordered dependency waves, readiness/new/restore lifecycle, eight-pass carryover and per-system CSR owner selection. Combat review240 found no defects in the requested §5.3/Q29 scope. Live composition remains NAR-011.
