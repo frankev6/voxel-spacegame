@@ -14,7 +14,7 @@ using Unity.Transforms;
 namespace Game.Simulation.Factions
 {
     /// <summary>Single fixed-step standing writer; schedules after matrix readers without main-thread completion.</summary>
-    [BurstCompile, UpdateInGroup(typeof(GameplayPrePhysicsGroup)), UpdateBefore(typeof(ShipCommandGroup))]
+    [BurstCompile, UpdateInGroup(typeof(GameplayPrePhysicsGroup), OrderFirst = true), UpdateBefore(typeof(ShipCommandGroup))]
     public partial struct FactionStandingSystem : ISystem
     {
         static readonly ProfilerMarker ProvokeMarker = new("FactionStandingSystem.Provoke");
@@ -43,7 +43,7 @@ namespace Game.Simulation.Factions
             states.Update(ref state); relations.Update(ref state);
             var singleton = SystemAPI.GetSingletonEntity<FactionState>();
             uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
-            var provoked = new NativeArray<byte>(64, state.WorldUpdateAllocator);
+            var provoked = CollectionHelper.CreateNativeArray<byte>(64, state.WorldUpdateAllocator);
             var playerList = players.ToEntityListAsync(Allocator.TempJob, state.Dependency, out var gathered);
             JobHandle provoke;
             using (ProvokeMarker.Auto())
@@ -52,6 +52,7 @@ namespace Game.Simulation.Factions
             JobHandle apply;
             using (ApplyMarker.Auto())
                 apply = new FactionApplyJob { Singleton = singleton, Tick = tick, Provoked = provoked,
+                    Matrix = SystemAPI.GetSingleton<FactionRelations>().Stance,
                     Standings = standings, Requests = requests, States = states, Relations = relations,
                     Events = SystemAPI.GetSingleton<ManagedEventQueue<FactionRelationChanged>>().Queue.AsParallelWriter() }.Schedule(provoke);
             state.Dependency = playerList.Dispose(apply);

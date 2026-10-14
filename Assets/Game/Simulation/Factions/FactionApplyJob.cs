@@ -14,6 +14,7 @@ namespace Game.Simulation.Factions
     {
         public Entity Singleton;
         public uint Tick;
+        public NativeArray<byte> Matrix;
         [ReadOnly] public NativeArray<byte> Provoked;
         public BufferLookup<FactionStanding> Standings;
         public BufferLookup<FactionRelationRequest> Requests;
@@ -25,7 +26,6 @@ namespace Game.Simulation.Factions
             var standings = Standings[Singleton];
             var requests = Requests[Singleton];
             var state = States[Singleton];
-            var relations = Relations[Singleton];
             FixedList512Bytes<int> before = default;
             for (int i = 0; i < standings.Length; i++) before.Add(standings[i].Relation);
             foreach (var request in requests)
@@ -54,7 +54,7 @@ namespace Game.Simulation.Factions
                 {
                     standing.PlayerStance = standing.Relation <= state.HostileAtOrBelow ? FactionStance.Hostile
                         : standing.Relation >= state.FriendlyAtOrAbove ? FactionStance.Friendly : FactionStance.Neutral;
-                    relations.Stance[i] = relations.Stance[i * state.Count] = (byte)standing.PlayerStance;
+                    Matrix[i] = Matrix[i * state.Count] = (byte)standing.PlayerStance;
                     Events.Enqueue(new ManagedEventEnvelope<FactionRelationChanged> { Tick = Tick, SortKey = (ulong)i,
                         Payload = new FactionRelationChanged(standing.Faction, before[i], standing.Relation, (byte)oldStance, (byte)standing.PlayerStance) });
                     changed = true;

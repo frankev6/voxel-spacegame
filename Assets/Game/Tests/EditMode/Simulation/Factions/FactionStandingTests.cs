@@ -19,7 +19,7 @@ using Unity.Jobs;
 
 namespace Game.Tests.EditMode.Simulation.Factions
 {
-    public sealed class FactionStandingTests : GameTestBase
+    public sealed partial class FactionStandingTests : GameTestBase
     {
         [TearDown] public void ContentCleanup() => TestContentFactory.DestroyAll();
         internal sealed class Fixture : IDisposable
@@ -109,9 +109,15 @@ namespace Game.Tests.EditMode.Simulation.Factions
             using var f = new Fixture();
             var reader = f.World.World.GetOrCreateSystemManaged<MatrixReader>();
             using var result = new NativeArray<byte>(1, Allocator.TempJob); reader.Result = result;
+            Assert.AreEqual(3, f.Em.GetComponentData<FactionState>(f.Singleton).Count);
+            Assert.AreEqual(0, f.Standing(f.Index).Relation);
             f.Request(f.Index, -100, 1); reader.Update();
-            f.World.UpdateSystem<FactionStandingSystem>(); f.World.CompleteAll();
-            Assert.AreEqual((byte)FactionStance.Neutral, result[0]); Assert.AreEqual(FactionStance.Hostile, f.Matrix.Get(0, f.Index));
+            try
+            {
+                f.Tick(1);
+                Assert.AreEqual((byte)FactionStance.Neutral, result[0]); Assert.AreEqual(FactionStance.Hostile, f.Matrix.Get(0, f.Index), "relation=" + f.Standing(f.Index).Relation + " pending=" + f.Em.GetBuffer<FactionRelationRequest>(f.Singleton).Length + " revision=" + f.Em.GetComponentData<FactionState>(f.Singleton).Revision + " count=" + f.Em.GetComponentData<FactionState>(f.Singleton).Count + " stance=" + f.Standing(f.Index).PlayerStance);
+            }
+            finally { f.World.CompleteAll(); }
         }
         [DisableAutoCreation] public partial class MatrixReader : SystemBase
         {

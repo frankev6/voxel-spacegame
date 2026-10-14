@@ -99,6 +99,7 @@ namespace Game.App.Boot
             Content = Push(new ContentService(config.ContentDatabase));
             Content.CreateSingletons(em);
             Push(BootSingletons.CreateAll(em, Content.Catalog, Content.PropMeshes));
+            Register(Game.Simulation.Factions.FactionIndexMap.Build(Content.Catalog));
             Register(Content);
             Content.Catalog.TryGet(new ContentId("config_game"), out GameConfigDefinition gameConfig);
             GameConfig = gameConfig;                                       // FND-E003 guarantees exactly one in a validated database

@@ -182,7 +182,7 @@ namespace Game.App.DevRuntime.Playground
                     if (enemyRequested) result = DevCommandResult.Ok("Enemy trial already started. playground reset restores the quiet sandbox.");
                     else
                     {
-                        result = host.Commands.Execute("spawn blueprint=ship_fighter dx=0 dz=90 face=player team=2 ai=true", host.Context);
+                        result = host.Commands.Execute("spawn blueprint=ship_fighter dx=0 dz=90 face=player faction=faction_raiders team=2 ai=true", host.Context);
                         if (result.Kind != DevResultKind.Failed) enemyRequested = true;
                     }
                     break;

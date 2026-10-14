@@ -3,6 +3,10 @@ using Game.App.DevRuntime;
 using Game.App.Session;
 using Game.Core;
 using Game.Economy;
+using Game.Simulation;
+using Game.Simulation.Ai;
+using Unity.Entities;
+using Unity.Collections;
 using Game.UI.Services;
 using Game.UI.Views;
 using UnityEngine.UIElements;
@@ -45,6 +49,16 @@ namespace Game.Tests.PlayMode.App
             Assert.IsNull(Services.Get<EconomyService>().Merchants.Current);
             Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=combat", Host.Context).Kind);
             yield return RunCommand("playground activate");
+            EM.CompleteAllTrackedJobs();
+            using (var fighters = EM.CreateEntityQuery(typeof(AiBrain), typeof(Allegiance)))
+            using (var allegiances = fighters.ToComponentDataArray<Allegiance>(Allocator.Temp))
+            using (var factions = EM.CreateEntityQuery(typeof(FactionRelations)))
+            {
+                bool hostile = false;
+                var matrix = factions.GetSingleton<FactionRelations>();
+                foreach (var allegiance in allegiances) hostile |= matrix.IsHostile(Allegiance.Player, allegiance);
+                Assert.IsTrue(hostile, "Combat trial must spawn an actual hostile faction, not only a differently numbered team");
+            }
             Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind, "Repeated combat activation cannot spawn another fighter");
             yield return RunCommand("playground reset");
             Assert.IsFalse(EM.Exists(originalPlayer), "Reset disposes previous player");
