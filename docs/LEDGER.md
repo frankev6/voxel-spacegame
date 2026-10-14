@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 18 | 14 | 0 | 0 | 150 | 0 | 182 | 6 |
+| M3 | 17 | 15 | 0 | 0 | 150 | 0 | 182 | 6 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -410,7 +410,7 @@
 | QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, QST-005, PERS-001 | yes | done | astra (gpt-6) | 2026-10-14 | 8e16b5e7 | QUST version1, raw IDs/name baselines, atomic restore; three required functional plus malformed-state case pass; capture advisory deferred. App registration QST-008. |
 | QST-008 | Bridge rules, player-free gating and registration | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005, QST-006, QST-007, NAR-011, NAR-012, TRV-006, ENC-007, ENC-009, DLG-008 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | ADR-0107 concrete completed dependencies; combat worker implements actual registration/bridge/gating. |
 | QST-009 | Opening chapter content | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, GAL-003, NAR-013, DLG-003, ENC-002, ECO-002 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same economy worker reconciling e987aae8 opening assets/import with accepted actual DLG-007 compiler; lead import and two required checks pending. |
-| QST-010 | Opening chapter playthrough | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-008, QST-009, QST-007, SPEC-70, SPEC-32, SPEC-50 | no | todo |  |  |  |  |
+| QST-010 | Opening chapter playthrough | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-008, QST-009, QST-007, SPEC-70, SPEC-32, SPEC-50 | no | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Source pipeline per owner substantial-work correction; actual scenario acceptance awaits QST-008 registration and QST-009 import. No substitute owners. |
 | ECO-001 | Public contract types | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | CORE-001, DATA-001, NAR-001, VOX-001, DMG-001, SYS-001, FLT-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a81ff41 | Economy contracts and serialized tradeable defaults; 2 required tests. Runtime ECO-002 onward remains open. Full 1027 EM / 145 PM passed. |
 | ECO-002 | Definitions, config and validators | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | db5d72e | Strict economy validators/config and canonical scrap; 15 required tests; partial ECO-009 scrap only |
 | ECO-003 | InventoryModel and Wallet | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-001 | yes | done | astra (gpt-6) | 2026-10-13 | 80a8bd18 | Twelve functional inventory/wallet checks pass; advisory Apply40 unmeasured (ADR-0070) |
