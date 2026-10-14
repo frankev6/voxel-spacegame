@@ -1466,6 +1466,7 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 | 27 | Data effects cannot access narrative tracing or the dialog merchant continuation through ILogicContext | Resolved by ADR-0075: optional ILogicEffectHost exposes rejection tracing and the current blocking continuation without changing ILogicContext or module references. OpenMerchant rejects a missing continuation. App/dialog production wiring remains NAR-011/DLG-006; tests supply a recording host. | Tech lead — ledger Q351 |
 
 | 28 | Unity reloads unused serialized string argument slots as empty strings | Resolved: numeric/boolean compiled-function slots accept null or empty unused text, but still reject nonempty text and incompatible expression slots. Apply the same predicate during validation and binding; verify existing function cases through serialized graphs. No vocabulary or field-layout change. | Tech lead — ledger Q356 |
+| 29 | Full reevaluation flag lifetime and meaning of dependency-index owners | Resolved: snapshot pendingFull once per pass and pass that same value to every registered system, clearing it once for the pass. Systems receive the ordered change batch; each system uses its own DependencyIndex to select subscribed content owners (quests/beats/etc.), as SPEC-42 requires. No new subscription API is added to INarrativeSystem. Equal Order values retain registration order; registration ends when a session begins. | Tech lead — ledger Q363 |
 
 ## 11. References
 
