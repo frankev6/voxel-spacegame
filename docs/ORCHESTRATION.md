@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Counter source integrated, fixture correction active:** DEV-0117f6f58e compile clean; JSON case passes, marker case fails on zero EditMode last-frame samples. Worker corrects fixture, no repeat blind runs. No Unity active. Next lead DLG-006 runtime; DLG-013 combat active, NAR-019 source review presentation active.
+
 - **Dialog authoring accepted:** DLG-00332bbc244 done; generated real command table/facts/YSLS repeat byte-identically. Four required cases pass across initial3-pass run and single corrected JSON-fixture retry. Compile clean, no Unity active; evidence Logs/playtest/dialog-validator. DLG-0106629f3aa metadata integrated,7 sprites still deferred. Next integrate DEV-0115f154755, implement DLG-006 runtime/SYS-009 pose persistence; dispatch newly ready DLG-013. NAR-019 delivery pending actual live owners.
 
 - **Dialog source integrated:** DLG-0036120691e on task/DLG-003-validator-integration, uncompiled/unaccepted. Next review/generate real authoring outputs, verify repeat-generation stability and four required EditMode cases; mirror SPEC-41Q14 in ledger. No Unity active. SYS-008 accepted on main ea853edc; NAR-019 delivery remains pending.

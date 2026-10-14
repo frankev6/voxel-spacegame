@@ -960,6 +960,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 386 | SPEC-31 Q21: shared docking composition | ADR-0083 supplies shared production docking owner, compatible loader injection and canonical interaction event handling. PLOC restore remains SYS-009. | Tech lead |
 | 387 | SPEC-41 Q14: generated dialog metadata defaults | Internal cloned registry snapshot, canonical source/facts hash, stable UTF-8 outputs, append-only line IDs and Edit-mode menus. Real output generation verified. | Tech lead |
 | 388 | SPEC-41 Q15: missing approved dialog sprites | Integrate existing eight metadata identities; leave seven unavailable sprite fields null. DLG-010 stays partial; no art generation or new gate. | Tech lead |
+| 389 | SPEC-70 Q30: diagnostic counter ownership/availability | Use existing owner APIs and explicit unavailable values, canonical JSON, bounded marker list and disposable host-owned recorders/queries. No benchmark runs. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1092,6 +1093,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DEV-011 integrated; marker fixture correction delegated — astra (gpt-6)
+
+- 7f6f58e integrates owned counter snapshots, perf command/CLI and FX/audio probes. Compile68424 clean, zero warning CS. Json_IsValid passes and perf-command.json parses with Python; marker case fails because headless EditMode last-frame samples are all0 and the15-row alphabetical tie set excludes FX Batch. No functional assertion weakened; worker corrects the frame fixture once while lead continues runtime work.
+- spec-required: 2, extra: 0. Task remains in progress/unaccepted; evidence Logs/playtest/dev011/first.xml and first.log. No perf/soak or optimization run. Q389 mirrors SPEC-70Q30. Presentation261 review reports no source defect; now reviews pending NAR-019 delivery. Combat277 implements DLG-013. No Unity active. Previous dialog acceptance and current counter integration/evidence are progress.
 
 ### 2026-10-13 — DLG-003 done: real dialog authoring outputs — astra (gpt-6)
 
