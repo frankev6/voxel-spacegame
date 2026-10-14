@@ -1122,6 +1122,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-14 — EDT-018 incremental prop transactions — astra (gpt-6)
+
+- f718c5b4 wires module-internal borrowed diffs to per-mesh prop sets before history merges/disposes commands. Undo processes inverse operations in reverse order. Opening/discard rebuilds enumerate once, observer recovery cannot interrupt history bookkeeping, and disposal unsubscribes before releasing owned native sets. SPEC-51 Q45/global417 records the default.
+- Source uncompiled/unaccepted; drawing/material bindings and six required cases remain. spec-required:0 authored this checkpoint (six pending),extra:0. No Unity run; checks remain grouped after the compatible implementation batch. Documentation check passes (33 specs,515 tasks,zero errors/warnings).
+- EDT-0153991bae4, EDT-021ef94aca8 and EDT-01799ec7ef5 delivered, queued for integration. Exact existing combat/economy workers review clipboard/area-tools; presentation panel review307 found no concrete defects and has an acceptance/dependency wait. No duplicates. EDT-016 review330 found shared-origin damaged transforms rejected by placement and stale selection after undo; lead repairs remain pending before this slice is accepted. Previous turn reinforced policy only; this turn changes renderer source and dispatch state. Goal remains active.
+
 ### 2026-10-14 — EDT-018 scheduling and prop storage authored — astra (gpt-6)
 
 - 756bd8f6 adds bounded nearest-pivot scheduling, prior-frame job application, dirty requeueing, slice visibility/invalidation and reused brick drawing. InstancedPropSet owns exact-identity native maps/records/matrices with constant-time swap removal, retaining distinct damaged instances at a shared origin. SPEC-51 Q44/global416 records scheduling and identity details.
