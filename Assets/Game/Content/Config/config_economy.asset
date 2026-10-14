@@ -38,5 +38,6 @@ MonoBehaviour:
   scrapPerCell: 0.02
   salvageMaxScrap: 500
   maxSalvageCells: 20000
-  salvageDistanceM: 120
+  salvageDistanceM: 40
+  salvageReachBonusCapM: 60
   salvageCue: {fileID: 11400000, guid: 67882f03c1e6b41c7adcd65371399523, type: 2}

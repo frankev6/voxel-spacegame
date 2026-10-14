@@ -30,7 +30,7 @@ namespace Game.App.DevRuntime.Playground
         internal const int WrecksPerReset = 3;
         internal const string PadId = "salvage";
         internal const string PadTitle = "12  SALVAGE / RECOVER CARGO";
-        internal const string PadDetail = "F prepares one stationary fighter wreck nearby. Wait for the HUD Salvage prompt, then press F again.\nThe normal salvage owner transfers real items and opens your inventory. A full hold leaves salvage on that same wreck; make room and return. Three wrecks per playground reset.";
+        internal const string PadDetail = "F prepares one stationary fighter wreck nearby. Wait for the HUD Salvage prompt, then press F again.\nThe normal salvage owner pulls the wreck into your hold; item toasts list the haul (I opens cargo). A full hold leaves salvage on that same wreck; make room and return. Three wrecks per playground reset.";
         static readonly ContentId BlueprintId = new("ship_fighter");
         readonly DevRuntimeHost host;
         readonly Action<string> report;
@@ -91,7 +91,7 @@ namespace Game.App.DevRuntime.Playground
                 return DevCommandResult.Fail("The approved fighter does not fit the production salvage cell limit.");
             if (math.floor(source.SolidCellCount * config.ScrapPerCell) < 1 || config.SalvageMaxScrap < 1)
                 return DevCommandResult.Fail("The approved fighter has no guaranteed scrap under the current salvage configuration.");
-            double3 absolute = padPosition + new double3(0, 0, 85);
+            double3 absolute = padPosition + new double3(0, 0, 48); // inside the 40 m production reach (QA-001)
             float3 local = (float3)(absolute - frame.OriginInStarSystem);
             if (!math.all(math.isfinite(local))) return DevCommandResult.Fail("Salvage position exceeds the local frame.");
             var em = ctx.EntityManager; em.CompleteAllTrackedJobs();
@@ -174,7 +174,7 @@ namespace Game.App.DevRuntime.Playground
                 outcome += " Scrap carried: " + economy.Inventory.CountOf(new ContentId("resource_scrap"))
                     + ". Occupied slots: " + economy.Inventory.UsedSlots + "/" + economy.Inventory.Capacity + ".";
             SetStatus(outcome + " Wrecks issued: " + issued + "/" + WrecksPerReset + ".");
-            if (ui != null && host.Context.TryGetService<UiComposition>(out var screens)) screens.ShowInventory();
+            // QA-001: no automatic inventory: it covered (and paused) the pull animation. Toasts list the items; I opens cargo.
         }
         void SessionReset(SessionReset value) => Reset();
         void TransitionStarted(SceneTransitionStarted value) => leavingWorld = value.From == GameScene.World;

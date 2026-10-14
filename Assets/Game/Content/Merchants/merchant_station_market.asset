@@ -31,6 +31,9 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: e359aa29e6b064108934b2dac57ec713, type: 2}
     count: 6
     priceFactor: 1
+  - item: {fileID: 11400000, guid: de62599a58f143b9a78394896c4b1a2a, type: 2}
+    count: 3
+    priceFactor: 1
   - item: {fileID: 11400000, guid: 863c5916c5e6c4806ad23751a5746537, type: 2}
     count: 4
     priceFactor: 1

@@ -172,8 +172,7 @@ namespace Game.Tests.PlayMode.App
                 "Actual salvage prompt is available", 3);
             yield return RunCommand("playground run=salvage");
             Assert.Greater(economy.Inventory.CountOf(new ContentId("resource_scrap")), scrapBefore, "Production salvage transfers actual cargo.");
-            Assert.IsTrue(ui.Navigator.Get<InventoryView>().IsOpen);
-            ui.Navigator.Pop(ui.Navigator.Get<InventoryView>());
+            Assert.IsFalse(ui.Navigator.Get<InventoryView>().IsOpen, "QA-001: salvage leaves the pull animation visible");
             Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=combat", Host.Context).Kind);
             yield return RunCommand("playground activate");
             EM.CompleteAllTrackedJobs();

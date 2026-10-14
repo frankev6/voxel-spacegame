@@ -19,6 +19,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField] private int salvageMaxScrap = 500;
         [UnityEngine.SerializeField] private int maxSalvageCells = 20000;
         [UnityEngine.SerializeField] private float salvageDistanceM = 120f;
+        [UnityEngine.SerializeField] private float salvageReachBonusCapM = 60f;   // QA-001: summed magnet bonus cap
         [UnityEngine.SerializeField] private AudioCueDefinition salvageCue;
         public int BaseCargoSlots => baseCargoSlots;
         public float UnitsPerSlot => unitsPerSlot;
@@ -33,6 +34,7 @@ namespace Game.Data.Definitions
         public int SalvageMaxScrap => salvageMaxScrap;
         public int MaxSalvageCells => maxSalvageCells;
         public float SalvageDistanceM => salvageDistanceM;
+        public float SalvageReachBonusCapM => salvageReachBonusCapM;
         public AudioCueDefinition SalvageCue => salvageCue;
         public override void Validate(Game.Data.Validation.ValidationScope scope, Game.Data.Validation.ContentValidationContext context)
         {
@@ -49,6 +51,7 @@ namespace Game.Data.Definitions
             EconomyDefinitionValidation.Positive(scope, nameof(salvageMaxScrap), salvageMaxScrap);
             EconomyDefinitionValidation.Positive(scope, nameof(maxSalvageCells), maxSalvageCells);
             EconomyDefinitionValidation.FloatRange(scope, "ECO-E005", nameof(salvageDistanceM), salvageDistanceM, 0f, float.MaxValue, true);
+            EconomyDefinitionValidation.FloatRange(scope, "ECO-E005", nameof(salvageReachBonusCapM), salvageReachBonusCapM, 0f, float.MaxValue, false);
             if (scrapItem == null) scope.Error("ECO-E005", nameof(scrapItem), "Scrap item is not set; canonical resource_scrap is authored by ECO-009.");
             if (salvageCue == null) scope.Error("ECO-E005", nameof(salvageCue), "Salvage cue is not set.");
         }

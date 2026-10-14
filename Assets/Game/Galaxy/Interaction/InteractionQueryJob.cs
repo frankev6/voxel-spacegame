@@ -1,6 +1,7 @@
 using Game.Core.Components;
 using Game.Core.Events;
 using Game.Data.Components;
+using Game.Data.Definitions;
 using Game.Galaxy.Bodies;
 using Game.Simulation.Spatial;
 using Game.Voxel.PhysicsBody;
@@ -25,6 +26,7 @@ namespace Game.Galaxy.Interaction
         public byte Counter;
         public uint Tick;
         public float QueryRadius;
+        public float SalvageBonusM;   // QA-001: the player's salvage magnets extend Salvage targets' reach
         [ReadOnly] public CollisionWorld Physics;
         [ReadOnly] public SpatialHashQueryData Spatial;
         [ReadOnly] public ComponentLookup<LocalTransform> Transforms;
@@ -59,8 +61,9 @@ namespace Game.Galaxy.Interaction
                         if (Bodies.HasComponent(candidate) && Bodies[candidate].Grid == Player) continue;
                         var interactable = Interactables[candidate];
                         float distance = math.max(0, hit.Distance - radius);
-                        if (distance > 2 * interactable.DistanceM) continue;
-                        byte inRange = (byte)(distance <= interactable.DistanceM ? 1 : 0);
+                        float reach = interactable.DistanceM + (interactable.Kind == InteractionKind.Salvage ? SalvageBonusM : 0);
+                        if (distance > 2 * reach) continue;
+                        byte inRange = (byte)(distance <= reach ? 1 : 0);
                         if (target.Target != Entity.Null && (inRange < target.InRange ||
                             inRange == target.InRange && (distance > target.DistanceM ||
                             distance == target.DistanceM && candidate.Index >= target.Target.Index))) continue;

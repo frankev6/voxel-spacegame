@@ -46,6 +46,8 @@ namespace Game.Galaxy.Interaction
             job.Counter = SystemAPI.GetSingleton<PlayerCommand>().Edges.Interact;
             job.Tick = SystemAPI.TryGetSingleton<SimClock>(out var clock) ? clock.Tick : 0;
             job.QueryRadius = SystemAPI.GetSingleton<StreamingConfig>().InteractionQueryRadiusM;
+            job.SalvageBonusM = job.Player != Entity.Null && SystemAPI.HasComponent<Salvage.SalvageReach>(job.Player)
+                ? SystemAPI.GetComponent<Salvage.SalvageReach>(job.Player).BonusM : 0;
             job.Physics = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
             var spatial = SystemAPI.GetSingleton<SpatialHash>(); job.Spatial = spatial.AsReadOnly();
             job.Events = SystemAPI.GetSingleton<ManagedEventQueue<BodyInteracted>>().Queue.AsParallelWriter();

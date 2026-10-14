@@ -69,7 +69,7 @@ namespace Game.Tests.EditMode.Economy
             var station = catalog.Get<MerchantDefinition>(new ContentId("merchant_station_market"));
             Assert.AreEqual("ARK Station Market", station.DisplayName); Assert.AreEqual(24, station.RestockHours); Assert.AreEqual(1, station.SellPriceFactor); Assert.AreEqual(.5f, station.BuyPriceFactor);
             Assert.AreEqual(ItemCategoryMask.Block | ItemCategoryMask.Resource | ItemCategoryMask.Module, station.Buys);
-            Stock(station, "resource_fuel:-1,block_hull:200,block_hull_angled:100,block_thruster_small:10,block_cargo_small:6,block_shield_small:4,block_reactor_small:2,weapon_plasma_turret_small:4,weapon_small_beam_turret:2");
+            Stock(station, "resource_fuel:-1,block_hull:200,block_hull_angled:100,block_thruster_small:10,block_cargo_small:6,block_salvage_magnet_small:3,block_shield_small:4,block_reactor_small:2,weapon_plasma_turret_small:4,weapon_small_beam_turret:2");
             Assert.IsEmpty(station.BodyTemplates); Assert.AreEqual(1, station.AuthoredBodies.Count);
             var placement = station.AuthoredBodies.Single(); Assert.IsNotNull(placement.starSystem, "Integrate GAL-012 before ECO-009 validation.");
             Assert.AreEqual("starsys_ark_start", placement.starSystem.IdString); Assert.AreEqual("ark_station", placement.bodyKey);

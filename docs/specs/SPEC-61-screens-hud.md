@@ -285,6 +285,12 @@ Per frame (marker `HudSyncSystem.Apply`):
 
 ### 5.3 `FlightHudView` per-frame update path
 
+**World overlay (QA-001, owner 2026-10-14: "ships and stations should have a text and visuals overlay").** `WorldOverlaySystem` (Presentation, after `CameraTargetSyncSystem`) draws up to 24 pooled tags on the UI World layer:
+- **Which objects:** the nearest non-player ship and station grids within 1,500 m, plus wrecks within 400 m that are salvageable or have at least 24 cells. Asteroids are excluded.
+- **What each tag shows:** corner brackets around the projected bounds, and a label "name · distance m" (names from `IHudNames.TargetName`).
+- **Styling:** relation classes `world-tag--ally/--enemy`, salvage highlight `world-tag--salvage`, and `world-tag--active` for the in-range interaction target (`components/world-overlay.uss`).
+- **Radar:** `HudSyncSystem.SetMarkers` adds point-of-interest blips (used by the dev playground's beacons), and `DisplayRangeM` sets the shown range.
+
 `FlightHudView` subscribes to `HudViewModel.propertyChanged` in `OnBuild`. In the handler it switches on the args' property name (compared by reference with the static args instances) and updates elements directly: `Meter.SetValue`, `Slot.SetCooldown`, `Label.text = NumberStringCache.Get(...)`, class toggles. Strings that change rarely (names, objective) use UXML `DataBinding`. Radar: on `RadarVersion` change, the view positions its 64 pooled blip elements (`style.translate` in px = offset / range × 120, rotated by `-RadarYawDeg`, where yaw = `atan2(forward.x, forward.z)`: `x = ox·cos − oz·sin`, `y = ox·sin + oz·cos`, so a contact dead ahead is straight up (QA-001 fixed mirrored sides), sets kind/relation classes (`.marker--ally/--enemy/--neutral` + `.hud-blip--ship/--station/--body/--poi`, `.hud-blip--beyond` for flag 2), and hides unused ones with `.is-hidden`. No element is created after `OnBuild`.
 
 ### 5.4 Presenters

@@ -7,7 +7,7 @@ namespace Game.Galaxy.Salvage
         public static EconomyConfigRef Create(EconomyConfigDefinition definition)
         {
             if (definition == null) throw new ArgumentNullException(nameof(definition));
-            return new EconomyConfigRef { SalvageDistanceM = definition.SalvageDistanceM };
+            return new EconomyConfigRef { SalvageDistanceM = definition.SalvageDistanceM, SalvageReachBonusCapM = definition.SalvageReachBonusCapM };
         }
     }
 }

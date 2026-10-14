@@ -83,6 +83,12 @@ Each has a test here.
    - Non-player, non-body hulks get `Interactable { Kind = Salvage }` from `SalvageMarkSystem`. This is one batched structural change per frame, only when new hulks exist.
    - Pressing Interact computes the hulk's yields once, moves what fits into cargo, and despawns the hulk when nothing is left.
    - Hulks over `maxSalvageCells` (20,000) cannot be salvaged in M3.
+   - **QA-001 (owner playtest 2026-10-14):**
+     - production reach is 40 m (`config_economy.salvageDistanceM`), measured from the player's hull radius;
+     - every intact `SalvageMagnet` block module (`block_salvage_magnet_small`, +20 m, sold at ARK Station Market) adds reach, capped at `salvageReachBonusCapM` (60 m), through `SalvageReach`/`SalvageReachSystem` and `InteractionQueryJob.SalvageBonusM`;
+     - a completed salvage adds `SalvageCollected { Collector }` with the despawn request. `SalvagePullSystem` (GameInitGroup, before `GridSpawnSystem`) turns up to 1,500 exposed cells into debris with `FxEventFlags.Collected`, flying into the collector over `FxCollect.Seconds` (0.45 s), so the wreck is visibly sucked into the ship rather than vanishing;
+     - salvageable wrecks carry a salvage-coloured world tag (SPEC-61 world overlay);
+     - salvage never opens the inventory by itself.
 
    Reason: core loop step 4; persistent world wrecks (station hulks) stay untouched.
 10. **Module boundaries.**

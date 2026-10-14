@@ -238,7 +238,7 @@ namespace Game.Tests.EditMode.Economy
             Assert.AreEqual(2000L, config.StartCredits); Assert.AreEqual(.002f, config.RelationPriceSlope);
             Assert.AreEqual(.5f, config.SalvageFunctionalChance); Assert.AreEqual(.1f, config.SalvageStructuralChance);
             Assert.AreEqual(50, config.SalvageMaxStructuralItems); Assert.AreEqual(.02f, config.ScrapPerCell);
-            Assert.AreEqual(500, config.SalvageMaxScrap); Assert.AreEqual(20000, config.MaxSalvageCells); Assert.AreEqual(120f, config.SalvageDistanceM);
+            Assert.AreEqual(500, config.SalvageMaxScrap); Assert.AreEqual(20000, config.MaxSalvageCells); Assert.AreEqual(120f, config.SalvageDistanceM); Assert.AreEqual(60f, config.SalvageReachBonusCapM);
             Assert.AreSame(scrap, config.ScrapItem); Assert.AreSame(cue, config.SalvageCue);
             CollectionAssert.AreEqual(new[] { "resource_fuel", "block_hull", "block_hull_angled" }, config.StartItems.Select(e => e.item.IdString));
             CollectionAssert.AreEqual(new[] { 50, 40, 20 }, config.StartItems.Select(e => e.min));

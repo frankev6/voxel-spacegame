@@ -113,10 +113,28 @@ namespace Game.Tests.PlayMode.Galaxy
             var expected = f.Yields(root); f.Cargo.SetCapacity(2);
             Assert.IsTrue(f.Salvage.TrySalvage(root, out string message)); StringAssert.Contains("Cargo full", message);
             Assert.AreEqual(1, f.Salvage.PendingWrecks); Assert.IsFalse(f.Em.IsComponentEnabled<GridDespawnRequest>(root));
+            var collector = f.Em.CreateEntity(typeof(PlayerShip));
             f.Cargo.SetCapacity(20); Assert.IsTrue(f.Salvage.TrySalvage(root, out message)); Assert.AreEqual(0, f.Salvage.PendingWrecks);
+            Assert.AreEqual(collector, f.Em.GetComponentData<SalvageCollected>(root).Collector, "QA-001: the wreck is pulled into the player's ship");
             foreach (var item in expected) Assert.AreEqual(item.Count, f.Cargo.CountOf(item.ItemIndex));
             Assert.IsTrue(f.Em.IsComponentEnabled<GridDespawnRequest>(root)); Assert.AreEqual(1, f.Sound.Calls);
             Assert.IsFalse(f.Salvage.TrySalvage(root, out _), "Pending despawn cannot be harvested again.");
+        }
+        [Test] public void Magnet_ExtendsReach_Capped()
+        {
+            using var f = new Fixture(); f.Content.CreateSingletons(f.Em);
+            var magnet = f.Content.Catalog.Get<BlockDefinition>(new ContentId("block_salvage_magnet_small"));
+            var ship = f.Em.CreateEntity(typeof(PlayerShip), typeof(VoxelGrid), typeof(BlockInstance));
+            var buffer = f.Em.GetBuffer<BlockInstance>(ship);
+            for (int i = 0; i < 4; i++) buffer.Add(new BlockInstance { Block = f.Content.Catalog.GetBlockIndex(magnet), CellsAlive = 1 });
+            var system = f.Test.World.CreateSystem<SalvageReachSystem>();
+            system.Update(f.Test.World.Unmanaged); system.Update(f.Test.World.Unmanaged);
+            Assert.AreEqual(f.Config.SalvageReachBonusCapM, f.Em.GetComponentData<SalvageReach>(ship).BonusM, "4 × 20 m capped");
+            buffer = f.Em.GetBuffer<BlockInstance>(ship); buffer.RemoveRange(1, 3);
+            var instance = buffer[0]; instance.Flags = BlockInstanceFlags.Destroyed; buffer[0] = instance;
+            var grid = f.Em.GetComponentData<VoxelGrid>(ship); grid.Revision++; f.Em.SetComponentData(ship, grid);
+            system.Update(f.Test.World.Unmanaged);
+            Assert.AreEqual(0f, f.Em.GetComponentData<SalvageReach>(ship).BonusM, "a destroyed magnet adds nothing");
         }
         [Test] public void TooLarge_Refused()
         {

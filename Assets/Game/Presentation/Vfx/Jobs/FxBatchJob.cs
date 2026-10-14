@@ -58,7 +58,8 @@ namespace Game.Presentation.Vfx
                 if (debris)
                 {
                     DebrisBudget--; Counters[(int)FxCounter.DebrisSpawned]++;
-                    lifetime = math.lerp(DebrisLifetimeMin, DebrisLifetimeMax, (seed >> 8) * (1f / 16777216)) / DebrisLifetimeMax;
+                    lifetime = (e.Flags & FxEventFlags.Collected) != 0 ? FxCollect.Seconds / math.max(DebrisLifetimeMax, FxCollect.Seconds)
+                        : math.lerp(DebrisLifetimeMin, DebrisLifetimeMax, (seed >> 8) * (1f / 16777216)) / DebrisLifetimeMax;
                 }
                 bool palette = (e.Flags & FxEventFlags.PaletteColor) != 0;
                 uint color = palette ? Palette[(int)(e.Color & 255)] : e.Color == 0 ? s.DefaultColorRgba8 : e.Color;

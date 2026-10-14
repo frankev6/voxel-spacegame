@@ -19,6 +19,7 @@
 @import url("components/tooltip.uss");
 @import url("components/toast.uss");
 @import url("components/modal.uss");
+@import url("components/world-overlay.uss");
 @import url("screens/dialog-services.uss");
 @import url("screens/travel.uss");
 

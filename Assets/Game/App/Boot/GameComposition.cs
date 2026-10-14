@@ -269,6 +269,7 @@ namespace Game.App.Boot
             var hudNames = new Game.Presentation.Presenters.HudNames(Content.Catalog,
                 Game.Core.Services.Get<Game.Simulation.Factions.FactionIndexMap>(), campaignGalaxy, travel, encounters);
             hudSync.Bind(Screens.HudModel, hudNames, Input.GetBindingDisplay);
+            world.GetOrCreateSystemManaged<WorldOverlaySystem>().Bind(UI.GetLayer(Game.UI.Data.UILayer.World), hudNames, Camera.Camera);
             Input.BindingsChanged += hudSync.RefreshBindings;
             Screens.BindSceneRoots(hudSync, Input.GetBindingDisplay, editorServices);
             Screens.BindHudPresenters(Input, Content.Catalog);
@@ -390,6 +391,7 @@ namespace Game.App.Boot
                 world.GetExistingSystemManaged<PlayerInputSampleSystem>()?.Unbind();
                 var hud = world.GetExistingSystemManaged<HudSyncSystem>();
                 if (hud != null) { if (Input != null) Input.BindingsChanged -= hud.RefreshBindings; hud.Unbind(); }
+                world.GetExistingSystemManaged<WorldOverlaySystem>()?.Unbind();
             }
             LastDisposeLog.Clear();
             for (int i = DisposeStack.Count - 1; i >= 0; i--)

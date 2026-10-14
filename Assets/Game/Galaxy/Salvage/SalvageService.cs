@@ -29,7 +29,7 @@ namespace Game.Galaxy.Salvage
         readonly EconomyConfigDefinition config;
         readonly IAudioService audio;
         readonly SalvageLedger ledger = new();
-        EntityQuery targets, hulks;
+        EntityQuery targets, hulks, players;
         bool disposed, transferring, leavingWorld;
         public SalvageService(World world, ContentCatalog catalog, EconomyConfigDefinition config, IAudioService audio)
         {
@@ -39,6 +39,7 @@ namespace Game.Galaxy.Salvage
             this.audio = audio ?? throw new ArgumentNullException(nameof(audio));
             targets = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<InteractionTarget>());
             hulks = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Hulk>(), ComponentType.ReadOnly<PersistentId>());
+            players = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerShip>());
             EventBus<BodyInteracted>.Subscribe(Interacted); EventBus<SceneTransitionStarted>.Subscribe(Transition);
             EventBus<SceneTransitionFinished>.Subscribe(TransitionFinished); EventBus<SessionReset>.Subscribe(Reset);
         }
@@ -93,6 +94,9 @@ namespace Game.Galaxy.Salvage
                 }
                 if (!remaining)
                 {
+                    // QA-001: the wreck is pulled into the player's ship (SalvagePullSystem) on its way out, not deleted outright.
+                    if (players.CalculateEntityCount() == 1)
+                        em.AddComponentData(root, new SalvageCollected { Collector = players.GetSingletonEntity() });
                     GridSpawnApi.RequestDespawn(em, root); ledger.Entries.Remove(id);
                     if (config.SalvageCue != null) audio.PlayCue(config.SalvageCue.Id);
                     message = "Salvaged " + total + " items.";
@@ -132,7 +136,7 @@ namespace Game.Galaxy.Salvage
         {
             if (disposed) return; disposed = true;
             EventBus<BodyInteracted>.Unsubscribe(Interacted); EventBus<SceneTransitionStarted>.Unsubscribe(Transition); EventBus<SceneTransitionFinished>.Unsubscribe(TransitionFinished); EventBus<SessionReset>.Unsubscribe(Reset);
-            ledger.Clear(); if (world.IsCreated) { targets.Dispose(); hulks.Dispose(); }
+            ledger.Clear(); if (world.IsCreated) { targets.Dispose(); hulks.Dispose(); players.Dispose(); }
         }
     }
 }
