@@ -39,7 +39,7 @@ Additional access shortcuts:
 
 ## Controls and other commands
 
-- W/S: forward/reverse; A/D: turn; Shift+A/D: strafe; Ctrl: boost; X: brake.
+- W/S: forward/reverse; A/D: turn; Q/E (or Shift+A/D): strafe; Ctrl: boost; X: brake; middle mouse: orbit camera; C: recenter.
 - Space: fire; F: interact; mouse wheel: camera zoom; Esc: back/pause.
 - `help` lists registered commands; `help cmd=<name>` shows arguments.
 - `save slot=qa_manual` and `load slot=qa_manual` access persistence in the active profile.

@@ -14,7 +14,7 @@ Start with `Assets/Game/Scenes/World.unity` and Play, or run `tools/playtest/pla
 
 | Command | What to exercise |
 |---|---|
-| `playground run=flight` | Four-gate course. W/S forward/reverse; A/D turn; Shift+A/D strafe; Ctrl boost; X brake; wheel zoom. |
+| `playground run=flight` | Four-gate course. W/S forward/reverse; A/D turn; Q/E (or Shift+A/D) strafe; Ctrl boost; X brake; wheel zoom. |
 | `playground run=range` | Space fires at the enlarged procedural station. Cut narrow bridges; observe detached sections, damage, colliders, debris, VFX/audio. |
 | `playground run=combat` | One hostile fighter per reset. AI pursuit, firing, incoming damage and defeat flow. Reset before trying quiet features. |
 | `playground run=power` | Live energy supply/demand, shield HP and ability charges/cooldowns. Use shield/boost buttons and normal equipped ability keys. |
