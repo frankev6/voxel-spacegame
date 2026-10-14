@@ -23,7 +23,9 @@ namespace Game.Galaxy.Interaction
         InteractionQueryJob job;
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
-            singleton = state.EntityManager.CreateEntity(typeof(InteractionTarget), typeof(InteractionInputState));
+            singleton = state.EntityManager.CreateEntity();
+            state.EntityManager.AddComponent<InteractionTarget>(singleton);
+            state.EntityManager.AddComponent<InteractionInputState>(singleton);
             players = new EntityQueryBuilder(Allocator.Temp).WithAll<PlayerShip, LocalTransform>().WithNone<Parent>().Build(ref state);
             active = new EntityQueryBuilder(Allocator.Temp).WithAll<WorldSceneActive>().Build(ref state);
             job = new InteractionQueryJob { Singleton = singleton,
