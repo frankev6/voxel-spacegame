@@ -111,7 +111,7 @@ namespace Game.App.Services
         {
             if (disposed) return;
             var kind = (InteractionKind)value.Kind;
-            if (kind == InteractionKind.Salvage || value.BodyKey == 0) return;
+            if (kind == InteractionKind.Salvage) return;
             if (kind == InteractionKind.LaneGate && !travelIdle()) return;
             if (kind == InteractionKind.Hail)
             {
@@ -119,6 +119,7 @@ namespace Game.App.Services
                 if (encounter.HasValue) hail(encounter.Value, value.GridPersistentId, narrative.PlayerCanTalk);
                 return;
             }
+            if (value.BodyKey == 0) return;
             var body = resolveBody(value.StarSystemValue, value.BodyKey);
             if (!body.HasValue) return;
             Add(FactFamily.Interacted, body.Value.Template, 1);

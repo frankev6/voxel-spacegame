@@ -20,7 +20,7 @@ namespace Game.Tests.EditMode.App
         NarrativeWorldEventBridge bridge;
         FactStore facts;
         ContentHash body, item;
-        int selectedCount, countAtSelection, unhandled;
+        int selectedCount, countAtSelection, unhandled, hails;
         void Setup()
         {
             EventHub.Reset(); GameLog.ResetOnceKeys();
@@ -35,9 +35,9 @@ namespace Game.Tests.EditMode.App
             var host = new NarrativeService(facts, context); host.BeginNewGame(); host.SetPlayerCanTalk(true);
             bridge = new NarrativeWorldEventBridge(host,
                 (s, key) => new LogicBodyHandle(s, (byte)BodyRole.Station, 0, 0, body),
-                s => default, member => null, () => true, hash => 0,
+                s => default, member => member == 42 ? body : (ContentHash?)null, () => true, hash => 0,
                 (handle, canTalk) => { selectedCount++; countAtSelection = Value(FactFamily.Interacted, body); Assert.IsTrue(canTalk); return false; },
-                (hash, member, talk) => { }, (system, first) => { });
+                (hash, member, talk) => { hails++; Assert.AreEqual(42, member); Assert.IsTrue(talk); }, (system, first) => { });
             EventBus<InteractionUnhandled>.Subscribe(value => unhandled++);
         }
         int Value(FactFamily family, ContentHash hash) => facts.GetBySlot(facts.Catalog.GeneratedSlot(family, hash.Value));
@@ -55,6 +55,8 @@ namespace Game.Tests.EditMode.App
             EventBus<BodyInteracted>.Publish(new BodyInteracted(1, 1, (byte)InteractionKind.Salvage, 0));
             EventBus<BodyInteracted>.Publish(new BodyInteracted(1, 0, (byte)InteractionKind.Inspect, 0));
             EventBus<BodyInteracted>.Drain(); Assert.AreEqual(1, selectedCount);
+            EventBus<BodyInteracted>.Publish(new BodyInteracted(1, 0, (byte)InteractionKind.Hail, 42));
+            EventBus<BodyInteracted>.Drain(); Assert.AreEqual(1, hails); Assert.AreEqual(1, selectedCount);
         }
         [Test] public void PlayerShipDestroyed_Ignored()
         {
