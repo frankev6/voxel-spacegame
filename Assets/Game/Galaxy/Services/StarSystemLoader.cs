@@ -86,7 +86,19 @@ namespace Game.Galaxy.Services
         public StarSystemId Loaded { get; private set; }
         public bool IsReady => State == LoaderState.Ready;
         public bool BeginStarSystemChange(StarSystemId target, double3 arrivalPositionM, float arrivalYawRad, StarSystemEntryReason reason)
-            => throw new NotImplementedException("SYS-013");
+        {
+            CheckAlive();
+            if (!IsReady || galaxy.Galaxy == null || !galaxy.Galaxy.TryGetIndex(target, out _) ||
+                !math.all(math.isfinite(arrivalPositionM)) || !math.isfinite(arrivalYawRad)) return false;
+            var location = new PlayerLocation { StarSystem = target, PositionM = arrivalPositionM, YawRad = arrivalYawRad };
+            // Complete the existing owner's prefetch before retiring the current content.
+            galaxy.PrefetchContent(target);
+            if (docking.HasPendingRestore) docking.RestoreDocked(default);
+            StartLoad(target, location, reason, true);
+            galaxy.State.PlayerLocation = location; galaxy.State.HasPlayerLocation = true;
+            info.SetSingleton(new CurrentStarSystemInfo { Id = target, Changing = 1 });
+            return true;
+        }
         public bool IsArrivalReady => IsReady && IsAreaReady(arrival.PositionM);
         public bool IsAreaReady(double3 positionM)
         {
@@ -123,10 +135,13 @@ namespace Game.Galaxy.Services
                 context.Reason == SceneEntryReason.ExitBlueprintLab ? StarSystemEntryReason.ReturnFromEditor : StarSystemEntryReason.NewGame;
             StartLoad(id, galaxy.State.PlayerLocation, reason);
         }
-        void StartLoad(StarSystemId id, PlayerLocation location, StarSystemEntryReason reason)
+        void StartLoad(StarSystemId id, PlayerLocation location, StarSystemEntryReason reason, bool placePlayer = false)
         {
             Unload(); target = id; arrival = location; entryReason = reason;
-            originSerial = galaxy.RequestOriginReset(id, location.PositionM); State = LoaderState.Loading;
+            originSerial = placePlayer
+                ? galaxy.RequestOriginReset(id, location.PositionM, new PlayerPlacement { PositionM = location.PositionM, YawRad = location.YawRad })
+                : galaxy.RequestOriginReset(id, location.PositionM);
+            State = LoaderState.Loading;
         }
         public void Tick(in GalaxyFrameContext ctx)
         {
