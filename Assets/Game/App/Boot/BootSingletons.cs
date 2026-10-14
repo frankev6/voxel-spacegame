@@ -87,7 +87,7 @@ namespace Game.App.Boot
                     lifetime.AiProfiles = em.GetComponentData<AiConfig>(created[i]).Profiles;
                 }
                 Create(em, StreamingConfigFactory.Create(catalog.Get<StreamingConfigDefinition>(new ContentId("config_streaming"))), created);
-                // Later rows (ENC-001, ECO-007) are added by their tasks (SPEC-01 §5.3).
+                Create(em, Game.Galaxy.Salvage.EconomyConfigRefFactory.Create(catalog.Get<EconomyConfigDefinition>(new ContentId("config_economy"))), created);
 
                 Create(em, default(PersistentIdAllocator), created);
 

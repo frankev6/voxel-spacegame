@@ -990,6 +990,8 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
 
 | 29 | Exact rejected editor transaction rollback | Inventory-owned opaque checkpoint restores slots and overflow even when normal capacity is full; inverse deltas are insufficient. ADR-0096; ledger Q452. | Tech lead | Resolved. |
 
+| 30 | Exact marking batch, partial ledger lifetime and salvage rounding | Snapshot the new-hulk query before its structural AddComponent, then use one Burst IJob over precisely that snapshot and a ComponentLookup; this preserves the specified batched mark without touching unrelated existing interactions. Check complete required hulk state and refuse pending-despawn roots to prevent repeated harvest before owner cleanup. Ledger entries bind entity generations as well as persistent IDs; prune dead roots on access and clear only on successful World exit or SessionReset, not failed transitions. Block reentrant transfers. Scrap multiplication/floor uses float arithmetic as authored (5,000 × 0.02 yields100); merge items in first-appearance order with a dictionary for O(instances). Two-free-slot partial fixture uses three distinct intact thruster types, since identical items can stack into one slot. The two advisory fixtures live in SalvagePerfTests, excluded from default focused runs. | Tech lead — resolved; ledger Q479 |
+
 ## 11. References
 
 - Audit (background only): `docs/reference/audit-2026-10/06-ui-shipeditor.md` (06-A13 merchant stack bug, 06-D1 last slot), `04-persistence-data.md` §12 (linear scans, unsaved fuel and toolbar), `LEDGER.md` R12, R15.

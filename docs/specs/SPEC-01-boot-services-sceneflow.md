@@ -372,7 +372,7 @@ Creates ECS configuration singletons from content, once per boot, **in table ord
 | `AiConfig` | `AiContent.CreateSingletons(em, catalog, created)` | AI content task |
 | `AbilityDefsRef` | `AbilityContent.CreateSingletons(em, catalog, created)` | ABL content task |
 | `StreamingConfig` | `StreamingConfigFactory.Create(catalog.Get<StreamingConfigDefinition>("config_streaming"))` | SYS-002 |
-| `EconomyConfigRef` | `EconomyConfigRefFactory.Create(catalog.Get<EconomyConfigDefinition>("config_economy"))` | ECO-007 |
+| `EconomyConfigRef` | `EconomyConfigRefFactory.Create(catalog.Get<EconomyConfigDefinition>("config_economy"))`; created and BootSingleton-tagged before the scene snapshot | ECO-007 |
 | `PersistentIdAllocator { Next = 0, End = 0 }` | FND-008 | FND-008 |
 
 ### 5.4 `SceneFlow`
