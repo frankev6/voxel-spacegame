@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-014 delivered | e0157b39 pending validation/composition disposal; real dependency wait | EncounterDirector, MapCanvas, BeatService/dialog or dev overlay must unblock next standard features |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | HUD-003 accepted | b9f9cb46 accepted; real dependency wait | Frontier runtime owners must unblock remaining standard features |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | FND-015 delivered | ca17dce3 pending integration; real dependency wait for lead roots/startup | Other standard features require frontier runtime owners; no substitute implementation |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | FND-015 accepted | 18910e5a accepted; real frontier dependency wait | Other standard features require frontier runtime owners; no substitute implementation |
 
 ## Operating rules
 
@@ -49,3 +49,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - Production roots accepted 057f29ea: HUD-002 four required cases and live flight HUD/creative Lab verified. EDT-023 scenario acceptance remains open. HUD-003 four of five pass, Continue correction returned to original worker; other two deliveries retain genuine dependency waits.
 
 - b9f9cb46 accepts HUD-003 after actual Continue passes (worker b1da267c fixes fixture panel lifetime). EDT-023 real Lab save/reload/MainMenu return passes; four fleet/dialog scenarios remain. All three recorded workers delivered, genuine frontier-owner dependency waits; no duplicate/review-only assignments.
+
+- FND-01518910e5a accepted: root-owned defeat recovery, actual save/load/menu and all scene starts pass. Same three workers delivered/accepted; next lead must unblock EncounterDirector/dialog/map/dev-overlay owners for substantial ready standard follow-ups. No routine test queues.

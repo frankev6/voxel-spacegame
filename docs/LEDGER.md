@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 33 | 14 | 0 | 0 | 135 | 0 | 182 | 5 |
+| M3 | 33 | 13 | 0 | 0 | 136 | 0 | 182 | 5 |
 | M4 | 9 | 3 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -309,7 +309,7 @@
 | MIG-011 | Audio cue converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-004, AUD-001 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | ca37e33 | 20 generated cues; lead fixture fix ed77024; one required + three migration safety tests. Full batch green. |
 | FND-011 | Load flow end to end (R28) | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | frontier | FND-010, SPEC-30, SPEC-31 | no | todo |  |  |  |  |
 | FND-013 | Blueprint Lab entry and exit | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | frontier | FND-011, EDT-001 | no | todo |  |  |  | partial in EDT-023: fleet pose capture/respawn and targets / production composition, creative startup and scene-flow acceptance remain. |
-| FND-015 | Boot from any scene and the defeat flow | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | standard | FND-010, HUD-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Delivered ca17dce3: actual defeat watcher and five cases authored; composition/startup and validation remain. |
+| FND-015 | Boot from any scene and the defeat flow | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | standard | FND-010, HUD-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 18910e5a | Actual root-owned defeat delay/save block/load/menu; all four scene starts plus real recovery accepted across focused runs. Q466. |
 | PERS-013 | Regression scenario R28: load from the pause menu | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-009, PERS-010, SPEC-01, SPEC-20, SPEC-31, SPEC-61, TST-001 | no | todo |  |  |  |  |
 | PERS-014 | Regression scenario 04-B1: load after a content change (end to end) | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | standard | PERS-010, SPEC-01, SPEC-50, SPEC-61, TST-001 | no | todo |  |  |  |  |
 | PERS-015 | Full-world round trip with all real participants | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-011, PERS-012, SPEC-01, SPEC-30, SPEC-31, SPEC-33, SPEC-40, SPEC-41, SPEC-42, SPEC-50 | no | todo |  |  |  |  |
@@ -1065,6 +1065,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 463 | SPEC-61 Q47: pooled flight HUD construction | Five weapon/four ability/64 radar pools and direct updates; real source binding remains HUD-009/002. Five specified cases pass. | Tech lead |
 | 464 | SPEC-61 Q48: HUD names and radar bridge defaults | Real owner caches, fuel-aware gate invalidation and final-contact waypoint comparison; encounter display requires actual ENC-007, no fake director. | Tech lead |
 | 465 | SPEC-51 Q57: production editor/HUD composition | Resolved ADR-0098: real profile storage, reused editor view/model, actual HUD and launcher, creative startup and ordered disposal. | Tech lead |
+| 466 | SPEC-01 Q33: defeat composition and isolated startup | Root owns watcher lifetime/tick; current readable save or latest autosave, disabled Load without saves. Isolated SaveRoot suppresses dev playground takeover; ordinary World Play unchanged. | Tech lead |
 
 ## Measurements
 
@@ -1176,6 +1177,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — FND-015 defeat recovery and startup accepted — astra (gpt-6)
+
+- 18910e5a integrates worker ca17dce3 into the actual GameRoot lifetime and unscaled Update. Player destruction immediately blocks saves; after configured three seconds, real confirmation loads the current readable save/latest autosave or leaves without saving. Missing saves disable Load. Scene/session events invalidate stale callbacks. Direct Lab startup from EDT-023 is now covered rather than ignored.
+- Required startup batch: three passed/one teardown failed; World automatic dev playground takeover caused Busy during isolated startup cleanup. Existing test SaveRoot now suppresses that takeover only in isolated fixtures; real World Play still enters the playground. Focused World passed (0.67s). Defeat case initially read title before UI binding; condition-based binding readiness fixed it. Actual production watcher/save/load/no-save-menu case passed (0.55s). Evidence Logs/playtest/defeat-startup/{startup,world,defeat-final}.xml. Test count: spec-required: 5, extra: 0. Compile clean, zero CS warnings; no full suite/performance/soak.
+- Small review fixes: retain typed Unity SceneHandle instead of obsolete int conversion; test the composed watcher rather than installing a second event subscriber. Q466 documents composition and fixture isolation. Remaining worker deliveries and real frontier dependency waits are in ORCHESTRATION; next prioritize missing runtime owners to unlock their substantial standard work.
 
 ### 2026-10-14 — EDT-023 Lab persistence / HUD-003 accepted — astra (gpt-6)
 
