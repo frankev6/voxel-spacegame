@@ -962,6 +962,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 388 | SPEC-41 Q15: missing approved dialog sprites | Integrate existing eight metadata identities; leave seven unavailable sprite fields null. DLG-010 stays partial; no art generation or new gate. | Tech lead |
 | 389 | SPEC-70 Q30: diagnostic counter ownership/availability | Use existing owner APIs and explicit unavailable values, canonical JSON, bounded marker list and disposable host-owned recorders/queries. No benchmark runs. | Tech lead |
 | 390 | SPEC-41 Q17: runtime command effect access and memory | ADR-0084 preserves concrete effect identity through guarded access; fail closed on bad table rows. Ordinal visit/raw memory retains exact save values. | Tech lead |
+| 391 | SPEC-41 Q18: non-reentrant selection, abort and roll lookup | Queue option selection through Pump; settle completion outside runner callbacks. Explicit abort clears the old page/terminal. Generated Beat family ordinal order maps the existing content index for roll count. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1094,6 +1095,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DLG-006 execution loop authored — astra (gpt-6)
+
+- 1925068d implements queued line/option/resume progression, deferred terminal effects, abort/interruption cleanup, scoped continuation restoration and deterministic rolls. Q391 resolves conflicting SelectOption pseudocode. Runtime is uncompiled/unaccepted; required fixtures and review are next.
+- spec-required: 7 planned, extra: 0; no Unity/perf run. Previous turn authored DLGS persistence; this turn replaces the service throwing shell. Presentation now reviews these concrete sources; combat280/economy304 cross-review delivered DEV-011/DLG-013. No genuine implementation blocker.
 
 
 ### 2026-10-13 — DLG-006 memory persistence authored — astra (gpt-6)

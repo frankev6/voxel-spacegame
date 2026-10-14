@@ -9,7 +9,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DLG-013 | Delivered0d09a8cf; bounded review of DEV-01162f2c25e active | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-011 | Correction62f2c25e delivered; bounded review of DLG-0130d09a8cf active | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-019 | Delivered310332f7/a1fbc3cb; review262 complete; dependency wait for DLG-006 | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-019 | Delivered310332f7/a1fbc3cb; reviewing DLG-0061925068d lifecycle | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Dialog execution loop authored:** DLG-0061925068d replaces the service shell with queued progression, terminal/blocking handling, cleanup and deterministic rolls. Still uncompiled/unaccepted; next seven required functional cases and review corrections, then one compatible batch. All three existing workers now review concrete deliveries/runtime; no Unity active.
 
 - **Dialog memory persistence authored:** DLG-006f610e52e adds canonical DLGS save/validated restore; lifecycle and seven-case acceptance still pending. No Unity run. DLG-0130d09a8cf and DEV-01162f2c25e delivered, existing combat/economy cross-review; presentation has a verified ready-task dependency wait until dialog runtime unlocks presenter work. Next finish runtime and validate a compatible focused batch.
 

@@ -761,6 +761,8 @@ sequenceDiagram
 
 | 17 | Runtime command lookup needs a concrete effect from the compiled list | ADR-0084 supplies guarded single-node access; reject stale/malformed/duplicate table rows and never reparse commands at runtime. Memory uses prescribed visit: keys and ordinal raw keys, retains explicit zero values for save round trips, clears CopySorted output and saturates visit count at Int32.MaxValue. | Tech lead — ledger Q390 |
 
+| 18 | Lifecycle pseudocode calls SelectOption immediately despite the runner non-reentrancy rule; explicit abort could wait on an old page | Resolved: SelectOption queues the choice and Pump emits PageCleared then drives selection. Runner completion settles only after its call returns. Explicit player abort clears the page acknowledgement and terminal; abort_beat still permits authored closing lines. Blocking callbacks are scoped to the active dialog generation and restored on end. Beat fact indices are obtained by ordinal traversal of the generated Beat family, matching ContentCatalog one-based ordinal IDs; debug beat zero uses count zero. | Tech lead — ledger Q391 |
+
 ## 11. References
 
 - Audit `05-narrative-quests.md` B4, B5, B6, B11, B12, §5.9 (Yarn vs Ink), §5.13 phase 3; `LEDGER.md` R6, R11, R19; legacy UI `Import/Legacy/ui/Pages/NarrativeViewUI.uxml` (layout reference only).
