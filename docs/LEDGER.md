@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 33 | 13 | 0 | 0 | 136 | 0 | 182 | 5 |
+| M3 | 32 | 14 | 0 | 0 | 136 | 0 | 182 | 5 |
 | M4 | 9 | 3 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -364,7 +364,7 @@
 | ENC-004 | FactionService and FACN | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-003, PERS-001, FND-001 | yes | done | astra (gpt-6) | 2026-10-14 | 3b4929e9 | Queued reads, FACN unknown-ID preservation and atomic restore; production save/new-game/sandbox reset registration. Six service and two integration cases pass. |
 | ENC-005 | TerritoryService (authored ownership) | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, ENC-003, ENC-004, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | de3f1ee | Authored territory ownership, generation/reset rebuild; production map/ticker registration 0f00dd27; three required cases pass. |
 | ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, GAL-006, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 21d0996b | Full ordered seeded composition, clearance placement and line-abreast formation; 9 required cases pass. Director cap remains ENC-007. |
-| ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SPEC-31, SPEC-32, SPEC-23 | no | todo |  |  |  |  |
+| ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SYS-008, SYS-013, FND-012, TRV-006, AI-008 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead implementing actual director runtime under ADR-0099; worker follow-ups wait for working owner. |
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | no | todo |  |  |  |  |
 | ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, SPEC-40 | no | todo |  |  |  |  |
 | ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | cdf292d6 | Ten canonical encounters, six factions, real ARK/Whisper ownership; generation/rerun zero errors, two required checks pass |

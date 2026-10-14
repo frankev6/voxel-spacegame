@@ -927,7 +927,8 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 ### ENC-007 — EncounterDirectorService
 - **Milestone:** M3
 - **Tier:** frontier — F5: coordinates spawning, AI anchors, travel and loader state, story persistence and caps across frames
-- **Depends on:** `ENC-004`, `ENC-005`, `ENC-006`, `SPEC-31`, `SPEC-32`, `SPEC-23`
+- **Depends on:** `ENC-004`, `ENC-005`, `ENC-006`, `SYS-008`, `SYS-013`, `FND-012`, `TRV-006`, `AI-008`
+- **Sequencing:** ADR-0099 uses completed runtime owners; independent scenario/performance tasks retain their acceptance.
 - **Do:**
   1. Implement §5.4 (roll), §5.7 (spawn), §5.8 (sweep, defeat, despawn, pending, handlers) and §5.9 (member lookup, hail `Interactable`).
   2. If SPEC-21's `ShipDestroyed` bridge exists, fill its `Encounter`/`EncounterInstance` fields from `EncounterTag` (item 68).
