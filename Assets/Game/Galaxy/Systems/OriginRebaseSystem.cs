@@ -6,6 +6,7 @@ using Game.Data.Components;
 using Game.Galaxy.Components;
 using Game.Galaxy.Data;
 using Game.Simulation.Commands;
+using Game.Voxel.Model;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -66,6 +67,7 @@ namespace Game.Galaxy.Systems
             using (ShiftMarker.Auto())
             {
                 state.Dependency = new ShiftJob { Decision = decision, Positions = readPositions, Interpolation = interpolation }.ScheduleParallel(state.Dependency);
+                state.Dependency = new ShiftSpawnRequestJob { Decision = decision, Positions = readPositions }.ScheduleParallel(state.Dependency);
                 state.Dependency = new PlaceJob { Decision = decision, Positions = positions, Interpolation = interpolation }.Schedule(state.Dependency);
             }
             using (SyncMarker.Auto()) state.Dependency = new SyncJob { Decision = decision }.ScheduleParallel(state.Dependency);
@@ -147,6 +149,19 @@ namespace Game.Galaxy.Systems
                 if (d.Changed == 1) history.PreviousTransform = new RigidTransform(transform.Rotation, transform.Position);
                 else history.PreviousTransform.pos += d.Delta;
                 Interpolation[entity] = history;
+            }
+        }
+        // Streamers queue requests after this group's spawn pass. Their local poses must follow
+        // an origin change before GridSpawnSystem materializes LocalTransform on the next pass.
+        [BurstCompile, WithNone(typeof(Parent))] partial struct ShiftSpawnRequestJob : IJobEntity
+        {
+            [ReadOnly] public NativeReference<RebaseDecision> Decision;
+            [ReadOnly] public ComponentLookup<UniversePosition> Positions;
+            void Execute(Entity entity, ref GridSpawnRequest request)
+            {
+                var d = Decision.Value; if (d.Rebase == 0) return;
+                if (Positions.HasComponent(entity)) request.Pose.pos = (float3)(Positions[entity].Value - d.NewOrigin);
+                else if (d.Changed == 0) request.Pose.pos += d.Delta;
             }
         }
         [BurstCompile, WithAll(typeof(PlayerShip)), WithNone(typeof(Parent))] partial struct PlaceJob : IJobEntity

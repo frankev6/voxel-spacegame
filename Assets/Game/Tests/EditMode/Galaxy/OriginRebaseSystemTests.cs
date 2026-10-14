@@ -14,6 +14,7 @@ using Game.Galaxy.Services;
 using Game.Galaxy.Systems;
 using Game.Simulation.Commands;
 using Game.Tests.Common;
+using Game.Voxel.Model;
 using NUnit.Framework;
 using Unity.Burst;
 using Unity.Collections;
@@ -57,15 +58,30 @@ namespace Game.Tests.EditMode.Galaxy
             return entity;
         }
         void Step() { world.StepFrame(EcsTestWorld.TickSeconds); Em.CompleteAllTrackedJobs(); }
+        Entity PendingSpawn(float3 local, bool universal = false)
+        {
+            var entity = Em.CreateEntity(typeof(GridSpawnRequest));
+            Em.SetComponentData(entity, new GridSpawnRequest { Pose = new RigidTransform(quaternion.RotateY(.25f), local),
+                LinearVelocity = new float3(1, 2, 3), StructureHandle = -1 });
+            if (universal) Em.AddComponentData(entity, new UniversePosition { Value = Frame.OriginInStarSystem + (double3)local });
+            return entity;
+        }
         [Test] public void Threshold_Rebases()
         {
             var player = Root(new float3(2000, 0, 0), true, true);
+            var pending = PendingSpawn(new float3(2120, 0, 81), universal: true);
+            var localPending = PendingSpawn(new float3(2201, 0, 5));
             Em.AddComponent<PendingRebaseWrite>(player);
             Assert.DoesNotThrow(Step, "Origin gather must depend on the pending transform writer without main-thread synchronization.");
             Assert.AreEqual(float3.zero, Em.GetComponentData<LocalTransform>(player).Position);
             Assert.AreEqual(new double3(2001, 0, 0), Frame.OriginInStarSystem); Assert.AreEqual(1u, Frame.ShiftSequence);
             Assert.AreEqual(1, events.Count); var e = events.Dequeue();
             Assert.AreEqual(new float3(-2001, 0, 0), e.Payload.Delta); Assert.AreEqual(1ul, e.SortKey);
+            var request = Em.GetComponentData<GridSpawnRequest>(pending);
+            Assert.AreEqual(new float3(119, 0, 81), request.Pose.pos, "Pending streamed roots follow the origin before conversion.");
+            Assert.AreEqual(new double3(2120, 0, 81), Em.GetComponentData<UniversePosition>(pending).Value);
+            Assert.AreEqual(new float3(200, 0, 5), Em.GetComponentData<GridSpawnRequest>(localPending).Pose.pos);
+            Assert.AreEqual(quaternion.RotateY(.25f), request.Pose.rot); Assert.AreEqual(new float3(1, 2, 3), request.LinearVelocity);
         }
         [Test] public void UniversePosition_ExactAcrossRebases()
         {
@@ -81,14 +97,23 @@ namespace Game.Tests.EditMode.Galaxy
             Em.AddComponentData(child, new Parent { Value = player }); var before = Em.GetComponentData<LocalTransform>(child);
             var up = Em.GetComponentData<UniversePosition>(child); Step();
             Assert.AreEqual(before, Em.GetComponentData<LocalTransform>(child)); Assert.AreEqual(up, Em.GetComponentData<UniversePosition>(child));
+            var pendingChild = PendingSpawn(new float3(3, 4, 5), universal: true);
+            Em.AddComponentData(pendingChild, new Parent { Value = player });
+            service.RequestOriginReset(StarSystemId.None, new double3(3000, 0, 0)); Step();
+            Assert.AreEqual(new float3(3, 4, 5), Em.GetComponentData<GridSpawnRequest>(pendingChild).Pose.pos);
         }
         [Test] public void Request_ChangesStarSystem()
         {
             var persistent = Root(new float3(30, 0, 40), universal: true); var transient = Root(new float3(7, 0, 9));
+            var pending = PendingSpawn(new float3(130, 0, 240), universal: true);
+            var transientPending = PendingSpawn(new float3(7, 0, 9));
             service.RequestOriginReset(new StarSystemId(2), new double3(10, 0, 20)); Step();
             Assert.AreEqual(new float3(20, 0, 20), Em.GetComponentData<LocalTransform>(persistent).Position);
             Assert.AreEqual(new float3(7, 0, 9), Em.GetComponentData<LocalTransform>(transient).Position);
             Assert.AreEqual(new StarSystemId(2), Frame.StarSystem); Assert.AreEqual(1, Frame.LastShiftChangedStarSystem); Assert.AreEqual(float3.zero, Frame.LastShiftDelta);
+            Assert.AreEqual(new float3(120, 0, 220), Em.GetComponentData<GridSpawnRequest>(pending).Pose.pos);
+            Assert.AreEqual(new float3(7, 0, 9), Em.GetComponentData<GridSpawnRequest>(transientPending).Pose.pos,
+                "An unscoped destination request retains its authored local pose on a system change.");
         }
         [Test] public void Analytic_NotSynced()
         {
