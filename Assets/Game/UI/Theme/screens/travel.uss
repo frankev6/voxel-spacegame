@@ -1,0 +1,7 @@
+/* SPEC-32 §5.8. Approved NOCTURNE black cover; timing remains owned by travel. */
+.travel-cover {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    background-color: var(--color-travel-cover); opacity: 0;
+    transition-property: opacity; transition-duration: var(--duration-travel-fade);
+}
+.travel-cover--covered { opacity: 1; }
