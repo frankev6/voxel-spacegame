@@ -10,6 +10,7 @@ using Game.Data.Definitions;
 using Game.Data.Logic;
 using Game.Data.Services;
 using Game.Galaxy.Data;
+using Game.Galaxy.Encounters;
 using Game.Galaxy.Services;
 using Game.UI.Data;
 using Game.UI.Services;
@@ -24,9 +25,7 @@ namespace Game.App.Services
     {
         // Updated by the corresponding owner wiring tasks. Callers cannot mutate this set.
         [field: StaticStateOk("Immutable read-only view of task-owned missing routes; never changed at runtime") ]
-        public static IReadOnlyList<string> UnwiredMembers { get; } = Array.AsReadOnly(new[] { nameof(GetRelation), nameof(AdjustRelation),
-            nameof(CurrentStarSystemOwnerFactionIndex), nameof(SpawnEncounter), nameof(StartCombat),
-            nameof(OpenMerchant) });
+        public static IReadOnlyList<string> UnwiredMembers { get; } = Array.AsReadOnly(new[] { nameof(OpenMerchant) });
         readonly ContentCatalog content;
         readonly GameSession session;
         readonly GalaxyService galaxy;
@@ -36,6 +35,10 @@ namespace Game.App.Services
         readonly World world;
         readonly EntityQuery clock;
         readonly NarrativePlayerDamage hull;
+        readonly FactionService factions;
+        readonly TerritoryService territory;
+        readonly StarSystemLoader loader;
+        readonly EncounterDirectorService encounters;
         public LogicWorldAdapter(ContentCatalog content, GameSession session, GalaxyService galaxy,
             BlueprintLibrary blueprints, IAudioService audio, NotificationService notifications,
             World world, NarrativeConfigDefinition config)
@@ -46,6 +49,12 @@ namespace Game.App.Services
             this.blueprints = blueprints ?? throw new ArgumentNullException(nameof(blueprints));
             this.audio = audio; this.notifications = notifications;
             this.world = world ?? throw new ArgumentNullException(nameof(world));
+            // These canonical owners are registered before narrative boot (ENC-007/009).
+            // Keep the NAR-011 constructor contract; smaller contexts may omit world owners.
+            Game.Core.Services.TryGet(out factions);
+            Game.Core.Services.TryGet(out territory);
+            Game.Core.Services.TryGet(out loader);
+            Game.Core.Services.TryGet(out encounters);
             hull = new NarrativePlayerDamage(world, config);
             clock = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<SimClock>());
         }
@@ -60,12 +69,36 @@ namespace Game.App.Services
             }
         }
         public double UniversalTime => world.IsCreated && !clock.IsEmptyIgnoreFilter ? clock.GetSingleton<SimClock>().UniversalTime : 0;
-        public int CurrentStarSystemOwnerFactionIndex { get { Missing(nameof(CurrentStarSystemOwnerFactionIndex), "ENC-005/009"); return 0; } }
-        public int GetRelation(int factionIndex) { Missing(nameof(GetRelation), "ENC-004/009"); return 0; }
-        public void AdjustRelation(int factionIndex, int delta) => Missing(nameof(AdjustRelation), "ENC-004/009");
+        FactionDefinition CurrentOwner => territory != null && loader != null ? territory.GetOwner(loader.Loaded) : null;
+        public int CurrentStarSystemOwnerFactionIndex => content.IndexOf(CurrentOwner);
+        public int GetRelation(int factionIndex)
+            => Require(factions, nameof(GetRelation)) ? factions.GetRelation(Faction(factionIndex)) : 0;
+        public void AdjustRelation(int factionIndex, int delta)
+        {
+            if (Require(factions, nameof(AdjustRelation))) factions.AdjustRelation(Faction(factionIndex), delta);
+        }
+        FactionDefinition Faction(int index) => index == -1 ? CurrentOwner : Definition<FactionDefinition>(index);
         public void SpawnEncounter(int encounterIndex, string anchorTag, int count, in LogicScope scope)
-            => Missing(nameof(SpawnEncounter), "ENC-007/009");
-        public void StartCombat(int encounterIndex, in LogicScope scope) => Missing(nameof(StartCombat), "ENC-007/009");
+        {
+            if (Require(encounters, nameof(SpawnEncounter)))
+                encounters.SpawnEncounter(Definition<EncounterDefinition>(encounterIndex), Anchor(anchorTag, scope), count, EncounterSource.Narrative);
+        }
+        public void StartCombat(int encounterIndex, in LogicScope scope)
+        {
+            if (Require(encounters, nameof(StartCombat)))
+                encounters.StartCombat(Definition<EncounterDefinition>(encounterIndex), Anchor("here", scope));
+        }
+        static EncounterAnchor Anchor(string tag, in LogicScope scope)
+        {
+            if (tag == "here") return scope.HasBody ? new EncounterAnchor { Kind = EncounterAnchorKind.Body, Body = Body(scope.Body) } : EncounterAnchor.Player();
+            return tag == "player" ? EncounterAnchor.Player() : new EncounterAnchor { Kind = EncounterAnchorKind.Tag, Tag = tag };
+        }
+        static bool Require<T>(T owner, string member) where T : class
+        {
+            if (owner != null) return true;
+            GameLog.ErrorOnce("Narrative.Unavailable." + member, "Narrative", member + " requires " + typeof(T).Name + ".");
+            return false;
+        }
         public void RequestLaneJump(int starSystemIndex)
         {
             var definition = Definition<AuthoredStarSystemDefinition>(starSystemIndex);

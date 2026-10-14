@@ -149,10 +149,14 @@ namespace Game.App.Services
             Add(FactFamily.Destroyed, value.Encounter, 1);
         }
         void OnDefeated(EncounterDefeated value)
-        { if (!disposed) Add(FactFamily.Defeated, value.Encounter, 1); }
+        {
+            // ENC-009 uses the generated defeated_<encounter> slot and the shared WorldEvent writer.
+            if (!disposed) Add(FactFamily.Defeated, value.Encounter, 1);
+        }
         void OnRelation(FactionRelationChanged value)
         {
             if (disposed) return;
+            // ENC-009 dependencies use the content catalogue index, never the ECS faction index.
             int index = factionIndex(value.Faction);
             if (index <= 0) { Warn(value.Faction.Value); return; }
             narrative.NotifyDependency(new LogicDependency(LogicDependencyKind.Relation, index));

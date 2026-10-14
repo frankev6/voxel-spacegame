@@ -1072,6 +1072,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 470 | SPEC-33 Q33: encounter dev commands and queued combat requests | Use real services; zero-return combat is explicitly queued-or-refused without claimed success; per-scenario typed defeat baselines; relations queue through existing owner. | Tech lead |
 | 471 | SPEC-33 Q34/Q35: reuse authored wedge and formation fallback | Retain canonical AI-013 asset/GUID; insufficient slots or unavailable index falls back to line abreast; failed leader creates no invalid follower reference. | Tech lead |
 | 472 | SPEC-70 Q32: live debug overlay ownership and traversal | Read-only Burst gathers after tracked jobs, root rendered transforms/300 m range, nested collider leaf traversal, bounded whole-box truncation and host disposal; future overlay types remain explicit pending work. | Tech lead |
+| 473 | SPEC-33 Q36: narrative adapter owner binding | Resolve registered concrete faction/territory/loader/director owners in existing constructor; preserve editor route and canonical bridge notifications; no duplicate subscriptions. | Tech lead |
 
 ## Measurements
 
