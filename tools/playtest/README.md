@@ -137,3 +137,5 @@ Fly into a ring and press **F**:
 `playground goto=<id>` teleports to any of those areas. `playground status` lists them. The old informational facts/grid/directory circles were removed; inspection commands remain available but do not count as playable activities. Campaign travel, story and editor gameplay still need integration before becoming playable areas here.
 
 CLI while playing: `tools/playtest/g.sh dev --cmd "playground reset"`; poll its returned operation with `tools/playtest/g.sh op --id N`.
+
+Live voxel inspection: `g.sh overlay --name bricks`, `--name dirty` or `--name colliders`; `--on false` disables one, `--name none` clears all. `g.sh overlay` reports edge count and truncation. The same `overlay name=...` commands work in the F1 console. These inspect grids within 300 m of the player.

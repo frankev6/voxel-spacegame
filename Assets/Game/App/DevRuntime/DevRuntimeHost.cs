@@ -39,6 +39,7 @@ namespace Game.App.DevRuntime
         int lastId;
         bool disposed;
         internal Playground.DevPlayground Playground { get; private set; }
+        public Overlays.DevOverlayRenderer Overlays { get; private set; }
         public DevCommandRegistry Commands { get; private set; }
         public DevContext Context { get; private set; }
         public Scenarios.ScenarioProbeRegistry Probes { get; private set; }
@@ -64,6 +65,7 @@ namespace Game.App.DevRuntime
                 host.Playground = new Playground.DevPlayground(host);
                 host.Replay = new Commands.FlightReplaySession();
                 host.Perf = new Game.App.DevRuntime.Perf.DevPerfCounters();
+                host.Overlays = new Overlays.DevOverlayRenderer();
                 host.Commands = DevCommandRegistry.CreateDefault();
                 host.Probes = Scenarios.ScenarioProbeRegistry.CreateDefault();
                 return host;
@@ -111,7 +113,7 @@ namespace Game.App.DevRuntime
             for (int i = scenarioCount - 1; i >= 0; i--) if (scenarios[i].Finished) scenarios.RemoveAt(i);
             Console?.Update();
         }
-        void LateUpdate() { Playground?.Tick(); /* DEV-012 adds overlay rendering. */ }
+        void LateUpdate() { Playground?.Tick(); Overlays?.Draw(Context); }
         void OnDestroy() { Cleanup(); }
         void Cleanup()
         {
@@ -125,6 +127,7 @@ namespace Game.App.DevRuntime
             Console?.Dispose();
             Replay?.Dispose();
             Perf?.Dispose();
+            Overlays?.Dispose();
             Context?.Dispose();
             Input?.Dispose();
             Events?.Dispose();
