@@ -53,12 +53,22 @@ namespace Game.Galaxy.Encounters
             var forward = (facePointM - centreM).xz;
             double length = math.length(forward);
             forward = length > 0 ? forward / length : new double2(0, 1);
+            float yaw = (float)math.atan2(forward.x, forward.y);
+            if (formation != null && formation.Slots.Count >= ships.Count - 1)
+            {
+                var rotation = quaternion.RotateY(yaw);
+                for (int k = 0; k < ships.Count; k++)
+                {
+                    var offset = k == 0 ? float3.zero :
+                        new float3(formation.Slots[k - 1].x, 0, formation.Slots[k - 1].y);
+                    into.Add((centreM + (double3)math.rotate(rotation, offset), yaw));
+                }
+                return;
+            }
             var right = new double3(forward.y, 0, -forward.x);
             float largestRadius = 0;
             for (int i = 0; i < ships.Count; i++) largestRadius = math.max(largestRadius, ships[i].RadiusM);
             float spacing = spacingM > 0 ? spacingM : 2f * largestRadius + 20f;
-            float yaw = (float)math.atan2(forward.x, forward.y);
-            // M3 line abreast. Formation slots and FleetMember assignment belong to ENC-013 (M4).
             for (int k = 0; k < ships.Count; k++)
                 into.Add((centreM + right * ((k - (ships.Count - 1) / 2.0) * spacing), yaw));
         }

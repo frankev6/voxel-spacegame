@@ -5,6 +5,7 @@ using Game.Galaxy.Data;
 using Game.Galaxy.Encounters;
 using NUnit.Framework;
 using Unity.Mathematics;
+using UnityEditor;
 
 namespace Game.Tests.EditMode.Galaxy.Encounters
 {
@@ -109,6 +110,49 @@ namespace Game.Tests.EditMode.Galaxy.Encounters
             Assert.That(EncounterPlacement.TryPlaceCentre(content, double3.zero, 0, double3.zero, 0, Seed, p, out _), Is.False);
             p.Tries = 0;
             Assert.That(EncounterPlacement.TryPlaceCentre(content, double3.zero, 0, double3.zero, 0, Seed, p, out _), Is.False);
+        }
+
+        [Test] public void Formation_Slots()
+        {
+            var formation = AssetDatabase.LoadAssetAtPath<FormationDefinition>("Assets/Game/Content/Ai/formation_wedge.asset");
+            Assert.NotNull(formation);
+            var centre = new double3(1e9, 11, -1e9);
+            var ships = new List<PlannedShip> { default, default, default, default };
+            var poses = new List<(double3 pos, float yaw)> { default };
+            var repeat = new List<(double3 pos, float yaw)>();
+            var forward = new double3(.6, 0, .8); var right = new double3(.8, 0, -.6);
+            EncounterPlacement.ShipPoses(centre, centre + forward * 100, ships, 999, formation, poses);
+            EncounterPlacement.ShipPoses(centre, centre + forward * 100, ships, 999, formation, repeat);
+            CollectionAssert.AreEqual(poses, repeat);
+            Assert.AreEqual(ships.Count, poses.Count); Assert.AreEqual(centre, poses[0].pos);
+            for (int k = 1; k < poses.Count; k++)
+            {
+                var slot = formation.Slots[k - 1];
+                Assert.Less(math.distance(poses[k].pos, centre + right * slot.x + forward * slot.y), 3e-5);
+                Assert.AreEqual(centre.y, poses[k].pos.y);
+                Assert.That(poses[k].yaw, Is.EqualTo((float)math.atan2(.6, .8)).Within(1e-6));
+            }
+            // Zero planar face direction uses +Z, preserving the authored follower offsets.
+            EncounterPlacement.ShipPoses(centre, centre + new double3(0, 5, 0), ships, 0, formation, poses);
+            Assert.AreEqual(centre, poses[0].pos); Assert.AreEqual(0, poses[0].yaw);
+            Assert.AreEqual(centre + new double3(-40, 0, -40), poses[1].pos);
+            Assert.AreEqual(centre + new double3(40, 0, -40), poses[2].pos);
+            ships.RemoveRange(1, 3);
+            EncounterPlacement.ShipPoses(centre, centre, ships, 0, formation, poses);
+            Assert.AreEqual(1, poses.Count); Assert.AreEqual(centre, poses[0].pos);
+            ships.Clear();
+            EncounterPlacement.ShipPoses(centre, centre, ships, 0, formation, poses);
+            Assert.IsEmpty(poses);
+            var shortFormation = UnityEngine.ScriptableObject.CreateInstance<FormationDefinition>();
+            try
+            {
+                ships.Add(default); ships.Add(default); ships.Add(default);
+                EncounterPlacement.ShipPoses(centre, centre, ships, 0, shortFormation, poses);
+                Assert.AreEqual(centre - new double3(20, 0, 0), poses[0].pos);
+                Assert.AreEqual(centre, poses[1].pos);
+                Assert.AreEqual(centre + new double3(20, 0, 0), poses[2].pos);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(shortFormation); }
         }
 
         [Test] public void LineAbreast_Geometry()

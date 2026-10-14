@@ -149,9 +149,17 @@ namespace Game.Galaxy.Services
                 centre = anchorPosition + new double3(radius + distance, 0, 0);
                 GameLog.WarnOnce("ENC.Placement.Fallback", "Encounters", "Story encounter uses fallback placement.");
             }
-            EncounterPlacement.ShipPoses(centre, playerPosition, planned, def.ShipSpacingM, def.Formation, poses);
+            var formation = def.Formation;
+            ushort formationIndex = catalog.IndexOf(formation);
+            if (formation != null && (formationIndex == 0 || formation.Slots.Count < planned.Count - 1))
+            {
+                GameLog.WarnOnce("ENC.Formation.Invalid", "Encounters", "Encounter formation is unavailable or has too few slots; using line abreast.");
+                formation = null;
+            }
+            EncounterPlacement.ShipPoses(centre, playerPosition, planned, def.ShipSpacingM, formation, poses);
             var instance = new EncounterInstance { Id = id, Definition = def, StarSystem = loader.Loaded, Source = source,
                 State = InstanceState.Active, Persistent = source != EncounterSource.Director || def.PersistUntilDefeated, Seed = seed, Anchor = anchor };
+            Entity leader = Entity.Null;
             for (int k = 0; k < planned.Count; k++)
             {
                 var ship = planned[k]; var pose = poses[k];
@@ -159,6 +167,9 @@ namespace Game.Galaxy.Services
                     Rotation = quaternion.RotateY(pose.yaw), Allegiance = new Allegiance { Faction = factions.Indices.IndexOf(def.Faction), Team = (byte)(1 + id % 254) },
                     WithAi = true, AiProfile = ship.Profile != null ? ship.Profile.Id : ContentId.None, StarSystem = loader.Loaded, Encounter = def.Id.Hash });
                 if (pid.Value == 0 || !spawner.TryGetRoot(pid.Value, out var root)) { GameLog.WarnOnce("ENC.Spawn.Failed", "Encounters", "Encounter ship spawn failed."); continue; }
+                if (k == 0) leader = root;
+                else if (formation != null && leader != Entity.Null)
+                    em.AddComponentData(root, new FleetMember { Leader = leader, Slot = (byte)(k - 1), FormationIndex = formationIndex });
                 em.AddComponentData(root, new EncounterTag { Encounter = def.Id.Hash, Instance = id });
                 if (def.Hailable && instance.Members.Count == 0) em.AddComponentData(root, new Interactable { Kind = InteractionKind.Hail, TemplateIndex = 0xffff, DistanceM = Config.HailDistanceM });
                 if ((combat || def.Kind == EncounterKind.Ambush) && em.HasComponent<AiBrain>(root))
@@ -169,7 +180,6 @@ namespace Game.Galaxy.Services
             if (instance.Members.Count == 0) return false;
             instance.AliveMembers = instance.Members.Count; active.Add(instance); spawnedThisVisit.Add(def.Id);
             if (def.UniqueGlobal) globallyUsed.Add(def.Id);
-            // TODO(ENC-013): formation placement and FleetMember assignments.
             return true;
         }
         void ResolveAnchor(in EncounterAnchor anchor, double3 player, out double3 position, out float radius)

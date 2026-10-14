@@ -14,6 +14,7 @@ using Game.Tests.Common;
 using Game.Voxel.Model;
 using NUnit.Framework;
 using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine.TestTools;
 
@@ -25,6 +26,42 @@ namespace Game.Tests.PlayMode.Galaxy
         EncounterDirectorService Director => Service<EncounterDirectorService>();
         EncounterDefinition Raiders => Service<ContentService>().Catalog.Get<EncounterDefinition>(new ContentId("encounter_raiders"));
         void Tick(double time) => Director.Tick(new GalaxyFrameContext(Em, time, 0, 0, 0));
+        [UnityTest] public IEnumerator Formation_FleetMember()
+        {
+            yield return NewGame(42); Director.Enabled = false;
+            using var pause = HoldSimulation("encounter formation spawn");
+            var catalog = Service<ContentService>().Catalog;
+            var definition = catalog.Get<EncounterDefinition>(new ContentId("encounter_xeno_probe_tutorial"));
+            var formation = catalog.Get<FormationDefinition>(new ContentId("formation_wedge"));
+            Assert.AreSame(formation, definition.Formation);
+            Assert.AreEqual(1, Director.SpawnEncounter(definition, EncounterAnchor.Player(), 1, EncounterSource.Narrative));
+            using var query = Em.CreateEntityQuery(typeof(EncounterTag));
+            using var roots = query.ToEntityArray(Allocator.Temp);
+            var leader = Entity.Null; int count = 0;
+            foreach (var root in roots)
+            {
+                if (Em.GetComponentData<EncounterTag>(root).Encounter != definition.Id.Hash) continue;
+                count++;
+                if (Em.HasComponent<FleetMember>(root)) continue;
+                Assert.AreEqual(Entity.Null, leader, "Only ship zero is the leader."); leader = root;
+            }
+            Assert.AreEqual(3, count); Assert.AreNotEqual(Entity.Null, leader);
+            var leaderPose = Em.GetComponentData<GridSpawnRequest>(leader).Pose;
+            var slots = new HashSet<byte>();
+            foreach (var root in roots)
+            {
+                if (Em.GetComponentData<EncounterTag>(root).Encounter != definition.Id.Hash || root == leader) continue;
+                var member = Em.GetComponentData<FleetMember>(root);
+                Assert.AreEqual(leader, member.Leader); Assert.IsTrue(slots.Add(member.Slot));
+                Assert.AreEqual(catalog.IndexOf(formation), member.FormationIndex); Assert.AreNotEqual(0, member.FormationIndex);
+                var slot = formation.Slots[member.Slot]; var pose = Em.GetComponentData<GridSpawnRequest>(root).Pose;
+                var expected = leaderPose.pos + math.rotate(leaderPose.rot, new float3(slot.x, 0, slot.y));
+                Assert.Less(math.distance(expected, pose.pos), .001f);
+                Assert.Less(math.abs(math.dot(leaderPose.rot.value, pose.rot.value) - 1), 1e-6f);
+            }
+            CollectionAssert.AreEquivalent(new byte[] { 0, 1 }, slots);
+        }
+
         [UnityTest] public IEnumerator Spawn_TagsAndAllegiance()
         {
             yield return NewGame(42); Director.Enabled = false;

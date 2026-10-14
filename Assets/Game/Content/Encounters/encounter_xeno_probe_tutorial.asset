@@ -25,7 +25,7 @@ MonoBehaviour:
   useFactionDoctrine: 0
   doctrineMinShips: 2
   doctrineMaxShips: 3
-  formation: {fileID: 0}
+  formation: {fileID: 11400000, guid: b2f97218393546aba2ad219dc9a6d205, type: 2}
   directorWeight: 0
   minDanger: 0
   maxDanger: 3
