@@ -80,6 +80,9 @@ MonoBehaviour:
   - Key: hud
     Uxml: {fileID: 9197481963319205126, guid: 3edded8a0d9241afa9ea140c95806db2, type: 3}
     Prewarm: 1
+  - Key: dock
+    Uxml: {fileID: 9197481963319205126, guid: b9c16f1070f445d0badbd26fa5ccc768, type: 3}
+    Prewarm: 0
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32

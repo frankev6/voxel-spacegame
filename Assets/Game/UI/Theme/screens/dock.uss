@@ -1,0 +1,6 @@
+/* HUD-019: existing NOCTURNE panel/button tokens; availability never requires hover. */
+.dock-screen { flex-grow: 1; align-items: center; justify-content: center; }
+.dock-panel { width: 560px; max-width: 90%; max-height: 90%; }
+.dock-panel .panel__title { min-width: 0; }
+.dock-actions { align-items: stretch; }
+.dock-reason { white-space: normal; }

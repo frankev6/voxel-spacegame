@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../../Theme/screens/dock.uss" />
+    <ui:VisualElement class="dock-screen" picking-mode="Ignore">
+        <ui:VisualElement name="dock-panel" class="panel dock-panel" picking-mode="Position">
+            <ui:VisualElement class="panel__header" picking-mode="Ignore">
+                <ui:Label name="dock-station-name" class="panel__title text-display text-ellipsis" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__body dock-actions stack-m" picking-mode="Ignore">
+                <ui:Button name="dock-trade" text="Trade" class="btn btn--primary" />
+                <ui:Label name="dock-trade-blocked" class="text-s text-muted dock-reason" picking-mode="Ignore" />
+                <ui:Button name="dock-edit-ship" text="Edit ship" class="btn btn--secondary" />
+                <ui:Label name="dock-edit-blocked" class="text-s text-muted dock-reason" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__footer" picking-mode="Ignore">
+                <ui:Button name="dock-undock" text="Undock" class="btn btn--secondary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
