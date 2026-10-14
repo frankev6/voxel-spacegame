@@ -1090,7 +1090,7 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 ### TRV-014 — Escort transfer hooks
 - **Milestone:** M4
 - **Tier:** standard — calls into an interface at fixed points of the timeline (§5.11)
-- **Depends on:** `TRV-012`, `AI-001`, `FND-001`
+- **Depends on:** `TRV-006`, `TRV-009`, `AI-001`, `FND-001`
 - **Do:**
   1. Call `IJumpEscorts` at commit, on refusal and at BeginArrival (§5.11).
   2. Write the contract test with a fake.
@@ -1144,3 +1144,5 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 - Audit (background only): `docs/reference/audit-2026-10/00-synthesis.md` chain C and §6 row 3; `LEDGER.md` R29, R30; `03-galaxy-world.md` §5 (lanes, fuel gating).
 - Design system: `docs/design/DESIGN-SYSTEM.md` lane jump rows (spool 0.5 s, cover 0.5 s, arrival 0.5 s) for all three directions.
 - SPEC-30 §5.3 (lanes), §5.5 step 6 (gates on the lane ring), §5.12 (map visibility); SPEC-31 §5.14 (`BeginStarSystemChange`); SPEC-40 §6 (`LogicWatcher`).
+
+| 25 | Escort hooks depend on aggregate integration/performance task instead of implemented travel lifecycle | Use completed TRV-006/009, AI-001 and FND-001 under ADR-0068. Hook construction is independent of R30/performance measurements; actual fleet escort implementation remains its SPEC-01 owner. | Tech lead | Resolved; ledger Q457. |
