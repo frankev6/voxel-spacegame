@@ -27,3 +27,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - Real remaining dependencies: full ECO-008 launcher needs encounter member lookup ENC-007; QST-009 delivered source needs actual compiled dialogue program DLG-005/007. No fake owners. Editor was stopped before validation; preserve that state. Owner QualitySettings and two content metas remain excluded.
 
 - EDT-008 accepted c86bd67b: incremental connectivity and bounded/async split jobs integrated into edit lifecycle, six required cases passed. Lead next EDT-009 validation/removal then EDT-011 commit. All three existing worker handles confirmed active during this delivery.
+
+- EDT-009 accepted 56d65d57: full validation, throttled issues and atomic floating removal; all 11 explicit acceptance cases pass. Lead next compatible integration includes ENC-005 0322c7f9, HUD-017 e7f4a957 and HUD-013 6222e0a3, then EDT-011 commit/host. Worker assignments in the table supersede historical completed-task notes above.

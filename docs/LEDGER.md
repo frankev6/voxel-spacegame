@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 41 | 17 | 0 | 0 | 124 | 0 | 182 | 5 |
+| M3 | 41 | 16 | 0 | 0 | 125 | 0 | 182 | 5 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -430,7 +430,7 @@
 | EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | yes | done | astra (gpt-6) | 2026-10-13 | d0a167dc | Incremental intact/damaged and orientation counts, lazy inventory-aware BOM; five required plus six session regressions pass; spec-required: 5, extra: 0 |
 | EDT-007 | Placement validator | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | done | astra (gpt-6) | 2026-10-13 | 633e952c | Placement checks, atomic group rollback, exact damaged identity/restore; 17 required cases pass; spec-required: 17, extra: 0 |
 | EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | done | astra (gpt-6) | 2026-10-14 | c86bd67b | Incremental islands, bounded split/Burst async relabel, disconnected-cell job; integrated exact damage masks through apply/undo/redo/discard. Six required cases pass; advisory timing deferred. |
-| EDT-009 | Full validation, issues and remove-floating | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-006, EDT-007, EDT-008 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead: complete validation, throttled issues and atomic remove-floating action. |
+| EDT-009 | Full validation, issues and remove-floating | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-006, EDT-007, EDT-008 | yes | done | astra (gpt-6) | 2026-10-14 | 56d65d57 | Full validation, throttled issue cache and one-command remove-floating; 11 required cases pass; ADR-0095/Q447. |
 | EDT-010 | Stats accumulator and diff | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-006, PWR-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 73bcc085 | Exact moments, canonical sorted stats and deltas; four required cases pass; spec-required: 4, extra: 0 |
 | EDT-011 | Commit pipeline and R15 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-009, EDT-010, SPEC-50 | no | todo |  |  |  |  |
 | EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | ed61500 | Bounded DDA, slice/X-ray, working plane and placement origin; seven required methods (12 parameterized cases) pass; spec-required: 7, extra: 0 |
@@ -1157,6 +1157,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — EDT-009 full validation and floating removal — astra (gpt-6)
+
+- 56d65d57 implements every validation error/warning, stable error-first ordering, disconnected block count/focus on largest non-core island, exact extents/cell budgets, damage invariant and missing build-item detection. Public issue refresh is cached at 0.25 s; commit has an immediate internal path. Remove-floating uses the normal atomic edit pipeline, one history entry, correct BOM and undo/redo. ADR-0095 supplies the omitted session API; Q447 resolves damaged-origin handling and omitted explicit acceptance cases.
+- `Logs/playtest/editor-validation/editmode.xml`: 11 passed, zero failed/skipped, 0.105 seconds test bodies. spec-required: 11, extra: 0 (seven listed plus four issue-kind cases mandated by the acceptance criterion, now listed). Compile clean, zero CS warnings; docs clean. No broad/soak/performance run; owner dirt excluded.
+- Delivered for the next compatible integration: ENC-005 0322c7f9 territory, HUD-017 e7f4a957 fleet screen, HUD-013 6222e0a3 dialog host. Same three workers immediately recycled to HUD-006 pause, HUD-007 flight HUD and HUD-003 main menu respectively. Lead retains real root/playground registration and frontier commit/editor host; these delivered screens are not yet advertised as live playground areas.
 
 ### 2026-10-14 — EDT-008 draft connectivity accepted — astra (gpt-6)
 
