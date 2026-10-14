@@ -178,8 +178,8 @@ namespace Game.App.Boot
                 Spawner = Push(new ShipSpawnService(world, Registry, Content.Catalog, Session, galaxy));
                 Register(Spawner); Register<IShipSpawner>(Spawner);
             }
-            // SPEC-30 permits absent lane/ownership services until their implementations are composed.
-            // TODO(TRV-006/ENC-007): pass their actual interfaces here when those services are installed above.
+            var encounters = Push(new EncounterDirectorService(campaignGalaxy, systemLoader, travel, docking, Spawner, factions, territory, world, Content.Catalog));
+            Register(encounters); galaxyTicker.Register(encounters); Flow.RegisterExiting(encounters);
             Register(new GalaxyMapModel(campaignGalaxy, travel, territory));
             // Remaining travel/faction/economy/narrative bindings follow SPEC-01 §5.2.
 
@@ -252,7 +252,7 @@ namespace Game.App.Boot
             Screens.BindMenuNavigation(Screens.ShowSaveSlots, editorLauncher.OpenLab, Screens.ShowSettings);
             var hudSync = world.GetOrCreateSystemManaged<HudSyncSystem>();
             var hudNames = new Game.Presentation.Presenters.HudNames(Content.Catalog,
-                Game.Core.Services.Get<Game.Simulation.Factions.FactionIndexMap>(), campaignGalaxy, travel);
+                Game.Core.Services.Get<Game.Simulation.Factions.FactionIndexMap>(), campaignGalaxy, travel, encounters);
             hudSync.Bind(Screens.HudModel, hudNames, Input.GetBindingDisplay);
             Input.BindingsChanged += hudSync.RefreshBindings;
             Screens.BindSceneRoots(hudSync, Input.GetBindingDisplay, editorServices);

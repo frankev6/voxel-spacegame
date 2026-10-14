@@ -4,6 +4,7 @@ using Game.Core.Events;
 using Game.Core.Systems;
 using Game.Data.Components;
 using Game.Simulation.Commands;
+using Game.Simulation.Factions;
 using Game.Voxel.Damage;
 using Game.Voxel.Model;
 using Unity.Collections;
@@ -35,6 +36,7 @@ namespace Game.Simulation.Weapons
             var em = state.EntityManager;
             em.CompleteDependencyBeforeRO<PlayerShip>();
             em.CompleteDependencyBeforeRO<Allegiance>();
+            em.CompleteDependencyBeforeRO<EncounterTag>();
             em.CompleteDependencyBeforeRO<GridSource>();
             em.CompleteDependencyBeforeRO<HulkInfo>();
             em.CompleteDependencyBeforeRO<GridDamageStats>();
@@ -48,9 +50,11 @@ namespace Game.Simulation.Weapons
                 var loss = pending[i];
                 byte isPlayer = 0, faction = 255, kind = 0, killerIsPlayer = 0;
                 ContentHash blueprint = default;
+                EncounterTag encounter = default;
                 ulong killerPersistentId = 0;
                 if (em.Exists(loss.Grid))
                 {
+                    if (em.HasComponent<EncounterTag>(loss.Grid)) encounter = em.GetComponentData<EncounterTag>(loss.Grid);
                     isPlayer = (byte)(em.HasComponent<PlayerShip>(loss.Grid) ? 1 : 0);
                     if (em.HasComponent<Allegiance>(loss.Grid)) faction = em.GetComponentData<Allegiance>(loss.Grid).Faction;
                     if (em.HasComponent<GridSource>(loss.Grid)) blueprint = em.GetComponentData<GridSource>(loss.Grid).Blueprint;
@@ -66,12 +70,11 @@ namespace Game.Simulation.Weapons
                         }
                     }
                 }
-                // TODO(ENC-007): enrich encounter identity from EncounterTag once its canonical contract exists.
                 queue.Enqueue(new ManagedEventEnvelope<ShipDestroyed>
                 {
                     Tick = loss.Tick,
                     SortKey = loss.PersistentId,
-                    Payload = new ShipDestroyed(loss.PersistentId, blueprint, default, 0, loss.Tick,
+                    Payload = new ShipDestroyed(loss.PersistentId, blueprint, encounter.Encounter, encounter.Instance, loss.Tick,
                         isPlayer, faction, kind, killerPersistentId, killerIsPlayer)
                 });
             }
