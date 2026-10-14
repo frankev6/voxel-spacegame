@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 40 | 13 | 0 | 0 | 129 | 0 | 182 | 5 |
+| M3 | 38 | 15 | 0 | 0 | 129 | 0 | 182 | 4 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -470,7 +470,7 @@
 | HUD-016 | Galaxy map and star-system map screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-015, SPEC-30, SPEC-31, TRV-001, QST-001 | no | todo |  |  |  |  |
 | HUD-017 | Fleet screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, FND-010, SYS-008, EDT-001, EDT-010 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 0f00dd27 | Fleet view/presenter, canonical committed stats and actual playground trigger; three required cases plus live screenshot pass. Actual edit launcher remains EDT-023; switch unavailable. |
 | HUD-018 | Ship editor host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, EDT-001, EDT-021 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 46d844de | Four-region editor host mounts accepted panels; four required graphics cases pass. Playable editor launcher remains EDT-023/HUD-002. |
-| HUD-019 | Loading and dock screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-010, SYS-001, ECO-001, EDT-001 | no | todo |  |  |  | partial in HUD-002: loading view, progress presenter and UXML / composition polling, dock screen and full acceptance remain |
+| HUD-019 | Loading and dock screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-006, SYS-008, ECO-001, EDT-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Combat worker: real loading/dock interactions; actual trade route remains ECO-008, no substitute. |
 | HUD-020 | Full-screen layout regression suite | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-003, HUD-004, HUD-005, HUD-006, HUD-007, HUD-011, HUD-012, HUD-013, HUD-014, HUD-016, HUD-017, HUD-018, HUD-019 | no | todo |  |  |  |  |
 | CAM-006 | Origin warp and teleport cut | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, GAL-001 | yes | done | astra (gpt-6) | 2026-10-13 | 710a668 | Origin warp preserves framing and residual teleport cuts; five required tests; full 1051 EM /146 PM passed. |
 | CAM-007 | Occlusion pull-in | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, PHY-001 | yes | todo |  |  |  |  |
@@ -1160,6 +1160,8 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 3. Keep the provisional yaw values and revise the Small acceleration target to preserve the legacy spread. Avoids layout changes, but accepts a roughly 20× acceleration range among powered ships and requires an explicit design decision.
 
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
+
+| 453 | SPEC-61 Q43: independent loading/dock construction | Use completed UI, SceneFlow and DockingService contracts per ADR-0072; actual merchant opening remains ECO-008. | Tech lead |
 
 ## Log
 
