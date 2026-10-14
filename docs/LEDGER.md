@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 58 | 13 | 0 | 0 | 109 | 0 | 180 | 6 |
+| M3 | 58 | 12 | 0 | 0 | 110 | 0 | 180 | 7 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -438,8 +438,8 @@
 | EDT-015 | Line, box and fill tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-014 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Reusable combat worker: line, box and fill tools |
 | EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | yes | done | astra (gpt-6) | 2026-10-14 | dd5467a7 | Native selection, atomic damage-preserving transforms, replacement and controller gestures; six required checks pass |
 | EDT-017 | Copy, cut, paste and stamp | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-016 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Reusable presentation worker: clipboard/paste/stamp after TRV-009 delivery |
-| EDT-018 | Draft renderer | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, SPEC-11 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead: snapshot meshing, reused meshes, slice and incremental props |
-| EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | no | todo |  |  |  |  |
+| EDT-018 | Draft renderer | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, SPEC-11 | yes | done | astra (gpt-6) | 2026-10-14 | 843f7435 | Snapshot meshes, dirty requeue, slice/X-ray, incremental props; six required cases pass including native leak and async bounds; live visualization remains EDT-022 |
+| EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | yes | todo |  |  |  |  |
 | EDT-020 | Blueprint store, browser and name sanitising | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-017, PERS-001, SPEC-60 | no | todo |  |  |  |  |
 | EDT-021 | Editor UI panels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-001, UI-003, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, HUD-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Reusable economy worker: editor panels on completed UI owners |
 | EDT-022 | Editor host, input, presenter and leave prompt | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-011, EDT-015, EDT-019, EDT-021, SPEC-62, INP-001 | no | todo |  |  |  |  |
@@ -1122,6 +1122,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — EDT-018 renderer functional acceptance — astra (gpt-6)
+
+- Final implementation843f7435 strengthens existing required cases: pending snapshot jobs are disposed under the warmed native leak guard, all meshes retire, and final async mesh bounds match a fresh mesh alongside packed vertices/indices. Six required cases passed3178; changed two cases passed76625, terminal0, after clean compile27747. Zero warning CS. Evidence Logs/playtest/editor-renderer, including ownership-playmode files. spec-required:6,extra:0.
+- EDT-018 marked done against its explicit functional acceptance criteria. No new standalone visual gate: actual rendered gameplay/editor verification belongs to the assembled EDT-022 host. Shader compatibility review310 fixed shared clipping in all relevant passes; evidence review354 resolved both native-leak and bounds gaps within existing tests. No visual screenshot claimed.
+- Next integrate delivered EDT-015/017/021 and repair EDT-016 selection issues, unlocking blueprint storage/editor host prerequisites. All current Unity handles terminal. Previous material/check batch and current acceptance are progress; full roadmap goal remains active.
 
 ### 2026-10-14 — EDT-018 materials and focused renderer checks — astra (gpt-6)
 

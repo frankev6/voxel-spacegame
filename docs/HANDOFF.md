@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-14)
 
+- **Draft renderer accepted:** EDT-018843f7435 passes six required cases, including revised native-leak disposal and async mesh bounds; compile27747 clean, focused3178/76625 terminal0. Real editor visualization remains EDT-022 host integration, no new gate. Next integrate delivered EDT-015/017/021 and fix selection review findings. No Unity active.
+
 - **Draft renderer focused checks pass:** EDT-01893947f59 binds existing baked brick materials plus packed Nocturne X-ray, fixes prop clipping in depth/normals/shadow passes, and passes all six required PlayMode cases (0.102100s bodies), compile78703 clean. Final native-disposal evidence review and graphics draw verification remain; EDT-018 stays in-progress. Worker deliveries and selection fixes remain queued. No Unity active.
 
 - **Draft prop drawing authored:** EDT-01883d2ab8d adds conventional instance batches, palette indices, slice clipping and transformed brick/prop bounds under ADR-0092. Material setup and six required cases remain; uncompiled/unaccepted. Tool/panel reviews clear apart from known EDT-016 selection defects. Combat audits ready standard work, presentation reviews shader compatibility; economy has a verified acceptance/dependency wait. No Unity active.
