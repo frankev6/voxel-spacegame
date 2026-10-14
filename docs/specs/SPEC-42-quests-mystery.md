@@ -846,7 +846,7 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 ### QST-005 — BeatService
 - **Milestone:** M3
 - **Tier:** frontier — F5: triggers, queue, dialog lifecycle, nested completion and terminal commands across frames
-- **Depends on:** `QST-003`, `QST-004`, `SPEC-41`
+- **Depends on:** `QST-003`, `QST-004`, `DLG-006`, `DLG-007`, `DLG-008` (ADR-0102)
 - **Do:** Implement `BeatService` per §5.2: indexes, selection, triggers, queue, `Play`, the `Ended` handler, `CompleteInternal`, effects and `DebugPlay`.
 - **Files:** `Assets/Game/Narrative/Beats/{BeatService,BeatQueue}.cs`; `Assets/Game/Tests/EditMode/Narrative/BeatServiceTests.cs` (fake `IDialogRunner` through SPEC-41's test seam)
 - **Acceptance criteria:**
