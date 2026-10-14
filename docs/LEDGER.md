@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 47 | 12 | 0 | 0 | 123 | 0 | 182 | 7 |
+| M3 | 46 | 13 | 0 | 0 | 123 | 0 | 182 | 6 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -362,7 +362,7 @@
 | ENC-002 | Definitions, config and validators | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 40501eb0 | 31 validator checks pass; config and locked ARK generated; remaining encounter content stays ENC-010 |
 | ENC-003 | Faction singleton, index map and FactionStandingSystem | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-002, WPN-012, DMG-015, AI-010 | yes | done | astra (gpt-6) | 2026-10-14 | a2467740 | Canonical boot matrix/index map and scheduled request/provocation writer; eight required functional checks pass; advisory 200-grid fixture authored, measurement deferred. Next ENC-004 owns reset/save. |
 | ENC-004 | FactionService and FACN | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-003, PERS-001, FND-001 | yes | done | astra (gpt-6) | 2026-10-14 | 3b4929e9 | Queued reads, FACN unknown-ID preservation and atomic restore; production save/new-game/sandbox reset registration. Six service and two integration cases pass. |
-| ENC-005 | TerritoryService (authored ownership) | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-30 | yes | todo |  |  |  |  |
+| ENC-005 | TerritoryService (authored ownership) | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, ENC-003, ENC-004, GAL-008 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Combat worker: authored territory ownership and generation rebuild against real faction service. |
 | ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, GAL-006, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 21d0996b | Full ordered seeded composition, clearance placement and line-abreast formation; 9 required cases pass. Director cap remains ENC-007. |
 | ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SPEC-31, SPEC-32, SPEC-23 | no | todo |  |  |  |  |
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | no | todo |  |  |  |  |
@@ -1041,6 +1041,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 439 | SPEC-30 Q38: advisory galaxy fixtures | Resolved: real generation/deltas and separate unchanged budgets; compiled, measurements deferred without tuning. | Tech lead |
 | 440 | SPEC-50 Q28: directory/capacity ownership | Resolved: authored-first real body lookup and fleet/reset-driven cargo capacity; three transferred cases pass. | Tech lead |
 | 441 | SPEC-33 Q20: queued relation reads, FACN and sandbox reset | Resolved: per-operation clamp matches fixed step; session adapter clears relations and unknown records for sandbox/new sessions; validate entire FACN before mutation. | Tech lead |
+| 442 | SPEC-33 Q21: territory concrete prerequisites | Resolved: ENC-002/003/004 and GAL-008 replace broad SPEC-30 dependency; all completed before dispatch. | Tech lead |
 
 ## Measurements
 

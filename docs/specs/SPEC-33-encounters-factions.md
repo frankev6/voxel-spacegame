@@ -900,7 +900,7 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 ### ENC-005 — TerritoryService (authored ownership)
 - **Milestone:** M3
 - **Tier:** standard — table rules in §5.11
-- **Depends on:** `ENC-002`, `SPEC-30`
+- **Depends on:** `ENC-002`, `ENC-003`, `ENC-004`, `GAL-008`
 - **Do:** Implement `TerritoryService` steps 1–2 of §5.11, the queries, and the rebuild check.
 - **Files:** `Assets/Game/Galaxy/Services/TerritoryService.cs`; `Assets/Game/Tests/EditMode/Galaxy/Encounters/TerritoryTests.cs`
 - **Acceptance criteria:**
@@ -1127,3 +1127,5 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 | 19 | ENC-003 job writer retains a read-only nested matrix handle after a scheduled reader; group bucket and world allocator need explicit APIs | Keep RW FactionRelations lookup for ECS ordering, and pass its Stance NativeArray explicitly as the apply job write container so native safety tracks the writer. Use CollectionHelper.CreateNativeArray with WorldUpdateAllocator. FactionStandingSystem uses OrderFirst with UpdateBefore ShipCommandGroup, which is also OrderFirst. No Complete calls in the production system; the required reader test passes. Intermediate request arithmetic uses long before clamping. | Tech lead — resolved; ledger Q437 |
 
 | 20 | ENC-004 pending-read saturation and sandbox/reset lifetime | Fold each queued operation with the same clamp as the fixed-step writer. Register a session-model adapter as well as the new-game initializer, because sandbox reset skips campaign initializers. Parse FACN fully before mutation; reject duplicate or malformed records and preserve unknown IDs until session reset. | Tech lead — resolved; ledger Q441 |
+
+| 21 | ENC-005 concrete prerequisites hidden by whole-spec dependency | Territory reads the canonical ENC-003 index map via ENC-004 faction service and GAL-008 galaxy generation; use these concrete completed prerequisites with ENC-002. | Tech lead — resolved; ledger Q442 |
