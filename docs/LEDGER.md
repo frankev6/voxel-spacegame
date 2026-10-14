@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 81 | 9 | 0 | 0 | 90 | 0 | 180 | 7 |
+| M3 | 80 | 9 | 0 | 0 | 91 | 0 | 180 | 8 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -396,11 +396,11 @@
 | DLG-005 | GATE: Yarn Spinner adoption | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-004 | no | todo |  |  |  |  |
 | DLG-006 | DialogService, memory and DLGS chunk | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, DLG-003, NAR-011, CORE-003, CORE-007 | yes | done | astra (gpt-6) | 2026-10-13 | 99290d38 | Queued lifecycle, scoped blocking/terminal flow, detour-safe rolls and DLGS; seven direct cases pass; production runner/registration DLG-007; spec-required: 7, extra: 0 |
 | DLG-007 | Production dialog runner (path chosen by DLG-005) | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-005, DLG-006, DLG-003 | no | todo |  |  |  |  |
-| DLG-008 | Dialog presenter | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-006 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Presentation worker; five required direct cases; lead batches validation |
-| DLG-009 | Dialog view screen | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, UI-001, INP-001 | no | todo |  |  |  |  |
+| DLG-008 | Dialog presenter | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-006 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b1057490 | Pooled presenter and conditional composition; five direct cases pass; runner DLG-007 and authored view DLG-009 pending; spec-required: 5, extra: 0 |
+| DLG-009 | Dialog view screen | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, UI-001, INP-001 | yes | todo |  |  |  |  |
 | DLG-010 | Speakers and illustrations | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 6629f3aa | Metadata integrated; all converted tag IDs resolve. Seven approved portrait/illustration sprites unavailable; remains partial, no new art or owner gate. |
 | DLG-011 | Dialog PlayMode scenarios | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-007, DLG-009, QST-001 | no | todo |  |  |  |  |
-| DLG-012 | Harness commands for dialog | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, DEV-001 | no | todo |  |  |  |  |
+| DLG-012 | Harness commands for dialog | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, DEV-001 | yes | todo |  |  |  |  |
 | QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 95f80410 | Public quest/mystery contracts and required assembly test; behavior remains QST-002 onward |
 | QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, NAR-003, NAR-004, NAR-006, NAR-009, NAR-013 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9ca0b84 | Real definitions, compile/bind and validation; 24 prior cases plus repaired Usage_Enforced pass; generated content compiled except separate TRV-003 owner stub. |
 | QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | done | astra (gpt-6) | 2026-10-13 | a8b2d6d1 | Quest runtime/baselines/progression/restore implemented; seven required functional cases pass39710; Q371, trace and objective dependency review fixes. QUST/live adapter remain owning tasks. |
@@ -965,6 +965,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 391 | SPEC-41 Q18: non-reentrant selection, abort and roll lookup | Queue option selection through Pump; settle completion outside runner callbacks. Explicit abort clears the old page/terminal. Generated Beat family ordinal order maps the existing content index for roll count. | Tech lead |
 | 392 | SPEC-41 Q16: archived localization writing | Export the marked LEGACY-UNAVAILABLE option as non-executable archival text; ordinal line IDs, quoted UTF-8 CSV, no source rewrites. | Tech lead |
 | 393 | SPEC-31 Q22: PLOC lifecycle and missing chunk defaults | ADR-0085 supplies delayed validated docking notification; preserve independently restored pose during missing-GLXY regeneration; missing PLOC clears stale pose/dock and uses the existing start fallback. | Tech lead |
+| 394 | SPEC-41 Q19: presenter pooling and staged composition | Accept worker defaults: bounded32 displayed lines, pooled options without authored truncation, synthetic labels supplied by view, conditional real-service composition and explicit production runner/view ownership. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1097,6 +1098,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DLG-008 done; player persistence follow-up — astra (gpt-6)
+
+- b1057490 integrates pooled presenter, numbered/hidden/fallback options, Back behavior, acknowledgement and portrait persistence; conditional boot binding and narrative pumping retain explicit DLG-007/009 composition gaps. Q394 mirrors SPEC-41Q19. spec-required: 5, extra: 0; advisory fixture compiled only.
+- Compile24673 terminal0, zero warning CS; focused EditMode32026 terminal0 passes six cases (five presenter plus revised PLOC corrupt-input case),0.1923333s bodies. Evidence Logs/playtest/dialog-presenter. No full/perf run.
+- SYS-009 review311 flags pending docking surviving session failure. Clear it on non-load SessionReset and disposal, reject hulk targets; required real-loader case extended with session-clear assertion. Final retry pending; SYS-009 stays in progress. Existing anchor/grid finding already fixed ef4d3227.
+- Presentation can take newly ready DLG-009; DLG-012 also now ready. Previous real-loader proof and this presenter acceptance are progress. No Unity active.
 
 ### 2026-10-13 — SYS-009 restore integration verified; final review pending — astra (gpt-6)
 

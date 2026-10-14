@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Dialog presenter accepted:** DLG-008b1057490 passes five required cases alongside revised PLOC case; clean compile, six-case batch0.1923s. SYS-009 reset/disposal follow-up needs final check. Next DLG-009 view and DLG-012 harness workers; production runner still separate. No Unity active.
+
 - **Player restore integration passes:** SYS-009ef4d3227 passes the real-loader docking case after fixing grid-versus-anchor interaction lookup; two binary cases passed before the nonfinite-input extension. Final compile, revised binary case and lifecycle review pending. DLG-0085d27d43b delivered; next compatible integration/validation. No Unity active.
 
 - **Player pose persistence authored:** SYS-00995715e15 adds PLOC and delayed validated docking, preserving restored state through loader teardown and missing-galaxy regeneration. Three required direct cases authored; uncompiled/unaccepted. Next review and focused validation. Presenter DLG-008 active; combat/economy review restore. No Unity active.
