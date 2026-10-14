@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Canonical bridge lookups authored:** NAR-012ec427094 adds CreateForWorld using real galaxy body templates, prebuilt authored-system hashes and faction catalog indices. SPEC-42 QST-008 owns live registration after its beat/travel/encounter dependencies; GameComposition TODO now names that owner. Four functional cases already passed; final factory compile/review pending next compatible batch. No Unity active. Workers DLG-003265, bounded bridge review283 and DEV-010237 active. Previous clue acceptance and current canonical source work are progress.
+
 - **Clue lifecycle accepted:** QST-00419b24412 done; compile75549 clean and focused EditMode89861 passes9 (five clue/four world-event cases), 0.1676s bodies, about43s total including Unity lifecycle. No Unity active. NAR-012 stays in progress pending canonical lookups/composition resolution and review; allocation fixture compiled only. Next finish that integration and advance dialog work. Workers DLG-003265, bridge review283 and DEV-010236 active.
 
 - **Clue service integrated for validation:** worker3b4a3895 source is on task/QST-004-clue-integration; implements discovery ordinals, mystery effects, rumor latching and restore hooks with five cases. NAR-012658a627f source checkpoint merged under ADR-0062, still unaccepted; five direct-event cases authored. Next review feedback, canonical bridge composition resolution and one compatible compile/functional batch. No Unity active. DLG-003265 and DEV-010235 active; economy282 delivered and assigned bounded bridge review. Previous routing and current tests/integration are progress.

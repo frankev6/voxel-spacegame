@@ -1082,6 +1082,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — NAR-012 canonical composition entry authored — astra (gpt-6)
+
+- ec427094 supplies real galaxy/content lookups for the bridge. Q376 clarified from SPEC-42 QST-008: that task owns live construction/registration with implemented beat, travel and encounter owners. GameComposition retains its explicit QST-008 TODO; no throwing services or fake successes introduced.
+- Four required functional routing checks previously passed; factory changes await the next compatible compile/review. spec-required: 5 (four functional passed, one advisory compiled), extra: 0. No new test run. Workers265/283/237 remain active. Previous clue acceptance and this canonical lookup implementation are progress.
+
 ### 2026-10-13 — QST-004 done; world-event checks pass — astra (gpt-6)
 
 - QST-00419b24412 accepted after worker integration and one test declaration repair. Compile75549 terminal0, zero CS warnings; EditMode89861 terminal0: nine passed, zero failed, 0.1675691s test bodies (roughly43s including Unity startup/shutdown). Five are required clue cases, four world-event functional cases; no repeat/full/perf run. Evidence Logs/playtest/narrative-world-clues. spec-required: 5, extra: 0 for QST-004.
