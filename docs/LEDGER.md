@@ -957,6 +957,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 383 | SPEC-51 Q28: negative function HP and shared-origin hash association | Preserve finite damage HP including negative values; hash each instance identity with HP in canonical identity order. ADR-0082. | Tech lead |
 | 384 | SPEC-31 Q20: SYS-008 direct prerequisites | Accepted SYS-006, INP-005, AI-004, CORE-006 supply actual owners; later AI/perf work does not block interaction. | Tech lead |
 | 385 | SPEC-70 Q29: DEV-014 missing behavior dependencies | Require SYS-008, DEV-012 and INP-005; contract-only SYS-001 cannot provide real interaction acceptance. | Tech lead |
+| 386 | SPEC-31 Q21: shared docking composition | ADR-0083 supplies shared production docking owner, compatible loader injection and canonical interaction event handling. PLOC restore remains SYS-009. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1089,6 +1090,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — SYS-008 query and docking authored — astra (gpt-6)
+
+- 020b16e6 implements Burst collider surface queries with player hull radii, canonical target selection, wrapped Interact counter consumption and managed BodyInteracted output. Interaction state is created in OnCreate before scene snapshots; spatial reads join the guarded owner chain.
+- Shared production DockingService is registered/injected into the loader (ADR-0083/Q386). Valid interactions persist Interacted without rebuilding geometry; docking is idempotent, stale bodies are ignored and unload undocks. PLOC restore stays explicitly SYS-009.
+- Uncompiled/unaccepted; next four required cases and bounded source review, then one focused batch. spec-required: 4 planned, extra: 0. No Unity run. Workers DLG-003273, DEV-011297 and SYS-008 support255 active; NAR-019 delivery queued. Previous adapter acceptance and this implementation are concrete progress.
 
 ### 2026-10-13 — EDT-003 done: exact draft restoration — astra (gpt-6)
 

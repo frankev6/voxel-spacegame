@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Station interaction authored:** SYS-008020b16e6 adds Burst surface-distance query, edge consumption, boot-lifetime singleton state and shared live docking/loader events (ADR-0083/Q386). Uncompiled/unaccepted; next four required cases plus source review, then focused validation. No Unity active. DLG-003273 and DEV-011297 implementing; presentation255 reviews interaction source. NAR-019 delivery remains queued. Previous EDT-003 acceptance and current query/docking code are progress.
+
 - **Draft adapters accepted:** EDT-0032d3181ff done: exact negative damage HP, canonical identity-associated hash, atomic undo write path and native reads. Compile clean; four focused cases pass (0.2039s bodies), handle93715 terminal0; evidence Logs/playtest/editor-adapters. No Unity active. Next lead SYS-008 real station interaction/docking; dependency audit252 confirms accepted prerequisites. Workers DLG-003272 and DEV-011296 active; presentation support available after audit. NAR-019 delivered pending integration/live owners.
 
 - **Final adapter review295:** two remaining EDT-003 defects: exact restoration must allow damage-produced negative non-functional HP; equal-origin hash must preserve HP-to-block identity. Lead fixes next, task remains unaccepted. DEV-017 accepted/main700c1adf. Economy recycled DEV-011 (counter plumbing only, no benchmarks); presentation audits SYS-008, combat DLG-003. No Unity active.
