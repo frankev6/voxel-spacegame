@@ -1086,6 +1086,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — EDT-003 writer and native reads authored — astra (gpt-6)
+
+- 12d4acf8 translates ordered forward/inverse operations and damage bytes into one ApplyEdits call. Adds borrowed read-only VoxelStructureReadView, Burst block enumeration and palette/instance-order-independent hash. DraftReader pins/completes/unpins jobs. ADR-0082 clarifies missing-root enumeration from live instances and direct native diff views until EDT-004/005 containers exist.
+- Uncompiled/unaccepted; four required cases and bounded review findings next, then batch with DEV-017f8f376aa. spec-required: 4 planned, extra: 0. No Unity run. Workers269/290/245 active; previous atomic source changes and current adapters/jobs are progress.
+
 ### 2026-10-13 — EDT-003 atomic source batches authored — astra (gpt-6)
 
 - 257a98bc adds ADR-0082 atomic VoxelEdit batches within the owning voxel module. Touched cells/instances and prospective palette/free slots are staged before source mutation; invalid batches leave source/touched output unchanged. Commit sorts cells/bricks canonically. Missing-root remove/HP uses the supplied definition footprint. No whole-ship rollback clone or ShipEditor cell writes.

@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Draft writer/native jobs authored:** EDT-00312d4acf8 translates forward/inverse diffs into one ApplyEdits call and adds canonical Burst block enumeration/hash through borrowed read-only source views. Reader pins until jobs complete; missing-root instances remain enumerable. Still uncompiled/unaccepted; next four required cases and transaction review fixes, then compatible DEV-017 integration/validation. No Unity active. DLG-003269, editor review290 and NAR-019245 active; DEV-017f8f376aa pending. Previous atomic batch and current adapter/jobs are progress.
+
 - **Atomic voxel edit prerequisite authored:** EDT-003257a98bc adds ADR-0082 source-only VoxelEdit/ApplyEdits with touched-data preflight, simulated palette/instance allocation and stable commit order. Uncompiled/unaccepted; next writer translation, native read/hash/enumeration and four required cases before validation. DEV-017f8f376aa delivered pending integration; economy reviews tables/reader/transaction. DLG-003268 and NAR-019244 active. No Unity active. Previous reader and current atomic source code are progress.
 
 - **Draft damage reader started:** EDT-003 claimed a2c22275; c68d75d8 adds read-only block lookup and canonical HP/FunctionHp capture, including missing cells/root via surviving footprint. Uncompiled/unaccepted. Q381 records missing VoxelStructure.ApplyEdits: next accepted Voxel batch/read contract, atomic writer and Burst enumeration/hash, then four required cases. No Unity active. Workers DLG-003267/DEV-017288/NAR-019244 active. Previous content-table acceptance and current reader source are progress.
