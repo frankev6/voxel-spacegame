@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 23 | 16 | 0 | 0 | 143 | 0 | 182 | 5 |
+| M3 | 22 | 17 | 0 | 0 | 143 | 0 | 182 | 5 |
 | M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -417,7 +417,7 @@
 | ECO-004 | Loot and EconomyService | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003, ECO-005, NAR-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9d457784 | Seeded loot and stable economy lifecycle facade; clean compile, eight required checks pass |
 | ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | f4cae431 | Merchant pricing, stock/restock and trading; eight required checks pass; sale rounding repaired |
 | ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | d3c8b0bc | INVT v1 and boot registration: slots/overflow, wallet, merchant state and missing identities. Q368; four functional cases and eight affected merchant cases pass, production save passes. Advisory capture fixture compiled only. |
-| ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, SPEC-13, SPEC-31, SPEC-12 | no | todo |  |  |  |  |
+| ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, DMG-012, SYS-008, PHY-013, VOX-014 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead implementing real hulk salvage; concrete runtime dependencies ADR-0104. |
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-011, ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c0f0c244 | 17 assets plus existing Scrap; real catalog/readback zero errors; two required checks pass; three existing quest-item warnings retained |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |

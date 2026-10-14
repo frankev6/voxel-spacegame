@@ -865,7 +865,7 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
 ### ECO-007 — Salvage
 - **Milestone:** M3
 - **Tier:** frontier — F1/F5: a structural system outside the fixed step, plus ledger state across interactions and despawns
-- **Depends on:** `ECO-003`, `SPEC-13`, `SPEC-31`, `SPEC-12`
+- **Depends on:** `ECO-003`, `DMG-012`, `SYS-008`, `PHY-013`, `VOX-014` (ADR-0104)
 - **Do:** Implement `SalvageMarkSystem` (§5.6), `SalvageService` (§5.7) and the `EconomyConfigRef` boot singleton factory (`EconomyConfigRefFactory.Create(def)`). Add a ledger note to SPEC-01's BootSingletons.
 - **Files:** `Assets/Game/Galaxy/Salvage/{SalvageMarkSystem,SalvageService,SalvageLedger,EconomyConfigRef,EconomyConfigRefFactory}.cs`; `Assets/Game/Tests/PlayMode/Galaxy/SalvageTests.cs`
 - **Acceptance criteria:**
