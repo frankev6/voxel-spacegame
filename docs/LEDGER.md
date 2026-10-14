@@ -1106,6 +1106,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — EDT-005 draft lifecycle functional checks pass — astra (gpt-6)
+
+- 6fa8c55a implements independent original/draft clones, atomic DraftWriter application, captured removal damage (including earlier additions in the same batch), history transfer, reverse undo/forward redo, discard, invalidation and disposal. Later validator/index/BOM/connectivity/commit work remains explicitly marked. dca0bd98 adds exactly six required cases; spec-required:6,extra:0.
+- Compile21966 terminal0, zero warning CS; focused EditMode79691 terminal0,6passed,0.225383s bodies. Evidence Logs/playtest/editor-session. Added required profiling scopes73b22759 after this run; final compile still pending, so task remains in-progress. Combat303 reviews source; route325 and celestial284 active. No Unity active. Next final source review/compile and compatible route integration. Previous batch support and current tested lifecycle are progress.
+
 ### 2026-10-13 — EDT-005 batch support; celestial factory resolved — astra (gpt-6)
 
 - EDT-005 claimed dc21319c;02d69553 implements disposable native batch input, reusable group report and exact dirty-brick/face-neighbour support. ADR-0088/SPEC-51Q30/global401 supplies missing storage contracts. Main EditSession still unfinished; next draft lifetime/apply/undo/redo/discard and six required cases. spec-required:6 planned,extra:0. No compile/tests yet.

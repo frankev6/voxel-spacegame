@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | TRV-008 | Delivered40452bf0; review301 complete; gate-info checks wait real TRV-010 | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | TRV-008 | Delivered40452bf0; reviews EDT-005 lifecycle; gate-info checks wait real TRV-010 | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-010 | Destination/route service dispatched; DLG-012 live acceptance waits DLG-007 | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | SYS-011 | Celestial visual owner dispatched; TRV-009 waits this actual prerequisite | HUD-003/006/007 once ready |
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Draft lifecycle passes:** EDT-0056fa8c55a/dca0bd98 clean compile and six direct checks pass (0.225383s bodies). Required profiling scopes73b22759 added afterward; final compile pending, still in-progress. Combat303 reviews runtime; TRV-010 routing and SYS-011 visuals active. Next finish session acceptance and integrate travel deliveries. No Unity active.
 
 - **Draft session support authored:** EDT-00502d69553 adds owned batches, per-group reports and face-neighbour dirty tracking (ADR-0088/Q401); session apply/undo/redo and six cases remain next, uncompiled/unaccepted. SYS-011 unblocked through accepted loader-owned factory ADR-0087/Q400. TRV-008 delivered; TRV-010 and SYS-011 active. No Unity active.
 
