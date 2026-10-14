@@ -971,6 +971,8 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 
 | 11 | Quest/clue services wait on all SPEC-40, including debugger tools that need those same services | **Resolved:** under ADR-0068, QST-003/004 require QST-002 definitions/compiler/binder/validator plus NAR-005 effect execution, NAR-007 facts, NAR-010 ordered evaluation/dependency index and NAR-011 live context. These accepted prerequisites supply their complete local runtime; world-event routing, dialog, debugger UI and their integration acceptance retain their own tasks. No reduction of service behavior, restore semantics or tests. | Tech lead |
 
+| 12 | Quest restore prose says re-evaluate but also preserve saved bits; effect callbacks can complete/restart a quest during progression | **Resolved:** decision 6 and QST-003 acceptance take precedence: the initial restored evaluation may read conditions but never changes saved bits/stages/status or applies effects, including failWhen. Subsequent dependency changes use normal progression. Evaluate canonical quest-index order and capture baselines before acceptance effects and after stage effects. Terminal status is set before effects; after callbacks, continue only while the same latest instance remains Active, so nested completion/repeatable starts cannot advance an old instance. Unknown queries return the declared empty defaults; missing baselines log and return current fact value. QUST importing/unknown IDs remain QST-007 and live adapter/registration remain QST-006/008. | Tech lead |
+
 ## 11. References
 
 - Audit (background only): `docs/reference/audit-2026-10/05-narrative-quests.md` §2 (B3, B4, B5, B7, B8, B9, B10, B15), §5.5–§5.7 (clue graph, storylets, declarative quests).
