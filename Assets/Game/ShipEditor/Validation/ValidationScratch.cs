@@ -19,6 +19,7 @@ namespace Game.ShipEditor.Validation
             internal int Kind, BeforeInt;
             internal int3 Cell;
             internal CellState Before;
+            internal BlockRecord Identity;
             internal bool Existed;
         }
         internal struct Checkpoint
@@ -28,8 +29,9 @@ namespace Game.ShipEditor.Validation
             internal bool Bounds;
         }
         internal NativeHashMap<int3, CellState> Cells = new(64, Allocator.Persistent);
-        internal NativeHashMap<int3, BlockRecord> Origins = new(64, Allocator.Persistent);
+        internal NativeHashMap<BlockRecord, BlockRecord> Origins = new(64, Allocator.Persistent);
         internal NativeHashMap<int3, int> ClearanceDelta = new(64, Allocator.Persistent);
+        internal NativeHashMap<int3, int> MissingDelta = new(64, Allocator.Persistent);
         internal NativeList<int> AcceptedOps = new(Allocator.Persistent);
         internal NativeList<int3> Candidates = new(Allocator.Persistent), Stack = new(Allocator.Persistent);
         internal NativeHashSet<int3> GroupCells = new(64, Allocator.Persistent), Visited = new(64, Allocator.Persistent);
@@ -39,7 +41,7 @@ namespace Game.ShipEditor.Validation
         internal bool HasBounds;
         internal void Clear()
         {
-            Cells.Clear(); Origins.Clear(); ClearanceDelta.Clear(); AcceptedOps.Clear(); Candidates.Clear();
+            Cells.Clear(); Origins.Clear(); ClearanceDelta.Clear(); MissingDelta.Clear(); AcceptedOps.Clear(); Candidates.Clear();
             Stack.Clear(); GroupCells.Clear(); Visited.Clear(); journal.Clear(); CellDelta = CoreDelta = 0; HasBounds = false;
         }
         internal Checkpoint Mark() => new() { Journal = journal.Length, Candidates = Candidates.Length,
@@ -49,15 +51,20 @@ namespace Game.ShipEditor.Validation
             bool found = Cells.TryGetValue(cell, out var before);
             journal.Add(new Change { Kind = 0, Cell = cell, Before = before, Existed = found }); Cells[cell] = value;
         }
-        internal void SetOrigin(int3 cell, BlockRecord value)
+        internal void SetOrigin(BlockRecord identity, BlockRecord value)
         {
-            bool found = Origins.TryGetValue(cell, out var before);
-            journal.Add(new Change { Kind = 1, Cell = cell, Before = new CellState { Block = before }, Existed = found }); Origins[cell] = value;
+            bool found = Origins.TryGetValue(identity, out var before);
+            journal.Add(new Change { Kind = 1, Identity = identity, Before = new CellState { Block = before }, Existed = found }); Origins[identity] = value;
         }
         internal void ChangeClearance(int3 cell, int delta)
         {
             bool found = ClearanceDelta.TryGetValue(cell, out int before);
             journal.Add(new Change { Kind = 2, Cell = cell, BeforeInt = before, Existed = found }); ClearanceDelta[cell] = before + delta;
+        }
+        internal void ChangeMissing(int3 cell, int delta)
+        {
+            bool found = MissingDelta.TryGetValue(cell, out int before);
+            journal.Add(new Change { Kind = 3, Cell = cell, BeforeInt = before, Existed = found }); MissingDelta[cell] = before + delta;
         }
         internal void Include(int3 cell)
         { Min = HasBounds ? math.min(Min, cell) : cell; Max = HasBounds ? math.max(Max, cell) : cell; HasBounds = true; }
@@ -67,8 +74,9 @@ namespace Game.ShipEditor.Validation
             {
                 var change = journal[i];
                 if (change.Kind == 0) { if (change.Existed) Cells[change.Cell] = change.Before; else Cells.Remove(change.Cell); }
-                else if (change.Kind == 1) { if (change.Existed) Origins[change.Cell] = change.Before.Block; else Origins.Remove(change.Cell); }
-                else { if (change.Existed) ClearanceDelta[change.Cell] = change.BeforeInt; else ClearanceDelta.Remove(change.Cell); }
+                else if (change.Kind == 1) { if (change.Existed) Origins[change.Identity] = change.Before.Block; else Origins.Remove(change.Identity); }
+                else if (change.Kind == 2) { if (change.Existed) ClearanceDelta[change.Cell] = change.BeforeInt; else ClearanceDelta.Remove(change.Cell); }
+                else { if (change.Existed) MissingDelta[change.Cell] = change.BeforeInt; else MissingDelta.Remove(change.Cell); }
             }
             journal.ResizeUninitialized(point.Journal); Candidates.ResizeUninitialized(point.Candidates);
             CellDelta = point.Cells; CoreDelta = point.Cores; Min = point.Min; Max = point.Max; HasBounds = point.Bounds;
@@ -76,7 +84,7 @@ namespace Game.ShipEditor.Validation
         public void Dispose()
         {
             if (Cells.IsCreated) Cells.Dispose(); if (Origins.IsCreated) Origins.Dispose();
-            if (ClearanceDelta.IsCreated) ClearanceDelta.Dispose(); if (AcceptedOps.IsCreated) AcceptedOps.Dispose();
+            if (ClearanceDelta.IsCreated) ClearanceDelta.Dispose(); if (MissingDelta.IsCreated) MissingDelta.Dispose(); if (AcceptedOps.IsCreated) AcceptedOps.Dispose();
             if (Candidates.IsCreated) Candidates.Dispose(); if (Stack.IsCreated) Stack.Dispose();
             if (GroupCells.IsCreated) GroupCells.Dispose(); if (Visited.IsCreated) Visited.Dispose(); if (journal.IsCreated) journal.Dispose();
         }

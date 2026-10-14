@@ -53,27 +53,32 @@ namespace Game.ShipEditor.Validation
         }
         ValidationScratch.CellState At(int3 cell)
         {
-            if (scratch.Cells.TryGetValue(cell, out var changed)) return changed;
+            scratch.MissingDelta.TryGetValue(cell, out int missingDelta);
+            bool reserved = indexes.MissingCount(cell) + missingDelta > 0;
+            if (scratch.Cells.TryGetValue(cell, out var changed)) { changed.Reserved = reserved; return changed; }
             if (!draft.GetCell(cell).IsAir && draft.TryGetBlockAt(cell, out var placed, out _))
-                return new ValidationScratch.CellState { Present = true, Group = -1,
+                return new ValidationScratch.CellState { Present = true, Reserved = reserved, Group = -1,
                     Block = new BlockRecord { Block = placed.Block, Origin = placed.Origin, Orient = placed.Orient, Color = placed.Color, DamageOffset = -1 } };
-            return new ValidationScratch.CellState { Reserved = indexes.IsReservedMissing(cell), Group = -1 };
+            return new ValidationScratch.CellState { Reserved = reserved, Group = -1 };
         }
+
         PlacementError Remove(BlockRecord record)
         {
-            bool found = scratch.Origins.TryGetValue(record.Origin, out var current);
-            if (!found) found = indexes.TryGetBlock(record.Origin, out current);
+            bool found = scratch.Origins.TryGetValue(record, out var current);
+            if (!found) found = indexes.TryGetBlock(record, out current);
             if (!found || current.Block == 0 || !current.Equals(record)) return PlacementError.NotFound;
             var footprint = context.Footprints.Get(current.Block, current.Orient);
             foreach (var offset in footprint.Cells)
             {
                 int3 cell = current.Origin + offset;
-                if (At(cell).Present) scratch.CellDelta--;
-                scratch.SetCell(cell, default);
+                var occupant = At(cell);
+                if (occupant.Present && occupant.Block.Equals(record))
+                { scratch.CellDelta--; scratch.SetCell(cell, new ValidationScratch.CellState { Group = -1 }); }
+                else scratch.ChangeMissing(cell, -1);
             }
             foreach (var offset in footprint.Clearance) scratch.ChangeClearance(current.Origin + offset, -1);
             if (context.Definitions.Value.Blocks[current.Block].IsCore) scratch.CoreDelta--;
-            scratch.SetOrigin(current.Origin, default); return PlacementError.None;
+            scratch.SetOrigin(current, default); return PlacementError.None;
         }
         PlacementError Add(BlockRecord record, int group)
         {
@@ -115,11 +120,12 @@ namespace Game.ShipEditor.Validation
                 bool present = record.DamageOffset == -1 || batch.Damage[record.DamageOffset + i] != 0;
                 scratch.SetCell(cell, new ValidationScratch.CellState { Block = record, Group = group, Present = present, Reserved = !present });
                 if (present) { scratch.CellDelta++; scratch.Candidates.Add(cell); }
+                else scratch.ChangeMissing(cell, 1);
                 scratch.Include(cell);
             }
             foreach (var offset in footprint.Clearance) scratch.ChangeClearance(record.Origin + offset, 1);
             if (definition.IsCore) scratch.CoreDelta++;
-            scratch.SetOrigin(record.Origin, record); return PlacementError.None;
+            scratch.SetOrigin(record, record); return PlacementError.None;
         }
         bool InBounds(int3 origin, int3 offset, out int3 cell)
         {

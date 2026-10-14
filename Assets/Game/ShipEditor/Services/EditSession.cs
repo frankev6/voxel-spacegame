@@ -86,21 +86,21 @@ namespace Game.ShipEditor.Services
                 command.Damage.AddRange(batch.Damage.AsArray());
                 var reader = new DraftReader(Draft, context);
                 // Earlier operations can create the very block a later operation removes.
-                // Track only touched origins, rather than rescanning the full command or ship.
-                var pending = new System.Collections.Generic.Dictionary<int3, BlockRecord>();
+                // Track exact block identities: damaged blocks may legally share an origin.
+                var pending = new System.Collections.Generic.Dictionary<BlockRecord, BlockRecord>();
                 for (int i = 0; i < count; i++)
                 {
                     var op = batch.Ops[validation.AcceptedOps[i]]; var record = op.Record;
                     if (op.Kind == DiffOpKind.Remove)
                     {
-                        if (pending.TryGetValue(record.Origin, out var added))
+                        if (pending.TryGetValue(record, out var added))
                         {
                             if (!added.Equals(record)) throw new InvalidOperationException("EDT: removal disagrees with the preceding addition.");
-                            record.DamageOffset = added.DamageOffset; pending.Remove(record.Origin);
+                            record.DamageOffset = added.DamageOffset; pending.Remove(record);
                         }
                         else record.DamageOffset = reader.CaptureDamage(record, command.Damage);
                     }
-                    else if (op.Kind == DiffOpKind.Add) pending[record.Origin] = record;
+                    else if (op.Kind == DiffOpKind.Add) pending[record] = record;
                     else throw new ArgumentException("EDT: unknown diff operation.", nameof(batch));
                     op.Record = record; command.Ops.Add(op);
                 }

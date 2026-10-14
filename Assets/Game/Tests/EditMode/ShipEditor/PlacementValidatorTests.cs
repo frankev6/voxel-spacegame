@@ -107,6 +107,13 @@ namespace Game.Tests.EditMode.ShipEditor
             b.Clear(); Remove(b, Record(f.Multi)); Add(b, Record(f.Hull)); Accepts(s, b);
             Assert.AreEqual(1, s.Draft.SolidCellCount); Assert.IsTrue(s.Undo());
             Assert.IsTrue(s.Draft.GetCell(int3.zero).IsAir); Assert.IsTrue(s.Placement.IsReservedMissing(int3.zero));
+            // Imported damaged footprints may share an origin with a different live block (ADR-0082).
+            using var other = Fixture(); Place(other, other.Multi); other.Edits(new VoxelEdit { Kind = VoxelEditKind.ClearCell });
+            Place(other, other.Hull); using var shared = Session(other); b.Clear();
+            Remove(b, Record(other.Multi)); Add(b, Record(other.Hull)); Refuses(shared, b, PlacementError.Occupied);
+            b.Clear(); Remove(b, Record(other.Multi)); Accepts(shared, b);
+            Assert.AreEqual(1, shared.Draft.SolidCellCount); Assert.AreEqual(other.Hull, new DraftReader(shared.Draft, other.Context).TryGetBlockAt(int3.zero, out var survivor) ? survivor.Block : 0);
+            Assert.IsTrue(shared.Undo()); Assert.AreEqual(4, shared.Draft.SolidCellCount);
         }
         [Test] public void PerGroup_RollsBackFailedGroup()
         {

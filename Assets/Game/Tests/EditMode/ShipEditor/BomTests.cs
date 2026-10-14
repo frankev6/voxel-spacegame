@@ -20,7 +20,11 @@ namespace Game.Tests.EditMode.ShipEditor
         static BlockRecord Record(ushort block, int x, byte orient = 0)
             => new() { Block = block, Origin = new int3(x, 0, 0), Orient = orient, DamageOffset = -1 };
         static void Apply(EditSession session, EditBatch batch)
-            => Assert.IsTrue(session.TryApply(batch, AtomicityMode.AllOrNothing, 0, ToolId.Place, "BOM check", new ApplyReport()));
+        {
+            var report = new ApplyReport();
+            Assert.IsTrue(session.TryApply(batch, AtomicityMode.AllOrNothing, 0, ToolId.Place, "BOM check", report),
+                string.Join(", ", report.GroupErrors));
+        }
         static void Populate(DraftAdapterTests.Fixture f, int count, bool damaged)
         {
             var edits = new List<VoxelEdit>();
@@ -106,8 +110,12 @@ namespace Game.Tests.EditMode.ShipEditor
                         reader.Enumerate(blocks);
                         if (blocks.Length != 0)
                         {
-                            x = blocks[0].Origin.x;
-                            while (reader.TryGetBlockAt(new int3(x, 0, 0), out _)) x++;
+                            for (int candidate = 0; candidate < 16; candidate++)
+                            {
+                                if (reader.TryGetBlockAt(new int3(candidate, 0, 0), out _)) continue;
+                                if (reader.TryGetBlockAt(new int3(candidate - 1, 0, 0), out _) ||
+                                    reader.TryGetBlockAt(new int3(candidate + 1, 0, 0), out _)) { x = candidate; break; }
+                            }
                         }
                         record = Record(rng.NextBool() ? f.Hull : f.Single, x, (byte)rng.NextInt(24));
                     }
