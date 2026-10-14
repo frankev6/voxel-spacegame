@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 2 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 26 | 16 | 0 | 0 | 140 | 0 | 182 | 5 |
+| M3 | 26 | 15 | 0 | 0 | 141 | 0 | 182 | 6 |
 | M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -395,11 +395,11 @@
 | DLG-004 | Yarn Spinner 3 compatibility spike | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-002 | yes | todo |  |  |  |  |
 | DLG-005 | GATE: Yarn Spinner adoption | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-004 | no | todo |  |  |  |  |
 | DLG-006 | DialogService, memory and DLGS chunk | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, DLG-003, NAR-011, CORE-003, CORE-007 | yes | done | astra (gpt-6) | 2026-10-13 | 99290d38 | Queued lifecycle, scoped blocking/terminal flow, detour-safe rolls and DLGS; seven direct cases pass; production runner/registration DLG-007; spec-required: 7, extra: 0 |
-| DLG-007 | Production dialog runner (path chosen by DLG-005) | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-006, DLG-003 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead implements documented graph fallback under ADR-0101; Yarn spike/owner gate stay open. |
+| DLG-007 | Production dialog runner (path chosen by DLG-005) | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-006, DLG-003 | yes | done | astra (gpt-6) | 2026-10-14 | d835fa49 | Graph fallback compiled and composed; 11 required checks pass; live opening dialog and choice verified. Yarn gate remains pending ADR-0101. |
 | DLG-008 | Dialog presenter | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-006 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b1057490 | Pooled presenter and conditional composition; five direct cases pass; runner DLG-007 and authored view DLG-009 pending; spec-required: 5, extra: 0 |
 | DLG-009 | Dialog view screen | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, UI-001, INP-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | f2f3aa39 | Authored view/input/recycling; four required cases pass across batch and layout retry; spec-required: 4, extra: 0 |
 | DLG-010 | Speakers and illustrations | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 6629f3aa | Metadata integrated; all converted tag IDs resolve. Seven approved portrait/illustration sprites unavailable; remains partial, no new art or owner gate. |
-| DLG-011 | Dialog PlayMode scenarios | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-007, DLG-009, QST-001 | no | todo |  |  |  |  |
+| DLG-011 | Dialog PlayMode scenarios | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-007, DLG-009, QST-001 | yes | todo |  |  |  |  |
 | DLG-012 | Harness commands for dialog | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, DEV-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Integrated fedb7e70; required direct case passes; live intro acceptance still needs DLG-007 |
 | QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 95f80410 | Public quest/mystery contracts and required assembly test; behavior remains QST-002 onward |
 | QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, NAR-003, NAR-004, NAR-006, NAR-009, NAR-013 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9ca0b84 | Real definitions, compile/bind and validation; 24 prior cases plus repaired Usage_Enforced pass; generated content compiled except separate TRV-003 owner stub. |
@@ -1074,6 +1074,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 472 | SPEC-70 Q32: live debug overlay ownership and traversal | Read-only Burst gathers after tracked jobs, root rendered transforms/300 m range, nested collider leaf traversal, bounded whole-box truncation and host disposal; future overlay types remain explicit pending work. | Tech lead |
 | 473 | SPEC-33 Q36: narrative adapter owner binding | Resolve registered concrete faction/territory/loader/director owners in existing constructor; preserve editor route and canonical bridge notifications; no duplicate subscriptions. | Tech lead |
 | 474 | SPEC-41 Q22: pending Yarn gate and playable dialogue | ADR-0101 uses the documented fallback now; actual spike and owner adoption remain open. Same format/interface and eleven conformance checks retained. | Tech lead |
+| 475 | SPEC-41 Q23: graph encoding and runtime defaults | Four successive A operands carry each option record; executed Option instructions preserve outer visibility. 10,000-instruction guard, stable generated asset, matching command-table hash and explicit dialog adapter binding. Effect-only beats have no runner start node. | Tech lead |
 
 ## Measurements
 
@@ -1185,6 +1186,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — DLG-007 production graph dialogue accepted — astra (gpt-6)
+
+- d835fa49 implements the specified shared-AST compiler, compiled graph interpreter, menu visibility/availability, stack/visits/facts/commands, generated program and real boot/presenter/DLGS/session binding. ADR-0101 preserves the pending Yarn decision; Q475 records concrete encoding and bounded authored-loop guard. Quest/BeatService methods remain explicit pending work.
+- All eleven required conformance cases pass (Logs/playtest/dialog-runner/conformance.xml). Initial fixture incorrectly treated effect-only beats as dialog starts; corrected to require each nonempty start node, without omitting any dialogue beat. Compile clean/zero CS warnings. Test count: spec-required: 11, extra: 0. No full/performance/soak runs.
+- Live production service displays waking_up_start; UI choice 1 advances to waking_up_syringe. Dialog blocks saves as Transitioning, pauses flight, and interruption resumes timeScale1. Screenshot visually inspected: Logs/playtest/dialog-runner-live.png. Playground left running after interruption with zero new logs. This is actual runner/presenter integration, not yet automatic story-trigger integration. Owner QualitySettings and two content metas excluded.
 
 ### 2026-10-14 — ENC-009 narrative routes accepted — astra (gpt-6)
 
