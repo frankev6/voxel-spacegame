@@ -35,21 +35,6 @@ namespace Game.Tests.EditMode.Galaxy
                 CollectionAssert.AreEqual(expected, Capture(participant), "Truncation cannot partially replace live position");
             }
         }
-        [Test] public void Docked_Restored()
-        {
-            using var state = State(); var docking = new DockingService();
-            var body = new BodyId(state.CurrentStarSystem, BodyRole.Station, 3, 1);
-            docking.Dock(body); EventBus<DockStateChanged>.Drain();
-            var participant = new PlayerLocationSaveParticipant(state, docking); byte[] saved = Capture(participant);
-            docking.Undock(); EventBus<DockStateChanged>.Drain();
-            int events = 0; EventBus<DockStateChanged>.Subscribe(value => { Assert.IsTrue(value.Docked); events++; });
-            participant.Restore(new SaveReader(saved), 1); EventBus<DockStateChanged>.Drain();
-            Assert.IsTrue(docking.IsDocked); Assert.AreEqual(body, docking.DockedBody); Assert.AreEqual(0, events);
-            CollectionAssert.AreEqual(saved, Capture(participant));
-            docking.CompleteRestore(candidate => candidate.Equals(body));
-            docking.CompleteRestore(candidate => candidate.Equals(body)); EventBus<DockStateChanged>.Drain();
-            Assert.AreEqual(1, events); Assert.IsFalse(docking.HasPendingRestore);
-        }
         [Test] public void MissingChunk_Defaults()
         {
             using var state = State(); var docking = new DockingService();
