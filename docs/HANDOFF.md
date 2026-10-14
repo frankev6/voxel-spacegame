@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Belt streaming accepted:** SYS-00796127285 done; compile98274 clean, PlayMode61443 terminal0 with9 passes (4 belt+5 T2), evidence Logs/playtest/belt-streaming. Runtime now streams dynamic asteroid grids with bounded jobs/shared spawn budget and destruction persistence. No Unity active. DEV-009 worker active259; other two dependency waits. Next ready frontier integration and worker recycling; previous turn/runtime acceptance made progress.
+
 - **Belt acceptance batch active:**96127285 adds exactly four small belt cases (deterministic descriptors/shape hashes, actual depletion event/no return, bubble retirement, deferred job pipeline). Compile98274 terminal0, zero CS warnings after fixing one missing fixture import; PlayMode61443 runs4 belt+5 affected T2 cases. Poll that exact handle before further Unity/source changes. Presentation review220 found no runtime defects; DEV-009 active259; combat/presentation genuine dependency waits. Previous turn connected the runtime pipeline (progress).
 
 - **Belt runtime connected:**793cb5e1 wires bounded sector/shape jobs, ordered spawns, destruction filtering and delayed retirement into StarSystemLoader. T2 returns its spawn count; T3 uses remaining per-frame budget and requires a real player. Ordinary retirement polls jobs; system shutdown joins before release. Still uncompiled/unaccepted; next four required cases plus bounded presentation integration review, then one focused validation batch. No Unity active. DEV-009 active257; combat dependency wait; presentation review dispatched. Previous turn authored asteroid source ownership (progress).

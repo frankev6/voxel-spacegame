@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 1 | 0 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 6 |
-| M3 | 98 | 7 | 0 | 0 | 75 | 0 | 180 | 8 |
+| M3 | 97 | 7 | 0 | 0 | 76 | 0 | 180 | 7 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -338,7 +338,7 @@
 | SYS-004 | Load and unload (T1) | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-002, GAL-008, GAL-009, SPEC-10, PHY-001, PHY-012 | yes | done | astra (gpt-6) | 2026-10-13 | 37ed39f6 | Five T1 cases pass; Q357 stages actual scene registration with SYS-006 T2; missing grids correctly block arrival. |
 | SYS-005 | BodyOnRailsSystem | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 370ffff | BodyOnRailsSystem integrated14a0989e; two required cases pass9669, preserves exact cross-FPS results and 1mm local tolerance. |
 | SYS-006 | T2 voxel bodies and damage persistence | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-003, SYS-004, DMG-014, WPN-012, AI-010 | yes | done | astra (gpt-6) | 2026-10-13 | 8ec9a970 | Actual loader composed;5 required streaming/damage/hulk/lifecycle cases pass6996; compile3045 clean; Q357–361. |
-| SYS-007 | T3 asteroid belts | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  |  |
+| SYS-007 | T3 asteroid belts | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006 | yes | done | astra (gpt-6) | 2026-10-13 | 96127285 | Bounded asynchronous belt sectors/shapes, shared spawn budget, destruction persistence and retirement;4 required cases plus5 T2 regressions pass61443. |
 | SYS-008 | InteractionQuerySystem, docking and BodyInteracted | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-004, SPEC-20, SPEC-23 | no | todo |  |  |  |  |
 | SYS-009 | PLOC participant | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-008, PERS-001 | no | todo |  |  |  |  |
 | SYS-010 | IShipSpawner contract for Galaxy services | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, FND-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | adcf164 | Spawner contract forwarding only; 2 required tests. FND-012 runtime remains open. Full 1027 EM / 145 PM passed. |
@@ -1066,6 +1066,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — SYS-007 done: physical asteroid belt streaming — astra (gpt-6)
+
+-96127285 completes the793cb5e1 runtime: bounded asynchronous sector/shape generation, deterministic IDs/draws, T2/T3 shared spawn budget, dynamic asteroid grids, persisted destroyed IDs, hysteresis and source/read-pin retirement. Q362 records root-as-anchor integration; existing Q9 geometry preserved. Source review220 found no defects.
+- Compile98274 terminal0, zero CS warnings. Focused PlayMode61443 terminal0:9 passed/0 failed (0.371787s test execution, excludes startup/shutdown), comprising4 required belt cases and5 affected T2 regressions. Evidence Logs/playtest/belt-streaming/{compile.log,acceptance.xml,acceptance.log}. Spec-required: 4, extra: 0. No full-suite/performance claim.
+- No Unity active. DEV-009 worker active259; combat/presentation wait for ready standard work. Next select the next ready frontier integration and recycle workers as dependencies clear. Previous turn runtime wiring and this turn acceptance are progress.
 
 ### 2026-10-13 — SYS-007 focused belt acceptance authored and compiled — astra (gpt-6)
 
