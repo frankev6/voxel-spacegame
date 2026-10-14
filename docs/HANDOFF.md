@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Station interaction accepted:** SYS-008499de6e3 done; hull-to-surface query, counter edges and shared loader docking pass all four required direct PlayMode cases (0.2253s bodies). Compile clean, handle18770 terminal0; evidence Logs/playtest/interaction. No Unity active. Next integrate DLG-0037f14ca33. Combat audits runtime prerequisites; economy DEV-011 active; presentation258 completes lifetime review. NAR-019 delivery queued with live-owner gaps preserved.
+
 - **Station interaction authored:** SYS-008020b16e6 adds Burst surface-distance query, edge consumption, boot-lifetime singleton state and shared live docking/loader events (ADR-0083/Q386). Uncompiled/unaccepted; next four required cases plus source review, then focused validation. No Unity active. DLG-003273 and DEV-011297 implementing; presentation255 reviews interaction source. NAR-019 delivery remains queued. Previous EDT-003 acceptance and current query/docking code are progress.
 
 - **Draft adapters accepted:** EDT-0032d3181ff done: exact negative damage HP, canonical identity-associated hash, atomic undo write path and native reads. Compile clean; four focused cases pass (0.2039s bodies), handle93715 terminal0; evidence Logs/playtest/editor-adapters. No Unity active. Next lead SYS-008 real station interaction/docking; dependency audit252 confirms accepted prerequisites. Workers DLG-003272 and DEV-011296 active; presentation support available after audit. NAR-019 delivered pending integration/live owners.
