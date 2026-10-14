@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | QST-010 | TRV011fc64807f and input probe74a97706 delivered; investigates actual Drift cache interaction | Actual streaming/interaction owners; no Unity |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-019 | ECO0105dc40d39/6c5a4b45 delivered; completes actual load-safety scenarios | Canonical narrative/save owners; no Unity |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-021 | HUD004/005 routes already implemented, acceptance with lead; implements real story/map/log playground area | Canonical narrative/UI owners; no Unity |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | QST-010 | Delivered hand-in24090059; genuine dependency wait while lead integrates completed sources | Next ready standard implementation after frontier/integration dependency |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-019 | Delivered3af69584, integrated9d6c7c96; genuine ready-standard dependency wait during lead acceptance | Next substantial standard feature unlocked by frontier/integration owner |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-021 | Sourcee5850d70 integrated; repairs real ClueService scope failure from focused playground check | Canonical clue evaluation owner; no Unity |
 
 ## Operating rules
 
@@ -92,6 +92,6 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 - HUD-014a754ae35/HUD-01647ddeaa4 accepted: ten required functional cases pass with actual rumor-to-map navigation, zero skips. Theme root colour resolution fixed. NAR0180dd949f3 delivered; same worker recycled to TRV014 remaining integration. QST010 pending lead acceptance.
 
-- QST-010 integration a2c53015 remains unaccepted: actual route reaches The Drift after real probe combat, patrol hand-in and rumor. Lead fixed deferred DockPresenter navigation covering the active dialogue and corrected scenario key release/option selection; pending-spawn rebasing now passes ten existing checks and cache/derelict interactions succeed; the save checkpoint is blocked by combat state, under diagnosis. No full route or save/replay pass claimed. Three exact workers recycled as above; NAR019 remains active.
+- QST-010 integration a2c53015 remains unaccepted: actual route reaches The Drift after real probe combat, patrol hand-in and rumor. Lead fixed deferred DockPresenter navigation covering the active dialogue and corrected scenario key release/option selection; pending-spawn rebasing now passes ten existing checks and cache/derelict interactions succeed; save refusal was the normal damage cooldown (0 hostiles,310/600 ticks); fixture shortens its restored config, scenario waits on actual save eligibility. No full route or save/replay pass claimed. Three exact workers recycled as above; NAR019 remains active.
 
 - 14:39Z recovery: all three recorded worker turns were interrupted with source preserved. Resumed the same threads on QST010 later-route support, NAR019 load safety and DEV021 actual story/log/map beacons. No duplicates; Editor stopped and no test run active before lead resumed focused validation.
