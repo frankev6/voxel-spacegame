@@ -38,6 +38,6 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 3. Next
 
-Reviewer briefing: [copyable QA prompt](QA-REVIEWER-PROMPT.md), [complete recorded decision register](QA-DECISION-REGISTER.md), and [playground command guide](QA-PLAYGROUND.md). These documentation-only additions do not resume implementation.
+Independent reviewer entry point: [scope and access only](QA-REVIEWER-PROMPT.md). Frank corrected the earlier directed checklist: first-pass reviewers must defer previous findings, acceptance summaries and decision-audit material until recording their own findings. Historical QA/decision documents are retained for a separately authorized reconciliation, not first-pass briefing. Implementation remains paused.
 
 Wait for the independent reviewer/QA and Frank's instructions. Address reported M1–M3 functional issues and verify those systems with Frank before further M4 depth/scale/polish. No automatic worker recycling during this pause. Existing startup warnings and open task/gate details remain in LEDGER; advisory performance targets do not justify new benchmark or soak loops.

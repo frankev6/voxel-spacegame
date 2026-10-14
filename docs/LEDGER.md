@@ -1218,6 +1218,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-14 — Owner correction: unbiased reviewer access brief — astra (gpt-6)
+
+- Frank clarified that the initial reviewer prompt must provide access instructions and scope, not directed checks or coordinator bias. Replaced QA-REVIEWER-PROMPT.md with scope, launch/navigation commands, controls, pause constraints and neutral reporting instructions. Removed expected outcomes, prioritized checks, known findings and decision summaries. Prior evaluative documents remain available only for later reconciliation after independent findings are recorded and Frank authorizes it.
+- Documentation only. No gameplay changes, tests, worker dispatch, goal or schedule changes. Implementation remains paused. spec-required: 0, extra: 0.
+
 ### 2026-10-14 — Independent reviewer briefing and decision disclosure — astra (gpt-6)
 
 - Owner requested a handoff prompt covering all playground trials, known issues and autonomous decisions while keeping implementation paused. Added QA-REVIEWER-PROMPT.md with access/reproduction checklist, existing warnings/limitations, pending acceptance and read-only review boundaries. QA-DECISION-REGISTER.md reproduces all 500 recorded question rows without filtering and indexes 113 actual ADRs plus all 33 specs; distinguishes technical defaults, predecessor authorship, explicit owner approval and unapproved choices. No claim that undocumented judgments are exhaustively captured.
