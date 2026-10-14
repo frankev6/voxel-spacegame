@@ -86,7 +86,7 @@ namespace Game.App.EditorHost
                 if(model.SelectedCategory>0 && (int)block.BlockCategory!=(int)context.Categories[model.SelectedCategory-1])continue;
                 if(!string.IsNullOrEmpty(model.SearchText) && block.DisplayName.IndexOf(model.SearchText,StringComparison.OrdinalIgnoreCase)<0 && block.Id.Value.IndexOf(model.SearchText,StringComparison.OrdinalIgnoreCase)<0)continue;
                 int available=args.Inventory?.CountOf(block.Id)??0;
-                model.Items.Add(new EditorPaletteItemViewModel{BlockId=block.Id.Value,DisplayName=block.DisplayName,Icon=block.Icon,Available=available,ShowCount=!args.Options.Creative,IsSelected=index==controller.SelectedBlock,IsLocked=block.AllowedOrientations==0,LockReason=block.AllowedOrientations==0?"Unavailable orientation":""});
+                model.Items.Add(new EditorPaletteItemViewModel{BlockId=block.Id.Value,DisplayName=block.DisplayName,Icon=block.Icon,Available=available,ShowCount=!args.Options.Creative,IsSelected=index==controller.SelectedBlock,IsLocked=block.AllowedOrientations.Bits==0,LockReason=block.AllowedOrientations.Bits==0?"Unavailable orientation":""});
                 if(index==controller.SelectedBlock)model.SelectedBlockId=block.Id.Value;
             }
             model.NotifyItems();

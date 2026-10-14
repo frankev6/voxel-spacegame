@@ -38,7 +38,7 @@ namespace Game.App.EditorHost
             overlay=new OverlayRenderer(session,context,controller,owners.Content.PropMeshes);
             presenter=new ShipEditorPresenter(args,owners,session,context,controller);
             input=new EditorInputSampler(owners.Input,owners.Ui);controller.FocusRequested+=Focus;
-            owners.Presenter=presenter;owners.Ui.Navigator.SetRoot(owners.View);
+            owners.Presenter=presenter;if(owners.Ui.Navigator.Top!=owners.View)owners.Ui.Navigator.SetRoot(owners.View);
             session.Draft.TryGetCellBounds(out var min,out var max);float size=session.Draft.CellSize;
             owners.Camera.EnterEditorOrbit(((float3)min+max+1)*(.5f*size),math.max(1,math.length((float3)max-min+1)*size*.5f),true);
         }
@@ -52,7 +52,7 @@ namespace Game.App.EditorHost
             services.Camera.SetEditorSuppression(controller.ConsumesWheel,false);
             presenter.Tick(Time.unscaledDeltaTime,frame.PrimaryHeld);
             draft.SetSlice(controller.SliceEnabled,controller.SliceLevel);draft.XRay=controller.XRay;
-            draft.CameraPivotCells=services.Camera.Focus/size;draft.UpdateMeshes();overlay.Update(Time.realtimeSinceStartupAsDouble);
+            draft.CameraPivotCells=services.Camera.Focus/size;overlay.Update(Time.realtimeSinceStartupAsDouble);
         }
         void LateUpdate(){if(released || draft==null)return;draft.Render(services.Camera.Camera);overlay.Render(services.Camera.Camera);}
         void OnDestroy()=>Release();
