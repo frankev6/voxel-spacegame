@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 38 | 15 | 0 | 0 | 129 | 0 | 182 | 4 |
+| M3 | 37 | 16 | 0 | 0 | 129 | 0 | 182 | 4 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -461,7 +461,7 @@
 | HUD-007 | Flight HUD view and layout | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Presentation worker: complete HUD zones, direct updates, pooled weapons/abilities/radar and required cases; HUD-009/002 retain data/root integration. |
 | HUD-008 | HudSnapshotSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, PWR-001, WPN-001, ABL-001, SYS-001, GAL-001, FLT-001, VOX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 13c85bbd | Review repairs complete: duplicate players, frozen hulk meters and interactable-body radar; nine focused checks pass |
 | HUD-009 | HudSyncSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-008, HUD-007, TRV-001, ENC-001 | no | todo |  |  |  |  |
-| HUD-010 | HUD presenters and screen hotkeys | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-009, QST-001, ECO-001, INP-001, TRV-001, NAR-001 | no | todo |  |  |  |  |
+| HUD-010 | HUD presenters and screen hotkeys | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-009, UI-010, QST-001, ECO-001, INP-001, TRV-001, NAR-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Presentation worker: real notifications/hotkeys and objective hook; live sync/root/query integrations remain with owners. |
 | HUD-011 | Inventory screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-006 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-14 | f8adea23 | Real inventory screen/presenter integrated into UiComposition and playground; five required cases pass; live cargo screen verified. |
 | HUD-012 | Merchant screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-005 | yes | done | combat (gpt-6.1-sol high) | 2026-10-14 | f5e9e949 | Real MerchantSession screen/presenter registered/reset in UiComposition and playground; four required cases pass; live Buy verified. Normal faction launcher remains ECO-008. |
 | HUD-013 | Dialog host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, DLG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f3eea58 | Complete dialog host; five required plus four preserved DLG-009 cases pass. Production story driver remains DLG-007; no fake dialog pad. |
@@ -1052,6 +1052,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 450 | SPEC-61 Q38: dialog host and existing story-page compatibility | Resolved: preserve SPEC-41 page/overflow hooks, prebuild nine rows, numbered commands and scroll reset, separate portrait; actual story runner remains DLG-007. | Tech lead |
 | 451 | SPEC-51 Q52: commit concrete prerequisites | Resolved: EDT-009/010 plus ECO-003; no merchant/performance prerequisite. | Tech lead |
 | 452 | SPEC-51 Q53 / SPEC-50 Q29: rejected commits lose slot/overflow state with inverse deltas | Resolved: inventory-owned checkpoint restores exact slots and capacity; preallocate baseline and reject reentrant edits. ADR-0096. | Tech lead |
+| 453 | SPEC-61 Q43: independent loading/dock construction | Use completed UI, SceneFlow and DockingService contracts per ADR-0072; actual merchant opening remains ECO-008. | Tech lead |
+| 454 | SPEC-61 Q44: presenter construction dependencies | Use existing VM/event/navigation contracts; HUD-009 sync and real query/root integration remain independent owners. ADR-0072. | Tech lead |
 
 ## Measurements
 
@@ -1161,7 +1163,6 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
-| 453 | SPEC-61 Q43: independent loading/dock construction | Use completed UI, SceneFlow and DockingService contracts per ADR-0072; actual merchant opening remains ECO-008. | Tech lead |
 
 ## Log
 
