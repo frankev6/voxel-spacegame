@@ -75,6 +75,33 @@ namespace Game.App.Session
         readonly List<ISaveBlocker> blockers = new List<ISaveBlocker>();
         bool operationPending, disposed, worldReady;
         BlueprintLabMode labMode;
+        ulong labReturnId;
+        Unity.Mathematics.double3 labReturnPosition;
+        Unity.Mathematics.quaternion labReturnRotation;
+
+        void CaptureLabReturnPose(ulong id)
+        {
+            if (Fleet.Flagship?.PersistentId != id || PlayerSpawner == null || !PlayerSpawner.TryGetRoot(out var root))
+                throw new InvalidOperationException("The active fleet ship is unavailable.");
+            var em = world.EntityManager;
+            em.CompleteAllTrackedJobs();
+            var pose = em.GetComponentData<Unity.Transforms.LocalTransform>(root);
+            using var origins = em.CreateEntityQuery(ComponentType.ReadOnly<Game.Galaxy.Components.FrameOrigin>());
+            var origin = origins.IsEmptyIgnoreFilter ? default : origins.GetSingleton<Game.Galaxy.Components.FrameOrigin>().OriginInStarSystem;
+            labReturnPosition = MathD.ToStarSystem(pose.Position, origin);
+            labReturnRotation = pose.Rotation;
+            labReturnId = id;
+        }
+
+        internal bool TryGetLabReturnPose(ulong id, out Unity.Mathematics.RigidTransform pose)
+        {
+            pose = Unity.Mathematics.RigidTransform.identity;
+            if (labReturnId == 0 || labReturnId != id) return false;
+            using var origins = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Game.Galaxy.Components.FrameOrigin>());
+            var origin = origins.IsEmptyIgnoreFilter ? default : origins.GetSingleton<Game.Galaxy.Components.FrameOrigin>().OriginInStarSystem;
+            pose = new Unity.Mathematics.RigidTransform(labReturnRotation, MathD.ToLocal(labReturnPosition, origin));
+            return true;
+        }
         internal bool PlayerDefeated;
         internal bool IsSandbox { get; private set; }
         internal bool SpawnPlayerInWorld { get; private set; } = true;
@@ -169,6 +196,7 @@ namespace Game.App.Session
             => ResetForNewSession(new NewGameArgs(gameConfig.DefaultCommanderName, seed == 0 ? 1ul : seed, true, ContentId.None), true);
         void ResetForNewSession(in NewGameArgs args, bool sandbox)
         {
+            labReturnId = 0;
             save.ResetForNewGame();
             if (save.ActiveProfile.Value == null) save.SetActiveProfile(save.CreateProfile(gameConfig.DefaultCommanderName).Id);
             ResetPersistentIds(1, false);
@@ -228,6 +256,7 @@ namespace Game.App.Session
         }
         internal void EndSession()
         {
+            labReturnId = 0;
             if (narrative != null) { narrative.SetWorldReady(false); narrative.Facts.ResetToDefaults(); }
             ResetPersistentIds(1, false); worldReady = false; PlayerDefeated = false;
             IsSandbox = false; SpawnPlayerInWorld = true;
@@ -238,6 +267,7 @@ namespace Game.App.Session
         }
         internal void ApplySavedState(string commander, ulong seed, double time, double playtime, ulong next, bool creative)
         {
+            labReturnId = 0;
             ResetPersistentIds(next, false);
             CommanderName = commander; CampaignSeed = seed; UniversalTime = time; PlaytimeSeconds = playtime; IsCreativeSession = creative;
             IsSandbox = false; SpawnPlayerInWorld = true;
@@ -372,7 +402,9 @@ namespace Game.App.Session
                 using var pause = flow.PauseForExitSave();
                 if (CurrentScene == GameScene.World) await SaveBeforeSceneExit();
                 labMode = args.Mode;
-                // TODO(FND-013): fleet pose capture and editor commit/cancel writeback wiring.
+                labReturnId = 0;
+                if (args.Mode == BlueprintLabMode.FleetShip) CaptureLabReturnPose(args.FleetShipId);
+                // TODO(FND-013): complete the owning scene-flow acceptance after EDT-023 integration.
                 return await flow.TransitionAsync(GameScene.BlueprintLab, SceneEntryReason.EnterBlueprintLab, args,
                     args.Mode == BlueprintLabMode.Creative ? () => Between(() => BeginNewGame(new NewGameArgs(gameConfig.DefaultCommanderName, 1, true, ContentId.None))) : null);
             });

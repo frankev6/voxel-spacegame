@@ -45,6 +45,8 @@ namespace Game.App.Session
                         position = MathD.ToLocal(location.PositionM, origins.GetSingleton<Game.Galaxy.Components.FrameOrigin>().OriginInStarSystem);
                         rotation = Planar.YawRotation(location.YawRad);
                     }
+                    if (context.Reason == SceneEntryReason.ExitBlueprintLab && session.TryGetLabReturnPose(record.PersistentId, out var returnPose))
+                    { position = returnPose.pos; rotation = returnPose.rot; }
                     var id = spawner.SpawnRegistered(new Game.App.Spawning.ShipSpawnArgs
                     {
                         Structure = record.Structure, PersistentId = record.PersistentId, Position = position,
@@ -57,7 +59,9 @@ namespace Game.App.Session
                     // Retain the standalone M1 path until the real galaxy composition is installed.
                     root = GridSpawnApi.RequestSpawn(world.EntityManager, registry, handle, new GridSpawnParams
                     {
-                        PersistentId = record.PersistentId, Pose = RigidTransform.identity, Kind = GridKind.Ship,
+                        PersistentId = record.PersistentId,
+                        Pose = context.Reason == SceneEntryReason.ExitBlueprintLab && session.TryGetLabReturnPose(record.PersistentId, out var returnPose)
+                            ? returnPose : RigidTransform.identity, Kind = GridKind.Ship,
                         Motion = GridMotion.Dynamic, Flags = GridSpawnFlags.WriteBack, Profile = GridProfile.PlayerShip
                     });
                     world.EntityManager.AddComponentData(root, Game.Simulation.Allegiance.Player);

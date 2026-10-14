@@ -45,7 +45,7 @@ namespace Game.Tests.EditMode.ShipEditor
             public bool TryCommitStructure(VoxelStructure committed,out string error)
             {
                 Calls++; if(Reject){error="target refused";return false;}
-                Fleet.ReplaceStructure(42,committed);error=null;return true;
+                return new Game.App.EditorHost.FleetCommitTarget(Fleet,42).TryCommitStructure(committed,out error);
             }
             internal void Resize(EditSession s,int count)
             {
