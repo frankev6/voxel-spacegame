@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 34 | 15 | 0 | 0 | 133 | 0 | 182 | 6 |
+| M3 | 33 | 16 | 0 | 0 | 133 | 0 | 182 | 5 |
 | M4 | 9 | 3 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -460,7 +460,7 @@
 | HUD-006 | Pause screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-003, FND-009 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 67c25036 | Actual pause routes/hints and accessible scrolling; all four required cases pass. Production root composition remains HUD-002. |
 | HUD-007 | Flight HUD view and layout | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 67c25036 | Seven-zone pooled flight HUD, direct updates and 64 radar contacts; all five required cases pass. Actual source/root binding remains HUD-009/002. |
 | HUD-008 | HudSnapshotSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, PWR-001, WPN-001, ABL-001, SYS-001, GAL-001, FLT-001, VOX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 13c85bbd | Review repairs complete: duplicate players, frozen hulk meters and interactable-body radar; nine focused checks pass |
-| HUD-009 | HudSyncSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-008, HUD-007, TRV-001, ENC-001 | yes | todo |  |  |  |  |
+| HUD-009 | HudSyncSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-008, HUD-007, TRV-001, ENC-001 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead: actual snapshot/name/radar/route bridge needed for playable root and editor integration. |
 | HUD-010 | HUD presenters and screen hotkeys | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-009, UI-010, QST-001, ECO-001, INP-001, TRV-001, NAR-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Presentation worker: real notifications/hotkeys and objective hook; live sync/root/query integrations remain with owners. |
 | HUD-011 | Inventory screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-006 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-14 | f8adea23 | Real inventory screen/presenter integrated into UiComposition and playground; five required cases pass; live cargo screen verified. |
 | HUD-012 | Merchant screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-005 | yes | done | combat (gpt-6.1-sol high) | 2026-10-14 | f5e9e949 | Real MerchantSession screen/presenter registered/reset in UiComposition and playground; four required cases pass; live Buy verified. Normal faction launcher remains ECO-008. |
