@@ -1348,6 +1348,8 @@ Visibility:
 
 | 36 | Default 2000 m belt width and 500 m sectors violate the fixed two-ring identity capacity | Resolved: retain the authored 2000 m belt width and use 1000 m sectors in the default and actual body_asteroid_belt asset. Two rings fit SPEC-31 Q9 without changing packed IDs or weakening SYS-E003. | Tech lead — ledger Q355 |
 
+| 37 | GAL-012 staged smoke checks and deterministic author/import recipes precede real galaxy, lane and SYS owners | Finish the existing three production-boot smoke cases against current GalaxyService, StarSystemLoader, ILaneAccess/TravelService and ILogicContext. Validate exact SPEC-42 system/body/tag/faction tables, cross-definition GAL/TRV rules, fixed-seed generation, live start anchors, moon parent/cache placement, actual outpost turret payload and gate templates at both ends. Compile/apply real set_fact commands and drain deferred events directly for close/open/close, without sleep or a replacement runtime. PlayMode discovers editor-owned validators via the existing interface/TypeCache; no assembly reference change. Keep the existing real authored assets/identities/art. Make Q36 belt sectors explicit in authoring and run the canonical scoped NAR-009/TRV-003 compile in the lead import recipe before strict readback, replacing obsolete pending-owner warnings. Exactly three required methods, no extra tests, Unity execution or optimization passes by the worker; lead validates. | Tech lead — GAL-012 completion default; central mirror pending. |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/03-galaxy-world.md` (03-B1, 03-B9a–d, 03-D3), `04` (04-B1, 04-B11), `LEDGER.md` R9.

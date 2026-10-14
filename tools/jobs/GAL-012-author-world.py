@@ -102,6 +102,10 @@ for suffix in TAGS:
               'structureSource': 0 if celestial or belt else 1 if blueprint else 2,
               'blueprint': ref('Assets/Game/Content/Ships/' + ('ship_vestari' if suffix == 'station' else 'ship_frigate') + '.asset') if blueprint else '{fileID: 0}',
               'destructible': int(not celestial and not gate), 'asteroidBlock': hull if belt else '{fileID: 0}'}
+    # SPEC-30 Q36 / SYS-003: the two packed sector rings must contain the 2000 m belt.
+    # Author this explicitly so fresh MIG-014 stubs cannot retain their old 500 m default.
+    if belt:
+        values.update(beltWidthM=2000, sectorSizeM=1000)
     for key, value in values.items():
         text, count = re.subn(r'^  ' + key + r':.*$', '  ' + key + ': ' + str(value), text, flags=re.M)
         if count != 1: raise RuntimeError(f'Missing/duplicate field {p}:{key}')
@@ -179,4 +183,4 @@ for key, gate in [('starsys_drift',False),('starsys_whisper',True)]:
 fields += '  defaultHyperlaneGate: '+body_ref('body_jump_point')+'\n  defaultAncientGate: '+body_ref('body_gate_active')+'\n  references:\n    version: 2\n    RefIds:\n    - rid: -2\n      type: {class: , ns: , asm: }\n'
 asset('Assets/Game/Content/Galaxy/galaxy_main.asset','GalaxyGenerationDefinition',fields)
 print('Authored 3 real star systems, 2 lanes, galaxy_main, 1 template and 2 approved-art visual definitions; completed 20 canonical body stubs.')
-print('Gate compile intentionally pending TRV-003; blocked gate is serialized fail-closed. Run lead import/validation recipe before gameplay.')
+print('Raw gate source is serialized fail-closed; the lead import recipe must compile it through the actual TRV-003/NAR-009 owner before gameplay.')

@@ -1,7 +1,8 @@
 // Lead-only: copy to Assets/Game/Editor/GalaxyM3ContentJob.cs, invoke
 // Game.Editor.GalaxyM3ContentJob.Run in the serialized Editor, then remove temporary source/meta.
 // Assets are authored by GAL-012-author-world.py. This imports, checks actual references and records readback;
-// it does not replace owners' pending GAL-004/008, NAR-011 or TRV-003 work.
+// Galaxy logic is compiled by the actual TRV-003/NAR-009 owner. The three production-boot
+// GalaxyContentSmokeTests separately verify gameplay; this recipe never claims a World run.
 using System;
 using System.IO;
 using System.Linq;
@@ -12,6 +13,7 @@ using Game.Data.Services;
 using Game.Data.Validation;
 using Game.Editor.Content;
 using Game.Editor.Content.Validators;
+using Game.Editor.Narrative;
 using Game.Voxel.Model;
 using Unity.Collections;
 using UnityEditor;
@@ -28,6 +30,9 @@ namespace Game.Editor
                 foreach (string path in Directory.GetFiles(folder, "*.asset").OrderBy(p => p, StringComparer.Ordinal))
                     AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
             var database = ContentDatabaseBuilder.Rebuild();
+            // Import callbacks are deferred. Finish the canonical scoped compile before validating/readback.
+            var logic = LogicCompilePostprocessor.RecompileAll(database, "Assets/Game/Content/Galaxy");
+            if (logic == null || logic.HasErrors) throw new InvalidOperationException(logic?.ToText() ?? "Galaxy logic was not compiled.");
             var report = new ValidationReport("GAL-012 authored content");
             var catalog = ContentCatalog.Build(database.Definitions, report);
             var membership = database.Definitions.ToHashSet();
@@ -58,6 +63,20 @@ namespace Game.Editor
             var gate = generation.AuthoredLanes.Single(l => l.a == whisper || l.b == whisper);
             if (gate.condition.Source != "$gate_ark_start_active" || gate.lockedMessage != "The gate is dormant." || gate.gateTemplateA?.IdString != "body_gate_dormant" || gate.gateTemplateB?.IdString != "body_gate_dormant")
                 throw new InvalidOperationException("Whisper gate source/message/templates differ.");
+            if (gate.condition.IsStale || gate.condition.HasErrors)
+                throw new InvalidOperationException("Whisper gate must compile successfully through the actual lane logic owner.");
+            var tags = new[] { ("body_station_ark", "ark_station"), ("body_station", "station"), ("body_station_abandoned", "abandoned_station"),
+                ("body_derelict_ship", "derelict"), ("body_debris_field", "debris_field"), ("body_resource_cache", "resource_cache"),
+                ("body_gate_dormant", "gate_dormant"), ("body_gate_active", "gate_active"), ("body_jump_point", "jump_point"),
+                ("body_asteroid_belt", "asteroid_belt"), ("body_planet_barren", "barren_planet"), ("body_planet_gas_giant", "gas_giant"),
+                ("body_planet_ice", "ice_planet"), ("body_planet_ice_giant", "ice_giant"), ("body_planet_rocky", "rocky_planet"),
+                ("body_planet_terrestrial", "terrestrial_planet"), ("body_planet_water", "ocean_planet"), ("body_moon", "moon"), ("body_star", "star"), ("body_star_blackhole", "black_hole") };
+            foreach (var row in tags)
+                if (catalog.Get<BodyTemplateDefinition>(new ContentId(row.Item1)).StoryTag != row.Item2)
+                    throw new InvalidOperationException("SPEC-42 body tag differs: " + row.Item1);
+            var asteroidBelt = catalog.Get<BodyTemplateDefinition>(new ContentId("body_asteroid_belt"));
+            if (asteroidBelt.BeltWidthM != 2000 || asteroidBelt.SectorSizeM != 1000)
+                throw new InvalidOperationException("Opening belts must retain SPEC-30 Q36's 2000 m width and 1000 m sectors.");
             var drift = catalog.Get<AuthoredStarSystemDefinition>(new ContentId("starsys_drift"));
             var belt = drift.Bodies.Single(b => b.key == "drift_belt"); var cache = drift.Bodies.Single(b => b.key == "drift_cache");
             if (!(cache.orbitRadiusM < belt.orbitRadiusM + belt.template.BeltWidthM * .5f))
@@ -85,9 +104,7 @@ namespace Game.Editor
             File.WriteAllText(Evidence + "/readback.txt", string.Join("\n", database.Definitions.Where(d => d is GalaxyGenerationDefinition || d is AuthoredStarSystemDefinition || d is StarSystemTemplateDefinition || d is BodyTemplateDefinition || d is BodyVisualDefinition)
                 .OrderBy(d => d.IdString, StringComparer.Ordinal).Select(d => d.IdString + " " + AssetDatabase.GetAssetPath(d) + " " + AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(d)))) + "\nOutpost real turret instances: " + turrets + "\n");
             if (report.HasErrors) throw new InvalidOperationException(report.ToText());
-            GameLog.Info("Content", report.ToText() + "\nAuthored content read back. GalaxyService.NewGame/body resolution/lane-access acceptance remains pending its feature owners.");
-            if (gate.condition.IsStale || gate.condition.HasErrors)
-                GameLog.Warn("Content", "Whisper gate remains fail-closed until TRV-003 compiles/binds authored lane conditions; no narrative/runtime success claimed.");
+            GameLog.Info("Content", report.ToText() + "\nAuthored content and compiled gate read back. Run the three GalaxyContentSmokeTests for production new-game/body/lane acceptance.");
         }
     }
 }
