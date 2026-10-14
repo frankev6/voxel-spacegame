@@ -15,6 +15,7 @@ namespace Game.Galaxy.Bodies
 
     /// <summary>Reports core loss and asteroid depletion; the loader owns persistent body-state writes.</summary>
     [BurstCompile, UpdateInGroup(typeof(WorldGroup))]
+    [UpdateAfter(typeof(Game.Galaxy.Interaction.InteractionQuerySystem))]
     public partial struct BodyGridWatchSystem : ISystem
     {
         NativeQueue<BodyGridEvent> events;
