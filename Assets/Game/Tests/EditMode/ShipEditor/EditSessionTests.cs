@@ -49,10 +49,11 @@ namespace Game.Tests.EditMode.ShipEditor
         {
             using var f = new DraftAdapterTests.Fixture(); using var session = Session(f);
             ulong original = new DraftReader(session.Original, f.Context).ComputeDraftHash();
-            var random = new Unity.Mathematics.Random(0x12345678);
+            var random = Game.Core.RngStreams.For(0x12345678, Game.Core.RngPurpose.ShipEditor, 5);
             for (int i = 0; i < 100; i++)
             {
-                using var batch = Add(f.Hull, new int3(i, random.NextInt(1, 15), random.NextInt(1, 15)));
+                using var batch = Add(f.Hull, new int3(i, 0, 0));
+                var op = batch.Ops[0]; op.Record.Color = (byte)random.NextInt(16); batch.Ops[0] = op;
                 Assert.IsTrue(session.TryApply(batch, AtomicityMode.AllOrNothing, 0, ToolId.Place, "place", new ApplyReport()));
                 Assert.AreEqual(original, new DraftReader(session.Original, f.Context).ComputeDraftHash());
             }

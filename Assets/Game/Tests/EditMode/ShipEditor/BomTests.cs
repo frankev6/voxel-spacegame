@@ -100,7 +100,17 @@ namespace Game.Tests.EditMode.ShipEditor
                 {
                     batch.Clear(); int x = rng.NextInt(16);
                     bool exists = reader.TryGetBlockAt(new int3(x, 0, 0), out var record);
-                    if (!exists) record = Record(rng.NextBool() ? f.Hull : f.Single, x, (byte)rng.NextInt(24));
+                    if (!exists)
+                    {
+                        // Keep random additions attached; removals and undo may still split the tiny draft.
+                        reader.Enumerate(blocks);
+                        if (blocks.Length != 0)
+                        {
+                            x = blocks[0].Origin.x;
+                            while (reader.TryGetBlockAt(new int3(x, 0, 0), out _)) x++;
+                        }
+                        record = Record(rng.NextBool() ? f.Hull : f.Single, x, (byte)rng.NextInt(24));
+                    }
                     batch.Ops.Add(new DiffOp { Kind = exists ? DiffOpKind.Remove : DiffOpKind.Add, Record = record }); Apply(session, batch);
                 }
                 System.Array.Clear(intact, 0, intact.Length); System.Array.Clear(damaged, 0, damaged.Length); pairs.Clear();

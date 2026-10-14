@@ -30,10 +30,11 @@ namespace Game.Tests.EditMode.ShipEditor
             public readonly DraftWriter Writer;
             public readonly ushort Multi, Single, Hull, Prop;
             public VoxelContent Content => new VoxelContent { Blocks = definitions, Orientations = rotations };
-            public Fixture()
+            public Fixture(Action<System.Collections.Generic.List<Game.Data.Definitions.ContentDefinition>> configure = null)
             {
                 var defs = BlockDefsBlobBuilderTests.Defs(out _, out _);
                 var single = TestContentFactory.Block("block_single_function", BlockKind.Functional); defs.Add(single);
+                configure?.Invoke(defs);
                 definitions = BlockDefsBlobBuilderTests.Build(defs, out var catalog, out modules); Catalog = catalog;
                 rotations = OrientationTableGenerator.BuildBlob(OrientationTableGenerator.Generate(), Allocator.Persistent);
                 config = ScriptableObject.CreateInstance<ShipEditorConfig>();

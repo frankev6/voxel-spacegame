@@ -15,11 +15,14 @@ namespace Game.ShipEditor.Services
         readonly ShipEditorEntryArgs entry;
         readonly DirtyBrickSet dirty = new();
         readonly PlacementIndexes placement;
+        readonly ValidationScratch validation;
+        readonly PlacementValidator validator;
         readonly ProfilerMarker applyMarker = new("EditSession.Apply");
         readonly ProfilerMarker undoMarker = new("EditSession.Undo");
         readonly ProfilerMarker validateMarker = new("EditSession.Validate");
         readonly BillOfMaterials bom = new();
         bool bomDirty = true;
+        internal PlacementIndexes Placement => placement;
         internal BlockCountTables OriginalCounts { get; private set; }
         internal BlockCountTables DraftCounts { get; private set; }
         bool disposed;
@@ -31,7 +34,8 @@ namespace Game.ShipEditor.Services
             Options = args.Options;
             try
             {
-                placement = new PlacementIndexes();
+                placement = new PlacementIndexes(); validation = new ValidationScratch();
+                validator = new PlacementValidator(context, placement, validation);
                 Original = args.Source.Clone(); Draft = args.Source.Clone();
                 History = new EditHistory(context.Config.HistoryBudgetBytes, context.Config.HistoryMaxEntries);
                 MarkAllBricks(Draft);
@@ -73,8 +77,9 @@ namespace Game.ShipEditor.Services
                 if (batch.Groups.Length != 0 && end != count) throw new ArgumentException("EDT: groups must cover the operations.", nameof(batch));
             }
             if (count == 0) return false;
-            // TODO(EDT-007): replace the specified pass-through stage with per-group placement validation.
-            for (int i = 0; i < math.max(1, batch.Groups.Length); i++) report.AddGroup(PlacementError.None);
+            using (validateMarker.Auto())
+                if (!validator.Validate(Draft, batch, OriginalCounts, Options.Creative, mode, report)) return false;
+            count = validation.AcceptedOps.Length;
             var command = new DiffCommand(tool, label, strokeId);
             try
             {
@@ -85,7 +90,7 @@ namespace Game.ShipEditor.Services
                 var pending = new System.Collections.Generic.Dictionary<int3, BlockRecord>();
                 for (int i = 0; i < count; i++)
                 {
-                    var op = batch.Ops[i]; var record = op.Record;
+                    var op = batch.Ops[validation.AcceptedOps[i]]; var record = op.Record;
                     if (op.Kind == DiffOpKind.Remove)
                     {
                         if (pending.TryGetValue(record.Origin, out var added))
@@ -171,7 +176,7 @@ namespace Game.ShipEditor.Services
             if (disposed) return;
             // TODO(EDT-008): join/release connectivity jobs before disposing source storage.
             if (!Options.Creative && entry.Inventory != null) entry.Inventory.Changed -= InvalidateBom;
-            OriginalCounts?.Dispose(); DraftCounts?.Dispose(); placement?.Dispose();
+            OriginalCounts?.Dispose(); DraftCounts?.Dispose(); placement?.Dispose(); validation?.Dispose();
             History?.Dispose(); Draft?.Dispose(); Original?.Dispose(); dirty.Clear();
             Changed = null; disposed = true;
         }
