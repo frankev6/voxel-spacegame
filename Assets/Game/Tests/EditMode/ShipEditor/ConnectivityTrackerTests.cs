@@ -72,7 +72,7 @@ namespace Game.Tests.EditMode.ShipEditor
         {
             using(var warm = new ConnectivityTracker()) { Add(warm,int3.zero); warm.FullRelabel(); }
             void BaselineLog(string message, string trace, UnityEngine.LogType type)
-            { if (type == UnityEngine.LogType.Log && message.StartsWith("Leak Detected", StringComparison.Ordinal)) LogAssert.Expect(type, message); }
+            { if (type == UnityEngine.LogType.Log) LogAssert.Expect(type, message); } // the baseline report may print "Leak Detected" and "Found N leak(s)" lines
             UnityEngine.Application.logMessageReceived += BaselineLog;
             try { UnsafeUtility.CheckForLeaks(); } finally { UnityEngine.Application.logMessageReceived -= BaselineLog; }
             var t=new ConnectivityTracker(); Add(t,int3.zero,new int3(1,0,0)); t.FullRelabel(); Assert.IsTrue(t.ConnectivityPending);

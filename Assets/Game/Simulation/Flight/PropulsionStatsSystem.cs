@@ -88,9 +88,11 @@ namespace Game.Simulation.Flight
                 var multipliers = Multipliers.HasComponent(entity) ? Multipliers[entity] : default;
                 float thrust = multipliers.Get(StatId.Thrust), turn = multipliers.Get(StatId.TurnRate);
                 float inverseMass = stats.Mass > 0 ? 1 / stats.Mass : 0;
-                output.ForwardAccel = output.ForwardThrust * thrust * inverseMass;
-                output.ReverseAccel = output.ReverseThrust * thrust * inverseMass;
-                output.StrafeAccel = output.StrafeThrust * thrust * inverseMass;
+                // ADR-0114: the core manoeuvring assist adds the same force along every planar axis.
+                float core = FlightMath.CoreAssistForce(Config, mass.InverseMass);
+                output.ForwardAccel = (output.ForwardThrust + core) * thrust * inverseMass;
+                output.ReverseAccel = (output.ReverseThrust + core) * thrust * inverseMass;
+                output.StrafeAccel = (output.StrafeThrust + core) * thrust * inverseMass;
                 output.GyroYawTorque = FlightMath.GyroYawTorque(Config, mass.InverseInertia.y);
                 float yaw = inverseMass > 0 ? (output.YawTorque * thrust + output.GyroYawTorque) * turn * mass.InverseInertia.y : 0;
                 output.YawAccelDeg = math.degrees(yaw);

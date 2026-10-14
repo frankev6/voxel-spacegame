@@ -9,6 +9,8 @@ namespace Game.Simulation.Flight
         public uint SourceRevision;      // VoxelGrid.Revision the FlightThruster buffer was built from
         public float Gyro;               // last gyro throttle −1..1 (warm start)
         public float GyroTorque;         // N·m available this tick
+        public float2 CoreAssist;        // last core manoeuvring throttles −1..1 (x strafe, y forward; warm start, ADR-0114)
+        public float CoreAssistForce;    // N per axis available this tick
         public float2 LocalVelocity;     // m/s: x = strafe (+ right), y = forward
         public float YawRate;            // rad/s, + = turning right
         public float ForwardCap, ReverseCap, StrafeCap;   // m/s this tick, after multipliers and boost

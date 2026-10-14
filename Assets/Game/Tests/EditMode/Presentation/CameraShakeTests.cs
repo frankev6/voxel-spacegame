@@ -15,7 +15,7 @@ using Fixture = Game.Tests.EditMode.Presentation.CameraRigServiceTests.Fixture;
 
 namespace Game.Tests.EditMode.Presentation
 {
-    /// <summary>SPEC-62 CAM-008: additive trauma, accessibility settings and the bounded FX frame reader.</summary>
+    /// <summary>SPEC-62 CAM-008: saturating trauma, per-frame peak hold (QA-001), accessibility settings and the bounded FX frame reader.</summary>
     public sealed class CameraShakeTests : GameTestBase
     {
         static void Start(Fixture f)
@@ -38,11 +38,11 @@ namespace Game.Tests.EditMode.Presentation
             Assert.AreEqual(5, config.ShakeRules.Length);
             var expected = new[]
             {
-                new ShakeRule { Kind = FxKind.ExplosionSmall, Strength = .5f, RadiusMeters = 300 },
-                new ShakeRule { Kind = FxKind.ExplosionLarge, Strength = .5f, RadiusMeters = 300 },
-                new ShakeRule { Kind = FxKind.RamImpact, Strength = .4f, RadiusMeters = 200 },
-                new ShakeRule { Kind = FxKind.HitKinetic, Strength = .05f, RadiusMeters = 80 },
-                new ShakeRule { Kind = FxKind.HitEnergy, Strength = .05f, RadiusMeters = 80 }
+                new ShakeRule { Kind = FxKind.ExplosionSmall, Strength = .35f, RadiusMeters = 150 },
+                new ShakeRule { Kind = FxKind.ExplosionLarge, Strength = .6f, RadiusMeters = 400 },
+                new ShakeRule { Kind = FxKind.RamImpact, Strength = .2f, RadiusMeters = 120 },
+                new ShakeRule { Kind = FxKind.HitKinetic, Strength = .04f, RadiusMeters = 60 },
+                new ShakeRule { Kind = FxKind.HitEnergy, Strength = .04f, RadiusMeters = 60 }
             };
             CollectionAssert.AreEquivalent(expected, config.ShakeRules);
         }
@@ -137,7 +137,7 @@ namespace Game.Tests.EditMode.Presentation
             sync.Bind(f.Rig, reader);
             var ship = w.EntityManager.CreateEntity(typeof(PlayerShip), typeof(LocalToWorld));
             w.EntityManager.SetComponentData(ship, new LocalToWorld { Value = float4x4.Translate(f.Rig.Focus) });
-            f.Config.ShakeRules = new[] { new ShakeRule { Kind = FxKind.ExplosionSmall, Strength = .001f, RadiusMeters = 300 } };
+            f.Config.ShakeRules = new[] { new ShakeRule { Kind = FxKind.ExplosionSmall, Strength = .1f, RadiusMeters = 300 } };
             var queue = w.GetSingleton<FxEventQueue>().Queue;
             for (int i = 0; i < 256; i++) queue.Enqueue(new FxEvent { Kind = FxKind.None });
             queue.Enqueue(new FxEvent { Kind = FxKind.ExplosionSmall, Pos = f.Rig.Focus, Scale = 1000 });
@@ -148,8 +148,8 @@ namespace Game.Tests.EditMode.Presentation
             queue.Enqueue(new FxEvent { Kind = FxKind.ExplosionSmall, Pos = f.Rig.Focus, Scale = 1000 });
             w.StepFrame(0);
             Assert.AreEqual(257, reader.Current.Length);
-            float expected = .512f - f.Config.TraumaDecayPerSecond * math.clamp(Time.unscaledDeltaTime, 0, .1f);
-            Assert.AreEqual(expected, f.Rig.Trauma, 1e-5f, "First 256 events apply their scale once; final event is ignored.");
+            float expected = .2f - f.Config.TraumaDecayPerSecond * math.clamp(Time.unscaledDeltaTime, 0, .1f);
+            Assert.AreEqual(expected, f.Rig.Trauma, 1e-5f, "Peak hold: the strongest of the first 256 events applies once; the final event is ignored.");
             w.StepFrame(0);
             Assert.AreEqual(0, reader.Current.Length, "Empty next drain does not replay previous-frame events.");
         }

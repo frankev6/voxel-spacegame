@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Presentation::Game.Presentation.Data.CameraConfig
   CameraPrefab: {fileID: 586258118316653058, guid: b354bc6c2afd64ceb9b1bc9604def9c9, type: 3}
   VerticalFovDeg: 40
+  BoostFovKickDeg: 7
+  BoostFovHalfLife: 0.18
   NearClip: 0.3
   FarClip: 50000
   DefaultPitchDeg: 55
@@ -50,23 +52,23 @@ MonoBehaviour:
   MenuPosition: {x: 0, y: 60, z: -120}
   MenuLookAt: {x: 0, y: 0, z: 0}
   MenuDriftDegPerSecond: 2
-  TraumaDecayPerSecond: 1.4
-  ShakeFrequencyHz: 22
-  ShakeMaxOffsetFraction: 0.01
-  ShakeMaxAngleDeg: 2
+  TraumaDecayPerSecond: 2
+  ShakeFrequencyHz: 18
+  ShakeMaxOffsetFraction: 0.006
+  ShakeMaxAngleDeg: 1
   ShakeRules:
   - Kind: 4
-    Strength: 0.5
-    RadiusMeters: 300
+    Strength: 0.35
+    RadiusMeters: 150
   - Kind: 5
-    Strength: 0.5
-    RadiusMeters: 300
+    Strength: 0.6
+    RadiusMeters: 400
   - Kind: 13
-    Strength: 0.4
-    RadiusMeters: 200
+    Strength: 0.2
+    RadiusMeters: 120
   - Kind: 2
-    Strength: 0.05
-    RadiusMeters: 80
+    Strength: 0.04
+    RadiusMeters: 60
   - Kind: 3
-    Strength: 0.05
-    RadiusMeters: 80
+    Strength: 0.04
+    RadiusMeters: 60

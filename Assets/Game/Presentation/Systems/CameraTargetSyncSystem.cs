@@ -75,7 +75,7 @@ namespace Game.Presentation.Systems
             using (TargetMarker.Auto())
             {
                 int count = players.CalculateEntityCount();
-                if (count == 0) { rig.ClearTarget(); lastTarget = Entity.Null; }
+                if (count == 0) { rig.ClearTarget(); rig.SetBoost(false); lastTarget = Entity.Null; }
                 else
                 {
                     Entity target;
@@ -102,6 +102,9 @@ namespace Game.Presentation.Systems
                     }
                     bool cut = target != lastTarget || math.distance(pos, lastTargetPos + warpDelta) > rig.Config.TeleportCutDistance;
                     rig.SetTarget(pos, rotation, velocity, radius, cut);
+                    // QA-001: boost gets a visible response (FOV kick); the command flag is what the player asked for.
+                    rig.SetBoost(EntityManager.HasComponent<ShipCommand>(target) &&
+                        (EntityManager.GetComponentData<ShipCommand>(target).Flags & ShipCommandFlags.Boost) != 0);
                     if (hasBounds) rig.SetTargetBounds(boundsMin, boundsMax, ltw.Value);
                     lastTarget = target; lastTargetPos = pos;
                 }
@@ -113,16 +116,22 @@ namespace Game.Presentation.Systems
                     var events = fx.Current;
                     int count = math.min(256, events.Length);
                     var rules = rig.Config.ShakeRules;
+                    // Peak hold (QA-001): one collision emits a contact event per tick and pair, so summing every event
+                    // pinned trauma at one. The frame's strongest falloff-weighted impulse raises trauma to at least itself.
+                    float strongest = 0; float3 focus = rig.Focus;
                     for (int i = 0; i < count; i++)
                     {
                         var e = events[i];
                         for (int j = 0; j < rules.Length; j++)
                             if (rules[j].Kind == e.Kind)
                             {
-                                rig.AddImpulse(e.Pos, rules[j].Strength * math.max(e.Scale, 0), rules[j].RadiusMeters);
+                                float radius = rules[j].RadiusMeters;
+                                float value = radius > 0 ? rules[j].Strength * math.max(e.Scale, 0) * math.saturate(1 - math.distance(e.Pos, focus) / radius) : 0;
+                                if (math.isfinite(value) && value > strongest) strongest = value;
                                 break;
                             }
                     }
+                    if (strongest > rig.Trauma) rig.AddImpulse(focus, strongest - rig.Trauma, 1);
                 }
             }
             using (OcclusionMarker.Auto())

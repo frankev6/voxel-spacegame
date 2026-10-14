@@ -34,6 +34,8 @@ namespace Game.Presentation.Services
         float3 unshakenPos;
         quaternion unshakenRot;
         float trauma, shakeTime;
+        bool boosting;
+        float fovKick;
         internal CameraConfig Config => config;
         internal bool HasTarget { get; private set; }
         internal float3 TargetPosition { get; private set; }
@@ -112,6 +114,9 @@ namespace Game.Presentation.Services
         internal void SetTargetBounds(float3 min, float3 max, float4x4 localToWorld)
         { boundsMin = min; boundsMax = max; boundsTransform = localToWorld; hasBounds = true; }
         public void ClearTarget() { HasTarget = false; CutRequested = false; }
+        /// <summary>QA-001: flight boost widens the field of view; reduce motion and non-flight modes keep the base FOV.</summary>
+        public void SetBoost(bool active) => boosting = active;
+        internal float FovKick => fovKick;
         public void Warp(float3 delta)
         {
             if (disposed) return;
@@ -176,6 +181,9 @@ namespace Game.Presentation.Services
             using var marker = TickMarker.Auto();
             dt = math.isfinite(dt) ? math.clamp(dt, 0, .1f) : 0;
             input?.Sample();
+            float kickTarget = mode == CameraMode.Flight && boosting && !settings.ReduceMotion ? config.BoostFovKickDeg : 0;
+            fovKick = settings.ReduceMotion ? 0 : CameraMath.Damp(fovKick, kickTarget, config.BoostFovHalfLife, dt);
+            camera.fieldOfView = config.VerticalFovDeg + fovKick;
             float3 p = unshakenPos; quaternion r = unshakenRot;
             if (mode == CameraMode.Menu)
             {

@@ -63,7 +63,7 @@ namespace Game.Simulation.Flight
                 Weights = new float3(1f / math.max(1, bodyMass * 10), 1f / math.max(1, bodyMass * 10),
                     Config.TorqueWeight / math.max(1, inertia)), Sweeps = Config.AllocationSweeps
             };
-            var actuators = new NativeArray<ThrustActuator>(thrusters.Length + 1, Allocator.Temp);
+            var actuators = new NativeArray<ThrustActuator>(thrusters.Length + 3, Allocator.Temp);
             var throttles = new NativeArray<float>(actuators.Length, Allocator.Temp);
             for (int k = 0; k < thrusters.Length; k++)
             {
@@ -82,6 +82,11 @@ namespace Game.Simulation.Flight
             int gyroIndex = thrusters.Length;
             actuators[gyroIndex] = new ThrustActuator { Column = new float3(0, 0, gyroTorque), Min = -1, Max = 1 };
             throttles[gyroIndex] = flight.Gyro;
+            // ADR-0114: the core's manoeuvring assist acts at the centre of mass along local X and Z, like the gyro for yaw.
+            float coreForce = FlightMath.CoreAssistForce(Config, mass.InverseMass) * thrustMultiplier;
+            actuators[gyroIndex + 1] = new ThrustActuator { Column = new float3(coreForce, 0, 0), Min = -1, Max = 1 };
+            actuators[gyroIndex + 2] = new ThrustActuator { Column = new float3(0, coreForce, 0), Min = -1, Max = 1 };
+            throttles[gyroIndex + 1] = flight.CoreAssist.x; throttles[gyroIndex + 2] = flight.CoreAssist.y;
             // Bound impossible requests before comparing axes: a target speed is not an unlimited engine.
             // Each bound is an outer bound only; the allocator still resolves coupled force/torque.
             float3 minimum = 0, maximum = 0;
@@ -109,7 +114,7 @@ namespace Game.Simulation.Flight
                 if (Thrusters.HasComponent(thruster.Thruster))
                 {
                     float intensity = Thrusters[thruster.Thruster].Intensity;
-                    float desired = math.saturate(throttle);
+                    float desired = math.clamp(throttle, 0, Config.BoostThrottle); // boost overdrive shows as a longer plume (QA-001)
                     intensity += (desired - intensity) * (desired > intensity ? Config.IntensityRise : Config.IntensityFall);
                     Thrusters[thruster.Thruster] = new ThrusterState { Intensity = intensity < .005f ? 0 : intensity };
                 }
@@ -117,10 +122,15 @@ namespace Game.Simulation.Flight
             float gyro = math.abs(throttles[gyroIndex]) < Config.ThrottleEpsilon ? 0 : throttles[gyroIndex];
             velocity.ApplyAngularImpulse(mass, math.rotate(math.inverse(inertiaRotation), new float3(0, gyro * gyroTorque * dt, 0)));
             flight.Gyro = gyro; flight.GyroTorque = gyroTorque;
+            float2 core = new float2(throttles[gyroIndex + 1], throttles[gyroIndex + 2]);
+            core = math.select(core, 0, math.abs(core) < Config.ThrottleEpsilon);
+            if (coreForce > 0 && math.any(core != 0))
+                velocity.ApplyLinearImpulse(mass, math.rotate(rotation, new float3(core.x, 0, core.y)) * (coreForce * dt));
+            flight.CoreAssist = core; flight.CoreAssistForce = coreForce;
+            flight.Flags = firing ? flight.Flags | FlightFlags.Firing : flight.Flags & ~FlightFlags.Firing;
             flight.LocalVelocity = local; flight.YawRate = yaw;
             flight.ForwardCap = forward; flight.ReverseCap = reverse; flight.StrafeCap = strafe; flight.YawRateCap = yawCap;
             flight.TargetLocalVelocity = target; flight.TargetYawRate = targetYaw;
-            flight.Flags = firing ? flight.Flags | FlightFlags.Firing : flight.Flags & ~FlightFlags.Firing;
             throttles.Dispose(); actuators.Dispose();
         }
 

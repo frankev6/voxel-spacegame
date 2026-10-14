@@ -9,6 +9,9 @@ namespace Game.Simulation.Flight
         /// N·m of core reaction torque: min(Iyy × radians(CoreYawAccelDeg), CoreMaxYawTorque); 0 if inverseInertiaY ≤ 0.
         public static float GyroYawTorque(in FlightConfig c, float inverseInertiaY)
             => inverseInertiaY > 0 ? math.min(math.radians(c.CoreYawAccelDeg) / inverseInertiaY, c.CoreMaxYawTorque) : 0;
+        /// N of core manoeuvring assist per local planar axis: min(mass × CoreLinearAccel, CoreMaxLinearForce); 0 if inverseMass ≤ 0 (ADR-0114).
+        public static float CoreAssistForce(in FlightConfig c, float inverseMass)
+            => inverseMass > 0 ? math.min(c.CoreLinearAccel / inverseMass, c.CoreMaxLinearForce) : 0;
         /// Caps after multipliers. Boost raises the forward cap only.
         public static void SpeedCaps(in FlightConfig c, float maxSpeedMultiplier, bool boost, out float forward, out float reverse, out float strafe)
         {

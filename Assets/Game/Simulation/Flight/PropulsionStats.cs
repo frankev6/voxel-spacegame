@@ -14,7 +14,7 @@ namespace Game.Simulation.Flight
         public uint SourceRevision;
         // Mass part: recomputed when the functional part, PhysicsMass or ShipStatMultipliers changed
         public float GyroYawTorque;     // N·m = FlightMath.GyroYawTorque(FlightConfig, InverseInertia.y)
-        public float ForwardAccel;      // m/s² = ForwardThrust × Thrust multiplier / ShipStats.Mass
+        public float ForwardAccel;      // m/s² = (ForwardThrust + core assist force, ADR-0114) × Thrust multiplier / ShipStats.Mass
         public float ReverseAccel;      // m/s²
         public float StrafeAccel;       // m/s²
         public float YawAccelDeg;       // deg/s² = degrees((YawTorque × Thrust mult + GyroYawTorque) × TurnRate mult × InverseInertia.y)

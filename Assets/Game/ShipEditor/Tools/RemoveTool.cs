@@ -49,7 +49,10 @@ namespace Game.ShipEditor.Tools
             }
             else
             {
-                if (input.PrimaryPressed || input.PrimaryHeld) context.RemoveHovered(Id);
+                // A held stroke stays on the first block's layer; re-picking would drill through the hull (QA-001).
+                if (input.PrimaryPressed) { context.RemoveHovered(Id); end = start; }
+                else if (input.PrimaryHeld && context.TryStrokePlaneCell(start, normal, out var cell) && !cell.Equals(end))
+                { end = cell; if (context.TryBlockAt(cell, out var record)) context.Remove(record, Id); }
                 if (input.PrimaryReleased) Cancel();
             }
         }

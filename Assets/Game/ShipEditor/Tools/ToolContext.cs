@@ -87,19 +87,27 @@ namespace Game.ShipEditor.Tools
             record = default;
             return Hover.Kind == DraftPicker.HitKind.Block && new DraftReader(Session.Draft, Content).TryGetBlockAt(Hover.Cell, out record);
         }
+        internal bool TryBlockAt(Unity.Mathematics.int3 cell, out BlockRecord record)
+            => new DraftReader(Session.Draft, Content).TryGetBlockAt(cell, out record);
         internal bool TryPlacement(out BlockRecord record)
         {
             record = default;
-            if (Hover.Kind == DraftPicker.HitKind.None || SelectedBlock == 0 || SelectedBlock >= Content.Footprints.BlockCount) return false;
+            return Hover.Kind != DraftPicker.HitKind.None && TryPlacementAt(Hover.PlacementCell, Hover.Normal, out record);
+        }
+        bool TryPlacementAt(Unity.Mathematics.int3 cell, Unity.Mathematics.int3 normal, out BlockRecord record)
+        {
+            record = default;
+            if (SelectedBlock == 0 || SelectedBlock >= Content.Footprints.BlockCount) return false;
             var footprint = Content.Footprints.Get(SelectedBlock, Orient);
             record = new BlockRecord { Block = SelectedBlock, Orient = Orient, Color = Color, DamageOffset = -1,
-                Origin = PlacementMath.OriginFor(Hover.PlacementCell, Hover.Normal, footprint.Min, footprint.Max) };
+                Origin = PlacementMath.OriginFor(cell, normal, footprint.Min, footprint.Max) };
             return true;
         }
-        bool PreparePlacement()
+        bool PreparePlacement() => Hover.Kind != DraftPicker.HitKind.None && PreparePlacementAt(Hover.PlacementCell, Hover.Normal);
+        bool PreparePlacementAt(Unity.Mathematics.int3 cell, Unity.Mathematics.int3 normal)
         {
             Batch.Clear(); copies.Clear(); Error = PlacementError.None;
-            if (!TryPlacement(out var record)) return false;
+            if (!TryPlacementAt(cell, normal, out var record)) return false;
             Error = Mapper.BuildCopies(record, default, Symmetry, copies, Batch.Damage);
             if (Error != PlacementError.None) return false;
             foreach (var copy in copies) Batch.Ops.Add(new DiffOp { Kind = DiffOpKind.Add, Record = copy });
@@ -108,6 +116,24 @@ namespace Game.ShipEditor.Tools
         }
         internal bool Place()
             => PreparePlacement() && Apply(ToolId.Place, "Place blocks");
+        /// <summary>Held strokes place on their start plane, never on cells exposed by the stroke's own blocks.</summary>
+        internal bool PlaceAt(Unity.Mathematics.int3 cell, Unity.Mathematics.int3 normal)
+            => PreparePlacementAt(cell, normal) && Apply(ToolId.Place, "Place blocks");
+        /// <summary>Cell where the pointer ray crosses the plane through <paramref name="planeCell"/> perpendicular to <paramref name="normal"/>.</summary>
+        internal bool TryStrokePlaneCell(Unity.Mathematics.int3 planeCell, Unity.Mathematics.int3 normal, out Unity.Mathematics.int3 cell)
+        {
+            cell = planeCell;
+            int axis = normal.x != 0 ? 0 : normal.z != 0 ? 2 : 1;
+            float direction = GridRay.direction[axis];
+            if (Unity.Mathematics.math.abs(direction) < 1e-4f) return false;
+            float distance = (planeCell[axis] + 0.5f - GridRay.origin[axis]) / direction;
+            if (!(distance >= 0) || float.IsInfinity(distance)) return false;
+            var point = (Unity.Mathematics.float3)GridRay.GetPoint(distance);
+            if (!Unity.Mathematics.math.all(Unity.Mathematics.math.isfinite(point))) return false;
+            cell = (Unity.Mathematics.int3)Unity.Mathematics.math.clamp(Unity.Mathematics.math.floor(point), (Unity.Mathematics.float3)planeCell - 255, (Unity.Mathematics.float3)planeCell + 255);
+            cell[axis] = planeCell[axis];
+            return true;
+        }
         internal bool RemoveHovered(ToolId tool)
         {
             return TryHovered(out var record) && Remove(record, tool);

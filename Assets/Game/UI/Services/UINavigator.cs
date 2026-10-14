@@ -168,7 +168,12 @@ namespace Game.UI.Services
             focus = null; Build(screen);
             int index = stack.IndexOf(screen);
             if (index >= 0) RemoveFrom(index + 1, ref changed);
-            else { stack.Add(screen); screen.IsOpen = true; screen.Root.RemoveFromClassList(UIStyleClasses.IsHidden); }
+            else
+            {
+                stack.Add(screen); screen.IsOpen = true; screen.Root.RemoveFromClassList(UIStyleClasses.IsHidden);
+                // Layer children draw in sibling order, which is first-build order; the pushed screen must draw above earlier ones.
+                screen.Root.BringToFront();
+            }
             changed = true;
             try { screen.OnPush(args); focus = screen; }
             catch (Exception e)

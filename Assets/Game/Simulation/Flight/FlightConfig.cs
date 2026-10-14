@@ -19,6 +19,8 @@ namespace Game.Simulation.Flight
         public int AllocationSweeps;       // 6
         public float CoreYawAccelDeg;      // 60 deg/s²: gyro torque = Iyy × this, capped
         public float CoreMaxYawTorque;     // 2.0e6 N·m
+        public float CoreLinearAccel;      // m/s²: core manoeuvring assist force = mass × this, capped (QA-001, ADR-0114); 0 = thrusters only
+        public float CoreMaxLinearForce;   // N cap of the core manoeuvring assist per local axis
         public float ThrottleEpsilon;      // 0.001: smaller throttles are 0
         public float PlaneCorrection;      // 0.2: fraction of the Y offset removed per tick
         public float IntensityRise;        // 0.35: ThrusterState.Intensity EMA factor when rising
@@ -26,7 +28,7 @@ namespace Game.Simulation.Flight
         public static FlightConfig Default => new FlightConfig {
             MaxForwardSpeed = 120f, ReverseSpeedFraction = 0.5f, StrafeSpeedFraction = 0.6f, BoostSpeedMultiplier = 1.5f,
             BoostThrottle = 1.25f, MaxYawRateDeg = 120f, LinearAssistGain = 0.5f, CoastDeceleration = 0.08f, AngularAssistGain = 0.5f, TorqueWeight = 2f,
-            AllocationSweeps = 6, CoreYawAccelDeg = 60f, CoreMaxYawTorque = 2.0e6f, ThrottleEpsilon = 0.001f,
+            AllocationSweeps = 6, CoreYawAccelDeg = 60f, CoreMaxYawTorque = 2.0e6f, CoreLinearAccel = 0f, CoreMaxLinearForce = 0f, ThrottleEpsilon = 0.001f,
             PlaneCorrection = 0.2f, IntensityRise = 0.35f, IntensityFall = 0.15f };
     }
 }

@@ -21,6 +21,8 @@ namespace Game.Data.Definitions
         [SerializeField, Range(1, 16)] private int allocationSweeps = 6;
         [SerializeField, Range(0, 720)] private float coreYawAccelDeg = 60f;
         [SerializeField, Min(0)] private float coreMaxYawTorque = 2.0e6f;
+        [SerializeField, Range(0, 60)] private float coreLinearAccel = 0f;     // QA-001/ADR-0114 core manoeuvring assist
+        [SerializeField, Min(0)] private float coreMaxLinearForce = 0f;
         [SerializeField, Range(0, 0.05f)] private float throttleEpsilon = 0.001f;
         [SerializeField, Range(0.01f, 1)] private float planeCorrection = 0.2f;
         [SerializeField, Range(0.01f, 1)] private float intensityRise = 0.35f;
@@ -39,6 +41,8 @@ namespace Game.Data.Definitions
         public int AllocationSweeps => allocationSweeps;
         public float CoreYawAccelDeg => coreYawAccelDeg;
         public float CoreMaxYawTorque => coreMaxYawTorque;
+        public float CoreLinearAccel => coreLinearAccel;
+        public float CoreMaxLinearForce => coreMaxLinearForce;
         public float ThrottleEpsilon => throttleEpsilon;
         public float PlaneCorrection => planeCorrection;
         public float IntensityRise => intensityRise;
@@ -51,6 +55,8 @@ namespace Game.Data.Definitions
                 scope.Error("FLT-E001", nameof(maxForwardSpeed), "Maximum forward speed must be positive.");
             if (float.IsNaN(coastDeceleration) || float.IsInfinity(coastDeceleration) || coastDeceleration < 0)
                 scope.Error("FLT-E001", nameof(coastDeceleration), "Coast deceleration must be finite and nonnegative.");
+            if (!(coreLinearAccel >= 0) || float.IsInfinity(coreLinearAccel) || !(coreMaxLinearForce >= 0) || float.IsInfinity(coreMaxLinearForce))
+                scope.Error("FLT-E001", nameof(coreLinearAccel), "Core manoeuvring assist must be finite and nonnegative.");
             if (allocationSweeps < 1)
                 scope.Error("FLT-E001", nameof(allocationSweeps), "Allocation requires at least one sweep.");
         }

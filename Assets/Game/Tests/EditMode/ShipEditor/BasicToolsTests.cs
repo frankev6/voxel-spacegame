@@ -25,6 +25,31 @@ namespace Game.Tests.EditMode.ShipEditor
             Assert.AreEqual(50, session.GetStats(false).Blocks); Assert.AreEqual(1, session.History.Count);
             Assert.IsTrue(session.Undo()); Assert.AreEqual(original, session.ComputeDraftHash());
         }
+        [Test] public void PlaceHeldStill_PlacesOneBlock()
+        {
+            // QA-001: re-picking each frame placed on the stroke's own block and grew a column toward the camera.
+            using var f = new DraftAdapterTests.Fixture(); using var session = Session(f);
+            using var controller = new ShipEditorController(session, f.Context); controller.SelectBlock(f.Hull);
+            for (int i = 0; i < 20; i++) controller.Tick(new EditorInputFrame { PointerAllowed = true, PrimaryPressed = i == 0, PrimaryHeld = true }, Ray());
+            controller.Tick(new EditorInputFrame { PointerAllowed = true, PrimaryReleased = true }, Ray());
+            Assert.AreEqual(1, session.GetStats(false).Blocks); Assert.AreEqual(1, session.History.Count);
+        }
+        [Test] public void RemoveHeldStill_RemovesOnlyTheFirstLayer()
+        {
+            using var f = new DraftAdapterTests.Fixture();
+            f.Edits(new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = f.Hull, Cell = new int3(0, 0, 0) },
+                new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = f.Hull, Cell = new int3(0, 1, 0) },
+                new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = f.Hull, Cell = new int3(0, 2, 0) },
+                new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = f.Hull, Cell = new int3(1, 2, 0) });
+            using var session = Session(f); using var controller = new ShipEditorController(session, f.Context);
+            controller.SelectTool(ToolId.Remove);
+            for (int i = 0; i < 20; i++) controller.Tick(new EditorInputFrame { PointerAllowed = true, PrimaryPressed = i == 0, PrimaryHeld = true }, Ray());
+            Assert.AreEqual(3, session.GetStats(false).Blocks, "holding still removes the hovered block only, never drilling");
+            controller.Tick(new EditorInputFrame { PointerAllowed = true, PrimaryHeld = true }, Ray(1));
+            controller.Tick(new EditorInputFrame { PointerAllowed = true, PrimaryReleased = true }, Ray(1));
+            Assert.AreEqual(2, session.GetStats(false).Blocks, "dragging continues across the same layer");
+            Assert.AreEqual(1, session.History.Count);
+        }
         [Test] public void PointerBlocked_NoEdit()
         {
             using var f = new DraftAdapterTests.Fixture(); using var session = Session(f);

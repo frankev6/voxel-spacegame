@@ -77,6 +77,15 @@ namespace Game.Tests.EditMode.UI
             c.BackAction = () => { nav.Pop(c); Assert.IsTrue(c.IsOpen, "Back mutations are deferred"); return true; };
             nav.Back(); Assert.AreEqual(2, nav.Count); Assert.AreSame(b, nav.Top); Assert.IsFalse(c.IsOpen);
         }
+        [Test] public void Push_ScreenBuiltEarlier_DrawsAboveScreensBelowIt()
+        {
+            // QA-001: layer children draw in sibling order; a confirm built before the pause menu rendered beneath it.
+            var pauseMenu = Register<A>(layer: UILayer.Modals); var confirm = Register<B>(layer: UILayer.Modals);
+            nav.Push(confirm); nav.Pop(confirm); nav.Push(pauseMenu);
+            var layer = new VisualElement(); layer.Add(confirm.Root); layer.Add(pauseMenu.Root);
+            nav.Push(confirm);
+            Assert.Greater(layer.IndexOf(confirm.Root), layer.IndexOf(pauseMenu.Root), "the most recently pushed screen draws last");
+        }
         [Test] public void Back_OnRoot_NeverPopsRoot()
         { var a = Register<A>(false, true, InputContext.Flight, UILayer.Hud); nav.SetRoot(a); nav.Back(); Assert.AreSame(a, nav.Top); Assert.IsTrue(a.IsOpen); }
         [Test] public void NestedPausingScreens_PopInner_StaysPaused()

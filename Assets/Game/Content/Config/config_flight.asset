@@ -17,16 +17,18 @@ MonoBehaviour:
   maxForwardSpeed: 120
   reverseSpeedFraction: 0.5
   strafeSpeedFraction: 0.6
-  boostSpeedMultiplier: 1.5
-  boostThrottle: 1.25
+  boostSpeedMultiplier: 1.6
+  boostThrottle: 1.6
   maxYawRateDeg: 120
   linearAssistGain: 0.5
-  coastDeceleration: 0.08
+  coastDeceleration: 1
   angularAssistGain: 0.5
   torqueWeight: 2
   allocationSweeps: 6
   coreYawAccelDeg: 180
   coreMaxYawTorque: 2500000
+  coreLinearAccel: 18
+  coreMaxLinearForce: 600000
   throttleEpsilon: 0.001
   planeCorrection: 0.2
   intensityRise: 0.35

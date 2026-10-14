@@ -6,6 +6,8 @@ namespace Game.Presentation.Data
     {
         public UnityEngine.GameObject CameraPrefab;          // Presentation/Data/MainCamera.prefab
         public float VerticalFovDeg = 40f;
+        public float BoostFovKickDeg = 7f;      // QA-001: added to the flight FOV while boost is held
+        public float BoostFovHalfLife = .18f;
         public float NearClip = 0.3f;
         public float FarClip = 50000f;
         // flight

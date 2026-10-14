@@ -20,6 +20,8 @@ namespace Game.Simulation.Flight
             AllocationSweeps = def.AllocationSweeps,
             CoreYawAccelDeg = def.CoreYawAccelDeg,
             CoreMaxYawTorque = def.CoreMaxYawTorque,
+            CoreLinearAccel = def.CoreLinearAccel,
+            CoreMaxLinearForce = def.CoreMaxLinearForce,
             ThrottleEpsilon = def.ThrottleEpsilon,
             PlaneCorrection = def.PlaneCorrection,
             IntensityRise = def.IntensityRise,

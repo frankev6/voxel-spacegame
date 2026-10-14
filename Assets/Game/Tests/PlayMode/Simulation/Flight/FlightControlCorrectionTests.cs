@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace Game.Tests.PlayMode.Simulation.Flight
 {
-    /// <summary>FLT-013: actual imported Fighter, production thrusters and Unity Physics.</summary>
+    /// <summary>FLT-013: actual imported Fighter, production thrusters and Unity Physics; QA-001/ADR-0114 core manoeuvring assist.</summary>
     public sealed class FlightControlCorrectionTests
     {
         ContentService content;
@@ -54,7 +54,9 @@ namespace Game.Tests.PlayMode.Simulation.Flight
                 // Compare in the original body frame: +Z became world +X at the 90-degree test rotation.
                 float2 velocity = FlightMath.ToLocalPlanar(fixture.Velocity(ship).Linear, quaternion.RotateY(math.PI / 2));
                 float acceleration = math.dot(velocity, direction);
-                float bound = available * fixture.Mass(ship).InverseMass;
+                float core = FlightMath.CoreAssistForce(fixture.Em.GetComponentData<FlightConfig>(fixture.ConfigEntity), fixture.Mass(ship).InverseMass);
+                Assert.Greater(core, 0, "Production config enables the core manoeuvring assist.");
+                float bound = (available + core) * fixture.Mass(ship).InverseMass;
                 Assert.That(acceleration, Is.InRange(bound * .9f, bound * 1.01f), direction.ToString());
                 Assert.Less(math.abs(velocity.x * direction.y - velocity.y * direction.x), .05f);
                 TestContext.WriteLine($"Fighter {direction}: {acceleration:G8} m/s²; force/mass {bound:G8}, velocity {velocity}");
@@ -65,7 +67,9 @@ namespace Game.Tests.PlayMode.Simulation.Flight
                 if (thruster.ForceDirLocal.z < -.5f) fixture.RemoveThruster(ship, thruster.InstanceIndex);
             thrustersCopy.Dispose();
             fixture.Command(ship, new float2(0, -1)); fixture.Tick(60);
-            Assert.GreaterOrEqual(fixture.Velocity(ship).Linear.z, -.001f, "No reverse engine may be invented after loss of both reverse thrusters.");
+            float coreOnly = FlightMath.CoreAssistForce(fixture.Em.GetComponentData<FlightConfig>(fixture.ConfigEntity), fixture.Mass(ship).InverseMass) * fixture.Mass(ship).InverseMass;
+            Assert.That(-fixture.Velocity(ship).Linear.z, Is.InRange(coreOnly * .9f, coreOnly * 1.01f),
+                "After losing both reverse thrusters only the core assist reverses; no thruster force is invented.");
         }
 
         [Test] public void Fighter_TurnAndStrafe()
@@ -92,13 +96,13 @@ namespace Game.Tests.PlayMode.Simulation.Flight
             fixture.Em.SetComponentData(ship, new PhysicsVelocity { Linear = new float3(0, 0, 20) });
             fixture.Command(ship); fixture.Tick(120);
             float coast = fixture.Velocity(ship).Linear.z;
-            Assert.That(coast, Is.InRange(16.5f, 18f));
+            Assert.That(coast, Is.InRange(2f, 4f), "Owner 2026-10-14: releasing W/S must not drift indefinitely (coast 1/s).");
             ResetMotion(quaternion.identity);
             fixture.Em.SetComponentData(ship, new PhysicsVelocity { Linear = new float3(0, 0, 20) });
             fixture.Em.SetComponentData(ship, new ShipCommand { Flags = ShipCommandFlags.Brake }); fixture.Tick(120);
             float brake = fixture.Velocity(ship).Linear.z;
-            Assert.Less(brake, coast - .2f);
-            Assert.Greater(brake, 0);
+            Assert.Less(brake, math.min(coast - .2f, .5f));
+            Assert.GreaterOrEqual(brake, -.05f, "Brake stops without reversing.");
             fixture.Tick(900); Assert.Less(math.length(fixture.Velocity(ship).Linear), .02f);
             TestContext.WriteLine($"From 20 m/s after 2 seconds: coast {coast:G8}, brake {brake:G8} m/s; final {fixture.Velocity(ship).Linear}");
         }
