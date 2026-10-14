@@ -19,6 +19,15 @@ namespace Game.Data.Logic
             return true;
         }
 
+        // Authoring export through the existing Editor friend assembly; every row/parameter array is copied.
+        internal IReadOnlyList<LogicFunctionInfo> Snapshot()
+        {
+            var names = new List<string>(entries.Keys); names.Sort(StringComparer.Ordinal);
+            var result = new LogicFunctionInfo[names.Count];
+            for (int i = 0; i < names.Count; i++) { TryGet(names[i], out var info); result[i] = info; }
+            return result;
+        }
+
         internal string Suggest(string name)
         {
             string best = null; int distance = 3;

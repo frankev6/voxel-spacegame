@@ -9,10 +9,30 @@ namespace Game.Data.Definitions
         public System.Collections.Generic.IReadOnlyList<DialogCommandEntry> Entries => entries;
         public ulong SourcesHash => sourcesHash;
 
-        // TODO(DLG-003): compile and bind the definition's authored logic wrappers.
         public void CompileLogic(Game.Data.Logic.Compiler.LogicCompiler compiler, Game.Data.Validation.ValidationScope scope)
-            => throw new System.NotImplementedException("DLG-003");
+        {
+            if (compiler == null) throw new System.ArgumentNullException(nameof(compiler));
+            if (entries == null) { scope.Error("DLG-E007", "entries", "Command entries are missing."); return; }
+            for (int i = 0; i < entries.Length; i++)
+            {
+                var entry = entries[i]; string field = "entries[" + i + "].Effect";
+                if (entry.Effect == null || entry.Effect.Source.Count != 1 || entry.Effect.Source[0] != entry.Text)
+                { scope.Error("DLG-E007", field, "A command requires exactly one effect source equal to its lookup text."); continue; }
+                var report = new Game.Data.Validation.ValidationReport(scope.AssetPath);
+                compiler.Compile(entry.Effect, new Game.Data.Logic.Compiler.LogicCompileOptions(Game.Data.Logic.LogicUsage.DialogCommand, scope.AssetPath, field), report);
+                foreach (var diagnostic in report.Entries)
+                    switch (diagnostic.Severity)
+                    {
+                        case Game.Data.Validation.ValidationSeverity.Error: scope.Error(diagnostic.Code, diagnostic.Field, diagnostic.Message); break;
+                        case Game.Data.Validation.ValidationSeverity.Warning: scope.Warning(diagnostic.Code, diagnostic.Field, diagnostic.Message); break;
+                        default: scope.Info(diagnostic.Code, diagnostic.Field, diagnostic.Message); break;
+                    }
+            }
+        }
         public void BindLogic(Game.Data.Logic.LogicBinder binder)
-            => throw new System.NotImplementedException("DLG-003");
+        {
+            if (binder == null) throw new System.ArgumentNullException(nameof(binder));
+            if (entries != null) foreach (var entry in entries) entry.Effect?.Bind(binder);
+        }
     }
 }
