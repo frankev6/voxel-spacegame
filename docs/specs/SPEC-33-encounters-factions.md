@@ -960,7 +960,7 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
     - a narrative request during Transit spawns after arrival.
   - [ ] **Caps:** 40 ships and 16 instances are never exceeded.
   - [ ] `Tick_Steady_NoAlloc` and `Spawn_TenShips_Time` meet §8.
-- **Tests:** `EncounterDirectorTests.Roll_Schedule`, `.Roll_Deterministic`, `.Roll_Preconditions`, `.Spawn_TagsAndAllegiance`, `.Ambush_HeadsForPlayer`, `.Defeat_OnceWithLoot`, `.Despawn_DirectorOnly`, `.Pending_AcrossJump`, `.Pending_DuringTransit`, `.Caps`, `.Tick_Steady_NoAlloc`, `.Spawn_TenShips_Time`.
+- **Tests:** `EncounterDirectorTests.Roll_Schedule`, `.Roll_Deterministic`, `.Roll_Preconditions`, `.Spawn_TagsAndAllegiance`, `.Ambush_HeadsForPlayer`, `.Defeat_OnceWithLoot`, `.Despawn_DirectorOnly`, `.Pending_AcrossJump`, `.Pending_DuringTransit`, `.Caps`, `EncounterDirectorPerfTests.Tick_Steady_NoAlloc`, `.Spawn_TenShips_Time` (separate opt-in fixture so the live API can select functional cases without benchmarks).
 
 ### ENC-008 — ENCT participant
 - **Milestone:** M3
