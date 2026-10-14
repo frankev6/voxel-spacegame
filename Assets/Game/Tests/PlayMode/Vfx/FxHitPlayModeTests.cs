@@ -33,7 +33,7 @@ namespace Game.Tests.PlayMode.Vfx
                 world.World.GetExistingSystemManaged<FxUploadSystem>().Update();
                 Assert.AreEqual(1, rig.Stats.BatchesSubmitted); Assert.AreEqual(100, rig.Stats.EventsDrained);
                 var effect = rig.transform.Find("Fx_fx_hit_kinetic_default").GetComponent<VisualEffect>();
-                Assert.AreEqual(800, effect.GetInt("FxEventCount") * effect.GetInt("ParticlesPerEvent"));
+                Assert.AreEqual(100 * 24, effect.GetInt("FxEventCount") * effect.GetInt("ParticlesPerEvent"), "QA-001: 24 sparks per hit");
                 int alive = 0;
                 for (int frame = 0; frame < 5 && alive == 0; frame++) { yield return null; alive = effect.aliveParticleCount; }
                 Assert.Greater(alive, 0, "Actual GPU particles within five frames");

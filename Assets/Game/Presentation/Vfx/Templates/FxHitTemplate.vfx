@@ -2528,7 +2528,7 @@ MonoBehaviour:
   m_Disabled: 0
   m_ActivationSlot: {fileID: 114350483966675066}
   m_BlockName: Custom HLSL
-  m_HLSLCode: "void InitializeFx(inout VFXAttributes attributes, float3 eventPosition, float eventSize, float3 eventDirection, float3 eventVelocity, uint eventSeed, float4 eventColor, uint particleCount, int perEvent)\n{\n    uint local = attributes.spawnIndex % max(1, perEvent);\n    attributes.alive = local < particleCount;\n    uint r = eventSeed ^ (local * 747796405u + 2891336453u);\n    r = r * 1664525u + 1013904223u; float x = (r & 65535u) / 65535.0;\n    r = r * 1664525u + 1013904223u; float y = (r & 65535u) / 65535.0;\n    r = r * 1664525u + 1013904223u; float z = (r & 65535u) / 65535.0;\n    float3 spread = normalize(float3(x,y,z) * 2.0 - 1.0 + eventDirection * 0.8);\n    attributes.position = eventPosition;\n    attributes.velocity = eventVelocity + spread * (3.0 + x * 7.0);\n    attributes.lifetime = 0.25 + y * 0.25;\n    attributes.size = eventSize * (0.12 + z * 0.12);\n    attributes.color = eventColor.rgb * 2.0;\n    attributes.alpha = eventColor.a;\n}"
+  m_HLSLCode: "void InitializeFx(inout VFXAttributes attributes, float3 eventPosition, float eventSize, float3 eventDirection, float3 eventVelocity, uint eventSeed, float4 eventColor, uint particleCount, int perEvent)\n{\n    uint local = attributes.spawnIndex % max(1, perEvent);\n    attributes.alive = local < particleCount;\n    uint r = eventSeed ^ (local * 747796405u + 2891336453u);\n    r = r * 1664525u + 1013904223u; float x = (r & 65535u) / 65535.0;\n    r = r * 1664525u + 1013904223u; float y = (r & 65535u) / 65535.0;\n    r = r * 1664525u + 1013904223u; float z = (r & 65535u) / 65535.0;\n    float3 spread = normalize(float3(x,y,z) * 2.0 - 1.0 + eventDirection * 0.8);\n    attributes.position = eventPosition;\n    attributes.velocity = eventVelocity + spread * (6.0 + x * x * 22.0);\n    attributes.lifetime = 0.18 + y * 0.42;\n    attributes.size = eventSize * (0.16 + z * 0.22);\n    attributes.color = eventColor.rgb * 3.5;\n    attributes.alpha = eventColor.a;\n}"
   m_ShaderFile: {fileID: 0}
   m_AvailableFunction:
     selection: InitializeFx
@@ -3517,7 +3517,7 @@ MonoBehaviour:
   m_Disabled: 0
   m_ActivationSlot: {fileID: 114350483966675107}
   m_BlockName: Custom HLSL
-  m_HLSLCode: 'void ImpactFlash(inout VFXAttributes attributes) { attributes.alpha *= attributes.particleId % 8u == 0u ? saturate(1.0 - attributes.age / 0.055) : 0.0; attributes.position -= attributes.velocity * attributes.age; attributes.size *= 8.0; }'
+  m_HLSLCode: 'void ImpactFlash(inout VFXAttributes attributes) { attributes.alpha *= attributes.particleId % 8u == 0u ? saturate(1.0 - attributes.age / 0.09) : 0.0; attributes.position -= attributes.velocity * attributes.age; attributes.size *= 14.0; }'
   m_ShaderFile: {fileID: 0}
   m_AvailableFunction:
     selection: ImpactFlash

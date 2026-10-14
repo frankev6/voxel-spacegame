@@ -19,3 +19,6 @@
 .world-tag--active .world-tag__corner--tr { border-left-width: 0; border-bottom-width: 0; }
 .world-tag--active .world-tag__corner--bl { border-right-width: 0; border-top-width: 0; }
 .world-tag--active .world-tag__corner--br { border-left-width: 0; border-top-width: 0; }
+/* QA-001 hit confirmation: a small cross at each of the player's hits, popped and faded by HitMarkerSystem. */
+.hit-marker { position: absolute; translate: -50% -50%; font-size: var(--text-m); -unity-font-style: bold; color: var(--color-text); padding: 0; margin: 0; }
+.hit-marker--energy { color: var(--color-shield); }

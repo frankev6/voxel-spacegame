@@ -131,9 +131,10 @@ namespace Game.Presentation.Systems
                     relation = stance == FactionStance.Friendly ? 1 : stance == FactionStance.Hostile ? 2 : 0;
                 }
                 bool active = interaction.Target == entity && interaction.InRange != 0;
+                var blueprint = em.HasComponent<GridSource>(entity) ? em.GetComponentData<GridSource>(entity).Blueprint : default;
                 string name = hulk ? (salvage ? "Wreck  ·  Salvage" : "Wreck")
-                    : names.TargetName(em.HasComponent<GridSource>(entity) ? em.GetComponentData<GridSource>(entity).Blueprint : default,
-                        em.HasComponent<Allegiance>(entity) ? em.GetComponentData<Allegiance>(entity).Faction : (byte)255);
+                    : blueprint.Value == 0 ? (grid.Kind == GridKind.Station ? "Station" : "Contact")
+                    : names.TargetName(blueprint, em.HasComponent<Allegiance>(entity) ? em.GetComponentData<Allegiance>(entity).Faction : (byte)255);
                 Show(tags[used++], rect, name, (int)math.round(candidate.Distance / 10) * 10, relation, salvage, active);
             }
             return used;
