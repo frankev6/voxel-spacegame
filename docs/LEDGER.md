@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 14 | 16 | 0 | 0 | 152 | 0 | 182 | 5 |
+| M3 | 14 | 15 | 0 | 0 | 153 | 0 | 182 | 5 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -408,7 +408,7 @@
 | QST-005 | BeatService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, DLG-006, DLG-007, DLG-008 | yes | done | astra (gpt-6) | 2026-10-14 | 30762271 | Deterministic scheduler/queue/completion implemented; nine required functional checks pass; two advisory fixtures authored, deferred. QST-006/008 own adapter/live registration. |
 | QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f71186b4 | Actual adapter/log/markers4738dc21; six required cases pass across initial/fix and four save regressions; live registration QST-008. |
 | QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, QST-005, PERS-001 | yes | done | astra (gpt-6) | 2026-10-14 | 8e16b5e7 | QUST version1, raw IDs/name baselines, atomic restore; three required functional plus malformed-state case pass; capture advisory deferred. App registration QST-008. |
-| QST-008 | Bridge rules, player-free gating and registration | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005, QST-006, QST-007, NAR-011, NAR-012, TRV-006, ENC-007, ENC-009, DLG-008 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | ADR-0107 concrete completed dependencies; combat worker implements actual registration/bridge/gating. |
+| QST-008 | Bridge rules, player-free gating and registration | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005, QST-006, QST-007, NAR-011, NAR-012, TRV-006, ENC-007, ENC-009, DLG-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 64156bf6 | Actual owners/bridge841a3882 plus sandbox lifecycle64156bf6; five required cases and existing playground entry/reset pass. Opening ordering remains QST-010. |
 | QST-009 | Opening chapter content | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, GAL-003, NAR-013, DLG-003, ENC-002, ECO-002 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f468139e | Real opening content imported; two required checks plus fourteen existing regressions pass across fixes. Actual opening path/reward repair remains QST-010. |
 | QST-010 | Opening chapter playthrough | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-008, QST-009, QST-007, SPEC-70, SPEC-32, SPEC-50 | no | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Source pipeline per owner substantial-work correction; actual scenario acceptance awaits QST-008 registration and QST-009 import. No substitute owners. |
 | ECO-001 | Public contract types | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | CORE-001, DATA-001, NAR-001, VOX-001, DMG-001, SYS-001, FLT-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a81ff41 | Economy contracts and serialized tradeable defaults; 2 required tests. Runtime ECO-002 onward remains open. Full 1027 EM / 145 PM passed. |
@@ -1084,6 +1084,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 482 | SPEC-33 Q29: procedural territory and lifecycle | Canonical seeded FIFO expansion; exhaust seeds without looping; first/different owned entry emits, reset clears previous system, disposal unsubscribes. Production Push owns lifetime. Four functional checks pass; existing zero seed content retained, advisory100k deferred. | Tech lead |
 | 485 | SPEC-50 Q31: merchant and economy composition | Actual faction owner precedence; malformed/missing routes release continuation; shared economy uses live clock; own/dispose salvage and bind real dock launchers. Two required cases accepted. | Tech lead |
 | 486 | SPEC-61 Q49: loading/dock lifecycle | Synchronize current docking and flow state; actual launchers, real merchant route and close, unavailable reasons only for missing owners; four required cases pass. | Tech lead |
+| 490 | SPEC-42 Q20: story registration and lifecycle | Accepted ADR-0109; actual quest/clue/beat/query/save owners after dialog presenter, fresh interaction gating, seed refresh. Sandbox canonical reset disables narrative evaluation; ordinary/creative campaigns retain story. Five routing cases plus playground regression pass. | Tech lead |
 | 491 | SPEC-61 Q51: MapCanvas ownership and extreme geometry | ADR-0110 public control methods, retained transforms, pre-render label/style changes, bounded colour cache and extreme dash subdivisions. Five functional cases pass; actual screens HUD-016. | Tech lead |
 | 488 | SPEC-42 Q17: opening import and content ownership | Preserve authored IDs/lore; facts_opening owns opening facts, derelict uses Inspect, actual DialogMenu compiles program and command table with matching current hashes. Imported98 nodes/2079 instructions; array wrappers traversed by element in compiler/validator. | Tech lead |
 | 487 | SPEC-61 Q50: HUD lifetime and input | Accepted ADR-0106; app-owned subscriptions and actual registered screens only, no blank log/map views. Canonical objective query binding via QST-008; nine required cases pass. | Tech lead |
@@ -1201,6 +1202,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — QST-008 real story registration accepted — astra (gpt-6)
+
+- Worker55981e06 integrated841a3882; lead64156bf6 fixes missing imports and sandbox/campaign lifecycle. Actual quest/clue/beat/log/QUST owners are registered after dialog presentation; real travel, hail, body and Hulk rules, fresh UI gating and campaign seed refresh. ADR-0109/Q490 accepted. Five required NarrativeBridgeBeatTests cases pass; existing PlaygroundTests.Enter_Interact_Reset passes with explicit no-intro assertions on entry/reset. Test count: spec-required: 5, extra: 0; one existing owner-feature regression. Compile clean/zero CS warnings, no full/performance/soak run, zero tuning passes. Evidence Logs/playtest/qst008/{bridge,playground}.xml.
+- Live integration caught automatic campaign intro pausing isolated sandbox startup; fixed at session lifecycle, retaining canonical reset and normal/creative campaign story. Campaign live readback proves actual story dialog runs, but initial territory greeting precedes waking-up; QST-010 worker owns sequencing fix (SPEC42Q22/global493 reserved), reward and full scenario. No full-chapter acceptance claimed. Live evidence Logs/playtest/qst008/campaign-live.txt.
+- Live stop also exposed EncounterDirector query disposal after Unity had destroyed its world; b15e7c5d guards the owning-world lifetime. Compile clean and real Play exit now reports zero errors (Logs/playtest/qst008/exit-errors.txt). Playground restored running.
+- Same three workers continue substantial HUD-016 maps, QST-010 opening chapter and HUD-014 ship log. Accepted MapLine.Route decision assigned to HUD-016/ADR0112/global492; source delivery pending. No duplicate threads or owner gates.
 
 ### 2026-10-14 — HUD-015 retained map control accepted — astra (gpt-6)
 

@@ -6,8 +6,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | HUD-016 | QST-00855981e06 delivered pending lead acceptance; implements actual galaxy/system maps | HUD-015f2df90b8 accepted; real owners ADR0111; no Unity |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | QST-010 | QST-0091bce8069 delivered; implements real opening scenario against incoming QST-008 | Pipeline source work; acceptance awaits real registration/import |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | HUD-016 | QST-008841a3882/64156bf6 accepted; implements actual galaxy/system maps | HUD-015f2df90b8 accepted; real owners ADR0111; no Unity |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | QST-010 | QST-009/QST-008 accepted; implements opening scenario, reward and initial story ordering | Pipeline source work; acceptance awaits real registration/import |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-014 | HUD-004/005 source already wired; implements actual ship-log view/presenter and binding hook | Map route remains HUD-015/016; no fake map; ADR0108 reserved |
 
 ## Operating rules
@@ -83,3 +83,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - QST-009f468139e accepted: actual98-node opening program, two required content checks and fourteen existing regression cases pass across corrections. Compiler/validator array traversal and actual adapter namespace fixed. QST-010 worker fixes real missing hand-in reward (Q19/global489 reserved); QST-008 and HUD-014 active.
 
 - HUD-015f2df90b8 accepted: actual retained mapcontrol, five required rendered cases pass; two advisory fixtures deferred. Lead next QST-00855981e06 integration; combatworker nextHUD016 real maps; other workers QST010/HUD014 continue.
+
+- QST-008841a3882/64156bf6 accepted: five routing checks plus playground entry/reset pass; actual sandbox lifecycle fixed. Live campaign initial territory greeting precedes waking-up: assigned to QST-010 (Q22/global493), not claimed full opening acceptance. HUD-016 owns accepted Route flag ADR0112/global492, HUD-014 continues real log.

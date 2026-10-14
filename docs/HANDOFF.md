@@ -39,7 +39,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 - Economy/dock/HUD batch accepted00094da7/188ecaae/92d9da23: faction-aware merchant and salvage composition, actual dock Trade and notification/hotkey bindings. Nineteen focused cases pass including regressions; no broad suites. QST-009f468139e opening content is imported and validated; actual opening playthrough/reward correction remains QST-010. Three workers continue QST-008, QST-010 and HUD-014. HUD-004/005 navigation source is already wired; live acceptance reconciliation remains.
 
-- HUD-015f2df90b8 map control accepted with five rendered interaction checks. Actual galaxy/system screens remain HUD-016. QST-00855981e06 story registration is delivered for lead integration.
+- HUD-015f2df90b8 map control accepted with five rendered interaction checks. Actual galaxy/system screens remain HUD-016. QST-008841a3882/64156bf6 story registration accepted: five required routing checks plus playground entry/reset pass. Sandbox stays free of campaign intro. Actual campaign dialogue runs; opening territory-before-waking ordering remains QST-010 alongside reward/playthrough. Same workers implement HUD-016 maps, QST-010 chapter and HUD-014 ship log.
 
 ## 3. Next
 
