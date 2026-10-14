@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Editor controller/basic tools accepted:** EDT-014175c78cb clean compile and seven required cases plus core-limit regression pass; pointer-cache follow-up also passes. Placement, removal, paint, eyedropper, rotation and cancel chain now use the draft session. EDT-015 and EDT-021 are ready for the existing workers; lead continues selection/transform prerequisites. TRV-009 active. No Unity active.
+
 - **Editor tool transactions authored:** EDT-014b74f0bbb adds reusable previews and place/paint/eyedropper transaction helpers. Controller wiring, remove gestures and seven required cases remain pending, uncompiled/unaccepted; next complete these before one focused batch. Mirror review318 clear. TRV-009 worker active; combat/economy have genuine dependency waits. No Unity active.
 
 - **Mirror symmetry accepted:** EDT-01394110337 passes all seven required focused checks (0.264s test bodies), zero CS warnings/errors. Canonical damage/chiral mirrors, atomic groups and exact removals are ready for EDT-014 controller/basic tools. TRV-009 worker active; combat reviews mirrors; economy has a genuine dependency wait. No Unity active.

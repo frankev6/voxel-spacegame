@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 63 | 11 | 0 | 0 | 106 | 0 | 180 | 8 |
+| M3 | 63 | 10 | 0 | 0 | 107 | 0 | 180 | 10 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -434,9 +434,9 @@
 | EDT-011 | Commit pipeline and R15 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-009, EDT-010, SPEC-50 | no | todo |  |  |  |  |
 | EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | ed61500 | Bounded DDA, slice/X-ray, working plane and placement origin; seven required methods (12 parameterized cases) pass; spec-required: 7, extra: 0 |
 | EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | yes | done | astra (gpt-6) | 2026-10-13 | 94110337 | Chiral mirrors, canonical damage remapping, atomic copies, exact removal; seven required checks pass |
-| EDT-014 | Controller, tool framework and basic tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-012, EDT-013 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead: controller, preview and basic tools |
-| EDT-015 | Line, box and fill tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-014 | no | todo |  |  |  |  |
-| EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | no | todo |  |  |  |  |
+| EDT-014 | Controller, tool framework and basic tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-012, EDT-013 | yes | done | astra (gpt-6) | 2026-10-13 | 175c78cb | Controller, palette, previews, place/remove/paint/eyedropper; seven required checks pass; spec-required:7,extra:0 |
+| EDT-015 | Line, box and fill tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-014 | yes | todo |  |  |  |  |
+| EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | yes | todo |  |  |  |  |
 | EDT-017 | Copy, cut, paste and stamp | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-016 | no | todo |  |  |  |  |
 | EDT-018 | Draft renderer | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, SPEC-11 | yes | todo |  |  |  |  |
 | EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | no | todo |  |  |  |  |
@@ -1116,6 +1116,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — EDT-014 controller/basic tools accepted — astra (gpt-6)
+
+- 2fffad89 wires discrete input, allowed-orientation rotation, mirror/core defaults, slice/X-ray/box state, pointer-safe tools, cached previews and cancel chain. Remove supports click/drag and bounded-volume Shift box removal. Paint retains canonical cell/function damage through session transactions. ADR-0091/SPEC-51 Q37/global411 adds constructor and read-only state; placement core identities are now incrementally indexed. Later advanced, selection and clipboard behavior retains TODO owners.
+- Compile90552 terminal0, zero CS warnings. EditMode4045 terminal0:8 passed (seven required plus existing core-limit regression),0.2860099s test bodies. Follow-up175c78cb adds pointer access to the preview cache key; focused pointer26235 terminal0:1 passed, zero CS warnings. Evidence Logs/playtest/editor-tools. spec-required:7,extra:0. No full suites, PlayMode or performance run for this pure managed editor logic.
+- Concrete completed EDT-021 prerequisites resolved via ADR-0068/SPEC-51 Q38/global412; panels no longer wait for unrelated screens. Combat review320 still checks paint/validator seams; fix any concrete finding without adding a review gate. Next dispatch EDT-015 and EDT-021 to the same combat/economy chats; presentation continues TRV-009. Previous tool-layer checkpoint and this acceptance are progress. No Unity active; full roadmap goal remains active.
 
 ### 2026-10-13 — EDT-014 tool transactions authored — astra (gpt-6)
 
