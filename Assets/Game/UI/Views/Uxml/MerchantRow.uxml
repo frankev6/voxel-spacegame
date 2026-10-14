@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="merchant-row" class="list__item merchant-row" picking-mode="Ignore">
+        <ui:Image name="merchant-row-icon" class="merchant-row-icon" picking-mode="Ignore" />
+        <ui:Label name="merchant-row-name" class="grow text-m text-ellipsis merchant-row-name" picking-mode="Ignore" />
+        <ui:Label name="merchant-row-price" class="text-s text-mono merchant-row-price" picking-mode="Ignore" />
+        <ui:Label name="merchant-row-quantity" class="text-s text-mono merchant-row-quantity" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

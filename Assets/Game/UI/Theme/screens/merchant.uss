@@ -1,0 +1,29 @@
+/* HUD-012: NOCTURNE appearance through existing tokens; all overflow stays inside the panel. */
+.merchant-screen { flex-grow: 1; align-items: center; justify-content: center; }
+.merchant-panel { width: 1600px; max-width: 92%; height: 920px; max-height: 90%; }
+.merchant-panel .panel__title { min-width: 0; flex-shrink: 1; }
+.merchant-wallet { margin-right: var(--space-4); flex-shrink: 0; }
+.merchant-body { min-height: 0; flex-shrink: 1; flex-basis: 0; }
+.merchant-tabs { flex-shrink: 0; margin-bottom: var(--space-3); }
+.merchant-refusal { white-space: normal; margin-bottom: var(--space-3); }
+.merchant-columns { flex-grow: 1; flex-basis: 0; flex-direction: row; min-height: 0; min-width: 0; }
+.merchant-column { flex-grow: 1; flex-basis: 0; flex-shrink: 1; min-width: 0; min-height: 0; }
+.merchant-column--cargo { margin-left: var(--space-4); }
+.merchant-column-title { margin-bottom: var(--space-2); }
+.merchant-list { min-width: 0; min-height: 0; flex-grow: 1; flex-basis: 0; flex-shrink: 1; }
+.merchant-row { height: 60px; min-width: 0; }
+.merchant-row-icon { width: 40px; height: 40px; flex-shrink: 0; margin-right: var(--space-2); }
+.merchant-row-name { min-width: 0; flex-shrink: 1; }
+.merchant-row-price { width: 128px; flex-shrink: 0; -unity-text-align: middle-right; }
+.merchant-row-quantity { width: 112px; flex-shrink: 0; margin-left: var(--space-2); -unity-text-align: middle-right; }
+.merchant-detail { height: 132px; flex-shrink: 0; flex-direction: row; min-width: 0; margin-top: var(--space-3); }
+.merchant-description-column { flex-grow: 1; min-width: 0; flex-shrink: 1; }
+.merchant-description-scroll { flex-grow: 1; min-height: 0; min-width: 0; }
+.merchant-description { white-space: normal; }
+.merchant-quantity-column { width: 340px; flex-shrink: 0; margin-left: var(--space-5); }
+.merchant-footer { flex-direction: row; align-items: stretch; }
+.merchant-action { flex-grow: 1; flex-basis: 0; min-width: 0; flex-direction: row; align-items: center; }
+.merchant-action--sell { margin-left: var(--space-4); }
+.merchant-blocked { flex-grow: 1; min-width: 0; white-space: normal; margin-right: var(--space-3); }
+.merchant-action > .btn { flex-shrink: 0; }
+.merchant-refusal, .merchant-blocked { color: var(--color-warning); }

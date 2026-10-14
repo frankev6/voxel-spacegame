@@ -1,0 +1,51 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:game="Game.UI.Controls">
+    <Style src="../../Theme/screens/merchant.uss" />
+    <ui:VisualElement class="merchant-screen" picking-mode="Ignore">
+        <ui:VisualElement name="merchant-panel" class="panel merchant-panel" picking-mode="Position">
+            <ui:VisualElement class="panel__header" picking-mode="Ignore">
+                <ui:Label name="merchant-name" class="panel__title text-display text-ellipsis grow" picking-mode="Ignore" />
+                <ui:Label name="merchant-wallet" class="text-mono text-s merchant-wallet" picking-mode="Ignore" />
+                <ui:VisualElement class="panel__header-actions" picking-mode="Ignore">
+                    <ui:Button name="merchant-close" text="Leave" class="btn btn--ghost" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__body merchant-body" picking-mode="Ignore">
+                <game:TabBar name="merchant-tabs" class="merchant-tabs" />
+                <ui:Label name="merchant-refusal" class="text-s text-warning merchant-refusal is-hidden" picking-mode="Ignore" />
+                <ui:VisualElement class="merchant-columns" picking-mode="Ignore">
+                    <ui:VisualElement class="merchant-column merchant-column--stock" picking-mode="Ignore">
+                        <ui:Label text="Market stock" class="text-display text-s merchant-column-title" picking-mode="Ignore" />
+                        <ui:ListView name="merchant-stock-list" class="list merchant-list" item-template="project://database/Assets/Game/UI/Views/Uxml/MerchantRow.uxml?fileID=9197481963319205126&amp;guid=dca53228ada949b1b2714a8eeaafd3c8&amp;type=3#MerchantRow" fixed-item-height="60" virtualization-method="FixedHeight" selection-type="Single" show-border="false" show-add-remove-footer="false" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="merchant-column merchant-column--cargo" picking-mode="Ignore">
+                        <ui:Label text="Your cargo" class="text-display text-s merchant-column-title" picking-mode="Ignore" />
+                        <ui:ListView name="merchant-cargo-list" class="list merchant-list" item-template="project://database/Assets/Game/UI/Views/Uxml/MerchantRow.uxml?fileID=9197481963319205126&amp;guid=dca53228ada949b1b2714a8eeaafd3c8&amp;type=3#MerchantRow" fixed-item-height="60" virtualization-method="FixedHeight" selection-type="Single" show-border="false" show-add-remove-footer="false" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="merchant-detail" picking-mode="Ignore">
+                    <ui:VisualElement class="merchant-description-column" picking-mode="Ignore">
+                        <ui:Label name="merchant-detail-name" class="text-m text-ellipsis" picking-mode="Ignore" />
+                        <ui:ScrollView name="merchant-description-scroll" class="merchant-description-scroll" mode="Vertical" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto">
+                            <ui:Label name="merchant-detail-description" class="text-s text-muted merchant-description" picking-mode="Ignore" />
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="merchant-quantity-column" picking-mode="Ignore">
+                        <ui:SliderInt name="merchant-quantity" label="Quantity" low-value="1" high-value="1" value="1" show-input-field="true" />
+                        <ui:Label name="merchant-buy-total" class="text-s text-mono" picking-mode="Ignore" />
+                        <ui:Label name="merchant-sell-total" class="text-s text-mono" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__footer merchant-footer" picking-mode="Ignore">
+                <ui:VisualElement class="merchant-action merchant-action--buy" picking-mode="Ignore">
+                    <ui:Label name="merchant-buy-blocked" class="text-s text-warning merchant-blocked" picking-mode="Ignore" />
+                    <ui:Button name="merchant-buy" text="Buy" class="btn btn--primary" />
+                </ui:VisualElement>
+                <ui:VisualElement class="merchant-action merchant-action--sell" picking-mode="Ignore">
+                    <ui:Label name="merchant-sell-blocked" class="text-s text-warning merchant-blocked" picking-mode="Ignore" />
+                    <ui:Button name="merchant-sell" text="Sell" class="btn btn--secondary" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
