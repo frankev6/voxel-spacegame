@@ -438,7 +438,7 @@
 | EDT-015 | Line, box and fill tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-014 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Reusable combat worker: line, box and fill tools |
 | EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | yes | done | astra (gpt-6) | 2026-10-14 | dd5467a7 | Native selection, atomic damage-preserving transforms, replacement and controller gestures; six required checks pass |
 | EDT-017 | Copy, cut, paste and stamp | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-016 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Reusable presentation worker: clipboard/paste/stamp after TRV-009 delivery |
-| EDT-018 | Draft renderer | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, SPEC-11 | yes | todo |  |  |  |  |
+| EDT-018 | Draft renderer | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, SPEC-11 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead: snapshot meshing, reused meshes, slice and incremental props |
 | EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | no | todo |  |  |  |  |
 | EDT-020 | Blueprint store, browser and name sanitising | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-017, PERS-001, SPEC-60 | no | todo |  |  |  |  |
 | EDT-021 | Editor UI panels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-001, UI-003, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, HUD-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Reusable economy worker: editor panels on completed UI owners |
