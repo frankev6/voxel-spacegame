@@ -26,7 +26,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _NebulaSpeed: 0.012
-    - _Brightness: 1
+    - _Brightness: 1.5
     - _NebulaPhase: 0
     m_Colors: []
   m_BuildTextureStacks: []

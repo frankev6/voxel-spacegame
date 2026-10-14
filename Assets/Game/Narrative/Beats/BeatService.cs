@@ -204,8 +204,8 @@ namespace Game.Narrative.Beats
             CompleteInternal(beatIndex, current == 0 ? default : currentScope);
         }
         public void AbortCurrent() { if (current != 0) abortRequested = true; }
-        /// <summary>QA-001: harness/test campaigns that are not about story start quiet: queued beats are dropped, nothing plays
-        /// on its own. <see cref="QuietNextCampaign"/> is one-shot (dev newgame); <see cref="QuietCampaigns"/> is a test hook.</summary>
+        /// <summary>QA-001: harness/test campaigns that are not about story start quiet: automatic beats (game start, arrival,
+        /// condition) are dropped; interaction, hail and manual beats still play. <see cref="QuietNextCampaign"/> is one-shot (dev newgame); <see cref="QuietCampaigns"/> is a test hook.</summary>
         public bool QuietNextCampaign { get; set; }
         public bool QuietCampaigns { get; set; }
         bool quiet;
@@ -232,7 +232,19 @@ namespace Game.Narrative.Beats
             try
             {
                 if (!playerFree || current != 0 || dialog.IsActive) return;
-                if (quiet) { gameStartPending = false; QueueState.Clear(); return; }
+                if (quiet)
+                {
+                    // Quiet campaigns drop only automatic story (opening, arrival, condition); beats the player asks for
+                    // by interacting, hailing or a manual call still play.
+                    gameStartPending = false;
+                    while (QueueState.TryPop(out var queued))
+                    {
+                        var trigger = beats[queued.Beat - 1].Trigger;
+                        if (trigger == BeatTrigger.GameStart || trigger == BeatTrigger.StarSystemEntered || trigger == BeatTrigger.Condition) continue;
+                        Play(queued.Beat, queued.Scope, queued.Introduction); return;
+                    }
+                    return;
+                }
                 if (gameStartPending)
                 {
                     gameStartPending = false;

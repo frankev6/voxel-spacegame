@@ -33,6 +33,7 @@ namespace Game.Tests.PlayMode.Narrative
     /// <summary>NAR-019: actual FACT/QUST/DLGS owners, physical interactions and restore boundaries.</summary>
     public sealed class NarrativeLoadSafetyTests : GameFlowFixture
     {
+        protected override bool QuietCampaign => false;   // exercises automatic story beats
         const string SavedFact = "intro_awake", UnknownFact = "unknown_nar019_saved_fact";
         GameComposition Game => GameRoot.Instance.Composition;
         NarrativeService Narrative => Service<NarrativeService>();

@@ -1,0 +1,60 @@
+/* QA-001 NOCTURNE UI skin (DESIGN-GUIDE §8): translucent dark panels, 1 px lines, corner brackets on plates, thin
+   glowing bars, display type with a faint cyan glow. Imported last so it refines every component without changing
+   any layout size (the layout tests pin region geometry). Brackets are added by UI/Controls/CornerBrackets. */
+
+/* Panels and HUD plates: the crew's instrument glass over a dirty world. */
+.hud-plate {
+    background-color: rgba(4, 7, 12, 0.72);
+    border-color: rgba(86, 118, 159, 0.42);
+}
+.panel {
+    background-color: rgba(7, 11, 19, 0.92);
+    border-color: rgba(86, 118, 159, 0.5);
+}
+.panel--modal { border-color: rgba(57, 213, 255, 0.55); }
+.panel__header { border-bottom-color: rgba(86, 118, 159, 0.35); }
+.panel__footer { border-top-color: rgba(86, 118, 159, 0.35); }
+.panel__title, .text-display {
+    color: var(--color-accent);
+    letter-spacing: 2px;
+    text-shadow: 0 0 6px rgba(57, 213, 255, 0.35);
+}
+
+/* Corner brackets (CornerBrackets.Decorate): short L marks just inside each corner. */
+.corner-bracket { position: absolute; width: 9px; height: 9px; border-color: rgba(57, 213, 255, 0.85); }
+.corner-bracket--tl { left: 0; top: 0; border-left-width: 1px; border-top-width: 1px; }
+.corner-bracket--tr { right: 0; top: 0; border-right-width: 1px; border-top-width: 1px; }
+.corner-bracket--bl { left: 0; bottom: 0; border-left-width: 1px; border-bottom-width: 1px; }
+.corner-bracket--br { right: 0; bottom: 0; border-right-width: 1px; border-bottom-width: 1px; }
+
+/* Meters: a hairline track with a 2 px glowing fill; small spaced captions, mono values. */
+.meter { background-color: rgba(0, 0, 0, 0); padding-left: 0; padding-right: 0; }
+.meter__fill { height: 2px; bottom: 3px; }
+.meter__track { position: absolute; left: 0; right: 0; bottom: 3px; height: 1px; background-color: rgba(86, 118, 159, 0.3); }
+.meter__caption { letter-spacing: 2px; color: var(--color-text-muted); font-size: var(--text-xs); }
+.meter--low .meter__caption { color: var(--color-danger); }
+.meter--absent { opacity: 0.45; }
+
+/* Slots: dark cards with a lit key and a thin cooldown line. */
+.slot { background-color: rgba(10, 15, 26, 0.86); border-color: rgba(86, 118, 159, 0.45); }
+.slot__key, .slot__count { background-color: rgba(0, 0, 0, 0); }
+.slot__key { color: var(--color-accent); }
+.slot.is-ready { background-color: rgba(23, 34, 51, 0.9); }
+.slot:hover, .slot:focus { border-color: rgba(57, 213, 255, 0.9); }
+
+/* Radar: ringed scope with a faint crosshair. */
+.hud-radar { background-color: rgba(4, 9, 16, 0.55); border-color: rgba(57, 213, 255, 0.35); }
+.hud-radar-ring { position: absolute; border-width: 1px; border-color: rgba(57, 213, 255, 0.16); border-radius: 50%; }
+.hud-radar-ring--inner { left: 33%; top: 33%; right: 33%; bottom: 33%; }
+.hud-radar-ring--mid { left: 16.5%; top: 16.5%; right: 16.5%; bottom: 16.5%; }
+.hud-radar-axis { position: absolute; background-color: rgba(57, 213, 255, 0.1); }
+.hud-radar-axis--h { left: 0; right: 0; top: 50%; height: 1px; }
+.hud-radar-axis--v { top: 0; bottom: 0; left: 50%; width: 1px; }
+
+/* Buttons: hairline frames that light up rather than filled blocks. */
+.btn { border-color: rgba(86, 118, 159, 0.55); }
+.btn:hover { border-color: rgba(57, 213, 255, 0.85); }
+
+/* Toasts and tooltips share the glass. */
+.toast { background-color: rgba(5, 8, 14, 0.86); border-color: rgba(86, 118, 159, 0.45); }
+.tooltip { background-color: rgba(5, 8, 14, 0.94); border-color: rgba(57, 213, 255, 0.45); }

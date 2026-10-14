@@ -13,12 +13,15 @@ namespace Game.UI.Controls
         string caption = string.Empty, variant = "neutral", childNamePrefix;
         bool showNumbers = true;
         float fraction, percent = -1, lowThreshold = .25f;
+        bool absent;
         int lastValue, lastMax;
 
         public Meter()
         {
             name = "meter"; pickingMode = PickingMode.Ignore;
             AddToClassList(UIStyleClasses.Meter); AddToClassList(UIStyleClasses.MeterNeutral);
+            // QA-001 NOCTURNE: a hairline track under the fill (styled by nocturne-skin.uss).
+            var track = new VisualElement { pickingMode = PickingMode.Ignore }; track.AddToClassList("meter__track"); Add(track);
             fill = new VisualElement { pickingMode = PickingMode.Ignore }; fill.AddToClassList(UIStyleClasses.MeterFill);
             captionLabel = new Label { pickingMode = PickingMode.Ignore }; captionLabel.AddToClassList(UIStyleClasses.MeterCaption);
             valueLabel = new Label(NumberStringCache.Get(0)) { pickingMode = PickingMode.Ignore }; valueLabel.AddToClassList(UIStyleClasses.MeterValue);
@@ -64,6 +67,8 @@ namespace Game.UI.Controls
         {
             if (value != lastValue) { lastValue = value; valueLabel.text = NumberStringCache.Get(value); }
             if (max != lastMax) { lastMax = max; maxLabel.text = NumberStringCache.Get(max); }
+            // QA-001: a ship without the system (max 0) shows a muted, empty meter rather than a red low warning.
+            absent = max <= 0; EnableInClassList("meter--absent", absent);
             SetFraction(max > 0 ? (float)value / max : 0);
         }
         public void SetFraction(float fraction)
@@ -71,7 +76,7 @@ namespace Game.UI.Controls
             this.fraction = ClampFraction(fraction);
             float rounded = Mathf.Round(this.fraction * 1000) * .1f;
             if (rounded != percent) { percent = rounded; fill.style.width = Length.Percent(rounded); }
-            EnableInClassList(UIStyleClasses.MeterLow, this.fraction < lowThreshold);
+            EnableInClassList(UIStyleClasses.MeterLow, !absent && this.fraction < lowThreshold);
         }
         static float ClampFraction(float value) => float.IsNaN(value) || float.IsInfinity(value) ? 0 : Mathf.Clamp01(value);
         static string VariantClass(string value) => value switch

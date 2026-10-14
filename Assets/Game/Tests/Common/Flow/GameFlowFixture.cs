@@ -31,8 +31,9 @@ namespace Game.Tests.Common
         NativeLeakDetectionMode previousLeakMode;
         bool ownsSetup;
         internal string TestDirectory { get; private set; }
-        /// <summary>QA-001: fixtures that test free flight, menus or saving opt out of automatic story dialogue.</summary>
-        protected virtual bool QuietCampaign => false;
+        /// <summary>QA-001: campaigns start without automatic story dialogue (it pauses the game and blocks saving) unless a
+        /// story fixture opts back in. Interaction, hail and manual beats always play.</summary>
+        protected virtual bool QuietCampaign => true;
         protected EntityManager Em => World.DefaultGameObjectInjectionWorld.EntityManager;
         protected T Service<T>() where T : class => Services.Get<T>();
         protected Entity PlayerRoot

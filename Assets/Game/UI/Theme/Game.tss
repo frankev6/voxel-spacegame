@@ -24,3 +24,4 @@
 @import url("screens/travel.uss");
 
 @import url("screens/maps.uss");
+@import url("components/nocturne-skin.uss");

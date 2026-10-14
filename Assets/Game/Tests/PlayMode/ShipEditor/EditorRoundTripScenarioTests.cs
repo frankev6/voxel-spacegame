@@ -35,6 +35,7 @@ namespace Game.Tests.PlayMode.ShipEditor
     [Category("Scenario")]
     public sealed class EditorRoundTripScenarioTests : GameFlowFixture
     {
+        protected override bool QuietCampaign => false;   // exercises automatic story beats
         [UnityTest]
         public IEnumerator Lab_FromMainMenu_SaveBlueprint()
         {

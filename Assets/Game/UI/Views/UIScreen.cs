@@ -24,6 +24,7 @@ namespace Game.UI.Views
             Navigator = navigator; Root = root;
             try { OnBuild(); }
             catch { Navigator = null; Root = null; throw; }
+            Game.UI.Controls.CornerBrackets.DecorateAll(root);   // QA-001 NOCTURNE plate/modal corner marks
         }
 
         /// Explicit programmatic fallback when no ScreenAsset exists (ADR-0049); null preserves missing-view errors.

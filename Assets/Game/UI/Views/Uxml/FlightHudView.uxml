@@ -12,6 +12,10 @@
         </ui:VisualElement>
         <ui:VisualElement name="hud-region-radar" class="hud-region hud-plate anchor-top-right hud-radar-plate" picking-mode="Ignore">
             <ui:VisualElement name="hud-radar" class="hud-radar" picking-mode="Ignore">
+                <ui:VisualElement class="hud-radar-axis hud-radar-axis--h" picking-mode="Ignore" />
+                <ui:VisualElement class="hud-radar-axis hud-radar-axis--v" picking-mode="Ignore" />
+                <ui:VisualElement class="hud-radar-ring hud-radar-ring--mid" picking-mode="Ignore" />
+                <ui:VisualElement class="hud-radar-ring hud-radar-ring--inner" picking-mode="Ignore" />
                 <ui:Label name="hud-radar-self" text="▲" class="hud-radar-self text-xs" picking-mode="Ignore" />
             </ui:VisualElement>
             <ui:VisualElement class="hud-number-line" picking-mode="Ignore"><ui:Label name="hud-radar-range" class="text-s" picking-mode="Ignore" /><ui:Label text=" m" class="text-s text-muted" picking-mode="Ignore" /></ui:VisualElement>

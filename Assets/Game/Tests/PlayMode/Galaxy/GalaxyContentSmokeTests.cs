@@ -29,6 +29,7 @@ namespace Game.Tests.PlayMode.Galaxy
     /// <summary>GAL-012: exactly three production-boot cases, real content/loader/logic/lane owners and direct event drains.</summary>
     public sealed class GalaxyContentSmokeTests : GameFlowFixture
     {
+        protected override bool QuietCampaign => false;   // exercises automatic story beats
         IEnumerator OpenWorld(ulong seed)
         {
             yield return NewGame(seed);

@@ -28,6 +28,7 @@ namespace Game.Tests.PlayMode.Narrative
     /// <summary>QST-010: actual compiled opening content and production input/save owners.</summary>
     public sealed class OpeningChapterTests : EncounterScenarioFixture
     {
+        protected override bool QuietCampaign => false;   // exercises automatic story beats
         const string DriftMarker = "# CHECKPOINT_DRIFT_LOAD_DONE";
         const ushort ModifierSource = 42010;
         static string ScenarioPath => Path.GetFullPath(Path.Combine(Application.dataPath, "..", "TestData", "Scenarios", "opening_chapter.scenario"));
