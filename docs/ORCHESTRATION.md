@@ -6,10 +6,10 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-018 | DLG-002 converted-input audit dispatched | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DLG-003 | Claimed c513df81; full validator/generated files dispatched | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | QST-004 | Claimed c59e9110; full clue/mystery service implementation dispatched | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DLG-002 review | Parser daea28bc source review dispatched | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | Dependency wait | Review234 complete; separator finding fixed and verified | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -21,7 +21,7 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
-- **Dialog parser accepted:** DLG-002179603ec done; seven required cases including 38 real converted files pass, plus one targeted separator-fix retry. Compile clean; no Unity active. Next DLG-003 claim/dispatch to existing combat worker. QST-004 worker279 active; presentation review234 complete with its sole finding fixed. Evidence Logs/playtest/dialog-parser.
+- **Dialog parser accepted:** DLG-002179603ec done; seven required cases including 38 real converted files pass, plus one targeted separator-fix retry. Compile clean; no Unity active. DLG-003 claimed c513df81 and dispatched to existing combat worker. QST-004 worker279 active; presentation review234 complete with its sole finding fixed. Evidence Logs/playtest/dialog-parser.
 
 - **Dialog structural parser authored:** DLG-002daea28bc adds node/header, choice-group, if/elseif/else, flow/set/command and text/tag/speaker parsing with diagnostics; Q373/SPEC-41 Q12 records representation/indentation defaults. Uncompiled/unaccepted. Next seven required cases plus actual converted-file readback before one focused batch. No Unity active. Clue worker active277; combat converted-input audit active260; presentation assigned parser review. Previous syntax work and this implementation are progress.
 
