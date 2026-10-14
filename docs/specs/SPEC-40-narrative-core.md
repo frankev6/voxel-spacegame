@@ -1476,6 +1476,8 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 
 | 33 | World-event counter effects require variable amounts and WorldEvent provenance, absent from AddFactEffect | **Resolved:** ADR-0080 adds a pre-bound code-counter constructor and explicit amount/source overload; cache effect instances per catalog slot. Authored effects remain unchanged. Runtime bridge acceptance remains NAR-012. | Tech lead |
 
+| 34 | Bridge constructor and staged owner dependencies are unspecified; BeatService and TravelService still throw | **Resolved:** inject canonical owner lookup/trigger delegates at construction; the bridge owns only subscription, ordering and counter effects. Callbacks must resolve real galaxy/body/encounter/faction state and the accepted travel/beat owners. Do not instantiate staged throwing services or fake successful beat/travel behavior. Keep NAR-012 unaccepted until routing tests and composition staging are explicitly resolved; QST-005/006 and TRV-006 own their unfinished runtime behavior. | Tech lead |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/05-narrative-quests.md` (B3, B8, B10, B13, B14, B17; §5.3–§5.5, §5.12–§5.13), `00-synthesis.md` §6h.
