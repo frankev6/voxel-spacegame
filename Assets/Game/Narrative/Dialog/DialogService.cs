@@ -22,6 +22,7 @@ namespace Game.Narrative.Dialog
         }
         RollFrame rollFrame;
         DialogRequest request;
+        string lastPresentedNode;
         DialogOutcome outcome;
         IEffect terminal;
         Action previousContinuation;
@@ -39,6 +40,10 @@ namespace Game.Narrative.Dialog
         }
         public bool IsActive { get; private set; }
         public int CurrentBeatIndex => IsActive ? request.BeatIndex : 0;
+        // DLG-012 read-only harness diagnostics; the service remains the only writer of runner state.
+        internal string CurrentNode => IsActive ? rollFrame?.Node ?? lastPresentedNode ?? request.StartNode ?? "" : "";
+        internal bool CanSelectOption => IsActive && awaitingOption && !finished && !blocked && !optionPending;
+        internal bool CanAcknowledgeEnd => IsActive && finished && pageUnacknowledged && !stopPending;
         public DialogMemory Memory { get; }
         public event Action<DialogRequest> Started;
         public event Action<DialogLine> LinePresented;
@@ -54,6 +59,7 @@ namespace Game.Narrative.Dialog
             context.PushScope(new LogicScope(LogicUsage.DialogCommand, next.Scope.QuestIndex,
                 next.Scope.QuestInstance, next.BeatIndex, next.Scope.HasBody, next.Scope.Body));
             request = next; outcome = DialogOutcome.Completed; terminal = null;
+            lastPresentedNode = null;
             awaitingContinue = awaitingOption = blocked = resumePending = finished = false;
             pageUnacknowledged = stopPending = optionPending = acknowledgeNotified = false;
             nodeVisitIndex = 0; rollFrame = null; IsActive = true;
@@ -143,6 +149,7 @@ namespace Game.Narrative.Dialog
         }
         public void OnLine(in DialogLine line)
         {
+            lastPresentedNode = line.Node;
             pageUnacknowledged = true; awaitingContinue = true;
             LinePresented?.Invoke(line);
         }
