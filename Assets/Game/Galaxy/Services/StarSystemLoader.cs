@@ -54,7 +54,6 @@ namespace Game.Galaxy.Services
         {
             this.galaxy = galaxy ?? throw new ArgumentNullException(nameof(galaxy));
             this.docking = docking ?? new DockingService();
-            this.docking.ValidateRestoredBody = IsRestoredDockAvailable;
             this.world = world ?? throw new ArgumentNullException(nameof(world));
             this.registry = registry != null ? registry : throw new ArgumentNullException(nameof(registry));
             if (blueprints == null || ids == null || catalog == null) throw new ArgumentNullException("Loader dependencies");
@@ -77,6 +76,7 @@ namespace Game.Galaxy.Services
             infoEntity = ownsInfo ? em.CreateEntity(typeof(CurrentStarSystemInfo)) : info.GetSingletonEntity();
             registry.AddSpawnHook(hook); galaxy.SetLiveDeltaSink(this);
             EventBus<BodyInteracted>.Subscribe(OnBodyInteracted);
+            EventBus<SceneTransitionFinished>.Subscribe(OnTransitionFinished);
         }
         public int TickOrder => 100;
         public int SceneReadyOrder => SceneHookOrder.Galaxy;
@@ -176,12 +176,18 @@ namespace Game.Galaxy.Services
                 origins.GetSingleton<FrameOrigin>().OriginInStarSystem, bodies, colliders);
             info.SetSingleton(new CurrentStarSystemInfo { Id = Loaded, Loaded = 1, BodyCount = checked((ushort)bodies.Count) });
             anchorsDirty = false;
+            if (docking.IsDocked && !docking.HasPendingRestore && !IsRestoredDockAvailable(docking.DockedBody)) docking.Undock();
         }
         public void FlushStructures()
         {
             if (!world.IsCreated || worldActive.IsEmptyIgnoreFilter) return;
             world.EntityManager.CompleteAllTrackedJobs();
             t2?.Flush(); foreach (var old in retiring) old.Flush();
+        }
+        void OnTransitionFinished(SceneTransitionFinished value)
+        {
+            if (value.Success && value.Scene == GameScene.World && !disposed)
+                docking.CompleteRestore(IsRestoredDockAvailable);
         }
         bool IsRestoredDockAvailable(BodyId body)
         {
@@ -296,7 +302,8 @@ namespace Game.Galaxy.Services
             if (disposed) return;
             Unload(); DrainRetired();
             if (retiring.Count != 0 || retiringBelts.Count != 0) throw new InvalidOperationException("Loader disposal requires completed grid/read retirement.");
-            disposed = true; EventBus<BodyInteracted>.Unsubscribe(OnBodyInteracted); registry.RemoveSpawnHook(hook); galaxy.SetLiveDeltaSink(null);
+            disposed = true; EventBus<BodyInteracted>.Unsubscribe(OnBodyInteracted);
+            EventBus<SceneTransitionFinished>.Unsubscribe(OnTransitionFinished); registry.RemoveSpawnHook(hook); galaxy.SetLiveDeltaSink(null);
             if (!world.IsCreated) return;
             if (ownsInfo && world.EntityManager.Exists(infoEntity)) world.EntityManager.DestroyEntity(infoEntity);
             players.Dispose(); streaming.Dispose(); blockDefs.Dispose(); orientations.Dispose(); bodyEvents.Dispose();

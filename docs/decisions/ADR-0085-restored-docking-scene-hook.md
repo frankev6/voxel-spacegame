@@ -10,10 +10,10 @@ SYS-009 restores PLOC before World loads. Loader teardown currently undocks, and
 
 ## Decision
 
-DockingService implements the existing ISceneReady contract at SceneHookOrder.Ui. Its existing RestoreDocked API restores silently and marks pending notification. Galaxy's loader installs an internal body-validation callback; no assembly reference changes. Loader teardown preserves pending restored docking. Once the sequential player/camera hooks have completed, the docking hook validates the current loaded body, emits one restored docking event, or clears an unavailable body with a warning. Ordinary Dock/Undock retain their existing behavior.
+DockingService retains its existing public API. RestoreDocked restores silently and marks pending notification. The existing StarSystemLoader subscribes to successful World SceneTransitionFinished and invokes an internal completion method after all readiness hooks succeed. Loader teardown preserves pending restored docking. Completion validates the loaded body and emits one restored docking event, or clears an unavailable body with a warning. Ordinary Dock/Undock retain their existing behavior; anchor replacement/removal also clears stale live docking. The loader unsubscribes on disposal. No assembly references change.
 
 PLOC parses before committing state. Missing PLOC clears stale pose/docking. Missing GLXY regeneration preserves an independently restored PLOC pose; normal loader validation still handles a system that no longer exists. No new owner gate.
 
 ## Consequences
 
-Boot registers the shared docking scene hook and PLOC order90 participant. Pending notification is transient and never serialized. Tests use direct hook calls, not time delays.
+Boot registers the PLOC order90 participant with the existing shared docking owner. Pending notification is transient and never serialized. Tests use direct hook calls, not time delays.

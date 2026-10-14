@@ -152,7 +152,6 @@ namespace Game.App.Boot
             Flow.RegisterReady(systemLoader); Flow.RegisterExiting(systemLoader);
             Session.RegisterWriteback(new GalaxyFlushWriteback(systemLoader));
             Save.Register(new PlayerLocationSaveParticipant(Session.Galaxy, docking));
-            Flow.RegisterReady(docking);
 
             Session.BindFleet(Blueprints, Registry, Content.Catalog); Save.Register(Session.FleetParticipant);
             Register(Session.Fleet);

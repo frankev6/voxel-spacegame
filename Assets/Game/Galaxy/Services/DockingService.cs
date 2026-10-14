@@ -1,17 +1,14 @@
 using System;
 using Game.Core.Events;
 using Game.Core;
-using Game.Core.Flow;
 using Game.Galaxy.Data;
 
 namespace Game.Galaxy.Services
 {
     /// <summary>Implements SPEC-31 §4.4. SYS-008 supplies docking state and managed notifications.</summary>
-    public sealed class DockingService : ISceneReady
+    public sealed class DockingService
     {
         internal bool HasPendingRestore { get; private set; }
-        internal Func<BodyId, bool> ValidateRestoredBody;
-        public int SceneReadyOrder => SceneHookOrder.Ui;
         public bool IsDocked => DockedBody.IsValid;
         public BodyId DockedBody { get; private set; }
         public void Dock(BodyId body)
@@ -35,17 +32,16 @@ namespace Game.Galaxy.Services
             DockedBody = body;
             HasPendingRestore = body.IsValid;
         }
-        public void OnSceneReady(in SceneReadyContext context)
+        internal void CompleteRestore(Func<BodyId, bool> validate)
         {
-            if (context.Scene != GameScene.World || !HasPendingRestore) return;
+            if (!HasPendingRestore) return;
             HasPendingRestore = false;
-            if (ValidateRestoredBody == null || !ValidateRestoredBody(DockedBody))
+            if (validate == null || !validate(DockedBody))
             {
                 GameLog.Warn("Galaxy", "Saved dock body is unavailable; restored player remains undocked.");
                 DockedBody = default; return;
             }
             EventBus<DockStateChanged>.Publish(new DockStateChanged(true, DockedBody.System.Value, DockedBody.LocalKey));
         }
-        public bool IsSceneReadyComplete(in SceneReadyContext context) => true;
     }
 }

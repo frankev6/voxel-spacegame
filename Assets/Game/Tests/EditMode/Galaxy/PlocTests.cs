@@ -1,6 +1,5 @@
 using System;
 using Game.Core.Events;
-using Game.Core.Flow;
 using Game.Core.Save;
 using Game.Data.Definitions;
 using Game.Galaxy.Data;
@@ -47,9 +46,8 @@ namespace Game.Tests.EditMode.Galaxy
             participant.Restore(new SaveReader(saved), 1); EventBus<DockStateChanged>.Drain();
             Assert.IsTrue(docking.IsDocked); Assert.AreEqual(body, docking.DockedBody); Assert.AreEqual(0, events);
             CollectionAssert.AreEqual(saved, Capture(participant));
-            docking.ValidateRestoredBody = candidate => candidate.Equals(body);
-            var ready = new SceneReadyContext(GameScene.World, SceneEntryReason.LoadGame, default);
-            docking.OnSceneReady(ready); docking.OnSceneReady(ready); EventBus<DockStateChanged>.Drain();
+            docking.CompleteRestore(candidate => candidate.Equals(body));
+            docking.CompleteRestore(candidate => candidate.Equals(body)); EventBus<DockStateChanged>.Drain();
             Assert.AreEqual(1, events); Assert.IsFalse(docking.HasPendingRestore);
         }
         [Test] public void MissingChunk_Defaults()
