@@ -21,6 +21,12 @@ namespace Game.App.DevRuntime.Overlays
         public bool IsCreated => Vertices.IsCreated;
         public bool Truncated => Overflow.IsCreated && Overflow.Value != 0;
         public void Clear() { Vertices.Clear(); Overflow.Value = 0; }
+        public void Line(float3 a, float3 b, Color32 color)
+        {
+            if (Vertices.Length + 2 > MaxVertices) { Overflow.Value = 1; return; }
+            Vertices.AddNoResize(new DevLineVertex { Position = a, Color = color });
+            Vertices.AddNoResize(new DevLineVertex { Position = b, Color = color });
+        }
         public void Box(float3 min, float3 max, float4x4 transform, Color32 color)
         {
             if (Vertices.Length + 24 > MaxVertices) { Overflow.Value = 1; return; }

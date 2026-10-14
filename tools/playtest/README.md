@@ -75,6 +75,9 @@ Runtime dev commands, reachable as `gh_<name>` and in the in-game console. Each 
 | `range` (via `gh_dev --cmd range` or the console) | Spawn the test station in World. Left pod has one bridge; right pod has two; rear bay has paired reactors. New game resets all pieces and projectiles |
 | `gh_encounter` (`--spawn`, `--combat`, `--director=on\|off`, `--list=false`, `--count=1`, `--anchor`) | List definitions/active instances by default; Dev spawn uses 1–10 encounter instances at the player or a body story tag. Combat uses StartCombat; zero created is reported as queued/refused, never as spawn success. Sandbox has no galaxy |
 | `gh_relation` (`--faction`, `--set`, `--add`) | Read relation/stance, or queue one Int32 set/add through FactionService. Relations clamp to −100..100; the matrix changes at the next fixed tick |
+| `gh_teleport` (`--x`, `--z`, `--sx`, `--sz`, `--yaw`, `--near`, `--offset=40`) | Move in one coordinate mode, or to body centre minus Z by surfaceRadius + non-negative offset. Near matches a loaded body key, case-insensitive display name or story tag, nearest to the player |
+| `gh_overlay` (`--name`, `--on=true`, `--id=0`) | Toggle bricks, dirty, colliders, islands, spatial, interaction, all or none; no name reports status, skips and truncation. Islands use the supplied PersistentId or default player, with a 60-frame cache and 2M-cell cap. Spatial shows occupied XZ cells within 1 km. All six overlays share the bounded line mesh |
+| `gh_interact` (`--body`) | With a body query, move to surfaceRadius + half its interactionRange, wait for the real in-range target, then press bound Flight/Interact for 0.1 s. Returns an operation; success requires the matching BodyInteracted event. Without body, use the current legal target. Unbound actions fail before movement |
 | `gh_dev` (`--cmd`) | Execute any runtime command line |
 | `gh_op` (`--id`) | Poll `running/succeeded/failed` status without blocking |
 | `gh_until` (`--cond`) | Evaluate a typed scenario expression once; returns true/false |
@@ -90,6 +93,8 @@ Useful built-ins: `editor_play`, `editor_stop`, `open_scene`, `recompile`, `reco
 Travel scenario probes are `travel.phase`, `travel.arrival_gap`, `travel.inside_ring`, `travel.destination` and `travel.route_hops`. `r30_lane_jump_entry` is active and checks the real Drift/Ark round trip: both arrivals finish Idle inside the lane ring with a 0–200 m gate gap.
 
 Encounter probes are `encounters.active`, `encounters.ships`, `relation("faction_id")`, `stance("faction_id")` and `encounter_defeated("encounter_id")`. Defeats count real EncounterDefeated events since each scenario started; a concurrent or later run has its own baseline. Unknown IDs and unavailable owners fail explicitly. Example: `g.sh encounter --spawn encounter_raiders`, then `g.sh until --cond 'encounters.ships >= 2'`; `g.sh relation --faction faction_vestari --set -50` queues hostility for the next tick.
+
+Interaction probes are `interaction.target` (current body display name or empty) and `interaction.inrange` (the real query flag). `overlay name=interaction` draws a 32-segment XZ circle at surfaceRadius + interactionRange per live interactable and a green/red player-to-target line from that flag. Example: `g.sh interact --body ark_station`, then poll its operation via `g.sh op --id <id>`. Station Dock/BodyInteracted is functional acceptance; the draft dialog route remains with its dialogue owner (SPEC-70 Q29).
 
 ## Gotchas learned the hard way
 

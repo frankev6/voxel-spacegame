@@ -21,7 +21,7 @@ namespace Game.App.DevRuntime
                 commands.Add(command);
             }
         }
-        public static DevCommandRegistry CreateDefault() => new DevCommandRegistry(new OverlayDevCommand(), new EncounterDevCommand(), new RelationDevCommand(), new PlaygroundDevCommand(), new SaveDevCommand(), new LoadDevCommand(), new JumpDevCommand(), new HelpDevCommand(), new OpDevCommand(), new UntilDevCommand(), new KeyDevCommand(), new MouseDevCommand(), new ClickDevCommand(), new UiDevCommand(), new NewGameDevCommand(), new SandboxDevCommand(), new RecordDevCommand(), new ReplayDevCommand(), new RangeDevCommand(), new TeleportDevCommand(), new SpawnDevCommand(), new GridDevCommand(), new AimDevCommand(), new FireDevCommand(), new InvDevCommand(), new GiveDevCommand(), new FactsDevCommand(), new PerfDevCommand());
+        public static DevCommandRegistry CreateDefault() => new DevCommandRegistry(new OverlayDevCommand(), new InteractDevCommand(), new EncounterDevCommand(), new RelationDevCommand(), new PlaygroundDevCommand(), new SaveDevCommand(), new LoadDevCommand(), new JumpDevCommand(), new HelpDevCommand(), new OpDevCommand(), new UntilDevCommand(), new KeyDevCommand(), new MouseDevCommand(), new ClickDevCommand(), new UiDevCommand(), new NewGameDevCommand(), new SandboxDevCommand(), new RecordDevCommand(), new ReplayDevCommand(), new RangeDevCommand(), new TeleportDevCommand(), new SpawnDevCommand(), new GridDevCommand(), new AimDevCommand(), new FireDevCommand(), new InvDevCommand(), new GiveDevCommand(), new FactsDevCommand(), new PerfDevCommand());
         public bool TryGet(string name, out IDevCommand command) => byName.TryGetValue(name, out command);
         public DevCommandResult Execute(string line, DevContext ctx)
         {

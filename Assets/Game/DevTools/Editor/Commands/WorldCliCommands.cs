@@ -13,11 +13,16 @@ namespace Game.DevTools.Editor.Commands
         [CliCommand("gh_teleport", "Teleport the player in local or star-system coordinates (play mode).")]
         public static string Teleport([CliArg("x", "Local X metres")] string x = "", [CliArg("z", "Local Z metres")] string z = "",
             [CliArg("sx", "Star-system X metres")] string sx = "", [CliArg("sz", "Star-system Z metres")] string sz = "",
-            [CliArg("yaw", "Yaw degrees; omitted keeps current rotation")] string yaw = "")
+            [CliArg("yaw", "Yaw degrees; omitted keeps current rotation")] string yaw = "",
+            [CliArg("near", "Loaded body key, display name or story tag")] string near = "",
+            [CliArg("offset", "Non-negative surface offset in metres; default 40")] string offset = "")
         {
-            var args = new List<string> { "teleport" }; Add(args, "x", x); Add(args, "z", z); Add(args, "sx", sx); Add(args, "sz", sz); Add(args, "yaw", yaw);
+            var args = new List<string> { "teleport" }; Add(args, "x", x); Add(args, "z", z); Add(args, "sx", sx); Add(args, "sz", sz); Add(args, "yaw", yaw); Add(args, "near", near); Add(args, "offset", offset);
             return CoreDevCliCommands.Dev(string.Join(" ", args));
         }
+        [CliCommand("gh_interact", "Press the real Interact action, optionally after moving inside a body's legal surface range (play mode).")]
+        public static string Interact([CliArg("body", "Optional loaded body key, display name or story tag")] string body = null)
+            => CoreDevCliCommands.Dev(body == null ? "interact" : "interact body=" + DevJsonWriter.Quote(body));
         [CliCommand("gh_spawn", "Request ships through the runtime command registry (play mode).")]
         public static string Spawn([CliArg("blueprint", "Ship blueprint ID")] string blueprint,
             [CliArg("x", "Local X metres")] string x = "", [CliArg("z", "Local Z metres")] string z = "",

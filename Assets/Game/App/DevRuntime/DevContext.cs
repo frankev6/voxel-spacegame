@@ -49,6 +49,15 @@ namespace Game.App.DevRuntime
         public long EventCount(string name) => Events.Count(name) - (eventBaseline != null && eventBaseline.TryGetValue(name, out long count) ? count : 0);
         internal long EncounterDefeatedCount(Game.Core.ContentHash encounter) => Events.DefeatCount(encounter) -
             (defeatBaseline != null && defeatBaseline.TryGetValue(encounter, out long count) ? count : 0);
+        internal bool TryGetInteractionTarget(out Game.Galaxy.Interaction.InteractionTarget target)
+        {
+            target = default;
+            if (World == null || !World.IsCreated) return false;
+            EntityManager.CompleteDependencyBeforeRO<Game.Galaxy.Interaction.InteractionTarget>();
+            if (!Query(TypeManager.GetTypeIndex<Game.Galaxy.Interaction.InteractionTarget>()).TryGetSingleton(out target)) return false;
+            if (target.Target != Entity.Null && !EntityManager.Exists(target.Target)) { target = default; return false; }
+            return true;
+        }
         public Camera GameplayCamera => TryGetService<Game.Presentation.Services.CameraRigService>(out var rig) ? rig.Camera : null;
         public Entity PlayerShipRoot
         {

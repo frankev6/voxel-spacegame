@@ -12,12 +12,14 @@ namespace Game.App.DevRuntime
         readonly Dictionary<string, long> counts = new Dictionary<string, long>(StringComparer.Ordinal);
         readonly Dictionary<ContentHash, long> defeats = new Dictionary<ContentHash, long>();
         bool disposed;
+        internal BodyInteracted LastBodyInteracted { get; private set; }
         internal GameSaved LastGameSaved { get; private set; }
         internal GameLoaded LastGameLoaded { get; private set; }
         internal StarSystemEntered LastStarSystemEntered { get; private set; }
         public DevEventCounter()
         {
             foreach (string name in new[] { "ShipDestroyed", "StarSystemEntered", "BodyInteracted", "BodyDestroyed", "LaneJumped", "ItemAcquired", "FactChanged", "SessionReset", "GameSaved", "GameLoaded", "EncounterDefeated" }) counts.Add(name, 0);
+            EventBus<BodyInteracted>.Subscribe(OnBodyInteracted);
             EventBus<EncounterDefeated>.Subscribe(OnEncounterDefeated);
             EventBus<SessionReset>.Subscribe(OnSessionReset);
             EventBus<GameSaved>.Subscribe(OnGameSaved);
@@ -30,6 +32,7 @@ namespace Game.App.DevRuntime
         void OnEncounterDefeated(EncounterDefeated value)
         { counts[nameof(EncounterDefeated)]++; defeats[value.Encounter] = DefeatCount(value.Encounter) + 1; }
         public long Count(string name) => counts.TryGetValue(name, out long count) ? count : throw new ArgumentException("unknown event '" + name + "'");
+        void OnBodyInteracted(BodyInteracted value) { LastBodyInteracted = value; counts[nameof(BodyInteracted)]++; }
         void OnSessionReset(SessionReset e) { counts[nameof(SessionReset)]++; }
         void OnGameSaved(GameSaved e) { LastGameSaved = e; counts[nameof(GameSaved)]++; }
         void OnGameLoaded(GameLoaded e) { LastGameLoaded = e; counts[nameof(GameLoaded)]++; }
@@ -38,6 +41,7 @@ namespace Game.App.DevRuntime
         {
             if (disposed) return;
             disposed = true;
+            EventBus<BodyInteracted>.Unsubscribe(OnBodyInteracted);
             EventBus<EncounterDefeated>.Unsubscribe(OnEncounterDefeated);
             EventBus<SessionReset>.Unsubscribe(OnSessionReset);
             EventBus<GameSaved>.Unsubscribe(OnGameSaved);
