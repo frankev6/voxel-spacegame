@@ -915,7 +915,7 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 ### QST-009 — Opening chapter content
 - **Milestone:** M3
 - **Tier:** standard — content from the tables of §4.8, §4.10–§4.12
-- **Depends on:** `QST-002`, `SPEC-30`, `SPEC-40`
+- **Depends on:** `QST-002`, `GAL-003`, `NAR-013`, `DLG-003`, `ENC-002`, `ECO-002`
 - **Do:**
   1. Create `facts_opening.asset`, `opening.yarn` with the two new beats, the three mysteries, the seven clues and the six rumors (§4.11).
   2. Set `storyTag` on every listed body template (§4.10).
@@ -978,3 +978,5 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 
 - Audit (background only): `docs/reference/audit-2026-10/05-narrative-quests.md` §2 (B3, B4, B5, B7, B8, B9, B10, B15), §5.5–§5.7 (clue graph, storylets, declarative quests).
 - SPEC-40 §4.2 (generated families), §4.3 (`ILogicNarrative`), §5.3 (tick), §5.6 (bridge), §5.8 (converter, flag table, quest map); SPEC-41 §4.7 and §5.3 (dialog lifecycle); legacy files `Import/Legacy/narrative/*.json` and `Import/Legacy/content/Galaxies/Solar System Entities/**`.
+
+| 14 | Opening content depends on whole galaxy/narrative specs, including its own downstream integrations | Use accepted QST-002, GAL-003, NAR-013, DLG-003, ENC-002 and ECO-002 definitions/compilers/validators under ADR-0068. Existing GAL-012 authored content is input, not a runtime acceptance prerequisite for authoring. Preserve every content validation and tag-coverage criterion; production opening playthrough stays QST-010. | Tech lead — resolved; ledger Q424 |
