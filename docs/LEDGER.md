@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 52 | 15 | 0 | 0 | 115 | 0 | 182 | 7 |
+| M3 | 51 | 13 | 0 | 0 | 118 | 0 | 182 | 6 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -462,8 +462,8 @@
 | HUD-008 | HudSnapshotSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, PWR-001, WPN-001, ABL-001, SYS-001, GAL-001, FLT-001, VOX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 13c85bbd | Review repairs complete: duplicate players, frozen hulk meters and interactable-body radar; nine focused checks pass |
 | HUD-009 | HudSyncSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-008, HUD-007, TRV-001, ENC-001 | no | todo |  |  |  |  |
 | HUD-010 | HUD presenters and screen hotkeys | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-009, QST-001, ECO-001, INP-001, TRV-001, NAR-001 | no | todo |  |  |  |  |
-| HUD-011 | Inventory screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-006 | yes | in-progress | presentation (gpt-6.1-sol high) | 2026-10-14 |  | Existing presentation worker: complete inventory screen/presenter, 200 pooled slots and real drag/sort/stack; Q425 |
-| HUD-012 | Merchant screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-005 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-14 |  | Complete real trade-session screen/presenter, tabs and buy/sell/refusal lifecycle; Q427 |
+| HUD-011 | Inventory screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-006 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-14 | f8adea23 | Real inventory screen/presenter integrated into UiComposition and playground; five required cases pass; live cargo screen verified. |
+| HUD-012 | Merchant screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-005 | yes | done | combat (gpt-6.1-sol high) | 2026-10-14 | f5e9e949 | Real MerchantSession screen/presenter registered/reset in UiComposition and playground; four required cases pass; live Buy verified. Normal faction launcher remains ECO-008. |
 | HUD-013 | Dialog host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
 | HUD-014 | Ship log screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-42 | no | todo |  |  |  |  |
 | HUD-015 | MapCanvas control | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-62 | no | todo |  |  |  |  |
@@ -483,7 +483,7 @@
 | DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-008, DEV-012, INP-005 | no | todo |  |  |  |  |
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | yes | done | economy (gpt-6.1-sol high) | 2026-10-13 | 40421f42 | Real inv/give/facts owners, probes and CLI; three required cases pass in focused seven-case batch. |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-14 | f6304ccd | Save/load/jump commands integrated; all 3 required checks pass (position fixture corrected a5833668); real menu routing/toworld acceptance still HUD-002-dependent; Q430 |
-| DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | in-progress | astra (gpt-6) | 2026-10-14 | 8734972d | Reopened after owner playtest: most pads only text; direct World entry and accessible console missing. Replace informational pads with real interactions and wire delivered screens. |
+| DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | done | astra (gpt-6) | 2026-10-14 | 54734103 | Direct World Play, visible Console/entry and launcher; six actual trials/screens. 15-case compatible batch green; broader campaign/story/editor areas remain absent. |
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
 | MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e9d50f3c | Three exact factions generated; duplicate skipped, player/AI ownership preserved; rerun byte/GUID/manifest stable |
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3d65849 | Protected ordered loot assets/catalog; rerun byte-identical; 1 required and 1 migration-safety test |
@@ -1143,6 +1143,15 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — DEV-021 owner-playtest correction: actual access and interactions — astra (gpt-6)
+
+- Owner found that most circles were only text and there was no usable World/console entry. Reopened DEV-021; the previous “eight live interaction pads” description overstated what could be tested. Removed informational facts/grid/directory and unintegrated campaign circles. Six current areas: four-gate flight course, aligned destruction range, one opt-in enemy, actual inventory, settings and actual market trading. This is not yet a playground for every project feature: campaign travel/story/editor integration remains unfinished.
+- Implementation 54734103: direct Editor World Play automatically enters once the real player is ready; always-accessible Console/Enter playground controls, console Close control, and `tools/playtest/playground.sh` (verified from stopped Editor, ready in 2.062s). Reset remains `playground reset`, not a button. Real campaign/profile safety is preserved. Live direct World startup, Console click, F cargo and market interactions verified. Screenshots: `Logs/playtest/playground-inventory.png`, `playground-trading-live.png`.
+- Integrated HUD-011 f8adea23 (worker509da170) and HUD-012 f5e9e949 (workera80e70af), real UiComposition registration/session rebind/disposal. Accepted ADR-0094; reconciled shared UIConfig and folder metadata, no assembly changes. HUD-004 0764e3e7 (workerf882471) fixes load confirmation for every active session, including Blueprint Lab; root-menu composition remains pending HUD-002.
+- Validation once for compatible batch: compile zero warning CS; graphics `Logs/playtest/playground/access-batch.xml`: 15 passed, zero failed/skipped, 1.768s test execution excluding Editor startup. DEV-021 spec-required: 1, extra: 0; HUD-011 spec-required: 5, extra: 0; HUD-012 spec-required: 4, extra: 0; HUD-004 existing spec-required: 5, extra: 0. No broad suite, soak or performance run. Batch backed up/restored QualitySettings with cp. Owner QualitySettings and two content metas excluded; no stray InitTestScene files staged.
+- Same three workers recycled to ECO-011 directory/cargo owners, GAL-013 specified advisory fixtures (no benchmark run/tuning) and HUD-018 editor host. Full launcher/territory genuinely depend on missing faction runtime; QST-009 source waits for compiled dialogue programs. Lead retains frontier work. Git local only; leave the live playground intact.
+
 
 ### 2026-10-14 — DEV-021 playable playground and compatible worker deliveries — astra (gpt-6)
 

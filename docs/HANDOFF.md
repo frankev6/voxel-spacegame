@@ -31,9 +31,9 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-14)
 
-- Interactive playground DEV-021 is playable: F1 `playground`, F activates nearby rings, F1 `playground reset` resets the complete isolated sandbox; `playground goto=range` jumps to the destruction trial. Eight pads, beacon map, quiet default, opt-in enemy. Live screenshot `Logs/playtest/playground-map.png`; unfinished UI/story/editor integrations are labeled honestly.
+- DEV-021 reopened after owner playtest: most original pads were informational, and entry/console access was missing. Direct World Play now auto-enters; visible Console and Enter playground controls plus `tools/playtest/playground.sh` exist. Real inventory/settings/merchant screens and checkpoint course replace inert circles; 15 focused cases passed and live entry/trading verified. Console `playground reset` restores trials. Six working areas; campaign/story/editor are still absent from the playground.
 - GAL-012 galaxy content and EDT-020 blueprint store/browser accepted; save/load/jump commands pass their three cases, but DEV-018 menu-route acceptance remains HUD-002-dependent. TRV-011 source/unit checks integrated; actual R30 run remains. Lead fixed live pink props caused by editor material-buffer layout. Exact hashes/results and test counts are in LEDGER newest log.
-- Same three Sol6.1-high workers now implement merchant UI HUD-012, opening content QST-009 and inventory UI HUD-011. Preserve live game, owner QualitySettings and two untracked content metas. Full roadmap remains active; no broad test/performance loop.
+- Same three Sol6.1-high workers delivered inventory/merchant screens and opening content; now recycled to editor host HUD-018, GAL-013 required fixtures and merchant directory/cargo owners ECO-011 (full launcher awaits real factions). Preserve live game, owner QualitySettings and two untracked content metas. Full roadmap remains active; no broad test/performance loop.
 
 ## 3. Next
 
