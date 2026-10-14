@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:game="Game.UI.Controls">
+    <Style src="../../Theme/screens/maps.uss" />
+    <ui:VisualElement class="maps-screen" picking-mode="Ignore">
+        <ui:VisualElement name="system-map-panel" class="panel maps-panel">
+            <ui:VisualElement class="panel__header" picking-mode="Ignore">
+                <ui:Label text="Star system" class="panel__title text-display" picking-mode="Ignore" />
+                <ui:VisualElement class="panel__header-actions"><ui:Button name="system-map-close" text="Close" class="btn btn--ghost" /></ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__body maps-body" picking-mode="Ignore">
+                <game:MapCanvas name="system-map-canvas" class="grow" />
+                <ui:ScrollView name="system-map-details" class="maps-details" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto">
+                    <ui:Label name="system-map-selected-name" class="text-display text-l maps-description" picking-mode="Ignore" />
+                    <ui:Label name="system-map-selected-info" class="text-s maps-description" picking-mode="Ignore" />
+                    <ui:Button name="system-map-set-waypoint" text="Cruise here" class="btn btn--primary is-hidden" />
+                    <ui:Button name="system-map-focus-player" text="Focus player" class="btn btn--secondary" />
+                    <ui:VisualElement class="maps-zoom"><ui:Button name="system-map-zoom-in" text="Zoom +" class="btn btn--ghost" /><ui:Button name="system-map-zoom-out" text="Zoom −" class="btn btn--ghost" /></ui:VisualElement>
+                    <ui:Label text="Drag to pan · Scroll to zoom
+Arrow keys to pan · + / − to zoom · Home to focus" class="text-s text-muted maps-description" picking-mode="Ignore" />
+                    <ui:Label text="◆ Player   ◇ Destination
+? Rumor   + Objective
+Dashed lane: gated" class="text-s text-muted maps-description" picking-mode="Ignore" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

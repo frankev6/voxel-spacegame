@@ -20,7 +20,7 @@ namespace Game.UI.Controls
         readonly Dictionary<string, Color> tokenColors = new(StringComparer.Ordinal);
         MapData data;
         int version, pointer = -1;
-        bool hasVersion, hasGeometry, dragged;
+        bool hasVersion, hasGeometry, dragged, styleResolved;
         Vector2 pressed, previous;
         MapViewTransform view = new() { UnitsPerPixel = 1, MinUnitsPerPixel = 1e-6, MaxUnitsPerPixel = 1e12 };
         MapViewTransform tessellated;
@@ -45,7 +45,7 @@ namespace Game.UI.Controls
                 content.Add(labels[i]);
             }
             content.generateVisualContent += Draw;
-            RegisterCallback<CustomStyleResolvedEvent>(_ => { ResolveColors(); Invalidate(); });
+            RegisterCallback<CustomStyleResolvedEvent>(_ => { styleResolved = true; ResolveColors(); Invalidate(); });
             RegisterCallback<GeometryChangedEvent>(e =>
             {
                 if (e.newRect.size == e.oldRect.size) return;
@@ -55,7 +55,7 @@ namespace Game.UI.Controls
             RegisterCallback<PointerMoveEvent>(Move);
             RegisterCallback<PointerUpEvent>(Up);
             RegisterCallback<PointerCaptureOutEvent>(_ => { pointer = -1; });
-            RegisterCallback<DetachFromPanelEvent>(_ => { pointer = -1; });
+            RegisterCallback<DetachFromPanelEvent>(_ => { pointer = -1; styleResolved = false; });
             RegisterCallback<WheelEvent>(e => { ZoomAt(e.localMousePosition, -e.delta.y); e.StopPropagation(); });
         }
 
@@ -162,8 +162,8 @@ namespace Game.UI.Controls
                 if (tokenColors.Count == 64) { GameLog.WarnOnce("MapCanvas.ColorLimit", "UI", "Map has more than 64 distinct colour tokens; remaining tokens use the default."); break; }
                 if (!customStyle.TryGetValue(new CustomStyleProperty<Color>(token), out var color))
                 {
-                    // Styles resolve after attachment; do not diagnose an unattached control.
-                    if (panel != null) GameLog.WarnOnce("MapCanvas.Color." + token, "UI", "Unknown map colour token: " + token);
+                    // Screen OnPush supplies data after attachment but before the first style pass.
+                    if (styleResolved && panel != null) GameLog.WarnOnce("MapCanvas.Color." + token, "UI", "Unknown map colour token: " + token);
                     color = colors[0];
                 }
                 tokenColors.Add(token, color);
@@ -187,7 +187,7 @@ namespace Game.UI.Controls
             {
                 if (!line.Known || line.A < 0 || line.B < 0 || line.A >= data.Points.Count || line.B >= data.Points.Count) continue;
                 var a = data.Points[line.A]; var b = data.Points[line.B];
-                painter.strokeColor = ((a.Flags | b.Flags) & MapPointFlags.Destination) != 0 ? accent : colors[0];
+                painter.strokeColor = line.Route ? accent : colors[0];
                 Line(painter, Pixel(a.Pos), Pixel(b.Pos), line.Gated);
             }
             painter.strokeColor = muted;

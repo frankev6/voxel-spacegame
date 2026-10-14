@@ -236,6 +236,7 @@ namespace Game.App.Boot
             Register(narrativeOwner); Register<Game.Data.Logic.ILogicNarrative>(narrativeOwner);
             Register(story.Quests); Register(story.Clues); Register(story.Beats); Register(story.ShipLog);
             Save.Register(story.Save);
+            Screens.BindMapPresenters(world);
             // Travel subscribed first: a successful gate jump is already Spooling when this bridge sees it.
             Push(NarrativeWorldEventBridge.CreateForWorld(narrative, Content.Catalog, campaignGalaxy,
                 world, travel, encounters, story.Beats, dialogService, UI.Navigator));

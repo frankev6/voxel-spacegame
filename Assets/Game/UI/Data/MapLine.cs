@@ -6,5 +6,6 @@ namespace Game.UI.Data
         public int A, B;
         public bool Gated;
         public bool Known;
+        public bool Route; // HUD-016 / ADR-0112: this edge belongs to the selected route
     }
 }

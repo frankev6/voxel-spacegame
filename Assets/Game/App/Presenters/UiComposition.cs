@@ -25,6 +25,8 @@ namespace Game.App.Presenters
         Game.Presentation.Presenters.HudNotificationPresenter hudNotifications;
         Game.Presentation.Presenters.HudObjectivePresenter hudObjective;
         Game.Presentation.Presenters.ScreenHotkeyRouter screenHotkeys;
+        Game.Presentation.Presenters.GalaxyMapPresenter galaxyMapPresenter;
+        Game.Presentation.Presenters.StarSystemMapPresenter systemMapPresenter;
         MainMenuPresenter menuPresenter;
         PausePresenter pausePresenter;
         bool rootsBound, disposed;
@@ -95,6 +97,40 @@ namespace Game.App.Presenters
         internal void ShowFleet() { fleetPresenter.Refresh(); ui.Navigator.Push<FleetView>(); }
 
         internal void ShowInventory() => ui.Navigator.Push<InventoryView>();
+
+        internal void BindMapPresenters(Unity.Entities.World world)
+        {
+            CheckAlive();
+            if (galaxyMapPresenter != null) throw new InvalidOperationException("Map presenters are already installed.");
+            var galaxy = Game.Core.Services.Get<Game.Galaxy.Services.GalaxyService>();
+            var query = Game.Core.Services.Get<Game.Narrative.ShipLog.ShipLogQuery>();
+            galaxyMapPresenter = new Game.Presentation.Presenters.GalaxyMapPresenter(GalaxyMapModel, galaxy,
+                Game.Core.Services.Get<Game.Galaxy.Services.GalaxyMapModel>(), Game.Core.Services.Get<Game.Galaxy.Services.TravelService>());
+            var galaxyView = new GalaxyMapView(GalaxyMapModel, galaxyMapPresenter); ui.Register(galaxyView); galaxyMapPresenter.Bind(galaxyView, query);
+            systemMapPresenter = new Game.Presentation.Presenters.StarSystemMapPresenter(StarSystemMapModel, galaxy,
+                Game.Core.Services.Get<Game.Galaxy.Services.StarSystemLoader>(), world);
+            var systemView = new StarSystemMapView(StarSystemMapModel, systemMapPresenter); ui.Register(systemView); systemMapPresenter.Bind(systemView, query);
+            Game.Core.Services.Register(galaxyMapPresenter); Game.Core.Services.Register(systemMapPresenter);
+        }
+
+        // HUD-014's rumor route calls this with the canonical authored target ID.
+        internal bool ShowGalaxyMapSelected(Game.Galaxy.Data.StarSystemId starSystemId)
+        {
+            CheckAlive();
+            if (galaxyMapPresenter == null || !starSystemId.IsValid) return false;
+            var galaxy = Game.Core.Services.Get<Game.Galaxy.Services.GalaxyService>();
+            if (galaxy.Galaxy == null || !galaxy.Galaxy.TryGetIndex(starSystemId, out _)) return false;
+            bool shown = galaxy.State.IsKnown(starSystemId);
+            if (!shown)
+                foreach (var marker in Game.Core.Services.Get<Game.Narrative.ShipLog.ShipLogQuery>().Markers)
+                    if (marker.Kind == Game.Narrative.ShipLog.NarrativeMarkerKind.Rumor && !marker.StarSystem.IsNone &&
+                        Game.Galaxy.Data.StarSystemId.FromAuthored(marker.StarSystem.Hash).Equals(starSystemId)) { shown = true; break; }
+            if (!shown) return false;
+            var view = ui.Navigator.Get<GalaxyMapView>();
+            if (view.IsOpen) ui.Navigator.Pop(view);
+            ui.Navigator.Push(view, starSystemId);
+            return view.IsOpen;
+        }
 
         internal void ShowSettings() => settingsPresenter.Show();
 
@@ -199,7 +235,8 @@ namespace Game.App.Presenters
             fleetPresenter.Bind(Game.Core.Services.Get<Game.App.Session.GameSession>().Fleet, Game.Core.Services.Get<Game.Galaxy.Services.DockingService>());
             hudObjective?.Unbind();
             if (value.Reason != SessionResetReason.Cleared) RebindHudObjective();
-            // TODO(HUD-013/014/015/016): rebind the owning feature presenters
+            galaxyMapPresenter?.Reset(); systemMapPresenter?.Reset();
+            // TODO(HUD-014): rebind the owning feature presenters
             // to the new session models here when those features install their production bindings.
         }
         internal void Tick()
@@ -209,6 +246,7 @@ namespace Game.App.Presenters
             pausePresenter?.Tick();
             loadingPresenter.Tick();
             saveSlotsPresenter.Tick();
+            galaxyMapPresenter?.Tick(); systemMapPresenter?.Tick();
         }
         void CheckAlive() { if (disposed) throw new ObjectDisposedException(nameof(UiComposition)); }
         public void Dispose()
@@ -217,6 +255,8 @@ namespace Game.App.Presenters
             disposed = true;
             EventBus<SessionReset>.Unsubscribe(OnSessionReset);
             screenHotkeys?.Dispose(); hudNotifications?.Dispose(); hudObjective?.Dispose();
+            if (galaxyMapPresenter != null) { Game.Core.Services.Unregister(galaxyMapPresenter); galaxyMapPresenter.Dispose(); }
+            if (systemMapPresenter != null) { Game.Core.Services.Unregister(systemMapPresenter); systemMapPresenter.Dispose(); }
             DialogPresenter?.Dispose();
             Game.Core.Services.Unregister(dockPresenter); dockPresenter.Dispose();
             loadingPresenter.Dispose();

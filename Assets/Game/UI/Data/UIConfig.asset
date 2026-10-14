@@ -83,6 +83,12 @@ MonoBehaviour:
   - Key: dock
     Uxml: {fileID: 9197481963319205126, guid: b9c16f1070f445d0badbd26fa5ccc768, type: 3}
     Prewarm: 0
+  - Key: galaxy-map
+    Uxml: {fileID: 9197481963319205126, guid: 644c2f86da5e47bda4760e48da6f7488, type: 3}
+    Prewarm: 0
+  - Key: system-map
+    Uxml: {fileID: 9197481963319205126, guid: 3ec96ec0a3fc4201861220cde0d1ed7c, type: 3}
+    Prewarm: 0
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32
