@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 46 | 13 | 0 | 0 | 123 | 0 | 182 | 6 |
+| M3 | 45 | 14 | 0 | 0 | 123 | 0 | 182 | 5 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -429,7 +429,7 @@
 | EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | yes | done | astra (gpt-6) | 2026-10-13 | 5520be15 | Draft clone/apply/undo/redo/discard and dirty bricks; six direct cases pass, final compile clean; spec-required: 6, extra: 0 |
 | EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | yes | done | astra (gpt-6) | 2026-10-13 | d0a167dc | Incremental intact/damaged and orientation counts, lazy inventory-aware BOM; five required plus six session regressions pass; spec-required: 5, extra: 0 |
 | EDT-007 | Placement validator | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | done | astra (gpt-6) | 2026-10-13 | 633e952c | Placement checks, atomic group rollback, exact damaged identity/restore; 17 required cases pass; spec-required: 17, extra: 0 |
-| EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | todo |  |  |  |  |
+| EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead: incremental connectivity, bounded split jobs and session undo/redo/discard integration. |
 | EDT-009 | Full validation, issues and remove-floating | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-006, EDT-007, EDT-008 | no | todo |  |  |  |  |
 | EDT-010 | Stats accumulator and diff | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-006, PWR-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 73bcc085 | Exact moments, canonical sorted stats and deltas; four required cases pass; spec-required: 4, extra: 0 |
 | EDT-011 | Commit pipeline and R15 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-009, EDT-010, SPEC-50 | no | todo |  |  |  |  |
