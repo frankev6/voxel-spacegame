@@ -974,6 +974,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 400 | SPEC-31 Q24: celestial rendering creation boundary | ADR-0087 supplies Galaxy interface/Presentation implementation and App injection; loader retains visual-link/lifetime ownership, including refresh cleanup. | Tech lead |
 | 401 | SPEC-51 Q30: batch/report storage contract | ADR-0088 defines native input ownership and per-group reports; dirty cells mark only owning/face-neighbour bricks. Later placement rules remain EDT-007. | Tech lead |
 | 402 | SPEC-32 Q21: destination cache lifetime and missing-content defaults | One service-owned scratch/read-only route view; stamp state, generation and lanes; count displayed recomputations only. Missing galaxy retains saved destination, removed destination clears, fuel saturates, missing gate yields no next hop. | Tech lead — resolved |
+| 403 | SPEC-51 Q31: picker signatures and boundary defaults | Stateless grid-ray picker with immutable hit; normalize direction, begin traversal at expanded bounds, canonical XYZ ties and opposite dominant normal for inside hits. Clamp configured steps to1..4096; plane reach4096. | Tech lead — resolved |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1106,6 +1107,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — EDT-012 picker source integrated; EDT-010 dispatched — astra (gpt-6)
+
+- ed61500 integrates c3fbd13e bounded DDA picking, slice/X-ray filtering, working-plane fallback and placement math. Seven required cases authored; spec-required:7,extra:0. Uncompiled/unaccepted; awaiting next compatible validation batch. Q31 mirrored as Q403.
+- EDT-006 review333 found no functional defects. EDT-010 claimed810c6813 and assigned to existing economy chat; no duplicate worker. Combat chat reviews celestial ownership while SYS-011 actively implements. No Unity active; no repeated acceptance runs.
 
 ### 2026-10-13 — EDT-006 done: block counts and material costs — astra (gpt-6)
 

@@ -21,7 +21,7 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
-- **Editor material costs accepted:** EDT-006d0a167dc clean compile and11 focused checks pass (five required BOM plus six existing session cases). EDT-010 stats unlocks for the waiting worker. EDT-012c3fbd13e picker delivered pending validation; SYS-011 visuals active. Next lead placement/connectivity prerequisites and compatible delivery integration. No Unity active.
+- **Editor material costs accepted:** EDT-006d0a167dc clean compile and11 focused checks pass (five required BOM plus six existing session cases). EDT-010 stats dispatched to the reusable worker. EDT-012ed61500 picker integrated pending validation; SYS-011 visuals active. Next lead placement/connectivity prerequisites and compatible delivery integration. No Unity active.
 
 - **Gate and route slice accepted:** TRV-008/TRV-010 integrated through8c2e7cd8; compile clean and11 required focused checks pass. EDT-012 picker and SYS-011 celestial visuals active; route worker has a genuine dependency wait. Next lead editor count/BOM prerequisite to unlock stats work. No Unity active.
 
