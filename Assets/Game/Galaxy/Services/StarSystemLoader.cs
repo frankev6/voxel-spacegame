@@ -136,7 +136,7 @@ namespace Game.Galaxy.Services
                 try
                 {
                     var content = galaxy.GetContent(Loaded);
-                    AnchorBuilder.Create(world, galaxy.Galaxy, content, ctx.UniversalTime, origin.OriginInStarSystem, bodies, colliders);
+                    AnchorBuilder.Create(world, galaxy.Galaxy, content, galaxy.State.GetOrCreateDelta(content.Id), ctx.UniversalTime, origin.OriginInStarSystem, bodies, colliders);
                     var delta = galaxy.State.GetOrCreateDelta(Loaded); delta.IncrementVisit(); galaxy.MarkVisited(Loaded);
                     galaxy.State.CurrentStarSystem = Loaded;
                     info.SetSingleton(new CurrentStarSystemInfo { Id = Loaded, Loaded = 1, BodyCount = checked((ushort)bodies.Count) });
@@ -155,6 +155,12 @@ namespace Game.Galaxy.Services
         public bool IsSceneReadyComplete(in SceneReadyContext context)
             => context.Scene != GameScene.World || IsArrivalReady;
         public void OnSceneExiting(in SceneExitContext context) { if (context.Scene == GameScene.World) Unload(); }
+        public void PrepareBodyRemoval(BodyId body)
+        {
+            CheckAlive(); world.EntityManager.CompleteAllTrackedJobs();
+            t2?.DiscardBody(body);
+            foreach (var old in retiring) old.DiscardBody(body);
+        }
         public void OnBodyDeltaChanged(BodyId body)
         { CheckAlive(); if (!applyingDestruction && body.System.Equals(Loaded)) anchorsDirty = true; }
         void RefreshAnchors(double time)
@@ -162,7 +168,7 @@ namespace Game.Galaxy.Services
             FlushStructures(); RetireStreaming(); var em = world.EntityManager; em.CompleteAllTrackedJobs();
             foreach (var body in bodies.Values) if (em.Exists(body.Anchor)) em.DestroyEntity(body.Anchor);
             bodies.Clear(); RetireColliders();
-            AnchorBuilder.Create(world, galaxy.Galaxy, galaxy.GetContent(Loaded), time,
+            AnchorBuilder.Create(world, galaxy.Galaxy, galaxy.GetContent(Loaded), galaxy.State.GetOrCreateDelta(Loaded), time,
                 origins.GetSingleton<FrameOrigin>().OriginInStarSystem, bodies, colliders);
             info.SetSingleton(new CurrentStarSystemInfo { Id = Loaded, Loaded = 1, BodyCount = checked((ushort)bodies.Count) });
             anchorsDirty = false;

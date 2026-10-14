@@ -258,6 +258,24 @@ namespace Game.Galaxy.Services
             if (cache.TryGetValue(body.System, out var content) && content.TryFind(body.LocalKey, out int index)) content.Bodies.RemoveAt(index);
             names.Remove(body); liveSink?.OnBodyDeltaChanged(body); return true;
         }
+        /// <summary>ADR-0077: remove a body and its saved hulk, retaining the existing persistent tombstone.</summary>
+        public void RemoveBody(BodyId body)
+        {
+            RequireSystem(body.System);
+            if (!body.IsValid) throw new ArgumentException("Body identity is required.", nameof(body));
+            liveSink?.PrepareBodyRemoval(body);
+            var delta = State.GetOrCreateDelta(body.System);
+            delta.RemoveStructure(body.LocalKey);
+            delta.MarkDestroyed(body.LocalKey);
+            if (body.Role == BodyRole.StorySpawn) delta.RemoveStorySpawn(body.Slot);
+            if (cache.TryGetValue(body.System, out var content) && content.TryFind(body.LocalKey, out int index))
+            {
+                var changed = content.Bodies[index];
+                changed.State = (changed.State | BodyStateFlags.Destroyed) & ~BodyStateFlags.HasStructure;
+                content.Bodies[index] = changed;
+            }
+            names.Remove(body); liveSink?.OnBodyDeltaChanged(body);
+        }
         public bool MarkBodyDestroyed(BodyId body)
         {
             RequireSystem(body.System);

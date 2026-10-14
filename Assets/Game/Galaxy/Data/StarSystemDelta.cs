@@ -67,6 +67,12 @@ namespace Game.Galaxy.Data
             }
             else structures.Insert(~index, new StructureDiffRecord { BodyKey = bodyKey, Revision = revision, Structure = structure });
         }
+        internal StructureDiffRecord TakeStructure(ulong bodyKey)
+        {
+            int index = FindStructure(bodyKey);
+            if (index < 0) return null;
+            var record = structures[index]; structures.RemoveAt(index); return record;
+        }
         public bool RemoveStructure(ulong bodyKey)
         {
             int index = FindStructure(bodyKey);

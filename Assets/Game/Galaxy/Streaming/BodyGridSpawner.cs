@@ -27,7 +27,7 @@ namespace Game.Galaxy.Streaming
             internal Entity Root;
             internal VoxelStructure Source;
             internal int Handle;
-            internal bool OwnsSource;
+            internal bool OwnsSource, SuppressCapture;
         }
         readonly EntityManager em;
         readonly VoxelStructureRegistry registry;
@@ -128,6 +128,7 @@ namespace Game.Galaxy.Streaming
         }
         internal void Capture(Lease lease, StarSystemDelta delta)
         {
+            if (lease.SuppressCapture) return;
             // Even an unfinished grid must not lose its writable source when it is unloaded.
             // The spawn/despawn owner can finish writeback into this same delta-owned clone.
             if (lease.OwnsSource && em.Exists(lease.Root) && em.HasComponent<BodyGridOwner>(lease.Root))

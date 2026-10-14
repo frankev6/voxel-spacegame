@@ -85,6 +85,7 @@ namespace Game.Tests.EditMode.Galaxy
         }
         sealed class Sink : IGalaxyLiveDeltaSink
         {
+            public void PrepareBodyRemoval(BodyId body) { }
             internal readonly List<BodyId> Changes = new();
             public void OnBodyDeltaChanged(BodyId body) => Changes.Add(body);
             public void FlushStructures() { }

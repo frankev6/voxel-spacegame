@@ -25,7 +25,7 @@ namespace Game.App.Services
         [field: StaticStateOk("Immutable read-only view of task-owned missing routes; never changed at runtime") ]
         public static IReadOnlyList<string> UnwiredMembers { get; } = Array.AsReadOnly(new[] { nameof(GetRelation), nameof(AdjustRelation),
             nameof(CurrentStarSystemOwnerFactionIndex), nameof(SpawnEncounter), nameof(StartCombat),
-            nameof(RequestLaneJump), nameof(OpenMerchant), nameof(RemoveBody) });
+            nameof(RequestLaneJump), nameof(OpenMerchant) });
         readonly ContentCatalog content;
         readonly GameSession session;
         readonly GalaxyService galaxy;
@@ -88,8 +88,11 @@ namespace Game.App.Services
             { GameLog.ErrorOnce("Narrative.ReplaceBody.Target", "Narrative", "ReplaceBody requires a body scope and template."); return; }
             galaxy.ReplaceBody(Body(scope.Body), definition.Id);
         }
-        // TODO(NAR-011): resolve general body removal with the galaxy owner; destruction can leave a hulk.
-        public void RemoveBody(in LogicScope scope) => Missing(nameof(RemoveBody), "general galaxy removal API");
+        public void RemoveBody(in LogicScope scope)
+        {
+            if (!scope.HasBody) { GameLog.ErrorOnce("Narrative.RemoveBody.Target", "Narrative", "RemoveBody requires a body scope."); return; }
+            galaxy.RemoveBody(Body(scope.Body));
+        }
         public void OpenShipEditor() => _ = EnterEditor();
         async Awaitable EnterEditor()
         {

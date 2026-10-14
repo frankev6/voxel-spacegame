@@ -1468,6 +1468,8 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 | 28 | Unity reloads unused serialized string argument slots as empty strings | Resolved: numeric/boolean compiled-function slots accept null or empty unused text, but still reject nonempty text and incompatible expression slots. Apply the same predicate during validation and binding; verify existing function cases through serialized graphs. No vocabulary or field-layout change. | Tech lead — ledger Q356 |
 | 29 | Full reevaluation flag lifetime and meaning of dependency-index owners | Resolved: snapshot pendingFull once per pass and pass that same value to every registered system, clearing it once for the pass. Systems receive the ordered change batch; each system uses its own DependencyIndex to select subscribed content owners (quests/beats/etc.), as SPEC-42 requires. No new subscription API is added to INarrativeSystem. Equal Order values retain registration order; registration ends when a session begins. | Tech lead — ledger Q363 |
 
+| 30 | RemoveBody has no general owner API and destruction can retain a hulk | Resolved: ADR-0077 adds GalaxyService.RemoveBody and a pre-removal live-sink hook. Suppress capture, transfer pinned snapshot ownership to retirement, clear the snapshot and retain the existing destroyed/story tombstone. Destroyed bodies without snapshots have no anchor on reload. No GLXY format change. | Tech lead — ledger Q364 |
+
 ## 11. References
 
 - Audit: `docs/reference/audit-2026-10/05-narrative-quests.md` (B3, B8, B10, B13, B14, B17; §5.3–§5.5, §5.12–§5.13), `00-synthesis.md` §6h.

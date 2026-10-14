@@ -17,7 +17,7 @@ namespace Game.Galaxy.Streaming
 {
     internal static class AnchorBuilder
     {
-        internal static void Create(World world, GalaxyDef galaxy, StarSystemContent content, double time, double3 origin,
+        internal static void Create(World world, GalaxyDef galaxy, StarSystemContent content, StarSystemDelta delta, double time, double3 origin,
             Dictionary<ulong, LoadedBody> loaded, Dictionary<float, BlobAssetReference<Collider>> colliders)
         {
             var em = world.EntityManager; em.CompleteAllTrackedJobs();
@@ -25,7 +25,7 @@ namespace Game.Galaxy.Streaming
             foreach (var spec in content.Bodies)
             {
                 var template = galaxy.BodyTemplates[spec.TemplateIndex];
-                if ((spec.State & BodyStateFlags.Destroyed) != 0 && template.StructureSource == StructureSource.None) continue;
+                if ((spec.State & BodyStateFlags.Destroyed) != 0 && !delta.TryGetStructure(spec.Id.LocalKey, out _)) continue;
                 bool orbit = spec.Orbit.Mode != OrbitMode.Fixed || spec.ParentOrbit.Mode != OrbitMode.Fixed;
                 bool sphere = template.HasCollider && (template.Role == BodyRole.Star || template.Role == BodyRole.Planet || template.Role == BodyRole.Moon);
                 bool interact = template.Interaction != InteractionKind.None && template.StructureSource == StructureSource.None;

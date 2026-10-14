@@ -63,6 +63,25 @@ namespace Game.Galaxy.Streaming
             }
             return spawned;
         }
+        internal void DiscardBody(BodyId body)
+        {
+            if (!body.System.Equals(delta.StarSystem)) return;
+            ulong key = body.LocalKey;
+            void Suppress(BodyGridSpawner.Lease lease)
+            {
+                lease.SuppressCapture = true;
+                if (delta.TryGetStructure(key, out var record) && ReferenceEquals(record.Structure, lease.Source))
+                {
+                    delta.TakeStructure(key); lease.OwnsSource = true;
+                }
+            }
+            foreach (var entry in retired) if (entry.Key == key) Suppress(entry.Lease);
+            if (active.TryGetValue(key, out var live))
+            {
+                Suppress(live); Retire(key, live); active.Remove(key);
+                if (bodies.TryGetValue(key, out var loaded)) { ClearGrid(ref loaded); bodies[key] = loaded; }
+            }
+        }
         internal void Flush()
         {
             foreach (var lease in active.Values) spawner.Capture(lease, delta);
