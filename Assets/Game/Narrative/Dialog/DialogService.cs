@@ -13,15 +13,21 @@ namespace Game.Narrative.Dialog
         readonly DialogCommandTable commands;
         readonly ILogicContext context;
         readonly ILogicEffectHost effectHost;
-        readonly (int sides, int value)[] rolls = new (int, int)[8];
+        sealed class RollFrame
+        {
+            public string Node;
+            public int Visit, Count;
+            public RollFrame Parent;
+            public readonly (int sides, int value)[] Values = new (int, int)[8];
+        }
+        RollFrame rollFrame;
         DialogRequest request;
         DialogOutcome outcome;
         IEffect terminal;
         Action previousContinuation;
         bool driving, pumping, awaitingContinue, awaitingOption, blocked, resumePending;
         bool finished, pageUnacknowledged, stopPending, optionPending, acknowledgeNotified;
-        int selectedOption, nodeVisitIndex, rollCount, generation;
-        string currentNode;
+        int selectedOption, nodeVisitIndex, generation, blockingGeneration;
 
         public DialogService(IDialogRunner runner, DialogCommandTable commands, ILogicContext context, DialogMemory memory)
         {
@@ -50,7 +56,7 @@ namespace Game.Narrative.Dialog
             request = next; outcome = DialogOutcome.Completed; terminal = null;
             awaitingContinue = awaitingOption = blocked = resumePending = finished = false;
             pageUnacknowledged = stopPending = optionPending = acknowledgeNotified = false;
-            nodeVisitIndex = rollCount = 0; currentNode = null; IsActive = true;
+            nodeVisitIndex = 0; rollFrame = null; IsActive = true;
             int token = ++generation;
             if (effectHost != null)
             {
@@ -159,18 +165,29 @@ namespace Game.Narrative.Dialog
                 return DialogCommandResult.Continue;
             }
             if (effect.Flow == EffectFlow.Blocking)
-            { blocked = true; effect.Apply(context); return DialogCommandResult.Block; }
+            {
+                blocked = true;
+                int dialogToken = generation, blockToken = ++blockingGeneration;
+                if (effectHost != null) effectHost.BlockingCommandCompleted = () =>
+                {
+                    if (!IsActive || generation != dialogToken || blockingGeneration != blockToken || !blocked) return;
+                    blocked = false; resumePending = true;
+                };
+                effect.Apply(context); return DialogCommandResult.Block;
+            }
             effect.Apply(context); return stopPending ? DialogCommandResult.Stop : DialogCommandResult.Continue;
         }
-        public void OnNodeStarted(string node) { currentNode = node; nodeVisitIndex++; rollCount = 0; }
-        public void OnNodeCompleted(string node) { }
+        public void OnNodeStarted(string node)
+        { rollFrame = new RollFrame { Node = node, Visit = ++nodeVisitIndex, Parent = rollFrame }; }
+        public void OnNodeCompleted(string node)
+        { if (rollFrame != null && rollFrame.Node == node) rollFrame = rollFrame.Parent; }
         public void OnDialogComplete() { finished = true; Settle(); }
 
         public int Roll(int sides)
         {
-            if (!IsActive || currentNode == null) throw new InvalidOperationException("roll requires an active dialog node");
+            if (!IsActive || rollFrame == null) throw new InvalidOperationException("roll requires an active dialog node");
             if (sides < 1 || sides == int.MaxValue) throw new ArgumentOutOfRangeException(nameof(sides));
-            for (int i = 0; i < rollCount; i++) if (rolls[i].sides == sides) return rolls[i].value;
+            for (int i = 0; i < rollFrame.Count; i++) if (rollFrame.Values[i].sides == sides) return rollFrame.Values[i].value;
             // Beat indices and generated beat facts both use ordinal content IDs, one-based.
             int beatCount = 0, index = 0;
             var catalog = context.Facts.Catalog;
@@ -178,10 +195,10 @@ namespace Game.Narrative.Dialog
                 if (catalog.FamilyAt(slot) == FactFamily.Beat && ++index == request.BeatIndex)
                 { beatCount = context.Facts.GetBySlot(slot); break; }
             ulong salt = StableHash.Combine(StableHash.Combine((ulong)(uint)request.BeatIndex, (ulong)(uint)beatCount),
-                StableHash.Combine(StableHash.Hash64(currentNode), (ulong)(uint)nodeVisitIndex));
+                StableHash.Combine(StableHash.Hash64(rollFrame.Node), (ulong)(uint)rollFrame.Visit));
             var rng = RngStreams.For(context.CampaignSeed, RngPurpose.Narrative, salt);
             int value = rng.NextInt(1, sides + 1);
-            if (rollCount < rolls.Length) rolls[rollCount++] = (sides, value);
+            if (rollFrame.Count < rollFrame.Values.Length) rollFrame.Values[rollFrame.Count++] = (sides, value);
             return value;
         }
     }
