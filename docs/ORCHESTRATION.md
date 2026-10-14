@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | HUD-006 | Complete pause view/presenter and four cases; ENC-005 accepted de3f1ee/0f00dd27 | Ready standard implementation |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | HUD-019 | Pause delivered 7fa0900 pending validation; implementing loading/dock interactions | Actual trade acceptance waits on ECO-008 |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | HUD-003 | Complete main menu/new-game prompt and five cases; HUD-013 accepted f3eea58 | Ready standard implementation |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-005 | HUD-007 delivered d0ac700a pending central validation; completing settings acceptance on existing claim | HUD-004 remaining behavior if settings complete |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-010 | HUD-007 delivered d0ac700a; settings/save source confirmed complete, now implementing notifications/hotkeys/objective hook | Actual root/sync/query integration remains lead-owned |
 
 ## Operating rules
 
