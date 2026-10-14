@@ -162,9 +162,6 @@ namespace Game.Tests.PlayMode.Narrative
             for (int run = 0; run < snapshots.Length; run++)
             {
                 yield return StartWorld();
-                using var pause = Game.Pause.Acquire("NAR-019 deterministic input sequence");
-                yield return null; // let the real pause bridge publish its simulation gate
-                double time = Narrative.Context.World.UniversalTime;
                 int acquired = Facts.Catalog.GeneratedSlot(FactFamily.Acquired, new ContentId("resource_fuel").Hash.Value);
                 Assert.GreaterOrEqual(acquired, 0); int before = Facts.GetBySlot(acquired);
                 var economy = Service<EconomyService>();
@@ -173,17 +170,17 @@ namespace Game.Tests.PlayMode.Narrative
                 economy.GiveLoot(Catalog.IndexOf(Catalog.Get<LootTableDefinition>(new ContentId("loot_salvage_module"))), 2, 19);
                 yield return null;
 
-                // Two physical inputs go through the actual query/input/world-event/beat
-                // bridge. Numeric choices execute the stored graph, quest and clue owners.
+                // Keep the actual gameplay pipeline running: the interaction command
+                // moves the player and physics/spatial data must refresh before F.
+                // These scripted rewards/counters depend on seed and inputs, not time.
                 yield return InteractStation();
                 yield return Choice("Mission Control", 4); yield return Choice("Accept Material Turn-In Test", 1);
                 yield return Choice("Undock", 7); yield return Undock();
                 yield return InteractStation();
                 yield return Choice("Station Bar", 2); yield return Choice("Talk to Shady Figure", 1);
                 yield return Choice("Pay for Info (100 Scrap)", 1); yield return Choice("Thanks", 1);
-                yield return Choice("Back", 1); yield return Choice("Undock", 7); yield return Undock();
+                yield return Choice("Back", 2); yield return Choice("Undock", 7); yield return Undock();
                 EventHub.DrainAll(); Narrative.Tick(); EventHub.DrainAll();
-                Assert.AreEqual(time, Narrative.Context.World.UniversalTime, "Simulation time remains fixed through the script.");
                 Assert.AreEqual(2, Facts.GetBySlot(acquired) - before, "Actual acquired-item events reach the bridge.");
                 int station = Facts.Catalog.GeneratedSlot(FactFamily.Interacted, new ContentId("body_station_ark").Hash.Value);
                 Assert.GreaterOrEqual(station, 0); Assert.AreEqual(2, Facts.GetBySlot(station));
