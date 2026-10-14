@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Button name="dialog-option-button" class="btn btn--wide dialog-option">
+        <ui:Label name="dialog-option-number" class="text-m text-mono dialog-option-number" picking-mode="Ignore" />
+        <ui:Label name="dialog-option-text" class="text-m dialog-option-text" picking-mode="Ignore" />
+    </ui:Button>
+</ui:UXML>

@@ -74,6 +74,10 @@ namespace Game.Tests.EditMode.Presentation
             Service = new DialogService(Script, DialogServiceTests.Table(), Context, new DialogMemory());
             Navigator = new UINavigator(new Pause(), new Target(), new Clock(), new VisualElement());
             Presenter = new DialogPresenter(Service, content, Model, Navigator, Sounds);
+            // The implemented view now requires its actual authored elements even in detached presenter tests.
+            var tree = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.VisualTreeAsset>(
+                "Assets/Game/UI/Views/Uxml/DialogView.uxml").Instantiate();
+            Presenter.View.Build(Navigator, tree);
         }
         internal void Start(Action<IDialogRunnerHost> action)
         { Script.StartAction = action; Assert.IsTrue(Service.TryStart(new DialogRequest(0, "start", default))); }

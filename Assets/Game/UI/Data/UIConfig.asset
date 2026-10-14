@@ -47,6 +47,9 @@ MonoBehaviour:
   - Key: settings
     Uxml: {fileID: 9197481963319205126, guid: 05e0379d119b49e88984f3a490738a97, type: 3}
     Prewarm: 0
+  - Key: dialog
+    Uxml: {fileID: 9197481963319205126, guid: 698b98cba57647febcaf2a3da3f383c0, type: 3}
+    Prewarm: 0
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32

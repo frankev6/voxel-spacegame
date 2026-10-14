@@ -1,0 +1,23 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../../Theme/screens/dialog.uss" />
+    <ui:VisualElement class="dialog-screen" picking-mode="Ignore">
+        <ui:VisualElement name="dialog-panel" class="panel panel--floating dialog-panel" picking-mode="Position">
+            <ui:VisualElement class="panel__header" picking-mode="Ignore">
+                <ui:Label text="COMMUNICATION" class="panel__title text-display" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__body dialog-body" picking-mode="Ignore">
+                <ui:Image name="dialog-illustration" class="dialog-illustration is-hidden" scale-mode="ScaleToFit" picking-mode="Ignore" />
+                <ui:VisualElement class="row dialog-page" picking-mode="Ignore">
+                    <ui:Image name="dialog-portrait" class="dialog-portrait is-hidden" scale-mode="ScaleToFit" picking-mode="Ignore" />
+                    <ui:ListView name="dialog-lines" class="list dialog-lines" item-template="project://database/Assets/Game/UI/Views/Uxml/DialogLineItem.uxml?fileID=9197481963319205126&amp;guid=de19c8d3d4bc4b37b9f9c2af1ac44ad1&amp;type=3#DialogLineItem" virtualization-method="DynamicHeight" selection-type="None" show-border="false" show-add-remove-footer="false" />
+                </ui:VisualElement>
+                <ui:ListView name="dialog-options" class="list dialog-options" item-template="project://database/Assets/Game/UI/Views/Uxml/DialogOptionItem.uxml?fileID=9197481963319205126&amp;guid=9f976bb3a3e44c96ad98ac674732f816&amp;type=3#DialogOptionItem" virtualization-method="DynamicHeight" selection-type="None" show-border="false" show-add-remove-footer="false" />
+                <ui:Label name="dialog-end-label" text="End conversation" class="is-hidden" picking-mode="Ignore" />
+                <ui:Label name="dialog-continue-label" text="Continue" class="is-hidden" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__footer" picking-mode="Ignore">
+                <ui:Label text="1–9  Choose     Space / Enter  Continue     Esc  Leave" class="text-xs text-muted text-mono dialog-hint" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
