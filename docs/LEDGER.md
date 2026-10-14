@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 57 | 11 | 0 | 0 | 113 | 0 | 181 | 8 |
+| M3 | 56 | 12 | 0 | 0 | 113 | 0 | 181 | 8 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -461,7 +461,7 @@
 | HUD-008 | HudSnapshotSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, PWR-001, WPN-001, ABL-001, SYS-001, GAL-001, FLT-001, VOX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 13c85bbd | Review repairs complete: duplicate players, frozen hulk meters and interactable-body radar; nine focused checks pass |
 | HUD-009 | HudSyncSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-008, HUD-007, TRV-001, ENC-001 | no | todo |  |  |  |  |
 | HUD-010 | HUD presenters and screen hotkeys | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-009, QST-001, ECO-001, INP-001, TRV-001, NAR-001 | no | todo |  |  |  |  |
-| HUD-011 | Inventory screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-50 | no | todo |  |  |  |  |
+| HUD-011 | Inventory screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-006 | yes | in-progress | presentation (gpt-6.1-sol high) | 2026-10-14 |  | Existing presentation worker: complete inventory screen/presenter, 200 pooled slots and real drag/sort/stack; Q425 |
 | HUD-012 | Merchant screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-50 | no | todo |  |  |  |  |
 | HUD-013 | Dialog host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
 | HUD-014 | Ship log screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-42 | no | todo |  |  |  |  |
@@ -1020,6 +1020,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 
 | 424 | SPEC-42: QST-009 concrete content-authoring prerequisites | Resolved: accepted definition/compiler/validator owners replace whole-spec cycles under ADR-0068; actual opening gameplay remains QST-010. | Tech lead |
+
+| 425 | SPEC-61 Q29: HUD-011 concrete inventory-screen prerequisites | Resolved: real inventory/economy and UI owners replace whole-spec cycles under ADR-0068; root navigation remains its own task. | Tech lead |
 
 ## Measurements
 

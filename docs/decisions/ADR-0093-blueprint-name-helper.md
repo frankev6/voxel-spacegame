@@ -1,12 +1,12 @@
 # ADR-0093 — Blueprint name helper
 
-**Status:** Proposed (EDT-020, 2026-10-14; lead acceptance pending).
+**Status:** Accepted (Tech lead, 2026-10-14; EDT-020).
 
 ## Context
 
 SPEC-51 assigns BlueprintNames.Sanitize to ShipEditor while the profile store is in App. The task names the helper but leaves its signatures and collision predicate unspecified. Existing IBlueprintStore, editor, persistence and UI interfaces already support the feature.
 
-## Proposal
+## Decision
 
 Add the task-owned public static BlueprintNames helper with Sanitize(string), Unique(string, Func<string, bool>) and IsId(string). App supplies the collision predicate against its profile files and reserved content IDs. Names use ASCII lowercase, replace invalid characters with a collapsed underscore, trim edge separators, fall back to blueprint, and remain at most 48 characters including suffixes beginning _2.
 

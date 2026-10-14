@@ -560,7 +560,7 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 ### HUD-011 — Inventory screen
 - **Milestone:** M3
 - **Tier:** standard — view on an existing view model with a fixed pool
-- **Depends on:** `HUD-002`, `SPEC-50`
+- **Depends on:** `HUD-001`, `UI-003`, `UI-004`, `UI-005`, `UI-006`, `UI-007`, `UI-008`, `UI-012`, `ECO-003`, `ECO-004`, `ECO-006`
 - **Do:** `InventoryView` (200 pooled `Slot`s, drag-move with a `PointerManipulator` that captures the pointer and drops on the slot under the pointer), `InventoryPresenter`.
 - **Files:** `Assets/Game/UI/Views/InventoryView.cs`, `Assets/Game/UI/Views/Uxml/InventoryView.uxml`, `Assets/Game/UI/Theme/screens/inventory.uss`, `Assets/Game/Presentation/Presenters/InventoryPresenter.cs`
 - **Acceptance criteria:**
@@ -727,3 +727,5 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 - `Import/Legacy/ui/*.uxml` (old layouts, reference only; their styles are not reused).
 - `docs/design/DESIGN-SYSTEM.md` §5.8 (HUD zones Z-BL, Z-BC, Z-TR, Z-L; final look after approval).
 - Synthesis §6j.
+
+| 29 | Inventory screen construction waits on unrelated full economy and root-screen tasks | Under ADR-0068 use accepted HUD-001, UI-003/004/005/006/007/008/012 and ECO-003/004/006. Build against real InventoryModel and existing UI root; all five cases remain required. Production root navigation remains HUD-002/010 and is not falsely completed by this screen. | Tech lead — resolved; ledger Q425 |
