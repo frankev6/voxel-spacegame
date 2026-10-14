@@ -18,6 +18,7 @@ namespace Game.ShipEditor.Tools
         readonly PlacementValidator previewValidator;
         NativeList<BlockRecord> copies = new(Allocator.Persistent);
         internal DraftPicker.Hit Hover;
+        internal UnityEngine.Ray GridRay;
         internal SymmetrySettings Symmetry;
         internal ushort SelectedBlock;
         internal byte Orient, Color;
@@ -30,6 +31,7 @@ namespace Game.ShipEditor.Tools
             Mapper = new SymmetryMapper(content);
             previewValidator = new PlacementValidator(content, session.Placement, previewScratch);
         }
+        internal void SetError(PlacementError error) => Error = error;
         internal void BeginStroke() { StrokeId = checked(StrokeId + 1); }
         internal bool TryHovered(out BlockRecord record)
         {

@@ -9,11 +9,16 @@ namespace Game.ShipEditor.Services
     {
         NativeList<BlockRecord> records = new(Allocator.Persistent);
         internal NativeArray<BlockRecord> Records => records.AsArray();
+        internal bool HasBounds { get; private set; }
+        internal Unity.Mathematics.int3 BoundsMin { get; private set; }
+        internal Unity.Mathematics.int3 BoundsMax { get; private set; }
+        internal void SetBounds(Unity.Mathematics.int3 min, Unity.Mathematics.int3 max)
+        { Clear(); HasBounds = true; BoundsMin = min; BoundsMax = max; }
         internal PlacementError Error { get; private set; }
         internal int Version { get; private set; }
-        internal void Clear() { records.Clear(); Error = PlacementError.None; Version++; }
+        internal void Clear() { records.Clear(); HasBounds = false; Error = PlacementError.None; Version++; }
         internal void Set(NativeArray<BlockRecord> value, PlacementError error)
-        { records.Clear(); records.AddRange(value); Error = error; Version++; }
+        { records.Clear(); HasBounds = false; records.AddRange(value); Error = error; Version++; }
         public void Dispose() { if (records.IsCreated) records.Dispose(); records = default; }
     }
 }
