@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-14)
 
+- **Selection transactions authored:** EDT-0165c3d54af adds atomic damage-preserving move/rotate/mirror/delete and replacement transactions, with canonical same-origin lookup. Select gestures/controller actions and six required cases remain next; uncompiled/unaccepted. EDT-015, EDT-021 and TRV-009 workers all active; travel source nearly ready. No Unity active.
+
 - **Editor controller/basic tools accepted:** EDT-014175c78cb clean compile and seven required cases plus core-limit regression pass; pointer-cache follow-up also passes. Placement, removal, paint, eyedropper, rotation and cancel chain now use the draft session. EDT-015 and EDT-021 are ready for the existing workers; lead continues selection/transform prerequisites. TRV-009 active. No Unity active.
 
 - **Editor tool transactions authored:** EDT-014b74f0bbb adds reusable previews and place/paint/eyedropper transaction helpers. Controller wiring, remove gestures and seven required cases remain pending, uncompiled/unaccepted; next complete these before one focused batch. Mirror review318 clear. TRV-009 worker active; combat/economy have genuine dependency waits. No Unity active.

@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 61 | 12 | 0 | 0 | 107 | 0 | 180 | 8 |
+| M3 | 60 | 13 | 0 | 0 | 107 | 0 | 180 | 7 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -1117,6 +1117,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — EDT-016 selection transactions authored — astra (gpt-6)
+
+- 5c3d54af adds native origin selection, canonical exact-record capture through an incremental origin multimap, atomic move/rotate/mirror/delete, preserved damage and per-block replacement transactions. SPEC-51 Q41/global413 records reversible mixed-parity centre rounding and same-origin identity policy. Selection is controller-owned through ToolContext. Cross-task placement indexes gain origin lookup maintenance alongside existing exact identities.
+- SelectTool gestures, controller actions/registration, and six required SelectTransformTests remain pending; source is uncompiled/unaccepted and EDT-016 stays in-progress. spec-required:0 authored this checkpoint (six pending),extra:0. No Unity run; validate after implementation with compatible deliveries.
+- All three existing workers confirmed active: combat323 EDT-015, economy343 EDT-021, presentation299 TRV-009 with four cases authored and final source review before delivery. No duplicate workers or dependency waits. Previous controller acceptance and current selection transactions are progress. Next wire selection gestures/actions and required cases; integrate delivered travel source in the next batch. Full roadmap goal remains active.
 
 ### 2026-10-14 — Orchestration: editor worker dispatch — astra (gpt-6)
 
