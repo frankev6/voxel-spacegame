@@ -6,10 +6,10 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-015 | 3991bae4 delivered; review332 confirms selection findings; auditing ready standard work | EDT-017 after EDT-016 |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-021 | ef94aca8 delivered; area-tool review352 clear; acceptance/dependency wait | DLG-012 after DLG-007 |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-015 | 3991bae4 delivered; audit335 identifies QST-009 concrete dependency correction candidate | EDT-017 after EDT-016 |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-021 | ef94aca8 delivered; reviewing six renderer cases/disposal evidence | DLG-012 after DLG-007 |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | EDT-017 | 99ec7ef5 delivered; reviewing EDT-01883d2ab8d shader compatibility | EDT-020 after acceptance |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | EDT-017 | 99ec7ef5 delivered; shader review310 depth clipping fixed; acceptance/dependency wait | EDT-020 after acceptance |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Draft renderer focused checks pass:** EDT-01893947f59 binds existing baked brick materials plus packed Nocturne X-ray, fixes prop clipping in depth/normals/shadow passes, and passes all six required PlayMode cases (0.102100s bodies), compile78703 clean. Final native-disposal evidence review and graphics draw verification remain; EDT-018 stays in-progress. Worker deliveries and selection fixes remain queued. No Unity active.
 
 - **Draft prop drawing authored:** EDT-01883d2ab8d adds conventional instance batches, palette indices, slice clipping and transformed brick/prop bounds under ADR-0092. Material setup and six required cases remain; uncompiled/unaccepted. Tool/panel reviews clear apart from known EDT-016 selection defects. Combat audits ready standard work, presentation reviews shader compatibility; economy has a verified acceptance/dependency wait. No Unity active.
 

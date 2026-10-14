@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-14)
 
+- **Draft renderer focused checks pass:** EDT-01893947f59 binds existing baked brick materials plus packed Nocturne X-ray, fixes prop clipping in depth/normals/shadow passes, and passes all six required PlayMode cases (0.102100s bodies), compile78703 clean. Final native-disposal evidence review and graphics draw verification remain; EDT-018 stays in-progress. Worker deliveries and selection fixes remain queued. No Unity active.
+
 - **Draft prop drawing authored:** EDT-01883d2ab8d adds conventional instance batches, palette indices, slice clipping and transformed brick/prop bounds under ADR-0092. Material setup and six required cases remain; uncompiled/unaccepted. Tool/panel reviews clear apart from known EDT-016 selection defects. Combat audits ready standard work, presentation reviews shader compatibility; economy has a verified acceptance/dependency wait. No Unity active.
 
 - **Incremental draft props authored:** EDT-018f718c5b4 consumes edit diffs before history merge, reverses undo operations and maintains exact prop instances; opening/discard rebuilds are explicit. Drawing/materials and six cases remain; uncompiled/unaccepted. EDT-0153991bae4, EDT-021ef94aca8 and EDT-01799ec7ef5 delivered; combat/economy cross-review; presentation review307 found no panel defects and awaits lead acceptance/dependencies. Selection review found shared-origin transform rejection and stale selection after undo; lead fixes pending. No Unity active.

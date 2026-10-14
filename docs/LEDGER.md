@@ -1123,6 +1123,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-14 — EDT-018 materials and focused renderer checks — astra (gpt-6)
+
+- 93947f59 binds EditorBrick to existing baked texture/palette properties with the regular packed shader; EditorBrickXRay uses packed geometry and configured Nocturne cyan, no new imagery. SPEC-51 Q46/global418 records the provisional material default. Review310 found sliced props still writing above-plane depth/normals; shared clipping now covers forward, depth, normals and shadow fragments while excluding the procedural live-world path.
+- Compile61436 found one fixture using-declaration error (ApplyReport is not disposable), corrected before compile78703 terminal0 with zero warning CS. PlayMode3178 terminal0: six passed, none failed/skipped, 0.102100s total test bodies. Evidence Logs/playtest/editor-renderer. spec-required:6,extra:0. No broad suite or performance/soak run.
+- EDT-018 remains in-progress for final native-disposal evidence review and graphics draw verification. Source is compiled, but the direct mesh/storage checks do not prove visual output. Economy reviews that exact evidence; combat audit335 identifies QST-009 as a dependency-correction candidate and EDT-020 after clipboard acceptance. Presentation310 completed shader review. All three delivered editor tasks and EDT-016 selection fixes remain queued for integration. Prior prop draw work and this validated material/fixture batch are progress; no Unity active. Goal remains active.
+
 ### 2026-10-14 — EDT-018 prop drawing and shader adapter — astra (gpt-6)
 
 - 83d2ab8d adds reused conventional instance batches (500, below the 1,023 ceiling), per-instance palette indices, intersecting-prop slice clipping and transformed world bounds for brick and prop draws. Accepted ADR-0092 preserves the existing procedural live-world shader path and borrows shared materials without per-block material allocation.
