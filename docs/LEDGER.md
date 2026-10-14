@@ -1101,6 +1101,7 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 ### 2026-10-13 — SYS-009 player pose/docking restore authored — astra (gpt-6)
 
 - 95715e15 implements PLOC binary capture/atomic restore, silent docking, shared boot registration and a validated one-time docking notification after player/camera readiness (ADR-0085/Q393). Pending restored docking survives loader teardown; missing-GLXY regeneration preserves independently restored pose.
+- Compile7613 terminal1 identified an unqualified Interactable type in the new loader validator; qualified it. Undefined saved body roles now reject before mutation. Compilation retry and scene-completion timing review remain pending; no Unity active.
 - Three direct required cases authored: raw-bit/byte-identical round trip with truncation safety, silent-then-once docking, missing-chunk defaults. spec-required: 3, extra: 0. Uncompiled/unaccepted; review and focused validation next. No Unity active.
 - Combat reviews exact binary source, economy audits live restore hooks, presentation267 implements DLG-008. Previous exporter acceptance and current runtime/save implementation are progress.
 

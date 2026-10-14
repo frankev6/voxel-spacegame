@@ -48,7 +48,7 @@ namespace Game.Galaxy.Services
             var body = BodyId.FromLocalKey(dockSystem, key);
             if (hasLocation && (!system.IsValid || !location.StarSystem.Equals(system)))
                 throw new SaveFormatException("Inconsistent PLOC star system", reader.Position);
-            if (docked && (!hasLocation || !body.IsValid || body.LocalKey != key || !dockSystem.Equals(system)))
+            if (docked && (!hasLocation || !body.IsValid || !Enum.IsDefined(typeof(Game.Data.Definitions.BodyRole), body.Role) || body.LocalKey != key || !dockSystem.Equals(system)))
                 throw new SaveFormatException("Invalid PLOC docking identity", reader.Position);
             if (!reader.IsAtEnd) throw new SaveFormatException("Trailing PLOC data", reader.Position);
             state.CurrentStarSystem = system; state.HasPlayerLocation = hasLocation; state.PlayerLocation = location;
