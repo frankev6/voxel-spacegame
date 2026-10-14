@@ -51,6 +51,7 @@ namespace Game.Editor.Narrative
                             while (iterator.Next(descend))
                             {
                                 descend = true;
+                                if (iterator.isArray) continue; // Invalidate each wrapper element, not its collection.
                                 if (iterator.type != nameof(CompiledCondition) && iterator.type != nameof(CompiledIntExpr) && iterator.type != nameof(CompiledEffectList)) continue;
                                 iterator.FindPropertyRelative("compilerVersion").intValue = -1; descend = false;
                             }
@@ -165,7 +166,7 @@ namespace Game.Editor.Narrative
         static IReadOnlyCollection<string> Unwired()
         {
             // The adapter belongs to NAR-011. Read its actual declared set when present; no duplicated wiring table.
-            var type = TypeCache.GetTypesDerivedFrom<ILogicWorld>().FirstOrDefault(t => t.FullName == "Game.App.LogicWorldAdapter");
+            var type = TypeCache.GetTypesDerivedFrom<ILogicWorld>().FirstOrDefault(t => t.FullName == "Game.App.Services.LogicWorldAdapter");
             var value = type?.GetField("UnwiredMembers", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null)
                 ?? type?.GetProperty("UnwiredMembers", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null);
             if (value is IEnumerable<string> members) return members.ToArray();

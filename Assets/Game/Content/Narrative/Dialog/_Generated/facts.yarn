@@ -7,6 +7,7 @@
 <<declare $intro_ship_chosen = false>>
 <<declare $morale_boost = false>>
 <<declare $opening_cache_found = false>>
+<<declare $opening_chapter_done = false>>
 <<declare $pirate_bounty_accepted = false>>
 <<declare $relation_watch_report_submitted = false>>
 <<declare $relation_watch_submit_report = false>>

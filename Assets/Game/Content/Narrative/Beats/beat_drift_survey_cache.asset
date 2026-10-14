@@ -21,12 +21,12 @@ MonoBehaviour:
     - resource_cache
     hailEncounter: {fileID: 0}
   condition:
-    source: "quest_active(\"quest_survey_local_materials\")"
-    sourceHash: 0
-    compilerVersion: 0
-    hasErrors: 1
+    source: quest_active("quest_survey_local_materials")
+    sourceHash: 5789188731543685230
+    compilerVersion: 1
+    hasErrors: 0
     root:
-      rid: -2
+      rid: 6548929074352881947
   salience: 40
   weight: 1
   repeat: 0
@@ -50,3 +50,13 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 6548929074352881947
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: quest_active
+        intArgs:
+        - rid: -2
+        boolArgs:
+        - rid: -2
+        textArgs:
+        - quest_survey_local_materials

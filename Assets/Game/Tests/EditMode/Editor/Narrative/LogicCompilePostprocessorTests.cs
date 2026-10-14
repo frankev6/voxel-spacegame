@@ -54,7 +54,7 @@ namespace Game.Tests.EditMode.Editor.Narrative
             { so.FindProperty("condition.source").stringValue = "false"; so.ApplyModifiedPropertiesWithoutUndo(); }
             AssetDatabase.SaveAssetIfDirty(asset);
             AssetDatabase.ImportAsset(Path, ImportAssetOptions.ForceUpdate);
-            yield return null; // exactly one Editor update; no readiness/wall-clock loop
+            yield return DelayedEditorUpdate(); // Observe the actual import delay-call phase.
             var loaded = AssetDatabase.LoadAssetAtPath<LogicCompileFixtureDefinition>(Path);
             Assert.IsFalse(loaded.Condition.IsStale); Assert.IsFalse(loaded.Condition.HasErrors);
             using var saved = new SerializedObject(loaded);
@@ -71,7 +71,7 @@ namespace Game.Tests.EditMode.Editor.Narrative
             string guid = AssetDatabase.AssetPathToGUID(Path);
             Assert.IsFalse(EditorUtility.IsDirty(asset));
             AssetDatabase.ImportAsset(Path, ImportAssetOptions.ForceUpdate);
-            yield return null;
+            yield return DelayedEditorUpdate();
             var loaded = AssetDatabase.LoadAssetAtPath<LogicCompileFixtureDefinition>(Path);
             Assert.IsFalse(EditorUtility.IsDirty(loaded)); Assert.IsFalse(loaded.Condition.IsStale);
             Assert.AreEqual(guid, AssetDatabase.AssetPathToGUID(Path)); CollectionAssert.AreEqual(before, File.ReadAllBytes(Path));
@@ -120,6 +120,20 @@ namespace Game.Tests.EditMode.Editor.Narrative
             var repeated = LogicCompilePostprocessor.RecompileAll(ContentDatabaseBuilder.Rebuild(), Root);
             Assert.AreEqual(failed.ErrorCount, repeated.ErrorCount, "Current failed wrappers still return their diagnostics.");
             CollectionAssert.AreEqual(failedBytes, File.ReadAllBytes(Path));
+        }
+
+        static IEnumerator DelayedEditorUpdate()
+        {
+            bool completed = false;
+            void Completed() => completed = true;
+            EditorApplication.delayCall += Completed;
+            var deadline = EditorApplication.timeSinceStartup + 1;
+            try
+            {
+                while (!completed && EditorApplication.timeSinceStartup < deadline) yield return null;
+                Assert.IsTrue(completed, "Editor import delay-call phase did not execute.");
+            }
+            finally { EditorApplication.delayCall -= Completed; }
         }
 
         static long[] ManagedIds(LogicCompileFixtureDefinition owner)

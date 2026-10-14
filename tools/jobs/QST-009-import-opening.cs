@@ -104,7 +104,8 @@ namespace Game.Editor
                 while (property.Next(children))
                 {
                     children = true;
-                    if (property.type != nameof(CompiledCondition) && property.type != nameof(CompiledIntExpr) && property.type != nameof(CompiledEffectList)) continue;
+                    if (property.isArray) continue; // Visit elements, not the collection container.
+                if (property.type != nameof(CompiledCondition) && property.type != nameof(CompiledIntExpr) && property.type != nameof(CompiledEffectList)) continue;
                     text.AppendLine("  " + property.propertyPath + " sourceHash=" + property.FindPropertyRelative("sourceHash").ulongValue +
                         " version=" + property.FindPropertyRelative("compilerVersion").intValue + " stale=" + LogicCompilePostprocessor.IsStale(property) +
                         " errors=" + property.FindPropertyRelative("hasErrors").boolValue);

@@ -181,6 +181,7 @@ namespace Game.Editor.Narrative
             while (property.Next(children))
             {
                 children = true;
+                if (property.isArray) continue; // Visit elements, not the collection container.
                 if (property.type != nameof(CompiledCondition) && property.type != nameof(CompiledIntExpr) && property.type != nameof(CompiledEffectList)) continue;
                 result.Add(new Stamp(property)); children = false;
             }

@@ -20,17 +20,17 @@ MonoBehaviour:
     bodyTags: []
     hailEncounter: {fileID: 0}
   condition:
-    source: "$gate_ark_start_active and not $opening_chapter_done"
-    sourceHash: 0
-    compilerVersion: 0
-    hasErrors: 1
+    source: $gate_ark_start_active and not $opening_chapter_done
+    sourceHash: 3203237573341877642
+    compilerVersion: 1
+    hasErrors: 0
     root:
-      rid: -2
+      rid: 6548929074352881955
   salience: 0
   weight: 1
   repeat: 0
   firstVisitOnly: 0
-  yarnNode:
+  yarnNode: 
   onStart:
     source: []
     sourceHash: 3244421341483603138
@@ -39,15 +39,64 @@ MonoBehaviour:
     effects: []
   onComplete:
     source:
-    - "set_fact opening_chapter_done true"
-    - "notify \"The gate to Whisper hums awake.\""
-    sourceHash: 0
-    compilerVersion: 0
-    hasErrors: 1
-    effects: []
+    - set_fact opening_chapter_done true
+    - notify "The gate to Whisper hums awake."
+    sourceHash: 12743872946484981384
+    compilerVersion: 1
+    hasErrors: 0
+    effects:
+    - rid: 6548929074352881959
+    - rid: 6548929074352881961
   debug: 0
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 6548929074352881955
+      type: {class: AndCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 6548929074352881956
+        right:
+          rid: 6548929074352881957
+    - rid: 6548929074352881956
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: gate_ark_start_active
+    - rid: 6548929074352881957
+      type: {class: NotCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        operand:
+          rid: 6548929074352881958
+    - rid: 6548929074352881958
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: opening_chapter_done
+    - rid: 6548929074352881959
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929074352881960
+          Text:
+          - opening_chapter_done
+          - 
+    - rid: 6548929074352881960
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929074352881961
+      type: {class: NotifyEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - The gate to Whisper hums awake.

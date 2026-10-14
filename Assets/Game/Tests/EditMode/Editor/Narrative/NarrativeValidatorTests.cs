@@ -122,11 +122,15 @@ namespace Game.Tests.EditMode.Editor.Narrative
             string path = Path.Combine(root, "narrative-validation.txt");
             try
             {
-                database.EditorSetDefinitions(fixture.Definitions);
-                Assert.AreEqual(0, NarrativeValidatorCli.RunAndGetExitCode(database, path));
+                // The CLI runs every provider, including dialogue sources from the content tree.
+                // Its catalog must therefore be the matching production database.
+                var production = AssetDatabase.LoadAssetAtPath<ContentDatabase>(Game.Editor.Content.ContentDatabaseBuilder.DatabasePath);
+                database.EditorSetDefinitions(production.Definitions.ToList());
+                int validExit = NarrativeValidatorCli.RunAndGetExitCode(database, path);
+                Assert.AreEqual(0, validExit, File.ReadAllText(path));
                 StringAssert.Contains("0 errors", File.ReadAllText(path));
                 fixture.Definitions.RemoveAll(d => d is NarrativeConfigDefinition);
-                database.EditorSetDefinitions(fixture.Definitions);
+                database.EditorSetDefinitions(production.Definitions.Where(d => d is not NarrativeConfigDefinition).ToList());
                 Assert.AreEqual(1, NarrativeValidatorCli.RunAndGetExitCode(database, path));
                 Has(fixture.Validate(), "NAR-V005", true); Has(fixture.Validate(), "NAR-V010", true);
                 fixture.Definitions.Add(Create<NarrativeConfigDefinition>("narrative_one"));
