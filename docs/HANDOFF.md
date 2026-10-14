@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Draft session support authored:** EDT-00502d69553 adds owned batches, per-group reports and face-neighbour dirty tracking (ADR-0088/Q401); session apply/undo/redo and six cases remain next, uncompiled/unaccepted. SYS-011 unblocked through accepted loader-owned factory ADR-0087/Q400. TRV-008 delivered; TRV-010 and SYS-011 active. No Unity active.
+
 - **Editor history accepted:** EDT-0049d447ea5 clean compile, six direct checks pass. Next lead EDT-005 actual draft apply/undo/redo. TRV-00840452bf0 delivered; gate-info validation waits real TRV-010 (economy active). SYS-011 celestial worker active. Combat review301 complete, route/integration wait. No Unity active.
 
 - **Editor history source / visual prerequisite:** EDT-0047f26b7d1 adds compact native diffs, stroke merge, bounded history and correct saved-state invalidation (ADR-0086/Q398). Uncompiled/unaccepted; six required cases next. All three workers active: TRV-008 gates, TRV-010 routes, newly claimed SYS-011 celestial visuals (Q399); TRV-009 genuinely depends on those visuals. No Unity active.

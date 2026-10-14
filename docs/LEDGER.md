@@ -1106,6 +1106,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — EDT-005 batch support; celestial factory resolved — astra (gpt-6)
+
+- EDT-005 claimed dc21319c;02d69553 implements disposable native batch input, reusable group report and exact dirty-brick/face-neighbour support. ADR-0088/SPEC-51Q30/global401 supplies missing storage contracts. Main EditSession still unfinished; next draft lifetime/apply/undo/redo/discard and six required cases. spec-required:6 planned,extra:0. No compile/tests yet.
+- SYS-011 worker283 identified missing rendering creation seam. Accepted ADR-0087 in111f8a9a keeps interface in Galaxy (already referenced by Presentation), loader as sole link/lifetime writer, injected Presentation factory and explicit child cleanup. Worker received exact contract; Q24/global400 recorded. All work remains local. Previous history acceptance and current source/real dependency resolution are progress. No Unity active.
+
 ### 2026-10-13 — EDT-004 done: compact edit history — astra (gpt-6)
 
 - 7f26b7d1/9d447ea5 implements persistent diffs, same-stroke/tool merging, rebased damage, redo disposal, byte/count trimming and saved-state identity. Review301 found no ownership/merge/trim defects. spec-required:6,extra:0; NativeLeakDetection.EnabledWithStackTrace active in required fixtures. EDT-005 still owns actual voxel application.
