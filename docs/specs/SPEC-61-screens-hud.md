@@ -636,7 +636,7 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 ### HUD-017 — Fleet screen
 - **Milestone:** M3
 - **Tier:** standard — view on an existing view model
-- **Depends on:** `HUD-002`, `EDT-001`
+- **Depends on:** `HUD-001`, `UI-003`, `UI-004`, `UI-005`, `UI-006`, `UI-007`, `UI-008`, `UI-009`, `UI-012`, `FND-010`, `SYS-008`, `EDT-001`, `EDT-010`
 - **Do:** `FleetView`, `FleetPresenter` (stats rows from SPEC-22 `BlockStatMath`, §10 Q15 for edit).
 - **Files:** `Assets/Game/UI/Views/FleetView.cs`, `Assets/Game/UI/Views/Uxml/{FleetView,FleetShipRow,StatRow}.uxml`, `Assets/Game/UI/Theme/screens/fleet.uss`, `Assets/Game/App/Presenters/FleetPresenter.cs`
 - **Acceptance criteria:**
@@ -740,3 +740,5 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 | 34 | Dialog host view waits on umbrella root composition | ADR-0068: use completed view-model, UI service/control and dialog-command contracts. Implement the complete view and five specified cases; actual narrative driver/content remains SPEC-41, never fake a story encounter. | Tech lead — resolved; ledger Q435 |
 
 | 35 | Ship-editor host obtains the UI root for panel mounting while its public constructor must stay unchanged | Keep ShipEditorView(vm, commands) and existing public contracts unchanged. An internal read-only UINavigator.RootOwner accessor supplies the exact same UI root that built the screen; no global service lookup, additional service registration or public API. OnBuild mounts accepted EDT-021 fragments once into four authored hud-region/hud-plate regions: top 64px, bottom 48px, left 360px and right 380px. Root/host ignore picking, with no centre element; plates remain pickable. Host plates remove inherited padding because the mounted panels own their own padding; host tool rows are 24px to leave space for the narrow-width horizontal scrollbar. Root switching stays with existing SetRoot; Back forwards to existing commands. Reuse the accepted panel worst-case fixture in exactly four required cases, including real FlightHudView/root visibility and actual UIRoot pointer-gate checks with a controlled frame guard. Lead owns production composition; no Unity run by this worker. | Tech lead | HUD-018 implementation defaults; lead acceptance/central mirror pending. |
+
+| 36 | Fleet view prerequisites and unimplemented actions | ADR-0068 concrete completed UI, fleet, docking and stats dependencies replace umbrella HUD-002. Use existing editor launcher contract; EDT-023 owns actual launch, report unavailable without pretending success. Flagship switching has no owner API, so CanSetActive stays false. | Tech lead — resolved; ledger Q436 |
