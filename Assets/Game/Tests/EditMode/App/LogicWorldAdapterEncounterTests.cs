@@ -270,7 +270,7 @@ namespace Game.Tests.EditMode.App
                 Ecs.CompleteAll(); Bridge?.Dispose(); Adapter?.Dispose(); Director?.Dispose(); Travel?.Dispose(); Loader?.Dispose();
                 Services.Unregister(Director); Services.Unregister(Loader); Services.Unregister(Territory); Services.Unregister(Factions);
                 session?.Dispose(); registry?.Dispose(); if (registry != null) Object.DestroyImmediate(registry); blueprints?.Dispose();
-                Factions?.Dispose(); Galaxy?.Dispose(); State.Dispose(); pause.Dispose();
+                Territory?.Dispose(); Factions?.Dispose(); Galaxy?.Dispose(); State.Dispose(); pause.Dispose();
                 if (Standing != Entity.Null && Em.Exists(Standing)) Em.GetComponentData<FactionRelations>(Standing).Dispose();
                 if (relationEvents.IsCreated) relationEvents.Dispose(); if (originEvents.IsCreated) originEvents.Dispose();
                 Ecs.Dispose(); Content.Dispose();
