@@ -1084,7 +1084,7 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 ### ENC-014 — Procedural territory and TerritoryEntered
 - **Milestone:** M4
 - **Tier:** standard — seeded selection and multi-source BFS fully specified in §5.11
-- **Depends on:** `ENC-011`
+- **Depends on:** `ENC-005`, `GAL-008`, `CORE-003`
 - **Do:** Implement §5.11 step 3 and `TerritoryEntered`.
 - **Files:** `Assets/Game/Galaxy/Services/TerritoryService.cs`; `Assets/Game/Tests/EditMode/Galaxy/Encounters/TerritoryTests.cs`
 - **Acceptance criteria:**
@@ -1131,3 +1131,5 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 | 20 | ENC-004 pending-read saturation and sandbox/reset lifetime | Fold each queued operation with the same clamp as the fixed-step writer. Register a session-model adapter as well as the new-game initializer, because sandbox reset skips campaign initializers. Parse FACN fully before mutation; reject duplicate or malformed records and preserve unknown IDs until session reset. | Tech lead — resolved; ledger Q441 |
 
 | 21 | ENC-005 concrete prerequisites hidden by whole-spec dependency | Territory reads the canonical ENC-003 index map via ENC-004 faction service and GAL-008 galaxy generation; use these concrete completed prerequisites with ENC-002. | Tech lead — resolved; ledger Q442 |
+
+| 28 | Procedural territory waits on unrelated encounter integration scenarios | Use completed authored territory, galaxy generation and deterministic RNG under ADR-0068. No encounter director or spawning dependency exists in the specified BFS/event algorithm. | Tech lead — resolved; ledger Q458 |

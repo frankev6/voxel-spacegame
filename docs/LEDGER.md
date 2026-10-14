@@ -17,7 +17,7 @@
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
 | M3 | 36 | 15 | 0 | 0 | 131 | 0 | 182 | 5 |
-| M4 | 10 | 2 | 0 | 0 | 2 | 0 | 14 | 5 |
+| M4 | 9 | 3 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -498,7 +498,7 @@
 | TRV-013 | Supercruise (in-system hop) | [SPEC-32](specs/SPEC-32-travel.md) | M4 | frontier | TRV-012, SPEC-23, SPEC-61 | no | todo |  |  |  |  |
 | TRV-014 | Escort transfer hooks | [SPEC-32](specs/SPEC-32-travel.md) | M4 | standard | TRV-006, TRV-009, AI-001, FND-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Economy worker: actual travel escort callbacks and three required contract cases; fleet implementation stays with SPEC-01. |
 | ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011, AI-001 | no | todo |  |  |  |  |
-| ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011 | no | todo |  |  |  |  |
+| ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-005, GAL-008, CORE-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Combat worker: deterministic procedural territory BFS and owner-change events; advisory large measurement deferred. |
 | NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 4ca00b3 | Partial4ca00b3 +6d6e1ce9; fact editing required case passes39710, formatter also green. Baseline/Play beat live acceptance still awaits QST-005/006 and DLG-006; remains in progress. |
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
@@ -1057,6 +1057,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 455 | SPEC-51 Q54: host concrete dependencies | Use completed CAM-009, INP-006, HUD-018 and UI-011; flight occlusion is unrelated. | Tech lead |
 | 456 | SPEC-51 Q55: scene host and persistent editor bindings | ADR-0097: register persistent views once, forward only to active presenter, detach before native disposal; read-only SelectedCount. | Tech lead |
 | 457 | SPEC-32 Q25: escort hook prerequisites | Use completed travel timeline/presentation contracts; R30/benchmark task is unrelated to construction. | Tech lead |
+| 458 | SPEC-33 Q28: procedural territory concrete prerequisites | Use ENC-005, GAL-008 and CORE-003; encounter integration scenarios are unrelated to BFS and ownership events. | Tech lead |
 
 ## Measurements
 

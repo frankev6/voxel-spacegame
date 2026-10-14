@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | HUD-019 | Pause delivered 7fa0900 pending validation; implementing loading/dock interactions | Actual trade acceptance waits on ECO-008 |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-014 | Loading/dock delivered 4e48193c; now implementing procedural territory BFS/events | HUD-019 actual trade acceptance waits on ECO-008 |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-014 | Main menu delivered 95638c8e pending validation; implementing travel escort lifecycle hooks | Actual fleet owner remains SPEC-01 |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-010 | HUD-007 delivered d0ac700a; settings/save source confirmed complete, now implementing notifications/hotkeys/objective hook | Actual root/sync/query integration remains lead-owned |
 
