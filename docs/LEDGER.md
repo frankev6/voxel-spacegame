@@ -1101,6 +1101,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — TRV-006 jump lifecycle authored — astra (gpt-6)
+
+- c661995b supplies request acceptance, narrative undock, prefetch, control locks, departure/arrival effects and cues, tick-based spool/arrival, unscaled transit/readiness/timeout, commit fuel recheck/payment, optional escort hooks, pause release, abort notices/save blocker and scene/disposal cleanup. Boot registers real TravelService with ticker, session, flow and ILaneAccess. Gate interaction remains explicit TRV-008 TODO.
+- Uncompiled/unaccepted: next eight required direct cases and compatible validation; spec-required: 8 functional planned, extra: 0. No Unity launched. Combat reviews implementation. Economy review318 found no SYS-012 fixture/ownership defects and now waits for acceptance/ready dependencies; DLG-009 remains active. Previous eligibility and current lifecycle source are progress.
+
 ### 2026-10-13 — TRV-006 ordered eligibility authored — astra (gpt-6)
 
 - Claimed bb5a9a17 after explicit completed dependency resolution (SPEC-32 Q19/global396). 28dd59c5 implements ordered pure CanJump checks without watcher rebuild, narrative undock or fuel mutation; selects the lowest player entity index and connects the existing StarSystemLoader to ITravelLoader. Properties now expose idle state rather than throw. RequestJump and execution remain explicit unfinished TRV-006 work.

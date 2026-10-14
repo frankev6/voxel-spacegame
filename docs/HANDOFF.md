@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Jump lifecycle authored:** TRV-006 c661995b connects spool/commit/transit/arrival, fuel, pause/lock cleanup, effects, optional escort hooks and boot owners. Uncompiled/unaccepted; next eight required direct cases and focused compatible validation. Combat reviews actual timeline; economy SYS-012 review318 found no defects and has an acceptance/dependency wait; DLG-009 view active. No Unity active.
+
 - **Travel eligibility authored:** TRV-006 claimed bb5a9a17; 28dd59c5 adds ordered read-only jump refusals, lowest-index player selection and the existing loader interface. Uncompiled/unaccepted; RequestJump/timeline, lock/pause/fuel/FX, boot wiring and eight required functional cases remain next. SYS-012/DLG-012 source awaits compatible validation; DLG-009 worker active. No Unity active.
 
 - **Compatible deliveries integrated:** SYS-012 c1acaa03 and DLG-012 fedb7e70 are on local main, uncompiled/unaccepted pending focused batch with DLG-009. Combat reviews actual travel seams; economy reviews loader regressions; presentation implements the view. Next lead TRV-006 dependency resolution/timeline. No Unity active.

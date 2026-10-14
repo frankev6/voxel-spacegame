@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | SYS-012 | Delivered c1acaa03; pending batch validation; reviewing travel integration seams | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DLG-012 | Delivered fedb7e70; pending batch validation; reviewing loader regressions | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DLG-012 | Delivered fedb7e70; pending batch validation; review318 complete, acceptance/dependency wait | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DLG-009 | Presenter accepted; authored dialog view dispatched | HUD-003/006/007 once ready |
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Jump lifecycle authored:** TRV-006 c661995b connects spool/commit/transit/arrival, fuel, pause/lock cleanup, effects, optional escort hooks and boot owners. Uncompiled/unaccepted; next eight required direct cases and focused compatible validation. Combat reviews actual timeline; economy SYS-012 review318 found no defects and has an acceptance/dependency wait; DLG-009 view active. No Unity active.
 
 - **Travel eligibility authored:** TRV-006 claimed bb5a9a17; 28dd59c5 adds ordered read-only jump refusals, lowest-index player selection and the existing loader interface. Uncompiled/unaccepted; RequestJump/timeline, lock/pause/fuel/FX, boot wiring and eight required functional cases remain next. SYS-012/DLG-012 source awaits compatible validation; DLG-009 worker active. No Unity active.
 
