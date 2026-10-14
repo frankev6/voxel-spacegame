@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Quest runtime unblocked:** QST-003 claimed d1ab9183 for lead; QST-004 claimed c59e9110 and dispatched to the existing economy worker. SPEC-42 Q11/global Q370 replaces circular whole-spec dependencies with accepted real runtime prerequisites under ADR-0068. NAR-018 partial4ca00b3 is integrated but remains unaccepted; validate with the next compatible batch. Combat audits dialog prerequisites; presentation reviews the debugger source. No Unity active. Previous persistence acceptance and current source integration/dependency repair are progress.
+
 - **Inventory persistence accepted:** ECO-006d3c8b0bc saves wallet, cargo/overflow and merchant stock, preserving missing/unknown identities; real boot registration is in place. Compile clean, final focused EditMode12 passes (0.2672s bodies), production newgame/save1 pass (1.0264s). No broad/perf run; evidence Logs/playtest/inventory-save. No Unity active. NAR-018 partial2751035d awaits integration/real owners; combat audits dependency cycle, other workers have genuine dependency waits. Next NAR-012 and quest/dialog prerequisites. Previous acceptance and this persistence work are progress.
 
 - **DEV-009 accepted:**348fa4f7 completes world commands and explicit sandbox NPC spawning. Compile12672 clean; spawn/grid pass7809 and teleport retry54555 passes after actual physics fixture setup. Three required cases, no broad/perf run; evidence Logs/playtest/dev009. No Unity active. Next ECO-006 inventory saving; NAR-018 active249, economy reviewing INVT state, presentation dependency wait. Previous correction and current acceptance are progress.
