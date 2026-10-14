@@ -1104,6 +1104,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — EDT-004 history authored; SYS-011 dispatched — astra (gpt-6)
+
+- EDT-0047f26b7d1 owns persistent diff/damage buffers, merges same-tool strokes with offset rebasing, disposes redo branches, trims by bytes/count, and preserves dirty state when saved states become unreachable. ADR-0086/SPEC-51 Q29/global398 specify missing internal-module API and ownership. Uncompiled/unaccepted; spec-required:6 planned,extra:0. EDT-005 still owns actual voxel undo/redo application. Source checkpoint integrated under ADR-0062.
+- Presentation audit281 found actual missing celestial visual owner blocking travel emission. SYS-011 claimed1df1c516 on completed camera/anchor dependencies (SPEC-31Q23/global399); same presentation thread dispatched. Combat299 gate and economy322 route workers active. Lead continues history cases, then compatible validation. No Unity run this turn. Previous acceptance/dispatch and current implementation are progress.
+
 ### 2026-10-13 — TRV-006 / SYS-012 / DLG-009 accepted — astra (gpt-6)
 
 - TRV-0062430de6e implements full jump lifecycle/boot; review298 fixes zero-frame reveal bypass and connects map lane access. SYS-012c1acaa03 and DLG-009f2f3aa39 delivered/integrated. DLG-012fedb7e70 direct case passes but remains in-progress for actual intro verification after DLG-007. SPEC-41 Q20 mirrored397.

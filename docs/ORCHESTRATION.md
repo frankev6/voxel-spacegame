@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Editor history source / visual prerequisite:** EDT-0047f26b7d1 adds compact native diffs, stroke merge, bounded history and correct saved-state invalidation (ADR-0086/Q398). Uncompiled/unaccepted; six required cases next. All three workers active: TRV-008 gates, TRV-010 routes, newly claimed SYS-011 celestial visuals (Q399); TRV-009 genuinely depends on those visuals. No Unity active.
+
 - **Travel/dialog focused batch accepted:** TRV-006/SYS-012/DLG-009 done. Clean compile;21 EditMode pass; six PlayMode cases pass across initial5 and one corrected layout retry (Burst startup fixed39b1cf0c). DLG-012 direct check passes, live intro awaits DLG-007. Next gate/destination workers and lead presentation/production-runner prerequisites. No Unity active.
 
 - **Jump lifecycle authored:** TRV-006 c661995b connects spool/commit/transit/arrival, fuel, pause/lock cleanup, effects, optional escort hooks and boot owners. Uncompiled/unaccepted; next eight required direct cases and focused compatible validation. Combat reviews actual timeline; economy SYS-012 review318 found no defects and has an acceptance/dependency wait; DLG-009 view active. No Unity active.
