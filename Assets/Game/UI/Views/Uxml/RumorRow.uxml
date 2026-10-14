@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+  <ui:VisualElement class="list__item ship-log-row" picking-mode="Ignore">
+    <ui:VisualElement class="ship-log-row-copy" picking-mode="Ignore">
+      <ui:Label name="row-title" class="text-m text-ellipsis" picking-mode="Ignore" />
+      <ui:Label name="row-subtitle" class="text-s text-muted text-ellipsis" picking-mode="Ignore" />
+    </ui:VisualElement>
+    <ui:Button name="row-action" text="Show on map" class="btn btn--secondary ship-log-map" />
+  </ui:VisualElement>
+</ui:UXML>

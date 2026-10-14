@@ -14,6 +14,6 @@ namespace Game.UI.ViewModels
         [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
         static readonly BindablePropertyChangedEventArgs ValueChanged = new BindablePropertyChangedEventArgs(nameof(Value));
         int value;
-        [CreateProperty] public int Value { get => value; set => Set(ref value, value, ValueChanged); }
+        [CreateProperty] public int Value { get => value; set => Set(ref this.value, value, ValueChanged); }
     }
 }

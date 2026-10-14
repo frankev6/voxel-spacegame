@@ -89,6 +89,9 @@ MonoBehaviour:
   - Key: system-map
     Uxml: {fileID: 9197481963319205126, guid: 3ec96ec0a3fc4201861220cde0d1ed7c, type: 3}
     Prewarm: 0
+  - Key: ship-log
+    Uxml: {fileID: 9197481963319205126, guid: e0470649b088498490d70cadd4ca0033, type: 3}
+    Prewarm: 0
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32

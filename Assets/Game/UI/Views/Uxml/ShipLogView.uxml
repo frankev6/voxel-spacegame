@@ -1,0 +1,52 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:controls="Game.UI.Controls">
+  <Style src="../../Theme/screens/ship-log.uss" />
+  <ui:VisualElement class="ship-log-screen" picking-mode="Ignore">
+    <ui:VisualElement name="ship-log-panel" class="panel ship-log-panel">
+      <ui:VisualElement class="panel__header" picking-mode="Ignore">
+        <ui:Label text="Ship log" class="panel__title text-display" picking-mode="Ignore" />
+        <ui:VisualElement class="panel__header-actions" picking-mode="Ignore">
+          <ui:Button name="ship-log-close" text="Close" class="btn btn--ghost" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <controls:TabBar name="ship-log-tabs" class="ship-log-tabs" />
+      <ui:VisualElement class="panel__body ship-log-body" picking-mode="Ignore">
+        <ui:VisualElement name="ship-log-quests" class="ship-log-tab ship-log-columns" picking-mode="Ignore">
+          <ui:VisualElement class="ship-log-sidebar" picking-mode="Ignore">
+            <ui:Toggle name="ship-log-show-completed" label="Completed and failed" class="ship-log-filter" />
+            <ui:Label name="ship-log-quest-empty" text="No quests here." class="text-muted text-s" picking-mode="Ignore" />
+            <ui:ListView name="ship-log-quest-list" class="list ship-log-fill" fixed-item-height="88" virtualization-method="FixedHeight" selection-type="Single" item-template="project://database/Assets/Game/UI/Views/Uxml/QuestRow.uxml?fileID=9197481963319205126&amp;guid=ef9abdcd9123492881f03a2aaf3679e1&amp;type=3#QuestRow" />
+          </ui:VisualElement>
+          <ui:VisualElement class="ship-log-detail" picking-mode="Ignore">
+            <ui:ScrollView name="ship-log-quest-detail" class="ship-log-prose-scroll" horizontal-scroller-visibility="Hidden">
+              <ui:Label name="ship-log-quest-title" class="text-display text-l ship-log-prose" picking-mode="Ignore" />
+              <ui:Label name="ship-log-quest-stage" class="text-m ship-log-prose" picking-mode="Ignore" />
+              <ui:Label name="ship-log-quest-description" class="text-s text-muted ship-log-prose" picking-mode="Ignore" />
+              <ui:VisualElement name="ship-log-objectives" picking-mode="Ignore" />
+            </ui:ScrollView>
+            <ui:Label text="Log entries" class="text-s text-muted ship-log-section" picking-mode="Ignore" />
+            <ui:ListView name="ship-log-quest-log" class="list ship-log-fill" fixed-item-height="40" virtualization-method="DynamicHeight" selection-type="None" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="ship-log-clues" class="ship-log-tab ship-log-columns" picking-mode="Ignore">
+          <ui:VisualElement class="ship-log-sidebar" picking-mode="Ignore">
+            <ui:Label name="ship-log-clue-empty" text="No clues discovered." class="text-muted text-s" picking-mode="Ignore" />
+            <ui:ListView name="ship-log-clue-list" class="list ship-log-fill" fixed-item-height="88" virtualization-method="FixedHeight" selection-type="Single" item-template="project://database/Assets/Game/UI/Views/Uxml/ClueRow.uxml?fileID=9197481963319205126&amp;guid=29b3f3b653584684b342e365c60682d9&amp;type=3#ClueRow" />
+          </ui:VisualElement>
+          <ui:VisualElement class="ship-log-detail" picking-mode="Ignore">
+            <ui:ScrollView name="ship-log-clue-detail" class="ship-log-prose-scroll" horizontal-scroller-visibility="Hidden">
+              <ui:Label name="ship-log-clue-body" class="text-m ship-log-prose" picking-mode="Ignore" />
+            </ui:ScrollView>
+            <ui:Label text="Mysteries" class="text-s text-muted ship-log-section" picking-mode="Ignore" />
+            <ui:ListView name="ship-log-mysteries" class="list ship-log-fill" fixed-item-height="88" virtualization-method="DynamicHeight" selection-type="None" />
+            <ui:Label text="Journal" class="text-s text-muted ship-log-section" picking-mode="Ignore" />
+            <ui:ListView name="ship-log-journal" class="list ship-log-fill" fixed-item-height="40" virtualization-method="DynamicHeight" selection-type="None" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="ship-log-rumors" class="ship-log-tab" picking-mode="Ignore">
+          <ui:Label name="ship-log-rumor-empty" text="No rumors discovered." class="text-muted text-s" picking-mode="Ignore" />
+          <ui:ListView name="ship-log-rumor-list" class="list ship-log-fill" fixed-item-height="88" virtualization-method="FixedHeight" selection-type="None" item-template="project://database/Assets/Game/UI/Views/Uxml/RumorRow.uxml?fileID=9197481963319205126&amp;guid=3e3dab8549dd42be8ffed11e28dd3195&amp;type=3#RumorRow" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:VisualElement>
+</ui:UXML>

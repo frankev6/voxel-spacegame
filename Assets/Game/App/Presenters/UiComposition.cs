@@ -40,6 +40,8 @@ namespace Game.App.Presenters
         internal MerchantViewModel MerchantModel { get; } = new MerchantViewModel();
         internal DialogViewModel DialogModel { get; } = new DialogViewModel();
         internal ShipLogViewModel ShipLogModel { get; } = new ShipLogViewModel();
+        Game.Presentation.Presenters.ShipLogPresenter shipLogPresenter;
+        Func<ContentId, bool> rumorMapNavigation;
         internal GalaxyMapViewModel GalaxyMapModel { get; } = new GalaxyMapViewModel();
         internal StarSystemMapViewModel StarSystemMapModel { get; } = new StarSystemMapViewModel();
         internal FleetViewModel FleetModel { get; } = new FleetViewModel();
@@ -187,6 +189,25 @@ namespace Game.App.Presenters
             DialogPresenter = new Game.Presentation.Bridges.DialogPresenter(service, content, DialogModel, ui.Navigator, sound);
         }
 
+        // QST-008 installs this once the canonical query exists; no shell view or substitute query is registered.
+        internal void BindShipLogQuery(Game.Narrative.ShipLog.ShipLogQuery query)
+        {
+            CheckAlive();
+            if (query == null) throw new ArgumentNullException(nameof(query));
+            if (shipLogPresenter == null)
+            {
+                shipLogPresenter = new Game.Presentation.Presenters.ShipLogPresenter(ShipLogModel,
+                    Game.Core.Services.Get<Game.Data.Services.ContentService>().Catalog,
+                    system => rumorMapNavigation != null && rumorMapNavigation(system),
+                    text => ui.Notifications.Post(new Game.UI.Data.Notification { Kind = Game.UI.Data.NotificationKind.Info, Label = text }));
+                shipLogPresenter.Bind(query); ui.Register(new ShipLogView(ShipLogModel, shipLogPresenter));
+            }
+            else shipLogPresenter.Bind(query);
+        }
+        // TODO(HUD-016): callback opens the real registered map and selects this authored star system.
+        internal void BindShipLogMapNavigation(Func<ContentId, bool> navigate)
+        { CheckAlive(); rumorMapNavigation = navigate ?? throw new ArgumentNullException(nameof(navigate)); }
+
         internal void ShowSaveSlots(SaveSlotsMode mode) => saveSlotsPresenter.Show(mode);
 
         // Installed only with real screen/launcher navigation, never placeholder command implementations.
@@ -237,6 +258,12 @@ namespace Game.App.Presenters
             if (value.Reason != SessionResetReason.Cleared) RebindHudObjective();
             galaxyMapPresenter?.Reset(); systemMapPresenter?.Reset();
             // TODO(HUD-014): rebind the owning feature presenters
+            if (shipLogPresenter != null)
+            {
+                shipLogPresenter.Unbind();
+                if (value.Reason != SessionResetReason.Cleared && Game.Core.Services.TryGet<Game.Narrative.ShipLog.ShipLogQuery>(out var query)) shipLogPresenter.Bind(query);
+            }
+            // TODO(HUD-009/010/013/014/015/016/018/019): rebind the owning feature presenters
             // to the new session models here when those features install their production bindings.
         }
         internal void Tick()
@@ -257,6 +284,7 @@ namespace Game.App.Presenters
             screenHotkeys?.Dispose(); hudNotifications?.Dispose(); hudObjective?.Dispose();
             if (galaxyMapPresenter != null) { Game.Core.Services.Unregister(galaxyMapPresenter); galaxyMapPresenter.Dispose(); }
             if (systemMapPresenter != null) { Game.Core.Services.Unregister(systemMapPresenter); systemMapPresenter.Dispose(); }
+            shipLogPresenter?.Dispose(); rumorMapNavigation = null;
             DialogPresenter?.Dispose();
             Game.Core.Services.Unregister(dockPresenter); dockPresenter.Dispose();
             loadingPresenter.Dispose();
