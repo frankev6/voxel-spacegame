@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement class="narrative-debugger-shell">
+        <uie:Toolbar>
+            <uie:ToolbarToggle name="facts-tab" text="Facts" />
+            <uie:ToolbarToggle name="trace-tab" text="Trace" />
+            <uie:ToolbarToggle name="quests-tab" text="Quests" />
+            <uie:ToolbarButton name="refresh" text="Refresh" />
+        </uie:Toolbar>
+        <ui:Label name="status" class="narrative-debugger-status" />
+        <ui:VisualElement name="facts-panel" class="narrative-debugger-panel">
+            <uie:ToolbarSearchField name="search" tooltip="Filter facts by name" />
+            <ui:Label name="fact-status" class="narrative-debugger-status" />
+        </ui:VisualElement>
+        <ui:VisualElement name="trace-panel" class="narrative-debugger-panel">
+            <ui:Label name="trace-status" class="narrative-debugger-status" />
+        </ui:VisualElement>
+        <ui:VisualElement name="quests-panel" class="narrative-debugger-panel">
+            <ui:Label name="quest-status" class="narrative-debugger-status" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

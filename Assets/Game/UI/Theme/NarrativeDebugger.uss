@@ -1,0 +1,31 @@
+.narrative-debugger-root {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    -unity-font-definition: var(--font-body);
+    font-size: var(--text-xs);
+}
+.narrative-debugger-shell, .narrative-debugger-panel, .narrative-debugger-list { flex-grow: 1; }
+.narrative-debugger-panel { padding: var(--space-2); }
+.narrative-debugger-status {
+    color: var(--color-text-muted);
+    white-space: normal;
+    margin: var(--space-1);
+}
+.narrative-debugger-cell {
+    -unity-font-definition: var(--font-mono);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.narrative-debugger-entry {
+    -unity-font-definition: var(--font-mono);
+    white-space: normal;
+    padding: var(--space-2);
+    border-bottom-width: var(--border-thin);
+    border-bottom-color: var(--color-border);
+}
+.narrative-debugger-root .unity-toolbar {
+    background-color: var(--color-surface-1);
+    border-bottom-color: var(--color-border);
+}
+.narrative-debugger-hidden { display: none; }
