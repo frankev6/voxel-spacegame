@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 1 | 0 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 6 |
-| M3 | 96 | 7 | 0 | 0 | 77 | 0 | 180 | 8 |
+| M3 | 95 | 8 | 0 | 0 | 77 | 0 | 180 | 7 |
 | M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -386,7 +386,7 @@
 | NAR-014 | Legacy converter: reading, mapping tables and logic translation | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-003, MIG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 2be62596 | Strict five-file loader and mapped logic; 5 focused checks pass; emission/assets remain NAR-015/016 |
 | NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 5d85a419 | 34 Yarn/34 beats/facts and manifest generated;145 files byte-stable,35 definitions registered; six required checks accepted, clean compile; Q325 |
 | NAR-016 | Legacy converter: quests, triggers, templates and flag assets | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-015 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 1b0cb271 | Four required converter cases pass9669; real generation42967 terminal0, 225 files raw-byte identical across rerun;9 total quests incl Whisper,3 contracts,143 source strings; Q337/343. |
-| NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | yes | todo |  |  |  |  |
+| NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Existing combat worker; read-only debugger Facts/Trace/Quests, one required formatting case |
 | NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | no | todo |  |  |  |  |
 | NAR-020 | LogicWatcher | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-004 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | b4344a9 | Sorted/deduplicated dependency watcher; 4 focused tests pass |
 | DLG-001 | Public contract types | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | NAR-001, UI-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 67e0ffd | Dialog contracts, one required test; full suites green |
