@@ -65,6 +65,9 @@ MonoBehaviour:
   - Key: blueprint-browser
     Uxml: {fileID: 9197481963319205126, guid: 7d2dec1331b64a91aa1ba1a567531aa2, type: 3}
     Prewarm: 0
+  - Key: inventory
+    Uxml: {fileID: 9197481963319205126, guid: 898c4391482142c284b438f33782e8bd, type: 3}
+    Prewarm: 0
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32

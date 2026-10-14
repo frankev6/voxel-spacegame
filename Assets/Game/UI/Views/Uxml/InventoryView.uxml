@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../../Theme/screens/inventory.uss" />
+    <ui:VisualElement class="inventory-screen" picking-mode="Ignore">
+        <ui:VisualElement name="inventory-panel" class="panel inventory-panel">
+            <ui:VisualElement class="panel__header inventory-header" picking-mode="Ignore">
+                <ui:Label name="inventory-title" text="Inventory" class="panel__title text-display" picking-mode="Ignore" />
+                <ui:Label name="inventory-capacity" class="text-s inventory-capacity" picking-mode="Ignore" />
+                <ui:Button name="inventory-sort" text="Sort" class="btn btn--secondary" />
+                <ui:Button name="inventory-stack-all" text="Stack All" class="btn btn--secondary" />
+                <ui:Button name="inventory-close" text="Close" class="btn btn--ghost" />
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__body inventory-body" picking-mode="Ignore">
+                <ui:ScrollView name="inventory-grid" class="inventory-grid" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
+                <ui:ScrollView name="inventory-detail" class="inventory-detail" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto">
+                    <ui:Label name="inventory-detail-name" class="text-display text-l inventory-detail-text" picking-mode="Ignore" />
+                    <ui:Label name="inventory-detail-description" class="text-s inventory-detail-text" picking-mode="Ignore" />
+                    <ui:Label name="inventory-detail-count" class="text-s inventory-detail-text" picking-mode="Ignore" />
+                    <ui:Label name="inventory-detail-value" class="text-s inventory-detail-text" picking-mode="Ignore" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__footer" picking-mode="Ignore">
+                <ui:Label name="inventory-wallet" class="text-s" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

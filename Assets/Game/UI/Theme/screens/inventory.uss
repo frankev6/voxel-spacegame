@@ -1,0 +1,13 @@
+/* SPEC-61 HUD-011: fixed pool, responsive wrapping; approved NOCTURNE appearance. */
+.inventory-screen { flex-grow: 1; align-items: center; justify-content: center; }
+.inventory-panel { width: 1100px; max-width: 94%; height: 760px; max-height: 90%; }
+.inventory-header > .btn, .inventory-capacity { margin-left: var(--space-2); }
+.inventory-header > .panel__title { min-width: 0; }
+.inventory-body { flex-direction: row; flex-grow: 1; flex-basis: 0; min-height: 0; }
+.inventory-grid { flex-grow: 1; flex-basis: 0; min-width: 0; min-height: 0; }
+.inventory-grid-row { flex-direction: row; flex-wrap: wrap; flex-shrink: 0; }
+.inventory-grid-row > .slot { width: 72px; height: 72px; margin: 0; flex-shrink: 0; }
+.inventory-detail { width: 320px; min-width: 0; min-height: 0; margin-left: var(--space-2); flex-shrink: 0; }
+.inventory-detail-text { white-space: normal; margin-bottom: var(--space-2); }
+.slot--overflow { border-color: var(--color-warning); }
+.inventory-slot--dragging { border-color: var(--color-accent); }
