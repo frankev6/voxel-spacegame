@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 45 | 13 | 0 | 0 | 124 | 0 | 182 | 6 |
+| M3 | 44 | 14 | 0 | 0 | 124 | 0 | 182 | 6 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -458,7 +458,7 @@
 | HUD-004 | Save and load slots | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, PERS-002, PERS-005, PERS-006, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | a8d00e7a/9e5db398: view + persistent composition; 5 required screen and4 boot checks pass; session-race review repaired b05b62f; visible menu routing pending |
 | HUD-005 | Settings screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, UI-012, UI-013, FND-004, INP-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Presentation worker next after bounded HUD-004 review; ADR-0072/Q327 construction split, lead owns actual navigation |
 | HUD-006 | Pause screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: authored pause view and service-backed presenter/save eligibility/confirmation / pause composition hookup authored / key hints and acceptance remain |
-| HUD-007 | Flight HUD view and layout | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  | partial in HUD-002: view-model binding and Esc-to-pause route / HUD layout, data integration and acceptance remain |
+| HUD-007 | Flight HUD view and layout | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Presentation worker: complete HUD zones, direct updates, pooled weapons/abilities/radar and required cases; HUD-009/002 retain data/root integration. |
 | HUD-008 | HudSnapshotSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, PWR-001, WPN-001, ABL-001, SYS-001, GAL-001, FLT-001, VOX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 13c85bbd | Review repairs complete: duplicate players, frozen hulk meters and interactable-body radar; nine focused checks pass |
 | HUD-009 | HudSyncSystem | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-008, HUD-007, TRV-001, ENC-001 | no | todo |  |  |  |  |
 | HUD-010 | HUD presenters and screen hotkeys | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-009, QST-001, ECO-001, INP-001, TRV-001, NAR-001 | no | todo |  |  |  |  |
@@ -1043,6 +1043,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 441 | SPEC-33 Q20: queued relation reads, FACN and sandbox reset | Resolved: per-operation clamp matches fixed step; session adapter clears relations and unknown records for sandbox/new sessions; validate entire FACN before mutation. | Tech lead |
 | 442 | SPEC-33 Q21: territory concrete prerequisites | Resolved: ENC-002/003/004 and GAL-008 replace broad SPEC-30 dependency; all completed before dispatch. | Tech lead |
 | 443 | SPEC-51 Q50: damaged-footprint connectivity | Resolved: surviving-cell union, removal by previous roots, retain final split root, second-buffer job and exact undo/redo masks; overlay host owns refresh cadence. | Tech lead |
+| 444 | SPEC-61 Q40: flight HUD concrete prerequisites | Resolved: completed framework/view contracts unblock full HUD view implementation; snapshot synchronization and root wiring stay HUD-009/002. | Tech lead |
 
 ## Measurements
 

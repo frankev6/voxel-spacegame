@@ -507,7 +507,7 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 ### HUD-007 — Flight HUD view and layout
 - **Milestone:** M3
 - **Tier:** standard — layout and direct-update path fully given in §4.4 and §5.3
-- **Depends on:** `HUD-002`
+- **Depends on:** `HUD-001`, `UI-003`, `UI-004`, `UI-005`, `UI-006`, `UI-007`, `UI-008`, `UI-009`, `UI-012`
 - **Do:** `FlightHudView` UXML with the zones of §4.4, `screens/hud.uss`, pooled 5 weapon slots, 4 ability slots, 64 radar blip elements, direct-update handler (§5.3), `.hud-narrow` switch.
 - **Files:** `Assets/Game/UI/Views/FlightHudView.cs`, `Assets/Game/UI/Views/Uxml/FlightHudView.uxml`, `Assets/Game/UI/Theme/screens/hud.uss`
 - **Acceptance criteria:**
@@ -742,3 +742,5 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 | 35 | Ship-editor host obtains the UI root for panel mounting while its public constructor must stay unchanged | Keep ShipEditorView(vm, commands) and existing public contracts unchanged. An internal read-only UINavigator.RootOwner accessor supplies the exact same UI root that built the screen; no global service lookup, additional service registration or public API. OnBuild mounts accepted EDT-021 fragments once into four authored hud-region/hud-plate regions: top 64px, bottom 48px, left 360px and right 380px. Root/host ignore picking, with no centre element; plates remain pickable. Host plates remove inherited padding because the mounted panels own their own padding; host tool rows are 24px to leave space for the narrow-width horizontal scrollbar. Root switching stays with existing SetRoot; Back forwards to existing commands. Reuse the accepted panel worst-case fixture in exactly four required cases, including real FlightHudView/root visibility and actual UIRoot pointer-gate checks with a controlled frame guard. Lead owns production composition; no Unity run by this worker. | Tech lead | HUD-018 implementation defaults; lead acceptance/central mirror pending. |
 
 | 36 | Fleet view prerequisites and unimplemented actions | ADR-0068 concrete completed UI, fleet, docking and stats dependencies replace umbrella HUD-002. Use existing editor launcher contract; EDT-023 owns actual launch, report unavailable without pretending success. Flagship switching has no owner API, so CanSetActive stays false. | Tech lead — resolved; ledger Q436 |
+
+| 40 | HUD-007 view construction depends on unfinished composition instead of completed UI contracts | Under ADR-0072 use concrete completed view/control/theme/input framework prerequisites. Implement the full authored flight HUD and direct-update path now; real snapshot synchronization and root wiring remain HUD-009 and HUD-002. No fabricated gameplay source. | Tech lead — resolved; ledger Q444 |
