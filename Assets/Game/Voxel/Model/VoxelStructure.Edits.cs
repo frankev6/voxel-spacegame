@@ -10,10 +10,14 @@ namespace Game.Voxel.Model
     {
         /// <summary>ADR-0082: validate the entire ordered batch in a touched-data overlay before publishing any mutation.</summary>
         public bool ApplyEdits(NativeArray<VoxelEdit> edits, in VoxelContent content, NativeList<int3> touchedBricks)
+            => ApplyEdits(edits, default, content, touchedBricks);
+
+        /// <summary>ADR-0089: damaged placement writes only surviving cells; damage storage is borrowed for this call.</summary>
+        public bool ApplyEdits(NativeArray<VoxelEdit> edits, NativeArray<byte> damage, in VoxelContent content, NativeList<int3> touchedBricks)
         {
             RequireUnpinned();
             if (IsReadOnly || !content.Blocks.IsCreated || !content.Orientations.IsCreated) return false;
-            var plan = new EditPlan(this, content);
+            var plan = new EditPlan(this, content, damage);
             for (int i = 0; i < edits.Length; i++) if (!plan.Add(edits[i])) return false;
             if (!plan.ValidateFinal()) return false;
             plan.Commit(touchedBricks);
@@ -23,15 +27,16 @@ namespace Game.Voxel.Model
         {
             readonly VoxelStructure owner;
             readonly VoxelContent content;
+            readonly NativeArray<byte> damage;
             readonly Dictionary<int3, Cell> cells = new();
             readonly Dictionary<int, BlockInstance> instances = new();
             readonly Dictionary<(int3, ushort, byte), int> origins = new();
             readonly List<PaletteEntry> palettes = new();
             readonly List<int> released = new();
             int freeCursor, instanceLength;
-            public EditPlan(VoxelStructure owner, VoxelContent content)
+            public EditPlan(VoxelStructure owner, VoxelContent content, NativeArray<byte> damage)
             {
-                this.owner = owner; this.content = content;
+                this.owner = owner; this.content = content; this.damage = damage;
                 freeCursor = owner.data.FreeInstances.Length; instanceLength = owner.data.Instances.Length;
             }
             Cell Read(int3 cell) => cells.TryGetValue(cell, out var value) ? value : owner.GetCell(cell);
@@ -63,7 +68,8 @@ namespace Game.Voxel.Model
                 if (math.any(edit.Cell < -1048576) || math.any(edit.Cell > 1048575)) return false;
                 switch (edit.Kind)
                 {
-                    case VoxelEditKind.PlaceBlock: return Place(edit);
+                    case VoxelEditKind.PlaceBlock: return Place(edit, false);
+                    case VoxelEditKind.RestoreBlock: return Place(edit, true);
                     case VoxelEditKind.RemoveBlock: return Remove(edit);
                     case VoxelEditKind.SetCellHp:
                     {
@@ -99,16 +105,31 @@ namespace Game.Voxel.Model
                     default: return false;
                 }
             }
-            bool Place(in VoxelEdit edit)
+            bool Place(in VoxelEdit edit, bool restore)
             {
                 if (!ValidBlock(edit.Block) || edit.Orient >= 24) return false;
                 ref var def = ref content.Blocks.Value.Blocks[edit.Block];
                 if ((def.AllowedOrientations & (1u << edit.Orient)) == 0) return false;
+                float functionHp = def.FunctionHp;
+                if (restore)
+                {
+                    if (!damage.IsCreated || edit.DamageOffset < 0 || edit.DamageOffset > damage.Length - def.Cells.Length - 4) return false;
+                    int offset = edit.DamageOffset + def.Cells.Length;
+                    uint bits = (uint)(damage[offset] | damage[offset + 1] << 8 | damage[offset + 2] << 16 | damage[offset + 3] << 24);
+                    functionHp = math.asfloat(bits);
+                    if (def.RequiresInstance && (!math.isfinite(functionHp) || functionHp > def.FunctionHp)) return false;
+                    if (!def.RequiresInstance && !float.IsNaN(functionHp)) return false;
+                }
+                int alive = 0;
                 for (int i = 0; i < def.Cells.Length; i++)
                 {
                     int3 p = edit.Cell + content.Orientations.Value.Rotate(def.Cells[i], edit.Orient);
-                    if (math.any(p < -1048576) || math.any(p > 1048575) || !Read(p).IsAir) return false;
+                    if (math.any(p < -1048576) || math.any(p > 1048575)) return false;
+                    if (restore && damage[edit.DamageOffset + i] == 0) continue;
+                    if (!Read(p).IsAir) return false;
+                    alive++;
                 }
+                if (alive == 0) return false;
                 if (!def.RequiresInstance)
                 {
                     var entry = new PaletteEntry { Block = edit.Block, Orient = edit.Orient, Color = edit.Color };
@@ -117,16 +138,22 @@ namespace Game.Voxel.Model
                     { var candidate = Palette(i); if (candidate.Block == entry.Block && candidate.Orient == entry.Orient && candidate.Color == entry.Color) { found = i; break; } }
                     if (found == 0)
                     { if (count > Cell.MaxPaletteIndex) return false; found = count; palettes.Add(entry); }
-                    cells[edit.Cell] = Cell.Palette((ushort)found); return true;
+                    var value = Cell.Palette((ushort)found); if (restore) value.Hp = damage[edit.DamageOffset];
+                    cells[edit.Cell] = value; return true;
                 }
                 int slot;
                 if (released.Count != 0) { int last = released.Count - 1; slot = released[last]; released.RemoveAt(last); }
                 else if (freeCursor != 0) slot = owner.data.FreeInstances[--freeCursor];
                 else { if (instanceLength > Cell.MaxInstanceIndex) return false; slot = instanceLength++; }
                 var instance = new BlockInstance { Block = edit.Block, Orient = edit.Orient, Color = edit.Color,
-                    Origin = edit.Cell, FunctionHp = def.FunctionHp, CellsAlive = (ushort)def.Cells.Length };
+                    Origin = edit.Cell, FunctionHp = functionHp, CellsAlive = (ushort)alive };
+                if (def.Kind == BlockKind.Functional && functionHp <= 0) instance.Flags |= BlockInstanceFlags.Destroyed;
                 instances[slot] = instance; origins[(edit.Cell, edit.Block, edit.Orient)] = slot;
-                for (int i = 0; i < def.Cells.Length; i++) cells[Position(instance, i)] = Cell.Instance(slot, 255, i == 0 ? (byte)CellFlags.InstanceRoot : (byte)0);
+                for (int i = 0; i < def.Cells.Length; i++)
+                {
+                    byte hp = restore ? damage[edit.DamageOffset + i] : (byte)255;
+                    if (hp != 0) cells[Position(instance, i)] = Cell.Instance(slot, hp, i == 0 ? (byte)CellFlags.InstanceRoot : (byte)0);
+                }
                 return true;
             }
             bool Remove(in VoxelEdit edit)

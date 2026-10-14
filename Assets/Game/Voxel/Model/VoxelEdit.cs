@@ -3,7 +3,7 @@ using Unity.Mathematics;
 namespace Game.Voxel.Model
 {
     /// <summary>ADR-0082: source-structure batch operations; all writes remain in Game.Voxel.</summary>
-    public enum VoxelEditKind : byte { PlaceBlock, RemoveBlock, SetCellHp, ClearCell, SetFunctionHp }
+    public enum VoxelEditKind : byte { PlaceBlock, RemoveBlock, SetCellHp, ClearCell, SetFunctionHp, RestoreBlock }
     public struct VoxelEdit
     {
         public VoxelEditKind Kind;
@@ -11,5 +11,6 @@ namespace Game.Voxel.Model
         public byte Orient, Color, Hp;
         public int3 Cell;
         public float FunctionHp;
+        public int DamageOffset; // ADR-0089: only RestoreBlock reads the borrowed damage record
     }
 }
