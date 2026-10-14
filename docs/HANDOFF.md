@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Clue lifecycle accepted:** QST-00419b24412 done; compile75549 clean and focused EditMode89861 passes9 (five clue/four world-event cases), 0.1676s bodies, about43s total including Unity lifecycle. No Unity active. NAR-012 stays in progress pending canonical lookups/composition resolution and review; allocation fixture compiled only. Next finish that integration and advance dialog work. Workers DLG-003265, bridge review283 and DEV-010236 active.
+
 - **Clue service integrated for validation:** worker3b4a3895 source is on task/QST-004-clue-integration; implements discovery ordinals, mystery effects, rumor latching and restore hooks with five cases. NAR-012658a627f source checkpoint merged under ADR-0062, still unaccepted; five direct-event cases authored. Next review feedback, canonical bridge composition resolution and one compatible compile/functional batch. No Unity active. DLG-003265 and DEV-010235 active; economy282 delivered and assigned bounded bridge review. Previous routing and current tests/integration are progress.
 
 - **World-event routing authored:** NAR-012c795e4de subscribes/disposes nine event families, counts before beat selection, ignores player destruction/salvage, publishes unhandled inspections and propagates location/relation changes. Q376 documents injected canonical-owner callbacks and unfinished beat/travel composition dependencies. Still uncompiled/unaccepted; next canonical lookup/composition resolution and five required cases, then one compatible batch. No Unity active. Workers DLG-003264, QST-004281 and DEV-010235 active. Previous counter contract and current routing code are progress.

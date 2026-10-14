@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 10 | 1 | 0 | 0 | 81 | 0 | 92 | 7 |
-| M3 | 88 | 10 | 0 | 0 | 82 | 0 | 180 | 8 |
+| M3 | 88 | 9 | 0 | 0 | 83 | 0 | 180 | 8 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -404,7 +404,7 @@
 | QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 95f80410 | Public quest/mystery contracts and required assembly test; behavior remains QST-002 onward |
 | QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, NAR-003, NAR-004, NAR-006, NAR-009, NAR-013 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9ca0b84 | Real definitions, compile/bind and validation; 24 prior cases plus repaired Usage_Enforced pass; generated content compiled except separate TRV-003 owner stub. |
 | QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | done | astra (gpt-6) | 2026-10-13 | a8b2d6d1 | Quest runtime/baselines/progression/restore implemented; seven required functional cases pass39710; Q371, trace and objective dependency review fixes. QUST/live adapter remain owning tasks. |
-| QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Existing economy worker: complete clue/mystery/rumor lifecycle, five direct required cases; Q370 dependencies. |
+| QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 19b24412 | Clue/mystery/rumor lifecycle accepted; five required functional cases pass in focused nine-case batch; Q377. |
 | QST-005 | BeatService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, SPEC-41 | no | todo |  |  |  |  |
 | QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | no | todo |  |  |  |  |
 | QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-006, PERS-001 | no | todo |  |  |  |  |
@@ -1081,6 +1081,11 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — QST-004 done; world-event checks pass — astra (gpt-6)
+
+- QST-00419b24412 accepted after worker integration and one test declaration repair. Compile75549 terminal0, zero CS warnings; EditMode89861 terminal0: nine passed, zero failed, 0.1675691s test bodies (roughly43s including Unity startup/shutdown). Five are required clue cases, four world-event functional cases; no repeat/full/perf run. Evidence Logs/playtest/narrative-world-clues. spec-required: 5, extra: 0 for QST-004.
+- NAR-012 functional routing cases pass but remains in progress: real owner lookup/composition resolution and review feedback next. Its fifth allocation fixture is advisory/compiled only. Q377 mirrors clue defaults; marker ownership corrected to QST-006. No Unity active. DLG-003265/DEV-010236 active; economy283 reviews bridge. Previous authored cases/integration and current acceptance are progress.
 
 ### 2026-10-13 — QST-004 integrated; NAR-012 cases authored — astra (gpt-6)
 
