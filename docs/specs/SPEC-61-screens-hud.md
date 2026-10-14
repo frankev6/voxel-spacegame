@@ -585,7 +585,7 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 ### HUD-013 — Dialog host screen
 - **Milestone:** M3
 - **Tier:** standard — view on an existing view model; SPEC-41 drives it
-- **Depends on:** `HUD-002`
+- **Depends on:** `HUD-001`, `UI-003`, `UI-004`, `UI-005`, `UI-006`, `UI-007`, `UI-008`, `UI-012`, `DLG-001`
 - **Do:** `DialogView` per §5.6 with 9 pooled option buttons calling `IDialogCommands.Choose(n)`, text scroll reset on `LineVersion` change.
 - **Files:** `Assets/Game/UI/Views/DialogView.cs`, `Assets/Game/UI/Views/Uxml/DialogView.uxml`, `Assets/Game/UI/Theme/screens/dialog.uss`
 - **Acceptance criteria:**
@@ -736,3 +736,5 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 | 31 | Inventory presenter construction, fixed-pool visibility and pointer-capture lifetimes are unspecified | Accepted [ADR-0094](../decisions/ADR-0094-inventory-presenter-construction.md) records task-owned public presenter construction/Bind/Unbind/Dispose without changing existing binding APIs or assemblies. Project actual ECO-003 InventoryModel/Wallet into the same 200 existing row identities; subscribe to SlotChanged/Reset/Wallet.Changed and release old session sources on rebind. InCapacity is index less than Capacity; show every in-capacity slot and every non-empty overflow slot, hiding unused out-of-capacity slots/rows. Build twenty wrapping rows of ten 72px Slots once, preserving pool identities. Detail values are selected stack count and per-item BasePrice; wallet uses invariant thousands separators. PointerManipulator captures the primary pointer on a non-empty source and picks the destination through the actual panel at release, independent of the captured event target; delegate writes to existing Move/TryMove. Pop, detach, capture loss, cancel, Back and source item/count change release the capture; invalid/outside/same-slot drops do not write. Sort/Stack All remain header actions. Lead owns production registration/navigation and SessionReset composition. Exactly five required cases use a two-item actual cargo fixture, one initial layout frame where needed and one scroll frame; no Unity run by this worker. | Tech lead | Accepted construction defaults; ledger Q431. |
 
 | 32 | Editor host layout depends on umbrella HUD-002 | Under ADR-0068 use accepted view models, UI services and EDT-001/021 panels. Keep production editor composition in HUD-002; all four HUD-018 acceptance cases remain required. | Tech lead — resolved; ledger Q432 |
+
+| 34 | Dialog host view waits on umbrella root composition | ADR-0068: use completed view-model, UI service/control and dialog-command contracts. Implement the complete view and five specified cases; actual narrative driver/content remains SPEC-41, never fake a story encounter. | Tech lead — resolved; ledger Q435 |

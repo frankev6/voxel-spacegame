@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 50 | 14 | 0 | 0 | 118 | 0 | 182 | 6 |
+| M3 | 49 | 15 | 0 | 0 | 118 | 0 | 182 | 6 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -464,7 +464,7 @@
 | HUD-010 | HUD presenters and screen hotkeys | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-009, QST-001, ECO-001, INP-001, TRV-001, NAR-001 | no | todo |  |  |  |  |
 | HUD-011 | Inventory screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-006 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-14 | f8adea23 | Real inventory screen/presenter integrated into UiComposition and playground; five required cases pass; live cargo screen verified. |
 | HUD-012 | Merchant screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-005 | yes | done | combat (gpt-6.1-sol high) | 2026-10-14 | f5e9e949 | Real MerchantSession screen/presenter registered/reset in UiComposition and playground; four required cases pass; live Buy verified. Normal faction launcher remains ECO-008. |
-| HUD-013 | Dialog host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002 | no | todo |  |  |  |  |
+| HUD-013 | Dialog host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, DLG-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Complete dialog host view; narrative driver remains SPEC-41 |
 | HUD-014 | Ship log screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-42 | no | todo |  |  |  |  |
 | HUD-015 | MapCanvas control | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-62 | no | todo |  |  |  |  |
 | HUD-016 | Galaxy map and star-system map screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-015, SPEC-30, SPEC-31, TRV-001, QST-001 | no | todo |  |  |  |  |
@@ -1034,6 +1034,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 432 | SPEC-61 Q32: editor host prerequisites | Resolved: ADR-0068 concrete completed UI/panel prerequisites, production root integration stays HUD-002. | Tech lead |
 | 433 | SPEC-61 Q33: merchant lifecycle and filtered selections | Resolved: real MerchantSession owner, stable row identities, exact stock/cargo mappings; UiComposition registers and resets presenter, playground opens actual market. | Tech lead |
 | 434 | SPEC-33 Q18: faction runtime prerequisites | Resolved: ADR-0068 concrete completed runtime prerequisites; no performance/balance gate. | Tech lead |
+| 435 | SPEC-61 Q34: dialog host prerequisites | Resolved: concrete completed UI and command contracts, actual narrative driver remains SPEC-41. | Tech lead |
 
 ## Measurements
 
