@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-018 | Claimed; debugger editing and explicit owner dependency assessment | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-009 | Integrated9c74eb42 +sandbox25defe8f; review dispatched, lead validation active | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-009 | Accepted348fa4f7; bounded INVT state review | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | Final lifecycle review225 complete | HUD-003/006/007 once ready |
 
@@ -21,7 +21,7 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
-- **DEV-009 integrated / validation pending:** worker37d1d116 integrated9c74eb42;25defe8f fixes sandbox NPC commands through explicit GameSession mode (ADR-0079/Q367), extends existing one-cell case. Compile55432 terminal failure: System.Math ambiguity in worker probe; qualified, pending next validation. No Unity active. Review269 caught an internal-property reflection lookup in the fixture; fixed before another run. Three required one-cell/direct-tick cases next; still unaccepted. NAR-018 active249; economy review complete; presentation dependency wait. Prior narrative acceptance and current command integration are progress.
+- **DEV-009 accepted:**348fa4f7 completes world commands and explicit sandbox NPC spawning. Compile12672 clean; spawn/grid pass7809 and teleport retry54555 passes after actual physics fixture setup. Three required cases, no broad/perf run; evidence Logs/playtest/dev009. No Unity active. Next ECO-006 inventory saving; NAR-018 active249, economy reviewing INVT state, presentation dependency wait. Previous correction and current acceptance are progress.
 
 - **Live narrative foundation accepted:** NAR-011ce82fed9 and NAR-0176276ae7b done. Compile clean; EditMode10 pass; production PlayMode17661 passes6 including newgame/save and hulk-removal retirement. Evidence Logs/playtest/narrative-live. No Unity active. Next recycle newly ready standard work and implement INVT (ECO-006); DEV-009 integration/sandbox fix pending. QST-006 execution remains unfinished. Previous repair and this acceptance are progress.
 

@@ -31,7 +31,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
-- **DEV-009 integrated / validation pending:** worker37d1d116 integrated9c74eb42;25defe8f fixes sandbox NPC commands through explicit GameSession mode (ADR-0079/Q367), extends existing one-cell case. Compile55432 terminal failure: System.Math ambiguity in worker probe; qualified, pending next validation. No Unity active. Review269 caught an internal-property reflection lookup in the fixture; fixed before another run. Three required one-cell/direct-tick cases next; still unaccepted. NAR-018 active249; economy review complete; presentation dependency wait. Prior narrative acceptance and current command integration are progress.
+- **DEV-009 accepted:**348fa4f7 completes world commands and explicit sandbox NPC spawning. Compile12672 clean; spawn/grid pass7809 and teleport retry54555 passes after actual physics fixture setup. Three required cases, no broad/perf run; evidence Logs/playtest/dev009. No Unity active. Next ECO-006 inventory saving; NAR-018 active249, economy reviewing INVT state, presentation dependency wait. Previous correction and current acceptance are progress.
 
 - **Live narrative foundation accepted:** NAR-011ce82fed9 and NAR-0176276ae7b done. Compile clean; EditMode10 pass; production PlayMode17661 passes6 including newgame/save and hulk-removal retirement. Evidence Logs/playtest/narrative-live. No Unity active. Next recycle newly ready standard work and implement INVT (ECO-006); DEV-009 integration/sandbox fix pending. QST-006 execution remains unfinished. Previous repair and this acceptance are progress.
 

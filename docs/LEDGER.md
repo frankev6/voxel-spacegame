@@ -14,9 +14,9 @@
 | Milestone | todo | in-progress | blocked | review | done | dropped | total | ready to start |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
-| M1 | 1 | 1 | 0 | 0 | 107 | 0 | 109 | 0 |
-| M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 6 |
-| M3 | 94 | 7 | 0 | 0 | 79 | 0 | 180 | 7 |
+| M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
+| M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 8 |
+| M3 | 94 | 7 | 0 | 0 | 79 | 0 | 180 | 9 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -207,8 +207,8 @@
 | AUD-010 | Audio provenance table and release-build check | [SPEC-64](specs/SPEC-64-audio.md) | M1 | standard | AUD-002 | yes | done | astra (gpt-6) | 2026-10-12 | 8879cfa | 19 clips: 2 Blocked, 17 Unverified; release guard and four tests |
 | DEV-007 | PlayMode test that runs every active scenario file | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, SPEC-71 | yes | done | astra (gpt-6) | 2026-10-12 | 8f8adc3 | Automatic file cases; live Boot smoke passes, added active case discovered, future-command draft ignored (Q176) |
 | DEV-008 | newgame and sandbox commands, newgame.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-006, FND-001, PERS-001 | yes | done | astra (gpt-6) | 2026-10-12 | 0b4269c | Real launch/probes, isolated profile, live edit-mode launch 1.370 s; Q144–146 |
-| DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Q155 implementation prerequisites now exist: accepted FND-012, actual GalaxyService, FrameOrigin and T1 loader. Economy worker implements commands/probes; serialized validation by lead. |
-| DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | no | todo |  |  |  |  |
+| DEV-009 | teleport, spawn and grid commands; snapshot game sections | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, VOX-001, PHY-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 348fa4f7 | Teleport/spawn/grid commands, probes/CLI/snapshots; explicit sandbox NPCs ADR-0079. Three required cases passed across focused runs7809/54555; evidence Logs/playtest/dev009. |
+| DEV-012 | Overlay renderer and voxel overlays (bricks, dirty, colliders) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | frontier | DEV-009, REN-001, PHY-001 | yes | todo |  |  |  |  |
 | DEV-015 | In-game dev console | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-003, UI-001, INP-001 | yes | done | astra (gpt-6) | 2026-10-12 | 8cf2df1 | F1 console; history/completion, async results, 0 B closed; ADR-0049 |
 | DEV-016 | record and replay commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-008, SPEC-71 | yes | done | astra (gpt-6) | 2026-10-12 | f1f6cd2 | Console/CLI replay; real seed-7 Fighter 300 ticks, 0 m error; live 1790-tick recording and screenshot; Q175 |
 | DEV-019 | Draft regression scenario files | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M1 | standard | DEV-007 | yes | done | astra (gpt-6) | 2026-10-12 | f891b9d | Six drafts parse; active Boot passes and all six drafts are ignored; activation prerequisites Q177 |
@@ -299,8 +299,8 @@
 | AUD-008 | Music director, crossfades and scene contexts | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006, FND-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 65c6ed89 | Six EditMode plus one PlayMode required checks; live exploration-to-combat music transition verified |
 | AUD-009 | Loop voices: player engine and beams | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006, FLT-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 5401ca29 | Three required loop tests pass; engine/beam loop assets remain null per authored config |
 | AUD-013 | Audio performance and allocation tests | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-008, AUD-009 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 8a24a71f | 4 required measurements; zero warmed GC; performance deferred: drain500/4096 misses, zero optimization passes |
-| DEV-010 | aim and fire commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, WPN-001, INP-001, CAM-001 | no | todo |  |  |  |  |
-| DEV-011 | perf command and gh_perf extensions | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, VFX-001, AUD-001, TST-001 | no | todo |  |  |  |  |
+| DEV-010 | aim and fire commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, WPN-001, INP-001, CAM-001 | yes | todo |  |  |  |  |
+| DEV-011 | perf command and gh_perf extensions | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, VFX-001, AUD-001, TST-001 | yes | todo |  |  |  |  |
 | DEV-013 | Overlays: islands and spatial hash | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-012, AI-001 | no | todo |  |  |  |  |
 | TST-005 | Determinism runner and the combat determinism gate | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | frontier | TST-002, TST-003, SPEC-13, SPEC-20, SPEC-21, SPEC-22, SPEC-23 | no | todo |  |  |  |  |
 | TST-006 | Ten-minute combat soak | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | standard | TST-005, SPEC-70 | no | todo |  |  |  |  |
@@ -479,8 +479,8 @@
 | VFX-014 | Warp effect and strict config validation | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | standard | VFX-004, TRV-001 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | 600-particle pooled warp with oldest stealing, all 13 defaults strict; travel gameplay remains open; spec-required: 3, extra: 0 |
 | AUD-011 | GATE: Owner confirms licences of the carried-over audio | [SPEC-64](specs/SPEC-64-audio.md) | M3 | standard | AUD-010 | yes | todo |  |  |  |  |
 | AUD-012 | Floating-origin shift and clears | [SPEC-64](specs/SPEC-64-audio.md) | M3 | frontier | AUD-006, GAL-001, SYS-001 | yes | done | astra (gpt-6) | 2026-10-13 | f9fed29a | Three required origin/system/reset audio checks pass; spatial shifts and clears preserve appropriate music lifecycle |
-| DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-001, INP-001 | no | todo |  |  |  |  |
-| DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | no | todo |  |  |  |  |
+| DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-001, INP-001 | yes | todo |  |  |  |  |
+| DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | yes | todo |  |  |  |  |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Preparing working command plumbing; full jump/pose acceptance needs real TRV-006, GAL-008 and SYS-009 implementations; no dev-owned substitutes |
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
 | MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e9d50f3c | Three exact factions generated; duplicate skipped, player/AI ownership preserved; rerun byte/GUID/manifest stable |
@@ -1071,6 +1071,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DEV-009 done: world commands and sandbox spawning — astra (gpt-6)
+
+- Implementation348fa4f7 includes worker9c74eb42, sandbox25defe8f and fixture repairs. Teleport resets physics/interpolation and supports universe coordinates; spawn uses canonical services, grid inspection exposes actual state. Campaign/interface restrictions remain intact; sandbox NPCs are explicitly permitted.
+- Compile12672 terminal0, zero CS warnings. Focused PlayMode7809 terminal1: spawn/grid pass, teleport fixture lacked body initialization (0.2000081s total bodies). 348fa4f7 adds the real body/collider systems only to the physics fixture; focused retry54555 terminal0: teleport passes, zero CS warnings. All three required cases now passed; no full/perf suite. Spec-required: 3, extra: 0. Evidence Logs/playtest/dev009.
+- Review269 fixture reflection defect fixed in de36e067 before validation. No Unity active. NAR-018 remains active; economy assigned bounded INVT state review; presentation dependency wait. Previous fixture correction and this verified command acceptance are progress. Next ECO-006 inventory persistence. Unrelated QualitySettings and _Test metadata excluded.
 
 ### 2026-10-13 — DEV-009 integrated with explicit sandbox spawning — astra (gpt-6)
 
