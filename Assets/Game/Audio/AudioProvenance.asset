@@ -108,3 +108,43 @@ MonoBehaviour:
     licence: unknown
     status: 0
     note: Awaiting owner licence confirmation (AUD-011)
+  - clip: {fileID: 8300000, guid: 0894c4b46da6c40f9ac94903bd3179a1, type: 3}
+    source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
+    licence: own work
+    status: 0
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+  - clip: {fileID: 8300000, guid: 416a96a847a034e8d833bdfc5f632182, type: 3}
+    source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
+    licence: own work
+    status: 0
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+  - clip: {fileID: 8300000, guid: a25e6c623a74548e9b9a6b276aaae0b1, type: 3}
+    source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
+    licence: own work
+    status: 0
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+  - clip: {fileID: 8300000, guid: 3b4140ad3d513466488ffa5fc971b354, type: 3}
+    source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
+    licence: own work
+    status: 0
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+  - clip: {fileID: 8300000, guid: bff18a7142ef74f1181d73f572deddf8, type: 3}
+    source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
+    licence: own work
+    status: 0
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+  - clip: {fileID: 8300000, guid: f32241bd7be694eae8638b517cd45cab, type: 3}
+    source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
+    licence: own work
+    status: 0
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+  - clip: {fileID: 8300000, guid: 1dde6b9e711bc47f09e8a642335c1f31, type: 3}
+    source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
+    licence: own work
+    status: 0
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+  - clip: {fileID: 8300000, guid: 769486934bbff475395407c905289a78, type: 3}
+    source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
+    licence: own work
+    status: 0
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound

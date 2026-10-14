@@ -15,7 +15,7 @@ MonoBehaviour:
   id: cue_ui_trade
   formerIds: []
   clips:
-  - {fileID: 8300000, guid: 0e821dd27320b2d4ab9589a0f85718ed, type: 3}
+  - {fileID: 8300000, guid: 769486934bbff475395407c905289a78, type: 3}
   bus: 1
   volume: 0.5
   volumeRandom: 0.1

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: cue_ui_view_open
   formerIds: []
   clips:
-  - {fileID: 8300000, guid: fd2daab841acc5f45bdadfe794b3d157, type: 3}
+  - {fileID: 8300000, guid: bff18a7142ef74f1181d73f572deddf8, type: 3}
   bus: 1
   volume: 0.5
   volumeRandom: 0.1

@@ -134,6 +134,14 @@ See [audit evidence and unresolved file list](licenses/placeholder-audit-2026-10
 | `Assets/Game/Audio/Music/upbeat.mp3` | music | - | Unresolved; audio table status Blocked | Unknown | - | - | placeholder-only |
 | `Assets/Game/Audio/Music/upbeat.mp3.meta` | definition | - | Unresolved | Unknown | - | - | placeholder-only |
 | `Assets/Game/Audio/Sfx.meta` | definition | - | Unresolved | Unknown | - | - | placeholder-only |
+| `Assets/Game/Audio/Sfx/Ui/SFX_Ui_Click_01.wav` | sfx | own work | Procedurally synthesized by `ArtSource/Audio/ui_sounds.py` (deterministic, no samples, no AI model) | Claude Opus 5.5, for Frank | 2026-10-14 | regenerate with the script | placeholder-only |
+| `Assets/Game/Audio/Sfx/Ui/SFX_Ui_Hover_01.wav` | sfx | own work | Procedurally synthesized by `ArtSource/Audio/ui_sounds.py` (deterministic, no samples, no AI model) | Claude Opus 5.5, for Frank | 2026-10-14 | regenerate with the script | placeholder-only |
+| `Assets/Game/Audio/Sfx/Ui/SFX_Ui_SlotClick_01.wav` | sfx | own work | Procedurally synthesized by `ArtSource/Audio/ui_sounds.py` (deterministic, no samples, no AI model) | Claude Opus 5.5, for Frank | 2026-10-14 | regenerate with the script | placeholder-only |
+| `Assets/Game/Audio/Sfx/Ui/SFX_Ui_Fail_01.wav` | sfx | own work | Procedurally synthesized by `ArtSource/Audio/ui_sounds.py` (deterministic, no samples, no AI model) | Claude Opus 5.5, for Frank | 2026-10-14 | regenerate with the script | placeholder-only |
+| `Assets/Game/Audio/Sfx/Ui/SFX_Ui_Open_01.wav` | sfx | own work | Procedurally synthesized by `ArtSource/Audio/ui_sounds.py` (deterministic, no samples, no AI model) | Claude Opus 5.5, for Frank | 2026-10-14 | regenerate with the script | placeholder-only |
+| `Assets/Game/Audio/Sfx/Ui/SFX_Ui_Close_01.wav` | sfx | own work | Procedurally synthesized by `ArtSource/Audio/ui_sounds.py` (deterministic, no samples, no AI model) | Claude Opus 5.5, for Frank | 2026-10-14 | regenerate with the script | placeholder-only |
+| `Assets/Game/Audio/Sfx/Ui/SFX_Ui_Success_01.wav` | sfx | own work | Procedurally synthesized by `ArtSource/Audio/ui_sounds.py` (deterministic, no samples, no AI model) | Claude Opus 5.5, for Frank | 2026-10-14 | regenerate with the script | placeholder-only |
+| `Assets/Game/Audio/Sfx/Ui/SFX_Ui_Trade_01.wav` | sfx | own work | Procedurally synthesized by `ArtSource/Audio/ui_sounds.py` (deterministic, no samples, no AI model) | Claude Opus 5.5, for Frank | 2026-10-14 | regenerate with the script | placeholder-only |
 | `Assets/Game/Audio/Sfx/DSGNMisc_MOVEMENT-Mecha Large Takeoff_HY_PC-004.wav` | sfx | - | Unresolved | Unknown | - | - | placeholder-only |
 | `Assets/Game/Audio/Sfx/DSGNMisc_MOVEMENT-Mecha Large Takeoff_HY_PC-004.wav.meta` | definition | - | Unresolved | Unknown | - | - | placeholder-only |
 | `Assets/Game/Audio/Sfx/DSGNTonl_USABLE-Coin Toss_HY_PC-002.wav` | sfx | - | Unresolved | Unknown | - | - | placeholder-only |

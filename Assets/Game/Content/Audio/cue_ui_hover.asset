@@ -15,7 +15,7 @@ MonoBehaviour:
   id: cue_ui_hover
   formerIds: []
   clips:
-  - {fileID: 8300000, guid: a7e262ca1dcf3ed449f0098a3b8e00d0, type: 3}
+  - {fileID: 8300000, guid: 3b4140ad3d513466488ffa5fc971b354, type: 3}
   bus: 1
   volume: 1
   volumeRandom: 0.1

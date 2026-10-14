@@ -15,7 +15,7 @@ MonoBehaviour:
   id: cue_ui_slot_click
   formerIds: []
   clips:
-  - {fileID: 8300000, guid: 24ef121871b080342a5a1735ea9be720, type: 3}
+  - {fileID: 8300000, guid: f32241bd7be694eae8638b517cd45cab, type: 3}
   bus: 1
   volume: 1
   volumeRandom: 0.1
