@@ -22,7 +22,7 @@ Ledger Q125, the flight balance sign-off, stayed pending while the work moved on
    Thrusters still push from their blocks and still decide each ship's top acceleration, its turning off-centre, and how much it degrades when damaged. The assist is capped, so large ships still need real thrusters (pillar 2, as decision 6 does for yaw).
 2. **Stats.** `PropulsionStats` forward, reverse and strafe acceleration include the assist force, so AI braking estimates stay truthful.
 3. **Coast.** Releasing W/S decays the forward target at `CoastDeceleration = 1/s` (was 0.08/s); real thrusters and the assist still bound the deceleration. This supersedes ADR-0052's "gentle" default.
-4. **Boost.** Boost throttle 1.6 (was 1.25) and forward cap ×1.6 (was ×1.5). Plume intensity may exceed 1 while boosting, so the overdrive is visible. The camera widens its FOV by 7° while boost is held (SPEC-62, reduce motion disables it).
+4. **Boost.** Boost throttle 1.6 (was 1.25) for thrusters and for the core assist's forward push, and forward cap ×1.6 (was ×1.5). Plume intensity may exceed 1 while boosting, so the overdrive is visible. The camera widens its FOV by 7° while boost is held (SPEC-62, reduce motion disables it).
 5. **Production values** (`config_flight`): `coreLinearAccel` 18 m/s², `coreMaxLinearForce` 600 kN. `FlightConfig.Default` and the definition defaults keep the assist at 0, so isolated physics fixtures still measure thrusters alone.
 
 ## Consequences

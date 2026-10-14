@@ -6,6 +6,7 @@
 .hud-objective-text { white-space: normal; max-height: 54px; overflow: hidden; text-overflow: ellipsis; }
 .hud-radar-plate { width: 268px; }
 .hud-radar { width: 240px; height: 240px; position: relative; overflow: hidden; background-color: var(--color-surface-2); border-color: var(--color-border); border-width: var(--border-thin); border-radius: 50%; }
+.hud-radar-self { position: absolute; left: 50%; top: 50%; translate: -50% -50%; color: var(--color-accent); -unity-text-align: middle-center; padding: 0; margin: 0; }
 .hud-blip { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; }
 .hud-blip--station { width: 10px; height: 10px; }
 .hud-blip--body { border-radius: 50%; }

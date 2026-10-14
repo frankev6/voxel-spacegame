@@ -26,7 +26,7 @@ namespace Game.UI.Views
         readonly string[] weaponKeys = new string[WeaponCount], abilityKeys = new string[AbilityCount];
         Meter hull, shield, energy, targetHull, targetShield;
         Label speed, shieldStatus, targetDistance, radarRange, interactionDetail;
-        VisualElement objectiveRegion, statusRegion, weaponRegion, radarRegion, targetRegion, promptRegion, targetRelation, objectiveTitle, objectiveText, route;
+        VisualElement locationRegion, objectiveRegion, statusRegion, weaponRegion, radarRegion, targetRegion, promptRegion, targetRelation, objectiveTitle, objectiveText, route;
         KeyHint interactionKey;
         bool observing;
         public FlightHudView(HudViewModel vm, IHudRadarSource radar, Func<string, string> bindingDisplay)
@@ -44,7 +44,7 @@ namespace Game.UI.Views
             hull = Q<Meter>("hud-hull-meter"); shield = Q<Meter>("hud-shield-meter"); energy = Q<Meter>("hud-energy-meter");
             targetHull = Q<Meter>("hud-target-hull"); targetShield = Q<Meter>("hud-target-shield");
             speed = Q<Label>("hud-speed"); shieldStatus = Q<Label>("hud-shield-status"); targetDistance = Q<Label>("hud-target-distance"); radarRange = Q<Label>("hud-radar-range");
-            objectiveRegion = Q<VisualElement>("hud-region-objective"); objectiveTitle = Q<Label>("hud-objective-title"); objectiveText = Q<Label>("hud-objective-text"); route = Q<Label>("hud-route");
+            locationRegion = Q<VisualElement>("hud-region-location"); objectiveRegion = Q<VisualElement>("hud-region-objective"); objectiveTitle = Q<Label>("hud-objective-title"); objectiveText = Q<Label>("hud-objective-text"); route = Q<Label>("hud-route");
             statusRegion = Q<VisualElement>("hud-region-status"); weaponRegion = Q<VisualElement>("hud-region-weapons"); radarRegion = Q<VisualElement>("hud-region-radar");
             targetRegion = Q<VisualElement>("hud-region-target"); promptRegion = Q<VisualElement>("hud-region-prompt"); targetRelation = Q<VisualElement>("hud-target-relation"); interactionKey = Q<KeyHint>("hud-interaction-key");
             interactionDetail = Q<Label>("hud-interaction-detail");
@@ -114,7 +114,7 @@ namespace Game.UI.Views
         void Changed(object sender, BindablePropertyChangedEventArgs args)
         {
             string property = args.propertyName;
-            if (ReferenceEquals(property, nameof(HudViewModel.HasShip)) || ReferenceEquals(property, nameof(HudViewModel.HasTarget)) || ReferenceEquals(property, nameof(HudViewModel.HasInteraction)) || ReferenceEquals(property, nameof(HudViewModel.HasObjective)) || ReferenceEquals(property, nameof(HudViewModel.HasRoute))) { Visibility(); }
+            if (ReferenceEquals(property, nameof(HudViewModel.HasShip)) || ReferenceEquals(property, nameof(HudViewModel.HasTarget)) || ReferenceEquals(property, nameof(HudViewModel.HasInteraction)) || ReferenceEquals(property, nameof(HudViewModel.HasObjective)) || ReferenceEquals(property, nameof(HudViewModel.HasRoute)) || ReferenceEquals(property, nameof(HudViewModel.StarSystemName))) { Visibility(); }
             else if (ReferenceEquals(property, nameof(HudViewModel.HullPercent)) || ReferenceEquals(property, nameof(HudViewModel.HullFraction)) || ReferenceEquals(property, nameof(HudViewModel.ShieldValue)) || ReferenceEquals(property, nameof(HudViewModel.ShieldMax)) || ReferenceEquals(property, nameof(HudViewModel.ShieldFraction)) || ReferenceEquals(property, nameof(HudViewModel.EnergyValue)) || ReferenceEquals(property, nameof(HudViewModel.EnergyMax)) || ReferenceEquals(property, nameof(HudViewModel.EnergyFraction)) || ReferenceEquals(property, nameof(HudViewModel.IsHulk))) { PlayerMeters(); }
             else if (ReferenceEquals(property, nameof(HudViewModel.SpeedMps))) { speed.text = NumberStringCache.Get(viewModel.SpeedMps); }
             else if (ReferenceEquals(property, nameof(HudViewModel.Boosting))) { speed.EnableInClassList("hud-speed--boosting", viewModel.Boosting); }
@@ -132,6 +132,8 @@ namespace Game.UI.Views
         static void Show(VisualElement element, bool visible) => element.EnableInClassList(UIStyleClasses.IsHidden, !visible);
         void Visibility()
         {
+            // QA-001: an empty location plate drew as a blank black bar (sandbox/playground has no star-system name).
+            Show(locationRegion, !string.IsNullOrEmpty(viewModel.StarSystemName));
             Show(objectiveRegion, viewModel.HasObjective || viewModel.HasRoute); Show(objectiveTitle, viewModel.HasObjective); Show(objectiveText, viewModel.HasObjective); Show(route, viewModel.HasRoute);
             Show(statusRegion, viewModel.HasShip); Show(weaponRegion, viewModel.HasShip); Show(radarRegion, viewModel.HasShip);
             Show(targetRegion, viewModel.HasShip && viewModel.HasTarget); Show(promptRegion, viewModel.HasShip && viewModel.HasInteraction);
@@ -181,7 +183,9 @@ namespace Game.UI.Views
                 var contact = contacts[i]; var offset = contact.OffsetXZ; if (!float.IsFinite(offset.x) || !float.IsFinite(offset.y)) offset = Vector2.zero;
                 bool beyond = (contact.Flags & 2) != 0 || offset.sqrMagnitude > range * range;
                 if (offset.sqrMagnitude > range * range) offset = offset.normalized * range;
-                float x = (offset.x * cos + offset.y * sin) * 120 / range, y = (-offset.x * sin + offset.y * cos) * 120 / range;
+                // Heading-up: yaw = atan2(forward.x, forward.z), so rotating by −yaw maps the ship's nose to +y (QA-001: the
+                // previous signs mirrored the sides, showing a contact dead ahead behind the ship at a 90° heading).
+                float x = (offset.x * cos - offset.y * sin) * 120 / range, y = (offset.x * sin + offset.y * cos) * 120 / range;
                 blip.style.translate = new Translate(x, -y, 0);
                 blip.EnableInClassList("marker--ally", contact.Relation == 1); blip.EnableInClassList("marker--enemy", contact.Relation == 2); blip.EnableInClassList("marker--neutral", contact.Relation != 1 && contact.Relation != 2);
                 blip.EnableInClassList("hud-blip--ship", contact.Kind == 0); blip.EnableInClassList("hud-blip--station", contact.Kind == 1); blip.EnableInClassList("hud-blip--body", contact.Kind == 2); blip.EnableInClassList("hud-blip--poi", contact.Kind == 3);

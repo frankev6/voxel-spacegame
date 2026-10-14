@@ -117,6 +117,8 @@ namespace Game.Tests.PlayMode.UI.Screens
             using var w = new Window(Maximum()); w.Model.HasShip = false;
             foreach (string zone in new[] { "status", "weapons", "radar", "target", "prompt" }) Assert.IsTrue(w.View.Root.Q("hud-region-" + zone).ClassListContains(UIStyleClasses.IsHidden));
             Assert.IsFalse(w.View.Root.Q("hud-region-location").ClassListContains(UIStyleClasses.IsHidden)); Assert.IsFalse(w.View.Root.Q("hud-region-objective").ClassListContains(UIStyleClasses.IsHidden));
+            w.Model.StarSystemName = ""; Assert.IsTrue(w.View.Root.Q("hud-region-location").ClassListContains(UIStyleClasses.IsHidden), "QA-001: no blank location plate");
+            w.Model.StarSystemName = "Drift"; Assert.IsFalse(w.View.Root.Q("hud-region-location").ClassListContains(UIStyleClasses.IsHidden));
             w.Model.HasShip = true; Assert.IsFalse(w.View.Root.Q("hud-region-status").ClassListContains(UIStyleClasses.IsHidden));
             float saved = w.View.Root.Q<Meter>("hud-hull-meter").Fraction; w.Model.IsHulk = true; w.Model.HullFraction = .1f;
             Assert.AreEqual(saved, w.View.Root.Q<Meter>("hud-hull-meter").Fraction, "Hulk status meters keep the last values.");
@@ -133,7 +135,10 @@ namespace Game.Tests.PlayMode.UI.Screens
             w.Model.RadarRangeM = 100; w.Model.RadarVersion++;
             Assert.AreEqual(64, w.View.Root.Query(className: "hud-blip").ToList().Count);
             var blip = w.View.Root.Q("hud-radar-blip-0"); Assert.AreEqual(-120, blip.style.translate.value.y.value, .001f);
-            w.Model.RadarYawDeg = 90; Assert.AreEqual(120, blip.style.translate.value.x.value, .001f);
+            w.Model.RadarYawDeg = 90; Assert.AreEqual(-120, blip.style.translate.value.x.value, .001f, "Facing east, a contact due north is on the left");
+            w.Radar.Data[0].OffsetXZ = new Vector2(100, 0); w.Model.RadarVersion++;
+            Assert.AreEqual(0, blip.style.translate.value.x.value, .001f); Assert.AreEqual(-120, blip.style.translate.value.y.value, .001f, "Dead ahead is up");
+            w.Radar.Data[0].OffsetXZ = new Vector2(0, 100); w.Model.RadarYawDeg = 0; w.Model.RadarVersion++;
             Assert.IsTrue(w.View.Root.Q("hud-radar-blip-63").ClassListContains("hud-blip--beyond"));
             Assert.IsTrue(w.View.Root.Q("hud-radar-blip-63").ClassListContains("hud-blip--waypoint"));
             w.Radar.Data[0].OffsetXZ = new Vector2(1000, 0); w.Model.RadarVersion++; Assert.IsTrue(blip.ClassListContains("hud-blip--beyond"));

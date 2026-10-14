@@ -33,7 +33,16 @@ namespace Game.Presentation.Systems
         int radarCount, radarVersion;
         uint lastSourceRadar;
         bool radarInitialized;
+        readonly System.Collections.Generic.List<double3> markers = new();
         public ReadOnlySpan<HudRadarBlipView> Blips => radar.AsSpan(0, radarCount);
+        /// <summary>Extra point-of-interest markers in star-system coordinates, drawn as POI blips after the
+        /// simulation contacts and clamped to the rim when beyond range (QA-001: the dev playground's beacons use the
+        /// real radar instead of a second map). Replaces the previous set; an empty span clears it.</summary>
+        /// <summary>Displayed radar range; contacts are gathered within 2000 m and those beyond this range sit on the rim.</summary>
+        public float DisplayRangeM { get => displayRange; set => displayRange = math.isfinite(value) ? math.clamp(value, 100, 2000) : 2000; }
+        float displayRange = 2000;
+        public void SetMarkers(ReadOnlySpan<double3> positions)
+        { markers.Clear(); for (int i = 0; i < positions.Length; i++) markers.Add(positions[i]); }
         protected override void OnCreate()
         {
             snapshots = GetEntityQuery(ComponentType.ReadOnly<HudSnapshot>(), ComponentType.ReadOnly<HudRadarBlip>());
@@ -125,6 +134,7 @@ namespace Game.Presentation.Systems
                 row.CooldownFraction = Fraction(slot.Cooldown01, 100); row.Charges = slot.Charges; row.Ready = slot.Ready != 0; row.Active = slot.Active != 0;
                 row.KeyText = i < abilityKeys.Length ? abilityKeys[i] : "";
             }
+            model.RadarRangeM = displayRange;
             bool changed = !radarInitialized || lastSourceRadar != value.RadarVersion;
             int count = ship ? math.min(contacts.Length, radar.Length) : 0;
             int waypointIndex = -1;
@@ -150,6 +160,17 @@ namespace Game.Presentation.Systems
                     next = new HudRadarBlipView { OffsetXZ = new UnityEngine.Vector2(contact.OffsetXZ.x, contact.OffsetXZ.y), Kind = contact.Kind, Relation = contact.Relation, Flags = contact.Flags };
                 }
                 changed |= !Same(radar[i], next); radar[i] = next;
+            }
+            if (ship && hasPosition)
+            {
+                float range = model.RadarRangeM > 0 ? model.RadarRangeM : 2000;
+                for (int m = 0; m < markers.Count && count < radar.Length; m++)
+                {
+                    float2 offset = (float2)(markers[m] - playerPosition).xz; byte flags = 0;
+                    if (math.lengthsq(offset) > range * range) { offset = math.normalizesafe(offset) * range; flags = 2; }
+                    var next = new HudRadarBlipView { OffsetXZ = new UnityEngine.Vector2(offset.x, offset.y), Kind = 3, Flags = flags };
+                    changed |= !Same(radar[count], next); radar[count++] = next;
+                }
             }
             changed |= radarCount != count; radarCount = count; lastSourceRadar = value.RadarVersion; radarInitialized = true;
             if (changed) model.RadarVersion = ++radarVersion;

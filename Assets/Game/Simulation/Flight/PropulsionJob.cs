@@ -85,7 +85,8 @@ namespace Game.Simulation.Flight
             // ADR-0114: the core's manoeuvring assist acts at the centre of mass along local X and Z, like the gyro for yaw.
             float coreForce = FlightMath.CoreAssistForce(Config, mass.InverseMass) * thrustMultiplier;
             actuators[gyroIndex + 1] = new ThrustActuator { Column = new float3(coreForce, 0, 0), Min = -1, Max = 1 };
-            actuators[gyroIndex + 2] = new ThrustActuator { Column = new float3(0, coreForce, 0), Min = -1, Max = 1 };
+            // Boost overdrives the forward push like the thrusters (QA-001: boost must be felt), never braking or strafing.
+            actuators[gyroIndex + 2] = new ThrustActuator { Column = new float3(0, coreForce, 0), Min = -1, Max = boost ? Config.BoostThrottle : 1 };
             throttles[gyroIndex + 1] = flight.CoreAssist.x; throttles[gyroIndex + 2] = flight.CoreAssist.y;
             // Bound impossible requests before comparing axes: a target speed is not an unlimited engine.
             // Each bound is an outer bound only; the allocator still resolves coupled force/torque.

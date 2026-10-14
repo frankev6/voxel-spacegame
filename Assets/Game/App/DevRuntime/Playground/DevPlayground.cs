@@ -60,8 +60,11 @@ namespace Game.App.DevRuntime.Playground
         readonly DevPlaygroundCampaign campaign = new();
         InputService input;
         UIRoot ui;
-        VisualElement panel, markers, map, launcher;
-        Label heading, detail, outcome, playerDot;
+        VisualElement panel, markers, launcher;
+        Label heading, detail, outcome;
+        Button enterButton;
+        // QA-001: beacons appear on the game's own HUD radar as point-of-interest blips, not on a second map.
+        double3[] beaconPositions;
         GameObject visuals;
         Material material;
         LineRenderer courseRing;
@@ -81,13 +84,15 @@ namespace Game.App.DevRuntime.Playground
             salvage = new DevPlaygroundSalvage(host, SetReport);
             input.Controls.Flight.Interact.performed += OnInteract;
             launcher = new VisualElement { name = "dev-launcher", pickingMode = PickingMode.Ignore };
-            launcher.style.position = Position.Absolute; launcher.style.right = 24; launcher.style.top = 16;
+            // Bottom-right corner: the HUD radar owns the top-right (QA-001: these buttons covered it).
+            launcher.style.position = Position.Absolute; launcher.style.right = 24; launcher.style.bottom = 12;
             launcher.style.flexDirection = FlexDirection.Row;
             var console = new Button(() => host.Console.Toggle()) { name = "btn-open-console", text = "Console" };
             console.AddToClassList("btn"); console.AddToClassList("btn--secondary"); launcher.Add(console);
             var enter = new Button(() => { var result = Enter(); if (result.Kind == DevResultKind.Failed) Debug.LogWarning(result.Text); })
                 { name = "btn-enter-playground", text = "Enter playground" };
-            enter.AddToClassList("btn"); enter.AddToClassList("btn--secondary"); launcher.Add(enter);
+            enter.AddToClassList("btn"); enter.AddToClassList("btn--secondary"); launcher.Add(enter); enterButton = enter;
+            console.AddToClassList("btn--small"); enter.AddToClassList("btn--small");
             ui.GetLayer(UILayer.Toasts).Add(launcher);
         }
         internal DevCommandResult Enter()
@@ -329,6 +334,7 @@ namespace Game.App.DevRuntime.Playground
         internal void Tick()
         {
             if (launcher != null) launcher.style.display = host.Console.Screen.IsOpen ? DisplayStyle.None : DisplayStyle.Flex;
+            if (enterButton != null) enterButton.style.display = active ? DisplayStyle.None : DisplayStyle.Flex;
             var ctx = host.Context;
             power?.Tick(ctx); salvage?.Tick();
             if (autoEnter && !entering && input != null && PlayerScenarioProbes.IsReady(ctx)
@@ -353,16 +359,17 @@ namespace Game.App.DevRuntime.Playground
             if (next != nearest)
             {
                 nearest = next;
-                if (heading != null) heading.text = next < 0 ? "DEV PLAYGROUND  /  FLY TO A BEACON" : pads[next].Title + "  /  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
-                if (detail != null) detail.text = next < 0 ? "North: Lab / flight / range / enemy · South: fleet / cargo / settings / trade\nFar south: power / story / survey / map · Campaign / salvage further south. Console: playground goto=<id> · playground status lists all beacons" : pads[next].Detail;
+                if (heading != null) heading.text = next < 0 ? "DEV PLAYGROUND  ·  FLY TO A BEACON" : pads[next].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
+                // Details only inside a ring; the beacon chart and world labels do the wayfinding (QA-001 clutter).
+                if (detail != null) { detail.text = next < 0 ? "" : pads[next].Detail; detail.style.display = next < 0 ? DisplayStyle.None : DisplayStyle.Flex; }
             }
             if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status != DevOperationStatus.Running)
             { pending = 0; SetReport(operation.Status + ": " + operation.Message); }
-            if (playerDot != null && DevEcs.TryGetUniversePosition(ctx, ctx.PlayerShipRoot, out var current))
+            if (beaconPositions != null && ctx.World != null && ctx.World.IsCreated)
             {
-                var offset = current - origin;
-                playerDot.style.left = (float)math.clamp((offset.x + 360) * .24, 0, 240);
-                playerDot.style.top = (float)math.clamp((60 - offset.z) * .24, 0, 180);
+                for (int i = 0; i < pads.Length; i++) beaconPositions[i] = origin + pads[i].Offset;
+                var hud = ctx.World.GetExistingSystemManaged<Game.Presentation.Systems.HudSyncSystem>();
+                if (hud != null) { hud.SetMarkers(beaconPositions); hud.DisplayRangeM = 800; } // beacons lie within ±600 m
             }
             var camera = ctx.GameplayCamera;
             if (markers == null || camera == null || !ctx.TryGetFrame(out var frame)) return;
@@ -398,35 +405,23 @@ namespace Game.App.DevRuntime.Playground
         {
             report = value ?? "";
             // Keep verbose diagnostics available in command output; the flight HUD remains bounded.
-            if (outcome != null) outcome.text = report.Length > 650 ? report.Substring(0, 650) + "… (F1: playground status)" : report;
+            if (outcome == null) return;
+            outcome.text = report.Length > 240 ? report.Substring(0, 240) + "… (F1: playground status)" : report;
+            outcome.style.display = report.Length == 0 ? DisplayStyle.None : DisplayStyle.Flex;
         }
         void BuildPresentation()
         {
             if (ui == null) return;
             panel = new VisualElement { name = "dev-playground", pickingMode = PickingMode.Ignore };
-            panel.AddToClassList("panel"); panel.style.position = Position.Absolute; panel.style.left = 24; panel.style.top = 80;
-            panel.style.width = 540; panel.style.paddingLeft = 16; panel.style.paddingRight = 16;
-            panel.style.paddingTop = 12; panel.style.paddingBottom = 12;
-            heading = AddLabel(panel, "DEV PLAYGROUND", "panel__title");
-            detail = AddLabel(panel, "", "text-muted");
-            detail.style.whiteSpace = WhiteSpace.Normal;
-            outcome = AddLabel(panel, report, "text-mono"); outcome.style.whiteSpace = WhiteSpace.Normal;
-            AddLabel(panel, "Console: playground reset  — restores the entire playground", "text-muted");
+            panel.AddToClassList("panel"); panel.style.position = Position.Absolute; panel.style.left = 24; panel.style.top = 96;
+            panel.style.maxWidth = 420; panel.style.paddingLeft = 12; panel.style.paddingRight = 12;
+            panel.style.paddingTop = 8; panel.style.paddingBottom = 8;
+            heading = AddLabel(panel, "DEV PLAYGROUND", "text-s");
+            detail = AddLabel(panel, "", "text-xs"); detail.AddToClassList("text-muted");
+            detail.style.whiteSpace = WhiteSpace.Normal; detail.style.display = DisplayStyle.None;
+            outcome = AddLabel(panel, report, "text-xs"); outcome.style.whiteSpace = WhiteSpace.Normal;
             ui.GetLayer(UILayer.Hud).Add(panel);
-            map = new VisualElement { name = "dev-playground-map", pickingMode = PickingMode.Ignore };
-            map.AddToClassList("panel"); map.style.position = Position.Absolute; map.style.right = 24; map.style.bottom = 32;
-            map.style.width = 280; map.style.paddingLeft = 16; map.style.paddingTop = 12; map.style.paddingBottom = 12;
-            AddLabel(map, "BEACONS / NORTH UP", "panel__title");
-            var chart = new VisualElement { pickingMode = PickingMode.Ignore }; chart.style.height = 180; map.Add(chart);
-            for (int i = 0; i < pads.Length; i++)
-            {
-                var dot = AddLabel(chart, (i + 1).ToString(System.Globalization.CultureInfo.InvariantCulture), "text-muted");
-                dot.style.position = Position.Absolute;
-                dot.style.left = (pads[i].Offset.x + 360) * .24f; dot.style.top = (60 - pads[i].Offset.z) * .24f;
-            }
-            playerDot = AddLabel(chart, "+", "panel__title"); playerDot.style.position = Position.Absolute;
-            AddLabel(map, "1 Flight    2 Range    3 Enemy\n4 Cargo     5 Settings   6 Trade\n7 Fleet     8 Lab     9 Story\n10 Survey   11 Map    12 Power\n13 Campaign 14 Salvage\n+ Your ship", "text-mono");
-            ui.GetLayer(UILayer.Hud).Add(map);
+            beaconPositions = new double3[pads.Length];
             markers = new VisualElement { name = "dev-playground-beacons", pickingMode = PickingMode.Ignore };
             markers.style.position = Position.Absolute; markers.style.left = 0; markers.style.top = 0;
             ui.GetLayer(UILayer.World).Add(markers);
@@ -435,7 +430,7 @@ namespace Game.App.DevRuntime.Playground
             if (shader != null) material = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
             foreach (var pad in pads)
             {
-                pad.Label = AddLabel(markers, "+ " + pad.Title, "text-mono");
+                pad.Label = AddLabel(markers, pad.Title, "text-xs");
                 pad.Label.style.position = Position.Absolute;
                 if (material == null) continue;
                 var ringObject = new GameObject(pad.Id); ringObject.transform.SetParent(visuals.transform, false);
@@ -456,8 +451,14 @@ namespace Game.App.DevRuntime.Playground
         }
         void ClearPresentation()
         {
-            panel?.RemoveFromHierarchy(); markers?.RemoveFromHierarchy(); map?.RemoveFromHierarchy();
-            panel = markers = map = null; heading = detail = outcome = playerDot = null;
+            panel?.RemoveFromHierarchy(); markers?.RemoveFromHierarchy();
+            if (beaconPositions != null && host.Context.World != null && host.Context.World.IsCreated)
+            {
+                var hud = host.Context.World.GetExistingSystemManaged<Game.Presentation.Systems.HudSyncSystem>();
+                if (hud != null) { hud.SetMarkers(default); hud.DisplayRangeM = 2000; }
+            }
+            beaconPositions = null;
+            panel = markers = null; heading = detail = outcome = null;
             if (visuals != null) UnityEngine.Object.Destroy(visuals);
             if (material != null) UnityEngine.Object.Destroy(material);
             visuals = null; material = null; courseRing = null; courseGate = -1;

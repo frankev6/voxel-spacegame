@@ -11,7 +11,9 @@
             <ui:Label name="hud-route" class="text-s text-muted text-ellipsis" picking-mode="Ignore"><Bindings><ui:DataBinding property="text" data-source-path="RouteText" binding-mode="ToTarget" /></Bindings></ui:Label>
         </ui:VisualElement>
         <ui:VisualElement name="hud-region-radar" class="hud-region hud-plate anchor-top-right hud-radar-plate" picking-mode="Ignore">
-            <ui:VisualElement name="hud-radar" class="hud-radar" picking-mode="Ignore" />
+            <ui:VisualElement name="hud-radar" class="hud-radar" picking-mode="Ignore">
+                <ui:Label name="hud-radar-self" text="▲" class="hud-radar-self text-xs" picking-mode="Ignore" />
+            </ui:VisualElement>
             <ui:VisualElement class="hud-number-line" picking-mode="Ignore"><ui:Label name="hud-radar-range" class="text-s" picking-mode="Ignore" /><ui:Label text=" m" class="text-s text-muted" picking-mode="Ignore" /></ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="hud-region-target" class="hud-region hud-plate anchor-right-center hud-target" picking-mode="Ignore">

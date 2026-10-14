@@ -32,7 +32,7 @@ namespace Game.App.DevRuntime.Playground
         readonly DevContext context;
         readonly UIRoot ui;
         readonly SceneFlow flow;
-        VisualElement panel, hiddenMap;
+        VisualElement panel;
         Label energy, shield, abilities, feedback;
         Button shieldButton, boostButton;
         AbilityOperation operation;
@@ -163,10 +163,9 @@ namespace Game.App.DevRuntime.Playground
         void Show()
         {
             if (panel != null) return;
-            hiddenMap = ui.RootElement.Q<VisualElement>("dev-playground-map");
-            if (hiddenMap != null) hiddenMap.style.display = DisplayStyle.None;
             panel = new VisualElement { name = "dev-power-trial" }; panel.AddToClassList("panel");
-            panel.style.position = Position.Absolute; panel.style.right = 24; panel.style.top = 90;
+            // Left column under the playground panel; the HUD radar owns the top-right (QA-001).
+            panel.style.position = Position.Absolute; panel.style.left = 24; panel.style.top = 250;
             panel.style.width = 390; panel.style.maxWidth = Length.Percent(45); panel.style.paddingLeft = 14;
             panel.style.paddingRight = 14; panel.style.paddingTop = 12; panel.style.paddingBottom = 12;
             var title = new Label("POWER / SHIELDS / ABILITIES"); title.AddToClassList("label"); panel.Add(title);
@@ -230,8 +229,6 @@ namespace Game.App.DevRuntime.Playground
         void Close()
         {
             operation?.Cancel("Power trial closed."); operation = null; operationId = 0;
-            if (hiddenMap != null) hiddenMap.style.display = DisplayStyle.Flex;
-            hiddenMap = null;
             panel?.RemoveFromHierarchy(); panel = null; energy = shield = abilities = feedback = null;
             shieldButton = boostButton = null; lastEnergy = lastShield = lastAbilities = null;
         }
