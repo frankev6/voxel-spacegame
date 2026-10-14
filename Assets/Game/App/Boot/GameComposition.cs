@@ -201,7 +201,7 @@ namespace Game.App.Boot
             Session.BindNarrative(narrative);
             Push(new NarrativeEconomyDependencies(economy, narrative));
             // TODO(QST-002/003/004/005): register implemented INarrativeSystem owners here before sessions begin.
-            // TODO(NAR-012): register the world-event/counter bridge once implemented.
+            // TODO(QST-008): construct NarrativeWorldEventBridge.CreateForWorld after real beat/travel/encounter owners; do not instantiate their staged shells.
 
             // 10. App-lifetime UI models and implemented presenter bindings (HUD-002).
             Screens = Push(new UiComposition(UI));

@@ -5,6 +5,9 @@ using Game.Core.Events;
 using Game.Data.Definitions;
 using Game.Data.Logic;
 using Game.Data.Logic.Nodes;
+using Game.Data.Services;
+using Game.Galaxy.Data;
+using Game.Galaxy.Services;
 using Game.Narrative;
 
 namespace Game.App.Services
@@ -56,6 +59,33 @@ namespace Game.App.Services
             EventBus<FactionRelationChanged>.Subscribe(OnRelation);
             EventBus<TerritoryEntered>.Subscribe(OnTerritory);
             EventBus<ItemAcquired>.Subscribe(OnAcquired);
+        }
+
+        /// <summary>QST-008 composition entry: canonical lookups plus implemented beat/travel/encounter owners.</summary>
+        public static NarrativeWorldEventBridge CreateForWorld(NarrativeService narrative,
+            ContentCatalog content, GalaxyService galaxy, Func<ulong, ContentHash?> encounterOfMember,
+            Func<bool> travelIdle, Func<LogicBodyHandle, bool, bool> interact,
+            Action<ContentHash, ulong, bool> hail, Action<uint, bool> enter)
+        {
+            if (content == null) throw new ArgumentNullException(nameof(content));
+            if (galaxy == null) throw new ArgumentNullException(nameof(galaxy));
+            var anchors = new Dictionary<uint, ContentHash>();
+            foreach (var definition in content.All<AuthoredStarSystemDefinition>())
+                anchors.Add(StarSystemId.FromAuthored(definition.Id.Hash).Value, definition.Id.Hash);
+            LogicBodyHandle? ResolveBody(uint system, ulong key)
+            {
+                var id = new StarSystemId(system);
+                if (galaxy.Galaxy == null || !galaxy.Galaxy.TryGetIndex(id, out _)) return null;
+                var bodies = galaxy.GetContent(id);
+                if (!bodies.TryFind(key, out int index)) return null;
+                var body = bodies.Bodies[index];
+                var template = galaxy.GetBodyTemplate(body.TemplateIndex);
+                return new LogicBodyHandle(system, (byte)body.Id.Role, body.Id.Slot, body.Id.SubSlot, template.Id.Hash);
+            }
+            ContentHash ResolveAnchor(uint system) => anchors.TryGetValue(system, out var hash) ? hash : default;
+            int ResolveFaction(ContentHash hash) => content.TryGet<FactionDefinition>(hash, out var faction) ? content.IndexOf(faction) : 0;
+            return new NarrativeWorldEventBridge(narrative, ResolveBody, ResolveAnchor,
+                encounterOfMember, travelIdle, ResolveFaction, interact, hail, enter);
         }
 
         void Add(int slot, int amount)
