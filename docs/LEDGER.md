@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 32 | 14 | 0 | 0 | 136 | 0 | 182 | 5 |
+| M3 | 32 | 13 | 0 | 0 | 137 | 0 | 182 | 6 |
 | M4 | 9 | 3 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -364,8 +364,8 @@
 | ENC-004 | FactionService and FACN | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-003, PERS-001, FND-001 | yes | done | astra (gpt-6) | 2026-10-14 | 3b4929e9 | Queued reads, FACN unknown-ID preservation and atomic restore; production save/new-game/sandbox reset registration. Six service and two integration cases pass. |
 | ENC-005 | TerritoryService (authored ownership) | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, ENC-003, ENC-004, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | de3f1ee | Authored territory ownership, generation/reset rebuild; production map/ticker registration 0f00dd27; three required cases pass. |
 | ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, GAL-006, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 21d0996b | Full ordered seeded composition, clearance placement and line-abreast formation; 9 required cases pass. Director cap remains ENC-007. |
-| ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SYS-008, SYS-013, FND-012, TRV-006, AI-008 | yes | in-progress | astra (gpt-6) | 2026-10-14 | 247fd49a | Real runtime composed; tags/allegiance, ambush and caps pass. Schedule, defeat/loot, despawn, pending acceptance and two advisory fixtures remain; not done. |
-| ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | no | todo |  |  |  |  |
+| ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SYS-008, SYS-013, FND-012, TRV-006, AI-008 | yes | done | astra (gpt-6) | 2026-10-14 | a445825b | Real production director; ten functional cases accepted across batch/fix; two advisory perf fixtures authored, measurements deferred. ENCT binary persistence stays ENC-008. |
+| ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | yes | todo |  |  |  |  |
 | ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, SPEC-40 | no | todo |  |  |  |  |
 | ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | cdf292d6 | Ten canonical encounters, six factions, real ARK/Whisper ownership; generation/rerun zero errors, two required checks pass |
 | ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | no | todo |  |  |  |  |
@@ -1178,6 +1178,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — ENC-007 accepted: real director lifecycle — astra (gpt-6)
+
+- a445825b completes all twelve specified fixture definitions over the actual boot/loader/travel/spawn/faction/economy owners. Functional batch nine passed/one fixture ID failure in 5.19s; corrected resource_fuel lookup and focused defeat/loot case passed. All ten functional cases accepted: schedule, deterministic visits, preconditions, spawn allegiance/clearance, ambush, exactly-once rewards with hulks retained, director-only retirement, actual travel away/back with preserved instance ID, requests queued during Transit, and caps. Evidence Logs/playtest/encounter-director/{lifecycle,loot}.xml.
+- Two advisory performance fixtures retain 16-instance/40-member steady state, zero-GC and ten-ship spawn targets/PerfRun records. They live in EncounterDirectorPerfTests so the live API can select functional checks without accidentally dispatching benchmarks. Initial mixed-filter request was rejected before dispatch; no benchmark/full-suite/soak executed. Compile clean, zero CS warnings. Test count: spec-required: 12, extra: 0. Measurements deferred under ADR-0042/0070.
+- ENC-007 is done; ENCT binary save persistence remains separate ENC-008. This unlocks actual narrative/command/formation implementation through concrete dependency reconciliation, without faking missing runtime owners.
 
 ### 2026-10-14 — ENC-007 real director implementation, acceptance partial — astra (gpt-6)
 
