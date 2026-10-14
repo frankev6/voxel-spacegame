@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 13 | 12 | 0 | 0 | 157 | 0 | 182 | 4 |
+| M3 | 13 | 11 | 0 | 0 | 158 | 0 | 182 | 4 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -387,7 +387,7 @@
 | NAR-015 | Legacy converter: Yarn emission, beats and preservation manifest | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-014, DLG-001, QST-001 | yes | done | astra (gpt-6) | 2026-10-13 | 5d85a419 | 34 Yarn/34 beats/facts and manifest generated;145 files byte-stable,35 definitions registered; six required checks accepted, clean compile; Q325 |
 | NAR-016 | Legacy converter: quests, triggers, templates and flag assets | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-015 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 1b0cb271 | Four required converter cases pass9669; real generation42967 terminal0, 225 files raw-byte identical across rerun;9 total quests incl Whisper,3 contracts,143 source strings; Q337/343. |
 | NAR-017 | Narrative Debugger window (read-only) | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-010 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 6276ae7b | Facts/Trace/read-only debugger; formatter passes; Quests shows unavailable until QST-006 |
-| NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | yes | in-progress | presentation (gpt-6.1-sol high) | 2026-10-13 |  | Existing presentation worker: three required load-safety scenarios, minimal real boot fixtures, no Unity worker runs. |
+| NAR-019 | Load-safety and determinism tests | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-012 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-14 | 080e2390 | Three specified live cases pass: load effect/visit silence, exact same-seed FACT inputs, byte-identical unknown FACT resave. Source9d6c7c96 and fixture correction080e2390; Q498. |
 | NAR-020 | LogicWatcher | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-004 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | b4344a9 | Sorted/deduplicated dependency watcher; 4 focused tests pass |
 | DLG-001 | Public contract types | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | NAR-001, UI-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 67e0ffd | Dialog contracts, one required test; full suites green |
 | DLG-002 | Dialog script parser | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, NAR-003, NAR-016 | yes | done | astra (gpt-6) | 2026-10-13 | 179603ec | Parser and seven required cases accepted; 38 converted files parse cleanly; focused separator review fix passes. |
@@ -483,7 +483,7 @@
 | DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-008, DEV-012, INP-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 38d812a3 | Combined source accepted; real overlays and input interaction, five required checks pass; Q477/Q478. |
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | yes | done | economy (gpt-6.1-sol high) | 2026-10-13 | 40421f42 | Real inv/give/facts owners, probes and CLI; three required cases pass in focused seven-case batch. |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-14 | f6304ccd | Save/load/jump commands integrated; all 3 required checks pass (position fixture corrected a5833668); real menu routing/toworld acceptance still HUD-002-dependent; Q430 |
-| DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | done | astra (gpt-6) | 2026-10-14 | 5871d067 | Eight actual playground beacons, including creative Blueprint Lab entry/exit/reset. One expanded owner-feature case passes; live Lab screenshot. Campaign/map/log and docked fleet trials remain separate integration. |
+| DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | done | astra (gpt-6) | 2026-10-14 | 0c2e5059 | Eleven actual beacons, including real story/log, supplies and rumor map; expanded owner-feature case passes. Live story log screenshot verified, zero new errors; reset clears canonical demo state. |
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
 | MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e9d50f3c | Three exact factions generated; duplicate skipped, player/AI ownership preserved; rerun byte/GUID/manifest stable |
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3d65849 | Protected ordered loot assets/catalog; rerun byte-identical; 1 required and 1 migration-safety test |
@@ -1216,6 +1216,16 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — NAR-019 live load safety accepted — astra (gpt-6)
+
+- 9d6c7c96/080e2390: all three required scenarios pass across initial load/resave results and corrected deterministic input case. Actual paused load restores FACT before evaluation without effect dispatch or visit/crossing increments; positive controls prove trace production. Unknown FACT payload resaves byte-identically. Two actual seeded station interaction sequences produce equal full FACT snapshots. Evidence Logs/playtest/opening-chapter/load-safety-{initial,determinism}.xml. Test count: spec-required: 3, extra: 0.
+- Lead exposed the existing common Complete await helper as protected. Initial deterministic fixture paused the world before teleport/query, preventing interaction; corrected to live gameplay and the real bar Back option2. No production guard bypass. Existing complete opening route passes against the load fix. Compile clean, no CS warnings; no broad/performance/soak runs.
+
+### 2026-10-14 — DEV-021 real story, supplies and map playground accepted — astra (gpt-6)
+
+- e5850d70/0c2e5059 extend the playground from eight to eleven actual areas. Story starts the authored survey and reveals a real clue/targeted rumor; supplies add one real palladium per activation up to three and advance the objective; map opens the actual rumor destination. Existing areas remain. Reset clears canonical quest/clue/seen/cargo/map state and keeps campaign intro disabled. Full expanded Enter_Interact_Reset passes; evidence Logs/playtest/playground-story-functional.xml. Test count: spec-required: 0, extra: 0; existing single owner-feature case extended.
+- The real first activation exposed ClueService evaluating a rumor condition without its declared MarkerCondition scope. The owner now pushes/restores that scope in finally before notifications; no condition bypass. Existing case checks restoration. Lead also corrected valid seed0 initialization logic. Compile clean, zero CS warnings; no broad/perf/soak checks. Live actual F activation opens the real survey log; screenshot Logs/playtest/playground-story-live.png inspected, zero new errors/warnings.
 
 ### 2026-10-14 — QST-010 opening route accepted — astra (gpt-6)
 

@@ -7,8 +7,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | QST-010 | Delivered hand-in24090059; genuine dependency wait while lead integrates completed sources | Next ready standard implementation after frontier/integration dependency |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-019 | Delivered3af69584, integrated9d6c7c96; genuine ready-standard dependency wait during lead acceptance | Next substantial standard feature unlocked by frontier/integration owner |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-021 | Sourcee5850d70 integrated; repairs real ClueService scope failure from focused playground check | Canonical clue evaluation owner; no Unity |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | NAR-019 | Accepted9d6c7c96/080e2390, three required cases pass; genuine ready-standard dependency wait | Next substantial standard feature unlocked by frontier/integration owner |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-021 | Acceptede5850d70/0c2e5059, expanded case and live story activation pass; genuine ready-standard dependency wait | Canonical clue evaluation owner; no Unity |
 
 ## Operating rules
 
@@ -95,3 +95,7 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - QST-010 integration a2c53015 remains unaccepted: actual route reaches The Drift after real probe combat, patrol hand-in and rumor. Lead fixed deferred DockPresenter navigation covering the active dialogue and corrected scenario key release/option selection; pending-spawn rebasing now passes ten existing checks and cache/derelict interactions succeed; save refusal was the normal damage cooldown (0 hostiles,310/600 ticks); fixture shortens its restored config, scenario waits on actual save eligibility. No full route or save/replay pass claimed. Three exact workers recycled as above; NAR019 remains active.
 
 - 14:39Z recovery: all three recorded worker turns were interrupted with source preserved. Resumed the same threads on QST010 later-route support, NAR019 load safety and DEV021 actual story/log/map beacons. No duplicates; Editor stopped and no test run active before lead resumed focused validation.
+
+- QST0104bb3198b accepted: actual full route8.512s and replay4.520s pass, including reward consumption and Whisper arrival. NAR0199d6c7c96 load boundary/unknown FACT cases pass; worker repairs paused-query deterministic fixture. DEV021e5850d70/0c2e5059 adds three real story/supplies/map beacons and fixes canonical rumor condition scope; focused entry/reset check pending.
+
+- Final compatible batch: QST010 and NAR019 accepted, DEV021 eleven functional areas accepted with live story screenshot. All three exact workers have delivered; genuine ready-standard waits remain while lead integrates remaining already-delivered scenarios and takes next frontier work. No new duplicate threads or review-only assignment.
