@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Jump integration started:** SYS-01328aa9189 implements destination validation, prefetch/unload, origin-owner placement and arrival state. Uncompiled/unaccepted; next three required cases. SYS-009 accepted; SYS-012/DLG-009/DLG-012 assigned to the existing workers. No Unity active.
+
 - **Player pose/docking persistence accepted:** SYS-009efe6dfff has clean final compile and passing binary/real-loader cases, including corrupt input and reset cleanup. Next lead SYS-013 jump integration; SYS-012 regression worker unlocks, DLG-009/012 workers active. No Unity active.
 
 - **Dialog presenter accepted:** DLG-008b1057490 passes five required cases alongside revised PLOC case; clean compile, six-case batch0.1923s. SYS-009 reset/disposal follow-up needs final check. Next DLG-009 view and DLG-012 harness workers; production runner still separate. No Unity active.

@@ -91,7 +91,7 @@ namespace Game.Galaxy.Services
             if (!IsReady || galaxy.Galaxy == null || !galaxy.Galaxy.TryGetIndex(target, out _) ||
                 !math.all(math.isfinite(arrivalPositionM)) || !math.isfinite(arrivalYawRad)) return false;
             var location = new PlayerLocation { StarSystem = target, PositionM = arrivalPositionM, YawRad = arrivalYawRad };
-            // Complete the existing owner's prefetch before retiring the current content.
+            // Start the existing owner's prefetch before retiring the current content.
             galaxy.PrefetchContent(target);
             if (docking.HasPendingRestore) docking.RestoreDocked(default);
             StartLoad(target, location, reason, true);

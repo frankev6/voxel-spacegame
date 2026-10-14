@@ -1099,6 +1099,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-013 jump entry authored — astra (gpt-6)
+
+- 28aa9189 replaces BeginStarSystemChange shell with validated destination/arrival, owner prefetch, existing unload, origin-owner player placement, arrival persistence and Changing state. Normal scene entry retains spawn-after-ready behavior. Uncompiled/unaccepted; next three required direct cases for placement, old-world retirement and single entry event. spec-required: 3 planned, extra: 0. No Unity run for this source.
+- SYS-009 accepted9a1d2ac9; SYS-012 claimed4612abf1 for existing combat worker after its bounded presenter review. DLG-009/012 workers implementing. Previous presenter acceptance and current player-save acceptance plus jump source are progress. No Unity active.
+
 ### 2026-10-13 — SYS-009 done: player pose and docking persistence — astra (gpt-6)
 
 - efe6dfff completes canonical PLOC binary restore, missing-chunk fallback, missing-GLXY pose preservation, shared boot registration, real grid/anchor dock validation, delayed success notification, hulk rejection and session-reset/disposal cleanup. Initial namespace and anchor/grid failures remain recorded above.
