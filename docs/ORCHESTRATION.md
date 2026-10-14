@@ -33,3 +33,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - Compatible territory/dialog/fleet integration accepted0f00dd27;16 distinct focused cases pass after documented fixture/live-layout fixes. Seventh playground fleet area visually verified at Logs/playtest/playground-fleet-live.png; game left running there. Next lead EDT-011 commit, then overlays/host/root.
 
 - EDT-011 accepted b60fde52/7d95a992: eight required commit and ten inventory cases pass; exact cargo checkpoint ADR-0096. HUD-007 d0ac700a pending integration. Presentation now completing HUD-005/004, pause and main-menu workers active. Lead next editor overlays/host and compatible HUD integration.
+
+- EDT-019 accepted 38c38243: all four required overlay checks pass, including Metal support and 65,536 instances in one category draw. Next EDT-022 host and compatible pending HUD deliveries; updated active table is authoritative.

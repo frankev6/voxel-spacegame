@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 37 | 16 | 0 | 0 | 129 | 0 | 182 | 4 |
+| M3 | 37 | 15 | 0 | 0 | 130 | 0 | 182 | 4 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -440,7 +440,7 @@
 | EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | yes | done | astra (gpt-6) | 2026-10-14 | e28ae8a5 | Selection transforms retain shared-origin damage/interleaved hull; undo/redo remap origins; six required cases pass including repaired case |
 | EDT-017 | Copy, cut, paste and stamp | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-016 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 61e4057e | Pristine clipboard, damage-preserving cut and atomic mirrored stamp; five required cases pass in compatible batch |
 | EDT-018 | Draft renderer | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, SPEC-11 | yes | done | astra (gpt-6) | 2026-10-14 | 843f7435 | Snapshot meshes, dirty requeue, slice/X-ray, incremental props; six required cases pass including native leak and async bounds; live visualization remains EDT-022 |
-| EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead: procedural Metal-compatible overlays and real controller/category feeds. |
+| EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | yes | done | astra (gpt-6) | 2026-10-14 | 38c38243 | Versioned procedural cubes/prop ghosts, controller and damage/island feeds; Metal shader plus three renderer cases pass. |
 | EDT-020 | Blueprint store, browser and name sanitising | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-017, PERS-001, VOX-009, UI-003, UI-005, UI-007, UI-008, UI-009, HUD-001 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-14 | 97440534 | Profile VOXS store/browser, read-only content and atomic replacement; all 5 required cases pass; ADR-0093 accepted; Q428; host integration stays EDT-022 |
 | EDT-021 | Editor UI panels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-001, UI-003, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, HUD-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f0e774dc | Pooled editor panels, real UXML/theme and current-identity bindings; four graphics-enabled cases pass |
 | EDT-022 | Editor host, input, presenter and leave prompt | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-011, EDT-015, EDT-019, EDT-021, SPEC-62, INP-001 | no | todo |  |  |  |  |
@@ -1165,6 +1165,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — EDT-019 editor overlays — astra (gpt-6)
+
+- 38c38243 implements procedural edge-UV cube and URP Metal-compatible shader, configured material, 11 versioned categories with bounded doubled GPU buffers, ghost prop meshes, selection, clearance, symmetry/grid/box outlines, incremental damaged records and throttled disconnected cells. Renderer consumes the actual controller/session; playable host remains EDT-022.
+- `Logs/playtest/editor-overlay/shader.xml`: one required shader/stride/config check passes; `renderer.xml`: all three required renderer checks pass, including a real 65,536-instance draw. spec-required: 4, extra: 0. Clean compile, zero CS warnings. Fixed one readonly-native-array test compile error before acceptance. No broad suite, tuning or soak. Generated font atlases restored and QualitySettings cp-restored; unrelated metas excluded.
+- Same workers: pause source 7fa0900 and flight HUD d0ac700a await compatible central integration; combat now implements loading/dock HUD-019, presentation notification/hotkeys HUD-010, economy main menu HUD-003. Concrete dependency splits Q453/454 preserve missing actual merchant/query owners instead of substitutes. Lead next playable editor host/input/presenter and normal roots.
 
 ### 2026-10-14 — EDT-011 atomic editor commits — astra (gpt-6)
 
