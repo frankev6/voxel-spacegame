@@ -31,3 +31,13 @@
 
 .editor-fragment { flex-grow: 1; min-height: 0; min-width: 0; }
 .editor-key-hints > .key-hint { font-size: var(--text-xs); padding-top: 0; padding-bottom: 0; margin-top: 0; margin-bottom: 0; }
+/* QA-001 creative hotbar and paint strip. */
+.editor-bottom--creative { flex-direction: column; }
+.editor-hotbar { flex-direction: row; align-items: center; justify-content: center; flex-shrink: 0; padding: var(--space-1); }
+.editor-hotbar > .slot { width: 56px; height: 56px; margin: 2px; }
+.editor-colors--compact { flex-direction: row; flex-wrap: wrap; width: 196px; margin-left: var(--space-3); flex-shrink: 0; }
+.editor-colors--compact > .editor-swatch { width: 20px; height: 20px; margin: 2px; }
+.editor-bottom--creative .editor-footer { flex-grow: 0; height: 30px; padding-top: 0; padding-bottom: 0; }
+.ship-editor-right .editor-stat-value { width: 70px; }
+.ship-editor-right .editor-stat-delta { width: 56px; }
+.ship-editor-right .editor-actions { flex-wrap: wrap; }

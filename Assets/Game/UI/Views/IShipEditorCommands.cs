@@ -25,5 +25,9 @@ namespace Game.UI.Views
         void RequestLeave();
         void OpenSettings();
         bool OnBackPressed(); // cancel chain; always returns true
+        /// QA-001 creative hotbar and drawers.
+        void SelectHotbar(int slot);
+        void TogglePalette();
+        void ToggleDetails();
     }
 }

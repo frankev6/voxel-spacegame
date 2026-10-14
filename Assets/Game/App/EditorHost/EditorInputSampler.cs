@@ -11,6 +11,9 @@ namespace Game.App.EditorHost
     {
         readonly InputService input;
         readonly IWorldPointerGate pointerGate;
+        // QA-001: right button orbits when dragged and removes when clicked; the click resolves on release.
+        const float ClickSlopPixels = 6;
+        Vector2 secondaryDown; bool secondaryDragged;
         public EditorInputSampler(InputService input, IWorldPointerGate pointerGate)
         {
             this.input = input ?? throw new ArgumentNullException(nameof(input));
@@ -27,8 +30,10 @@ namespace Game.App.EditorHost
             frame.PrimaryPressed = editor.Primary.WasPressedThisFrame();
             frame.PrimaryHeld = editor.Primary.IsPressed();
             frame.PrimaryReleased = editor.Primary.WasReleasedThisFrame();
-            frame.SecondaryPressed = editor.Secondary.WasPressedThisFrame();
+            if (editor.Secondary.WasPressedThisFrame()) { secondaryDown = pointer; secondaryDragged = false; }
+            if (editor.Secondary.IsPressed() && (pointer - secondaryDown).sqrMagnitude > ClickSlopPixels * ClickSlopPixels) secondaryDragged = true;
             frame.SecondaryReleased = editor.Secondary.WasReleasedThisFrame();
+            frame.SecondaryPressed = frame.SecondaryReleased && !secondaryDragged;
             frame.Shift = editor.ModShift.IsPressed();
             frame.Ctrl = editor.ModCtrl.IsPressed();
             frame.Alt = editor.ModAlt.IsPressed();
@@ -67,6 +72,12 @@ namespace Game.App.EditorHost
             if (editor.MoveDown.WasPressedThisFrame()) frame.Actions |= EditorActions.MoveDown;
             if (editor.MirrorSelection.WasPressedThisFrame()) frame.Actions |= EditorActions.MirrorSelection;
             if (editor.SelectAll.WasPressedThisFrame()) frame.Actions |= EditorActions.SelectAll;
+            if (editor.Hotbar1.WasPressedThisFrame()) frame.HotbarSlot = 1; else if (editor.Hotbar2.WasPressedThisFrame()) frame.HotbarSlot = 2;
+            else if (editor.Hotbar3.WasPressedThisFrame()) frame.HotbarSlot = 3; else if (editor.Hotbar4.WasPressedThisFrame()) frame.HotbarSlot = 4;
+            else if (editor.Hotbar5.WasPressedThisFrame()) frame.HotbarSlot = 5; else if (editor.Hotbar6.WasPressedThisFrame()) frame.HotbarSlot = 6;
+            else if (editor.Hotbar7.WasPressedThisFrame()) frame.HotbarSlot = 7; else if (editor.Hotbar8.WasPressedThisFrame()) frame.HotbarSlot = 8;
+            else if (editor.Hotbar9.WasPressedThisFrame()) frame.HotbarSlot = 9;
+            frame.TogglePalette = editor.TogglePalette.WasPressedThisFrame();
         }
     }
 }

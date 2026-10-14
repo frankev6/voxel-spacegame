@@ -12,6 +12,35 @@ namespace Game.UI.ViewModels
         [CreateProperty] public string Title { get => title; set => Set(ref title, value, TitleChanged); }
 
         [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs HotbarIndexChanged = new BindablePropertyChangedEventArgs(nameof(HotbarIndex));
+        int hotbarIndexField;
+        /// QA-001 creative hotbar: selected slot 0..8.
+        [CreateProperty] public int HotbarIndex { get => hotbarIndexField; set => Set(ref hotbarIndexField, value, HotbarIndexChanged); }
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs HotbarVersionChanged = new BindablePropertyChangedEventArgs(nameof(HotbarVersion));
+        int hotbarVersionField;
+        /// Bumped whenever Hotbar ids/icons change.
+        [CreateProperty] public int HotbarVersion { get => hotbarVersionField; set => Set(ref hotbarVersionField, value, HotbarVersionChanged); }
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs PaletteOpenChanged = new BindablePropertyChangedEventArgs(nameof(PaletteOpen));
+        bool paletteOpenField;
+        /// Block catalogue drawer (Tab).
+        [CreateProperty] public bool PaletteOpen { get => paletteOpenField; set => Set(ref paletteOpenField, value, PaletteOpenChanged); }
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs DetailsOpenChanged = new BindablePropertyChangedEventArgs(nameof(DetailsOpen));
+        bool detailsOpenField;
+        /// Full stats, bill of materials and issues.
+        [CreateProperty] public bool DetailsOpen { get => detailsOpenField; set => Set(ref detailsOpenField, value, DetailsOpenChanged); }
+
+        /// <summary>QA-001: nine block ids (null = empty) and their icons, written by the presenter.</summary>
+        public readonly string[] Hotbar = new string[9];
+        public readonly UnityEngine.Sprite[] HotbarIcons = new UnityEngine.Sprite[9];
+        public readonly string[] HotbarNames = new string[9];
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
         static readonly BindablePropertyChangedEventArgs IsCreativeChanged = new BindablePropertyChangedEventArgs(nameof(IsCreative));
         bool isCreative;
         [CreateProperty] public bool IsCreative { get => isCreative; set => Set(ref isCreative, value, IsCreativeChanged); }

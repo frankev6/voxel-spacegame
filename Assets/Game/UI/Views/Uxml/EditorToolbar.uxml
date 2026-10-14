@@ -1,25 +1,25 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:controls="Game.UI.Controls">
     <Style src="../../Theme/screens/editor.uss" />
-    <ui:ScrollView name="editor-toolbar" class="panel editor-toolbar" mode="Horizontal" horizontal-scroller-visibility="Auto" vertical-scroller-visibility="Hidden">
+    <ui:ScrollView name="editor-toolbar" class="panel editor-toolbar" mode="Horizontal" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden">
         <ui:VisualElement class="editor-toolbar-row">
             <ui:Button name="editor-tool-place" text="Place" class="btn btn--small editor-tool" />
             <ui:Button name="editor-tool-line" text="Line" class="btn btn--small editor-tool" />
             <ui:Button name="editor-tool-box" text="Box" class="btn btn--small editor-tool" />
             <ui:Button name="editor-tool-fill" text="Fill" class="btn btn--small editor-tool" />
-            <ui:Button name="editor-tool-remove" text="Remove" class="btn btn--small editor-tool" />
-            <ui:Button name="editor-tool-replace" text="Replace" class="btn btn--small editor-tool" />
+            <ui:Button name="editor-tool-remove" text="Erase" class="btn btn--small editor-tool" />
+            <ui:Button name="editor-tool-replace" text="Swap" class="btn btn--small editor-tool" />
             <ui:Button name="editor-tool-paint" text="Paint" class="btn btn--small editor-tool" />
-            <ui:Button name="editor-tool-eyedropper" text="Eyedropper" class="btn btn--small editor-tool" />
+            <ui:Button name="editor-tool-eyedropper" text="Pick" class="btn btn--small editor-tool" />
             <ui:Button name="editor-tool-select" text="Select" class="btn btn--small editor-tool" />
             <ui:Button name="editor-undo" text="Undo" class="btn btn--small editor-tool" />
             <ui:Button name="editor-redo" text="Redo" class="btn btn--small editor-tool" />
-            <ui:Button name="editor-mirror-x" text="Mirror X" class="btn btn--small editor-tool" />
+            <ui:Button name="editor-mirror-x" text="Sym X" class="btn btn--small editor-tool" />
             <ui:Button name="editor-mirror-x-minus" text="X−" class="btn btn--small editor-tool" />
             <ui:Button name="editor-mirror-x-plus" text="X+" class="btn btn--small editor-tool" />
-            <ui:Button name="editor-mirror-y" text="Mirror Y" class="btn btn--small editor-tool" />
+            <ui:Button name="editor-mirror-y" text="Sym Y" class="btn btn--small editor-tool" />
             <ui:Button name="editor-mirror-y-minus" text="Y−" class="btn btn--small editor-tool" />
             <ui:Button name="editor-mirror-y-plus" text="Y+" class="btn btn--small editor-tool" />
-            <ui:Button name="editor-mirror-z" text="Mirror Z" class="btn btn--small editor-tool" />
+            <ui:Button name="editor-mirror-z" text="Sym Z" class="btn btn--small editor-tool" />
             <ui:Button name="editor-mirror-z-minus" text="Z−" class="btn btn--small editor-tool" />
             <ui:Button name="editor-mirror-z-plus" text="Z+" class="btn btn--small editor-tool" />
             <ui:Button name="editor-slice-toggle" text="Slice" class="btn btn--small editor-tool" />
@@ -29,8 +29,8 @@
             <ui:Button name="editor-xray" text="X-ray" class="btn btn--small editor-tool" />
             <ui:Button name="editor-box-mode" text="Box: Solid" class="btn btn--small editor-tool" />
             <ui:Label name="editor-orientation" class="text-mono" />
-            <ui:Button name="editor-save-blueprint" text="Save blueprint" class="btn btn--small editor-tool" />
-            <ui:Button name="editor-load-blueprint" text="Load blueprint" class="btn btn--small editor-tool" />
+            <ui:Button name="editor-save-blueprint" text="Save" class="btn btn--small editor-tool" />
+            <ui:Button name="editor-load-blueprint" text="Load" class="btn btn--small editor-tool" />
             <ui:Button name="editor-settings" text="Settings" class="btn btn--small editor-tool" />
             <ui:Button name="editor-leave" text="Done" class="btn btn--small editor-tool" />
         </ui:VisualElement>

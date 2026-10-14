@@ -58,6 +58,8 @@ namespace Game.App.EditorHost
         public void OpenBlueprintBrowser()=>Presenter?.OpenBlueprintBrowser();public void RequestCommit()=>Presenter?.RequestCommit();
         public void RequestLeave()=>Presenter?.RequestLeave();public void OpenSettings()=>Presenter?.OpenSettings();
         public bool OnBackPressed(){Presenter?.OnBackPressed();return true;}
+        public void SelectHotbar(int slot)=>Presenter?.SelectHotbar(slot);public void TogglePalette()=>Presenter?.TogglePalette();
+        public void ToggleDetails()=>Presenter?.ToggleDetails();
         public void Select(int index)=>Presenter?.Select(index);public void LoadStamp()=>Presenter?.LoadStamp();
         public void LoadReplace()=>Presenter?.LoadReplace();public void Delete()=>Presenter?.Delete();
     }

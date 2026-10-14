@@ -47,6 +47,7 @@ namespace Game.App.EditorHost
         {
             if(released || presenter==null)return;
             session.CompleteRelabel();EditorInputFrame frame=default;input.Sample(ref frame);
+            if(frame.HotbarSlot>0)presenter.SelectHotbar(frame.HotbarSlot-1);if(frame.TogglePalette)presenter.TogglePalette();
             var ray=services.Camera.ScreenPointToRay(frame.PointerScreen);float size=session.Draft.CellSize;
             controller.Tick(frame,new Ray(ray.origin/size,ray.direction));
             services.Camera.SetEditorSuppression(controller.ConsumesWheel,false);

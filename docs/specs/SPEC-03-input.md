@@ -514,3 +514,12 @@ When the Editor map is disabled, set `frame = default`.
 - Architecture §5 (`PlayerInputSampleSystem`), §5.1 (latching), §6.4 (`PlayerCommand`).
 - Legacy bindings: `Import/Legacy/input/legacy_InputSystem_Actions.inputactions` (reference only; Fire on Space and Interact on E were replaced).
 - Unity Input System: `PerformInteractiveRebinding`, `SaveBindingOverridesAsJson`, `InputTestFixture`, `shortcutKeysConsumeInput`.
+
+## QA-001 amendment (2026-10-14): creative editor input
+
+Owner playtest: the editor "needs to be much more friendly". The Editor map changes as follows:
+- `Hotbar1`–`Hotbar9` on `1`–`9` select the creative hotbar slot (SPEC-51 QA-001).
+- `Tool1`–`Tool9` move to `Shift`+`1`–`9`.
+- `TogglePalette` on `Tab` opens and closes the block catalogue.
+- `OrbitHold` also binds the right mouse button. `EditorInputSampler` resolves `Secondary` on release only when the pointer moved less than 6 px, so a right-drag orbits the camera and a right-click removes.
+

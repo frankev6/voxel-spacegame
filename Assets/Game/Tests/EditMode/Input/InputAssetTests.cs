@@ -47,14 +47,16 @@ namespace Game.Tests.EditMode.Input
                 B("Editor", a, "OneModifier:" + K + "ctrl," + K + k, "OneModifier:" + K + "leftMeta," + K + k);
             B("Editor", "Delete", K + "delete", K + "backspace");
             B("Editor", "RotateYaw", K + "r"); B("Editor", "RotatePitch", K + "t"); B("Editor", "RotateRoll", K + "g");
-            for (int i = 1; i <= 9; i++) B("Editor", $"Tool{i}", K + i);
+            for (int i = 1; i <= 9; i++) B("Editor", $"Tool{i}", "OneModifier:" + K + "shift," + K + i);   // QA-001: digits are the hotbar
+            for (int i = 1; i <= 9; i++) B("Editor", $"Hotbar{i}", K + i);
+            B("Editor", "TogglePalette", K + "tab");
             B("Editor", "MirrorX", K + "x"); B("Editor", "MirrorY", K + "v"); B("Editor", "MirrorZ", K + "z");
             B("Editor", "SliceToggle", K + "l"); B("Editor", "SliceUp", K + "rightBracket"); B("Editor", "SliceDown", K + "leftBracket");
             B("Editor", "XRay", K + "h"); B("Editor", "BoxModeCycle", K + "b");
             B("Editor", "MoveLeft", K + "leftArrow"); B("Editor", "MoveRight", K + "rightArrow"); B("Editor", "MoveForward", K + "upArrow");
             B("Editor", "MoveBack", K + "downArrow"); B("Editor", "MoveUp", K + "pageUp"); B("Editor", "MoveDown", K + "pageDown");
             B("Editor", "MirrorSelection", K + "m");
-            V("Editor", "Orbit", "Vector2", M + "delta"); B("Editor", "OrbitHold", M + "middleButton", "OneModifier:" + K + "alt," + M + "leftButton");
+            V("Editor", "Orbit", "Vector2", M + "delta"); B("Editor", "OrbitHold", M + "middleButton", "OneModifier:" + K + "alt," + M + "leftButton", M + "rightButton");
             V("Editor", "Pan", "Vector2", M + "delta"); B("Editor", "PanHold", "OneModifier:" + K + "shift," + M + "middleButton");
             V("Editor", "Zoom", "Axis", M + "scroll/y"); B("Editor", "Focus", K + "f");
             B("Editor", "ViewIso", K + "numpad5"); B("Editor", "ViewTop", K + "numpad7"); B("Editor", "ViewFront", K + "numpad1"); B("Editor", "ViewSide", K + "numpad3");
@@ -115,7 +117,8 @@ namespace Game.Tests.EditMode.Input
         public void NoDuplicateBindingsWithinMap()
         {
             // Shared controls the spec defines on purpose, separated by a hold button or by Ctrl (SPEC-03 §4.2 Editor table).
-            var shared = new HashSet<string> { "Editor:<Mouse>/delta", "Editor:<Mouse>/scroll/y", "Flight:<Gamepad>/rightStick" }; // AimDirection and hold-gated CameraLook (Q11).
+            // QA-001: right button is Secondary (click, resolved on release) and OrbitHold (drag); the sampler separates them.
+            var shared = new HashSet<string> { "Editor:<Mouse>/delta", "Editor:<Mouse>/scroll/y", "Flight:<Gamepad>/rightStick", "Editor:<Mouse>/rightButton" }; // AimDirection and hold-gated CameraLook (Q11).
             foreach (var map in controls.asset.actionMaps)
             {
                 var seen = new Dictionary<string, string>();

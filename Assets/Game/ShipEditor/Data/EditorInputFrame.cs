@@ -10,5 +10,7 @@ namespace Game.ShipEditor.Data
         public bool Shift, Ctrl, Alt;
         public float ToolWheel;                            // scroll notches this frame, + = up
         public EditorActions Actions;                      // edge-triggered this frame
+        public byte HotbarSlot;                            // QA-001: 1..9 = number key pressed this frame, 0 = none
+        public bool TogglePalette;                         // QA-001: Tab
     }
 }

@@ -61,10 +61,10 @@ namespace Game.App.EditorHost
             Model.UndoLabel=Model.CanUndo?session.History[session.History.Cursor-1].Label:"Undo";Model.RedoLabel=Model.CanRedo?session.History[session.History.Cursor].Label:"Redo";
             var sym=controller.Symmetry;Model.MirrorX=sym.MirrorX;Model.MirrorY=sym.MirrorY;Model.MirrorZ=sym.MirrorZ;Model.RadialFold=sym.RadialFold;
             Model.SliceEnabled=controller.SliceEnabled;Model.SliceLevel=controller.SliceLevel;Model.XRay=controller.XRay;Model.BoxMode=(int)controller.BoxMode;
-            Model.OrientationText="Orientation "+controller.Orient;Model.HoverText=controller.Hover.Kind+" "+controller.Hover.Cell;
+            Model.OrientationText="Rot "+controller.Orient;Model.HoverText=HoverText();
             Model.SelectedCount=controller.SelectedCount;Model.Palette.SelectedColor=controller.Color;
             for(int i=0;i<Model.Palette.Colors.Count;i++)Model.Palette.Colors[i].IsSelected=i==controller.Color;
-            Palette();Stats();Bom();session.GetIssues(issues);Model.Issues.Rows.Clear();int errors=0,warnings=0;bool floating=false;
+            Palette();Hotbar();Stats();Bom();session.GetIssues(issues);Model.Issues.Rows.Clear();int errors=0,warnings=0;bool floating=false;
             for(int i=0;i<issues.Count;i++){var issue=issues[i];if(issue.IsError)errors++;else warnings++;floating|=issue.Kind==EditIssueKind.Disconnected;Model.Issues.Rows.Add(new EditorIssueRowViewModel{Index=i,Text=issue.Kind+" ("+issue.Count+")",IsError=issue.IsError});}
             Model.Issues.ErrorCount=errors;Model.Issues.WarningCount=warnings;Model.Issues.CanRemoveFloating=floating;Model.Issues.NotifyRows();
             string reason=!session.IsDirty?"No changes to commit":errors>0?Model.Issues.Rows[0].Text:args.CommitTarget==null?"Commit target unavailable":"";
@@ -75,6 +75,14 @@ namespace Game.App.EditorHost
                     if(!args.Inventory.CanApply(deltas.ToArray(),shortfalls,out bool full))reason=full?"Cargo full":shortfalls.Count>0?"Missing "+shortfalls[0].Missing+" "+shortfalls[0].Item.Value:"Items unavailable";}
             }
             Model.CanCommit=reason.Length==0;Model.CommitBlockedReason=reason;Model.CommitLabel=args.Options.Creative?"Save blueprint":"Commit";
+        }
+        // QA-001: the footer names what is under the pointer instead of printing the picker's debug state.
+        string HoverText()
+        {
+            if(controller.Hover.Kind==DraftPicker.HitKind.None)return "";
+            if(controller.Hover.Kind==DraftPicker.HitKind.Block && new DraftReader(session.Draft,context).TryGetBlockAt(controller.Hover.Cell,out var record))
+                return services.Content.Catalog.GetBlock(record.Block)?.DisplayName??"Block";
+            return "Empty cell";
         }
         void Palette()
         {
@@ -91,6 +99,46 @@ namespace Game.App.EditorHost
             }
             model.NotifyItems();
         }
+        // QA-001 creative hotbar: seeded once from the palette; picking a block (palette or eyedropper) lands in the
+        // active slot unless it is already on the bar, in which case that slot becomes active.
+        bool hotbarSeeded;
+        void Hotbar()
+        {
+            bool changed=false;
+            if(!hotbarSeeded)
+            {
+                hotbarSeeded=true;int n=0;
+                foreach(var block in services.Content.Catalog.All<BlockDefinition>())
+                {
+                    if(n>=Model.Hotbar.Length)break;ushort index=services.Content.Catalog.GetBlockIndex(block);
+                    if(!context.Items.HasItem(index) || block.AllowedOrientations.Bits==0)continue;
+                    Model.Hotbar[n++]=block.Id.Value;changed=true;
+                }
+            }
+            var selected=controller.SelectedBlock!=0?services.Content.Catalog.GetBlock(controller.SelectedBlock):null;
+            if(selected!=null)
+            {
+                int at=Array.IndexOf(Model.Hotbar,selected.Id.Value);
+                if(at>=0)Model.HotbarIndex=at;
+                else{Model.Hotbar[Model.HotbarIndex]=selected.Id.Value;changed=true;}
+            }
+            if(!changed)return;
+            for(int i=0;i<Model.Hotbar.Length;i++)
+            {
+                var block=Model.Hotbar[i]!=null && services.Content.Catalog.TryGet<BlockDefinition>(new ContentId(Model.Hotbar[i]),out var definition)?definition:null;
+                Model.HotbarIcons[i]=block?.Icon;Model.HotbarNames[i]=block?.DisplayName;
+            }
+            Model.HotbarVersion++;
+        }
+        public void SelectHotbar(int slot)
+        {
+            if(disposed || (uint)slot>=(uint)Model.Hotbar.Length)return;
+            Model.HotbarIndex=slot;var id=Model.Hotbar[slot];
+            if(id!=null){if(controller.ActiveTool!=ToolId.Place && controller.ActiveTool!=ToolId.Line && controller.ActiveTool!=ToolId.Box && controller.ActiveTool!=ToolId.Fill)controller.SelectTool(ToolId.Place);SelectBlock(id);}
+            dirty=true;
+        }
+        public void TogglePalette(){if(!disposed)Model.PaletteOpen=!Model.PaletteOpen;}
+        public void ToggleDetails(){if(!disposed)Model.DetailsOpen=!Model.DetailsOpen;}
         void Stats()
         {
             var now=session.GetStats(false);var before=session.GetStats(true);Model.Stats.Rows.Clear();

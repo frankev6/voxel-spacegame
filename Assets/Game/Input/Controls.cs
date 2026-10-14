@@ -2365,6 +2365,106 @@ namespace Game.Input
                     ""priority"": 0
                 },
                 {
+                    ""name"": ""Hotbar1"",
+                    ""type"": ""Button"",
+                    ""id"": ""4c62a28d-92d4-5721-b4d3-0155e3bdf8dd"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Hotbar2"",
+                    ""type"": ""Button"",
+                    ""id"": ""ff483dca-07da-5221-9eb3-17d6824e07f2"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Hotbar3"",
+                    ""type"": ""Button"",
+                    ""id"": ""fa48e9b9-dae4-50c8-b461-a5e72e2fe42d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Hotbar4"",
+                    ""type"": ""Button"",
+                    ""id"": ""dbd49a87-79b5-566c-8a4a-dc372c588ef1"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Hotbar5"",
+                    ""type"": ""Button"",
+                    ""id"": ""e3c26839-184e-5289-9e1e-029a80d61319"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Hotbar6"",
+                    ""type"": ""Button"",
+                    ""id"": ""23c4daba-d7d8-58ca-9052-859cec3efb6a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Hotbar7"",
+                    ""type"": ""Button"",
+                    ""id"": ""964e9e51-b9b0-5964-ae67-6114445c3568"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Hotbar8"",
+                    ""type"": ""Button"",
+                    ""id"": ""651256da-98c2-50ee-a79d-2e3c5095b698"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Hotbar9"",
+                    ""type"": ""Button"",
+                    ""id"": ""471f5688-ac5d-5d99-a22a-68100ecfe946"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""TogglePalette"",
+                    ""type"": ""Button"",
+                    ""id"": ""49ae4f89-30ae-512e-95e9-ac4414834ed7"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
                     ""name"": ""MirrorX"",
                     ""type"": ""Button"",
                     ""id"": ""3f962f31-1f0d-5af2-99dc-bc5be1f05b54"",
@@ -3197,101 +3297,398 @@ namespace Game.Input
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": """",
-                    ""id"": ""4ba03b4b-4fa1-5fef-9b58-e7407e4ceef2"",
+                    ""name"": ""OneModifier"",
+                    ""id"": ""8a29cb4e-5838-5e0d-be76-010c61092baa"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Tool1"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""e7f49485-b0b1-5dc7-93d9-95caf5007ca7"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Tool1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""cbc09446-f629-5341-a5af-acccf159ab0f"",
                     ""path"": ""<Keyboard>/1"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KeyboardMouse"",
                     ""action"": ""Tool1"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
-                    ""id"": ""a3510bd6-d385-50bc-863d-6b1fa34ab5ab"",
+                    ""id"": ""c39779a0-b064-599c-8cf5-4c2c691076fb"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Hotbar1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""OneModifier"",
+                    ""id"": ""153eb7df-b00d-5657-bfc9-3fcd17528cd3"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Tool2"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""5df86e1a-81b1-5249-ae6c-59f94ce5f5a4"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Tool2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""6da10e46-e47a-5324-80c5-c94c8e9d2c03"",
                     ""path"": ""<Keyboard>/2"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KeyboardMouse"",
                     ""action"": ""Tool2"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
-                    ""id"": ""2ebb8ea9-0d2c-502c-86d4-10fa4c4fc7d3"",
+                    ""id"": ""17465877-1e50-5d61-8d04-57abd07ea5b5"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Hotbar2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""OneModifier"",
+                    ""id"": ""574657d6-1918-5bca-bbb7-e0600f0c3717"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Tool3"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""3f8899a6-458a-5a95-866d-bab794accfd3"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Tool3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""bc9a7e08-e9d9-51b2-80e7-3bd8035725e7"",
                     ""path"": ""<Keyboard>/3"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KeyboardMouse"",
                     ""action"": ""Tool3"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
-                    ""id"": ""5910bf31-c65c-550c-b5d7-0bf2c6eaa713"",
+                    ""id"": ""3c923f74-5292-5d28-9b4a-c310a8e13fdf"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Hotbar3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""OneModifier"",
+                    ""id"": ""3392135e-0b69-5da9-9396-73f2855ddf5c"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Tool4"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""887696c9-b964-5d60-9f58-6bf89ebffd8f"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Tool4"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""e6002da3-cc4d-50ab-ae78-89f8ae3f9cd9"",
                     ""path"": ""<Keyboard>/4"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KeyboardMouse"",
                     ""action"": ""Tool4"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
-                    ""id"": ""2daeab06-5e0a-5174-a8cb-cd3aebf14fd1"",
+                    ""id"": ""bb0cec09-0091-5be3-aff3-db983b2490c4"",
+                    ""path"": ""<Keyboard>/4"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Hotbar4"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""OneModifier"",
+                    ""id"": ""fe32851a-92a6-58fe-aae9-31c4dfabfea3"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Tool5"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""b04fa115-874f-597e-8c94-8f30ec46bf1a"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Tool5"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""f75e97db-9164-5b34-957f-558d3720a424"",
                     ""path"": ""<Keyboard>/5"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KeyboardMouse"",
                     ""action"": ""Tool5"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
-                    ""id"": ""d35d4ec8-5354-5c1e-9458-3c40b9ae862e"",
+                    ""id"": ""8eaac8cb-a35e-5c4c-a377-4da319aff192"",
+                    ""path"": ""<Keyboard>/5"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Hotbar5"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""OneModifier"",
+                    ""id"": ""4790fb8d-e0dd-5254-8298-f9dab451c05c"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Tool6"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""6bc54e9a-7dcb-594a-a4a9-3d1ca1f25442"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Tool6"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""34cc8214-9361-5549-bc97-e49d92f0593d"",
                     ""path"": ""<Keyboard>/6"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KeyboardMouse"",
                     ""action"": ""Tool6"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
-                    ""id"": ""17759f5a-5213-5bb7-9eaa-0622cf92d811"",
+                    ""id"": ""5e380d34-61a6-51d7-812d-49f5465aa388"",
+                    ""path"": ""<Keyboard>/6"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Hotbar6"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""OneModifier"",
+                    ""id"": ""d475456a-979f-52e4-8a12-f535245e8ee9"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Tool7"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""16ce9add-5a30-5453-93b2-5a5b74342f4c"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Tool7"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""ea5e3951-7008-553d-86cb-f2b63c971755"",
                     ""path"": ""<Keyboard>/7"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KeyboardMouse"",
                     ""action"": ""Tool7"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
-                    ""id"": ""ec8ec80b-03de-5eeb-929e-036716290393"",
+                    ""id"": ""9719fba8-e3cf-5bf3-88c4-4f8a6c0d9956"",
+                    ""path"": ""<Keyboard>/7"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Hotbar7"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""OneModifier"",
+                    ""id"": ""ef639d24-f495-5cf6-a6ab-198b921d6b90"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Tool8"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""b446baf8-6b7f-5933-a999-3c0baa35ea2d"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Tool8"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""bcc9ba3c-a498-5b18-af7d-7ba635b49e9e"",
                     ""path"": ""<Keyboard>/8"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KeyboardMouse"",
                     ""action"": ""Tool8"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
-                    ""id"": ""a8c3aa99-f1cb-5678-b254-4674c4c8ec01"",
+                    ""id"": ""33aa5e93-f2a5-5322-b36f-0ba703c99c06"",
+                    ""path"": ""<Keyboard>/8"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Hotbar8"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""OneModifier"",
+                    ""id"": ""22685b1b-fb09-54d4-ab7d-244cddb9bb00"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Tool9"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""a05690d6-9d12-59ea-a9be-d516952b5467"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Tool9"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""16003ba4-a001-5c15-ac89-93085722a924"",
                     ""path"": ""<Keyboard>/9"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KeyboardMouse"",
                     ""action"": ""Tool9"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fad778b9-2334-5ab5-91bf-8e4932a8518d"",
+                    ""path"": ""<Keyboard>/9"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Hotbar9"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -3668,6 +4065,28 @@ namespace Game.Input
                     ""action"": ""ModAlt"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b988e814-386e-5b62-af62-101e983fa690"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""TogglePalette"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""be6915bb-604b-5b95-99b3-63a546c9833d"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""OrbitHold"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -3784,6 +4203,16 @@ namespace Game.Input
             m_Editor_Tool7 = m_Editor.FindAction("Tool7", throwIfNotFound: true);
             m_Editor_Tool8 = m_Editor.FindAction("Tool8", throwIfNotFound: true);
             m_Editor_Tool9 = m_Editor.FindAction("Tool9", throwIfNotFound: true);
+            m_Editor_Hotbar1 = m_Editor.FindAction("Hotbar1", throwIfNotFound: true);
+            m_Editor_Hotbar2 = m_Editor.FindAction("Hotbar2", throwIfNotFound: true);
+            m_Editor_Hotbar3 = m_Editor.FindAction("Hotbar3", throwIfNotFound: true);
+            m_Editor_Hotbar4 = m_Editor.FindAction("Hotbar4", throwIfNotFound: true);
+            m_Editor_Hotbar5 = m_Editor.FindAction("Hotbar5", throwIfNotFound: true);
+            m_Editor_Hotbar6 = m_Editor.FindAction("Hotbar6", throwIfNotFound: true);
+            m_Editor_Hotbar7 = m_Editor.FindAction("Hotbar7", throwIfNotFound: true);
+            m_Editor_Hotbar8 = m_Editor.FindAction("Hotbar8", throwIfNotFound: true);
+            m_Editor_Hotbar9 = m_Editor.FindAction("Hotbar9", throwIfNotFound: true);
+            m_Editor_TogglePalette = m_Editor.FindAction("TogglePalette", throwIfNotFound: true);
             m_Editor_MirrorX = m_Editor.FindAction("MirrorX", throwIfNotFound: true);
             m_Editor_MirrorY = m_Editor.FindAction("MirrorY", throwIfNotFound: true);
             m_Editor_MirrorZ = m_Editor.FindAction("MirrorZ", throwIfNotFound: true);
@@ -4798,6 +5227,16 @@ namespace Game.Input
         private readonly InputAction m_Editor_Tool7;
         private readonly InputAction m_Editor_Tool8;
         private readonly InputAction m_Editor_Tool9;
+        private readonly InputAction m_Editor_Hotbar1;
+        private readonly InputAction m_Editor_Hotbar2;
+        private readonly InputAction m_Editor_Hotbar3;
+        private readonly InputAction m_Editor_Hotbar4;
+        private readonly InputAction m_Editor_Hotbar5;
+        private readonly InputAction m_Editor_Hotbar6;
+        private readonly InputAction m_Editor_Hotbar7;
+        private readonly InputAction m_Editor_Hotbar8;
+        private readonly InputAction m_Editor_Hotbar9;
+        private readonly InputAction m_Editor_TogglePalette;
         private readonly InputAction m_Editor_MirrorX;
         private readonly InputAction m_Editor_MirrorY;
         private readonly InputAction m_Editor_MirrorZ;
@@ -4929,6 +5368,46 @@ namespace Game.Input
             /// Provides access to the underlying input action "Editor/Tool9".
             /// </summary>
             public InputAction @Tool9 => m_Wrapper.m_Editor_Tool9;
+            /// <summary>
+            /// Provides access to the underlying input action "Editor/Hotbar1".
+            /// </summary>
+            public InputAction @Hotbar1 => m_Wrapper.m_Editor_Hotbar1;
+            /// <summary>
+            /// Provides access to the underlying input action "Editor/Hotbar2".
+            /// </summary>
+            public InputAction @Hotbar2 => m_Wrapper.m_Editor_Hotbar2;
+            /// <summary>
+            /// Provides access to the underlying input action "Editor/Hotbar3".
+            /// </summary>
+            public InputAction @Hotbar3 => m_Wrapper.m_Editor_Hotbar3;
+            /// <summary>
+            /// Provides access to the underlying input action "Editor/Hotbar4".
+            /// </summary>
+            public InputAction @Hotbar4 => m_Wrapper.m_Editor_Hotbar4;
+            /// <summary>
+            /// Provides access to the underlying input action "Editor/Hotbar5".
+            /// </summary>
+            public InputAction @Hotbar5 => m_Wrapper.m_Editor_Hotbar5;
+            /// <summary>
+            /// Provides access to the underlying input action "Editor/Hotbar6".
+            /// </summary>
+            public InputAction @Hotbar6 => m_Wrapper.m_Editor_Hotbar6;
+            /// <summary>
+            /// Provides access to the underlying input action "Editor/Hotbar7".
+            /// </summary>
+            public InputAction @Hotbar7 => m_Wrapper.m_Editor_Hotbar7;
+            /// <summary>
+            /// Provides access to the underlying input action "Editor/Hotbar8".
+            /// </summary>
+            public InputAction @Hotbar8 => m_Wrapper.m_Editor_Hotbar8;
+            /// <summary>
+            /// Provides access to the underlying input action "Editor/Hotbar9".
+            /// </summary>
+            public InputAction @Hotbar9 => m_Wrapper.m_Editor_Hotbar9;
+            /// <summary>
+            /// Provides access to the underlying input action "Editor/TogglePalette".
+            /// </summary>
+            public InputAction @TogglePalette => m_Wrapper.m_Editor_TogglePalette;
             /// <summary>
             /// Provides access to the underlying input action "Editor/MirrorX".
             /// </summary>
@@ -5136,6 +5615,36 @@ namespace Game.Input
                 @Tool9.started += instance.OnTool9;
                 @Tool9.performed += instance.OnTool9;
                 @Tool9.canceled += instance.OnTool9;
+                @Hotbar1.started += instance.OnHotbar1;
+                @Hotbar1.performed += instance.OnHotbar1;
+                @Hotbar1.canceled += instance.OnHotbar1;
+                @Hotbar2.started += instance.OnHotbar2;
+                @Hotbar2.performed += instance.OnHotbar2;
+                @Hotbar2.canceled += instance.OnHotbar2;
+                @Hotbar3.started += instance.OnHotbar3;
+                @Hotbar3.performed += instance.OnHotbar3;
+                @Hotbar3.canceled += instance.OnHotbar3;
+                @Hotbar4.started += instance.OnHotbar4;
+                @Hotbar4.performed += instance.OnHotbar4;
+                @Hotbar4.canceled += instance.OnHotbar4;
+                @Hotbar5.started += instance.OnHotbar5;
+                @Hotbar5.performed += instance.OnHotbar5;
+                @Hotbar5.canceled += instance.OnHotbar5;
+                @Hotbar6.started += instance.OnHotbar6;
+                @Hotbar6.performed += instance.OnHotbar6;
+                @Hotbar6.canceled += instance.OnHotbar6;
+                @Hotbar7.started += instance.OnHotbar7;
+                @Hotbar7.performed += instance.OnHotbar7;
+                @Hotbar7.canceled += instance.OnHotbar7;
+                @Hotbar8.started += instance.OnHotbar8;
+                @Hotbar8.performed += instance.OnHotbar8;
+                @Hotbar8.canceled += instance.OnHotbar8;
+                @Hotbar9.started += instance.OnHotbar9;
+                @Hotbar9.performed += instance.OnHotbar9;
+                @Hotbar9.canceled += instance.OnHotbar9;
+                @TogglePalette.started += instance.OnTogglePalette;
+                @TogglePalette.performed += instance.OnTogglePalette;
+                @TogglePalette.canceled += instance.OnTogglePalette;
                 @MirrorX.started += instance.OnMirrorX;
                 @MirrorX.performed += instance.OnMirrorX;
                 @MirrorX.canceled += instance.OnMirrorX;
@@ -5300,6 +5809,36 @@ namespace Game.Input
                 @Tool9.started -= instance.OnTool9;
                 @Tool9.performed -= instance.OnTool9;
                 @Tool9.canceled -= instance.OnTool9;
+                @Hotbar1.started -= instance.OnHotbar1;
+                @Hotbar1.performed -= instance.OnHotbar1;
+                @Hotbar1.canceled -= instance.OnHotbar1;
+                @Hotbar2.started -= instance.OnHotbar2;
+                @Hotbar2.performed -= instance.OnHotbar2;
+                @Hotbar2.canceled -= instance.OnHotbar2;
+                @Hotbar3.started -= instance.OnHotbar3;
+                @Hotbar3.performed -= instance.OnHotbar3;
+                @Hotbar3.canceled -= instance.OnHotbar3;
+                @Hotbar4.started -= instance.OnHotbar4;
+                @Hotbar4.performed -= instance.OnHotbar4;
+                @Hotbar4.canceled -= instance.OnHotbar4;
+                @Hotbar5.started -= instance.OnHotbar5;
+                @Hotbar5.performed -= instance.OnHotbar5;
+                @Hotbar5.canceled -= instance.OnHotbar5;
+                @Hotbar6.started -= instance.OnHotbar6;
+                @Hotbar6.performed -= instance.OnHotbar6;
+                @Hotbar6.canceled -= instance.OnHotbar6;
+                @Hotbar7.started -= instance.OnHotbar7;
+                @Hotbar7.performed -= instance.OnHotbar7;
+                @Hotbar7.canceled -= instance.OnHotbar7;
+                @Hotbar8.started -= instance.OnHotbar8;
+                @Hotbar8.performed -= instance.OnHotbar8;
+                @Hotbar8.canceled -= instance.OnHotbar8;
+                @Hotbar9.started -= instance.OnHotbar9;
+                @Hotbar9.performed -= instance.OnHotbar9;
+                @Hotbar9.canceled -= instance.OnHotbar9;
+                @TogglePalette.started -= instance.OnTogglePalette;
+                @TogglePalette.performed -= instance.OnTogglePalette;
+                @TogglePalette.canceled -= instance.OnTogglePalette;
                 @MirrorX.started -= instance.OnMirrorX;
                 @MirrorX.performed -= instance.OnMirrorX;
                 @MirrorX.canceled -= instance.OnMirrorX;
@@ -5986,6 +6525,76 @@ namespace Game.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnTool9(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Hotbar1" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnHotbar1(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Hotbar2" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnHotbar2(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Hotbar3" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnHotbar3(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Hotbar4" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnHotbar4(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Hotbar5" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnHotbar5(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Hotbar6" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnHotbar6(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Hotbar7" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnHotbar7(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Hotbar8" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnHotbar8(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Hotbar9" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnHotbar9(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "TogglePalette" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnTogglePalette(InputAction.CallbackContext context);
             /// <summary>
             /// Method invoked when associated input action "MirrorX" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>

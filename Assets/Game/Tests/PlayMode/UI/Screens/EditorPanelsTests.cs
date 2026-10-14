@@ -48,6 +48,10 @@ namespace Game.Tests.PlayMode.UI.Screens
             public void RequestLeave() { }
             public void OpenSettings() { }
             public bool OnBackPressed() => true;
+            internal int Hotbar = -1, PaletteToggles, DetailToggles;
+            public void SelectHotbar(int slot) => Hotbar = slot;
+            public void TogglePalette() => PaletteToggles++;
+            public void ToggleDetails() => DetailToggles++;
         }
         sealed class Window : IDisposable
         {
@@ -64,10 +68,11 @@ namespace Game.Tests.PlayMode.UI.Screens
                 UI = new UIRoot(Panel.Document, config, new DialogTestContext.Pause(), new DialogTestContext.Context(), new NullUISoundSink(), new UnityFrameClock());
                 Root = new VisualElement { name = "editor-panel-test", pickingMode = PickingMode.Ignore }; Root.AddToClassList(UIStyleClasses.Screen);
                 UI.GetLayer(UILayer.Hud).Add(Root);
-                Top = Region("ship-editor-region-top"); Top.style.top = 0; Top.style.left = 0; Top.style.right = 0; Top.style.height = 64;
-                Bottom = Region("ship-editor-region-bottom"); Bottom.style.bottom = 0; Bottom.style.left = 0; Bottom.style.right = 0; Bottom.style.height = 48;
-                Left = Region("ship-editor-region-left"); Left.style.left = 0; Left.style.top = 64; Left.style.bottom = 48; Left.style.width = 360;
-                Right = Region("ship-editor-region-right"); Right.style.right = 0; Right.style.top = 64; Right.style.bottom = 48; Right.style.width = 380;
+                // QA-001 creative geometry (ship-editor.uss), both drawers open for the worst case.
+                Top = Region("ship-editor-region-top"); Top.style.top = 0; Top.style.left = 0; Top.style.right = 0; Top.style.height = 40;
+                Bottom = Region("ship-editor-region-bottom"); Bottom.style.bottom = 12; Bottom.style.left = (width - 820) / 2; Bottom.style.width = 820; Bottom.style.height = 112;
+                Left = Region("ship-editor-region-left"); Left.style.left = 12; Left.style.top = 48; Left.style.bottom = 132; Left.style.width = 360;
+                Right = Region("ship-editor-region-right"); Right.style.right = 12; Right.style.top = 48; Right.style.bottom = 132; Right.style.width = 320;
                 ShipEditorPanels.Mount(Top, Left, Right, Bottom, Model, Commands, UI);
             }
             VisualElement Region(string name)
@@ -84,7 +89,7 @@ namespace Game.Tests.PlayMode.UI.Screens
         {
             var vm = new ShipEditorViewModel { Title = "Blueprint Lab", ActiveTool = 1, IsCreative = false, CanUndo = true, CanRedo = true,
                 UndoLabel = "Undo place hull", RedoLabel = "Redo place hull", CanCommit = true, CommitLabel = "Commit", IsDirty = true,
-                SliceEnabled = true, SliceLevel = 12, OrientationText = "Yaw 180°", HoverText = "Hull · 12, 0, 18", StatusText = "Ready to build",
+                SliceEnabled = true, SliceLevel = 12, PaletteOpen = true, DetailsOpen = true, MirrorX = true, OrientationText = "Yaw 180°", HoverText = "Hull · 12, 0, 18", StatusText = "Ready to build",
                 Palette = new EditorPaletteViewModel(), Stats = new EditorStatsViewModel(), Bom = new EditorBomViewModel(), Issues = new EditorIssuesViewModel() };
             vm.Palette.Categories.AddRange(new[] { "Structure", "Detail", "Core", "Propulsion", "Power", "Weapons", "Shields", "Utility" });
             for (int i = 0; i < 128; i++) vm.Palette.Items.Add(new EditorPaletteItemViewModel

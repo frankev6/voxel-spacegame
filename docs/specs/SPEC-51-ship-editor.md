@@ -1095,3 +1095,15 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 | 56 | EDT-023 whole-spec prerequisites include unrelated aggregate checks and later work | Use completed host, session/fleet, spawn, galaxy, docking and transition owners: EDT-022, FND-010, FND-012, GAL-008, SYS-008, SYS-013. Actual dialog integration remains explicitly pending DLG-007; no substitute runner. | Tech lead — resolved; ledger Q460 |
 
 | 57 | Production editor storage and scene-root ownership | ADR-0098: profile-aware persistent blueprint store, reuse exact editor view/model, real launcher and creative startup; release host native state before store disposal. First operation with no profile creates Blueprints through SaveService. | Tech lead — resolved; ledger Q465 |
+
+## QA-001 amendment (2026-10-14): creative layout and hotbar
+
+Owner playtest: "the current ui for blueprints looks like an excel spreadsheet ... it needs to be much more friendly". The orbit camera stays (owner: "not opposed to a third person orbiting view"), and the panels become a creative layout. Every element name of §5.14 is kept.
+- **Hotbar** (bottom centre). Nine block slots (`editor-hotbar-0..8`, keys `1`–`9`, SPEC-03 QA-001), seeded from the palette. Picking a block from the catalogue or the eyedropper puts it in the active slot unless it is already on the bar. Choosing a slot while a non-placing tool is active switches to Place. State lives in `ShipEditorViewModel.Hotbar/HotbarIndex`, written by the presenter.
+- **Paint strip.** The 16 swatches sit next to the hotbar, as colours without index numbers.
+- **Block catalogue.** A drawer on the left, toggled by `Tab` or "Blocks · Tab" (`PaletteOpen`); closed by default.
+- **Stats card.** It shows Mass, Thrust/weight, Power generation and use, DPS and Cost, with deltas, the BOM summary, the issue summary and the commit actions. "Details" (`DetailsOpen`) expands the full stats, BOM and issue lists. "Remove floating" appears only when there are floating parts.
+- **Toolbar.** One slim row with short labels (Erase, Swap, Pick, Sym X/Y/Z, Save, Load) and no scrollbar. Mirror nudges appear only while their axis is on, slice steps only while slicing, and the box mode only with the Box tool.
+- **Footer.** It names the block under the pointer instead of printing the picker state.
+- **Camera and mouse.** A right-drag orbits, and a right-click without dragging removes a block.
+

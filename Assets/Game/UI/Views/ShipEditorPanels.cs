@@ -112,6 +112,9 @@ namespace Game.UI.Views
             readonly BomRow[] bom = new BomRow[64];
             readonly IssueRow[] issues = new IssueRow[16];
             readonly Button[] colors = new Button[16], categories = new Button[12], tools = new Button[9];
+            readonly Slot[] hotbar = new Slot[9];   // QA-001 creative hotbar (number keys 1–9)
+            Button blocksToggle, detailsToggle;
+            int hotbarVersion = -1;
             readonly Page palettePage, statsPage, bomPage, issuesPage;
             readonly TabBar tabs;
             readonly TextField search;
@@ -178,9 +181,34 @@ namespace Game.UI.Views
                 Button(top, "editor-settings", commands.OpenSettings); Button(top, "editor-leave", commands.RequestLeave);
                 Button(right, "editor-remove-floating", commands.RemoveFloatingParts); Button(right, "editor-revert", commands.RevertAll);
                 var commit = Button(right, "editor-commit", commands.RequestCommit); Tip(commit, content => { content.Title = vm.CommitLabel; content.Body = vm.CommitBlockedReason; });
+                BuildCreativeLayout();
                 top.RegisterCallback<AttachToPanelEvent>(evt => { if (ReferenceEquals(evt.target, top)) Connect(); });
                 top.RegisterCallback<DetachFromPanelEvent>(evt => { if (ReferenceEquals(evt.target, top)) Disconnect(); });
             }
+            // QA-001 (owner: "looks like an excel spreadsheet"): a block hotbar and paint strip along the bottom, the block
+            // catalogue and the full stats/BOM/issues as drawers, and a slim toolbar whose secondary controls appear in context.
+            void BuildCreativeLayout()
+            {
+                var bar = new VisualElement { name = "editor-hotbar", pickingMode = PickingMode.Ignore }; bar.AddToClassList("editor-hotbar");
+                for (int i = 0; i < hotbar.Length; i++)
+                {
+                    int index = i; var slot = hotbar[i] = new Slot { name = "editor-hotbar-" + i }; slot.SetKeyHint(N(i + 1));
+                    slot.RegisterCallback<ClickEvent>(_ => { if (active) { commands.SelectHotbar(index); ui.PlaySound(UISound.Click); } });
+                    Tip(slot, content => { content.Title = vm.HotbarNames[index] ?? "Empty"; content.Body = "Key " + (index + 1) + " · Tab opens the block catalogue; picking a block fills this slot"; });
+                    bar.Add(slot);
+                }
+                var paint = left.Q("editor-colors"); paint.AddToClassList("editor-colors--compact"); bar.Add(paint);
+                foreach (var swatch in colors) swatch.text = "";   // colour, not an index number
+                bottom.Insert(0, bar); bottom.AddToClassList("editor-bottom--creative");
+                var row = top.Q(className: "editor-toolbar-row");
+                blocksToggle = new Button(() => { if (active) commands.TogglePalette(); }) { name = "editor-blocks-toggle", text = "Blocks · Tab" };
+                detailsToggle = new Button(() => { if (active) commands.ToggleDetails(); }) { name = "editor-details-toggle", text = "Details" };
+                foreach (var toggle in new[] { blocksToggle, detailsToggle }) { toggle.AddToClassList("btn"); toggle.AddToClassList("btn--small"); toggle.AddToClassList("editor-tool"); }
+                row.Insert(0, blocksToggle); row.Add(detailsToggle);
+                Tip(blocksToggle, content => content.Title = "Block catalogue (Tab)");
+                Tip(detailsToggle, content => content.Title = "Full stats, bill of materials and issues");
+            }
+            static readonly string[] KeyStats = { "Mass kg", "Thrust / weight", "Power generation", "Power use", "DPS", "Cost" };
             Button Button(VisualElement region, string name, Action action)
             { var button = region.Q<Button>(name) ?? throw new InvalidOperationException("Editor panel missing " + name); button.clicked += () => { if (active) action(); }; return button; }
             void Tip(VisualElement element, Action<TooltipContent> fill) => tips.Add((element, fill));
@@ -200,6 +228,30 @@ namespace Game.UI.Views
             void Unobserve() { foreach (var model in observed) model.propertyChanged -= Changed; observed.Clear(); }
             void Observe(ViewModelBase model)
             { if (!active || model == null || observed.Contains(model)) return; observed.Add(model); model.propertyChanged += Changed; }
+            void RefreshCreative()
+            {
+                if (hotbarVersion != vm.HotbarVersion) { hotbarVersion = vm.HotbarVersion; for (int i = 0; i < hotbar.Length; i++) hotbar[i].SetIcon(vm.HotbarIcons[i]); }
+                for (int i = 0; i < hotbar.Length; i++) hotbar[i].SetState(i == vm.HotbarIndex, false, false);
+                // left/right are the mounted fragments; their parents are the host's region plates.
+                Show(left, vm.PaletteOpen); if (left.parent != null) Show(left.parent, vm.PaletteOpen);
+                blocksToggle.EnableInClassList(UIStyleClasses.IsSelected, vm.PaletteOpen);
+                detailsToggle.EnableInClassList(UIStyleClasses.IsSelected, vm.DetailsOpen);
+                // Compact: six key stats with deltas and the issue/commit lines; Details adds every stat, the BOM and the issue list.
+                foreach (var name in new[] { "editor-bom-heading", "editor-bom", "editor-bom-pages", "editor-issues", "editor-issues-pages", "editor-stats-pages" })
+                    Show(right.Q(name), vm.DetailsOpen);
+                right.EnableInClassList("editor-details--open", vm.DetailsOpen); right.parent?.EnableInClassList("editor-details--open", vm.DetailsOpen);
+                Show(right.Q("editor-remove-floating"), vm.Issues?.CanRemoveFloating == true);
+                for (int i = 0; i < stats.Length; i++)
+                    if (!vm.DetailsOpen && stats[i].Id != null && Array.IndexOf(KeyStats, stats[i].Id) < 0) Show(stats[i].Root, false);
+                // Secondary controls only when their mode is on.
+                for (int i = 0; i < 3; i++)
+                {
+                    bool on = i == 0 ? vm.MirrorX : i == 1 ? vm.MirrorY : vm.MirrorZ; string letter = "xyz"[i].ToString();
+                    Show(top.Q("editor-mirror-" + letter + "-minus"), on); Show(top.Q("editor-mirror-" + letter + "-plus"), on);
+                }
+                Show(top.Q("editor-slice-down"), vm.SliceEnabled); Show(top.Q("editor-slice-up"), vm.SliceEnabled);
+                Show(top.Q("editor-box-mode"), vm.ActiveTool == 3);
+            }
             internal void Refresh()
             {
                 if (refreshing) return; refreshing = true;
@@ -266,9 +318,10 @@ namespace Game.UI.Views
                     top.Q<Button>("editor-slice-up").SetEnabled(vm.SliceEnabled); top.Q<Button>("editor-slice-down").SetEnabled(vm.SliceEnabled);
                     top.Q<Label>("editor-slice-level").text = vm.SliceEnabled ? N(vm.SliceLevel) : "";
                     top.Q<Button>("editor-xray").EnableInClassList(UIStyleClasses.IsSelected, vm.XRay);
-                    top.Q<Button>("editor-box-mode").text = vm.BoxMode == 1 ? "Box: Hollow" : vm.BoxMode == 2 ? "Box: Frame" : "Box: Solid";
+                    top.Q<Button>("editor-box-mode").text = vm.BoxMode == 1 ? "Hollow" : vm.BoxMode == 2 ? "Frame" : "Solid";
                     top.Q<Label>("editor-orientation").text = vm.OrientationText ?? "";
                     bottom.Q<Label>("editor-hover-info").text = vm.HoverText ?? ""; bottom.Q<Label>("editor-status").text = vm.StatusText ?? "";
+                    RefreshCreative();
                     if (hintTool != vm.ActiveTool)
                     {
                         hintTool = vm.ActiveTool;

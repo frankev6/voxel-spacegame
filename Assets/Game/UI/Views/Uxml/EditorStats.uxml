@@ -4,7 +4,7 @@
         <ui:Label text="SHIP STATS" class="text-display text-s editor-heading" picking-mode="Ignore" />
         <ui:ScrollView name="editor-stats" class="editor-scroll editor-stats" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
         <ui:VisualElement name="editor-stats-pages" class="editor-pager" />
-        <ui:Label text="BILL OF MATERIALS" class="text-display text-s editor-heading" picking-mode="Ignore" />
+        <ui:Label name="editor-bom-heading" text="BILL OF MATERIALS" class="text-display text-s editor-heading" picking-mode="Ignore" />
         <ui:ScrollView name="editor-bom" class="editor-scroll editor-bom" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
         <ui:VisualElement name="editor-bom-pages" class="editor-pager" />
         <ui:Label name="editor-bom-summary" class="text-s text-ellipsis editor-summary" picking-mode="Ignore" />

@@ -26,6 +26,10 @@ namespace Game.Tests.PlayMode.UI.Screens
         {
             internal int BackCalls, Tool;
             public bool OnBackPressed() { BackCalls++; return true; }
+            internal int Hotbar = -1, PaletteToggles, DetailToggles;
+            public void SelectHotbar(int slot) => Hotbar = slot;
+            public void TogglePalette() => PaletteToggles++;
+            public void ToggleDetails() => DetailToggles++;
             public void SelectTool(int tool) => Tool = tool;
             public void SelectBlock(string block) { }
             public void SelectColor(int index) { }
@@ -112,8 +116,9 @@ namespace Game.Tests.PlayMode.UI.Screens
             {
                 using var w = new Window(size.x, size.y); w.ShowEditor(); yield return null;
                 var regions = new[] { Region(w, "top"), Region(w, "left"), Region(w, "right"), Region(w, "bottom") };
-                Assert.AreEqual(64, regions[0].worldBound.height, .1f); Assert.AreEqual(360, regions[1].worldBound.width, .1f);
-                Assert.AreEqual(380, regions[2].worldBound.width, .1f); Assert.AreEqual(48, regions[3].worldBound.height, .1f);
+                // QA-001 creative layout: slim toolbar, catalogue drawer, compact stats card, hotbar + paint strip.
+                Assert.AreEqual(40, regions[0].worldBound.height, .1f); Assert.AreEqual(360, regions[1].worldBound.width, .1f);
+                Assert.AreEqual(320, regions[2].worldBound.width, .1f); Assert.AreEqual(112, regions[3].worldBound.height, .1f);
                 for (int i = 0; i < regions.Length; i++)
                 {
                     Assert.IsTrue(regions[i].ClassListContains(UIStyleClasses.HudRegion)); Assert.IsTrue(regions[i].ClassListContains("hud-plate"));
