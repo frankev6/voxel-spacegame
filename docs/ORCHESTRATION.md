@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Star-system jump integration accepted:** SYS-01305b87f54 compile clean, three real origin/loader cases pass. Player arrives at requested pose, source entities/debris retire, and entry is emitted once. SYS-012 regression and DLG-009/012 workers active. Next travel timeline integration and compatible deliveries. No Unity active.
+
 - **Jump integration started:** SYS-01328aa9189 implements destination validation, prefetch/unload, origin-owner placement and arrival state. Uncompiled/unaccepted; next three required cases. SYS-009 accepted; SYS-012/DLG-009/DLG-012 assigned to the existing workers. No Unity active.
 
 - **Player pose/docking persistence accepted:** SYS-009efe6dfff has clean final compile and passing binary/real-loader cases, including corrupt input and reset cleanup. Next lead SYS-013 jump integration; SYS-012 regression worker unlocks, DLG-009/012 workers active. No Unity active.

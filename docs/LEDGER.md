@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 78 | 10 | 0 | 0 | 92 | 0 | 180 | 7 |
+| M3 | 76 | 11 | 0 | 0 | 93 | 0 | 180 | 6 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -344,8 +344,8 @@
 | SYS-010 | IShipSpawner contract for Galaxy services | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, FND-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | adcf164 | Spawner contract forwarding only; 2 required tests. FND-012 runtime remains open. Full 1027 EM / 145 PM passed. |
 | SYS-011 | Celestial visuals and distance compression | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004, SPEC-62 | no | todo |  |  |  |  |
 | SYS-012 | Regression scenarios R9, R28 | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-006, SYS-009, FND-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Combat worker; two direct regression cases |
-| SYS-013 | Jump integration hooks | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006, SYS-008 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead implements real jump unload/load and placement; three direct required cases |
-| SYS-014 | World gates: streaming performance and soak | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-007, SYS-013, TST-001 | no | todo |  |  |  |  |
+| SYS-013 | Jump integration hooks | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006, SYS-008 | yes | done | astra (gpt-6) | 2026-10-13 | 05b87f54 | Real prefetch/unload/origin placement; three direct jump cases pass; spec-required: 3, extra: 0 |
+| SYS-014 | World gates: streaming performance and soak | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-007, SYS-013, TST-001 | yes | todo |  |  |  |  |
 | TRV-001 | Public contract types | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, FLT-001, NAR-001, AUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a68c988 | Canonical travel contracts and staged watcher API; 2 required tests; runtime travel remains later tasks |
 | TRV-002 | Travel config definition and validator | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-04, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 5a436d86 | 19 required checks pass; real shipped travel content zero errors, GAL-012 gates32m satisfy geometry |
 | TRV-003 | Lane access: gated lanes, fuel, revision | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-002, GAL-008, NAR-003, NAR-004, NAR-006, NAR-020 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c716202e | Lane watchers, fuel, revision and authored compile/bind; 8 required cases pass. Execution stays TRV-006. |
@@ -1098,6 +1098,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — SYS-013 done: star-system jump integration — astra (gpt-6)
+
+- 28aa9189/05b87f54 implements validated destination/arrival, owner prefetch, source-world unload, explicit player placement via OriginRebaseSystem, persistent arrival and Changing state. Scene entry still defers player spawn to its existing hook.
+- Compile51693 terminal0, zero warning CS; focused PlayMode73727 terminal0 passes all three required cases (0.1283804s bodies): requested world position/yaw at local origin, old/disabled entities and player debris removed while player survives, one entry after origin completion and refusal while loading. spec-required: 3, extra: 0. Evidence Logs/playtest/system-change. No benchmark/full suite.
+- SYS-012 regression worker uses this real hook; DLG-009/012 workers active. SPEC-41 Q20 reserved view, Q21 harness (Q18/19 already accepted). Previous restore acceptance and current jump acceptance are progress. No Unity active.
 
 ### 2026-10-13 — SYS-013 jump entry authored — astra (gpt-6)
 
