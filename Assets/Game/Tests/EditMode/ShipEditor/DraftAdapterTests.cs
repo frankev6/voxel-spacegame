@@ -17,7 +17,7 @@ namespace Game.Tests.EditMode.ShipEditor
 {
     public sealed class DraftAdapterTests
     {
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             readonly BlobAssetReference<BlockDefsBlob> definitions;
             readonly BlobAssetReference<BlockModulesBlob> modules;
