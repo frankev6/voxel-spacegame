@@ -292,7 +292,8 @@ namespace Game.Presentation.Services
             float3 center = math.transform(transform, (min + max) * .5f);
             var inverse = math.inverse(rotation);
             float3 translation = math.rotate(inverse, FocusState - center);
-            float tanY = math.tan(math.radians(camera.fieldOfView * .5f)), tanX = tanY * camera.aspect;
+            // QA-001: frame inside a 1 % inset so a frame of motion between solve and render never puts a corner past the edge.
+            float tanY = math.tan(math.radians(camera.fieldOfView * .5f)) * .99f, tanX = tanY * camera.aspect;
             float fraction = 1;
             for (int i = 0; i < 8; i++)
             {

@@ -235,6 +235,9 @@ namespace Game.App.Boot
             var story = Push(NarrativeBootstrap.BuildStory(Content.Catalog, narrative, narrativeOwner, dialogService, Session.CampaignSeed));
             Register(narrativeOwner); Register<Game.Data.Logic.ILogicNarrative>(narrativeOwner);
             Register(story.Quests); Register(story.Clues); Register(story.Beats); Register(story.ShipLog);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            story.Beats.QuietCampaigns = Game.App.Testing.GameRootTestHooks.SkipCampaignOpening;
+#endif
             Save.Register(story.Save);
             Screens.BindMapPresenters(world);
             Screens.BindShipLogQuery(story.ShipLog);
@@ -276,7 +279,7 @@ namespace Game.App.Boot
             Screens.BindSceneRoots(hudSync, Input.GetBindingDisplay, editorServices);
             Screens.BindHudPresenters(Input, Content.Catalog);
             Screens.BindHudObjectiveQuery(story.ShipLog);
-            world.GetExistingSystemManaged<SceneNavigationBridgeSystem>().Unbind();
+            world.GetExistingSystemManaged<SceneNavigationBridgeSystem>().Bind(Flow, Pause, UI);
             Defeat = Push(new DefeatWatcher(Session, Save, UI, GameConfig));
             Defeat.Bind();
             Step("11 camera and scene roots");

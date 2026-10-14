@@ -23,6 +23,12 @@ namespace Game.Presentation.Environment
         bool previousSkyEnabled, ownsSkybox;
         CameraClearFlags previousClear;
         ParticleSystem dust;
+        // QA-001 ("visible snapping when going to another system or bound"): this scene-authored placeholder and the dust
+        // lattice live in star-system coordinates and follow the floating origin; an origin rebase used to leave them behind.
+        Transform planet;
+        Vector3 planetHome;
+        Unity.Entities.EntityQuery origins, bodies;
+        bool queries;
 
         IEnumerator Start()
         {
@@ -31,6 +37,8 @@ namespace Game.Presentation.Environment
             yield return null;
             if (!Game.Core.Services.TryGet<CameraRigService>(out var rig)) yield break;
             camera = rig.Camera;
+            planet = transform.Find("VESPER-9 placeholder sphere");
+            if (planet != null) planetHome = planet.position;
             previousClear = camera.clearFlags;
             skybox = camera.GetComponent<Skybox>();
             ownsSkybox = skybox == null;
@@ -71,15 +79,38 @@ namespace Game.Presentation.Environment
             LateUpdate();
         }
 
+        double3 FrameOrigin(out bool hasBodies)
+        {
+            hasBodies = false;
+            var world = Unity.Entities.World.DefaultGameObjectInjectionWorld;
+            if (world == null || !world.IsCreated) return double3.zero;
+            if (!queries)
+            {
+                origins = world.EntityManager.CreateEntityQuery(Unity.Entities.ComponentType.ReadOnly<Game.Galaxy.Components.FrameOrigin>());
+                bodies = world.EntityManager.CreateEntityQuery(Unity.Entities.ComponentType.ReadOnly<Game.Galaxy.Bodies.StarSystemBody>());
+                queries = true;
+            }
+            hasBodies = !bodies.IsEmptyIgnoreFilter;
+            return origins.IsEmptyIgnoreFilter ? double3.zero : origins.GetSingleton<Game.Galaxy.Components.FrameOrigin>().OriginInStarSystem;
+        }
         void LateUpdate()
         {
             if (camera == null || dust == null) return;
+            double3 frame = FrameOrigin(out bool hasBodies);
+            if (planet != null)
+            {
+                // The real system's bodies replace the placeholder (SYS-011); never show both.
+                if (planet.gameObject.activeSelf == hasBodies) planet.gameObject.SetActive(!hasBodies);
+                planet.position = (Vector3)(float3)((double3)(float3)planetHome - frame);
+            }
             Vector3 origin = camera.transform.position;
+            // Lattice anchors are star-system positions; wrap relative to the camera's star-system position.
+            float3 frameWrap = (float3)(frame - math.floor((frame + HalfExtent) / (2 * HalfExtent)) * (2 * HalfExtent));
             for (int i = 0; i < Count; i++)
             {
                 // The lattice is fixed in world space. Only invisible boundary copies recycle;
                 // camera motion never adds velocity to a particle or drags the field along.
-                float3 delta = (float3)(anchors[i] - origin);
+                float3 delta = (float3)anchors[i] - ((float3)origin + frameWrap);
                 delta -= math.floor((delta + HalfExtent) / (2 * HalfExtent)) * (2 * HalfExtent);
                 particles[i].position = origin + (Vector3)delta;
                 float edge = math.cmax(math.abs(delta));

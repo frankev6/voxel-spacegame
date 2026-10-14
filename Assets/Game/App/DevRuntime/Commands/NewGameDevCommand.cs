@@ -27,6 +27,8 @@ namespace Game.App.DevRuntime.Commands
             if (flow.IsTransitioning || save.IsBusy) return DevCommandResult.Fail("game flow or save is busy");
             if (flow.CurrentScene != GameScene.MainMenu && flow.CurrentScene != GameScene.World) return DevCommandResult.Fail("newgame requires MainMenu or World");
             SelectProfile(save, profile);
+            // QA-001: intro=false means "straight to flight"; story dialogue would otherwise hold readiness forever.
+            if (!intro && ctx.TryGetService<Game.Narrative.Beats.BeatService>(out var beats)) beats.QuietNextCampaign = true;
             int id = ctx.Host.AddOperation(new SessionDevOperation(flow.NewGameAsync(new NewGameArgs("Harness", seed, false, ship)), true, intro, 60));
             return DevCommandResult.Pending(id, "starting new game");
         }

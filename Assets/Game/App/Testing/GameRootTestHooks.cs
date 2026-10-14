@@ -8,8 +8,9 @@ namespace Game.App.Testing
         [Game.Core.StaticStateOk("test hooks, reset by GameFlowFixture")] public static string SaveRoot;          // null = default
         [Game.Core.StaticStateOk("test hooks, reset by GameFlowFixture")] public static string SettingsPath;      // null = default
         [Game.Core.StaticStateOk("test hooks, reset by GameFlowFixture")] public static bool SkipIntroScreens;    // MainMenu splash skipped
+        [Game.Core.StaticStateOk("test hooks, reset by GameFlowFixture")] public static bool SkipCampaignOpening; // no automatic story beats (QA-001)
 
-        public static void Reset() { SaveRoot = null; SettingsPath = null; SkipIntroScreens = false; }
+        public static void Reset() { SaveRoot = null; SettingsPath = null; SkipIntroScreens = false; SkipCampaignOpening = false; }
     }
 }
 #endif

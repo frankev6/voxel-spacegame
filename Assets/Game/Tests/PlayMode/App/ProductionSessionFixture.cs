@@ -52,6 +52,8 @@ namespace Game.Tests.PlayMode.App
             GameRootTestHooks.SaveRoot = Path.Combine(directory, "saves");
             GameRootTestHooks.SettingsPath = Path.Combine(directory, "settings.json");
             GameRootTestHooks.SkipIntroScreens = true;
+            // The campaign opening has its own owner tests (OpeningChapterTests); flight fixtures start in free flight.
+            GameRootTestHooks.SkipCampaignOpening = true;
             Bootstrap.Boot();
             // Only headless functional runs skip the GPU prerequisite. Live/GPU runs use the production renderer unchanged.
             if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null)

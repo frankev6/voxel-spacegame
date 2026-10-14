@@ -23,6 +23,10 @@ namespace Game.Tests.PlayMode.Presentation
             Game.Camera.ApplySettings(new Game.Presentation.Data.CameraSettings { MouseSensitivity = 1, ShakeScale = 0 });
             Assert.AreEqual("ship_fighter", Game.Session.Fleet.Flagship.SourceBlueprint.Value);
             Assert.AreEqual(1005, Game.Session.Fleet.Flagship.Structure.SolidCellCount);
+            // The starter now spawns beside a station; framing is measured in open space, away from camera occlusion.
+            var moved = Host.Commands.Execute("teleport x=1000 z=-1000 yaw=0", Host.Context);
+            Assert.AreEqual(global::Game.App.DevRuntime.DevResultKind.Ok, moved.Kind, moved.Text);
+            yield return null; yield return null;
             Host.Input.SetMouse(640, 360, "none", false, scroll, 0, 0);
             double zoomDeadline = Time.realtimeSinceStartupAsDouble + 10;
             while (math.abs(Game.Camera.CurrentDistance - expectedDistance) >= .01f && Time.realtimeSinceStartupAsDouble < zoomDeadline) yield return null;
@@ -46,7 +50,7 @@ namespace Game.Tests.PlayMode.Presentation
             for (int corner = 0; corner < 8; corner++)
             {
                 var point = Project(LocalPoint(corner));
-                Assert.IsTrue(Visible(point), "Hull corner " + corner + " clipped at " + point + ", aspect=" + Game.Camera.Camera.aspect);
+                Assert.IsTrue(Visible(point), "Hull corner " + corner + " clipped at " + point.ToString("F4") + ", aspect=" + Game.Camera.Camera.aspect);
             }
         }
         void SetFlight(float heading)

@@ -204,15 +204,21 @@ namespace Game.Narrative.Beats
             CompleteInternal(beatIndex, current == 0 ? default : currentScope);
         }
         public void AbortCurrent() { if (current != 0) abortRequested = true; }
+        /// <summary>QA-001: harness/test campaigns that are not about story start quiet: queued beats are dropped, nothing plays
+        /// on its own. <see cref="QuietNextCampaign"/> is one-shot (dev newgame); <see cref="QuietCampaigns"/> is a test hook.</summary>
+        public bool QuietNextCampaign { get; set; }
+        public bool QuietCampaigns { get; set; }
+        bool quiet;
         public void OnNewGame()
         {
             // App owners outlive campaigns. GameSession sets the seed before this lifecycle callback.
             campaignSeed = context.CampaignSeed;
             QueueState.Clear(); PerBody.Clear(); ResetForRestore(); gameStartPending = true;
+            quiet = QuietCampaigns || QuietNextCampaign; QuietNextCampaign = false;
         }
         internal void ResetForRestore()
         { current = 0; currentIntroduction = false; currentScope = default; gameStartPending = false; dirty.Clear(); completing.Clear(); abortRequested = completedByEffect = false; restored = false; }
-        public void OnRestored() { campaignSeed = context.CampaignSeed; ResetForRestore(); restored = true; }
+        public void OnRestored() { campaignSeed = context.CampaignSeed; ResetForRestore(); restored = true; quiet = QuietCampaigns; }
         public void Evaluate(IReadOnlyList<LogicDependency> changed, bool fullReevaluate)
         {
             if (changed != null) dependencies.Collect(changed, dirty);
@@ -226,6 +232,7 @@ namespace Game.Narrative.Beats
             try
             {
                 if (!playerFree || current != 0 || dialog.IsActive) return;
+                if (quiet) { gameStartPending = false; QueueState.Clear(); return; }
                 if (gameStartPending)
                 {
                     gameStartPending = false;
