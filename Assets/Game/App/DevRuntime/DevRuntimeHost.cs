@@ -47,6 +47,7 @@ namespace Game.App.DevRuntime
         public DevEventCounter Events { get; private set; }
         internal Game.App.DevRuntime.Console.DevConsole Console { get; private set; }
         internal Commands.FlightReplaySession Replay { get; private set; }
+        internal Game.App.DevRuntime.Perf.DevPerfCounters Perf { get; private set; }
         public static DevRuntimeHost Create(Transform parent)
         {
             var root = new GameObject("DevRuntimeHost");
@@ -60,6 +61,7 @@ namespace Game.App.DevRuntime
                 host.Ui = new DevUiQuery();
                 host.Context = new DevContext(host);
                 host.Replay = new Commands.FlightReplaySession();
+                host.Perf = new Game.App.DevRuntime.Perf.DevPerfCounters();
                 host.Commands = DevCommandRegistry.CreateDefault();
                 host.Probes = Scenarios.ScenarioProbeRegistry.CreateDefault();
                 return host;
@@ -119,6 +121,7 @@ namespace Game.App.DevRuntime
             scenarios.Clear();
             Console?.Dispose();
             Replay?.Dispose();
+            Perf?.Dispose();
             Context?.Dispose();
             Input?.Dispose();
             Events?.Dispose();

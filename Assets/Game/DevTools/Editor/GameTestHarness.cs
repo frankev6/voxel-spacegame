@@ -12,7 +12,6 @@ using Game.App.DevRuntime;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Pipeline.Commands;
-using Unity.Profiling;
 using Unity.Transforms;
 using UnityEditor;
 using UnityEngine;
@@ -35,6 +34,8 @@ namespace Game.DevTools.Editor
             Application.logMessageReceivedThreaded += OnLog;
             EditorApplication.playModeStateChanged -= OnPlayMode;
             EditorApplication.playModeStateChanged += OnPlayMode;
+            AssemblyReloadEvents.beforeAssemblyReload += DisposePerf;
+            EditorApplication.quitting += DisposePerf;
             if (EditorApplication.isPlaying && SessionState.GetBool(UnfocusedKey, true)) ApplyUnfocusedInput(true);
             if (!EditorApplication.isPlaying) RestoreNativeMice(); // never leave a native mouse disabled after a reload
         }
@@ -60,7 +61,7 @@ namespace Game.DevTools.Editor
         static void OnPlayMode(PlayModeStateChange s)
         {
             if (s == PlayModeStateChange.EnteredPlayMode && SessionState.GetBool(UnfocusedKey, true)) ApplyUnfocusedInput(true);
-            if (s == PlayModeStateChange.ExitingPlayMode) { ApplyUnfocusedInput(false); RemoveAgentMouse(); }
+            if (s == PlayModeStateChange.ExitingPlayMode) { ApplyUnfocusedInput(false); RemoveAgentMouse(); DisposePerf(); }
         }
 
         static void ApplyUnfocusedInput(bool on)
@@ -508,37 +509,21 @@ namespace Game.DevTools.Editor
 
         // ------------------------------------------------------------ performance counters
 
-        static ProfilerRecorder mainThread, drawCalls, triangles, gcAlloc, systemMemory;
+        static Game.App.DevRuntime.Perf.DevPerfCounters editorPerf;
+        static void DisposePerf() { editorPerf?.Dispose(); editorPerf = null; }
 
-        static void EnsureRecorders()
+        [CliCommand("gh_perf", "Profiler counters and optional voxel, combat and last-frame markers; JSON available in and out of play mode.")]
+        public static string Perf([CliArg("voxel", "Voxel grid/brick/chunk counters")] bool voxel = false,
+            [CliArg("combat", "Projectile, beam, FX and audio counters")] bool combat = false,
+            [CliArg("markers", "15 slowest game markers in the last frame")] bool markers = false,
+            [CliArg("json", "Emit one JSON object")] bool json = false)
         {
-            if (mainThread.Valid) return;
-            mainThread = ProfilerRecorder.StartNew(ProfilerCategory.Internal, "Main Thread", 15);
-            drawCalls = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count");
-            triangles = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Triangles Count");
-            gcAlloc = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Allocated In Frame");
-            systemMemory = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
-        }
-
-        static double AverageMs(ProfilerRecorder r)
-        {
-            if (!r.Valid || r.Count == 0) return double.NaN;
-            double sum = 0;
-            for (int i = 0; i < r.Count; i++) sum += r.GetSample(i).Value;
-            return sum / r.Count * 1e-6;
-        }
-
-        [CliCommand("gh_perf", "Main-thread ms (15-frame average), draw calls, triangles, GC alloc per frame, memory, entity totals. First call starts the recorders.")]
-        public static string Perf()
-        {
-            bool first = !mainThread.Valid;
-            EnsureRecorders();
-            if (first) return "recorders started; call gh_perf again after a few frames";
-            int entities = 0;
-            var w = World.DefaultGameObjectInjectionWorld;
-            if (w != null && w.IsCreated) entities = w.EntityManager.UniversalQuery.CalculateEntityCount();
-            return $"main={AverageMs(mainThread):F2}ms draws={drawCalls.LastValue} tris={triangles.LastValue / 1e6:F2}M " +
-                   $"gcAlloc/frame={gcAlloc.LastValue}B sysMem={systemMemory.LastValue / 1e6:F0}MB entities={entities}";
+            string command = "perf voxel=" + (voxel ? "true" : "false") + " combat=" + (combat ? "true" : "false") +
+                " markers=" + (markers ? "true" : "false") + " json=" + (json ? "true" : "false");
+            if (RuntimeCommand(command, out string result)) return result;
+            editorPerf ??= new Game.App.DevRuntime.Perf.DevPerfCounters();
+            using var context = new DevContext(null);
+            return editorPerf.Format(context, voxel, combat, markers, json);
         }
 
         // ------------------------------------------------------------ reflection helpers

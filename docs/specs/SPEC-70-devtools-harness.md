@@ -335,7 +335,7 @@ CLI-only: `gh_scenario --file <path>` (starts a run, enters play mode first when
 - Default line (as built): main ms (15-frame average), draws, triangles, GC alloc/frame, system memory, entities.
 - `voxel`: grids by kind, bricks, solid cells, dirty bricks, chunk bodies, hulks.
 - `combat`: live projectiles (SPEC-21 `ProjectileStore.Stats.Live`, read after `CompleteAccess()`), active beams, `FxStats` (drained, culled, budget-dropped, debris live estimate), `AudioStats` (drained, started, active voices).
-- `markers`: the 15 slowest `<System>.<Step>` markers in the last frame through SPEC-71 `PerfMarkers.Recorders` (ms, sorted).
+- `markers`: the 15 slowest `<System>.<Step>` markers in the last frame through SPEC-71 `PerfMarkers.SampleLastFrame` (ms, sorted).
 - `json`: the same data as one JSON object (hand-written) for scripts.
 
 ### 6.7 Scripts (`tools/playtest/`, zsh, source `_env.sh`)
@@ -516,7 +516,7 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Milestone:** M2
 - **Tier:** standard — counters listed in §6.6
 - **Depends on:** `DEV-009`, `VFX-001`, `AUD-001`, `TST-001`
-- **Do:** `DevPerfCounters` (voxel, combat, markers through `PerfMarkers.Recorders`), command `perf`, `gh_perf` args `voxel`, `combat`, `markers`, `json`; probes `fx.drained`, `sfx.voices`.
+- **Do:** `DevPerfCounters` (voxel, combat, markers through `PerfMarkers.SampleLastFrame`), command `perf`, `gh_perf` args `voxel`, `combat`, `markers`, `json`; probes `fx.drained`, `sfx.voices`.
 - **Files:** `Assets/Game/App/DevRuntime/Perf/DevPerfCounters.cs`, `Assets/Game/App/DevRuntime/Commands/PerfDevCommand.cs`, `Assets/Game/DevTools/Editor/GameTestHarness.cs`
 - **Acceptance criteria:**
   - [ ] `gh_perf --json true` output parses with `python3 -m json.tool`.
@@ -667,6 +667,7 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 | 28 | DEV-017's example uses an invalid fact name and an unsupported function; state command edge behavior is unspecified | Follow accepted SPEC-40 syntax and owner semantics | Tech lead | DEV-017 default: declare story_count and evaluate `$story_count >= 3`; `fact("story_count")` remains the separate numeric scenario probe. No alternate condition dialect or runtime API changes. Blank conditions follow the compiler's unconditional-true behavior. Fact sets require Int32 values and return the owner's normalized value; all changes retain Debugger provenance, including generated slots. Grants require a live world, complete tracked jobs, and use cargo-only TryAdd or nonnegative saturating Wallet.Add. inv shows ordinal slots, preserved missing IDs and overflow, with max 0..200 (default 80), explicit truncation, capacity and credits. Unknown inventory probes follow CountOf (zero); unknown facts fail without an invalid-slot log. cond caches bound nodes per source/catalog and evaluates with a fresh BeatCondition scope against the current registered context. gh_facts with no arguments lists all. Lead owns the central question mirror and Unity acceptance. |
 
 | 29 | DEV-014 declares only interaction contracts, not functioning owners | Require SYS-008 query/docking/BodyInteracted, DEV-012 overlay rendering and INP-005 actual action sampling. Real Dock acceptance observes docking/event delivery; merchant/dialog UI retains its owners. | Tech lead | Resolved; ledger Q385. |
+| 30 | DEV-011 references a superseded marker accessor and leaves diagnostic lifetime/output edges unspecified | Use accepted owner APIs and explicit availability | Tech lead | DEV-011 default: SampleLastFrame after idempotent StartRecording, 15 entries sorted by descending ms then ordinal name. Host owns generic recorders and cached ECS queries; Editor-only fallback supports gh_perf outside play and disposes on play exit/domain reload/quit. PerfMarkers retains its own shared ownership. Main-thread mean uses up to 15 recorded frames; unavailable generic metrics/projectile store are null in JSON or unavailable in text. Requested sections only; worldAvailable distinguishes absent-world zero counts. Voxel totals include disabled storage roots/bricks; dirty requires enabled BrickDirty and relevant flags; live chunks require Live and enabled entity. Active beams exclude disabled entities. Projectile Stats.Live is read only after CompleteAccess. FX/audio use existing systems and AudioService fallback, never create systems or drain queues. Probes return zero when absent. Exactly two functional cases; no benchmarks, tuning passes or Unity runs by worker. Lead owns central mirror and runtime validation. |
 
 ## 11. References
 
