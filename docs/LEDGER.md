@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
-| M2 | 10 | 0 | 0 | 0 | 82 | 0 | 92 | 7 |
-| M3 | 84 | 10 | 0 | 0 | 86 | 0 | 180 | 6 |
+| M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
+| M3 | 84 | 9 | 0 | 0 | 87 | 0 | 180 | 6 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -423,7 +423,7 @@
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
 | EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 9c627fd | Editor contracts/config; 4 required tests; runtime tools remain EDT-002 onward |
 | EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-13 | 0089c35c | Context/rotated footprints/item tables accepted; five required cases pass; ADR-0081/Q380. |
-| EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead implements draft adapters; required atomic VoxelStructure.ApplyEdits API is missing and must be added in Voxel under an ADR. |
+| EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-13 | 2d3181ff | Atomic draft adapters, native canonical hash/enumeration and exact damage restore; four required cases pass, including negative HP/shared origins. |
 | EDT-004 | Edit history and diff commands | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001 | yes | todo |  |  |  |  |
 | EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | no | todo |  |  |  |  |
 | EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | no | todo |  |  |  |  |
@@ -951,9 +951,10 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 377 | SPEC-42 Q13: clue lifecycle and restore boundaries | Canonical clue/mystery facts, positive ordinals, solved latch before effects, silent first restored rumor evaluation, sorted preserved seen/resolved IDs. Marker composition QST-006 and QUST QST-007 remain separate. | Tech lead |
 | 378 | SPEC-40 Q35: zero-key hails dropped | Handle Hail before remaining zero-body-key exclusion; encounter NPC ships intentionally lack a body. Existing interaction test covers it. | Tech lead |
 | 379 | SPEC-70 Q27: aim tracking and fire holds | Track stable PersistentId, preserve offscreen projection, fail behind-camera; Flight actions use existing injector and release on completion/context change. Two small controlled-clock cases; no production tuning. | Tech lead |
-| 380 | SPEC-51 Q24: editor content ownership and API | ADR-0081: session owns rotated footprint arrays, borrows content blobs, exposes canonical item/prices and enum categories. | Tech lead |
-| 381 | SPEC-51 Q25: atomic voxel edit API missing | Add batch API in Voxel under ADR before writer; no direct ShipEditor cell writes. Canonical damage capture begins with missing-cell bytes and explicit float encoding; task remains in progress. | Tech lead |
+| 380 | SPEC-51 Q26: editor content ownership and API | ADR-0081: session owns rotated footprint arrays, borrows content blobs, exposes canonical item/prices and enum categories. | Tech lead |
+| 381 | SPEC-51 Q27: atomic voxel edit API missing | Add batch API in Voxel under ADR before writer; no direct ShipEditor cell writes. Canonical damage capture begins with missing-cell bytes and explicit float encoding; task remains in progress. | Tech lead |
 | 382 | SPEC-70 Q28: DEV-017 condition syntax and state edges | Canonical `$story_count >= 3`; numeric fact probe stays separate. Owner-normalized Debugger writes, cargo-only grants, cached bound conditions; explicit empty CLI eval remains unconditional true. | Tech lead |
+| 383 | SPEC-51 Q28: negative function HP and shared-origin hash association | Preserve finite damage HP including negative values; hash each instance identity with HP in canonical identity order. ADR-0082. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1086,6 +1087,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — EDT-003 done: exact draft restoration — astra (gpt-6)
+
+- 2d3181ff closes adapter review: accepts finite negative damage HP, restores derived destroyed state, and hashes instance identity with HP so shared origins cannot erase their association. Atomic writer, damage capture, pinned Burst enumeration/hash and missing-root removal are complete. Q383/ADR-0082 records the repair. Corrected duplicate SPEC-51 question numbering: content tables Q26, atomic API Q27, damage/hash Q28.
+- Compile clean with zero warning CS; handle93715 terminal0; four required EditMode cases passed, 0.2039208s test bodies. spec-required: 4, extra: 0. Evidence Logs/playtest/editor-adapters. No full, perf or soak run. Previous turn accepted DEV-017; this turn accepts the full draft adapter after concrete fixes.
+- Worker252 verified SYS-008 can proceed with actual accepted owners SYS-006/INP-005/AI-004/CORE-006. DEV-014 must wait for query/docking and overlay implementation. Next lead implements SYS-008 to unlock actual station interaction; workers continue dialog validator, counter command and bounded support. NAR-019 delivery remains pending integration, with its real live-owner acceptance gaps retained.
 
 ### 2026-10-13 — DEV-017 done; EDT-003 review fixes — astra (gpt-6)
 

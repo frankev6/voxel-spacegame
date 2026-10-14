@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Draft adapters accepted:** EDT-0032d3181ff done: exact negative damage HP, canonical identity-associated hash, atomic undo write path and native reads. Compile clean; four focused cases pass (0.2039s bodies), handle93715 terminal0; evidence Logs/playtest/editor-adapters. No Unity active. Next lead SYS-008 real station interaction/docking; dependency audit252 confirms accepted prerequisites. Workers DLG-003272 and DEV-011296 active; presentation support available after audit. NAR-019 delivered pending integration/live owners.
+
 - **Final adapter review295:** two remaining EDT-003 defects: exact restoration must allow damage-produced negative non-functional HP; equal-origin hash must preserve HP-to-block identity. Lead fixes next, task remains unaccepted. DEV-017 accepted/main700c1adf. Economy recycled DEV-011 (counter plumbing only, no benchmarks); presentation audits SYS-008, combat DLG-003. No Unity active.
 
 - **State commands accepted; editor adapter review:** DEV-01740421f42 done. EDT-00313b2ef45 has four passing required cases and reviewed identity/hash/destroyed-state fixes; remains in progress for final damage-restoration review. Compile clean; focused seven-case batch passes in0.3734s test bodies (handle62393 terminal0), evidence Logs/playtest/editor-state. No Unity active. DLG-003271 active; economy294 reviews adapter; presentation audits real SYS-008/DEV-014 prerequisites. NAR-019310332f7/a1fbc3cb delivered pending integration, explicit live-owner gaps. Next finish adapter review, dispatch ready standard work and integrate dialog delivery.
