@@ -52,14 +52,14 @@ namespace Game.ShipEditor.Services
             int count = batch.Ops.Length, end = 0;
             using (validateMarker.Auto())
             {
-            for (int i = 0; i < batch.Groups.Length; i++)
-            {
-                var group = batch.Groups[i];
-                if (group.OpStart != end || group.OpCount < 0 || group.OpCount > count - end)
-                    throw new ArgumentException("EDT: groups must partition the operations.", nameof(batch));
-                end += group.OpCount;
-            }
-            if (batch.Groups.Length != 0 && end != count) throw new ArgumentException("EDT: groups must cover the operations.", nameof(batch));
+                for (int i = 0; i < batch.Groups.Length; i++)
+                {
+                    var group = batch.Groups[i];
+                    if (group.OpStart != end || group.OpCount < 0 || group.OpCount > count - end)
+                        throw new ArgumentException("EDT: groups must partition the operations.", nameof(batch));
+                    end += group.OpCount;
+                }
+                if (batch.Groups.Length != 0 && end != count) throw new ArgumentException("EDT: groups must cover the operations.", nameof(batch));
             }
             if (count == 0) return false;
             // TODO(EDT-007): replace the specified pass-through stage with per-group placement validation.
