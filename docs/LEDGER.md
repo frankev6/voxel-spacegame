@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 8 |
-| M3 | 93 | 7 | 0 | 0 | 80 | 0 | 180 | 8 |
+| M3 | 93 | 7 | 0 | 0 | 80 | 0 | 180 | 10 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -403,8 +403,8 @@
 | DLG-012 | Harness commands for dialog | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, DEV-001 | no | todo |  |  |  |  |
 | QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 95f80410 | Public quest/mystery contracts and required assembly test; behavior remains QST-002 onward |
 | QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, NAR-003, NAR-004, NAR-006, NAR-009, NAR-013 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9ca0b84 | Real definitions, compile/bind and validation; 24 prior cases plus repaired Usage_Enforced pass; generated content compiled except separate TRV-003 owner stub. |
-| QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, SPEC-40 | no | todo |  |  |  |  |
-| QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, SPEC-40 | no | todo |  |  |  |  |
+| QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | todo |  |  |  |  |
+| QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | todo |  |  |  |  |
 | QST-005 | BeatService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, SPEC-41 | no | todo |  |  |  |  |
 | QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | no | todo |  |  |  |  |
 | QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-006, PERS-001 | no | todo |  |  |  |  |
@@ -941,6 +941,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 367 | SPEC-70 Q26: sandbox NPC commands | ADR-0079 permits unscoped public spawn only for composition-bound GameSession.IsSandbox; campaign/interface requests remain strict. No fake galaxy or second spawner. | Tech lead |
 | 368 | SPEC-50 Q27: inventory save normalization and unknown merchants | **Resolved:** INVT v1 follows SPEC-50 §5.5: capacity is derived and excluded; correct SPEC-05 registry prose without changing bytes. Merchant state is keyed internally by ContentId, so unknown merchants retain restock time and ordered rows without opening/restocking a session. Unknown merchants preserve all original row IDs, including known item aliases. Missing placeholders cannot be bought or sold, preventing identity loss through ordinary item-only trade APIs. Preserve stock counts (including unlimited), price float bits and buyback flags; resolve missing items while retaining OriginalId. Resolve known merchant aliases to canonical IDs before duplicate detection/opening; unknown IDs remain unchanged. Byte identity applies to canonical valid payloads within current item stack limits; the specified inventory clamp/drop repairs intentionally change invalid or newly over-limit data. Reject known-merchant counts below -1 (unknown merchant rows stay raw), unsupported versions, duplicate slots/merchants, empty merchant IDs, impossible counts and trailing data as SaveFormatException; version zero resets models. No public API or chunk layout change. | Tech lead |
 | 369 | SPEC-40 Q32: debugger editing runtime dependencies | Fact editing is implemented; baselines and Play beat route through canonical quest/beat/dialog owners and report unavailable while those owners are unfinished. NAR-018 remains in progress, not accepted. | Tech lead |
+| 370 | SPEC-42 Q11: quest/clue scheduling cycle | ADR-0068: QST-003/004 depend on accepted definitions and actual effect/fact/index/context runtime, not downstream debugger/world-event integrations. Full service acceptance retained. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |

@@ -819,7 +819,7 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 ### QST-003 — QuestService
 - **Milestone:** M3
 - **Tier:** frontier — F3: baselines and restore mode are what prevent the 05-B3/B8 classes; the errors are silent
-- **Depends on:** `QST-002`, `SPEC-40`
+- **Depends on:** `QST-002`, `NAR-005`, `NAR-007`, `NAR-010`, `NAR-011`
 - **Do:** Implement `QuestService` per §5.3: index, `Start`, `Evaluate` (normal and restore modes), stages, `Fail`, `ForceComplete`, `Track`, `AddLog`, `GetBaseline`, `GetObjectives`.
 - **Files:** `Assets/Game/Narrative/Quests/{QuestService,QuestInstance}.cs`; `Assets/Game/Tests/EditMode/Narrative/{QuestServiceTests,NarrativeSystemsPerfTests}.cs`
 - **Acceptance criteria:**
@@ -834,7 +834,7 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 ### QST-004 — ClueService
 - **Milestone:** M3
 - **Tier:** standard — algorithm in §5.4
-- **Depends on:** `QST-002`, `SPEC-40`
+- **Depends on:** `QST-002`, `NAR-005`, `NAR-007`, `NAR-010`, `NAR-011`
 - **Do:** Implement `ClueService` per §5.4: reveal ordinals, mystery solve, rumor resolution, seen state.
 - **Files:** `Assets/Game/Narrative/Clues/ClueService.cs`; `Assets/Game/Tests/EditMode/Narrative/ClueServiceTests.cs`
 - **Acceptance criteria:**
@@ -968,6 +968,8 @@ SPEC-61 resolves `StarSystem` to a map position and `BodyTag` to a body of the l
 | 9 | Whole SPEC-40 dependency prevents implementing quest definitions even though imported beats already require their validators at boot | QST-002 depends on completed contracts, compiler/binder, condition nodes, reference/fact catalog, import pipeline and validator framework: QST-001 and NAR-003/004/006/009/013. Runtime effect execution, narrative scheduling and campaign playthrough remain their own tasks; no bypass of local validation, fake bindings or reduced acceptance. | Tech lead |
 
 | 10 | QST-002 local/cross-content validation boundaries and provider defaults | Definitions enforce applicable structural rules, database references and compiled-wrapper freshness/errors, with condition/expression root validation; compile/bind traverses all declared fields with the exact usages and semantic indexed paths. Clues have no logic owner and validate their optional mystery/link references. Editor providers implement the full rule table: Beat order15, Quest20, Mystery30; tag vocabulary is the specified union, objective IDs are unique across the quest, and static Jump/Detour edges determine node reachability. Command references use compiled graphs plus real compilation of command-table Text when that owner supplied no graphs; existing dialog-owner errors remain visible. Empty failWhen/resolvedWhen keep their canonical source semantics; runtime quest/clue services retain their specified empty=never guard. Imported version0 wrappers must be recompiled through the existing pipeline before boot acceptance. NAR-013's existing failed-owner case uses an explicit failing fixture owner after removing the quest shell; no test is removed or added outside the25 QST-required cases. No converter/content or runtime service implementation is included. | Tech lead — resolved; ledger Q348 |
+
+| 11 | Quest/clue services wait on all SPEC-40, including debugger tools that need those same services | **Resolved:** under ADR-0068, QST-003/004 require QST-002 definitions/compiler/binder/validator plus NAR-005 effect execution, NAR-007 facts, NAR-010 ordered evaluation/dependency index and NAR-011 live context. These accepted prerequisites supply their complete local runtime; world-event routing, dialog, debugger UI and their integration acceptance retain their own tasks. No reduction of service behavior, restore semantics or tests. | Tech lead |
 
 ## 11. References
 
