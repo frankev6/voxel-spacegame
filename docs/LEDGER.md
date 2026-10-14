@@ -1078,6 +1078,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — DLG-002 structural parser authored — astra (gpt-6)
+
+- daea28bc implements nodes, headers, choice grouping/bodies, conditional branches, flow/set/effect commands, escaping/tag/speaker parsing and source diagnostics. Q373 documents AST and same-indent converted conditionals. Original command spelling stays available for downstream normalization validation; semantic rules remain DLG-003.
+- Spec-required: 7 pending authoring, extra:0. No compile/Unity run yet; unaccepted. Next required example/escape/forbidden/indent/nesting/speaker/converted-source cases, then one focused batch.
+- Clue worker active277; converted-input audit260 active; presentation reviews parser. No Unity active. Previous syntax model and current structural source work are progress.
+
 ### 2026-10-13 — DLG-002 syntax model authored — astra (gpt-6)
 
 - 9b171637 adds the editor AST and exact SPEC-41 text escape/unescape table. Structural Parse, diagnostics and required cases remain open; explicit TODO retained. Q372/SPEC-41 Q11 resolves actual dialog scheduling prerequisites under ADR-0068; DLG-006 command effect access still needs its accepted contract resolution before implementation.

@@ -9,7 +9,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-018 | DLG-002 converted-input audit dispatched | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | QST-004 | Claimed c59e9110; full clue/mystery service implementation dispatched | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-003 review | Review232 complete; dependency wait | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DLG-002 review | Parser daea28bc source review dispatched | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Dialog structural parser authored:** DLG-002daea28bc adds node/header, choice-group, if/elseif/else, flow/set/command and text/tag/speaker parsing with diagnostics; Q373/SPEC-41 Q12 records representation/indentation defaults. Uncompiled/unaccepted. Next seven required cases plus actual converted-file readback before one focused batch. No Unity active. Clue worker active277; combat converted-input audit active260; presentation assigned parser review. Previous syntax work and this implementation are progress.
 
 - **Dialog parser started:** DLG-002 claimed1c63949e;9b171637 adds AST nodes and exact escaping, not yet structural parsing or acceptance. Q372/SPEC-41 Q11 replaces whole-spec scheduling with actual parser/command-table prerequisites. Next full line/indent/branch parser and seven required cases, then one focused batch. No Unity active. Clue worker active276; combat audits actual converted Yarn input; presentation has a genuine dependency wait. Previous quest acceptance and this source work are progress.
 
