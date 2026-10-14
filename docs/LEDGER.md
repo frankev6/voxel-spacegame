@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
-| M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 7 |
-| M3 | 29 | 14 | 0 | 0 | 139 | 0 | 182 | 6 |
+| M2 | 8 | 2 | 0 | 0 | 82 | 0 | 92 | 6 |
+| M3 | 28 | 14 | 0 | 0 | 140 | 0 | 182 | 6 |
 | M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -366,9 +366,9 @@
 | ENC-006 | Composition and placement | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, GAL-006, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 21d0996b | Full ordered seeded composition, clearance placement and line-abreast formation; 9 required cases pass. Director cap remains ENC-007. |
 | ENC-007 | EncounterDirectorService | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-004, ENC-005, ENC-006, SYS-008, SYS-013, FND-012, TRV-006, AI-008 | yes | done | astra (gpt-6) | 2026-10-14 | a445825b | Real production director; ten functional cases accepted across batch/fix; two advisory perf fixtures authored, measurements deferred. ENCT binary persistence stays ENC-008. |
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | yes | done | astra (gpt-6) | 2026-10-14 | f9c6f0d5 | ENCT v1, atomic raw preservation and Loaded lifecycle; 3 spec checks and 1 real save/load/combat-refusal scenario pass. |
-| ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, NAR-011, NAR-012, NAR-020 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Economy worker: actual narrative encounter/faction routing and event dependencies. |
+| ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, NAR-011, NAR-012, NAR-020 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | aae617cd | Worker cb960707 integrated; five real-owner routing/dependency cases pass. Live all-event bridge composition remains QST-008. |
 | ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | cdf292d6 | Ten canonical encounters, six factions, real ARK/Whisper ownership; generation/rerun zero errors, two required checks pass |
-| ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | no | todo |  |  |  |  |
+| ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | yes | todo |  |  |  |  |
 | ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, ENC-004, DEV-003, DEV-005, DEV-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | a9adf708 | Worker230f64b8 integrated; actual encounter/relation commands, probes and CLI; two required production-owner cases pass. |
 | NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | e39b2d3 | Narrative contracts and precise future-task stubs; 2 required tests; full batch 901 EM / 128 PM, zero failures |
 | NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 67ce3485 | Located lexer/AST/parser; seven focused checks pass; Q305 resolves grammar example |
@@ -1184,6 +1184,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — ENC-009 narrative routes accepted — astra (gpt-6)
+
+- aae617cd integrates cb960707: actual faction relations/owner lookup, spawn anchors and StartCombat through registered production owners. Existing canonical bridge relation/defeat handlers retained; no duplicate subscriptions. SPEC-33 Q36 / ledger Q473 records constructor bindings. Live all-event bridge registration still belongs to QST-008 and requires BeatService; this acceptance does not claim live dialogue-driven defeat facts.
+- Five required direct-owner checks pass (Logs/playtest/encounter-narrative/routing.xml). Lead fixed fixture NUnit import, NarrativeConfig ID prefix, missing PlayerControlLock and valid condition scope; earlier runs failed fixture setup, not suppressed. Final compile clean/zero CS warnings. Test count: spec-required: 5, extra: 0. No broad/performance/soak runs. DEV-013 and DEV-014 workers actively implement; accepted routing unlocks ENC-011 scenario implementation on the same third thread, with missing actual dialog/bridge owners explicit.
 
 ### 2026-10-14 — DEV-012 live voxel overlays accepted — astra (gpt-6)
 
