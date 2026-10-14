@@ -594,7 +594,7 @@ sequenceDiagram
 ### DLG-002 — Dialog script parser
 - **Milestone:** M3
 - **Tier:** frontier — F3/F6: the format definition; a parse error silently changes or drops writing
-- **Depends on:** `DLG-001`, `SPEC-40`
+- **Depends on:** `DLG-001`, `NAR-003`, `NAR-016`
 - **Do:** Implement `DialogScriptParser` and the AST classes per §4.2–§4.4 and §5.1 (indentation, option groups, if/elseif/else pairing, tag splitting, escape table, speaker prefix, diagnostics with file:line). Parse every converted legacy file in a test.
 - **Files:** `Assets/Game/Editor/Narrative/Dialog/{DialogScriptParser,DialogScriptAst,DialogNodeAst,DialogStatementAst}.cs`; `Assets/Game/Tests/EditMode/Editor/Narrative/DialogScriptParserTests.cs`
 - **Acceptance criteria:**
@@ -641,7 +641,7 @@ sequenceDiagram
 ### DLG-006 — DialogService, memory and DLGS chunk
 - **Milestone:** M3
 - **Tier:** frontier — F5: ordering between runner, effects, presenter, beat service and terminal actions
-- **Depends on:** `DLG-001`, `SPEC-40`
+- **Depends on:** `DLG-001`, `DLG-003`, `NAR-011`, `CORE-003`, `CORE-007`
 - **Do:** Install and restore the current blocking continuation through ADR-0075 `ILogicEffectHost.BlockingCommandCompleted`; the callback queues resume for Pump, never re-enters the runner. Implement `DialogService` (§5.3), `DialogMemory`, `DialogCommandTable`, deterministic `Roll` (§5.6) and `DialogSaveParticipant` (§4.10; register `DLGS` order 50). Build `FakeDialogRunner` (scripted runner for tests) under Tests.
 - **Files:** `Assets/Game/Narrative/Dialog/{DialogService,DialogMemory,DialogCommandTable,DialogSaveParticipant}.cs`; `Assets/Game/Tests/EditMode/Narrative/{DialogServiceTests,FakeDialogRunner,DialogServicePerfTests}.cs`
 - **Acceptance criteria:**
@@ -748,6 +748,8 @@ sequenceDiagram
 | 9 | §4.1 / DLG-001 lists `Views/IDialogCommands.cs`, but the existing canonical `Game.UI.Views.IDialogCommands` is in `Views/Commands/IDialogCommands.cs` with SPEC-61's `Choose(int)` signature. | Keep that file and its meta GUID, retain `Choose(int)` / `Continue()`, and add `ChooseByNumber(int)`, `ChooseOption(int)` and `Back()`. DLG-008's presenter must implement both the staged and canonical signatures; do not duplicate or move the interface. | Tech lead — resolved by DLG-001; central mirror pending. |
 
 | 10 | Dialog provider Order200 conflicts with SPEC-40 dialog-before-quest order and quest/mystery Order20/30 | **Resolved (2026-10-13):** dialog rule provider uses Order10, followed by quest20 and mystery30. Numeric provider sorting remains the sole ordering mechanism. Runtime narrative system ordering is unchanged. | Tech lead |
+
+| 11 | Whole SPEC-40 dependency blocks dialog behind debugger controls that require live dialog | **Resolved:** ADR-0068 uses real prerequisites. DLG-002 requires DLG-001 contracts, NAR-003 grammar and NAR-016 completed converted inputs. DLG-006 requires DLG-001, DLG-003 generated command table, NAR-011 live scoped context, CORE-003 deterministic RNG and CORE-007 save primitives. No parser, production command-table, runtime or test acceptance is removed; the IEffect/CompiledEffectList access gap must be resolved before implementing DLG-006 without runtime reparsing. | Tech lead |
 
 ## 11. References
 
