@@ -23,6 +23,8 @@ namespace Game.ShipEditor.Tools
         internal SymmetrySettings Symmetry;
         internal ushort SelectedBlock;
         internal byte Orient, Color;
+        internal BoxMode BoxMode;
+        internal string StatusText { get; private set; } = "";
         internal int StrokeId { get; private set; }
         internal PlacementError Error { get; private set; }
         internal ToolContext(EditSession session, EditorContext content)
@@ -33,6 +35,52 @@ namespace Game.ShipEditor.Tools
             previewValidator = new PlacementValidator(content, session.Placement, previewScratch);
         }
         internal void SetError(PlacementError error) => Error = error;
+        internal void SetStatus(string text, PlacementError error = PlacementError.None)
+        { StatusText = text ?? ""; Error = error; }
+        internal bool AllowsArea()
+        {
+            if (SelectedBlock != 0 && Content.Footprints.Get(SelectedBlock, Orient).Cells.Length == 1) return true;
+            SetStatus("This tool requires a single-cell block.", PlacementError.MultiCellNotAllowed); return false;
+        }
+        bool PrepareArea(NativeArray<Unity.Mathematics.int3> cells, Unity.Mathematics.int3 normal)
+        {
+            Batch.Clear(); copies.Clear(); SetStatus("");
+            if (!AllowsArea()) return false;
+            foreach (var target in cells)
+            {
+                copies.Clear(); var footprint = Content.Footprints.Get(SelectedBlock, Orient);
+                var record = new BlockRecord { Block = SelectedBlock, Orient = Orient, Color = Color, DamageOffset = -1,
+                    Origin = PlacementMath.OriginFor(target, normal, footprint.Min, footprint.Max) };
+                var error = Mapper.BuildCopies(record, default, Symmetry, copies, Batch.Damage);
+                if (error != PlacementError.None) { Error = error; continue; }
+                int start = Batch.Ops.Length;
+                foreach (var copy in copies) Batch.Ops.Add(new DiffOp { Kind = DiffOpKind.Add, Record = copy });
+                if (Batch.Ops.Length > Content.Config.MaxBatchCells)
+                { Batch.Clear(); SetStatus("Region too large", PlacementError.OverBudget); return false; }
+                Batch.Groups.Add(new BatchGroup { OpStart = start, OpCount = Batch.Ops.Length - start });
+            }
+            return Batch.Ops.Length != 0;
+        }
+        internal bool ApplyArea(NativeArray<Unity.Mathematics.int3> cells, Unity.Mathematics.int3 normal, ToolId tool, string label)
+        {
+            if (!PrepareArea(cells, normal)) return false;
+            var mappingError = Error;
+            bool changed = Session.TryApply(Batch, AtomicityMode.PerGroup, StrokeId, tool, label, Report);
+            Error = mappingError;
+            foreach (var error in Report.GroupErrors) if (error != PlacementError.None) { Error = error; break; }
+            return changed;
+        }
+        internal void PreviewArea(NativeArray<Unity.Mathematics.int3> cells, Unity.Mathematics.int3 normal, PreviewBuffer preview)
+        {
+            if (!PrepareArea(cells, normal)) { preview.Clear(); preview.SetMessage(StatusText, Error); return; }
+            var mappingError = Error; Report.Clear();
+            previewValidator.Validate(Session.Draft, Batch, Session.OriginalCounts, Session.Options.Creative, AtomicityMode.PerGroup, Report);
+            Error = mappingError;
+            foreach (var error in Report.GroupErrors) if (error != PlacementError.None) { Error = error; break; }
+            using var records = new NativeList<BlockRecord>(Allocator.Temp);
+            foreach (var op in Batch.Ops) records.Add(op.Record);
+            preview.Set(records.AsArray(), Error);
+        }
         internal void BeginStroke() { StrokeId = checked(StrokeId + 1); }
         internal bool TryHovered(out BlockRecord record)
         {

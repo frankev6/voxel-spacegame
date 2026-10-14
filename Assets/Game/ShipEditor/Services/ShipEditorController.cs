@@ -33,6 +33,7 @@ namespace Game.ShipEditor.Services
             context = new ToolContext(session, content);
             Register(new PlaceTool()); Register(new RemoveTool()); Register(new PaintTool()); Register(new EyedropperTool());
             Register(new ReplaceTool()); Register(new SelectTool());
+            Register(new LineTool()); Register(new BoxTool()); Register(new FillTool());
             active = tools[ToolId.Place];
             for (int block = 1; block < content.Footprints.BlockCount; block++)
                 if (content.Items.HasItem(block) && content.Definitions.Value.Blocks[block].AllowedOrientations != 0)
@@ -63,6 +64,7 @@ namespace Game.ShipEditor.Services
             context.Hover = input.PointerAllowed ? DraftPicker.Raycast(session.Draft, content, gridRay, SliceEnabled, SliceLevel, XRay) : default;
             if (previous.Kind != context.Hover.Kind || !previous.Cell.Equals(context.Hover.Cell) || !previous.Normal.Equals(context.Hover.Normal)) StateVersion++;
             var palette = (SelectedBlock, Orient, Color); int toolVersion = active.Version, revision = session.Revision, selectionVersion = Selection.Version;
+            context.BoxMode = BoxMode;
             active.Tick(context, input);
             if (palette != (SelectedBlock, Orient, Color) || toolVersion != active.Version || revision != session.Revision || selectionVersion != Selection.Version) StateVersion++;
             var key = (context.Hover.Kind, context.Hover.Cell, context.Hover.Normal, SelectedBlock, Orient, Color,
