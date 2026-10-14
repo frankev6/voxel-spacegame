@@ -311,7 +311,7 @@ namespace Game.Galaxy.Services
                     transitSeconds += ctx.UnscaledDeltaTime;
                     readyFrames = loader.IsArrivalReady ? readyFrames + 1 : 0;
                     bool loaded = loader.IsReady && loader.Loaded.Equals(Target);
-                    if (loaded && readyFrames >= Config.RevealDelayFrames && transitSeconds >= Config.CoverMinSeconds)
+                    if (loaded && loader.IsArrivalReady && readyFrames >= Config.RevealDelayFrames && transitSeconds >= Config.CoverMinSeconds)
                         BeginArrival();
                     else if (transitSeconds >= Config.TransitTimeoutSeconds)
                     {

@@ -48,13 +48,14 @@ namespace Game.Tests.EditMode.Galaxy.Travel
             public void SetMusicOverride(ContentId cue, float seconds) => throw new NotSupportedException();
             public void ClearMusicOverride(float seconds) => throw new NotSupportedException();
         }
-        sealed class Context : ILogicContext
+        internal sealed class Context : ILogicContext
         {
             internal readonly FactStore Store;
             internal readonly FakeLogicContext Reads;
             internal Context(FactCatalog facts) { Store = new FactStore(facts); Reads = new FakeLogicContext(facts); }
             public ILogicFacts Facts => Store;
-            public ILogicEconomy Economy => Reads;
+            internal ILogicEconomy EconomyOverride;
+            public ILogicEconomy Economy => EconomyOverride ?? Reads;
             public ILogicNarrative Narrative => Reads;
             public ILogicWorld World => Reads;
             public LogicScope Scope => Reads.Scope;
@@ -62,7 +63,7 @@ namespace Game.Tests.EditMode.Galaxy.Travel
             public void PushScope(in LogicScope scope) => Reads.PushScope(scope);
             public void PopScope() => Reads.PopScope();
         }
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             internal readonly TestGalaxyFixtures.Fixture Content = new(2, 0, 42, false);
             internal readonly World World = new("TRV-003 lane fixture");
@@ -73,7 +74,7 @@ namespace Game.Tests.EditMode.Galaxy.Travel
             internal readonly Context Logic;
             internal readonly FactCatalog Facts;
             readonly PauseService pause = new();
-            internal Fixture(string source = "$gate_open", bool registerContext = true, bool generate = true)
+            internal Fixture(string source = "$gate_open", bool registerContext = true, bool generate = true, ITravelLoader loader = null, IPauseService pauseOverride = null, IAudioService audio = null, DockingService docking = null)
             {
                 var fuel = AssetDatabase.LoadAssetAtPath<ItemDefinition>("Assets/Game/Content/Items/resource_fuel.asset");
                 var cue = AssetDatabase.LoadAssetAtPath<AudioCueDefinition>("Assets/Game/Content/Audio/cue_warp.asset");
@@ -89,8 +90,9 @@ namespace Game.Tests.EditMode.Galaxy.Travel
                 Content.Generation.BindLogic(new LogicBinder(Facts, refs, report)); Assert.IsFalse(report.HasErrors, report.ToText());
                 Logic = new Context(Facts); if (registerContext) Services.Register<ILogicContext>(Logic);
                 World.EntityManager.CreateEntity(typeof(WorldSceneActive));
+                World.EntityManager.CreateEntity(typeof(Game.Simulation.Commands.PlayerControlLock));
                 Galaxy = new GalaxyService(Catalog, State, World, new GalaxyFrameTicker()); if (generate) Galaxy.NewGame(42);
-                Travel = new TravelService(Galaxy, new Loader(), new DockingService(), World, Catalog, pause, new Audio());
+                Travel = new TravelService(Galaxy, loader ?? new Loader(), docking ?? new DockingService(), World, Catalog, pauseOverride ?? pause, audio ?? new Audio());
             }
             internal void Set(bool open) { Logic.Store.SetBySlot(Facts.SlotOf("gate_open"), open ? 1 : 0, FactWriteSource.Debugger); EventHub.DrainAll(); }
             public void Dispose() { Services.Unregister<ILogicContext>(Logic); Travel.Dispose(); Galaxy.Dispose(); State.Dispose(); World.Dispose(); pause.Dispose(); Content.Dispose(); }

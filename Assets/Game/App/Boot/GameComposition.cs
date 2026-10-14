@@ -171,7 +171,7 @@ namespace Game.App.Boot
             }
             // SPEC-30 permits absent lane/ownership services until their implementations are composed.
             // TODO(TRV-006/ENC-007): pass their actual interfaces here when those services are installed above.
-            Register(new GalaxyMapModel(campaignGalaxy, null, null));
+            Register(new GalaxyMapModel(campaignGalaxy, travel, null));
             // Remaining travel/faction/economy/narrative bindings follow SPEC-01 §5.2.
 
             // 9. Persistent UI document and root (UI-003). Navigation owns pause/context (UI-004).
