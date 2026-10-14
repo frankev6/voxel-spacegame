@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 57 | 13 | 0 | 0 | 110 | 0 | 180 | 7 |
+| M3 | 57 | 10 | 0 | 0 | 113 | 0 | 180 | 7 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -435,13 +435,13 @@
 | EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | ed61500 | Bounded DDA, slice/X-ray, working plane and placement origin; seven required methods (12 parameterized cases) pass; spec-required: 7, extra: 0 |
 | EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | yes | done | astra (gpt-6) | 2026-10-13 | 94110337 | Chiral mirrors, canonical damage remapping, atomic copies, exact removal; seven required checks pass |
 | EDT-014 | Controller, tool framework and basic tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-012, EDT-013 | yes | done | astra (gpt-6) | 2026-10-13 | 175c78cb | Controller, palette, previews, place/remove/paint/eyedropper; seven required checks pass; spec-required:7,extra:0 |
-| EDT-015 | Line, box and fill tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-014 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Reusable combat worker: line, box and fill tools |
-| EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | yes | done | astra (gpt-6) | 2026-10-14 | dd5467a7 | Native selection, atomic damage-preserving transforms, replacement and controller gestures; six required checks pass |
-| EDT-017 | Copy, cut, paste and stamp | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-016 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Reusable presentation worker: clipboard/paste/stamp after TRV-009 delivery |
+| EDT-015 | Line, box and fill tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-014 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | e1f6d5e5 | Line/box/enclosed fill integrated; seven required cases pass in 42-case batch |
+| EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | yes | done | astra (gpt-6) | 2026-10-14 | e28ae8a5 | Selection transforms retain shared-origin damage/interleaved hull; undo/redo remap origins; six required cases pass including repaired case |
+| EDT-017 | Copy, cut, paste and stamp | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-016 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 61e4057e | Pristine clipboard, damage-preserving cut and atomic mirrored stamp; five required cases pass in compatible batch |
 | EDT-018 | Draft renderer | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, SPEC-11 | yes | done | astra (gpt-6) | 2026-10-14 | 843f7435 | Snapshot meshes, dirty requeue, slice/X-ray, incremental props; six required cases pass including native leak and async bounds; live visualization remains EDT-022 |
 | EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | yes | todo |  |  |  |  |
-| EDT-020 | Blueprint store, browser and name sanitising | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-017, PERS-001, SPEC-60 | no | in-progress | presentation (gpt-6.1-sol high) | 2026-10-14 |  | Owner 2026-10-14 parallel implementation correction: build blueprint store/browser atop integrated EDT-017 source; acceptance remains dependent on EDT-017 validation; no false dependency completion |
-| EDT-021 | Editor UI panels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-001, UI-003, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, HUD-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Reusable economy worker: editor panels on completed UI owners |
+| EDT-020 | Blueprint store, browser and name sanitising | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-017, PERS-001, VOX-009, UI-003, UI-005, UI-007, UI-008, UI-009, HUD-001 | yes | in-progress | presentation (gpt-6.1-sol high) | 2026-10-14 |  | Owner 2026-10-14 parallel implementation correction: build blueprint store/browser atop integrated EDT-017 source; acceptance remains dependent on EDT-017 validation; no false dependency completion |
+| EDT-021 | Editor UI panels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-001, UI-003, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, HUD-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f0e774dc | Pooled editor panels, real UXML/theme and current-identity bindings; four graphics-enabled cases pass |
 | EDT-022 | Editor host, input, presenter and leave prompt | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-011, EDT-015, EDT-019, EDT-021, SPEC-62, INP-001 | no | todo |  |  |  |  |
 | EDT-023 | Lab and ship-edit scene flow; R16/R19 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, SPEC-01, SPEC-31 | no | todo |  |  |  |  |
 | EDT-024 | Editor performance gates | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, TST-001 | no | todo |  |  |  |  |
@@ -994,6 +994,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 420 | SPEC-51 Q42: clipboard and stamp ownership | Controller owns pristine copied records, full-footprint pivot, independent yaw and one atomic mirrored paste; cut history retains original damage. | Tech lead — resolved |
 | 421 | SPEC-51 Q39: allocation-free panel mount | Fixed row/control pools with paging resolve ListView/TabBar rebuilding conflict; scoped subscriptions use current row identities and existing UIConfig fragments. | Tech lead — resolved |
 | 422 | SPEC-51 Q48: preserved damaged layout and undo selection | Internal rigid transforms validate live occupancy without overwriting interleaved missing-cell occupants; ordinary placement retains reservations. Undo/redo remap affected selection; discard clears. | Tech lead — resolved |
+| 423 | SPEC-51 Q49: blueprint concrete prerequisites | Replace whole SPEC-60 with completed root/text/controls/tooltips/screen contracts plus actual VOXS codec and accepted clipboard. Host stays EDT-022. | Tech lead — resolved |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1126,6 +1127,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — Three implementation lanes restarted; editor batch accepted — astra (gpt-6)
+
+- Owner: "get the 3 workers actually implementing again. i don't want more promises or reviews. no tiny little commits every two seconds." Reused exact three GPT-6.1-Sol high threads, claimed/reassigned9c4f8233: combat DEV-018 actual save/load/jump/CLI, economy GAL-012 authored galaxy integration, presentation EDT-020 complete blueprint store/browser. Live snapshots338/357/313 confirm active implementation turns. No replacement threads or review-only assignments. Lead owns frontier editor prerequisites. Full feature deliveries and batched validation replace helper checkpoints.
+- e28ae8a5 fixes both selection defects: internal rigid transforms preserve missing-cell interleaving while live collisions still reject; undo/redo remap affected origins and discard clears selection. Existing MoveDamaged case now includes an interleaved hull and repeat move after undo. SPEC-51 Q48/global422. No additional test methods.
+- Compatible EDT-015e1f6d5e5, EDT-01761e4057e, EDT-021f0e774dc accepted with selection repair. Compile13495 terminal0, zero CS warnings. EditMode72181 terminal0:42 passed in0.216198s test bodies. Graphics PlayMode55789 terminal0:four passed in0.543747s bodies, none skipped; owner QualitySettings backup matches restored file. Evidence Logs/playtest/editor-integration. These timings exclude Unity startup/import/shutdown. spec-required:7 area,5 clipboard,4 panels,6 selection;extra:0; other passes are existing relevant regressions. No full suite or performance soak.
+- EDT-020 concrete prerequisites under ADR-0068 (SPEC-51 Q49/global423) now all accepted; temporary source pipeline exception ends. Next lead connectivity/full validation/commit and actual host wiring; integrate worker feature deliveries in compatible batches. No standalone visual acceptance invented; actual playable editor demonstration remains host work. Full roadmap goal active.
 
 ### 2026-10-14 — EDT-015/017/021 compatible source integration — astra (gpt-6)
 
