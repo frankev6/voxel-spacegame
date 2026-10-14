@@ -16,8 +16,8 @@ namespace Game.Tests.PlayMode.UI
     {
         internal sealed class Commands : IDialogCommands
         {
-            internal int Number, Choices, Index = -1, Clicks, Continues, Backs;
-            public void Choose(int number) => ChooseByNumber(number);
+            internal int Number, Choices, HostChoices, Index = -1, Clicks, Continues, Backs;
+            public void Choose(int number) { HostChoices++; ChooseByNumber(number); }
             public void ChooseByNumber(int number) { Number = number; Choices++; }
             public void ChooseOption(int index) { Index = index; Clicks++; }
             public void Continue() => Continues++;

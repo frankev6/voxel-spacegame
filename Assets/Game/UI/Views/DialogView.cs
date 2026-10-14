@@ -3,24 +3,33 @@ using Game.Input;
 using Game.UI.Data;
 using Game.UI.ViewModels;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace Game.UI.Views
 {
-    /// <summary>SPEC-41 §5.7: event-driven, recycled dialog rows and the owned Dialog input map.</summary>
+    /// <summary>HUD-013 comms host and SPEC-41 §5.7 page/overflow support; event-driven with the owned Dialog input map.</summary>
     public sealed class DialogView : UIScreen
     {
         readonly DialogViewModel viewModel;
         readonly IDialogCommands commands;
         ListView lines, options;
+        ScrollView textScroll;
+        Label speaker, text;
+        Button continueButton;
+        VisualElement portraitColumn;
+        readonly OptionRow[] optionPool = new OptionRow[9];
+        readonly List<OptionRow> optionRows = new(9);
+        VisualTreeAsset optionTemplate;
         Image portrait, illustration;
         Label endLabel, continueLabel;
         InputService input;
         InputAction[] choices;
         IVisualElementScheduledItem scroll;
         bool observing;
+        bool forceScrollTop;
 
         sealed class LineRow
         {
@@ -47,20 +56,53 @@ namespace Game.UI.Views
             internal readonly Button Button;
             internal readonly Label Number, Text;
             readonly IDialogCommands commands;
+            readonly DialogView owner;
+            readonly bool pooled;
+            DialogOptionViewModel model;
+            internal bool InUse;
             internal int Index = -1;
-            internal OptionRow(VisualElement root, IDialogCommands commands)
+            internal bool Pooled => pooled;
+            internal OptionRow(VisualElement root, DialogView owner, IDialogCommands commands, bool pooled = false)
             {
-                Root = root; this.commands = commands;
+                Root = root; this.owner = owner; this.commands = commands; this.pooled = pooled;
                 Button = root.Q<Button>("dialog-option-button"); Number = root.Q<Label>("dialog-option-number"); Text = root.Q<Label>("dialog-option-text");
                 Button.clicked += Click;
             }
-            void Click() { if (Index >= 0) commands.ChooseOption(Index); }
+            bool Available => model != null && (model.Number > 0 ? model.Enabled : model.IsAvailable);
+            void Click()
+            {
+                if (Index < 0 || !Available || !owner.IsOpen || !ReferenceEquals(owner.Navigator.Top, owner)) return;
+                if (model.Number > 0) commands.Choose(model.Number);
+                else commands.ChooseOption(Index); // SPEC-41 unnumbered overflow and legacy indexed rows.
+            }
+            internal void Bind(DialogOptionViewModel item, int index, string endText, string continueText)
+            {
+                Clear(); model = item; Index = index; Root.dataSource = item;
+                Button.name = "dialog-option-" + (index + 1);
+                Text.text = item.Synthetic == 1 ? endText : item.Synthetic == 2 ? continueText : item.Text;
+                model.propertyChanged += Changed; Refresh();
+            }
+            void Changed(object sender, BindablePropertyChangedEventArgs args)
+            {
+                if (model.Synthetic == 0) Text.text = model.Text;
+                Refresh();
+            }
+            void Refresh()
+            {
+                Number.text = model.Number > 0 ? "[" + model.Number + "]" : model.NumberLabel ?? "";
+                Button.SetEnabled(Available); Button.tooltip = model.DisabledReason;
+                Button.EnableInClassList("dialog__option--quest", model.IsQuest);
+                Button.EnableInClassList(UIStyleClasses.IsDisabled, !Available);
+            }
             internal void Clear()
             {
+                if (model != null) model.propertyChanged -= Changed;
+                model = null;
                 Index = -1; Root.dataSource = null; Number.text = Text.text = ""; Button.SetEnabled(false);
+                Button.tooltip = null;
                 Button.RemoveFromClassList("dialog__option--quest"); Button.RemoveFromClassList(UIStyleClasses.IsDisabled);
             }
-            internal void Destroy() { Clear(); Button.clicked -= Click; }
+            internal void Destroy() { Clear(); InUse = false; if (!pooled) Button.clicked -= Click; }
         }
 
         public DialogView(DialogViewModel vm, IDialogCommands commands)
@@ -77,25 +119,47 @@ namespace Game.UI.Views
         public override bool HidesHud => true;
         public override bool IsRoot => false;
         public override bool OnBack() => commands.Back();
-        public override VisualElement DefaultFocus => options;
+        public override VisualElement DefaultFocus => continueButton != null && continueButton.enabledSelf ? continueButton : options;
         protected override void OnBuild()
         {
             Root.dataSource = viewModel;
             lines = Q<ListView>("dialog-lines"); options = Q<ListView>("dialog-options");
             var lineTemplate = lines.itemTemplate ?? throw new InvalidOperationException("dialog: missing line template");
-            var optionTemplate = options.itemTemplate ?? throw new InvalidOperationException("dialog: missing option template");
+            optionTemplate = options.itemTemplate ?? throw new InvalidOperationException("dialog: missing option template");
             lines.itemTemplate = options.itemTemplate = null;
             lines.makeItem = () => { var row = lineTemplate.Instantiate(); row.AddToClassList("dialog-line-container"); row.userData = new LineRow(row); return row; };
-            options.makeItem = () => { var row = optionTemplate.Instantiate(); row.userData = new OptionRow(row, commands); return row; };
+            for (int i = 0; i < optionPool.Length; i++) optionPool[i] = CreateOption(true);
+            options.makeItem = MakeOption;
             lines.bindItem = BindLine; options.bindItem = BindOption;
             lines.unbindItem = (row, _) => ((LineRow)row.userData).Clear();
             options.unbindItem = (row, _) => ((OptionRow)row.userData).Clear();
             lines.destroyItem = row => ((LineRow)row.userData).Clear();
-            options.destroyItem = row => ((OptionRow)row.userData).Destroy();
+            options.destroyItem = root =>
+            {
+                var row = (OptionRow)root.userData; row.Destroy();
+                if (!row.Pooled) optionRows.Remove(row);
+            };
             lines.selectionType = options.selectionType = SelectionType.None;
             portrait = Q<Image>("dialog-portrait"); illustration = Q<Image>("dialog-illustration");
+            portraitColumn = Q<VisualElement>("dialog-portrait-column");
+            speaker = Q<Label>("dialog-speaker"); text = Q<Label>("dialog-text-label"); textScroll = Q<ScrollView>("dialog-text");
+            continueButton = Q<Button>("dialog-continue");
+            continueButton.clicked += () => { if (IsOpen && ReferenceEquals(Navigator.Top, this) && viewModel.CanContinue) commands.Continue(); };
             endLabel = Q<Label>("dialog-end-label"); continueLabel = Q<Label>("dialog-continue-label");
             scroll = Root.schedule.Execute(ScrollPageTop); scroll.Pause();
+        }
+        OptionRow CreateOption(bool pooled)
+        {
+            var row = optionTemplate.Instantiate(); var state = new OptionRow(row, this, commands, pooled); optionRows.Add(state);
+            row.userData = state; return state;
+        }
+        VisualElement MakeOption()
+        {
+            foreach (var row in optionPool)
+                if (!row.InUse) { row.InUse = true; return row.Root; }
+            // DLG-009 permits more than nine displayed options, with mouse-only overflow.
+            // The standard nine-choice host reuses the pool; overflow keeps its existing ListView contract.
+            return CreateOption(false).Root;
         }
         bool ReducedMotion()
         {
@@ -118,20 +182,15 @@ namespace Game.UI.Views
         }
         void BindOption(VisualElement root, int index)
         {
-            var row = (OptionRow)root.userData; row.Clear();
-            var model = viewModel.Options[index]; root.dataSource = model; row.Index = index;
-            row.Number.text = model.NumberLabel;
-            row.Text.text = model.Synthetic == 1 ? endLabel.text : model.Synthetic == 2 ? continueLabel.text : model.Text;
-            row.Button.SetEnabled(model.IsAvailable);
-            row.Button.EnableInClassList("dialog__option--quest", model.IsQuest);
-            row.Button.EnableInClassList(UIStyleClasses.IsDisabled, !model.IsAvailable);
+            ((OptionRow)root.userData).Bind(viewModel.Options[index], index, endLabel.text, continueLabel.text);
         }
         public override void OnPush(object args)
         {
             if (observing) return;
             observing = true; Root.dataSource = viewModel; viewModel.propertyChanged += Changed;
             lines.itemsSource = viewModel.Lines; options.itemsSource = viewModel.Options;
-            RefreshImages(); RefreshLines(); options.RefreshItems();
+            forceScrollTop = true;
+            RefreshImages(); RefreshText(); RefreshLines(); options.RefreshItems(); RefreshContinue();
             // Detached presenter tests can display without an input service. Production boot always registers it.
             if (Game.Core.Services.TryGet<InputService>(out input))
             {
@@ -148,33 +207,55 @@ namespace Game.UI.Views
             if (input != null)
             { foreach (var choice in choices) choice.performed -= Choice; input.Controls.Dialog.Continue.performed -= Continue; }
             input = null; choices = null; scroll.Pause();
+            foreach (var row in optionRows) row.Clear();
             lines.itemsSource = options.itemsSource = null; Root.dataSource = null;
         }
         void Choice(InputAction.CallbackContext context)
         {
             if (!IsOpen || !ReferenceEquals(Navigator.Top, this)) return;
-            for (int i = 0; i < choices.Length; i++) if (ReferenceEquals(context.action, choices[i])) { commands.ChooseByNumber(i + 1); return; }
+            for (int i = 0; i < choices.Length; i++) if (ReferenceEquals(context.action, choices[i])) { commands.Choose(i + 1); return; }
         }
         void Continue(InputAction.CallbackContext context)
         { if (IsOpen && ReferenceEquals(Navigator.Top, this)) commands.Continue(); }
         void Changed(object sender, BindablePropertyChangedEventArgs args)
         {
-            if (args.propertyName == nameof(DialogViewModel.Lines)) RefreshLines();
-            else if (args.propertyName == nameof(DialogViewModel.Options)) options.RefreshItems();
-            else if (args.propertyName == nameof(DialogViewModel.ScrollToLine)) { ScrollPageTop(); scroll.ExecuteLater(0); }
+            if (args.propertyName == nameof(DialogViewModel.Lines)) { RefreshText(); RefreshLines(); }
+            else if (args.propertyName == nameof(DialogViewModel.Options)) { options.RefreshItems(); RefreshContinue(); }
+            else if (args.propertyName == nameof(DialogViewModel.LineText) || args.propertyName == nameof(DialogViewModel.SpeakerName)) RefreshText();
+            else if (args.propertyName == nameof(DialogViewModel.LineVersion)) { forceScrollTop = true; ScrollPageTop(); scroll.ExecuteLater(0); }
+            else if (args.propertyName == nameof(DialogViewModel.ScrollToLine)) { forceScrollTop = false; ScrollPageTop(); scroll.ExecuteLater(0); }
+            else if (args.propertyName == nameof(DialogViewModel.CanContinue)) RefreshContinue();
             else if (args.propertyName == nameof(DialogViewModel.Portrait) || args.propertyName == nameof(DialogViewModel.HasPortrait) ||
                 args.propertyName == nameof(DialogViewModel.Illustration) || args.propertyName == nameof(DialogViewModel.HasIllustration)) RefreshImages();
         }
         void RefreshImages()
         {
             portrait.sprite = viewModel.Portrait; illustration.sprite = viewModel.Illustration;
-            portrait.EnableInClassList(UIStyleClasses.IsHidden, !viewModel.HasPortrait);
+            portraitColumn.EnableInClassList(UIStyleClasses.IsHidden, !viewModel.HasPortrait);
             illustration.EnableInClassList(UIStyleClasses.IsHidden, !viewModel.HasIllustration);
+        }
+        void RefreshText()
+        {
+            speaker.text = viewModel.SpeakerName;
+            speaker.EnableInClassList(UIStyleClasses.IsHidden, string.IsNullOrEmpty(viewModel.SpeakerName));
+            text.text = viewModel.LineText;
+            // SPEC-41's page collection takes precedence; HUD-001's single-line contract works without a driver.
+            bool page = viewModel.Lines.Count != 0;
+            lines.EnableInClassList(UIStyleClasses.IsHidden, !page);
+            textScroll.EnableInClassList(UIStyleClasses.IsHidden, page);
+        }
+        void RefreshContinue()
+        {
+            continueButton.SetEnabled(viewModel.CanContinue);
+            continueButton.EnableInClassList(UIStyleClasses.IsHidden, !viewModel.CanContinue);
+            bool syntheticContinue = viewModel.CanContinue && viewModel.Options.Count == 1 && viewModel.Options[0].Synthetic == 2;
+            options.EnableInClassList(UIStyleClasses.IsHidden, syntheticContinue || viewModel.Options.Count == 0);
         }
         void RefreshLines() { lines.RefreshItems(); ScrollPageTop(); scroll.ExecuteLater(0); }
         void ScrollPageTop()
         {
-            if (viewModel.ScrollToLine == 0) lines.Q<ScrollView>().scrollOffset = Vector2.zero;
+            textScroll.scrollOffset = Vector2.zero;
+            if (forceScrollTop || viewModel.ScrollToLine == 0) lines.Q<ScrollView>().scrollOffset = Vector2.zero;
             else if (viewModel.ScrollToLine > 0 && viewModel.ScrollToLine < viewModel.Lines.Count) lines.ScrollToItem(viewModel.ScrollToLine);
         }
     }

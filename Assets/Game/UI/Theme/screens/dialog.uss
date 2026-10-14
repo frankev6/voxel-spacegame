@@ -1,11 +1,16 @@
-/* SPEC-41 DLG-009: approved NOCTURNE tokens; proportionate layout at both reference sizes. */
-.dialog-screen { flex-grow: 1; align-items: center; justify-content: center; }
-.dialog-panel { align-self: center; width: 80%; max-width: 90%; height: 90%; }
+/* SPEC-61 HUD-013 host dimensions; SPEC-41's page/overflow hooks remain available. */
+.dialog-screen { flex-grow: 1; min-height: 0; align-items: flex-start; padding: var(--space-6); }
+.dialog-panel { align-self: flex-start; width: 640px; max-width: 100%; flex-grow: 1; flex-basis: 0; min-height: 0; max-height: 100%; }
+.dialog-speaker { color: var(--color-accent); margin-left: var(--space-3); white-space: normal; min-width: 0; flex-shrink: 1; }
 .dialog-body { min-height: 0; flex-shrink: 1; flex-basis: 0; }
 .dialog-illustration { height: 20%; flex-shrink: 0; margin-bottom: var(--space-3); }
 .dialog-page { flex-grow: 2; flex-basis: 0; min-height: 0; margin-bottom: var(--space-3); }
-.dialog-portrait { width: var(--space-8); height: var(--space-8); flex-shrink: 0; margin-right: var(--space-3); }
-.dialog-lines { min-width: 0; min-height: 0; flex-shrink: 1; }
+.dialog-portrait-column { width: 96px; flex-shrink: 0; margin-right: var(--space-3); }
+.dialog-portrait { width: 96px; height: 96px; flex-shrink: 0; }
+.dialog-copy { flex-grow: 1; flex-basis: 0; min-width: 0; min-height: 0; }
+.dialog-text, .dialog-lines { flex-grow: 1; flex-basis: 0; min-width: 0; min-height: 0; flex-shrink: 1; }
+.dialog-text > .unity-scroll-view__content-viewport { min-width: 0; }
+.dialog-text .unity-scroll-view__content-container { min-width: 0; }
 .dialog-options { flex-grow: 1; flex-basis: 0; min-height: 0; flex-shrink: 1; }
 .dialog-line-row { padding: var(--space-2) var(--space-3); }
 .dialog-line-speaker { color: var(--color-accent); margin-bottom: var(--space-1); white-space: normal; }
@@ -18,5 +23,5 @@
 .dialog-option-text { flex-grow: 1; min-width: 0; white-space: normal; -unity-text-align: middle-left; }
 .dialog__option--quest { border-color: var(--color-objective); }
 .dialog-option.is-disabled .dialog-option-text, .dialog-option.is-disabled .dialog-option-number { color: var(--color-text-muted); }
-.dialog-hint { white-space: normal; }
+.dialog-hint { white-space: normal; flex-grow: 1; flex-shrink: 1; min-width: 0; }
 .reduce-motion .dialog-line-container { transition-duration: 0s; }
