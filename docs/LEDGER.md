@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 8 |
-| M3 | 93 | 7 | 0 | 0 | 80 | 0 | 180 | 10 |
+| M3 | 92 | 8 | 0 | 0 | 80 | 0 | 180 | 9 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -404,7 +404,7 @@
 | QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 95f80410 | Public quest/mystery contracts and required assembly test; behavior remains QST-002 onward |
 | QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, NAR-003, NAR-004, NAR-006, NAR-009, NAR-013 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9ca0b84 | Real definitions, compile/bind and validation; 24 prior cases plus repaired Usage_Enforced pass; generated content compiled except separate TRV-003 owner stub. |
 | QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | todo |  |  |  |  |
-| QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | todo |  |  |  |  |
+| QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Existing economy worker: complete clue/mystery/rumor lifecycle, five direct required cases; Q370 dependencies. |
 | QST-005 | BeatService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, SPEC-41 | no | todo |  |  |  |  |
 | QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | no | todo |  |  |  |  |
 | QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-006, PERS-001 | no | todo |  |  |  |  |
