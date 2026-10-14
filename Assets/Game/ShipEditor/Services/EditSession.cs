@@ -16,6 +16,10 @@ namespace Game.ShipEditor.Services
         readonly ProfilerMarker applyMarker = new("EditSession.Apply");
         readonly ProfilerMarker undoMarker = new("EditSession.Undo");
         readonly ProfilerMarker validateMarker = new("EditSession.Validate");
+        readonly BillOfMaterials bom = new();
+        bool bomDirty = true;
+        internal BlockCountTables OriginalCounts { get; private set; }
+        internal BlockCountTables DraftCounts { get; private set; }
         bool disposed;
         public EditSession(ShipEditorEntryArgs args, EditorContext context)
         {
@@ -28,7 +32,10 @@ namespace Game.ShipEditor.Services
                 Original = args.Source.Clone(); Draft = args.Source.Clone();
                 History = new EditHistory(context.Config.HistoryBudgetBytes, context.Config.HistoryMaxEntries);
                 MarkAllBricks(Draft);
-                // TODO(EDT-006/007/008/010): initialize count/placement/connectivity/stat indexes from one enumeration.
+                OriginalCounts = new BlockCountTables(context.Items.Count); OriginalCounts.Initialize(Original, context);
+                DraftCounts = new BlockCountTables(context.Items.Count); DraftCounts.CopyFrom(OriginalCounts);
+                if (!Options.Creative && entry.Inventory != null) entry.Inventory.Changed += InvalidateBom;
+                // TODO(EDT-007/008/010): initialize placement/connectivity/stat indexes; share the opening enumeration.
                 Notify(EditChangeKind.Opened, 0);
             }
             catch { Dispose(); throw; }
@@ -115,7 +122,8 @@ namespace Game.ShipEditor.Services
             foreach (var op in command.Ops)
                 foreach (var cell in context.Footprints.Get(op.Record.Block, op.Record.Orient).Cells)
                     dirty.AddCell(op.Record.Origin + cell);
-            // TODO(EDT-006/007/008/010): update count, clearance, reserved-missing, connectivity and stats indexes in operation order.
+            DraftCounts.Apply(command, forward, context); InvalidateBom();
+            // TODO(EDT-007/008/010): update clearance, reserved-missing, connectivity and stats indexes in operation order.
         }
         void MarkAllBricks(VoxelStructure source)
         {
@@ -124,8 +132,17 @@ namespace Game.ShipEditor.Services
         internal void DrainDirtyBricks(NativeList<int3> output) { CheckAlive(); dirty.Drain(output); }
         void Notify(EditChangeKind kind, int count)
         { Revision++; Changed?.Invoke(new EditChange { Kind = kind, OpsApplied = count, Revision = Revision }); }
-        // TODO(EDT-006): lazily refreshed BOM.
-        public BillOfMaterials GetBom() => throw new System.NotImplementedException("EDT-006");
+        void InvalidateBom() => bomDirty = true;
+        public BillOfMaterials GetBom()
+        {
+            CheckAlive();
+            if (bomDirty)
+            {
+                BomCalculator.Refresh(bom, OriginalCounts, DraftCounts, context.Items, entry.Inventory, Options.Creative);
+                bomDirty = false;
+            }
+            return bom;
+        }
         // TODO(EDT-010): original/draft stats.
         public StatTotals GetStats(bool original) => throw new System.NotImplementedException("EDT-010");
         // TODO(EDT-009): full validation and issue list.
@@ -137,7 +154,8 @@ namespace Game.ShipEditor.Services
             CheckAlive(); CompleteRelabel(); var replacement = Original.Clone();
             MarkAllBricks(Draft); MarkAllBricks(replacement);
             Draft.Dispose(); Draft = replacement; History.Clear();
-            // TODO(EDT-006/007/008/010): reset owned indexes from Original alongside the clone.
+            DraftCounts.CopyFrom(OriginalCounts); InvalidateBom();
+            // TODO(EDT-007/008/010): reset placement/connectivity/stat indexes from Original alongside the clone.
             Notify(EditChangeKind.Discarded, 0);
         }
         public void CompleteRelabel()
@@ -148,6 +166,7 @@ namespace Game.ShipEditor.Services
         {
             if (disposed) return;
             // TODO(EDT-008): join/release connectivity jobs before disposing source storage.
+            if (!Options.Creative && entry.Inventory != null) entry.Inventory.Changed -= InvalidateBom;
             History?.Dispose(); Draft?.Dispose(); Original?.Dispose(); dirty.Clear();
             Changed = null; disposed = true;
         }

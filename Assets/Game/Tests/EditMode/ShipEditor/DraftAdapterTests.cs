@@ -24,6 +24,7 @@ namespace Game.Tests.EditMode.ShipEditor
             readonly BlobAssetReference<OrientationTablesBlob> rotations;
             readonly ShipEditorConfig config;
             public readonly EditorContext Context;
+            public readonly Game.Data.Services.ContentCatalog Catalog;
             public readonly VoxelStructure Draft = new();
             public readonly DraftReader Reader;
             public readonly DraftWriter Writer;
@@ -33,7 +34,7 @@ namespace Game.Tests.EditMode.ShipEditor
             {
                 var defs = BlockDefsBlobBuilderTests.Defs(out _, out _);
                 var single = TestContentFactory.Block("block_single_function", BlockKind.Functional); defs.Add(single);
-                definitions = BlockDefsBlobBuilderTests.Build(defs, out var catalog, out modules);
+                definitions = BlockDefsBlobBuilderTests.Build(defs, out var catalog, out modules); Catalog = catalog;
                 rotations = OrientationTableGenerator.BuildBlob(OrientationTableGenerator.Generate(), Allocator.Persistent);
                 config = ScriptableObject.CreateInstance<ShipEditorConfig>();
                 Context = new EditorContext(config, catalog, definitions, rotations, 16);
