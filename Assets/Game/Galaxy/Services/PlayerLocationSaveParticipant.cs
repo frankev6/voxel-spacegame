@@ -46,6 +46,8 @@ namespace Game.Galaxy.Services
             var dockSystem = new StarSystemId(reader.ReadUInt32());
             ulong key = reader.ReadUInt64();
             var body = BodyId.FromLocalKey(dockSystem, key);
+            if (hasLocation && (!Unity.Mathematics.math.all(Unity.Mathematics.math.isfinite(location.PositionM)) || !Unity.Mathematics.math.isfinite(location.YawRad)))
+                throw new SaveFormatException("Nonfinite PLOC pose", reader.Position);
             if (hasLocation && (!system.IsValid || !location.StarSystem.Equals(system)))
                 throw new SaveFormatException("Inconsistent PLOC star system", reader.Position);
             if (docked && (!hasLocation || !body.IsValid || !Enum.IsDefined(typeof(Game.Data.Definitions.BodyRole), body.Role) || body.LocalKey != key || !dockSystem.Equals(system)))

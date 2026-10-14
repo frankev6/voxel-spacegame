@@ -28,6 +28,13 @@ namespace Game.Tests.EditMode.Galaxy
             state.Clear(); participant.Restore(new SaveReader(expected), 1);
             CollectionAssert.AreEqual(expected, Capture(participant));
             Assert.AreEqual(long.MinValue, BitConverter.DoubleToInt64Bits(state.PlayerLocation.PositionM.y));
+            foreach (double value in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+            {
+                byte[] invalid = (byte[])expected.Clone();
+                System.Buffers.Binary.BinaryPrimitives.WriteInt64LittleEndian(invalid.AsSpan(9, 8), BitConverter.DoubleToInt64Bits(value));
+                Assert.Throws<SaveFormatException>(() => participant.Restore(new SaveReader(invalid), 1));
+                CollectionAssert.AreEqual(expected, Capture(participant));
+            }
             for (int size = 0; size < expected.Length; size++)
             {
                 int truncatedSize = size;
