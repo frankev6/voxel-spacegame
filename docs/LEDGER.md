@@ -436,7 +436,7 @@
 | EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | yes | done | astra (gpt-6) | 2026-10-13 | 94110337 | Chiral mirrors, canonical damage remapping, atomic copies, exact removal; seven required checks pass |
 | EDT-014 | Controller, tool framework and basic tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-012, EDT-013 | yes | done | astra (gpt-6) | 2026-10-13 | 175c78cb | Controller, palette, previews, place/remove/paint/eyedropper; seven required checks pass; spec-required:7,extra:0 |
 | EDT-015 | Line, box and fill tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-014 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Reusable combat worker: line, box and fill tools |
-| EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | yes | todo |  |  |  |  |
+| EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead: exact selection, damage-preserving transforms and replacement |
 | EDT-017 | Copy, cut, paste and stamp | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-016 | no | todo |  |  |  |  |
 | EDT-018 | Draft renderer | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, SPEC-11 | yes | todo |  |  |  |  |
 | EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | no | todo |  |  |  |  |
