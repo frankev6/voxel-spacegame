@@ -392,6 +392,13 @@ namespace Game.App.Session
                 return await flow.TransitionAsync(GameScene.MainMenu, SceneEntryReason.QuitToMenu, betweenScenes: () => Between(EndSession));
             });
         }
+        internal Awaitable<FlowResult> DevStartBlueprintLabAsync()
+        {
+            labMode = BlueprintLabMode.Creative;
+            return Execute(() => flow.TransitionAsync(GameScene.BlueprintLab, SceneEntryReason.DevQuickStart,
+                new BlueprintLabArgs(BlueprintLabMode.Creative, 0, ContentId.None),
+                () => Between(() => BeginNewGame(new NewGameArgs(gameConfig.DefaultCommanderName, 1, true, ContentId.None)))));
+        }
         public Awaitable<FlowResult> EnterBlueprintLabAsync(BlueprintLabArgs args)
         {
             var access = Access(args.Mode == BlueprintLabMode.Creative ? CurrentScene == GameScene.MainMenu :

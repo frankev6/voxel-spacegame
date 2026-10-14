@@ -188,7 +188,6 @@ namespace Game.App.Boot
                 new AppUiSoundSink(Audio, config.UiConfig), new UnityFrameClock()));
             Register(UI); Register(UI.Navigator); Register(config.UiDocument);
             Game.Core.Services.Register<IWorldPointerGate>(UI);
-            world.GetExistingSystemManaged<SceneNavigationBridgeSystem>().Bind(Flow, Pause, UI);
             inputBridge.BindBack(UI.HandleBackPressed);
             Step("9 ui");
 
@@ -228,7 +227,6 @@ namespace Game.App.Boot
                 Register(Screens.DialogPresenter);
             }
             // TODO(DLG-007): construct/register the production DialogService; do not use a substitute runner.
-            // TODO(HUD-002): install real destination/editor bindings and replace the M1 adapter before SetRootScreens.
             Step("10 ui composition");
 
             // 9.1 Flight input uses the live UI pointer gate; ADR-0047 supplies scene roots through the navigator.
@@ -242,7 +240,23 @@ namespace Game.App.Boot
             Audio.SetListenerTarget(Camera.ListenerPivot);
             Session.SetThumbnailCamera(Camera.Camera);
             Flow.RegisterReady(new CameraSceneHook(Camera));
-            Step("11 camera");
+            // Persistent editor bindings and real scene roots (ADR-0098).
+            var blueprintStore = Push(new Game.App.EditorHost.ActiveProfileBlueprintStore(Save, savePaths, Content, config.ShipEditorConfig));
+            var editorServices = new Game.App.EditorHost.EditorHostServices(UI, Input, Camera, Content, config.ShipEditorConfig, blueprintStore);
+            editorServices.ShowSettings = Screens.ShowSettings;
+            Register(editorServices);
+            var editorLauncher = Push(new Game.App.EditorHost.ShipEditorLauncher(Session, Flow, world, docking, economy, editorServices));
+            Register(editorLauncher);
+            Screens.BindEditorLauncher(editorLauncher);
+            Screens.BindMenuNavigation(Screens.ShowSaveSlots, editorLauncher.OpenLab, Screens.ShowSettings);
+            var hudSync = world.GetOrCreateSystemManaged<HudSyncSystem>();
+            var hudNames = new Game.Presentation.Presenters.HudNames(Content.Catalog,
+                Game.Core.Services.Get<Game.Simulation.Factions.FactionIndexMap>(), campaignGalaxy, travel);
+            hudSync.Bind(Screens.HudModel, hudNames, Input.GetBindingDisplay);
+            Input.BindingsChanged += hudSync.RefreshBindings;
+            Screens.BindSceneRoots(hudSync, Input.GetBindingDisplay, editorServices);
+            world.GetExistingSystemManaged<SceneNavigationBridgeSystem>().Unbind();
+            Step("11 camera and scene roots");
 
             // 12. Authored VFX. Null graphics runs retain the unbound drain instead of allocating GPU resources.
             if (SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null)
@@ -354,6 +368,8 @@ namespace Game.App.Boot
             {
                 world.GetExistingSystemManaged<SceneNavigationBridgeSystem>()?.Unbind();
                 world.GetExistingSystemManaged<PlayerInputSampleSystem>()?.Unbind();
+                var hud = world.GetExistingSystemManaged<HudSyncSystem>();
+                if (hud != null) { if (Input != null) Input.BindingsChanged -= hud.RefreshBindings; hud.Unbind(); }
             }
             LastDisposeLog.Clear();
             for (int i = DisposeStack.Count - 1; i >= 0; i--)

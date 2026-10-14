@@ -133,7 +133,7 @@ namespace Game.App.Flow
                     if (session != null) return await session.DevQuickStartAsync();
                     return await TransitionAsync(GameScene.World, SceneEntryReason.DevQuickStart);
                 case GameScene.BlueprintLab:
-                    // TODO(FND-013): EnterBlueprintLabAsync(new BlueprintLabArgs(Creative, 0, ContentId.None)) with a BeginSandbox(1) session.
+                    if (session != null) return await session.DevStartBlueprintLabAsync();
                     return await TransitionAsync(GameScene.BlueprintLab, SceneEntryReason.DevQuickStart);
 #else
                 case GameScene.World:

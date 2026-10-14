@@ -4,6 +4,7 @@ namespace Game.App.Boot
     [System.Serializable]
     public sealed class GameRootConfig
     {
+        public Game.ShipEditor.Data.ShipEditorConfig ShipEditorConfig;
         public Game.Presentation.Data.CameraConfig CameraConfig;        // SPEC-62, CAM-004
         public Game.Data.ContentDatabase ContentDatabase;               // Assets/Game/Content/ContentDatabase.asset
         public Game.UI.Data.UIConfig UiConfig;                          // SPEC-60 UI-003

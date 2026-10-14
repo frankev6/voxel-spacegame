@@ -27,6 +27,7 @@ namespace Game.App.EditorHost
         readonly EconomyService economy;
         readonly EditorHostServices services;
         DialogService waitingDialog;
+        ShipEditorHost host;
         bool disposed, entering;
 
         public ShipEditorLauncher(GameSession session, SceneFlow flow, World world,
@@ -115,7 +116,7 @@ namespace Game.App.EditorHost
             if (lab.Mode == BlueprintLabMode.FleetShip)
             {
                 var ship = session.Fleet.Find(lab.FleetShipId) ?? throw new InvalidOperationException("Editor fleet ship is missing.");
-                ShipEditorHost.Create(new ShipEditorEntryArgs
+                host = ShipEditorHost.Create(new ShipEditorEntryArgs
                 {
                     Options = new EditSessionOptions { TargetKind = EditTargetKind.FleetShip, Title = ship.Name },
                     Source = ship.Structure, PersistentId = ship.PersistentId, Inventory = economy.Inventory,
@@ -127,7 +128,7 @@ namespace Game.App.EditorHost
             var target = new BlueprintCommitTarget(services.Blueprints, "New blueprint");
             services.SetBlueprintName = name => target.Name = name;
             using var source = CreativeSource(lab.StartBlueprint);
-            ShipEditorHost.Create(new ShipEditorEntryArgs
+            host = ShipEditorHost.Create(new ShipEditorEntryArgs
             {
                 Options = new EditSessionOptions { Creative = true, TargetKind = EditTargetKind.NewBlueprint, Title = "New blueprint" },
                 Source = source, CommitTarget = target
@@ -163,6 +164,7 @@ namespace Game.App.EditorHost
             if (disposed) return;
             disposed = true;
             ClearDialog();
+            if (host != null) { host.Release(); UnityEngine.Object.Destroy(host.gameObject); host = null; }
             flow.UnregisterReady(this);
             services.Leave = null;
             services.SetBlueprintName = null;

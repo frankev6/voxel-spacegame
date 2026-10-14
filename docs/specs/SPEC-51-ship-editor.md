@@ -1093,3 +1093,5 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 | 55 | Scene-owned host versus persistent screen registration | EditorHostServices registers editor/browser models once and forwards to the active scene presenter. Launcher owns real leave/settings/name callbacks; detach before native disposal. Controller exposes read-only SelectedCount. Palette/props use actual render content. ADR-0097. | Tech lead | Resolved; ledger Q456. |
 
 | 56 | EDT-023 whole-spec prerequisites include unrelated aggregate checks and later work | Use completed host, session/fleet, spawn, galaxy, docking and transition owners: EDT-022, FND-010, FND-012, GAL-008, SYS-008, SYS-013. Actual dialog integration remains explicitly pending DLG-007; no substitute runner. | Tech lead — resolved; ledger Q460 |
+
+| 57 | Production editor storage and scene-root ownership | ADR-0098: profile-aware persistent blueprint store, reuse exact editor view/model, real launcher and creative startup; release host native state before store disposal. First operation with no profile creates Blueprints through SaveService. | Tech lead — resolved; ledger Q465 |

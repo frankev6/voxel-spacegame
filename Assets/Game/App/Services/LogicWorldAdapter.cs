@@ -107,17 +107,11 @@ namespace Game.App.Services
             if (!scope.HasBody) { GameLog.ErrorOnce("Narrative.RemoveBody.Target", "Narrative", "RemoveBody requires a body scope."); return; }
             galaxy.RemoveBody(Body(scope.Body));
         }
-        public void OpenShipEditor() => _ = EnterEditor();
-        async Awaitable EnterEditor()
+        public void OpenShipEditor()
         {
-            try
-            {
-                var flagship = session.Fleet.Flagship;
-                if (flagship == null) { GameLog.ErrorOnce("Narrative.Editor.Flagship", "Narrative", "OpenShipEditor requires a flagship."); return; }
-                var result = await session.EnterBlueprintLabAsync(new BlueprintLabArgs(BlueprintLabMode.FleetShip, flagship.PersistentId, ContentId.None));
-                if (result != FlowResult.Ok) GameLog.WarnOnce("Narrative.Editor.Rejected", "Narrative", "OpenShipEditor was rejected: " + result);
-            }
-            catch (Exception error) { GameLog.Exception("Narrative", error, "OpenShipEditor"); }
+            if (!Game.Core.Services.TryGet<Game.App.EditorHost.ShipEditorLauncher>(out var launcher))
+            { GameLog.WarnOnce("Narrative.Editor.Unavailable", "Narrative", "Ship editor launcher is unavailable."); return; }
+            if (!launcher.EditPlayerShip(out var reason)) GameLog.Warn("Narrative", reason);
         }
         public void RepairPlayerShip(int percent) => hull.Repair(percent);
         public void DamagePlayerShip(int amount, in LogicScope scope) => hull.Damage(amount, session.CampaignSeed, UniversalTime);

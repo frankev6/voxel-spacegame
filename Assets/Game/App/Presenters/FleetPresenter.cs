@@ -22,7 +22,7 @@ namespace Game.App.Presenters
     {
         readonly FleetViewModel model;
         readonly ContentCatalog catalog;
-        readonly ShipEditorLauncher launcher;
+        ShipEditorLauncher launcher;
         readonly Action<string> notice;
         readonly List<FleetShipRowViewModel> rows = new(32);
         readonly List<StatRowViewModel> stats = new(12);
@@ -31,6 +31,7 @@ namespace Game.App.Presenters
         bool disposed, launcherUnavailable;
         internal FleetPresenter(FleetViewModel model, ContentCatalog catalog, ShipEditorLauncher launcher = null, Action<string> notice = null)
         { this.model = model ?? throw new ArgumentNullException(nameof(model)); this.catalog = catalog ?? throw new ArgumentNullException(nameof(catalog)); this.launcher = launcher; this.notice = notice; }
+        internal void BindLauncher(ShipEditorLauncher value) { launcher = value; launcherUnavailable = false; Gate(); }
         internal void Bind(FleetModel fleet, DockingService docking)
         {
             if (disposed) throw new ObjectDisposedException(nameof(FleetPresenter));

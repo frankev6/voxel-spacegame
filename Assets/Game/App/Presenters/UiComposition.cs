@@ -37,7 +37,7 @@ namespace Game.App.Presenters
         internal GalaxyMapViewModel GalaxyMapModel { get; } = new GalaxyMapViewModel();
         internal StarSystemMapViewModel StarSystemMapModel { get; } = new StarSystemMapViewModel();
         internal FleetViewModel FleetModel { get; } = new FleetViewModel();
-        internal ShipEditorViewModel ShipEditorModel { get; } = new ShipEditorViewModel();
+        internal ShipEditorViewModel ShipEditorModel { get; private set; } = new ShipEditorViewModel();
         internal DockViewModel DockModel { get; } = new DockViewModel();
         internal LoadingViewModel LoadingModel { get; } = new LoadingViewModel();
 
@@ -79,6 +79,8 @@ namespace Game.App.Presenters
         public UIScreen ShipEditor => ui.Navigator.Get<ShipEditorView>();
         public UIScreen Loading { get; }
 
+        internal void BindEditorLauncher(Game.App.EditorHost.ShipEditorLauncher launcher) => fleetPresenter.BindLauncher(launcher);
+
         internal void ShowFleet() { fleetPresenter.Refresh(); ui.Navigator.Push<FleetView>(); }
 
         internal void ShowInventory() => ui.Navigator.Push<InventoryView>();
@@ -108,16 +110,16 @@ namespace Game.App.Presenters
             menuPresenter = menu;
             menu.Bind();
         }
-        internal void BindSceneRoots(IHudRadarSource radar, Func<string, string> bindingDisplay, IShipEditorCommands editorCommands)
+        internal void BindSceneRoots(IHudRadarSource radar, Func<string, string> bindingDisplay, Game.App.EditorHost.EditorHostServices editorServices)
         {
             CheckAlive();
             if (rootsBound) throw new InvalidOperationException("Scene roots are already installed.");
             if (menuPresenter == null) throw new InvalidOperationException("Install menu navigation before scene roots.");
             if (radar == null) throw new ArgumentNullException(nameof(radar));
             if (bindingDisplay == null) throw new ArgumentNullException(nameof(bindingDisplay));
-            if (editorCommands == null) throw new ArgumentNullException(nameof(editorCommands));
+            if (editorServices == null) throw new ArgumentNullException(nameof(editorServices));
             ui.Register(new FlightHudView(HudModel, radar, bindingDisplay));
-            ui.Register(new ShipEditorView(ShipEditorModel, editorCommands));
+            ShipEditorModel = editorServices.Model; // ADR-0097: already registered by the persistent editor owner.
             flow.SetRootScreens(this);
             rootsBound = true;
         }
@@ -167,7 +169,6 @@ namespace Game.App.Presenters
             menuPresenter?.Dispose();
             if (rootsBound) flow.SetRootScreens(null);
         }
-        // TODO(HUD-002): install real navigation/editor/HUD bindings before replacing the M1 adapter,
-        // then run the four required root/session acceptance checks.
+        // Remaining downstream screens and HUD-010 hotkeys retain their own implementation tasks.
     }
 }

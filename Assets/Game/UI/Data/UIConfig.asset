@@ -28,10 +28,10 @@ MonoBehaviour:
     Prewarm: 0
   - Key: confirm
     Uxml: {fileID: 9197481963319205126, guid: cec6401b63f34beca55e94542f6ed3de, type: 3}
-    Prewarm: 0
+    Prewarm: 1
   - Key: text-prompt
     Uxml: {fileID: 9197481963319205126, guid: c4319cf380724e0da50c6e29bf5a9dbb, type: 3}
-    Prewarm: 0
+    Prewarm: 1
   - Key: loading
     Uxml: {fileID: 9197481963319205126, guid: e1c2117e80634546a8450effb5ee4900, type: 3}
     Prewarm: 1
@@ -79,7 +79,7 @@ MonoBehaviour:
     Prewarm: 0
   - Key: hud
     Uxml: {fileID: 9197481963319205126, guid: 3edded8a0d9241afa9ea140c95806db2, type: 3}
-    Prewarm: 0
+    Prewarm: 1
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32

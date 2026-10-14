@@ -56,7 +56,7 @@ namespace Game.App.EditorHost
         }
         void LateUpdate(){if(released || draft==null)return;draft.Render(services.Camera.Camera);overlay.Render(services.Camera.Camera);}
         void OnDestroy()=>Release();
-        void Release()
+        internal void Release()
         {
             if(released)return;released=true;
             if(services!=null && services.Presenter==presenter)services.Presenter=null;
