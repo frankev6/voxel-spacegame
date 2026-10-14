@@ -1067,6 +1067,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-007 belt runtime connected — astra (gpt-6)
+
+-793cb5e1 adds BeltStreamer with canonical sorted sector keys, bounded outstanding sector/shape work, persistent descriptor ownership, destroyed-key filtering after deterministic draws and again before spawn, delayed nonblocking ordinary retirement, and explicit shutdown joins. Loader owns both streamers, shared spawn budget (T2 first), body destruction events and refresh/exit retirement. T3 skips initial entry until a real player exists. Added specified T2/T3 profiler markers; no tuning passes.
+- Runtime remains uncompiled/unaccepted. Next exactly four required cases (deterministic sectors, destroyed-never-returns, bubble bound, scheduled generation), then one compatible compile/focused batch. Spec-required: 0 authored of4, extra: 0. No Unity runs this turn.
+- Three workers checked: DEV-009 active257, combat238 genuine dependency wait; presentation assigned finite integration review of job accounting, lifetimes and destruction. Previous turn source ownership was implementation progress.
+
 ### 2026-10-13 — SYS-007 asteroid grid ownership authored — astra (gpt-6)
 
 - Added AsteroidGridSpawner: consumes generated sources; canonical dynamic Asteroid/None-profile requests; actual universe position/system membership; initial-cell baseline; request failure reconciliation; despawn-before-release with read-pin checks and source disposal. No damage writeback or delta source transfer for asteroids.
