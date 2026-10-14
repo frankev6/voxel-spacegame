@@ -1,5 +1,6 @@
 using System;
 using Unity.Collections;
+using Unity.Profiling;
 using Unity.Mathematics;
 using Game.ShipEditor.Data;
 using Game.Voxel.Model;
@@ -12,6 +13,9 @@ namespace Game.ShipEditor.Services
         readonly EditorContext context;
         readonly ShipEditorEntryArgs entry;
         readonly DirtyBrickSet dirty = new();
+        readonly ProfilerMarker applyMarker = new("EditSession.Apply");
+        readonly ProfilerMarker undoMarker = new("EditSession.Undo");
+        readonly ProfilerMarker validateMarker = new("EditSession.Validate");
         bool disposed;
         public EditSession(ShipEditorEntryArgs args, EditorContext context)
         {
@@ -46,6 +50,8 @@ namespace Game.ShipEditor.Services
             report.Clear(); CompleteRelabel();
             if (mode != AtomicityMode.AllOrNothing && mode != AtomicityMode.PerGroup) throw new ArgumentOutOfRangeException(nameof(mode));
             int count = batch.Ops.Length, end = 0;
+            using (validateMarker.Auto())
+            {
             for (int i = 0; i < batch.Groups.Length; i++)
             {
                 var group = batch.Groups[i];
@@ -54,6 +60,7 @@ namespace Game.ShipEditor.Services
                 end += group.OpCount;
             }
             if (batch.Groups.Length != 0 && end != count) throw new ArgumentException("EDT: groups must cover the operations.", nameof(batch));
+            }
             if (count == 0) return false;
             // TODO(EDT-007): replace the specified pass-through stage with per-group placement validation.
             for (int i = 0; i < math.max(1, batch.Groups.Length); i++) report.AddGroup(PlacementError.None);
@@ -88,6 +95,7 @@ namespace Game.ShipEditor.Services
         }
         public bool Undo()
         {
+            using var marker = undoMarker.Auto();
             CheckAlive(); CompleteRelabel(); if (!History.CanUndo) return false;
             var command = History[History.Cursor - 1]; ApplyCommand(command, false); History.MoveUndo();
             Notify(EditChangeKind.Undone, command.Ops.Length); return true;
@@ -100,6 +108,7 @@ namespace Game.ShipEditor.Services
         }
         void ApplyCommand(DiffCommand command, bool forward)
         {
+            using var marker = applyMarker.Auto();
             using var touched = new NativeList<int3>(Allocator.Temp);
             new DraftWriter(Draft, context).Apply(command.Ops.AsArray(), command.Damage.AsArray(), forward, touched);
             foreach (var brick in touched) dirty.Add(brick);
