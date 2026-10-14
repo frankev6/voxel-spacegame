@@ -61,6 +61,9 @@ namespace Game.ShipEditor.Services
         // TODO(EDT-008): own and complete asynchronous connectivity work.
         public bool ConnectivityPending => false;
         public event Action<EditChange> Changed;
+        // Borrowed only during the callback, before History.Push can merge/dispose this command.
+        // Presentation observers must contain their failures so they cannot interrupt history bookkeeping.
+        internal event Action<DiffCommand, bool> DraftApplied;
         public bool TryApply(EditBatch batch, AtomicityMode mode, int strokeId, ToolId tool, string label, ApplyReport report)
         {
             CheckAlive();
@@ -138,6 +141,7 @@ namespace Game.ShipEditor.Services
             DraftCounts.Apply(command, forward, context); placement.Apply(command, forward, context); InvalidateBom();
             draftStats.Apply(command, forward); draftStatsDirty = true;
             // TODO(EDT-008): update connectivity in operation order.
+            DraftApplied?.Invoke(command, forward);
         }
         void MarkAllBricks(VoxelStructure source)
         {
@@ -193,7 +197,7 @@ namespace Game.ShipEditor.Services
             if (!Options.Creative && entry.Inventory != null) entry.Inventory.Changed -= InvalidateBom;
             OriginalCounts?.Dispose(); DraftCounts?.Dispose(); placement?.Dispose(); validation?.Dispose();
             History?.Dispose(); Draft?.Dispose(); Original?.Dispose(); dirty.Clear();
-            Changed = null; disposed = true;
+            Changed = null; DraftApplied = null; disposed = true;
         }
     }
 }

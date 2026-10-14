@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Game.Data.Blocks;
 using Game.ShipEditor.Data;
 using Game.ShipEditor.Services;
 using Game.Voxel.Rendering;
@@ -18,6 +19,8 @@ namespace Game.ShipEditor.Rendering
         readonly EditSession session;
         readonly EditorContext content;
         readonly Dictionary<int3, BrickRenderSlot> slots = new();
+        readonly Dictionary<int, InstancedPropSet> props = new();
+        readonly IReadOnlyList<Mesh> propMeshes;
         readonly HashSet<int3> dirty = new();
         readonly List<int3> ordered = new();
         readonly List<BrickRenderSlot> asynchronous = new(), synchronous = new();
@@ -26,6 +29,7 @@ namespace Game.ShipEditor.Rendering
         BlobAssetReference<BrickShapeTables> shapes;
         readonly Material brickMaterial, xrayMaterial;
         bool disposed, sliceEnabled;
+        bool rebuildProps;
         int sliceLevel;
         public Matrix4x4 GridToWorld { get; set; } = Matrix4x4.identity;
         public float3 CameraPivotCells { get; set; }
@@ -33,15 +37,69 @@ namespace Game.ShipEditor.Rendering
         public int RemeshCount { get; private set; }
         internal int PendingJobs => asynchronous.Count;
         internal IReadOnlyDictionary<int3, BrickRenderSlot> Slots => slots;
-        public DraftRenderer(EditSession session, EditorContext content, Material brickMaterial, Material xrayMaterial)
+        internal IReadOnlyDictionary<int, InstancedPropSet> Props => props;
+        public DraftRenderer(EditSession session, EditorContext content, Material brickMaterial, Material xrayMaterial,
+            IReadOnlyList<Mesh> propMeshes = null)
         {
             this.session = session ?? throw new ArgumentNullException(nameof(session));
             this.content = content ?? throw new ArgumentNullException(nameof(content));
             this.brickMaterial = brickMaterial; this.xrayMaterial = xrayMaterial;
-            shapes = BrickShapeTablesBuilder.Build(ref content.Orientations.Value);
-            // Includes existing content even when another preview previously drained the session's dirty queue.
-            foreach (var brick in session.Draft.Data.Bricks) if (brick.SolidCount != 0) dirty.Add(brick.Coord);
-            // TODO(EDT-018): subscribe incremental prop transactions and populate per-mesh instance sets.
+            this.propMeshes = propMeshes ?? Array.Empty<Mesh>();
+            try
+            {
+                shapes = BrickShapeTablesBuilder.Build(ref content.Orientations.Value);
+                // Includes existing content even when another preview previously drained the session's dirty queue.
+                foreach (var brick in session.Draft.Data.Bricks) if (brick.SolidCount != 0) dirty.Add(brick.Coord);
+                RebuildProps();
+                session.DraftApplied += OnDraftApplied;
+                session.Changed += OnSessionChanged;
+            }
+            catch { Dispose(); throw; }
+        }
+        void RebuildProps()
+        {
+            foreach (var set in props.Values) set.Clear();
+            using var records = new NativeList<BlockRecord>(Allocator.TempJob);
+            new DraftReader(session.Draft, content).Enumerate(records);
+            foreach (var record in records) UpdateProp(record, true);
+            rebuildProps = false;
+        }
+        void UpdateProp(BlockRecord record, bool add)
+        {
+            ref var definition = ref content.Definitions.Value.Blocks[record.Block];
+            int mesh = definition.PropMeshIndex;
+            if (definition.Kind == BlockKind.Structural || mesh < 0) return;
+            if (mesh >= propMeshes.Count || propMeshes[mesh] == null)
+                throw new InvalidOperationException("EDT: draft prop mesh table does not match content.");
+            if (!props.TryGetValue(mesh, out var set))
+            {
+                if (!add) throw new InvalidOperationException("EDT: missing draft prop instance set.");
+                set = new InstancedPropSet(propMeshes[mesh]); props.Add(mesh, set);
+            }
+            if (add) set.Add(record, content, session.Draft.CellSize);
+            else if (!set.Remove(record)) throw new InvalidOperationException("EDT: missing draft prop identity.");
+        }
+        void OnDraftApplied(DiffCommand command, bool forward)
+        {
+            if (rebuildProps) return;
+            try
+            {
+                var ops = command.Ops;
+                for (int n = 0; n < ops.Length; n++)
+                {
+                    var op = ops[forward ? n : ops.Length - 1 - n];
+                    UpdateProp(op.Record, (op.Kind == DiffOpKind.Add) == forward);
+                }
+            }
+            catch (Exception error)
+            {
+                // The draft already changed: never prevent the corresponding history cursor update.
+                rebuildProps = true; Debug.LogException(error);
+            }
+        }
+        void OnSessionChanged(EditChange change)
+        {
+            if (change.Kind == EditChangeKind.Discarded) rebuildProps = true;
         }
         public void SetSlice(bool enabled, int level)
         {
@@ -57,6 +115,7 @@ namespace Game.ShipEditor.Rendering
         internal void UpdateMeshes()
         {
             CheckAlive(); using var marker = remesh.Auto();
+            if (rebuildProps) RebuildProps();
             // Every outstanding snapshot is joined next frame. Later edits remain in the session dirty queue.
             foreach (var slot in asynchronous) slot.CompleteAndApply();
             asynchronous.Clear();
@@ -112,6 +171,8 @@ namespace Game.ShipEditor.Rendering
         public void Dispose()
         {
             if (disposed) return;
+            session.DraftApplied -= OnDraftApplied; session.Changed -= OnSessionChanged;
+            foreach (var set in props.Values) set.Dispose(); props.Clear();
             foreach (var slot in slots.Values) slot.Dispose(); slots.Clear(); asynchronous.Clear(); synchronous.Clear();
             if (shapes.IsCreated) shapes.Dispose(); if (incoming.IsCreated) incoming.Dispose();
             dirty.Clear(); ordered.Clear(); disposed = true;
