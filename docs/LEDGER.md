@@ -433,7 +433,7 @@
 | EDT-010 | Stats accumulator and diff | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-006, PWR-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 73bcc085 | Exact moments, canonical sorted stats and deltas; four required cases pass; spec-required: 4, extra: 0 |
 | EDT-011 | Commit pipeline and R15 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-009, EDT-010, SPEC-50 | no | todo |  |  |  |  |
 | EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | ed61500 | Bounded DDA, slice/X-ray, working plane and placement origin; seven required methods (12 parameterized cases) pass; spec-required: 7, extra: 0 |
-| EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | yes | todo |  |  |  |  |
+| EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead: chiral mirrors, damage remapping, atomic copies and exact mirrored removal |
 | EDT-014 | Controller, tool framework and basic tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-012, EDT-013 | no | todo |  |  |  |  |
 | EDT-015 | Line, box and fill tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-014 | no | todo |  |  |  |  |
 | EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | no | todo |  |  |  |  |
