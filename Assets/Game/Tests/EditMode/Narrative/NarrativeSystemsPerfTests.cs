@@ -14,6 +14,41 @@ namespace Game.Tests.EditMode.Narrative
     public sealed class NarrativeSystemsPerfTests
     {
         [TearDown] public void Cleanup() { EventHub.Reset(); TestContentFactory.DestroyAll(); }
+        [Test, Performance, Category("Performance")] public void Idle()
+        {
+            using var f = new BeatServiceTests.Fixture(new[] { BeatServiceTests.Beat("beat_idle", BeatTrigger.Manual) });
+            var runtime = new Game.Narrative.NarrativeService(f.Facts, f.Context);
+            var quests = new Game.Narrative.Quests.QuestService(f.Content, f.Facts, f.Context, runtime);
+            var clues = new Game.Narrative.Clues.ClueService(f.Content, f.Facts, f.Context);
+            runtime.Register(quests); runtime.Register(clues); runtime.Register(f.Beats);
+            runtime.BeginNewGame(); runtime.SetWorldReady(true); runtime.SetPlayerFree(true);
+            for (int i = 0; i < 20; i++) runtime.Tick();
+            var samples = new double[10]; long allocations = 0;
+            for (int i = 0; i < samples.Length; i++)
+            {
+                long bytes = GC.GetAllocatedBytesForCurrentThread(), start = Stopwatch.GetTimestamp();
+                runtime.Tick(); samples[i] = (Stopwatch.GetTimestamp() - start) * 1000.0 / Stopwatch.Frequency;
+                allocations += GC.GetAllocatedBytesForCurrentThread() - bytes;
+            }
+            Assert.AreEqual(0, f.Beats.CurrentBeatIndex);
+            PerfRun.Gate("NarrativeSystemsIdle", samples, .02);
+            PerfRun.Gate("NarrativeSystemsIdleGC", new[] { (double)allocations }, 0, "B");
+        }
+        [Test, Performance, Category("Performance")] public void Select40_Time()
+        {
+            var beats = new StoryBeatDefinition[40];
+            for (int i = 0; i < beats.Length; i++) beats[i] = BeatServiceTests.Beat("beat_select_" + i, repeat: BeatRepeat.Always, node: "start");
+            using var f = new BeatServiceTests.Fixture(beats);
+            var body = new LogicBodyHandle(4, 1, 1, 0, default); var samples = new double[10];
+            for (int i = 0; i < 10; i++) { f.Beats.OnBodyInteracted(body, true); f.Dialog.Interrupt(); }
+            for (int i = 0; i < samples.Length; i++)
+            {
+                long start = Stopwatch.GetTimestamp(); bool selected = f.Beats.OnBodyInteracted(body, true);
+                samples[i] = (Stopwatch.GetTimestamp() - start) * 1000.0 / Stopwatch.Frequency;
+                Assert.IsTrue(selected); f.Dialog.Interrupt();
+            }
+            PerfRun.Gate("BeatSelect40", samples, .1);
+        }
         [Test, Performance, Category("Performance")] public void OneChange50Objectives()
         {
             var definitions = new QuestDefinition[5];
