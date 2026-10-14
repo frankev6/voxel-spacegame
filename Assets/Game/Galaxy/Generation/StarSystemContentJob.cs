@@ -7,7 +7,9 @@ using Unity.Mathematics;
 
 namespace Game.Galaxy.Generation
 {
-    [BurstCompile]
+    // QA-001: synchronous, strict Burst, like ShapeFillJob. Asynchronous compilation let early Editor runs execute this job
+    // as Mono, whose trig differs from Burst's in the last bits, so the galaxy hash depended on Burst cache timing.
+    [BurstCompile(CompileSynchronously = true, FloatMode = FloatMode.Strict)]
     internal struct StarSystemContentJob : IJob
     {
         internal StarSystemDef System;

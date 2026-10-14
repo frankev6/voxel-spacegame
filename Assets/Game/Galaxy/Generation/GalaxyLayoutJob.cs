@@ -9,7 +9,9 @@ using Unity.Mathematics;
 namespace Game.Galaxy.Generation
 {
     /// <summary>SPEC-30 §5.2. One ordered job keeps rejection draws independent of worker scheduling.</summary>
-    [BurstCompile]
+    // QA-001: synchronous, strict Burst, like ShapeFillJob. Asynchronous compilation let early Editor runs execute this job
+    // as Mono, whose trig differs from Burst's in the last bits, so the galaxy hash depended on Burst cache timing.
+    [BurstCompile(CompileSynchronously = true, FloatMode = FloatMode.Strict)]
     internal struct GalaxyLayoutJob : IJob
     {
         internal ulong Seed;
