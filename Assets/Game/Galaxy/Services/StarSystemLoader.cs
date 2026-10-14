@@ -194,8 +194,10 @@ namespace Game.Galaxy.Services
             if (disposed || !IsReady || !body.System.Equals(Loaded) || !world.IsCreated ||
                 !bodies.TryGetValue(body.LocalKey, out var loaded)) return false;
             var em = world.EntityManager;
-            return em.Exists(loaded.Anchor) && em.HasComponent<Game.Galaxy.Interaction.Interactable>(loaded.Anchor) &&
-                em.GetComponentData<Game.Galaxy.Interaction.Interactable>(loaded.Anchor).Kind == InteractionKind.Dock;
+            if (!em.Exists(loaded.Anchor)) return false;
+            var target = em.Exists(loaded.Grid) ? loaded.Grid : loaded.Anchor;
+            return em.HasComponent<Game.Galaxy.Interaction.Interactable>(target) &&
+                em.GetComponentData<Game.Galaxy.Interaction.Interactable>(target).Kind == InteractionKind.Dock;
         }
         void OnBodyInteracted(BodyInteracted value)
         {
