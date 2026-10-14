@@ -20,7 +20,7 @@ using NUnit.Framework;
 
 namespace Game.Tests.EditMode.App
 {
-    public sealed class LogicContextTests
+    public sealed partial class LogicContextTests
     {
         [Test] public void ScopeStack_DepthLimit()
         {
