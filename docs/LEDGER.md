@@ -1063,6 +1063,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 461 | SPEC-61 Q45: menu lifetime and Continue eligibility | Actual save/flow owners, generation/profile guards and bounded completion; two failed acceptance cases returned to the same implementing worker. | Tech lead |
 | 462 | SPEC-61 Q46: pause hints and accessibility layout | Existing real input bindings and owner routes, guarded modal callbacks and scrolling at 130 percent text. Four specified cases pass. | Tech lead |
 | 463 | SPEC-61 Q47: pooled flight HUD construction | Five weapon/four ability/64 radar pools and direct updates; real source binding remains HUD-009/002. Five specified cases pass. | Tech lead |
+| 464 | SPEC-61 Q48: HUD names and radar bridge defaults | Real owner caches, fuel-aware gate invalidation and final-contact waypoint comparison; encounter display requires actual ENC-007, no fake director. | Tech lead |
 
 ## Measurements
 
