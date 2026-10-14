@@ -944,7 +944,7 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 ### EDT-022 — Editor host, input, presenter and leave prompt
 - **Milestone:** M3
 - **Tier:** frontier — F5: input, UI, camera, session and renderers ordered every frame
-- **Depends on:** `EDT-011`, `EDT-015`, `EDT-019`, `EDT-021`, `SPEC-62`, `INP-001`
+- **Depends on:** `EDT-011`, `EDT-015`, `EDT-019`, `EDT-021`, `CAM-009`, `INP-006`, `HUD-018`, `UI-011`
 - **Do:** `ShipEditorHost` (§5.15 steps 1–5), compose INP-006's existing `EditorInputSampler` (Editor map → `EditorInputFrame`, ADR-0048), `ShipEditorPresenter` (view models, commands, throttled refresh, leave prompt §5.9, commit toast), `EditorHostServices`.
 - **Files:** `Assets/Game/App/EditorHost/{ShipEditorHost,EditorInputSampler,ShipEditorPresenter,EditorHostServices}.cs`
 - **Acceptance criteria:**
@@ -1087,3 +1087,5 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 | 52 | Commit waits on whole economy spec although it consumes only completed atomic inventory operations | Use EDT-009/010 and ECO-003 as concrete dependencies under ADR-0068. Merchant launcher and advisory gates do not participate in editor commit. | Tech lead | Resolved; ledger Q451. |
 
 | 53 | Inverse deltas cannot restore overflow or exact slots after target rejection | Capture and restore an inventory-owned checkpoint, preallocate replacement baseline before mutation, and guard reentrant editor edits. ADR-0096. | Tech lead | Resolved; ledger Q452. |
+
+| 54 | Editor host waits on unrelated camera occlusion | Use completed editor orbit, editor sampler and UI host/modal tasks as concrete dependencies under ADR-0068. Flight occlusion does not participate in the editor host. | Tech lead | Resolved; ledger Q455. |

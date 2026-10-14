@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 37 | 15 | 0 | 0 | 130 | 0 | 182 | 4 |
+| M3 | 36 | 16 | 0 | 0 | 130 | 0 | 182 | 4 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -443,7 +443,7 @@
 | EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | yes | done | astra (gpt-6) | 2026-10-14 | 38c38243 | Versioned procedural cubes/prop ghosts, controller and damage/island feeds; Metal shader plus three renderer cases pass. |
 | EDT-020 | Blueprint store, browser and name sanitising | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-017, PERS-001, VOX-009, UI-003, UI-005, UI-007, UI-008, UI-009, HUD-001 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-14 | 97440534 | Profile VOXS store/browser, read-only content and atomic replacement; all 5 required cases pass; ADR-0093 accepted; Q428; host integration stays EDT-022 |
 | EDT-021 | Editor UI panels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-001, UI-003, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, HUD-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f0e774dc | Pooled editor panels, real UXML/theme and current-identity bindings; four graphics-enabled cases pass |
-| EDT-022 | Editor host, input, presenter and leave prompt | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-011, EDT-015, EDT-019, EDT-021, SPEC-62, INP-001 | no | todo |  |  |  |  |
+| EDT-022 | Editor host, input, presenter and leave prompt | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-011, EDT-015, EDT-019, EDT-021, CAM-009, INP-006, HUD-018, UI-011 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead: real editor host, presenter, input and leave flow. |
 | EDT-023 | Lab and ship-edit scene flow; R16/R19 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, SPEC-01, SPEC-31 | no | todo |  |  |  |  |
 | EDT-024 | Editor performance gates | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, TST-001 | no | todo |  |  |  |  |
 | UI-008 | Meter, Slot and TabBar controls | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-007 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 90c13ad | Meter, Slot and scrolling TabBar; 7 required tests; full batch 901 EM / 128 PM, zero failures |
@@ -1054,6 +1054,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 452 | SPEC-51 Q53 / SPEC-50 Q29: rejected commits lose slot/overflow state with inverse deltas | Resolved: inventory-owned checkpoint restores exact slots and capacity; preallocate baseline and reject reentrant edits. ADR-0096. | Tech lead |
 | 453 | SPEC-61 Q43: independent loading/dock construction | Use completed UI, SceneFlow and DockingService contracts per ADR-0072; actual merchant opening remains ECO-008. | Tech lead |
 | 454 | SPEC-61 Q44: presenter construction dependencies | Use existing VM/event/navigation contracts; HUD-009 sync and real query/root integration remain independent owners. ADR-0072. | Tech lead |
+| 455 | SPEC-51 Q54: host concrete dependencies | Use completed CAM-009, INP-006, HUD-018 and UI-011; flight occlusion is unrelated. | Tech lead |
 
 ## Measurements
 
