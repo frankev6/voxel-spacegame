@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DLG-003 | Claimed c513df81; full validator/generated files dispatched | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DLG-003 | Delivered7f14ca33, integrated6120691e pending validation; worker audits DLG-006 | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-011 | Claimed; counter command/probes implementation dispatched; no benchmark runs | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-019 | Delivered310332f7/a1fbc3cb pending integration; bounded SYS-008 dependency audit | HUD-003/006/007 once ready |
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Dialog source integrated:** DLG-0036120691e on task/DLG-003-validator-integration, uncompiled/unaccepted. Next review/generate real authoring outputs, verify repeat-generation stability and four required EditMode cases; mirror SPEC-41Q14 in ledger. No Unity active. SYS-008 accepted on main ea853edc; NAR-019 delivery remains pending.
 
 - **Station interaction accepted:** SYS-008499de6e3 done; hull-to-surface query, counter edges and shared loader docking pass all four required direct PlayMode cases (0.2253s bodies). Compile clean, handle18770 terminal0; evidence Logs/playtest/interaction. No Unity active. Next integrate DLG-0037f14ca33. Combat audits runtime prerequisites; economy DEV-011 active; presentation258 completes lifetime review. NAR-019 delivery queued with live-owner gaps preserved.
 
