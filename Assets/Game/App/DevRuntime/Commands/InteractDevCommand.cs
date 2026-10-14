@@ -91,6 +91,7 @@ namespace Game.App.DevRuntime.Commands
                     ? delivered.StarSystemValue == body.System.Value && delivered.BodyKey == body.LocalKey
                     : delivered.GridPersistentId == targetGrid))
                 {
+                    Release(ctx);
                     Status = DevOperationStatus.Succeeded;
                     Message = "BodyInteracted delivered; before=" + DevJsonWriter.Quote(before) + " after=" + DevJsonWriter.Quote(DevBodyQuery.TargetName(ctx));
                     return;
