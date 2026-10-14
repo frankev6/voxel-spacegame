@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 19 | 17 | 0 | 0 | 146 | 0 | 182 | 5 |
+| M3 | 19 | 16 | 0 | 0 | 147 | 0 | 182 | 5 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -406,7 +406,7 @@
 | QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | done | astra (gpt-6) | 2026-10-13 | a8b2d6d1 | Quest runtime/baselines/progression/restore implemented; seven required functional cases pass39710; Q371, trace and objective dependency review fixes. QUST/live adapter remain owning tasks. |
 | QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 19b24412 | Clue/mystery/rumor lifecycle accepted; five required functional cases pass in focused nine-case batch; Q377. |
 | QST-005 | BeatService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, DLG-006, DLG-007, DLG-008 | yes | done | astra (gpt-6) | 2026-10-14 | 30762271 | Deterministic scheduler/queue/completion implemented; nine required functional checks pass; two advisory fixtures authored, deferred. QST-006/008 own adapter/live registration. |
-| QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Worker c7b8fa41 delivered real adapter/log/markers and accepted ADR-0103; lead focused acceptance next. Worker now HUD-010 actual presenter/hotkey composition. |
+| QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f71186b4 | Actual adapter/log/markers4738dc21; six required cases pass across initial/fix and four save regressions; live registration QST-008. |
 | QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, QST-005, PERS-001 | yes | done | astra (gpt-6) | 2026-10-14 | 8e16b5e7 | QUST version1, raw IDs/name baselines, atomic restore; three required functional plus malformed-state case pass; capture advisory deferred. App registration QST-008. |
 | QST-008 | Bridge rules, player-free gating and registration | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005, QST-006, SPEC-40, SPEC-32, SPEC-33 | no | todo |  |  |  |  |
 | QST-009 | Opening chapter content | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, GAL-003, NAR-013, DLG-003, ENC-002, ECO-002 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same economy worker reconciling e987aae8 opening assets/import with accepted actual DLG-007 compiler; lead import and two required checks pending. |
@@ -1082,6 +1082,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 480 | SPEC-62 Q19: camera occlusion recovery | Separate requested/effective distance, immediate pull-in and configured release half-life, preserve ordinary zoom/framing, cached synchronized Unity Physics query and own-grid exclusion. Advisory timing fixture extended, deferred. | Tech lead |
 | 481 | SPEC-33 Q37: actual encounter scenario fixtures | Six specified cases; four real functional scenarios pass using bounded fixed ticks, actual combat and pending ENCT save/load. Clear neutral derelict from firing lane by fixture placement, retain friendly-fire avoidance. Separate optional battle fixture, dialogue case retains QST-008 dependency. | Tech lead |
 | 482 | SPEC-33 Q29: procedural territory and lifecycle | Canonical seeded FIFO expansion; exhaust seeds without looping; first/different owned entry emits, reset clears previous system, disposal unsubscribes. Production Push owns lifetime. Four functional checks pass; existing zero seed content retained, advisory100k deferred. | Tech lead |
+| 484 | SPEC-42 Q16: adapter and ship-log ownership | ADR-0103; bind actual owners, coalesce changes after evaluation, latest quest instance lists, cached journal labels and progress-only invalidation. Raw save history stays QUST-owned. | Tech lead |
 | 483 | SPEC-42 Q18: QUST snapshot/restore boundaries | ADR-0105; parse/validate completely before mutation, preserve missing IDs/baseline names and dormant queue entries; changed unusable quest histories remain raw. No restore effects or fact writes; host owns OnRestored. Existing registry QUST/order40 reused; production registration QST-008. | Tech lead |
 
 ## Measurements
@@ -1195,6 +1196,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — QST-006 adapter and ship log accepted — astra (gpt-6)
+
+- Worker c7b8fa41 integrated4738dc21; fixture correctionf71186b4. Actual service routing, markers, journal, clue ordering and coalesced progress updates. Six required cases pass across initial five-pass batch and corrected adapter case; fake runner has no visit-memory accounting, so routing fixture seeds memory explicitly. Four QUST save regressions pass. Test count: spec-required: 6, extra: 0. Compile clean/zero CS warnings. Evidence Logs/playtest/ship-log/{initial,adapter,save-regression}.xml. A broad method substring accidentally selected an unrelated existing LogicContext case with stale ECO-008 expectations; it failed and remains assigned to the incoming economy integration, not hidden as green. No broad suites/perf/soaks. Production registration remains QST-008.
+- ECO-008 bad3f9b7 and HUD-019795cc3fb delivered; worker recycled to QST-008 real story wiring. QST-009 and HUD-010 workers continue.
 
 ### 2026-10-14 — QST-007 quest save owner accepted — astra (gpt-6)
 
