@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-14)
 
+- **Draft scheduler authored:** EDT-018756bd8f6 adds nearest-pivot sync/async queues, dirty requeueing, sliced brick drawing and exact-identity prop storage. Prop event/draw bindings and six cases remain pending; uncompiled/unaccepted. EDT-0153991bae4 delivered awaiting integration, its worker reviews selection; EDT-021/017 active. No Unity active.
+
 - **Draft mesh slots authored:** EDT-018c4dcf0a3 owns snapshot jobs, reuses meshes and applies packed results through writable mesh data; slice clipping and disposal are explicit. Scheduler/draw, materials, props and six cases remain next, uncompiled/unaccepted. EDT-015/021 workers finalizing cases; EDT-017 active. No Unity active.
 
 - **Travel presentation accepted:** TRV-00989a0187b compiles clean; all four graphics-enabled cases pass with none skipped. Opaque Transit, reveal fade, real gate emission and layout verified; owner quality settings preserved. EDT-015/021/017 workers active. Lead next EDT-018 draft rendering and remaining editor prerequisites. No Unity active.

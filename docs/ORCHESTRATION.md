@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-015 | Line/box/fill implementation dispatched after controller acceptance; finish review320 first | EDT-017 after EDT-016 |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-015 | 3991bae4 delivered; lead validation pending; worker reviews selection transforms | EDT-017 after EDT-016 |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-021 | Editor panels dispatched from completed concrete UI owners | DLG-012 after DLG-007 |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | EDT-017 | Clipboard/stamp dispatched after TRV-0092836b721 delivery; lead integrating travel | EDT-020 after acceptance |
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Draft scheduler authored:** EDT-018756bd8f6 adds nearest-pivot sync/async queues, dirty requeueing, sliced brick drawing and exact-identity prop storage. Prop event/draw bindings and six cases remain pending; uncompiled/unaccepted. EDT-0153991bae4 delivered awaiting integration, its worker reviews selection; EDT-021/017 active. No Unity active.
 
 - **Draft mesh slots authored:** EDT-018c4dcf0a3 owns snapshot jobs, reuses meshes and applies packed results through writable mesh data; slice clipping and disposal are explicit. Scheduler/draw, materials, props and six cases remain next, uncompiled/unaccepted. EDT-015/021 workers finalizing cases; EDT-017 active. No Unity active.
 

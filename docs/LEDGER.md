@@ -1121,6 +1121,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-14 — EDT-018 scheduling and prop storage authored — astra (gpt-6)
+
+- 756bd8f6 adds bounded nearest-pivot scheduling, prior-frame job application, dirty requeueing, slice visibility/invalidation and reused brick drawing. InstancedPropSet owns exact-identity native maps/records/matrices with constant-time swap removal, retaining distinct damaged instances at a shared origin. SPEC-51 Q44/global416 records scheduling and identity details.
+- Prop transaction subscription, prop drawing/material bindings and six required renderer cases remain pending. Source uncompiled/unaccepted; EDT-018 remains in-progress. spec-required:0 authored this checkpoint (six pending),extra:0. No Unity run while completing this compatible slice.
+- EDT-015 worker delivered3991bae4 (seven required cases, no Unity); queued for lead integration. Same combat worker now reviews accepted selection transforms. Economy349 EDT-021 and presentation305 EDT-017 remain active. Prior snapshot source and this scheduler source are progress. Next finish renderer bindings and integrate worker deliveries before a focused batch. No Unity active; full roadmap goal remains active.
+
 ### 2026-10-14 — EDT-018 snapshot mesh slots authored — astra (gpt-6)
 
 - e05242e1/c4dcf0a3 adds an owned per-brick snapshot job and reused Mesh, using actual BrickSnapshotUtility/MeshLod0 APIs, packed BrickLit vertex layout and Mesh.ApplyAndDisposeWritableMeshData. Snapshot copies pin only during the copy; the asynchronous job never reads the live draft. Slice clears cells and halo above the plane. Disposal completes the handle before releasing native buffers or Mesh. SPEC-51 Q43/global415 records the adapter default.
