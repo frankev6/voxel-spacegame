@@ -1068,6 +1068,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — NAR-010 ordered narrative runtime authored — astra (gpt-6)
+
+- Claimed d83c57dd; e3617234 replaces NarrativeService shell with boot-only stable registration, ready/session gates, new/restore full evaluation, deduplicated external/fact waves, eight-pass carryover, ordered AfterEvaluation and trace-world binding. Adds per-system CSR DependencyIndex with duplicate subscription removal and canonical owner ranges; Collect reuses caller dirty set.
+- Q363/SPEC-40 Q29 resolves ambiguous full-flag clearing and owner terminology: every system gets the same full flag for a pass; content subscriptions live in each system's index per SPEC-42, not a new INarrativeSystem API. Uncompiled/unaccepted. Next five required functional tests and two advisory perf fixtures; focused validation after the compatible batch. Spec-required: 0 authored of7, extra: 0. No Unity this turn.
+- Workers inspected: DEV-009 active260; combat assigned finite read-only runtime/index review; presentation genuine dependency wait. Previous turn belt acceptance was progress.
+
 ### 2026-10-13 — SYS-007 done: physical asteroid belt streaming — astra (gpt-6)
 
 -96127285 completes the793cb5e1 runtime: bounded asynchronous sector/shape generation, deterministic IDs/draws, T2/T3 shared spawn budget, dynamic asteroid grids, persisted destroyed IDs, hysteresis and source/read-pin retirement. Q362 records root-as-anchor integration; existing Q9 geometry preserved. Source review220 found no defects.

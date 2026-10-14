@@ -6,10 +6,10 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | dependency wait | NAR-016 accepted: focused tests and actual 225-file raw-byte stability pass; waiting ready narrative work | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-010 review | Bounded read-only review of e3617234 dispatched; NAR-017 candidate after acceptance | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-009 | Dispatched from claim5f510f02; world commands/probes, no Unity | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | Review220 complete, no runtime findings; belt acceptance batch active on lead | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | Review220 complete; belt accepted, waiting ready standard work | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Narrative runtime authored:** NAR-010claimed d83c57dd; e3617234 implements ordered eight-pass evaluation, queued dependency dedup, session/full-ready lifecycle, tracing and per-system CSR content-owner index. Q363 resolves full flag across all systems without changing INarrativeSystem. Uncompiled/unaccepted; next five required functional cases and two advisory fixtures, then focused batch. No Unity active. DEV-009 active260; combat assigned bounded narrative source review; presentation waits for ready work. Previous turn accepted belt streaming (progress).
 
 - **Belt streaming accepted:** SYS-00796127285 done; compile98274 clean, PlayMode61443 terminal0 with9 passes (4 belt+5 T2), evidence Logs/playtest/belt-streaming. Runtime now streams dynamic asteroid grids with bounded jobs/shared spawn budget and destruction persistence. No Unity active. DEV-009 worker active259; other two dependency waits. Next ready frontier integration and worker recycling; previous turn/runtime acceptance made progress.
 
