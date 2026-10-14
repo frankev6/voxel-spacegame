@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Draft damage reader started:** EDT-003 claimed a2c22275; c68d75d8 adds read-only block lookup and canonical HP/FunctionHp capture, including missing cells/root via surviving footprint. Uncompiled/unaccepted. Q381 records missing VoxelStructure.ApplyEdits: next accepted Voxel batch/read contract, atomic writer and Burst enumeration/hash, then four required cases. No Unity active. Workers DLG-003267/DEV-017288/NAR-019244 active. Previous content-table acceptance and current reader source are progress.
+
 - **Ship-editor content tables accepted:** EDT-0020089c35c done; compile6917 clean, focused EditMode29238 passes5 (0.3253s bodies). Next EDT-003 draft read/write/hash path. No Unity active. DLG-003266, DEV-017287, NAR-019243 active; the latter has a real QST-008 interaction-determinism dependency. Evidence Logs/playtest/editor-content.
 
 - **Ship-editor content tables authored:** EDT-002d3261523 builds all24 rotated cell/clearance sets and face masks, item/price mapping and context with owned footprints/borrowed blobs (ADR-0081/Q380). Uncompiled/unaccepted; next five required cases and one focused batch. No Unity active. DLG-003265, DEV-017286 and NAR-019242 active. Previous aim/fire acceptance and current editor implementation are progress.

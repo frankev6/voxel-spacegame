@@ -1086,6 +1086,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — EDT-003 damage reader started — astra (gpt-6)
+
+- c68d75d8 adds DraftReader block identity and exact HP/FunctionHp byte capture. Missing cells contribute zero; pristine capture removes temporary bytes. Missing root can be resolved through a surviving footprint cell. No writes are performed by ShipEditor.
+- Q381 records missing prerequisite API: actual VoxelStructure has no ApplyEdits/VoxelEdit despite SPEC-51 assuming it. Next define/implement atomic batch within Voxel under ADR, expose canonical native read access for Burst jobs, then writer/enumeration/hash and four required cases. No compile/acceptance claim. spec-required: 4 planned, extra: 0. Workers267/288/244 active; previous tables accepted and current reader source are progress.
+
 ### 2026-10-13 — EDT-002 done: ship-editor content tables — astra (gpt-6)
 
 - 0089c35c accepted: context, rotated cells/clearance/bounds/face masks, item mapping/prices and categories. Five cases cover all24 orientations, all64 face masks with inverse rotation, explicit L-shape yaw/clearance/bounds, price/identity mapping and air/Missing exclusions.
