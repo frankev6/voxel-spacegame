@@ -88,6 +88,12 @@ namespace Game.App.DevRuntime.Input
             if (mouse != null && mouse.added) InputSystem.QueueStateEvent(mouse, mouseState);
             mouseState.delta = Vector2.zero; mouseState.scroll = Vector2.zero;
         }
+        // Projected targets may be outside the viewport: negative coordinates are positions here,
+        // while SetMouse retains its existing negative-value "keep position" CLI contract.
+        internal void MoveMouse(Vector2 position)
+        {
+            CheckAlive(); AgentMouse(); mouseState.position = position; QueueMouse();
+        }
         public void PressAction(InputAction action, double seconds)
         {
             CheckAlive(); Duration(seconds);
