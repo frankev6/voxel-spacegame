@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ECO-008 | DLG-011571ae6f6 delivered pending QST-006/008; now merchant/salvage production wiring | Salvage accepted a7a433f2; no Unity |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ENC-011 | Dispatched main959819dd: integrated encounter scenarios | Real gameplay; dialogue case retains DLG-007/QST-008 dependency |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ENC-014 | ENC-0113415b964 delivered pending acceptance/dialogue prerequisite; implementing live territory composition | Reuse e0157b39 with real production lifecycle; no Unity |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | QST-006 | Combined overlays bdbefa75 delivered; adapter/log/markers now dispatched | Accepted BeatService30762271; no Unity |
 
 ## Operating rules
@@ -67,3 +67,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - QST-00530762271 accepted with nine required functional cases; two advisory fixtures deferred. Presentation recycled to ready QST-006. Combined DEV-013/014 accepted38d812a3 with five focused cases and live rendering; other workers DLG-011 and ENC-011 remain active.
 
 - ECO-007a7a433f2 accepted: five functional salvage cases, two advisory fixtures deferred. Combat worker recycled to ready ECO-008 real launcher/production wiring. DLG-011571ae6f6 retains actual intro QST-006/008 prerequisite; no substitute queue. Other workers QST-006 and ENC-011 continue.
+
+- CAM-0078da588cd accepted: four required occlusion checks and seven flight regressions pass; real-ray advisory measurement deferred. ENC-0113415b964 delivered pending focused acceptance and QST-008 dialogue case; same worker now finishes ENC-014 production territory wiring. ECO-008 and QST-006 remain active.

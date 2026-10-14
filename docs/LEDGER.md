@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 21 | 17 | 0 | 0 | 144 | 0 | 182 | 5 |
+| M3 | 20 | 17 | 0 | 0 | 145 | 0 | 182 | 5 |
 | M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -368,7 +368,7 @@
 | ENC-008 | ENCT participant | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | frontier | ENC-007, PERS-001 | yes | done | astra (gpt-6) | 2026-10-14 | f9c6f0d5 | ENCT v1, atomic raw preservation and Loaded lifecycle; 3 spec checks and 1 real save/load/combat-refusal scenario pass. |
 | ENC-009 | Narrative wiring | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, NAR-011, NAR-012, NAR-020 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | aae617cd | Worker cb960707 integrated; five real-owner routing/dependency cases pass. Live all-event bridge composition remains QST-008. |
 | ENC-010 | Legacy converter and M3 content | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | cdf292d6 | Ten canonical encounters, six factions, real ARK/Whisper ownership; generation/rerun zero errors, two required checks pass |
-| ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Third reusable worker: real integrated encounter scenarios; actual dialogue/bridge scenario retains DLG-007/QST-008 dependency. No substitute owners. |
+| ENC-011 | Integration and regression scenarios | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-008, ENC-009, ENC-010, TST-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Worker3415b964 delivered four runnable scenarios and deferred performance case; compile/acceptance pending. Actual dialogue case waits for QST-008. Worker continues ENC-014 wiring. |
 | ENC-012 | Dev commands and probes | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | ENC-007, ENC-004, DEV-003, DEV-005, DEV-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | a9adf708 | Worker230f64b8 integrated; actual encounter/relation commands, probes and CLI; two required production-owner cases pass. |
 | NAR-001 | Public contract types | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | CORE-001, DATA-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | e39b2d3 | Narrative contracts and precise future-task stubs; 2 required tests; full batch 901 EM / 128 PM, zero failures |
 | NAR-002 | Lexer and parser | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | frontier | NAR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 67ce3485 | Located lexer/AST/parser; seven focused checks pass; Q305 resolves grammar example |
@@ -466,14 +466,14 @@
 | HUD-012 | Merchant screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, ECO-003, ECO-004, ECO-005 | yes | done | combat (gpt-6.1-sol high) | 2026-10-14 | f5e9e949 | Real MerchantSession screen/presenter registered/reset in UiComposition and playground; four required cases pass; live Buy verified. Normal faction launcher remains ECO-008. |
 | HUD-013 | Dialog host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, DLG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f3eea58 | Complete dialog host; five required plus four preserved DLG-009 cases pass. Production story driver remains DLG-007; no fake dialog pad. |
 | HUD-014 | Ship log screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-42 | no | todo |  |  |  |  |
-| HUD-015 | MapCanvas control | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-62 | no | todo |  |  |  |  |
+| HUD-015 | MapCanvas control | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-62 | yes | todo |  |  |  |  |
 | HUD-016 | Galaxy map and star-system map screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-015, SPEC-30, SPEC-31, TRV-001, QST-001 | no | todo |  |  |  |  |
 | HUD-017 | Fleet screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, FND-010, SYS-008, EDT-001, EDT-010 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 0f00dd27 | Fleet view/presenter, canonical committed stats and actual playground trigger; three required cases plus live screenshot pass. Actual edit launcher remains EDT-023; switch unavailable. |
 | HUD-018 | Ship editor host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, EDT-001, EDT-021 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 46d844de | Four-region editor host mounts accepted panels; four required graphics cases pass. Playable editor launcher remains EDT-023/HUD-002. |
 | HUD-019 | Loading and dock screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-006, SYS-008, ECO-001, EDT-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Combat worker: real loading/dock interactions; actual trade route remains ECO-008, no substitute. |
 | HUD-020 | Full-screen layout regression suite | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-003, HUD-004, HUD-005, HUD-006, HUD-007, HUD-011, HUD-012, HUD-013, HUD-014, HUD-016, HUD-017, HUD-018, HUD-019 | no | todo |  |  |  |  |
 | CAM-006 | Origin warp and teleport cut | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, GAL-001 | yes | done | astra (gpt-6) | 2026-10-13 | 710a668 | Origin warp preserves framing and residual teleport cuts; five required tests; full 1051 EM /146 PM passed. |
-| CAM-007 | Occlusion pull-in | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, PHY-001 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead implements actual Unity Physics camera occlusion while narrative/economy workers implement. |
+| CAM-007 | Occlusion pull-in | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, PHY-001 | yes | done | astra (gpt-6) | 2026-10-14 | 8da588cd | Actual physics ray, own-grid exclusion, immediate pull-in/damped release; four required cases and seven existing flight regressions pass. Advisory ray timing deferred. |
 | CAM-009 | Editor orbit mode | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-005 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 21e43a1 | Editor orbit, bounded pan/zoom, snap/focus and suppression; 6 required tests; full batch 901 EM / 128 PM, zero failures |
 | CAM-010 | Map view transform | [SPEC-62](specs/SPEC-62-camera.md) | M3 | standard | CAM-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | 014ed0b | Map transforms, zoom anchoring, framing and clamps; 6 required tests; full batch 901 EM / 128 PM, zero failures |
 | VFX-013 | Floating-origin shift and clears | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | frontier | VFX-003, GAL-001, SYS-001, FND-001 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | Canonical rebase anchors, reset/system clears, idle reset; gameplay streaming remains open; spec-required: 5, extra: 0 |
@@ -1079,6 +1079,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 477 | SPEC-70 Q33: bounded islands and spatial overlays | 2M inclusive address-volume cap; 60-draw local-bounds cache; immediate invalidation for target/world/serial/toggle; largest white bounds first; guarded occupied hash buckets within1km. | Tech lead |
 | 478 | SPEC-70 Q34: real input interaction tools | Body lookup by key/name/tag, nearest deterministic target, legal surface offset, actual bound press and matching BodyInteracted success. Shared range circles reserve largest island box budget; no direct interaction calls. | Tech lead |
 | 479 | SPEC-50 Q30: salvage state and rounding | Exact batched hulk snapshot, O(instances) merged deterministic yields, float scrap arithmetic, entity-bound partial state, pending-despawn/reentrant guards, successful-exit/reset cleanup. Boot config created before snapshot; ECO-008 retains service registration. | Tech lead |
+| 480 | SPEC-62 Q19: camera occlusion recovery | Separate requested/effective distance, immediate pull-in and configured release half-life, preserve ordinary zoom/framing, cached synchronized Unity Physics query and own-grid exclusion. Advisory timing fixture extended, deferred. | Tech lead |
 
 ## Measurements
 
@@ -1190,6 +1191,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — CAM-007 physical camera occlusion accepted — astra (gpt-6)
+
+- 8da588cd adds the actual Unity Physics focus-to-camera ray with own-grid exclusion, immediate obstruction pull-in and configured half-life release. Requested zoom stays separate from effective distance; existing flight framing and normal zoom filtering remain intact. Q480/SPEC-62 Q19 records these choices.
+- Four required PlayMode cases pass (0.1 s reported test duration): box pull-in, smooth release, own-grid ignored, missing physics world. Seven existing flight-camera EditMode regressions pass (0.07 s). Evidence: Logs/playtest/camera-occlusion/{occlusion,flight-regression}.xml. Compile clean with zero CS warnings. Test count: spec-required: 5, extra: 0; existing performance fixture extended with a real ray, measurement deferred; no initial optimization passes, full suites or soak runs.
+- All three exact worker chats inspected. ENC-0113415b964 delivered; actual dialogue case still needs QST-008, remaining focused acceptance pending. Same worker dispatched to finish live ENC-014 territory wiring; ECO-008 and QST-006 continue implementation. Owner QualitySettings/content metas excluded and generated font churn restored.
 
 ### 2026-10-14 — ECO-007 salvage runtime accepted — astra (gpt-6)
 
