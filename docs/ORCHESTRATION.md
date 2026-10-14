@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-012 | Accepted a9adf708; dependency wait: no unclaimed ready standard implementation | Next standard owner unlocked by lead; no review-only dispatch |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ENC-009 | Dispatched on main57dbe986: narrative/faction routing | Complete owner routes and five spec checks |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | ENC-013 | Accepted078e8058; dependency wait pending standard owner | Next standard owner unlocked by lead; no review-only dispatch |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DEV-014 | Dispatched main0dcf5555: real interaction command/probes/circle overlay | Complete actual input-path feature; no Unity |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ENC-011 | Dispatched main959819dd: integrated encounter scenarios | Real gameplay; dialogue case retains DLG-007/QST-008 dependency |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-013 | Dispatched main0dcf5555: island/spatial overlays | Additive renderer/command hunks; lead reconciles with DEV-014 |
 
 ## Operating rules
 
@@ -59,3 +59,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - ENC-008 f9c6f0d5 accepted: 3 binary checks and actual SaveGame/LoadGame same-instance respawn/combat refusal pass. Worker ENC-012230f64b8 delivered; others implementing. Integrate compatible encounter deliveries next.
 
 - ENC-012a9adf708 and ENC-013078e8058 accepted with two focused cases each. Those two workers have genuine ready-standard dependency waits; ENC-009 worker still finishing source. Next lead DEV-012 unlocks standard overlay/interaction work; ENC-009 acceptance unlocks ENC-011.
+
+- DEV-01253b1466a accepted with three focused cases and real GPU screenshot; ENC-009aae617cd accepted with five routing cases. All three same workers now dispatched implementation: DEV-014 interaction, DEV-013 island/spatial overlays, ENC-011 actual encounter scenarios. Prior dependency waits superseded; only dialogue scenario remains genuinely dependent on DLG-007/QST-008. Lead next actual dialogue owner and remaining playground integration.
