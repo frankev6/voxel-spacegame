@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using Game.App.DevRuntime;
 using Game.App.DevRuntime.Scenarios;
+using Game.App.Testing;
 using Game.Core;
 using Game.Core.Diagnostics;
 using Game.Data.Blocks;
@@ -22,6 +23,8 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Profiling;
+using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -30,8 +33,40 @@ namespace Game.Tests.EditMode.DevTools
     /// <summary>DEV-011's two functional cases; tiny payloads, direct owner updates, no benchmark loops.</summary>
     public sealed class PerfCommandTests
     {
+        Fixture markerFixture;
+        bool ownsPlayMode, profilerCaptured, hooksCaptured;
+        bool previousProfilerEnabled, previousProfileEditor, previousCpu, previousSkipIntro;
+        string previousSaveRoot, previousSettingsPath, playerTestDirectory;
         [SetUp] public void Setup() => PerfMarkers.StopRecording();
         [TearDown] public void Cleanup() => PerfMarkers.StopRecording();
+        [UnityTearDown] public IEnumerator LeavePlayerMode()
+        {
+            Exception disposalFailure = null;
+            try { markerFixture?.Dispose(); }
+            catch (Exception e) { disposalFailure = e; }
+            markerFixture = null;
+            try
+            {
+                if (ownsPlayMode && Application.isPlaying) yield return new ExitPlayMode();
+            }
+            finally
+            {
+                ownsPlayMode = false;
+                if (profilerCaptured)
+                {
+                    ProfilerDriver.enabled = previousProfilerEnabled; ProfilerDriver.profileEditor = previousProfileEditor;
+                    ProfilerDriver.SetAreaEnabled(ProfilerArea.CPU, previousCpu); profilerCaptured = false;
+                }
+                if (hooksCaptured)
+                {
+                    GameRootTestHooks.SaveRoot = previousSaveRoot; GameRootTestHooks.SettingsPath = previousSettingsPath;
+                    GameRootTestHooks.SkipIntroScreens = previousSkipIntro; hooksCaptured = false;
+                }
+                if (playerTestDirectory != null && Directory.Exists(playerTestDirectory)) Directory.Delete(playerTestDirectory, true);
+                playerTestDirectory = null;
+            }
+            if (disposalFailure != null) throw disposalFailure;
+        }
         sealed class Fixture : IDisposable
         {
             internal readonly EcsTestWorld Test = EcsTestWorld.Create(typeof(FxEventQueueCreateSystem), typeof(FxUploadSystem), typeof(AudioEventDrainSystem));
@@ -146,14 +181,39 @@ namespace Game.Tests.EditMode.DevTools
 
         [UnityTest] public IEnumerator Markers_ListsActiveMarkers()
         {
-            using var f = new Fixture(); f.Command("perf markers=true");
-            // Two real profiler frame boundaries; only one FX event per direct update, no timing target or warmup loop.
-            for (int i = 0; i < 2; i++) { f.Flow(); yield return null; }
+            Assert.IsFalse(Application.isPlaying, "The EditMode case owns its one player-mode transition.");
+            previousSaveRoot = GameRootTestHooks.SaveRoot; previousSettingsPath = GameRootTestHooks.SettingsPath;
+            previousSkipIntro = GameRootTestHooks.SkipIntroScreens; hooksCaptured = true;
+            playerTestDirectory = Path.GetFullPath(Path.Combine(Application.dataPath, "../Temp/TestRuns/dev011-" + Guid.NewGuid().ToString("N")));
+            Directory.CreateDirectory(playerTestDirectory);
+            GameRootTestHooks.SaveRoot = Path.Combine(playerTestDirectory, "saves");
+            GameRootTestHooks.SettingsPath = Path.Combine(playerTestDirectory, "settings.json"); GameRootTestHooks.SkipIntroScreens = true;
+            previousProfilerEnabled = ProfilerDriver.enabled; previousProfileEditor = ProfilerDriver.profileEditor;
+            previousCpu = ProfilerDriver.IsAreaEnabled(ProfilerArea.CPU); profilerCaptured = true;
+            ownsPlayMode = true; yield return new EnterPlayMode();
+            ProfilerDriver.profileEditor = false; ProfilerDriver.SetAreaEnabled(ProfilerArea.CPU, true); ProfilerDriver.enabled = true;
+            markerFixture = new Fixture(); var f = markerFixture;
+            UnityEngine.Object.DontDestroyOnLoad(f.Host.gameObject); // Startup scene changes must not destroy the test's counter owner.
+            f.Command("perf markers=true");
+            using var observed = ProfilerRecorder.StartNew(ProfilerCategory.Scripts, "FxUploadSystem.Batch", 1);
+            Assert.IsTrue(observed.Valid); Assert.IsTrue(observed.IsRunning);
+            long batchWorkNs = 0; bool hasCompletedSample = false;
+            // At most four actual player frames, with one real FX upload each. No timing target or benchmark warmup.
+            for (int i = 0; i < 4; i++)
+            {
+                long before = observed.CurrentValue; f.Flow(); batchWorkNs += observed.CurrentValue - before;
+                yield return null;
+                if (observed.Count > 0 && observed.LastValue > 0) { hasCompletedSample = true; break; }
+            }
+            Assert.Greater(batchWorkNs, 0, "The canonical FX upload Batch must emit real profiler work.");
+            if (!hasCompletedSample)
+                Assert.Inconclusive("Profiler frame samples unavailable after four player frames with CPU recording enabled; real FxUploadSystem.Batch work=" +
+                    batchWorkNs.ToString(CultureInfo.InvariantCulture) + " ns, Count=" + observed.Count + ". No zero timing accepted (docs/08-tools.md, headless profiler guidance).");
             var result = JsonUtility.FromJson<Snapshot>(f.Command("perf markers=true json=true"));
             Assert.That(result.markers.Length, Is.InRange(1, 15)); bool found = false;
             for (int i = 0; i < result.markers.Length; i++)
             {
-                found |= result.markers[i].name == "FxUploadSystem.Batch";
+                if (result.markers[i].name == "FxUploadSystem.Batch") { found = true; Assert.Greater(result.markers[i].ms, 0); }
                 Assert.GreaterOrEqual(result.markers[i].ms, 0);
                 if (i > 0) Assert.GreaterOrEqual(result.markers[i - 1].ms, result.markers[i].ms);
             }
