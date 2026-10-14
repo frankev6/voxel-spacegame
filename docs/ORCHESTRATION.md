@@ -7,7 +7,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-014 delivered | e0157b39 pending validation/composition disposal; real dependency wait | EncounterDirector, MapCanvas, BeatService/dialog or dev overlay must unblock next standard features |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | HUD-003 correction delivered | d32357df pending two focused reruns; real dependency wait | Frontier runtime owners must unblock remaining standard features |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | HUD-003 correction delivered | Active: Continue still fails after correction; underlying cause assigned to same worker | Frontier runtime owners must unblock remaining standard features |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | FND-015 delivered | ca17dce3 pending integration; real dependency wait for lead roots/startup | Other standard features require frontier runtime owners; no substitute implementation |
 
 ## Operating rules
@@ -45,3 +45,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - HUD-006/007 accepted67c25036: 4/5 specified cases pass. HUD-0033/5: two failures assigned to its original worker, now active. Lead next HUD-009 actual sync before replacing temporary roots and installing EDT-023. No empty HUD source or fake interaction owner.
 
 - HUD-00939074534 source integrated: six required EditMode behaviors accepted, production Bind/root wiring and three performance fixture definitions remain. All three workers delivered and are in explicitly recorded dependency waits. Next lead actual HUD/editor composition, not another empty screen or placeholder owner.
+
+- Production roots accepted 057f29ea: HUD-002 four required cases and live flight HUD/creative Lab verified. EDT-023 scenario acceptance remains open. HUD-003 four of five pass, Continue correction returned to original worker; other two deliveries retain genuine dependency waits.

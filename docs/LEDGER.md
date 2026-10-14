@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 33 | 16 | 0 | 0 | 133 | 0 | 182 | 5 |
+| M3 | 33 | 15 | 0 | 0 | 134 | 0 | 182 | 5 |
 | M4 | 9 | 3 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -453,8 +453,8 @@
 | UI-012 | Layout, contrast and allegiance-colour audits | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | frontier | UI-008 | yes | done | astra (gpt-6) | 2026-10-13 | 6a6c2ccb | Layout/contrast/CVD audits and shared panel; 8 audit cases + required existing tab case pass |
 | UI-013 | Accessibility options | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-010, UI-012 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | e3fa8660 | Accessibility settings applied to live root; scaled tokens/reduced motion; 1 EditMode + 4 PlayMode pass |
 | HUD-001 | Public contract types | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | UI-001, CORE-001, CAM-001 | yes | done | combat (gpt-6.1-sol) | 2026-10-13 | a983d88 | Screen/VM/snapshot contracts; static notification lifetime fix f847997; 3 required tests; full batch 901 EM / 128 PM, zero failures |
-| HUD-002 | UI composition, screen registration and root switching | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, UI-001, UI-002, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead composition/root/session infrastructure under ADR-0072; preserve existing playable menu/pause/flight |
-| HUD-003 | Main menu and new game | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-011, PERS-002, PERS-006, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 | 67c25036 | Source integrated: three required cases pass, corrupt-slot eligibility and bounded real flow completion failed; original worker finishing correction. |
+| HUD-002 | UI composition, screen registration and root switching | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, UI-001, UI-002, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-001 | yes | done | astra (gpt-6) | 2026-10-14 | 057f29ea | Actual menu/flight/editor roots, persistent models and real sync installed; all four required lifetime/context cases passed. Downstream features retain ADR-0072 scope. |
+| HUD-003 | Main menu and new game | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-011, PERS-002, PERS-006, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 | 67c25036 | Correction d32357df integrated: four cases pass; Continue remains failing after bounded retry, original worker investigating. Not accepted. |
 | HUD-004 | Save and load slots | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, PERS-002, PERS-005, PERS-006, FND-009 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | a8d00e7a/9e5db398: view + persistent composition; 5 required screen and4 boot checks pass; session-race review repaired b05b62f; visible menu routing pending |
 | HUD-005 | Settings screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-011, UI-012, UI-013, FND-004, INP-003 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Presentation worker next after bounded HUD-004 review; ADR-0072/Q327 construction split, lead owns actual navigation |
 | HUD-006 | Pause screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-003, FND-009 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 67c25036 | Actual pause routes/hints and accessible scrolling; all four required cases pass. Production root composition remains HUD-002. |
@@ -1064,6 +1064,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 462 | SPEC-61 Q46: pause hints and accessibility layout | Existing real input bindings and owner routes, guarded modal callbacks and scrolling at 130 percent text. Four specified cases pass. | Tech lead |
 | 463 | SPEC-61 Q47: pooled flight HUD construction | Five weapon/four ability/64 radar pools and direct updates; real source binding remains HUD-009/002. Five specified cases pass. | Tech lead |
 | 464 | SPEC-61 Q48: HUD names and radar bridge defaults | Real owner caches, fuel-aware gate invalidation and final-contact waypoint comparison; encounter display requires actual ENC-007, no fake director. | Tech lead |
+| 465 | SPEC-51 Q57: production editor/HUD composition | Resolved ADR-0098: real profile storage, reused editor view/model, actual HUD and launcher, creative startup and ordered disposal. | Tech lead |
 
 ## Measurements
 
@@ -1175,6 +1176,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — EDT-023 / HUD-002 playable production roots — astra (gpt-6)
+
+- 057f29ea installs the actual HUD sync/names, profile-aware blueprint storage, editor launcher, reused editor screen/model and creative Lab startup. Fleet and narrative edit requests use the real launcher; teardown releases native host state before persistent storage. ADR-0098 / Q465. Editor scenario acceptance remains EDT-023, not inferred from root tests.
+- HUD-002 four required cases passed (2.87s); after removing temporary registrations/prewarming, focused BootEachScene passed again. Compile clean, zero CS warnings. Evidence Logs/playtest/editor-roots/roots.xml and final-boot.xml. Test count: spec-required: 4, extra: 0. No full suite/performance/soak loop.
+- Live playground reached FlightHudView/Flight context/one layer; real hull, energy, weapons and radar visible. Actual main-menu Lab click reached BlueprintLab, ShipEditorView/Editor context/one layer/pause zero, visible core/palette/grid/stats/issues. Screenshots Logs/playtest/hud-live.png and editor-live.png. Full blueprint-save/fleet round-trip scenarios remain pending; no empty editor pad advertised.
+- HUD-003 correction d32357df fixes corrupt-slot fixture and frame-count waits. Batch four passed/one failed; focused Continue still fails after isolated presenter Tick correction (11.23s total). Assigned underlying failure to the original worker; no longer timeout escalation. Test count: spec-required: 5 existing, extra: 0. ENC-014 and FND-015 deliveries remain pending integration; those two workers have recorded dependency waits.
 
 ### 2026-10-14 — HUD-009 real data bridge — astra (gpt-6)
 
