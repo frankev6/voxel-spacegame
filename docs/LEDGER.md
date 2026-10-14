@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
-| M2 | 10 | 1 | 0 | 0 | 81 | 0 | 92 | 7 |
-| M3 | 87 | 9 | 0 | 0 | 84 | 0 | 180 | 8 |
+| M2 | 10 | 0 | 0 | 0 | 82 | 0 | 92 | 7 |
+| M3 | 86 | 10 | 0 | 0 | 84 | 0 | 180 | 7 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -299,7 +299,7 @@
 | AUD-008 | Music director, crossfades and scene contexts | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006, FND-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 65c6ed89 | Six EditMode plus one PlayMode required checks; live exploration-to-combat music transition verified |
 | AUD-009 | Loop voices: player engine and beams | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-006, FLT-001, WPN-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 5401ca29 | Three required loop tests pass; engine/beam loop assets remain null per authored config |
 | AUD-013 | Audio performance and allocation tests | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-008, AUD-009 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 8a24a71f | 4 required measurements; zero warmed GC; performance deferred: drain500/4096 misses, zero optimization passes |
-| DEV-010 | aim and fire commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, WPN-001, INP-001, CAM-001 | yes | in-progress | presentation (gpt-6.1-sol high) | 2026-10-13 |  | Claimed for focused implementation; batch validation after code complete. |
+| DEV-010 | aim and fire commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, WPN-001, INP-001, CAM-001 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-13 | c5c7fc15 | Aim/tracking/fire CLI accepted; two real-input/weapon PlayMode cases pass; Q379. |
 | DEV-011 | perf command and gh_perf extensions | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, VFX-001, AUD-001, TST-001 | yes | todo |  |  |  |  |
 | DEV-013 | Overlays: islands and spatial hash | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-012, AI-001 | no | todo |  |  |  |  |
 | TST-005 | Determinism runner and the combat determinism gate | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | frontier | TST-002, TST-003, SPEC-13, SPEC-20, SPEC-21, SPEC-22, SPEC-23 | no | todo |  |  |  |  |
@@ -1083,6 +1083,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DEV-010 done: aim and fire commands — astra (gpt-6)
+
+- c5c7fc15 integrates worker5924eb13 aim target selection/tracking and real Flight-action fire, registry and CLI wrappers. Q379/SPEC-70 Q27 records defaults; no control bindings or production balance changed.
+- Compile11416 terminal0, zero CS warnings. Focused PlayMode30736 terminal0: two passed, zero failed, 0.173025s test bodies (Unity lifecycle separate). Real input sampler, command apply, weapon fire and FX drain exercised with a controlled clock. Evidence Logs/playtest/dev010. spec-required: 2, extra: 0. No full/perf run.
+- Same presentation worker recycled to NAR-019 from claim2919e717. DLG-003265 and DEV-017285 active. No Unity active. Previous bridge acceptance and current command integration/acceptance are progress.
 
 ### 2026-10-13 — NAR-012 done: world-event bridge — astra (gpt-6)
 
