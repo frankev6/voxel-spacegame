@@ -1,58 +1,188 @@
+using System;
+using Game.Core;
+using Game.Data.Logic;
+using Game.Data.Logic.Nodes;
+
 namespace Game.Narrative.Dialog
 {
-    /// <summary>Executes one dialog at a time. Implements SPEC-41 §5.3. Main thread.</summary>
+    /// <summary>SPEC-41 §5.3. Runner callbacks only queue work; Pump drives progression.</summary>
     public sealed class DialogService : IDialogRunnerHost
     {
         public const int MaxLinesPerPump = 16;
-        public DialogService(IDialogRunner runner, DialogCommandTable commands, Game.Data.Logic.ILogicContext context, DialogMemory memory) => throw new System.NotImplementedException("DLG-006");
-        public bool IsActive { get; }
-        public int CurrentBeatIndex { get; }
-        public bool TryStart(in DialogRequest request) => throw new System.NotImplementedException("DLG-006");        // false if active or node unknown (error logged)
-        public void Pump() => throw new System.NotImplementedException("DLG-006");                                     // once per frame by DialogPresenter (§5.3)
-        public void SelectOption(int optionId) => throw new System.NotImplementedException("DLG-006");
-        public void AcknowledgeEnd() => throw new System.NotImplementedException("DLG-006");                           // presenter: "Continue" after the last page
-        public void AbortByPlayer() => throw new System.NotImplementedException("DLG-006");                            // synthetic "End conversation" → outcome Aborted
-        public void Interrupt() => throw new System.NotImplementedException("DLG-006");                                // session reset/load → outcome Interrupted
-        public int Roll(int sides) => throw new System.NotImplementedException("DLG-006");                             // §5.6
+        readonly IDialogRunner runner;
+        readonly DialogCommandTable commands;
+        readonly ILogicContext context;
+        readonly ILogicEffectHost effectHost;
+        readonly (int sides, int value)[] rolls = new (int, int)[8];
+        DialogRequest request;
+        DialogOutcome outcome;
+        IEffect terminal;
+        Action previousContinuation;
+        bool driving, pumping, awaitingContinue, awaitingOption, blocked, resumePending;
+        bool finished, pageUnacknowledged, stopPending, optionPending, acknowledgeNotified;
+        int selectedOption, nodeVisitIndex, rollCount, generation;
+        string currentNode;
+
+        public DialogService(IDialogRunner runner, DialogCommandTable commands, ILogicContext context, DialogMemory memory)
+        {
+            this.runner = runner ?? throw new ArgumentNullException(nameof(runner));
+            this.commands = commands ?? throw new ArgumentNullException(nameof(commands));
+            this.context = context ?? throw new ArgumentNullException(nameof(context));
+            Memory = memory ?? throw new ArgumentNullException(nameof(memory));
+            effectHost = context as ILogicEffectHost;
+        }
+        public bool IsActive { get; private set; }
+        public int CurrentBeatIndex => IsActive ? request.BeatIndex : 0;
         public DialogMemory Memory { get; }
+        public event Action<DialogRequest> Started;
+        public event Action<DialogLine> LinePresented;
+        public event Action<DialogOption[], int> OptionsPresented;
+        public event Action PageCleared;
+        public event Action WaitingForEndAcknowledge;
+        public event Action<DialogEnded> Ended;
 
-        public event System.Action<DialogRequest> Started
+        public bool TryStart(in DialogRequest next)
         {
-            add => throw new System.NotImplementedException("DLG-006");
-            remove => throw new System.NotImplementedException("DLG-006");
+            if (IsActive || driving || pumping) { GameLog.Warn("Dialog", "Dialog already active"); return false; }
+            if (!runner.HasNode(next.StartNode)) { GameLog.Error("Dialog", "unknown node: " + next.StartNode); return false; }
+            context.PushScope(new LogicScope(LogicUsage.DialogCommand, next.Scope.QuestIndex,
+                next.Scope.QuestInstance, next.BeatIndex, next.Scope.HasBody, next.Scope.Body));
+            request = next; outcome = DialogOutcome.Completed; terminal = null;
+            awaitingContinue = awaitingOption = blocked = resumePending = finished = false;
+            pageUnacknowledged = stopPending = optionPending = acknowledgeNotified = false;
+            nodeVisitIndex = rollCount = 0; currentNode = null; IsActive = true;
+            int token = ++generation;
+            if (effectHost != null)
+            {
+                previousContinuation = effectHost.BlockingCommandCompleted;
+                effectHost.BlockingCommandCompleted = () =>
+                {
+                    if (!IsActive || generation != token || !blocked) return;
+                    blocked = false; resumePending = true;
+                };
+            }
+            driving = true;
+            try { Started?.Invoke(request); if (!stopPending) runner.Start(request.StartNode, this); }
+            catch { outcome = DialogOutcome.Interrupted; terminal = null; finished = true; pageUnacknowledged = false; throw; }
+            finally { driving = false; Settle(); }
+            return true;
         }
-        public event System.Action<DialogLine> LinePresented
-        {
-            add => throw new System.NotImplementedException("DLG-006");
-            remove => throw new System.NotImplementedException("DLG-006");
-        }
-        public event System.Action<DialogOption[], int> OptionsPresented
-        {
-            add => throw new System.NotImplementedException("DLG-006");
-            remove => throw new System.NotImplementedException("DLG-006");
-        }   // array reused; copy if kept
-        public event System.Action PageCleared
-        {
-            add => throw new System.NotImplementedException("DLG-006");
-            remove => throw new System.NotImplementedException("DLG-006");
-        }
-        public event System.Action WaitingForEndAcknowledge
-        {
-            add => throw new System.NotImplementedException("DLG-006");
-            remove => throw new System.NotImplementedException("DLG-006");
-        }    // last page shown, dialog finished
-        public event System.Action<DialogEnded> Ended
-        {
-            add => throw new System.NotImplementedException("DLG-006");
-            remove => throw new System.NotImplementedException("DLG-006");
-        }
-        // TODO(DLG-006): implement SPEC-41 service, command lookup and visit memory behavior.
 
-        public void OnLine(in DialogLine line) => throw new System.NotImplementedException("DLG-006");
-        public void OnOptions(DialogOption[] options, int count) => throw new System.NotImplementedException("DLG-006");
-        public DialogCommandResult OnCommand(string commandText) => throw new System.NotImplementedException("DLG-006");
-        public void OnNodeStarted(string node) => throw new System.NotImplementedException("DLG-006");
-        public void OnNodeCompleted(string node) => throw new System.NotImplementedException("DLG-006");
-        public void OnDialogComplete() => throw new System.NotImplementedException("DLG-006");
+        public void Pump()
+        {
+            if (!IsActive || driving || pumping) return;
+            pumping = true;
+            try
+            {
+                Settle();
+                if (!IsActive || finished || blocked) return;
+                if (optionPending)
+                {
+                    optionPending = false;
+                    Drive(() => { PageCleared?.Invoke(); if (!stopPending) runner.SelectOption(selectedOption); });
+                }
+                if (IsActive && !finished && resumePending)
+                { resumePending = false; Drive(runner.Resume); }
+                for (int i = 0; i < MaxLinesPerPump && IsActive && !finished && !blocked && awaitingContinue; i++)
+                { awaitingContinue = false; Drive(runner.Continue); }
+            }
+            finally { pumping = false; }
+        }
+        void Drive(Action action)
+        {
+            driving = true;
+            try { action(); }
+            finally { driving = false; Settle(); }
+        }
+        public void SelectOption(int optionId)
+        {
+            if (!IsActive || !awaitingOption || finished) return;
+            awaitingOption = false; selectedOption = optionId; optionPending = true;
+        }
+        public void AcknowledgeEnd()
+        {
+            if (!IsActive || !finished) return;
+            pageUnacknowledged = false; Settle();
+        }
+        public void AbortByPlayer() => RequestStop(DialogOutcome.Aborted);
+        public void Interrupt() => RequestStop(DialogOutcome.Interrupted);
+        void RequestStop(DialogOutcome reason)
+        {
+            if (!IsActive) return;
+            outcome = reason; terminal = null; pageUnacknowledged = false; stopPending = true;
+            Settle();
+        }
+        void Settle()
+        {
+            if (driving || !IsActive) return;
+            if (stopPending)
+            {
+                stopPending = false; driving = true;
+                try { runner.Stop(); }
+                finally { driving = false; }
+                finished = true;
+            }
+            if (!finished) return;
+            if (pageUnacknowledged && outcome != DialogOutcome.Interrupted)
+            {
+                if (!acknowledgeNotified)
+                { acknowledgeNotified = true; WaitingForEndAcknowledge?.Invoke(); }
+                return;
+            }
+            var result = new DialogEnded(request.BeatIndex, outcome, terminal, request.Scope);
+            context.PopScope();
+            if (effectHost != null) effectHost.BlockingCommandCompleted = previousContinuation;
+            previousContinuation = null; IsActive = false;
+            Ended?.Invoke(result);
+        }
+        public void OnLine(in DialogLine line)
+        {
+            pageUnacknowledged = true; awaitingContinue = true;
+            LinePresented?.Invoke(line);
+        }
+        public void OnOptions(DialogOption[] options, int count)
+        {
+            awaitingContinue = false; awaitingOption = true; pageUnacknowledged = false;
+            OptionsPresented?.Invoke(options, count);
+        }
+        public DialogCommandResult OnCommand(string text)
+        {
+            if (stopPending) return DialogCommandResult.Stop;
+            if (!commands.TryGet(text, out var effect))
+            { GameLog.Error("Dialog", "command not in table: " + text); outcome = DialogOutcome.Interrupted; terminal = null; return DialogCommandResult.Stop; }
+            if (effect.Flow == EffectFlow.Terminal) { terminal = effect; return DialogCommandResult.Stop; }
+            if (effect is AbortBeatEffect) { outcome = DialogOutcome.Aborted; return DialogCommandResult.Continue; }
+            if (!effect.CanApply(context))
+            {
+                effectHost?.EffectRejected();
+                GameLog.WarnOnce("Dialog.Rejected:" + text, "Dialog", "Rejected command: " + text);
+                return DialogCommandResult.Continue;
+            }
+            if (effect.Flow == EffectFlow.Blocking)
+            { blocked = true; effect.Apply(context); return DialogCommandResult.Block; }
+            effect.Apply(context); return stopPending ? DialogCommandResult.Stop : DialogCommandResult.Continue;
+        }
+        public void OnNodeStarted(string node) { currentNode = node; nodeVisitIndex++; rollCount = 0; }
+        public void OnNodeCompleted(string node) { }
+        public void OnDialogComplete() { finished = true; Settle(); }
+
+        public int Roll(int sides)
+        {
+            if (!IsActive || currentNode == null) throw new InvalidOperationException("roll requires an active dialog node");
+            if (sides < 1 || sides == int.MaxValue) throw new ArgumentOutOfRangeException(nameof(sides));
+            for (int i = 0; i < rollCount; i++) if (rolls[i].sides == sides) return rolls[i].value;
+            // Beat indices and generated beat facts both use ordinal content IDs, one-based.
+            int beatCount = 0, index = 0;
+            var catalog = context.Facts.Catalog;
+            for (int slot = 0; request.BeatIndex > 0 && slot < catalog.Count; slot++)
+                if (catalog.FamilyAt(slot) == FactFamily.Beat && ++index == request.BeatIndex)
+                { beatCount = context.Facts.GetBySlot(slot); break; }
+            ulong salt = StableHash.Combine(StableHash.Combine((ulong)(uint)request.BeatIndex, (ulong)(uint)beatCount),
+                StableHash.Combine(StableHash.Hash64(currentNode), (ulong)(uint)nodeVisitIndex));
+            var rng = RngStreams.For(context.CampaignSeed, RngPurpose.Narrative, salt);
+            int value = rng.NextInt(1, sides + 1);
+            if (rollCount < rolls.Length) rolls[rollCount++] = (sides, value);
+            return value;
+        }
     }
 }
