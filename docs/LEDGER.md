@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 14 | 16 | 0 | 0 | 152 | 0 | 182 | 5 |
+| M3 | 14 | 15 | 0 | 0 | 153 | 0 | 182 | 5 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -483,7 +483,7 @@
 | DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-008, DEV-012, INP-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 38d812a3 | Combined source accepted; real overlays and input interaction, five required checks pass; Q477/Q478. |
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | yes | done | economy (gpt-6.1-sol high) | 2026-10-13 | 40421f42 | Real inv/give/facts owners, probes and CLI; three required cases pass in focused seven-case batch. |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-14 | f6304ccd | Save/load/jump commands integrated; all 3 required checks pass (position fixture corrected a5833668); real menu routing/toworld acceptance still HUD-002-dependent; Q430 |
-| DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | in-progress | astra (gpt-6) | 2026-10-14 | 54734103 | Reopened for actual creative Blueprint Lab beacon and directory/map accessibility; existing seven trials retained. |
+| DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | done | astra (gpt-6) | 2026-10-14 | 5871d067 | Eight actual playground beacons, including creative Blueprint Lab entry/exit/reset. One expanded owner-feature case passes; live Lab screenshot. Campaign/map/log and docked fleet trials remain separate integration. |
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
 | MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e9d50f3c | Three exact factions generated; duplicate skipped, player/AI ownership preserved; rerun byte/GUID/manifest stable |
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3d65849 | Protected ordered loot assets/catalog; rerun byte-identical; 1 required and 1 migration-safety test |
@@ -1202,6 +1202,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — DEV-021 playable Blueprint Lab beacon — astra (gpt-6)
+
+- 5871d067 adds the eighth real playground area: `playground goto=editor`, then F (or `playground activate`) exits the isolated trial through normal game flow and opens the actual creative Blueprint Lab. Existing place/remove, mirror, undo/redo, overlays, stats and blueprint storage are accessible. Exit the Lab to MainMenu, then `playground reset` returns to the sandbox; stored blueprints are retained. Docked fleet editing remains EDT-023 and is not claimed by this creative route.
+- Corrected beacon chart coordinates to include western Fleet/Lab, completed its legend and updated the directory/README. No new art or substitute editor. Extended the existing owner-feature PlaygroundTests.Enter_Interact_Reset: actual Lab scene/host/input, leave to MainMenu, and reset back to sandbox all pass along with the prior trials. Test count: spec-required: 1, extra: 0. Compile clean/zero CS warnings, docs checks clean, no full/performance/soak runs. Evidence Logs/playtest/playground-editor/functional.xml; visually inspected actual Lab screenshot Logs/playtest/playground-editor-live.png. Live activation reports ready; playground restored after capture.
+- Same three worker threads remain active on substantial map screens, ship log and opening chapter; no duplicate or review-only assignment. Next lead integrates their compatible UI/story deliveries and resumes remaining fleet editor scenarios.
 
 ### 2026-10-14 — QST-008 real story registration accepted — astra (gpt-6)
 
