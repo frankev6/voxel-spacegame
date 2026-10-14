@@ -1,8 +1,16 @@
+using System.Collections.Generic;
+using Game.ShipEditor.Data;
+
 namespace Game.ShipEditor.Services
 {
-    /// <summary>Implements SPEC-51 §4.2. Editor contract.</summary>
+    /// <summary>SPEC-51 reusable per-group validation result. PlacementValidator fills errors in EDT-007.</summary>
     public sealed class ApplyReport
     {
-        // TODO(EDT-005): implement this canonical dependency identity. Fields, algorithms and owned resources are not staged here.
+        readonly List<PlacementError> errors = new();
+        public IReadOnlyList<PlacementError> GroupErrors => errors;
+        public int AcceptedGroups { get; internal set; }
+        public int OpsApplied { get; internal set; }
+        public void Clear() { errors.Clear(); AcceptedGroups = OpsApplied = 0; }
+        internal void AddGroup(PlacementError error) { errors.Add(error); if (error == PlacementError.None) AcceptedGroups++; }
     }
 }
