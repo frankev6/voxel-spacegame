@@ -29,6 +29,9 @@
             float4 _Highlight;
             float _Dissolve01;
             float _FunctionPaint, _Damage01, _Powered, _Throttle;
+            // Editor overrides must retain an SRP-compatible fallback for live Entities Graphics props.
+            float _DraftPaintIndex, _DraftSliceEnabled, _DraftSliceTop;
+            float4x4 _DraftWorldToCells;
         CBUFFER_END
 
         TEXTURE2D_ARRAY(_BrickAlbedoArray); SAMPLER(sampler_BrickAlbedoArray);

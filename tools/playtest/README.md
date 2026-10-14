@@ -105,3 +105,13 @@ Files use SPEC-71's `cmdrec 1` text format with a `.pcr` suffix. Names allow 1â€
 ## Flight controls (FLT-013)
 
 W/S requests forward/reverse thrust, A/D turns, Shift+A/D strafes while the turn command is zero, Q/E also strafes, Left Ctrl boosts, X brakes. Releasing thrust gently slows the ship through its opposing thrusters. Small maneuvering thrusters take longer to brake than the main engines take to accelerate. All movement follows the current ship orientation and physical thrust/mass; rotation does not instantly rotate momentum.
+
+## Interactive development playground (DEV-021)
+
+Run Boot or World in the Editor, press **F1**, enter **`playground`**, then close the console with F1. Fly into a labeled ring and press **F** (the rebindable Flight/Interact action). There are no hostile ships until you activate the combat ring.
+
+**Reset everything with `playground reset` in the F1 console.** This recreates the session, restoring the player and procedural station and clearing enemies, broken pieces, projectiles, inventory grants, facts and pad activation state. It uses a separate `dev-playground` save profile; entering from a real campaign saves that campaign before changing profiles. A blocked/failed save stops entry instead of discarding that campaign.
+
+`playground goto=<id>` instantly moves you to a ring: `flight`, `range`, `combat`, `cargo`, `facts`, `grid`, `campaign`, `features`. `playground status` lists the directory. Range exercises shooting/breakup/VFX/audio; combat adds one real hostile fighter per reset; cargo grants fuel/credits; facts/grid inspect real runtime state. Campaign starts the real seeded galaxy in the same isolated profile. Unfinished screen/gameplay integrations are labeled as pending, never represented by fake working controls.
+
+CLI equivalent in Play: `tools/playtest/g.sh dev --cmd "playground"` (or `"playground reset"`); poll the returned operation with `g.sh op --id N`.

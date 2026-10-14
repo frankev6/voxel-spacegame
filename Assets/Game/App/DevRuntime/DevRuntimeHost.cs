@@ -38,6 +38,7 @@ namespace Game.App.DevRuntime
         readonly List<Scenarios.ScenarioRunner> scenarios = new List<Scenarios.ScenarioRunner>();
         int lastId;
         bool disposed;
+        internal Playground.DevPlayground Playground { get; private set; }
         public DevCommandRegistry Commands { get; private set; }
         public DevContext Context { get; private set; }
         public Scenarios.ScenarioProbeRegistry Probes { get; private set; }
@@ -60,6 +61,7 @@ namespace Game.App.DevRuntime
                 host.Input = new DevInputInjector();
                 host.Ui = new DevUiQuery();
                 host.Context = new DevContext(host);
+                host.Playground = new Playground.DevPlayground(host);
                 host.Replay = new Commands.FlightReplaySession();
                 host.Perf = new Game.App.DevRuntime.Perf.DevPerfCounters();
                 host.Commands = DevCommandRegistry.CreateDefault();
@@ -69,7 +71,7 @@ namespace Game.App.DevRuntime
             catch { host.Dispose(); throw; }
         }
         internal void BindConsole(Game.Input.InputService input, Game.UI.Services.UIRoot ui)
-        { Console = new Game.App.DevRuntime.Console.DevConsole(this, input, ui); }
+        { Console = new Game.App.DevRuntime.Console.DevConsole(this, input, ui); Playground.Bind(input, ui); }
 
         public Scenarios.ScenarioRunner RunScenario(Scenarios.ScenarioScript script, string path, int runId, string outputDirectory = null)
         {
@@ -109,7 +111,7 @@ namespace Game.App.DevRuntime
             for (int i = scenarioCount - 1; i >= 0; i--) if (scenarios[i].Finished) scenarios.RemoveAt(i);
             Console?.Update();
         }
-        void LateUpdate() { /* DEV-012 adds overlay rendering. */ }
+        void LateUpdate() { Playground?.Tick(); /* DEV-012 adds overlay rendering. */ }
         void OnDestroy() { Cleanup(); }
         void Cleanup()
         {
@@ -119,6 +121,7 @@ namespace Game.App.DevRuntime
             running.Clear();
             foreach (var scenario in scenarios) scenario.Abort("play mode exited");
             scenarios.Clear();
+            Playground?.Dispose();
             Console?.Dispose();
             Replay?.Dispose();
             Perf?.Dispose();

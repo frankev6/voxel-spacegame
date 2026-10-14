@@ -70,11 +70,11 @@ Shader "Game/Voxel/PropInstanced"
         StructuredBuffer<PropInstanceGpu> _PropInstances;
         StructuredBuffer<float4x4> _GridMatrices;
         float4x4 _OrientMatrices[24];
+        #if defined(UNITY_INSTANCING_ENABLED)
         UNITY_INSTANCING_BUFFER_START(DraftProps)
             UNITY_DEFINE_INSTANCED_PROP(float, _DraftPaintIndex)
         UNITY_INSTANCING_BUFFER_END(DraftProps)
-        float _DraftSliceEnabled, _DraftSliceTop;
-        float4x4 _DraftWorldToCells;
+        #endif
         // Vertex pulling below uses the same instance ID; no per-instance material or object is created.
         void PropSetup() { }
         struct PropAttributes
