@@ -1095,6 +1095,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+
+### 2026-10-13 — DLG-006 memory persistence authored — astra (gpt-6)
+
+- f610e52e adds canonical DLGS capture and fully validated restore before replacing live memory; missing chunk clears memory. Production registration remains DLG-007. Service lifecycle is still unfinished; no acceptance or gameplay claim.
+- spec-required: 7 planned, extra: 0. No Unity run: source is queued for the dialog batch. Previous conversational turn made no implementation progress; this turn adds the save participant.
+- DLG-013 delivered0d09a8cf; DEV-011 correction delivered62f2c25e. Existing combat/economy threads cross-review those exact deliveries without Unity. Presentation262 completed NAR-019 review and has a genuine dependency wait: the only unassigned standard-ready rows are advisory GAL-013 and owner-only AUD-011. DLG-006 completion unlocks presenter work. No new worker or benchmark busywork.
+
 ### 2026-10-13 — DLG-006 runtime foundation authored — astra (gpt-6)
 
 - Claimed90cbd07d; dc15f7b0 implements guarded concrete command lookup (ADR-0084/Q390) and deterministic visit/raw memory. Rejects stale/malformed/duplicate compiled commands; no runtime parsing or wrapper that loses terminal/abort identity.

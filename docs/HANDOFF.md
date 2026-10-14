@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Dialog memory persistence authored:** DLG-006f610e52e adds canonical DLGS save/validated restore; lifecycle and seven-case acceptance still pending. No Unity run. DLG-0130d09a8cf and DEV-01162f2c25e delivered, existing combat/economy cross-review; presentation has a verified ready-task dependency wait until dialog runtime unlocks presenter work. Next finish runtime and validate a compatible focused batch.
+
 - **Dialog runtime started:** DLG-006dc15f7b0 supplies guarded concrete effect lookup and ordinal visit/raw memory under ADR-0084/Q390. Uncompiled/unaccepted; next lifecycle, blocking/terminal flow, rolls and DLGS before seven focused cases. No Unity active. DEV-011 marker fixture correction assigned to economy; DLG-013 combat active; presentation reviews NAR-019.
 
 - **Dialog authoring accepted:** DLG-00332bbc244 done; generated real command table/facts/YSLS repeat byte-identically. Four required cases pass across initial3-pass run and single corrected JSON-fixture retry. Compile clean, no Unity active; evidence Logs/playtest/dialog-validator. DLG-0106629f3aa metadata integrated,7 sprites still deferred. Next integrate DEV-0115f154755, implement DLG-006 runtime/SYS-009 pose persistence; dispatch newly ready DLG-013. NAR-019 delivery pending actual live owners.
