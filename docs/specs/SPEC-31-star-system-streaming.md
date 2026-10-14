@@ -642,6 +642,8 @@ sequenceDiagram
 
 | 23 | Celestial visuals wait for whole camera spec although main camera state is implemented | Under ADR-0068 use SYS-004 anchors and CAM-004/005 live camera-state owners. Remaining camera modes and advisory checks do not gate visuals. Preserve actual definition registration, child transform ownership, hiding, and all three functional cases. | Tech lead — ledger Q399 |
 
+| 24 | Galaxy owns visual links but cannot reference render APIs | ADR-0087 adds Galaxy-owned ICelestialVisualFactory implemented by Presentation and injected from App. Loader creates/links children in T1, retains single-writer ownership and explicitly cleans children on refresh/removal/unload; factory owns rendering registration. | Tech lead — ledger Q400 |
+
 ## 11. References
 
 - Audit (background only): `docs/reference/audit-2026-10/03-galaxy-world.md` B1/D3 (R9), R10, R28; `00-synthesis.md` §5.
