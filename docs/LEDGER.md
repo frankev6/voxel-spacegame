@@ -1115,6 +1115,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — EDT-014 tool transactions authored — astra (gpt-6)
+
+- b74f0bbb adds internal tool lifecycle/context, reusable preview validation, mirrored place/remove transactions, damage-preserving paint/flood and eyedropper behavior. SPEC-51 Q36/global410 records helper ownership. Controller wiring, RemoveTool gesture/box behavior, palette/cancel handling and the seven required cases remain pending; uncompiled/unaccepted, status in-progress. spec-required:0 authored this checkpoint (seven pending),extra:0. No Unity run; validation deferred to the complete compatible tool batch.
+- Mirror source review318 found no defects. Presentation296 remains active on TRV-009 cover and gate emission. Combat/economy have verified implementation dependency waits until editor controller or narrative prerequisites unlock standard work. No duplicate worker or idle Unity wait. Prior turn's mirror acceptance and this source checkpoint are progress; full roadmap goal remains active.
+
 ### 2026-10-13 — EDT-013 mirror symmetry accepted — astra (gpt-6)
 
 - 94110337 implements chiral partner mapping, all enabled-axis combinations in canonical order, exact dedupe, damage-byte remapping, atomic unsupported-group rollback, mirrored removal and plane defaults/nudges. SPEC-51 Q35/global409 records internal helper ownership. No cross-module API change or new art.

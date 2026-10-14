@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Editor tool transactions authored:** EDT-014b74f0bbb adds reusable previews and place/paint/eyedropper transaction helpers. Controller wiring, remove gestures and seven required cases remain pending, uncompiled/unaccepted; next complete these before one focused batch. Mirror review318 clear. TRV-009 worker active; combat/economy have genuine dependency waits. No Unity active.
+
 - **Mirror symmetry accepted:** EDT-01394110337 passes all seven required focused checks (0.264s test bodies), zero CS warnings/errors. Canonical damage/chiral mirrors, atomic groups and exact removals are ready for EDT-014 controller/basic tools. TRV-009 worker active; combat reviews mirrors; economy has a genuine dependency wait. No Unity active.
 
 - **Stats and celestial visuals accepted:** EDT-01073bcc085 and SYS-011d76a9039 compile clean;17 focused EditMode plus3 Metal PlayMode checks pass. Real registration/compression/hide behavior verified; quality settings preserved. Travel presentation now has concrete completed prerequisites and is next for the existing presentation worker. Lead continues editor mirror/controller/connectivity prerequisites. No Unity active.
