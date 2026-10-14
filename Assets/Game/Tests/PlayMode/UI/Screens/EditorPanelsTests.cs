@@ -80,7 +80,7 @@ namespace Game.Tests.PlayMode.UI.Screens
             }
             public void Dispose() { Root.RemoveFromHierarchy(); UI.Dispose(); Object.Destroy(config); Panel.Dispose(); }
         }
-        static ShipEditorViewModel WorstCase()
+        internal static ShipEditorViewModel WorstCase()
         {
             var vm = new ShipEditorViewModel { Title = "Blueprint Lab", ActiveTool = 1, IsCreative = false, CanUndo = true, CanRedo = true,
                 UndoLabel = "Undo place hull", RedoLabel = "Redo place hull", CanCommit = true, CommitLabel = "Commit", IsDirty = true,

@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../../Theme/screens/ship-editor.uss" />
+    <ui:VisualElement name="ship-editor-host" class="ship-editor-host" picking-mode="Ignore">
+        <ui:VisualElement name="ship-editor-region-top" class="hud-region hud-plate ship-editor-region ship-editor-top" />
+        <ui:VisualElement name="ship-editor-region-left" class="hud-region hud-plate ship-editor-region ship-editor-left" />
+        <ui:VisualElement name="ship-editor-region-right" class="hud-region hud-plate ship-editor-region ship-editor-right" />
+        <ui:VisualElement name="ship-editor-region-bottom" class="hud-region hud-plate ship-editor-region ship-editor-bottom" />
+    </ui:VisualElement>
+</ui:UXML>

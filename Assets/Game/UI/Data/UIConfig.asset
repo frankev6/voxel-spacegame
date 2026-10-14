@@ -71,6 +71,9 @@ MonoBehaviour:
   - Key: merchant
     Uxml: {fileID: 9197481963319205126, guid: fdfb822e676a42dabb15dca3131e30c9, type: 3}
     Prewarm: 0
+  - Key: ship-editor
+    Uxml: {fileID: 9197481963319205126, guid: 8190860c5c42429591fa64c0e3ebdb26, type: 3}
+    Prewarm: 0
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32

@@ -1,0 +1,9 @@
+/* SPEC-61 HUD-018: geometry owns the four plates; SPEC-51 owns their panel contents. */
+.ship-editor-host { flex-grow: 1; min-width: 0; min-height: 0; }
+.ship-editor-region { padding: 0; }
+.ship-editor-top { top: 0; left: 0; right: 0; height: 64px; }
+.ship-editor-bottom { bottom: 0; left: 0; right: 0; height: 48px; }
+.ship-editor-left { top: 64px; bottom: 48px; left: 0; width: 360px; }
+.ship-editor-right { top: 64px; bottom: 48px; right: 0; width: 380px; }
+/* Two tool rows leave room for the native horizontal scrollbar at narrow widths. */
+.ship-editor-top .editor-toolbar-row { height: 24px; }

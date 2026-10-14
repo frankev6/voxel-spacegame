@@ -21,6 +21,7 @@ namespace Game.UI.Services
         }
         static readonly ProfilerMarker SyncMarker = new ProfilerMarker(ProfilerCategory.Scripts, "UINavigator.Sync");
         readonly UIRoot root;
+        internal UIRoot RootOwner => root;
         readonly IPauseService pause;
         readonly IInputContextTarget contextTarget;
         readonly IFrameClock clock;
