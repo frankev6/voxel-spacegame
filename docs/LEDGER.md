@@ -17,7 +17,7 @@
 | M1 | 1 | 1 | 0 | 0 | 107 | 0 | 109 | 0 |
 | M2 | 11 | 0 | 0 | 0 | 81 | 0 | 92 | 6 |
 | M3 | 94 | 7 | 0 | 0 | 79 | 0 | 180 | 7 |
-| M4 | 13 | 0 | 0 | 0 | 1 | 0 | 14 | 5 |
+| M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -497,7 +497,7 @@
 | TRV-014 | Escort transfer hooks | [SPEC-32](specs/SPEC-32-travel.md) | M4 | standard | TRV-012, AI-001, FND-001 | no | todo |  |  |  |  |
 | ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011, AI-001 | no | todo |  |  |  |  |
 | ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011 | no | todo |  |  |  |  |
-| NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | todo |  |  |  |  |
+| NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Existing combat worker; editing tools and explicit missing beat/dialog owner integration |
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | no | todo |  |  |  |  |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | no | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
