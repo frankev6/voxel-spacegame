@@ -16,6 +16,8 @@ namespace Game.ShipEditor.Services
         readonly EditSession session;
         readonly EditorContext content;
         readonly ToolContext context;
+        readonly Clipboard clipboard;
+        readonly PasteTool paste;
         readonly Dictionary<ToolId, IEditorTool> tools = new();
         readonly Action requestLeave;
         readonly ProfilerMarker marker = new("ShipEditorController.Tick");
@@ -31,8 +33,9 @@ namespace Game.ShipEditor.Services
             this.content = content ?? throw new ArgumentNullException(nameof(content));
             this.requestLeave = requestLeave;
             context = new ToolContext(session, content);
+            clipboard = new Clipboard(content); paste = new PasteTool(clipboard, session, content);
             Register(new PlaceTool()); Register(new RemoveTool()); Register(new PaintTool()); Register(new EyedropperTool());
-            Register(new ReplaceTool()); Register(new SelectTool());
+            Register(new ReplaceTool()); Register(new SelectTool()); Register(paste);
             Register(new LineTool()); Register(new BoxTool()); Register(new FillTool());
             active = tools[ToolId.Place];
             for (int block = 1; block < content.Footprints.BlockCount; block++)
@@ -92,6 +95,10 @@ namespace Game.ShipEditor.Services
                 if (math.any(move != 0)) Selection.Move(move, context.StrokeId);
                 if (before != Selection.Version) Changed(); context.SetError(Selection.Error);
             }
+            else if (ActiveTool == ToolId.Paste)
+            {
+                if (Has(EditorActions.RotateYaw)) { paste.Rotate(content, reverse); Changed(); }
+            }
             else
             {
                 if (Has(EditorActions.RotateYaw)) Rotate(1, reverse);
@@ -101,6 +108,19 @@ namespace Game.ShipEditor.Services
             if (Has(EditorActions.SelectAll)) { SelectTool(ToolId.Select); Selection.SelectAll(); Changed(); }
             if (Has(EditorActions.Delete) && Selection.Count != 0)
             { context.BeginStroke(); Selection.Delete(context.StrokeId); context.SetError(Selection.Error); Changed(); }
+            if ((Has(EditorActions.Copy) || Has(EditorActions.Cut)) && Selection.Count != 0)
+            {
+                if (clipboard.Copy(Selection))
+                {
+                    paste.Reset();
+                    if (Has(EditorActions.Cut))
+                    { active.Cancel(); context.BeginStroke(); Selection.Delete(context.StrokeId, "Cut selection"); context.SetError(Selection.Error); }
+                    else context.SetError(PlacementError.None);
+                    Changed();
+                }
+                else { context.SetError(clipboard.Error); Changed(); }
+            }
+            if (Has(EditorActions.Paste) && clipboard.Count != 0) { paste.Reset(); SelectTool(ToolId.Paste); Changed(); }
             if (Has(EditorActions.MirrorX)) ToggleMirror(0);
             if (Has(EditorActions.MirrorY)) ToggleMirror(1);
             if (Has(EditorActions.MirrorZ)) ToggleMirror(2);
@@ -109,7 +129,6 @@ namespace Game.ShipEditor.Services
             if (Has(EditorActions.SliceDown)) StepSlice(-1);
             if (Has(EditorActions.XRayToggle)) ToggleXRay();
             if (Has(EditorActions.BoxModeCycle)) CycleBoxMode();
-            // TODO(EDT-017): copy, cut and paste actions and stamp-specific rotation.
         }
         internal void Rotate(int axis, bool reverse)
         {
@@ -129,7 +148,6 @@ namespace Game.ShipEditor.Services
             CheckAlive();
             if (active.Id == tool || !tools.TryGetValue(tool, out var next)) return;
             // TODO(EDT-015): register line, box and fill.
-            // TODO(EDT-017): register paste.
             active.Cancel(); if (tool == ToolId.Paste) previousTool = active.Id;
             active = next; Changed();
         }
@@ -161,8 +179,12 @@ namespace Game.ShipEditor.Services
         public void StepSlice(int delta) { CheckAlive(); SliceLevel = checked(SliceLevel + delta); Changed(); }
         public void ToggleXRay() { CheckAlive(); XRay = !XRay; Changed(); }
         public void CycleBoxMode() { CheckAlive(); BoxMode = (BoxMode)(((int)BoxMode + 1) % 3); Changed(); }
-        // TODO(EDT-017): copy records for a blueprint stamp and enter the registered Paste tool.
-        public void BeginStamp(VoxelStructure stampSource) => throw new NotImplementedException("EDT-017");
+        public void BeginStamp(VoxelStructure stampSource)
+        {
+            CheckAlive();
+            if (clipboard.Copy(stampSource)) { paste.Reset(); SelectTool(ToolId.Paste); }
+            context.SetError(clipboard.Error); Changed();
+        }
         public bool Cancel()
         {
             CheckAlive();
@@ -177,7 +199,7 @@ namespace Game.ShipEditor.Services
         {
             if (disposed) return;
             active?.Cancel(); foreach (var tool in tools.Values) if (tool is IDisposable owner) owner.Dispose();
-            context.Dispose(); Preview.Dispose(); tools.Clear(); FocusRequested = null; disposed = true;
+            context.Dispose(); clipboard.Dispose(); Preview.Dispose(); tools.Clear(); FocusRequested = null; disposed = true;
         }
     }
 }

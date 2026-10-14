@@ -135,8 +135,8 @@ namespace Game.ShipEditor.Services
             }
             return Apply(stroke, "Mirror selection");
         }
-        internal bool Delete(int stroke)
-        { Prepare(); return source.Length != 0 && Apply(stroke, "Delete selection"); }
+        internal bool Delete(int stroke, string label = "Delete selection")
+        { Prepare(); return source.Length != 0 && Apply(stroke, label); }
         void Prepare()
         { Error = PlacementError.None; batch.Clear(); target.Clear(); Capture(source, damage); }
         bool Apply(int stroke, string label)

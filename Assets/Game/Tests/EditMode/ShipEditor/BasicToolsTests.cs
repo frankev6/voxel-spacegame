@@ -1,6 +1,5 @@
 using Game.ShipEditor.Data;
 using Game.ShipEditor.Services;
-using Game.ShipEditor.Tools;
 using Game.Tests.EditMode.Data;
 using Game.Voxel.Model;
 using NUnit.Framework;
@@ -81,20 +80,13 @@ namespace Game.Tests.EditMode.ShipEditor
             Assert.AreEqual(f.Single, controller.SelectedBlock); Assert.AreEqual(5, controller.Orient); Assert.AreEqual(7, controller.Color);
             Assert.AreEqual(0, session.History.Count);
         }
-        sealed class PasteProbe : IEditorTool
-        {
-            public ToolId Id => ToolId.Paste; public bool HasGesture => false; public bool ConsumesWheel => false; public int Version => 0;
-            public void Tick(ToolContext context, in EditorInputFrame input) { }
-            public void BuildPreview(ToolContext context, PreviewBuffer preview) => preview.Clear();
-            public bool Cancel() => false;
-        }
         [Test] public void CancelChain_Order()
         {
             using var f = new DraftAdapterTests.Fixture(); using var session = Session(f); int leave = 0;
             using var controller = new ShipEditorController(session, f.Context, () => leave++); controller.SelectBlock(f.Hull);
             controller.Tick(new EditorInputFrame { PointerAllowed = true, PrimaryPressed = true }, Ray());
             controller.Selection.Add(int3.zero); Assert.IsTrue(controller.Cancel()); Assert.AreEqual(1, controller.Selection.Count); Assert.AreEqual(0, leave);
-            controller.Register(new PasteProbe()); controller.SelectTool(ToolId.Paste);
+            controller.SelectTool(ToolId.Paste);
             Assert.IsTrue(controller.Cancel()); Assert.AreEqual(ToolId.Place, controller.ActiveTool); Assert.AreEqual(1, controller.Selection.Count);
             Assert.IsTrue(controller.Cancel()); Assert.AreEqual(0, controller.Selection.Count); Assert.AreEqual(0, leave);
             Assert.IsTrue(controller.Cancel()); Assert.AreEqual(1, leave);
