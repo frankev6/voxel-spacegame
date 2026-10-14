@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 75 | 9 | 0 | 0 | 96 | 0 | 180 | 8 |
+| M3 | 72 | 12 | 0 | 0 | 96 | 0 | 180 | 6 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -342,7 +342,7 @@
 | SYS-008 | InteractionQuerySystem, docking and BodyInteracted | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006, INP-005, AI-004, CORE-006 | yes | done | astra (gpt-6) | 2026-10-13 | 499de6e3 | Surface query, wrapped press counters, shared docking and loader interaction persistence; four direct PlayMode cases pass. |
 | SYS-009 | PLOC participant | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-008, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | efe6dfff | PLOC raw-bit atomic restore, boot registration and validated deferred docking; reset/disposal cleanup; three required cases pass; spec-required: 3, extra: 0 |
 | SYS-010 | IShipSpawner contract for Galaxy services | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, FND-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | adcf164 | Spawner contract forwarding only; 2 required tests. FND-012 runtime remains open. Full 1027 EM / 145 PM passed. |
-| SYS-011 | Celestial visuals and distance compression | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004, SPEC-62 | no | todo |  |  |  |  |
+| SYS-011 | Celestial visuals and distance compression | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004, CAM-004, CAM-005 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Presentation worker implements real celestial visual owner |
 | SYS-012 | Regression scenarios R9, R28 | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-006, SYS-009, FND-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | c1acaa03 | Both real loader/GLXY-PLOC regressions pass; spec-required: 2, extra: 0 |
 | SYS-013 | Jump integration hooks | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006, SYS-008 | yes | done | astra (gpt-6) | 2026-10-13 | 05b87f54 | Real prefetch/unload/origin placement; three direct jump cases pass; spec-required: 3, extra: 0 |
 | SYS-014 | World gates: streaming performance and soak | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-007, SYS-013, TST-001 | yes | todo |  |  |  |  |
@@ -970,6 +970,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 396 | SPEC-32 Q19: functional jump dependencies and pure validation | Use completed concrete owners under ADR-0068; CanJump only reads current conditions/economy/player state; narrative undock occurs on request acceptance. | Tech lead |
 | 397 | SPEC-41 Q20: authored dialog view recycling and input | Accept authored screen/template defaults, pooled row cleanup and real input subscriptions; production runner remains DLG-007. | Tech lead |
 | 398 | SPEC-51 Q29: history ownership and saved cursor identity | ADR-0086 defines command transfer and cursor accessors; saved states destroyed by merge/branch trim become unreachable until MarkSaved/Clear. | Tech lead |
+| 399 | SPEC-31 Q23: concrete celestial visual prerequisites | Use completed anchor and camera-state owners under ADR-0068; all visual lifecycle and angular-size acceptance remains required. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |

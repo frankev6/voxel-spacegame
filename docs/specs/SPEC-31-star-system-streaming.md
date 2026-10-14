@@ -566,7 +566,7 @@ sequenceDiagram
 ### SYS-011 — Celestial visuals and distance compression
 - **Milestone:** M3
 - **Tier:** standard — rendering through registered IDs per §5.9
-- **Depends on:** `SYS-004`, `SPEC-62`
+- **Depends on:** `SYS-004`, `CAM-004`, `CAM-005`
 - **Do:** §5.9.
 - **Files:** `Assets/Game/Presentation/World/CelestialVisualSystem.cs`, tests
 - **Acceptance criteria:**
@@ -639,6 +639,8 @@ sequenceDiagram
 | 21 | Shared docking owner and managed interaction composition missing | ADR-0083 adds compatible optional loader injection; production registers and injects the shared service. Ignore stale/unknown bodies, persist Interacted without rebuilding geometry, dock through the owner, undock on unload. PLOC restore stays SYS-009. | Tech lead — ledger Q386 |
 
 | 22 | PLOC restore needs a silent lifecycle and missing-chunk defaults | Resolved: ADR-0085 completes docking on successful World SceneTransitionFinished after all readiness hooks. Pending docking survives loader teardown, validates the loaded dock anchor, then notifies once or clears with a warning. Missing PLOC clears pose/current-system/docking for the existing start fallback; missing GLXY regeneration preserves independently restored PLOC. Parse the complete v1 record before mutating state; reject inconsistent saved system/dock IDs and malformed/trailing bytes. Preserve position and yaw bits. | Tech lead — ledger Q393 |
+
+| 23 | Celestial visuals wait for whole camera spec although main camera state is implemented | Under ADR-0068 use SYS-004 anchors and CAM-004/005 live camera-state owners. Remaining camera modes and advisory checks do not gate visuals. Preserve actual definition registration, child transform ownership, hiding, and all three functional cases. | Tech lead — ledger Q399 |
 
 ## 11. References
 
