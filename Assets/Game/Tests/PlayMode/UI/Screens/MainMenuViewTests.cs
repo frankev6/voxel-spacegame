@@ -65,22 +65,20 @@ namespace Game.Tests.PlayMode.UI.Screens
             var issues = new List<LayoutIssue>(); UILayoutAudit.Run(root, viewport, issues);
             Assert.IsEmpty(issues, string.Join("\n", issues.Select(issue => issue.Kind + " " + issue.ElementPath)));
         }
-        static IEnumerator Complete<T>(Awaitable<T> operation, Action<T> check)
+        IEnumerator Complete<T>(Awaitable<T> operation, Action<T> check, string what)
         {
             var awaiter = operation.GetAwaiter();
-            for (int frame = 0; frame < 30 && !awaiter.IsCompleted; frame++) yield return null;
-            Assert.IsTrue(awaiter.IsCompleted, "The real owner operation completes within the bounded fixture.");
+            // Use the production-flow fixture's bounded completion policy, independent of frame rate.
+            yield return WaitUntil(() => awaiter.IsCompleted, 10, what);
             check(awaiter.GetResult());
         }
-        static IEnumerator Settle(Window window, Func<bool> completed)
+        IEnumerator Settle(Window window, Func<bool> completed, string what)
         {
-            for (int frame = 0; frame < 30; frame++)
+            yield return WaitUntil(() =>
             {
                 window.Presenter.Tick();
-                if (completed()) yield break;
-                yield return null;
-            }
-            window.Presenter.Tick(); Assert.IsTrue(completed(), "The real menu operation completes within the bounded fixture.");
+                return completed();
+            }, 10, what);
         }
 
         [UnityTest] public IEnumerator NoSave_ContinueHidden()
@@ -93,8 +91,13 @@ namespace Game.Tests.PlayMode.UI.Screens
             Assert.AreSame(window.View.Root.Q<Button>("main-menu-new-game"), window.View.DefaultFocus);
             var paths = new SavePaths(GameRootTestHooks.SaveRoot);
             var slot = new SlotRef(Service<SaveService>().ActiveProfile, new SlotId("manual_001"));
-            Directory.CreateDirectory(paths.SlotDir(slot)); File.WriteAllBytes(paths.WorldFile(slot), new byte[] { 1, 2, 3 });
-            window.Presenter.Refresh(); Assert.IsFalse(window.Model.HasContinue, "A real corrupt slot must not become Continue.");
+            // SPEC-05 §5.2 lists an existing world.sav without metadata as MetaMissing,
+            // even when truncated. An empty recognized slot directory is actually Corrupt.
+            Directory.CreateDirectory(paths.SlotDir(slot));
+            var listed = Service<SaveService>().ListSlots(slot.Profile);
+            Assert.AreEqual(1, listed.Count); Assert.AreEqual(SlotStatus.Corrupt, listed[0].Status);
+            window.Presenter.Refresh(); Assert.IsFalse(window.Model.HasContinue, "A slot listed as Corrupt must not become Continue.");
+            Assert.AreEqual(DisplayStyle.None, window.View.Root.Q<Button>("main-menu-continue").resolvedStyle.display);
             window.Click("main-menu-load"); window.Click("main-menu-lab"); window.Click("main-menu-settings");
             Assert.AreEqual(1, window.Loads); Assert.AreEqual(1, window.Labs); Assert.AreEqual(1, window.Settings);
             window.Presenter.Unbind(); window.Click("main-menu-new-game"); Assert.IsFalse(window.UI.Prompt.IsOpen);
@@ -123,7 +126,7 @@ namespace Game.Tests.PlayMode.UI.Screens
             window.Field.value = "  Ada O'Neil  "; Assert.IsTrue(window.Ok.enabledSelf);
             DialogTestContext.Enter(window.Field);
             var flow = Service<IGameFlow>(); var session = Service<GameSession>();
-            yield return Settle(window, () => flow.CurrentScene == GameScene.World && !flow.IsTransitioning && session.HasActiveSession);
+            yield return Settle(window, () => flow.CurrentScene == GameScene.World && !flow.IsTransitioning && session.HasActiveSession, "Menu NewGame reaches an active World session");
             Assert.IsFalse(window.UI.Prompt.IsOpen); Assert.AreEqual("Ada O'Neil", session.CommanderName);
             Assert.IsFalse(session.IsCreativeSession); Assert.AreNotEqual(0UL, session.CampaignSeed);
             Assert.AreEqual(1, Service<GalaxyService>().GenerationCount, "The prompt requests one actual new game.");
@@ -131,14 +134,15 @@ namespace Game.Tests.PlayMode.UI.Screens
             // Continue uses the actual persisted newest readable slot, including its commander/session data.
             var save = Service<SaveService>(); var first = new SlotRef(save.ActiveProfile, new SlotId("manual_001"));
             var latest = new SlotRef(save.ActiveProfile, new SlotId("manual_002"));
-            yield return Complete(save.SaveAsync(first, SaveReason.Manual, "Earlier save"), result => Assert.IsTrue(result.Success, result.Message));
-            yield return Complete(save.SaveAsync(latest, SaveReason.Manual, "Latest save"), result => Assert.IsTrue(result.Success, result.Message));
-            yield return Complete(flow.QuitToMainMenuAsync(false), result => Assert.AreEqual(FlowResult.Ok, result));
+            yield return Complete(save.SaveAsync(first, SaveReason.Manual, "Earlier save"), result => Assert.IsTrue(result.Success, result.Message), "Earlier save completes");
+            yield return Complete(save.SaveAsync(latest, SaveReason.Manual, "Latest save"), result => Assert.IsTrue(result.Success, result.Message), "Latest save completes");
+            yield return Complete(flow.QuitToMainMenuAsync(false), result => Assert.AreEqual(FlowResult.Ok, result), "Return to MainMenu completes");
+            window.Presenter.Tick(); // Consume the earlier NewGame completion before another menu intent.
             EventHub.DrainAll(); window.Presenter.Refresh();
             Assert.IsTrue(window.Model.HasContinue); Assert.AreEqual("Latest save", window.Model.ContinueSubtitle);
             Assert.AreEqual("Latest save", window.View.Root.Q<Label>("main-menu-continue-subtitle").text);
             window.Click("main-menu-continue");
-            yield return Settle(window, () => flow.CurrentScene == GameScene.World && !flow.IsTransitioning && session.HasActiveSession);
+            yield return Settle(window, () => flow.CurrentScene == GameScene.World && !flow.IsTransitioning && session.HasActiveSession, "Menu Continue reaches an active World session");
             Assert.AreEqual(latest, save.CurrentSlot); Assert.AreEqual("Ada O'Neil", session.CommanderName);
         }
         [UnityTest] public IEnumerator Layout_AllLogicalSizes_NoIssues()
