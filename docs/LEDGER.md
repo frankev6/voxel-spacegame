@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 13 | 11 | 0 | 0 | 158 | 0 | 182 | 4 |
+| M3 | 13 | 12 | 0 | 0 | 157 | 0 | 182 | 4 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -1216,6 +1216,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — Owner sequencing: M1–M3 before further M4 — astra (gpt-6)
+
+- Frank: “I would leave that for after all m1,2,3 based systems are completed and verified by me before we start doing depth and polish”. Finish functional integration and playground access first; then owner play verification. Further M4 implementation/acceptance is deferred; preserve delivered sources. Current three DEV-021 modules remain M1–M3 composition. Performance targets remain advisory, no new long test loops.
+- Documentation-only sequencing update; spec-required: 0, extra: 0. No gameplay completion or owner verification claimed.
 
 ### 2026-10-14 — NAR-019 live load safety accepted — astra (gpt-6)
 

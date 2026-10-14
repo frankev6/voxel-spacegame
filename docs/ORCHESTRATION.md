@@ -12,6 +12,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 ## Operating rules
 
+Owner sequencing correction (2026-10-14): finish and connect M1–M3 systems, then let Frank verify them before starting further M4 depth, scale or polish. Preserve already-delivered M4 work without advancing it. Current playground work exposes existing M1–M3 systems; it does not authorize new M4 features. Advisory performance work remains deferred unless an integrated gameplay defect requires it.
+
 Owner correction 2026-10-14: all three workers implement substantial feature deliveries, not repeated review assignments. Batch source/integration commits at meaningful completion points. EDT-020 may implement against integrated EDT-017 source while the lead validates it; this explicit pipeline exception does not mark EDT-017 done or waive functional acceptance. Lead owns selection fixes and editor connectivity/validation/commit prerequisites. Do not use partial acceptance as an idle reason when useful independent implementation is available.
 
 Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol high threads; no replacements or subagents. Lead owns central docs/main, reviews, frontier work and the serialized Unity channel. Workers use isolated task branches, no Unity, no remotes and no central workflow docs. Read all three exact thread states at work boundaries; recycle to ready standard tasks. Record real waits. Advisory performance policy and art restrictions remain binding.

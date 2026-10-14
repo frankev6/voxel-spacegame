@@ -38,6 +38,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 3. Next
 
+Owner sequencing correction (2026-10-14): finish and connect M1–M3 systems, then let Frank verify them before starting further M4 depth, scale or polish. Preserve already-delivered M4 work without advancing it. Current playground work exposes existing M1–M3 systems; it does not authorize new M4 features. Advisory performance work remains deferred unless an integrated gameplay defect requires it.
+
 Keep all three recorded workers on their current substantial assignments and integrate compatible deliveries locally. Lead next compatible map/log/story deliveries and remaining gameplay scenarios; no substitute owners or text-only feature pads. ENC-011's actual test-dialog scenario can now use accepted QST-008; DLG-007 is accepted; other real gameplay scenarios proceed.
 
 Retain full roadmap. Procedural territory461ffc36 is accepted (four required cases plus five regressions); authored seeds remain0. Pending compatible deliveries include escort2e03c4cb; HUD hotkeys/dock launchers are accepted. ECO-007 salvage is accepted; ECO-008 production registration is accepted. HUD-009 production binding is live, with three opt-in performance fixture definitions remaining. Focused batches only, performance advisory, no routine full suites or soaks.

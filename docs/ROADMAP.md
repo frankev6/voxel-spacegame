@@ -95,6 +95,8 @@ flowchart LR
 
 **Exit gates:** every old-prototype regression scenario in [05-testing.md §5](05-testing.md#5-old-prototype-regression-scenarios) passes; a scripted full playthrough of the opening (harness) passes; save/load anywhere outside combat.
 
+**Owner sequencing correction (2026-10-14): finish and connect M1–M3 systems, then let Frank verify them before starting further M4 depth, scale or polish. Preserve already-delivered M4 work without advancing it. Current playground work exposes existing M1–M3 systems; it does not authorize new M4 features. Advisory performance work remains deferred unless an integrated gameplay defect requires it.**
+
 ## M4 — Depth and scale
 
 In-world editing when docked, supercruise, faction territory, more content, LOD2/dormancy polish, gamepad. Specs mark these tasks with milestone `M4`.
