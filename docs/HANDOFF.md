@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Compatible deliveries integrated:** SYS-012 c1acaa03 and DLG-012 fedb7e70 are on local main, uncompiled/unaccepted pending focused batch with DLG-009. Combat reviews actual travel seams; economy reviews loader regressions; presentation implements the view. Next lead TRV-006 dependency resolution/timeline. No Unity active.
+
 - **Star-system jump integration accepted:** SYS-01305b87f54 compile clean, three real origin/loader cases pass. Player arrives at requested pose, source entities/debris retire, and entry is emitted once. SYS-012 regression and DLG-009/012 workers active. Next travel timeline integration and compatible deliveries. No Unity active.
 
 - **Jump integration started:** SYS-01328aa9189 implements destination validation, prefetch/unload, origin-owner placement and arrival state. Uncompiled/unaccepted; next three required cases. SYS-009 accepted; SYS-012/DLG-009/DLG-012 assigned to the existing workers. No Unity active.
