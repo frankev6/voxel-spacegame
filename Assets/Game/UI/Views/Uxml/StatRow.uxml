@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="fleet-stat-row" picking-mode="Ignore">
+        <ui:Label name="stat-label" class="text-s text-ellipsis fleet-stat-label" picking-mode="Ignore" />
+        <ui:Label name="stat-value" class="text-s text-ellipsis fleet-stat-value" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,19 @@
+/* SPEC-61 HUD-017: headers and list rows participate in normal flex layout. */
+.fleet-screen { flex-grow: 1; align-items: center; justify-content: center; }
+.fleet-panel { width: 1100px; max-width: 94%; height: 760px; max-height: 90%; }
+.fleet-body { flex-direction: row; flex-grow: 1; flex-basis: 0; min-height: 0; }
+.fleet-list-column { width: 420px; flex-shrink: 0; min-height: 0; }
+.fleet-ship-list, .fleet-stats { flex-grow: 1; flex-basis: 0; min-height: 0; }
+.fleet-detail { flex-grow: 1; flex-basis: 0; min-width: 0; margin-left: var(--space-4); }
+.fleet-detail-heading { flex-shrink: 0; margin-bottom: var(--space-3); }
+.fleet-detail-name, .fleet-detail-class { min-width: 0; }
+.fleet-row { height: 88px; justify-content: center; padding: var(--space-2); }
+.fleet-row-heading { flex-direction: row; align-items: center; }
+.fleet-row-name { flex-grow: 1; min-width: 0; }
+.fleet-active-tag { flex-shrink: 0; margin-left: var(--space-2); }
+.fleet-row-hull { margin-top: var(--space-2); }
+.fleet-stat-row { height: 36px; flex-direction: row; align-items: center; padding: var(--space-2); }
+.fleet-stat-label { flex-grow: 1; min-width: 0; }
+.fleet-stat-value { width: 140px; flex-shrink: 0; -unity-text-align: middle-right; }
+.fleet-edit-reason { flex-grow: 1; min-width: 0; white-space: normal; }
+.fleet-actions > .btn { margin-left: var(--space-2); }

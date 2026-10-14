@@ -1,0 +1,29 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../../Theme/screens/fleet.uss" />
+    <ui:VisualElement class="fleet-screen" picking-mode="Ignore">
+        <ui:VisualElement name="fleet-panel" class="panel fleet-panel">
+            <ui:VisualElement class="panel__header" picking-mode="Ignore">
+                <ui:Label text="Fleet" class="panel__title text-display" picking-mode="Ignore" />
+                <ui:Button name="fleet-close" text="Close" class="btn btn--ghost" />
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__body fleet-body" picking-mode="Ignore">
+                <ui:VisualElement class="fleet-list-column" picking-mode="Ignore">
+                    <ui:Label name="fleet-empty" text="No ships in the fleet." class="list__empty" picking-mode="Ignore" />
+                    <ui:ListView name="fleet-ship-list" class="list fleet-ship-list" fixed-item-height="88" virtualization-method="FixedHeight" selection-type="Single" item-template="project://database/Assets/Game/UI/Views/Uxml/FleetShipRow.uxml?fileID=9197481963319205126&amp;guid=616ff06842b84bfe8b7adc1f38a0eb34&amp;type=3#FleetShipRow" />
+                </ui:VisualElement>
+                <ui:VisualElement class="fleet-detail" picking-mode="Ignore">
+                    <ui:VisualElement name="fleet-detail-heading" class="fleet-detail-heading" picking-mode="Ignore">
+                        <ui:Label name="fleet-detail-name" class="text-display text-l text-ellipsis fleet-detail-name" picking-mode="Ignore" />
+                        <ui:Label name="fleet-detail-class" class="text-s text-muted text-ellipsis fleet-detail-class" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:ListView name="fleet-stats" class="list fleet-stats" fixed-item-height="36" virtualization-method="FixedHeight" selection-type="None" item-template="project://database/Assets/Game/UI/Views/Uxml/StatRow.uxml?fileID=9197481963319205126&amp;guid=348e74d7a1e54929890f90cc46ee5f5d&amp;type=3#StatRow" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__footer fleet-actions" picking-mode="Ignore">
+                <ui:Label name="fleet-edit-blocked" class="text-s text-muted fleet-edit-reason" picking-mode="Ignore" />
+                <ui:Button name="fleet-set-active" text="Set Active" class="btn btn--secondary" />
+                <ui:Button name="fleet-edit" text="Edit ship" class="btn btn--primary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
