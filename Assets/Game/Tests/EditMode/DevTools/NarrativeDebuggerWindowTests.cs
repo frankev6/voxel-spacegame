@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Reflection;
 using Game.Data.Logic;
+using Game.Data.Definitions;
 using Game.Core.Events;
 using Game.Narrative;
 using Game.Tests.EditMode.Data;
