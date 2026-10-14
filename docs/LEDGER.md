@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 59 | 13 | 0 | 0 | 108 | 0 | 180 | 7 |
+| M3 | 59 | 12 | 0 | 0 | 109 | 0 | 180 | 7 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -354,7 +354,7 @@
 | TRV-006 | TravelService jump timeline | [SPEC-32](specs/SPEC-32-travel.md) | M3 | frontier | TRV-003, TRV-005, TRV-007, GAL-008, GAL-009, SYS-007, SYS-009, SYS-013, FND-001 | yes | done | astra (gpt-6) | 2026-10-13 | 2430de6e | Jump lifecycle/boot and map lane binding; eight direct cases pass, review fixes readiness; advisory fixture compiled only; spec-required: 8, extra: 0 |
 | TRV-007 | PlayerControlLock consumption | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 75ba22b | Movement/action lock consumption without press replay; 4 required tests. TRV-006 owns lifecycle. Full 1027 EM / 145 PM passed. |
 | TRV-008 | Gate interaction, gate info and notices | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 8c2e7cd8 | Integrated real gate/destination routing; focused batch 11/11 passes, compile clean; spec-required: 6, extra: 0 |
-| TRV-009 | Travel presentation | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006, SYS-011, UI-003, UI-007, UI-012, VFX-014, AUD-006 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Existing presentation worker: travel cover and gate emission; exact prerequisites Q408 |
+| TRV-009 | Travel presentation | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006, SYS-011, UI-003, UI-007, UI-012, VFX-014, AUD-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 89a0187b | Travel cover/fade, opaque Transit and real gate emission; four graphics checks pass; spec-required:4,extra:0 |
 | TRV-010 | Destination and route service | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-004, TRV-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 8c2e7cd8 | Integrated real gate/destination routing; focused batch 11/11 passes, compile clean; spec-required: 5, extra: 0 |
 | TRV-011 | Narrative, dev probes and the R30 scenario | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-008, TRV-010, SPEC-40, SPEC-70 | no | todo |  |  |  |  |
 | TRV-012 | Jump integration, R30 regression and budget | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-009, TRV-011, TST-001 | no | todo |  |  |  |  |
@@ -985,6 +985,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 411 | SPEC-51 Q37: controller construction and state | ADR-0091 supplies borrowed session/content constructor, leave callback and read-only palette/hover state; maintain core identities incrementally and query bounded removal volumes. | Tech lead — resolved |
 | 412 | SPEC-51 Q38: editor-panel concrete prerequisites | ADR-0068 replaces whole UI/screen specifications with completed view-model/command, root, binding, input, control, tooltip and audit owners; host integration remains EDT-022. | Tech lead — resolved |
 | 413 | SPEC-51 Q41: selection identity and grid-compatible rotation | Origin multimap preserves shared-origin records and canonical capture order. Quarter-turn group minima use truncating span differences for reversible mixed-parity alignment; move/rotate retain damage, mirrors remap it. Replacement preserves colour and charges pristine replacement normally. | Tech lead — resolved |
+| 414 | SPEC-32 Q23: travel cover and refreshed gate ownership | Presentation owns only its cover; use approved fade tokens, force opacity at Transit, detach on UIRoot replacement. Gate emission follows lane/system/generation and structural revisions; SYS-011 supplies initial emission only. | Tech lead — resolved |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1117,6 +1118,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — TRV-009 travel presentation accepted — astra (gpt-6)
+
+- Integrated worker2836b721 as89a0187b. Cover follows real travel phases, is opaque at Transit even when fixed ticks run faster than the CSS fade, fades on reveal/abort, and owns only its element. Gate emission writes existing SYS-011 children and refreshes after T1 anchor recreation. SPEC-32 Q23/global414 mirrors the accepted defaults.
+- Compile95178 terminal0, zero CS warnings. Graphics PlayMode91896 terminal0:4 passed,0 failed,0 skipped (0.7896187s test bodies). Required real child emission test ran with graphics enabled. Existing QualitySettings restored byte-for-byte from pre-run backup, preserving owner's dirt. Evidence Logs/playtest/travel-presentation. spec-required:4,extra:0. No full suite or benchmark.
+- Workers active on EDT-015 area tools, EDT-021 panels, EDT-017 clipboard/stamp. Lead next EDT-018 draft rendering then remaining editor connectivity/commit/host prerequisites. Previous selection acceptance/integration and this travel acceptance are progress. No Unity active; full roadmap goal remains active.
 
 ### 2026-10-14 — TRV-009 source integrated; EDT-017 dispatched — astra (gpt-6)
 

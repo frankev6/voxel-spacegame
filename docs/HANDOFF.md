@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-14)
 
+- **Travel presentation accepted:** TRV-00989a0187b compiles clean; all four graphics-enabled cases pass with none skipped. Opaque Transit, reveal fade, real gate emission and layout verified; owner quality settings preserved. EDT-015/021/017 workers active. Lead next EDT-018 draft rendering and remaining editor prerequisites. No Unity active.
+
 - **Travel presentation delivered:** TRV-0092836b721 integrated on task/TRV-009-travel-integration, awaiting focused graphics acceptance. Same presentation worker recycled to EDT-017 clipboard/stamp; combat EDT-015 and economy EDT-021 remain active. No Unity active.
 
 - **Selection/transforms accepted:** EDT-016dd5467a7 clean compile and14 focused checks pass (six required, seven basic tools, core limit). Damage survives movement/rotation/chiral mirroring; blocked moves are atomic. Clipboard/stamp EDT-017 now ready. Existing workers continue EDT-015, EDT-021 and TRV-009; lead next renderer/connectivity and delivery integration. No Unity active.

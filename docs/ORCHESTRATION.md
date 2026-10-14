@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Travel presentation accepted:** TRV-00989a0187b compiles clean; all four graphics-enabled cases pass with none skipped. Opaque Transit, reveal fade, real gate emission and layout verified; owner quality settings preserved. EDT-015/021/017 workers active. Lead next EDT-018 draft rendering and remaining editor prerequisites. No Unity active.
+
 - **Travel delivered / worker recycled:** TRV-0092836b721 integrated on task/TRV-009-travel-integration, validation pending. Presentation worker now EDT-017 (claimccfac595; SPEC-51 Q42 reserved). Combat EDT-015 and economy EDT-021 active. Lead next focused travel graphics acceptance, then renderer/connectivity. No Unity active.
 
 - **Selection/transforms accepted:** EDT-016dd5467a7 clean compile and14 focused checks pass (six required, seven basic tools, core limit). Damage survives movement/rotation/chiral mirroring; blocked moves are atomic. Clipboard/stamp EDT-017 now ready. Existing workers continue EDT-015, EDT-021 and TRV-009; lead next renderer/connectivity and delivery integration. No Unity active.
