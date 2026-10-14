@@ -16,7 +16,7 @@ Owner correction 2026-10-14: all three workers implement substantial feature del
 
 Owner authorization: ADR-0062. Exactly these three separate reusable GPT-6.1-Sol high threads; no replacements or subagents. Lead owns central docs/main, reviews, frontier work and the serialized Unity channel. Workers use isolated task branches, no Unity, no remotes and no central workflow docs. Read all three exact thread states at work boundaries; recycle to ready standard tasks. Record real waits. Advisory performance policy and art restrictions remain binding.
 
-Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` is paused as a fallback. Never falsely mark the roadmap achieved.
+Native goal was verified paused on 2026-10-14; do not describe it as active or achieved. Existing heartbeat `spaceship-implementation-coordinator` was reactivated at its existing five-minute cadence under Frank’s keep-going/keep-three-workers-working request. It supplies continuation, with quiet unchanged-state notifications. No duplicate schedule or workers.
 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
