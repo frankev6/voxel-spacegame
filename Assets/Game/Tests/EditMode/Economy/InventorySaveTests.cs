@@ -25,8 +25,17 @@ namespace Game.Tests.EditMode.Economy
             public readonly ItemDefinition Item;
             public Fixture()
             {
-                Item = TestContentFactory.Item("resource_save", so => TestContentFactory.Set(so, "maxStack", 10));
-                Merchant = TestContentFactory.Create<MerchantDefinition>("merchant_save");
+                Item = TestContentFactory.Item("resource_save", so =>
+                {
+                    TestContentFactory.Set(so, "maxStack", 10);
+                    var aliases = so.FindProperty("formerIds"); aliases.arraySize = 1;
+                    aliases.GetArrayElementAtIndex(0).stringValue = "resource_old";
+                });
+                Merchant = TestContentFactory.Create<MerchantDefinition>("merchant_save", so =>
+                {
+                    var aliases = so.FindProperty("formerIds"); aliases.arraySize = 1;
+                    aliases.GetArrayElementAtIndex(0).stringValue = "merchant_old";
+                });
                 var config = TestContentFactory.Create<EconomyConfigDefinition>("config_economy_save");
                 var report = new ValidationReport("InventorySaveTests");
                 Catalog = ContentCatalog.Build(new ContentDefinition[] { Item, Merchant, config,
@@ -37,7 +46,7 @@ namespace Game.Tests.EditMode.Economy
                 Economy.Inventory.SetCapacity(20); Save = new InventorySaveParticipant(Economy, Catalog);
             }
             public byte[] Capture() { using var w = new SaveWriter(); Save.Capture(w); return w.ToArray(); }
-            public byte[] Payload(int slots = 200, int merchants = 2)
+            public byte[] Payload(int slots = 200, int merchants = 2, bool alias = false)
             {
                 using var w = new SaveWriter(); w.WriteInt64(12345); w.WriteVarUInt32((uint)slots);
                 for (int i = 0; i < slots; i++)
@@ -47,9 +56,9 @@ namespace Game.Tests.EditMode.Economy
                 w.WriteVarUInt32((uint)merchants);
                 for (int i = 0; i < merchants; i++)
                 {
-                    w.WriteContentId(i == 0 ? Merchant.Id : new ContentId("merchant_unknown_" + i));
+                    w.WriteContentId(i == 0 ? (alias ? new ContentId("merchant_old") : Merchant.Id) : new ContentId("merchant_unknown_" + i));
                     w.WriteDouble(12.5 + i); w.WriteVarUInt32(2);
-                    w.WriteContentId(Item.Id); w.WriteInt32(37); w.WriteSingle(1.25f); w.WriteBool(false);
+                    w.WriteContentId(i == 0 ? Item.Id : new ContentId("resource_old")); w.WriteInt32(37); w.WriteSingle(1.25f); w.WriteBool(false);
                     w.WriteContentId(new ContentId("item_removed")); w.WriteInt32(-1); w.WriteSingle(-0f); w.WriteBool(true);
                 }
                 return w.ToArray();
@@ -72,7 +81,9 @@ namespace Game.Tests.EditMode.Economy
             var f = new Fixture(); var bytes = f.Payload(1, 1); f.Save.Restore(new SaveReader(bytes), 1);
             var slot = f.Economy.Inventory.Get(0);
             Assert.AreSame(f.Catalog.MissingItem, slot.Item); Assert.AreEqual(new ContentId("item_removed"), slot.OriginalId);
-            var stock = f.Economy.Merchants.OpenSession(f.Merchant, 0, false, "").Stock[1];
+            var session = f.Economy.Merchants.OpenSession(f.Merchant, 0, false, "");
+            var stock = session.Stock[1];
+            Assert.IsFalse(session.TryBuy(1, 1, out var reason)); Assert.AreEqual("Item unavailable", reason);
             Assert.AreSame(f.Catalog.MissingItem, stock.Item); Assert.AreEqual(slot.OriginalId, stock.OriginalId);
             Assert.AreEqual(-1, stock.Count); CollectionAssert.AreEqual(bytes, f.Capture());
         }
@@ -83,6 +94,10 @@ namespace Game.Tests.EditMode.Economy
             CollectionAssert.AreEqual(bytes, f.Capture());
             f.Economy.Merchants.OpenSession(f.Merchant, 0, false, "").Close();
             CollectionAssert.AreEqual(bytes, f.Capture());
+            f.Save.Restore(new SaveReader(f.Payload(0, 2, alias: true)), 1);
+            var session = f.Economy.Merchants.OpenSession(f.Merchant, 0, false, "");
+            Assert.AreEqual(37, session.Stock[0].Count, "A renamed merchant must reuse restored stock");
+            CollectionAssert.AreEqual(bytes, f.Capture(), "Known aliases resave canonically; unknown merchants remain unchanged");
         }
         [Test] public void Restore_Replaces()
         {

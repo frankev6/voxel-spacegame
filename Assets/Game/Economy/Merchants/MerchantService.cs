@@ -56,6 +56,7 @@ namespace Game.Economy
                 state.Restock(merchant, now);
             return Current = new MerchantSession(this, state, merchant, relation, refuse, refusalReason);
         }
+        internal bool IsMissing(ItemDefinition item) => item == catalog.MissingItem;
         internal bool BeginTrade(out string reason)
         {
             reason = trading ? "Trade in progress" : null;

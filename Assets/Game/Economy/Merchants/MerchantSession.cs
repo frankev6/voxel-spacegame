@@ -29,7 +29,7 @@ namespace Game.Economy
             var row = state.Rows[stockIndex];
             return PriceMath.BuyPrice(row.Item.BasePrice, row.PriceFactor, Merchant.SellPriceFactor, Relation, owner.Config.RelationPriceSlope);
         }
-        bool Buys(ItemDefinition item) => item != null && item.Tradeable && (int)item.Category < 8 &&
+        bool Buys(ItemDefinition item) => item != null && !owner.IsMissing(item) && item.Tradeable && (int)item.Category < 8 &&
             (Merchant.Buys & (ItemCategoryMask)(1 << (int)item.Category)) != 0;
         public int SellPriceOf(ItemDefinition item) => Buys(item) ?
             PriceMath.SellPrice(item.BasePrice, Merchant.BuyPriceFactor, Relation, owner.Config.RelationPriceSlope) : 0;
@@ -41,6 +41,7 @@ namespace Game.Economy
             if ((uint)stockIndex >= state.Rows.Count) { reason = "Not in stock"; return false; }
             if (quantity < 1) { reason = "Invalid quantity"; return false; }
             var row = state.Rows[stockIndex];
+            if (owner.IsMissing(row.Item)) { reason = "Item unavailable"; return false; }
             if (row.Count != -1 && quantity > row.Count) { reason = $"Only {row.Count} in stock"; return false; }
             long total = (long)BuyPriceOf(stockIndex) * quantity;
             if (owner.Wallet.Credits < total) { reason = $"Not enough credits: {total} needed"; return false; }
@@ -71,7 +72,7 @@ namespace Game.Economy
             if (!Available(out reason)) return false;
             if ((uint)slot >= InventoryModel.MaxSlots || owner.Inventory.Get(slot).IsEmpty) { reason = "Nothing to sell"; return false; }
             var stack = owner.Inventory.Get(slot);
-            if (!stack.Item.Tradeable) { reason = "Cannot sell this item"; return false; }
+            if (owner.IsMissing(stack.Item) || !stack.Item.Tradeable) { reason = "Cannot sell this item"; return false; }
             if (!Buys(stack.Item)) { reason = $"{Merchant.DisplayName} does not buy {stack.Item.Category}"; return false; }
             if (quantity < 1 || quantity > stack.Count) { reason = "Invalid quantity"; return false; }
             if (SellPriceOf(stack.Item) == 0) { reason = "No value"; return false; }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Game.Core;
 using Game.Core.Save;
 using Game.Data.Services;
+using Game.Data.Definitions;
 
 namespace Game.Economy
 {
@@ -38,11 +39,12 @@ namespace Game.Economy
             foreach (var id in merchantIds)
             {
                 var state = economy.Merchants.SavedStates[id];
+                bool unknownMerchant = !catalog.TryGet<MerchantDefinition>(id, out _);
                 writer.WriteContentId(id); writer.WriteDouble(state.LastRestock);
                 writer.WriteVarUInt32((uint)state.Rows.Count);
                 foreach (var row in state.Rows)
                 {
-                    writer.WriteContentId(row.Item == catalog.MissingItem && !row.OriginalId.IsNone ? row.OriginalId : row.Item.Id);
+                    writer.WriteContentId((unknownMerchant || row.Item == catalog.MissingItem) && !row.OriginalId.IsNone ? row.OriginalId : row.Item.Id);
                     writer.WriteInt32(row.Count); writer.WriteSingle(row.PriceFactor); writer.WriteBool(row.Buyback);
                 }
             }
@@ -74,6 +76,8 @@ namespace Game.Economy
             for (uint n = 0; n < merchants; n++)
             {
                 var id = reader.ReadContentId(); double restock = reader.ReadDouble();
+                bool knownMerchant = catalog.TryGet<MerchantDefinition>(id, out var merchant);
+                if (knownMerchant) id = merchant.Id;
                 if (id.IsNone || !seen.Add(id)) throw new SaveFormatException("Empty or duplicate INVT merchant", reader.Position);
                 uint entries = ReadCount(reader, 10); // shortest content ID + int + float + bool
                 var rows = new List<MerchantStockState>();
@@ -81,8 +85,10 @@ namespace Game.Economy
                 {
                     var itemId = reader.ReadContentId();
                     var item = catalog.ResolveItemOrMissing(itemId, "INVT");
-                    rows.Add(new MerchantStockState { Item = item, OriginalId = item == catalog.MissingItem ? itemId : default,
-                        Count = reader.ReadInt32(), PriceFactor = reader.ReadSingle(), Buyback = reader.ReadBool() });
+                    int count = reader.ReadInt32();
+                    if (knownMerchant && count < -1) throw new SaveFormatException("Invalid INVT stock count", reader.Position);
+                    rows.Add(new MerchantStockState { Item = item, OriginalId = itemId,
+                        Count = count, PriceFactor = reader.ReadSingle(), Buyback = reader.ReadBool() });
                 }
                 economy.Merchants.RestoreState(id, restock, rows);
             }
