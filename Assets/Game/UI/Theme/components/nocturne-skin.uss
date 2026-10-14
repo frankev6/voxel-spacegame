@@ -17,7 +17,7 @@
 .panel__title, .text-display {
     color: var(--color-accent);
     letter-spacing: 2px;
-    text-shadow: 0 0 6px rgba(57, 213, 255, 0.35);
+    /* No text-shadow: its blur samples outside the placeholder SDF atlas padding and draws stray dashes. */
 }
 
 /* Corner brackets (CornerBrackets.Decorate): short L marks just inside each corner. */

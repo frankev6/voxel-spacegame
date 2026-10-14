@@ -171,6 +171,7 @@ namespace Game.App.Boot
             var rangeConfig = Content.Catalog.Get<FiringRangeConfigDefinition>(new ContentId("config_firing_range"));
             var range = Push(new Game.App.Session.FiringRangeService(world, Content.Catalog, new VoxelContent { Blocks = Content.BlockDefs, Orientations = Content.Orientations }, Registry, Session, rangeConfig));
             Register(range); Flow.RegisterReady(range); Flow.RegisterExiting(range);
+            Flow.RegisterReady(new Game.App.Session.MainMenuShowcase(Registry, Content, config.ShipEditorConfig ? config.ShipEditorConfig.BrickMaterial : null));
 
             // GAL-008 installs and registers its real GalaxyService at row 8.1 before this point.
             // 8.3 FND-012: install both canonical surfaces only after that production dependency exists.

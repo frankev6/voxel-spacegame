@@ -1,5 +1,7 @@
 /* SPEC-61: screen regions own dimensions; appearance uses the approved theme. */
-.main-menu-screen { justify-content: center; background-color: var(--color-bg); }
+/* QA-001: the menu floats over the NOCTURNE showcase scene; only the column keeps a glass backing. */
+.main-menu-screen { justify-content: center; background-color: rgba(0, 0, 0, 0); }
+.main-menu-column { background-color: rgba(4, 7, 12, 0.62); padding: var(--space-5); border-left-width: 1px; border-left-color: rgba(57, 213, 255, 0.5); }
 .main-menu-column { width: 420px; max-width: 90%; margin-left: var(--space-8); }
 .main-menu-subtitle { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .main-menu-version { position: absolute; right: var(--space-8); bottom: var(--space-8); }

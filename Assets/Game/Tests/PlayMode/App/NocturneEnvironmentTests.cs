@@ -13,7 +13,6 @@ namespace Game.Tests.PlayMode.App
     {
         [UnityTest] public IEnumerator NewGameRestart_PreservesSky()
         {
-            var clear = Game.Camera.Camera.clearFlags;
             for (int restart = 0; restart < 3; restart++)
             {
                 yield return Run(Game.Session.NewGameAsync(new NewGameArgs("Harness", 42, false, ContentId.None)));
@@ -29,15 +28,22 @@ namespace Game.Tests.PlayMode.App
                 Assert.AreEqual(1, environment.GetComponentsInChildren<ParticleSystem>().Length);
                 Assert.AreEqual(1400, environment.GetComponentInChildren<ParticleSystem>().particleCount);
             }
-            yield return Run(Game.Session.QuitToMainMenuAsync(false)); yield return null;
-            Assert.IsNull(Object.FindAnyObjectByType<NocturneFlightEnvironment>());
-            Assert.IsNull(Game.Camera.Camera.GetComponent<Skybox>());
-            Assert.AreEqual(clear, Game.Camera.Camera.clearFlags);
+            yield return Run(Game.Session.QuitToMainMenuAsync(false));
+            yield return MenuBackdrop();
+        }
+        // QA-001: the main menu has its own NOCTURNE backdrop (sky, VESPER-9, light rig); the World's instance is gone.
+        IEnumerator MenuBackdrop()
+        {
+            yield return Until(() => Object.FindAnyObjectByType<NocturneFlightEnvironment>()?.GetComponentInChildren<ParticleSystem>() != null, "Menu backdrop initialized");
+            yield return null;
+            var environments = Object.FindObjectsByType<NocturneFlightEnvironment>();
+            Assert.AreEqual(1, environments.Length);
+            Assert.AreEqual("MainMenu", environments[0].gameObject.scene.name);
+            Assert.AreEqual("Game/NocturneSky", Game.Camera.Camera.GetComponent<Skybox>().material.shader.name);
         }
 
         [UnityTest] public IEnumerator WorldEnvironment_EntersMovesAndCleansUp()
         {
-            var clear = Game.Camera.Camera.clearFlags;
             for (int entry = 0; entry < 2; entry++)
             {
                 yield return Run(Game.Session.NewGameAsync(new NewGameArgs("Harness", 42, false, ContentId.None)));
@@ -76,8 +82,7 @@ namespace Game.Tests.PlayMode.App
                 yield return Run(Game.Session.QuitToMainMenuAsync(false));
                 yield return null;
                 Assert.IsTrue(environment == null && dust == null, "Scene owns and destroys presentation");
-                Assert.AreEqual(clear, Game.Camera.Camera.clearFlags);
-                Assert.IsNull(Game.Camera.Camera.GetComponent<Skybox>());
+                yield return MenuBackdrop();
             }
         }
     }
