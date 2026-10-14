@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 2 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 24 | 16 | 0 | 0 | 142 | 0 | 182 | 6 |
+| M3 | 23 | 17 | 0 | 0 | 142 | 0 | 182 | 5 |
 | M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -406,7 +406,7 @@
 | QST-003 | QuestService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | done | astra (gpt-6) | 2026-10-13 | a8b2d6d1 | Quest runtime/baselines/progression/restore implemented; seven required functional cases pass39710; Q371, trace and objective dependency review fixes. QUST/live adapter remain owning tasks. |
 | QST-004 | ClueService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, NAR-005, NAR-007, NAR-010, NAR-011 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 19b24412 | Clue/mystery/rumor lifecycle accepted; five required functional cases pass in focused nine-case batch; Q377. |
 | QST-005 | BeatService | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, DLG-006, DLG-007, DLG-008 | yes | done | astra (gpt-6) | 2026-10-14 | 30762271 | Deterministic scheduler/queue/completion implemented; nine required functional checks pass; two advisory fixtures authored, deferred. QST-006/008 own adapter/live registration. |
-| QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | yes | todo |  |  |  |  |
+| QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same presentation worker; full narrative adapter, ship log and markers after accepted BeatService. |
 | QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-006, PERS-001 | no | todo |  |  |  |  |
 | QST-008 | Bridge rules, player-free gating and registration | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005, QST-006, SPEC-40, SPEC-32, SPEC-33 | no | todo |  |  |  |  |
 | QST-009 | Opening chapter content | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, GAL-003, NAR-013, DLG-003, ENC-002, ECO-002 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Existing economy worker authoring complete opening chapter content; concrete prerequisites Q424; no new story/art |
