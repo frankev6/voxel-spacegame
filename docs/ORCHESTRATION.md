@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DEV-018 | Implement real save/load/jump commands and CLI/menu flow | TRV-011 after delivery |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | GAL-012 | Finish authored galaxy/body content and real service integration | QST-009 after delivery |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | EDT-020 | Implement blueprint store/browser on integrated clipboard source | Editor host support after delivery |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | HUD-012 | Implement real merchant screen/presenter and trade-session interaction | More ready UI integration after delivery |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | QST-009 | Author exact opening chapter content and tags against accepted validators | Opening integration after concrete prerequisites |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-011 | Implement inventory screen/presenter, pooled slots and drag/sort/stack | More ready UI integration after delivery |
 
 ## Operating rules
 
@@ -22,5 +22,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
-- Owner correction implemented: DEV-018, GAL-012 and EDT-020 active in the exact three existing workers (snapshots338/357/313). Main source integrated; previous worker deliveries accepted in one compatible42 EditMode +4 graphics PlayMode batch. Selection repaired e28ae8a5, renderer previously accepted. Lead next connectivity/validation/commit/overlay/host implementation; no Unity active.
-- Deliver feature-sized changes, run required focused checks together, and recycle the same workers promptly. Blueprint dependencies are concrete and accepted (SPEC-51 Q49); future follow-ups TRV-011/QST-009 still require actual delivery acceptance. Historical outcomes live in LEDGER, not repeated here.
+- DEV-021 playground playable, required functional test and live image verified. DEV-018/GAL-012/EDT-020 compatible worker deliveries integrated; GAL-012 and EDT-020 accepted. TRV-011 hooks integrated and unit checks pass, actual R30 remains. Exact evidence and partial states in LEDGER.
+- Workers dispatched to claimed HUD-012, QST-009 and HUD-011, same exact three threads. Lead finishes playground demonstration and keeps incoming screen integration moving; frontier editor/root work remains lead-owned. Preserve the live game after demonstration. No unchanged-state chatter or repeated review-only dispatches.
