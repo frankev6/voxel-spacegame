@@ -96,7 +96,7 @@ namespace Game.Voxel.Grid
             var queue = em.GetComponentData<BrickMeshQueue>(singletons); queue.CompleteAccess();
             using (var roots = spawning.ToEntityArray(Allocator.Temp))
             {
-                roots.Sort(new SerialOrder { Grids = state.GetComponentLookup<VoxelGrid>(true) });
+                roots.Sort(new SerialOrder { Grids = SystemAPI.GetComponentLookup<VoxelGrid>(true) });
                 foreach (var root in roots)
                 {
                     if (budget == 0) break;
@@ -244,16 +244,16 @@ namespace Game.Voxel.Grid
             }
         }
 
-        static void FillRoots(ref SystemState state, NativeArray<RootFillData> data)
+        void FillRoots(ref SystemState state, NativeArray<RootFillData> data)
         {
             new RootFillJob
             {
-                Data = data, Grids = state.GetComponentLookup<VoxelGrid>(), Tokens = state.GetComponentLookup<SpawnReadToken>(),
-                Transforms = state.GetComponentLookup<LocalTransform>(), Ids = state.GetComponentLookup<PersistentId>(), Sources = state.GetComponentLookup<GridSource>(),
-                Spawning = state.GetComponentLookup<GridSpawning>(), Bodies = state.GetComponentLookup<GridBodyInit>(), Masses = state.GetComponentLookup<GridMass>(),
-                Recompute = state.GetComponentLookup<GridMassRecompute>(), Despawn = state.GetComponentLookup<GridDespawnRequest>(), Rebuilt = state.GetComponentLookup<GridRebuilt>(),
-                Edit = state.GetComponentLookup<GridEditRequest>(), Dormant = state.GetComponentLookup<Dormant>(), Palettes = state.GetBufferLookup<PaletteEntry>(),
-                Instances = state.GetBufferLookup<BlockInstance>(), Slots = state.GetBufferLookup<BrickSlot>(), Groups = state.GetBufferLookup<LinkedEntityGroup>(), Baselines = state.GetBufferLookup<GridSpawnBrick>()
+                Data = data, Grids = SystemAPI.GetComponentLookup<VoxelGrid>(), Tokens = SystemAPI.GetComponentLookup<SpawnReadToken>(),
+                Transforms = SystemAPI.GetComponentLookup<LocalTransform>(), Ids = SystemAPI.GetComponentLookup<PersistentId>(), Sources = SystemAPI.GetComponentLookup<GridSource>(),
+                Spawning = SystemAPI.GetComponentLookup<GridSpawning>(), Bodies = SystemAPI.GetComponentLookup<GridBodyInit>(), Masses = SystemAPI.GetComponentLookup<GridMass>(),
+                Recompute = SystemAPI.GetComponentLookup<GridMassRecompute>(), Despawn = SystemAPI.GetComponentLookup<GridDespawnRequest>(), Rebuilt = SystemAPI.GetComponentLookup<GridRebuilt>(),
+                Edit = SystemAPI.GetComponentLookup<GridEditRequest>(), Dormant = SystemAPI.GetComponentLookup<Dormant>(), Palettes = SystemAPI.GetBufferLookup<PaletteEntry>(),
+                Instances = SystemAPI.GetBufferLookup<BlockInstance>(), Slots = SystemAPI.GetBufferLookup<BrickSlot>(), Groups = SystemAPI.GetBufferLookup<LinkedEntityGroup>(), Baselines = SystemAPI.GetBufferLookup<GridSpawnBrick>()
             }.Schedule(data.Length, 1).Complete();
         }
 
@@ -262,7 +262,7 @@ namespace Game.Voxel.Grid
             var em = state.EntityManager;
             using var roots = despawns.ToEntityArray(Allocator.Temp);
             if (roots.Length == 0) return;
-            em.CompleteAllTrackedJobs(); roots.Sort(new SerialOrder { Grids = state.GetComponentLookup<VoxelGrid>(true) });
+            em.CompleteAllTrackedJobs(); roots.Sort(new SerialOrder { Grids = SystemAPI.GetComponentLookup<VoxelGrid>(true) });
             foreach (var root in roots)
             {
                 if (em.HasComponent<RebuildReadToken>(root)) registry.EndRead(em.GetComponentData<RebuildReadToken>(root).Value);
@@ -278,7 +278,7 @@ namespace Game.Voxel.Grid
             var em = state.EntityManager;
             using var roots = rebuilds.ToEntityArray(Allocator.Temp);
             if (roots.Length == 0) return;
-            em.CompleteAllTrackedJobs(); roots.Sort(new SerialOrder { Grids = state.GetComponentLookup<VoxelGrid>(true) });
+            em.CompleteAllTrackedJobs(); roots.Sort(new SerialOrder { Grids = SystemAPI.GetComponentLookup<VoxelGrid>(true) });
             using var selected = new NativeList<Entity>(Allocator.Temp);
             using var children = new NativeList<Entity>(Allocator.TempJob);
             using var data = new NativeList<RootFillData>(Allocator.TempJob);
@@ -340,7 +340,7 @@ namespace Game.Voxel.Grid
             using var roots = edits.ToEntityArray(Allocator.Temp);
             if (roots.Length == 0) return;
             em.CompleteAllTrackedJobs();
-            roots.Sort(new SerialOrder { Grids = state.GetComponentLookup<VoxelGrid>(true) });
+            roots.Sort(new SerialOrder { Grids = SystemAPI.GetComponentLookup<VoxelGrid>(true) });
             var colliders = em.GetComponentData<ColliderDirtyQueue>(singletons); colliders.CompleteAccess();
             foreach (var root in roots)
             {
@@ -441,9 +441,9 @@ namespace Game.Voxel.Grid
                     {
                         new BrickFillJob { Entities = targets.AsArray(), Records = records.AsArray(), Pages = source.Data.CellPages.AsArray(),
                             SparsePages = source.Data.SparsePages.AsArray(), Masks = masks.AsArray(), Root = root, CellSize = grid.CellSize,
-                            Bricks = state.GetComponentLookup<Brick>(), Cells = state.GetBufferLookup<BrickCells>(), Sparse = state.GetBufferLookup<BrickSparseCells>(),
-                            SolidMasks = state.GetBufferLookup<BrickSolidMask>(), Transforms = state.GetComponentLookup<LocalTransform>(),
-                            Parents = state.GetComponentLookup<Parent>(), Dirty = state.GetComponentLookup<BrickDirty>() }.Schedule(targets.Length, 8).Complete();
+                            Bricks = SystemAPI.GetComponentLookup<Brick>(), Cells = SystemAPI.GetBufferLookup<BrickCells>(), Sparse = SystemAPI.GetBufferLookup<BrickSparseCells>(),
+                            SolidMasks = SystemAPI.GetBufferLookup<BrickSolidMask>(), Transforms = SystemAPI.GetComponentLookup<LocalTransform>(),
+                            Parents = SystemAPI.GetComponentLookup<Parent>(), Dirty = SystemAPI.GetComponentLookup<BrickDirty>() }.Schedule(targets.Length, 8).Complete();
                         foreach (var entity in targets) { var brick = em.GetComponentData<Brick>(entity); brick.ChangedRevision = grid.Revision; em.SetComponentData(entity, brick); }
                     }
                     if (created.Length > 0) foreach (var hook in registry.SpawnHooks) hook.OnEntitiesCreated(em, root, created);
@@ -506,16 +506,16 @@ namespace Game.Voxel.Grid
             new BrickFillJob
             {
                 Entities = entities, Records = source.Data.Bricks.AsArray(), Pages = source.Data.CellPages.AsArray(), SparsePages = source.Data.SparsePages.AsArray(), Masks = source.Data.Masks.AsArray(),
-                Root = root, Start = start, CellSize = grid.CellSize, Bricks = state.GetComponentLookup<Brick>(), Cells = state.GetBufferLookup<BrickCells>(), Sparse = state.GetBufferLookup<BrickSparseCells>(),
-                SolidMasks = state.GetBufferLookup<BrickSolidMask>(), Transforms = state.GetComponentLookup<LocalTransform>(), Parents = state.GetComponentLookup<Parent>(),
-                Dirty = state.GetComponentLookup<BrickDirty>()
+                Root = root, Start = start, CellSize = grid.CellSize, Bricks = SystemAPI.GetComponentLookup<Brick>(), Cells = SystemAPI.GetBufferLookup<BrickCells>(), Sparse = SystemAPI.GetBufferLookup<BrickSparseCells>(),
+                SolidMasks = SystemAPI.GetBufferLookup<BrickSolidMask>(), Transforms = SystemAPI.GetComponentLookup<LocalTransform>(), Parents = SystemAPI.GetComponentLookup<Parent>(),
+                Dirty = SystemAPI.GetComponentLookup<BrickDirty>()
             }.Schedule(count, 8).Complete();
             using var emptyIndices = new NativeArray<int>(0, Allocator.TempJob);
             new LinkCreatedJob
             {
                 Entities = entities, Records = source.Data.Bricks.AsArray(), InstanceIndices = emptyIndices,
-                Root = root, Grid = grid, Start = start, Groups = state.GetBufferLookup<LinkedEntityGroup>(), Slots = state.GetBufferLookup<BrickSlot>(),
-                Instances = state.GetBufferLookup<BlockInstance>(), Spawning = state.GetComponentLookup<GridSpawning>()
+                Root = root, Grid = grid, Start = start, Groups = SystemAPI.GetBufferLookup<LinkedEntityGroup>(), Slots = SystemAPI.GetBufferLookup<BrickSlot>(),
+                Instances = SystemAPI.GetBufferLookup<BlockInstance>(), Spawning = SystemAPI.GetComponentLookup<GridSpawning>()
             }.Run();
             if (render) new EnqueueSpawnMeshesJob
             {
@@ -564,14 +564,14 @@ namespace Game.Voxel.Grid
                     CellSize = source.Data.Header.Value.CellSize, Blocks = content.Blocks, Orientations = content.Orientations,
                     Render = (byte)(render ? 1 : 0), Material = runtime.PropMaterial,
                     Meshes = render ? runtime.PropMeshIds : emptyMeshes, Bounds = render ? runtime.PropMeshBounds : emptyBounds,
-                    Functional = state.GetComponentLookup<FunctionalBlock>(), Transforms = state.GetComponentLookup<LocalTransform>(), Parents = state.GetComponentLookup<Parent>(),
-                    MeshInfo = state.GetComponentLookup<MaterialMeshInfo>(), RenderBounds = state.GetComponentLookup<RenderBounds>()
+                    Functional = SystemAPI.GetComponentLookup<FunctionalBlock>(), Transforms = SystemAPI.GetComponentLookup<LocalTransform>(), Parents = SystemAPI.GetComponentLookup<Parent>(),
+                    MeshInfo = SystemAPI.GetComponentLookup<MaterialMeshInfo>(), RenderBounds = SystemAPI.GetComponentLookup<RenderBounds>()
                 }.Schedule(entities.Length, 8).Complete();
                 new LinkCreatedJob
                 {
                     Entities = entities, Records = source.Data.Bricks.AsArray(), InstanceIndices = indices, Root = root, Functional = 1,
-                    Groups = state.GetBufferLookup<LinkedEntityGroup>(), Slots = state.GetBufferLookup<BrickSlot>(), Instances = state.GetBufferLookup<BlockInstance>(),
-                    Spawning = state.GetComponentLookup<GridSpawning>()
+                    Groups = SystemAPI.GetBufferLookup<LinkedEntityGroup>(), Slots = SystemAPI.GetBufferLookup<BrickSlot>(), Instances = SystemAPI.GetBufferLookup<BlockInstance>(),
+                    Spawning = SystemAPI.GetComponentLookup<GridSpawning>()
                 }.Run();
                 foreach (var hook in registry.SpawnHooks) hook.OnEntitiesCreated(em, root, entities);
             }
