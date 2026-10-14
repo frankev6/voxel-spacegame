@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 36 | 16 | 0 | 0 | 130 | 0 | 182 | 4 |
+| M3 | 36 | 15 | 0 | 0 | 131 | 0 | 182 | 5 |
 | M4 | 10 | 2 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -443,9 +443,9 @@
 | EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | yes | done | astra (gpt-6) | 2026-10-14 | 38c38243 | Versioned procedural cubes/prop ghosts, controller and damage/island feeds; Metal shader plus three renderer cases pass. |
 | EDT-020 | Blueprint store, browser and name sanitising | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-017, PERS-001, VOX-009, UI-003, UI-005, UI-007, UI-008, UI-009, HUD-001 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-14 | 97440534 | Profile VOXS store/browser, read-only content and atomic replacement; all 5 required cases pass; ADR-0093 accepted; Q428; host integration stays EDT-022 |
 | EDT-021 | Editor UI panels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-001, UI-003, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, HUD-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f0e774dc | Pooled editor panels, real UXML/theme and current-identity bindings; four graphics-enabled cases pass |
-| EDT-022 | Editor host, input, presenter and leave prompt | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-011, EDT-015, EDT-019, EDT-021, CAM-009, INP-006, HUD-018, UI-011 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead: real editor host, presenter, input and leave flow. |
+| EDT-022 | Editor host, input, presenter and leave prompt | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-011, EDT-015, EDT-019, EDT-021, CAM-009, INP-006, HUD-018, UI-011 | yes | done | astra (gpt-6) | 2026-10-14 | 1448b2fb | Actual scene host/input/camera/renderers, persistent UI command binding, presenter and leave/browser flows; six required cases accepted across focused runs. Launcher remains EDT-023. |
 | EDT-023 | Lab and ship-edit scene flow; R16/R19 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, SPEC-01, SPEC-31 | no | todo |  |  |  |  |
-| EDT-024 | Editor performance gates | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, TST-001 | no | todo |  |  |  |  |
+| EDT-024 | Editor performance gates | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, TST-001 | yes | todo |  |  |  |  |
 | UI-008 | Meter, Slot and TabBar controls | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-007 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 90c13ad | Meter, Slot and scrolling TabBar; 7 required tests; full batch 901 EM / 128 PM, zero failures |
 | UI-009 | Tooltip service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | c777fd7 | Pooled tooltips, scheduler and lifecycle; fixture repair a34c3c3; spec-required: 7, extra: 0 |
 | UI-010 | Notification service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 6b3a919 | Notification pooling/lifecycle, seven required tests; full suites green |
@@ -1168,6 +1168,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — EDT-022 editor host and presenter — astra (gpt-6)
+
+- 1448b2fb + b5922750 connect scene-owned editor context/session/controller/renderers, real input and camera orbit, persistent editor/browser bindings, palette/stat/BOM/issue panels, actual commit/revert/save/browser commands, throttled refresh and Commit/Discard/Keep-editing prompt. ADR-0097/Q456 exposes read-only selection count and separates persistent screen ownership from scene native resources. EDT-023 still owns launch, real commit targets and world return; no editor playground pad advertised yet.
+- `Logs/playtest/editor-host/initial.xml`: five interaction/throttle cases passed, global leak assertion failed. Focused lifetime reruns attributed Toolkit text/style caches and default-world Entities Graphics bookkeeping; `lifetime.xml` now passes with persistent UI warmed, unrelated rendering suspended, and every retained allocation group inspected: no Game.ShipEditor allocation allowed, unknown groups fail. Unity summary/group counts differ (18 versus21 observed), so grouped coverage is checked rather than assuming one-to-one counts. This proves editor-owned native cleanup, not zero global engine cache allocations. Several short fixture corrections were needed; no full-suite/soak/performance run.
+- Six distinct required host cases accepted; spec-required: 6, extra: 0. `config.xml` also passes the existing config contract after replacing its obsolete null-overlay expectation. Compile clean, zero CS warnings; docs clean. QualitySettings cp-restored, generated font atlases restored, unrelated metas excluded.
+- Pending compatible deliveries: HUD-003 95638c8e, HUD-006 7fa0900, HUD-007 d0ac700a. Same three workers now implement TRV-014 escort hooks, HUD-019 loading/dock and HUD-010 notifications/hotkeys respectively. Actual merchant/query/fleet owners remain explicit dependencies, not simulated implementations. Next lead EDT-023 launch/return and HUD root integration.
 
 ### 2026-10-14 — EDT-019 editor overlays — astra (gpt-6)
 

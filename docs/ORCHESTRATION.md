@@ -35,3 +35,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - EDT-011 accepted b60fde52/7d95a992: eight required commit and ten inventory cases pass; exact cargo checkpoint ADR-0096. HUD-007 d0ac700a pending integration. Presentation now completing HUD-005/004, pause and main-menu workers active. Lead next editor overlays/host and compatible HUD integration.
 
 - EDT-019 accepted 38c38243: all four required overlay checks pass, including Metal support and 65,536 instances in one category draw. Next EDT-022 host and compatible pending HUD deliveries; updated active table is authoritative.
+
+- EDT-022 accepted 1448b2fb/b5922750: six required host behaviors pass across initial and focused lifetime results. Native check attributes Toolkit caches explicitly and forbids editor allocations; launcher remains EDT-023. Pending compatible HUD003/006/007 hashes in ledger; active table tracks recycled workers.
