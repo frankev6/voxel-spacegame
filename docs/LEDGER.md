@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 10 | 0 | 0 | 0 | 82 | 0 | 92 | 7 |
-| M3 | 85 | 10 | 0 | 0 | 85 | 0 | 180 | 7 |
+| M3 | 84 | 10 | 0 | 0 | 86 | 0 | 180 | 6 |
 | M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -480,7 +480,7 @@
 | AUD-011 | GATE: Owner confirms licences of the carried-over audio | [SPEC-64](specs/SPEC-64-audio.md) | M3 | standard | AUD-010 | yes | todo |  |  |  |  |
 | AUD-012 | Floating-origin shift and clears | [SPEC-64](specs/SPEC-64-audio.md) | M3 | frontier | AUD-006, GAL-001, SYS-001 | yes | done | astra (gpt-6) | 2026-10-13 | f9fed29a | Three required origin/system/reset audio checks pass; spatial shifts and clears preserve appropriate music lifecycle |
 | DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-001, INP-001 | yes | todo |  |  |  |  |
-| DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | yes | in-progress | economy (gpt-6.1-sol high) | 2026-10-13 |  | Existing economy worker: inventory, give and facts commands; focused acceptance after implementation. |
+| DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | yes | done | economy (gpt-6.1-sol high) | 2026-10-13 | 40421f42 | Real inv/give/facts owners, probes and CLI; three required cases pass in focused seven-case batch. |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Preparing working command plumbing; full jump/pose acceptance needs real TRV-006, GAL-008 and SYS-009 implementations; no dev-owned substitutes |
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
 | MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e9d50f3c | Three exact factions generated; duplicate skipped, player/AI ownership preserved; rerun byte/GUID/manifest stable |
@@ -953,6 +953,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 379 | SPEC-70 Q27: aim tracking and fire holds | Track stable PersistentId, preserve offscreen projection, fail behind-camera; Flight actions use existing injector and release on completion/context change. Two small controlled-clock cases; no production tuning. | Tech lead |
 | 380 | SPEC-51 Q24: editor content ownership and API | ADR-0081: session owns rotated footprint arrays, borrows content blobs, exposes canonical item/prices and enum categories. | Tech lead |
 | 381 | SPEC-51 Q25: atomic voxel edit API missing | Add batch API in Voxel under ADR before writer; no direct ShipEditor cell writes. Canonical damage capture begins with missing-cell bytes and explicit float encoding; task remains in progress. | Tech lead |
+| 382 | SPEC-70 Q28: DEV-017 condition syntax and state edges | Canonical `$story_count >= 3`; numeric fact probe stays separate. Owner-normalized Debugger writes, cargo-only grants, cached bound conditions; explicit empty CLI eval remains unconditional true. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1085,6 +1086,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DEV-017 done; EDT-003 review fixes — astra (gpt-6)
+
+- DEV-017 87fab37 plus 40421f42 adds canonical inventory grants, listing, facts get/set/list/eval, scenario probes and CLI wrappers. Review fixed explicit empty CLI eval. Q382 mirrors SPEC-70 Q28. spec-required: 3, extra: 0.
+- EDT-003 1dec130d and 13b2ef45 fixes missing-root identity, final-cell removal, destroyed-state restoration and equal-origin hash ordering; four required cases authored. Still in progress pending final damage-restoration review. spec-required: 4, extra: 0.
+- Compile clean, zero warning CS; serialized handle62393 terminal0; focused EditMode seven passed, zero failed/skipped, 0.3734088s test bodies. Initial batch also passed; retry followed concrete review fixes. No full suite, perf or soak. Evidence Logs/playtest/editor-state. Native fixture initialization compile error fixed in 9ba762d5.
+- DLG-003 worker271 implements validator; NAR-019 delivered310332f7/a1fbc3cb pending integration with explicit live-owner gaps. Presentation audit confirms DEV-014 cannot pass real interaction until SYS-008 and DEV-012; dependency correction next. Economy reviews remaining EDT-003 damage edge. No Unity active. Previous trailer-only turn was housekeeping; this turn produced reviewed code and functional evidence.
 
 ### 2026-10-13 — EDT-003 writer and native reads authored — astra (gpt-6)
 
