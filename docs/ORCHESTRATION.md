@@ -39,3 +39,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - EDT-022 accepted 1448b2fb/b5922750: six required host behaviors pass across initial and focused lifetime results. Native check attributes Toolkit caches explicitly and forbids editor allocations; launcher remains EDT-023. Pending compatible HUD003/006/007 hashes in ledger; active table tracks recycled workers.
 
 - EDT-023 claimed: real launcher/commit targets/world return. TRV-014 delivery 2e03c4cb received; economy worker has a recorded dependency wait (no ready standard implementation without missing frontier owners). FND-015 active on the same presentation thread.
+
+- EDT-023 source56209106 integrated as explicitly partial: actual launcher/targets and frame-aware pose return compile clean; eight existing commit cases pass. Next install profile-aware blueprint storage and persistent editor binding in GameComposition, reuse its screen in UiComposition, finish actual roots/startup, then five real scenario checks. No editor pad advertised. FND-013 partial row retained.
