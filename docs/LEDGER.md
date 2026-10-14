@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 51 | 15 | 0 | 0 | 115 | 0 | 181 | 6 |
+| M3 | 52 | 15 | 0 | 0 | 115 | 0 | 182 | 7 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -418,9 +418,10 @@
 | ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | f4cae431 | Merchant pricing, stock/restock and trading; eight required checks pass; sale rounding repaired |
 | ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | d3c8b0bc | INVT v1 and boot registration: slots/overflow, wallet, merchant state and missing identities. Q368; four functional cases and eight affected merchant cases pass, production save passes. Advisory capture fixture compiled only. |
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, SPEC-13, SPEC-31, SPEC-12 | no | todo |  |  |  |  |
-| ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
+| ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-011, ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c0f0c244 | 17 assets plus existing Scrap; real catalog/readback zero errors; two required checks pass; three existing quest-item warnings retained |
 | ECO-010 | Economy integration scenarios | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-006, ECO-008, ECO-009, TST-001 | no | todo |  |  |  |  |
+| ECO-011 | Merchant directory and fleet cargo capacity | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, GAL-008, FND-010 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Independent directory/cargo work extracted from ECO-008; launcher waits for real factions |
 | EDT-001 | Public contract types | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | CORE-001, DATA-001, VOX-001, ECO-001, UI-001, HUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 9c627fd | Editor contracts/config; 4 required tests; runtime tools remain EDT-002 onward |
 | EDT-002 | Editor content tables | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001, SPEC-04 | yes | done | astra (gpt-6) | 2026-10-13 | 0089c35c | Context/rotated footprints/item tables accepted; five required cases pass; ADR-0081/Q380. |
 | EDT-003 | Draft reader/writer adapter and canonical hash | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-002, SPEC-10 | yes | done | astra (gpt-6) | 2026-10-13 | 2d3181ff | Atomic draft adapters, native canonical hash/enumeration and exact damage restore; four required cases pass, including negative HP/shared origins. |
@@ -1031,6 +1032,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 430 | SPEC-70 Q31: command completion versus staged menu routing | Resolved: real save/load/PLOC and travel/event command acceptance passes; menu retains its normal seed default and explicit seed requests fail until a seed UI exists; toworld acceptance remains pending HUD-002 routing. | Tech lead |
 | 431 | SPEC-61 Q31: inventory construction | Resolved: ADR-0094 accepted; actual InventoryModel/Wallet presenter rebind and pooled screen. | Tech lead |
 | 432 | SPEC-61 Q32: editor host prerequisites | Resolved: ADR-0068 concrete completed UI/panel prerequisites, production root integration stays HUD-002. | Tech lead |
+| 433 | SPEC-61 Q33: merchant lifecycle and filtered selections | Resolved: real MerchantSession owner, stable row identities, exact stock/cargo mappings; UiComposition registers and resets presenter, playground opens actual market. | Tech lead |
 
 ## Measurements
 

@@ -878,19 +878,16 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
 ### ECO-008 — App glue and wiring
 - **Milestone:** M3
 - **Tier:** standard — lookups and calls specified in §5.8
-- **Depends on:** `ECO-004`, `ECO-005`, `ECO-007`, `SPEC-33`, `SPEC-01`
+- **Depends on:** `ECO-011`, `ECO-004`, `ECO-005`, `ECO-007`, `SPEC-33`, `SPEC-01`
 - **Do:**
-  1. Implement `MerchantDirectory`, `MerchantLauncher` and `CargoCapacitySync` (§5.8).
+  1. Implement `MerchantLauncher` (§5.8); use the directory/capacity owners implemented in ECO-011.
   2. Wire `LogicWorldAdapter.OpenMerchant` and remove it from `UnwiredMembers`.
   3. Implement SPEC-01 §5.2 rows 8.4 (economy, `INVT`, `CargoCapacitySync`, `SalvageService`, `MerchantDirectory`) and 10.1 (`MerchantLauncher`, which needs the UI navigator) exactly as written there, with the registrations listed in those rows.
 - **Files:** `Assets/Game/App/Economy/{MerchantDirectory,MerchantLauncher,CargoCapacitySync}.cs`; `Assets/Game/App/Services/LogicWorldAdapter.cs`; `Assets/Game/App/Boot/GameComposition.cs`; `Assets/Game/Tests/EditMode/App/EconomyWiringTests.cs`
 - **Acceptance criteria:**
-  - [ ] `FindForBody`: an authored body wins over a template.
   - [ ] A Hostile owner's merchant opens refused.
-  - [ ] A flagship with 2 `block_cargo_small` → capacity 30.
-  - [ ] `FleetModel.ReplaceStructure` with a structure holding one more `block_cargo_small` raises capacity by 5 without any other call.
   - [ ] `open_merchant` calls `onClosed` after the screen pops.
-- **Tests:** `EconomyWiringTests.Capacity_FollowsFleetChanged`, `EconomyWiringTests.Directory_AuthoredFirst`, `.Launcher_HostileRefused`, `.Capacity_TwoCargoBlocks`, `.OpenMerchant_CallsOnClosed`.
+- **Tests:** `EconomyWiringTests.Launcher_HostileRefused`, `.OpenMerchant_CallsOnClosed`.
 
 ### ECO-009 — M3 economy content
 - **Milestone:** M3
@@ -945,6 +942,18 @@ SPEC-40's `OpenMerchant(merchantIndex, scope, onClosed)` is routed to `Open(cata
 - **Acceptance criteria:**
   - [ ] All five scenarios pass.
 - **Tests:** `EconomyIntegrationTests.Trade_BuySell`, `.SaveLoad_Identical`, `.Salvage_Raider`, `.Commit_CapacityGrows`, `.R15_CancelledEdit_NoChange`.
+
+### ECO-011 — Merchant directory and fleet cargo capacity
+- **Milestone:** M3
+- **Tier:** standard — existing lookup and capacity algorithms in §5.8
+- **Depends on:** `ECO-004`, `ECO-005`, `GAL-008`, `FND-010`
+- **Do:** Extract the independently usable MerchantDirectory and CargoCapacitySync owners from ECO-008. Follow §4 contracts and §5.8 exactly; register through the existing composition. No faction/encounter stand-ins.
+- **Files:** `Assets/Game/App/Economy/{MerchantDirectory,CargoCapacitySync}.cs`, `Assets/Game/App/Boot/GameComposition.cs`, `Assets/Game/Tests/EditMode/App/EconomyWiringTests.cs`
+- **Acceptance criteria:**
+  - [ ] Authored body merchant wins over template; no match returns null.
+  - [ ] Two cargo-small blocks produce capacity 30; replacing flagship structure with one extra block adds five slots via the real fleet event.
+  - [ ] Initialization and disposal use the prescribed owner lifecycle.
+- **Tests:** Existing required cases transferred from ECO-008: `EconomyWiringTests.Capacity_FollowsFleetChanged`, `.Directory_AuthoredFirst`, `.Capacity_TwoCargoBlocks`. No additional cases.
 
 ## 10. Open questions
 
