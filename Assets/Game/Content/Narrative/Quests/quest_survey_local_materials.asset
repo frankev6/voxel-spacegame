@@ -28,10 +28,10 @@ MonoBehaviour:
 
         Gather 3 units of raw materials.'
       doneWhen:
-        source: has_item("resource_palladium", 3)
-        sourceHash: 10988607801768678526
-        compilerVersion: 1
-        hasErrors: 0
+        source: (has_item("resource_palladium", 3)) or (($story_survey_complete) or $survey_local_materials_deliver_to_ark)
+        sourceHash: 0
+        compilerVersion: 0
+        hasErrors: 1
         root:
           rid: 6548929066013557115
       progress:

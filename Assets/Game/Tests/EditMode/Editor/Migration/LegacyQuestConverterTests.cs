@@ -101,6 +101,12 @@ namespace Game.Tests.EditMode.Editor.Migration
             Assert.Greater(counters, 10);
             Assert.IsTrue(plan.Facts.Any(f => f.Name == "relation_watch_territory_seen"));
             Assert.IsTrue(plan.Quests.Quests.Single(q => q.Id == "quest_relation_watch").Stages[0].Objectives.Any(o => o.Condition.Contains("$relation_watch_territory_seen")));
+            var survey = plan.Quests.Quests.Single(q => q.Id == "quest_survey_local_materials").Stages[0];
+            var collected = survey.Objectives.Single(o => o.Id == "collect_raw_materials");
+            Assert.AreEqual("(has_item(\"resource_palladium\", 3)) or (($story_survey_complete) or $survey_local_materials_deliver_to_ark)", collected.Condition,
+                "The ARK hand-in consumes inventory before the quest evaluates; delivery must preserve collection proof.");
+            Assert.IsFalse(collected.Latch, "Spending inventory before delivery still clears collection progress.");
+            Assert.AreEqual("item_count(\"resource_palladium\")", collected.Progress);
         }
         [Test] public void FlagClues_Created()
         {

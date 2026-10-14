@@ -175,6 +175,12 @@ namespace Game.Editor.Migration.Narrative
                         string fact = ObjectiveFact(quest.Id, objective.Id);
                         if (translator.Facts.Any(f => f.Name == fact)) objective.Condition = "(" + objective.Condition + ") or $" + fact;
                     }
+            // QST-010: ARK consumes the collected materials before QuestService evaluates.
+            // A recorded delivery remains proof of collection after inventory drops to zero.
+            var survey = result.Quests.Single(q => q.Id == "quest_survey_local_materials").Stages[0];
+            var collected = survey.Objectives.Single(o => o.Id == "collect_raw_materials");
+            var delivered = survey.Objectives.Single(o => o.Id == "deliver_to_ark");
+            collected.Condition = "(" + collected.Condition + ") or (" + delivered.Condition + ")";
             result.Clues = LegacyClueWriter.Prepare(resolve);
             CheckExternalReferences(result, dialogue, resolve);
             return result;
