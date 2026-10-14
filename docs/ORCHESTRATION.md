@@ -6,10 +6,10 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-012 | Picker integrated pending acceptance; review309 done, dependency wait | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-010 | Stats dispatched after accepted EDT-006; DLG-012 waits DLG-007 | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-012 | Picker accepted; reviewing delivered stats | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-010 | Stats91fcc6b7 delivered; reviewing visuals; DLG-012 waits DLG-007 | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | SYS-011 | Celestial visual owner dispatched; TRV-009 waits this actual prerequisite | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | SYS-011 | Visuals f46a75a4 delivered pending acceptance; TRV-009 next | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Placement and picking accepted:** EDT-007633e952c and EDT-012ed61500 pass required functional cases; damaged undo now preserves neighbours through ADR-0089. EDT-01091fcc6b7 stats and SYS-011f46a75a4 visuals delivered, pending integration/validation; combat/economy review those deliveries, presentation awaits acceptance. Next integrate them and unlock travel presentation; lead editor prerequisites continue. No Unity active.
 
 - **Placement indexes authored:** EDT-00771fd04e4 owns clearance/missing-cell/origin indexes and exact shrinking bounds; validation/rollback and required cases still next. EDT-006 native-map correction181b1cd1 and integrated picker await compatible validation. EDT-010 stats and SYS-011 visuals active; combat worker has a real dependency wait after review309. No Unity active.
 

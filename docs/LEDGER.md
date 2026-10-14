@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 68 | 11 | 0 | 0 | 101 | 0 | 180 | 9 |
+| M3 | 66 | 11 | 0 | 0 | 103 | 0 | 180 | 8 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -427,13 +427,13 @@
 | EDT-004 | Edit history and diff commands | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-001 | yes | done | astra (gpt-6) | 2026-10-13 | 9d447ea5 | Owned compact diffs, exact offset merge and saved-state tracking; six direct checks pass; spec-required: 6, extra: 0 |
 | EDT-005 | EditSession core | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-003, EDT-004 | yes | done | astra (gpt-6) | 2026-10-13 | 5520be15 | Draft clone/apply/undo/redo/discard and dirty bricks; six direct cases pass, final compile clean; spec-required: 6, extra: 0 |
 | EDT-006 | Count tables and bill of materials | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, ECO-001 | yes | done | astra (gpt-6) | 2026-10-13 | d0a167dc | Incremental intact/damaged and orientation counts, lazy inventory-aware BOM; five required plus six session regressions pass; spec-required: 5, extra: 0 |
-| EDT-007 | Placement validator | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead: placement indexes, per-group rollback and session integration |
+| EDT-007 | Placement validator | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | done | astra (gpt-6) | 2026-10-13 | 633e952c | Placement checks, atomic group rollback, exact damaged identity/restore; 17 required cases pass; spec-required: 17, extra: 0 |
 | EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | todo |  |  |  |  |
 | EDT-009 | Full validation, issues and remove-floating | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-006, EDT-007, EDT-008 | no | todo |  |  |  |  |
 | EDT-010 | Stats accumulator and diff | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-006, PWR-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Reusable economy worker; incremental stats and exact moments, four required cases |
 | EDT-011 | Commit pipeline and R15 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-009, EDT-010, SPEC-50 | no | todo |  |  |  |  |
-| EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Combat worker recycled to picker; travel delivery pending compatible batch |
-| EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | no | todo |  |  |  |  |
+| EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | ed61500 | Bounded DDA, slice/X-ray, working plane and placement origin; seven required methods (12 parameterized cases) pass; spec-required: 7, extra: 0 |
+| EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | yes | todo |  |  |  |  |
 | EDT-014 | Controller, tool framework and basic tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-012, EDT-013 | no | todo |  |  |  |  |
 | EDT-015 | Line, box and fill tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-014 | no | todo |  |  |  |  |
 | EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | no | todo |  |  |  |  |
@@ -975,7 +975,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 401 | SPEC-51 Q30: batch/report storage contract | ADR-0088 defines native input ownership and per-group reports; dirty cells mark only owning/face-neighbour bricks. Later placement rules remain EDT-007. | Tech lead |
 | 402 | SPEC-32 Q21: destination cache lifetime and missing-content defaults | One service-owned scratch/read-only route view; stamp state, generation and lanes; count displayed recomputations only. Missing galaxy retains saved destination, removed destination clears, fuel saturates, missing gate yields no next hop. | Tech lead — resolved |
 | 403 | SPEC-51 Q31: picker signatures and boundary defaults | Stateless grid-ray picker with immutable hit; normalize direction, begin traversal at expanded bounds, canonical XYZ ties and opposite dominant normal for inside hits. Clamp configured steps to1..4096; plane reach4096. | Tech lead — resolved |
-| 404 | SPEC-51 Q33: placement index lifetime and out-of-window source bounds | Fixed histograms plus sparse overflow retain removable imported drafts; native origin identities preserve damaged-root removal; checked clearance counts and native orientation map ownership. | Tech lead — resolved |
+| 404 | SPEC-51 Q33: placement index lifetime and out-of-window source bounds | Fixed histograms plus sparse overflow retain removable imported drafts; complete native block identities and missing-cell reference counts preserve damaged-root removal; checked clearance counts and native orientation map ownership. | Tech lead — resolved |
+| 405 | SPEC-51 Q34: staged placement errors and exact damaged restoration | Complete block identity, journaled native rollback, own-cell removal and overlapping missing reservations; ADR-0089 restores only surviving cells, preserving neighbours and colour identity. Tool-specific errors stay with their tool tasks. | Tech lead — resolved |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1108,6 +1109,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — EDT-007 / EDT-012 accepted: placement, rollback and picking — astra (gpt-6)
+
+- 084a6b2a/d9f68bdb implements ordered validation, footprint/clearance/attachment/core/budget/build limits, per-group journal rollback and accepted-op mapping. 8e4ce815 corrects full block identities and reservation counts after review313; 00fb04b9/d68cccd7/633e952c adds ADR-0089 atomic damaged restoration and exact colour removal. Cross-task files: Voxel/Model/VoxelEdit.cs, VoxelStructure.Edits.cs and EDT-003 DraftWriter.cs. Source scan helper renamed f7b42bed; the single voxel writer remains intact. SPEC-51 Q34/global405 records defaults and tool-owned errors.
+- Compile73639 terminal0, zero warning CS. Initial combined49950:39 pass/1 random-fixture bounds failure; fixed fixture remains within16 cells. Subsequent33669 exposed neighbour-preserving undo defect, fixed in atomic restoration. Batch56490:31 functional checks pass,1 source-scan name false positive; rename-only scan14862 passes. Final affected restoration+adapter50352:5/5 pass, zero warning CS (one fixture compilation correction in between). Evidence Logs/playtest/editor-placement retains failures and final passes. No full suites/performance runs; passing unaffected picker cases not rerun.
+- EDT-007 spec-required:17,extra:0. EDT-012 spec-required:7 methods (12 parameterized cases),extra:0; all picker cases passed initial batch. Existing BOM/session/adapter regressions remain green across focused runs, including native orientation-map correction181b1cd1. Required ReservedMissing case includes same-origin/different-colour damaged neighbours; no added test method.
+- EDT-01091fcc6b7 and SYS-011f46a75a4 delivered, awaiting compatible integration/validation; existing combat worker reviews stats, economy reviews visuals, presentation has a genuine acceptance wait. Next integrate these deliveries, unlock travel presentation, and lead mirror/controller/connectivity prerequisites. Previous index implementation and current corrections/acceptance are progress; full roadmap goal remains active.
 
 ### 2026-10-13 — EDT-007 placement indexes authored — astra (gpt-6)
 

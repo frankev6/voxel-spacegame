@@ -1142,3 +1142,5 @@ Evidence retained locally in ignored `Logs/tools/vox003-{reference,thin-shell}.t
 ### EDT-003 source edit integration (ADR-0082)
 
 [ADR-0082](../decisions/ADR-0082-atomic-source-voxel-edits.md) adds source-only VoxelEdit batches through VoxelStructure.ApplyEdits using VoxelContent. Validation stages touched data before commit; individual source APIs and runtime damage ownership remain unchanged. This fulfills SPEC-51’s missing assumed dependency; implementation/acceptance is tracked by EDT-003.
+
+[ADR-0089](../decisions/ADR-0089-atomic-damaged-block-restoration.md) appends source-only RestoreBlock/DamageOffset and an ApplyEdits overload borrowing canonical damage bytes. Missing footprint cells never overwrite neighbours; ordinary placement remains unchanged. Explicit block removal resolves colour as part of identity. EDT-007 owns this correctness follow-up and its existing required damaged-block/adapter evidence.
