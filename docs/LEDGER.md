@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 80 | 9 | 0 | 0 | 91 | 0 | 180 | 8 |
+| M3 | 78 | 10 | 0 | 0 | 92 | 0 | 180 | 7 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -340,10 +340,10 @@
 | SYS-006 | T2 voxel bodies and damage persistence | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-003, SYS-004, DMG-014, WPN-012, AI-010 | yes | done | astra (gpt-6) | 2026-10-13 | 8ec9a970 | Actual loader composed;5 required streaming/damage/hulk/lifecycle cases pass6996; compile3045 clean; Q357–361. |
 | SYS-007 | T3 asteroid belts | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006 | yes | done | astra (gpt-6) | 2026-10-13 | 96127285 | Bounded asynchronous belt sectors/shapes, shared spawn budget, destruction persistence and retirement;4 required cases plus5 T2 regressions pass61443. |
 | SYS-008 | InteractionQuerySystem, docking and BodyInteracted | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006, INP-005, AI-004, CORE-006 | yes | done | astra (gpt-6) | 2026-10-13 | 499de6e3 | Surface query, wrapped press counters, shared docking and loader interaction persistence; four direct PlayMode cases pass. |
-| SYS-009 | PLOC participant | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-008, PERS-001 | yes | in-progress | astra (gpt-6) | 2026-10-13 |  | Lead implements exact pose/docking persistence and live restore lifecycle; three required cases |
+| SYS-009 | PLOC participant | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-008, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | efe6dfff | PLOC raw-bit atomic restore, boot registration and validated deferred docking; reset/disposal cleanup; three required cases pass; spec-required: 3, extra: 0 |
 | SYS-010 | IShipSpawner contract for Galaxy services | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, FND-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | adcf164 | Spawner contract forwarding only; 2 required tests. FND-012 runtime remains open. Full 1027 EM / 145 PM passed. |
 | SYS-011 | Celestial visuals and distance compression | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004, SPEC-62 | no | todo |  |  |  |  |
-| SYS-012 | Regression scenarios R9, R28 | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-006, SYS-009, FND-001 | no | todo |  |  |  |  |
+| SYS-012 | Regression scenarios R9, R28 | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-006, SYS-009, FND-001 | yes | todo |  |  |  |  |
 | SYS-013 | Jump integration hooks | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006, SYS-008 | yes | todo |  |  |  |  |
 | SYS-014 | World gates: streaming performance and soak | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-007, SYS-013, TST-001 | no | todo |  |  |  |  |
 | TRV-001 | Public contract types | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, FLT-001, NAR-001, AUD-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a68c988 | Canonical travel contracts and staged watcher API; 2 required tests; runtime travel remains later tasks |
@@ -1098,6 +1098,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — SYS-009 done: player pose and docking persistence — astra (gpt-6)
+
+- efe6dfff completes canonical PLOC binary restore, missing-chunk fallback, missing-GLXY pose preservation, shared boot registration, real grid/anchor dock validation, delayed success notification, hulk rejection and session-reset/disposal cleanup. Initial namespace and anchor/grid failures remain recorded above.
+- Final compile26657 terminal0, zero warning CS; final real-loader PlayMode72184 terminal0 passes. Binary missing-chunk/round-trip cases passed32698; updated corrupt-pose round trip passed32026 with presenter batch. spec-required: 3, extra: 0. Evidence Logs/playtest/ploc plus dialog-presenter/functional.xml. No broad/performance run.
+- SYS-012 regression scenarios now unlock. Lead continues SYS-013 jump integration; presentation271 DLG-009 and economy312 DLG-012 active. Combat completes presenter lifetime review before SYS-012. Previous presenter acceptance and this final restore acceptance are progress. No Unity active.
 
 ### 2026-10-13 — DLG-008 done; player persistence follow-up — astra (gpt-6)
 

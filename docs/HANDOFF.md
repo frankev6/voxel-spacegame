@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Player pose/docking persistence accepted:** SYS-009efe6dfff has clean final compile and passing binary/real-loader cases, including corrupt input and reset cleanup. Next lead SYS-013 jump integration; SYS-012 regression worker unlocks, DLG-009/012 workers active. No Unity active.
+
 - **Dialog presenter accepted:** DLG-008b1057490 passes five required cases alongside revised PLOC case; clean compile, six-case batch0.1923s. SYS-009 reset/disposal follow-up needs final check. Next DLG-009 view and DLG-012 harness workers; production runner still separate. No Unity active.
 
 - **Player restore integration passes:** SYS-009ef4d3227 passes the real-loader docking case after fixing grid-versus-anchor interaction lookup; two binary cases passed before the nonfinite-input extension. Final compile, revised binary case and lifecycle review pending. DLG-0085d27d43b delivered; next compatible integration/validation. No Unity active.
