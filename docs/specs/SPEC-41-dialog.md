@@ -751,6 +751,8 @@ sequenceDiagram
 
 | 11 | Whole SPEC-40 dependency blocks dialog behind debugger controls that require live dialog | **Resolved:** ADR-0068 uses real prerequisites. DLG-002 requires DLG-001 contracts, NAR-003 grammar and NAR-016 completed converted inputs. DLG-006 requires DLG-001, DLG-003 generated command table, NAR-011 live scoped context, CORE-003 deterministic RNG and CORE-007 save primitives. No parser, production command-table, runtime or test acceptance is removed; the IEffect/CompiledEffectList access gap must be resolved before implementing DLG-006 without runtime reparsing. | Tech lead |
 
+| 12 | Parser AST diagnostics and conditional-body indentation are not fully typed; generated declarations have no normal node headers | **Resolved:** editor AST carries ValidationReport diagnostics with source path and one-based line field, tags without the leading hash and original command spelling for DLG-E012. Parse same-indent conditional bodies used by converted files, and uniformly one-level-indented branch bodies; option bodies always require one level. Retain generated declarations separately only for _Generated/facts.yarn; no runtime reparsing or execution. Unsupported/dangling text escapes diagnose DLG-E001. Cross-file uniqueness, tag semantics and expression/command compilation remain DLG-003. | Tech lead |
+
 ## 11. References
 
 - Audit `05-narrative-quests.md` B4, B5, B6, B11, B12, §5.9 (Yarn vs Ink), §5.13 phase 3; `LEDGER.md` R6, R11, R19; legacy UI `Import/Legacy/ui/Pages/NarrativeViewUI.uxml` (layout reference only).
