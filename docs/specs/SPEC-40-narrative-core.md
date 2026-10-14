@@ -888,7 +888,7 @@ Effects never partially apply a list: costs are checked before the first `Apply`
 
 ### 5.6 World-event bridge (`NarrativeWorldEventBridge`, Game.App)
 
-Subscribes in its constructor, unsubscribes in `Dispose`. Maps every event's `ContentHash` to a slot with `FactCatalog.GeneratedSlot(family, hash.Value)` (O(1), no strings) and applies a pre-built `AddFactEffect(allowReserved: true)` per touched slot (created lazily, cached in an `int[]` indexed by slot) so no allocation happens per event after warm-up. All writes use `FactWriteSource.WorldEvent`.
+Subscribes in its constructor, unsubscribes in `Dispose`. Maps every event's `ContentHash` to a slot with `FactCatalog.GeneratedSlot(family, hash.Value)` (O(1), no strings) and applies a pre-built `AddFactEffect(allowReserved: true)` per touched slot (created lazily, cached in an `AddFactEffect[]` indexed by slot (ADR-0080)) so no allocation happens per event after warm-up. All writes use `FactWriteSource.WorldEvent`.
 
 | Event (owner) | Payload (as defined by the owner) | Narrative handling |
 |---|---|---|
@@ -1473,6 +1473,8 @@ Frame budget context: idle flight allows 0 B/frame; the narrative tick must stay
 | 31 | Narrative UI gates require inspecting layers and event drain is OrderLast | Resolved: ADR-0078 adds read-only UINavigator.HasOpenLayer; narrative bridge is OrderLast plus UpdateAfter ManagedEventDrainSystem so Unity ordering partitions preserve drain-before-tick. | Tech lead — ledger Q365 |
 
 | 32 | NAR-018 depends only on NAR-017 although active baselines and Play beat require unfinished runtime owners | **NAR-018 default:** implement editor fact edits and debug_menus through FactStore.SetBySlot with Debugger source; do not create missing facts. Route baseline reads through QST-006 active QuestEntryView records and QST-003 GetBaseline, taking the latest zero-based instance from GetInstanceCount - 1 and using the sorted union of Fact dependencies from every doneWhen/progress/failWhen exactly as SPEC-42 §5.3 captures it. Resolve Play beat against real content and call QST-005 BeatService.DebugPlay only with a registered DLG-006 DialogService and ready world. Missing/stub owners are explicit unavailable states; successful dispatch is reported as a request, not proof a dialog started. Preserve runtime TODO IDs and existing APIs. Editor delivery is partial until real QST-003/005/006 and DLG-006 owners enable baseline/dialog acceptance; the required fact-write case remains independently testable with the real FactStore. | Tech lead — dependency gap; central mirror pending. |
+
+| 33 | World-event counter effects require variable amounts and WorldEvent provenance, absent from AddFactEffect | **Resolved:** ADR-0080 adds a pre-bound code-counter constructor and explicit amount/source overload; cache effect instances per catalog slot. Authored effects remain unchanged. Runtime bridge acceptance remains NAR-012. | Tech lead |
 
 ## 11. References
 
